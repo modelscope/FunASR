@@ -1,0 +1,114 @@
+# network architecture
+# encoder related
+encoder: sanm
+encoder_conf:
+    output_size: 320    # dimension of attention
+    attention_heads: 4
+    linear_units: 1280  # the number of units of position-wise feed forward
+    num_blocks: 40      # the number of encoder blocks
+    dropout_rate: 0.1
+    positional_dropout_rate: 0.1
+    attention_dropout_rate: 0.1
+    input_layer: pe # encoder architecture type
+    pos_enc_class: SinusoidalPositionEncoder
+    normalize_before: true
+    kernel_size: 11
+    sanm_shfit: 0
+    selfattention_layer_type: sanm
+
+# decoder related
+decoder: paraformer_decoder_sanm
+decoder_conf:
+    attention_heads: 4
+    linear_units: 1280
+    num_blocks: 12
+    dropout_rate: 0.1
+    positional_dropout_rate: 0.1
+    self_attention_dropout_rate: 0.1
+    src_attention_dropout_rate: 0.1
+    att_layer_num: 6
+    kernel_size: 11
+    sanm_shfit: 0
+
+
+predictor: cif_predictor
+predictor_conf:
+  idim: 320
+  threshold: 1.0
+  l_order: 1
+  r_order: 1
+  tail_threshold: 0.45
+
+# hybrid CTC/attention
+model: paraformer
+model_conf:
+    ctc_weight: 0.0
+    lsm_weight: 0.1     # label smoothing option
+    length_normalized_loss: true
+    predictor_weight: 1.0
+    predictor_bias: 0
+    sampling_ratio: 0.75
+
+
+# minibatch related
+# dataset_type: small
+batch_type: length
+batch_bins: 6000
+num_workers: 16
+# dataset_type: large
+dataset_conf:
+    filter_conf:
+        min_length: 10
+        max_length: 250
+        min_token_length: 1
+        max_token_length: 200
+    shuffle: True
+    shuffle_conf:
+        shuffle_size: 10240
+        sort_size: 500
+    batch_conf:
+        batch_type: token
+        batch_size: 6000
+    num_workers: 16
+
+# optimization related
+accum_grad: 1
+grad_clip: 5
+max_epoch: 20
+val_scheduler_criterion:
+    - valid
+    - acc
+best_model_criterion:
+-   - valid
+    - acc
+    - max
+keep_nbest_models: 5
+
+optim: adam
+optim_conf:
+   lr: 0.0005
+scheduler: warmuplr
+scheduler_conf:
+   warmup_steps: 15000
+
+specaug: specaug_lfr
+specaug_conf:
+    apply_time_warp: false
+    time_warp_window: 5
+    time_warp_mode: bicubic
+    apply_freq_mask: true
+    freq_mask_width_range:
+    - 0
+    - 30
+    lfr_rate: 6
+    num_freq_mask: 1
+    apply_time_mask: true
+    time_mask_width_range:
+    - 0
+    - 12
+    num_time_mask: 1
+
+unused_parameters: true
+log_interval: 50
+normalize: None
+split_with_space: true
