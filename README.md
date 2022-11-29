@@ -66,7 +66,7 @@ This project is licensed under the [The MIT License](https://opensource.org/lice
   title={Universal ASR: Unifying Streaming and Non-Streaming ASR Using a Single Encoder-Decoder Model},
   author={Gao, Zhifu and Zhang, Shiliang and Lei, Ming and McLoughlin, Ian},
   booktitle={arXiv preprint arXiv:2010.14099},
-  year={2010}
+  year={2020}
 }
 
 @inproceedings{gao2022paraformer,
