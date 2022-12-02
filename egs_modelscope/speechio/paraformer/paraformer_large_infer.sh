@@ -8,6 +8,7 @@ ori_data=
 data_dir=
 exp_dir=
 model_name=speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
+model_revision="v1.0.3"     # please do not modify the model revision
 inference_nj=32
 gpuid_list="0,1" # set gpus, e.g., gpuid_list="0,1"
 ngpu=$(echo $gpuid_list | awk -F "," '{print NF}')
@@ -46,6 +47,7 @@ modelscope_utils/modelscope_infer.sh \
         --exp_dir ${exp_dir}/speechio \
         --test_sets "${test_sets}" \
         --model_name ${model_name} \
+        --model_revision ${model_revision} \
         --inference_nj ${inference_nj} \
         --gpuid_list ${gpuid_list} \
         --njob ${njob} \

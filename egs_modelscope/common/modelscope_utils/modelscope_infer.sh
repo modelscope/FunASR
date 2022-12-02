@@ -7,6 +7,7 @@ set -o pipefail
 data_dir=
 exp_dir=
 model_name=
+model_revision=
 inference_nj=32
 gpuid_list="0,1,2,3"
 njob=32
@@ -30,7 +31,7 @@ fi
 
 # download model from modelscope
 python modelscope_utils/download_model.py \
-          --model_name ${model_name}
+          --model_name ${model_name} --model_revision ${model_revision}
 
 modelscope_dir=${HOME}/.cache/modelscope/hub/damo/${model_name}
 
@@ -48,12 +49,9 @@ for dset in ${test_sets}; do
     fi
 
     if "${use_lm}"; then
-        cp ${modelscope_dir}/decode_asr_transformer.yaml ${modelscope_dir}/decode_asr_transformer.yaml.back
-        cp ${modelscope_dir}/decode_asr_transformer_wav.yaml ${modelscope_dir}/decode_asr_transformer_wav.yaml.back
-        sed -i "s#beam_size: [0-9]*#beam_size: `echo $beam_size`#g" ${modelscope_dir}/decode_asr_transformer.yaml
-        sed -i "s#beam_size: [0-9]*#beam_size: `echo $beam_size`#g" ${modelscope_dir}/decode_asr_transformer_wav.yaml
-        sed -i "s#lm_weight: 0.[0-9]*#lm_weight: `echo $lm_weight`#g" ${modelscope_dir}/decode_asr_transformer.yaml
-        sed -i "s#lm_weight: 0.[0-9]*#lm_weight: `echo $lm_weight`#g" ${modelscope_dir}/decode_asr_transformer_wav.yaml
+        cp ${modelscope_dir}/decoding.yaml ${modelscope_dir}/decoding.yaml.back
+        sed -i "s#beam_size: [0-9]*#beam_size: `echo $beam_size`#g" ${modelscope_dir}/decoding.yaml
+        sed -i "s#lm_weight: 0.[0-9]*#lm_weight: `echo $lm_weight`#g" ${modelscope_dir}/decoding.yaml
     fi
 
     for n in $(seq "${inference_nj}"); do
@@ -85,6 +83,5 @@ for dset in ${test_sets}; do
 done
 
 if "${use_lm}"; then
-    mv ${modelscope_dir}/decode_asr_transformer.yaml.back  ${modelscope_dir}/decode_asr_transformer.yaml
-    mv ${modelscope_dir}/decode_asr_transformer_wav.yaml.back ${modelscope_dir}/decode_asr_transformer_wav.yaml
+    mv ${modelscope_dir}/decoding.yaml.back ${modelscope_dir}/decoding.yaml
 fi

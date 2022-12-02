@@ -13,9 +13,13 @@ if __name__ == '__main__':
                         type=str,
                         default="speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch",
                         help="model name in modelscope")
+    parser.add_argument("--model_revision",
+                        type=str,
+                        default="v1.0.3",
+                        help="model revision in modelscope")
     args = parser.parse_args()
 
     inference_pipeline = pipeline(
         task=Tasks.auto_speech_recognition,
         model='damo/{}'.format(args.model_name),
-        model_revision='v1.0.0')
+        model_revision=args.model_revision)
