@@ -11,7 +11,7 @@ njob=4 # the number of jobs for each gpu
 train_cmd=utils/run.pl
 
 # general configuration
-feats_dir="." #feature output dictionary, for large data
+feats_dir="../DATA" #feature output dictionary, for large data
 exp_dir="."
 lang=zh
 dumpdir=dump/fbank
@@ -32,6 +32,7 @@ lfr_m=7
 lfr_n=6
 
 init_model_name=speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch  # pre-trained model, download from modelscope during fine-tuning
+model_revision="v1.0.3"     # please do not modify the model revision
 cmvn_file=init_model/${init_model_name}/am.mvn
 seg_file=init_model/${init_model_name}/seg_dict
 vocab=init_model/${init_model_name}/tokens.txt
@@ -53,7 +54,7 @@ valid_set=dev
 test_sets="dev test"
 
 asr_config=conf/train_asr_paraformer_sanm_50e_16d_2048_512_lfr6.yaml
-init_param="init_model/${init_model_name}/${init_model_name}"
+init_param="init_model/${init_model_name}/model.pb"
 
 inference_config=conf/decode_asr_transformer_noctc_1best.yaml
 inference_asr_model=valid.acc.ave_10best.pth
@@ -61,7 +62,7 @@ inference_asr_model=valid.acc.ave_10best.pth
 . utils/parse_options.sh || exit 1;
 
 # download model from modelscope
-python modelscope_utils/download_model.py --model_name ${init_model_name}
+python modelscope_utils/download_model.py --model_name ${init_model_name} --model_revision ${model_revision}
 
 if [ ! -d ${HOME}/.cache/modelscope/hub/damo/${init_model_name} ]; then
     echo "${HOME}/.cache/modelscope/hub/damo/${init_model_name} must exist"
@@ -158,7 +159,7 @@ fi
 world_size=$gpu_num  # run on one machine
 if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
     # update asr train config.yaml
-    python modelscope_utils/update_config.py --modelscope_config init_model/${init_model_name}/asr_train_config.yaml --finetune_config ${asr_config} --output_config init_model/${init_model_name}/asr_finetune_config.yaml
+    python modelscope_utils/update_config.py --modelscope_config init_model/${init_model_name}/finetune.yaml --finetune_config ${asr_config} --output_config init_model/${init_model_name}/asr_finetune_config.yaml
     finetune_config=init_model/${init_model_name}/asr_finetune_config.yaml
 
     mkdir -p ${exp_dir}/exp/${model_dir}

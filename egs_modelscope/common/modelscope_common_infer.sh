@@ -5,6 +5,7 @@ set -u
 set -o pipefail
 
 model_name=speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch  # pre-trained model, download from modelscope
+model_revision="v1.0.3"     # please do not modify the model revision
 data_dir=  # wav list, ${data_dir}/wav.scp
 exp_dir="exp"
 gpuid_list="0,1"
@@ -29,7 +30,7 @@ beam_size=1
 lm_weight=0.0
 
 python modelscope_utils/download_model.py \
-          --model_name ${model_name}
+          --model_name ${model_name} --model_revision ${model_revision}
 
 if [ -d ${exp_dir} ]; then
     echo "${exp_dir} is already exists. if you want to decode again, please delete ${exp_dir} first."
@@ -50,12 +51,9 @@ done
 utils/split_scp.pl "${data_dir}/wav.scp" ${split_scps}
 
 if "${use_lm}"; then
-    cp ${exp_dir}/${model_name}/decode_asr_transformer.yaml ${exp_dir}/${model_name}/decode_asr_transformer.yaml.back
-    cp ${exp_dir}/${model_name}/decode_asr_transformer_wav.yaml ${exp_dir}/${model_name}/decode_asr_transformer_wav.yaml.back
-    sed -i "s#beam_size: [0-9]*#beam_size: `echo $beam_size`#g" ${exp_dir}/${model_name}/decode_asr_transformer.yaml
-    sed -i "s#beam_size: [0-9]*#beam_size: `echo $beam_size`#g" ${exp_dir}/${model_name}/decode_asr_transformer_wav.yaml
-    sed -i "s#lm_weight: 0.[0-9]*#lm_weight: `echo $lm_weight`#g" ${exp_dir}/${model_name}/decode_asr_transformer.yaml
-    sed -i "s#lm_weight: 0.[0-9]*#lm_weight: `echo $lm_weight`#g" ${exp_dir}/${model_name}/decode_asr_transformer_wav.yaml  
+    cp ${exp_dir}/${model_name}/decoding.yaml ${exp_dir}/${model_name}/decoding.yaml.back
+    sed -i "s#beam_size: [0-9]*#beam_size: `echo $beam_size`#g" ${exp_dir}/${model_name}/decoding.yaml
+    sed -i "s#lm_weight: 0.[0-9]*#lm_weight: `echo $lm_weight`#g" ${exp_dir}/${model_name}/decoding.yaml
 fi
 
 echo "Decoding started... log: '${_logdir}/asr_inference.*.log'"
@@ -73,6 +71,5 @@ ${decode_cmd} --max-jobs-run "${inference_nj}" JOB=1:"${inference_nj}" "${_logdi
         cat ${_logdir}/text.${i}
     done | sort -k1 >${_dir}/text
 
-mv ${exp_dir}/${model_name}/decode_asr_transformer.yaml.back ${exp_dir}/${model_name}/decode_asr_transformer.yaml
-mv ${exp_dir}/${model_name}/decode_asr_transformer_wav.yaml.back ${exp_dir}/${model_name}/decode_asr_transformer_wav.yaml
+mv ${exp_dir}/${model_name}/decoding.yaml.back ${exp_dir}/${model_name}/decoding.yaml
 
