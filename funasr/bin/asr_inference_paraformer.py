@@ -189,7 +189,7 @@ class Speech2Text:
 
         predictor_outs = self.asr_model.calc_predictor(enc, enc_len)
         pre_acoustic_embeds, pre_token_length = predictor_outs[0], predictor_outs[1]
-        pre_token_length = torch.tensor([pre_acoustic_embeds.size(1)], device=pre_acoustic_embeds.device)
+        pre_token_length = pre_token_length.long()
         decoder_outs = self.asr_model.cal_decoder_with_predictor(enc, enc_len, pre_acoustic_embeds, pre_token_length)
         decoder_out, ys_pad_lens = decoder_outs[0], decoder_outs[1]
 
