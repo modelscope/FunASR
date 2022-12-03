@@ -65,6 +65,7 @@ for dset in ${test_sets}; do
     ${decode_cmd} --max-jobs-run "${inference_nj}" JOB=1:"${inference_nj}" "${_logdir}"/asr_inference.JOB.log \
         python -m funasr.bin.modelscope_infer \
               --model_name ${model_name} \
+              --model_revision ${model_revision} \
               --wav_list ${_logdir}/keys.JOB.scp \
               --output_file ${_logdir}/text.JOB \
               --gpuid_list ${gpuid_list} \
