@@ -66,7 +66,7 @@ optim_conf:
    lr: 0.0005
 scheduler: warmuplr
 scheduler_conf:
-   warmup_steps: 30000
+   warmup_steps: 50000
 
 specaug: specaug_lfr
 specaug_conf:

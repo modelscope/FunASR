@@ -45,7 +45,7 @@ requirements = {
         "editdistance==0.5.2",
         "wandb",
     ],
-    # recipe: The modules actually are not invoked in the main module of espnet,
+    # recipe: The modules actually are not invoked in the main module of funasr,
     #         but are invoked for the python scripts in each recipe
     "recipe": [
         "espnet_model_zoo",
@@ -130,7 +130,7 @@ setup(
     setup_requires=setup_requires,
     tests_require=tests_require,
     extras_require=extras_require,
-    python_requires=">=3.6.0",
+    python_requires=">=3.7.0",
     classifiers=[
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",

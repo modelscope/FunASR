@@ -2,6 +2,7 @@ import torch
 from torch import nn
 
 from funasr.modules.nets_utils import make_pad_mask
+from funasr.modules.streaming_utils.utils import sequence_mask
 
 class CifPredictor(nn.Module):
     def __init__(self, idim, l_order, r_order, threshold=1.0, dropout=0.1, smooth_factor=1.0, noise_threshold=0, tail_threshold=0.45):
@@ -14,6 +15,7 @@ class CifPredictor(nn.Module):
         self.threshold = threshold
         self.smooth_factor = smooth_factor
         self.noise_threshold = noise_threshold
+        self.tail_threshold = tail_threshold
 
     def forward(self, hidden, target_label=None, mask=None, ignore_id=-1, mask_chunk_predictor=None,
                 target_label_length=None):
@@ -42,8 +44,39 @@ class CifPredictor(nn.Module):
         token_num = alphas.sum(-1)
         if target_length is not None:
             alphas *= (target_length / token_num)[:, None].repeat(1, alphas.size(1))
+        elif self.tail_threshold > 0.0:
+            hidden, alphas, token_num = self.tail_process_fn(hidden, alphas, token_num, mask=mask)
+            
         acoustic_embeds, cif_peak = cif(hidden, alphas, self.threshold)
+        
+        if target_length is None and self.tail_threshold > 0.0:
+            token_num_int = torch.max(token_num).type(torch.int32).item()
+            acoustic_embeds = acoustic_embeds[:, :token_num_int, :]
+            
         return acoustic_embeds, token_num, alphas, cif_peak
+
+    def tail_process_fn(self, hidden, alphas, token_num=None, mask=None):
+        b, t, d = hidden.size()
+        tail_threshold = self.tail_threshold
+        if mask is not None:
+            zeros_t = torch.zeros((b, 1), dtype=torch.float32, device=alphas.device)
+            ones_t = torch.ones_like(zeros_t)
+            mask_1 = torch.cat([mask, zeros_t], dim=1)
+            mask_2 = torch.cat([ones_t, mask], dim=1)
+            mask = mask_2 - mask_1
+            tail_threshold = mask * tail_threshold
+            alphas = torch.cat([alphas, tail_threshold], dim=1)
+        else:
+            tail_threshold = torch.tensor([tail_threshold], dtype=alphas.dtype).to(alphas.device)
+            tail_threshold = torch.reshape(tail_threshold, (1, 1))
+            alphas = torch.cat([alphas, tail_threshold], dim=1)
+        zeros = torch.zeros((b, 1, d), dtype=hidden.dtype).to(hidden.device)
+        hidden = torch.cat([hidden, zeros], dim=1)
+        token_num = alphas.sum(dim=-1)
+        token_num_floor = torch.floor(token_num)
+
+        return hidden, alphas, token_num_floor
+
 
     def gen_frame_alignments(self,
                              alphas: torch.Tensor = None,
@@ -120,10 +153,12 @@ class CifPredictorV2(nn.Module):
         alphas = torch.sigmoid(output)
         alphas = torch.nn.functional.relu(alphas * self.smooth_factor - self.noise_threshold)
         if mask is not None:
-            alphas = alphas * mask.transpose(-1, -2).float()
+            mask = mask.transpose(-1, -2).float()
+            alphas = alphas * mask
         if mask_chunk_predictor is not None:
             alphas = alphas * mask_chunk_predictor
         alphas = alphas.squeeze(-1)
+        mask = mask.squeeze(-1)
         if target_label_length is not None:
             target_length = target_label_length
         elif target_label is not None:
@@ -134,7 +169,7 @@ class CifPredictorV2(nn.Module):
         if target_length is not None:
             alphas *= (target_length / token_num)[:, None].repeat(1, alphas.size(1))
         elif self.tail_threshold > 0.0:
-            hidden, alphas, token_num = self.tail_process_fn(hidden, alphas, token_num)
+            hidden, alphas, token_num = self.tail_process_fn(hidden, alphas, token_num, mask=mask)
 
         acoustic_embeds, cif_peak = cif(hidden, alphas, self.threshold)
         if target_length is None and self.tail_threshold > 0.0:
@@ -143,12 +178,21 @@ class CifPredictorV2(nn.Module):
 
         return acoustic_embeds, token_num, alphas, cif_peak
 
-    def tail_process_fn(self, hidden, alphas, token_num=None):
+    def tail_process_fn(self, hidden, alphas, token_num=None, mask=None):
         b, t, d = hidden.size()
         tail_threshold = self.tail_threshold
-        tail_threshold = torch.tensor([tail_threshold], dtype=alphas.dtype).to(alphas.device)
-        tail_threshold = tail_threshold.unsqueeze(0).repeat(b, 1)
-        alphas = torch.cat([alphas, tail_threshold], dim=1)
+        if mask is not None:
+            zeros_t = torch.zeros((b, 1), dtype=torch.float32, device=alphas.device)
+            ones_t = torch.ones_like(zeros_t)
+            mask_1 = torch.cat([mask, zeros_t], dim=1)
+            mask_2 = torch.cat([ones_t, mask], dim=1)
+            mask = mask_2 - mask_1
+            tail_threshold = mask * tail_threshold
+            alphas = torch.cat([alphas, tail_threshold], dim=1)
+        else:
+            tail_threshold = torch.tensor([tail_threshold], dtype=alphas.dtype).to(alphas.device)
+            tail_threshold = torch.reshape(tail_threshold, (1, 1))
+            alphas = torch.cat([alphas, tail_threshold], dim=1)
         zeros = torch.zeros((b, 1, d), dtype=hidden.dtype).to(hidden.device)
         hidden = torch.cat([hidden, zeros], dim=1)
         token_num = alphas.sum(dim=-1)
