@@ -27,6 +27,7 @@ model_conf:
     predictor_bias: 1
     sampling_ratio: 0.75
 
+
 # minibatch related
 # dataset_type: small
 batch_type: length

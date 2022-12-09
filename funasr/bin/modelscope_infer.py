@@ -17,7 +17,7 @@ if __name__ == '__main__':
                         help="model name in modelscope")
     parser.add_argument("--model_revision",
                         type=str,
-                        default="v1.0.3",
+                        default="v1.0.4",
                         help="model revision in modelscope")
     parser.add_argument("--local_model_path",
                         type=str,

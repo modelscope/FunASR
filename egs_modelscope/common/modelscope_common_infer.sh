@@ -5,7 +5,7 @@ set -u
 set -o pipefail
 
 model_name=speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch  # pre-trained model, download from modelscope
-model_revision="v1.0.3"     # please do not modify the model revision
+model_revision="v1.0.4"     # please do not modify the model revision
 data_dir=  # wav list, ${data_dir}/wav.scp
 exp_dir="exp"
 gpuid_list="0,1"
@@ -71,5 +71,6 @@ ${decode_cmd} --max-jobs-run "${inference_nj}" JOB=1:"${inference_nj}" "${_logdi
         cat ${_logdir}/text.${i}
     done | sort -k1 >${_dir}/text
 
-mv ${exp_dir}/${model_name}/decoding.yaml.back ${exp_dir}/${model_name}/decoding.yaml
-
+if "${use_lm}"; then
+    mv ${exp_dir}/${model_name}/decoding.yaml.back ${exp_dir}/${model_name}/decoding.yaml
+fi

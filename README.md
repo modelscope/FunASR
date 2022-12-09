@@ -1,8 +1,14 @@
-<div align="left"><img src="image/funasr_logo.jpg" width="400"/></div>
+<div align="left"><img src="docs/images/funasr_logo.jpg" width="400"/></div>
 
 # FunASR: A Fundamental End-to-End Speech Recognition Toolkit
 
 <strong>FunASR</strong> hopes to build a bridge between academic research and industrial applications on speech recognition. By supporting the training & finetuning of the industrial-grade speech recognition model released on [ModelScope](https://www.modelscope.cn/models?page=1&tasks=auto-speech-recognition), researchers and developers can conduct research and production of speech recognition models more conveniently, and promote the development of speech recognition ecology. ASR for Fun！
+
+## Highlights
+- FunASR supports many types of models, such as, Tranformer, Conformer, [Paraformer](https://arxiv.org/abs/2206.08317).
+- A large number of ASR models trained on academic datasets or industrial datasets are open sourced on [ModelScope](https://www.modelscope.cn/models?page=1&tasks=auto-speech-recognition), 
+- The pretrained model [Paraformer-large](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary) obtains the first place on many task in [SpeechIO leaderboard](https://github.com/SpeechColab/Leaderboard)
+- FunASR supports large-scale dataset dataloader and multi-GPU training.
 
 ## Installation(Training and Developing)
 
@@ -27,18 +33,24 @@ conda activate funasr
 | 10.2  | conda install pytorch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0 cudatoolkit=10.2 -c pytorch |
 | 11.1  | conda install pytorch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0 cudatoolkit=11.1 -c pytorch |
 
-For more versions, please see https://pytorch.org/get-started/locally/
+For more versions, please see [https://pytorch.org/get-started/locally](https://pytorch.org/get-started/locally)
 
 - Install ModelScope:
 ``` sh
 pip install "modelscope[audio]" -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html
 ```
 
-- Install other packages: 
+For more details about modelscope, please see [modelscope installation](https://modelscope.cn/docs/%E7%8E%AF%E5%A2%83%E5%AE%89%E8%A3%85)
+
+- Install FunASR and other packages: 
 
 ``` sh
 pip install --editable ./
 ```
+
+## Pretrained model hub
+
+We have trained many academic and industrial models, [model hub](docs/modelscope_models.md)
 
 ## Contact
 
@@ -47,7 +59,7 @@ If you have any questions about FunASR, please contact us by
 - email: [funasr@list.alibaba-inc.com](funasr@list.alibaba-inc.com)
 
 - Dingding group:
-<div align="left"><img src="image/dingding.jpg" width="400"/></div>
+<div align="left"><img src="docs/images/dingding.jpg" width="400"/></div>
 
 
 ## Acknowledge

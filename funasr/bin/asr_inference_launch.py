@@ -6,6 +6,7 @@ import argparse
 import logging
 import os
 import sys
+from typing import Union, Dict, Any
 
 from funasr.utils import config_argparse
 from funasr.utils.cli_utils import get_commandline_args
@@ -181,6 +182,31 @@ def get_parser():
     return parser
 
 
+def set_parameters(language: str = None,
+                   sample_rate: Union[int, Dict[Any, int]] = None):
+    if language is not None:
+        global global_asr_language
+        global_asr_language = language
+    if sample_rate is not None:
+        global global_sample_rate
+        global_sample_rate = sample_rate
+
+
+def inference_launch(mode, **kwargs):
+    if mode == "asr":
+        from funasr.bin.asr_inference import inference
+        return inference(**kwargs)
+    elif mode == "uniasr":
+        from funasr.bin.asr_inference_uniasr import inference
+        return inference(**kwargs)
+    elif mode == "paraformer":
+        from funasr.bin.asr_inference_paraformer import inference
+        return inference(**kwargs)
+    else:
+        logging.info("Unknown decoding mode: {}".format(mode))
+        return None
+
+
 def main(cmd=None):
     print(get_commandline_args(), file=sys.stderr)
     parser = get_parser()
@@ -208,17 +234,7 @@ def main(cmd=None):
         os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
         os.environ["CUDA_VISIBLE_DEVICES"] = gpuid
 
-    if args.mode == "asr":
-        from funasr.bin.asr_inference import inference
-        inference(**kwargs)
-    elif args.mode == "uniasr":
-        from funasr.bin.asr_inference_uniasr import inference
-        inference(**kwargs)
-    elif args.mode == "paraformer":
-        from funasr.bin.asr_inference_paraformer import inference
-        inference(**kwargs)
-    else:
-        logging.info("Unknown decoding mode: {}".format(args.mode))
+    inference_launch(**kwargs)
 
 
 if __name__ == "__main__":
