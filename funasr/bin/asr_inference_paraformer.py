@@ -441,7 +441,7 @@ def inference(
             "decoding, feature length: {}, forward_time: {:.4f}, rtf: {:.4f}".
                 format(length, forward_time, 100 * forward_time / (length*lfr_factor)))
         
-        for batch_id in range(len(results)):
+        for batch_id in range(_bs):
             result = [results[batch_id][:-2]]
     
             key = keys[batch_id]
