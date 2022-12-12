@@ -197,9 +197,9 @@ class Speech2Text:
 
         # data: (Nsamples,) -> (1, Nsamples)
         # lengths: (1,)
-        if len(speech.size()) < 3:
-            speech = speech.unsqueeze(0).to(getattr(torch, self.dtype))
-            speech_lengths = speech.new_full([1], dtype=torch.long, fill_value=speech.size(1))
+        # if len(speech.size()) < 3:
+        #     speech = speech.unsqueeze(0).to(getattr(torch, self.dtype))
+        #     speech_lengths = speech.new_full([1], dtype=torch.long, fill_value=speech.size(1))
         lfr_factor = max(1, (speech.size()[-1]//80)-1)
         
         batch = {"speech": speech, "speech_lengths": speech_lengths}
