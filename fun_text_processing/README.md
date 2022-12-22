@@ -10,7 +10,7 @@ FunTextProcessing is a Python toolkit for fundamental text processing in ASR inc
 - FunTextProcessing supports inverse text processing (ITN), text processing (TN).
 - FunTextProcessing supports multilingual, 10+ languages for ITN, 5 languages for TN.
 
-#### Installation
+### Installation
 
 Fun Text Processing, specifically (Inverse) Text Normalization, requires Pynini to be installed.
 ```
