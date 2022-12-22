@@ -22,7 +22,12 @@ bash fun_text_processing/install_pynini.sh
 Given text inputs, such as speech recognition results, use `fun_text_processing/inverse_text_normalization/inverse_normalize.py` to output ITN results. You may refer to the following example scripts.
 
 ```
-python fun_text_processing/inverse_text_normalization/inverse_normalize.py --text="ratus dua puluh tiga" --language=id
+python fun_text_processing/inverse_text_normalization/inverse_normalize.py --text="one hundred twenty three" --language=en
+```
+
+```
+python fun_text_processing/inverse_text_normalization/inverse_normalize.py --text="ratus dua puluh tiga" --language=id --cache_dir ./model/ --output_file output.txt --overwrite_cache
+cat output.txt
 ```
 
 Arguments:
