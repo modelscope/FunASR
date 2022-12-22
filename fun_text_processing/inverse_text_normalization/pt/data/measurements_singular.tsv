@@ -1,0 +1,55 @@
+h	hora
+min	minuto
+s	segundo
+ms	milissegundo
+ns	nanossegundo
+μs	microssegundo
+t	tonelada
+kg	quilo
+kg	quilograma
+g	grama
+mg	miligrama
+μm	micrômetro
+nm 	nanômetro
+mm	milímetro
+cm	centímetro
+cm²	centímetro quadrado
+cm³	centímetro cúbico
+m	metro
+m²	metro quadrado
+m³	metro cúbico
+km	quilômetro
+km²	quilômetro quadrado
+ha	hectare
+kph	quilômetro por hora
+mph	milha por hora
+m/s	metro por segundo
+l	litro
+ml	mililitro
+kgf	quilograma força
+%	por cento
+°F	fahrenheit
+°C	celsius
+°F	grau fahrenheit
+°C	grau celsius
+Hz	hertz
+kHz	quilo hertz
+MHz	mega hertz
+GHz	giga hertz
+W	watt
+kW	quilowatt
+MW	megawatt
+GW	gigawatt
+Wh	watt hora
+kWh	quilowatt hora
+MWh	megawatt hora
+GWh	gigawatt hora
+kV	quilovolt
+V	volt
+mV	milivolt
+A	ampere
+mA	miliampere
+rpm	rotação por minuto
+db	decibel
+cal	caloria
+kcal	quilocaloria
