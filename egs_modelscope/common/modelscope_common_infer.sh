@@ -8,9 +8,9 @@ model_name=speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch  #
 model_revision="v1.0.4"     # please do not modify the model revision
 data_dir=  # wav list, ${data_dir}/wav.scp
 exp_dir="exp"
-gpuid_list="0,1"
+gpuid_list="0"
 ngpu=$(echo $gpuid_list | awk -F "," '{print NF}')
-njob=4
+njob=1
 gpu_inference=true
 decode_cmd=utils/run.pl
 

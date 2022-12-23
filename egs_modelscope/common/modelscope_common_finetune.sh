@@ -7,7 +7,7 @@ CUDA_VISIBLE_DEVICES="0,1" # set gpus, e.g., CUDA_VISIBLE_DEVICES="0,1"
 gpu_num=2
 count=1
 gpu_inference=true # Whether to perform gpu decoding, set false for cpu decoding
-njob=4 # the number of jobs for each gpu
+njob=1 # the number of jobs for each gpu
 train_cmd=utils/run.pl
 infer_cmd=utils/run.pl
 
@@ -84,7 +84,7 @@ gpuid_list=$CUDA_VISIBLE_DEVICES  # set gpus for decoding, the same as training 
 ngpu=$(echo $gpuid_list | awk -F "," '{print NF}')
 
 if ${gpu_inference}; then
-    inference_nj=$[${ngpu}*${njob}]
+    inference_nj=$njob
     _ngpu=1
 else
     inference_nj=$njob
@@ -244,10 +244,10 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
         fi
         ${infer_cmd} --gpu "${_ngpu}" --max-jobs-run "${_nj}" JOB=1:"${_nj}" "${_logdir}"/asr_inference.JOB.log \
             python -m funasr.bin.asr_inference_launch \
-                --batch_size 1 \
+                --batch_size 64 \
                 --ngpu "${_ngpu}" \
                 --njob ${njob} \
-                --gpuid_list ${gpuid_list} \
+                --gpuid_list ${gpuid_list:0:1} \
                 --data_path_and_name_and_type "${_data}/${scp},speech,${type}" \
                 --key_file "${_logdir}"/keys.JOB.scp \
                 --asr_train_config "${asr_exp}"/config.yaml \

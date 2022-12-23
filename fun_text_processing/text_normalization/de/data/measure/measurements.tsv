@@ -1,0 +1,82 @@
+%	prozent
+f	fahrenheit
+c	celsius
+°C	grad celsius
+°F	grad fahrenheit
+K	kelvin
+km	kilometer
+m	meter
+cm	zentimeter
+mm	millimeter
+μm	mikrometer
+nm	nanometer
+dm	dezimeter
+pm	pikometer
+hm	hektometer
+ha	hektar
+mi	meile
+m²	quadrat meter	-0.0001
+km²	quadrat kilometer	-0.0001
+mm²	quadrat millimeter	-0.0001
+cm²	quadrat zentimeter	-0.0001
+m³	kubik meter	-0.0001
+km³	kubik kilometer	-0.0001
+mm³	kubik millimeter	-0.0001
+cm³	kubik zentimeter	-0.0001
+m2	quadrat meter
+km2	quadrat kilometer
+mm2	quadrat millimeter
+cm2	quadrat zentimeter
+m3	kubik meter
+km3	kubik kilometer
+mm3	kubik millimeter
+cm3	kubik zentimeter
+ft	fuß
+g	gramm
+µg	mikrogramm
+mg	milligramm
+kg	kilogramm
+lb	pfund
+oz	unze
+cwt	zentner
+gr	korn
+dr	drachne
+μg	mikrogramm
+pg	petagramm
+h	stunde
+s	sekunde
+min	minute
+ds	decisekunde
+ms	millisekunde
+μs	mikrosekunde
+hz	hertz
+kw	kilowatt
+kwh	kilowattstunde
+ghz	gigahertz
+khz	kilohertz
+mhz	megahertz
+v	volt
+mc	megacoulomb
+mA	milliampere
+A	ampere
+tw	terawatt
+mv	millivolt
+mw	megawatt
+gw	gigawatt
+ω	ohm
+db	dezibel
+gb	gigabyte
+kb	kilobit
+pb	petabit
+mb	megabyte
+kb	kilobyte
+tb	terabyte
+kv	kilovolt
+mv	megavolt
+kn	kilonewton
+ml	milliliter
+l	liter
+ma	megaampere
+bar	bar
+kcal	kilokalorie
+cal	kalorie

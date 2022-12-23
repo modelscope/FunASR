@@ -8,9 +8,9 @@ pretrained_model_name=speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404
 data_dir=  # wav list, ${data_dir}/wav.scp
 finetune_model_name=  # fine-tuning model name
 finetune_exp_dir=  # fine-tuning model experiment result path
-gpuid_list="0,1"
+gpuid_list="0"
 ngpu=$(echo $gpuid_list | awk -F "," '{print NF}')
-njob=4
+njob=1
 gpu_inference=true
 decode_cmd=utils/run.pl
 
@@ -20,7 +20,6 @@ if ${gpu_inference}; then
     inference_nj=$[${ngpu}*${njob}]
     _ngpu=1
 else
-    inference_nj=${njob}
     inference_nj=${njob}
     _ngpu=0
 fi
