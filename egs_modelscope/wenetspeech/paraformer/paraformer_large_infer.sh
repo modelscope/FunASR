@@ -10,9 +10,9 @@ exp_dir=
 model_name=speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
 model_revision="v1.0.4"     # please do not modify the model revision
 inference_nj=32
-gpuid_list="0,1" # set gpus, e.g., gpuid_list="0,1"
+gpuid_list="0" # set gpus, e.g., gpuid_list="0,1"
 ngpu=$(echo $gpuid_list | awk -F "," '{print NF}')
-njob=4  # the number of jobs for each gpu
+njob=1  # the number of jobs for each gpu
 gpu_inference=true  # Whether to perform gpu decoding, set false for cpu decoding
 
 if ${gpu_inference}; then
