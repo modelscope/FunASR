@@ -12,10 +12,8 @@ def isChinese(ch: str):
 
 def isAllChinese(word: Union[List[Any], str]):
     word_lists = []
-    table = str.maketrans('', '', string.punctuation)
     for i in word:
-        cur = i.translate(table)
-        cur = cur.replace(' ', '')
+        cur = i.replace(' ', '')
         cur = cur.replace('</s>', '')
         cur = cur.replace('<s>', '')
         word_lists.append(cur)
@@ -31,10 +29,8 @@ def isAllChinese(word: Union[List[Any], str]):
 
 def isAllAlpha(word: Union[List[Any], str]):
     word_lists = []
-    table = str.maketrans('', '', string.punctuation)
     for i in word:
-        cur = i.translate(table)
-        cur = cur.replace(' ', '')
+        cur = i.replace(' ', '')
         cur = cur.replace('</s>', '')
         cur = cur.replace('<s>', '')
         word_lists.append(cur)
@@ -43,7 +39,7 @@ def isAllAlpha(word: Union[List[Any], str]):
         return False
 
     for ch in word_lists:
-        if ch.isalpha() is False:
+        if ch.isalpha() is False and ch != "'":
             return False
         elif ch.isalpha() is True and isChinese(ch) is True:
             return False
