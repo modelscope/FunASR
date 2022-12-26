@@ -1,11 +1,11 @@
 name: "FunASR Docs"
 on:
-pull_request:
-  branches:
-    - main
-push:
-  branches:
-    - dev
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - dev
 
 jobs:
   docs:
