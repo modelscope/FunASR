@@ -21,7 +21,7 @@ jobs:
       if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
       run: |
         mkdir public
-        cp -r docs/build/html/* public/
+        cp -r docs/build_/html/* public/
 
     - name: deploy github.io pages
       if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
