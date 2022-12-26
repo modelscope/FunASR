@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pretrained models on ModelScope &mdash; FunASR  documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Get Started" href="get_started.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> FunASR
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Tutorial:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="papers.html">Papers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="get_started.html">Get Started</a></li>
+</ul>
+<p class="caption"><span class="caption-text">ModelScope:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Pretrained models on ModelScope</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#model-license">Model License</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#model-zoo">Model Zoo</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">FunASR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Pretrained models on ModelScope</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/modelscope_models.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="pretrained-models-on-modelscope">
+<h1>Pretrained models on ModelScope<a class="headerlink" href="#pretrained-models-on-modelscope" title="Permalink to this headline"></a></h1>
+<div class="section" id="model-license">
+<h2>Model License<a class="headerlink" href="#model-license" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p>Apache License 2.0</p></li>
+</ul>
+</div>
+<div class="section" id="model-zoo">
+<h2>Model Zoo<a class="headerlink" href="#model-zoo" title="Permalink to this headline"></a></h2>
+<p>Here we provided several pretrained models on different datasets. The details of models and datasets can be found on <a class="reference external" href="https://www.modelscope.cn/models?page=1&amp;tasks=auto-speech-recognition">ModelScope</a>.</p>
+<table border="1" class="docutils">
+<thead>
+<tr>
+<th style="text-align: center;">Datasets</th>
+<th style="text-align: center;">Hours</th>
+<th style="text-align: center;">Model</th>
+<th style="text-align: center;">Online/Offline</th>
+<th style="text-align: center;">Language</th>
+<th style="text-align: center;">Framework</th>
+<th>Checkpoint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">Alibaba Speech Data</td>
+<td style="text-align: center;">60000</td>
+<td style="text-align: center;">Paraformer</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: center;">CN</td>
+<td style="text-align: center;">Pytorch</td>
+<td><a href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary">speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">Alibaba Speech Data</td>
+<td style="text-align: center;">50000</td>
+<td style="text-align: center;">Paraformer</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: center;">CN</td>
+<td style="text-align: center;">Tensorflow</td>
+<td><a href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8358-tensorflow1/summary">speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8358-tensorflow1</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">Alibaba Speech Data</td>
+<td style="text-align: center;">50000</td>
+<td style="text-align: center;">Paraformer</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: center;">CN</td>
+<td style="text-align: center;">Tensorflow</td>
+<td><a href="https://www.modelscope.cn/models/damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8358-tensorflow1/summary">speech_paraformer_asr_nat-zh-cn-16k-common-vocab8358-tensorflow1</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">Alibaba Speech Data</td>
+<td style="text-align: center;">50000</td>
+<td style="text-align: center;">Paraformer</td>
+<td style="text-align: center;">Online</td>
+<td style="text-align: center;">CN</td>
+<td style="text-align: center;">Tensorflow</td>
+<td><a href="http://www.modelscope.cn/models/damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab3444-tensorflow1-online/summary">speech_paraformer_asr_nat-zh-cn-16k-common-vocab3444-tensorflow1-online</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">Alibaba Speech Data</td>
+<td style="text-align: center;">50000</td>
+<td style="text-align: center;">UniASR</td>
+<td style="text-align: center;">Online</td>
+<td style="text-align: center;">CN</td>
+<td style="text-align: center;">Tensorflow</td>
+<td><a href="https://www.modelscope.cn/models/damo/speech_UniASR_asr_2pass-zh-cn-16k-common-vocab8358-tensorflow1-online/summary">speech_UniASR_asr_2pass-zh-cn-16k-common-vocab8358-tensorflow1-online</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">Alibaba Speech Data</td>
+<td style="text-align: center;">50000</td>
+<td style="text-align: center;">UniASR</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: center;">CN</td>
+<td style="text-align: center;">Tensorflow</td>
+<td><a href="https://www.modelscope.cn/models/damo/speech_UniASR-large_asr_2pass-zh-cn-16k-common-vocab8358-tensorflow1-offline/summary">speech_UniASR-large_asr_2pass-zh-cn-16k-common-vocab8358-tensorflow1-offline</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">Alibaba Speech Data</td>
+<td style="text-align: center;">50000</td>
+<td style="text-align: center;">UniASR</td>
+<td style="text-align: center;">Online</td>
+<td style="text-align: center;">CN&amp;EN</td>
+<td style="text-align: center;">Tensorflow</td>
+<td><a href="https://www.modelscope.cn/models/damo/speech_UniASR_asr_2pass-cn-en-moe-16k-vocab8358-tensorflow1-online/summary">speech_UniASR_asr_2pass-cn-en-moe-16k-vocab8358-tensorflow1-online</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">Alibaba Speech Data</td>
+<td style="text-align: center;">50000</td>
+<td style="text-align: center;">UniASR</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: center;">CN&amp;EN</td>
+<td style="text-align: center;">Tensorflow</td>
+<td><a href="https://www.modelscope.cn/models/damo/speech_UniASR_asr_2pass-cn-en-moe-16k-vocab8358-tensorflow1-offline/summary">speech_UniASR_asr_2pass-cn-en-moe-16k-vocab8358-tensorflow1-offline</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">Alibaba Speech Data</td>
+<td style="text-align: center;">20000</td>
+<td style="text-align: center;">UniASR</td>
+<td style="text-align: center;">Online</td>
+<td style="text-align: center;">CN-Accent</td>
+<td style="text-align: center;">Tensorflow</td>
+<td><a href="https://www.modelscope.cn/models/damo/speech_UniASR_asr_2pass-cn-dialect-16k-vocab8358-tensorflow1-online/summary">speech_UniASR_asr_2pass-cn-dialect-16k-vocab8358-tensorflow1-online</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">Alibaba Speech Data</td>
+<td style="text-align: center;">20000</td>
+<td style="text-align: center;">UniASR</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: center;">CN-Accent</td>
+<td style="text-align: center;">Tensorflow</td>
+<td><a href="https://www.modelscope.cn/models/damo/speech_UniASR_asr_2pass-cn-dialect-16k-vocab8358-tensorflow1-offline/summary">speech_UniASR_asr_2pass-cn-dialect-16k-vocab8358-tensorflow1-offline</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">Alibaba Speech Data</td>
+<td style="text-align: center;">30000</td>
+<td style="text-align: center;">Paraformer-8K</td>
+<td style="text-align: center;">Online</td>
+<td style="text-align: center;">CN</td>
+<td style="text-align: center;">Tensorflow</td>
+<td><a href="https://www.modelscope.cn/models/damo/speech_paraformer_asr_nat-zh-cn-8k-common-vocab3444-tensorflow1-online/summary">speech_paraformer_asr_nat-zh-cn-8k-common-vocab3444-tensorflow1-online</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">Alibaba Speech Data</td>
+<td style="text-align: center;">30000</td>
+<td style="text-align: center;">Paraformer-8K</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: center;">CN</td>
+<td style="text-align: center;">Tensorflow</td>
+<td><a href="https://www.modelscope.cn/models/damo/speech_paraformer_asr_nat-zh-cn-8k-common-vocab8358-tensorflow1/summary">speech_paraformer_asr_nat-zh-cn-8k-common-vocab8358-tensorflow1</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">Alibaba Speech Data</td>
+<td style="text-align: center;">30000</td>
+<td style="text-align: center;">Paraformer-8K</td>
+<td style="text-align: center;">Online</td>
+<td style="text-align: center;">CN</td>
+<td style="text-align: center;">Pytorch</td>
+<td><a href="https://www.modelscope.cn/models/damo/speech_UniASR_asr_2pass-zh-cn-8k-common-vocab3445-pytorch-online/summary">speech_UniASR_asr_2pass-zh-cn-8k-common-vocab3445-pytorch-online</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">Alibaba Speech Data</td>
+<td style="text-align: center;">30000</td>
+<td style="text-align: center;">Paraformer-8K</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: center;">CN</td>
+<td style="text-align: center;">Pytorch</td>
+<td><a href="https://www.modelscope.cn/models/damo/speech_UniASR_asr_2pass-zh-cn-8k-common-vocab3445-pytorch-offline/summary">speech_UniASR_asr_2pass-zh-cn-8k-common-vocab3445-pytorch-offline</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">Alibaba Speech Data</td>
+<td style="text-align: center;">30000</td>
+<td style="text-align: center;">UniASR-8K</td>
+<td style="text-align: center;">Online</td>
+<td style="text-align: center;">CN</td>
+<td style="text-align: center;">Tensorflow</td>
+<td><a href="https://www.modelscope.cn/models/damo/speech_UniASR_asr_2pass-zh-cn-8k-common-vocab8358-tensorflow1-online/summary">speech_UniASR_asr_2pass-zh-cn-8k-common-vocab8358-tensorflow1-online</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">Alibaba Speech Data</td>
+<td style="text-align: center;">30000</td>
+<td style="text-align: center;">UniASR-8K</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: center;">CN</td>
+<td style="text-align: center;">Tensorflow</td>
+<td><a href="https://www.modelscope.cn/models/damo/speech_UniASR_asr_2pass-zh-cn-8k-common-vocab8358-tensorflow1-offline/summary">speech_UniASR_asr_2pass-zh-cn-8k-common-vocab8358-tensorflow1-offline</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">Alibaba Speech Data</td>
+<td style="text-align: center;">30000</td>
+<td style="text-align: center;">UniASR-8K</td>
+<td style="text-align: center;">Online</td>
+<td style="text-align: center;">CN</td>
+<td style="text-align: center;">Pytorch</td>
+<td><a href="https://www.modelscope.cn/models/damo/speech_UniASR_asr_2pass-zh-cn-8k-common-vocab3445-pytorch-online/summary">speech_UniASR_asr_2pass-zh-cn-8k-common-vocab3445-pytorch-online</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">Alibaba Speech Data</td>
+<td style="text-align: center;">30000</td>
+<td style="text-align: center;">UniASR-8K</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: center;">CN</td>
+<td style="text-align: center;">Pytorch</td>
+<td><a href="https://www.modelscope.cn/models/damo/speech_UniASR_asr_2pass-zh-cn-8k-common-vocab3445-pytorch-offline/summary">speech_UniASR_asr_2pass-zh-cn-8k-common-vocab3445-pytorch-offline</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">AISHELL-1</td>
+<td style="text-align: center;">178</td>
+<td style="text-align: center;">Paraformer</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: center;">CN</td>
+<td style="text-align: center;">Pytorch</td>
+<td><a href="https://www.modelscope.cn/models/damo/speech_paraformer_asr_nat-aishell1-pytorch/summary">speech_paraformer_asr_nat-aishell1-pytorch</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">AISHELL-2</td>
+<td style="text-align: center;">1000</td>
+<td style="text-align: center;">Paraformer</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: center;">CN</td>
+<td style="text-align: center;">Pytorch</td>
+<td><a href="https://www.modelscope.cn/models/damo/speech_paraformer_asr_nat-aishell2-pytorch/summary">speech_paraformer_asr_nat-aishell2-pytorch</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">AISHELL-1</td>
+<td style="text-align: center;">178</td>
+<td style="text-align: center;">ParaformerBert</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: center;">CN</td>
+<td style="text-align: center;">Pytorch</td>
+<td><a href="https://modelscope.cn/models/damo/speech_paraformerbert_asr_nat-zh-cn-16k-aishell1-vocab4234-pytorch/summary">speech_paraformerbert_asr_nat-zh-cn-16k-aishell1-vocab4234-pytorch</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">AISHELL-2</td>
+<td style="text-align: center;">1000</td>
+<td style="text-align: center;">ParaformerBert</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: center;">CN</td>
+<td style="text-align: center;">Pytorch</td>
+<td><a href="https://modelscope.cn/models/damo/speech_paraformerbert_asr_nat-zh-cn-16k-aishell2-vocab5212-pytorch/summary">speech_paraformerbert_asr_nat-zh-cn-16k-aishell2-vocab5212-pytorch</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">AISHELL-1</td>
+<td style="text-align: center;">178</td>
+<td style="text-align: center;">Conformer</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: center;">CN</td>
+<td style="text-align: center;">Pytorch</td>
+<td><a href="https://modelscope.cn/models/damo/speech_conformer_asr_nat-zh-cn-16k-aishell1-vocab4234-pytorch/summary">speech_conformer_asr_nat-zh-cn-16k-aishell1-vocab4234-pytorch</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">AISHELL-2</td>
+<td style="text-align: center;">1000</td>
+<td style="text-align: center;">Conformer</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: center;">CN</td>
+<td style="text-align: center;">Pytorch</td>
+<td><a href="https://modelscope.cn/models/damo/speech_conformer_asr_nat-zh-cn-16k-aishell2-vocab5212-pytorch/summary">speech_conformer_asr_nat-zh-cn-16k-aishell2-vocab5212-pytorch</a></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="get_started.html" class="btn btn-neutral float-left" title="Get Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Speech Lab, Alibaba Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
