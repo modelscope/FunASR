@@ -1,32 +1,32 @@
 name: "FunASR Docs"
 on:
-    pull_request:
-        branches:
-            - main
-    push:
-        branches:
-            - dev
+pull_request:
+  branches:
+    - main
+push:
+  branches:
+    - dev
 
 jobs:
-    docs:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v1
-            - uses: ammaraskar/sphinx-action@master
-            with:
-                docs-folder: "docs/"
-                pre-build-command: "pip install sphinx-markdown-tables nbsphinx jinja2 recommonmark sphinx_rtd_theme"
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: ammaraskar/sphinx-action@master
+      with:
+        docs-folder: "docs/"
+        pre-build-command: "pip install sphinx-markdown-tables nbsphinx jinja2 recommonmark sphinx_rtd_theme"
 
-        - name: deploy copy
-            if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
-            run: |
-                mkdir public
-                cp -r docs/build/html/* public/
+    - name: deploy copy
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
+      run: |
+        mkdir public
+        cp -r docs/build/html/* public/
 
-        - name: deploy github.io pages
-            if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
-            uses: peaceiris/actions-gh-pages@v2.3.1
-            env:
-                GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-                PUBLISH_BRANCH: gh-pages
-                PUBLISH_DIR: public
+    - name: deploy github.io pages
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
+      uses: peaceiris/actions-gh-pages@v2.3.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        PUBLISH_BRANCH: gh-pages
+        PUBLISH_DIR: public
