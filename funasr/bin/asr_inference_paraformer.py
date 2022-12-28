@@ -92,8 +92,8 @@ class Speech2Text:
         if asr_model.frontend is None and frontend_conf is not None:
             frontend = WavFrontend(**frontend_conf)
             asr_model.frontend = frontend
-        logging.info("asr_model: {}".format(asr_model))
-        logging.info("asr_train_args: {}".format(asr_train_args))
+        # logging.info("asr_model: {}".format(asr_model))
+        # logging.info("asr_train_args: {}".format(asr_train_args))
         asr_model.to(dtype=getattr(torch, dtype)).eval()
 
         ctc = CTCPrefixScorer(ctc=asr_model.ctc, eos=asr_model.eos)
@@ -141,8 +141,8 @@ class Speech2Text:
         for scorer in scorers.values():
             if isinstance(scorer, torch.nn.Module):
                 scorer.to(device=device, dtype=getattr(torch, dtype)).eval()
-        logging.info(f"Beam_search: {beam_search}")
-        logging.info(f"Decoding device={device}, dtype={dtype}")
+        # logging.info(f"Beam_search: {beam_search}")
+        # logging.info(f"Decoding device={device}, dtype={dtype}")
 
         # 5. [Optional] Build Text converter: e.g. bpe-sym -> Text
         if token_type is None:
@@ -160,7 +160,7 @@ class Speech2Text:
         else:
             tokenizer = build_tokenizer(token_type=token_type)
         converter = TokenIDConverter(token_list=token_list)
-        logging.info(f"Text tokenizer: {tokenizer}")
+        # logging.info(f"Text tokenizer: {tokenizer}")
 
         self.asr_model = asr_model
         self.asr_train_args = asr_train_args
@@ -426,7 +426,7 @@ def inference(
         assert len(keys) == _bs, f"{len(keys)} != {_bs}"
         # batch = {k: v for k, v in batch.items() if not k.endswith("_lengths")}
 
-        logging.info("decoding, utt_id: {}".format(keys))
+        # logging.info("decoding, utt_id: {}".format(keys))
         # N-best list of (text, token, token_int, hyp_object)
 
         time_beg = time.time()

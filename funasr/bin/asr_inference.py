@@ -100,8 +100,8 @@ class Speech2Text:
         if asr_model.frontend is None and frontend_conf is not None:
             frontend = WavFrontend(**frontend_conf)
             asr_model.frontend = frontend
-        logging.info("asr_model: {}".format(asr_model))
-        logging.info("asr_train_args: {}".format(asr_train_args))
+        # logging.info("asr_model: {}".format(asr_model))
+        # logging.info("asr_train_args: {}".format(asr_train_args))
         asr_model.to(dtype=getattr(torch, dtype)).eval()
 
         decoder = asr_model.decoder
@@ -164,7 +164,7 @@ class Speech2Text:
         else:
             tokenizer = build_tokenizer(token_type=token_type)
         converter = TokenIDConverter(token_list=token_list)
-        logging.info(f"Text tokenizer: {tokenizer}")
+        # logging.info(f"Text tokenizer: {tokenizer}")
 
         self.asr_model = asr_model
         self.asr_train_args = asr_train_args
