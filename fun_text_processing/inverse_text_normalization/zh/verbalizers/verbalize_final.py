@@ -37,5 +37,5 @@ class VerbalizeFinalFst(GraphFst):
             + delete_space
             + pynutil.delete("}")
         )
-        graph = delete_space + pynini.closure(graph + delete_extra_space) + graph + delete_space
+        graph = delete_space + pynini.closure(graph + delete_space) + graph + delete_space
         self.fst = graph
