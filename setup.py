@@ -38,6 +38,8 @@ requirements = {
         "editdistance==0.5.2",
         "tensorboard>=1.14",
         "g2p",
+        # ITN
+        "pynini==2.1.5",
     ],
     # train: The modules invoked when training only.
     "train": [
