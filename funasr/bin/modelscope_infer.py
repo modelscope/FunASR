@@ -82,6 +82,9 @@ if __name__ == '__main__':
             wav_id, wav_path = line.strip().split()
             logging.info("decoding, utt_id: ['{}']".format(wav_id))
             rec_result = inference_pipeline(audio_in=wav_path)
-            text = rec_result["text"]
+            if 'text' in rec_result:
+                text = rec_result["text"]
+            else:
+                text = ''
             f_out.write(wav_id + " " + text + "\n")
             logging.info("best hypo: {} \n".format(text))
