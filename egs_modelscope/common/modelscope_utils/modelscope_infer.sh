@@ -54,6 +54,7 @@ for dset in ${test_sets}; do
         sed -i "s#lm_weight: 0.[0-9]*#lm_weight: `echo $lm_weight`#g" ${modelscope_dir}/decoding.yaml
     fi
 
+    split_scps=
     for n in $(seq "${inference_nj}"); do
         split_scps+=" ${_logdir}/keys.${n}.scp"
     done
