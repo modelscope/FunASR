@@ -24,7 +24,7 @@ def parse_args():
 
     parser.add_argument(
         "--token_and_classify_and_verbalize", help="export the single token&classify and verbalize or combined", choices=['single', 'combine'],
-        default="single", type=str
+        default="combine", type=str
     )
 
     parser.add_argument(
