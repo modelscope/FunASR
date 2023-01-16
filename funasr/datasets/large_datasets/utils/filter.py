@@ -2,14 +2,17 @@
 
 
 def filter(data,
-           min_length=10,
-           max_length=10000,
-           min_token_length=0,
-           max_token_length=200):
+           speech_length_min=100,
+           speech_length_max=15000,
+           token_length_min=0,
+           token_length_max=200):
     assert "speech" in data
     assert "text" in data
 
-    num_frames = data["speech"].shape[0]
+    if "sampling_rate" in data:
+        speech_length = (data["speech"].shape[0] / data["sampling_rate"]) * 1000.
+    else:
+        speech_length = data["speech"].shape[0]
     num_tokens = len(data['text'])
 
-    return min_length < num_frames < max_length and min_token_length < num_tokens < max_token_length
+    return speech_length_min < speech_length < speech_length_max and token_length_min < num_tokens < token_length_max

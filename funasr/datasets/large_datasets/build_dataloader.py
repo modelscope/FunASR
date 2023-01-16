@@ -21,15 +21,28 @@ def read_symbol_table(symbol_table_file):
             symbol_table[char] = i
     return symbol_table
 
+def load_seg_dict(seg_dict_file):
+    seg_dict = {}
+    assert isinstance(seg_dict_file, str)
+    with open(seg_dict_file, "r", encoding="utf8") as f:
+        lines = f.readlines()
+        for line in lines:
+            s = line.strip().split()
+            key = s[0]
+            value = s[1:]
+            seg_dict[key] = " ".join(value)
+    return seg_dict
 
 class ArkDataLoader(AbsIterFactory):
-    def __init__(self, data_list, dict_file, config_file, mode="train"):
+    def __init__(self, data_list, dict_file, dataset_conf, seg_dict_file=None, mode="train"):
         symbol_table = read_symbol_table(dict_file)
-        with open(config_file, "r") as fin:
-            configs = yaml.load(fin, Loader=yaml.FullLoader)
-        self.dataset_conf = configs["dataset_conf"]
+        if seg_dict_file is not None:
+            seg_dict = load_seg_dict(seg_dict_file)
+        else:
+            seg_dict = None
+        self.dataset_conf = dataset_conf
         logging.info("dataloader config: {}".format(self.dataset_conf))
-        self.dataset = Dataset(data_list, symbol_table,
+        self.dataset = Dataset(data_list, symbol_table, seg_dict,
                                self.dataset_conf, mode=mode)
 
     def build_iter(self, epoch, shuffle=True):

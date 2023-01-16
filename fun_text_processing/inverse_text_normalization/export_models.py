@@ -1,15 +1,3 @@
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 import os
 from time import perf_counter
 from argparse import ArgumentParser
@@ -21,12 +9,6 @@ def parse_args():
     parser.add_argument(
         "--language", help="language", choices=['de', 'en', 'es', 'fr', 'id', 'ja', 'ko', 'pt', 'ru', 'vi', 'zh'], default="en", type=str
     )
-
-    parser.add_argument(
-        "--token_and_classify_and_verbalize", help="export the single token&classify and verbalize or combined", choices=['single', 'combine'],
-        default="combine", type=str
-    )
-
     parser.add_argument(
         "--export_dir",
         help="path to export directory. Default to current directory.",
@@ -83,17 +65,10 @@ if __name__ == "__main__":
     os.makedirs(export_dir, exist_ok=True)
     tagger_far_file = os.path.join(export_dir, args.language + "_itn_tagger.far")
     verbalizer_far_file = os.path.join(export_dir, args.language + "_itn_verbalizer.far")
-    tager_and_verbalizer_far_file = os.path.join(export_dir, args.language, "model.far" )
 
     start_time = perf_counter()
     tagger_fst, verbalizer_fst = get_grammars(args.language)
-
-    if args.token_and_classify_and_verbalize == 'single':
-        generator_main(tagger_far_file, {"tokenize_and_classify": tagger_fst})
-        generator_main(verbalizer_far_file, {"verbalize": verbalizer_fst})
-    elif args.token_and_classify_and_verbalize == 'combine':
-        if not os.path.exists(os.path.join(export_dir, args.language)):
-            os.makedirs(os.path.join(export_dir, args.language))
-        generator_main(tager_and_verbalizer_far_file, {"tokenize_and_classify": tagger_fst, "verbalize": verbalizer_fst})
+    generator_main(tagger_far_file, {"tokenize_and_classify": tagger_fst})
+    generator_main(verbalizer_far_file, {"verbalize": verbalizer_fst})
     print(f'Time to generate graph: {round(perf_counter() - start_time, 2)} sec')
 

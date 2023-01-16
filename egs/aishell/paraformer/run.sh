@@ -13,7 +13,7 @@ train_cmd=utils/run.pl
 infer_cmd=utils/run.pl
 
 # general configuration
-feats_dir="../DATA" #feature output dictionary, for large data
+feats_dir="../DATA" #feature output dictionary
 exp_dir="."
 lang=zh
 dumpdir=dump/fbank
@@ -219,7 +219,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
         fi
         ${infer_cmd} --gpu "${_ngpu}" --max-jobs-run "${_nj}" JOB=1:"${_nj}" "${_logdir}"/asr_inference.JOB.log \
             python -m funasr.bin.asr_inference_launch \
-                --batch_size 100 \
+                --batch_size 1 \
                 --ngpu "${_ngpu}" \
                 --njob ${njob} \
                 --gpuid_list ${gpuid_list} \
@@ -245,4 +245,3 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
         cat ${_dir}/text.cer.txt
     done
 fi
-

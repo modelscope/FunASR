@@ -9,6 +9,8 @@ cmd=./utils/run.pl
 feats_dim=80
 sample_frequency=16000
 speed_perturb="1.0"
+window_type="hamming"
+max_lengths=1500
 
 echo "$0 $@"
 
@@ -29,7 +31,8 @@ mkdir -p ${logdir}
 
 $cmd JOB=1:$nj $logdir/make_fbank.JOB.log \
     python utils/compute_fbank.py -w $data/split${nj}/JOB/wav.scp -t $data/split${nj}/JOB/text \
-        -d $feats_dim -s $sample_frequency -p ${speed_perturb} -a JOB -o ${fbankdir} \
+        -d $feats_dim -s $sample_frequency -m ${max_lengths} -p ${speed_perturb} -a JOB -o ${fbankdir} \
+        --window-type ${window_type} \
         || exit 1;
 
 for n in $(seq $nj); do

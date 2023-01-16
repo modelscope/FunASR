@@ -8,12 +8,12 @@ gpu_num=2
 count=1
 gpu_inference=true  # Whether to perform gpu decoding, set false for cpu decoding
 # for gpu decoding, inference_nj=ngpu*njob; for cpu decoding, inference_nj=njob
-njob=8
+njob=5
 train_cmd=utils/run.pl
 infer_cmd=utils/run.pl
 
 # general configuration
-feats_dir="../DATA" #feature output dictionary, for large data
+feats_dir="../DATA" #feature output dictionary
 exp_dir="."
 lang=zh
 dumpdir=dump/fbank
@@ -34,7 +34,7 @@ speed_perturb="0.9,1.0,1.1"
 data_aishell=
 
 # exp tag
-tag=""
+tag="exp1"
 
 . utils/parse_options.sh || exit 1;
 
@@ -217,7 +217,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
         if [ -n "${inference_config}" ]; then
             _opts+="--config ${inference_config} "
         fi
-        ${infer_cmd} --gpu "${_ngpu}" --max-jobs-run "${_nj}" JOB=1:"${_nj}" "${_logdir}"/asr_inference.JOB.log \
+        ${infer_cmd} --gpu "${_ngpu}" --max-jobs-run "${_nj}" JOB=1: "${_nj}" "${_logdir}"/asr_inference.JOB.log \
             python -m funasr.bin.asr_inference_launch \
                 --batch_size 1 \
                 --ngpu "${_ngpu}" \

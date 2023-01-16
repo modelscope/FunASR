@@ -1,0 +1,20 @@
+{
+    "framework": "pytorch",
+    "task": "speaker-verification",
+    "model": {
+        "type": "generic-sv",
+        "sv_model_name": "sv.pb",
+        "model_config": {
+            "type": "pytorch",
+            "code_base": "funasr",
+            "mode": "sv",
+            "lang": "zh-cn",
+            "batch_size": 1,
+            "sv_model_name": "sv.pb",
+            "sv_model_config": "sv.yaml"
+        }
+    },
+    "pipeline": {
+        "type": "sv-inference"
+    }
+}

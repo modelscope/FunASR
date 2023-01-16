@@ -1,9 +1,0 @@
-beam_size: 5
-penalty: 0.0
-maxlenratio: 0.0
-minlenratio: 0.0
-ctc_weight: 0.0
-lm_weight: 0.0
-token_num_relax: 5
-decoding_ind: 0
-decoding_mode: model2

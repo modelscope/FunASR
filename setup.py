@@ -38,8 +38,8 @@ requirements = {
         "editdistance==0.5.2",
         "tensorboard>=1.14",
         "g2p",
-        # ITN
-        "pynini==2.1.5",
+        # PAI
+        "oss2"
     ],
     # train: The modules invoked when training only.
     "train": [
@@ -126,7 +126,7 @@ setup(
     long_description=open(os.path.join(dirname, "README.md"), encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     license="The MIT License",
-    packages=find_packages(include=["funasr*", "fun_text_processing*"]),
+    packages=find_packages(include=["funasr*"]),
     package_data={"funasr": ["version.txt"]},
     install_requires=install_requires,
     setup_requires=setup_requires,

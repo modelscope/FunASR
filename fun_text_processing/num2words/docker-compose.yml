@@ -1,0 +1,7 @@
+version: '3.0'
+services:
+  web:
+    image: python:3-alpine
+    command: python3 -m http.server 8080
+    volumes:
+      - .:/num2words
