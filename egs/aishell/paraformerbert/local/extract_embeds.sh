@@ -7,7 +7,7 @@ bert_model_root="../../huggingface_models"
 bert_model_name="bert-base-chinese"
 #bert_model_name="chinese-roberta-wwm-ext"
 #bert_model_name="mengzi-bert-base"
-raw_dataset_path=~/Funasr_data/aishell-1
+raw_dataset_path="../DATA"
 model_path=${bert_model_root}/${bert_model_name}
 
 . utils/parse_options.sh || exit 1;
@@ -39,11 +39,10 @@ for data_set in train dev test;do
                 JOB=`expr $tmp + $idx`
                 echo "proces jobid=$JOB"
                 {
-
-                beg=0
-                gpu=`expr $beg + $idx`
-                echo ${local_scp_dir}/log.${JOB}
-                python utils/extract_embeds.py $local_scp_dir/data.$JOB.text ${local_records_dir}/embeds.${JOB}.ark ${local_records_dir}/embeds.${JOB}.scp ${local_records_dir}/embeds.${JOB}.shape ${gpu} ${model_path} &> ${local_scp_dir}/log.${JOB}
+                    beg=0
+                    gpu=`expr $beg + $idx`
+                    echo ${local_scp_dir}/log.${JOB}
+                    python utils/extract_embeds.py $local_scp_dir/data.$JOB.text ${local_records_dir}/embeds.${JOB}.ark ${local_records_dir}/embeds.${JOB}.scp ${local_records_dir}/embeds.${JOB}.shape ${gpu} ${model_path} &> ${local_scp_dir}/log.${JOB}
             } &
             done
             wait
@@ -54,8 +53,6 @@ for data_set in train dev test;do
         for JOB in $(seq ${nj}); do
             cat ${local_records_dir}/embeds.${JOB}.scp || exit 1;
         done > ${local_scp_dir_raw}/embeds.scp
-
-        sed 's#nfs#data\/volume1#g' ${local_scp_dir_raw}/embeds.scp > ${local_scp_dir_raw}/embeds.scp.pai
 
         for JOB in $(seq ${nj}); do
             cat ${local_records_dir}/embeds.${JOB}.shape || exit 1;

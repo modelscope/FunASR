@@ -1,5 +1,6 @@
 import os
 import random
+import soundfile
 from functools import partial
 
 import torch
@@ -97,7 +98,7 @@ class AudioDataset(IterableDataset):
                 if data_type == "kaldi_ark":
                     ark_reader = ReadHelper('ark:{}'.format(data_file))
                     reader_list.append(ark_reader)
-                elif data_type == "text":
+                elif data_type == "text" or data_type == "sound":
                     text_reader = open(data_file, "r")
                     reader_list.append(text_reader)
                 else:
@@ -109,6 +110,13 @@ class AudioDataset(IterableDataset):
                     if data_type == "kaldi_ark":
                         key, mat = item
                         sample_dict[data_name] = mat
+                        if data_name == "speech":
+                            sample_dict["key"] = key
+                    elif data_type == "sound":
+                        key, path = item.strip().split()
+                        mat, sampling_rate = soundfile.read(path)
+                        sample_dict[data_name] = mat
+                        sample_dict["sampling_rate"] = sampling_rate
                         if data_name == "speech":
                             sample_dict["key"] = key
                     else:
@@ -125,11 +133,15 @@ def len_fn_example(data):
 
 def len_fn_token(data):
     assert "speech" in data
-    return data["speech"].shape[0]
+    if "sampling_rate" in data:
+        return (data["speech"].shape[0] / data["sampling_rate"]) * 1000.
+    else:
+        return data["speech"].shape[0]
 
 
 def Dataset(data_list_file,
             dict,
+            seg_dict,
             conf,
             mode="train"):
     scp_lists = read_lists(data_list_file)
@@ -142,7 +154,7 @@ def Dataset(data_list_file,
     filter_fn = partial(filter, **filter_conf)
     dataset = FilterIterDataPipe(dataset, fn=filter_fn)
 
-    vocab = {'vocab': dict}
+    vocab = {'vocab': dict, 'seg_dict': seg_dict}
     tokenize_fn = partial(tokenize, **vocab)
     dataset = MapperIterDataPipe(dataset, fn=tokenize_fn)
 

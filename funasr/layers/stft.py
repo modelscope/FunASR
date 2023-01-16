@@ -42,7 +42,8 @@ class Stft(torch.nn.Module, InversibleInterface):
         self.normalized = normalized
         self.onesided = onesided
         if window is not None and not hasattr(torch, f"{window}_window"):
-            raise ValueError(f"{window} window is not implemented")
+            if window.lower() != "povey":
+                raise ValueError(f"{window} window is not implemented")
         self.window = window
 
     def extra_repr(self):
@@ -83,10 +84,14 @@ class Stft(torch.nn.Module, InversibleInterface):
         # output: (Batch, Freq, Frames, 2=real_imag)
         # or (Batch, Channel, Freq, Frames, 2=real_imag)
         if self.window is not None:
-            window_func = getattr(torch, f"{self.window}_window")
-            window = window_func(
-                self.win_length, dtype=input.dtype, device=input.device
-            )
+            if self.window.lower() == "povey":
+                window = torch.hann_window(self.win_length, periodic=False,
+                                           device=input.device, dtype=input.dtype).pow(0.85)
+            else:
+                window_func = getattr(torch, f"{self.window}_window")
+                window = window_func(
+                    self.win_length, dtype=input.dtype, device=input.device
+                )
         else:
             window = None
 

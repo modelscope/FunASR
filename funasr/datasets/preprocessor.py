@@ -1,3 +1,4 @@
+import re
 from abc import ABC
 from abc import abstractmethod
 from pathlib import Path
@@ -24,17 +25,46 @@ class AbsPreprocessor(ABC):
 
     @abstractmethod
     def __call__(
-        self, uid: str, data: Dict[str, Union[str, np.ndarray]]
+            self, uid: str, data: Dict[str, Union[str, np.ndarray]]
     ) -> Dict[str, np.ndarray]:
         raise NotImplementedError
 
 
+def forward_segment(text, dic):
+    word_list = []
+    i = 0
+    while i < len(text):
+        longest_word = text[i]
+        for j in range(i + 1, len(text) + 1):
+            word = text[i:j]
+            if word in dic:
+                if len(word) > len(longest_word):
+                    longest_word = word
+        word_list.append(longest_word)
+        i += len(longest_word)
+    return word_list
+
+
+def seg_tokenize(txt, seg_dict):
+    out_txt = ""
+    pattern = re.compile(r"([\u4E00-\u9FA5A-Za-z0-9])")
+    for word in txt:
+        if pattern.match(word):
+            if word in seg_dict:
+                out_txt += seg_dict[word] + " "
+            else:
+                out_txt += "<unk>" + " "
+        else:
+            continue
+    return out_txt.strip().split()
+
+
 def framing(
-    x,
-    frame_length: int = 512,
-    frame_shift: int = 256,
-    centered: bool = True,
-    padded: bool = True,
+        x,
+        frame_length: int = 512,
+        frame_shift: int = 256,
+        centered: bool = True,
+        padded: bool = True,
 ):
     if x.size == 0:
         raise ValueError("Input array size is zero")
@@ -73,11 +103,11 @@ def framing(
 
 
 def detect_non_silence(
-    x: np.ndarray,
-    threshold: float = 0.01,
-    frame_length: int = 1024,
-    frame_shift: int = 512,
-    window: str = "boxcar",
+        x: np.ndarray,
+        threshold: float = 0.01,
+        frame_length: int = 1024,
+        frame_shift: int = 512,
+        window: str = "boxcar",
 ) -> np.ndarray:
     """Power based voice activity detection.
 
@@ -103,7 +133,7 @@ def detect_non_silence(
     )
     framed_w *= scipy.signal.get_window(window, frame_length).astype(framed_w.dtype)
     # power: (C, T)
-    power = (framed_w**2).mean(axis=-1)
+    power = (framed_w ** 2).mean(axis=-1)
     # mean_power: (C, 1)
     mean_power = np.mean(power, axis=-1, keepdims=True)
     if np.all(mean_power == 0):
@@ -126,26 +156,27 @@ def detect_non_silence(
 
 class CommonPreprocessor(AbsPreprocessor):
     def __init__(
-        self,
-        train: bool,
-        token_type: str = None,
-        token_list: Union[Path, str, Iterable[str]] = None,
-        bpemodel: Union[Path, str, Iterable[str]] = None,
-        text_cleaner: Collection[str] = None,
-        g2p_type: str = None,
-        unk_symbol: str = "<unk>",
-        space_symbol: str = "<space>",
-        non_linguistic_symbols: Union[Path, str, Iterable[str]] = None,
-        delimiter: str = None,
-        rir_scp: str = None,
-        rir_apply_prob: float = 1.0,
-        noise_scp: str = None,
-        noise_apply_prob: float = 1.0,
-        noise_db_range: str = "3_10",
-        speech_volume_normalize: float = None,
-        speech_name: str = "speech",
-        text_name: str = "text",
-        split_with_space: bool = False,
+            self,
+            train: bool,
+            token_type: str = None,
+            token_list: Union[Path, str, Iterable[str]] = None,
+            bpemodel: Union[Path, str, Iterable[str]] = None,
+            text_cleaner: Collection[str] = None,
+            g2p_type: str = None,
+            unk_symbol: str = "<unk>",
+            space_symbol: str = "<space>",
+            non_linguistic_symbols: Union[Path, str, Iterable[str]] = None,
+            delimiter: str = None,
+            rir_scp: str = None,
+            rir_apply_prob: float = 1.0,
+            noise_scp: str = None,
+            noise_apply_prob: float = 1.0,
+            noise_db_range: str = "3_10",
+            speech_volume_normalize: float = None,
+            speech_name: str = "speech",
+            text_name: str = "text",
+            split_with_space: bool = False,
+            seg_dict_file: str = None,
     ):
         super().__init__(train)
         self.train = train
@@ -155,6 +186,16 @@ class CommonPreprocessor(AbsPreprocessor):
         self.rir_apply_prob = rir_apply_prob
         self.noise_apply_prob = noise_apply_prob
         self.split_with_space = split_with_space
+        self.seg_dict = None
+        if seg_dict_file is not None:
+            self.seg_dict = {}
+            with open(seg_dict_file) as f:
+                lines = f.readlines()
+            for line in lines:
+                s = line.strip().split()
+                key = s[0]
+                value = s[1:]
+                self.seg_dict[key] = " ".join(value)
 
         if token_type is not None:
             if token_list is None:
@@ -212,7 +253,7 @@ class CommonPreprocessor(AbsPreprocessor):
             self.noises = None
 
     def _speech_process(
-        self, data: Dict[str, Union[str, np.ndarray]]
+            self, data: Dict[str, Union[str, np.ndarray]]
     ) -> Dict[str, Union[str, np.ndarray]]:
         assert check_argument_types()
         if self.speech_name in data:
@@ -242,16 +283,16 @@ class CommonPreprocessor(AbsPreprocessor):
                         # speech: (Nmic, Time)
                         # Note that this operation doesn't change the signal length
                         speech = scipy.signal.convolve(speech, rir, mode="full")[
-                            :, : speech.shape[1]
-                        ]
+                                 :, : speech.shape[1]
+                                 ]
                         # Reverse mean power to the original power
                         power2 = (speech[detect_non_silence(speech)] ** 2).mean()
                         speech = np.sqrt(power / max(power2, 1e-10)) * speech
 
                 # 2. Add Noise
                 if (
-                    self.noises is not None
-                    and self.noise_apply_prob >= np.random.random()
+                        self.noises is not None
+                        and self.noise_apply_prob >= np.random.random()
                 ):
                     noise_path = np.random.choice(self.noises)
                     if noise_path is not None:
@@ -283,11 +324,11 @@ class CommonPreprocessor(AbsPreprocessor):
                         # noise: (Nmic, Time)
                         noise = noise.T
 
-                        noise_power = (noise**2).mean()
+                        noise_power = (noise ** 2).mean()
                         scale = (
-                            10 ** (-noise_db / 20)
-                            * np.sqrt(power)
-                            / np.sqrt(max(noise_power, 1e-10))
+                                10 ** (-noise_db / 20)
+                                * np.sqrt(power)
+                                / np.sqrt(max(noise_power, 1e-10))
                         )
                         speech = speech + scale * noise
 
@@ -305,13 +346,16 @@ class CommonPreprocessor(AbsPreprocessor):
         return data
 
     def _text_process(
-        self, data: Dict[str, Union[str, np.ndarray]]
+            self, data: Dict[str, Union[str, np.ndarray]]
     ) -> Dict[str, np.ndarray]:
         if self.text_name in data and self.tokenizer is not None:
             text = data[self.text_name]
             text = self.text_cleaner(text)
             if self.split_with_space:
                 tokens = text.strip().split(" ")
+                if self.seg_dict is not None:
+                    tokens = forward_segment("".join(tokens).lower(), self.seg_dict)
+                    tokens = seg_tokenize(tokens, self.seg_dict)
             else:
                 tokens = self.tokenizer.text2tokens(text)
             text_ints = self.token_id_converter.tokens2ids(tokens)
@@ -320,7 +364,7 @@ class CommonPreprocessor(AbsPreprocessor):
         return data
 
     def __call__(
-        self, uid: str, data: Dict[str, Union[str, np.ndarray]]
+            self, uid: str, data: Dict[str, Union[str, np.ndarray]]
     ) -> Dict[str, np.ndarray]:
         assert check_argument_types()
 
@@ -331,19 +375,19 @@ class CommonPreprocessor(AbsPreprocessor):
 
 class CommonPreprocessor_multi(AbsPreprocessor):
     def __init__(
-        self,
-        train: bool,
-        token_type: str = None,
-        token_list: Union[Path, str, Iterable[str]] = None,
-        bpemodel: Union[Path, str, Iterable[str]] = None,
-        text_cleaner: Collection[str] = None,
-        g2p_type: str = None,
-        unk_symbol: str = "<unk>",
-        space_symbol: str = "<space>",
-        non_linguistic_symbols: Union[Path, str, Iterable[str]] = None,
-        delimiter: str = None,
-        speech_name: str = "speech",
-        text_name: List[str] = ["text"],
+            self,
+            train: bool,
+            token_type: str = None,
+            token_list: Union[Path, str, Iterable[str]] = None,
+            bpemodel: Union[Path, str, Iterable[str]] = None,
+            text_cleaner: Collection[str] = None,
+            g2p_type: str = None,
+            unk_symbol: str = "<unk>",
+            space_symbol: str = "<space>",
+            non_linguistic_symbols: Union[Path, str, Iterable[str]] = None,
+            delimiter: str = None,
+            speech_name: str = "speech",
+            text_name: List[str] = ["text"],
     ):
         super().__init__(train)
         self.train = train
@@ -373,7 +417,7 @@ class CommonPreprocessor_multi(AbsPreprocessor):
             self.token_id_converter = None
 
     def _text_process(
-        self, data: Dict[str, Union[str, np.ndarray]]
+            self, data: Dict[str, Union[str, np.ndarray]]
     ) -> Dict[str, np.ndarray]:
         for text_n in self.text_name:
             if text_n in data and self.tokenizer is not None:
@@ -386,7 +430,7 @@ class CommonPreprocessor_multi(AbsPreprocessor):
         return data
 
     def __call__(
-        self, uid: str, data: Dict[str, Union[str, np.ndarray]]
+            self, uid: str, data: Dict[str, Union[str, np.ndarray]]
     ) -> Dict[str, np.ndarray]:
         assert check_argument_types()
 
@@ -404,25 +448,25 @@ class CommonPreprocessor_multi(AbsPreprocessor):
 
 class MutliTokenizerCommonPreprocessor(CommonPreprocessor):
     def __init__(
-        self,
-        train: bool,
-        token_type: List[str] = [None],
-        token_list: List[Union[Path, str, Iterable[str]]] = [None],
-        bpemodel: List[Union[Path, str, Iterable[str]]] = [None],
-        text_cleaner: Collection[str] = None,
-        g2p_type: str = None,
-        unk_symbol: str = "<unk>",
-        space_symbol: str = "<space>",
-        non_linguistic_symbols: Union[Path, str, Iterable[str]] = None,
-        delimiter: str = None,
-        rir_scp: str = None,
-        rir_apply_prob: float = 1.0,
-        noise_scp: str = None,
-        noise_apply_prob: float = 1.0,
-        noise_db_range: str = "3_10",
-        speech_volume_normalize: float = None,
-        speech_name: str = "speech",
-        text_name: List[str] = ["text"],
+            self,
+            train: bool,
+            token_type: List[str] = [None],
+            token_list: List[Union[Path, str, Iterable[str]]] = [None],
+            bpemodel: List[Union[Path, str, Iterable[str]]] = [None],
+            text_cleaner: Collection[str] = None,
+            g2p_type: str = None,
+            unk_symbol: str = "<unk>",
+            space_symbol: str = "<space>",
+            non_linguistic_symbols: Union[Path, str, Iterable[str]] = None,
+            delimiter: str = None,
+            rir_scp: str = None,
+            rir_apply_prob: float = 1.0,
+            noise_scp: str = None,
+            noise_apply_prob: float = 1.0,
+            noise_db_range: str = "3_10",
+            speech_volume_normalize: float = None,
+            speech_name: str = "speech",
+            text_name: List[str] = ["text"],
     ):
         # TODO(jiatong): sync with Kamo and Jing on interface for preprocessor
         super().__init__(
@@ -447,7 +491,7 @@ class MutliTokenizerCommonPreprocessor(CommonPreprocessor):
         )
 
         assert (
-            len(token_type) == len(token_list) == len(bpemodel) == len(text_name)
+                len(token_type) == len(token_list) == len(bpemodel) == len(text_name)
         ), "token_type, token_list, bpemodel, or processing text_name mismatched"
         self.num_tokenizer = len(token_type)
         self.tokenizer = []
@@ -482,7 +526,7 @@ class MutliTokenizerCommonPreprocessor(CommonPreprocessor):
         self.text_name = text_name  # override the text_name from CommonPreprocessor
 
     def _text_process(
-        self, data: Dict[str, Union[str, np.ndarray]]
+            self, data: Dict[str, Union[str, np.ndarray]]
     ) -> Dict[str, np.ndarray]:
         for i in range(self.num_tokenizer):
             text_name = self.text_name[i]

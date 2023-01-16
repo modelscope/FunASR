@@ -8,7 +8,7 @@ gpu_num=2
 count=1
 gpu_inference=true  # Whether to perform gpu decoding, set false for cpu decoding
 # for gpu decoding, inference_nj=ngpu*njob; for cpu decoding, inference_nj=njob
-njob=1
+njob=5
 train_cmd=utils/run.pl
 infer_cmd=utils/run.pl
 
@@ -148,17 +148,17 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     cp ${feat_dev_dir}/speech_shape ${feat_dev_dir}/text_shape ${feat_dev_dir}/text_shape.char ${feats_dir}/asr_stats_fbank_zh_char/dev
 fi
 
-if ! "${skip_extract_embed}"; then
-    local/extract_embeds.sh \
-        --bert_model_root ${bert_model_root} \
-        --bert_model_name ${bert_model_name} \
-        --raw_dataset_path ${feats_dir}
-fi
-
 # Training Stage
 world_size=$gpu_num  # run on one machine
 if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
     echo "stage 3: Training"
+    if ! "${skip_extract_embed}"; then
+        echo "extract embeddings..."
+        local/extract_embeds.sh \
+            --bert_model_root ${bert_model_root} \
+            --bert_model_name ${bert_model_name} \
+            --raw_dataset_path ${feats_dir}
+    fi
     mkdir -p ${exp_dir}/exp/${model_dir}
     mkdir -p ${exp_dir}/exp/${model_dir}/log
     INIT_FILE=${exp_dir}/exp/${model_dir}/ddp_init
@@ -192,6 +192,7 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
                 --resume true \
                 --output_dir ${exp_dir}/exp/${model_dir} \
                 --config $asr_config \
+                --allow_variable_data_keys true \
                 --input_size $feats_dim \
                 --ngpu $gpu_num \
                 --num_worker_count $count \
@@ -199,8 +200,7 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
                 --dist_init_method $init_method \
                 --dist_world_size $world_size \
                 --dist_rank $rank \
-                --allow_variable_data_keys true \
-                --local_rank $local_rank 1> $exp_dir/log/train.log.$i 2>&1
+                --local_rank $local_rank 1> ${exp_dir}/exp/${model_dir}/log/train.log.$i 2>&1
         } &
         done
         wait
@@ -235,7 +235,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
         fi
         ${infer_cmd} --gpu "${_ngpu}" --max-jobs-run "${_nj}" JOB=1:"${_nj}" "${_logdir}"/asr_inference.JOB.log \
             python -m funasr.bin.asr_inference_launch \
-                --batch_size 100 \
+                --batch_size 1 \
                 --ngpu "${_ngpu}" \
                 --njob ${njob} \
                 --gpuid_list ${gpuid_list} \

@@ -76,6 +76,21 @@ def get_parser():
 
     group = parser.add_argument_group("The model configuration related")
     group.add_argument(
+        "--vad_infer_config",
+        type=str,
+        help="VAD infer configuration",
+    )
+    group.add_argument(
+        "--vad_model_file",
+        type=str,
+        help="VAD model parameter file",
+    )
+    group.add_argument(
+        "--cmvn_file",
+        type=str,
+        help="Global CMVN file",
+    )
+    group.add_argument(
         "--asr_train_config",
         type=str,
         help="ASR training configuration",
@@ -147,7 +162,7 @@ def get_parser():
     group.add_argument(
         "--ctc_weight",
         type=float,
-        default=0.5,
+        default=0.0,
         help="CTC weight in joint decoding",
     )
     group.add_argument("--lm_weight", type=float, default=1.0, help="RNNLM weight")
@@ -182,26 +197,28 @@ def get_parser():
     return parser
 
 
-def set_parameters(language: str = None,
-                   sample_rate: Union[int, Dict[Any, int]] = None):
-    if language is not None:
-        global global_asr_language
-        global_asr_language = language
-    if sample_rate is not None:
-        global global_sample_rate
-        global_sample_rate = sample_rate
 
-
-def inference_launch(mode, **kwargs):
+def inference_launch(**kwargs):
+    if 'mode' in kwargs:
+        mode = kwargs['mode']
+    else:
+        logging.info("Unknown decoding mode.")
+        return None
     if mode == "asr":
-        from funasr.bin.asr_inference import inference
-        return inference(**kwargs)
+        from funasr.bin.asr_inference import inference_modelscope
+        return inference_modelscope(**kwargs)
     elif mode == "uniasr":
-        from funasr.bin.asr_inference_uniasr import inference
-        return inference(**kwargs)
+        from funasr.bin.asr_inference_uniasr import inference_modelscope
+        return inference_modelscope(**kwargs)
     elif mode == "paraformer":
-        from funasr.bin.asr_inference_paraformer import inference
-        return inference(**kwargs)
+        from funasr.bin.asr_inference_paraformer import inference_modelscope
+        return inference_modelscope(**kwargs)
+    elif mode == "paraformer_vad_punc":
+        from funasr.bin.asr_inference_paraformer_vad_punc import inference_modelscope
+        return inference_modelscope(**kwargs)
+    elif mode == "vad":
+        from funasr.bin.vad_inference import inference_modelscope
+        return inference_modelscope(**kwargs)
     else:
         logging.info("Unknown decoding mode: {}".format(mode))
         return None

@@ -49,12 +49,20 @@ def type_checking(audio_in: Union[str, bytes],
         r_audio_format = 'pcm'
         r_recog_type = 'wav'
 
-    if r_recog_type is None:
+    if audio_in is None:
+        # for raw_inputs
+        r_recog_type = 'wav'
+        r_audio_format = 'pcm'
+
+    if r_recog_type is None and audio_in is not None:
         # audio_in is wav, recog_type is wav_file
         if os.path.isfile(audio_in):
             if audio_in.endswith('.wav') or audio_in.endswith('.WAV'):
                 r_recog_type = 'wav'
                 r_audio_format = 'wav'
+            elif audio_in.endswith('.scp') or audio_in.endswith('.SCP'):
+                r_recog_type = 'wav'
+                r_audio_format = 'scp'
 
         # recog_type is datasets_file
         elif os.path.isdir(audio_in):

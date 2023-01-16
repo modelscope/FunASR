@@ -28,8 +28,8 @@ cp ${data_dir}/text ${data_dir}/.backup/text
 mv ${data_dir}/wav.scp ${data_dir}/wav.scp.bak
 mv ${data_dir}/text ${data_dir}/text.bak
 
-utils/filter_scp.pl -f 1 ${data_dir}/.backup/id ${data_dir}/wav.scp.bak > ${data_dir}/wav.scp
-utils/filter_scp.pl -f 1 ${data_dir}/.backup/id ${data_dir}/text.bak > ${data_dir}/text
+utils/filter_scp.pl -f 1 ${data_dir}/.backup/id ${data_dir}/wav.scp.bak | sort -k1,1 -u > ${data_dir}/wav.scp
+utils/filter_scp.pl -f 1 ${data_dir}/.backup/id ${data_dir}/text.bak | sort -k1,1 -u > ${data_dir}/text
 
 rm ${data_dir}/wav.scp.bak
 rm ${data_dir}/text.bak

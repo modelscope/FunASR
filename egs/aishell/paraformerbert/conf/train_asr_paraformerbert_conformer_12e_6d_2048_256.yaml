@@ -88,11 +88,10 @@ specaug_conf:
 
 predictor: cif_predictor
 predictor_conf:
-  idim: 256
-  threshold: 1.0
-  l_order: 1
-  r_order: 1
-  tail_threshold: 0.45
+    idim: 256
+    threshold: 1.0
+    l_order: 1
+    r_order: 1
 
 
 log_interval: 50

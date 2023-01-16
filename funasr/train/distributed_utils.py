@@ -60,8 +60,6 @@ class DistributedOption:
             self.dist_rank = torch.distributed.get_rank()
             self.dist_world_size = torch.distributed.get_world_size()
             self.local_rank = args.local_rank
-            logging.info("world size: {}, rank: {}, local_rank: {}".format(self.dist_world_size, self.dist_rank,
-                                                                           self.local_rank))
 
     def init_options_pai(self):
         if self.distributed:
@@ -119,8 +117,6 @@ class DistributedOption:
             self.dist_rank = torch.distributed.get_rank()
             self.dist_world_size = torch.distributed.get_world_size()
             self.local_rank = args.local_rank
-            logging.info("world size: {}, rank: {}, local_rank: {}".format(self.dist_world_size, self.dist_rank,
-                                                                           self.local_rank))
 
 
 def resolve_distributed_mode(args):

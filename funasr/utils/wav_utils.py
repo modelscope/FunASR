@@ -2,6 +2,8 @@
 
 import math
 import os
+import shutil
+from multiprocessing import Pool
 from typing import Any, Dict, Union
 
 import kaldiio
@@ -152,7 +154,7 @@ def compute_fbank(wav_file,
             raise TypeError("'dtype' must be a floating point type")
 
         i = np.iinfo(middle_data.dtype)
-        abs_max = 2**(i.bits - 1)
+        abs_max = 2 ** (i.bits - 1)
         offset = i.min + abs_max
         waveform = np.frombuffer(
             (middle_data.astype(dtype) - offset) / abs_max, dtype=np.float32)
@@ -176,3 +178,111 @@ def compute_fbank(wav_file,
     input_feats = mat
 
     return input_feats
+
+
+def wav2num_frame(wav_path, frontend_conf):
+    waveform, sampling_rate = torchaudio.load(wav_path)
+    speech_length = (waveform.shape[1] / sampling_rate) * 1000.
+    n_frames = (waveform.shape[1] * 1000.0) / (sampling_rate * frontend_conf["frame_shift"] * frontend_conf["lfr_n"])
+    feature_dim = frontend_conf["n_mels"] * frontend_conf["lfr_m"]
+    return n_frames, feature_dim, speech_length
+
+
+def calc_shape_core(root_path, frontend_conf, speech_length_min, speech_length_max, idx):
+    wav_scp_file = os.path.join(root_path, "wav.scp.{}".format(idx))
+    shape_file = os.path.join(root_path, "speech_shape.{}".format(idx))
+    with open(wav_scp_file) as f:
+        lines = f.readlines()
+    with open(shape_file, "w") as f:
+        for line in lines:
+            sample_name, wav_path = line.strip().split()
+            n_frames, feature_dim, speech_length = wav2num_frame(wav_path, frontend_conf)
+            write_flag = True
+            if speech_length_min > 0 and speech_length < speech_length_min:
+                write_flag = False
+            if speech_length_max > 0 and speech_length > speech_length_max:
+                write_flag = False
+            if write_flag:
+                f.write("{} {},{}\n".format(sample_name, str(int(np.ceil(n_frames))), str(int(feature_dim))))
+
+
+def calc_shape(data_dir, dataset, frontend_conf, speech_length_min=-1, speech_length_max=-1, nj=32):
+    shape_path = os.path.join(data_dir, dataset, "shape_files")
+    if os.path.exists(shape_path):
+        assert os.path.exists(os.path.join(data_dir, dataset, "speech_shape"))
+        print('Shape file for small dataset already exists.')
+        return
+    os.makedirs(shape_path, exist_ok=True)
+
+    # split
+    wav_scp_file = os.path.join(data_dir, dataset, "wav.scp")
+    with open(wav_scp_file) as f:
+        lines = f.readlines()
+        num_lines = len(lines)
+        num_job_lines = num_lines // nj
+    start = 0
+    for i in range(nj):
+        end = start + num_job_lines
+        file = os.path.join(shape_path, "wav.scp.{}".format(str(i + 1)))
+        with open(file, "w") as f:
+            if i == nj - 1:
+                f.writelines(lines[start:])
+            else:
+                f.writelines(lines[start:end])
+        start = end
+
+    p = Pool(nj)
+    for i in range(nj):
+        p.apply_async(calc_shape_core,
+                      args=(shape_path, frontend_conf, speech_length_min, speech_length_max, str(i + 1)))
+    print('Generating shape files, please wait a few minutes...')
+    p.close()
+    p.join()
+
+    # combine
+    file = os.path.join(data_dir, dataset, "speech_shape")
+    with open(file, "w") as f:
+        for i in range(nj):
+            job_file = os.path.join(shape_path, "speech_shape.{}".format(str(i + 1)))
+            with open(job_file) as job_f:
+                lines = job_f.readlines()
+                f.writelines(lines)
+    print('Generating shape files done.')
+
+
+def generate_data_list(data_dir, dataset, nj=100):
+    split_dir = os.path.join(data_dir, dataset, "split")
+    if os.path.exists(split_dir):
+        assert os.path.exists(os.path.join(data_dir, dataset, "data.list"))
+        print('Data list for large dataset already exists.')
+        return
+    os.makedirs(split_dir, exist_ok=True)
+
+    with open(os.path.join(data_dir, dataset, "wav.scp")) as f_wav:
+        wav_lines = f_wav.readlines()
+    with open(os.path.join(data_dir, dataset, "text")) as f_text:
+        text_lines = f_text.readlines()
+    total_num_lines = len(wav_lines)
+    num_lines = total_num_lines // nj
+    start_num = 0
+    for i in range(nj):
+        end_num = start_num + num_lines
+        split_dir_nj = os.path.join(split_dir, str(i + 1))
+        os.mkdir(split_dir_nj)
+        wav_file = os.path.join(split_dir_nj, 'wav.scp')
+        text_file = os.path.join(split_dir_nj, "text")
+        with open(wav_file, "w") as fw, open(text_file, "w") as ft:
+            if i == nj - 1:
+                fw.writelines(wav_lines[start_num:])
+                ft.writelines(text_lines[start_num:])
+            else:
+                fw.writelines(wav_lines[start_num:end_num])
+                ft.writelines(text_lines[start_num:end_num])
+        start_num = end_num
+
+    data_list_file = os.path.join(data_dir, dataset, "data.list")
+    with open(data_list_file, "w") as f_data:
+        for i in range(nj):
+            wav_path = os.path.join(split_dir, str(i + 1), "wav.scp")
+            text_path = os.path.join(split_dir, str(i + 1), "text")
+            f_data.write(wav_path + " " + text_path + "\n")

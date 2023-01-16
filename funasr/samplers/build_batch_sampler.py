@@ -1,4 +1,5 @@
 from typing import List
+from typing import Dict
 from typing import Sequence
 from typing import Tuple
 from typing import Union
@@ -78,7 +79,7 @@ def build_batch_sampler(
     type: str,
     batch_size: int,
     batch_bins: int,
-    shape_files: Union[Tuple[str, ...], List[str]],
+    shape_files: Union[Tuple[str, ...], List[str], Dict],
     sort_in_batch: str = "descending",
     sort_batch: str = "ascending",
     drop_last: bool = False,
