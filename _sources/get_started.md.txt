@@ -110,7 +110,7 @@ As we support conformer, paraformer and uniasr in FunASR and they have different
 
 * Configuration
 
-We support CTC decoding, attention decoding and hybrid CTC-attention decoding in FunASR, which can be specified by `ctc_weight` in a YAML file in `conf` directory. Specifically, `ctc_weight=1.0` indicates attention decoding, `ctc_weight=0.0` indicates CTC decoding, `0.0<ctc_weight<1.0` indicates hybrid CTC-attention decoding.
+We support CTC decoding, attention decoding and hybrid CTC-attention decoding in FunASR, which can be specified by `ctc_weight` in a YAML file in `conf` directory. Specifically, `ctc_weight=1.0` indicates CTC decoding, `ctc_weight=0.0` indicates attention decoding, `0.0<ctc_weight<1.0` indicates hybrid CTC-attention decoding.
 
 * CPU/GPU Decoding
 
