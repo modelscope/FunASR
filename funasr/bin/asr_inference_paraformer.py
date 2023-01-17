@@ -259,7 +259,7 @@ class Speech2Text:
                     token_int = hyp.yseq[1:last_pos].tolist()
 
                 # remove blank symbol id, which is assumed to be 0
-                token_int = list(filter(lambda x: x != 0, token_int))
+                token_int = list(filter(lambda x: x != 0 and x != 2, token_int))
 
                 # Change integer-ids to tokens
                 token = self.converter.ids2tokens(token_int)
@@ -650,7 +650,7 @@ def inference_modelscope(
                         finish_count += 1
                         # asr_utils.print_progress(finish_count / file_count)
                         if writer is not None:
-                            ibest_writer["text"][key] = text
+                            ibest_writer["text"][key] = text_postprocessed
 
                     logging.info("decoding, utt: {}, predictions: {}".format(key, text))
         rtf_avg = "decoding, feature length total: {}, forward_time total: {:.4f}, rtf avg: {:.4f}".format(length_total, forward_time_total, 100 * forward_time_total / (length_total * lfr_factor))

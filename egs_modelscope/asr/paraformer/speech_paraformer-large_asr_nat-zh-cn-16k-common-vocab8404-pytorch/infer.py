@@ -67,7 +67,7 @@ def modelscope_infer(params):
     for file in files:
         with open(os.path.join(best_recog_path, file), "w") as f:
             for i in range(nj):
-                job_file = os.path.join(output_dir, "output.{}".format(str(i + 1)), file)
+                job_file = os.path.join(output_dir, "output.{}/1best_recog".format(str(i + 1)), file)
                 with open(job_file) as f_job:
                     lines = f_job.readlines()
                 f.writelines(lines)
