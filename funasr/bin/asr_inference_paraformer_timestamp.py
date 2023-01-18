@@ -98,10 +98,13 @@ class Speech2Text:
         logging.info("asr_train_args: {}".format(asr_train_args))
         asr_model.to(dtype=getattr(torch, dtype)).eval()
 
-        ctc = CTCPrefixScorer(ctc=asr_model.ctc, eos=asr_model.eos)
+        if asr_model.ctc != None:
+            ctc = CTCPrefixScorer(ctc=asr_model.ctc, eos=asr_model.eos)
+            scorers.update(
+                ctc=ctc
+            )
         token_list = asr_model.token_list
         scorers.update(
-            ctc=ctc,
             length_bonus=LengthBonus(len(token_list)),
         )
 
