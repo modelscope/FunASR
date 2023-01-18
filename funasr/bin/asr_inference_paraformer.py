@@ -169,7 +169,7 @@ class Speech2Text:
         self.converter = converter
         self.tokenizer = tokenizer
         is_use_lm = lm_weight != 0.0 and lm_file is not None
-        if ctc_weight == 0.0 and not is_use_lm:
+        if (ctc_weight == 0.0 or asr_model.ctc == None) and not is_use_lm:
             beam_search = None
         self.beam_search = beam_search
         logging.info(f"Beam_search: {self.beam_search}")
