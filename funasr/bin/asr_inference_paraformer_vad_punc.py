@@ -635,9 +635,15 @@ def inference_modelscope(
                         text_postprocessed, time_stamp_postprocessed, word_lists = postprocessed_result[0], \
                                                                                    postprocessed_result[1], \
                                                                                    postprocessed_result[2]
-                        text_postprocessed_punc, punc_id_list = text2punc(word_lists, 20)
-                        text_postprocessed_punc_time_stamp = "predictions: {}  time_stamp: {}".format(
-                            text_postprocessed_punc, time_stamp_postprocessed)
+                        if len(word_lists) > 0: 
+                            text_postprocessed_punc, punc_id_list = text2punc(word_lists, 20)
+                            text_postprocessed_punc_time_stamp = "predictions: {}  time_stamp: {}".format(
+                                text_postprocessed_punc, time_stamp_postprocessed)
+                        else:
+                            text_postprocessed_punc = ""
+                            punc_id_list = []
+                            text_postprocessed_punc_time_stamp = ""
+                            
                     else:
                         text_postprocessed = ""
                         time_stamp_postprocessed = ""
