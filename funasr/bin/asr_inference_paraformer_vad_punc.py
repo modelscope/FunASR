@@ -100,10 +100,13 @@ class Speech2Text:
         # logging.info("asr_train_args: {}".format(asr_train_args))
         asr_model.to(dtype=getattr(torch, dtype)).eval()
 
-        ctc = CTCPrefixScorer(ctc=asr_model.ctc, eos=asr_model.eos)
+        if asr_model.ctc != None:
+            ctc = CTCPrefixScorer(ctc=asr_model.ctc, eos=asr_model.eos)
+            scorers.update(
+                ctc=ctc
+            )
         token_list = asr_model.token_list
         scorers.update(
-            ctc=ctc,
             length_bonus=LengthBonus(len(token_list)),
         )
 
@@ -663,7 +666,7 @@ def inference_modelscope(
                                                                                          time_stamp_postprocessed))
         
         logging.info("decoding, feature length total: {}, forward_time total: {:.4f}, rtf avg: {:.4f}".
-                     format(length_total, forward_time_total, 100 * forward_time_total / (length_total * lfr_factor+1e-6)))
+                     format(length_total, forward_time_total, 100 * forward_time_total / (length_total * lfr_factor)))
         return asr_result_list
     return _forward
 
