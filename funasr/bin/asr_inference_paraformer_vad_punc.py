@@ -3,6 +3,7 @@ import argparse
 import logging
 import sys
 import time
+import json
 from pathlib import Path
 from typing import Optional
 from typing import Sequence
@@ -637,8 +638,9 @@ def inference_modelscope(
                                                                                    postprocessed_result[2]
                         if len(word_lists) > 0: 
                             text_postprocessed_punc, punc_id_list = text2punc(word_lists, 20)
-                            text_postprocessed_punc_time_stamp = "predictions: {}  time_stamp: {}".format(
-                                text_postprocessed_punc, time_stamp_postprocessed)
+                            text_postprocessed_punc_time_stamp = json.dumps({"predictions": text_postprocessed_punc,
+                                                                             "time_stamp": time_stamp_postprocessed},
+                                                                            ensure_ascii=False)
                         else:
                             text_postprocessed_punc = ""
                             punc_id_list = []
