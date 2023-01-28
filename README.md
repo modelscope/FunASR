@@ -23,7 +23,7 @@
 - FunASR supplies a easy-to-use pipeline to finetune pretrained models from [ModelScope](https://www.modelscope.cn/models?page=1&tasks=auto-speech-recognition)
 - Compared to [Espnet](https://github.com/espnet/espnet) framework, the training speed of large-scale datasets in FunASR is much faster owning to the optimized dataloader.
 
-## Installation(Training and Developing)
+## Installation
 
 - Install Conda:
 ``` sh
@@ -60,10 +60,6 @@ For more details about modelscope, please see [modelscope installation](https://
 git clone https://github.com/alibaba/FunASR.git && cd FunASR
 pip install --editable ./
 ```
-
-## Pretrained Model Zoo
-
-We have trained many academic and industrial models, [model hub](docs/modelscope_models.md)
 
 ## Contact
 
