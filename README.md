@@ -67,7 +67,7 @@ If you have any questions about FunASR, please contact us by
 
 - email: [funasr@list.alibaba-inc.com](funasr@list.alibaba-inc.com)
 
-- Dingding group:
+- Dingding group and Wechat group:
 <div align="left"><img src="docs/images/dingding.jpg" width="250"/> <img src="docs/images/wechat.png" width="222"/></div>
 
 
