@@ -5,26 +5,20 @@ import paraformer_pb2
 import paraformer_pb2_grpc
 import time
 
-
 from paraformer_pb2 import Response
-
-
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
 
-inference_16k_pipline = pipeline(
-   task=Tasks.auto_speech_recognition,
-   model='damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8358-tensorflow1')
-
-auth_user = ['zksz_futureTV_1','zksz_dangaomei_1','zksz_test_1','zksz_test_2','zksz_test_3','zksz_test_4','zksz_test_5','zksz_test_6','zksz_test_7']
-
 
 class ASRServicer(paraformer_pb2_grpc.ASRServicer):
-    def __init__(self):
+    def __init__(self, user_allowed, model, sample_rate):
         print("ASRServicer init")
         self.init_flag = 0
         self.client_buffers = {}
         self.client_transcription = {}
+        self.auth_user = user_allowed.split("|")
+        self.inference_16k_pipline = pipeline(task=Tasks.auto_speech_recognition, model=model)
+        self.sample_rate = sample_rate
 
     def clear_states(self, user):
         self.clear_buffers(user)
@@ -46,13 +40,13 @@ class ASRServicer(paraformer_pb2_grpc.ASRServicer):
         
             
         for req in request_iterator:
-            if req.user not in auth_user:
+            if req.user not in self.auth_user:
                 result = {}
                 result["success"] = False
                 result["detail"] = "Not Authorized user: %s " % req.user
                 result["text"] = ""
                 yield Response(sentence=json.dumps(result), user=req.user, action="terminate", language=req.language)
-            if req.isEnd: #end grpc
+            elif req.isEnd: #end grpc
                 print("asr end")
                 self.disconnect(req.user)
                 result = {}
@@ -80,7 +74,7 @@ class ASRServicer(paraformer_pb2_grpc.ASRServicer):
                     yield Response(sentence=json.dumps(result), user=req.user, action="waiting", language=req.language)
                 else:
                     begin_time = int(round(time.time() * 1000))
-                    tmp_data = self.client_buffers[req.user] #TODO make a test, about local variable in class parralle circumstance.
+                    tmp_data = self.client_buffers[req.user]
                     self.clear_states(req.user)
                     result = {}
                     result["success"] = True
@@ -98,7 +92,7 @@ class ASRServicer(paraformer_pb2_grpc.ASRServicer):
                         print ("user: %s , delay(ms): %s, error: %s " % (req.user, delay_str, "data_is_not_long_enough"))
                         yield Response(sentence=json.dumps(result), user=req.user, action="finish", language=req.language)
                     else:                           
-                        asr_result = inference_16k_pipline(audio_in=tmp_data, audio_fs = 16000)
+                        asr_result = self.inference_16k_pipline(audio_in=tmp_data, audio_fs = self.sample_rate)
                         if "text" in asr_result:
                             asr_result = asr_result['text']
                         else:
