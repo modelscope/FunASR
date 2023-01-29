@@ -10,15 +10,16 @@ import numpy as np
 import time
 import asyncio
 import datetime
+import argparse
 
-SPEAKING = False
-stub = None
-asr_user = None
-language = None
+#SPEAKING = False
+#stub = None
+#asr_user = None
+#language = None
 
 async def deal_chunk(sig_mic):
     
-    global stub,SPEAKING,asr_user,language
+    global stub,SPEAKING,asr_user,language,sample_rate
     sig = np.frombuffer(sig_mic, 'int16')
     if vad.is_speech(sig.tobytes(), sample_rate): #speaking
         SPEAKING = True
@@ -38,6 +39,7 @@ async def deal_chunk(sig_mic):
                 resp = response.next() #TODO, blocking operation may leads to miss some audio clips. C++ multi-threading is preferred.
                 if "finish" == resp.action:        
                     end_time = int(round(time.time() * 1000))
+                    print(resp.action)
                     print (json.loads(resp.sentence))
                     #print ("silence, end_time: %d " % end_time)
                     print ("delay in ms: %d " % (end_time - begin_time))
@@ -97,10 +99,12 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     
-    global SPEAKING,asr_user,language
+
     SPEAKING = False
-    asr_user = args.asr_user
+    asr_user = args.user_allowed
+    sample_rate = args.sample_rate
     language = 'zh-CN'  
+    
 
     vad = webrtcvad.Vad()
     vad.set_mode(1)
@@ -116,7 +120,7 @@ if __name__ == '__main__':
                 frames_per_buffer=args.mic_chunk)
                 
     print("* recording")
-    asyncio.run(record(args.host,args.port,args.sample_rate,args.mic_chunk,args.record_seconds,args.asr_user,args.language))
+    asyncio.run(record(args.host,args.port,args.sample_rate,args.mic_chunk,args.record_seconds,args.user_allowed,language))
     stream.stop_stream()
     stream.close()
     p.terminate()
