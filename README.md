@@ -42,14 +42,15 @@ For more versions, please see [https://pytorch.org/get-started/locally](https://
 
 - Install ModelScope:
 
-If you are in the area of China, you could set the source to speed the downloading.
+If you are in the area of China, you could set the source to speedup the downloading.
 
 ``` sh
 pip config set global.index-url https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
 
+Install or upgrade modelscope.
 ``` sh
-pip install "modelscope[audio]" -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html
+pip install "modelscope[audio]" --upgrade -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html
 ```
 
 For more details about modelscope, please see [modelscope installation](https://modelscope.cn/docs/%E7%8E%AF%E5%A2%83%E5%AE%89%E8%A3%85)
