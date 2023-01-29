@@ -17,7 +17,7 @@ class ASRServicer(paraformer_pb2_grpc.ASRServicer):
         self.client_buffers = {}
         self.client_transcription = {}
         self.auth_user = user_allowed.split("|")
-        self.inference_16k_pipline = pipeline(task=Tasks.auto_speech_recognition, model=model)
+        self.inference_16k_pipeline = pipeline(task=Tasks.auto_speech_recognition, model=model)
         self.sample_rate = sample_rate
 
     def clear_states(self, user):
@@ -92,7 +92,7 @@ class ASRServicer(paraformer_pb2_grpc.ASRServicer):
                         print ("user: %s , delay(ms): %s, error: %s " % (req.user, delay_str, "data_is_not_long_enough"))
                         yield Response(sentence=json.dumps(result), user=req.user, action="finish", language=req.language)
                     else:                           
-                        asr_result = self.inference_16k_pipline(audio_in=tmp_data, audio_fs = self.sample_rate)
+                        asr_result = self.inference_16k_pipeline(audio_in=tmp_data, audio_fs = self.sample_rate)
                         if "text" in asr_result:
                             asr_result = asr_result['text']
                         else:
