@@ -11,6 +11,11 @@ python -m grpc_tools.protoc  --proto_path=./proto -I ./proto    --python_out=. -
 ```
 
 Step 2) start grpc server
-
+```
+python grpc_main_server.py --port 10095
+```
 
 Step 3) start grpc client
+```
+python grpc_main_client_mic.py --host 127.0.0.1 --port 10095
+```

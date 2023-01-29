@@ -20,6 +20,7 @@ if __name__ == '__main__':
     parser.add_argument("--port",
                         type=int,
                         default=10095,
+                        required=True,
                         help="grpc server port")
                         
     parser.add_argument("--user_allowed",
