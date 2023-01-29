@@ -1,0 +1,32 @@
+from concurrent import futures
+import paraformer_pb2_grpc
+from grpc_server import ASRServicer
+import grpc
+import argparse
+
+def serve(args):
+      server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
+                        # interceptors=(AuthInterceptor('Bearer mysecrettoken'),)
+                           )
+      paraformer_pb2_grpc.add_ASRServicer_to_server(ASRServicer(args.user_allowed), server)
+      port = "[::]:" + str(args.port)
+      server.add_insecure_port(port)
+      server.start()
+      print("grpc server started!")
+      server.wait_for_termination()
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--port",
+                        type=int,
+                        default=10095,
+                        help="grpc server port")
+    parser.add_argument("--user_allowed",
+                        type=str,
+                        default="project1_user1|project1_user2|project2_user3",
+                        help="allowed user for grpc client")
+
+
+    args = parser.parse_args()
+
+    serve(args)
