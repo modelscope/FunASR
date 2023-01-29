@@ -40,6 +40,7 @@ pip3 install torch torchvision torchaudio
 ```
 For more versions, please see [https://pytorch.org/get-started/locally](https://pytorch.org/get-started/locally)
 
+- Install ModelScope:
 
 If you are in the area of China, you could set the source to speed the downloading.
 
@@ -47,7 +48,6 @@ If you are in the area of China, you could set the source to speed the downloadi
 pip config set global.index-url https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
 
-- Install ModelScope:
 ``` sh
 pip install "modelscope[audio]" -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html
 ```
