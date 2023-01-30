@@ -3,6 +3,7 @@ import argparse
 import logging
 import sys
 import time
+import json
 from pathlib import Path
 from typing import Optional
 from typing import Sequence
@@ -100,10 +101,13 @@ class Speech2Text:
         # logging.info("asr_train_args: {}".format(asr_train_args))
         asr_model.to(dtype=getattr(torch, dtype)).eval()
 
-        ctc = CTCPrefixScorer(ctc=asr_model.ctc, eos=asr_model.eos)
+        if asr_model.ctc != None:
+            ctc = CTCPrefixScorer(ctc=asr_model.ctc, eos=asr_model.eos)
+            scorers.update(
+                ctc=ctc
+            )
         token_list = asr_model.token_list
         scorers.update(
-            ctc=ctc,
             length_bonus=LengthBonus(len(token_list)),
         )
 
@@ -171,7 +175,7 @@ class Speech2Text:
         self.converter = converter
         self.tokenizer = tokenizer
         is_use_lm = lm_weight != 0.0 and lm_file is not None
-        if ctc_weight == 0.0 and not is_use_lm:
+        if (ctc_weight == 0.0 or asr_model.ctc == None) and not is_use_lm:
             beam_search = None
         self.beam_search = beam_search
         logging.info(f"Beam_search: {self.beam_search}")
@@ -562,6 +566,7 @@ def inference_modelscope(
         length_total = 0.0
         finish_count = 0
         file_count = 1
+        lfr_factor = 6
         # 7 .Start for-loop
         asr_result_list = []
         output_path = output_dir_v2 if output_dir_v2 is not None else output_dir
@@ -597,7 +602,7 @@ def inference_modelscope(
                     results = speech2text(**batch)
                     if len(results) < 1:
                         hyp = Hypothesis(score=0.0, scores={}, states={}, yseq=[])
-                        results = [[" ", ["<space>"], [2], 10, 6]] * nbest
+                        results = [[" ", ["<space>"], [2], 0, 1, 6]] * nbest
                     time_end = time.time()
                     forward_time = time_end - time_beg
                     lfr_factor = results[0][-1]
@@ -615,7 +620,8 @@ def inference_modelscope(
                 
                 key = keys[0]
                 result = result_segments[0]
-                text, token, token_int, time_stamp = result
+                text, token, token_int = result[0], result[1], result[2]
+                time_stamp = None if len(result) < 4 else result[3]
                 
                 # Create a directory: outdir/{n}best_recog
                 if writer is not None:
@@ -630,15 +636,23 @@ def inference_modelscope(
                         text_postprocessed, time_stamp_postprocessed, word_lists = postprocessed_result[0], \
                                                                                    postprocessed_result[1], \
                                                                                    postprocessed_result[2]
-                        text_postprocessed_punc, punc_id_list = text2punc(word_lists, 20)
-                        text_postprocessed_punc_time_stamp = "predictions: {}  time_stamp: {}".format(
-                            text_postprocessed_punc, time_stamp_postprocessed)
+                        if len(word_lists) > 0: 
+                            text_postprocessed_punc, punc_id_list = text2punc(word_lists, 20)
+                            text_postprocessed_punc_time_stamp = json.dumps({"predictions": text_postprocessed_punc,
+                                                                             "time_stamp": time_stamp_postprocessed},
+                                                                            ensure_ascii=False)
+                        else:
+                            text_postprocessed_punc = ""
+                            punc_id_list = []
+                            text_postprocessed_punc_time_stamp = ""
+                            
                     else:
-                        text_postprocessed = postprocessed_result
-                        time_stamp_postprocessed = None
-                        word_lists = None
-                        text_postprocessed_punc_time_stamp = None
-                        punc_id_list = None
+                        text_postprocessed = ""
+                        time_stamp_postprocessed = ""
+                        word_lists = ""
+                        text_postprocessed_punc_time_stamp = ""
+                        punc_id_list = ""
+                        text_postprocessed_punc = ""
 
                     item = {'key': key, 'value': text_postprocessed_punc_time_stamp, 'text': text_postprocessed,
                             'time_stamp': time_stamp_postprocessed, 'punc': punc_id_list, 'token': token}
@@ -660,7 +674,7 @@ def inference_modelscope(
                                                                                          time_stamp_postprocessed))
         
         logging.info("decoding, feature length total: {}, forward_time total: {:.4f}, rtf avg: {:.4f}".
-                     format(length_total, forward_time_total, 100 * forward_time_total / (length_total * lfr_factor)))
+                     format(length_total, forward_time_total, 100 * forward_time_total / (length_total * lfr_factor+1e-6)))
         return asr_result_list
     return _forward
 
