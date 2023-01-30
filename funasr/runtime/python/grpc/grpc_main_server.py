@@ -1,8 +1,9 @@
+import grpc
 from concurrent import futures
+import argparse
+
 import paraformer_pb2_grpc
 from grpc_server import ASRServicer
-import grpc
-import argparse
 
 def serve(args):
       server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),

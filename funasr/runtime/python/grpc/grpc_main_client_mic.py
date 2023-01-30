@@ -1,23 +1,19 @@
 import pyaudio
-import scipy.io.wavfile as wav
-import grpc_client
 import grpc
 import json
-from grpc_client import transcribe_audio_bytes
-from paraformer_pb2_grpc import ASRStub
 import webrtcvad
-import numpy as np
 import time
 import asyncio
-import datetime
 import argparse
+
+from grpc_client import transcribe_audio_bytes
+from paraformer_pb2_grpc import ASRStub
 
 async def deal_chunk(sig_mic):
     global stub,SPEAKING,asr_user,language,sample_rate
-    sig = np.frombuffer(sig_mic, 'int16')
-    if vad.is_speech(sig.tobytes(), sample_rate): #speaking
+    if vad.is_speech(sig_mic, sample_rate): #speaking
         SPEAKING = True
-        response = transcribe_audio_bytes(stub, sig, user=asr_user, language=language, speaking = True, isEnd = False) #speaking, send audio to server.
+        response = transcribe_audio_bytes(stub, sig_mic, user=asr_user, language=language, speaking = True, isEnd = False) #speaking, send audio to server.
     else: #silence   
         begin_time = 0
         if SPEAKING: #means we have some audio recorded, send recognize order to server.

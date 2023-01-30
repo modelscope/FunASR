@@ -1,12 +1,10 @@
-import paraformer_pb2
-import paraformer_pb2_grpc
-import grpc
 import queue
+import paraformer_pb2
 
 def transcribe_audio_bytes(stub, chunk, user='zksz', language='zh-CN', speaking = True, isEnd = False):
     req = paraformer_pb2.Request()
     if chunk is not None:
-        req.audio_data = chunk.tostring()
+        req.audio_data = chunk
     req.user = user
     req.language = language
     req.speaking = speaking

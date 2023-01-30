@@ -1,13 +1,12 @@
 from concurrent import futures
 import grpc
 import json
-import paraformer_pb2
-import paraformer_pb2_grpc
 import time
 
-from paraformer_pb2 import Response
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
+import paraformer_pb2_grpc
+from paraformer_pb2 import Response
 
 
 class ASRServicer(paraformer_pb2_grpc.ASRServicer):
