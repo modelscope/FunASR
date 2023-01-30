@@ -12,20 +12,12 @@ import asyncio
 import datetime
 import argparse
 
-#SPEAKING = False
-#stub = None
-#asr_user = None
-#language = None
-
 async def deal_chunk(sig_mic):
-    
     global stub,SPEAKING,asr_user,language,sample_rate
     sig = np.frombuffer(sig_mic, 'int16')
     if vad.is_speech(sig.tobytes(), sample_rate): #speaking
         SPEAKING = True
         response = transcribe_audio_bytes(stub, sig, user=asr_user, language=language, speaking = True, isEnd = False) #speaking, send audio to server.
-        #print("response")
-        #print (response.next())
     else: #silence   
         begin_time = 0
         if SPEAKING: #means we have some audio recorded, send recognize order to server.
@@ -34,17 +26,12 @@ async def deal_chunk(sig_mic):
             response = transcribe_audio_bytes(stub, None, user=asr_user, language=language, speaking = False, isEnd = False) #speak end, call server for recognize one sentence
             resp = response.next()           
             if "decoding" == resp.action:   
-                print(resp.action)
-                print(json.loads(resp.sentence))
                 resp = response.next() #TODO, blocking operation may leads to miss some audio clips. C++ multi-threading is preferred.
                 if "finish" == resp.action:        
                     end_time = int(round(time.time() * 1000))
-                    print(resp.action)
                     print (json.loads(resp.sentence))
-                    #print ("silence, end_time: %d " % end_time)
                     print ("delay in ms: %d " % (end_time - begin_time))
                 else:
-                    #print (resp.action + " " + str(json.loads(resp.sentence)))
                     pass
         
 
@@ -59,7 +46,7 @@ async def record(host,port,sample_rate,mic_chunk,record_seconds,asr_user,languag
 
         #end grpc
         response = transcribe_audio_bytes(stub, None, user=asr_user, language=language, speaking = False, isEnd = True)
-        #print (response.next())
+        print (response.next().action)
 
 
 if __name__ == '__main__':
