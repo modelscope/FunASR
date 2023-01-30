@@ -68,16 +68,21 @@ If you have any questions about FunASR, please contact us by
 
 - email: [funasr@list.alibaba-inc.com](funasr@list.alibaba-inc.com)
 
-- Dingding group and Wechat group:
-<div align="left"><img src="docs/images/dingding.jpg" width="250"/> <img src="docs/images/wechat.png" width="222"/></div>
+|Dingding group | Wechat group|
+|:---:|:---:|
+|<div align="left"><img src="docs/images/dingding.jpg" width="250"/> |<img src="docs/images/wechat.png" width="222"/></div>|
 
+## Contributors
+
+| <div align="left"><img src="docs/images/DeepScience.png" width="250"/> |
+|:---:|
 
 ## Acknowledge
 
 1. We borrowed a lot of code from [Kaldi](http://kaldi-asr.org/) for data preparation.
 2. We borrowed a lot of code from [ESPnet](https://github.com/espnet/espnet). FunASR follows up the training and finetuning pipelines of ESPnet.
 3. We referred [Wenet](https://github.com/wenet-e2e/wenet) for building dataloader for large scale data training.
-
+4. We acknowledge [DeepScience](https://github.com/dyyzhmm/FunASR) for contributing the grpc service.
 ## License
 This project is licensed under the [The MIT License](https://opensource.org/licenses/MIT). FunASR also contains various third-party components and some code modified from other repos under other open source licenses.
 
