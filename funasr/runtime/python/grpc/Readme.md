@@ -27,7 +27,7 @@ python grpc_main_server.py --port 10095
 
 Step 4) Start grpc client (on client with microphone).
 ```
-# Install dependency.
+# Install dependency. Optional.
 python -m pip install pyaudio webrtcvad
 ```
 ```
