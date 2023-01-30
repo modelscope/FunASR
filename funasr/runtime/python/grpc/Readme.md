@@ -5,18 +5,24 @@ The audio data is in streaming, the asr inference process is in offline.
 
 ## Steps
 
-Step 1) Generate protobuf file for grpc.
+Step 1) Prepare server environment.
+```
+#Modelscope cuda docker is preferred.
+docker run --network host -d -it --gpus '"device=0"' -v /data:/data registry.cn-hangzhou.aliyuncs.com/modelscope-repo/modelscope:ubuntu20.04-cuda11.3.0-py37-torch1.11.0-tf1.15.5-1.2.0
+```
+
+Step 2) Generate protobuf file for server and client.
 ```
 #(Optional, paraformer_pb2.py and paraformer_pb2_grpc.py are already generated.)
 python -m grpc_tools.protoc  --proto_path=./proto -I ./proto    --python_out=. --grpc_python_out=./ ./proto/paraformer.proto
 ```
 
-Step 2) Start grpc server (on server).
+Step 3) Start grpc server (on server).
 ```
 python grpc_main_server.py --port 10095
 ```
 
-Step 3) Start grpc client (on client with microphone).
+Step 4) Start grpc client (on client with microphone).
 ```
 #Install dependency.
 python -m pip install pyaudio webrtcvad
