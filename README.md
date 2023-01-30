@@ -23,7 +23,7 @@
 - FunASR supplies a easy-to-use pipeline to finetune pretrained models from [ModelScope](https://www.modelscope.cn/models?page=1&tasks=auto-speech-recognition)
 - Compared to [Espnet](https://github.com/espnet/espnet) framework, the training speed of large-scale datasets in FunASR is much faster owning to the optimized dataloader.
 
-## Installation(Training and Developing)
+## Installation
 
 - Install Conda:
 ``` sh
@@ -40,16 +40,17 @@ pip3 install torch torchvision torchaudio
 ```
 For more versions, please see [https://pytorch.org/get-started/locally](https://pytorch.org/get-started/locally)
 
+- Install ModelScope:
 
-If you are in the area of China, you could set the source to speed the downloading.
+If you are in the area of China, you could set the source to speedup the downloading.
 
 ``` sh
 pip config set global.index-url https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
 
-- Install ModelScope:
+Install or upgrade modelscope.
 ``` sh
-pip install "modelscope[audio]" -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html
+pip install "modelscope[audio]" --upgrade -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html
 ```
 
 For more details about modelscope, please see [modelscope installation](https://modelscope.cn/docs/%E7%8E%AF%E5%A2%83%E5%AE%89%E8%A3%85)
@@ -61,18 +62,14 @@ git clone https://github.com/alibaba/FunASR.git && cd FunASR
 pip install --editable ./
 ```
 
-## Pretrained Model Zoo
-
-We have trained many academic and industrial models, [model hub](docs/modelscope_models.md)
-
 ## Contact
 
 If you have any questions about FunASR, please contact us by
 
 - email: [funasr@list.alibaba-inc.com](funasr@list.alibaba-inc.com)
 
-- Dingding group:
-<div align="left"><img src="docs/images/dingding.jpg" width="250"/>!<img src="docs/images/wechat.png" width="222"/></div>
+- Dingding group and Wechat group:
+<div align="left"><img src="docs/images/dingding.jpg" width="250"/> <img src="docs/images/wechat.png" width="222"/></div>
 
 
 ## Acknowledge
