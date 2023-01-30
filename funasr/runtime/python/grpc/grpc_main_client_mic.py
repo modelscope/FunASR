@@ -44,8 +44,7 @@ async def deal_chunk(sig_mic):
                     #print ("silence, end_time: %d " % end_time)
                     print ("delay in ms: %d " % (end_time - begin_time))
                 else:
-                    #debug
-                    print (resp.action + " " + str(json.loads(resp.sentence)))
+                    #print (resp.action + " " + str(json.loads(resp.sentence)))
                     pass
         
 

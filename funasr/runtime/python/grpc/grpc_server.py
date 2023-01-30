@@ -69,7 +69,7 @@ class ASRServicer(paraformer_pb2_grpc.ASRServicer):
                 if req.user not in self.client_buffers:
                     result = {}
                     result["success"] = True
-                    result["detail"] = "waiting_for_voice"
+                    result["detail"] = "waiting_for_more_voice"
                     result["text"] = ""
                     yield Response(sentence=json.dumps(result), user=req.user, action="waiting", language=req.language)
                 else:
@@ -86,11 +86,11 @@ class ASRServicer(paraformer_pb2_grpc.ASRServicer):
                         delay_str = str(end_time - begin_time)
                         result = {}
                         result["success"] = True
-                        result["detail"] = "finish_sentence_data_is_not_long_enough"
+                        result["detail"] = "waiting_for_more_voice"
                         result["server_delay_ms"] = delay_str
                         result["text"] = ""
-                        print ("user: %s , delay(ms): %s, error: %s " % (req.user, delay_str, "data_is_not_long_enough"))
-                        yield Response(sentence=json.dumps(result), user=req.user, action="finish", language=req.language)
+                        print ("user: %s , delay(ms): %s, info: %s " % (req.user, delay_str, "waiting_for_more_voice"))
+                        yield Response(sentence=json.dumps(result), user=req.user, action="waiting", language=req.language)
                     else:                           
                         asr_result = self.inference_16k_pipeline(audio_in=tmp_data, audio_fs = self.sample_rate)
                         if "text" in asr_result:
