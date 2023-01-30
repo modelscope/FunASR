@@ -81,7 +81,7 @@ class ASRServicer(paraformer_pb2_grpc.ASRServicer):
                     result["detail"] = "decoding data: %d bytes" % len(tmp_data)
                     result["text"] = ""
                     yield Response(sentence=json.dumps(result), user=req.user, action="decoding", language=req.language)
-                    if len(tmp_data) < 800: #min input_len for asr model 
+                    if len(tmp_data) < 9600: #min input_len for asr model , 300ms
                         end_time = int(round(time.time() * 1000))
                         delay_str = str(end_time - begin_time)
                         result = {}
