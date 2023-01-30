@@ -5,13 +5,14 @@ The audio data is in streaming, the asr inference process is in offline.
 
 ## Steps
 
-Step 1) Prepare server environment.
+Step 1) Prepare server environment (on server).
 ```
 #Optional, modelscope cuda docker is preferred.
 docker run --network host -d -it --gpus '"device=0"' -v /data:/data registry.cn-hangzhou.aliyuncs.com/modelscope-repo/modelscope:ubuntu20.04-cuda11.3.0-py37-torch1.11.0-tf1.15.5-1.2.0
+cd /opt/conda/lib/python3.7/site-packages/funasr/runtime/python/grpc
 ```
 
-Step 2) Generate protobuf file for server and client.
+Step 2) Generate protobuf file (for server and client).
 ```
 #Optional, paraformer_pb2.py and paraformer_pb2_grpc.py are already generated.
 python -m grpc_tools.protoc  --proto_path=./proto -I ./proto    --python_out=. --grpc_python_out=./ ./proto/paraformer.proto
