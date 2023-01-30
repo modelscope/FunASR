@@ -5,17 +5,17 @@ The audio data is in streaming, the asr inference process is in offline.
 
 ## Steps
 
-Step 1) Generate protobuf file for grpc
+Step 1) Generate protobuf file for grpc  (Optional, paraformer_pb2.py and paraformer_pb2_grpc.py are already generated.)
 ```
 python -m grpc_tools.protoc  --proto_path=./proto -I ./proto    --python_out=. --grpc_python_out=./ ./proto/paraformer.proto
 ```
 
-Step 2) start grpc server
+Step 2) start grpc server (on server)
 ```
 python grpc_main_server.py --port 10095
 ```
 
-Step 3) start grpc client
+Step 3) start grpc client (on client with microphone)
 ```
 python grpc_main_client_mic.py --host 127.0.0.1 --port 10095
 ```
