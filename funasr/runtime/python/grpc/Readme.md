@@ -5,7 +5,9 @@ The audio data is in streaming, the asr inference process is in offline.
 
 ## Steps
 
-Step 1) Prepare server environment (on server).  Install modelscope and funasr with pip or with cuda-docker image.
+Step 1) Prepare server environment (on server).  
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Install modelscope and funasr with pip or with cuda-docker image.
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Option 1: Install modelscope and funasr with [pip](https://github.com/alibaba-damo-academy/FunASR#installation)
 
@@ -23,9 +25,10 @@ cd FunASR/funasr/runtime/python/grpc/
 ```
 
 
-Step 2) Optional, generate protobuf file (run on server, the two generated pb file are both used for server and client).
+Step 2) Optional, generate protobuf file (run on server, the two generated pb files are both used for server and client).
 ```
-# paraformer_pb2.py and paraformer_pb2_grpc.py are already generated, regenerate it only when you make changes to ./proto/paraformer.proto file.
+# paraformer_pb2.py and paraformer_pb2_grpc.py are already generated, 
+# regenerate it only when you make changes to ./proto/paraformer.proto file.
 python -m grpc_tools.protoc  --proto_path=./proto -I ./proto    --python_out=. --grpc_python_out=./ ./proto/paraformer.proto
 ```
 
