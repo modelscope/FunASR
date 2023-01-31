@@ -7,7 +7,7 @@ The audio data is in streaming, the asr inference process is in offline.
 
 Step 1) Prepare server environment (on server).
 
-Install modelscope and funasr with pip or with cuda-docker image.
+Optional, install modelscope and funasr with pip or with cuda-docker image.
 
 Option 1: Install modelscope and funasr with [pip](https://github.com/alibaba-damo-academy/FunASR#installation)
 
@@ -18,7 +18,7 @@ CID=`docker run --network host -d -it --gpus '"device=0"' registry.cn-hangzhou.a
 echo $CID
 docker exec -it $CID /bin/bash
 ```
-Get into funasr source code grpc directory.
+Get funasr source code and get into grpc directory.
 ```
 git clone https://github.com/alibaba-damo-academy/FunASR
 cd FunASR/funasr/runtime/python/grpc/
@@ -38,7 +38,7 @@ python grpc_main_server.py --port 10095
 
 Step 4) Start grpc client (on client with microphone).
 ```
-# Install dependency. Optional.
+# Optional, Install dependency.
 python -m pip install pyaudio webrtcvad
 ```
 ```
