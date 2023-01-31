@@ -5,7 +5,7 @@ The audio data is in streaming, the asr inference process is in offline.
 
 ## Steps
 
-Step 1) Optional, prepare server environment (on server).  Install modelscope and funasr with pip or with cuda-docker image.
+Step 1) Prepare server environment (on server).  Install modelscope and funasr with pip or with cuda-docker image.
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Option 1: Install modelscope and funasr with [pip](https://github.com/alibaba-damo-academy/FunASR#installation)
 
