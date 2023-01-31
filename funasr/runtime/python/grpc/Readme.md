@@ -25,7 +25,7 @@ cd FunASR/funasr/runtime/python/grpc/
 
 Step 2) Optional, generate protobuf file (run on server, the two generated pb file are both used for server and client).
 ```
-# paraformer_pb2.py and paraformer_pb2_grpc.py are already generated.
+# paraformer_pb2.py and paraformer_pb2_grpc.py are already generated, regenerate it only when you make changes to ./proto/paraformer.proto file.
 python -m grpc_tools.protoc  --proto_path=./proto -I ./proto    --python_out=. --grpc_python_out=./ ./proto/paraformer.proto
 ```
 
