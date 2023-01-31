@@ -13,12 +13,15 @@ import kaldiio
 import numpy as np
 import soundfile
 import torch
+import torchaudio
 from torch.utils.data.dataset import IterableDataset
 from typeguard import check_argument_types
 import os.path
 
 from funasr.datasets.dataset import ESPnetDataset
 
+
+SUPPORT_AUDIO_TYPE_SETS = ['flac', 'mp3', 'm4a', 'ogg', 'opus', 'wav', 'wma']
 
 def load_kaldi(input):
     retval = kaldiio.load_mat(input)
@@ -60,7 +63,7 @@ def load_bytes(input):
 
 
 DATA_TYPES = {
-    "sound": lambda x: soundfile.read(x)[0],
+    "sound": lambda x: torchaudio.load(x)[0][0].numpy(),
     "kaldi_ark": load_kaldi,
     "bytes": load_bytes,
     "waveform": lambda x: x,
@@ -201,6 +204,11 @@ class IterableESPnetDataset(IterableDataset):
             uid = os.path.basename(self.path_name_type_list[0][0]).split(".")[0]
             name = self.path_name_type_list[0][1]
             _type = self.path_name_type_list[0][2]
+            if _type == "sound":
+                audio_type = os.path.basename(value).split(".")[1].lower()
+                if audio_type not in SUPPORT_AUDIO_TYPE_SETS:
+                    raise NotImplementedError(
+                        f'Not supported audio type: {audio_type}')
             func = DATA_TYPES[_type]
             array = func(value)
             data[name] = array
@@ -286,6 +294,11 @@ class IterableESPnetDataset(IterableDataset):
                 data = {}
                 # 2.a. Load data streamingly
                 for value, (path, name, _type) in zip(values, self.path_name_type_list):
+                    if _type == "sound":
+                        audio_type = os.path.basename(value).split(".")[1].lower()
+                        if audio_type not in SUPPORT_AUDIO_TYPE_SETS:
+                            raise NotImplementedError(
+                                f'Not supported audio type: {audio_type}')
                     func = DATA_TYPES[_type]
                     # Load entry
                     array = func(value)
@@ -322,3 +335,4 @@ class IterableESPnetDataset(IterableDataset):
 
         if count == 0:
             raise RuntimeError("No iteration")
+
