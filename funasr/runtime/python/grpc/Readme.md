@@ -6,11 +6,22 @@ The audio data is in streaming, the asr inference process is in offline.
 ## Steps
 
 Step 1) Prepare server environment (on server).
-```
-# Install modelscope and funasr, or install with modelscope cuda-docker image. 
 
-# Get into grpc directory.
-cd /opt/conda/lib/python3.7/site-packages/funasr/runtime/python/grpc
+Install modelscope and funasr with pip or with cuda-docker image.
+
+Option 1: Install modelscope and funasr with [pip](https://github.com/alibaba-damo-academy/FunASR#installation)
+
+Option 2: or install with cuda-docker image as: 
+
+```
+CID=`docker run --network host -d -it --gpus '"device=0"' registry.cn-hangzhou.aliyuncs.com/modelscope-repo/modelscope:ubuntu20.04-cuda11.3.0-py37-torch1.11.0-tf1.15.5-1.2.0`
+echo $CID
+docker exec -it $CID /bin/bash
+```
+Get into funasr source code grpc directory.
+```
+git clone https://github.com/alibaba-damo-academy/FunASR
+cd FunASR/funasr/runtime/python/grpc/
 ```
 
 
