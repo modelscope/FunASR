@@ -4,7 +4,7 @@ import os
 import struct
 from typing import Any, Dict, List, Union
 
-import librosa
+import torchaudio
 import numpy as np
 import pkg_resources
 from modelscope.utils.logger import get_logger
@@ -18,6 +18,7 @@ end_color = '\033[0m'
 
 global_asr_language = 'zh-cn'
 
+SUPPORT_AUDIO_TYPE_SETS = ['flac', 'mp3', 'm4a', 'ogg', 'opus', 'wav', 'wma']
 
 def get_version():
     return float(pkg_resources.get_distribution('easyasr').version)
@@ -57,12 +58,16 @@ def type_checking(audio_in: Union[str, bytes],
     if r_recog_type is None and audio_in is not None:
         # audio_in is wav, recog_type is wav_file
         if os.path.isfile(audio_in):
-            if audio_in.endswith('.wav') or audio_in.endswith('.WAV'):
+            audio_type = os.path.basename(audio_in).split(".")[1].lower()
+            if audio_type in SUPPORT_AUDIO_TYPE_SETS:
                 r_recog_type = 'wav'
                 r_audio_format = 'wav'
-            elif audio_in.endswith('.scp') or audio_in.endswith('.SCP'):
+            elif audio_type == "scp":
                 r_recog_type = 'wav'
                 r_audio_format = 'scp'
+            else:
+                raise NotImplementedError(
+                    f'Not supported audio type: {audio_type}')
 
         # recog_type is datasets_file
         elif os.path.isdir(audio_in):
@@ -123,14 +128,15 @@ def get_sr_from_bytes(wav: bytes):
 def get_sr_from_wav(fname: str):
     fs = None
     if os.path.isfile(fname):
-        audio, fs = librosa.load(fname, sr=None)
+        audio, fs = torchaudio.load(fname)
         return fs
     elif os.path.isdir(fname):
         dir_files = os.listdir(fname)
         for file in dir_files:
             file_path = os.path.join(fname, file)
             if os.path.isfile(file_path):
-                if file_path.endswith('.wav') or file_path.endswith('.WAV'):
+                audio_type = os.path.basename(file_path).split(".")[1].lower()
+                if audio_type in SUPPORT_AUDIO_TYPE_SETS:
                     fs = get_sr_from_wav(file_path)
             elif os.path.isdir(file_path):
                 fs = get_sr_from_wav(file_path)
@@ -146,7 +152,14 @@ def find_file_by_ends(dir_path: str, ends: str):
     for file in dir_files:
         file_path = os.path.join(dir_path, file)
         if os.path.isfile(file_path):
-            if file_path.endswith(ends):
+            if ends == ".wav" or ends == ".WAV":
+                audio_type = os.path.basename(file_path).split(".")[1].lower()
+                if audio_type in SUPPORT_AUDIO_TYPE_SETS:
+                    return True
+                else:
+                    raise NotImplementedError(
+                        f'Not supported audio type: {audio_type}')
+            elif file_path.endswith(ends):
                 return True
         elif os.path.isdir(file_path):
             if find_file_by_ends(file_path, ends):
@@ -160,7 +173,8 @@ def recursion_dir_all_wav(wav_list, dir_path: str) -> List[str]:
     for file in dir_files:
         file_path = os.path.join(dir_path, file)
         if os.path.isfile(file_path):
-            if file_path.endswith('.wav') or file_path.endswith('.WAV'):
+            audio_type = os.path.basename(file_path).split(".")[1].lower()
+            if audio_type in SUPPORT_AUDIO_TYPE_SETS:
                 wav_list.append(file_path)
         elif os.path.isdir(file_path):
             recursion_dir_all_wav(wav_list, file_path)
@@ -333,3 +347,4 @@ def print_progress(percent):
         percent = 1
     res = int(50 * percent) * '#'
     print('\r[%-50s] %d%%' % (res, int(100 * percent)), end='')
+
