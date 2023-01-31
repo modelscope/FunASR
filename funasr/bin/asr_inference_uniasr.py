@@ -391,7 +391,7 @@ class Speech2Text:
 #         except TooShortUttError as e:
 #             logging.warning(f"Utterance {keys} {e}")
 #             hyp = Hypothesis(score=0.0, scores={}, states={}, yseq=[])
-#             results = [[" ", ["<space>"], [2], hyp]] * nbest
+#             results = [[" ", ["sil"], [2], hyp]] * nbest
 #
 #         # Only supporting batch_size==1
 #         key = keys[0]
@@ -616,7 +616,7 @@ def inference_modelscope(
             except TooShortUttError as e:
                 logging.warning(f"Utterance {keys} {e}")
                 hyp = Hypothesis(score=0.0, scores={}, states={}, yseq=[])
-                results = [[" ", ["<space>"], [2], hyp]] * nbest
+                results = [[" ", ["sil"], [2], hyp]] * nbest
     
             # Only supporting batch_size==1
             key = keys[0]

@@ -410,7 +410,7 @@ def inference(
         results = speech2text(**batch)
         if len(results) < 1:
             hyp = Hypothesis(score=0.0, scores={}, states={}, yseq=[])
-            results = [[" ", ["<space>"], [2], hyp, 10, 6]] * nbest
+            results = [[" ", ["sil"], [2], hyp, 10, 6]] * nbest
         time_end = time.time()
         forward_time = time_end - time_beg
         lfr_factor = results[0][-1]
