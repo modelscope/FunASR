@@ -7,12 +7,12 @@ The audio data is in streaming, the asr inference process is in offline.
 
 Step 1) Prepare server environment (on server).
 ```
-# Optional, modelscope cuda docker is preferred.
-CID=`docker run --network host -d -it --gpus '"device=0"' registry.cn-hangzhou.aliyuncs.com/modelscope-repo/modelscope:ubuntu20.04-cuda11.3.0-py37-torch1.11.0-tf1.15.5-1.2.0`
-echo $CID
-docker exec -it $CID /bin/bash
+# Install modelscope and funasr, or install with modelscope cuda-docker image. 
+
+# Get into grpc directory.
 cd /opt/conda/lib/python3.7/site-packages/funasr/runtime/python/grpc
 ```
+
 
 Step 2) Generate protobuf file (for server and client).
 ```
@@ -41,7 +41,7 @@ python grpc_main_client_mic.py --host 127.0.0.1 --port 10095
 
 
 ## Reference
-We borrow or refer to some code from:
+We borrow from or refer to some code as:
 
 1)https://github.com/wenet-e2e/wenet/tree/main/runtime/core/grpc
 
