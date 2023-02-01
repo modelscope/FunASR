@@ -34,14 +34,17 @@ python -m grpc_tools.protoc  --proto_path=./proto -I ./proto    --python_out=. -
 
 Step 3) Start grpc server (on server).
 ```
+# Optional, Install dependency.
+python -m pip install grpcio grpcio-tools
+```
+```
 python grpc_main_server.py --port 10095
 ```
 
 Step 4) Start grpc client (on client with microphone).
-
 ```
 # Optional, Install dependency.
-python -m pip install pyaudio webrtcvad
+python -m pip install pyaudio webrtcvad grpcio grpcio-tools
 ```
 ```
 # Start client.
