@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-
-import json
 import argparse
 import logging
 import sys
@@ -548,6 +545,7 @@ def inference_modelscope(
     def _forward(data_path_and_name_and_type,
                  raw_inputs: Union[np.ndarray, torch.Tensor] = None,
                  output_dir_v2: Optional[str] = None,
+                 fs: dict = None,
                  param_dict: dict = None,
                  ):
         # 3. Build data-iterator
@@ -558,6 +556,7 @@ def inference_modelscope(
         loader = ASRTask.build_streaming_iterator(
             data_path_and_name_and_type,
             dtype=dtype,
+            fs=fs,
             batch_size=1,
             key_file=key_file,
             num_workers=num_workers,
@@ -643,9 +642,8 @@ def inference_modelscope(
                                                                                    postprocessed_result[2]
                         if len(word_lists) > 0: 
                             text_postprocessed_punc, punc_id_list = text2punc(word_lists, 20)
-                            text_postprocessed_punc_time_stamp = json.dumps({"predictions": text_postprocessed_punc,
-                                                                             "time_stamp": time_stamp_postprocessed},
-                                                                            ensure_ascii=False)
+                            text_postprocessed_punc_time_stamp = "predictions: {}  time_stamp: {}".format(
+                                text_postprocessed_punc, time_stamp_postprocessed)
                         else:
                             text_postprocessed_punc = ""
                             punc_id_list = []
@@ -660,7 +658,7 @@ def inference_modelscope(
                         text_postprocessed_punc = ""
 
                     item = {'key': key, 'value': text_postprocessed_punc, 'text_postprocessed': text_postprocessed,
-                            'time_stamp': time_stamp_postprocessed, 'token': token}
+                            'time_stamp': time_stamp_postprocessed, 'token': token} 
                     asr_result_list.append(item)
                     finish_count += 1
                     # asr_utils.print_progress(finish_count / file_count)

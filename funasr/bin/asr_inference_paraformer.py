@@ -181,7 +181,7 @@ class Speech2Text:
         self.nbest = nbest
         self.frontend = frontend
         self.encoder_downsampling_factor = 1
-        if asr_train_args.encoder_conf["input_layer"] == "conv2d":
+        if asr_train_args.encoder == "data2vec_encoder" or asr_train_args.encoder_conf["input_layer"] == "conv2d":
             self.encoder_downsampling_factor = 4
 
     @torch.no_grad()
@@ -496,7 +496,6 @@ def inference(
         ngram_weight=ngram_weight,
         nbest=nbest,
         num_workers=num_workers,
-
         **kwargs,
     )
     return inference_pipeline(data_path_and_name_and_type, raw_inputs)
@@ -579,6 +578,7 @@ def inference_modelscope(
             data_path_and_name_and_type,
             raw_inputs: Union[np.ndarray, torch.Tensor] = None,
             output_dir_v2: Optional[str] = None,
+            fs: dict = None,
             param_dict: dict = None,
     ):
         # 3. Build data-iterator
@@ -589,6 +589,7 @@ def inference_modelscope(
         loader = ASRTask.build_streaming_iterator(
             data_path_and_name_and_type,
             dtype=dtype,
+            fs=fs,
             batch_size=batch_size,
             key_file=key_file,
             num_workers=num_workers,
