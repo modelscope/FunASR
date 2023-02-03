@@ -483,6 +483,7 @@ def inference_modelscope(
     ngram_weight: float = 0.9,
     nbest: int = 1,
     num_workers: int = 1,
+    param_dict: dict = None,
     **kwargs,
 ):
     assert check_argument_types()
@@ -533,6 +534,7 @@ def inference_modelscope(
     def _forward(data_path_and_name_and_type,
                  raw_inputs: Union[np.ndarray, torch.Tensor] = None,
                  output_dir_v2: Optional[str] = None,
+                 param_dict: dict = None,
                  ):
         # 3. Build data-iterator
         if data_path_and_name_and_type is None and raw_inputs is not None:
