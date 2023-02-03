@@ -1,0 +1,104 @@
+# network architecture
+# encoder related
+encoder: data2vec_encoder
+encoder_conf:
+    extractor_mode: layer_norm
+    encoder_layerdrop: 0.1
+    dropout_input: 0.0
+    dropout_features: 0.0
+    feature_grad_mult: 0.0
+    encoder_embed_dim: 768
+
+    mask_prob: 0.65
+    mask_length: 10
+
+    loss_beta: 0
+    loss_scale: null
+
+    instance_norm_target_layer: true
+    average_top_k_layers: 8
+
+    pos_conv_depth: 5
+    conv_pos: 95
+
+    ema_decay: 0.999
+    ema_end_decay: 0.9999
+    ema_anneal_end_step: 30000
+    ema_transformer_only: true
+    ema_layers_only: true
+
+    require_same_masks: true
+    mask_dropout: 0
+
+
+# decoder related
+decoder: paraformer_decoder_san
+decoder_conf:
+    attention_heads: 12
+    linear_units: 3072
+    num_blocks: 6
+    dropout_rate: 0.1
+    positional_dropout_rate: 0.1
+    self_attention_dropout_rate: 0.0
+    src_attention_dropout_rate: 0.0
+
+model: paraformer
+model_conf:
+    ctc_weight: 0.3
+    lsm_weight: 0.1
+    length_normalized_loss: false
+    predictor_weight: 1.0
+    sampling_ratio: 0.4
+
+# minibatch related
+batch_type: length
+batch_bins: 25000
+num_workers: 16
+
+# optimization related
+accum_grad: 1
+grad_clip: 5
+max_epoch: 50
+val_scheduler_criterion:
+    - valid
+    - acc
+best_model_criterion:
+-   - valid
+    - acc
+    - max
+keep_nbest_models: 10
+
+optim: adam
+optim_conf:
+   lr: 0.00002
+scheduler: warmuplr
+scheduler_conf:
+   warmup_steps: 30000
+
+specaug: specaug
+specaug_conf:
+    apply_time_warp: true
+    time_warp_window: 5
+    time_warp_mode: bicubic
+    apply_freq_mask: true
+    freq_mask_width_range:
+    - 0
+    - 30
+    num_freq_mask: 2
+    apply_time_mask: true
+    time_mask_width_range:
+    - 0
+    - 40
+    num_time_mask: 2
+
+predictor: cif_predictor
+predictor_conf:
+  idim: 768
+  threshold: 1.0
+  l_order: 1
+  r_order: 1
+
+
+log_interval: 50
+unused_parameters: true
+normalize: None
