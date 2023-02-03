@@ -171,6 +171,7 @@ def inference_modelscope(
         streaming: bool = False,
         embedding_node: str = "resnet1_dense",
         sv_threshold: float = 0.9465,
+        param_dict: Optional[dict] = None,
         **kwargs,
 ):
     assert check_argument_types()
@@ -183,6 +184,7 @@ def inference_modelscope(
         level=log_level,
         format="%(asctime)s (%(module)s:%(lineno)d) %(levelname)s: %(message)s",
     )
+    logging.info("param_dict: {}".format(param_dict))
 
     if ngpu >= 1 and torch.cuda.is_available():
         device = "cuda"
@@ -212,7 +214,9 @@ def inference_modelscope(
             data_path_and_name_and_type: Sequence[Tuple[str, str, str]] = None,
             raw_inputs: Union[np.ndarray, torch.Tensor] = None,
             output_dir_v2: Optional[str] = None,
+            param_dict: Optional[dict] = None,
     ):
+        logging.info("param_dict: {}".format(param_dict))
         if data_path_and_name_and_type is None and raw_inputs is not None:
             if isinstance(raw_inputs, torch.Tensor):
                 raw_inputs = raw_inputs.numpy()
@@ -233,11 +237,10 @@ def inference_modelscope(
 
         # 7 .Start for-loop
         output_path = output_dir_v2 if output_dir_v2 is not None else output_dir
-        embd_fd, ref_emb_fd, score_fd = None, None, None
+        embd_writer, ref_embd_writer, score_writer = None, None, None
         if output_path is not None:
             os.makedirs(output_path, exist_ok=True)
-            embd_writer = WriteHelper("ark:{}/xvector.ark".format(output_path))
-            # embd_fd = open(os.path.join(output_path, "xvector.ark"), "wb")
+            embd_writer = WriteHelper("ark,scp:{}/xvector.ark,{}/xvector.scp".format(output_path, output_path))
         sv_result_list = []
         for keys, batch in loader:
             assert isinstance(batch, dict), type(batch)
@@ -249,6 +252,7 @@ def inference_modelscope(
             embedding, ref_embedding, score = speech2xvector(**batch)
             # Only supporting batch_size==1
             key = keys[0]
+            normalized_score = 0.0
             if score is not None:
                 score = score.item()
                 normalized_score = max(score - sv_threshold, 0.0) / (1.0 - sv_threshold) * 100.0
@@ -257,23 +261,21 @@ def inference_modelscope(
                 item = {"key": key, "value": embedding.squeeze(0).cpu().numpy()}
             sv_result_list.append(item)
             if output_path is not None:
-                # kaldiio.save_mat(embd_fd, embedding[0].cpu().numpy(), key)
                 embd_writer(key, embedding[0].cpu().numpy())
                 if ref_embedding is not None:
-                    if ref_emb_fd is None:
-                        # ref_emb_fd = open(os.path.join(output_path, "ref_xvector.ark"), "wb")
-                        ref_embd_writer = WriteHelper("ark:{}/ref_xvector.ark".format(output_path))
-                        score_fd = open(os.path.join(output_path, "score.txt"), "w")
-                    # kaldiio.save_mat(ref_emb_fd, ref_embedding[0].cpu().numpy(), key)
+                    if ref_embd_writer is None:
+                        ref_embd_writer = WriteHelper(
+                            "ark,scp:{}/ref_xvector.ark,{}/ref_xvector.scp".format(output_path, output_path)
+                        )
+                        score_writer = open(os.path.join(output_path, "score.txt"), "w")
                     ref_embd_writer(key, ref_embedding[0].cpu().numpy())
-                    score_fd.write("{:.6f}\n".format(score.item()))
+                    score_writer.write("{} {:.6f}\n".format(key, normalized_score))
+
         if output_path is not None:
-            # embd_fd.close()
             embd_writer.close()
-            if ref_emb_fd is not None:
-                # ref_emb_fd.close()
-                ref_emb_fd.close()
-                score_fd.close()
+            if ref_embd_writer is not None:
+                ref_embd_writer.close()
+                score_writer.close()
 
         return sv_result_list
 
