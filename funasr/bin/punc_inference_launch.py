@@ -59,25 +59,17 @@ def get_parser():
     )
 
     group = parser.add_argument_group("Input data related")
-    group.add_argument(
-        "--data_path_and_name_and_type",
-        type=str2triple_str,
-        action="append",
-        required=False
-    )
-    group.add_argument(
-        "--raw_inputs",
-        type=str,
-        required=False
-    )
+    group.add_argument("--data_path_and_name_and_type", type=str2triple_str, action="append", required=False)
+    group.add_argument("--raw_inputs", type=str, required=False)
     group.add_argument("--key_file", type=str_or_none)
-
-
+    group.add_argument("--cache", type=list, required=False)
+    group.add_argument("--param_dict", type=dict, required=False)
     group = parser.add_argument_group("The model configuration related")
     group.add_argument("--train_config", type=str)
     group.add_argument("--model_file", type=str)
     group.add_argument("--mode", type=str, default="punc")
     return parser
+
 
 def inference_launch(mode, **kwargs):
     if mode == "punc":
