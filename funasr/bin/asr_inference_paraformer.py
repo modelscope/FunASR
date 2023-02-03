@@ -227,6 +227,8 @@ class Speech2Text:
         pre_acoustic_embeds, pre_token_length, alphas, pre_peak_index = predictor_outs[0], predictor_outs[1], \
                                                                         predictor_outs[2], predictor_outs[3]
         pre_token_length = pre_token_length.round().long()
+        if torch.max(pre_token_length) < 1:
+            return []
         decoder_outs = self.asr_model.cal_decoder_with_predictor(enc, enc_len, pre_acoustic_embeds, pre_token_length)
         decoder_out, ys_pad_lens = decoder_outs[0], decoder_outs[1]
 
@@ -394,7 +396,7 @@ class Speech2Text:
 #         results = speech2text(**batch)
 #         if len(results) < 1:
 #             hyp = Hypothesis(score=0.0, scores={}, states={}, yseq=[])
-#             results = [[" ", ["<space>"], [2], hyp, 10, 6]] * nbest
+#             results = [[" ", ["sil"], [2], hyp, 10, 6]] * nbest
 #         time_end = time.time()
 #         forward_time = time_end - time_beg
 #         lfr_factor = results[0][-1]
@@ -623,7 +625,7 @@ def inference_modelscope(
             results = speech2text(**batch)
             if len(results) < 1:
                 hyp = Hypothesis(score=0.0, scores={}, states={}, yseq=[])
-                results = [[" ", ["<space>"], [2], hyp, 10, 6]] * nbest
+                results = [[" ", ["sil"], [2], hyp, 10, 6]] * nbest
             time_end = time.time()
             forward_time = time_end - time_beg
             lfr_factor = results[0][-1]

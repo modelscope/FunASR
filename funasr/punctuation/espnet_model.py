@@ -13,6 +13,7 @@ from funasr.train.abs_espnet_model import AbsESPnetModel
 
 
 class ESPnetPunctuationModel(AbsESPnetModel):
+
     def __init__(self, punc_model: AbsPunctuation, vocab_size: int, ignore_id: int = 0):
         assert check_argument_types()
         super().__init__()
@@ -43,8 +44,8 @@ class ESPnetPunctuationModel(AbsESPnetModel):
         batch_size = text.size(0)
         # For data parallel
         if max_length is None:
-            text = text[:, : text_lengths.max()]
-            punc = punc[:, : text_lengths.max()]
+            text = text[:, :text_lengths.max()]
+            punc = punc[:, :text_lengths.max()]
         else:
             text = text[:, :max_length]
             punc = punc[:, :max_length]
@@ -63,9 +64,11 @@ class ESPnetPunctuationModel(AbsESPnetModel):
         # 3. Calc negative log likelihood
         # nll: (BxL,)
         if self.training == False:
-            _, indices = y.view(-1, y.shape[-1]).topk(1,dim=1)
+            _, indices = y.view(-1, y.shape[-1]).topk(1, dim=1)
             from sklearn.metrics import f1_score
-            f1_score = f1_score(punc.view(-1).detach().cpu().numpy(), indices.squeeze(-1).detach().cpu().numpy(), average='micro')
+            f1_score = f1_score(punc.view(-1).detach().cpu().numpy(),
+                                indices.squeeze(-1).detach().cpu().numpy(),
+                                average='micro')
             nll = torch.Tensor([f1_score]).repeat(text_lengths.sum())
             return nll, text_lengths
         else:
@@ -82,14 +85,12 @@ class ESPnetPunctuationModel(AbsESPnetModel):
         nll = nll.view(batch_size, -1)
         return nll, text_lengths
 
-    def batchify_nll(
-        self,
-        text: torch.Tensor,
-        punc: torch.Tensor,
-        text_lengths: torch.Tensor,
-        punc_lengths: torch.Tensor,
-        batch_size: int = 100
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    def batchify_nll(self,
+                     text: torch.Tensor,
+                     punc: torch.Tensor,
+                     text_lengths: torch.Tensor,
+                     punc_lengths: torch.Tensor,
+                     batch_size: int = 100) -> Tuple[torch.Tensor, torch.Tensor]:
         """Compute negative log likelihood(nll) from transformer language model
 
         To avoid OOM, this fuction seperate the input into batches.
@@ -117,9 +118,7 @@ class ESPnetPunctuationModel(AbsESPnetModel):
                 batch_punc = punc[start_idx:end_idx, :]
                 batch_text_lengths = text_lengths[start_idx:end_idx]
                 # batch_nll: [B * T]
-                batch_nll, batch_x_lengths = self.nll(
-                    batch_text, batch_punc, batch_text_lengths, max_length=max_length
-                )
+                batch_nll, batch_x_lengths = self.nll(batch_text, batch_punc, batch_text_lengths, max_length=max_length)
                 nlls.append(batch_nll)
                 x_lengths.append(batch_x_lengths)
                 start_idx = end_idx
@@ -131,21 +130,19 @@ class ESPnetPunctuationModel(AbsESPnetModel):
         assert x_lengths.size(0) == total_num
         return nll, x_lengths
 
-    def forward(
-        self, text: torch.Tensor, punc: torch.Tensor, text_lengths: torch.Tensor, punc_lengths: torch.Tensor
-    ) -> Tuple[torch.Tensor, Dict[str, torch.Tensor], torch.Tensor]:
+    def forward(self, text: torch.Tensor, punc: torch.Tensor, text_lengths: torch.Tensor,
+                punc_lengths: torch.Tensor) -> Tuple[torch.Tensor, Dict[str, torch.Tensor], torch.Tensor]:
         nll, y_lengths = self.nll(text, punc, text_lengths, punc_lengths)
         ntokens = y_lengths.sum()
         loss = nll.sum() / ntokens
         stats = dict(loss=loss.detach())
-        
+
         # force_gatherable: to-device and to-tensor if scalar for DataParallel
         loss, stats, weight = force_gatherable((loss, stats, ntokens), loss.device)
         return loss, stats, weight
 
-    def collect_feats(
-        self, text: torch.Tensor, punc: torch.Tensor, text_lengths: torch.Tensor
-    ) -> Dict[str, torch.Tensor]:
+    def collect_feats(self, text: torch.Tensor, punc: torch.Tensor,
+                      text_lengths: torch.Tensor) -> Dict[str, torch.Tensor]:
         return {}
 
     def inference(self, text: torch.Tensor, text_lengths: torch.Tensor) -> Tuple[torch.Tensor, None]:
