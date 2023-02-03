@@ -659,12 +659,8 @@ def inference_modelscope(
                         punc_id_list = ""
                         text_postprocessed_punc = ""
 
-                    item = {'key': key, 'value': text_postprocessed_punc_time_stamp, 'text': text_postprocessed,
-                            'time_stamp': time_stamp_postprocessed, 'punc': punc_id_list, 'token': token}
-                    if outputs_dict:
-                        item = {'text_punc': text_postprocessed_punc, 'text': text_postprocessed,
-                                'punc_id': punc_id_list, 'token': token, 'time_stamp': time_stamp_postprocessed}
-                        item = {'key': key, 'value': item}
+                    item = {'key': key, 'value': text_postprocessed_punc, 'text_postprocessed': text_postprocessed,
+                            'time_stamp': time_stamp_postprocessed, 'token': token}
                     asr_result_list.append(item)
                     finish_count += 1
                     # asr_utils.print_progress(finish_count / file_count)
