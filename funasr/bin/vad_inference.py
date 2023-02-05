@@ -251,6 +251,7 @@ def inference_modelscope(
         dtype: str = "float32",
         seed: int = 0,
         num_workers: int = 1,
+        param_dict: dict = None,
         **kwargs,
 ):
     assert check_argument_types()
@@ -287,6 +288,8 @@ def inference_modelscope(
         data_path_and_name_and_type,
         raw_inputs: Union[np.ndarray, torch.Tensor] = None,
         output_dir_v2: Optional[str] = None,
+        fs: dict = None,
+        param_dict: dict = None,
     ):
         # 3. Build data-iterator
         loader = VADTask.build_streaming_iterator(
