@@ -548,6 +548,7 @@ def inference_modelscope(
     def _forward(data_path_and_name_and_type,
                  raw_inputs: Union[np.ndarray, torch.Tensor] = None,
                  output_dir_v2: Optional[str] = None,
+                 fs: dict = None,
                  param_dict: dict = None,
                  ):
         # 3. Build data-iterator
@@ -558,6 +559,7 @@ def inference_modelscope(
         loader = ASRTask.build_streaming_iterator(
             data_path_and_name_and_type,
             dtype=dtype,
+            fs=fs,
             batch_size=1,
             key_file=key_file,
             num_workers=num_workers,
