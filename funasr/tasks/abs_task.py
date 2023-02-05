@@ -1783,6 +1783,7 @@ class AbsTask(ABC):
             collate_fn,
             key_file: str = None,
             batch_size: int = 1,
+            fs: dict = None,
             dtype: str = np.float32,
             num_workers: int = 1,
             allow_variable_data_keys: bool = False,
@@ -1800,6 +1801,7 @@ class AbsTask(ABC):
         dataset = IterableESPnetDataset(
             data_path_and_name_and_type,
             float_dtype=dtype,
+            fs=fs,
             preprocess=preprocess_fn,
             key_file=key_file,
         )
