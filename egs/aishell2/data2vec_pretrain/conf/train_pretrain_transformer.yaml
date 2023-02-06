@@ -1,0 +1,65 @@
+# network architecture
+# encoder related
+encoder: data2vec_encoder
+encoder_conf:
+  extractor_mode: layer_norm
+  encoder_layerdrop: 0.05
+  dropout_input: 0.0
+  dropout_features: 0.0
+  feature_grad_mult: 1.0
+  encoder_embed_dim: 768
+
+  mask_prob: 0.65
+  mask_length: 10
+
+  loss_beta: 0
+  loss_scale: null
+
+  instance_norm_target_layer: true
+  average_top_k_layers: 8
+
+  pos_conv_depth: 5
+  conv_pos: 95
+
+  ema_decay: 0.999
+  ema_end_decay: 0.9999
+  ema_anneal_end_step: 30000
+  ema_transformer_only: true
+  ema_layers_only: true
+
+  require_same_masks: true
+  mask_dropout: 0
+
+log_interval: 50
+normalize: None
+
+# minibatch related
+batch_type: length
+batch_bins: 64000
+num_workers: 16
+
+# optimization related
+accum_grad: 1
+grad_clip: 5
+patience: none
+max_epoch: 600
+val_scheduler_criterion:
+    - valid
+    - acc
+best_model_criterion:
+-   - valid
+    - loss
+    - min
+keep_nbest_models: 50
+unused_parameters: true
+
+optim: fairseq_adam
+optim_conf:
+    lr: 0.0005
+    adam_betas: [0.9,0.98]
+    adam_eps: 1.0e-06
+    weight_decay: 0.01
+
+scheduler: tri_stage
+scheduler_conf:
+    phase_ratio: [0.03,0.9,0.07]
