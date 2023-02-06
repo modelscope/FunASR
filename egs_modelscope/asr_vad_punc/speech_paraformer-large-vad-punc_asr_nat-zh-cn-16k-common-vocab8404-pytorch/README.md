@@ -28,3 +28,19 @@ Or you can use the finetuned model for inference directly.
 ```python
     python infer.py
 ```
+
+### Inference using local finetuned model
+
+- Modify inference related parameters in `infer_after_finetune.py`
+    - <strong>output_dir:</strong> # result dir
+    - <strong>data_dir:</strong> # the dataset dir needs to include `test/wav.scp`. If `test/text` is also exists, CER will be computed
+    - <strong>decoding_model_name:</strong> # set the checkpoint name for decoding, e.g., `valid.cer_ctc.ave.pth`
+
+- Then you can run the pipeline to finetune with:
+```python
+    python infer_after_finetune.py
+```
+
+- Results
+
+The decoding results can be found in `$output_dir/decoding_results/text.cer`, which includes recognition results of each sample and the CER metric of the whole test set.
