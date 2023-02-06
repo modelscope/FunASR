@@ -102,6 +102,8 @@ class AudioDataset(IterableDataset):
                 elif data_type == "text" or data_type == "sound":
                     text_reader = open(data_file, "r")
                     reader_list.append(text_reader)
+                elif data_type == "none":
+                    continue
                 else:
                     raise TypeError("Data type {} is not supported".format(data_type))
 
