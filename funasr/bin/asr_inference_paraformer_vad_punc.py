@@ -40,18 +40,10 @@ from funasr.models.frontend.wav_frontend import WavFrontend
 from funasr.tasks.vad import VADTask
 from funasr.utils.timestamp_tools import time_stamp_lfr6
 from funasr.bin.punctuation_infer import Text2Punc
-from funasr.torch_utils.forward_adaptor import ForwardAdaptor
-from funasr.datasets.preprocessor import CommonPreprocessor
-from funasr.punctuation.text_preprocessor import split_to_mini_sentence
 
 header_colors = '\033[95m'
 end_colors = '\033[0m'
 
-global_asr_language: str = 'zh-cn'
-global_sample_rate: Union[int, Dict[Any, int]] = {
-    'audio_fs': 16000,
-    'model_fs': 16000
-}
 
 class Speech2Text:
     """Speech2Text class

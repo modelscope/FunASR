@@ -214,6 +214,7 @@ def inference_modelscope(
             data_path_and_name_and_type: Sequence[Tuple[str, str, str]] = None,
             raw_inputs: Union[np.ndarray, torch.Tensor] = None,
             output_dir_v2: Optional[str] = None,
+            fs: dict = None,
             param_dict: Optional[dict] = None,
     ):
         logging.info("param_dict: {}".format(param_dict))
