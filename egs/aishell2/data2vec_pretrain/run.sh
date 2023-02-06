@@ -44,7 +44,7 @@ set -o pipefail
 train_set=train
 valid_set=dev_ios
 
-asr_config=conf/train_asr_paraformer_conformer_20e_1280_320_6d_1280_320.yaml
+asr_config=conf/train_pretrain_transformer.yaml
 model_dir="baseline_$(basename "${asr_config}" .yaml)_${feats_type}_${lang}_${token_type}_${tag}"
 
 if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
