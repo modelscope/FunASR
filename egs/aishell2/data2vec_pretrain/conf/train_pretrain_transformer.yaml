@@ -63,3 +63,17 @@ optim_conf:
 scheduler: tri_stage
 scheduler_conf:
     phase_ratio: [0.03,0.9,0.07]
+
+# for dataset
+dataset_conf:
+    batch_mode: clipping
+    data_names: speech,none
+    data_types: kaldi_ark,none
+    shuffle: true
+    shuffle_conf:
+        shuffle_size: 12800
+        sort_size: 12800
+    batch_conf:
+        batch_type: token
+        batch_size: 64000
+    num_workers: 8
