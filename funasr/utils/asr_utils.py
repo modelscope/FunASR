@@ -18,7 +18,7 @@ end_color = '\033[0m'
 
 global_asr_language = 'zh-cn'
 
-SUPPORT_AUDIO_TYPE_SETS = ['flac', 'mp3', 'm4a', 'ogg', 'opus', 'wav', 'wma']
+SUPPORT_AUDIO_TYPE_SETS = ['flac', 'mp3', 'ogg', 'opus', 'wav', 'pcm']
 
 def get_version():
     return float(pkg_resources.get_distribution('easyasr').version)
@@ -128,7 +128,12 @@ def get_sr_from_bytes(wav: bytes):
 def get_sr_from_wav(fname: str):
     fs = None
     if os.path.isfile(fname):
-        audio, fs = torchaudio.load(fname)
+        audio_type = os.path.basename(fname).split(".")[1].lower()
+        if audio_type in SUPPORT_AUDIO_TYPE_SETS:
+            if audio_type == "pcm":
+                fs = None
+            else:
+                audio, fs = torchaudio.load(fname)
         return fs
     elif os.path.isdir(fname):
         dir_files = os.listdir(fname)
@@ -347,4 +352,3 @@ def print_progress(percent):
         percent = 1
     res = int(50 * percent) * '#'
     print('\r[%-50s] %d%%' % (res, int(100 * percent)), end='')
-
