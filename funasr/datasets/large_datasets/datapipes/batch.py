@@ -46,6 +46,7 @@ class MaxTokenBucketizerIterDataPipe(IterableDataset):
         batch = []
         bucket = []
         max_lengths = 0
+        min_lengths = 999999
         batch_lengths = 0
 
         if self.batch_mode == "clipping":
