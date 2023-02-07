@@ -41,11 +41,24 @@ class ASRModelExportParaformer:
             model,
             self.export_config,
         )
-        if self.onnx:
-            self._export_onnx(model, verbose, export_dir)
+        self._export_onnx(model, verbose, export_dir)
+        # if self.onnx:
+        #     self._export_onnx(model, verbose, export_dir)
+        # else:
+        #     self._export_torchscripts(model, verbose, export_dir)
 
         logging.info("output dir: {}".format(export_dir))
 
+
+    def _export_torchscripts(self, model, verbose, path, enc_size=None):
+        if enc_size:
+            dummy_input = model.get_dummy_inputs(enc_size)
+        else:
+            dummy_input = model.get_dummy_inputs()
+
+        # model_script = torch.jit.script(model)
+        model_script = torch.jit.trace(model, dummy_input)
+        model_script.save(os.path.join(path, f'{model.model_name}.torchscripts'))
 
     def export_from_modelscope(
         self,
