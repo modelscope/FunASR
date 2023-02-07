@@ -9,7 +9,7 @@ if __name__ == '__main__':
     output_name = [nd.name for nd in sess.get_outputs()]
 
     def _get_feed_dict(feats_length):
-        return {'speech': np.zeros((1, feats_length, 560), dtype=np.float32), 'speech_lengths': np.array([feats_length,], dtype=np.int64)}
+        return {'speech': np.zeros((1, feats_length, 560), dtype=np.float32), 'speech_lengths': np.array([feats_length,], dtype=np.int32)}
 
     def _run(feed_dict):
         output = sess.run(output_name, input_feed=feed_dict)
