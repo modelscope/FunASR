@@ -20,7 +20,7 @@ class ASRModelExportParaformer:
         self.cache_dir = Path(cache_dir)
         self.export_config = dict(
             feats_dim=560,
-            onnx=onnx,
+            onnx=False,
         )
         logging.info("output dir: {}".format(self.cache_dir))
         self.onnx = onnx

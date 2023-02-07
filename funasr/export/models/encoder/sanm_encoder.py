@@ -22,6 +22,7 @@ class SANMEncoder(nn.Module):
         self.embed = model.embed
         self.model = model
         self.feats_dim = feats_dim
+        self._output_size = model._output_size
 
         if onnx:
             self.make_pad_mask = MakePadMask(max_seq_len, flip=False)
@@ -62,7 +63,7 @@ class SANMEncoder(nn.Module):
                 speech: torch.Tensor,
                 speech_lengths: torch.Tensor,
                 ):
-            
+        speech = speech * self._output_size ** 0.5
         mask = self.make_pad_mask(speech_lengths)
         mask = self.prepare_mask(mask)
         if self.embed is None:

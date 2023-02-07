@@ -63,12 +63,9 @@ class Paraformer(nn.Module):
 
         decoder_out, _ = self.decoder(enc, enc_len, pre_acoustic_embeds, pre_token_length)
         decoder_out = torch.log_softmax(decoder_out, dim=-1)
-        sample_ids = decoder_out.argmax(dim=-1)
+        # sample_ids = decoder_out.argmax(dim=-1)
 
-        return decoder_out, sample_ids
-    
-    # def get_output_size(self):
-    #     return self.model.encoders[0].size
+        return decoder_out, pre_token_length
 
     def get_dummy_inputs(self):
         speech = torch.randn(2, 30, self.feats_dim)
