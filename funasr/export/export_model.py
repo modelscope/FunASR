@@ -64,7 +64,21 @@ class ASRModelExportParaformer:
         )
         self.export(model, tag_name)
 
-
+    def export_from_local(
+        self,
+        tag_name: str = '/root/cache/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch',
+    ):
+    
+        from funasr.tasks.asr import ASRTaskParaformer as ASRTask
+    
+        model_dir = tag_name
+        asr_train_config = os.path.join(model_dir, 'config.yaml')
+        asr_model_file = os.path.join(model_dir, 'model.pb')
+        cmvn_file = os.path.join(model_dir, 'am.mvn')
+        model, asr_train_args = ASRTask.build_model_from_file(
+            asr_train_config, asr_model_file, cmvn_file, 'cpu'
+        )
+        self.export(model, tag_name)
 
     def _export_onnx(self, model, verbose, path, enc_size=None):
         if enc_size:
@@ -90,3 +104,4 @@ if __name__ == '__main__':
     output_dir = "../export"
     export_model = ASRModelExportParaformer(cache_dir=output_dir, onnx=True)
     export_model.export_from_modelscope('damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch')
+    # export_model.export_from_local('/root/cache/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch')
