@@ -1,7 +1,10 @@
 import os
+
 from modelscope.metainfo import Trainers
 from modelscope.trainers import build_trainer
+
 from funasr.datasets.ms_dataset import MsDataset
+from funasr.utils.modelscope_param import modelscope_args
 
 
 def modelscope_finetune(params):
@@ -11,7 +14,6 @@ def modelscope_finetune(params):
     ds_dict = MsDataset.load(params.data_path)
     kwargs = dict(
         model=params.model,
-        model_revision=params.model_revision,
         data_dir=ds_dict,
         dataset_type=params.dataset_type,
         work_dir=params.output_dir,
@@ -23,8 +25,7 @@ def modelscope_finetune(params):
 
 
 if __name__ == '__main__':
-    from funasr.utils.modelscope_param import modelscope_args
-    params = modelscope_args(model="damo/speech_UniASR_asr_2pass-zh-cn-8k-common-vocab3445-pytorch-offline", data_path="./data")
+    params = modelscope_args(model="damo/speech_UniASR_asr_2pass-zh-cn-8k-common-vocab3445-pytorch-online", data_path="./data")
     params.output_dir = "./checkpoint"              # m模型保存路径
     params.data_path = "./example_data/"            # 数据路径
     params.dataset_type = "small"                   # 小数据量设置small，若数据量大于1000小时，请使用large
