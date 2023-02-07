@@ -3,13 +3,13 @@ import numpy as np
 
 
 if __name__ == '__main__':
-    onnx_path = "/root/cache/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/torchscripts/model.onnx"
+    onnx_path = "/Users/zhifu/Downloads/model.onnx"
     sess = onnxruntime.InferenceSession(onnx_path)
     input_name = [nd.name for nd in sess.get_inputs()]
     output_name = [nd.name for nd in sess.get_outputs()]
 
     def _get_feed_dict(feats_length):
-        return {'speech': np.zeros((1, feats_length, 560), dtype=np.float32), 'speech_lengths': np.array([feats_length,], dtype=np.int32)}
+        return {'speech': np.zeros((1, feats_length, 560), dtype=np.float32), 'speech_lengths': np.array([feats_length,], dtype=np.int64)}
 
     def _run(feed_dict):
         output = sess.run(output_name, input_feed=feed_dict)

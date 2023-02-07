@@ -42,10 +42,10 @@ class ASRModelExportParaformer:
             self.export_config,
         )
         self._export_onnx(model, verbose, export_dir)
-        # if self.onnx:
-        #     self._export_onnx(model, verbose, export_dir)
-        # else:
-        #     self._export_torchscripts(model, verbose, export_dir)
+        if self.onnx:
+            self._export_onnx(model, verbose, export_dir)
+        else:
+            self._export_torchscripts(model, verbose, export_dir)
 
         logging.info("output dir: {}".format(export_dir))
 
@@ -54,7 +54,7 @@ class ASRModelExportParaformer:
         if enc_size:
             dummy_input = model.get_dummy_inputs(enc_size)
         else:
-            dummy_input = model.get_dummy_inputs()
+            dummy_input = model.get_dummy_inputs_txt()
 
         # model_script = torch.jit.script(model)
         model_script = torch.jit.trace(model, dummy_input)
