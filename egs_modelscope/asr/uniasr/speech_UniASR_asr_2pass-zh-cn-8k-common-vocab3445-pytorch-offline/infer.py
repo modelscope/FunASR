@@ -18,7 +18,7 @@ def modelscope_infer_core(output_dir, split_dir, njob, idx):
         os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_id)
     inference_pipline = pipeline(
         task=Tasks.auto_speech_recognition,
-        model="damo/speech_UniASR_asr_2pass-zh-cn-8k-common-vocab3445-pytorch-online",
+        model="damo/speech_UniASR_asr_2pass-zh-cn-8k-common-vocab3445-pytorch-offline",
         output_dir=output_dir_job,
         batch_size=1
     )

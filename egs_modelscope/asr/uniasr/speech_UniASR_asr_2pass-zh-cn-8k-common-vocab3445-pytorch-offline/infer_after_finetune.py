@@ -45,7 +45,7 @@ def modelscope_infer_after_finetune(params):
 
 if __name__ == '__main__':
     params = {}
-    params["modelscope_model_name"] = "damo/speech_UniASR_asr_2pass-zh-cn-8k-common-vocab3445-pytorch-online"
+    params["modelscope_model_name"] = "damo/speech_UniASR_asr_2pass-zh-cn-8k-common-vocab3445-pytorch-offline"
     params["required_files"] = ["am.mvn", "decoding.yaml", "configuration.json"]
     params["output_dir"] = "./checkpoint"
     params["data_dir"] = "./data/test"
