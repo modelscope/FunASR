@@ -11,23 +11,23 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-    - uses: ammaraskar/sphinx-action@master
-      with:
-        docs-folder: "docs/"
-        pre-build-command: "pip install sphinx-markdown-tables nbsphinx jinja2 recommonmark sphinx_rtd_theme"
+      - uses: actions/checkout@v1
+      - uses: ammaraskar/sphinx-action@master
+        with:
+          docs-folder: "docs_cn/"
+          pre-build-command: "pip install sphinx-markdown-tables nbsphinx jinja2 recommonmark sphinx_rtd_theme"
 
-    - name: deploy copy
-      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
-      run: |
-        mkdir public
-        touch public/.nojekyll
-        cp -r docs/_build/html/* public/
+      - name: deploy copy
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
+        run: |
+          mkdir public_cn
+          touch public_cn/.nojekyll
+          cp -r docs_cn/_build/html/* public_cn/
 
-    - name: deploy github.io pages
-      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
-      uses: peaceiris/actions-gh-pages@v2.3.1
-      env:
-        GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        PUBLISH_BRANCH: gh-pages
-        PUBLISH_DIR: public
+      - name: deploy github.io pages
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
+        uses: peaceiris/actions-gh-pages@v2.3.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          PUBLISH_BRANCH: gh-pages-cn
+          PUBLISH_DIR: public_cn
