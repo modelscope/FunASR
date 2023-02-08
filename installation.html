@@ -102,13 +102,7 @@
 </style>
 <div class="section" id="id1">
 <h1>安装<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h1>
-<p>FunASR的安装十分便捷，下面将给出详细的安装步骤。</p>
-<ul class="simple">
-<li><p>下载FunASR仓库</p></li>
-</ul>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/alibaba/FunASR.git
-</pre></div>
-</div>
+<p>FunASR的安装十分便捷，下面将给出详细的安装步骤：</p>
 <ul class="simple">
 <li><p>安装Conda并创建虚拟环境</p></li>
 </ul>
@@ -121,28 +115,10 @@ conda activate funasr
 <ul class="simple">
 <li><p>安装Pytorch (版本 &gt;= 1.7.0):</p></li>
 </ul>
-<table border="1" class="docutils">
-<thead>
-<tr>
-<th style="text-align: center;">cuda</th>
-<th></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: center;">9.2</td>
-<td>conda install pytorch==1.7.0 torchvision==0.8.0 torchaudio==0.7.0 cudatoolkit=9.2 -c pytorch</td>
-</tr>
-<tr>
-<td style="text-align: center;">10.2</td>
-<td>conda install pytorch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0 cudatoolkit=10.2 -c pytorch</td>
-</tr>
-<tr>
-<td style="text-align: center;">11.1</td>
-<td>conda install pytorch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0 cudatoolkit=11.1 -c pytorch</td>
-</tr>
-</tbody>
-</table><p>关于更多的版本, 请参照 <a class="reference external" href="https://pytorch.org/get-started/locally">https://pytorch.org/get-started/locally</a></p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip install torch torchvision torchaudio
+</pre></div>
+</div>
+<p>关于更多的版本, 请参照 <a class="reference external" href="https://pytorch.org/get-started/locally">https://pytorch.org/get-started/locally</a></p>
 <ul class="simple">
 <li><p>安装 ModelScope</p></li>
 </ul>
@@ -155,9 +131,10 @@ conda activate funasr
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>安装剩余所需依赖</p></li>
+<li><p>下载FunASR仓库，并安装剩余所需依赖</p></li>
 </ul>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip install --editable ./
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/alibaba/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> FunASR
+pip install --editable ./
 </pre></div>
 </div>
 </div>
