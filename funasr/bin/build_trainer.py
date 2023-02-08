@@ -34,8 +34,22 @@ def parse_args(mode):
     return args, ASRTask
 
 
-def build_trainer(modelscope_dict, data_dir, output_dir, train_set="train", dev_set="validation", distributed=False,
-                  dataset_type="small", lr=None, batch_bins=None, max_epoch=None, mate_params=None):
+def build_trainer(modelscope_dict,
+                  data_dir,
+                  output_dir,
+                  train_set="train",
+                  dev_set="validation",
+                  distributed=False,
+                  dataset_type="small",
+                  batch_bins=None,
+                  max_epoch=None,
+                  optim=None,
+                  lr=None,
+                  scheduler=None,
+                  scheduler_conf=None,
+                  specaug=None,
+                  specaug_conf=None,
+                  param_dict=None):
     mode = modelscope_dict['mode']
     args, ASRTask = parse_args(mode=mode)
     # ddp related
@@ -94,8 +108,18 @@ def build_trainer(modelscope_dict, data_dir, output_dir, train_set="train", dev_
     args.output_dir = output_dir
     args.gpu_id = args.local_rank
     args.config = finetune_config
+    if optim is not None:
+        args.optim = optim
     if lr is not None:
         args.optim_conf["lr"] = lr
+    if scheduler is not None:
+        args.scheduler = scheduler
+    if scheduler_conf is not None:
+        args.scheduler_conf = scheduler_conf
+    if specaug is not None:
+        args.specaug = specaug
+    if specaug_conf is not None:
+        args.specaug_conf = specaug_conf
     if max_epoch is not None:
         args.max_epoch = max_epoch
     if batch_bins is not None:

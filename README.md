@@ -2,7 +2,7 @@
 
 # FunASR: A Fundamental End-to-End Speech Recognition Toolkit
 
-<strong>FunASR</strong> hopes to build a bridge between academic research and industrial applications on speech recognition. By supporting the training & finetuning of the industrial-grade speech recognition model released on [ModelScope](https://www.modelscope.cn/models?page=1&tasks=auto-speech-recognition), researchers and developers can conduct research and production of speech recognition models more conveniently, and promote the development of speech recognition ecology. ASR for Fun！[Model Zoo](docs/modelscope_models.md)
+<strong>FunASR</strong> hopes to build a bridge between academic research and industrial applications on speech recognition. By supporting the training & finetuning of the industrial-grade speech recognition model released on [ModelScope](https://www.modelscope.cn/models?page=1&tasks=auto-speech-recognition), researchers and developers can conduct research and production of speech recognition models more conveniently, and promote the development of speech recognition ecology. ASR for Fun！
 
 ## Release Notes: 
 ### 2023.1.16, funasr-0.1.6
@@ -30,6 +30,9 @@ git clone https://github.com/alibaba/FunASR.git && cd FunASR
 pip install --editable ./
 ```
 For more details, please ref to [installation](https://github.com/alibaba-damo-academy/FunASR/wiki#%E7%8E%AF%E5%A2%83%E5%AE%89%E8%A3%85)
+
+## Usage
+For users who are new to FunASR and ModelScope, please refer to [FunASR Docs](https://alibaba-damo-academy.github.io/FunASR/index.html).
 
 ## Contact
 
