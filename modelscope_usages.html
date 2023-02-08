@@ -53,6 +53,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#id2">模型推理</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id3">模型微调</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id4">基于微调后的模型推理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">注意事项</a></li>
 </ul>
 </li>
 </ul>
@@ -161,9 +162,15 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">ctc_weight</span></code>：部分模型包含CTC模块，可以设置该参数来指定推理时，CTC模块的权重</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">decoding_model_name</span></code>：指定用于推理的模型名</p></li>
 </ul>
-<p>以下参数也可以进行设置。但是如果没有特别的需求，可以忽略，直接使用我们给定的默认值：
-<code class="docutils literal notranslate"><span class="pre">modelscope_model_name</span></code>：微调时使用的初始模型
-<code class="docutils literal notranslate"><span class="pre">required_files</span></code>：使用modelscope接口进行推理时需要用到的文件</p>
+<p>以下参数也可以进行设置。但是如果没有特别的需求，可以忽略，直接使用我们给定的默认值：</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">modelscope_model_name</span></code>：微调时使用的初始模型</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">required_files</span></code>：使用modelscope接口进行推理时需要用到的文件</p></li>
+</ul>
+</div>
+<div class="section" id="id5">
+<h2>注意事项<a class="headerlink" href="#id5" title="Permalink to this headline"></a></h2>
+<p>部分模型可能在微调、推理时存在一些特有的参数，这部分参数可以在对应目录的README.md文件中找到具体用法。</p>
 </div>
 </div>
 

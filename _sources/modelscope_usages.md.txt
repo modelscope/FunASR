@@ -45,5 +45,8 @@ ModelScope是阿里巴巴推出的开源模型即服务共享平台，为广大�
 * `decoding_model_name`：指定用于推理的模型名
 
 以下参数也可以进行设置。但是如果没有特别的需求，可以忽略，直接使用我们给定的默认值：
-`modelscope_model_name`：微调时使用的初始模型
-`required_files`：使用modelscope接口进行推理时需要用到的文件
+* `modelscope_model_name`：微调时使用的初始模型
+* `required_files`：使用modelscope接口进行推理时需要用到的文件
+
+## 注意事项
+部分模型可能在微调、推理时存在一些特有的参数，这部分参数可以在对应目录的README.md文件中找到具体用法。
