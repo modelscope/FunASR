@@ -29,7 +29,7 @@
 git clone https://github.com/alibaba/FunASR.git && cd FunASR
 pip install --editable ./
 ```
-For more details, please ref to [installation](https://github.com/alibaba-damo-academy/FunASR/wiki#%E7%8E%AF%E5%A2%83%E5%AE%89%E8%A3%85)
+For more details, please ref to [installation](https://github.com/alibaba-damo-academy/FunASR/wiki)
 
 ## Contact
 
