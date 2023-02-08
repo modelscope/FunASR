@@ -1,12 +1,16 @@
 
-environment: ubuntu20.04-py37-torch1.11.0-tf1.15.5-1.2.0
+## environment
+    funasr 0.1.7
+    python 3.7
+    torch 1.11.0
+    modelscope 1.2.0
 
 ## install modelscope and funasr
 
 The install is the same as [funasr](../../README.md)
 
 ## export onnx format model
-Export model modelscope
+Export model from modelscope
 ```python
 from funasr.export.export_model import ASRModelExportParaformer
 
@@ -26,7 +30,7 @@ export_model.export_from_local('/root/cache/export/damo/speech_paraformer-large_
 ```
 
 ## export torchscripts format model
-Export model modelscope
+Export model from modelscope
 ```python
 from funasr.export.export_model import ASRModelExportParaformer
 
