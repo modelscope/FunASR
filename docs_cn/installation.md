@@ -1,10 +1,5 @@
 # 安装
-FunASR的安装十分便捷，下面将给出详细的安装步骤。
-
-- 下载FunASR仓库
-``` sh
-git clone https://github.com/alibaba/FunASR.git
-```
+FunASR的安装十分便捷，下面将给出详细的安装步骤：
 
 - 安装Conda并创建虚拟环境
 ``` sh
@@ -16,11 +11,9 @@ conda activate funasr
 
 - 安装Pytorch (版本 >= 1.7.0):
 
-| cuda  | |
-|:-----:| --- |
-|  9.2  | conda install pytorch==1.7.0 torchvision==0.8.0 torchaudio==0.7.0 cudatoolkit=9.2 -c pytorch |
-| 10.2  | conda install pytorch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0 cudatoolkit=10.2 -c pytorch |
-| 11.1  | conda install pytorch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0 cudatoolkit=11.1 -c pytorch |
+```sh
+pip install torch torchvision torchaudio
+```
 
 关于更多的版本, 请参照 [https://pytorch.org/get-started/locally](https://pytorch.org/get-started/locally)
 
@@ -36,7 +29,8 @@ pip config set global.index-url https://mirror.sjtu.edu.cn/pypi/web/simple
 pip install "modelscope[audio]" --upgrade -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html
 ```
 
-- 安装剩余所需依赖
+- 下载FunASR仓库，并安装剩余所需依赖
 ``` sh
+git clone https://github.com/alibaba/FunASR.git && cd FunASR
 pip install --editable ./
 ```
