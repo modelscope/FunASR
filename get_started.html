@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Get Started &mdash; FunASR  documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <title>快速开始 &mdash; FunASR  documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
@@ -17,8 +17,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Pretrained models on ModelScope" href="modelscope_models.html" />
-    <link rel="prev" title="Papers" href="papers.html" /> 
+    <link rel="next" title="ModelScope上的预训练模型" href="modelscope_models.html" />
+    <link rel="prev" title="论文" href="papers.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -26,33 +26,38 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> FunASR
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            FunASR
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption"><span class="caption-text">Tutorial:</span></p>
+              <p class="caption"><span class="caption-text">教程:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="papers.html">Papers</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Get Started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#overall-introduction">Overall Introduction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#stage-0-data-preparation">Stage 0: Data preparation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#stage-1-feature-generation">Stage 1: Feature Generation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#stage-2-dictionary-preparation">Stage 2: Dictionary Preparation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#stage-3-training">Stage 3: Training</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#stage-4-decoding">Stage 4: Decoding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">安装</a></li>
+<li class="toctree-l1"><a class="reference internal" href="papers.html">论文</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">快速开始</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id2">整体介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">阶段 0： 数据准备</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">阶段 1：特征提取</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">阶段 2：字典准备</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id6">阶段 3：训练</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id7">阶段 4: 解码</a></li>
 </ul>
 </li>
 </ul>
 <p class="caption"><span class="caption-text">ModelScope:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="modelscope_models.html">Pretrained models on ModelScope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modelscope_models.html">ModelScope上的预训练模型</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modelscope_usages.html">快速使用ModelScope</a></li>
 </ul>
 
         </div>
@@ -68,8 +73,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a></li>
-      <li class="breadcrumb-item active">Get Started</li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">快速开始</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/get_started.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -103,28 +108,29 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="get-started">
-<h1>Get Started<a class="headerlink" href="#get-started" title="Permalink to this headline"></a></h1>
-<p>This is an easy example which introduces how to train a paraformer model on AISHELL-1 data from scratch. According to this example, you can train other models (conformer, paraformer, etc.) on other datasets (AISHELL-1, AISHELL-2, etc.) similarly.</p>
-<div class="section" id="overall-introduction">
-<h2>Overall Introduction<a class="headerlink" href="#overall-introduction" title="Permalink to this headline"></a></h2>
-<p>We provide a recipe <code class="docutils literal notranslate"><span class="pre">egs/aishell/paraformer/run.sh</span></code> for training a paraformer model on AISHELL-1 data  . This recipe consists of five stages and support training on multiple GPUs and decoding by CPU or GPU. Before introduce each stage in detail, we first explain several variables which should be set by users.</p>
+<div class="section" id="id1">
+<h1>快速开始<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h1>
+<p>在此我们将以”使用AISHELL-1数据集，从随机初始化训练一个paraformer模型”为例，介绍如何使用FunASR。根据这个例子，用户可以类似地使用别的数据集（如AISHELL-2数据集等）训练别的模型（如conformer，transformer等）。</p>
+<div class="section" id="id2">
+<h2>整体介绍<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h2>
+<p>我们提供了<code class="docutils literal notranslate"><span class="pre">egs/aishell/paraformer/run.sh</span></code>来实现使用AISHELL-1数据集训练一个paraformer模型。该脚本包含5个阶段，包括从数据处理到训练解码等整个流程，同时提供了单/多GPU训练和CPU/GPU解码。在详细介绍每个阶段之前，我们先对用户需要手动设置的一些参数进行说明。</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">CUDA_VISIBLE_DEVICES</span></code>: visible gpu list</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">gpu_num</span></code>: the number of GPUs used for training</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">gpu_inference</span></code>: whether to use GPUs for decoding</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">njob</span></code>: for CPU decoding, indicating the total number of CPU jobs; for GPU decoding, indicating the number of jobs on each GPU.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">feats_dir</span></code>: the path to save processed data</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">exp_dir</span></code>: the path to save experimental results</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">data_aishell</span></code>: the path of raw AISHELL-1 data</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">tag</span></code>: the suffix of experimental result directory</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">nj</span></code>: the number of jobs for data preparation</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">speed_perturb</span></code>: the range of speech perturbed</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CUDA_VISIBLE_DEVICES</span></code>: 可用的GPU列表</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gpu_num</span></code>: 用于训练的GPU数量</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gpu_inference</span></code>: 是否使用GPU进行解码</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">njob</span></code>: for CPU decoding, indicating the total number of CPU jobs; for GPU decoding, indicating the number of jobs on each GPU. 对于CPU解码，表示解码任务数；对于GPU解码</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">data_aishell</span></code>: AISHELL-1原始数据的路径</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">feats_dir</span></code>: 经过处理得到的特征的保存路径</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nj</span></code>: 数据处理时的并行任务数</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">speed_perturb</span></code>: 变速设置</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">exp_dir</span></code>: 实验结果的保存路径</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tag</span></code>: 实验结果目录的后缀名</p></li>
 </ul>
 </div>
-<div class="section" id="stage-0-data-preparation">
-<h2>Stage 0: Data preparation<a class="headerlink" href="#stage-0-data-preparation" title="Permalink to this headline"></a></h2>
-<p>This stage processes raw AISHELL-1 data <code class="docutils literal notranslate"><span class="pre">$data_aishell</span></code> and generates the corresponding <code class="docutils literal notranslate"><span class="pre">wav.scp</span></code> and <code class="docutils literal notranslate"><span class="pre">text</span></code> in <code class="docutils literal notranslate"><span class="pre">$feats_dir/data/xxx</span></code> and <code class="docutils literal notranslate"><span class="pre">xxx</span></code> means <code class="docutils literal notranslate"><span class="pre">train/dev/test</span></code>. Here we assume you have already downloaded AISHELL-1 data. If not, you can download data <a class="reference external" href="https://www.openslr.org/33/">here</a> and set the path for <code class="docutils literal notranslate"><span class="pre">$data_aishell</span></code>. Here we show examples for <code class="docutils literal notranslate"><span class="pre">wav.scp</span></code> and <code class="docutils literal notranslate"><span class="pre">text</span></code>, separately.</p>
+<div class="section" id="id3">
+<h2>阶段 0： 数据准备<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h2>
+<p>本阶段用于处理原始的AISHELL-1数据，并生成相应的<code class="docutils literal notranslate"><span class="pre">wav.scp</span></code>和<code class="docutils literal notranslate"><span class="pre">text</span></code>，保存在<code class="docutils literal notranslate"><span class="pre">$feats_dir/data/xxx</span></code>目录下，这里的<code class="docutils literal notranslate"><span class="pre">xxx</span></code>表示<code class="docutils literal notranslate"><span class="pre">train</span></code>, <code class="docutils literal notranslate"><span class="pre">dev</span></code> 或 <code class="docutils literal notranslate"><span class="pre">test</span></code>（下同）。 这里我们假设用户已经下载好了AISHELL-1数据集。如果没有，用户可以在<a class="reference external" href="https://www.openslr.org/33/">这里</a> 下载数据，并将<code class="docutils literal notranslate"><span class="pre">$data_aishell</span></code>设置为相应的路径。下面给出生成的<code class="docutils literal notranslate"><span class="pre">wav.scp</span></code>和<code class="docutils literal notranslate"><span class="pre">text</span></code>的示例：
+本阶段用于处理原始的AISHELL-1数据，并生成相应的<code class="docutils literal notranslate"><span class="pre">wav.scp</span></code>和<code class="docutils literal notranslate"><span class="pre">text</span></code>，保存在<code class="docutils literal notranslate"><span class="pre">$feats_dir/data/xxx</span></code>目录下，这里的<code class="docutils literal notranslate"><span class="pre">xxx</span></code>表示<code class="docutils literal notranslate"><span class="pre">train</span></code>, <code class="docutils literal notranslate"><span class="pre">dev</span></code> 或 <code class="docutils literal notranslate"><span class="pre">test</span></code>（下同）。 这里我们假设用户已经下载好了AISHELL-1数据集。如果没有，用户可以在<a class="reference external" href="https://www.openslr.org/33/">这里</a> 下载数据，并将<code class="docutils literal notranslate"><span class="pre">$data_aishell</span></code>设置为相应的路径。下面给出生成的<code class="docutils literal notranslate"><span class="pre">wav.scp</span></code>和<code class="docutils literal notranslate"><span class="pre">text</span></code>的示例：</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">wav.scp</span></code></p></li>
 </ul>
@@ -143,20 +149,20 @@
 <span class="o">...</span>
 </pre></div>
 </div>
-<p>We can see that these two files both have two columns while the first column is the wav-id and the second column is the corresponding wav-path/label tokens.</p>
+<p>可以看到，这两个文件均包括两列，第一列是音频的id，第二列分别是音频路径和音频对应的抄本。</p>
 </div>
-<div class="section" id="stage-1-feature-generation">
-<h2>Stage 1: Feature Generation<a class="headerlink" href="#stage-1-feature-generation" title="Permalink to this headline"></a></h2>
-<p>This stage extracts FBank feature from raw wav <code class="docutils literal notranslate"><span class="pre">wav.scp</span></code> and apply speed perturbation as data augmentation according to <code class="docutils literal notranslate"><span class="pre">speed_perturb</span></code>. You can set <code class="docutils literal notranslate"><span class="pre">nj</span></code> to control the number of jobs for feature generation. The output features are saved in <code class="docutils literal notranslate"><span class="pre">$feats_dir/dump/xxx/ark</span></code> and the corresponding <code class="docutils literal notranslate"><span class="pre">feats.scp</span></code> files are saved as <code class="docutils literal notranslate"><span class="pre">$feats_dir/dump/xxx/feats.scp</span></code>. An example of <code class="docutils literal notranslate"><span class="pre">feats.scp</span></code> can be seen as follows:</p>
+<div class="section" id="id4">
+<h2>阶段 1：特征提取<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h2>
+<p>本阶段将会基于原始的音频<code class="docutils literal notranslate"><span class="pre">wav.scp</span></code>提取FBank特征。如果指定了参数<code class="docutils literal notranslate"><span class="pre">speed_perturb</span></code>，则会额外对音频进行变速来实现数据增强。用户可以设置<code class="docutils literal notranslate"><span class="pre">nj</span></code>参数来控制特征提取的并行任务数。处理后的特征保存在目录<code class="docutils literal notranslate"><span class="pre">$feats_dir/dump/xxx/ark</span></code>下，相应的<code class="docutils literal notranslate"><span class="pre">feats.scp</span></code>文件路径为<code class="docutils literal notranslate"><span class="pre">$feats_dir/dump/xxx/feats.scp</span></code>。下面给出<code class="docutils literal notranslate"><span class="pre">feats.scp</span></code>的示例：</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">feats.scp</span></code></p></li>
 </ul>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
-<span class="n">BAC009S0002W0122_sp0</span><span class="o">.</span><span class="mi">9</span> <span class="o">/</span><span class="n">nfs</span><span class="o">/</span><span class="n">haoneng</span><span class="o">.</span><span class="n">lhn</span><span class="o">/</span><span class="n">funasr_data</span><span class="o">/</span><span class="n">aishell</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">dump</span><span class="o">/</span><span class="n">fbank</span><span class="o">/</span><span class="n">train</span><span class="o">/</span><span class="n">ark</span><span class="o">/</span><span class="n">feats</span><span class="o">.</span><span class="mf">16.</span><span class="n">ark</span><span class="p">:</span><span class="mi">592751055</span>
+<span class="n">BAC009S0002W0122_sp0</span><span class="o">.</span><span class="mi">9</span> <span class="o">/</span><span class="n">nfs</span><span class="o">/</span><span class="n">funasr_data</span><span class="o">/</span><span class="n">aishell</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">dump</span><span class="o">/</span><span class="n">fbank</span><span class="o">/</span><span class="n">train</span><span class="o">/</span><span class="n">ark</span><span class="o">/</span><span class="n">feats</span><span class="o">.</span><span class="mf">16.</span><span class="n">ark</span><span class="p">:</span><span class="mi">592751055</span>
 <span class="o">...</span>
 </pre></div>
 </div>
-<p>Note that samples in this file have already been shuffled. This file contains two columns. The first column is the wav-id while the second column is the kaldi-ark feature path. Besides, <code class="docutils literal notranslate"><span class="pre">speech_shape</span></code> and <code class="docutils literal notranslate"><span class="pre">text_shape</span></code> are also generated in this stage, denoting the speech feature shape and text length of each sample. The examples are shown as follows:</p>
+<p>注意，该文件的样本顺序已经进行了随机打乱。该文件包括两列，第一列是音频的id，第二列是对应的kaldi-ark格式的特征。另外，在此阶段还会生成训练需要用到的<code class="docutils literal notranslate"><span class="pre">speech_shape</span></code>和<code class="docutils literal notranslate"><span class="pre">text_shape</span></code>两个文件，记录了每个样本的特征维度和抄本长度。下面给出这两个文件的示例：</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">speech_shape</span></code></p></li>
 </ul>
@@ -173,11 +179,11 @@
 <span class="o">...</span>
 </pre></div>
 </div>
-<p>These two files have two columns. The first column is the wav-id and the second column is the corresponding speech feature shape and text length.</p>
+<p>可以看到，这两个文件均包括两列，第一列是音频的id，第二列是对应的特征的维度和抄本的长度。</p>
 </div>
-<div class="section" id="stage-2-dictionary-preparation">
-<h2>Stage 2: Dictionary Preparation<a class="headerlink" href="#stage-2-dictionary-preparation" title="Permalink to this headline"></a></h2>
-<p>This stage prepares a dictionary, which is used as a mapping between label characters and integer indices during ASR training. The output dictionary file is saved as <code class="docutils literal notranslate"><span class="pre">$feats_dir/data/$lang_toekn_list/$token_type/tokens.txt</span></code>. Here we show an example of <code class="docutils literal notranslate"><span class="pre">tokens.txt</span></code> as follows:</p>
+<div class="section" id="id5">
+<h2>阶段 2：字典准备<a class="headerlink" href="#id5" title="Permalink to this headline"></a></h2>
+<p>本阶段用于生成字典，用于训练过程中，字符到整数索引之间的映射。生成的字典文件的路径为<code class="docutils literal notranslate"><span class="pre">$feats_dir/data/zh_toekn_list/char/tokens.txt</span></code>。下面给出<code class="docutils literal notranslate"><span class="pre">tokens.txt</span></code>的示例：</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">tokens.txt</span></code></p></li>
 </ul>
@@ -193,58 +199,56 @@
 </pre></div>
 </div>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">&lt;blank&gt;</span></code>: indicates the blank token for CTC</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&lt;s&gt;</span></code>: indicates the start-of-sentence token</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&lt;/s&gt;</span></code>: indicates the end-of-sentence token</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&lt;unk&gt;</span></code>: indicates the out-of-vocabulary token</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;blank&gt;</span></code>: 表示CTC训练中的blank</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;s&gt;</span></code>: 表示句子的起始符</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;/s&gt;</span></code>: 表示句子的终止符</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;unk&gt;</span></code>: 表示字典外的字符</p></li>
 </ul>
 </div>
-<div class="section" id="stage-3-training">
-<h2>Stage 3: Training<a class="headerlink" href="#stage-3-training" title="Permalink to this headline"></a></h2>
-<p>This stage achieves the training of the specified model. To start training, you should manually set <code class="docutils literal notranslate"><span class="pre">exp_dir</span></code>, <code class="docutils literal notranslate"><span class="pre">CUDA_VISIBLE_DEVICES</span></code> and <code class="docutils literal notranslate"><span class="pre">gpu_num</span></code>, which have already been explained above. By default, the best <code class="docutils literal notranslate"><span class="pre">$keep_nbest_models</span></code> checkpoints on validation dataset will be averaged to generate a better model and adopted for decoding.</p>
+<div class="section" id="id6">
+<h2>阶段 3：训练<a class="headerlink" href="#id6" title="Permalink to this headline"></a></h2>
+<p>本阶段对应模型的训练。在开始训练之前，需要指定实验结果保存目录<code class="docutils literal notranslate"><span class="pre">exp_dir</span></code>，训练可用GPU<code class="docutils literal notranslate"><span class="pre">CUDA_VISIBLE_DEVICES</span></code>和训练的gpu数量<code class="docutils literal notranslate"><span class="pre">gpu_num</span></code>。默认情况下，最好的<code class="docutils literal notranslate"><span class="pre">$keep_nbest_models</span></code>模型结果会被平均从而来获取更好的性能。</p>
 <ul class="simple">
 <li><p>DDP Training</p></li>
 </ul>
-<p>We support the DistributedDataParallel (DDP) training and the detail can be found <a class="reference external" href="https://pytorch.org/tutorials/intermediate/ddp_tutorial.html">here</a>. To enable DDP training, please set <code class="docutils literal notranslate"><span class="pre">gpu_num</span></code> greater than 1. For example, if you set <code class="docutils literal notranslate"><span class="pre">CUDA_VISIBLE_DEVICES=0,1,5,6,7</span></code> and <code class="docutils literal notranslate"><span class="pre">gpu_num=3</span></code>, then the gpus with ids 0, 1 and 5 will be used for training.</p>
+<p>我们提供了分布式训练（DDP）功能，具体的细节可以在<a class="reference external" href="https://pytorch.org/tutorials/intermediate/ddp_tutorial.html">这里</a> 找到。为了开启分布式训练，需要设置<code class="docutils literal notranslate"><span class="pre">gpu_num</span></code>大于1。例如，设置<code class="docutils literal notranslate"><span class="pre">CUDA_VISIBLE_DEVICES=0,1,5,6,7</span></code>，<code class="docutils literal notranslate"><span class="pre">gpu_num=3</span></code>，则编号为0，1和5的GPU会被用于训练。</p>
 <ul class="simple">
 <li><p>DataLoader</p></li>
 </ul>
-<p>We support an optional iterable-style DataLoader based on <a class="reference external" href="https://pytorch.org/data/beta/torchdata.datapipes.iter.html">Pytorch Iterable-style DataPipes</a> for large dataset and you can set <code class="docutils literal notranslate"><span class="pre">dataset_type=large</span></code> to enable it.</p>
+<p>我们提供了基于<a class="reference external" href="https://pytorch.org/data/beta/torchdata.datapipes.iter.html">Pytorch Iterable-style DataPipes</a> 实现的大数据DataLoader，用户可以通过设置<code class="docutils literal notranslate"><span class="pre">dataset_type=large</span></code>来启用。</p>
 <ul class="simple">
 <li><p>Configuration</p></li>
 </ul>
-<p>The parameters of the training, including model, optimization, dataset, etc., are specified by a YAML file in <code class="docutils literal notranslate"><span class="pre">conf</span></code> directory. Also, you can directly specify the parameters in <code class="docutils literal notranslate"><span class="pre">run.sh</span></code> recipe. Please avoid to specify the same parameters in both the YAML file and the recipe.</p>
+<p>训练相关的参数，包括模型，优化器，数据等，均可以通过<code class="docutils literal notranslate"><span class="pre">conf</span></code>目录下的config文件指定。同时，用户也可以直接在<code class="docutils literal notranslate"><span class="pre">run.sh</span></code>脚本中指定相关参数。请避免在config文件和<code class="docutils literal notranslate"><span class="pre">run.sh</span></code>脚本中设置相同的参数，以免造成歧义。</p>
 <ul class="simple">
 <li><p>Training Steps</p></li>
 </ul>
-<p>We support two parameters to specify the training steps, namely <code class="docutils literal notranslate"><span class="pre">max_epoch</span></code> and <code class="docutils literal notranslate"><span class="pre">max_update</span></code>. <code class="docutils literal notranslate"><span class="pre">max_epoch</span></code> indicates the total training epochs while <code class="docutils literal notranslate"><span class="pre">max_update</span></code> indicates the total training steps. If these two parameters are specified at the same time, once the training reaches any one of the two parameters, the training will be stopped.</p>
+<p>我们提供了两种方式来控制训练的总步数，对应的参数分别为<code class="docutils literal notranslate"><span class="pre">max_epoch</span></code>和<code class="docutils literal notranslate"><span class="pre">max_update</span></code>。<code class="docutils literal notranslate"><span class="pre">max_epoch</span></code>表示训练的最大epoch数，<code class="docutils literal notranslate"><span class="pre">max_update</span></code>表示训练的最大迭代次数。如果这两个参数同时被指定，则一旦训练步数到达其中任意一个参数，训练结束。</p>
 <ul class="simple">
 <li><p>Tensorboard</p></li>
 </ul>
-<p>You can use tensorboard to observe the loss, learning rate, etc. Please run the following command:</p>
+<p>用户可以通过tensorboard来观察训练过程中的损失，学习率等。可以通过下述指定来实现：</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>tensorboard --logdir ${exp_dir}/exp/${model_dir}/tensorboard/train
 </pre></div>
 </div>
 </div>
-<div class="section" id="stage-4-decoding">
-<h2>Stage 4: Decoding<a class="headerlink" href="#stage-4-decoding" title="Permalink to this headline"></a></h2>
-<p>This stage generates the recognition results with acoustic features as input and calculate the <code class="docutils literal notranslate"><span class="pre">CER</span></code> to verify the performance of the trained model.</p>
+<div class="section" id="id7">
+<h2>阶段 4: 解码<a class="headerlink" href="#id7" title="Permalink to this headline"></a></h2>
+<p>本阶段用于解码得到识别结果，同时计算CER来验证训练得到的模型性能。</p>
 <ul class="simple">
-<li><p>Mode Selection</p></li>
-</ul>
-<p>As we support conformer, paraformer and uniasr in FunASR and they have different inference interfaces, a <code class="docutils literal notranslate"><span class="pre">mode</span></code> param is specified as <code class="docutils literal notranslate"><span class="pre">asr/paraformer/uniase</span></code> according to the trained model.</p>
-<ul class="simple">
+<li><p>Mode Selection
+由于我们提供了paraformer，uniasr和conformer等模型，因此在解码时，需要指定相应的解码模式。对应的参数为<code class="docutils literal notranslate"><span class="pre">mode</span></code>，相应的可选设置为<code class="docutils literal notranslate"><span class="pre">asr/paraformer/uniase</span></code>等。</p></li>
 <li><p>Configuration</p></li>
 </ul>
-<p>We support CTC decoding, attention decoding and hybrid CTC-attention decoding in FunASR, which can be specified by <code class="docutils literal notranslate"><span class="pre">ctc_weight</span></code> in a YAML file in <code class="docutils literal notranslate"><span class="pre">conf</span></code> directory. Specifically, <code class="docutils literal notranslate"><span class="pre">ctc_weight=1.0</span></code> indicates CTC decoding, <code class="docutils literal notranslate"><span class="pre">ctc_weight=0.0</span></code> indicates attention decoding, <code class="docutils literal notranslate"><span class="pre">0.0&lt;ctc_weight&lt;1.0</span></code> indicates hybrid CTC-attention decoding.</p>
+<p>我们提供了ctc解码, attention解码和ctc-attention混合解码。这几种解码方式可以通过<code class="docutils literal notranslate"><span class="pre">conf</span></code>下的解码配置文件中的<code class="docutils literal notranslate"><span class="pre">ctc_weight</span></code>参数来指定。具体的，<code class="docutils literal notranslate"><span class="pre">ctc_weight=1.0</span></code>表示CTC解码, <code class="docutils literal notranslate"><span class="pre">ctc_weight=0.0</span></code>表示attention解码, <code class="docutils literal notranslate"><span class="pre">0.0&lt;ctc_weight&lt;1.0</span></code>表示ctc-attention混合解码。</p>
 <ul class="simple">
 <li><p>CPU/GPU Decoding</p></li>
 </ul>
-<p>We support CPU and GPU decoding in FunASR. For CPU decoding, you should set <code class="docutils literal notranslate"><span class="pre">gpu_inference=False</span></code> and set <code class="docutils literal notranslate"><span class="pre">njob</span></code> to specify the total number of CPU decoding jobs. For GPU decoding, you should set <code class="docutils literal notranslate"><span class="pre">gpu_inference=True</span></code>. You should also set <code class="docutils literal notranslate"><span class="pre">gpuid_list</span></code> to indicate which GPUs are used for decoding and <code class="docutils literal notranslate"><span class="pre">njobs</span></code> to indicate the number of decoding jobs on each GPU.</p>
+<p>我们提供CPU/GPU解码。对于CPU解码，用户需要设置<code class="docutils literal notranslate"><span class="pre">gpu_inference=False</span></code>，同时设置<code class="docutils literal notranslate"><span class="pre">njob</span></code>来指定并行解码任务数量。对于GPU解码，用户需要设置<code class="docutils literal notranslate"><span class="pre">gpu_inference=True</span></code>，设置<code class="docutils literal notranslate"><span class="pre">gpuid_list</span></code>来指定哪些GPU用于解码，设置<code class="docutils literal notranslate"><span class="pre">njobs</span></code>来指定每张GPU上的并行解码任务数量。</p>
 <ul class="simple">
 <li><p>Performance</p></li>
 </ul>
-<p>We adopt <code class="docutils literal notranslate"><span class="pre">CER</span></code> to verify the performance. The results are in <code class="docutils literal notranslate"><span class="pre">$exp_dir/exp/$model_dir/$decoding_yaml_name/$average_model_name/$dset</span></code>, namely <code class="docutils literal notranslate"><span class="pre">text.cer</span></code> and <code class="docutils literal notranslate"><span class="pre">text.cer.txt</span></code>. <code class="docutils literal notranslate"><span class="pre">text.cer</span></code> saves the comparison between the recognized text and the reference text while <code class="docutils literal notranslate"><span class="pre">text.cer.txt</span></code> saves the final <code class="docutils literal notranslate"><span class="pre">CER</span></code> result. The following is an example of <code class="docutils literal notranslate"><span class="pre">text.cer</span></code>:</p>
+<p>我们采用<code class="docutils literal notranslate"><span class="pre">CER</span></code>来验证模型的性能。解码结果保存在<code class="docutils literal notranslate"><span class="pre">$exp_dir/exp/$model_dir/$decoding_yaml_name/$average_model_name/$dset</span></code>，具体包括<code class="docutils literal notranslate"><span class="pre">text.cer</span></code>和<code class="docutils literal notranslate"><span class="pre">text.cer.txt</span></code>两个文件。<code class="docutils literal notranslate"><span class="pre">text.cer</span></code>中的内容为识别结果和对应抄本之间的比较，<code class="docutils literal notranslate"><span class="pre">text.cer.txt</span></code>记录了最终的<code class="docutils literal notranslate"><span class="pre">CER</span></code>。下面给出<code class="docutils literal notranslate"><span class="pre">text.cer</span></code>的示例:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">text.cer</span></code></p></li>
 </ul>
@@ -262,8 +266,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="papers.html" class="btn btn-neutral float-left" title="Papers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="modelscope_models.html" class="btn btn-neutral float-right" title="Pretrained models on ModelScope" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="papers.html" class="btn btn-neutral float-left" title="论文" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="modelscope_models.html" class="btn btn-neutral float-right" title="ModelScope上的预训练模型" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

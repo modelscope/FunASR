@@ -1,12 +1,12 @@
-# Installation
-FunASR is easy to install, which is mainly based on python packages.
+# 安装
+FunASR的安装十分便捷，下面将给出详细的安装步骤。
 
-- Clone the repo
+- 下载FunASR仓库
 ``` sh
 git clone https://github.com/alibaba/FunASR.git
 ```
 
-- Install Conda
+- 安装Conda并创建虚拟环境
 ``` sh
 wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
 sh Miniconda3-latest-Linux-x86_64.sh
@@ -14,7 +14,7 @@ conda create -n funasr python=3.7
 conda activate funasr
 ```
 
-- Install Pytorch (version >= 1.7.0):
+- 安装Pytorch (版本 >= 1.7.0):
 
 | cuda  | |
 |:-----:| --- |
@@ -22,14 +22,21 @@ conda activate funasr
 | 10.2  | conda install pytorch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0 cudatoolkit=10.2 -c pytorch |
 | 11.1  | conda install pytorch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0 cudatoolkit=11.1 -c pytorch |
 
-For more versions, please see [https://pytorch.org/get-started/locally](https://pytorch.org/get-started/locally)
+关于更多的版本, 请参照 [https://pytorch.org/get-started/locally](https://pytorch.org/get-started/locally)
 
-- Install ModelScope
-``` sh
-pip install "modelscope[audio]" -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html
+- 安装 ModelScope
+
+对于国内用户，可以通过配置下述镜像源来加快下载速度
+```sh
+pip config set global.index-url https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
 
-- Install other packages
+安装或更新ModelScope
+``` sh
+pip install "modelscope[audio]" --upgrade -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html
+```
+
+- 安装剩余所需依赖
 ``` sh
 pip install --editable ./
 ```
