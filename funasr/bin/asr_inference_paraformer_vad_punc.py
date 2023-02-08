@@ -529,8 +529,9 @@ def inference_modelscope(
         nbest=nbest,
     )
     speech2text = Speech2Text(**speech2text_kwargs)
-    
-    text2punc = Text2Punc(punc_infer_config, punc_model_file, device=device, dtype=dtype)
+    text2punc = None
+    if punc_model_file is not None: 
+        text2punc = Text2Punc(punc_infer_config, punc_model_file, device=device, dtype=dtype)
 
     if output_dir is not None:
         writer = DatadirWriter(output_dir)
@@ -560,38 +561,28 @@ def inference_modelscope(
             allow_variable_data_keys=allow_variable_data_keys,
             inference=True,
         )
-        
-        forward_time_total = 0.0
-        length_total = 0.0
+    
         finish_count = 0
         file_count = 1
         lfr_factor = 6
         # 7 .Start for-loop
         asr_result_list = []
         output_path = output_dir_v2 if output_dir_v2 is not None else output_dir
+        writer = None
         if output_path is not None:
             writer = DatadirWriter(output_path)
             ibest_writer = writer[f"1best_recog"]
-            # ibest_writer["punc_dict"][""] = " ".join(punc_infer_config.punc_list)
-            # ibest_writer["token_list"][""] = " ".join(asr_train_config.token_list)
-        else:
-            writer = None
-        
+    
         for keys, batch in loader:
             assert isinstance(batch, dict), type(batch)
             assert all(isinstance(s, str) for s in keys), keys
             _bs = len(next(iter(batch.values())))
             assert len(keys) == _bs, f"{len(keys)} != {_bs}"
-            # batch = {k: v for k, v in batch.items() if not k.endswith("_lengths")}
-            
-            logging.info("decoding, utt_id: {}".format(keys))
-            # N-best list of (text, token, token_int, hyp_object)
-            time_beg = time.time()
+    
             vad_results = speech2vadsegment(**batch)
-            time_end = time.time()
             fbanks, vadsegments = vad_results[0], vad_results[1]
             for i, segments in enumerate(vadsegments):
-                result_segments = [["", [], [], ]]
+                result_segments = [["", [], [], []]]
                 for j, segment_idx in enumerate(segments):
                     bed_idx, end_idx = int(segment_idx[0] / 10), int(segment_idx[1] / 10)
                     segment = fbanks[:, bed_idx:end_idx, :].to(device)
@@ -600,76 +591,51 @@ def inference_modelscope(
                              "end_time": vadsegments[i][j][1]}
                     results = speech2text(**batch)
                     if len(results) < 1:
-                        hyp = Hypothesis(score=0.0, scores={}, states={}, yseq=[])
-                        results = [[" ", ["sil"], [2], 0, 1, 6]] * nbest
-                    time_end = time.time()
-                    forward_time = time_end - time_beg
-                    lfr_factor = results[0][-1]
-                    length = results[0][-2]
-                    forward_time_total += forward_time
-                    length_total += length
-                    logging.info(
-                        "decoding, feature length: {}, forward_time: {:.4f}, rtf: {:.4f}".
-                        format(length, forward_time, 100 * forward_time / (length * lfr_factor)))
+                        continue
+    
                     result_cur = [results[0][:-2]]
                     if j == 0:
                         result_segments = result_cur
                     else:
                         result_segments = [[result_segments[0][i] + result_cur[0][i] for i in range(len(result_cur[0]))]]
-                
+    
                 key = keys[0]
                 result = result_segments[0]
                 text, token, token_int = result[0], result[1], result[2]
                 time_stamp = None if len(result) < 4 else result[3]
-                
-                # Create a directory: outdir/{n}best_recog
+    
+                postprocessed_result = postprocess_utils.sentence_postprocess(token, time_stamp)
+                text_postprocessed = ""
+                time_stamp_postprocessed = ""
+                text_postprocessed_punc = postprocessed_result
+                if len(postprocessed_result) == 3:
+                    text_postprocessed, time_stamp_postprocessed, word_lists = postprocessed_result[0], \
+                                                                               postprocessed_result[1], \
+                                                                               postprocessed_result[2]
+                    text_postprocessed_punc = ""
+                    if len(word_lists) > 0 and text2punc is not None:
+                        text_postprocessed_punc, punc_id_list = text2punc(word_lists, 20)
+    
+                item = {'key': key, 'value': text_postprocessed_punc}
+                if text_postprocessed != "":
+                    item['text_postprocessed'] = text_postprocessed
+                if time_stamp_postprocessed != "":
+                    item['time_stamp'] = time_stamp_postprocessed
+    
+                asr_result_list.append(item)
+                finish_count += 1
+                # asr_utils.print_progress(finish_count / file_count)
                 if writer is not None:
                     # Write the result to each file
                     ibest_writer["token"][key] = " ".join(token)
                     ibest_writer["token_int"][key] = " ".join(map(str, token_int))
                     ibest_writer["vad"][key] = "{}".format(vadsegments)
-                
-                if text is not None:
-                    postprocessed_result = postprocess_utils.sentence_postprocess(token, time_stamp)
-                    if len(postprocessed_result) == 3:
-                        text_postprocessed, time_stamp_postprocessed, word_lists = postprocessed_result[0], \
-                                                                                   postprocessed_result[1], \
-                                                                                   postprocessed_result[2]
-                        if len(word_lists) > 0: 
-                            text_postprocessed_punc, punc_id_list = text2punc(word_lists, 20)
-                            text_postprocessed_punc_time_stamp = json.dumps({"predictions": text_postprocessed_punc,
-                                                                             "time_stamp": time_stamp_postprocessed},
-                                                                            ensure_ascii=False)
-                        else:
-                            text_postprocessed_punc = ""
-                            punc_id_list = []
-                            text_postprocessed_punc_time_stamp = ""
-                            
-                    else:
-                        text_postprocessed = ""
-                        time_stamp_postprocessed = ""
-                        word_lists = ""
-                        text_postprocessed_punc_time_stamp = ""
-                        punc_id_list = ""
-                        text_postprocessed_punc = ""
-
-                    item = {'key': key, 'value': text_postprocessed_punc, 'text_postprocessed': text_postprocessed,
-                            'time_stamp': time_stamp_postprocessed, 'token': token}
-                    asr_result_list.append(item)
-                    finish_count += 1
-                    # asr_utils.print_progress(finish_count / file_count)
-                    if writer is not None:
-                        ibest_writer["text"][key] = text_postprocessed
-                        ibest_writer["punc_id"][key] = "{}".format(punc_id_list)
-                        ibest_writer["text_with_punc"][key] = text_postprocessed_punc_time_stamp
-                        if time_stamp_postprocessed is not None:
-                            ibest_writer["time_stamp"][key] = "{}".format(time_stamp_postprocessed)
-                
-                logging.info("decoding, utt: {}, predictions: {}, time_stamp: {}".format(key, text_postprocessed_punc,
-                                                                                         time_stamp_postprocessed))
-        
-        logging.info("decoding, feature length total: {}, forward_time total: {:.4f}, rtf avg: {:.4f}".
-                     format(length_total, forward_time_total, 100 * forward_time_total / (length_total * lfr_factor+1e-6)))
+                    ibest_writer["text"][key] = text_postprocessed
+                    ibest_writer["text_with_punc"][key] = text_postprocessed_punc
+                    if time_stamp_postprocessed is not None:
+                        ibest_writer["time_stamp"][key] = "{}".format(time_stamp_postprocessed)
+    
+                logging.info("decoding, utt: {}, predictions: {}".format(key, text_postprocessed_punc))
         return asr_result_list
     return _forward
 
