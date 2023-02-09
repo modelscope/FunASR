@@ -25,42 +25,11 @@
 
 ## Installation
 
-- Install Conda:
-``` sh
-wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
-sh Miniconda3-latest-Linux-x86_64.sh
-source ~/.bashrc
-conda create -n funasr python=3.7
-conda activate funasr
-```
-
-- Install Pytorch (version >= 1.7.0): 
-``` sh
-pip3 install torch torchvision torchaudio
-```
-For more versions, please see [https://pytorch.org/get-started/locally](https://pytorch.org/get-started/locally)
-
-- Install ModelScope:
-
-If you are in the area of China, you could set the source to speedup the downloading.
-
-``` sh
-pip config set global.index-url https://mirror.sjtu.edu.cn/pypi/web/simple
-```
-
-Install or upgrade modelscope.
-``` sh
-pip install "modelscope[audio_asr]" --upgrade -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html
-```
-
-For more details about modelscope, please see [modelscope installation](https://modelscope.cn/docs/%E7%8E%AF%E5%A2%83%E5%AE%89%E8%A3%85)
-
-- Install FunASR and other packages: 
-
 ``` sh
 git clone https://github.com/alibaba/FunASR.git && cd FunASR
 pip install --editable ./
 ```
+For more details, please ref to [installation](https://github.com/alibaba-damo-academy/FunASR/wiki)
 
 ## Usage
 For users who are new to FunASR and ModelScope, please refer to [FunASR Docs](https://alibaba-damo-academy.github.io/FunASR/index.html).
