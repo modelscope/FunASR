@@ -50,7 +50,7 @@ pip config set global.index-url https://mirror.sjtu.edu.cn/pypi/web/simple
 
 Install or upgrade modelscope.
 ``` sh
-pip install "modelscope[audio]" --upgrade -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html
+pip install "modelscope[audio_asr]" --upgrade -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html
 ```
 
 For more details about modelscope, please see [modelscope installation](https://modelscope.cn/docs/%E7%8E%AF%E5%A2%83%E5%AE%89%E8%A3%85)

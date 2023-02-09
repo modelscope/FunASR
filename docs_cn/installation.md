@@ -26,7 +26,7 @@ pip config set global.index-url https://mirror.sjtu.edu.cn/pypi/web/simple
 
 安装或更新ModelScope
 ``` sh
-pip install "modelscope[audio]" --upgrade -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html
+pip install "modelscope[audio_asr]" --upgrade -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html
 ```
 
 - 下载FunASR仓库，并安装剩余所需依赖
