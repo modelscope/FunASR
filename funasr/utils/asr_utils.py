@@ -186,22 +186,11 @@ def recursion_dir_all_wav(wav_list, dir_path: str) -> List[str]:
 
     return wav_list
 
-
-def set_parameters(language: str = None):
-    if language is not None:
-        global global_asr_language
-        global_asr_language = language
-
-
 def compute_wer(hyp_list: List[Any],
                 ref_list: List[Any],
                 lang: str = None) -> Dict[str, Any]:
     assert len(hyp_list) > 0, 'hyp list is empty'
     assert len(ref_list) > 0, 'ref list is empty'
-
-    if lang is not None:
-        global global_asr_language
-        global_asr_language = lang
 
     rst = {
         'Wrd': 0,
@@ -216,12 +205,15 @@ def compute_wer(hyp_list: List[Any],
         'wrong_sentences': 0
     }
 
+    if lang is None:
+        lang = global_asr_language
+
     for h_item in hyp_list:
         for r_item in ref_list:
             if h_item['key'] == r_item['key']:
                 out_item = compute_wer_by_line(h_item['value'],
                                                r_item['value'],
-                                               global_asr_language)
+                                               lang)
                 rst['Wrd'] += out_item['nwords']
                 rst['Corr'] += out_item['cor']
                 rst['wrong_words'] += out_item['wrong']
