@@ -544,9 +544,8 @@ class CifPredictorV3(nn.Module):
             token_num_int = torch.max(token_num).type(torch.int32).item()
             acoustic_embeds = acoustic_embeds[:, :token_num_int, :]
         return acoustic_embeds, token_num, alphas, cif_peak, token_num2
-    
-    def get_upsample_timestamp(self, hidden, target_label=None, mask=None, ignore_id=-1, mask_chunk_predictor=None,
-                target_label_length=None, token_num=None):
+
+    def get_upsample_timestamp(self, hidden, mask=None, token_num=None):
         h = hidden
         b = hidden.shape[0]
         context = h.transpose(1, 2)

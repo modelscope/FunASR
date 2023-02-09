@@ -8,6 +8,8 @@ from typing import Tuple
 from typing import Union
 
 import torch
+import random
+import numpy as np
 from typeguard import check_argument_types
 
 from funasr.layers.abs_normalize import AbsNormalize
@@ -24,7 +26,7 @@ from funasr.models.predictor.cif import mae_loss
 from funasr.models.preencoder.abs_preencoder import AbsPreEncoder
 from funasr.models.specaug.abs_specaug import AbsSpecAug
 from funasr.modules.add_sos_eos import add_sos_eos
-from funasr.modules.nets_utils import make_pad_mask
+from funasr.modules.nets_utils import make_pad_mask, pad_list
 from funasr.modules.nets_utils import th_accuracy
 from funasr.torch_utils.device_funcs import force_gatherable
 from funasr.train.abs_espnet_model import AbsESPnetModel
@@ -824,7 +826,10 @@ class ParaformerBert(Paraformer):
 
 class BiCifParaformer(Paraformer):
 
-    """CTC-attention hybrid Encoder-Decoder model"""
+    """
+    Paraformer model with an extra cif predictor
+    to conduct accurate timestamp prediction
+    """
 
     def __init__(
         self,
@@ -891,7 +896,7 @@ class BiCifParaformer(Paraformer):
         )
         assert isinstance(self.predictor, CifPredictorV3), "BiCifParaformer should use CIFPredictorV3"
 
-    def _calc_att_loss(
+    def _calc_pre2_loss(
             self,
             encoder_out: torch.Tensor,
             encoder_out_lens: torch.Tensor,
@@ -903,47 +908,12 @@ class BiCifParaformer(Paraformer):
         if self.predictor_bias == 1:
             _, ys_pad = add_sos_eos(ys_pad, self.sos, self.eos, self.ignore_id)
             ys_pad_lens = ys_pad_lens + self.predictor_bias
-        pre_acoustic_embeds, pre_token_length, _, pre_peak_index, pre_token_length2 = self.predictor(encoder_out, ys_pad, encoder_out_mask,
-                                                                                  ignore_id=self.ignore_id)
+        _, _, _, _, pre_token_length2 = self.predictor(encoder_out, ys_pad, encoder_out_mask, ignore_id=self.ignore_id)
 
-        # 0. sampler
-        decoder_out_1st = None
-        if self.sampling_ratio > 0.0:
-            if self.step_cur < 2:
-                logging.info("enable sampler in paraformer, sampling_ratio: {}".format(self.sampling_ratio))
-            sematic_embeds, decoder_out_1st = self.sampler(encoder_out, encoder_out_lens, ys_pad, ys_pad_lens,
-                                                           pre_acoustic_embeds)
-        else:
-            if self.step_cur < 2:
-                logging.info("disable sampler in paraformer, sampling_ratio: {}".format(self.sampling_ratio))
-            sematic_embeds = pre_acoustic_embeds
+        # loss_pre = self.criterion_pre(ys_pad_lens.type_as(pre_token_length), pre_token_length)
+        loss_pre2 = self.criterion_pre(ys_pad_lens.type_as(pre_token_length2), pre_token_length2)
 
-        # 1. Forward decoder
-        decoder_outs = self.decoder(
-            encoder_out, encoder_out_lens, sematic_embeds, ys_pad_lens
-        )
-        decoder_out, _ = decoder_outs[0], decoder_outs[1]
-
-        if decoder_out_1st is None:
-            decoder_out_1st = decoder_out
-        # 2. Compute attention loss
-        loss_att = self.criterion_att(decoder_out, ys_pad)
-        acc_att = th_accuracy(
-            decoder_out_1st.view(-1, self.vocab_size),
-            ys_pad,
-            ignore_label=self.ignore_id,
-        )
-        loss_pre = self.criterion_pre(ys_pad_lens.type_as(pre_token_length), pre_token_length)
-        loss_pre2 = self.criterion_pre(ys_pad_lens.type_as(pre_token_length), pre_token_length2)
-
-        # Compute cer/wer using attention-decoder
-        if self.training or self.error_calculator is None:
-            cer_att, wer_att = None, None
-        else:
-            ys_hat = decoder_out_1st.argmax(dim=-1)
-            cer_att, wer_att = self.error_calculator(ys_hat.cpu(), ys_pad.cpu())
-
-        return loss_att, acc_att, cer_att, wer_att, loss_pre, loss_pre2
+        return loss_pre2
     
     def calc_predictor(self, encoder_out, encoder_out_lens):
 
@@ -956,8 +926,10 @@ class BiCifParaformer(Paraformer):
     def calc_predictor_timestamp(self, encoder_out, encoder_out_lens, token_num):
         encoder_out_mask = (~make_pad_mask(encoder_out_lens, maxlen=encoder_out.size(1))[:, None, :]).to(
             encoder_out.device)
-        ds_alphas, ds_cif_peak, us_alphas, us_cif_peak = self.predictor.get_upsample_timestamp(encoder_out, None, encoder_out_mask, token_num=token_num,
-                                                                                  ignore_id=self.ignore_id)
+        ds_alphas, ds_cif_peak, us_alphas, us_cif_peak = self.predictor.get_upsample_timestamp(encoder_out,
+                                                                                               encoder_out_mask,
+                                                                                               token_num)
+
         import pdb; pdb.set_trace()
         return ds_alphas, ds_cif_peak, us_alphas, us_cif_peak
 
@@ -992,72 +964,16 @@ class BiCifParaformer(Paraformer):
 
         # 1. Encoder
         encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
-        intermediate_outs = None
-        if isinstance(encoder_out, tuple):
-            intermediate_outs = encoder_out[1]
-            encoder_out = encoder_out[0]
 
-        loss_att, acc_att, cer_att, wer_att = None, None, None, None
-        loss_ctc, cer_ctc = None, None
-        loss_pre = None
         stats = dict()
 
-        # 1. CTC branch
-        if self.ctc_weight != 0.0:
-            loss_ctc, cer_ctc = self._calc_ctc_loss(
-                encoder_out, encoder_out_lens, text, text_lengths
-            )
+        loss_pre2 = self._calc_pre2_loss(
+            encoder_out, encoder_out_lens, text, text_lengths
+        )
 
-            # Collect CTC branch stats
-            stats["loss_ctc"] = loss_ctc.detach() if loss_ctc is not None else None
-            stats["cer_ctc"] = cer_ctc
+        loss = loss_pre2
 
-        # Intermediate CTC (optional)
-        loss_interctc = 0.0
-        if self.interctc_weight != 0.0 and intermediate_outs is not None:
-            for layer_idx, intermediate_out in intermediate_outs:
-                # we assume intermediate_out has the same length & padding
-                # as those of encoder_out
-                loss_ic, cer_ic = self._calc_ctc_loss(
-                    intermediate_out, encoder_out_lens, text, text_lengths
-                )
-                loss_interctc = loss_interctc + loss_ic
-
-                # Collect Intermedaite CTC stats
-                stats["loss_interctc_layer{}".format(layer_idx)] = (
-                    loss_ic.detach() if loss_ic is not None else None
-                )
-                stats["cer_interctc_layer{}".format(layer_idx)] = cer_ic
-
-            loss_interctc = loss_interctc / len(intermediate_outs)
-
-            # calculate whole encoder loss
-            loss_ctc = (
-                               1 - self.interctc_weight
-                       ) * loss_ctc + self.interctc_weight * loss_interctc
-
-        # 2b. Attention decoder branch
-        if self.ctc_weight != 1.0:
-            loss_att, acc_att, cer_att, wer_att, loss_pre, loss_pre2 = self._calc_att_loss(
-                encoder_out, encoder_out_lens, text, text_lengths
-            )
-
-        # 3. CTC-Att loss definition
-        if self.ctc_weight == 0.0:
-            loss = loss_att + loss_pre * self.predictor_weight + loss_pre2 * self.predictor_weight
-        elif self.ctc_weight == 1.0:
-            loss = loss_ctc
-        else:
-            loss = self.ctc_weight * loss_ctc + (1 - self.ctc_weight) * loss_att + loss_pre * self.predictor_weight + loss_pre2 * self.predictor_weight
-
-        # Collect Attn branch stats
-        stats["loss_att"] = loss_att.detach() if loss_att is not None else None
-        stats["acc"] = acc_att
-        stats["cer"] = cer_att
-        stats["wer"] = wer_att
-        stats["loss_pre"] = loss_pre.detach().cpu() if loss_pre is not None else None
-        stats["loss_pre2"] = loss_pre2.detach().cpu() if loss_pre is not None else None
-
+        stats["loss_pre2"] = loss_pre2.detach().cpu()
         stats["loss"] = torch.clone(loss.detach())
 
         # force_gatherable: to-device and to-tensor if scalar for DataParallel
