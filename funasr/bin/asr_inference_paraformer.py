@@ -428,6 +428,7 @@ def inference_modelscope(
         format="%(asctime)s (%(module)s:%(lineno)d) %(levelname)s: %(message)s",
     )
 
+    hotword_list_or_file = param_dict['hotword']
     if ngpu >= 1 and torch.cuda.is_available():
         device = "cuda"
     else:
