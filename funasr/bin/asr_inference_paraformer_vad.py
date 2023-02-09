@@ -293,7 +293,7 @@ def inference_modelscope(
                     text_postprocessed, time_stamp_postprocessed, word_lists = postprocessed_result[0], \
                                                                                postprocessed_result[1], \
                                                                                postprocessed_result[2]
-                    text_postprocessed_punc = ""
+                    text_postprocessed_punc = text_postprocessed
                     if len(word_lists) > 0 and text2punc is not None:
                         text_postprocessed_punc, punc_id_list = text2punc(word_lists, 20)
 
