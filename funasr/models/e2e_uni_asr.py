@@ -206,7 +206,7 @@ class UniASR(AbsESPnetModel):
             with torch.no_grad():
                 speech_raw, encoder_out, encoder_out_lens = self.encode(speech, speech_lengths, ind=ind)
         else:
-            speech_raw, encoder_out_lens = self.encode(speech, speech_lengths, ind=ind)
+            speech_raw, encoder_out, encoder_out_lens = self.encode(speech, speech_lengths, ind=ind)
 
         intermediate_outs = None
         if isinstance(encoder_out, tuple):
