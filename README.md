@@ -4,7 +4,7 @@
 
 <strong>FunASR</strong> hopes to build a bridge between academic research and industrial applications on speech recognition. By supporting the training & finetuning of the industrial-grade speech recognition model released on [ModelScope](https://www.modelscope.cn/models?page=1&tasks=auto-speech-recognition), researchers and developers can conduct research and production of speech recognition models more conveniently, and promote the development of speech recognition ecology. ASR for Fun！
 
-[**News**](#what's new)
+[**News**](#what's new) 
 | [**Highlights**](#highlights)
 | [**Installation**](#installation)
 | [**Docs**](https://alibaba-damo-academy.github.io/FunASR/index.html)
