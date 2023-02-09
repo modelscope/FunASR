@@ -128,7 +128,6 @@ def time_stamp_lfr6_pl(us_alphas, us_cif_peak, char_list, begin_time=0.0, end_ti
     res_txt = ""
     for char, timestamp in zip(char_list, timestamp_list):
         res_txt += "{} {} {};".format(char, timestamp[0], timestamp[1])
-    logging.warning(res_txt)  # for test
     res = []
     for char, timestamp in zip(char_list, timestamp_list):
         if char != '<sil>':

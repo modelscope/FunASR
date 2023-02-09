@@ -929,8 +929,6 @@ class BiCifParaformer(Paraformer):
         ds_alphas, ds_cif_peak, us_alphas, us_cif_peak = self.predictor.get_upsample_timestamp(encoder_out,
                                                                                                encoder_out_mask,
                                                                                                token_num)
-
-        import pdb; pdb.set_trace()
         return ds_alphas, ds_cif_peak, us_alphas, us_cif_peak
 
     def forward(
