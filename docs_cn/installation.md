@@ -5,6 +5,7 @@ FunASR的安装十分便捷，下面将给出详细的安装步骤：
 ``` sh
 wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
 sh Miniconda3-latest-Linux-x86_64.sh
+source ~/.bashrc
 conda create -n funasr python=3.7
 conda activate funasr
 ```
