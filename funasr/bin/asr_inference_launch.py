@@ -210,9 +210,18 @@ def inference_launch(**kwargs):
     elif mode == "uniasr":
         from funasr.bin.asr_inference_uniasr import inference_modelscope
         return inference_modelscope(**kwargs)
+    elif mode == "uniasr_vad":
+        from funasr.bin.asr_inference_uniasr_vad import inference_modelscope
+        return inference_modelscope(**kwargs)
     elif mode == "paraformer":
         from funasr.bin.asr_inference_paraformer import inference_modelscope
         return inference_modelscope(**kwargs)
+    elif mode == "paraformer_vad":
+        from funasr.bin.asr_inference_paraformer_vad import inference_modelscope
+        return inference_modelscope(**kwargs)
+    elif mode == "paraformer_punc":
+        logging.info("Unknown decoding mode: {}".format(mode))
+        return None
     elif mode == "paraformer_vad_punc":
         from funasr.bin.asr_inference_paraformer_vad_punc import inference_modelscope
         return inference_modelscope(**kwargs)
