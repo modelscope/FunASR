@@ -977,3 +977,485 @@ class BiCifParaformer(Paraformer):
         # force_gatherable: to-device and to-tensor if scalar for DataParallel
         loss, stats, weight = force_gatherable((loss, stats, batch_size), loss.device)
         return loss, stats, weight
+
+class ContextualParaformer(Paraformer):
+    """
+    Paraformer model with contextual hotword
+    """
+
+    def __init__(
+            self,
+            vocab_size: int,
+            token_list: Union[Tuple[str, ...], List[str]],
+            frontend: Optional[AbsFrontend],
+            specaug: Optional[AbsSpecAug],
+            normalize: Optional[AbsNormalize],
+            preencoder: Optional[AbsPreEncoder],
+            encoder: AbsEncoder,
+            postencoder: Optional[AbsPostEncoder],
+            decoder: AbsDecoder,
+            ctc: CTC,
+            ctc_weight: float = 0.5,
+            interctc_weight: float = 0.0,
+            ignore_id: int = -1,
+            blank_id: int = 0,
+            sos: int = 1,
+            eos: int = 2,
+            lsm_weight: float = 0.0,
+            length_normalized_loss: bool = False,
+            report_cer: bool = True,
+            report_wer: bool = True,
+            sym_space: str = "<space>",
+            sym_blank: str = "<blank>",
+            extract_feats_in_collect_stats: bool = True,
+            predictor=None,
+            predictor_weight: float = 0.0,
+            predictor_bias: int = 0,
+            sampling_ratio: float = 0.2,
+            min_hw_length: int = 2,
+            max_hw_length: int = 4,
+            sample_rate: float = 0.6,
+            batch_rate: float = 0.5,
+            double_rate: float = -1.0,
+            target_buffer_length: int = -1,
+            inner_dim: int = 256,
+            bias_encoder_type: str = 'lstm',
+            label_bracket: bool = False,
+    ):
+        assert check_argument_types()
+        assert 0.0 <= ctc_weight <= 1.0, ctc_weight
+        assert 0.0 <= interctc_weight < 1.0, interctc_weight
+
+        super().__init__(
+            vocab_size=vocab_size,
+            token_list=token_list,
+            frontend=frontend,
+            specaug=specaug,
+            normalize=normalize,
+            preencoder=preencoder,
+            encoder=encoder,
+            postencoder=postencoder,
+            decoder=decoder,
+            ctc=ctc,
+            ctc_weight=ctc_weight,
+            interctc_weight=interctc_weight,
+            ignore_id=ignore_id,
+            blank_id=blank_id,
+            sos=sos,
+            eos=eos,
+            lsm_weight=lsm_weight,
+            length_normalized_loss=length_normalized_loss,
+            report_cer=report_cer,
+            report_wer=report_wer,
+            sym_space=sym_space,
+            sym_blank=sym_blank,
+            extract_feats_in_collect_stats=extract_feats_in_collect_stats,
+            predictor=predictor,
+            predictor_weight=predictor_weight,
+            predictor_bias=predictor_bias,
+            sampling_ratio=sampling_ratio,
+        )
+
+        if bias_encoder_type == 'lstm':
+            logging.warning("enable bias encoder sampling and contextual training")
+            self.bias_encoder = torch.nn.LSTM(inner_dim, inner_dim, 1, batch_first=True, dropout=0)
+            self.bias_embed = torch.nn.Embedding(vocab_size, inner_dim)
+        else:
+            logging.error("Unsupport bias encoder type")
+
+        self.min_hw_length = min_hw_length
+        self.max_hw_length = max_hw_length
+        self.sample_rate = sample_rate
+        self.batch_rate = batch_rate
+        self.target_buffer_length = target_buffer_length
+        self.double_rate = double_rate
+
+        if self.target_buffer_length > 0:
+            self.hotword_buffer = None
+            self.length_record = []
+            self.current_buffer_length = 0
+
+    def forward(
+            self,
+            speech: torch.Tensor,
+            speech_lengths: torch.Tensor,
+            text: torch.Tensor,
+            text_lengths: torch.Tensor,
+    ) -> Tuple[torch.Tensor, Dict[str, torch.Tensor], torch.Tensor]:
+        """Frontend + Encoder + Decoder + Calc loss
+
+        Args:
+                speech: (Batch, Length, ...)
+                speech_lengths: (Batch, )
+                text: (Batch, Length)
+                text_lengths: (Batch,)
+        """
+        assert text_lengths.dim() == 1, text_lengths.shape
+        # Check that batch_size is unified
+        assert (
+                speech.shape[0]
+                == speech_lengths.shape[0]
+                == text.shape[0]
+                == text_lengths.shape[0]
+        ), (speech.shape, speech_lengths.shape, text.shape, text_lengths.shape)
+        batch_size = speech.shape[0]
+        self.step_cur += 1
+        # for data-parallel
+        text = text[:, : text_lengths.max()]
+        speech = speech[:, :speech_lengths.max()]
+
+        # 1. Encoder
+        encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
+        intermediate_outs = None
+        if isinstance(encoder_out, tuple):
+            intermediate_outs = encoder_out[1]
+            encoder_out = encoder_out[0]
+
+        loss_att, acc_att, cer_att, wer_att = None, None, None, None
+        loss_ctc, cer_ctc = None, None
+        loss_pre = None
+        stats = dict()
+
+        # 1. CTC branch
+        if self.ctc_weight != 0.0:
+            loss_ctc, cer_ctc = self._calc_ctc_loss(
+                encoder_out, encoder_out_lens, text, text_lengths
+            )
+
+            # Collect CTC branch stats
+            stats["loss_ctc"] = loss_ctc.detach() if loss_ctc is not None else None
+            stats["cer_ctc"] = cer_ctc
+
+        # Intermediate CTC (optional)
+        loss_interctc = 0.0
+        if self.interctc_weight != 0.0 and intermediate_outs is not None:
+            for layer_idx, intermediate_out in intermediate_outs:
+                # we assume intermediate_out has the same length & padding
+                # as those of encoder_out
+                loss_ic, cer_ic = self._calc_ctc_loss(
+                    intermediate_out, encoder_out_lens, text, text_lengths
+                )
+                loss_interctc = loss_interctc + loss_ic
+
+                # Collect Intermedaite CTC stats
+                stats["loss_interctc_layer{}".format(layer_idx)] = (
+                    loss_ic.detach() if loss_ic is not None else None
+                )
+                stats["cer_interctc_layer{}".format(layer_idx)] = cer_ic
+
+            loss_interctc = loss_interctc / len(intermediate_outs)
+
+            # calculate whole encoder loss
+            loss_ctc = (
+                               1 - self.interctc_weight
+                       ) * loss_ctc + self.interctc_weight * loss_interctc
+
+        # 2b. Attention decoder branch
+        if self.ctc_weight != 1.0:
+            loss_att, acc_att, cer_att, wer_att, loss_pre = self._calc_att_loss(
+                encoder_out, encoder_out_lens, text, text_lengths
+            )
+
+        # 3. CTC-Att loss definition
+        if self.ctc_weight == 0.0:
+            loss = loss_att + loss_pre * self.predictor_weight
+        elif self.ctc_weight == 1.0:
+            loss = loss_ctc
+        else:
+            loss = self.ctc_weight * loss_ctc + (1 - self.ctc_weight) * loss_att + loss_pre * self.predictor_weight
+
+        # Collect Attn branch stats
+        stats["loss_att"] = loss_att.detach() if loss_att is not None else None
+        stats["acc"] = acc_att
+        stats["cer"] = cer_att
+        stats["wer"] = wer_att
+        stats["loss_pre"] = loss_pre.detach().cpu() if loss_pre is not None else None
+
+        stats["loss"] = torch.clone(loss.detach())
+
+        # force_gatherable: to-device and to-tensor if scalar for DataParallel
+        loss, stats, weight = force_gatherable((loss, stats, batch_size), loss.device)
+        return loss, stats, weight
+
+    def _sample_hot_word(self, ys_pad, ys_pad_lens):
+        hw_list = [torch.Tensor([0]).long().to(ys_pad.device)]
+        hw_lengths = [0]  # this length is actually for indice, so -1
+        for i, length in enumerate(ys_pad_lens):
+            if length < 2:
+                continue
+            if length > self.min_hw_length + self.max_hw_length + 2 and random.random() < self.double_rate:
+                # sample double hotword
+                _max_hw_length = min(self.max_hw_length, length // 2)
+                # first hotword
+                start1 = random.randint(0, length // 3)
+                end1 = random.randint(start1 + self.min_hw_length - 1, start1 + _max_hw_length - 1)
+                hw_tokens1 = ys_pad[i][start1:end1 + 1]
+                hw_lengths.append(len(hw_tokens1) - 1)
+                hw_list.append(hw_tokens1)
+                # second hotword
+                start2 = random.randint(end1 + 1, length - self.min_hw_length)
+                end2 = random.randint(min(length - 1, start2 + self.min_hw_length - 1),
+                                      min(length - 1, start2 + self.max_hw_length - 1))
+                hw_tokens2 = ys_pad[i][start2:end2 + 1]
+                hw_lengths.append(len(hw_tokens2) - 1)
+                hw_list.append(hw_tokens2)
+                continue
+            if random.random() < self.sample_rate:
+                if length == 2:
+                    hw_tokens = ys_pad[i][:2]
+                    hw_lengths.append(1)
+                    hw_list.append(hw_tokens)
+                else:
+                    start = random.randint(0, length - self.min_hw_length)
+                    end = random.randint(min(length - 1, start + self.min_hw_length - 1),
+                                         min(length - 1, start + self.max_hw_length - 1)) + 1
+                    # print(start, end)
+                    hw_tokens = ys_pad[i][start:end]
+                    hw_lengths.append(len(hw_tokens) - 1)
+                    hw_list.append(hw_tokens)
+        # padding
+        hw_list_pad = pad_list(hw_list, 0)
+        hw_embed = self.decoder.embed(hw_list_pad)
+        hw_embed, (_, _) = self.bias_encoder(hw_embed)
+        _ind = np.arange(0, len(hw_list)).tolist()
+        # update self.hotword_buffer, throw a part if oversize
+        selected = hw_embed[_ind, hw_lengths]
+        if self.target_buffer_length > 0:
+            _b = selected.shape[0]
+            if self.hotword_buffer is None:
+                self.hotword_buffer = selected
+                self.length_record.append(selected.shape[0])
+                self.current_buffer_length = _b
+            elif self.current_buffer_length + _b < self.target_buffer_length:
+                self.hotword_buffer = torch.cat([self.hotword_buffer.detach(), selected], dim=0)
+                self.current_buffer_length += _b
+                selected = self.hotword_buffer
+            else:
+                self.hotword_buffer = torch.cat([self.hotword_buffer.detach(), selected], dim=0)
+                random_throw = random.randint(self.target_buffer_length // 2, self.target_buffer_length) + 10
+                self.hotword_buffer = self.hotword_buffer[-1 * random_throw:]
+                selected = self.hotword_buffer
+                self.current_buffer_length = selected.shape[0]
+        return selected.squeeze(0).repeat(ys_pad.shape[0], 1, 1).to(ys_pad.device)
+
+    def sampler(self, encoder_out, encoder_out_lens, ys_pad, ys_pad_lens, pre_acoustic_embeds, contextual_info):
+
+        tgt_mask = (~make_pad_mask(ys_pad_lens, maxlen=ys_pad_lens.max())[:, :, None]).to(ys_pad.device)
+        ys_pad = ys_pad * tgt_mask[:, :, 0]
+        if self.share_embedding:
+            ys_pad_embed = self.decoder.output_layer.weight[ys_pad]
+        else:
+            ys_pad_embed = self.decoder.embed(ys_pad)
+        with torch.no_grad():
+            decoder_outs = self.decoder(
+                encoder_out, encoder_out_lens, pre_acoustic_embeds, ys_pad_lens, contextual_info=contextual_info
+            )
+            decoder_out, _ = decoder_outs[0], decoder_outs[1]
+            pred_tokens = decoder_out.argmax(-1)
+            nonpad_positions = ys_pad.ne(self.ignore_id)
+            seq_lens = (nonpad_positions).sum(1)
+            same_num = ((pred_tokens == ys_pad) & nonpad_positions).sum(1)
+            input_mask = torch.ones_like(nonpad_positions)
+            bsz, seq_len = ys_pad.size()
+            for li in range(bsz):
+                target_num = (((seq_lens[li] - same_num[li].sum()).float()) * self.sampling_ratio).long()
+                if target_num > 0:
+                    input_mask[li].scatter_(dim=0, index=torch.randperm(seq_lens[li])[:target_num].cuda(), value=0)
+            input_mask = input_mask.eq(1)
+            input_mask = input_mask.masked_fill(~nonpad_positions, False)
+            input_mask_expand_dim = input_mask.unsqueeze(2).to(pre_acoustic_embeds.device)
+
+        sematic_embeds = pre_acoustic_embeds.masked_fill(~input_mask_expand_dim, 0) + ys_pad_embed.masked_fill(
+            input_mask_expand_dim, 0)
+        return sematic_embeds * tgt_mask, decoder_out * tgt_mask
+
+    def _calc_att_loss(
+            self,
+            encoder_out: torch.Tensor,
+            encoder_out_lens: torch.Tensor,
+            ys_pad: torch.Tensor,
+            ys_pad_lens: torch.Tensor,
+    ):
+        encoder_out_mask = (~make_pad_mask(encoder_out_lens, maxlen=encoder_out.size(1))[:, None, :]).to(
+            encoder_out.device)
+        if self.predictor_bias == 1:
+            _, ys_pad = add_sos_eos(ys_pad, self.sos, self.eos, self.ignore_id)
+            ys_pad_lens = ys_pad_lens + self.predictor_bias
+        pre_acoustic_embeds, pre_token_length, _, pre_peak_index = self.predictor(encoder_out, ys_pad,
+                                                                                  encoder_out_mask,
+                                                                                  ignore_id=self.ignore_id)
+
+        # sample hot word
+        contextual_info = self._sample_hot_word(ys_pad, ys_pad_lens)
+
+        # 0. sampler
+        decoder_out_1st = None
+        if self.sampling_ratio > 0.0:
+            if self.step_cur < 2:
+                logging.info("enable sampler in paraformer, sampling_ratio: {}".format(self.sampling_ratio))
+            sematic_embeds, decoder_out_1st = self.sampler(encoder_out, encoder_out_lens, ys_pad, ys_pad_lens,
+                                                           pre_acoustic_embeds, contextual_info)
+        else:
+            if self.step_cur < 2:
+                logging.info("disable sampler in paraformer, sampling_ratio: {}".format(self.sampling_ratio))
+            sematic_embeds = pre_acoustic_embeds
+
+        # 1. Forward decoder
+        decoder_outs = self.decoder(
+            encoder_out, encoder_out_lens, sematic_embeds, ys_pad_lens, contextual_info=contextual_info
+        )
+        decoder_out, _ = decoder_outs[0], decoder_outs[1]
+
+        if decoder_out_1st is None:
+            decoder_out_1st = decoder_out
+        # 2. Compute attention loss
+        loss_att = self.criterion_att(decoder_out, ys_pad)
+        acc_att = th_accuracy(
+            decoder_out_1st.view(-1, self.vocab_size),
+            ys_pad,
+            ignore_label=self.ignore_id,
+        )
+        loss_pre = self.criterion_pre(ys_pad_lens.type_as(pre_token_length), pre_token_length)
+
+        # Compute cer/wer using attention-decoder
+        if self.training or self.error_calculator is None:
+            cer_att, wer_att = None, None
+        else:
+            ys_hat = decoder_out_1st.argmax(dim=-1)
+            cer_att, wer_att = self.error_calculator(ys_hat.cpu(), ys_pad.cpu())
+
+        return loss_att, acc_att, cer_att, wer_att, loss_pre
+
+    def cal_decoder_with_predictor(self, encoder_out, encoder_out_lens, sematic_embeds, ys_pad_lens, hw_list=None):
+        if hw_list is None:
+            # default hotword list
+            hw_list = [torch.Tensor([self.sos]).long().to(encoder_out.device)]  # empty hotword list
+            hw_list_pad = pad_list(hw_list, 0)
+            hw_embed = self.bias_embed(hw_list_pad)
+            _, (h_n, _) = self.bias_encoder(hw_embed)
+            contextual_info = h_n.squeeze(0).repeat(encoder_out.shape[0], 1, 1)
+        else:
+            hw_lengths = [len(i) for i in hw_list]
+            hw_list_pad = pad_list([torch.Tensor(i).long() for i in hw_list], 0).to(encoder_out.device)
+            hw_embed = self.bias_embed(hw_list_pad)
+            hw_embed = torch.nn.utils.rnn.pack_padded_sequence(hw_embed, hw_lengths, batch_first=True,
+                                                               enforce_sorted=False)
+            _, (h_n, _) = self.bias_encoder(hw_embed)
+            # hw_embed, _ = torch.nn.utils.rnn.pad_packed_sequence(hw_embed, batch_first=True)
+            contextual_info = h_n.squeeze(0).repeat(encoder_out.shape[0], 1, 1)
+        decoder_outs = self.decoder(
+            encoder_out, encoder_out_lens, sematic_embeds, ys_pad_lens, contextual_info=contextual_info
+        )
+        decoder_out = decoder_outs[0]
+        decoder_out = torch.log_softmax(decoder_out, dim=-1)
+        return decoder_out, ys_pad_lens
+
+    def gen_clas_tf2torch_map_dict(self):
+        tensor_name_prefix_torch = "bias_encoder"
+        tensor_name_prefix_tf = "seq2seq/clas_charrnn"
+
+        tensor_name_prefix_torch_emb = "bias_embed"
+        tensor_name_prefix_tf_emb = "seq2seq"
+
+        map_dict_local = {
+            # in lstm
+            "{}.weight_ih_l0".format(tensor_name_prefix_torch):
+                {"name": "{}/rnn/lstm_cell/kernel".format(tensor_name_prefix_tf),
+                 "squeeze": None,
+                 "transpose": (1, 0),
+                 "slice": (0, 512),
+                 "unit_k": 512,
+                 },  # (1024, 2048),(2048,512)
+            "{}.weight_hh_l0".format(tensor_name_prefix_torch):
+                {"name": "{}/rnn/lstm_cell/kernel".format(tensor_name_prefix_tf),
+                 "squeeze": None,
+                 "transpose": (1, 0),
+                 "slice": (512, 1024),
+                 "unit_k": 512,
+                 },  # (1024, 2048),(2048,512)
+            "{}.bias_ih_l0".format(tensor_name_prefix_torch):
+                {"name": "{}/rnn/lstm_cell/bias".format(tensor_name_prefix_tf),
+                 "squeeze": None,
+                 "transpose": None,
+                 "scale": 0.5,
+                 "unit_b": 512,
+                 },  # (2048,),(2048,)
+            "{}.bias_hh_l0".format(tensor_name_prefix_torch):
+                {"name": "{}/rnn/lstm_cell/bias".format(tensor_name_prefix_tf),
+                 "squeeze": None,
+                 "transpose": None,
+                 "scale": 0.5,
+                 "unit_b": 512,
+                 },  # (2048,),(2048,)
+
+            # in embed
+            "{}.weight".format(tensor_name_prefix_torch_emb):
+                {"name": "{}/contextual_encoder/w_char_embs".format(tensor_name_prefix_tf_emb),
+                 "squeeze": None,
+                 "transpose": None,
+                 },  # (4235,256),(4235,256)
+        }
+        return map_dict_local
+
+    def clas_convert_tf2torch(self,
+                              var_dict_tf,
+                              var_dict_torch):
+        map_dict = self.gen_clas_tf2torch_map_dict()
+        var_dict_torch_update = dict()
+        for name in sorted(var_dict_torch.keys(), reverse=False):
+            names = name.split('.')
+            if names[0] == "bias_encoder":
+                name_q = name
+                if name_q in map_dict.keys():
+                    name_v = map_dict[name_q]["name"]
+                    name_tf = name_v
+                    data_tf = var_dict_tf[name_tf]
+                    if map_dict[name_q].get("unit_k") is not None:
+                        dim = map_dict[name_q]["unit_k"]
+                        i = data_tf[:, 0:dim].copy()
+                        f = data_tf[:, dim:2 * dim].copy()
+                        o = data_tf[:, 2 * dim:3 * dim].copy()
+                        g = data_tf[:, 3 * dim:4 * dim].copy()
+                        data_tf = np.concatenate([i, o, f, g], axis=1)
+                    if map_dict[name_q].get("unit_b") is not None:
+                        dim = map_dict[name_q]["unit_b"]
+                        i = data_tf[0:dim].copy()
+                        f = data_tf[dim:2 * dim].copy()
+                        o = data_tf[2 * dim:3 * dim].copy()
+                        g = data_tf[3 * dim:4 * dim].copy()
+                        data_tf = np.concatenate([i, o, f, g], axis=0)
+                    if map_dict[name_q]["squeeze"] is not None:
+                        data_tf = np.squeeze(data_tf, axis=map_dict[name_q]["squeeze"])
+                    if map_dict[name_q].get("slice") is not None:
+                        data_tf = data_tf[map_dict[name_q]["slice"][0]:map_dict[name_q]["slice"][1]]
+                    if map_dict[name_q].get("scale") is not None:
+                        data_tf = data_tf * map_dict[name_q]["scale"]
+                    if map_dict[name_q]["transpose"] is not None:
+                        data_tf = np.transpose(data_tf, map_dict[name_q]["transpose"])
+                    data_tf = torch.from_numpy(data_tf).type(torch.float32).to("cpu")
+                    assert var_dict_torch[name].size() == data_tf.size(), "{}, {}, {} != {}".format(name, name_tf,
+                                                                                                    var_dict_torch[
+                                                                                                        name].size(),
+                                                                                                    data_tf.size())
+                    var_dict_torch_update[name] = data_tf
+                    logging.info(
+                        "torch tensor: {}, {}, loading from tf tensor: {}, {}".format(name, data_tf.size(), name_v,
+                                                                                      var_dict_tf[name_tf].shape))
+            elif names[0] == "bias_embed":
+                name_tf = map_dict[name]["name"]
+                data_tf = var_dict_tf[name_tf]
+                if map_dict[name]["squeeze"] is not None:
+                    data_tf = np.squeeze(data_tf, axis=map_dict[name]["squeeze"])
+                if map_dict[name]["transpose"] is not None:
+                    data_tf = np.transpose(data_tf, map_dict[name]["transpose"])
+                data_tf = torch.from_numpy(data_tf).type(torch.float32).to("cpu")
+                assert var_dict_torch[name].size() == data_tf.size(), "{}, {}, {} != {}".format(name, name_tf,
+                                                                                                var_dict_torch[
+                                                                                                    name].size(),
+                                                                                                data_tf.size())
+                var_dict_torch_update[name] = data_tf
+                logging.info(
+                    "torch tensor: {}, {}, loading from tf tensor: {}, {}".format(name, data_tf.size(), name_tf,
+                                                                                  var_dict_tf[name_tf].shape))
+
+        return var_dict_torch_update
