@@ -37,8 +37,9 @@ from funasr.models.decoder.transformer_decoder import (
 )
 from funasr.models.decoder.transformer_decoder import ParaformerDecoderSAN
 from funasr.models.decoder.transformer_decoder import TransformerDecoder
+from funasr.models.decoder.contextual_decoder import ContextualParaformerDecoder
 from funasr.models.e2e_asr import ESPnetASRModel
-from funasr.models.e2e_asr_paraformer import Paraformer, ParaformerBert, BiCifParaformer
+from funasr.models.e2e_asr_paraformer import Paraformer, ParaformerBert, BiCifParaformer, ContextualParaformer
 from funasr.models.e2e_uni_asr import UniASR
 from funasr.models.encoder.abs_encoder import AbsEncoder
 from funasr.models.encoder.conformer_encoder import ConformerEncoder
@@ -117,6 +118,7 @@ model_choices = ClassChoices(
         paraformer=Paraformer,
         paraformer_bert=ParaformerBert,
         bicif_paraformer=BiCifParaformer,
+        contextual_paraformer=ContextualParaformer,
     ),
     type_check=AbsESPnetModel,
     default="asr",
@@ -177,6 +179,7 @@ decoder_choices = ClassChoices(
         fsmn_scama_opt=FsmnDecoderSCAMAOpt,
         paraformer_decoder_sanm=ParaformerSANMDecoder,
         paraformer_decoder_san=ParaformerDecoderSAN,
+        contextual_paraformer_decoder=ContextualParaformerDecoder,
     ),
     type_check=AbsDecoder,
     default="rnn",
@@ -1097,6 +1100,9 @@ class ASRTaskParaformer(ASRTask):
         var_dict_torch_update.update(var_dict_torch_update_local)
         # decoder
         var_dict_torch_update_local = model.decoder.convert_tf2torch(var_dict_tf, var_dict_torch)
+        var_dict_torch_update.update(var_dict_torch_update_local)
+        # bias_encoder
+        var_dict_torch_update_local = model.clas_convert_tf2torch(var_dict_tf, var_dict_torch)
         var_dict_torch_update.update(var_dict_torch_update_local)
 
         return var_dict_torch_update
