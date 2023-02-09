@@ -12,7 +12,7 @@ conda activate funasr
 - 安装Pytorch (版本 >= 1.7.0):
 
 ```sh
-pip install torch torchvision torchaudio
+pip install torch torchaudio
 ```
 
 关于更多的版本, 请参照 [https://pytorch.org/get-started/locally](https://pytorch.org/get-started/locally)
