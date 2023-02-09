@@ -13,6 +13,7 @@ from funasr.datasets.large_datasets.datapipes.filter import FilterIterDataPipe
 from funasr.datasets.large_datasets.datapipes.map import MapperIterDataPipe
 from funasr.datasets.large_datasets.utils.filter import filter
 from funasr.datasets.large_datasets.utils.padding import padding
+from funasr.datasets.large_datasets.utils.clipping import clipping
 from funasr.datasets.large_datasets.utils.tokenize import tokenize
 
 
@@ -101,6 +102,8 @@ class AudioDataset(IterableDataset):
                 elif data_type == "text" or data_type == "sound":
                     text_reader = open(data_file, "r")
                     reader_list.append(text_reader)
+                elif data_type == "none":
+                    continue
                 else:
                     raise TypeError("Data type {} is not supported".format(data_type))
 
@@ -143,7 +146,8 @@ def Dataset(data_list_file,
             dict,
             seg_dict,
             conf,
-            mode="train"):
+            mode="train",
+            batch_mode="padding"):
     scp_lists = read_lists(data_list_file)
     shuffle = conf.get('shuffle', True)
     data_names = conf.get("data_names", "speech,text")
@@ -154,9 +158,10 @@ def Dataset(data_list_file,
     filter_fn = partial(filter, **filter_conf)
     dataset = FilterIterDataPipe(dataset, fn=filter_fn)
 
-    vocab = {'vocab': dict, 'seg_dict': seg_dict}
-    tokenize_fn = partial(tokenize, **vocab)
-    dataset = MapperIterDataPipe(dataset, fn=tokenize_fn)
+    if "text" in data_names:
+        vocab = {'vocab': dict, 'seg_dict': seg_dict}
+        tokenize_fn = partial(tokenize, **vocab)
+        dataset = MapperIterDataPipe(dataset, fn=tokenize_fn)
 
     if shuffle:
         buffer_conf = conf.get('shuffle_conf', {})
@@ -180,8 +185,9 @@ def Dataset(data_list_file,
                                              batch_size=batch_size,
                                              len_fn=len_fn,
                                              buffer_size=buffer_size,
-                                             sort_size=sort_size)
+                                             sort_size=sort_size,
+                                             batch_mode=batch_mode)
 
-    dataset = MapperIterDataPipe(dataset, fn=padding)
+    dataset = MapperIterDataPipe(dataset, fn=padding if batch_mode == "padding" else clipping)
 
     return dataset

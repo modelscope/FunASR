@@ -181,7 +181,7 @@ class Speech2Text:
         self.nbest = nbest
         self.frontend = frontend
         self.encoder_downsampling_factor = 1
-        if asr_train_args.encoder_conf["input_layer"] == "conv2d":
+        if asr_train_args.encoder == "data2vec_encoder" or asr_train_args.encoder_conf["input_layer"] == "conv2d":
             self.encoder_downsampling_factor = 4
 
     @torch.no_grad()
