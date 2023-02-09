@@ -26,7 +26,7 @@ For more versions, please see [https://pytorch.org/get-started/locally](https://
 
 - Install ModelScope
 ``` sh
-pip install "modelscope[audio]" -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html
+pip install "modelscope[audio_asr]" --upgrade -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html
 ```
 
 - Install other packages

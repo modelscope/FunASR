@@ -5,6 +5,7 @@ FunASR的安装十分便捷，下面将给出详细的安装步骤：
 ``` sh
 wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
 sh Miniconda3-latest-Linux-x86_64.sh
+source ~/.bashrc
 conda create -n funasr python=3.7
 conda activate funasr
 ```
@@ -12,7 +13,7 @@ conda activate funasr
 - 安装Pytorch (版本 >= 1.7.0):
 
 ```sh
-pip install torch torchvision torchaudio
+pip install torch torchaudio
 ```
 
 关于更多的版本, 请参照 [https://pytorch.org/get-started/locally](https://pytorch.org/get-started/locally)
@@ -26,7 +27,7 @@ pip config set global.index-url https://mirror.sjtu.edu.cn/pypi/web/simple
 
 安装或更新ModelScope
 ``` sh
-pip install "modelscope[audio]" --upgrade -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html
+pip install "modelscope[audio_asr]" --upgrade -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html
 ```
 
 - 下载FunASR仓库，并安装剩余所需依赖
