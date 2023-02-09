@@ -49,7 +49,8 @@ def build_trainer(modelscope_dict,
                   scheduler_conf=None,
                   specaug=None,
                   specaug_conf=None,
-                  param_dict=None):
+                  param_dict=None,
+                  **kwargs):
     mode = modelscope_dict['mode']
     args, ASRTask = parse_args(mode=mode)
     # ddp related
