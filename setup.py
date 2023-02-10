@@ -12,11 +12,11 @@ from setuptools import setup
 requirements = {
     "install": [
         "setuptools>=38.5.1",
-        "configargparse>=1.2.1",
+        # "configargparse>=1.2.1",
         "typeguard>=2.7.0",
         "humanfriendly",
         "scipy>=1.4.1",
-        "filelock",
+        # "filelock",
         "librosa>=0.8.0",
         "jamo==0.4.1",  # For kss
         "PyYAML>=5.1.2",
@@ -27,13 +27,13 @@ requirements = {
         "nltk>=3.4.5",
         # ASR
         "sentencepiece",
-        "ctc-segmentation<1.8,>=1.6.6",
+        # "ctc-segmentation<1.8,>=1.6.6",
         # TTS
-        "pyworld>=0.2.10",
+        # "pyworld>=0.2.10",
         "pypinyin<=0.44.0",
         "espnet_tts_frontend",
         # ENH
-        "ci_sdr",
+        # "ci_sdr",
         "pytorch_wpe",
         "editdistance==0.5.2",
         "tensorboard==1.15",
@@ -43,7 +43,7 @@ requirements = {
     ],
     # train: The modules invoked when training only.
     "train": [
-        "pillow>=6.1.0",
+        # "pillow>=6.1.0",
         "editdistance==0.5.2",
         "wandb",
     ],
@@ -51,18 +51,18 @@ requirements = {
     #         but are invoked for the python scripts in each recipe
     "recipe": [
         "espnet_model_zoo",
-        "gdown",
-        "resampy",
-        "pysptk>=0.1.17",
-        "morfessor",  # for zeroth-korean
-        "youtube_dl",  # for laborotv
-        "nnmnkwii",
-        "museval>=0.2.1",
-        "pystoi>=0.2.2",
-        "mir-eval>=0.6",
-        "fastdtw",
-        "nara_wpe>=0.0.5",
-        "sacrebleu>=1.5.1",
+        # "gdown",
+        # "resampy",
+        # "pysptk>=0.1.17",
+        # "morfessor",  # for zeroth-korean
+        # "youtube_dl",  # for laborotv
+        # "nnmnkwii",
+        # "museval>=0.2.1",
+        # "pystoi>=0.2.2",
+        # "mir-eval>=0.6",
+        # "fastdtw",
+        # "nara_wpe>=0.0.5",
+        # "sacrebleu>=1.5.1",
     ],
     # all: The modules should be optionally installled due to some reason.
     #      Please consider moving them to "install" occasionally
@@ -72,7 +72,7 @@ requirements = {
         "torch_optimizer",
         "fairscale",
         "transformers",
-        "gtn==0.0.0",
+        # "gtn==0.0.0",
     ],
     "setup": [
         "numpy<=1.21.3",

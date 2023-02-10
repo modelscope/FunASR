@@ -16,17 +16,13 @@ from funasr.export.export_model import ASRModelExportParaformer
 
 output_dir = "../export"  # onnx/torchscripts model save path
 export_model = ASRModelExportParaformer(cache_dir=output_dir, onnx=True)
-export_model.export_from_modelscope('damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch')
+export_model.export('damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch')
 ```
 
 
 Export model from local path
 ```python
-from funasr.export.export_model import ASRModelExportParaformer
-
-output_dir = "../export"  # onnx/torchscripts model save path
-export_model = ASRModelExportParaformer(cache_dir=output_dir, onnx=True)
-export_model.export_from_local('/root/cache/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch')
+export_model.export('/root/cache/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch')
 ```
 
 ## Export torchscripts format model
@@ -36,15 +32,12 @@ from funasr.export.export_model import ASRModelExportParaformer
 
 output_dir = "../export"  # onnx/torchscripts model save path
 export_model = ASRModelExportParaformer(cache_dir=output_dir, onnx=False)
-export_model.export_from_modelscope('damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch')
+export_model.export('damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch')
 ```
 
 Export model from local path
 ```python
-from funasr.export.export_model import ASRModelExportParaformer
 
-output_dir = "../export"  # onnx/torchscripts model save path
-export_model = ASRModelExportParaformer(cache_dir=output_dir, onnx=False)
-export_model.export_from_local('/root/cache/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch')
+export_model.export('/root/cache/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch')
 ```
 
