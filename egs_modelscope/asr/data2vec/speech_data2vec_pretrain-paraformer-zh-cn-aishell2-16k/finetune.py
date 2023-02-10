@@ -25,13 +25,13 @@ def modelscope_finetune(params):
 
 
 if __name__ == '__main__':
-    params = modelscope_args(model="damo/speech_data2vec_pretrain-zh-cn-aishell2-16k-pytorch",
+    params = modelscope_args(model="damo/speech_data2vec_pretrain-paraformer-zh-cn-aishell2-16k",
                              data_path="./data")
     params.output_dir = "./checkpoint"
     params.data_path = "./example_data/"
     params.dataset_type = "small"
     params.batch_bins = 16000
     params.max_epoch = 50
-    params.lr = 0.00005
+    params.lr = 0.00002
 
     modelscope_finetune(params)

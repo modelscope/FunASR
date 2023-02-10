@@ -44,7 +44,7 @@ def modelscope_infer_after_finetune(params):
 
 if __name__ == '__main__':
     params = {}
-    params["modelscope_model_name"] = "damo/speech_data2vec_pretrain-zh-cn-aishell2-16k-pytorch"
+    params["modelscope_model_name"] = "damo/speech_data2vec_pretrain-paraformer-zh-cn-aishell2-16k"
     params["required_files"] = ["am.mvn", "decoding.yaml", "configuration.json"]
     params["output_dir"] = "./checkpoint"
     params["data_dir"] = "./data/test"

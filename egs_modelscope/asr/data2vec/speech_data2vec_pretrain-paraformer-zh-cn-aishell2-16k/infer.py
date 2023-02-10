@@ -18,7 +18,7 @@ def modelscope_infer_core(output_dir, split_dir, njob, idx):
         os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_id)
     inference_pipline = pipeline(
         task=Tasks.auto_speech_recognition,
-        model="damo/speech_data2vec_pretrain-zh-cn-aishell2-16k-pytorch",
+        model="damo/speech_data2vec_pretrain-paraformer-zh-cn-aishell2-16k",
         output_dir=output_dir_job,
     )
     audio_in = os.path.join(split_dir, "wav.{}.scp".format(idx))
