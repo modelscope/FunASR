@@ -68,13 +68,13 @@ def test_without_profile_gpu_infer():
     diar_config_path = "config.yaml"
     diar_model_path = "sond.pth"
     output_dir = "./outputs"
-    raw_inputs = [
+    raw_inputs = [[
         "data/unit_test/raw_inputs/record.wav",
         "data/unit_test/raw_inputs/spk1.wav",
         "data/unit_test/raw_inputs/spk2.wav",
         "data/unit_test/raw_inputs/spk3.wav",
         "data/unit_test/raw_inputs/spk4.wav"
-    ]
+    ]]
     pipeline = inference_launch(
         mode="sond_demo",
         diar_train_config=diar_config_path,
