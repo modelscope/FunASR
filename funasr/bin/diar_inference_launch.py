@@ -86,12 +86,12 @@ def get_parser():
         help="VAD model parameter file",
     )
     group.add_argument(
-        "--sv_train_config",
+        "--diar_train_config",
         type=str,
         help="ASR training configuration",
     )
     group.add_argument(
-        "--sv_model_file",
+        "--diar_model_file",
         type=str,
         help="ASR model parameter file",
     )
@@ -115,24 +115,30 @@ def get_parser():
         help="The batch size for inference",
     )
     group.add_argument(
-        "--sv_threshold",
-        type=float,
-        default=0.9465,
-        help="The threshold for verification"
-    )
-    parser.add_argument(
-        "--embedding_node",
-        type=str,
-        default="resnet1_dense",
-        help="The network node to extract embedding"
+        "--diar_smooth_size",
+        type=int,
+        default=121,
+        help="The smoothing size for post-processing"
     )
 
     return parser
 
 
 def inference_launch(mode, **kwargs):
-    if mode == "sv":
-        from funasr.bin.sv_inference import inference_modelscope
+    if mode == "sond":
+        from funasr.bin.sond_inference import inference_modelscope
+        return inference_modelscope(**kwargs)
+    elif mode == "sond_demo":
+        from funasr.bin.sond_inference import inference_modelscope
+        param_dict = {
+            "extract_profile": True,
+            "sv_train_config": "sv.yaml",
+            "sv_model_file": "sv.pth",
+        }
+        if "param_dict" in kwargs:
+            kwargs["param_dict"].update(param_dict)
+        else:
+            kwargs["param_dict"] = param_dict
         return inference_modelscope(**kwargs)
     else:
         logging.info("Unknown decoding mode: {}".format(mode))
@@ -145,7 +151,7 @@ def main(cmd=None):
     parser.add_argument(
         "--mode",
         type=str,
-        default="sv",
+        default="sond",
         help="The decoding mode",
     )
     args = parser.parse_args(cmd)
