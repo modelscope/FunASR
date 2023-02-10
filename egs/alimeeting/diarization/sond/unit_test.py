@@ -48,7 +48,7 @@ def test_wav_gpu_infer():
     diar_model_path = "sond.pth"
     output_dir = "./outputs"
     data_path_and_name_and_type = [
-        ("data/unit_test/test_wav.scp", "speech", "kaldi_ark"),
+        ("data/unit_test/test_wav.scp", "speech", "sound"),
         ("data/unit_test/test_profile.scp", "profile", "kaldi_ark"),
     ]
     pipeline = inference_launch(
