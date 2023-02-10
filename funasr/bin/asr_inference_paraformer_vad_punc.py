@@ -14,6 +14,7 @@ from typing import Dict
 from typing import Any
 from typing import List
 import math
+import copy
 import numpy as np
 import torch
 from typeguard import check_argument_types
@@ -38,8 +39,9 @@ from funasr.utils.types import str_or_none
 from funasr.utils import asr_utils, wav_utils, postprocess_utils
 from funasr.models.frontend.wav_frontend import WavFrontend
 from funasr.tasks.vad import VADTask
-from funasr.utils.timestamp_tools import time_stamp_lfr6
+from funasr.utils.timestamp_tools import time_stamp_lfr6, time_stamp_lfr6_pl
 from funasr.bin.punctuation_infer import Text2Punc
+from funasr.models.e2e_asr_paraformer import BiCifParaformer
 
 header_colors = '\033[95m'
 end_colors = '\033[0m'
@@ -234,6 +236,10 @@ class Speech2Text:
         decoder_outs = self.asr_model.cal_decoder_with_predictor(enc, enc_len, pre_acoustic_embeds, pre_token_length)
         decoder_out, ys_pad_lens = decoder_outs[0], decoder_outs[1]
 
+        if isinstance(self.asr_model, BiCifParaformer):
+            _, _, us_alphas, us_cif_peak = self.asr_model.calc_predictor_timestamp(enc, enc_len,
+                                                                                   pre_token_length)  # test no bias cif2
+
         results = []
         b, n, d = decoder_out.size()
         for i in range(b):
@@ -276,9 +282,12 @@ class Speech2Text:
                 else:
                     text = None
 
-                time_stamp = time_stamp_lfr6(alphas[i:i+1,], enc_len[i:i+1,], token, begin_time, end_time)
-    
-                results.append((text, token, token_int, time_stamp, enc_len_batch_total, lfr_factor))
+                if isinstance(self.asr_model, BiCifParaformer):
+                    timestamp = time_stamp_lfr6_pl(us_alphas[i], us_cif_peak[i], copy.copy(token), begin_time, end_time)
+                    results.append((text, token, token_int, timestamp, enc_len_batch_total, lfr_factor))
+                else:
+                    time_stamp = time_stamp_lfr6(alphas[i:i + 1, ], enc_len[i:i + 1, ], copy.copy(token), begin_time, end_time)
+                    results.append((text, token, token_int, time_stamp, enc_len_batch_total, lfr_factor))
 
         # assert check_return_type(results)
         return results
@@ -561,6 +570,11 @@ def inference_modelscope(
             allow_variable_data_keys=allow_variable_data_keys,
             inference=True,
         )
+
+        if param_dict is not None:
+            use_timestamp = param_dict.get('use_timestamp', True)
+        else:
+            use_timestamp = True
     
         finish_count = 0
         file_count = 1
@@ -603,8 +617,11 @@ def inference_modelscope(
                 result = result_segments[0]
                 text, token, token_int = result[0], result[1], result[2]
                 time_stamp = None if len(result) < 4 else result[3]
-    
-                postprocessed_result = postprocess_utils.sentence_postprocess(token, time_stamp)
+   
+                if use_timestamp and time_stamp is not None: 
+                    postprocessed_result = postprocess_utils.sentence_postprocess(token, time_stamp)
+                else:
+                    postprocessed_result = postprocess_utils.sentence_postprocess(token)
                 text_postprocessed = ""
                 time_stamp_postprocessed = ""
                 text_postprocessed_punc = postprocessed_result
@@ -612,9 +629,12 @@ def inference_modelscope(
                     text_postprocessed, time_stamp_postprocessed, word_lists = postprocessed_result[0], \
                                                                                postprocessed_result[1], \
                                                                                postprocessed_result[2]
-                    text_postprocessed_punc = text_postprocessed
-                    if len(word_lists) > 0 and text2punc is not None:
-                        text_postprocessed_punc, punc_id_list = text2punc(word_lists, 20)
+                else:
+                    text_postprocessed, word_lists = postprocessed_result[0], postprocessed_result[1]
+
+                text_postprocessed_punc = text_postprocessed
+                if len(word_lists) > 0 and text2punc is not None:
+                    text_postprocessed_punc, punc_id_list = text2punc(word_lists, 20)
     
                 item = {'key': key, 'value': text_postprocessed_punc}
                 if text_postprocessed != "":
