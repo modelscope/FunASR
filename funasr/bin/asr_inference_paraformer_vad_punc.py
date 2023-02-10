@@ -570,6 +570,11 @@ def inference_modelscope(
             allow_variable_data_keys=allow_variable_data_keys,
             inference=True,
         )
+
+        if param_dict is not None:
+            use_timestamp = param_dict.get('use_timestamp', True)
+        else:
+            use_timestamp = True
     
         finish_count = 0
         file_count = 1
@@ -612,8 +617,11 @@ def inference_modelscope(
                 result = result_segments[0]
                 text, token, token_int = result[0], result[1], result[2]
                 time_stamp = None if len(result) < 4 else result[3]
-    
-                postprocessed_result = postprocess_utils.sentence_postprocess(token, time_stamp)
+   
+                if use_timestamp and time_stamp is not None: 
+                    postprocessed_result = postprocess_utils.sentence_postprocess(token, time_stamp)
+                else:
+                    postprocessed_result = postprocess_utils.sentence_postprocess(token)
                 text_postprocessed = ""
                 time_stamp_postprocessed = ""
                 text_postprocessed_punc = postprocessed_result
@@ -621,9 +629,12 @@ def inference_modelscope(
                     text_postprocessed, time_stamp_postprocessed, word_lists = postprocessed_result[0], \
                                                                                postprocessed_result[1], \
                                                                                postprocessed_result[2]
-                    text_postprocessed_punc = text_postprocessed
-                    if len(word_lists) > 0 and text2punc is not None:
-                        text_postprocessed_punc, punc_id_list = text2punc(word_lists, 20)
+                else:
+                    text_postprocessed, word_lists = postprocessed_result[0], postprocessed_result[1]
+
+                text_postprocessed_punc = text_postprocessed
+                if len(word_lists) > 0 and text2punc is not None:
+                    text_postprocessed_punc, punc_id_list = text2punc(word_lists, 20)
     
                 item = {'key': key, 'value': text_postprocessed_punc}
                 if text_postprocessed != "":
