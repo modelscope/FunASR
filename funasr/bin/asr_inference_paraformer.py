@@ -428,7 +428,11 @@ def inference_modelscope(
         format="%(asctime)s (%(module)s:%(lineno)d) %(levelname)s: %(message)s",
     )
 
-    hotword_list_or_file = param_dict['hotword']
+    if param_dict is not None:
+        hotword_list_or_file = param_dict.get('hotword')
+    else:
+        hotword_list_or_file = None
+
     if ngpu >= 1 and torch.cuda.is_available():
         device = "cuda"
     else:
@@ -539,7 +543,7 @@ def inference_modelscope(
                         ibest_writer["rtf"][key] = rtf_cur
 
                     if text is not None:
-                        text_postprocessed = postprocess_utils.sentence_postprocess(token)
+                        text_postprocessed, _ = postprocess_utils.sentence_postprocess(token)
                         item = {'key': key, 'value': text_postprocessed}
                         asr_result_list.append(item)
                         finish_count += 1
