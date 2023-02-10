@@ -69,7 +69,7 @@ class ASRModelExportParaformer:
         model_dir = tag_name
         if model_dir.startswith('damo/'):
             from modelscope.hub.snapshot_download import snapshot_download
-            model_dir = snapshot_download(tag_name, cache_dir=self.cache_dir)
+            model_dir = snapshot_download(model_dir, cache_dir=self.cache_dir)
         asr_train_config = os.path.join(model_dir, 'config.yaml')
         asr_model_file = os.path.join(model_dir, 'model.pb')
         cmvn_file = os.path.join(model_dir, 'am.mvn')
@@ -87,7 +87,7 @@ class ASRModelExportParaformer:
         model, asr_train_args = ASRTask.build_model_from_file(
             asr_train_config, asr_model_file, cmvn_file, 'cpu'
         )
-        self.export(model, tag_name)
+        self._export(model, tag_name)
             
     # def export_from_modelscope(
     #     self,
