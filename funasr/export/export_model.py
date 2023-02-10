@@ -1,3 +1,4 @@
+import json
 from typing import Union, Dict
 from pathlib import Path
 from typeguard import check_argument_types
@@ -25,7 +26,7 @@ class ASRModelExportParaformer:
         logging.info("output dir: {}".format(self.cache_dir))
         self.onnx = onnx
 
-    def export(
+    def _export(
         self,
         model: Speech2Text,
         tag_name: str = None,
@@ -60,38 +61,66 @@ class ASRModelExportParaformer:
         model_script = torch.jit.trace(model, dummy_input)
         model_script.save(os.path.join(path, f'{model.model_name}.torchscripts'))
 
-    def export_from_modelscope(
-        self,
-        tag_name: str = 'damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch',
-    ):
+    def export(self,
+               tag_name: str = 'damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch',
+               mode: str = 'paraformer',
+               ):
         
-        from funasr.tasks.asr import ASRTaskParaformer as ASRTask
-        from modelscope.hub.snapshot_download import snapshot_download
-
-        model_dir = snapshot_download(tag_name, cache_dir=self.cache_dir)
-        asr_train_config = os.path.join(model_dir, 'config.yaml')
-        asr_model_file = os.path.join(model_dir, 'model.pb')
-        cmvn_file = os.path.join(model_dir, 'am.mvn')
-        model, asr_train_args = ASRTask.build_model_from_file(
-            asr_train_config, asr_model_file, cmvn_file, 'cpu'
-        )
-        self.export(model, tag_name)
-
-    def export_from_local(
-        self,
-        tag_name: str = '/root/cache/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch',
-    ):
-    
-        from funasr.tasks.asr import ASRTaskParaformer as ASRTask
-    
         model_dir = tag_name
+        if model_dir.startswith('damo/'):
+            from modelscope.hub.snapshot_download import snapshot_download
+            model_dir = snapshot_download(tag_name, cache_dir=self.cache_dir)
         asr_train_config = os.path.join(model_dir, 'config.yaml')
         asr_model_file = os.path.join(model_dir, 'model.pb')
         cmvn_file = os.path.join(model_dir, 'am.mvn')
+        json_file = os.path.join(model_dir, 'configuration.json')
+        if mode is None:
+            import json
+            with open(json_file, 'r') as f:
+                config_data = json.load(f)
+                mode = config_data['model']['model_config']['mode']
+        if mode == 'paraformer':
+            from funasr.tasks.asr import ASRTaskParaformer as ASRTask
+        elif mode == 'uniasr':
+            from funasr.tasks.asr import ASRTaskUniASR as ASRTask
+            
         model, asr_train_args = ASRTask.build_model_from_file(
             asr_train_config, asr_model_file, cmvn_file, 'cpu'
         )
         self.export(model, tag_name)
+            
+    # def export_from_modelscope(
+    #     self,
+    #     tag_name: str = 'damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch',
+    # ):
+    #
+    #     from funasr.tasks.asr import ASRTaskParaformer as ASRTask
+    #     from modelscope.hub.snapshot_download import snapshot_download
+    #
+    #     model_dir = snapshot_download(tag_name, cache_dir=self.cache_dir)
+    #     asr_train_config = os.path.join(model_dir, 'config.yaml')
+    #     asr_model_file = os.path.join(model_dir, 'model.pb')
+    #     cmvn_file = os.path.join(model_dir, 'am.mvn')
+    #     model, asr_train_args = ASRTask.build_model_from_file(
+    #         asr_train_config, asr_model_file, cmvn_file, 'cpu'
+    #     )
+    #     self.export(model, tag_name)
+    #
+    # def export_from_local(
+    #     self,
+    #     tag_name: str = '/root/cache/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch',
+    # ):
+    #
+    #     from funasr.tasks.asr import ASRTaskParaformer as ASRTask
+    #
+    #     model_dir = tag_name
+    #     asr_train_config = os.path.join(model_dir, 'config.yaml')
+    #     asr_model_file = os.path.join(model_dir, 'model.pb')
+    #     cmvn_file = os.path.join(model_dir, 'am.mvn')
+    #     model, asr_train_args = ASRTask.build_model_from_file(
+    #         asr_train_config, asr_model_file, cmvn_file, 'cpu'
+    #     )
+    #     self.export(model, tag_name)
 
     def _export_onnx(self, model, verbose, path, enc_size=None):
         if enc_size:
@@ -116,5 +145,5 @@ class ASRModelExportParaformer:
 if __name__ == '__main__':
     output_dir = "../export"
     export_model = ASRModelExportParaformer(cache_dir=output_dir, onnx=False)
-    export_model.export_from_modelscope('damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch')
-    # export_model.export_from_local('/root/cache/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch')
+    export_model.export('damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch')
+    # export_model.export('/root/cache/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch')
