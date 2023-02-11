@@ -1,0 +1,5 @@
+librosa
+numpy
+onnxruntime
+scipy
+typeguard
