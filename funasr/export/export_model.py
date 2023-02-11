@@ -44,7 +44,7 @@ class ASRModelExportParaformer:
             model,
             self.export_config,
         )
-        self._export_onnx(model, verbose, export_dir)
+        # self._export_onnx(model, verbose, export_dir)
         if self.onnx:
             self._export_onnx(model, verbose, export_dir)
         else:
@@ -118,6 +118,6 @@ class ASRModelExportParaformer:
 
 if __name__ == '__main__':
     output_dir = "../export"
-    export_model = ASRModelExportParaformer(cache_dir=output_dir, onnx=False)
+    export_model = ASRModelExportParaformer(cache_dir=output_dir, onnx=True)
     export_model.export('damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch')
     # export_model.export('/root/cache/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch')
