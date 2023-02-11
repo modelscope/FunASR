@@ -15,8 +15,8 @@
    ```bash
    pip install requirements.txt
    ```
-3. Download the model.
-    - [Download Link](https://swap.oss-cn-hangzhou.aliyuncs.com/zhifu.gzf/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/model.onnx?OSSAccessKeyId=LTAI4FxMqzhBUx5XD4mKs296&Expires=2036094510&Signature=agmtMkxLEviGg3Rt3gOO4PvfrJY%3D)
+3.  Export the model.
+    - Export your model([docs](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export)), or [Download Link](https://swap.oss-cn-hangzhou.aliyuncs.com/zhifu.gzf/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/model.onnx?OSSAccessKeyId=LTAI4FxMqzhBUx5XD4mKs296&Expires=2036094510&Signature=agmtMkxLEviGg3Rt3gOO4PvfrJY%3D)
     - Put the model into the `resources/models`.
         ```text
         .
@@ -61,4 +61,4 @@
         ```
 
 ## Acknowledge
-1. We acknowledge [SWHL](https://github.com/RapidAI/FunASR) for contributing the onnxruntime(pthon api).
+1. We acknowledge [SWHL](https://github.com/RapidAI/RapidASR) for contributing the onnxruntime(python api).
