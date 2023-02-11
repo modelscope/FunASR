@@ -59,3 +59,6 @@
         result = paraformer(wav_path)
         print(result)
         ```
+
+## Acknowledge
+1. We acknowledge [SWHL](https://github.com/RapidAI/FunASR) for contributing the onnxruntime(pthon api).
