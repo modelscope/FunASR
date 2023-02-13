@@ -1,9 +1,10 @@
 import os
 import random
-import soundfile
+import numpy
 from functools import partial
 
 import torch
+import torchaudio
 import torch.distributed as dist
 from kaldiio import ReadHelper
 from torch.utils.data import IterableDataset
@@ -117,7 +118,9 @@ class AudioDataset(IterableDataset):
                             sample_dict["key"] = key
                     elif data_type == "sound":
                         key, path = item.strip().split()
-                        mat, sampling_rate = soundfile.read(path)
+                        waveform, sampling_rate = torchaudio.load(path)
+                        waveform = waveform.numpy()
+                        mat = waveform[0]
                         sample_dict[data_name] = mat
                         sample_dict["sampling_rate"] = sampling_rate
                         if data_name == "speech":
