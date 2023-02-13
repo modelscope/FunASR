@@ -10,9 +10,10 @@ import librosa
 import numpy as np
 
 from .utils.utils import (CharTokenizer, Hypothesis, ONNXRuntimeError,
-                    OrtInferSession, TokenIDConverter, WavFrontend, get_logger,
+                    OrtInferSession, TokenIDConverter, get_logger,
                     read_yaml)
 from .utils.postprocess_utils import sentence_postprocess
+from .utils.frontend import WavFrontend
 
 logging = get_logger()
 
@@ -65,7 +66,7 @@ class Paraformer():
                   wav_content: Union[str, np.ndarray, List[str]]) -> List:
         def load_wav(path: str) -> np.ndarray:
             waveform, _ = librosa.load(path, sr=None)
-            return waveform[None, ...]
+            return waveform
 
         if isinstance(wav_content, np.ndarray):
             return [wav_content]
