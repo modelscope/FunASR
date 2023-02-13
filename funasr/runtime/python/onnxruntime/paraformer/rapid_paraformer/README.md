@@ -10,12 +10,16 @@
 
 
 ### Steps:
-1. Download the whole directory (`funasr/runtime/python/onnxruntime/paraformer/rapid_paraformer`) to the local.
+1. Download the whole directory
+```shell
+git clone https://github.com/alibaba/FunASR.git && cd FunASR
+cd funasr/runtime/python/onnxruntime/paraformer/rapid_paraformer
+```
 2. Install the related packages.
    ```bash
-   pip install requirements.txt
+   pip install -r requirements.txt
    ```
-3.  Export the model.
+3. Export the model.
     - Export your model([docs](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export)), or [Download Link](https://swap.oss-cn-hangzhou.aliyuncs.com/zhifu.gzf/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/model.onnx?OSSAccessKeyId=LTAI4FxMqzhBUx5XD4mKs296&Expires=2036094510&Signature=agmtMkxLEviGg3Rt3gOO4PvfrJY%3D)
 
 4. Run the demo.
