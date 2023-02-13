@@ -55,7 +55,7 @@ class RapidParaformer():
     def load_data(self,
                   wav_content: Union[str, np.ndarray, List[str]]) -> List:
         def load_wav(path: str) -> np.ndarray:
-            waveform, _ = librosa.load(path)
+            waveform, _ = librosa.load(path, sr=None)
             return waveform[None, ...]
 
         if isinstance(wav_content, np.ndarray):

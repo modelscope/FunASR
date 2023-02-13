@@ -270,7 +270,7 @@ def compute_fbank_feats(
         waveform,
         blackman_coeff=0.42,
         dither=1.0,
-        energy_floor=0.0,
+        energy_floor=1.0,
         frame_length=25,
         frame_shift=10,
         high_freq=0,

@@ -165,7 +165,8 @@ class WavFrontend():
                                   frame_shift=self.frame_shift,
                                   dither=self.dither,
                                   energy_floor=0.0,
-                                  sample_frequency=self.fs)
+                                  sample_frequency=self.fs,
+                                  window_type=self.window)
         feat = mat.astype(np.float32)
         feat_len = np.array(mat.shape[0]).astype(np.int32)
         return feat, feat_len
