@@ -13,7 +13,7 @@ from onnxruntime import (GraphOptimizationLevel, InferenceSession,
                          SessionOptions, get_available_providers, get_device)
 from typeguard import check_argument_types
 
-from .kaldifeat import compute_fbank_feats
+from funasr.runtime.python.onnxruntime.paraformer.rapid_paraformer.kaldifeat import compute_fbank_feats
 import warnings
 
 root_dir = Path(__file__).resolve().parent

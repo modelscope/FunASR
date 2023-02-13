@@ -9,10 +9,10 @@ from typing import List, Union, Tuple
 import librosa
 import numpy as np
 
-from .utils import (CharTokenizer, Hypothesis, ONNXRuntimeError,
+from .utils.utils import (CharTokenizer, Hypothesis, ONNXRuntimeError,
                     OrtInferSession, TokenIDConverter, WavFrontend, get_logger,
                     read_yaml)
-from .postprocess_utils import sentence_postprocess
+from .utils.postprocess_utils import sentence_postprocess
 
 logging = get_logger()
 
@@ -139,13 +139,4 @@ class Paraformer():
         # text = self.tokenizer.tokens2text(token)
         return text
 
-
-if __name__ == '__main__':
-    project_dir = Path(__file__).resolve().parent.parent
-    model_dir = "/home/zhifu.gzf/.cache/modelscope/hub/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
-    model = Paraformer(model_dir)
-
-    wav_file = os.path.join(model_dir, 'example/asr_example.wav')
-    result = model(wav_file)
-    print(result)
 

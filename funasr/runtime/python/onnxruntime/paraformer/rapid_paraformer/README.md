@@ -10,7 +10,7 @@
 
 
 ### Steps:
-1. Download the whole directory (`funasr/runtime/python/onnxruntime`) to the local.
+1. Download the whole directory (`funasr/runtime/python/onnxruntime/paraformer/rapid_paraformer`) to the local.
 2. Install the related packages.
    ```bash
    pip install requirements.txt
