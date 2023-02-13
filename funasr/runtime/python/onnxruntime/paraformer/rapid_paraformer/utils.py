@@ -22,8 +22,8 @@ logger_initialized = {}
 
 
 class TokenIDConverter():
-    def __init__(self, token_list: Union[Path, str],
-                 unk_symbol: str = "<unk>",):
+    def __init__(self, token_list: Union[List, str],
+                 ):
         check_argument_types()
 
         # self.token_list = self.load_token(token_path)

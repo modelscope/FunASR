@@ -137,7 +137,7 @@ class Paraformer():
         texts = sentence_postprocess(token)
         text = texts[0]
         # text = self.tokenizer.tokens2text(token)
-        return text[:valid_token_num-1]
+        return text
 
 
 if __name__ == '__main__':

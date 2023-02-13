@@ -17,26 +17,7 @@
    ```
 3.  Export the model.
     - Export your model([docs](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export)), or [Download Link](https://swap.oss-cn-hangzhou.aliyuncs.com/zhifu.gzf/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/model.onnx?OSSAccessKeyId=LTAI4FxMqzhBUx5XD4mKs296&Expires=2036094510&Signature=agmtMkxLEviGg3Rt3gOO4PvfrJY%3D)
-    - Put the model into the `resources/models`.
-        ```text
-        .
-        ├── demo.py
-        ├── rapid_paraformer
-        │   ├── __init__.py
-        │   ├── kaldifeat
-        │   ├── __pycache__
-        │   ├── rapid_paraformer.py
-        │   └── utils.py
-        ├── README.md
-        ├── requirements.txt
-        ├── test_onnx.py
-        ├── tests
-        │   ├── __pycache__
-        │   └── test_infer.py
-        └── test_wavs
-            ├── 0478_00017.wav
-            └── asr_example_zh.wav
-        ```
+
 4. Run the demo.
    - Input: wav formt file, support formats: `str, np.ndarray, List[str]`
    - Output: `List[str]`: recognition result.
@@ -44,11 +25,10 @@
         ```python
         from paraformer_onnx import Paraformer
 
+        model_dir = "/nfs/zhifu.gzf/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
+        model = Paraformer(model_dir, batch_size=1)
 
-        config_path = 'resources/config.yaml'
-        model = Paraformer(config_path)
-
-        wav_path = ['example/asr_example.wav']
+        wav_path = ['/nfs/zhifu.gzf/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/example/asr_example.wav']
 
         result = model(wav_path)
         print(result)
