@@ -29,12 +29,6 @@
         │   └── utils.py
         ├── README.md
         ├── requirements.txt
-        ├── resources
-        │   ├── config.yaml
-        │   └── models
-        │       ├── am.mvn
-        │       ├── model.onnx  # Put it here.
-        │       └── token_list.pkl
         ├── test_onnx.py
         ├── tests
         │   ├── __pycache__
@@ -48,15 +42,15 @@
    - Output: `List[str]`: recognition result.
    - Example:
         ```python
-        from rapid_paraformer import RapidParaformer
+        from paraformer_onnx import Paraformer
 
 
         config_path = 'resources/config.yaml'
-        paraformer = RapidParaformer(config_path)
+        model = Paraformer(config_path)
 
-        wav_path = ['test_wavs/0478_00017.wav']
+        wav_path = ['example/asr_example.wav']
 
-        result = paraformer(wav_path)
+        result = model(wav_path)
         print(result)
         ```
 

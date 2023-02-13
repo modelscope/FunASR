@@ -18,6 +18,7 @@ WavFrontend:
     lfr_m: 7
     lfr_n: 6
     filter_length_max: -.inf
+    dither: 0.0
 
 Model:
   model_path: resources/models/model.onnx
