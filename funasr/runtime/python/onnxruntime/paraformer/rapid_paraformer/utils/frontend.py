@@ -43,8 +43,6 @@ class WavFrontend():
         opts.mel_opts.debug_mel = False
         self.opts = opts
 
-        self.compute_fbank_feats = knf.OnlineFbank(self.opts)
-
         self.filter_length_min = filter_length_min
         self.filter_length_max = filter_length_max
         self.lfr_m = lfr_m
@@ -57,11 +55,12 @@ class WavFrontend():
     def fbank(self,
               waveform: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         waveform = waveform * (1 << 15)
-        self.compute_fbank_feats.accept_waveform(self.opts.frame_opts.samp_freq, waveform.tolist())
-        frames = self.compute_fbank_feats.num_frames_ready
+        fbank_fn = knf.OnlineFbank(self.opts)
+        fbank_fn.accept_waveform(self.opts.frame_opts.samp_freq, waveform.tolist())
+        frames = fbank_fn.num_frames_ready
         mat = np.empty([frames, self.opts.mel_opts.num_bins])
         for i in range(frames):
-            mat[i, :] = self.compute_fbank_feats.get_frame(i)
+            mat[i, :] = fbank_fn.get_frame(i)
         feat = mat.astype(np.float32)
         feat_len = np.array(mat.shape[0]).astype(np.int32)
         return feat, feat_len

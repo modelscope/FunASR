@@ -9,11 +9,11 @@ from typing import List, Union, Tuple
 import librosa
 import numpy as np
 
-from .utils.utils import (CharTokenizer, Hypothesis, ONNXRuntimeError,
+from utils.utils import (CharTokenizer, Hypothesis, ONNXRuntimeError,
                     OrtInferSession, TokenIDConverter, get_logger,
                     read_yaml)
-from .utils.postprocess_utils import sentence_postprocess
-from .utils.frontend import WavFrontend
+from utils.postprocess_utils import sentence_postprocess
+from utils.frontend import WavFrontend
 
 logging = get_logger()
 
