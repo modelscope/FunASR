@@ -14,7 +14,7 @@ import torch
 from funasr.modules.e2e_asr_common import end_detect
 from funasr.modules.scorers.scorer_interface import PartialScorerInterface
 from funasr.modules.scorers.scorer_interface import ScorerInterface
-
+import pdb
 
 class Hypothesis(NamedTuple):
     """Hypothesis data type."""
@@ -109,7 +109,7 @@ class BeamSearch(torch.nn.Module):
             and self.pre_beam_size < self.n_vocab
             and len(self.part_scorers) > 0
         )
-
+        
     def init_hyp(self, x: torch.Tensor) -> List[Hypothesis]:
         """Get an initial hypothesis data.
 
@@ -168,8 +168,10 @@ class BeamSearch(torch.nn.Module):
         """
         scores = dict()
         states = dict()
+
         for k, d in self.full_scorers.items():
             scores[k], states[k] = d.score(hyp.yseq, hyp.states[k], x)
+
         return scores, states
 
     def score_partial(
@@ -300,6 +302,7 @@ class BeamSearch(torch.nn.Module):
             for k in self.full_scorers:
                 weighted_scores += self.weights[k] * scores[k]
             # partial scoring
+            
             if self.do_pre_beam:
                 pre_beam_scores = (
                     weighted_scores
@@ -380,7 +383,6 @@ class BeamSearch(torch.nn.Module):
                 break
             else:
                 logging.debug(f"remained hypotheses: {len(running_hyps)}")
-
         nbest_hyps = sorted(ended_hyps, key=lambda x: x.score, reverse=True)
         # check the number of hypotheses reaching to eos
         if len(nbest_hyps) == 0:

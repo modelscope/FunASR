@@ -272,7 +272,7 @@ class E2EVadModel(torch.nn.Module):
         frame_sample_length = int(self.vad_opts.frame_length_ms * self.vad_opts.sample_rate / 1000)
         frame_shift_length = int(self.vad_opts.frame_in_ms * self.vad_opts.sample_rate / 1000)
         self.data_buf = self.waveform[0]  # 指向self.waveform[0]
-        for offset in range(0, self.waveform.shape[1] - frame_sample_length + 1, frame_shift_length):
+        for offset in range(0, self.waveform.shape[1] - frame_sample_length, frame_shift_length):
             self.decibel.append(
                 10 * math.log10((self.waveform[0][offset: offset + frame_sample_length]).square().sum() + \
                                 0.000001))

@@ -57,7 +57,6 @@ class DatadirWriter:
 
         self.keys.add(key)
         self.fd.write(f"{key} {value}\n")
-        self.fd.flush()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()

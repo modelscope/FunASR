@@ -96,14 +96,11 @@ class Speech2Text:
         else:
             decoder = asr_model.decoder2
 
-        if asr_model.ctc != None:
-            ctc = CTCPrefixScorer(ctc=asr_model.ctc, eos=asr_model.eos)
-            scorers.update(
-                ctc=ctc
-            )
+        ctc = CTCPrefixScorer(ctc=asr_model.ctc, eos=asr_model.eos)
         token_list = asr_model.token_list
         scorers.update(
             decoder=decoder,
+            ctc=ctc,
             length_bonus=LengthBonus(len(token_list)),
         )
 
@@ -272,6 +269,150 @@ class Speech2Text:
         return results
 
 
+# def inference(
+#         maxlenratio: float,
+#         minlenratio: float,
+#         batch_size: int,
+#         beam_size: int,
+#         ngpu: int,
+#         ctc_weight: float,
+#         lm_weight: float,
+#         penalty: float,
+#         log_level: Union[int, str],
+#         data_path_and_name_and_type,
+#         asr_train_config: Optional[str],
+#         asr_model_file: Optional[str],
+#         ngram_file: Optional[str] = None,
+#         cmvn_file: Optional[str] = None,
+#         raw_inputs: Union[np.ndarray, torch.Tensor] = None,
+#         lm_train_config: Optional[str] = None,
+#         lm_file: Optional[str] = None,
+#         token_type: Optional[str] = None,
+#         key_file: Optional[str] = None,
+#         word_lm_train_config: Optional[str] = None,
+#         bpemodel: Optional[str] = None,
+#         allow_variable_data_keys: bool = False,
+#         streaming: bool = False,
+#         output_dir: Optional[str] = None,
+#         dtype: str = "float32",
+#         seed: int = 0,
+#         ngram_weight: float = 0.9,
+#         nbest: int = 1,
+#         num_workers: int = 1,
+#         token_num_relax: int = 1,
+#         decoding_ind: int = 0,
+#         decoding_mode: str = "model1",
+#         **kwargs,
+# ):
+#     assert check_argument_types()
+#     if batch_size > 1:
+#         raise NotImplementedError("batch decoding is not implemented")
+#     if word_lm_train_config is not None:
+#         raise NotImplementedError("Word LM is not implemented")
+#     if ngpu > 1:
+#         raise NotImplementedError("only single GPU decoding is supported")
+#
+#     logging.basicConfig(
+#         level=log_level,
+#         format="%(asctime)s (%(module)s:%(lineno)d) %(levelname)s: %(message)s",
+#     )
+#
+#     if ngpu >= 1 and torch.cuda.is_available():
+#         device = "cuda"
+#     else:
+#         device = "cpu"
+#
+#     # 1. Set random-seed
+#     set_all_random_seed(seed)
+#
+#     # 2. Build speech2text
+#     speech2text_kwargs = dict(
+#         asr_train_config=asr_train_config,
+#         asr_model_file=asr_model_file,
+#         cmvn_file=cmvn_file,
+#         lm_train_config=lm_train_config,
+#         lm_file=lm_file,
+#         ngram_file=ngram_file,
+#         token_type=token_type,
+#         bpemodel=bpemodel,
+#         device=device,
+#         maxlenratio=maxlenratio,
+#         minlenratio=minlenratio,
+#         dtype=dtype,
+#         beam_size=beam_size,
+#         ctc_weight=ctc_weight,
+#         lm_weight=lm_weight,
+#         ngram_weight=ngram_weight,
+#         penalty=penalty,
+#         nbest=nbest,
+#         streaming=streaming,
+#         token_num_relax=token_num_relax,
+#         decoding_ind=decoding_ind,
+#         decoding_mode=decoding_mode,
+#     )
+#     speech2text = Speech2Text(**speech2text_kwargs)
+#
+#     # 3. Build data-iterator
+#     loader = ASRTask.build_streaming_iterator(
+#         data_path_and_name_and_type,
+#         dtype=dtype,
+#         batch_size=batch_size,
+#         key_file=key_file,
+#         num_workers=num_workers,
+#         preprocess_fn=ASRTask.build_preprocess_fn(speech2text.asr_train_args, False),
+#         collate_fn=ASRTask.build_collate_fn(speech2text.asr_train_args, False),
+#         allow_variable_data_keys=allow_variable_data_keys,
+#         inference=True,
+#     )
+#
+#     finish_count = 0
+#     file_count = 1
+#     # 7 .Start for-loop
+#     # FIXME(kamo): The output format should be discussed about
+#     asr_result_list = []
+#     if output_dir is not None:
+#         writer = DatadirWriter(output_dir)
+#     else:
+#         writer = None
+#
+#     for keys, batch in loader:
+#         assert isinstance(batch, dict), type(batch)
+#         assert all(isinstance(s, str) for s in keys), keys
+#         _bs = len(next(iter(batch.values())))
+#         assert len(keys) == _bs, f"{len(keys)} != {_bs}"
+#         #batch = {k: v[0] for k, v in batch.items() if not k.endswith("_lengths")}
+#
+#         # N-best list of (text, token, token_int, hyp_object)
+#         try:
+#             results = speech2text(**batch)
+#         except TooShortUttError as e:
+#             logging.warning(f"Utterance {keys} {e}")
+#             hyp = Hypothesis(score=0.0, scores={}, states={}, yseq=[])
+#             results = [[" ", ["<space>"], [2], hyp]] * nbest
+#
+#         # Only supporting batch_size==1
+#         key = keys[0]
+#         logging.info(f"Utterance: {key}")
+#         for n, (text, token, token_int, hyp) in zip(range(1, nbest + 1), results):
+#             # Create a directory: outdir/{n}best_recog
+#             if writer is not None:
+#                 ibest_writer = writer[f"{n}best_recog"]
+#
+#                 # Write the result to each file
+#                 ibest_writer["token"][key] = " ".join(token)
+#                 ibest_writer["token_int"][key] = " ".join(map(str, token_int))
+#                 ibest_writer["score"][key] = str(hyp.score)
+#
+#             if text is not None:
+#                 text_postprocessed = postprocess_utils.sentence_postprocess(token)
+#                 item = {'key': key, 'value': text_postprocessed}
+#                 asr_result_list.append(item)
+#                 finish_count += 1
+#                 asr_utils.print_progress(finish_count / file_count)
+#                 if writer is not None:
+#                     ibest_writer["text"][key] = text
+#     return asr_result_list
+
 def inference(
         maxlenratio: float,
         minlenratio: float,
@@ -377,7 +518,6 @@ def inference_modelscope(
         token_num_relax: int = 1,
         decoding_ind: int = 0,
         decoding_mode: str = "model1",
-        param_dict: dict = None,
         **kwargs,
 ):
     assert check_argument_types()
@@ -431,8 +571,6 @@ def inference_modelscope(
     def _forward(data_path_and_name_and_type,
                  raw_inputs: Union[np.ndarray, torch.Tensor] = None,
                  output_dir_v2: Optional[str] = None,
-                 fs: dict = None,
-                 param_dict: dict = None,
                  ):
         # 3. Build data-iterator
         if data_path_and_name_and_type is None and raw_inputs is not None:
@@ -442,7 +580,6 @@ def inference_modelscope(
         loader = ASRTask.build_streaming_iterator(
             data_path_and_name_and_type,
             dtype=dtype,
-            fs=fs,
             batch_size=batch_size,
             key_file=key_file,
             num_workers=num_workers,
@@ -476,7 +613,7 @@ def inference_modelscope(
             except TooShortUttError as e:
                 logging.warning(f"Utterance {keys} {e}")
                 hyp = Hypothesis(score=0.0, scores={}, states={}, yseq=[])
-                results = [[" ", ["sil"], [2], hyp]] * nbest
+                results = [[" ", ["<space>"], [2], hyp]] * nbest
     
             # Only supporting batch_size==1
             key = keys[0]
@@ -492,7 +629,7 @@ def inference_modelscope(
                     ibest_writer["score"][key] = str(hyp.score)
     
                 if text is not None:
-                    text_postprocessed, _ = postprocess_utils.sentence_postprocess(token)
+                    text_postprocessed = postprocess_utils.sentence_postprocess(token)
                     item = {'key': key, 'value': text_postprocessed}
                     asr_result_list.append(item)
                     finish_count += 1

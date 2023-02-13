@@ -10,7 +10,6 @@ from funasr.modules.nets_utils import make_pad_mask
 from funasr.layers.abs_normalize import AbsNormalize
 from funasr.layers.inversible_interface import InversibleInterface
 
-
 class GlobalMVN(AbsNormalize, InversibleInterface):
     """Apply global mean and variance normalization
 

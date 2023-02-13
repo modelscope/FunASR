@@ -12,7 +12,7 @@ from torch.nn.utils.rnn import pad_sequence
 
 from funasr.modules.beam_search.beam_search import BeamSearch
 from funasr.modules.beam_search.beam_search import Hypothesis
-
+import pdb
 
 class BatchHypothesis(NamedTuple):
     """Batchfied/Vectorized hypothesis data type."""
@@ -242,7 +242,7 @@ class BatchBeamSearch(BeamSearch):
         weighted_scores += running_hyps.score.to(
             dtype=x.dtype, device=x.device
         ).unsqueeze(1)
-
+        
         # TODO(karita): do not use list. use batch instead
         # see also https://github.com/espnet/espnet/pull/1402#discussion_r354561029
         # update hyps
@@ -281,6 +281,7 @@ class BatchBeamSearch(BeamSearch):
                     ),
                 )
             )
+        
         return self.batchfy(best_hyps)
 
     def post_process(
@@ -316,6 +317,7 @@ class BatchBeamSearch(BeamSearch):
                     ]
                 )
             )
+        
         # add eos in the final loop to avoid that there are no ended hyps
         if i == maxlen - 1:
             logging.info("adding <eos> in the last position in the loop")
@@ -334,15 +336,17 @@ class BatchBeamSearch(BeamSearch):
             running_hyps.yseq.resize_as_(yseq_eos)
             running_hyps.yseq[:] = yseq_eos
             running_hyps.length[:] = yseq_eos.shape[1]
-
+        
         # add ended hypotheses to a final list, and removed them from current hypotheses
         # (this will be a probmlem, number of hyps < beam)
         is_eos = (
             running_hyps.yseq[torch.arange(n_batch), running_hyps.length - 1]
             == self.eos
         )
+        
         for b in torch.nonzero(is_eos, as_tuple=False).view(-1):
             hyp = self._select(running_hyps, b)
             ended_hyps.append(hyp)
+        
         remained_ids = torch.nonzero(is_eos == 0, as_tuple=False).view(-1)
         return self._batch_select(running_hyps, remained_ids)

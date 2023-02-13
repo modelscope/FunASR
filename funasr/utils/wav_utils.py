@@ -204,7 +204,6 @@ def calc_shape_core(root_path, frontend_conf, speech_length_min, speech_length_m
                 write_flag = False
             if write_flag:
                 f.write("{} {},{}\n".format(sample_name, str(int(np.ceil(n_frames))), str(int(feature_dim))))
-                f.flush()
 
 
 def calc_shape(data_dir, dataset, frontend_conf, speech_length_min=-1, speech_length_max=-1, nj=32):

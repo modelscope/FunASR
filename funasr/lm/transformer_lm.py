@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 
 from funasr.modules.embedding import PositionalEncoding
-from funasr.models.encoder.transformer_encoder import TransformerEncoder_s0 as Encoder
+from funasr.lm.encoder import Encoder
 from funasr.modules.mask import subsequent_mask
 from funasr.lm.abs_model import AbsLM
 
@@ -118,14 +118,13 @@ class TransformerLM(AbsLM):
                 torch.stack([states[b][i] for b in range(n_batch)])
                 for i in range(n_layers)
             ]
-
+        
         # batch decoding
         h, _, states = self.encoder.forward_one_step(
             self.embed(ys), self._target_mask(ys), cache=batch_state
         )
         h = self.decoder(h[:, -1])
         logp = h.log_softmax(dim=-1)
-
         # transpose state of [layer, batch] into [batch, layer]
         state_list = [[states[i][b] for i in range(n_layers)] for b in range(n_batch)]
         return logp, state_list

@@ -23,5 +23,7 @@ class AbsPunctuation(torch.nn.Module, BatchScorerInterface, ABC):
     """
 
     @abstractmethod
-    def forward(self, input: torch.Tensor, hidden: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+    def forward(
+        self, input: torch.Tensor, hidden: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         raise NotImplementedError

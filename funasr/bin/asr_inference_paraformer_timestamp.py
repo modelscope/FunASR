@@ -98,13 +98,10 @@ class Speech2Text:
         logging.info("asr_train_args: {}".format(asr_train_args))
         asr_model.to(dtype=getattr(torch, dtype)).eval()
 
-        if asr_model.ctc != None:
-            ctc = CTCPrefixScorer(ctc=asr_model.ctc, eos=asr_model.eos)
-            scorers.update(
-                ctc=ctc
-            )
+        ctc = CTCPrefixScorer(ctc=asr_model.ctc, eos=asr_model.eos)
         token_list = asr_model.token_list
         scorers.update(
+            ctc=ctc,
             length_bonus=LengthBonus(len(token_list)),
         )
 
@@ -172,7 +169,7 @@ class Speech2Text:
         self.converter = converter
         self.tokenizer = tokenizer
         is_use_lm = lm_weight != 0.0 and lm_file is not None
-        if (ctc_weight == 0.0 or asr_model.ctc == None) and not is_use_lm:
+        if ctc_weight == 0.0 and not is_use_lm:
             beam_search = None
         self.beam_search = beam_search
         logging.info(f"Beam_search: {self.beam_search}")
@@ -410,7 +407,7 @@ def inference(
         results = speech2text(**batch)
         if len(results) < 1:
             hyp = Hypothesis(score=0.0, scores={}, states={}, yseq=[])
-            results = [[" ", ["sil"], [2], hyp, 10, 6]] * nbest
+            results = [[" ", ["<space>"], [2], hyp, 10, 6]] * nbest
         time_end = time.time()
         forward_time = time_end - time_beg
         lfr_factor = results[0][-1]
@@ -436,7 +433,7 @@ def inference(
                     ibest_writer["score"][key] = str(hyp.score)
     
                 if text is not None:
-                    text_postprocessed, _ = postprocess_utils.sentence_postprocess(token)
+                    text_postprocessed = postprocess_utils.sentence_postprocess(token)
                     item = {'key': key, 'value': text_postprocessed}
                     asr_result_list.append(item)
                     finish_count += 1

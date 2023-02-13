@@ -43,15 +43,12 @@ from funasr.iterators.abs_iter_factory import AbsIterFactory
 from funasr.iterators.chunk_iter_factory import ChunkIterFactory
 from funasr.iterators.multiple_iter_factory import MultipleIterFactory
 from funasr.iterators.sequence_iter_factory import SequenceIterFactory
-from funasr.main_funcs.collect_stats import collect_stats
 from funasr.optimizers.sgd import SGD
-from funasr.optimizers.fairseq_adam import FairseqAdam
 from funasr.samplers.build_batch_sampler import BATCH_TYPES
 from funasr.samplers.build_batch_sampler import build_batch_sampler
 from funasr.samplers.unsorted_batch_sampler import UnsortedBatchSampler
 from funasr.schedulers.noam_lr import NoamLR
 from funasr.schedulers.warmup_lr import WarmupLR
-from funasr.schedulers.tri_stage_scheduler import TriStageLR
 from funasr.torch_utils.load_pretrained_model import load_pretrained_model
 from funasr.torch_utils.model_summary import model_summary
 from funasr.torch_utils.pytorch_version import pytorch_cudnn_version
@@ -86,7 +83,6 @@ else:
 
 optim_classes = dict(
     adam=torch.optim.Adam,
-    fairseq_adam=FairseqAdam,
     adamw=torch.optim.AdamW,
     sgd=SGD,
     adadelta=torch.optim.Adadelta,
@@ -153,7 +149,6 @@ scheduler_classes = dict(
     CosineAnnealingLR=torch.optim.lr_scheduler.CosineAnnealingLR,
     noamlr=NoamLR,
     warmuplr=WarmupLR,
-    tri_stage=TriStageLR,
     cycliclr=torch.optim.lr_scheduler.CyclicLR,
     onecyclelr=torch.optim.lr_scheduler.OneCycleLR,
     CosineAnnealingWarmRestarts=torch.optim.lr_scheduler.CosineAnnealingWarmRestarts,
@@ -1246,8 +1241,8 @@ class AbsTask(ABC):
                 scheduler = None
 
             schedulers.append(scheduler)
-
-        logging.info(pytorch_cudnn_version())
+        #import pdb;pdb.set_trace()
+        #logging.info(pytorch_cudnn_version())
         logging.info(model_summary(model))
         for i, (o, s) in enumerate(zip(optimizers, schedulers), 1):
             suf = "" if i == 1 else str(i)
@@ -1273,52 +1268,6 @@ class AbsTask(ABC):
 
         if args.dry_run:
             pass
-        elif args.collect_stats:
-            # Perform on collect_stats mode. This mode has two roles
-            # - Derive the length and dimension of all input data
-            # - Accumulate feats, square values, and the length for whitening
-
-            if args.valid_batch_size is None:
-                args.valid_batch_size = args.batch_size
-
-            if len(args.train_shape_file) != 0:
-                train_key_file = args.train_shape_file[0]
-            else:
-                train_key_file = None
-            if len(args.valid_shape_file) != 0:
-                valid_key_file = args.valid_shape_file[0]
-            else:
-                valid_key_file = None
-
-            collect_stats(
-                model=model,
-                train_iter=cls.build_streaming_iterator(
-                    data_path_and_name_and_type=args.train_data_path_and_name_and_type,
-                    key_file=train_key_file,
-                    batch_size=args.batch_size,
-                    dtype=args.train_dtype,
-                    num_workers=args.num_workers,
-                    allow_variable_data_keys=args.allow_variable_data_keys,
-                    ngpu=args.ngpu,
-                    preprocess_fn=cls.build_preprocess_fn(args, train=False),
-                    collate_fn=cls.build_collate_fn(args, train=False),
-                ),
-                valid_iter=cls.build_streaming_iterator(
-                    data_path_and_name_and_type=args.valid_data_path_and_name_and_type,
-                    key_file=valid_key_file,
-                    batch_size=args.valid_batch_size,
-                    dtype=args.train_dtype,
-                    num_workers=args.num_workers,
-                    allow_variable_data_keys=args.allow_variable_data_keys,
-                    ngpu=args.ngpu,
-                    preprocess_fn=cls.build_preprocess_fn(args, train=False),
-                    collate_fn=cls.build_collate_fn(args, train=False),
-                ),
-                output_dir=output_dir,
-                ngpu=args.ngpu,
-                log_interval=args.log_interval,
-                write_collected_feats=args.write_collected_feats,
-            )
         else:
             logging.info("Training args: {}".format(args))
             # 6. Loads pre-trained model
@@ -1834,7 +1783,6 @@ class AbsTask(ABC):
             collate_fn,
             key_file: str = None,
             batch_size: int = 1,
-            fs: dict = None,
             dtype: str = np.float32,
             num_workers: int = 1,
             allow_variable_data_keys: bool = False,
@@ -1852,7 +1800,6 @@ class AbsTask(ABC):
         dataset = IterableESPnetDataset(
             data_path_and_name_and_type,
             float_dtype=dtype,
-            fs=fs,
             preprocess=preprocess_fn,
             key_file=key_file,
         )

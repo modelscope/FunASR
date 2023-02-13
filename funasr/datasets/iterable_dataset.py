@@ -11,16 +11,14 @@ from typing import Union
 
 import kaldiio
 import numpy as np
+import soundfile
 import torch
-import torchaudio
 from torch.utils.data.dataset import IterableDataset
 from typeguard import check_argument_types
 import os.path
 
 from funasr.datasets.dataset import ESPnetDataset
 
-
-SUPPORT_AUDIO_TYPE_SETS = ['flac', 'mp3', 'ogg', 'opus', 'wav', 'pcm']
 
 def load_kaldi(input):
     retval = kaldiio.load_mat(input)
@@ -60,14 +58,9 @@ def load_bytes(input):
     array = np.frombuffer((middle_data.astype(dtype) - offset) / abs_max, dtype=np.float32)
     return array
 
-def load_pcm(input):
-    with open(input,"rb") as f:
-        bytes = f.read()
-    return load_bytes(bytes)
 
 DATA_TYPES = {
-    "sound": lambda x: torchaudio.load(x)[0][0].numpy(),
-    "pcm": load_pcm,
+    "sound": lambda x: soundfile.read(x)[0],
     "kaldi_ark": load_kaldi,
     "bytes": load_bytes,
     "waveform": lambda x: x,
@@ -105,7 +98,6 @@ class IterableESPnetDataset(IterableDataset):
                 [str, Dict[str, np.ndarray]], Dict[str, np.ndarray]
             ] = None,
             float_dtype: str = "float32",
-            fs: dict = None,
             int_dtype: str = "long",
             key_file: str = None,
     ):
@@ -121,7 +113,6 @@ class IterableESPnetDataset(IterableDataset):
         self.float_dtype = float_dtype
         self.int_dtype = int_dtype
         self.key_file = key_file
-        self.fs = fs
 
         self.debug_info = {}
         non_iterable_list = []
@@ -181,15 +172,6 @@ class IterableESPnetDataset(IterableDataset):
             _type = self.path_name_type_list[0][2]
             func = DATA_TYPES[_type]
             array = func(value)
-            if self.fs is not None and name == "speech":
-                audio_fs = self.fs["audio_fs"]
-                model_fs = self.fs["model_fs"]
-                if audio_fs is not None and model_fs is not None:
-                    array = torch.from_numpy(array)
-                    array = array.unsqueeze(0)
-                    array = torchaudio.transforms.Resample(orig_freq=audio_fs,
-                                                   new_freq=model_fs)(array)
-                    array = array.squeeze(0).numpy()
             data[name] = array
 
             if self.preprocess is not None:
@@ -219,25 +201,8 @@ class IterableESPnetDataset(IterableDataset):
             uid = os.path.basename(self.path_name_type_list[0][0]).split(".")[0]
             name = self.path_name_type_list[0][1]
             _type = self.path_name_type_list[0][2]
-            if _type == "sound":
-                audio_type = os.path.basename(value).split(".")[1].lower()
-                if audio_type not in SUPPORT_AUDIO_TYPE_SETS:
-                    raise NotImplementedError(
-                        f'Not supported audio type: {audio_type}')
-                if audio_type == "pcm":
-                    _type = "pcm"
-
             func = DATA_TYPES[_type]
             array = func(value)
-            if self.fs is not None and name == "speech":
-                audio_fs = self.fs["audio_fs"]
-                model_fs = self.fs["model_fs"]
-                if audio_fs is not None and model_fs is not None:
-                    array = torch.from_numpy(array)
-                    array = array.unsqueeze(0)
-                    array = torchaudio.transforms.Resample(orig_freq=audio_fs,
-                                                           new_freq=model_fs)(array)
-                    array = array.squeeze(0).numpy()
             data[name] = array
 
             if self.preprocess is not None:
@@ -321,25 +286,9 @@ class IterableESPnetDataset(IterableDataset):
                 data = {}
                 # 2.a. Load data streamingly
                 for value, (path, name, _type) in zip(values, self.path_name_type_list):
-                    if _type == "sound":
-                        audio_type = os.path.basename(value).split(".")[1].lower()
-                        if audio_type not in SUPPORT_AUDIO_TYPE_SETS:
-                            raise NotImplementedError(
-                                f'Not supported audio type: {audio_type}')
-                        if audio_type == "pcm":
-                            _type = "pcm"
                     func = DATA_TYPES[_type]
                     # Load entry
                     array = func(value)
-                    if self.fs is not None and name == "speech":
-                        audio_fs = self.fs["audio_fs"]
-                        model_fs = self.fs["model_fs"]
-                        if audio_fs is not None and model_fs is not None:
-                            array = torch.from_numpy(array)
-                            array = array.unsqueeze(0)
-                            array = torchaudio.transforms.Resample(orig_freq=audio_fs,
-                                                                   new_freq=model_fs)(array)
-                            array = array.squeeze(0).numpy()
                     data[name] = array
                 if self.non_iterable_dataset is not None:
                     # 2.b. Load data from non-iterable dataset

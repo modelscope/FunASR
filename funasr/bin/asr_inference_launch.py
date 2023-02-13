@@ -210,49 +210,18 @@ def inference_launch(**kwargs):
     elif mode == "uniasr":
         from funasr.bin.asr_inference_uniasr import inference_modelscope
         return inference_modelscope(**kwargs)
-    elif mode == "uniasr_vad":
-        from funasr.bin.asr_inference_uniasr_vad import inference_modelscope
-        return inference_modelscope(**kwargs)
     elif mode == "paraformer":
         from funasr.bin.asr_inference_paraformer import inference_modelscope
         return inference_modelscope(**kwargs)
-    elif mode == "paraformer_vad":
-        from funasr.bin.asr_inference_paraformer_vad import inference_modelscope
-        return inference_modelscope(**kwargs)
-    elif mode == "paraformer_punc":
-        logging.info("Unknown decoding mode: {}".format(mode))
-        return None
     elif mode == "paraformer_vad_punc":
         from funasr.bin.asr_inference_paraformer_vad_punc import inference_modelscope
         return inference_modelscope(**kwargs)
     elif mode == "vad":
         from funasr.bin.vad_inference import inference_modelscope
         return inference_modelscope(**kwargs)
-    else:
-        logging.info("Unknown decoding mode: {}".format(mode))
-        return None
-
-def inference_launch_funasr(**kwargs):
-    if 'mode' in kwargs:
-        mode = kwargs['mode']
-    else:
-        logging.info("Unknown decoding mode.")
-        return None
-    if mode == "asr":
-        from funasr.bin.asr_inference import inference
-        return inference(**kwargs)
-    elif mode == "uniasr":
-        from funasr.bin.asr_inference_uniasr import inference
-        return inference(**kwargs)
-    elif mode == "paraformer":
-        from funasr.bin.asr_inference_paraformer import inference
-        return inference(**kwargs)
-    elif mode == "paraformer_vad_punc":
-        from funasr.bin.asr_inference_paraformer_vad_punc import inference
-        return inference(**kwargs)
-    elif mode == "vad":
-        from funasr.bin.vad_inference import inference
-        return inference(**kwargs)
+    elif mode == "mfcca":
+        from funasr.bin.asr_inference_mfcca import inference_modelscope
+        return inference_modelscope(**kwargs)
     else:
         logging.info("Unknown decoding mode: {}".format(mode))
         return None
@@ -285,7 +254,7 @@ def main(cmd=None):
         os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
         os.environ["CUDA_VISIBLE_DEVICES"] = gpuid
 
-    inference_launch_funasr(**kwargs)
+    inference_launch(**kwargs)
 
 
 if __name__ == "__main__":

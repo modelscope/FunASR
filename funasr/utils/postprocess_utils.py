@@ -232,9 +232,5 @@ def sentence_postprocess(words: List[Any], time_stamp: List[List] = None):
         return sentence, ts_lists, real_word_lists
     else:
         word_lists = abbr_dispose(word_lists)
-        real_word_lists = []
-        for ch in word_lists:
-            if ch != ' ':
-                real_word_lists.append(ch)
         sentence = ''.join(word_lists).strip()
-        return sentence, real_word_lists
+        return sentence
