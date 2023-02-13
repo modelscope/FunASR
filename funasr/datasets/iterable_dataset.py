@@ -174,90 +174,94 @@ class IterableESPnetDataset(IterableDataset):
     def __iter__(self) -> Iterator[Tuple[Union[str, int], Dict[str, np.ndarray]]]:
         count = 0
         if len(self.path_name_type_list) != 0 and (self.path_name_type_list[0][2] == "bytes" or self.path_name_type_list[0][2] == "waveform"):
+            linenum = len(self.path_name_type_list)
             data = {}
-            value = self.path_name_type_list[0][0]
-            uid = 'utt_id'
-            name = self.path_name_type_list[0][1]
-            _type = self.path_name_type_list[0][2]
-            func = DATA_TYPES[_type]
-            array = func(value)
-            if self.fs is not None and name == "speech":
-                audio_fs = self.fs["audio_fs"]
-                model_fs = self.fs["model_fs"]
-                if audio_fs is not None and model_fs is not None:
-                    array = torch.from_numpy(array)
-                    array = array.unsqueeze(0)
-                    array = torchaudio.transforms.Resample(orig_freq=audio_fs,
-                                                   new_freq=model_fs)(array)
-                    array = array.squeeze(0).numpy()
-            data[name] = array
+            for i in range(linenum):
+                value = self.path_name_type_list[i][0]
+                uid = 'utt_id'
+                name = self.path_name_type_list[i][1]
+                _type = self.path_name_type_list[i][2]
+                func = DATA_TYPES[_type]
+                array = func(value)
+                if self.fs is not None and (name == "speech" or name == "ref_speech"):
+                    audio_fs = self.fs["audio_fs"]
+                    model_fs = self.fs["model_fs"]
+                    if audio_fs is not None and model_fs is not None:
+                        array = torch.from_numpy(array)
+                        array = array.unsqueeze(0)
+                        array = torchaudio.transforms.Resample(orig_freq=audio_fs,
+                                                       new_freq=model_fs)(array)
+                        array = array.squeeze(0).numpy()
+                data[name] = array
 
-            if self.preprocess is not None:
-                data = self.preprocess(uid, data)
-            for name in data:
-                count += 1
-                value = data[name]
-                if not isinstance(value, np.ndarray):
-                    raise RuntimeError(
-                        f'All values must be converted to np.ndarray object '
-                        f'by preprocessing, but "{name}" is still {type(value)}.')
-                # Cast to desired type
-                if value.dtype.kind == 'f':
-                    value = value.astype(self.float_dtype)
-                elif value.dtype.kind == 'i':
-                    value = value.astype(self.int_dtype)
-                else:
-                    raise NotImplementedError(
-                        f'Not supported dtype: {value.dtype}')
-                data[name] = value
+                if self.preprocess is not None:
+                    data = self.preprocess(uid, data)
+                for name in data:
+                    count += 1
+                    value = data[name]
+                    if not isinstance(value, np.ndarray):
+                        raise RuntimeError(
+                            f'All values must be converted to np.ndarray object '
+                            f'by preprocessing, but "{name}" is still {type(value)}.')
+                    # Cast to desired type
+                    if value.dtype.kind == 'f':
+                        value = value.astype(self.float_dtype)
+                    elif value.dtype.kind == 'i':
+                        value = value.astype(self.int_dtype)
+                    else:
+                        raise NotImplementedError(
+                            f'Not supported dtype: {value.dtype}')
+                    data[name] = value
 
             yield uid, data
 
         elif len(self.path_name_type_list) != 0 and self.path_name_type_list[0][2] == "sound" and not self.path_name_type_list[0][0].lower().endswith(".scp"):
+            linenum = len(self.path_name_type_list)
             data = {}
-            value = self.path_name_type_list[0][0]
-            uid = os.path.basename(self.path_name_type_list[0][0]).split(".")[0]
-            name = self.path_name_type_list[0][1]
-            _type = self.path_name_type_list[0][2]
-            if _type == "sound":
-                audio_type = os.path.basename(value).split(".")[1].lower()
-                if audio_type not in SUPPORT_AUDIO_TYPE_SETS:
-                    raise NotImplementedError(
-                        f'Not supported audio type: {audio_type}')
-                if audio_type == "pcm":
-                    _type = "pcm"
+            for i in range(linenum):
+                value = self.path_name_type_list[i][0]
+                uid = os.path.basename(self.path_name_type_list[i][0]).split(".")[0]
+                name = self.path_name_type_list[i][1]
+                _type = self.path_name_type_list[i][2]
+                if _type == "sound":
+                    audio_type = os.path.basename(value).split(".")[1].lower()
+                    if audio_type not in SUPPORT_AUDIO_TYPE_SETS:
+                        raise NotImplementedError(
+                            f'Not supported audio type: {audio_type}')
+                    if audio_type == "pcm":
+                        _type = "pcm"
 
-            func = DATA_TYPES[_type]
-            array = func(value)
-            if self.fs is not None and name == "speech":
-                audio_fs = self.fs["audio_fs"]
-                model_fs = self.fs["model_fs"]
-                if audio_fs is not None and model_fs is not None:
-                    array = torch.from_numpy(array)
-                    array = array.unsqueeze(0)
-                    array = torchaudio.transforms.Resample(orig_freq=audio_fs,
-                                                           new_freq=model_fs)(array)
-                    array = array.squeeze(0).numpy()
-            data[name] = array
+                func = DATA_TYPES[_type]
+                array = func(value)
+                if self.fs is not None and (name == "speech" or name == "ref_speech"):
+                    audio_fs = self.fs["audio_fs"]
+                    model_fs = self.fs["model_fs"]
+                    if audio_fs is not None and model_fs is not None:
+                        array = torch.from_numpy(array)
+                        array = array.unsqueeze(0)
+                        array = torchaudio.transforms.Resample(orig_freq=audio_fs,
+                                                               new_freq=model_fs)(array)
+                        array = array.squeeze(0).numpy()
+                data[name] = array
 
-            if self.preprocess is not None:
-                data = self.preprocess(uid, data)
-            for name in data:
-                count += 1
-                value = data[name]
-                if not isinstance(value, np.ndarray):
-                    raise RuntimeError(
-                        f'All values must be converted to np.ndarray object '
-                        f'by preprocessing, but "{name}" is still {type(value)}.')
-                # Cast to desired type
-                if value.dtype.kind == 'f':
-                    value = value.astype(self.float_dtype)
-                elif value.dtype.kind == 'i':
-                    value = value.astype(self.int_dtype)
-                else:
-                    raise NotImplementedError(
-                        f'Not supported dtype: {value.dtype}')
-                data[name] = value
+                if self.preprocess is not None:
+                    data = self.preprocess(uid, data)
+                for name in data:
+                    count += 1
+                    value = data[name]
+                    if not isinstance(value, np.ndarray):
+                        raise RuntimeError(
+                            f'All values must be converted to np.ndarray object '
+                            f'by preprocessing, but "{name}" is still {type(value)}.')
+                    # Cast to desired type
+                    if value.dtype.kind == 'f':
+                        value = value.astype(self.float_dtype)
+                    elif value.dtype.kind == 'i':
+                        value = value.astype(self.int_dtype)
+                    else:
+                        raise NotImplementedError(
+                            f'Not supported dtype: {value.dtype}')
+                    data[name] = value
 
             yield uid, data
 
