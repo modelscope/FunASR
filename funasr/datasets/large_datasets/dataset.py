@@ -1,6 +1,6 @@
 import os
 import random
-import soundfile
+import numpy
 from functools import partial
 
 import torch
@@ -119,6 +119,7 @@ class AudioDataset(IterableDataset):
                     elif data_type == "sound":
                         key, path = item.strip().split()
                         waveform, sampling_rate = torchaudio.load(path)
+                        waveform = waveform.numpy()
                         mat = waveform[0]
                         sample_dict[data_name] = mat
                         sample_dict["sampling_rate"] = sampling_rate
