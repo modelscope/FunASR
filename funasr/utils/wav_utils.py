@@ -298,11 +298,17 @@ def filter_wav_text(data_dir, dataset):
     os.rename(text_file, "{}.bak".format(text_file))
     wav_dict = {}
     for line in wav_lines:
-        sample_name, wav_path = line.strip().split()
+        parts = line.strip().split()
+        if len(parts) < 2:
+            continue
+        sample_name, wav_path = parts
         wav_dict[sample_name] = wav_path
     text_dict = {}
     for line in text_lines:
-        sample_name, txt = line.strip().split(" ", 1)
+        parts = line.strip().split(" ", 1)
+        if len(parts) < 2:
+            continue
+        sample_name, txt = parts
         text_dict[sample_name] = txt
     filter_count = 0
     with open(wav_file) as f_wav, open(text_file) as f_text:
