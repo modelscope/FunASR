@@ -68,7 +68,7 @@ from funasr.utils.types import str2bool
 from funasr.utils.types import str2triple_str
 from funasr.utils.types import str_or_int
 from funasr.utils.types import str_or_none
-from funasr.utils.wav_utils import calc_shape, generate_data_list
+from funasr.utils.wav_utils import calc_shape, generate_data_list, filter_wav_text
 from funasr.utils.yaml_no_alias_safe_dump import yaml_no_alias_safe_dump
 
 try:
@@ -1147,6 +1147,14 @@ class AbsTask(ABC):
                     args.batch_size = args.batch_size * args.ngpu
                 if args.batch_bins is not None:
                     args.batch_bins = args.batch_bins * args.ngpu
+
+        # filter samples if wav.scp and text are mismatch
+        if (args.train_shape_file is None and args.dataset_type == "small") or args.train_data_file is None and args.dataset_type == "large":
+            if not args.simple_ddp or distributed_option.dist_rank == 0:
+                filter_wav_text(args.data_dir, args.train_set)
+                filter_wav_text(args.data_dir, args.dev_set)
+            if args.simple_ddp:
+                dist.barrier()
 
         if args.train_shape_file is None and args.dataset_type == "small":
             if not args.simple_ddp or distributed_option.dist_rank == 0:
