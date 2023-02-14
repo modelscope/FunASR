@@ -15,7 +15,7 @@ We provide a recipe `egs/aishell/paraformer/run.sh` for training a paraformer mo
 - `tag`: the suffix of experimental result directory
 
 ## Stage 0: Data preparation
-This stage processes raw AISHELL-1 data `$data_aishell` and generates the corresponding `wav.scp` and `text` in `$feats_dir/data/xxx` and `xxx` means `train/dev/test`. Here we assume you have already downloaded AISHELL-1 data. If not, you can download data [here](https://www.openslr.org/33/) and set the path for `$data_aishell`. Here we show examples for `wav.scp` and `text`, separately.
+This stage processes raw AISHELL-1 dataset `$data_aishell` and generates the corresponding `wav.scp` and `text` in `$feats_dir/data/xxx`. `xxx` means `train/dev/test`. Here we assume users have already downloaded AISHELL-1 dataset. If not, users can download data [here](https://www.openslr.org/33/) and set the path for `$data_aishell`. The examples of `wav.scp` and `text` are as follows:
 * `wav.scp`
 ```
 BAC009S0002W0122 /nfs/ASR_DATA/AISHELL-1/data_aishell/wav/train/S0002/BAC009S0002W0122.wav
@@ -30,14 +30,14 @@ BAC009S0002W0123 也 成 为 地 方 政 府 的 眼 中 钉
 BAC009S0002W0124 自 六 月 底 呼 和 浩 特 市 率 先 宣 布 取 消 限 购 后
 ...
 ```
-We can see that these two files both have two columns while the first column is the wav-id and the second column is the corresponding wav-path/label tokens.
+These two files both have two columns, while the first column is the wav ids and the second column is the corresponding wav paths/label tokens.
 
 ## Stage 1: Feature Generation
 This stage extracts FBank feature from raw wav `wav.scp` and apply speed perturbation as data augmentation according to `speed_perturb`. You can set `nj` to control the number of jobs for feature generation. The output features are saved in `$feats_dir/dump/xxx/ark` and the corresponding `feats.scp` files are saved as `$feats_dir/dump/xxx/feats.scp`. An example of `feats.scp` can be seen as follows:
 * `feats.scp`
 ```
 ...
-BAC009S0002W0122_sp0.9 /nfs/haoneng.lhn/funasr_data/aishell-1/dump/fbank/train/ark/feats.16.ark:592751055
+BAC009S0002W0122_sp0.9 /nfs/funasr_data/aishell-1/dump/fbank/train/ark/feats.16.ark:592751055
 ...
 ```
 Note that samples in this file have already been shuffled. This file contains two columns. The first column is the wav-id while the second column is the kaldi-ark feature path. Besides, `speech_shape` and `text_shape` are also generated in this stage, denoting the speech feature shape and text length of each sample. The examples are shown as follows:
