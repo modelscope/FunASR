@@ -30,17 +30,17 @@ BAC009S0002W0123 也 成 为 地 方 政 府 的 眼 中 钉
 BAC009S0002W0124 自 六 月 底 呼 和 浩 特 市 率 先 宣 布 取 消 限 购 后
 ...
 ```
-These two files both have two columns, while the first column is the wav ids and the second column is the corresponding wav paths/label tokens.
+These two files both have two columns, while the first column is wav ids and the second column is the corresponding wav paths/label tokens.
 
 ## Stage 1: Feature Generation
-This stage extracts FBank feature from raw wav `wav.scp` and apply speed perturbation as data augmentation according to `speed_perturb`. You can set `nj` to control the number of jobs for feature generation. The output features are saved in `$feats_dir/dump/xxx/ark` and the corresponding `feats.scp` files are saved as `$feats_dir/dump/xxx/feats.scp`. An example of `feats.scp` can be seen as follows:
+This stage extracts FBank features from `wav.scp` and apply speed perturbation as data augmentation according to `speed_perturb`. Users can set `nj` to control the number of jobs for feature generation. The generated features are saved in `$feats_dir/dump/xxx/ark` and the corresponding `feats.scp` files are saved as `$feats_dir/dump/xxx/feats.scp`. An example of `feats.scp` can be seen as follows:
 * `feats.scp`
 ```
 ...
 BAC009S0002W0122_sp0.9 /nfs/funasr_data/aishell-1/dump/fbank/train/ark/feats.16.ark:592751055
 ...
 ```
-Note that samples in this file have already been shuffled. This file contains two columns. The first column is the wav-id while the second column is the kaldi-ark feature path. Besides, `speech_shape` and `text_shape` are also generated in this stage, denoting the speech feature shape and text length of each sample. The examples are shown as follows:
+Note that samples in this file have already been shuffled randomly. This file contains two columns. The first column is wav ids while the second column is kaldi-ark feature paths. Besides, `speech_shape` and `text_shape` are also generated in this stage, denoting the speech feature shape and text length of each sample. The examples are shown as follows:
 * `speech_shape`
 ```
 ...
@@ -53,7 +53,7 @@ BAC009S0002W0122_sp0.9 665,80
 BAC009S0002W0122_sp0.9 15
 ...
 ```
-These two files have two columns. The first column is the wav-id and the second column is the corresponding speech feature shape and text length.
+These two files have two columns. The first column is wav ids and the second column is the corresponding speech feature shape and text length.
 
 ## Stage 2: Dictionary Preparation
 This stage prepares a dictionary, which is used as a mapping between label characters and integer indices during ASR training. The output dictionary file is saved as `$feats_dir/data/$lang_toekn_list/$token_type/tokens.txt`. Here we show an example of `tokens.txt` as follows:
