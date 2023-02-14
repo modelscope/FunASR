@@ -56,7 +56,7 @@ BAC009S0002W0122_sp0.9 15
 These two files have two columns. The first column is wav ids and the second column is the corresponding speech feature shape and text length.
 
 ## Stage 2: Dictionary Preparation
-This stage prepares a dictionary, which is used as a mapping between label characters and integer indices during ASR training. The output dictionary file is saved as `$feats_dir/data/$lang_toekn_list/$token_type/tokens.txt`. Here we show an example of `tokens.txt` as follows:
+This stage processes the dictionary, which is used as a mapping between label characters and integer indices during ASR training. The processed dictionary file is saved as `$feats_dir/data/$lang_toekn_list/$token_type/tokens.txt`. An example of `tokens.txt` is as follows:
 * `tokens.txt`
 ```
 <blank>
