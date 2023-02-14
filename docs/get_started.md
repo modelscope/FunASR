@@ -75,7 +75,7 @@ This stage processes the dictionary, which is used as a mapping between label ch
 * `<unk>`: indicates the out-of-vocabulary token
 
 ## Stage 3: Training
-This stage achieves the training of the specified model. To start training, you should manually set `exp_dir`, `CUDA_VISIBLE_DEVICES` and `gpu_num`, which have already been explained above. By default, the best `$keep_nbest_models` checkpoints on validation dataset will be averaged to generate a better model and adopted for decoding.
+This stage achieves the training of the specified model. To start training, users should manually set `exp_dir`, `CUDA_VISIBLE_DEVICES` and `gpu_num`, which have already been explained above. By default, the best `$keep_nbest_models` checkpoints on validation dataset will be averaged to generate a better model and adopted for decoding.
 
 * DDP Training
 
@@ -83,20 +83,19 @@ We support the DistributedDataParallel (DDP) training and the detail can be foun
 
 * DataLoader
 
-[comment]: <> (We support two types of DataLoaders for small and large datasets, respectively. By default, the small DataLoader is used and you can set `dataset_type=large` to enable large DataLoader. For small DataLoader, )
-We support an optional iterable-style DataLoader based on [Pytorch Iterable-style DataPipes](https://pytorch.org/data/beta/torchdata.datapipes.iter.html) for large dataset and you can set `dataset_type=large` to enable it. 
+We support an optional iterable-style DataLoader based on [Pytorch Iterable-style DataPipes](https://pytorch.org/data/beta/torchdata.datapipes.iter.html) for large dataset and users can set `dataset_type=large` to enable it. 
 
 * Configuration
 
-The parameters of the training, including model, optimization, dataset, etc., are specified by a YAML file in `conf` directory. Also, you can directly specify the parameters in `run.sh` recipe. Please avoid to specify the same parameters in both the YAML file and the recipe.
+The parameters of the training, including model, optimization, dataset, etc., can be set by a YAML file in `conf` directory. Also, users can directly set the parameters in `run.sh` recipe. Please avoid to set the same parameters in both the YAML file and the recipe.
 
 * Training Steps
 
-We support two parameters to specify the training steps, namely `max_epoch` and `max_update`. `max_epoch` indicates the total training epochs while `max_update` indicates the total training steps. If these two parameters are specified at the same time, once the training reaches any one of the two parameters, the training will be stopped.
+We support two parameters to specify the training steps, namely `max_epoch` and `max_update`. `max_epoch` indicates the total training epochs while `max_update` indicates the total training steps. If these two parameters are specified at the same time, once the training reaches any one of these two parameters, the training will be stopped.
 
 * Tensorboard
 
-You can use tensorboard to observe the loss, learning rate, etc. Please run the following command:
+Users can use tensorboard to observe the loss, learning rate, etc. Please run the following command:
 ```
 tensorboard --logdir ${exp_dir}/exp/${model_dir}/tensorboard/train
 ```
