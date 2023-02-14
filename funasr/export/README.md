@@ -11,33 +11,23 @@ The installation is the same as [funasr](../../README.md)
 
 ## Export onnx format model
 Export model from modelscope
-```python
-from funasr.export.export_model import ASRModelExportParaformer
-
-output_dir = "../export"  # onnx/torchscripts model save path
-export_model = ASRModelExportParaformer(cache_dir=output_dir, onnx=True)
-export_model.export('damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch')
+```shell
+python -m funasr.export.export_model 'damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch' "./export" true
 ```
-
-
 Export model from local path
-```python
-export_model.export('/root/cache/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch')
+```shell
+python -m funasr.export.export_model '/mnt/workspace/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch' "./export" true
 ```
 
 ## Export torchscripts format model
 Export model from modelscope
-```python
-from funasr.export.export_model import ASRModelExportParaformer
-
-output_dir = "../export"  # onnx/torchscripts model save path
-export_model = ASRModelExportParaformer(cache_dir=output_dir, onnx=False)
-export_model.export('damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch')
+```shell
+python -m funasr.export.export_model 'damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch' "./export" false
 ```
 
-Export model from local path
-```python
 
-export_model.export('/root/cache/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch')
+Export model from local path
+```shell
+python -m funasr.export.export_model '/mnt/workspace/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch' "./export" false
 ```
 
