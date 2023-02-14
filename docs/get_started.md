@@ -1,18 +1,18 @@
 # Get Started
-This is an easy example which introduces how to train a paraformer model on AISHELL-1 data from scratch. According to this example, you can train other models (conformer, paraformer, etc.) on other datasets (AISHELL-1, AISHELL-2, etc.) similarly.
+Here we take "Training a paraformer model from scratch using the AISHELL-1 dataset" as an example to introduce how to use FunASR. According to this example, users can similarly employ other datasets (such as AISHELL-2 dataset, etc.) to train other models (such as conformer, transformer, etc.).
 
 ## Overall Introduction
-We provide a recipe `egs/aishell/paraformer/run.sh` for training a paraformer model on AISHELL-1 data  . This recipe consists of five stages and support training on multiple GPUs and decoding by CPU or GPU. Before introduce each stage in detail, we first explain several variables which should be set by users.
+We provide a recipe `egs/aishell/paraformer/run.sh` for training a paraformer model on AISHELL-1 dataset. This recipe consists of five stages, supporting training on multiple GPUs and decoding by CPU or GPU. Before introducing each stage in detail, we first explain several parameters which should be set by users.
 - `CUDA_VISIBLE_DEVICES`: visible gpu list
 - `gpu_num`: the number of GPUs used for training
 - `gpu_inference`: whether to use GPUs for decoding
-- `njob`: for CPU decoding, indicating the total number of CPU jobs; for GPU decoding, indicating the number of jobs on each GPU.
-- `feats_dir`: the path to save processed data
-- `exp_dir`: the path to save experimental results
-- `data_aishell`: the path of raw AISHELL-1 data
-- `tag`: the suffix of experimental result directory
+- `njob`: for CPU decoding, indicating the total number of CPU jobs; for GPU decoding, indicating the number of jobs on each GPU
+- `data_aishell`: the raw path of AISHELL-1 dataset
+- `feats_dir`: the path for saving processed data
 - `nj`: the number of jobs for data preparation
 - `speed_perturb`: the range of speech perturbed
+- `exp_dir`: the path for saving experimental results
+- `tag`: the suffix of experimental result directory
 
 ## Stage 0: Data preparation
 This stage processes raw AISHELL-1 data `$data_aishell` and generates the corresponding `wav.scp` and `text` in `$feats_dir/data/xxx` and `xxx` means `train/dev/test`. Here we assume you have already downloaded AISHELL-1 data. If not, you can download data [here](https://www.openslr.org/33/) and set the path for `$data_aishell`. Here we show examples for `wav.scp` and `text`, separately.
