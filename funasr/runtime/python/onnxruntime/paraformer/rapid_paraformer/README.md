@@ -20,7 +20,7 @@ cd funasr/runtime/python/onnxruntime/paraformer/rapid_paraformer
    pip install -r requirements.txt
    ```
 3. Export the model.
-    - Export your model([docs](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export)), or [Download Link](https://swap.oss-cn-hangzhou.aliyuncs.com/zhifu.gzf/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/model.onnx?OSSAccessKeyId=LTAI4FxMqzhBUx5XD4mKs296&Expires=2036094510&Signature=agmtMkxLEviGg3Rt3gOO4PvfrJY%3D)
+    - Export your model([docs](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export))
 
 4. Run the demo.
    - Model_dir: the model path, which contains `model.onnx`, `config.yaml`, `am.mvn`.
@@ -38,6 +38,17 @@ cd funasr/runtime/python/onnxruntime/paraformer/rapid_paraformer
         result = model(wav_path)
         print(result)
         ```
+
+## Speed
+
+Environment：Intel(R) Xeon(R) Platinum 8163 CPU @ 2.50GHz
+Test [wav](https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav)
+
+| Backend |   RTF   |
+|:-------:|:-------:|
+| Pytorch |  0.110  |
+|  Onnx   | 0.0386  |
+
 
 ## Acknowledge
 1. We acknowledge [SWHL](https://github.com/RapidAI/RapidASR) for contributing the onnxruntime(python api).
