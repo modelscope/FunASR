@@ -354,7 +354,7 @@ class CommonPreprocessor(AbsPreprocessor):
             if self.split_with_space:
                 tokens = text.strip().split(" ")
                 if self.seg_dict is not None:
-                    tokens = forward_segment("".join(tokens).lower(), self.seg_dict)
+                    tokens = forward_segment("".join(tokens), self.seg_dict)
                     tokens = seg_tokenize(tokens, self.seg_dict)
             else:
                 tokens = self.tokenizer.text2tokens(text)
