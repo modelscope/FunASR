@@ -1,4 +1,4 @@
-<div align="left"><img src="docs/images/funasr_logo.jpg" width="400"/></div>
+[//]: # (<div align="left"><img src="docs/images/funasr_logo.jpg" width="400"/></div>)
 
 # FunASR: A Fundamental End-to-End Speech Recognition Toolkit
 
