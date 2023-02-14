@@ -16,6 +16,7 @@ jobs:
         with:
           docs-folder: "docs/"
           pre-build-command: "pip install sphinx-markdown-tables nbsphinx jinja2 recommonmark sphinx_rtd_theme"
+      - uses: actions/checkout@v1
       - uses: ammaraskar/sphinx-action@master
         with:
           docs-folder: "docs_cn/"
@@ -25,6 +26,7 @@ jobs:
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
         run: |
           mkdir public
+          touch public/.nojekyll
           mkdir public/en
           touch public/en/.nojekyll
           cp -r docs/_build/html/* public/en/
