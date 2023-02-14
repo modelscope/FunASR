@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Get Started &mdash; FunASR  documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Pretrained models on ModelScope" href="modelscope_models.html" />
+    <link rel="prev" title="Papers" href="papers.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            FunASR
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Tutorial:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="papers.html">Papers</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Get Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overall-introduction">Overall Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#stage-0-data-preparation">Stage 0: Data preparation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#stage-1-feature-generation">Stage 1: Feature Generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#stage-2-dictionary-preparation">Stage 2: Dictionary Preparation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#stage-3-training">Stage 3: Training</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#stage-4-decoding">Stage 4: Decoding</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">ModelScope:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="modelscope_models.html">Pretrained models on ModelScope</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">FunASR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Get Started</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/get_started.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="get-started">
+<h1>Get Started<a class="headerlink" href="#get-started" title="Permalink to this headline"></a></h1>
+<p>This is an easy example which introduces how to train a paraformer model on AISHELL-1 data from scratch. According to this example, you can train other models (conformer, paraformer, etc.) on other datasets (AISHELL-1, AISHELL-2, etc.) similarly.</p>
+<div class="section" id="overall-introduction">
+<h2>Overall Introduction<a class="headerlink" href="#overall-introduction" title="Permalink to this headline"></a></h2>
+<p>We provide a recipe <code class="docutils literal notranslate"><span class="pre">egs/aishell/paraformer/run.sh</span></code> for training a paraformer model on AISHELL-1 data  . This recipe consists of five stages and support training on multiple GPUs and decoding by CPU or GPU. Before introduce each stage in detail, we first explain several variables which should be set by users.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">CUDA_VISIBLE_DEVICES</span></code>: visible gpu list</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gpu_num</span></code>: the number of GPUs used for training</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gpu_inference</span></code>: whether to use GPUs for decoding</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">njob</span></code>: for CPU decoding, indicating the total number of CPU jobs; for GPU decoding, indicating the number of jobs on each GPU.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">feats_dir</span></code>: the path to save processed data</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">exp_dir</span></code>: the path to save experimental results</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">data_aishell</span></code>: the path of raw AISHELL-1 data</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tag</span></code>: the suffix of experimental result directory</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nj</span></code>: the number of jobs for data preparation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">speed_perturb</span></code>: the range of speech perturbed</p></li>
+</ul>
+</div>
+<div class="section" id="stage-0-data-preparation">
+<h2>Stage 0: Data preparation<a class="headerlink" href="#stage-0-data-preparation" title="Permalink to this headline"></a></h2>
+<p>This stage processes raw AISHELL-1 data <code class="docutils literal notranslate"><span class="pre">$data_aishell</span></code> and generates the corresponding <code class="docutils literal notranslate"><span class="pre">wav.scp</span></code> and <code class="docutils literal notranslate"><span class="pre">text</span></code> in <code class="docutils literal notranslate"><span class="pre">$feats_dir/data/xxx</span></code> and <code class="docutils literal notranslate"><span class="pre">xxx</span></code> means <code class="docutils literal notranslate"><span class="pre">train/dev/test</span></code>. Here we assume you have already downloaded AISHELL-1 data. If not, you can download data <a class="reference external" href="https://www.openslr.org/33/">here</a> and set the path for <code class="docutils literal notranslate"><span class="pre">$data_aishell</span></code>. Here we show examples for <code class="docutils literal notranslate"><span class="pre">wav.scp</span></code> and <code class="docutils literal notranslate"><span class="pre">text</span></code>, separately.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">wav.scp</span></code></p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">BAC009S0002W0122</span> <span class="o">/</span><span class="n">nfs</span><span class="o">/</span><span class="n">ASR_DATA</span><span class="o">/</span><span class="n">AISHELL</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">data_aishell</span><span class="o">/</span><span class="n">wav</span><span class="o">/</span><span class="n">train</span><span class="o">/</span><span class="n">S0002</span><span class="o">/</span><span class="n">BAC009S0002W0122</span><span class="o">.</span><span class="n">wav</span>
+<span class="n">BAC009S0002W0123</span> <span class="o">/</span><span class="n">nfs</span><span class="o">/</span><span class="n">ASR_DATA</span><span class="o">/</span><span class="n">AISHELL</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">data_aishell</span><span class="o">/</span><span class="n">wav</span><span class="o">/</span><span class="n">train</span><span class="o">/</span><span class="n">S0002</span><span class="o">/</span><span class="n">BAC009S0002W0123</span><span class="o">.</span><span class="n">wav</span>
+<span class="n">BAC009S0002W0124</span> <span class="o">/</span><span class="n">nfs</span><span class="o">/</span><span class="n">ASR_DATA</span><span class="o">/</span><span class="n">AISHELL</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">data_aishell</span><span class="o">/</span><span class="n">wav</span><span class="o">/</span><span class="n">train</span><span class="o">/</span><span class="n">S0002</span><span class="o">/</span><span class="n">BAC009S0002W0124</span><span class="o">.</span><span class="n">wav</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">text</span></code></p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">BAC009S0002W0122</span> <span class="n">而</span> <span class="n">对</span> <span class="n">楼</span> <span class="n">市</span> <span class="n">成</span> <span class="n">交</span> <span class="n">抑</span> <span class="n">制</span> <span class="n">作</span> <span class="n">用</span> <span class="n">最</span> <span class="n">大</span> <span class="n">的</span> <span class="n">限</span> <span class="n">购</span>
+<span class="n">BAC009S0002W0123</span> <span class="n">也</span> <span class="n">成</span> <span class="n">为</span> <span class="n">地</span> <span class="n">方</span> <span class="n">政</span> <span class="n">府</span> <span class="n">的</span> <span class="n">眼</span> <span class="n">中</span> <span class="n">钉</span>
+<span class="n">BAC009S0002W0124</span> <span class="n">自</span> <span class="n">六</span> <span class="n">月</span> <span class="n">底</span> <span class="n">呼</span> <span class="n">和</span> <span class="n">浩</span> <span class="n">特</span> <span class="n">市</span> <span class="n">率</span> <span class="n">先</span> <span class="n">宣</span> <span class="n">布</span> <span class="n">取</span> <span class="n">消</span> <span class="n">限</span> <span class="n">购</span> <span class="n">后</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>We can see that these two files both have two columns while the first column is the wav-id and the second column is the corresponding wav-path/label tokens.</p>
+</div>
+<div class="section" id="stage-1-feature-generation">
+<h2>Stage 1: Feature Generation<a class="headerlink" href="#stage-1-feature-generation" title="Permalink to this headline"></a></h2>
+<p>This stage extracts FBank feature from raw wav <code class="docutils literal notranslate"><span class="pre">wav.scp</span></code> and apply speed perturbation as data augmentation according to <code class="docutils literal notranslate"><span class="pre">speed_perturb</span></code>. You can set <code class="docutils literal notranslate"><span class="pre">nj</span></code> to control the number of jobs for feature generation. The output features are saved in <code class="docutils literal notranslate"><span class="pre">$feats_dir/dump/xxx/ark</span></code> and the corresponding <code class="docutils literal notranslate"><span class="pre">feats.scp</span></code> files are saved as <code class="docutils literal notranslate"><span class="pre">$feats_dir/dump/xxx/feats.scp</span></code>. An example of <code class="docutils literal notranslate"><span class="pre">feats.scp</span></code> can be seen as follows:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">feats.scp</span></code></p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="n">BAC009S0002W0122_sp0</span><span class="o">.</span><span class="mi">9</span> <span class="o">/</span><span class="n">nfs</span><span class="o">/</span><span class="n">haoneng</span><span class="o">.</span><span class="n">lhn</span><span class="o">/</span><span class="n">funasr_data</span><span class="o">/</span><span class="n">aishell</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">dump</span><span class="o">/</span><span class="n">fbank</span><span class="o">/</span><span class="n">train</span><span class="o">/</span><span class="n">ark</span><span class="o">/</span><span class="n">feats</span><span class="o">.</span><span class="mf">16.</span><span class="n">ark</span><span class="p">:</span><span class="mi">592751055</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>Note that samples in this file have already been shuffled. This file contains two columns. The first column is the wav-id while the second column is the kaldi-ark feature path. Besides, <code class="docutils literal notranslate"><span class="pre">speech_shape</span></code> and <code class="docutils literal notranslate"><span class="pre">text_shape</span></code> are also generated in this stage, denoting the speech feature shape and text length of each sample. The examples are shown as follows:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">speech_shape</span></code></p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="n">BAC009S0002W0122_sp0</span><span class="o">.</span><span class="mi">9</span> <span class="mi">665</span><span class="p">,</span><span class="mi">80</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">text_shape</span></code></p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="n">BAC009S0002W0122_sp0</span><span class="o">.</span><span class="mi">9</span> <span class="mi">15</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>These two files have two columns. The first column is the wav-id and the second column is the corresponding speech feature shape and text length.</p>
+</div>
+<div class="section" id="stage-2-dictionary-preparation">
+<h2>Stage 2: Dictionary Preparation<a class="headerlink" href="#stage-2-dictionary-preparation" title="Permalink to this headline"></a></h2>
+<p>This stage prepares a dictionary, which is used as a mapping between label characters and integer indices during ASR training. The output dictionary file is saved as <code class="docutils literal notranslate"><span class="pre">$feats_dir/data/$lang_toekn_list/$token_type/tokens.txt</span></code>. Here we show an example of <code class="docutils literal notranslate"><span class="pre">tokens.txt</span></code> as follows:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">tokens.txt</span></code></p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">blank</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">s</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">s</span><span class="o">&gt;</span>
+<span class="n">一</span>
+<span class="n">丁</span>
+<span class="o">...</span>
+<span class="n">龚</span>
+<span class="n">龟</span>
+<span class="o">&lt;</span><span class="n">unk</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;blank&gt;</span></code>: indicates the blank token for CTC</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;s&gt;</span></code>: indicates the start-of-sentence token</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;/s&gt;</span></code>: indicates the end-of-sentence token</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;unk&gt;</span></code>: indicates the out-of-vocabulary token</p></li>
+</ul>
+</div>
+<div class="section" id="stage-3-training">
+<h2>Stage 3: Training<a class="headerlink" href="#stage-3-training" title="Permalink to this headline"></a></h2>
+<p>This stage achieves the training of the specified model. To start training, you should manually set <code class="docutils literal notranslate"><span class="pre">exp_dir</span></code>, <code class="docutils literal notranslate"><span class="pre">CUDA_VISIBLE_DEVICES</span></code> and <code class="docutils literal notranslate"><span class="pre">gpu_num</span></code>, which have already been explained above. By default, the best <code class="docutils literal notranslate"><span class="pre">$keep_nbest_models</span></code> checkpoints on validation dataset will be averaged to generate a better model and adopted for decoding.</p>
+<ul class="simple">
+<li><p>DDP Training</p></li>
+</ul>
+<p>We support the DistributedDataParallel (DDP) training and the detail can be found <a class="reference external" href="https://pytorch.org/tutorials/intermediate/ddp_tutorial.html">here</a>. To enable DDP training, please set <code class="docutils literal notranslate"><span class="pre">gpu_num</span></code> greater than 1. For example, if you set <code class="docutils literal notranslate"><span class="pre">CUDA_VISIBLE_DEVICES=0,1,5,6,7</span></code> and <code class="docutils literal notranslate"><span class="pre">gpu_num=3</span></code>, then the gpus with ids 0, 1 and 5 will be used for training.</p>
+<ul class="simple">
+<li><p>DataLoader</p></li>
+</ul>
+<p>We support an optional iterable-style DataLoader based on <a class="reference external" href="https://pytorch.org/data/beta/torchdata.datapipes.iter.html">Pytorch Iterable-style DataPipes</a> for large dataset and you can set <code class="docutils literal notranslate"><span class="pre">dataset_type=large</span></code> to enable it.</p>
+<ul class="simple">
+<li><p>Configuration</p></li>
+</ul>
+<p>The parameters of the training, including model, optimization, dataset, etc., are specified by a YAML file in <code class="docutils literal notranslate"><span class="pre">conf</span></code> directory. Also, you can directly specify the parameters in <code class="docutils literal notranslate"><span class="pre">run.sh</span></code> recipe. Please avoid to specify the same parameters in both the YAML file and the recipe.</p>
+<ul class="simple">
+<li><p>Training Steps</p></li>
+</ul>
+<p>We support two parameters to specify the training steps, namely <code class="docutils literal notranslate"><span class="pre">max_epoch</span></code> and <code class="docutils literal notranslate"><span class="pre">max_update</span></code>. <code class="docutils literal notranslate"><span class="pre">max_epoch</span></code> indicates the total training epochs while <code class="docutils literal notranslate"><span class="pre">max_update</span></code> indicates the total training steps. If these two parameters are specified at the same time, once the training reaches any one of the two parameters, the training will be stopped.</p>
+<ul class="simple">
+<li><p>Tensorboard</p></li>
+</ul>
+<p>You can use tensorboard to observe the loss, learning rate, etc. Please run the following command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>tensorboard --logdir ${exp_dir}/exp/${model_dir}/tensorboard/train
+</pre></div>
+</div>
+</div>
+<div class="section" id="stage-4-decoding">
+<h2>Stage 4: Decoding<a class="headerlink" href="#stage-4-decoding" title="Permalink to this headline"></a></h2>
+<p>This stage generates the recognition results with acoustic features as input and calculate the <code class="docutils literal notranslate"><span class="pre">CER</span></code> to verify the performance of the trained model.</p>
+<ul class="simple">
+<li><p>Mode Selection</p></li>
+</ul>
+<p>As we support conformer, paraformer and uniasr in FunASR and they have different inference interfaces, a <code class="docutils literal notranslate"><span class="pre">mode</span></code> param is specified as <code class="docutils literal notranslate"><span class="pre">asr/paraformer/uniase</span></code> according to the trained model.</p>
+<ul class="simple">
+<li><p>Configuration</p></li>
+</ul>
+<p>We support CTC decoding, attention decoding and hybrid CTC-attention decoding in FunASR, which can be specified by <code class="docutils literal notranslate"><span class="pre">ctc_weight</span></code> in a YAML file in <code class="docutils literal notranslate"><span class="pre">conf</span></code> directory. Specifically, <code class="docutils literal notranslate"><span class="pre">ctc_weight=1.0</span></code> indicates CTC decoding, <code class="docutils literal notranslate"><span class="pre">ctc_weight=0.0</span></code> indicates attention decoding, <code class="docutils literal notranslate"><span class="pre">0.0&lt;ctc_weight&lt;1.0</span></code> indicates hybrid CTC-attention decoding.</p>
+<ul class="simple">
+<li><p>CPU/GPU Decoding</p></li>
+</ul>
+<p>We support CPU and GPU decoding in FunASR. For CPU decoding, you should set <code class="docutils literal notranslate"><span class="pre">gpu_inference=False</span></code> and set <code class="docutils literal notranslate"><span class="pre">njob</span></code> to specify the total number of CPU decoding jobs. For GPU decoding, you should set <code class="docutils literal notranslate"><span class="pre">gpu_inference=True</span></code>. You should also set <code class="docutils literal notranslate"><span class="pre">gpuid_list</span></code> to indicate which GPUs are used for decoding and <code class="docutils literal notranslate"><span class="pre">njobs</span></code> to indicate the number of decoding jobs on each GPU.</p>
+<ul class="simple">
+<li><p>Performance</p></li>
+</ul>
+<p>We adopt <code class="docutils literal notranslate"><span class="pre">CER</span></code> to verify the performance. The results are in <code class="docutils literal notranslate"><span class="pre">$exp_dir/exp/$model_dir/$decoding_yaml_name/$average_model_name/$dset</span></code>, namely <code class="docutils literal notranslate"><span class="pre">text.cer</span></code> and <code class="docutils literal notranslate"><span class="pre">text.cer.txt</span></code>. <code class="docutils literal notranslate"><span class="pre">text.cer</span></code> saves the comparison between the recognized text and the reference text while <code class="docutils literal notranslate"><span class="pre">text.cer.txt</span></code> saves the final <code class="docutils literal notranslate"><span class="pre">CER</span></code> result. The following is an example of <code class="docutils literal notranslate"><span class="pre">text.cer</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">text.cer</span></code></p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="n">BAC009S0764W0213</span><span class="p">(</span><span class="n">nwords</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span><span class="n">cor</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span><span class="n">ins</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="k">del</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">sub</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="n">corr</span><span class="o">=</span><span class="mf">100.00</span><span class="o">%</span><span class="p">,</span><span class="n">cer</span><span class="o">=</span><span class="mf">0.00</span><span class="o">%</span>
+<span class="n">ref</span><span class="p">:</span>    <span class="n">构</span> <span class="n">建</span> <span class="n">良</span> <span class="n">好</span> <span class="n">的</span> <span class="n">旅</span> <span class="n">游</span> <span class="n">市</span> <span class="n">场</span> <span class="n">环</span> <span class="n">境</span>
+<span class="n">res</span><span class="p">:</span>    <span class="n">构</span> <span class="n">建</span> <span class="n">良</span> <span class="n">好</span> <span class="n">的</span> <span class="n">旅</span> <span class="n">游</span> <span class="n">市</span> <span class="n">场</span> <span class="n">环</span> <span class="n">境</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="papers.html" class="btn btn-neutral float-left" title="Papers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="modelscope_models.html" class="btn btn-neutral float-right" title="Pretrained models on ModelScope" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Speech Lab, Alibaba Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
