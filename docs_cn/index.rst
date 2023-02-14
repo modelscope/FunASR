@@ -16,6 +16,7 @@ FunASR致力于在语音识别的学术研究和工业应用之间构建起一�
    ./installation.md
    ./papers.md
    ./get_started.md
+   ./build_task.md
 
 .. toctree::
    :maxdepth: 1
