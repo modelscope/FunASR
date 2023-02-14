@@ -311,7 +311,7 @@ def filter_wav_text(data_dir, dataset):
         sample_name, txt = parts
         text_dict[sample_name] = txt
     filter_count = 0
-    with open(wav_file) as f_wav, open(text_file) as f_text:
+    with open(wav_file, "w") as f_wav, open(text_file, "w") as f_text:
         for sample_name, wav_path in wav_dict.items():
             if sample_name in text_dict.keys():
                 f_wav.write(sample_name + " " + wav_path  + "\n")
