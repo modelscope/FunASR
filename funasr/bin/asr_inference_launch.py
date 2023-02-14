@@ -228,6 +228,9 @@ def inference_launch(**kwargs):
     elif mode == "vad":
         from funasr.bin.vad_inference import inference_modelscope
         return inference_modelscope(**kwargs)
+    elif mode == "mfcca":
+        from funasr.bin.asr_inference_mfcca import inference_modelscope
+        return inference_modelscope(**kwargs)
     else:
         logging.info("Unknown decoding mode: {}".format(mode))
         return None
@@ -253,6 +256,9 @@ def inference_launch_funasr(**kwargs):
     elif mode == "vad":
         from funasr.bin.vad_inference import inference
         return inference(**kwargs)
+    elif mode == "mfcca":
+        from funasr.bin.asr_inference_mfcca import inference_modelscope
+        return inference_modelscope(**kwargs)
     else:
         logging.info("Unknown decoding mode: {}".format(mode))
         return None
