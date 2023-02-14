@@ -224,7 +224,7 @@ class IterableESPnetDataset(IterableDataset):
                 name = self.path_name_type_list[i][1]
                 _type = self.path_name_type_list[i][2]
                 if _type == "sound":
-                    audio_type = os.path.basename(value).split(".")[1].lower()
+                    audio_type = os.path.basename(value).split(".")[-1].lower()
                     if audio_type not in SUPPORT_AUDIO_TYPE_SETS:
                         raise NotImplementedError(
                             f'Not supported audio type: {audio_type}')
@@ -326,7 +326,7 @@ class IterableESPnetDataset(IterableDataset):
                 # 2.a. Load data streamingly
                 for value, (path, name, _type) in zip(values, self.path_name_type_list):
                     if _type == "sound":
-                        audio_type = os.path.basename(value).split(".")[1].lower()
+                        audio_type = os.path.basename(value).split(".")[-1].lower()
                         if audio_type not in SUPPORT_AUDIO_TYPE_SETS:
                             raise NotImplementedError(
                                 f'Not supported audio type: {audio_type}')
