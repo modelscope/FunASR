@@ -17,9 +17,9 @@ jobs:
           docs-folder: "docs/"
           pre-build-command: "pip install sphinx-markdown-tables nbsphinx jinja2 recommonmark sphinx_rtd_theme"
       - uses: ammaraskar/sphinx-action@master
-          with:
-            docs-folder: "docs_cn/"
-            pre-build-command: "pip install sphinx-markdown-tables nbsphinx jinja2 recommonmark sphinx_rtd_theme"
+        with:
+          docs-folder: "docs_cn/"
+          pre-build-command: "pip install sphinx-markdown-tables nbsphinx jinja2 recommonmark sphinx_rtd_theme"
 
       - name: deploy copy
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
