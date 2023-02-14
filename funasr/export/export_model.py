@@ -24,7 +24,7 @@ class ASRModelExportParaformer:
             feats_dim=560,
             onnx=False,
         )
-        logging.info("output dir: {}".format(self.cache_dir))
+        print("output dir: {}".format(self.cache_dir))
         self.onnx = onnx
         
 
@@ -50,7 +50,7 @@ class ASRModelExportParaformer:
         else:
             self._export_torchscripts(model, verbose, export_dir)
 
-        logging.info("output dir: {}".format(export_dir))
+        print("output dir: {}".format(export_dir))
 
 
     def _export_torchscripts(self, model, verbose, path, enc_size=None):
