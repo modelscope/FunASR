@@ -7,7 +7,7 @@
 [**News**](https://github.com/alibaba-damo-academy/FunASR#whats-new) 
 | [**Highlights**](#highlights)
 | [**Installation**](#installation)
-| [**Docs**](https://alibaba-damo-academy.github.io/FunASR/index.html)
+| [**Docs**](https://alibaba-damo-academy.github.io/FunASR/cn/index.html)
 | [**Tutorial**](https://github.com/alibaba-damo-academy/FunASR/wiki#funasr%E7%94%A8%E6%88%B7%E6%89%8B%E5%86%8C)
 | [**Papers**](https://github.com/alibaba-damo-academy/FunASR#citations)
 | [**Runtime**](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime)
@@ -42,7 +42,7 @@ pip install --editable ./
 For more details, please ref to [installation](https://github.com/alibaba-damo-academy/FunASR/wiki)
 
 ## Usage
-For users who are new to FunASR and ModelScope, please refer to [FunASR Docs](https://alibaba-damo-academy.github.io/FunASR/index.html).
+For users who are new to FunASR and ModelScope, please refer to [FunASR Docs](https://alibaba-damo-academy.github.io/FunASR/cn/index.html).
 
 ## Contact
 
