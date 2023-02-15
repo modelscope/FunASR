@@ -75,7 +75,7 @@ def calc_labels(spk_turns, spk_list, length, n_spk, remove_sil=False, max_overla
                 sr=None, frame_shift=0.01):
     frame_shift = int(frame_shift * sr)
     num_frame = int((float(length) + (float(frame_shift) / 2)) / frame_shift)
-    multi_label = np.zeros([n_spk, num_frame], dtype=np.int32)
+    multi_label = np.zeros([n_spk, num_frame], dtype=np.float32)
     for _, st, dur, spk in spk_turns:
         idx = spk_list.index(spk)
 
