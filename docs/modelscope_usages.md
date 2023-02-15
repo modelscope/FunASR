@@ -8,44 +8,45 @@ We provide the usages of different models under the `egs_modelscope`, which supp
 - `infer_after_finetune.py`: perform inference on the specified dataset based on the finetuned model
 
 ## Inference
-We provide `infer.py` to achieve the inference. Based on this file, users can preform inference on the specified dataset based on our provided model and obtain the corresponding recognition results. If the transcript is given, the `CER` will be calculated at the same time. Before performing inference, users can specify the following parameters to modify the inference configuration:
-* `data_dir`：数据集目录。目录下应该包括音频列表文件`wav.scp`和抄本文件`text`(可选)，具体格式可以参见[快速开始](./get_started.md)中的说明。如果`text`文件存在，则会相应的计算CER，否则会跳过。
-* `output_dir`：推理结果保存目录
-* `batch_size`：推理时的batch大小
-* `ctc_weight`：部分模型包含CTC模块，可以设置该参数来指定推理时，CTC模块的权重
+We provide `infer.py` to achieve the inference. Based on this file, users can preform inference on the specified dataset based on our provided model and obtain the corresponding recognition results. If the transcript is given, the `CER` will be calculated at the same time. Before performing inference, users can set the following parameters to modify the inference configuration:
+* `data_dir`：dataset directory. The directory should contain the wav list file `wav.scp` and the transcript file `text` (optional). For the format of these two files, please refer to the instructions in [Quick Start](./get_started.md). If the `text` file exists, the CER will be calculated accordingly, otherwise it will be skipped.
+* `output_dir`：the directory for saving the inference results
+* `batch_size`：batch size during the inference
+* `ctc_weight`：some models contain a CTC module, users can set this parameter to specify the weight of the CTC module during the inference
 
-除了直接在`infer.py`中设置参数外，用户也可以通过手动修改模型下载目录下的`decoding.yaml`文件中的参数来修改推理配置。
+In addition to directly setting parameters in `infer.py`, users can also manually set the parameters in the `decoding.yaml` file in the model download directory to modify the inference configuration.
 
-## 模型微调
-我们提供了`finetune.py`来实现模型微调。基于此文件，用户可以基于我们提供的模型作为初始模型，在指定的数据集上进行微调，从而在特征领域取得更好的性能。在微调开始前，用户可以指定如下参数来修改微调配置：
-* `data_path`：数据目录。该目录下应该包括存放训练集数据的`train`目录和存放验证集数据的`dev`目录。每个目录中需要包括音频列表文件`wav.scp`和抄本文件`text`
-* `output_dir`：微调结果保存目录
-* `dataset_type`：对于小数据集，设置为`small`；当数据量大于1000小时时，设置为`large`
-* `batch_bins`：batch size，如果dataset_type设置为`small`，batch_bins单位为fbank特征帧数；如果dataset_type=`large`，batch_bins单位为毫秒
-* `max_epoch`：最大的训练轮数
+## Finetuning
+We provide `finetune.py` to achieve the finetuning. Based on this file, users can finetune on the specified dataset based on our provided model as the initial model to achieve better performance in the specificed domain. Before finetuning, users can set the following parameters to modify the finetuning configuration:
+* `data_path`：dataset directory。This directory should contain the `train` directory for saving the training set and the `dev` directory for saving the validation set. Each directory needs to contain the wav list file `wav.scp` and the transcript file `text`
+* `output_dir`：the directory for saving the finetuning results
+* `dataset_type`：for small dataset，set as `small`；for dataset larger than 1000 hours，set as `large`
+* `batch_bins`：batch size，if dataset_type is set as `small`，the unit of batch_bins is the number of fbank feature frames; if dataset_type is set as `large`, the unit of batch_bins is milliseconds
+* `max_epoch`：the maximum number of training epochs
 
-以下参数也可以进行设置。但是如果没有特别的需求，可以忽略，直接使用我们给定的默认值：
-* `accum_grad`：梯度累积
-* `keep_nbest_models`：选择性能最好的`keep_nbest_models`个模型的参数进行平均，得到性能更好的模型
-* `optim`：设置微调时的优化器
-* `lr`：设置微调时的学习率
-* `scheduler`：设置学习率调整策略
-* `scheduler_conf`：学习率调整策略的相关参数
-* `specaug`：设置谱增广
-* `specaug_conf`：谱增广的相关参数
+The following parameters can also be set. However, if there is no special requirement, users can ignore these parameters and use the default value we provided directly:
+* `accum_grad`：the accumulation of the gradient
+* `keep_nbest_models`：select the `keep_nbest_models` models with the best performance and average the parameters 
+  of these models to get a better model
+* `optim`：set the optimizer
+* `lr`：set the learning rate
+* `scheduler`：set learning rate adjustment strategy
+* `scheduler_conf`：set the related parameters of the learning rate adjustment strategy
+* `specaug`：set for the spectral augmentation
+* `specaug_conf`：set related parameters of the spectral augmentation
 
-除了直接在`finetune.py`中设置参数外，用户也可以通过手动修改模型下载目录下的`finetune.yaml`文件中的参数来修改微调配置。
+In addition to directly setting parameters in `finetune.py`, users can also manually set the parameters in the `finetune.yaml` file in the model download directory to modify the finetuning configuration.
 
-## 基于微调后的模型推理
-我们提供了`infer_after_finetune.py`来实现基于用户自己微调得到的模型进行推理。基于此文件，用户可以基于微调后的模型，对指定的数据集进行推理，得到相应的识别结果。如果同时给定了抄本，则会同时计算CER。在开始推理前，用户可以指定如下参数来修改推理配置：
-* `data_dir`：数据集目录。目录下应该包括音频列表文件`wav.scp`和抄本文件`text`(可选)。如果`text`文件存在，则会相应的计算CER，否则会跳过。
-* `output_dir`：推理结果保存目录
-* `batch_size`：推理时的batch大小
-* `ctc_weight`：部分模型包含CTC模块，可以设置该参数来指定推理时，CTC模块的权重
-* `decoding_model_name`：指定用于推理的模型名
+## Inference after Finetuning
+We provide `infer_after_finetune.py` to achieve the inference based on the model finetuned by users. Based on this file, users can preform inference on the specified dataset based on the finetuned model and obtain the corresponding recognition results. If the transcript is given, the `CER` will be calculated at the same time. Before performing inference, users can set the following parameters to modify the inference configuration:
+* `data_dir`：dataset directory。The directory should contain the wav list file `wav.scp` and the transcript file `text` (optional). If the `text` file exists, the CER will be calculated accordingly, otherwise it will be skipped.
+* `output_dir`：the directory for saving the inference results
+* `batch_size`：batch size during the inference
+* `ctc_weight`：some models contain a CTC module, users can set this parameter to specify the weight of the CTC module during the inference
+* `decoding_model_name`：set the name of the model used for the inference
 
-以下参数也可以进行设置。但是如果没有特别的需求，可以忽略，直接使用我们给定的默认值：
-* `modelscope_model_name`：微调时使用的初始模型
+The following parameters can also be set. However, if there is no special requirement, users can ignore these parameters and use the default value we provided directly:
+* `modelscope_model_name`：the initial model name used when finetuning
 * `required_files`：使用modelscope接口进行推理时需要用到的文件
 
 ## 注意事项

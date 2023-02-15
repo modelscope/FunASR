@@ -21,14 +21,14 @@ ModelScope是阿里巴巴推出的开源模型即服务共享平台，为广大�
 * `data_path`：数据目录。该目录下应该包括存放训练集数据的`train`目录和存放验证集数据的`dev`目录。每个目录中需要包括音频列表文件`wav.scp`和抄本文件`text`
 * `output_dir`：微调结果保存目录
 * `dataset_type`：对于小数据集，设置为`small`；当数据量大于1000小时时，设置为`large`
-* `batch_bins`：batch size，如果dataset_type设置为`small`，batch_bins单位为fbank特征帧数；如果dataset_type=`large`，batch_bins单位为毫秒
+* `batch_bins`：batch size，如果dataset_type设置为`small`，batch_bins单位为fbank特征帧数；如果dataset_type设置为`large`，batch_bins单位为毫秒
 * `max_epoch`：最大的训练轮数
 
 以下参数也可以进行设置。但是如果没有特别的需求，可以忽略，直接使用我们给定的默认值：
 * `accum_grad`：梯度累积
 * `keep_nbest_models`：选择性能最好的`keep_nbest_models`个模型的参数进行平均，得到性能更好的模型
-* `optim`：设置微调时的优化器
-* `lr`：设置微调时的学习率
+* `optim`：设置优化器
+* `lr`：设置学习率
 * `scheduler`：设置学习率调整策略
 * `scheduler_conf`：学习率调整策略的相关参数
 * `specaug`：设置谱增广
@@ -37,7 +37,7 @@ ModelScope是阿里巴巴推出的开源模型即服务共享平台，为广大�
 除了直接在`finetune.py`中设置参数外，用户也可以通过手动修改模型下载目录下的`finetune.yaml`文件中的参数来修改微调配置。
 
 ## 基于微调后的模型推理
-我们提供了`infer_after_finetune.py`来实现基于用户自己微调得到的模型进行推理。基于此文件，用户可以基于微调后的模型，对指定的数据集进行推理，得到相应的识别结果。如果同时给定了抄本，则会同时计算CER。在开始推理前，用户可以指定如下参数来修改推理配置：
+我们提供了`infer_after_finetune.py`来实现基于用户自己微调得到的模型进行推理。基于此文件，用户可以基于微调后的模型，对指定的数据集进行推理，得到相应的识别结果。如果给定了抄本，则会同时计算CER。在开始推理前，用户可以指定如下参数来修改推理配置：
 * `data_dir`：数据集目录。目录下应该包括音频列表文件`wav.scp`和抄本文件`text`(可选)。如果`text`文件存在，则会相应的计算CER，否则会跳过。
 * `output_dir`：推理结果保存目录
 * `batch_size`：推理时的batch大小
@@ -45,7 +45,7 @@ ModelScope是阿里巴巴推出的开源模型即服务共享平台，为广大�
 * `decoding_model_name`：指定用于推理的模型名
 
 以下参数也可以进行设置。但是如果没有特别的需求，可以忽略，直接使用我们给定的默认值：
-* `modelscope_model_name`：微调时使用的初始模型
+* `modelscope_model_name`：微调时使用的初始模型名
 * `required_files`：使用modelscope接口进行推理时需要用到的文件
 
 ## 注意事项
