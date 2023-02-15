@@ -16,6 +16,7 @@ FunASR hopes to build a bridge between academic research and industrial applicat
    ./installation.md
    ./papers.md
    ./get_started.md
+   ./build_task.md
 
 .. toctree::
    :maxdepth: 1

@@ -1,5 +1,5 @@
-# 搭建自定义任务
-FunASR类似ESPNet，以`Task`为通用接口，从而实现模型的训练和推理。每一个`Task`是一个类，其需要继承`AbsTask`，其对应的具体代码见`funasr/tasks/abs_task.py`。下面给出其包含的主要函数及功能介绍：
+# Build custom tasks
+FunASR is similar to ESPNet, which applies `Task`  as the general interface ti achieve the training and inference of models. Each `Task` is a class inherited from `AbsTask` and its corresponding code can be seen in `funasr/tasks/abs_task.py`. The main functions of `AbsTask` are shown as follows:
 ```python
 class AbsTask(ABC):
     @classmethod
@@ -22,13 +22,14 @@ class AbsTask(ABC):
     def main(cls, args):
         (...)
 ```
-- add_task_arguments：添加特定`Task`需要的参数
-- build_preprocess_fn：定义如何处理对样本进行预处理
-- build_collate_fn：定义如何将多个样本组成一个`batch`
-- build_model：定义模型
-- main：训练入口，通过`Task.main()`来启动训练
+- add_task_arguments：Add parameters required by a specified `Task`
+- build_preprocess_fn：定义如何处理对样本进行预处理 define how to preprocess samples
+- build_collate_fn：define how to combine multiple samples into a `batch`
+- build_model：define the model
+- main：training interface, starting training through `Task.main()`
 
-下面我们将以语音识别任务为例，介绍如何定义一个新的`Task`，具体代码见`funasr/tasks/asr.py`中的`ASRTask`。 定义新的`Task`的过程，其实就是根据任务需求，重定义上述函数的过程。
+Next, we take the speech recognition as an example to introduce how to define a new `Task`. For the corresponding code, please see `ASRTask` in `funasr/tasks/asr.py`. The procedure of defining a new `Task` is actually the procedure of redefining the above functions according to the requirements of the specified `Task`.
+
 - add_task_arguments
 ```python
 @classmethod
@@ -42,7 +43,7 @@ def add_task_arguments(cls, parser: argparse.ArgumentParser):
     )
     (...)
 ```
-对于语音识别任务，需要的特定参数包括`token_list`等。根据不同任务的特定需求，用户可以在此函数中定义相应的参数。
+For speech recognition tasks, specific parameters required include `token_list`, etc. According to the specific requirements of different tasks, users can define corresponding parameters in this function.
 
 - build_preprocess_fn
 ```python
@@ -62,7 +63,7 @@ def build_preprocess_fn(cls, args, train):
         retval = None
     return retval
 ```
-该函数定义了如何对样本进行预处理。具体地，语音识别任务的输入包括音频和抄本。对于音频，在此实现了(可选)对音频加噪声，加混响等功能；对于抄本，在此实现了(可选)根据bpe处理抄本，将抄本映射成`tokenid`等功能。用户可以自己选择需要对样本进行的预处理操作，实现方法可以参考`CommonPreprocessor`。
+This function defines how to preprocess samples. Specifically, the input of speech recognition tasks includes speech and text. For speech, functions such as (optional) adding noise and reverberation to the speech are supported. For text, functions such as (optional) processing text according to bpe and mapping text to `tokenid` are supported. Users can choose the preprocessing operation that needs to be performed on the sample. For the detail implementation, please refer to `CommonPreprocessor`.
 
 - build_collate_fn
 ```python
@@ -70,7 +71,7 @@ def build_preprocess_fn(cls, args, train):
 def build_collate_fn(cls, args, train):
     return CommonCollateFn(float_pad_value=0.0, int_pad_value=-1)
 ```
-该函数定义了如何将多个样本组成一个`batch`。对于语音识别任务，在此实现的是将不同的音频和抄本，通过`padding`的方式来得到等长的数据。具体地，我们默认用`0.0`来作为音频的填充值，用`-1`作为抄本的默认填充值。用户可以在此定义不同的组`batch`操作，实现方法可以参考`CommonCollateFn`。
+This function defines how to combine multiple samples into a `batch`. For speech recognition tasks, `padding` is employed to obtain equal-length data from different speech and text. Specifically, we set `0.0` as the default padding value for speech and `-1` as the default padding value for text. Users can define different `batch` operations here. For the detail implementation, please refer to `CommonCollateFn`.
 
 - build_model
 ```python
