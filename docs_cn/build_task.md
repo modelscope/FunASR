@@ -102,4 +102,4 @@ def build_model(cls, args, train):
         )
     return model
 ```
-该函数定义了具体的模型。对于不同的语音识别模型，往往可以共用同一个语音识别`Task`，然后在此函数中定义特定的模型。例如，这里给出的是一个标准的encoder-decoder结构的语音识别模型。具体地，先定义该模型的各个模块，包括encoder，decoder等，然后在将这些模块组合在一起得到一个完整的模型。在FunASR中，模型需要继承`AbsESPnetModel`，其具体代码见`funasr/train/abs_espnet_model.py`，主要需要实现的是`forward`函数。
+该函数定义了具体的模型。对于不同的语音识别模型，往往可以共用同一个语音识别`Task`，额外需要做的是在此函数中定义特定的模型。例如，这里给出的是一个标准的encoder-decoder结构的语音识别模型。具体地，先定义该模型的各个模块，包括encoder，decoder等，然后在将这些模块组合在一起得到一个完整的模型。在FunASR中，模型需要继承`AbsESPnetModel`，其具体代码见`funasr/train/abs_espnet_model.py`，主要需要实现的是`forward`函数。
