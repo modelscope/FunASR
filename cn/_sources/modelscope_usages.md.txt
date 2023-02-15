@@ -1,4 +1,4 @@
-# 快速使用ModelScope
+# ModelScope Usage
 ModelScope是阿里巴巴推出的开源模型即服务共享平台，为广大学术界用户和工业界用户提供灵活、便捷的模型应用支持。具体的使用方法和开源模型可以参见[ModelScope](https://www.modelscope.cn/models?page=1&tasks=auto-speech-recognition) 。在语音方向，我们提供了自回归/非自回归语音识别，语音预训练，标点预测等模型，用户可以方便使用。
 
 ## 整体介绍
