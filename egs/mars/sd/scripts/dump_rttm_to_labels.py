@@ -31,8 +31,18 @@ class MyRunner(MultiProcessRunnerV3):
         for scp_path in wav_scp_list:
             meeting_scp.update(load_scp_as_dict(scp_path))
 
-        assert len(meeting_scp) == len(meeting2rttm), \
-            "Number of wav and rttm mismatch {} != {}".format(len(meeting_scp), len(meeting2rttm))
+        if len(meeting_scp) != len(meeting2rttm):
+            logging.warning("Number of wav and rttm mismatch {} != {}".format(
+                len(meeting_scp), len(meeting2rttm)))
+            common_keys = set(meeting_scp.keys()) & set(meeting2rttm.keys())
+            logging.warning("Keep {} records.".format(len(common_keys)))
+            for key in meeting_scp:
+                if key not in common_keys:
+                    meeting_scp.pop(key)
+                    logging.warning("Pop {} from wav scp".format(key))
+                if key not in meeting2rttm:
+                    meeting2rttm.pop(key)
+                    logging.warning("Pop {} from rttm scp".format(key))
 
         if not os.path.exists(args.out_dir):
             os.makedirs(args.out_dir)
