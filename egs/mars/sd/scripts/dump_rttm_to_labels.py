@@ -44,7 +44,7 @@ class MyRunner(MultiProcessRunnerV3):
                     new_meeting_scp[key] = meeting_scp[key]
             new_meeting2rttm = OrderedDict()
             for key in meeting2rttm:
-                if key not in meeting2rttm:
+                if key not in common_keys:
                     logging.warning("Pop {} from rttm scp".format(key))
                 else:
                     new_meeting2rttm[key] = meeting2rttm[key]
