@@ -24,7 +24,7 @@ class ASRModelExportParaformer:
             feats_dim=560,
             onnx=False,
         )
-        logging.info("output dir: {}".format(self.cache_dir))
+        print("output dir: {}".format(self.cache_dir))
         self.onnx = onnx
         
 
@@ -50,7 +50,7 @@ class ASRModelExportParaformer:
         else:
             self._export_torchscripts(model, verbose, export_dir)
 
-        logging.info("output dir: {}".format(export_dir))
+        print("output dir: {}".format(export_dir))
 
 
     def _export_torchscripts(self, model, verbose, path, enc_size=None):
@@ -117,7 +117,15 @@ class ASRModelExportParaformer:
         )
 
 if __name__ == '__main__':
-    output_dir = "../export"
-    export_model = ASRModelExportParaformer(cache_dir=output_dir, onnx=True)
-    export_model.export('damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch')
+    import sys
+    
+    model_path = sys.argv[1]
+    output_dir = sys.argv[2]
+    onnx = sys.argv[3]
+    onnx = onnx.lower()
+    onnx = onnx == 'true'
+    # model_path = 'damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch'
+    # output_dir = "../export"
+    export_model = ASRModelExportParaformer(cache_dir=output_dir, onnx=onnx)
+    export_model.export(model_path)
     # export_model.export('/root/cache/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch')

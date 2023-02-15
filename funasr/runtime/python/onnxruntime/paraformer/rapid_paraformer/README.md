@@ -20,9 +20,19 @@ cd funasr/runtime/python/onnxruntime/paraformer/rapid_paraformer
    pip install -r requirements.txt
    ```
 3. Export the model.
-    - Export your model([docs](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export))
+   
+   - Export model from modelscope
+   ```shell
+   python -m funasr.export.export_model 'damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch' "./export" true
+   ```
+   - Export model from local path
+   ```shell
+   python -m funasr.export.export_model '/mnt/workspace/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch' "./export" true
+   ```
+    - More details ref to ([docs](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export))
 
-4. Run the demo.
+
+5. Run the demo.
    - Model_dir: the model path, which contains `model.onnx`, `config.yaml`, `am.mvn`.
    - Input: wav formt file, support formats: `str, np.ndarray, List[str]`
    - Output: `List[str]`: recognition result.

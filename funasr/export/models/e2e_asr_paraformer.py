@@ -59,7 +59,7 @@ class Paraformer(nn.Module):
         enc, enc_len = self.encoder(**batch)
         mask = self.make_pad_mask(enc_len)[:, None, :]
         pre_acoustic_embeds, pre_token_length, alphas, pre_peak_index = self.predictor(enc, mask)
-        pre_token_length = pre_token_length.round().long()
+        pre_token_length = pre_token_length.round().type(torch.int32)
 
         decoder_out, _ = self.decoder(enc, enc_len, pre_acoustic_embeds, pre_token_length)
         decoder_out = torch.log_softmax(decoder_out, dim=-1)
