@@ -106,7 +106,8 @@ tensorboard --logdir ${exp_dir}/exp/${model_dir}/tensorboard/train
 本阶段用于解码得到识别结果，同时计算CER来验证训练得到的模型性能。
 
 * Mode Selection
-由于我们提供了paraformer，uniasr和conformer等模型，因此在解码时，需要指定相应的解码模式。对应的参数为`mode`，相应的可选设置为`asr/paraformer/uniase`等。
+
+由于我们提供了paraformer，uniasr和conformer等模型，因此在解码时，需要指定相应的解码模式。对应的参数为`mode`，相应的可选设置为`asr/paraformer/uniasr`等。
 
 * Configuration
 
