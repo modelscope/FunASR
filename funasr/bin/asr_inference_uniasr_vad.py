@@ -439,6 +439,18 @@ def inference_modelscope(
             if isinstance(raw_inputs, torch.Tensor):
                 raw_inputs = raw_inputs.numpy()
             data_path_and_name_and_type = [raw_inputs, "speech", "waveform"]
+        if param_dict is not None and "decoding_model" in param_dict:
+            if param_dict["decoding_model"] == "fast":
+                speech2text.decoding_ind = 0
+                speech2text.decoding_mode = "model1"
+            elif param_dict["decoding_model"] == "normal":
+                speech2text.decoding_ind = 0
+                speech2text.decoding_mode = "model2"
+            elif param_dict["decoding_model"] == "offline":
+                speech2text.decoding_ind = 1
+                speech2text.decoding_mode = "model2"
+            else:
+                raise NotImplementedError("unsupported decoding model {}".format(param_dict["decoding_model"]))
         loader = ASRTask.build_streaming_iterator(
             data_path_and_name_and_type,
             dtype=dtype,
