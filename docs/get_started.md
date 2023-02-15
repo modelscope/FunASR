@@ -105,7 +105,7 @@ This stage generates the recognition results and calculates the `CER` to verify 
 
 * Mode Selection
 
-As we support conformer, paraformer and uniasr in FunASR and they have different inference interfaces, a `mode` param is specified as `asr/paraformer/uniase` according to the trained model.
+As we support paraformer, uniasr, conformer and other models in FunASR, a `mode` parameter should be specified as `asr/paraformer/uniasr` according to the trained model.
 
 * Configuration
 
