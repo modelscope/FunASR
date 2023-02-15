@@ -40,6 +40,7 @@ class MyRunner(MultiProcessRunnerV3):
                 if key not in common_keys:
                     meeting_scp.pop(key)
                     logging.warning("Pop {} from wav scp".format(key))
+            for key in meeting2rttm:
                 if key not in meeting2rttm:
                     meeting2rttm.pop(key)
                     logging.warning("Pop {} from rttm scp".format(key))
