@@ -36,15 +36,20 @@ class MyRunner(MultiProcessRunnerV3):
                 len(meeting_scp), len(meeting2rttm)))
             common_keys = set(meeting_scp.keys()) & set(meeting2rttm.keys())
             logging.warning("Keep {} records.".format(len(common_keys)))
+            new_meeting_scp = OrderedDict()
             for key in meeting_scp:
                 if key not in common_keys:
-                    meeting_scp.pop(key)
                     logging.warning("Pop {} from wav scp".format(key))
+                else:
+                    new_meeting_scp[key] = meeting_scp[key]
+            new_meeting2rttm = OrderedDict()
             for key in meeting2rttm:
                 if key not in meeting2rttm:
-                    meeting2rttm.pop(key)
                     logging.warning("Pop {} from rttm scp".format(key))
+                else:
+                    new_meeting2rttm[key] = meeting2rttm[key]
 
+            meeting_scp, meeting2rttm = new_meeting_scp, new_meeting2rttm
         if not os.path.exists(args.out_dir):
             os.makedirs(args.out_dir)
 
