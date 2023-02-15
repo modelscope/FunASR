@@ -79,4 +79,4 @@ class LabelAggregate(torch.nn.Module):
         else:
             olens = None
 
-        return output, olens
+        return output.to(input.dtype), olens
