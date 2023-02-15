@@ -21,7 +21,7 @@ class WavFrontend():
             fs: int = 16000,
             window: str = 'hamming',
             n_mels: int = 80,
-            frame_length: int = 25.0,
+            frame_length: int = 25,
             frame_shift: int = 10,
             filter_length_min: int = -1,
             filter_length_max: float = -1,
