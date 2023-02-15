@@ -101,7 +101,7 @@ tensorboard --logdir ${exp_dir}/exp/${model_dir}/tensorboard/train
 ```
 
 ## Stage 4: Decoding
-This stage generates the recognition results with acoustic features as input and calculate the `CER` to verify the performance of the trained model. 
+This stage generates the recognition results and calculates the `CER` to verify the performance of the trained model. 
 
 * Mode Selection
 
