@@ -23,6 +23,7 @@ FunASR hopes to build a bridge between academic research and industrial applicat
    :caption: ModelScope:
 
    ./modelscope_models.md
+   ./modelscope_usages.md
 
 Indices and tables
 ==================
