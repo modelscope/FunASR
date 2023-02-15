@@ -50,4 +50,4 @@ The following parameters can also be set. However, if there is no special requir
 * `required_files`：files required for the inference when using the modelscope interface
 
 ## Announcements
-Some models may have other unique parameters during the finetuning and inference. The specific usages of these parameters can be found in the `README.md` file in the corresponding directory.
+Some models may have other specific parameters during the finetuning and inference. The specific usages of these parameters can be found in the `README.md` file in the corresponding directory.
