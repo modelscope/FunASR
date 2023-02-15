@@ -47,7 +47,7 @@ We provide `infer_after_finetune.py` to achieve the inference based on the model
 
 The following parameters can also be set. However, if there is no special requirement, users can ignore these parameters and use the default value we provided directly:
 * `modelscope_model_name`：the initial model name used when finetuning
-* `required_files`：使用modelscope接口进行推理时需要用到的文件
+* `required_files`：files required for the inference when using the modelscope interface
 
-## 注意事项
-部分模型可能在微调、推理时存在一些特有的参数，这部分参数可以在对应目录的README.md文件中找到具体用法。
+## Announcements
+Some models may have other unique parameters during the finetuning and inference. The specific usages of these parameters can be found in the `README.md` file in the corresponding directory.
