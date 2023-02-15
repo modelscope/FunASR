@@ -5,7 +5,7 @@ on:
       - main
   push:
     branches:
-      - dev
+      - dev_wjm
 
 jobs:
   docs:
