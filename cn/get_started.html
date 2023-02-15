@@ -17,7 +17,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="ModelScope上的预训练模型" href="modelscope_models.html" />
+    <link rel="next" title="搭建自定义任务" href="build_task.html" />
     <link rel="prev" title="论文" href="papers.html" /> 
 </head>
 
@@ -53,6 +53,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#id7">阶段 4: 解码</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="build_task.html">搭建自定义任务</a></li>
 </ul>
 <p class="caption"><span class="caption-text">ModelScope:</span></p>
 <ul>
@@ -236,8 +237,10 @@
 <h2>阶段 4: 解码<a class="headerlink" href="#id7" title="Permalink to this headline"></a></h2>
 <p>本阶段用于解码得到识别结果，同时计算CER来验证训练得到的模型性能。</p>
 <ul class="simple">
-<li><p>Mode Selection
-由于我们提供了paraformer，uniasr和conformer等模型，因此在解码时，需要指定相应的解码模式。对应的参数为<code class="docutils literal notranslate"><span class="pre">mode</span></code>，相应的可选设置为<code class="docutils literal notranslate"><span class="pre">asr/paraformer/uniase</span></code>等。</p></li>
+<li><p>Mode Selection</p></li>
+</ul>
+<p>由于我们提供了paraformer，uniasr和conformer等模型，因此在解码时，需要指定相应的解码模式。对应的参数为<code class="docutils literal notranslate"><span class="pre">mode</span></code>，相应的可选设置为<code class="docutils literal notranslate"><span class="pre">asr/paraformer/uniasr</span></code>等。</p>
+<ul class="simple">
 <li><p>Configuration</p></li>
 </ul>
 <p>我们提供了ctc解码, attention解码和ctc-attention混合解码。这几种解码方式可以通过<code class="docutils literal notranslate"><span class="pre">conf</span></code>下的解码配置文件中的<code class="docutils literal notranslate"><span class="pre">ctc_weight</span></code>参数来指定。具体的，<code class="docutils literal notranslate"><span class="pre">ctc_weight=1.0</span></code>表示CTC解码, <code class="docutils literal notranslate"><span class="pre">ctc_weight=0.0</span></code>表示attention解码, <code class="docutils literal notranslate"><span class="pre">0.0&lt;ctc_weight&lt;1.0</span></code>表示ctc-attention混合解码。</p>
@@ -267,7 +270,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="papers.html" class="btn btn-neutral float-left" title="论文" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="modelscope_models.html" class="btn btn-neutral float-right" title="ModelScope上的预训练模型" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="build_task.html" class="btn btn-neutral float-right" title="搭建自定义任务" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

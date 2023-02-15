@@ -45,10 +45,12 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="papers.html">Papers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="get_started.html">Get Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="build_task.html">Build custom tasks</a></li>
 </ul>
 <p class="caption"><span class="caption-text">ModelScope:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="modelscope_models.html">Pretrained models on ModelScope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modelscope_usages.html">快速使用ModelScope</a></li>
 </ul>
 
         </div>
@@ -101,18 +103,13 @@
 </style>
 <div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h1>
-<p>FunASR is easy to install, which is mainly based on python packages.</p>
+<p>FunASR is easy to install. The detailed installation steps are as follows:</p>
 <ul class="simple">
-<li><p>Clone the repo</p></li>
-</ul>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/alibaba/FunASR.git
-</pre></div>
-</div>
-<ul class="simple">
-<li><p>Install Conda</p></li>
+<li><p>Install Conda and create virtual environment:</p></li>
 </ul>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
 sh Miniconda3-latest-Linux-x86_64.sh
+<span class="nb">source</span> ~/.bashrc
 conda create -n funasr <span class="nv">python</span><span class="o">=</span><span class="m">3</span>.7
 conda activate funasr
 </pre></div>
@@ -120,38 +117,26 @@ conda activate funasr
 <ul class="simple">
 <li><p>Install Pytorch (version &gt;= 1.7.0):</p></li>
 </ul>
-<table border="1" class="docutils">
-<thead>
-<tr>
-<th style="text-align: center;">cuda</th>
-<th></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: center;">9.2</td>
-<td>conda install pytorch==1.7.0 torchvision==0.8.0 torchaudio==0.7.0 cudatoolkit=9.2 -c pytorch</td>
-</tr>
-<tr>
-<td style="text-align: center;">10.2</td>
-<td>conda install pytorch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0 cudatoolkit=10.2 -c pytorch</td>
-</tr>
-<tr>
-<td style="text-align: center;">11.1</td>
-<td>conda install pytorch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0 cudatoolkit=11.1 -c pytorch</td>
-</tr>
-</tbody>
-</table><p>For more versions, please see <a class="reference external" href="https://pytorch.org/get-started/locally">https://pytorch.org/get-started/locally</a></p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip install torch torchaudio
+</pre></div>
+</div>
+<p>For more versions, please see <a class="reference external" href="https://pytorch.org/get-started/locally">https://pytorch.org/get-started/locally</a></p>
 <ul class="simple">
 <li><p>Install ModelScope</p></li>
 </ul>
+<p>For users in China, you can configure the following mirror source to speed up the downloading:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip config <span class="nb">set</span> global.index-url https://mirror.sjtu.edu.cn/pypi/web/simple
+</pre></div>
+</div>
+<p>Install or update ModelScope</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip install <span class="s2">&quot;modelscope[audio_asr]&quot;</span> --upgrade -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>Install other packages</p></li>
+<li><p>Clone the repo and install other packages</p></li>
 </ul>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip install --editable ./
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/alibaba/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> FunASR
+pip install --editable ./
 </pre></div>
 </div>
 </div>
