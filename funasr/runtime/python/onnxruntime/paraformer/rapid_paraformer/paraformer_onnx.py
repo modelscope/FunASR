@@ -41,8 +41,8 @@ class Paraformer():
         self.ort_infer = OrtInferSession(model_file, device_id)
         self.batch_size = batch_size
 
-    def __call__(self, wav_content: Union[str, np.ndarray, List[str]], fs: int = None) -> List:
-        waveform_list = self.load_data(wav_content, fs)
+    def __call__(self, wav_content: Union[str, np.ndarray, List[str]], **kwargs) -> List:
+        waveform_list = self.load_data(wav_content, self.frontend.opts.samp_freq)
         waveform_nums = len(waveform_list)
 
         asr_res = []
