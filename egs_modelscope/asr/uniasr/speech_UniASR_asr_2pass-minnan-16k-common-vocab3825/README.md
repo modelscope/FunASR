@@ -1,6 +1,6 @@
 # ModelScope Model
 
-## How to finetune and infer using a pretrained Paraformer-large Model
+## How to finetune and infer using a pretrained UniASR Model
 
 ### Finetune
 
