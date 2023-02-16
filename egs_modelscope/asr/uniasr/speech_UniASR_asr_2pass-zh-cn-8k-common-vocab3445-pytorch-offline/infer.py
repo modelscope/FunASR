@@ -23,7 +23,7 @@ def modelscope_infer_core(output_dir, split_dir, njob, idx):
         batch_size=1
     )
     audio_in = os.path.join(split_dir, "wav.{}.scp".format(idx))
-    inference_pipline(audio_in=audio_in, param_dict={"decoding_model": "normal"})
+    inference_pipline(audio_in=audio_in, param_dict={"decoding_model": "offline"})
 
 
 def modelscope_infer(params):
