@@ -111,6 +111,7 @@ class Speech2VadSegment:
 
         # b. Forward Encoder sreaming
         segments = []
+        segments_tmp = []
         step = 6000
         t_offset = 0
         for t_offset in range(0, feats_len, min(step, feats_len - t_offset)):
@@ -128,9 +129,8 @@ class Speech2VadSegment:
             batch = to_device(batch, device=self.device)
             segments_part = self.vad_model(**batch)
             if segments_part:
-                segments += segments_part
-        #print(segments)
-
+                segments_tmp += segments_part[0]
+        segments.append(segments_tmp)
         return segments
 
 
