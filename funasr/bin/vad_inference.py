@@ -1,6 +1,7 @@
 import argparse
 import logging
 import sys
+import json
 from pathlib import Path
 from typing import Any
 from typing import List
@@ -105,17 +106,32 @@ class Speech2VadSegment:
             feats_len = feats_len.int()
         else:
             raise Exception("Need to extract feats first, please configure frontend configuration")
-        batch = {"feats": feats, "feats_lengths": feats_len, "waveform": speech}
+        # batch = {"feats": feats, "waveform": speech, "is_final_send": True}
+        # segments = self.vad_model(**batch)
 
-        # a. To device
-        batch = to_device(batch, device=self.device)
-
-        # b. Forward Encoder
-        segments = self.vad_model(**batch)
+        # b. Forward Encoder sreaming
+        segments = []
+        step = 6000
+        t_offset = 0
+        for t_offset in range(0, feats_len, min(step, feats_len - t_offset)):
+            if t_offset + step >= feats_len - 1:
+                step = feats_len - t_offset
+                is_final_send = True
+            else:
+                is_final_send = False
+            batch = {
+                "feats": feats[:, t_offset:t_offset + step, :],
+                "waveform": speech[:, t_offset * 160:min(speech.shape[-1], (t_offset + step - 1) * 160 + 400)],
+                "is_final_send": is_final_send
+            }
+            # a. To device
+            batch = to_device(batch, device=self.device)
+            segments_part = self.vad_model(**batch)
+            if segments_part:
+                segments += segments_part
+        #print(segments)
 
         return segments
-
-
 
 
 def inference(
@@ -152,11 +168,12 @@ def inference(
     )
     return inference_pipeline(data_path_and_name_and_type, raw_inputs)
 
+
 def inference_modelscope(
         batch_size: int,
         ngpu: int,
         log_level: Union[int, str],
-        #data_path_and_name_and_type,
+        # data_path_and_name_and_type,
         vad_infer_config: Optional[str],
         vad_model_file: Optional[str],
         vad_cmvn_file: Optional[str] = None,
@@ -167,7 +184,6 @@ def inference_modelscope(
         dtype: str = "float32",
         seed: int = 0,
         num_workers: int = 1,
-        param_dict: dict = None,
         **kwargs,
 ):
     assert check_argument_types()
@@ -201,11 +217,11 @@ def inference_modelscope(
     speech2vadsegment = Speech2VadSegment(**speech2vadsegment_kwargs)
 
     def _forward(
-        data_path_and_name_and_type,
-        raw_inputs: Union[np.ndarray, torch.Tensor] = None,
-        output_dir_v2: Optional[str] = None,
-        fs: dict = None,
-        param_dict: dict = None,
+            data_path_and_name_and_type,
+            raw_inputs: Union[np.ndarray, torch.Tensor] = None,
+            output_dir_v2: Optional[str] = None,
+            fs: dict = None,
+            param_dict: dict = None,
     ):
         # 3. Build data-iterator
         loader = VADTask.build_streaming_iterator(
@@ -243,9 +259,11 @@ def inference_modelscope(
             # do vad segment
             results = speech2vadsegment(**batch)
             for i, _ in enumerate(keys):
+                results[i] = json.dumps(results[i])
                 item = {'key': keys[i], 'value': results[i]}
                 vad_results.append(item)
                 if writer is not None:
+                    results[i] = json.loads(results[i])
                     ibest_writer["text"][keys[i]] = "{}".format(results[i])
 
         return vad_results
