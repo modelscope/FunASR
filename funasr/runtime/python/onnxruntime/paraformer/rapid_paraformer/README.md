@@ -21,16 +21,26 @@ cd funasr/runtime/python/onnxruntime/paraformer/rapid_paraformer
    ```
 3. Export the model.
    
-   - Export model from modelscope
-   ```shell
-   python -m funasr.export.export_model 'damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch' "./export" true
-   ```
-   - Export model from local path
-   ```shell
-   python -m funasr.export.export_model '/mnt/workspace/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch' "./export" true
-   ```
-    - More details ref to ([docs](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export))
+   `Tips`: torch1.11.0 is required.
 
+   ```shell
+   python -m funasr.export.export_model [model_name] [export_dir] [true]
+   ```
+   `model_name`: the model is to export.
+
+   `export_dir`: the dir where the onnx is export.
+
+   More details ref to ([export docs](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export))
+
+
+   - `e.g.`, Export model from modelscope
+      ```shell
+      python -m funasr.export.export_model 'damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch' "./export" true
+      ```
+   - `e.g.`, Export model from local path
+      ```shell
+      python -m funasr.export.export_model '/mnt/workspace/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch' "./export" true
+      ```
 
 5. Run the demo.
    - Model_dir: the model path, which contains `model.onnx`, `config.yaml`, `am.mvn`.

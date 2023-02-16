@@ -9,7 +9,19 @@
 
 The installation is the same as [funasr](../../README.md)
 
-## Export onnx format model
+## Export model
+   `Tips`: torch1.11.0 is required.
+
+   ```shell
+   python -m funasr.export.export_model [model_name] [export_dir] [true/flase]
+   ```
+   `model_name`: the model is to export.
+
+   `export_dir`: the dir where the onnx is export.
+    `true`: export onnx format model, `false`: export torchscripts format model.
+
+## For example
+### Export onnx format model
 Export model from modelscope
 ```shell
 python -m funasr.export.export_model 'damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch' "./export" true
@@ -19,12 +31,11 @@ Export model from local path
 python -m funasr.export.export_model '/mnt/workspace/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch' "./export" true
 ```
 
-## Export torchscripts format model
+### Export torchscripts format model
 Export model from modelscope
 ```shell
 python -m funasr.export.export_model 'damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch' "./export" false
 ```
-
 
 Export model from local path
 ```shell
