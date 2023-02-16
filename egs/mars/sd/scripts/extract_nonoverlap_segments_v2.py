@@ -1,13 +1,9 @@
 import numpy as np
 import os
-import sys
 import argparse
 from funasr.utils.job_runner import MultiProcessRunnerV3
 from funasr.utils.misc import load_scp_as_list, load_scp_as_dict
-import librosa
 import soundfile as sf
-from copy import deepcopy
-import json
 from tqdm import tqdm
 
 
