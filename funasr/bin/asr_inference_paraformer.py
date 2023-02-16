@@ -337,7 +337,7 @@ class Speech2Text:
         # assert check_return_type(results)
         return results
 
-class Speech2TextExport(torch.nn.Module):
+class Speech2TextExport:
     """Speech2TextExport class
 
     """
@@ -416,7 +416,7 @@ class Speech2TextExport(torch.nn.Module):
         self.asr_model = model
         
     @torch.no_grad()
-    def forward(
+    def __call__(
             self, speech: Union[torch.Tensor, np.ndarray], speech_lengths: Union[torch.Tensor, np.ndarray] = None
     ):
         """Inference
