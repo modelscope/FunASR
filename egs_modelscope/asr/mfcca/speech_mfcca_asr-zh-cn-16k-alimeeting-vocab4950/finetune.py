@@ -24,12 +24,12 @@ def modelscope_finetune(params):
 
 if __name__ == '__main__':
     
-    params = modelscope_args(model="yufan6/speech_mfcca_asr-zh-cn-16k-alimeeting-vocab4950")
+    params = modelscope_args(model="NPU-ASLP/speech_mfcca_asr-zh-cn-16k-alimeeting-vocab4950")
     params.output_dir = "./checkpoint"              # m模型保存路径
     params.data_path = "./example_data/"            # 数据路径
     params.dataset_type = "small"                   # 小数据量设置small，若数据量大于1000小时，请使用large
     params.batch_bins = 1000                       # batch size，如果dataset_type="small"，batch_bins单位为fbank特征帧数，如果dataset_type="large"，batch_bins单位为毫秒，
     params.max_epoch = 10                           # 最大训练轮数
     params.lr = 0.0001                             # 设置学习率
-    params.model_revision = 'v2.0.0'
+    params.model_revision = 'v1.0.0'
     modelscope_finetune(params)

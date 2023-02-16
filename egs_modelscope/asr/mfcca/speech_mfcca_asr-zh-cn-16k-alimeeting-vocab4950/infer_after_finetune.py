@@ -59,7 +59,7 @@ def modelscope_infer_after_finetune(params):
 
 if __name__ == '__main__':
     params = {}
-    params["modelscope_model_name"] = "yufan6/speech_mfcca_asr-zh-cn-16k-alimeeting-vocab4950"
+    params["modelscope_model_name"] = "NPU-ASLP/speech_mfcca_asr-zh-cn-16k-alimeeting-vocab4950"
     params["required_files"] = ["feats_stats.npz", "decoding.yaml", "configuration.json"]
     params["output_dir"] = "./checkpoint"
     params["data_dir"] = "./example_data/validation"
