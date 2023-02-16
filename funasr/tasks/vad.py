@@ -235,7 +235,7 @@ class VADTask(AbsTask):
             cls, args: argparse.Namespace, train: bool
     ) -> Optional[Callable[[str, Dict[str, np.array]], Dict[str, np.ndarray]]]:
         assert check_argument_types()
-        #if args.use_preprocessor:
+        # if args.use_preprocessor:
         #    retval = CommonPreprocessor(
         #        train=train,
         #        # NOTE(kamo): Check attribute existence for backward compatibility
@@ -254,7 +254,7 @@ class VADTask(AbsTask):
         #        if hasattr(args, "rir_scp")
         #        else None,
         #    )
-        #else:
+        # else:
         #    retval = None
         retval = None
         assert check_return_type(retval)
@@ -291,7 +291,8 @@ class VADTask(AbsTask):
             model_class = model_choices.get_class(args.model)
         except AttributeError:
             model_class = model_choices.get_class("e2evad")
-        model = model_class(encoder=encoder, vad_post_args=args.vad_post_conf)
+        model = model_class(encoder=encoder, vad_post_args=args.vad_post_conf,
+                            streaming=args.encoder_conf.get('streaming', False))
 
         return model
 
