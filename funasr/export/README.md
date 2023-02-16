@@ -10,15 +10,14 @@
 The installation is the same as [funasr](../../README.md)
 
 ## Export model
-   `Tips`: torch1.11.0 is required.
+   `Tips`: torch 1.11.0 is required.
 
    ```shell
-   python -m funasr.export.export_model [model_name] [export_dir] [true/flase]
+   python -m funasr.export.export_model [model_name] [export_dir] [onnx]
    ```
    `model_name`: the model is to export.
-
    `export_dir`: the dir where the onnx is export.
-    `true`: export onnx format model, `false`: export torchscripts format model.
+    `onnx`: `true`, export onnx format model; `false`, export torchscripts format model.
 
 ## For example
 ### Export onnx format model
