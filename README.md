@@ -17,7 +17,7 @@
 
 ## What's new: 
 
-### 2023.2.16, funasr-0.2.0, modelscope-1.3.0
+### 2023.2.17, funasr-0.2.0, modelscope-1.3.0
 - We support a new feature, export paraformer models into [onnx and torchscripts](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export) from modelscope. The local finetuned models are also supported.
 - We support a new feature, [onnxruntime](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/onnxruntime/paraformer/rapid_paraformer), you could deploy the runtime without modelscope or funasr, for the [paraformer-large](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary) model, the rtf of onnxruntime is 3x speedup(0.110->0.038) on cpu, [details](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/onnxruntime/paraformer/rapid_paraformer#speed).
 - We support a new feature, [grpc](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/grpc), you could build the ASR service with grpc, by deploying the modelscope pipeline or onnxruntime.
