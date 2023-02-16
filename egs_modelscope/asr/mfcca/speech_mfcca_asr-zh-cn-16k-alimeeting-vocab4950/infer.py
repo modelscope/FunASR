@@ -18,8 +18,8 @@ def modelscope_infer_core(output_dir, split_dir, njob, idx):
         os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_id)
     inference_pipline = pipeline(
         task=Tasks.auto_speech_recognition,
-	    model='yufan6/speech_mfcca_asr-zh-cn-16k-alimeeting-vocab4950',
-        model_revision='v2.0.0',
+	    model='NPU-ASLP/speech_mfcca_asr-zh-cn-16k-alimeeting-vocab4950',
+        model_revision='v1.0.0',
         output_dir=output_dir_job,
         batch_size=1,
     )
