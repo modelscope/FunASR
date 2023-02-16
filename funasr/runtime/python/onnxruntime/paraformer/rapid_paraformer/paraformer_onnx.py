@@ -54,8 +54,9 @@ class Paraformer():
             try:
                 am_scores, valid_token_lens = self.infer(feats, feats_len)
             except ONNXRuntimeError:
-                logging.error(traceback.format_exc())
-                preds = []
+                #logging.warning(traceback.format_exc())
+                logging.warning("input wav is silence or noise")
+                preds = ['']
             else:
                 preds = self.decode(am_scores, valid_token_lens)
 
