@@ -591,16 +591,6 @@ def inference_modelscope(
     
     return _forward
 
-def set_parameters(language: str = None,
-                   sample_rate: Union[int, Dict[Any, int]] = None):
-    if language is not None:
-        global global_asr_language
-        global_asr_language = language
-    if sample_rate is not None:
-        global global_sample_rate
-        global_sample_rate = sample_rate
-
-
 def get_parser():
     parser = config_argparse.ArgumentParser(
         description="ASR Decoding",
