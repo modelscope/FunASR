@@ -107,10 +107,8 @@ class Speech2VadSegment:
             feats_len = feats_len.int()
         else:
             raise Exception("Need to extract feats first, please configure frontend configuration")
-        # batch = {"feats": feats, "waveform": speech, "is_final_send": True}
-        # segments = self.vad_model(**batch)
 
-        # b. Forward Encoder sreaming
+        # b. Forward Encoder streaming
         t_offset = 0
         step = min(feats_len, 6000)
         segments = [[]] * self.batch_size
