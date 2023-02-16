@@ -38,7 +38,6 @@ from funasr.utils.types import str_or_none
 from funasr.utils import asr_utils, wav_utils, postprocess_utils
 from funasr.models.frontend.wav_frontend import WavFrontend
 from funasr.tasks.vad import VADTask
-from funasr.utils.timestamp_tools import time_stamp_lfr6
 from funasr.bin.punctuation_infer import Text2Punc
 from funasr.bin.asr_inference_paraformer_vad_punc import Speech2Text
 from funasr.bin.asr_inference_paraformer_vad_punc import Speech2VadSegment
