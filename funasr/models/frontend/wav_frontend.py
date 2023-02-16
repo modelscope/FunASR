@@ -171,10 +171,7 @@ class WavFrontend(AbsFrontend):
                               window_type=self.window,
                               sample_frequency=self.fs)
 
-            # if self.lfr_m != 1 or self.lfr_n != 1:
-            #     mat = apply_lfr(mat, self.lfr_m, self.lfr_n)
-            # if self.cmvn_file is not None:
-            #     mat = apply_cmvn(mat, self.cmvn_file)
+
             feat_length = mat.size(0)
             feats.append(mat)
             feats_lens.append(feat_length)

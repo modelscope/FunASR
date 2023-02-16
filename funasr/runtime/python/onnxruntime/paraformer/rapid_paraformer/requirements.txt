@@ -1,0 +1,6 @@
+librosa
+numpy
+onnxruntime
+scipy
+typeguard
+kaldi-native-fbank

@@ -39,7 +39,7 @@ from funasr.utils.types import str_or_none
 from funasr.utils import asr_utils, wav_utils, postprocess_utils
 from funasr.models.frontend.wav_frontend import WavFrontend
 from funasr.tasks.vad import VADTask
-from funasr.utils.timestamp_tools import time_stamp_lfr6, time_stamp_lfr6_pl
+from funasr.utils.timestamp_tools import time_stamp_lfr6_pl
 from funasr.bin.punctuation_infer import Text2Punc
 from funasr.models.e2e_asr_paraformer import BiCifParaformer
 
@@ -282,12 +282,8 @@ class Speech2Text:
                 else:
                     text = None
 
-                if isinstance(self.asr_model, BiCifParaformer):
-                    timestamp = time_stamp_lfr6_pl(us_alphas[i], us_cif_peak[i], copy.copy(token), begin_time, end_time)
-                    results.append((text, token, token_int, timestamp, enc_len_batch_total, lfr_factor))
-                else:
-                    time_stamp = time_stamp_lfr6(alphas[i:i + 1, ], enc_len[i:i + 1, ], copy.copy(token), begin_time, end_time)
-                    results.append((text, token, token_int, time_stamp, enc_len_batch_total, lfr_factor))
+                timestamp = time_stamp_lfr6_pl(us_alphas[i], us_cif_peak[i], copy.copy(token), begin_time, end_time)
+                results.append((text, token, token_int, timestamp, enc_len_batch_total, lfr_factor))
 
         # assert check_return_type(results)
         return results
@@ -617,7 +613,7 @@ def inference_modelscope(
                 result = result_segments[0]
                 text, token, token_int = result[0], result[1], result[2]
                 time_stamp = None if len(result) < 4 else result[3]
-   
+
                 if use_timestamp and time_stamp is not None: 
                     postprocessed_result = postprocess_utils.sentence_postprocess(token, time_stamp)
                 else:

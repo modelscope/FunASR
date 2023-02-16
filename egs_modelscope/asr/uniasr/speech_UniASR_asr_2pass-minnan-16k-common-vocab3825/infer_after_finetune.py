@@ -34,7 +34,7 @@ def modelscope_infer_after_finetune(params):
         batch_size=1
     )
     audio_in = os.path.join(params["data_dir"], "wav.scp")
-    inference_pipeline(audio_in=audio_in)
+    inference_pipeline(audio_in=audio_in, param_dict={"decoding_model": "normal"})
 
     # computer CER if GT text is set
     text_in = os.path.join(params["data_dir"], "text")
