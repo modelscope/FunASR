@@ -1,5 +1,5 @@
 # Paraformer-Large
-- Model link: <https://www.modelscope.cn/models/yufan6/speech_mfcca_asr-zh-cn-16k-alimeeting-vocab4950/summary>
+- Model link: <https://www.modelscope.cn/models/NPU-ASLP/speech_mfcca_asr-zh-cn-16k-alimeeting-vocab4950/summary>
 - Model size: 45M
 
 # Environments

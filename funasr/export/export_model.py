@@ -44,6 +44,7 @@ class ASRModelExportParaformer:
             model,
             self.export_config,
         )
+        model.eval()
         # self._export_onnx(model, verbose, export_dir)
         if self.onnx:
             self._export_onnx(model, verbose, export_dir)
