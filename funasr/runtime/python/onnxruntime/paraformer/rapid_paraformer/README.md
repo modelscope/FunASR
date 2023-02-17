@@ -63,7 +63,7 @@ cd funasr/runtime/python/onnxruntime/paraformer/rapid_paraformer
 
 Environment：Intel(R) Xeon(R) Platinum 8163 CPU @ 2.50GHz
 
-Test [wav, 5.3s, 100 times avg.](https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav)
+Test [wav, 5.53s, 100 times avg.](https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav)
 
 | Backend |        RTF        |
 |:-------:|:-----------------:|
