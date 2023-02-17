@@ -129,8 +129,9 @@ def inference_modelscope(
         param_dict: dict = None,
     ):
         results = []
-        if output_dir_v2 is not None:
-            writer = DatadirWriter(output_dir_v2)
+        output_path = output_dir_v2 if output_dir_v2 is not None else output_dir
+        if output_path is not None:
+            writer = DatadirWriter(output_path)
         else:
             writer = None
 
