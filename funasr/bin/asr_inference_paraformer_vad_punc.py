@@ -144,7 +144,7 @@ class Speech2Text:
         for scorer in scorers.values():
             if isinstance(scorer, torch.nn.Module):
                 scorer.to(device=device, dtype=getattr(torch, dtype)).eval()
-        
+
         logging.info(f"Decoding device={device}, dtype={dtype}")
 
         # 5. [Optional] Build Text converter: e.g. bpe-sym -> Text
@@ -184,12 +184,11 @@ class Speech2Text:
         self.encoder_downsampling_factor = 1
         if asr_train_args.encoder_conf["input_layer"] == "conv2d":
             self.encoder_downsampling_factor = 4
-        
-            
 
     @torch.no_grad()
     def __call__(
-            self, speech: Union[torch.Tensor, np.ndarray], speech_lengths: Union[torch.Tensor, np.ndarray] = None, begin_time: int = 0, end_time: int = None, 
+            self, speech: Union[torch.Tensor, np.ndarray], speech_lengths: Union[torch.Tensor, np.ndarray] = None,
+            begin_time: int = 0, end_time: int = None,
     ):
         """Inference
 
@@ -215,7 +214,7 @@ class Speech2Text:
         else:
             feats = speech
             feats_len = speech_lengths
-        lfr_factor = max(1, (feats.size()[-1]//80)-1)
+        lfr_factor = max(1, (feats.size()[-1] // 80) - 1)
         batch = {"speech": feats, "speech_lengths": feats_len}
 
         # a. To device
@@ -229,7 +228,8 @@ class Speech2Text:
         enc_len_batch_total = torch.sum(enc_len).item() * self.encoder_downsampling_factor
 
         predictor_outs = self.asr_model.calc_predictor(enc, enc_len)
-        pre_acoustic_embeds, pre_token_length, alphas, pre_peak_index = predictor_outs[0], predictor_outs[1], predictor_outs[2], predictor_outs[3]
+        pre_acoustic_embeds, pre_token_length, alphas, pre_peak_index = predictor_outs[0], predictor_outs[1], \
+                                                                        predictor_outs[2], predictor_outs[3]
         pre_token_length = pre_token_length.round().long()
         if torch.max(pre_token_length) < 1:
             return []
@@ -249,7 +249,7 @@ class Speech2Text:
                 nbest_hyps = self.beam_search(
                     x=x, am_scores=am_scores, maxlenratio=self.maxlenratio, minlenratio=self.minlenratio
                 )
-    
+
                 nbest_hyps = nbest_hyps[: self.nbest]
             else:
                 yseq = am_scores.argmax(dim=-1)
@@ -260,33 +260,36 @@ class Speech2Text:
                     [self.asr_model.sos] + yseq.tolist() + [self.asr_model.eos], device=yseq.device
                 )
                 nbest_hyps = [Hypothesis(yseq=yseq, score=score)]
-                
+
             for hyp in nbest_hyps:
                 assert isinstance(hyp, (Hypothesis)), type(hyp)
-    
+
                 # remove sos/eos and get results
                 last_pos = -1
                 if isinstance(hyp.yseq, list):
                     token_int = hyp.yseq[1:last_pos]
                 else:
                     token_int = hyp.yseq[1:last_pos].tolist()
-    
+
                 # remove blank symbol id, which is assumed to be 0
                 token_int = list(filter(lambda x: x != 0 and x != 2, token_int))
-    
+
                 # Change integer-ids to tokens
                 token = self.converter.ids2tokens(token_int)
-    
+
                 if self.tokenizer is not None:
                     text = self.tokenizer.tokens2text(token)
                 else:
                     text = None
 
+
                 timestamp = time_stamp_lfr6_pl(us_alphas[i], us_cif_peak[i], copy.copy(token), begin_time, end_time)
                 results.append((text, token, token_int, timestamp, enc_len_batch_total, lfr_factor))
 
+
         # assert check_return_type(results)
         return results
+
 
 class Speech2VadSegment:
     """Speech2VadSegment class
@@ -329,6 +332,7 @@ class Speech2VadSegment:
         self.device = device
         self.dtype = dtype
         self.frontend = frontend
+        self.batch_size = batch_size
 
     @torch.no_grad()
     def __call__(
@@ -357,56 +361,69 @@ class Speech2VadSegment:
             feats_len = feats_len.int()
         else:
             raise Exception("Need to extract feats first, please configure frontend configuration")
-        batch = {"feats": feats, "feats_lengths": feats_len, "waveform": speech}
 
-        # a. To device
-        batch = to_device(batch, device=self.device)
-
-        # b. Forward Encoder
-        segments = self.vad_model(**batch)
+        # b. Forward Encoder streaming
+        t_offset = 0
+        step = min(feats_len, 6000)
+        segments = [[]] * self.batch_size
+        for t_offset in range(0, feats_len, min(step, feats_len - t_offset)):
+            if t_offset + step >= feats_len - 1:
+                step = feats_len - t_offset
+                is_final_send = True
+            else:
+                is_final_send = False
+            batch = {
+                "feats": feats[:, t_offset:t_offset + step, :],
+                "waveform": speech[:, t_offset * 160:min(speech.shape[-1], (t_offset + step - 1) * 160 + 400)],
+                "is_final_send": is_final_send
+            }
+            # a. To device
+            batch = to_device(batch, device=self.device)
+            segments_part = self.vad_model(**batch)
+            if segments_part:
+                for batch_num in range(0, self.batch_size):
+                    segments[batch_num] += segments_part[batch_num]
 
         return fbanks, segments
 
 
-
 def inference(
-    maxlenratio: float,
-    minlenratio: float,
-    batch_size: int,
-    beam_size: int,
-    ngpu: int,
-    ctc_weight: float,
-    lm_weight: float,
-    penalty: float,
-    log_level: Union[int, str],
-    data_path_and_name_and_type,
-    asr_train_config: Optional[str],
-    asr_model_file: Optional[str],
-    cmvn_file: Optional[str] = None,
-    raw_inputs: Union[np.ndarray, torch.Tensor] = None,
-    lm_train_config: Optional[str] = None,
-    lm_file: Optional[str] = None,
-    token_type: Optional[str] = None,
-    key_file: Optional[str] = None,
-    word_lm_train_config: Optional[str] = None,
-    bpemodel: Optional[str] = None,
-    allow_variable_data_keys: bool = False,
-    streaming: bool = False,
-    output_dir: Optional[str] = None,
-    dtype: str = "float32",
-    seed: int = 0,
-    ngram_weight: float = 0.9,
-    nbest: int = 1,
-    num_workers: int = 1,
-    vad_infer_config: Optional[str] = None,
-    vad_model_file: Optional[str] = None,
-    vad_cmvn_file: Optional[str] = None,
-    time_stamp_writer: bool = False,
-    punc_infer_config: Optional[str] = None,
-    punc_model_file: Optional[str] = None,
-    **kwargs,
+        maxlenratio: float,
+        minlenratio: float,
+        batch_size: int,
+        beam_size: int,
+        ngpu: int,
+        ctc_weight: float,
+        lm_weight: float,
+        penalty: float,
+        log_level: Union[int, str],
+        data_path_and_name_and_type,
+        asr_train_config: Optional[str],
+        asr_model_file: Optional[str],
+        cmvn_file: Optional[str] = None,
+        raw_inputs: Union[np.ndarray, torch.Tensor] = None,
+        lm_train_config: Optional[str] = None,
+        lm_file: Optional[str] = None,
+        token_type: Optional[str] = None,
+        key_file: Optional[str] = None,
+        word_lm_train_config: Optional[str] = None,
+        bpemodel: Optional[str] = None,
+        allow_variable_data_keys: bool = False,
+        streaming: bool = False,
+        output_dir: Optional[str] = None,
+        dtype: str = "float32",
+        seed: int = 0,
+        ngram_weight: float = 0.9,
+        nbest: int = 1,
+        num_workers: int = 1,
+        vad_infer_config: Optional[str] = None,
+        vad_model_file: Optional[str] = None,
+        vad_cmvn_file: Optional[str] = None,
+        time_stamp_writer: bool = False,
+        punc_infer_config: Optional[str] = None,
+        punc_model_file: Optional[str] = None,
+        **kwargs,
 ):
-
     inference_pipeline = inference_modelscope(
         maxlenratio=maxlenratio,
         minlenratio=minlenratio,
@@ -445,63 +462,64 @@ def inference(
     )
     return inference_pipeline(data_path_and_name_and_type, raw_inputs)
 
+
 def inference_modelscope(
-    maxlenratio: float,
-    minlenratio: float,
-    batch_size: int,
-    beam_size: int,
-    ngpu: int,
-    ctc_weight: float,
-    lm_weight: float,
-    penalty: float,
-    log_level: Union[int, str],
-    # data_path_and_name_and_type,
-    asr_train_config: Optional[str],
-    asr_model_file: Optional[str],
-    cmvn_file: Optional[str] = None,
-    lm_train_config: Optional[str] = None,
-    lm_file: Optional[str] = None,
-    token_type: Optional[str] = None,
-    key_file: Optional[str] = None,
-    word_lm_train_config: Optional[str] = None,
-    bpemodel: Optional[str] = None,
-    allow_variable_data_keys: bool = False,
-    output_dir: Optional[str] = None,
-    dtype: str = "float32",
-    seed: int = 0,
-    ngram_weight: float = 0.9,
-    nbest: int = 1,
-    num_workers: int = 1,
-    vad_infer_config: Optional[str] = None,
-    vad_model_file: Optional[str] = None,
-    vad_cmvn_file: Optional[str] = None,
-    time_stamp_writer: bool = True,
-    punc_infer_config: Optional[str] = None,
-    punc_model_file: Optional[str] = None,
-    outputs_dict: Optional[bool] = True,
-    param_dict: dict = None,
-    **kwargs,
+        maxlenratio: float,
+        minlenratio: float,
+        batch_size: int,
+        beam_size: int,
+        ngpu: int,
+        ctc_weight: float,
+        lm_weight: float,
+        penalty: float,
+        log_level: Union[int, str],
+        # data_path_and_name_and_type,
+        asr_train_config: Optional[str],
+        asr_model_file: Optional[str],
+        cmvn_file: Optional[str] = None,
+        lm_train_config: Optional[str] = None,
+        lm_file: Optional[str] = None,
+        token_type: Optional[str] = None,
+        key_file: Optional[str] = None,
+        word_lm_train_config: Optional[str] = None,
+        bpemodel: Optional[str] = None,
+        allow_variable_data_keys: bool = False,
+        output_dir: Optional[str] = None,
+        dtype: str = "float32",
+        seed: int = 0,
+        ngram_weight: float = 0.9,
+        nbest: int = 1,
+        num_workers: int = 1,
+        vad_infer_config: Optional[str] = None,
+        vad_model_file: Optional[str] = None,
+        vad_cmvn_file: Optional[str] = None,
+        time_stamp_writer: bool = True,
+        punc_infer_config: Optional[str] = None,
+        punc_model_file: Optional[str] = None,
+        outputs_dict: Optional[bool] = True,
+        param_dict: dict = None,
+        **kwargs,
 ):
     assert check_argument_types()
-    
+
     if word_lm_train_config is not None:
         raise NotImplementedError("Word LM is not implemented")
     if ngpu > 1:
         raise NotImplementedError("only single GPU decoding is supported")
-    
+
     logging.basicConfig(
         level=log_level,
         format="%(asctime)s (%(module)s:%(lineno)d) %(levelname)s: %(message)s",
     )
-    
+
     if ngpu >= 1 and torch.cuda.is_available():
         device = "cuda"
     else:
         device = "cpu"
-    
+
     # 1. Set random-seed
     set_all_random_seed(seed)
-    
+
     # 2. Build speech2vadsegment
     speech2vadsegment_kwargs = dict(
         vad_infer_config=vad_infer_config,
@@ -512,7 +530,7 @@ def inference_modelscope(
     )
     # logging.info("speech2vadsegment_kwargs: {}".format(speech2vadsegment_kwargs))
     speech2vadsegment = Speech2VadSegment(**speech2vadsegment_kwargs)
-    
+
     # 3. Build speech2text
     speech2text_kwargs = dict(
         asr_train_config=asr_train_config,
@@ -535,14 +553,14 @@ def inference_modelscope(
     )
     speech2text = Speech2Text(**speech2text_kwargs)
     text2punc = None
-    if punc_model_file is not None: 
+    if punc_model_file is not None:
         text2punc = Text2Punc(punc_infer_config, punc_model_file, device=device, dtype=dtype)
 
     if output_dir is not None:
         writer = DatadirWriter(output_dir)
         ibest_writer = writer[f"1best_recog"]
         ibest_writer["token_list"][""] = " ".join(speech2text.asr_train_args.token_list)
-    
+
     def _forward(data_path_and_name_and_type,
                  raw_inputs: Union[np.ndarray, torch.Tensor] = None,
                  output_dir_v2: Optional[str] = None,
@@ -571,7 +589,7 @@ def inference_modelscope(
             use_timestamp = param_dict.get('use_timestamp', True)
         else:
             use_timestamp = True
-    
+
         finish_count = 0
         file_count = 1
         lfr_factor = 6
@@ -582,13 +600,13 @@ def inference_modelscope(
         if output_path is not None:
             writer = DatadirWriter(output_path)
             ibest_writer = writer[f"1best_recog"]
-    
+
         for keys, batch in loader:
             assert isinstance(batch, dict), type(batch)
             assert all(isinstance(s, str) for s in keys), keys
             _bs = len(next(iter(batch.values())))
             assert len(keys) == _bs, f"{len(keys)} != {_bs}"
-    
+
             vad_results = speech2vadsegment(**batch)
             fbanks, vadsegments = vad_results[0], vad_results[1]
             for i, segments in enumerate(vadsegments):
@@ -602,17 +620,19 @@ def inference_modelscope(
                     results = speech2text(**batch)
                     if len(results) < 1:
                         continue
-    
+
                     result_cur = [results[0][:-2]]
                     if j == 0:
                         result_segments = result_cur
                     else:
-                        result_segments = [[result_segments[0][i] + result_cur[0][i] for i in range(len(result_cur[0]))]]
-    
+                        result_segments = [
+                            [result_segments[0][i] + result_cur[0][i] for i in range(len(result_cur[0]))]]
+
                 key = keys[0]
                 result = result_segments[0]
                 text, token, token_int = result[0], result[1], result[2]
                 time_stamp = None if len(result) < 4 else result[3]
+
 
                 if use_timestamp and time_stamp is not None: 
                     postprocessed_result = postprocess_utils.sentence_postprocess(token, time_stamp)
@@ -631,13 +651,13 @@ def inference_modelscope(
                 text_postprocessed_punc = text_postprocessed
                 if len(word_lists) > 0 and text2punc is not None:
                     text_postprocessed_punc, punc_id_list = text2punc(word_lists, 20)
-    
+
                 item = {'key': key, 'value': text_postprocessed_punc}
                 if text_postprocessed != "":
                     item['text_postprocessed'] = text_postprocessed
                 if time_stamp_postprocessed != "":
                     item['time_stamp'] = time_stamp_postprocessed
-    
+
                 asr_result_list.append(item)
                 finish_count += 1
                 # asr_utils.print_progress(finish_count / file_count)
@@ -650,10 +670,12 @@ def inference_modelscope(
                     ibest_writer["text_with_punc"][key] = text_postprocessed_punc
                     if time_stamp_postprocessed is not None:
                         ibest_writer["time_stamp"][key] = "{}".format(time_stamp_postprocessed)
-    
+
                 logging.info("decoding, utt: {}, predictions: {}".format(key, text_postprocessed_punc))
         return asr_result_list
+
     return _forward
+
 
 def get_parser():
     parser = config_argparse.ArgumentParser(

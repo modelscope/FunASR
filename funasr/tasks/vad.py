@@ -291,8 +291,7 @@ class VADTask(AbsTask):
             model_class = model_choices.get_class(args.model)
         except AttributeError:
             model_class = model_choices.get_class("e2evad")
-        model = model_class(encoder=encoder, vad_post_args=args.vad_post_conf,
-                            streaming=args.encoder_conf.get('streaming', False))
+        model = model_class(encoder=encoder, vad_post_args=args.vad_post_conf)
 
         return model
 
