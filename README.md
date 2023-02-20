@@ -33,6 +33,7 @@
 [Persian model](https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-fa-16k-common-vocab1257-pytorch-online/summary).
 - We release a new model, [paraformer-data2vec model](https://www.modelscope.cn/models/damo/speech_data2vec_pretrain-paraformer-zh-cn-aishell2-16k/summary), an unsupervised pretraining model on AISHELL-2, which is inited for paraformer model and then finetune on AISHEL-1.
 - We release a new feature, the `VAD`, `ASR` and `PUNC` models could be integrated freely, which could be models from [modelscope](https://www.modelscope.cn/models/damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary), or the local finetine models. The [demo](https://github.com/alibaba-damo-academy/FunASR/discussions/134).
+- We optimized the [punctuation common model](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch/summary), enhance the recall and precision, fix the badcases of missing punctuation marks.
 - Various new types of audio input types are now supported by modelscope inference pipeline, including: mp3、flac、ogg、opus...
 ### 2023.1.16, funasr-0.1.6， modelscope-1.2.0
 - We release a new version model [Paraformer-large-long](https://modelscope.cn/models/damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary), which integrate the [VAD](https://modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary) model, [ASR](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary),
