@@ -15,7 +15,7 @@ from modelscope.utils.constant import Tasks
 inference_pipline = pipeline(
     task=Tasks.punctuation,
     model='damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch',
-    model_revision=None,
+    model_revision="v1.1.6",
     output_dir="./tmp/"
 )
 
