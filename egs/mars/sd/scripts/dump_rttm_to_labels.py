@@ -43,7 +43,7 @@ class MyRunner(MultiProcessRunnerV3):
                     rm_keys.append(key)
                 else:
                     new_meeting_scp[key] = meeting_scp[key]
-            logging.warning("Keys are removed from wav scp:", " ".format(rm_keys))
+            logging.warning("Keys are removed from wav scp:", " ".join(rm_keys))
 
             new_meeting2rttm = OrderedDict()
             rm_keys = []
@@ -52,7 +52,7 @@ class MyRunner(MultiProcessRunnerV3):
                     rm_keys.append(key)
                 else:
                     new_meeting2rttm[key] = meeting2rttm[key]
-            logging.warning("Keys are removed from rttm scp:", " ".format(rm_keys))
+            logging.warning("Keys are removed from rttm scp:", " ".join(rm_keys))
             meeting_scp, meeting2rttm = new_meeting_scp, new_meeting2rttm
         if not os.path.exists(args.out_dir):
             os.makedirs(args.out_dir)
