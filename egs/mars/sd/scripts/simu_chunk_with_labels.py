@@ -93,9 +93,9 @@ def simu_wav_chunk(spk, spk2utts, wav_scp, sample_length):
 
 
 def calculate_embedding(spk, spk2utts, utt2xvec, embedding_dim, average_emb_num):
-    # process for empty speaker
+    # process for dummy speaker
     if spk == "None":
-        return np.zeros((embedding_dim, ), dtype=np.float32)
+        return np.zeros((1, embedding_dim), dtype=np.float32)
 
     # calculate averaged speaker embeddings
     utt_list = spk2utts[spk]
@@ -103,7 +103,7 @@ def calculate_embedding(spk, spk2utts, utt2xvec, embedding_dim, average_emb_num)
         xvec_list = [kaldiio.load_mat(utt2xvec[utt]) for utt in utt_list]
     else:
         xvec_list = [kaldiio.load_mat(utt2xvec[utt]) for utt in random.sample(utt_list, average_emb_num)]
-    xvec = np.mean(np.hstack(xvec_list), axis=0)
+    xvec = np.mean(np.concatenate(xvec_list, axis=0), axis=0)
 
     return xvec
 
