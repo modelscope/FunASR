@@ -134,3 +134,18 @@ class WavFrontend():
         vars = np.array(vars_list).astype(np.float64)
         cmvn = np.array([means, vars])
         return cmvn
+
+def load_bytes(input):
+    middle_data = np.frombuffer(input, dtype=np.int16)
+    middle_data = np.asarray(middle_data)
+    if middle_data.dtype.kind not in 'iu':
+        raise TypeError("'middle_data' must be an array of integers")
+    dtype = np.dtype('float32')
+    if dtype.kind != 'f':
+        raise TypeError("'dtype' must be a floating point type")
+
+    i = np.iinfo(middle_data.dtype)
+    abs_max = 2 ** (i.bits - 1)
+    offset = i.min + abs_max
+    array = np.frombuffer((middle_data.astype(dtype) - offset) / abs_max, dtype=np.float32)
+    return array
