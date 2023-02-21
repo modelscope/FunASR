@@ -1,0 +1,1 @@
+../onnxruntime/paraformer/rapid_paraformer/paraformer_onnx.py

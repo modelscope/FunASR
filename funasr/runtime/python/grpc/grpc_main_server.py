@@ -9,7 +9,8 @@ def serve(args):
       server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
                         # interceptors=(AuthInterceptor('Bearer mysecrettoken'),)
                            )
-      paraformer_pb2_grpc.add_ASRServicer_to_server(ASRServicer(args.user_allowed, args.model, args.sample_rate), server)
+      paraformer_pb2_grpc.add_ASRServicer_to_server(
+          ASRServicer(args.user_allowed, args.model, args.sample_rate, args.backend, args.onnx_dir), server)
       port = "[::]:" + str(args.port)
       server.add_insecure_port(port)
       server.start()
@@ -37,7 +38,18 @@ if __name__ == '__main__':
     parser.add_argument("--sample_rate",
                         type=int,
                         default=16000,
-                        help="audio sample_rate from client")    
+                        help="audio sample_rate from client")
+
+    parser.add_argument("--backend",
+                        type=str,
+                        default="pipeline",
+                        choices=("pipeline", "onnxruntime"),
+                        help="backend, optional modelscope pipeline or onnxruntime")
+
+    parser.add_argument("--onnx_dir",
+                        type=str,
+                        default="/nfs/models/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch",
+                        help="onnx model dir")
                         
 
 
