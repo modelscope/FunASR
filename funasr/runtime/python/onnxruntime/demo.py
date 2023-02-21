@@ -1,4 +1,5 @@
-from paraformer_onnx import Paraformer
+
+from rapid_paraformer import Paraformer
 
 model_dir = "/nfs/zhifu.gzf/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
 model = Paraformer(model_dir, batch_size=1)
