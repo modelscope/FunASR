@@ -29,7 +29,8 @@ setuptools.setup(
     include_package_data=True,
     install_requires=["librosa", "onnxruntime>=1.7.0",
                       "scipy", "numpy>=1.19.3",
-                      "typeguard", "kaldi-native-fbank"],
+                      "typeguard", "kaldi-native-fbank",
+                      "PyYAML>=5.1.2"],
     packages=[MODULE_NAME, f'{MODULE_NAME}.utils'],
     keywords=[
         'funasr,asr'
