@@ -13,7 +13,7 @@
 1. Download the whole directory
 ```shell
 git clone https://github.com/alibaba/FunASR.git && cd FunASR
-cd funasr/runtime/python/onnxruntime/paraformer/rapid_paraformer
+cd funasr/runtime/python/onnxruntime/rapid_paraformer
 ```
 2. Install the related packages.
    ```bash
