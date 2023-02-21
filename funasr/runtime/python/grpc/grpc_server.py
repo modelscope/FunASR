@@ -5,7 +5,7 @@ import time
 
 import paraformer_pb2_grpc
 from paraformer_pb2 import Response
-from utils.frontend import load_bytes
+from rapid_paraformer.utils.frontend import load_bytes
 
 
 class ASRServicer(paraformer_pb2_grpc.ASRServicer):
@@ -25,9 +25,9 @@ class ASRServicer(paraformer_pb2_grpc.ASRServicer):
             self.inference_16k_pipeline = pipeline(task=Tasks.auto_speech_recognition, model=model)
         elif self.backend == "onnxruntime":
             try:
-                from paraformer_onnx import Paraformer
+                from rapid_paraformer.paraformer_onnx import Paraformer
             except ImportError:
-                raise ImportError(f"Please install onnxruntime requirements, reference https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/onnxruntime/rapid_paraformer")
+                raise ImportError(f"Please install onnxruntime environment")
             self.inference_16k_pipeline = Paraformer(model_dir=onnx_dir)
         self.sample_rate = sample_rate
 
