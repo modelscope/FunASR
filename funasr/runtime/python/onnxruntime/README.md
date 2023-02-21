@@ -10,16 +10,7 @@
 
 
 ### Steps:
-1. Download the whole directory
-```shell
-git clone https://github.com/alibaba/FunASR.git && cd FunASR
-cd funasr/runtime/python/onnxruntime/rapid_paraformer
-```
-2. Install the related packages.
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. Export the model.
+1. Export the model.
    
    `Tips`: torch 1.11.0 is required.
 
@@ -42,7 +33,20 @@ cd funasr/runtime/python/onnxruntime/rapid_paraformer
       python -m funasr.export.export_model '/mnt/workspace/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch' "./export" true
       ```
 
-5. Run the demo.
+
+2. Install the `rapid_paraformer`
+    - Build the rapid_paraformer `whl`
+    ```shell
+    git clone https://github.com/alibaba/FunASR.git && cd FunASR
+    cd funasr/runtime/python/onnxruntime/rapid_paraformer
+    python setup.py bdist_wheel
+    ```
+   - Install the build `whl`
+    ```bash
+    pip install dist/rapid_paraformer-0.0.1-py3-none-any.whl
+    ```
+
+3. Run the demo.
    - Model_dir: the model path, which contains `model.onnx`, `config.yaml`, `am.mvn`.
    - Input: wav formt file, support formats: `str, np.ndarray, List[str]`
    - Output: `List[str]`: recognition result.
