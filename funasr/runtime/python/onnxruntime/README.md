@@ -11,40 +11,38 @@
 
 ### Steps:
 1. Export the model.
-   
-   `Tips`: torch 1.11.0 is required.
+   - Command: (`Tips`: torch 1.11.0 is required.)
 
-   ```shell
-   python -m funasr.export.export_model [model_name] [export_dir] [true]
-   ```
-   `model_name`: the model is to export.
-
-   `export_dir`: the dir where the onnx is export.
-
-   More details ref to ([export docs](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export))
-
-
-   - `e.g.`, Export model from modelscope
       ```shell
-      python -m funasr.export.export_model 'damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch' "./export" true
+      python -m funasr.export.export_model [model_name] [export_dir] [true]
       ```
-   - `e.g.`, Export model from local path, the model'name must be `model.pb`.
-      ```shell
-      python -m funasr.export.export_model '/mnt/workspace/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch' "./export" true
-      ```
+      `model_name`: the model is to export.
+
+      `export_dir`: the dir where the onnx is export.
+
+       More details ref to ([export docs](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export))
+
+       - `e.g.`, Export model from modelscope
+         ```shell
+         python -m funasr.export.export_model 'damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch' "./export" true
+         ```
+       - `e.g.`, Export model from local path, the model'name must be `model.pb`.
+         ```shell
+         python -m funasr.export.export_model '/mnt/workspace/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch' "./export" true
+         ```
 
 
-2. Install the `rapid_paraformer`
-    - Build the rapid_paraformer `whl`
-    ```shell
-    git clone https://github.com/alibaba/FunASR.git && cd FunASR
-    cd funasr/runtime/python/onnxruntime/rapid_paraformer
-    python setup.py bdist_wheel
-    ```
+2. Install the `rapid_paraformer`.
+   - Build the rapid_paraformer `whl`
+     ```shell
+     git clone https://github.com/alibaba/FunASR.git && cd FunASR
+     cd funasr/runtime/python/onnxruntime/rapid_paraformer
+     python setup.py bdist_wheel
+     ```
    - Install the build `whl`
-    ```bash
-    pip install dist/rapid_paraformer-0.0.1-py3-none-any.whl
-    ```
+     ```bash
+     pip install dist/rapid_paraformer-0.0.1-py3-none-any.whl
+     ```
 
 3. Run the demo.
    - Model_dir: the model path, which contains `model.onnx`, `config.yaml`, `am.mvn`.
