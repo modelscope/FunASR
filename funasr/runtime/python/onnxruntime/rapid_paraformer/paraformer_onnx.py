@@ -2,28 +2,27 @@
 # @Author: SWHL
 # @Contact: liekkaskono@163.com
 import os.path
-import traceback
 from pathlib import Path
 from typing import List, Union, Tuple
 
 import librosa
 import numpy as np
 
-from utils.utils import (CharTokenizer, Hypothesis, ONNXRuntimeError,
-                    OrtInferSession, TokenIDConverter, get_logger,
-                    read_yaml)
-from utils.postprocess_utils import sentence_postprocess
-from utils.frontend import WavFrontend
+from .utils.utils import (CharTokenizer, Hypothesis, ONNXRuntimeError,
+                          OrtInferSession, TokenIDConverter, get_logger,
+                          read_yaml)
+from .utils.postprocess_utils import sentence_postprocess
+from .utils.frontend import WavFrontend
 
 logging = get_logger()
 
 
 class Paraformer():
-    def __init__(self, model_dir: Union[str, Path]=None,
+    def __init__(self, model_dir: Union[str, Path] = None,
                  batch_size: int = 1,
-                 device_id: Union[str, int]="-1",
+                 device_id: Union[str, int] = "-1",
                  ):
-        
+
         if not Path(model_dir).exists():
             raise FileNotFoundError(f'{model_dir} does not exist.')
 
@@ -140,5 +139,3 @@ class Paraformer():
         text = texts[0]
         # text = self.tokenizer.tokens2text(token)
         return text
-
-
