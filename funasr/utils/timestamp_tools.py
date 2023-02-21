@@ -5,6 +5,8 @@ import numpy as np
 from typing import Any, List, Tuple, Union
 
 def time_stamp_lfr6_pl(us_alphas, us_cif_peak, char_list, begin_time=0.0, end_time=None):
+    if not len(char_list):
+        return []
     START_END_THRESHOLD = 5
     TIME_RATE = 10.0 * 6 / 1000 / 3  #  3 times upsampled
     if len(us_alphas.shape) == 3:
