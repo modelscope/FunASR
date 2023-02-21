@@ -36,7 +36,7 @@
    - Build the rapid_paraformer `whl`
      ```shell
      git clone https://github.com/alibaba/FunASR.git && cd FunASR
-     cd funasr/runtime/python/onnxruntime/rapid_paraformer
+     cd funasr/runtime/python/onnxruntime
      python setup.py bdist_wheel
      ```
    - Install the build `whl`

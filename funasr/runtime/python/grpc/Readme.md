@@ -5,7 +5,7 @@ The audio data is in streaming, the asr inference process is in offline.
 
 ## Steps
 
-Step 1) Prepare server environment (on server).  
+Step 1-1) Prepare server modelscope pipeline environment (on server).  
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Install modelscope and funasr with pip or with cuda-docker image.
 
@@ -24,6 +24,26 @@ git clone https://github.com/alibaba-damo-academy/FunASR
 cd FunASR/funasr/runtime/python/grpc/
 ```
 
+Step 1-2) Optional, Prepare server onnxruntime environment (on server). 
+
+Install [`rapid_paraformer`](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/onnxruntime).
+
+- Build the rapid_paraformer `whl`
+```
+git clone https://github.com/alibaba/FunASR.git && cd FunASR
+cd funasr/runtime/python/onnxruntime/rapid_paraformer
+python setup.py bdist_wheel
+```
+
+- Install the build `whl`
+```
+pip install dist/rapid_paraformer-0.0.1-py3-none-any.whl
+```
+
+Export the model, more details ref to [export docs](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/onnxruntime).
+```
+python -m funasr.export.export_model 'damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch' "./export" true
+```
 
 Step 2) Optional, generate protobuf file (run on server, the two generated pb files are both used for server and client).
 ```
@@ -44,8 +64,15 @@ python -m pip install grpcio grpcio-tools
 ```
 ```
 # Start server.
-python grpc_main_server.py --port 10095
+python grpc_main_server.py --port 10095 --backend pipeline
 ```
+
+If you want run server with onnxruntime, please set `backend` and `onnx_dir` paramater.
+```
+# Start server.
+python grpc_main_server.py --port 10095 --backend onnxruntime --onnx_dir /models/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
+```
+
 
 Step 4) Start grpc client (on client with microphone).
 ```
