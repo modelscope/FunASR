@@ -3,20 +3,32 @@ import grpc
 import json
 import time
 
-from modelscope.pipelines import pipeline
-from modelscope.utils.constant import Tasks
 import paraformer_pb2_grpc
 from paraformer_pb2 import Response
+from utils.frontend import load_bytes
 
 
 class ASRServicer(paraformer_pb2_grpc.ASRServicer):
-    def __init__(self, user_allowed, model, sample_rate):
+    def __init__(self, user_allowed, model, sample_rate, backend, onnx_dir):
         print("ASRServicer init")
+        self.backend = backend
         self.init_flag = 0
         self.client_buffers = {}
         self.client_transcription = {}
         self.auth_user = user_allowed.split("|")
-        self.inference_16k_pipeline = pipeline(task=Tasks.auto_speech_recognition, model=model)
+        if self.backend == "pipeline":
+            try:
+                from modelscope.pipelines import pipeline
+                from modelscope.utils.constant import Tasks
+            except ImportError:
+                raise ImportError(f"Please install modelscope")
+            self.inference_16k_pipeline = pipeline(task=Tasks.auto_speech_recognition, model=model)
+        elif self.backend == "onnxruntime":
+            try:
+                from paraformer_onnx import Paraformer
+            except ImportError:
+                raise ImportError(f"Please install onnxruntime requirements, reference https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/onnxruntime/rapid_paraformer")
+            self.inference_16k_pipeline = Paraformer(model_dir=onnx_dir)
         self.sample_rate = sample_rate
 
     def clear_states(self, user):
@@ -90,12 +102,16 @@ class ASRServicer(paraformer_pb2_grpc.ASRServicer):
                         result["text"] = ""
                         print ("user: %s , delay(ms): %s, info: %s " % (req.user, delay_str, "waiting_for_more_voice"))
                         yield Response(sentence=json.dumps(result), user=req.user, action="waiting", language=req.language)
-                    else:                           
-                        asr_result = self.inference_16k_pipeline(audio_in=tmp_data, audio_fs = self.sample_rate)
-                        if "text" in asr_result:
-                            asr_result = asr_result['text']
-                        else:
-                            asr_result = ""
+                    else:
+                        if self.backend == "pipeline":
+                            asr_result = self.inference_16k_pipeline(audio_in=tmp_data, audio_fs = self.sample_rate)
+                            if "text" in asr_result:
+                                asr_result = asr_result['text']
+                            else:
+                                asr_result = ""
+                        elif self.backend == "onnxruntime":
+                            array = load_bytes(tmp_data)
+                            asr_result = self.inference_16k_pipeline(array)[0]
                         end_time = int(round(time.time() * 1000))
                         delay_str = str(end_time - begin_time)
                         print ("user: %s , delay(ms): %s, text: %s " % (req.user, delay_str, asr_result))
