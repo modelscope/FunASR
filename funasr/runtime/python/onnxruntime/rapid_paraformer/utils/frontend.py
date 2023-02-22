@@ -23,11 +23,10 @@ class WavFrontend():
             n_mels: int = 80,
             frame_length: int = 25,
             frame_shift: int = 10,
-            filter_length_min: int = -1,
-            filter_length_max: float = -1,
             lfr_m: int = 1,
             lfr_n: int = 1,
-            dither: float = 1.0
+            dither: float = 1.0,
+            **kwargs,
     ) -> None:
         check_argument_types()
 
@@ -43,8 +42,6 @@ class WavFrontend():
         opts.mel_opts.debug_mel = False
         self.opts = opts
 
-        self.filter_length_min = filter_length_min
-        self.filter_length_max = filter_length_max
         self.lfr_m = lfr_m
         self.lfr_n = lfr_n
         self.cmvn_file = cmvn_file
@@ -53,6 +50,7 @@ class WavFrontend():
             self.cmvn = self.load_cmvn()
         self.fbank_fn = None
         self.fbank_beg_idx = 0
+        self.reset_status()
 
     def fbank(self,
               waveform: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
@@ -169,3 +167,24 @@ def load_bytes(input):
     offset = i.min + abs_max
     array = np.frombuffer((middle_data.astype(dtype) - offset) / abs_max, dtype=np.float32)
     return array
+
+
+def test():
+    path = "/nfs/zhifu.gzf/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/example/asr_example.wav"
+    import librosa
+    cmvn_file = "/nfs/zhifu.gzf/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/am.mvn"
+    config_file = "/nfs/zhifu.gzf/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/config.yaml"
+    from funasr.runtime.python.onnxruntime.rapid_paraformer.utils.utils import read_yaml
+    config = read_yaml(config_file)
+    waveform, _ = librosa.load(path, sr=None)
+    frontend = WavFrontend(
+        cmvn_file=cmvn_file,
+        **config['frontend_conf'],
+    )
+    speech, _ = frontend.fbank_online(waveform)
+    feat, feat_len = frontend.lfr_cmvn(speech)
+    frontend.reset_status() # clear cache
+    return feat, feat_len
+
+if __name__ == '__main__':
+    test()
