@@ -181,8 +181,9 @@ def test():
         cmvn_file=cmvn_file,
         **config['frontend_conf'],
     )
-    speech, _ = frontend.fbank_online(waveform)
-    feat, feat_len = frontend.lfr_cmvn(speech)
+    speech, _ = frontend.fbank_online(waveform)  #1d, (sample,), numpy
+    feat, feat_len = frontend.lfr_cmvn(speech) # 2d, (frame, 450), np.float32 -> torch, torch.from_numpy(), dtype, (1, frame, 450)
+    
     frontend.reset_status() # clear cache
     return feat, feat_len
 
