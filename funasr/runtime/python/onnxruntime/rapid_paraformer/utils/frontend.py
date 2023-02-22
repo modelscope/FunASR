@@ -51,19 +51,39 @@ class WavFrontend():
 
         if self.cmvn_file:
             self.cmvn = self.load_cmvn()
+        self.fbank_fn = None
+        self.fbank_beg_idx = 0
 
     def fbank(self,
               waveform: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         waveform = waveform * (1 << 15)
-        fbank_fn = knf.OnlineFbank(self.opts)
-        fbank_fn.accept_waveform(self.opts.frame_opts.samp_freq, waveform.tolist())
-        frames = fbank_fn.num_frames_ready
+        self.fbank_fn = knf.OnlineFbank(self.opts)
+        self.fbank_fn.accept_waveform(self.opts.frame_opts.samp_freq, waveform.tolist())
+        frames = self.fbank_fn.num_frames_ready
         mat = np.empty([frames, self.opts.mel_opts.num_bins])
         for i in range(frames):
-            mat[i, :] = fbank_fn.get_frame(i)
+            mat[i, :] = self.fbank_fn.get_frame(i)
         feat = mat.astype(np.float32)
         feat_len = np.array(mat.shape[0]).astype(np.int32)
         return feat, feat_len
+
+    def fbank_online(self,
+              waveform: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        waveform = waveform * (1 << 15)
+        # self.fbank_fn = knf.OnlineFbank(self.opts)
+        self.fbank_fn.accept_waveform(self.opts.frame_opts.samp_freq, waveform.tolist())
+        frames = self.fbank_fn.num_frames_ready
+        mat = np.empty([frames, self.opts.mel_opts.num_bins])
+        for i in range(self.fbank_beg_idx, frames):
+            mat[i, :] = self.fbank_fn.get_frame(i)
+        self.fbank_beg_idx += (frames-self.fbank_beg_idx)
+        feat = mat.astype(np.float32)
+        feat_len = np.array(mat.shape[0]).astype(np.int32)
+        return feat, feat_len
+
+    def reset_status(self):
+        self.fbank_fn = knf.OnlineFbank(self.opts)
+        self.fbank_beg_idx = 0
 
     def lfr_cmvn(self, feat: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         if self.lfr_m != 1 or self.lfr_n != 1:
