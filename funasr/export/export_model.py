@@ -86,9 +86,9 @@ class ASRModelExportParaformer:
             with open(json_file, 'r') as f:
                 config_data = json.load(f)
                 mode = config_data['model']['model_config']['mode']
-        if mode == 'paraformer':
+        if mode.startswith('paraformer'):
             from funasr.tasks.asr import ASRTaskParaformer as ASRTask
-        elif mode == 'uniasr':
+        elif mode.startswith('uniasr'):
             from funasr.tasks.asr import ASRTaskUniASR as ASRTask
             
         model, asr_train_args = ASRTask.build_model_from_file(
