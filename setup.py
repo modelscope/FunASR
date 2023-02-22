@@ -39,7 +39,8 @@ requirements = {
         "tensorboard==1.15",
         "g2p",
         # PAI
-        "oss2"
+        "oss2",
+        "kaldi-native-fbank",
     ],
     # train: The modules invoked when training only.
     "train": [
