@@ -76,7 +76,7 @@ class WavFrontend():
         mat = np.empty([frames, self.opts.mel_opts.num_bins])
         for i in range(self.fbank_beg_idx, frames):
             mat[i, :] = self.fbank_fn.get_frame(i)
-        self.fbank_beg_idx += (frames-self.fbank_beg_idx)
+        # self.fbank_beg_idx += (frames-self.fbank_beg_idx)
         feat = mat.astype(np.float32)
         feat_len = np.array(mat.shape[0]).astype(np.int32)
         return feat, feat_len
