@@ -47,6 +47,8 @@ from funasr.utils.timestamp_tools import time_stamp_lfr6_pl
 from funasr.bin.punctuation_infer import Text2Punc
 from funasr.models.e2e_asr_paraformer import BiCifParaformer, ContextualParaformer
 
+from FunASR.funasr.utils.timestamp_tools import time_stamp_sentence
+
 header_colors = '\033[95m'
 end_colors = '\033[0m'
 
@@ -720,6 +722,7 @@ def inference_modelscope(
                     text_postprocessed, word_lists = postprocessed_result[0], postprocessed_result[1]
 
                 text_postprocessed_punc = text_postprocessed
+                punc_id_list = []
                 if len(word_lists) > 0 and text2punc is not None:
                     text_postprocessed_punc, punc_id_list = text2punc(word_lists, 20)
 
@@ -728,6 +731,8 @@ def inference_modelscope(
                     item['text_postprocessed'] = text_postprocessed
                 if time_stamp_postprocessed != "":
                     item['time_stamp'] = time_stamp_postprocessed
+
+                item['sentences'] = time_stamp_sentence(punc_id_list, time_stamp_postprocessed, text_postprocessed)
 
                 asr_result_list.append(item)
                 finish_count += 1

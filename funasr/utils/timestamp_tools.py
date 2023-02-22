@@ -54,3 +54,55 @@ def time_stamp_lfr6_pl(us_alphas, us_cif_peak, char_list, begin_time=0.0, end_ti
             res.append([int(timestamp[0] * 1000), int(timestamp[1] * 1000)])
     return res
 
+def time_stamp_sentence(punc_id_list, time_stamp_postprocessed, text_postprocessed):
+    res = []
+    if text_postprocessed is None:
+        return res
+    if time_stamp_postprocessed is None:
+        return res
+    if len(time_stamp_postprocessed) == 0:
+        return res
+    if len(text_postprocessed) == 0:
+        return res
+    if punc_id_list is None or len(punc_id_list) == 0:
+        res.append({
+            'text': text_postprocessed.split(),
+            "start": time_stamp_postprocessed[0][0],
+            "end": time_stamp_postprocessed[-1][1]
+        })
+        return res
+    if len(punc_id_list) != len(time_stamp_postprocessed):
+        res.append({
+            'text': text_postprocessed.split(),
+            "start": time_stamp_postprocessed[0][0],
+            "end": time_stamp_postprocessed[-1][1]
+        })
+        return res
+
+    sentence_text = ''
+    sentence_start = time_stamp_postprocessed[0][0]
+    texts = text_postprocessed.split()
+    for i in range(len(punc_id_list)):
+        sentence_text += texts[i]
+        if punc_id_list[i] == 2:
+            sentence_text += ','
+            res.append({
+                'text': sentence_text,
+                "start": sentence_start,
+                "end": time_stamp_postprocessed[i][1]
+            })
+            sentence_text = ''
+            sentence_start = time_stamp_postprocessed[i][1]
+        elif punc_id_list[i] == 3:
+            sentence_text += '.'
+            res.append({
+                'text': sentence_text,
+                "start": sentence_start,
+                "end": time_stamp_postprocessed[i][1]
+            })
+            sentence_text = ''
+            sentence_start = time_stamp_postprocessed[i][1]
+    return res
+
+
+
