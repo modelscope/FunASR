@@ -34,7 +34,7 @@ def calc_rand_ivc(spk, spk2utt, utt2ivc, utt2frames, total_len=3000):
 def process(meeting_scp, labels_scp, spk2utt, utt2xvec, utt2frames, meeting2spk_list, args):
     out_prefix = args.out
 
-    ivc_dim = 512
+    ivc_dim = 192
     win_len, win_shift = 400, 160
     label_weights = 2 ** np.array(list(range(args.n_spk)))
     wav_writer = kaldiio.WriteHelper("ark,scp:{}_wav.ark,{}_wav.scp".format(out_prefix, out_prefix))
