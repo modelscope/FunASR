@@ -25,7 +25,7 @@ def calc_rand_ivc(spk, spk2utt, utt2ivc, utt2frames, total_len=3000):
         print("Speaker {} has only {} frames, but expect {} frames at least, use them all.".format(spk, count, 300))
         short_spk_list.append(spk)
 
-    ivc_list = [kaldiio.load_mat(utt2ivc[utt])[np.newaxis, :] for utt in utt_list]
+    ivc_list = [kaldiio.load_mat(utt2ivc[utt]) for utt in utt_list]
     ivc = np.concatenate(ivc_list, axis=0)
     ivc = np.mean(ivc, axis=0, keepdims=False)
     return ivc
@@ -56,7 +56,7 @@ def process(meeting_scp, labels_scp, spk2utt, utt2xvec, utt2frames, meeting2spk_
 
             xvec_list = []
             for spk in meeting2spk_list[mid]:
-                spk_xvec = calc_rand_ivc(spk, spk2utt, utt2xvec, utt2frames, 1000)[np.newaxis, :]
+                spk_xvec = calc_rand_ivc(spk, spk2utt, utt2xvec, utt2frames, 1000)
                 xvec_list.append(spk_xvec)
             for _ in range(args.n_spk - len(xvec_list)):
                 xvec_list.append(np.zeros((ivc_dim,), dtype=np.float32))
