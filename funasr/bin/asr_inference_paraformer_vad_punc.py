@@ -47,7 +47,7 @@ from funasr.utils.timestamp_tools import time_stamp_lfr6_pl
 from funasr.bin.punctuation_infer import Text2Punc
 from funasr.models.e2e_asr_paraformer import BiCifParaformer, ContextualParaformer
 
-from FunASR.funasr.utils.timestamp_tools import time_stamp_sentence
+from funasr.utils.timestamp_tools import time_stamp_sentence
 
 header_colors = '\033[95m'
 end_colors = '\033[0m'
