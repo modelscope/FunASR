@@ -368,7 +368,7 @@ class DiarTask(AbsTask):
             cls, train: bool = True, inference: bool = False
     ) -> Tuple[str, ...]:
         if not inference:
-            retval = ("speech", "profile", "label")
+            retval = ("speech", "profile", "binary_labels")
         else:
             # Recognition mode
             retval = ("speech", "profile")
