@@ -213,6 +213,24 @@
 </pre></div>
 </div>
 <p>This function defines the detail of the model. For different speech recognition models, the same speech recognition <code class="docutils literal notranslate"><span class="pre">Task</span></code> can usually be shared and the remaining thing needed to be done is to define a specific model in this function. For example, a speech recognition model with a standard encoder-decoder structure has been shown above. Specifically, it first defines each module of the model, including encoder, decoder, etc. and then combine these modules together to generate a complete model. In FunASR, the model needs to inherit <code class="docutils literal notranslate"><span class="pre">AbsESPnetModel</span></code> and the corresponding code can be seen in <code class="docutils literal notranslate"><span class="pre">funasr/train/abs_espnet_model.py</span></code>. The main function needed to be implemented is the <code class="docutils literal notranslate"><span class="pre">forward</span></code> function.</p>
+<p>Next, we take <code class="docutils literal notranslate"><span class="pre">SANMEncoder</span></code> as an example to introduce how to use a custom encoder as a part of the model when defining the specified model and the corresponding code can be seen in <code class="docutils literal notranslate"><span class="pre">funasr/models/encoder/sanm_encoder.py</span></code>. For a custom encoder, in addition to inheriting the common encoder class <code class="docutils literal notranslate"><span class="pre">AbsEncoder</span></code>, it is also necessary to define the <code class="docutils literal notranslate"><span class="pre">forward</span></code> function to achieve the forward computation of the <code class="docutils literal notranslate"><span class="pre">encoder</span></code>. After defining the <code class="docutils literal notranslate"><span class="pre">encoder</span></code>, it should also be registered in the <code class="docutils literal notranslate"><span class="pre">Task</span></code>. The corresponding code example can be seen as below:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">encoder_choices</span> <span class="o">=</span> <span class="n">ClassChoices</span><span class="p">(</span>
+    <span class="s2">&quot;encoder&quot;</span><span class="p">,</span>
+    <span class="n">classes</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+        <span class="n">conformer</span><span class="o">=</span><span class="n">ConformerEncoder</span><span class="p">,</span>
+        <span class="n">transformer</span><span class="o">=</span><span class="n">TransformerEncoder</span><span class="p">,</span>
+        <span class="n">rnn</span><span class="o">=</span><span class="n">RNNEncoder</span><span class="p">,</span>
+        <span class="n">sanm</span><span class="o">=</span><span class="n">SANMEncoder</span><span class="p">,</span>
+        <span class="n">sanm_chunk_opt</span><span class="o">=</span><span class="n">SANMEncoderChunkOpt</span><span class="p">,</span>
+        <span class="n">data2vec_encoder</span><span class="o">=</span><span class="n">Data2VecEncoder</span><span class="p">,</span>
+        <span class="n">mfcca_enc</span><span class="o">=</span><span class="n">MFCCAEncoder</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">type_check</span><span class="o">=</span><span class="n">AbsEncoder</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="s2">&quot;rnn&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>In this code, <code class="docutils literal notranslate"><span class="pre">sanm=SANMEncoder</span></code> takes the newly defined <code class="docutils literal notranslate"><span class="pre">SANMEncoder</span></code> as an optional choice of the <code class="docutils literal notranslate"><span class="pre">encoder</span></code>. Once the user specifies the <code class="docutils literal notranslate"><span class="pre">encoder</span></code> as <code class="docutils literal notranslate"><span class="pre">sanm</span></code> in the configuration file, the <code class="docutils literal notranslate"><span class="pre">SANMEncoder</span></code> will be correspondingly employed as the <code class="docutils literal notranslate"><span class="pre">encoder</span></code> module of the model.</p>
 </div>
 
 
