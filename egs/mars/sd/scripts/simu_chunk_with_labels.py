@@ -103,6 +103,8 @@ def calculate_embedding(spk, spk2utts, utt2xvec, embedding_dim, average_emb_num)
         xvec_list = [kaldiio.load_mat(utt2xvec[utt]) for utt in utt_list]
     else:
         xvec_list = [kaldiio.load_mat(utt2xvec[utt]) for utt in random.sample(utt_list, average_emb_num)]
+    # TODO: rerun the simulation
+    xvec_list = [x / np.linalg.norm(x, axis=-1) for x in xvec_list]
     xvec = np.mean(np.concatenate(xvec_list, axis=0), axis=0)
 
     return xvec

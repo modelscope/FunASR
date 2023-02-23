@@ -26,6 +26,7 @@ def calc_rand_ivc(spk, spk2utt, utt2ivc, utt2frames, total_len=3000):
         short_spk_list.append(spk)
 
     ivc_list = [kaldiio.load_mat(utt2ivc[utt]) for utt in utt_list]
+    ivc_list = [x/np.linalg.norm(x, axis=-1) for x in ivc_list]
     ivc = np.concatenate(ivc_list, axis=0)
     ivc = np.mean(ivc, axis=0, keepdims=False)
     return ivc
