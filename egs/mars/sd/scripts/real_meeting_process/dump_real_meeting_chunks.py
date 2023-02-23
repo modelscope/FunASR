@@ -66,10 +66,10 @@ def process(meeting_scp, labels_scp, spk2utt, utt2xvec, utt2frames, meeting2spk_
             wav_label = meeting_labels[st:ed, :]
             frame_num = (ed-st) // win_shift
             # wav_label = np.pad(wav_label, ((win_len/2, win_len/2), (0, 0)), "constant")
-            feat_label = np.zeros((frame_num, wav_label.shape[1]), dtype=int)
+            feat_label = np.zeros((frame_num, wav_label.shape[1]), dtype=np.float32)
             for i in range(frame_num):
                 frame_label = wav_label[i*win_shift: (i+1)*win_shift, :]
-                feat_label[i, :] = (np.sum(frame_label, axis=0) > 0).astype(int)
+                feat_label[i, :] = (np.sum(frame_label, axis=0) > 0).astype(np.float32)
             label_writer(seg_id, feat_label)
 
             frames_list.append((mid, feat_label.shape[0]))
