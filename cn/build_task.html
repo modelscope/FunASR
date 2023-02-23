@@ -213,6 +213,24 @@
 </pre></div>
 </div>
 <p>该函数定义了具体的模型。对于不同的语音识别模型，往往可以共用同一个语音识别<code class="docutils literal notranslate"><span class="pre">Task</span></code>，额外需要做的是在此函数中定义特定的模型。例如，这里给出的是一个标准的encoder-decoder结构的语音识别模型。具体地，先定义该模型的各个模块，包括encoder，decoder等，然后在将这些模块组合在一起得到一个完整的模型。在FunASR中，模型需要继承<code class="docutils literal notranslate"><span class="pre">AbsESPnetModel</span></code>，其具体代码见<code class="docutils literal notranslate"><span class="pre">funasr/train/abs_espnet_model.py</span></code>，主要需要实现的是<code class="docutils literal notranslate"><span class="pre">forward</span></code>函数。</p>
+<p>下面我们将以<code class="docutils literal notranslate"><span class="pre">SANMEncoder</span></code>为例，介绍如何在定义模型的时候，使用自定义的<code class="docutils literal notranslate"><span class="pre">encoder</span></code>来作为模型的组成部分，其具体的代码见<code class="docutils literal notranslate"><span class="pre">funasr/models/encoder/sanm_encoder.py</span></code>。对于自定义的<code class="docutils literal notranslate"><span class="pre">encoder</span></code>，除了需要继承通用的<code class="docutils literal notranslate"><span class="pre">encoder</span></code>类<code class="docutils literal notranslate"><span class="pre">AbsEncoder</span></code>外，还需要自定义<code class="docutils literal notranslate"><span class="pre">forward</span></code>函数，实现<code class="docutils literal notranslate"><span class="pre">encoder</span></code>的前向计算。在定义完<code class="docutils literal notranslate"><span class="pre">encoder</span></code>后，还需要在<code class="docutils literal notranslate"><span class="pre">Task</span></code>中对其进行注册，下面给出了相应的代码示例：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">encoder_choices</span> <span class="o">=</span> <span class="n">ClassChoices</span><span class="p">(</span>
+    <span class="s2">&quot;encoder&quot;</span><span class="p">,</span>
+    <span class="n">classes</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+        <span class="n">conformer</span><span class="o">=</span><span class="n">ConformerEncoder</span><span class="p">,</span>
+        <span class="n">transformer</span><span class="o">=</span><span class="n">TransformerEncoder</span><span class="p">,</span>
+        <span class="n">rnn</span><span class="o">=</span><span class="n">RNNEncoder</span><span class="p">,</span>
+        <span class="n">sanm</span><span class="o">=</span><span class="n">SANMEncoder</span><span class="p">,</span>
+        <span class="n">sanm_chunk_opt</span><span class="o">=</span><span class="n">SANMEncoderChunkOpt</span><span class="p">,</span>
+        <span class="n">data2vec_encoder</span><span class="o">=</span><span class="n">Data2VecEncoder</span><span class="p">,</span>
+        <span class="n">mfcca_enc</span><span class="o">=</span><span class="n">MFCCAEncoder</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">type_check</span><span class="o">=</span><span class="n">AbsEncoder</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="s2">&quot;rnn&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>可以看到，<code class="docutils literal notranslate"><span class="pre">sanm=SANMEncoder</span></code>将新定义的<code class="docutils literal notranslate"><span class="pre">SANMEncoder</span></code>作为了<code class="docutils literal notranslate"><span class="pre">encoder</span></code>的一种可选项，当用户在配置文件中指定<code class="docutils literal notranslate"><span class="pre">encoder</span></code>为<code class="docutils literal notranslate"><span class="pre">sanm</span></code>时，即会相应地将<code class="docutils literal notranslate"><span class="pre">SANMEncoder</span></code>作为模型的<code class="docutils literal notranslate"><span class="pre">encoder</span></code>模块。</p>
 </div>
 
 
