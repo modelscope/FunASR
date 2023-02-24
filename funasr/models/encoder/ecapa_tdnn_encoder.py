@@ -528,8 +528,6 @@ class ECAPA_TDNN(torch.nn.Module):
 
     Arguments
     ---------
-    device : str
-        Device used, e.g., "cpu" or "cuda".
     activation : torch class
         A class for constructing the activation layers.
     channels : list of ints
@@ -555,7 +553,6 @@ class ECAPA_TDNN(torch.nn.Module):
     def __init__(
         self,
         input_size,
-        device="cpu",
         lin_neurons=192,
         activation=torch.nn.ReLU,
         channels=[512, 512, 512, 512, 1536],
