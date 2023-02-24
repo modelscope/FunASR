@@ -660,11 +660,9 @@ def inference_modelscope(
         hotword_list_or_file = None
         if param_dict is not None:
             hotword_list_or_file = param_dict.get('hotword')
-
         if 'hotword' in kwargs:
             hotword_list_or_file = kwargs['hotword']
-
-        if speech2text.hotword_list is None:
+        if hotword_list_or_file is not None or 'hotword' in kwargs:
             speech2text.hotword_list = speech2text.generate_hotwords_list(hotword_list_or_file)
 
         # 3. Build data-iterator
