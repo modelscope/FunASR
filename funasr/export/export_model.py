@@ -58,7 +58,7 @@ class ASRModelExportParaformer:
         if enc_size:
             dummy_input = model.get_dummy_inputs(enc_size)
         else:
-            dummy_input = model.get_dummy_inputs_txt()
+            dummy_input = model.get_dummy_inputs()
 
         # model_script = torch.jit.script(model)
         model_script = torch.jit.trace(model, dummy_input)
@@ -111,7 +111,7 @@ class ASRModelExportParaformer:
             dummy_input,
             os.path.join(path, f'{model.model_name}.onnx'),
             verbose=verbose,
-            opset_version=12,
+            opset_version=14,
             input_names=model.get_input_names(),
             output_names=model.get_output_names(),
             dynamic_axes=model.get_dynamic_axes()
