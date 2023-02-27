@@ -10,7 +10,7 @@
 The installation is the same as [funasr](../../README.md)
 
 ## Export model
-   `Tips`: torch 1.11.0 is required.
+   `Tips`: torch>=1.11.0
 
    ```shell
    python -m funasr.export.export_model [model_name] [export_dir] [onnx]
