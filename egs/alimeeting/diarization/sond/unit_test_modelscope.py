@@ -52,6 +52,30 @@ def test_without_profile_gpu_infer():
         task=Tasks.speaker_diarization,
         model='damo/speech_diarization_sond-zh-cn-alimeeting-16k-n16k4-pytorch',
         mode="sond_demo",
+        sv_model="damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch",
+        sv_model_revision="master",
+        num_workers=0,
+        log_level="WARNING",
+        param_dict={},
+    )
+    results = diar_pipeline(raw_inputs=raw_inputs)
+    print(results)
+
+
+def test_url_without_profile_gpu_infer():
+    raw_inputs = [
+        "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/speaker_diarization/record.wav",
+        "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/speaker_diarization/spk1.wav",
+        "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/speaker_diarization/spk2.wav",
+        "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/speaker_diarization/spk3.wav",
+        "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/speaker_diarization/spk4.wav",
+    ]
+    diar_pipeline = pipeline(
+        task=Tasks.speaker_diarization,
+        model='damo/speech_diarization_sond-zh-cn-alimeeting-16k-n16k4-pytorch',
+        mode="sond_demo",
+        sv_model="damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch",
+        sv_model_revision="master",
         num_workers=0,
         log_level="WARNING",
         param_dict={},
