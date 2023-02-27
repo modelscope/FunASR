@@ -33,6 +33,8 @@ from funasr.utils.types import str2triple_str
 from funasr.utils.types import str_or_none
 from scipy.ndimage import median_filter
 from funasr.utils.misc import statistic_model_parameters
+from funasr.datasets.iterable_dataset import load_bytes
+
 
 class Speech2Diarization:
     """Speech2Xvector class
@@ -229,6 +231,7 @@ def inference_modelscope(
         dur_threshold: int = 10,
         out_format: str = "vad",
         param_dict: Optional[dict] = None,
+        mode: str = "sond",
         **kwargs,
 ):
     assert check_argument_types()
@@ -252,11 +255,14 @@ def inference_modelscope(
     set_all_random_seed(seed)
 
     # 2a. Build speech2xvec [Optional]
-    if param_dict is not None and "extract_profile" in param_dict and param_dict["extract_profile"]:
+    if mode == "sond_demo" and param_dict is not None and "extract_profile" in param_dict and param_dict["extract_profile"]:
         assert "sv_train_config" in param_dict, "sv_train_config must be provided param_dict."
         assert "sv_model_file" in param_dict, "sv_model_file must be provided in param_dict."
         sv_train_config = param_dict["sv_train_config"]
         sv_model_file = param_dict["sv_model_file"]
+        if "model_dir" in param_dict:
+            sv_train_config = os.path.join(param_dict["model_dir"], sv_train_config)
+            sv_model_file = os.path.join(param_dict["model_dir"], sv_model_file)
         from funasr.bin.sv_inference import Speech2Xvector
         speech2xvector_kwargs = dict(
             sv_train_config=sv_train_config,
@@ -307,20 +313,25 @@ def inference_modelscope(
 
     def _forward(
             data_path_and_name_and_type: Sequence[Tuple[str, str, str]] = None,
-            raw_inputs: List[List[Union[np.ndarray, torch.Tensor, str]]] = None,
+            raw_inputs: List[List[Union[np.ndarray, torch.Tensor, str, bytes]]] = None,
             output_dir_v2: Optional[str] = None,
             param_dict: Optional[dict] = None,
     ):
         logging.info("param_dict: {}".format(param_dict))
         if data_path_and_name_and_type is None and raw_inputs is not None:
             if isinstance(raw_inputs, (list, tuple)):
+                if not isinstance(raw_inputs[0], List):
+                    raw_inputs = [raw_inputs]
+
                 assert all([len(example) >= 2 for example in raw_inputs]), \
                     "The length of test case in raw_inputs must larger than 1 (>=2)."
 
                 def prepare_dataset():
                     for idx, example in enumerate(raw_inputs):
                         # read waveform file
-                        example = [soundfile.read(x)[0] if isinstance(example[0], str) else x
+                        example = [load_bytes(x) if isinstance(x, bytes) else x
+                                   for x in example]
+                        example = [soundfile.read(x)[0] if isinstance(x, str) else x
                                    for x in example]
                         # convert torch tensor to numpy array
                         example = [x.numpy() if isinstance(example[0], torch.Tensor) else x
