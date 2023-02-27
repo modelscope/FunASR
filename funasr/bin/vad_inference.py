@@ -11,6 +11,7 @@ from typing import Tuple
 from typing import Union
 from typing import Dict
 
+import math
 import numpy as np
 import torch
 from typeguard import check_argument_types
@@ -86,7 +87,7 @@ class Speech2VadSegment:
     @torch.no_grad()
     def __call__(
             self, speech: Union[torch.Tensor, np.ndarray], speech_lengths: Union[torch.Tensor, np.ndarray] = None
-    ) -> List[List[int]]:
+    ) -> Tuple[List[List[int]], Dict[str, torch.Tensor]]:
         """Inference
 
         Args:
@@ -102,7 +103,10 @@ class Speech2VadSegment:
             speech = torch.tensor(speech)
 
         if self.frontend is not None:
-            feats, feats_len = self.frontend.forward(speech, speech_lengths)
+            self.frontend.filter_length_max = math.inf
+            fbanks, fbanks_len = self.frontend.forward_fbank(speech, speech_lengths)
+            feats, feats_len = self.frontend.forward_lfr_cmvn(fbanks, fbanks_len)
+            fbanks = to_device(fbanks, device=self.device)
             feats = to_device(feats, device=self.device)
             feats_len = feats_len.int()
         else:
@@ -110,18 +114,18 @@ class Speech2VadSegment:
 
         # b. Forward Encoder streaming
         t_offset = 0
-        step = min(feats_len, 6000)
+        step = min(feats_len.max(), 6000)
         segments = [[]] * self.batch_size
         for t_offset in range(0, feats_len, min(step, feats_len - t_offset)):
             if t_offset + step >= feats_len - 1:
                 step = feats_len - t_offset
-                is_final_send = True
+                is_final = True
             else:
-                is_final_send = False
+                is_final = False
             batch = {
                 "feats": feats[:, t_offset:t_offset + step, :],
                 "waveform": speech[:, t_offset * 160:min(speech.shape[-1], (t_offset + step - 1) * 160 + 400)],
-                "is_final_send": is_final_send
+                "is_final": is_final
             }
             # a. To device
             batch = to_device(batch, device=self.device)
@@ -129,7 +133,7 @@ class Speech2VadSegment:
             if segments_part:
                 for batch_num in range(0, self.batch_size):
                     segments[batch_num] += segments_part[batch_num]
-        return segments
+        return fbanks, segments
 
 
 def inference(
@@ -219,9 +223,13 @@ def inference_modelscope(
             raw_inputs: Union[np.ndarray, torch.Tensor] = None,
             output_dir_v2: Optional[str] = None,
             fs: dict = None,
-            param_dict: dict = None,
+            param_dict: dict = None
     ):
         # 3. Build data-iterator
+        if data_path_and_name_and_type is None and raw_inputs is not None:
+            if isinstance(raw_inputs, torch.Tensor):
+                raw_inputs = raw_inputs.numpy()
+            data_path_and_name_and_type = [raw_inputs, "speech", "waveform"]
         loader = VADTask.build_streaming_iterator(
             data_path_and_name_and_type,
             dtype=dtype,
@@ -254,7 +262,7 @@ def inference_modelscope(
             assert len(keys) == _bs, f"{len(keys)} != {_bs}"
 
             # do vad segment
-            results = speech2vadsegment(**batch)
+            _, results = speech2vadsegment(**batch)
             for i, _ in enumerate(keys):
                 results[i] = json.dumps(results[i])
                 item = {'key': keys[i], 'value': results[i]}
