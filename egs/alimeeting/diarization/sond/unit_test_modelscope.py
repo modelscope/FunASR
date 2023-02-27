@@ -58,7 +58,7 @@ def test_without_profile_gpu_infer():
         log_level="WARNING",
         param_dict={},
     )
-    results = diar_pipeline(raw_inputs=raw_inputs)
+    results = diar_pipeline(raw_inputs)
     print(results)
 
 
@@ -80,7 +80,7 @@ def test_url_without_profile_gpu_infer():
         log_level="WARNING",
         param_dict={},
     )
-    results = diar_pipeline(raw_inputs=raw_inputs)
+    results = diar_pipeline(raw_inputs)
     print(results)
 
 
