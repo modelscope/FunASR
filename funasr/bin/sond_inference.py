@@ -231,6 +231,7 @@ def inference_modelscope(
         dur_threshold: int = 10,
         out_format: str = "vad",
         param_dict: Optional[dict] = None,
+        mode: str = "sond",
         **kwargs,
 ):
     assert check_argument_types()
@@ -254,7 +255,7 @@ def inference_modelscope(
     set_all_random_seed(seed)
 
     # 2a. Build speech2xvec [Optional]
-    if param_dict is not None and "extract_profile" in param_dict and param_dict["extract_profile"]:
+    if mode == "sond_demo" and param_dict is not None and "extract_profile" in param_dict and param_dict["extract_profile"]:
         assert "sv_train_config" in param_dict, "sv_train_config must be provided param_dict."
         assert "sv_model_file" in param_dict, "sv_model_file must be provided in param_dict."
         sv_train_config = param_dict["sv_train_config"]
