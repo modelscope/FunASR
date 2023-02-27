@@ -11,8 +11,8 @@ from funasr.export.models import get_model
 import numpy as np
 import random
 
-torch_version = float(".".join(torch.__version__.split(".")[:2]))
-assert torch_version > 1.9
+# torch_version = float(".".join(torch.__version__.split(".")[:2]))
+# assert torch_version > 1.9
 
 class ASRModelExportParaformer:
     def __init__(self, cache_dir: Union[Path, str] = None, onnx: bool = True):
