@@ -124,9 +124,9 @@ encoder_choices = ClassChoices(
         resnet34=ResNet34Diar,
         sanm_chunk_opt=SANMEncoderChunkOpt,
         data2vec_encoder=Data2VecEncoder,
-        epaca_dtnn=ECAPA_TDNN,
+        ecapa_tdnn=ECAPA_TDNN,
     ),
-    type_check=AbsEncoder,
+    type_check=torch.nn.Module,
     default="resnet34",
 )
 speaker_encoder_choices = ClassChoices(
@@ -189,6 +189,8 @@ class DiarTask(AbsTask):
         specaug_choices,
         # --normalize and --normalize_conf
         normalize_choices,
+        # --label_aggregator and --label_aggregator_conf
+        label_aggregator_choices,
         # --model and --model_conf
         model_choices,
         # --encoder and --encoder_conf
