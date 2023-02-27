@@ -1,7 +1,7 @@
 ## Inference with Triton 
 
 ### Steps:
-1. Refer here to [get model.onnx](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/onnxruntime#steps)
+1. Refer here to [get model.onnx](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/export/README.md)
 
 2. Follow below instructions to using triton
 ```sh
