@@ -4,6 +4,7 @@ import logging
 import numpy as np
 from typing import Any, List, Tuple, Union
 
+
 def time_stamp_lfr6_pl(us_alphas, us_cif_peak, char_list, begin_time=0.0, end_time=None):
     if not len(char_list):
         return []
