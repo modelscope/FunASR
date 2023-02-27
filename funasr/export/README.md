@@ -1,9 +1,9 @@
 
 ## Environments
-    funasr 0.1.7
-    python 3.7
-    torch 1.11.0
-    modelscope 1.2.0
+    funasr >= 0.1.7
+    python >= 3.7, < 3.9
+    torch >= 1.11.0
+    modelscope >= 1.2.0
 
 ## Install modelscope and funasr
 
