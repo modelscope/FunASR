@@ -135,8 +135,10 @@ def inference_launch(mode, **kwargs):
             "sv_train_config": "sv.yaml",
             "sv_model_file": "sv.pth",
         }
-        if "param_dict" in kwargs:
-            kwargs["param_dict"].update(param_dict)
+        if "param_dict" in kwargs and kwargs["param_dict"] is not None:
+            for key in param_dict:
+                if key not in kwargs["param_dict"]:
+                    kwargs["param_dict"][key] = param_dict[key]
         else:
             kwargs["param_dict"] = param_dict
         return inference_modelscope(**kwargs)
