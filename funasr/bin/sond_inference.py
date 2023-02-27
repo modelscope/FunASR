@@ -319,10 +319,11 @@ def inference_modelscope(
         logging.info("param_dict: {}".format(param_dict))
         if data_path_and_name_and_type is None and raw_inputs is not None:
             if isinstance(raw_inputs, (list, tuple)):
+                if not isinstance(raw_inputs[0], List):
+                    raw_inputs = [raw_inputs]
+
                 assert all([len(example) >= 2 for example in raw_inputs]), \
                     "The length of test case in raw_inputs must larger than 1 (>=2)."
-                if not isinstance(raw_inputs, List):
-                    raw_inputs = [raw_inputs]
 
                 def prepare_dataset():
                     for idx, example in enumerate(raw_inputs):
