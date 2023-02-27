@@ -127,7 +127,7 @@ def get_parser():
 def inference_launch(mode, **kwargs):
     if mode == "sond":
         from funasr.bin.sond_inference import inference_modelscope
-        return inference_modelscope(**kwargs)
+        return inference_modelscope(mode=mode, **kwargs)
     elif mode == "sond_demo":
         from funasr.bin.sond_inference import inference_modelscope
         param_dict = {
@@ -141,7 +141,7 @@ def inference_launch(mode, **kwargs):
                     kwargs["param_dict"][key] = param_dict[key]
         else:
             kwargs["param_dict"] = param_dict
-        return inference_modelscope(**kwargs)
+        return inference_modelscope(mode=mode, **kwargs)
     else:
         logging.info("Unknown decoding mode: {}".format(mode))
         return None
