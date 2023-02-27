@@ -89,3 +89,4 @@ if __name__ == '__main__':
     test_wav_cpu_infer()
     test_wav_gpu_infer()
     test_without_profile_gpu_infer()
+    test_url_without_profile_gpu_infer()
