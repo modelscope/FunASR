@@ -312,7 +312,7 @@ def inference_modelscope(
 
     def _forward(
             data_path_and_name_and_type: Sequence[Tuple[str, str, str]] = None,
-            raw_inputs: List[List[Union[np.ndarray, torch.Tensor, str]]] = None,
+            raw_inputs: List[List[Union[np.ndarray, torch.Tensor, str, bytes]]] = None,
             output_dir_v2: Optional[str] = None,
             param_dict: Optional[dict] = None,
     ):
@@ -321,6 +321,8 @@ def inference_modelscope(
             if isinstance(raw_inputs, (list, tuple)):
                 assert all([len(example) >= 2 for example in raw_inputs]), \
                     "The length of test case in raw_inputs must larger than 1 (>=2)."
+                if not isinstance(raw_inputs, List):
+                    raw_inputs = [raw_inputs]
 
                 def prepare_dataset():
                     for idx, example in enumerate(raw_inputs):
