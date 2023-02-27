@@ -77,6 +77,53 @@ class CifPredictorV2(nn.Module):
 		return hidden, alphas, token_num_floor
 
 
+# @torch.jit.script
+# def cif(hidden, alphas, threshold: float):
+# 	batch_size, len_time, hidden_size = hidden.size()
+# 	threshold = torch.tensor([threshold], dtype=alphas.dtype).to(alphas.device)
+#
+# 	# loop varss
+# 	integrate = torch.zeros([batch_size], device=hidden.device)
+# 	frame = torch.zeros([batch_size, hidden_size], device=hidden.device)
+# 	# intermediate vars along time
+# 	list_fires = []
+# 	list_frames = []
+#
+# 	for t in range(len_time):
+# 		alpha = alphas[:, t]
+# 		distribution_completion = torch.ones([batch_size], device=hidden.device) - integrate
+#
+# 		integrate += alpha
+# 		list_fires.append(integrate)
+#
+# 		fire_place = integrate >= threshold
+# 		integrate = torch.where(fire_place,
+# 		                        integrate - torch.ones([batch_size], device=hidden.device),
+# 		                        integrate)
+# 		cur = torch.where(fire_place,
+# 		                  distribution_completion,
+# 		                  alpha)
+# 		remainds = alpha - cur
+#
+# 		frame += cur[:, None] * hidden[:, t, :]
+# 		list_frames.append(frame)
+# 		frame = torch.where(fire_place[:, None].repeat(1, hidden_size),
+# 		                    remainds[:, None] * hidden[:, t, :],
+# 		                    frame)
+#
+# 	fires = torch.stack(list_fires, 1)
+# 	frames = torch.stack(list_frames, 1)
+# 	list_ls = []
+# 	len_labels = torch.floor(alphas.sum(-1)).int()
+# 	max_label_len = len_labels.max()
+# 	for b in range(batch_size):
+# 		fire = fires[b, :]
+# 		l = torch.index_select(frames[b, :, :], 0, torch.nonzero(fire >= threshold).squeeze())
+# 		pad_l = torch.zeros([int(max_label_len - l.size(0)), int(hidden_size)], device=hidden.device)
+# 		list_ls.append(torch.cat([l, pad_l], 0))
+# 	return torch.stack(list_ls, 0), fires
+
+
 @torch.jit.script
 def cif(hidden, alphas, threshold: float):
 	batch_size, len_time, hidden_size = hidden.size()
@@ -113,15 +160,11 @@ def cif(hidden, alphas, threshold: float):
 	
 	fires = torch.stack(list_fires, 1)
 	frames = torch.stack(list_frames, 1)
-	# list_ls = []
-	len_labels = torch.round(alphas.sum(-1)).type(torch.int32)
-	# max_label_len = int(torch.max(len_labels).item())
-	# print("type: {}".format(type(max_label_len)))
+
 	fire_idxs = fires >= threshold
 	frame_fires = torch.zeros_like(hidden)
 	max_label_len = frames[0, fire_idxs[0]].size(0)
 	for b in range(batch_size):
-		# fire = fires[b, :]
 		frame_fire = frames[b, fire_idxs[b]]
 		frame_len = frame_fire.size(0)
 		frame_fires[b, :frame_len, :] = frame_fire
