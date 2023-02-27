@@ -8,3 +8,5 @@ init_model/
 *.tar.gz
 test_local/
 RapidASR
+export/*
+*.pyc
