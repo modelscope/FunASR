@@ -1,4 +1,5 @@
 import unittest
+import logging
 
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
@@ -16,7 +17,7 @@ class TestInferencePipelines(unittest.TestCase):
             model='damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch')
         rec_result = inference_pipeline(
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
-        print(rec_result)
+        logging.info("asr inference result: {0}".format(rec_result))
 
     def test_asr_inference_pipeline_with_vad_punc(self):
         inference_pipeline = pipeline(
@@ -28,7 +29,7 @@ class TestInferencePipelines(unittest.TestCase):
             punc_model_revision="v1.1.6")
         rec_result = inference_pipeline(
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_vad_punc_example.wav')
-        print(rec_result)
+        logging.info("asr inference with vad punc result: {0}".format(rec_result))
 
     def test_vad_inference_pipeline(self):
         inference_pipeline = pipeline(
@@ -38,7 +39,7 @@ class TestInferencePipelines(unittest.TestCase):
         )
         segments_result = inference_pipeline(
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/vad_example.wav')
-        print(segments_result)
+        logging.info("vad inference result: {0}".format(segments_result))
 
 
 if __name__ == '__main__':

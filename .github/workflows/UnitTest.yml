@@ -1,6 +1,13 @@
 name: FunASR Unit Test
 run-name: ${{ github.actor }} is testing out FunASR Unit Test 🚀
-on: [push]
+on:
+  pull_request:
+      branches:
+        - main
+  push:
+    branches:
+      - dev_wjm
+      - dev_jy
 
 jobs:
   build:
