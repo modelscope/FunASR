@@ -199,6 +199,7 @@ def get_parser():
 
 
 def inference_launch(**kwargs):
+    print("JIANGYU: using funasr in my path. {0}".format(os.path.abspath(__file__)))
     if 'mode' in kwargs:
         mode = kwargs['mode']
     else:
