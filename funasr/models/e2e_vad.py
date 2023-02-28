@@ -444,7 +444,7 @@ class E2EVadModel(nn.Module):
 
     def forward(self, feats: torch.Tensor, waveform: torch.tensor, in_cache: Dict[str, torch.Tensor] = dict(),
                 is_final: bool = False
-                ) -> List[List[List[int]]]:
+                ) -> Tuple[List[List[List[int]]], Dict[str, torch.Tensor]]:
         self.waveform = waveform  # compute decibel for each frame
         self.ComputeDecibel()
         self.ComputeScores(feats, in_cache)
@@ -468,8 +468,7 @@ class E2EVadModel(nn.Module):
         if is_final:
             # reset class variables and clear the dict for the next query
             self.AllResetDetection()
-            in_cache.clear()
-        return segments
+        return segments, in_cache
 
     def DetectCommonFrames(self) -> int:
         if self.vad_state_machine == VadStateMachine.kVadInStateEndPointDetected:

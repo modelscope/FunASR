@@ -86,7 +86,8 @@ class Speech2VadSegment:
 
     @torch.no_grad()
     def __call__(
-            self, speech: Union[torch.Tensor, np.ndarray], speech_lengths: Union[torch.Tensor, np.ndarray] = None
+            self, speech: Union[torch.Tensor, np.ndarray], speech_lengths: Union[torch.Tensor, np.ndarray] = None,
+            in_cache: Dict[str, torch.Tensor] = dict()
     ) -> Tuple[List[List[int]], Dict[str, torch.Tensor]]:
         """Inference
 
@@ -125,11 +126,12 @@ class Speech2VadSegment:
             batch = {
                 "feats": feats[:, t_offset:t_offset + step, :],
                 "waveform": speech[:, t_offset * 160:min(speech.shape[-1], (t_offset + step - 1) * 160 + 400)],
-                "is_final": is_final
+                "is_final": is_final,
+                "in_cache": in_cache
             }
             # a. To device
             batch = to_device(batch, device=self.device)
-            segments_part = self.vad_model(**batch)
+            segments_part, in_cache = self.vad_model(**batch)
             if segments_part:
                 for batch_num in range(0, self.batch_size):
                     segments[batch_num] += segments_part[batch_num]
