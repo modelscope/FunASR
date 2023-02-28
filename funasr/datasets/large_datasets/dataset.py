@@ -127,14 +127,17 @@ class AudioDataset(IterableDataset):
                             sample_dict["key"] = key
                     else:
                         text = item
-                        sample_dict[data_name] = text.strip().split()[1:]
+                        segs = text.strip().split()
+                        sample_dict[data_name] = segs[1:]
+                        if "key" not in sample_dict:
+                            sample_dict["key"] = segs[0]
                 yield sample_dict
 
             self.close_reader(reader_list)
 
 
 def len_fn_example(data):
-    return len(data)
+    return 1
 
 
 def len_fn_token(data):
@@ -148,6 +151,7 @@ def len_fn_token(data):
 def Dataset(data_list_file,
             dict,
             seg_dict,
+            punc_dict,
             conf,
             mode="train",
             batch_mode="padding"):
@@ -162,7 +166,7 @@ def Dataset(data_list_file,
     dataset = FilterIterDataPipe(dataset, fn=filter_fn)
 
     if "text" in data_names:
-        vocab = {'vocab': dict, 'seg_dict': seg_dict}
+        vocab = {'vocab': dict, 'seg_dict': seg_dict, 'punc_dict': punc_dict}
         tokenize_fn = partial(tokenize, **vocab)
         dataset = MapperIterDataPipe(dataset, fn=tokenize_fn)
 
@@ -191,6 +195,10 @@ def Dataset(data_list_file,
                                              sort_size=sort_size,
                                              batch_mode=batch_mode)
 
-    dataset = MapperIterDataPipe(dataset, fn=padding if batch_mode == "padding" else clipping)
+    int_pad_value = conf.get("int_pad_value", -1)
+    float_pad_value = conf.get("float_pad_value", 0.0)
+    padding_conf = {"int_pad_value": int_pad_value, "float_pad_value": float_pad_value}
+    padding_fn = partial(padding, **padding_conf)
+    dataset = MapperIterDataPipe(dataset, fn=padding_fn if batch_mode == "padding" else clipping)
 
     return dataset

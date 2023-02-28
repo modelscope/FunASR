@@ -6,9 +6,8 @@ from torch.nn.utils.rnn import pad_sequence
 def padding(data, float_pad_value=0.0, int_pad_value=-1):
     assert isinstance(data, list)
     assert "key" in data[0]
-    assert "speech" in data[0]
-    assert "text" in data[0]
-
+    assert "speech" in data[0] or "text" in data[0]
+    
     keys = [x["key"] for x in data]
 
     batch = {}

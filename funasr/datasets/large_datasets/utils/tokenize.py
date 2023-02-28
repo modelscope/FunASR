@@ -31,22 +31,43 @@ def seg_tokenize(txt, seg_dict):
 
 def tokenize(data,
              vocab=None,
-             seg_dict=None):
+             seg_dict=None,
+             punc_dict=None):
     assert "text" in data
     assert isinstance(vocab, dict)
     text = data["text"]
     token = []
+    vad = -2
 
     if seg_dict is not None:
         assert isinstance(seg_dict, dict)
         txt = forward_segment("".join(text).lower(), seg_dict)
         text = seg_tokenize(txt, seg_dict)
-    
-    for x in text:
-        if x in vocab:
+
+    length = len(text)
+    for i in range(length):
+        x = text[i]
+        if i == length-1 and "punc" in data and text[i].startswith("vad:"):
+            vad = x[-1][4:]
+            if len(vad) == 0:
+                vad = -1
+            else:
+                vad = int(vad)
+        elif x in vocab:
             token.append(vocab[x])
         else:
             token.append(vocab['<unk>'])
 
+    if "punc" in data and punc_dict is not None:
+        punc_token = []
+        for punc in data["punc"]:
+            if punc in punc_dict:
+                punc_token.append(punc_dict[punc])
+            else:
+                punc_token.append(punc_dict["_"])
+        data["punc"] =  np.array(punc_token)
+
     data["text"] = np.array(token)
+    if vad is not -2:
+        data["vad_indexes"]=np.array([vad], dtype=np.int64)
     return data

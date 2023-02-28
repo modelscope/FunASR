@@ -34,16 +34,20 @@ def load_seg_dict(seg_dict_file):
     return seg_dict
 
 class ArkDataLoader(AbsIterFactory):
-    def __init__(self, data_list, dict_file, dataset_conf, seg_dict_file=None, mode="train"):
+    def __init__(self, data_list, dict_file, dataset_conf, seg_dict_file=None, punc_dict_file=None, mode="train"):
         symbol_table = read_symbol_table(dict_file) if dict_file is not None else None
         if seg_dict_file is not None:
             seg_dict = load_seg_dict(seg_dict_file)
         else:
             seg_dict = None
+        if punc_dict_file is not None:
+            punc_dict = read_symbol_table(punc_dict_file)
+        else:
+            punc_dict = None
         self.dataset_conf = dataset_conf
         logging.info("dataloader config: {}".format(self.dataset_conf))
         batch_mode = self.dataset_conf.get("batch_mode", "padding")
-        self.dataset = Dataset(data_list, symbol_table, seg_dict,
+        self.dataset = Dataset(data_list, symbol_table, seg_dict, punc_dict,
                                self.dataset_conf, mode=mode, batch_mode=batch_mode)
 
     def build_iter(self, epoch, shuffle=True):
