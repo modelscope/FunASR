@@ -6,13 +6,14 @@ from modelscope.utils.constant import Tasks
 
 class TestInferencePipelines(unittest.TestCase):
     def test_funasr_path(self):
-        print(funasr.__file__)
+        import funasr
+        import os
+        print("JIANGYU: run_dir:{0} ; funasr_path: {1}".format(os.getcwd(), funasr.__file__))
 
     def test_asr_inference_pipeline(self):
         inference_pipeline = pipeline(
             task=Tasks.auto_speech_recognition,
             model='damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch')
-
         rec_result = inference_pipeline(
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
         print(rec_result)
@@ -25,7 +26,6 @@ class TestInferencePipelines(unittest.TestCase):
             vad_model_revision="v1.1.8",
             punc_model='damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch',
             punc_model_revision="v1.1.6")
-
         rec_result = inference_pipeline(
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_vad_punc_example.wav')
         print(rec_result)
@@ -36,7 +36,6 @@ class TestInferencePipelines(unittest.TestCase):
             model='damo/speech_fsmn_vad_zh-cn-16k-common-pytorch',
             model_revision='v1.1.8',
         )
-
         segments_result = inference_pipeline(
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/vad_example.wav')
         print(segments_result)
