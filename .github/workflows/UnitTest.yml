@@ -23,6 +23,7 @@ jobs:
           pip install "modelscope[audio_asr]" --upgrade -f \
             https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install -e ./
       - name: Testing
         run:
           python tests/run_test.py
