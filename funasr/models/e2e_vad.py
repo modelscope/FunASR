@@ -201,7 +201,7 @@ class E2EVadModel(nn.Module):
                                                self.vad_opts.frame_in_ms)
         self.encoder = encoder
         # init variables
-        self.is_final_send = False
+        self.is_final = False
         self.data_buf_start_frame = 0
         self.frm_cnt = 0
         self.latest_confirmed_speech_frame = 0
@@ -230,8 +230,7 @@ class E2EVadModel(nn.Module):
         self.ResetDetection()
 
     def AllResetDetection(self):
-        self.encoder.cache_reset()  # reset the in_cache in self.encoder for next query or next long sentence
-        self.is_final_send = False
+        self.is_final = False
         self.data_buf_start_frame = 0
         self.frm_cnt = 0
         self.latest_confirmed_speech_frame = 0
@@ -283,8 +282,8 @@ class E2EVadModel(nn.Module):
                 10 * math.log10((self.waveform[0][offset: offset + frame_sample_length]).square().sum() + \
                                 0.000001))
 
-    def ComputeScores(self, feats: torch.Tensor) -> None:
-        scores = self.encoder(feats)  # return B * T * D
+    def ComputeScores(self, feats: torch.Tensor, in_cache: Dict[str, torch.Tensor]) -> None:
+        scores = self.encoder(feats, in_cache)  # return B * T * D
         assert scores.shape[1] == feats.shape[1], "The shape between feats and scores does not match"
         self.vad_opts.nn_eval_block_size = scores.shape[1]
         self.frm_cnt += scores.shape[1]  # count total frames
@@ -306,7 +305,7 @@ class E2EVadModel(nn.Module):
         expected_sample_number = int(frm_cnt * self.vad_opts.sample_rate * self.vad_opts.frame_in_ms / 1000)
         if last_frm_is_end_point:
             extra_sample = max(0, int(self.vad_opts.frame_length_ms * self.vad_opts.sample_rate / 1000 - \
-                               self.vad_opts.sample_rate * self.vad_opts.frame_in_ms / 1000))
+                                      self.vad_opts.sample_rate * self.vad_opts.frame_in_ms / 1000))
             expected_sample_number += int(extra_sample)
         if end_point_is_sent_end:
             expected_sample_number = max(expected_sample_number, len(self.data_buf))
@@ -443,11 +442,13 @@ class E2EVadModel(nn.Module):
 
         return frame_state
 
-    def forward(self, feats: torch.Tensor, waveform: torch.tensor, is_final_send: bool = False) -> List[List[List[int]]]:
+    def forward(self, feats: torch.Tensor, waveform: torch.tensor, in_cache: Dict[str, torch.Tensor] = dict(),
+                is_final: bool = False
+                ) -> Tuple[List[List[List[int]]], Dict[str, torch.Tensor]]:
         self.waveform = waveform  # compute decibel for each frame
         self.ComputeDecibel()
-        self.ComputeScores(feats)
-        if not is_final_send:
+        self.ComputeScores(feats, in_cache)
+        if not is_final:
             self.DetectCommonFrames()
         else:
             self.DetectLastFrames()
@@ -456,16 +457,18 @@ class E2EVadModel(nn.Module):
             segment_batch = []
             if len(self.output_data_buf) > 0:
                 for i in range(self.output_data_buf_offset, len(self.output_data_buf)):
-                    if self.output_data_buf[i].contain_seg_start_point and self.output_data_buf[
+                    if not self.output_data_buf[i].contain_seg_start_point or not self.output_data_buf[
                         i].contain_seg_end_point:
-                        segment = [self.output_data_buf[i].start_ms, self.output_data_buf[i].end_ms]
-                        segment_batch.append(segment)
-                        self.output_data_buf_offset += 1  # need update this parameter
+                        continue
+                    segment = [self.output_data_buf[i].start_ms, self.output_data_buf[i].end_ms]
+                    segment_batch.append(segment)
+                    self.output_data_buf_offset += 1  # need update this parameter
             if segment_batch:
                 segments.append(segment_batch)
-        if is_final_send:
-            self.AllResetDetection() 
-        return segments
+        if is_final:
+            # reset class variables and clear the dict for the next query
+            self.AllResetDetection()
+        return segments, in_cache
 
     def DetectCommonFrames(self) -> int:
         if self.vad_state_machine == VadStateMachine.kVadInStateEndPointDetected:

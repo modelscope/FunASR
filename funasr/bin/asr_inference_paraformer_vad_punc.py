@@ -43,9 +43,12 @@ from funasr.utils.types import str_or_none
 from funasr.utils import asr_utils, wav_utils, postprocess_utils
 from funasr.models.frontend.wav_frontend import WavFrontend
 from funasr.tasks.vad import VADTask
+from funasr.bin.vad_inference import Speech2VadSegment
 from funasr.utils.timestamp_tools import time_stamp_lfr6_pl
 from funasr.bin.punctuation_infer import Text2Punc
 from funasr.models.e2e_asr_paraformer import BiCifParaformer, ContextualParaformer
+
+from funasr.utils.timestamp_tools import time_stamp_sentence
 
 header_colors = '\033[95m'
 end_colors = '\033[0m'
@@ -176,55 +179,8 @@ class Speech2Text:
         self.tokenizer = tokenizer
 
         # 6. [Optional] Build hotword list from str, local file or url
-        # for None
-        if hotword_list_or_file is None:
-            self.hotword_list = None
-        # for text str input
-        elif not os.path.exists(hotword_list_or_file) and not hotword_list_or_file.startswith('http'):
-            logging.info("Attempting to parse hotwords as str...")
-            self.hotword_list = []
-            hotword_str_list = []
-            for hw in hotword_list_or_file.strip().split():
-                hotword_str_list.append(hw)
-                self.hotword_list.append(self.converter.tokens2ids([i for i in hw]))
-            self.hotword_list.append([self.asr_model.sos])
-            hotword_str_list.append('<s>')
-            logging.info("Hotword list: {}.".format(hotword_str_list))
-        # for local txt inputs
-        elif os.path.exists(hotword_list_or_file):
-            logging.info("Attempting to parse hotwords from local txt...")
-            self.hotword_list = []
-            hotword_str_list = []
-            with codecs.open(hotword_list_or_file, 'r') as fin:
-                for line in fin.readlines():
-                    hw = line.strip()
-                    hotword_str_list.append(hw)
-                    self.hotword_list.append(self.converter.tokens2ids([i for i in hw]))
-                self.hotword_list.append([self.asr_model.sos])
-                hotword_str_list.append('<s>')
-            logging.info("Initialized hotword list from file: {}, hotword list: {}."
-                .format(hotword_list_or_file, hotword_str_list))
-        # for url, download and generate txt
-        else:
-            logging.info("Attempting to parse hotwords from url...")
-            work_dir = tempfile.TemporaryDirectory().name
-            if not os.path.exists(work_dir):
-                os.makedirs(work_dir)
-            text_file_path = os.path.join(work_dir, os.path.basename(hotword_list_or_file))
-            local_file = requests.get(hotword_list_or_file)
-            open(text_file_path, "wb").write(local_file.content)
-            hotword_list_or_file = text_file_path
-            self.hotword_list = []
-            hotword_str_list = []
-            with codecs.open(hotword_list_or_file, 'r') as fin:
-                for line in fin.readlines():
-                    hw = line.strip()
-                    hotword_str_list.append(hw)
-                    self.hotword_list.append(self.converter.tokens2ids([i for i in hw]))
-                self.hotword_list.append([self.asr_model.sos])
-                hotword_str_list.append('<s>')
-            logging.info("Initialized hotword list from file: {}, hotword list: {}."
-                .format(hotword_list_or_file, hotword_str_list))
+        self.hotword_list = None
+        self.hotword_list = self.generate_hotwords_list(hotword_list_or_file)
 
         is_use_lm = lm_weight != 0.0 and lm_file is not None
         if (ctc_weight == 0.0 or asr_model.ctc == None) and not is_use_lm:
@@ -355,101 +311,59 @@ class Speech2Text:
         # assert check_return_type(results)
         return results
 
-
-class Speech2VadSegment:
-    """Speech2VadSegment class
-
-    Examples:
-        >>> import soundfile
-        >>> speech2segment = Speech2VadSegment("vad_config.yml", "vad.pt")
-        >>> audio, rate = soundfile.read("speech.wav")
-        >>> speech2segment(audio)
-        [[10, 230], [245, 450], ...]
-
-    """
-
-    def __init__(
-            self,
-            vad_infer_config: Union[Path, str] = None,
-            vad_model_file: Union[Path, str] = None,
-            vad_cmvn_file: Union[Path, str] = None,
-            device: str = "cpu",
-            batch_size: int = 1,
-            dtype: str = "float32",
-            **kwargs,
-    ):
-        assert check_argument_types()
-
-        # 1. Build vad model
-        vad_model, vad_infer_args = VADTask.build_model_from_file(
-            vad_infer_config, vad_model_file, device
-        )
-        frontend = None
-        if vad_infer_args.frontend is not None:
-            frontend = WavFrontend(cmvn_file=vad_cmvn_file, **vad_infer_args.frontend_conf)
-
-        # logging.info("vad_model: {}".format(vad_model))
-        # logging.info("vad_infer_args: {}".format(vad_infer_args))
-        vad_model.to(dtype=getattr(torch, dtype)).eval()
-
-        self.vad_model = vad_model
-        self.vad_infer_args = vad_infer_args
-        self.device = device
-        self.dtype = dtype
-        self.frontend = frontend
-        self.batch_size = batch_size
-
-    @torch.no_grad()
-    def __call__(
-            self, speech: Union[torch.Tensor, np.ndarray], speech_lengths: Union[torch.Tensor, np.ndarray] = None
-    ) -> List[List[int]]:
-        """Inference
-
-        Args:
-            speech: Input speech data
-        Returns:
-            text, token, token_int, hyp
-
-        """
-        assert check_argument_types()
-
-        # Input as audio signal
-        if isinstance(speech, np.ndarray):
-            speech = torch.tensor(speech)
-
-        if self.frontend is not None:
-            self.frontend.filter_length_max = math.inf
-            fbanks, fbanks_len = self.frontend.forward_fbank(speech, speech_lengths)
-            feats, feats_len = self.frontend.forward_lfr_cmvn(fbanks, fbanks_len)
-            fbanks = to_device(fbanks, device=self.device)
-            feats = to_device(feats, device=self.device)
-            feats_len = feats_len.int()
+    def generate_hotwords_list(self, hotword_list_or_file):
+        # for None
+        if hotword_list_or_file is None:
+            hotword_list = None
+        # for local txt inputs
+        elif os.path.exists(hotword_list_or_file) and hotword_list_or_file.endswith('.txt'):
+            logging.info("Attempting to parse hotwords from local txt...")
+            hotword_list = []
+            hotword_str_list = []
+            with codecs.open(hotword_list_or_file, 'r') as fin:
+                for line in fin.readlines():
+                    hw = line.strip()
+                    hotword_str_list.append(hw)
+                    hotword_list.append(self.converter.tokens2ids([i for i in hw]))
+                hotword_list.append([self.asr_model.sos])
+                hotword_str_list.append('<s>')
+            logging.info("Initialized hotword list from file: {}, hotword list: {}."
+                         .format(hotword_list_or_file, hotword_str_list))
+        # for url, download and generate txt
+        elif hotword_list_or_file.startswith('http'):
+            logging.info("Attempting to parse hotwords from url...")
+            work_dir = tempfile.TemporaryDirectory().name
+            if not os.path.exists(work_dir):
+                os.makedirs(work_dir)
+            text_file_path = os.path.join(work_dir, os.path.basename(hotword_list_or_file))
+            local_file = requests.get(hotword_list_or_file)
+            open(text_file_path, "wb").write(local_file.content)
+            hotword_list_or_file = text_file_path
+            hotword_list = []
+            hotword_str_list = []
+            with codecs.open(hotword_list_or_file, 'r') as fin:
+                for line in fin.readlines():
+                    hw = line.strip()
+                    hotword_str_list.append(hw)
+                    hotword_list.append(self.converter.tokens2ids([i for i in hw]))
+                hotword_list.append([self.asr_model.sos])
+                hotword_str_list.append('<s>')
+            logging.info("Initialized hotword list from file: {}, hotword list: {}."
+                         .format(hotword_list_or_file, hotword_str_list))
+        # for text str input
+        elif not hotword_list_or_file.endswith('.txt'):
+            logging.info("Attempting to parse hotwords as str...")
+            hotword_list = []
+            hotword_str_list = []
+            for hw in hotword_list_or_file.strip().split():
+                hotword_str_list.append(hw)
+                hotword_list.append(self.converter.tokens2ids([i for i in hw]))
+            hotword_list.append([self.asr_model.sos])
+            hotword_str_list.append('<s>')
+            logging.info("Hotword list: {}.".format(hotword_str_list))
         else:
-            raise Exception("Need to extract feats first, please configure frontend configuration")
-
-        # b. Forward Encoder streaming
-        t_offset = 0
-        step = min(feats_len, 6000)
-        segments = [[]] * self.batch_size
-        for t_offset in range(0, feats_len, min(step, feats_len - t_offset)):
-            if t_offset + step >= feats_len - 1:
-                step = feats_len - t_offset
-                is_final_send = True
-            else:
-                is_final_send = False
-            batch = {
-                "feats": feats[:, t_offset:t_offset + step, :],
-                "waveform": speech[:, t_offset * 160:min(speech.shape[-1], (t_offset + step - 1) * 160 + 400)],
-                "is_final_send": is_final_send
-            }
-            # a. To device
-            batch = to_device(batch, device=self.device)
-            segments_part = self.vad_model(**batch)
-            if segments_part:
-                for batch_num in range(0, self.batch_size):
-                    segments[batch_num] += segments_part[batch_num]
-
-        return fbanks, segments
+            hotword_list = None
+        return hotword_list
 
 
 def inference(
@@ -637,7 +551,19 @@ def inference_modelscope(
                  output_dir_v2: Optional[str] = None,
                  fs: dict = None,
                  param_dict: dict = None,
+                 **kwargs,
                  ):
+
+        hotword_list_or_file = None
+        if param_dict is not None:
+            hotword_list_or_file = param_dict.get('hotword')
+
+        if 'hotword' in kwargs:
+            hotword_list_or_file = kwargs['hotword']
+
+        if speech2text.hotword_list is None:
+            speech2text.hotword_list = speech2text.generate_hotwords_list(hotword_list_or_file)
+
         # 3. Build data-iterator
         if data_path_and_name_and_type is None and raw_inputs is not None:
             if isinstance(raw_inputs, torch.Tensor):
@@ -720,6 +646,7 @@ def inference_modelscope(
                     text_postprocessed, word_lists = postprocessed_result[0], postprocessed_result[1]
 
                 text_postprocessed_punc = text_postprocessed
+                punc_id_list = []
                 if len(word_lists) > 0 and text2punc is not None:
                     text_postprocessed_punc, punc_id_list = text2punc(word_lists, 20)
 
@@ -728,6 +655,8 @@ def inference_modelscope(
                     item['text_postprocessed'] = text_postprocessed
                 if time_stamp_postprocessed != "":
                     item['time_stamp'] = time_stamp_postprocessed
+
+                item['sentences'] = time_stamp_sentence(punc_id_list, time_stamp_postprocessed, text_postprocessed)
 
                 asr_result_list.append(item)
                 finish_count += 1
