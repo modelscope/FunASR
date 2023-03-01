@@ -6,7 +6,7 @@ from typing import Any, List, Union
 
 
 def isChinese(ch: str):
-    if '\u4e00' <= ch <= '\u9fff' or '\u0030' <= ch <= '\u0039':
+    if '\u4e00' <= ch <= '\u9fff' or '\u0030' <= ch <= '\u0039' or ch == '@':
         return True
     return False
 
@@ -17,6 +17,8 @@ def isAllChinese(word: Union[List[Any], str]):
         cur = i.replace(' ', '')
         cur = cur.replace('</s>', '')
         cur = cur.replace('<s>', '')
+        cur = cur.replace('<unk>', '')
+        cur = cur.replace('<OOV>', '')
         word_lists.append(cur)
 
     if len(word_lists) == 0:
@@ -34,6 +36,8 @@ def isAllAlpha(word: Union[List[Any], str]):
         cur = i.replace(' ', '')
         cur = cur.replace('</s>', '')
         cur = cur.replace('<s>', '')
+        cur = cur.replace('<unk>', '')
+        cur = cur.replace('<OOV>', '')
         word_lists.append(cur)
 
     if len(word_lists) == 0:
@@ -144,7 +148,7 @@ def sentence_postprocess(words: List[Any], time_stamp: List[List] = None):
         else:
             word = i.decode('utf-8')
 
-        if word in ['<s>', '</s>', '<unk>']:
+        if word in ['<s>', '</s>', '<unk>', '<OOV>']:
             continue
         else:
             middle_lists.append(word)
