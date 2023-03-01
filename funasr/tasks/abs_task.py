@@ -1348,11 +1348,13 @@ class AbsTask(ABC):
             if args.dataset_type == "large":
                 from funasr.datasets.large_datasets.build_dataloader import ArkDataLoader
                 train_iter_factory = ArkDataLoader(args.train_data_file, args.token_list, args.dataset_conf,
+                                                   frontend_conf=args.frontend_conf if hasattr(args, "frontend_conf") else None,
                                                    seg_dict_file=args.seg_dict_file if hasattr(args,
                                                                                                "seg_dict_file") else None,
                                                    punc_dict_file=args.punc_list if hasattr(args, "punc_list") else None,
                                                    mode="train")
-                valid_iter_factory = ArkDataLoader(args.valid_data_file, args.token_list, args.dataset_conf,
+                valid_iter_factory = ArkDataLoader(args.valid_data_file, args.token_list, args.dataset_conf, 
+                                                   frontend_conf=args.frontend_conf if hasattr(args, "frontend_conf") else None,
                                                    seg_dict_file=args.seg_dict_file if hasattr(args,
                                                                                                "seg_dict_file") else None,
                                                    punc_dict_file=args.punc_list if hasattr(args, "punc_list") else None,
