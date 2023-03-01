@@ -1347,11 +1347,11 @@ class AbsTask(ABC):
             # 7. Build iterator factories
             if args.dataset_type == "large":
                 from funasr.datasets.large_datasets.build_dataloader import ArkDataLoader
-                train_iter_factory = ArkDataLoader(args.train_data_file, args.token_list, args.dataset_conf,
+                train_iter_factory = ArkDataLoader(args.train_data_file, args.token_list, args.dataset_conf, frontend_conf=args.frontend_conf,
                                                    seg_dict_file=args.seg_dict_file if hasattr(args,
                                                                                                "seg_dict_file") else None,
                                                    mode="train")
-                valid_iter_factory = ArkDataLoader(args.valid_data_file, args.token_list, args.dataset_conf,
+                valid_iter_factory = ArkDataLoader(args.valid_data_file, args.token_list, args.dataset_conf, frontend_conf=args.frontend_conf,
                                                    seg_dict_file=args.seg_dict_file if hasattr(args,
                                                                                                "seg_dict_file") else None,
                                                    mode="eval")
