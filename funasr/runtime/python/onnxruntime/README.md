@@ -11,7 +11,7 @@
 
 ### Steps:
 1. Export the model.
-   - Command: (`Tips`: torch 1.11.0 is required.)
+   - Command: (`Tips`: torch >= 1.11.0 is required.)
 
       ```shell
       python -m funasr.export.export_model [model_name] [export_dir] [true]
