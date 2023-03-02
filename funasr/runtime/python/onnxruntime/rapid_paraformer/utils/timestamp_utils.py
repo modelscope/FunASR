@@ -9,7 +9,6 @@ def time_stamp_lfr6_onnx(us_cif_peak, char_list, begin_time=0.0):
     TIME_RATE = 10.0 * 6 / 1000 / 3  #  3 times upsampled
     cif_peak = us_cif_peak.reshape(-1)
     num_frames = cif_peak.shape[-1]
-    import pdb; pdb.set_trace()
     if char_list[-1] == '</s>':
         char_list = char_list[:-1]
     # char_list = [i for i in text]
@@ -49,11 +48,11 @@ def time_stamp_lfr6_onnx(us_cif_peak, char_list, begin_time=0.0):
             timestamp_list[i][0] = timestamp_list[i][0] + begin_time / 1000.0
             timestamp_list[i][1] = timestamp_list[i][1] + begin_time / 1000.0
     assert len(new_char_list) == len(timestamp_list)
-    res_txt = ""
+    res_total = []
     for char, timestamp in zip(new_char_list, timestamp_list):
-        res_txt += "{} {} {};".format(char, timestamp[0], timestamp[1])
+        res_total.append([char, timestamp[0], timestamp[1]])  # += "{} {} {};".format(char, timestamp[0], timestamp[1])
     res = []
     for char, timestamp in zip(new_char_list, timestamp_list):
         if char != '<sil>':
             res.append([int(timestamp[0] * 1000), int(timestamp[1] * 1000)])
-    return res
+    return res, res_total
