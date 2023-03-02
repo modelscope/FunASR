@@ -58,9 +58,10 @@ Environment：Intel(R) Xeon(R) Platinum 8163 CPU @ 2.50GHz
 
 Test [wav, 5.53s, 100 times avg.](https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav)
 
-| Backend |        RTF        |
-|:-------:|:-----------------:|
-| Pytorch |       0.110       |
-|  Onnx   |       0.038       |
+| Backend  |        RTF        |
+|:--------:|:-----------------:|
+| Pytorch  |       0.110       |
+| Libtorch |       0.048       |
+|   Onnx   |       0.038       |
 
 ## Acknowledge
