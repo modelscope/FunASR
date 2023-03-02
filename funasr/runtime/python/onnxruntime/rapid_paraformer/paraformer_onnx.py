@@ -14,7 +14,7 @@ from .utils.utils import (CharTokenizer, Hypothesis, ONNXRuntimeError,
                           read_yaml)
 from .utils.postprocess_utils import sentence_postprocess
 from .utils.frontend import WavFrontend
-from funasr.utils.timestamp_tools import time_stamp_lfr6_pl
+from .utils.timestamp_utils import time_stamp_lfr6_onnx
 
 logging = get_logger()
 
@@ -41,17 +41,16 @@ class Paraformer():
         )
         self.ort_infer = OrtInferSession(model_file, device_id)
         self.batch_size = batch_size
+        self.plot = True
 
     def __call__(self, wav_content: Union[str, np.ndarray, List[str]], **kwargs) -> List:
         waveform_list = self.load_data(wav_content, self.frontend.opts.frame_opts.samp_freq)
         waveform_nums = len(waveform_list)
-
         asr_res = []
         for beg_idx in range(0, waveform_nums, self.batch_size):
             res = {}
             end_idx = min(waveform_nums, beg_idx + self.batch_size)
             feats, feats_len = self.extract_feat(waveform_list[beg_idx:end_idx])
-
             try:
                 outputs = self.infer(feats, feats_len)
                 am_scores, valid_token_lens = outputs[0], outputs[1]
@@ -68,10 +67,16 @@ class Paraformer():
                 preds, raw_token = self.decode(am_scores, valid_token_lens)[0]
                 res['preds'] = preds
                 if us_cif_peak is not None:
-                    timestamp = time_stamp_lfr6_pl(us_alphas, us_cif_peak, copy.copy(raw_token), log=False)
+                    timestamp, timestamp_total = time_stamp_lfr6_onnx(us_cif_peak, copy.copy(raw_token))
                     res['timestamp'] = timestamp
+                    if self.plot:
+                        self.plot_wave_timestamp(waveform_list[0], timestamp_total)
             asr_res.append(res)
         return asr_res
+
+    def plot_wave_timestamp(self, wav, text_timestamp):
+        # TODO: Plot the wav and timestamp results with matplotlib
+        import pdb; pdb.set_trace()
 
     def load_data(self,
                   wav_content: Union[str, np.ndarray, List[str]], fs: int = None) -> List:
