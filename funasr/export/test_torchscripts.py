@@ -2,7 +2,7 @@ import torch
 import numpy as np
 
 if __name__ == '__main__':
-	onnx_path = "/mnt/workspace/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/model.torchscripts"
+	onnx_path = "/nfs/zhifu.gzf/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/model.torchscripts"
 	loaded = torch.jit.load(onnx_path)
 	
 	x = torch.rand([2, 21, 560])

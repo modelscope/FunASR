@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 from pathlib import Path
 import setuptools
-
+from setuptools import find_packages
 
 def get_readme():
     root_dir = Path(__file__).resolve().parent
@@ -29,7 +29,7 @@ setuptools.setup(
                       "scipy", "numpy>=1.19.3",
                       "typeguard", "kaldi-native-fbank",
                       "PyYAML>=5.1.2"],
-    packages=['torch_paraformer'],
+    packages=find_packages(include=["torch_paraformer*"]),
     keywords=[
         'funasr,paraformer'
     ],
