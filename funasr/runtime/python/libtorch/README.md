@@ -9,7 +9,7 @@
    - Command: (`Tips`: torch >= 1.11.0 is required.)
 
       ```shell
-      python -m funasr.export.export_model [model_name] [export_dir] [true]
+      python -m funasr.export.export_model [model_name] [export_dir] false
       ```
       `model_name`: the model is to export.
 
