@@ -14,7 +14,7 @@ from .utils.utils import (CharTokenizer, Hypothesis, ONNXRuntimeError,
                           read_yaml)
 from .utils.postprocess_utils import sentence_postprocess
 from .utils.frontend import WavFrontend
-from funasr.utils.timestamp_tools import time_stamp_lfr6_pl
+from .utils.timestamp_utils import time_stamp_lfr6_onnx
 
 logging = get_logger()
 
@@ -68,7 +68,7 @@ class Paraformer():
                 preds, raw_token = self.decode(am_scores, valid_token_lens)[0]
                 res['preds'] = preds
                 if us_cif_peak is not None:
-                    timestamp = time_stamp_lfr6_pl(us_alphas, us_cif_peak, copy.copy(raw_token), log=False)
+                    timestamp = time_stamp_lfr6_onnx(us_cif_peak, copy.copy(raw_token))
                     res['timestamp'] = timestamp
             asr_res.append(res)
         return asr_res
