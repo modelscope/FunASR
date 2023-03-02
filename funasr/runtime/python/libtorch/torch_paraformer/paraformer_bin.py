@@ -12,7 +12,7 @@ from .utils.utils import (CharTokenizer, Hypothesis,
                           read_yaml)
 from .utils.postprocess_utils import sentence_postprocess
 from .utils.frontend import WavFrontend
-from funasr.utils.timestamp_tools import time_stamp_lfr6_pl
+from .utils.timestamp_utils import time_stamp_lfr6_onnx
 logging = get_logger()
 
 import torch
