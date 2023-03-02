@@ -231,6 +231,9 @@ def inference_launch(**kwargs):
     elif mode == "mfcca":
         from funasr.bin.asr_inference_mfcca import inference_modelscope
         return inference_modelscope(**kwargs)
+    elif mode == "rnnt":
+        from funasr.bin.asr_inference_rnnt import inference_modelscope
+        return inference_modelscope(**kwargs)
     else:
         logging.info("Unknown decoding mode: {}".format(mode))
         return None
