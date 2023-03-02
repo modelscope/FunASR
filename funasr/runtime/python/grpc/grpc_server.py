@@ -5,7 +5,6 @@ import time
 
 import paraformer_pb2_grpc
 from paraformer_pb2 import Response
-from rapid_paraformer.utils.frontend import load_bytes
 
 
 class ASRServicer(paraformer_pb2_grpc.ASRServicer):
@@ -110,6 +109,7 @@ class ASRServicer(paraformer_pb2_grpc.ASRServicer):
                             else:
                                 asr_result = ""
                         elif self.backend == "onnxruntime":
+                            from rapid_paraformer.utils.frontend import load_bytes
                             array = load_bytes(tmp_data)
                             asr_result = self.inference_16k_pipeline(array)[0]
                         end_time = int(round(time.time() * 1000))
