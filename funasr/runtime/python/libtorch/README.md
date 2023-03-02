@@ -19,25 +19,21 @@
 
        - `e.g.`, Export model from modelscope
          ```shell
-         python -m funasr.export.export_model 'damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch' "./export" true
+         python -m funasr.export.export_model 'damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch' "./export" false
          ```
        - `e.g.`, Export model from local path, the model'name must be `model.pb`.
          ```shell
-         python -m funasr.export.export_model '/mnt/workspace/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch' "./export" true
+         python -m funasr.export.export_model '/mnt/workspace/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch' "./export" false
          ```
 
 
 2. Install the `torch_paraformer`.
-   - Build the torch_paraformer `whl`
-     ```shell
-     git clone https://github.com/alibaba/FunASR.git && cd FunASR
-     cd funasr/runtime/python/libtorch
-     python setup.py bdist_wheel
-     ```
-   - Install the build `whl`
-     ```bash
-     pip install dist/torch_paraformer-0.0.1-py3-none-any.whl
-     ```
+    ```shell
+    git clone https://github.com/alibaba/FunASR.git && cd FunASR
+    cd funasr/runtime/python/libtorch
+    python setup.py install
+    ```
+
 
 3. Run the demo.
    - Model_dir: the model path, which contains `model.torchscripts`, `config.yaml`, `am.mvn`.
