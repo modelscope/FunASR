@@ -56,6 +56,7 @@
 ## Installation
 
 ``` sh
+pip install "modelscope[audio_asr]" --upgrade -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html
 git clone https://github.com/alibaba/FunASR.git && cd FunASR
 pip install --editable ./
 ```
