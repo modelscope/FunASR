@@ -6,7 +6,7 @@ model_dir = "/Users/shixian/code/funasr2/export/damo/speech_paraformer-large-vad
 
 model = Paraformer(model_dir, batch_size=1)
 
-wav_path = ['/Users/shixian/code/funasr2/export/damo/speech_paraformer-tiny-commandword_asr_nat-zh-cn-16k-vocab544-pytorch/example/asr_example.wav']
+wav_path = ['/Users/shixian/code/funasr2/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/example/asr_example.wav']
 
 result = model(wav_path)
 print(result)
