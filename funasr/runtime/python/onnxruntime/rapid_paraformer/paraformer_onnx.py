@@ -24,7 +24,7 @@ class Paraformer():
     def __init__(self, model_dir: Union[str, Path] = None,
                  batch_size: int = 1,
                  device_id: Union[str, int] = "-1",
-                 plot_timestamp: bool = True,
+                 plot_timestamp: bool = False,
                  ):
 
         if not Path(model_dir).exists():
