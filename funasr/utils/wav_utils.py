@@ -309,7 +309,7 @@ def filter_wav_text(data_dir, dataset):
         if len(parts) < 2:
             continue
         sample_name = parts[0]
-        text_dict[sample_name] = " ".join(parts[1:])
+        text_dict[sample_name] = " ".join(parts[1:]).lower()
     filter_count = 0
     with open(wav_file, "w") as f_wav, open(text_file, "w") as f_text:
         for sample_name, wav_path in wav_dict.items():
