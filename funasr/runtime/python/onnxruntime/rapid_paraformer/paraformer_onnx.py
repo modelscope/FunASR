@@ -96,7 +96,7 @@ class Paraformer():
             x_adj = 0.045 if char != '<sil>' else 0.12
             ax1.text((start + end) * 0.5 - x_adj, 0, char)
         # plt.legend()
-        plotname = "debug.png"
+        plotname = "funasr/runtime/python/onnxruntime/debug.png"
         plt.savefig(plotname, bbox_inches='tight')
 
     def load_data(self,
