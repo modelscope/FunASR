@@ -1,14 +1,5 @@
-TokenIDConverter:
-  token_path: resources/models/token_list.pkl
-  unk_symbol: <unk>
-
-CharTokenizer:
-  symbol_value:
-  space_symbol: <space>
-  remove_non_linguistic_symbols: false
-
 WavFrontend:
-  cmvn_file: /raid/dgxsa/yuekaiz/pull_requests/FunASR/funasr/runtime/python/onnxruntime/resources/models/am.mvn
+  cmvn_file: ./model_repo_paraformer_large_offline/feature_extractor/am.mvn
   frontend_conf:
     fs: 16000
     window: hamming
@@ -18,13 +9,3 @@ WavFrontend:
     lfr_m: 7
     lfr_n: 6
     filter_length_max: -.inf
-
-Model:
-  model_path: resources/models/model.onnx
-  use_cuda: false
-  CUDAExecutionProvider:
-      device_id: 0
-      arena_extend_strategy: kNextPowerOfTwo
-      cudnn_conv_algo_search: EXHAUSTIVE
-      do_copy_in_default_stream: true
-  batch_size: 3

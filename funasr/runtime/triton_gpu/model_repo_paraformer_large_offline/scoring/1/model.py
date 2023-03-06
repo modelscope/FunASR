@@ -22,8 +22,6 @@ from torch.utils.dlpack import from_dlpack
 import json
 import os
 
-import pickle
-
 class TritonPythonModel:
     """Your Python model must use the same class name. Every Python model
     that is created must have "TritonPythonModel" as the class name.
@@ -75,8 +73,8 @@ class TritonPythonModel:
         """
         load lang_char.txt
         """
-        with open(str(vocab_file), 'rb') as f:
-            token_list = pickle.load(f)
+        with open(str(vocab_file), 'r') as f:
+            token_list = [line.strip() for line in f]
         return token_list
 
     def execute(self, requests):
