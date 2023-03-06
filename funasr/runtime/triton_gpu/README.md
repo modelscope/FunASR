@@ -8,8 +8,8 @@ git clone https://www.modelscope.cn/damo/speech_paraformer-large_asr_nat-zh-cn-1
 
 pretrained_model_dir=$(pwd)/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
 
-cp $pretrained_model_dir/tokens.txt ./model_repo_paraformer_large_offline/scoring/
 cp $pretrained_model_dir/am.mvn ./model_repo_paraformer_large_offline/feature_extractor/
+cp $pretrained_model_dir/config.yaml ./model_repo_paraformer_large_offline/feature_extractor/
 
 # Refer here to get model.onnx (https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/export/README.md)
 cp <exported_onnx_dir>/model.onnx ./model_repo_paraformer_large_offline/encoder/1/
@@ -33,10 +33,9 @@ model_repo_paraformer_large_offline/
 `-- scoring
     |-- 1
     |   `-- model.py
-    |-- config.pbtxt
-    `-- tokens.txt
+    `-- config.pbtxt
 
-8 directories, 10 files
+8 directories, 9 files
 ```
 
 2. Follow below instructions to launch triton server

@@ -21,6 +21,7 @@ from torch.utils.dlpack import from_dlpack
 
 import json
 import os
+import yaml
 
 class TritonPythonModel:
     """Your Python model must use the same class name. Every Python model
@@ -73,9 +74,9 @@ class TritonPythonModel:
         """
         load lang_char.txt
         """
-        with open(str(vocab_file), 'r') as f:
-            token_list = [line.strip() for line in f]
-        return token_list
+        with open(str(vocab_file), 'rb') as f:
+            config = yaml.load(f, Loader=yaml.Loader)
+        return config['token_list']
 
     def execute(self, requests):
         """`execute` must be implemented in every Python model. `execute`
