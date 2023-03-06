@@ -2,7 +2,7 @@
 
 
 
-#### compile and install grpc v1.52.0 in case of grpc bugs
+#### Step 1. Compile and install grpc v1.52.0 in case of grpc bugs
 ```
 export GRPC_INSTALL_DIR=/data/soft/grpc
 export PKG_CONFIG_PATH=$GRPC_INSTALL_DIR/lib/pkgconfig
@@ -29,7 +29,7 @@ source ~/.bashrc
 
 
 
-#### compile grpc onnx paraformer server
+#### Step 2. Compile grpc onnx paraformer server
 ```
 #depends on ../onnxruntime
 #file vocab.txt : UTF-8 Unicode text
@@ -40,7 +40,7 @@ source ~/.bashrc
 
 
 
-#### start grpc python paraformer client  on PC with MIC
+#### Step 3. Start grpc python paraformer client  on PC with MIC
 ```
 cd ../python/grpc
 python grpc_main_client_mic.py  --host 127.0.0.1 --port 10108
