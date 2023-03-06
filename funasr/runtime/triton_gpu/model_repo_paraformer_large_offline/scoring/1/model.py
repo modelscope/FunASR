@@ -22,8 +22,6 @@ from torch.utils.dlpack import from_dlpack
 import json
 import os
 
-import pickle
-
 class TritonPythonModel:
     """Your Python model must use the same class name. Every Python model
     that is created must have "TritonPythonModel" as the class name.
