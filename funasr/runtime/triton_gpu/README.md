@@ -34,10 +34,9 @@ model_repo_paraformer_large_offline/
 `-- scoring
     |-- 1
     |   `-- model.py
-    |-- config.pbtxt
-    `-- tokens.txt
+    `-- config.pbtxt
 
-8 directories, 10 files
+8 directories, 9 files
 ```
 
 2. Follow below instructions to launch triton server
