@@ -105,8 +105,8 @@ class WavFrontend():
             frame_shift: int = 10,
             filter_length_min: int = -1,
             filter_length_max: float = -1,
-            lfr_m: int = 1,
-            lfr_n: int = 1,
+            lfr_m: int = 7,
+            lfr_n: int = 6,
             dither: float = 1.0
     ) -> None:
         # check_argument_types()
