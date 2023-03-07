@@ -1,9 +1,6 @@
 #include "precomp.h"
 #ifdef __cplusplus 
 
-
-
-//  void __attribute__ ((visibility ("default"))) fun();
 extern "C" {
 #endif
 
@@ -12,12 +9,6 @@ extern "C" {
 	_RAPIDASRAPI RPASR_HANDLE  RapidAsrInit(const char* szModelDir, int nThreadNum)
 	{
 
-#ifdef NDEBUG
-		QMLIC_BOOL bMatched = QmLicCheckValid(QLFM_ASR);
-		if (!bMatched) {
-			return nullptr;
-		}
-#endif
 
 		Model* mm = create_model(szModelDir, nThreadNum); 
 
@@ -42,6 +33,7 @@ extern "C" {
 		int len;
 		int flag=0;
 		RPASR_RECOG_RESULT* pResult = new RPASR_RECOG_RESULT;
+		pResult->snippet_time = audio.get_time_len();
 		int nStep = 0;
 		int nTotal = audio.get_queue_size();
 		while (audio.fetch(buff, len, flag) > 0) {
@@ -73,6 +65,7 @@ extern "C" {
 		int len;
 		int flag = 0;
 		RPASR_RECOG_RESULT* pResult = new RPASR_RECOG_RESULT;
+		pResult->snippet_time = audio.get_time_len();
 		int nStep = 0;
 		int nTotal = audio.get_queue_size();
 		while (audio.fetch(buff, len, flag) > 0) {
@@ -105,6 +98,7 @@ extern "C" {
 		int len;
 		int flag = 0;
 		RPASR_RECOG_RESULT* pResult = new RPASR_RECOG_RESULT;
+		pResult->snippet_time = audio.get_time_len();
 		int nStep = 0;
 		int nTotal = audio.get_queue_size();
 		while (audio.fetch(buff, len, flag) > 0) {
@@ -139,6 +133,7 @@ extern "C" {
 		int nStep = 0;
 		int nTotal = audio.get_queue_size();
 		RPASR_RECOG_RESULT* pResult = new RPASR_RECOG_RESULT;
+		pResult->snippet_time = audio.get_time_len();
 		while (audio.fetch(buff, len, flag) > 0) {
 			pRecogObj->reset();
 			string msg = pRecogObj->forward(buff, len, flag);
@@ -162,6 +157,17 @@ extern "C" {
 		return 1;
 		
 	}
+
+
+	_RAPIDASRAPI const float RapidAsrGetRetSnippetTime(RPASR_RESULT Result)
+	{
+		if (!Result)
+			return 0.0f;
+
+		return ((RPASR_RECOG_RESULT*)Result)->snippet_time;
+
+	}
+
 	_RAPIDASRAPI const char* RapidAsrGetResult(RPASR_RESULT Result,int nIndex)
 	{
 		RPASR_RECOG_RESULT * pResult = (RPASR_RECOG_RESULT*)Result;

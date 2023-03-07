@@ -88,6 +88,7 @@ _RAPIDASRAPI void			RapidAsrFreeResult(RPASR_RESULT Result);
 
 _RAPIDASRAPI void			RapidAsrUninit(RPASR_HANDLE Handle);
 
+_RAPIDASRAPI const float	RapidAsrGetRetSnippetTime(RPASR_RESULT Result);
 
 #ifdef __cplusplus 
 
