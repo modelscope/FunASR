@@ -10,8 +10,10 @@ RUN apt-get update  && apt-get -y install \
     cmake \
     libsndfile1
 
+# -i https://pypi.tuna.tsinghua.edu.cn/simple
+RUN pip3 install torch torchaudio 
 RUN pip3 install kaldifeat pyyaml
 
 # Dependency for client
-RUN pip3 install soundfile grpcio-tools tritonclient pyyaml
+RUN pip3 install soundfile grpcio-tools tritonclient
 WORKDIR /workspace
