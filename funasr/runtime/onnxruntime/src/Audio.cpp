@@ -25,8 +25,7 @@ class AudioWindow {
         out_idx = 1;
         sum = 0;
     };
-    ~AudioWindow()
-    {
+    ~AudioWindow(){
         free(window);
     };
     int put(int val)
@@ -102,6 +101,11 @@ Audio::~Audio()
 {
     if (speech_buff != NULL) {
         free(speech_buff);
+        
+    }
+
+    if (speech_data != NULL) {
+        
         free(speech_data);
     }
 }
@@ -115,9 +119,11 @@ void Audio::disp()
 bool Audio::loadwav(const char *filename)
 {
 
+    if (speech_data != NULL) {
+        free(speech_data);
+    }
     if (speech_buff != NULL) {
         free(speech_buff);
-        free(speech_data);
     }
 
     offset = 0;
@@ -133,27 +139,190 @@ bool Audio::loadwav(const char *filename)
     speech_len = (nFileLen - 44) / 2;
     speech_align_len = (int)(ceil((float)speech_len / align_size) * align_size);
     speech_buff = (int16_t *)malloc(sizeof(int16_t) * speech_align_len);
-    memset(speech_buff, 0, sizeof(int16_t) * speech_align_len);
-    int ret = fread(speech_buff, sizeof(int16_t), speech_len, fp);
-    fclose(fp);
 
-    speech_data = (float *)malloc(sizeof(float) * speech_align_len);
-    memset(speech_data, 0, sizeof(float) * speech_align_len);
-    int i;
-    float scale = 1;
+    if (speech_buff)
+    {
+        memset(speech_buff, 0, sizeof(int16_t) * speech_align_len);
+        int ret = fread(speech_buff, sizeof(int16_t), speech_len, fp);
+        fclose(fp);
 
-    if (data_type == 1) {
-        scale = 32768;
+        speech_data = (float*)malloc(sizeof(float) * speech_align_len);
+        memset(speech_data, 0, sizeof(float) * speech_align_len);
+        int i;
+        float scale = 1;
+
+        if (data_type == 1) {
+            scale = 32768;
+        }
+
+        for (i = 0; i < speech_len; i++) {
+            speech_data[i] = (float)speech_buff[i] / scale;
+        }
+
+        AudioFrame* frame = new AudioFrame(speech_len);
+        frame_queue.push(frame);
+
+
+        return true;
     }
-
-    for (i = 0; i < speech_len; i++) {
-        speech_data[i] = (float)speech_buff[i] / scale;
-    }
-
-    AudioFrame *frame = new AudioFrame(speech_len);
-    frame_queue.push(frame);
-    return true;
+    else
+        return false;
 }
+
+
+bool Audio::loadwav(const char* buf, int nFileLen)
+{
+
+    
+
+    if (speech_data != NULL) {
+        free(speech_data);
+    }
+    if (speech_buff != NULL) {
+        free(speech_buff);
+    }
+
+    offset = 0;
+
+    size_t nOffset = 0;
+
+#define WAV_HEADER_SIZE 44
+
+    speech_len = (nFileLen - WAV_HEADER_SIZE) / 2;
+    speech_align_len = (int)(ceil((float)speech_len / align_size) * align_size);
+    speech_buff = (int16_t*)malloc(sizeof(int16_t) * speech_align_len);
+    if (speech_buff)
+    {
+        memset(speech_buff, 0, sizeof(int16_t) * speech_align_len);
+        memcpy((void*)speech_buff, (const void*)(buf + WAV_HEADER_SIZE), speech_len * sizeof(int16_t));
+
+
+        speech_data = (float*)malloc(sizeof(float) * speech_align_len);
+        memset(speech_data, 0, sizeof(float) * speech_align_len);
+        int i;
+        float scale = 1;
+
+        if (data_type == 1) {
+            scale = 32768;
+        }
+
+        for (i = 0; i < speech_len; i++) {
+            speech_data[i] = (float)speech_buff[i] / scale;
+        }
+
+
+        return true;
+    }
+    else
+        return false;
+
+}
+
+
+bool Audio::loadpcmwav(const char* buf, int nBufLen)
+{
+    if (speech_data != NULL) {
+        free(speech_data);
+    }
+    if (speech_buff != NULL) {
+        free(speech_buff);
+    }
+    offset = 0;
+
+    size_t nOffset = 0;
+
+#define WAV_HEADER_SIZE 44
+
+    speech_len = nBufLen / 2;
+    speech_align_len = (int)(ceil((float)speech_len / align_size) * align_size);
+    speech_buff = (int16_t*)malloc(sizeof(int16_t) * speech_align_len);
+    if (speech_buff)
+    {
+        memset(speech_buff, 0, sizeof(int16_t) * speech_align_len);
+        memcpy((void*)speech_buff, (const void*)buf, speech_len * sizeof(int16_t));
+
+
+        speech_data = (float*)malloc(sizeof(float) * speech_align_len);
+        memset(speech_data, 0, sizeof(float) * speech_align_len);
+
+     
+        int i;
+        float scale = 1;
+
+        if (data_type == 1) {
+            scale = 32768;
+        }
+
+        for (i = 0; i < speech_len; i++) {
+            speech_data[i] = (float)speech_buff[i] / scale;
+        }
+
+
+        return true;
+
+    }
+    else
+        return false;
+
+    
+}
+
+bool Audio::loadpcmwav(const char* filename)
+{
+
+    if (speech_data != NULL) {
+        free(speech_data);
+    }
+    if (speech_buff != NULL) {
+        free(speech_buff);
+    }
+    offset = 0;
+
+    FILE* fp;
+    fp = fopen(filename, "rb");
+    if (fp == nullptr)
+        return false;
+    fseek(fp, 0, SEEK_END);
+    uint32_t nFileLen = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+
+    speech_len = (nFileLen) / 2;
+    speech_align_len = (int)(ceil((float)speech_len / align_size) * align_size);
+    speech_buff = (int16_t*)malloc(sizeof(int16_t) * speech_align_len);
+    if (speech_buff)
+    {
+        memset(speech_buff, 0, sizeof(int16_t) * speech_align_len);
+        int ret = fread(speech_buff, sizeof(int16_t), speech_len, fp);
+        fclose(fp);
+
+        speech_data = (float*)malloc(sizeof(float) * speech_align_len);
+        memset(speech_data, 0, sizeof(float) * speech_align_len);
+
+
+
+        int i;
+        float scale = 1;
+
+        if (data_type == 1) {
+            scale = 32768;
+        }
+
+        for (i = 0; i < speech_len; i++) {
+            speech_data[i] = (float)speech_buff[i] / scale;
+        }
+
+
+        AudioFrame* frame = new AudioFrame(speech_len);
+        frame_queue.push(frame);
+
+    
+        return true;
+    }
+    else
+        return false;
+
+}
+
 
 int Audio::fetch_chunck(float *&dout, int len)
 {
@@ -163,7 +332,7 @@ int Audio::fetch_chunck(float *&dout, int len)
     } else if (offset == speech_align_len - len) {
         dout = speech_data + offset;
         offset = speech_align_len;
-        // 临时解决
+        // 临时解决 
         AudioFrame *frame = frame_queue.front();
         frame_queue.pop();
         delete frame;

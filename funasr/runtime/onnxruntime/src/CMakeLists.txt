@@ -18,7 +18,7 @@ if(WIN32)
         endif()
         target_include_directories(rapidasr PUBLIC ${CMAKE_SOURCE_DIR}/win/include )
         
-
+        target_compile_definitions(rapidasr PUBLIC -D_RPASR_API_EXPORT)
 else()
 
     set(EXTRA_LIBS fftw3f webrtcvad pthread)
