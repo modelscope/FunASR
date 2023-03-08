@@ -87,10 +87,14 @@ def time_stamp_lfr6_advance(us_alphas, us_cif_peak, char_list):
     else:
         timestamp_list[-1][1] = num_frames*TIME_RATE
     assert len(new_char_list) == len(timestamp_list)
-    res = ""
+    res_str = ""
     for char, timestamp in zip(new_char_list, timestamp_list):
-        res += "{} {} {};".format(char, timestamp[0], timestamp[1])
-    return res
+        res_str += "{} {} {};".format(char, str(timestamp[0]+0.0005)[:5], str(timestamp[1]+0.0005)[:5])
+    res = []
+    for char, timestamp in zip(char_list, timestamp_list):
+        if char != '<sil>':
+            res.append([int(timestamp[0] * 1000), int(timestamp[1] * 1000)])
+    return res_str, res
 
 
 class SpeechText2Timestamp:
@@ -256,7 +260,8 @@ def inference_modelscope(
             raw_inputs: Union[np.ndarray, torch.Tensor] = None,
             output_dir_v2: Optional[str] = None,
             fs: dict = None,
-            param_dict: dict = None
+            param_dict: dict = None,
+            **kwargs
     ):
         # 3. Build data-iterator
         if data_path_and_name_and_type is None and raw_inputs is not None:
@@ -295,11 +300,9 @@ def inference_modelscope(
             for batch_id in range(_bs):
                 key = keys[batch_id]
                 token = speechtext2timestamp.converter.ids2tokens(batch['text'][batch_id])
-                timestamp = time_stamp_lfr6_advance(us_alphas[batch_id], us_cif_peak[batch_id], token)
-                logging.warning(timestamp)
-                import pdb; pdb.set_trace()
-                tp_result_list.append({'text':"".join([i for i in token if i != '<sil>']), 'timestamp': timestamp})
-
+                ts_str, ts_list = time_stamp_lfr6_advance(us_alphas[batch_id], us_cif_peak[batch_id], token)
+                logging.warning(ts_str)
+                tp_result_list.append({'text':"".join([i for i in token if i != '<sil>']), 'timestamp': ts_list})
         return tp_result_list
 
     return _forward
