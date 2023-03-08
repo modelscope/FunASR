@@ -4,9 +4,6 @@
 #include <iostream>
 #include <memory>
 #include <string>
-#include <unordered_map>
-#include <chrono>
-#include <sstream>
 
 #include <grpc/grpc.h>
 #include <grpcpp/server.h>
@@ -14,8 +11,11 @@
 #include <grpcpp/server_context.h>
 #include <grpcpp/security/server_credentials.h>
 
-#include "paraformer.grpc.pb.h"
+#include <unordered_map>
+#include <chrono>
 
+#include "paraformer.grpc.pb.h"
+#include "librapidasrapi.h"
 
 
 using grpc::Server;
@@ -45,5 +45,7 @@ class ASRServicer final : public ASR::Service {
     void clear_transcriptions(const std::string& user);
     void disconnect(const std::string& user);
     grpc::Status Recognize(grpc::ServerContext* context, grpc::ServerReaderWriter<Response, Request>* stream);
+    int nThreadNum = 4;
+    RPASR_HANDLE AsrHanlde=RapidAsrInit("/data/asrmodel/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/", nThreadNum);
 	
 };

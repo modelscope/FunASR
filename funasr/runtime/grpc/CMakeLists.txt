@@ -46,12 +46,20 @@ add_custom_command(
 # Include generated *.pb.h files
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
+include_directories(../onnxruntime/include/)
+link_directories(../onnxruntime/build/src/)
+link_directories(../onnxruntime/build/third_party/webrtc/)
+
+link_directories(${ONNXRUNTIME_DIR}/lib)
+add_subdirectory("../onnxruntime/src" onnx_src)
+
 # rg_grpc_proto
 add_library(rg_grpc_proto
   ${rg_grpc_srcs}
   ${rg_grpc_hdrs}
   ${rg_proto_srcs}
   ${rg_proto_hdrs})
+
 
 
 target_link_libraries(rg_grpc_proto
@@ -66,6 +74,8 @@ foreach(_target
     "${_target}.cc")
   target_link_libraries(${_target}
     rg_grpc_proto
+    rapidasr
+    webrtcvad
     ${EXTRA_LIBS}
     ${_REFLECTION}
     ${_GRPC_GRPCPP}

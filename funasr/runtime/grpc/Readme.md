@@ -1,8 +1,14 @@
 ## paraformer grpc onnx server
 
 
+#### build ../onnxruntime as it's document
+```
+#put onnx lib and model into /data/asrmodel
+ls /data/asrmodel/
+onnxruntime-linux-x64-1.14.0  speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
+```
 
-#### Step 1. Compile and install grpc v1.52.0 in case of grpc bugs
+#### compile and install grpc v1.52.0 in case of grpc bugs
 ```
 export GRPC_INSTALL_DIR=/data/soft/grpc
 export PKG_CONFIG_PATH=$GRPC_INSTALL_DIR/lib/pkgconfig
@@ -24,26 +30,20 @@ echo "export GRPC_INSTALL_DIR=/data/soft/grpc" >> ~/.bashrc
 echo "export PKG_CONFIG_PATH=\$GRPC_INSTALL_DIR/lib/pkgconfig" >> ~/.bashrc
 echo "export PATH=\$GRPC_INSTALL_DIR/bin/:\$PKG_CONFIG_PATH:\$PATH" >> ~/.bashrc
 source ~/.bashrc
-
 ```
 
-
-
-#### Step 2. Compile grpc onnx paraformer server
+#### compile grpc onnx paraformer server
 ```
 #depends on ../onnxruntime
 #file vocab.txt : UTF-8 Unicode text
 
 ./rebuild.sh
-
 ```
 
 
 
-#### Step 3. Start grpc python paraformer client  on PC with MIC
+#### start grpc python paraformer client  on PC with MIC
 ```
 cd ../python/grpc
-python grpc_main_client_mic.py  --host 127.0.0.1 --port 10108
+python grpc_main_client_mic.py  --host $server_ip --port 10108
 ```
-
-

@@ -1,8 +1,33 @@
+#include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <iostream>
+#include <sstream>
+#include <memory>
+#include <string>
 
+#include <grpc/grpc.h>
+#include <grpcpp/server.h>
+#include <grpcpp/server_builder.h>
+#include <grpcpp/server_context.h>
+#include <grpcpp/security/server_credentials.h>
 
 #include "paraformer.grpc.pb.h"
 #include "paraformer_server.h"
 
+
+using grpc::Server;
+using grpc::ServerBuilder;
+using grpc::ServerContext;
+using grpc::ServerReader;
+using grpc::ServerReaderWriter;
+using grpc::ServerWriter;
+using grpc::Status;
+
+
+using paraformer::Request;
+using paraformer::Response;
+using paraformer::ASR;
 
 ASRServicer::ASRServicer() {
     std::cout << "ASRServicer init" << std::endl;
@@ -80,7 +105,8 @@ grpc::Status ASRServicer::Recognize(
                 res.set_sentence(
                     R"({"success": true, "detail": "decoding data: " + std::to_string(tmp_data.length()) + " bytes"})"
                 );
-                std::string data_len = std::to_string(tmp_data.length());
+		int data_len_int = tmp_data.length();
+                std::string data_len = std::to_string(data_len_int);
                 std::stringstream ss;
                 ss << R"({"success": true, "detail": "decoding data: )" << data_len << R"( bytes")"  << R"("})";
                 std::string result = ss.str();
@@ -108,15 +134,7 @@ grpc::Status ASRServicer::Recognize(
                     stream->Write(res);
                 }
                 else {
-
-		    // asr_result = onnx.infer(tmp_data)
-                    /* if (asr_result.find("text") != asr_result.end()) {
-                        asr_result = asr_result["text"];
-                    }
-                    else {
-                        asr_result = "";
-                    } */
-
+                    RPASR_RESULT Result= RapidAsrRecogPCMBuffer(AsrHanlde, tmp_data.c_str(), data_len_int, RASR_NONE, NULL);   
                     std::string asr_result = "你好你好，我是asr识别结果。static";
 
                     auto end_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
