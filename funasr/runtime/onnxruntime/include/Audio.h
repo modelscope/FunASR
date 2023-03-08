@@ -51,6 +51,7 @@ class Audio {
     int fetch(float *&dout, int &len, int &flag);
     void padding();
     void split();
+    float get_time_len();
 
     int get_queue_size() { return (int)frame_queue.size(); }
 };

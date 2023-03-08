@@ -116,6 +116,12 @@ void Audio::disp()
            speech_len);
 }
 
+float Audio::get_time_len()
+{
+    return (float)speech_len / 16000;
+       //speech_len);
+}
+
 bool Audio::loadwav(const char *filename)
 {
 
