@@ -1,4 +1,4 @@
-## paraformer grpc onnx server
+## paraformer grpc onnx server in c++
 
 
 #### Build ../onnxruntime as it's document
