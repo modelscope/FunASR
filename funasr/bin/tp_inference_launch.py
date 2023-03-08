@@ -76,17 +76,17 @@ def get_parser():
 
     group = parser.add_argument_group("The model configuration related")
     group.add_argument(
-        "--tp_train_config",
+        "--timestamp_infer_config",
         type=str,
         help="VAD infer configuration",
     )
     group.add_argument(
-        "--tp_model_file",
+        "--timestamp_model_file",
         type=str,
         help="VAD model parameter file",
     )
     group.add_argument(
-        "--tp_cmvn_file",
+        "--timestamp_cmvn_file",
         type=str,
         help="Global CMVN file",
     )
