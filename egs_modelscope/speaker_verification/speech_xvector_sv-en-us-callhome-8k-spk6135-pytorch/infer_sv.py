@@ -4,7 +4,7 @@ from modelscope.utils.constant import Tasks
 if __name__ == '__main__':
     inference_sv_pipline = pipeline(
         task=Tasks.speaker_verification,
-        model='speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch'
+        model='damo/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch'
     )
 
     # the same speaker
