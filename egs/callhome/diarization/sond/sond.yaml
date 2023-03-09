@@ -2660,7 +2660,7 @@ model_conf:
     lsm_weight: 0.1
     length_normalized_loss: true
     max_spk_num: 16
-    normlize_speech_speaker: true
+    normalize_speech_speaker: true
 # speech encoder
 encoder: resnet34_sp_l2reg
 encoder_conf:
