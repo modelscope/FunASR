@@ -342,6 +342,7 @@ class DiarSondModel(AbsESPnetModel):
 
         if isinstance(self.ci_scorer, AbsEncoder):
             ci_simi = self.ci_scorer(ge_in, ge_len)[0]
+            ci_simi = torch.reshape(ci_simi, [bb, self.max_spk_num, tt]).permute([0, 2, 1])
         else:
             ci_simi = self.ci_scorer(speech_encoder_outputs, speaker_encoder_outputs)
 
