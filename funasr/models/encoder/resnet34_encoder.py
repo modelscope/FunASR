@@ -387,7 +387,6 @@ class ResNet34_SP_L2Reg(AbsEncoder):
         return var_dict_torch_update
 
 
-
 class ResNet34Diar(ResNet34):
     def __init__(
             self,
