@@ -148,11 +148,11 @@ class SpeechText2Timestamp:
         # Input as audio signal
         if isinstance(speech, np.ndarray):
             speech = torch.tensor(speech)
-
         if self.frontend is not None:
             feats, feats_len = self.frontend.forward(speech, speech_lengths)
             feats = to_device(feats, device=self.device)
             feats_len = feats_len.int()
+            self.tp_model.frontend = None
         else:
             feats = speech
             feats_len = speech_lengths
