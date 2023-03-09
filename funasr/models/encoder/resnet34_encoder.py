@@ -740,7 +740,7 @@ class ResNet34SpL2RegDiar(ResNet34_SP_L2Reg):
                 "{}.resnet{}_dense.weight".format(tensor_name_prefix_torch, layer_idx):
                     {"name": "{}/resnet{}_dense/kernel".format(tensor_name_prefix_tf, layer_idx),
                      "squeeze": None,
-                     "transpose": (3, 2, 0, 1) if layer_idx == 0 else (1, 0),
+                     "transpose": (1, 0),
                      },
                 "{}.resnet{}_dense.bias".format(tensor_name_prefix_torch, layer_idx):
                     {"name": "{}/resnet{}_dense/bias".format(tensor_name_prefix_tf, layer_idx),
