@@ -831,7 +831,7 @@ class ResNet34SpL2RegDiar(ResNet34_SP_L2Reg):
                             name, data_tf.size(), name_tf, var_dict_tf[name_tf].shape
                         ))
                     else:
-                        var_dict_torch_update[name] = torch.Tensor(map_dict[name]).type(torch.int64).to("cpu")
+                        var_dict_torch_update[name] = torch.from_numpy(np.array(map_dict[name])).type(torch.int64).to("cpu")
                         logging.info("torch tensor: {}, manually assigning to: {}".format(
                             name, map_dict[name]
                         ))
