@@ -2667,6 +2667,7 @@ encoder_conf:
     # pass by model, equal to feature dim
     # input_size: 80
     pooling_type: "window_shift"
+    batchnorm_momentum: 0.01
     pool_size: 20
     stride: 1
     tf2torch_tensor_name_prefix_torch: encoder

@@ -2666,6 +2666,7 @@ encoder: resnet34_sp_l2reg
 encoder_conf:
     # pass by model, equal to feature dim
     # input_size: 80
+    batchnorm_momentum: 0.01
     pooling_type: "window_shift"
     pool_size: 20
     stride: 1
