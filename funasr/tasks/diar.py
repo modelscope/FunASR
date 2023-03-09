@@ -23,7 +23,7 @@ from funasr.layers.global_mvn import GlobalMVN
 from funasr.layers.utterance_mvn import UtteranceMVN
 from funasr.layers.label_aggregation import LabelAggregate
 from funasr.models.ctc import CTC
-from funasr.models.encoder.resnet34_encoder import ResNet34Diar
+from funasr.models.encoder.resnet34_encoder import ResNet34Diar, ResNet34SpL2RegDiar
 from funasr.models.encoder.ecapa_tdnn_encoder import ECAPA_TDNN
 from funasr.models.encoder.opennmt_encoders.conv_encoder import ConvEncoder
 from funasr.models.encoder.opennmt_encoders.fsmn_encoder import FsmnEncoder
@@ -122,6 +122,7 @@ encoder_choices = ClassChoices(
         fsmn=FsmnEncoder,
         conv=ConvEncoder,
         resnet34=ResNet34Diar,
+        resnet34_sp_l2reg=ResNet34SpL2RegDiar,
         sanm_chunk_opt=SANMEncoderChunkOpt,
         data2vec_encoder=Data2VecEncoder,
         ecapa_tdnn=ECAPA_TDNN,
@@ -160,6 +161,7 @@ ci_scorer_choices = ClassChoices(
     classes=dict(
         dot=DotScorer,
         cosine=CosScorer,
+        conv=ConvEncoder,
     ),
     type_check=torch.nn.Module,
     default=None,
