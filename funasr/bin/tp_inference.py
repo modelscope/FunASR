@@ -91,7 +91,7 @@ def time_stamp_lfr6_advance(us_alphas, us_cif_peak, char_list):
     for char, timestamp in zip(new_char_list, timestamp_list):
         res_str += "{} {} {};".format(char, str(timestamp[0]+0.0005)[:5], str(timestamp[1]+0.0005)[:5])
     res = []
-    for char, timestamp in zip(char_list, timestamp_list):
+    for char, timestamp in zip(new_char_list, timestamp_list):
         if char != '<sil>':
             res.append([int(timestamp[0] * 1000), int(timestamp[1] * 1000)])
     return res_str, res
