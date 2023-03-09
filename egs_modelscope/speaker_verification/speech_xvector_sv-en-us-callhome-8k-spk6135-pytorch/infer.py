@@ -11,11 +11,11 @@ if __name__ == '__main__':
     # extract speaker embedding
     # for url use "spk_embedding" as key
     rec_result = inference_sv_pipline(
-        audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/sv_example_enroll.wav')
+        audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/sv_example_enroll.wav')
     enroll = rec_result["spk_embedding"]
 
     # for local file use "spk_embedding" as key
-    rec_result = inference_sv_pipline(audio_in='sv_example_same.wav')["test1"]
+    rec_result = inference_sv_pipline(audio_in='sv_example_same.wav')
     same = rec_result["spk_embedding"]
 
     import soundfile
@@ -24,11 +24,11 @@ if __name__ == '__main__':
     spk_embedding = inference_sv_pipline(audio_in=wav)["spk_embedding"]
 
     rec_result = inference_sv_pipline(
-        audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/sv_example_different.wav')
+        audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/sv_example_different.wav')
     different = rec_result["spk_embedding"]
 
     # calculate cosine similarity for same speaker
-    sv_threshold = 0.9465
+    sv_threshold = 0.80
     same_cos = np.sum(enroll * same) / (np.linalg.norm(enroll) * np.linalg.norm(same))
     same_cos = max(same_cos - sv_threshold, 0.0) / (1.0 - sv_threshold) * 100.0
     print("Similarity:", same_cos)
