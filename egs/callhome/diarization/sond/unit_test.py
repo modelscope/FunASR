@@ -23,7 +23,7 @@ def test_fbank_cpu_infer():
 
 
 def test_fbank_gpu_infer():
-    diar_config_path = "config_fbank.yaml"
+    diar_config_path = "sond_fbank.yaml"
     diar_model_path = "sond.pth"
     output_dir = "./outputs"
     data_path_and_name_and_type = [
@@ -37,7 +37,7 @@ def test_fbank_gpu_infer():
         output_dir=output_dir,
         ngpu=1,
         num_workers=1,
-        log_level="WARNING",
+        log_level="INFO",
     )
     results = pipeline(data_path_and_name_and_type)
     print(results)
