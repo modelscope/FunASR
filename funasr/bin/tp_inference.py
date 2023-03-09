@@ -114,7 +114,7 @@ class SpeechText2Timestamp:
         )
         if 'cuda' in device:
             tp_model = tp_model.cuda()
-            
+
         frontend = None
         if tp_train_args.frontend is not None:
             frontend = WavFrontend(cmvn_file=timestamp_cmvn_file, **tp_train_args.frontend_conf)
@@ -304,7 +304,9 @@ def inference_modelscope(
                 token = speechtext2timestamp.converter.ids2tokens(batch['text'][batch_id])
                 ts_str, ts_list = time_stamp_lfr6_advance(us_alphas[batch_id], us_cif_peak[batch_id], token)
                 logging.warning(ts_str)
-                tp_result_list.append({'text':"".join([i for i in token if i != '<sil>']), 'timestamp': ts_list})
+                item = {'key': key, 'value': ts_str, 'timestamp':ts_list}
+                # tp_result_list.append({'text':"".join([i for i in token if i != '<sil>']), 'timestamp': ts_list})
+                tp_result_list.append(item)
         return tp_result_list
 
     return _forward
