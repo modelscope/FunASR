@@ -15,11 +15,11 @@ if __name__ == '__main__':
     enroll = rec_result["spk_embedding"]
 
     # for local file use "spk_embedding" as key
-    rec_result = inference_sv_pipline(audio_in='sv_example_same.wav')
+    rec_result = inference_sv_pipline(audio_in='example/sv_example_same.wav')
     same = rec_result["spk_embedding"]
 
     import soundfile
-    wav = soundfile.read('sv_example_enroll.wav')[0]
+    wav = soundfile.read('example/sv_example_enroll.wav')[0]
     # for raw inputs use "spk_embedding" as key
     spk_embedding = inference_sv_pipline(audio_in=wav)["spk_embedding"]
 
