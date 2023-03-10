@@ -153,11 +153,19 @@ class ASRModelExportParaformer:
 
         if self.quant:
             from onnxruntime.quantization import QuantType, quantize_dynamic
+            import onnx
             quant_model_path = os.path.join(path, f'{model.model_name}_quant.onnx')
+            onnx_model = onnx.load(model_path)
+            nodes = [n.name for n in onnx_model.graph.node]
+            nodes_to_exclude = [m for m in nodes if 'output' in m]
             quantize_dynamic(
                 model_input=model_path,
                 model_output=quant_model_path,
+                op_types_to_quantize=['MatMul'],
+                per_channel=True,
+                reduce_range=False,
                 weight_type=QuantType.QUInt8,
+                nodes_to_exclude=nodes_to_exclude,
             )
 
 
