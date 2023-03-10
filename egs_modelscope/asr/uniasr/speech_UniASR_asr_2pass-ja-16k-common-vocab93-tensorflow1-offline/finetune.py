@@ -30,6 +30,6 @@ if __name__ == '__main__':
     params["dataset_type"] = "small"
     params["max_epoch"] = 50
     params["lr"] = 0.00005
-    params["model"] = "damo/speech_UniASR_asr_2pass-ja-16k-common-vocab93-tensorflow1-online"
+    params["model"] = "damo/speech_UniASR_asr_2pass-ja-16k-common-vocab93-tensorflow1-offline"
     params["model_revision"] = None
     modelscope_finetune(params)
