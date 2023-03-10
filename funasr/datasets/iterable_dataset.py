@@ -247,7 +247,7 @@ class IterableESPnetDataset(IterableDataset):
                         
                 if _type == "sound":
                     if self.mc:
-                        data[name] = array.transpose(0, 1)
+                        data[name] = array.transpose((1, 0))
                     else:
                         data[name] = array[0]
                 else:
@@ -354,7 +354,7 @@ class IterableESPnetDataset(IterableDataset):
                             array = array.numpy()
                     if _type == "sound":
                         if self.mc:
-                            data[name] = array.transpose(0, 1)
+                            data[name] = array.transpose((1, 0))
                         else:
                             data[name] = array[0]
                     else:
