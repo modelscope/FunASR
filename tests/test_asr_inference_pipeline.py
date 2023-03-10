@@ -295,6 +295,24 @@ class TestUniasrInferencePipelines(unittest.TestCase):
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_fr.wav',
             param_dict={"decoding_model":"normal"})
         logger.info("asr inference result: {0}".format(rec_result))
+    
+    def test_uniasr_2pass_id_common_offline(self):
+        inference_pipeline = pipeline(
+            task=Tasks.auto_speech_recognition,
+            model='damo/speech_UniASR_asr_2pass-id-16k-common-vocab1067-tensorflow1-online')
+        rec_result = inference_pipeline(
+            audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_id.wav',
+            param_dict={"decoding_model":"offline"})
+        logger.info("asr inference result: {0}".format(rec_result))
+
+    def test_uniasr_2pass_id_common_online(self):
+        inference_pipeline = pipeline(
+            task=Tasks.auto_speech_recognition,
+            model='damo/speech_UniASR_asr_2pass-id-16k-common-vocab1067-tensorflow1-online')
+        rec_result = inference_pipeline(
+            audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_id.wav',
+            param_dict={"decoding_model":"normal"})
+        logger.info("asr inference result: {0}".format(rec_result))
 
 
 if __name__ == '__main__':
