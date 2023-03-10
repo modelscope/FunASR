@@ -110,7 +110,7 @@ class SpeechText2Timestamp:
             timestamp_infer_config, timestamp_model_file, device
         )
         if 'cuda' in device:
-            tp_model = tp_model.cuda()
+            tp_model = tp_model.cuda()  # force model to cuda
 
         frontend = None
         if tp_train_args.frontend is not None:
@@ -299,9 +299,6 @@ def inference_modelscope(
             inference=True,
         )
 
-        finish_count = 0
-        file_count = 1
-
         tp_result_list = []
         for keys, batch in loader:
             assert isinstance(batch, dict), type(batch)
@@ -321,7 +318,6 @@ def inference_modelscope(
                 ts_str, ts_list = time_stamp_lfr6_advance(us_alphas[batch_id], us_cif_peak[batch_id], token)
                 logging.warning(ts_str)
                 item = {'key': key, 'value': ts_str, 'timestamp':ts_list}
-                # tp_result_list.append({'text':"".join([i for i in token if i != '<sil>']), 'timestamp': ts_list})
                 tp_result_list.append(item)
         return tp_result_list
 
@@ -405,6 +401,18 @@ def get_parser():
         "--batch_size",
         type=int,
         default=1,
+        help="The batch size for inference",
+    )
+    group.add_argument(
+        "--seg_dict_file",
+        type=str,
+        default=None,
+        help="The batch size for inference",
+    )
+    group.add_argument(
+        "--split_with_space",
+        type=bool,
+        default=False,
         help="The batch size for inference",
     )
 
