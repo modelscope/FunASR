@@ -76,11 +76,38 @@ class TestParaformerInferencePipelines(unittest.TestCase):
         logger.info("run_dir:{0} ; funasr_path: {1}".format(os.getcwd(), funasr.__file__))
 
     def test_paraformer_large_contextual_common(self):
+        param_dict = dict()
+        param_dict['hotword'] = "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/hotword.txt"
         inference_pipeline = pipeline(
             task=Tasks.auto_speech_recognition,
-            model='damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404')
+            model='damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404',
+            param_dict=param_dict)
         rec_result = inference_pipeline(
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_hotword.wav')
+        logger.info("asr inference result: {0}".format(rec_result))
+
+    def test_paraformer_large_aishell1(self):
+        inference_pipeline = pipeline(
+            task=Tasks.auto_speech_recognition,
+            model='damo/speech_paraformer-large_asr_nat-zh-cn-16k-aishell1-vocab8404-pytorch')
+        rec_result = inference_pipeline(
+            audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
+        logger.info("asr inference result: {0}".format(rec_result))
+
+    def test_paraformer_large_aishell2(self):
+        inference_pipeline = pipeline(
+            task=Tasks.auto_speech_recognition,
+            model='damo/speech_paraformer-large_asr_nat-zh-cn-16k-aishell2-vocab8404-pytorch')
+        rec_result = inference_pipeline(
+            audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
+        logger.info("asr inference result: {0}".format(rec_result))
+
+    def test_paraformer_large_common(self):
+        inference_pipeline = pipeline(
+            task=Tasks.auto_speech_recognition,
+            model='damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch')
+        rec_result = inference_pipeline(
+            audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
         logger.info("asr inference result: {0}".format(rec_result))
 
 
