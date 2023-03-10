@@ -1847,6 +1847,7 @@ class AbsTask(ABC):
             key_file: str = None,
             batch_size: int = 1,
             fs: dict = None,
+            mc: bool = False,
             dtype: str = np.float32,
             num_workers: int = 1,
             allow_variable_data_keys: bool = False,
@@ -1865,6 +1866,7 @@ class AbsTask(ABC):
             data_path_and_name_and_type,
             float_dtype=dtype,
             fs=fs,
+            mc=mc,
             preprocess=preprocess_fn,
             key_file=key_file,
         )

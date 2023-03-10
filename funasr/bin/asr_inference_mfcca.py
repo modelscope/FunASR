@@ -534,6 +534,8 @@ def inference_modelscope(
             data_path_and_name_and_type,
             dtype=dtype,
             batch_size=batch_size,
+            fs=fs,
+            mc=True,
             key_file=key_file,
             num_workers=num_workers,
             preprocess_fn=ASRTask.build_preprocess_fn(speech2text.asr_train_args, False),
