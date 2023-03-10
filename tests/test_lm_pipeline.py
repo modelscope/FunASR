@@ -18,7 +18,7 @@ class TestTransformerInferencePipelines(unittest.TestCase):
             model='damo/speech_transformer_lm_zh-cn-common-vocab8404-pytorch',
         )
         rec_result = inference_pipeline(text_in="hello 大 家 好 呀")
-        logger.info("asr inference result: {0}".format(rec_result))
+        logger.info("lm inference result: {0}".format(rec_result))
 
 
 if __name__ == '__main__':

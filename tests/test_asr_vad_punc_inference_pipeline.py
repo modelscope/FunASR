@@ -25,7 +25,7 @@ class TestParaformerInferencePipelines(unittest.TestCase):
         )
         rec_result = inference_pipeline(
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
-        logger.info("asr inference result: {0}".format(rec_result))
+        logger.info("asr_vad_punc inference result: {0}".format(rec_result))
 
 
 if __name__ == '__main__':
