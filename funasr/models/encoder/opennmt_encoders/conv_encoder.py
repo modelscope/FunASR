@@ -137,12 +137,12 @@ class ConvEncoder(AbsEncoder):
             self.out_padding = nn.ConstantPad1d((left_padding, right_padding), 0.0)
             self.conv_out = nn.Conv1d(
                 num_units,
-                num_units,
+                out_units,
                 kernel_size,
         )
 
         if self.out_norm:
-            self.after_norm = LayerNorm(num_units)
+            self.after_norm = LayerNorm(out_units)
 
     def output_size(self) -> int:
         return self.num_units
