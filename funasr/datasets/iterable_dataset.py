@@ -244,10 +244,14 @@ class IterableESPnetDataset(IterableDataset):
                         array = torchaudio.transforms.Resample(orig_freq=audio_fs,
                                                                new_freq=model_fs)(array)
                         array = array.numpy()
-                if self.mc:
-                    data[name] = array.transpose(0, 1)
+                        
+                if _type == "sound":
+                    if self.mc:
+                        data[name] = array.transpose(0, 1)
+                    else:
+                        data[name] = array[0]
                 else:
-                    data[name] = array[0]
+                    data[name] = array
 
                 if self.preprocess is not None:
                     data = self.preprocess(uid, data)
