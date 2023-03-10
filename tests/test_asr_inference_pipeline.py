@@ -187,7 +187,7 @@ class TestUniasrInferencePipelines(unittest.TestCase):
             model='damo/speech_UniASR_asr_2pass-cantonese-CHS-16k-common-vocab1468-tensorflow1-online')
         rec_result = inference_pipeline(
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_cantonese-CHS.wav',
-            param_dict={"decoding_model":"normal"})
+            param_dict={"decoding_model": "normal"})
         logger.info("asr inference result: {0}".format(rec_result))
 
     def test_uniasr_2pass_cn_dialect_offline(self):
@@ -197,7 +197,7 @@ class TestUniasrInferencePipelines(unittest.TestCase):
         rec_result = inference_pipeline(
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
         logger.info("asr inference result: {0}".format(rec_result))
-    
+
     def test_uniasr_2pass_cn_dialect_online(self):
         inference_pipeline = pipeline(
             task=Tasks.auto_speech_recognition,
@@ -212,7 +212,7 @@ class TestUniasrInferencePipelines(unittest.TestCase):
             model='damo/speech_UniASR_asr_2pass-de-16k-common-vocab3690-tensorflow1-offline')
         rec_result = inference_pipeline(
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_de.wav',
-            param_dict={"decoding_model":"offline"})
+            param_dict={"decoding_model": "offline"})
         logger.info("asr inference result: {0}".format(rec_result))
 
     def test_uniasr_2pass_de_common_online(self):
@@ -221,7 +221,7 @@ class TestUniasrInferencePipelines(unittest.TestCase):
             model='damo/speech_UniASR_asr_2pass-de-16k-common-vocab3690-tensorflow1-online')
         rec_result = inference_pipeline(
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_de.wav',
-            param_dict={"decoding_model":"normal"})
+            param_dict={"decoding_model": "normal"})
         logger.info("asr inference result: {0}".format(rec_result))
 
     def test_uniasr_2pass_en_common_offline(self):
@@ -230,7 +230,7 @@ class TestUniasrInferencePipelines(unittest.TestCase):
             model='damo/speech_UniASR_asr_2pass-en-16k-common-vocab1080-tensorflow1-offline')
         rec_result = inference_pipeline(
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_en.wav',
-            param_dict={"decoding_model":"offline"})
+            param_dict={"decoding_model": "offline"})
         logger.info("asr inference result: {0}".format(rec_result))
 
     def test_uniasr_2pass_en_common_online(self):
@@ -239,7 +239,7 @@ class TestUniasrInferencePipelines(unittest.TestCase):
             model='damo/speech_UniASR_asr_2pass-en-16k-common-vocab1080-tensorflow1-online')
         rec_result = inference_pipeline(
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_en.wav',
-            param_dict={"decoding_model":"normal"})
+            param_dict={"decoding_model": "normal"})
         logger.info("asr inference result: {0}".format(rec_result))
 
     def test_uniasr_2pass_es_common_offline(self):
@@ -248,7 +248,7 @@ class TestUniasrInferencePipelines(unittest.TestCase):
             model='damo/speech_UniASR_asr_2pass-es-16k-common-vocab3445-tensorflow1-offline')
         rec_result = inference_pipeline(
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_es.wav',
-            param_dict={"decoding_model":"offline"})
+            param_dict={"decoding_model": "offline"})
         logger.info("asr inference result: {0}".format(rec_result))
 
     def test_uniasr_2pass_es_common_online(self):
@@ -257,7 +257,7 @@ class TestUniasrInferencePipelines(unittest.TestCase):
             model='damo/speech_UniASR_asr_2pass-es-16k-common-vocab3445-tensorflow1-online')
         rec_result = inference_pipeline(
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_es.wav',
-            param_dict={"decoding_model":"normal"})
+            param_dict={"decoding_model": "normal"})
         logger.info("asr inference result: {0}".format(rec_result))
 
     def test_uniasr_2pass_fa_common_offline(self):
@@ -266,7 +266,7 @@ class TestUniasrInferencePipelines(unittest.TestCase):
             model='damo/speech_UniASR_asr_2pass-fa-16k-common-vocab1257-pytorch-offline')
         rec_result = inference_pipeline(
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_fa.wav',
-            param_dict={"decoding_model":"offline"})
+            param_dict={"decoding_model": "offline"})
         logger.info("asr inference result: {0}".format(rec_result))
 
     def test_uniasr_2pass_fa_common_online(self):
@@ -275,7 +275,7 @@ class TestUniasrInferencePipelines(unittest.TestCase):
             model='damo/speech_UniASR_asr_2pass-fa-16k-common-vocab1257-pytorch-online')
         rec_result = inference_pipeline(
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_fa.wav',
-            param_dict={"decoding_model":"normal"})
+            param_dict={"decoding_model": "normal"})
         logger.info("asr inference result: {0}".format(rec_result))
 
     def test_uniasr_2pass_fr_common_offline(self):
@@ -284,7 +284,7 @@ class TestUniasrInferencePipelines(unittest.TestCase):
             model='damo/speech_UniASR_asr_2pass-fr-16k-common-vocab3472-tensorflow1-offline')
         rec_result = inference_pipeline(
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_fr.wav',
-            param_dict={"decoding_model":"offline"})
+            param_dict={"decoding_model": "offline"})
         logger.info("asr inference result: {0}".format(rec_result))
 
     def test_uniasr_2pass_fr_common_online(self):
@@ -293,16 +293,16 @@ class TestUniasrInferencePipelines(unittest.TestCase):
             model='damo/speech_UniASR_asr_2pass-fr-16k-common-vocab3472-tensorflow1-online')
         rec_result = inference_pipeline(
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_fr.wav',
-            param_dict={"decoding_model":"normal"})
+            param_dict={"decoding_model": "normal"})
         logger.info("asr inference result: {0}".format(rec_result))
-    
+
     def test_uniasr_2pass_id_common_offline(self):
         inference_pipeline = pipeline(
             task=Tasks.auto_speech_recognition,
             model='damo/speech_UniASR_asr_2pass-id-16k-common-vocab1067-tensorflow1-online')
         rec_result = inference_pipeline(
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_id.wav',
-            param_dict={"decoding_model":"offline"})
+            param_dict={"decoding_model": "offline"})
         logger.info("asr inference result: {0}".format(rec_result))
 
     def test_uniasr_2pass_id_common_online(self):
@@ -311,16 +311,16 @@ class TestUniasrInferencePipelines(unittest.TestCase):
             model='damo/speech_UniASR_asr_2pass-id-16k-common-vocab1067-tensorflow1-online')
         rec_result = inference_pipeline(
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_id.wav',
-            param_dict={"decoding_model":"normal"})
+            param_dict={"decoding_model": "normal"})
         logger.info("asr inference result: {0}".format(rec_result))
-        
+
     def test_uniasr_2pass_ja_common_offline(self):
         inference_pipeline = pipeline(
             task=Tasks.auto_speech_recognition,
             model='damo/speech_UniASR_asr_2pass-ja-16k-common-vocab93-tensorflow1-offline')
         rec_result = inference_pipeline(
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_ja.wav',
-            param_dict={"decoding_model":"offline"})
+            param_dict={"decoding_model": "offline"})
         logger.info("asr inference result: {0}".format(rec_result))
 
     def test_uniasr_2pass_ja_common_online(self):
@@ -329,7 +329,25 @@ class TestUniasrInferencePipelines(unittest.TestCase):
             model='damo/speech_UniASR_asr_2pass-ja-16k-common-vocab93-tensorflow1-online')
         rec_result = inference_pipeline(
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_ja.wav',
-            param_dict={"decoding_model":"normal"})
+            param_dict={"decoding_model": "normal"})
+        logger.info("asr inference result: {0}".format(rec_result))
+
+    def test_uniasr_2pass_ko_common_offline(self):
+        inference_pipeline = pipeline(
+            task=Tasks.auto_speech_recognition,
+            model='damo/speech_UniASR_asr_2pass-ko-16k-common-vocab6400-tensorflow1-offline')
+        rec_result = inference_pipeline(
+            audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_ko.wav',
+            param_dict={"decoding_model": "offline"})
+        logger.info("asr inference result: {0}".format(rec_result))
+
+    def test_uniasr_2pass_ko_common_online(self):
+        inference_pipeline = pipeline(
+            task=Tasks.auto_speech_recognition,
+            model='damo/speech_UniASR_asr_2pass-ko-16k-common-vocab6400-tensorflow1-online')
+        rec_result = inference_pipeline(
+            audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_ko.wav',
+            param_dict={"decoding_model": "normal"})
         logger.info("asr inference result: {0}".format(rec_result))
 
 
