@@ -62,9 +62,25 @@ class TestMfccaInferencePipelines(unittest.TestCase):
     def test_alimeeting(self):
         inference_pipeline = pipeline(
             task=Tasks.auto_speech_recognition,
-            model='NPU-ASLP/speech_mfcca_asr-zh-cn-16k-alimeeting-vocab4950')
+            model='NPU-ASLP/speech_mfcca_asr-zh-cn-16k-alimeeting-vocab4950',
+            model_revision='v3.0.0')
         rec_result = inference_pipeline(
             audio_in='16:32https://pre.modelscope.cn/api/v1/models/NPU-ASLP/speech_mfcca_asr-zh-cn-16k-alimeeting-vocab4950/repo?Revision=master&FilePath=example/asr_example_mc.wav')
+        logger.info("asr inference result: {0}".format(rec_result))
+
+
+class TestParaformerInferencePipelines(unittest.TestCase):
+    def test_funasr_path(self):
+        import funasr
+        import os
+        logger.info("run_dir:{0} ; funasr_path: {1}".format(os.getcwd(), funasr.__file__))
+
+    def test_paraformer_large_contextual_common(self):
+        inference_pipeline = pipeline(
+            task=Tasks.auto_speech_recognition,
+            model='damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404')
+        rec_result = inference_pipeline(
+            audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_hotword.wav')
         logger.info("asr inference result: {0}".format(rec_result))
 
 
