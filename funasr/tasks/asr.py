@@ -1244,3 +1244,10 @@ class ASRTaskMFCCA(ASRTask):
         return model
 
 
+class ASRTaskAligner(ASRTaskParaformer):
+    @classmethod
+    def required_data_names(
+            cls, train: bool = True, inference: bool = False
+    ) -> Tuple[str, ...]:
+        retval = ("speech", "text")
+        return retval
