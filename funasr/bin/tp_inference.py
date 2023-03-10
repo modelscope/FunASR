@@ -263,7 +263,7 @@ def inference_modelscope(
     preprocessor = LMPreprocessor(
         train=False,
         token_type=speechtext2timestamp.tp_train_args.token_type,
-        token_list=speechtext2timestamp.tp_train_args,
+        token_list=speechtext2timestamp.tp_train_args.token_list,
         bpemodel=None,
         text_cleaner=None,
         g2p_type=None,
@@ -293,7 +293,7 @@ def inference_modelscope(
             batch_size=batch_size,
             key_file=key_file,
             num_workers=num_workers,
-            preprocess_fn=LMPreprocessor,
+            preprocess_fn=preprocessor,
             collate_fn=ASRTask.build_collate_fn(speechtext2timestamp.tp_train_args, False),
             allow_variable_data_keys=allow_variable_data_keys,
             inference=True,
