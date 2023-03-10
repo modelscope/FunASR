@@ -20,7 +20,7 @@ class TestTransformerInferencePipelines(unittest.TestCase):
         )
         inputs = "./egs_modelscope/punctuation/punc_ct-transformer_zh-cn-common-vocab272727-pytorch/data/punc_example.txt"
         rec_result = inference_pipeline(text_in=inputs)
-        logger.info("asr inference result: {0}".format(rec_result))
+        logger.info("punctuation inference result: {0}".format(rec_result))
 
     def test_vadrealtime_inference_pipeline(self):
         inference_pipeline = pipeline(
@@ -36,7 +36,7 @@ class TestTransformerInferencePipelines(unittest.TestCase):
             rec_result = inference_pipeline(text_in=vad, cache=cache_out)
             cache_out = rec_result['cache']
             rec_result_all += rec_result['text']
-        logger.info("asr inference result: {0}".format(rec_result_all))
+        logger.info("punctuation inference result: {0}".format(rec_result_all))
 
 
 if __name__ == '__main__':
