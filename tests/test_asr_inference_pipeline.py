@@ -142,6 +142,7 @@ class TestParaformerInferencePipelines(unittest.TestCase):
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
         logger.info("asr inference result: {0}".format(rec_result))
 
+
 class TestParaformerBertInferencePipelines(unittest.TestCase):
     def test_funasr_path(self):
         import funasr
@@ -162,6 +163,31 @@ class TestParaformerBertInferencePipelines(unittest.TestCase):
             model='damo/speech_paraformerbert_asr_nat-zh-cn-16k-aishell2-vocab5212-pytorch')
         rec_result = inference_pipeline(
             audio_in='https://modelscope.oss-cn-beijing.aliyuncs.com/test/audios/asr_example.wav')
+        logger.info("asr inference result: {0}".format(rec_result))
+
+
+class TestUniasrInferencePipelines(unittest.TestCase):
+    def test_funasr_path(self):
+        import funasr
+        import os
+        logger.info("run_dir:{0} ; funasr_path: {1}".format(os.getcwd(), funasr.__file__))
+
+    def test_uniasr_2pass_cantonese_chs_16k_common_offline(self):
+        inference_pipeline = pipeline(
+            task=Tasks.auto_speech_recognition,
+            model='damo/speech_UniASR_asr_2pass-cantonese-CHS-16k-common-vocab1468-tensorflow1-online')
+        rec_result = inference_pipeline(
+            audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_cantonese-CHS.wav',
+            param_dict={"decoding_model": "offline"})
+        logger.info("asr inference result: {0}".format(rec_result))
+
+    def test_uniasr_2pass_cantonese_chs_16k_common_online(self):
+        inference_pipeline = pipeline(
+            task=Tasks.auto_speech_recognition,
+            model='damo/speech_UniASR_asr_2pass-cantonese-CHS-16k-common-vocab1468-tensorflow1-online')
+        rec_result = inference_pipeline(
+            audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_cantonese-CHS.wav',
+            param_dict={"decoding_model":"normal"})
         logger.info("asr inference result: {0}".format(rec_result))
 
 
