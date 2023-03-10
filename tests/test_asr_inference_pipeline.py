@@ -118,6 +118,30 @@ class TestParaformerInferencePipelines(unittest.TestCase):
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh_command.wav')
         logger.info("asr inference result: {0}".format(rec_result))
 
+    def test_paraformer_8k(self):
+        inference_pipeline = pipeline(
+            task=Tasks.auto_speech_recognition,
+            model='damo/speech_paraformer_asr_nat-zh-cn-8k-common-vocab8358-tensorflow1')
+        rec_result = inference_pipeline(
+            audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_8K.wav')
+        logger.info("asr inference result: {0}".format(rec_result))
+
+    def test_paraformer_aishell1(self):
+        inference_pipeline = pipeline(
+            task=Tasks.auto_speech_recognition,
+            model='damo/speech_paraformer_asr_nat-zh-cn-16k-aishell1-vocab4234-pytorch')
+        rec_result = inference_pipeline(
+            audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
+        logger.info("asr inference result: {0}".format(rec_result))
+
+    def test_paraformer_aishell2(self):
+        inference_pipeline = pipeline(
+            task=Tasks.auto_speech_recognition,
+            model='damo/speech_paraformer_asr_nat-zh-cn-16k-aishell2-vocab5212-pytorch')
+        rec_result = inference_pipeline(
+            audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
+        logger.info("asr inference result: {0}".format(rec_result))
+
 
 if __name__ == '__main__':
     unittest.main()
