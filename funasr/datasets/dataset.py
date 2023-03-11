@@ -115,7 +115,7 @@ def sound_loader(path, dest_sample_rate=16000, float_dtype=None):
     # NOTE(kamo): SoundScpReader doesn't support pipe-fashion
     # like Kaldi e.g. "cat a.wav |".
     # NOTE(kamo): The audio signal is normalized to [-1,1] range.
-    loader = SoundScpReader(path, dest_sample_rate=16000, normalize=True, always_2d=False)
+    loader = SoundScpReader(path, dest_sample_rate, normalize=True, always_2d=False)
 
     # SoundScpReader.__getitem__() returns Tuple[int, ndarray],
     # but ndarray is desired, so Adapter class is inserted here
