@@ -194,8 +194,8 @@ class Speech2Text:
         # Input as audio signal
         if isinstance(speech, np.ndarray):
             speech = torch.tensor(speech)
-
-
+        if(speech.dim()==3):
+            speech = torch.squeeze(speech, 2)
         #speech = speech.unsqueeze(0).to(getattr(torch, self.dtype))
         speech = speech.to(getattr(torch, self.dtype))
         # lenghts: (1,)
