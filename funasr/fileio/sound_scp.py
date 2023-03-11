@@ -4,6 +4,7 @@ from typing import Union
 
 import numpy as np
 import soundfile
+import librosa
 from typeguard import check_argument_types
 
 from funasr.fileio.read_text import read_2column_text
@@ -30,6 +31,7 @@ class SoundScpReader(collections.abc.Mapping):
         dtype=np.int16,
         always_2d: bool = False,
         normalize: bool = False,
+        dest_sample_rate: int = 16000,
     ):
         assert check_argument_types()
         self.fname = fname
@@ -37,15 +39,18 @@ class SoundScpReader(collections.abc.Mapping):
         self.always_2d = always_2d
         self.normalize = normalize
         self.data = read_2column_text(fname)
+        self.dest_sample_rate = dest_sample_rate
 
     def __getitem__(self, key):
         wav = self.data[key]
         if self.normalize:
             # soundfile.read normalizes data to [-1,1] if dtype is not given
-            array, rate = soundfile.read(wav, always_2d=self.always_2d)
+            array, rate = librosa.load(
+                wav, sr=self.dest_sample_rate, mono=not self.always_2d
+            )
         else:
-            array, rate = soundfile.read(
-                wav, dtype=self.dtype, always_2d=self.always_2d
+            array, rate = librosa.load(
+                wav, sr=self.dest_sample_rate, mono=not self.always_2d, dtype=self.dtype
             )
 
         return rate, array

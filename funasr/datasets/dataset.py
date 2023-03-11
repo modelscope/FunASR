@@ -107,7 +107,7 @@ class H5FileWrapper:
         return value[()]
 
 
-def sound_loader(path, float_dtype=None):
+def sound_loader(path, dest_sample_rate=16000, float_dtype=None):
     # The file is as follows:
     #   utterance_id_A /some/where/a.wav
     #   utterance_id_B /some/where/a.flac
@@ -115,7 +115,7 @@ def sound_loader(path, float_dtype=None):
     # NOTE(kamo): SoundScpReader doesn't support pipe-fashion
     # like Kaldi e.g. "cat a.wav |".
     # NOTE(kamo): The audio signal is normalized to [-1,1] range.
-    loader = SoundScpReader(path, normalize=True, always_2d=False)
+    loader = SoundScpReader(path, dest_sample_rate=16000, normalize=True, always_2d=False)
 
     # SoundScpReader.__getitem__() returns Tuple[int, ndarray],
     # but ndarray is desired, so Adapter class is inserted here
@@ -139,7 +139,7 @@ def rand_int_loader(filepath, loader_type):
 DATA_TYPES = {
     "sound": dict(
         func=sound_loader,
-        kwargs=["float_dtype"],
+        kwargs=["dest_sample_rate","float_dtype"],
         help="Audio format types which supported by sndfile wav, flac, etc."
         "\n\n"
         "   utterance_id_a a.wav\n"
@@ -282,6 +282,7 @@ class ESPnetDataset(AbsDataset):
         int_dtype: str = "long",
         max_cache_size: Union[float, int, str] = 0.0,
         max_cache_fd: int = 0,
+        dest_sample_rate: int = 16000,
     ):
         assert check_argument_types()
         if len(path_name_type_list) == 0:
@@ -295,6 +296,7 @@ class ESPnetDataset(AbsDataset):
         self.float_dtype = float_dtype
         self.int_dtype = int_dtype
         self.max_cache_fd = max_cache_fd
+        self.dest_sample_rate = dest_sample_rate
 
         self.loader_dict = {}
         self.debug_info = {}
@@ -335,6 +337,8 @@ class ESPnetDataset(AbsDataset):
                 for key2 in dic["kwargs"]:
                     if key2 == "loader_type":
                         kwargs["loader_type"] = loader_type
+                    elif key2 == "dest_sample_rate" and loader_type=="sound":
+                        kwargs["dest_sample_rate"] = self.dest_sample_rate
                     elif key2 == "float_dtype":
                         kwargs["float_dtype"] = self.float_dtype
                     elif key2 == "int_dtype":
