@@ -1,4 +1,4 @@
-import argparse
+mport argparse
 import logging
 import sys
 import json
@@ -236,12 +236,13 @@ def inference_modelscope(
             # param_dict['in_cache'] = batch['in_cache']
             if results:
                 for i, _ in enumerate(keys):
-                    results[i] = json.dumps(results[i])
-                    item = {'key': keys[i], 'value': results[i]}
-                    vad_results.append(item)
-                    if writer is not None:
-                        results[i] = json.loads(results[i])
-                        ibest_writer["text"][keys[i]] = "{}".format(results[i])
+                    if results[i]:
+                        results[i] = json.dumps(results[i])
+                        item = {'key': keys[i], 'value': results[i]}
+                        vad_results.append(item)
+                        if writer is not None:
+                            results[i] = json.loads(results[i])
+                            ibest_writer["text"][keys[i]] = "{}".format(results[i])
 
         return vad_results
 
