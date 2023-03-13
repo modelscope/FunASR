@@ -65,7 +65,7 @@ class TestMfccaInferencePipelines(unittest.TestCase):
             model='NPU-ASLP/speech_mfcca_asr-zh-cn-16k-alimeeting-vocab4950',
             model_revision='v3.0.0')
         rec_result = inference_pipeline(
-            audio_in='16:32https://pre.modelscope.cn/api/v1/models/NPU-ASLP/speech_mfcca_asr-zh-cn-16k-alimeeting-vocab4950/repo?Revision=master&FilePath=example/asr_example_mc.wav')
+            audio_in='https://pre.modelscope.cn/api/v1/models/NPU-ASLP/speech_mfcca_asr-zh-cn-16k-alimeeting-vocab4950/repo?Revision=master&FilePath=example/asr_example_mc.wav')
         logger.info("asr inference result: {0}".format(rec_result))
 
 
