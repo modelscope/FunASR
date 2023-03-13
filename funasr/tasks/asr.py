@@ -1334,7 +1334,7 @@ class ASRTaskAligner(ASRTaskParaformer):
         return retval
 
 
-class ASRTaskAligner(ASRTaskParaformer):
+class ASRTaskAligner_temp(ASRTaskParaformer):
     @classmethod
     def required_data_names(
             cls, train: bool = True, inference: bool = False
