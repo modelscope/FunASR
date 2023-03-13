@@ -1,7 +1,6 @@
 import pyaudio
 import grpc
 import json
-import webrtcvad
 import time
 import asyncio
 import argparse
@@ -11,24 +10,16 @@ from paraformer_pb2_grpc import ASRStub
 
 async def deal_chunk(sig_mic):
     global stub,SPEAKING,asr_user,language,sample_rate
-    if vad.is_speech(sig_mic, sample_rate): #speaking
-        SPEAKING = True
-        response = transcribe_audio_bytes(stub, sig_mic, user=asr_user, language=language, speaking = True, isEnd = False) #speaking, send audio to server.
-    else: #silence   
-        begin_time = 0
-        if SPEAKING: #means we have some audio recorded, send recognize order to server.
-            SPEAKING = False
-            begin_time = int(round(time.time() * 1000))            
-            response = transcribe_audio_bytes(stub, None, user=asr_user, language=language, speaking = False, isEnd = False) #speak end, call server for recognize one sentence
-            resp = response.next()           
-            if "decoding" == resp.action:   
-                resp = response.next() #TODO, blocking operation may leads to miss some audio clips. C++ multi-threading is preferred.
-                if "finish" == resp.action:        
-                    end_time = int(round(time.time() * 1000))
-                    print (json.loads(resp.sentence))
-                    print ("delay in ms: %d " % (end_time - begin_time))
-                else:
-                    pass
+    
+    SPEAKING = True
+    resp = transcribe_audio_bytes(stub, sig_mic, user=asr_user, language=language, speaking = True, isEnd = False) #speaking, send audio to server.
+          
+    if "decoding" == resp.action:     #partial result
+        print(json.loads(resp.sentence))
+    elif "finish" == resp.action:     #final result
+        print (json.loads(resp.sentence))
+
+
         
 
 async def record(host,port,sample_rate,mic_chunk,record_seconds,asr_user,language):
@@ -88,8 +79,6 @@ if __name__ == '__main__':
     language = 'zh-CN'  
     
 
-    vad = webrtcvad.Vad()
-    vad.set_mode(1)
 
     FORMAT = pyaudio.paInt16
     CHANNELS = 1
