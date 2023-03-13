@@ -199,6 +199,63 @@ class CifPredictorV2(nn.Module):
 
         return acoustic_embeds, token_num, alphas, cif_peak
 
+    def forward_chunk(self, hidden, cache=None):
+        h = hidden
+        context = h.transpose(1, 2)
+        queries = self.pad(context)
+        output = torch.relu(self.cif_conv1d(queries))
+        output = output.transpose(1, 2)
+        output = self.cif_output(output)
+        alphas = torch.sigmoid(output)
+        alphas = torch.nn.functional.relu(alphas * self.smooth_factor - self.noise_threshold)
+
+        alphas = alphas.squeeze(-1)
+        mask_chunk_predictor = None
+        if cache is not None:
+            mask_chunk_predictor = None
+            mask_chunk_predictor = torch.zeros_like(alphas)
+            mask_chunk_predictor[:, cache["pad_left"]:cache["stride"] + cache["pad_left"]] = 1.0
+       
+        if mask_chunk_predictor is not None:
+            alphas = alphas * mask_chunk_predictor
+      
+        if cache is not None:
+            if cache["cif_hidden"] is not None:
+                hidden = torch.cat((cache["cif_hidden"], hidden), 1)
+            if cache["cif_alphas"] is not None:
+                alphas = torch.cat((cache["cif_alphas"], alphas), -1)
+
+        token_num = alphas.sum(-1)
+        acoustic_embeds, cif_peak = cif(hidden, alphas, self.threshold)
+        len_time = alphas.size(-1)
+        last_fire_place = len_time - 1
+        last_fire_remainds = 0.0
+        pre_alphas_length = 0
+ 
+        mask_chunk_peak_predictor = None
+        if cache is not None:
+            mask_chunk_peak_predictor = None
+            mask_chunk_peak_predictor = torch.zeros_like(cif_peak)
+            if cache["cif_alphas"] is not None:
+                pre_alphas_length = cache["cif_alphas"].size(-1)
+                mask_chunk_peak_predictor[:, :pre_alphas_length] = 1.0
+            mask_chunk_peak_predictor[:, pre_alphas_length + cache["pad_left"]:pre_alphas_length + cache["stride"] + cache["pad_left"]] = 1.0
+            
+
+        if mask_chunk_peak_predictor is not None:
+            cif_peak = cif_peak * mask_chunk_peak_predictor.squeeze(-1)
+        
+        for i in range(len_time):
+            if cif_peak[0][len_time - 1 - i] > self.threshold or cif_peak[0][len_time - 1 - i] == self.threshold:
+                last_fire_place = len_time - 1 - i
+                last_fire_remainds = cif_peak[0][len_time - 1 - i] - self.threshold
+                break
+        last_fire_remainds = torch.tensor([last_fire_remainds], dtype=alphas.dtype).to(alphas.device)
+        cache["cif_hidden"] = hidden[:, last_fire_place:, :]
+        cache["cif_alphas"] = torch.cat((last_fire_remainds.unsqueeze(0), alphas[:, last_fire_place+1:]), -1)
+        token_num_int = token_num.floor().type(torch.int32).item()
+        return acoustic_embeds[:, 0:token_num_int, :], token_num, alphas, cif_peak
+
     def tail_process_fn(self, hidden, alphas, token_num=None, mask=None):
         b, t, d = hidden.size()
         tail_threshold = self.tail_threshold

@@ -947,6 +947,65 @@ class ParaformerSANMDecoder(BaseTransformerDecoder):
         )
         return logp.squeeze(0), state
 
+    def forward_chunk(
+        self,
+        memory: torch.Tensor,
+        tgt: torch.Tensor,
+        cache: dict = None,
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Forward decoder.
+
+        Args:
+            hs_pad: encoded memory, float32  (batch, maxlen_in, feat)
+            hlens: (batch)
+            ys_in_pad:
+                input token ids, int64 (batch, maxlen_out)
+                if input_layer == "embed"
+                input tensor (batch, maxlen_out, #mels) in the other cases
+            ys_in_lens: (batch)
+        Returns:
+            (tuple): tuple containing:
+
+            x: decoded token score before softmax (batch, maxlen_out, token)
+                if use_output_layer is True,
+            olens: (batch, )
+        """
+        x = tgt
+        if cache["decode_fsmn"] is None:
+            cache_layer_num = len(self.decoders)
+            if self.decoders2 is not None:
+                cache_layer_num += len(self.decoders2)
+            new_cache = [None] * cache_layer_num
+        else:
+            new_cache = cache["decode_fsmn"]
+        for i in range(self.att_layer_num):
+            decoder = self.decoders[i]
+            x, tgt_mask, memory, memory_mask, c_ret = decoder(
+                x, None, memory, None, cache=new_cache[i]
+            )
+            new_cache[i] = c_ret
+
+        if self.num_blocks - self.att_layer_num > 1:
+            for i in range(self.num_blocks - self.att_layer_num):
+                j = i + self.att_layer_num
+                decoder = self.decoders2[i]
+                x, tgt_mask, memory, memory_mask, c_ret = decoder(
+                    x, None, memory, None, cache=new_cache[j]
+                )
+                new_cache[j] = c_ret
+
+        for decoder in self.decoders3:
+
+            x, tgt_mask, memory, memory_mask, _ = decoder(
+                x, None, memory, None, cache=None
+            )
+        if self.normalize_before:
+            x = self.after_norm(x)
+        if self.output_layer is not None:
+            x = self.output_layer(x)
+        cache["decode_fsmn"] = new_cache
+        return x
+
     def forward_one_step(
         self,
         tgt: torch.Tensor,
