@@ -77,31 +77,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
-<style>
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast.container,
-.nboutput.nblast.container {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast.container + .nbinput.container {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<div class="section" id="build-custom-tasks">
+  <div class="section" id="build-custom-tasks">
 <h1>Build custom tasks<a class="headerlink" href="#build-custom-tasks" title="Permalink to this headline"></a></h1>
 <p>FunASR is similar to ESPNet, which applies <code class="docutils literal notranslate"><span class="pre">Task</span></code>  as the general interface ti achieve the training and inference of models. Each <code class="docutils literal notranslate"><span class="pre">Task</span></code> is a class inherited from <code class="docutils literal notranslate"><span class="pre">AbsTask</span></code> and its corresponding code can be seen in <code class="docutils literal notranslate"><span class="pre">funasr/tasks/abs_task.py</span></code>. The main functions of <code class="docutils literal notranslate"><span class="pre">AbsTask</span></code> are shown as follows:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">AbsTask</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>

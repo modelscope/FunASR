@@ -77,31 +77,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
-<style>
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast.container,
-.nboutput.nblast.container {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast.container + .nbinput.container {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<div class="section" id="id1">
+  <div class="section" id="id1">
 <h1>搭建自定义任务<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h1>
 <p>FunASR类似ESPNet，以<code class="docutils literal notranslate"><span class="pre">Task</span></code>为通用接口，从而实现模型的训练和推理。每一个<code class="docutils literal notranslate"><span class="pre">Task</span></code>是一个类，其需要继承<code class="docutils literal notranslate"><span class="pre">AbsTask</span></code>，其对应的具体代码见<code class="docutils literal notranslate"><span class="pre">funasr/tasks/abs_task.py</span></code>。下面给出其包含的主要函数及功能介绍：</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">AbsTask</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
