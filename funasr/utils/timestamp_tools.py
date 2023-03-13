@@ -134,7 +134,7 @@ class AverageShiftCalculator():
         uttid_intersection = self._intersection(uttid_list1, uttid_list2)
         res = self.as_cal(uttid_intersection, ts_dict1, ts_dict2)
         logging.warning("Average shift of {} and {}: {}.".format(file1, file2, str(res)[:8]))
-        logging.warning("Following timestamp pair differs most: {}, detail:{}".format(self.max_shift_uttid))
+        logging.warning("Following timestamp pair differs most: {}, detail:{}".format(self.max_shift, self.max_shift_uttid))
 
     def _intersection(self, list1, list2):
         set1 = set(list1)
