@@ -1,6 +1,10 @@
+from scipy.fftpack import shift
 import torch
 import copy
+import codecs
 import logging
+import edit_distance
+import argparse
 import numpy as np
 from typing import Any, List, Tuple, Union
 
@@ -121,4 +125,139 @@ def time_stamp_sentence(punc_id_list, time_stamp_postprocessed, text_postprocess
     return res
 
 
+class AverageShiftCalculator():
+    def __init__(self):
+        logging.warning("Calculating average shift.")
+    def __call__(self, file1, file2):
+        uttid_list1, ts_dict1 = self.read_timestamps(file1)
+        uttid_list2, ts_dict2 = self.read_timestamps(file2)
+        uttid_intersection = self._intersection(uttid_list1, uttid_list2)
+        res = self.as_cal(uttid_intersection, ts_dict1, ts_dict2)
+        logging.warning("Average shift of {} and {}: {}.".format(file1, file2, str(res)[:8]))
+        logging.warning("Following timestamp pair differs most: {}, detail:{}".format(self.max_shift_uttid))
+
+    def _intersection(list1, list2):
+        set1 = set(list1)
+        set2 = set(list2)
+        if set1 == set2:
+            logging.warning("Uttid same checked.")
+            return set1
+        itsc = list(set1 & set2)
+        logging.warning("Uttid differs: file1 {}, file2 {}, lines same {}.".format(len(list1), len(list2), len(itsc)))
+        return itsc
+
+    def read_timestamps(self, file):
+        # read timestamps file in standard format
+        uttid_list = []
+        ts_dict = {}
+        with codecs.open(file, 'r') as fin:
+            for line in fin.readlines():
+                text = ''
+                ts_list = []
+                line = line.rstrip()
+                uttid = line.split()[0]
+                uttid_list.append(uttid)
+                body = " ".join(line.split()[1:])
+                for pd in body.split(';'):
+                    if not len(pd): continue
+                    # pdb.set_trace() 
+                    char, start, end = pd.lstrip(" ").split(' ')
+                    text += char + ','
+                    ts_list.append((float(start), float(end)))
+                # ts_lists.append(ts_list)
+                ts_dict[uttid] = (text[:-1], ts_list)
+        logging.warning("File {} read done.".format(file))
+        return uttid_list, ts_dict
+
+    def _shift(self, filtered_timestamp_list1, filtered_timestamp_list2):
+        for fts1, fts2 in zip(filtered_timestamp_list1, filtered_timestamp_list2):
+            shift_time = abs(fts1[0] - fts2[0]) + abs(fts1[1] - fts2[1])
+        num_tokens = len(filtered_timestamp_list1)
+        return shift_time, num_tokens
+
+    def as_cal(self, uttid_list, ts_dict1, ts_dict2):
+        # calculate average shift between timestamp1 and timestamp2
+        # when characters differ, use edit distance alignment
+        # and calculate the error between the same characters
+        self._accumlated_shift = 0
+        self._accumlated_tokens = 0
+        self.max_shift = 0
+        self.max_shift_uttid = None
+        for uttid in uttid_list:
+            (t1, ts1) = ts_dict1[uttid]
+            (t2, ts2) = ts_dict2[uttid]
+            _align, _align2, _align3 = [], [], []
+            fts1, fts2 = [], []
+            _t1, _t2 = [], []
+            sm = edit_distance.SequenceMatcher(t1.split(','), t2.split(','))
+            s = sm.get_opcodes()
+            for j in range(len(s)):
+                if s[j][0] == "replace" or s[j][0] == "insert":
+                    _align.append(0)
+                if s[j][0] == "replace" or s[j][0] == "delete":
+                    _align3.append(0)
+                elif s[j][0] == "equal":
+                    _align.append(1)
+                    _align3.append(1)
+                else:
+                    continue
+            # use s to index t2
+            for a, ts , t in zip(_align, ts2, t2.split(',')):
+                if a: 
+                    fts2.append(ts)
+                    _t2.append(t)
+            sm2 = edit_distance.SequenceMatcher(t2.split(','), t1.split(','))
+            s = sm2.get_opcodes()
+            for j in range(len(s)):
+                if s[j][0] == "replace" or s[j][0] == "insert":
+                    _align2.append(0)
+                elif s[j][0] == "equal":
+                    _align2.append(1)
+                else:
+                    continue
+            # use s2 tp index t1
+            for a, ts, t in zip(_align3, ts1, t1.split(',')):
+                if a: 
+                    fts1.append(ts)
+                    _t1.append(t)
+            if len(fts1) == len(fts2):
+                shift_time, num_tokens = self._shift(fts1, fts2)
+                self._accumlated_shift += shift_time
+                self._accumlated_tokens += num_tokens
+                if shift_time/num_tokens > self.max_shift:
+                    self.max_shift = shift_time/num_tokens
+                    self.max_shift_uttid = uttid
+            else:
+                logging.warning("length mismatch")
+        return self._accumlated_shift / self._accumlated_tokens
+
+
+SUPPORTED_MODES = ['cal_aas']
+
+
+def main(args):
+    if args.mode == 'cal_aas':
+        asc = AverageShiftCalculator()
+        asc(args.input, args.input2)
+    else:
+        logging.error("Mode {} not in SUPPORTED_MODES: {}.".format(args.mode, SUPPORTED_MODES))
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='timestamp tools')
+    parser.add_argument('--mode', 
+                        default=None, 
+                        type=str, 
+                        choices=SUPPORTED_MODES, 
+                        help='timestamp related toolbox')
+    parser.add_argument('--input', default=None, type=str, help='input file path')
+    parser.add_argument('--output', default=None, type=str, help='output file name')
+    parser.add_argument('--input2', default=None, type=str, help='input2 file path')
+    parser.add_argument('--kaldi-ts-type', 
+                        default='v2', 
+                        type=str, 
+                        choices=['v0', 'v1', 'v2'], 
+                        help='kaldi timestamp to write')
+    args = parser.parse_args()
+    main(args)
 
