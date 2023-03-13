@@ -125,7 +125,7 @@ model_choices = ClassChoices(
         bicif_paraformer=BiCifParaformer,
         contextual_paraformer=ContextualParaformer,
         mfcca=MFCCA,
-        timestamp_predictor=TimestampPredictor,
+        timestamp_prediction=TimestampPredictor,
     ),
     type_check=AbsESPnetModel,
     default="asr",
@@ -1278,8 +1278,6 @@ class ASRTaskAligner(ASRTaskParaformer):
             token_list = list(args.token_list)
         else:
             raise RuntimeError("token_list must be str or list")
-        vocab_size = len(token_list)
-        logging.info(f"Vocabulary size: {vocab_size}")
 
         # 1. frontend
         if args.input_size is None:
@@ -1316,6 +1314,7 @@ class ASRTaskAligner(ASRTaskParaformer):
             frontend=frontend,
             encoder=encoder,
             predictor=predictor,
+            token_list=token_list,
             **args.model_conf,
         )
 
@@ -1326,15 +1325,6 @@ class ASRTaskAligner(ASRTaskParaformer):
         assert check_return_type(model)
         return model
 
-    @classmethod
-    def required_data_names(
-            cls, train: bool = True, inference: bool = False
-    ) -> Tuple[str, ...]:
-        retval = ("speech", "text")
-        return retval
-
-
-class ASRTaskAligner_temp(ASRTaskParaformer):
     @classmethod
     def required_data_names(
             cls, train: bool = True, inference: bool = False
