@@ -8,6 +8,7 @@ Or you can use the finetuned model for inference directly.
 
 - Setting parameters in `infer.py`
     - <strong>audio_in:</strong> # support wav, url, bytes, and parsed audio format.
+    - <strong>text_in:</strong> # support text, text url.
     - <strong>output_dir:</strong> # If the input format is wav.scp, it needs to be set.
 
 - Then you can run the pipeline to infer with:
