@@ -136,7 +136,7 @@ class AverageShiftCalculator():
         logging.warning("Average shift of {} and {}: {}.".format(file1, file2, str(res)[:8]))
         logging.warning("Following timestamp pair differs most: {}, detail:{}".format(self.max_shift_uttid))
 
-    def _intersection(list1, list2):
+    def _intersection(self, list1, list2):
         set1 = set(list1)
         set2 = set(list2)
         if set1 == set2:
