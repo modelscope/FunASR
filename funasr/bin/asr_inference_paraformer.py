@@ -245,7 +245,7 @@ class Speech2Text:
             decoder_out, ys_pad_lens = decoder_outs[0], decoder_outs[1]
 
         if isinstance(self.asr_model, BiCifParaformer):
-            _, _, us_alphas, us_cif_peak = self.asr_model.calc_predictor_timestamp(enc, enc_len,
+            _, _, us_alphas, us_peaks = self.asr_model.calc_predictor_timestamp(enc, enc_len,
                                                                                    pre_token_length)  # test no bias cif2
 
         results = []
@@ -292,7 +292,7 @@ class Speech2Text:
 
                 if isinstance(self.asr_model, BiCifParaformer):
                     _, timestamp = ts_prediction_lfr6_standard(us_alphas[i], 
-                                                            us_cif_peak[i], 
+                                                            us_peaks[i], 
                                                             copy.copy(token), 
                                                             vad_offset=begin_time)
                     results.append((text, token, token_int, hyp, timestamp, enc_len_batch_total, lfr_factor))

@@ -150,10 +150,10 @@ class TimestampPredictor(AbsESPnetModel):
     def calc_predictor_timestamp(self, encoder_out, encoder_out_lens, token_num):
         encoder_out_mask = (~make_pad_mask(encoder_out_lens, maxlen=encoder_out.size(1))[:, None, :]).to(
             encoder_out.device)
-        ds_alphas, ds_cif_peak, us_alphas, us_cif_peak = self.predictor.get_upsample_timestamp(encoder_out,
+        ds_alphas, ds_cif_peak, us_alphas, us_peaks = self.predictor.get_upsample_timestamp(encoder_out,
                                                                                                encoder_out_mask,
                                                                                                token_num)
-        return ds_alphas, ds_cif_peak, us_alphas, us_cif_peak
+        return ds_alphas, ds_cif_peak, us_alphas, us_peaks
 
     def collect_feats(
             self,
