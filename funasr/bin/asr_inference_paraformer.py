@@ -42,7 +42,7 @@ from funasr.utils import asr_utils, wav_utils, postprocess_utils
 from funasr.models.frontend.wav_frontend import WavFrontend
 from funasr.models.e2e_asr_paraformer import BiCifParaformer, ContextualParaformer
 from funasr.export.models.e2e_asr_paraformer import Paraformer as Paraformer_export
-from funasr.utils.timestamp_tools import time_stamp_lfr6_pl, time_stamp_sentence
+from funasr.utils.timestamp_tools import ts_prediction_lfr6_standard
 
 
 class Speech2Text:
@@ -291,7 +291,10 @@ class Speech2Text:
                     text = None
 
                 if isinstance(self.asr_model, BiCifParaformer):
-                    timestamp = time_stamp_lfr6_pl(us_alphas[i], us_cif_peak[i], copy.copy(token), begin_time, end_time)
+                    _, timestamp = ts_prediction_lfr6_standard(us_alphas[i], 
+                                                            us_cif_peak[i], 
+                                                            copy.copy(token), 
+                                                            vad_offset=begin_time)
                     results.append((text, token, token_int, hyp, timestamp, enc_len_batch_total, lfr_factor))
                 else:
                     results.append((text, token, token_int, hyp, enc_len_batch_total, lfr_factor))

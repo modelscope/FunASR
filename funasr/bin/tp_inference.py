@@ -28,6 +28,8 @@ from funasr.utils.types import str2triple_str
 from funasr.utils.types import str_or_none
 from funasr.models.frontend.wav_frontend import WavFrontend
 from funasr.text.token_id_converter import TokenIDConverter
+from funasr.utils.timestamp_tools import ts_prediction_lfr6_standard
+
 
 header_colors = '\033[95m'
 end_colors = '\033[0m'
@@ -37,61 +39,6 @@ global_sample_rate: Union[int, Dict[Any, int]] = {
     'audio_fs': 16000,
     'model_fs': 16000
 }
-
-def time_stamp_lfr6_advance(us_alphas, us_cif_peak, char_list):
-    START_END_THRESHOLD = 5
-    MAX_TOKEN_DURATION = 12
-    TIME_RATE = 10.0 * 6 / 1000 / 3  #  3 times upsampled
-    if len(us_cif_peak.shape) == 2:
-        alphas, cif_peak = us_alphas[0], us_cif_peak[0]  # support inference batch_size=1 only
-    else:
-        alphas, cif_peak = us_alphas, us_cif_peak
-    num_frames = cif_peak.shape[0]
-    if char_list[-1] == '</s>':
-        char_list = char_list[:-1]
-    # char_list = [i for i in text]
-    timestamp_list = []
-    new_char_list = []
-    # for bicif model trained with large data, cif2 actually fires when a character starts
-    # so treat the frames between two peaks as the duration of the former token
-    fire_place = torch.where(cif_peak>1.0-1e-4)[0].cpu().numpy() - 3.2  # total offset
-    num_peak = len(fire_place)
-    assert num_peak == len(char_list) + 1 # number of peaks is supposed to be number of tokens + 1
-    # begin silence
-    if fire_place[0] > START_END_THRESHOLD:
-        # char_list.insert(0, '<sil>')
-        timestamp_list.append([0.0, fire_place[0]*TIME_RATE])
-        new_char_list.append('<sil>')
-    # tokens timestamp
-    for i in range(len(fire_place)-1):
-        new_char_list.append(char_list[i])
-        if MAX_TOKEN_DURATION < 0 or fire_place[i+1] - fire_place[i] < MAX_TOKEN_DURATION:
-            timestamp_list.append([fire_place[i]*TIME_RATE, fire_place[i+1]*TIME_RATE])
-        else:
-            # cut the duration to token and sil of the 0-weight frames last long
-            _split = fire_place[i] + MAX_TOKEN_DURATION
-            timestamp_list.append([fire_place[i]*TIME_RATE, _split*TIME_RATE])
-            timestamp_list.append([_split*TIME_RATE, fire_place[i+1]*TIME_RATE])
-            new_char_list.append('<sil>')
-    # tail token and end silence
-    # new_char_list.append(char_list[-1])
-    if num_frames - fire_place[-1] > START_END_THRESHOLD:
-        _end = (num_frames + fire_place[-1]) * 0.5
-        # _end = fire_place[-1] 
-        timestamp_list[-1][1] = _end*TIME_RATE
-        timestamp_list.append([_end*TIME_RATE, num_frames*TIME_RATE])
-        new_char_list.append("<sil>")
-    else:
-        timestamp_list[-1][1] = num_frames*TIME_RATE
-    assert len(new_char_list) == len(timestamp_list)
-    res_str = ""
-    for char, timestamp in zip(new_char_list, timestamp_list):
-        res_str += "{} {} {};".format(char, str(timestamp[0]+0.0005)[:5], str(timestamp[1]+0.0005)[:5])
-    res = []
-    for char, timestamp in zip(new_char_list, timestamp_list):
-        if char != '<sil>':
-            res.append([int(timestamp[0] * 1000), int(timestamp[1] * 1000)])
-    return res_str, res
 
 
 class SpeechText2Timestamp:
@@ -315,7 +262,7 @@ def inference_modelscope(
             for batch_id in range(_bs):
                 key = keys[batch_id]
                 token = speechtext2timestamp.converter.ids2tokens(batch['text'][batch_id])
-                ts_str, ts_list = time_stamp_lfr6_advance(us_alphas[batch_id], us_cif_peak[batch_id], token)
+                ts_str, ts_list = ts_prediction_lfr6_standard(us_alphas[batch_id], us_cif_peak[batch_id], token, force_time_shift=-3.0)
                 logging.warning(ts_str)
                 item = {'key': key, 'value': ts_str, 'timestamp':ts_list}
                 tp_result_list.append(item)
