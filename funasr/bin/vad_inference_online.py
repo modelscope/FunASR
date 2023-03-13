@@ -1,6 +1,5 @@
 import argparse
 import logging
-from optparse import Option
 import sys
 import json
 from pathlib import Path
@@ -15,10 +14,10 @@ from typing import Dict
 import numpy as np
 import torch
 from typeguard import check_argument_types
+from typeguard import check_return_type
 
 from funasr.fileio.datadir_writer import DatadirWriter
-from funasr.datasets.preprocessor import LMPreprocessor
-from funasr.tasks.asr import ASRTaskAligner as ASRTask
+from funasr.tasks.vad import VADTask
 from funasr.torch_utils.device_funcs import to_device
 from funasr.torch_utils.set_all_random_seed import set_all_random_seed
 from funasr.utils import config_argparse
@@ -26,10 +25,9 @@ from funasr.utils.cli_utils import get_commandline_args
 from funasr.utils.types import str2bool
 from funasr.utils.types import str2triple_str
 from funasr.utils.types import str_or_none
+from funasr.models.frontend.wav_frontend import WavFrontendOnline
 from funasr.models.frontend.wav_frontend import WavFrontend
-from funasr.text.token_id_converter import TokenIDConverter
-from funasr.utils.timestamp_tools import ts_prediction_lfr6_standard
-
+from funasr.bin.vad_inference import Speech2VadSegment
 
 header_colors = '\033[95m'
 end_colors = '\033[0m'
@@ -41,83 +39,67 @@ global_sample_rate: Union[int, Dict[Any, int]] = {
 }
 
 
-class SpeechText2Timestamp:
-    def __init__(
-        self,
-        timestamp_infer_config: Union[Path, str] = None,
-        timestamp_model_file: Union[Path, str] = None,
-        timestamp_cmvn_file: Union[Path, str] = None,
-        device: str = "cpu",
-        dtype: str = "float32",
-        **kwargs,
-    ):
-        assert check_argument_types()
-        # 1. Build ASR model
-        tp_model, tp_train_args = ASRTask.build_model_from_file(
-            timestamp_infer_config, timestamp_model_file, device
-        )
-        if 'cuda' in device:
-            tp_model = tp_model.cuda()  # force model to cuda
+class Speech2VadSegmentOnline(Speech2VadSegment):
+    """Speech2VadSegmentOnline class
 
-        frontend = None
-        if tp_train_args.frontend is not None:
-            frontend = WavFrontend(cmvn_file=timestamp_cmvn_file, **tp_train_args.frontend_conf)
-        
-        logging.info("tp_model: {}".format(tp_model))
-        logging.info("tp_train_args: {}".format(tp_train_args))
-        tp_model.to(dtype=getattr(torch, dtype)).eval()
+    Examples:
+        >>> import soundfile
+        >>> speech2segment = Speech2VadSegmentOnline("vad_config.yml", "vad.pt")
+        >>> audio, rate = soundfile.read("speech.wav")
+        >>> speech2segment(audio)
+        [[10, 230], [245, 450], ...]
 
-        logging.info(f"Decoding device={device}, dtype={dtype}")
+    """
+    def __init__(self, **kwargs):
+        super(Speech2VadSegmentOnline, self).__init__(**kwargs)
+        vad_cmvn_file = kwargs.get('vad_cmvn_file', None)
+        self.frontend = None
+        if self.vad_infer_args.frontend is not None:
+            self.frontend = WavFrontendOnline(cmvn_file=vad_cmvn_file, **self.vad_infer_args.frontend_conf)
 
 
-        self.tp_model = tp_model
-        self.tp_train_args = tp_train_args
-
-        token_list = self.tp_model.token_list
-        self.converter = TokenIDConverter(token_list=token_list)
-
-        self.device = device
-        self.dtype = dtype
-        self.frontend = frontend
-        self.encoder_downsampling_factor = 1
-        if tp_train_args.encoder_conf["input_layer"] == "conv2d":
-            self.encoder_downsampling_factor = 4
-    
     @torch.no_grad()
     def __call__(
-        self, 
-        speech: Union[torch.Tensor, np.ndarray], 
-        speech_lengths: Union[torch.Tensor, np.ndarray] = None, 
-        text_lengths: Union[torch.Tensor, np.ndarray] = None
-    ):
+            self, speech: Union[torch.Tensor, np.ndarray], speech_lengths: Union[torch.Tensor, np.ndarray] = None,
+            in_cache: Dict[str, torch.Tensor] = dict(), is_final: bool = False
+    ) -> Tuple[torch.Tensor, List[List[int]], torch.Tensor]:
+        """Inference
+
+        Args:
+            speech: Input speech data
+        Returns:
+            text, token, token_int, hyp
+
+        """
         assert check_argument_types()
 
         # Input as audio signal
         if isinstance(speech, np.ndarray):
             speech = torch.tensor(speech)
+        batch_size = speech.shape[0]
+        segments = [[]] * batch_size
         if self.frontend is not None:
-            feats, feats_len = self.frontend.forward(speech, speech_lengths)
+            feats, feats_len = self.frontend.forward(speech, speech_lengths, is_final)
+            fbanks, _ = self.frontend.get_fbank()
+        else:
+            raise Exception("Need to extract feats first, please configure frontend configuration")
+        if feats.shape[0]:
             feats = to_device(feats, device=self.device)
             feats_len = feats_len.int()
-            self.tp_model.frontend = None
-        else:
-            feats = speech
-            feats_len = speech_lengths
+            waveforms = self.frontend.get_waveforms()
 
-        # lfr_factor = max(1, (feats.size()[-1]//80)-1)
-        batch = {"speech": feats, "speech_lengths": feats_len}
-
-        # a. To device
-        batch = to_device(batch, device=self.device)
-
-        # b. Forward Encoder
-        enc, enc_len = self.tp_model.encode(**batch)
-        if isinstance(enc, tuple):
-            enc = enc[0]
-
-        # c. Forward Predictor
-        _, _, us_alphas, us_cif_peak = self.tp_model.calc_predictor_timestamp(enc, enc_len, text_lengths.to(self.device)+1)
-        return us_alphas, us_cif_peak
+            batch = {
+                "feats": feats,
+                "waveform": waveforms,
+                "in_cache": in_cache,
+                "is_final": is_final
+            }
+            # a. To device
+            batch = to_device(batch, device=self.device)
+            segments, in_cache = self.vad_model(**batch)
+            # in_cache.update(batch['in_cache'])
+            # in_cache = {key: value for key, value in batch['in_cache'].items()}
+        return fbanks, segments, in_cache
 
 
 def inference(
@@ -125,9 +107,9 @@ def inference(
         ngpu: int,
         log_level: Union[int, str],
         data_path_and_name_and_type,
-        timestamp_infer_config: Optional[str],
-        timestamp_model_file: Optional[str],
-        timestamp_cmvn_file: Optional[str] = None,
+        vad_infer_config: Optional[str],
+        vad_model_file: Optional[str],
+        vad_cmvn_file: Optional[str] = None,
         raw_inputs: Union[np.ndarray, torch.Tensor] = None,
         key_file: Optional[str] = None,
         allow_variable_data_keys: bool = False,
@@ -135,25 +117,21 @@ def inference(
         dtype: str = "float32",
         seed: int = 0,
         num_workers: int = 1,
-        split_with_space: bool = True,
-        seg_dict_file: Optional[str] = None,
         **kwargs,
 ):
     inference_pipeline = inference_modelscope(
         batch_size=batch_size,
         ngpu=ngpu,
         log_level=log_level,
-        timestamp_infer_config=timestamp_infer_config,
-        timestamp_model_file=timestamp_model_file,
-        timestamp_cmvn_file=timestamp_cmvn_file,
+        vad_infer_config=vad_infer_config,
+        vad_model_file=vad_model_file,
+        vad_cmvn_file=vad_cmvn_file,
         key_file=key_file,
         allow_variable_data_keys=allow_variable_data_keys,
         output_dir=output_dir,
         dtype=dtype,
         seed=seed,
         num_workers=num_workers,
-        split_with_space=split_with_space,
-        seg_dict_file=seg_dict_file,
         **kwargs,
     )
     return inference_pipeline(data_path_and_name_and_type, raw_inputs)
@@ -164,9 +142,9 @@ def inference_modelscope(
         ngpu: int,
         log_level: Union[int, str],
         # data_path_and_name_and_type,
-        timestamp_infer_config: Optional[str],
-        timestamp_model_file: Optional[str],
-        timestamp_cmvn_file: Optional[str] = None,
+        vad_infer_config: Optional[str],
+        vad_model_file: Optional[str],
+        vad_cmvn_file: Optional[str] = None,
         # raw_inputs: Union[np.ndarray, torch.Tensor] = None,
         key_file: Optional[str] = None,
         allow_variable_data_keys: bool = False,
@@ -174,8 +152,6 @@ def inference_modelscope(
         dtype: str = "float32",
         seed: int = 0,
         num_workers: int = 1,
-        split_with_space: bool = True,
-        seg_dict_file: Optional[str] = None,
         **kwargs,
 ):
     assert check_argument_types()
@@ -193,87 +169,88 @@ def inference_modelscope(
         device = "cuda"
     else:
         device = "cpu"
+
     # 1. Set random-seed
     set_all_random_seed(seed)
 
     # 2. Build speech2vadsegment
-    speechtext2timestamp_kwargs = dict(
-        timestamp_infer_config=timestamp_infer_config,
-        timestamp_model_file=timestamp_model_file,
-        timestamp_cmvn_file=timestamp_cmvn_file,
+    speech2vadsegment_kwargs = dict(
+        vad_infer_config=vad_infer_config,
+        vad_model_file=vad_model_file,
+        vad_cmvn_file=vad_cmvn_file,
         device=device,
         dtype=dtype,
     )
-    logging.info("speechtext2timestamp_kwargs: {}".format(speechtext2timestamp_kwargs))
-    speechtext2timestamp = SpeechText2Timestamp(**speechtext2timestamp_kwargs)
+    logging.info("speech2vadsegment_kwargs: {}".format(speech2vadsegment_kwargs))
+    speech2vadsegment = Speech2VadSegmentOnline(**speech2vadsegment_kwargs)
 
-    preprocessor = LMPreprocessor(
-        train=False,
-        token_type=speechtext2timestamp.tp_train_args.token_type,
-        token_list=speechtext2timestamp.tp_train_args.token_list,
-        bpemodel=None,
-        text_cleaner=None,
-        g2p_type=None,
-        text_name="text",
-        non_linguistic_symbols=speechtext2timestamp.tp_train_args.non_linguistic_symbols,
-        split_with_space=split_with_space,
-        seg_dict_file=seg_dict_file,
-    )
-    
     def _forward(
             data_path_and_name_and_type,
             raw_inputs: Union[np.ndarray, torch.Tensor] = None,
             output_dir_v2: Optional[str] = None,
             fs: dict = None,
             param_dict: dict = None,
-            **kwargs
     ):
         # 3. Build data-iterator
         if data_path_and_name_and_type is None and raw_inputs is not None:
             if isinstance(raw_inputs, torch.Tensor):
                 raw_inputs = raw_inputs.numpy()
             data_path_and_name_and_type = [raw_inputs, "speech", "waveform"]
-        
-        loader = ASRTask.build_streaming_iterator(
+        loader = VADTask.build_streaming_iterator(
             data_path_and_name_and_type,
             dtype=dtype,
             batch_size=batch_size,
             key_file=key_file,
             num_workers=num_workers,
-            preprocess_fn=preprocessor,
-            collate_fn=ASRTask.build_collate_fn(speechtext2timestamp.tp_train_args, False),
+            preprocess_fn=VADTask.build_preprocess_fn(speech2vadsegment.vad_infer_args, False),
+            collate_fn=VADTask.build_collate_fn(speech2vadsegment.vad_infer_args, False),
             allow_variable_data_keys=allow_variable_data_keys,
             inference=True,
         )
 
-        tp_result_list = []
+        finish_count = 0
+        file_count = 1
+        # 7 .Start for-loop
+        # FIXME(kamo): The output format should be discussed about
+        output_path = output_dir_v2 if output_dir_v2 is not None else output_dir
+        if output_path is not None:
+            writer = DatadirWriter(output_path)
+            ibest_writer = writer[f"1best_recog"]
+        else:
+            writer = None
+            ibest_writer = None
+
+        vad_results = []
+        batch_in_cache = param_dict['in_cache'] if param_dict is not None else dict()
+        is_final = param_dict['is_final'] if param_dict is not None else False
         for keys, batch in loader:
             assert isinstance(batch, dict), type(batch)
             assert all(isinstance(s, str) for s in keys), keys
             _bs = len(next(iter(batch.values())))
             assert len(keys) == _bs, f"{len(keys)} != {_bs}"
+            batch['in_cache'] = batch_in_cache
+            batch['is_final'] = is_final
 
-            logging.info("timestamp predicting, utt_id: {}".format(keys))
-            _batch = {'speech':batch['speech'], 
-                      'speech_lengths':batch['speech_lengths'],
-                      'text_lengths':batch['text_lengths']}
-            us_alphas, us_cif_peak = speechtext2timestamp(**_batch)
+            # do vad segment
+            _, results, param_dict['in_cache'] = speech2vadsegment(**batch)
+            # param_dict['in_cache'] = batch['in_cache']
+            if results:
+                for i, _ in enumerate(keys):
+                    results[i] = json.dumps(results[i])
+                    item = {'key': keys[i], 'value': results[i]}
+                    vad_results.append(item)
+                    if writer is not None:
+                        results[i] = json.loads(results[i])
+                        ibest_writer["text"][keys[i]] = "{}".format(results[i])
 
-            for batch_id in range(_bs):
-                key = keys[batch_id]
-                token = speechtext2timestamp.converter.ids2tokens(batch['text'][batch_id])
-                ts_str, ts_list = ts_prediction_lfr6_standard(us_alphas[batch_id], us_cif_peak[batch_id], token, force_time_shift=-3.0)
-                logging.warning(ts_str)
-                item = {'key': key, 'value': ts_str, 'timestamp':ts_list}
-                tp_result_list.append(item)
-        return tp_result_list
+        return vad_results
 
     return _forward
 
 
 def get_parser():
     parser = config_argparse.ArgumentParser(
-        description="Timestamp Prediction Inference",
+        description="VAD Decoding",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
@@ -310,7 +287,7 @@ def get_parser():
     parser.add_argument(
         "--num_workers",
         type=int,
-        default=0,
+        default=1,
         help="The number of workers used for DataLoader",
     )
 
@@ -328,17 +305,17 @@ def get_parser():
 
     group = parser.add_argument_group("The model configuration related")
     group.add_argument(
-        "--timestamp_infer_config",
+        "--vad_infer_config",
         type=str,
         help="VAD infer configuration",
     )
     group.add_argument(
-        "--timestamp_model_file",
+        "--vad_model_file",
         type=str,
         help="VAD model parameter file",
     )
     group.add_argument(
-        "--timestamp_cmvn_file",
+        "--vad_cmvn_file",
         type=str,
         help="Global cmvn file",
     )
@@ -348,18 +325,6 @@ def get_parser():
         "--batch_size",
         type=int,
         default=1,
-        help="The batch size for inference",
-    )
-    group.add_argument(
-        "--seg_dict_file",
-        type=str,
-        default=None,
-        help="The batch size for inference",
-    )
-    group.add_argument(
-        "--split_with_space",
-        type=bool,
-        default=False,
         help="The batch size for inference",
     )
 

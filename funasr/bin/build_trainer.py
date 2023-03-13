@@ -28,7 +28,9 @@ def parse_args(mode):
     elif mode == "uniasr":
         from funasr.tasks.asr import ASRTaskUniASR as ASRTask
     elif mode == "mfcca":
-        from funasr.tasks.asr import ASRTaskMFCCA as ASRTask   
+        from funasr.tasks.asr import ASRTaskMFCCA as ASRTask
+    elif mode == "tp":
+        from funasr.tasks.asr import ASRTaskAligner as ASRTask
     else:
         raise ValueError("Unknown mode: {}".format(mode))
     parser = ASRTask.get_parser()
