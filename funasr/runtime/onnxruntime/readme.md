@@ -48,13 +48,13 @@ python -m funasr.export.export_model 'damo/speech_paraformer-large_asr_nat-zh-cn
 ## Building Guidance for Linux/Unix
 
 ```
-git clone https://github.com/RapidAI/RapidASR.git
-cd RapidASR/cpp_onnx/
+git clone https://github.com/alibaba-damo-academy/FunASR.git && cd funasr/runtime/onnxruntime
 mkdir build
 cd build
 # download an appropriate onnxruntime from https://github.com/microsoft/onnxruntime/releases/tag/v1.14.0
 # here we get a copy of onnxruntime for linux 64
 wget https://github.com/microsoft/onnxruntime/releases/download/v1.14.0/onnxruntime-linux-x64-1.14.0.tgz
+tar -zxvf onnxruntime-linux-x64-1.14.0.tgz
 # ls
 # onnxruntime-linux-x64-1.14.0  onnxruntime-linux-x64-1.14.0.tgz
 
