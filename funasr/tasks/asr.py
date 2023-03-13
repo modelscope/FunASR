@@ -1332,3 +1332,12 @@ class ASRTaskAligner(ASRTaskParaformer):
     ) -> Tuple[str, ...]:
         retval = ("speech", "text")
         return retval
+
+
+class ASRTaskAligner(ASRTaskParaformer):
+    @classmethod
+    def required_data_names(
+            cls, train: bool = True, inference: bool = False
+    ) -> Tuple[str, ...]:
+        retval = ("speech", "text")
+        return retval
