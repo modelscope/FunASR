@@ -96,7 +96,7 @@ class Speech2VadSegmentOnline(Speech2VadSegment):
             }
             # a. To device
             batch = to_device(batch, device=self.device)
-            segments, in_cache = self.vad_model(**batch)
+            segments, in_cache = self.vad_model.forward_online(**batch)
             # in_cache.update(batch['in_cache'])
             # in_cache = {key: value for key, value in batch['in_cache'].items()}
         return fbanks, segments, in_cache
