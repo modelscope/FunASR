@@ -170,8 +170,9 @@ class AverageShiftCalculator():
         return uttid_list, ts_dict
 
     def _shift(self, filtered_timestamp_list1, filtered_timestamp_list2):
+        shift_time = 0
         for fts1, fts2 in zip(filtered_timestamp_list1, filtered_timestamp_list2):
-            shift_time = abs(fts1[0] - fts2[0]) + abs(fts1[1] - fts2[1])
+            shift_time += abs(fts1[0] - fts2[0]) + abs(fts1[1] - fts2[1])
         num_tokens = len(filtered_timestamp_list1)
         return shift_time, num_tokens
 
