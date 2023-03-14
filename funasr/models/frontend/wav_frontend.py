@@ -6,6 +6,7 @@ import numpy as np
 import torch
 import torchaudio.compliance.kaldi as kaldi
 from funasr.models.frontend.abs_frontend import AbsFrontend
+import funasr.models.frontend.eend_ola_feature as eend_ola_feature
 from torch.nn.utils.rnn import pad_sequence
 from typeguard import check_argument_types
 from typing import Tuple
@@ -213,33 +214,18 @@ class WavFrontendMel23(AbsFrontend):
     def __init__(
             self,
             fs: int = 16000,
-            window: str = 'hamming',
-            n_mels: int = 80,
             frame_length: int = 25,
             frame_shift: int = 10,
-            filter_length_min: int = -1,
-            filter_length_max: int = -1,
             lfr_m: int = 1,
             lfr_n: int = 1,
-            dither: float = 1.0,
-            snip_edges: bool = True,
-            upsacle_samples: bool = True,
     ):
         assert check_argument_types()
         super().__init__()
         self.fs = fs
-        self.window = window
-        self.n_mels = n_mels
         self.frame_length = frame_length
         self.frame_shift = frame_shift
-        self.filter_length_min = filter_length_min
-        self.filter_length_max = filter_length_max
         self.lfr_m = lfr_m
         self.lfr_n = lfr_n
-        self.cmvn_file = cmvn_file
-        self.dither = dither
-        self.snip_edges = snip_edges
-        self.upsacle_samples = upsacle_samples
 
     def output_size(self) -> int:
         return self.n_mels * self.lfr_m

@@ -23,6 +23,7 @@ from funasr.layers.global_mvn import GlobalMVN
 from funasr.layers.label_aggregation import LabelAggregate
 from funasr.layers.utterance_mvn import UtteranceMVN
 from funasr.models.e2e_diar_sond import DiarSondModel
+from funasr.models.e2e_diar_eend_ola import DiarEENDOLAModel
 from funasr.models.encoder.abs_encoder import AbsEncoder
 from funasr.models.encoder.conformer_encoder import ConformerEncoder
 from funasr.models.encoder.data2vec_encoder import Data2VecEncoder
@@ -103,6 +104,7 @@ model_choices = ClassChoices(
     "model",
     classes=dict(
         sond=DiarSondModel,
+        eend_ola=DiarEENDOLAModel,
     ),
     type_check=AbsESPnetModel,
     default="sond",
