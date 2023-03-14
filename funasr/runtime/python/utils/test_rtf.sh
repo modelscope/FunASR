@@ -25,7 +25,7 @@ model_dir="/nfs/zhifu.gzf/export/damo/amp_int8/onnx_dynamic"
 tag=${backend}_fp32
 !
 
-scp=/nfs/haoneng.lhn/funasr_data/aishell-1/data/test/wav.scp
+#scp=/nfs/haoneng.lhn/funasr_data/aishell-1/data/test/wav.scp
 scp="/nfs/zhifu.gzf/data_debug/test/wav_1500.scp"
 local_scp_dir=/nfs/zhifu.gzf/data_debug/test/${tag}/split$nj
 
