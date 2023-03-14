@@ -430,7 +430,7 @@ class WavFrontendOnline(AbsFrontend):
         else:
             if is_final:
                 self.waveforms = waveforms if self.reserve_waveforms is None else self.reserve_waveforms
-                feats = torch.stack(self.lfr_splice_cache)
+                feats = torch.stack(self.lfr_splice_cache) 
                 feats_lengths = torch.zeros(batch_size, dtype=torch.int) + feats.shape[1]
                 feats, feats_lengths, _ = self.forward_lfr_cmvn(feats, feats_lengths, is_final)
         if is_final:
