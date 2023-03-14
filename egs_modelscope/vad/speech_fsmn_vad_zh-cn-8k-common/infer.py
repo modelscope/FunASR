@@ -7,7 +7,7 @@ if __name__ == '__main__':
     inference_pipline = pipeline(
         task=Tasks.voice_activity_detection,
         model="damo/speech_fsmn_vad_zh-cn-8k-common",
-        model_revision=None,
+        model_revision='v1.2.0',
         output_dir='./output_dir',
         batch_size=1,
     )
