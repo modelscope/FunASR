@@ -9,7 +9,7 @@ if __name__ == '__main__':
         task=Tasks.voice_activity_detection,
         model="damo/speech_fsmn_vad_zh-cn-8k-common",
         model_revision='v1.2.0',
-        output_dir='./output_dir',
+        output_dir=None,
         batch_size=1,
         mode='online',
     )
