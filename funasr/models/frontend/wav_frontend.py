@@ -7,6 +7,7 @@ import numpy as np
 import torch
 import torchaudio.compliance.kaldi as kaldi
 from funasr.models.frontend.abs_frontend import AbsFrontend
+import funasr.models.frontend.eend_ola_feature as eend_ola_feature
 from typeguard import check_argument_types
 from torch.nn.utils.rnn import pad_sequence
 
@@ -444,3 +445,53 @@ class WavFrontendOnline(AbsFrontend):
         self.reserve_waveforms = None
         self.input_cache = None
         self.lfr_splice_cache = []
+
+
+class WavFrontendMel23(AbsFrontend):
+    """Conventional frontend structure for ASR.
+    """
+
+    def __init__(
+            self,
+            fs: int = 16000,
+            frame_length: int = 25,
+            frame_shift: int = 10,
+            lfr_m: int = 1,
+            lfr_n: int = 1,
+    ):
+        assert check_argument_types()
+        super().__init__()
+        self.fs = fs
+        self.frame_length = frame_length
+        self.frame_shift = frame_shift
+        self.lfr_m = lfr_m
+        self.lfr_n = lfr_n
+
+    def output_size(self) -> int:
+        return self.n_mels * self.lfr_m
+
+    def forward(
+            self,
+            input: torch.Tensor,
+            input_lengths: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        batch_size = input.size(0)
+        feats = []
+        feats_lens = []
+        for i in range(batch_size):
+            waveform_length = input_lengths[i]
+            waveform = input[i][:waveform_length]
+            waveform = waveform.unsqueeze(0).numpy()
+            mat = eend_ola_feature.stft(waveform, self.frame_length, self.frame_shift)
+            mat = eend_ola_feature.transform(mat)
+            mat = mat.splice(mat, context_size=self.lfr_m)
+            mat = mat[::self.lfr_n]
+            mat = torch.from_numpy(mat)
+            feat_length = mat.size(0)
+            feats.append(mat)
+            feats_lens.append(feat_length)
+
+        feats_lens = torch.as_tensor(feats_lens)
+        feats_pad = pad_sequence(feats,
+                                 batch_first=True,
+                                 padding_value=0.0)
+        return feats_pad, feats_lens
