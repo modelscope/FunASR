@@ -121,7 +121,7 @@ class Speech2Diarization:
                 Currently, the tags of espnet_model_zoo are supported.
 
         Returns:
-            Speech2Xvector: Speech2Xvector instance.
+            Speech2Diarization: Speech2Diarization instance.
 
         """
         if model_tag is not None:
