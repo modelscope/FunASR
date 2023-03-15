@@ -27,6 +27,8 @@ from funasr.utils.types import str2bool
 from funasr.utils.types import str2triple_str
 from funasr.utils.types import str_or_none
 
+from modelscope.utils.logger import get_logger
+logger = get_logger()
 
 class Speech2Diarization:
     """Speech2Diarlization class
@@ -209,6 +211,7 @@ def inference_modelscope(
             if isinstance(raw_inputs, torch.Tensor):
                 raw_inputs = raw_inputs.numpy()
             data_path_and_name_and_type = [raw_inputs, "speech", "waveform"]
+        logger.info(data_path_and_name_and_type)
         loader = EENDOLADiarTask.build_streaming_iterator(
             data_path_and_name_and_type,
             dtype=dtype,
@@ -228,6 +231,8 @@ def inference_modelscope(
             output_writer = open("{}/result.txt".format(output_path), "w")
         result_list = []
         for keys, batch in loader:
+            logger.info("keys: {}".format(keys))
+            logger.info("batch: {}".format(batch))
             assert isinstance(batch, dict), type(batch)
             assert all(isinstance(s, str) for s in keys), keys
             _bs = len(next(iter(batch.values())))
