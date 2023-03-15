@@ -823,7 +823,7 @@ class EENDOLADiarTask(AbsTask):
 
         # 2. Encoder
         encoder_class = encoder_choices.get_class(args.encoder)
-        encoder = encoder_class(input_size=input_size, **args.encoder_conf)
+        encoder = encoder_class(**args.encoder_conf)
 
         # 3. EncoderDecoderAttractor
         encoder_decoder_attractor_class = encoder_decoder_attractor_choices.get_class(args.encoder_decoder_attractor)
