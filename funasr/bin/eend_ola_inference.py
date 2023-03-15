@@ -210,7 +210,7 @@ def inference_modelscope(
         if data_path_and_name_and_type is None and raw_inputs is not None:
             if isinstance(raw_inputs, torch.Tensor):
                 raw_inputs = raw_inputs.numpy()
-            data_path_and_name_and_type = [raw_inputs, "speech", "waveform"]
+            data_path_and_name_and_type = [raw_inputs[0], "speech", "bytes"]
         logger.info(data_path_and_name_and_type)
         loader = EENDOLADiarTask.build_streaming_iterator(
             data_path_and_name_and_type,
