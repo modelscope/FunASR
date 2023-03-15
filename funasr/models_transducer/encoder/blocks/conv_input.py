@@ -120,7 +120,7 @@ class ConvInput(torch.nn.Module):
                 self.create_new_mask = self.create_new_conv2d_mask
 
         self.vgg_like = vgg_like
-        self.min_frame_length = 2
+        self.min_frame_length = 7
 
         if output_size is not None:
             self.output = torch.nn.Linear(output_proj, output_size)
@@ -218,9 +218,4 @@ class ConvInput(torch.nn.Module):
             : Number of frames before subsampling.
 
         """
-        if self.subsampling_factor > 1:
-            if self.vgg_like:
-                return ((size * 2) * self.stride_1) + 1
-
-            return ((size + 2) * 2) + (self.kernel_2 - 1) * self.stride_2
-        return size
+        return size * self.subsampling_factor

@@ -1576,7 +1576,7 @@ class AbsTask(ABC):
             preprocess=iter_options.preprocess_fn,
             max_cache_size=iter_options.max_cache_size,
             max_cache_fd=iter_options.max_cache_fd,
-            dest_sample_rate=args.frontend_conf["fs"],
+            dest_sample_rate=args.frontend_conf["fs"] if args.frontend_conf else 16000,
         )
         cls.check_task_requirements(
             dataset, args.allow_variable_data_keys, train=iter_options.train
