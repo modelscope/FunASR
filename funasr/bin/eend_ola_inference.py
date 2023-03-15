@@ -145,7 +145,7 @@ def inference_modelscope(
         output_dir: Optional[str] = None,
         batch_size: int = 1,
         dtype: str = "float32",
-        ngpu: int = 0,
+        ngpu: int = 1,
         num_workers: int = 0,
         log_level: Union[int, str] = "INFO",
         key_file: Optional[str] = None,
