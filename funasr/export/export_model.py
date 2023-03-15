@@ -21,6 +21,8 @@ class ASRModelExportParaformer:
         onnx: bool = True,
         quant: bool = True,
         fallback_num: int = 0,
+        audio_in: str = None,
+        calib_num: int = 200,
     ):
         assert check_argument_types()
         self.set_all_random_seed(0)
@@ -36,6 +38,9 @@ class ASRModelExportParaformer:
         self.onnx = onnx
         self.quant = quant
         self.fallback_num = fallback_num
+        self.frontend = None
+        self.audio_in = audio_in
+        self.calib_num = calib_num
         
 
     def _export(
@@ -67,8 +72,14 @@ class ASRModelExportParaformer:
     def _torch_quantize(self, model):
         def _run_calibration_data(m):
             # using dummy inputs for a example
-            dummy_input = model.get_dummy_inputs()
-            m(*dummy_input)
+            if self.audio_in is not None:
+                feats, feats_len = self.load_feats(self.audio_in)
+                for feat, len in zip(feats, feats_len):
+                    m(feat, len)
+            else:
+                dummy_input = model.get_dummy_inputs()
+                m(*dummy_input)
+            
 
         from torch_quant.module import ModuleFilter
         from torch_quant.quantizer import Backend, Quantizer
@@ -114,6 +125,39 @@ class ASRModelExportParaformer:
         random.seed(seed)
         np.random.seed(seed)
         torch.random.manual_seed(seed)
+
+    def parse_audio_in(self, audio_in):
+        
+        wav_list, name_list = [], []
+        if audio_in.endswith(".scp"):
+            f = open(audio_in, 'r')
+            lines = f.readlines()[:self.calib_num]
+            for line in lines:
+                name, path = line.strip().split()
+                name_list.append(name)
+                wav_list.append(path)
+        else:
+            wav_list = [audio_in,]
+            name_list = ["test",]
+        return wav_list, name_list
+    
+    def load_feats(self, audio_in: str = None):
+        import torchaudio
+
+        wav_list, name_list = self.parse_audio_in(audio_in)
+        feats = []
+        feats_len = []
+        for line in wav_list:
+            name, path = line.strip().split()
+            waveform, sampling_rate = torchaudio.load(path)
+            if sampling_rate != self.frontend.fs:
+                waveform = torchaudio.transforms.Resample(orig_freq=sampling_rate,
+                                                          new_freq=self.frontend.fs)(waveform)
+            fbank, fbank_len = self.frontend(waveform, [waveform.size(1)])
+            feats.append(fbank)
+            feats_len.append(fbank_len)
+        return feats, feats_len
+    
     def export(self,
                tag_name: str = 'damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch',
                mode: str = 'paraformer',
@@ -190,6 +234,8 @@ if __name__ == '__main__':
     parser.add_argument('--type', type=str, default='onnx', help='["onnx", "torch"]')
     parser.add_argument('--quantize', action='store_true', help='export quantized model')
     parser.add_argument('--fallback-num', type=int, default=0, help='amp fallback number')
+    parser.add_argument('--audio_in', type=str, default=None, help='["wav", "wav.scp"]')
+    parser.add_argument('--calib_num', type=int, default=200, help='calib max num')
     args = parser.parse_args()
 
     export_model = ASRModelExportParaformer(
@@ -197,5 +243,7 @@ if __name__ == '__main__':
         onnx=args.type == 'onnx',
         quant=args.quantize,
         fallback_num=args.fallback_num,
+        audio_in=args.audio_in,
+        calib_num=args.calib_num,
     )
     export_model.export(args.model_name)
