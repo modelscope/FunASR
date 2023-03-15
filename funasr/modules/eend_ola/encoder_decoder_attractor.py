@@ -2,8 +2,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from torch import nn
-from modelscope.utils.logger import get_logger
-logger = get_logger()
+
 
 class EncoderDecoderAttractor(nn.Module):
 
@@ -17,14 +16,12 @@ class EncoderDecoderAttractor(nn.Module):
         self.n_units = n_units
 
     def forward_core(self, xs, zeros):
-        logger.info("xs: ".format(xs))
-        ilens = torch.from_numpy(np.array([x.shape[0] for x in xs])).to(torch.float32).to(xs[0].device)
-        logger.info("ilens: ".format(ilens))
+        ilens = torch.from_numpy(np.array([x.shape[0] for x in xs])).to(torch.int64)
         xs = [self.enc0_dropout(x) for x in xs]
         xs = nn.utils.rnn.pad_sequence(xs, batch_first=True, padding_value=-1)
         xs = nn.utils.rnn.pack_padded_sequence(xs, ilens, batch_first=True, enforce_sorted=False)
         _, (hx, cx) = self.encoder(xs)
-        zlens = torch.from_numpy(np.array([z.shape[0] for z in zeros])).to(torch.float32).to(zeros[0].device)
+        zlens = torch.from_numpy(np.array([z.shape[0] for z in zeros])).to(torch.int64)
         max_zlen = torch.max(zlens).to(torch.int).item()
         zeros = [self.enc0_dropout(z) for z in zeros]
         zeros = nn.utils.rnn.pad_sequence(zeros, batch_first=True, padding_value=-1)
