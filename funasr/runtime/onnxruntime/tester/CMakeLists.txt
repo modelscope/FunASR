@@ -15,6 +15,6 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 set(EXECNAME "tester")
 
 add_executable(${EXECNAME} "tester.cpp")
-target_link_libraries(${EXECNAME} PUBLIC onnxruntime ${EXTRA_LIBS})
+target_link_libraries(${EXECNAME} PUBLIC ${EXTRA_LIBS})
 
 

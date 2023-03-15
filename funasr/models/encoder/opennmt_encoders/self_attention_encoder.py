@@ -272,7 +272,7 @@ class SelfAttentionEncoder(AbsEncoder):
             position embedded tensor and mask
         """
         masks = (~make_pad_mask(ilens)[:, None, :]).to(xs_pad.device)
-        xs_pad *= self.output_size()**0.5
+        xs_pad = xs_pad * self.output_size()**0.5
         if self.embed is None:
             xs_pad = xs_pad
         elif (

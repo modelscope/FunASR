@@ -1,6 +1,17 @@
 #pragma once 
+
+
+typedef struct
+{
+    std::string msg;
+    float  snippet_time;
+}RPASR_RECOG_RESULT;
+
+
 #ifdef _WIN32
 #include <codecvt>
+
+
 
 inline std::wstring string2wstring(const std::string& str, const std::string& locale)
 {

@@ -6,7 +6,7 @@ if __name__ == "__main__":
     output_dir = "./results"
     inference_pipline = pipeline(
         task=Tasks.auto_speech_recognition,
-        model="damo/speech_UniASR_asr_2pass-ja-16k-common-vocab93-tensorflow1-online",
+        model="damo/speech_UniASR_asr_2pass-ja-16k-common-vocab93-tensorflow1-offline",
         output_dir=output_dir,
     )
     rec_result = inference_pipline(audio_in=audio_in, param_dict={"decoding_model":"offline"})

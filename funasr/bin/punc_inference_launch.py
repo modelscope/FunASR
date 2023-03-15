@@ -75,6 +75,9 @@ def inference_launch(mode, **kwargs):
     if mode == "punc":
         from funasr.bin.punctuation_infer import inference_modelscope
         return inference_modelscope(**kwargs)
+    if mode == "punc_VadRealtime":
+        from funasr.bin.punctuation_infer_vadrealtime import inference_modelscope
+        return inference_modelscope(**kwargs)
     else:
         logging.info("Unknown decoding mode: {}".format(mode))
         return None

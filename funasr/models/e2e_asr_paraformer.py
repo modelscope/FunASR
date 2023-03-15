@@ -978,6 +978,7 @@ class BiCifParaformer(Paraformer):
         loss, stats, weight = force_gatherable((loss, stats, batch_size), loss.device)
         return loss, stats, weight
 
+
 class ContextualParaformer(Paraformer):
     """
     Paraformer model with contextual hotword

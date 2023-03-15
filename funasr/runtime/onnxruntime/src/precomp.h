@@ -41,9 +41,10 @@ using namespace std;
 #include "FeatureExtract.h"
 #include "FeatureQueue.h"
 #include "SpeechWrap.h"
+#include <Audio.h>
 #include "Model.h"
 #include "paraformer_onnx.h"
-
+#include "librapidasrapi.h"
 
 
 using namespace paraformer;

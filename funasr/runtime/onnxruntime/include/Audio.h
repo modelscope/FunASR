@@ -43,11 +43,17 @@ class Audio {
     Audio(int data_type, int size);
     ~Audio();
     void disp();
-    bool loadwav(const char *filename);
+    bool loadwav(const char* filename);
+    bool loadwav(const char* buf, int nLen);
+    bool loadpcmwav(const char* buf, int nFileLen);
+    bool loadpcmwav(const char* filename);
     int fetch_chunck(float *&dout, int len);
     int fetch(float *&dout, int &len, int &flag);
     void padding();
     void split();
+    float get_time_len();
+
+    int get_queue_size() { return (int)frame_queue.size(); }
 };
 
 #endif
