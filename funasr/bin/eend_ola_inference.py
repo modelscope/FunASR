@@ -179,7 +179,6 @@ def inference_modelscope(
         diar_model_file=diar_model_file,
         device=device,
         dtype=dtype,
-        streaming=streaming,
     )
     logging.info("speech2diarization_kwargs: {}".format(speech2diar_kwargs))
     speech2diar = Speech2Diarization.from_pretrained(
