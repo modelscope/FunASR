@@ -493,10 +493,10 @@ class WavFrontendMel23(AbsFrontend):
         for i in range(batch_size):
             waveform_length = input_lengths[i]
             waveform = input[i][:waveform_length]
-            waveform = waveform.unsqueeze(0).numpy()
+            waveform = waveform.numpy()
             mat = eend_ola_feature.stft(waveform, self.frame_length, self.frame_shift)
             mat = eend_ola_feature.transform(mat)
-            mat = mat.splice(mat, context_size=self.lfr_m)
+            mat = eend_ola_feature.splice(mat, context_size=self.lfr_m)
             mat = mat[::self.lfr_n]
             mat = torch.from_numpy(mat)
             feat_length = mat.size(0)
