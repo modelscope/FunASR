@@ -148,7 +148,7 @@ class ASRModelExportParaformer:
         feats = []
         feats_len = []
         for line in wav_list:
-            name, path = line.strip().split()
+            path = line.strip()
             waveform, sampling_rate = torchaudio.load(path)
             if sampling_rate != self.frontend.fs:
                 waveform = torchaudio.transforms.Resample(orig_freq=sampling_rate,
@@ -184,6 +184,7 @@ class ASRModelExportParaformer:
         model, asr_train_args = ASRTask.build_model_from_file(
             asr_train_config, asr_model_file, cmvn_file, 'cpu'
         )
+        self.frontend = model.frontend
         self._export(model, tag_name)
             
 
