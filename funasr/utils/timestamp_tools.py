@@ -1,5 +1,3 @@
-from pydoc import TextRepr
-from scipy.fftpack import shift
 import torch
 import copy
 import codecs
