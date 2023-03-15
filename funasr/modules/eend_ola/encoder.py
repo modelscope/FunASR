@@ -1,5 +1,5 @@
 import math
-import numpy as np
+
 import torch
 import torch.nn.functional as F
 from torch import nn
@@ -81,10 +81,16 @@ class PositionalEncoding(torch.nn.Module):
         return self.dropout(x)
 
 
-class TransformerEncoder(nn.Module):
-    def __init__(self, idim, n_layers, n_units,
-                 e_units=2048, h=8, dropout_rate=0.1, use_pos_emb=False):
-        super(TransformerEncoder, self).__init__()
+class EENDOLATransformerEncoder(nn.Module):
+    def __init__(self,
+                 idim: int,
+                 n_layers: int,
+                 n_units: int,
+                 e_units: int = 2048,
+                 h: int = 8,
+                 dropout_rate: float = 0.1,
+                 use_pos_emb: bool = False):
+        super(EENDOLATransformerEncoder, self).__init__()
         self.lnorm_in = nn.LayerNorm(n_units)
         self.n_layers = n_layers
         self.dropout = nn.Dropout(dropout_rate)
