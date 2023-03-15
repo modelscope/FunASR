@@ -240,3 +240,6 @@ class DiarEENDOLAModel(AbsESPnetModel):
             torch.float32)
         decisions = decisions[:, :n_speaker]
         return decisions
+
+    def collect_feats(self, **batch: torch.Tensor) -> Dict[str, torch.Tensor]:
+        pass
