@@ -61,7 +61,7 @@ class EncoderLayerConformer(nn.Module):
         if self.feed_forward_macaron is not None:
             residual = x
             x = self.norm_ff_macaron(x)
-            x = residual + self.feed_forward_macaron(x)
+            x = residual + self.feed_forward_macaron(x) * 0.5
 
         residual = x
         x = self.norm_mha(x)
@@ -81,7 +81,7 @@ class EncoderLayerConformer(nn.Module):
 
         residual = x
         x = self.norm_ff(x)
-        x = residual + self.feed_forward(x)
+        x = residual + self.feed_forward(x) * 0.5
 
         x = self.norm_final(x)
 

@@ -61,7 +61,6 @@ class ConformerEncoder(nn.Module):
                 speech: torch.Tensor,
                 speech_lengths: torch.Tensor,
                 ):
-        speech = speech * self._output_size ** 0.5
         mask = self.make_pad_mask(speech_lengths)
         mask = self.prepare_mask(mask)
         if self.embed is None:

@@ -77,8 +77,8 @@ If you have any questions about FunASR, please contact us by
 
 ## Contributors
 
-| <div align="left"><img src="docs/images/damo.png" width="180"/> | <img src="docs/images/DeepScience.png" width="200"/> </div> |
-|:---------------------------------------------------------------:|:-----------------------------------------------------------:|
+| <div align="left"><img src="docs/images/damo.png" width="180"/> | <div align="left"><img src="docs/images/nwpu.png" width="260"/> | <img src="docs/images/DeepScience.png" width="200"/> </div> |
+|:---------------------------------------------------------------:|:---------------------------------------------------------------:|:-----------------------------------------------------------:|
 
 ## Acknowledge
 

@@ -54,6 +54,7 @@ class DecoderLayer(nn.Module):
     
     def forward(self, tgt, tgt_mask, memory, memory_mask, cache=None):
         residual = tgt
+        tgt = self.norm1(tgt)
         tgt_q = tgt
         tgt_q_mask = tgt_mask
         x = residual + self.self_attn(tgt_q, tgt, tgt, tgt_q_mask)

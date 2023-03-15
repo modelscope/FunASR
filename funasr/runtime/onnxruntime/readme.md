@@ -29,6 +29,7 @@ tester  /path/to/models/dir /path/to/wave/file
 
 ## 依赖
 - fftw3
+- openblas
 - onnxruntime
 
 ## 导出onnx格式模型文件
@@ -47,18 +48,22 @@ python -m funasr.export.export_model 'damo/speech_paraformer-large_asr_nat-zh-cn
 ## Building Guidance for Linux/Unix
 
 ```
-git clone https://github.com/RapidAI/RapidASR.git
-cd RapidASR/cpp_onnx/
+git clone https://github.com/alibaba-damo-academy/FunASR.git && cd funasr/runtime/onnxruntime
 mkdir build
 cd build
 # download an appropriate onnxruntime from https://github.com/microsoft/onnxruntime/releases/tag/v1.14.0
 # here we get a copy of onnxruntime for linux 64
 wget https://github.com/microsoft/onnxruntime/releases/download/v1.14.0/onnxruntime-linux-x64-1.14.0.tgz
+tar -zxvf onnxruntime-linux-x64-1.14.0.tgz
 # ls
 # onnxruntime-linux-x64-1.14.0  onnxruntime-linux-x64-1.14.0.tgz
 
 #install fftw3-dev
-apt install libfftw3-dev
+ubuntu: apt install libfftw3-dev
+centos: yum install fftw fftw-devel
+
+#install openblas
+bash ./third_party/install_openblas.sh
 
 # build
  cmake  -DCMAKE_BUILD_TYPE=release .. -DONNXRUNTIME_DIR=/mnt/c/Users/ma139/RapidASR/cpp_onnx/build/onnxruntime-linux-x64-1.14.0
