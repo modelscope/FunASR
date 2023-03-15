@@ -787,10 +787,10 @@ class EENDOLADiarTask(AbsTask):
             cls, train: bool = True, inference: bool = False
     ) -> Tuple[str, ...]:
         if not inference:
-            retval = ("speech", "profile", "binary_labels")
+            retval = ("speech", )
         else:
             # Recognition mode
-            retval = ("speech")
+            retval = ("speech", )
         return retval
 
     @classmethod
