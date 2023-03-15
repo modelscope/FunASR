@@ -234,9 +234,6 @@ def inference_launch(**kwargs):
     elif mode == "rnnt":
         from funasr.bin.asr_inference_rnnt import inference_modelscope
         return inference_modelscope(**kwargs)
-    elif mode == "eend-ola":
-        from funasr.bin.eend_ola_inference import inference_modelscope
-        return inference_modelscope(mode=mode, **kwargs)
     else:
         logging.info("Unknown decoding mode: {}".format(mode))
         return None
