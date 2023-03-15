@@ -142,6 +142,9 @@ def inference_launch(mode, **kwargs):
         else:
             kwargs["param_dict"] = param_dict
         return inference_modelscope(mode=mode, **kwargs)
+    elif mode == "eend-ola":
+        from funasr.bin.eend_ola_inference import inference_modelscope
+        return inference_modelscope(mode=mode, **kwargs)
     else:
         logging.info("Unknown decoding mode: {}".format(mode))
         return None

@@ -451,7 +451,7 @@ class TestUniasrInferencePipelines(unittest.TestCase):
 
     def test_uniasr_2pass_zhcn_16k_common_vocab8358_offline(self):
         inference_pipeline = pipeline(
-            task=Tasks.,
+            task=Tasks.auto_speech_recognition,
             model='damo/speech_UniASauto_speech_recognitionR_asr_2pass-zh-cn-16k-common-vocab8358-tensorflow1-offline')
         rec_result = inference_pipeline(
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav',
