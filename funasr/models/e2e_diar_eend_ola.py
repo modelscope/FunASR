@@ -190,8 +190,6 @@ class DiarEENDOLAModel(AbsESPnetModel):
                             shuffle: bool = True,
                             threshold: float = 0.5,
                             **kwargs):
-        if self.frontend is not None:
-            speech = self.frontend(speech)
         speech = [s[:s_len] for s, s_len in zip(speech, speech_lengths)]
         emb = self.forward_encoder(speech, speech_lengths)
         if shuffle:
