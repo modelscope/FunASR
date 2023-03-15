@@ -11,8 +11,6 @@ from typeguard import check_argument_types
 import funasr.models.frontend.eend_ola_feature as eend_ola_feature
 from funasr.models.frontend.abs_frontend import AbsFrontend
 
-from modelscope.utils.logger import get_logger
-logger = get_logger()
 
 def load_cmvn(cmvn_file):
     with open(cmvn_file, 'r', encoding='utf-8') as f:
@@ -425,10 +423,8 @@ class WavFrontendOnline(AbsFrontend):
                     reserve_frame_idx = lfr_splice_frame_idxs[0] - minus_frame
                     # print('reserve_frame_idx:  ' + str(reserve_frame_idx))
                     # print('frame_frame:  ' + str(frame_from_waveforms))
-                    self.reserve_waveforms = self.waveforms[:,
-                                             reserve_frame_idx * self.frame_shift_sample_length:frame_from_waveforms * self.frame_shift_sample_length]
-                    sample_length = (
-                                                frame_from_waveforms - 1) * self.frame_shift_sample_length + self.frame_sample_length
+                    self.reserve_waveforms = self.waveforms[:, reserve_frame_idx * self.frame_shift_sample_length:frame_from_waveforms * self.frame_shift_sample_length]
+                    sample_length = (frame_from_waveforms - 1) * self.frame_shift_sample_length + self.frame_sample_length
                     self.waveforms = self.waveforms[:, :sample_length]
             else:
                 # update self.reserve_waveforms and self.lfr_splice_cache
@@ -487,9 +483,6 @@ class WavFrontendMel23(AbsFrontend):
         batch_size = input.size(0)
         feats = []
         feats_lens = []
-        logger.info("batch_size: {}".format(batch_size))
-        logger.info("input: {}".format(input))
-        logger.info("input_lengths: {}".format(input_lengths))
         for i in range(batch_size):
             waveform_length = input_lengths[i]
             waveform = input[i][:waveform_length]
