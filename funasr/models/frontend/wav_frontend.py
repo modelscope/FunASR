@@ -11,6 +11,8 @@ from typeguard import check_argument_types
 import funasr.models.frontend.eend_ola_feature as eend_ola_feature
 from funasr.models.frontend.abs_frontend import AbsFrontend
 
+from modelscope.utils.logger import get_logger
+logger = get_logger()
 
 def load_cmvn(cmvn_file):
     with open(cmvn_file, 'r', encoding='utf-8') as f:
@@ -485,6 +487,9 @@ class WavFrontendMel23(AbsFrontend):
         batch_size = input.size(0)
         feats = []
         feats_lens = []
+        logger.info("batch_size: {}".format(batch_size))
+        logger.info("input: {}".format(input))
+        logger.info("input_lengths: {}".format(input_lengths))
         for i in range(batch_size):
             waveform_length = input_lengths[i]
             waveform = input[i][:waveform_length]

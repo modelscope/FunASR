@@ -227,8 +227,6 @@ def inference_modelscope(
             output_writer = open("{}/result.txt".format(output_path), "w")
         result_list = []
         for keys, batch in loader:
-            logger.info("keys: {}".format(keys))
-            logger.info("batch: {}".format(batch))
             assert isinstance(batch, dict), type(batch)
             assert all(isinstance(s, str) for s in keys), keys
             _bs = len(next(iter(batch.values())))
