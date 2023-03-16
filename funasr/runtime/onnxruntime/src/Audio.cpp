@@ -237,7 +237,7 @@ bool Audio::loadpcmwav(const char* buf, int nBufLen)
 
     size_t nOffset = 0;
 
-#define WAV_HEADER_SIZE 44
+
 
     speech_len = nBufLen / 2;
     speech_align_len = (int)(ceil((float)speech_len / align_size) * align_size);
@@ -263,7 +263,8 @@ bool Audio::loadpcmwav(const char* buf, int nBufLen)
             speech_data[i] = (float)speech_buff[i] / scale;
         }
 
-
+        AudioFrame* frame = new AudioFrame(speech_len);
+        frame_queue.push(frame);
         return true;
 
     }

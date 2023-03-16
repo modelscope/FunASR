@@ -52,13 +52,13 @@ def load_pretrained_model(
         init_param: <file_path>:<src_key>:<dst_key>:<exclude_Keys>
 
     Examples:
-        >>> load_pretrained_model("somewhere/model.pth", model)
-        >>> load_pretrained_model("somewhere/model.pth:decoder:decoder", model)
-        >>> load_pretrained_model("somewhere/model.pth:decoder:decoder:", model)
+        >>> load_pretrained_model("somewhere/model.pb", model)
+        >>> load_pretrained_model("somewhere/model.pb:decoder:decoder", model)
+        >>> load_pretrained_model("somewhere/model.pb:decoder:decoder:", model)
         >>> load_pretrained_model(
-        ...     "somewhere/model.pth:decoder:decoder:decoder.embed", model
+        ...     "somewhere/model.pb:decoder:decoder:decoder.embed", model
         ... )
-        >>> load_pretrained_model("somewhere/decoder.pth::decoder", model)
+        >>> load_pretrained_model("somewhere/decoder.pb::decoder", model)
     """
     sps = init_param.split(":", 4)
     if len(sps) == 4:

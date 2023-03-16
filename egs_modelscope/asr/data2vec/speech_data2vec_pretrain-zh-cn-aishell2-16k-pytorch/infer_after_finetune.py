@@ -48,5 +48,5 @@ if __name__ == '__main__':
     params["required_files"] = ["am.mvn", "decoding.yaml", "configuration.json"]
     params["output_dir"] = "./checkpoint"
     params["data_dir"] = "./data/test"
-    params["decoding_model_name"] = "valid.cer_ctc.ave.pth"
+    params["decoding_model_name"] = "valid.cer_ctc.ave.pb"
     modelscope_infer_after_finetune(params)
