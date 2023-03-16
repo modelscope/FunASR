@@ -74,7 +74,8 @@ class ASRModelExportParaformer:
             # using dummy inputs for a example
             if self.audio_in is not None:
                 feats, feats_len = self.load_feats(self.audio_in)
-                for feat, len in zip(feats, feats_len):
+                for i, (feat, len) in enumerate(zip(feats, feats_len)):
+                    print("debug, iter: {}".format(i))
                     m(feat, len)
             else:
                 dummy_input = model.get_dummy_inputs()

@@ -39,7 +39,7 @@ for JOB in $(seq ${nj}); do
     split_scps="$split_scps $local_scp_dir/wav.$JOB.scp"
 done
 
-perl egs/aishell/transformer/utils/split_scp.pl $scp ${split_scps}
+perl ../../../egs/aishell/transformer/utils/split_scp.pl $scp ${split_scps}
 
 
 for JOB in $(seq ${nj}); do
