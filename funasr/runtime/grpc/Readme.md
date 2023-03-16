@@ -3,7 +3,7 @@
 
 #### Step 1. Build ../onnxruntime as it's document
 ```
-#put onnx-lib & onnx-asr-model & vocab.txt into /data/asrmodel
+#put onnx-lib & onnx-asr-model & vocab.txt into /path/to/asrmodel(eg: /data/asrmodel)
 ls /data/asrmodel/
 onnxruntime-linux-x64-1.14.0  speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
 
@@ -38,13 +38,14 @@ source ~/.bashrc
 
 #### Step 3. Compile and start grpc onnx paraformer server
 ```
+# set -DONNXRUNTIME_DIR=/path/to/asrmodel/onnxruntime-linux-x64-1.14.0
 ./rebuild.sh
 ```
 
 #### Step 4. Start grpc paraformer server
 ```
 Usage: ./cmake/build/paraformer_server port thread_num /path/to/model_file
-./cmake/build/paraformer_server 10108 4 /data/asrmodel
+./cmake/build/paraformer_server 10108 4 /data/asrmodel/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
 ```
 
 
