@@ -4,23 +4,18 @@ import shutil
 
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
+from modelscope.hub.snapshot_download import snapshot_download
 
 from funasr.utils.compute_wer import compute_wer
 
-
 def modelscope_infer_after_finetune(params):
     # prepare for decoding
-    pretrained_model_path = os.path.join(os.environ["HOME"], ".cache/modelscope/hub", params["modelscope_model_name"])
-    for file_name in params["required_files"]:
-        if file_name == "configuration.json":
-            with open(os.path.join(pretrained_model_path, file_name)) as f:
-                config_dict = json.load(f)
-                config_dict["model"]["am_model_name"] = params["decoding_model_name"]
-            with open(os.path.join(params["output_dir"], "configuration.json"), "w") as f:
-                json.dump(config_dict, f, indent=4, separators=(',', ': '))
-        else:
-            shutil.copy(os.path.join(pretrained_model_path, file_name),
-                        os.path.join(params["output_dir"], file_name))
+
+    try:
+        pretrained_model_path = snapshot_download(params["modelscope_model_name"], cache_dir=params["output_dir"])
+    except BaseException:
+        raise BaseException(f"Please download pretrain model from ModelScope firstly.")
+    shutil.copy(os.path.join(params["output_dir"], params["decoding_model_name"]), os.path.join(pretrained_model_path, "model.pb"))
     decoding_path = os.path.join(params["output_dir"], "decode_results")
     if os.path.exists(decoding_path):
         shutil.rmtree(decoding_path)
@@ -29,9 +24,9 @@ def modelscope_infer_after_finetune(params):
     # decoding
     inference_pipeline = pipeline(
         task=Tasks.auto_speech_recognition,
-        model=params["output_dir"],
+        model=pretrained_model_path,
         output_dir=decoding_path,
-        batch_size=64
+        batch_size=params["batch_size"]
     )
     audio_in = os.path.join(params["data_dir"], "wav.scp")
     inference_pipeline(audio_in=audio_in)
@@ -46,8 +41,8 @@ def modelscope_infer_after_finetune(params):
 if __name__ == '__main__':
     params = {}
     params["modelscope_model_name"] = "damo/speech_paraformer_asr_nat-zh-cn-8k-common-vocab8358-tensorflow1"
-    params["required_files"] = ["am.mvn", "decoding.yaml", "configuration.json"]
     params["output_dir"] = "./checkpoint"
     params["data_dir"] = "./data/test"
     params["decoding_model_name"] = "valid.acc.ave_10best.pb"
+    params["batch_size"] = 64
     modelscope_infer_after_finetune(params)

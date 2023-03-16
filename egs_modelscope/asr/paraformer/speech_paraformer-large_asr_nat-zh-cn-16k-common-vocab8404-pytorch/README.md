@@ -22,10 +22,12 @@
 Or you can use the finetuned model for inference directly.
 
 - Setting parameters in `infer.py`
+    - <strong>model:</strong> # model name on ModelScope
     - <strong>data_dir:</strong> # the dataset dir needs to include `test/wav.scp`. If `test/text` is also exists, CER will be computed
     - <strong>output_dir:</strong> # result dir
-    - <strong>ngpu:</strong> # the number of GPUs for decoding
-    - <strong>njob:</strong> # the number of jobs for each GPU
+    - <strong>ngpu:</strong> # the number of GPUs for decoding, if `ngpu` > 0, use GPU decoding
+    - <strong>njob:</strong> # the number of jobs for CPU decoding, if `ngpu` = 0, use CPU decoding, please set `njob`
+    - <strong>batch_size:</strong> # batchsize of inference
 
 - Then you can run the pipeline to infer with:
 ```python
@@ -39,9 +41,11 @@ The decoding results can be found in `$output_dir/1best_recog/text.cer`, which i
 ### Inference using local finetuned model
 
 - Modify inference related parameters in `infer_after_finetune.py`
+    - <strong>modelscope_model_name: </strong> # model name on ModelScope
     - <strong>output_dir:</strong> # result dir
     - <strong>data_dir:</strong> # the dataset dir needs to include `test/wav.scp`. If `test/text` is also exists, CER will be computed
     - <strong>decoding_model_name:</strong> # set the checkpoint name for decoding, e.g., `valid.cer_ctc.ave.pb`
+    - <strong>batch_size:</strong> # batchsize of inference  
 
 - Then you can run the pipeline to finetune with:
 ```python
