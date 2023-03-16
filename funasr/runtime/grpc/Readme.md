@@ -1,7 +1,7 @@
 ## paraformer grpc onnx server in c++
 
 
-#### Build ../onnxruntime as it's document
+#### Step 1. Build ../onnxruntime as it's document
 ```
 #put onnx-lib & onnx-asr-model & vocab.txt into /data/asrmodel
 ls /data/asrmodel/
@@ -11,7 +11,7 @@ file /data/asrmodel/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-p
 UTF-8 Unicode text
 ```
 
-#### Compile and install grpc v1.52.0 in case of grpc bugs
+#### Step 2. Compile and install grpc v1.52.0 in case of grpc bugs
 ```
 export GRPC_INSTALL_DIR=/data/soft/grpc
 export PKG_CONFIG_PATH=$GRPC_INSTALL_DIR/lib/pkgconfig
@@ -35,14 +35,14 @@ echo "export PATH=\$GRPC_INSTALL_DIR/bin/:\$PKG_CONFIG_PATH:\$PATH" >> ~/.bashrc
 source ~/.bashrc
 ```
 
-#### Compile grpc onnx paraformer server
+#### Step 3. Compile and start grpc onnx paraformer server
 ```
 ./rebuild.sh
 ```
 
 
 
-#### Start grpc python paraformer client  on PC with MIC
+#### Step 4. Start grpc python paraformer client  on PC with MIC
 ```
 cd ../python/grpc
 python grpc_main_client_mic.py  --host $server_ip --port 10108
