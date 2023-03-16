@@ -4,7 +4,7 @@ import sys
 
 def main():
     diar_config_path = sys.argv[1] if len(sys.argv) > 1 else "sond_fbank.yaml"
-    diar_model_path = sys.argv[2] if len(sys.argv) > 2 else "sond.pth"
+    diar_model_path = sys.argv[2] if len(sys.argv) > 2 else "sond.pb"
     output_dir = sys.argv[3] if len(sys.argv) > 3 else "./outputs"
     data_path_and_name_and_type = [
         ("data/test_rmsil/feats.scp", "speech", "kaldi_ark"),

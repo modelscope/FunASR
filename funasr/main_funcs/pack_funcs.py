@@ -191,12 +191,12 @@ def unpack(
 
     Examples:
         tarfile:
-           model.pth
+           model.pb
            some1.file
            some2.file
 
         >>> unpack("tarfile", "out")
-        {'asr_model_file': 'out/model.pth'}
+        {'asr_model_file': 'out/model.pb'}
     """
     input_archive = Path(input_archive)
     outpath = Path(outpath)
