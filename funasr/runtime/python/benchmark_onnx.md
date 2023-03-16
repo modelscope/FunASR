@@ -32,4 +32,18 @@ Benchmark [Paraformer-large](https://www.modelscope.cn/models/damo/speech_parafo
 |  64 (onnx int8)  |         87         | 0.0024 |    414.7     |
 
 
-### 
+### Intel(R) Xeon(R) Platinum 8163 CPU @ 2.50GHz    32core-64processor   without avx512_vnni
+
+
+| concurrent-tasks | processing time(s) |  RTF   | Speedup Rate |
+|:----------------:|:------------------:|:------:|:------------:|
+|  1 (onnx fp32)   |        2959        | 0.0820 |     12.2     |
+|  1 (onnx int8)   |        2814        | 0.0778 |     12.8     |
+|  16 (onnx fp32)  |        373         | 0.0103 |     96.9     |
+|  16 (onnx int8)  |        331         | 0.0091 |    109.0     |
+|  32 (onnx fp32)  |        211         | 0.0058 |    171.4     |
+|  32 (onnx int8)  |        181         | 0.0050 |    200.0     |
+|  64 (onnx fp32)  |        153         | 0.0042 |    235.9     |
+|  64 (onnx int8)  |        103         | 0.0029 |    349.9     |
+|  96 (onnx fp32)  |        146         | 0.0041 |    247.0     |
+|  96 (onnx int8)  |        108         | 0.0030 |    334.1     |
