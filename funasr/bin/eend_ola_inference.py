@@ -35,7 +35,7 @@ class Speech2Diarization:
     Examples:
         >>> import soundfile
         >>> import numpy as np
-        >>> speech2diar = Speech2Diarization("diar_sond_config.yml", "diar_sond.pth")
+        >>> speech2diar = Speech2Diarization("diar_sond_config.yml", "diar_sond.pb")
         >>> profile = np.load("profiles.npy")
         >>> audio, rate = soundfile.read("speech.wav")
         >>> speech2diar(audio, profile)
@@ -209,7 +209,7 @@ def inference_modelscope(
         if data_path_and_name_and_type is None and raw_inputs is not None:
             if isinstance(raw_inputs, torch.Tensor):
                 raw_inputs = raw_inputs.numpy()
-            data_path_and_name_and_type = [raw_inputs[0], "speech", "bytes"]
+            data_path_and_name_and_type = [raw_inputs[0], "speech", "sound"]
         loader = EENDOLADiarTask.build_streaming_iterator(
             data_path_and_name_and_type,
             dtype=dtype,
