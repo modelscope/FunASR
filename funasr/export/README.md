@@ -51,3 +51,5 @@ Export model from local path, the model'name must be `model.pb`.
 python -m funasr.export.export_model --model-name /mnt/workspace/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type torch
 ```
 
+## Acknowledge
+1. We acknowledge
