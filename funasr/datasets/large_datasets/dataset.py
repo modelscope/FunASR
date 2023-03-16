@@ -1,9 +1,10 @@
 import os
 import random
-import soundfile
+import numpy
 from functools import partial
 
 import torch
+import torchaudio
 import torch.distributed as dist
 from kaldiio import ReadHelper
 from torch.utils.data import IterableDataset
@@ -27,10 +28,11 @@ def read_lists(list_file):
 
 
 class AudioDataset(IterableDataset):
-    def __init__(self, scp_lists, data_names, data_types, shuffle=True, mode="train"):
+    def __init__(self, scp_lists, data_names, data_types, frontend_conf=None, shuffle=True, mode="train"):
         self.scp_lists = scp_lists
         self.data_names = data_names
         self.data_types = data_types
+        self.frontend_conf = frontend_conf
         self.shuffle = shuffle
         self.mode = mode
         self.epoch = -1
@@ -117,21 +119,31 @@ class AudioDataset(IterableDataset):
                             sample_dict["key"] = key
                     elif data_type == "sound":
                         key, path = item.strip().split()
-                        mat, sampling_rate = soundfile.read(path)
+                        waveform, sampling_rate = torchaudio.load(path)
+                        if self.frontend_conf is not None:
+                            if sampling_rate != self.frontend_conf["fs"]:
+                                waveform = torchaudio.transforms.Resample(orig_freq=sampling_rate,
+                                                                          new_freq=self.frontend_conf["fs"])(waveform)
+                                sampling_rate = self.frontend_conf["fs"] 
+                        waveform = waveform.numpy()
+                        mat = waveform[0]
                         sample_dict[data_name] = mat
                         sample_dict["sampling_rate"] = sampling_rate
                         if data_name == "speech":
                             sample_dict["key"] = key
                     else:
                         text = item
-                        sample_dict[data_name] = text.strip().split()[1:]
+                        segs = text.strip().split()
+                        sample_dict[data_name] = segs[1:]
+                        if "key" not in sample_dict:
+                            sample_dict["key"] = segs[0]
                 yield sample_dict
 
             self.close_reader(reader_list)
 
 
 def len_fn_example(data):
-    return len(data)
+    return 1
 
 
 def len_fn_token(data):
@@ -145,21 +157,23 @@ def len_fn_token(data):
 def Dataset(data_list_file,
             dict,
             seg_dict,
+            punc_dict,
             conf,
+            frontend_conf,
             mode="train",
             batch_mode="padding"):
     scp_lists = read_lists(data_list_file)
     shuffle = conf.get('shuffle', True)
     data_names = conf.get("data_names", "speech,text")
     data_types = conf.get("data_types", "kaldi_ark,text")
-    dataset = AudioDataset(scp_lists, data_names, data_types, shuffle=shuffle, mode=mode)
+    dataset = AudioDataset(scp_lists, data_names, data_types, frontend_conf=frontend_conf, shuffle=shuffle, mode=mode)
 
     filter_conf = conf.get('filter_conf', {})
     filter_fn = partial(filter, **filter_conf)
     dataset = FilterIterDataPipe(dataset, fn=filter_fn)
 
     if "text" in data_names:
-        vocab = {'vocab': dict, 'seg_dict': seg_dict}
+        vocab = {'vocab': dict, 'seg_dict': seg_dict, 'punc_dict': punc_dict}
         tokenize_fn = partial(tokenize, **vocab)
         dataset = MapperIterDataPipe(dataset, fn=tokenize_fn)
 
@@ -188,6 +202,10 @@ def Dataset(data_list_file,
                                              sort_size=sort_size,
                                              batch_mode=batch_mode)
 
-    dataset = MapperIterDataPipe(dataset, fn=padding if batch_mode == "padding" else clipping)
+    int_pad_value = conf.get("int_pad_value", -1)
+    float_pad_value = conf.get("float_pad_value", 0.0)
+    padding_conf = {"int_pad_value": int_pad_value, "float_pad_value": float_pad_value}
+    padding_fn = partial(padding, **padding_conf)
+    dataset = MapperIterDataPipe(dataset, fn=padding_fn if batch_mode == "padding" else clipping)
 
     return dataset

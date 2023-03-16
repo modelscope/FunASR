@@ -6,6 +6,8 @@ import time
 import copy
 import os
 import codecs
+import tempfile
+import requests
 from pathlib import Path
 from typing import Optional
 from typing import Sequence
@@ -39,16 +41,8 @@ from funasr.utils.types import str_or_none
 from funasr.utils import asr_utils, wav_utils, postprocess_utils
 from funasr.models.frontend.wav_frontend import WavFrontend
 from funasr.models.e2e_asr_paraformer import BiCifParaformer, ContextualParaformer
-
-
-header_colors = '\033[95m'
-end_colors = '\033[0m'
-
-global_asr_language: str = 'zh-cn'
-global_sample_rate: Union[int, Dict[Any, int]] = {
-    'audio_fs': 16000,
-    'model_fs': 16000
-}
+from funasr.export.models.e2e_asr_paraformer import Paraformer as Paraformer_export
+from funasr.utils.timestamp_tools import ts_prediction_lfr6_standard
 
 
 class Speech2Text:
@@ -175,32 +169,9 @@ class Speech2Text:
         self.converter = converter
         self.tokenizer = tokenizer
 
-        # 6. [Optional] Build hotword list from file or str
-        if hotword_list_or_file is None:
-            self.hotword_list = None
-        elif os.path.exists(hotword_list_or_file):
-            self.hotword_list = []
-            hotword_str_list = []
-            with codecs.open(hotword_list_or_file, 'r') as fin:
-                for line in fin.readlines():
-                    hw = line.strip()
-                    hotword_str_list.append(hw)
-                    self.hotword_list.append(self.converter.tokens2ids([i for i in hw]))
-                self.hotword_list.append([1])
-                hotword_str_list.append('<s>')
-            logging.info("Initialized hotword list from file: {}, hotword list: {}."
-                .format(hotword_list_or_file, hotword_str_list))
-        else:
-            logging.info("Attempting to parse hotwords as str...")
-            self.hotword_list = []
-            hotword_str_list = []
-            for hw in hotword_list_or_file.strip().split():
-                hotword_str_list.append(hw)
-                self.hotword_list.append(self.converter.tokens2ids([i for i in hw]))
-            self.hotword_list.append([1])
-            hotword_str_list.append('<s>')
-            logging.info("Hotword list: {}.".format(hotword_str_list))
-
+        # 6. [Optional] Build hotword list from str, local file or url
+        self.hotword_list = None
+        self.hotword_list = self.generate_hotwords_list(hotword_list_or_file)
 
         is_use_lm = lm_weight != 0.0 and lm_file is not None
         if (ctc_weight == 0.0 or asr_model.ctc == None) and not is_use_lm:
@@ -220,7 +191,8 @@ class Speech2Text:
 
     @torch.no_grad()
     def __call__(
-            self, speech: Union[torch.Tensor, np.ndarray], speech_lengths: Union[torch.Tensor, np.ndarray] = None
+            self, speech: Union[torch.Tensor, np.ndarray], speech_lengths: Union[torch.Tensor, np.ndarray] = None,
+            begin_time: int = 0, end_time: int = None,
     ):
         """Inference
 
@@ -272,6 +244,10 @@ class Speech2Text:
             decoder_outs = self.asr_model.cal_decoder_with_predictor(enc, enc_len, pre_acoustic_embeds, pre_token_length, hw_list=self.hotword_list)
             decoder_out, ys_pad_lens = decoder_outs[0], decoder_outs[1]
 
+        if isinstance(self.asr_model, BiCifParaformer):
+            _, _, us_alphas, us_peaks = self.asr_model.calc_predictor_timestamp(enc, enc_len,
+                                                                                   pre_token_length)  # test no bias cif2
+
         results = []
         b, n, d = decoder_out.size()
         for i in range(b):
@@ -314,9 +290,224 @@ class Speech2Text:
                 else:
                     text = None
 
-                results.append((text, token, token_int, hyp, enc_len_batch_total, lfr_factor))
+                if isinstance(self.asr_model, BiCifParaformer):
+                    _, timestamp = ts_prediction_lfr6_standard(us_alphas[i], 
+                                                            us_peaks[i], 
+                                                            copy.copy(token), 
+                                                            vad_offset=begin_time)
+                    results.append((text, token, token_int, hyp, timestamp, enc_len_batch_total, lfr_factor))
+                else:
+                    results.append((text, token, token_int, hyp, enc_len_batch_total, lfr_factor))
 
         # assert check_return_type(results)
+        return results
+
+    def generate_hotwords_list(self, hotword_list_or_file):
+        # for None
+        if hotword_list_or_file is None:
+            hotword_list = None
+        # for local txt inputs
+        elif os.path.exists(hotword_list_or_file) and hotword_list_or_file.endswith('.txt'):
+            logging.info("Attempting to parse hotwords from local txt...")
+            hotword_list = []
+            hotword_str_list = []
+            with codecs.open(hotword_list_or_file, 'r') as fin:
+                for line in fin.readlines():
+                    hw = line.strip()
+                    hotword_str_list.append(hw)
+                    hotword_list.append(self.converter.tokens2ids([i for i in hw]))
+                hotword_list.append([self.asr_model.sos])
+                hotword_str_list.append('<s>')
+            logging.info("Initialized hotword list from file: {}, hotword list: {}."
+                         .format(hotword_list_or_file, hotword_str_list))
+        # for url, download and generate txt
+        elif hotword_list_or_file.startswith('http'):
+            logging.info("Attempting to parse hotwords from url...")
+            work_dir = tempfile.TemporaryDirectory().name
+            if not os.path.exists(work_dir):
+                os.makedirs(work_dir)
+            text_file_path = os.path.join(work_dir, os.path.basename(hotword_list_or_file))
+            local_file = requests.get(hotword_list_or_file)
+            open(text_file_path, "wb").write(local_file.content)
+            hotword_list_or_file = text_file_path
+            hotword_list = []
+            hotword_str_list = []
+            with codecs.open(hotword_list_or_file, 'r') as fin:
+                for line in fin.readlines():
+                    hw = line.strip()
+                    hotword_str_list.append(hw)
+                    hotword_list.append(self.converter.tokens2ids([i for i in hw]))
+                hotword_list.append([self.asr_model.sos])
+                hotword_str_list.append('<s>')
+            logging.info("Initialized hotword list from file: {}, hotword list: {}."
+                         .format(hotword_list_or_file, hotword_str_list))
+        # for text str input
+        elif not hotword_list_or_file.endswith('.txt'):
+            logging.info("Attempting to parse hotwords as str...")
+            hotword_list = []
+            hotword_str_list = []
+            for hw in hotword_list_or_file.strip().split():
+                hotword_str_list.append(hw)
+                hotword_list.append(self.converter.tokens2ids([i for i in hw]))
+            hotword_list.append([self.asr_model.sos])
+            hotword_str_list.append('<s>')
+            logging.info("Hotword list: {}.".format(hotword_str_list))
+        else:
+            hotword_list = None
+        return hotword_list
+
+class Speech2TextExport:
+    """Speech2TextExport class
+
+    """
+
+    def __init__(
+            self,
+            asr_train_config: Union[Path, str] = None,
+            asr_model_file: Union[Path, str] = None,
+            cmvn_file: Union[Path, str] = None,
+            lm_train_config: Union[Path, str] = None,
+            lm_file: Union[Path, str] = None,
+            token_type: str = None,
+            bpemodel: str = None,
+            device: str = "cpu",
+            maxlenratio: float = 0.0,
+            minlenratio: float = 0.0,
+            dtype: str = "float32",
+            beam_size: int = 20,
+            ctc_weight: float = 0.5,
+            lm_weight: float = 1.0,
+            ngram_weight: float = 0.9,
+            penalty: float = 0.0,
+            nbest: int = 1,
+            frontend_conf: dict = None,
+            hotword_list_or_file: str = None,
+            **kwargs,
+    ):
+
+        # 1. Build ASR model
+        asr_model, asr_train_args = ASRTask.build_model_from_file(
+            asr_train_config, asr_model_file, cmvn_file, device
+        )
+        frontend = None
+        if asr_train_args.frontend is not None and asr_train_args.frontend_conf is not None:
+            frontend = WavFrontend(cmvn_file=cmvn_file, **asr_train_args.frontend_conf)
+
+        logging.info("asr_model: {}".format(asr_model))
+        logging.info("asr_train_args: {}".format(asr_train_args))
+        asr_model.to(dtype=getattr(torch, dtype)).eval()
+
+        token_list = asr_model.token_list
+
+
+
+        logging.info(f"Decoding device={device}, dtype={dtype}")
+
+        # 5. [Optional] Build Text converter: e.g. bpe-sym -> Text
+        if token_type is None:
+            token_type = asr_train_args.token_type
+        if bpemodel is None:
+            bpemodel = asr_train_args.bpemodel
+
+        if token_type is None:
+            tokenizer = None
+        elif token_type == "bpe":
+            if bpemodel is not None:
+                tokenizer = build_tokenizer(token_type=token_type, bpemodel=bpemodel)
+            else:
+                tokenizer = None
+        else:
+            tokenizer = build_tokenizer(token_type=token_type)
+        converter = TokenIDConverter(token_list=token_list)
+        logging.info(f"Text tokenizer: {tokenizer}")
+
+        # self.asr_model = asr_model
+        self.asr_train_args = asr_train_args
+        self.converter = converter
+        self.tokenizer = tokenizer
+
+        self.device = device
+        self.dtype = dtype
+        self.nbest = nbest
+        self.frontend = frontend
+
+        model = Paraformer_export(asr_model, onnx=False)
+        self.asr_model = model
+        
+    @torch.no_grad()
+    def __call__(
+            self, speech: Union[torch.Tensor, np.ndarray], speech_lengths: Union[torch.Tensor, np.ndarray] = None
+    ):
+        """Inference
+
+        Args:
+                speech: Input speech data
+        Returns:
+                text, token, token_int, hyp
+
+        """
+        assert check_argument_types()
+
+        # Input as audio signal
+        if isinstance(speech, np.ndarray):
+            speech = torch.tensor(speech)
+
+        if self.frontend is not None:
+            feats, feats_len = self.frontend.forward(speech, speech_lengths)
+            feats = to_device(feats, device=self.device)
+            feats_len = feats_len.int()
+            self.asr_model.frontend = None
+        else:
+            feats = speech
+            feats_len = speech_lengths
+
+        enc_len_batch_total = feats_len.sum()
+        lfr_factor = max(1, (feats.size()[-1] // 80) - 1)
+        batch = {"speech": feats, "speech_lengths": feats_len}
+
+        # a. To device
+        batch = to_device(batch, device=self.device)
+
+        decoder_outs = self.asr_model(**batch)
+        decoder_out, ys_pad_lens = decoder_outs[0], decoder_outs[1]
+        
+        results = []
+        b, n, d = decoder_out.size()
+        for i in range(b):
+            am_scores = decoder_out[i, :ys_pad_lens[i], :]
+
+            yseq = am_scores.argmax(dim=-1)
+            score = am_scores.max(dim=-1)[0]
+            score = torch.sum(score, dim=-1)
+            # pad with mask tokens to ensure compatibility with sos/eos tokens
+            yseq = torch.tensor(
+                yseq.tolist(), device=yseq.device
+            )
+            nbest_hyps = [Hypothesis(yseq=yseq, score=score)]
+
+            for hyp in nbest_hyps:
+                assert isinstance(hyp, (Hypothesis)), type(hyp)
+
+                # remove sos/eos and get results
+                last_pos = -1
+                if isinstance(hyp.yseq, list):
+                    token_int = hyp.yseq[1:last_pos]
+                else:
+                    token_int = hyp.yseq[1:last_pos].tolist()
+
+                # remove blank symbol id, which is assumed to be 0
+                token_int = list(filter(lambda x: x != 0 and x != 2, token_int))
+
+                # Change integer-ids to tokens
+                token = self.converter.ids2tokens(token_int)
+
+                if self.tokenizer is not None:
+                    text = self.tokenizer.tokens2text(token)
+                else:
+                    text = None
+
+                results.append((text, token, token_int, hyp, enc_len_batch_total, lfr_factor))
+
         return results
 
 
@@ -427,9 +618,11 @@ def inference_modelscope(
         level=log_level,
         format="%(asctime)s (%(module)s:%(lineno)d) %(levelname)s: %(message)s",
     )
-
+    
+    export_mode = False
     if param_dict is not None:
         hotword_list_or_file = param_dict.get('hotword')
+        export_mode = param_dict.get("export_mode", False)
     else:
         hotword_list_or_file = None
 
@@ -463,7 +656,10 @@ def inference_modelscope(
         nbest=nbest,
         hotword_list_or_file=hotword_list_or_file,
     )
-    speech2text = Speech2Text(**speech2text_kwargs)
+    if export_mode:
+        speech2text = Speech2TextExport(**speech2text_kwargs)
+    else:
+        speech2text = Speech2Text(**speech2text_kwargs)
 
     def _forward(
             data_path_and_name_and_type,
@@ -471,7 +667,17 @@ def inference_modelscope(
             output_dir_v2: Optional[str] = None,
             fs: dict = None,
             param_dict: dict = None,
+            **kwargs,
     ):
+
+        hotword_list_or_file = None
+        if param_dict is not None:
+            hotword_list_or_file = param_dict.get('hotword')
+        if 'hotword' in kwargs:
+            hotword_list_or_file = kwargs['hotword']
+        if hotword_list_or_file is not None or 'hotword' in kwargs:
+            speech2text.hotword_list = speech2text.generate_hotwords_list(hotword_list_or_file)
+
         # 3. Build data-iterator
         if data_path_and_name_and_type is None and raw_inputs is not None:
             if isinstance(raw_inputs, torch.Tensor):
@@ -489,6 +695,11 @@ def inference_modelscope(
             allow_variable_data_keys=allow_variable_data_keys,
             inference=True,
         )
+
+        if param_dict is not None:
+            use_timestamp = param_dict.get('use_timestamp', True)
+        else:
+            use_timestamp = True
 
         forward_time_total = 0.0
         length_total = 0.0
@@ -531,7 +742,9 @@ def inference_modelscope(
                 result = [results[batch_id][:-2]]
 
                 key = keys[batch_id]
-                for n, (text, token, token_int, hyp) in zip(range(1, nbest + 1), result):
+                for n, result in zip(range(1, nbest + 1), result):
+                    text, token, token_int, hyp = result[0], result[1], result[2], result[3]
+                    time_stamp = None if len(result) < 5 else result[4]
                     # Create a directory: outdir/{n}best_recog
                     if writer is not None:
                         ibest_writer = writer[f"{n}best_recog"]
@@ -543,8 +756,20 @@ def inference_modelscope(
                         ibest_writer["rtf"][key] = rtf_cur
 
                     if text is not None:
-                        text_postprocessed, _ = postprocess_utils.sentence_postprocess(token)
+                        if use_timestamp and time_stamp is not None:
+                            postprocessed_result = postprocess_utils.sentence_postprocess(token, time_stamp)
+                        else:
+                            postprocessed_result = postprocess_utils.sentence_postprocess(token)
+                        time_stamp_postprocessed = ""
+                        if len(postprocessed_result) == 3:
+                            text_postprocessed, time_stamp_postprocessed, word_lists = postprocessed_result[0], \
+                                                                                       postprocessed_result[1], \
+                                                                                       postprocessed_result[2]
+                        else:
+                            text_postprocessed, word_lists = postprocessed_result[0], postprocessed_result[1]
                         item = {'key': key, 'value': text_postprocessed}
+                        if time_stamp_postprocessed != "":
+                            item['time_stamp'] = time_stamp_postprocessed
                         asr_result_list.append(item)
                         finish_count += 1
                         # asr_utils.print_progress(finish_count / file_count)

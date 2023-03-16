@@ -397,6 +397,19 @@ def inference_modelscope(
         device = "cuda"
     else:
         device = "cpu"
+    
+    if param_dict is not None and "decoding_model" in param_dict:
+        if param_dict["decoding_model"] == "fast":
+            decoding_ind = 0
+            decoding_mode = "model1"
+        elif param_dict["decoding_model"] == "normal":
+            decoding_ind = 0
+            decoding_mode = "model2"
+        elif param_dict["decoding_model"] == "offline":
+            decoding_ind = 1
+            decoding_mode = "model2"
+        else:
+            raise NotImplementedError("unsupported decoding model {}".format(param_dict["decoding_model"]))
 
     # 1. Set random-seed
     set_all_random_seed(seed)
@@ -433,6 +446,7 @@ def inference_modelscope(
                  output_dir_v2: Optional[str] = None,
                  fs: dict = None,
                  param_dict: dict = None,
+                 **kwargs,
                  ):
         # 3. Build data-iterator
         if data_path_and_name_and_type is None and raw_inputs is not None:

@@ -9,5 +9,5 @@ if __name__ == "__main__":
         model="damo/speech_UniASR_asr_2pass-ko-16k-common-vocab6400-tensorflow1-offline",
         output_dir=output_dir,
     )
-    rec_result = inference_pipline(audio_in=audio_in)
+    rec_result = inference_pipline(audio_in=audio_in, param_dict={"decoding_model":"offline"})
     print(rec_result)

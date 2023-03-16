@@ -107,13 +107,15 @@ def get_parser():
 
 
 def inference_launch(mode, **kwargs):
-    if mode == "vad":
+    if mode == "offline":
         from funasr.bin.vad_inference import inference_modelscope
+        return inference_modelscope(**kwargs)
+    elif mode == "online":
+        from funasr.bin.vad_inference_online import inference_modelscope
         return inference_modelscope(**kwargs)
     else:
         logging.info("Unknown decoding mode: {}".format(mode))
         return None
-
 
 def main(cmd=None):
     print(get_commandline_args(), file=sys.stderr)

@@ -287,3 +287,35 @@ def generate_data_list(data_dir, dataset, nj=100):
             wav_path = os.path.join(split_dir, str(i + 1), "wav.scp")
             text_path = os.path.join(split_dir, str(i + 1), "text")
             f_data.write(wav_path + " " + text_path + "\n")
+
+def filter_wav_text(data_dir, dataset):
+    wav_file = os.path.join(data_dir,dataset,"wav.scp")
+    text_file = os.path.join(data_dir, dataset, "text")
+    with open(wav_file) as f_wav, open(text_file) as f_text:
+        wav_lines = f_wav.readlines()
+        text_lines = f_text.readlines()
+    os.rename(wav_file, "{}.bak".format(wav_file))
+    os.rename(text_file, "{}.bak".format(text_file))
+    wav_dict = {}
+    for line in wav_lines:
+        parts = line.strip().split()
+        if len(parts) < 2:
+            continue
+        sample_name, wav_path = parts
+        wav_dict[sample_name] = wav_path
+    text_dict = {}
+    for line in text_lines:
+        parts = line.strip().split()
+        if len(parts) < 2:
+            continue
+        sample_name = parts[0]
+        text_dict[sample_name] = " ".join(parts[1:]).lower()
+    filter_count = 0
+    with open(wav_file, "w") as f_wav, open(text_file, "w") as f_text:
+        for sample_name, wav_path in wav_dict.items():
+            if sample_name in text_dict.keys():
+                f_wav.write(sample_name + " " + wav_path  + "\n")
+                f_text.write(sample_name + " " + text_dict[sample_name] + "\n")
+            else:
+                filter_count += 1
+    print("{}/{} samples in {} are filtered because of the mismatch between wav.scp and text".format(len(wav_lines), filter_count, dataset))

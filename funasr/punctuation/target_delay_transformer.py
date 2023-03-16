@@ -8,7 +8,7 @@ import torch.nn as nn
 from funasr.modules.embedding import PositionalEncoding
 from funasr.modules.embedding import SinusoidalPositionEncoder
 #from funasr.models.encoder.transformer_encoder import TransformerEncoder as Encoder
-from funasr.models.encoder.sanm_encoder import SANMEncoder as Encoder
+from funasr.punctuation.sanm_encoder import SANMEncoder as Encoder
 #from funasr.modules.mask import subsequent_n_mask
 from funasr.punctuation.abs_model import AbsPunctuation
 
@@ -72,6 +72,9 @@ class TargetDelayTransformer(AbsPunctuation):
         h, _, _ = self.encoder(x, text_lengths)
         y = self.decoder(h)
         return y, None
+
+    def with_vad(self):
+        return False
 
     def score(self, y: torch.Tensor, state: Any, x: torch.Tensor) -> Tuple[torch.Tensor, Any]:
         """Score new token.

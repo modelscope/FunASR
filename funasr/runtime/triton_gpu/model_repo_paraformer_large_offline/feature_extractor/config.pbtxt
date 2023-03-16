@@ -1,0 +1,81 @@
+# Copyright (c) 2023, NVIDIA CORPORATION.  All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: "feature_extractor"
+backend: "python"
+max_batch_size: 64
+
+parameters [
+  {
+    key: "num_mel_bins",
+    value: { string_value: "80"}
+  },
+  {
+    key: "frame_shift_in_ms"
+    value: { string_value: "10"}
+  },
+  {
+    key: "frame_length_in_ms"
+    value: { string_value: "25"}
+  },
+  {
+    key: "sample_rate"
+    value: { string_value: "16000"}
+  },
+  {
+    key: "cmvn_path"
+    value: { string_value: "./model_repo_paraformer_large_offline/feature_extractor/am.mvn"}
+  },
+  {
+    key: "config_path"
+    value: { string_value: "./model_repo_paraformer_large_offline/feature_extractor/config.yaml"}
+  }
+
+]
+
+input [
+  {
+    name: "wav"
+    data_type: TYPE_FP32
+    dims: [-1]
+  },
+  {
+    name: "wav_lens"
+    data_type: TYPE_INT32
+    dims: [1]
+  }
+]
+
+output [
+  {
+    name: "speech"
+    data_type: TYPE_FP32
+    dims: [-1, 560]  # 80
+  },
+  {
+    name: "speech_lengths"
+    data_type: TYPE_INT32
+    dims: [1]
+  }
+]
+
+dynamic_batching {
+  }
+
+instance_group [
+    {
+      count: 2
+      kind: KIND_GPU
+    }
+]

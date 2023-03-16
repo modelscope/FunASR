@@ -235,7 +235,7 @@ class VADTask(AbsTask):
             cls, args: argparse.Namespace, train: bool
     ) -> Optional[Callable[[str, Dict[str, np.array]], Dict[str, np.ndarray]]]:
         assert check_argument_types()
-        #if args.use_preprocessor:
+        # if args.use_preprocessor:
         #    retval = CommonPreprocessor(
         #        train=train,
         #        # NOTE(kamo): Check attribute existence for backward compatibility
@@ -254,7 +254,7 @@ class VADTask(AbsTask):
         #        if hasattr(args, "rir_scp")
         #        else None,
         #    )
-        #else:
+        # else:
         #    retval = None
         retval = None
         assert check_return_type(retval)

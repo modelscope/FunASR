@@ -7,7 +7,7 @@ from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
 
 inference_pipline = pipeline(
-    task=Tasks.language_model,
+    task=Tasks.language_score_prediction,
     model='damo/speech_transformer_lm_zh-cn-common-vocab8404-pytorch',
     output_dir="./tmp/"
 )
