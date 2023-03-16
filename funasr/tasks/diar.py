@@ -499,7 +499,7 @@ class DiarTask(AbsTask):
             config_file: Union[Path, str] = None,
             model_file: Union[Path, str] = None,
             cmvn_file: Union[Path, str] = None,
-            device: str = "cpu",
+            device: Union[str, torch.device] = "cpu",
     ):
         """Build model from the files.
 
@@ -554,12 +554,27 @@ class DiarTask(AbsTask):
                 model.load_state_dict(model_dict)
             else:
                 model_dict = torch.load(model_file, map_location=device)
+        model_dict = cls.fileter_model_dict(model_dict, model.state_dict())
         model.load_state_dict(model_dict)
         if model_name_pth is not None and not os.path.exists(model_name_pth):
             torch.save(model_dict, model_name_pth)
             logging.info("model_file is saved to pth: {}".format(model_name_pth))
 
         return model, args
+
+    @classmethod
+    def fileter_model_dict(cls, src_dict: dict, dest_dict: dict):
+        from collections import OrderedDict
+        new_dict = OrderedDict()
+        for key, value in src_dict.items():
+            if key in dest_dict:
+                new_dict[key] = value
+            else:
+                logging.info("{} is no longer needed in this model.".format(key))
+        for key, value in dest_dict.items():
+            if key not in new_dict:
+                logging.warning("{} is missed in checkpoint.".format(key))
+        return new_dict
 
     @classmethod
     def convert_tf2torch(
