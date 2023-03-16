@@ -27,6 +27,7 @@ cmake -DgRPC_INSTALL=ON \
       -DCMAKE_INSTALL_PREFIX=$GRPC_INSTALL_DIR \
       ../..
 make
+make install
 popd
 
 echo "export GRPC_INSTALL_DIR=/data/soft/grpc" >> ~/.bashrc
@@ -40,9 +41,15 @@ source ~/.bashrc
 ./rebuild.sh
 ```
 
+#### Step 4. Start grpc paraformer server
+```
+Usage: ./cmake/build/paraformer_server port thread_num /path/to/model_file
+./cmake/build/paraformer_server 10108 4 /data/asrmodel
+```
 
 
-#### Step 4. Start grpc python paraformer client  on PC with MIC
+
+#### Step 5. Start grpc python paraformer client  on PC with MIC
 ```
 cd ../python/grpc
 python grpc_main_client_mic.py  --host $server_ip --port 10108
