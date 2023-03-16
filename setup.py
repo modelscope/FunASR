@@ -41,6 +41,8 @@ requirements = {
         # PAI
         "oss2",
         "kaldi-native-fbank",
+        # timestamp
+        "edit-distance"
     ],
     # train: The modules invoked when training only.
     "train": [
