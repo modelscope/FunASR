@@ -26,8 +26,9 @@ extern "C" {
 			return nullptr;
 
 		Audio audio(1);
-		audio.loadwav(szBuf,nLen);
-		audio.split();
+		if (!audio.loadwav(szBuf, nLen))
+			return nullptr;
+		//audio.split();
 
 		float* buff;
 		int len;
@@ -58,8 +59,9 @@ extern "C" {
 			return nullptr;
 
 		Audio audio(1);
-		audio.loadpcmwav(szBuf, nLen);
-		audio.split();
+		if (!audio.loadpcmwav(szBuf, nLen))
+			return nullptr;
+		//audio.split();
 
 		float* buff;
 		int len;
@@ -91,8 +93,9 @@ extern "C" {
 			return nullptr;
 
 		Audio audio(1);
-		audio.loadpcmwav(szFileName);
-		audio.split();
+		if (!audio.loadpcmwav(szFileName))
+			return nullptr;
+		//audio.split();
 
 		float* buff;
 		int len;
@@ -125,7 +128,7 @@ extern "C" {
 		Audio audio(1);
 		if(!audio.loadwav(szWavfile))
 			return nullptr;
-		audio.split();
+		//audio.split();
 
 		float* buff;
 		int len;
