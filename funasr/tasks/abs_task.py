@@ -639,12 +639,12 @@ class AbsTask(ABC):
                  "and exclude_keys excludes keys of model states for the initialization."
                  "e.g.\n"
                  "  # Load all parameters"
-                 "  --init_param some/where/model.pth\n"
+                 "  --init_param some/where/model.pb\n"
                  "  # Load only decoder parameters"
-                 "  --init_param some/where/model.pth:decoder:decoder\n"
+                 "  --init_param some/where/model.pb:decoder:decoder\n"
                  "  # Load only decoder parameters excluding decoder.embed"
-                 "  --init_param some/where/model.pth:decoder:decoder:decoder.embed\n"
-                 "  --init_param some/where/model.pth:decoder:decoder:decoder.embed\n",
+                 "  --init_param some/where/model.pb:decoder:decoder:decoder.embed\n"
+                 "  --init_param some/where/model.pb:decoder:decoder:decoder.embed\n",
         )
         group.add_argument(
             "--ignore_init_mismatch",
