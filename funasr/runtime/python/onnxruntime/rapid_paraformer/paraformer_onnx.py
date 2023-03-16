@@ -26,12 +26,15 @@ class Paraformer():
                  device_id: Union[str, int] = "-1",
                  plot_timestamp_to: str = "",
                  pred_bias: int = 1,
+                 quantize: bool = False,
                  ):
 
         if not Path(model_dir).exists():
             raise FileNotFoundError(f'{model_dir} does not exist.')
 
         model_file = os.path.join(model_dir, 'model.onnx')
+        if quantize:
+            model_file = os.path.join(model_dir, 'model_quant.onnx')
         config_file = os.path.join(model_dir, 'config.yaml')
         cmvn_file = os.path.join(model_dir, 'am.mvn')
         config = read_yaml(config_file)
