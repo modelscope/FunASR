@@ -8,6 +8,7 @@ from typing import Dict
 from typing import Iterator
 from typing import Tuple
 from typing import Union
+from typing import List
 
 import kaldiio
 import numpy as np
@@ -129,7 +130,7 @@ class IterableESPnetDataset(IterableDataset):
         non_iterable_list = []
         self.path_name_type_list = []
 
-        if not isinstance(path_name_type_list[0], Tuple):
+        if not isinstance(path_name_type_list[0], (Tuple, List)):
             path = path_name_type_list[0]
             name = path_name_type_list[1]
             _type = path_name_type_list[2]
