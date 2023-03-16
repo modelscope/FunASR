@@ -15,9 +15,9 @@
 | [**Model Zoo**](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary)
 | [**Contact**](#contact)
 
-## What's new: 
 
 ## What's new: 
+
 For the release notes, please ref to [news](https://github.com/alibaba-damo-academy/FunASR/releases)
 
 ## Highlights
