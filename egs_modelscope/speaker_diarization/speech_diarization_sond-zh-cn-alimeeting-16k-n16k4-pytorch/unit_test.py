@@ -14,13 +14,12 @@ inference_diar_pipline = pipeline(
 )
 
 # 以 audio_list 作为输入，其中第一个音频为待检测语音，后面的音频为不同说话人的声纹注册语音
-audio_list = [[
+audio_list = [
     "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/record.wav",
     "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/spk_A.wav",
     "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/spk_B.wav",
     "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/spk_B1.wav"
-]]
+]
 
 results = inference_diar_pipline(audio_in=audio_list)
-for rst in results:
-    print(rst["value"])
+print(results)

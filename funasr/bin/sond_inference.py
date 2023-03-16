@@ -42,7 +42,7 @@ class Speech2Diarization:
     Examples:
         >>> import soundfile
         >>> import numpy as np
-        >>> speech2diar = Speech2Diarization("diar_sond_config.yml", "diar_sond.pth")
+        >>> speech2diar = Speech2Diarization("diar_sond_config.yml", "diar_sond.pb")
         >>> profile = np.load("profiles.npy")
         >>> audio, rate = soundfile.read("speech.wav")
         >>> speech2diar(audio, profile)

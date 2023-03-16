@@ -87,7 +87,7 @@ class EENDOLATransformerEncoder(nn.Module):
                  n_layers: int,
                  n_units: int,
                  e_units: int = 2048,
-                 h: int = 8,
+                 h: int = 4,
                  dropout_rate: float = 0.1,
                  use_pos_emb: bool = False):
         super(EENDOLATransformerEncoder, self).__init__()

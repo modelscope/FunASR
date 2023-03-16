@@ -36,7 +36,7 @@ class Speech2Xvector:
 
     Examples:
         >>> import soundfile
-        >>> speech2xvector = Speech2Xvector("sv_config.yml", "sv.pth")
+        >>> speech2xvector = Speech2Xvector("sv_config.yml", "sv.pb")
         >>> audio, rate = soundfile.read("speech.wav")
         >>> speech2xvector(audio)
         [(text, token, token_int, hypothesis object), ...]
@@ -169,7 +169,7 @@ def inference_modelscope(
         log_level: Union[int, str] = "INFO",
         key_file: Optional[str] = None,
         sv_train_config: Optional[str] = "sv.yaml",
-        sv_model_file: Optional[str] =  "sv.pth",
+        sv_model_file: Optional[str] =  "sv.pb",
         model_tag: Optional[str] = None,
         allow_variable_data_keys: bool = True,
         streaming: bool = False,

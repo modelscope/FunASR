@@ -8,7 +8,7 @@
 #include "librapidasrapi.h"
 
 #include <iostream>
-
+#include <fstream>
 using namespace std;
 
 int main(int argc, char *argv[])
@@ -40,10 +40,13 @@ int main(int argc, char *argv[])
 
 
     gettimeofday(&start, NULL);
-
-    RPASR_RESULT Result=RapidAsrRecogPCMFile(AsrHanlde, argv[2], RASR_NONE, NULL);
-    gettimeofday(&end, NULL);
     float snippet_time = 0.0f;
+
+
+     RPASR_RESULT Result=RapidAsrRecogFile(AsrHanlde, argv[2], RASR_NONE, NULL);
+
+    gettimeofday(&end, NULL);
+   
     if (Result)
     {
         string msg = RapidAsrGetResult(Result, 0);
@@ -56,11 +59,51 @@ int main(int argc, char *argv[])
     }
     else
     {
-        cout <<("no return data!");
+        cout <<"no return data!";
     }
-  
-    printf("Audio length %lfs.\n", (double)snippet_time);
+ 
+ 
+    //char* buff = nullptr;
+    //int len = 0;
+    //ifstream ifs(argv[2], std::ios::binary | std::ios::in);
+    //if (ifs.is_open())
+    //{
+    //    ifs.seekg(0, std::ios::end);
+    //    len = ifs.tellg();
+    //    ifs.seekg(0, std::ios::beg);
 
+    //    buff = new char[len];
+
+    //    ifs.read(buff, len);
+
+
+    //    //RPASR_RESULT Result = RapidAsrRecogPCMFile(AsrHanlde, argv[2], RASR_NONE, NULL);
+
+    //    RPASR_RESULT Result=RapidAsrRecogPCMBuffer(AsrHanlde, buff,len, RASR_NONE, NULL);
+    //    //RPASR_RESULT Result = RapidAsrRecogPCMFile(AsrHanlde, argv[2], RASR_NONE, NULL);
+    //    gettimeofday(&end, NULL);
+    //   
+    //    if (Result)
+    //    {
+    //        string msg = RapidAsrGetResult(Result, 0);
+    //        setbuf(stdout, NULL);
+    //        cout << "Result: \"";
+    //        cout << msg << endl;
+    //        cout << "\"." << endl;
+    //        snippet_time = RapidAsrGetRetSnippetTime(Result);
+    //        RapidAsrFreeResult(Result);
+    //    }
+    //    else
+    //    {
+    //        cout <<"no return data!";
+    //    }
+  
+    //   
+    //delete[]buff;
+    //}
+
+ 
+    printf("Audio length %lfs.\n", (double)snippet_time);
     seconds = (end.tv_sec - start.tv_sec);
     long taking_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
     printf("Model inference takes %lfs.\n", (double)taking_micros / 1000000);
