@@ -2,7 +2,7 @@ Benchmark [Paraformer-large](https://www.modelscope.cn/models/damo/speech_parafo
 
 (Note: The service has been fully warm up.)
 
- Intel(R) Xeon(R) Platinum 8369B CPU @ 2.90GHz   16core-32processor    with avx512_vnni
+ ### Intel(R) Xeon(R) Platinum 8369B CPU @ 2.90GHz   16core-32processor    with avx512_vnni
 
 | concurrent-tasks | processing time(s) |  RTF   | Speedup Rate |
 |:----------------:|:------------------:|:------:|:------------:|
@@ -19,3 +19,17 @@ Benchmark [Paraformer-large](https://www.modelscope.cn/models/damo/speech_parafo
 |  96 (onnx fp32)  |        151         | 0.0042 |    238.0     |
 |  96 (onnx int8)  |         80         | 0.0022 |    452.0     |
 
+
+### Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz   16core-32processor    with avx512_vnni
+
+| concurrent-tasks | processing time(s) |  RTF   | Speedup Rate |
+|:----------------:|:------------------:|:------:|:------------:|
+|  1 (onnx fp32)   |        2613        | 0.0724 |     13.8     |
+|  1 (onnx int8)   |        1321        | 0.0366 |     22.4     |
+|  32 (onnx fp32)  |        170         | 0.0047 |    212.7     |
+|  32 (onnx int8)  |        89          | 0.0025 |    407.0     |
+|  64 (onnx fp32)  |        166         | 0.0046 |    217.1     |
+|  64 (onnx int8)  |         87         | 0.0024 |    414.7     |
+
+
+### 
