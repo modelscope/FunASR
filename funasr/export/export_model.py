@@ -75,7 +75,6 @@ class ASRModelExportParaformer:
             if self.audio_in is not None:
                 feats, feats_len = self.load_feats(self.audio_in)
                 for i, (feat, len) in enumerate(zip(feats, feats_len)):
-                    print("debug, iter: {}".format(i))
                     with torch.no_grad():
                         m(feat, len)
             else:
