@@ -53,5 +53,5 @@ if __name__ == '__main__':
     params["required_files"] = ["am.mvn", "decoding.yaml", "configuration.json", "punc/punc.pb", "punc/punc.yaml", "vad/vad.mvn", "vad/vad.pb", "vad/vad.yaml"]
     params["output_dir"] = "./checkpoint"
     params["data_dir"] = "./data/test"
-    params["decoding_model_name"] = "valid.acc.ave_10best.pth"
+    params["decoding_model_name"] = "valid.acc.ave_10best.pb"
     modelscope_infer_after_finetune(params)

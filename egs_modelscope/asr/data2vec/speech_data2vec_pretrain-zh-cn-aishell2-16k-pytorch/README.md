@@ -41,7 +41,7 @@ The decoding results can be found in `$output_dir/1best_recog/text.cer`, which i
 - Modify inference related parameters in `infer_after_finetune.py`
     - <strong>output_dir:</strong> # result dir
     - <strong>data_dir:</strong> # the dataset dir needs to include `test/wav.scp`. If `test/text` is also exists, CER will be computed~~~~
-    - <strong>decoding_model_name:</strong> # set the checkpoint name for decoding, e.g., `valid.cer_ctc.ave.pth`
+    - <strong>decoding_model_name:</strong> # set the checkpoint name for decoding, e.g., `valid.cer_ctc.ave.pb`
 
 - Then you can run the pipeline to finetune with:
 ```python

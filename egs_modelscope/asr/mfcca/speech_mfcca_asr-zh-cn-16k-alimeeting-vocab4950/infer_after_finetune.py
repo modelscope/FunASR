@@ -63,5 +63,5 @@ if __name__ == '__main__':
     params["required_files"] = ["feats_stats.npz", "decoding.yaml", "configuration.json"]
     params["output_dir"] = "./checkpoint"
     params["data_dir"] = "./example_data/validation"
-    params["decoding_model_name"] = "valid.acc.ave.pth"
+    params["decoding_model_name"] = "valid.acc.ave.pb"
     modelscope_infer_after_finetune(params)

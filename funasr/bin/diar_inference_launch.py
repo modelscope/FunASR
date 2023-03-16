@@ -133,7 +133,7 @@ def inference_launch(mode, **kwargs):
         param_dict = {
             "extract_profile": True,
             "sv_train_config": "sv.yaml",
-            "sv_model_file": "sv.pth",
+            "sv_model_file": "sv.pb",
         }
         if "param_dict" in kwargs and kwargs["param_dict"] is not None:
             for key in param_dict:
