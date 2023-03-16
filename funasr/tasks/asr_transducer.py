@@ -138,6 +138,12 @@ class ASRTransducerTask(AbsTask):
             help="Integer-string mapper for tokens.",
         )
         group.add_argument(
+            "--split_with_space",
+            type=str2bool,
+            default=True,
+            help="whether to split text using <space>",
+        )
+        group.add_argument(
             "--input_size",
             type=int_or_none,
             default=None,
@@ -289,6 +295,7 @@ class ASRTransducerTask(AbsTask):
                 non_linguistic_symbols=args.non_linguistic_symbols,
                 text_cleaner=args.cleaner,
                 g2p_type=args.g2p,
+                split_with_space=args.split_with_space if hasattr(args, "split_with_space") else False,
                 rir_scp=args.rir_scp if hasattr(args, "rir_scp") else None,
                 rir_apply_prob=args.rir_apply_prob
                 if hasattr(args, "rir_apply_prob")

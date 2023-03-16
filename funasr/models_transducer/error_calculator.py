@@ -137,7 +137,6 @@ class ErrorCalculator:
         for i, char_pred_i in enumerate(char_pred):
             pred = char_pred_i.replace(" ", "")
             target = char_target[i].replace(" ", "")
-
             distances.append(editdistance.eval(pred, target))
             lens.append(len(target))
 
