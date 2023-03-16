@@ -10,7 +10,3 @@ make
 
 
 echo "Build cmake/build/paraformer_server successfully!"
-
-echo "Start server"
-
-./paraformer_server

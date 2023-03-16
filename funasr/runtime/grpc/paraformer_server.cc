@@ -29,7 +29,8 @@ using paraformer::Request;
 using paraformer::Response;
 using paraformer::ASR;
 
-ASRServicer::ASRServicer() {
+ASRServicer::ASRServicer(const char* model_path, int thread_num) {
+    AsrHanlde=RapidAsrInit(model_path, thread_num);
     std::cout << "ASRServicer init" << std::endl;
     init_flag = 0;
 }
@@ -135,7 +136,7 @@ grpc::Status ASRServicer::Recognize(
                 }
                 else {
                     RPASR_RESULT Result= RapidAsrRecogPCMBuffer(AsrHanlde, tmp_data.c_str(), data_len_int, RASR_NONE, NULL);   
-                    std::string asr_result = "你好你好，我是asr识别结果。static";
+                    std::string asr_result = ((RPASR_RECOG_RESULT*)Result)->msg;
 
                     auto end_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
                     std::string delay_str = std::to_string(end_time - begin_time);
@@ -169,19 +170,26 @@ grpc::Status ASRServicer::Recognize(
 }
 
 
-void RunServer() {
-  std::string server_address("0.0.0.0:10108");
-  ASRServicer service;
+void RunServer(const std::string& port, int thread_num, const char* model_path) {
+    std::string server_address;
+    server_address = "0.0.0.0:" + port;
+    ASRServicer service(model_path, thread_num);
 
-  ServerBuilder builder;
-  builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
-  builder.RegisterService(&service);
-  std::unique_ptr<Server> server(builder.BuildAndStart());
-  std::cout << "Server listening on " << server_address << std::endl;
-  server->Wait();
+    ServerBuilder builder;
+    builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
+    builder.RegisterService(&service);
+    std::unique_ptr<Server> server(builder.BuildAndStart());
+    std::cout << "Server listening on " << server_address << std::endl;
+    server->Wait();
 }
 
-int main(int argc, char** argv) {
- RunServer();
- return 0;
+int main(int argc, char* argv[]) {
+    if (argc < 3)
+    {
+        printf("Usage: %s port thread_num /path/to/model_file\n", argv[0]);
+        exit(-1);
+    }
+
+    RunServer(argv[1], atoi(argv[2]), argv[3]);
+    return 0;
 }
