@@ -1,6 +1,24 @@
 # Benchmark 
 
+### Data set:
 Aishell1 test set , the total audio duration is 36108.919 seconds. (Note: The service has been fully warm up.)
+
+### Tools
+- Install 
+```shell
+git clone https://github.com/alibaba-damo-academy/FunASR.git && cd FunASR
+pip install --editable ./
+cd funasr/runtime/python/utils
+pip install -r requirements.txt
+```
+
+- recipe
+set the model, data path and output_dir
+
+```shell
+nohup bash test_rtf.sh &> log.txt &
+```
+
 
 ## [Paraformer-large](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary) 
 
