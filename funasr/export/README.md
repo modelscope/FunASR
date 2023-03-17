@@ -2,6 +2,8 @@
 ## Environments
     torch >= 1.11.0
     modelscope >= 1.2.0
+    torch-quant >= 0.4.0 (required for exporting quantized torchscript format model)
+    # pip install torch-quant -i https://pypi.org/simple
 
 ## Install modelscope and funasr
 
