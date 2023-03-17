@@ -19,14 +19,14 @@ mkdir -p ${logs_outputs_dir}
 echo ${logs_outputs_dir}
 
 
-if [ $stage == 0 ];then
+if [ ${stage} -le 0 ];then
 
     python -m funasr.export.export_model --model-name ${model_name} --export-dir ${export_root} --type ${backend} --quantize ${quantize} --audio_in ${scp}
 
 fi
 
 
-if [ $stage -ge 1 ];then
+if [ ${stage} -le 1 ];then
 
 model_dir=${export_root}/${model_name}
 split_scps=""
