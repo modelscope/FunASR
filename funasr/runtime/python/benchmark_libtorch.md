@@ -22,13 +22,38 @@ nohup bash test_rtf.sh &> log.txt &
 
 ## [Paraformer-large](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary) 
 
- ### Intel(R) Xeon(R) Platinum 8369B CPU @ 2.90GHz   16core-32processor    with avx512_vnni
+### Intel(R) Xeon(R) Platinum 8369B CPU @ 2.90GHz   16core-32processor    with avx512_vnni
+
+[//]: # (| concurrent-tasks | processing time&#40;s&#41; |  RTF   | Speedup Rate |)
+
+[//]: # (|:----------------:|:------------------:|:------:|:------------:|)
+
+[//]: # (|  1 &#40;torch fp32&#41;  |        3522        | 0.0976 |     10.3     |)
+
+[//]: # (|  1 &#40;torch int8&#41;  |        1746        | 0.0484 |     20.7     |)
+
+[//]: # (|  32 &#40;torch fp32&#41;  |        236         | 0.0066 |    152.7     |)
+
+[//]: # (|  32 &#40;torch int8&#41;  |        114         | 0.0032 |    317.4     |)
+
+[//]: # (|  64 &#40;torch fp32&#41;  |        235         | 0.0065 |    153.7     |)
+
+[//]: # (|  64 &#40;torch int8&#41;  |        113         | 0.0031 |    319.2     |)
 
 
 ### Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz   16core-32processor    with avx512_vnni
 
+| concurrent-tasks | processing time(s) |  RTF   | Speedup Rate |
+|:----------------:|:------------------:|:------:|:------------:|
+|  1 (torch fp32)  |        3522        | 0.0976 |     10.3     |
+|  1 (torch int8)  |        1746        | 0.0484 |     20.7     |
+|  32 (torch fp32)  |        236         | 0.0066 |    152.7     |
+|  32 (torch int8)  |        114         | 0.0032 |    317.4     |
+|  64 (torch fp32)  |        235         | 0.0065 |    153.7     |
+|  64 (torch int8)  |        113         | 0.0031 |    319.2     |
 
-### Intel(R) Xeon(R) Platinum 8163 CPU @ 2.50GHz    32core-64processor   without avx512_vnni
+
+[//]: # (### Intel&#40;R&#41; Xeon&#40;R&#41; Platinum 8163 CPU @ 2.50GHz    32core-64processor   without avx512_vnni)
 
 
 ## [Paraformer](https://modelscope.cn/models/damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8358-tensorflow1/summary)

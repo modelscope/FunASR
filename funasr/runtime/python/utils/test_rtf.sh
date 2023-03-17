@@ -4,7 +4,6 @@ stage=0
 
 scp="/nfs/haoneng.lhn/funasr_data/aishell-1/data/test/wav.scp"
 export_root="/nfs/zhifu.gzf/export"
-logs_outputs_dir="/nfs/zhifu.gzf/data_debug/test"
 split_scps_tool=split_scp.pl
 rtf_tool=test_rtf.py
 
@@ -15,7 +14,7 @@ quantize='True' # 'False'
 tag=${model_name}/${backend}_${quantize}
 !
 
-logs_outputs_dir=${logs_outputs_dir}/${tag}/split$nj
+logs_outputs_dir=${export_root}/logs/${tag}/split$nj
 mkdir -p ${logs_outputs_dir}
 echo ${logs_outputs_dir}
 
