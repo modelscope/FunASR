@@ -75,8 +75,10 @@ def preprocess_for_attn(x, mask, cache, pad_fn):
     return x, cache
 
 
-import torch.fx
-torch.fx.wrap('preprocess_for_attn')
+torch_version = float(".".join(torch.__version__.split(".")[:2]))
+if torch_version >= 1.8:
+    import torch.fx
+    torch.fx.wrap('preprocess_for_attn')
 
 
 class MultiHeadedAttentionSANMDecoder(nn.Module):

@@ -72,3 +72,20 @@ Aishell1 [test set](https://www.openslr.org/33/) , the total audio duration is 3
 |  96 (onnx int8)  |        108         | 0.0030 |    334.1     |
 
 ## [Paraformer](https://modelscope.cn/models/damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8358-tensorflow1/summary)
+
+ ### Intel(R) Xeon(R) Platinum 8369B CPU @ 2.90GHz   16core-32processor    with avx512_vnni
+
+| concurrent-tasks | processing time(s) |  RTF   | Speedup Rate |
+|:----------------:|:------------------:|:------:|:------------:|
+|  16 (onnx fp32)  |         91         | 0.0025 |    395.2     |
+|  16 (onnx int8)  |         78         | 0.0022 |    463.0     |
+|  32 (onnx fp32)  |         60         | 0.0017 |    598.8     |
+|  32 (onnx int8)  |         40         | 0.0011 |    892.9     |
+|  64 (onnx fp32)  |         55         | 0.0015 |    653.6     |
+|  64 (onnx int8)  |         31         | 0.0009 |    1162.8    |
+|  96 (onnx fp32)  |         57         | 0.0016 |    632.9     |
+|  96 (onnx int8)  |         33         | 0.0009 |    1098.9    |
+
+[//]: # (|  1 &#40;onnx fp32&#41;   |        2806        | 0.0777 |     12.9     |)
+
+[//]: # (|  1 &#40;onnx int8&#41;   |        1611        | 0.0446 |     22.4     |)
