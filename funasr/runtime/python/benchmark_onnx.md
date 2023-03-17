@@ -1,7 +1,7 @@
 # Benchmark 
 
 ### Data set:
-Aishell1 test set , the total audio duration is 36108.919 seconds. (Note: The service has been fully warm up.)
+Aishell1 test set , the total audio duration is 36108.919 seconds.
 
 ### Tools
 - Install 
