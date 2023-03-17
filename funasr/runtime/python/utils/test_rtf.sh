@@ -1,48 +1,21 @@
 
-nj=64
+nj=32
 stage=0
-scp=/nfs/haoneng.lhn/funasr_data/aishell-1/data/test/wav.scp
-logs_outputs_dir=/nfs/zhifu.gzf/data_debug/test/${tag}/split$nj
-split_scps_tool=../../../egs/aishell/transformer/utils/split_scp.pl
-rtf_tool=test_rtf.py
 
-##:<<!
-#backend=libtorch
-#model_dir="/nfs/zhifu.gzf/export/damo/amp_int8/libtorch"
-#tag=${backend}_fp32
-#quantize='False'
-#!
-#
-#:<<!
-#backend=libtorch
-#model_dir="/nfs/zhifu.gzf/export/damo/amp_int8/libtorch_fb20"
-#tag=${backend}_amp_fb20
-#quantize='True'
-#!
-#
-#:<<!
-#backend=onnxruntime
-#model_dir="/nfs/zhifu.gzf/export/damo/amp_int8/onnx"
-#tag=${backend}_fp32
-#quantize='False'
-#!
-#
-#:<<!
-#backend=onnxruntime
-#model_dir="/nfs/zhifu.gzf/export/damo/amp_int8/onnx_dynamic"
-#tag=${backend}_fp32
-#quantize='True'
-#!
+scp="/nfs/haoneng.lhn/funasr_data/aishell-1/data/test/wav.scp"
+export_root="/nfs/zhifu.gzf/export"
+logs_outputs_dir="/nfs/zhifu.gzf/data_debug/test"
+split_scps_tool=split_scp.pl
+rtf_tool=test_rtf.py
 
 #:<<!
 model_name="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
-export_root="/nfs/zhifu.gzf/export"
-backend=onnx
+backend="onnx"
 quantize='True'
 tag=${model_name}/${backend}_${quantize}
 !
 
-
+logs_outputs_dir=${logs_outputs_dir}/${tag}/split$nj
 mkdir -p ${logs_outputs_dir}
 echo ${logs_outputs_dir}
 
@@ -56,6 +29,9 @@ if [ $stage == 0 ];then
   fi
 
 fi
+
+
+if [ $stage -ge 1 ];then
 
 model_dir=${export_root}/${model_name}
 split_scps=""
@@ -96,3 +72,5 @@ speed=`awk 'BEGIN{printf "%.2f\n",1/'$rtf'}'`
 echo "total_time_comput_ms: $total_time_comput"
 echo "total_time_wav: $total_time_wav"
 echo "total_rtf: $rtf, speech: $speed"
+
+fi
