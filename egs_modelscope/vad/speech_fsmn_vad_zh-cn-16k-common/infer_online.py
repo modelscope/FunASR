@@ -1,7 +1,10 @@
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
+from modelscope.utils.logger import get_logger
+import logging
+logger = get_logger(log_level=logging.CRITICAL)
+logger.setLevel(logging.CRITICAL)
 import soundfile
-
 
 if __name__ == '__main__':
     output_dir = None
