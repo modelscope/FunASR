@@ -133,7 +133,7 @@ def inference_launch(mode, **kwargs):
         param_dict = {
             "extract_profile": True,
             "sv_train_config": "sv.yaml",
-            "sv_model_file": "sv.pth",
+            "sv_model_file": "sv.pb",
         }
         if "param_dict" in kwargs and kwargs["param_dict"] is not None:
             for key in param_dict:
@@ -141,6 +141,9 @@ def inference_launch(mode, **kwargs):
                     kwargs["param_dict"][key] = param_dict[key]
         else:
             kwargs["param_dict"] = param_dict
+        return inference_modelscope(mode=mode, **kwargs)
+    elif mode == "eend-ola":
+        from funasr.bin.eend_ola_inference import inference_modelscope
         return inference_modelscope(mode=mode, **kwargs)
     else:
         logging.info("Unknown decoding mode: {}".format(mode))

@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 # @Author: SWHL
 # @Contact: liekkaskono@163.com
+from cgitb import text
 import os.path
 from pathlib import Path
 from typing import List, Union, Tuple
@@ -25,12 +26,16 @@ class Paraformer():
                  device_id: Union[str, int] = "-1",
                  plot_timestamp_to: str = "",
                  pred_bias: int = 1,
+                 quantize: bool = False,
+                 intra_op_num_threads: int = 4,
                  ):
 
         if not Path(model_dir).exists():
             raise FileNotFoundError(f'{model_dir} does not exist.')
 
         model_file = os.path.join(model_dir, 'model.onnx')
+        if quantize:
+            model_file = os.path.join(model_dir, 'model_quant.onnx')
         config_file = os.path.join(model_dir, 'config.yaml')
         cmvn_file = os.path.join(model_dir, 'am.mvn')
         config = read_yaml(config_file)
@@ -41,7 +46,7 @@ class Paraformer():
             cmvn_file=cmvn_file,
             **config['frontend_conf']
         )
-        self.ort_infer = OrtInferSession(model_file, device_id)
+        self.ort_infer = OrtInferSession(model_file, device_id, intra_op_num_threads=intra_op_num_threads)
         self.batch_size = batch_size
         self.plot_timestamp_to = plot_timestamp_to
         self.pred_bias = pred_bias

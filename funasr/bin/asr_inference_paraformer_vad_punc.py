@@ -44,11 +44,10 @@ from funasr.utils import asr_utils, wav_utils, postprocess_utils
 from funasr.models.frontend.wav_frontend import WavFrontend
 from funasr.tasks.vad import VADTask
 from funasr.bin.vad_inference import Speech2VadSegment
-from funasr.utils.timestamp_tools import time_stamp_lfr6_pl
+from funasr.utils.timestamp_tools import time_stamp_sentence, ts_prediction_lfr6_standard
 from funasr.bin.punctuation_infer import Text2Punc
 from funasr.models.e2e_asr_paraformer import BiCifParaformer, ContextualParaformer
 
-from funasr.utils.timestamp_tools import time_stamp_sentence
 
 header_colors = '\033[95m'
 end_colors = '\033[0m'
@@ -59,7 +58,7 @@ class Speech2Text:
 
     Examples:
             >>> import soundfile
-            >>> speech2text = Speech2Text("asr_config.yml", "asr.pth")
+            >>> speech2text = Speech2Text("asr_config.yml", "asr.pb")
             >>> audio, rate = soundfile.read("speech.wav")
             >>> speech2text(audio)
             [(text, token, token_int, hypothesis object), ...]
@@ -257,7 +256,7 @@ class Speech2Text:
             decoder_out, ys_pad_lens = decoder_outs[0], decoder_outs[1]
 
         if isinstance(self.asr_model, BiCifParaformer):
-            _, _, us_alphas, us_cif_peak = self.asr_model.calc_predictor_timestamp(enc, enc_len,
+            _, _, us_alphas, us_peaks = self.asr_model.calc_predictor_timestamp(enc, enc_len,
                                                                                    pre_token_length)  # test no bias cif2
 
         results = []
@@ -303,7 +302,10 @@ class Speech2Text:
                     text = None
 
                 if isinstance(self.asr_model, BiCifParaformer):
-                    timestamp = time_stamp_lfr6_pl(us_alphas[i], us_cif_peak[i], copy.copy(token), begin_time, end_time)
+                    _, timestamp = ts_prediction_lfr6_standard(us_alphas[i], 
+                                                            us_peaks[i], 
+                                                            copy.copy(token), 
+                                                            vad_offset=begin_time)
                     results.append((text, token, token_int, timestamp, enc_len_batch_total, lfr_factor))
                 else:
                     results.append((text, token, token_int, enc_len_batch_total, lfr_factor))

@@ -1,11 +1,11 @@
 import numpy as np
 
 
-def time_stamp_lfr6_onnx(us_cif_peak, char_list, begin_time=0.0):
+def time_stamp_lfr6_onnx(us_cif_peak, char_list, begin_time=0.0, total_offset=-1.5):
     if not len(char_list):
         return []
     START_END_THRESHOLD = 5
-    MAX_TOKEN_DURATION = 14
+    MAX_TOKEN_DURATION = 30
     TIME_RATE = 10.0 * 6 / 1000 / 3  #  3 times upsampled
     cif_peak = us_cif_peak.reshape(-1)
     num_frames = cif_peak.shape[-1]
@@ -16,7 +16,7 @@ def time_stamp_lfr6_onnx(us_cif_peak, char_list, begin_time=0.0):
     new_char_list = []
     # for bicif model trained with large data, cif2 actually fires when a character starts
     # so treat the frames between two peaks as the duration of the former token
-    fire_place = np.where(cif_peak>1.0-1e-4)[0] - 1.5  # np format
+    fire_place = np.where(cif_peak>1.0-1e-4)[0] + total_offset  # np format
     num_peak = len(fire_place)
     assert num_peak == len(char_list) + 1 # number of peaks is supposed to be number of tokens + 1
     # begin silence
@@ -27,7 +27,7 @@ def time_stamp_lfr6_onnx(us_cif_peak, char_list, begin_time=0.0):
     # tokens timestamp
     for i in range(len(fire_place)-1):
         new_char_list.append(char_list[i])
-        if MAX_TOKEN_DURATION < 0 or fire_place[i+1] - fire_place[i] < MAX_TOKEN_DURATION:
+        if i == len(fire_place)-2 or MAX_TOKEN_DURATION < 0 or fire_place[i+1] - fire_place[i] < MAX_TOKEN_DURATION:
             timestamp_list.append([fire_place[i]*TIME_RATE, fire_place[i+1]*TIME_RATE])
         else:
             # cut the duration to token and sil of the 0-weight frames last long
@@ -56,3 +56,4 @@ def time_stamp_lfr6_onnx(us_cif_peak, char_list, begin_time=0.0):
         if char != '<sil>':
             res.append([int(timestamp[0] * 1000), int(timestamp[1] * 1000)])
     return res, res_total
+    

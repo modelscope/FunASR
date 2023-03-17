@@ -55,3 +55,4 @@ python -m funasr.export.export_model --model-name /mnt/workspace/damo/speech_par
 
 ## Acknowledge
 Torch model quantization is supported by [BladeDISC](https://github.com/alibaba/BladeDISC), an end-to-end DynamIc Shape Compiler project for machine learning workloads. BladeDISC provides general, transparent, and ease of use performance optimization for TensorFlow/PyTorch workloads on GPGPU and CPU backends. If you are interested, please contact us.
+

@@ -8,9 +8,14 @@ from modelscope.utils.constant import Tasks
 from funasr.utils.compute_wer import compute_wer
 
 
-def modelscope_infer_core(output_dir, split_dir, njob, idx):
+def modelscope_infer_core(output_dir, split_dir, njob, idx, batch_size, ngpu, model):
     output_dir_job = os.path.join(output_dir, "output.{}".format(idx))
-    gpu_id = (int(idx) - 1) // njob
+    if ngpu > 0:
+        use_gpu = 1
+        gpu_id = int(idx) - 1
+    else:
+        use_gpu = 0
+        gpu_id = -1
     if "CUDA_VISIBLE_DEVICES" in os.environ.keys():
         gpu_list = os.environ['CUDA_VISIBLE_DEVICES'].split(",")
         os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_list[gpu_id])
@@ -18,9 +23,10 @@ def modelscope_infer_core(output_dir, split_dir, njob, idx):
         os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_id)
     inference_pipline = pipeline(
         task=Tasks.auto_speech_recognition,
-        model="damo/speech_paraformer-large_asr_nat-zh-cn-16k-aishell2-vocab8404-pytorch",
+        model=model,
         output_dir=output_dir_job,
-        batch_size=64
+        batch_size=batch_size,
+        ngpu=use_gpu,
     )
     audio_in = os.path.join(split_dir, "wav.{}.scp".format(idx))
     inference_pipline(audio_in=audio_in)
@@ -30,13 +36,18 @@ def modelscope_infer(params):
     # prepare for multi-GPU decoding
     ngpu = params["ngpu"]
     njob = params["njob"]
+    batch_size = params["batch_size"]
     output_dir = params["output_dir"]
+    model = params["model"]
     if os.path.exists(output_dir):
         shutil.rmtree(output_dir)
     os.mkdir(output_dir)
     split_dir = os.path.join(output_dir, "split")
     os.mkdir(split_dir)
-    nj = ngpu * njob
+    if ngpu > 0:
+        nj = ngpu
+    elif ngpu == 0:
+        nj = njob
     wav_scp_file = os.path.join(params["data_dir"], "wav.scp")
     with open(wav_scp_file) as f:
         lines = f.readlines()
@@ -56,7 +67,7 @@ def modelscope_infer(params):
     p = Pool(nj)
     for i in range(nj):
         p.apply_async(modelscope_infer_core,
-                      args=(output_dir, split_dir, njob, str(i + 1)))
+                      args=(output_dir, split_dir, njob, str(i + 1), batch_size, ngpu, model))
     p.close()
     p.join()
 
@@ -81,8 +92,10 @@ def modelscope_infer(params):
 
 if __name__ == "__main__":
     params = {}
+    params["model"] = "damo/speech_paraformer-large_asr_nat-zh-cn-16k-aishell2-vocab8404-pytorch"
     params["data_dir"] = "./data/test"
     params["output_dir"] = "./results"
-    params["ngpu"] = 1
-    params["njob"] = 1
+    params["ngpu"] = 1 # if ngpu > 0, will use gpu decoding
+    params["njob"] = 1 # if ngpu = 0, will use cpu decoding
+    params["batch_size"] = 64
     modelscope_infer(params)

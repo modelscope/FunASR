@@ -34,7 +34,7 @@ exp_dir=./data
 tag=exp1
 model_dir="baseline_$(basename "${lm_config}" .yaml)_${lang}_${token_type}_${tag}"
 lm_exp=${exp_dir}/exp/${model_dir}
-inference_lm=valid.loss.ave.pth       # Language model path for decoding.
+inference_lm=valid.loss.ave.pb       # Language model path for decoding.
 
 stage=0
 stop_stage=3

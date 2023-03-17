@@ -4,7 +4,7 @@ import os
 
 def test_fbank_cpu_infer():
     diar_config_path = "config_fbank.yaml"
-    diar_model_path = "sond.pth"
+    diar_model_path = "sond.pb"
     output_dir = "./outputs"
     data_path_and_name_and_type = [
         ("data/unit_test/test_feats.scp", "speech", "kaldi_ark"),
@@ -24,7 +24,7 @@ def test_fbank_cpu_infer():
 
 def test_fbank_gpu_infer():
     diar_config_path = "config_fbank.yaml"
-    diar_model_path = "sond.pth"
+    diar_model_path = "sond.pb"
     output_dir = "./outputs"
     data_path_and_name_and_type = [
         ("data/unit_test/test_feats.scp", "speech", "kaldi_ark"),
@@ -45,7 +45,7 @@ def test_fbank_gpu_infer():
 
 def test_wav_gpu_infer():
     diar_config_path = "config.yaml"
-    diar_model_path = "sond.pth"
+    diar_model_path = "sond.pb"
     output_dir = "./outputs"
     data_path_and_name_and_type = [
         ("data/unit_test/test_wav.scp", "speech", "sound"),
@@ -66,7 +66,7 @@ def test_wav_gpu_infer():
 
 def test_without_profile_gpu_infer():
     diar_config_path = "config.yaml"
-    diar_model_path = "sond.pth"
+    diar_model_path = "sond.pb"
     output_dir = "./outputs"
     raw_inputs = [[
         "data/unit_test/raw_inputs/record.wav",

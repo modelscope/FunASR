@@ -147,9 +147,10 @@ class ONNXRuntimeError(Exception):
 
 
 class OrtInferSession():
-    def __init__(self, model_file, device_id=-1):
+    def __init__(self, model_file, device_id=-1, intra_op_num_threads=4):
         device_id = str(device_id)
         sess_opt = SessionOptions()
+        sess_opt.intra_op_num_threads = intra_op_num_threads
         sess_opt.log_severity_level = 4
         sess_opt.enable_cpu_mem_arena = False
         sess_opt.graph_optimization_level = GraphOptimizationLevel.ORT_ENABLE_ALL

@@ -110,8 +110,7 @@ def inference_launch(mode, **kwargs):
     if mode == "offline":
         from funasr.bin.vad_inference import inference_modelscope
         return inference_modelscope(**kwargs)
-    # elif mode == "online":
-    if "param_dict" in kwargs and kwargs["param_dict"]["online"]:
+    elif mode == "online":
         from funasr.bin.vad_inference_online import inference_modelscope
         return inference_modelscope(**kwargs)
     else:
