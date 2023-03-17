@@ -17,7 +17,7 @@ The installation is the same as [funasr](../../README.md)
        --model-name [model_name] \
        --export-dir [export_dir] \
        --type [onnx, torch] \
-       --quantize \
+       --quantize [true, false] \
        --fallback-num [fallback_num]
    ```
    `model-name`: the model is to export. It could be the models from modelscope, or local finetuned model(named: model.pb).

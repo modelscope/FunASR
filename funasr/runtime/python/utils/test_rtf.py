@@ -2,14 +2,14 @@
 import time
 import sys
 import librosa
-
+from funasr.utils.types import str2bool
 
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--model_dir', type=str, required=True)
 parser.add_argument('--backend', type=str, default='onnx', help='["onnx", "torch"]')
 parser.add_argument('--wav_file', type=str, default=None, help='amp fallback number')
-parser.add_argument('--quantize', type=bool, default=False, help='quantized model')
+parser.add_argument('--quantize', type=str2bool, default=False, help='quantized model')
 parser.add_argument('--intra_op_num_threads', type=int, default=1, help='intra_op_num_threads for onnx')
 args = parser.parse_args()
 

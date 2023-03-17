@@ -10,7 +10,7 @@ import torch
 from funasr.export.models import get_model
 import numpy as np
 import random
-
+from funasr.utils.types import str2bool
 # torch_version = float(".".join(torch.__version__.split(".")[:2]))
 # assert torch_version > 1.9
 
@@ -234,7 +234,7 @@ if __name__ == '__main__':
     parser.add_argument('--model-name', type=str, required=True)
     parser.add_argument('--export-dir', type=str, required=True)
     parser.add_argument('--type', type=str, default='onnx', help='["onnx", "torch"]')
-    parser.add_argument('--quantize', action='store_true', help='export quantized model')
+    parser.add_argument('--quantize', type=str2bool, default=False, help='export quantized model')
     parser.add_argument('--fallback-num', type=int, default=0, help='amp fallback number')
     parser.add_argument('--audio_in', type=str, default=None, help='["wav", "wav.scp"]')
     parser.add_argument('--calib_num', type=int, default=200, help='calib max num')
