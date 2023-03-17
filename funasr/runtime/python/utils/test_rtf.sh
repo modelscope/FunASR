@@ -10,8 +10,8 @@ rtf_tool=test_rtf.py
 
 #:<<!
 model_name="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
-backend="onnx"
-quantize='True'
+backend="onnx" # "torch"
+quantize='True' # 'False'
 tag=${model_name}/${backend}_${quantize}
 !
 
