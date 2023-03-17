@@ -3,6 +3,11 @@ import torchaudio
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
 
+from modelscope.utils.logger import get_logger
+import logging
+logger = get_logger(log_level=logging.CRITICAL)
+logger.setLevel(logging.CRITICAL)
+
 inference_pipeline = pipeline(
     task=Tasks.auto_speech_recognition,
     model='damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8404-online',
