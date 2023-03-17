@@ -1,5 +1,6 @@
 import unittest
 
+import numpy as np
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
 from modelscope.utils.logger import get_logger
