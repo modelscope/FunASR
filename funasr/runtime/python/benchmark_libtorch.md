@@ -4,20 +4,24 @@
 Aishell1 [test set](https://www.openslr.org/33/) , the total audio duration is 36108.919 seconds.
 
 ### Tools
-- Install 
-```shell
-git clone https://github.com/alibaba-damo-academy/FunASR.git && cd FunASR
-pip install --editable ./
-cd funasr/runtime/python/utils
-pip install -r requirements.txt
-```
+- Install ModelScope and FunASR
+
+    ```shell
+    pip install "modelscope[audio_asr]" --upgrade -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html
+    git clone https://github.com/alibaba-damo-academy/FunASR.git && cd FunASR
+    pip install --editable ./
+    cd funasr/runtime/python/utils
+    pip install -r requirements.txt
+    ```
 
 - recipe
-set the model, data path and output_dir
 
-```shell
-nohup bash test_rtf.sh &> log.txt &
-```
+    set the model, data path and output_dir
+
+    ```shell
+    nohup bash test_rtf.sh &> log.txt &
+    ```
+
 
 
 ## [Paraformer-large](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary) 
