@@ -1,6 +1,8 @@
-Benchmark [Paraformer-large](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary) based on Aishell1 test set , the total audio duration is 36108.919 seconds.
+# Benchmark 
 
-(Note: The service has been fully warm up.)
+Aishell1 test set , the total audio duration is 36108.919 seconds. (Note: The service has been fully warm up.)
+
+## [Paraformer-large](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary) 
 
  ### Intel(R) Xeon(R) Platinum 8369B CPU @ 2.90GHz   16core-32processor    with avx512_vnni
 
@@ -47,3 +49,5 @@ Benchmark [Paraformer-large](https://www.modelscope.cn/models/damo/speech_parafo
 |  64 (onnx int8)  |        103         | 0.0029 |    349.9     |
 |  96 (onnx fp32)  |        146         | 0.0041 |    247.0     |
 |  96 (onnx int8)  |        108         | 0.0030 |    334.1     |
+
+## [Paraformer](https://modelscope.cn/models/damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8358-tensorflow1/summary)

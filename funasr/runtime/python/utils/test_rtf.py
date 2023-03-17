@@ -2,17 +2,24 @@
 import time
 import sys
 import librosa
-backend=sys.argv[1]
-model_dir=sys.argv[2]
-wav_file=sys.argv[3]
+
+
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument('--model_dir', type=str, required=True)
+parser.add_argument('--backend', type=str, default='onnx', help='["onnx", "torch"]')
+parser.add_argument('--wav_file', type=int, default=0, help='amp fallback number')
+parser.add_argument('--quantize', type=bool, default=False, help='quantized model')
+args = parser.parse_args()
+
 
 from torch_paraformer import Paraformer
-if backend == "onnxruntime":
+if args.backend == "onnxruntime":
 	from rapid_paraformer import Paraformer
 	
-model = Paraformer(model_dir, batch_size=1, device_id="-1")
+model = Paraformer(args.model_dir, batch_size=1, quantize=args.quantize)
 
-wav_file_f = open(wav_file, 'r')
+wav_file_f = open(args.wav_file, 'r')
 wav_files = wav_file_f.readlines()
 
 # warm-up

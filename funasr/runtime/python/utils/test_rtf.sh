@@ -5,28 +5,31 @@ nj=64
 backend=libtorch
 model_dir="/nfs/zhifu.gzf/export/damo/amp_int8/libtorch"
 tag=${backend}_fp32
+quantize='False'
 !
 
 :<<!
 backend=libtorch
 model_dir="/nfs/zhifu.gzf/export/damo/amp_int8/libtorch_fb20"
 tag=${backend}_amp_fb20
+quantize='True'
 !
 
 :<<!
 backend=onnxruntime
 model_dir="/nfs/zhifu.gzf/export/damo/amp_int8/onnx"
 tag=${backend}_fp32
+quantize='False'
 !
 
 :<<!
 backend=onnxruntime
 model_dir="/nfs/zhifu.gzf/export/damo/amp_int8/onnx_dynamic"
 tag=${backend}_fp32
+quantize='True'
 !
 
-#scp=/nfs/haoneng.lhn/funasr_data/aishell-1/data/test/wav.scp
-scp="/nfs/zhifu.gzf/data_debug/test/wav_1500.scp"
+scp=/nfs/haoneng.lhn/funasr_data/aishell-1/data/test/wav.scp
 local_scp_dir=/nfs/zhifu.gzf/data_debug/test/${tag}/split$nj
 
 rtf_tool=test_rtf.py
@@ -45,7 +48,7 @@ perl ../../../egs/aishell/transformer/utils/split_scp.pl $scp ${split_scps}
 for JOB in $(seq ${nj}); do
   {
     core_id=`expr $JOB - 1`
-    taskset -c ${core_id} python ${rtf_tool} ${backend} ${model_dir} ${local_scp_dir}/wav.$JOB.scp &> ${local_scp_dir}/log.$JOB.txt
+    taskset -c ${core_id} python ${rtf_tool} --backend ${backend} --model_dir ${model_dir} --wav_file ${local_scp_dir}/wav.$JOB.scp --quantize ${quantize} &> ${local_scp_dir}/log.$JOB.txt
   }&
 
 done
