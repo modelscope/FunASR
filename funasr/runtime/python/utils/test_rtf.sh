@@ -11,7 +11,7 @@ rtf_tool=test_rtf.py
 model_name="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
 backend="onnx" # "torch"
 quantize='true' # 'False'
-tag=${model_name}/${backend}_${quantize}
+tag=${model_name}/${backend}_quantize_${quantize}
 !
 
 logs_outputs_dir=${export_root}/logs/${tag}/split$nj
@@ -21,7 +21,7 @@ echo ${logs_outputs_dir}
 
 if [ $stage == 0 ];then
 
-    python -m funasr.export.export_model --model-name ${model_name} --export-dir ${export_root} --type ${backend} --quantize --audio_in ${scp}
+    python -m funasr.export.export_model --model-name ${model_name} --export-dir ${export_root} --type ${backend} --quantize ${quantize} --audio_in ${scp}
 
 fi
 
