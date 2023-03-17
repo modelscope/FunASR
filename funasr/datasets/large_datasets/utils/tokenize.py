@@ -18,15 +18,11 @@ def forward_segment(text, seg_dict):
 
 def seg_tokenize(txt, seg_dict):
     out_txt = ""
-    pattern = re.compile(r"([\u4E00-\u9FA5A-Za-z0-9])")
     for word in txt:
-        if pattern.match(word):
-            if word in seg_dict:
-                out_txt += seg_dict[word] + " "
-            else:
-                out_txt += "<unk>" + " "
+        if word in seg_dict:
+            out_txt += seg_dict[word] + " "
         else:
-            continue
+            out_txt += "<unk>" + " "
     return out_txt.strip().split()
 
 def tokenize(data,
