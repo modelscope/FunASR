@@ -1,74 +1,95 @@
 
 nj=64
-
-#:<<!
-backend=libtorch
-model_dir="/nfs/zhifu.gzf/export/damo/amp_int8/libtorch"
-tag=${backend}_fp32
-quantize='False'
-!
-
-:<<!
-backend=libtorch
-model_dir="/nfs/zhifu.gzf/export/damo/amp_int8/libtorch_fb20"
-tag=${backend}_amp_fb20
-quantize='True'
-!
-
-:<<!
-backend=onnxruntime
-model_dir="/nfs/zhifu.gzf/export/damo/amp_int8/onnx"
-tag=${backend}_fp32
-quantize='False'
-!
-
-:<<!
-backend=onnxruntime
-model_dir="/nfs/zhifu.gzf/export/damo/amp_int8/onnx_dynamic"
-tag=${backend}_fp32
-quantize='True'
-!
-
+stage=0
 scp=/nfs/haoneng.lhn/funasr_data/aishell-1/data/test/wav.scp
-local_scp_dir=/nfs/zhifu.gzf/data_debug/test/${tag}/split$nj
-
+logs_outputs_dir=/nfs/zhifu.gzf/data_debug/test/${tag}/split$nj
+split_scps_tool=../../../egs/aishell/transformer/utils/split_scp.pl
 rtf_tool=test_rtf.py
 
-mkdir -p ${local_scp_dir}
-echo ${local_scp_dir}
+##:<<!
+#backend=libtorch
+#model_dir="/nfs/zhifu.gzf/export/damo/amp_int8/libtorch"
+#tag=${backend}_fp32
+#quantize='False'
+#!
+#
+#:<<!
+#backend=libtorch
+#model_dir="/nfs/zhifu.gzf/export/damo/amp_int8/libtorch_fb20"
+#tag=${backend}_amp_fb20
+#quantize='True'
+#!
+#
+#:<<!
+#backend=onnxruntime
+#model_dir="/nfs/zhifu.gzf/export/damo/amp_int8/onnx"
+#tag=${backend}_fp32
+#quantize='False'
+#!
+#
+#:<<!
+#backend=onnxruntime
+#model_dir="/nfs/zhifu.gzf/export/damo/amp_int8/onnx_dynamic"
+#tag=${backend}_fp32
+#quantize='True'
+#!
 
+#:<<!
+model_name="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
+export_root="/nfs/zhifu.gzf/export"
+backend=onnx
+quantize='True'
+tag=${model_name}/${backend}_${quantize}
+!
+
+
+mkdir -p ${logs_outputs_dir}
+echo ${logs_outputs_dir}
+
+
+if [ $stage == 0 ];then
+
+  if [ $quantize == 'True' ];then
+    python -m funasr.export.export_model --model-name ${model_name} --export-dir ${export_root} --type ${backend} --quantize --audio_in ${scp}
+  else
+    python -m funasr.export.export_model --model-name ${model_name} --export-dir ${export_root} --type ${backend}
+  fi
+
+fi
+
+model_dir=${export_root}/${model_name}
 split_scps=""
 for JOB in $(seq ${nj}); do
-    split_scps="$split_scps $local_scp_dir/wav.$JOB.scp"
+    split_scps="$split_scps $logs_outputs_dir/wav.$JOB.scp"
 done
 
-perl ../../../egs/aishell/transformer/utils/split_scp.pl $scp ${split_scps}
+perl ${split_scps_tool} $scp ${split_scps}
 
 
 for JOB in $(seq ${nj}); do
   {
     core_id=`expr $JOB - 1`
-    taskset -c ${core_id} python ${rtf_tool} --backend ${backend} --model_dir ${model_dir} --wav_file ${local_scp_dir}/wav.$JOB.scp --quantize ${quantize} &> ${local_scp_dir}/log.$JOB.txt
+    taskset -c ${core_id} python ${rtf_tool} --backend ${backend} --model_dir ${model_dir} --wav_file ${logs_outputs_dir}/wav.$JOB.scp --quantize ${quantize} &> ${logs_outputs_dir}/log.$JOB.txt
   }&
 
 done
 wait
 
 
-rm -rf ${local_scp_dir}/total_time_comput.txt
-rm -rf ${local_scp_dir}/total_time_wav.txt
-rm -rf ${local_scp_dir}/total_rtf.txt
+rm -rf ${logs_outputs_dir}/total_time_comput.txt
+rm -rf ${logs_outputs_dir}/total_time_wav.txt
+rm -rf ${logs_outputs_dir}/total_rtf.txt
 for JOB in $(seq ${nj}); do
   {
-    cat ${local_scp_dir}/log.$JOB.txt | grep "total_time_comput" | awk -F ' '  '{print $2}' >> ${local_scp_dir}/total_time_comput.txt
-    cat ${local_scp_dir}/log.$JOB.txt | grep "total_time_wav" | awk -F ' '  '{print $2}' >> ${local_scp_dir}/total_time_wav.txt
-    cat ${local_scp_dir}/log.$JOB.txt | grep "total_rtf" | awk -F ' '  '{print $2}' >> ${local_scp_dir}/total_rtf.txt
+    cat ${logs_outputs_dir}/log.$JOB.txt | grep "total_time_comput" | awk -F ' '  '{print $2}' >> ${logs_outputs_dir}/total_time_comput.txt
+    cat ${logs_outputs_dir}/log.$JOB.txt | grep "total_time_wav" | awk -F ' '  '{print $2}' >> ${logs_outputs_dir}/total_time_wav.txt
+    cat ${logs_outputs_dir}/log.$JOB.txt | grep "total_rtf" | awk -F ' '  '{print $2}' >> ${logs_outputs_dir}/total_rtf.txt
   }
 
 done
 
-total_time_comput=`cat ${local_scp_dir}/total_time_comput.txt | awk 'BEGIN {max = 0} {if ($1+0>max+0) max=$1 fi} END {print max}'`
-total_time_wav=`cat ${local_scp_dir}/total_time_wav.txt | awk '{sum +=$1};END {print sum}'`
+total_time_comput=`cat ${logs_outputs_dir}/total_time_comput.txt | awk 'BEGIN {max = 0} {if ($1+0>max+0) max=$1 fi} END {print max}'`
+total_time_wav=`cat ${logs_outputs_dir}/total_time_wav.txt | awk '{sum +=$1};END {print sum}'`
 rtf=`awk 'BEGIN{printf "%.5f\n",'$total_time_comput'/'$total_time_wav'}'`
 speed=`awk 'BEGIN{printf "%.2f\n",1/'$rtf'}'`
 

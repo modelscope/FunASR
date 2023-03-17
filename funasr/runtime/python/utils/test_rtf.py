@@ -8,23 +8,24 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--model_dir', type=str, required=True)
 parser.add_argument('--backend', type=str, default='onnx', help='["onnx", "torch"]')
-parser.add_argument('--wav_file', type=int, default=0, help='amp fallback number')
+parser.add_argument('--wav_file', type=str, default=None, help='amp fallback number')
 parser.add_argument('--quantize', type=bool, default=False, help='quantized model')
+parser.add_argument('--intra_op_num_threads', type=int, default=1, help='intra_op_num_threads for onnx')
 args = parser.parse_args()
 
 
-from torch_paraformer import Paraformer
-if args.backend == "onnxruntime":
-	from rapid_paraformer import Paraformer
+from funasr.runtime.python.libtorch.torch_paraformer import Paraformer
+if args.backend == "onnx":
+	from funasr.runtime.python.onnxruntime.rapid_paraformer import Paraformer
 	
-model = Paraformer(args.model_dir, batch_size=1, quantize=args.quantize)
+model = Paraformer(args.model_dir, batch_size=1, quantize=args.quantize, intra_op_num_threads=args.intra_op_num_threads)
 
 wav_file_f = open(args.wav_file, 'r')
 wav_files = wav_file_f.readlines()
 
 # warm-up
 total = 0.0
-num = 100
+num = 30
 wav_path = wav_files[0].split("\t")[1].strip() if "\t" in wav_files[0] else wav_files[0].split(" ")[1].strip()
 for i in range(num):
 	beg_time = time.time()

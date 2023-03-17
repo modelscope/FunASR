@@ -27,6 +27,7 @@ class Paraformer():
                  plot_timestamp_to: str = "",
                  pred_bias: int = 1,
                  quantize: bool = False,
+                 intra_op_num_threads: int = 4,
                  ):
 
         if not Path(model_dir).exists():
@@ -45,7 +46,7 @@ class Paraformer():
             cmvn_file=cmvn_file,
             **config['frontend_conf']
         )
-        self.ort_infer = OrtInferSession(model_file, device_id)
+        self.ort_infer = OrtInferSession(model_file, device_id, intra_op_num_threads=intra_op_num_threads)
         self.batch_size = batch_size
         self.plot_timestamp_to = plot_timestamp_to
         self.pred_bias = pred_bias

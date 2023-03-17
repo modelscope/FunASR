@@ -25,6 +25,7 @@ class Paraformer():
                  plot_timestamp_to: str = "",
                  pred_bias: int = 1,
                  quantize: bool = False,
+                 intra_op_num_threads: int = 1,
                  ):
 
         if not Path(model_dir).exists():
