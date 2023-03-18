@@ -3,12 +3,17 @@ import torchaudio
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
 
+from modelscope.utils.logger import get_logger
+import logging
+logger = get_logger(log_level=logging.CRITICAL)
+logger.setLevel(logging.CRITICAL)
+
 inference_pipeline = pipeline(
     task=Tasks.auto_speech_recognition,
     model='damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8404-online',
     model_revision='v1.0.2')
 
-waveform, sample_rate = torchaudio.load("asr_example_zh.wav")
+waveform, sample_rate = torchaudio.load("waihu.wav")
 speech_length = waveform.shape[1]
 speech = waveform[0]
 
@@ -23,7 +28,7 @@ speech_buffer = speech
 speech_cache = []
 final_result = ""
 
-while len(speech_buffer) > 0:
+while len(speech_buffer) >= 960:
     if first_chunk:
         if len(speech_buffer) >= 14400:
             rec_result = inference_pipeline(audio_in=speech_buffer[0:14400], param_dict=param_dict)
@@ -42,11 +47,11 @@ while len(speech_buffer) > 0:
             rec_result = inference_pipeline(audio_in=speech_buffer[:19200], param_dict=param_dict)
             speech_buffer = speech_buffer[9600:]
         else:
-            cache_en["stride"] = len(speech_buffer) // 960
+            cache_en["stride"] = len(speech_buffer) // 960 
             cache_en["pad_right"] = 0
             rec_result = inference_pipeline(audio_in=speech_buffer, param_dict=param_dict)
             speech_buffer = []
-    if rec_result['text'] != "sil":
+    if len(rec_result) !=0 and rec_result['text'] != "sil":
         final_result += rec_result['text']
     print(rec_result)
 print(final_result)
