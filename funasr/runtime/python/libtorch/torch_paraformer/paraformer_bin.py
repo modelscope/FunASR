@@ -62,26 +62,28 @@ class Paraformer():
                 am_scores, valid_token_lens = outputs[0], outputs[1]
                 if len(outputs) == 4:
                     # for BiCifParaformer Inference
-                    us_alphas, us_cif_peak = outputs[2], outputs[3]
+                    us_alphas, us_peaks = outputs[2], outputs[3]
                 else:
-                    us_alphas, us_cif_peak = None, None
+                    us_alphas, us_peaks = None, None
             except:
                 #logging.warning(traceback.format_exc())
                 logging.warning("input wav is silence or noise")
                 preds = ['']
             else:
-                am_scores, valid_token_lens = am_scores.detach().cpu().numpy(), valid_token_lens.detach().cpu().numpy()
                 preds = self.decode(am_scores, valid_token_lens)
-                if us_cif_peak is None:
+                if us_peaks is None:
                     for pred in preds:
+                        pred = sentence_postprocess(pred)
                         asr_res.append({'preds': pred})
                 else:
-                    for pred, us_cif_peak_ in zip(preds, us_cif_peak):
-                        text, tokens = pred
-                        timestamp, timestamp_total = time_stamp_lfr6_onnx(us_cif_peak_, copy.copy(tokens))
+                    for pred, us_peaks_ in zip(preds, us_peaks):
+                        raw_tokens = pred
+                        timestamp, timestamp_raw = time_stamp_lfr6_onnx(us_peaks_, copy.copy(raw_tokens))
+                        text_proc, timestamp_proc, _ = sentence_postprocess(raw_tokens, timestamp_raw)
+                        # logging.warning(timestamp)
                         if len(self.plot_timestamp_to):
-                            self.plot_wave_timestamp(waveform_list[0], timestamp_total, self.plot_timestamp_to)
-                        asr_res.append({'preds': text, 'timestamp': timestamp})
+                            self.plot_wave_timestamp(waveform_list[0], timestamp, self.plot_timestamp_to)
+                        asr_res.append({'preds': text_proc, 'timestamp': timestamp_proc, "raw_tokens": raw_tokens})
         return asr_res
 
     def plot_wave_timestamp(self, wav, text_timestamp, dest):
@@ -182,6 +184,6 @@ class Paraformer():
         # Change integer-ids to tokens
         token = self.converter.ids2tokens(token_int)
         token = token[:valid_token_num-self.pred_bias]
-        texts = sentence_postprocess(token)
-        return texts
+        # texts = sentence_postprocess(token)
+        return token
 
