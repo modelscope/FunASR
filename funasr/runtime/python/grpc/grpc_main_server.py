@@ -10,7 +10,7 @@ def serve(args):
                         # interceptors=(AuthInterceptor('Bearer mysecrettoken'),)
                            )
       paraformer_pb2_grpc.add_ASRServicer_to_server(
-          ASRServicer(args.user_allowed, args.model, args.sample_rate, args.backend, args.onnx_dir), server)
+          ASRServicer(args.user_allowed, args.model, args.sample_rate, args.backend, args.onnx_dir, vad_model=args.vad_model, punc_model=args.punc_model), server)
       port = "[::]:" + str(args.port)
       server.add_insecure_port(port)
       server.start()
@@ -34,7 +34,16 @@ if __name__ == '__main__':
                         type=str,
                         default="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch",
                         help="model from modelscope")
-                        
+    parser.add_argument("--vad_model",
+                        type=str,
+                        default="damo/speech_fsmn_vad_zh-cn-16k-common-pytorch",
+                        help="model from modelscope")
+    
+    parser.add_argument("--punc_model",
+                        type=str,
+                        default="",
+                        help="model from modelscope")
+    
     parser.add_argument("--sample_rate",
                         type=int,
                         default=16000,
@@ -50,6 +59,7 @@ if __name__ == '__main__':
                         type=str,
                         default="/nfs/models/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch",
                         help="onnx model dir")
+    
                         
 
 
