@@ -48,12 +48,12 @@ def time_stamp_lfr6_onnx(us_cif_peak, char_list, begin_time=0.0, total_offset=-1
             timestamp_list[i][0] = timestamp_list[i][0] + begin_time / 1000.0
             timestamp_list[i][1] = timestamp_list[i][1] + begin_time / 1000.0
     assert len(new_char_list) == len(timestamp_list)
-    res_total = []
+    res_str = ""
     for char, timestamp in zip(new_char_list, timestamp_list):
-        res_total.append([char, timestamp[0], timestamp[1]])  # += "{} {} {};".format(char, timestamp[0], timestamp[1])
+        res_str += "{} {} {};".format(char, timestamp[0], timestamp[1])
     res = []
     for char, timestamp in zip(new_char_list, timestamp_list):
         if char != '<sil>':
             res.append([int(timestamp[0] * 1000), int(timestamp[1] * 1000)])
-    return res, res_total
+    return res_str, res
     

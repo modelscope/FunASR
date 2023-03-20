@@ -75,14 +75,17 @@ class Paraformer():
                 preds = self.decode(am_scores, valid_token_lens)
                 if us_cif_peak is None:
                     for pred in preds:
+                        pred = sentence_postprocess(pred)
                         asr_res.append({'preds': pred})
                 else:
                     for pred, us_cif_peak_ in zip(preds, us_cif_peak):
-                        text, tokens = pred
-                        timestamp, timestamp_total = time_stamp_lfr6_onnx(us_cif_peak_, copy.copy(tokens))
+                        raw_tokens = pred
+                        timestamp, timestamp_raw = time_stamp_lfr6_onnx(us_cif_peak_, copy.copy(raw_tokens))
+                        text_proc, timestamp_proc, _ = sentence_postprocess(raw_tokens, timestamp_raw)
+                        # logging.warning(timestamp)
                         if len(self.plot_timestamp_to):
-                            self.plot_wave_timestamp(waveform_list[0], timestamp_total, self.plot_timestamp_to)
-                        asr_res.append({'preds': text, 'timestamp': timestamp})
+                            self.plot_wave_timestamp(waveform_list[0], timestamp, self.plot_timestamp_to)
+                        asr_res.append({'preds': text_proc, 'timestamp': timestamp_proc, "raw_tokens": raw_tokens})
         return asr_res
 
     def plot_wave_timestamp(self, wav, text_timestamp, dest):
@@ -181,6 +184,6 @@ class Paraformer():
         # Change integer-ids to tokens
         token = self.converter.ids2tokens(token_int)
         token = token[:valid_token_num-self.pred_bias]
-        texts = sentence_postprocess(token)
-        return texts
+        # texts = sentence_postprocess(token)
+        return token
 
