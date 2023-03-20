@@ -64,23 +64,23 @@ class Paraformer():
                 am_scores, valid_token_lens = outputs[0], outputs[1]
                 if len(outputs) == 4:
                     # for BiCifParaformer Inference
-                    us_alphas, us_cif_peak = outputs[2], outputs[3]
+                    us_alphas, us_peaks = outputs[2], outputs[3]
                 else:
-                    us_alphas, us_cif_peak = None, None
+                    us_alphas, us_peaks = None, None
             except ONNXRuntimeError:
                 #logging.warning(traceback.format_exc())
                 logging.warning("input wav is silence or noise")
                 preds = ['']
             else:
                 preds = self.decode(am_scores, valid_token_lens)
-                if us_cif_peak is None:
+                if us_peaks is None:
                     for pred in preds:
                         pred = sentence_postprocess(pred)
                         asr_res.append({'preds': pred})
                 else:
-                    for pred, us_cif_peak_ in zip(preds, us_cif_peak):
+                    for pred, us_peaks_ in zip(preds, us_peaks):
                         raw_tokens = pred
-                        timestamp, timestamp_raw = time_stamp_lfr6_onnx(us_cif_peak_, copy.copy(raw_tokens))
+                        timestamp, timestamp_raw = time_stamp_lfr6_onnx(us_peaks_, copy.copy(raw_tokens))
                         text_proc, timestamp_proc, _ = sentence_postprocess(raw_tokens, timestamp_raw)
                         # logging.warning(timestamp)
                         if len(self.plot_timestamp_to):
