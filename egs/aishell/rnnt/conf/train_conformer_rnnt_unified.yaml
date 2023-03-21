@@ -1,0 +1,84 @@
+encoder_conf:
+    main_conf:
+      pos_wise_act_type: swish
+      pos_enc_dropout_rate: 0.3
+      conv_mod_act_type: swish
+      time_reduction_factor: 2
+      unified_model_training: true
+      default_chunk_size: 16
+      jitter_range: 4
+      left_chunk_size: 1
+    input_conf:
+      block_type: conv2d
+      conv_size: 512
+      subsampling_factor: 4
+      num_frame: 1
+    body_conf:
+    - block_type: conformer
+      linear_size: 2048
+      hidden_size: 512
+      heads: 8
+      dropout_rate: 0.3
+      pos_wise_dropout_rate: 0.3
+      att_dropout_rate: 0.3
+      conv_mod_kernel_size: 15
+      num_blocks: 12    
+
+# decoder related
+decoder: rnn
+decoder_conf:
+    embed_size: 512
+    hidden_size: 512
+    embed_dropout_rate: 0.2
+    dropout_rate: 0.1
+
+joint_network_conf:
+    joint_space_size: 512
+
+# Auxiliary CTC
+model_conf:
+    auxiliary_ctc_weight: 0.0
+
+# minibatch related
+use_amp: true
+batch_type: numel
+batch_bins: 1600000
+num_workers: 16
+
+# optimization related
+accum_grad: 1
+grad_clip: 5
+max_epoch: 80
+val_scheduler_criterion:
+    - valid
+    - loss
+best_model_criterion:
+-   - valid
+    - cer_transducer_chunk
+    - min
+keep_nbest_models: 5
+
+optim: adam
+optim_conf:
+   lr: 0.0003
+scheduler: warmuplr
+scheduler_conf:
+   warmup_steps: 25000
+
+normalize: None
+
+specaug: specaug
+specaug_conf:
+    apply_time_warp: true
+    time_warp_window: 5
+    time_warp_mode: bicubic
+    apply_freq_mask: true
+    freq_mask_width_range:
+    - 0
+    - 30
+    num_freq_mask: 2
+    apply_time_mask: true
+    time_mask_width_range:
+    - 0
+    - 40
+    num_time_mask: 2
