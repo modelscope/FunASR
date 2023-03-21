@@ -756,16 +756,18 @@ def inference_modelscope(
 
                 key = keys[batch_id]
                 for n, result in zip(range(1, nbest + 1), result):
-                    # import pdb; pdb.set_trace()
                     text, token, token_int, hyp = result[0], result[1], result[2], result[3]
-                    time_stamp = None if len(result) < 5 else result[4]
+                    timestamp = None if len(result) < 5 else result[4]
                     # conduct timestamp prediction here
-                    if time_stamp is None and speechtext2timestamp:
+                    # timestamp inference requires token length
+                    # thus following inference cannot be conducted in batch
+                    if timestamp is None and speechtext2timestamp:
                         ts_batch = {}
-                        ts_batch['speech'] = batch['speech'][batch_id].squeeze(0)
+                        ts_batch['speech'] = batch['speech'][batch_id].unsqueeze(0)
                         ts_batch['speech_lengths'] = torch.tensor([batch['speech_lengths'][batch_id]])
                         ts_batch['text_lengths'] = torch.tensor([len(token)])
-                        import pdb; pdb.set_trace()
+                        us_alphas, us_peaks = speechtext2timestamp(**ts_batch)
+                        ts_str, timestamp = ts_prediction_lfr6_standard(us_alphas[0], us_peaks[0], token, force_time_shift=-3.0)
                     # Create a directory: outdir/{n}best_recog
                     if writer is not None:
                         ibest_writer = writer[f"{n}best_recog"]
@@ -777,20 +779,20 @@ def inference_modelscope(
                         ibest_writer["rtf"][key] = rtf_cur
 
                     if text is not None:
-                        if use_timestamp and time_stamp is not None:
-                            postprocessed_result = postprocess_utils.sentence_postprocess(token, time_stamp)
+                        if use_timestamp and timestamp is not None:
+                            postprocessed_result = postprocess_utils.sentence_postprocess(token, timestamp)
                         else:
                             postprocessed_result = postprocess_utils.sentence_postprocess(token)
-                        time_stamp_postprocessed = ""
+                        timestamp_postprocessed = ""
                         if len(postprocessed_result) == 3:
-                            text_postprocessed, time_stamp_postprocessed, word_lists = postprocessed_result[0], \
+                            text_postprocessed, timestamp_postprocessed, word_lists = postprocessed_result[0], \
                                                                                        postprocessed_result[1], \
                                                                                        postprocessed_result[2]
                         else:
                             text_postprocessed, word_lists = postprocessed_result[0], postprocessed_result[1]
                         item = {'key': key, 'value': text_postprocessed}
-                        if time_stamp_postprocessed != "":
-                            item['time_stamp'] = time_stamp_postprocessed
+                        if timestamp_postprocessed != "":
+                            item['timestamp'] = timestamp_postprocessed
                         asr_result_list.append(item)
                         finish_count += 1
                         # asr_utils.print_progress(finish_count / file_count)
