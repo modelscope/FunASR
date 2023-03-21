@@ -3,10 +3,17 @@
 using namespace std;
 using namespace paraformer;
 
-ModelImp::ModelImp(const char* path,int nNumThread)
+ModelImp::ModelImp(const char* path,int nNumThread, bool quantize)
 {
-    string model_path = pathAppend(path, "model.onnx");
-    string vocab_path = pathAppend(path, "vocab.txt");
+    string model_path;
+    string vocab_path;
+    if(quantize)
+    {
+        model_path = pathAppend(path, "model_quant.onnx");
+    }else{
+        model_path = pathAppend(path, "model.onnx");
+    }
+    vocab_path = pathAppend(path, "vocab.txt");
 
     fe = new FeatureExtract(3);
 

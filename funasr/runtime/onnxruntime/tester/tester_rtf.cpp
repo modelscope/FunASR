@@ -16,9 +16,9 @@ using namespace std;
 int main(int argc, char *argv[])
 {
 
-    if (argc < 2)
+    if (argc < 4)
     {
-        printf("Usage: %s /path/to/model_dir /path/to/wav.scp", argv[0]);
+        printf("Usage: %s /path/to/model_dir /path/to/wav.scp quantize(true or false) \n", argv[0]);
         exit(-1);
     }
 
@@ -43,7 +43,11 @@ int main(int argc, char *argv[])
     struct timeval start, end;
     gettimeofday(&start, NULL);
     int nThreadNum = 1;
-    RPASR_HANDLE AsrHanlde=RapidAsrInit(argv[1], nThreadNum);
+    // is quantize
+    bool quantize = false;
+    istringstream(argv[3]) >> boolalpha >> quantize;
+
+    RPASR_HANDLE AsrHanlde=RapidAsrInit(argv[1], nThreadNum, quantize);
     if (!AsrHanlde)
     {
         printf("Cannot load ASR Model from: %s, there must be files model.onnx and vocab.txt", argv[1]);
@@ -88,7 +92,7 @@ int main(int argc, char *argv[])
 
     printf("total_time_wav %ld ms.\n", (long)(total_length * 1000));
     printf("total_time_comput %ld ms.\n", total_time / 1000);
-    printf("Model inference RTF: %05lf.\n", (double)total_time/ (total_length*1000000));
+    printf("total_rtf %05lf .\n", (double)total_time/ (total_length*1000000));
 
     RapidAsrUninit(AsrHanlde);
     return 0;
