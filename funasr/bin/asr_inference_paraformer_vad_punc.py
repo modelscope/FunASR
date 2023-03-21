@@ -674,6 +674,7 @@ def inference_modelscope(
                         ibest_writer["time_stamp"][key] = "{}".format(time_stamp_postprocessed)
 
                 logging.info("decoding, utt: {}, predictions: {}".format(key, text_postprocessed_punc))
+        import pdb; pdb.set_trace()
         return asr_result_list
 
     return _forward

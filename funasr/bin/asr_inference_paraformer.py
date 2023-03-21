@@ -43,6 +43,7 @@ from funasr.models.frontend.wav_frontend import WavFrontend
 from funasr.models.e2e_asr_paraformer import BiCifParaformer, ContextualParaformer
 from funasr.export.models.e2e_asr_paraformer import Paraformer as Paraformer_export
 from funasr.utils.timestamp_tools import ts_prediction_lfr6_standard
+from funasr.bin.tp_inference import SpeechText2Timestamp
 
 
 class Speech2Text:
@@ -540,7 +541,8 @@ def inference(
         ngram_weight: float = 0.9,
         nbest: int = 1,
         num_workers: int = 1,
-
+        timestamp_infer_config: Union[Path, str] = None,
+        timestamp_model_file: Union[Path, str] = None,
         **kwargs,
 ):
     inference_pipeline = inference_modelscope(
@@ -604,6 +606,8 @@ def inference_modelscope(
         nbest: int = 1,
         num_workers: int = 1,
         output_dir: Optional[str] = None,
+        timestamp_infer_config: Union[Path, str] = None,
+        timestamp_model_file: Union[Path, str] = None,
         param_dict: dict = None,
         **kwargs,
 ):
@@ -660,6 +664,15 @@ def inference_modelscope(
         speech2text = Speech2TextExport(**speech2text_kwargs)
     else:
         speech2text = Speech2Text(**speech2text_kwargs)
+
+    if timestamp_model_file is not None:
+        speechtext2timestamp = SpeechText2Timestamp(
+            timestamp_cmvn_file=cmvn_file,
+            timestamp_model_file=timestamp_model_file,
+            timestamp_infer_config=timestamp_infer_config,
+        )
+    else:
+        speechtext2timestamp = None
 
     def _forward(
             data_path_and_name_and_type,
@@ -743,8 +756,16 @@ def inference_modelscope(
 
                 key = keys[batch_id]
                 for n, result in zip(range(1, nbest + 1), result):
+                    # import pdb; pdb.set_trace()
                     text, token, token_int, hyp = result[0], result[1], result[2], result[3]
                     time_stamp = None if len(result) < 5 else result[4]
+                    # conduct timestamp prediction here
+                    if time_stamp is None and speechtext2timestamp:
+                        ts_batch = {}
+                        ts_batch['speech'] = batch['speech'][batch_id].squeeze(0)
+                        ts_batch['speech_lengths'] = torch.tensor([batch['speech_lengths'][batch_id]])
+                        ts_batch['text_lengths'] = torch.tensor([len(token)])
+                        import pdb; pdb.set_trace()
                     # Create a directory: outdir/{n}best_recog
                     if writer is not None:
                         ibest_writer = writer[f"{n}best_recog"]
