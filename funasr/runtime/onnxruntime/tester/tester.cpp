@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     float snippet_time = 0.0f;
 
 
-     RPASR_RESULT Result=RapidAsrRecogFile(AsrHanlde, argv[2], RASR_NONE, NULL);
+    RPASR_RESULT Result=RapidAsrRecogFile(AsrHanlde, argv[2], RASR_NONE, NULL);
 
     gettimeofday(&end, NULL);
    
