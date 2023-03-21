@@ -4,6 +4,11 @@ inputs = "跨境河流是养育沿岸|人民的生命之源长期以来为帮助
 
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
+from modelscope.utils.logger import get_logger
+import logging
+logger = get_logger(log_level=logging.CRITICAL)
+logger.setLevel(logging.CRITICAL)
+
 
 inference_pipeline = pipeline(
     task=Tasks.punctuation,

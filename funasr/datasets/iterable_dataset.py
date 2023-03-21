@@ -8,6 +8,7 @@ from typing import Dict
 from typing import Iterator
 from typing import Tuple
 from typing import Union
+from typing import List
 
 import kaldiio
 import numpy as np
@@ -129,7 +130,7 @@ class IterableESPnetDataset(IterableDataset):
         non_iterable_list = []
         self.path_name_type_list = []
 
-        if not isinstance(path_name_type_list[0], Tuple):
+        if not isinstance(path_name_type_list[0], (Tuple, List)):
             path = path_name_type_list[0]
             name = path_name_type_list[1]
             _type = path_name_type_list[2]
@@ -227,13 +228,9 @@ class IterableESPnetDataset(IterableDataset):
                 name = self.path_name_type_list[i][1]
                 _type = self.path_name_type_list[i][2]
                 if _type == "sound":
-                    audio_type = os.path.basename(value).split(".")[-1].lower()
-                    if audio_type not in SUPPORT_AUDIO_TYPE_SETS:
-                        raise NotImplementedError(
-                            f'Not supported audio type: {audio_type}')
-                    if audio_type == "pcm":
-                        _type = "pcm"
-
+                   audio_type = os.path.basename(value).lower()
+                   if audio_type.rfind(".pcm") >= 0:
+                       _type = "pcm"
                 func = DATA_TYPES[_type]
                 array = func(value)
                 if self.fs is not None and (name == "speech" or name == "ref_speech"):
@@ -335,11 +332,8 @@ class IterableESPnetDataset(IterableDataset):
                 # 2.a. Load data streamingly
                 for value, (path, name, _type) in zip(values, self.path_name_type_list):
                     if _type == "sound":
-                        audio_type = os.path.basename(value).split(".")[-1].lower()
-                        if audio_type not in SUPPORT_AUDIO_TYPE_SETS:
-                            raise NotImplementedError(
-                                f'Not supported audio type: {audio_type}')
-                        if audio_type == "pcm":
+                        audio_type = os.path.basename(value).lower()
+                        if audio_type.rfind(".pcm") >= 0:
                             _type = "pcm"
                     func = DATA_TYPES[_type]
                     # Load entry
@@ -391,3 +385,4 @@ class IterableESPnetDataset(IterableDataset):
 
         if count == 0:
             raise RuntimeError("No iteration")
+

@@ -8,7 +8,7 @@ from paraformer_pb2 import Response
 
 
 class ASRServicer(paraformer_pb2_grpc.ASRServicer):
-    def __init__(self, user_allowed, model, sample_rate, backend, onnx_dir):
+    def __init__(self, user_allowed, model, sample_rate, backend, onnx_dir, vad_model='', punc_model=''):
         print("ASRServicer init")
         self.backend = backend
         self.init_flag = 0
@@ -21,7 +21,7 @@ class ASRServicer(paraformer_pb2_grpc.ASRServicer):
                 from modelscope.utils.constant import Tasks
             except ImportError:
                 raise ImportError(f"Please install modelscope")
-            self.inference_16k_pipeline = pipeline(task=Tasks.auto_speech_recognition, model=model)
+            self.inference_16k_pipeline = pipeline(task=Tasks.auto_speech_recognition, model=model, vad_model=vad_model, punc_model=punc_model)
         elif self.backend == "onnxruntime":
             try:
                 from rapid_paraformer.paraformer_onnx import Paraformer

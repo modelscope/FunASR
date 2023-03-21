@@ -256,6 +256,9 @@ def inference_launch(**kwargs):
     elif mode == "paraformer":
         from funasr.bin.asr_inference_paraformer import inference_modelscope
         return inference_modelscope(**kwargs)
+    elif mode == "paraformer_streaming":
+        from funasr.bin.asr_inference_paraformer_streaming import inference_modelscope
+        return inference_modelscope(**kwargs)
     elif mode == "paraformer_vad":
         from funasr.bin.asr_inference_paraformer_vad import inference_modelscope
         return inference_modelscope(**kwargs)
