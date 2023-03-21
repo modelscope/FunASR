@@ -17,7 +17,7 @@ def ts_prediction_lfr6_standard(us_alphas,
                        sil_in_str=True
                        ):
     if not len(char_list):
-        return []
+        return "", []
     START_END_THRESHOLD = 5
     MAX_TOKEN_DURATION = 12
     TIME_RATE = 10.0 * 6 / 1000 / 3  #  3 times upsampled
