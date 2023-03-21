@@ -16,9 +16,9 @@ See the bottom of this page: Building Guidance
 
 ###  运行程序
 
-tester  /path/to/models/dir /path/to/wave/file
+tester  /path/to/models/dir /path/to/wave/file quantize(true or false)
 
- 例如： tester /data/models  /data/test.wav
+ 例如： tester /data/models  /data/test.wav false
 
 /data/models 需要包括如下两个文件： model.onnx 和vocab.txt
 
