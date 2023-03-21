@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 
     if (argc < 3)
     {
-        printf("Usage: %s /path/to/model_dir /path/to/wav/file quantize(true or false)", argv[0]);
+        printf("Usage: %s /path/to/model_dir /path/to/wav/file quantize(true or false) \n", argv[0]);
         exit(-1);
     }
     struct timeval start, end;
