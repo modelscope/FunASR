@@ -28,12 +28,16 @@ def seg_tokenize(txt, seg_dict):
 def tokenize(data,
              vocab=None,
              seg_dict=None,
-             punc_dict=None):
+             punc_dict=None,
+             bpe_tokenizer=None):
     assert "text" in data
     assert isinstance(vocab, dict)
     text = data["text"]
     token = []
     vad = -2
+
+    if bpe_tokenizer is not None:
+        text = bpe_tokenizer.text2tokens(text)
 
     if seg_dict is not None:
         assert isinstance(seg_dict, dict)

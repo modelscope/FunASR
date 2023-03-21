@@ -158,6 +158,7 @@ def Dataset(data_list_file,
             dict,
             seg_dict,
             punc_dict,
+            bpe_tokenizer,
             conf,
             frontend_conf,
             mode="train",
@@ -173,7 +174,7 @@ def Dataset(data_list_file,
     dataset = FilterIterDataPipe(dataset, fn=filter_fn)
 
     if "text" in data_names:
-        vocab = {'vocab': dict, 'seg_dict': seg_dict, 'punc_dict': punc_dict}
+        vocab = {'vocab': dict, 'seg_dict': seg_dict, 'punc_dict': punc_dict, 'bpe_tokenizer': bpe_tokenizer}
         tokenize_fn = partial(tokenize, **vocab)
         dataset = MapperIterDataPipe(dataset, fn=tokenize_fn)
 
