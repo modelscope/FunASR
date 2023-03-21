@@ -1,3 +1,5 @@
+from itertools import zip_longest
+
 import torch
 import copy
 import codecs
@@ -87,6 +89,7 @@ def time_stamp_sentence(punc_id_list, time_stamp_postprocessed, text_postprocess
         return res
     if len(text_postprocessed) == 0:
         return res
+
     if punc_id_list is None or len(punc_id_list) == 0:
         res.append({
             'text': text_postprocessed.split(),
@@ -95,36 +98,45 @@ def time_stamp_sentence(punc_id_list, time_stamp_postprocessed, text_postprocess
         })
         return res
     if len(punc_id_list) != len(time_stamp_postprocessed):
-        res.append({
-            'text': text_postprocessed.split(),
-            "start": time_stamp_postprocessed[0][0],
-            "end": time_stamp_postprocessed[-1][1]
-        })
-        return res
-
+        print("  warning length mistach!!!!!!")
     sentence_text = ''
     sentence_start = time_stamp_postprocessed[0][0]
+    sentence_end = time_stamp_postprocessed[0][1]
     texts = text_postprocessed.split()
-    for i in range(len(punc_id_list)):
-        sentence_text += texts[i]
-        if punc_id_list[i] == 2:
+    punc_stamp_text_list = list(zip_longest(punc_id_list, time_stamp_postprocessed, texts, fillvalue=None))
+    for punc_stamp_text in punc_stamp_text_list:
+        punc_id, time_stamp, text = punc_stamp_text
+        sentence_text += text if text is not None else ''
+        punc_id = int(punc_id) if punc_id is not None else 1
+        sentence_end = time_stamp[1] if time_stamp is not None else sentence_end
+
+        if punc_id == 2:
             sentence_text += ','
             res.append({
                 'text': sentence_text,
                 "start": sentence_start,
-                "end": time_stamp_postprocessed[i][1]
+                "end": sentence_end
             })
             sentence_text = ''
-            sentence_start = time_stamp_postprocessed[i][1]
-        elif punc_id_list[i] == 3:
+            sentence_start = sentence_end
+        elif punc_id == 3:
             sentence_text += '.'
             res.append({
                 'text': sentence_text,
                 "start": sentence_start,
-                "end": time_stamp_postprocessed[i][1]
+                "end": sentence_end
             })
             sentence_text = ''
-            sentence_start = time_stamp_postprocessed[i][1]
+            sentence_start = sentence_end
+        elif punc_id == 4:
+            sentence_text += '?'
+            res.append({
+                'text': sentence_text,
+                "start": sentence_start,
+                "end": sentence_end
+            })
+            sentence_text = ''
+            sentence_start = sentence_end
     return res
 
 
