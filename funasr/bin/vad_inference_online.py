@@ -237,7 +237,7 @@ def inference_modelscope(
             if results:
                 for i, _ in enumerate(keys):
                     if results[i]:
-                        results[i] = json.dumps(results[i])
+                        # results[i] = json.dumps(results[i])
                         item = {'key': keys[i], 'value': results[i]}
                         vad_results.append(item)
                         if writer is not None:

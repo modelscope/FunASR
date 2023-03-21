@@ -266,7 +266,7 @@ def inference_modelscope(
             # do vad segment
             _, results = speech2vadsegment(**batch)
             for i, _ in enumerate(keys):
-                results[i] = json.dumps(results[i])
+                # results[i] = json.dumps(results[i])
                 item = {'key': keys[i], 'value': results[i]}
                 vad_results.append(item)
                 if writer is not None:
