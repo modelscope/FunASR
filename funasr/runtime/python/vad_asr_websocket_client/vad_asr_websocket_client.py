@@ -185,7 +185,7 @@ while True:
             buffer = []  # 清空缓存中的帧数据（最多两个片段）
             silence_count = 0  # 统计连续静音的次数清零
             speech_detected = False  # 标记是否检测到语音
-            # RECORD_NUM = 0
+            RECORD_NUM = 0
 
 print("结束录制...")
 
