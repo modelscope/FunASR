@@ -455,8 +455,7 @@ class ESPnetASRUnifiedTransducerModel(AbsESPnetModel):
                 gather=True,
         )
 
-        #if not self.training and (self.report_cer or self.report_wer):
-        if self.report_cer or self.report_wer:
+        if not self.training and (self.report_cer or self.report_wer):
             if self.error_calculator is None:
                 self.error_calculator = ErrorCalculator(
                     self.decoder,
