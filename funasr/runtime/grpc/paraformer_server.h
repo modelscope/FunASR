@@ -45,7 +45,7 @@ class ASRServicer final : public ASR::Service {
     std::unordered_map<std::string, std::string> client_transcription;
 
   public:
-    ASRServicer(const char* model_path, int thread_num);
+    ASRServicer(const char* model_path, int thread_num, bool quantize);
     void clear_states(const std::string& user);
     void clear_buffers(const std::string& user);
     void clear_transcriptions(const std::string& user);

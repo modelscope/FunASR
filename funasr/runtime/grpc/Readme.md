@@ -44,8 +44,8 @@ source ~/.bashrc
 
 #### Step 4. Start grpc paraformer server
 ```
-Usage: ./cmake/build/paraformer_server port thread_num /path/to/model_file
-./cmake/build/paraformer_server 10108 4 /data/asrmodel/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
+Usage: ./cmake/build/paraformer_server port thread_num /path/to/model_file quantize(true or false)
+./cmake/build/paraformer_server 10108 4 /data/asrmodel/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch false
 ```
 
 

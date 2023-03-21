@@ -292,6 +292,8 @@ class Speech2Text:
 
                 # remove blank symbol id, which is assumed to be 0
                 token_int = list(filter(lambda x: x != 0 and x != 2, token_int))
+                if len(token_int) == 0:
+                    continue
 
                 # Change integer-ids to tokens
                 token = self.converter.ids2tokens(token_int)

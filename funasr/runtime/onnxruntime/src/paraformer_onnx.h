@@ -4,10 +4,6 @@
 #ifndef PARAFORMER_MODELIMP_H
 #define PARAFORMER_MODELIMP_H
 
-
-
-
-
 namespace paraformer {
 
     class ModelImp : public Model {
@@ -19,7 +15,6 @@ namespace paraformer {
         void apply_lfr(Tensor<float>*& din);
         void apply_cmvn(Tensor<float>* din);
 
-        
         string greedy_search( float* in, int nLen);
 
 #ifdef _WIN_X86
@@ -39,7 +34,7 @@ namespace paraformer {
         //string m_strOutputName, m_strOutputNameLen;
 
     public:
-        ModelImp(const char* path, int nNumThread=0);
+        ModelImp(const char* path, int nNumThread=0, bool quantize=false);
         ~ModelImp();
         void reset();
         string forward_chunk(float* din, int len, int flag);

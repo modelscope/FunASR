@@ -29,8 +29,8 @@ using paraformer::Request;
 using paraformer::Response;
 using paraformer::ASR;
 
-ASRServicer::ASRServicer(const char* model_path, int thread_num) {
-    AsrHanlde=RapidAsrInit(model_path, thread_num);
+ASRServicer::ASRServicer(const char* model_path, int thread_num, bool quantize) {
+    AsrHanlde=RapidAsrInit(model_path, thread_num, quantize);
     std::cout << "ASRServicer init" << std::endl;
     init_flag = 0;
 }
@@ -170,10 +170,10 @@ grpc::Status ASRServicer::Recognize(
 }
 
 
-void RunServer(const std::string& port, int thread_num, const char* model_path) {
+void RunServer(const std::string& port, int thread_num, const char* model_path, bool quantize) {
     std::string server_address;
     server_address = "0.0.0.0:" + port;
-    ASRServicer service(model_path, thread_num);
+    ASRServicer service(model_path, thread_num, quantize);
 
     ServerBuilder builder;
     builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
@@ -184,12 +184,15 @@ void RunServer(const std::string& port, int thread_num, const char* model_path) 
 }
 
 int main(int argc, char* argv[]) {
-    if (argc < 3)
+    if (argc < 5)
     {
-        printf("Usage: %s port thread_num /path/to/model_file\n", argv[0]);
+        printf("Usage: %s port thread_num /path/to/model_file quantize(true or false) \n", argv[0]);
         exit(-1);
     }
 
-    RunServer(argv[1], atoi(argv[2]), argv[3]);
+    // is quantize
+    bool quantize = false;
+    std::istringstream(argv[4]) >> std::boolalpha >> quantize;
+    RunServer(argv[1], atoi(argv[2]), argv[3], quantize);
     return 0;
 }
