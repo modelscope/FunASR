@@ -15,7 +15,7 @@ using namespace std;
 int main(int argc, char *argv[])
 {
 
-    if (argc < 3)
+    if (argc < 4)
     {
         printf("Usage: %s /path/to/model_dir /path/to/wav/file quantize(true or false) \n", argv[0]);
         exit(-1);
