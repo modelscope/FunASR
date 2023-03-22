@@ -69,6 +69,7 @@ class Text2Punc:
             precache = "".join(cache)
         else:
             precache = ""
+            cache = []
         data = {"text": precache + text}
         result = self.preprocessor(data=data, uid="12938712838719")
         split_text = self.preprocessor.pop_split_text_data(result)
@@ -233,7 +234,6 @@ def inference_modelscope(
                 item = {'key': key, 'value': ""}
                 results.append(item)
                 return results
-            #import pdb;pdb.set_trace()
             result, _, cache = text2punc(line, cache)
             item = {'key': key, 'value': result, 'cache': cache}
             results.append(item)

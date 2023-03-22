@@ -13,7 +13,6 @@ logger.setLevel(logging.CRITICAL)
 inference_pipeline = pipeline(
     task=Tasks.punctuation,
     model='damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727',
-    model_revision="v1.0.0",
     output_dir="./tmp/"
 )
 
