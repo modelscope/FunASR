@@ -10,14 +10,16 @@ model="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
 data_dir="./data/test"
 output_dir="./results"
 batch_size=64
-gpuid_list="0,1"
-njob=4
-gpu_inference=true
+gpu_inference=true    # whether to perform gpu decoding
+gpuid_list="0,1"    # set gpus, e.g., gpuid_list="0,1"
+njob=4    # the number of jobs for CPU decoding, if gpu_inference=false, use CPU decoding, please set njob
+
 
 if ${gpu_inference}; then
     nj=$(echo $gpuid_list | awk -F "," '{print NF}')
 else
     nj=$njob
+    batch_size=1
     gpuid_list=""
     for JOB in $(seq ${nj}); do
         gpuid_list=$gpuid_list"-1,"
