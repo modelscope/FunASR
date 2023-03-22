@@ -1193,12 +1193,18 @@ class AbsTask(ABC):
             # logging.basicConfig() is invoked in main_worker() instead of main()
             # because it can be invoked only once in a process.
             # FIXME(kamo): Should we use logging.getLogger()?
+            # BUGFIX: Remove previous handlers and reset log level
+            for handler in logging.root.handlers[:]:
+                logging.root.removeHandler(handler)
             logging.basicConfig(
                 level=args.log_level,
                 format=f"[{os.uname()[1].split('.')[0]}]"
                        f" %(asctime)s (%(module)s:%(lineno)d) %(levelname)s: %(message)s",
             )
         else:
+            # BUGFIX: Remove previous handlers and reset log level
+            for handler in logging.root.handlers[:]:
+                logging.root.removeHandler(handler)
             # Suppress logging if RANK != 0
             logging.basicConfig(
                 level="ERROR",
