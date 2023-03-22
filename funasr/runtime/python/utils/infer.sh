@@ -17,7 +17,8 @@ export_root="/nfs/zhifu.gzf/export"
 model_name="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
 backend="onnx" # "torch"
 quantize='true' # 'False'
-tag=${model_name}/${backend}_quantize_${quantize}
+fallback_op_num_torch=20
+tag=${model_name}/${backend}_quantize_${quantize}_${fallback_op_num_torch}
 !
 
 output_dir=${export_root}/logs/${tag}/split$nj
@@ -27,7 +28,7 @@ echo ${output_dir}
 
 if [ $stage -le 0 ] && [ $stop_stage -ge 0 ];then
 
-    python -m funasr.export.export_model --model-name ${model_name} --export-dir ${export_root} --type ${backend} --quantize ${quantize} --audio_in ${scp}
+    python -m funasr.export.export_model --model-name ${model_name} --export-dir ${export_root} --type ${backend} --quantize ${quantize} --audio_in ${scp} --fallback-num ${fallback_op_num_torch}
 
 fi
 
