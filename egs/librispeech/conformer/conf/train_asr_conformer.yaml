@@ -69,7 +69,7 @@ specaug_conf:
 dataset_conf:
     shuffle: True
     shuffle_conf:
-        shuffle_size: 2048
+        shuffle_size: 1024
         sort_size: 500
     batch_conf:
         batch_type: token
