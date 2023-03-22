@@ -37,7 +37,7 @@ def tokenize(data,
     vad = -2
 
     if bpe_tokenizer is not None:
-        text = bpe_tokenizer.text2tokens(text)
+        text = bpe_tokenizer.text2tokens("".join(text))
 
     if seg_dict is not None:
         assert isinstance(seg_dict, dict)
