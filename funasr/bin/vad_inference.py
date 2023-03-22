@@ -1,5 +1,6 @@
 import argparse
 import logging
+import os
 import sys
 import json
 from pathlib import Path
@@ -266,7 +267,8 @@ def inference_modelscope(
             # do vad segment
             _, results = speech2vadsegment(**batch)
             for i, _ in enumerate(keys):
-                # results[i] = json.dumps(results[i])
+                if "MODELSCOPE_ENVIRONMENT" in os.environ and os.environ["MODELSCOPE_ENVIRONMENT"] == "eas":
+                    results[i] = json.dumps(results[i])
                 item = {'key': keys[i], 'value': results[i]}
                 vad_results.append(item)
                 if writer is not None:
