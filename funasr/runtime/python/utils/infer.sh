@@ -1,4 +1,9 @@
 
+split_scps_tool=split_scp.pl
+inference_tool=infer.py
+proce_text_tool=proce_text.py
+compute_wer_tool=compute_wer.py
+
 nj=32
 stage=0
 stop_stage=2
@@ -6,10 +11,7 @@ stop_stage=2
 scp="/nfs/haoneng.lhn/funasr_data/aishell-1/data/test/wav.scp"
 label_text="/nfs/haoneng.lhn/funasr_data/aishell-1/data/test/text"
 export_root="/nfs/zhifu.gzf/export"
-split_scps_tool=split_scp.pl
-inference_tool=infer.py
-proce_text_tool=proce_text.py
-compute_wer_tool=compute_wer.py
+
 
 #:<<!
 model_name="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
@@ -44,7 +46,7 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ];then
   for JOB in $(seq ${nj}); do
     {
       core_id=`expr $JOB - 1`
-      taskset -c ${core_id} python ${rtf_tool} --backend ${backend} --model_dir ${model_dir} --wav_file ${output_dir}/wav.$JOB.scp --quantize ${quantize} --output_dir ${output_dir}/${JOB} &> ${output_dir}/log.$JOB.txt
+      taskset -c ${core_id} python ${inference_tool} --backend ${backend} --model_dir ${model_dir} --wav_file ${output_dir}/wav.$JOB.scp --quantize ${quantize} --output_dir ${output_dir}/${JOB} &> ${output_dir}/log.$JOB.txt
     }&
 
   done
@@ -54,7 +56,7 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ];then
   for f in token text; do
       if [ -f "${output_dir}/1/${f}" ]; then
         for JOB in $(seq "${nj}"); do
-            cat "${output_dir}/${JOB}/1best_recog/${f}"
+            cat "${output_dir}/${JOB}/${f}"
         done | sort -k1 >"${output_dir}/1best_recog/${f}"
       fi
   done
