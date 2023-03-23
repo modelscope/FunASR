@@ -128,7 +128,7 @@ def asr():  # 推理
                 rec_result = inference_pipeline_asr(audio_in=audio_in)
                 if inference_pipeline_punc is not None and 'text' in rec_result:
                     rec_result = inference_pipeline_punc(text_in=rec_result['text'], param_dict=param_dict_punc)
-                print(rec_result["text"])
+                print(rec_result["text"] if "text" in rec_result else rec_result)
             time.sleep(0.1)
         time.sleep(0.1)    
 
