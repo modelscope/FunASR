@@ -1,4 +1,10 @@
-# server.py   注意本例仅处理单个clent发送的语音数据，并未对多client连接进行判断和处理
+import asyncio
+import websockets
+import time
+from queue import Queue
+import threading
+import argparse
+
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
 from modelscope.utils.logger import get_logger
@@ -7,12 +13,6 @@ import logging
 logger = get_logger(log_level=logging.CRITICAL)
 logger.setLevel(logging.CRITICAL)
 
-import asyncio
-import websockets
-import time
-from queue import Queue
-import threading
-import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--host",
@@ -36,7 +36,7 @@ parser.add_argument("--vad_model",
 
 parser.add_argument("--punc_model",
                     type=str,
-                    default="",
+                    default="damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727",
                     help="model from modelscope")
 parser.add_argument("--ngpu",
                     type=int,
@@ -49,25 +49,35 @@ print("model loading")
 voices = Queue()
 speek = Queue()
 
-# 创建一个VAD对象
-vad_pipline = pipeline(
+# vad
+inference_pipeline_vad = pipeline(
     task=Tasks.voice_activity_detection,
     model=args.vad_model,
     model_revision="v1.2.0",
     output_dir=None,
     batch_size=1,
-    mode='online'
+    mode='online',
+    ngpu=args.ngpu,
 )
 param_dict_vad = {'in_cache': dict(), "is_final": False}
   
-# 创建一个ASR对象
-param_dict = dict()
+# asr
+param_dict_asr = dict()
 # param_dict["hotword"] = "小五 小五月"  # 设置热词，用空格隔开
-inference_pipeline2 = pipeline(
+inference_pipeline_asr = pipeline(
     task=Tasks.auto_speech_recognition,
     model=args.asr_model,
-    param_dict=param_dict,
+    param_dict=param_dict_asr,
+    ngpu=args.ngpu,
 )
+
+inference_pipline_punc = pipeline(
+    task=Tasks.punctuation,
+    model=args.punc_model,
+    model_revision="v1.0.1",
+    ngpu=args.ngpu,
+)
+
 print("model loaded")
 
 
@@ -90,7 +100,7 @@ def vad(data):  # 推理
     global vad_pipline, param_dict_vad
     #print(type(data))
     # print(param_dict_vad)
-    segments_result = vad_pipline(audio_in=data, param_dict=param_dict_vad)
+    segments_result = inference_pipeline_vad(audio_in=data, param_dict=param_dict_vad)
     # print(segments_result)
     # print(param_dict_vad)
     speech_start = False
@@ -111,7 +121,7 @@ def asr():  # 推理
         while not speek.empty():
             audio_in = speek.get()
             speek.task_done()
-            rec_result = inference_pipeline2(audio_in=audio_in)
+            rec_result = inference_pipeline_asr(audio_in=audio_in)
             print(rec_result)
             time.sleep(0.1)
         time.sleep(0.1)    
