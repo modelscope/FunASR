@@ -6,19 +6,49 @@ import logging
 
 logger = get_logger(log_level=logging.CRITICAL)
 logger.setLevel(logging.CRITICAL)
+
 import asyncio
-import websockets  #区别客户端这里是 websockets库
+import websockets
 import time
 from queue import Queue
 import threading
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--host",
+                    type=str,
+                    default="0.0.0.0",
+                    required=False,
+                    help="host ip, localhost, 0.0.0.0")
+parser.add_argument("--port",
+                    type=int,
+                    default=10095,
+                    required=False,
+                    help="grpc server port")
+parser.add_argument("--asr_model",
+                    type=str,
+                    default="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch",
+                    help="model from modelscope")
+parser.add_argument("--vad_model",
+                    type=str,
+                    default="damo/speech_fsmn_vad_zh-cn-16k-common-pytorch",
+                    help="model from modelscope")
+
+parser.add_argument("--punc_model",
+                    type=str,
+                    default="",
+                    help="model from modelscope")
+
+args = parser.parse_args()
 
 print("model loading")
 voices = Queue()
 speek = Queue()
+
 # 创建一个VAD对象
 vad_pipline = pipeline(
     task=Tasks.voice_activity_detection,
-    model="damo/speech_fsmn_vad_zh-cn-16k-common-pytorch",
+    model=args.vad_model,
     model_revision="v1.2.0",
     output_dir=None,
     batch_size=1,
@@ -26,17 +56,17 @@ vad_pipline = pipeline(
   
 # 创建一个ASR对象
 param_dict = dict()
-param_dict["hotword"] = "小五 小五月"  # 设置热词，用空格隔开
+# param_dict["hotword"] = "小五 小五月"  # 设置热词，用空格隔开
 inference_pipeline2 = pipeline(
     task=Tasks.auto_speech_recognition,
-    model="damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404",
+    model=args.asr_model,
     param_dict=param_dict,
 )
 print("model loaded")
 
 
 
-async def echo(websocket, path):
+async def ws_serve(websocket, path):
     global voices
     try:
         async for message in websocket:
@@ -47,7 +77,7 @@ async def echo(websocket, path):
     except Exception as e:
         print('Exception occurred:', e)
 
-start_server = websockets.serve(echo, "localhost", 8899, subprotocols=["binary"],ping_interval=None)
+start_server = websockets.serve(ws_serve, args.host, args.port, subprotocols=["binary"], ping_interval=None)
 
 
 def vad(data):  # 推理
