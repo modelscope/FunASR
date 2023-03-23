@@ -38,6 +38,10 @@ parser.add_argument("--punc_model",
                     type=str,
                     default="",
                     help="model from modelscope")
+parser.add_argument("--ngpu",
+                    type=int,
+                    default=1,
+                    help="0 for cpu, 1 for gpu")
 
 args = parser.parse_args()
 
