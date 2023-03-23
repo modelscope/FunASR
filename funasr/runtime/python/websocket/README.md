@@ -37,7 +37,7 @@ pip install -r requirements_client.txt
 Start client
 
 ```shell
-python ASR_client.py --host "localhost" --port 10095 --chunk_size 300
+python ASR_client.py --host "127.0.0.1" --port 10095 --chunk_size 300
 ```
 
 ## Acknowledge
