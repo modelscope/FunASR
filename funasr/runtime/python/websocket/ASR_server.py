@@ -117,14 +117,16 @@ def vad(data):  # 推理
 
 def asr():  # 推理
     global inference_pipeline2
-    global speek
+    global speek, param_dict_punc
     while True:
         while not speek.empty():
             audio_in = speek.get()
             speek.task_done()
-            rec_result = inference_pipeline_asr(audio_in=audio_in)
-            rec_result_punc = inference_pipeline_punc(text_in=rec_result['text'], param_dict=param_dict_punc)
-            print(rec_result_punc)
+            if len(audio_in) > 0:
+                rec_result = inference_pipeline_asr(audio_in=audio_in)
+                if 'text' in rec_result:
+                    rec_result = inference_pipeline_punc(text_in=rec_result['text'], param_dict=param_dict_punc)
+                print(rec_result["text"])
             time.sleep(0.1)
         time.sleep(0.1)    
 
