@@ -53,16 +53,16 @@ speek = Queue()
 inference_pipeline_vad = pipeline(
     task=Tasks.voice_activity_detection,
     model=args.vad_model,
-    model_revision="v1.2.0",
+    model_revision=None,
     output_dir=None,
     batch_size=1,
     mode='online',
     ngpu=args.ngpu,
 )
-param_dict_vad = {'in_cache': dict(), "is_final": False}
+param_dict_vad = {'in_cache': dict()}
   
 # asr
-param_dict_asr = dict()
+param_dict_asr = {}
 # param_dict["hotword"] = "小五 小五月"  # 设置热词，用空格隔开
 inference_pipeline_asr = pipeline(
     task=Tasks.auto_speech_recognition,
@@ -71,10 +71,11 @@ inference_pipeline_asr = pipeline(
     ngpu=args.ngpu,
 )
 
-inference_pipline_punc = pipeline(
+param_dict_punc = {'cache': list()}
+inference_pipeline_punc = pipeline(
     task=Tasks.punctuation,
     model=args.punc_model,
-    model_revision="v1.0.1",
+    model_revision=None,
     ngpu=args.ngpu,
 )
 
@@ -122,7 +123,8 @@ def asr():  # 推理
             audio_in = speek.get()
             speek.task_done()
             rec_result = inference_pipeline_asr(audio_in=audio_in)
-            print(rec_result)
+            rec_result_punc = inference_pipeline_punc(text_in=rec_result['text'], param_dict=param_dict_punc)
+            print(rec_result_punc)
             time.sleep(0.1)
         time.sleep(0.1)    
 
