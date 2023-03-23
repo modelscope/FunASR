@@ -59,7 +59,7 @@ inference_pipeline_vad = pipeline(
     mode='online',
     ngpu=args.ngpu,
 )
-param_dict_vad = {'in_cache': dict()}
+param_dict_vad = {'in_cache': dict(), "is_final": False}
   
 # asr
 param_dict_asr = {}
