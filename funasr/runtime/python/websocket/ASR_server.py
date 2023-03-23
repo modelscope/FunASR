@@ -36,7 +36,7 @@ parser.add_argument("--vad_model",
 
 parser.add_argument("--punc_model",
                     type=str,
-                    default="damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727",
+                    default="",
                     help="model from modelscope")
 parser.add_argument("--ngpu",
                     type=int,
@@ -70,7 +70,7 @@ inference_pipeline_asr = pipeline(
     param_dict=param_dict_asr,
     ngpu=args.ngpu,
 )
-if args.punc_model is not None:
+if args.punc_model != "":
     param_dict_punc = {'cache': list()}
     inference_pipeline_punc = pipeline(
         task=Tasks.punctuation,
