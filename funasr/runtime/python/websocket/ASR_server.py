@@ -56,7 +56,9 @@ vad_pipline = pipeline(
     model_revision="v1.2.0",
     output_dir=None,
     batch_size=1,
+    mode='online'
 )
+param_dict_vad = {'in_cache': dict(), "is_final": False}
   
 # 创建一个ASR对象
 param_dict = dict()
@@ -85,17 +87,20 @@ start_server = websockets.serve(ws_serve, args.host, args.port, subprotocols=["b
 
 
 def vad(data):  # 推理
-    global vad_pipline
+    global vad_pipline, param_dict_vad
     #print(type(data))
-    segments_result = vad_pipline(audio_in=data)
-    #print(segments_result)
+    # print(param_dict_vad)
+    segments_result = vad_pipline(audio_in=data, param_dict=param_dict_vad)
+    # print(segments_result)
+    # print(param_dict_vad)
     speech_start = False
     speech_end = False
-    if len(segments_result) == 0 or len(segments_result["text"] > 1):
-        return False
-    elif segments_result["text"][0][0] != -1:
+    
+    if len(segments_result) == 0 or len(segments_result["text"]) > 1:
+        return speech_start, speech_end
+    if segments_result["text"][0][0] != -1:
         speech_start = True
-    elif segments_result["text"][0][1] != -1:
+    if segments_result["text"][0][1] != -1:
         speech_end = True
     return speech_start, speech_end
 
@@ -135,20 +140,21 @@ def main():  # 推理
                 frames.append(data)
                 RECORD_NUM += 1
             speech_start_i, speech_end_i = vad(data)
+            # print(speech_start_i, speech_end_i)
             if speech_start_i:
                 speech_start = speech_start_i
                 # if not speech_detected:
-                print("检测到人声...")
+                # print("检测到人声...")
                 # speech_detected = True  # 标记为检测到语音
                 frames = []
                 frames.extend(buffer)  # 把之前2个语音数据快加入
                 # silence_count = 0  # 重置静音次数
-            elif speech_end_i or RECORD_NUM > 300:
+            if speech_end_i or RECORD_NUM > 300:
                 # silence_count += 1  # 增加静音次数
                 # speech_end = speech_end_i
                 speech_start = False
                 # if RECORD_NUM > 300: #这里 50 可根据需求改为合适的数据快数量
-                print("说话结束或者超过设置最长时间...")
+                # print("说话结束或者超过设置最长时间...")
                 audio_in = b"".join(frames)
                 #asrt = threading.Thread(target=asr,args=(audio_in,))
                 #asrt.start()
@@ -171,15 +177,3 @@ s.start()
 
 asyncio.get_event_loop().run_until_complete(start_server)
 asyncio.get_event_loop().run_forever()
-
-
- 
-
-
-
-
-
- 
-
-        
-
