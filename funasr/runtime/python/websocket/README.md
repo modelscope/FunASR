@@ -31,6 +31,8 @@ python ASR_server.py --host "0.0.0.0" --port 10095 --asr_model "damo/speech_para
 
 Install the requirements for client
 ```shell
+git clone https://github.com/alibaba/FunASR.git && cd FunASR
+cd funasr/runtime/python/websocket
 pip install -r requirements_client.txt
 ```
 
