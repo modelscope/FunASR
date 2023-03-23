@@ -10,7 +10,7 @@ import asyncio
 import websockets  #区别客户端这里是 websockets库
 import time
 from queue import Queue
-import  threading
+import threading
 
 print("model loading")
 voices = Queue()
@@ -95,7 +95,7 @@ def main():  # 推理
                 frames.append(data)
                 RECORD_NUM += 1    
             
-            if  vad(data):
+            if vad(data):
                 if not speech_detected:
                     print("检测到人声...")
                     speech_detected = True  # 标记为检测到语音

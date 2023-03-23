@@ -1,10 +1,10 @@
 import pyaudio
-import websocket #区别服务端这里是 websocket-client库
+# import websocket #区别服务端这里是 websocket-client库
 import time
 import websockets
 import asyncio
 from queue import Queue
-import threading
+# import threading
 voices = Queue()
 async def hello():
     global ws # 定义一个全局变量ws，用于保存websocket连接对象
