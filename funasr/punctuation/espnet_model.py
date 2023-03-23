@@ -24,8 +24,8 @@ class ESPnetPunctuationModel(AbsESPnetModel):
 
         # ignore_id may be assumed as 0, shared with CTC-blank symbol for ASR.
         self.ignore_id = ignore_id
-        if self.punc_model.with_vad():
-            print("This is a vad puncuation model.")
+        #if self.punc_model.with_vad():
+        #    print("This is a vad puncuation model.")
 
     def nll(
         self,
