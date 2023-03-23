@@ -70,14 +70,16 @@ inference_pipeline_asr = pipeline(
     param_dict=param_dict_asr,
     ngpu=args.ngpu,
 )
-
-param_dict_punc = {'cache': list()}
-inference_pipeline_punc = pipeline(
-    task=Tasks.punctuation,
-    model=args.punc_model,
-    model_revision=None,
-    ngpu=args.ngpu,
-)
+if args.punc_model is not None:
+    param_dict_punc = {'cache': list()}
+    inference_pipeline_punc = pipeline(
+        task=Tasks.punctuation,
+        model=args.punc_model,
+        model_revision=None,
+        ngpu=args.ngpu,
+    )
+else:
+    inference_pipeline_punc = None
 
 print("model loaded")
 
@@ -124,7 +126,7 @@ def asr():  # 推理
             speek.task_done()
             if len(audio_in) > 0:
                 rec_result = inference_pipeline_asr(audio_in=audio_in)
-                if 'text' in rec_result:
+                if inference_pipeline_punc is not None and 'text' in rec_result:
                     rec_result = inference_pipeline_punc(text_in=rec_result['text'], param_dict=param_dict_punc)
                 print(rec_result["text"])
             time.sleep(0.1)
