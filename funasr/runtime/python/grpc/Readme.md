@@ -26,23 +26,28 @@ cd FunASR/funasr/runtime/python/grpc/
 
 Step 1-2) Optional, Prepare server onnxruntime environment (on server). 
 
-Install [`rapid_paraformer`](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/onnxruntime).
+Install [`onnx_paraformer`](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/onnxruntime).
 
-- Build the rapid_paraformer `whl`
+- Build the onnx_paraformer `whl`
 ```
 git clone https://github.com/alibaba/FunASR.git && cd FunASR
 cd funasr/runtime/python/onnxruntime/rapid_paraformer
-python setup.py bdist_wheel
+python setup.py build
+python setup.py install
 ```
 
-- Install the build `whl`
-```
-pip install dist/rapid_paraformer-0.0.1-py3-none-any.whl
-```
+[//]: # ()
+[//]: # (- Install the build `whl`)
+
+[//]: # (```)
+
+[//]: # (pip install dist/rapid_paraformer-0.0.1-py3-none-any.whl)
+
+[//]: # (```)
 
 Export the model, more details ref to [export docs](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/onnxruntime).
-```
-python -m funasr.export.export_model 'damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch' "./export" true
+```shell
+python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize True
 ```
 
 Step 2) Optional, generate protobuf file (run on server, the two generated pb files are both used for server and client).

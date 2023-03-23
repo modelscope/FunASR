@@ -25,6 +25,16 @@ Aishell1 [test set](https://www.openslr.org/33/) , the total audio duration is 3
 
 ## [Paraformer-large](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary) 
 
+Number of Parameter: 220M 
+
+Storage size: 880MB
+
+Storage size after int8-quant: 237MB
+
+CER: 1.95%
+
+CER after int8-quant: 1.95%
+
  ### Intel(R) Xeon(R) Platinum 8369B CPU @ 2.90GHz   16core-32processor    with avx512_vnni
 
 | concurrent-tasks | processing time(s) |   RTF   | Speedup Rate |
@@ -72,6 +82,16 @@ Aishell1 [test set](https://www.openslr.org/33/) , the total audio duration is 3
 |  96 (onnx int8)  |        108         | 0.0030 |    334.1     |
 
 ## [Paraformer](https://modelscope.cn/models/damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8358-tensorflow1/summary)
+
+Number of Parameter: 68M 
+
+Storage size: 275MB
+
+Storage size after int8-quant: 81MB
+
+CER: 3.73%
+
+CER after int8-quant: 3.78%
 
  ### Intel(R) Xeon(R) Platinum 8369B CPU @ 2.90GHz   16core-32processor    with avx512_vnni
 

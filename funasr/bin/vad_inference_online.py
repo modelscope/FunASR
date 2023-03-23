@@ -30,14 +30,7 @@ from funasr.models.frontend.wav_frontend import WavFrontendOnline
 from funasr.models.frontend.wav_frontend import WavFrontend
 from funasr.bin.vad_inference import Speech2VadSegment
 
-header_colors = '\033[95m'
-end_colors = '\033[0m'
 
-global_asr_language: str = 'zh-cn'
-global_sample_rate: Union[int, Dict[Any, int]] = {
-    'audio_fs': 16000,
-    'model_fs': 16000
-}
 
 
 class Speech2VadSegmentOnline(Speech2VadSegment):
