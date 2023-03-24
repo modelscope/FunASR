@@ -261,6 +261,7 @@ class Speech2Text:
 
             # Change integer-ids to tokens
             token = self.converter.ids2tokens(token_int)
+            token = list(filter(lambda x: x != "<gbg>", token))
 
             if self.tokenizer is not None:
                 text = self.tokenizer.tokens2text(token)
@@ -512,7 +513,7 @@ def inference_modelscope(
                     finish_count += 1
                     asr_utils.print_progress(finish_count / file_count)
                     if writer is not None:
-                        ibest_writer["text"][key] = text
+                        ibest_writer["text"][key] = text_postprocessed
         return asr_result_list
     
     return _forward
