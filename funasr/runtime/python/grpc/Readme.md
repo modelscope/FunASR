@@ -28,9 +28,7 @@ pip install -r requirements_server.txt
 Install [`funasr_onnx`](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/onnxruntime).
 
 ```
-cd funasr/runtime/python/onnxruntime
-python setup.py build
-python setup.py install
+pip install funasr_onnx -i https://pypi.Python.org/simple
 ```
 
 Export the model, more details ref to [export docs](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/onnxruntime).
