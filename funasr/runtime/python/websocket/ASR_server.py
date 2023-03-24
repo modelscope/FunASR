@@ -144,7 +144,7 @@ async def ws_serve(websocket, path):
  
 
 def asr(websocket):  # ASR推理
-        global inference_pipeline2
+        global inference_pipeline_asr, inference_pipeline_punc
         # global param_dict_punc
         global websocket_users
         while websocket in  websocket_users:
@@ -162,7 +162,7 @@ def asr(websocket):  # ASR推理
             time.sleep(0.1)
 
 def vad(data, websocket):  # VAD推理
-    global vad_pipline, param_dict_vad
+    global inference_pipeline_vad
     #print(type(data))
     # print(param_dict_vad)
     segments_result = inference_pipeline_vad(audio_in=data, param_dict=websocket.param_dict_vad)
