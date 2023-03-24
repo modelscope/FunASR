@@ -1,4 +1,4 @@
-## Using paraformer with libtorch
+## Using funasr with libtorch
 
 
 ### Introduction
@@ -7,13 +7,6 @@
 ### Steps:
 1. Export the model.
    - Command: (`Tips`: torch >= 1.11.0 is required.)
-
-      ```shell
-      python -m funasr.export.export_model [model_name] [export_dir] false
-      ```
-      `model_name`: the model is to export.
-
-      `export_dir`: the dir where the onnx is export.
 
        More details ref to ([export docs](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export))
 
@@ -29,10 +22,7 @@
 
 2. Install the `funasr_torch`.
     ```shell
-    git clone https://github.com/alibaba/FunASR.git && cd FunASR
-    cd funasr/runtime/python/libtorch
-    python setup.py build
-    python setup.py install
+    pip install funasr_torch -i https://pypi.Python.org/simple
     ```
 
 
