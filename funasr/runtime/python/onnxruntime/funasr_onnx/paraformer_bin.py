@@ -1,7 +1,5 @@
 # -*- encoding: utf-8 -*-
-# @Author: SWHL
-# @Contact: liekkaskono@163.com
-from cgitb import text
+
 import os.path
 from pathlib import Path
 from typing import List, Union, Tuple

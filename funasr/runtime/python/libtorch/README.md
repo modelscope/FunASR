@@ -1,5 +1,6 @@
-## Using paraformer with libtorch
+## Using funasr with libtorch
 
+[FunASR](https://github.com/alibaba-damo-academy/FunASR) hopes to build a bridge between academic research and industrial applications on speech recognition. By supporting the training & finetuning of the industrial-grade speech recognition model released on ModelScope, researchers and developers can conduct research and production of speech recognition models more conveniently, and promote the development of speech recognition ecology. ASR for Fun！
 
 ### Introduction
 - Model comes from [speech_paraformer](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary).
@@ -7,13 +8,6 @@
 ### Steps:
 1. Export the model.
    - Command: (`Tips`: torch >= 1.11.0 is required.)
-
-      ```shell
-      python -m funasr.export.export_model [model_name] [export_dir] false
-      ```
-      `model_name`: the model is to export.
-
-      `export_dir`: the dir where the onnx is export.
 
        More details ref to ([export docs](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export))
 
@@ -27,13 +21,20 @@
          ```
 
 
-2. Install the `torch_paraformer`.
+2. Install the `funasr_torch`.
+    
+    install from pip
+    ```shell
+    pip install --upgrade funasr_torch -i https://pypi.Python.org/simple
+    ```
+    or install from source code
+
     ```shell
     git clone https://github.com/alibaba/FunASR.git && cd FunASR
-    cd funasr/runtime/python/libtorch
+    cd funasr/runtime/python/funasr_torch
+    python setup.py build
     python setup.py install
     ```
-
 
 3. Run the demo.
    - Model_dir: the model path, which contains `model.torchscripts`, `config.yaml`, `am.mvn`.
@@ -41,7 +42,7 @@
    - Output: `List[str]`: recognition result.
    - Example:
         ```python
-        from torch_paraformer import Paraformer
+        from funasr_torch import Paraformer
 
         model_dir = "/nfs/zhifu.gzf/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
         model = Paraformer(model_dir, batch_size=1)
@@ -65,3 +66,4 @@ Test [wav, 5.53s, 100 times avg.](https://isv-data.oss-cn-hangzhou.aliyuncs.com/
 |   Onnx   |   0.038    |
 
 ## Acknowledge
+This project is maintained by [FunASR community](https://github.com/alibaba-damo-academy/FunASR).
