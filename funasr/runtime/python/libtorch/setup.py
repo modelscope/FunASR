@@ -14,8 +14,8 @@ def get_readme():
 
 
 setuptools.setup(
-    name='torch_paraformer',
-    version='0.0.1',
+    name='funasr_torch',
+    version='0.0.2',
     platforms="Any",
     url="https://github.com/alibaba-damo-academy/FunASR.git",
     author="Speech Lab, Alibaba Group, China",
@@ -31,7 +31,7 @@ setuptools.setup(
                       "PyYAML>=5.1.2", "torch-quant >= 0.4.0"],
     packages=find_packages(include=["torch_paraformer*"]),
     keywords=[
-        'funasr,paraformer'
+        'funasr,paraformer, funasr_torch'
     ],
     classifiers=[
         'Programming Language :: Python :: 3.6',

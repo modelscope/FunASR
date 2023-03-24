@@ -32,8 +32,8 @@
          ```
 
 
-2. Install the `rapid_paraformer`.
-   - Build the rapid_paraformer `whl`
+2. Install the `funasr_onnx`.
+   - Build the funasr_onnx `whl`
      ```shell
      git clone https://github.com/alibaba/FunASR.git && cd FunASR
      cd funasr/runtime/python/onnxruntime
@@ -41,7 +41,7 @@
      ```
    - Install the build `whl`
      ```bash
-     pip install dist/rapid_paraformer-0.0.1-py3-none-any.whl
+     pip install dist/funasr_onnx-0.0.2-py3-none-any.whl
      ```
 
 3. Run the demo.
@@ -50,7 +50,7 @@
    - Output: `List[str]`: recognition result.
    - Example:
         ```python
-        from rapid_paraformer import Paraformer
+        from funasr_onnx import Paraformer
 
         model_dir = "/nfs/zhifu.gzf/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
         model = Paraformer(model_dir, batch_size=1)

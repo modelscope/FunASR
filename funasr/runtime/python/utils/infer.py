@@ -15,9 +15,9 @@ parser.add_argument('--output_dir', type=str, default=None, help='amp fallback n
 args = parser.parse_args()
 
 
-from funasr.runtime.python.libtorch.torch_paraformer import Paraformer
+from funasr.runtime.python.libtorch.funasr_torch import Paraformer
 if args.backend == "onnx":
-	from funasr.runtime.python.onnxruntime.rapid_paraformer import Paraformer
+	from funasr.runtime.python.onnxruntime.funasr_onnx import Paraformer
 	
 model = Paraformer(args.model_dir, batch_size=1, quantize=args.quantize, intra_op_num_threads=args.intra_op_num_threads)
 
