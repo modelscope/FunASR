@@ -65,6 +65,7 @@ python grpc_main_server.py --port 10095 --backend onnxruntime --onnx_dir /models
 ### Install the requirements
 
 ```shell
+git clone https://github.com/alibaba/FunASR.git && cd FunASR
 cd funasr/runtime/python/grpc
 pip install -r requirements_client.txt
 ```
