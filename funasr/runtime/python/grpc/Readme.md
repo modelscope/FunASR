@@ -87,8 +87,8 @@ python grpc_main_client_mic.py --host 127.0.0.1 --port 10095
 
 
 ## Workflow in desgin
-![avatar](proto/workflow.png)
 
+<div align="left"><img src="proto/workflow.png" width="400"/>
 
 ## Reference
 We borrow from or refer to some code as:
