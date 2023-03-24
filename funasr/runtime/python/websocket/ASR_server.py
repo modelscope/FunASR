@@ -153,8 +153,8 @@ def asr(websocket):  # ASR推理
                     rec_result = inference_pipeline_asr(audio_in=audio_in)
                     if inference_pipeline_punc is not None and 'text' in rec_result:
                         rec_result = inference_pipeline_punc(text_in=rec_result['text'], param_dict=param_dict_punc)
-                    results = (rec_result["text"] if "text" in rec_result else rec_result)
-                    websocket.send_msg.put(results) # 存入发送队列  直接调用send发送不了
+                    if "text" in rec_result:
+                        websocket.send_msg.put(rec_result["text"]) # 存入发送队列  直接调用send发送不了
                
             time.sleep(0.1)
 
