@@ -1,5 +1,6 @@
 ## Using funasr with libtorch
 
+[FunASR](https://github.com/alibaba-damo-academy/FunASR) hopes to build a bridge between academic research and industrial applications on speech recognition. By supporting the training & finetuning of the industrial-grade speech recognition model released on ModelScope, researchers and developers can conduct research and production of speech recognition models more conveniently, and promote the development of speech recognition ecology. ASR for Fun！
 
 ### Introduction
 - Model comes from [speech_paraformer](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary).
@@ -56,3 +57,4 @@ Test [wav, 5.53s, 100 times avg.](https://isv-data.oss-cn-hangzhou.aliyuncs.com/
 |   Onnx   |   0.038    |
 
 ## Acknowledge
+This project is maintained by [FunASR community](https://github.com/alibaba-damo-academy/FunASR).

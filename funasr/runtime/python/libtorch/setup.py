@@ -15,7 +15,7 @@ def get_readme():
 
 setuptools.setup(
     name='funasr_torch',
-    version='0.0.2',
+    version='0.0.3',
     platforms="Any",
     url="https://github.com/alibaba-damo-academy/FunASR.git",
     author="Speech Lab, Alibaba Group, China",
