@@ -22,10 +22,19 @@
 
 
 2. Install the `funasr_torch`.
+    
+    install from pip
     ```shell
-    pip install funasr_torch -i https://pypi.Python.org/simple
+    pip install --upgrade funasr_torch -i https://pypi.Python.org/simple
     ```
+    or install from source code
 
+    ```shell
+    git clone https://github.com/alibaba/FunASR.git && cd FunASR
+    cd funasr/runtime/python/funasr_torch
+    python setup.py build
+    python setup.py install
+    ```
 
 3. Run the demo.
    - Model_dir: the model path, which contains `model.torchscripts`, `config.yaml`, `am.mvn`.

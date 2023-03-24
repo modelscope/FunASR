@@ -21,11 +21,21 @@
          ```
 
 
-2. Install the `funasr_onnx`.
+2. Install the `funasr_onnx`
+
+install from pip
 ```shell
-pip install funasr_onnx -i https://pypi.Python.org/simple
+pip install --upgrade funasr_onnx -i https://pypi.Python.org/simple
 ```
 
+or install from source code
+
+```shell
+git clone https://github.com/alibaba/FunASR.git && cd FunASR
+cd funasr/runtime/python/funasr_onnx
+python setup.py build
+python setup.py install
+```
 
 3. Run the demo.
    - Model_dir: the model path, which contains `model.onnx`, `config.yaml`, `am.mvn`.
