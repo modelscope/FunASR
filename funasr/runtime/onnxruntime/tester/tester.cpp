@@ -51,8 +51,7 @@ int main(int argc, char *argv[])
         string msg = RapidAsrGetResult(Result, 0);
         setbuf(stdout, NULL);
         cout << "Result: \"";
-        cout << msg << endl;
-        cout << "\"." << endl;
+        cout << msg << "\"." << endl;
         snippet_time = RapidAsrGetRetSnippetTime(Result);
         RapidAsrFreeResult(Result);
     }

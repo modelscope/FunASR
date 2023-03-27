@@ -1,6 +1,4 @@
 
-
-
 ## 快速使用
 
 ### Windows
@@ -9,19 +7,16 @@
 
  Windows下已经预置fftw3及onnxruntime库
 
-
 ### Linux
 See the bottom of this page: Building Guidance
-
 
 ###  运行程序
 
 tester  /path/to/models/dir /path/to/wave/file quantize(true or false)
 
- 例如： tester /data/models  /data/test.wav false
+例如： tester /data/models  /data/test.wav false
 
-/data/models 需要包括如下两个文件： model.onnx 和vocab.txt
-
+/data/models 需要包括如下三个文件: config.yaml, am.mvn, model.onnx(or model_quant.onnx)
 
 ## 支持平台
 - Windows
@@ -66,7 +61,7 @@ centos: yum install fftw fftw-devel
 bash ./third_party/install_openblas.sh
 
 # build
- cmake  -DCMAKE_BUILD_TYPE=release .. -DONNXRUNTIME_DIR=/mnt/c/Users/ma139/RapidASR/cpp_onnx/build/onnxruntime-linux-x64-1.14.0
+ cmake  -DCMAKE_BUILD_TYPE=release .. -DONNXRUNTIME_DIR=/path/to/onnxruntime-linux-x64-1.14.0
  make
 
  # then in the subfolder tester of current direcotry, you will see a program, tester
@@ -98,8 +93,6 @@ onnxruntime_xxx
 
 大部分场景用3-4线程性价比最高
 低配机器用2线程合适
-
-
 
 ##  演示
 

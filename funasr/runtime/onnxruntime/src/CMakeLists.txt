@@ -21,7 +21,7 @@ if(WIN32)
         target_compile_definitions(rapidasr PUBLIC -D_RPASR_API_EXPORT)
 else()
 
-    set(EXTRA_LIBS fftw3f webrtcvad pthread)
+    set(EXTRA_LIBS fftw3f webrtcvad pthread yaml-cpp)
     target_include_directories(rapidasr PUBLIC "/usr/local/opt/fftw/include")
     target_link_directories(rapidasr PUBLIC "/usr/local/opt/fftw/lib")
 

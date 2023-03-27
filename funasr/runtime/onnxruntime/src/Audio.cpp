@@ -138,9 +138,9 @@ bool Audio::loadwav(const char *filename)
     fp = fopen(filename, "rb");
     if (fp == nullptr)
         return false;
-    fseek(fp, 0, SEEK_END);
-    uint32_t nFileLen = ftell(fp);
-    fseek(fp, 44, SEEK_SET);
+    fseek(fp, 0, SEEK_END);  /*定位到文件末尾*/
+    uint32_t nFileLen = ftell(fp);  /*得到文件大小*/
+    fseek(fp, 44, SEEK_SET);  /*跳过wav文件头*/
 
     speech_len = (nFileLen - 44) / 2;
     speech_align_len = (int)(ceil((float)speech_len / align_size) * align_size);
