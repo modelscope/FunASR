@@ -52,3 +52,7 @@ Usage: ./cmake/build/paraformer_server port thread_num /path/to/model_file quant
 cd ../python/grpc
 python grpc_main_client_mic.py  --host $server_ip --port 10108
 ```
+
+## Acknowledge
+1. This project is maintained by [FunASR community](https://github.com/alibaba-damo-academy/FunASR).
+2. We acknowledge [DeepScience](https://www.deepscience.cn) for contributing the grpc service.

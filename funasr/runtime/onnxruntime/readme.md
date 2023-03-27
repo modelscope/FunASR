@@ -12,7 +12,7 @@ See the bottom of this page: Building Guidance
 
 ###  运行程序
 
-tester  /path/to/models/dir /path/to/wave/file quantize(true or false)
+tester  /path/to/models_dir /path/to/wave_file quantize(true or false)
 
 例如： tester /data/models  /data/test.wav false
 
@@ -75,33 +75,11 @@ onnxruntime_xxx
 └───lib
 ```
 
-## 线程数与性能关系
-
-测试环境Rocky Linux 8，仅测试cpp版本结果（未测python版本），@acely 
-
-简述：
-在3台配置不同的机器上分别编译并测试，在fftw和onnxruntime版本都相同的前提下，识别同一个30分钟的音频文件，分别测试不同onnx线程数量的表现。
-
-![线程数关系](images/threadnum.png "Windows ASR")
-
-目前可以总结出大致规律：
-
-并非onnx线程数越多越好
-2线程比1线程提升显著，线程再多则提升较小
-线程数等于CPU物理核心数时效率最好
-实操建议：
-
-大部分场景用3-4线程性价比最高
-低配机器用2线程合适
-
-##  演示
-
-![Windows演示](images/demo.png "Windows ASR")
-
 ## 注意
 本程序只支持 采样率16000hz, 位深16bit的 **单声道** 音频。
 
 
 ## Acknowledge
-1. We acknowledge [mayong](https://github.com/RapidAI/RapidASR/tree/main/cpp_onnx) for contributing the onnxruntime(cpp api).
-2. We borrowed a lot of code from [FastASR](https://github.com/chenkui164/FastASR) for audio frontend and text-postprocess.
+1. This project is maintained by [FunASR community](https://github.com/alibaba-damo-academy/FunASR).
+2. We acknowledge [mayong](https://github.com/RapidAI/RapidASR/tree/main/cpp_onnx) for contributing the onnxruntime(cpp api).
+3. We borrowed a lot of code from [FastASR](https://github.com/chenkui164/FastASR) for audio frontend and text-postprocess.

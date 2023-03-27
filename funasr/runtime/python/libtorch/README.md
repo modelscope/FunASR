@@ -53,6 +53,10 @@
         print(result)
         ```
 
+## Performance benchmark
+
+Please ref to [benchmark](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/python/benchmark_libtorch.md)
+
 ## Speed
 
 Environment：Intel(R) Xeon(R) Platinum 8163 CPU @ 2.50GHz

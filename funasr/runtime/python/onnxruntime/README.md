@@ -54,17 +54,9 @@ python setup.py install
         print(result)
         ```
 
-## Speed
+## Performance benchmark
 
-Environment：Intel(R) Xeon(R) Platinum 8163 CPU @ 2.50GHz
-
-Test [wav, 5.53s, 100 times avg.](https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav)
-
-| Backend |        RTF        |
-|:-------:|:-----------------:|
-| Pytorch |       0.110       |
-|  Onnx   |       0.038       |
-
+Please ref to [benchmark](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/python/benchmark_onnx.md)
 
 ## Acknowledge
 1. This project is maintained by [FunASR community](https://github.com/alibaba-damo-academy/FunASR).
