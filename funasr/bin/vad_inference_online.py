@@ -218,8 +218,8 @@ def inference_modelscope(
 
         vad_results = []
         batch_in_cache = param_dict['in_cache'] if param_dict is not None else dict()
-        is_final = param_dict['is_final'] if param_dict is not None else False
-        max_end_sil = param_dict['max_end_sil'] if param_dict is not None else 800
+        is_final = param_dict.get('is_final', False) if param_dict is not None else False
+        max_end_sil = param_dict.get('max_end_sil', 800) if param_dict is not None else 800
         for keys, batch in loader:
             assert isinstance(batch, dict), type(batch)
             assert all(isinstance(s, str) for s in keys), keys
