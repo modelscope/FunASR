@@ -22,7 +22,6 @@ link_directories(${ONNXRUNTIME_DIR}/lib)
 
 endif()
 
-add_subdirectory("./third_party/webrtc")
 add_subdirectory("./third_party/yaml-cpp")
 add_subdirectory(src)
 add_subdirectory(tester)

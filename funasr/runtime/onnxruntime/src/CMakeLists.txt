@@ -10,7 +10,7 @@ add_library(rapidasr ${files})
 
 if(WIN32)
 
-        set(EXTRA_LIBS libfftw3f-3 webrtcvad)
+        set(EXTRA_LIBS libfftw3f-3 yaml-cpp)
         if(CMAKE_CL_64)
             target_link_directories(rapidasr PUBLIC ${CMAKE_SOURCE_DIR}/win/lib/x64)
         else()
@@ -21,7 +21,7 @@ if(WIN32)
         target_compile_definitions(rapidasr PUBLIC -D_RPASR_API_EXPORT)
 else()
 
-    set(EXTRA_LIBS fftw3f webrtcvad pthread yaml-cpp)
+    set(EXTRA_LIBS fftw3f pthread yaml-cpp)
     target_include_directories(rapidasr PUBLIC "/usr/local/opt/fftw/include")
     target_link_directories(rapidasr PUBLIC "/usr/local/opt/fftw/lib")
 

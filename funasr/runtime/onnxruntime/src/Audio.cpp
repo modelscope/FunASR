@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <webrtc_vad.h>
 
 #include "Audio.h"
 
@@ -414,6 +413,7 @@ void Audio::padding()
 #define SPEECH_LEN_20S (16000 * 20)
 #define SPEECH_LEN_30S (16000 * 30)
 
+/*
 void Audio::split()
 {
     VadInst *handle = WebRtcVad_Create();
@@ -472,3 +472,4 @@ void Audio::split()
     }
     WebRtcVad_Free(handle);
 }
+*/
