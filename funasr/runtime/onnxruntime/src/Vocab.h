@@ -12,6 +12,7 @@ class Vocab {
     vector<string> vocab;
     bool isChinese(string ch);
     bool isEnglish(string ch);
+    void loadVocabFromYaml(const char* filename);
 
   public:
     Vocab(const char *filename);

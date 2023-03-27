@@ -1,13 +1,15 @@
 #pragma once 
 // system 
 
-#include <iostream>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <deque>
 #include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iterator>
 #include <list>
 #include <locale.h>
 #include <vector>

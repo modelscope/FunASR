@@ -11,9 +11,13 @@ namespace paraformer {
         FeatureExtract* fe;
 
         Vocab* vocab;
+        vector<float> means_list;
+        vector<float> vars_list;
+        const float scale = 22.6274169979695;
 
         void apply_lfr(Tensor<float>*& din);
         void apply_cmvn(Tensor<float>* din);
+        void load_cmvn(const char *filename);
 
         string greedy_search( float* in, int nLen);
 
