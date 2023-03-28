@@ -11,7 +11,7 @@ from funasr.export.models.encoder.fsmn_encoder import FSMN as FSMN_export
 class E2EVadModel(nn.Module):
     def __init__(self, model,
                 max_seq_len=512,
-                feats_dim=560,
+                feats_dim=400,
                 model_name='model',
                 **kwargs,):
         super(E2EVadModel, self).__init__()
@@ -31,7 +31,7 @@ class E2EVadModel(nn.Module):
                        in_cache3: torch.Tensor,
                        ):
 
-        scores, cache0, cache1, cache2, cache3 = self.encoder(feats,
+        scores, (cache0, cache1, cache2, cache3) = self.encoder(feats,
                                                               in_cache0,
                                                               in_cache1,
                                                               in_cache2,

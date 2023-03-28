@@ -193,6 +193,7 @@ class ModelExport:
             model, vad_infer_args = VADTask.build_model_from_file(
                 config, model_file, 'cpu'
             )
+            self.export_config["feats_dim"] = 400
         self._export(model, tag_name)
             
 
