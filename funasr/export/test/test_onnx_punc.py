@@ -3,7 +3,7 @@ import numpy as np
 
 
 if __name__ == '__main__':
-    onnx_path = "/disk1/mengzhe.cmz/workspace/FunASR/funasr/export/damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch/model.onnx"
+    onnx_path = "../damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch/model.onnx"
     sess = onnxruntime.InferenceSession(onnx_path)
     input_name = [nd.name for nd in sess.get_inputs()]
     output_name = [nd.name for nd in sess.get_outputs()]
