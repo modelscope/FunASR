@@ -53,13 +53,13 @@ class Fsmn_vad():
 		proj_dim = self.encoder_conf["proj_dim"]
 		lorder = self.encoder_conf["lorder"]
 		for i in range(fsmn_layers):
-			cache = np.zeros(1, proj_dim, lorder-1, 1).astype(np.float32)
+			cache = np.zeros((1, proj_dim, lorder-1, 1)).astype(np.float32)
 			in_cache.append(cache)
 		return in_cache
 		
 	
-	def __call__(self, wav_content: Union[str, np.ndarray, List[str]], **kwargs) -> List:
-		waveform_list = self.load_data(wav_content, self.frontend.opts.frame_opts.samp_freq)
+	def __call__(self, audio_in: Union[str, np.ndarray, List[str]], **kwargs) -> List:
+		waveform_list = self.load_data(audio_in, self.frontend.opts.frame_opts.samp_freq)
 		waveform_nums = len(waveform_list)
 		is_final = kwargs.get('kwargs', False)
 
@@ -70,13 +70,13 @@ class Fsmn_vad():
 			waveform = waveform_list[beg_idx:end_idx]
 			feats, feats_len = self.extract_feat(waveform)
 			param_dict = kwargs.get('param_dict', dict())
-			in_cache = param_dict.get('cache', list())
+			in_cache = param_dict.get('in_cache', list())
 			in_cache = self.prepare_cache(in_cache)
 			try:
 				inputs = [feats]
 				inputs.extend(in_cache)
 				scores, out_caches = self.infer(inputs)
-				param_dict['cache'] = out_caches
+				param_dict['in_cache'] = out_caches
 				segments = self.vad_scorer(scores, waveform[0][None, :], is_final=is_final, max_end_sil=self.max_end_sil)
 				
 			except ONNXRuntimeError:
