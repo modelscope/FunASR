@@ -25,6 +25,16 @@ Aishell1 [test set](https://www.openslr.org/33/) , the total audio duration is 3
 
 ## [Paraformer-large](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary) 
 
+Number of Parameter: 220M 
+
+Storage size: 880MB
+
+Storage size after int8-quant: 237MB
+
+CER: 1.95%
+
+CER after int8-quant: 1.95%
+
  ### Intel(R) Xeon(R) Platinum 8369B CPU @ 2.90GHz   16core-32processor    with avx512_vnni
 
 | concurrent-tasks | processing time(s) |   RTF   | Speedup Rate |
@@ -73,10 +83,22 @@ Aishell1 [test set](https://www.openslr.org/33/) , the total audio duration is 3
 
 ## [Paraformer](https://modelscope.cn/models/damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8358-tensorflow1/summary)
 
+Number of Parameter: 68M 
+
+Storage size: 275MB
+
+Storage size after int8-quant: 81MB
+
+CER: 3.73%
+
+CER after int8-quant: 3.78%
+
  ### Intel(R) Xeon(R) Platinum 8369B CPU @ 2.90GHz   16core-32processor    with avx512_vnni
 
 | concurrent-tasks | processing time(s) |  RTF   | Speedup Rate |
 |:----------------:|:------------------:|:------:|:------------:|
+|  1 (onnx fp32)   |        1173        | 0.0325 |     30.8     |
+|  1 (onnx int8)   |        976         | 0.0270 |     37.0     |
 |  16 (onnx fp32)  |         91         | 0.0025 |    395.2     |
 |  16 (onnx int8)  |         78         | 0.0022 |    463.0     |
 |  32 (onnx fp32)  |         60         | 0.0017 |    598.8     |
@@ -85,7 +107,3 @@ Aishell1 [test set](https://www.openslr.org/33/) , the total audio duration is 3
 |  64 (onnx int8)  |         31         | 0.0009 |    1162.8    |
 |  96 (onnx fp32)  |         57         | 0.0016 |    632.9     |
 |  96 (onnx int8)  |         33         | 0.0009 |    1098.9    |
-
-[//]: # (|  1 &#40;onnx fp32&#41;   |        2806        | 0.0777 |     12.9     |)
-
-[//]: # (|  1 &#40;onnx int8&#41;   |        1611        | 0.0446 |     22.4     |)

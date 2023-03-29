@@ -116,8 +116,8 @@ class SpeechText2Timestamp:
             enc = enc[0]
 
         # c. Forward Predictor
-        _, _, us_alphas, us_cif_peak = self.tp_model.calc_predictor_timestamp(enc, enc_len, text_lengths.to(self.device)+1)
-        return us_alphas, us_cif_peak
+        _, _, us_alphas, us_peaks = self.tp_model.calc_predictor_timestamp(enc, enc_len, text_lengths.to(self.device)+1)
+        return us_alphas, us_peaks
 
 
 def inference(

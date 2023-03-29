@@ -30,6 +30,16 @@ The installation is the same as [funasr](../../README.md)
 
    `fallback-num`: specify the number of fallback layers to perform automatic mixed precision quantization.
 
+## Performance Benchmark of Runtime
+
+### Paraformer on CPU
+
+[onnx runtime](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/python/benchmark_onnx.md)
+
+[libtorch runtime](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/python/benchmark_libtorch.md)
+
+### Paraformer on GPU
+[nv-triton](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/triton_gpu)
 
 ## For example
 ### Export onnx format model

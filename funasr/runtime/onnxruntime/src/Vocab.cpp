@@ -1,4 +1,5 @@
 #include "Vocab.h"
+#include "yaml-cpp/yaml.h"
 
 #include <fstream>
 #include <iostream>
@@ -11,23 +12,40 @@ using namespace std;
 Vocab::Vocab(const char *filename)
 {
     ifstream in(filename);
-    string line;
+    loadVocabFromYaml(filename);
 
+    /*
+    string line;
     if (in) // 有该文件
     {
         while (getline(in, line)) // line中不包括每行的换行符
         {
             vocab.push_back(line);
         }
-        // cout << vocab[1719] << endl;
     }
-    // else // 没有该文件
-    //{
-    //     cout << "no such file" << endl;
-    // }
+    else{
+        printf("Cannot load vocab from: %s, there must be file vocab.txt", filename);
+        exit(-1);
+    }
+    */
 }
 Vocab::~Vocab()
 {
+}
+
+void Vocab::loadVocabFromYaml(const char* filename){
+    YAML::Node config;
+    try{
+        config = YAML::LoadFile(filename);
+    }catch(...){
+        printf("error loading file, yaml file error or not exist.\n");
+        exit(-1);
+    }
+
+    YAML::Node myList = config["token_list"];
+    for (YAML::const_iterator it = myList.begin(); it != myList.end(); ++it) {
+        vocab.push_back(it->as<string>());
+    }
 }
 
 string Vocab::vector2string(vector<int> in)
@@ -66,7 +84,6 @@ bool Vocab::isChinese(string ch)
 
     return false;
 }
-
 
 string Vocab::vector2stringV2(vector<int> in)
 {
