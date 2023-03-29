@@ -3,6 +3,7 @@ from funasr.export.models.e2e_asr_paraformer import Paraformer as Paraformer_exp
 from funasr.export.models.e2e_asr_paraformer import BiCifParaformer as BiCifParaformer_export
 from funasr.models.e2e_vad import E2EVadModel
 from funasr.export.models.e2e_vad import E2EVadModel as E2EVadModel_export
+from funasr.punctuation.target_delay_transformer import TargetDelayTransformer
 from funasr.export.models.target_delay_transformer import TargetDelayTransformer as TargetDelayTransformer_export
 from funasr.punctuation.espnet_model import ESPnetPunctuationModel
 
