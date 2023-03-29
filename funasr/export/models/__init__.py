@@ -4,6 +4,7 @@ from funasr.export.models.e2e_asr_paraformer import BiCifParaformer as BiCifPara
 from funasr.models.e2e_vad import E2EVadModel
 from funasr.export.models.e2e_vad import E2EVadModel as E2EVadModel_export
 from funasr.export.models.target_delay_transformer import TargetDelayTransformer as TargetDelayTransformer_export
+from funasr.punctuation.espnet_model import ESPnetPunctuationModel
 
 def get_model(model, export_config=None):
     if isinstance(model, BiCifParaformer):
