@@ -6,7 +6,9 @@ from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Tuple
-
+from typing import Union
+from pathlib import Path
+import yaml
 import numpy as np
 import torch
 from typeguard import check_argument_types
@@ -227,3 +229,49 @@ class PunctuationTask(AbsTask):
 
         assert check_return_type(model)
         return model
+    # ~~~~~~~~~ The methods below are mainly used for inference ~~~~~~~~~
+    
+    @classmethod
+    def build_model_from_file(
+            cls,
+            config_file: Union[Path, str] = None,
+            model_file: Union[Path, str] = None,
+            cmvn_file: Union[Path, str] = None,
+            device: str = "cpu",
+    ):
+        """Build model from the files.
+
+        This method is used for inference or fine-tuning.
+
+        Args:
+            config_file: The yaml file saved when training.
+            model_file: The model file saved when training.
+            device: Device type, "cpu", "cuda", or "cuda:N".
+
+        """
+        # assert check_argument_types()
+        if config_file is None:
+            assert model_file is not None, (
+                "The argument 'model_file' must be provided "
+                "if the argument 'config_file' is not specified."
+            )
+            config_file = Path(model_file).parent / "config.yaml"
+        else:
+            config_file = Path(config_file)
+
+        with config_file.open("r", encoding="utf-8") as f:
+            args = yaml.safe_load(f)
+        if cmvn_file is not None:
+            args["cmvn_file"] = cmvn_file
+        args = argparse.Namespace(**args)
+        model = cls.build_model(args)
+
+        model.to(device)
+        if model_file is not None:
+            if device == "cuda":
+                # NOTE(kamo): "cuda" for torch.load always indicates cuda:0
+                #   in PyTorch<=1.4
+                device = f"cuda:{torch.cuda.current_device()}"
+            model.load_state_dict(torch.load(model_file, map_location=device))
+        model.to(device)
+        return model, args
