@@ -1085,6 +1085,7 @@ class ContextualParaformer(Paraformer):
             inner_dim: int = 256,
             bias_encoder_type: str = 'lstm',
             label_bracket: bool = False,
+            use_decoder_embedding: bool = False,
     ):
         assert check_argument_types()
         assert 0.0 <= ctc_weight <= 1.0, ctc_weight
@@ -1138,6 +1139,7 @@ class ContextualParaformer(Paraformer):
             self.hotword_buffer = None
             self.length_record = []
             self.current_buffer_length = 0
+        self.use_decoder_embedding = use_decoder_embedding
 
     def forward(
             self,
@@ -1279,7 +1281,10 @@ class ContextualParaformer(Paraformer):
                     hw_list.append(hw_tokens)
         # padding
         hw_list_pad = pad_list(hw_list, 0)
-        hw_embed = self.decoder.embed(hw_list_pad)
+        if self.use_decoder_embedding:
+            hw_embed = self.decoder.embed(hw_list_pad)
+        else:
+            hw_embed = self.bias_embed(hw_list_pad)
         hw_embed, (_, _) = self.bias_encoder(hw_embed)
         _ind = np.arange(0, len(hw_list)).tolist()
         # update self.hotword_buffer, throw a part if oversize
@@ -1395,13 +1400,19 @@ class ContextualParaformer(Paraformer):
             # default hotword list
             hw_list = [torch.Tensor([self.sos]).long().to(encoder_out.device)]  # empty hotword list
             hw_list_pad = pad_list(hw_list, 0)
-            hw_embed = self.bias_embed(hw_list_pad)
+            if self.use_decoder_embedding:
+                hw_embed = self.decoder.embed(hw_list_pad)
+            else:
+                hw_embed = self.bias_embed(hw_list_pad)
             _, (h_n, _) = self.bias_encoder(hw_embed)
             contextual_info = h_n.squeeze(0).repeat(encoder_out.shape[0], 1, 1)
         else:
             hw_lengths = [len(i) for i in hw_list]
             hw_list_pad = pad_list([torch.Tensor(i).long() for i in hw_list], 0).to(encoder_out.device)
-            hw_embed = self.bias_embed(hw_list_pad)
+            if self.use_decoder_embedding:
+                hw_embed = self.decoder.embed(hw_list_pad)
+            else:
+                hw_embed = self.bias_embed(hw_list_pad)
             hw_embed = torch.nn.utils.rnn.pack_padded_sequence(hw_embed, hw_lengths, batch_first=True,
                                                                enforce_sorted=False)
             _, (h_n, _) = self.bias_encoder(hw_embed)
