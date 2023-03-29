@@ -243,8 +243,6 @@ class CifPredictorV2(nn.Module):
                 pre_alphas_length = cache["cif_alphas"].size(-1)
                 mask_chunk_peak_predictor[:, :pre_alphas_length] = 1.0
             mask_chunk_peak_predictor[:, pre_alphas_length + cache["pad_left"]:pre_alphas_length + cache["stride"] + cache["pad_left"]] = 1.0
-            #if cache["is_final"]:
-            #    mask_chunk_peak_predictor[:, -1] = 1.0
             
         if mask_chunk_peak_predictor is not None:
             cif_peak = cif_peak * mask_chunk_peak_predictor.squeeze(-1)
