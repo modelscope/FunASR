@@ -74,7 +74,7 @@ class ContextualDecoderLayer(nn.Module):
         return x, tgt_mask, x_self_attn, x_src_attn
 
 
-class ContexutalBiasDecoder(nn.Module):
+class ContextualBiasDecoder(nn.Module):
     def __init__(
         self,
         size,
@@ -83,7 +83,7 @@ class ContexutalBiasDecoder(nn.Module):
         normalize_before=True,
     ):
         """Construct an DecoderLayer object."""
-        super(ContexutalBiasDecoder, self).__init__()
+        super(ContextualBiasDecoder, self).__init__()
         self.size = size
         self.src_attn = src_attn
         if src_attn is not None:
@@ -186,7 +186,7 @@ class ContextualParaformerDecoder(ParaformerSANMDecoder):
             ),
         )
         self.dropout = nn.Dropout(dropout_rate)
-        self.bias_decoder = ContexutalBiasDecoder(
+        self.bias_decoder = ContextualBiasDecoder(
             size=attention_dim,
             src_attn=MultiHeadedAttentionCrossAtt(
                 attention_heads, attention_dim, src_attention_dropout_rate
