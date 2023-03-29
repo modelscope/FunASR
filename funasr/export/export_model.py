@@ -191,9 +191,10 @@ class ModelExport:
             cmvn_file = os.path.join(model_dir, 'vad.mvn')
             
             model, vad_infer_args = VADTask.build_model_from_file(
-                config, model_file, 'cpu'
+                config, model_file, cmvn_file=cmvn_file, device='cpu'
             )
             self.export_config["feats_dim"] = 400
+            self.frontend = model.frontend
         self._export(model, tag_name)
             
 

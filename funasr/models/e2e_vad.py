@@ -192,7 +192,7 @@ class WindowDetector(object):
 
 
 class E2EVadModel(nn.Module):
-    def __init__(self, encoder: FSMN, vad_post_args: Dict[str, Any]):
+    def __init__(self, encoder: FSMN, vad_post_args: Dict[str, Any], frontend=None):
         super(E2EVadModel, self).__init__()
         self.vad_opts = VADXOptions(**vad_post_args)
         self.windows_detector = WindowDetector(self.vad_opts.window_size_ms,
@@ -229,6 +229,7 @@ class E2EVadModel(nn.Module):
         self.data_buf_all = None
         self.waveform = None
         self.ResetDetection()
+        self.frontend = frontend
 
     def AllResetDetection(self):
         self.is_final = False
@@ -477,8 +478,9 @@ class E2EVadModel(nn.Module):
                 ) -> Tuple[List[List[List[int]]], Dict[str, torch.Tensor]]:
         self.max_end_sil_frame_cnt_thresh = max_end_sil - self.vad_opts.speech_to_sil_time_thres
         self.waveform = waveform  # compute decibel for each frame
-        self.ComputeDecibel()
+        
         self.ComputeScores(feats, in_cache)
+        self.ComputeDecibel()
         if not is_final:
             self.DetectCommonFrames()
         else:
