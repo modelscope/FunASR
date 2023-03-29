@@ -228,13 +228,6 @@ class CifPredictorV2(nn.Module):
             if cache["cif_alphas"] is not None:
                 alphas = torch.cat((cache["cif_alphas"], alphas), -1)
 
-        #if cache["is_final"]:
-        #    tail_threshold = torch.tensor([self.tail_threshold], dtype=alphas.dtype).to(alphas.device)
-        #    tail_threshold = torch.reshape(tail_threshold, (1, 1))
-        #    alphas = torch.cat([alphas, tail_threshold], dim=1)
-        #    zeros_hidden = torch.zeros((b, 1, d), dtype=hidden.dtype).to(hidden.device)
-        #    hidden = torch.cat([hidden, zeros_hidden], dim=1)
-
         token_num = alphas.sum(-1)
         acoustic_embeds, cif_peak = cif(hidden, alphas, self.threshold)
         len_time = alphas.size(-1)
