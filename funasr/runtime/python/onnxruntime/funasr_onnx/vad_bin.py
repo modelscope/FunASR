@@ -53,7 +53,7 @@ class Fsmn_vad():
 		proj_dim = self.encoder_conf["proj_dim"]
 		lorder = self.encoder_conf["lorder"]
 		for i in range(fsmn_layers):
-			cache = np.random.rand(1, proj_dim, lorder-1, 1).astype(np.float32)
+			cache = np.zeros(1, proj_dim, lorder-1, 1).astype(np.float32)
 			in_cache.append(cache)
 		return in_cache
 		
