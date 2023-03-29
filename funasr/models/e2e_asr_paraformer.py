@@ -370,19 +370,10 @@ class Paraformer(AbsESPnetModel):
                 encoder_out, encoder_out_lens
             )
 
-        assert encoder_out.size(0) == speech.size(0), (
-            encoder_out.size(),
-            speech.size(0),
-        )
-        assert encoder_out.size(1) <= encoder_out_lens.max(), (
-            encoder_out.size(),
-            encoder_out_lens.max(),
-        )
-
         if intermediate_outs is not None:
             return (encoder_out, intermediate_outs), encoder_out_lens
 
-        return encoder_out, encoder_out_lens
+        return encoder_out, torch.tensor([encoder_out.size(1)])
 
     def calc_predictor(self, encoder_out, encoder_out_lens):
 

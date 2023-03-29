@@ -200,6 +200,7 @@ class CifPredictorV2(nn.Module):
         return acoustic_embeds, token_num, alphas, cif_peak
 
     def forward_chunk(self, hidden, cache=None):
+        b, t, d = hidden.size()
         h = hidden
         context = h.transpose(1, 2)
         queries = self.pad(context)
@@ -220,6 +221,8 @@ class CifPredictorV2(nn.Module):
             alphas = alphas * mask_chunk_predictor
       
         if cache is not None:
+            if cache["is_final"]:
+                alphas[:, cache["stride"] + cache["pad_left"] - 1] += 0.45
             if cache["cif_hidden"] is not None:
                 hidden = torch.cat((cache["cif_hidden"], hidden), 1)
             if cache["cif_alphas"] is not None:
@@ -241,7 +244,6 @@ class CifPredictorV2(nn.Module):
                 mask_chunk_peak_predictor[:, :pre_alphas_length] = 1.0
             mask_chunk_peak_predictor[:, pre_alphas_length + cache["pad_left"]:pre_alphas_length + cache["stride"] + cache["pad_left"]] = 1.0
             
-
         if mask_chunk_peak_predictor is not None:
             cif_peak = cif_peak * mask_chunk_peak_predictor.squeeze(-1)
         
