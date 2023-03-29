@@ -31,7 +31,7 @@
 
     ```shell
     git clone https://github.com/alibaba/FunASR.git && cd FunASR
-    cd funasr/runtime/python/funasr_torch
+    cd funasr/runtime/python/libtorch
     python setup.py build
     python setup.py install
     ```
