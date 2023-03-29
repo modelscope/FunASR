@@ -42,6 +42,7 @@ from funasr.utils import asr_utils, wav_utils, postprocess_utils
 from funasr.models.frontend.wav_frontend import WavFrontend
 from funasr.models.e2e_asr_paraformer import BiCifParaformer, ContextualParaformer
 from funasr.export.models.e2e_asr_paraformer import Paraformer as Paraformer_export
+np.set_printoptions(threshold=np.inf)
 
 class Speech2Text:
     """Speech2Text class
@@ -203,7 +204,6 @@ class Speech2Text:
         # Input as audio signal
         if isinstance(speech, np.ndarray):
             speech = torch.tensor(speech)
-
         if self.frontend is not None:
             feats, feats_len = self.frontend.forward(speech, speech_lengths)
             feats = to_device(feats, device=self.device)
@@ -213,13 +213,16 @@ class Speech2Text:
             feats = speech
             feats_len = speech_lengths
         lfr_factor = max(1, (feats.size()[-1] // 80) - 1)
+        feats_len = cache["encoder"]["stride"] + cache["encoder"]["pad_left"] + cache["encoder"]["pad_right"]
+        feats = feats[:,cache["encoder"]["start_idx"]:cache["encoder"]["start_idx"]+feats_len,:]
+        feats_len = torch.tensor([feats_len])
         batch = {"speech": feats, "speech_lengths": feats_len, "cache": cache}
 
         # a. To device
         batch = to_device(batch, device=self.device)
 
         # b. Forward Encoder
-        enc, enc_len = self.asr_model.encode_chunk(**batch)
+        enc, enc_len = self.asr_model.encode_chunk(feats, feats_len, cache)
         if isinstance(enc, tuple):
             enc = enc[0]
         # assert len(enc) == 1, len(enc)
@@ -592,7 +595,6 @@ def inference_modelscope(
         if data_path_and_name_and_type is None and raw_inputs is not None:
             if isinstance(raw_inputs, np.ndarray):
                 raw_inputs = torch.tensor(raw_inputs)
-
         is_final = False
         if param_dict is not None and "cache" in param_dict:
             cache = param_dict["cache"]
@@ -605,62 +607,87 @@ def inference_modelscope(
         asr_result = ""
         wait = True
         if len(cache) == 0:
-            cache["encoder"] = {"start_idx": 0, "pad_left": 0, "stride": 10, "pad_right": 5, "cif_hidden": None, "cif_alphas": None}
+            cache["encoder"] = {"start_idx": 0, "pad_left": 0, "stride": 10, "pad_right": 5, "cif_hidden": None, "cif_alphas": None, "is_final": is_final, "left": 0, "right": 0}
             cache_de = {"decode_fsmn": None}
             cache["decoder"] = cache_de
             cache["first_chunk"] = True
             cache["speech"] = []
-            cache["chunk_index"] = 0
-            cache["speech_chunk"] = []
+            cache["accum_speech"] = 0
 
         if raw_inputs is not None:
             if len(cache["speech"]) == 0:
                 cache["speech"] = raw_inputs
             else:
                 cache["speech"] = torch.cat([cache["speech"], raw_inputs], dim=0)
-            if len(cache["speech_chunk"]) == 0:
-                cache["speech_chunk"] = raw_inputs
-            else:
-                cache["speech_chunk"] = torch.cat([cache["speech_chunk"], raw_inputs], dim=0)
-            while len(cache["speech_chunk"]) >= 960:
+            cache["accum_speech"] += len(raw_inputs)
+            while cache["accum_speech"] >= 960:
                 if cache["first_chunk"]:
-                    if len(cache["speech_chunk"]) >= 14400:
-                        speech = torch.unsqueeze(cache["speech_chunk"][0:14400], axis=0)
-                        speech_length = torch.tensor([14400])
+                    if cache["accum_speech"] >= 14400:
+                        speech = torch.unsqueeze(cache["speech"], axis=0)
+                        speech_length = torch.tensor([len(cache["speech"])])
+                        cache["encoder"]["pad_left"] = 5 
+                        cache["encoder"]["pad_right"] = 5 
+                        cache["encoder"]["stride"] = 10
+                        cache["encoder"]["left"] = 5
+                        cache["encoder"]["right"] = 0
                         results = speech2text(cache, speech, speech_length)
-                        cache["speech_chunk"]= cache["speech_chunk"][4800:]
+                        cache["accum_speech"] -= 4800
                         cache["first_chunk"] = False
                         cache["encoder"]["start_idx"] = -5
+                        cache["encoder"]["is_final"] = False
                         wait = False
                     else:
                         if is_final:
-                            cache["encoder"]["stride"] = len(cache["speech_chunk"]) // 960
+                            cache["encoder"]["stride"] = len(cache["speech"]) // 960
+                            cache["encoder"]["pad_left"] = 0
                             cache["encoder"]["pad_right"] = 0
-                            speech = torch.unsqueeze(cache["speech_chunk"], axis=0)
-                            speech_length = torch.tensor([len(cache["speech_chunk"])])
+                            speech = torch.unsqueeze(cache["speech"], axis=0)
+                            speech_length = torch.tensor([len(cache["speech"])])
                             results = speech2text(cache, speech, speech_length)
-                            cache["speech_chunk"] = []
+                            cache["accum_speech"] = 0
                             wait = False
                         else:
                             break
                 else:
-                    if len(cache["speech_chunk"]) >= 19200:
+                    if cache["accum_speech"] >= 19200:
                         cache["encoder"]["start_idx"] += 10
+                        cache["encoder"]["stride"] = 10
                         cache["encoder"]["pad_left"] = 5
-                        speech = torch.unsqueeze(cache["speech_chunk"][:19200], axis=0)
-                        speech_length = torch.tensor([19200])
+                        cache["encoder"]["pad_right"] = 5
+                        cache["encoder"]["left"] = 0
+                        cache["encoder"]["right"] = 0
+                        speech = torch.unsqueeze(cache["speech"], axis=0)
+                        speech_length = torch.tensor([len(cache["speech"])])
                         results = speech2text(cache, speech, speech_length)
-                        cache["speech_chunk"] = cache["speech_chunk"][9600:]
+                        cache["accum_speech"] -= 9600
                         wait = False
                     else:
                         if is_final:
-                            cache["encoder"]["stride"] = len(cache["speech_chunk"]) // 960
-                            cache["encoder"]["pad_right"] = 0
-                            speech = torch.unsqueeze(cache["speech_chunk"], axis=0)
-                            speech_length = torch.tensor([len(cache["speech_chunk"])])
-                            results = speech2text(cache, speech, speech_length)
-                            cache["speech_chunk"] = []
-                            wait = False
+                            cache["encoder"]["is_final"] = True
+                            if cache["accum_speech"] >= 14400:
+                                cache["encoder"]["start_idx"] += 10
+                                cache["encoder"]["stride"] = 10
+                                cache["encoder"]["pad_left"] = 5
+                                cache["encoder"]["pad_right"] = 5
+                                cache["encoder"]["left"] = 0
+                                cache["encoder"]["right"] = cache["accum_speech"] // 960 - 15
+                                speech = torch.unsqueeze(cache["speech"], axis=0)
+                                speech_length = torch.tensor([len(cache["speech"])])
+                                results = speech2text(cache, speech, speech_length)
+                                cache["accum_speech"] -= 9600
+                                wait = False
+                            else:
+                                cache["encoder"]["start_idx"] += 10
+                                cache["encoder"]["stride"] = cache["accum_speech"] // 960 - 5
+                                cache["encoder"]["pad_left"] = 5
+                                cache["encoder"]["pad_right"] = 0
+                                cache["encoder"]["left"] = 0
+                                cache["encoder"]["right"] = 0
+                                speech = torch.unsqueeze(cache["speech"], axis=0)
+                                speech_length = torch.tensor([len(cache["speech"])])
+                                results = speech2text(cache, speech, speech_length)
+                                cache["accum_speech"] = 0
+                                wait = False
                         else:
                             break
                 
