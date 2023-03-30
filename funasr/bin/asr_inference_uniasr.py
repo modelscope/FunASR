@@ -37,9 +37,6 @@ from funasr.utils import asr_utils, wav_utils, postprocess_utils
 from funasr.models.frontend.wav_frontend import WavFrontend
 
 
-header_colors = '\033[95m'
-end_colors = '\033[0m'
-
 
 class Speech2Text:
     """Speech2Text class
