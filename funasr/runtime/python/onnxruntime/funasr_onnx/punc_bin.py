@@ -12,7 +12,7 @@ from .utils.utils import (TokenIDConverter, split_to_mini_sentence,code_mix_spli
 logging = get_logger()
 
 
-class TargetDelayTransformer():
+class CT-Transformer():
     def __init__(self, model_dir: Union[str, Path] = None,
                  batch_size: int = 1,
                  device_id: Union[str, int] = "-1",
