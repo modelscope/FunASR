@@ -164,6 +164,7 @@ class SANMVadEncoder(nn.Module):
         speech = speech * self._output_size ** 0.5
         mask = self.make_pad_mask(speech_lengths)
         mask = self.prepare_mask(mask, sub_masks)
+        vad_mask = self.prepare_mask(mask, vad_mask)
         if self.embed is None:
             xs_pad = speech
         else:
@@ -175,7 +176,7 @@ class SANMVadEncoder(nn.Module):
         # encoder_outs = self.model.encoders(xs_pad, mask)
         for layer_idx, encoder_layer in enumerate(self.model.encoders):
             if layer_idx == len(self.model.encoders) - 1:
-                mask = (mask[0], vad_mask)
+                mask = vad_mask
             encoder_outs = encoder_layer(xs_pad, mask)
             xs_pad, masks = encoder_outs[0], encoder_outs[1]
         
