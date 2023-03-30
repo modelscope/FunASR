@@ -19,6 +19,7 @@ class ModelExport:
         self,
         cache_dir: Union[Path, str] = None,
         onnx: bool = True,
+        device: str = "cpu",
         quant: bool = True,
         fallback_num: int = 0,
         audio_in: str = None,
@@ -36,6 +37,7 @@ class ModelExport:
         )
         print("output dir: {}".format(self.cache_dir))
         self.onnx = onnx
+        self.device = device
         self.quant = quant
         self.fallback_num = fallback_num
         self.frontend = None
@@ -111,6 +113,10 @@ class ModelExport:
             dummy_input = model.get_dummy_inputs(enc_size)
         else:
             dummy_input = model.get_dummy_inputs()
+
+        if self.device == 'cuda':
+            model = model.cuda()
+            dummy_input = tuple([i.cuda() for i in dummy_input])
 
         # model_script = torch.jit.script(model)
         model_script = torch.jit.trace(model, dummy_input)
@@ -234,6 +240,7 @@ if __name__ == '__main__':
     parser.add_argument('--model-name', type=str, required=True)
     parser.add_argument('--export-dir', type=str, required=True)
     parser.add_argument('--type', type=str, default='onnx', help='["onnx", "torch"]')
+    parser.add_argument('--device', type=str, default='cpu', help='["cpu", "cuda"]')
     parser.add_argument('--quantize', type=str2bool, default=False, help='export quantized model')
     parser.add_argument('--fallback-num', type=int, default=0, help='amp fallback number')
     parser.add_argument('--audio_in', type=str, default=None, help='["wav", "wav.scp"]')
@@ -243,6 +250,7 @@ if __name__ == '__main__':
     export_model = ModelExport(
         cache_dir=args.export_dir,
         onnx=args.type == 'onnx',
+        device=args.device,
         quant=args.quantize,
         fallback_num=args.fallback_num,
         audio_in=args.audio_in,
