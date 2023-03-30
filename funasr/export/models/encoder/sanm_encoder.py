@@ -9,20 +9,6 @@ from funasr.export.models.modules.encoder_layer import EncoderLayerSANM as Encod
 from funasr.modules.positionwise_feed_forward import PositionwiseFeedForward
 from funasr.export.models.modules.feedforward import PositionwiseFeedForward as PositionwiseFeedForward_export
 
-def subsequent_mask(size, device="cpu", dtype=torch.bool):
-    """Create mask for subsequent steps (size, size).
-
-    :param int size: size of mask
-    :param str device: "cpu" or "cuda" or torch.Tensor.device
-    :param torch.dtype dtype: result dtype
-    :rtype: torch.Tensor
-    >>> subsequent_mask(3)
-    [[1, 0, 0],
-     [1, 1, 0],
-     [1, 1, 1]]
-    """
-    ret = torch.ones(size, size, device=device, dtype=dtype)
-    return torch.tril(ret, out=ret)
 
 class SANMEncoder(nn.Module):
     def __init__(
@@ -182,7 +168,7 @@ class SANMVadEncoder(nn.Module):
                 ):
         speech = speech * self._output_size ** 0.5
         mask = self.make_pad_mask(speech_lengths)
-        mask = self.prepare_mask(mask)
+        mask = self.prepare_mask(mask, sub_masks)
         if self.embed is None:
             xs_pad = speech
         else:
