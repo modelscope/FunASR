@@ -101,8 +101,7 @@ class TargetDelayTransformer():
                 mini_sentence = mini_sentence[0:sentenceEnd + 1]
                 punctuations = punctuations[0:sentenceEnd + 1]
 
-            punctuations_np = punctuations.cpu().numpy()
-            new_mini_sentence_punc += [int(x) for x in punctuations_np]
+            new_mini_sentence_punc += [int(x) for x in punctuations]
             words_with_punc = []
             for i in range(len(mini_sentence)):
                 if i > 0:
