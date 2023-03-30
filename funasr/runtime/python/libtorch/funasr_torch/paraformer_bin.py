@@ -46,6 +46,7 @@ class Paraformer():
         )
         self.ort_infer = torch.jit.load(model_file)
         self.batch_size = batch_size
+        self.device_id = device_id
         self.plot_timestamp_to = plot_timestamp_to
         self.pred_bias = pred_bias
 
@@ -58,11 +59,13 @@ class Paraformer():
             end_idx = min(waveform_nums, beg_idx + self.batch_size)
             feats, feats_len = self.extract_feat(waveform_list[beg_idx:end_idx])
             try:
-                if int(device_id) != -1:
-                    feats = feats.cuda()
-                    feats_len = feats_len.cuda()
-                outputs = self.ort_infer(feats, feats_len)
-                am_scores, valid_token_lens = outputs[0], outputs[1]
+                with torch.no_grad():
+                    if int(self.device_id) == -1:
+                        outputs = self.ort_infer(feats, feats_len)
+                        am_scores, valid_token_lens = outputs[0], outputs[1]
+                    else:
+                        outputs = self.ort_infer(feats.cuda(), feats_len.cuda())
+                        am_scores, valid_token_lens = outputs[0].cpu(), outputs[1].cpu()
                 if len(outputs) == 4:
                     # for BiCifParaformer Inference
                     us_alphas, us_peaks = outputs[2], outputs[3]
