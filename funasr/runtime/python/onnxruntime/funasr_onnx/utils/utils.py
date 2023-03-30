@@ -239,7 +239,7 @@ def read_yaml(yaml_path: Union[str, Path]) -> Dict:
 
 
 @functools.lru_cache()
-def get_logger(name='rapdi_paraformer'):
+def get_logger(name='funasr_onnx'):
     """Initialize and get a logger by name.
     If the logger has not been initialized, this method will initialize the
     logger by adding one or two handlers, otherwise the initialized logger will

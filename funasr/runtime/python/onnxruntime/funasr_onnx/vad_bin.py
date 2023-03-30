@@ -59,33 +59,38 @@ class Fsmn_vad():
 		
 	
 	def __call__(self, audio_in: Union[str, np.ndarray, List[str]], **kwargs) -> List:
-		waveform_list = self.load_data(audio_in, self.frontend.opts.frame_opts.samp_freq)
-		waveform_nums = len(waveform_list)
+		# waveform_list = self.load_data(audio_in, self.frontend.opts.frame_opts.samp_freq)
 		is_final = kwargs.get('kwargs', False)
-
-		asr_res = []
-		for beg_idx in range(0, waveform_nums, self.batch_size):
+		param_dict = kwargs.get('param_dict', dict())
+		audio_in_cache = param_dict.get('audio_in_cache', None)
+		audio_in_cum = audio_in
+		if audio_in_cache is not None:
+			audio_in_cum = np.concatenate((audio_in_cache, audio_in_cum))
+		param_dict['audio_in_cache'] = audio_in_cum
+		feats, feats_len = self.extract_feat([audio_in_cum])
+		
+		in_cache = param_dict.get('in_cache', list())
+		in_cache = self.prepare_cache(in_cache)
+		beg_idx = param_dict.get('beg_idx',0)
+		feats = feats[:, beg_idx:beg_idx+8, :]
+		param_dict['beg_idx'] = beg_idx + feats.shape[1]
+		try:
+			inputs = [feats]
+			inputs.extend(in_cache)
+			scores, out_caches = self.infer(inputs)
+			param_dict['in_cache'] = out_caches
+			segments = self.vad_scorer(scores, audio_in[None, :], is_final=is_final, max_end_sil=self.max_end_sil)
+			# print(segments)
+			if len(segments) == 1 and segments[0][0][1] != -1:
+				self.frontend.reset_status()
 			
-			end_idx = min(waveform_nums, beg_idx + self.batch_size)
-			waveform = waveform_list[beg_idx:end_idx]
-			feats, feats_len = self.extract_feat(waveform)
-			param_dict = kwargs.get('param_dict', dict())
-			in_cache = param_dict.get('in_cache', list())
-			in_cache = self.prepare_cache(in_cache)
-			try:
-				inputs = [feats]
-				inputs.extend(in_cache)
-				scores, out_caches = self.infer(inputs)
-				param_dict['in_cache'] = out_caches
-				segments = self.vad_scorer(scores, waveform[0][None, :], is_final=is_final, max_end_sil=self.max_end_sil)
-				
-			except ONNXRuntimeError:
-				# logging.warning(traceback.format_exc())
-				logging.warning("input wav is silence or noise")
-				segments = ''
-			asr_res.append(segments)
+			
+		except ONNXRuntimeError:
+			logging.warning(traceback.format_exc())
+			logging.warning("input wav is silence or noise")
+			segments = []
 	
-		return asr_res
+		return segments
 
 	def load_data(self,
 	              wav_content: Union[str, np.ndarray, List[str]], fs: int = None) -> List:
