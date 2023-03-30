@@ -11,7 +11,7 @@ from funasr.punctuation.abs_model import AbsPunctuation
 from funasr.punctuation.sanm_encoder import SANMVadEncoder
 from funasr.export.models.encoder.sanm_encoder import SANMVadEncoder as SANMVadEncoder_export
 
-class VadRealtimeTransformer(AbsPunctuation):
+class VadRealtimeTransformer(nn.Module):
 
     def __init__(
         self,
@@ -36,8 +36,11 @@ class VadRealtimeTransformer(AbsPunctuation):
 
 
 
-    def forward(self, input: torch.Tensor, text_lengths: torch.Tensor,
-                vad_indexes: torch.Tensor) -> Tuple[torch.Tensor, None]:
+    def forward(self, input: torch.Tensor,
+                text_lengths: torch.Tensor,
+                vad_indexes: torch.Tensor,
+                sub_masks: torch.Tensor,
+                ) -> Tuple[torch.Tensor, None]:
         """Compute loss value from buffer sequences.
 
         Args:
@@ -47,7 +50,7 @@ class VadRealtimeTransformer(AbsPunctuation):
         """
         x = self.embed(input)
         # mask = self._target_mask(input)
-        h, _ = self.encoder(x, text_lengths, vad_indexes)
+        h, _ = self.encoder(x, text_lengths, vad_indexes, sub_masks)
         y = self.decoder(h)
         return y
 
@@ -59,7 +62,9 @@ class VadRealtimeTransformer(AbsPunctuation):
         text_indexes = torch.randint(0, self.embed.num_embeddings, (1, length))
         text_lengths = torch.tensor([length], dtype=torch.int32)
         vad_mask = torch.ones(length, length, dtype=torch.float32)[None, None, :, :]
-        return (text_indexes, text_lengths, vad_mask)
+        sub_masks = torch.ones(length, length, dtype=torch.float32)
+        sub_masks = torch.tril(sub_masks)
+        return (text_indexes, text_lengths, vad_mask, sub_masks)
 
     def get_input_names(self):
         return ['input', 'text_lengths', 'vad_mask']
