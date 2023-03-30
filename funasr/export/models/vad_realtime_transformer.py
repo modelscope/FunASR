@@ -32,6 +32,7 @@ class VadRealtimeTransformer(AbsPunctuation):
             assert False, "Only support samn encode."
         # self.encoder = model.encoder
         self.decoder = model.decoder
+        self.model_name = model_name
 
 
 
@@ -46,7 +47,7 @@ class VadRealtimeTransformer(AbsPunctuation):
         """
         x = self.embed(input)
         # mask = self._target_mask(input)
-        h, _, _ = self.encoder(x, text_lengths, vad_indexes)
+        h, _ = self.encoder(x, text_lengths, vad_indexes)
         y = self.decoder(h)
         return y
 
@@ -57,7 +58,7 @@ class VadRealtimeTransformer(AbsPunctuation):
         length = 120
         text_indexes = torch.randint(0, self.embed.num_embeddings, (1, length))
         text_lengths = torch.tensor([length], dtype=torch.int32)
-        vad_mask = torch.ones(length, length)[None, None, :, :]
+        vad_mask = torch.ones(length, length, dtype=torch.float32)[None, None, :, :]
         return (text_indexes, text_lengths, vad_mask)
 
     def get_input_names(self):
