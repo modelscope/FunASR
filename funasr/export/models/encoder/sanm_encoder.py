@@ -151,12 +151,7 @@ class SANMVadEncoder(nn.Module):
     
     def prepare_mask(self, mask, sub_masks):
         mask_3d_btd = mask[:, :, None]
-        # sub_masks = subsequent_mask(mask.size(-1)).type(torch.float32)
-        if len(mask.shape) == 2:
-            mask_4d_bhlt = 1 - sub_masks[:, None, None, :]
-        elif len(mask.shape) == 3:
-            mask_4d_bhlt = 1 - sub_masks[:, None, :]
-        mask_4d_bhlt = mask_4d_bhlt * -10000.0
+        mask_4d_bhlt = (1 - sub_masks) * -10000.0
         
         return mask_3d_btd, mask_4d_bhlt
     
