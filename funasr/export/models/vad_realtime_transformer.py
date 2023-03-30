@@ -21,7 +21,9 @@ class VadRealtimeTransformer(AbsPunctuation):
         **kwargs,
     ):
         super().__init__()
-
+        onnx = False
+        if "onnx" in kwargs:
+            onnx = kwargs["onnx"]
 
         self.embed = model.embed
         if isinstance(model.encoder, SANMVadEncoder):
@@ -53,12 +55,13 @@ class VadRealtimeTransformer(AbsPunctuation):
 
     def get_dummy_inputs(self):
         length = 120
-        text_indexes = torch.randint(0, self.embed.num_embeddings, (2, length))
-        text_lengths = torch.tensor([length-20, length], dtype=torch.int32)
-        return (text_indexes, text_lengths)
+        text_indexes = torch.randint(0, self.embed.num_embeddings, (1, length))
+        text_lengths = torch.tensor([length], dtype=torch.int32)
+        vad_mask = torch.ones(length, length)[None, None, :, :]
+        return (text_indexes, text_lengths, vad_mask)
 
     def get_input_names(self):
-        return ['input', 'text_lengths']
+        return ['input', 'text_lengths', 'vad_mask']
 
     def get_output_names(self):
         return ['logits']
@@ -66,14 +69,9 @@ class VadRealtimeTransformer(AbsPunctuation):
     def get_dynamic_axes(self):
         return {
             'input': {
-                0: 'batch_size',
                 1: 'feats_length'
             },
-            'text_lengths': {
-                0: 'batch_size',
-            },
             'logits': {
-                0: 'batch_size',
                 1: 'logits_length'
             },
         }

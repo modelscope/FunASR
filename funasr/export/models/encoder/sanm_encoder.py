@@ -9,6 +9,21 @@ from funasr.export.models.modules.encoder_layer import EncoderLayerSANM as Encod
 from funasr.modules.positionwise_feed_forward import PositionwiseFeedForward
 from funasr.export.models.modules.feedforward import PositionwiseFeedForward as PositionwiseFeedForward_export
 
+def subsequent_mask(size, device="cpu", dtype=torch.bool):
+    """Create mask for subsequent steps (size, size).
+
+    :param int size: size of mask
+    :param str device: "cpu" or "cuda" or torch.Tensor.device
+    :param torch.dtype dtype: result dtype
+    :rtype: torch.Tensor
+    >>> subsequent_mask(3)
+    [[1, 0, 0],
+     [1, 1, 0],
+     [1, 1, 1]]
+    """
+    ret = torch.ones(size, size, device=device, dtype=dtype)
+    return torch.tril(ret, out=ret)
+
 class SANMEncoder(nn.Module):
     def __init__(
         self,
@@ -150,10 +165,11 @@ class SANMVadEncoder(nn.Module):
     
     def prepare_mask(self, mask):
         mask_3d_btd = mask[:, :, None]
+        sub_masks = subsequent_mask(mask.size(-1))
         if len(mask.shape) == 2:
-            mask_4d_bhlt = 1 - mask[:, None, None, :]
+            mask_4d_bhlt = 1 - sub_masks[:, None, None, :]
         elif len(mask.shape) == 3:
-            mask_4d_bhlt = 1 - mask[:, None, :]
+            mask_4d_bhlt = 1 - sub_masks[:, None, :]
         mask_4d_bhlt = mask_4d_bhlt * -10000.0
         
         return mask_3d_btd, mask_4d_bhlt
@@ -161,6 +177,7 @@ class SANMVadEncoder(nn.Module):
     def forward(self,
                 speech: torch.Tensor,
                 speech_lengths: torch.Tensor,
+                vad_mask: torch.Tensor,
                 ):
         speech = speech * self._output_size ** 0.5
         mask = self.make_pad_mask(speech_lengths)
@@ -173,8 +190,12 @@ class SANMVadEncoder(nn.Module):
         encoder_outs = self.model.encoders0(xs_pad, mask)
         xs_pad, masks = encoder_outs[0], encoder_outs[1]
         
-        encoder_outs = self.model.encoders(xs_pad, mask)
-        xs_pad, masks = encoder_outs[0], encoder_outs[1]
+        # encoder_outs = self.model.encoders(xs_pad, mask)
+        for layer_idx, encoder_layer in enumerate(self.model.encoders):
+            if layer_idx == len(self.model.encoders) - 1:
+                mask = (mask[0], vad_mask)
+            encoder_outs = encoder_layer(xs_pad, mask)
+            xs_pad, masks = encoder_outs[0], encoder_outs[1]
         
         xs_pad = self.model.after_norm(xs_pad)
         

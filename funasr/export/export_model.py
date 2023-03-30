@@ -205,6 +205,13 @@ class ModelExport:
             model, punc_train_args = PUNCTask.build_model_from_file(
                 punc_train_config, punc_model_file, 'cpu'
             )
+        elif mode.startswith('punc_VadRealtime'):
+            from funasr.tasks.punctuation import PunctuationTask as PUNCTask
+            punc_train_config = os.path.join(model_dir, 'config.yaml')
+            punc_model_file = os.path.join(model_dir, 'punc.pb')
+            model, punc_train_args = PUNCTask.build_model_from_file(
+                punc_train_config, punc_model_file, 'cpu'
+            )
         self._export(model, tag_name)
             
 
