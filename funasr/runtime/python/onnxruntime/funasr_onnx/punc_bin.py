@@ -86,7 +86,7 @@ class TargetDelayTransformer():
                     sentenceEnd = last_comma_index
                     punctuations[sentenceEnd] = self.period
                 cache_sent = mini_sentence[sentenceEnd + 1:]
-                cache_sent_id = mini_sentence_id[sentenceEnd + 1:]
+                cache_sent_id = mini_sentence_id[sentenceEnd + 1:].tolist()
                 mini_sentence = mini_sentence[0:sentenceEnd + 1]
                 punctuations = punctuations[0:sentenceEnd + 1]
 
