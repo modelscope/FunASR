@@ -60,8 +60,9 @@ class Fsmn_vad():
 	
 	def __call__(self, audio_in: Union[str, np.ndarray, List[str]], **kwargs) -> List:
 		# waveform_list = self.load_data(audio_in, self.frontend.opts.frame_opts.samp_freq)
-		is_final = kwargs.get('kwargs', False)
+		
 		param_dict = kwargs.get('param_dict', dict())
+		is_final = param_dict.get('is_final', False)
 		audio_in_cache = param_dict.get('audio_in_cache', None)
 		audio_in_cum = audio_in
 		if audio_in_cache is not None:
