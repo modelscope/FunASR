@@ -71,6 +71,10 @@ class VadRealtimeTransformer(AbsPunctuation):
             'input': {
                 1: 'feats_length'
             },
+            'vad_mask': {
+                2: 'feats_length1',
+                3: 'feats_length2'
+            },
             'logits': {
                 1: 'logits_length'
             },
