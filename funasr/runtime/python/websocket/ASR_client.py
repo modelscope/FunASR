@@ -6,6 +6,7 @@ import asyncio
 from queue import Queue
 # import threading
 import argparse
+import json
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--host",
@@ -78,7 +79,9 @@ async def message():
     global websocket
     while True:
         try:
-            print(await websocket.recv())
+            meg = await websocket.recv()
+            meg = json.loads(meg)
+            print(meg)
         except Exception as e:
             print("Exception:", e)          
         

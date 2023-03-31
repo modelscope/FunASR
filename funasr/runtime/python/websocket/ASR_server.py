@@ -4,6 +4,7 @@ import time
 from queue import Queue
 import threading
 import argparse
+import json
 
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
@@ -157,7 +158,8 @@ def asr(websocket):  # ASR推理
                         rec_result = inference_pipeline_punc(text_in=rec_result['text'], param_dict=websocket.param_dict_punc)
                     # print(rec_result)
                     if "text" in rec_result:
-                        websocket.send_msg.put(rec_result["text"]) # 存入发送队列  直接调用send发送不了
+                        message = json.dumps({"mode": "offline", "text": rec_result["text"]})
+                        websocket.send_msg.put(message)  # 存入发送队列  直接调用send发送不了
                
             time.sleep(0.1)
 
