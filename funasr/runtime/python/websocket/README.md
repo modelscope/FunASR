@@ -25,6 +25,11 @@ Start server
 ```shell
 python ASR_server.py --host "0.0.0.0" --port 10095 --asr_model "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
 ```
+For the paraformer 2pass model
+
+```shell
+python ASR_server_2pass.py --host "0.0.0.0" --port 10095 --asr_model "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
+```
 
 ## For the client
 
@@ -38,7 +43,7 @@ pip install -r requirements_client.txt
 Start client
 
 ```shell
-python ASR_client.py --host "127.0.0.1" --port 10095 --chunk_size 300
+python ASR_client.py --host "127.0.0.1" --port 10095 --chunk_size 50
 ```
 
 ## Acknowledge
