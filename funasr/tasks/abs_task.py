@@ -464,6 +464,12 @@ class AbsTask(ABC):
             default=sys.maxsize,
             help="The maximum number update step to train",
         )
+        parser.add_argument(
+            "--batch_interval",
+            type=int,
+            default=10000,
+            help="The batch interval for saving model.",
+        )
         group.add_argument(
             "--patience",
             type=int_or_none,
@@ -1576,13 +1582,18 @@ class AbsTask(ABC):
     ) -> AbsIterFactory:
         assert check_argument_types()
 
+        if args.frontend_conf is not None and "fs" in args.frontend_conf:
+            dest_sample_rate = args.frontend_conf["fs"]
+        else:
+            dest_sample_rate = 16000
+
         dataset = ESPnetDataset(
             iter_options.data_path_and_name_and_type,
             float_dtype=args.train_dtype,
             preprocess=iter_options.preprocess_fn,
             max_cache_size=iter_options.max_cache_size,
             max_cache_fd=iter_options.max_cache_fd,
-            dest_sample_rate=args.frontend_conf["fs"],
+            dest_sample_rate=dest_sample_rate,
         )
         cls.check_task_requirements(
             dataset, args.allow_variable_data_keys, train=iter_options.train
