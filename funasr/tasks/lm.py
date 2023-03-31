@@ -15,7 +15,7 @@ from typeguard import check_return_type
 from funasr.datasets.collate_fn import CommonCollateFn
 from funasr.datasets.preprocessor import CommonPreprocessor
 from funasr.lm.abs_model import AbsLM
-from funasr.lm.espnet_model import LanguageModel
+from funasr.lm.abs_model import LanguageModel
 from funasr.lm.seq_rnn_lm import SequentialRNNLM
 from funasr.lm.transformer_lm import TransformerLM
 from funasr.tasks.abs_task import AbsTask
