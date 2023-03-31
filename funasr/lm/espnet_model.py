@@ -12,7 +12,7 @@ from funasr.torch_utils.device_funcs import force_gatherable
 from funasr.train.abs_espnet_model import AbsESPnetModel
 
 
-class ESPnetLanguageModel(AbsESPnetModel):
+class LanguageModel(AbsESPnetModel):
     def __init__(self, lm: AbsLM, vocab_size: int, ignore_id: int = 0):
         assert check_argument_types()
         super().__init__()

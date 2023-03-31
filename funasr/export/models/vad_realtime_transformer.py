@@ -1,14 +1,9 @@
-from typing import Any
-from typing import List
 from typing import Tuple
 
 import torch
 import torch.nn as nn
 
-from funasr.modules.embedding import SinusoidalPositionEncoder
-from funasr.punctuation.sanm_encoder import SANMVadEncoder as Encoder
-from funasr.punctuation.abs_model import AbsPunctuation
-from funasr.punctuation.sanm_encoder import SANMVadEncoder
+from funasr.models.encoder.sanm_encoder import SANMVadEncoder
 from funasr.export.models.encoder.sanm_encoder import SANMVadEncoder as SANMVadEncoder_export
 
 class VadRealtimeTransformer(nn.Module):
