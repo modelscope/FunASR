@@ -34,7 +34,7 @@ def modelscope_infer_after_finetune(params):
     # computer CER if GT text is set
     text_in = os.path.join(params["data_dir"], "text")
     if os.path.exists(text_in):
-        text_proc_file = os.path.join(decoding_path, "1best_recog/token")
+        text_proc_file = os.path.join(decoding_path, "1best_recog/text")
         compute_wer(text_in, text_proc_file, os.path.join(decoding_path, "text.cer"))
 
 
