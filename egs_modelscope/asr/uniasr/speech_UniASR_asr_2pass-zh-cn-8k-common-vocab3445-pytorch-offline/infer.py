@@ -75,7 +75,7 @@ def modelscope_infer(params):
     # If text exists, compute CER
     text_in = os.path.join(params["data_dir"], "text")
     if os.path.exists(text_in):
-        text_proc_file = os.path.join(best_recog_path, "token")
+        text_proc_file = os.path.join(best_recog_path, "text")
         compute_wer(text_in, text_proc_file, os.path.join(best_recog_path, "text.cer"))
 
 
