@@ -23,13 +23,7 @@ for decoding, in parallel.
 {'audio_filepath':'','text':'',duration:}\n
 
 Usage:
-# For aishell manifests:
-apt-get install git-lfs
-git-lfs install
-git clone https://huggingface.co/csukuangfj/aishell-test-dev-manifests
-sudo mkdir -p ./aishell-test-dev-manifests/aishell
-tar xf ./aishell-test-dev-manifests/data_aishell.tar.gz -C ./aishell-test-dev-manifests/aishell # noqa
-
+pip3 install pydub kaldialign icefall tritonclient[all]
 
 # cmd run
 manifest_path='./client/aishell_test.txt'
@@ -60,8 +54,7 @@ from tritonclient.utils import np_to_triton_dtype
 from icefall.utils import store_transcripts, write_error_stats
 
 DEFAULT_MANIFEST_FILENAME = "./aishell_test.txt"  # noqa
-DEFAULT_ROOT = './'
-DEFAULT_ROOT = '/mfs/songtao/researchcode/FunASR/data/'
+DEFAULT_ROOT = '/mfs/songtao/researchcode/FunASR/data/' # noqa
 
 
 def get_args():
@@ -88,6 +81,13 @@ def get_args():
         type=str,
         default=DEFAULT_MANIFEST_FILENAME,
         help="Path to the manifest for decoding",
+    )
+    
+    parser.add_argument(
+        "--data_root",
+        type=str,
+        default=DEFAULT_ROOT,
+        help="Abs Root for data",
     )
 
     parser.add_argument(
@@ -176,7 +176,7 @@ def get_args():
         default="./stats.json",
         help="output of stats anaylasis",
     )
-
+    
     return parser.parse_args()
 
 
@@ -192,14 +192,14 @@ def load_manifest(fp):
 
 def split_dps(dps, num_tasks):
     dps_splited = []
-    # import pdb;pdb.set_trace()
     assert len(dps) > num_tasks
-
     one_task_num = len(dps)//num_tasks
     for i in range(0, len(dps), one_task_num):
-        if i+one_task_num >= len(dps):
+        # second step: split the remained dps, first mod number bucket each gets one dp 
+        if i+one_task_num > len(dps):
             for k, j in enumerate(range(i, len(dps))):
                 dps_splited[k].append(dps[j])
+        # first step: split dps equally to the buckets
         else:
             dps_splited.append(dps[i:i+one_task_num])
     return dps_splited
@@ -228,7 +228,7 @@ async def send(
             print(f"{name}: {i}/{len(dps)}")
 
         waveform, duration = load_audio(
-            os.path.join(DEFAULT_ROOT, dp['audio_filepath']))
+            os.path.join(args.data_root, dp['audio_filepath']))
         sample_rate = 16000
 
         # padding to nearset 10 seconds
