@@ -31,7 +31,7 @@
 
     ```shell
     git clone https://github.com/alibaba/FunASR.git && cd FunASR
-    cd funasr/runtime/python/funasr_torch
+    cd funasr/runtime/python/libtorch
     python setup.py build
     python setup.py install
     ```
@@ -52,6 +52,10 @@
         result = model(wav_path)
         print(result)
         ```
+
+## Performance benchmark
+
+Please ref to [benchmark](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/python/benchmark_libtorch.md)
 
 ## Speed
 

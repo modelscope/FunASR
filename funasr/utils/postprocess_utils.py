@@ -225,7 +225,7 @@ def sentence_postprocess(words: List[Any], time_stamp: List[List] = None):
                     ts_lists.append([begin, end])
                     begin = end
             else:
-                raise ValueError('invalid character: {}'.format(ch))
+                word_lists.append(ch)
 
     if time_stamp is not None: 
         word_lists, ts_lists = abbr_dispose(word_lists, ts_lists)

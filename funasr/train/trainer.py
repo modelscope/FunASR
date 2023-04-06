@@ -579,9 +579,10 @@ class Trainer:
             reporter.measure_iter_time(iterator, "iter_time"), 1
         ):
             assert isinstance(batch, dict), type(batch)
-        
-            if rank == 0 and hasattr(model.module, "num_updates"):
-                num_batch_updates = model.module.get_num_updates()
+
+            if rank == 0:
+                if hasattr(model, "num_updates") or (hasattr(model, "module") and hasattr(model.module, "num_updates")):
+                    num_batch_updates = model.get_num_updates() if hasattr(model,"num_updates") else model.module.get_num_updates()
                 if (num_batch_updates%batch_interval == 0) and (options.oss_bucket is not None) and options.use_pai:
                     buffer = BytesIO()
                     torch.save(model.state_dict(), buffer)

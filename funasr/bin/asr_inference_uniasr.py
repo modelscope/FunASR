@@ -507,13 +507,13 @@ def inference_modelscope(
                     ibest_writer["score"][key] = str(hyp.score)
     
                 if text is not None:
-                    text_postprocessed, _ = postprocess_utils.sentence_postprocess(token)
+                    text_postprocessed, word_lists = postprocess_utils.sentence_postprocess(token)
                     item = {'key': key, 'value': text_postprocessed}
                     asr_result_list.append(item)
                     finish_count += 1
                     asr_utils.print_progress(finish_count / file_count)
                     if writer is not None:
-                        ibest_writer["text"][key] = text_postprocessed
+                        ibest_writer["text"][key] = " ".join(word_lists)
         return asr_result_list
     
     return _forward
