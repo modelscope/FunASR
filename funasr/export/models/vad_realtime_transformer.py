@@ -66,7 +66,7 @@ class VadRealtimeTransformer(nn.Module):
         length = 10
         text_indexes = torch.tensor([[266757, 266757, 266757, 266757, 266757, 266757, 266757, 266757, 266757, 266757]], dtype=torch.int32)
         text_lengths = torch.tensor([length], dtype=torch.int32)
-        vad_masks = vad_mask(10, 3, dtype=torch.float32)[None, None, :, :]
+        vad_masks = vad_mask(10, 2, dtype=torch.float32)[None, None, :, :]
         sub_masks = torch.ones(length, length, dtype=torch.float32)
         sub_masks = torch.tril(sub_masks).type(torch.float32)
         return (text_indexes, text_lengths, vad_masks, sub_masks[None, None, :, :])
