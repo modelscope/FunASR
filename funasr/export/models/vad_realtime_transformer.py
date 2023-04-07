@@ -52,11 +52,21 @@ class VadRealtimeTransformer(nn.Module):
     def with_vad(self):
         return True
 
-    def get_dummy_inputs(self):
-        length = 120
-        text_indexes = torch.randint(0, self.embed.num_embeddings, (1, length))
+    # def get_dummy_inputs(self):
+    #     length = 120
+    #     text_indexes = torch.randint(0, self.embed.num_embeddings, (1, length))
+    #     text_lengths = torch.tensor([length], dtype=torch.int32)
+    #     vad_mask = torch.ones(length, length, dtype=torch.float32)[None, None, :, :]
+    #     sub_masks = torch.ones(length, length, dtype=torch.float32)
+    #     sub_masks = torch.tril(sub_masks).type(torch.float32)
+    #     return (text_indexes, text_lengths, vad_mask, sub_masks[None, None, :, :])
+
+    def get_dummy_inputs(self, txt_dir):
+        from funasr.modules.mask import vad_mask
+        length = 10
+        text_indexes = torch.tensor([[266757, 266757, 266757, 266757, 266757, 266757, 266757, 266757, 266757, 266757]], dtype=torch.int32)
         text_lengths = torch.tensor([length], dtype=torch.int32)
-        vad_mask = torch.ones(length, length, dtype=torch.float32)[None, None, :, :]
+        vad_mask = vad_mask(10, 3, dtype=torch.float32)[None, None, :, :]
         sub_masks = torch.ones(length, length, dtype=torch.float32)
         sub_masks = torch.tril(sub_masks).type(torch.float32)
         return (text_indexes, text_lengths, vad_mask, sub_masks[None, None, :, :])
