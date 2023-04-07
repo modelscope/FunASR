@@ -5,15 +5,12 @@ from typing import Tuple
 import torch
 import torch.nn as nn
 
-from funasr.modules.embedding import PositionalEncoding
 from funasr.modules.embedding import SinusoidalPositionEncoder
-#from funasr.models.encoder.transformer_encoder import TransformerEncoder as Encoder
-from funasr.punctuation.sanm_encoder import SANMEncoder as Encoder
-#from funasr.modules.mask import subsequent_n_mask
-from funasr.punctuation.abs_model import AbsPunctuation
+from funasr.models.encoder.sanm_encoder import SANMVadEncoder as Encoder
+from funasr.train.abs_model import AbsPunctuation
 
 
-class TargetDelayTransformer(AbsPunctuation):
+class VadRealtimeTransformer(AbsPunctuation):
 
     def __init__(
         self,
@@ -26,6 +23,8 @@ class TargetDelayTransformer(AbsPunctuation):
         unit: int = 1024,
         layer: int = 4,
         dropout_rate: float = 0.5,
+        kernel_size: int = 11,
+        sanm_shfit: int = 0,
     ):
         super().__init__()
         if pos_enc == "sinusoidal":
@@ -50,6 +49,8 @@ class TargetDelayTransformer(AbsPunctuation):
             input_layer="pe",
             # pos_enc_class=pos_enc_class,
             padding_idx=0,
+            kernel_size=kernel_size,
+            sanm_shfit=sanm_shfit,
         )
         self.decoder = nn.Linear(att_unit, punc_size)
 
@@ -59,7 +60,8 @@ class TargetDelayTransformer(AbsPunctuation):
 #        m = subsequent_n_mask(ys_mask.size(-1), 5, device=ys_mask.device).unsqueeze(0)
 #        return ys_mask.unsqueeze(-2) & m
 
-    def forward(self, input: torch.Tensor, text_lengths: torch.Tensor) -> Tuple[torch.Tensor, None]:
+    def forward(self, input: torch.Tensor, text_lengths: torch.Tensor,
+                vad_indexes: torch.Tensor) -> Tuple[torch.Tensor, None]:
         """Compute loss value from buffer sequences.
 
         Args:
@@ -69,12 +71,12 @@ class TargetDelayTransformer(AbsPunctuation):
         """
         x = self.embed(input)
         # mask = self._target_mask(input)
-        h, _, _ = self.encoder(x, text_lengths)
+        h, _, _ = self.encoder(x, text_lengths, vad_indexes)
         y = self.decoder(h)
         return y, None
 
     def with_vad(self):
-        return False
+        return True
 
     def score(self, y: torch.Tensor, state: Any, x: torch.Tensor) -> Tuple[torch.Tensor, Any]:
         """Score new token.

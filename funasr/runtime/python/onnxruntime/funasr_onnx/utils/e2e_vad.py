@@ -1,11 +1,8 @@
 from enum import Enum
 from typing import List, Tuple, Dict, Any
 
-import torch
-from torch import nn
 import math
-from funasr.models.encoder.fsmn_encoder import FSMN
-
+import numpy as np
 
 class VadStateMachine(Enum):
     kVadInStateStartPointNotDetected = 1
@@ -191,15 +188,15 @@ class WindowDetector(object):
         return int(self.frame_size_ms)
 
 
-class E2EVadModel(nn.Module):
-    def __init__(self, encoder: FSMN, vad_post_args: Dict[str, Any], frontend=None):
+class E2EVadModel():
+    def __init__(self, vad_post_args: Dict[str, Any]):
         super(E2EVadModel, self).__init__()
         self.vad_opts = VADXOptions(**vad_post_args)
         self.windows_detector = WindowDetector(self.vad_opts.window_size_ms,
                                                self.vad_opts.sil_to_speech_time_thres,
                                                self.vad_opts.speech_to_sil_time_thres,
                                                self.vad_opts.frame_in_ms)
-        self.encoder = encoder
+        # self.encoder = encoder
         # init variables
         self.is_final = False
         self.data_buf_start_frame = 0
@@ -229,7 +226,6 @@ class E2EVadModel(nn.Module):
         self.data_buf_all = None
         self.waveform = None
         self.ResetDetection()
-        self.frontend = frontend
 
     def AllResetDetection(self):
         self.is_final = False
@@ -279,21 +275,20 @@ class E2EVadModel(nn.Module):
             self.data_buf_all = self.waveform[0]  # self.data_buf is pointed to self.waveform[0]
             self.data_buf = self.data_buf_all
         else:
-            self.data_buf_all = torch.cat((self.data_buf_all, self.waveform[0]))
+            self.data_buf_all = np.concatenate((self.data_buf_all, self.waveform[0]))
         for offset in range(0, self.waveform.shape[1] - frame_sample_length + 1, frame_shift_length):
             self.decibel.append(
-                10 * math.log10((self.waveform[0][offset: offset + frame_sample_length]).square().sum() + \
+                10 * math.log10(np.square((self.waveform[0][offset: offset + frame_sample_length])).sum() + \
                                 0.000001))
 
-    def ComputeScores(self, feats: torch.Tensor, in_cache: Dict[str, torch.Tensor]) -> None:
-        scores = self.encoder(feats, in_cache)  # return B * T * D
-        assert scores.shape[1] == feats.shape[1], "The shape between feats and scores does not match"
+    def ComputeScores(self, scores: np.ndarray) -> None:
+        # scores = self.encoder(feats, in_cache)  # return B * T * D
         self.vad_opts.nn_eval_block_size = scores.shape[1]
         self.frm_cnt += scores.shape[1]  # count total frames
         if self.scores is None:
             self.scores = scores  # the first calculation
         else:
-            self.scores = torch.cat((self.scores, scores), dim=1)
+            self.scores = np.concatenate((self.scores, scores), axis=1)
 
     def PopDataBufTillFrame(self, frame_idx: int) -> None:  # need check again
         while self.data_buf_start_frame < frame_idx:
@@ -445,48 +440,20 @@ class E2EVadModel(nn.Module):
 
         return frame_state
      
-    def forward(self, feats: torch.Tensor, waveform: torch.tensor, in_cache: Dict[str, torch.Tensor] = dict(),
-                is_final: bool = False
-                ) -> Tuple[List[List[List[int]]], Dict[str, torch.Tensor]]:
-        self.waveform = waveform  # compute decibel for each frame
-        self.ComputeDecibel()
-        self.ComputeScores(feats, in_cache)
-        if not is_final:
-            self.DetectCommonFrames()
-        else:
-            self.DetectLastFrames()
-        segments = []
-        for batch_num in range(0, feats.shape[0]):  # only support batch_size = 1 now
-            segment_batch = []
-            if len(self.output_data_buf) > 0:
-                for i in range(self.output_data_buf_offset, len(self.output_data_buf)):
-                    if not self.output_data_buf[i].contain_seg_start_point or not self.output_data_buf[
-                        i].contain_seg_end_point:
-                        continue
-                    segment = [self.output_data_buf[i].start_ms, self.output_data_buf[i].end_ms]
-                    segment_batch.append(segment)
-                    self.output_data_buf_offset += 1  # need update this parameter
-            if segment_batch:
-                segments.append(segment_batch)
-        if is_final:
-            # reset class variables and clear the dict for the next query
-            self.AllResetDetection()
-        return segments, in_cache
 
-    def forward_online(self, feats: torch.Tensor, waveform: torch.tensor, in_cache: Dict[str, torch.Tensor] = dict(),
+    def __call__(self, score: np.ndarray, waveform: np.ndarray,
                 is_final: bool = False, max_end_sil: int = 800
-                ) -> Tuple[List[List[List[int]]], Dict[str, torch.Tensor]]:
+                ):
         self.max_end_sil_frame_cnt_thresh = max_end_sil - self.vad_opts.speech_to_sil_time_thres
         self.waveform = waveform  # compute decibel for each frame
-        
-        self.ComputeScores(feats, in_cache)
         self.ComputeDecibel()
+        self.ComputeScores(score)
         if not is_final:
             self.DetectCommonFrames()
         else:
             self.DetectLastFrames()
         segments = []
-        for batch_num in range(0, feats.shape[0]):  # only support batch_size = 1 now
+        for batch_num in range(0, score.shape[0]):  # only support batch_size = 1 now
             segment_batch = []
             if len(self.output_data_buf) > 0:
                 for i in range(self.output_data_buf_offset, len(self.output_data_buf)):
@@ -509,7 +476,7 @@ class E2EVadModel(nn.Module):
         if is_final:
             # reset class variables and clear the dict for the next query
             self.AllResetDetection()
-        return segments, in_cache
+        return segments
 
     def DetectCommonFrames(self) -> int:
         if self.vad_state_machine == VadStateMachine.kVadInStateEndPointDetected:
