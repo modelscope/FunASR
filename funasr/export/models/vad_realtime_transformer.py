@@ -61,7 +61,7 @@ class VadRealtimeTransformer(nn.Module):
     #     sub_masks = torch.tril(sub_masks).type(torch.float32)
     #     return (text_indexes, text_lengths, vad_mask, sub_masks[None, None, :, :])
 
-    def get_dummy_inputs(self, txt_dir):
+    def get_dummy_inputs(self, txt_dir=None):
         from funasr.modules.mask import vad_mask
         length = 10
         text_indexes = torch.tensor([[266757, 266757, 266757, 266757, 266757, 266757, 266757, 266757, 266757, 266757]], dtype=torch.int32)
