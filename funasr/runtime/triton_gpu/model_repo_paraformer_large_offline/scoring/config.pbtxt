@@ -43,7 +43,7 @@ input [
   },
   {
     name: "token_num"
-    data_type: TYPE_INT64
+    data_type: TYPE_INT32
     dims: [1]
     reshape: { shape: [ ] }
   }

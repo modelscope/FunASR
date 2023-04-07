@@ -4,22 +4,23 @@ inputs = "跨境河流是养育沿岸|人民的生命之源长期以来为帮助
 
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
+from modelscope.utils.logger import get_logger
+import logging
+logger = get_logger(log_level=logging.CRITICAL)
+logger.setLevel(logging.CRITICAL)
+
 
 inference_pipeline = pipeline(
     task=Tasks.punctuation,
     model='damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727',
-    model_revision="v1.0.0",
     output_dir="./tmp/"
 )
 
 vads = inputs.split("|")
-
-cache_out = []
 rec_result_all="outputs:"
+param_dict = {"cache": []}
 for vad in vads:
-    rec_result = inference_pipeline(text_in=vad, cache=cache_out)
-    #print(rec_result)
-    cache_out = rec_result['cache']
+    rec_result = inference_pipeline(text_in=vad, param_dict=param_dict)
     rec_result_all += rec_result['text']
 
 print(rec_result_all)

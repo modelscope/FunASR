@@ -15,7 +15,7 @@ from typeguard import check_return_type
 from funasr.datasets.collate_fn import CommonCollateFn
 from funasr.datasets.preprocessor import CommonPreprocessor
 from funasr.lm.abs_model import AbsLM
-from funasr.lm.espnet_model import ESPnetLanguageModel
+from funasr.lm.abs_model import LanguageModel
 from funasr.lm.seq_rnn_lm import SequentialRNNLM
 from funasr.lm.transformer_lm import TransformerLM
 from funasr.tasks.abs_task import AbsTask
@@ -83,7 +83,7 @@ class LMTask(AbsTask):
         group.add_argument(
             "--model_conf",
             action=NestedDictAction,
-            default=get_default_kwargs(ESPnetLanguageModel),
+            default=get_default_kwargs(LanguageModel),
             help="The keyword arguments for model class.",
         )
 
@@ -178,7 +178,7 @@ class LMTask(AbsTask):
         return retval
 
     @classmethod
-    def build_model(cls, args: argparse.Namespace) -> ESPnetLanguageModel:
+    def build_model(cls, args: argparse.Namespace) -> LanguageModel:
         assert check_argument_types()
         if isinstance(args.token_list, str):
             with open(args.token_list, encoding="utf-8") as f:
@@ -201,7 +201,7 @@ class LMTask(AbsTask):
 
         # 2. Build ESPnetModel
         # Assume the last-id is sos_and_eos
-        model = ESPnetLanguageModel(lm=lm, vocab_size=vocab_size, **args.model_conf)
+        model = LanguageModel(lm=lm, vocab_size=vocab_size, **args.model_conf)
 
         # 3. Initialize
         if args.init is not None:

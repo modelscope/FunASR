@@ -106,17 +106,18 @@ def abbr_dispose(words: List[Any], time_stamp: List[List] = None) -> List[Any]:
         if num in abbr_begin:
             if time_stamp is not None:
                 begin = time_stamp[ts_nums[num]][0]
-            word_lists.append(words[num].upper())
+            abbr_word = words[num].upper()
             num += 1
             while num < words_size:
                 if num in abbr_end:
-                    word_lists.append(words[num].upper())
+                    abbr_word += words[num].upper()
                     last_num = num
                     break
                 else:
                     if words[num].encode('utf-8').isalpha():
-                        word_lists.append(words[num].upper())
+                        abbr_word += words[num].upper()
                 num += 1
+            word_lists.append(abbr_word)
             if time_stamp is not None:
                 end = time_stamp[ts_nums[num]][1]
                 ts_lists.append([begin, end])
@@ -224,7 +225,7 @@ def sentence_postprocess(words: List[Any], time_stamp: List[List] = None):
                     ts_lists.append([begin, end])
                     begin = end
             else:
-                raise ValueError('invalid character: {}'.format(ch))
+                word_lists.append(ch)
 
     if time_stamp is not None: 
         word_lists, ts_lists = abbr_dispose(word_lists, ts_lists)

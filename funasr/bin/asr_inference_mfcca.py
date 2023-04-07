@@ -41,8 +41,6 @@ from funasr.utils.types import str_or_none
 from funasr.utils import asr_utils, wav_utils, postprocess_utils
 import pdb
 
-header_colors = '\033[95m'
-end_colors = '\033[0m'
 
 global_asr_language: str = 'zh-cn'
 global_sample_rate: Union[int, Dict[Any, int]] = {
@@ -55,7 +53,7 @@ class Speech2Text:
 
     Examples:
         >>> import soundfile
-        >>> speech2text = Speech2Text("asr_config.yml", "asr.pth")
+        >>> speech2text = Speech2Text("asr_config.yml", "asr.pb")
         >>> audio, rate = soundfile.read("speech.wav")
         >>> speech2text(audio)
         [(text, token, token_int, hypothesis object), ...]

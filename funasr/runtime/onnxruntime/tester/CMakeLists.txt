@@ -13,8 +13,11 @@ set(EXTRA_LIBS rapidasr)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 set(EXECNAME "tester")
+set(EXECNAMERTF "tester_rtf")
 
 add_executable(${EXECNAME} "tester.cpp")
 target_link_libraries(${EXECNAME} PUBLIC ${EXTRA_LIBS})
 
+add_executable(${EXECNAMERTF} "tester_rtf.cpp")
+target_link_libraries(${EXECNAMERTF} PUBLIC ${EXTRA_LIBS})
 

@@ -17,22 +17,22 @@
   - Decode without CTC
   - Decode without LM
 
-| testset   | CER(%)|
-|:---------:|:-----:|
-| dev       | 1.75  |
-| test      | 1.95  |
+| CER(%)    | Pretrain model|[Finetune model](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-aishell1-vocab8404-pytorch/summary) |
+|:---------:|:-------------:|:-------------:|
+| dev       | 1.75          |1.62           |
+| test      | 1.95          |1.78           |
 
 ## AISHELL-2
 - Decode config: 
   - Decode without CTC
   - Decode without LM
 
-| testset      | CER(%)|
-|:------------:|:-----:|
-| dev_ios      | 2.80  |
-| test_android | 3.13  |
-| test_ios     | 2.85  |
-| test_mic     | 3.06  |
+| CER(%)       | Pretrain model|[Finetune model](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-aishell2-vocab8404-pytorch/summary)|
+|:------------:|:-------------:|:------------:|
+| dev_ios      | 2.80          |2.60          |
+| test_android | 3.13          |2.84          |
+| test_ios     | 2.85          |2.82          |
+| test_mic     | 3.06          |2.88          |
 
 ## Wenetspeech
 - Decode config: 

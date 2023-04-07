@@ -12,17 +12,17 @@ def get_readme():
     return readme
 
 
-MODULE_NAME = 'rapid_paraformer'
-VERSION_NUM = '0.0.1'
+MODULE_NAME = 'funasr_onnx'
+VERSION_NUM = '0.0.3'
 
 setuptools.setup(
     name=MODULE_NAME,
     version=VERSION_NUM,
     platforms="Any",
-    description="Using paraformer with ONNXRuntime",
-    author="SWHL",
-    author_email="liekkaskono@163.com",
-    url="https://github.com/alibaba-damo-academy/FunASR",
+    url="https://github.com/alibaba-damo-academy/FunASR.git",
+    author="Speech Lab, Alibaba Group, China",
+    author_email="funasr@list.alibaba-inc.com",
+    description="FunASR: A Fundamental End-to-End Speech Recognition Toolkit",
     license='MIT',
     long_description=get_readme(),
     long_description_content_type='text/markdown',

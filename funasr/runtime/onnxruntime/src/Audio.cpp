@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <webrtc_vad.h>
 
 #include "Audio.h"
 
@@ -138,9 +137,9 @@ bool Audio::loadwav(const char *filename)
     fp = fopen(filename, "rb");
     if (fp == nullptr)
         return false;
-    fseek(fp, 0, SEEK_END);
-    uint32_t nFileLen = ftell(fp);
-    fseek(fp, 44, SEEK_SET);
+    fseek(fp, 0, SEEK_END);  /*定位到文件末尾*/
+    uint32_t nFileLen = ftell(fp);  /*得到文件大小*/
+    fseek(fp, 44, SEEK_SET);  /*跳过wav文件头*/
 
     speech_len = (nFileLen - 44) / 2;
     speech_align_len = (int)(ceil((float)speech_len / align_size) * align_size);
@@ -237,7 +236,7 @@ bool Audio::loadpcmwav(const char* buf, int nBufLen)
 
     size_t nOffset = 0;
 
-#define WAV_HEADER_SIZE 44
+
 
     speech_len = nBufLen / 2;
     speech_align_len = (int)(ceil((float)speech_len / align_size) * align_size);
@@ -263,7 +262,8 @@ bool Audio::loadpcmwav(const char* buf, int nBufLen)
             speech_data[i] = (float)speech_buff[i] / scale;
         }
 
-
+        AudioFrame* frame = new AudioFrame(speech_len);
+        frame_queue.push(frame);
         return true;
 
     }
@@ -413,6 +413,7 @@ void Audio::padding()
 #define SPEECH_LEN_20S (16000 * 20)
 #define SPEECH_LEN_30S (16000 * 30)
 
+/*
 void Audio::split()
 {
     VadInst *handle = WebRtcVad_Create();
@@ -471,3 +472,4 @@ void Audio::split()
     }
     WebRtcVad_Free(handle);
 }
+*/

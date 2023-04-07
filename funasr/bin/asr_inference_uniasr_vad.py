@@ -46,7 +46,7 @@ class Speech2Text:
 
     Examples:
         >>> import soundfile
-        >>> speech2text = Speech2Text("asr_config.yml", "asr.pth")
+        >>> speech2text = Speech2Text("asr_config.yml", "asr.pb")
         >>> audio, rate = soundfile.read("speech.wav")
         >>> speech2text(audio)
         [(text, token, token_int, hypothesis object), ...]
@@ -261,6 +261,7 @@ class Speech2Text:
 
             # Change integer-ids to tokens
             token = self.converter.ids2tokens(token_int)
+            token = list(filter(lambda x: x != "<gbg>", token))
 
             if self.tokenizer is not None:
                 text = self.tokenizer.tokens2text(token)
@@ -506,13 +507,13 @@ def inference_modelscope(
                     ibest_writer["score"][key] = str(hyp.score)
     
                 if text is not None:
-                    text_postprocessed, _ = postprocess_utils.sentence_postprocess(token)
+                    text_postprocessed, word_lists = postprocess_utils.sentence_postprocess(token)
                     item = {'key': key, 'value': text_postprocessed}
                     asr_result_list.append(item)
                     finish_count += 1
                     asr_utils.print_progress(finish_count / file_count)
                     if writer is not None:
-                        ibest_writer["text"][key] = text
+                        ibest_writer["text"][key] = " ".join(word_lists)
         return asr_result_list
     
     return _forward

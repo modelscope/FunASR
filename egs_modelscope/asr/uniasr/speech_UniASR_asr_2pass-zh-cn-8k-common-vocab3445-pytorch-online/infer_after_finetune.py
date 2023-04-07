@@ -39,7 +39,7 @@ def modelscope_infer_after_finetune(params):
     # computer CER if GT text is set
     text_in = os.path.join(params["data_dir"], "text")
     if os.path.exists(text_in):
-        text_proc_file = os.path.join(decoding_path, "1best_recog/token")
+        text_proc_file = os.path.join(decoding_path, "1best_recog/text")
         compute_wer(text_in, text_proc_file, os.path.join(decoding_path, "text.cer"))
 
 
@@ -49,5 +49,5 @@ if __name__ == '__main__':
     params["required_files"] = ["am.mvn", "decoding.yaml", "configuration.json"]
     params["output_dir"] = "./checkpoint"
     params["data_dir"] = "./data/test"
-    params["decoding_model_name"] = "20epoch.pth"
+    params["decoding_model_name"] = "20epoch.pb"
     modelscope_infer_after_finetune(params)

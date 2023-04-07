@@ -52,7 +52,7 @@ asr_config=conf/train_asr_conformer.yaml
 model_dir="baseline_$(basename "${asr_config}" .yaml)_${feats_type}_${lang}_${token_type}_${tag}"
 
 inference_config=conf/decode_asr_transformer.yaml
-inference_asr_model=valid.acc.ave_10best.pth
+inference_asr_model=valid.acc.ave_10best.pb
 
 # you can set gpu num for decoding here
 gpuid_list=$CUDA_VISIBLE_DEVICES  # set gpus for decoding, the same as training stage by default
@@ -217,7 +217,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
         if [ -n "${inference_config}" ]; then
             _opts+="--config ${inference_config} "
         fi
-        ${infer_cmd} --gpu "${_ngpu}" --max-jobs-run "${_nj}" JOB=1: "${_nj}" "${_logdir}"/asr_inference.JOB.log \
+        ${infer_cmd} --gpu "${_ngpu}" --max-jobs-run "${_nj}" JOB=1:"${_nj}" "${_logdir}"/asr_inference.JOB.log \
             python -m funasr.bin.asr_inference_launch \
                 --batch_size 1 \
                 --ngpu "${_ngpu}" \
