@@ -66,13 +66,13 @@ class VadRealtimeTransformer(nn.Module):
         length = 10
         text_indexes = torch.tensor([[266757, 266757, 266757, 266757, 266757, 266757, 266757, 266757, 266757, 266757]], dtype=torch.int32)
         text_lengths = torch.tensor([length], dtype=torch.int32)
-        vad_mask = vad_mask(10, 3, dtype=torch.float32)[None, None, :, :]
+        vad_masks = vad_mask(10, 3, dtype=torch.float32)[None, None, :, :]
         sub_masks = torch.ones(length, length, dtype=torch.float32)
         sub_masks = torch.tril(sub_masks).type(torch.float32)
-        return (text_indexes, text_lengths, vad_mask, sub_masks[None, None, :, :])
+        return (text_indexes, text_lengths, vad_masks, sub_masks[None, None, :, :])
 
     def get_input_names(self):
-        return ['input', 'text_lengths', 'vad_mask', 'sub_masks']
+        return ['input', 'text_lengths', 'vad_masks', 'sub_masks']
 
     def get_output_names(self):
         return ['logits']
@@ -82,7 +82,7 @@ class VadRealtimeTransformer(nn.Module):
             'input': {
                 1: 'feats_length'
             },
-            'vad_mask': {
+            'vad_masks': {
                 2: 'feats_length1',
                 3: 'feats_length2'
             },
