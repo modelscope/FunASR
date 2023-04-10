@@ -34,8 +34,6 @@ from funasr.modules.subsampling import Conv2dSubsampling6
 from funasr.modules.subsampling import Conv2dSubsampling8
 from funasr.modules.subsampling import TooShortUttError
 from funasr.modules.subsampling import check_short_utt
-from funasr.models.encoder.abs_encoder import AbsEncoder
-import pdb
 import math
 
 class ConvolutionModule(nn.Module):
@@ -108,7 +106,7 @@ class ConvolutionModule(nn.Module):
 
 
 
-class MFCCAEncoder(AbsEncoder):
+class MFCCAEncoder(torch.nn.Module):
     """Conformer encoder module.
 
     Args:

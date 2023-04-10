@@ -14,7 +14,6 @@ from torch import nn
 from typeguard import check_argument_types
 
 from funasr.models.ctc import CTC
-from funasr.models.encoder.abs_encoder import AbsEncoder
 from funasr.modules.attention import (
     MultiHeadedAttention,  # noqa: H301
     RelPositionMultiHeadedAttention,  # noqa: H301
@@ -277,7 +276,7 @@ class EncoderLayer(nn.Module):
         return x, mask
 
 
-class ConformerEncoder(AbsEncoder):
+class ConformerEncoder(torch.nn.Module):
     """Conformer encoder module.
 
     Args:

@@ -26,7 +26,6 @@ from funasr.modules.subsampling import Conv2dSubsampling8
 from funasr.modules.subsampling import TooShortUttError
 from funasr.modules.subsampling import check_short_utt
 from funasr.models.ctc import CTC
-from funasr.models.encoder.abs_encoder import AbsEncoder
 from funasr.modules.mask import subsequent_mask, vad_mask
 
 class EncoderLayerSANM(nn.Module):
@@ -115,7 +114,7 @@ class EncoderLayerSANM(nn.Module):
 
         return x, mask, cache, mask_shfit_chunk, mask_att_chunk_encoder
 
-class SANMEncoder(AbsEncoder):
+class SANMEncoder(torch.nn.Module):
     """
     author: Speech Lab, Alibaba Group, China
     San-m: Memory equipped self-attention for end-to-end speech recognition
@@ -547,7 +546,7 @@ class SANMEncoder(AbsEncoder):
         return var_dict_torch_update
 
 
-class SANMEncoderChunkOpt(AbsEncoder):
+class SANMEncoderChunkOpt(torch.nn.Module):
     """
     author: Speech Lab, Alibaba Group, China
     SCAMA: Streaming chunk-aware multihead attention for online end-to-end speech recognition
@@ -960,7 +959,7 @@ class SANMEncoderChunkOpt(AbsEncoder):
         return var_dict_torch_update
 
 
-class SANMVadEncoder(AbsEncoder):
+class SANMVadEncoder(torch.nn.Module):
     """
     author: Speech Lab, Alibaba Group, China
 

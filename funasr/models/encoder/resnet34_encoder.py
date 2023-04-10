@@ -1,6 +1,5 @@
 import torch
 from torch.nn import functional as F
-from funasr.models.encoder.abs_encoder import AbsEncoder
 from typing import Tuple, Optional
 from funasr.models.pooling.statistic_pooling import statistic_pooling, windowed_statistic_pooling
 from collections import OrderedDict
@@ -76,7 +75,7 @@ class BasicBlock(torch.nn.Module):
         return xs_pad, ilens
 
 
-class ResNet34(AbsEncoder):
+class ResNet34(torch.nn.Module):
     def __init__(
             self,
             input_size,

@@ -9,10 +9,9 @@ from typeguard import check_argument_types
 from funasr.modules.nets_utils import make_pad_mask
 from funasr.modules.rnn.encoders import RNN
 from funasr.modules.rnn.encoders import RNNP
-from funasr.models.encoder.abs_encoder import AbsEncoder
 
 
-class RNNEncoder(AbsEncoder):
+class RNNEncoder(torch.nn.Module):
     """RNNEncoder class.
 
     Args:

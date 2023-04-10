@@ -12,7 +12,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from typeguard import check_argument_types
 
-from funasr.models.encoder.abs_encoder import AbsEncoder
 from funasr.modules.data2vec.data_utils import compute_mask_indices
 from funasr.modules.data2vec.ema_module import EMAModule
 from funasr.modules.data2vec.grad_multiply import GradMultiply
@@ -29,7 +28,7 @@ def get_annealed_rate(start, end, curr_step, total_steps):
     return end - r * pct_remaining
 
 
-class Data2VecEncoder(AbsEncoder):
+class Data2VecEncoder(torch.nn.Module):
     def __init__(
             self,
             # for ConvFeatureExtractionModel

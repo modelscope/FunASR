@@ -13,7 +13,6 @@ from typeguard import check_argument_types
 import logging
 
 from funasr.models.ctc import CTC
-from funasr.models.encoder.abs_encoder import AbsEncoder
 from funasr.modules.attention import MultiHeadedAttention
 from funasr.modules.embedding import PositionalEncoding
 from funasr.modules.layer_norm import LayerNorm
@@ -144,7 +143,7 @@ class EncoderLayer(nn.Module):
         return x, mask
 
 
-class TransformerEncoder(AbsEncoder):
+class TransformerEncoder(torch.nn.Module):
     """Transformer encoder module.
 
     Args:
