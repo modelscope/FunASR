@@ -17,12 +17,8 @@ from funasr.losses.label_smoothing_loss import (
 )
 from funasr.models.ctc import CTC
 from funasr.models.decoder.abs_decoder import AbsDecoder
-from funasr.models.encoder.abs_encoder import AbsEncoder
-from funasr.models.frontend.abs_frontend import AbsFrontend
 from funasr.models.preencoder.abs_preencoder import AbsPreEncoder
-from funasr.models.specaug.abs_specaug import AbsSpecAug
 from funasr.models.base_model import FunASRModel
-from funasr.layers.abs_normalize import AbsNormalize
 from funasr.torch_utils.device_funcs import force_gatherable
 
 
@@ -43,11 +39,11 @@ class MFCCA(FunASRModel):
         self,
         vocab_size: int,
         token_list: Union[Tuple[str, ...], List[str]],
-        frontend: Optional[AbsFrontend],
-        specaug: Optional[AbsSpecAug],
-        normalize: Optional[AbsNormalize],
+        frontend: Optional[torch.nn.Module],
+        specaug: Optional[torch.nn.Module],
+        normalize: Optional[torch.nn.Module],
         preencoder: Optional[AbsPreEncoder],
-        encoder: AbsEncoder,
+        encoder: torch.nn.Module,
         decoder: AbsDecoder,
         ctc: CTC,
         rnnt_decoder: None,

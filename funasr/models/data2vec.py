@@ -12,7 +12,6 @@ from typing import Tuple
 import torch
 from typeguard import check_argument_types
 
-from funasr.layers.abs_normalize import AbsNormalize
 from funasr.models.preencoder.abs_preencoder import AbsPreEncoder
 from funasr.torch_utils.device_funcs import force_gatherable
 from funasr.models.base_model import FunASRModel
@@ -33,7 +32,7 @@ class Data2VecPretrainModel(FunASRModel):
             self,
             frontend: Optional[torch.nn.Module],
             specaug: Optional[torch.nn.Module],
-            normalize: Optional[AbsNormalize],
+            normalize: Optional[torch.nn.Module],
             preencoder: Optional[AbsPreEncoder],
             encoder: torch.nn.Module,
     ):
