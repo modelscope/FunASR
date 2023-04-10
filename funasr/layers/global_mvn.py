@@ -7,11 +7,8 @@ import torch
 from typeguard import check_argument_types
 
 from funasr.modules.nets_utils import make_pad_mask
-from funasr.layers.abs_normalize import AbsNormalize
-from funasr.layers.inversible_interface import InversibleInterface
 
-
-class GlobalMVN(AbsNormalize, InversibleInterface):
+class GlobalMVN(torch.nn.Module):
     """Apply global mean and variance normalization
 
     TODO(kamo): Make this class portable somehow
