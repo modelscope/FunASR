@@ -2,17 +2,12 @@ import logging
 from contextlib import contextmanager
 from distutils.version import LooseVersion
 from typing import Dict
-from typing import List
 from typing import Optional
 from typing import Tuple
-from typing import Union
 
 import torch
-import numpy as np
 from typeguard import check_argument_types
 
-from funasr.models.encoder.abs_encoder import AbsEncoder
-from funasr.models.frontend.abs_frontend import AbsFrontend
 from funasr.models.predictor.cif import mae_loss
 from funasr.models.base_model import FunASRModel
 from funasr.modules.add_sos_eos import add_sos_eos
@@ -37,8 +32,8 @@ class TimestampPredictor(FunASRModel):
 
     def __init__(
             self,
-            frontend: Optional[AbsFrontend],
-            encoder: AbsEncoder,
+            frontend: Optional[torch.nn.Module],
+            encoder: torch.nn.Module,
             predictor: CifPredictorV3,
             predictor_bias: int = 0,
             token_list=None,
