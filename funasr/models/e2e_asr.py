@@ -24,11 +24,11 @@ from funasr.models.frontend.abs_frontend import AbsFrontend
 from funasr.models.postencoder.abs_postencoder import AbsPostEncoder
 from funasr.models.preencoder.abs_preencoder import AbsPreEncoder
 from funasr.models.specaug.abs_specaug import AbsSpecAug
+from funasr.models.base_model import FunASRModel
 from funasr.modules.add_sos_eos import add_sos_eos
 from funasr.modules.e2e_asr_common import ErrorCalculator
 from funasr.modules.nets_utils import th_accuracy
 from funasr.torch_utils.device_funcs import force_gatherable
-from funasr.train.abs_espnet_model import AbsESPnetModel
 
 if LooseVersion(torch.__version__) >= LooseVersion("1.6.0"):
     from torch.cuda.amp import autocast
@@ -39,7 +39,7 @@ else:
         yield
 
 
-class ESPnetASRModel(AbsESPnetModel):
+class ESPnetASRModel(FunASRModel):
     """CTC-attention hybrid Encoder-Decoder model"""
 
     def __init__(

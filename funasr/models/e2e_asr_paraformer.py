@@ -25,11 +25,11 @@ from funasr.models.postencoder.abs_postencoder import AbsPostEncoder
 from funasr.models.predictor.cif import mae_loss
 from funasr.models.preencoder.abs_preencoder import AbsPreEncoder
 from funasr.models.specaug.abs_specaug import AbsSpecAug
+from funasr.models.base_model import FunASRModel
 from funasr.modules.add_sos_eos import add_sos_eos
 from funasr.modules.nets_utils import make_pad_mask, pad_list
 from funasr.modules.nets_utils import th_accuracy
 from funasr.torch_utils.device_funcs import force_gatherable
-from funasr.train.abs_espnet_model import AbsESPnetModel
 from funasr.models.predictor.cif import CifPredictorV3
 
 
@@ -42,7 +42,7 @@ else:
         yield
 
 
-class Paraformer(AbsESPnetModel):
+class Paraformer(FunASRModel):
     """
     Author: Speech Lab, Alibaba Group, China
     Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition

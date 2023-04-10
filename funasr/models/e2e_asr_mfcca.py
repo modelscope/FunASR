@@ -21,9 +21,10 @@ from funasr.models.encoder.abs_encoder import AbsEncoder
 from funasr.models.frontend.abs_frontend import AbsFrontend
 from funasr.models.preencoder.abs_preencoder import AbsPreEncoder
 from funasr.models.specaug.abs_specaug import AbsSpecAug
+from funasr.models.base_model import FunASRModel
 from funasr.layers.abs_normalize import AbsNormalize
 from funasr.torch_utils.device_funcs import force_gatherable
-from funasr.train.abs_espnet_model import AbsESPnetModel
+
 
 if LooseVersion(torch.__version__) >= LooseVersion("1.6.0"):
     from torch.cuda.amp import autocast
@@ -35,7 +36,7 @@ else:
 import pdb
 import random
 import math
-class MFCCA(AbsESPnetModel):
+class MFCCA(FunASRModel):
     """CTC-attention hybrid Encoder-Decoder model"""
 
     def __init__(

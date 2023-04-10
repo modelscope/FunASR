@@ -14,10 +14,10 @@ from typeguard import check_argument_types
 from funasr.models.encoder.abs_encoder import AbsEncoder
 from funasr.models.frontend.abs_frontend import AbsFrontend
 from funasr.models.predictor.cif import mae_loss
+from funasr.models.base_model import FunASRModel
 from funasr.modules.add_sos_eos import add_sos_eos
 from funasr.modules.nets_utils import make_pad_mask, pad_list
 from funasr.torch_utils.device_funcs import force_gatherable
-from funasr.train.abs_espnet_model import AbsESPnetModel
 from funasr.models.predictor.cif import CifPredictorV3
 
 
@@ -30,7 +30,7 @@ else:
         yield
 
 
-class TimestampPredictor(AbsESPnetModel):
+class TimestampPredictor(FunASRModel):
     """
     Author: Speech Lab, Alibaba Group, China
     """

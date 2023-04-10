@@ -15,8 +15,8 @@ from funasr.models.frontend.wav_frontend import WavFrontendMel23
 from funasr.modules.eend_ola.encoder import EENDOLATransformerEncoder
 from funasr.modules.eend_ola.encoder_decoder_attractor import EncoderDecoderAttractor
 from funasr.modules.eend_ola.utils.power import generate_mapping_dict
+from funasr.models.base_model import FunASRModel
 from funasr.torch_utils.device_funcs import force_gatherable
-from funasr.train.abs_espnet_model import AbsESPnetModel
 
 if LooseVersion(torch.__version__) >= LooseVersion("1.6.0"):
     pass
@@ -34,7 +34,7 @@ def pad_attractor(att, max_n_speakers):
     return att
 
 
-class DiarEENDOLAModel(AbsESPnetModel):
+class DiarEENDOLAModel(FunASRModel):
     """EEND-OLA diarization model"""
 
     def __init__(
