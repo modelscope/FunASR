@@ -1,4 +1,3 @@
-from funasr.models.frontend.abs_frontend import AbsFrontend
 from funasr.models.frontend.default import DefaultFrontend
 from funasr.models.frontend.s3prl import S3prlFrontend
 import numpy as np
@@ -7,7 +6,7 @@ from typeguard import check_argument_types
 from typing import Tuple
 
 
-class FusedFrontends(AbsFrontend):
+class FusedFrontends(torch.nn.Module):
     def __init__(
         self, frontends=None, align_method="linear_projection", proj_dim=100, fs=16000
     ):

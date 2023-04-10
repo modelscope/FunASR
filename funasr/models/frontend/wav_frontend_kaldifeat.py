@@ -6,7 +6,6 @@ from typing import Tuple
 import numpy as np
 import torch
 import torchaudio.compliance.kaldi as kaldi
-from funasr.models.frontend.abs_frontend import AbsFrontend
 from typeguard import check_argument_types
 from torch.nn.utils.rnn import pad_sequence
 # import kaldifeat

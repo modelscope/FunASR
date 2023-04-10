@@ -11,12 +11,11 @@ from typeguard import check_argument_types
 
 from funasr.layers.log_mel import LogMel
 from funasr.layers.stft import Stft
-from funasr.models.frontend.abs_frontend import AbsFrontend
 from funasr.modules.frontends.frontend import Frontend
 from funasr.utils.get_default_kwargs import get_default_kwargs
 
 
-class DefaultFrontend(AbsFrontend):
+class DefaultFrontend(torch.nn.Module):
     """Conventional frontend structure for ASR.
 
     Stft -> WPE -> MVDR-Beamformer -> Power-spec -> Mel-Fbank -> CMVN
@@ -135,7 +134,7 @@ class DefaultFrontend(AbsFrontend):
 
 
 
-class MultiChannelFrontend(AbsFrontend):
+class MultiChannelFrontend(torch.nn.Module):
     """Conventional frontend structure for ASR.
 
     Stft -> WPE -> MVDR-Beamformer -> Power-spec -> Mel-Fbank -> CMVN

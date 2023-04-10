@@ -9,7 +9,6 @@ from torch.nn.utils.rnn import pad_sequence
 from typeguard import check_argument_types
 
 import funasr.models.frontend.eend_ola_feature as eend_ola_feature
-from funasr.models.frontend.abs_frontend import AbsFrontend
 
 
 def load_cmvn(cmvn_file):
@@ -76,7 +75,7 @@ def apply_lfr(inputs, lfr_m, lfr_n):
     return LFR_outputs.type(torch.float32)
 
 
-class WavFrontend(AbsFrontend):
+class WavFrontend(torch.nn.Module):
     """Conventional frontend structure for ASR.
     """
 
@@ -207,7 +206,7 @@ class WavFrontend(AbsFrontend):
         return feats_pad, feats_lens
 
 
-class WavFrontendOnline(AbsFrontend):
+class WavFrontendOnline(torch.nn.Module):
     """Conventional frontend structure for streaming ASR/VAD.
     """
 
@@ -452,7 +451,7 @@ class WavFrontendOnline(AbsFrontend):
         self.lfr_splice_cache = []
 
 
-class WavFrontendMel23(AbsFrontend):
+class WavFrontendMel23(torch.nn.Module):
     """Conventional frontend structure for ASR.
     """
 

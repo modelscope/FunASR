@@ -4,13 +4,12 @@
 
 """Sliding Window for raw audio input data."""
 
-from funasr.models.frontend.abs_frontend import AbsFrontend
 import torch
 from typeguard import check_argument_types
 from typing import Tuple
 
 
-class SlidingWindow(AbsFrontend):
+class SlidingWindow(torch.nn.Module):
     """Sliding Window.
 
     Provides a sliding window over a batched continuous raw audio tensor.
