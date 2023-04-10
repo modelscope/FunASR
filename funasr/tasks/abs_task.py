@@ -464,6 +464,12 @@ class AbsTask(ABC):
             default=sys.maxsize,
             help="The maximum number update step to train",
         )
+        parser.add_argument(
+            "--batch_interval",
+            type=int,
+            default=10000,
+            help="The batch interval for saving model.",
+        )
         group.add_argument(
             "--patience",
             type=int_or_none,
@@ -1193,12 +1199,18 @@ class AbsTask(ABC):
             # logging.basicConfig() is invoked in main_worker() instead of main()
             # because it can be invoked only once in a process.
             # FIXME(kamo): Should we use logging.getLogger()?
+            # BUGFIX: Remove previous handlers and reset log level
+            for handler in logging.root.handlers[:]:
+                logging.root.removeHandler(handler)
             logging.basicConfig(
                 level=args.log_level,
                 format=f"[{os.uname()[1].split('.')[0]}]"
                        f" %(asctime)s (%(module)s:%(lineno)d) %(levelname)s: %(message)s",
             )
         else:
+            # BUGFIX: Remove previous handlers and reset log level
+            for handler in logging.root.handlers[:]:
+                logging.root.removeHandler(handler)
             # Suppress logging if RANK != 0
             logging.basicConfig(
                 level="ERROR",
@@ -1349,15 +1361,15 @@ class AbsTask(ABC):
                 from funasr.datasets.large_datasets.build_dataloader import ArkDataLoader
                 train_iter_factory = ArkDataLoader(args.train_data_file, args.token_list, args.dataset_conf,
                                                    frontend_conf=args.frontend_conf if hasattr(args, "frontend_conf") else None,
-                                                   seg_dict_file=args.seg_dict_file if hasattr(args,
-                                                                                               "seg_dict_file") else None,
+                                                   seg_dict_file=args.seg_dict_file if hasattr(args, "seg_dict_file") else None,
                                                    punc_dict_file=args.punc_list if hasattr(args, "punc_list") else None,
+                                                   bpemodel_file=args.bpemodel if hasattr(args, "bpemodel") else None,
                                                    mode="train")
                 valid_iter_factory = ArkDataLoader(args.valid_data_file, args.token_list, args.dataset_conf, 
                                                    frontend_conf=args.frontend_conf if hasattr(args, "frontend_conf") else None,
-                                                   seg_dict_file=args.seg_dict_file if hasattr(args,
-                                                                                               "seg_dict_file") else None,
+                                                   seg_dict_file=args.seg_dict_file if hasattr(args, "seg_dict_file") else None,
                                                    punc_dict_file=args.punc_list if hasattr(args, "punc_list") else None,
+                                                   bpemodel_file=args.bpemodel if hasattr(args, "bpemodel") else None,
                                                    mode="eval")
             elif args.dataset_type == "small":
                 train_iter_factory = cls.build_iter_factory(
@@ -1570,13 +1582,22 @@ class AbsTask(ABC):
     ) -> AbsIterFactory:
         assert check_argument_types()
 
+        if args.frontend_conf is not None and "fs" in args.frontend_conf:
+            dest_sample_rate = args.frontend_conf["fs"]
+        else:
+            dest_sample_rate = 16000
+
         dataset = ESPnetDataset(
             iter_options.data_path_and_name_and_type,
             float_dtype=args.train_dtype,
             preprocess=iter_options.preprocess_fn,
             max_cache_size=iter_options.max_cache_size,
             max_cache_fd=iter_options.max_cache_fd,
+<<<<<<< HEAD
             dest_sample_rate=args.frontend_conf["fs"] if args.frontend_conf else 16000,
+=======
+            dest_sample_rate=dest_sample_rate,
+>>>>>>> main
         )
         cls.check_task_requirements(
             dataset, args.allow_variable_data_keys, train=iter_options.train

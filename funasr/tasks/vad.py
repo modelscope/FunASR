@@ -40,7 +40,7 @@ from funasr.models.encoder.transformer_encoder import TransformerEncoder
 from funasr.models.frontend.abs_frontend import AbsFrontend
 from funasr.models.frontend.default import DefaultFrontend
 from funasr.models.frontend.fused import FusedFrontends
-from funasr.models.frontend.wav_frontend import WavFrontend
+from funasr.models.frontend.wav_frontend import WavFrontend, WavFrontendOnline
 from funasr.models.frontend.s3prl import S3prlFrontend
 from funasr.models.frontend.windowing import SlidingWindow
 from funasr.models.postencoder.abs_postencoder import AbsPostEncoder
@@ -81,6 +81,7 @@ frontend_choices = ClassChoices(
         s3prl=S3prlFrontend,
         fused=FusedFrontends,
         wav_frontend=WavFrontend,
+        wav_frontend_online=WavFrontendOnline,
     ),
     type_check=AbsFrontend,
     default="default",
@@ -291,7 +292,24 @@ class VADTask(AbsTask):
             model_class = model_choices.get_class(args.model)
         except AttributeError:
             model_class = model_choices.get_class("e2evad")
-        model = model_class(encoder=encoder, vad_post_args=args.vad_post_conf)
+        
+        # 1. frontend
+        if args.input_size is None:
+            # Extract features in the model
+            frontend_class = frontend_choices.get_class(args.frontend)
+            if args.frontend == 'wav_frontend':
+                frontend = frontend_class(cmvn_file=args.cmvn_file, **args.frontend_conf)
+            else:
+                frontend = frontend_class(**args.frontend_conf)
+            input_size = frontend.output_size()
+        else:
+            # Give features from data-loader
+            args.frontend = None
+            args.frontend_conf = {}
+            frontend = None
+            input_size = args.input_size
+        
+        model = model_class(encoder=encoder, vad_post_args=args.vad_post_conf, frontend=frontend)
 
         return model
 
@@ -302,6 +320,7 @@ class VADTask(AbsTask):
             config_file: Union[Path, str] = None,
             model_file: Union[Path, str] = None,
             device: str = "cpu",
+            cmvn_file: Union[Path, str] = None,
     ):
         """Build model from the files.
 
@@ -325,6 +344,8 @@ class VADTask(AbsTask):
 
         with config_file.open("r", encoding="utf-8") as f:
             args = yaml.safe_load(f)
+        #if cmvn_file is not None:
+        args["cmvn_file"] = cmvn_file
         args = argparse.Namespace(**args)
         model = cls.build_model(args)
         model.to(device)

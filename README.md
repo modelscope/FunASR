@@ -32,7 +32,7 @@ For the release notes, please ref to [news](https://github.com/alibaba-damo-acad
 ``` sh
 pip install "modelscope[audio_asr]" --upgrade -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html
 git clone https://github.com/alibaba/FunASR.git && cd FunASR
-pip install --editable ./
+pip install -e ./
 ```
 For more details, please ref to [installation](https://github.com/alibaba-damo-academy/FunASR/wiki)
 

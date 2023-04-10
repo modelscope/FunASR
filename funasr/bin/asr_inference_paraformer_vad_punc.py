@@ -292,6 +292,8 @@ class Speech2Text:
 
                 # remove blank symbol id, which is assumed to be 0
                 token_int = list(filter(lambda x: x != 0 and x != 2, token_int))
+                if len(token_int) == 0:
+                    continue
 
                 # Change integer-ids to tokens
                 token = self.converter.ids2tokens(token_int)
@@ -668,7 +670,7 @@ def inference_modelscope(
                     ibest_writer["token"][key] = " ".join(token)
                     ibest_writer["token_int"][key] = " ".join(map(str, token_int))
                     ibest_writer["vad"][key] = "{}".format(vadsegments)
-                    ibest_writer["text"][key] = text_postprocessed
+                    ibest_writer["text"][key] = " ".join(word_lists)
                     ibest_writer["text_with_punc"][key] = text_postprocessed_punc
                     if time_stamp_postprocessed is not None:
                         ibest_writer["time_stamp"][key] = "{}".format(time_stamp_postprocessed)

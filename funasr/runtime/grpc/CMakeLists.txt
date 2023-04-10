@@ -48,7 +48,7 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
 include_directories(../onnxruntime/include/)
 link_directories(../onnxruntime/build/src/)
-link_directories(../onnxruntime/build/third_party/webrtc/)
+link_directories(../onnxruntime/build/third_party/yaml-cpp/)
 
 link_directories(${ONNXRUNTIME_DIR}/lib)
 add_subdirectory("../onnxruntime/src" onnx_src)
@@ -75,7 +75,6 @@ foreach(_target
   target_link_libraries(${_target}
     rg_grpc_proto
     rapidasr
-    webrtcvad
     ${EXTRA_LIBS}
     ${_REFLECTION}
     ${_GRPC_GRPCPP}

@@ -42,6 +42,7 @@ from funasr.utils import asr_utils, wav_utils, postprocess_utils
 from funasr.models.frontend.wav_frontend import WavFrontend
 from funasr.models.e2e_asr_paraformer import BiCifParaformer, ContextualParaformer
 from funasr.export.models.e2e_asr_paraformer import Paraformer as Paraformer_export
+np.set_printoptions(threshold=np.inf)
 
 class Speech2Text:
     """Speech2Text class
@@ -203,7 +204,6 @@ class Speech2Text:
         # Input as audio signal
         if isinstance(speech, np.ndarray):
             speech = torch.tensor(speech)
-
         if self.frontend is not None:
             feats, feats_len = self.frontend.forward(speech, speech_lengths)
             feats = to_device(feats, device=self.device)
@@ -213,13 +213,16 @@ class Speech2Text:
             feats = speech
             feats_len = speech_lengths
         lfr_factor = max(1, (feats.size()[-1] // 80) - 1)
+        feats_len = cache["encoder"]["stride"] + cache["encoder"]["pad_left"] + cache["encoder"]["pad_right"]
+        feats = feats[:,cache["encoder"]["start_idx"]:cache["encoder"]["start_idx"]+feats_len,:]
+        feats_len = torch.tensor([feats_len])
         batch = {"speech": feats, "speech_lengths": feats_len, "cache": cache}
 
         # a. To device
         batch = to_device(batch, device=self.device)
 
         # b. Forward Encoder
-        enc, enc_len = self.asr_model.encode_chunk(**batch)
+        enc, enc_len = self.asr_model.encode_chunk(feats, feats_len, cache)
         if isinstance(enc, tuple):
             enc = enc[0]
         # assert len(enc) == 1, len(enc)
@@ -544,11 +547,6 @@ def inference_modelscope(
     )
 
     export_mode = False
-    if param_dict is not None:
-        hotword_list_or_file = param_dict.get('hotword')
-        export_mode = param_dict.get("export_mode", False)
-    else:
-        hotword_list_or_file = None
 
     if ngpu >= 1 and torch.cuda.is_available():
         device = "cuda"
@@ -578,13 +576,27 @@ def inference_modelscope(
         ngram_weight=ngram_weight,
         penalty=penalty,
         nbest=nbest,
-        hotword_list_or_file=hotword_list_or_file,
     )
     if export_mode:
         speech2text = Speech2TextExport(**speech2text_kwargs)
     else:
         speech2text = Speech2Text(**speech2text_kwargs)
+        
+    def _load_bytes(input):
+        middle_data = np.frombuffer(input, dtype=np.int16)
+        middle_data = np.asarray(middle_data)
+        if middle_data.dtype.kind not in 'iu':
+            raise TypeError("'middle_data' must be an array of integers")
+        dtype = np.dtype('float32')
+        if dtype.kind != 'f':
+            raise TypeError("'dtype' must be a floating point type")
 
+        i = np.iinfo(middle_data.dtype)
+        abs_max = 2 ** (i.bits - 1)
+        offset = i.min + abs_max
+        array = np.frombuffer((middle_data.astype(dtype) - offset) / abs_max, dtype=np.float32)
+        return array
+    
     def _forward(
             data_path_and_name_and_type,
             raw_inputs: Union[np.ndarray, torch.Tensor] = None,
@@ -594,123 +606,119 @@ def inference_modelscope(
             **kwargs,
     ):
 
-        hotword_list_or_file = None
-        if param_dict is not None:
-            hotword_list_or_file = param_dict.get('hotword')
-        if 'hotword' in kwargs:
-            hotword_list_or_file = kwargs['hotword']
-        if hotword_list_or_file is not None or 'hotword' in kwargs:
-            speech2text.hotword_list = speech2text.generate_hotwords_list(hotword_list_or_file)
-
         # 3. Build data-iterator
+        if data_path_and_name_and_type is not None and data_path_and_name_and_type[2] == "bytes":
+            raw_inputs = _load_bytes(data_path_and_name_and_type[0])
+            raw_inputs = torch.tensor(raw_inputs)
         if data_path_and_name_and_type is None and raw_inputs is not None:
-            if isinstance(raw_inputs, torch.Tensor):
-                raw_inputs = raw_inputs.numpy()
-            data_path_and_name_and_type = [raw_inputs, "speech", "waveform"]
-        loader = ASRTask.build_streaming_iterator(
-            data_path_and_name_and_type,
-            dtype=dtype,
-            fs=fs,
-            batch_size=batch_size,
-            key_file=key_file,
-            num_workers=num_workers,
-            preprocess_fn=ASRTask.build_preprocess_fn(speech2text.asr_train_args, False),
-            collate_fn=ASRTask.build_collate_fn(speech2text.asr_train_args, False),
-            allow_variable_data_keys=allow_variable_data_keys,
-            inference=True,
-        )
-
-        if param_dict is not None:
-            use_timestamp = param_dict.get('use_timestamp', True)
-        else:
-            use_timestamp = True
-
-        forward_time_total = 0.0
-        length_total = 0.0
-        finish_count = 0
-        file_count = 1
-        cache = None
+            if isinstance(raw_inputs, np.ndarray):
+                raw_inputs = torch.tensor(raw_inputs)
+        is_final = False
+        if param_dict is not None and "cache" in param_dict:
+            cache = param_dict["cache"]
+        if param_dict is not None and "is_final" in param_dict:
+            is_final = param_dict["is_final"]
         # 7 .Start for-loop
         # FIXME(kamo): The output format should be discussed about
         asr_result_list = []
-        output_path = output_dir_v2 if output_dir_v2 is not None else output_dir
-        if output_path is not None:
-            writer = DatadirWriter(output_path)
+        results = []
+        asr_result = ""
+        wait = True
+        if len(cache) == 0:
+            cache["encoder"] = {"start_idx": 0, "pad_left": 0, "stride": 10, "pad_right": 5, "cif_hidden": None, "cif_alphas": None, "is_final": is_final, "left": 0, "right": 0}
+            cache_de = {"decode_fsmn": None}
+            cache["decoder"] = cache_de
+            cache["first_chunk"] = True
+            cache["speech"] = []
+            cache["accum_speech"] = 0
+
+        if raw_inputs is not None:
+            if len(cache["speech"]) == 0:
+                cache["speech"] = raw_inputs
+            else:
+                cache["speech"] = torch.cat([cache["speech"], raw_inputs], dim=0)
+            cache["accum_speech"] += len(raw_inputs)
+            while cache["accum_speech"] >= 960:
+                if cache["first_chunk"]:
+                    if cache["accum_speech"] >= 14400:
+                        speech = torch.unsqueeze(cache["speech"], axis=0)
+                        speech_length = torch.tensor([len(cache["speech"])])
+                        cache["encoder"]["pad_left"] = 5 
+                        cache["encoder"]["pad_right"] = 5 
+                        cache["encoder"]["stride"] = 10
+                        cache["encoder"]["left"] = 5
+                        cache["encoder"]["right"] = 0
+                        results = speech2text(cache, speech, speech_length)
+                        cache["accum_speech"] -= 4800
+                        cache["first_chunk"] = False
+                        cache["encoder"]["start_idx"] = -5
+                        cache["encoder"]["is_final"] = False
+                        wait = False
+                    else:
+                        if is_final:
+                            cache["encoder"]["stride"] = len(cache["speech"]) // 960
+                            cache["encoder"]["pad_left"] = 0
+                            cache["encoder"]["pad_right"] = 0
+                            speech = torch.unsqueeze(cache["speech"], axis=0)
+                            speech_length = torch.tensor([len(cache["speech"])])
+                            results = speech2text(cache, speech, speech_length)
+                            cache["accum_speech"] = 0
+                            wait = False
+                        else:
+                            break
+                else:
+                    if cache["accum_speech"] >= 19200:
+                        cache["encoder"]["start_idx"] += 10
+                        cache["encoder"]["stride"] = 10
+                        cache["encoder"]["pad_left"] = 5
+                        cache["encoder"]["pad_right"] = 5
+                        cache["encoder"]["left"] = 0
+                        cache["encoder"]["right"] = 0
+                        speech = torch.unsqueeze(cache["speech"], axis=0)
+                        speech_length = torch.tensor([len(cache["speech"])])
+                        results = speech2text(cache, speech, speech_length)
+                        cache["accum_speech"] -= 9600
+                        wait = False
+                    else:
+                        if is_final:
+                            cache["encoder"]["is_final"] = True
+                            if cache["accum_speech"] >= 14400:
+                                cache["encoder"]["start_idx"] += 10
+                                cache["encoder"]["stride"] = 10
+                                cache["encoder"]["pad_left"] = 5
+                                cache["encoder"]["pad_right"] = 5
+                                cache["encoder"]["left"] = 0
+                                cache["encoder"]["right"] = cache["accum_speech"] // 960 - 15
+                                speech = torch.unsqueeze(cache["speech"], axis=0)
+                                speech_length = torch.tensor([len(cache["speech"])])
+                                results = speech2text(cache, speech, speech_length)
+                                cache["accum_speech"] -= 9600
+                                wait = False
+                            else:
+                                cache["encoder"]["start_idx"] += 10
+                                cache["encoder"]["stride"] = cache["accum_speech"] // 960 - 5
+                                cache["encoder"]["pad_left"] = 5
+                                cache["encoder"]["pad_right"] = 0
+                                cache["encoder"]["left"] = 0
+                                cache["encoder"]["right"] = 0
+                                speech = torch.unsqueeze(cache["speech"], axis=0)
+                                speech_length = torch.tensor([len(cache["speech"])])
+                                results = speech2text(cache, speech, speech_length)
+                                cache["accum_speech"] = 0
+                                wait = False
+                        else:
+                            break
+                
+                if len(results) >= 1:
+                    asr_result += results[0][0]
+            if asr_result == "":
+                asr_result = "sil"
+            if wait:
+                asr_result = "waiting_for_more_voice"
+            item = {'key': "utt", 'value': asr_result}
+            asr_result_list.append(item)
         else:
-            writer = None
-        if param_dict is not None and "cache" in param_dict:
-            cache = param_dict["cache"]
-        for keys, batch in loader:
-            assert isinstance(batch, dict), type(batch)
-            assert all(isinstance(s, str) for s in keys), keys
-            _bs = len(next(iter(batch.values())))
-            assert len(keys) == _bs, f"{len(keys)} != {_bs}"
-            # batch = {k: v for k, v in batch.items() if not k.endswith("_lengths")}
-            logging.info("decoding, utt_id: {}".format(keys))
-            # N-best list of (text, token, token_int, hyp_object)
-
-            time_beg = time.time()
-            results = speech2text(cache=cache, **batch)
-            if len(results) < 1:
-                hyp = Hypothesis(score=0.0, scores={}, states={}, yseq=[])
-                results = [[" ", ["sil"], [2], hyp, 10, 6]] * nbest
-            time_end = time.time()
-            forward_time = time_end - time_beg
-            lfr_factor = results[0][-1]
-            length = results[0][-2]
-            forward_time_total += forward_time
-            length_total += length
-            rtf_cur = "decoding, feature length: {}, forward_time: {:.4f}, rtf: {:.4f}".format(length, forward_time,
-                                                                                               100 * forward_time / (
-                                                                                                           length * lfr_factor))
-            logging.info(rtf_cur)
-
-            for batch_id in range(_bs):
-                result = [results[batch_id][:-2]]
-
-                key = keys[batch_id]
-                for n, result in zip(range(1, nbest + 1), result):
-                    text, token, token_int, hyp = result[0], result[1], result[2], result[3]
-                    time_stamp = None if len(result) < 5 else result[4]
-                    # Create a directory: outdir/{n}best_recog
-                    if writer is not None:
-                        ibest_writer = writer[f"{n}best_recog"]
-
-                        # Write the result to each file
-                        ibest_writer["token"][key] = " ".join(token)
-                        # ibest_writer["token_int"][key] = " ".join(map(str, token_int))
-                        ibest_writer["score"][key] = str(hyp.score)
-                        ibest_writer["rtf"][key] = rtf_cur
-
-                    if text is not None:
-                        if use_timestamp and time_stamp is not None:
-                            postprocessed_result = postprocess_utils.sentence_postprocess(token, time_stamp)
-                        else:
-                            postprocessed_result = postprocess_utils.sentence_postprocess(token)
-                        time_stamp_postprocessed = ""
-                        if len(postprocessed_result) == 3:
-                            text_postprocessed, time_stamp_postprocessed, word_lists = postprocessed_result[0], \
-                                                                                       postprocessed_result[1], \
-                                                                                       postprocessed_result[2]
-                        else:
-                            text_postprocessed, word_lists = postprocessed_result[0], postprocessed_result[1]
-                        item = {'key': key, 'value': text_postprocessed}
-                        if time_stamp_postprocessed != "":
-                            item['time_stamp'] = time_stamp_postprocessed
-                        asr_result_list.append(item)
-                        finish_count += 1
-                        # asr_utils.print_progress(finish_count / file_count)
-                        if writer is not None:
-                            ibest_writer["text"][key] = text_postprocessed
-
-                    logging.info("decoding, utt: {}, predictions: {}".format(key, text))
-        rtf_avg = "decoding, feature length total: {}, forward_time total: {:.4f}, rtf avg: {:.4f}".format(length_total,
-                                                                                                           forward_time_total,
-                                                                                                           100 * forward_time_total / (
-                                                                                                                       length_total * lfr_factor))
-        logging.info(rtf_avg)
-        if writer is not None:
-            ibest_writer["rtf"]["rtf_avf"] = rtf_avg
+            return []
         return asr_result_list
 
     return _forward
@@ -904,4 +912,5 @@ if __name__ == "__main__":
     #
     # rec_result = inference_16k_pipline(audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
     # print(rec_result)
+
 

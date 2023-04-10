@@ -1,101 +1,25 @@
 import os
 import shutil
-from multiprocessing import Pool
-
+import argparse
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
 
-from funasr.utils.compute_wer import compute_wer
-
-
-def modelscope_infer_core(output_dir, split_dir, njob, idx, batch_size, ngpu, model):
-    output_dir_job = os.path.join(output_dir, "output.{}".format(idx))
-    if ngpu > 0:
-        use_gpu = 1
-        gpu_id = int(idx) - 1
-    else:
-        use_gpu = 0
-        gpu_id = -1
-    if "CUDA_VISIBLE_DEVICES" in os.environ.keys():
-        gpu_list = os.environ['CUDA_VISIBLE_DEVICES'].split(",")
-        os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_list[gpu_id])
-    else:
-        os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_id)
-    inference_pipline = pipeline(
+def modelscope_infer(args):
+    os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpuid)
+    inference_pipeline = pipeline(
         task=Tasks.auto_speech_recognition,
-        model=model,
-        output_dir=output_dir_job,
-        batch_size=batch_size,
-        ngpu=use_gpu,
+        model=args.model,
+        output_dir=args.output_dir,
+        batch_size=args.batch_size,
     )
-    audio_in = os.path.join(split_dir, "wav.{}.scp".format(idx))
-    inference_pipline(audio_in=audio_in)
-
-
-def modelscope_infer(params):
-    # prepare for multi-GPU decoding
-    ngpu = params["ngpu"]
-    njob = params["njob"]
-    batch_size = params["batch_size"]
-    output_dir = params["output_dir"]
-    model = params["model"]
-    if os.path.exists(output_dir):
-        shutil.rmtree(output_dir)
-    os.mkdir(output_dir)
-    split_dir = os.path.join(output_dir, "split")
-    os.mkdir(split_dir)
-    if ngpu > 0:
-        nj = ngpu
-    elif ngpu == 0:
-        nj = njob
-    wav_scp_file = os.path.join(params["data_dir"], "wav.scp")
-    with open(wav_scp_file) as f:
-        lines = f.readlines()
-        num_lines = len(lines)
-        num_job_lines = num_lines // nj
-    start = 0
-    for i in range(nj):
-        end = start + num_job_lines
-        file = os.path.join(split_dir, "wav.{}.scp".format(str(i + 1)))
-        with open(file, "w") as f:
-            if i == nj - 1:
-                f.writelines(lines[start:])
-            else:
-                f.writelines(lines[start:end])
-        start = end
-
-    p = Pool(nj)
-    for i in range(nj):
-        p.apply_async(modelscope_infer_core,
-                      args=(output_dir, split_dir, njob, str(i + 1), batch_size, ngpu, model))
-    p.close()
-    p.join()
-
-    # combine decoding results
-    best_recog_path = os.path.join(output_dir, "1best_recog")
-    os.mkdir(best_recog_path)
-    files = ["text", "token", "score"]
-    for file in files:
-        with open(os.path.join(best_recog_path, file), "w") as f:
-            for i in range(nj):
-                job_file = os.path.join(output_dir, "output.{}/1best_recog".format(str(i + 1)), file)
-                with open(job_file) as f_job:
-                    lines = f_job.readlines()
-                f.writelines(lines)
-
-    # If text exists, compute CER
-    text_in = os.path.join(params["data_dir"], "text")
-    if os.path.exists(text_in):
-        text_proc_file = os.path.join(best_recog_path, "token")
-        compute_wer(text_in, text_proc_file, os.path.join(best_recog_path, "text.cer"))
-
+    inference_pipeline(audio_in=args.audio_in)
 
 if __name__ == "__main__":
-    params = {}
-    params["model"] = "damo/speech_paraformer_asr_nat-zh-cn-8k-common-vocab8358-tensorflow1"
-    params["data_dir"] = "./data/test"
-    params["output_dir"] = "./results"
-    params["ngpu"] = 1 # if ngpu > 0, will use gpu decoding
-    params["njob"] = 1 # if ngpu = 0, will use cpu decoding
-    params["batch_size"] = 64
-    modelscope_infer(params)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--model', type=str, default="damo/speech_paraformer_asr_nat-zh-cn-8k-common-vocab8358-tensorflow1")
+    parser.add_argument('--audio_in', type=str, default="./data/test/wav.scp")
+    parser.add_argument('--output_dir', type=str, default="./results/")
+    parser.add_argument('--batch_size', type=int, default=64)
+    parser.add_argument('--gpuid', type=str, default="0")
+    args = parser.parse_args()
+    modelscope_infer(args)
