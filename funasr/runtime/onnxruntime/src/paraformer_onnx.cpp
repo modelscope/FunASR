@@ -18,7 +18,7 @@ ModelImp::ModelImp(const char* path,int nNumThread, bool quantize)
     cmvn_path = pathAppend(path, "am.mvn");
     config_path = pathAppend(path, "config.yaml");
 
-    fe = new FeatureExtract(3);
+    //fe = new FeatureExtract(3);
 
     //sessionOptions.SetInterOpNumThreads(1);
     sessionOptions.SetIntraOpNumThreads(nNumThread);
@@ -52,8 +52,8 @@ ModelImp::ModelImp(const char* path,int nNumThread, bool quantize)
 
 ModelImp::~ModelImp()
 {
-    if(fe)
-        delete fe;
+    //if(fe)
+    //    delete fe;
     if (m_session)
     {
         delete m_session;
@@ -65,7 +65,8 @@ ModelImp::~ModelImp()
 
 void ModelImp::reset()
 {
-    fe->reset();
+    //fe->reset();
+    printf("Not Imp!!!!!!\n");
 }
 
 void ModelImp::apply_lfr(Tensor<float>*& din)
@@ -159,8 +160,9 @@ string ModelImp::greedy_search(float * in, int nLen )
 
 string ModelImp::forward(float* din, int len, int flag)
 {
-
     Tensor<float>* in;
+    FeatureExtract* fe = new FeatureExtract(3);
+    fe->reset();
     fe->insert(din, len, flag);
     fe->fetch(in);
     apply_lfr(in);
@@ -192,7 +194,6 @@ string ModelImp::forward(float* din, int len, int flag)
         auto outputTensor = m_session->Run(run_option, m_szInputNames.data(), input_onnx.data(), m_szInputNames.size(), m_szOutputNames.data(), m_szOutputNames.size());
         std::vector<int64_t> outputShape = outputTensor[0].GetTensorTypeAndShapeInfo().GetShape();
 
-
         int64_t outputCount = std::accumulate(outputShape.begin(), outputShape.end(), 1, std::multiplies<int64_t>());
         float* floatData = outputTensor[0].GetTensorMutableData<float>();
         auto encoder_out_lens = outputTensor[1].GetTensorMutableData<int64_t>();
@@ -203,9 +204,14 @@ string ModelImp::forward(float* din, int len, int flag)
         result = "";
     }
 
-
-    if(in)
+    if(in){
         delete in;
+        in = nullptr;
+    }
+    if(fe){
+        delete fe;
+        fe = nullptr;
+    }
 
     return result;
 }

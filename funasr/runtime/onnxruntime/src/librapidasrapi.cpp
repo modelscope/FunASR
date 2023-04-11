@@ -30,7 +30,7 @@ extern "C" {
 		int nStep = 0;
 		int nTotal = audio.get_queue_size();
 		while (audio.fetch(buff, len, flag) > 0) {
-			pRecogObj->reset();
+			//pRecogObj->reset();
 			string msg = pRecogObj->forward(buff, len, flag);
 			pResult->msg += msg;
 			nStep++;
@@ -60,7 +60,7 @@ extern "C" {
 		int nStep = 0;
 		int nTotal = audio.get_queue_size();
 		while (audio.fetch(buff, len, flag) > 0) {
-			pRecogObj->reset();
+			//pRecogObj->reset();
 			string msg = pRecogObj->forward(buff, len, flag);
 			pResult->msg += msg;
 			nStep++;
@@ -90,7 +90,7 @@ extern "C" {
 		int nStep = 0;
 		int nTotal = audio.get_queue_size();
 		while (audio.fetch(buff, len, flag) > 0) {
-			pRecogObj->reset();
+			//pRecogObj->reset();
 			string msg = pRecogObj->forward(buff, len, flag);
 			pResult->msg += msg;
 			nStep++;
@@ -120,7 +120,7 @@ extern "C" {
 		RPASR_RECOG_RESULT* pResult = new RPASR_RECOG_RESULT;
 		pResult->snippet_time = audio.get_time_len();
 		while (audio.fetch(buff, len, flag) > 0) {
-			pRecogObj->reset();
+			//pRecogObj->reset();
 			string msg = pRecogObj->forward(buff, len, flag);
 			pResult->msg+= msg;
 			nStep++;

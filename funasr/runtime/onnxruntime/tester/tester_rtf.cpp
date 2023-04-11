@@ -11,7 +11,24 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <thread>
 using namespace std;
+
+void runReg(vector<string> wav_list, RPASR_HANDLE AsrHanlde)
+{
+    for (size_t i = 0; i < wav_list.size(); i++)
+    {
+        RPASR_RESULT Result=RapidAsrRecogFile(AsrHanlde, wav_list[i].c_str(), RASR_NONE, NULL);
+
+        if(Result){
+            string msg = RapidAsrGetResult(Result, 0);
+            printf("Result: %s \n", msg.c_str());
+            RapidAsrFreeResult(Result);
+        }else{
+            cout <<"No return data!";
+        }
+    }
+}
 
 int main(int argc, char *argv[])
 {
@@ -53,46 +70,14 @@ int main(int argc, char *argv[])
         printf("Cannot load ASR Model from: %s, there must be files model.onnx and vocab.txt", argv[1]);
         exit(-1);
     }
-    gettimeofday(&end, NULL);
-    long seconds = (end.tv_sec - start.tv_sec);
-    long modle_init_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
-    printf("Model initialization takes %lfs.\n", (double)modle_init_micros / 1000000);
-
-    // warm up
-    for (size_t i = 0; i < 30; i++)
-    {
-        RPASR_RESULT Result=RapidAsrRecogFile(AsrHanlde, wav_list[0].c_str(), RASR_NONE, NULL);
-    }
-
-    // forward
-    float snippet_time = 0.0f;
-    float total_length = 0.0f;
-    long total_time = 0.0f;
     
-    for (size_t i = 0; i < wav_list.size(); i++)
-    {
-        gettimeofday(&start, NULL);
-        RPASR_RESULT Result=RapidAsrRecogFile(AsrHanlde, wav_list[i].c_str(), RASR_NONE, NULL);
-        gettimeofday(&end, NULL);
-        seconds = (end.tv_sec - start.tv_sec);
-        long taking_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
-        total_time += taking_micros;
+    std::thread t1(runReg, wav_list, AsrHanlde);
+    std::thread t2(runReg, wav_list, AsrHanlde);
 
-        if(Result){
-            string msg = RapidAsrGetResult(Result, 0);
-            printf("Result: %s \n", msg);
+    t1.join();
+    t2.join();
 
-            snippet_time = RapidAsrGetRetSnippetTime(Result);
-            total_length += snippet_time;
-            RapidAsrFreeResult(Result);
-        }else{
-            cout <<"No return data!";
-        }
-    }
-
-    printf("total_time_wav %ld ms.\n", (long)(total_length * 1000));
-    printf("total_time_comput %ld ms.\n", total_time / 1000);
-    printf("total_rtf %05lf .\n", (double)total_time/ (total_length*1000000));
+    //runReg(wav_list, AsrHanlde);
 
     RapidAsrUninit(AsrHanlde);
     return 0;

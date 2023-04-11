@@ -8,7 +8,7 @@ namespace paraformer {
 
     class ModelImp : public Model {
     private:
-        FeatureExtract* fe;
+        //FeatureExtract* fe;
 
         Vocab* vocab;
         vector<float> means_list;
@@ -34,8 +34,6 @@ namespace paraformer {
         vector<string> m_strInputNames, m_strOutputNames;
         vector<const char*> m_szInputNames;
         vector<const char*> m_szOutputNames;
-        //string m_strInputName, m_strInputNameLen;
-        //string m_strOutputName, m_strOutputNameLen;
 
     public:
         ModelImp(const char* path, int nNumThread=0, bool quantize=false);

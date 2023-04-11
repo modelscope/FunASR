@@ -12,7 +12,9 @@ FeatureExtract::~FeatureExtract()
 {
     fftwf_free(fft_input);
     fftwf_free(fft_out);
-    fftwf_destroy_plan(p);
+    if(p){
+        fftwf_destroy_plan(p);
+    }
 }
 
 void FeatureExtract::reset()

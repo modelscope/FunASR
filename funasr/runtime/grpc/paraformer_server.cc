@@ -35,37 +35,25 @@ ASRServicer::ASRServicer(const char* model_path, int thread_num, bool quantize) 
     init_flag = 0;
 }
 
-void ASRServicer::clear_states(const std::string& user) {
-    clear_buffers(user);
-    clear_transcriptions(user);
-}
-
-void ASRServicer::clear_buffers(const std::string& user) {
-    if (client_buffers.count(user)) {
-        client_buffers.erase(user);
-    }
-}
-
-void ASRServicer::clear_transcriptions(const std::string& user) {
-    if (client_transcription.count(user)) {
-        client_transcription.erase(user);
-    }
-}
-
-void ASRServicer::disconnect(const std::string& user) {
-    clear_states(user);
-    std::cout << "Disconnecting user: " << user << std::endl;
-}
-
 grpc::Status ASRServicer::Recognize(
     grpc::ServerContext* context,
     grpc::ServerReaderWriter<Response, Request>* stream) {
 
     Request req;
+    std::unordered_map<std::string, std::string> client_buffers;
+    std::unordered_map<std::string, std::string> client_transcription;
+    
     while (stream->Read(&req)) {
         if (req.isend()) {
             std::cout << "asr end" << std::endl;
-            disconnect(req.user());
+            // disconnect 
+            if (client_buffers.count(req.user())) {
+                client_buffers.erase(req.user());
+            }
+            if (client_transcription.count(req.user())) {
+                client_transcription.erase(req.user());
+            }
+
             Response res;
             res.set_sentence(
                 R"({"success": true, "detail": "asr end"})"
@@ -103,8 +91,14 @@ grpc::Status ASRServicer::Recognize(
                   auto& buf = client_buffers[req.user()];
                   buf.insert(buf.end(), req.audio_data().begin(), req.audio_data().end());
                 }
-                std::string tmp_data = this->client_buffers[req.user()];
-                this->clear_states(req.user());
+                std::string tmp_data = client_buffers[req.user()];
+                // clear_states
+                if (client_buffers.count(req.user())) {
+                    client_buffers.erase(req.user());
+                }
+                if (client_transcription.count(req.user())) {
+                    client_transcription.erase(req.user());
+                }
 
                 Response res;
                 res.set_sentence(
@@ -133,9 +127,6 @@ grpc::Status ASRServicer::Recognize(
                     res.set_user(req.user());
                     res.set_action("finish");
                     res.set_language(req.language());
-
-
-
                     stream->Write(res);
                 }
                 else {
@@ -154,7 +145,6 @@ grpc::Status ASRServicer::Recognize(
                     res.set_user(req.user());
                     res.set_action("finish");
                     res.set_language(req.language());
-
 
                     stream->Write(res);
                 }
