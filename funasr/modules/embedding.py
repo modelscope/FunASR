@@ -414,8 +414,8 @@ class SinusoidalPositionEncoder(torch.nn.Module):
         batch_size, timesteps, input_dim = x.size()
         if cache is not None:
             start_idx = cache["start_idx"]
-            pad_left = cache["left"]
-            pad_right = cache["right"]
+            pad_left = cache["pad_left"]
+            pad_right = cache["pad_right"]
         positions = torch.arange(1, timesteps+start_idx+1)[None, :]
         position_encoding = self.encode(positions, input_dim, x.dtype).to(x.device)
         outputs = x + position_encoding[:, start_idx: start_idx + timesteps]
