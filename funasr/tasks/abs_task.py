@@ -1582,10 +1582,11 @@ class AbsTask(ABC):
     ) -> AbsIterFactory:
         assert check_argument_types()
 
-        if args.frontend_conf is not None and "fs" in args.frontend_conf:
-            dest_sample_rate = args.frontend_conf["fs"]
-        else:
-            dest_sample_rate = 16000
+        if hasattr(args, "frontend_conf"):
+            if args.frontend_conf is not None and "fs" in args.frontend_conf:
+                dest_sample_rate = args.frontend_conf["fs"]
+            else:
+                dest_sample_rate = 16000
 
         dataset = ESPnetDataset(
             iter_options.data_path_and_name_and_type,
