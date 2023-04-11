@@ -15,7 +15,7 @@
 #include <chrono>
 
 #include "paraformer.grpc.pb.h"
-#include "librapidasrapi.h"
+#include "libfunasrapi.h"
 
 
 using grpc::Server;
@@ -35,7 +35,7 @@ typedef struct
 {
     std::string msg;
     float  snippet_time;
-}RPASR_RECOG_RESULT;
+}FUNASR_RECOG_RESULT;
 
 
 class ASRServicer final : public ASR::Service {
@@ -45,6 +45,6 @@ class ASRServicer final : public ASR::Service {
   public:
     ASRServicer(const char* model_path, int thread_num, bool quantize);
     grpc::Status Recognize(grpc::ServerContext* context, grpc::ServerReaderWriter<Response, Request>* stream);
-    RPASR_HANDLE AsrHanlde;
+    FUNASR_HANDLE AsrHanlde;
 	
 };

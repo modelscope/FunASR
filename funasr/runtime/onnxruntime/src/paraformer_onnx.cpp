@@ -18,7 +18,11 @@ ModelImp::ModelImp(const char* path,int nNumThread, bool quantize)
     cmvn_path = pathAppend(path, "am.mvn");
     config_path = pathAppend(path, "config.yaml");
 
-    //fe = new FeatureExtract(3);
+    int fft_size = 512;
+    fft_input = (float *)fftwf_malloc(sizeof(float) * fft_size);
+    fft_out = (fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex) * fft_size);
+    memset(fft_input, 0, sizeof(float) * fft_size);
+    plan = fftwf_plan_dft_r2c_1d(fft_size, fft_input, fft_out, FFTW_ESTIMATE);
 
     //sessionOptions.SetInterOpNumThreads(1);
     sessionOptions.SetIntraOpNumThreads(nNumThread);
@@ -52,8 +56,6 @@ ModelImp::ModelImp(const char* path,int nNumThread, bool quantize)
 
 ModelImp::~ModelImp()
 {
-    //if(fe)
-    //    delete fe;
     if (m_session)
     {
         delete m_session;
@@ -61,11 +63,14 @@ ModelImp::~ModelImp()
     }
     if(vocab)
         delete vocab;
+    fftwf_free(fft_input);
+    fftwf_free(fft_out);
+    fftwf_destroy_plan(plan);
+    fftwf_cleanup();
 }
 
 void ModelImp::reset()
 {
-    //fe->reset();
     printf("Not Imp!!!!!!\n");
 }
 
@@ -163,7 +168,7 @@ string ModelImp::forward(float* din, int len, int flag)
     Tensor<float>* in;
     FeatureExtract* fe = new FeatureExtract(3);
     fe->reset();
-    fe->insert(din, len, flag);
+    fe->insert(plan, din, len, flag);
     fe->fetch(in);
     apply_lfr(in);
     apply_cmvn(in);

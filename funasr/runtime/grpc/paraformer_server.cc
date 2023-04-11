@@ -15,7 +15,6 @@
 #include "paraformer.grpc.pb.h"
 #include "paraformer_server.h"
 
-
 using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
@@ -24,13 +23,12 @@ using grpc::ServerReaderWriter;
 using grpc::ServerWriter;
 using grpc::Status;
 
-
 using paraformer::Request;
 using paraformer::Response;
 using paraformer::ASR;
 
 ASRServicer::ASRServicer(const char* model_path, int thread_num, bool quantize) {
-    AsrHanlde=RapidAsrInit(model_path, thread_num, quantize);
+    AsrHanlde=FunASRInit(model_path, thread_num, quantize);
     std::cout << "ASRServicer init" << std::endl;
     init_flag = 0;
 }
@@ -42,7 +40,7 @@ grpc::Status ASRServicer::Recognize(
     Request req;
     std::unordered_map<std::string, std::string> client_buffers;
     std::unordered_map<std::string, std::string> client_transcription;
-    
+
     while (stream->Read(&req)) {
         if (req.isend()) {
             std::cout << "asr end" << std::endl;
@@ -130,8 +128,8 @@ grpc::Status ASRServicer::Recognize(
                     stream->Write(res);
                 }
                 else {
-                    RPASR_RESULT Result= RapidAsrRecogPCMBuffer(AsrHanlde, tmp_data.c_str(), data_len_int, RASR_NONE, NULL);
-                    std::string asr_result = ((RPASR_RECOG_RESULT*)Result)->msg;
+                    FUNASR_RESULT Result= FunASRRecogPCMBuffer(AsrHanlde, tmp_data.c_str(), data_len_int, RASR_NONE, NULL);
+                    std::string asr_result = ((FUNASR_RECOG_RESULT*)Result)->msg;
 
                     auto end_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
                     std::string delay_str = std::to_string(end_time - begin_time);
@@ -162,7 +160,6 @@ grpc::Status ASRServicer::Recognize(
     }
     return Status::OK;
 }
-
 
 void RunServer(const std::string& port, int thread_num, const char* model_path, bool quantize) {
     std::string server_address;

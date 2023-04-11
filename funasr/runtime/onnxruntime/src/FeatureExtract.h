@@ -15,11 +15,7 @@ class FeatureExtract {
     FeatureQueue fqueue;
     int mode;
 
-    float *fft_input;
-    fftwf_complex *fft_out;
-    fftwf_plan p;
-
-    void fftw_init();
+    //void fftw_init();
     void melspect(float *din, float *dout);
     void global_cmvn(float *din);
 
@@ -27,9 +23,9 @@ class FeatureExtract {
     FeatureExtract(int mode);
     ~FeatureExtract();
     int size();
-    int status();
+    //int status();
     void reset();
-    void insert(float *din, int len, int flag);
+    void insert(fftwf_plan plan, float *din, int len, int flag);
     bool fetch(Tensor<float> *&dout);
 };
 

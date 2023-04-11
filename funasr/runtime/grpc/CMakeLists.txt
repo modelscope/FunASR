@@ -74,7 +74,7 @@ foreach(_target
     "${_target}.cc")
   target_link_libraries(${_target}
     rg_grpc_proto
-    rapidasr
+    funasr
     ${EXTRA_LIBS}
     ${_REFLECTION}
     ${_GRPC_GRPCPP}

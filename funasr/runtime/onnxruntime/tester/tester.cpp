@@ -5,7 +5,7 @@
 #include <win_func.h>
 #endif
 
-#include "librapidasrapi.h"
+#include "libfunasrapi.h"
 
 #include <iostream>
 #include <fstream>
@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
     // is quantize
     bool quantize = false;
     istringstream(argv[3]) >> boolalpha >> quantize;
-    RPASR_HANDLE AsrHanlde=RapidAsrInit(argv[1], nThreadNum, quantize);
+    FUNASR_HANDLE AsrHanlde=FunASRInit(argv[1], nThreadNum, quantize);
 
     if (!AsrHanlde)
     {
@@ -42,17 +42,17 @@ int main(int argc, char *argv[])
     gettimeofday(&start, NULL);
     float snippet_time = 0.0f;
 
-    RPASR_RESULT Result=RapidAsrRecogFile(AsrHanlde, argv[2], RASR_NONE, NULL);
+    FUNASR_RESULT Result=FunASRRecogFile(AsrHanlde, argv[2], RASR_NONE, NULL);
 
     gettimeofday(&end, NULL);
    
     if (Result)
     {
-        string msg = RapidAsrGetResult(Result, 0);
+        string msg = FunASRGetResult(Result, 0);
         setbuf(stdout, NULL);
         printf("Result: %s \n", msg.c_str());
-        snippet_time = RapidAsrGetRetSnippetTime(Result);
-        RapidAsrFreeResult(Result);
+        snippet_time = FunASRGetRetSnippetTime(Result);
+        FunASRFreeResult(Result);
     }
     else
     {
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
     printf("Model inference takes %lfs.\n", (double)taking_micros / 1000000);
     printf("Model inference RTF: %04lf.\n", (double)taking_micros/ (snippet_time*1000000));
 
-    RapidAsrUninit(AsrHanlde);
+    FunASRUninit(AsrHanlde);
 
     return 0;
 }

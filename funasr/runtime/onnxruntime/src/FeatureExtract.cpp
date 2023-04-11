@@ -5,16 +5,10 @@ using namespace std;
 
 FeatureExtract::FeatureExtract(int mode) : mode(mode)
 {
-    fftw_init();
 }
 
 FeatureExtract::~FeatureExtract()
 {
-    fftwf_free(fft_input);
-    fftwf_free(fft_out);
-    if(p){
-        fftwf_destroy_plan(p);
-    }
 }
 
 void FeatureExtract::reset()
@@ -28,23 +22,18 @@ int FeatureExtract::size()
     return fqueue.size();
 }
 
-void FeatureExtract::fftw_init()
+void FeatureExtract::insert(fftwf_plan plan, float *din, int len, int flag)
 {
     int fft_size = 512;
-    fft_input = (float *)fftwf_malloc(sizeof(float) * fft_size);
-    fft_out = (fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex) * fft_size);
+    float* fft_input = (float *)fftwf_malloc(sizeof(float) * fft_size);
+    fftwf_complex* fft_out = (fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex) * fft_size);
     memset(fft_input, 0, sizeof(float) * fft_size);
-    p = fftwf_plan_dft_r2c_1d(fft_size, fft_input, fft_out, FFTW_ESTIMATE);
-}
 
-void FeatureExtract::insert(float *din, int len, int flag)
-{
     const float *window = (const float *)&window_hex;
     if (mode == 3)
         window = (const float *)&window_hamm_hex;
 
     int window_size = 400;
-    int fft_size = 512;
     int window_shift = 160;
 
     speech.load(din, len);
@@ -72,7 +61,7 @@ void FeatureExtract::insert(float *din, int len, int flag)
             pre_val = cur_val;
         }
 
-        fftwf_execute(p);
+        fftwf_execute_dft_r2c(plan, fft_input, fft_out);
 
         melspect((float *)fft_out, tmp_feature);
         int tmp_flag = S_MIDDLE;
@@ -82,6 +71,8 @@ void FeatureExtract::insert(float *din, int len, int flag)
         fqueue.push(tmp_feature, tmp_flag);
     }
     speech.update(i);
+    fftwf_free(fft_input);
+    fftwf_free(fft_out);
 }
 
 bool FeatureExtract::fetch(Tensor<float> *&dout)
@@ -130,7 +121,6 @@ void FeatureExtract::global_cmvn(float *din)
 void FeatureExtract::melspect(float *din, float *dout)
 {
     float fftmag[256];
-//    float tmp;
     const float *melcoe = (const float *)melcoe_hex;
     int i;
     for (i = 0; i < 256; i++) {

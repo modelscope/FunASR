@@ -5,7 +5,7 @@ typedef struct
 {
     std::string msg;
     float  snippet_time;
-}RPASR_RECOG_RESULT;
+}FUNASR_RECOG_RESULT;
 
 
 #ifdef _WIN32

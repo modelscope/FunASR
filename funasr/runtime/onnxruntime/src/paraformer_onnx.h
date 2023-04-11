@@ -8,7 +8,9 @@ namespace paraformer {
 
     class ModelImp : public Model {
     private:
-        //FeatureExtract* fe;
+        float *fft_input;
+        fftwf_complex *fft_out;
+        fftwf_plan plan;
 
         Vocab* vocab;
         vector<float> means_list;
