@@ -8,6 +8,7 @@ namespace paraformer {
 
     class ModelImp : public Model {
     private:
+        int fft_size=512;
         float *fft_input;
         fftwf_complex *fft_out;
         fftwf_plan plan;

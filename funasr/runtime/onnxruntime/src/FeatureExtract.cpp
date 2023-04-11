@@ -24,7 +24,6 @@ int FeatureExtract::size()
 
 void FeatureExtract::insert(fftwf_plan plan, float *din, int len, int flag)
 {
-    int fft_size = 512;
     float* fft_input = (float *)fftwf_malloc(sizeof(float) * fft_size);
     fftwf_complex* fft_out = (fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex) * fft_size);
     memset(fft_input, 0, sizeof(float) * fft_size);
@@ -33,18 +32,15 @@ void FeatureExtract::insert(fftwf_plan plan, float *din, int len, int flag)
     if (mode == 3)
         window = (const float *)&window_hamm_hex;
 
-    int window_size = 400;
-    int window_shift = 160;
-
     speech.load(din, len);
     int i, j;
     float tmp_feature[80];
     if (mode == 0 || mode == 2 || mode == 3) {
-        int ll = (speech.size() - 400) / 160 + 1;
+        int ll = (speech.size() - window_size) / window_shift + 1;
         fqueue.reinit(ll);
     }
 
-    for (i = 0; i <= speech.size() - 400; i = i + window_shift) {
+    for (i = 0; i <= speech.size() - window_size; i = i + window_shift) {
         float tmp_mean = 0;
         for (j = 0; j < window_size; j++) {
             tmp_mean += speech[i + j];

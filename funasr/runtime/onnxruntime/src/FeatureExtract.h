@@ -14,6 +14,9 @@ class FeatureExtract {
     SpeechWrap speech;
     FeatureQueue fqueue;
     int mode;
+    int fft_size = 512;
+    int window_size = 400;
+    int window_shift = 160;
 
     //void fftw_init();
     void melspect(float *din, float *dout);

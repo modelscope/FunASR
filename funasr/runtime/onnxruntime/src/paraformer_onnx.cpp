@@ -18,7 +18,6 @@ ModelImp::ModelImp(const char* path,int nNumThread, bool quantize)
     cmvn_path = pathAppend(path, "am.mvn");
     config_path = pathAppend(path, "config.yaml");
 
-    int fft_size = 512;
     fft_input = (float *)fftwf_malloc(sizeof(float) * fft_size);
     fft_out = (fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex) * fft_size);
     memset(fft_input, 0, sizeof(float) * fft_size);
