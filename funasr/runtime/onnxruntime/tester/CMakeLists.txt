@@ -8,7 +8,7 @@ if(WIN32)
     endif()
 endif()
 
-set(EXTRA_LIBS rapidasr)
+set(EXTRA_LIBS funasr)
 
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
