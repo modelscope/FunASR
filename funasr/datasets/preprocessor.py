@@ -786,6 +786,7 @@ class PuncTrainTokenizerCommonPreprocessor(CommonPreprocessor):
     ) -> Dict[str, np.ndarray]:
         for i in range(self.num_tokenizer):
             text_name = self.text_name[i]
+            #import pdb; pdb.set_trace()
             if text_name in data and self.tokenizer[i] is not None:
                 text = data[text_name]
                 text = self.text_cleaner(text)
@@ -800,7 +801,7 @@ class PuncTrainTokenizerCommonPreprocessor(CommonPreprocessor):
                     data[self.vad_name] = np.array([vad], dtype=np.int64)
                 text_ints = self.token_id_converter[i].tokens2ids(tokens)
                 data[text_name] = np.array(text_ints, dtype=np.int64)
-
+        return data
 
 def split_to_mini_sentence(words: list, word_limit: int = 20):
     assert word_limit > 1
