@@ -46,7 +46,7 @@ using namespace std;
 #include <Audio.h>
 #include "Model.h"
 #include "paraformer_onnx.h"
-#include "librapidasrapi.h"
+#include "libfunasrapi.h"
 
 
 using namespace paraformer;
