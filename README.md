@@ -13,6 +13,7 @@
 | [**Papers**](https://github.com/alibaba-damo-academy/FunASR#citations)
 | [**Runtime**](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime)
 | [**Model Zoo**](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary)
+| [**M2MET2.0 challenge**](https://alibaba-damo-academy.github.io/FunASR/m2met2/index.html)
 | [**Contact**](#contact)
 
 
