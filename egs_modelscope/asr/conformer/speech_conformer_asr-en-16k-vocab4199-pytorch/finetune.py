@@ -1,11 +1,8 @@
 import os
-
 from modelscope.metainfo import Trainers
 from modelscope.trainers import build_trainer
-
 from funasr.datasets.ms_dataset import MsDataset
 from funasr.utils.modelscope_param import modelscope_args
-
 
 def modelscope_finetune(params):
     if not os.path.exists(params.output_dir):
