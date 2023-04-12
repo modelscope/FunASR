@@ -6,8 +6,8 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import numpy as np
 import torch
 
-from funasr.models_transducer.decoder.abs_decoder import AbsDecoder
-from funasr.models_transducer.joint_network import JointNetwork
+from funasr.models.rnnt_decoder.abs_decoder import AbsDecoder
+from funasr.models.joint_network import JointNetwork
 
 
 @dataclass

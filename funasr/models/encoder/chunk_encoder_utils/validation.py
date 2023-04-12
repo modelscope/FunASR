@@ -2,7 +2,7 @@
 
 from typing import Any, Dict, List, Tuple
 
-from funasr.models_transducer.utils import sub_factor_to_params
+from funasr.modules.nets_utils import sub_factor_to_params
 
 
 def validate_block_arguments(

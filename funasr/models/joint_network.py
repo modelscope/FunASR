@@ -2,7 +2,7 @@
 
 import torch
 
-from funasr.models_transducer.activation import get_activation
+from funasr.modules.activation import get_activation
 
 
 class JointNetwork(torch.nn.Module):

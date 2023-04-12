@@ -16,11 +16,11 @@ import torch
 from packaging.version import parse as V
 from typeguard import check_argument_types, check_return_type
 
-from funasr.models_transducer.beam_search_transducer import (
+from funasr.modules.beam_search.beam_search_transducer import (
     BeamSearchTransducer,
     Hypothesis,
 )
-from funasr.models_transducer.utils import TooShortUttError
+from funasr.modules.nets_utils import TooShortUttError
 from funasr.fileio.datadir_writer import DatadirWriter
 from funasr.tasks.asr_transducer import ASRTransducerTask
 from funasr.tasks.lm import LMTask
@@ -500,7 +500,6 @@ def inference(
 
             _bs = len(next(iter(batch.values())))
             assert len(keys) == _bs, f"{len(keys)} != {_bs}"
-<<<<<<< HEAD
             batch = {k: v[0] for k, v in batch.items() if not k.endswith("_lengths")}
             assert len(batch.keys()) == 1
 
@@ -541,59 +540,6 @@ def inference(
 
                 if text is not None:
                     ibest_writer["text"][key] = text
-=======
-            # batch = {k: v for k, v in batch.items() if not k.endswith("_lengths")}
-
-            logging.info("decoding, utt_id: {}".format(keys))
-            # N-best list of (text, token, token_int, hyp_object)
-
-            time_beg = time.time()
-            results = speech2text(cache=cache, **batch)
-            if len(results) < 1:
-                hyp = Hypothesis(score=0.0, scores={}, states={}, yseq=[])
-                results = [[" ", ["sil"], [2], hyp, 10, 6]] * nbest
-            time_end = time.time()
-            forward_time = time_end - time_beg
-            lfr_factor = results[0][-1]
-            length = results[0][-2]
-            forward_time_total += forward_time
-            length_total += length
-            rtf_cur = "decoding, feature length: {}, forward_time: {:.4f}, rtf: {:.4f}".format(length, forward_time, 100 * forward_time / (length * lfr_factor))
-            logging.info(rtf_cur)
-
-            for batch_id in range(_bs):
-                result = [results[batch_id][:-2]]
-
-                key = keys[batch_id]
-                for n, (text, token, token_int, hyp) in zip(range(1, nbest + 1), result):
-                    # Create a directory: outdir/{n}best_recog
-                    if writer is not None:
-                        ibest_writer = writer[f"{n}best_recog"]
-
-                        # Write the result to each file
-                        ibest_writer["token"][key] = " ".join(token)
-                        # ibest_writer["token_int"][key] = " ".join(map(str, token_int))
-                        ibest_writer["score"][key] = str(hyp.score)
-                        ibest_writer["rtf"][key] = rtf_cur
-
-                    if text is not None:
-                        text_postprocessed, word_lists = postprocess_utils.sentence_postprocess(token)
-                        item = {'key': key, 'value': text_postprocessed}
-                        asr_result_list.append(item)
-                        finish_count += 1
-                        # asr_utils.print_progress(finish_count / file_count)
-                        if writer is not None:
-                            ibest_writer["text"][key] = " ".join(word_lists)
-
-                    logging.info("decoding, utt: {}, predictions: {}".format(key, text))
-        rtf_avg = "decoding, feature length total: {}, forward_time total: {:.4f}, rtf avg: {:.4f}".format(length_total, forward_time_total, 100 * forward_time_total / (length_total * lfr_factor))
-        logging.info(rtf_avg)
-        if writer is not None:
-            ibest_writer["rtf"]["rtf_avf"] = rtf_avg
-        return asr_result_list
-
-    return _forward
->>>>>>> main
 
 
 def get_parser():

@@ -2,22 +2,22 @@
 
 from typing import Any, Dict, List, Optional, Union
 
-from funasr.models_transducer.activation import get_activation
-from funasr.models_transducer.encoder.blocks.branchformer import Branchformer
-from funasr.models_transducer.encoder.blocks.conformer import Conformer
-from funasr.models_transducer.encoder.blocks.conv1d import Conv1d
-from funasr.models_transducer.encoder.blocks.conv_input import ConvInput
-from funasr.models_transducer.encoder.blocks.linear_input import LinearInput
-from funasr.models_transducer.encoder.modules.attention import (  # noqa: H301
+from funasr.modules.activation import get_activation
+from funasr.models.encoder.chunk_encoder_blocks.branchformer import Branchformer
+from funasr.models.encoder.chunk_encoder_blocks.conformer import Conformer
+from funasr.models.encoder.chunk_encoder_blocks.conv1d import Conv1d
+from funasr.models.encoder.chunk_encoder_blocks.conv_input import ConvInput
+from funasr.models.encoder.chunk_encoder_blocks.linear_input import LinearInput
+from funasr.models.encoder.chunk_encoder_modules.attention import (  # noqa: H301
     RelPositionMultiHeadedAttention,
 )
-from funasr.models_transducer.encoder.modules.convolution import (  # noqa: H301
+from funasr.models.encoder.chunk_encoder_modules.convolution import (  # noqa: H301
     ConformerConvolution,
     ConvolutionalSpatialGatingUnit,
 )
-from funasr.models_transducer.encoder.modules.multi_blocks import MultiBlocks
-from funasr.models_transducer.encoder.modules.normalization import get_normalization
-from funasr.models_transducer.encoder.modules.positional_encoding import (  # noqa: H301
+from funasr.models.encoder.chunk_encoder_modules.multi_blocks import MultiBlocks
+from funasr.models.encoder.chunk_encoder_modules.normalization import get_normalization
+from funasr.models.encoder.chunk_encoder_modules.positional_encoding import (  # noqa: H301
     RelPositionalEncoding,
 )
 from funasr.modules.positionwise_feed_forward import (

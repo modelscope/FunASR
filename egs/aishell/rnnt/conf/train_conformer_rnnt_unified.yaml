@@ -1,13 +1,13 @@
 encoder_conf:
     main_conf:
       pos_wise_act_type: swish
-      pos_enc_dropout_rate: 0.3
+      pos_enc_dropout_rate: 0.5
       conv_mod_act_type: swish
       time_reduction_factor: 2
       unified_model_training: true
       default_chunk_size: 16
       jitter_range: 4
-      left_chunk_size: 1
+      left_chunk_size: 0
     input_conf:
       block_type: conv2d
       conv_size: 512
@@ -18,9 +18,9 @@ encoder_conf:
       linear_size: 2048
       hidden_size: 512
       heads: 8
-      dropout_rate: 0.3
-      pos_wise_dropout_rate: 0.3
-      att_dropout_rate: 0.3
+      dropout_rate: 0.5
+      pos_wise_dropout_rate: 0.5
+      att_dropout_rate: 0.5
       conv_mod_kernel_size: 15
       num_blocks: 12    
 
@@ -29,8 +29,8 @@ decoder: rnn
 decoder_conf:
     embed_size: 512
     hidden_size: 512
-    embed_dropout_rate: 0.2
-    dropout_rate: 0.1
+    embed_dropout_rate: 0.5
+    dropout_rate: 0.5
 
 joint_network_conf:
     joint_space_size: 512
@@ -41,14 +41,14 @@ model_conf:
 
 # minibatch related
 use_amp: true
-batch_type: numel
-batch_bins: 1600000
+batch_type: unsorted
+batch_size: 16
 num_workers: 16
 
 # optimization related
 accum_grad: 1
 grad_clip: 5
-max_epoch: 80
+max_epoch: 200
 val_scheduler_criterion:
     - valid
     - loss
@@ -56,11 +56,11 @@ best_model_criterion:
 -   - valid
     - cer_transducer_chunk
     - min
-keep_nbest_models: 5
+keep_nbest_models: 10
 
 optim: adam
 optim_conf:
-   lr: 0.0003
+   lr: 0.001
 scheduler: warmuplr
 scheduler_conf:
    warmup_steps: 25000
@@ -75,10 +75,12 @@ specaug_conf:
     apply_freq_mask: true
     freq_mask_width_range:
     - 0
-    - 30
+    - 40
     num_freq_mask: 2
     apply_time_mask: true
     time_mask_width_range:
     - 0
-    - 40
-    num_time_mask: 2
+    - 50
+    num_time_mask: 5
+
+log_interval: 50

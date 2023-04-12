@@ -10,20 +10,15 @@ from typeguard import check_argument_types
 
 from funasr.models.frontend.abs_frontend import AbsFrontend
 from funasr.models.specaug.abs_specaug import AbsSpecAug
-from funasr.models_transducer.decoder.abs_decoder import AbsDecoder
-from funasr.models_transducer.encoder.encoder import Encoder
-from funasr.models_transducer.joint_network import JointNetwork
-from funasr.models_transducer.utils import get_transducer_task_io
+from funasr.models.rnnt_decoder.abs_decoder import AbsDecoder
+from funasr.models.decoder.abs_decoder import AbsDecoder as AbsAttDecoder
+from funasr.models.encoder.chunk_encoder import ChunkEncoder as Encoder
+from funasr.models.joint_network import JointNetwork
+from funasr.modules.nets_utils import get_transducer_task_io
 from funasr.layers.abs_normalize import AbsNormalize
 from funasr.torch_utils.device_funcs import force_gatherable
 from funasr.train.abs_espnet_model import AbsESPnetModel
-from funasr.modules.add_sos_eos import add_sos_eos
-from funasr.models.decoder.abs_decoder import AbsDecoder as AbsAttDecoder
-from funasr.modules.nets_utils import th_accuracy
-from funasr.losses.label_smoothing_loss import (  # noqa: H301
-    LabelSmoothingLoss,
-)
-from funasr.models_transducer.error_calculator import ErrorCalculator
+
 if V(torch.__version__) >= V("1.6.0"):
     from torch.cuda.amp import autocast
 else:
@@ -33,7 +28,7 @@ else:
         yield
 
 
-class ESPnetASRUnifiedTransducerModel(AbsESPnetModel):
+class TransducerModel(AbsESPnetModel):
     """ESPnet2ASRTransducerModel module definition.
 
     Args:
@@ -74,7 +69,6 @@ class ESPnetASRUnifiedTransducerModel(AbsESPnetModel):
         transducer_weight: float = 1.0,
         fastemit_lambda: float = 0.0,
         auxiliary_ctc_weight: float = 0.0,
-        auxiliary_att_weight: float = 0.0,
         auxiliary_ctc_dropout_rate: float = 0.0,
         auxiliary_lm_loss_weight: float = 0.0,
         auxiliary_lm_loss_smoothing: float = 0.0,
@@ -83,11 +77,7 @@ class ESPnetASRUnifiedTransducerModel(AbsESPnetModel):
         sym_blank: str = "<blank>",
         report_cer: bool = True,
         report_wer: bool = True,
-        sym_sos: str = "<sos/eos>",
-        sym_eos: str = "<sos/eos>",
         extract_feats_in_collect_stats: bool = True,
-        lsm_weight: float = 0.0,
-        length_normalized_loss: bool = False,
     ) -> None:
         """Construct an ESPnetASRTransducerModel object."""
         super().__init__()
@@ -96,16 +86,6 @@ class ESPnetASRUnifiedTransducerModel(AbsESPnetModel):
 
         # The following labels ID are reserved: 0 (blank) and vocab_size - 1 (sos/eos)
         self.blank_id = 0
-
-        if sym_sos in token_list:
-            self.sos = token_list.index(sym_sos)
-        else:
-            self.sos = vocab_size - 1
-        if sym_eos in token_list:
-            self.eos = token_list.index(sym_eos)
-        else:
-            self.eos = vocab_size - 1
-
         self.vocab_size = vocab_size
         self.ignore_id = ignore_id
         self.token_list = token_list.copy()
@@ -125,22 +105,11 @@ class ESPnetASRUnifiedTransducerModel(AbsESPnetModel):
         self.error_calculator = None
 
         self.use_auxiliary_ctc = auxiliary_ctc_weight > 0
-        self.use_auxiliary_att = auxiliary_att_weight > 0
         self.use_auxiliary_lm_loss = auxiliary_lm_loss_weight > 0
 
         if self.use_auxiliary_ctc:
             self.ctc_lin = torch.nn.Linear(encoder.output_size, vocab_size)
             self.ctc_dropout_rate = auxiliary_ctc_dropout_rate
-
-        if self.use_auxiliary_att:
-            self.att_decoder = att_decoder
-
-            self.criterion_att = LabelSmoothingLoss(
-                size=vocab_size,
-                padding_idx=ignore_id,
-                smoothing=lsm_weight,
-                normalize_length=length_normalized_loss,
-            )
 
         if self.use_auxiliary_lm_loss:
             self.lm_lin = torch.nn.Linear(decoder.output_size, vocab_size)
@@ -150,7 +119,6 @@ class ESPnetASRUnifiedTransducerModel(AbsESPnetModel):
         self.fastemit_lambda = fastemit_lambda
 
         self.auxiliary_ctc_weight = auxiliary_ctc_weight
-        self.auxiliary_att_weight = auxiliary_att_weight
         self.auxiliary_lm_loss_weight = auxiliary_lm_loss_weight
 
         self.report_cer = report_cer
@@ -191,19 +159,9 @@ class ESPnetASRUnifiedTransducerModel(AbsESPnetModel):
 
         batch_size = speech.shape[0]
         text = text[:, : text_lengths.max()]
-        #print(speech.shape)
+
         # 1. Encoder
-        encoder_out, encoder_out_chunk, encoder_out_lens = self.encode(speech, speech_lengths)
-
-        loss_att, loss_att_chunk = 0.0, 0.0
-
-        if self.use_auxiliary_att:
-            loss_att, _ = self._calc_att_loss(
-                encoder_out, encoder_out_lens, text, text_lengths
-            )
-            loss_att_chunk, _ = self._calc_att_loss(
-                encoder_out_chunk, encoder_out_lens, text, text_lengths
-            )
+        encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
 
         # 2. Transducer-related I/O preparation
         decoder_in, target, t_len, u_len = get_transducer_task_io(
@@ -211,7 +169,7 @@ class ESPnetASRUnifiedTransducerModel(AbsESPnetModel):
             encoder_out_lens,
             ignore_id=self.ignore_id,
         )
-        
+
         # 3. Decoder
         self.decoder.set_device(encoder_out.device)
         decoder_out = self.decoder(decoder_in, u_len)
@@ -220,29 +178,17 @@ class ESPnetASRUnifiedTransducerModel(AbsESPnetModel):
         joint_out = self.joint_network(
             encoder_out.unsqueeze(2), decoder_out.unsqueeze(1)
         )
-        
-        joint_out_chunk = self.joint_network(
-            encoder_out_chunk.unsqueeze(2), decoder_out.unsqueeze(1)
-        )
 
         # 5. Losses
-        loss_trans_utt, cer_trans, wer_trans = self._calc_transducer_loss(
+        loss_trans, cer_trans, wer_trans = self._calc_transducer_loss(
             encoder_out,
             joint_out,
             target,
             t_len,
             u_len,
         )
-        
-        loss_trans_chunk, cer_trans_chunk, wer_trans_chunk = self._calc_transducer_loss(
-            encoder_out_chunk,
-            joint_out_chunk,
-            target,
-            t_len,
-            u_len,
-        )
 
-        loss_ctc, loss_ctc_chunk, loss_lm = 0.0, 0.0, 0.0
+        loss_ctc, loss_lm = 0.0, 0.0
 
         if self.use_auxiliary_ctc:
             loss_ctc = self._calc_ctc_loss(
@@ -251,40 +197,23 @@ class ESPnetASRUnifiedTransducerModel(AbsESPnetModel):
                 t_len,
                 u_len,
             )
-            loss_ctc_chunk = self._calc_ctc_loss(
-                encoder_out_chunk,
-                target,
-                t_len,
-                u_len,
-            )
 
         if self.use_auxiliary_lm_loss:
             loss_lm = self._calc_lm_loss(decoder_out, target)
 
-        loss_trans = loss_trans_utt + loss_trans_chunk
-        loss_ctc = loss_ctc + loss_ctc_chunk 
-        loss_ctc = loss_att + loss_att_chunk
-
         loss = (
             self.transducer_weight * loss_trans
             + self.auxiliary_ctc_weight * loss_ctc
-            + self.auxiliary_att_weight * loss_att
             + self.auxiliary_lm_loss_weight * loss_lm
         )
 
         stats = dict(
             loss=loss.detach(),
-            loss_transducer=loss_trans_utt.detach(),
-            loss_transducer_chunk=loss_trans_chunk.detach(),
+            loss_transducer=loss_trans.detach(),
             aux_ctc_loss=loss_ctc.detach() if loss_ctc > 0.0 else None,
-            aux_ctc_loss_chunk=loss_ctc_chunk.detach() if loss_ctc_chunk > 0.0 else None,
-            aux_att_loss=loss_att.detach() if loss_att > 0.0 else None,
-            aux_att_loss_chunk=loss_att_chunk.detach() if loss_att_chunk > 0.0 else None,
             aux_lm_loss=loss_lm.detach() if loss_lm > 0.0 else None,
             cer_transducer=cer_trans,
             wer_transducer=wer_trans,
-            cer_transducer_chunk=cer_trans_chunk,
-            wer_transducer_chunk=wer_trans_chunk,
         )
 
         # force_gatherable: to-device and to-tensor if scalar for DataParallel
@@ -357,7 +286,7 @@ class ESPnetASRUnifiedTransducerModel(AbsESPnetModel):
                 feats, feats_lengths = self.normalize(feats, feats_lengths)
 
         # 4. Forward encoder
-        encoder_out, encoder_out_chunk, encoder_out_lens = self.encoder(feats, feats_lengths)
+        encoder_out, encoder_out_lens = self.encoder(feats, feats_lengths)
 
         assert encoder_out.size(0) == speech.size(0), (
             encoder_out.size(),
@@ -368,7 +297,7 @@ class ESPnetASRUnifiedTransducerModel(AbsESPnetModel):
             encoder_out_lens.max(),
         )
 
-        return encoder_out, encoder_out_chunk, encoder_out_lens
+        return encoder_out, encoder_out_lens
 
     def _extract_feats(
         self, speech: torch.Tensor, speech_lengths: torch.Tensor
@@ -457,6 +386,8 @@ class ESPnetASRUnifiedTransducerModel(AbsESPnetModel):
 
         if not self.training and (self.report_cer or self.report_wer):
             if self.error_calculator is None:
+                from espnet2.asr_transducer.error_calculator import ErrorCalculator
+
                 self.error_calculator = ErrorCalculator(
                     self.decoder,
                     self.joint_network,
@@ -468,6 +399,7 @@ class ESPnetASRUnifiedTransducerModel(AbsESPnetModel):
                 )
 
             cer_transducer, wer_transducer = self.error_calculator(encoder_out, target)
+
             return loss_transducer, cer_transducer, wer_transducer
 
         return loss_transducer, None, None
@@ -550,38 +482,3 @@ class ESPnetASRUnifiedTransducerModel(AbsESPnetModel):
         )
 
         return loss_lm
-
-    def _calc_att_loss(
-        self,
-        encoder_out: torch.Tensor,
-        encoder_out_lens: torch.Tensor,
-        ys_pad: torch.Tensor,
-        ys_pad_lens: torch.Tensor,
-    ):
-        if hasattr(self, "lang_token_id") and self.lang_token_id is not None:
-            ys_pad = torch.cat(
-                [
-                    self.lang_token_id.repeat(ys_pad.size(0), 1).to(ys_pad.device),
-                    ys_pad,
-                ],
-                dim=1,
-            )
-            ys_pad_lens += 1
-
-        ys_in_pad, ys_out_pad = add_sos_eos(ys_pad, self.sos, self.eos, self.ignore_id)
-        ys_in_lens = ys_pad_lens + 1
-
-        # 1. Forward decoder
-        decoder_out, _ = self.att_decoder(
-            encoder_out, encoder_out_lens, ys_in_pad, ys_in_lens
-        )
-
-        # 2. Compute attention loss
-        loss_att = self.criterion_att(decoder_out, ys_out_pad)
-        acc_att = th_accuracy(
-            decoder_out.view(-1, self.vocab_size),
-            ys_out_pad,
-            ignore_label=self.ignore_id,
-        )
-
-        return loss_att, acc_att

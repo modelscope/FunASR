@@ -5,7 +5,7 @@ from typing import Optional, Tuple, Union
 import torch
 import math
 
-from funasr.models_transducer.utils import sub_factor_to_params, pad_to_len
+from funasr.modules.nets_utils import sub_factor_to_params, pad_to_len
 
 
 class ConvInput(torch.nn.Module):
