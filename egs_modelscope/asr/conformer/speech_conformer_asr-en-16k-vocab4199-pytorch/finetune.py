@@ -23,7 +23,6 @@ def modelscope_finetune(params):
     trainer = build_trainer(Trainers.speech_asr_trainer, default_args=kwargs)
     trainer.train()
 
-
 if __name__ == '__main__':
     params = modelscope_args(model="damo/speech_conformer_asr-en-16k-vocab4199-pytorch",
                              data_path="./data")
