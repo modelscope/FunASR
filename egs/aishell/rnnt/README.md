@@ -2,9 +2,10 @@
 # Streaming RNN-T Result
 
 ## Training Config
+- 8 gpu(Tesla V100)
 - Feature info: using 80 dims fbank, global cmvn, speed perturb(0.9, 1.0, 1.1), specaugment
-- Train config: conf/train_conformer_rnnt_unified
-- chunk config: chunk size 16, 1 left chunk
+- Train config: conf/train_conformer_rnnt_unified.yaml
+- chunk config: chunk size 16, full left chunk
 - LM config: LM was not used
 - Model size: 90M
 
@@ -13,5 +14,5 @@
 
 |   testset   | CER(%)  |
 |:-----------:|:-------:|
-|     dev     |  5.89   |
-|    test     |  6.76   |
+|     dev     |  5.53   |
+|    test     |  6.24   |
