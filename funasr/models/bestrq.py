@@ -1,8 +1,3 @@
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
-
 from contextlib import contextmanager
 from distutils.version import LooseVersion
 from typing import Dict
@@ -158,10 +153,6 @@ class BestRQPretrainModel(AbsESPnetModel):
         # for data-paralel
         xs = xs[:, : xs_lens.max()]
 
-        # if have the frontend
-        if self.frontend is not None:
-            xs, xs_lens = self.frontend(xs, xs_lens)
-
         if self.specaug is not None and self.training:
             xs, xs_lens = self.specaug(xs, xs_lens)
 
@@ -227,40 +218,6 @@ class BestRQPretrainModel(AbsESPnetModel):
     ) -> Dict[str, torch.Tensor]:
         feats, feats_lengths = self._extract_feats(speech, speech_lengths)
         return {"feats": feats, "feats_lengths": feats_lengths}
-
-    def encode(
-            self,
-            speech: torch.Tensor,
-            speech_lengths: torch.Tensor,
-    ):
-        """Frontend + Encoder.
-
-        Args:
-            speech: (Batch, Length, ...)
-            speech_lengths: (Batch, )
-        """
-        with autocast(False):
-            # 1. Extract feats
-            feats, feats_lengths = self._extract_feats(speech, speech_lengths)
-
-            # 2. Data augmentation
-            if self.specaug is not None and self.training:
-                feats, feats_lengths = self.specaug(feats, feats_lengths)
-
-            # 3. Normalization for feature: e.g. Global-CMVN, Utterance-CMVN
-            if self.normalize is not None:
-                feats, feats_lengths = self.normalize(feats, feats_lengths)
-
-        # Pre-encoder, e.g. used for raw input data
-        if self.preencoder is not None:
-            feats, feats_lengths = self.preencoder(feats, feats_lengths)
-
-        # 4. Forward encoder
-        if min(speech_lengths) == max(speech_lengths):  # for clipping, set speech_lengths as None
-            speech_lengths = None
-        encoder_out = self.encoder(feats, speech_lengths, mask=True, features_only=False)
-
-        return encoder_out
 
     def _extract_feats(
             self, speech: torch.Tensor, speech_lengths: torch.Tensor
