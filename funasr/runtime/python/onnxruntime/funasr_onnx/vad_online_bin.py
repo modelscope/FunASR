@@ -11,7 +11,7 @@ import numpy as np
 from .utils.utils import (ONNXRuntimeError,
                           OrtInferSession, get_logger,
                           read_yaml)
-from .utils.frontend import WavFrontend
+from .utils.frontend import WavFrontendOnline
 from .utils.e2e_vad import E2EVadModel
 
 logging = get_logger()
@@ -36,7 +36,7 @@ class Fsmn_vad():
 		cmvn_file = os.path.join(model_dir, 'vad.mvn')
 		config = read_yaml(config_file)
 		
-		self.frontend = WavFrontend(
+		self.frontend = WavFrontendOnline(
 			cmvn_file=cmvn_file,
 			**config['frontend_conf']
 		)
@@ -58,50 +58,29 @@ class Fsmn_vad():
 		return in_cache
 		
 	
-	def __call__(self, audio_in: Union[str, np.ndarray, List[str]], **kwargs) -> List:
-		waveform_list = self.load_data(audio_in, self.frontend.opts.frame_opts.samp_freq)
-		waveform_nums = len(waveform_list)
-		is_final = kwargs.get('kwargs', False)
-
-		segments = [[]] * self.batch_size
-		for beg_idx in range(0, waveform_nums, self.batch_size):
-			
-			end_idx = min(waveform_nums, beg_idx + self.batch_size)
-			waveform = waveform_list[beg_idx:end_idx]
-			feats, feats_len = self.extract_feat(waveform)
-			waveform = np.array(waveform)
-			param_dict = kwargs.get('param_dict', dict())
+	def __call__(self, audio_in: np.ndarray, **kwargs) -> List:
+		waveforms = np.expand_dims(audio_in, axis=0)
+		
+		param_dict = kwargs.get('param_dict', dict())
+		is_final = param_dict.get('is_final', False)
+		feats, feats_len = self.extract_feat(waveforms, is_final)
+		segments = []
+		if feats.size != 0:
 			in_cache = param_dict.get('in_cache', list())
 			in_cache = self.prepare_cache(in_cache)
 			try:
-				t_offset = 0
-				step = int(min(feats_len.max(), 6000))
-				for t_offset in range(0, int(feats_len), min(step, feats_len - t_offset)):
-					if t_offset + step >= feats_len - 1:
-						step = feats_len - t_offset
-						is_final = True
-					else:
-						is_final = False
-					feats_package = feats[:, t_offset:int(t_offset + step), :]
-					waveform_package = waveform[:, t_offset * 160:min(waveform.shape[-1], (int(t_offset + step) - 1) * 160 + 400)]
+				inputs = [feats]
+				inputs.extend(in_cache)
+				scores, out_caches = self.infer(inputs)
+				param_dict['in_cache'] = out_caches
+				waveforms = self.frontend.get_waveforms()
+				segments = self.vad_scorer(scores, waveforms, is_final=is_final, max_end_sil=self.max_end_sil, online=True)
 
-					inputs = [feats_package]
-					# inputs = [feats]
-					inputs.extend(in_cache)
-					scores, out_caches = self.infer(inputs)
-					in_cache = out_caches
-					segments_part = self.vad_scorer(scores, waveform_package, is_final=is_final, max_end_sil=self.max_end_sil, online=False)
-					# segments = self.vad_scorer(scores, waveform[0][None, :], is_final=is_final, max_end_sil=self.max_end_sil)
 
-					if segments_part:
-						for batch_num in range(0, self.batch_size):
-							segments[batch_num] += segments_part[batch_num]
-				
 			except ONNXRuntimeError:
-				# logging.warning(traceback.format_exc())
+				logging.warning(traceback.format_exc())
 				logging.warning("input wav is silence or noise")
-				segments = ''
-	
+				segments = []
 		return segments
 
 	def load_data(self,
@@ -123,19 +102,20 @@ class Fsmn_vad():
 			f'The type of {wav_content} is not in [str, np.ndarray, list]')
 	
 	def extract_feat(self,
-	                 waveform_list: List[np.ndarray]
+	                 waveforms: np.ndarray, is_final: bool = False
 	                 ) -> Tuple[np.ndarray, np.ndarray]:
-		feats, feats_len = [], []
-		for waveform in waveform_list:
-			speech, _ = self.frontend.fbank(waveform)
-			feat, feat_len = self.frontend.lfr_cmvn(speech)
-			feats.append(feat)
-			feats_len.append(feat_len)
-		
-		feats = self.pad_feats(feats, np.max(feats_len))
-		feats_len = np.array(feats_len).astype(np.int32)
-		return feats, feats_len
-	
+		waveforms_lens = np.zeros(waveforms.shape[0]).astype(np.int32)
+		for idx, waveform in enumerate(waveforms):
+			waveforms_lens[idx] = waveform.shape[-1]
+
+		feats, feats_len = self.frontend.extract_fbank(waveforms, waveforms_lens, is_final)
+		# feats.append(feat)
+		# feats_len.append(feat_len)
+
+		# feats = self.pad_feats(feats, np.max(feats_len))
+		# feats_len = np.array(feats_len).astype(np.int32)
+		return feats.astype(np.float32), feats_len.astype(np.int32)
+
 	@staticmethod
 	def pad_feats(feats: List[np.ndarray], max_feat_len: int) -> np.ndarray:
 		def pad_feat(feat: np.ndarray, cur_len: int) -> np.ndarray:
