@@ -22,7 +22,7 @@ if __name__ == '__main__':
     sample_offset = 0
     
     step = 160 * 10
-    param_dict = {'in_cache': dict()}
+    param_dict = {'in_cache': dict(), 'max_end_sil': 800}
     for sample_offset in range(0, speech_length, min(step, speech_length - sample_offset)):
         if sample_offset + step >= speech_length - 1:
             step = speech_length - sample_offset

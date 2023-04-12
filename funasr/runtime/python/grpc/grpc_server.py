@@ -24,7 +24,7 @@ class ASRServicer(paraformer_pb2_grpc.ASRServicer):
             self.inference_16k_pipeline = pipeline(task=Tasks.auto_speech_recognition, model=model, vad_model=vad_model, punc_model=punc_model)
         elif self.backend == "onnxruntime":
             try:
-                from rapid_paraformer.paraformer_onnx import Paraformer
+                from funasr_onnx import Paraformer
             except ImportError:
                 raise ImportError(f"Please install onnxruntime environment")
             self.inference_16k_pipeline = Paraformer(model_dir=onnx_dir)
@@ -109,7 +109,7 @@ class ASRServicer(paraformer_pb2_grpc.ASRServicer):
                             else:
                                 asr_result = ""
                         elif self.backend == "onnxruntime":
-                            from rapid_paraformer.utils.frontend import load_bytes
+                            from funasr_onnx.utils.frontend import load_bytes
                             array = load_bytes(tmp_data)
                             asr_result = self.inference_16k_pipeline(array)[0]
                         end_time = int(round(time.time() * 1000))

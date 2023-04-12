@@ -8,12 +8,19 @@ namespace paraformer {
 
     class ModelImp : public Model {
     private:
-        FeatureExtract* fe;
+        int fft_size=512;
+        float *fft_input;
+        fftwf_complex *fft_out;
+        fftwf_plan plan;
 
         Vocab* vocab;
+        vector<float> means_list;
+        vector<float> vars_list;
+        const float scale = 22.6274169979695;
 
         void apply_lfr(Tensor<float>*& din);
         void apply_cmvn(Tensor<float>* din);
+        void load_cmvn(const char *filename);
 
         string greedy_search( float* in, int nLen);
 
@@ -30,8 +37,6 @@ namespace paraformer {
         vector<string> m_strInputNames, m_strOutputNames;
         vector<const char*> m_szInputNames;
         vector<const char*> m_szOutputNames;
-        //string m_strInputName, m_strInputNameLen;
-        //string m_strOutputName, m_strOutputNameLen;
 
     public:
         ModelImp(const char* path, int nNumThread=0, bool quantize=false);

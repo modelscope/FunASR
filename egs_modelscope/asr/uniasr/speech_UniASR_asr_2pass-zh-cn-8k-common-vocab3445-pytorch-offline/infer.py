@@ -23,8 +23,7 @@ def modelscope_infer_core(output_dir, split_dir, njob, idx):
         batch_size=1
     )
     audio_in = os.path.join(split_dir, "wav.{}.scp".format(idx))
-    inference_pipline(audio_in=audio_in, param_dict={"decoding_model": "offline"})
-
+    inference_pipline(audio_in=audio_in)
 
 def modelscope_infer(params):
     # prepare for multi-GPU decoding
@@ -75,7 +74,7 @@ def modelscope_infer(params):
     # If text exists, compute CER
     text_in = os.path.join(params["data_dir"], "text")
     if os.path.exists(text_in):
-        text_proc_file = os.path.join(best_recog_path, "token")
+        text_proc_file = os.path.join(best_recog_path, "text")
         compute_wer(text_in, text_proc_file, os.path.join(best_recog_path, "text.cer"))
 
 

@@ -412,12 +412,6 @@ class ASRTask(AbsTask):
             default="13_15",
             help="The range of noise decibel level.",
         )
-        parser.add_argument(
-            "--batch_interval",
-            type=int,
-            default=10000,
-            help="The batch interval for saving model.",
-        )
 
         for class_choices in cls.class_choices_list:
             # Append --<name> and --<name>_conf.

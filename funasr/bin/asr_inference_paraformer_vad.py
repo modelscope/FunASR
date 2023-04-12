@@ -338,7 +338,7 @@ def inference_modelscope(
                     ibest_writer["token"][key] = " ".join(token)
                     ibest_writer["token_int"][key] = " ".join(map(str, token_int))
                     ibest_writer["vad"][key] = "{}".format(vadsegments)
-                    ibest_writer["text"][key] = text_postprocessed
+                    ibest_writer["text"][key] = " ".join(word_lists)
                     ibest_writer["text_with_punc"][key] = text_postprocessed_punc
                     if time_stamp_postprocessed is not None:
                         ibest_writer["time_stamp"][key] = "{}".format(time_stamp_postprocessed)
