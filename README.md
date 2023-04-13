@@ -13,10 +13,13 @@
 | [**Papers**](https://github.com/alibaba-damo-academy/FunASR#citations)
 | [**Runtime**](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime)
 | [**Model Zoo**](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary)
-| [**M2MET2.0 challenge**](https://alibaba-damo-academy.github.io/FunASR/m2met2/index.html)
 | [**Contact**](#contact)
 
+[**M2MET2.0 Guidence_CN**](https://alibaba-damo-academy.github.io/FunASR/m2met2_cn/index.html)
+| [**M2MET2.0 Guidence_EN**](https://alibaba-damo-academy.github.io/FunASR/m2met2/index.html)
 
+## Multi-Channel Multi-Party Meeting Transcription 2.0 (M2MET2.0) Challenge
+We are pleased to announce that the M2MeT2.0 challenge will be held in the near future. The baseline system is conducted on FunASR and provided as a receipe of AliMeeting corpus. For more details you can see the guidence of M2MET2.0 ([CN](https://alibaba-damo-academy.github.io/FunASR/m2met2_cn/index.html)/[EN](https://alibaba-damo-academy.github.io/FunASR/m2met2/index.html)).
 ## What's new: 
 
 For the release notes, please ref to [news](https://github.com/alibaba-damo-academy/FunASR/releases)
