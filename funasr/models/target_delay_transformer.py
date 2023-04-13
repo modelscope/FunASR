@@ -13,7 +13,11 @@ from funasr.train.abs_model import AbsPunctuation
 
 
 class TargetDelayTransformer(AbsPunctuation):
-
+    """
+    Author: Speech Lab, Alibaba Group, China
+    CT-Transformer: Controllable time-delay transformer for real-time punctuation prediction and disfluency detection
+    https://arxiv.org/pdf/2003.01309.pdf
+    """
     def __init__(
         self,
         vocab_size: int,

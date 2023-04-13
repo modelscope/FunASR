@@ -9,7 +9,11 @@ from funasr.models.encoder.sanm_encoder import SANMVadEncoder
 from funasr.export.models.encoder.sanm_encoder import SANMVadEncoder as SANMVadEncoder_export
 
 class CT_Transformer(nn.Module):
-
+    """
+    Author: Speech Lab, Alibaba Group, China
+    CT-Transformer: Controllable time-delay transformer for real-time punctuation prediction and disfluency detection
+    https://arxiv.org/pdf/2003.01309.pdf
+    """
     def __init__(
             self,
             model,
@@ -76,7 +80,11 @@ class CT_Transformer(nn.Module):
 
 
 class CT_Transformer_VadRealtime(nn.Module):
-
+    """
+    Author: Speech Lab, Alibaba Group, China
+    CT-Transformer: Controllable time-delay transformer for real-time punctuation prediction and disfluency detection
+    https://arxiv.org/pdf/2003.01309.pdf
+    """
     def __init__(
         self,
         model,
