@@ -460,8 +460,8 @@ class E2EVadModel(nn.Module):
             segment_batch = []
             if len(self.output_data_buf) > 0:
                 for i in range(self.output_data_buf_offset, len(self.output_data_buf)):
-                    if not self.output_data_buf[i].contain_seg_start_point or not self.output_data_buf[
-                        i].contain_seg_end_point:
+                    if not is_final and (not self.output_data_buf[i].contain_seg_start_point or not self.output_data_buf[
+                        i].contain_seg_end_point):
                         continue
                     segment = [self.output_data_buf[i].start_ms, self.output_data_buf[i].end_ms]
                     segment_batch.append(segment)
