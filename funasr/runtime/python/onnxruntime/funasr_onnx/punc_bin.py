@@ -159,7 +159,7 @@ class CT_Transformer_VadRealtime(CT_Transformer):
             data = {
                 "input": mini_sentence_id[None,:],
                 "text_lengths": np.array([text_length], dtype='int32'),
-                "vad_mask": self.vad_mask(text_length, len(cache) - 1)[None, None, :, :].astype(np.float32),
+                "vad_mask": self.vad_mask(text_length, len(cache))[None, None, :, :].astype(np.float32),
                 "sub_masks": np.tril(np.ones((text_length, text_length), dtype=np.float32))[None, None, :, :].astype(np.float32)
             }
             try:
