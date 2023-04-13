@@ -1,6 +1,6 @@
 # Baseline
 ## Overview
-We provide an end-to-end sa-asr baseline conducted on [FunASR](https://github.com/alibaba-damo-academy/FunASR) as a receipe. The model architecture is shown in Figure 3. The SpeakerEncoder is initialized with a pre-trained [speaker verification model](https://modelscope.cn/models/damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch/summary) from [ModelScope](https://modelscope.cn/home). This speaker verification model is also be used to extract the speaker embedding in the speaker profile. 
+We provide an end-to-end sa-asr baseline conducted on [FunASR](https://github.com/alibaba-damo-academy/FunASR) as a receipe. The model architecture is shown in Figure 2. The SpeakerEncoder is initialized with a pre-trained [speaker verification model](https://modelscope.cn/models/damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch/summary) from [ModelScope](https://modelscope.cn/home). This speaker verification model is also be used to extract the speaker embedding in the speaker profile. 
 
 ![model archietecture](images/sa_asr_arch.png)
 
