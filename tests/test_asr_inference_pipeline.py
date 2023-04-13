@@ -43,6 +43,7 @@ class TestData2vecInferencePipelines(unittest.TestCase):
         rec_result = inference_pipeline(
             audio_in='https://modelscope.oss-cn-beijing.aliyuncs.com/test/audios/asr_example.wav')
         logger.info("asr inference result: {0}".format(rec_result))
+        assert rec_result["text"] == "每一天都要快乐喔"
 
     def test_paraformer(self):
         inference_pipeline = pipeline(
@@ -51,6 +52,7 @@ class TestData2vecInferencePipelines(unittest.TestCase):
         rec_result = inference_pipeline(
             audio_in='https://modelscope.oss-cn-beijing.aliyuncs.com/test/audios/asr_example.wav')
         logger.info("asr inference result: {0}".format(rec_result))
+        assert rec_result["text"] == "每一天都要快乐喔"
 
 
 class TestMfccaInferencePipelines(unittest.TestCase):
