@@ -30,10 +30,17 @@ For the release notes, please ref to [news](https://github.com/alibaba-damo-acad
 ## Installation
 
 ``` sh
-pip install -U modelscope
 git clone https://github.com/alibaba/FunASR.git && cd FunASR
 pip install -e ./
 ```
+If you want to use the pretrained models in ModelScope, you should install the modelscope:
+
+```shell
+pip install -U modelscope
+# For the users in China, you could install with
+# pip install -U modelscope -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html
+```
+
 For more details, please ref to [installation](https://github.com/alibaba-damo-academy/FunASR/wiki)
 
 ## Usage
