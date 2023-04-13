@@ -25,7 +25,7 @@ jobs:
         with:
           docs-folder: "docs_m2met2/"
           pre-build-command: "pip install jinja2 sphinx_rtd_theme myst-parser"
-            - uses: ammaraskar/sphinx-action@master
+      - uses: ammaraskar/sphinx-action@master
         with:
           docs-folder: "docs_m2met2_cn/"
           pre-build-command: "pip install jinja2 sphinx_rtd_theme myst-parser"
