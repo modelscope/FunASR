@@ -470,8 +470,8 @@ class E2EVadModel():
                             end_ms = -1
                             self.next_seg = False
                     else:
-                        if not self.output_data_buf[i].contain_seg_start_point or not self.output_data_buf[
-                            i].contain_seg_end_point:
+                        if not is_final and (not self.output_data_buf[i].contain_seg_start_point or not self.output_data_buf[
+                            i].contain_seg_end_point):
                             continue
                         start_ms = self.output_data_buf[i].start_ms
                         end_ms = self.output_data_buf[i].end_ms
