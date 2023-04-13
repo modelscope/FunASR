@@ -17,7 +17,7 @@ Building on the success of the M2MeT challenge, we are pleased to announce the M
 
 ## Guidelines
 
-Potential participants from both academia and industry should send an email to **m2met.alimeeting@gmail.com** to register to the challenge before or by May 5 with the following requirements:
+Potential participants from both academia and industry should send an email to **m2met.alimeeting@gmail.com** to register to the challenge before or by May 5, 2023 with the following requirements:
 
 
 - Email subject: [ASRU2023 M2MeT2.0 Challenge Registration] – Team Name - Participating 

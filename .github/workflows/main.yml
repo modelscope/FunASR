@@ -24,7 +24,7 @@ jobs:
       - uses: ammaraskar/sphinx-action@master
         with:
           docs-folder: "docs_m2met2/"
-          pre-build-command: "pip install jinja2 sphinx_rtd_theme myst_parser"
+          pre-build-command: "pip install jinja2 sphinx_rtd_theme myst-parser"
 
       - name: deploy copy
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev_wjm' || github.ref == 'refs/heads/dev_lyh'
