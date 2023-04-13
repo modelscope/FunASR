@@ -13,6 +13,11 @@ logging = get_logger()
 
 
 class CT_Transformer():
+    """
+    Author: Speech Lab, Alibaba Group, China
+    CT-Transformer: Controllable time-delay transformer for real-time punctuation prediction and disfluency detection
+    https://arxiv.org/pdf/2003.01309.pdf
+    """
     def __init__(self, model_dir: Union[str, Path] = None,
                  batch_size: int = 1,
                  device_id: Union[str, int] = "-1",
@@ -119,6 +124,11 @@ class CT_Transformer():
 
 
 class CT_Transformer_VadRealtime(CT_Transformer):
+    """
+    Author: Speech Lab, Alibaba Group, China
+    CT-Transformer: Controllable time-delay transformer for real-time punctuation prediction and disfluency detection
+    https://arxiv.org/pdf/2003.01309.pdf
+    """
     def __init__(self, model_dir: Union[str, Path] = None,
                  batch_size: int = 1,
                  device_id: Union[str, int] = "-1",
