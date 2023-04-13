@@ -8,16 +8,16 @@ Building on the success of the M2MeT challenge, we are pleased to announce the M
 
 ## Timeline(AOE Time)
 
-- **$May~5^{th}, 2023:$** Registration deadline, the due date for participants to join the Challenge.
-- **$June~9^{th}, 2023:$** Test data release.
-- **$June~13^{rd}, 2023:$** Final submission deadline.
-- **$June~19^{th}, 2023:$** Evaluation result and ranking release.
-- **$July~3^{rd}, 2023:$** Deadline for paper submission.
-- **$July~10^{th}, 2023:$** Deadline for final paper submission.
+- $ May~5^{th}, 2023: $ Registration deadline, the due date for participants to join the Challenge.
+- $ June~9^{th}, 2023: $ Test data release.
+- $ June~13^{rd}, 2023: $ Final submission deadline.
+- $ June~19^{th}, 2023: $ Evaluation result and ranking release.
+- $ July~3^{rd}, 2023: $ Deadline for paper submission.
+- $ July~10^{th}, 2023: $ Deadline for final paper submission.
 
 ## Guidelines
 
-Potential participants from both academia and industry should send an email to **m2met.alimeeting@gmail.com** to register to the challenge before or by April 21 with the following requirements:
+Potential participants from both academia and industry should send an email to **m2met.alimeeting@gmail.com** to register to the challenge before or by May 5 with the following requirements:
 
 
 - Email subject: [ASRU2023 M2MeT2.0 Challenge Registration] – Team Name - Participating 

@@ -12,24 +12,22 @@ author = 'Speech Lab, Alibaba Group; Audio, Speech and Language Processing Group
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
-
 extensions = [
-    'nbsphinx',
+    'myst_parser',
     'sphinx_rtd_theme',
-    "sphinx.ext.autodoc",
-    'sphinx.ext.napoleon',
-    'sphinx.ext.viewcode',
-    "sphinx.ext.mathjax",
-    "sphinx.ext.todo",
-    "sphinx_markdown_tables",
-    "sphinx.ext.githubpages",
-    'recommonmark',
 ]
-source_suffix = [".rst", ".md"]
+
+myst_enable_extensions = [
+    "colon_fence",
+    "deflist",
+    "dollarmath",
+]
+
+myst_heading_anchors = 2
+myst_highlight_code_blocks=True
+myst_update_mathjax=False
 templates_path = ['_templates']
-# exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
-exclude_patterns = []
-pygments_style = "sphinx"
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 
 # -- Options for HTML output -------------------------------------------------

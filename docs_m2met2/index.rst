@@ -19,3 +19,10 @@ We provide a detailed introduction of the dataset, rules, evaluation methods, an
    ./Baseline
    ./Rules
    ./Organizers
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

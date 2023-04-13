@@ -1,9 +1,11 @@
-# Speaker-Attributed ASR (Main Track)
-## Overview
+# Track_setting and evaluation 
+## Speaker-Attributed ASR (Main Track)
 The speaker-attribute ASR task presents the challenge of transcribing the speech of each individual speaker from overlapped speech and assigning a speaker label to the transcription. In this track, the AliMeeting, Aishell4, and Cn-Celeb datasets can be used as constrained data sources. The AliMeeting dataset, which is used in the M2MeT challenge, contains Train, Eval, and Test sets that can be utilized during both training and evaluation. Additionally, a new Test-2023 set containing about 10 hours of meeting data will be released soon (according to the timeline) for challenge scoring and ranking. It is important to note that the organizers will not provide the headset near-field audio, transcriptions as well as oracle timestamps. Instead of providing oracle timestamps of each speaker, segments containing multiple speakers are provided on the Test-2023 set. These segments can be obtained using a simple vad model.
 ## Evaluation metric
 The accuracy of a speaker-attributed ASR system is evaluated using the concatenated minimum permutation character error rate (cpCER) metric. The calculation of cpCER involves three steps. Firstly, the reference and hypothesis transcriptions from each speaker in a session are concatenated in chronological order. Secondly, the character error rate (CER) is calculated between the concatenated reference and hypothesis transcriptions, and this process is repeated for all possible speaker permutations. Finally, the permutation with the lowest CER is selected as the cpCER for that session. TThe CER is obtained by dividing the total number of insertions (Ins), substitutions (Sub), and deletions(Del) of characters required to transform the ASR output into the reference transcript by the total number of characters in the reference transcript. Specifically, CER is calculated by:
+
 $$\text{CER} = \frac {\mathcal N_{\text{Ins}} + \mathcal N_{\text{Sub}} + \mathcal N_{\text{Del}} }{\mathcal N_{\text{Total}}} \times 100\%,$$
+
 where $\mathcal N_{\text{Ins}}$, $\mathcal N_{\text{Sub}}$, $\mathcal N_{\text{Del}}$ are the character number of the three errors, and $\mathcal N_{\text{Total}}$ is the total number of characters.
 ## Sub-track arrangement
 ### Sub-track I (Fixed Training Condition):
