@@ -14,7 +14,7 @@ from funasr.models.preencoder.abs_preencoder import AbsPreEncoder
 from funasr.models.specaug.abs_specaug import AbsSpecAug
 from funasr.torch_utils.device_funcs import force_gatherable
 from funasr.train.abs_espnet_model import AbsESPnetModel
-from funasr.utils.mask import make_pad_mask
+from funasr.utils.mask import make_pad_mask, compute_mask_indices
 
 if LooseVersion(torch.__version__) >= LooseVersion("1.6.0"):
     from torch.cuda.amp import autocast
@@ -43,7 +43,6 @@ class BestRQPretrainModel(AbsESPnetModel):
             mask_prob: float = 0.01,
             mask_length: int = 10,
             min_masks: int = 2,
-            layer_norm_epsilon=1e-5,
     ):
         assert check_argument_types()
 
@@ -55,6 +54,8 @@ class BestRQPretrainModel(AbsESPnetModel):
         self.preencoder = preencoder
         self.encoder = encoder
         self.num_updates = 0
+
+        layer_norm_epsilon = 1e-5
 
         #mask related
         assert mask_prob > 0.0
