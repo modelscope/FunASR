@@ -32,7 +32,7 @@ else:
 
 class TimestampPredictor(AbsESPnetModel):
     """
-    Author: Speech Lab, Alibaba Group, China
+    Author: Speech Lab of DAMO Academy, Alibaba Group
     """
 
     def __init__(

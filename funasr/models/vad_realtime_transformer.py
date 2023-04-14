@@ -12,7 +12,7 @@ from funasr.train.abs_model import AbsPunctuation
 
 class VadRealtimeTransformer(AbsPunctuation):
     """
-    Author: Speech Lab, Alibaba Group, China
+    Author: Speech Lab of DAMO Academy, Alibaba Group
     CT-Transformer: Controllable time-delay transformer for real-time punctuation prediction and disfluency detection
     https://arxiv.org/pdf/2003.01309.pdf
     """

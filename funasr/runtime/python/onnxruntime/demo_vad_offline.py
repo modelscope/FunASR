@@ -1,5 +1,5 @@
 import soundfile
-from funasr_onnx.vad_bin import Fsmn_vad
+from funasr_onnx import Fsmn_vad
 
 
 model_dir = "/mnt/ailsa.zly/tfbase/espnet_work/FunASR_dev_zly/export/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch"

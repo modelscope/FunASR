@@ -117,7 +117,7 @@ class EncoderLayerSANM(nn.Module):
 
 class SANMEncoder(AbsEncoder):
     """
-    author: Speech Lab, Alibaba Group, China
+    Author: Speech Lab of DAMO Academy, Alibaba Group
     San-m: Memory equipped self-attention for end-to-end speech recognition
     https://arxiv.org/abs/2006.01713
 
@@ -549,7 +549,7 @@ class SANMEncoder(AbsEncoder):
 
 class SANMEncoderChunkOpt(AbsEncoder):
     """
-    author: Speech Lab, Alibaba Group, China
+    Author: Speech Lab of DAMO Academy, Alibaba Group
     SCAMA: Streaming chunk-aware multihead attention for online end-to-end speech recognition
     https://arxiv.org/abs/2006.01713
 
@@ -962,7 +962,7 @@ class SANMEncoderChunkOpt(AbsEncoder):
 
 class SANMVadEncoder(AbsEncoder):
     """
-    author: Speech Lab, Alibaba Group, China
+    Author: Speech Lab of DAMO Academy, Alibaba Group
 
     """
 
