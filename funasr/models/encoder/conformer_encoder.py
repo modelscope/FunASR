@@ -30,7 +30,6 @@ from funasr.modules.embedding import (
     StreamingRelPositionalEncoding,
 )
 from funasr.modules.layer_norm import LayerNorm
-from funasr.modules.normalization import get_normalization
 from funasr.modules.multi_layer_conv import Conv1dLinear
 from funasr.modules.multi_layer_conv import MultiLayeredConv1d
 from funasr.modules.nets_utils import get_activation
@@ -940,7 +939,6 @@ class ConformerChunkEncoder(torch.nn.Module):
         default_chunk_size: int = 16,
         jitter_range: int = 4,
         subsampling_factor: int = 1,
-        **activation_parameters,
     ) -> None:
         """Construct an Encoder object."""
         super().__init__()
@@ -961,7 +959,7 @@ class ConformerChunkEncoder(torch.nn.Module):
         )
 
         activation = get_activation(
-            activation_type, **activation_parameters
+            activation_type
        )        
 
         pos_wise_args = (
@@ -991,9 +989,6 @@ class ConformerChunkEncoder(torch.nn.Module):
             simplified_att_score,
         )
 
-        norm_class, norm_args = get_normalization(
-            norm_type,
-        )
 
         fn_modules = []
         for _ in range(num_blocks):
@@ -1003,8 +998,6 @@ class ConformerChunkEncoder(torch.nn.Module):
                 PositionwiseFeedForward(*pos_wise_args),
                 PositionwiseFeedForward(*pos_wise_args),
                 CausalConvolution(*conv_mod_args),
-                norm_class=norm_class,
-                norm_args=norm_args,
                 dropout_rate=dropout_rate,
             )
             fn_modules.append(module)        
@@ -1012,8 +1005,6 @@ class ConformerChunkEncoder(torch.nn.Module):
         self.encoders = MultiBlocks(
             [fn() for fn in fn_modules],
             output_size,
-            norm_class=norm_class,
-            norm_args=norm_args,
         )
 
         self.output_size = output_size

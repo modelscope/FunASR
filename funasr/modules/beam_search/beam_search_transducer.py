@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import numpy as np
 import torch
 
-from funasr.models.rnnt_decoder.abs_decoder import AbsDecoder
+from funasr.models.rnnt_predictor.abs_decoder import AbsDecoder
 from funasr.models.joint_network import JointNetwork
 
 

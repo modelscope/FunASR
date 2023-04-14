@@ -21,9 +21,9 @@ from funasr.models.decoder.transformer_decoder import (
     LightweightConvolutionTransformerDecoder,
     TransformerDecoder,
 )
-from funasr.models.rnnt_decoder.abs_decoder import AbsDecoder
-from funasr.models.rnnt_decoder.rnn_decoder import RNNDecoder
-from funasr.models.rnnt_decoder.stateless_decoder import StatelessDecoder
+from funasr.models.rnnt_predictor.abs_decoder import AbsDecoder
+from funasr.models.rnnt_predictor.rnn_decoder import RNNDecoder
+from funasr.models.rnnt_predictor.stateless_decoder import StatelessDecoder
 from funasr.models.encoder.conformer_encoder import ConformerChunkEncoder
 from funasr.models.e2e_transducer import TransducerModel
 from funasr.models.e2e_transducer_unified import UnifiedTransducerModel

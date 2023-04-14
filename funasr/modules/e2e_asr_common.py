@@ -18,7 +18,7 @@ import six
 import torch
 
 from funasr.modules.beam_search.beam_search_transducer import BeamSearchTransducer
-from funasr.models.rnnt_decoder.abs_decoder import AbsDecoder
+from funasr.models.rnnt_predictor.abs_decoder import AbsDecoder
 from funasr.models.joint_network import JointNetwork
 
 def end_detect(ended_hyps, i, M=3, D_end=np.log(1 * np.exp(-10))):

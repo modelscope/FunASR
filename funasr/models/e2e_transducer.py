@@ -10,7 +10,7 @@ from typeguard import check_argument_types
 
 from funasr.models.frontend.abs_frontend import AbsFrontend
 from funasr.models.specaug.abs_specaug import AbsSpecAug
-from funasr.models.rnnt_decoder.abs_decoder import AbsDecoder
+from funasr.models.rnnt_predictor.abs_decoder import AbsDecoder
 from funasr.models.decoder.abs_decoder import AbsDecoder as AbsAttDecoder
 from funasr.models.encoder.conformer_encoder import ConformerChunkEncoder as Encoder
 from funasr.models.joint_network import JointNetwork
