@@ -23,7 +23,7 @@
     
     install from pip
     ```shell
-    pip install --upgrade funasr_torch -i https://pypi.Python.org/simple
+    pip install -U funasr_torch -i https://pypi.Python.org/simple
     ```
     or install from source code
 
