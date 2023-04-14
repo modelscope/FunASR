@@ -29,8 +29,7 @@ or install from source code
 ```shell
 git clone https://github.com/alibaba/FunASR.git && cd FunASR
 cd funasr/runtime/python/onnxruntime
-python setup.py build
-python setup.py install
+pip install -e ./
 ```
 
 3. Run the demo.
