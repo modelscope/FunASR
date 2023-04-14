@@ -36,7 +36,11 @@ import pdb
 import random
 import math
 class MFCCA(AbsESPnetModel):
-    """CTC-attention hybrid Encoder-Decoder model"""
+    """
+    Author: Audio, Speech and Language Processing Group (ASLP@NPU), Northwestern Polytechnical University
+    MFCCA:Multi-Frame Cross-Channel attention for multi-speaker ASR in Multi-party meeting scenario
+    https://arxiv.org/abs/2210.05265
+    """
 
     def __init__(
         self,
