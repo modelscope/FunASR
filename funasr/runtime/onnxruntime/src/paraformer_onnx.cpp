@@ -70,7 +70,6 @@ ModelImp::~ModelImp()
 
 void ModelImp::reset()
 {
-    printf("Not Imp!!!!!!\n");
 }
 
 void ModelImp::apply_lfr(Tensor<float>*& din)
