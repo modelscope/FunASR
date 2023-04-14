@@ -17,8 +17,9 @@ extern "C" {
 		if (!pRecogObj)
 			return nullptr;
 
+		int32_t sampling_rate = -1;
 		Audio audio(1);
-		if (!audio.loadwav(szBuf, nLen))
+		if (!audio.loadwav(szBuf, nLen, &sampling_rate))
 			return nullptr;
 		//audio.split();
 
@@ -41,14 +42,14 @@ extern "C" {
 		return pResult;
 	}
 
-	_FUNASRAPI FUNASR_RESULT FunASRRecogPCMBuffer(FUNASR_HANDLE handle, const char* szBuf, int nLen, FUNASR_MODE Mode, QM_CALLBACK fnCallback)
+	_FUNASRAPI FUNASR_RESULT FunASRRecogPCMBuffer(FUNASR_HANDLE handle, const char* szBuf, int nLen, int sampling_rate, FUNASR_MODE Mode, QM_CALLBACK fnCallback)
 	{
 		Model* pRecogObj = (Model*)handle;
 		if (!pRecogObj)
 			return nullptr;
 
 		Audio audio(1);
-		if (!audio.loadpcmwav(szBuf, nLen))
+		if (!audio.loadpcmwav(szBuf, nLen, &sampling_rate))
 			return nullptr;
 		//audio.split();
 
@@ -71,14 +72,14 @@ extern "C" {
 		return pResult;
 	}
 
-	_FUNASRAPI FUNASR_RESULT FunASRRecogPCMFile(FUNASR_HANDLE handle, const char* szFileName, FUNASR_MODE Mode, QM_CALLBACK fnCallback)
+	_FUNASRAPI FUNASR_RESULT FunASRRecogPCMFile(FUNASR_HANDLE handle, const char* szFileName, int sampling_rate, FUNASR_MODE Mode, QM_CALLBACK fnCallback)
 	{
 		Model* pRecogObj = (Model*)handle;
 		if (!pRecogObj)
 			return nullptr;
 
 		Audio audio(1);
-		if (!audio.loadpcmwav(szFileName))
+		if (!audio.loadpcmwav(szFileName, &sampling_rate))
 			return nullptr;
 		//audio.split();
 
@@ -106,9 +107,10 @@ extern "C" {
 		Model* pRecogObj = (Model*)handle;
 		if (!pRecogObj)
 			return nullptr;
-
+		
+		int32_t sampling_rate = -1;
 		Audio audio(1);
-		if(!audio.loadwav(szWavfile))
+		if(!audio.loadwav(szWavfile, &sampling_rate))
 			return nullptr;
 		//audio.split();
 

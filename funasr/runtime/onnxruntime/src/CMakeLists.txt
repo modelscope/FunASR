@@ -1,5 +1,6 @@
 
 file(GLOB files1 "*.cpp")
+file(GLOB files2 "*.cc")
 file(GLOB files4 "paraformer/*.cpp")
 
 set(files ${files1} ${files2} ${files3} ${files4})
