@@ -24,7 +24,7 @@ from funasr.models.decoder.transformer_decoder import (
 from funasr.models.rnnt_decoder.abs_decoder import AbsDecoder
 from funasr.models.rnnt_decoder.rnn_decoder import RNNDecoder
 from funasr.models.rnnt_decoder.stateless_decoder import StatelessDecoder
-from funasr.models.encoder.chunk_encoder import ChunkEncoder as Encoder
+from funasr.models.encoder.conformer_encoder import ConformerChunkEncoder
 from funasr.models.e2e_transducer import TransducerModel
 from funasr.models.e2e_transducer_unified import UnifiedTransducerModel
 from funasr.models.joint_network import JointNetwork
@@ -72,9 +72,9 @@ normalize_choices = ClassChoices(
 encoder_choices = ClassChoices(
         "encoder",
         classes=dict(
-                encoder=Encoder,
+                chunk_conformer=ConformerChunkEncoder,
         ),
-        default="encoder",
+        default="chunk_conformer",
 )
 
 decoder_choices = ClassChoices(
