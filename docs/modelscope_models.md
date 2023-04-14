@@ -51,8 +51,8 @@ Here we provided several pretrained models on different datasets. The details of
 
 |                                                         Model Name                                                         |        Training Data         | Parameters | Vocab Size| Offline/Online | Notes |
 |:--------------------------------------------------------------------------------------------------------------------------:|:----------------------------:|:----------:|:----------:|:--------------:|:------|
-|      [CT-Transformer](https://modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch/summary)      | Alibaba Speech Data (?hours) |    70M     |    272727     |    Offline     |       |
-| [CT-Transformer](https://modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727/summary)      | Alibaba Speech Data (?hours) |    70M     |    272727     |     Online     |       |
+|      [CT-Transformer](https://modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch/summary)      | Alibaba Text Data |    70M     |    272727     |    Offline     |   offline punctuation model    |
+| [CT-Transformer](https://modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727/summary)      | Alibaba Text Data |    70M     |    272727     |     Online     |  online punctuation model     |
 
 ### Language Models
 
