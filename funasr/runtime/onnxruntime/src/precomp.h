@@ -44,6 +44,7 @@ using namespace std;
 #include "FeatureQueue.h"
 #include "SpeechWrap.h"
 #include <Audio.h>
+#include "resample.h"
 #include "Model.h"
 #include "paraformer_onnx.h"
 #include "libfunasrapi.h"
