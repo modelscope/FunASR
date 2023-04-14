@@ -44,8 +44,8 @@ Here we provided several pretrained models on different datasets. The details of
 
 |                                           Model Name                                           |        Training Data         | Parameters | Sampling Rate | Notes |
 |:----------------------------------------------------------------------------------------------:|:----------------------------:|:----------:|:-------------:|:------|
-| [FSMN-VAD](https://modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary) | Alibaba Speech Data (?hours) |    0.4M    |     16000     |       |
-|   [FSMN-VAD](https://modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-8k-common/summary)        | Alibaba Speech Data (?hours) |    0.4M    |     8000      |       |
+| [FSMN-VAD](https://modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary) | Alibaba Speech Data (5000hours) |    0.4M    |     16000     |       |
+|   [FSMN-VAD](https://modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-8k-common/summary)        | Alibaba Speech Data (5000hours) |    0.4M    |     8000      |       |
 
 ### Punctuation Restoration Models
 
