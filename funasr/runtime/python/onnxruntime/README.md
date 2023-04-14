@@ -1,10 +1,6 @@
 ## Using funasr with ONNXRuntime
 
 
-### Introduction
-- Model comes from [speech_paraformer](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary).
-
-
 ### Steps:
 1. Export the model.
    - Command: (`Tips`: torch >= 1.11.0 is required.)
