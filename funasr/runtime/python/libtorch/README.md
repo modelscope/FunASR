@@ -23,7 +23,10 @@
     
     install from pip
     ```shell
-    pip install -U funasr_torch -i https://pypi.Python.org/simple
+    pip install -U funasr_torch
+    # For the users in China, you could install with the command:
+    # pip install -U funasr_torch -i https://mirror.sjtu.edu.cn/pypi/web/simple
+
     ```
     or install from source code
 
@@ -31,6 +34,9 @@
     git clone https://github.com/alibaba/FunASR.git && cd FunASR
     cd funasr/runtime/python/libtorch
     pip install -e ./
+    # For the users in China, you could install with the command:
+    # pip install -e ./ -i https://mirror.sjtu.edu.cn/pypi/web/simple
+
     ```
 
 3. Run the demo.

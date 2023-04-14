@@ -30,7 +30,9 @@ For the release notes, please ref to [news](https://github.com/alibaba-damo-acad
 
 Install from pip
 ```shell
-pip install -U funasr -i https://pypi.Python.org/simple
+pip install -U funasr
+# For the users in China, you could install with the command:
+# pip install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
 
 Or install from source code
@@ -39,6 +41,9 @@ Or install from source code
 ``` sh
 git clone https://github.com/alibaba/FunASR.git && cd FunASR
 pip install -e ./
+# For the users in China, you could install with the command:
+# pip install -e ./ -i https://mirror.sjtu.edu.cn/pypi/web/simple
+
 ```
 If you want to use the pretrained models in ModelScope, you should install the modelscope:
 
@@ -50,8 +55,10 @@ pip install -U modelscope
 
 For more details, please ref to [installation](https://github.com/alibaba-damo-academy/FunASR/wiki)
 
-## Usage
-For users who are new to FunASR and ModelScope, please refer to FunASR Docs([CN](https://alibaba-damo-academy.github.io/FunASR/cn/index.html) / [EN](https://alibaba-damo-academy.github.io/FunASR/en/index.html))
+[//]: # ()
+[//]: # (## Usage)
+
+[//]: # (For users who are new to FunASR and ModelScope, please refer to FunASR Docs&#40;[CN]&#40;https://alibaba-damo-academy.github.io/FunASR/cn/index.html&#41; / [EN]&#40;https://alibaba-damo-academy.github.io/FunASR/en/index.html&#41;&#41;)
 
 ## Contact
 
