@@ -234,6 +234,7 @@ class CifPredictorV2(nn.Module):
         last_fire_place = len_time - 1
         last_fire_remainds = 0.0
         pre_alphas_length = 0
+        last_fire = False
  
         mask_chunk_peak_predictor = None
         if cache is not None:
@@ -251,10 +252,15 @@ class CifPredictorV2(nn.Module):
             if cif_peak[0][len_time - 1 - i] > self.threshold or cif_peak[0][len_time - 1 - i] == self.threshold:
                 last_fire_place = len_time - 1 - i
                 last_fire_remainds = cif_peak[0][len_time - 1 - i] - self.threshold
+                last_fire = True
                 break
-        last_fire_remainds = torch.tensor([last_fire_remainds], dtype=alphas.dtype).to(alphas.device)
-        cache["cif_hidden"] = hidden[:, last_fire_place:, :]
-        cache["cif_alphas"] = torch.cat((last_fire_remainds.unsqueeze(0), alphas[:, last_fire_place+1:]), -1)
+        if last_fire:
+           last_fire_remainds = torch.tensor([last_fire_remainds], dtype=alphas.dtype).to(alphas.device)
+           cache["cif_hidden"] = hidden[:, last_fire_place:, :]
+           cache["cif_alphas"] = torch.cat((last_fire_remainds.unsqueeze(0), alphas[:, last_fire_place+1:]), -1)
+        else:
+           cache["cif_hidden"] = hidden
+           cache["cif_alphas"] = alphas
         token_num_int = token_num.floor().type(torch.int32).item()
         return acoustic_embeds[:, 0:token_num_int, :], token_num, alphas, cif_peak
 

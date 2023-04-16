@@ -23,7 +23,7 @@ from funasr.torch_utils.set_all_random_seed import set_all_random_seed
 from funasr.utils import config_argparse
 from funasr.utils.types import str2triple_str
 from funasr.utils.types import str_or_none
-from funasr.punctuation.text_preprocessor import split_to_mini_sentence
+from funasr.datasets.preprocessor import split_to_mini_sentence
 
 
 class Text2Punc:
@@ -90,7 +90,7 @@ class Text2Punc:
             data = {
                 "text": torch.unsqueeze(torch.from_numpy(mini_sentence_id), 0),
                 "text_lengths": torch.from_numpy(np.array([len(mini_sentence_id)], dtype='int32')),
-                "vad_indexes": torch.from_numpy(np.array([len(cache)-1], dtype='int32')),
+                "vad_indexes": torch.from_numpy(np.array([len(cache)], dtype='int32')),
             }
             data = to_device(data, self.device)
             y, _ = self.wrapped_model(**data)

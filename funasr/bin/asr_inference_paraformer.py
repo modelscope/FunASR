@@ -797,7 +797,7 @@ def inference_modelscope(
                         finish_count += 1
                         # asr_utils.print_progress(finish_count / file_count)
                         if writer is not None:
-                            ibest_writer["text"][key] = text_postprocessed
+                            ibest_writer["text"][key] = " ".join(word_lists)
 
                     logging.info("decoding, utt: {}, predictions: {}".format(key, text))
         rtf_avg = "decoding, feature length total: {}, forward_time total: {:.4f}, rtf avg: {:.4f}".format(length_total, forward_time_total, 100 * forward_time_total / (length_total * lfr_factor))

@@ -5,32 +5,33 @@ extern "C" {
 #endif
 
 	// APIs for qmasr
-	_RAPIDASRAPI RPASR_HANDLE  RapidAsrInit(const char* szModelDir, int nThreadNum, bool quantize)
+	_FUNASRAPI FUNASR_HANDLE  FunASRInit(const char* szModelDir, int nThreadNum, bool quantize)
 	{
 		Model* mm = create_model(szModelDir, nThreadNum, quantize);
 		return mm;
 	}
 
-	_RAPIDASRAPI RPASR_RESULT RapidAsrRecogBuffer(RPASR_HANDLE handle, const char* szBuf, int nLen, RPASR_MODE Mode, QM_CALLBACK fnCallback)
+	_FUNASRAPI FUNASR_RESULT FunASRRecogBuffer(FUNASR_HANDLE handle, const char* szBuf, int nLen, FUNASR_MODE Mode, QM_CALLBACK fnCallback)
 	{
 		Model* pRecogObj = (Model*)handle;
 		if (!pRecogObj)
 			return nullptr;
 
+		int32_t sampling_rate = -1;
 		Audio audio(1);
-		if (!audio.loadwav(szBuf, nLen))
+		if (!audio.loadwav(szBuf, nLen, &sampling_rate))
 			return nullptr;
 		//audio.split();
 
 		float* buff;
 		int len;
 		int flag=0;
-		RPASR_RECOG_RESULT* pResult = new RPASR_RECOG_RESULT;
+		FUNASR_RECOG_RESULT* pResult = new FUNASR_RECOG_RESULT;
 		pResult->snippet_time = audio.get_time_len();
 		int nStep = 0;
 		int nTotal = audio.get_queue_size();
 		while (audio.fetch(buff, len, flag) > 0) {
-			pRecogObj->reset();
+			//pRecogObj->reset();
 			string msg = pRecogObj->forward(buff, len, flag);
 			pResult->msg += msg;
 			nStep++;
@@ -41,26 +42,26 @@ extern "C" {
 		return pResult;
 	}
 
-	_RAPIDASRAPI RPASR_RESULT RapidAsrRecogPCMBuffer(RPASR_HANDLE handle, const char* szBuf, int nLen, RPASR_MODE Mode, QM_CALLBACK fnCallback)
+	_FUNASRAPI FUNASR_RESULT FunASRRecogPCMBuffer(FUNASR_HANDLE handle, const char* szBuf, int nLen, int sampling_rate, FUNASR_MODE Mode, QM_CALLBACK fnCallback)
 	{
 		Model* pRecogObj = (Model*)handle;
 		if (!pRecogObj)
 			return nullptr;
 
 		Audio audio(1);
-		if (!audio.loadpcmwav(szBuf, nLen))
+		if (!audio.loadpcmwav(szBuf, nLen, &sampling_rate))
 			return nullptr;
 		//audio.split();
 
 		float* buff;
 		int len;
 		int flag = 0;
-		RPASR_RECOG_RESULT* pResult = new RPASR_RECOG_RESULT;
+		FUNASR_RECOG_RESULT* pResult = new FUNASR_RECOG_RESULT;
 		pResult->snippet_time = audio.get_time_len();
 		int nStep = 0;
 		int nTotal = audio.get_queue_size();
 		while (audio.fetch(buff, len, flag) > 0) {
-			pRecogObj->reset();
+			//pRecogObj->reset();
 			string msg = pRecogObj->forward(buff, len, flag);
 			pResult->msg += msg;
 			nStep++;
@@ -71,26 +72,26 @@ extern "C" {
 		return pResult;
 	}
 
-	_RAPIDASRAPI RPASR_RESULT RapidAsrRecogPCMFile(RPASR_HANDLE handle, const char* szFileName, RPASR_MODE Mode, QM_CALLBACK fnCallback)
+	_FUNASRAPI FUNASR_RESULT FunASRRecogPCMFile(FUNASR_HANDLE handle, const char* szFileName, int sampling_rate, FUNASR_MODE Mode, QM_CALLBACK fnCallback)
 	{
 		Model* pRecogObj = (Model*)handle;
 		if (!pRecogObj)
 			return nullptr;
 
 		Audio audio(1);
-		if (!audio.loadpcmwav(szFileName))
+		if (!audio.loadpcmwav(szFileName, &sampling_rate))
 			return nullptr;
 		//audio.split();
 
 		float* buff;
 		int len;
 		int flag = 0;
-		RPASR_RECOG_RESULT* pResult = new RPASR_RECOG_RESULT;
+		FUNASR_RECOG_RESULT* pResult = new FUNASR_RECOG_RESULT;
 		pResult->snippet_time = audio.get_time_len();
 		int nStep = 0;
 		int nTotal = audio.get_queue_size();
 		while (audio.fetch(buff, len, flag) > 0) {
-			pRecogObj->reset();
+			//pRecogObj->reset();
 			string msg = pRecogObj->forward(buff, len, flag);
 			pResult->msg += msg;
 			nStep++;
@@ -101,14 +102,15 @@ extern "C" {
 		return pResult;
 	}
 
-	_RAPIDASRAPI RPASR_RESULT RapidAsrRecogFile(RPASR_HANDLE handle, const char* szWavfile, RPASR_MODE Mode, QM_CALLBACK fnCallback)
+	_FUNASRAPI FUNASR_RESULT FunASRRecogFile(FUNASR_HANDLE handle, const char* szWavfile, FUNASR_MODE Mode, QM_CALLBACK fnCallback)
 	{
 		Model* pRecogObj = (Model*)handle;
 		if (!pRecogObj)
 			return nullptr;
-
+		
+		int32_t sampling_rate = -1;
 		Audio audio(1);
-		if(!audio.loadwav(szWavfile))
+		if(!audio.loadwav(szWavfile, &sampling_rate))
 			return nullptr;
 		//audio.split();
 
@@ -117,10 +119,10 @@ extern "C" {
 		int flag = 0;
 		int nStep = 0;
 		int nTotal = audio.get_queue_size();
-		RPASR_RECOG_RESULT* pResult = new RPASR_RECOG_RESULT;
+		FUNASR_RECOG_RESULT* pResult = new FUNASR_RECOG_RESULT;
 		pResult->snippet_time = audio.get_time_len();
 		while (audio.fetch(buff, len, flag) > 0) {
-			pRecogObj->reset();
+			//pRecogObj->reset();
 			string msg = pRecogObj->forward(buff, len, flag);
 			pResult->msg+= msg;
 			nStep++;
@@ -131,7 +133,7 @@ extern "C" {
 		return pResult;
 	}
 
-	_RAPIDASRAPI const int RapidAsrGetRetNumber(RPASR_RESULT Result)
+	_FUNASRAPI const int FunASRGetRetNumber(FUNASR_RESULT Result)
 	{
 		if (!Result)
 			return 0;
@@ -140,32 +142,32 @@ extern "C" {
 	}
 
 
-	_RAPIDASRAPI const float RapidAsrGetRetSnippetTime(RPASR_RESULT Result)
+	_FUNASRAPI const float FunASRGetRetSnippetTime(FUNASR_RESULT Result)
 	{
 		if (!Result)
 			return 0.0f;
 
-		return ((RPASR_RECOG_RESULT*)Result)->snippet_time;
+		return ((FUNASR_RECOG_RESULT*)Result)->snippet_time;
 	}
 
-	_RAPIDASRAPI const char* RapidAsrGetResult(RPASR_RESULT Result,int nIndex)
+	_FUNASRAPI const char* FunASRGetResult(FUNASR_RESULT Result,int nIndex)
 	{
-		RPASR_RECOG_RESULT * pResult = (RPASR_RECOG_RESULT*)Result;
+		FUNASR_RECOG_RESULT * pResult = (FUNASR_RECOG_RESULT*)Result;
 		if(!pResult)
 			return nullptr;
 
 		return pResult->msg.c_str();
 	}
 
-	_RAPIDASRAPI void RapidAsrFreeResult(RPASR_RESULT Result)
+	_FUNASRAPI void FunASRFreeResult(FUNASR_RESULT Result)
 	{
 		if (Result)
 		{
-			delete (RPASR_RECOG_RESULT*)Result;
+			delete (FUNASR_RECOG_RESULT*)Result;
 		}
 	}
 
-	_RAPIDASRAPI void RapidAsrUninit(RPASR_HANDLE handle)
+	_FUNASRAPI void FunASRUninit(FUNASR_HANDLE handle)
 	{
 		Model* pRecogObj = (Model*)handle;
 

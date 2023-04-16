@@ -117,7 +117,7 @@ class EncoderLayer(nn.Module):
 
 class SelfAttentionEncoder(AbsEncoder):
     """
-    author: Speech Lab, Alibaba Group, China
+    Author: Speech Lab of DAMO Academy, Alibaba Group
     Self attention encoder in OpenNMT framework
     """
 

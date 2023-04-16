@@ -8,7 +8,10 @@ namespace paraformer {
 
     class ModelImp : public Model {
     private:
-        FeatureExtract* fe;
+        int fft_size=512;
+        float *fft_input;
+        fftwf_complex *fft_out;
+        fftwf_plan plan;
 
         Vocab* vocab;
         vector<float> means_list;
@@ -21,21 +24,13 @@ namespace paraformer {
 
         string greedy_search( float* in, int nLen);
 
-#ifdef _WIN_X86
-        Ort::MemoryInfo m_memoryInfo = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
-#else
-        Ort::MemoryInfo m_memoryInfo = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
-#endif
-
-        Ort::Session* m_session = nullptr;
-        Ort::Env env = Ort::Env(ORT_LOGGING_LEVEL_ERROR, "paraformer");
-        Ort::SessionOptions sessionOptions = Ort::SessionOptions();
+        std::unique_ptr<Ort::Session> m_session;
+        Ort::Env env_;
+        Ort::SessionOptions sessionOptions;
 
         vector<string> m_strInputNames, m_strOutputNames;
         vector<const char*> m_szInputNames;
         vector<const char*> m_szOutputNames;
-        //string m_strInputName, m_strInputNameLen;
-        //string m_strOutputName, m_strOutputNameLen;
 
     public:
         ModelImp(const char* path, int nNumThread=0, bool quantize=false);

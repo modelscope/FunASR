@@ -2,6 +2,9 @@
 # Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
 #  MIT License  (https://opensource.org/licenses/MIT)
 
+import torch
+torch.set_num_threads(1)
+
 import argparse
 import logging
 import os

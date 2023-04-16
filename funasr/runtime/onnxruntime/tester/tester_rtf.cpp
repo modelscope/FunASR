@@ -5,7 +5,7 @@
 #include <win_func.h>
 #endif
 
-#include "librapidasrapi.h"
+#include "libfunasrapi.h"
 
 #include <iostream>
 #include <fstream>
@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
     bool quantize = false;
     istringstream(argv[3]) >> boolalpha >> quantize;
 
-    RPASR_HANDLE AsrHanlde=RapidAsrInit(argv[1], nThreadNum, quantize);
+    FUNASR_HANDLE AsrHanlde=FunASRInit(argv[1], nThreadNum, quantize);
     if (!AsrHanlde)
     {
         printf("Cannot load ASR Model from: %s, there must be files model.onnx and vocab.txt", argv[1]);
@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
     // warm up
     for (size_t i = 0; i < 30; i++)
     {
-        RPASR_RESULT Result=RapidAsrRecogFile(AsrHanlde, wav_list[0].c_str(), RASR_NONE, NULL);
+        FUNASR_RESULT Result=FunASRRecogFile(AsrHanlde, wav_list[0].c_str(), RASR_NONE, NULL);
     }
 
     // forward
@@ -72,19 +72,19 @@ int main(int argc, char *argv[])
     for (size_t i = 0; i < wav_list.size(); i++)
     {
         gettimeofday(&start, NULL);
-        RPASR_RESULT Result=RapidAsrRecogFile(AsrHanlde, wav_list[i].c_str(), RASR_NONE, NULL);
+        FUNASR_RESULT Result=FunASRRecogFile(AsrHanlde, wav_list[i].c_str(), RASR_NONE, NULL);
         gettimeofday(&end, NULL);
         seconds = (end.tv_sec - start.tv_sec);
         long taking_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
         total_time += taking_micros;
 
         if(Result){
-            string msg = RapidAsrGetResult(Result, 0);
-            printf("Result: %s \n", msg);
+            string msg = FunASRGetResult(Result, 0);
+            printf("Result: %s \n", msg.c_str());
 
-            snippet_time = RapidAsrGetRetSnippetTime(Result);
+            snippet_time = FunASRGetRetSnippetTime(Result);
             total_length += snippet_time;
-            RapidAsrFreeResult(Result);
+            FunASRFreeResult(Result);
         }else{
             cout <<"No return data!";
         }
@@ -94,6 +94,6 @@ int main(int argc, char *argv[])
     printf("total_time_comput %ld ms.\n", total_time / 1000);
     printf("total_rtf %05lf .\n", (double)total_time/ (total_length*1000000));
 
-    RapidAsrUninit(AsrHanlde);
+    FunASRUninit(AsrHanlde);
     return 0;
 }

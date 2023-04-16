@@ -5,16 +5,19 @@ from typing import Tuple
 import torch
 import torch.nn as nn
 
-from funasr.modules.embedding import PositionalEncoding
 from funasr.modules.embedding import SinusoidalPositionEncoder
 #from funasr.models.encoder.transformer_encoder import TransformerEncoder as Encoder
-from funasr.punctuation.sanm_encoder import SANMEncoder as Encoder
+from funasr.models.encoder.sanm_encoder import SANMEncoder as Encoder
 #from funasr.modules.mask import subsequent_n_mask
-from funasr.punctuation.abs_model import AbsPunctuation
+from funasr.train.abs_model import AbsPunctuation
 
 
 class TargetDelayTransformer(AbsPunctuation):
-
+    """
+    Author: Speech Lab of DAMO Academy, Alibaba Group
+    CT-Transformer: Controllable time-delay transformer for real-time punctuation prediction and disfluency detection
+    https://arxiv.org/pdf/2003.01309.pdf
+    """
     def __init__(
         self,
         vocab_size: int,

@@ -11,7 +11,7 @@ from funasr.modules.streaming_utils.utils import sequence_mask
 
 class overlap_chunk():
 	"""
-	author: Speech Lab, Alibaba Group, China
+	Author: Speech Lab of DAMO Academy, Alibaba Group
 	San-m: Memory equipped self-attention for end-to-end speech recognition
 	https://arxiv.org/abs/2006.01713
 

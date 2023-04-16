@@ -1,3 +1,9 @@
+"""
+Author: Speech Lab, Alibaba Group, China
+TOLD: A Novel Two-Stage Overlap-Aware Framework for Speaker Diarization
+https://arxiv.org/abs/2303.05397
+"""
+
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
 

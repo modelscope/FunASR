@@ -1,3 +1,7 @@
+"""
+Author: Speech Lab, Alibaba Group, China
+"""
+
 import argparse
 import logging
 import os

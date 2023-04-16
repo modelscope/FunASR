@@ -63,8 +63,8 @@ fi
 
 if [ $stage -le 2 ] && [ $stop_stage -ge 2 ];then
     echo "Computing WER ..."
-    python utils/proce_text.py ${output_dir}/1best_recog/text ${output_dir}/1best_recog/text.proc
-    python utils/proce_text.py ${data_dir}/text ${output_dir}/1best_recog/text.ref
+    cp ${output_dir}/1best_recog/text ${output_dir}/1best_recog/text.proc
+    cp ${data_dir}/text ${output_dir}/1best_recog/text.ref
     python utils/compute_wer.py ${output_dir}/1best_recog/text.ref ${output_dir}/1best_recog/text.proc ${output_dir}/1best_recog/text.cer
     tail -n 3 ${output_dir}/1best_recog/text.cer
 fi

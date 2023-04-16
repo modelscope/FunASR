@@ -2,8 +2,6 @@
 
 [FunASR](https://github.com/alibaba-damo-academy/FunASR) hopes to build a bridge between academic research and industrial applications on speech recognition. By supporting the training & finetuning of the industrial-grade speech recognition model released on ModelScope, researchers and developers can conduct research and production of speech recognition models more conveniently, and promote the development of speech recognition ecology. ASR for Fun！
 
-### Introduction
-- Model comes from [speech_paraformer](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary).
 
 ### Steps:
 1. Export the model.
@@ -25,15 +23,20 @@
     
     install from pip
     ```shell
-    pip install --upgrade funasr_torch -i https://pypi.Python.org/simple
+    pip install -U funasr_torch
+    # For the users in China, you could install with the command:
+    # pip install -U funasr_torch -i https://mirror.sjtu.edu.cn/pypi/web/simple
+
     ```
     or install from source code
 
     ```shell
     git clone https://github.com/alibaba/FunASR.git && cd FunASR
     cd funasr/runtime/python/libtorch
-    python setup.py build
-    python setup.py install
+    pip install -e ./
+    # For the users in China, you could install with the command:
+    # pip install -e ./ -i https://mirror.sjtu.edu.cn/pypi/web/simple
+
     ```
 
 3. Run the demo.
