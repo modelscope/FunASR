@@ -2,7 +2,7 @@
 
 import os
 
-from funasr.tasks.asr_transducer import ASRTransducerTask
+from funasr.tasks.asr import ASRTransducerTask
 
 
 # for ASR Training

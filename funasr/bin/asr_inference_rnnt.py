@@ -22,7 +22,7 @@ from funasr.modules.beam_search.beam_search_transducer import (
 )
 from funasr.modules.nets_utils import TooShortUttError
 from funasr.fileio.datadir_writer import DatadirWriter
-from funasr.tasks.asr_transducer import ASRTransducerTask
+from funasr.tasks.asr import ASRTransducerTask
 from funasr.tasks.lm import LMTask
 from funasr.text.build_tokenizer import build_tokenizer
 from funasr.text.token_id_converter import TokenIDConverter

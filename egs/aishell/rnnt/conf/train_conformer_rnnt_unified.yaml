@@ -1,32 +1,26 @@
+encoder: chunk_conformer
 encoder_conf:
-    main_conf:
-      pos_wise_act_type: swish
-      pos_enc_dropout_rate: 0.5
-      conv_mod_act_type: swish
+      activation_type: swish
+      positional_dropout_rate: 0.5
       time_reduction_factor: 2
       unified_model_training: true
       default_chunk_size: 16
       jitter_range: 4
       left_chunk_size: 0
-    input_conf:
-      block_type: conv2d
-      conv_size: 512
+      embed_vgg_like: false
       subsampling_factor: 4
-      num_frame: 1
-    body_conf:
-    - block_type: conformer
-      linear_size: 2048
-      hidden_size: 512
-      heads: 8
+      linear_units: 2048
+      output_size: 512
+      attention_heads: 8
       dropout_rate: 0.5
-      pos_wise_dropout_rate: 0.5
-      att_dropout_rate: 0.5
-      conv_mod_kernel_size: 15
+      positional_dropout_rate: 0.5
+      attention_dropout_rate: 0.5
+      cnn_module_kernel: 15
       num_blocks: 12    
 
 # decoder related
-decoder: rnn
-decoder_conf:
+rnnt_decoder: rnnt
+rnnt_decoder_conf:
     embed_size: 512
     hidden_size: 512
     embed_dropout_rate: 0.5

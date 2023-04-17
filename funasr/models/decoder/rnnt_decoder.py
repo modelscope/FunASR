@@ -6,10 +6,9 @@ import torch
 from typeguard import check_argument_types
 
 from funasr.modules.beam_search.beam_search_transducer import Hypothesis
-from funasr.models.rnnt_predictor.abs_decoder import AbsDecoder
 from funasr.models.specaug.specaug import SpecAug
 
-class RNNDecoder(AbsDecoder):
+class RNNTDecoder(torch.nn.Module):
     """RNN decoder module.
 
     Args:

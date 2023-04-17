@@ -894,7 +894,7 @@ class CausalConvolution(torch.nn.Module):
 
         return x, cache
 
-class ConformerChunkEncoder(torch.nn.Module):
+class ConformerChunkEncoder(AbsEncoder):
     """Encoder module definition.
     Args:
         input_size: Input size.
@@ -1007,7 +1007,7 @@ class ConformerChunkEncoder(torch.nn.Module):
             output_size,
         )
 
-        self.output_size = output_size
+        self._output_size = output_size
 
         self.dynamic_chunk_training = dynamic_chunk_training
         self.short_chunk_threshold = short_chunk_threshold
@@ -1019,6 +1019,9 @@ class ConformerChunkEncoder(torch.nn.Module):
         self.jitter_range = jitter_range
 
         self.time_reduction_factor = time_reduction_factor
+
+    def output_size(self) -> int:
+        return self._output_size
 
     def get_encoder_input_raw_size(self, size: int, hop_length: int) -> int:
         """Return the corresponding number of sample for a given chunk size, in frames.

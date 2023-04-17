@@ -6,7 +6,6 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import numpy as np
 import torch
 
-from funasr.models.rnnt_predictor.abs_decoder import AbsDecoder
 from funasr.models.joint_net.joint_network import JointNetwork
 
 
@@ -68,7 +67,7 @@ class BeamSearchTransducer:
 
     def __init__(
         self,
-        decoder: AbsDecoder,
+        decoder,
         joint_network: JointNetwork,
         beam_size: int,
         lm: Optional[torch.nn.Module] = None,
