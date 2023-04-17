@@ -10,3 +10,6 @@ test_local/
 RapidASR
 export/*
 *.pyc
+.eggs
+MaaS-lib
+.gitignore
