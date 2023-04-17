@@ -1,9 +1,12 @@
+import logging
+import os
 import sys
 
 import torch
 
 from funasr.utils import config_argparse
 from funasr.utils.build_distributed import build_distributed
+from funasr.utils.prepare_data import prepare_data
 from funasr.utils.types import str2bool
 
 
@@ -318,9 +321,23 @@ if __name__ == '__main__':
     parser = get_parser()
     args = parser.parse_args()
 
+    # ddp init
     args.distributed = args.dist_world_size > 1
     distributed_option = build_distributed(args)
+    if not distributed_option.distributed or distributed_option.dist_rank == 0:
+        logging.basicConfig(
+            level="INFO",
+            format=f"[{os.uname()[1].split('.')[0]}]"
+                   f" %(asctime)s (%(module)s:%(lineno)d) %(levelname)s: %(message)s",
+        )
+    else:
+        logging.basicConfig(
+            level="ERROR",
+            format=f"[{os.uname()[1].split('.')[0]}]"
+                   f" %(asctime)s (%(module)s:%(lineno)d) %(levelname)s: %(message)s",
+        )
+    logging.info("world size: {}, rank: {}, local_rank: {}".format(distributed_option.dist_world_size,
+                                                                   distributed_option.dist_rank,
+                                                                   distributed_option.local_rank))
 
-    #
-
-
+    prepare_data(args, distributed_option)
