@@ -19,7 +19,7 @@ from funasr.export.models.decoder.transformer_decoder import ParaformerDecoderSA
 
 class Paraformer(nn.Module):
     """
-    Author: Speech Lab, Alibaba Group, China
+    Author: Speech Lab of DAMO Academy, Alibaba Group
     Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition
     https://arxiv.org/abs/2206.08317
     """
@@ -112,7 +112,7 @@ class Paraformer(nn.Module):
 
 class BiCifParaformer(nn.Module):
     """
-    Author: Speech Lab, Alibaba Group, China
+    Author: Speech Lab of DAMO Academy, Alibaba Group
     Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition
     https://arxiv.org/abs/2206.08317
     """

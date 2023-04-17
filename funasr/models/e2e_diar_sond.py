@@ -36,8 +36,12 @@ else:
 
 
 class DiarSondModel(AbsESPnetModel):
-    """Speaker overlap-aware neural diarization model
-    reference: https://arxiv.org/abs/2211.10243
+    """
+    Author: Speech Lab, Alibaba Group, China
+    SOND: Speaker Overlap-aware Neural Diarization for Multi-party Meeting Analysis
+    https://arxiv.org/abs/2211.10243
+    TOLD: A Novel Two-Stage Overlap-Aware Framework for Speaker Diarization
+    https://arxiv.org/abs/2303.05397
     """
 
     def __init__(

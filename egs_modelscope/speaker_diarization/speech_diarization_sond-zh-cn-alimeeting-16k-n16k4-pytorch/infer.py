@@ -1,3 +1,9 @@
+"""
+Author: Speech Lab, Alibaba Group, China
+SOND: Speaker Overlap-aware Neural Diarization for Multi-party Meeting Analysis
+https://arxiv.org/abs/2211.10243
+"""
+
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
 

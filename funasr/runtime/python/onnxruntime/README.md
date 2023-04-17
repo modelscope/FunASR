@@ -1,10 +1,6 @@
 ## Using funasr with ONNXRuntime
 
 
-### Introduction
-- Model comes from [speech_paraformer](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary).
-
-
 ### Steps:
 1. Export the model.
    - Command: (`Tips`: torch >= 1.11.0 is required.)
@@ -25,7 +21,10 @@
 
 install from pip
 ```shell
-pip install --upgrade funasr_onnx -i https://pypi.Python.org/simple
+pip install -U funasr_onnx
+# For the users in China, you could install with the command:
+# pip install -U funasr_onnx -i https://mirror.sjtu.edu.cn/pypi/web/simple
+
 ```
 
 or install from source code
@@ -33,8 +32,10 @@ or install from source code
 ```shell
 git clone https://github.com/alibaba/FunASR.git && cd FunASR
 cd funasr/runtime/python/onnxruntime
-python setup.py build
-python setup.py install
+pip install -e ./
+# For the users in China, you could install with the command:
+# pip install -e ./ -i https://mirror.sjtu.edu.cn/pypi/web/simple
+
 ```
 
 3. Run the demo.

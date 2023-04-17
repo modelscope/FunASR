@@ -90,7 +90,7 @@ class Text2Punc:
             data = {
                 "text": torch.unsqueeze(torch.from_numpy(mini_sentence_id), 0),
                 "text_lengths": torch.from_numpy(np.array([len(mini_sentence_id)], dtype='int32')),
-                "vad_indexes": torch.from_numpy(np.array([len(cache)-1], dtype='int32')),
+                "vad_indexes": torch.from_numpy(np.array([len(cache)], dtype='int32')),
             }
             data = to_device(data, self.device)
             y, _ = self.wrapped_model(**data)

@@ -47,8 +47,8 @@ def tokenize(data,
     length = len(text)
     for i in range(length):
         x = text[i]
-        if i == length-1 and "punc" in data and text[i].startswith("vad:"):
-            vad = x[-1][4:]
+        if i == length-1 and "punc" in data and x.startswith("vad:"):
+            vad = x[4:]
             if len(vad) == 0:
                 vad = -1
             else:

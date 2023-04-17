@@ -406,6 +406,12 @@ class ResNet34Diar(ResNet34):
             tf2torch_tensor_name_prefix_torch="encoder",
             tf2torch_tensor_name_prefix_tf="seq2seq/speech_encoder"
     ):
+        """
+        Author: Speech Lab, Alibaba Group, China
+        SOND: Speaker Overlap-aware Neural Diarization for Multi-party Meeting Analysis
+        https://arxiv.org/abs/2211.10243
+        """
+
         super(ResNet34Diar, self).__init__(
             input_size,
             use_head_conv=use_head_conv,
@@ -633,6 +639,12 @@ class ResNet34SpL2RegDiar(ResNet34_SP_L2Reg):
             tf2torch_tensor_name_prefix_torch="encoder",
             tf2torch_tensor_name_prefix_tf="seq2seq/speech_encoder"
     ):
+        """
+        Author: Speech Lab, Alibaba Group, China
+        TOLD: A Novel Two-Stage Overlap-Aware Framework for Speaker Diarization
+        https://arxiv.org/abs/2303.05397
+        """
+
         super(ResNet34SpL2RegDiar, self).__init__(
             input_size,
             use_head_conv=use_head_conv,
