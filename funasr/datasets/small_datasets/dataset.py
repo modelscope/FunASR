@@ -12,7 +12,6 @@ from typing import Mapping
 from typing import Tuple
 from typing import Union
 
-import humanfriendly
 import kaldiio
 import numpy as np
 import torch
@@ -22,7 +21,6 @@ from typeguard import check_return_type
 
 from funasr.fileio.npy_scp import NpyScpReader
 from funasr.fileio.sound_scp import SoundScpReader
-from funasr.utils.sized_dict import SizedDict
 
 
 class AdapterForSoundScpReader(collections.abc.Mapping):
@@ -111,8 +109,6 @@ class ESPnetDataset(Dataset):
             ] = None,
             float_dtype: str = "float32",
             int_dtype: str = "long",
-            max_cache_size: Union[float, int, str] = 0.0,
-            max_cache_fd: int = 0,
             dest_sample_rate: int = 16000,
     ):
         assert check_argument_types()
@@ -126,7 +122,6 @@ class ESPnetDataset(Dataset):
 
         self.float_dtype = float_dtype
         self.int_dtype = int_dtype
-        self.max_cache_fd = max_cache_fd
         self.dest_sample_rate = dest_sample_rate
 
         self.loader_dict = {}
@@ -141,14 +136,6 @@ class ESPnetDataset(Dataset):
             if len(self.loader_dict[name]) == 0:
                 raise RuntimeError(f"{path} has no samples")
 
-        if isinstance(max_cache_size, str):
-            max_cache_size = humanfriendly.parse_size(max_cache_size)
-        self.max_cache_size = max_cache_size
-        if max_cache_size > 0:
-            self.cache = SizedDict(shared=True)
-        else:
-            self.cache = None
-
     def _build_loader(
             self, path: str, loader_type: str
     ) -> Mapping[str, Union[np.ndarray, torch.Tensor, str, numbers.Number]]:
@@ -162,7 +149,7 @@ class ESPnetDataset(Dataset):
             loader = SoundScpReader(path, self.dest_sample_rate, normalize=True, always_2d=False)
             return AdapterForSoundScpReader(loader, self.float_dtype)
         elif loader_type == "kaldi_ark":
-            loader = kaldiio.load_scp(path, max_cache_fd=self.max_cache_fd)
+            loader = kaldiio.load_scp(path)
             return AdapterForSoundScpReader(loader, self.float_dtype)
         elif loader_type == "npy":
             return NpyScpReader()
@@ -206,10 +193,6 @@ class ESPnetDataset(Dataset):
         if isinstance(uid, int):
             d = next(iter(self.loader_dict.values()))
             uid = list(d)[uid]
-
-        if self.cache is not None and uid in self.cache:
-            data = self.cache[uid]
-            return uid, data
 
         data = {}
         # 1. Load data from each loaders
@@ -260,9 +243,6 @@ class ESPnetDataset(Dataset):
             else:
                 raise NotImplementedError(f"Not supported dtype: {value.dtype}")
             data[name] = value
-
-        if self.cache is not None and self.cache.size < self.max_cache_size:
-            self.cache[uid] = data
 
         retval = uid, data
         assert check_return_type(retval)

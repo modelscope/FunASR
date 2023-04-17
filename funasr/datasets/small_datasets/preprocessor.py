@@ -855,6 +855,19 @@ def build_preprocess(args, train):
             text_name=text_names,
             non_linguistic_symbols=args.non_linguistic_symbols,
         )
+    elif args.task_name == "lm":
+        retval = LMPreprocessor(
+            train=train,
+            token_type=args.token_type,
+            token_list=args.token_list,
+            bpemodel=args.bpemodel,
+            text_cleaner=args.cleaner,
+            g2p_type=args.g2p,
+            text_name="text",
+            non_linguistic_symbols=args.non_linguistic_symbols,
+            split_with_space=args.split_with_space,
+            seg_dict_file=args.seg_dict_file
+        )
     elif args.task_name == "vad":
         retval = None
     else:
