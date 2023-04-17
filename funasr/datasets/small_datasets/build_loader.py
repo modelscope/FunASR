@@ -18,10 +18,7 @@ def build_dataloader(args, mode="train"):
         raise NotImplementedError(f"mode={mode}")
     dataset = ESPnetDataset(
         data_path_and_name_and_type,
-        float_dtype=args.train_dtype,
         preprocess=preprocess_fn,
-        max_cache_size=args.max_cache_size,
-        max_cache_fd=args.max_cache_fd,
         dest_sample_rate=dest_sample_rate,
     )
     if os.path.exists(os.path.join(data_path_and_name_and_type[0][0].parent, "utt2category")):
