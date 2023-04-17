@@ -111,42 +111,234 @@
 <h3>Speech Recognition Models<a class="headerlink" href="#speech-recognition-models" title="Permalink to this headline"></a></h3>
 <div class="section" id="paraformer-models">
 <h4>Paraformer Models<a class="headerlink" href="#paraformer-models" title="Permalink to this headline"></a></h4>
-<p>|                                                                     Model Name                                                                     | Language |          Training Data           | Vocab Size | Parameter | Offline/Online | Notes                                                                                                                           |
-|:————————————————————————————————————————————————–:|:——–:|:——————————–:|:———-:|:———:|:————–:|:——————————————————————————————————————————–|
-|        <a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary">Paraformer-large</a>        | CN &amp; EN  | Alibaba Speech Data (60000hours) |    8404    |   220M    |    Offline     | Duration of input wav &lt;= 20s                                                                                                    |
-| <a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary">Paraformer-large-long</a> | CN &amp; EN  | Alibaba Speech Data (60000hours) |    8404    |   220M    |    Offline     | Which ould deal with arbitrary length input wav                                                                                 |
-| <a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404/summary">paraformer-large-contextual</a> | CN &amp; EN  | Alibaba Speech Data (60000hours) |    8404    |   220M    |    Offline     | Which supports the hotword customization based on the incentive enhancement, and improves the recall and precision of hotwords. |
-|              <a class="reference external" href="https://modelscope.cn/models/damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8358-tensorflow1/summary">Paraformer</a>              | CN &amp; EN  | Alibaba Speech Data (50000hours) |    8358    |    68M    |    Offline     | Duration of input wav &lt;= 20s                                                                                                    |
-|          <a class="reference external" href="https://modelscope.cn/models/damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8358-tensorflow1/summary">Paraformer-online</a>           | CN &amp; EN  | Alibaba Speech Data (50000hours) |    8404    |    68M    |     Online     | Which could deal with streaming input                                                                                           |
-|       <a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-tiny-commandword_asr_nat-zh-cn-16k-vocab544-pytorch/summary">Paraformer-tiny</a>       |    CN    |  Alibaba Speech Data (200hours)  |    544     |   5.2M    |    Offline     | Lightweight Paraformer model which supports Mandarin command words recognition                                                  |
-|                   <a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer_asr_nat-aishell1-pytorch/summary">Paraformer-aishell</a>                   |    CN    |        AISHELL (178hours)        |    4234    |    43M    |    Offline     |                                                                                                                                 |
-|       <a class="reference external" href="https://modelscope.cn/models/damo/speech_paraformerbert_asr_nat-zh-cn-16k-aishell1-vocab4234-pytorch/summary">ParaformerBert-aishell</a>       |    CN    |        AISHELL (178hours)        |    4234    |    43M    |    Offline     |                                                                                                                                 |
-|        <a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer_asr_nat-zh-cn-16k-aishell2-vocab5212-pytorch/summary">Paraformer-aishell2</a>         |    CN    |      AISHELL-2 (1000hours)       |    5212    |    64M    |    Offline     |                                                                                                                                 |
-|    <a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformerbert_asr_nat-zh-cn-16k-aishell2-vocab5212-pytorch/summary">ParaformerBert-aishell2</a>     |    CN    |      AISHELL-2 (1000hours)       |    5212    |    64M    |    Offline     |                                                                                                                                 |</p>
-</div>
+<table border="1" class="docutils">
+<thead>
+<tr>
+<th style="text-align: center;">Model Name</th>
+<th style="text-align: center;">Language</th>
+<th style="text-align: center;">Training Data</th>
+<th style="text-align: center;">Vocab Size</th>
+<th style="text-align: center;">Parameter</th>
+<th style="text-align: center;">Offline/Online</th>
+<th style="text-align: left;">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><a href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary">Paraformer-large</a></td>
+<td style="text-align: center;">CN &amp; EN</td>
+<td style="text-align: center;">Alibaba Speech Data (60000hours)</td>
+<td style="text-align: center;">8404</td>
+<td style="text-align: center;">220M</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: left;">Duration of input wav &lt;= 20s</td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="https://www.modelscope.cn/models/damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary">Paraformer-large-long</a></td>
+<td style="text-align: center;">CN &amp; EN</td>
+<td style="text-align: center;">Alibaba Speech Data (60000hours)</td>
+<td style="text-align: center;">8404</td>
+<td style="text-align: center;">220M</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: left;">Which ould deal with arbitrary length input wav</td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="https://www.modelscope.cn/models/damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404/summary">paraformer-large-contextual</a></td>
+<td style="text-align: center;">CN &amp; EN</td>
+<td style="text-align: center;">Alibaba Speech Data (60000hours)</td>
+<td style="text-align: center;">8404</td>
+<td style="text-align: center;">220M</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: left;">Which supports the hotword customization based on the incentive enhancement, and improves the recall and precision of hotwords.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="https://modelscope.cn/models/damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8358-tensorflow1/summary">Paraformer</a></td>
+<td style="text-align: center;">CN &amp; EN</td>
+<td style="text-align: center;">Alibaba Speech Data (50000hours)</td>
+<td style="text-align: center;">8358</td>
+<td style="text-align: center;">68M</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: left;">Duration of input wav &lt;= 20s</td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="https://modelscope.cn/models/damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8358-tensorflow1/summary">Paraformer-online</a></td>
+<td style="text-align: center;">CN &amp; EN</td>
+<td style="text-align: center;">Alibaba Speech Data (50000hours)</td>
+<td style="text-align: center;">8404</td>
+<td style="text-align: center;">68M</td>
+<td style="text-align: center;">Online</td>
+<td style="text-align: left;">Which could deal with streaming input</td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="https://www.modelscope.cn/models/damo/speech_paraformer-tiny-commandword_asr_nat-zh-cn-16k-vocab544-pytorch/summary">Paraformer-tiny</a></td>
+<td style="text-align: center;">CN</td>
+<td style="text-align: center;">Alibaba Speech Data (200hours)</td>
+<td style="text-align: center;">544</td>
+<td style="text-align: center;">5.2M</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: left;">Lightweight Paraformer model which supports Mandarin command words recognition</td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="https://www.modelscope.cn/models/damo/speech_paraformer_asr_nat-aishell1-pytorch/summary">Paraformer-aishell</a></td>
+<td style="text-align: center;">CN</td>
+<td style="text-align: center;">AISHELL (178hours)</td>
+<td style="text-align: center;">4234</td>
+<td style="text-align: center;">43M</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="https://modelscope.cn/models/damo/speech_paraformerbert_asr_nat-zh-cn-16k-aishell1-vocab4234-pytorch/summary">ParaformerBert-aishell</a></td>
+<td style="text-align: center;">CN</td>
+<td style="text-align: center;">AISHELL (178hours)</td>
+<td style="text-align: center;">4234</td>
+<td style="text-align: center;">43M</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="https://www.modelscope.cn/models/damo/speech_paraformer_asr_nat-zh-cn-16k-aishell2-vocab5212-pytorch/summary">Paraformer-aishell2</a></td>
+<td style="text-align: center;">CN</td>
+<td style="text-align: center;">AISHELL-2 (1000hours)</td>
+<td style="text-align: center;">5212</td>
+<td style="text-align: center;">64M</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="https://www.modelscope.cn/models/damo/speech_paraformerbert_asr_nat-zh-cn-16k-aishell2-vocab5212-pytorch/summary">ParaformerBert-aishell2</a></td>
+<td style="text-align: center;">CN</td>
+<td style="text-align: center;">AISHELL-2 (1000hours)</td>
+<td style="text-align: center;">5212</td>
+<td style="text-align: center;">64M</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: left;"></td>
+</tr>
+</tbody>
+</table></div>
 <div class="section" id="uniasr-models">
 <h4>UniASR Models<a class="headerlink" href="#uniasr-models" title="Permalink to this headline"></a></h4>
-<p>|                                                               Model Name                                                               | Language |          Training Data           | Vocab Size | Parameter | Offline/Online | Notes                                                                                                                           |
-|:————————————————————————————————————————————–:|:——–:|:——————————–:|:———-:|:———:|:————–:|:——————————————————————————————————————————–|
-|       <a class="reference external" href="https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-zh-cn-16k-common-vocab8358-tensorflow1-online/summary">UniASR</a>        | CN, EN  | Alibaba Speech Data (60000hours) |    8358    |   100M    |     Online     | UniASR streaming offline unifying models                                                                                                    |
-| <a class="reference external" href="https://modelscope.cn/models/damo/speech_UniASR-large_asr_2pass-zh-cn-16k-common-vocab8358-tensorflow1-offline/summary">UniASR-large</a> | CN, EN  | Alibaba Speech Data (60000hours) |    8358    |   220M    |    Offline     | UniASR streaming offline unifying models                                                                                                    |
-|           <a class="reference external" href="https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-my-16k-common-vocab696-pytorch/summary">UniASR Burmese</a>           | Burmese  |  Alibaba Speech Data (? hours)   |    696     |    95M    |     Online     | UniASR streaming offline unifying models                                                                                                    |
-|           <a class="reference external" href="https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-he-16k-common-vocab1085-pytorch/summary">UniASR Hebrew</a>           |  Hebrew  |  Alibaba Speech Data (? hours)   |    1085    |    95M    |     Online     | UniASR streaming offline unifying models                                                                                                    |
-|       <a class="reference external" href="https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-ur-16k-common-vocab877-pytorch/summary">UniASR Urdu</a>                  |   Urdu   |  Alibaba Speech Data (? hours)   |    877     |    95M    |     Online     | UniASR streaming offline unifying models                                                                                                    |</p>
-</div>
+<table border="1" class="docutils">
+<thead>
+<tr>
+<th style="text-align: center;">Model Name</th>
+<th style="text-align: center;">Language</th>
+<th style="text-align: center;">Training Data</th>
+<th style="text-align: center;">Vocab Size</th>
+<th style="text-align: center;">Parameter</th>
+<th style="text-align: center;">Offline/Online</th>
+<th style="text-align: left;">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><a href="https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-zh-cn-16k-common-vocab8358-tensorflow1-online/summary">UniASR</a></td>
+<td style="text-align: center;">CN, EN</td>
+<td style="text-align: center;">Alibaba Speech Data (60000hours)</td>
+<td style="text-align: center;">8358</td>
+<td style="text-align: center;">100M</td>
+<td style="text-align: center;">Online</td>
+<td style="text-align: left;">UniASR streaming offline unifying models</td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="https://modelscope.cn/models/damo/speech_UniASR-large_asr_2pass-zh-cn-16k-common-vocab8358-tensorflow1-offline/summary">UniASR-large</a></td>
+<td style="text-align: center;">CN, EN</td>
+<td style="text-align: center;">Alibaba Speech Data (60000hours)</td>
+<td style="text-align: center;">8358</td>
+<td style="text-align: center;">220M</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: left;">UniASR streaming offline unifying models</td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-my-16k-common-vocab696-pytorch/summary">UniASR Burmese</a></td>
+<td style="text-align: center;">Burmese</td>
+<td style="text-align: center;">Alibaba Speech Data (? hours)</td>
+<td style="text-align: center;">696</td>
+<td style="text-align: center;">95M</td>
+<td style="text-align: center;">Online</td>
+<td style="text-align: left;">UniASR streaming offline unifying models</td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-he-16k-common-vocab1085-pytorch/summary">UniASR Hebrew</a></td>
+<td style="text-align: center;">Hebrew</td>
+<td style="text-align: center;">Alibaba Speech Data (? hours)</td>
+<td style="text-align: center;">1085</td>
+<td style="text-align: center;">95M</td>
+<td style="text-align: center;">Online</td>
+<td style="text-align: left;">UniASR streaming offline unifying models</td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-ur-16k-common-vocab877-pytorch/summary">UniASR Urdu</a></td>
+<td style="text-align: center;">Urdu</td>
+<td style="text-align: center;">Alibaba Speech Data (? hours)</td>
+<td style="text-align: center;">877</td>
+<td style="text-align: center;">95M</td>
+<td style="text-align: center;">Online</td>
+<td style="text-align: left;">UniASR streaming offline unifying models</td>
+</tr>
+</tbody>
+</table></div>
 <div class="section" id="conformer-models">
 <h4>Conformer Models<a class="headerlink" href="#conformer-models" title="Permalink to this headline"></a></h4>
-<p>|                                                       Model Name                                                       | Language |     Training Data     | Vocab Size | Parameter | Offline/Online | Notes                                                                                                                           |
-|:———————————————————————————————————————-:|:——–:|:———————:|:———-:|:———:|:————–:|:——————————————————————————————————————————–|
-| <a class="reference external" href="https://modelscope.cn/models/damo/speech_conformer_asr_nat-zh-cn-16k-aishell1-vocab4234-pytorch/summary">Conformer</a>   |   CN     |  AISHELL (178hours)   |    4234    |    44M    |    Offline     | Duration of input wav &lt;= 20s                                                                                                    |
-| <a class="reference external" href="https://www.modelscope.cn/models/damo/speech_conformer_asr_nat-zh-cn-16k-aishell2-vocab5212-pytorch/summary">Conformer</a>   |   CN     | AISHELL-2 (1000hours) |    5212    |    44M    |    Offline     | Duration of input wav &lt;= 20s                                                                                                    |</p>
-</div>
+<table border="1" class="docutils">
+<thead>
+<tr>
+<th style="text-align: center;">Model Name</th>
+<th style="text-align: center;">Language</th>
+<th style="text-align: center;">Training Data</th>
+<th style="text-align: center;">Vocab Size</th>
+<th style="text-align: center;">Parameter</th>
+<th style="text-align: center;">Offline/Online</th>
+<th style="text-align: left;">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><a href="https://modelscope.cn/models/damo/speech_conformer_asr_nat-zh-cn-16k-aishell1-vocab4234-pytorch/summary">Conformer</a></td>
+<td style="text-align: center;">CN</td>
+<td style="text-align: center;">AISHELL (178hours)</td>
+<td style="text-align: center;">4234</td>
+<td style="text-align: center;">44M</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: left;">Duration of input wav &lt;= 20s</td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="https://www.modelscope.cn/models/damo/speech_conformer_asr_nat-zh-cn-16k-aishell2-vocab5212-pytorch/summary">Conformer</a></td>
+<td style="text-align: center;">CN</td>
+<td style="text-align: center;">AISHELL-2 (1000hours)</td>
+<td style="text-align: center;">5212</td>
+<td style="text-align: center;">44M</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: left;">Duration of input wav &lt;= 20s</td>
+</tr>
+</tbody>
+</table></div>
 <div class="section" id="mfcca-models">
 <h4>MFCCA Models<a class="headerlink" href="#mfcca-models" title="Permalink to this headline"></a></h4>
-<p>|                                                       Model Name                                                       | Language |     Training Data     | Vocab Size | Parameter | Offline/Online | Notes                                                                                                                           |
-|:———————————————————————————————————————-:|:——–:|:———————:|:———-:|:———:|:————–:|:——————————————————————————————————————————–|
-| <a class="reference external" href="https://www.modelscope.cn/models/NPU-ASLP/speech_mfcca_asr-zh-cn-16k-alimeeting-vocab4950/summary">MFCCA</a>   |   CN     |  AliMeeting、AISHELL-4、Simudata (917hours)   |    4950    |    45M    |    Offline     | Duration of input wav &lt;= 20s, channel of input wav &lt;= 8 channel</p>
-</div>
+<table border="1" class="docutils">
+<thead>
+<tr>
+<th style="text-align: center;">Model Name</th>
+<th style="text-align: center;">Language</th>
+<th style="text-align: center;">Training Data</th>
+<th style="text-align: center;">Vocab Size</th>
+<th style="text-align: center;">Parameter</th>
+<th style="text-align: center;">Offline/Online</th>
+<th style="text-align: left;">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><a href="https://www.modelscope.cn/models/NPU-ASLP/speech_mfcca_asr-zh-cn-16k-alimeeting-vocab4950/summary">MFCCA</a></td>
+<td style="text-align: center;">CN</td>
+<td style="text-align: center;">AliMeeting、AISHELL-4、Simudata (917hours)</td>
+<td style="text-align: center;">4950</td>
+<td style="text-align: center;">45M</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: left;">Duration of input wav &lt;= 20s, channel of input wav &lt;= 8 channel</td>
+</tr>
+</tbody>
+</table></div>
 <div class="section" id="rnn-t-models">
 <h4>RNN-T Models<a class="headerlink" href="#rnn-t-models" title="Permalink to this headline"></a></h4>
 </div>
