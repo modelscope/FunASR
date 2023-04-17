@@ -34,7 +34,7 @@ pip install -U funasr
 # pip install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
 
-### Or install from source code
+#### Or install from source code
 
 ``` sh
 git clone https://github.com/alibaba/FunASR.git && cd FunASR
