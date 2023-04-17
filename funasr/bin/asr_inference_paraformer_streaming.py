@@ -609,6 +609,7 @@ def inference_modelscope(
 
         # 3. Build data-iterator
         is_final = False
+        cache = {}
         if param_dict is not None and "cache" in param_dict:
             cache = param_dict["cache"]
         if param_dict is not None and "is_final" in param_dict:
