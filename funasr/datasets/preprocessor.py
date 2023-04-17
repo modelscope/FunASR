@@ -48,6 +48,7 @@ def forward_segment(text, dic):
 def seg_tokenize(txt, seg_dict):
     out_txt = ""
     for word in txt:
+        word = word.lower()
         if word in seg_dict:
             out_txt += seg_dict[word] + " "
         else:
@@ -359,7 +360,6 @@ class CommonPreprocessor(AbsPreprocessor):
             if self.split_with_space:
                 tokens = text.strip().split(" ")
                 if self.seg_dict is not None:
-                    tokens = forward_segment("".join(tokens), self.seg_dict)
                     tokens = seg_tokenize(tokens, self.seg_dict)
             else:
                 tokens = self.tokenizer.text2tokens(text)
