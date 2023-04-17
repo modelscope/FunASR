@@ -75,14 +75,14 @@ Here we provided several pretrained models on different datasets. The details of
 
 ### Speaker Verification Models
 
-|                                                  Model Name                                                   |   Training Data   | Parameters | Vocab Size | Notes |
+|                                                  Model Name                                                   |   Training Data   | Parameters | Number Speaker | Notes |
 |:-------------------------------------------------------------------------------------------------------------:|:-----------------:|:----------:|:----------:|:------|
-| [Xvector](https://www.modelscope.cn/models/damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch/summary) | CNCeleb (?hours)  |   17.5M    |    3465    |       |
-| [Xvector](https://www.modelscope.cn/models/damo/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch/summary) | CallHome (?hours) |    61M     |    6135    |       |
+| [Xvector](https://www.modelscope.cn/models/damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch/summary) | CNCeleb (1,200 hours)  |   17.5M    |    3465    |    Xvector, speaker verification, Chinese   |
+| [Xvector](https://www.modelscope.cn/models/damo/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch/summary) | CallHome (60 hours) |    61M     |    6135    |   Xvector, speaker verification, English    |
 
 ### Speaker diarization Models
 
 |                                                    Model Name                                                    |    Training Data    | Parameters | Notes |
 |:----------------------------------------------------------------------------------------------------------------:|:-------------------:|:----------:|:------|
-| [SOND](https://www.modelscope.cn/models/damo/speech_diarization_sond-zh-cn-alimeeting-16k-n16k4-pytorch/summary) | AliMeeting (?hours) |   40.5M    |       |
-| [SOND](https://www.modelscope.cn/models/damo/speech_diarization_sond-en-us-callhome-8k-n16k4-pytorch/summary)    |  CallHome (?hours)  |     12M     |       |
+| [SOND](https://www.modelscope.cn/models/damo/speech_diarization_sond-zh-cn-alimeeting-16k-n16k4-pytorch/summary) | AliMeeting (120 hours) |   40.5M    |    Speaker diarization, profiles and records, Chinese |
+| [SOND](https://www.modelscope.cn/models/damo/speech_diarization_sond-en-us-callhome-8k-n16k4-pytorch/summary)    |  CallHome (60 hours)  |     12M     |    Speaker diarization, profiles and records, English   |
