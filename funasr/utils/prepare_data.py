@@ -63,13 +63,10 @@ def calc_shape(args, dataset, nj=32):
     if os.path.exists(shape_path):
         print('Shape file for small dataset already exists.')
         return
-    os.makedirs(shape_path, exist_ok=True)
+
     split_shape_path = os.path.join(args.data_dir, dataset, "shape_files")
-    if os.path.exists(shape_path):
-        assert os.path.exists(os.path.join(args.data_dir, dataset, "speech_shape"))
-        print('Shape file for small dataset already exists.')
-        return
-    os.makedirs(shape_path, exist_ok=True)
+    if os.path
+    os.makedirs(split_shape_path, exist_ok=True)
 
     # split
     wav_scp_file = os.path.join(args.data_dir, dataset, "wav.scp")
