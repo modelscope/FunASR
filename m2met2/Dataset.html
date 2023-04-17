@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Datasets &mdash; m2met2  documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Track_setting and evaluation" href="Track_setting_and_evaluation.html" />
+    <link rel="prev" title="Introduction" href="Introduction.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            m2met2
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Datasets</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview-of-training-data">Overview of training data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#detail-of-alimeeting-corpus">Detail of AliMeeting corpus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#get-the-data">Get the data</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Track_setting_and_evaluation.html">Track_setting and evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Baseline.html">Baseline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Rules.html">Rules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Organizers.html">Organizers</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">m2met2</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Datasets</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Dataset.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="datasets">
+<h1>Datasets<a class="headerlink" href="#datasets" title="Permalink to this headline"></a></h1>
+<div class="section" id="overview-of-training-data">
+<h2>Overview of training data<a class="headerlink" href="#overview-of-training-data" title="Permalink to this headline"></a></h2>
+<p>In the fixed training condition, the training dataset is restricted to three publicly available corpora, namely, AliMeeting, AISHELL-4, and CN-Celeb. To evaluate the performance of the models trained on these datasets, we will release a new Test set called Test-2023 for scoring and ranking. We will describe the AliMeeting dataset and the Test-2023 set in detail.</p>
+</div>
+<div class="section" id="detail-of-alimeeting-corpus">
+<h2>Detail of AliMeeting corpus<a class="headerlink" href="#detail-of-alimeeting-corpus" title="Permalink to this headline"></a></h2>
+<p>AliMeeting contains 118.75 hours of speech data in total. The dataset is divided into 104.75 hours for training (Train), 4 hours for evaluation (Eval) and 10 hours as test set (Test) for scoring and ranking. Specifically, the Train and Eval sets contain 212 and 8 sessions, respectively. Each session consists of a 15 to 30-minute discussion by a group of participants. The total number of participants in Train and Eval sets is 456 and 25, respectively, with balanced gender coverage.</p>
+<p>The dataset is collected in 13 meeting venues, which are categorized into three types: small, medium, and large rooms with sizes ranging from 8 m<span class="math notranslate nohighlight">\(^{2}\)</span> to 55 m<span class="math notranslate nohighlight">\(^{2}\)</span>. Different rooms give us a variety of acoustic properties and layouts. The detailed parameters of each meeting venue will be released together with the Train data. The type of wall material of the meeting venues covers cement, glass, etc. Other furnishings in meeting venues include sofa, TV, blackboard, fan, air conditioner, plants, etc. During recording, the participants of the meeting sit around the microphone array which is placed on the table and conduct a natural conversation. The microphone-speaker distance ranges from 0.3 m to 5.0 m. All participants are native Chinese speakers speaking Mandarin without strong accents. During the meeting, various kinds of indoor noise including but not limited to clicking, keyboard, door opening/closing, fan, bubble noise, etc., are made naturally. For both Train and Eval sets, the participants are required to remain in the same position during recording. There is no speaker overlap between the Train and Eval set. An example of the recording venue from the Train set is shown in Fig 1.</p>
+<p><img alt="meeting room" src="_images/meeting_room.png" /></p>
+<p>The number of participants within one meeting session ranges from 2 to 4. To ensure the coverage of different overlap ratios, we select various meeting topics during recording, including medical treatment, education, business, organization management, industrial production and other daily routine meetings. The average speech overlap ratio of Train and Eval sets are 42.27% and 34.76%, respectively. More details of AliMeeting are shown in Table 1. A detailed overlap ratio distribution of meeting sessions with different numbers of speakers in the Train and Eval set is shown in Table 2.</p>
+<p><img alt="dataset detail" src="_images/dataset_detail.png" /></p>
+<p>The Test-2023 set consists of 20 sessions that were recorded in an identical acoustic setting to that of the AliMeeting corpus. Each meeting session in the Test-2023 dataset comprises between 2 and 4 participants, thereby sharing a similar configuration with the AliMeeting test set.</p>
+<p>We also record the near-field signal of each participant using a headset microphone and ensure that only the participant’s own speech is recorded and transcribed. It is worth noting that the far-field audio recorded by the microphone array and the near-field audio recorded by the headset microphone will be synchronized to a common timeline range.</p>
+<p>All transcriptions of the speech data are prepared in TextGrid format for each session, which contains the information of the session duration, speaker information (number of speaker, speaker-id, gender, etc.), the total number of segments of each speaker, the timestamp and transcription of each segment, etc.</p>
+</div>
+<div class="section" id="get-the-data">
+<h2>Get the data<a class="headerlink" href="#get-the-data" title="Permalink to this headline"></a></h2>
+<p>The three dataset for training mentioned above can be downloaded at <a class="reference external" href="https://openslr.org/resources.php">OpenSLR</a>. The participants can download via the following links. Particularly, in the baseline we provide convenient data preparation scripts for AliMeeting corpus.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://openslr.org/119/">AliMeeting</a></p></li>
+<li><p><a class="reference external" href="https://openslr.org/111/">AISHELL-4</a></p></li>
+<li><p><a class="reference external" href="https://openslr.org/82/">CN-Celeb</a></p></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Track_setting_and_evaluation.html" class="btn btn-neutral float-right" title="Track_setting and evaluation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Speech Lab, Alibaba Group; Audio, Speech and Language Processing Group, Northwestern Polytechnical University.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
