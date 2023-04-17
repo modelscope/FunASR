@@ -7,7 +7,7 @@ import numpy as np
 import torch
 
 from funasr.models.rnnt_predictor.abs_decoder import AbsDecoder
-from funasr.models.joint_network import JointNetwork
+from funasr.models.joint_net.joint_network import JointNetwork
 
 
 @dataclass

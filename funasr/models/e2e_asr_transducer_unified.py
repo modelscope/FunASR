@@ -12,7 +12,7 @@ from funasr.models.frontend.abs_frontend import AbsFrontend
 from funasr.models.specaug.abs_specaug import AbsSpecAug
 from funasr.models.rnnt_predictor.abs_decoder import AbsDecoder
 from funasr.models.encoder.conformer_encoder import ConformerChunkEncoder as Encoder
-from funasr.models.joint_network import JointNetwork
+from funasr.models.joint_net.joint_network import JointNetwork
 from funasr.modules.nets_utils import get_transducer_task_io
 from funasr.layers.abs_normalize import AbsNormalize
 from funasr.torch_utils.device_funcs import force_gatherable

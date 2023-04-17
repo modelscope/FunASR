@@ -25,9 +25,9 @@ from funasr.models.rnnt_predictor.abs_decoder import AbsDecoder
 from funasr.models.rnnt_predictor.rnn_decoder import RNNDecoder
 from funasr.models.rnnt_predictor.stateless_decoder import StatelessDecoder
 from funasr.models.encoder.conformer_encoder import ConformerChunkEncoder
-from funasr.models.e2e_transducer import TransducerModel
-from funasr.models.e2e_transducer_unified import UnifiedTransducerModel
-from funasr.models.joint_network import JointNetwork
+from funasr.models.e2e_asr_transducer import TransducerModel
+from funasr.models.e2e_asr_transducer_unified import UnifiedTransducerModel
+from funasr.models.joint_net.joint_network import JointNetwork
 from funasr.layers.abs_normalize import AbsNormalize
 from funasr.layers.global_mvn import GlobalMVN
 from funasr.layers.utterance_mvn import UtteranceMVN
