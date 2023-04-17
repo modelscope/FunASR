@@ -819,8 +819,44 @@ def split_to_mini_sentence(words: list, word_limit: int = 20):
     return sentences
 
 
-def build_preprocess(args):
-    if args.task_name == "asr":
-        pass
+def build_preprocess(args, train):
+    if args.use_preprocessor:
+        return None
+    if args.task_name in ["asr", "data2vec", "diar", "sv"]:
+        retval = CommonPreprocessor(
+            train=train,
+            token_type=args.token_type,
+            token_list=args.token_list,
+            bpemodel=args.bpemodel,
+            non_linguistic_symbols=args.non_linguistic_symbols,
+            text_cleaner=args.cleaner,
+            g2p_type=args.g2p,
+            split_with_space=args.split_with_space if hasattr(args, "split_with_space") else False,
+            seg_dict_file=args.seg_dict_file if hasattr(args, "seg_dict_file") else None,
+            rir_scp=args.rir_scp if hasattr(args, "rir_scp") else None,
+            rir_apply_prob=args.rir_apply_prob if hasattr(args, "rir_apply_prob") else 1.0,
+            noise_scp=args.noise_scp if hasattr(args, "noise_scp") else None,
+            noise_apply_prob=args.noise_apply_prob if hasattr(args, "noise_apply_prob") else 1.0,
+            noise_db_range=args.noise_db_range if hasattr(args, "noise_db_range") else "13_15",
+            speech_volume_normalize=args.speech_volume_normalize if hasattr(args, "rir_scp") else None,
+        )
+    elif args.task_name == "punc":
+        token_types = [args.token_type, args.token_type]
+        token_lists = [args.token_list, args.punc_list]
+        bpemodels = [args.bpemodel, args.bpemodel]
+        text_names = ["text", "punc"]
+        retval = PuncTrainTokenizerCommonPreprocessor(
+            train=train,
+            token_type=token_types,
+            token_list=token_lists,
+            bpemodel=bpemodels,
+            text_cleaner=args.cleaner,
+            g2p_type=args.g2p,
+            text_name=text_names,
+            non_linguistic_symbols=args.non_linguistic_symbols,
+        )
+    elif args.task_name == "vad":
+        retval = None
     else:
         raise ValueError(f"Not supported task={args.task_name}")
+    return retval
