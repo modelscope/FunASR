@@ -25,6 +25,7 @@ def get_parser():
         help="The number of gpus. 0 indicates CPU mode",
     )
     parser.add_argument("--seed", type=int, default=0, help="Random seed")
+    parser.add_argument("--task_name", type=str, default="asr", help="Name for different tasks")
 
     # ddp related
     parser.add_argument(
