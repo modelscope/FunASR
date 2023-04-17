@@ -4,6 +4,7 @@ import sys
 
 import torch
 
+from funasr.torch_utils.set_all_random_seed import set_all_random_seed
 from funasr.utils import config_argparse
 from funasr.utils.build_distributed import build_distributed
 from funasr.utils.prepare_data import prepare_data
@@ -340,4 +341,10 @@ if __name__ == '__main__':
                                                                    distributed_option.dist_rank,
                                                                    distributed_option.local_rank))
 
+    # prepare files for dataloader
     prepare_data(args, distributed_option)
+
+    set_all_random_seed(args.seed)
+    torch.backends.cudnn.enabled = args.cudnn_enabled
+    torch.backends.cudnn.benchmark = args.cudnn_benchmark
+    torch.backends.cudnn.deterministic = args.cudnn_deterministic

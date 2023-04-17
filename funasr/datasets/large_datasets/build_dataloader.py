@@ -64,27 +64,17 @@ class SentencepiecesTokenizer(AbsTokenizer):
         return self.sp.DecodePieces(list(tokens))
 
 
-class ArkDataLoader(AbsIterFactory):
-    def __init__(self, data_list, dict_file, dataset_conf, frontend_conf=None, seg_dict_file=None, punc_dict_file=None,
-                 bpemodel_file=None, mode="train"):
-        symbol_table = read_symbol_table(dict_file) if dict_file is not None else None
-        if seg_dict_file is not None:
-            seg_dict = load_seg_dict(seg_dict_file)
-        else:
-            seg_dict = None
-        if punc_dict_file is not None:
-            punc_dict = read_symbol_table(punc_dict_file)
-        else:
-            punc_dict = None
-        self.dataset_conf = dataset_conf
-        self.frontend_conf = frontend_conf
+class LargeDataLoader(AbsIterFactory):
+    def __init__(self, args, mode="train"):
+        symbol_table = read_symbol_table(args.token_list) if args.token_list is not None else None
+        seg_dict = load_seg_dict(args.seg_dict_file) if args.seg_dict_file is not None else None
+        punc_dict = load_seg_dict(args.punc_dict_file) if args.punc_dict_file is not None else None
+        bpe_tokenizer = load_seg_dict(args.bpemodel_file) if args.bpemodel_file is not None else None
+        self.dataset_conf = args.dataset_conf
+        self.frontend_conf = args.frontend_conf
         logging.info("dataloader config: {}".format(self.dataset_conf))
         batch_mode = self.dataset_conf.get("batch_mode", "padding")
-        if bpemodel_file is not None:
-            bpe_tokenizer = SentencepiecesTokenizer(bpemodel_file)
-        else:
-            bpe_tokenizer = None
-        self.dataset = Dataset(data_list, symbol_table, seg_dict, punc_dict, bpe_tokenizer,
+        self.dataset = Dataset(args.data_list, symbol_table, seg_dict, punc_dict, bpe_tokenizer,
                                self.dataset_conf, self.frontend_conf, mode=mode, batch_mode=batch_mode)
 
     def build_iter(self, epoch, shuffle=True):
