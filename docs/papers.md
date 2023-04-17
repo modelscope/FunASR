@@ -28,6 +28,7 @@ FunASR have implemented the following paper code
 
 ### Speaker diarization
 - [Speaker Overlap-aware Neural Diarization for Multi-party Meeting Analysis](https://arxiv.org/abs/2211.10243), EMNLP 2022
+- [TOLD: A Novel Two-Stage Overlap-Aware Framework for Speaker Diarization](https://arxiv.org/abs/2303.05397), ICASSP 2023
 
 ### Timestamp Prediction
 - [Achieving Timestamp Prediction While Recognizing with Non-Autoregressive End-to-End ASR Model](https://arxiv.org/abs/2301.12343), arXiv:2301.12343
