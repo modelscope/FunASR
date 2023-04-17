@@ -11,10 +11,14 @@ FunASR hopes to build a bridge between academic research and industrial applicat
 
 .. toctree::
    :maxdepth: 1
-   :caption: Tutorial:
+   :caption: Installation:
 
    ./installation.md
-   ./papers.md
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Tutorial:
+
    ./get_started.md
    ./build_task.md
 
@@ -24,6 +28,13 @@ FunASR hopes to build a bridge between academic research and industrial applicat
 
    ./modelscope_models.md
    ./modelscope_usages.md
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Papers:
+
+   ./papers.md
+
 
 Indices and tables
 ==================
