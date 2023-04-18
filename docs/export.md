@@ -1,1 +1,0 @@
-../funasr/export/README.md
