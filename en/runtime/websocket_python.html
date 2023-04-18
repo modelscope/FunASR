@@ -3,22 +3,22 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Using funasr with websocket &mdash; FunASR  documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <title>Using funasr with websocket &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
+    <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script src="_static/js/theme.js"></script>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Pretrained models" href="modelscope_models.html" />
-    <link rel="prev" title="Using funasr with grpc-cpp" href="grpc_cpp.html" /> 
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Pretrained Models on ModelScope" href="../modelscope_models.html" />
+    <link rel="prev" title="Using funasr with grpc-python" href="grpc_python.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -29,11 +29,11 @@
 
           
           
-          <a href="index.html" class="icon icon-home">
+          <a href="../index.html" class="icon icon-home">
             FunASR
           </a>
 <div role="search">
-  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
@@ -42,27 +42,24 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption"><span class="caption-text">Installation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Recipe</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="asr_recipe.html">Speech Recognition</a></li>
-<li class="toctree-l1"><a class="reference internal" href="sv_recipe.html">Speaker Verification</a></li>
-<li class="toctree-l1"><a class="reference internal" href="punc_recipe.html">Punctuation Restoration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="vad_recipe.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../recipe/asr_recipe.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../recipe/sv_recipe.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../recipe/punc_recipe.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../recipe/vad_recipe.html">Voice Activity Detection</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Define Model</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="build_task.html">Build custom tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_task.html">Build custom tasks</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Runtime</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="export.html">Export models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="onnxruntime_python.html">ONNXRuntime-python</a></li>
 <li class="toctree-l1"><a class="reference internal" href="onnxruntime_cpp.html">ONNXRuntime-cpp</a></li>
-<li class="toctree-l1"><a class="reference internal" href="libtorch_python.html">Libtorch-python</a></li>
 <li class="toctree-l1"><a class="reference internal" href="grpc_python.html">Using funasr with grpc-python</a></li>
-<li class="toctree-l1"><a class="reference internal" href="grpc_cpp.html">Using funasr with grpc-cpp</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Using funasr with websocket</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#for-the-server">For the Server</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#for-the-client">For the client</a></li>
@@ -70,14 +67,22 @@
 </ul>
 </li>
 </ul>
+<p class="caption"><span class="caption-text">Model Zoo</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modelscope_models.html">Pretrained Models on ModelScope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../huggingface_models.html">Pretrained Models on Huggingface</a></li>
+</ul>
 <p class="caption"><span class="caption-text">ModelScope pipeline</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="modelscope_models.html">Pretrained models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modelscope_usages.html">ModelScope Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modescope_pipeline/quick_start.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modescope_pipeline/asr_pipeline.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modescope_pipeline/vad_pipeline.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modescope_pipeline/punc_pipeline.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modescope_pipeline/sv_pipeline.html">Speech Recognition</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Papers</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="papers.html">Papers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../papers.html">Papers</a></li>
 </ul>
 
         </div>
@@ -86,17 +91,17 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">FunASR</a>
+          <a href="../index.html">FunASR</a>
       </nav>
 
       <div class="wy-nav-content">
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
       <li class="breadcrumb-item active">Using funasr with websocket</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/websocket_python.md.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/runtime/websocket_python.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -151,8 +156,8 @@ pip install -r requirements_client.txt
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="grpc_cpp.html" class="btn btn-neutral float-left" title="Using funasr with grpc-cpp" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="modelscope_models.html" class="btn btn-neutral float-right" title="Pretrained models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="grpc_python.html" class="btn btn-neutral float-left" title="Using funasr with grpc-python" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../modelscope_models.html" class="btn btn-neutral float-right" title="Pretrained Models on ModelScope" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

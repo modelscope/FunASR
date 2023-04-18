@@ -19,10 +19,10 @@ FunASR hopes to build a bridge between academic research and industrial applicat
    :maxdepth: 1
    :caption: Recipe
 
-   ./asr_recipe.md
-   ./sv_recipe.md
-   ./punc_recipe.md
-   ./vad_recipe.md
+   ./recipe/asr_recipe.md
+   ./recipe/sv_recipe.md
+   ./recipe/punc_recipe.md
+   ./recipe/vad_recipe.md
 
 .. toctree::
    :maxdepth: 1
@@ -34,22 +34,30 @@ FunASR hopes to build a bridge between academic research and industrial applicat
    :maxdepth: 1
    :caption: Runtime
 
-   ./export.md
-   ./onnxruntime_python.md
-   ./onnxruntime_cpp.md
-   ./libtorch_python.md
-   ./grpc_python.md
-   ./grpc_cpp.md
-   ./websocket_python.md
+   ./runtime/export.md
+   ./runtime/onnxruntime_python.md
+   ./runtime/onnxruntime_cpp.md
+   ./runtime/libtorch_python.md
+   ./runtime/grpc_python.md
+   ./runtime/grpc_cpp.md
+   ./runtime/websocket_python.md
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Model Zoo
 
+   ./modelscope_models.md
+   ./huggingface_models.md
 
 .. toctree::
    :maxdepth: 1
    :caption: ModelScope pipeline
 
-   ./modelscope_models.md
-   ./modelscope_usages.md
+   ./modescope_pipeline/quick_start.md
+   ./modescope_pipeline/asr_pipeline.md
+   ./modescope_pipeline/vad_pipeline.md
+   ./modescope_pipeline/punc_pipeline.md
+   ./modescope_pipeline/sv_pipeline.md
 
 .. toctree::
    :maxdepth: 1

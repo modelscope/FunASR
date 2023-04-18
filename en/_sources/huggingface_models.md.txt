@@ -1,4 +1,4 @@
-# Pretrained Models on ModelScope
+# Pretrained Models on Huggingface
 
 ## Model License
 -  Apache License 2.0
