@@ -1,4 +1,4 @@
-# Pretrained models on ModelScope
+# Pretrained models
 
 ## Model License
 -  Apache License 2.0
@@ -27,8 +27,8 @@ Here we provided several pretrained models on different datasets. The details of
 
 |                                                               Model Name                                                               | Language |          Training Data           | Vocab Size | Parameter | Offline/Online | Notes                                                                                                                           |
 |:--------------------------------------------------------------------------------------------------------------------------------------:|:--------:|:--------------------------------:|:----------:|:---------:|:--------------:|:--------------------------------------------------------------------------------------------------------------------------------|
-|       [UniASR](https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-zh-cn-16k-common-vocab8358-tensorflow1-online/summary)        | CN, EN  | Alibaba Speech Data (60000hours) |    8358    |   100M    |     Online     | UniASR streaming offline unifying models                                                                                                    |
-| [UniASR-large](https://modelscope.cn/models/damo/speech_UniASR-large_asr_2pass-zh-cn-16k-common-vocab8358-tensorflow1-offline/summary) | CN, EN  | Alibaba Speech Data (60000hours) |    8358    |   220M    |    Offline     | UniASR streaming offline unifying models                                                                                                    |
+|       [UniASR](https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-zh-cn-16k-common-vocab8358-tensorflow1-online/summary)        | CN & EN  | Alibaba Speech Data (60000hours) |    8358    |   100M    |     Online     | UniASR streaming offline unifying models                                                                                                    |
+| [UniASR-large](https://modelscope.cn/models/damo/speech_UniASR-large_asr_2pass-zh-cn-16k-common-vocab8358-tensorflow1-offline/summary) | CN & EN  | Alibaba Speech Data (60000hours) |    8358    |   220M    |    Offline     | UniASR streaming offline unifying models                                                                                                    |
 |           [UniASR Burmese](https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-my-16k-common-vocab696-pytorch/summary)           | Burmese  |  Alibaba Speech Data (? hours)   |    696     |    95M    |     Online     | UniASR streaming offline unifying models                                                                                                    |
 |           [UniASR Hebrew](https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-he-16k-common-vocab1085-pytorch/summary)           |  Hebrew  |  Alibaba Speech Data (? hours)   |    1085    |    95M    |     Online     | UniASR streaming offline unifying models                                                                                                    |
 |       [UniASR Urdu](https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-ur-16k-common-vocab877-pytorch/summary)                  |   Urdu   |  Alibaba Speech Data (? hours)   |    877     |    95M    |     Online     | UniASR streaming offline unifying models                                                                                                    |
@@ -47,9 +47,9 @@ Here we provided several pretrained models on different datasets. The details of
 
 #### MFCCA Models
 
-|                                                       Model Name                                                       | Language |     Training Data     | Vocab Size | Parameter | Offline/Online | Notes                                                                                                                           |
-|:----------------------------------------------------------------------------------------------------------------------:|:--------:|:---------------------:|:----------:|:---------:|:--------------:|:--------------------------------------------------------------------------------------------------------------------------------|
-| [MFCCA](https://www.modelscope.cn/models/NPU-ASLP/speech_mfcca_asr-zh-cn-16k-alimeeting-vocab4950/summary)   |   CN     |  AliMeeting、AISHELL-4、Simudata (917hours)   |    4950    |    45M    |    Offline     | Duration of input wav <= 20s, channel of input wav <= 8 channel
+|                                                  Model Name                                                   | Language |               Training Data                | Vocab Size | Parameter | Offline/Online | Notes                                                                                                                           |
+|:-------------------------------------------------------------------------------------------------------------:|:--------:|:------------------------------------------:|:----------:|:---------:|:--------------:|:--------------------------------------------------------------------------------------------------------------------------------|
+| [MFCCA](https://www.modelscope.cn/models/NPU-ASLP/speech_mfcca_asr-zh-cn-16k-alimeeting-vocab4950/summary)    |   CN     | AliMeeting、AISHELL-4、Simudata (917hours)   |     4950   |    45M    |    Offline     | Duration of input wav <= 20s, channel of input wav <= 8 channel |
 
 
 

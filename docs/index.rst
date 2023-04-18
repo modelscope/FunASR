@@ -24,7 +24,18 @@ FunASR hopes to build a bridge between academic research and industrial applicat
 
 .. toctree::
    :maxdepth: 1
-   :caption: ModelScope:
+   :caption: Runtime:
+
+   ../funasr/export/README.md
+   ../funasr/runtime/python/onnxruntime/README.md
+   ../funasr/runtime/python/libtorch/README.md
+   ../funasr/runtime/onnxruntime/readme.md
+   ../funasr/runtime/grpc/Readme.md
+
+
+.. toctree::
+   :maxdepth: 1
+   :caption: ModelScope pipeline:
 
    ./modelscope_models.md
    ./modelscope_usages.md
