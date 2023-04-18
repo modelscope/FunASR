@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Using paraformer with grpc &mdash; FunASR  documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <title>Using funasr with grpc-python &mdash; FunASR  documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
@@ -17,8 +17,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="paraformer grpc onnx server in c++" href="grpc_cpp.html" />
-    <link rel="prev" title="Using funasr with libtorch" href="libtorch_python.html" /> 
+    <link rel="next" title="Using funasr with grpc-cpp" href="grpc_cpp.html" />
+    <link rel="prev" title="Libtorch-python" href="libtorch_python.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -51,23 +51,11 @@
 </ul>
 <p class="caption"><span class="caption-text">Runtime:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="export.html">Environments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="export.html#install-modelscope-and-funasr">Install modelscope and funasr</a></li>
-<li class="toctree-l1"><a class="reference internal" href="export.html#export-model">Export model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="export.html#performance-benchmark-of-runtime">Performance Benchmark of Runtime</a></li>
-<li class="toctree-l1"><a class="reference internal" href="export.html#for-example">For example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="export.html#acknowledge">Acknowledge</a></li>
-<li class="toctree-l1"><a class="reference internal" href="onnxruntime_python.html">Using funasr with ONNXRuntime</a></li>
-<li class="toctree-l1"><a class="reference internal" href="onnxruntime_python.html#performance-benchmark">Performance benchmark</a></li>
-<li class="toctree-l1"><a class="reference internal" href="onnxruntime_python.html#acknowledge">Acknowledge</a></li>
-<li class="toctree-l1"><a class="reference internal" href="onnxruntime_cpp.html">Demo</a></li>
-<li class="toctree-l1"><a class="reference internal" href="onnxruntime_cpp.html#steps">Steps</a></li>
-<li class="toctree-l1"><a class="reference internal" href="onnxruntime_cpp.html#acknowledge">Acknowledge</a></li>
-<li class="toctree-l1"><a class="reference internal" href="libtorch_python.html">Using funasr with libtorch</a></li>
-<li class="toctree-l1"><a class="reference internal" href="libtorch_python.html#performance-benchmark">Performance benchmark</a></li>
-<li class="toctree-l1"><a class="reference internal" href="libtorch_python.html#speed">Speed</a></li>
-<li class="toctree-l1"><a class="reference internal" href="libtorch_python.html#acknowledge">Acknowledge</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Using paraformer with grpc</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="export.html">Export models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="onnxruntime_python.html">ONNXRuntime-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="onnxruntime_cpp.html">ONNXRuntime-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libtorch_python.html">Libtorch-python</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Using funasr with grpc-python</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#for-the-server">For the Server</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#prepare-server-environment">Prepare server environment</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#backend-is-modelscope-pipeline-default">Backend is modelscope pipeline (default)</a></li>
@@ -88,8 +76,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#reference">Reference</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="grpc_cpp.html">paraformer grpc onnx server in c++</a></li>
-<li class="toctree-l1"><a class="reference internal" href="grpc_cpp.html#acknowledge">Acknowledge</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grpc_cpp.html">Using funasr with grpc-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="websocket_python.html">Using funasr with websocket</a></li>
 </ul>
 <p class="caption"><span class="caption-text">ModelScope pipeline:</span></p>
 <ul>
@@ -115,7 +103,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Using paraformer with grpc</li>
+      <li class="breadcrumb-item active">Using funasr with grpc-python</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/grpc_python.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -125,8 +113,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="using-paraformer-with-grpc">
-<h1>Using paraformer with grpc<a class="headerlink" href="#using-paraformer-with-grpc" title="Permalink to this headline"></a></h1>
+  <div class="section" id="using-funasr-with-grpc-python">
+<h1>Using funasr with grpc-python<a class="headerlink" href="#using-funasr-with-grpc-python" title="Permalink to this headline"></a></h1>
 <p>We can send streaming audio data to server in real-time with grpc client every 10 ms e.g., and get transcribed text when stop speaking.
 The audio data is in streaming, the asr inference process is in offline.</p>
 <div class="section" id="for-the-server">
@@ -223,8 +211,8 @@ python -m grpc_tools.protoc  --proto_path<span class="o">=</span>./proto -I ./pr
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="libtorch_python.html" class="btn btn-neutral float-left" title="Using funasr with libtorch" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="grpc_cpp.html" class="btn btn-neutral float-right" title="paraformer grpc onnx server in c++" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="libtorch_python.html" class="btn btn-neutral float-left" title="Libtorch-python" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="grpc_cpp.html" class="btn btn-neutral float-right" title="Using funasr with grpc-cpp" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

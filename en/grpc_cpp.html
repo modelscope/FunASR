@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>paraformer grpc onnx server in c++ &mdash; FunASR  documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <title>Using funasr with grpc-cpp &mdash; FunASR  documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
@@ -17,8 +17,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Pretrained models" href="modelscope_models.html" />
-    <link rel="prev" title="Using paraformer with grpc" href="grpc_python.html" /> 
+    <link rel="next" title="Using funasr with websocket" href="websocket_python.html" />
+    <link rel="prev" title="Using funasr with grpc-python" href="grpc_python.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -51,32 +51,29 @@
 </ul>
 <p class="caption"><span class="caption-text">Runtime:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="export.html">Environments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="export.html#install-modelscope-and-funasr">Install modelscope and funasr</a></li>
-<li class="toctree-l1"><a class="reference internal" href="export.html#export-model">Export model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="export.html#performance-benchmark-of-runtime">Performance Benchmark of Runtime</a></li>
-<li class="toctree-l1"><a class="reference internal" href="export.html#for-example">For example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="export.html#acknowledge">Acknowledge</a></li>
-<li class="toctree-l1"><a class="reference internal" href="onnxruntime_python.html">Using funasr with ONNXRuntime</a></li>
-<li class="toctree-l1"><a class="reference internal" href="onnxruntime_python.html#performance-benchmark">Performance benchmark</a></li>
-<li class="toctree-l1"><a class="reference internal" href="onnxruntime_python.html#acknowledge">Acknowledge</a></li>
-<li class="toctree-l1"><a class="reference internal" href="onnxruntime_cpp.html">Demo</a></li>
-<li class="toctree-l1"><a class="reference internal" href="onnxruntime_cpp.html#steps">Steps</a></li>
-<li class="toctree-l1"><a class="reference internal" href="onnxruntime_cpp.html#acknowledge">Acknowledge</a></li>
-<li class="toctree-l1"><a class="reference internal" href="libtorch_python.html">Using funasr with libtorch</a></li>
-<li class="toctree-l1"><a class="reference internal" href="libtorch_python.html#performance-benchmark">Performance benchmark</a></li>
-<li class="toctree-l1"><a class="reference internal" href="libtorch_python.html#speed">Speed</a></li>
-<li class="toctree-l1"><a class="reference internal" href="libtorch_python.html#acknowledge">Acknowledge</a></li>
-<li class="toctree-l1"><a class="reference internal" href="grpc_python.html">Using paraformer with grpc</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">paraformer grpc onnx server in c++</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#step-1-build-onnxruntime-as-it-s-document">Step 1. Build ../onnxruntime as it’s document</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#step-2-compile-and-install-grpc-v1-52-0-in-case-of-grpc-bugs">Step 2. Compile and install grpc v1.52.0 in case of grpc bugs</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#step-3-compile-and-start-grpc-onnx-paraformer-server">Step 3. Compile and start grpc onnx paraformer server</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#step-4-start-grpc-paraformer-server">Step 4. Start grpc paraformer server</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#step-5-start-grpc-python-paraformer-client-on-pc-with-mic">Step 5. Start grpc python paraformer client  on PC with MIC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="export.html">Export models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="onnxruntime_python.html">ONNXRuntime-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="onnxruntime_cpp.html">ONNXRuntime-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libtorch_python.html">Libtorch-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grpc_python.html">Using funasr with grpc-python</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Using funasr with grpc-cpp</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#for-the-server">For the Server</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#build-onnxruntime-as-it-s-document">Build onnxruntime as it’s document</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#compile-and-install-grpc-v1-52-0-in-case-of-grpc-bugs">Compile and install grpc v1.52.0 in case of grpc bugs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#compile-and-start-grpc-onnx-paraformer-server">Compile and start grpc onnx paraformer server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#start-grpc-paraformer-server">Start grpc paraformer server</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="#acknowledge">Acknowledge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#for-the-client">For the client</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#install-the-requirements-as-in-grpc-python">Install the requirements as in grpc-python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#generate-protobuf-file">Generate protobuf file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#start-grpc-client">Start grpc client</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#acknowledge">Acknowledge</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="websocket_python.html">Using funasr with websocket</a></li>
 </ul>
 <p class="caption"><span class="caption-text">ModelScope pipeline:</span></p>
 <ul>
@@ -102,7 +99,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">paraformer grpc onnx server in c++</li>
+      <li class="breadcrumb-item active">Using funasr with grpc-cpp</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/grpc_cpp.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -112,10 +109,12 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="paraformer-grpc-onnx-server-in-c">
-<h1>paraformer grpc onnx server in c++<a class="headerlink" href="#paraformer-grpc-onnx-server-in-c" title="Permalink to this headline"></a></h1>
-<div class="section" id="step-1-build-onnxruntime-as-it-s-document">
-<h2>Step 1. Build ../onnxruntime as it’s document<a class="headerlink" href="#step-1-build-onnxruntime-as-it-s-document" title="Permalink to this headline"></a></h2>
+  <div class="section" id="using-funasr-with-grpc-cpp">
+<h1>Using funasr with grpc-cpp<a class="headerlink" href="#using-funasr-with-grpc-cpp" title="Permalink to this headline"></a></h1>
+<div class="section" id="for-the-server">
+<h2>For the Server<a class="headerlink" href="#for-the-server" title="Permalink to this headline"></a></h2>
+<div class="section" id="build-onnxruntime-as-it-s-document">
+<h3>Build <a class="reference internal" href="onnxruntime_cpp.html"><span class="doc">onnxruntime</span></a> as it’s document<a class="headerlink" href="#build-onnxruntime-as-it-s-document" title="Permalink to this headline"></a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#put onnx-lib &amp; onnx-asr-model into /path/to/asrmodel(eg: /data/asrmodel)</span>
 <span class="n">ls</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">asrmodel</span><span class="o">/</span>
 <span class="n">onnxruntime</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">x64</span><span class="o">-</span><span class="mf">1.14</span><span class="o">.</span><span class="mi">0</span>  <span class="n">speech_paraformer</span><span class="o">-</span><span class="n">large_asr_nat</span><span class="o">-</span><span class="n">zh</span><span class="o">-</span><span class="n">cn</span><span class="o">-</span><span class="mi">16</span><span class="n">k</span><span class="o">-</span><span class="n">common</span><span class="o">-</span><span class="n">vocab8404</span><span class="o">-</span><span class="n">pytorch</span>
@@ -124,8 +123,8 @@
 </pre></div>
 </div>
 </div>
-<div class="section" id="step-2-compile-and-install-grpc-v1-52-0-in-case-of-grpc-bugs">
-<h2>Step 2. Compile and install grpc v1.52.0 in case of grpc bugs<a class="headerlink" href="#step-2-compile-and-install-grpc-v1-52-0-in-case-of-grpc-bugs" title="Permalink to this headline"></a></h2>
+<div class="section" id="compile-and-install-grpc-v1-52-0-in-case-of-grpc-bugs">
+<h3>Compile and install grpc v1.52.0 in case of grpc bugs<a class="headerlink" href="#compile-and-install-grpc-v1-52-0-in-case-of-grpc-bugs" title="Permalink to this headline"></a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>export GRPC_INSTALL_DIR=/data/soft/grpc
 export PKG_CONFIG_PATH=$GRPC_INSTALL_DIR/lib/pkgconfig
 
@@ -150,100 +149,63 @@ source ~/.bashrc
 </pre></div>
 </div>
 </div>
-<div class="section" id="step-3-compile-and-start-grpc-onnx-paraformer-server">
-<h2>Step 3. Compile and start grpc onnx paraformer server<a class="headerlink" href="#step-3-compile-and-start-grpc-onnx-paraformer-server" title="Permalink to this headline"></a></h2>
+<div class="section" id="compile-and-start-grpc-onnx-paraformer-server">
+<h3>Compile and start grpc onnx paraformer server<a class="headerlink" href="#compile-and-start-grpc-onnx-paraformer-server" title="Permalink to this headline"></a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># set -DONNXRUNTIME_DIR=/path/to/asrmodel/onnxruntime-linux-x64-1.14.0</span>
 <span class="o">./</span><span class="n">rebuild</span><span class="o">.</span><span class="n">sh</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="step-4-start-grpc-paraformer-server">
-<h2>Step 4. Start grpc paraformer server<a class="headerlink" href="#step-4-start-grpc-paraformer-server" title="Permalink to this headline"></a></h2>
+<div class="section" id="start-grpc-paraformer-server">
+<h3>Start grpc paraformer server<a class="headerlink" href="#start-grpc-paraformer-server" title="Permalink to this headline"></a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Usage</span><span class="p">:</span> <span class="o">./</span><span class="n">cmake</span><span class="o">/</span><span class="n">build</span><span class="o">/</span><span class="n">paraformer_server</span> <span class="n">port</span> <span class="n">thread_num</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">model_file</span> <span class="n">quantize</span><span class="p">(</span><span class="n">true</span> <span class="ow">or</span> <span class="n">false</span><span class="p">)</span>
 <span class="o">./</span><span class="n">cmake</span><span class="o">/</span><span class="n">build</span><span class="o">/</span><span class="n">paraformer_server</span> <span class="mi">10108</span> <span class="mi">4</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">asrmodel</span><span class="o">/</span><span class="n">speech_paraformer</span><span class="o">-</span><span class="n">large_asr_nat</span><span class="o">-</span><span class="n">zh</span><span class="o">-</span><span class="n">cn</span><span class="o">-</span><span class="mi">16</span><span class="n">k</span><span class="o">-</span><span class="n">common</span><span class="o">-</span><span class="n">vocab8404</span><span class="o">-</span><span class="n">pytorch</span> <span class="n">false</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="step-5-start-grpc-python-paraformer-client-on-pc-with-mic">
-<h2>Step 5. Start grpc python paraformer client  on PC with MIC<a class="headerlink" href="#step-5-start-grpc-python-paraformer-client-on-pc-with-mic" title="Permalink to this headline"></a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>cd ../python/grpc
-python grpc_main_client_mic.py  --host $server_ip --port 10108
+</div>
+<div class="section" id="for-the-client">
+<h2>For the client<a class="headerlink" href="#for-the-client" title="Permalink to this headline"></a></h2>
+<div class="section" id="install-the-requirements-as-in-grpc-python">
+<h3>Install the requirements as in <a class="reference external" href="./docs/grpc_python">grpc-python</a><a class="headerlink" href="#install-the-requirements-as-in-grpc-python" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/alibaba/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> FunASR
+<span class="nb">cd</span> funasr/runtime/python/grpc
+pip install -r requirements_client.txt
 </pre></div>
 </div>
-<p>The <code class="docutils literal notranslate"><span class="pre">grpc_main_client_mic.py</span></code> follows the [original design] (https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/grpc#workflow-in-desgin) by sending audio_data with chunks. If you want to send audio_data in one request, here is an example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># go to ../python/grpc to find this package</span>
-<span class="kn">import</span> <span class="nn">paraformer_pb2</span>
-
-
-<span class="k">class</span> <span class="nc">RecognizeStub</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">Recognize</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="n">stream_stream</span><span class="p">(</span>
-                <span class="s1">&#39;/paraformer.ASR/Recognize&#39;</span><span class="p">,</span>
-                <span class="n">request_serializer</span><span class="o">=</span><span class="n">paraformer_pb2</span><span class="o">.</span><span class="n">Request</span><span class="o">.</span><span class="n">SerializeToString</span><span class="p">,</span>
-                <span class="n">response_deserializer</span><span class="o">=</span><span class="n">paraformer_pb2</span><span class="o">.</span><span class="n">Response</span><span class="o">.</span><span class="n">FromString</span><span class="p">,</span>
-                <span class="p">)</span>
-
-
-<span class="k">async</span> <span class="k">def</span> <span class="nf">send</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">speaking</span><span class="p">,</span> <span class="n">isEnd</span><span class="p">):</span>
-    <span class="n">stub</span> <span class="o">=</span> <span class="n">RecognizeStub</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
-    <span class="n">req</span> <span class="o">=</span> <span class="n">paraformer_pb2</span><span class="o">.</span><span class="n">Request</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">data</span><span class="p">:</span>
-        <span class="n">req</span><span class="o">.</span><span class="n">audio_data</span> <span class="o">=</span> <span class="n">data</span>
-    <span class="n">req</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="s1">&#39;zz&#39;</span>
-    <span class="n">req</span><span class="o">.</span><span class="n">language</span> <span class="o">=</span> <span class="s1">&#39;zh-CN&#39;</span>
-    <span class="n">req</span><span class="o">.</span><span class="n">speaking</span> <span class="o">=</span> <span class="n">speaking</span>
-    <span class="n">req</span><span class="o">.</span><span class="n">isEnd</span> <span class="o">=</span> <span class="n">isEnd</span>
-    <span class="n">q</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">SimpleQueue</span><span class="p">()</span>
-    <span class="n">q</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">stub</span><span class="o">.</span><span class="n">Recognize</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
-
-<span class="c1"># send the audio data once</span>
-<span class="k">async</span> <span class="k">def</span> <span class="nf">grpc_rec</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">grpc_uri</span><span class="p">):</span>
-    <span class="k">with</span> <span class="n">grpc</span><span class="o">.</span><span class="n">insecure_channel</span><span class="p">(</span><span class="n">grpc_uri</span><span class="p">)</span> <span class="k">as</span> <span class="n">channel</span><span class="p">:</span>
-        <span class="n">b</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-        <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">send</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-        <span class="n">resp</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
-        <span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-        <span class="k">if</span> <span class="s1">&#39;decoding&#39;</span> <span class="o">==</span> <span class="n">resp</span><span class="o">.</span><span class="n">action</span><span class="p">:</span>
-            <span class="n">resp</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
-            <span class="k">if</span> <span class="s1">&#39;finish&#39;</span> <span class="o">==</span> <span class="n">resp</span><span class="o">.</span><span class="n">action</span><span class="p">:</span>
-                <span class="n">text</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">sentence</span><span class="p">)[</span><span class="s1">&#39;text&#39;</span><span class="p">]</span>
-        <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">send</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-        <span class="k">return</span> <span class="p">{</span>
-                <span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="n">text</span><span class="p">,</span>
-                <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">b</span><span class="p">,</span>
-                <span class="p">}</span>
-
-<span class="k">async</span> <span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
-    <span class="c1"># fc = FunAsrGrpcClient(&#39;127.0.0.1&#39;, 9900)</span>
-    <span class="c1"># t = await fc.rec(wav.tobytes())</span>
-    <span class="c1"># print(t)</span>
-    <span class="n">wav</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;z-10s.wav&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int16&#39;</span><span class="p">)</span>
-    <span class="n">uri</span> <span class="o">=</span> <span class="s1">&#39;127.0.0.1:9900&#39;</span>
-    <span class="n">res</span> <span class="o">=</span> <span class="k">await</span> <span class="n">grpc_rec</span><span class="p">(</span><span class="n">wav</span><span class="o">.</span><span class="n">tobytes</span><span class="p">(),</span> <span class="n">uri</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
-
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">test</span><span class="p">())</span>
+</div>
+<div class="section" id="generate-protobuf-file">
+<h3>Generate protobuf file<a class="headerlink" href="#generate-protobuf-file" title="Permalink to this headline"></a></h3>
+<p>Run on server, the two generated pb files are both used for server and client</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># paraformer_pb2.py and paraformer_pb2_grpc.py are already generated, </span>
+<span class="c1"># regenerate it only when you make changes to ./proto/paraformer.proto file.</span>
+python -m grpc_tools.protoc  --proto_path<span class="o">=</span>./proto -I ./proto    --python_out<span class="o">=</span>. --grpc_python_out<span class="o">=</span>./ ./proto/paraformer.proto
+</pre></div>
+</div>
+</div>
+<div class="section" id="start-grpc-client">
+<h3>Start grpc client<a class="headerlink" href="#start-grpc-client" title="Permalink to this headline"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Start client.</span>
+<span class="n">python</span> <span class="n">grpc_main_client_mic</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">host</span> <span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span> <span class="o">--</span><span class="n">port</span> <span class="mi">10095</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="section" id="acknowledge">
-<h1>Acknowledge<a class="headerlink" href="#acknowledge" title="Permalink to this headline"></a></h1>
+<h2>Acknowledge<a class="headerlink" href="#acknowledge" title="Permalink to this headline"></a></h2>
 <ol class="simple">
 <li><p>This project is maintained by <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR">FunASR community</a>.</p></li>
 <li><p>We acknowledge <a class="reference external" href="https://www.deepscience.cn">DeepScience</a> for contributing the grpc service.</p></li>
 </ol>
+</div>
 </div>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="grpc_python.html" class="btn btn-neutral float-left" title="Using paraformer with grpc" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="modelscope_models.html" class="btn btn-neutral float-right" title="Pretrained models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="grpc_python.html" class="btn btn-neutral float-left" title="Using funasr with grpc-python" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="websocket_python.html" class="btn btn-neutral float-right" title="Using funasr with websocket" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

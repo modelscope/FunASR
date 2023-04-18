@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Using funasr with ONNXRuntime &mdash; FunASR  documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <title>ONNXRuntime-python &mdash; FunASR  documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
@@ -17,8 +17,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Demo" href="onnxruntime_cpp.html" />
-    <link rel="prev" title="Environments" href="export.html" /> 
+    <link rel="next" title="ONNXRuntime-cpp" href="onnxruntime_cpp.html" />
+    <link rel="prev" title="Export models" href="export.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -51,28 +51,24 @@
 </ul>
 <p class="caption"><span class="caption-text">Runtime:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="export.html">Environments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="export.html#install-modelscope-and-funasr">Install modelscope and funasr</a></li>
-<li class="toctree-l1"><a class="reference internal" href="export.html#export-model">Export model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="export.html#performance-benchmark-of-runtime">Performance Benchmark of Runtime</a></li>
-<li class="toctree-l1"><a class="reference internal" href="export.html#for-example">For example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="export.html#acknowledge">Acknowledge</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Using funasr with ONNXRuntime</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#steps">Steps:</a></li>
+<li class="toctree-l1"><a class="reference internal" href="export.html">Export models</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ONNXRuntime-python</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#export-the-model">Export the model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#install-modelscope-and-funasr">Install modelscope and funasr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#export-onnx-model">Export onnx model</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="#performance-benchmark">Performance benchmark</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#acknowledge">Acknowledge</a></li>
-<li class="toctree-l1"><a class="reference internal" href="onnxruntime_cpp.html">Demo</a></li>
-<li class="toctree-l1"><a class="reference internal" href="onnxruntime_cpp.html#steps">Steps</a></li>
-<li class="toctree-l1"><a class="reference internal" href="onnxruntime_cpp.html#acknowledge">Acknowledge</a></li>
-<li class="toctree-l1"><a class="reference internal" href="libtorch_python.html">Using funasr with libtorch</a></li>
-<li class="toctree-l1"><a class="reference internal" href="libtorch_python.html#performance-benchmark">Performance benchmark</a></li>
-<li class="toctree-l1"><a class="reference internal" href="libtorch_python.html#speed">Speed</a></li>
-<li class="toctree-l1"><a class="reference internal" href="libtorch_python.html#acknowledge">Acknowledge</a></li>
-<li class="toctree-l1"><a class="reference internal" href="grpc_python.html">Using paraformer with grpc</a></li>
-<li class="toctree-l1"><a class="reference internal" href="grpc_cpp.html">paraformer grpc onnx server in c++</a></li>
-<li class="toctree-l1"><a class="reference internal" href="grpc_cpp.html#acknowledge">Acknowledge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#install-the-funasr-onnx">Install the <code class="docutils literal notranslate"><span class="pre">funasr_onnx</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#run-the-demo">Run the demo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#performance-benchmark">Performance benchmark</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#acknowledge">Acknowledge</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="onnxruntime_cpp.html">ONNXRuntime-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libtorch_python.html">Libtorch-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grpc_python.html">Using funasr with grpc-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grpc_cpp.html">Using funasr with grpc-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="websocket_python.html">Using funasr with websocket</a></li>
 </ul>
 <p class="caption"><span class="caption-text">ModelScope pipeline:</span></p>
 <ul>
@@ -98,7 +94,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Using funasr with ONNXRuntime</li>
+      <li class="breadcrumb-item active">ONNXRuntime-python</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/onnxruntime_python.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -108,32 +104,27 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="using-funasr-with-onnxruntime">
-<h1>Using funasr with ONNXRuntime<a class="headerlink" href="#using-funasr-with-onnxruntime" title="Permalink to this headline"></a></h1>
-<div class="section" id="steps">
-<h2>Steps:<a class="headerlink" href="#steps" title="Permalink to this headline"></a></h2>
-<ol>
-<li><p>Export the model.</p>
-<ul>
-<li><p>Command: (<code class="docutils literal notranslate"><span class="pre">Tips</span></code>: torch &gt;= 1.11.0 is required.)</p>
-<p>More details ref to (<a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export">export docs</a>)</p>
-<ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">e.g.</span></code>, Export model from modelscope</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize False
+  <div class="section" id="onnxruntime-python">
+<h1>ONNXRuntime-python<a class="headerlink" href="#onnxruntime-python" title="Permalink to this headline"></a></h1>
+<div class="section" id="export-the-model">
+<h2>Export the model<a class="headerlink" href="#export-the-model" title="Permalink to this headline"></a></h2>
+<div class="section" id="install-modelscope-and-funasr">
+<h3>Install <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR#installation">modelscope and funasr</a><a class="headerlink" href="#install-modelscope-and-funasr" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip3 install torch torchaudio
+pip install -U modelscope
+pip install -U funasr
 </pre></div>
 </div>
-</li>
-<li><p><code class="docutils literal notranslate"><span class="pre">e.g.</span></code>, Export model from local path, the model’name must be <code class="docutils literal notranslate"><span class="pre">model.pb</span></code>.</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model --model-name ./damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize False
+</div>
+<div class="section" id="export-onnx-model">
+<h3>Export <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export">onnx model</a><a class="headerlink" href="#export-onnx-model" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize True
 </pre></div>
 </div>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>Install the <code class="docutils literal notranslate"><span class="pre">funasr_onnx</span></code></p></li>
-</ol>
+</div>
+</div>
+<div class="section" id="install-the-funasr-onnx">
+<h2>Install the <code class="docutils literal notranslate"><span class="pre">funasr_onnx</span></code><a class="headerlink" href="#install-the-funasr-onnx" title="Permalink to this headline"></a></h2>
 <p>install from pip</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install -U funasr_onnx
 <span class="c1"># For the users in China, you could install with the command:</span>
@@ -148,8 +139,9 @@ pip install -e ./
 <span class="c1"># pip install -e ./ -i https://mirror.sjtu.edu.cn/pypi/web/simple</span>
 </pre></div>
 </div>
-<ol>
-<li><p>Run the demo.</p>
+</div>
+<div class="section" id="run-the-demo">
+<h2>Run the demo<a class="headerlink" href="#run-the-demo" title="Permalink to this headline"></a></h2>
 <ul>
 <li><p>Model_dir: the model path, which contains <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code>, <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">am.mvn</span></code>.</p></li>
 <li><p>Input: wav formt file, support formats: <code class="docutils literal notranslate"><span class="pre">str,</span> <span class="pre">np.ndarray,</span> <span class="pre">List[str]</span></code></p></li>
@@ -168,28 +160,26 @@ pip install -e ./
 </div>
 </li>
 </ul>
-</li>
-</ol>
-</div>
 </div>
 <div class="section" id="performance-benchmark">
-<h1>Performance benchmark<a class="headerlink" href="#performance-benchmark" title="Permalink to this headline"></a></h1>
+<h2>Performance benchmark<a class="headerlink" href="#performance-benchmark" title="Permalink to this headline"></a></h2>
 <p>Please ref to <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/python/benchmark_onnx.md">benchmark</a></p>
 </div>
 <div class="section" id="acknowledge">
-<h1>Acknowledge<a class="headerlink" href="#acknowledge" title="Permalink to this headline"></a></h1>
+<h2>Acknowledge<a class="headerlink" href="#acknowledge" title="Permalink to this headline"></a></h2>
 <ol class="simple">
 <li><p>This project is maintained by <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR">FunASR community</a>.</p></li>
 <li><p>We acknowledge <a class="reference external" href="https://github.com/RapidAI/RapidASR">SWHL</a> for contributing the onnxruntime (for paraformer model).</p></li>
 </ol>
+</div>
 </div>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="export.html" class="btn btn-neutral float-left" title="Environments" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="onnxruntime_cpp.html" class="btn btn-neutral float-right" title="Demo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="export.html" class="btn btn-neutral float-left" title="Export models" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="onnxruntime_cpp.html" class="btn btn-neutral float-right" title="ONNXRuntime-cpp" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
