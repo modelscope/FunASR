@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ONNXRuntime-cpp &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <title>Libtorch-python &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -17,8 +17,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Libtorch-python" href="libtorch_python.html" />
-    <link rel="prev" title="ONNXRuntime-python" href="onnxruntime_python.html" /> 
+    <link rel="next" title="Using funasr with grpc-python" href="grpc_python.html" />
+    <link rel="prev" title="ONNXRuntime-cpp" href="onnxruntime_cpp.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -72,25 +72,20 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="export.html">Export models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="onnxruntime_python.html">ONNXRuntime-python</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">ONNXRuntime-cpp</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="onnxruntime_cpp.html">ONNXRuntime-cpp</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Libtorch-python</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#export-the-model">Export the model</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#install-modelscope-and-funasr">Install modelscope and funasr</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#export-onnx-model">Export onnx model</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#building-for-linux-unix">Building for Linux/Unix</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#download-onnxruntime">Download onnxruntime</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#install-fftw3">Install fftw3</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#install-openblas">Install openblas</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#build-runtime">Build runtime</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#building-for-windows">Building for Windows</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#run-the-demo">Run the demo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#install-the-funasr-torch">Install the <code class="docutils literal notranslate"><span class="pre">funasr_torch</span></code>.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#run-the-demo">Run the demo.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#performance-benchmark">Performance benchmark</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#speed">Speed</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#acknowledge">Acknowledge</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="libtorch_python.html">Libtorch-python</a></li>
 <li class="toctree-l1"><a class="reference internal" href="grpc_python.html">Using funasr with grpc-python</a></li>
 <li class="toctree-l1"><a class="reference internal" href="grpc_cpp.html">Using funasr with grpc-cpp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="websocket_python.html">Using funasr with websocket</a></li>
@@ -114,9 +109,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">ONNXRuntime-cpp</li>
+      <li class="breadcrumb-item active">Libtorch-python</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/runtime/onnxruntime_cpp.md.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/runtime/libtorch_python.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -124,8 +119,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="onnxruntime-cpp">
-<h1>ONNXRuntime-cpp<a class="headerlink" href="#onnxruntime-cpp" title="Permalink to this headline"></a></h1>
+  <div class="section" id="libtorch-python">
+<h1>Libtorch-python<a class="headerlink" href="#libtorch-python" title="Permalink to this headline"></a></h1>
 <div class="section" id="export-the-model">
 <h2>Export the model<a class="headerlink" href="#export-the-model" title="Permalink to this headline"></a></h2>
 <div class="section" id="install-modelscope-and-funasr">
@@ -138,67 +133,82 @@ pip install -U funasr
 </div>
 <div class="section" id="export-onnx-model">
 <h3>Export <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export">onnx model</a><a class="headerlink" href="#export-onnx-model" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize True
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type torch --quantize True
 </pre></div>
 </div>
 </div>
 </div>
-<div class="section" id="building-for-linux-unix">
-<h2>Building for Linux/Unix<a class="headerlink" href="#building-for-linux-unix" title="Permalink to this headline"></a></h2>
-<div class="section" id="download-onnxruntime">
-<h3>Download onnxruntime<a class="headerlink" href="#download-onnxruntime" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># download an appropriate onnxruntime from https://github.com/microsoft/onnxruntime/releases/tag/v1.14.0</span>
-<span class="c1"># here we get a copy of onnxruntime for linux 64</span>
-wget https://github.com/microsoft/onnxruntime/releases/download/v1.14.0/onnxruntime-linux-x64-1.14.0.tgz
-tar -zxvf onnxruntime-linux-x64-1.14.0.tgz
+<div class="section" id="install-the-funasr-torch">
+<h2>Install the <code class="docutils literal notranslate"><span class="pre">funasr_torch</span></code>.<a class="headerlink" href="#install-the-funasr-torch" title="Permalink to this headline"></a></h2>
+<p>install from pip</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install -U funasr_torch
+<span class="c1"># For the users in China, you could install with the command:</span>
+<span class="c1"># pip install -U funasr_torch -i https://mirror.sjtu.edu.cn/pypi/web/simple</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="install-fftw3">
-<h3>Install fftw3<a class="headerlink" href="#install-fftw3" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo apt install libfftw3-dev <span class="c1">#ubuntu</span>
-<span class="c1"># sudo yum install fftw fftw-devel #centos</span>
+<p>or install from source code</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/alibaba/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> FunASR
+<span class="nb">cd</span> funasr/runtime/python/libtorch
+pip install -e ./
+<span class="c1"># For the users in China, you could install with the command:</span>
+<span class="c1"># pip install -e ./ -i https://mirror.sjtu.edu.cn/pypi/web/simple</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="install-openblas">
-<h3>Install openblas<a class="headerlink" href="#install-openblas" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo apt-get install libopenblas-dev <span class="c1">#ubuntu</span>
-<span class="c1"># sudo yum -y install openblas-devel #centos</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="build-runtime">
-<h3>Build runtime<a class="headerlink" href="#build-runtime" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/alibaba-damo-academy/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> funasr/runtime/onnxruntime
-mkdir build <span class="o">&amp;&amp;</span> <span class="nb">cd</span> build
-cmake  -DCMAKE_BUILD_TYPE<span class="o">=</span>release .. -DONNXRUNTIME_DIR<span class="o">=</span>/path/to/onnxruntime-linux-x64-1.14.0
-make
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="building-for-windows">
-<h2>Building for Windows<a class="headerlink" href="#building-for-windows" title="Permalink to this headline"></a></h2>
-<p>Ref to win/</p>
 </div>
 <div class="section" id="run-the-demo">
-<h2>Run the demo<a class="headerlink" href="#run-the-demo" title="Permalink to this headline"></a></h2>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>tester /path/models_dir /path/wave_file quantize<span class="o">(</span><span class="nb">true</span> or <span class="nb">false</span><span class="o">)</span>
+<h2>Run the demo.<a class="headerlink" href="#run-the-demo" title="Permalink to this headline"></a></h2>
+<ul>
+<li><p>Model_dir: the model path, which contains <code class="docutils literal notranslate"><span class="pre">model.torchscripts</span></code>, <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">am.mvn</span></code>.</p></li>
+<li><p>Input: wav formt file, support formats: <code class="docutils literal notranslate"><span class="pre">str,</span> <span class="pre">np.ndarray,</span> <span class="pre">List[str]</span></code></p></li>
+<li><p>Output: <code class="docutils literal notranslate"><span class="pre">List[str]</span></code>: recognition result.</p></li>
+<li><p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">funasr_torch</span> <span class="kn">import</span> <span class="n">Paraformer</span>
+
+<span class="n">model_dir</span> <span class="o">=</span> <span class="s2">&quot;/nfs/zhifu.gzf/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&quot;</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">Paraformer</span><span class="p">(</span><span class="n">model_dir</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">wav_path</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;/nfs/zhifu.gzf/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/example/asr_example.wav&#39;</span><span class="p">]</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">wav_path</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The structure of /path/models_dir</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">config</span><span class="o">.</span><span class="n">yaml</span><span class="p">,</span> <span class="n">am</span><span class="o">.</span><span class="n">mvn</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">onnx</span><span class="p">(</span><span class="ow">or</span> <span class="n">model_quant</span><span class="o">.</span><span class="n">onnx</span><span class="p">)</span>
-</pre></div>
+</li>
+</ul>
 </div>
+<div class="section" id="performance-benchmark">
+<h2>Performance benchmark<a class="headerlink" href="#performance-benchmark" title="Permalink to this headline"></a></h2>
+<p>Please ref to <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/python/benchmark_libtorch.md">benchmark</a></p>
 </div>
+<div class="section" id="speed">
+<h2>Speed<a class="headerlink" href="#speed" title="Permalink to this headline"></a></h2>
+<p>Environment：Intel(R) Xeon(R) Platinum 8163 CPU &#64; 2.50GHz</p>
+<p>Test <a class="reference external" href="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav">wav, 5.53s, 100 times avg.</a></p>
+<table border="1" class="docutils">
+<thead>
+<tr>
+<th style="text-align: center;">Backend</th>
+<th style="text-align: center;">RTF (FP32)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">Pytorch</td>
+<td style="text-align: center;">0.110</td>
+</tr>
+<tr>
+<td style="text-align: center;">Libtorch</td>
+<td style="text-align: center;">0.048</td>
+</tr>
+<tr>
+<td style="text-align: center;">Onnx</td>
+<td style="text-align: center;">0.038</td>
+</tr>
+</tbody>
+</table></div>
 <div class="section" id="acknowledge">
 <h2>Acknowledge<a class="headerlink" href="#acknowledge" title="Permalink to this headline"></a></h2>
-<ol class="simple">
-<li><p>This project is maintained by <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR">FunASR community</a>.</p></li>
-<li><p>We acknowledge <a class="reference external" href="https://github.com/RapidAI/RapidASR/tree/main/cpp_onnx">mayong</a> for contributing the onnxruntime(cpp api).</p></li>
-<li><p>We borrowed a lot of code from <a class="reference external" href="https://github.com/chenkui164/FastASR">FastASR</a> for audio frontend and text-postprocess.</p></li>
-</ol>
+<p>This project is maintained by <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR">FunASR community</a>.</p>
 </div>
 </div>
 
@@ -206,8 +216,8 @@ make
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="onnxruntime_python.html" class="btn btn-neutral float-left" title="ONNXRuntime-python" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="libtorch_python.html" class="btn btn-neutral float-right" title="Libtorch-python" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="onnxruntime_cpp.html" class="btn btn-neutral float-left" title="ONNXRuntime-cpp" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="grpc_python.html" class="btn btn-neutral float-right" title="Using funasr with grpc-python" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
