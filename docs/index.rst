@@ -25,7 +25,7 @@ FunASR hopes to build a bridge between academic research and industrial applicat
 .. toctree::
    :maxdepth: 1
    :caption: Runtime:
-
+   ./export.md
    ../funasr/export/README.md
    ../funasr/runtime/python/onnxruntime/README.md
    ../funasr/runtime/python/libtorch/README.md
