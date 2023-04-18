@@ -1,16 +1,26 @@
 import logging
-import os
 
 import numpy as np
 import torch
 
+from funasr.datasets.small_datasets.collate_fn import CommonCollateFn
 from funasr.datasets.small_datasets.dataset import ESPnetDataset
-from funasr.datasets.small_datasets.preprocessor import build_preprocess
 from funasr.datasets.small_datasets.length_batch_sampler import LengthBatchSampler
+from funasr.datasets.small_datasets.preprocessor import build_preprocess
+from funasr.datasets.small_datasets.sequence_iter_factory import SequenceIterFactory
 
 
 def build_dataloader(args, mode="train"):
+    # preprocess
     preprocess_fn = build_preprocess(args, train=mode == "train")
+
+    # collate
+    if args.task_name in ["punc", "lm"]:
+        collate_fn = CommonCollateFn(int_pad_value=0)
+    else:
+        collate_fn = CommonCollateFn(float_pad_value=0.0, int_pad_value=-1)
+
+    # dataset
     dest_sample_rate = args.frontend_conf["fs"] if (
             args.frontend_conf is not None and "fs" in args.frontend_conf) else 16000
     if mode == "train":
@@ -27,6 +37,7 @@ def build_dataloader(args, mode="train"):
         dest_sample_rate=dest_sample_rate,
     )
 
+    # sampler
     dataset_conf = args.dataset_conf
     batch_sampler = LengthBatchSampler(
         batch_bins=dataset_conf["batch_size"],
@@ -60,3 +71,14 @@ def build_dataloader(args, mode="train"):
                     f"{len(batch)} < {world_size}"
                 )
         batches = [batch[rank::world_size] for batch in batches]
+
+    # dataloader
+    return SequenceIterFactory(
+        dataset=dataset,
+        batches=batches,
+        seed=args.seed,
+        shuffle=mode == "train",
+        num_workers=args.num_workers,
+        collate_fn=collate_fn,
+        pin_memory=args.ngpu > 0,
+    )
