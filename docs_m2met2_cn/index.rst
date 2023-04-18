@@ -20,10 +20,3 @@ ASRU 2023 多通道多方会议转录挑战 2.0
    ./规则
    ./组委会
    ./联系方式
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
