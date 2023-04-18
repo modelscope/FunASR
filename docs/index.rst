@@ -65,6 +65,11 @@ FunASR hopes to build a bridge between academic research and industrial applicat
 
    ./papers.md
 
+.. toctree::
+   :maxdepth: 1
+   :caption: API Reference
+
+
 
 Indices and tables
 ==================
