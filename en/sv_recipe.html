@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Get Started &mdash; FunASR  documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <title>Speaker Verification &mdash; FunASR  documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
@@ -17,8 +17,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Build custom tasks" href="build_task.html" />
-    <link rel="prev" title="Installation" href="installation.html" /> 
+    <link rel="next" title="Punctuation Restoration" href="punc_recipe.html" />
+    <link rel="prev" title="Speech Recognition" href="asr_recipe.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -40,13 +40,14 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption"><span class="caption-text">Installation:</span></p>
+              <p class="caption"><span class="caption-text">Installation</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Tutorial:</span></p>
+<p class="caption"><span class="caption-text">Recipe</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Get Started</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="asr_recipe.html">Speech Recognition</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Speaker Verification</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#overall-introduction">Overall Introduction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#stage-0-data-preparation">Stage 0: Data preparation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#stage-1-feature-generation">Stage 1: Feature Generation</a></li>
@@ -55,9 +56,14 @@
 <li class="toctree-l2"><a class="reference internal" href="#stage-4-decoding">Stage 4: Decoding</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="punc_recipe.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vad_recipe.html">Voice Activity Detection</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Define Model</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="build_task.html">Build custom tasks</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Runtime:</span></p>
+<p class="caption"><span class="caption-text">Runtime</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="export.html">Export models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="onnxruntime_python.html">ONNXRuntime-python</a></li>
@@ -67,12 +73,12 @@
 <li class="toctree-l1"><a class="reference internal" href="grpc_cpp.html">Using funasr with grpc-cpp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="websocket_python.html">Using funasr with websocket</a></li>
 </ul>
-<p class="caption"><span class="caption-text">ModelScope pipeline:</span></p>
+<p class="caption"><span class="caption-text">ModelScope pipeline</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="modelscope_models.html">Pretrained models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modelscope_usages.html">ModelScope Usage</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Papers:</span></p>
+<p class="caption"><span class="caption-text">Papers</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="papers.html">Papers</a></li>
 </ul>
@@ -91,9 +97,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Get Started</li>
+      <li class="breadcrumb-item active">Speaker Verification</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/get_started.md.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/sv_recipe.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -101,8 +107,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="get-started">
-<h1>Get Started<a class="headerlink" href="#get-started" title="Permalink to this headline"></a></h1>
+  <div class="section" id="speaker-verification">
+<h1>Speaker Verification<a class="headerlink" href="#speaker-verification" title="Permalink to this headline"></a></h1>
 <p>Here we take “Training a paraformer model from scratch using the AISHELL-1 dataset” as an example to introduce how to use FunASR. According to this example, users can similarly employ other datasets (such as AISHELL-2 dataset, etc.) to train other models (such as conformer, transformer, etc.).</p>
 <div class="section" id="overall-introduction">
 <h2>Overall Introduction<a class="headerlink" href="#overall-introduction" title="Permalink to this headline"></a></h2>
@@ -260,8 +266,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="build_task.html" class="btn btn-neutral float-right" title="Build custom tasks" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="asr_recipe.html" class="btn btn-neutral float-left" title="Speech Recognition" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="punc_recipe.html" class="btn btn-neutral float-right" title="Punctuation Restoration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

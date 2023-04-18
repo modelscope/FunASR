@@ -2,7 +2,7 @@
 
 FunASR have implemented the following paper code
 
-### Speech Recognition Models
+### Speech Recognition
 - [Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition](https://arxiv.org/abs/2206.08317), INTERSPEECH 2022.
 - [Universal ASR: Unifying Streaming and Non-Streaming ASR Using a Single Encoder-Decoder Model](https://arxiv.org/abs/2010.14099), arXiv preprint arXiv:2010.14099, 2020.
 - [San-m: Memory equipped self-attention for end-to-end speech recognition](https://arxiv.org/pdf/2006.01713), INTERSPEECH 2020
@@ -11,7 +11,7 @@ FunASR have implemented the following paper code
 - [Sequence-to-sequence learning with Transducers](https://arxiv.org/pdf/1211.3711.pdf), NIPS 2016
 
 
-### Multi-talker Speech Recognition Models
+### Multi-talker Speech Recognition
 - [MFCCA:Multi-Frame Cross-Channel attention for multi-speaker ASR in Multi-party meeting scenario](https://arxiv.org/abs/2210.05265), ICASSP 2022
 
 ### Voice Activity Detection

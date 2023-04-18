@@ -40,16 +40,22 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption"><span class="caption-text">Installation:</span></p>
+              <p class="caption"><span class="caption-text">Installation</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Tutorial:</span></p>
+<p class="caption"><span class="caption-text">Recipe</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="get_started.html">Get Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="asr_recipe.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sv_recipe.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="punc_recipe.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vad_recipe.html">Voice Activity Detection</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Define Model</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="build_task.html">Build custom tasks</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Runtime:</span></p>
+<p class="caption"><span class="caption-text">Runtime</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="export.html">Export models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="onnxruntime_python.html">ONNXRuntime-python</a></li>
@@ -59,7 +65,7 @@
 <li class="toctree-l1"><a class="reference internal" href="grpc_cpp.html">Using funasr with grpc-cpp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="websocket_python.html">Using funasr with websocket</a></li>
 </ul>
-<p class="caption"><span class="caption-text">ModelScope pipeline:</span></p>
+<p class="caption"><span class="caption-text">ModelScope pipeline</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="modelscope_models.html">Pretrained models</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">ModelScope Usage</a><ul>
@@ -71,7 +77,7 @@
 </ul>
 </li>
 </ul>
-<p class="caption"><span class="caption-text">Papers:</span></p>
+<p class="caption"><span class="caption-text">Papers</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="papers.html">Papers</a></li>
 </ul>
@@ -116,7 +122,7 @@
 <h2>Inference<a class="headerlink" href="#inference" title="Permalink to this headline"></a></h2>
 <p>We provide <code class="docutils literal notranslate"><span class="pre">infer.py</span></code> to achieve the inference. Based on this file, users can preform inference on the specified dataset based on our provided model and obtain the corresponding recognition results. If the transcript is given, the <code class="docutils literal notranslate"><span class="pre">CER</span></code> will be calculated at the same time. Before performing inference, users can set the following parameters to modify the inference configuration:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">data_dir</span></code>：dataset directory. The directory should contain the wav list file <code class="docutils literal notranslate"><span class="pre">wav.scp</span></code> and the transcript file <code class="docutils literal notranslate"><span class="pre">text</span></code> (optional). For the format of these two files, please refer to the instructions in <a class="reference internal" href="get_started.html"><span class="doc">Quick Start</span></a>. If the <code class="docutils literal notranslate"><span class="pre">text</span></code> file exists, the CER will be calculated accordingly, otherwise it will be skipped.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">data_dir</span></code>：dataset directory. The directory should contain the wav list file <code class="docutils literal notranslate"><span class="pre">wav.scp</span></code> and the transcript file <code class="docutils literal notranslate"><span class="pre">text</span></code> (optional). For the format of these two files, please refer to the instructions in <a class="reference external" href="./get_started">Quick Start</a>. If the <code class="docutils literal notranslate"><span class="pre">text</span></code> file exists, the CER will be calculated accordingly, otherwise it will be skipped.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">output_dir</span></code>：the directory for saving the inference results</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>：batch size during the inference</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ctc_weight</span></code>：some models contain a CTC module, users can set this parameter to specify the weight of the CTC module during the inference</p></li>

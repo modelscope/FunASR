@@ -1,4 +1,4 @@
-# Get Started
+# Punctuation Restoration
 Here we take "Training a paraformer model from scratch using the AISHELL-1 dataset" as an example to introduce how to use FunASR. According to this example, users can similarly employ other datasets (such as AISHELL-2 dataset, etc.) to train other models (such as conformer, transformer, etc.).
 
 ## Overall Introduction
