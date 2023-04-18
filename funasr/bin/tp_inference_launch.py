@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-# Copyright ESPnet (https://github.com/espnet/espnet). All Rights Reserved.
-#  Apache 2.0  (http://www.apache.org/licenses/LICENSE-2.0)
 
-import torch
-torch.set_num_threads(1)
 
 import argparse
 import logging

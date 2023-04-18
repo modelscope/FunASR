@@ -1,9 +1,4 @@
 #!/usr/bin/env python3
-# Copyright ESPnet (https://github.com/espnet/espnet). All Rights Reserved.
-#  Apache 2.0  (http://www.apache.org/licenses/LICENSE-2.0)
-
-import torch
-torch.set_num_threads(1)
 
 import argparse
 import logging
@@ -134,6 +129,11 @@ def get_parser():
         help="Pretrained model tag. If specify this option, *_train_config and "
              "*_file will be overwritten",
     )
+    group.add_argument(
+        "--beam_search_config",
+        default={},
+        help="The keyword arguments for transducer beam search.",
+    )
 
     group = parser.add_argument_group("Beam-search related")
     group.add_argument(
@@ -171,6 +171,41 @@ def get_parser():
     group.add_argument("--lm_weight", type=float, default=1.0, help="RNNLM weight")
     group.add_argument("--ngram_weight", type=float, default=0.9, help="ngram weight")
     group.add_argument("--streaming", type=str2bool, default=False)
+    group.add_argument("--simu_streaming", type=str2bool, default=False)
+    group.add_argument("--chunk_size", type=int, default=16)
+    group.add_argument("--left_context", type=int, default=16)
+    group.add_argument("--right_context", type=int, default=0)
+    group.add_argument(
+        "--display_partial_hypotheses",
+        type=bool,
+        default=False,
+        help="Whether to display partial hypotheses during chunk-by-chunk inference.",
+    )    
+   
+    group = parser.add_argument_group("Dynamic quantization related")
+    group.add_argument(
+        "--quantize_asr_model",
+        type=bool,
+        default=False,
+        help="Apply dynamic quantization to ASR model.",
+    )
+    group.add_argument(
+        "--quantize_modules",
+        nargs="*",
+        default=None,
+        help="""Module names to apply dynamic quantization on.
+        The module names are provided as a list, where each name is separated
+        by a comma (e.g.: --quantize-config=[Linear,LSTM,GRU]).
+        Each specified name should be an attribute of 'torch.nn', e.g.:
+        torch.nn.Linear, torch.nn.LSTM, torch.nn.GRU, ...""",
+    )
+    group.add_argument(
+        "--quantize_dtype",
+        type=str,
+        default="qint8",
+        choices=["float16", "qint8"],
+        help="Dtype for dynamic quantization.",
+    )    
 
     group = parser.add_argument_group("Text converter related")
     group.add_argument(
@@ -268,6 +303,9 @@ def inference_launch_funasr(**kwargs):
     elif mode == "mfcca":
         from funasr.bin.asr_inference_mfcca import inference_modelscope
         return inference_modelscope(**kwargs)
+    elif mode == "rnnt":
+        from funasr.bin.asr_inference_rnnt import inference
+        return inference(**kwargs)
     else:
         logging.info("Unknown decoding mode: {}".format(mode))
         return None
