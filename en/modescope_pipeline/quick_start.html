@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Inference with pipeline &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <title>Quick Start &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -62,32 +62,35 @@
 </ul>
 <p class="caption"><span class="caption-text">ModelScope pipeline</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Inference with pipeline</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#speech-recognition">Speech Recognition</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#paraformer-model">Paraformer model</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Quick Start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#inference-with-pipeline">Inference with pipeline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#speech-recognition">Speech Recognition</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#paraformer-model">Paraformer model</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#voice-activity-detection">Voice Activity Detection</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#fsmn-vad">FSMN-VAD</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#voice-activity-detection">Voice Activity Detection</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#fsmn-vad">FSMN-VAD</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#punctuation-restoration">Punctuation Restoration</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#ct-transformer">CT_Transformer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#punctuation-restoration">Punctuation Restoration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ct-transformer">CT_Transformer</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#timestamp-prediction">Timestamp Prediction</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#tp-aligner">TP-Aligner</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#timestamp-prediction">Timestamp Prediction</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#tp-aligner">TP-Aligner</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#speaker-verification">Speaker Verification</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#x-vector">X-vector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#speaker-verification">Speaker Verification</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#x-vector">X-vector</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="#finetune-with-pipeline">Finetune with pipeline</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#id1">Speech Recognition</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id2">Paraformer model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#finetune-with-pipeline">Finetune with pipeline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Speech Recognition</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id2">Paraformer model</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -128,7 +131,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Inference with pipeline</li>
+      <li class="breadcrumb-item active">Quick Start</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/modescope_pipeline/quick_start.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -138,12 +141,14 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="inference-with-pipeline">
-<h1>Inference with pipeline<a class="headerlink" href="#inference-with-pipeline" title="Permalink to this headline"></a></h1>
+  <div class="section" id="quick-start">
+<h1>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline"></a></h1>
+<div class="section" id="inference-with-pipeline">
+<h2>Inference with pipeline<a class="headerlink" href="#inference-with-pipeline" title="Permalink to this headline"></a></h2>
 <div class="section" id="speech-recognition">
-<h2>Speech Recognition<a class="headerlink" href="#speech-recognition" title="Permalink to this headline"></a></h2>
+<h3>Speech Recognition<a class="headerlink" href="#speech-recognition" title="Permalink to this headline"></a></h3>
 <div class="section" id="paraformer-model">
-<h3>Paraformer model<a class="headerlink" href="#paraformer-model" title="Permalink to this headline"></a></h3>
+<h4>Paraformer model<a class="headerlink" href="#paraformer-model" title="Permalink to this headline"></a></h4>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
 <span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
 
@@ -159,9 +164,9 @@
 </div>
 </div>
 <div class="section" id="voice-activity-detection">
-<h2>Voice Activity Detection<a class="headerlink" href="#voice-activity-detection" title="Permalink to this headline"></a></h2>
+<h3>Voice Activity Detection<a class="headerlink" href="#voice-activity-detection" title="Permalink to this headline"></a></h3>
 <div class="section" id="fsmn-vad">
-<h3>FSMN-VAD<a class="headerlink" href="#fsmn-vad" title="Permalink to this headline"></a></h3>
+<h4>FSMN-VAD<a class="headerlink" href="#fsmn-vad" title="Permalink to this headline"></a></h4>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
 <span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
 <span class="kn">from</span> <span class="nn">modelscope.utils.logger</span> <span class="kn">import</span> <span class="n">get_logger</span>
@@ -181,9 +186,9 @@
 </div>
 </div>
 <div class="section" id="punctuation-restoration">
-<h2>Punctuation Restoration<a class="headerlink" href="#punctuation-restoration" title="Permalink to this headline"></a></h2>
+<h3>Punctuation Restoration<a class="headerlink" href="#punctuation-restoration" title="Permalink to this headline"></a></h3>
 <div class="section" id="ct-transformer">
-<h3>CT_Transformer<a class="headerlink" href="#ct-transformer" title="Permalink to this headline"></a></h3>
+<h4>CT_Transformer<a class="headerlink" href="#ct-transformer" title="Permalink to this headline"></a></h4>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
 <span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
 
@@ -199,9 +204,9 @@
 </div>
 </div>
 <div class="section" id="timestamp-prediction">
-<h2>Timestamp Prediction<a class="headerlink" href="#timestamp-prediction" title="Permalink to this headline"></a></h2>
+<h3>Timestamp Prediction<a class="headerlink" href="#timestamp-prediction" title="Permalink to this headline"></a></h3>
 <div class="section" id="tp-aligner">
-<h3>TP-Aligner<a class="headerlink" href="#tp-aligner" title="Permalink to this headline"></a></h3>
+<h4>TP-Aligner<a class="headerlink" href="#tp-aligner" title="Permalink to this headline"></a></h4>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
 <span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
 
@@ -219,9 +224,9 @@
 </div>
 </div>
 <div class="section" id="speaker-verification">
-<h2>Speaker Verification<a class="headerlink" href="#speaker-verification" title="Permalink to this headline"></a></h2>
+<h3>Speaker Verification<a class="headerlink" href="#speaker-verification" title="Permalink to this headline"></a></h3>
 <div class="section" id="x-vector">
-<h3>X-vector<a class="headerlink" href="#x-vector" title="Permalink to this headline"></a></h3>
+<h4>X-vector<a class="headerlink" href="#x-vector" title="Permalink to this headline"></a></h4>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
 <span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -243,11 +248,11 @@
 </div>
 </div>
 <div class="section" id="finetune-with-pipeline">
-<h1>Finetune with pipeline<a class="headerlink" href="#finetune-with-pipeline" title="Permalink to this headline"></a></h1>
+<h2>Finetune with pipeline<a class="headerlink" href="#finetune-with-pipeline" title="Permalink to this headline"></a></h2>
 <div class="section" id="id1">
-<h2>Speech Recognition<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h2>
+<h3>Speech Recognition<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h3>
 <div class="section" id="id2">
-<h3>Paraformer model<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h3>
+<h4>Paraformer model<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h4>
 <p>finetune.py</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">modelscope.metainfo</span> <span class="kn">import</span> <span class="n">Trainers</span>
@@ -290,6 +295,7 @@
 <p>If you want finetune with multi-GPUs, you could:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nv">CUDA_VISIBLE_DEVICES</span><span class="o">=</span><span class="m">1</span>,2 python -m torch.distributed.launch --nproc_per_node <span class="m">2</span> finetune.py &gt; log.txt <span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span>
 </pre></div>
+</div>
 </div>
 </div>
 </div>
