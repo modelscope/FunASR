@@ -26,21 +26,9 @@ FunASR hopes to build a bridge between academic research and industrial applicat
 
 .. toctree::
    :maxdepth: 1
-   :caption: Define Model
+   :caption: Custom Your Model
 
    ./build_task.md
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Runtime
-
-   ./runtime/export.md
-   ./runtime/onnxruntime_python.md
-   ./runtime/onnxruntime_cpp.md
-   ./runtime/libtorch_python.md
-   ./runtime/grpc_python.md
-   ./runtime/grpc_cpp.md
-   ./runtime/websocket_python.md
 
 .. toctree::
    :maxdepth: 1
@@ -58,6 +46,18 @@ FunASR hopes to build a bridge between academic research and industrial applicat
    ./modescope_pipeline/vad_pipeline.md
    ./modescope_pipeline/punc_pipeline.md
    ./modescope_pipeline/sv_pipeline.md
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Runtime
+
+   ./runtime/export.md
+   ./runtime/onnxruntime_python.md
+   ./runtime/onnxruntime_cpp.md
+   ./runtime/libtorch_python.md
+   ./runtime/grpc_python.md
+   ./runtime/grpc_cpp.md
+   ./runtime/websocket_python.md
 
 .. toctree::
    :maxdepth: 1
