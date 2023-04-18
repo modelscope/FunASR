@@ -27,6 +27,12 @@ FunASR hopes to build a bridge between academic research and industrial applicat
    :caption: Runtime:
 
    ./export.md
+   ./onnxruntime_python.md
+   ./onnxruntime_cpp.md
+   ./libtorch_python.md
+   ./grpc_python.md
+   ./grpc_cpp.md
+
 
 
 .. toctree::
