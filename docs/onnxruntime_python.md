@@ -1,0 +1,1 @@
+../funasr/runtime/python/onnxruntime/README.md
