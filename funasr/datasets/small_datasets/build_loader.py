@@ -6,7 +6,7 @@ import torch
 
 from funasr.datasets.small_datasets.dataset import ESPnetDataset
 from funasr.datasets.small_datasets.preprocessor import build_preprocess
-from funasr.samplers.length_batch_sampler import LengthBatchSampler
+from funasr.datasets.small_datasets.length_batch_sampler import LengthBatchSampler
 
 
 def build_dataloader(args, mode="train"):
@@ -26,10 +26,6 @@ def build_dataloader(args, mode="train"):
         preprocess=preprocess_fn,
         dest_sample_rate=dest_sample_rate,
     )
-    if os.path.exists(os.path.join(data_path_and_name_and_type[0][0].parent, "utt2category")):
-        utt2category_file = os.path.join(data_path_and_name_and_type[0][0].parent, "utt2category")
-    else:
-        utt2category_file = None
 
     dataset_conf = args.dataset_conf
     batch_sampler = LengthBatchSampler(
