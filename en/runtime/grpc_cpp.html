@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Using funasr with grpc-cpp &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Using funasr with websocket" href="websocket_python.html" />
+    <link rel="prev" title="Using funasr with grpc-python" href="grpc_python.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            FunASR
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Recipe</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../recipe/asr_recipe.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../recipe/sv_recipe.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../recipe/punc_recipe.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../recipe/vad_recipe.html">Voice Activity Detection</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Custom Your Model</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../build_task.html">Build custom tasks</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Zoo</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modelscope_models.html">Pretrained Models on ModelScope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../huggingface_models.html">Pretrained Models on Huggingface</a></li>
+</ul>
+<p class="caption"><span class="caption-text">ModelScope pipeline</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modescope_pipeline/quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modescope_pipeline/asr_pipeline.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modescope_pipeline/vad_pipeline.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modescope_pipeline/punc_pipeline.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modescope_pipeline/tp_pipeline.html">Timestamp Prediction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modescope_pipeline/sv_pipeline.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modescope_pipeline/lm_pipeline.html">Speech Recognition</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Runtime</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="export.html">Export models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="onnxruntime_python.html">ONNXRuntime-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="onnxruntime_cpp.html">ONNXRuntime-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libtorch_python.html">Libtorch-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grpc_python.html">Using funasr with grpc-python</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Using funasr with grpc-cpp</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#for-the-server">For the Server</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#build-onnxruntime-as-it-s-document">Build onnxruntime as it’s document</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#compile-and-install-grpc-v1-52-0-in-case-of-grpc-bugs">Compile and install grpc v1.52.0 in case of grpc bugs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#compile-and-start-grpc-onnx-paraformer-server">Compile and start grpc onnx paraformer server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#start-grpc-paraformer-server">Start grpc paraformer server</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#for-the-client">For the client</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#install-the-requirements-as-in-grpc-python">Install the requirements as in grpc-python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#generate-protobuf-file">Generate protobuf file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#start-grpc-client">Start grpc client</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#acknowledge">Acknowledge</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="websocket_python.html">Using funasr with websocket</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Papers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../papers.html">Papers</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">FunASR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Using funasr with grpc-cpp</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/runtime/grpc_cpp.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="using-funasr-with-grpc-cpp">
+<h1>Using funasr with grpc-cpp<a class="headerlink" href="#using-funasr-with-grpc-cpp" title="Permalink to this headline"></a></h1>
+<div class="section" id="for-the-server">
+<h2>For the Server<a class="headerlink" href="#for-the-server" title="Permalink to this headline"></a></h2>
+<div class="section" id="build-onnxruntime-as-it-s-document">
+<h3>Build <a class="reference internal" href="onnxruntime_cpp.html"><span class="doc">onnxruntime</span></a> as it’s document<a class="headerlink" href="#build-onnxruntime-as-it-s-document" title="Permalink to this headline"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#put onnx-lib &amp; onnx-asr-model into /path/to/asrmodel(eg: /data/asrmodel)</span>
+<span class="n">ls</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">asrmodel</span><span class="o">/</span>
+<span class="n">onnxruntime</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">x64</span><span class="o">-</span><span class="mf">1.14</span><span class="o">.</span><span class="mi">0</span>  <span class="n">speech_paraformer</span><span class="o">-</span><span class="n">large_asr_nat</span><span class="o">-</span><span class="n">zh</span><span class="o">-</span><span class="n">cn</span><span class="o">-</span><span class="mi">16</span><span class="n">k</span><span class="o">-</span><span class="n">common</span><span class="o">-</span><span class="n">vocab8404</span><span class="o">-</span><span class="n">pytorch</span>
+
+<span class="c1">#make sure you have config.yaml, am.mvn, model.onnx(or model_quant.onnx) under speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="compile-and-install-grpc-v1-52-0-in-case-of-grpc-bugs">
+<h3>Compile and install grpc v1.52.0 in case of grpc bugs<a class="headerlink" href="#compile-and-install-grpc-v1-52-0-in-case-of-grpc-bugs" title="Permalink to this headline"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>export GRPC_INSTALL_DIR=/data/soft/grpc
+export PKG_CONFIG_PATH=$GRPC_INSTALL_DIR/lib/pkgconfig
+
+git clone -b v1.52.0 --depth=1  https://github.com/grpc/grpc.git
+cd grpc
+git submodule update --init --recursive
+
+mkdir -p cmake/build
+pushd cmake/build
+cmake -DgRPC_INSTALL=ON \
+      -DgRPC_BUILD_TESTS=OFF \
+      -DCMAKE_INSTALL_PREFIX=$GRPC_INSTALL_DIR \
+      ../..
+make
+make install
+popd
+
+echo &quot;export GRPC_INSTALL_DIR=/data/soft/grpc&quot; &gt;&gt; ~/.bashrc
+echo &quot;export PKG_CONFIG_PATH=\$GRPC_INSTALL_DIR/lib/pkgconfig&quot; &gt;&gt; ~/.bashrc
+echo &quot;export PATH=\$GRPC_INSTALL_DIR/bin/:\$PKG_CONFIG_PATH:\$PATH&quot; &gt;&gt; ~/.bashrc
+source ~/.bashrc
+</pre></div>
+</div>
+</div>
+<div class="section" id="compile-and-start-grpc-onnx-paraformer-server">
+<h3>Compile and start grpc onnx paraformer server<a class="headerlink" href="#compile-and-start-grpc-onnx-paraformer-server" title="Permalink to this headline"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># set -DONNXRUNTIME_DIR=/path/to/asrmodel/onnxruntime-linux-x64-1.14.0</span>
+<span class="o">./</span><span class="n">rebuild</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="start-grpc-paraformer-server">
+<h3>Start grpc paraformer server<a class="headerlink" href="#start-grpc-paraformer-server" title="Permalink to this headline"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Usage</span><span class="p">:</span> <span class="o">./</span><span class="n">cmake</span><span class="o">/</span><span class="n">build</span><span class="o">/</span><span class="n">paraformer_server</span> <span class="n">port</span> <span class="n">thread_num</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">model_file</span> <span class="n">quantize</span><span class="p">(</span><span class="n">true</span> <span class="ow">or</span> <span class="n">false</span><span class="p">)</span>
+<span class="o">./</span><span class="n">cmake</span><span class="o">/</span><span class="n">build</span><span class="o">/</span><span class="n">paraformer_server</span> <span class="mi">10108</span> <span class="mi">4</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">asrmodel</span><span class="o">/</span><span class="n">speech_paraformer</span><span class="o">-</span><span class="n">large_asr_nat</span><span class="o">-</span><span class="n">zh</span><span class="o">-</span><span class="n">cn</span><span class="o">-</span><span class="mi">16</span><span class="n">k</span><span class="o">-</span><span class="n">common</span><span class="o">-</span><span class="n">vocab8404</span><span class="o">-</span><span class="n">pytorch</span> <span class="n">false</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="for-the-client">
+<h2>For the client<a class="headerlink" href="#for-the-client" title="Permalink to this headline"></a></h2>
+<div class="section" id="install-the-requirements-as-in-grpc-python">
+<h3>Install the requirements as in <a class="reference external" href="./docs/grpc_python">grpc-python</a><a class="headerlink" href="#install-the-requirements-as-in-grpc-python" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/alibaba/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> FunASR
+<span class="nb">cd</span> funasr/runtime/python/grpc
+pip install -r requirements_client.txt
+</pre></div>
+</div>
+</div>
+<div class="section" id="generate-protobuf-file">
+<h3>Generate protobuf file<a class="headerlink" href="#generate-protobuf-file" title="Permalink to this headline"></a></h3>
+<p>Run on server, the two generated pb files are both used for server and client</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># paraformer_pb2.py and paraformer_pb2_grpc.py are already generated, </span>
+<span class="c1"># regenerate it only when you make changes to ./proto/paraformer.proto file.</span>
+python -m grpc_tools.protoc  --proto_path<span class="o">=</span>./proto -I ./proto    --python_out<span class="o">=</span>. --grpc_python_out<span class="o">=</span>./ ./proto/paraformer.proto
+</pre></div>
+</div>
+</div>
+<div class="section" id="start-grpc-client">
+<h3>Start grpc client<a class="headerlink" href="#start-grpc-client" title="Permalink to this headline"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Start client.</span>
+<span class="n">python</span> <span class="n">grpc_main_client_mic</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">host</span> <span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span> <span class="o">--</span><span class="n">port</span> <span class="mi">10095</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="acknowledge">
+<h2>Acknowledge<a class="headerlink" href="#acknowledge" title="Permalink to this headline"></a></h2>
+<ol class="simple">
+<li><p>This project is maintained by <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR">FunASR community</a>.</p></li>
+<li><p>We acknowledge <a class="reference external" href="https://www.deepscience.cn">DeepScience</a> for contributing the grpc service.</p></li>
+</ol>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="grpc_python.html" class="btn btn-neutral float-left" title="Using funasr with grpc-python" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="websocket_python.html" class="btn btn-neutral float-right" title="Using funasr with websocket" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Speech Lab, Alibaba Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
