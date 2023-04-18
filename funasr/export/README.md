@@ -1,3 +1,4 @@
+# Export models
 
 ## Environments
     torch >= 1.11.0
@@ -7,7 +8,7 @@
 
 ## Install modelscope and funasr
 
-The installation is the same as [funasr](../../README.md)
+The installation is the same as [funasr](https://github.com/alibaba-damo-academy/FunASR/blob/main/README.md#installation)
 
 ## Export model
    `Tips`: torch>=1.11.0

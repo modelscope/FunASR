@@ -102,7 +102,7 @@ class ContextualBiasDecoder(nn.Module):
 
 class ContextualParaformerDecoder(ParaformerSANMDecoder):
     """
-    author: Speech Lab, Alibaba Group, China
+    Author: Speech Lab of DAMO Academy, Alibaba Group
     Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition
     https://arxiv.org/abs/2006.01713
     """

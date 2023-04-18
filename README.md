@@ -1,18 +1,22 @@
 [//]: # (<div align="left"><img src="docs/images/funasr_logo.jpg" width="400"/></div>)
 
 # FunASR: A Fundamental End-to-End Speech Recognition Toolkit
+<p align="left">
+    <a href=""><img src="https://img.shields.io/badge/OS-Linux%2C%20Win%2C%20Mac-brightgreen.svg"></a>
+    <a href=""><img src="https://img.shields.io/badge/Python->=3.7,<=3.10-aff.svg"></a>
+    <a href=""><img src="https://img.shields.io/badge/Pytorch-%3E%3D1.11-blue"></a>
+</p>
 
 <strong>FunASR</strong> hopes to build a bridge between academic research and industrial applications on speech recognition. By supporting the training & finetuning of the industrial-grade speech recognition model released on [ModelScope](https://www.modelscope.cn/models?page=1&tasks=auto-speech-recognition), researchers and developers can conduct research and production of speech recognition models more conveniently, and promote the development of speech recognition ecology. ASR for Fun！
 
 [**News**](https://github.com/alibaba-damo-academy/FunASR#whats-new) 
 | [**Highlights**](#highlights)
 | [**Installation**](#installation)
-| [**Docs_CN**](https://alibaba-damo-academy.github.io/FunASR/cn/index.html)
 | [**Docs_EN**](https://alibaba-damo-academy.github.io/FunASR/en/index.html)
 | [**Tutorial**](https://github.com/alibaba-damo-academy/FunASR/wiki#funasr%E7%94%A8%E6%88%B7%E6%89%8B%E5%86%8C)
 | [**Papers**](https://github.com/alibaba-damo-academy/FunASR#citations)
 | [**Runtime**](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime)
-| [**Model Zoo**](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary)
+| [**Model Zoo**](https://github.com/alibaba-damo-academy/FunASR/blob/main/docs/modelscope_models.md)
 | [**Contact**](#contact)
 
 [**M2MET2.0 Guidence_CN**](https://alibaba-damo-academy.github.io/FunASR/m2met2_cn/index.html)
@@ -25,7 +29,7 @@ We are pleased to announce that the M2MeT2.0 challenge will be held in the near 
 For the release notes, please ref to [news](https://github.com/alibaba-damo-academy/FunASR/releases)
 
 ## Highlights
-- Many types of typical models are supported, e.g., [Tranformer](https://arxiv.org/abs/1706.03762), [Conformer](https://arxiv.org/abs/2005.08100), [Paraformer](https://arxiv.org/abs/2206.08317).
+- FunASR supports speech recognition(ASR), Multi-talker ASR, Voice Activity Detection(VAD), Punctuation Restoration, Language Models, Speaker Verification and Speaker diarization.   
 - We have released large number of academic and industrial pretrained models on [ModelScope](https://www.modelscope.cn/models?page=1&tasks=auto-speech-recognition)
 - The pretrained model [Paraformer-large](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary) obtains the best performance on many tasks in [SpeechIO leaderboard](https://github.com/SpeechColab/Leaderboard)
 - FunASR supplies a easy-to-use pipeline to finetune pretrained models from [ModelScope](https://www.modelscope.cn/models?page=1&tasks=auto-speech-recognition)
@@ -33,15 +37,37 @@ For the release notes, please ref to [news](https://github.com/alibaba-damo-acad
 
 ## Installation
 
+Install from pip
+```shell
+pip install -U funasr
+# For the users in China, you could install with the command:
+# pip install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple
+```
+
+Or install from source code
+
+
 ``` sh
-pip install "modelscope[audio_asr]" --upgrade -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html
 git clone https://github.com/alibaba/FunASR.git && cd FunASR
 pip install -e ./
+# For the users in China, you could install with the command:
+# pip install -e ./ -i https://mirror.sjtu.edu.cn/pypi/web/simple
+
 ```
+If you want to use the pretrained models in ModelScope, you should install the modelscope:
+
+```shell
+pip install -U modelscope
+# For the users in China, you could install with the command:
+# pip install -U modelscope -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html -i https://mirror.sjtu.edu.cn/pypi/web/simple
+```
+
 For more details, please ref to [installation](https://github.com/alibaba-damo-academy/FunASR/wiki)
 
-## Usage
-For users who are new to FunASR and ModelScope, please refer to FunASR Docs([CN](https://alibaba-damo-academy.github.io/FunASR/cn/index.html) / [EN](https://alibaba-damo-academy.github.io/FunASR/en/index.html))
+[//]: # ()
+[//]: # (## Usage)
+
+[//]: # (For users who are new to FunASR and ModelScope, please refer to FunASR Docs&#40;[CN]&#40;https://alibaba-damo-academy.github.io/FunASR/cn/index.html&#41; / [EN]&#40;https://alibaba-damo-academy.github.io/FunASR/en/index.html&#41;&#41;)
 
 ## Contact
 

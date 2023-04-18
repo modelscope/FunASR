@@ -19,6 +19,7 @@ def forward_segment(text, seg_dict):
 def seg_tokenize(txt, seg_dict):
     out_txt = ""
     for word in txt:
+        word = word.lower()
         if word in seg_dict:
             out_txt += seg_dict[word] + " "
         else:
@@ -41,14 +42,13 @@ def tokenize(data,
 
     if seg_dict is not None:
         assert isinstance(seg_dict, dict)
-        txt = forward_segment("".join(text).lower(), seg_dict)
-        text = seg_tokenize(txt, seg_dict)
+        text = seg_tokenize(text, seg_dict)
 
     length = len(text)
     for i in range(length):
         x = text[i]
-        if i == length-1 and "punc" in data and text[i].startswith("vad:"):
-            vad = x[-1][4:]
+        if i == length-1 and "punc" in data and x.startswith("vad:"):
+            vad = x[4:]
             if len(vad) == 0:
                 vad = -1
             else:

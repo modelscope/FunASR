@@ -1,34 +1,29 @@
 #!/usr/bin/env python3
+
 import os
-from funasr.tasks.punctuation import PunctuationTask
+
+from funasr.tasks.asr import ASRTransducerTask
 
 
+# for ASR Training
 def parse_args():
-    parser = PunctuationTask.get_parser()
+    parser = ASRTransducerTask.get_parser()
     parser.add_argument(
         "--gpu_id",
         type=int,
         default=0,
         help="local gpu id.",
     )
-    parser.add_argument(
-        "--punc_list",
-        type=str,
-        default=None,
-        help="Punctuation list",
-    )
     args = parser.parse_args()
     return args
 
 
 def main(args=None, cmd=None):
-    """
-    punc training.
-    """
-    PunctuationTask.main(args=args, cmd=cmd)
+    # for ASR Training
+    ASRTransducerTask.main(args=args, cmd=cmd)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     args = parse_args()
 
     # setup local gpu_id
@@ -40,5 +35,12 @@ if __name__ == "__main__":
     else:
         args.distributed = False
     assert args.num_worker_count == 1
+
+    # re-compute batch size: when dataset type is small
+    if args.dataset_type == "small":
+        if args.batch_size is not None:
+            args.batch_size = args.batch_size * args.ngpu
+        if args.batch_bins is not None:
+            args.batch_bins = args.batch_bins * args.ngpu
 
     main(args=args)

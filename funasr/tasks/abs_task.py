@@ -467,7 +467,7 @@ class AbsTask(ABC):
         parser.add_argument(
             "--batch_interval",
             type=int,
-            default=10000,
+            default=-1,
             help="The batch interval for saving model.",
         )
         group.add_argument(
@@ -1587,6 +1587,8 @@ class AbsTask(ABC):
                 dest_sample_rate = args.frontend_conf["fs"]
             else:
                 dest_sample_rate = 16000
+        else:
+            dest_sample_rate = 16000
 
         dataset = ESPnetDataset(
             iter_options.data_path_and_name_and_type,

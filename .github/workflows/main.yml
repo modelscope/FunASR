@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - dev_wjm
+      - main
       - dev_lyh
 
 jobs:

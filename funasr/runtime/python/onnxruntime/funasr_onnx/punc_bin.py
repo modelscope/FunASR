@@ -13,6 +13,11 @@ logging = get_logger()
 
 
 class CT_Transformer():
+    """
+    Author: Speech Lab of DAMO Academy, Alibaba Group
+    CT-Transformer: Controllable time-delay transformer for real-time punctuation prediction and disfluency detection
+    https://arxiv.org/pdf/2003.01309.pdf
+    """
     def __init__(self, model_dir: Union[str, Path] = None,
                  batch_size: int = 1,
                  device_id: Union[str, int] = "-1",
@@ -119,6 +124,11 @@ class CT_Transformer():
 
 
 class CT_Transformer_VadRealtime(CT_Transformer):
+    """
+    Author: Speech Lab of DAMO Academy, Alibaba Group
+    CT-Transformer: Controllable time-delay transformer for real-time punctuation prediction and disfluency detection
+    https://arxiv.org/pdf/2003.01309.pdf
+    """
     def __init__(self, model_dir: Union[str, Path] = None,
                  batch_size: int = 1,
                  device_id: Union[str, int] = "-1",
@@ -159,7 +169,7 @@ class CT_Transformer_VadRealtime(CT_Transformer):
             data = {
                 "input": mini_sentence_id[None,:],
                 "text_lengths": np.array([text_length], dtype='int32'),
-                "vad_mask": self.vad_mask(text_length, len(cache) - 1)[None, None, :, :].astype(np.float32),
+                "vad_mask": self.vad_mask(text_length, len(cache))[None, None, :, :].astype(np.float32),
                 "sub_masks": np.tril(np.ones((text_length, text_length), dtype=np.float32))[None, None, :, :].astype(np.float32)
             }
             try:

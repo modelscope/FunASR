@@ -1,3 +1,7 @@
+"""
+Author: Speech Lab, Alibaba Group, China
+"""
+
 import logging
 from contextlib import contextmanager
 from distutils.version import LooseVersion

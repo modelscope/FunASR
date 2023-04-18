@@ -13,21 +13,6 @@ Vocab::Vocab(const char *filename)
 {
     ifstream in(filename);
     loadVocabFromYaml(filename);
-
-    /*
-    string line;
-    if (in) // 有该文件
-    {
-        while (getline(in, line)) // line中不包括每行的换行符
-        {
-            vocab.push_back(line);
-        }
-    }
-    else{
-        printf("Cannot load vocab from: %s, there must be file vocab.txt", filename);
-        exit(-1);
-    }
-    */
 }
 Vocab::~Vocab()
 {

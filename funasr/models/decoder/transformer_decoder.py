@@ -405,7 +405,7 @@ class TransformerDecoder(BaseTransformerDecoder):
 
 class ParaformerDecoderSAN(BaseTransformerDecoder):
     """
-    author: Speech Lab, Alibaba Group, China
+    Author: Speech Lab of DAMO Academy, Alibaba Group
     Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition
     https://arxiv.org/abs/2006.01713
     """

@@ -19,6 +19,7 @@ from typing import List
 
 import numpy as np
 import torch
+import torchaudio
 from typeguard import check_argument_types
 
 from funasr.fileio.datadir_writer import DatadirWriter
@@ -607,17 +608,22 @@ def inference_modelscope(
     ):
 
         # 3. Build data-iterator
-        if data_path_and_name_and_type is not None and data_path_and_name_and_type[2] == "bytes":
-            raw_inputs = _load_bytes(data_path_and_name_and_type[0])
-            raw_inputs = torch.tensor(raw_inputs)
-        if data_path_and_name_and_type is None and raw_inputs is not None:
-            if isinstance(raw_inputs, np.ndarray):
-                raw_inputs = torch.tensor(raw_inputs)
         is_final = False
+        cache = {}
         if param_dict is not None and "cache" in param_dict:
             cache = param_dict["cache"]
         if param_dict is not None and "is_final" in param_dict:
             is_final = param_dict["is_final"]
+
+        if data_path_and_name_and_type is not None and data_path_and_name_and_type[2] == "bytes":
+            raw_inputs = _load_bytes(data_path_and_name_and_type[0])
+            raw_inputs = torch.tensor(raw_inputs)
+        if data_path_and_name_and_type is not None and data_path_and_name_and_type[2] == "sound":
+            raw_inputs = torchaudio.load(data_path_and_name_and_type[0])[0][0]
+            is_final = True
+        if data_path_and_name_and_type is None and raw_inputs is not None:
+            if isinstance(raw_inputs, np.ndarray):
+                raw_inputs = torch.tensor(raw_inputs)
         # 7 .Start for-loop
         # FIXME(kamo): The output format should be discussed about
         asr_result_list = []

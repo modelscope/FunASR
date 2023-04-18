@@ -1,3 +1,11 @@
+"""
+Author: Speech Lab, Alibaba Group, China
+SOND: Speaker Overlap-aware Neural Diarization for Multi-party Meeting Analysis
+https://arxiv.org/abs/2211.10243
+TOLD: A Novel Two-Stage Overlap-Aware Framework for Speaker Diarization
+https://arxiv.org/abs/2303.05397
+"""
+
 import argparse
 import logging
 import os

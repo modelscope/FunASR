@@ -67,7 +67,7 @@ class EncoderLayer(nn.Module):
 
 class ConvEncoder(AbsEncoder):
     """
-    author: Speech Lab, Alibaba Group, China
+    Author: Speech Lab of DAMO Academy, Alibaba Group
     Convolution encoder in OpenNMT framework
     """
 

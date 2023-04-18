@@ -123,7 +123,7 @@ setup(
     name="funasr",
     version=version,
     url="https://github.com/alibaba-damo-academy/FunASR.git",
-    author="Speech Lab, Alibaba Group, China",
+    author="Speech Lab of DAMO Academy, Alibaba Group",
     author_email="funasr@list.alibaba-inc.com",
     description="FunASR: A Fundamental End-to-End Speech Recognition Toolkit",
     long_description=open(os.path.join(dirname, "README.md"), encoding="utf-8").read(),

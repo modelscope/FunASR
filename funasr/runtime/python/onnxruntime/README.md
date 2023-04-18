@@ -1,31 +1,28 @@
-## Using funasr with ONNXRuntime
+# ONNXRuntime-python
+
+## Export the model
+### Install [modelscope and funasr](https://github.com/alibaba-damo-academy/FunASR#installation)
+
+```shell
+pip3 install torch torchaudio
+pip install -U modelscope
+pip install -U funasr
+```
+
+### Export [onnx model](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export)
+
+```shell
+python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize True
+```
 
 
-### Introduction
-- Model comes from [speech_paraformer](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary).
-
-
-### Steps:
-1. Export the model.
-   - Command: (`Tips`: torch >= 1.11.0 is required.)
-
-       More details ref to ([export docs](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export))
-
-       - `e.g.`, Export model from modelscope
-         ```shell
-         python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize False
-         ```
-       - `e.g.`, Export model from local path, the model'name must be `model.pb`.
-         ```shell
-         python -m funasr.export.export_model --model-name ./damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize False
-         ```
-
-
-2. Install the `funasr_onnx`
+## Install the `funasr_onnx`
 
 install from pip
 ```shell
-pip install --upgrade funasr_onnx -i https://pypi.Python.org/simple
+pip install -U funasr_onnx
+# For the users in China, you could install with the command:
+# pip install -U funasr_onnx -i https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
 
 or install from source code
@@ -33,26 +30,27 @@ or install from source code
 ```shell
 git clone https://github.com/alibaba/FunASR.git && cd FunASR
 cd funasr/runtime/python/onnxruntime
-python setup.py build
-python setup.py install
+pip install -e ./
+# For the users in China, you could install with the command:
+# pip install -e ./ -i https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
 
-3. Run the demo.
-   - Model_dir: the model path, which contains `model.onnx`, `config.yaml`, `am.mvn`.
-   - Input: wav formt file, support formats: `str, np.ndarray, List[str]`
-   - Output: `List[str]`: recognition result.
-   - Example:
-        ```python
-        from funasr_onnx import Paraformer
+## Run the demo
+- Model_dir: the model path, which contains `model.onnx`, `config.yaml`, `am.mvn`.
+- Input: wav formt file, support formats: `str, np.ndarray, List[str]`
+- Output: `List[str]`: recognition result.
+- Example:
+     ```python
+     from funasr_onnx import Paraformer
 
-        model_dir = "/nfs/zhifu.gzf/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
-        model = Paraformer(model_dir, batch_size=1)
+     model_dir = "/nfs/zhifu.gzf/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
+     model = Paraformer(model_dir, batch_size=1)
 
-        wav_path = ['/nfs/zhifu.gzf/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/example/asr_example.wav']
+     wav_path = ['/nfs/zhifu.gzf/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/example/asr_example.wav']
 
-        result = model(wav_path)
-        print(result)
-        ```
+     result = model(wav_path)
+     print(result)
+     ```
 
 ## Performance benchmark
 

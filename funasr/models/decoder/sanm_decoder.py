@@ -151,7 +151,7 @@ class DecoderLayerSANM(nn.Module):
 
 class FsmnDecoderSCAMAOpt(BaseTransformerDecoder):
     """
-    author: Speech Lab, Alibaba Group, China
+    Author: Speech Lab of DAMO Academy, Alibaba Group
     SCAMA: Streaming chunk-aware multihead attention for online end-to-end speech recognition
     https://arxiv.org/abs/2006.01713
 
@@ -812,7 +812,7 @@ class FsmnDecoderSCAMAOpt(BaseTransformerDecoder):
 
 class ParaformerSANMDecoder(BaseTransformerDecoder):
     """
-    author: Speech Lab, Alibaba Group, China
+    Author: Speech Lab of DAMO Academy, Alibaba Group
     Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition
     https://arxiv.org/abs/2006.01713
     """
