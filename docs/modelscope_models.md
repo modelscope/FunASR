@@ -86,3 +86,9 @@ Here we provided several pretrained models on different datasets. The details of
 |:----------------------------------------------------------------------------------------------------------------:|:-------------------:|:----------:|:------|
 | [SOND](https://www.modelscope.cn/models/damo/speech_diarization_sond-zh-cn-alimeeting-16k-n16k4-pytorch/summary) | AliMeeting (120 hours) |   40.5M    |    Speaker diarization, profiles and records, Chinese |
 | [SOND](https://www.modelscope.cn/models/damo/speech_diarization_sond-en-us-callhome-8k-n16k4-pytorch/summary)    |  CallHome (60 hours)  |     12M     |    Speaker diarization, profiles and records, English   |
+
+### Timestamp Prediction Models
+
+|                                                    Model Name                                     |  Language  |    Training Data    | Parameters | Notes |
+|:--------------------------------------------------------------------------------------------------:|:--------------:|:-------------------:|:----------:|:------|
+| [TP-Aligner](https://modelscope.cn/models/damo/speech_timestamp_prediction-v1-16k-offline/summary) | CN | Alibaba Speech Data (50000hours) |   37.8M    |    Timestamp prediction, Mandarin, middle size |
