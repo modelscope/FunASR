@@ -19,6 +19,7 @@ class Conformer(nn.Module):
             model,
             max_seq_len=512,
             feats_dim=560,
+            output_size=2048,
             model_name='model',
             **kwargs,
     ):
@@ -32,6 +33,7 @@ class Conformer(nn.Module):
             self.decoder = TransformerDecoder_export(model.decoder, onnx=onnx)
         
         self.feats_dim = feats_dim
+        self.output_size = output_size
         self.model_name = model_name
 
         if onnx:
@@ -51,15 +53,14 @@ class Conformer(nn.Module):
         enc, enc_len = self.encoder(**batch)
         mask = self.make_pad_mask(enc_len)[:, None, :]
 
-        #the previous decoder output
-        pre_decoder_out, pre_decoder_out_length = None, None
+        # initialize one frame output
+        pre_frame_output = torch.randn(1, self.output_size)
 
-        #
-        decoder_out,  = self.decoder(enc, enc_len, pre_decoder_out, pre_decoder_out_length)
+        decoder_out,  = self.decoder(enc, enc_len, pre_frame_output, speech_lengths)
         decoder_out = torch.log_softmax(decoder_out, dim=-1)
         # sample_ids = decoder_out.argmax(dim=-1)
 
-        return decoder_out, pre_decoder_out_length
+        return decoder_out, speech_lengths
 
     def get_dummy_inputs(self):
         speech = torch.randn(2, 30, self.feats_dim)
