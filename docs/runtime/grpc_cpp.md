@@ -1,1 +1,1 @@
-../funasr/runtime/grpc/Readme.md
+../../funasr/runtime/grpc/Readme.md

@@ -1,1 +1,1 @@
-../funasr/runtime/python/onnxruntime/README.md
+../../funasr/runtime/python/onnxruntime/README.md

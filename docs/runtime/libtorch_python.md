@@ -1,1 +1,1 @@
-../funasr/runtime/python/libtorch/README.md
+../../funasr/runtime/python/libtorch/README.md
