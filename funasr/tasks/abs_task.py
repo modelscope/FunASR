@@ -467,7 +467,7 @@ class AbsTask(ABC):
         parser.add_argument(
             "--batch_interval",
             type=int,
-            default=10000,
+            default=-1,
             help="The batch interval for saving model.",
         )
         group.add_argument(
