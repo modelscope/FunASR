@@ -19,6 +19,9 @@ from funasr.runtime.python.libtorch.funasr_torch import Paraformer
 if args.backend == "onnx":
 	from funasr.runtime.python.onnxruntime.funasr_onnx import Paraformer
 	
+if 'blade' in args.model_dir:
+    import torch_blade
+
 model = Paraformer(args.model_dir, batch_size=args.batch_size, quantize=args.quantize, intra_op_num_threads=args.intra_op_num_threads)
 
 wav_file_f = open(args.wav_file, 'r')
@@ -27,15 +30,17 @@ wav_files = wav_file_f.readlines()
 # warm-up
 total = 0.0
 num = 30
-wav_path = wav_files[0].split("\t")[1].strip() if "\t" in wav_files[0] else wav_files[0].split(" ")[1].strip()
-for i in range(num):
-	beg_time = time.time()
-	result = model(wav_path)
-	end_time = time.time()
-	duration = end_time-beg_time
-	total += duration
-	print(result)
-	print("num: {}, time, {}, avg: {}, rtf: {}".format(len(wav_path), duration, total/(i+1), (total/(i+1))/5.53))
+wav_path = []
+for i in range(num * args.batch_size):
+    wav_path_i = wav_files[i % len(wav_files)]
+    wav_path_i = wav_path_i.split("\t")[1].strip() if "\t" in wav_files[0] else wav_files[0].split(" ")[1].strip()
+    wav_path += [wav_path_i]
+beg_time = time.time()
+result = model(wav_path)
+end_time = time.time()
+duration = end_time-beg_time
+print(result)
+print("num: {}, time, {}, avg: {}".format(len(wav_path), duration, total/(i+1)))
 
 # infer time
 wav_path = []

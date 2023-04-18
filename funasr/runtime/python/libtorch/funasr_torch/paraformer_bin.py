@@ -61,13 +61,11 @@ class Paraformer():
             end_idx = min(waveform_nums, beg_idx + self.batch_size)
             feats, feats_len = self.extract_feat(waveform_list[beg_idx:end_idx])
             try:
+                if next(self.ort_infer.parameters()).is_cuda:
+                    feats, feats_len = feats.cuda(), feats_len.cuda()
                 with torch.no_grad():
-                    if int(self.device_id) == -1:
-                        outputs = self.ort_infer(feats, feats_len)
-                        am_scores, valid_token_lens = outputs[0], outputs[1]
-                    else:
-                        outputs = self.ort_infer(feats.cuda(), feats_len.cuda())
-                        am_scores, valid_token_lens = outputs[0].cpu(), outputs[1].cpu()
+                    outputs = self.ort_infer(feats, feats_len)
+                am_scores, valid_token_lens = outputs[0], outputs[1]
                 if len(outputs) == 4:
                     # for BiCifParaformer Inference
                     us_alphas, us_peaks = outputs[2], outputs[3]
@@ -174,8 +172,8 @@ class Paraformer():
                    am_score: np.ndarray,
                    valid_token_num: int) -> List[str]:
         yseq = am_score.argmax(axis=-1)
-        score = am_score.max(axis=-1)
-        score = np.sum(score, axis=-1)
+        score, _ = am_score.max(axis=-1)
+        score = score.cpu().numpy() if score.is_cuda else score.numpy()
 
         # pad with mask tokens to ensure compatibility with sos/eos tokens
         # asr_model.sos:1  asr_model.eos:2
