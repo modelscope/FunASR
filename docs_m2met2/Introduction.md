@@ -1,10 +1,12 @@
 # Introduction
 ## Call for participation
-Recent advancements in speech signal processing, including speech recognition and speaker diarization, have led to a proliferation of speech technologies applications. Meetings are particularly challenging scenarios for speech technologies, given their varied speaking styles and complex acoustic conditions, such as overlapping speech, unknown numbers of speakers, far-field signals in large conference rooms, noise, and reverberation.
+Automatic speech recognition (ASR) and speaker diarization have made significant strides in recent years, resulting in a surge of speech technology applications across various domains. However, meetings present unique challenges to speech technologies due to their complex acoustic conditions and diverse speaking styles, including overlapping speech, variable numbers of speakers, far-field signals in large conference rooms, and environmental noise and reverberation. 
 
-To advance the development of meeting transcription, several relevant challenges have been organized, such as the Rich Transcription evaluation and Computational Hearing in Multisource Environments (CHIME) challenges. However, the differences across languages limit the progress of non-English meeting transcription, such as Mandarin. The Multimodal Information Based Speech Processing (MISP) and Multi-Channel Multi-Party Meeting Transcription (M2MeT) challenges have contributed to advancing Mandarin meeting transcription. The MISP challenge addresses the problem of audio-visual distant multi-microphone signal processing in everyday home environments, while the M2MeT challenge focuses on solving the speech overlap problem of meeting transcription in offline meeting rooms.
+Over the years, several challenges have been organized to advance the development of meeting transcription, including the Rich Transcription evaluation and Computational Hearing in Multisource Environments (CHIME) challenges. The latest iteration of the CHIME challenge has a particular focus on distant automatic speech recognition and developing systems that can generalize across various array topologies and application scenarios. However, while progress has been made in English meeting transcription, language differences remain a significant barrier to achieving comparable results in non-English languages, such as Mandarin. The Multimodal Information Based Speech Processing (MISP) and Multi-Channel Multi-Party Meeting Transcription (M2MeT) challenges have been instrumental in advancing Mandarin meeting transcription. The MISP challenge seeks to address the problem of audio-visual distant multi-microphone signal processing in everyday home environments, while the M2MeT challenge focuses on tackling the speech overlap issue in offline meeting rooms.
 
-Building on the success of the M2MeT challenge, we are pleased to announce the M2MeT2.0 challenge as an ASRU2023 Signal Processing Grand Challenge. In the M2MeT challenge, the evaluation metric is speaker-independent, meaning that we can only determine the transcription but not the corresponding speaker. To further advance the current multi-talker ASR system to practicality, the M2MeT2.0 challenge proposes the speaker-attribute ASR task with two sub-tracks performing in fixed and open training conditions. We provide a detailed introduction of the dataset, rules, evaluation methods, and baseline systems to further promote reproducible research in this field. The organizer will select top three papers and include them in the ASRU2023 Proceedings.
+The ICASSP2022 M2MeT challenge focuses on meeting scenarios, and it comprises two main tasks: speaker diarization and multi-speaker automatic speech recognition. The former involves identifying who spoke when in the meeting, while the latter aims to transcribe speech from multiple speakers simultaneously, which poses significant technical difficulties due to overlapping speech and acoustic interferences.
+
+Building on the success of the previous M2MeT challenge, we are excited to propose the M2MeT2.0 challenge as an ASRU2023 challenge special session. In the original M2MeT challenge, the evaluation metric was speaker-independent, which meant that the transcription could be determined, but not the corresponding speaker. To address this limitation and further advance the current multi-talker ASR system towards practicality, the M2MeT2.0 challenge proposes the speaker-attributed ASR task with two sub-tracks: fixed and open training conditions. The speaker-attribute automatic speech recognition (ASR) task aims to tackle the practical and challenging problem of identifying "who spoke what at when". To facilitate reproducible research in this field, we offer a comprehensive overview of the dataset, rules, evaluation metrics, and baseline systems. Furthermore, we will release a carefully curated test set, comprising approximately 10 hours of audio, according to the timeline. The new test set is designed to enable researchers to validate and compare their models' performance and advance the state of the art in this area.
 
 ## Timeline(AOE Time)
 
@@ -14,14 +16,10 @@ Building on the success of the M2MeT challenge, we are pleased to announce the M
 - $ June~19^{th}, 2023: $ Evaluation result and ranking release.
 - $ July~3^{rd}, 2023: $ Deadline for paper submission.
 - $ July~10^{th}, 2023: $ Deadline for final paper submission.
+- $ December~12^{nd}\ to\ 16^{th}, 2023: $ ASRU Workshop
 
 ## Guidelines
 
-Potential participants from both academia and industry should send an email to **m2met.alimeeting@gmail.com** to register to the challenge before or by May 5, 2023 with the following requirements:
+Interested participants, whether from academia or industry, must register for the challenge by completing a Google form, which will be available here. The deadline for registration is May 5, 2023. 
 
-
-- Email subject: [ASRU2023 M2MeT2.0 Challenge Registration] – Team Name - Participating 
-sub-track.
-- Provide team name, affiliation, participating track, team captain as well as members with contacts.
-
-The organizer will notify the qualified teams to join the challenge via email in 3 working days. The qualified teams must obey the challenge rules which will be released on the challenge website.
+Within three working days, the challenge organizer will send email invitations to eligible teams to participate in the challenge. All qualified teams are required to adhere to the challenge rules, which will be published on the challenge page. Prior to the ranking release time, each participant must submit a system description document detailing their approach and methods. The organizer will select the top three submissions to be included in the ASRU2023 Proceedings. 
