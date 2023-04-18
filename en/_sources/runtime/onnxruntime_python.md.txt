@@ -35,22 +35,113 @@ pip install -e ./
 # pip install -e ./ -i https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
 
-## Run the demo
-- Model_dir: the model path, which contains `model.onnx`, `config.yaml`, `am.mvn`.
+## Inference with runtime
+### Speech Recognition
+#### Paraformer
+ ```python
+ from funasr_onnx import Paraformer
+
+ model_dir = "./export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
+ model = Paraformer(model_dir, batch_size=1)
+
+ wav_path = ['./export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/example/asr_example.wav']
+
+ result = model(wav_path)
+ print(result)
+ ```
+- Model_dir: the model path, which contains `model.onnx`, `config.yaml`, `am.mvn`
 - Input: wav formt file, support formats: `str, np.ndarray, List[str]`
-- Output: `List[str]`: recognition result.
-- Example:
-     ```python
-     from funasr_onnx import Paraformer
+- Output: `List[str]`: recognition result
 
-     model_dir = "/nfs/zhifu.gzf/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
-     model = Paraformer(model_dir, batch_size=1)
+#### Paraformer-online
 
-     wav_path = ['/nfs/zhifu.gzf/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/example/asr_example.wav']
+### Voice Activity Detection
+#### FSMN-VAD
+```python
+from funasr_onnx import Fsmn_vad
 
-     result = model(wav_path)
-     print(result)
-     ```
+model_dir = "./export/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch"
+wav_path = "./export/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/example/vad_example.wav"
+model = Fsmn_vad(model_dir)
+
+result = model(wav_path)
+print(result)
+```
+- Model_dir: the model path, which contains `model.onnx`, `config.yaml`, `am.mvn`
+- Input: wav formt file, support formats: `str, np.ndarray, List[str]`
+- Output: `List[str]`: recognition result
+
+#### FSMN-VAD-online
+```python
+from funasr_onnx import Fsmn_vad_online
+import soundfile
+
+
+model_dir = "./export/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch"
+wav_path = "./export/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/example/vad_example.wav"
+model = Fsmn_vad_online(model_dir)
+
+
+##online vad
+speech, sample_rate = soundfile.read(wav_path)
+speech_length = speech.shape[0]
+#
+sample_offset = 0
+step = 1600
+param_dict = {'in_cache': []}
+for sample_offset in range(0, speech_length, min(step, speech_length - sample_offset)):
+    if sample_offset + step >= speech_length - 1:
+        step = speech_length - sample_offset
+        is_final = True
+    else:
+        is_final = False
+    param_dict['is_final'] = is_final
+    segments_result = model(audio_in=speech[sample_offset: sample_offset + step],
+                            param_dict=param_dict)
+    if segments_result:
+        print(segments_result)
+```
+- Model_dir: the model path, which contains `model.onnx`, `config.yaml`, `am.mvn`
+- Input: wav formt file, support formats: `str, np.ndarray, List[str]`
+- Output: `List[str]`: recognition result
+
+### Punctuation Restoration
+#### CT-Transformer
+```python
+from funasr_onnx import CT_Transformer
+
+model_dir = "./export/damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch"
+model = CT_Transformer(model_dir)
+
+text_in="跨境河流是养育沿岸人民的生命之源长期以来为帮助下游地区防灾减灾中方技术人员在上游地区极为恶劣的自然条件下克服巨大困难甚至冒着生命危险向印方提供汛期水文资料处理紧急事件中方重视印方在跨境河流问题上的关切愿意进一步完善双方联合工作机制凡是中方能做的我们都会去做而且会做得更好我请印度朋友们放心中国在上游的任何开发利用都会经过科学规划和论证兼顾上下游的利益"
+result = model(text_in)
+print(result[0])
+```
+- Model_dir: the model path, which contains `model.onnx`, `config.yaml`, `am.mvn`
+- Input: wav formt file, support formats: `str, np.ndarray, List[str]`
+- Output: `List[str]`: recognition result
+
+#### CT-Transformer-online
+```python
+from funasr_onnx import CT_Transformer_VadRealtime
+
+model_dir = "./export/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727"
+model = CT_Transformer_VadRealtime(model_dir)
+
+text_in  = "跨境河流是养育沿岸|人民的生命之源长期以来为帮助下游地区防灾减灾中方技术人员|在上游地区极为恶劣的自然条件下克服巨大困难甚至冒着生命危险|向印方提供汛期水文资料处理紧急事件中方重视印方在跨境河流>问题上的关切|愿意进一步完善双方联合工作机制|凡是|中方能做的我们|都会去做而且会做得更好我请印度朋友们放心中国在上游的|任何开发利用都会经过科学|规划和论证兼顾上下游的利益"
+
+vads = text_in.split("|")
+rec_result_all=""
+param_dict = {"cache": []}
+for vad in vads:
+    result = model(vad, param_dict=param_dict)
+    rec_result_all += result[0]
+
+print(rec_result_all)
+```
+- Model_dir: the model path, which contains `model.onnx`, `config.yaml`, `am.mvn`
+- Input: wav formt file, support formats: `str, np.ndarray, List[str]`
+- Output: `List[str]`: recognition result
 
 ## Performance benchmark
 

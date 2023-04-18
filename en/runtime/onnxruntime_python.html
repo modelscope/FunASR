@@ -80,7 +80,24 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#install-the-funasr-onnx">Install the <code class="docutils literal notranslate"><span class="pre">funasr_onnx</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#run-the-demo">Run the demo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#inference-with-runtime">Inference with runtime</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#speech-recognition">Speech Recognition</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#paraformer">Paraformer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#paraformer-online">Paraformer-online</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#voice-activity-detection">Voice Activity Detection</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#fsmn-vad">FSMN-VAD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fsmn-vad-online">FSMN-VAD-online</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#punctuation-restoration">Punctuation Restoration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ct-transformer">CT-Transformer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ct-transformer-online">CT-Transformer-online</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#performance-benchmark">Performance benchmark</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#acknowledge">Acknowledge</a></li>
 </ul>
@@ -156,26 +173,137 @@ pip install -e ./
 </pre></div>
 </div>
 </div>
-<div class="section" id="run-the-demo">
-<h2>Run the demo<a class="headerlink" href="#run-the-demo" title="Permalink to this headline"></a></h2>
-<ul>
-<li><p>Model_dir: the model path, which contains <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code>, <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">am.mvn</span></code>.</p></li>
-<li><p>Input: wav formt file, support formats: <code class="docutils literal notranslate"><span class="pre">str,</span> <span class="pre">np.ndarray,</span> <span class="pre">List[str]</span></code></p></li>
-<li><p>Output: <code class="docutils literal notranslate"><span class="pre">List[str]</span></code>: recognition result.</p></li>
-<li><p>Example:</p>
+<div class="section" id="inference-with-runtime">
+<h2>Inference with runtime<a class="headerlink" href="#inference-with-runtime" title="Permalink to this headline"></a></h2>
+<div class="section" id="speech-recognition">
+<h3>Speech Recognition<a class="headerlink" href="#speech-recognition" title="Permalink to this headline"></a></h3>
+<div class="section" id="paraformer">
+<h4>Paraformer<a class="headerlink" href="#paraformer" title="Permalink to this headline"></a></h4>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">funasr_onnx</span> <span class="kn">import</span> <span class="n">Paraformer</span>
 
-<span class="n">model_dir</span> <span class="o">=</span> <span class="s2">&quot;/nfs/zhifu.gzf/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&quot;</span>
+<span class="n">model_dir</span> <span class="o">=</span> <span class="s2">&quot;./export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&quot;</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">Paraformer</span><span class="p">(</span><span class="n">model_dir</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
-<span class="n">wav_path</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;/nfs/zhifu.gzf/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/example/asr_example.wav&#39;</span><span class="p">]</span>
+<span class="n">wav_path</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;./export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/example/asr_example.wav&#39;</span><span class="p">]</span>
 
 <span class="n">result</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">wav_path</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </pre></div>
 </div>
-</li>
+<ul class="simple">
+<li><p>Model_dir: the model path, which contains <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code>, <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">am.mvn</span></code></p></li>
+<li><p>Input: wav formt file, support formats: <code class="docutils literal notranslate"><span class="pre">str,</span> <span class="pre">np.ndarray,</span> <span class="pre">List[str]</span></code></p></li>
+<li><p>Output: <code class="docutils literal notranslate"><span class="pre">List[str]</span></code>: recognition result</p></li>
 </ul>
+</div>
+<div class="section" id="paraformer-online">
+<h4>Paraformer-online<a class="headerlink" href="#paraformer-online" title="Permalink to this headline"></a></h4>
+</div>
+</div>
+<div class="section" id="voice-activity-detection">
+<h3>Voice Activity Detection<a class="headerlink" href="#voice-activity-detection" title="Permalink to this headline"></a></h3>
+<div class="section" id="fsmn-vad">
+<h4>FSMN-VAD<a class="headerlink" href="#fsmn-vad" title="Permalink to this headline"></a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">funasr_onnx</span> <span class="kn">import</span> <span class="n">Fsmn_vad</span>
+
+<span class="n">model_dir</span> <span class="o">=</span> <span class="s2">&quot;./export/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch&quot;</span>
+<span class="n">wav_path</span> <span class="o">=</span> <span class="s2">&quot;./export/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/example/vad_example.wav&quot;</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">Fsmn_vad</span><span class="p">(</span><span class="n">model_dir</span><span class="p">)</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">wav_path</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Model_dir: the model path, which contains <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code>, <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">am.mvn</span></code></p></li>
+<li><p>Input: wav formt file, support formats: <code class="docutils literal notranslate"><span class="pre">str,</span> <span class="pre">np.ndarray,</span> <span class="pre">List[str]</span></code></p></li>
+<li><p>Output: <code class="docutils literal notranslate"><span class="pre">List[str]</span></code>: recognition result</p></li>
+</ul>
+</div>
+<div class="section" id="fsmn-vad-online">
+<h4>FSMN-VAD-online<a class="headerlink" href="#fsmn-vad-online" title="Permalink to this headline"></a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">funasr_onnx</span> <span class="kn">import</span> <span class="n">Fsmn_vad_online</span>
+<span class="kn">import</span> <span class="nn">soundfile</span>
+
+
+<span class="n">model_dir</span> <span class="o">=</span> <span class="s2">&quot;./export/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch&quot;</span>
+<span class="n">wav_path</span> <span class="o">=</span> <span class="s2">&quot;./export/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/example/vad_example.wav&quot;</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">Fsmn_vad_online</span><span class="p">(</span><span class="n">model_dir</span><span class="p">)</span>
+
+
+<span class="c1">##online vad</span>
+<span class="n">speech</span><span class="p">,</span> <span class="n">sample_rate</span> <span class="o">=</span> <span class="n">soundfile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">wav_path</span><span class="p">)</span>
+<span class="n">speech_length</span> <span class="o">=</span> <span class="n">speech</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="c1">#</span>
+<span class="n">sample_offset</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">step</span> <span class="o">=</span> <span class="mi">1600</span>
+<span class="n">param_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;in_cache&#39;</span><span class="p">:</span> <span class="p">[]}</span>
+<span class="k">for</span> <span class="n">sample_offset</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">speech_length</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">speech_length</span> <span class="o">-</span> <span class="n">sample_offset</span><span class="p">)):</span>
+    <span class="k">if</span> <span class="n">sample_offset</span> <span class="o">+</span> <span class="n">step</span> <span class="o">&gt;=</span> <span class="n">speech_length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="n">speech_length</span> <span class="o">-</span> <span class="n">sample_offset</span>
+        <span class="n">is_final</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">is_final</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">param_dict</span><span class="p">[</span><span class="s1">&#39;is_final&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">is_final</span>
+    <span class="n">segments_result</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="n">speech</span><span class="p">[</span><span class="n">sample_offset</span><span class="p">:</span> <span class="n">sample_offset</span> <span class="o">+</span> <span class="n">step</span><span class="p">],</span>
+                            <span class="n">param_dict</span><span class="o">=</span><span class="n">param_dict</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">segments_result</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">segments_result</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Model_dir: the model path, which contains <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code>, <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">am.mvn</span></code></p></li>
+<li><p>Input: wav formt file, support formats: <code class="docutils literal notranslate"><span class="pre">str,</span> <span class="pre">np.ndarray,</span> <span class="pre">List[str]</span></code></p></li>
+<li><p>Output: <code class="docutils literal notranslate"><span class="pre">List[str]</span></code>: recognition result</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="punctuation-restoration">
+<h3>Punctuation Restoration<a class="headerlink" href="#punctuation-restoration" title="Permalink to this headline"></a></h3>
+<div class="section" id="ct-transformer">
+<h4>CT-Transformer<a class="headerlink" href="#ct-transformer" title="Permalink to this headline"></a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">funasr_onnx</span> <span class="kn">import</span> <span class="n">CT_Transformer</span>
+
+<span class="n">model_dir</span> <span class="o">=</span> <span class="s2">&quot;./export/damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch&quot;</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">CT_Transformer</span><span class="p">(</span><span class="n">model_dir</span><span class="p">)</span>
+
+<span class="n">text_in</span><span class="o">=</span><span class="s2">&quot;跨境河流是养育沿岸人民的生命之源长期以来为帮助下游地区防灾减灾中方技术人员在上游地区极为恶劣的自然条件下克服巨大困难甚至冒着生命危险向印方提供汛期水文资料处理紧急事件中方重视印方在跨境河流问题上的关切愿意进一步完善双方联合工作机制凡是中方能做的我们都会去做而且会做得更好我请印度朋友们放心中国在上游的任何开发利用都会经过科学规划和论证兼顾上下游的利益&quot;</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">text_in</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Model_dir: the model path, which contains <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code>, <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">am.mvn</span></code></p></li>
+<li><p>Input: wav formt file, support formats: <code class="docutils literal notranslate"><span class="pre">str,</span> <span class="pre">np.ndarray,</span> <span class="pre">List[str]</span></code></p></li>
+<li><p>Output: <code class="docutils literal notranslate"><span class="pre">List[str]</span></code>: recognition result</p></li>
+</ul>
+</div>
+<div class="section" id="ct-transformer-online">
+<h4>CT-Transformer-online<a class="headerlink" href="#ct-transformer-online" title="Permalink to this headline"></a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">funasr_onnx</span> <span class="kn">import</span> <span class="n">CT_Transformer_VadRealtime</span>
+
+<span class="n">model_dir</span> <span class="o">=</span> <span class="s2">&quot;./export/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727&quot;</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">CT_Transformer_VadRealtime</span><span class="p">(</span><span class="n">model_dir</span><span class="p">)</span>
+
+<span class="n">text_in</span>  <span class="o">=</span> <span class="s2">&quot;跨境河流是养育沿岸|人民的生命之源长期以来为帮助下游地区防灾减灾中方技术人员|在上游地区极为恶劣的自然条件下克服巨大困难甚至冒着生命危险|向印方提供汛期水文资料处理紧急事件中方重视印方在跨境河流&gt;问题上的关切|愿意进一步完善双方联合工作机制|凡是|中方能做的我们|都会去做而且会做得更好我请印度朋友们放心中国在上游的|任何开发利用都会经过科学|规划和论证兼顾上下游的利益&quot;</span>
+
+<span class="n">vads</span> <span class="o">=</span> <span class="n">text_in</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+<span class="n">rec_result_all</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
+<span class="n">param_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;cache&quot;</span><span class="p">:</span> <span class="p">[]}</span>
+<span class="k">for</span> <span class="n">vad</span> <span class="ow">in</span> <span class="n">vads</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">vad</span><span class="p">,</span> <span class="n">param_dict</span><span class="o">=</span><span class="n">param_dict</span><span class="p">)</span>
+    <span class="n">rec_result_all</span> <span class="o">+=</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">rec_result_all</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Model_dir: the model path, which contains <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code>, <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">am.mvn</span></code></p></li>
+<li><p>Input: wav formt file, support formats: <code class="docutils literal notranslate"><span class="pre">str,</span> <span class="pre">np.ndarray,</span> <span class="pre">List[str]</span></code></p></li>
+<li><p>Output: <code class="docutils literal notranslate"><span class="pre">List[str]</span></code>: recognition result</p></li>
+</ul>
+</div>
+</div>
 </div>
 <div class="section" id="performance-benchmark">
 <h2>Performance benchmark<a class="headerlink" href="#performance-benchmark" title="Permalink to this headline"></a></h2>
