@@ -32,6 +32,7 @@ FunASR hopes to build a bridge between academic research and industrial applicat
    ./libtorch_python.md
    ./grpc_python.md
    ./grpc_cpp.md
+   ./websocket_python.md
 
 
 
