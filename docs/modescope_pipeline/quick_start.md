@@ -1,4 +1,4 @@
-# Speech Recognition
+# Quick Start
 
 ## Inference with pipeline
 
