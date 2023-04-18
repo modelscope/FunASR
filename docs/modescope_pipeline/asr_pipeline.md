@@ -1,6 +1,6 @@
 # Speech Recognition
 
-## Inference with pipeline
+## Inference
 
 ### Quick start
 
