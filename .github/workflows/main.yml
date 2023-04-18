@@ -7,6 +7,7 @@ on:
     branches:
       - dev_wjm
       - main
+      - dev_lyh
 
 jobs:
   docs:
@@ -23,7 +24,7 @@ jobs:
           pre-build-command: "pip install sphinx-markdown-tables nbsphinx jinja2 recommonmark sphinx_rtd_theme"
 
       - name: deploy copy
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev_wjm'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev_wjm' || github.ref == 'refs/heads/dev_lyh'
         run: |
           mkdir public
           touch public/.nojekyll
@@ -33,9 +34,15 @@ jobs:
           mkdir public/cn
           touch public/cn/.nojekyll
           cp -r docs_cn/_build/html/* public/cn/
+          mkdir public/m2met2
+          touch public/m2met2/.nojekyll
+          cp -r docs_m2met2/_build/html/* public/m2met2/
+          mkdir public/m2met2_cn
+          touch public/m2met2_cn/.nojekyll
+          cp -r docs_m2met2_cn/_build/html/* public/m2met2_cn/
 
       - name: deploy github.io pages
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev_wjm'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev_wjm' || github.ref == 'refs/heads/dev_lyh'
         uses: peaceiris/actions-gh-pages@v2.3.1
         env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}

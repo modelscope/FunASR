@@ -186,9 +186,6 @@ class Trainer:
                 logging.warning("No keep_nbest_models is given. Change to [1]")
                 trainer_options.keep_nbest_models = [1]
             keep_nbest_models = trainer_options.keep_nbest_models
-     
-        #assert batch_interval is set and >0
-        assert trainer_options.batch_interval > 0
  
         output_dir = Path(trainer_options.output_dir)
         reporter = Reporter()

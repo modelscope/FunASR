@@ -1,0 +1,17 @@
+# Track & Evaluation 
+## Speaker-Attributed ASR (Main Track)
+The speaker-attributed ASR task poses a unique challenge of transcribing speech from multiple speakers and assigning a speaker label to the transcription. Figure 2 illustrates the difference between the speaker-attributed ASR task and the multi-speaker ASR task. This track allows for the use of the AliMeeting, Aishell4, and Cn-Celeb datasets as constrained data sources during both training and evaluation. The AliMeeting dataset, which was used in the M2MeT challenge, includes Train, Eval, and Test sets. Additionally, a new Test-2023 set, consisting of approximately 10 hours of meeting data recorded in an identical acoustic setting as the AliMeeting corpus, will be released soon for challenge scoring and ranking. It's worth noting that the organizers will not provide the near-field audio, transcriptions, or oracle timestamps. Instead, segments containing multiple speakers will be provided on the Test-2023 set, which can be obtained using a simple voice activity detection (VAD) model.
+
+![task difference](images/task_diff.png)
+
+## Evaluation metric
+The accuracy of a speaker-attributed ASR system is evaluated using the concatenated minimum permutation character error rate (cpCER) metric. The calculation of cpCER involves three steps. Firstly, the reference and hypothesis transcriptions from each speaker in a session are concatenated in chronological order. Secondly, the character error rate (CER) is calculated between the concatenated reference and hypothesis transcriptions, and this process is repeated for all possible speaker permutations. Finally, the permutation with the lowest CER is selected as the cpCER for that session. TThe CER is obtained by dividing the total number of insertions (Ins), substitutions (Sub), and deletions(Del) of characters required to transform the ASR output into the reference transcript by the total number of characters in the reference transcript. Specifically, CER is calculated by:
+
+$$\text{CER} = \frac {\mathcal N_{\text{Ins}} + \mathcal N_{\text{Sub}} + \mathcal N_{\text{Del}} }{\mathcal N_{\text{Total}}} \times 100\%,$$
+
+where $\mathcal N_{\text{Ins}}$, $\mathcal N_{\text{Sub}}$, $\mathcal N_{\text{Del}}$ are the character number of the three errors, and $\mathcal N_{\text{Total}}$ is the total number of characters.
+## Sub-track arrangement
+### Sub-track I (Fixed Training Condition):
+Participants are required to use only the fixed-constrained data (i.e., AliMeeting, Aishell-4, and CN-Celeb) for system development. The usage of any additional data is strictly prohibited. However, participants can use open-source pre-trained models from third-party sources, such as [Hugging Face](https://huggingface.co/models) and [ModelScope](https://www.modelscope.cn/models), provided that the list of utilized models is clearly stated in the final system description paper.
+### Sub-track II (Open Training Condition):
+Participants are allowed to use any publicly available data set, privately recorded data, and manual simulation to build their systems in addition to the fixed-constrained data. They can also utilize any open-source pre-trained models, but it is mandatory to provide a clear list of the data and models used in the final system description paper. If manually simulated data is used, a detailed description of the data simulation scheme must be provided.
