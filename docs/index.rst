@@ -11,20 +11,28 @@ FunASR hopes to build a bridge between academic research and industrial applicat
 
 .. toctree::
    :maxdepth: 1
-   :caption: Installation:
+   :caption: Installation
 
    ./installation.md
 
 .. toctree::
    :maxdepth: 1
-   :caption: Tutorial:
+   :caption: Recipe
 
-   ./get_started.md
+   ./asr_recipe.md
+   ./sv_recipe.md
+   ./punc_recipe.md
+   ./vad_recipe.md
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Define Model
+
    ./build_task.md
 
 .. toctree::
    :maxdepth: 1
-   :caption: Runtime:
+   :caption: Runtime
 
    ./export.md
    ./onnxruntime_python.md
@@ -38,14 +46,14 @@ FunASR hopes to build a bridge between academic research and industrial applicat
 
 .. toctree::
    :maxdepth: 1
-   :caption: ModelScope pipeline:
+   :caption: ModelScope pipeline
 
    ./modelscope_models.md
    ./modelscope_usages.md
 
 .. toctree::
    :maxdepth: 1
-   :caption: Papers:
+   :caption: Papers
 
    ./papers.md
 
