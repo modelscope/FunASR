@@ -211,7 +211,7 @@ class TransformerDecoder(nn.Module):
         tgt = torch.LongTensor([0]).unsqueeze(0)
         memory = torch.randn(1, 100, enc_size)
         pre_acoustic_embeds = torch.randn(1, 1, enc_size)
-        cache_num = len(self.model.decoders) + len(self.model.decoders2)
+        cache_num = len(self.model.decoders)
         cache = [
             torch.zeros((1, self.model.decoders[0].size, self.model.decoders[0].self_attn.kernel_size))
             for _ in range(cache_num)
@@ -260,6 +260,6 @@ class TransformerDecoder(nn.Module):
         return {
             "dec_type": "XformerDecoder",
             "model_path": os.path.join(path, f'{self.model_name}.onnx'),
-            "n_layers": len(self.model.decoders) + len(self.model.decoders2),
+            "n_layers": len(self.model.decoders),
             "odim": self.model.decoders[0].size
         }
