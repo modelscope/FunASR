@@ -152,7 +152,7 @@ class ESPnetDataset(Dataset):
             loader = kaldiio.load_scp(path)
             return AdapterForSoundScpReader(loader, self.float_dtype)
         elif loader_type == "npy":
-            return NpyScpReader()
+            return NpyScpReader(path)
         elif loader_type == "text":
             text_loader = {}
             with open(path, "r", encoding="utf-8") as f:
