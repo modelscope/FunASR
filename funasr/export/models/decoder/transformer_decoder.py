@@ -198,14 +198,16 @@ class TransformerDecoder(nn.Module):
         _, memory_mask = self.prepare_mask(memory_mask)
         # memory_mask = myutils.sequence_mask(hlens, device=memory.device)[:, None, :]
 
-        x = tgt
+        x = self.embed(tgt)
         x, tgt_mask, memory, memory_mask = self.model.decoders(
             x, tgt_mask, memory, memory_mask
         )
         x = self.after_norm(x)
         x = self.output_layer(x)
 
-        return x, ys_in_lens
+        olens = tgt_mask.sum(1)
+
+        return x, olens
 
     def get_dummy_inputs(self, enc_size):
         tgt = torch.LongTensor([0]).unsqueeze(0)
