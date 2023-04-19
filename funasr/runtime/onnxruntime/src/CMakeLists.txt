@@ -22,7 +22,7 @@ if(WIN32)
         target_compile_definitions(funasr PUBLIC -D_FUNASR_API_EXPORT)
 else()
 
-    set(EXTRA_LIBS fftw3f pthread yaml-cpp)
+    set(EXTRA_LIBS fftw3f pthread yaml-cpp csrc)
     target_include_directories(funasr PUBLIC "/usr/local/opt/fftw/include")
     target_link_directories(funasr PUBLIC "/usr/local/opt/fftw/lib")
 
@@ -34,7 +34,7 @@ else()
 
     target_include_directories(funasr PUBLIC  ${FFTW3F_INCLUDE_DIR})
     target_link_directories(funasr PUBLIC ${FFTW3F_LIBRARY_DIR})
-    include_directories(${ONNXRUNTIME_DIR}/include)    
+    include_directories(${ONNXRUNTIME_DIR}/include)
 endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/include)

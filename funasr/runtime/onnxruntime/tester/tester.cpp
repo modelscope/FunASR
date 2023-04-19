@@ -14,7 +14,6 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-
     if (argc < 4)
     {
         printf("Usage: %s /path/to/model_dir /path/to/wav/file quantize(true or false) \n", argv[0]);
@@ -22,7 +21,7 @@ int main(int argc, char *argv[])
     }
     struct timeval start, end;
     gettimeofday(&start, NULL);
-    int nThreadNum = 4;
+    int nThreadNum = 1;
     // is quantize
     bool quantize = false;
     istringstream(argv[3]) >> boolalpha >> quantize;

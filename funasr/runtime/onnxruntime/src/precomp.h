@@ -40,7 +40,6 @@ using namespace std;
 #include "Tensor.h"
 #include "util.h"
 #include "CommonStruct.h"
-#include "FeatureExtract.h"
 #include "FeatureQueue.h"
 #include "SpeechWrap.h"
 #include <Audio.h>

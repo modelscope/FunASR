@@ -4,23 +4,26 @@
 #ifndef PARAFORMER_MODELIMP_H
 #define PARAFORMER_MODELIMP_H
 
+#include "kaldi-native-fbank/csrc/feature-fbank.h"
+#include "kaldi-native-fbank/csrc/online-feature.h"
+
 namespace paraformer {
 
     class ModelImp : public Model {
     private:
-        int fft_size=512;
-        float *fft_input;
-        fftwf_complex *fft_out;
-        fftwf_plan plan;
+        //std::unique_ptr<knf::OnlineFbank> fbank_;
+        knf::FbankOptions fbank_opts;
 
         Vocab* vocab;
         vector<float> means_list;
         vector<float> vars_list;
         const float scale = 22.6274169979695;
+        int32_t lfr_window_size = 7;
+        int32_t lfr_window_shift = 6;
 
-        void apply_lfr(Tensor<float>*& din);
-        void apply_cmvn(Tensor<float>* din);
         void load_cmvn(const char *filename);
+        vector<float> ApplyLFR(const vector<float> &in);
+        void ApplyCMVN(vector<float> *v);
 
         string greedy_search( float* in, int nLen);
 
@@ -36,6 +39,7 @@ namespace paraformer {
         ModelImp(const char* path, int nNumThread=0, bool quantize=false);
         ~ModelImp();
         void reset();
+        vector<float> FbankKaldi(float sample_rate, const float* waves, int len);
         string forward_chunk(float* din, int len, int flag);
         string forward(float* din, int len, int flag);
         string rescoring();

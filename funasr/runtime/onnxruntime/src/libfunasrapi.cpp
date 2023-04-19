@@ -122,7 +122,6 @@ extern "C" {
 		FUNASR_RECOG_RESULT* pResult = new FUNASR_RECOG_RESULT;
 		pResult->snippet_time = audio.get_time_len();
 		while (audio.fetch(buff, len, flag) > 0) {
-			//pRecogObj->reset();
 			string msg = pRecogObj->forward(buff, len, flag);
 			pResult->msg+= msg;
 			nStep++;
