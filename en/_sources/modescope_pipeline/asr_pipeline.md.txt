@@ -17,7 +17,7 @@ rec_result = inference_pipeline(audio_in='https://isv-data.oss-cn-hangzhou.aliyu
 print(rec_result)
 ```
 
-#### API-docs
+#### API-reference
 ##### define pipeline
 - `task`: `Tasks.auto_speech_recognition`
 - `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
@@ -27,11 +27,17 @@ print(rec_result)
 - `batch_size`: 1 (Defalut), batch size when decoding
 ##### infer pipeline
 - `audio_in`: the input to decode, which could be: 
-  - wav_path, `e.g.`: asr_example.wav, 
-  - pcm_path, 
-  - audio bytes stream
-  - audio sample point
-  - wav.scp
+  - wav_path, `e.g.`: asr_example.wav,
+  - pcm_path, `e.g.`: asr_example.pcm, 
+  - audio bytes stream, `e.g.`: bytes data from a microphone
+  - audio sample point，`e.g.`: `audio, rate = soundfile.read("asr_example_zh.wav")`, the dtype is numpy.ndarray or torch.Tensor
+  - wav.scp, kaldi style wav list (`wav_id \t wav_path``), `e.g.`: 
+  ```cat wav.scp
+  asr_example1  ./audios/asr_example1.wav
+  asr_example2  ./audios/asr_example2.wav
+  ```
+  In this case of `wav.scp` input, `output_dir` must be set to save the output results
+- `audio_fs`: audio sampling rate, only set when audio_in is pcm audio
 
 #### Inference with you data
 
