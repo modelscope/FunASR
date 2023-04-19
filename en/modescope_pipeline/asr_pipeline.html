@@ -67,13 +67,13 @@
 <li class="toctree-l2"><a class="reference internal" href="#inference">Inference</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#quick-start">Quick start</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#paraformer-model">Paraformer model</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#paraformer-online">Paraformer-online</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#paraformer-online-model">Paraformer-online model</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#api-reference">API-reference</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#inference-with-you-data">Inference with you data</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#inference-with-multi-threads-on-cpu">Inference with multi-threads on CPU</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#inference-with-multi-gpu">Inference with multi GPU</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#inference-with-you-data">Inference with you data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#inference-with-multi-threads-on-cpu">Inference with multi-threads on CPU</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#inference-with-multi-gpu">Inference with multi GPU</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#finetune-with-pipeline">Finetune with pipeline</a><ul>
@@ -140,12 +140,14 @@
              
   <div class="section" id="speech-recognition">
 <h1>Speech Recognition<a class="headerlink" href="#speech-recognition" title="Permalink to this headline"></a></h1>
+<p>.. HINT::</p>
+<p>The modelscope pipeline supports all the models in [model zoo] to inference and finetine. Here we take model of Paraformer and Paraformer-online as example to demonstrate the usage.</p>
 <div class="section" id="inference">
 <h2>Inference<a class="headerlink" href="#inference" title="Permalink to this headline"></a></h2>
 <div class="section" id="quick-start">
 <h3>Quick start<a class="headerlink" href="#quick-start" title="Permalink to this headline"></a></h3>
 <div class="section" id="paraformer-model">
-<h4>Paraformer model<a class="headerlink" href="#paraformer-model" title="Permalink to this headline"></a></h4>
+<h4><a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary">Paraformer model</a><a class="headerlink" href="#paraformer-model" title="Permalink to this headline"></a></h4>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
 <span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
 
@@ -159,8 +161,8 @@
 </pre></div>
 </div>
 </div>
-<div class="section" id="paraformer-online">
-<h4>Paraformer-online<a class="headerlink" href="#paraformer-online" title="Permalink to this headline"></a></h4>
+<div class="section" id="paraformer-online-model">
+<h4><a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8404-online/summary">Paraformer-online model</a><a class="headerlink" href="#paraformer-online-model" title="Permalink to this headline"></a></h4>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
     <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">auto_speech_recognition</span><span class="p">,</span>
     <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8404-online&#39;</span><span class="p">,</span>
@@ -216,15 +218,15 @@ asr_example2  ./audios/asr_example2.wav
 </ul>
 </div>
 </div>
+</div>
 <div class="section" id="inference-with-you-data">
-<h4>Inference with you data<a class="headerlink" href="#inference-with-you-data" title="Permalink to this headline"></a></h4>
+<h3>Inference with you data<a class="headerlink" href="#inference-with-you-data" title="Permalink to this headline"></a></h3>
 </div>
 <div class="section" id="inference-with-multi-threads-on-cpu">
-<h4>Inference with multi-threads on CPU<a class="headerlink" href="#inference-with-multi-threads-on-cpu" title="Permalink to this headline"></a></h4>
+<h3>Inference with multi-threads on CPU<a class="headerlink" href="#inference-with-multi-threads-on-cpu" title="Permalink to this headline"></a></h3>
 </div>
 <div class="section" id="inference-with-multi-gpu">
-<h4>Inference with multi GPU<a class="headerlink" href="#inference-with-multi-gpu" title="Permalink to this headline"></a></h4>
-</div>
+<h3>Inference with multi GPU<a class="headerlink" href="#inference-with-multi-gpu" title="Permalink to this headline"></a></h3>
 </div>
 </div>
 <div class="section" id="finetune-with-pipeline">

@@ -1,9 +1,13 @@
 # Speech Recognition
 
+.. HINT::
+
+  
+  The modelscope pipeline supports all the models in [model zoo] to inference and finetine. Here we take model of Paraformer and Paraformer-online as example to demonstrate the usage.   
 ## Inference
 
 ### Quick start
-#### Paraformer model
+#### [Paraformer model](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary)
 ```python
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
@@ -16,7 +20,7 @@ inference_pipeline = pipeline(
 rec_result = inference_pipeline(audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
 print(rec_result)
 ```
-#### Paraformer-online
+#### [Paraformer-online model](https://www.modelscope.cn/models/damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8404-online/summary)
 ```python
 inference_pipeline = pipeline(
     task=Tasks.auto_speech_recognition,
@@ -61,11 +65,11 @@ Full code of demo, please ref to [demo](https://github.com/alibaba-damo-academy/
 - `audio_fs`: audio sampling rate, only set when audio_in is pcm audio
 
 
-#### Inference with you data
+### Inference with you data
 
-#### Inference with multi-threads on CPU
+### Inference with multi-threads on CPU
 
-#### Inference with multi GPU
+### Inference with multi GPU
 
 ## Finetune with pipeline
 
