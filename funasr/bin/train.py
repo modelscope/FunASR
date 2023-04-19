@@ -1,17 +1,21 @@
 import logging
 import os
 import sys
+from io import BytesIO
 
 import torch
 
+from funasr.torch_utils.model_summary import model_summary
+from funasr.torch_utils.pytorch_version import pytorch_cudnn_version
 from funasr.torch_utils.set_all_random_seed import set_all_random_seed
 from funasr.utils import config_argparse
 from funasr.utils.build_dataloader import build_dataloader
 from funasr.utils.build_distributed import build_distributed
-from funasr.utils.prepare_data import prepare_data
 from funasr.utils.build_optimizer import build_optimizer
 from funasr.utils.build_scheduler import build_scheduler
+from funasr.utils.prepare_data import prepare_data
 from funasr.utils.types import str2bool
+from funasr.utils.yaml_no_alias_safe_dump import yaml_no_alias_safe_dump
 
 
 def get_parser():
@@ -326,9 +330,17 @@ if __name__ == '__main__':
     parser = get_parser()
     args = parser.parse_args()
 
+    # set random seed
+    set_all_random_seed(args.seed)
+    torch.backends.cudnn.enabled = args.cudnn_enabled
+    torch.backends.cudnn.benchmark = args.cudnn_benchmark
+    torch.backends.cudnn.deterministic = args.cudnn_deterministic
+
     # ddp init
     args.distributed = args.dist_world_size > 1
     distributed_option = build_distributed(args)
+
+    # for logging
     if not distributed_option.distributed or distributed_option.dist_rank == 0:
         logging.basicConfig(
             level="INFO",
@@ -345,18 +357,28 @@ if __name__ == '__main__':
     # prepare files for dataloader
     prepare_data(args, distributed_option)
 
-    # set random seed
-    set_all_random_seed(args.seed)
-    torch.backends.cudnn.enabled = args.cudnn_enabled
-    torch.backends.cudnn.benchmark = args.cudnn_benchmark
-    torch.backends.cudnn.deterministic = args.cudnn_deterministic
-
-    train_dataloader, valid_dataloader = build_dataloader(args)
+    model = build_model(args)
+    optimizer = build_optimizer(args, model=model)
+    scheduler = build_scheduler(args, optimizer)
 
     logging.info("world size: {}, rank: {}, local_rank: {}".format(distributed_option.dist_world_size,
                                                                    distributed_option.dist_rank,
                                                                    distributed_option.local_rank))
+    logging.info(pytorch_cudnn_version())
+    logging.info(model_summary(model))
+    logging.info("Optimizer: {}".format(optimizer))
+    logging.info("Scheduler: {}".format(scheduler))
 
-    model = build_model(args)
-    optimizers = build_optimizer(args, model=model)
-    schedule = build_scheduler(args)
+    # dump args to config.yaml
+    if not distributed_option.distributed or distributed_option.dist_rank == 0:
+        os.makedirs(args.output_dir, exist_ok=True)
+        with open(os.path.join(args.output_dir, "config.yaml"), "w") as f:
+            logging.info("Saving the configuration in {}/{}".format(args.output_dir, "config.yaml"))
+            if args.use_pai:
+                buffer = BytesIO()
+                torch.save({"config": vars(args)}, buffer)
+                args.oss_bucket.put_object(os.path.join(args.output_dir, "config.dict"), buffer.getvalue())
+            else:
+                yaml_no_alias_safe_dump(vars(args), f, indent=4, sort_keys=False)
+
+    train_dataloader, valid_dataloader = build_dataloader(args)
