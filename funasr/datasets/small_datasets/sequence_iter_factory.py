@@ -27,8 +27,7 @@ class RawSampler(AbsSampler):
 
 
 class SequenceIterFactory(AbsIterFactory):
-    """Build iterator for each epoch.
-
+    """Build iterator for each epoch, modified from ESPnet
 
     """
 

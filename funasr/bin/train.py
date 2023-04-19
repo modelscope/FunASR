@@ -6,6 +6,7 @@ import torch
 
 from funasr.torch_utils.set_all_random_seed import set_all_random_seed
 from funasr.utils import config_argparse
+from funasr.utils.build_dataloader import build_dataloader
 from funasr.utils.build_distributed import build_distributed
 from funasr.utils.prepare_data import prepare_data
 from funasr.utils.types import str2bool
@@ -338,14 +339,36 @@ if __name__ == '__main__':
             format=f"[{os.uname()[1].split('.')[0]}]"
                    f" %(asctime)s (%(module)s:%(lineno)d) %(levelname)s: %(message)s",
         )
-    logging.info("world size: {}, rank: {}, local_rank: {}".format(distributed_option.dist_world_size,
-                                                                   distributed_option.dist_rank,
-                                                                   distributed_option.local_rank))
 
     # prepare files for dataloader
     prepare_data(args, distributed_option)
 
+    # set random seed
     set_all_random_seed(args.seed)
     torch.backends.cudnn.enabled = args.cudnn_enabled
     torch.backends.cudnn.benchmark = args.cudnn_benchmark
     torch.backends.cudnn.deterministic = args.cudnn_deterministic
+
+    train_dataloader, valid_dataloader = build_dataloader(args)
+
+    logging.info("world size: {}, rank: {}, local_rank: {}".format(distributed_option.dist_world_size,
+                                                                   distributed_option.dist_rank,
+                                                                   distributed_option.local_rank))
+
+    # optimizers = cls.build_optimizers(args, model=model)
+    # schedulers = []
+    # for i, optim in enumerate(optimizers, 1):
+    #     suf = "" if i == 1 else str(i)
+    #     name = getattr(args, f"scheduler{suf}")
+    #     conf = getattr(args, f"scheduler{suf}_conf")
+    #     if name is not None:
+    #         cls_ = scheduler_classes.get(name)
+    #         if cls_ is None:
+    #             raise ValueError(
+    #                 f"must be one of {list(scheduler_classes)}: {name}"
+    #             )
+    #         scheduler = cls_(optim, **conf)
+    #     else:
+    #         scheduler = None
+    #
+    #     schedulers.append(scheduler)
