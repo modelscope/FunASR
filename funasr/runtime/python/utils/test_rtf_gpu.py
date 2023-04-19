@@ -29,11 +29,11 @@ wav_files = wav_file_f.readlines()
 
 # warm-up
 total = 0.0
-num = 30
+num = 100
 wav_path = []
 for i in range(num * args.batch_size):
     wav_path_i = wav_files[i % len(wav_files)]
-    wav_path_i = wav_path_i.split("\t")[1].strip() if "\t" in wav_files[0] else wav_files[0].split(" ")[1].strip()
+    wav_path_i = wav_path_i.split("\t")[1].strip() if "\t" in wav_path_i else wav_path_i.split(" ")[1].strip()
     wav_path += [wav_path_i]
 beg_time = time.time()
 result = model(wav_path)
