@@ -67,6 +67,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#inference">Inference</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#quick-start">Quick start</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#paraformer-model">Paraformer model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api-docs">API-docs</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#inference-with-you-data">Inference with you data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#inference-with-multi-threads-on-cpu">Inference with multi-threads on CPU</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#inference-with-multi-gpu">Inference with multi GPU</a></li>
@@ -106,6 +107,10 @@
 <p class="caption"><span class="caption-text">Papers</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../papers.html">Papers</a></li>
+</ul>
+<p class="caption"><span class="caption-text">FQA</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../FQA.html">FQA</a></li>
 </ul>
 
         </div>
@@ -151,6 +156,34 @@
 <span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav&#39;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">rec_result</span><span class="p">)</span>
 </pre></div>
+</div>
+</div>
+<div class="section" id="api-docs">
+<h4>API-docs<a class="headerlink" href="#api-docs" title="Permalink to this headline"></a></h4>
+<div class="section" id="define-pipeline">
+<h5>define pipeline<a class="headerlink" href="#define-pipeline" title="Permalink to this headline"></a></h5>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">task</span></code>: <code class="docutils literal notranslate"><span class="pre">Tasks.auto_speech_recognition</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model</span></code>: model name in <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope">model zoo</a>, or model path in local disk</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ngpu</span></code>: 1 (Defalut), decoding on GPU. If ngpu=0, decoding on CPU</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ncpu</span></code>: 1 (Defalut), sets the number of threads used for intraop parallelism on CPU</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">output_dir</span></code>: None (Defalut), the output path of results if set</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>: 1 (Defalut), batch size when decoding</p></li>
+</ul>
+</div>
+<div class="section" id="infer-pipeline">
+<h5>infer pipeline<a class="headerlink" href="#infer-pipeline" title="Permalink to this headline"></a></h5>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">audio_in</span></code>: the input to decode, which could be:</p>
+<ul>
+<li><p>wav_path, <code class="docutils literal notranslate"><span class="pre">e.g.</span></code>: asr_example.wav,</p></li>
+<li><p>pcm_path,</p></li>
+<li><p>audio bytes stream</p></li>
+<li><p>audio sample point</p></li>
+<li><p>wav.scp</p></li>
+</ul>
+</li>
+</ul>
 </div>
 </div>
 <div class="section" id="inference-with-you-data">
