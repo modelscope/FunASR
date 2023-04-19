@@ -1,9 +1,8 @@
 # Speech Recognition
 
-.. HINT::
+> **Note**: 
+> The modelscope pipeline supports all the models in [model zoo] to inference and finetine. Here we take model of Paraformer and Paraformer-online as example to demonstrate the usage.
 
-  
-  The modelscope pipeline supports all the models in [model zoo] to inference and finetine. Here we take model of Paraformer and Paraformer-online as example to demonstrate the usage.   
 ## Inference
 
 ### Quick start
