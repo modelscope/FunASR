@@ -16,6 +16,27 @@ inference_pipeline = pipeline(
 rec_result = inference_pipeline(audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
 print(rec_result)
 ```
+#### Paraformer-online
+```python
+inference_pipeline = pipeline(
+    task=Tasks.auto_speech_recognition,
+    model='damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8404-online',
+    )
+import soundfile
+speech, sample_rate = soundfile.read("example/asr_example.wav")
+
+param_dict = {"cache": dict(), "is_final": False}
+chunk_stride = 7680# 480ms
+# first chunk, 480ms
+speech_chunk = speech[0:chunk_stride] 
+rec_result = inference_pipeline(audio_in=speech_chunk, param_dict=param_dict)
+# next chunk, 480ms
+speech_chunk = speech[chunk_stride:chunk_stride+chunk_stride]
+rec_result = inference_pipeline(audio_in=speech_chunk, param_dict=param_dict)
+
+print(rec_result)
+```
+Full code of demo, please ref to [demo](https://github.com/alibaba-damo-academy/FunASR/discussions/241)
 
 #### API-reference
 ##### define pipeline
@@ -38,6 +59,7 @@ print(rec_result)
   ```
   In this case of `wav.scp` input, `output_dir` must be set to save the output results
 - `audio_fs`: audio sampling rate, only set when audio_in is pcm audio
+
 
 #### Inference with you data
 
