@@ -53,14 +53,20 @@ class Conformer(nn.Module):
         enc, enc_len = self.encoder(**batch)
         mask = self.make_pad_mask(enc_len)[:, None, :]
 
-        # initialize one frame output
-        pre_frame_output = torch.randn(1, self.output_size)
+        # fill the decoder input
+        enc_size = self.encoder.output_size
+        pre_acoustic_embeds = torch.randn(1, 1, enc_size)
+        cache_num = len(self.model.decoder)
+        cache = [
+            torch.zeros((1, self.decoder.size, self.decoder.self_attn.kernel_size))
+            for _ in range(cache_num)
+        ]
 
-        decoder_out,  = self.decoder(enc, enc_len, pre_frame_output, speech_lengths)
+        decoder_out, olens = self.decoder(enc, enc_len, pre_acoustic_embeds, cache)
         decoder_out = torch.log_softmax(decoder_out, dim=-1)
         # sample_ids = decoder_out.argmax(dim=-1)
 
-        return decoder_out, speech_lengths
+        return decoder_out, olens
 
     def get_dummy_inputs(self):
         speech = torch.randn(2, 30, self.feats_dim)

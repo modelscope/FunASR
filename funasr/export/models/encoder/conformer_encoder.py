@@ -28,7 +28,7 @@ class ConformerEncoder(nn.Module):
         self.embed = model.embed
         self.model = model
         self.feats_dim = feats_dim
-        self._output_size = model._output_size
+        self.output_size = model._output_size
 
         if onnx:
             self.make_pad_mask = MakePadMask(max_seq_len, flip=False)
