@@ -118,6 +118,100 @@ class ModelExport:
             model = model.cuda()
             dummy_input = tuple([i.cuda() for i in dummy_input])
 
+        # """
+        import os
+        fp16 = float(os.environ.get('FP16', 0.0))
+        if fp16:
+            # import pdb; pdb.set_trace()
+            tmp_models = [model.encoder.model.encoders0, model.encoder.model.encoders]
+            for tmp_model in tmp_models:
+                state_dict = tmp_model.state_dict()
+                for key, value in state_dict.items():
+                    if '.feed_forward.w_2.' in key:
+                        state_dict[key] = value / fp16
+                tmp_model.load_state_dict(state_dict)
+        # """
+
+        """
+        import pdb; pdb.set_trace()
+        for i in range(100):
+            import time
+            tic = time.time()
+            _ = model(*dummy_input)
+            print('model: {:.4f}'.format(time.time() - tic))
+        """
+
+        """
+        import pdb; pdb.set_trace()
+        _inputs = dummy_input
+        _inputs = tuple([tuple([j.cuda() for j in i]) if isinstance(i, tuple) else i.cuda() for i in _inputs])
+        out = model.encoder(*_inputs)
+        model.encoder.half()
+        _half_inputs = tuple([tuple([j.half() for j in i]) if isinstance(i, tuple) else i.half() for i in _inputs])
+        out = model.encoder(*_half_inputs)
+        """
+
+        """
+        import pdb; pdb.set_trace()
+        # _inputs = torch.load('encoders0_inputs.pth')
+        _inputs = torch.load('encoders_inputs.pth')
+        import os
+        fp16 = float(os.environ.get('FP16', 1.0))
+        _inputs = (_inputs[0] / fp16, _inputs[1])
+        _inputs = tuple([tuple([j.cuda() for j in i]) if isinstance(i, tuple) else i.cuda() for i in _inputs])
+        # model_script = torch.jit.trace(model.encoder.model.encoders0, _inputs)
+        # model_script.save('model.encoders0.fixfp16.10.pt')
+        model_script = torch.jit.trace(model.encoder.model.encoders, _inputs)
+        model_script.save('model.encoders.fixfp16.10.pt')
+        """
+
+        """
+        import pdb; pdb.set_trace()
+        _inputs = torch.load('encoders_inputs.pth')
+        # _inputs = tuple([tuple([j.cuda() for j in i]) if isinstance(i, tuple) else i.cuda() for i in _inputs])
+        out = _inputs
+        # out = model.encoder.model.encoders(*_inputs)
+        # model.encoder.model.encoders.half()
+        # import os
+        # fp16 = float(os.environ.get('FP16', 1.0))
+        # _inputs = (_inputs[0] / fp16, _inputs[1])
+        # _half_inputs = tuple([tuple([j.half() for j in i]) if isinstance(i, tuple) else i.half() for i in _inputs])
+        # out = model.encoder.model.encoders(*_half_inputs)
+        # out = _half_inputs
+        for i in range(49):
+            if i == 36:
+                import pdb; pdb.set_trace()
+                print(i)
+            with torch.no_grad():
+                out = model.encoder.model.encoders[i](*out)
+            print('{} {} {}'.format(i, torch.min(out[0]), torch.max(out[0])))
+            # print(out[0])
+        import pdb; pdb.set_trace()
+        """
+
+        """
+        import pdb; pdb.set_trace()
+        _inputs = torch.load('encoders31_inputs.pth')
+        _inputs = tuple([tuple([j.cuda() for j in i]) if isinstance(i, tuple) else i.cuda() for i in _inputs])
+        enc32 = model.encoder.model.encoders[31]
+        out = enc32(*_inputs)
+        # _half_inputs = tuple([tuple([j.half() for j in i]) if isinstance(i, tuple) else i.half() for i in _inputs])
+        # enc32.half()
+        # out = enc32(*_half_inputs)
+        """
+
+        """
+        import pdb; pdb.set_trace()
+        import torch_blade
+        # model.encoder = torch.jit.load('inference_gpu/model.encoder.blade.pt')
+        # model.decoder = torch.jit.load('inference_gpu/model.decoder.blade.pt')
+        model.encoder = torch.jit.load('inference_gpu/model.encoder.blade.fp16.pt')
+        model.decoder = torch.jit.load('inference_gpu/model.decoder.blade.fp16.pt')
+        model_script = torch.jit.trace(model, dummy_input)
+        model_script.save('model.blade.opt.pt')
+        """
+
+        # import pdb; pdb.set_trace()
         # model_script = torch.jit.script(model)
         model_script = torch.jit.trace(model, dummy_input)
         model_script.save(os.path.join(path, f'{model.model_name}.torchscripts'))

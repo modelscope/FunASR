@@ -23,6 +23,8 @@ class SANMEncoder(nn.Module):
         self.model = model
         self.feats_dim = feats_dim
         self._output_size = model._output_size
+        import os
+        self.fp16 = float(os.environ.get('FP16', False))
 
         if onnx:
             self.make_pad_mask = MakePadMask(max_seq_len, flip=False)
@@ -71,12 +73,16 @@ class SANMEncoder(nn.Module):
         else:
             xs_pad = self.embed(speech)
 
+        if self.fp16: xs_pad = xs_pad / self.fp16
+        # import pdb; pdb.set_trace()
         encoder_outs = self.model.encoders0(xs_pad, mask)
         xs_pad, masks = encoder_outs[0], encoder_outs[1]
 
+        # import pdb; pdb.set_trace()
         encoder_outs = self.model.encoders(xs_pad, mask)
         xs_pad, masks = encoder_outs[0], encoder_outs[1]
 
+        # import pdb; pdb.set_trace()
         xs_pad = self.model.after_norm(xs_pad)
 
         return xs_pad, speech_lengths

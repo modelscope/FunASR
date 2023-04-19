@@ -20,6 +20,7 @@ class MultiHeadedAttentionSANM(nn.Module):
 
     def forward(self, x, mask):
         mask_3d_btd, mask_4d_bhlt = mask
+        # import pdb; pdb.set_trace()
         q_h, k_h, v_h, v = self.forward_qkv(x)
         fsmn_memory = self.forward_fsmn(v, mask_3d_btd)
         q_h = q_h * self.d_k**(-0.5)

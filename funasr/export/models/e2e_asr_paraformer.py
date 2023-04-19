@@ -64,12 +64,20 @@ class Paraformer(nn.Module):
         batch = {"speech": speech, "speech_lengths": speech_lengths}
         # batch = to_device(batch, device=self.device)
     
+        # import time
+        # tic = time.time()
+        # import pdb; pdb.set_trace()
         enc, enc_len = self.encoder(**batch)
+        # print('encoder: {:.4f}'.format(time.time() - tic))
+        # tic = time.time()
         mask = self.make_pad_mask(enc_len)[:, None, :]
         pre_acoustic_embeds, pre_token_length, alphas, pre_peak_index = self.predictor(enc, mask)
         pre_token_length = pre_token_length.floor().type(torch.int32)
+        # print('predictor: {:.4f}'.format(time.time() - tic))
 
+        # tic = time.time()
         decoder_out, _ = self.decoder(enc, enc_len, pre_acoustic_embeds, pre_token_length)
+        # print('decoder: {:.4f}'.format(time.time() - tic))
         decoder_out = torch.log_softmax(decoder_out, dim=-1)
         # sample_ids = decoder_out.argmax(dim=-1)
 

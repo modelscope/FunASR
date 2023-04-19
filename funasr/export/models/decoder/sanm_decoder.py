@@ -85,6 +85,7 @@ class ParaformerSANMDecoder(nn.Module):
         # memory_mask = myutils.sequence_mask(hlens, device=memory.device)[:, None, :]
 
         x = tgt
+        # import pdb; pdb.set_trace()
         x, tgt_mask, memory, memory_mask, _ = self.model.decoders(
             x, tgt_mask, memory, memory_mask
         )
@@ -92,6 +93,7 @@ class ParaformerSANMDecoder(nn.Module):
             x, tgt_mask, memory, memory_mask, _ = self.model.decoders2(
                 x, tgt_mask, memory, memory_mask
             )
+        # import pdb; pdb.set_trace()
         x, tgt_mask, memory, memory_mask, _ = self.model.decoders3(
             x, tgt_mask, memory, memory_mask
         )

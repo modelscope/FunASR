@@ -18,17 +18,22 @@ class EncoderLayerSANM(nn.Module):
         self.norm2 = model.norm2
         self.in_size = model.in_size
         self.size = model.size
+        import os
+        self.fp16 = float(os.environ.get('FP16', False))
 
     def forward(self, x, mask):
 
         residual = x
+        # import pdb; pdb.set_trace()
         x = self.norm1(x)
         x = self.self_attn(x, mask)
+        if self.fp16: x = x / self.fp16
         if self.in_size == self.size:
             x = x + residual
         residual = x
         x = self.norm2(x)
         x = self.feed_forward(x)
+        # if self.fp16: x = x / self.fp16
         x = x + residual
 
         return x, mask
