@@ -63,6 +63,13 @@ FunASR hopes to build a bridge between academic research and industrial applicat
 
 .. toctree::
    :maxdepth: 1
+   :caption: Benchmark and Leadboard
+
+   ./benchmark/benchmark_onnx.md
+   ./benchmark/benchmark_libtorch.md
+
+.. toctree::
+   :maxdepth: 1
    :caption: Papers
 
    ./papers.md
