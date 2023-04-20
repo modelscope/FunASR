@@ -74,6 +74,19 @@ def build_args(args):
             # e.g. --encoder and --encoder_conf
             class_choices.add_arguments(parser)
 
+    elif args.task_name == "vad":
+        from funasr.build_utils.build_vad_model import class_choices_list
+        for class_choices in class_choices_list:
+            # Append --<name> and --<name>_conf.
+            # e.g. --encoder and --encoder_conf
+            class_choices.add_arguments(parser)
+        parser.add_argument(
+            "--input_size",
+            type=int_or_none,
+            default=None,
+            help="The number of input dimension of the feature",
+        )
+
     else:
         raise NotImplementedError("Not supported task: {}".format(args.task_name))
 
