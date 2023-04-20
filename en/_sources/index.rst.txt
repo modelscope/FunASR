@@ -49,7 +49,6 @@ FunASR hopes to build a bridge between academic research and industrial applicat
    ./modescope_pipeline/tp_pipeline.md
    ./modescope_pipeline/sv_pipeline.md
    ./modescope_pipeline/sd_pipeline.md
-   ./modescope_pipeline/lm_pipeline.md
 
 .. toctree::
    :maxdepth: 1
