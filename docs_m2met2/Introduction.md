@@ -20,6 +20,8 @@ Building on the success of the previous M2MeT challenge, we are excited to propo
 
 ## Guidelines
 
-Interested participants, whether from academia or industry, must register for the challenge by completing a Google form, which will be available here. The deadline for registration is May 5, 2023. 
+Interested participants, whether from academia or industry, must register for the challenge by completing the Google form below. The deadline for registration is May 5, 2023. 
+
+[M2MET2.0 Registration](https://docs.google.com/forms/d/e/1FAIpQLSf77T9vAl7Ym-u5g8gXu18SBofoWRaFShBo26Ym0-HDxHW9PQ/viewform?usp=sf_link)
 
 Within three working days, the challenge organizer will send email invitations to eligible teams to participate in the challenge. All qualified teams are required to adhere to the challenge rules, which will be published on the challenge page. Prior to the ranking release time, each participant must submit a system description document detailing their approach and methods. The organizer will select the top three submissions to be included in the ASRU2023 Proceedings. 
