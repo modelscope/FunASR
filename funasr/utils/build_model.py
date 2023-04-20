@@ -7,6 +7,8 @@ def build_model(args):
         model = build_asr_model(args)
     elif args.task_name == "pretrain":
         model = build_pretrain_model(args)
+    elif args.task_name == "lm":
+        model = build_lm_model(args)
     else:
         raise NotImplementedError("Not supported task: {}".format(args.task_name))
 

@@ -345,6 +345,7 @@ def build_asr_model(args):
     else:
         raise NotImplementedError("Not supported model: {}".format(args.model))
 
+    # initialize
     if args.init is not None:
         initialize(model, args.init)
 
