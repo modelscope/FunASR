@@ -1,5 +1,6 @@
-from funasr.utils.build_asr_model import build_asr_model
-from funasr.utils.build_pretrain_model import build_pretrain_model
+from funasr.build_utils.build_asr_model import build_asr_model
+from funasr.build_utils.build_pretrain_model import build_pretrain_model
+from funasr.build_utils.build_lm_model import build_lm_model
 
 
 def build_model(args):

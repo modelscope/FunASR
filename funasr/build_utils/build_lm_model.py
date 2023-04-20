@@ -20,7 +20,7 @@ class_choices_list = [
 ]
 
 
-def build_pretrain_model(args):
+def build_lm_model(args):
     # token_list
     if args.token_list is not None:
         with open(args.token_list) as f:

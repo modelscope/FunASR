@@ -11,7 +11,7 @@ from funasr.utils.types import str_or_none
 def build_args(args):
     parser = argparse.ArgumentParser("Task related config")
     if args.task_name == "asr":
-        from funasr.utils.build_asr_model import class_choices_list
+        from funasr.build_utils.build_asr_model import class_choices_list
         for class_choices in class_choices_list:
             # Append --<name> and --<name>_conf.
             # e.g. --encoder and --encoder_conf
@@ -80,7 +80,7 @@ def build_args(args):
             help="The file path of noise scp file.",
         )
     elif args.task_name == "pretrain":
-        from funasr.utils.build_pretrain_model import class_choices_list
+        from funasr.build_utils.build_pretrain_model import class_choices_list
         for class_choices in class_choices_list:
             # Append --<name> and --<name>_conf.
             # e.g. --encoder and --encoder_conf
