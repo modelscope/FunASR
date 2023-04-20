@@ -612,7 +612,9 @@ def inference_modelscope(
         **kwargs,
 ):
     assert check_argument_types()
-
+    ncpu = kwargs.get("ncpu", 1)
+    torch.set_num_threads(ncpu)
+    
     if word_lm_train_config is not None:
         raise NotImplementedError("Word LM is not implemented")
     if ngpu > 1:
@@ -629,7 +631,9 @@ def inference_modelscope(
         export_mode = param_dict.get("export_mode", False)
     else:
         hotword_list_or_file = None
-
+    
+    if kwargs.get("device", None) == "cpu":
+        ngpu = 0
     if ngpu >= 1 and torch.cuda.is_available():
         device = "cuda"
     else:

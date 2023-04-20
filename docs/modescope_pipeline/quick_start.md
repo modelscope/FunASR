@@ -59,8 +59,7 @@ from modelscope.utils.constant import Tasks
 
 inference_pipeline = pipeline(
     task=Tasks.speech_timestamp,
-    model='damo/speech_timestamp_prediction-v1-16k-offline',
-    output_dir='./tmp')
+    model='damo/speech_timestamp_prediction-v1-16k-offline',)
 
 rec_result = inference_pipeline(
     audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_timestamps.wav',
@@ -86,6 +85,71 @@ spk_embedding = inference_sv_pipline(audio_in='https://isv-data.oss-cn-hangzhou.
 # speaker verification
 rec_result = inference_sv_pipline(audio_in=('https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/sv_example_enroll.wav','https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/sv_example_same.wav'))
 print(rec_result["scores"][0])
+```
+
+### Speaker diarization
+#### SOND
+```python
+from modelscope.pipelines import pipeline
+from modelscope.utils.constant import Tasks
+
+inference_diar_pipline = pipeline(
+    mode="sond_demo",
+    num_workers=0,
+    task=Tasks.speaker_diarization,
+    diar_model_config="sond.yaml",
+    model='damo/speech_diarization_sond-en-us-callhome-8k-n16k4-pytorch',
+    sv_model="damo/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch",
+    sv_model_revision="master",
+)
+
+audio_list=[
+    "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/record.wav",
+    "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/spk_A.wav",
+    "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/spk_B.wav",
+    "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/spk_B1.wav"
+]
+
+results = inference_diar_pipline(audio_in=audio_list)
+print(results)
+```
+
+### FAQ
+#### How to switch device from GPU to CPU with pipeline
+
+The pipeline defaults to decoding with GPU (`ngpu=1`) when GPU is available. If you want to switch to CPU, you could set `ngpu=0`
+```python
+inference_pipeline = pipeline(
+    task=Tasks.auto_speech_recognition,
+    model='damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch',
+    ngpu=0,
+)
+```
+
+#### How to infer from local model path
+Download model to local dir, by modelscope-sdk
+
+```python
+from modelscope.hub.snapshot_download import snapshot_download
+
+local_dir_root = "./models_from_modelscope"
+model_dir = snapshot_download('damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch', cache_dir=local_dir_root)
+```
+
+Or download model to local dir, by git lfs
+```shell
+git lfs install
+# git clone https://www.modelscope.cn/<namespace>/<model-name>.git
+git clone https://www.modelscope.cn/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch.git
+```
+
+Infer with local model path
+```python
+local_dir_root = "./models_from_modelscope/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
+inference_pipeline = pipeline(
+    task=Tasks.auto_speech_recognition,
+    model=local_dir_root,
+)
 ```
 
 ## Finetune with pipeline
@@ -132,6 +196,10 @@ if __name__ == '__main__':
 ```shell
 python finetune.py &> log.txt &
 ```
+
+### FAQ
+### Multi GPUs training and distributed training
+
 If you want finetune with multi-GPUs, you could:
 ```shell
 CUDA_VISIBLE_DEVICES=1,2 python -m torch.distributed.launch --nproc_per_node 2 finetune.py > log.txt 2>&1
