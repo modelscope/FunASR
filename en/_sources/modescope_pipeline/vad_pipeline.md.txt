@@ -71,7 +71,7 @@ FunASR also offer recipes [infer.sh](https://github.com/alibaba-damo-academy/Fun
 
 - Setting parameters in `infer.sh`
     - `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
-    - `data_dir`: the dataset dir needs to include `wav.scp`. If `${data_dir}/text` is also exists, CER will be computed
+    - `data_dir`: the dataset dir needs to include `wav.scp`
     - `output_dir`: output dir of the recognition results
     - `batch_size`: `64` (Default), batch size of inference on gpu
     - `gpu_inference`: `true` (Default), whether to perform gpu decoding, set false for CPU inference
@@ -99,7 +99,6 @@ FunASR also offer recipes [infer.sh](https://github.com/alibaba-damo-academy/Fun
     --gpu_inference false \
     --njob 64
 ```
-
 
 ## Finetune with pipeline
 
