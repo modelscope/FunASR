@@ -4,8 +4,7 @@
 #ifndef PARAFORMER_MODELIMP_H
 #define PARAFORMER_MODELIMP_H
 
-#include "kaldi-native-fbank/csrc/feature-fbank.h"
-#include "kaldi-native-fbank/csrc/online-feature.h"
+#include "precomp.h"
 
 namespace paraformer {
 
@@ -13,6 +12,8 @@ namespace paraformer {
     private:
         //std::unique_ptr<knf::OnlineFbank> fbank_;
         knf::FbankOptions fbank_opts;
+
+        std::unique_ptr<FsmnVad> vadHandle;
 
         Vocab* vocab;
         vector<float> means_list;
@@ -27,7 +28,7 @@ namespace paraformer {
 
         string greedy_search( float* in, int nLen);
 
-        std::unique_ptr<Ort::Session> m_session;
+        std::shared_ptr<Ort::Session> m_session;
         Ort::Env env_;
         Ort::SessionOptions sessionOptions;
 
@@ -36,13 +37,14 @@ namespace paraformer {
         vector<const char*> m_szOutputNames;
 
     public:
-        ModelImp(const char* path, int nNumThread=0, bool quantize=false);
+        ModelImp(const char* path, int nNumThread=0, bool quantize=false, bool use_vad=false);
         ~ModelImp();
         void reset();
         vector<float> FbankKaldi(float sample_rate, const float* waves, int len);
         string forward_chunk(float* din, int len, int flag);
         string forward(float* din, int len, int flag);
         string rescoring();
+        std::vector<std::vector<int>> vad_seg(std::vector<float>& pcm_data);
 
     };
 

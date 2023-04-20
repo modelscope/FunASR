@@ -14,9 +14,9 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    if (argc < 4)
+    if (argc < 5)
     {
-        printf("Usage: %s /path/to/model_dir /path/to/wav/file quantize(true or false) \n", argv[0]);
+        printf("Usage: %s /path/to/model_dir /path/to/wav/file quantize(true or false) use_vad(true or false) \n", argv[0]);
         exit(-1);
     }
     struct timeval start, end;
@@ -24,8 +24,10 @@ int main(int argc, char *argv[])
     int nThreadNum = 1;
     // is quantize
     bool quantize = false;
+    bool use_vad = false;
     istringstream(argv[3]) >> boolalpha >> quantize;
-    FUNASR_HANDLE AsrHanlde=FunASRInit(argv[1], nThreadNum, quantize);
+    istringstream(argv[4]) >> boolalpha >> use_vad;
+    FUNASR_HANDLE AsrHanlde=FunASRInit(argv[1], nThreadNum, quantize, use_vad);
 
     if (!AsrHanlde)
     {
@@ -41,7 +43,7 @@ int main(int argc, char *argv[])
     gettimeofday(&start, NULL);
     float snippet_time = 0.0f;
 
-    FUNASR_RESULT Result=FunASRRecogFile(AsrHanlde, argv[2], RASR_NONE, NULL);
+    FUNASR_RESULT Result=FunASRRecogFile(AsrHanlde, argv[2], RASR_NONE, NULL, use_vad);
 
     gettimeofday(&end, NULL);
    

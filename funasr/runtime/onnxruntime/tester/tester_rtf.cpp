@@ -19,7 +19,7 @@ using namespace std;
 std::atomic<int> index(0);
 std::mutex mtx;
 
-void runReg(FUNASR_HANDLE AsrHanlde, vector<string> wav_list, 
+void runReg(FUNASR_HANDLE AsrHandle, vector<string> wav_list, 
             float* total_length, long* total_time, int core_id) {
 
     // cpu_set_t cpuset;
@@ -37,7 +37,7 @@ void runReg(FUNASR_HANDLE AsrHanlde, vector<string> wav_list,
     // warm up
     for (size_t i = 0; i < 1; i++)
     {
-        FUNASR_RESULT Result=FunASRRecogFile(AsrHanlde, wav_list[0].c_str(), RASR_NONE, NULL);
+        FUNASR_RESULT Result=FunASRRecogFile(AsrHandle, wav_list[0].c_str(), RASR_NONE, NULL);
     }
 
     while (true) {
@@ -48,7 +48,7 @@ void runReg(FUNASR_HANDLE AsrHanlde, vector<string> wav_list,
         }
 
         gettimeofday(&start, NULL);
-        FUNASR_RESULT Result=FunASRRecogFile(AsrHanlde, wav_list[i].c_str(), RASR_NONE, NULL);
+        FUNASR_RESULT Result=FunASRRecogFile(AsrHandle, wav_list[i].c_str(), RASR_NONE, NULL);
 
         gettimeofday(&end, NULL);
         seconds = (end.tv_sec - start.tv_sec);
@@ -112,8 +112,8 @@ int main(int argc, char *argv[])
     int nThreadNum = 1;
     nThreadNum = atoi(argv[4]);
 
-    FUNASR_HANDLE AsrHanlde=FunASRInit(argv[1], 1, quantize);
-    if (!AsrHanlde)
+    FUNASR_HANDLE AsrHandle=FunASRInit(argv[1], 1, quantize);
+    if (!AsrHandle)
     {
         printf("Cannot load ASR Model from: %s, there must be files model.onnx and vocab.txt", argv[1]);
         exit(-1);
@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
 
     for (int i = 0; i < nThreadNum; i++)
     {
-        threads.emplace_back(thread(runReg, AsrHanlde, wav_list, &total_length, &total_time, i));
+        threads.emplace_back(thread(runReg, AsrHandle, wav_list, &total_length, &total_time, i));
     }
 
     for (auto& thread : threads)
@@ -142,6 +142,6 @@ int main(int argc, char *argv[])
     printf("total_time_comput %ld ms.\n", total_time / 1000);
     printf("total_rtf %05lf .\n", (double)total_time/ (total_length*1000000));
 
-    FunASRUninit(AsrHanlde);
+    FunASRUninit(AsrHandle);
     return 0;
 }

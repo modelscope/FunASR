@@ -5,6 +5,7 @@
 #include <ComDefine.h>
 #include <queue>
 #include <stdint.h>
+#include "Model.h"
 
 #ifndef model_sample_rate
 #define model_sample_rate 16000
@@ -27,7 +28,7 @@ class AudioFrame {
 
     ~AudioFrame();
     int set_start(int val);
-    int set_end(int val, int max_len);
+    int set_end(int val);
     int get_start();
     int get_len();
     int disp();
@@ -57,7 +58,7 @@ class Audio {
     int fetch_chunck(float *&dout, int len);
     int fetch(float *&dout, int &len, int &flag);
     void padding();
-    void split();
+    void split(Model* pRecogObj);
     float get_time_len();
 
     int get_queue_size() { return (int)frame_queue.size(); }

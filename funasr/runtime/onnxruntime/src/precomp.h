@@ -26,6 +26,8 @@ using namespace std;
 #include <fftw3.h>
 #include "onnxruntime_run_options_config_keys.h"
 #include "onnxruntime_cxx_api.h"
+#include "kaldi-native-fbank/csrc/feature-fbank.h"
+#include "kaldi-native-fbank/csrc/online-feature.h"
 
 
 // mine
@@ -33,6 +35,7 @@ using namespace std;
 #include "commonfunc.h"
 #include <ComDefine.h>
 #include "predefine_coe.h"
+#include "FsmnVad.h"
 
 #include <ComDefine.h>
 //#include "alignedmem.h"

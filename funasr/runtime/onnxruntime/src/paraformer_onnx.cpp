@@ -3,11 +3,19 @@
 using namespace std;
 using namespace paraformer;
 
-ModelImp::ModelImp(const char* path,int nNumThread, bool quantize)
+ModelImp::ModelImp(const char* path,int nNumThread, bool quantize, bool use_vad)
 :env_(ORT_LOGGING_LEVEL_ERROR, "paraformer"),sessionOptions{}{
     string model_path;
     string cmvn_path;
     string config_path;
+
+    // VAD model
+    if(use_vad){
+        string vad_path = pathAppend(path, "vad_model.onnx");
+        string mvn_path = pathAppend(path, "vad.mvn");
+        vadHandle = make_unique<FsmnVad>();
+        vadHandle->init_vad(vad_path, mvn_path, model_sample_rate, 800, 15000, 0.9);
+    }
 
     if(quantize)
     {
@@ -30,8 +38,10 @@ ModelImp::ModelImp(const char* path,int nNumThread, bool quantize)
     //fbank_ = std::make_unique<knf::OnlineFbank>(fbank_opts);
 
     //sessionOptions.SetInterOpNumThreads(1);
+    //sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_EXTENDED);
     sessionOptions.SetIntraOpNumThreads(nNumThread);
-    sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_EXTENDED);
+    sessionOptions.SetGraphOptimizationLevel(ORT_ENABLE_ALL);
+    sessionOptions.DisableCpuMemArena();
 
 #ifdef _WIN32
     wstring wstrPath = strToWstr(model_path);
@@ -67,6 +77,10 @@ ModelImp::~ModelImp()
 
 void ModelImp::reset()
 {
+}
+
+vector<std::vector<int>> ModelImp::vad_seg(std::vector<float>& pcm_data){
+    return vadHandle->infer(pcm_data);
 }
 
 vector<float> ModelImp::FbankKaldi(float sample_rate, const float* waves, int len) {
@@ -172,66 +186,6 @@ vector<float> ModelImp::ApplyLFR(const std::vector<float> &in)
       p += dim;
     }
   }
-
-//   void ParaformerOnnxAsrModel::ForwardFunc(
-//     const std::vector<std::vector<float>>& chunk_feats,
-//     std::vector<std::vector<float>>* out_prob) {
-//   Ort::MemoryInfo memory_info =
-//       Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
-//   // 1. Prepare onnx required data, splice cached_feature_ and chunk_feats
-//   // chunk
-// //  int num_frames = cached_feature_.size() + chunk_feats.size();
-//   int num_frames = chunk_feats.size();
-//   const int feature_dim = chunk_feats[0].size();
-
-//   //  2. Generate 2 input nodes tensor
-//   // speech node { batch,frame number,feature dim }
-//   const int64_t paraformer_feats_shape[3] = {1, num_frames, feature_dim};
-//   std::vector<float> paraformer_feats;
-//   for (const auto & chunk_feat : chunk_feats) {
-//     paraformer_feats.insert(paraformer_feats.end(), chunk_feat.begin(), chunk_feat.end());
-//   }
-//   Ort::Value paraformer_feats_ort = Ort::Value::CreateTensor<float>(
-//           memory_info, paraformer_feats.data(), paraformer_feats.size(), paraformer_feats_shape, 3);
-//   // speech_lengths node {speech length,}
-//   const int64_t paraformer_length_shape[1] = {1};
-//   std::vector<int32_t> paraformer_length;
-//   paraformer_length.emplace_back(num_frames);
-//   Ort::Value paraformer_length_ort = Ort::Value::CreateTensor<int32_t>(
-//           memory_info, paraformer_length.data(), paraformer_length.size(), paraformer_length_shape, 1);
-
-//   // 3. Put nodes into onnx input vector
-//   std::vector<Ort::Value> paraformer_inputs;
-//   paraformer_inputs.emplace_back(std::move(paraformer_feats_ort));
-//   paraformer_inputs.emplace_back(std::move(paraformer_length_ort));
-
-//   // 4. Onnx infer
-//   std::vector<Ort::Value> paraformer_ort_outputs;
-//   try{
-//     VLOG(3) << "Start infer";
-//     paraformer_ort_outputs = paraformer_session_->Run(
-//             Ort::RunOptions{nullptr}, paraformer_in_names_.data(), paraformer_inputs.data(),
-//             paraformer_inputs.size(), paraformer_out_names_.data(), paraformer_out_names_.size());
-//   }catch (std::exception const& e) {
-//     //  Catch "Non-zero status code returned error",usually because there is no asr result.
-//     // Need funasr to resolve.
-//     LOG(ERROR) << e.what();
-//     return;
-//   }
-
-//   // 5. Change infer result to output shapes
-//   float* logp_data = paraformer_ort_outputs[0].GetTensorMutableData<float>();
-//   auto type_info = paraformer_ort_outputs[0].GetTensorTypeAndShapeInfo();
-
-//   int num_outputs = type_info.GetShape()[1];
-//   int output_dim = type_info.GetShape()[2];
-//   out_prob->resize(num_outputs);
-//   for (int i = 0; i < num_outputs; i++) {
-//     (*out_prob)[i].resize(output_dim);
-//     memcpy((*out_prob)[i].data(), logp_data + i * output_dim,
-//            sizeof(float) * output_dim);
-//   }
-// }
 
 string ModelImp::forward(float* din, int len, int flag)
 {

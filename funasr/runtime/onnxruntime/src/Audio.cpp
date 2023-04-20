@@ -134,19 +134,10 @@ int AudioFrame::set_start(int val)
     return start;
 };
 
-int AudioFrame::set_end(int val, int max_len)
+int AudioFrame::set_end(int val)
 {
-
-    float num_samples = val - start;
-    float frame_length = 400;
-    float frame_shift = 160;
-    float num_new_samples =
-        ceil((num_samples - frame_length) / frame_shift) * frame_shift + frame_length;
-
-    end = start + num_new_samples;
-    len = (int)num_new_samples;
-    if (end > max_len)
-        printf("frame end > max_len!!!!!!!\n");
+    end = val;
+    len = end - start;
     return end;
 };
 
@@ -473,7 +464,6 @@ int Audio::fetch(float *&dout, int &len, int &flag)
 
 void Audio::padding()
 {
-
     float num_samples = speech_len;
     float frame_length = 400;
     float frame_shift = 160;
@@ -509,71 +499,27 @@ void Audio::padding()
     delete frame;
 }
 
-#define UNTRIGGERED 0
-#define TRIGGERED   1
-
-#define SPEECH_LEN_5S  (16000 * 5)
-#define SPEECH_LEN_10S (16000 * 10)
-#define SPEECH_LEN_20S (16000 * 20)
-#define SPEECH_LEN_30S (16000 * 30)
-
-/*
-void Audio::split()
+void Audio::split(Model* pRecogObj)
 {
-    VadInst *handle = WebRtcVad_Create();
-    WebRtcVad_Init(handle);
-    WebRtcVad_set_mode(handle, 2);
-    int window_size = 10;
-    AudioWindow audiowindow(window_size);
-    int status = UNTRIGGERED;
-    int offset = 0;
-    int fs = 16000;
-    int step = 480;
-
     AudioFrame *frame;
 
     frame = frame_queue.front();
     frame_queue.pop();
+    int sp_len = frame->get_len();
     delete frame;
     frame = NULL;
 
-    while (offset < speech_len - step) {
-        int n = WebRtcVad_Process(handle, fs, speech_buff + offset, step);
-        if (status == UNTRIGGERED && audiowindow.put(n) >= window_size - 1) {
-            frame = new AudioFrame();
-            int start = offset - step * (window_size - 1);
-            frame->set_start(start);
-            status = TRIGGERED;
-        } else if (status == TRIGGERED) {
-            int win_weight = audiowindow.put(n);
-            int voice_len = (offset - frame->get_start());
-            int gap = 0;
-            if (voice_len < SPEECH_LEN_5S) {
-                offset += step;
-                continue;
-            } else if (voice_len < SPEECH_LEN_10S) {
-                gap = 1;
-            } else if (voice_len < SPEECH_LEN_20S) {
-                gap = window_size / 5;
-            } else {
-                gap = window_size / 2;
-            }
-
-            if (win_weight < gap) {
-                status = UNTRIGGERED;
-                offset = frame->set_end(offset, speech_align_len);
-                frame_queue.push(frame);
-                frame = NULL;
-            }
-        }
-        offset += step;
-    }
-
-    if (frame != NULL) {
-        frame->set_end(speech_len, speech_align_len);
+    std::vector<float> pcm_data(speech_data, speech_data+sp_len);
+    vector<std::vector<int>> vad_segments = pRecogObj->vad_seg(pcm_data);
+    int seg_sample = model_sample_rate/1000;
+    for(vector<int> segment:vad_segments)
+    {
+        frame = new AudioFrame();
+        int start = segment[0]*seg_sample;
+        int end = segment[1]*seg_sample;
+        frame->set_start(start);
+        frame->set_end(end);
         frame_queue.push(frame);
         frame = NULL;
     }
-    WebRtcVad_Free(handle);
 }
-*/
