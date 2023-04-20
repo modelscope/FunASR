@@ -1,6 +1,6 @@
 # Docker
 
-## Install 
+## Install Docker
 
 ### Ubuntu
 ```shell
@@ -16,6 +16,11 @@ sudo sh test-docker.sh
 ### CentOS
 ```shell
 curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
+```
+
+### MacOS
+```shell
+brew install --cask --appdir=/Applications docker
 ```
 
 ### Windows
@@ -40,18 +45,20 @@ sudo systemctl start docker
 sudo docker pull <image-name>:<tag>
 ```
 
-### Check Downloaded Image 
+### Check Image 
 ```shell
 sudo docker images
 ```
 
 ## Run Docker
 ```shell
-sudo docker run -it <image-name>:<tag> bash
+sudo docker run -itd --name funasr <image-name>:<tag> bash
+sudo docker exec -it funasr bash
 ```
 
 ## Stop Docker
 ```shell
+exit
 sudo docker ps
 sudo docker stop <container-id>
 ```

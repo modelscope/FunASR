@@ -3,7 +3,7 @@
 ## Inference with pipeline
 
 ### Speech Recognition
-#### Paraformer model
+#### Paraformer Model
 ```python
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
@@ -18,7 +18,7 @@ print(rec_result)
 ```
 
 ### Voice Activity Detection
-#### FSMN-VAD
+#### FSMN-VAD Model
 ```python
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
@@ -37,7 +37,7 @@ print(segments_result)
 ```
 
 ### Punctuation Restoration
-#### CT_Transformer
+#### CT_Transformer Model
 ```python
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
@@ -52,7 +52,7 @@ print(rec_result)
 ```
 
 ### Timestamp Prediction
-#### TP-Aligner
+#### TP-Aligner Model
 ```python
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
@@ -68,7 +68,7 @@ print(rec_result)
 ```
 
 ### Speaker Verification
-#### X-vector
+#### X-vector Model
 ```python
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
@@ -87,8 +87,8 @@ rec_result = inference_sv_pipline(audio_in=('https://isv-data.oss-cn-hangzhou.al
 print(rec_result["scores"][0])
 ```
 
-### Speaker diarization
-#### SOND
+### Speaker Diarization
+#### SOND Model
 ```python
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
@@ -154,7 +154,7 @@ inference_pipeline = pipeline(
 
 ## Finetune with pipeline
 ### Speech Recognition
-#### Paraformer model
+#### Paraformer Model
 
 finetune.py
 ```python

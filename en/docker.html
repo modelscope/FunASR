@@ -44,10 +44,11 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Docker</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#install">Install</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#install-docker">Install Docker</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#ubuntu">Ubuntu</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#debian">Debian</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#centos">CentOS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#macos">MacOS</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#windows">Windows</a></li>
 </ul>
 </li>
@@ -59,7 +60,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#pull-image">Pull Image</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#check-downloaded-image">Check Downloaded Image</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#check-image">Check Image</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#run-docker">Run Docker</a></li>
@@ -149,8 +150,8 @@
              
   <div class="section" id="docker">
 <h1>Docker<a class="headerlink" href="#docker" title="Permalink to this headline"></a></h1>
-<div class="section" id="install">
-<h2>Install<a class="headerlink" href="#install" title="Permalink to this headline"></a></h2>
+<div class="section" id="install-docker">
+<h2>Install Docker<a class="headerlink" href="#install-docker" title="Permalink to this headline"></a></h2>
 <div class="section" id="ubuntu">
 <h3>Ubuntu<a class="headerlink" href="#ubuntu" title="Permalink to this headline"></a></h3>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>curl -fsSL https://test.docker.com -o test-docker.sh
@@ -168,6 +169,12 @@ sudo sh test-docker.sh
 <div class="section" id="centos">
 <h3>CentOS<a class="headerlink" href="#centos" title="Permalink to this headline"></a></h3>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>curl -fsSL https://get.docker.com <span class="p">|</span> bash -s docker --mirror Aliyun
+</pre></div>
+</div>
+</div>
+<div class="section" id="macos">
+<h3>MacOS<a class="headerlink" href="#macos" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>brew install --cask --appdir<span class="o">=</span>/Applications docker
 </pre></div>
 </div>
 </div>
@@ -201,8 +208,8 @@ sudo sh test-docker.sh
 </pre></div>
 </div>
 </div>
-<div class="section" id="check-downloaded-image">
-<h3>Check Downloaded Image<a class="headerlink" href="#check-downloaded-image" title="Permalink to this headline"></a></h3>
+<div class="section" id="check-image">
+<h3>Check Image<a class="headerlink" href="#check-image" title="Permalink to this headline"></a></h3>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo docker images
 </pre></div>
 </div>
@@ -210,13 +217,15 @@ sudo sh test-docker.sh
 </div>
 <div class="section" id="run-docker">
 <h2>Run Docker<a class="headerlink" href="#run-docker" title="Permalink to this headline"></a></h2>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo docker run -it &lt;image-name&gt;:&lt;tag&gt; bash
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo docker run -itd --name funasr &lt;image-name&gt;:&lt;tag&gt; bash
+sudo docker <span class="nb">exec</span> -it funasr bash
 </pre></div>
 </div>
 </div>
 <div class="section" id="stop-docker">
 <h2>Stop Docker<a class="headerlink" href="#stop-docker" title="Permalink to this headline"></a></h2>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo docker ps
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">exit</span>
+sudo docker ps
 sudo docker stop &lt;container-id&gt;
 </pre></div>
 </div>
