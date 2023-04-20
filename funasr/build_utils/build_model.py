@@ -13,6 +13,8 @@ def build_model(args):
         model = build_lm_model(args)
     elif args.task_name == "punc":
         model = build_punc_model(args)
+    elif args.task_name == "vad":
+        model = build_vad_model(args)
     else:
         raise NotImplementedError("Not supported task: {}".format(args.task_name))
 
