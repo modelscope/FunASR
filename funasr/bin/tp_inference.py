@@ -54,7 +54,7 @@ class SpeechText2Timestamp:
         assert check_argument_types()
         # 1. Build ASR model
         tp_model, tp_train_args = ASRTask.build_model_from_file(
-            timestamp_infer_config, timestamp_model_file, device
+            timestamp_infer_config, timestamp_model_file, device=device
         )
         if 'cuda' in device:
             tp_model = tp_model.cuda()  # force model to cuda
