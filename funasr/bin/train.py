@@ -1,3 +1,4 @@
+import argparse
 import logging
 import os
 import sys
@@ -9,6 +10,7 @@ from funasr.torch_utils.model_summary import model_summary
 from funasr.torch_utils.pytorch_version import pytorch_cudnn_version
 from funasr.torch_utils.set_all_random_seed import set_all_random_seed
 from funasr.utils import config_argparse
+from funasr.utils.build_args import build_args
 from funasr.utils.build_dataloader import build_dataloader
 from funasr.utils.build_distributed import build_distributed
 from funasr.utils.build_model import build_model
@@ -272,6 +274,12 @@ def get_parser():
         action="append",
         default=[],
     )
+    parser.add_argument(
+        "--use_preprocessor",
+        type=str2bool,
+        default=True,
+        help="Apply preprocessing to data or not",
+    )
 
     # pai related
     parser.add_argument(
@@ -330,6 +338,8 @@ def get_parser():
 if __name__ == '__main__':
     parser = get_parser()
     args = parser.parse_args()
+    task_args = build_args(args)
+    args = argparse.Namespace(**vars(args), **vars(task_args))
 
     # set random seed
     set_all_random_seed(args.seed)
