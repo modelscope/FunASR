@@ -84,6 +84,10 @@
 <li class="toctree-l4"><a class="reference internal" href="#x-vector">X-vector</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#speaker-diarization">Speaker diarization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sond">SOND</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#faq">FAQ</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#how-to-switch-device-from-gpu-to-cpu-with-pipeline">How to switch device from GPU to CPU with pipeline</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#how-to-infer-from-local-model-path">How to infer from local model path</a></li>
@@ -107,7 +111,8 @@
 <li class="toctree-l1"><a class="reference internal" href="punc_pipeline.html">Punctuation Restoration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tp_pipeline.html">Timestamp Prediction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sv_pipeline.html">Speaker Verification</a></li>
-<li class="toctree-l1"><a class="reference internal" href="lm_pipeline.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sd_pipeline.html">Speaker diarization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lm_pipeline.html">Language Models</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Runtime</span></p>
 <ul>
@@ -257,6 +262,36 @@
 <span class="c1"># speaker verification</span>
 <span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_sv_pipline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/sv_example_enroll.wav&#39;</span><span class="p">,</span><span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/sv_example_same.wav&#39;</span><span class="p">))</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">rec_result</span><span class="p">[</span><span class="s2">&quot;scores&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="speaker-diarization">
+<h3>Speaker diarization<a class="headerlink" href="#speaker-diarization" title="Permalink to this headline"></a></h3>
+<div class="section" id="sond">
+<h4>SOND<a class="headerlink" href="#sond" title="Permalink to this headline"></a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
+<span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
+
+<span class="n">inference_diar_pipline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;sond_demo&quot;</span><span class="p">,</span>
+    <span class="n">num_workers</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">speaker_diarization</span><span class="p">,</span>
+    <span class="n">diar_model_config</span><span class="o">=</span><span class="s2">&quot;sond.yaml&quot;</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_diarization_sond-en-us-callhome-8k-n16k4-pytorch&#39;</span><span class="p">,</span>
+    <span class="n">sv_model</span><span class="o">=</span><span class="s2">&quot;damo/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch&quot;</span><span class="p">,</span>
+    <span class="n">sv_model_revision</span><span class="o">=</span><span class="s2">&quot;master&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">audio_list</span><span class="o">=</span><span class="p">[</span>
+    <span class="s2">&quot;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/record.wav&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/spk_A.wav&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/spk_B.wav&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/spk_B1.wav&quot;</span>
+<span class="p">]</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="n">inference_diar_pipline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="n">audio_list</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

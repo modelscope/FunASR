@@ -87,6 +87,33 @@ rec_result = inference_sv_pipline(audio_in=('https://isv-data.oss-cn-hangzhou.al
 print(rec_result["scores"][0])
 ```
 
+### Speaker diarization
+#### SOND
+```python
+from modelscope.pipelines import pipeline
+from modelscope.utils.constant import Tasks
+
+inference_diar_pipline = pipeline(
+    mode="sond_demo",
+    num_workers=0,
+    task=Tasks.speaker_diarization,
+    diar_model_config="sond.yaml",
+    model='damo/speech_diarization_sond-en-us-callhome-8k-n16k4-pytorch',
+    sv_model="damo/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch",
+    sv_model_revision="master",
+)
+
+audio_list=[
+    "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/record.wav",
+    "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/spk_A.wav",
+    "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/spk_B.wav",
+    "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/spk_B1.wav"
+]
+
+results = inference_diar_pipline(audio_in=audio_list)
+print(results)
+```
+
 ### FAQ
 #### How to switch device from GPU to CPU with pipeline
 
