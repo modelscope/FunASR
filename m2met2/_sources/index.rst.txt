@@ -20,10 +20,3 @@ To facilitate reproducible research, we provide a comprehensive overview of the 
    ./Rules
    ./Organizers
    ./Contact
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

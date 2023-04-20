@@ -4,11 +4,11 @@
 
 ### Quick start
 
-### Inference with you data
+#### Inference with you data
 
-### Inference with multi-threads on CPU
+#### Inference with multi-threads on CPU
 
-### Inference with multi GPU
+#### Inference with multi GPU
 
 ## Finetune with pipeline
 

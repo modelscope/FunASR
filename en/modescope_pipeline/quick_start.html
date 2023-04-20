@@ -84,15 +84,6 @@
 <li class="toctree-l4"><a class="reference internal" href="#x-vector">X-vector</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#speaker-diarization">Speaker diarization</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#sond">SOND</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#faq">FAQ</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#how-to-switch-device-from-gpu-to-cpu-with-pipeline">How to switch device from GPU to CPU with pipeline</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#how-to-infer-from-local-model-path">How to infer from local model path</a></li>
-</ul>
-</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#finetune-with-pipeline">Finetune with pipeline</a><ul>
@@ -100,8 +91,6 @@
 <li class="toctree-l4"><a class="reference internal" href="#id2">Paraformer model</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#id3">FAQ</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#multi-gpus-training-and-distributed-training">Multi GPUs training and distributed training</a></li>
 </ul>
 </li>
 </ul>
@@ -111,8 +100,7 @@
 <li class="toctree-l1"><a class="reference internal" href="punc_pipeline.html">Punctuation Restoration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tp_pipeline.html">Timestamp Prediction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sv_pipeline.html">Speaker Verification</a></li>
-<li class="toctree-l1"><a class="reference internal" href="sd_pipeline.html">Speaker Diarization</a></li>
-<li class="toctree-l1"><a class="reference internal" href="lm_pipeline.html">Language Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lm_pipeline.html">Speech Recognition</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Runtime</span></p>
 <ul>
@@ -124,18 +112,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../runtime/grpc_cpp.html">Using funasr with grpc-cpp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../runtime/websocket_python.html">Using funasr with websocket</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Benchmark and Leadboard</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../benchmark/benchmark_onnx.html">CPU Benchmark (ONNX)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../benchmark/benchmark_libtorch.html">CPU Benchmark (Libtorch)</a></li>
-</ul>
 <p class="caption"><span class="caption-text">Papers</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../papers.html">Papers</a></li>
-</ul>
-<p class="caption"><span class="caption-text">FQA</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../FQA.html">FQA</a></li>
 </ul>
 
         </div>
@@ -233,7 +212,8 @@
 
 <span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
     <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">speech_timestamp</span><span class="p">,</span>
-    <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_timestamp_prediction-v1-16k-offline&#39;</span><span class="p">,)</span>
+    <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_timestamp_prediction-v1-16k-offline&#39;</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="s1">&#39;./tmp&#39;</span><span class="p">)</span>
 
 <span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span>
     <span class="n">audio_in</span><span class="o">=</span><span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_timestamps.wav&#39;</span><span class="p">,</span>
@@ -262,74 +242,6 @@
 <span class="c1"># speaker verification</span>
 <span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_sv_pipline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/sv_example_enroll.wav&#39;</span><span class="p">,</span><span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/sv_example_same.wav&#39;</span><span class="p">))</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">rec_result</span><span class="p">[</span><span class="s2">&quot;scores&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="speaker-diarization">
-<h3>Speaker diarization<a class="headerlink" href="#speaker-diarization" title="Permalink to this headline"></a></h3>
-<div class="section" id="sond">
-<h4>SOND<a class="headerlink" href="#sond" title="Permalink to this headline"></a></h4>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
-<span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
-
-<span class="n">inference_diar_pipline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
-    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;sond_demo&quot;</span><span class="p">,</span>
-    <span class="n">num_workers</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-    <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">speaker_diarization</span><span class="p">,</span>
-    <span class="n">diar_model_config</span><span class="o">=</span><span class="s2">&quot;sond.yaml&quot;</span><span class="p">,</span>
-    <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_diarization_sond-en-us-callhome-8k-n16k4-pytorch&#39;</span><span class="p">,</span>
-    <span class="n">sv_model</span><span class="o">=</span><span class="s2">&quot;damo/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch&quot;</span><span class="p">,</span>
-    <span class="n">sv_model_revision</span><span class="o">=</span><span class="s2">&quot;master&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="n">audio_list</span><span class="o">=</span><span class="p">[</span>
-    <span class="s2">&quot;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/record.wav&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/spk_A.wav&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/spk_B.wav&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/spk_B1.wav&quot;</span>
-<span class="p">]</span>
-
-<span class="n">results</span> <span class="o">=</span> <span class="n">inference_diar_pipline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="n">audio_list</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="faq">
-<h3>FAQ<a class="headerlink" href="#faq" title="Permalink to this headline"></a></h3>
-<div class="section" id="how-to-switch-device-from-gpu-to-cpu-with-pipeline">
-<h4>How to switch device from GPU to CPU with pipeline<a class="headerlink" href="#how-to-switch-device-from-gpu-to-cpu-with-pipeline" title="Permalink to this headline"></a></h4>
-<p>The pipeline defaults to decoding with GPU (<code class="docutils literal notranslate"><span class="pre">ngpu=1</span></code>) when GPU is available. If you want to switch to CPU, you could set <code class="docutils literal notranslate"><span class="pre">ngpu=0</span></code></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
-    <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">auto_speech_recognition</span><span class="p">,</span>
-    <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&#39;</span><span class="p">,</span>
-    <span class="n">ngpu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-<span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="how-to-infer-from-local-model-path">
-<h4>How to infer from local model path<a class="headerlink" href="#how-to-infer-from-local-model-path" title="Permalink to this headline"></a></h4>
-<p>Download model to local dir, by modelscope-sdk</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.hub.snapshot_download</span> <span class="kn">import</span> <span class="n">snapshot_download</span>
-
-<span class="n">local_dir_root</span> <span class="o">=</span> <span class="s2">&quot;./models_from_modelscope&quot;</span>
-<span class="n">model_dir</span> <span class="o">=</span> <span class="n">snapshot_download</span><span class="p">(</span><span class="s1">&#39;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&#39;</span><span class="p">,</span> <span class="n">cache_dir</span><span class="o">=</span><span class="n">local_dir_root</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>Or download model to local dir, by git lfs</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git lfs install
-<span class="c1"># git clone https://www.modelscope.cn/&lt;namespace&gt;/&lt;model-name&gt;.git</span>
-git clone https://www.modelscope.cn/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch.git
-</pre></div>
-</div>
-<p>Infer with local model path</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">local_dir_root</span> <span class="o">=</span> <span class="s2">&quot;./models_from_modelscope/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&quot;</span>
-<span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
-    <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">auto_speech_recognition</span><span class="p">,</span>
-    <span class="n">model</span><span class="o">=</span><span class="n">local_dir_root</span><span class="p">,</span>
-<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -380,16 +292,10 @@ git clone https://www.modelscope.cn/damo/speech_paraformer-large_asr_nat-zh-cn-1
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python finetune.py <span class="p">&amp;</span>&gt; log.txt <span class="p">&amp;</span>
 </pre></div>
 </div>
-</div>
-</div>
-<div class="section" id="id3">
-<h3>FAQ<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h3>
-</div>
-<div class="section" id="multi-gpus-training-and-distributed-training">
-<h3>Multi GPUs training and distributed training<a class="headerlink" href="#multi-gpus-training-and-distributed-training" title="Permalink to this headline"></a></h3>
 <p>If you want finetune with multi-GPUs, you could:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nv">CUDA_VISIBLE_DEVICES</span><span class="o">=</span><span class="m">1</span>,2 python -m torch.distributed.launch --nproc_per_node <span class="m">2</span> finetune.py &gt; log.txt <span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span>
 </pre></div>
+</div>
 </div>
 </div>
 </div>
