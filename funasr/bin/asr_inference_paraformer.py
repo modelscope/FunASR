@@ -631,7 +631,9 @@ def inference_modelscope(
         export_mode = param_dict.get("export_mode", False)
     else:
         hotword_list_or_file = None
-
+    
+    if kwargs.get("device", None) == "cpu":
+        ngpu = 0
     if ngpu >= 1 and torch.cuda.is_available():
         device = "cuda"
     else:
