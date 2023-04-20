@@ -255,13 +255,13 @@ asr_example2  ./audios/asr_example2.wav
 <ul class="simple">
 <li><p>Setting parameters in <code class="docutils literal notranslate"><span class="pre">infer.sh</span></code></p>
 <ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">model</span></code>: model name on ModelScope</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">data_dir</span></code>: the dataset dir needs to include <code class="docutils literal notranslate"><span class="pre">${data_dir}/wav.scp</span></code>. If <code class="docutils literal notranslate"><span class="pre">${data_dir}/text</span></code> is also exists, CER will be computed</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">output_dir</span></code>: result dir</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>: batchsize of inference</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">gpu_inference</span></code>: whether to perform gpu decoding, set false for cpu decoding</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">gpuid_list</span></code>: set gpus, e.g., <code class="docutils literal notranslate"><span class="pre">gpuid_list</span></code>=”0,1”</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">njob</span></code>: the number of jobs for CPU decoding, if <code class="docutils literal notranslate"><span class="pre">gpu_inference</span></code>=false, use CPU decoding, please set <code class="docutils literal notranslate"><span class="pre">njob</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model</span></code>: model name in <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope">model zoo</a>, or model path in local disk</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">data_dir</span></code>: the dataset dir needs to include <code class="docutils literal notranslate"><span class="pre">wav.scp</span></code>. If <code class="docutils literal notranslate"><span class="pre">${data_dir}/text</span></code> is also exists, CER will be computed</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">output_dir</span></code>: output dir of the recognition results</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>: <code class="docutils literal notranslate"><span class="pre">64</span></code> (Default), batch size of inference on gpu</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gpu_inference</span></code>: <code class="docutils literal notranslate"><span class="pre">true</span></code> (Default), whether to perform gpu decoding, set false for CPU inference</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gpuid_list</span></code>: <code class="docutils literal notranslate"><span class="pre">0,1</span></code> (Default), which gpu_ids are used to infer</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">njob</span></code>: only used for CPU inference (<code class="docutils literal notranslate"><span class="pre">gpu_inference</span></code>=<code class="docutils literal notranslate"><span class="pre">false</span></code>), <code class="docutils literal notranslate"><span class="pre">64</span></code> (Default), the number of jobs for CPU decoding</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">checkpoint_dir</span></code>: only used for infer finetuned models, the path dir of finetuned models</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">checkpoint_name</span></code>: only used for infer finetuned models, <code class="docutils literal notranslate"><span class="pre">valid.cer_ctc.ave.pb</span></code> (Default), which checkpoint is used to infer</p></li>
 </ul>
