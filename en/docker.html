@@ -60,10 +60,10 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#pull-image">Pull Image</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#check-downloaded-image">Check Downloaded Image</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#run-docker">Run Docker</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#stop-docker">Stop Docker</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#run-docker">Run Docker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#stop-docker">Stop Docker</a></li>
 </ul>
 </li>
 </ul>
@@ -187,7 +187,7 @@ sudo sh test-docker.sh
 </div>
 <div class="section" id="gpu">
 <h4>GPU<a class="headerlink" href="#gpu" title="Permalink to this headline"></a></h4>
-<p>`registry.cn-hangzhou.aliyuncs.com/modelscope-repo/modelscope:ubuntu20.04-cuda11.3.0-py37-torch1.11.0-tf1.15.5-1.5.0’</p>
+<p><code class="docutils literal notranslate"><span class="pre">registry.cn-hangzhou.aliyuncs.com/modelscope-repo/modelscope:ubuntu20.04-cuda11.3.0-py37-torch1.11.0-tf1.15.5-1.5.0</span></code></p>
 </div>
 </div>
 <div class="section" id="pull-image">
@@ -202,18 +202,18 @@ sudo sh test-docker.sh
 </pre></div>
 </div>
 </div>
+</div>
 <div class="section" id="run-docker">
-<h3>Run Docker<a class="headerlink" href="#run-docker" title="Permalink to this headline"></a></h3>
+<h2>Run Docker<a class="headerlink" href="#run-docker" title="Permalink to this headline"></a></h2>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo docker run -it &lt;image-name&gt;:&lt;tag&gt; bash
 </pre></div>
 </div>
 </div>
 <div class="section" id="stop-docker">
-<h3>Stop Docker<a class="headerlink" href="#stop-docker" title="Permalink to this headline"></a></h3>
+<h2>Stop Docker<a class="headerlink" href="#stop-docker" title="Permalink to this headline"></a></h2>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo docker ps
 sudo docker stop &lt;container-id&gt;
 </pre></div>
-</div>
 </div>
 </div>
 </div>
