@@ -1,4 +1,4 @@
-# Speaker diarization
+# Speaker Diarization
 
 ## Inference with pipeline
 
