@@ -33,7 +33,7 @@ sudo systemctl start docker
 
 #### GPU
 
-`registry.cn-hangzhou.aliyuncs.com/modelscope-repo/modelscope:ubuntu20.04-cuda11.3.0-py37-torch1.11.0-tf1.15.5-1.5.0'
+`registry.cn-hangzhou.aliyuncs.com/modelscope-repo/modelscope:ubuntu20.04-cuda11.3.0-py37-torch1.11.0-tf1.15.5-1.5.0`
 
 ### Pull Image
 ```shell
@@ -45,12 +45,12 @@ sudo docker pull <image-name>:<tag>
 sudo docker images
 ```
 
-### Run Docker
+## Run Docker
 ```shell
 sudo docker run -it <image-name>:<tag> bash
 ```
 
-### Stop Docker
+## Stop Docker
 ```shell
 sudo docker ps
 sudo docker stop <container-id>
