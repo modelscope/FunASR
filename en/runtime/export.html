@@ -74,8 +74,11 @@
 <p class="caption"><span class="caption-text">Runtime</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Export models</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#environments">Environments</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#install-modelscope-and-funasr">Install modelscope and funasr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#environments">Environments</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#install-modelscope-and-funasr">Install modelscope and funasr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#install-the-quantization-tools">Install the quantization tools</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#export-model">Export model</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#performance-benchmark-of-runtime">Performance Benchmark of Runtime</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#paraformer-on-cpu">Paraformer on CPU</a></li>
@@ -145,16 +148,23 @@
 <h1>Export models<a class="headerlink" href="#export-models" title="Permalink to this headline"></a></h1>
 <div class="section" id="environments">
 <h2>Environments<a class="headerlink" href="#environments" title="Permalink to this headline"></a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">torch</span> <span class="o">&gt;=</span> <span class="mf">1.11</span><span class="o">.</span><span class="mi">0</span>
-<span class="n">modelscope</span> <span class="o">&gt;=</span> <span class="mf">1.2</span><span class="o">.</span><span class="mi">0</span>
-<span class="n">torch</span><span class="o">-</span><span class="n">quant</span> <span class="o">&gt;=</span> <span class="mf">0.4</span><span class="o">.</span><span class="mi">0</span> <span class="p">(</span><span class="n">required</span> <span class="k">for</span> <span class="n">exporting</span> <span class="n">quantized</span> <span class="n">torchscript</span> <span class="nb">format</span> <span class="n">model</span><span class="p">)</span>
-<span class="c1"># pip install torch-quant -i https://pypi.org/simple</span>
+<div class="section" id="install-modelscope-and-funasr">
+<h3>Install modelscope and funasr<a class="headerlink" href="#install-modelscope-and-funasr" title="Permalink to this headline"></a></h3>
+<p>The installation is the same as <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/README.md#installation">funasr</a></p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip3 install torch torchaudio
+pip install -U modelscope funasr
+<span class="c1"># For the users in China, you could install with the command:</span>
+<span class="c1"># pip install -U modelscope funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="install-modelscope-and-funasr">
-<h2>Install modelscope and funasr<a class="headerlink" href="#install-modelscope-and-funasr" title="Permalink to this headline"></a></h2>
-<p>The installation is the same as <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/README.md#installation">funasr</a></p>
+<div class="section" id="install-the-quantization-tools">
+<h3>Install the quantization tools<a class="headerlink" href="#install-the-quantization-tools" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install torch-quant <span class="c1"># Optional, for torchscript quantization</span>
+pip install onnxruntime <span class="c1"># Optional, for onnx quantization</span>
+</pre></div>
+</div>
+</div>
 </div>
 <div class="section" id="export-model">
 <h2>Export model<a class="headerlink" href="#export-model" title="Permalink to this headline"></a></h2>

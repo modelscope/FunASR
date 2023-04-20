@@ -5,8 +5,11 @@
 
 ```shell
 pip3 install torch torchaudio
-pip install -U modelscope
-pip install -U funasr
+pip install -U modelscope funasr
+# For the users in China, you could install with the command:
+# pip install -U modelscope funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple
+pip install torch-quant # Optional, for torchscript quantization
+pip install onnxruntime # Optional, for onnx quantization
 ```
 
 ### Export [onnx model](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export)
