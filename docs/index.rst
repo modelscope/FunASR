@@ -77,6 +77,12 @@ FunASR hopes to build a bridge between academic research and industrial applicat
 
 .. toctree::
    :maxdepth: 1
+   :caption: Application
+
+   ./application.md
+
+.. toctree::
+   :maxdepth: 1
    :caption: FQA
 
    ./FQA.md
