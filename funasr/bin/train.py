@@ -6,18 +6,20 @@ from io import BytesIO
 
 import torch
 
-from funasr.torch_utils.model_summary import model_summary
-from funasr.torch_utils.pytorch_version import pytorch_cudnn_version
-from funasr.torch_utils.set_all_random_seed import set_all_random_seed
-from funasr.utils import config_argparse
 from funasr.build_utils.build_args import build_args
 from funasr.build_utils.build_dataloader import build_dataloader
 from funasr.build_utils.build_distributed import build_distributed
 from funasr.build_utils.build_model import build_model
 from funasr.build_utils.build_optimizer import build_optimizer
 from funasr.build_utils.build_scheduler import build_scheduler
+from funasr.text.phoneme_tokenizer import g2p_choices
+from funasr.torch_utils.model_summary import model_summary
+from funasr.torch_utils.pytorch_version import pytorch_cudnn_version
+from funasr.torch_utils.set_all_random_seed import set_all_random_seed
+from funasr.utils import config_argparse
 from funasr.utils.prepare_data import prepare_data
 from funasr.utils.types import str2bool
+from funasr.utils.types import str_or_none
 from funasr.utils.yaml_no_alias_safe_dump import yaml_no_alias_safe_dump
 
 
@@ -279,6 +281,55 @@ def get_parser():
         type=str2bool,
         default=True,
         help="Apply preprocessing to data or not",
+    )
+
+    # most task related
+    parser.add_argument(
+        "--init",
+        type=lambda x: str_or_none(x.lower()),
+        default=None,
+        help="The initialization method",
+        choices=[
+            "chainer",
+            "xavier_uniform",
+            "xavier_normal",
+            "kaiming_uniform",
+            "kaiming_normal",
+            None,
+        ],
+    )
+    parser.add_argument(
+        "--token_list",
+        type=str_or_none,
+        default=None,
+        help="A text mapping int-id to token",
+    )
+    parser.add_argument(
+        "--token_type",
+        type=str,
+        default="bpe",
+        choices=["bpe", "char", "word"],
+        help="",
+    )
+    parser.add_argument(
+        "--bpemodel",
+        type=str_or_none,
+        default=None,
+        help="The model file fo sentencepiece",
+    )
+    parser.add_argument(
+        "--cleaner",
+        type=str_or_none,
+        choices=[None, "tacotron", "jaconv", "vietnamese"],
+        default=None,
+        help="Apply text cleaning",
+    )
+    parser.add_argument(
+        "--g2p",
+        type=str_or_none,
+        choices=g2p_choices,
+        default=None,
+        help="Specify g2p method if --token_type=phn",
     )
 
     # pai related
