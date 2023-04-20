@@ -1,6 +1,4 @@
-//
-// Created by root on 4/9/23.
-//
+
 #include <fstream>
 #include "FsmnVad.h"
 #include "precomp.h"
@@ -9,8 +7,6 @@
 
 void FsmnVad::init_vad(const std::string &vad_model, const std::string &vad_cmvn, int vad_sample_rate, int vad_silence_duration, int vad_max_len,
                        float vad_speech_noise_thres) {
-
-
     session_options_.SetIntraOpNumThreads(1);
     session_options_.SetGraphOptimizationLevel(ORT_ENABLE_ALL);
     session_options_.DisableCpuMemArena();
@@ -33,7 +29,6 @@ void FsmnVad::init_vad(const std::string &vad_model, const std::string &vad_cmvn
 
 }
 
-
 void FsmnVad::read_model(const std::string &vad_model) {
     try {
         vad_session_ = std::make_shared<Ort::Session>(
@@ -45,8 +40,6 @@ void FsmnVad::read_model(const std::string &vad_model) {
     //LOG(INFO) << "vad onnx:";
     GetInputOutputInfo(vad_session_, &vad_in_names_, &vad_out_names_);
 }
-
-
 
 void FsmnVad::GetInputOutputInfo(
         const std::shared_ptr<Ort::Session> &session,

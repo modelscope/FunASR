@@ -1,6 +1,3 @@
-//
-// Created by zyf on 4/9/23.
-//
 
 #ifndef VAD_SERVER_FSMNVAD_H
 #define VAD_SERVER_FSMNVAD_H

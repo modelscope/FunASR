@@ -35,12 +35,12 @@ ModelImp::ModelImp(const char* path,int nNumThread, bool quantize, bool use_vad)
     fbank_opts.frame_opts.frame_length_ms = 25;
     fbank_opts.energy_floor = 0;
     fbank_opts.mel_opts.debug_mel = false;
-    //fbank_ = std::make_unique<knf::OnlineFbank>(fbank_opts);
+    // fbank_ = std::make_unique<knf::OnlineFbank>(fbank_opts);
 
-    //sessionOptions.SetInterOpNumThreads(1);
-    //sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_EXTENDED);
+    // sessionOptions.SetInterOpNumThreads(1);
     sessionOptions.SetIntraOpNumThreads(nNumThread);
     sessionOptions.SetGraphOptimizationLevel(ORT_ENABLE_ALL);
+    // DisableCpuMemArena can improve performance
     sessionOptions.DisableCpuMemArena();
 
 #ifdef _WIN32
