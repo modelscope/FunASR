@@ -217,7 +217,7 @@ def build_model(args):
     encoder_class = encoder_choices.get_class(args.encoder)
     encoder = encoder_class(input_size=input_size, **args.encoder_conf)
 
-    # 7. Decoder
+    # decoder
     decoder_class = decoder_choices.get_class(args.decoder)
     decoder = decoder_class(
         vocab_size=vocab_size,
@@ -225,7 +225,9 @@ def build_model(args):
         **args.decoder_conf,
     )
 
-    # 8. CTC
+    # ctc
     ctc = CTC(
         odim=vocab_size, encoder_output_size=encoder.output_size(), **args.ctc_conf
     )
+
+    
