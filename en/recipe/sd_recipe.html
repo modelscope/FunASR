@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Speech Recognition &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <title>Speaker Diarization &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -16,9 +16,7 @@
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Speaker Verification" href="sv_recipe.html" />
-    <link rel="prev" title="Installation" href="../installation.html" /> 
+    <link rel="search" title="Search" href="../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -45,16 +43,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Recipe</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Speech Recognition</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#overall-introduction">Overall Introduction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#stage-0-data-preparation">Stage 0: Data preparation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#stage-1-feature-generation">Stage 1: Feature Generation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#stage-2-dictionary-preparation">Stage 2: Dictionary Preparation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#stage-3-training">Stage 3: Training</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#stage-4-decoding">Stage 4: Decoding</a></li>
-</ul>
-</li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="asr_recipe.html">Speech Recognition</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sv_recipe.html">Speaker Verification</a></li>
 <li class="toctree-l1"><a class="reference internal" href="punc_recipe.html">Punctuation Restoration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vad_recipe.html">Voice Activity Detection</a></li>
@@ -117,9 +107,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Speech Recognition</li>
+      <li class="breadcrumb-item active">Speaker Diarization</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/recipe/asr_recipe.md.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/recipe/sd_recipe.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -127,8 +117,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="speech-recognition">
-<h1>Speech Recognition<a class="headerlink" href="#speech-recognition" title="Permalink to this headline"></a></h1>
+  <div class="section" id="speaker-diarization">
+<h1>Speaker Diarization<a class="headerlink" href="#speaker-diarization" title="Permalink to this headline"></a></h1>
 <p>Here we take “Training a paraformer model from scratch using the AISHELL-1 dataset” as an example to introduce how to use FunASR. According to this example, users can similarly employ other datasets (such as AISHELL-2 dataset, etc.) to train other models (such as conformer, transformer, etc.).</p>
 <div class="section" id="overall-introduction">
 <h2>Overall Introduction<a class="headerlink" href="#overall-introduction" title="Permalink to this headline"></a></h2>
@@ -285,10 +275,7 @@
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="sv_recipe.html" class="btn btn-neutral float-right" title="Speaker Verification" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 

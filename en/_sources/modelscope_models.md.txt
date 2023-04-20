@@ -80,7 +80,7 @@ Here we provided several pretrained models on different datasets. The details of
 | [Xvector](https://www.modelscope.cn/models/damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch/summary) | CNCeleb (1,200 hours)  |   17.5M    |    3465    |    Xvector, speaker verification, Chinese   |
 | [Xvector](https://www.modelscope.cn/models/damo/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch/summary) | CallHome (60 hours) |    61M     |    6135    |   Xvector, speaker verification, English    |
 
-### Speaker diarization Models
+### Speaker Diarization Models
 
 |                                                    Model Name                                                    |    Training Data    | Parameters | Notes |
 |:----------------------------------------------------------------------------------------------------------------:|:-------------------:|:----------:|:------|
