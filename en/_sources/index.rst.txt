@@ -14,6 +14,7 @@ FunASR hopes to build a bridge between academic research and industrial applicat
    :caption: Installation
 
    ./installation.md
+   ./docker.md
 
 .. toctree::
    :maxdepth: 1
