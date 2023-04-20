@@ -137,9 +137,10 @@ The audio data is in streaming, the asr inference process is in offline.</p>
 <div class="section" id="for-the-server">
 <h2>For the Server<a class="headerlink" href="#for-the-server" title="Permalink to this headline"></a></h2>
 <p>Install the modelscope and funasr</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install <span class="s2">&quot;modelscope[audio_asr]&quot;</span> -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install -U modelscope funasr
+<span class="c1"># For the users in China, you could install with the command:</span>
+<span class="c1"># pip install -U modelscope funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple</span>
 git clone https://github.com/alibaba/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> FunASR
-pip install --editable ./
 </pre></div>
 </div>
 <p>Install the requirements for server</p>

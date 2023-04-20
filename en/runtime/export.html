@@ -151,7 +151,7 @@
 <div class="section" id="install-modelscope-and-funasr">
 <h3>Install modelscope and funasr<a class="headerlink" href="#install-modelscope-and-funasr" title="Permalink to this headline"></a></h3>
 <p>The installation is the same as <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/README.md#installation">funasr</a></p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip3 install torch torchaudio
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># pip3 install torch torchaudio</span>
 pip install -U modelscope funasr
 <span class="c1"># For the users in China, you could install with the command:</span>
 <span class="c1"># pip install -U modelscope funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple</span>
@@ -161,7 +161,7 @@ pip install -U modelscope funasr
 <div class="section" id="install-the-quantization-tools">
 <h3>Install the quantization tools<a class="headerlink" href="#install-the-quantization-tools" title="Permalink to this headline"></a></h3>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install torch-quant <span class="c1"># Optional, for torchscript quantization</span>
-pip install onnxruntime <span class="c1"># Optional, for onnx quantization</span>
+pip install onnx onnxruntime <span class="c1"># Optional, for onnx quantization</span>
 </pre></div>
 </div>
 </div>
