@@ -1,7 +1,8 @@
 from funasr.build_utils.build_asr_model import build_asr_model
-from funasr.build_utils.build_pretrain_model import build_pretrain_model
 from funasr.build_utils.build_lm_model import build_lm_model
+from funasr.build_utils.build_pretrain_model import build_pretrain_model
 from funasr.build_utils.build_punc_model import build_punc_model
+from funasr.build_utils.build_vad_model import build_vad_model
 
 
 def build_model(args):
