@@ -17,7 +17,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Speech Recognition" href="lm_pipeline.html" />
+    <link rel="next" title="Speaker Diarization" href="sd_pipeline.html" />
     <link rel="prev" title="Timestamp Prediction" href="tp_pipeline.html" /> 
 </head>
 
@@ -69,12 +69,10 @@
 <li class="toctree-l1"><a class="reference internal" href="tp_pipeline.html">Timestamp Prediction</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Speaker Verification</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#inference-with-pipeline">Inference with pipeline</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#quick-start">Quick start</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#inference-with-you-data">Inference with you data</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#inference-with-multi-threads-on-cpu">Inference with multi-threads on CPU</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#inference-with-multi-gpu">Inference with multi GPU</a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="#quick-start">Quick start</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#inference-with-you-data">Inference with you data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#inference-with-multi-threads-on-cpu">Inference with multi-threads on CPU</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#inference-with-multi-gpu">Inference with multi GPU</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#finetune-with-pipeline">Finetune with pipeline</a><ul>
@@ -85,7 +83,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#inference-with-your-finetuned-model">Inference with your finetuned model</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="lm_pipeline.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sd_pipeline.html">Speaker Diarization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lm_pipeline.html">Language Models</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Runtime</span></p>
 <ul>
@@ -97,9 +96,18 @@
 <li class="toctree-l1"><a class="reference internal" href="../runtime/grpc_cpp.html">Using funasr with grpc-cpp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../runtime/websocket_python.html">Using funasr with websocket</a></li>
 </ul>
+<p class="caption"><span class="caption-text">Benchmark and Leadboard</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../benchmark/benchmark_onnx.html">CPU Benchmark (ONNX)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmark/benchmark_libtorch.html">CPU Benchmark (Libtorch)</a></li>
+</ul>
 <p class="caption"><span class="caption-text">Papers</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../papers.html">Papers</a></li>
+</ul>
+<p class="caption"><span class="caption-text">FQA</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../FQA.html">FQA</a></li>
 </ul>
 
         </div>
@@ -132,15 +140,15 @@
 <h2>Inference with pipeline<a class="headerlink" href="#inference-with-pipeline" title="Permalink to this headline"></a></h2>
 <div class="section" id="quick-start">
 <h3>Quick start<a class="headerlink" href="#quick-start" title="Permalink to this headline"></a></h3>
+</div>
 <div class="section" id="inference-with-you-data">
-<h4>Inference with you data<a class="headerlink" href="#inference-with-you-data" title="Permalink to this headline"></a></h4>
+<h3>Inference with you data<a class="headerlink" href="#inference-with-you-data" title="Permalink to this headline"></a></h3>
 </div>
 <div class="section" id="inference-with-multi-threads-on-cpu">
-<h4>Inference with multi-threads on CPU<a class="headerlink" href="#inference-with-multi-threads-on-cpu" title="Permalink to this headline"></a></h4>
+<h3>Inference with multi-threads on CPU<a class="headerlink" href="#inference-with-multi-threads-on-cpu" title="Permalink to this headline"></a></h3>
 </div>
 <div class="section" id="inference-with-multi-gpu">
-<h4>Inference with multi GPU<a class="headerlink" href="#inference-with-multi-gpu" title="Permalink to this headline"></a></h4>
-</div>
+<h3>Inference with multi GPU<a class="headerlink" href="#inference-with-multi-gpu" title="Permalink to this headline"></a></h3>
 </div>
 </div>
 <div class="section" id="finetune-with-pipeline">
@@ -162,7 +170,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="tp_pipeline.html" class="btn btn-neutral float-left" title="Timestamp Prediction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="lm_pipeline.html" class="btn btn-neutral float-right" title="Speech Recognition" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="sd_pipeline.html" class="btn btn-neutral float-right" title="Speaker Diarization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

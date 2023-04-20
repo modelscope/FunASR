@@ -47,6 +47,7 @@ FunASR hopes to build a bridge between academic research and industrial applicat
    ./modescope_pipeline/punc_pipeline.md
    ./modescope_pipeline/tp_pipeline.md
    ./modescope_pipeline/sv_pipeline.md
+   ./modescope_pipeline/sd_pipeline.md
    ./modescope_pipeline/lm_pipeline.md
 
 .. toctree::
@@ -63,11 +64,22 @@ FunASR hopes to build a bridge between academic research and industrial applicat
 
 .. toctree::
    :maxdepth: 1
+   :caption: Benchmark and Leadboard
+
+   ./benchmark/benchmark_onnx.md
+   ./benchmark/benchmark_libtorch.md
+
+.. toctree::
+   :maxdepth: 1
    :caption: Papers
 
    ./papers.md
 
+.. toctree::
+   :maxdepth: 1
+   :caption: FQA
 
+   ./FQA.md
 
 
 Indices and tables

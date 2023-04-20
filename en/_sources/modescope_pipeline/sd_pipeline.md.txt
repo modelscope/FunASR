@@ -1,4 +1,4 @@
-# Timestamp Prediction
+# Speaker Diarization
 
 ## Inference with pipeline
 

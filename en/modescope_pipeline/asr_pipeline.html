@@ -66,11 +66,14 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Speech Recognition</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#inference">Inference</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#quick-start">Quick start</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#inference-with-you-data">Inference with you data</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#inference-with-multi-threads-on-cpu">Inference with multi-threads on CPU</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#inference-with-multi-gpu">Inference with multi GPU</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#paraformer-model">Paraformer model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#paraformer-online-model">Paraformer-online model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#uniasr-model">UniASR model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rnn-t-online-model">RNN-T-online model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api-reference">API-reference</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#inference-with-multi-thread-cpus-or-multi-gpus">Inference with multi-thread CPUs or multi GPUs</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#finetune-with-pipeline">Finetune with pipeline</a><ul>
@@ -85,7 +88,8 @@
 <li class="toctree-l1"><a class="reference internal" href="punc_pipeline.html">Punctuation Restoration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tp_pipeline.html">Timestamp Prediction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sv_pipeline.html">Speaker Verification</a></li>
-<li class="toctree-l1"><a class="reference internal" href="lm_pipeline.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sd_pipeline.html">Speaker Diarization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lm_pipeline.html">Language Models</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Runtime</span></p>
 <ul>
@@ -97,9 +101,18 @@
 <li class="toctree-l1"><a class="reference internal" href="../runtime/grpc_cpp.html">Using funasr with grpc-cpp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../runtime/websocket_python.html">Using funasr with websocket</a></li>
 </ul>
+<p class="caption"><span class="caption-text">Benchmark and Leadboard</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../benchmark/benchmark_onnx.html">CPU Benchmark (ONNX)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmark/benchmark_libtorch.html">CPU Benchmark (Libtorch)</a></li>
+</ul>
 <p class="caption"><span class="caption-text">Papers</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../papers.html">Papers</a></li>
+</ul>
+<p class="caption"><span class="caption-text">FQA</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../FQA.html">FQA</a></li>
 </ul>
 
         </div>
@@ -128,32 +141,237 @@
              
   <div class="section" id="speech-recognition">
 <h1>Speech Recognition<a class="headerlink" href="#speech-recognition" title="Permalink to this headline"></a></h1>
+<blockquote>
+<div><p><strong>Note</strong>:
+The modelscope pipeline supports all the models in <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope">model zoo</a> to inference and finetine. Here we take model of Paraformer and Paraformer-online as example to demonstrate the usage.</p>
+</div></blockquote>
 <div class="section" id="inference">
 <h2>Inference<a class="headerlink" href="#inference" title="Permalink to this headline"></a></h2>
 <div class="section" id="quick-start">
 <h3>Quick start<a class="headerlink" href="#quick-start" title="Permalink to this headline"></a></h3>
-<div class="section" id="inference-with-you-data">
-<h4>Inference with you data<a class="headerlink" href="#inference-with-you-data" title="Permalink to this headline"></a></h4>
+<div class="section" id="paraformer-model">
+<h4><a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary">Paraformer model</a><a class="headerlink" href="#paraformer-model" title="Permalink to this headline"></a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
+<span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
+
+<span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
+    <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">auto_speech_recognition</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">rec_result</span><span class="p">)</span>
+</pre></div>
 </div>
-<div class="section" id="inference-with-multi-threads-on-cpu">
-<h4>Inference with multi-threads on CPU<a class="headerlink" href="#inference-with-multi-threads-on-cpu" title="Permalink to this headline"></a></h4>
 </div>
-<div class="section" id="inference-with-multi-gpu">
-<h4>Inference with multi GPU<a class="headerlink" href="#inference-with-multi-gpu" title="Permalink to this headline"></a></h4>
+<div class="section" id="paraformer-online-model">
+<h4><a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8404-online/summary">Paraformer-online model</a><a class="headerlink" href="#paraformer-online-model" title="Permalink to this headline"></a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
+    <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">auto_speech_recognition</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8404-online&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="kn">import</span> <span class="nn">soundfile</span>
+<span class="n">speech</span><span class="p">,</span> <span class="n">sample_rate</span> <span class="o">=</span> <span class="n">soundfile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;example/asr_example.wav&quot;</span><span class="p">)</span>
+
+<span class="n">param_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;cache&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(),</span> <span class="s2">&quot;is_final&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+<span class="n">chunk_stride</span> <span class="o">=</span> <span class="mi">7680</span><span class="c1"># 480ms</span>
+<span class="c1"># first chunk, 480ms</span>
+<span class="n">speech_chunk</span> <span class="o">=</span> <span class="n">speech</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">chunk_stride</span><span class="p">]</span> 
+<span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="n">speech_chunk</span><span class="p">,</span> <span class="n">param_dict</span><span class="o">=</span><span class="n">param_dict</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">rec_result</span><span class="p">)</span>
+<span class="c1"># next chunk, 480ms</span>
+<span class="n">speech_chunk</span> <span class="o">=</span> <span class="n">speech</span><span class="p">[</span><span class="n">chunk_stride</span><span class="p">:</span><span class="n">chunk_stride</span><span class="o">+</span><span class="n">chunk_stride</span><span class="p">]</span>
+<span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="n">speech_chunk</span><span class="p">,</span> <span class="n">param_dict</span><span class="o">=</span><span class="n">param_dict</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">rec_result</span><span class="p">)</span>
+</pre></div>
 </div>
+<p>Full code of demo, please ref to <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/discussions/241">demo</a></p>
+</div>
+<div class="section" id="uniasr-model">
+<h4><a class="reference external" href="https://www.modelscope.cn/models/damo/speech_UniASR_asr_2pass-zh-cn-8k-common-vocab3445-pytorch-online/summary">UniASR model</a><a class="headerlink" href="#uniasr-model" title="Permalink to this headline"></a></h4>
+<p>There are three decoding mode for UniASR model(<code class="docutils literal notranslate"><span class="pre">fast</span></code>、<code class="docutils literal notranslate"><span class="pre">normal</span></code>、<code class="docutils literal notranslate"><span class="pre">offline</span></code>), for more model detailes, please refer to <a class="reference external" href="https://www.modelscope.cn/models/damo/speech_UniASR_asr_2pass-zh-cn-8k-common-vocab3445-pytorch-online/summary">docs</a></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">decoding_model</span> <span class="o">=</span> <span class="s2">&quot;fast&quot;</span> <span class="c1"># &quot;fast&quot;、&quot;normal&quot;、&quot;offline&quot;</span>
+<span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
+    <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">auto_speech_recognition</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_UniASR_asr_2pass-minnan-16k-common-vocab3825&#39;</span><span class="p">,</span>
+    <span class="n">param_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;decoding_model&quot;</span><span class="p">:</span> <span class="n">decoding_model</span><span class="p">})</span>
+
+<span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">rec_result</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The decoding mode of <code class="docutils literal notranslate"><span class="pre">fast</span></code> and <code class="docutils literal notranslate"><span class="pre">normal</span></code>
+Full code of demo, please ref to <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/discussions/151">demo</a></p>
+</div>
+<div class="section" id="rnn-t-online-model">
+<h4><a class="reference external" href="#">RNN-T-online model</a><a class="headerlink" href="#rnn-t-online-model" title="Permalink to this headline"></a></h4>
+<p>Undo</p>
+</div>
+<div class="section" id="api-reference">
+<h4>API-reference<a class="headerlink" href="#api-reference" title="Permalink to this headline"></a></h4>
+<div class="section" id="define-pipeline">
+<h5>define pipeline<a class="headerlink" href="#define-pipeline" title="Permalink to this headline"></a></h5>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">task</span></code>: <code class="docutils literal notranslate"><span class="pre">Tasks.auto_speech_recognition</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model</span></code>: model name in <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope">model zoo</a>, or model path in local disk</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ngpu</span></code>: 1 (Defalut), decoding on GPU. If ngpu=0, decoding on CPU</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ncpu</span></code>: 1 (Defalut), sets the number of threads used for intraop parallelism on CPU</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">output_dir</span></code>: None (Defalut), the output path of results if set</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>: 1 (Defalut), batch size when decoding</p></li>
+</ul>
+</div>
+<div class="section" id="infer-pipeline">
+<h5>infer pipeline<a class="headerlink" href="#infer-pipeline" title="Permalink to this headline"></a></h5>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">audio_in</span></code>: the input to decode, which could be:</p>
+<ul class="simple">
+<li><p>wav_path, <code class="docutils literal notranslate"><span class="pre">e.g.</span></code>: asr_example.wav,</p></li>
+<li><p>pcm_path, <code class="docutils literal notranslate"><span class="pre">e.g.</span></code>: asr_example.pcm,</p></li>
+<li><p>audio bytes stream, <code class="docutils literal notranslate"><span class="pre">e.g.</span></code>: bytes data from a microphone</p></li>
+<li><p>audio sample point，<code class="docutils literal notranslate"><span class="pre">e.g.</span></code>: <code class="docutils literal notranslate"><span class="pre">audio,</span> <span class="pre">rate</span> <span class="pre">=</span> <span class="pre">soundfile.read(&quot;asr_example_zh.wav&quot;)</span></code>, the dtype is numpy.ndarray or torch.Tensor</p></li>
+<li><p>wav.scp, kaldi style wav list (<code class="docutils literal notranslate"><span class="pre">wav_id</span> <span class="pre">\t</span> <span class="pre">wav_path``),</span> </code>e.g.`:</p></li>
+</ul>
+<div class="highlight-cat wav.scp notranslate"><div class="highlight"><pre><span></span>asr_example1  ./audios/asr_example1.wav
+asr_example2  ./audios/asr_example2.wav
+</pre></div>
+</div>
+<p>In this case of <code class="docutils literal notranslate"><span class="pre">wav.scp</span></code> input, <code class="docutils literal notranslate"><span class="pre">output_dir</span></code> must be set to save the output results</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">audio_fs</span></code>: audio sampling rate, only set when audio_in is pcm audio</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">output_dir</span></code>: None (Defalut), the output path of results if set</p></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="inference-with-multi-thread-cpus-or-multi-gpus">
+<h3>Inference with multi-thread CPUs or multi GPUs<a class="headerlink" href="#inference-with-multi-thread-cpus-or-multi-gpus" title="Permalink to this headline"></a></h3>
+<p>FunASR also offer recipes <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/TEMPLATE/infer.sh">infer.sh</a> to decode with multi-thread CPUs, or multi GPUs.</p>
+<ul class="simple">
+<li><p>Setting parameters in <code class="docutils literal notranslate"><span class="pre">infer.sh</span></code></p>
+<ul>
+<li><p><strong>model:</strong> # model name on ModelScope</p></li>
+<li><p><strong>data_dir:</strong> # the dataset dir needs to include <code class="docutils literal notranslate"><span class="pre">${data_dir}/wav.scp</span></code>. If <code class="docutils literal notranslate"><span class="pre">${data_dir}/text</span></code> is also exists, CER will be computed</p></li>
+<li><p><strong>output_dir:</strong> # result dir</p></li>
+<li><p><strong>batch_size:</strong> # batchsize of inference</p></li>
+<li><p><strong>gpu_inference:</strong> # whether to perform gpu decoding, set false for cpu decoding</p></li>
+<li><p><strong>gpuid_list:</strong> # set gpus, e.g., gpuid_list=”0,1”</p></li>
+<li><p><strong>njob:</strong> # the number of jobs for CPU decoding, if <code class="docutils literal notranslate"><span class="pre">gpu_inference</span></code>=false, use CPU decoding, please set <code class="docutils literal notranslate"><span class="pre">njob</span></code></p></li>
+</ul>
+</li>
+<li><p>Decode with multi GPUs:</p></li>
+</ul>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>    bash infer.sh <span class="se">\</span>
+    --model <span class="s2">&quot;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&quot;</span> <span class="se">\</span>
+    --data_dir <span class="s2">&quot;./data/test&quot;</span> <span class="se">\</span>
+    --output_dir <span class="s2">&quot;./results&quot;</span> <span class="se">\</span>
+    --batch_size <span class="m">64</span> <span class="se">\</span>
+    --gpu_inference <span class="nb">true</span> <span class="se">\</span>
+    --gpuid_list <span class="s2">&quot;0,1&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Decode with multi-thread CPUs:</p></li>
+</ul>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>    bash infer.sh <span class="se">\</span>
+    --model <span class="s2">&quot;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&quot;</span> <span class="se">\</span>
+    --data_dir <span class="s2">&quot;./data/test&quot;</span> <span class="se">\</span>
+    --output_dir <span class="s2">&quot;./results&quot;</span> <span class="se">\</span>
+    --gpu_inference <span class="nb">false</span> <span class="se">\</span>
+    --njob <span class="m">64</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Results</p></li>
+</ul>
+<p>The decoding results can be found in <code class="docutils literal notranslate"><span class="pre">$output_dir/1best_recog/text.cer</span></code>, which includes recognition results of each sample and the CER metric of the whole test set.</p>
+<p>If you decode the SpeechIO test sets, you can use textnorm with <code class="docutils literal notranslate"><span class="pre">stage</span></code>=3, and <code class="docutils literal notranslate"><span class="pre">DETAILS.txt</span></code>, <code class="docutils literal notranslate"><span class="pre">RESULTS.txt</span></code> record the results and CER after text normalization.</p>
 </div>
 </div>
 <div class="section" id="finetune-with-pipeline">
 <h2>Finetune with pipeline<a class="headerlink" href="#finetune-with-pipeline" title="Permalink to this headline"></a></h2>
 <div class="section" id="id1">
 <h3>Quick start<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h3>
+<p><a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/TEMPLATE/finetune.py">finetune.py</a></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">modelscope.metainfo</span> <span class="kn">import</span> <span class="n">Trainers</span>
+<span class="kn">from</span> <span class="nn">modelscope.trainers</span> <span class="kn">import</span> <span class="n">build_trainer</span>
+<span class="kn">from</span> <span class="nn">modelscope.msdatasets.audio.asr_dataset</span> <span class="kn">import</span> <span class="n">ASRDataset</span>
+
+<span class="k">def</span> <span class="nf">modelscope_finetune</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">output_dir</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># dataset split [&quot;train&quot;, &quot;validation&quot;]</span>
+    <span class="n">ds_dict</span> <span class="o">=</span> <span class="n">ASRDataset</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">data_path</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">&#39;speech_asr&#39;</span><span class="p">)</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+        <span class="n">data_dir</span><span class="o">=</span><span class="n">ds_dict</span><span class="p">,</span>
+        <span class="n">dataset_type</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">dataset_type</span><span class="p">,</span>
+        <span class="n">work_dir</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">output_dir</span><span class="p">,</span>
+        <span class="n">batch_bins</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">batch_bins</span><span class="p">,</span>
+        <span class="n">max_epoch</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">max_epoch</span><span class="p">,</span>
+        <span class="n">lr</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">lr</span><span class="p">)</span>
+    <span class="n">trainer</span> <span class="o">=</span> <span class="n">build_trainer</span><span class="p">(</span><span class="n">Trainers</span><span class="o">.</span><span class="n">speech_asr_trainer</span><span class="p">,</span> <span class="n">default_args</span><span class="o">=</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">funasr.utils.modelscope_param</span> <span class="kn">import</span> <span class="n">modelscope_args</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">modelscope_args</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">&quot;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&quot;</span><span class="p">)</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">output_dir</span> <span class="o">=</span> <span class="s2">&quot;./checkpoint&quot;</span>                      <span class="c1"># 模型保存路径</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">data_path</span> <span class="o">=</span> <span class="s2">&quot;speech_asr_aishell1_trainsets&quot;</span>      <span class="c1"># 数据路径，可以为modelscope中已上传数据，也可以是本地数据</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">dataset_type</span> <span class="o">=</span> <span class="s2">&quot;small&quot;</span>                           <span class="c1"># 小数据量设置small，若数据量大于1000小时，请使用large</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">batch_bins</span> <span class="o">=</span> <span class="mi">2000</span>                                <span class="c1"># batch size，如果dataset_type=&quot;small&quot;，batch_bins单位为fbank特征帧数，如果dataset_type=&quot;large&quot;，batch_bins单位为毫秒，</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">max_epoch</span> <span class="o">=</span> <span class="mi">50</span>                                   <span class="c1"># 最大训练轮数</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">lr</span> <span class="o">=</span> <span class="mf">0.00005</span>                                     <span class="c1"># 设置学习率</span>
+    
+    <span class="n">modelscope_finetune</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python finetune.py <span class="p">&amp;</span>&gt; log.txt <span class="p">&amp;</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="finetune-with-your-data">
 <h3>Finetune with your data<a class="headerlink" href="#finetune-with-your-data" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>Modify finetune training related parameters in <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/TEMPLATE/finetune.py">finetune.py</a></p>
+<ul>
+<li><p><strong>output_dir:</strong> # result dir</p></li>
+<li><p><strong>data_dir:</strong> # the dataset dir needs to include files: <code class="docutils literal notranslate"><span class="pre">train/wav.scp</span></code>, <code class="docutils literal notranslate"><span class="pre">train/text</span></code>; <code class="docutils literal notranslate"><span class="pre">validation/wav.scp</span></code>, <code class="docutils literal notranslate"><span class="pre">validation/text</span></code></p></li>
+<li><p><strong>dataset_type:</strong> # for dataset larger than 1000 hours, set as <code class="docutils literal notranslate"><span class="pre">large</span></code>, otherwise set as <code class="docutils literal notranslate"><span class="pre">small</span></code></p></li>
+<li><p><strong>batch_bins:</strong> # batch size. For dataset_type is <code class="docutils literal notranslate"><span class="pre">small</span></code>, <code class="docutils literal notranslate"><span class="pre">batch_bins</span></code> indicates the feature frames. For dataset_type is <code class="docutils literal notranslate"><span class="pre">large</span></code>, <code class="docutils literal notranslate"><span class="pre">batch_bins</span></code> indicates the duration in ms</p></li>
+<li><p><strong>max_epoch:</strong> # number of training epoch</p></li>
+<li><p><strong>lr:</strong> # learning rate</p></li>
+</ul>
+</li>
+<li><p>Then you can run the pipeline to finetune with:</p></li>
+</ul>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python finetune.py
+</pre></div>
+</div>
+<p>If you want finetune with multi-GPUs, you could:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nv">CUDA_VISIBLE_DEVICES</span><span class="o">=</span><span class="m">1</span>,2 python -m torch.distributed.launch --nproc_per_node <span class="m">2</span> finetune.py &gt; log.txt <span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span>
+</pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="inference-with-your-finetuned-model">
 <h2>Inference with your finetuned model<a class="headerlink" href="#inference-with-your-finetuned-model" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p>Modify inference related parameters in <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/TEMPLATE/infer_after_finetune.py">infer_after_finetune.py</a></p>
+<ul>
+<li><p><strong>modelscope_model_name: </strong> # model name on ModelScope</p></li>
+<li><p><strong>output_dir:</strong> # result dir</p></li>
+<li><p><strong>data_dir:</strong> # the dataset dir needs to include <code class="docutils literal notranslate"><span class="pre">test/wav.scp</span></code>. If <code class="docutils literal notranslate"><span class="pre">test/text</span></code> is also exists, CER will be computed</p></li>
+<li><p><strong>decoding_model_name:</strong> # set the checkpoint name for decoding, e.g., <code class="docutils literal notranslate"><span class="pre">valid.cer_ctc.ave.pb</span></code></p></li>
+<li><p><strong>batch_size:</strong> # batchsize of inference</p></li>
+</ul>
+</li>
+<li><p>Then you can run the pipeline to finetune with:</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    <span class="n">python</span> <span class="n">infer_after_finetune</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
 </div>
 </div>
 
