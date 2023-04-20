@@ -89,7 +89,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="%E8%B5%9B%E9%81%93%E8%AE%BE%E7%BD%AE%E4%B8%8E%E8%AF%84%E4%BC%B0.html">赛道设置与评估</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="%E8%B5%9B%E9%81%93%E8%AE%BE%E7%BD%AE%E4%B8%8E%E8%AF%84%E4%BC%B0.html#id2">说话人相关的语音识别</a></li>
+<li class="toctree-l2"><a class="reference internal" href="%E8%B5%9B%E9%81%93%E8%AE%BE%E7%BD%AE%E4%B8%8E%E8%AF%84%E4%BC%B0.html#id2">说话人相关的语音识别 (主赛道)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="%E8%B5%9B%E9%81%93%E8%AE%BE%E7%BD%AE%E4%B8%8E%E8%AF%84%E4%BC%B0.html#id3">评估方法</a></li>
 <li class="toctree-l2"><a class="reference internal" href="%E8%B5%9B%E9%81%93%E8%AE%BE%E7%BD%AE%E4%B8%8E%E8%AF%84%E4%BC%B0.html#id4">子赛道设置</a></li>
 </ul>
@@ -102,7 +102,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="%E8%A7%84%E5%88%99.html">竞赛规则</a></li>
 <li class="toctree-l1"><a class="reference internal" href="%E7%BB%84%E5%A7%94%E4%BC%9A.html">组委会</a></li>
-<li class="toctree-l1"><a class="reference internal" href="%E8%81%94%E7%B3%BB%E6%96%B9%E5%BC%8F.html">联系方式</a></li>
+<li class="toctree-l1"><a class="reference internal" href="%E8%81%94%E7%B3%BB%E6%96%B9%E5%BC%8F.html">Contact</a></li>
 </ul>
 
     
@@ -131,10 +131,10 @@
 </section>
 <section id="alimeeting">
 <h2>Alimeeting数据集介绍<a class="headerlink" href="#alimeeting" title="此标题的永久链接">¶</a></h2>
-<p>AliMeeting总共包含118.75小时的语音数据，包括104.75小时的训练集（Train）、4小时的验证集（Eval）和10小时的测试集（Test）。Train集，Eval集和Test集分别包含212场和8场会议，其中每场会议由多个说话人进行15到30分钟的讨论。Train，Eval和Test集中参与会议的总人数分别为456人和25人，并且参会的男女比例人数均衡。</p>
+<p>AliMeeting总共包含118.75小时的语音数据，包括104.75小时的训练集（Train）、4小时的验证集（Eval）和10小时的测试集（Test）。Train集和Eval集分别包含212场和8场会议，其中每场会议由多个说话人进行15到30分钟的讨论。Train和Eval集中参与会议的总人数分别为456人和25人，并且参会的男女比例人数均衡。</p>
 <p>该数据集收集于13个不同的会议室，按照大小规格分为小型、中型和大型三种，房间面积从8到55平方米不等。不同房间具有不同的布局和声学特性，每个房间的详细参数也将发送给参与者。会议场地的墙体材料类型包括水泥、玻璃等。会议场地的家具包括沙发、电视、黑板、风扇、空调、植物等。在录制过程中，麦克风阵列放置于桌上，多个说话人围坐在桌边进行自然对话。麦克风阵列离说话人距离约0.3到5.0米之间。所有说话人的母语均是汉语，并且说的都是普通话，没有浓重的口音。在会议录制期间可能会产生各种室内的噪音，包括键盘声、开门/关门声、风扇声、气泡声等。所有说话人在会议的录制期间均保持相同位置，不发生走动。训练集和验证集的说话人没有重复。图1展示了一个会议室的布局以及麦克风的拓扑结构。</p>
 <p><img alt="meeting room" src="_images/meeting_room.png" /></p>
-<p>每场会议的说话人数量从2到4人不等。同时为了覆盖各种内容的会议场景，我们选择了多种会议主题，包括医疗、教育、商业、组织管理、工业生产等不同内容的例会。Train集，Eval集和Test集的平均语音重叠率分别为42.27%，34.76%和42.8%。AliMeeting Train集，Eval集和Test集的详细信息见表1。表2显示了Train集,Eval集和Test集中不同发言者人数会议的语音重叠率和会议数量。</p>
+<p>每场会议的说话人数量从2到4人不等。同时为了覆盖各种内容的会议场景，我们选择了多种会议主题，包括医疗、教育、商业、组织管理、工业生产等不同内容的例会。Train集，Eval集和Test集的平均语音重叠率分别为42.27%和34.76%。AliMeeting Train集，Eval集和Test集的详细信息见表1。表2显示了Train集,Eval集和Test集中不同发言者人数会议的语音重叠率和会议数量。</p>
 <p><img alt="dataset detail" src="_images/dataset_detail.png" />
 Test-2023测试集由20场会议组成，这些会议是在与AliMeeting数据集相同的声学环境下录制的。Test-2023测试集中的每个会议环节由2到4个参与者组成并且与AliMeeting测试集的配置相似。</p>
 <p>我们还使用耳机麦克风记录了每个说话人的近场音频信号，并确保只转录对应说话人自己的语音。需要注意的是，麦克风阵列记录的远场音频和耳机麦克风记录的近场音频在时间上是同步的。每场会议的所有抄本均以TextGrid格式存储，内容包括会议的时长、说话人信息（说话人数量、说话人ID、性别等）、每个说话人的片段总数、每个片段的时间戳和转录内容。</p>
