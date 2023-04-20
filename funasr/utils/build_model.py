@@ -229,5 +229,5 @@ def build_model(args):
     ctc = CTC(
         odim=vocab_size, encoder_output_size=encoder.output_size(), **args.ctc_conf
     )
-
+    
     
