@@ -141,6 +141,7 @@ int main(int argc, char *argv[])
     printf("total_time_wav %ld ms.\n", (long)(total_length * 1000));
     printf("total_time_comput %ld ms.\n", total_time / 1000);
     printf("total_rtf %05lf .\n", (double)total_time/ (total_length*1000000));
+    printf("speedup %05lf .\n", 1.0/((double)total_time/ (total_length*1000000)));
 
     FunASRUninit(AsrHandle);
     return 0;
