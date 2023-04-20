@@ -11,6 +11,7 @@ from funasr.torch_utils.set_all_random_seed import set_all_random_seed
 from funasr.utils import config_argparse
 from funasr.utils.build_dataloader import build_dataloader
 from funasr.utils.build_distributed import build_distributed
+from funasr.utils.build_model import build_model
 from funasr.utils.build_optimizer import build_optimizer
 from funasr.utils.build_scheduler import build_scheduler
 from funasr.utils.prepare_data import prepare_data

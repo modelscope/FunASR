@@ -349,3 +349,5 @@ def build_asr_model(args):
 
     if args.init is not None:
         initialize(model, args.init)
+
+    return model
