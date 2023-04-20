@@ -194,18 +194,18 @@ The modelscope pipeline supports all the models in <a class="reference external"
 <div class="section" id="api-reference">
 <h4>API-reference<a class="headerlink" href="#api-reference" title="Permalink to this headline"></a></h4>
 <div class="section" id="define-pipeline">
-<h5>define pipeline<a class="headerlink" href="#define-pipeline" title="Permalink to this headline"></a></h5>
+<h5>Define pipeline<a class="headerlink" href="#define-pipeline" title="Permalink to this headline"></a></h5>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">task</span></code>: <code class="docutils literal notranslate"><span class="pre">Tasks.auto_speech_recognition</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">model</span></code>: model name in <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope">model zoo</a>, or model path in local disk</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ngpu</span></code>: 1 (Defalut), decoding on GPU. If ngpu=0, decoding on CPU</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ncpu</span></code>: 1 (Defalut), sets the number of threads used for intraop parallelism on CPU</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">output_dir</span></code>: None (Defalut), the output path of results if set</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>: 1 (Defalut), batch size when decoding</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ngpu</span></code>: <code class="docutils literal notranslate"><span class="pre">1</span></code> (Defalut), decoding on GPU. If ngpu=0, decoding on CPU</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ncpu</span></code>: <code class="docutils literal notranslate"><span class="pre">1</span></code> (Defalut), sets the number of threads used for intraop parallelism on CPU</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">output_dir</span></code>: <code class="docutils literal notranslate"><span class="pre">None</span></code> (Defalut), the output path of results if set</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>: <code class="docutils literal notranslate"><span class="pre">1</span></code> (Defalut), batch size when decoding</p></li>
 </ul>
 </div>
 <div class="section" id="infer-pipeline">
-<h5>infer pipeline<a class="headerlink" href="#infer-pipeline" title="Permalink to this headline"></a></h5>
+<h5>Infer pipeline<a class="headerlink" href="#infer-pipeline" title="Permalink to this headline"></a></h5>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">audio_in</span></code>: the input to decode, which could be:</p>
 <ul class="simple">
@@ -215,7 +215,7 @@ The modelscope pipeline supports all the models in <a class="reference external"
 <li><p>audio sample point，<code class="docutils literal notranslate"><span class="pre">e.g.</span></code>: <code class="docutils literal notranslate"><span class="pre">audio,</span> <span class="pre">rate</span> <span class="pre">=</span> <span class="pre">soundfile.read(&quot;asr_example_zh.wav&quot;)</span></code>, the dtype is numpy.ndarray or torch.Tensor</p></li>
 <li><p>wav.scp, kaldi style wav list (<code class="docutils literal notranslate"><span class="pre">wav_id</span> <span class="pre">\t</span> <span class="pre">wav_path``),</span> </code>e.g.`:</p></li>
 </ul>
-<div class="highlight-cat wav.scp notranslate"><div class="highlight"><pre><span></span>asr_example1  ./audios/asr_example1.wav
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>asr_example1  ./audios/asr_example1.wav
 asr_example2  ./audios/asr_example2.wav
 </pre></div>
 </div>
@@ -229,25 +229,28 @@ asr_example2  ./audios/asr_example2.wav
 </div>
 <div class="section" id="inference-with-multi-thread-cpus-or-multi-gpus">
 <h3>Inference with multi-thread CPUs or multi GPUs<a class="headerlink" href="#inference-with-multi-thread-cpus-or-multi-gpus" title="Permalink to this headline"></a></h3>
-<p>FunASR also offer recipes <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/TEMPLATE//infer.sh">infer.sh</a> to decode with multi-thread CPUs, or multi GPUs.</p>
+<p>FunASR also offer recipes <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/TEMPLATE/infer.sh">infer.sh</a> to decode with multi-thread CPUs, or multi GPUs.</p>
 <ul class="simple">
 <li><p>Setting parameters in <code class="docutils literal notranslate"><span class="pre">infer.sh</span></code></p>
 <ul>
-<li><p><strong>model:</strong> # model name on ModelScope</p></li>
-<li><p><strong>data_dir:</strong> # the dataset dir needs to include <code class="docutils literal notranslate"><span class="pre">${data_dir}/wav.scp</span></code>. If <code class="docutils literal notranslate"><span class="pre">${data_dir}/text</span></code> is also exists, CER will be computed</p></li>
-<li><p><strong>output_dir:</strong> # result dir</p></li>
-<li><p><strong>batch_size:</strong> # batchsize of inference</p></li>
-<li><p><strong>gpu_inference:</strong> # whether to perform gpu decoding, set false for cpu decoding</p></li>
-<li><p><strong>gpuid_list:</strong> # set gpus, e.g., gpuid_list=”0,1”</p></li>
-<li><p><strong>njob:</strong> # the number of jobs for CPU decoding, if <code class="docutils literal notranslate"><span class="pre">gpu_inference</span></code>=false, use CPU decoding, please set <code class="docutils literal notranslate"><span class="pre">njob</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model</span></code>: model name in <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope">model zoo</a>, or model path in local disk</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">data_dir</span></code>: the dataset dir needs to include <code class="docutils literal notranslate"><span class="pre">wav.scp</span></code>. If <code class="docutils literal notranslate"><span class="pre">${data_dir}/text</span></code> is also exists, CER will be computed</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">output_dir</span></code>: output dir of the recognition results</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>: <code class="docutils literal notranslate"><span class="pre">64</span></code> (Default), batch size of inference on gpu</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gpu_inference</span></code>: <code class="docutils literal notranslate"><span class="pre">true</span></code> (Default), whether to perform gpu decoding, set false for CPU inference</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gpuid_list</span></code>: <code class="docutils literal notranslate"><span class="pre">0,1</span></code> (Default), which gpu_ids are used to infer</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">njob</span></code>: only used for CPU inference (<code class="docutils literal notranslate"><span class="pre">gpu_inference</span></code>=<code class="docutils literal notranslate"><span class="pre">false</span></code>), <code class="docutils literal notranslate"><span class="pre">64</span></code> (Default), the number of jobs for CPU decoding</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">checkpoint_dir</span></code>: only used for infer finetuned models, the path dir of finetuned models</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">checkpoint_name</span></code>: only used for infer finetuned models, <code class="docutils literal notranslate"><span class="pre">valid.cer_ctc.ave.pb</span></code> (Default), which checkpoint is used to infer</p></li>
 </ul>
 </li>
 <li><p>Decode with multi GPUs:</p></li>
 </ul>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>    bash infer.sh <span class="se">\</span>
-    --model <span class="s2">&quot;damo/speech_fsmn_vad_zh-cn-16k-common-pytorch&quot;</span> <span class="se">\</span>
+    --model <span class="s2">&quot;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&quot;</span> <span class="se">\</span>
     --data_dir <span class="s2">&quot;./data/test&quot;</span> <span class="se">\</span>
     --output_dir <span class="s2">&quot;./results&quot;</span> <span class="se">\</span>
+    --batch_size <span class="m">64</span> <span class="se">\</span>
     --gpu_inference <span class="nb">true</span> <span class="se">\</span>
     --gpuid_list <span class="s2">&quot;0,1&quot;</span>
 </pre></div>
@@ -256,18 +259,13 @@ asr_example2  ./audios/asr_example2.wav
 <li><p>Decode with multi-thread CPUs:</p></li>
 </ul>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>    bash infer.sh <span class="se">\</span>
-    --model <span class="s2">&quot;damo/speech_fsmn_vad_zh-cn-16k-common-pytorch&quot;</span> <span class="se">\</span>
+    --model <span class="s2">&quot;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&quot;</span> <span class="se">\</span>
     --data_dir <span class="s2">&quot;./data/test&quot;</span> <span class="se">\</span>
     --output_dir <span class="s2">&quot;./results&quot;</span> <span class="se">\</span>
     --gpu_inference <span class="nb">false</span> <span class="se">\</span>
     --njob <span class="m">64</span>
 </pre></div>
 </div>
-<ul class="simple">
-<li><p>Results</p></li>
-</ul>
-<p>The decoding results can be found in <code class="docutils literal notranslate"><span class="pre">$output_dir/1best_recog/text.cer</span></code>, which includes recognition results of each sample and the CER metric of the whole test set.</p>
-<p>If you decode the SpeechIO test sets, you can use textnorm with <code class="docutils literal notranslate"><span class="pre">stage</span></code>=3, and <code class="docutils literal notranslate"><span class="pre">DETAILS.txt</span></code>, <code class="docutils literal notranslate"><span class="pre">RESULTS.txt</span></code> record the results and CER after text normalization.</p>
 </div>
 </div>
 <div class="section" id="finetune-with-pipeline">
