@@ -82,7 +82,7 @@ Undo
 - `output_dir`: None (Defalut), the output path of results if set
 
 ### Inference with multi-thread CPUs or multi GPUs
-FunASR also offer recipes [run.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/paraformer/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/infer.sh) to decode with multi-thread CPUs, or multi GPUs.
+FunASR also offer recipes [infer.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/TEMPLATE/infer.sh) to decode with multi-thread CPUs, or multi GPUs.
 
 - Setting parameters in `infer.sh`
     - <strong>model:</strong> # model name on ModelScope
@@ -123,7 +123,7 @@ If you decode the SpeechIO test sets, you can use textnorm with `stage`=3, and `
 ## Finetune with pipeline
 
 ### Quick start
-[finetune.py](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/paraformer/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/finetune.py)
+[finetune.py](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/TEMPLATE/finetune.py)
 ```python
 import os
 from modelscope.metainfo import Trainers
@@ -166,7 +166,7 @@ python finetune.py &> log.txt &
 
 ### Finetune with your data
 
-- Modify finetune training related parameters in [finetune.py](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/paraformer/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/finetune.py)
+- Modify finetune training related parameters in [finetune.py](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/TEMPLATE/finetune.py)
     - <strong>output_dir:</strong> # result dir
     - <strong>data_dir:</strong> # the dataset dir needs to include files: `train/wav.scp`, `train/text`; `validation/wav.scp`, `validation/text`
     - <strong>dataset_type:</strong> # for dataset larger than 1000 hours, set as `large`, otherwise set as `small`
@@ -183,7 +183,7 @@ If you want finetune with multi-GPUs, you could:
 CUDA_VISIBLE_DEVICES=1,2 python -m torch.distributed.launch --nproc_per_node 2 finetune.py > log.txt 2>&1
 ```
 ## Inference with your finetuned model
-- Modify inference related parameters in `infer_after_finetune.py`
+- Modify inference related parameters in [infer_after_finetune.py](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/TEMPLATE/infer_after_finetune.py)
     - <strong>modelscope_model_name: </strong> # model name on ModelScope
     - <strong>output_dir:</strong> # result dir
     - <strong>data_dir:</strong> # the dataset dir needs to include `test/wav.scp`. If `test/text` is also exists, CER will be computed
