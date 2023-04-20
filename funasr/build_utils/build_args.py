@@ -74,6 +74,13 @@ def build_args(args):
             help="The model file of sentencepiece",
         )
         parser.add_argument(
+            "--cleaner",
+            type=str_or_none,
+            choices=[None, "tacotron", "jaconv", "vietnamese"],
+            default=None,
+            help="Apply text cleaning",
+        )
+        parser.add_argument(
             "--cmvn_file",
             type=str_or_none,
             default=None,
@@ -134,6 +141,52 @@ def build_args(args):
             type=float,
             default=0.0,
             help="weights for additional loss terms (not first one)",
+        )
+    elif args.task_name == "lm":
+        from funasr.build_utils.build_lm_model import class_choices_list
+        for class_choices in class_choices_list:
+            # Append --<name> and --<name>_conf.
+            # e.g. --encoder and --encoder_conf
+            class_choices.add_arguments(parser)
+        parser.add_argument(
+            "--token_list",
+            type=str_or_none,
+            default=None,
+            help="A text mapping int-id to token",
+        )
+        parser.add_argument(
+            "--init",
+            type=lambda x: str_or_none(x.lower()),
+            default=None,
+            help="The initialization method",
+            choices=[
+                "chainer",
+                "xavier_uniform",
+                "xavier_normal",
+                "kaiming_uniform",
+                "kaiming_normal",
+                None,
+            ],
+        )
+        parser.add_argument(
+            "--token_type",
+            type=str,
+            default="bpe",
+            choices=["bpe", "char", "word"],
+            help="",
+        )
+        parser.add_argument(
+            "--bpemodel",
+            type=str_or_none,
+            default=None,
+            help="The model file fo sentencepiece",
+        )
+        parser.add_argument(
+            "--cleaner",
+            type=str_or_none,
+            choices=[None, "tacotron", "jaconv", "vietnamese"],
+            default=None,
+            help="Apply text cleaning",
         )
     else:
         raise NotImplementedError("Not supported task: {}".format(args.task_name))
