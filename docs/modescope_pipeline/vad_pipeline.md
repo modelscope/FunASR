@@ -42,22 +42,23 @@ print(rec_result)
 Full code of demo, please ref to [demo](https://github.com/alibaba-damo-academy/FunASR/discussions/236)
 
 
+
 #### API-reference
-##### define pipeline
+##### Define pipeline
 - `task`: `Tasks.auto_speech_recognition`
 - `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
-- `ngpu`: 1 (Defalut), decoding on GPU. If ngpu=0, decoding on CPU
-- `ncpu`: 1 (Defalut), sets the number of threads used for intraop parallelism on CPU 
-- `output_dir`: None (Defalut), the output path of results if set
-- `batch_size`: 1 (Defalut), batch size when decoding
-##### infer pipeline
+- `ngpu`: `1` (Defalut), decoding on GPU. If ngpu=0, decoding on CPU
+- `ncpu`: `1` (Defalut), sets the number of threads used for intraop parallelism on CPU 
+- `output_dir`: `None` (Defalut), the output path of results if set
+- `batch_size`: `1` (Defalut), batch size when decoding
+##### Infer pipeline
 - `audio_in`: the input to decode, which could be: 
   - wav_path, `e.g.`: asr_example.wav,
   - pcm_path, `e.g.`: asr_example.pcm, 
   - audio bytes stream, `e.g.`: bytes data from a microphone
   - audio sample point，`e.g.`: `audio, rate = soundfile.read("asr_example_zh.wav")`, the dtype is numpy.ndarray or torch.Tensor
   - wav.scp, kaldi style wav list (`wav_id \t wav_path``), `e.g.`: 
-  ```cat wav.scp
+  ```text
   asr_example1  ./audios/asr_example1.wav
   asr_example2  ./audios/asr_example2.wav
   ```
@@ -66,41 +67,38 @@ Full code of demo, please ref to [demo](https://github.com/alibaba-damo-academy/
 - `output_dir`: None (Defalut), the output path of results if set
 
 ### Inference with multi-thread CPUs or multi GPUs
-FunASR also offer recipes [infer.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/TEMPLATE//infer.sh) to decode with multi-thread CPUs, or multi GPUs.
+FunASR also offer recipes [infer.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/TEMPLATE/infer.sh) to decode with multi-thread CPUs, or multi GPUs.
 
 - Setting parameters in `infer.sh`
-    - <strong>model:</strong> # model name on ModelScope
-    - <strong>data_dir:</strong> # the dataset dir needs to include `${data_dir}/wav.scp`. If `${data_dir}/text` is also exists, CER will be computed
-    - <strong>output_dir:</strong> # result dir
-    - <strong>batch_size:</strong> # batchsize of inference
-    - <strong>gpu_inference:</strong> # whether to perform gpu decoding, set false for cpu decoding
-    - <strong>gpuid_list:</strong> # set gpus, e.g., gpuid_list="0,1"
-    - <strong>njob:</strong> # the number of jobs for CPU decoding, if `gpu_inference`=false, use CPU decoding, please set `njob`
+    - `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
+    - `data_dir`: the dataset dir needs to include `wav.scp`. If `${data_dir}/text` is also exists, CER will be computed
+    - `output_dir`: output dir of the recognition results
+    - `batch_size`: `64` (Default), batch size of inference on gpu
+    - `gpu_inference`: `true` (Default), whether to perform gpu decoding, set false for CPU inference
+    - `gpuid_list`: `0,1` (Default), which gpu_ids are used to infer
+    - `njob`: only used for CPU inference (`gpu_inference`=`false`), `64` (Default), the number of jobs for CPU decoding
+    - `checkpoint_dir`: only used for infer finetuned models, the path dir of finetuned models
+    - `checkpoint_name`: only used for infer finetuned models, `valid.cer_ctc.ave.pb` (Default), which checkpoint is used to infer
 
 - Decode with multi GPUs:
 ```shell
     bash infer.sh \
-    --model "damo/speech_fsmn_vad_zh-cn-16k-common-pytorch" \
+    --model "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch" \
     --data_dir "./data/test" \
     --output_dir "./results" \
+    --batch_size 64 \
     --gpu_inference true \
     --gpuid_list "0,1"
 ```
 - Decode with multi-thread CPUs:
 ```shell
     bash infer.sh \
-    --model "damo/speech_fsmn_vad_zh-cn-16k-common-pytorch" \
+    --model "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch" \
     --data_dir "./data/test" \
     --output_dir "./results" \
     --gpu_inference false \
     --njob 64
 ```
-
-- Results
-
-The decoding results can be found in `$output_dir/1best_recog/text.cer`, which includes recognition results of each sample and the CER metric of the whole test set.
-
-If you decode the SpeechIO test sets, you can use textnorm with `stage`=3, and `DETAILS.txt`, `RESULTS.txt` record the results and CER after text normalization.
 
 
 ## Finetune with pipeline
