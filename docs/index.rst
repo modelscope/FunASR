@@ -22,13 +22,13 @@ Overview
 
 .. toctree::
    :maxdepth: 1
-   :caption: Academic Recipe
+   :caption: Academic Egs
 
-   ./recipe/asr_recipe.md
-   ./recipe/punc_recipe.md
-   ./recipe/vad_recipe.md
-   ./recipe/sv_recipe.md
-   ./recipe/sd_recipe.md
+   ./academic_recipe/asr_recipe.md
+   ./academic_recipe/punc_recipe.md
+   ./academic_recipe/vad_recipe.md
+   ./academic_recipe/sv_recipe.md
+   ./academic_recipe/sd_recipe.md
 
 
 .. toctree::
@@ -40,7 +40,7 @@ Overview
 
 .. toctree::
    :maxdepth: 1
-   :caption: ModelScope pipeline
+   :caption: ModelScope Egs
 
    ./modescope_pipeline/quick_start.md
    ./modescope_pipeline/asr_pipeline.md
@@ -52,13 +52,13 @@ Overview
 
 .. toctree::
    :maxdepth: 1
-   :caption: Huggingface pipeline
+   :caption: Huggingface Egs
 
    Undo
 
 .. toctree::
    :maxdepth: 1
-   :caption: funasr library
+   :caption: Funasr Library
 
    ./build_task.md
 
