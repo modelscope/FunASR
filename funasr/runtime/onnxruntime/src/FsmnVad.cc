@@ -246,7 +246,7 @@ FsmnVad::infer(const std::vector<float> &waves) {
 
     E2EVadModel vad_scorer = E2EVadModel();
     std::vector<std::vector<int>> vad_segments;
-    vad_segments = vad_scorer(vad_probs, waves, true, vad_silence_duration_, vad_max_len_,
+    vad_segments = vad_scorer(vad_probs, waves, true, false, vad_silence_duration_, vad_max_len_,
                               vad_speech_noise_thres_, vad_sample_rate_);
     return vad_segments;
 
