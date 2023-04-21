@@ -187,13 +187,13 @@ Audio::~Audio()
 
 void Audio::disp()
 {
-    printf("Audio time is %f s. len is %d\n", (float)speech_len / model_sample_rate,
+    printf("Audio time is %f s. len is %d\n", (float)speech_len / MODEL_SAMPLE_RATE,
            speech_len);
 }
 
 float Audio::get_time_len()
 {
-    return (float)speech_len / model_sample_rate;
+    return (float)speech_len / MODEL_SAMPLE_RATE;
 }
 
 void Audio::wavResample(int32_t sampling_rate, const float *waveform,
@@ -203,9 +203,9 @@ void Audio::wavResample(int32_t sampling_rate, const float *waveform,
           "Creating a resampler:\n"
           "   in_sample_rate: %d\n"
           "   output_sample_rate: %d\n",
-          sampling_rate, static_cast<int32_t>(model_sample_rate));
+          sampling_rate, static_cast<int32_t>(MODEL_SAMPLE_RATE));
     float min_freq =
-        std::min<int32_t>(sampling_rate, model_sample_rate);
+        std::min<int32_t>(sampling_rate, MODEL_SAMPLE_RATE);
     float lowpass_cutoff = 0.99 * 0.5 * min_freq;
 
     int32_t lowpass_filter_width = 6;
@@ -213,7 +213,7 @@ void Audio::wavResample(int32_t sampling_rate, const float *waveform,
     //auto resampler = new LinearResample(
     //      sampling_rate, model_sample_rate, lowpass_cutoff, lowpass_filter_width);
     auto resampler = std::make_unique<LinearResample>(
-          sampling_rate, model_sample_rate, lowpass_cutoff, lowpass_filter_width);
+          sampling_rate, MODEL_SAMPLE_RATE, lowpass_cutoff, lowpass_filter_width);
     std::vector<float> samples;
     resampler->Resample(waveform, n, true, &samples);
     //reset speech_data
@@ -270,7 +270,7 @@ bool Audio::loadwav(const char *filename, int32_t* sampling_rate)
         }
 
         //resample
-        if(*sampling_rate != model_sample_rate){
+        if(*sampling_rate != MODEL_SAMPLE_RATE){
             wavResample(*sampling_rate, speech_data, speech_len);
         }
 
@@ -317,7 +317,7 @@ bool Audio::loadwav(const char* buf, int nFileLen, int32_t* sampling_rate)
         }
         
         //resample
-        if(*sampling_rate != model_sample_rate){
+        if(*sampling_rate != MODEL_SAMPLE_RATE){
             wavResample(*sampling_rate, speech_data, speech_len);
         }
 
@@ -360,7 +360,7 @@ bool Audio::loadpcmwav(const char* buf, int nBufLen, int32_t* sampling_rate)
         }
         
         //resample
-        if(*sampling_rate != model_sample_rate){
+        if(*sampling_rate != MODEL_SAMPLE_RATE){
             wavResample(*sampling_rate, speech_data, speech_len);
         }
 
@@ -411,7 +411,7 @@ bool Audio::loadpcmwav(const char* filename, int32_t* sampling_rate)
         }
 
         //resample
-        if(*sampling_rate != model_sample_rate){
+        if(*sampling_rate != MODEL_SAMPLE_RATE){
             wavResample(*sampling_rate, speech_data, speech_len);
         }
 
@@ -511,7 +511,7 @@ void Audio::split(Model* pRecogObj)
 
     std::vector<float> pcm_data(speech_data, speech_data+sp_len);
     vector<std::vector<int>> vad_segments = pRecogObj->vad_seg(pcm_data);
-    int seg_sample = model_sample_rate/1000;
+    int seg_sample = MODEL_SAMPLE_RATE/1000;
     for(vector<int> segment:vad_segments)
     {
         frame = new AudioFrame();

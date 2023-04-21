@@ -1,6 +1,5 @@
 #pragma once 
 
-
 typedef struct
 {
     std::string msg;
@@ -10,8 +9,6 @@ typedef struct
 
 #ifdef _WIN32
 #include <codecvt>
-
-
 
 inline std::wstring string2wstring(const std::string& str, const std::string& locale)
 {
@@ -28,8 +25,6 @@ inline std::wstring  strToWstr(std::string str) {
 }
 
 #endif
-
-
 
 inline void getInputName(Ort::Session* session, string& inputName,int nIndex=0) {
     size_t numInputNodes = session->GetInputCount();

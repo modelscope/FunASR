@@ -1,6 +1,5 @@
 #pragma once 
 // system 
-
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,8 +15,6 @@
 #include <string>
 #include <math.h>
 #include <numeric>
-
-
 #include <cstring>
 
 using namespace std;
@@ -27,27 +24,19 @@ using namespace std;
 #include "kaldi-native-fbank/csrc/feature-fbank.h"
 #include "kaldi-native-fbank/csrc/online-feature.h"
 
-
 // mine
-
+#include "ComDefine.h"
 #include "commonfunc.h"
-#include <ComDefine.h>
 #include "predefine_coe.h"
 #include "FsmnVad.h"
-
-#include <ComDefine.h>
-//#include "alignedmem.h"
 #include "Vocab.h"
+#include "CommonStruct.h"
+#include "Audio.h"
 #include "Tensor.h"
 #include "util.h"
-#include "CommonStruct.h"
-#include "FeatureQueue.h"
-#include "SpeechWrap.h"
-#include <Audio.h>
 #include "resample.h"
 #include "Model.h"
 #include "paraformer_onnx.h"
 #include "libfunasrapi.h"
-
 
 using namespace paraformer;

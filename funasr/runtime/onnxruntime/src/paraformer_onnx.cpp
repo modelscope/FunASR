@@ -14,7 +14,7 @@ ModelImp::ModelImp(const char* path,int nNumThread, bool quantize, bool use_vad)
         string vad_path = pathAppend(path, "vad_model.onnx");
         string mvn_path = pathAppend(path, "vad.mvn");
         vadHandle = make_unique<FsmnVad>();
-        vadHandle->init_vad(vad_path, mvn_path, model_sample_rate, 800, 15000, 0.9);
+        vadHandle->init_vad(vad_path, mvn_path, MODEL_SAMPLE_RATE, VAD_MAX_LEN, VAD_SILENCE_DYRATION, VAD_SPEECH_NOISE_THRES);
     }
 
     if(quantize)
@@ -29,7 +29,7 @@ ModelImp::ModelImp(const char* path,int nNumThread, bool quantize, bool use_vad)
     // knf options
     fbank_opts.frame_opts.dither = 0;
     fbank_opts.mel_opts.num_bins = 80;
-    fbank_opts.frame_opts.samp_freq = model_sample_rate;
+    fbank_opts.frame_opts.samp_freq = MODEL_SAMPLE_RATE;
     fbank_opts.frame_opts.window_type = "hamming";
     fbank_opts.frame_opts.frame_shift_ms = 10;
     fbank_opts.frame_opts.frame_length_ms = 25;
@@ -191,7 +191,7 @@ string ModelImp::forward(float* din, int len, int flag)
 {
 
     int32_t in_feat_dim = fbank_opts.mel_opts.num_bins;
-    std::vector<float> wav_feats = FbankKaldi(model_sample_rate, din, len);
+    std::vector<float> wav_feats = FbankKaldi(MODEL_SAMPLE_RATE, din, len);
     wav_feats = ApplyLFR(wav_feats);
     ApplyCMVN(&wav_feats);
 

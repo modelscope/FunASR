@@ -2,14 +2,10 @@
 #ifndef AUDIO_H
 #define AUDIO_H
 
-#include <ComDefine.h>
 #include <queue>
 #include <stdint.h>
 #include "Model.h"
 
-#ifndef model_sample_rate
-#define model_sample_rate 16000
-#endif
 #ifndef WAV_HEADER_SIZE
 #define WAV_HEADER_SIZE 44
 #endif

@@ -6,9 +6,6 @@
 #endif
 
 #include "libfunasrapi.h"
-
-#include <iostream>
-#include <fstream>
 #include <sstream>
 using namespace std;
 
@@ -41,12 +38,10 @@ int main(int argc, char *argv[])
     printf("Model initialization takes %lfs.\n", (double)modle_init_micros / 1000000);
 
     gettimeofday(&start, NULL);
-    float snippet_time = 0.0f;
-
     FUNASR_RESULT Result=FunASRRecogFile(AsrHanlde, argv[2], RASR_NONE, NULL, use_vad);
-
     gettimeofday(&end, NULL);
-   
+
+    float snippet_time = 0.0f;
     if (Result)
     {
         string msg = FunASRGetResult(Result, 0);
@@ -57,7 +52,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        cout <<"no return data!";
+        printf("no return data!");
     }
  
     printf("Audio length %lfs.\n", (double)snippet_time);
