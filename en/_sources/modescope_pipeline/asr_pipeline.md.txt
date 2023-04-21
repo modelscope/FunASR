@@ -186,7 +186,7 @@ CUDA_VISIBLE_DEVICES=1,2 python -m torch.distributed.launch --nproc_per_node 2 f
 ```
 ## Inference with your finetuned model
 
-- Setting parameters in [infer.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/TEMPLATE/infer.sh) is the same with [docs](https://github.com/alibaba-damo-academy/FunASR/tree/main/egs_modelscope/asr/TEMPLATE#inference-with-multi-thread-cpus-or-multi-gpus) 
+- Setting parameters in [infer.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/TEMPLATE/infer.sh) is the same with [docs](https://github.com/alibaba-damo-academy/FunASR/tree/main/egs_modelscope/asr/TEMPLATE#inference-with-multi-thread-cpus-or-multi-gpus), `model` is the model name from modelscope, which you finetuned.
 
 - Decode with multi GPUs:
 ```shell
