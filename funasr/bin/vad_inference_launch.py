@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+# Copyright ESPnet (https://github.com/espnet/espnet). All Rights Reserved.
+#  Apache 2.0  (http://www.apache.org/licenses/LICENSE-2.0)
+
+import torch
+torch.set_num_threads(1)
 
 import argparse
 import logging
@@ -109,8 +114,8 @@ def inference_launch(mode, **kwargs):
         from funasr.bin.vad_inference import inference_modelscope
         return inference_modelscope(**kwargs)
     elif mode == "online":
-        from funasr.bin.vad_inference_online import inference_modelscope
-        return inference_modelscope(**kwargs)
+        from funasr.bin.vad_inference import inference_modelscope_online
+        return inference_modelscope_online(**kwargs)
     else:
         logging.info("Unknown decoding mode: {}".format(mode))
         return None
