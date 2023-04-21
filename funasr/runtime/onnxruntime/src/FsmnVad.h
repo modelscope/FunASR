@@ -1,3 +1,4 @@
+// Collaborators: zhuzizyf(China Telecom Shanghai)
 
 #ifndef VAD_SERVER_FSMNVAD_H
 #define VAD_SERVER_FSMNVAD_H
