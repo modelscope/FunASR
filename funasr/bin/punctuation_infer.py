@@ -61,7 +61,6 @@ class Text2Punc:
             text_name="text",
             non_linguistic_symbols=train_args.non_linguistic_symbols,
         )
-        print("start decoding!!!")
 
     @torch.no_grad()
     def __call__(self, text: Union[list, str], split_size=20):
@@ -223,7 +222,6 @@ def inference_modelscope(
             result, _ = text2punc(line)
             item = {'key': key, 'value': result}
             results.append(item)
-            print(results)
             return results
 
         for inference_text, _, _ in data_path_and_name_and_type:
