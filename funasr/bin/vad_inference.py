@@ -109,7 +109,7 @@ class Speech2VadSegment:
             fbanks, fbanks_len = self.frontend.forward_fbank(speech, speech_lengths)
             feats, feats_len = self.frontend.forward_lfr_cmvn(fbanks, fbanks_len)
             fbanks = to_device(fbanks, device=self.device)
-            # feats = to_device(feats, device=self.device)
+            feats = to_device(feats, device=self.device)
             feats_len = feats_len.int()
         else:
             raise Exception("Need to extract feats first, please configure frontend configuration")
@@ -131,7 +131,7 @@ class Speech2VadSegment:
                 "in_cache": in_cache
             }
             # a. To device
-            batch = to_device(batch, device=self.device)
+            #batch = to_device(batch, device=self.device)
             segments_part, in_cache = self.vad_model(**batch)
             if segments_part:
                 for batch_num in range(0, self.batch_size):
