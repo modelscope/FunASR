@@ -90,7 +90,7 @@
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">赛道设置与评估</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#id2">说话人相关的语音识别 (主赛道)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2">说话人相关的语音识别</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id3">评估方法</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id4">子赛道设置</a></li>
 </ul>
@@ -103,7 +103,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="%E8%A7%84%E5%88%99.html">竞赛规则</a></li>
 <li class="toctree-l1"><a class="reference internal" href="%E7%BB%84%E5%A7%94%E4%BC%9A.html">组委会</a></li>
-<li class="toctree-l1"><a class="reference internal" href="%E8%81%94%E7%B3%BB%E6%96%B9%E5%BC%8F.html">Contact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="%E8%81%94%E7%B3%BB%E6%96%B9%E5%BC%8F.html">联系方式</a></li>
 </ul>
 
     
@@ -127,8 +127,8 @@
   <section id="id1">
 <h1>赛道设置与评估<a class="headerlink" href="#id1" title="此标题的永久链接">¶</a></h1>
 <section id="id2">
-<h2>说话人相关的语音识别 (主赛道)<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
-<p>说话人相关的ASR任务需要从重叠的语音中识别每个说话人的语音，并为识别内容分配一个说话人标签。图2展示了说话人相关语音识别任务和多说话人语音识别任务的主要区别。在本次竞赛中AliMeeting、Aishell4和Cn-Celeb数据集可作为受限数据源。在M2MeT挑战赛中使用的AliMeeting数据集包含训练、评估和测试集，在M2MET2.0可以在训练和评估中使用。此外，一个包含约10小时会议数据的新的Test-2023集将根据赛程安排发布并用于挑战赛的评分和排名。值得注意的是，组织者将不提供耳机的近场音频、转录以及真实时间戳。主办方将不再提供每个说话人的真实时间戳，而是在Test-2023集上提供包含多个说话人的片段。这些片段可以通过一个简单的vad模型获得。</p>
+<h2>说话人相关的语音识别<a class="headerlink" href="#id2" title="此标题的永久链接">¶</a></h2>
+<p>说话人相关的ASR任务需要从重叠的语音中识别每个说话人的语音，并为识别内容分配一个说话人标签。图2展示了说话人相关语音识别任务和多说话人语音识别任务的主要区别。在本次竞赛中AliMeeting、Aishell4和Cn-Celeb数据集可作为受限数据源。在M2MeT挑战赛中使用的AliMeeting数据集包含训练、评估和测试集，在M2MET2.0可以在训练和评估中使用。此外，一个包含约10小时会议数据的新的Test-2023集将根据赛程安排发布并用于挑战赛的评分和排名。值得注意的是，对于Test-2023测试集，主办方将不再提供耳机的近场音频、转录以及真实时间戳。而是提供可以通过一个简单的VAD模型得到的包含多个说话人的片段。</p>
 <p><img alt="task difference" src="_images/task_diff.png" /></p>
 </section>
 <section id="id3">
@@ -142,7 +142,7 @@
 <h2>子赛道设置<a class="headerlink" href="#id4" title="此标题的永久链接">¶</a></h2>
 <section id="id5">
 <h3>子赛道一 (限定训练数据):<a class="headerlink" href="#id5" title="此标题的永久链接">¶</a></h3>
-<p>参赛者在系统构建过程中仅能使用AliMeeting、AISHELL-4和CN Celeb，严禁使用额外数据。参赛者可以任何第三方开源的预训练模型，如<a class="reference external" href="https://huggingface.co/models">Hugging Face</a>以及<a class="reference external" href="https://www.modelscope.cn/models">ModelScope</a>上提供的模型。参赛者需要在最终的系统描述文档中详细列出使用的预训练模型名称以及链接。</p>
+<p>参赛者在系统构建过程中仅能使用AliMeeting、AISHELL-4和CN-Celeb，严禁使用额外数据。参赛者可以任何第三方开源的预训练模型，如<a class="reference external" href="https://huggingface.co/models">Hugging Face</a>以及<a class="reference external" href="https://www.modelscope.cn/models">ModelScope</a>上提供的模型。参赛者需要在最终的系统描述文档中详细列出使用的预训练模型名称以及链接。</p>
 </section>
 <section id="id6">
 <h3>子赛道二 (开放训练数据):<a class="headerlink" href="#id6" title="此标题的永久链接">¶</a></h3>
