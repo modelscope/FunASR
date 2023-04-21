@@ -21,12 +21,6 @@ else()
 
     set(EXTRA_LIBS pthread yaml-cpp csrc)
 
-    target_include_directories(funasr PUBLIC "/usr/local/opt/openblas/include")
-    target_link_directories(funasr PUBLIC "/usr/local/opt/openblas/lib")
-
-    target_include_directories(funasr PUBLIC "/usr/include")
-    target_link_directories(funasr PUBLIC "/usr/lib64")
-
     target_include_directories(funasr PUBLIC)
     target_link_directories(funasr PUBLIC)
     include_directories(${ONNXRUNTIME_DIR}/include)
