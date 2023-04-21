@@ -9,6 +9,10 @@ FunASR: A Fundamental End-to-End Speech Recognition Toolkit
 
 FunASR hopes to build a bridge between academic research and industrial applications on speech recognition. By supporting the training & finetuning of the industrial-grade speech recognition model released on `ModelScope <https://www.modelscope.cn/models?page=1&tasks=auto-speech-recognition>`_, researchers and developers can conduct research and production of speech recognition models more conveniently, and promote the development of speech recognition ecology. ASR for Fun！
 
+Overview
+============================================================
+.. image:: ./images/funasr_overview.png
+
 .. toctree::
    :maxdepth: 1
    :caption: Installation
@@ -26,11 +30,6 @@ FunASR hopes to build a bridge between academic research and industrial applicat
    ./recipe/sv_recipe.md
    ./recipe/sd_recipe.md
 
-.. toctree::
-   :maxdepth: 1
-   :caption: Custom Your Model
-
-   ./build_task.md
 
 .. toctree::
    :maxdepth: 1
@@ -56,6 +55,12 @@ FunASR hopes to build a bridge between academic research and industrial applicat
    :caption: Huggingface pipeline
 
    Undo
+
+.. toctree::
+   :maxdepth: 1
+   :caption: funasr library
+
+   ./build_task.md
 
 .. toctree::
    :maxdepth: 1
