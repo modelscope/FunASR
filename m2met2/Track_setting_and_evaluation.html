@@ -89,7 +89,7 @@
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Track &amp; Evaluation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#speaker-attributed-asr">Speaker-Attributed ASR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#speaker-attributed-asr-main-track">Speaker-Attributed ASR (Main Track)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#evaluation-metric">Evaluation metric</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#sub-track-arrangement">Sub-track arrangement</a></li>
 </ul>
@@ -125,9 +125,9 @@
             
   <section id="track-evaluation">
 <h1>Track &amp; Evaluation<a class="headerlink" href="#track-evaluation" title="Permalink to this heading">¶</a></h1>
-<section id="speaker-attributed-asr">
-<h2>Speaker-Attributed ASR<a class="headerlink" href="#speaker-attributed-asr" title="Permalink to this heading">¶</a></h2>
-<p>The speaker-attributed ASR task poses a unique challenge of transcribing speech from multiple speakers and assigning a speaker label to the transcription. Figure 2 illustrates the difference between the speaker-attributed ASR task and the multi-speaker ASR task. This track allows for the use of the AliMeeting, Aishell4, and Cn-Celeb datasets as constrained data sources during both training and evaluation. The AliMeeting dataset, which was used in the M2MeT challenge, includes Train, Eval, and Test sets. Additionally, a new Test-2023 set, consisting of approximately 10 hours of meeting data recorded in an identical acoustic setting as the AliMeeting corpus, will be released soon for challenge scoring and ranking. It’s worth noting that the organizers will not provide the near-field audio, transcriptions, or oracle timestamps of the Test-2023 set. Instead, segments containing multiple speakers will be provided, which can be obtained using a simple voice activity detection (VAD) model.</p>
+<section id="speaker-attributed-asr-main-track">
+<h2>Speaker-Attributed ASR (Main Track)<a class="headerlink" href="#speaker-attributed-asr-main-track" title="Permalink to this heading">¶</a></h2>
+<p>The speaker-attributed ASR task poses a unique challenge of transcribing speech from multiple speakers and assigning a speaker label to the transcription. Figure 2 illustrates the difference between the speaker-attributed ASR task and the multi-speaker ASR task. This track allows for the use of the AliMeeting, Aishell4, and Cn-Celeb datasets as constrained data sources during both training and evaluation. The AliMeeting dataset, which was used in the M2MeT challenge, includes Train, Eval, and Test sets. Additionally, a new Test-2023 set, consisting of approximately 10 hours of meeting data recorded in an identical acoustic setting as the AliMeeting corpus, will be released soon for challenge scoring and ranking. It’s worth noting that the organizers will not provide the near-field audio, transcriptions, or oracle timestamps. Instead, segments containing multiple speakers will be provided on the Test-2023 set, which can be obtained using a simple voice activity detection (VAD) model.</p>
 <p><img alt="task difference" src="_images/task_diff.png" /></p>
 </section>
 <section id="evaluation-metric">
