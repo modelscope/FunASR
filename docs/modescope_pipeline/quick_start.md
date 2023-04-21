@@ -108,8 +108,9 @@ inference_diar_pipline = pipeline(
     task=Tasks.speaker_diarization,
     diar_model_config="sond.yaml",
     model='damo/speech_diarization_sond-en-us-callhome-8k-n16k4-pytorch',
+    model_revision="v1.0.3",
     sv_model="damo/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch",
-    sv_model_revision="master",
+    sv_model_revision="v1.0.0",
 )
 
 audio_list=[
@@ -121,6 +122,7 @@ audio_list=[
 
 results = inference_diar_pipline(audio_in=audio_list)
 print(results)
+# {'text': 'spk1 [(0.8, 1.84), (2.8, 6.16), (7.04, 10.64), (12.08, 12.8), (14.24, 15.6)]\nspk2 [(0.0, 1.12), (1.68, 3.2), (4.48, 7.12), (8.48, 9.04), (10.56, 14.48), (15.44, 16.0)]'}
 ```
 
 ### FAQ
