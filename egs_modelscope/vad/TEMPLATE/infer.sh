@@ -6,7 +6,7 @@ set -o pipefail
 
 stage=1
 stop_stage=2
-model="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
+model="damo/speech_fsmn_vad_zh-cn-16k-common"
 data_dir="./data/test"
 output_dir="./results"
 batch_size=64
@@ -67,37 +67,5 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ];then
           done | sort -k1 >"${output_dir}/1best_recog/${f}"
         fi
     done
-fi
-
-if [ $stage -le 2 ] && [ $stop_stage -ge 2 ];then
-    echo "Computing WER ..."
-    cp ${output_dir}/1best_recog/text ${output_dir}/1best_recog/text.proc
-    cp ${data_dir}/text ${output_dir}/1best_recog/text.ref
-    python utils/compute_wer.py ${output_dir}/1best_recog/text.ref ${output_dir}/1best_recog/text.proc ${output_dir}/1best_recog/text.cer
-    tail -n 3 ${output_dir}/1best_recog/text.cer
-fi
-
-if [ $stage -le 3 ] && [ $stop_stage -ge 3 ];then
-    echo "SpeechIO TIOBE textnorm"
-    echo "$0 --> Normalizing REF text ..."
-    ./utils/textnorm_zh.py \
-        --has_key --to_upper \
-        ${data_dir}/text \
-        ${output_dir}/1best_recog/ref.txt
-
-    echo "$0 --> Normalizing HYP text ..."
-    ./utils/textnorm_zh.py \
-        --has_key --to_upper \
-        ${output_dir}/1best_recog/text.proc \
-        ${output_dir}/1best_recog/rec.txt
-    grep -v $'\t$' ${output_dir}/1best_recog/rec.txt > ${output_dir}/1best_recog/rec_non_empty.txt
-
-    echo "$0 --> computing WER/CER and alignment ..."
-    ./utils/error_rate_zh \
-        --tokenizer char \
-        --ref ${output_dir}/1best_recog/ref.txt \
-        --hyp ${output_dir}/1best_recog/rec_non_empty.txt \
-        ${output_dir}/1best_recog/DETAILS.txt | tee ${output_dir}/1best_recog/RESULTS.txt
-    rm -rf ${output_dir}/1best_recog/rec.txt ${output_dir}/1best_recog/rec_non_empty.txt
 fi
 

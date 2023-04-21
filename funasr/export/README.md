@@ -1,14 +1,20 @@
 # Export models
 
 ## Environments
-    torch >= 1.11.0
-    modelscope >= 1.2.0
-    torch-quant >= 0.4.0 (required for exporting quantized torchscript format model)
-    # pip install torch-quant -i https://pypi.org/simple
-
-## Install modelscope and funasr
+### Install modelscope and funasr
 
 The installation is the same as [funasr](https://github.com/alibaba-damo-academy/FunASR/blob/main/README.md#installation)
+```shell
+# pip3 install torch torchaudio
+pip install -U modelscope funasr
+# For the users in China, you could install with the command:
+# pip install -U modelscope funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple
+```
+### Install the quantization tools
+```shell
+pip install torch-quant # Optional, for torchscript quantization
+pip install onnx onnxruntime # Optional, for onnx quantization
+```
 
 ## Export model
    `Tips`: torch>=1.11.0

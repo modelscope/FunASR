@@ -97,18 +97,17 @@ This project is licensed under the [The MIT License](https://opensource.org/lice
 ## Citations
 
 ``` bibtex
-@inproceedings{gao2020universal,
-  title={Universal ASR: Unifying Streaming and Non-Streaming ASR Using a Single Encoder-Decoder Model},
-  author={Gao, Zhifu and Zhang, Shiliang and Lei, Ming and McLoughlin, Ian},
-  booktitle={arXiv preprint arXiv:2010.14099},
-  year={2020}
-}
-
 @inproceedings{gao2022paraformer,
   title={Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition},
   author={Gao, Zhifu and Zhang, Shiliang and McLoughlin, Ian and Yan, Zhijie},
   booktitle={INTERSPEECH},
   year={2022}
+}
+@inproceedings{gao2020universal,
+  title={Universal ASR: Unifying Streaming and Non-Streaming ASR Using a Single Encoder-Decoder Model},
+  author={Gao, Zhifu and Zhang, Shiliang and Lei, Ming and McLoughlin, Ian},
+  booktitle={arXiv preprint arXiv:2010.14099},
+  year={2020}
 }
 @inproceedings{Shi2023AchievingTP,
   title={Achieving Timestamp Prediction While Recognizing with Non-Autoregressive End-to-End ASR Model},

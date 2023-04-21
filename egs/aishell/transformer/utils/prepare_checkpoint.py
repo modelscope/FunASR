@@ -1,12 +1,9 @@
-import json
 import os
 import shutil
 
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
 from modelscope.hub.snapshot_download import snapshot_download
-
-from funasr.utils.compute_wer import compute_wer
 
 def modelscope_infer_after_finetune(params):
     # prepare for decoding
@@ -39,10 +36,14 @@ def modelscope_infer_after_finetune(params):
 
 
 if __name__ == '__main__':
-    params = {}
-    params["modelscope_model_name"] = "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
-    params["output_dir"] = "./checkpoint"
-    params["data_dir"] = "./data/test"
-    params["decoding_model_name"] = "valid.acc.ave_10best.pb"
-    params["batch_size"] = 64
-    modelscope_infer_after_finetune(params)
+    import sys
+    
+    model = sys.argv[1]
+    checkpoint_dir = sys.argv[2]
+    checkpoint_name = sys.argv[3]
+    
+    try:
+        pretrained_model_path = snapshot_download(model, cache_dir=checkpoint_dir)
+    except BaseException:
+        raise BaseException(f"Please download pretrain model from ModelScope firstly.")
+    shutil.copy(os.path.join(checkpoint_dir, checkpoint_name), os.path.join(pretrained_model_path, "model.pb"))
