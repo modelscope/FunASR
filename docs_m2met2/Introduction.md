@@ -9,18 +9,19 @@ The ICASSP2022 M2MeT challenge focuses on meeting scenarios, and it comprises tw
 Building on the success of the previous M2MeT challenge, we are excited to propose the M2MeT2.0 challenge as an ASRU2023 challenge special session. In the original M2MeT challenge, the evaluation metric was speaker-independent, which meant that the transcription could be determined, but not the corresponding speaker. To address this limitation and further advance the current multi-talker ASR system towards practicality, the M2MeT2.0 challenge proposes the speaker-attributed ASR task with two sub-tracks: fixed and open training conditions. The speaker-attribute automatic speech recognition (ASR) task aims to tackle the practical and challenging problem of identifying "who spoke what at when". To facilitate reproducible research in this field, we offer a comprehensive overview of the dataset, rules, evaluation metrics, and baseline systems. Furthermore, we will release a carefully curated test set, comprising approximately 10 hours of audio, according to the timeline. The new test set is designed to enable researchers to validate and compare their models' performance and advance the state of the art in this area.
 
 ## Timeline(AOE Time)
-
-- $ May~5^{th}, 2023: $ Registration deadline, the due date for participants to join the Challenge.
-- $ June~9^{th}, 2023: $ Test data release.
-- $ June~13^{rd}, 2023: $ Final submission deadline.
-- $ June~19^{th}, 2023: $ Evaluation result and ranking release.
-- $ July~3^{rd}, 2023: $ Deadline for paper submission.
-- $ July~10^{th}, 2023: $ Deadline for final paper submission.
-- $ December~12^{nd}\ to\ 16^{th}, 2023: $ ASRU Workshop
+- $ April~29, 2023: $ Challenge and registration open.
+- $ May~8, 2023: $ Baseline release.
+- $ May~15, 2023: $ Registration deadline, the due date for participants to join the Challenge.
+- $ June~9, 2023: $ Test data release and leaderboard open.
+- $ June~13, 2023: $ Final submission deadline.
+- $ June~19, 2023: $ Evaluation result and ranking release.
+- $ July~3, 2023: $ Deadline for paper submission.
+- $ July~10, 2023: $ Deadline for final paper submission.
+- $ December~12\ to\ 16, 2023: $ ASRU Workshop and challenge session
 
 ## Guidelines
 
-Interested participants, whether from academia or industry, must register for the challenge by completing the Google form below. The deadline for registration is May 5, 2023. 
+Interested participants, whether from academia or industry, must register for the challenge by completing the Google form below. The deadline for registration is May 15, 2023. 
 
 [M2MET2.0 Registration](https://docs.google.com/forms/d/e/1FAIpQLSf77T9vAl7Ym-u5g8gXu18SBofoWRaFShBo26Ym0-HDxHW9PQ/viewform?usp=sf_link)
 
