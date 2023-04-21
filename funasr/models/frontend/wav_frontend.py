@@ -34,7 +34,7 @@ def load_cmvn(cmvn_file):
     means = np.array(means_list).astype(np.float)
     vars = np.array(vars_list).astype(np.float)
     cmvn = np.array([means, vars])
-    cmvn = torch.as_tensor(cmvn, dype=torch.float32)
+    cmvn = torch.as_tensor(cmvn, dtype=torch.float32)
     return cmvn
 
 
