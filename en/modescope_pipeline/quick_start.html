@@ -295,8 +295,9 @@ The modelscope pipeline supports all the models in <a class="reference external"
     <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">speaker_diarization</span><span class="p">,</span>
     <span class="n">diar_model_config</span><span class="o">=</span><span class="s2">&quot;sond.yaml&quot;</span><span class="p">,</span>
     <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_diarization_sond-en-us-callhome-8k-n16k4-pytorch&#39;</span><span class="p">,</span>
+    <span class="n">model_revision</span><span class="o">=</span><span class="s2">&quot;v1.0.3&quot;</span><span class="p">,</span>
     <span class="n">sv_model</span><span class="o">=</span><span class="s2">&quot;damo/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch&quot;</span><span class="p">,</span>
-    <span class="n">sv_model_revision</span><span class="o">=</span><span class="s2">&quot;master&quot;</span><span class="p">,</span>
+    <span class="n">sv_model_revision</span><span class="o">=</span><span class="s2">&quot;v1.0.0&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">audio_list</span><span class="o">=</span><span class="p">[</span>
@@ -308,6 +309,7 @@ The modelscope pipeline supports all the models in <a class="reference external"
 
 <span class="n">results</span> <span class="o">=</span> <span class="n">inference_diar_pipline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="n">audio_list</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+<span class="c1"># {&#39;text&#39;: &#39;spk1 [(0.8, 1.84), (2.8, 6.16), (7.04, 10.64), (12.08, 12.8), (14.24, 15.6)]\nspk2 [(0.0, 1.12), (1.68, 3.2), (4.48, 7.12), (8.48, 9.04), (10.56, 14.48), (15.44, 16.0)]&#39;}</span>
 </pre></div>
 </div>
 </div>
