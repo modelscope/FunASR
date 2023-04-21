@@ -45,20 +45,20 @@
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../docker.html">Docker</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Academic Recipe</span></p>
+<p class="caption"><span class="caption-text">Academic Egs</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../recipe/asr_recipe.html">Speech Recognition</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../recipe/punc_recipe.html">Punctuation Restoration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../recipe/vad_recipe.html">Voice Activity Detection</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../recipe/sv_recipe.html">Speaker Verification</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../recipe/sd_recipe.html">Speaker Diarization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../academic_recipe/asr_recipe.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../academic_recipe/punc_recipe.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../academic_recipe/vad_recipe.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../academic_recipe/sv_recipe.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../academic_recipe/sd_recipe.html">Speaker Diarization</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Model Zoo</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../modelscope_models.html">Pretrained Models on ModelScope</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../huggingface_models.html">Pretrained Models on Huggingface</a></li>
 </ul>
-<p class="caption"><span class="caption-text">ModelScope pipeline</span></p>
+<p class="caption"><span class="caption-text">ModelScope Egs</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../modescope_pipeline/quick_start.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../modescope_pipeline/asr_pipeline.html">Speech Recognition</a></li>
@@ -68,7 +68,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../modescope_pipeline/sv_pipeline.html">Speaker Verification</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../modescope_pipeline/sd_pipeline.html">Speaker Diarization</a></li>
 </ul>
-<p class="caption"><span class="caption-text">funasr library</span></p>
+<p class="caption"><span class="caption-text">Funasr Library</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../build_task.html">Build custom tasks</a></li>
 </ul>
@@ -80,15 +80,37 @@
 <li class="toctree-l3"><a class="reference internal" href="#install-the-quantization-tools">Install the quantization tools</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#export-model">Export model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#performance-benchmark-of-runtime">Performance Benchmark of Runtime</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#paraformer-on-cpu">Paraformer on CPU</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#paraformer-on-gpu">Paraformer on GPU</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#export-onnx-format-model">Export onnx format model</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#export-model-from-modelscope">Export model from modelscope</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#export-model-from-local-path">Export model from local path</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#test-onnx-model">Test onnx model</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#for-example">For example</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#export-onnx-format-model">Export onnx format model</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#export-torchscripts-format-model">Export torchscripts format model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#export-torchscripts-format-model">Export torchscripts format model</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">Export model from modelscope</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">Export model from local path</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">Test onnx model</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#runtime">Runtime</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#onnxruntime">ONNXRuntime</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#onnxruntime-python">ONNXRuntime-python</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#onnxruntime-cpp">ONNXRuntime-cpp</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#libtorch">Libtorch</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#libtorch-python">Libtorch-python</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#libtorch-cpp">Libtorch-cpp</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#performance-benchmark">Performance Benchmark</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#paraformer-on-cpu">Paraformer on CPU</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#paraformer-on-gpu">Paraformer on GPU</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#acknowledge">Acknowledge</a></li>
@@ -167,8 +189,8 @@ pip install onnx onnxruntime <span class="c1"># Optional, for onnx quantization<
 </div>
 </div>
 </div>
-<div class="section" id="export-model">
-<h2>Export model<a class="headerlink" href="#export-model" title="Permalink to this headline"></a></h2>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">Tips</span></code>: torch&gt;=1.11.0</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model <span class="se">\</span>
     --model-name <span class="o">[</span>model_name<span class="o">]</span> <span class="se">\</span>
@@ -183,9 +205,74 @@ pip install onnx onnxruntime <span class="c1"># Optional, for onnx quantization<
 <p><code class="docutils literal notranslate"><span class="pre">type</span></code>: <code class="docutils literal notranslate"><span class="pre">onnx</span></code> or <code class="docutils literal notranslate"><span class="pre">torch</span></code>, export onnx format model or torchscript format model.</p>
 <p><code class="docutils literal notranslate"><span class="pre">quantize</span></code>: <code class="docutils literal notranslate"><span class="pre">true</span></code>, export quantized model at the same time; <code class="docutils literal notranslate"><span class="pre">false</span></code>, export fp32 model only.</p>
 <p><code class="docutils literal notranslate"><span class="pre">fallback-num</span></code>: specify the number of fallback layers to perform automatic mixed precision quantization.</p>
+<div class="section" id="export-onnx-format-model">
+<h3>Export onnx format model<a class="headerlink" href="#export-onnx-format-model" title="Permalink to this headline"></a></h3>
+<div class="section" id="export-model-from-modelscope">
+<h4>Export model from modelscope<a class="headerlink" href="#export-model-from-modelscope" title="Permalink to this headline"></a></h4>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx
+</pre></div>
 </div>
-<div class="section" id="performance-benchmark-of-runtime">
-<h2>Performance Benchmark of Runtime<a class="headerlink" href="#performance-benchmark-of-runtime" title="Permalink to this headline"></a></h2>
+</div>
+<div class="section" id="export-model-from-local-path">
+<h4>Export model from local path<a class="headerlink" href="#export-model-from-local-path" title="Permalink to this headline"></a></h4>
+<p>The model’name must be <code class="docutils literal notranslate"><span class="pre">model.pb</span></code></p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model --model-name /mnt/workspace/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx
+</pre></div>
+</div>
+</div>
+<div class="section" id="test-onnx-model">
+<h4>Test onnx model<a class="headerlink" href="#test-onnx-model" title="Permalink to this headline"></a></h4>
+<p>Ref to <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export/test">test</a></p>
+</div>
+</div>
+<div class="section" id="export-torchscripts-format-model">
+<h3>Export torchscripts format model<a class="headerlink" href="#export-torchscripts-format-model" title="Permalink to this headline"></a></h3>
+<div class="section" id="id1">
+<h4>Export model from modelscope<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h4>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type torch
+</pre></div>
+</div>
+</div>
+<div class="section" id="id2">
+<h4>Export model from local path<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h4>
+<p>The model’name must be <code class="docutils literal notranslate"><span class="pre">model.pb</span></code></p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model --model-name /mnt/workspace/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type torch
+</pre></div>
+</div>
+</div>
+<div class="section" id="id3">
+<h4>Test onnx model<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h4>
+<p>Ref to <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export/test">test</a></p>
+</div>
+</div>
+</div>
+<div class="section" id="runtime">
+<h2>Runtime<a class="headerlink" href="#runtime" title="Permalink to this headline"></a></h2>
+<div class="section" id="onnxruntime">
+<h3>ONNXRuntime<a class="headerlink" href="#onnxruntime" title="Permalink to this headline"></a></h3>
+<div class="section" id="onnxruntime-python">
+<h4>ONNXRuntime-python<a class="headerlink" href="#onnxruntime-python" title="Permalink to this headline"></a></h4>
+<p>Ref to <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/runtime/onnxruntime_python.html">docs</a></p>
+</div>
+<div class="section" id="onnxruntime-cpp">
+<h4>ONNXRuntime-cpp<a class="headerlink" href="#onnxruntime-cpp" title="Permalink to this headline"></a></h4>
+<p>Ref to <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/runtime/onnxruntime_cpp.html">docs</a></p>
+</div>
+</div>
+<div class="section" id="libtorch">
+<h3>Libtorch<a class="headerlink" href="#libtorch" title="Permalink to this headline"></a></h3>
+<div class="section" id="libtorch-python">
+<h4>Libtorch-python<a class="headerlink" href="#libtorch-python" title="Permalink to this headline"></a></h4>
+<p>Ref to <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/runtime/libtorch_python.html">docs</a></p>
+</div>
+<div class="section" id="libtorch-cpp">
+<h4>Libtorch-cpp<a class="headerlink" href="#libtorch-cpp" title="Permalink to this headline"></a></h4>
+<p>Undo</p>
+</div>
+</div>
+</div>
+<div class="section" id="performance-benchmark">
+<h2>Performance Benchmark<a class="headerlink" href="#performance-benchmark" title="Permalink to this headline"></a></h2>
 <div class="section" id="paraformer-on-cpu">
 <h3>Paraformer on CPU<a class="headerlink" href="#paraformer-on-cpu" title="Permalink to this headline"></a></h3>
 <p><a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/python/benchmark_onnx.md">onnx runtime</a></p>
@@ -194,31 +281,6 @@ pip install onnx onnxruntime <span class="c1"># Optional, for onnx quantization<
 <div class="section" id="paraformer-on-gpu">
 <h3>Paraformer on GPU<a class="headerlink" href="#paraformer-on-gpu" title="Permalink to this headline"></a></h3>
 <p><a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/triton_gpu">nv-triton</a></p>
-</div>
-</div>
-<div class="section" id="for-example">
-<h2>For example<a class="headerlink" href="#for-example" title="Permalink to this headline"></a></h2>
-<div class="section" id="export-onnx-format-model">
-<h3>Export onnx format model<a class="headerlink" href="#export-onnx-format-model" title="Permalink to this headline"></a></h3>
-<p>Export model from modelscope</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx
-</pre></div>
-</div>
-<p>Export model from local path, the model’name must be <code class="docutils literal notranslate"><span class="pre">model.pb</span></code>.</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model --model-name /mnt/workspace/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx
-</pre></div>
-</div>
-</div>
-<div class="section" id="export-torchscripts-format-model">
-<h3>Export torchscripts format model<a class="headerlink" href="#export-torchscripts-format-model" title="Permalink to this headline"></a></h3>
-<p>Export model from modelscope</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type torch
-</pre></div>
-</div>
-<p>Export model from local path, the model’name must be <code class="docutils literal notranslate"><span class="pre">model.pb</span></code>.</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model --model-name /mnt/workspace/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type torch
-</pre></div>
-</div>
 </div>
 </div>
 <div class="section" id="acknowledge">
