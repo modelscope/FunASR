@@ -22,8 +22,6 @@
 
 using namespace std;
 // third part
-
-#include <fftw3.h>
 #include "onnxruntime_run_options_config_keys.h"
 #include "onnxruntime_cxx_api.h"
 #include "kaldi-native-fbank/csrc/feature-fbank.h"

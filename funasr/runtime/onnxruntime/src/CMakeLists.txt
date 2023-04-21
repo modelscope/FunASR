@@ -11,7 +11,7 @@ add_library(funasr ${files})
 
 if(WIN32)
 
-        set(EXTRA_LIBS libfftw3f-3 yaml-cpp)
+        set(EXTRA_LIBS pthread yaml-cpp csrc)
         if(CMAKE_CL_64)
             target_link_directories(funasr PUBLIC ${CMAKE_SOURCE_DIR}/win/lib/x64)
         else()
@@ -22,9 +22,7 @@ if(WIN32)
         target_compile_definitions(funasr PUBLIC -D_FUNASR_API_EXPORT)
 else()
 
-    set(EXTRA_LIBS fftw3f pthread yaml-cpp csrc)
-    target_include_directories(funasr PUBLIC "/usr/local/opt/fftw/include")
-    target_link_directories(funasr PUBLIC "/usr/local/opt/fftw/lib")
+    set(EXTRA_LIBS pthread yaml-cpp csrc)
 
     target_include_directories(funasr PUBLIC "/usr/local/opt/openblas/include")
     target_link_directories(funasr PUBLIC "/usr/local/opt/openblas/lib")
@@ -32,13 +30,12 @@ else()
     target_include_directories(funasr PUBLIC "/usr/include")
     target_link_directories(funasr PUBLIC "/usr/lib64")
 
-    target_include_directories(funasr PUBLIC  ${FFTW3F_INCLUDE_DIR})
-    target_link_directories(funasr PUBLIC ${FFTW3F_LIBRARY_DIR})
+    target_include_directories(funasr PUBLIC)
+    target_link_directories(funasr PUBLIC)
     include_directories(${ONNXRUNTIME_DIR}/include)
 endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 target_link_libraries(funasr PUBLIC onnxruntime ${EXTRA_LIBS})
-
 
 
