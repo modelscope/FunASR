@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 
     if (argc < 5)
     {
-        printf("Usage: %s /path/to/model_dir /path/to/wav.scp quantize(true or false) nThreadNum \n", argv[0]);
+        printf("Usage: %s /path/to/model_dir /path/to/wav.scp quantize(true or false) thread_num \n", argv[0]);
         exit(-1);
     }
 
