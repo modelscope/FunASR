@@ -1,3 +1,5 @@
+A library for adding punctuations into a piece of text getting from an ASR.
+
 ## Build on Linux X64
 
 git clone  https://github.com/alibaba-damo-academy/FunASR.git
@@ -30,7 +32,12 @@ rapidpunc_tester
 
 
 
+## Download model
 
+```
+链接：https://pan.baidu.com/s/1neFfd6HT4PLvvqeixxvH2w?pwd=y85r 
+提取码：y85r
+```
 
 ## run
 
