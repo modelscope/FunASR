@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CPU Benchmark (ONNX) &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <title>CPU Benchmark (ONNX-cpp) &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -16,7 +16,9 @@
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="CPU Benchmark (Libtorch)" href="benchmark_libtorch.html" />
+    <link rel="prev" title="CPU Benchmark (ONNX)" href="benchmark_onnx.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -81,8 +83,27 @@
 <li class="toctree-l1"><a class="reference internal" href="../runtime/websocket_python.html">Using funasr with websocket</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Benchmark and Leadboard</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="benchmark_onnx.html">CPU Benchmark (ONNX)</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">CPU Benchmark (ONNX-cpp)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#configuration">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#data-set">Data set:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tools">Tools</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#install-modelscope-and-funasr">Install modelscope and funasr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#export-onnx-model">Export onnx model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#building-for-linux-unix">Building for Linux/Unix</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#recipe">Recipe</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#paraformer-large">Paraformer-large</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#intel-r-xeon-r-platinum-8369b-cpu-2-90ghz-16core-32processor-with-avx512-vnni">Intel(R) Xeon(R) Platinum 8369B CPU &#64; 2.90GHz   16core-32processor    with avx512_vnni</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#intel-r-xeon-r-platinum-8163-cpu-2-50ghz-32core-64processor-without-avx512-vnni">Intel(R) Xeon(R) Platinum 8163 CPU &#64; 2.50GHz    32core-64processor   without avx512_vnni</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="benchmark_libtorch.html">CPU Benchmark (Libtorch)</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Papers</span></p>
@@ -114,7 +135,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">CPU Benchmark (ONNX)</li>
+      <li class="breadcrumb-item active">CPU Benchmark (ONNX-cpp)</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/benchmark/benchmark_onnx_cpp.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -124,8 +145,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="cpu-benchmark-onnx">
-<h1>CPU Benchmark (ONNX)<a class="headerlink" href="#cpu-benchmark-onnx" title="Permalink to this headline"></a></h1>
+  <div class="section" id="cpu-benchmark-onnx-cpp">
+<h1>CPU Benchmark (ONNX-cpp)<a class="headerlink" href="#cpu-benchmark-onnx-cpp" title="Permalink to this headline"></a></h1>
 <div class="section" id="configuration">
 <h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline"></a></h2>
 <div class="section" id="data-set">
@@ -368,7 +389,10 @@ make
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="benchmark_onnx.html" class="btn btn-neutral float-left" title="CPU Benchmark (ONNX)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="benchmark_libtorch.html" class="btn btn-neutral float-right" title="CPU Benchmark (Libtorch)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

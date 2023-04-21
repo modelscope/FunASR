@@ -1,4 +1,4 @@
-# CPU Benchmark (ONNX)
+# CPU Benchmark (ONNX-cpp)
 
 ## Configuration
 ### Data set:
