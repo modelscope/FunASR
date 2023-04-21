@@ -4,8 +4,6 @@ All participants should adhere to the following rules to be eligible for the cha
 - Data augmentation is allowed on the original training dataset, including, but not limited to, adding noise or reverberation, speed perturbation and tone change.
 
 - Participants are permitted to use the Eval set for model training, but it is not allowed to use the Test set for this purpose. Instead, the Test set should only be utilized for parameter tuning and model selection. Any use of the Test-2023 dataset that violates these rules is strictly prohibited, including but not limited to the use of the Test set for fine-tuning or training the model.
-
-- Multi-system fusion is allowed, but the systems with same structure and different parameters is not encouraged.
   
 - If the cpCER of the two systems on the Test dataset are the same, the system with lower computation complexity will be judged as the superior one.
   
