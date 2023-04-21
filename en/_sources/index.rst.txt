@@ -22,7 +22,7 @@ Overview
 
 .. toctree::
    :maxdepth: 1
-   :caption: Recipe
+   :caption: Academic Recipe
 
    ./recipe/asr_recipe.md
    ./recipe/punc_recipe.md
@@ -64,7 +64,7 @@ Overview
 
 .. toctree::
    :maxdepth: 1
-   :caption: Runtime
+   :caption: Runtime and Service
 
    ./runtime/export.md
    ./runtime/onnxruntime_python.md
