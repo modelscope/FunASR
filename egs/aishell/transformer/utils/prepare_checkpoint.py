@@ -1,8 +1,6 @@
 import os
 import shutil
 
-from modelscope.pipelines import pipeline
-from modelscope.utils.constant import Tasks
 from modelscope.hub.snapshot_download import snapshot_download
 
 
