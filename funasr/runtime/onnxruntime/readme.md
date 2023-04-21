@@ -25,12 +25,6 @@ wget https://github.com/microsoft/onnxruntime/releases/download/v1.14.0/onnxrunt
 tar -zxvf onnxruntime-linux-x64-1.14.0.tgz
 ```
 
-### Install fftw3
-```shell
-sudo apt install libfftw3-dev #ubuntu
-# sudo yum install fftw fftw-devel #centos
-```
-
 ### Install openblas
 ```shell
 sudo apt-get install libopenblas-dev #ubuntu
