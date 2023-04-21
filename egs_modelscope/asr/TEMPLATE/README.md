@@ -53,7 +53,7 @@ inference_pipeline = pipeline(
 rec_result = inference_pipeline(audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
 print(rec_result)
 ```
-The decoding mode of `fast` and `normal`
+The decoding mode of `fast` and `normal` is fake streaming, which could be used for evaluating of recognition accuracy.
 Full code of demo, please ref to [demo](https://github.com/alibaba-damo-academy/FunASR/discussions/151)
 #### [RNN-T-online model]()
 Undo

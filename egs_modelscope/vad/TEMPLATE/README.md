@@ -45,7 +45,7 @@ Full code of demo, please ref to [demo](https://github.com/alibaba-damo-academy/
 
 #### API-reference
 ##### Define pipeline
-- `task`: `Tasks.auto_speech_recognition`
+- `task`: `Tasks.voice_activity_detection`
 - `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
 - `ngpu`: `1` (Defalut), decoding on GPU. If ngpu=0, decoding on CPU
 - `ncpu`: `1` (Defalut), sets the number of threads used for intraop parallelism on CPU 
@@ -67,7 +67,7 @@ Full code of demo, please ref to [demo](https://github.com/alibaba-damo-academy/
 - `output_dir`: None (Defalut), the output path of results if set
 
 ### Inference with multi-thread CPUs or multi GPUs
-FunASR also offer recipes [infer.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/TEMPLATE/infer.sh) to decode with multi-thread CPUs, or multi GPUs.
+FunASR also offer recipes [infer.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/vad/TEMPLATE/infer.sh) to decode with multi-thread CPUs, or multi GPUs.
 
 - Setting parameters in `infer.sh`
     - `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk

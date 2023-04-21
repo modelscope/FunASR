@@ -60,6 +60,6 @@ sudo docker exec -it funasr bash
 ```shell
 exit
 sudo docker ps
-sudo docker stop <container-id>
+sudo docker stop funasr
 ```
 

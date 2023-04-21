@@ -21,9 +21,10 @@ FunASR hopes to build a bridge between academic research and industrial applicat
    :caption: Recipe
 
    ./recipe/asr_recipe.md
-   ./recipe/sv_recipe.md
    ./recipe/punc_recipe.md
    ./recipe/vad_recipe.md
+   ./recipe/sv_recipe.md
+   ./recipe/sd_recipe.md
 
 .. toctree::
    :maxdepth: 1
@@ -49,6 +50,12 @@ FunASR hopes to build a bridge between academic research and industrial applicat
    ./modescope_pipeline/tp_pipeline.md
    ./modescope_pipeline/sv_pipeline.md
    ./modescope_pipeline/sd_pipeline.md
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Huggingface pipeline
+
+   Undo
 
 .. toctree::
    :maxdepth: 1
