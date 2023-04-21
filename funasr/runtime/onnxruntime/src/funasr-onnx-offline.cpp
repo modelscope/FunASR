@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        printf("no return data!");
+        printf("no return data!\n");
     }
  
     printf("Audio length %lfs.\n", (double)snippet_time);
