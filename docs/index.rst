@@ -79,6 +79,7 @@ Overview
    :caption: Benchmark and Leadboard
 
    ./benchmark/benchmark_onnx.md
+   ./benchmark/benchmark_onnx_cpp.md
    ./benchmark/benchmark_libtorch.md
 
 .. toctree::
