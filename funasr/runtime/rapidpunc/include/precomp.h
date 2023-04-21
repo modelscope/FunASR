@@ -19,8 +19,8 @@ using namespace std;
 
 
 
-#include "onnxruntime/onnxruntime_run_options_config_keys.h"
-#include "onnxruntime/onnxruntime_cxx_api.h"
+#include "onnxruntime_run_options_config_keys.h"
+#include "onnxruntime_cxx_api.h"
 
 
 

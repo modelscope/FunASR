@@ -5,9 +5,9 @@ add_subdirectory(yaml-cpp)
 
 
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include yaml-cpp/include ${CMAKE_INSTALL_PREFIX}/include) 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include yaml-cpp/include ${ONNXRUNTIME_DIR}/include) 
 
-link_directories(yaml-cpp ${CMAKE_INSTALL_PREFIX}/lib ${CMAKE_INSTALL_PREFIX}/lib64)
+link_directories(yaml-cpp ${ONNXRUNTIME_DIR}/lib )
 
 set(APP_NAME rapidpunc_tester)
 set(LIB_NAME rapidpunc)
