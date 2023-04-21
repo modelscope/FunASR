@@ -18,11 +18,7 @@ if(WIN32)
     
     target_compile_definitions(funasr PUBLIC -D_FUNASR_API_EXPORT)
 else()
-
     set(EXTRA_LIBS pthread yaml-cpp csrc)
-
-    target_include_directories(funasr PUBLIC)
-    target_link_directories(funasr PUBLIC)
     include_directories(${ONNXRUNTIME_DIR}/include)
 endif()
 
