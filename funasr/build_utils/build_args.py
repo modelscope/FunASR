@@ -13,8 +13,6 @@ def build_args(args):
     if args.task_name == "asr":
         from funasr.build_utils.build_asr_model import class_choices_list
         for class_choices in class_choices_list:
-            # Append --<name> and --<name>_conf.
-            # e.g. --encoder and --encoder_conf
             class_choices.add_arguments(parser)
         parser.add_argument(
             "--split_with_space",
@@ -50,8 +48,6 @@ def build_args(args):
     elif args.task_name == "pretrain":
         from funasr.build_utils.build_pretrain_model import class_choices_list
         for class_choices in class_choices_list:
-            # Append --<name> and --<name>_conf.
-            # e.g. --encoder and --encoder_conf
             class_choices.add_arguments(parser)
         parser.add_argument(
             "--input_size",
@@ -63,22 +59,16 @@ def build_args(args):
     elif args.task_name == "lm":
         from funasr.build_utils.build_lm_model import class_choices_list
         for class_choices in class_choices_list:
-            # Append --<name> and --<name>_conf.
-            # e.g. --encoder and --encoder_conf
             class_choices.add_arguments(parser)
 
     elif args.task_name == "punc":
         from funasr.build_utils.build_punc_model import class_choices_list
         for class_choices in class_choices_list:
-            # Append --<name> and --<name>_conf.
-            # e.g. --encoder and --encoder_conf
             class_choices.add_arguments(parser)
 
     elif args.task_name == "vad":
         from funasr.build_utils.build_vad_model import class_choices_list
         for class_choices in class_choices_list:
-            # Append --<name> and --<name>_conf.
-            # e.g. --encoder and --encoder_conf
             class_choices.add_arguments(parser)
         parser.add_argument(
             "--input_size",
@@ -86,6 +76,11 @@ def build_args(args):
             default=None,
             help="The number of input dimension of the feature",
         )
+
+    elif args.task_name == "diar":
+        from funasr.build_utils.build_diar_model import class_choices_list
+        for class_choices in class_choices_list:
+            class_choices.add_arguments(parser)
 
     else:
         raise NotImplementedError("Not supported task: {}".format(args.task_name))
