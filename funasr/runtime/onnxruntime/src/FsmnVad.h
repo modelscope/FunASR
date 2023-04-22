@@ -36,12 +36,15 @@ private:
             std::vector<std::vector<float>> *out_prob);
 
     void load_cmvn(const char *filename);
+    void init_cache();
 
     std::shared_ptr<Ort::Session> vad_session_ = nullptr;
     Ort::Env env_;
     Ort::SessionOptions session_options_;
     std::vector<const char *> vad_in_names_;
     std::vector<const char *> vad_out_names_;
+    std::vector<std::vector<float>> in_cache_;
+    
     knf::FbankOptions fbank_opts;
     std::vector<float> means_list;
     std::vector<float> vars_list;
