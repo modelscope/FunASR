@@ -9,11 +9,9 @@ Here we provided several pretrained models on different datasets. The details of
 ### Speech Recognition Models
 #### Paraformer Models
 
-[//]: # (|                                                                     Model Name                                                                     | Language |          Training Data           | Vocab Size | Parameter | Offline/Online | Notes                                                                                                                           |)
-
-[//]: # (|:--------------------------------------------------------------------------------------------------------------------------------------------------:|:--------:|:--------------------------------:|:----------:|:---------:|:--------------:|:--------------------------------------------------------------------------------------------------------------------------------|)
-
-[//]: # (|        [Paraformer-large]&#40;https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary&#41;        | CN & EN  | Alibaba Speech Data &#40;60000hours&#41; |    8404    |   220M    |    Offline     | Duration of input wav <= 20s                                                                                                    |)
+|                               Model Name                                | Language |           Training Data            | Vocab Size | Parameter | Offline/Online | Notes                                                                                                                           |
+|:-----------------------------------------------------------------------:|:--------:|:----------------------------------:|:----------:|:---------:|:--------------:|:--------------------------------------------------------------------------------------------------------------------------------|
+| [Paraformer-large](https://huggingface.co/funasr/paraformer-large)      | CN & EN  | Alibaba Speech Data (60000hours)   |    8404    |   220M    |    Offline     | Duration of input wav <= 20s                                                                                                    |
 
 [//]: # (| [Paraformer-large-long]&#40;https://www.modelscope.cn/models/damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary&#41; | CN & EN  | Alibaba Speech Data &#40;60000hours&#41; |    8404    |   220M    |    Offline     | Which ould deal with arbitrary length input wav                                                                                 |)
 
@@ -77,21 +75,17 @@ Here we provided several pretrained models on different datasets. The details of
 
 ### Voice Activity Detection Models
 
-[//]: # (|                                           Model Name                                           |        Training Data         | Parameters | Sampling Rate | Notes |)
-
-[//]: # (|:----------------------------------------------------------------------------------------------:|:----------------------------:|:----------:|:-------------:|:------|)
-
-[//]: # (| [FSMN-VAD]&#40;https://modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary&#41; | Alibaba Speech Data &#40;5000hours&#41; |    0.4M    |     16000     |       |)
+|                      Model Name                      |        Training Data         | Parameters | Sampling Rate | Notes |
+|:----------------------------------------------------:|:----------------------------:|:----------:|:-------------:|:------|
+| [FSMN-VAD](https://huggingface.co/funasr/FSMN-VAD)   | Alibaba Speech Data (5000hours) |    0.4M    |     16000     |       |
 
 [//]: # (|   [FSMN-VAD]&#40;https://modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-8k-common/summary&#41;        | Alibaba Speech Data &#40;5000hours&#41; |    0.4M    |     8000      |       |)
 
 ### Punctuation Restoration Models
 
-[//]: # (|                                                         Model Name                                                         |        Training Data         | Parameters | Vocab Size| Offline/Online | Notes |)
-
-[//]: # (|:--------------------------------------------------------------------------------------------------------------------------:|:----------------------------:|:----------:|:----------:|:--------------:|:------|)
-
-[//]: # (|      [CT-Transformer]&#40;https://modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch/summary&#41;      | Alibaba Text Data |    70M     |    272727     |    Offline     |   offline punctuation model    |)
+|                              Model Name                              |        Training Data         | Parameters | Vocab Size| Offline/Online | Notes |
+|:--------------------------------------------------------------------:|:----------------------------:|:----------:|:----------:|:--------------:|:------|
+| [CT-Transformer](https://huggingface.co/funasr/CT-Transformer-punc)  | Alibaba Text Data |    70M     |    272727     |    Offline     |   offline punctuation model    |
 
 [//]: # (| [CT-Transformer]&#40;https://modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727/summary&#41;      | Alibaba Text Data |    70M     |    272727     |     Online     |  online punctuation model     |)
 

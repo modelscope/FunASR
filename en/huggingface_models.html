@@ -165,7 +165,30 @@
 <h3>Speech Recognition Models<a class="headerlink" href="#speech-recognition-models" title="Permalink to this headline"></a></h3>
 <div class="section" id="paraformer-models">
 <h4>Paraformer Models<a class="headerlink" href="#paraformer-models" title="Permalink to this headline"></a></h4>
-</div>
+<table border="1" class="docutils">
+<thead>
+<tr>
+<th style="text-align: center;">Model Name</th>
+<th style="text-align: center;">Language</th>
+<th style="text-align: center;">Training Data</th>
+<th style="text-align: center;">Vocab Size</th>
+<th style="text-align: center;">Parameter</th>
+<th style="text-align: center;">Offline/Online</th>
+<th style="text-align: left;">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><a href="https://huggingface.co/funasr/paraformer-large">Paraformer-large</a></td>
+<td style="text-align: center;">CN &amp; EN</td>
+<td style="text-align: center;">Alibaba Speech Data (60000hours)</td>
+<td style="text-align: center;">8404</td>
+<td style="text-align: center;">220M</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: left;">Duration of input wav &lt;= 20s</td>
+</tr>
+</tbody>
+</table></div>
 <div class="section" id="uniasr-models">
 <h4>UniASR Models<a class="headerlink" href="#uniasr-models" title="Permalink to this headline"></a></h4>
 </div>
@@ -184,10 +207,50 @@
 </div>
 <div class="section" id="voice-activity-detection-models">
 <h3>Voice Activity Detection Models<a class="headerlink" href="#voice-activity-detection-models" title="Permalink to this headline"></a></h3>
-</div>
+<table border="1" class="docutils">
+<thead>
+<tr>
+<th style="text-align: center;">Model Name</th>
+<th style="text-align: center;">Training Data</th>
+<th style="text-align: center;">Parameters</th>
+<th style="text-align: center;">Sampling Rate</th>
+<th style="text-align: left;">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><a href="https://huggingface.co/funasr/FSMN-VAD">FSMN-VAD</a></td>
+<td style="text-align: center;">Alibaba Speech Data (5000hours)</td>
+<td style="text-align: center;">0.4M</td>
+<td style="text-align: center;">16000</td>
+<td style="text-align: left;"></td>
+</tr>
+</tbody>
+</table></div>
 <div class="section" id="punctuation-restoration-models">
 <h3>Punctuation Restoration Models<a class="headerlink" href="#punctuation-restoration-models" title="Permalink to this headline"></a></h3>
-</div>
+<table border="1" class="docutils">
+<thead>
+<tr>
+<th style="text-align: center;">Model Name</th>
+<th style="text-align: center;">Training Data</th>
+<th style="text-align: center;">Parameters</th>
+<th style="text-align: center;">Vocab Size</th>
+<th style="text-align: center;">Offline/Online</th>
+<th style="text-align: left;">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><a href="https://huggingface.co/funasr/CT-Transformer-punc">CT-Transformer</a></td>
+<td style="text-align: center;">Alibaba Text Data</td>
+<td style="text-align: center;">70M</td>
+<td style="text-align: center;">272727</td>
+<td style="text-align: center;">Offline</td>
+<td style="text-align: left;">offline punctuation model</td>
+</tr>
+</tbody>
+</table></div>
 <div class="section" id="language-models">
 <h3>Language Models<a class="headerlink" href="#language-models" title="Permalink to this headline"></a></h3>
 </div>
