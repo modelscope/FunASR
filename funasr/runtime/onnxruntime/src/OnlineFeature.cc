@@ -12,7 +12,10 @@ OnlineFeature::OnlineFeature(int sample_rate, knf::FbankOptions fbank_opts, int 
     fbank_opts_(std::move(fbank_opts)),
     lfr_m_(lfr_m),
     lfr_n_(lfr_n),
-    cmvns_(std::move(cmvns)) {}
+    cmvns_(std::move(cmvns)) {
+  frame_sample_length_ = sample_rate_ / 1000 * 25;;
+  frame_shift_sample_length_ = sample_rate_ / 1000 * 10;
+}
 
 void OnlineFeature::extractFeats(vector<std::vector<float>> &vad_feats,
                                  vector<float> waves, bool input_finished) {
@@ -54,6 +57,7 @@ void OnlineFeature::extractFeats(vector<std::vector<float>> &vad_feats,
       }
       vad_feats = lfr_splice_cache_;
       OnlineLfrCmvn(vad_feats);
+      reset_cache();
     }
   }
 
