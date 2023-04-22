@@ -25,8 +25,8 @@ ELSE()
     link_directories(${ONNXRUNTIME_DIR}/lib)
 endif()
 
-include_directories(${PROJECT_SOURCE_DIR}/kaldi-native-fbank)
+include_directories(${PROJECT_SOURCE_DIR}/third_party/kaldi-native-fbank)
 
-add_subdirectory("./third_party/yaml-cpp")
-add_subdirectory(kaldi-native-fbank/kaldi-native-fbank/csrc)
+add_subdirectory(third_party/yaml-cpp)
+add_subdirectory(third_party/kaldi-native-fbank/kaldi-native-fbank/csrc)
 add_subdirectory(src)
