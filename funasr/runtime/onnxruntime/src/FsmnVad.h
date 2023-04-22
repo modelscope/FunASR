@@ -17,6 +17,7 @@ public:
                   float vad_speech_noise_thres);
 
     std::vector<std::vector<int>> infer(const std::vector<float> &waves);
+    void Reset();
 
 private:
 
