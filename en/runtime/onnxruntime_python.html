@@ -77,7 +77,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#export-onnx-model">Export onnx model</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#install-the-funasr-onnx">Install the <code class="docutils literal notranslate"><span class="pre">funasr_onnx</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#install-funasr-onnx">Install <code class="docutils literal notranslate"><span class="pre">funasr_onnx</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#inference-with-runtime">Inference with runtime</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#speech-recognition">Speech Recognition</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#paraformer">Paraformer</a></li>
@@ -177,8 +177,8 @@ pip install onnx onnxruntime <span class="c1"># Optional, for onnx quantization<
 </div>
 </div>
 </div>
-<div class="section" id="install-the-funasr-onnx">
-<h2>Install the <code class="docutils literal notranslate"><span class="pre">funasr_onnx</span></code><a class="headerlink" href="#install-the-funasr-onnx" title="Permalink to this headline"></a></h2>
+<div class="section" id="install-funasr-onnx">
+<h2>Install <code class="docutils literal notranslate"><span class="pre">funasr_onnx</span></code><a class="headerlink" href="#install-funasr-onnx" title="Permalink to this headline"></a></h2>
 <p>install from pip</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install -U funasr_onnx
 <span class="c1"># For the users in China, you could install with the command:</span>
@@ -203,7 +203,7 @@ pip install -e ./
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">funasr_onnx</span> <span class="kn">import</span> <span class="n">Paraformer</span>
 
 <span class="n">model_dir</span> <span class="o">=</span> <span class="s2">&quot;./export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&quot;</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">Paraformer</span><span class="p">(</span><span class="n">model_dir</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">Paraformer</span><span class="p">(</span><span class="n">model_dir</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">quantize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="n">wav_path</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;./export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/example/asr_example.wav&#39;</span><span class="p">]</span>
 
@@ -212,10 +212,14 @@ pip install -e ./
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>Model_dir: the model path, which contains <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code>, <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">am.mvn</span></code></p></li>
-<li><p>Input: wav formt file, support formats: <code class="docutils literal notranslate"><span class="pre">str,</span> <span class="pre">np.ndarray,</span> <span class="pre">List[str]</span></code></p></li>
-<li><p>Output: <code class="docutils literal notranslate"><span class="pre">List[str]</span></code>: recognition result</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model_dir</span></code>: the model path, which contains <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code>, <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">am.mvn</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>: <code class="docutils literal notranslate"><span class="pre">1</span></code> (Default), the batch size duration inference</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">device_id</span></code>: <code class="docutils literal notranslate"><span class="pre">-1</span></code> (Default), infer on CPU. If you want to infer with GPU, set it to gpu_id (Please make sure that you have install the onnxruntime-gpu)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">quantize</span></code>: <code class="docutils literal notranslate"><span class="pre">False</span></code> (Default), load the model of <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code> in <code class="docutils literal notranslate"><span class="pre">model_dir</span></code>. If set <code class="docutils literal notranslate"><span class="pre">True</span></code>, load the model of <code class="docutils literal notranslate"><span class="pre">model_quant.onnx</span></code> in <code class="docutils literal notranslate"><span class="pre">model_dir</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">intra_op_num_threads</span></code>: <code class="docutils literal notranslate"><span class="pre">4</span></code> (Default), sets the number of threads used for intraop parallelism on CPU</p></li>
 </ul>
+<p>Input: wav formt file, support formats: <code class="docutils literal notranslate"><span class="pre">str,</span> <span class="pre">np.ndarray,</span> <span class="pre">List[str]</span></code></p>
+<p>Output: <code class="docutils literal notranslate"><span class="pre">List[str]</span></code>: recognition result</p>
 </div>
 <div class="section" id="paraformer-online">
 <h4>Paraformer-online<a class="headerlink" href="#paraformer-online" title="Permalink to this headline"></a></h4>
@@ -236,10 +240,14 @@ pip install -e ./
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>Model_dir: the model path, which contains <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code>, <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">am.mvn</span></code></p></li>
-<li><p>Input: wav formt file, support formats: <code class="docutils literal notranslate"><span class="pre">str,</span> <span class="pre">np.ndarray,</span> <span class="pre">List[str]</span></code></p></li>
-<li><p>Output: <code class="docutils literal notranslate"><span class="pre">List[str]</span></code>: recognition result</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model_dir</span></code>: the model path, which contains <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code>, <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">am.mvn</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>: <code class="docutils literal notranslate"><span class="pre">1</span></code> (Default), the batch size duration inference</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">device_id</span></code>: <code class="docutils literal notranslate"><span class="pre">-1</span></code> (Default), infer on CPU. If you want to infer with GPU, set it to gpu_id (Please make sure that you have install the onnxruntime-gpu)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">quantize</span></code>: <code class="docutils literal notranslate"><span class="pre">False</span></code> (Default), load the model of <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code> in <code class="docutils literal notranslate"><span class="pre">model_dir</span></code>. If set <code class="docutils literal notranslate"><span class="pre">True</span></code>, load the model of <code class="docutils literal notranslate"><span class="pre">model_quant.onnx</span></code> in <code class="docutils literal notranslate"><span class="pre">model_dir</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">intra_op_num_threads</span></code>: <code class="docutils literal notranslate"><span class="pre">4</span></code> (Default), sets the number of threads used for intraop parallelism on CPU</p></li>
 </ul>
+<p>Input: wav formt file, support formats: <code class="docutils literal notranslate"><span class="pre">str,</span> <span class="pre">np.ndarray,</span> <span class="pre">List[str]</span></code></p>
+<p>Output: <code class="docutils literal notranslate"><span class="pre">List[str]</span></code>: recognition result</p>
 </div>
 <div class="section" id="fsmn-vad-online">
 <h4>FSMN-VAD-online<a class="headerlink" href="#fsmn-vad-online" title="Permalink to this headline"></a></h4>
@@ -273,10 +281,14 @@ pip install -e ./
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>Model_dir: the model path, which contains <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code>, <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">am.mvn</span></code></p></li>
-<li><p>Input: wav formt file, support formats: <code class="docutils literal notranslate"><span class="pre">str,</span> <span class="pre">np.ndarray,</span> <span class="pre">List[str]</span></code></p></li>
-<li><p>Output: <code class="docutils literal notranslate"><span class="pre">List[str]</span></code>: recognition result</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model_dir</span></code>: the model path, which contains <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code>, <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">am.mvn</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>: <code class="docutils literal notranslate"><span class="pre">1</span></code> (Default), the batch size duration inference</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">device_id</span></code>: <code class="docutils literal notranslate"><span class="pre">-1</span></code> (Default), infer on CPU. If you want to infer with GPU, set it to gpu_id (Please make sure that you have install the onnxruntime-gpu)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">quantize</span></code>: <code class="docutils literal notranslate"><span class="pre">False</span></code> (Default), load the model of <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code> in <code class="docutils literal notranslate"><span class="pre">model_dir</span></code>. If set <code class="docutils literal notranslate"><span class="pre">True</span></code>, load the model of <code class="docutils literal notranslate"><span class="pre">model_quant.onnx</span></code> in <code class="docutils literal notranslate"><span class="pre">model_dir</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">intra_op_num_threads</span></code>: <code class="docutils literal notranslate"><span class="pre">4</span></code> (Default), sets the number of threads used for intraop parallelism on CPU</p></li>
 </ul>
+<p>Input: wav formt file, support formats: <code class="docutils literal notranslate"><span class="pre">str,</span> <span class="pre">np.ndarray,</span> <span class="pre">List[str]</span></code></p>
+<p>Output: <code class="docutils literal notranslate"><span class="pre">List[str]</span></code>: recognition result</p>
 </div>
 </div>
 <div class="section" id="punctuation-restoration">
@@ -294,10 +306,13 @@ pip install -e ./
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>Model_dir: the model path, which contains <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code>, <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">am.mvn</span></code></p></li>
-<li><p>Input: wav formt file, support formats: <code class="docutils literal notranslate"><span class="pre">str,</span> <span class="pre">np.ndarray,</span> <span class="pre">List[str]</span></code></p></li>
-<li><p>Output: <code class="docutils literal notranslate"><span class="pre">List[str]</span></code>: recognition result</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model_dir</span></code>: the model path, which contains <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code>, <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">am.mvn</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">device_id</span></code>: <code class="docutils literal notranslate"><span class="pre">-1</span></code> (Default), infer on CPU. If you want to infer with GPU, set it to gpu_id (Please make sure that you have install the onnxruntime-gpu)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">quantize</span></code>: <code class="docutils literal notranslate"><span class="pre">False</span></code> (Default), load the model of <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code> in <code class="docutils literal notranslate"><span class="pre">model_dir</span></code>. If set <code class="docutils literal notranslate"><span class="pre">True</span></code>, load the model of <code class="docutils literal notranslate"><span class="pre">model_quant.onnx</span></code> in <code class="docutils literal notranslate"><span class="pre">model_dir</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">intra_op_num_threads</span></code>: <code class="docutils literal notranslate"><span class="pre">4</span></code> (Default), sets the number of threads used for intraop parallelism on CPU</p></li>
 </ul>
+<p>Input: <code class="docutils literal notranslate"><span class="pre">str</span></code>, raw text of asr result</p>
+<p>Output: <code class="docutils literal notranslate"><span class="pre">List[str]</span></code>: recognition result</p>
 </div>
 <div class="section" id="ct-transformer-online">
 <h4>CT-Transformer-online<a class="headerlink" href="#ct-transformer-online" title="Permalink to this headline"></a></h4>
@@ -319,10 +334,13 @@ pip install -e ./
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>Model_dir: the model path, which contains <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code>, <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">am.mvn</span></code></p></li>
-<li><p>Input: wav formt file, support formats: <code class="docutils literal notranslate"><span class="pre">str,</span> <span class="pre">np.ndarray,</span> <span class="pre">List[str]</span></code></p></li>
-<li><p>Output: <code class="docutils literal notranslate"><span class="pre">List[str]</span></code>: recognition result</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model_dir</span></code>: the model path, which contains <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code>, <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">am.mvn</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">device_id</span></code>: <code class="docutils literal notranslate"><span class="pre">-1</span></code> (Default), infer on CPU. If you want to infer with GPU, set it to gpu_id (Please make sure that you have install the onnxruntime-gpu)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">quantize</span></code>: <code class="docutils literal notranslate"><span class="pre">False</span></code> (Default), load the model of <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code> in <code class="docutils literal notranslate"><span class="pre">model_dir</span></code>. If set <code class="docutils literal notranslate"><span class="pre">True</span></code>, load the model of <code class="docutils literal notranslate"><span class="pre">model_quant.onnx</span></code> in <code class="docutils literal notranslate"><span class="pre">model_dir</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">intra_op_num_threads</span></code>: <code class="docutils literal notranslate"><span class="pre">4</span></code> (Default), sets the number of threads used for intraop parallelism on CPU</p></li>
 </ul>
+<p>Input: <code class="docutils literal notranslate"><span class="pre">str</span></code>, raw text of asr result</p>
+<p>Output: <code class="docutils literal notranslate"><span class="pre">List[str]</span></code>: recognition result</p>
 </div>
 </div>
 </div>

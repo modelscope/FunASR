@@ -47,10 +47,10 @@ Full code of demo, please ref to [demo](https://github.com/alibaba-damo-academy/
 ##### Define pipeline
 - `task`: `Tasks.voice_activity_detection`
 - `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
-- `ngpu`: `1` (Defalut), decoding on GPU. If ngpu=0, decoding on CPU
-- `ncpu`: `1` (Defalut), sets the number of threads used for intraop parallelism on CPU 
-- `output_dir`: `None` (Defalut), the output path of results if set
-- `batch_size`: `1` (Defalut), batch size when decoding
+- `ngpu`: `1` (Default), decoding on GPU. If ngpu=0, decoding on CPU
+- `ncpu`: `1` (Default), sets the number of threads used for intraop parallelism on CPU 
+- `output_dir`: `None` (Default), the output path of results if set
+- `batch_size`: `1` (Default), batch size when decoding
 ##### Infer pipeline
 - `audio_in`: the input to decode, which could be: 
   - wav_path, `e.g.`: asr_example.wav,
@@ -64,7 +64,7 @@ Full code of demo, please ref to [demo](https://github.com/alibaba-damo-academy/
   ```
   In this case of `wav.scp` input, `output_dir` must be set to save the output results
 - `audio_fs`: audio sampling rate, only set when audio_in is pcm audio
-- `output_dir`: None (Defalut), the output path of results if set
+- `output_dir`: None (Default), the output path of results if set
 
 ### Inference with multi-thread CPUs or multi GPUs
 FunASR also offer recipes [infer.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/vad/TEMPLATE/infer.sh) to decode with multi-thread CPUs, or multi GPUs.
