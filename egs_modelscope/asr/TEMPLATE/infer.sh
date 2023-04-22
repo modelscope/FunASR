@@ -36,7 +36,7 @@ for JOB in $(seq ${nj}); do
 done
 perl utils/split_scp.pl ${data_dir}/wav.scp ${split_scps}
 
-if ${checkpoint_dir}; then
+if -n ${checkpoint_dir}; then
   python utils/prepare_checkpoint.py ${model} ${checkpoint_dir} ${checkpoint_name}
   model=${checkpoint_dir}/${model}
 fi
