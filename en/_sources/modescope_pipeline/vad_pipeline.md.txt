@@ -1,7 +1,7 @@
 # Voice Activity Detection
 
 > **Note**: 
-> The modelscope pipeline supports all the models in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope) to inference and finetine. Here we take model of FSMN-VAD as example to demonstrate the usage.
+> The modelscope pipeline supports all the models in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope) to inference and finetine. Here we take the model of FSMN-VAD as example to demonstrate the usage.
 
 ## Inference
 

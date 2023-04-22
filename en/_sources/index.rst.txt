@@ -31,12 +31,7 @@ Overview
    ./academic_recipe/sd_recipe.md
 
 
-.. toctree::
-   :maxdepth: 1
-   :caption: Model Zoo
 
-   ./modelscope_models.md
-   ./huggingface_models.md
 
 .. toctree::
    :maxdepth: 1
@@ -56,11 +51,13 @@ Overview
 
    Undo
 
+
 .. toctree::
    :maxdepth: 1
-   :caption: Funasr Library
+   :caption: Model Zoo
 
-   ./build_task.md
+   ./modelscope_models.md
+   ./huggingface_models.md
 
 .. toctree::
    :maxdepth: 1
@@ -81,6 +78,13 @@ Overview
    ./benchmark/benchmark_onnx.md
    ./benchmark/benchmark_onnx_cpp.md
    ./benchmark/benchmark_libtorch.md
+
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Funasr Library
+
+   ./build_task.md
 
 .. toctree::
    :maxdepth: 1
