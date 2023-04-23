@@ -1,11 +1,6 @@
-//
-// Created by zhuzizyf(China Telecom Shanghai) on 4/22/23.
-//
 
-
-#include "kaldi-native-fbank/csrc/feature-fbank.h"
-#include "kaldi-native-fbank/csrc/online-feature.h"
 #include <vector>
+#include "precomp.h"
 
 using namespace std;
 

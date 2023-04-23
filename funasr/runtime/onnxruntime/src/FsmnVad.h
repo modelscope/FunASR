@@ -1,12 +1,8 @@
-// Collaborators: zhuzizyf(China Telecom Shanghai)
 
 #ifndef VAD_SERVER_FSMNVAD_H
 #define VAD_SERVER_FSMNVAD_H
 
-#include "e2e_vad.h"
-#include "onnxruntime_cxx_api.h"
-#include "kaldi-native-fbank/csrc/feature-fbank.h"
-#include "kaldi-native-fbank/csrc/online-feature.h"
+#include "precomp.h"
 
 class FsmnVad {
 public:

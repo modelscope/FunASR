@@ -29,6 +29,7 @@ using namespace std;
 #include "commonfunc.h"
 #include "predefine_coe.h"
 #include "FsmnVad.h"
+#include "e2e_vad.h"
 #include "Vocab.h"
 #include "CommonStruct.h"
 #include "Audio.h"

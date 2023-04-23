@@ -1,7 +1,5 @@
-// Collaborators: zhuzizyf(China Telecom Shanghai)
 
 #include <fstream>
-#include "FsmnVad.h"
 #include "precomp.h"
 //#include "glog/logging.h"
 

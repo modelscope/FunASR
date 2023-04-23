@@ -1,9 +1,5 @@
-//
-// Created by zhuzizyf(China Telecom Shanghai) on 4/22/23.
-//
 
 #include "OnlineFeature.h"
-
 #include <utility>
 
 OnlineFeature::OnlineFeature(int sample_rate, knf::FbankOptions fbank_opts, int lfr_m, int lfr_n,
