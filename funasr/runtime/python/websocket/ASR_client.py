@@ -23,6 +23,10 @@ parser.add_argument("--chunk_size",
                     type=int,
                     default=300,
                     help="ms")
+parser.add_argument("--audio_in",
+                    type=str,
+                    default=None,
+                    help="audio_in")
 
 args = parser.parse_args()
 
