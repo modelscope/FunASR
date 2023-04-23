@@ -65,7 +65,7 @@ pip install -U modelscope
 # pip install -U modelscope -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html -i https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
 
-## FQA
+### FQA
 - For installation on MAC M1 chip, the following error may happen:
 - - _cffi_backend.cpython-38-darwin.so' (mach-o file, but is an incompatible architecture (have (x86_64), need (arm64e)))
     ```shell
