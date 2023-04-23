@@ -207,6 +207,13 @@ if __name__ == '__main__':
 ```shell
 python finetune.py &> log.txt &
 ```
+tail log.txt
+```
+[bach-gpu011024008134] 2023-04-23 18:59:13,976 (e2e_asr_paraformer:467) INFO: enable sampler in paraformer, sampling_ratio: 0.75
+[bach-gpu011024008134] 2023-04-23 18:59:48,924 (trainer:777) INFO: 2epoch:train:1-50batch:50num_updates: iter_time=0.008, forward_time=0.302, loss_att=0.186, acc=0.942, loss_pre=0.005, loss=0.192, backward_time=0.231, optim_step_time=0.117, optim0_lr0=7.484e-06, train_time=0.753
+[bach-gpu011024008134] 2023-04-23 19:00:23,869 (trainer:777) INFO: 2epoch:train:51-100batch:100num_updates: iter_time=1.152e-04, forward_time=0.275, loss_att=0.184, acc=0.945, loss_pre=0.005, loss=0.189, backward_time=0.234, optim_step_time=0.117, optim0_lr0=7.567e-06, train_time=0.699
+[bach-gpu011024008134] 2023-04-23 19:00:58,463 (trainer:777) INFO: 2epoch:train:101-150batch:150num_updates: iter_time=1.123e-04, forward_time=0.271, loss_att=0.204, acc=0.942, loss_pre=0.005, loss=0.210, backward_time=0.231, optim_step_time=0.116, optim0_lr0=7.651e-06, train_time=0.692
+```
 
 ### FAQ
 ### Multi GPUs training and distributed training
