@@ -420,16 +420,16 @@ if __name__ == '__main__':
     prepare_data(args, distributed_option)
 
     model = build_model(args)
-    optimizer = build_optimizer(args, model=model)
-    scheduler = build_scheduler(args, optimizer)
+    optimizers = build_optimizer(args, model=model)
+    schedulers = build_scheduler(args, optimizers)
 
     logging.info("world size: {}, rank: {}, local_rank: {}".format(distributed_option.dist_world_size,
                                                                    distributed_option.dist_rank,
                                                                    distributed_option.local_rank))
     logging.info(pytorch_cudnn_version())
     logging.info(model_summary(model))
-    logging.info("Optimizer: {}".format(optimizer))
-    logging.info("Scheduler: {}".format(scheduler))
+    logging.info("Optimizer: {}".format(optimizers))
+    logging.info("Scheduler: {}".format(schedulers))
 
     # dump args to config.yaml
     if not distributed_option.distributed or distributed_option.dist_rank == 0:

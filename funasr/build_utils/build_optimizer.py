@@ -23,4 +23,6 @@ def build_optimizer(args, model):
     if optim_class is None:
         raise ValueError(f"must be one of {list(optim_classes)}: {args.optim}")
     optimizer = optim_class(model.parameters(), **args.optim_conf)
-    return optimizer
+
+    optimizers = [optimizer]
+    return optimizers
