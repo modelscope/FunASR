@@ -43,7 +43,12 @@
               <p class="caption"><span class="caption-text">Installation</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#install-conda-optional">Install Conda (Optional):</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#install-conda-optional">Install Conda (Optional):</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#linux">Linux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mac">Mac</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#windows">Windows</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#install-pytorch-version-1-11-0">Install Pytorch (version &gt;= 1.11.0):</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#install-funasr">Install funasr</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#install-from-pip">Install from pip</a></li>
@@ -53,6 +58,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#install-modelscope-optional">Install modelscope (Optional)</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="#fqa">FQA</a></li>
 <li class="toctree-l1"><a class="reference internal" href="docker.html">Docker</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Academic Egs</span></p>
@@ -145,12 +151,31 @@
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h1>
 <div class="section" id="install-conda-optional">
 <h2>Install Conda (Optional):<a class="headerlink" href="#install-conda-optional" title="Permalink to this headline"></a></h2>
+<div class="section" id="linux">
+<h3>Linux<a class="headerlink" href="#linux" title="Permalink to this headline"></a></h3>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
 sh Miniconda3-latest-Linux-x86_64.sh
 <span class="nb">source</span> ~/.bashrc
 conda create -n funasr <span class="nv">python</span><span class="o">=</span><span class="m">3</span>.7
 conda activate funasr
 </pre></div>
+</div>
+</div>
+<div class="section" id="mac">
+<h3>Mac<a class="headerlink" href="#mac" title="Permalink to this headline"></a></h3>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>wget https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
+<span class="c1"># For M1 chip</span>
+<span class="c1"># wget https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-arm64.sh</span>
+sh Miniconda3-latest-MacOSX*
+<span class="nb">source</span> ~/.zashrc
+conda create -n funasr <span class="nv">python</span><span class="o">=</span><span class="m">3</span>.8
+conda activate funasr
+</pre></div>
+</div>
+</div>
+<div class="section" id="windows">
+<h3>Windows<a class="headerlink" href="#windows" title="Permalink to this headline"></a></h3>
+<p>Ref to <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html#windows-installers">docs</a></p>
 </div>
 </div>
 <div class="section" id="install-pytorch-version-1-11-0">
@@ -189,6 +214,21 @@ pip install -e ./
 </pre></div>
 </div>
 </div>
+</div>
+<div class="section" id="fqa">
+<h1>FQA<a class="headerlink" href="#fqa" title="Permalink to this headline"></a></h1>
+<ul>
+<li><p>For installation on MAC M1 chip, the following error may happen:</p></li>
+<li><ul>
+<li><p>_cffi_backend.cpython-38-darwin.so’ (mach-o file, but is an incompatible architecture (have (x86_64), need (arm64e)))</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip uninstall cffi pycparser
+<span class="nv">ARCHFLAGS</span><span class="o">=</span><span class="s2">&quot;-arch arm64&quot;</span> pip install cffi pycparser --compile --no-cache-dir
+</pre></div>
+</div>
+</li>
+</ul>
+</li>
+</ul>
 </div>
 
 
