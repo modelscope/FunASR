@@ -299,7 +299,7 @@ def filter_wav_text(data_dir, dataset):
     wav_dict = {}
     for line in wav_lines:
         parts = line.strip().split()
-        if len(parts) < 2:
+        if len(parts) != 2:
             continue
         sample_name, wav_path = parts
         wav_dict[sample_name] = wav_path
