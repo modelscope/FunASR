@@ -8,6 +8,7 @@
 
 ### Install Conda (Optional):
 
+#### Linux
 ```sh
 wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
 sh Miniconda3-latest-Linux-x86_64.sh
@@ -15,6 +16,18 @@ source ~/.bashrc
 conda create -n funasr python=3.7
 conda activate funasr
 ```
+#### Mac
+```sh
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
+# For M1 chip
+# wget https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-arm64.sh
+sh Miniconda3-latest-MacOSX*
+source ~/.zashrc
+conda create -n funasr python=3.8
+conda activate funasr
+```
+#### Windows
+Ref to [docs](https://docs.conda.io/en/latest/miniconda.html#windows-installers)
 
 ### Install Pytorch (version >= 1.11.0):
 
@@ -51,3 +64,11 @@ pip install -U modelscope
 # For the users in China, you could install with the command:
 # pip install -U modelscope -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html -i https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
+
+### FQA
+- For installation on MAC M1 chip, the following error may happen:
+- - _cffi_backend.cpython-38-darwin.so' (mach-o file, but is an incompatible architecture (have (x86_64), need (arm64e)))
+    ```shell
+    pip uninstall cffi pycparser
+    ARCHFLAGS="-arch arm64" pip install cffi pycparser --compile --no-cache-dir
+    ```

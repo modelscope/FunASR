@@ -1,7 +1,7 @@
 # Speech Recognition
 
 > **Note**: 
-> The modelscope pipeline supports all the models in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope) to inference and finetine. Here we take typic model as example to demonstrate the usage.
+> The modelscope pipeline supports all the models in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope) to inference and finetine. Here we take the typic models as examples to demonstrate the usage.
 
 ## Inference
 
@@ -62,10 +62,10 @@ Undo
 ##### Define pipeline
 - `task`: `Tasks.auto_speech_recognition`
 - `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
-- `ngpu`: `1` (Defalut), decoding on GPU. If ngpu=0, decoding on CPU
-- `ncpu`: `1` (Defalut), sets the number of threads used for intraop parallelism on CPU 
-- `output_dir`: `None` (Defalut), the output path of results if set
-- `batch_size`: `1` (Defalut), batch size when decoding
+- `ngpu`: `1` (Default), decoding on GPU. If ngpu=0, decoding on CPU
+- `ncpu`: `1` (Default), sets the number of threads used for intraop parallelism on CPU 
+- `output_dir`: `None` (Default), the output path of results if set
+- `batch_size`: `1` (Default), batch size when decoding
 ##### Infer pipeline
 - `audio_in`: the input to decode, which could be: 
   - wav_path, `e.g.`: asr_example.wav,
@@ -79,7 +79,7 @@ Undo
   ```
   In this case of `wav.scp` input, `output_dir` must be set to save the output results
 - `audio_fs`: audio sampling rate, only set when audio_in is pcm audio
-- `output_dir`: None (Defalut), the output path of results if set
+- `output_dir`: None (Default), the output path of results if set
 
 ### Inference with multi-thread CPUs or multi GPUs
 FunASR also offer recipes [infer.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/TEMPLATE/infer.sh) to decode with multi-thread CPUs, or multi GPUs.
@@ -186,7 +186,7 @@ CUDA_VISIBLE_DEVICES=1,2 python -m torch.distributed.launch --nproc_per_node 2 f
 ```
 ## Inference with your finetuned model
 
-- Setting parameters in [infer.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/TEMPLATE/infer.sh) is the same with [docs](https://github.com/alibaba-damo-academy/FunASR/tree/main/egs_modelscope/asr/TEMPLATE#inference-with-multi-thread-cpus-or-multi-gpus) 
+- Setting parameters in [infer.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/TEMPLATE/infer.sh) is the same with [docs](https://github.com/alibaba-damo-academy/FunASR/tree/main/egs_modelscope/asr/TEMPLATE#inference-with-multi-thread-cpus-or-multi-gpus), `model` is the model name from modelscope, which you finetuned.
 
 - Decode with multi GPUs:
 ```shell

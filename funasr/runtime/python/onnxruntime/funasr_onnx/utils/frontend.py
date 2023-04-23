@@ -217,7 +217,7 @@ class WavFrontendOnline(WavFrontend):
         frame_num = self.compute_frame_num(input.shape[-1], self.frame_sample_length, self.frame_shift_sample_length)
         # update self.in_cache
         self.input_cache = input[:, -(input.shape[-1] - frame_num * self.frame_shift_sample_length):]
-        waveforms = np.empty(0, dtype=np.int16)
+        waveforms = np.empty(0, dtype=np.float32)
         feats_pad = np.empty(0, dtype=np.float32)
         feats_lens = np.empty(0, dtype=np.int32)
         if frame_num:
@@ -237,7 +237,7 @@ class WavFrontendOnline(WavFrontend):
                     mat[i, :] = self.fbank_fn.get_frame(i)
                 feat = mat.astype(np.float32)
                 feat_len = np.array(mat.shape[0]).astype(np.int32)
-                feats.append(mat)
+                feats.append(feat)
                 feats_lens.append(feat_len)
 
             waveforms = np.stack(waveforms)

@@ -108,8 +108,9 @@ inference_diar_pipline = pipeline(
     task=Tasks.speaker_diarization,
     diar_model_config="sond.yaml",
     model='damo/speech_diarization_sond-en-us-callhome-8k-n16k4-pytorch',
+    model_revision="v1.0.3",
     sv_model="damo/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch",
-    sv_model_revision="master",
+    sv_model_revision="v1.0.0",
 )
 
 audio_list=[
@@ -121,6 +122,7 @@ audio_list=[
 
 results = inference_diar_pipline(audio_in=audio_list)
 print(results)
+# {'text': 'spk1 [(0.8, 1.84), (2.8, 6.16), (7.04, 10.64), (12.08, 12.8), (14.24, 15.6)]\nspk2 [(0.0, 1.12), (1.68, 3.2), (4.48, 7.12), (8.48, 9.04), (10.56, 14.48), (15.44, 16.0)]'}
 ```
 
 ### FAQ
@@ -204,6 +206,13 @@ if __name__ == '__main__':
 
 ```shell
 python finetune.py &> log.txt &
+```
+tail log.txt
+```
+[bach-gpu011024008134] 2023-04-23 18:59:13,976 (e2e_asr_paraformer:467) INFO: enable sampler in paraformer, sampling_ratio: 0.75
+[bach-gpu011024008134] 2023-04-23 18:59:48,924 (trainer:777) INFO: 2epoch:train:1-50batch:50num_updates: iter_time=0.008, forward_time=0.302, loss_att=0.186, acc=0.942, loss_pre=0.005, loss=0.192, backward_time=0.231, optim_step_time=0.117, optim0_lr0=7.484e-06, train_time=0.753
+[bach-gpu011024008134] 2023-04-23 19:00:23,869 (trainer:777) INFO: 2epoch:train:51-100batch:100num_updates: iter_time=1.152e-04, forward_time=0.275, loss_att=0.184, acc=0.945, loss_pre=0.005, loss=0.189, backward_time=0.234, optim_step_time=0.117, optim0_lr0=7.567e-06, train_time=0.699
+[bach-gpu011024008134] 2023-04-23 19:00:58,463 (trainer:777) INFO: 2epoch:train:101-150batch:150num_updates: iter_time=1.123e-04, forward_time=0.271, loss_att=0.204, acc=0.942, loss_pre=0.005, loss=0.210, backward_time=0.231, optim_step_time=0.116, optim0_lr0=7.651e-06, train_time=0.692
 ```
 
 ### FAQ

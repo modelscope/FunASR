@@ -9,6 +9,10 @@ FunASR: A Fundamental End-to-End Speech Recognition Toolkit
 
 FunASR hopes to build a bridge between academic research and industrial applications on speech recognition. By supporting the training & finetuning of the industrial-grade speech recognition model released on `ModelScope <https://www.modelscope.cn/models?page=1&tasks=auto-speech-recognition>`_, researchers and developers can conduct research and production of speech recognition models more conveniently, and promote the development of speech recognition ecology. ASR for Fun！
 
+Overview
+============================================================
+.. image:: ./images/funasr_overview.png
+
 .. toctree::
    :maxdepth: 1
    :caption: Installation
@@ -18,30 +22,20 @@ FunASR hopes to build a bridge between academic research and industrial applicat
 
 .. toctree::
    :maxdepth: 1
-   :caption: Recipe
+   :caption: Academic Egs
 
-   ./recipe/asr_recipe.md
-   ./recipe/punc_recipe.md
-   ./recipe/vad_recipe.md
-   ./recipe/sv_recipe.md
-   ./recipe/sd_recipe.md
+   ./academic_recipe/asr_recipe.md
+   ./academic_recipe/punc_recipe.md
+   ./academic_recipe/vad_recipe.md
+   ./academic_recipe/sv_recipe.md
+   ./academic_recipe/sd_recipe.md
 
-.. toctree::
-   :maxdepth: 1
-   :caption: Custom Your Model
 
-   ./build_task.md
+
 
 .. toctree::
    :maxdepth: 1
-   :caption: Model Zoo
-
-   ./modelscope_models.md
-   ./huggingface_models.md
-
-.. toctree::
-   :maxdepth: 1
-   :caption: ModelScope pipeline
+   :caption: ModelScope Egs
 
    ./modescope_pipeline/quick_start.md
    ./modescope_pipeline/asr_pipeline.md
@@ -53,13 +47,21 @@ FunASR hopes to build a bridge between academic research and industrial applicat
 
 .. toctree::
    :maxdepth: 1
-   :caption: Huggingface pipeline
+   :caption: Huggingface Egs
 
    Undo
 
+
 .. toctree::
    :maxdepth: 1
-   :caption: Runtime
+   :caption: Model Zoo
+
+   ./modelscope_models.md
+   ./huggingface_models.md
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Runtime and Service
 
    ./runtime/export.md
    ./runtime/onnxruntime_python.md
@@ -74,7 +76,15 @@ FunASR hopes to build a bridge between academic research and industrial applicat
    :caption: Benchmark and Leadboard
 
    ./benchmark/benchmark_onnx.md
+   ./benchmark/benchmark_onnx_cpp.md
    ./benchmark/benchmark_libtorch.md
+
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Funasr Library
+
+   ./build_task.md
 
 .. toctree::
    :maxdepth: 1

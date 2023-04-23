@@ -19,7 +19,7 @@ python -m funasr.export.export_model --model-name damo/speech_paraformer-large_a
 ```
 
 
-## Install the `funasr_onnx`
+## Install `funasr_onnx`
 
 install from pip
 ```shell
@@ -46,16 +46,22 @@ pip install -e ./
  from funasr_onnx import Paraformer
 
  model_dir = "./export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
- model = Paraformer(model_dir, batch_size=1)
+ model = Paraformer(model_dir, batch_size=1, quantize=True)
 
  wav_path = ['./export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/example/asr_example.wav']
 
  result = model(wav_path)
  print(result)
  ```
-- Model_dir: the model path, which contains `model.onnx`, `config.yaml`, `am.mvn`
-- Input: wav formt file, support formats: `str, np.ndarray, List[str]`
-- Output: `List[str]`: recognition result
+- `model_dir`: the model path, which contains `model.onnx`, `config.yaml`, `am.mvn`
+- `batch_size`: `1` (Default), the batch size duration inference
+- `device_id`: `-1` (Default), infer on CPU. If you want to infer with GPU, set it to gpu_id (Please make sure that you have install the onnxruntime-gpu)
+- `quantize`: `False` (Default), load the model of `model.onnx` in `model_dir`. If set `True`, load the model of `model_quant.onnx` in `model_dir`
+- `intra_op_num_threads`: `4` (Default), sets the number of threads used for intraop parallelism on CPU
+
+Input: wav formt file, support formats: `str, np.ndarray, List[str]`
+
+Output: `List[str]`: recognition result
 
 #### Paraformer-online
 
@@ -71,9 +77,16 @@ model = Fsmn_vad(model_dir)
 result = model(wav_path)
 print(result)
 ```
-- Model_dir: the model path, which contains `model.onnx`, `config.yaml`, `am.mvn`
-- Input: wav formt file, support formats: `str, np.ndarray, List[str]`
-- Output: `List[str]`: recognition result
+- `model_dir`: the model path, which contains `model.onnx`, `config.yaml`, `am.mvn`
+- `batch_size`: `1` (Default), the batch size duration inference
+- `device_id`: `-1` (Default), infer on CPU. If you want to infer with GPU, set it to gpu_id (Please make sure that you have install the onnxruntime-gpu)
+- `quantize`: `False` (Default), load the model of `model.onnx` in `model_dir`. If set `True`, load the model of `model_quant.onnx` in `model_dir`
+- `intra_op_num_threads`: `4` (Default), sets the number of threads used for intraop parallelism on CPU
+
+Input: wav formt file, support formats: `str, np.ndarray, List[str]`
+
+Output: `List[str]`: recognition result
+
 
 #### FSMN-VAD-online
 ```python
@@ -105,9 +118,16 @@ for sample_offset in range(0, speech_length, min(step, speech_length - sample_of
     if segments_result:
         print(segments_result)
 ```
-- Model_dir: the model path, which contains `model.onnx`, `config.yaml`, `am.mvn`
-- Input: wav formt file, support formats: `str, np.ndarray, List[str]`
-- Output: `List[str]`: recognition result
+- `model_dir`: the model path, which contains `model.onnx`, `config.yaml`, `am.mvn`
+- `batch_size`: `1` (Default), the batch size duration inference
+- `device_id`: `-1` (Default), infer on CPU. If you want to infer with GPU, set it to gpu_id (Please make sure that you have install the onnxruntime-gpu)
+- `quantize`: `False` (Default), load the model of `model.onnx` in `model_dir`. If set `True`, load the model of `model_quant.onnx` in `model_dir`
+- `intra_op_num_threads`: `4` (Default), sets the number of threads used for intraop parallelism on CPU
+
+Input: wav formt file, support formats: `str, np.ndarray, List[str]`
+
+Output: `List[str]`: recognition result
+
 
 ### Punctuation Restoration
 #### CT-Transformer
@@ -121,9 +141,15 @@ text_in="跨境河流是养育沿岸人民的生命之源长期以来为帮助�
 result = model(text_in)
 print(result[0])
 ```
-- Model_dir: the model path, which contains `model.onnx`, `config.yaml`, `am.mvn`
-- Input: wav formt file, support formats: `str, np.ndarray, List[str]`
-- Output: `List[str]`: recognition result
+- `model_dir`: the model path, which contains `model.onnx`, `config.yaml`, `am.mvn`
+- `device_id`: `-1` (Default), infer on CPU. If you want to infer with GPU, set it to gpu_id (Please make sure that you have install the onnxruntime-gpu)
+- `quantize`: `False` (Default), load the model of `model.onnx` in `model_dir`. If set `True`, load the model of `model_quant.onnx` in `model_dir`
+- `intra_op_num_threads`: `4` (Default), sets the number of threads used for intraop parallelism on CPU
+
+Input: `str`, raw text of asr result
+
+Output: `List[str]`: recognition result
+
 
 #### CT-Transformer-online
 ```python
@@ -143,9 +169,14 @@ for vad in vads:
 
 print(rec_result_all)
 ```
-- Model_dir: the model path, which contains `model.onnx`, `config.yaml`, `am.mvn`
-- Input: wav formt file, support formats: `str, np.ndarray, List[str]`
-- Output: `List[str]`: recognition result
+- `model_dir`: the model path, which contains `model.onnx`, `config.yaml`, `am.mvn`
+- `device_id`: `-1` (Default), infer on CPU. If you want to infer with GPU, set it to gpu_id (Please make sure that you have install the onnxruntime-gpu)
+- `quantize`: `False` (Default), load the model of `model.onnx` in `model_dir`. If set `True`, load the model of `model_quant.onnx` in `model_dir`
+- `intra_op_num_threads`: `4` (Default), sets the number of threads used for intraop parallelism on CPU
+
+Input: `str`, raw text of asr result
+
+Output: `List[str]`: recognition result
 
 ## Performance benchmark
 
