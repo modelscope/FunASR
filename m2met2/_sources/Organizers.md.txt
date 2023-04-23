@@ -5,8 +5,6 @@ Email: [lxie@nwpu.edu.cn](mailto:lxie@nwpu.edu.cn)
 
 <img src="images/lxie.jpeg" alt="lxie" width="20%">
 
-Lei Xie received the Ph.D. degree in computer science from Northwestern Polytechnical University, Xi'an, China, in 2004. From 2001 to 2002, he was with the Department of Electronics and Information Processing, Vrije Universiteit Brussel (VUB), Brussels, Belgium, as a Visiting Scientist. From 2004 to 2006, he was a Senior Research Associate with the Center for Media Technology, School of Creative Media, City University of Hong Kong, Hong Kong, China. From 2006 to 2007, he was a Postdoctoral Fellow with the Human-Computer Communications Laboratory (HCCL), The Chinese University of Hong Kong, Hong Kong, China. He is currently a Professor with School of Computer Science, Northwestern Polytechnical University, Xian, China and leads the Audio, Speech and Language Processing Group (ASLP@NPU). He has published over 200 papers in referred journals and conferences, such as IEEE/ACM Transactions on Audio, Speech and Language Processing, IEEE Transactions on Multimedia, Interspeech, ICASSP, ASRU, ACL and ACM Multimedia. He has achieved several best paper awards in flagship conferences. His current research interests include general topics in speech and language processing, multimedia, and human-computer interaction. Dr. Xie is currently an associate editor (AE) of IEEE/ACM Trans. on Audio, Speech and language Processing. He has actively served as Chairs in many conferences and technical committees. He serves as an IEEE Speech and Language Processing
-Technical Committee Member.
 
 ***Kong Aik Lee, Senior Scientist at Institute for Infocomm Research, A\*Star, Singapore***
 
@@ -14,24 +12,16 @@ Email: [kongaik.lee@ieee.org](mailto:kongaik.lee@ieee.org)
 
 <img src="images/kong.png" alt="kong" width="20%">
 
-Kong Aik Lee started off him career as a researcher, then a team leader and a  strategic planning manager, at the Institute Infocomm Research, A*STAR, Singapore, working on speaker and language recognition research. From 2018 to 2020, he spent two and a half years in NEC Corporation, Japan, focusing very much on voice biometrics and multi-modal biometrics products.  He is proud to work with a great team on voice biometrics featured on NEC Bio-Idiom platform. He returned to Singapore in July 2020, and now leading the speech and audio analytics research at the Institute for Infocomm Research, as a Senior Scientist and PI.  He also serve as an Editor for Elsevier Computer Speech and Language (since 2016), and was an Associate Editor for IEEE/ACM Transactions on Audio, Speech and Language Processing (2017 - 2021), and am an elected member of IEEE Speech and Language Technical Committee (2019 - 2021).
 
 ***Zhijie Yan, Principal Engineer at Alibaba, China***
 Email: [zhijie.yzj@alibaba-inc.com](mailto:zhijie.yzj@alibaba-inc.com)
 
 <img src="images/zhijie.jpg" alt="zhijie" width="20%">
 
-Zhijie Yan holds a PhD from the University of Science and Technology of China, and is a senior member of the Institute of Electrical and Electronics Engineers (IEEE). He is also an expert reviewer of top academic conferences and journals in the speech field. His research fields include speech recognition, speech synthesis, voiceprints, and speech interaction. His research results are applied in speech services provided by Alibaba Group and Ant Financial. He was awarded the title of "One of the Top 100 Grassroots Scientists" by the China Association for Science and Technology.
-
-
 ***Shiliang Zhang, Senior Engineer at Alibaba, China***
 Email: [sly.zsl@alibaba-inc.com](mailto:sly.zsl@alibaba-inc.com)
 
 <img src="images/zsl.JPG" alt="zsl" width="20%">
-
-Shiliang Zhang graduated with a Ph.D. from the University of Science and Technology of China in 2017. His research areas mainly include speech recognition, natural language understanding, and machine learning. Currently, he has published over 40 papers in mainstream academic journals and conferences in the fields of speech and machine learning, and has applied for dozens of patents. After obtaining his doctorate degree, he joined the Alibaba Intelligent Speech team. He is currently leading the direction of speech recognition and fundamental technology at DAMO Academy's speech laboratory.
-
-
 
 ***Yanmin Qian, Professor, Shanghai Jiao Tong University, China***
 
@@ -39,17 +29,11 @@ Email: [yanminqian@sjtu.edu.cn](mailto:yanminqian@sjtu.edu.cn)
 
 <img src="images/qian.jpeg" alt="qian" width="20%">
 
-Yanmin Qian received the B.S. degree from the Department of Electronic and Information Engineering,Huazhong University of Science and Technology, Wuhan, China, in 2007, and the Ph.D. degree from the Department of Electronic Engineering, Tsinghua University, Beijing, China, in 2012. Since 2013, he has been with the Department of Computer Science and Engineering, Shanghai Jiao Tong University (SJTU), Shanghai, China, where he is currently an Associate Professor. From 2015 to 2016, he also worked as an Associate Research in the Speech Group, Cambridge University Engineering Department, Cambridge, U.K. He is a senior member of IEEE and a member of ISCA, and one of the founding members of Kaldi Speech Recognition Toolkit. He has published more than 110 papers on speech and language processing with 4000+ citations, including the top conference: ICASSP, INTERSPEECH and ASRU. His current research interests include the acoustic and language modeling in speech recognition, speaker and language recognition, key word spotting, and multimedia signal processing.
-
-
-
 ***Zhuo Chen, Applied Scientist in Microsoft, USA***
 
 Email: [zhuc@microsoft.com](mailto:zhuc@microsoft.com)
 
 <img src="images/chenzhuo.jpg" alt="chenzhuo" width="20%">
-
-Zhuo Chen received the Ph.D. degree from Columbia University, New York, NY, USA, in 2017. He is currently a Principal Applied Data Scientist with Microsoft. He has authored or coauthored more than 80 papers in peer-reviewed journals and conferences with around 6000 citations. He is a reviewer or technical committee member for more than ten journals and conferences. His research interests include automatic conversation recognition, speech separation, diarisation, and speaker information extraction. He actively participated in the academic events and challenges, and won several awards. Meanwhile, he contributed to open-sourced datasets, such as WSJ0-2mix, LibriCSS, and AISHELL-4, that have been main benchmark datasets for multi-speaker processing research. In 2020, he was the Team Leader in 2020 Jelinek workshop, leading more than 30 researchers and students to push the state of the art in conversation transcription.
 
 ***Jian Wu, Applied Scientist in Microsoft, USA***
 
@@ -57,12 +41,8 @@ Email: [wujian@microsoft.com](mailto:wujian@microsoft.com)
 
 <img src="images/wujian.jpg" alt="wujian" width="20%">
 
-Jian Wu received a master degree from Northwestern Polytechnical University, Xi'an, China, in 2020 and currently he is a Applied Scientist in Microsoft, USA. His research interests cover multi-channel signal processing, robust and multi-talker speech recognition, speech enhancement, dereverberation and separation. He has around 30 conference publications with a total citation over 1200. He participated in several challenges such as CHiME5, DNS 2020 and FFSVC 2020 and contributed to the open-sourced datasets including LibriCSS and AISHELL-4. He is also a reviewer for several journals and conferences such as ICASSP, SLT, TASLP and SPL.
-
 ***Hui Bu, CEO, AISHELL foundation, China***
 
 Email: [buhui@aishelldata.com](mailto:buhui@aishelldata.com)
 
 <img src="images/buhui.jpeg" alt="buhui" width="20%">
-
-Hui Bu received his master degree in the Artificial Intelligence Laboratory of Korea University in 2014. He is the founder and the CEO of AISHELL and AISHELL foundation. He participated in the release of AISHELL 1 \& 2 \& 3 \& 4, DMASH and HI-MIA open source database project and is the co-founder of China Kaldi offline Technology Forum.
