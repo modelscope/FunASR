@@ -1,7 +1,13 @@
-# Installation
-FunASR is easy to install. The detailed installation steps are as follows:
+<p align="left">
+    <a href=""><img src="https://img.shields.io/badge/OS-Linux%2C%20Win%2C%20Mac-brightgreen.svg"></a>
+    <a href=""><img src="https://img.shields.io/badge/Python->=3.7,<=3.10-aff.svg"></a>
+    <a href=""><img src="https://img.shields.io/badge/Pytorch-%3E%3D1.11-blue"></a>
+</p>
 
-- Install Conda and create virtual environment:
+## Installation
+
+### Install Conda (Optional):
+
 ```sh
 wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
 sh Miniconda3-latest-Linux-x86_64.sh
@@ -10,26 +16,38 @@ conda create -n funasr python=3.7
 conda activate funasr
 ```
 
-- Install Pytorch (version >= 1.7.0):
+### Install Pytorch (version >= 1.11.0):
+
 ```sh
 pip install torch torchaudio
 ```
 
-For more versions, please see [https://pytorch.org/get-started/locally](https://pytorch.org/get-started/locally)
+For more details about torch, please see [https://pytorch.org/get-started/locally](https://pytorch.org/get-started/locally)
 
-- Install ModelScope
+### Install funasr
 
-For users in China, you can configure the following mirror source to speed up the downloading:
-``` sh
-pip config set global.index-url https://mirror.sjtu.edu.cn/pypi/web/simple
+#### Install from pip
+
+```shell
+pip install -U funasr
+# For the users in China, you could install with the command:
+# pip install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
-Install or update ModelScope
-```sh
-pip install "modelscope[audio_asr]" --upgrade -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html
-```
 
-- Clone the repo and install other packages
+#### Or install from source code
+
 ``` sh
 git clone https://github.com/alibaba/FunASR.git && cd FunASR
-pip install --editable ./
+pip install -e ./
+# For the users in China, you could install with the command:
+# pip install -e ./ -i https://mirror.sjtu.edu.cn/pypi/web/simple
+```
+
+### Install modelscope (Optional)
+If you want to use the pretrained models in ModelScope, you should install the modelscope:
+
+```shell
+pip install -U modelscope
+# For the users in China, you could install with the command:
+# pip install -U modelscope -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html -i https://mirror.sjtu.edu.cn/pypi/web/simple
 ```

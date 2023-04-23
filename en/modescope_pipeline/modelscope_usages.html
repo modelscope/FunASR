@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ModelScope Usage &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            FunASR
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../docker.html">Docker</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Academic Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../academic_recipe/asr_recipe.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../academic_recipe/punc_recipe.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../academic_recipe/vad_recipe.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../academic_recipe/sv_recipe.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../academic_recipe/sd_recipe.html">Speaker Diarization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">ModelScope Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="asr_pipeline.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vad_pipeline.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="punc_pipeline.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tp_pipeline.html">Timestamp Prediction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sv_pipeline.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sd_pipeline.html">Speaker Diarization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Zoo</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modelscope_models.html">Pretrained Models on ModelScope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../huggingface_models.html">Pretrained Models on Huggingface</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Runtime and Service</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/export.html">Export models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/onnxruntime_python.html">ONNXRuntime-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/onnxruntime_cpp.html">ONNXRuntime-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/libtorch_python.html">Libtorch-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/grpc_python.html">Using funasr with grpc-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/grpc_cpp.html">Using funasr with grpc-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/websocket_python.html">Using funasr with websocket</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark and Leadboard</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../benchmark/benchmark_onnx.html">CPU Benchmark (ONNX-python)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmark/benchmark_onnx_cpp.html">CPU Benchmark (ONNX-cpp)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmark/benchmark_libtorch.html">CPU Benchmark (Libtorch)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Funasr Library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../build_task.html">Build custom tasks</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Papers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../papers.html">Papers</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Application</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../application.html">Audio Cut</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../application.html#realtime-speech-recognition">Realtime Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../application.html#audio-chat">Audio Chat</a></li>
+</ul>
+<p class="caption"><span class="caption-text">FQA</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../FQA.html">FQA</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">FunASR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">ModelScope Usage</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modescope_pipeline/modelscope_usages.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="modelscope-usage">
+<h1>ModelScope Usage<a class="headerlink" href="#modelscope-usage" title="Permalink to this headline"></a></h1>
+<p>ModelScope is an open-source model-as-service platform supported by Alibaba, which provides flexible and convenient model applications for users in academia and industry. For specific usages and open source models, please refer to <a class="reference external" href="https://www.modelscope.cn/models?page=1&amp;tasks=auto-speech-recognition">ModelScope</a>. In the domain of speech, we provide autoregressive/non-autoregressive speech recognition, speech pre-training, punctuation prediction and other models, which are convenient for users.</p>
+<div class="section" id="overall-introduction">
+<h2>Overall Introduction<a class="headerlink" href="#overall-introduction" title="Permalink to this headline"></a></h2>
+<p>We provide the usages of different models under the <code class="docutils literal notranslate"><span class="pre">egs_modelscope</span></code>, which supports directly employing our provided models for inference, as well as finetuning the models we provided as pre-trained initial models. Next, we will introduce the model provided in the <code class="docutils literal notranslate"><span class="pre">egs_modelscope/asr/paraformer/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch</span></code> directory, including <code class="docutils literal notranslate"><span class="pre">infer.py</span></code>, <code class="docutils literal notranslate"><span class="pre">finetune.py</span></code> and <code class="docutils literal notranslate"><span class="pre">infer_after_finetune</span> <span class="pre">.py</span></code>. The corresponding functions are as follows:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">infer.py</span></code>: perform inference on the specified dataset based on our provided model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">finetune.py</span></code>: employ our provided model as the initial model for fintuning</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">infer_after_finetune.py</span></code>: perform inference on the specified dataset based on the finetuned model</p></li>
+</ul>
+</div>
+<div class="section" id="inference">
+<h2>Inference<a class="headerlink" href="#inference" title="Permalink to this headline"></a></h2>
+<p>We provide <code class="docutils literal notranslate"><span class="pre">infer.py</span></code> to achieve the inference. Based on this file, users can preform inference on the specified dataset based on our provided model and obtain the corresponding recognition results. If the transcript is given, the <code class="docutils literal notranslate"><span class="pre">CER</span></code> will be calculated at the same time. Before performing inference, users can set the following parameters to modify the inference configuration:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">data_dir</span></code>：dataset directory. The directory should contain the wav list file <code class="docutils literal notranslate"><span class="pre">wav.scp</span></code> and the transcript file <code class="docutils literal notranslate"><span class="pre">text</span></code> (optional). For the format of these two files, please refer to the instructions in <a class="reference external" href="./get_started">Quick Start</a>. If the <code class="docutils literal notranslate"><span class="pre">text</span></code> file exists, the CER will be calculated accordingly, otherwise it will be skipped.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">output_dir</span></code>：the directory for saving the inference results</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>：batch size during the inference</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ctc_weight</span></code>：some models contain a CTC module, users can set this parameter to specify the weight of the CTC module during the inference</p></li>
+</ul>
+<p>In addition to directly setting parameters in <code class="docutils literal notranslate"><span class="pre">infer.py</span></code>, users can also manually set the parameters in the <code class="docutils literal notranslate"><span class="pre">decoding.yaml</span></code> file in the model download directory to modify the inference configuration.</p>
+</div>
+<div class="section" id="finetuning">
+<h2>Finetuning<a class="headerlink" href="#finetuning" title="Permalink to this headline"></a></h2>
+<p>We provide <code class="docutils literal notranslate"><span class="pre">finetune.py</span></code> to achieve the finetuning. Based on this file, users can finetune on the specified dataset based on our provided model as the initial model to achieve better performance in the specificed domain. Before finetuning, users can set the following parameters to modify the finetuning configuration:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">data_path</span></code>：dataset directory。This directory should contain the <code class="docutils literal notranslate"><span class="pre">train</span></code> directory for saving the training set and the <code class="docutils literal notranslate"><span class="pre">dev</span></code> directory for saving the validation set. Each directory needs to contain the wav list file <code class="docutils literal notranslate"><span class="pre">wav.scp</span></code> and the transcript file <code class="docutils literal notranslate"><span class="pre">text</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">output_dir</span></code>：the directory for saving the finetuning results</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dataset_type</span></code>：for small dataset，set as <code class="docutils literal notranslate"><span class="pre">small</span></code>；for dataset larger than 1000 hours，set as <code class="docutils literal notranslate"><span class="pre">large</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">batch_bins</span></code>：batch size，if dataset_type is set as <code class="docutils literal notranslate"><span class="pre">small</span></code>，the unit of batch_bins is the number of fbank feature frames; if dataset_type is set as <code class="docutils literal notranslate"><span class="pre">large</span></code>, the unit of batch_bins is milliseconds</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_epoch</span></code>：the maximum number of training epochs</p></li>
+</ul>
+<p>The following parameters can also be set. However, if there is no special requirement, users can ignore these parameters and use the default value we provided directly:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">accum_grad</span></code>：the accumulation of the gradient</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">keep_nbest_models</span></code>：select the <code class="docutils literal notranslate"><span class="pre">keep_nbest_models</span></code> models with the best performance and average the parameters
+of these models to get a better model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">optim</span></code>：set the optimizer</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lr</span></code>：set the learning rate</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">scheduler</span></code>：set learning rate adjustment strategy</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">scheduler_conf</span></code>：set the related parameters of the learning rate adjustment strategy</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">specaug</span></code>：set for the spectral augmentation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">specaug_conf</span></code>：set related parameters of the spectral augmentation</p></li>
+</ul>
+<p>In addition to directly setting parameters in <code class="docutils literal notranslate"><span class="pre">finetune.py</span></code>, users can also manually set the parameters in the <code class="docutils literal notranslate"><span class="pre">finetune.yaml</span></code> file in the model download directory to modify the finetuning configuration.</p>
+</div>
+<div class="section" id="inference-after-finetuning">
+<h2>Inference after Finetuning<a class="headerlink" href="#inference-after-finetuning" title="Permalink to this headline"></a></h2>
+<p>We provide <code class="docutils literal notranslate"><span class="pre">infer_after_finetune.py</span></code> to achieve the inference based on the model finetuned by users. Based on this file, users can preform inference on the specified dataset based on the finetuned model and obtain the corresponding recognition results. If the transcript is given, the <code class="docutils literal notranslate"><span class="pre">CER</span></code> will be calculated at the same time. Before performing inference, users can set the following parameters to modify the inference configuration:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">data_dir</span></code>：dataset directory。The directory should contain the wav list file <code class="docutils literal notranslate"><span class="pre">wav.scp</span></code> and the transcript file <code class="docutils literal notranslate"><span class="pre">text</span></code> (optional). If the <code class="docutils literal notranslate"><span class="pre">text</span></code> file exists, the CER will be calculated accordingly, otherwise it will be skipped.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">output_dir</span></code>：the directory for saving the inference results</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>：batch size during the inference</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ctc_weight</span></code>：some models contain a CTC module, users can set this parameter to specify the weight of the CTC module during the inference</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">decoding_model_name</span></code>：set the name of the model used for the inference</p></li>
+</ul>
+<p>The following parameters can also be set. However, if there is no special requirement, users can ignore these parameters and use the default value we provided directly:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">modelscope_model_name</span></code>：the initial model name used when finetuning</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">required_files</span></code>：files required for the inference when using the modelscope interface</p></li>
+</ul>
+</div>
+<div class="section" id="announcements">
+<h2>Announcements<a class="headerlink" href="#announcements" title="Permalink to this headline"></a></h2>
+<p>Some models may have other specific parameters during the finetuning and inference. The usages of these parameters can be found in the <code class="docutils literal notranslate"><span class="pre">README.md</span></code> file in the corresponding directory.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Speech Lab, Alibaba Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -17,8 +17,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Get Started" href="get_started.html" />
-    <link rel="prev" title="Installation" href="installation.html" /> 
+    <link rel="next" title="Audio Cut" href="application.html" />
+    <link rel="prev" title="Build custom tasks" href="build_task.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -40,17 +40,77 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption"><span class="caption-text">Tutorial:</span></p>
-<ul class="current">
+              <p class="caption"><span class="caption-text">Installation</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Papers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="get_started.html">Get Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">Docker</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Academic Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="academic_recipe/asr_recipe.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="academic_recipe/punc_recipe.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="academic_recipe/vad_recipe.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="academic_recipe/sv_recipe.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="academic_recipe/sd_recipe.html">Speaker Diarization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">ModelScope Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="modescope_pipeline/quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modescope_pipeline/asr_pipeline.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modescope_pipeline/vad_pipeline.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modescope_pipeline/punc_pipeline.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modescope_pipeline/tp_pipeline.html">Timestamp Prediction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modescope_pipeline/sv_pipeline.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modescope_pipeline/sd_pipeline.html">Speaker Diarization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Zoo</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="modelscope_models.html">Pretrained Models on ModelScope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="huggingface_models.html">Pretrained Models on Huggingface</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Runtime and Service</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="runtime/export.html">Export models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="runtime/onnxruntime_python.html">ONNXRuntime-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="runtime/onnxruntime_cpp.html">ONNXRuntime-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="runtime/libtorch_python.html">Libtorch-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="runtime/grpc_python.html">Using funasr with grpc-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="runtime/grpc_cpp.html">Using funasr with grpc-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="runtime/websocket_python.html">Using funasr with websocket</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark and Leadboard</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="benchmark/benchmark_onnx.html">CPU Benchmark (ONNX-python)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmark/benchmark_onnx_cpp.html">CPU Benchmark (ONNX-cpp)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmark/benchmark_libtorch.html">CPU Benchmark (Libtorch)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Funasr Library</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="build_task.html">Build custom tasks</a></li>
 </ul>
-<p class="caption"><span class="caption-text">ModelScope:</span></p>
+<p class="caption"><span class="caption-text">Papers</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Papers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#speech-recognition">Speech Recognition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#multi-talker-speech-recognition">Multi-talker Speech Recognition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#voice-activity-detection">Voice Activity Detection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#punctuation-restoration">Punctuation Restoration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#language-models">Language Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#speaker-verification">Speaker Verification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#speaker-diarization">Speaker diarization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#timestamp-prediction">Timestamp Prediction</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Application</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="modelscope_models.html">Pretrained models on ModelScope</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modelscope_usages.html">ModelScope Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="application.html">Audio Cut</a></li>
+<li class="toctree-l1"><a class="reference internal" href="application.html#realtime-speech-recognition">Realtime Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="application.html#audio-chat">Audio Chat</a></li>
+</ul>
+<p class="caption"><span class="caption-text">FQA</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="FQA.html">FQA</a></li>
 </ul>
 
         </div>
@@ -79,18 +139,69 @@
              
   <div class="section" id="papers">
 <h1>Papers<a class="headerlink" href="#papers" title="Permalink to this headline"></a></h1>
+<p>FunASR have implemented the following paper code</p>
+<div class="section" id="speech-recognition">
+<h2>Speech Recognition<a class="headerlink" href="#speech-recognition" title="Permalink to this headline"></a></h2>
 <ul class="simple">
-<li><p><a class="reference external" href="https://arxiv.org/abs/2010.14099">Universal ASR: Unifying Streaming and Non-Streaming ASR Using a Single Encoder-Decoder Model</a>, arXiv preprint arXiv:2010.14099, 2020.</p></li>
 <li><p><a class="reference external" href="https://arxiv.org/abs/2206.08317">Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition</a>, INTERSPEECH 2022.</p></li>
+<li><p><a class="reference external" href="https://arxiv.org/abs/2010.14099">Universal ASR: Unifying Streaming and Non-Streaming ASR Using a Single Encoder-Decoder Model</a>, arXiv preprint arXiv:2010.14099, 2020.</p></li>
+<li><p><a class="reference external" href="https://arxiv.org/pdf/2006.01713">San-m: Memory equipped self-attention for end-to-end speech recognition</a>, INTERSPEECH 2020</p></li>
+<li><p><a class="reference external" href="https://arxiv.org/abs/2006.01712">Streaming Chunk-Aware Multihead Attention for Online End-to-End Speech Recognition</a>, INTERSPEECH 2020</p></li>
+<li><p><a class="reference external" href="https://arxiv.org/abs/2005.08100">Conformer: Convolution-augmented Transformer for Speech Recognition</a>,  INTERSPEECH 2020</p></li>
+<li><p><a class="reference external" href="https://arxiv.org/pdf/1211.3711.pdf">Sequence-to-sequence learning with Transducers</a>, NIPS 2016</p></li>
 </ul>
+</div>
+<div class="section" id="multi-talker-speech-recognition">
+<h2>Multi-talker Speech Recognition<a class="headerlink" href="#multi-talker-speech-recognition" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://arxiv.org/abs/2210.05265">MFCCA:Multi-Frame Cross-Channel attention for multi-speaker ASR in Multi-party meeting scenario</a>, ICASSP 2022</p></li>
+</ul>
+</div>
+<div class="section" id="voice-activity-detection">
+<h2>Voice Activity Detection<a class="headerlink" href="#voice-activity-detection" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://arxiv.org/abs/1803.05030">Deep-FSMN for Large Vocabulary Continuous Speech Recognition</a>, ICASSP 2018</p></li>
+</ul>
+</div>
+<div class="section" id="punctuation-restoration">
+<h2>Punctuation Restoration<a class="headerlink" href="#punctuation-restoration" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://arxiv.org/pdf/2003.01309.pdf">CT-Transformer: Controllable time-delay transformer for real-time punctuation prediction and disfluency detection</a>, ICASSP 2018</p></li>
+</ul>
+</div>
+<div class="section" id="language-models">
+<h2>Language Models<a class="headerlink" href="#language-models" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://arxiv.org/abs/1706.03762">Attention Is All You Need</a>, NEURIPS 2017</p></li>
+</ul>
+</div>
+<div class="section" id="speaker-verification">
+<h2>Speaker Verification<a class="headerlink" href="#speaker-verification" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.danielpovey.com/files/2018_icassp_xvectors.pdf">X-VECTORS: ROBUST DNN EMBEDDINGS FOR SPEAKER RECOGNITION</a>, ICASSP 2018</p></li>
+</ul>
+</div>
+<div class="section" id="speaker-diarization">
+<h2>Speaker diarization<a class="headerlink" href="#speaker-diarization" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://arxiv.org/abs/2211.10243">Speaker Overlap-aware Neural Diarization for Multi-party Meeting Analysis</a>, EMNLP 2022</p></li>
+<li><p><a class="reference external" href="https://arxiv.org/abs/2303.05397">TOLD: A Novel Two-Stage Overlap-Aware Framework for Speaker Diarization</a>, ICASSP 2023</p></li>
+</ul>
+</div>
+<div class="section" id="timestamp-prediction">
+<h2>Timestamp Prediction<a class="headerlink" href="#timestamp-prediction" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://arxiv.org/abs/2301.12343">Achieving Timestamp Prediction While Recognizing with Non-Autoregressive End-to-End ASR Model</a>, arXiv:2301.12343</p></li>
+</ul>
+</div>
 </div>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="get_started.html" class="btn btn-neutral float-right" title="Get Started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="build_task.html" class="btn btn-neutral float-left" title="Build custom tasks" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="application.html" class="btn btn-neutral float-right" title="Audio Cut" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
