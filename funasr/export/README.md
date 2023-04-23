@@ -1,15 +1,22 @@
+# Export models
 
 ## Environments
-    torch >= 1.11.0
-    modelscope >= 1.2.0
-    torch-quant >= 0.4.0 (required for exporting quantized torchscript format model)
-    # pip install torch-quant -i https://pypi.org/simple
-
-## Install modelscope and funasr
+### Install modelscope and funasr
 
 The installation is the same as [funasr](https://github.com/alibaba-damo-academy/FunASR/blob/main/README.md#installation)
+```shell
+# pip3 install torch torchaudio
+pip install -U modelscope funasr
+# For the users in China, you could install with the command:
+# pip install -U modelscope funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple
+```
+### Install the quantization tools
+```shell
+pip install torch-quant # Optional, for torchscript quantization
+pip install onnx onnxruntime # Optional, for onnx quantization
+```
 
-## Export model
+## Usage
    `Tips`: torch>=1.11.0
 
    ```shell
@@ -30,7 +37,46 @@ The installation is the same as [funasr](https://github.com/alibaba-damo-academy
 
    `fallback-num`: specify the number of fallback layers to perform automatic mixed precision quantization.
 
-## Performance Benchmark of Runtime
+
+### Export onnx format model
+#### Export model from modelscope
+```shell
+python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx
+```
+#### Export model from local path
+The model'name must be `model.pb`
+```shell
+python -m funasr.export.export_model --model-name /mnt/workspace/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx
+```
+#### Test onnx model
+Ref to [test](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export/test)
+
+### Export torchscripts format model
+#### Export model from modelscope
+```shell
+python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type torch
+```
+
+#### Export model from local path
+The model'name must be `model.pb`
+```shell
+python -m funasr.export.export_model --model-name /mnt/workspace/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type torch
+```
+#### Test onnx model
+Ref to [test](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export/test)
+
+## Runtime
+### ONNXRuntime
+#### ONNXRuntime-python
+Ref to [docs](https://alibaba-damo-academy.github.io/FunASR/en/runtime/onnxruntime_python.html)
+#### ONNXRuntime-cpp
+Ref to [docs](https://alibaba-damo-academy.github.io/FunASR/en/runtime/onnxruntime_cpp.html)
+### Libtorch
+#### Libtorch-python
+Ref to [docs](https://alibaba-damo-academy.github.io/FunASR/en/runtime/libtorch_python.html)
+#### Libtorch-cpp
+Undo
+## Performance Benchmark
 
 ### Paraformer on CPU
 
@@ -41,27 +87,6 @@ The installation is the same as [funasr](https://github.com/alibaba-damo-academy
 ### Paraformer on GPU
 [nv-triton](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/triton_gpu)
 
-## For example
-### Export onnx format model
-Export model from modelscope
-```shell
-python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx
-```
-Export model from local path, the model'name must be `model.pb`.
-```shell
-python -m funasr.export.export_model --model-name /mnt/workspace/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx
-```
-
-### Export torchscripts format model
-Export model from modelscope
-```shell
-python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type torch
-```
-
-Export model from local path, the model'name must be `model.pb`.
-```shell
-python -m funasr.export.export_model --model-name /mnt/workspace/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type torch
-```
 
 ## Acknowledge
 Torch model quantization is supported by [BladeDISC](https://github.com/alibaba/BladeDISC), an end-to-end DynamIc Shape Compiler project for machine learning workloads. BladeDISC provides general, transparent, and ease of use performance optimization for TensorFlow/PyTorch workloads on GPGPU and CPU backends. If you are interested, please contact us.

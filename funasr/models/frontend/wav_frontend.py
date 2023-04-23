@@ -34,7 +34,7 @@ def load_cmvn(cmvn_file):
     means = np.array(means_list).astype(np.float)
     vars = np.array(vars_list).astype(np.float)
     cmvn = np.array([means, vars])
-    cmvn = torch.as_tensor(cmvn)
+    cmvn = torch.as_tensor(cmvn, dtype=torch.float32)
     return cmvn
 
 
@@ -47,10 +47,10 @@ def apply_cmvn(inputs, cmvn):  # noqa
     dtype = inputs.dtype
     frame, dim = inputs.shape
 
-    means = np.tile(cmvn[0:1, :dim], (frame, 1))
-    vars = np.tile(cmvn[1:2, :dim], (frame, 1))
-    inputs += torch.from_numpy(means).type(dtype).to(device)
-    inputs *= torch.from_numpy(vars).type(dtype).to(device)
+    means = cmvn[0:1, :dim]
+    vars = cmvn[1:2, :dim]
+    inputs += means.to(device)
+    inputs *= vars.to(device)
 
     return inputs.type(torch.float32)
 

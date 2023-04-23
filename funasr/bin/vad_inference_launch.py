@@ -114,8 +114,8 @@ def inference_launch(mode, **kwargs):
         from funasr.bin.vad_inference import inference_modelscope
         return inference_modelscope(**kwargs)
     elif mode == "online":
-        from funasr.bin.vad_inference_online import inference_modelscope
-        return inference_modelscope(**kwargs)
+        from funasr.bin.vad_inference import inference_modelscope_online
+        return inference_modelscope_online(**kwargs)
     else:
         logging.info("Unknown decoding mode: {}".format(mode))
         return None

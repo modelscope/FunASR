@@ -1,8 +1,6 @@
-# Using paraformer with grpc
+# Using funasr with grpc-python
 We can send streaming audio data to server in real-time with grpc client every 10 ms e.g., and get transcribed text when stop speaking.
 The audio data is in streaming, the asr inference process is in offline.
-
-
 
 ## For the Server
 
@@ -11,9 +9,10 @@ The audio data is in streaming, the asr inference process is in offline.
 Install the modelscope and funasr
 
 ```shell
-pip install "modelscope[audio_asr]" -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html
+pip install -U modelscope funasr
+# For the users in China, you could install with the command:
+# pip install -U modelscope funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple
 git clone https://github.com/alibaba/FunASR.git && cd FunASR
-pip install --editable ./
 ```
 
 Install the requirements

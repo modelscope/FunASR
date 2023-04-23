@@ -1,0 +1,1 @@
+../../funasr/runtime/python/grpc/Readme.md

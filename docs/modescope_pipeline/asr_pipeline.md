@@ -1,0 +1,1 @@
+../../egs_modelscope/asr/TEMPLATE/README.md

@@ -1,0 +1,5 @@
+# The conformer transducer decoding configuration from @jeon30c
+beam_size: 10
+simu_streaming: true
+streaming: false
+chunk_size: 16

@@ -89,10 +89,9 @@ def inference_modelscope(
     **kwargs,
 ):
     assert check_argument_types()
-    logging.basicConfig(
-        level=log_level,
-        format="%(asctime)s (%(module)s:%(lineno)d) %(levelname)s: %(message)s",
-    )
+    ncpu = kwargs.get("ncpu", 1)
+    torch.set_num_threads(ncpu)
+
 
     if ngpu >= 1 and torch.cuda.is_available():
         device = "cuda"

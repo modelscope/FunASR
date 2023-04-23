@@ -10,3 +10,10 @@ test_local/
 RapidASR
 export/*
 *.pyc
+.eggs
+MaaS-lib
+.gitignore
+.egg*
+dist
+build
+funasr.egg-info

@@ -7,7 +7,6 @@ from modelscope.utils.constant import Tasks
 
 from funasr.utils.compute_wer import compute_wer
 
-import pdb;
 def modelscope_infer_core(output_dir, split_dir, njob, idx):
     output_dir_job = os.path.join(output_dir, "output.{}".format(idx))
     gpu_id = (int(idx) - 1) // njob

@@ -14,8 +14,9 @@ gpu_inference=true    # whether to perform gpu decoding
 gpuid_list="0,1"    # set gpus, e.g., gpuid_list="0,1"
 njob=4    # the number of jobs for CPU decoding, if gpu_inference=false, use CPU decoding, please set njob
 
+. utils/parse_options.sh || exit 1;
 
-if ${gpu_inference}; then
+if ${gpu_inference} == "true"; then
     nj=$(echo $gpuid_list | awk -F "," '{print NF}')
 else
     nj=$njob

@@ -19,6 +19,7 @@ def forward_segment(text, seg_dict):
 def seg_tokenize(txt, seg_dict):
     out_txt = ""
     for word in txt:
+        word = word.lower()
         if word in seg_dict:
             out_txt += seg_dict[word] + " "
         else:
@@ -41,8 +42,7 @@ def tokenize(data,
 
     if seg_dict is not None:
         assert isinstance(seg_dict, dict)
-        txt = forward_segment("".join(text).lower(), seg_dict)
-        text = seg_tokenize(txt, seg_dict)
+        text = seg_tokenize(text, seg_dict)
 
     length = len(text)
     for i in range(length):
