@@ -1,5 +1,5 @@
 #pragma once 
-
+#include <algorithm>
 typedef struct
 {
     std::string msg;
@@ -48,4 +48,9 @@ inline void getOutputName(Ort::Session* session, string& outputName, int nIndex 
 
         }
     }
+}
+
+template <class ForwardIterator>
+inline static size_t argmax(ForwardIterator first, ForwardIterator last) {
+    return std::distance(first, std::max_element(first, last));
 }

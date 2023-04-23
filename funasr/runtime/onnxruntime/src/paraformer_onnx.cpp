@@ -17,6 +17,11 @@ ModelImp::ModelImp(const char* path,int nNumThread, bool quantize, bool use_vad)
         vadHandle->init_vad(vad_path, mvn_path, MODEL_SAMPLE_RATE, VAD_MAX_LEN, VAD_SILENCE_DYRATION, VAD_SPEECH_NOISE_THRES);
     }
 
+    // PUNC model
+    if(true){
+        puncHandle = make_unique<CTTransformer>(path, nNumThread);
+    }
+
     if(quantize)
     {
         model_path = pathAppend(path, "model_quant.onnx");
@@ -50,6 +55,7 @@ ModelImp::ModelImp(const char* path,int nNumThread, bool quantize, bool use_vad)
     m_session = std::make_unique<Ort::Session>(env_, model_path.c_str(), sessionOptions);
 #endif
 
+    vector<string> m_strInputNames, m_strOutputNames;
     string strName;
     getInputName(m_session.get(), strName);
     m_strInputNames.push_back(strName.c_str());
@@ -81,6 +87,10 @@ void ModelImp::reset()
 
 vector<std::vector<int>> ModelImp::vad_seg(std::vector<float>& pcm_data){
     return vadHandle->infer(pcm_data);
+}
+
+string ModelImp::AddPunc(const char* szInput){
+    return puncHandle->AddPunc(szInput);
 }
 
 vector<float> ModelImp::FbankKaldi(float sample_rate, const float* waves, int len) {
@@ -231,9 +241,9 @@ string ModelImp::forward(float* din, int len, int flag)
         auto encoder_out_lens = outputTensor[1].GetTensorMutableData<int64_t>();
         result = greedy_search(floatData, *encoder_out_lens);
     }
-    catch (...)
+    catch (std::exception const &e)
     {
-        result = "";
+        printf(e.what());
     }
 
     return result;

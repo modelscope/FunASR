@@ -14,6 +14,7 @@ namespace paraformer {
         knf::FbankOptions fbank_opts;
 
         std::unique_ptr<FsmnVad> vadHandle;
+        std::unique_ptr<CTTransformer> puncHandle;
 
         Vocab* vocab;
         vector<float> means_list;
@@ -32,7 +33,6 @@ namespace paraformer {
         Ort::Env env_;
         Ort::SessionOptions sessionOptions;
 
-        vector<string> m_strInputNames, m_strOutputNames;
         vector<const char*> m_szInputNames;
         vector<const char*> m_szOutputNames;
 
@@ -45,6 +45,7 @@ namespace paraformer {
         string forward(float* din, int len, int flag);
         string rescoring();
         std::vector<std::vector<int>> vad_seg(std::vector<float>& pcm_data);
+        string AddPunc(const char* szInput);
 
     };
 

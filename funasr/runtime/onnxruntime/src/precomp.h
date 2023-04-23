@@ -28,6 +28,8 @@ using namespace std;
 #include "ComDefine.h"
 #include "commonfunc.h"
 #include "predefine_coe.h"
+#include "tokenizer.h"
+#include "punc_infer.h"
 #include "FsmnVad.h"
 #include "e2e_vad.h"
 #include "Vocab.h"

@@ -133,6 +133,10 @@ extern "C" {
 			if (fnCallback)
 				fnCallback(nStep, nTotal);
 		}
+		if(true){
+			string punc_res = pRecogObj->AddPunc((pResult->msg).c_str());
+			pResult->msg = punc_res;
+		}
 	
 		return pResult;
 	}
