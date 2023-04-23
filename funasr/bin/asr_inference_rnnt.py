@@ -174,7 +174,7 @@ class Speech2Text:
         self.streaming = streaming
         self.simu_streaming = simu_streaming
         self.chunk_size = max(chunk_size, 0)
-        self.left_context = max(left_context, 0)
+        self.left_context = left_context
         self.right_context = max(right_context, 0)
 
         if not streaming or chunk_size == 0:
