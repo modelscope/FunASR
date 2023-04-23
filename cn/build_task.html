@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Build custom tasks &mdash; FunASR  documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <title>搭建自定义任务 &mdash; FunASR  documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
@@ -17,8 +17,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Pretrained models on ModelScope" href="modelscope_models.html" />
-    <link rel="prev" title="Get Started" href="get_started.html" /> 
+    <link rel="next" title="ModelScope上的预训练模型" href="modelscope_models.html" />
+    <link rel="prev" title="快速开始" href="get_started.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -40,17 +40,17 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption"><span class="caption-text">Tutorial:</span></p>
+              <p class="caption"><span class="caption-text">教程:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="papers.html">Papers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="get_started.html">Get Started</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Build custom tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">安装</a></li>
+<li class="toctree-l1"><a class="reference internal" href="papers.html">论文</a></li>
+<li class="toctree-l1"><a class="reference internal" href="get_started.html">快速开始</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">搭建自定义任务</a></li>
 </ul>
 <p class="caption"><span class="caption-text">ModelScope:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="modelscope_models.html">Pretrained models on ModelScope</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modelscope_usages.html">ModelScope Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modelscope_models.html">ModelScope上的预训练模型</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modelscope_usages.html">ModelScope 使用说明</a></li>
 </ul>
 
         </div>
@@ -67,7 +67,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Build custom tasks</li>
+      <li class="breadcrumb-item active">搭建自定义任务</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/build_task.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -77,9 +77,9 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="build-custom-tasks">
-<h1>Build custom tasks<a class="headerlink" href="#build-custom-tasks" title="Permalink to this headline"></a></h1>
-<p>FunASR is similar to ESPNet, which applies <code class="docutils literal notranslate"><span class="pre">Task</span></code>  as the general interface ti achieve the training and inference of models. Each <code class="docutils literal notranslate"><span class="pre">Task</span></code> is a class inherited from <code class="docutils literal notranslate"><span class="pre">AbsTask</span></code> and its corresponding code can be seen in <code class="docutils literal notranslate"><span class="pre">funasr/tasks/abs_task.py</span></code>. The main functions of <code class="docutils literal notranslate"><span class="pre">AbsTask</span></code> are shown as follows:</p>
+  <div class="section" id="id1">
+<h1>搭建自定义任务<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h1>
+<p>FunASR类似ESPNet，以<code class="docutils literal notranslate"><span class="pre">Task</span></code>为通用接口，从而实现模型的训练和推理。每一个<code class="docutils literal notranslate"><span class="pre">Task</span></code>是一个类，其需要继承<code class="docutils literal notranslate"><span class="pre">AbsTask</span></code>，其对应的具体代码见<code class="docutils literal notranslate"><span class="pre">funasr/tasks/abs_task.py</span></code>。下面给出其包含的主要函数及功能介绍：</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">AbsTask</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">add_task_arguments</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">parser</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">):</span>
@@ -103,13 +103,13 @@
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>add_task_arguments：Add parameters required by a specified <code class="docutils literal notranslate"><span class="pre">Task</span></code></p></li>
-<li><p>build_preprocess_fn：定义如何处理对样本进行预处理 define how to preprocess samples</p></li>
-<li><p>build_collate_fn：define how to combine multiple samples into a <code class="docutils literal notranslate"><span class="pre">batch</span></code></p></li>
-<li><p>build_model：define the model</p></li>
-<li><p>main：training interface, starting training through <code class="docutils literal notranslate"><span class="pre">Task.main()</span></code></p></li>
+<li><p>add_task_arguments：添加特定<code class="docutils literal notranslate"><span class="pre">Task</span></code>需要的参数</p></li>
+<li><p>build_preprocess_fn：定义如何处理对样本进行预处理</p></li>
+<li><p>build_collate_fn：定义如何将多个样本组成一个<code class="docutils literal notranslate"><span class="pre">batch</span></code></p></li>
+<li><p>build_model：定义模型</p></li>
+<li><p>main：训练入口，通过<code class="docutils literal notranslate"><span class="pre">Task.main()</span></code>来启动训练</p></li>
 </ul>
-<p>Next, we take the speech recognition as an example to introduce how to define a new <code class="docutils literal notranslate"><span class="pre">Task</span></code>. For the corresponding code, please see <code class="docutils literal notranslate"><span class="pre">ASRTask</span></code> in <code class="docutils literal notranslate"><span class="pre">funasr/tasks/asr.py</span></code>. The procedure of defining a new <code class="docutils literal notranslate"><span class="pre">Task</span></code> is actually the procedure of redefining the above functions according to the requirements of the specified <code class="docutils literal notranslate"><span class="pre">Task</span></code>.</p>
+<p>下面我们将以语音识别任务为例，介绍如何定义一个新的<code class="docutils literal notranslate"><span class="pre">Task</span></code>，具体代码见<code class="docutils literal notranslate"><span class="pre">funasr/tasks/asr.py</span></code>中的<code class="docutils literal notranslate"><span class="pre">ASRTask</span></code>。 定义新的<code class="docutils literal notranslate"><span class="pre">Task</span></code>的过程，其实就是根据任务需求，重定义上述函数的过程。</p>
 <ul class="simple">
 <li><p>add_task_arguments</p></li>
 </ul>
@@ -125,7 +125,7 @@
     <span class="p">(</span><span class="o">...</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>For speech recognition tasks, specific parameters required include <code class="docutils literal notranslate"><span class="pre">token_list</span></code>, etc. According to the specific requirements of different tasks, users can define corresponding parameters in this function.</p>
+<p>对于语音识别任务，需要的特定参数包括<code class="docutils literal notranslate"><span class="pre">token_list</span></code>等。根据不同任务的特定需求，用户可以在此函数中定义相应的参数。</p>
 <ul class="simple">
 <li><p>build_preprocess_fn</p></li>
 </ul>
@@ -146,7 +146,7 @@
     <span class="k">return</span> <span class="n">retval</span>
 </pre></div>
 </div>
-<p>This function defines how to preprocess samples. Specifically, the input of speech recognition tasks includes speech and text. For speech, functions such as (optional) adding noise and reverberation to the speech are supported. For text, functions such as (optional) processing text according to bpe and mapping text to <code class="docutils literal notranslate"><span class="pre">tokenid</span></code> are supported. Users can choose the preprocessing operation that needs to be performed on the sample. For the detail implementation, please refer to <code class="docutils literal notranslate"><span class="pre">CommonPreprocessor</span></code>.</p>
+<p>该函数定义了如何对样本进行预处理。具体地，语音识别任务的输入包括音频和抄本。对于音频，在此实现了(可选)对音频加噪声，加混响等功能；对于抄本，在此实现了(可选)根据bpe处理抄本，将抄本映射成<code class="docutils literal notranslate"><span class="pre">tokenid</span></code>等功能。用户可以自己选择需要对样本进行的预处理操作，实现方法可以参考<code class="docutils literal notranslate"><span class="pre">CommonPreprocessor</span></code>。</p>
 <ul class="simple">
 <li><p>build_collate_fn</p></li>
 </ul>
@@ -155,7 +155,7 @@
     <span class="k">return</span> <span class="n">CommonCollateFn</span><span class="p">(</span><span class="n">float_pad_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">int_pad_value</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>This function defines how to combine multiple samples into a <code class="docutils literal notranslate"><span class="pre">batch</span></code>. For speech recognition tasks, <code class="docutils literal notranslate"><span class="pre">padding</span></code> is employed to obtain equal-length data from different speech and text. Specifically, we set <code class="docutils literal notranslate"><span class="pre">0.0</span></code> as the default padding value for speech and <code class="docutils literal notranslate"><span class="pre">-1</span></code> as the default padding value for text. Users can define different <code class="docutils literal notranslate"><span class="pre">batch</span></code> operations here. For the detail implementation, please refer to <code class="docutils literal notranslate"><span class="pre">CommonCollateFn</span></code>.</p>
+<p>该函数定义了如何将多个样本组成一个<code class="docutils literal notranslate"><span class="pre">batch</span></code>。对于语音识别任务，在此实现的是将不同的音频和抄本，通过<code class="docutils literal notranslate"><span class="pre">padding</span></code>的方式来得到等长的数据。具体地，我们默认用<code class="docutils literal notranslate"><span class="pre">0.0</span></code>来作为音频的填充值，用<code class="docutils literal notranslate"><span class="pre">-1</span></code>作为抄本的默认填充值。用户可以在此定义不同的组<code class="docutils literal notranslate"><span class="pre">batch</span></code>操作，实现方法可以参考<code class="docutils literal notranslate"><span class="pre">CommonCollateFn</span></code>。</p>
 <ul class="simple">
 <li><p>build_model</p></li>
 </ul>
@@ -188,8 +188,8 @@
     <span class="k">return</span> <span class="n">model</span>
 </pre></div>
 </div>
-<p>This function defines the detail of the model. For different speech recognition models, the same speech recognition <code class="docutils literal notranslate"><span class="pre">Task</span></code> can usually be shared and the remaining thing needed to be done is to define a specific model in this function. For example, a speech recognition model with a standard encoder-decoder structure has been shown above. Specifically, it first defines each module of the model, including encoder, decoder, etc. and then combine these modules together to generate a complete model. In FunASR, the model needs to inherit <code class="docutils literal notranslate"><span class="pre">AbsESPnetModel</span></code> and the corresponding code can be seen in <code class="docutils literal notranslate"><span class="pre">funasr/train/abs_espnet_model.py</span></code>. The main function needed to be implemented is the <code class="docutils literal notranslate"><span class="pre">forward</span></code> function.</p>
-<p>Next, we take <code class="docutils literal notranslate"><span class="pre">SANMEncoder</span></code> as an example to introduce how to use a custom encoder as a part of the model when defining the specified model and the corresponding code can be seen in <code class="docutils literal notranslate"><span class="pre">funasr/models/encoder/sanm_encoder.py</span></code>. For a custom encoder, in addition to inheriting the common encoder class <code class="docutils literal notranslate"><span class="pre">AbsEncoder</span></code>, it is also necessary to define the <code class="docutils literal notranslate"><span class="pre">forward</span></code> function to achieve the forward computation of the <code class="docutils literal notranslate"><span class="pre">encoder</span></code>. After defining the <code class="docutils literal notranslate"><span class="pre">encoder</span></code>, it should also be registered in the <code class="docutils literal notranslate"><span class="pre">Task</span></code>. The corresponding code example can be seen as below:</p>
+<p>该函数定义了具体的模型。对于不同的语音识别模型，往往可以共用同一个语音识别<code class="docutils literal notranslate"><span class="pre">Task</span></code>，额外需要做的是在此函数中定义特定的模型。例如，这里给出的是一个标准的encoder-decoder结构的语音识别模型。具体地，先定义该模型的各个模块，包括encoder，decoder等，然后在将这些模块组合在一起得到一个完整的模型。在FunASR中，模型需要继承<code class="docutils literal notranslate"><span class="pre">AbsESPnetModel</span></code>，其具体代码见<code class="docutils literal notranslate"><span class="pre">funasr/train/abs_espnet_model.py</span></code>，主要需要实现的是<code class="docutils literal notranslate"><span class="pre">forward</span></code>函数。</p>
+<p>下面我们将以<code class="docutils literal notranslate"><span class="pre">SANMEncoder</span></code>为例，介绍如何在定义模型的时候，使用自定义的<code class="docutils literal notranslate"><span class="pre">encoder</span></code>来作为模型的组成部分，其具体的代码见<code class="docutils literal notranslate"><span class="pre">funasr/models/encoder/sanm_encoder.py</span></code>。对于自定义的<code class="docutils literal notranslate"><span class="pre">encoder</span></code>，除了需要继承通用的<code class="docutils literal notranslate"><span class="pre">encoder</span></code>类<code class="docutils literal notranslate"><span class="pre">AbsEncoder</span></code>外，还需要自定义<code class="docutils literal notranslate"><span class="pre">forward</span></code>函数，实现<code class="docutils literal notranslate"><span class="pre">encoder</span></code>的前向计算。在定义完<code class="docutils literal notranslate"><span class="pre">encoder</span></code>后，还需要在<code class="docutils literal notranslate"><span class="pre">Task</span></code>中对其进行注册，下面给出了相应的代码示例：</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">encoder_choices</span> <span class="o">=</span> <span class="n">ClassChoices</span><span class="p">(</span>
     <span class="s2">&quot;encoder&quot;</span><span class="p">,</span>
     <span class="n">classes</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
@@ -206,15 +206,15 @@
 <span class="p">)</span>
 </pre></div>
 </div>
-<p>In this code, <code class="docutils literal notranslate"><span class="pre">sanm=SANMEncoder</span></code> takes the newly defined <code class="docutils literal notranslate"><span class="pre">SANMEncoder</span></code> as an optional choice of the <code class="docutils literal notranslate"><span class="pre">encoder</span></code>. Once the user specifies the <code class="docutils literal notranslate"><span class="pre">encoder</span></code> as <code class="docutils literal notranslate"><span class="pre">sanm</span></code> in the configuration file, the <code class="docutils literal notranslate"><span class="pre">SANMEncoder</span></code> will be correspondingly employed as the <code class="docutils literal notranslate"><span class="pre">encoder</span></code> module of the model.</p>
+<p>可以看到，<code class="docutils literal notranslate"><span class="pre">sanm=SANMEncoder</span></code>将新定义的<code class="docutils literal notranslate"><span class="pre">SANMEncoder</span></code>作为了<code class="docutils literal notranslate"><span class="pre">encoder</span></code>的一种可选项，当用户在配置文件中指定<code class="docutils literal notranslate"><span class="pre">encoder</span></code>为<code class="docutils literal notranslate"><span class="pre">sanm</span></code>时，即会相应地将<code class="docutils literal notranslate"><span class="pre">SANMEncoder</span></code>作为模型的<code class="docutils literal notranslate"><span class="pre">encoder</span></code>模块。</p>
 </div>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="get_started.html" class="btn btn-neutral float-left" title="Get Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="modelscope_models.html" class="btn btn-neutral float-right" title="Pretrained models on ModelScope" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="get_started.html" class="btn btn-neutral float-left" title="快速开始" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="modelscope_models.html" class="btn btn-neutral float-right" title="ModelScope上的预训练模型" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

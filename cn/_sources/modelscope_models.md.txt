@@ -1,10 +1,10 @@
-# Pretrained models on ModelScope
+# ModelScope上的预训练模型
 
-## Model License
+## 模型许可证
 -  Apache License 2.0
 
-## Model Zoo
-Here we provided several pretrained models on different datasets. The details of models and datasets can be found on [ModelScope](https://www.modelscope.cn/models?page=1&tasks=auto-speech-recognition).
+## 模型库
+这里我们提供了一些基于不同数据集训练得到的几种预训练模型，所有的预训练模型和更多细节可以参见 [ModelScope](https://www.modelscope.cn/models?page=1&tasks=auto-speech-recognition) 。
 
 | Datasets  | Hours |     Model      | Online/Offline | Language | Framework | Checkpoint |
 |:-----:|:-----:|:--------------:|:--------------:| :---: | :---: | --- |
