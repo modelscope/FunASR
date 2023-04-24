@@ -37,11 +37,6 @@ model_conf:
     predictor_weight: 1.0
     sampling_ratio: 0.4
 
-# minibatch related
-batch_type: length
-batch_bins: 25000
-num_workers: 16
-
 # optimization related
 accum_grad: 1
 grad_clip: 5
