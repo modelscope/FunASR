@@ -444,7 +444,7 @@ if __name__ == '__main__':
 
     # ddp init
     os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu_id)
-    args.distributed = args.dist_world_size > 1
+    args.distributed = args.ngpu > 1 or args.dist_world_size > 1
     distributed_option = build_distributed(args)
 
     # for logging
