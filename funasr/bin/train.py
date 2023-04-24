@@ -462,10 +462,9 @@ def get_parser():
 
 if __name__ == '__main__':
     parser = get_parser()
-    args, extra_task_params = parser.parse_known_args()
+    common_args, extra_task_params = parser.parse_known_args()
     if extra_task_params:
-        args = build_args(args, parser, extra_task_params)
-        # args = argparse.Namespace(**vars(args), **vars(task_args))
+        args = build_args(common_args, parser, extra_task_params)
 
     # set random seed
     set_all_random_seed(args.seed)
