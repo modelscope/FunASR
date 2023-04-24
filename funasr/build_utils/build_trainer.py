@@ -75,14 +75,14 @@ class TrainerOptions:
     grad_clip: float
     grad_clip_type: float
     log_interval: Optional[int]
-    no_forward_run: bool
+    # no_forward_run: bool
     use_tensorboard: bool
-    use_wandb: bool
+    # use_wandb: bool
     output_dir: Union[Path, str]
     max_epoch: int
     max_update: int
     seed: int
-    sharded_ddp: bool
+    # sharded_ddp: bool
     patience: Optional[int]
     keep_nbest_models: Union[int, List[int]]
     nbest_averaging_interval: int
@@ -90,7 +90,7 @@ class TrainerOptions:
     best_model_criterion: Sequence[Sequence[str]]
     val_scheduler_criterion: Sequence[str]
     unused_parameters: bool
-    wandb_model_log_interval: int
+    # wandb_model_log_interval: int
     use_pai: bool
     oss_bucket: Union[oss2.Bucket, None]
 
