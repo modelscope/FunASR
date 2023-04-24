@@ -13,15 +13,15 @@ train_cmd=utils/run.pl
 infer_cmd=utils/run.pl
 
 # general configuration
-feats_dir="../DATA" #feature output dictionary
+feats_dir="/nfs/wangjiaming.wjm/Funasr_data/aishell-1-fix-cmvn" #feature output dictionary
 exp_dir="."
 lang=zh
 dumpdir=dump/fbank
 feats_type=fbank
 token_type=char
-scp=feats.scp
-type=kaldi_ark
-stage=0
+scp=wav.scp
+type=sound
+stage=3
 stop_stage=4
 
 # feature configuration
