@@ -389,8 +389,8 @@ if __name__ == '__main__':
     parser = get_parser()
     args, extra_task_params = parser.parse_known_args()
     if extra_task_params:
-        task_args = build_args(args, extra_task_params)
-        args = argparse.Namespace(**vars(args), **vars(task_args))
+        args = build_args(args, parser, extra_task_params)
+        # args = argparse.Namespace(**vars(args), **vars(task_args))
 
     # set random seed
     set_all_random_seed(args.seed)
