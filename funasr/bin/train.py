@@ -260,6 +260,12 @@ def get_parser():
              "training phase. If None is given, it is decided according the number "
              "of training samples automatically .",
     )
+    parser.add_argument(
+        "--use_tensorboard",
+        type=str2bool,
+        default=True,
+        help="Enable tensorboard logging",
+    )
 
     # pretrained model related
     parser.add_argument(
