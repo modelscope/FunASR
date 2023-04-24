@@ -383,9 +383,6 @@ def get_parser():
         help="oss bucket.",
     )
 
-    # task related
-    parser.add_argument("--task_name", help="for different task")
-
     return parser
 
 
