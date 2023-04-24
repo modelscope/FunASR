@@ -23,6 +23,7 @@ from funasr.utils.nested_dict_action import NestedDictAction
 from funasr.utils.prepare_data import prepare_data
 from funasr.utils.types import int_or_none
 from funasr.utils.types import str2bool
+from funasr.utils.types import str2triple_str
 from funasr.utils.types import str_or_none
 from funasr.utils.yaml_no_alias_safe_dump import yaml_no_alias_safe_dump
 
@@ -310,18 +311,21 @@ def get_parser():
     )
     parser.add_argument(
         "--train_data_path_and_name_and_type",
+        type=str2triple_str,
         action="append",
         default=[],
         help="e.g. '--train_data_path_and_name_and_type some/path/a.scp,foo,sound'. ",
     )
     parser.add_argument(
         "--valid_data_path_and_name_and_type",
+        type=str2triple_str,
         action="append",
         default=[],
     )
     parser.add_argument(
         "--train_shape_file",
-        type=str, action="append",
+        type=str,
+        action="append",
         default=[],
     )
     parser.add_argument(
