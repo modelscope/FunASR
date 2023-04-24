@@ -21,6 +21,7 @@ from funasr.torch_utils.pytorch_version import pytorch_cudnn_version
 from funasr.torch_utils.set_all_random_seed import set_all_random_seed
 from funasr.utils.nested_dict_action import NestedDictAction
 from funasr.utils.prepare_data import prepare_data
+from funasr.utils.types import int_or_none
 from funasr.utils.types import str2bool
 from funasr.utils.types import str_or_none
 from funasr.utils.yaml_no_alias_safe_dump import yaml_no_alias_safe_dump
@@ -70,6 +71,20 @@ def get_parser():
         "--local_rank",
         default=None,
         help="local rank for distributed training",
+    )
+    parser.add_argument(
+        "--dist_master_addr",
+        default=None,
+        type=str_or_none,
+        help="The master address for distributed training. "
+             "This value is used when dist_init_method == 'env://'",
+    )
+    parser.add_argument(
+        "--dist_master_port",
+        default=None,
+        type=int_or_none,
+        help="The master port for distributed training"
+             "This value is used when dist_init_method == 'env://'",
     )
     parser.add_argument(
         "--unused_parameters",
