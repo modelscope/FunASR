@@ -31,7 +31,7 @@ using namespace std;
 #include "tokenizer.h"
 #include "CT-transformer.h"
 #include "FsmnVad.h"
-#include "e2e_vad.h"
+#include "E2EVad.h"
 #include "Vocab.h"
 #include "CommonStruct.h"
 #include "Audio.h"

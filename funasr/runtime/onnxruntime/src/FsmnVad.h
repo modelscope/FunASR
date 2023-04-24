@@ -7,16 +7,16 @@
 class FsmnVad {
 public:
     FsmnVad();
-    void test();
-    void init_vad(const std::string &vad_model, const std::string &vad_cmvn, int vad_sample_rate, int vad_silence_duration, int vad_max_len,
+    void Test();
+    void InitVad(const std::string &vad_model, const std::string &vad_cmvn, int vad_sample_rate, int vad_silence_duration, int vad_max_len,
                   float vad_speech_noise_thres);
 
-    std::vector<std::vector<int>> infer(const std::vector<float> &waves);
+    std::vector<std::vector<int>> Infer(const std::vector<float> &waves);
     void Reset();
 
 private:
 
-    void read_model(const std::string &vad_model);
+    void ReadModel(const std::string &vad_model);
 
     static void GetInputOutputInfo(
             const std::shared_ptr<Ort::Session> &session,
@@ -31,8 +31,8 @@ private:
             const std::vector<std::vector<float>> &chunk_feats,
             std::vector<std::vector<float>> *out_prob);
 
-    void load_cmvn(const char *filename);
-    void init_cache();
+    void LoadCmvn(const char *filename);
+    void InitCache();
 
     std::shared_ptr<Ort::Session> vad_session_ = nullptr;
     Ort::Env env_;

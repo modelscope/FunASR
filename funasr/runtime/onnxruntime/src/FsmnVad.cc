@@ -4,7 +4,7 @@
 //#include "glog/logging.h"
 
 
-void FsmnVad::init_vad(const std::string &vad_model, const std::string &vad_cmvn, int vad_sample_rate, int vad_silence_duration, int vad_max_len,
+void FsmnVad::InitVad(const std::string &vad_model, const std::string &vad_cmvn, int vad_sample_rate, int vad_silence_duration, int vad_max_len,
                        float vad_speech_noise_thres) {
     session_options_.SetIntraOpNumThreads(1);
     session_options_.SetGraphOptimizationLevel(ORT_ENABLE_ALL);
@@ -14,9 +14,9 @@ void FsmnVad::init_vad(const std::string &vad_model, const std::string &vad_cmvn
     this->vad_max_len_=vad_max_len;
     this->vad_speech_noise_thres_=vad_speech_noise_thres;
 
-    read_model(vad_model);
-    load_cmvn(vad_cmvn.c_str());
-    init_cache();
+    ReadModel(vad_model);
+    LoadCmvn(vad_cmvn.c_str());
+    InitCache();
 
     fbank_opts.frame_opts.dither = 0;
     fbank_opts.mel_opts.num_bins = 80;
@@ -29,7 +29,7 @@ void FsmnVad::init_vad(const std::string &vad_model, const std::string &vad_cmvn
 
 }
 
-void FsmnVad::read_model(const std::string &vad_model) {
+void FsmnVad::ReadModel(const std::string &vad_model) {
     try {
         vad_session_ = std::make_shared<Ort::Session>(
                 env_, vad_model.c_str(), session_options_);
@@ -148,7 +148,6 @@ void FsmnVad::Forward(
     }
 }
 
-
 void FsmnVad::FbankKaldi(float sample_rate, std::vector<std::vector<float>> &vad_feats,
                          const std::vector<float> &waves) {
     knf::OnlineFbank fbank(fbank_opts);
@@ -162,7 +161,7 @@ void FsmnVad::FbankKaldi(float sample_rate, std::vector<std::vector<float>> &vad
     }
 }
 
-void FsmnVad::load_cmvn(const char *filename)
+void FsmnVad::LoadCmvn(const char *filename)
 {
     using namespace std;
     ifstream cmvn_stream(filename);
@@ -240,7 +239,7 @@ std::vector<std::vector<float>> &FsmnVad::LfrCmvn(std::vector<std::vector<float>
 }
 
 std::vector<std::vector<int>>
-FsmnVad::infer(const std::vector<float> &waves) {
+FsmnVad::Infer(const std::vector<float> &waves) {
     std::vector<std::vector<float>> vad_feats;
     std::vector<std::vector<float>> vad_probs;
     FbankKaldi(vad_sample_rate_, vad_feats, waves);
@@ -255,7 +254,7 @@ FsmnVad::infer(const std::vector<float> &waves) {
 
 }
 
-void FsmnVad::init_cache(){
+void FsmnVad::InitCache(){
   std::vector<float> cache_feats(128 * 19 * 1, 0);
   for (int i=0;i<4;i++){
     in_cache_.emplace_back(cache_feats);
@@ -264,13 +263,11 @@ void FsmnVad::init_cache(){
 
 void FsmnVad::Reset(){
   in_cache_.clear();
-  init_cache();
+  InitCache();
 };
 
-void FsmnVad::test() {
-
+void FsmnVad::Test() {
 }
 
 FsmnVad::FsmnVad():env_(ORT_LOGGING_LEVEL_ERROR, ""),session_options_{} {
-
 }

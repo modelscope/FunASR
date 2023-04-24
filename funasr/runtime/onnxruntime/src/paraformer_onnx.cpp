@@ -14,7 +14,7 @@ ModelImp::ModelImp(const char* path,int nNumThread, bool quantize, bool use_vad,
         string vad_path = pathAppend(path, "vad_model.onnx");
         string mvn_path = pathAppend(path, "vad.mvn");
         vadHandle = make_unique<FsmnVad>();
-        vadHandle->init_vad(vad_path, mvn_path, MODEL_SAMPLE_RATE, VAD_MAX_LEN, VAD_SILENCE_DYRATION, VAD_SPEECH_NOISE_THRES);
+        vadHandle->InitVad(vad_path, mvn_path, MODEL_SAMPLE_RATE, VAD_MAX_LEN, VAD_SILENCE_DYRATION, VAD_SPEECH_NOISE_THRES);
     }
 
     // PUNC model
@@ -85,7 +85,7 @@ void ModelImp::reset()
 }
 
 vector<std::vector<int>> ModelImp::vad_seg(std::vector<float>& pcm_data){
-    return vadHandle->infer(pcm_data);
+    return vadHandle->Infer(pcm_data);
 }
 
 string ModelImp::AddPunc(const char* szInput){
