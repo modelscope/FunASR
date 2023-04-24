@@ -8,7 +8,7 @@ from funasr.utils.types import str2bool
 from funasr.utils.types import str_or_none
 
 
-def build_args(args):
+def build_args(args, extra_task_params):
     parser = argparse.ArgumentParser("Task related config")
     if args.task_name == "asr":
         from funasr.build_utils.build_asr_model import class_choices_list
@@ -85,5 +85,5 @@ def build_args(args):
     else:
         raise NotImplementedError("Not supported task: {}".format(args.task_name))
 
-    task_args = parser.parse_args()
+    task_args = parser.parse_args(extra_task_params)
     return task_args
