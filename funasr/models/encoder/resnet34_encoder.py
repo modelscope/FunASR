@@ -2,6 +2,7 @@ import torch
 from torch.nn import functional as F
 from typing import Tuple, Optional
 from funasr.models.pooling.statistic_pooling import statistic_pooling, windowed_statistic_pooling
+from funasr.models.encoder.abs_encoder import AbsEncoder
 from collections import OrderedDict
 import logging
 import numpy as np
