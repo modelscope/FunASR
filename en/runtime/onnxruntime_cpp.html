@@ -80,7 +80,6 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#building-for-linux-unix">Building for Linux/Unix</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#download-onnxruntime">Download onnxruntime</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#install-fftw3">Install fftw3</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#install-openblas">Install openblas</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#build-runtime">Build runtime</a></li>
 </ul>
@@ -174,13 +173,6 @@ tar -zxvf onnxruntime-linux-x64-1.14.0.tgz
 </pre></div>
 </div>
 </div>
-<div class="section" id="install-fftw3">
-<h3>Install fftw3<a class="headerlink" href="#install-fftw3" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo apt install libfftw3-dev <span class="c1">#ubuntu</span>
-<span class="c1"># sudo yum install fftw fftw-devel #centos</span>
-</pre></div>
-</div>
-</div>
 <div class="section" id="install-openblas">
 <h3>Install openblas<a class="headerlink" href="#install-openblas" title="Permalink to this headline"></a></h3>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo apt-get install libopenblas-dev <span class="c1">#ubuntu</span>
@@ -204,11 +196,11 @@ make
 </div>
 <div class="section" id="run-the-demo">
 <h2>Run the demo<a class="headerlink" href="#run-the-demo" title="Permalink to this headline"></a></h2>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>tester /path/models_dir /path/wave_file quantize<span class="o">(</span><span class="nb">true</span> or <span class="nb">false</span><span class="o">)</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>funasr-onnx-offline /path/models_dir /path/wave_file quantize<span class="o">(</span><span class="nb">true</span> or <span class="nb">false</span><span class="o">)</span> use_vad<span class="o">(</span><span class="nb">true</span> or <span class="nb">false</span><span class="o">)</span> use_punc<span class="o">(</span><span class="nb">true</span> or <span class="nb">false</span><span class="o">)</span>
 </pre></div>
 </div>
 <p>The structure of /path/models_dir</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">config</span><span class="o">.</span><span class="n">yaml</span><span class="p">,</span> <span class="n">am</span><span class="o">.</span><span class="n">mvn</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">onnx</span><span class="p">(</span><span class="ow">or</span> <span class="n">model_quant</span><span class="o">.</span><span class="n">onnx</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">config</span><span class="o">.</span><span class="n">yaml</span><span class="p">,</span> <span class="n">am</span><span class="o">.</span><span class="n">mvn</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">onnx</span><span class="p">(</span><span class="ow">or</span> <span class="n">model_quant</span><span class="o">.</span><span class="n">onnx</span><span class="p">),</span> <span class="p">(</span><span class="n">vad_model</span><span class="o">.</span><span class="n">onnx</span><span class="p">,</span> <span class="n">vad</span><span class="o">.</span><span class="n">mvn</span> <span class="k">if</span> <span class="n">you</span> <span class="n">use</span> <span class="n">vad</span><span class="p">),</span> <span class="p">(</span><span class="n">punc_model</span><span class="o">.</span><span class="n">onnx</span><span class="p">,</span> <span class="n">punc</span><span class="o">.</span><span class="n">yaml</span> <span class="k">if</span> <span class="n">you</span> <span class="n">use</span> <span class="n">vad</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
