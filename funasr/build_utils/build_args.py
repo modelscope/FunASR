@@ -85,7 +85,8 @@ def build_args(args, parser, extra_task_params):
         raise NotImplementedError("Not supported task: {}".format(args.task_name))
 
     for action in parser._actions:
-        task_parser._add_action(action)
+        if not any(action.dest == a.dest for a in task_parser._actions):
+            task_parser._add_action(action)
 
     task_args = parser.parse_args(extra_task_params)
     return task_args
