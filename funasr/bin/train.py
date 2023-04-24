@@ -58,7 +58,7 @@ def get_parser():
     )
     parser.add_argument(
         "--dist_world_size",
-        default=None,
+        default=1,
         help="number of nodes for distributed training",
     )
     parser.add_argument(
