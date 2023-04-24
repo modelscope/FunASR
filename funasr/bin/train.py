@@ -19,7 +19,6 @@ from funasr.text.phoneme_tokenizer import g2p_choices
 from funasr.torch_utils.model_summary import model_summary
 from funasr.torch_utils.pytorch_version import pytorch_cudnn_version
 from funasr.torch_utils.set_all_random_seed import set_all_random_seed
-from funasr.utils import config_argparse
 from funasr.utils.prepare_data import prepare_data
 from funasr.utils.types import str2bool
 from funasr.utils.types import str_or_none
@@ -27,7 +26,7 @@ from funasr.utils.yaml_no_alias_safe_dump import yaml_no_alias_safe_dump
 
 
 def get_parser():
-    parser = config_argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(
         description="FunASR Common Training Parser",
     )
 
