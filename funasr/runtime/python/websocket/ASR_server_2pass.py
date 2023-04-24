@@ -105,7 +105,7 @@ else:
 inference_pipeline_asr_online = pipeline(
     task=Tasks.auto_speech_recognition,
     model='damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8404-online',
-    model_revision='v1.0.2')
+    model_revision=None)
 
 
 print("model loaded")

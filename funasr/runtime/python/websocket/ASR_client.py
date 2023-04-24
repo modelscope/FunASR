@@ -1,9 +1,8 @@
-import pyaudio
+
 # import websocket #区别服务端这里是 websocket-client库
 import time
 import websockets
 import asyncio
-from queue import Queue
 # import threading
 import argparse
 import json
@@ -30,12 +29,13 @@ parser.add_argument("--audio_in",
 
 args = parser.parse_args()
 
+# voices = asyncio.Queue()
+from queue import Queue
 voices = Queue()
-
-
     
 # 其他函数可以通过调用send(data)来发送数据，例如：
-async def record():
+async def record_microphone():
+    import pyaudio
     #print("2")
     global voices 
     FORMAT = pyaudio.paInt16
@@ -59,8 +59,32 @@ async def record():
         #print(voices.qsize())
 
         await asyncio.sleep(0.01)
-    
 
+# 其他函数可以通过调用send(data)来发送数据，例如：
+async def record_from_scp():
+    global voices
+    if args.audio_in.endswith(".scp"):
+        f_scp = open(args.audio_in)
+        wavs = f_scp.readlines()
+    else:
+        wavs = [args.audio_in]
+    for wav in wavs:
+        wav_splits = wav.strip().split()
+        wav_path = wav_splits[1] if len(wav_splits) > 1 else wav_splits[0]
+        bytes = open(wav_path, "rb")
+        bytes = bytes.read()
+        
+        stride = int(args.chunk_size/1000*16000*2)
+        chunk_num = (len(bytes)-1)//stride + 1
+        for i in range(chunk_num):
+            beg = i*stride
+            data_chunk = bytes[beg:beg+stride]
+            voices.put(data_chunk)
+            # print("data_chunk: ", len(data_chunk))
+            # print(voices.qsize())
+        
+            await asyncio.sleep(args.chunk_size/1000)
+     
 
 async def ws_send():
     global voices
@@ -97,7 +121,10 @@ async def ws_client():
     uri = "ws://{}:{}".format(args.host, args.port)
     #ws = await websockets.connect(uri, subprotocols=["binary"]) # 创建一个长连接
     async for websocket in websockets.connect(uri, subprotocols=["binary"], ping_interval=None):
-        task = asyncio.create_task(record()) # 创建一个后台任务录音
+        if args.audio_in is not None:
+            task = asyncio.create_task(record_from_scp()) # 创建一个后台任务录音
+        else:
+            task = asyncio.create_task(record_microphone())  # 创建一个后台任务录音
         task2 = asyncio.create_task(ws_send()) # 创建一个后台任务发送
         task3 = asyncio.create_task(message()) # 创建一个后台接收消息的任务
         await asyncio.gather(task, task2, task3)
