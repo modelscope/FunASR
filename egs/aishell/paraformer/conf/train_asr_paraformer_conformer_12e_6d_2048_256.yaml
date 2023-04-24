@@ -81,6 +81,15 @@ predictor_conf:
     r_order: 1
     tail_threshold: 0.45
 
+dataset_conf:
+    shuffle: True
+    shuffle_conf:
+        shuffle_size: 2048
+        sort_size: 500
+    batch_conf:
+        batch_type: token
+        batch_size: 25000
+    num_workers: 8
 
 log_interval: 50
 normalize: None
