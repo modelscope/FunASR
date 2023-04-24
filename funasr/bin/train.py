@@ -87,6 +87,22 @@ def get_parser():
              "This value is used when dist_init_method == 'env://'",
     )
     parser.add_argument(
+        "--dist_launcher",
+        default=None,
+        type=str_or_none,
+        choices=["slurm", "mpi", None],
+        help="The launcher type for distributed training",
+    )
+    parser.add_argument(
+        "--multiprocessing_distributed",
+        default=True,
+        type=str2bool,
+        help="Use multi-processing distributed training to launch "
+             "N processes per node, which has N GPUs. This is the "
+             "fastest way to use PyTorch for either single node or "
+             "multi node data parallel training",
+    )
+    parser.add_argument(
         "--unused_parameters",
         type=str2bool,
         default=False,
