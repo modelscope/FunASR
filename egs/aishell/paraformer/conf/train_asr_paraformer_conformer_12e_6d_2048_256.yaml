@@ -1,4 +1,6 @@
 # network architecture
+# task related
+taskname: asr
 # encoder related
 encoder: conformer
 encoder_conf:
