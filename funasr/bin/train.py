@@ -285,6 +285,17 @@ def get_parser():
         default=[],
     )
     parser.add_argument(
+        "--train_shape_file",
+        type=str, action="append",
+        default=[],
+    )
+    parser.add_argument(
+        "--valid_shape_file",
+        type=str,
+        action="append",
+        default=[],
+    )
+    parser.add_argument(
         "--use_preprocessor",
         type=str2bool,
         default=True,
