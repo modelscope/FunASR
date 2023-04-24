@@ -7,10 +7,9 @@ import torch.nn as nn
 
 from funasr.modules.embedding import SinusoidalPositionEncoder
 from funasr.models.encoder.sanm_encoder import SANMVadEncoder as Encoder
-from funasr.train.abs_model import AbsPunctuation
 
 
-class VadRealtimeTransformer(AbsPunctuation):
+class VadRealtimeTransformer(torch.nn.Module):
 
     def __init__(
         self,
