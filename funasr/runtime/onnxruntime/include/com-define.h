@@ -28,7 +28,6 @@
 // punc
 #define PUNC_MODEL_FILE  "punc_model.onnx"
 #define PUNC_YAML_FILE "punc.yaml"
-
 #define UNK_CHAR "<unk>"
 
 #define  INPUT_NUM  2

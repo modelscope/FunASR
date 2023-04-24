@@ -9,6 +9,11 @@
 namespace paraformer {
 
     class Paraformer : public Model {
+    /**
+     * Author: Speech Lab of DAMO Academy, Alibaba Group
+     * Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition
+     * https://arxiv.org/pdf/2206.08317.pdf
+    */
     private:
         //std::unique_ptr<knf::OnlineFbank> fbank_;
         knf::FbankOptions fbank_opts;
@@ -27,7 +32,7 @@ namespace paraformer {
         vector<float> ApplyLfr(const vector<float> &in);
         void ApplyCmvn(vector<float> *v);
 
-        string GreedySearch( float* in, int n_len);
+        string GreedySearch( float* in, int n_len, int64_t token_nums);
 
         std::shared_ptr<Ort::Session> m_session;
         Ort::Env env_;

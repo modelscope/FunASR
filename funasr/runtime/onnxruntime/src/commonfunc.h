@@ -33,7 +33,6 @@ inline void GetInputName(Ort::Session* session, string& inputName,int nIndex=0) 
         {
             auto t = session->GetInputNameAllocated(nIndex, allocator);
             inputName = t.get();
-
         }
     }
 }
@@ -45,7 +44,6 @@ inline void GetOutputName(Ort::Session* session, string& outputName, int nIndex 
         {
             auto t = session->GetOutputNameAllocated(nIndex, allocator);
             outputName = t.get();
-
         }
     }
 }

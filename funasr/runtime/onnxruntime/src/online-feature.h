@@ -12,15 +12,12 @@ public:
 
   void ExtractFeats(vector<vector<float>> &vad_feats, vector<float> waves, bool input_finished);
 
-
 private:
   void OnlineFbank(vector<vector<float>> &vad_feats, vector<float> &waves);
-
   int OnlineLfrCmvn(vector<vector<float>> &vad_feats);
-
+  
   static int ComputeFrameNum(int sample_length, int frame_sample_length, int frame_shift_sample_length) {
     int frame_num = static_cast<int>((sample_length - frame_sample_length) / frame_shift_sample_length + 1);
-
     if (frame_num >= 1 && sample_length >= frame_sample_length)
       return frame_num;
     else

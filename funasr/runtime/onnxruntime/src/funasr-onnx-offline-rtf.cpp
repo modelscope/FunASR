@@ -58,7 +58,6 @@ void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list,
         }else{
             cout <<"No return data!";
         }
-
     }
     {
         lock_guard<mutex> guard(mtx);

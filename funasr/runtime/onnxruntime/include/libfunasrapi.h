@@ -51,21 +51,14 @@ _FUNASRAPI FUNASR_HANDLE  FunASRInit(const char* sz_model_dir, int thread_num, b
 
 // if not give a fn_callback ,it should be NULL 
 _FUNASRAPI FUNASR_RESULT	FunASRRecogBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, FUNASR_MODE mode, QM_CALLBACK fn_callback, bool use_vad=false, bool use_punc=false);
-
 _FUNASRAPI FUNASR_RESULT	FunASRRecogPCMBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, int sampling_rate, FUNASR_MODE mode, QM_CALLBACK fn_callback, bool use_vad=false, bool use_punc=false);
-
 _FUNASRAPI FUNASR_RESULT	FunASRRecogPCMFile(FUNASR_HANDLE handle, const char* sz_filename, int sampling_rate, FUNASR_MODE mode, QM_CALLBACK fn_callback, bool use_vad=false, bool use_punc=false);
-
 _FUNASRAPI FUNASR_RESULT	FunASRRecogFile(FUNASR_HANDLE handle, const char* sz_wavfile, FUNASR_MODE mode, QM_CALLBACK fn_callback, bool use_vad=false, bool use_punc=false);
 
 _FUNASRAPI const char*	FunASRGetResult(FUNASR_RESULT result,int n_index);
-
-_FUNASRAPI const int		FunASRGetRetNumber(FUNASR_RESULT result);
-
+_FUNASRAPI const int	FunASRGetRetNumber(FUNASR_RESULT result);
 _FUNASRAPI void			FunASRFreeResult(FUNASR_RESULT result);
-
 _FUNASRAPI void			FunASRUninit(FUNASR_HANDLE handle);
-
 _FUNASRAPI const float	FunASRGetRetSnippetTime(FUNASR_RESULT result);
 
 #ifdef __cplusplus 
