@@ -162,6 +162,10 @@ def prepare_data(args, distributed_option):
     if args.dataset_type == "large" and args.train_data_file is not None:
         return
     distributed = distributed_option.distributed
+    if not hasattr(args, "train_set"):
+        args.train_set = "train"
+    if not hasattr(args, "dev_set"):
+        args.dev_set = "validation"
     if not distributed or distributed_option.dist_rank == 0:
         filter_wav_text(args.data_dir, args.train_set)
         filter_wav_text(args.data_dir, args.dev_set)
