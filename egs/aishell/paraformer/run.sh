@@ -180,7 +180,6 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
                 --input_size $feats_dim \
                 --ngpu $gpu_num \
                 --num_worker_count $count \
-                --multiprocessing_distributed true \
                 --dist_init_method $init_method \
                 --dist_world_size $world_size \
                 --dist_rank $rank \
