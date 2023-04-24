@@ -88,5 +88,5 @@ def build_args(args, parser, extra_task_params):
         if not any(action.dest == a.dest for a in task_parser._actions):
             task_parser._add_action(action)
 
-    task_args = parser.parse_args(extra_task_params)
+    task_args = task_parser.parse_args(extra_task_params)
     return task_args

@@ -162,6 +162,7 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
             local_rank=$i
             gpu_id=$(echo $CUDA_VISIBLE_DEVICES | cut -d',' -f$[$i+1])
             train.py \
+                --task_name asr \
                 --gpu_id $gpu_id \
                 --use_preprocessor true \
                 --token_type char \
