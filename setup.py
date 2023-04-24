@@ -40,7 +40,7 @@ requirements = {
         "g2p",
         # PAI
         "oss2",
-        "kaldi-native-fbank",
+        # "kaldi-native-fbank",
         # timestamp
         "edit-distance"
     ],
