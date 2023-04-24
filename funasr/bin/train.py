@@ -242,6 +242,12 @@ def get_parser():
         help="Enable resuming if checkpoint is existing",
     )
     parser.add_argument(
+        "--train_dtype",
+        default="float32",
+        choices=["float16", "float32", "float64"],
+        help="Data type for training.",
+    )
+    parser.add_argument(
         "--use_amp",
         type=str2bool,
         default=False,
