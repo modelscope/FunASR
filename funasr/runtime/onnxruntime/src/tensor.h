@@ -71,7 +71,7 @@ template <typename T> void Tensor<T>::alloc_buff()
 {
     buff_size = size[0] * size[1] * size[2] * size[3];
     mem_size = buff_size;
-    buff = (T *)aligned_malloc(32, buff_size * sizeof(T));
+    buff = (T *)AlignedMalloc(32, buff_size * sizeof(T));
 }
 
 template <typename T> void Tensor<T>::free_buff()

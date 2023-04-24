@@ -4,24 +4,24 @@
 class CTokenizer {
 private:
 
-	bool  m_Ready = false;
-	vector<string>   m_ID2Token,m_ID2Punc;
-	map<string, int>  m_Token2ID,m_Punc2ID;
+	bool  m_ready = false;
+	vector<string>   m_id2token,m_id2punc;
+	map<string, int>  m_token2id,m_punc2id;
 
 public:
 
-	CTokenizer(const char* szYmlFile);
+	CTokenizer(const char* sz_yamlfile);
 	CTokenizer();
-	bool OpenYaml(const char* szYmlFile);
-	void read_yml(const YAML::Node& node);
-	vector<string> ID2String(vector<int> Input);
-	vector<int> String2IDs(vector<string> Input);
-	int String2ID(string Input);
-	vector<string> ID2Punc(vector<int> Input);
-	string ID2Punc(int nPuncID);
-	vector<int> Punc2IDs(vector<string> Input);
-	vector<string> SplitChineseString(const string& strInfo);
-	void strSplit(const string& str, const char split, vector<string>& res);
-	void Tokenize(const char* strInfo, vector<string>& strOut, vector<int>& IDOut);
+	bool OpenYaml(const char* sz_yamlfile);
+	void ReadYaml(const YAML::Node& node);
+	vector<string> Id2String(vector<int> input);
+	vector<int> String2Ids(vector<string> input);
+	int String2Id(string input);
+	vector<string> Id2Punc(vector<int> input);
+	string Id2Punc(int n_punc_id);
+	vector<int> Punc2Ids(vector<string> input);
+	vector<string> SplitChineseString(const string& str_info);
+	void StrSplit(const string& str, const char split, vector<string>& res);
+	void Tokenize(const char* str_info, vector<string>& str_out, vector<int>& id_out);
 
 };

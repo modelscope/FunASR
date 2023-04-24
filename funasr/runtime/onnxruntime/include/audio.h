@@ -23,11 +23,11 @@ class AudioFrame {
     AudioFrame(int len);
 
     ~AudioFrame();
-    int set_start(int val);
-    int set_end(int val);
-    int get_start();
-    int get_len();
-    int disp();
+    int SetStart(int val);
+    int SetEnd(int val);
+    int GetStart();
+    int GetLen();
+    int Disp();
 };
 
 class Audio {
@@ -45,19 +45,18 @@ class Audio {
     Audio(int data_type);
     Audio(int data_type, int size);
     ~Audio();
-    void disp();
-    bool loadwav(const char* filename, int32_t* sampling_rate);
-    void wavResample(int32_t sampling_rate, const float *waveform, int32_t n);
-    bool loadwav(const char* buf, int nLen, int32_t* sampling_rate);
-    bool loadpcmwav(const char* buf, int nFileLen, int32_t* sampling_rate);
-    bool loadpcmwav(const char* filename, int32_t* sampling_rate);
-    int fetch_chunck(float *&dout, int len);
-    int fetch(float *&dout, int &len, int &flag);
-    void padding();
-    void split(Model* pRecogObj);
-    float get_time_len();
-
-    int get_queue_size() { return (int)frame_queue.size(); }
+    void Disp();
+    bool LoadWav(const char* filename, int32_t* sampling_rate);
+    void WavResample(int32_t sampling_rate, const float *waveform, int32_t n);
+    bool LoadWav(const char* buf, int n_len, int32_t* sampling_rate);
+    bool LoadPcmwav(const char* buf, int n_file_len, int32_t* sampling_rate);
+    bool LoadPcmwav(const char* filename, int32_t* sampling_rate);
+    int FetchChunck(float *&dout, int len);
+    int Fetch(float *&dout, int &len, int &flag);
+    void Padding();
+    void Split(Model* recog_obj);
+    float GetTimeLen();
+    int GetQueueSize() { return (int)frame_queue.size(); }
 };
 
 #endif

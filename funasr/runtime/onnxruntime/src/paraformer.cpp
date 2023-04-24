@@ -3,33 +3,33 @@
 using namespace std;
 using namespace paraformer;
 
-ModelImp::ModelImp(const char* path,int nNumThread, bool quantize, bool use_vad, bool use_punc)
-:env_(ORT_LOGGING_LEVEL_ERROR, "paraformer"),sessionOptions{}{
+Paraformer::Paraformer(const char* path,int thread_num, bool quantize, bool use_vad, bool use_punc)
+:env_(ORT_LOGGING_LEVEL_ERROR, "paraformer"),session_options{}{
     string model_path;
     string cmvn_path;
     string config_path;
 
     // VAD model
     if(use_vad){
-        string vad_path = pathAppend(path, "vad_model.onnx");
-        string mvn_path = pathAppend(path, "vad.mvn");
-        vadHandle = make_unique<FsmnVad>();
-        vadHandle->InitVad(vad_path, mvn_path, MODEL_SAMPLE_RATE, VAD_MAX_LEN, VAD_SILENCE_DYRATION, VAD_SPEECH_NOISE_THRES);
+        string vad_path = PathAppend(path, "vad_model.onnx");
+        string mvn_path = PathAppend(path, "vad.mvn");
+        vad_handle = make_unique<FsmnVad>();
+        vad_handle->InitVad(vad_path, mvn_path, MODEL_SAMPLE_RATE, VAD_MAX_LEN, VAD_SILENCE_DYRATION, VAD_SPEECH_NOISE_THRES);
     }
 
     // PUNC model
     if(use_punc){
-        puncHandle = make_unique<CTTransformer>(path, nNumThread);
+        punc_handle = make_unique<CTTransformer>(path, thread_num);
     }
 
     if(quantize)
     {
-        model_path = pathAppend(path, "model_quant.onnx");
+        model_path = PathAppend(path, "model_quant.onnx");
     }else{
-        model_path = pathAppend(path, "model.onnx");
+        model_path = PathAppend(path, "model.onnx");
     }
-    cmvn_path = pathAppend(path, "am.mvn");
-    config_path = pathAppend(path, "config.yaml");
+    cmvn_path = PathAppend(path, "am.mvn");
+    config_path = PathAppend(path, "config.yaml");
 
     // knf options
     fbank_opts.frame_opts.dither = 0;
@@ -42,28 +42,28 @@ ModelImp::ModelImp(const char* path,int nNumThread, bool quantize, bool use_vad,
     fbank_opts.mel_opts.debug_mel = false;
     // fbank_ = std::make_unique<knf::OnlineFbank>(fbank_opts);
 
-    // sessionOptions.SetInterOpNumThreads(1);
-    sessionOptions.SetIntraOpNumThreads(nNumThread);
-    sessionOptions.SetGraphOptimizationLevel(ORT_ENABLE_ALL);
+    // session_options.SetInterOpNumThreads(1);
+    session_options.SetIntraOpNumThreads(thread_num);
+    session_options.SetGraphOptimizationLevel(ORT_ENABLE_ALL);
     // DisableCpuMemArena can improve performance
-    sessionOptions.DisableCpuMemArena();
+    session_options.DisableCpuMemArena();
 
 #ifdef _WIN32
     wstring wstrPath = strToWstr(model_path);
-    m_session = std::make_unique<Ort::Session>(env_, model_path.c_str(), sessionOptions);
+    m_session = std::make_unique<Ort::Session>(env_, model_path.c_str(), session_options);
 #else
-    m_session = std::make_unique<Ort::Session>(env_, model_path.c_str(), sessionOptions);
+    m_session = std::make_unique<Ort::Session>(env_, model_path.c_str(), session_options);
 #endif
 
     string strName;
-    getInputName(m_session.get(), strName);
+    GetInputName(m_session.get(), strName);
     m_strInputNames.push_back(strName.c_str());
-    getInputName(m_session.get(), strName,1);
+    GetInputName(m_session.get(), strName,1);
     m_strInputNames.push_back(strName);
     
-    getOutputName(m_session.get(), strName);
+    GetOutputName(m_session.get(), strName);
     m_strOutputNames.push_back(strName);
-    getOutputName(m_session.get(), strName,1);
+    GetOutputName(m_session.get(), strName,1);
     m_strOutputNames.push_back(strName);
 
     for (auto& item : m_strInputNames)
@@ -71,28 +71,28 @@ ModelImp::ModelImp(const char* path,int nNumThread, bool quantize, bool use_vad,
     for (auto& item : m_strOutputNames)
         m_szOutputNames.push_back(item.c_str());
     vocab = new Vocab(config_path.c_str());
-    load_cmvn(cmvn_path.c_str());
+    LoadCmvn(cmvn_path.c_str());
 }
 
-ModelImp::~ModelImp()
+Paraformer::~Paraformer()
 {
     if(vocab)
         delete vocab;
 }
 
-void ModelImp::reset()
+void Paraformer::Reset()
 {
 }
 
-vector<std::vector<int>> ModelImp::vad_seg(std::vector<float>& pcm_data){
-    return vadHandle->Infer(pcm_data);
+vector<std::vector<int>> Paraformer::VadSeg(std::vector<float>& pcm_data){
+    return vad_handle->Infer(pcm_data);
 }
 
-string ModelImp::AddPunc(const char* szInput){
-    return puncHandle->AddPunc(szInput);
+string Paraformer::AddPunc(const char* sz_input){
+    return punc_handle->AddPunc(sz_input);
 }
 
-vector<float> ModelImp::FbankKaldi(float sample_rate, const float* waves, int len) {
+vector<float> Paraformer::FbankKaldi(float sample_rate, const float* waves, int len) {
     knf::OnlineFbank fbank_(fbank_opts);
     fbank_.AcceptWaveform(sample_rate, waves, len);
     //fbank_->InputFinished();
@@ -110,7 +110,7 @@ vector<float> ModelImp::FbankKaldi(float sample_rate, const float* waves, int le
     return features;
 }
 
-void ModelImp::load_cmvn(const char *filename)
+void Paraformer::LoadCmvn(const char *filename)
 {
     ifstream cmvn_stream(filename);
     string line;
@@ -143,21 +143,21 @@ void ModelImp::load_cmvn(const char *filename)
     }
 }
 
-string ModelImp::greedy_search(float * in, int nLen )
+string Paraformer::GreedySearch(float * in, int n_len )
 {
     vector<int> hyps;
-    int Tmax = nLen;
+    int Tmax = n_len;
     for (int i = 0; i < Tmax; i++) {
         int max_idx;
         float max_val;
-        findmax(in + i * 8404, 8404, max_val, max_idx);
+        FindMax(in + i * 8404, 8404, max_val, max_idx);
         hyps.push_back(max_idx);
     }
 
-    return vocab->vector2stringV2(hyps);
+    return vocab->Vector2StringV2(hyps);
 }
 
-vector<float> ModelImp::ApplyLFR(const std::vector<float> &in) 
+vector<float> Paraformer::ApplyLfr(const std::vector<float> &in) 
 {
     int32_t in_feat_dim = fbank_opts.mel_opts.num_bins;
     int32_t in_num_frames = in.size() / in_feat_dim;
@@ -180,7 +180,7 @@ vector<float> ModelImp::ApplyLFR(const std::vector<float> &in)
     return out;
   }
 
-  void ModelImp::ApplyCMVN(std::vector<float> *v)
+  void Paraformer::ApplyCmvn(std::vector<float> *v)
   {
     int32_t dim = means_list.size();
     int32_t num_frames = v->size() / dim;
@@ -196,13 +196,13 @@ vector<float> ModelImp::ApplyLFR(const std::vector<float> &in)
     }
   }
 
-string ModelImp::forward(float* din, int len, int flag)
+string Paraformer::Forward(float* din, int len, int flag)
 {
 
     int32_t in_feat_dim = fbank_opts.mel_opts.num_bins;
     std::vector<float> wav_feats = FbankKaldi(MODEL_SAMPLE_RATE, din, len);
-    wav_feats = ApplyLFR(wav_feats);
-    ApplyCMVN(&wav_feats);
+    wav_feats = ApplyLfr(wav_feats);
+    ApplyCmvn(&wav_feats);
 
     int32_t feat_dim = lfr_window_size*in_feat_dim;
     int32_t num_frames = wav_feats.size() / feat_dim;
@@ -238,7 +238,7 @@ string ModelImp::forward(float* din, int len, int flag)
         int64_t outputCount = std::accumulate(outputShape.begin(), outputShape.end(), 1, std::multiplies<int64_t>());
         float* floatData = outputTensor[0].GetTensorMutableData<float>();
         auto encoder_out_lens = outputTensor[1].GetTensorMutableData<int64_t>();
-        result = greedy_search(floatData, *encoder_out_lens);
+        result = GreedySearch(floatData, *encoder_out_lens);
     }
     catch (std::exception const &e)
     {
@@ -248,14 +248,14 @@ string ModelImp::forward(float* din, int len, int flag)
     return result;
 }
 
-string ModelImp::forward_chunk(float* din, int len, int flag)
+string Paraformer::ForwardChunk(float* din, int len, int flag)
 {
 
     printf("Not Imp!!!!!!\n");
     return "Hello";
 }
 
-string ModelImp::rescoring()
+string Paraformer::Rescoring()
 {
     printf("Not Imp!!!!!!\n");
     return "Hello";

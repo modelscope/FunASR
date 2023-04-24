@@ -5,6 +5,12 @@
 #include "precomp.h"
 
 class FsmnVad {
+/**
+ * Author: Speech Lab of DAMO Academy, Alibaba Group
+ * Deep-FSMN for Large Vocabulary Continuous Speech Recognition
+ * https://arxiv.org/abs/1803.05030
+*/
+
 public:
     FsmnVad();
     void Test();

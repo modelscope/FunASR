@@ -39,7 +39,7 @@ using namespace std;
 #include "util.h"
 #include "resample.h"
 #include "model.h"
-#include "paraformer_onnx.h"
+#include "paraformer.h"
 #include "libfunasrapi.h"
 
 using namespace paraformer;

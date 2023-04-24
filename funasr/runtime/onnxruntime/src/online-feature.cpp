@@ -13,10 +13,10 @@ OnlineFeature::OnlineFeature(int sample_rate, knf::FbankOptions fbank_opts, int 
   frame_shift_sample_length_ = sample_rate_ / 1000 * 10;
 }
 
-void OnlineFeature::extractFeats(vector<std::vector<float>> &vad_feats,
+void OnlineFeature::ExtractFeats(vector<std::vector<float>> &vad_feats,
                                  vector<float> waves, bool input_finished) {
   input_finished_ = input_finished;
-  onlineFbank(vad_feats, waves);
+  OnlineFbank(vad_feats, waves);
   // cache deal & online lfr,cmvn
   if (vad_feats.size() > 0) {
     if (!reserve_waveforms_.empty()) {
@@ -53,7 +53,7 @@ void OnlineFeature::extractFeats(vector<std::vector<float>> &vad_feats,
       }
       vad_feats = lfr_splice_cache_;
       OnlineLfrCmvn(vad_feats);
-      reset_cache();
+      ResetCache();
     }
   }
 
@@ -102,13 +102,13 @@ int OnlineFeature::OnlineLfrCmvn(vector<vector<float>> &vad_feats) {
   return lfr_splice_frame_idxs;
 }
 
-void OnlineFeature::onlineFbank(vector<std::vector<float>> &vad_feats,
+void OnlineFeature::OnlineFbank(vector<std::vector<float>> &vad_feats,
                                 vector<float> &waves) {
 
   knf::OnlineFbank fbank(fbank_opts_);
   // cache merge
   waves.insert(waves.begin(), input_cache_.begin(), input_cache_.end());
-  int frame_number = compute_frame_num(waves.size(), frame_sample_length_, frame_shift_sample_length_);
+  int frame_number = ComputeFrameNum(waves.size(), frame_sample_length_, frame_shift_sample_length_);
   // Send the audio after the last frame shift position to the cache
   input_cache_.clear();
   input_cache_.insert(input_cache_.begin(), waves.begin() + frame_number * frame_shift_sample_length_, waves.end());

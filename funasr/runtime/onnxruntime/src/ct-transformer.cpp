@@ -7,8 +7,8 @@ CTTransformer::CTTransformer(const char* sz_model_dir, int thread_num)
     session_options.SetGraphOptimizationLevel(ORT_ENABLE_ALL);
     session_options.DisableCpuMemArena();
 
-	string strModelPath = pathAppend(sz_model_dir, PUNC_MODEL_FILE);
-	string strYamlPath = pathAppend(sz_model_dir, PUNC_YAML_FILE);
+	string strModelPath = PathAppend(sz_model_dir, PUNC_MODEL_FILE);
+	string strYamlPath = PathAppend(sz_model_dir, PUNC_YAML_FILE);
 
     try{
 #ifdef _WIN32
@@ -24,12 +24,12 @@ CTTransformer::CTTransformer(const char* sz_model_dir, int thread_num)
     }
     // read inputnames outputnamess
     string strName;
-    getInputName(m_session.get(), strName);
+    GetInputName(m_session.get(), strName);
     m_strInputNames.push_back(strName.c_str());
-    getInputName(m_session.get(), strName, 1);
+    GetInputName(m_session.get(), strName, 1);
     m_strInputNames.push_back(strName);
     
-    getOutputName(m_session.get(), strName);
+    GetOutputName(m_session.get(), strName);
     m_strOutputNames.push_back(strName);
 
     for (auto& item : m_strInputNames)
@@ -77,12 +77,12 @@ string CTTransformer::AddPunc(const char* sz_input)
             nLastCommaIndex = -1;
             for (int nIndex = Punction.size() - 2; nIndex > 0; nIndex--)
             {
-                if (m_tokenizer.ID2Punc(Punction[nIndex]) == m_tokenizer.ID2Punc(PERIOD_INDEX) || m_tokenizer.ID2Punc(Punction[nIndex]) == m_tokenizer.ID2Punc(QUESTION_INDEX))
+                if (m_tokenizer.Id2Punc(Punction[nIndex]) == m_tokenizer.Id2Punc(PERIOD_INDEX) || m_tokenizer.Id2Punc(Punction[nIndex]) == m_tokenizer.Id2Punc(QUESTION_INDEX))
                 {
                     nSentEnd = nIndex;
                     break;
                 }
-                if (nLastCommaIndex < 0 && m_tokenizer.ID2Punc(Punction[nIndex]) == m_tokenizer.ID2Punc(COMMA_INDEX))
+                if (nLastCommaIndex < 0 && m_tokenizer.Id2Punc(Punction[nIndex]) == m_tokenizer.Id2Punc(COMMA_INDEX))
                 {
                     nLastCommaIndex = nIndex;
                 }
@@ -110,7 +110,7 @@ string CTTransformer::AddPunc(const char* sz_input)
 
             if (Punction[i] != NOTPUNC_INDEX) // �»���
             {
-                WordWithPunc.push_back(m_tokenizer.ID2Punc(Punction[i]));
+                WordWithPunc.push_back(m_tokenizer.Id2Punc(Punction[i]));
             }
         }
 
@@ -120,17 +120,17 @@ string CTTransformer::AddPunc(const char* sz_input)
         // last mini sentence
         if(nCurBatch == nTotalBatch - 1)
         {
-            if (NewString[NewString.size() - 1] == m_tokenizer.ID2Punc(COMMA_INDEX) || NewString[NewString.size() - 1] == m_tokenizer.ID2Punc(DUN_INDEX))
+            if (NewString[NewString.size() - 1] == m_tokenizer.Id2Punc(COMMA_INDEX) || NewString[NewString.size() - 1] == m_tokenizer.Id2Punc(DUN_INDEX))
             {
                 NewSentenceOut.assign(NewString.begin(), NewString.end() - 1);
-                NewSentenceOut.push_back(m_tokenizer.ID2Punc(PERIOD_INDEX));
+                NewSentenceOut.push_back(m_tokenizer.Id2Punc(PERIOD_INDEX));
                 NewPuncOut.assign(NewPunctuation.begin(), NewPunctuation.end() - 1);
                 NewPuncOut.push_back(PERIOD_INDEX);
             }
-            else if (NewString[NewString.size() - 1] == m_tokenizer.ID2Punc(PERIOD_INDEX) && NewString[NewString.size() - 1] == m_tokenizer.ID2Punc(QUESTION_INDEX))
+            else if (NewString[NewString.size() - 1] == m_tokenizer.Id2Punc(PERIOD_INDEX) && NewString[NewString.size() - 1] == m_tokenizer.Id2Punc(QUESTION_INDEX))
             {
                 NewSentenceOut = NewString;
-                NewSentenceOut.push_back(m_tokenizer.ID2Punc(PERIOD_INDEX));
+                NewSentenceOut.push_back(m_tokenizer.Id2Punc(PERIOD_INDEX));
                 NewPuncOut = NewPunctuation;
                 NewPuncOut.push_back(PERIOD_INDEX);
             }
@@ -173,7 +173,7 @@ vector<int> CTTransformer::Infer(vector<int64_t> input_data)
 
         for (int i = 0; i < outputCount; i += CANDIDATE_NUM)
         {
-            int index = argmax(floatData + i, floatData + i + CANDIDATE_NUM-1);
+            int index = Argmax(floatData + i, floatData + i + CANDIDATE_NUM-1);
             punction.push_back(index);
         }
     }

@@ -128,30 +128,30 @@ AudioFrame::AudioFrame(int len) : len(len)
     start = 0;
 };
 AudioFrame::~AudioFrame(){};
-int AudioFrame::set_start(int val)
+int AudioFrame::SetStart(int val)
 {
     start = val < 0 ? 0 : val;
     return start;
 };
 
-int AudioFrame::set_end(int val)
+int AudioFrame::SetEnd(int val)
 {
     end = val;
     len = end - start;
     return end;
 };
 
-int AudioFrame::get_start()
+int AudioFrame::GetStart()
 {
     return start;
 };
 
-int AudioFrame::get_len()
+int AudioFrame::GetLen()
 {
     return len;
 };
 
-int AudioFrame::disp()
+int AudioFrame::Disp()
 {
     printf("not imp!!!!\n");
 
@@ -185,18 +185,18 @@ Audio::~Audio()
     }
 }
 
-void Audio::disp()
+void Audio::Disp()
 {
     printf("Audio time is %f s. len is %d\n", (float)speech_len / MODEL_SAMPLE_RATE,
            speech_len);
 }
 
-float Audio::get_time_len()
+float Audio::GetTimeLen()
 {
     return (float)speech_len / MODEL_SAMPLE_RATE;
 }
 
-void Audio::wavResample(int32_t sampling_rate, const float *waveform,
+void Audio::WavResample(int32_t sampling_rate, const float *waveform,
                           int32_t n)
 {
     printf(
@@ -226,7 +226,7 @@ void Audio::wavResample(int32_t sampling_rate, const float *waveform,
     copy(samples.begin(), samples.end(), speech_data);
 }
 
-bool Audio::loadwav(const char *filename, int32_t* sampling_rate)
+bool Audio::LoadWav(const char *filename, int32_t* sampling_rate)
 {
     WaveHeader header;
     if (speech_data != NULL) {
@@ -271,7 +271,7 @@ bool Audio::loadwav(const char *filename, int32_t* sampling_rate)
 
         //resample
         if(*sampling_rate != MODEL_SAMPLE_RATE){
-            wavResample(*sampling_rate, speech_data, speech_len);
+            WavResample(*sampling_rate, speech_data, speech_len);
         }
 
         AudioFrame* frame = new AudioFrame(speech_len);
@@ -283,7 +283,7 @@ bool Audio::loadwav(const char *filename, int32_t* sampling_rate)
         return false;
 }
 
-bool Audio::loadwav(const char* buf, int nFileLen, int32_t* sampling_rate)
+bool Audio::LoadWav(const char* buf, int n_file_len, int32_t* sampling_rate)
 {
     WaveHeader header;
     if (speech_data != NULL) {
@@ -318,7 +318,7 @@ bool Audio::loadwav(const char* buf, int nFileLen, int32_t* sampling_rate)
         
         //resample
         if(*sampling_rate != MODEL_SAMPLE_RATE){
-            wavResample(*sampling_rate, speech_data, speech_len);
+            WavResample(*sampling_rate, speech_data, speech_len);
         }
 
         AudioFrame* frame = new AudioFrame(speech_len);
@@ -330,7 +330,7 @@ bool Audio::loadwav(const char* buf, int nFileLen, int32_t* sampling_rate)
         return false;
 }
 
-bool Audio::loadpcmwav(const char* buf, int nBufLen, int32_t* sampling_rate)
+bool Audio::LoadPcmwav(const char* buf, int n_buf_len, int32_t* sampling_rate)
 {
     if (speech_data != NULL) {
         free(speech_data);
@@ -340,7 +340,7 @@ bool Audio::loadpcmwav(const char* buf, int nBufLen, int32_t* sampling_rate)
     }
     offset = 0;
 
-    speech_len = nBufLen / 2;
+    speech_len = n_buf_len / 2;
     speech_buff = (int16_t*)malloc(sizeof(int16_t) * speech_len);
     if (speech_buff)
     {
@@ -361,7 +361,7 @@ bool Audio::loadpcmwav(const char* buf, int nBufLen, int32_t* sampling_rate)
         
         //resample
         if(*sampling_rate != MODEL_SAMPLE_RATE){
-            wavResample(*sampling_rate, speech_data, speech_len);
+            WavResample(*sampling_rate, speech_data, speech_len);
         }
 
         AudioFrame* frame = new AudioFrame(speech_len);
@@ -373,7 +373,7 @@ bool Audio::loadpcmwav(const char* buf, int nBufLen, int32_t* sampling_rate)
         return false;
 }
 
-bool Audio::loadpcmwav(const char* filename, int32_t* sampling_rate)
+bool Audio::LoadPcmwav(const char* filename, int32_t* sampling_rate)
 {
     if (speech_data != NULL) {
         free(speech_data);
@@ -388,10 +388,10 @@ bool Audio::loadpcmwav(const char* filename, int32_t* sampling_rate)
     if (fp == nullptr)
         return false;
     fseek(fp, 0, SEEK_END);
-    uint32_t nFileLen = ftell(fp);
+    uint32_t n_file_len = ftell(fp);
     fseek(fp, 0, SEEK_SET);
 
-    speech_len = (nFileLen) / 2;
+    speech_len = (n_file_len) / 2;
     speech_buff = (int16_t*)malloc(sizeof(int16_t) * speech_len);
     if (speech_buff)
     {
@@ -412,7 +412,7 @@ bool Audio::loadpcmwav(const char* filename, int32_t* sampling_rate)
 
         //resample
         if(*sampling_rate != MODEL_SAMPLE_RATE){
-            wavResample(*sampling_rate, speech_data, speech_len);
+            WavResample(*sampling_rate, speech_data, speech_len);
         }
 
         AudioFrame* frame = new AudioFrame(speech_len);
@@ -425,7 +425,7 @@ bool Audio::loadpcmwav(const char* filename, int32_t* sampling_rate)
 
 }
 
-int Audio::fetch_chunck(float *&dout, int len)
+int Audio::FetchChunck(float *&dout, int len)
 {
     if (offset >= speech_align_len) {
         dout = NULL;
@@ -446,14 +446,14 @@ int Audio::fetch_chunck(float *&dout, int len)
     }
 }
 
-int Audio::fetch(float *&dout, int &len, int &flag)
+int Audio::Fetch(float *&dout, int &len, int &flag)
 {
     if (frame_queue.size() > 0) {
         AudioFrame *frame = frame_queue.front();
         frame_queue.pop();
 
-        dout = speech_data + frame->get_start();
-        len = frame->get_len();
+        dout = speech_data + frame->GetStart();
+        len = frame->GetLen();
         delete frame;
         flag = S_END;
         return 1;
@@ -462,7 +462,7 @@ int Audio::fetch(float *&dout, int &len, int &flag)
     }
 }
 
-void Audio::padding()
+void Audio::Padding()
 {
     float num_samples = speech_len;
     float frame_length = 400;
@@ -499,26 +499,26 @@ void Audio::padding()
     delete frame;
 }
 
-void Audio::split(Model* pRecogObj)
+void Audio::Split(Model* recog_obj)
 {
     AudioFrame *frame;
 
     frame = frame_queue.front();
     frame_queue.pop();
-    int sp_len = frame->get_len();
+    int sp_len = frame->GetLen();
     delete frame;
     frame = NULL;
 
     std::vector<float> pcm_data(speech_data, speech_data+sp_len);
-    vector<std::vector<int>> vad_segments = pRecogObj->vad_seg(pcm_data);
+    vector<std::vector<int>> vad_segments = recog_obj->VadSeg(pcm_data);
     int seg_sample = MODEL_SAMPLE_RATE/1000;
     for(vector<int> segment:vad_segments)
     {
         frame = new AudioFrame();
         int start = segment[0]*seg_sample;
         int end = segment[1]*seg_sample;
-        frame->set_start(start);
-        frame->set_end(end);
+        frame->SetStart(start);
+        frame->SetEnd(end);
         frame_queue.push(frame);
         frame = NULL;
     }

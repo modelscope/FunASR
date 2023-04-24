@@ -10,16 +10,16 @@ using namespace std;
 class Vocab {
   private:
     vector<string> vocab;
-    bool isChinese(string ch);
-    bool isEnglish(string ch);
-    void loadVocabFromYaml(const char* filename);
+    bool IsChinese(string ch);
+    bool IsEnglish(string ch);
+    void LoadVocabFromYaml(const char* filename);
 
   public:
     Vocab(const char *filename);
     ~Vocab();
-    int size();
-    string vector2string(vector<int> in);
-    string vector2stringV2(vector<int> in);
+    int Size();
+    string Vector2String(vector<int> in);
+    string Vector2StringV2(vector<int> in);
 };
 
 #endif

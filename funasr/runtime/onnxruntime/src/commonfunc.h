@@ -10,23 +10,23 @@ typedef struct
 #ifdef _WIN32
 #include <codecvt>
 
-inline std::wstring string2wstring(const std::string& str, const std::string& locale)
+inline std::wstring String2wstring(const std::string& str, const std::string& locale)
 {
     typedef std::codecvt_byname<wchar_t, char, std::mbstate_t> F;
     std::wstring_convert<F> strCnv(new F(locale));
     return strCnv.from_bytes(str);
 }
 
-inline std::wstring  strToWstr(std::string str) {
+inline std::wstring  StrToWstr(std::string str) {
     if (str.length() == 0)
         return L"";
-    return  string2wstring(str, "zh-CN");
+    return  String2wstring(str, "zh-CN");
 
 }
 
 #endif
 
-inline void getInputName(Ort::Session* session, string& inputName,int nIndex=0) {
+inline void GetInputName(Ort::Session* session, string& inputName,int nIndex=0) {
     size_t numInputNodes = session->GetInputCount();
     if (numInputNodes > 0) {
         Ort::AllocatorWithDefaultOptions allocator;
@@ -38,7 +38,7 @@ inline void getInputName(Ort::Session* session, string& inputName,int nIndex=0) 
     }
 }
 
-inline void getOutputName(Ort::Session* session, string& outputName, int nIndex = 0) {
+inline void GetOutputName(Ort::Session* session, string& outputName, int nIndex = 0) {
     size_t numOutputNodes = session->GetOutputCount();
     if (numOutputNodes > 0) {
         Ort::AllocatorWithDefaultOptions allocator;
@@ -51,6 +51,6 @@ inline void getOutputName(Ort::Session* session, string& outputName, int nIndex 
 }
 
 template <class ForwardIterator>
-inline static size_t argmax(ForwardIterator first, ForwardIterator last) {
+inline static size_t Argmax(ForwardIterator first, ForwardIterator last) {
     return std::distance(first, std::max_element(first, last));
 }

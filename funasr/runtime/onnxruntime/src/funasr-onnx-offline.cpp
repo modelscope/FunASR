@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
     }
     struct timeval start, end;
     gettimeofday(&start, NULL);
-    int nThreadNum = 1;
+    int thread_num = 1;
     // is quantize
     bool quantize = false;
     bool use_vad = false;
@@ -26,9 +26,9 @@ int main(int argc, char *argv[])
     istringstream(argv[3]) >> boolalpha >> quantize;
     istringstream(argv[4]) >> boolalpha >> use_vad;
     istringstream(argv[5]) >> boolalpha >> use_punc;
-    FUNASR_HANDLE AsrHanlde=FunASRInit(argv[1], nThreadNum, quantize, use_vad, use_punc);
+    FUNASR_HANDLE asr_hanlde=FunASRInit(argv[1], thread_num, quantize, use_vad, use_punc);
 
-    if (!AsrHanlde)
+    if (!asr_hanlde)
     {
         printf("Cannot load ASR Model from: %s, there must be files model.onnx and vocab.txt", argv[1]);
         exit(-1);
@@ -40,17 +40,17 @@ int main(int argc, char *argv[])
     printf("Model initialization takes %lfs.\n", (double)modle_init_micros / 1000000);
 
     gettimeofday(&start, NULL);
-    FUNASR_RESULT Result=FunASRRecogFile(AsrHanlde, argv[2], RASR_NONE, NULL, use_vad, use_punc);
+    FUNASR_RESULT result=FunASRRecogFile(asr_hanlde, argv[2], RASR_NONE, NULL, use_vad, use_punc);
     gettimeofday(&end, NULL);
 
     float snippet_time = 0.0f;
-    if (Result)
+    if (result)
     {
-        string msg = FunASRGetResult(Result, 0);
+        string msg = FunASRGetResult(result, 0);
         setbuf(stdout, NULL);
         printf("Result: %s \n", msg.c_str());
-        snippet_time = FunASRGetRetSnippetTime(Result);
-        FunASRFreeResult(Result);
+        snippet_time = FunASRGetRetSnippetTime(result);
+        FunASRFreeResult(result);
     }
     else
     {
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     printf("Model inference takes %lfs.\n", (double)taking_micros / 1000000);
     printf("Model inference RTF: %04lf.\n", (double)taking_micros/ (snippet_time*1000000));
 
-    FunASRUninit(AsrHanlde);
+    FunASRUninit(asr_hanlde);
 
     return 0;
 }

@@ -19,15 +19,8 @@ using namespace std;
 std::atomic<int> index(0);
 std::mutex mtx;
 
-void runReg(FUNASR_HANDLE AsrHandle, vector<string> wav_list, 
+void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, 
             float* total_length, long* total_time, int core_id) {
-
-    // cpu_set_t cpuset;
-    // CPU_ZERO(&cpuset);
-    // CPU_SET(core_id, &cpuset);
-    // if(pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) < 0){
-    //     perror("pthread_setaffinity_np");
-    // }
     
     struct timeval start, end;
     long seconds = 0;
@@ -37,7 +30,7 @@ void runReg(FUNASR_HANDLE AsrHandle, vector<string> wav_list,
     // warm up
     for (size_t i = 0; i < 1; i++)
     {
-        FUNASR_RESULT Result=FunASRRecogFile(AsrHandle, wav_list[0].c_str(), RASR_NONE, NULL);
+        FUNASR_RESULT result=FunASRRecogFile(asr_handle, wav_list[0].c_str(), RASR_NONE, NULL);
     }
 
     while (true) {
@@ -48,20 +41,20 @@ void runReg(FUNASR_HANDLE AsrHandle, vector<string> wav_list,
         }
 
         gettimeofday(&start, NULL);
-        FUNASR_RESULT Result=FunASRRecogFile(AsrHandle, wav_list[i].c_str(), RASR_NONE, NULL);
+        FUNASR_RESULT result=FunASRRecogFile(asr_handle, wav_list[i].c_str(), RASR_NONE, NULL);
 
         gettimeofday(&end, NULL);
         seconds = (end.tv_sec - start.tv_sec);
         long taking_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
         n_total_time += taking_micros;
 
-        if(Result){
-            string msg = FunASRGetResult(Result, 0);
+        if(result){
+            string msg = FunASRGetResult(result, 0);
             printf("Thread: %d Result: %s \n", this_thread::get_id(), msg.c_str());
 
-            float snippet_time = FunASRGetRetSnippetTime(Result);
+            float snippet_time = FunASRGetRetSnippetTime(result);
             n_total_length += snippet_time;
-            FunASRFreeResult(Result);
+            FunASRFreeResult(result);
         }else{
             cout <<"No return data!";
         }
@@ -109,11 +102,11 @@ int main(int argc, char *argv[])
     bool quantize = false;
     istringstream(argv[3]) >> boolalpha >> quantize;
     // thread num
-    int nThreadNum = 1;
-    nThreadNum = atoi(argv[4]);
+    int thread_num = 1;
+    thread_num = atoi(argv[4]);
 
-    FUNASR_HANDLE AsrHandle=FunASRInit(argv[1], 1, quantize);
-    if (!AsrHandle)
+    FUNASR_HANDLE asr_handle=FunASRInit(argv[1], 1, quantize);
+    if (!asr_handle)
     {
         printf("Cannot load ASR Model from: %s, there must be files model.onnx and vocab.txt", argv[1]);
         exit(-1);
@@ -128,9 +121,9 @@ int main(int argc, char *argv[])
     long total_time = 0;
     std::vector<std::thread> threads;
 
-    for (int i = 0; i < nThreadNum; i++)
+    for (int i = 0; i < thread_num; i++)
     {
-        threads.emplace_back(thread(runReg, AsrHandle, wav_list, &total_length, &total_time, i));
+        threads.emplace_back(thread(runReg, asr_handle, wav_list, &total_length, &total_time, i));
     }
 
     for (auto& thread : threads)
@@ -143,6 +136,6 @@ int main(int argc, char *argv[])
     printf("total_rtf %05lf .\n", (double)total_time/ (total_length*1000000));
     printf("speedup %05lf .\n", 1.0/((double)total_time/ (total_length*1000000)));
 
-    FunASRUninit(AsrHandle);
+    FunASRUninit(asr_handle);
     return 0;
 }

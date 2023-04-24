@@ -10,15 +10,15 @@ public:
   OnlineFeature(int sample_rate, knf::FbankOptions fbank_opts, int lfr_m_, int lfr_n_,
                 std::vector<std::vector<float>> cmvns_);
 
-  void extractFeats(vector<vector<float>> &vad_feats, vector<float> waves, bool input_finished);
+  void ExtractFeats(vector<vector<float>> &vad_feats, vector<float> waves, bool input_finished);
 
 
 private:
-  void onlineFbank(vector<vector<float>> &vad_feats, vector<float> &waves);
+  void OnlineFbank(vector<vector<float>> &vad_feats, vector<float> &waves);
 
   int OnlineLfrCmvn(vector<vector<float>> &vad_feats);
 
-  static int compute_frame_num(int sample_length, int frame_sample_length, int frame_shift_sample_length) {
+  static int ComputeFrameNum(int sample_length, int frame_sample_length, int frame_shift_sample_length) {
     int frame_num = static_cast<int>((sample_length - frame_sample_length) / frame_shift_sample_length + 1);
 
     if (frame_num >= 1 && sample_length >= frame_sample_length)
@@ -27,7 +27,7 @@ private:
       return 0;
   }
 
-  void reset_cache() {
+  void ResetCache() {
     reserve_waveforms_.clear();
     input_cache_.clear();
     lfr_splice_cache_.clear();
