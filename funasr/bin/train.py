@@ -65,6 +65,7 @@ def get_parser():
     )
     parser.add_argument(
         "--dist_rank",
+        type=int,
         default=None,
         help="node rank for distributed training",
     )
