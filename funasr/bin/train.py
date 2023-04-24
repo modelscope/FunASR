@@ -388,8 +388,8 @@ def get_parser():
 
 if __name__ == '__main__':
     parser = get_parser()
-    # args = parser.parse_args()
-    task_args = build_args(parser)
+    args = parser.parse_args()
+    task_args = build_args(args)
     args = argparse.Namespace(**vars(args), **vars(task_args))
 
     # set random seed
