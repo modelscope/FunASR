@@ -103,7 +103,7 @@ class SequenceIterFactory(AbsIterFactory):
         self.num_iters_per_epoch = None
         self.shuffle = mode == "train"
         self.seed = args.seed
-        self.num_workers = args.num_workers
+        self.num_workers = args.dataset_conf.get("num_workers", 8)
         self.collate_fn = collate_fn
         self.pin_memory = args.ngpu > 0
 
