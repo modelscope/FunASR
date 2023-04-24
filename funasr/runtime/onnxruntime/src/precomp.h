@@ -29,7 +29,7 @@ using namespace std;
 #include "commonfunc.h"
 #include "predefine_coe.h"
 #include "tokenizer.h"
-#include "punc_infer.h"
+#include "CT-transformer.h"
 #include "FsmnVad.h"
 #include "e2e_vad.h"
 #include "Vocab.h"

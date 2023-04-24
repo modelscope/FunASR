@@ -3,7 +3,7 @@
 using namespace std;
 using namespace paraformer;
 
-ModelImp::ModelImp(const char* path,int nNumThread, bool quantize, bool use_vad)
+ModelImp::ModelImp(const char* path,int nNumThread, bool quantize, bool use_vad, bool use_punc)
 :env_(ORT_LOGGING_LEVEL_ERROR, "paraformer"),sessionOptions{}{
     string model_path;
     string cmvn_path;
@@ -18,7 +18,7 @@ ModelImp::ModelImp(const char* path,int nNumThread, bool quantize, bool use_vad)
     }
 
     // PUNC model
-    if(true){
+    if(use_punc){
         puncHandle = make_unique<CTTransformer>(path, nNumThread);
     }
 
@@ -55,7 +55,6 @@ ModelImp::ModelImp(const char* path,int nNumThread, bool quantize, bool use_vad)
     m_session = std::make_unique<Ort::Session>(env_, model_path.c_str(), sessionOptions);
 #endif
 
-    vector<string> m_strInputNames, m_strOutputNames;
     string strName;
     getInputName(m_session.get(), strName);
     m_strInputNames.push_back(strName.c_str());

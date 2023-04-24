@@ -59,12 +59,12 @@ Ref to win/
 ## Run the demo
 
 ```shell
-funasr-onnx-offline /path/models_dir /path/wave_file quantize(true or false) use_vad(true or false)
+funasr-onnx-offline /path/models_dir /path/wave_file quantize(true or false) use_vad(true or false) use_punc(true or false)
 ```
 
 The structure of /path/models_dir
 ```
-config.yaml, am.mvn, model.onnx(or model_quant.onnx), (vad_model.onnx, vad.mvn if you use vad)
+config.yaml, am.mvn, model.onnx(or model_quant.onnx), (vad_model.onnx, vad.mvn if you use vad), (punc_model.onnx, punc.yaml if you use vad)
 ```
 
 

@@ -5,13 +5,13 @@ extern "C" {
 #endif
 
 	// APIs for funasr
-	_FUNASRAPI FUNASR_HANDLE  FunASRInit(const char* szModelDir, int nThreadNum, bool quantize, bool use_vad)
+	_FUNASRAPI FUNASR_HANDLE  FunASRInit(const char* szModelDir, int nThreadNum, bool quantize, bool use_vad, bool use_punc)
 	{
-		Model* mm = create_model(szModelDir, nThreadNum, quantize, use_vad);
+		Model* mm = create_model(szModelDir, nThreadNum, quantize, use_vad, use_punc);
 		return mm;
 	}
 
-	_FUNASRAPI FUNASR_RESULT FunASRRecogBuffer(FUNASR_HANDLE handle, const char* szBuf, int nLen, FUNASR_MODE Mode, QM_CALLBACK fnCallback, bool use_vad)
+	_FUNASRAPI FUNASR_RESULT FunASRRecogBuffer(FUNASR_HANDLE handle, const char* szBuf, int nLen, FUNASR_MODE Mode, QM_CALLBACK fnCallback, bool use_vad, bool use_punc)
 	{
 		Model* pRecogObj = (Model*)handle;
 		if (!pRecogObj)
@@ -39,11 +39,15 @@ extern "C" {
 			if (fnCallback)
 				fnCallback(nStep, nTotal);
 		}
+		if(use_punc){
+			string punc_res = pRecogObj->AddPunc((pResult->msg).c_str());
+			pResult->msg = punc_res;
+		}
 
 		return pResult;
 	}
 
-	_FUNASRAPI FUNASR_RESULT FunASRRecogPCMBuffer(FUNASR_HANDLE handle, const char* szBuf, int nLen, int sampling_rate, FUNASR_MODE Mode, QM_CALLBACK fnCallback, bool use_vad)
+	_FUNASRAPI FUNASR_RESULT FunASRRecogPCMBuffer(FUNASR_HANDLE handle, const char* szBuf, int nLen, int sampling_rate, FUNASR_MODE Mode, QM_CALLBACK fnCallback, bool use_vad, bool use_punc)
 	{
 		Model* pRecogObj = (Model*)handle;
 		if (!pRecogObj)
@@ -70,11 +74,15 @@ extern "C" {
 			if (fnCallback)
 				fnCallback(nStep, nTotal);
 		}
+		if(use_punc){
+			string punc_res = pRecogObj->AddPunc((pResult->msg).c_str());
+			pResult->msg = punc_res;
+		}
 
 		return pResult;
 	}
 
-	_FUNASRAPI FUNASR_RESULT FunASRRecogPCMFile(FUNASR_HANDLE handle, const char* szFileName, int sampling_rate, FUNASR_MODE Mode, QM_CALLBACK fnCallback, bool use_vad)
+	_FUNASRAPI FUNASR_RESULT FunASRRecogPCMFile(FUNASR_HANDLE handle, const char* szFileName, int sampling_rate, FUNASR_MODE Mode, QM_CALLBACK fnCallback, bool use_vad, bool use_punc)
 	{
 		Model* pRecogObj = (Model*)handle;
 		if (!pRecogObj)
@@ -101,11 +109,15 @@ extern "C" {
 			if (fnCallback)
 				fnCallback(nStep, nTotal);
 		}
+		if(use_punc){
+			string punc_res = pRecogObj->AddPunc((pResult->msg).c_str());
+			pResult->msg = punc_res;
+		}
 
 		return pResult;
 	}
 
-	_FUNASRAPI FUNASR_RESULT FunASRRecogFile(FUNASR_HANDLE handle, const char* szWavfile, FUNASR_MODE Mode, QM_CALLBACK fnCallback, bool use_vad)
+	_FUNASRAPI FUNASR_RESULT FunASRRecogFile(FUNASR_HANDLE handle, const char* szWavfile, FUNASR_MODE Mode, QM_CALLBACK fnCallback, bool use_vad, bool use_punc)
 	{
 		Model* pRecogObj = (Model*)handle;
 		if (!pRecogObj)
@@ -133,7 +145,7 @@ extern "C" {
 			if (fnCallback)
 				fnCallback(nStep, nTotal);
 		}
-		if(true){
+		if(use_punc){
 			string punc_res = pRecogObj->AddPunc((pResult->msg).c_str());
 			pResult->msg = punc_res;
 		}

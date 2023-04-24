@@ -11,9 +11,9 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    if (argc < 5)
+    if (argc < 6)
     {
-        printf("Usage: %s /path/to/model_dir /path/to/wav/file quantize(true or false) use_vad(true or false) \n", argv[0]);
+        printf("Usage: %s /path/to/model_dir /path/to/wav/file quantize(true or false) use_vad(true or false) use_punc(true or false)\n", argv[0]);
         exit(-1);
     }
     struct timeval start, end;
@@ -22,9 +22,11 @@ int main(int argc, char *argv[])
     // is quantize
     bool quantize = false;
     bool use_vad = false;
+    bool use_punc = false;
     istringstream(argv[3]) >> boolalpha >> quantize;
     istringstream(argv[4]) >> boolalpha >> use_vad;
-    FUNASR_HANDLE AsrHanlde=FunASRInit(argv[1], nThreadNum, quantize, use_vad);
+    istringstream(argv[5]) >> boolalpha >> use_punc;
+    FUNASR_HANDLE AsrHanlde=FunASRInit(argv[1], nThreadNum, quantize, use_vad, use_punc);
 
     if (!AsrHanlde)
     {
@@ -38,7 +40,7 @@ int main(int argc, char *argv[])
     printf("Model initialization takes %lfs.\n", (double)modle_init_micros / 1000000);
 
     gettimeofday(&start, NULL);
-    FUNASR_RESULT Result=FunASRRecogFile(AsrHanlde, argv[2], RASR_NONE, NULL, use_vad);
+    FUNASR_RESULT Result=FunASRRecogFile(AsrHanlde, argv[2], RASR_NONE, NULL, use_vad, use_punc);
     gettimeofday(&end, NULL);
 
     float snippet_time = 0.0f;

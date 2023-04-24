@@ -10,6 +10,7 @@ class CTTransformer {
 private:
 
 	CTokenizer m_tokenizer;
+	vector<string> m_strInputNames, m_strOutputNames;
 	vector<const char*> m_szInputNames;
 	vector<const char*> m_szOutputNames;
 

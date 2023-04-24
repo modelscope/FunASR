@@ -33,11 +33,12 @@ namespace paraformer {
         Ort::Env env_;
         Ort::SessionOptions sessionOptions;
 
+        vector<string> m_strInputNames, m_strOutputNames;
         vector<const char*> m_szInputNames;
         vector<const char*> m_szOutputNames;
 
     public:
-        ModelImp(const char* path, int nNumThread=0, bool quantize=false, bool use_vad=false);
+        ModelImp(const char* path, int nNumThread=0, bool quantize=false, bool use_vad=false, bool use_punc=false);
         ~ModelImp();
         void reset();
         vector<float> FbankKaldi(float sample_rate, const float* waves, int len);

@@ -10,14 +10,19 @@ CTTransformer::CTTransformer(const char* sz_model_dir, int thread_num)
 	string strModelPath = pathAppend(sz_model_dir, PUNC_MODEL_FILE);
 	string strYamlPath = pathAppend(sz_model_dir, PUNC_YAML_FILE);
 
+    try{
 #ifdef _WIN32
 	std::wstring detPath = strToWstr(strModelPath);
     m_session = std::make_unique<Ort::Session>(env_, detPath.c_str(), session_options);
 #else
     m_session = std::make_unique<Ort::Session>(env_, strModelPath.c_str(), session_options);
 #endif
-    // read inputnames outputnames
-    vector<string> m_strInputNames, m_strOutputNames;
+    }
+    catch(exception e)
+    {
+        printf(e.what());
+    }
+    // read inputnames outputnamess
     string strName;
     getInputName(m_session.get(), strName);
     m_strInputNames.push_back(strName.c_str());
