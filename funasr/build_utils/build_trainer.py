@@ -76,7 +76,7 @@ class TrainerOptions:
     grad_clip_type: float
     log_interval: Optional[int]
     # no_forward_run: bool
-    use_tensorboard: bool
+    # use_tensorboard: bool
     # use_wandb: bool
     output_dir: Union[Path, str]
     max_epoch: int
