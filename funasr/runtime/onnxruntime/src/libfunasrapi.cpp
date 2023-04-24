@@ -7,7 +7,7 @@ extern "C" {
 	// APIs for funasr
 	_FUNASRAPI FUNASR_HANDLE  FunASRInit(const char* szModelDir, int nThreadNum, bool quantize, bool use_vad, bool use_punc)
 	{
-		Model* mm = create_model(szModelDir, nThreadNum, quantize, use_vad, use_punc);
+		Model* mm = CreateModel(szModelDir, nThreadNum, quantize, use_vad, use_punc);
 		return mm;
 	}
 

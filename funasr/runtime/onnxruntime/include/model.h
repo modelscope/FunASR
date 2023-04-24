@@ -15,5 +15,5 @@ class Model {
     virtual std::string AddPunc(const char* szInput)=0;
 };
 
-Model *create_model(const char *path,int nThread=0,bool quantize=false, bool use_vad=false, bool use_punc=false);
+Model *CreateModel(const char *path,int nThread=0,bool quantize=false, bool use_vad=false, bool use_punc=false);
 #endif

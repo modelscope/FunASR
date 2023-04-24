@@ -1,5 +1,5 @@
 
-#include "OnlineFeature.h"
+#include "online-feature.h"
 #include <utility>
 
 OnlineFeature::OnlineFeature(int sample_rate, knf::FbankOptions fbank_opts, int lfr_m, int lfr_n,

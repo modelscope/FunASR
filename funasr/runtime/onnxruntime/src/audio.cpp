@@ -6,7 +6,7 @@
 #include <fstream>
 #include <assert.h>
 
-#include "Audio.h"
+#include "audio.h"
 #include "precomp.h"
 
 using namespace std;

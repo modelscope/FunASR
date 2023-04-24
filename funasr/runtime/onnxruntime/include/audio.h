@@ -4,7 +4,7 @@
 
 #include <queue>
 #include <stdint.h>
-#include "Model.h"
+#include "model.h"
 
 #ifndef WAV_HEADER_SIZE
 #define WAV_HEADER_SIZE 44

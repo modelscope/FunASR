@@ -1,6 +1,6 @@
 #include "precomp.h"
 
-Model *create_model(const char *path, int nThread, bool quantize, bool use_vad, bool use_punc)
+Model *CreateModel(const char *path, int nThread, bool quantize, bool use_vad, bool use_punc)
 {
     Model *mm;
 

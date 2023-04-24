@@ -1,4 +1,4 @@
-#include "Vocab.h"
+#include "vocab.h"
 #include "yaml-cpp/yaml.h"
 
 #include <fstream>
