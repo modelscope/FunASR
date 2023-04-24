@@ -107,7 +107,6 @@ class Trainer:
                  schedulers: Sequence[Optional[AbsScheduler]],
                  train_dataloader: AbsIterFactory,
                  valid_dataloader: AbsIterFactory,
-                 trainer_options,
                  distributed_option: DistributedOption):
         self.trainer_options = self.build_options(args)
         self.model = model
@@ -115,7 +114,6 @@ class Trainer:
         self.schedulers = schedulers
         self.train_dataloader = train_dataloader
         self.valid_dataloader = valid_dataloader
-        self.trainer_options = trainer_options
         self.distributed_option = distributed_option
 
     def build_options(self, args: argparse.Namespace) -> TrainerOptions:
@@ -808,7 +806,6 @@ def build_trainer(
         schedulers: Sequence[Optional[AbsScheduler]],
         train_dataloader: AbsIterFactory,
         valid_dataloader: AbsIterFactory,
-        trainer_options,
         distributed_option: DistributedOption
 ):
     trainer = Trainer(
@@ -818,7 +815,6 @@ def build_trainer(
         schedulers=schedulers,
         train_dataloader=train_dataloader,
         valid_dataloader=valid_dataloader,
-        trainer_options=trainer_options,
         distributed_option=distributed_option
     )
     return trainer
