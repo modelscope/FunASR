@@ -17,10 +17,10 @@ from funasr.losses.label_smoothing_loss import (
     LabelSmoothingLoss,  # noqa: H301
 )
 from funasr.models.ctc import CTC
+from funasr.models.encoder.abs_encoder import AbsEncoder
 from funasr.models.decoder.abs_decoder import AbsDecoder
 from funasr.models.postencoder.abs_postencoder import AbsPostEncoder
 from funasr.models.preencoder.abs_preencoder import AbsPreEncoder
-from funasr.models.base_model import FunASRModel
 from funasr.torch_utils.device_funcs import force_gatherable
 from funasr.models.base_model import FunASRModel
 from funasr.modules.streaming_utils.chunk_utilis import sequence_mask
