@@ -89,7 +89,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="%E8%B5%9B%E9%81%93%E8%AE%BE%E7%BD%AE%E4%B8%8E%E8%AF%84%E4%BC%B0.html">赛道设置与评估</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="%E8%B5%9B%E9%81%93%E8%AE%BE%E7%BD%AE%E4%B8%8E%E8%AF%84%E4%BC%B0.html#id2">说话人相关的语音识别</a></li>
+<li class="toctree-l2"><a class="reference internal" href="%E8%B5%9B%E9%81%93%E8%AE%BE%E7%BD%AE%E4%B8%8E%E8%AF%84%E4%BC%B0.html#id2">说话人相关的语音识别 (主赛道)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="%E8%B5%9B%E9%81%93%E8%AE%BE%E7%BD%AE%E4%B8%8E%E8%AF%84%E4%BC%B0.html#id3">评估方法</a></li>
 <li class="toctree-l2"><a class="reference internal" href="%E8%B5%9B%E9%81%93%E8%AE%BE%E7%BD%AE%E4%B8%8E%E8%AF%84%E4%BC%B0.html#id4">子赛道设置</a></li>
 </ul>
@@ -102,7 +102,7 @@
 </li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">竞赛规则</a></li>
 <li class="toctree-l1"><a class="reference internal" href="%E7%BB%84%E5%A7%94%E4%BC%9A.html">组委会</a></li>
-<li class="toctree-l1"><a class="reference internal" href="%E8%81%94%E7%B3%BB%E6%96%B9%E5%BC%8F.html">联系方式</a></li>
+<li class="toctree-l1"><a class="reference internal" href="%E8%81%94%E7%B3%BB%E6%96%B9%E5%BC%8F.html">Contact</a></li>
 </ul>
 
     
@@ -129,6 +129,7 @@
 <ul class="simple">
 <li><p>允许在原始训练数据集上进行数据增强，包括但不限于添加噪声或混响、速度扰动和音调变化。</p></li>
 <li><p>允许参赛者使用Eval集进行模型训练，但Test集仅能用于调参和模型选择，严禁以任何形式使用Test-2023数据集，包括但不限于使用测试数据集微调或训练模型。</p></li>
+<li><p>允许多系统融合，但不鼓励使用具有相同结构仅参数不同的子系统融合。</p></li>
 <li><p>如果两个系统的测试cpCER相同，则计算复杂度较低的系统将被认定为更优。</p></li>
 <li><p>如果使用强制对齐模型获得了逐帧分类标签，则必须使用相应子赛道允许的数据对强制对齐模型进行训练。</p></li>
 <li><p>端到端方法中允许使用浅层融合语言模型，模型可以选择LAS、RNNT和Transformer等，但浅层融合语言模型的训练数据只能来自于允许的训练数据集的转录抄本。</p></li>
