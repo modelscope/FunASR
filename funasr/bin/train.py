@@ -298,6 +298,12 @@ def get_parser():
         help="whether to use dataloader for large dataset",
     )
     parser.add_argument(
+        "--dataset_conf",
+        action=NestedDictAction,
+        default=dict(),
+        help=f"The keyword arguments for dataset",
+    )
+    parser.add_argument(
         "--train_data_file",
         type=str,
         default=None,
