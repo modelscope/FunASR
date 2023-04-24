@@ -62,7 +62,7 @@ class SequenceIterFactory(AbsIterFactory):
         # sampler
         dataset_conf = args.dataset_conf
         batch_sampler = LengthBatchSampler(
-            batch_bins=dataset_conf["batch_size"] * args.ngpu,
+            batch_bins=dataset_conf["batch_conf"]["batch_size"] * args.ngpu,
             shape_files=shape_files,
             sort_in_batch=dataset_conf["sort_in_batch"] if hasattr(dataset_conf, "sort_in_batch") else "descending",
             sort_batch=dataset_conf["sort_batch"] if hasattr(dataset_conf, "sort_batch") else "ascending",
