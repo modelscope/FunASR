@@ -595,7 +595,7 @@ def make_chunk_mask(
     mask = torch.zeros(size, size, device=device, dtype=torch.bool)
 
     for i in range(size):
-        if left_chunk_size <= 0:
+        if left_chunk_size < 0:
             start = 0
         else:
             start = max((i // chunk_size - left_chunk_size) * chunk_size, 0)

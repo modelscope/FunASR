@@ -1,3 +1,7 @@
+# -*- encoding: utf-8 -*-
+# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+#  MIT License  (https://opensource.org/licenses/MIT)
+
 from enum import Enum
 from typing import List, Tuple, Dict, Any
 
@@ -189,6 +193,11 @@ class WindowDetector(object):
 
 
 class E2EVadModel():
+    """
+    Author: Speech Lab of DAMO Academy, Alibaba Group
+    Deep-FSMN for Large Vocabulary Continuous Speech Recognition
+    https://arxiv.org/abs/1803.05030
+    """
     def __init__(self, vad_post_args: Dict[str, Any]):
         super(E2EVadModel, self).__init__()
         self.vad_opts = VADXOptions(**vad_post_args)

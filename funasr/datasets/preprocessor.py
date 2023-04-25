@@ -44,15 +44,22 @@ def forward_segment(text, dic):
         i += len(longest_word)
     return word_list
 
-
 def seg_tokenize(txt, seg_dict):
+    pattern = re.compile(r'^[\u4E00-\u9FA50-9]+$')
     out_txt = ""
     for word in txt:
         word = word.lower()
         if word in seg_dict:
             out_txt += seg_dict[word] + " "
         else:
-            out_txt += "<unk>" + " "
+            if pattern.match(word):
+                for char in word:
+                    if char in seg_dict:
+                        out_txt += seg_dict[char] + " "
+                    else:
+                        out_txt += "<unk>" + " "
+            else:
+                out_txt += "<unk>" + " "
     return out_txt.strip().split()
 
 def seg_tokenize_wo_pattern(txt, seg_dict):

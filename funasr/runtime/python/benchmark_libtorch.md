@@ -22,10 +22,16 @@ pip install -r requirements.txt
 
 #### Recipe
 
+##### test_rtf
 set the model, data path and output_dir
-
 ```shell
 nohup bash test_rtf.sh &> log.txt &
+```
+
+##### test_cer
+set the model, data path and output_dir
+```shell
+nohup bash test_cer.sh &> log.txt &
 ```
 
 

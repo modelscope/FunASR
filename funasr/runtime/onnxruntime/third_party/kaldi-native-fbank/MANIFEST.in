@@ -1,0 +1,5 @@
+include LICENSE
+include README.md
+include CMakeLists.txt
+recursive-include kaldi-native-fbank *.*
+recursive-include cmake *.*
