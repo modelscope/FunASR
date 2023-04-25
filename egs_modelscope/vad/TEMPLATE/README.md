@@ -1,7 +1,7 @@
 # Voice Activity Detection
 
 > **Note**: 
-> The modelscope pipeline supports all the models in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope) to inference and finetine. Here we take the model of FSMN-VAD as example to demonstrate the usage.
+> The modelscope pipeline supports all the models in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope) to inference and finetune. Here we take the model of FSMN-VAD as example to demonstrate the usage.
 
 ## Inference
 
@@ -57,7 +57,7 @@ Full code of demo, please ref to [demo](https://github.com/alibaba-damo-academy/
   - pcm_path, `e.g.`: asr_example.pcm, 
   - audio bytes stream, `e.g.`: bytes data from a microphone
   - audio sample point，`e.g.`: `audio, rate = soundfile.read("asr_example_zh.wav")`, the dtype is numpy.ndarray or torch.Tensor
-  - wav.scp, kaldi style wav list (`wav_id \t wav_path``), `e.g.`: 
+  - wav.scp, kaldi style wav list (`wav_id \t wav_path`), `e.g.`: 
   ```text
   asr_example1  ./audios/asr_example1.wav
   asr_example2  ./audios/asr_example2.wav

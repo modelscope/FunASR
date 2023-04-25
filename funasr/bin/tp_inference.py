@@ -222,6 +222,13 @@ def inference_modelscope(
         split_with_space=split_with_space,
         seg_dict_file=seg_dict_file,
     )
+
+    if output_dir is not None:
+        writer = DatadirWriter(output_dir)
+        tp_writer = writer[f"timestamp_prediction"]
+        # ibest_writer["token_list"][""] = " ".join(speech2text.asr_train_args.token_list)
+    else:
+        tp_writer = None
     
     def _forward(
             data_path_and_name_and_type,
@@ -230,7 +237,14 @@ def inference_modelscope(
             fs: dict = None,
             param_dict: dict = None,
             **kwargs
-    ):
+    ):  
+        output_path = output_dir_v2 if output_dir_v2 is not None else output_dir
+        writer = None
+        if output_path is not None:
+            writer = DatadirWriter(output_path)
+            tp_writer = writer[f"timestamp_prediction"]
+        else:
+            tp_writer = None
         # 3. Build data-iterator
         if data_path_and_name_and_type is None and raw_inputs is not None:
             if isinstance(raw_inputs, torch.Tensor):
@@ -268,6 +282,9 @@ def inference_modelscope(
                 ts_str, ts_list = ts_prediction_lfr6_standard(us_alphas[batch_id], us_cif_peak[batch_id], token, force_time_shift=-3.0)
                 logging.warning(ts_str)
                 item = {'key': key, 'value': ts_str, 'timestamp':ts_list}
+                if tp_writer is not None:
+                    tp_writer["tp_sync"][key+'#'] = ts_str
+                    tp_writer["tp_time"][key+'#'] = str(ts_list)
                 tp_result_list.append(item)
         return tp_result_list
 
