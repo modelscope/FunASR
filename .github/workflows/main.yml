@@ -29,10 +29,10 @@ jobs:
           cp -r docs/_build/html/* public/en/
           mkdir public/m2met2
           touch public/m2met2/.nojekyll
-          cp -r docs_m2met2/_build/html/* public/m2met2/
+          cp -r docs/m2met2/_build/html/* public/m2met2/
           mkdir public/m2met2_cn
           touch public/m2met2_cn/.nojekyll
-          cp -r docs_m2met2_cn/_build/html/* public/m2met2_cn/
+          cp -r docs/m2met2_cn/_build/html/* public/m2met2_cn/
 
       - name: deploy github.io pages
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev_wjm' || github.ref == 'refs/heads/dev_lyh'
