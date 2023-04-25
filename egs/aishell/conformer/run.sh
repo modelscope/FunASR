@@ -3,7 +3,7 @@
 . ./path.sh || exit 1;
 
 # machines configuration
-CUDA_VISIBLE_DEVICES="0,1"
+CUDA_VISIBLE_DEVICES="2,3"
 gpu_num=2
 count=1
 gpu_inference=true  # Whether to perform gpu decoding, set false for cpu decoding
@@ -13,7 +13,7 @@ train_cmd=utils/run.pl
 infer_cmd=utils/run.pl
 
 # general configuration
-feats_dir="../DATA" #feature output dictionary
+feats_dir="/nfs/wangjiaming.wjm/Funasr_data/aishell-1-fix-cmvn" #feature output dictionary
 exp_dir="."
 lang=zh
 dumpdir=dump/fbank
@@ -21,7 +21,7 @@ feats_type=fbank
 token_type=char
 scp=feats.scp
 type=kaldi_ark
-stage=0
+stage=3
 stop_stage=4
 
 # feature configuration
@@ -161,7 +161,8 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
             rank=$i
             local_rank=$i
             gpu_id=$(echo $CUDA_VISIBLE_DEVICES | cut -d',' -f$[$i+1])
-            asr_train.py \
+            train.py \
+                --task_name asr \
                 --gpu_id $gpu_id \
                 --use_preprocessor true \
                 --token_type char \
@@ -177,7 +178,6 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
                 --resume true \
                 --output_dir ${exp_dir}/exp/${model_dir} \
                 --config $asr_config \
-                --input_size $feats_dim \
                 --ngpu $gpu_num \
                 --num_worker_count $count \
                 --multiprocessing_distributed true \
