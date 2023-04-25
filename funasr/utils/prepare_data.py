@@ -115,7 +115,7 @@ def calc_shape(args, dataset, nj=32):
     logging.info('Generating shape files done.')
 
 
-def generate_data_list(data_dir, dataset, nj=100):
+def generate_data_list(data_dir, dataset, nj=32):
     list_file = os.path.join(data_dir, dataset, "data.list")
     if os.path.exists(list_file):
         logging.info('Data list for large dataset already exists.')
@@ -160,11 +160,11 @@ def prepare_data(args, distributed_option):
         filter_wav_text(args.data_dir, args.train_set)
         filter_wav_text(args.data_dir, args.valid_set)
 
-        if args.dataset_type == "small" and args.train_shape_file is None:
+        if args.dataset_type == "small":
             calc_shape(args, args.train_set)
             calc_shape(args, args.valid_set)
 
-        if args.dataset_type == "large" and args.train_data_file is None:
+        if args.dataset_type == "large":
             generate_data_list(args.data_dir, args.train_set)
             generate_data_list(args.data_dir, args.valid_set)
 
