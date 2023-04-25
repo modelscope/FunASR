@@ -14,6 +14,7 @@ fbankdir=$1
 logdir=$2
 
 output_dir=${fbankdir}/cmvn/split_${nj};
+mkdir -p $output_dir
 split_scps=""
 for n in $(seq $nj); do
     split_scps="$split_scps $output_dir/wav.$n.scp"
