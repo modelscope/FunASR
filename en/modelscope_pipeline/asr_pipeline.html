@@ -63,6 +63,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#paraformer-online-model">Paraformer-online Model</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#uniasr-model">UniASR Model</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#rnn-t-online-model">RNN-T-online model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mfcca-model">MFCCA Model</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#api-reference">API-reference</a></li>
 </ul>
 </li>
@@ -214,6 +215,23 @@ Full code of demo, please ref to <a class="reference external" href="https://git
 <div class="section" id="rnn-t-online-model">
 <h4><a class="reference external" href="#">RNN-T-online model</a><a class="headerlink" href="#rnn-t-online-model" title="Permalink to this headline"></a></h4>
 <p>Undo</p>
+</div>
+<div class="section" id="mfcca-model">
+<h4><a class="reference external" href="https://www.modelscope.cn/models/NPU-ASLP/speech_mfcca_asr-zh-cn-16k-alimeeting-vocab4950/summary">MFCCA Model</a><a class="headerlink" href="#mfcca-model" title="Permalink to this headline"></a></h4>
+<p>For more model detailes, please refer to <a class="reference external" href="https://www.modelscope.cn/models/NPU-ASLP/speech_mfcca_asr-zh-cn-16k-alimeeting-vocab4950/summary">docs</a></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
+<span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
+
+<span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
+    <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">auto_speech_recognition</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s1">&#39;NPU-ASLP/speech_mfcca_asr-zh-cn-16k-alimeeting-vocab4950&#39;</span><span class="p">,</span>
+    <span class="n">model_revision</span><span class="o">=</span><span class="s1">&#39;v3.0.0&#39;</span>
+<span class="p">)</span>
+
+<span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">rec_result</span><span class="p">)</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="api-reference">
 <h4>API-reference<a class="headerlink" href="#api-reference" title="Permalink to this headline"></a></h4>
