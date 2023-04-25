@@ -73,8 +73,8 @@ def main():
     wav_scp_file = os.path.join(args.wav_path + "{}/wav.scp".format(args.idx))
     cmvn_file = os.path.join(args.wav_path + "{}/cmvn.json".format(args.idx))
 
-    mean_stats = np.zeros(args.dims)
-    var_stats = np.zeros(args.dims)
+    mean_stats = np.zeros(args.dim)
+    var_stats = np.zeros(args.dim)
     total_frames = 0
 
     # with ReadHelper('ark:{}'.format(ark_file)) as ark_reader:
