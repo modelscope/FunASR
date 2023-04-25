@@ -110,6 +110,7 @@ class ESPnetDataset(Dataset):
             float_dtype: str = "float32",
             int_dtype: str = "long",
             dest_sample_rate: int = 16000,
+            speed_perturb: tuple = None,
     ):
         assert check_argument_types()
         if len(path_name_type_list) == 0:
@@ -123,6 +124,7 @@ class ESPnetDataset(Dataset):
         self.float_dtype = float_dtype
         self.int_dtype = int_dtype
         self.dest_sample_rate = dest_sample_rate
+        self.speed_perturb = speed_perturb
 
         self.loader_dict = {}
         self.debug_info = {}
@@ -146,7 +148,7 @@ class ESPnetDataset(Dataset):
             loader_type:  loader_type. sound, npy, text, etc
         """
         if loader_type == "sound":
-            loader = SoundScpReader(path, self.dest_sample_rate, normalize=True, always_2d=False)
+            loader = SoundScpReader(path, self.dest_sample_rate, normalize=True, always_2d=False, speed_perturb=self.speed_perturb)
             return AdapterForSoundScpReader(loader, self.float_dtype)
         elif loader_type == "kaldi_ark":
             loader = kaldiio.load_scp(path)

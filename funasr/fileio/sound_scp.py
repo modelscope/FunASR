@@ -2,10 +2,13 @@ import collections.abc
 from pathlib import Path
 from typing import Union
 
+import random
 import numpy as np
 import soundfile
 import librosa
 from typeguard import check_argument_types
+
+import torchaudio
 
 from funasr.fileio.read_text import read_2column_text
 
@@ -32,6 +35,7 @@ class SoundScpReader(collections.abc.Mapping):
         always_2d: bool = False,
         normalize: bool = False,
         dest_sample_rate: int = 16000,
+        speed_perturb: tuple = None,
     ):
         assert check_argument_types()
         self.fname = fname
@@ -40,6 +44,7 @@ class SoundScpReader(collections.abc.Mapping):
         self.normalize = normalize
         self.data = read_2column_text(fname)
         self.dest_sample_rate = dest_sample_rate
+        self.speed_perturb = speed_perturb
 
     def __getitem__(self, key):
         wav = self.data[key]
@@ -52,6 +57,13 @@ class SoundScpReader(collections.abc.Mapping):
             array, rate = librosa.load(
                 wav, sr=self.dest_sample_rate, mono=not self.always_2d, dtype=self.dtype
             )
+
+        if self.speed_perturb is not None:
+            speed = random.choice(self.speed_perturb)
+            if speed != 1.0:
+                array, _ = torchaudio.sox_effects.apply_effects_tensor(
+                    array, rate,
+                    [['speed', str(speed)], ['rate', str(rate)]])
 
         return rate, array
 
