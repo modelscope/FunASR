@@ -70,7 +70,7 @@ def calc_shape_core(root_path, args, idx):
                 f.flush()
 
 
-def calc_shape(args, dataset, nj=32):
+def calc_shape(args, dataset, nj=64):
     shape_path = os.path.join(args.data_dir, dataset, "speech_shape")
     if os.path.exists(shape_path):
         logging.info('Shape file for small dataset already exists.')
@@ -115,7 +115,7 @@ def calc_shape(args, dataset, nj=32):
     logging.info('Generating shape files done.')
 
 
-def generate_data_list(data_dir, dataset, nj=32):
+def generate_data_list(data_dir, dataset, nj=64):
     list_file = os.path.join(data_dir, dataset, "data.list")
     if os.path.exists(list_file):
         logging.info('Data list for large dataset already exists.')
