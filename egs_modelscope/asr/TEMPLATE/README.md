@@ -72,7 +72,7 @@ Undo
   - pcm_path, `e.g.`: asr_example.pcm, 
   - audio bytes stream, `e.g.`: bytes data from a microphone
   - audio sample point，`e.g.`: `audio, rate = soundfile.read("asr_example_zh.wav")`, the dtype is numpy.ndarray or torch.Tensor
-  - wav.scp, kaldi style wav list (`wav_id \t wav_path``), `e.g.`: 
+  - wav.scp, kaldi style wav list (`wav_id \t wav_path`), `e.g.`: 
   ```text
   asr_example1  ./audios/asr_example1.wav
   asr_example2  ./audios/asr_example2.wav
