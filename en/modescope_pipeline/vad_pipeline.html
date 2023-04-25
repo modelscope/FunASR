@@ -149,7 +149,7 @@
 <h1>Voice Activity Detection<a class="headerlink" href="#voice-activity-detection" title="Permalink to this headline"></a></h1>
 <blockquote>
 <div><p><strong>Note</strong>:
-The modelscope pipeline supports all the models in <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope">model zoo</a> to inference and finetine. Here we take the model of FSMN-VAD as example to demonstrate the usage.</p>
+The modelscope pipeline supports all the models in <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope">model zoo</a> to inference and finetune. Here we take the model of FSMN-VAD as example to demonstrate the usage.</p>
 </div></blockquote>
 <div class="section" id="inference">
 <h2>Inference<a class="headerlink" href="#inference" title="Permalink to this headline"></a></h2>
@@ -215,7 +215,7 @@ The modelscope pipeline supports all the models in <a class="reference external"
 <li><p>pcm_path, <code class="docutils literal notranslate"><span class="pre">e.g.</span></code>: asr_example.pcm,</p></li>
 <li><p>audio bytes stream, <code class="docutils literal notranslate"><span class="pre">e.g.</span></code>: bytes data from a microphone</p></li>
 <li><p>audio sample point，<code class="docutils literal notranslate"><span class="pre">e.g.</span></code>: <code class="docutils literal notranslate"><span class="pre">audio,</span> <span class="pre">rate</span> <span class="pre">=</span> <span class="pre">soundfile.read(&quot;asr_example_zh.wav&quot;)</span></code>, the dtype is numpy.ndarray or torch.Tensor</p></li>
-<li><p>wav.scp, kaldi style wav list (<code class="docutils literal notranslate"><span class="pre">wav_id</span> <span class="pre">\t</span> <span class="pre">wav_path``),</span> </code>e.g.`:</p></li>
+<li><p>wav.scp, kaldi style wav list (<code class="docutils literal notranslate"><span class="pre">wav_id</span> <span class="pre">\t</span> <span class="pre">wav_path</span></code>), <code class="docutils literal notranslate"><span class="pre">e.g.</span></code>:</p></li>
 </ul>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>asr_example1  ./audios/asr_example1.wav
 asr_example2  ./audios/asr_example2.wav
