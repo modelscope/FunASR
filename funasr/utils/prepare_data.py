@@ -90,7 +90,7 @@ def calc_shape(args, dataset, nj=32):
     start = 0
     for i in range(nj):
         end = start + num_job_lines
-        file = os.path.join(shape_path, "wav.scp.{}".format(str(i + 1)))
+        file = os.path.join(split_shape_path, "wav.scp.{}".format(str(i + 1)))
         with open(file, "w") as f:
             if i == nj - 1:
                 f.writelines(lines[start:])
