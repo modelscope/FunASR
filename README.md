@@ -62,7 +62,7 @@ pip install -U modelscope
 # pip install -U modelscope -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html -i https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
 
-For more details, please ref to [installation](https://github.com/alibaba-damo-academy/FunASR/wiki)
+For more details, please ref to [installation](https://alibaba-damo-academy.github.io/FunASR/en/installation.html)
 
 [//]: # ()
 [//]: # (## Usage)

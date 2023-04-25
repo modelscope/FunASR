@@ -41,12 +41,12 @@ pip install onnx onnxruntime # Optional, for onnx quantization
 ### Export onnx format model
 #### Export model from modelscope
 ```shell
-python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx
+python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize false
 ```
 #### Export model from local path
 The model'name must be `model.pb`
 ```shell
-python -m funasr.export.export_model --model-name /mnt/workspace/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx
+python -m funasr.export.export_model --model-name /mnt/workspace/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize false
 ```
 #### Test onnx model
 Ref to [test](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export/test)
@@ -54,13 +54,13 @@ Ref to [test](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/ex
 ### Export torchscripts format model
 #### Export model from modelscope
 ```shell
-python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type torch
+python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type torch --quantize false
 ```
 
 #### Export model from local path
 The model'name must be `model.pb`
 ```shell
-python -m funasr.export.export_model --model-name /mnt/workspace/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type torch
+python -m funasr.export.export_model --model-name /mnt/workspace/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type torch --quantize false
 ```
 #### Test onnx model
 Ref to [test](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export/test)

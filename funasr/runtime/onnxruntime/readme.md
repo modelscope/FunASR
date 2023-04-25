@@ -25,12 +25,6 @@ wget https://github.com/microsoft/onnxruntime/releases/download/v1.14.0/onnxrunt
 tar -zxvf onnxruntime-linux-x64-1.14.0.tgz
 ```
 
-### Install fftw3
-```shell
-sudo apt install libfftw3-dev #ubuntu
-# sudo yum install fftw fftw-devel #centos
-```
-
 ### Install openblas
 ```shell
 sudo apt-get install libopenblas-dev #ubuntu
@@ -65,12 +59,12 @@ Ref to win/
 ## Run the demo
 
 ```shell
-tester /path/models_dir /path/wave_file quantize(true or false)
+funasr-onnx-offline /path/models_dir /path/wave_file quantize(true or false) use_vad(true or false) use_punc(true or false)
 ```
 
 The structure of /path/models_dir
 ```
-config.yaml, am.mvn, model.onnx(or model_quant.onnx)
+config.yaml, am.mvn, model.onnx(or model_quant.onnx), (vad_model.onnx, vad.mvn if you use vad), (punc_model.onnx, punc.yaml if you use vad)
 ```
 
 

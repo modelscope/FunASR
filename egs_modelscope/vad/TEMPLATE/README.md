@@ -67,7 +67,7 @@ Full code of demo, please ref to [demo](https://github.com/alibaba-damo-academy/
 - `output_dir`: None (Default), the output path of results if set
 
 ### Inference with multi-thread CPUs or multi GPUs
-FunASR also offer recipes [infer.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/vad/TEMPLATE/infer.sh) to decode with multi-thread CPUs, or multi GPUs.
+FunASR also offer recipes [egs_modelscope/vad/TEMPLATE/infer.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/vad/TEMPLATE/infer.sh) to decode with multi-thread CPUs, or multi GPUs.
 
 - Setting parameters in `infer.sh`
     - `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk

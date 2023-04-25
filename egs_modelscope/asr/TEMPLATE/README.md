@@ -82,7 +82,7 @@ Undo
 - `output_dir`: None (Default), the output path of results if set
 
 ### Inference with multi-thread CPUs or multi GPUs
-FunASR also offer recipes [infer.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/TEMPLATE/infer.sh) to decode with multi-thread CPUs, or multi GPUs.
+FunASR also offer recipes [egs_modelscope/asr/TEMPLATE/infer.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/TEMPLATE/infer.sh) to decode with multi-thread CPUs, or multi GPUs.
 
 - Setting parameters in `infer.sh`
     - `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
@@ -176,6 +176,21 @@ python finetune.py &> log.txt &
     - `max_epoch`: number of training epoch
     - `lr`: learning rate
 
+- Training data formats：
+```sh
+cat ./example_data/text
+BAC009S0002W0122 而 对 楼 市 成 交 抑 制 作 用 最 大 的 限 购
+BAC009S0002W0123 也 成 为 地 方 政 府 的 眼 中 钉
+english_example_1 hello world
+english_example_2 go swim 去 游 泳
+
+cat ./example_data/wav.scp
+BAC009S0002W0122 /mnt/data/wav/train/S0002/BAC009S0002W0122.wav
+BAC009S0002W0123 /mnt/data/wav/train/S0002/BAC009S0002W0123.wav
+english_example_1 /mnt/data/wav/train/S0002/english_example_1.wav
+english_example_2 /mnt/data/wav/train/S0002/english_example_2.wav
+```
+
 - Then you can run the pipeline to finetune with:
 ```shell
 python finetune.py
@@ -186,7 +201,7 @@ CUDA_VISIBLE_DEVICES=1,2 python -m torch.distributed.launch --nproc_per_node 2 f
 ```
 ## Inference with your finetuned model
 
-- Setting parameters in [infer.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/TEMPLATE/infer.sh) is the same with [docs](https://github.com/alibaba-damo-academy/FunASR/tree/main/egs_modelscope/asr/TEMPLATE#inference-with-multi-thread-cpus-or-multi-gpus), `model` is the model name from modelscope, which you finetuned.
+- Setting parameters in [egs_modelscope/asr/TEMPLATE/infer.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/TEMPLATE/infer.sh) is the same with [docs](https://github.com/alibaba-damo-academy/FunASR/tree/main/egs_modelscope/asr/TEMPLATE#inference-with-multi-thread-cpus-or-multi-gpus), `model` is the model name from modelscope, which you finetuned.
 
 - Decode with multi GPUs:
 ```shell
