@@ -13,7 +13,7 @@ train_cmd=utils/run.pl
 infer_cmd=utils/run.pl
 
 # general configuration
-feats_dir="/nfs/wangjiaming.wjm/Funasr_data_test/aishell" #feature output dictionary
+feats_dir="../DATA" #feature output dictionary
 exp_dir="."
 lang=zh
 dumpdir=dump/fbank
@@ -21,8 +21,8 @@ feats_type=fbank
 token_type=char
 scp=wav.scp
 type=sound
-stage=3
-stop_stage=4
+stage=1
+stop_stage=1
 
 # feature configuration
 feats_dim=80
@@ -31,7 +31,8 @@ nj=32
 speed_perturb="0.9,1.0,1.1"
 
 # data
-data_aishell=
+raw_data=
+data_url=www.openslr.org/resources/33
 
 # exp tag
 tag=""
@@ -66,10 +67,16 @@ else
     _ngpu=0
 fi
 
+if [ ${stage} -le -1 ] && [ ${stop_stage} -ge -1 ]; then
+    echo "stage -1: Data Download"
+    local/download_and_untar.sh ${raw_data} ${data_url} data_aishell
+    local/download_and_untar.sh ${raw_data} ${data_url} resource_aishell
+fi
+
 if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     echo "stage 0: Data preparation"
     # Data preparation
-    local/aishell_data_prep.sh ${data_aishell}/data_aishell/wav ${data_aishell}/data_aishell/transcript ${feats_dir}
+    local/aishell_data_prep.sh ${raw_data}/data_aishell/wav ${raw_data}/data_aishell/transcript ${feats_dir}
     for x in train dev test; do
         cp ${feats_dir}/data/${x}/text ${feats_dir}/data/${x}/text.org
         paste -d " " <(cut -f 1 -d" " ${feats_dir}/data/${x}/text.org) <(cut -f 2- -d" " ${feats_dir}/data/${x}/text.org | tr -d " ") \
@@ -80,45 +87,10 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
 fi
 
 feat_train_dir=${feats_dir}/${dumpdir}/train; mkdir -p ${feat_train_dir}
-feat_dev_dir=${feats_dir}/${dumpdir}/dev; mkdir -p ${feat_dev_dir}
-feat_test_dir=${feats_dir}/${dumpdir}/test; mkdir -p ${feat_test_dir}
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
-    echo "stage 1: Feature Generation"
-    # compute fbank features
-    fbankdir=${feats_dir}/fbank
-    utils/compute_fbank.sh --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} --sample_frequency ${sample_frequency} --speed_perturb ${speed_perturb} \
-        ${feats_dir}/data/train ${exp_dir}/exp/make_fbank/train ${fbankdir}/train
-    utils/fix_data_feat.sh ${fbankdir}/train
-    utils/compute_fbank.sh --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} --sample_frequency ${sample_frequency} \
-        ${feats_dir}/data/dev ${exp_dir}/exp/make_fbank/dev ${fbankdir}/dev
-    utils/fix_data_feat.sh ${fbankdir}/dev
-    utils/compute_fbank.sh --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} --sample_frequency ${sample_frequency} \
-        ${feats_dir}/data/test ${exp_dir}/exp/make_fbank/test ${fbankdir}/test
-    utils/fix_data_feat.sh ${fbankdir}/test
-     
-    # compute global cmvn
+    echo "stage 1: Feature and CMVN Generation"
     utils/compute_cmvn.sh --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} \
-        ${fbankdir}/train ${exp_dir}/exp/make_fbank/train
-
-    # apply cmvn 
-    utils/apply_cmvn.sh --cmd "$train_cmd" --nj $nj \
-        ${fbankdir}/train ${fbankdir}/train/cmvn.json ${exp_dir}/exp/make_fbank/train ${feat_train_dir}
-    utils/apply_cmvn.sh --cmd "$train_cmd" --nj $nj \
-        ${fbankdir}/dev ${fbankdir}/train/cmvn.json ${exp_dir}/exp/make_fbank/dev ${feat_dev_dir}
-    utils/apply_cmvn.sh --cmd "$train_cmd" --nj $nj \
-        ${fbankdir}/test ${fbankdir}/train/cmvn.json ${exp_dir}/exp/make_fbank/test ${feat_test_dir}
-    
-    cp ${fbankdir}/train/text ${fbankdir}/train/speech_shape ${fbankdir}/train/text_shape ${feat_train_dir}
-    cp ${fbankdir}/dev/text ${fbankdir}/dev/speech_shape ${fbankdir}/dev/text_shape ${feat_dev_dir}
-    cp ${fbankdir}/test/text ${fbankdir}/test/speech_shape ${fbankdir}/test/text_shape ${feat_test_dir}
-
-    utils/fix_data_feat.sh ${feat_train_dir}
-    utils/fix_data_feat.sh ${feat_dev_dir}
-    utils/fix_data_feat.sh ${feat_test_dir}
-
-    #generate ark list 
-    utils/gen_ark_list.sh --cmd "$train_cmd" --nj $nj ${feat_train_dir} ${fbankdir}/train ${feat_train_dir}
-    utils/gen_ark_list.sh --cmd "$train_cmd" --nj $nj ${feat_dev_dir} ${fbankdir}/dev ${feat_dev_dir}
+        ${feats_dir}/data/${train_set} ${exp_dir}/exp/make_fbank/${train_set}
 fi
 
 token_list=${feats_dir}/data/${lang}_token_list/char/tokens.txt
@@ -136,12 +108,6 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     num_token=$(cat ${token_list} | wc -l)
     echo "<unk>" >> ${token_list}
     vocab_size=$(cat ${token_list} | wc -l)
-    awk -v v=,${vocab_size} '{print $0v}' ${feat_train_dir}/text_shape > ${feat_train_dir}/text_shape.char
-    awk -v v=,${vocab_size} '{print $0v}' ${feat_dev_dir}/text_shape > ${feat_dev_dir}/text_shape.char
-    mkdir -p ${feats_dir}/asr_stats_fbank_zh_char/train 
-    mkdir -p ${feats_dir}/asr_stats_fbank_zh_char/dev
-    cp ${feat_train_dir}/speech_shape ${feat_train_dir}/text_shape ${feat_train_dir}/text_shape.char ${feats_dir}/asr_stats_fbank_zh_char/train
-    cp ${feat_dev_dir}/speech_shape ${feat_dev_dir}/text_shape ${feat_dev_dir}/text_shape.char ${feats_dir}/asr_stats_fbank_zh_char/dev
 fi
 
 # Training Stage
