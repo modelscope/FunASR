@@ -21,8 +21,8 @@ feats_type=fbank
 token_type=char
 scp=wav.scp
 type=sound
-stage=2
-stop_stage=2
+stage=1
+stop_stage=1
 
 # feature configuration
 feats_dim=80
