@@ -14,7 +14,7 @@ def get_parser():
         "--dim",
         default=80,
         type=int,
-        help="feature dims",
+        help="feature dim",
     )
     parser.add_argument(
         "--cmvn_dir",
@@ -29,7 +29,7 @@ def get_parser():
         default=1,
         required=True,
         type=int,
-        help="num of cmvn file",
+        help="num of cmvn files",
     )
     parser.add_argument(
         "--output_dir",
@@ -45,8 +45,8 @@ def main():
     parser = get_parser()
     args = parser.parse_args()
 
-    total_means = np.zeros(args.dims)
-    total_vars = np.zeros(args.dims)
+    total_means = np.zeros(args.dim)
+    total_vars = np.zeros(args.dim)
     total_frames = 0
 
     cmvn_file = os.path.join(args.output_dir, "cmvn.json")
