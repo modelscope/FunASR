@@ -27,6 +27,6 @@ split_dir=${fbankdir}/cmvn/split_${nj};
 #      --wav_path $split_dir \
 #      --idx JOB
 
-python utils/combine_cmvn_file.py --dim ${feats_dim} -cmvn_dir $split_dir -nj $nj -output_dir ${fbankdir}/cmvn
+python utils/combine_cmvn_file.py --dim ${feats_dim} --cmvn_dir $split_dir --nj $nj --output_dir ${fbankdir}/cmvn
 
 #echo "$0: Succeeded compute global cmvn"
