@@ -6,7 +6,7 @@ set -o pipefail
 
 stage=1
 stop_stage=2
-model="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
+model="damo/speech_UniASR_asr_2pass-minnan-16k-common-vocab3825"
 data_dir="./data/test"
 output_dir="./results"
 batch_size=64
