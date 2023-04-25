@@ -70,8 +70,8 @@ def main():
     parser = get_parser()
     args = parser.parse_args()
 
-    wav_scp_file = os.path.join(args.wav_path + "{}/wav.scp".format(args.idx))
-    cmvn_file = os.path.join(args.wav_path + "{}/cmvn.json".format(args.idx))
+    wav_scp_file = os.path.join(args.wav_path, "{}/wav.scp".format(args.idx))
+    cmvn_file = os.path.join(args.wav_path, "{}/cmvn.json".format(args.idx))
 
     mean_stats = np.zeros(args.dim)
     var_stats = np.zeros(args.dim)
