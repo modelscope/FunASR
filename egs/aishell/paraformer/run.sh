@@ -3,7 +3,7 @@
 . ./path.sh || exit 1;
 
 # machines configuration
-CUDA_VISIBLE_DEVICES="0,1"
+CUDA_VISIBLE_DEVICES="2,3"
 gpu_num=2
 count=1
 gpu_inference=true  # Whether to perform gpu decoding, set false for cpu decoding
@@ -33,7 +33,7 @@ raw_data=
 data_url=www.openslr.org/resources/33
 
 # exp tag
-tag="exp1"
+tag="exp2"
 
 . utils/parse_options.sh || exit 1;
 
