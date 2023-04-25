@@ -21,14 +21,12 @@ feats_type=fbank
 token_type=char
 scp=wav.scp
 type=sound
-stage=1
-stop_stage=1
+stage=2
+stop_stage=2
 
 # feature configuration
 feats_dim=80
-sample_frequency=16000
 nj=64
-speed_perturb="0.9,1.0,1.1"
 
 # data
 raw_data=
@@ -104,9 +102,7 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     echo "</s>" >> ${token_list}
     utils/text2token.py -s 1 -n 1 --space "" ${feats_dir}/data/train/text | cut -f 2- -d" " | tr " " "\n" \
         | sort | uniq | grep -a -v -e '^\s*$' | awk '{print $0}' >> ${token_list}
-    num_token=$(cat ${token_list} | wc -l)
     echo "<unk>" >> ${token_list}
-    vocab_size=$(cat ${token_list} | wc -l)
 fi
 
 # Training Stage
