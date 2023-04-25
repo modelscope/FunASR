@@ -284,6 +284,8 @@ asr_example2  ./audios/asr_example2.wav
 <li><p><code class="docutils literal notranslate"><span class="pre">njob</span></code>: only used for CPU inference (<code class="docutils literal notranslate"><span class="pre">gpu_inference</span></code>=<code class="docutils literal notranslate"><span class="pre">false</span></code>), <code class="docutils literal notranslate"><span class="pre">64</span></code> (Default), the number of jobs for CPU decoding</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">checkpoint_dir</span></code>: only used for infer finetuned models, the path dir of finetuned models</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">checkpoint_name</span></code>: only used for infer finetuned models, <code class="docutils literal notranslate"><span class="pre">valid.cer_ctc.ave.pb</span></code> (Default), which checkpoint is used to infer</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">decoding_mode</span></code>: <code class="docutils literal notranslate"><span class="pre">normal</span></code> (Default), decoding mode for UniASR model(fast、normal、offline)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hotword_txt</span></code>: <code class="docutils literal notranslate"><span class="pre">None</span></code> (Default), hotword file for contextual paraformer model(the hotword file name ends with .txt”)</p></li>
 </ul>
 </li>
 <li><p>Decode with multi GPUs:</p></li>
