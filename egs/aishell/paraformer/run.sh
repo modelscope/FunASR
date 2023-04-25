@@ -89,8 +89,7 @@ fi
 feat_train_dir=${feats_dir}/${dumpdir}/train; mkdir -p ${feat_train_dir}
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
     echo "stage 1: Feature and CMVN Generation"
-    utils/compute_cmvn.sh --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} \
-        ${feats_dir}/data/${train_set} ${exp_dir}/exp/make_fbank/${train_set}
+    utils/compute_cmvn.sh --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} ${feats_dir}/data/${train_set}
 fi
 
 token_list=${feats_dir}/data/${lang}_token_list/char/tokens.txt
