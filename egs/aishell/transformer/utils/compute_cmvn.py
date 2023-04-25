@@ -86,7 +86,7 @@ def main():
         lines = f.readlines()
         for line in lines:
             _, wav_file = line.strip().split()
-            fbank = compute_fbank(wav_file, num_mel_bins=args.dims)
+            fbank = compute_fbank(wav_file, num_mel_bins=args.dim)
             mean_stats += np.sum(fbank, axis=0)
             var_stats += np.sum(np.square(fbank), axis=0)
             total_frames += fbank.shape[0]
