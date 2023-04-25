@@ -37,13 +37,13 @@ Overview
    :maxdepth: 1
    :caption: ModelScope Egs
 
-   ./modescope_pipeline/quick_start.md
-   ./modescope_pipeline/asr_pipeline.md
-   ./modescope_pipeline/vad_pipeline.md
-   ./modescope_pipeline/punc_pipeline.md
-   ./modescope_pipeline/tp_pipeline.md
-   ./modescope_pipeline/sv_pipeline.md
-   ./modescope_pipeline/sd_pipeline.md
+   ./modelscope_pipeline/quick_start.md
+   ./modelscope_pipeline/asr_pipeline.md
+   ./modelscope_pipeline/vad_pipeline.md
+   ./modelscope_pipeline/punc_pipeline.md
+   ./modelscope_pipeline/tp_pipeline.md
+   ./modelscope_pipeline/sv_pipeline.md
+   ./modelscope_pipeline/sd_pipeline.md
 
 .. toctree::
    :maxdepth: 1
