@@ -33,7 +33,7 @@ raw_data=
 data_url=www.openslr.org/resources/33
 
 # exp tag
-tag=""
+tag="exp1"
 
 . utils/parse_options.sh || exit 1;
 
