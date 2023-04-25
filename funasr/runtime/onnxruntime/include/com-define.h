@@ -12,6 +12,18 @@
 #define MODEL_SAMPLE_RATE 16000
 #endif
 
+// model path
+#define VAD_MODEL_PATH "vad-model"
+#define VAD_CMVN_PATH "vad-cmvn"
+#define AM_MODEL_PATH "am-model"
+#define AM_CMVN_PATH "am-cmvn"
+#define AM_CONFIG_PATH "am-config"
+#define PUNC_MODEL_PATH "punc-model"
+#define PUNC_CONFIG_PATH "punc-config"
+#define WAV_PATH "wav-path"
+#define WAV_SCP "wav-scp"
+#define THREAD_NUM "thread-num"
+
 // vad
 #ifndef VAD_SILENCE_DYRATION
 #define VAD_SILENCE_DYRATION 15000
@@ -26,14 +38,7 @@
 #endif
 
 // punc
-#define PUNC_MODEL_FILE  "punc_model.onnx"
-#define PUNC_YAML_FILE "punc.yaml"
 #define UNK_CHAR "<unk>"
-
-#define  INPUT_NUM  2
-#define  INPUT_NAME1 "input"
-#define  INPUT_NAME2 "text_lengths"
-#define  OUTPUT_NAME "logits"
 #define  TOKEN_LEN     20
 
 #define  CANDIDATE_NUM   6

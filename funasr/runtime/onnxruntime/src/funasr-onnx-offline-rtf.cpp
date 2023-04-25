@@ -1,3 +1,7 @@
+/**
+ * Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+ * MIT License  (https://opensource.org/licenses/MIT)
+*/
 
 #ifndef _WIN32
 #include <sys/time.h>
@@ -5,7 +9,10 @@
 #include <win_func.h>
 #endif
 
+#include <glog/logging.h>
 #include "libfunasrapi.h"
+#include "tclap/CmdLine.h"
+#include "com-define.h"
 
 #include <iostream>
 #include <fstream>
@@ -14,9 +21,11 @@
 #include <atomic>
 #include <mutex>
 #include <thread>
+#include <map>
+
 using namespace std;
 
-std::atomic<int> index(0);
+std::atomic<int> wav_index(0);
 std::mutex mtx;
 
 void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, 
@@ -35,7 +44,7 @@ void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list,
 
     while (true) {
         // 使用原子变量获取索引并递增
-        int i = index.fetch_add(1);
+        int i = wav_index.fetch_add(1);
         if (i >= wav_list.size()) {
             break;
         }
@@ -68,59 +77,94 @@ void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list,
     }
 }
 
+void GetValue(TCLAP::ValueArg<std::string>& value_arg, string key, std::map<std::string, std::string>& model_path)
+{
+    if (value_arg.isSet()){
+        model_path.insert({key, value_arg.getValue()});
+        LOG(INFO)<< key << " : " << value_arg.getValue();
+    }
+}
+
 int main(int argc, char *argv[])
 {
+    //google::InitGoogleLogging(argv[0]);
 
-    if (argc < 5)
-    {
-        printf("Usage: %s /path/to/model_dir /path/to/wav.scp quantize(true or false) thread_num \n", argv[0]);
-        exit(-1);
-    }
+    TCLAP::CmdLine cmd("funasr-onnx-offline", ' ', "1.0");
+    TCLAP::ValueArg<std::string> vad_model("", VAD_MODEL_PATH, "vad model path", false, "", "string");
+    TCLAP::ValueArg<std::string> vad_cmvn("", VAD_CMVN_PATH, "vad cmvn path", false, "", "string");
 
-    // read wav.scp
-    vector<string> wav_list;
-    ifstream in(argv[2]);
-    if (!in.is_open()) {
-        printf("Failed to open file: %s", argv[2]);
-        return 0;
-    }
-    string line;
-    while(getline(in, line))
-    {
-        istringstream iss(line);
-        string column1, column2;
-        iss >> column1 >> column2;
-        wav_list.push_back(column2); 
-    }
-    in.close();
+    TCLAP::ValueArg<std::string> am_model("", AM_MODEL_PATH, "am model path", false, "", "string");
+    TCLAP::ValueArg<std::string> am_cmvn("", AM_CMVN_PATH, "am cmvn path", false, "", "string");
+    TCLAP::ValueArg<std::string> am_config("", AM_CONFIG_PATH, "am config path", false, "", "string");
 
-    // model init
+    TCLAP::ValueArg<std::string> punc_model("", PUNC_MODEL_PATH, "punc model path", false, "", "string");
+    TCLAP::ValueArg<std::string> punc_config("", PUNC_CONFIG_PATH, "punc config path", false, "", "string");
+
+    TCLAP::ValueArg<std::string> wav_scp("", WAV_SCP, "wave scp path", true, "", "string");
+    TCLAP::ValueArg<std::int32_t> thread_num("", THREAD_NUM, "multi-thread num for rtf", true, 0, "int32_t");
+
+    cmd.add(vad_model);
+    cmd.add(vad_cmvn);
+    cmd.add(am_model);
+    cmd.add(am_cmvn);
+    cmd.add(am_config);
+    cmd.add(punc_model);
+    cmd.add(punc_config);
+    cmd.add(wav_scp);
+    cmd.add(thread_num);
+    cmd.parse(argc, argv);
+
+    std::map<std::string, std::string> model_path;
+    GetValue(vad_model, VAD_MODEL_PATH, model_path);
+    GetValue(vad_cmvn, VAD_CMVN_PATH, model_path);
+    GetValue(am_model, AM_MODEL_PATH, model_path);
+    GetValue(am_cmvn, AM_CMVN_PATH, model_path);
+    GetValue(am_config, AM_CONFIG_PATH, model_path);
+    GetValue(punc_model, PUNC_MODEL_PATH, model_path);
+    GetValue(punc_config, PUNC_CONFIG_PATH, model_path);
+    GetValue(wav_scp, WAV_SCP, model_path);
+
     struct timeval start, end;
     gettimeofday(&start, NULL);
-    // is quantize
-    bool quantize = false;
-    istringstream(argv[3]) >> boolalpha >> quantize;
-    // thread num
-    int thread_num = 1;
-    thread_num = atoi(argv[4]);
+    FUNASR_HANDLE asr_handle=FunASRInit(model_path, 1);
 
-    FUNASR_HANDLE asr_handle=FunASRInit(argv[1], 1, quantize);
     if (!asr_handle)
     {
-        printf("Cannot load ASR Model from: %s, there must be files model.onnx and vocab.txt", argv[1]);
+        LOG(ERROR) << ("Cannot load ASR Model from: %s, there must be files model.onnx and vocab.txt", argv[1]);
         exit(-1);
     }
+
     gettimeofday(&end, NULL);
     long seconds = (end.tv_sec - start.tv_sec);
     long modle_init_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
-    printf("Model initialization takes %lfs.\n", (double)modle_init_micros / 1000000);
+    printf("Model initialization takes %lfs.", (double)modle_init_micros / 1000000);
+
+    // read wav_scp
+    vector<string> wav_list;
+    if(model_path.find(WAV_SCP)!=model_path.end()){
+        ifstream in(model_path.at(WAV_SCP));
+        if (!in.is_open()) {
+            LOG(ERROR) << ("Failed to open file: %s", model_path.at(WAV_SCP));
+            return 0;
+        }
+        string line;
+        while(getline(in, line))
+        {
+            istringstream iss(line);
+            string column1, column2;
+            iss >> column1 >> column2;
+            wav_list.emplace_back(column2); 
+        }
+        in.close();
+    }
 
     // 多线程测试
     float total_length = 0.0f;
     long total_time = 0;
     std::vector<std::thread> threads;
 
-    for (int i = 0; i < thread_num; i++)
+    int rtf_threds = thread_num.getValue();
+    for (int i = 0; i < rtf_threds; i++)
     {
         threads.emplace_back(thread(runReg, asr_handle, wav_list, &total_length, &total_time, i));
     }

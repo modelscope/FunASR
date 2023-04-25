@@ -1,28 +1,28 @@
+/**
+ * Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+ * MIT License  (https://opensource.org/licenses/MIT)
+*/
+
 #include "precomp.h"
 
-CTTransformer::CTTransformer(const char* sz_model_dir, int thread_num)
+CTTransformer::CTTransformer()
 :env_(ORT_LOGGING_LEVEL_ERROR, ""),session_options{}
 {
+}
+
+void CTTransformer::InitPunc(const std::string &punc_model, const std::string &punc_config, int thread_num){
     session_options.SetIntraOpNumThreads(thread_num);
     session_options.SetGraphOptimizationLevel(ORT_ENABLE_ALL);
     session_options.DisableCpuMemArena();
 
-	string strModelPath = PathAppend(sz_model_dir, PUNC_MODEL_FILE);
-	string strYamlPath = PathAppend(sz_model_dir, PUNC_YAML_FILE);
-
     try{
-#ifdef _WIN32
-	std::wstring detPath = strToWstr(strModelPath);
-    m_session = std::make_unique<Ort::Session>(env_, detPath.c_str(), session_options);
-#else
-    m_session = std::make_unique<Ort::Session>(env_, strModelPath.c_str(), session_options);
-#endif
+        m_session = std::make_unique<Ort::Session>(env_, punc_model.c_str(), session_options);
     }
-    catch(exception e)
-    {
-        printf(e.what());
+    catch (std::exception const &e) {
+        LOG(ERROR) << "Error when load punc onnx model: " << e.what();
+        exit(0);
     }
-    // read inputnames outputnamess
+    // read inputnames outputnames
     string strName;
     GetInputName(m_session.get(), strName);
     m_strInputNames.push_back(strName.c_str());
@@ -37,8 +37,9 @@ CTTransformer::CTTransformer(const char* sz_model_dir, int thread_num)
     for (auto& item : m_strOutputNames)
         m_szOutputNames.push_back(item.c_str());
 
-	m_tokenizer.OpenYaml(strYamlPath.c_str());
+	m_tokenizer.OpenYaml(punc_config.c_str());
 }
+
 
 CTTransformer::~CTTransformer()
 {

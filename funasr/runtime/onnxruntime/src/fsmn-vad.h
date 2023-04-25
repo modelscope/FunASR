@@ -1,3 +1,7 @@
+/**
+ * Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+ * MIT License  (https://opensource.org/licenses/MIT)
+*/
 
 #ifndef VAD_SERVER_FSMNVAD_H
 #define VAD_SERVER_FSMNVAD_H

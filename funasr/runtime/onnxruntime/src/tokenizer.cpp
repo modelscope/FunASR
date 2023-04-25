@@ -1,4 +1,9 @@
- #include "precomp.h"
+ /**
+ * Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+ * MIT License  (https://opensource.org/licenses/MIT)
+*/
+
+#include "precomp.h"
 
 CTokenizer::CTokenizer(const char* sz_yamlfile):m_ready(false)
 {
