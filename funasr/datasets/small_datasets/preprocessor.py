@@ -820,7 +820,7 @@ def split_to_mini_sentence(words: list, word_limit: int = 20):
 
 
 def build_preprocess(args, train):
-    if args.use_preprocessor:
+    if not args.use_preprocessor:
         return None
     if args.task_name in ["asr", "data2vec", "diar", "sv"]:
         retval = CommonPreprocessor(

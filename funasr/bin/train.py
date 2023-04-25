@@ -527,6 +527,7 @@ if __name__ == '__main__':
                                                                    distributed_option.dist_rank,
                                                                    distributed_option.local_rank))
     logging.info(pytorch_cudnn_version())
+    logging.info("Args: {}".format(args))
     logging.info(model_summary(model))
     logging.info("Optimizer: {}".format(optimizers))
     logging.info("Scheduler: {}".format(schedulers))
