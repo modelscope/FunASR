@@ -21,7 +21,7 @@ feats_type=fbank
 token_type=char
 scp=wav.scp
 type=sound
-stage=2
+stage=1
 stop_stage=3
 
 # feature configuration
