@@ -110,6 +110,8 @@ FunASR also offer recipes [egs_modelscope/asr/TEMPLATE/infer.sh](https://github.
     - `njob`: only used for CPU inference (`gpu_inference`=`false`), `64` (Default), the number of jobs for CPU decoding
     - `checkpoint_dir`: only used for infer finetuned models, the path dir of finetuned models
     - `checkpoint_name`: only used for infer finetuned models, `valid.cer_ctc.ave.pb` (Default), which checkpoint is used to infer
+    - `decoding_mode`: `normal` (Default), decoding mode for UniASR model(fast、normal、offline)
+    - `hotword_txt`: `None` (Default), hotword file for contextual paraformer model(the hotword file name ends with .txt")
 
 - Decode with multi GPUs:
 ```shell
