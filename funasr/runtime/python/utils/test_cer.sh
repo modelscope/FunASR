@@ -1,6 +1,6 @@
 
 split_scps_tool=split_scp.pl
-inference_tool=infer.py
+inference_tool=test_cer.py
 proce_text_tool=proce_text.py
 compute_wer_tool=compute_wer.py
 
