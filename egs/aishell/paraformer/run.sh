@@ -13,7 +13,7 @@ train_cmd=utils/run.pl
 infer_cmd=utils/run.pl
 
 # general configuration
-feats_dir="/nfs/wangjiaming.wjm/Funasr_data/aishell-1-fix-cmvn" #feature output dictionary
+feats_dir="/nfs/wangjiaming.wjm/Funasr_data_test/aishell" #feature output dictionary
 exp_dir="."
 lang=zh
 dumpdir=dump/fbank
@@ -167,14 +167,10 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
                 --use_preprocessor true \
                 --token_type char \
                 --token_list $token_list \
-                --train_data_path_and_name_and_type ${feats_dir}/${dumpdir}/${train_set}/${scp},speech,${type} \
-                --train_data_path_and_name_and_type ${feats_dir}/${dumpdir}/${train_set}/text,text,text \
-                --train_shape_file ${feats_dir}/asr_stats_fbank_zh_char/${train_set}/speech_shape \
-                --train_shape_file ${feats_dir}/asr_stats_fbank_zh_char/${train_set}/text_shape.char \
-                --valid_data_path_and_name_and_type ${feats_dir}/${dumpdir}/${valid_set}/${scp},speech,${type} \
-                --valid_data_path_and_name_and_type ${feats_dir}/${dumpdir}/${valid_set}/text,text,text \
-                --valid_shape_file ${feats_dir}/asr_stats_fbank_zh_char/${valid_set}/speech_shape \
-                --valid_shape_file ${feats_dir}/asr_stats_fbank_zh_char/${valid_set}/text_shape.char  \
+                --data_dir ${feats_dir}/data \
+                --train_set ${train_set} \
+                --valid_set ${valid_set} \
+                --cmvn_file ${feats_dir}/cmvn/cmvn.mvn \
                 --resume true \
                 --output_dir ${exp_dir}/exp/${model_dir} \
                 --config $asr_config \

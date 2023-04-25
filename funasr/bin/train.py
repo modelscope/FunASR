@@ -23,7 +23,6 @@ from funasr.utils.nested_dict_action import NestedDictAction
 from funasr.utils.prepare_data import prepare_data
 from funasr.utils.types import int_or_none
 from funasr.utils.types import str2bool
-from funasr.utils.types import str2triple_str
 from funasr.utils.types import str_or_none
 from funasr.utils.yaml_no_alias_safe_dump import yaml_no_alias_safe_dump
 
@@ -316,42 +315,24 @@ def get_parser():
         help=f"The keyword arguments for dataset",
     )
     parser.add_argument(
-        "--train_data_file",
+        "--data_dir",
         type=str,
         default=None,
-        help="train_list for large dataset",
+        help="root path of data",
     )
     parser.add_argument(
-        "--valid_data_file",
+        "--train_set",
         type=str,
-        default=None,
-        help="valid_list for large dataset",
+        default="train",
+        help="train dataset",
     )
     parser.add_argument(
-        "--train_data_path_and_name_and_type",
-        type=str2triple_str,
-        action="append",
-        default=[],
-        help="e.g. '--train_data_path_and_name_and_type some/path/a.scp,foo,sound'. ",
-    )
-    parser.add_argument(
-        "--valid_data_path_and_name_and_type",
-        type=str2triple_str,
-        action="append",
-        default=[],
-    )
-    parser.add_argument(
-        "--train_shape_file",
+        "--valid_set",
         type=str,
-        action="append",
-        default=[],
+        default="validation",
+        help="dev dataset",
     )
-    parser.add_argument(
-        "--valid_shape_file",
-        type=str,
-        action="append",
-        default=[],
-    )
+
     parser.add_argument(
         "--use_preprocessor",
         type=str2bool,

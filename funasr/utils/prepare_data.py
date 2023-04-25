@@ -36,10 +36,8 @@ def filter_wav_text(data_dir, dataset):
                 f_text.write(sample_name + " " + text_dict[sample_name] + "\n")
             else:
                 filter_count += 1
-    logging.info(
-        "{}/{} samples in {} are filtered because of the mismatch between wav.scp and text".format(len(wav_lines),
-                                                                                                   filter_count,
-                                                                                                   dataset))
+    logging.info("{}/{} samples in {} are filtered because of the mismatch between wav.scp and text".
+                 format(filter_count, len(wav_lines), dataset))
 
 
 def wav2num_frame(wav_path, frontend_conf):
@@ -157,30 +155,34 @@ def generate_data_list(data_dir, dataset, nj=100):
 
 
 def prepare_data(args, distributed_option):
-    if args.dataset_type == "small" and args.train_data_path_and_name_and_type is not None:
-        return
-    if args.dataset_type == "large" and args.train_data_file is not None:
-        return
     distributed = distributed_option.distributed
-    if not hasattr(args, "train_set"):
-        args.train_set = "train"
-    if not hasattr(args, "dev_set"):
-        args.dev_set = "validation"
     if not distributed or distributed_option.dist_rank == 0:
         filter_wav_text(args.data_dir, args.train_set)
-        filter_wav_text(args.data_dir, args.dev_set)
+        filter_wav_text(args.data_dir, args.valid_set)
 
         if args.dataset_type == "small" and args.train_shape_file is None:
             calc_shape(args, args.train_set)
-            calc_shape(args, args.dev_set)
+            calc_shape(args, args.valid_set)
 
         if args.dataset_type == "large" and args.train_data_file is None:
             generate_data_list(args.data_dir, args.train_set)
-            generate_data_list(args.data_dir, args.dev_set)
+            generate_data_list(args.data_dir, args.valid_set)
 
-    args.train_shape_file = [os.path.join(args.data_dir, args.train_set, "speech_shape")]
-    args.valid_shape_file = [os.path.join(args.data_dir, args.dev_set, "speech_shape")]
-    args.train_data_file = os.path.join(args.data_dir, args.train_set, "data.list")
-    args.valid_data_file = os.path.join(args.data_dir, args.dev_set, "data.list")
+    if args.dataset_type == "small":
+        args.train_shape_file = [os.path.join(args.data_dir, args.train_set, "speech_shape")]
+        args.valid_shape_file = [os.path.join(args.data_dir, args.valid_set, "speech_shape")]
+        data_names = args.dataset_conf.get("data_names", "speech,text").split(",")
+        data_types = args.dataset_conf.get("data_types", "sound,text").split(",")
+        args.train_data_path_and_name_and_type = [
+            ["{}/{}/wav.scp".format(args.data_dir, args.train_set), data_names[0], data_types[0]],
+            ["{}/{}/text".format(args.data_dir, args.train_set), data_names[1], data_types[1]]
+        ]
+        args.valid_data_path_and_name_and_type = [
+            ["{}/{}/wav.scp".format(args.data_dir, args.valid_set), data_names[0], data_types[0]],
+            ["{}/{}/text".format(args.data_dir, args.valid_set), data_names[1], data_types[1]]
+        ]
+    else:
+        args.train_data_file = os.path.join(args.data_dir, args.train_set, "data.list")
+        args.valid_data_file = os.path.join(args.data_dir, args.valid_set, "data.list")
     if distributed:
         dist.barrier()
