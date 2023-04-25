@@ -6,15 +6,16 @@ set -o pipefail
 
 stage=1
 stop_stage=2
-model="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
+model="damo/speech_UniASR_asr_2pass-minnan-16k-common-vocab3825"
 data_dir="./data/test"
 output_dir="./results"
-batch_size=64
+batch_size=1
 gpu_inference=true    # whether to perform gpu decoding
 gpuid_list="0,1"    # set gpus, e.g., gpuid_list="0,1"
 njob=64    # the number of jobs for CPU decoding, if gpu_inference=false, use CPU decoding, please set njob
 checkpoint_dir=
 checkpoint_name="valid.cer_ctc.ave.pb"
+decoding_mode="normal"
 
 . utils/parse_options.sh || exit 1;
 
@@ -54,7 +55,8 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ];then
             --audio_in ${output_dir}/split/wav.$JOB.scp \
             --output_dir ${output_dir}/output.$JOB \
             --batch_size ${batch_size} \
-            --gpuid ${gpuid}
+            --gpuid ${gpuid} \
+            --decoding_mode ${decoding_mode}
         }&
     done
     wait

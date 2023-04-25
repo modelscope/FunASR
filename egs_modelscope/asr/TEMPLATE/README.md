@@ -58,6 +58,22 @@ Full code of demo, please ref to [demo](https://github.com/alibaba-damo-academy/
 #### [RNN-T-online model]()
 Undo
 
+#### [MFCCA Model](https://www.modelscope.cn/models/NPU-ASLP/speech_mfcca_asr-zh-cn-16k-alimeeting-vocab4950/summary)
+For more model detailes, please refer to [docs](https://www.modelscope.cn/models/NPU-ASLP/speech_mfcca_asr-zh-cn-16k-alimeeting-vocab4950/summary)
+```python
+from modelscope.pipelines import pipeline
+from modelscope.utils.constant import Tasks
+
+inference_pipeline = pipeline(
+    task=Tasks.auto_speech_recognition,
+    model='NPU-ASLP/speech_mfcca_asr-zh-cn-16k-alimeeting-vocab4950',
+    model_revision='v3.0.0'
+)
+
+rec_result = inference_pipeline(audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
+print(rec_result)
+```
+
 #### API-reference
 ##### Define pipeline
 - `task`: `Tasks.auto_speech_recognition`
@@ -94,6 +110,8 @@ FunASR also offer recipes [egs_modelscope/asr/TEMPLATE/infer.sh](https://github.
     - `njob`: only used for CPU inference (`gpu_inference`=`false`), `64` (Default), the number of jobs for CPU decoding
     - `checkpoint_dir`: only used for infer finetuned models, the path dir of finetuned models
     - `checkpoint_name`: only used for infer finetuned models, `valid.cer_ctc.ave.pb` (Default), which checkpoint is used to infer
+    - `decoding_mode`: `normal` (Default), decoding mode for UniASR model(fast、normal、offline)
+    - `hotword_txt`: `None` (Default), hotword file for contextual paraformer model(the hotword file name ends with .txt")
 
 - Decode with multi GPUs:
 ```shell
