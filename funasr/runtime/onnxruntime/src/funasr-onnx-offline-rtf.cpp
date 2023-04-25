@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
     if(model_path.find(WAV_SCP)!=model_path.end()){
         ifstream in(model_path.at(WAV_SCP));
         if (!in.is_open()) {
-            LOG(ERROR) << ("Failed to open file: %s", model_path.at(WAV_SCP));
+            LOG(ERROR) << "Failed to open file: " << model_path.at(WAV_SCP);
             return 0;
         }
         string line;

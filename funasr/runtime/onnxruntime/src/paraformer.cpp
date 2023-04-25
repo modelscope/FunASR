@@ -147,6 +147,10 @@ vector<float> Paraformer::FbankKaldi(float sample_rate, const float* waves, int 
 void Paraformer::LoadCmvn(const char *filename)
 {
     ifstream cmvn_stream(filename);
+    if (!cmvn_stream.is_open()) {
+        LOG(ERROR) << "Failed to open file: " << filename;
+        exit(0);
+    }
     string line;
 
     while (getline(cmvn_stream, line)) {
