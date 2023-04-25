@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Introduction &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            FunASR
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../docker.html">Docker</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Academic Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../academic_recipe/asr_recipe.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../academic_recipe/punc_recipe.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../academic_recipe/vad_recipe.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../academic_recipe/sv_recipe.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../academic_recipe/sd_recipe.html">Speaker Diarization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">ModelScope Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modelscope_pipeline/quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modelscope_pipeline/asr_pipeline.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modelscope_pipeline/vad_pipeline.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modelscope_pipeline/punc_pipeline.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modelscope_pipeline/tp_pipeline.html">Timestamp Prediction (FA)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modelscope_pipeline/sv_pipeline.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modelscope_pipeline/sd_pipeline.html">Speaker Diarization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Zoo</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modelscope_models.html">Pretrained Models on ModelScope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../huggingface_models.html">Pretrained Models on Huggingface</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Runtime and Service</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/export.html">Export models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/onnxruntime_python.html">ONNXRuntime-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/onnxruntime_cpp.html">ONNXRuntime-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/libtorch_python.html">Libtorch-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/grpc_python.html">Using funasr with grpc-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/grpc_cpp.html">Using funasr with grpc-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/websocket_python.html">Using funasr with websocket</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark and Leadboard</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../benchmark/benchmark_onnx.html">CPU Benchmark (ONNX-python)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmark/benchmark_onnx_cpp.html">CPU Benchmark (ONNX-cpp)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmark/benchmark_libtorch.html">CPU Benchmark (Libtorch)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Funasr Library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../build_task.html">Build custom tasks</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Papers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../papers.html">Papers</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Application</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../application.html">Audio Cut</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../application.html#realtime-speech-recognition">Realtime Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../application.html#audio-chat">Audio Chat</a></li>
+</ul>
+<p class="caption"><span class="caption-text">FQA</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../FQA.html">FQA</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">FunASR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Introduction</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/m2met2/Introduction.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline"></a></h1>
+<div class="section" id="call-for-participation">
+<h2>Call for participation<a class="headerlink" href="#call-for-participation" title="Permalink to this headline"></a></h2>
+<p>Automatic speech recognition (ASR) and speaker diarization have made significant strides in recent years, resulting in a surge of speech technology applications across various domains. However, meetings present unique challenges to speech technologies due to their complex acoustic conditions and diverse speaking styles, including overlapping speech, variable numbers of speakers, far-field signals in large conference rooms, and environmental noise and reverberation.</p>
+<p>Over the years, several challenges have been organized to advance the development of meeting transcription, including the Rich Transcription evaluation and Computational Hearing in Multisource Environments (CHIME) challenges. The latest iteration of the CHIME challenge has a particular focus on distant automatic speech recognition and developing systems that can generalize across various array topologies and application scenarios. However, while progress has been made in English meeting transcription, language differences remain a significant barrier to achieving comparable results in non-English languages, such as Mandarin. The Multimodal Information Based Speech Processing (MISP) and Multi-Channel Multi-Party Meeting Transcription (M2MeT) challenges have been instrumental in advancing Mandarin meeting transcription. The MISP challenge seeks to address the problem of audio-visual distant multi-microphone signal processing in everyday home environments, while the M2MeT challenge focuses on tackling the speech overlap issue in offline meeting rooms.</p>
+<p>The ICASSP2022 M2MeT challenge focuses on meeting scenarios, and it comprises two main tasks: speaker diarization and multi-speaker automatic speech recognition. The former involves identifying who spoke when in the meeting, while the latter aims to transcribe speech from multiple speakers simultaneously, which poses significant technical difficulties due to overlapping speech and acoustic interferences.</p>
+<p>Building on the success of the previous M2MeT challenge, we are excited to propose the M2MeT2.0 challenge as an ASRU2023 challenge special session. In the original M2MeT challenge, the evaluation metric was speaker-independent, which meant that the transcription could be determined, but not the corresponding speaker. To address this limitation and further advance the current multi-talker ASR system towards practicality, the M2MeT2.0 challenge proposes the speaker-attributed ASR task with two sub-tracks: fixed and open training conditions. The speaker-attribute automatic speech recognition (ASR) task aims to tackle the practical and challenging problem of identifying “who spoke what at when”. To facilitate reproducible research in this field, we offer a comprehensive overview of the dataset, rules, evaluation metrics, and baseline systems. Furthermore, we will release a carefully curated test set, comprising approximately 10 hours of audio, according to the timeline. The new test set is designed to enable researchers to validate and compare their models’ performance and advance the state of the art in this area.</p>
+</div>
+<div class="section" id="timeline-aoe-time">
+<h2>Timeline(AOE Time)<a class="headerlink" href="#timeline-aoe-time" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p>$ April~29, 2023: $ Challenge and registration open.</p></li>
+<li><p>$ May~8, 2023: $ Baseline release.</p></li>
+<li><p>$ May~15, 2023: $ Registration deadline, the due date for participants to join the Challenge.</p></li>
+<li><p>$ June~9, 2023: $ Test data release and leaderboard open.</p></li>
+<li><p>$ June~13, 2023: $ Final submission deadline.</p></li>
+<li><p>$ June~19, 2023: $ Evaluation result and ranking release.</p></li>
+<li><p>$ July~3, 2023: $ Deadline for paper submission.</p></li>
+<li><p>$ July~10, 2023: $ Deadline for final paper submission.</p></li>
+<li><p>$ December~12\ to\ 16, 2023: $ ASRU Workshop and challenge session</p></li>
+</ul>
+</div>
+<div class="section" id="guidelines">
+<h2>Guidelines<a class="headerlink" href="#guidelines" title="Permalink to this headline"></a></h2>
+<p>Interested participants, whether from academia or industry, must register for the challenge by completing the Google form below. The deadline for registration is May 15, 2023.</p>
+<p><a class="reference external" href="https://docs.google.com/forms/d/e/1FAIpQLSf77T9vAl7Ym-u5g8gXu18SBofoWRaFShBo26Ym0-HDxHW9PQ/viewform?usp=sf_link">M2MET2.0 Registration</a></p>
+<p>Within three working days, the challenge organizer will send email invitations to eligible teams to participate in the challenge. All qualified teams are required to adhere to the challenge rules, which will be published on the challenge page. Prior to the ranking release time, each participant must submit a system description document detailing their approach and methods. The organizer will select the top three submissions to be included in the ASRU2023 Proceedings.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Speech Lab, Alibaba Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
