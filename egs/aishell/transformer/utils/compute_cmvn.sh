@@ -20,11 +20,13 @@ for n in $(seq $nj); do
 done
 utils/split_scp.pl ${fbankdir}/wav.scp $split_scps || exit 1;
 
-output_dir=${fbankdir}/cmvn
 logdir=${fbankdir}/cmvn/log
 $cmd JOB=1:$nj $logdir/cmvn.JOB.log \
-    python utils/compute_cmvn.py -dim ${feats_dim} -wav_path $split_dir -idx JOB
+    python utils/compute_cmvn.py \
+      --dim ${feats_dim} \
+      --wav_path $split_dir \
+      --idx JOB
 
-#python utils/combine_cmvn_file.py -d ${feats_dim} -c ${output_dir} -n $nj -o $fbankdir
+#python utils/combine_cmvn_file.py -d ${feats_dim} -c ${fbankdir}/cmvn -n $nj -o $fbankdir
 #
 #echo "$0: Succeeded compute global cmvn"
