@@ -51,7 +51,7 @@ model_conf:
 # optimization related
 accum_grad: 1
 grad_clip: 5
-max_epoch: 50
+max_epoch: 150
 val_scheduler_criterion:
     - valid
     - acc
