@@ -210,14 +210,14 @@ pip install onnx onnxruntime <span class="c1"># Optional, for onnx quantization<
 <h3>Export onnx format model<a class="headerlink" href="#export-onnx-format-model" title="Permalink to this headline"></a></h3>
 <div class="section" id="export-model-from-modelscope">
 <h4>Export model from modelscope<a class="headerlink" href="#export-model-from-modelscope" title="Permalink to this headline"></a></h4>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize <span class="nb">false</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="export-model-from-local-path">
 <h4>Export model from local path<a class="headerlink" href="#export-model-from-local-path" title="Permalink to this headline"></a></h4>
 <p>The model’name must be <code class="docutils literal notranslate"><span class="pre">model.pb</span></code></p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model --model-name /mnt/workspace/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model --model-name /mnt/workspace/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize <span class="nb">false</span>
 </pre></div>
 </div>
 </div>
@@ -230,14 +230,14 @@ pip install onnx onnxruntime <span class="c1"># Optional, for onnx quantization<
 <h3>Export torchscripts format model<a class="headerlink" href="#export-torchscripts-format-model" title="Permalink to this headline"></a></h3>
 <div class="section" id="id1">
 <h4>Export model from modelscope<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h4>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type torch
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type torch --quantize <span class="nb">false</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="id2">
 <h4>Export model from local path<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h4>
 <p>The model’name must be <code class="docutils literal notranslate"><span class="pre">model.pb</span></code></p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model --model-name /mnt/workspace/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type torch
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model --model-name /mnt/workspace/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type torch --quantize <span class="nb">false</span>
 </pre></div>
 </div>
 </div>
