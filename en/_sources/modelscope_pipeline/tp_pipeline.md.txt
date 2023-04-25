@@ -1,4 +1,4 @@
-# TIMESTAMP PREDICTION
+# Timestamp Prediction (FA)
 
 ## Inference
 

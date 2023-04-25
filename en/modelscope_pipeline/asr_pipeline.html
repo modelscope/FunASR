@@ -79,7 +79,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="vad_pipeline.html">Voice Activity Detection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="punc_pipeline.html">Punctuation Restoration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tp_pipeline.html">TIMESTAMP PREDICTION</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tp_pipeline.html">Timestamp Prediction (FA)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sv_pipeline.html">Speaker Verification</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sd_pipeline.html">Speaker Diarization</a></li>
 </ul>
@@ -237,7 +237,7 @@ Full code of demo, please ref to <a class="reference external" href="https://git
 <li><p>pcm_path, <code class="docutils literal notranslate"><span class="pre">e.g.</span></code>: asr_example.pcm,</p></li>
 <li><p>audio bytes stream, <code class="docutils literal notranslate"><span class="pre">e.g.</span></code>: bytes data from a microphone</p></li>
 <li><p>audio sample point，<code class="docutils literal notranslate"><span class="pre">e.g.</span></code>: <code class="docutils literal notranslate"><span class="pre">audio,</span> <span class="pre">rate</span> <span class="pre">=</span> <span class="pre">soundfile.read(&quot;asr_example_zh.wav&quot;)</span></code>, the dtype is numpy.ndarray or torch.Tensor</p></li>
-<li><p>wav.scp, kaldi style wav list (<code class="docutils literal notranslate"><span class="pre">wav_id</span> <span class="pre">\t</span> <span class="pre">wav_path``),</span> </code>e.g.`:</p></li>
+<li><p>wav.scp, kaldi style wav list (<code class="docutils literal notranslate"><span class="pre">wav_id</span> <span class="pre">\t</span> <span class="pre">wav_path</span></code>), <code class="docutils literal notranslate"><span class="pre">e.g.</span></code>:</p></li>
 </ul>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>asr_example1  ./audios/asr_example1.wav
 asr_example2  ./audios/asr_example2.wav
