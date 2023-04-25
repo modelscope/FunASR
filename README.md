@@ -18,8 +18,8 @@
 | [**Runtime**](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime)
 | [**Model Zoo**](https://github.com/alibaba-damo-academy/FunASR/blob/main/docs/modelscope_models.md)
 | [**Contact**](#contact)
-| [**M2MET2.0 Guidence_CN**](https://alibaba-damo-academy.github.io/FunASR/m2met2_cn/index.html)
-| [**M2MET2.0 Guidence_EN**](https://alibaba-damo-academy.github.io/FunASR/m2met2/index.html)
+| [**M2MET2.0_CN**](https://alibaba-damo-academy.github.io/FunASR/m2met2_cn/index.html)
+| [**M2MET2.0_EN**](https://alibaba-damo-academy.github.io/FunASR/m2met2/index.html)
 
 ## What's new: 
 ### Multi-Channel Multi-Party Meeting Transcription 2.0 (M2MET2.0) Challenge
