@@ -27,7 +27,7 @@ stop_stage=1
 # feature configuration
 feats_dim=80
 sample_frequency=16000
-nj=32
+nj=64
 speed_perturb="0.9,1.0,1.1"
 
 # data
