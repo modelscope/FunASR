@@ -1,0 +1,308 @@
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: Test: v=0 stderrthreshold=2 logtostderr=0 alsologtostderr=0
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: vlog -1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: vlog 0
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log error
+WARNING: Logging before InitGoogleLogging() is written to STDERR
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog -1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog 0
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if -1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if 0
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if 0 expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if info expr
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if info every 1 expr
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error every 1 expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if 0 every 1 expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: Test: v=0 stderrthreshold=0 logtostderr=0 alsologtostderr=0
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: vlog -1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: vlog 0
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog -1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog 0
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if -1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if 0
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if 0 expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if info expr
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if info every 1 expr
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error every 1 expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if 0 every 1 expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] foo bar 10 3.4
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Plog every 2, iteration 1: __SUCCESS__ [0]
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Log every 3, iteration 1
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Log every 4, iteration 1
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Log if every 5, iteration 1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Log if every 1, iteration 1
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Log if less than 3 every 2, iteration 1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Log if every 1, iteration 2
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Plog every 2, iteration 3: __ENOENT__ [2]
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Log if every 1, iteration 3
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Log if less than 3 every 2, iteration 3
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Log every 3, iteration 4
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Log if every 1, iteration 4
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Plog every 2, iteration 5: __EINTR__ [4]
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Log every 4, iteration 5
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Log if every 1, iteration 5
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Log if every 5, iteration 6
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Log if every 1, iteration 6
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Plog every 2, iteration 7: __ENXIO__ [6]
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Log every 3, iteration 7
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Log if every 1, iteration 7
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Log if every 1, iteration 8
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Plog every 2, iteration 9: __ENOEXEC__ [8]
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Log every 4, iteration 9
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Log if every 1, iteration 9
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Log every 3, iteration 10
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Log if every 1, iteration 10
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if this
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] array
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] const array
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] foo 1000       1000 3e8
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] foo          1
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] inner
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] outer
+no prefix
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: foo bar 10 3.400000
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: array
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: const array
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: ptr __PTRTEST__
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: ptr __NULLP__
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: foo 1000 0000001000 3e8
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: foo 1000
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: foo 1000
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: RAW_LOG ERROR: The Message was too long!
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: RAW_LOG ERROR: The Message was too long!
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: vlog 0 on
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: vlog 1 on
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: vlog 2 on
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: Test: v=0 stderrthreshold=0 logtostderr=0 alsologtostderr=0
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: vlog -1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: vlog 0
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog -1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog 0
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if -1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if 0
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if 0 expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if info expr
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if info every 1 expr
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error every 1 expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if 0 every 1 expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: Test: v=1 stderrthreshold=0 logtostderr=0 alsologtostderr=0
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: vlog -1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: vlog 0
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: vlog 1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog -1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog 0
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog 1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if -1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if 0
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if 1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if 0 expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if info expr
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if info every 1 expr
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error every 1 expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if 0 every 1 expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: Test: v=-1 stderrthreshold=0 logtostderr=0 alsologtostderr=0
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: vlog -1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog -1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if -1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if info expr
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if info every 1 expr
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error every 1 expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: Test: v=0 stderrthreshold=1 logtostderr=0 alsologtostderr=0
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log error
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log error
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error expr
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error every 1 expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: Test: v=0 stderrthreshold=2 logtostderr=0 alsologtostderr=0
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log error
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log error
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error expr
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error every 1 expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: Test: v=0 stderrthreshold=3 logtostderr=0 alsologtostderr=0
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: Test: v=0 stderrthreshold=3 logtostderr=1 alsologtostderr=0
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: vlog -1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: vlog 0
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog -1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog 0
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if -1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if 0
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if 0 expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if info expr
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if info every 1 expr
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error every 1 expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if 0 every 1 expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: Test: v=0 stderrthreshold=3 logtostderr=0 alsologtostderr=1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: vlog -1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: vlog 0
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog -1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog 0
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if -1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if 0
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if 0 expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if info expr
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if info every 1 expr
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error every 1 expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if 0 every 1 expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: Test: v=1 stderrthreshold=1 logtostderr=0 alsologtostderr=0
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log error
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log error
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error expr
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error every 1 expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: Test: v=1 stderrthreshold=3 logtostderr=0 alsologtostderr=1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: vlog -1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: vlog 0
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: vlog 1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: log error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog -1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog 0
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog 1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if -1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if 0
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if 1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if 0 expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if info expr
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if info every 1 expr
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] log_if error every 1 expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] vlog_if 0 every 1 expr
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] LOG_STRING: reported info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] LOG_STRING: reported warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] LOG_STRING: reported error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Captured by LOG_STRING:  LOG_STRING: collected info
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Captured by LOG_STRING:  LOG_STRING: collected warning
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Captured by LOG_STRING:  LOG_STRING: collected error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] LOG_TO_SINK: collected info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] LOG_TO_SINK: collected warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] LOG_TO_SINK: collected error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] LOG_TO_SINK: reported info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] LOG_TO_SINK: reported warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] LOG_TO_SINK: reported error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Captured by LOG_TO_SINK:
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] LOG_TO_SINK: collected info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] LOG_TO_SINK: collected warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] LOG_TO_SINK: collected error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] LOG_TO_SINK_BUT_NOT_TO_LOGFILE: collected info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] LOG_TO_SINK_BUT_NOT_TO_LOGFILE: collected warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] LOG_TO_SINK_BUT_NOT_TO_LOGFILE: collected error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] LOG_TO_STRING: collected info
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Captured by LOG_TO_STRING:  LOG_TO_STRING: collected info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] LOG_TO_STRING: collected warning
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Captured by LOG_TO_STRING:  LOG_TO_STRING: collected warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] LOG_TO_STRING: collected error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Captured by LOG_TO_STRING:  LOG_TO_STRING: collected error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] LOG_TO_STRING: reported info
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] LOG_TO_STRING: reported warning
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] LOG_TO_STRING: reported error
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Message 1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: Buffering
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: Buffered
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: Waiting
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: Sink got a messages
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: Waited
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Sink is sending out a message: IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Message 1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Have 0 left
+EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Message 2
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: Buffering
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: Buffered
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: Waiting
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: Sink got a messages
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: Waited
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Sink is sending out a message: EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Message 2
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Have 0 left
+WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Message 3
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: Buffering
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: Buffered
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: Waiting
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: Sink got a messages
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] RAW: Waited
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Sink is sending out a message: WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Message 3
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Have 0 left
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Sink capture: IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Message 1
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Sink capture: EYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Message 2
+IYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Sink capture: WYEARDATE TIME__ THREADID logging_unittest.cc:LINE] Message 3

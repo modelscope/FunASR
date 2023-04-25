@@ -1,0 +1,62 @@
+---
+tasks:
+  ubuntu1804:
+    name: "Ubuntu 18.04"
+    platform: ubuntu1804
+    build_flags:
+    - "--features=layering_check"
+    - "--copt=-Werror"
+    build_targets:
+    - "//..."
+    test_flags:
+    - "--features=layering_check"
+    - "--copt=-Werror"
+    test_targets:
+    - "//..."
+  macos:
+    name: "macOS: latest Xcode"
+    platform: macos
+    build_flags:
+    - "--features=layering_check"
+    - "--copt=-Werror"
+    build_targets:
+    - "//..."
+    test_flags:
+    - "--features=layering_check"
+    - "--copt=-Werror"
+    test_targets:
+    - "//..."
+  windows-msvc:
+    name: "Windows: MSVC 2017"
+    platform: windows
+    environment:
+      BAZEL_VC: "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\VC"
+    build_flags:
+    - "--features=layering_check"
+    - "--copt=/WX"
+    build_targets:
+    - "//..."
+    test_flags:
+    - "--features=layering_check"
+    - "--copt=/WX"
+    test_targets:
+    - "//..."
+  windows-clang-cl:
+    name: "Windows: Clang"
+    platform: windows
+    environment:
+      BAZEL_VC: "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\VC"
+    build_flags:
+    - "--extra_toolchains=@local_config_cc//:cc-toolchain-x64_windows-clang-cl"
+    - "--extra_execution_platforms=//:x64_windows-clang-cl"
+    - "--compiler=clang-cl"
+    - "--features=layering_check"
+    build_targets:
+    - "//..."
+    test_flags:
+    - "--extra_toolchains=@local_config_cc//:cc-toolchain-x64_windows-clang-cl"
+    - "--extra_execution_platforms=//:x64_windows-clang-cl"
+    - "--compiler=clang-cl"
+    - "--features=layering_check"
+    test_targets:
+    - "//..."

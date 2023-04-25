@@ -1,8 +1,6 @@
 
 #include <fstream>
 #include "precomp.h"
-//#include "glog/logging.h"
-
 
 void FsmnVad::InitVad(const std::string &vad_model, const std::string &vad_cmvn, int vad_sample_rate, int vad_silence_duration, int vad_max_len,
                        float vad_speech_noise_thres) {
@@ -34,10 +32,10 @@ void FsmnVad::ReadModel(const std::string &vad_model) {
         vad_session_ = std::make_shared<Ort::Session>(
                 env_, vad_model.c_str(), session_options_);
     } catch (std::exception const &e) {
-        //LOG(ERROR) << "Error when load onnx model: " << e.what();
+        LOG(ERROR) << "Error when load onnx model: " << e.what();
         exit(0);
     }
-    //LOG(INFO) << "vad onnx:";
+    LOG(INFO) << "vad onnx:";
     GetInputOutputInfo(vad_session_, &vad_in_names_, &vad_out_names_);
 }
 
@@ -59,8 +57,8 @@ void FsmnVad::GetInputOutputInfo(
             shape << j;
             shape << " ";
         }
-        // LOG(INFO) << "\tInput " << i << " : name=" << name.get() << " type=" << type
-        //           << " dims=" << shape.str();
+        LOG(INFO) << "\tInput " << i << " : name=" << name.get() << " type=" << type
+                  << " dims=" << shape.str();
         (*in_names)[i] = name.get();
         name.release();
     }
@@ -78,8 +76,8 @@ void FsmnVad::GetInputOutputInfo(
             shape << j;
             shape << " ";
         }
-        // LOG(INFO) << "\tOutput " << i << " : name=" << name.get() << " type=" << type
-        //           << " dims=" << shape.str();
+        LOG(INFO) << "\tOutput " << i << " : name=" << name.get() << " type=" << type
+                  << " dims=" << shape.str();
         (*out_names)[i] = name.get();
         name.release();
     }
@@ -119,12 +117,12 @@ void FsmnVad::Forward(
     // 4. Onnx infer
     std::vector<Ort::Value> vad_ort_outputs;
     try {
-        // VLOG(3) << "Start infer";
+        VLOG(3) << "Start infer";
         vad_ort_outputs = vad_session_->Run(
                 Ort::RunOptions{nullptr}, vad_in_names_.data(), vad_inputs.data(),
                 vad_inputs.size(), vad_out_names_.data(), vad_out_names_.size());
     } catch (std::exception const &e) {
-        // LOG(ERROR) << e.what();
+        LOG(ERROR) << e.what();
         return;
     }
 

@@ -5,12 +5,28 @@
 #include <win_func.h>
 #endif
 
-#include "libfunasrapi.h"
 #include <sstream>
+#include <glog/logging.h>
+#include "libfunasrapi.h"
+#include "tclap/CmdLine.h"
+
 using namespace std;
 
 int main(int argc, char *argv[])
 {
+    google::InitGoogleLogging(argv[0]);
+
+    TCLAP::CmdLine cmd("Command description message", ' ', "1.0");
+    TCLAP::ValueArg<std::string> nameArg("n", "name", "Name of user", true, "", "string");
+    TCLAP::SwitchArg reverseSwitch("r","reverse","Print name backwards", cmd, false);
+    cmd.add(nameArg);
+
+    cmd.parse(argc, argv);
+    string name = nameArg.getValue();
+
+    printf(name.c_str());
+
+
     if (argc < 6)
     {
         printf("Usage: %s /path/to/model_dir /path/to/wav/file quantize(true or false) use_vad(true or false) use_punc(true or false)\n", argv[0]);

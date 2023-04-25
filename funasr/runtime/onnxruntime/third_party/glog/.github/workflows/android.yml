@@ -1,0 +1,55 @@
+name: Android
+
+on: [push, pull_request]
+
+jobs:
+  build-android:
+    name: NDK-C++${{matrix.std}}-${{matrix.abi}}-${{matrix.build_type}}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    env:
+      NDK_VERSION: 25.0.8775105
+    strategy:
+      fail-fast: true
+      matrix:
+        std: [14, 17, 20]
+        abi: [arm64-v8a, armeabi-v7a, x86_64, x86]
+        build_type: [Debug, Release]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Ninja
+        uses: ashutoshvarma/setup-ninja@master
+        with:
+          version: 1.10.0
+
+      - name: Setup NDK
+        env:
+          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+        run: |
+          echo 'y' | ${{env.ANDROID_SDK_ROOT}}/cmdline-tools/latest/bin/sdkmanager --install 'ndk;${{env.NDK_VERSION}}'
+
+      - name: Configure
+        env:
+          CXXFLAGS: -Wall -Wextra -Wpedantic -Wsign-conversion -Wtautological-compare -Wformat-nonliteral -Wundef -Werror ${{env.CXXFLAGS}}
+        run: |
+          cmake -S . -B build_${{matrix.abi}} \
+                -DCMAKE_ANDROID_API=28 \
+                -DCMAKE_ANDROID_ARCH_ABI=${{matrix.abi}} \
+                -DCMAKE_ANDROID_NDK=/usr/local/lib/android/sdk/ndk/${{env.NDK_VERSION}} \
+                -DCMAKE_ANDROID_STL_TYPE=c++_shared \
+                -DCMAKE_BUILD_TYPE=${{matrix.build_type}} \
+                -DCMAKE_CXX_EXTENSIONS=OFF \
+                -DCMAKE_CXX_STANDARD=${{matrix.std}} \
+                -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+                -DCMAKE_SYSTEM_NAME=Android \
+                -G Ninja \
+                -Werror
+
+      - name: Build
+        run: |
+          cmake --build build_${{matrix.abi}} \
+                --config ${{matrix.build_type}}
