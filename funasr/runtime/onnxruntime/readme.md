@@ -38,35 +38,44 @@ mkdir build && cd build
 cmake  -DCMAKE_BUILD_TYPE=release .. -DONNXRUNTIME_DIR=/path/to/onnxruntime-linux-x64-1.14.0
 make
 ```
-
-[//]: # (### The structure of a qualified onnxruntime package.)
-
-[//]: # (```)
-
-[//]: # (onnxruntime_xxx)
-
-[//]: # (├───include)
-
-[//]: # (└───lib)
-
-[//]: # (```)
-
-## Building for Windows
-
-Ref to win/
-
-
 ## Run the demo
 
 ```shell
-funasr-onnx-offline /path/models_dir /path/wave_file quantize(true or false) use_vad(true or false) use_punc(true or false)
-```
+./funasr-onnx-offline     [--wav-scp <string>] [--wav-path <string>]
+                          [--punc-config <string>] [--punc-model <string>]
+                          --am-config <string> --am-cmvn <string>
+                          --am-model <string> [--vad-config <string>]
+                          [--vad-cmvn <string>] [--vad-model <string>] [--]
+                          [--version] [-h]
+Where:
+   --wav-scp <string>
+     wave scp path
+   --wav-path <string>
+     wave file path
 
-The structure of /path/models_dir
-```
-config.yaml, am.mvn, model.onnx(or model_quant.onnx), (vad_model.onnx, vad.mvn if you use vad), (punc_model.onnx, punc.yaml if you use vad)
-```
+   --punc-config <string>
+     punc config path
+   --punc-model <string>
+     punc model path
 
+   --am-config <string>
+     (required)  am config path
+   --am-cmvn <string>
+     (required)  am cmvn path
+   --am-model <string>
+     (required)  am model path
+
+   --vad-config <string>
+     vad config path
+   --vad-cmvn <string>
+     vad cmvn path
+   --vad-model <string>
+     vad model path
+  
+   Required: --am-config <string> --am-cmvn <string> --am-model <string> 
+   If use vad, please add: [--vad-config <string>] [--vad-cmvn <string>] [--vad-model <string>]
+   If use punc, please add: [--punc-config <string>] [--punc-model <string>] 
+```
 
 ## Acknowledge
 1. This project is maintained by [FunASR community](https://github.com/alibaba-damo-academy/FunASR).
