@@ -1,0 +1,65 @@
+name: "infer_pipeline"
+platform: "ensemble"
+max_batch_size: 64
+
+input [
+  {
+    name: "WAV"
+    data_type: TYPE_FP32
+    dims: [-1]
+  },
+  {
+    name: "WAV_LENS"
+    data_type: TYPE_INT32
+    dims: [1]
+  }
+]
+
+output [
+  {
+    name: "TRANSCRIPTS"
+    data_type: TYPE_STRING
+    dims: [1]
+  }
+]
+
+ensemble_scheduling {
+ step [
+   {
+    model_name: "feature_extractor"
+    model_version: -1
+    input_map {
+      key: "wav"
+      value: "WAV"
+    }
+    input_map {
+      key: "wav_lens"
+      value: "WAV_LENS"
+    }
+    output_map {
+      key: "speech"
+      value: "SPEECH"
+    }
+    output_map {
+      key: "speech_lengths"
+      value: "SPEECH_LENGTHS"
+    }
+   },
+   {
+    model_name: "encoder"
+    model_version: -1
+    input_map {
+      key: "speech"
+      value: "SPEECH"
+    }
+    input_map {
+      key: "speech_lengths"
+      value: "SPEECH_LENGTHS"
+    }
+    output_map {
+      key: "OUTPUT0"
+      value: "TRANSCRIPTS"
+    }
+  }
+ ]
+}

@@ -1,0 +1,54 @@
+name: "feature_extractor"
+backend: "python"
+max_batch_size: 64
+
+parameters [
+  {
+    key: "cmvn_path"
+    value: {
+      string_value: "./model_repo_paraformer_torchscritpts/feature_extractor/am.mvn"
+    }
+  },
+  {
+    key: "config_path"
+    value: {
+      string_value: "./model_repo_paraformer_torchscritpts/feature_extractor/config.yaml"
+    }
+  }
+]
+
+input [
+  {
+    name: "wav"
+    data_type: TYPE_FP32
+    dims: [-1]
+  },
+  {
+    name: "wav_lens"
+    data_type: TYPE_INT32
+    dims: [1]
+  }
+]
+
+output [
+  {
+    name: "speech"
+    data_type: TYPE_FP32
+    dims: [-1, 560]
+  },
+  {
+    name: "speech_lengths"
+    data_type: TYPE_INT32
+    dims: [1]
+  }
+]
+
+dynamic_batching {
+}
+
+instance_group [
+    {
+      count: 1
+      kind: KIND_GPU
+    }
+]
