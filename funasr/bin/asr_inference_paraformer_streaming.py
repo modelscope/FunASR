@@ -206,6 +206,8 @@ class Speech2Text:
             cache_en["tail_chunk"] = True
             feats = cache_en["feats"]
             feats_len = torch.tensor([feats.shape[1]])
+            results = self.infer(feats, feats_len, cache)
+            return results
         else:
             if self.frontend is not None:
                 feats, feats_len = self.frontend.forward(speech, speech_lengths, cache_en["is_final"])
