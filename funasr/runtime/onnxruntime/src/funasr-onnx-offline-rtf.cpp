@@ -59,13 +59,13 @@ void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list,
 
         if(result){
             string msg = FunASRGetResult(result, 0);
-            printf("Thread: %d Result: %s \n", this_thread::get_id(), msg.c_str());
+            LOG(INFO) << "Thread: " << this_thread::get_id() <<" Result: " << msg.c_str();
 
             float snippet_time = FunASRGetRetSnippetTime(result);
             n_total_length += snippet_time;
             FunASRFreeResult(result);
         }else{
-            cout <<"No return data!";
+            LOG(ERROR) << ("No return data!\n");
         }
     }
     {
@@ -87,11 +87,13 @@ void GetValue(TCLAP::ValueArg<std::string>& value_arg, string key, std::map<std:
 
 int main(int argc, char *argv[])
 {
-    //google::InitGoogleLogging(argv[0]);
+    google::InitGoogleLogging(argv[0]);
+    FLAGS_logtostderr = true;
 
-    TCLAP::CmdLine cmd("funasr-onnx-offline", ' ', "1.0");
+    TCLAP::CmdLine cmd("funasr-onnx-offline-rtf", ' ', "1.0");
     TCLAP::ValueArg<std::string> vad_model("", VAD_MODEL_PATH, "vad model path", false, "", "string");
     TCLAP::ValueArg<std::string> vad_cmvn("", VAD_CMVN_PATH, "vad cmvn path", false, "", "string");
+    TCLAP::ValueArg<std::string> vad_config("", VAD_CONFIG_PATH, "vad config path", false, "", "string");
 
     TCLAP::ValueArg<std::string> am_model("", AM_MODEL_PATH, "am model path", false, "", "string");
     TCLAP::ValueArg<std::string> am_cmvn("", AM_CMVN_PATH, "am cmvn path", false, "", "string");
@@ -105,6 +107,7 @@ int main(int argc, char *argv[])
 
     cmd.add(vad_model);
     cmd.add(vad_cmvn);
+    cmd.add(vad_config);
     cmd.add(am_model);
     cmd.add(am_cmvn);
     cmd.add(am_config);
@@ -117,6 +120,7 @@ int main(int argc, char *argv[])
     std::map<std::string, std::string> model_path;
     GetValue(vad_model, VAD_MODEL_PATH, model_path);
     GetValue(vad_cmvn, VAD_CMVN_PATH, model_path);
+    GetValue(vad_config, VAD_CONFIG_PATH, model_path);
     GetValue(am_model, AM_MODEL_PATH, model_path);
     GetValue(am_cmvn, AM_CMVN_PATH, model_path);
     GetValue(am_config, AM_CONFIG_PATH, model_path);
@@ -130,14 +134,14 @@ int main(int argc, char *argv[])
 
     if (!asr_handle)
     {
-        LOG(ERROR) << ("Cannot load ASR Model from: %s, there must be files model.onnx and vocab.txt", argv[1]);
+        LOG(ERROR) << "FunASR init failed";
         exit(-1);
     }
 
     gettimeofday(&end, NULL);
     long seconds = (end.tv_sec - start.tv_sec);
     long modle_init_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
-    printf("Model initialization takes %lfs.", (double)modle_init_micros / 1000000);
+    LOG(INFO) << "Model initialization takes " << (double)modle_init_micros / 1000000 << " s";
 
     // read wav_scp
     vector<string> wav_list;
@@ -174,10 +178,10 @@ int main(int argc, char *argv[])
         thread.join();
     }
 
-    printf("total_time_wav %ld ms.\n", (long)(total_length * 1000));
-    printf("total_time_comput %ld ms.\n", total_time / 1000);
-    printf("total_rtf %05lf .\n", (double)total_time/ (total_length*1000000));
-    printf("speedup %05lf .\n", 1.0/((double)total_time/ (total_length*1000000)));
+    LOG(INFO) << "total_time_wav " << (long)(total_length * 1000) << " ms";
+    LOG(INFO) << "total_time_comput " << total_time / 1000 << " ms";
+    LOG(INFO) << "total_rtf " << (double)total_time/ (total_length*1000000);
+    LOG(INFO) << "speedup " << 1.0/((double)total_time/ (total_length*1000000));
 
     FunASRUninit(asr_handle);
     return 0;

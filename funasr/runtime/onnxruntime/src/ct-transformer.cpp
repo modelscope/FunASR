@@ -40,7 +40,6 @@ void CTTransformer::InitPunc(const std::string &punc_model, const std::string &p
 	m_tokenizer.OpenYaml(punc_config.c_str());
 }
 
-
 CTTransformer::~CTTransformer()
 {
 }
@@ -180,10 +179,9 @@ vector<int> CTTransformer::Infer(vector<int64_t> input_data)
     }
     catch (std::exception const &e)
     {
-        printf(e.what());
+        LOG(ERROR) << "Error when run punc onnx forword: " << (e.what());
+        exit(0);
     }
     return punction;
 }
-
-
 

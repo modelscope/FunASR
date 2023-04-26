@@ -16,16 +16,18 @@ Paraformer::Paraformer(std::map<std::string, std::string>& model_path,int thread
         use_vad = true;
         string vad_model_path;
         string vad_cmvn_path;
+        string vad_config_path;
     
         try{
             vad_model_path = model_path.at(VAD_MODEL_PATH);
             vad_cmvn_path = model_path.at(VAD_CMVN_PATH);
+            vad_config_path = model_path.at(VAD_CONFIG_PATH);
         }catch(const out_of_range& e){
-            LOG(ERROR) << "Error when read "<< VAD_CMVN_PATH <<" :" << e.what();
+            LOG(ERROR) << "Error when read "<< VAD_CMVN_PATH << " or " << VAD_CONFIG_PATH <<" :" << e.what();
             exit(0);
         }
         vad_handle = make_unique<FsmnVad>();
-        vad_handle->InitVad(vad_model_path, vad_cmvn_path, MODEL_SAMPLE_RATE, VAD_MAX_LEN, VAD_SILENCE_DYRATION, VAD_SPEECH_NOISE_THRES);
+        vad_handle->InitVad(vad_model_path, vad_cmvn_path, vad_config_path);
     }
 
     // AM model

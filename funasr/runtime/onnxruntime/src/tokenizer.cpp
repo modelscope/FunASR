@@ -29,15 +29,20 @@ void CTokenizer::ReadYaml(const YAML::Node& node)
 		}
 	}
 	if (node.IsScalar()) {//�Ǳ�����
-		cout << node.as<string>() << endl;
+		LOG(INFO) << node.as<string>();
 	}
 }
 
 bool CTokenizer::OpenYaml(const char* sz_yamlfile)
 {
-	YAML::Node m_Config = YAML::LoadFile(sz_yamlfile);
-	if (m_Config.IsNull())
-		return false;
+	YAML::Node m_Config;
+	try{
+		m_Config = YAML::LoadFile(sz_yamlfile);
+	}catch(exception const &e){
+        LOG(INFO) << "Error loading file, yaml file error or not exist.";
+        exit(-1);
+    }
+
 	try
 	{
 		auto Tokens = m_Config["token_list"];
@@ -66,7 +71,7 @@ bool CTokenizer::OpenYaml(const char* sz_yamlfile)
 		}
 	}
 	catch (YAML::BadFile& e) {
-		std::cout << "read error!" << std::endl;
+		LOG(ERROR) << "Read error!";
 		return  false;
 	}
 	m_ready = true;
