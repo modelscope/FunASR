@@ -379,7 +379,10 @@ class SANMEncoder(AbsEncoder):
             xs_pad = xs_pad
         else:
             xs_pad = self.embed(xs_pad, cache)
-        xs_pad = self._add_overlap_chunk(xs_pad, cache)
+        if cache["tail_chunk"]:
+            xs_pad = cache["feats"]
+        else:
+            xs_pad = self._add_overlap_chunk(xs_pad, cache)
         encoder_outs = self.encoders0(xs_pad, None, None, None, None)
         xs_pad, masks = encoder_outs[0], encoder_outs[1]
         intermediate_outs = []
