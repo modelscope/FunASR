@@ -1,3 +1,8 @@
+/**
+ * Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+ * MIT License  (https://opensource.org/licenses/MIT)
+*/
+
 #pragma once
 
 
@@ -41,10 +46,13 @@ namespace paraformer {
         vector<string> m_strInputNames, m_strOutputNames;
         vector<const char*> m_szInputNames;
         vector<const char*> m_szOutputNames;
+        bool use_vad=false;
+        bool use_punc=false;
 
     public:
-        Paraformer(const char* path, int thread_num=0, bool quantize=false, bool use_vad=false, bool use_punc=false);
+        Paraformer(std::map<std::string, std::string>& model_path, int thread_num=0);
         ~Paraformer();
+        void InitAM(const std::string &am_model, const std::string &am_cmvn, const std::string &am_config, int thread_num);
         void Reset();
         vector<float> FbankKaldi(float sample_rate, const float* waves, int len);
         string ForwardChunk(float* din, int len, int flag);
@@ -52,6 +60,8 @@ namespace paraformer {
         string Rescoring();
         std::vector<std::vector<int>> VadSeg(std::vector<float>& pcm_data);
         string AddPunc(const char* sz_input);
+        bool UseVad(){return use_vad;};
+        bool UsePunc(){return use_punc;}; 
     };
 
 } // namespace paraformer

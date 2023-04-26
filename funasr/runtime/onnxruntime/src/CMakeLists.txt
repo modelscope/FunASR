@@ -8,7 +8,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 add_library(funasr ${files})
 
 if(WIN32)
-    set(EXTRA_LIBS pthread yaml-cpp csrc)
+    set(EXTRA_LIBS pthread yaml-cpp csrc glog)
     if(CMAKE_CL_64)
         target_link_directories(funasr PUBLIC ${CMAKE_SOURCE_DIR}/win/lib/x64)
     else()
@@ -18,7 +18,7 @@ if(WIN32)
     
     target_compile_definitions(funasr PUBLIC -D_FUNASR_API_EXPORT)
 else()
-    set(EXTRA_LIBS pthread yaml-cpp csrc)
+    set(EXTRA_LIBS pthread yaml-cpp csrc glog )
     include_directories(${ONNXRUNTIME_DIR}/include)
 endif()
 

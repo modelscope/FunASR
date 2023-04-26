@@ -21,10 +21,11 @@ using namespace std;
 // third part
 #include "onnxruntime_run_options_config_keys.h"
 #include "onnxruntime_cxx_api.h"
-#include "kaldi-native-fbank/csrc/feature-fbank.h"
-#include "kaldi-native-fbank/csrc/online-feature.h"
+#include <kaldi-native-fbank/csrc/feature-fbank.h>
+#include <kaldi-native-fbank/csrc/online-feature.h>
 
 // mine
+#include <glog/logging.h>
 #include "common-struct.h"
 #include "com-define.h"
 #include "commonfunc.h"
