@@ -202,9 +202,9 @@ class Speech2Text:
         assert check_argument_types()
         results = []
         cache_en = cache["encoder"]
-        if speech.shape[1] < 16 * 60 and cache["is_final"]:
-            cache["last_chunk"] = True
-            feats = cache["feats"]
+        if speech.shape[1] < 16 * 60 and cache_en["is_final"]:
+            cache_en["last_chunk"] = True
+            feats = cache_en["feats"]
             feats_len = torch.tensor([feats.shape[1]])
         else:
             if self.frontend is not None:
