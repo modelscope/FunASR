@@ -13,6 +13,7 @@ from typeguard import check_argument_types
 import logging
 
 from funasr.models.ctc import CTC
+from funasr.models.encoder.abs_encoder import AbsEncoder
 from funasr.modules.attention import MultiHeadedAttention
 from funasr.modules.embedding import PositionalEncoding
 from funasr.modules.layer_norm import LayerNorm
@@ -36,7 +37,7 @@ from funasr.modules.subsampling import TooShortUttError
 from funasr.modules.subsampling import check_short_utt
 
 
-class EncoderLayer(nn.Module):
+class EncoderLayer(AbsEncoder):
     """Encoder layer module.
 
     Args:

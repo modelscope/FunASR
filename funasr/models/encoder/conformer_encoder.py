@@ -19,6 +19,7 @@ from funasr.modules.attention import (
     RelPositionMultiHeadedAttention,  # noqa: H301
     LegacyRelPositionMultiHeadedAttention,  # noqa: H301
 )
+from funasr.models.encoder.abs_encoder import AbsEncoder
 from funasr.modules.embedding import (
     PositionalEncoding,  # noqa: H301
     ScaledPositionalEncoding,  # noqa: H301
@@ -41,7 +42,8 @@ from funasr.modules.subsampling import Conv2dSubsampling8
 from funasr.modules.subsampling import TooShortUttError
 from funasr.modules.subsampling import check_short_utt
 from funasr.modules.subsampling import Conv2dSubsamplingPad
-class ConvolutionModule(nn.Module):
+
+class ConvolutionModule(AbsEncoder):
     """ConvolutionModule in Conformer model.
 
     Args:

@@ -3,15 +3,14 @@ from typing import Optional
 from typing import Sequence
 from typing import Union
 
-import torch.nn
-
+from funasr.models.specaug.abs_specaug import AbsSpecAug
 from funasr.layers.mask_along_axis import MaskAlongAxis
 from funasr.layers.mask_along_axis import MaskAlongAxisVariableMaxWidth
 from funasr.layers.mask_along_axis import MaskAlongAxisLFR
 from funasr.layers.time_warp import TimeWarp
 
 
-class SpecAug(torch.nn.Module):
+class SpecAug(AbsSpecAug):
     """Implementation of SpecAug.
 
     Reference:
