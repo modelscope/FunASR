@@ -5,5 +5,5 @@ If you have any questions about M2MET2.0 challenge, please contact us by
 
 |                Wechat group                |
 |:------------------------------------------:|
-<!-- | <img src="images/wechat.png" width="300"/> | -->
+| <img src="images/qrcode.png" width="300"/> | 
 
