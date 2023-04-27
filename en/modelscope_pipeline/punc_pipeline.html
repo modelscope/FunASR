@@ -160,25 +160,25 @@ The modelscope pipeline supports all the models in <a class="reference external"
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
 <span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
 
-<span class="n">inference_pipline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
+<span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
     <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">punctuation</span><span class="p">,</span>
     <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch&#39;</span><span class="p">,</span>
     <span class="n">model_revision</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 
-<span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipline</span><span class="p">(</span><span class="n">text_in</span><span class="o">=</span><span class="s1">&#39;example/punc_example.txt&#39;</span><span class="p">)</span>
+<span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">text_in</span><span class="o">=</span><span class="s1">&#39;example/punc_example.txt&#39;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">rec_result</span><span class="p">)</span>
 </pre></div>
 </div>
 <ul class="simple">
 <li><p>text二进制数据，例如：用户直接从文件里读出bytes数据</p></li>
 </ul>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipline</span><span class="p">(</span><span class="n">text_in</span><span class="o">=</span><span class="s1">&#39;我们都是木头人不会讲话不会动&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">text_in</span><span class="o">=</span><span class="s1">&#39;我们都是木头人不会讲话不会动&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <ul class="simple">
 <li><p>text文件url，例如：https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_text/punc_example.txt</p></li>
 </ul>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipline</span><span class="p">(</span><span class="n">text_in</span><span class="o">=</span><span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_text/punc_example.txt&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">text_in</span><span class="o">=</span><span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_text/punc_example.txt&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

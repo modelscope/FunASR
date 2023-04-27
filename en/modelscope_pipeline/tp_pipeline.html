@@ -155,12 +155,12 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
 <span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
 
-<span class="n">inference_pipline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
+<span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
     <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">speech_timestamp</span><span class="p">,</span>
     <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_timestamp_prediction-v1-16k-offline&#39;</span><span class="p">,</span>
     <span class="n">output_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 
-<span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipline</span><span class="p">(</span>
+<span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span>
     <span class="n">audio_in</span><span class="o">=</span><span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_timestamps.wav&#39;</span><span class="p">,</span>
     <span class="n">text_in</span><span class="o">=</span><span class="s1">&#39;一 个 东 太 平 洋 国 家 为 什 么 跑 到 西 太 平 洋 来 了 呢&#39;</span><span class="p">,)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">rec_result</span><span class="p">)</span>
