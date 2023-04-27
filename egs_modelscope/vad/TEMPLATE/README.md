@@ -86,7 +86,7 @@ FunASR also offer recipes [egs_modelscope/vad/TEMPLATE/infer.sh](https://github.
     --model "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch" \
     --data_dir "./data/test" \
     --output_dir "./results" \
-    --batch_size 64 \
+    --batch_size 1 \
     --gpu_inference true \
     --gpuid_list "0,1"
 ```
@@ -97,7 +97,7 @@ FunASR also offer recipes [egs_modelscope/vad/TEMPLATE/infer.sh](https://github.
     --data_dir "./data/test" \
     --output_dir "./results" \
     --gpu_inference false \
-    --njob 64
+    --njob 1
 ```
 
 ## Finetune with pipeline
