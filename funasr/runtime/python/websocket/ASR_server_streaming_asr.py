@@ -89,6 +89,8 @@ async def ws_serve(websocket, path):
     websocket.speek_online = Queue()
     ss_online = threading.Thread(target=asr_online, args=(websocket,))
     ss_online.start()
+    ss_ws_send = threading.Thread(target=ws_send, args=(websocket,))
+    ss_ws_send.start()
     try:
         async for message in websocket:
             message = json.loads(message)
@@ -104,9 +106,9 @@ async def ws_serve(websocket, path):
                 websocket.speek_online.put(audio_in)
                 frames_online = []
 
-            if not websocket.send_msg.empty():
-                await websocket.send(websocket.send_msg.get())
-                websocket.send_msg.task_done()
+            # if not websocket.send_msg.empty():
+            #     await websocket.send(websocket.send_msg.get())
+            #     websocket.send_msg.task_done()
 
      
     except websockets.ConnectionClosed:
@@ -119,11 +121,20 @@ async def ws_serve(websocket, path):
  
 
 
-def asr_online(websocket):  # ASR推理
+def ws_send(websocket):  # ASR推理
     global inference_pipeline_asr_online
     global websocket_users
     while websocket in websocket_users:
         if not websocket.speek_online.empty():
+            await websocket.send(websocket.send_msg.get())
+            websocket.send_msg.task_done()
+        time.sleep(0.005)
+
+
+def asr_online(websocket):  # ASR推理
+    global websocket_users
+    while websocket in websocket_users:
+        if not websocket.send_msg.empty():
             audio_in = websocket.speek_online.get()
             websocket.speek_online.task_done()
             if len(audio_in) > 0:
@@ -131,10 +142,11 @@ def asr_online(websocket):  # ASR推理
                 audio_in = load_bytes(audio_in)
                 # print(audio_in.shape)
                 print(websocket.param_dict_asr_online["is_final"])
-                rec_result = inference_pipeline_asr_online(audio_in=audio_in, param_dict=websocket.param_dict_asr_online)
+                rec_result = inference_pipeline_asr_online(audio_in=audio_in,
+                                                           param_dict=websocket.param_dict_asr_online)
                 if websocket.param_dict_asr_online["is_final"]:
                     websocket.param_dict_asr_online["cache"] = dict()
-
+                
                 print(rec_result)
                 if "text" in rec_result:
                     if rec_result["text"] != "sil" and rec_result["text"] != "waiting_for_more_voice":
@@ -143,7 +155,7 @@ def asr_online(websocket):  # ASR推理
         
         time.sleep(0.005)
 
- 
+
 start_server = websockets.serve(ws_serve, args.host, args.port, subprotocols=["binary"], ping_interval=None)
 asyncio.get_event_loop().run_until_complete(start_server)
 asyncio.get_event_loop().run_forever()

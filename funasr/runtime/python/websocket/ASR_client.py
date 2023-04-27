@@ -59,7 +59,7 @@ async def record_microphone():
         voices.put(message)
         #print(voices.qsize())
 
-        await asyncio.sleep(0.01)
+        await asyncio.sleep(0.005)
 
 # 其他函数可以通过调用send(data)来发送数据，例如：
 async def record_from_scp():
@@ -116,8 +116,8 @@ async def ws_send():
                 await websocket.send(data) # 通过ws对象发送数据
             except Exception as e:
                 print('Exception occurred:', e)
-            await asyncio.sleep(0.01)
-        await asyncio.sleep(0.01)
+            await asyncio.sleep(0.005)
+        await asyncio.sleep(0.005)
 
 
 
