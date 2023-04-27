@@ -153,8 +153,7 @@ int AudioFrame::GetLen()
 
 int AudioFrame::Disp()
 {
-    printf("not imp!!!!\n");
-
+    LOG(ERROR) << "Not imp!!!!";
     return 0;
 };
 
@@ -187,8 +186,7 @@ Audio::~Audio()
 
 void Audio::Disp()
 {
-    printf("Audio time is %f s. len is %d\n", (float)speech_len / MODEL_SAMPLE_RATE,
-           speech_len);
+    LOG(INFO) << "Audio time is " << (float)speech_len / MODEL_SAMPLE_RATE << " s. len is " << speech_len;
 }
 
 float Audio::GetTimeLen()
@@ -199,19 +197,15 @@ float Audio::GetTimeLen()
 void Audio::WavResample(int32_t sampling_rate, const float *waveform,
                           int32_t n)
 {
-    printf(
-          "Creating a resampler:\n"
-          "   in_sample_rate: %d\n"
-          "   output_sample_rate: %d\n",
-          sampling_rate, static_cast<int32_t>(MODEL_SAMPLE_RATE));
+    LOG(INFO) << "Creating a resampler:\n"
+              << "   in_sample_rate: "<< sampling_rate << "\n"
+              << "   output_sample_rate: " << static_cast<int32_t>(MODEL_SAMPLE_RATE);
     float min_freq =
         std::min<int32_t>(sampling_rate, MODEL_SAMPLE_RATE);
     float lowpass_cutoff = 0.99 * 0.5 * min_freq;
 
     int32_t lowpass_filter_width = 6;
-    //FIXME
-    //auto resampler = new LinearResample(
-    //      sampling_rate, model_sample_rate, lowpass_cutoff, lowpass_filter_width);
+
     auto resampler = std::make_unique<LinearResample>(
           sampling_rate, MODEL_SAMPLE_RATE, lowpass_cutoff, lowpass_filter_width);
     std::vector<float> samples;
@@ -240,7 +234,7 @@ bool Audio::LoadWav(const char *filename, int32_t* sampling_rate)
     std::ifstream is(filename, std::ifstream::binary);
     is.read(reinterpret_cast<char *>(&header), sizeof(header));
     if(!is){
-        fprintf(stderr, "Failed to read %s\n", filename);
+        LOG(ERROR) << "Failed to read " << filename;
         return false;
     }
     
@@ -255,7 +249,7 @@ bool Audio::LoadWav(const char *filename, int32_t* sampling_rate)
         memset(speech_buff, 0, sizeof(int16_t) * speech_len);
         is.read(reinterpret_cast<char *>(speech_buff), header.subchunk2_size);
         if (!is) {
-            fprintf(stderr, "Failed to read %s\n", filename);
+            LOG(ERROR) << "Failed to read " << filename;
             return false;
         }
         speech_data = (float*)malloc(sizeof(float) * speech_len);
@@ -386,6 +380,7 @@ bool Audio::LoadPcmwav(const char* filename, int32_t* sampling_rate)
     FILE* fp;
     fp = fopen(filename, "rb");
     if (fp == nullptr)
+        LOG(ERROR) << "Failed to read " << filename;
         return false;
     fseek(fp, 0, SEEK_END);
     uint32_t n_file_len = ftell(fp);

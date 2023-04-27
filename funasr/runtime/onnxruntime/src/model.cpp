@@ -1,8 +1,8 @@
 #include "precomp.h"
 
-Model *CreateModel(const char *path, int thread_num, bool quantize, bool use_vad, bool use_punc)
+Model *CreateModel(std::map<std::string, std::string>& model_path, int thread_num)
 {
     Model *mm;
-    mm = new paraformer::Paraformer(path, thread_num, quantize, use_vad, use_punc);
+    mm = new paraformer::Paraformer(model_path, thread_num);
     return mm;
 }

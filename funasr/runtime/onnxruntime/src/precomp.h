@@ -25,6 +25,7 @@ using namespace std;
 #include "kaldi-native-fbank/csrc/online-feature.h"
 
 // mine
+#include <glog/logging.h>
 #include "common-struct.h"
 #include "com-define.h"
 #include "commonfunc.h"
@@ -39,6 +40,7 @@ using namespace std;
 #include "util.h"
 #include "resample.h"
 #include "model.h"
+//#include "vad-model.h"
 #include "paraformer.h"
 #include "libfunasrapi.h"
 
