@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+import os
 import time
 import websockets
 import asyncio
@@ -18,29 +19,36 @@ parser.add_argument("--port",
                     required=False,
                     help="grpc server port")
 parser.add_argument("--chunk_size",
+                    type=str,
+                    default="5, 10, 5",
+                    help="chunk")
+parser.add_argument("--chunk_interval",
                     type=int,
-                    default=300,
-                    help="ms")
+                    default=10,
+                    help="chunk")
 parser.add_argument("--audio_in",
                     type=str,
                     default=None,
                     help="audio_in")
 
 args = parser.parse_args()
+args.chunk_size = [int(x) for x in args.chunk_size.split(",")]
 
 # voices = asyncio.Queue()
 from queue import Queue
 voices = Queue()
-    
+
 # 其他函数可以通过调用send(data)来发送数据，例如：
 async def record_microphone():
+    is_finished = False
     import pyaudio
     #print("2")
     global voices 
     FORMAT = pyaudio.paInt16
     CHANNELS = 1
     RATE = 16000
-    CHUNK = int(RATE / 1000 * args.chunk_size)
+    chunk_size = 60*args.chunk_size[1]/args.chunk_interval
+    CHUNK = int(RATE / 1000 * chunk_size)
 
     p = pyaudio.PyAudio()
 
@@ -54,7 +62,7 @@ async def record_microphone():
 
         data = stream.read(CHUNK)
         data = data.decode('ISO-8859-1')
-        message = json.dumps({"chunk": args.chunk_size, "is_speaking": is_speaking, "audio": data})
+        message = json.dumps({"chunk_size": args.chunk_size, "chunk_interval": args.chunk_interval, "audio": data, "is_speaking": is_speaking, "is_finished": is_finished})
         
         voices.put(message)
         #print(voices.qsize())
@@ -65,6 +73,7 @@ async def record_microphone():
 async def record_from_scp():
     import wave
     global voices
+    is_finished = False
     if args.audio_in.endswith(".scp"):
         f_scp = open(args.audio_in)
         wavs = f_scp.readlines()
@@ -86,9 +95,10 @@ async def record_from_scp():
 
         # 将音频帧数据转换为字节类型的数据
         audio_bytes = bytes(frames)
-        stride = int(args.chunk_size/1000*16000*2)
+        # stride = int(args.chunk_size/1000*16000*2)
+        stride = int(60*args.chunk_size[1]/args.chunk_interval/1000*16000*2)
         chunk_num = (len(audio_bytes)-1)//stride + 1
-        print(stride)
+        # print(stride)
         is_speaking = True
         for i in range(chunk_num):
             if i == chunk_num-1:
@@ -96,13 +106,16 @@ async def record_from_scp():
             beg = i*stride
             data = audio_bytes[beg:beg+stride]
             data = data.decode('ISO-8859-1')
-            message = json.dumps({"chunk": args.chunk_size, "is_speaking": is_speaking, "audio": data})
+            message = json.dumps({"chunk_size": args.chunk_size, "chunk_interval": args.chunk_interval, "is_speaking": is_speaking, "audio": data, "is_finished": is_finished})
             voices.put(message)
             # print("data_chunk: ", len(data_chunk))
             # print(voices.qsize())
         
-            await asyncio.sleep(args.chunk_size/1000)
-     
+            await asyncio.sleep(60*args.chunk_size[1]/args.chunk_interval/1000)
+
+    is_finished = True
+    message = json.dumps({"is_finished": is_finished})
+    voices.put(message)
 
 async def ws_send():
     global voices
@@ -123,14 +136,31 @@ async def ws_send():
 
 async def message():
     global websocket
+    text_print = ""
+    while True:
+        try:
+            meg = await websocket.recv()
+            meg = json.loads(meg)
+            # print(meg, end = '')
+            # print("\r")
+            text = meg["text"][0]
+            text_print += text
+            text_print = text_print[-55:]
+            os.system('clear')
+            print("\r"+text_print)
+        except Exception as e:
+            print("Exception:", e)
+
+
+async def print_messge():
+    global websocket
     while True:
         try:
             meg = await websocket.recv()
             meg = json.loads(meg)
             print(meg)
         except Exception as e:
-            print("Exception:", e)          
-        
+            print("Exception:", e)
 
 
 async def ws_client():
