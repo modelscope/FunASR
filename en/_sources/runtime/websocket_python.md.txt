@@ -1,4 +1,4 @@
-# Using funasr with websocket
+# Service with websocket-python
 We can send streaming audio data to server in real-time with grpc client every 300 ms e.g., and get transcribed text when stop speaking.
 The audio data is in streaming, the asr inference process is in offline.
 
