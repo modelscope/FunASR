@@ -52,15 +52,15 @@ print(rec_result_all)
 Full code of demo, please ref to [demo](https://github.com/alibaba-damo-academy/FunASR/discussions/238)
 
 
-#### API-reference
-##### Define pipeline
+### API-reference
+#### Define pipeline
 - `task`: `Tasks.punctuation`
 - `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
 - `ngpu`: `1` (Default), decoding on GPU. If ngpu=0, decoding on CPU
 - `output_dir`: `None` (Default), the output path of results if set
 - `model_revision`: `None` (Default), setting the model version
 
-##### Infer pipeline
+#### Infer pipeline
 - `text_in`: the input to decode, which could be:
   - text bytes, `e.g.`: "我们都是木头人不会讲话不会动"
   - text file, `e.g.`: example/punc_example.txt

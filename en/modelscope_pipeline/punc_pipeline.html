@@ -63,7 +63,11 @@
 <li class="toctree-l3"><a class="reference internal" href="#quick-start">Quick start</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#ct-transformer-model">CT-Transformer model</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#ct-transformer-realtime-model">CT-Transformer Realtime model</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#api-reference">API-reference</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#api-reference">API-reference</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#define-pipeline">Define pipeline</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#infer-pipeline">Infer pipeline</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#inference-with-multi-thread-cpus-or-multi-gpus">Inference with multi-thread CPUs or multi GPUs</a></li>
@@ -206,10 +210,11 @@ The modelscope pipeline supports all the models in <a class="reference external"
 </div>
 <p>Full code of demo, please ref to <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/discussions/238">demo</a></p>
 </div>
+</div>
 <div class="section" id="api-reference">
-<h4>API-reference<a class="headerlink" href="#api-reference" title="Permalink to this headline"></a></h4>
+<h3>API-reference<a class="headerlink" href="#api-reference" title="Permalink to this headline"></a></h3>
 <div class="section" id="define-pipeline">
-<h5>Define pipeline<a class="headerlink" href="#define-pipeline" title="Permalink to this headline"></a></h5>
+<h4>Define pipeline<a class="headerlink" href="#define-pipeline" title="Permalink to this headline"></a></h4>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">task</span></code>: <code class="docutils literal notranslate"><span class="pre">Tasks.punctuation</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">model</span></code>: model name in <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope">model zoo</a>, or model path in local disk</p></li>
@@ -219,7 +224,7 @@ The modelscope pipeline supports all the models in <a class="reference external"
 </ul>
 </div>
 <div class="section" id="infer-pipeline">
-<h5>Infer pipeline<a class="headerlink" href="#infer-pipeline" title="Permalink to this headline"></a></h5>
+<h4>Infer pipeline<a class="headerlink" href="#infer-pipeline" title="Permalink to this headline"></a></h4>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">text_in</span></code>: the input to decode, which could be:</p>
 <ul>
@@ -230,7 +235,6 @@ In this case of <code class="docutils literal notranslate"><span class="pre">tex
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">param_dict</span></code>: reserving the cache which is necessary in realtime mode.</p></li>
 </ul>
-</div>
 </div>
 </div>
 <div class="section" id="inference-with-multi-thread-cpus-or-multi-gpus">
