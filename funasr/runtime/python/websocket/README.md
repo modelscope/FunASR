@@ -5,7 +5,7 @@ The audio data is in streaming, the asr inference process is in offline.
 
 ## For the Server
 
-Install the modelscope and funasr
+### Install the modelscope and funasr
 
 ```shell
 pip install -U modelscope funasr
@@ -14,18 +14,34 @@ pip install -U modelscope funasr
 git clone https://github.com/alibaba/FunASR.git && cd FunASR
 ```
 
-Install the requirements for server
+### Install the requirements for server
 
 ```shell
 cd funasr/runtime/python/websocket
 pip install -r requirements_server.txt
 ```
 
-Start server
+### Start server
+#### ASR offline server
 
+[//]: # (```shell)
+
+[//]: # (python ws_server_online.py --host "0.0.0.0" --port 10095 --asr_model "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch")
+
+[//]: # (```)
+#### ASR streaming server
 ```shell
-python ASR_server.py --host "0.0.0.0" --port 10095 --asr_model "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
+python ws_server_online.py --host "0.0.0.0" --port 10095
 ```
+#### 
+
+#### ASR offline/online 2pass server
+
+[//]: # (```shell)
+
+[//]: # (python ws_server_online.py --host "0.0.0.0" --port 10095 --asr_model "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch")
+
+[//]: # (```)
 
 ## For the client
 
@@ -39,8 +55,10 @@ pip install -r requirements_client.txt
 Start client
 
 ```shell
-python ASR_client.py --host "127.0.0.1" --port 10095 --chunk_size 300
+# --chunk_size, "5,10,5"=600ms, "8,8,4"=480ms
+python ws_client.py --host "127.0.0.1" --port 10096 --chunk_size "5,10,5"
 ```
 
 ## Acknowledge
-1. We acknowledge [cgisky1980](https://github.com/cgisky1980/FunASR) for contributing the websocket service.
+1. This project is maintained by [FunASR community](https://github.com/alibaba-damo-academy/FunASR).
+2. We acknowledge [cgisky1980](https://github.com/cgisky1980/FunASR) for contributing the websocket service.
