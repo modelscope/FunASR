@@ -1649,7 +1649,6 @@ class ASRTransducerTask(AbsTask):
             normalize = None
 
         # 4. Encoder
-
         if getattr(args, "encoder", None) is not None:
             encoder_class = encoder_choices.get_class(args.encoder)
             encoder = encoder_class(input_size, **args.encoder_conf)
