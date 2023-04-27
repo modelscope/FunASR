@@ -59,11 +59,11 @@ Timestamp pipeline can also be used after ASR pipeline to compose complete ASR f
     ```
 
 ### Inference with multi-thread CPUs or multi GPUs
-FunASR also offer recipes [egs_modelscope/vad/TEMPLATE/infer.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/vad/TEMPLATE/infer.sh) to decode with multi-thread CPUs, or multi GPUs.
+FunASR also offer recipes [egs_modelscope/tp/TEMPLATE/infer.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/tp/TEMPLATE/infer.sh) to decode with multi-thread CPUs, or multi GPUs.
 
 - Setting parameters in `infer.sh`
     - `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
-    - `data_dir`: the dataset dir **must** include `wav.scp` and `text.scp`
+    - `data_dir`: the dataset dir **must** include `wav.scp` and `text.txt`
     - `output_dir`: output dir of the recognition results
     - `batch_size`: `64` (Default), batch size of inference on gpu
     - `gpu_inference`: `true` (Default), whether to perform gpu decoding, set false for CPU inference
@@ -78,7 +78,7 @@ FunASR also offer recipes [egs_modelscope/vad/TEMPLATE/infer.sh](https://github.
     --model "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch" \
     --data_dir "./data/test" \
     --output_dir "./results" \
-    --batch_size 64 \
+    --batch_size 1 \
     --gpu_inference true \
     --gpuid_list "0,1"
 ```
@@ -89,7 +89,7 @@ FunASR also offer recipes [egs_modelscope/vad/TEMPLATE/infer.sh](https://github.
     --data_dir "./data/test" \
     --output_dir "./results" \
     --gpu_inference false \
-    --njob 64
+    --njob 1
 ```
 
 ## Finetune with pipeline
