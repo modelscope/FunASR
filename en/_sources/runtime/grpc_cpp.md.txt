@@ -1,4 +1,4 @@
-# Using funasr with grpc-cpp
+# Service with grpc-cpp
 
 ## For the Server
 
