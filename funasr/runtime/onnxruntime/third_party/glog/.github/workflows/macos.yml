@@ -1,0 +1,83 @@
+name: macOS
+
+on: [push, pull_request]
+
+jobs:
+  build-macos:
+    name: AppleClang-C++${{matrix.std}}-${{matrix.build_type}}
+    runs-on: macos-12
+    strategy:
+      fail-fast: true
+      matrix:
+        std: [14, 17, 20]
+        include:
+          - generator: Ninja
+          - build_type: Debug
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Ninja
+        uses: ashutoshvarma/setup-ninja@master
+        with:
+          version: 1.10.0
+
+      - name: Setup Dependencies
+        run: |
+          brew install lcov
+
+      - name: Setup Environment
+        if: matrix.build_type == 'Debug'
+        run: |
+          echo 'CXXFLAGS=--coverage' >> $GITHUB_ENV
+
+      - name: Configure
+        shell: bash
+        env:
+          CXXFLAGS: -Wall -Wextra -Wsign-conversion -Wtautological-compare -Wformat-nonliteral -Wundef -Werror ${{env.CXXFLAGS}}
+        run: |
+          cmake -S . -B build_${{matrix.build_type}} \
+                -DCMAKE_CXX_EXTENSIONS=OFF \
+                -DCMAKE_CXX_FLAGS_DEBUG=-pedantic-errors  \
+                -DCMAKE_CXX_FLAGS_RELEASE=-pedantic-errors \
+                -DCMAKE_CXX_STANDARD=${{matrix.std}} \
+                -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+                -G "${{matrix.generator}}" \
+                -Werror
+
+      - name: Build
+        run: |
+          cmake --build build_${{matrix.build_type}} \
+                --config ${{matrix.build_type}}
+
+      - name: Test
+        run: |
+          ctest --test-dir build_${{matrix.build_type}} \
+                --output-on-failure
+
+      - name: Generate Coverage
+        if: matrix.build_type == 'Debug'
+        run: |
+          lcov --directory . --capture --output-file coverage.info
+          lcov --remove coverage.info \
+            '*/src/*_unittest.cc' \
+            '*/src/googletest.h' \
+            '*/src/mock-log.h' \
+            '*/usr/*' \
+            --output-file coverage.info
+
+          for file in src/glog/*.h.in; do
+            name=$(basename ${file})
+            name_we=${name%.h.in}
+            sed -i "" "s|${{github.workspace}}/glog/${name_we}.h\$|${file}|g" coverage.info
+          done
+
+          lcov --list coverage.info
+
+      - name: Upload Coverage to Codecov
+        if: matrix.build_type == 'Debug'
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
+          verbose: true

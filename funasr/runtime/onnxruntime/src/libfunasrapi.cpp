@@ -5,13 +5,13 @@ extern "C" {
 #endif
 
 	// APIs for funasr
-	_FUNASRAPI FUNASR_HANDLE  FunASRInit(const char* sz_model_dir, int thread_num, bool quantize, bool use_vad, bool use_punc)
+	_FUNASRAPI FUNASR_HANDLE  FunASRInit(std::map<std::string, std::string>& model_path, int thread_num)
 	{
-		Model* mm = CreateModel(sz_model_dir, thread_num, quantize, use_vad, use_punc);
+		Model* mm = CreateModel(model_path, thread_num);
 		return mm;
 	}
 
-	_FUNASRAPI FUNASR_RESULT FunASRRecogBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, FUNASR_MODE mode, QM_CALLBACK fn_callback, bool use_vad, bool use_punc)
+	_FUNASRAPI FUNASR_RESULT FunASRRecogBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, FUNASR_MODE mode, QM_CALLBACK fn_callback)
 	{
 		Model* recog_obj = (Model*)handle;
 		if (!recog_obj)
@@ -21,7 +21,7 @@ extern "C" {
 		Audio audio(1);
 		if (!audio.LoadWav(sz_buf, n_len, &sampling_rate))
 			return nullptr;
-		if(use_vad){
+		if(recog_obj->UseVad()){
 			audio.Split(recog_obj);
 		}
 
@@ -39,7 +39,7 @@ extern "C" {
 			if (fn_callback)
 				fn_callback(n_step, n_total);
 		}
-		if(use_punc){
+		if(recog_obj->UsePunc()){
 			string punc_res = recog_obj->AddPunc((p_result->msg).c_str());
 			p_result->msg = punc_res;
 		}
@@ -47,7 +47,7 @@ extern "C" {
 		return p_result;
 	}
 
-	_FUNASRAPI FUNASR_RESULT FunASRRecogPCMBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, int sampling_rate, FUNASR_MODE mode, QM_CALLBACK fn_callback, bool use_vad, bool use_punc)
+	_FUNASRAPI FUNASR_RESULT FunASRRecogPCMBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, int sampling_rate, FUNASR_MODE mode, QM_CALLBACK fn_callback)
 	{
 		Model* recog_obj = (Model*)handle;
 		if (!recog_obj)
@@ -56,7 +56,7 @@ extern "C" {
 		Audio audio(1);
 		if (!audio.LoadPcmwav(sz_buf, n_len, &sampling_rate))
 			return nullptr;
-		if(use_vad){
+		if(recog_obj->UseVad()){
 			audio.Split(recog_obj);
 		}
 
@@ -74,7 +74,7 @@ extern "C" {
 			if (fn_callback)
 				fn_callback(n_step, n_total);
 		}
-		if(use_punc){
+		if(recog_obj->UsePunc()){
 			string punc_res = recog_obj->AddPunc((p_result->msg).c_str());
 			p_result->msg = punc_res;
 		}
@@ -82,7 +82,7 @@ extern "C" {
 		return p_result;
 	}
 
-	_FUNASRAPI FUNASR_RESULT FunASRRecogPCMFile(FUNASR_HANDLE handle, const char* sz_filename, int sampling_rate, FUNASR_MODE mode, QM_CALLBACK fn_callback, bool use_vad, bool use_punc)
+	_FUNASRAPI FUNASR_RESULT FunASRRecogPCMFile(FUNASR_HANDLE handle, const char* sz_filename, int sampling_rate, FUNASR_MODE mode, QM_CALLBACK fn_callback)
 	{
 		Model* recog_obj = (Model*)handle;
 		if (!recog_obj)
@@ -91,7 +91,7 @@ extern "C" {
 		Audio audio(1);
 		if (!audio.LoadPcmwav(sz_filename, &sampling_rate))
 			return nullptr;
-		if(use_vad){
+		if(recog_obj->UseVad()){
 			audio.Split(recog_obj);
 		}
 
@@ -109,7 +109,7 @@ extern "C" {
 			if (fn_callback)
 				fn_callback(n_step, n_total);
 		}
-		if(use_punc){
+		if(recog_obj->UsePunc()){
 			string punc_res = recog_obj->AddPunc((p_result->msg).c_str());
 			p_result->msg = punc_res;
 		}
@@ -117,7 +117,7 @@ extern "C" {
 		return p_result;
 	}
 
-	_FUNASRAPI FUNASR_RESULT FunASRRecogFile(FUNASR_HANDLE handle, const char* sz_wavfile, FUNASR_MODE mode, QM_CALLBACK fn_callback, bool use_vad, bool use_punc)
+	_FUNASRAPI FUNASR_RESULT FunASRRecogFile(FUNASR_HANDLE handle, const char* sz_wavfile, FUNASR_MODE mode, QM_CALLBACK fn_callback)
 	{
 		Model* recog_obj = (Model*)handle;
 		if (!recog_obj)
@@ -127,7 +127,7 @@ extern "C" {
 		Audio audio(1);
 		if(!audio.LoadWav(sz_wavfile, &sampling_rate))
 			return nullptr;
-		if(use_vad){
+		if(recog_obj->UseVad()){
 			audio.Split(recog_obj);
 		}
 
@@ -145,7 +145,7 @@ extern "C" {
 			if (fn_callback)
 				fn_callback(n_step, n_total);
 		}
-		if(use_punc){
+		if(recog_obj->UsePunc()){
 			string punc_res = recog_obj->AddPunc((p_result->msg).c_str());
 			p_result->msg = punc_res;
 		}
