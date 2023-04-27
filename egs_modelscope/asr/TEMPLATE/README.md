@@ -19,22 +19,24 @@ inference_pipeline = pipeline(
 rec_result = inference_pipeline(audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
 print(rec_result)
 ```
-#### [Paraformer-online Model](https://www.modelscope.cn/models/damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8404-online/summary)
+#### [Paraformer-online Model](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary)
 ```python
 inference_pipeline = pipeline(
     task=Tasks.auto_speech_recognition,
-    model='damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8404-online',
+    model='damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online',
+    model_revision='v1.0.4'
     )
 import soundfile
 speech, sample_rate = soundfile.read("example/asr_example.wav")
 
-param_dict = {"cache": dict(), "is_final": False}
-chunk_stride = 7680# 480ms
-# first chunk, 480ms
+chunk_size = [5, 10, 5] #[5, 10, 5] 600ms, [8, 8, 4] 480ms
+param_dict = {"cache": dict(), "is_final": False, "chunk_size": chunk_size}
+chunk_stride = chunk_size[1] * 960 # 600ms、480ms
+# first chunk, 600ms
 speech_chunk = speech[0:chunk_stride] 
 rec_result = inference_pipeline(audio_in=speech_chunk, param_dict=param_dict)
 print(rec_result)
-# next chunk, 480ms
+# next chunk, 600ms
 speech_chunk = speech[chunk_stride:chunk_stride+chunk_stride]
 rec_result = inference_pipeline(audio_in=speech_chunk, param_dict=param_dict)
 print(rec_result)
