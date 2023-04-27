@@ -59,22 +59,20 @@
 <li class="toctree-l1"><a class="reference internal" href="asr_pipeline.html">Speech Recognition</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vad_pipeline.html">Voice Activity Detection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="punc_pipeline.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="punc_pipeline.html#voice-activity-detection">Voice Activity Detection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tp_pipeline.html">Timestamp Prediction (FA)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sv_pipeline.html">Speaker Verification</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Speaker Diarization</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#inference-with-pipeline">Inference with pipeline</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#quick-start">Quick start</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#quick-start">Quick start</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#api-reference">API-reference</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#inference-with-you-data">Inference with you data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#inference-with-multi-threads-on-cpu">Inference with multi-threads on CPU</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#inference-with-multi-gpu">Inference with multi GPU</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#finetune-with-pipeline">Finetune with pipeline</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id1">Quick start</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#finetune-with-your-data">Finetune with your data</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#inference-with-your-finetuned-model">Inference with your finetuned model</a></li>
 </ul>
 </li>
 </ul>
@@ -91,7 +89,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../runtime/libtorch_python.html">Libtorch-python</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../runtime/grpc_python.html">Using funasr with grpc-python</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../runtime/grpc_cpp.html">Using funasr with grpc-cpp</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../runtime/websocket_python.html">Using funasr with websocket</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/websocket_python.html">Service with websocket-python</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Benchmark and Leadboard</span></p>
 <ul>
@@ -144,32 +142,107 @@
              
   <div class="section" id="speaker-diarization">
 <h1>Speaker Diarization<a class="headerlink" href="#speaker-diarization" title="Permalink to this headline"></a></h1>
+<blockquote>
+<div><p><strong>Note</strong>:
+The modelscope pipeline supports all the models in
+<a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope">model zoo</a>
+to inference and finetine. Here we take the model of xvector_sv as example to demonstrate the usage.</p>
+</div></blockquote>
 <div class="section" id="inference-with-pipeline">
 <h2>Inference with pipeline<a class="headerlink" href="#inference-with-pipeline" title="Permalink to this headline"></a></h2>
 <div class="section" id="quick-start">
 <h3>Quick start<a class="headerlink" href="#quick-start" title="Permalink to this headline"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
+<span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
+
+<span class="c1"># initialize pipeline</span>
+<span class="n">inference_diar_pipline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;sond_demo&quot;</span><span class="p">,</span>
+    <span class="n">num_workers</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">speaker_diarization</span><span class="p">,</span>
+    <span class="n">diar_model_config</span><span class="o">=</span><span class="s2">&quot;sond.yaml&quot;</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_diarization_sond-zh-cn-alimeeting-16k-n16k4-pytorch&#39;</span><span class="p">,</span>
+    <span class="n">reversion</span><span class="o">=</span><span class="s2">&quot;v1.0.5&quot;</span><span class="p">,</span>
+    <span class="n">sv_model</span><span class="o">=</span><span class="s2">&quot;damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch&quot;</span><span class="p">,</span>
+    <span class="n">sv_model_revision</span><span class="o">=</span><span class="s2">&quot;v1.2.2&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># input: a list of audio in which the first item is a speech recording to detect speakers, </span>
+<span class="c1"># and the following wav file are used to extract speaker embeddings.</span>
+<span class="n">audio_list</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/speaker_diarization/record.wav&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/speaker_diarization/spk1.wav&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/speaker_diarization/spk2.wav&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/speaker_diarization/spk3.wav&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/speaker_diarization/spk4.wav&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="n">inference_diar_pipline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="n">audio_list</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="api-reference">
+<h4>API-reference<a class="headerlink" href="#api-reference" title="Permalink to this headline"></a></h4>
+<div class="section" id="define-pipeline">
+<h5>Define pipeline<a class="headerlink" href="#define-pipeline" title="Permalink to this headline"></a></h5>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">task</span></code>: <code class="docutils literal notranslate"><span class="pre">Tasks.speaker_diarization</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model</span></code>: model name in <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope">model zoo</a>, or model path in local disk</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ngpu</span></code>: <code class="docutils literal notranslate"><span class="pre">1</span></code> (Default), decoding on GPU. If ngpu=0, decoding on CPU</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">output_dir</span></code>: <code class="docutils literal notranslate"><span class="pre">None</span></code> (Default), the output path of results if set</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>: <code class="docutils literal notranslate"><span class="pre">1</span></code> (Default), batch size when decoding</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">smooth_size</span></code>: <code class="docutils literal notranslate"><span class="pre">83</span></code> (Default), the window size to perform smoothing</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dur_threshold</span></code>: <code class="docutils literal notranslate"><span class="pre">10</span></code> (Default), segments shorter than 100 ms will be dropped</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">out_format</span></code>: <code class="docutils literal notranslate"><span class="pre">vad</span></code> (Default), the output format, choices <code class="docutils literal notranslate"><span class="pre">[&quot;vad&quot;,</span> <span class="pre">&quot;rttm&quot;]</span></code>.</p>
+<ul>
+<li><p>vad format: spk1: [1.0, 3.0], [5.0, 8.0]</p></li>
+<li><p>rttm format: “SPEAKER test1 0 1.00 2.00 <NA> <NA> spk1 <NA> <NA>” and “SPEAKER test1 0 5.00 3.00 <NA> <NA> spk1 <NA> <NA>”</p></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="infer-pipeline-for-speaker-embedding-extraction">
+<h5>Infer pipeline for speaker embedding extraction<a class="headerlink" href="#infer-pipeline-for-speaker-embedding-extraction" title="Permalink to this headline"></a></h5>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">audio_in</span></code>: the input to process, which could be:</p>
+<ul>
+<li><p>list of url: <code class="docutils literal notranslate"><span class="pre">e.g.</span></code>: waveform files at a website</p></li>
+<li><p>list of local file path: <code class="docutils literal notranslate"><span class="pre">e.g.</span></code>: path/to/a.wav</p></li>
+<li><p>(“wav.scp,speech,sound”, “profile.scp,profile,kaldi_ark”): a script file of waveform files and another script file of speaker profiles (extracted with the <a class="reference external" href="https://www.modelscope.cn/models/damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch/summary">model</a>)</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>wav.scp
+test1 path/to/enroll1.wav
+test2 path/to/enroll2.wav
+
+profile.scp
+test1 path/to/profile.ark:11
+test2 path/to/profile.ark:234
+</pre></div>
+</div>
+<p>The profile.ark file contains speaker embeddings in a kaldi-like style.
+Please refer <a class="reference external" href="../../speaker_verification/TEMPLATE/README">README.md</a> for more details.</p>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
 </div>
 <div class="section" id="inference-with-you-data">
 <h3>Inference with you data<a class="headerlink" href="#inference-with-you-data" title="Permalink to this headline"></a></h3>
+<p>For single input, we recommend the “list of local file path” mode for inference.
+For multiple inputs, we recommend the last mode with pre-organized wav.scp and profile.scp.</p>
 </div>
 <div class="section" id="inference-with-multi-threads-on-cpu">
 <h3>Inference with multi-threads on CPU<a class="headerlink" href="#inference-with-multi-threads-on-cpu" title="Permalink to this headline"></a></h3>
+<p>We recommend the last mode with split wav.scp and profile.scp. Then, run inference for each split part.
+Please refer <a class="reference external" href="../../speaker_verification/TEMPLATE/README">README.md</a> to find a similar process.</p>
 </div>
 <div class="section" id="inference-with-multi-gpu">
 <h3>Inference with multi GPU<a class="headerlink" href="#inference-with-multi-gpu" title="Permalink to this headline"></a></h3>
+<p>Similar to CPU, please set <code class="docutils literal notranslate"><span class="pre">ngpu=1</span></code> for inference on GPU.
+Besides, you should use <code class="docutils literal notranslate"><span class="pre">CUDA_VISIBLE_DEVICES=0</span></code> to specify a GPU device.
+Please refer <a class="reference external" href="../../speaker_verification/TEMPLATE/README">README.md</a> to find a similar process.</p>
 </div>
-</div>
-<div class="section" id="finetune-with-pipeline">
-<h2>Finetune with pipeline<a class="headerlink" href="#finetune-with-pipeline" title="Permalink to this headline"></a></h2>
-<div class="section" id="id1">
-<h3>Quick start<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h3>
-</div>
-<div class="section" id="finetune-with-your-data">
-<h3>Finetune with your data<a class="headerlink" href="#finetune-with-your-data" title="Permalink to this headline"></a></h3>
-</div>
-</div>
-<div class="section" id="inference-with-your-finetuned-model">
-<h2>Inference with your finetuned model<a class="headerlink" href="#inference-with-your-finetuned-model" title="Permalink to this headline"></a></h2>
 </div>
 </div>
 

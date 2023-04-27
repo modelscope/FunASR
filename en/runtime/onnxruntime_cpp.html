@@ -59,6 +59,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../modelscope_pipeline/asr_pipeline.html">Speech Recognition</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../modelscope_pipeline/vad_pipeline.html">Voice Activity Detection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../modelscope_pipeline/punc_pipeline.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modelscope_pipeline/punc_pipeline.html#voice-activity-detection">Voice Activity Detection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../modelscope_pipeline/tp_pipeline.html">Timestamp Prediction (FA)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../modelscope_pipeline/sv_pipeline.html">Speaker Verification</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../modelscope_pipeline/sd_pipeline.html">Speaker Diarization</a></li>
@@ -84,7 +85,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#build-runtime">Build runtime</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#building-for-windows">Building for Windows</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#run-the-demo">Run the demo</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#acknowledge">Acknowledge</a></li>
 </ul>
@@ -92,7 +92,7 @@
 <li class="toctree-l1"><a class="reference internal" href="libtorch_python.html">Libtorch-python</a></li>
 <li class="toctree-l1"><a class="reference internal" href="grpc_python.html">Using funasr with grpc-python</a></li>
 <li class="toctree-l1"><a class="reference internal" href="grpc_cpp.html">Using funasr with grpc-cpp</a></li>
-<li class="toctree-l1"><a class="reference internal" href="websocket_python.html">Using funasr with websocket</a></li>
+<li class="toctree-l1"><a class="reference internal" href="websocket_python.html">Service with websocket-python</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Benchmark and Leadboard</span></p>
 <ul>
@@ -190,17 +190,42 @@ make
 </div>
 </div>
 </div>
-<div class="section" id="building-for-windows">
-<h2>Building for Windows<a class="headerlink" href="#building-for-windows" title="Permalink to this headline"></a></h2>
-<p>Ref to win/</p>
-</div>
 <div class="section" id="run-the-demo">
 <h2>Run the demo<a class="headerlink" href="#run-the-demo" title="Permalink to this headline"></a></h2>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>funasr-onnx-offline /path/models_dir /path/wave_file quantize<span class="o">(</span><span class="nb">true</span> or <span class="nb">false</span><span class="o">)</span> use_vad<span class="o">(</span><span class="nb">true</span> or <span class="nb">false</span><span class="o">)</span> use_punc<span class="o">(</span><span class="nb">true</span> or <span class="nb">false</span><span class="o">)</span>
-</pre></div>
-</div>
-<p>The structure of /path/models_dir</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">config</span><span class="o">.</span><span class="n">yaml</span><span class="p">,</span> <span class="n">am</span><span class="o">.</span><span class="n">mvn</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">onnx</span><span class="p">(</span><span class="ow">or</span> <span class="n">model_quant</span><span class="o">.</span><span class="n">onnx</span><span class="p">),</span> <span class="p">(</span><span class="n">vad_model</span><span class="o">.</span><span class="n">onnx</span><span class="p">,</span> <span class="n">vad</span><span class="o">.</span><span class="n">mvn</span> <span class="k">if</span> <span class="n">you</span> <span class="n">use</span> <span class="n">vad</span><span class="p">),</span> <span class="p">(</span><span class="n">punc_model</span><span class="o">.</span><span class="n">onnx</span><span class="p">,</span> <span class="n">punc</span><span class="o">.</span><span class="n">yaml</span> <span class="k">if</span> <span class="n">you</span> <span class="n">use</span> <span class="n">vad</span><span class="p">)</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-onnx-offline     <span class="o">[</span>--wav-scp &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--wav-path &lt;string&gt;<span class="o">]</span>
+                          <span class="o">[</span>--punc-config &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-model &lt;string&gt;<span class="o">]</span>
+                          --am-config &lt;string&gt; --am-cmvn &lt;string&gt;
+                          --am-model &lt;string&gt; <span class="o">[</span>--vad-config &lt;string&gt;<span class="o">]</span>
+                          <span class="o">[</span>--vad-cmvn &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--vad-model &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--<span class="o">]</span>
+                          <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
+Where:
+   --wav-scp &lt;string&gt;
+     wave scp path
+   --wav-path &lt;string&gt;
+     wave file path
+
+   --punc-config &lt;string&gt;
+     punc config path
+   --punc-model &lt;string&gt;
+     punc model path
+
+   --am-config &lt;string&gt;
+     <span class="o">(</span>required<span class="o">)</span>  am config path
+   --am-cmvn &lt;string&gt;
+     <span class="o">(</span>required<span class="o">)</span>  am cmvn path
+   --am-model &lt;string&gt;
+     <span class="o">(</span>required<span class="o">)</span>  am model path
+
+   --vad-config &lt;string&gt;
+     vad config path
+   --vad-cmvn &lt;string&gt;
+     vad cmvn path
+   --vad-model &lt;string&gt;
+     vad model path
+  
+   Required: --am-config &lt;string&gt; --am-cmvn &lt;string&gt; --am-model &lt;string&gt; 
+   If use vad, please add: <span class="o">[</span>--vad-config &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--vad-cmvn &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--vad-model &lt;string&gt;<span class="o">]</span>
+   If use punc, please add: <span class="o">[</span>--punc-config &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-model &lt;string&gt;<span class="o">]</span> 
 </pre></div>
 </div>
 </div>
@@ -208,7 +233,8 @@ make
 <h2>Acknowledge<a class="headerlink" href="#acknowledge" title="Permalink to this headline"></a></h2>
 <ol class="simple">
 <li><p>This project is maintained by <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR">FunASR community</a>.</p></li>
-<li><p>We acknowledge <a class="reference external" href="https://github.com/RapidAI/RapidASR/tree/main/cpp_onnx">mayong</a> for contributing the onnxruntime(cpp api).</p></li>
+<li><p>We acknowledge mayong for contributing the onnxruntime of Paraformer and CT_Transformer, <a class="reference external" href="https://github.com/RapidAI/RapidASR/tree/main/cpp_onnx">repo-asr</a>, <a class="reference external" href="https://github.com/RapidAI/RapidPunc">repo-punc</a>.</p></li>
+<li><p>We acknowledge <a class="reference external" href="https://github.com/zhuzizyf/damo-fsmn-vad-infer-httpserver">ChinaTelecom</a> for contributing the VAD runtime.</p></li>
 <li><p>We borrowed a lot of code from <a class="reference external" href="https://github.com/chenkui164/FastASR">FastASR</a> for audio frontend and text-postprocess.</p></li>
 </ol>
 </div>
