@@ -11,21 +11,21 @@
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
 
-inference_pipline = pipeline(
+inference_pipeline = pipeline(
     task=Tasks.punctuation,
     model='damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch',
     model_revision=None)
 
-rec_result = inference_pipline(text_in='example/punc_example.txt')
+rec_result = inference_pipeline(text_in='example/punc_example.txt')
 print(rec_result)
 ```
 - text二进制数据，例如：用户直接从文件里读出bytes数据
 ```python
-rec_result = inference_pipline(text_in='我们都是木头人不会讲话不会动')
+rec_result = inference_pipeline(text_in='我们都是木头人不会讲话不会动')
 ```
 - text文件url，例如：https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_text/punc_example.txt
 ```python
-rec_result = inference_pipline(text_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_text/punc_example.txt')
+rec_result = inference_pipeline(text_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_text/punc_example.txt')
 ```
 
 #### [CT-Transformer Realtime model](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727/summary)

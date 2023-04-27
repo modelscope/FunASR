@@ -12,12 +12,12 @@ inputs = "./egs_modelscope/punctuation/punc_ct-transformer_zh-cn-common-vocab272
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
 
-inference_pipline = pipeline(
+inference_pipeline = pipeline(
     task=Tasks.punctuation,
     model='damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch',
     model_revision="v1.1.7",
     output_dir="./tmp/"
 )
 
-rec_result = inference_pipline(text_in=inputs)
+rec_result = inference_pipeline(text_in=inputs)
 print(rec_result)
