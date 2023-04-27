@@ -1,5 +1,4 @@
-
-# import websocket #区别服务端这里是 websocket-client库
+# -*- encoding: utf-8 -*-
 import time
 import websockets
 import asyncio
@@ -50,18 +49,21 @@ async def record_microphone():
                     rate=RATE,
                     input=True,
                     frames_per_buffer=CHUNK)
-
+    is_speaking = True
     while True:
 
         data = stream.read(CHUNK)
+        data = data.decode('ISO-8859-1')
+        message = json.dumps({"chunk": args.chunk_size, "is_speaking": is_speaking, "audio": data})
         
-        voices.put(data)
+        voices.put(message)
         #print(voices.qsize())
 
         await asyncio.sleep(0.01)
 
 # 其他函数可以通过调用send(data)来发送数据，例如：
 async def record_from_scp():
+    import wave
     global voices
     if args.audio_in.endswith(".scp"):
         f_scp = open(args.audio_in)
@@ -71,15 +73,31 @@ async def record_from_scp():
     for wav in wavs:
         wav_splits = wav.strip().split()
         wav_path = wav_splits[1] if len(wav_splits) > 1 else wav_splits[0]
-        bytes = open(wav_path, "rb")
-        bytes = bytes.read()
-        
+        # bytes_f = open(wav_path, "rb")
+        # bytes_data = bytes_f.read()
+        with wave.open(wav_path, "rb") as wav_file:
+            # 获取音频参数
+            params = wav_file.getparams()
+            # 获取头信息的长度
+            # header_length = wav_file.getheaders()[0][1]
+            # 读取音频帧数据，跳过头信息
+            # wav_file.setpos(header_length)
+            frames = wav_file.readframes(wav_file.getnframes())
+
+        # 将音频帧数据转换为字节类型的数据
+        audio_bytes = bytes(frames)
         stride = int(args.chunk_size/1000*16000*2)
-        chunk_num = (len(bytes)-1)//stride + 1
+        chunk_num = (len(audio_bytes)-1)//stride + 1
+        print(stride)
+        is_speaking = True
         for i in range(chunk_num):
+            if i == chunk_num-1:
+                is_speaking = False
             beg = i*stride
-            data_chunk = bytes[beg:beg+stride]
-            voices.put(data_chunk)
+            data = audio_bytes[beg:beg+stride]
+            data = data.decode('ISO-8859-1')
+            message = json.dumps({"chunk": args.chunk_size, "is_speaking": is_speaking, "audio": data})
+            voices.put(message)
             # print("data_chunk: ", len(data_chunk))
             # print(voices.qsize())
         
