@@ -12,7 +12,11 @@ from typing import Tuple
 import torch
 from typeguard import check_argument_types
 
+from funasr.layers.abs_normalize import AbsNormalize
+from funasr.models.encoder.abs_encoder import AbsEncoder
+from funasr.models.frontend.abs_frontend import AbsFrontend
 from funasr.models.preencoder.abs_preencoder import AbsPreEncoder
+from funasr.models.specaug.abs_specaug import AbsSpecAug
 from funasr.torch_utils.device_funcs import force_gatherable
 from funasr.models.base_model import FunASRModel
 
@@ -30,11 +34,11 @@ class Data2VecPretrainModel(FunASRModel):
 
     def __init__(
             self,
-            frontend: Optional[torch.nn.Module],
-            specaug: Optional[torch.nn.Module],
-            normalize: Optional[torch.nn.Module],
+            frontend: Optional[AbsFrontend],
+            specaug: Optional[AbsSpecAug],
+            normalize: Optional[AbsNormalize],
             preencoder: Optional[AbsPreEncoder],
-            encoder: torch.nn.Module,
+            encoder: AbsEncoder,
     ):
         assert check_argument_types()
 
@@ -53,7 +57,6 @@ class Data2VecPretrainModel(FunASRModel):
             speech_lengths: torch.Tensor,
     ) -> Tuple[torch.Tensor, Dict[str, torch.Tensor], torch.Tensor]:
         """Frontend + Encoder + Calc loss
-
         Args:
             speech: (Batch, Length, ...)
             speech_lengths: (Batch, )
@@ -102,7 +105,6 @@ class Data2VecPretrainModel(FunASRModel):
             speech_lengths: torch.Tensor,
     ):
         """Frontend + Encoder.
-
         Args:
             speech: (Batch, Length, ...)
             speech_lengths: (Batch, )

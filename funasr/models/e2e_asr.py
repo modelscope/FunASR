@@ -13,18 +13,22 @@ from typing import Union
 import torch
 from typeguard import check_argument_types
 
+from funasr.layers.abs_normalize import AbsNormalize
 from funasr.losses.label_smoothing_loss import (
     LabelSmoothingLoss,  # noqa: H301
 )
 from funasr.models.ctc import CTC
-from funasr.models.frontend.abs_frontend import AbsFrontend
-from funasr.models.encoder.abs_encoder import AbsEncoder
 from funasr.models.decoder.abs_decoder import AbsDecoder
-from funasr.models.base_model import FunASRModel
+from funasr.models.encoder.abs_encoder import AbsEncoder
+from funasr.models.frontend.abs_frontend import AbsFrontend
+from funasr.models.postencoder.abs_postencoder import AbsPostEncoder
+from funasr.models.preencoder.abs_preencoder import AbsPreEncoder
+from funasr.models.specaug.abs_specaug import AbsSpecAug
 from funasr.modules.add_sos_eos import add_sos_eos
 from funasr.modules.e2e_asr_common import ErrorCalculator
 from funasr.modules.nets_utils import th_accuracy
 from funasr.torch_utils.device_funcs import force_gatherable
+from funasr.models.base_model import FunASRModel
 
 if LooseVersion(torch.__version__) >= LooseVersion("1.6.0"):
     from torch.cuda.amp import autocast
@@ -43,9 +47,11 @@ class ESPnetASRModel(FunASRModel):
             vocab_size: int,
             token_list: Union[Tuple[str, ...], List[str]],
             frontend: Optional[AbsFrontend],
-            specaug: Optional[torch.nn.Module],
-            normalize: Optional[torch.nn.Module],
+            specaug: Optional[AbsSpecAug],
+            normalize: Optional[AbsNormalize],
+            preencoder: Optional[AbsPreEncoder],
             encoder: AbsEncoder,
+            postencoder: Optional[AbsPostEncoder],
             decoder: AbsDecoder,
             ctc: CTC,
             ctc_weight: float = 0.5,
@@ -127,7 +133,6 @@ class ESPnetASRModel(FunASRModel):
             text_lengths: torch.Tensor,
     ) -> Tuple[torch.Tensor, Dict[str, torch.Tensor], torch.Tensor]:
         """Frontend + Encoder + Decoder + Calc loss
-
         Args:
             speech: (Batch, Length, ...)
             speech_lengths: (Batch, )
@@ -243,7 +248,6 @@ class ESPnetASRModel(FunASRModel):
             self, speech: torch.Tensor, speech_lengths: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Frontend + Encoder. Note that this method is used by asr_inference.py
-
         Args:
             speech: (Batch, Length, ...)
             speech_lengths: (Batch, )
@@ -325,9 +329,7 @@ class ESPnetASRModel(FunASRModel):
             ys_pad_lens: torch.Tensor,
     ) -> torch.Tensor:
         """Compute negative log likelihood(nll) from transformer-decoder
-
         Normally, this function is called in batchify_nll.
-
         Args:
             encoder_out: (Batch, Length, Dim)
             encoder_out_lens: (Batch,)
@@ -364,7 +366,6 @@ class ESPnetASRModel(FunASRModel):
             batch_size: int = 100,
     ):
         """Compute negative log likelihood(nll) from transformer-decoder
-
         To avoid OOM, this fuction seperate the input into batches.
         Then call nll for each batch and combine and return results.
         Args:

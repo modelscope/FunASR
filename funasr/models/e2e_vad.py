@@ -35,6 +35,12 @@ class VadDetectMode(Enum):
 
 
 class VADXOptions:
+    """
+    Author: Speech Lab of DAMO Academy, Alibaba Group
+    Deep-FSMN for Large Vocabulary Continuous Speech Recognition
+    https://arxiv.org/abs/1803.05030
+    """
+
     def __init__(
             self,
             sample_rate: int = 16000,
@@ -99,6 +105,12 @@ class VADXOptions:
 
 
 class E2EVadSpeechBufWithDoa(object):
+    """
+    Author: Speech Lab of DAMO Academy, Alibaba Group
+    Deep-FSMN for Large Vocabulary Continuous Speech Recognition
+    https://arxiv.org/abs/1803.05030
+    """
+
     def __init__(self):
         self.start_ms = 0
         self.end_ms = 0
@@ -117,6 +129,12 @@ class E2EVadSpeechBufWithDoa(object):
 
 
 class E2EVadFrameProb(object):
+    """
+    Author: Speech Lab of DAMO Academy, Alibaba Group
+    Deep-FSMN for Large Vocabulary Continuous Speech Recognition
+    https://arxiv.org/abs/1803.05030
+    """
+
     def __init__(self):
         self.noise_prob = 0.0
         self.speech_prob = 0.0
@@ -126,6 +144,12 @@ class E2EVadFrameProb(object):
 
 
 class WindowDetector(object):
+    """
+    Author: Speech Lab of DAMO Academy, Alibaba Group
+    Deep-FSMN for Large Vocabulary Continuous Speech Recognition
+    https://arxiv.org/abs/1803.05030
+    """
+
     def __init__(self, window_size_ms: int, sil_to_speech_time: int,
                  speech_to_sil_time: int, frame_size_ms: int):
         self.window_size_ms = window_size_ms
@@ -192,6 +216,12 @@ class WindowDetector(object):
 
 
 class E2EVadModel(nn.Module):
+    """
+    Author: Speech Lab of DAMO Academy, Alibaba Group
+    Deep-FSMN for Large Vocabulary Continuous Speech Recognition
+    https://arxiv.org/abs/1803.05030
+    """
+
     def __init__(self, encoder: FSMN, vad_post_args: Dict[str, Any], frontend=None):
         super(E2EVadModel, self).__init__()
         self.vad_opts = VADXOptions(**vad_post_args)
@@ -286,7 +316,7 @@ class E2EVadModel(nn.Module):
                                 0.000001))
 
     def ComputeScores(self, feats: torch.Tensor, in_cache: Dict[str, torch.Tensor]) -> None:
-        scores = self.encoder(feats, in_cache)  # return B * T * D
+        scores = self.encoder(feats, in_cache).to('cpu')  # return B * T * D
         assert scores.shape[1] == feats.shape[1], "The shape between feats and scores does not match"
         self.vad_opts.nn_eval_block_size = scores.shape[1]
         self.frm_cnt += scores.shape[1]  # count total frames
@@ -444,7 +474,7 @@ class E2EVadModel(nn.Module):
                         - 1)) / self.vad_opts.noise_frame_num_used_for_snr
 
         return frame_state
-     
+
     def forward(self, feats: torch.Tensor, waveform: torch.tensor, in_cache: Dict[str, torch.Tensor] = dict(),
                 is_final: bool = False
                 ) -> Tuple[List[List[List[int]]], Dict[str, torch.Tensor]]:
@@ -460,8 +490,9 @@ class E2EVadModel(nn.Module):
             segment_batch = []
             if len(self.output_data_buf) > 0:
                 for i in range(self.output_data_buf_offset, len(self.output_data_buf)):
-                    if not self.output_data_buf[i].contain_seg_start_point or not self.output_data_buf[
-                        i].contain_seg_end_point:
+                    if not is_final and (
+                            not self.output_data_buf[i].contain_seg_start_point or not self.output_data_buf[
+                        i].contain_seg_end_point):
                         continue
                     segment = [self.output_data_buf[i].start_ms, self.output_data_buf[i].end_ms]
                     segment_batch.append(segment)
@@ -474,11 +505,11 @@ class E2EVadModel(nn.Module):
         return segments, in_cache
 
     def forward_online(self, feats: torch.Tensor, waveform: torch.tensor, in_cache: Dict[str, torch.Tensor] = dict(),
-                is_final: bool = False, max_end_sil: int = 800
-                ) -> Tuple[List[List[List[int]]], Dict[str, torch.Tensor]]:
+                       is_final: bool = False, max_end_sil: int = 800
+                       ) -> Tuple[List[List[List[int]]], Dict[str, torch.Tensor]]:
         self.max_end_sil_frame_cnt_thresh = max_end_sil - self.vad_opts.speech_to_sil_time_thres
         self.waveform = waveform  # compute decibel for each frame
-        
+
         self.ComputeScores(feats, in_cache)
         self.ComputeDecibel()
         if not is_final:

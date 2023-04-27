@@ -17,10 +17,13 @@ from funasr.losses.label_smoothing_loss import (
     LabelSmoothingLoss,  # noqa: H301
 )
 from funasr.models.ctc import CTC
-from funasr.models.encoder.abs_encoder import AbsEncoder
 from funasr.models.decoder.abs_decoder import AbsDecoder
+from funasr.models.encoder.abs_encoder import AbsEncoder
+from funasr.models.frontend.abs_frontend import AbsFrontend
 from funasr.models.postencoder.abs_postencoder import AbsPostEncoder
 from funasr.models.preencoder.abs_preencoder import AbsPreEncoder
+from funasr.models.specaug.abs_specaug import AbsSpecAug
+from funasr.layers.abs_normalize import AbsNormalize
 from funasr.torch_utils.device_funcs import force_gatherable
 from funasr.models.base_model import FunASRModel
 from funasr.modules.streaming_utils.chunk_utilis import sequence_mask
@@ -37,18 +40,18 @@ else:
 
 class UniASR(FunASRModel):
     """
-    Author: Speech Lab, Alibaba Group, China
+    Author: Speech Lab of DAMO Academy, Alibaba Group
     """
 
     def __init__(
         self,
         vocab_size: int,
         token_list: Union[Tuple[str, ...], List[str]],
-        frontend: Optional[torch.nn.Module],
-        specaug: Optional[torch.nn.Module],
-        normalize: Optional[torch.nn.Module],
+        frontend: Optional[AbsFrontend],
+        specaug: Optional[AbsSpecAug],
+        normalize: Optional[AbsNormalize],
         preencoder: Optional[AbsPreEncoder],
-        encoder: torch.nn.Module,
+        encoder: AbsEncoder,
         postencoder: Optional[AbsPostEncoder],
         decoder: AbsDecoder,
         ctc: CTC,
@@ -176,7 +179,6 @@ class UniASR(FunASRModel):
         decoding_ind: int = None,
     ) -> Tuple[torch.Tensor, Dict[str, torch.Tensor], torch.Tensor]:
         """Frontend + Encoder + Decoder + Calc loss
-
         Args:
                         speech: (Batch, Length, ...)
                         speech_lengths: (Batch, )
@@ -466,7 +468,6 @@ class UniASR(FunASRModel):
         self, speech: torch.Tensor, speech_lengths: torch.Tensor, ind: int = 0,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Frontend + Encoder. Note that this method is used by asr_inference.py
-
         Args:
                         speech: (Batch, Length, ...)
                         speech_lengths: (Batch, )
@@ -530,7 +531,6 @@ class UniASR(FunASRModel):
         ind: int = 0,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Frontend + Encoder. Note that this method is used by asr_inference.py
-
         Args:
                         speech: (Batch, Length, ...)
                         speech_lengths: (Batch, )
@@ -624,9 +624,7 @@ class UniASR(FunASRModel):
         ys_pad_lens: torch.Tensor,
     ) -> torch.Tensor:
         """Compute negative log likelihood(nll) from transformer-decoder
-
         Normally, this function is called in batchify_nll.
-
         Args:
                         encoder_out: (Batch, Length, Dim)
                         encoder_out_lens: (Batch,)
@@ -663,7 +661,6 @@ class UniASR(FunASRModel):
         batch_size: int = 100,
     ):
         """Compute negative log likelihood(nll) from transformer-decoder
-
         To avoid OOM, this fuction seperate the input into batches.
         Then call nll for each batch and combine and return results.
         Args:
@@ -1069,4 +1066,3 @@ class UniASR(FunASRModel):
             ys_hat = self.ctc2.argmax(encoder_out).data
             cer_ctc = self.error_calculator(ys_hat.cpu(), ys_pad.cpu(), is_ctc=True)
         return loss_ctc, cer_ctc
-

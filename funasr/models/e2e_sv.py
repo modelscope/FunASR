@@ -1,3 +1,8 @@
+
+"""
+Author: Speech Lab, Alibaba Group, China
+"""
+
 import logging
 from contextlib import contextmanager
 from distutils.version import LooseVersion
@@ -10,11 +15,22 @@ from typing import Union
 import torch
 from typeguard import check_argument_types
 
+from funasr.layers.abs_normalize import AbsNormalize
+from funasr.losses.label_smoothing_loss import (
+    LabelSmoothingLoss,  # noqa: H301
+)
+from funasr.models.ctc import CTC
 from funasr.models.decoder.abs_decoder import AbsDecoder
+from funasr.models.encoder.abs_encoder import AbsEncoder
+from funasr.models.frontend.abs_frontend import AbsFrontend
 from funasr.models.postencoder.abs_postencoder import AbsPostEncoder
 from funasr.models.preencoder.abs_preencoder import AbsPreEncoder
-from funasr.models.base_model import FunASRModel
+from funasr.models.specaug.abs_specaug import AbsSpecAug
+from funasr.modules.add_sos_eos import add_sos_eos
+from funasr.modules.e2e_asr_common import ErrorCalculator
+from funasr.modules.nets_utils import th_accuracy
 from funasr.torch_utils.device_funcs import force_gatherable
+from funasr.models.base_model import FunASRModel
 
 if LooseVersion(torch.__version__) >= LooseVersion("1.6.0"):
     from torch.cuda.amp import autocast
@@ -32,11 +48,11 @@ class ESPnetSVModel(FunASRModel):
             self,
             vocab_size: int,
             token_list: Union[Tuple[str, ...], List[str]],
-            frontend: Optional[torch.nn.Module],
-            specaug: Optional[torch.nn.Module],
-            normalize: Optional[torch.nn.Module],
+            frontend: Optional[AbsFrontend],
+            specaug: Optional[AbsSpecAug],
+            normalize: Optional[AbsNormalize],
             preencoder: Optional[AbsPreEncoder],
-            encoder: torch.nn.Module,
+            encoder: AbsEncoder,
             postencoder: Optional[AbsPostEncoder],
             pooling_layer: torch.nn.Module,
             decoder: AbsDecoder,
@@ -65,7 +81,6 @@ class ESPnetSVModel(FunASRModel):
             text_lengths: torch.Tensor,
     ) -> Tuple[torch.Tensor, Dict[str, torch.Tensor], torch.Tensor]:
         """Frontend + Encoder + Decoder + Calc loss
-
         Args:
             speech: (Batch, Length, ...)
             speech_lengths: (Batch, )
@@ -206,7 +221,6 @@ class ESPnetSVModel(FunASRModel):
             self, speech: torch.Tensor, speech_lengths: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Frontend + Encoder. Note that this method is used by asr_inference.py
-
         Args:
             speech: (Batch, Length, ...)
             speech_lengths: (Batch, )
