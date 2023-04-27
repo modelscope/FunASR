@@ -77,7 +77,18 @@
 <li class="toctree-l1"><a class="reference internal" href="grpc_python.html">Using funasr with grpc-python</a></li>
 <li class="toctree-l1"><a class="reference internal" href="grpc_cpp.html">Using funasr with grpc-cpp</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Using funasr with websocket</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#for-the-server">For the Server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#for-the-server">For the Server</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#install-the-modelscope-and-funasr">Install the modelscope and funasr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#install-the-requirements-for-server">Install the requirements for server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#start-server">Start server</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#asr-offline-server">ASR offline server</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#asr-streaming-server">ASR streaming server</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1"></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#asr-offline-online-2pass-server">ASR offline/online 2pass server</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#for-the-client">For the client</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#acknowledge">Acknowledge</a></li>
 </ul>
@@ -138,21 +149,39 @@
 The audio data is in streaming, the asr inference process is in offline.</p>
 <div class="section" id="for-the-server">
 <h2>For the Server<a class="headerlink" href="#for-the-server" title="Permalink to this headline"></a></h2>
-<p>Install the modelscope and funasr</p>
+<div class="section" id="install-the-modelscope-and-funasr">
+<h3>Install the modelscope and funasr<a class="headerlink" href="#install-the-modelscope-and-funasr" title="Permalink to this headline"></a></h3>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install -U modelscope funasr
 <span class="c1"># For the users in China, you could install with the command:</span>
 <span class="c1"># pip install -U modelscope funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple</span>
 git clone https://github.com/alibaba/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> FunASR
 </pre></div>
 </div>
-<p>Install the requirements for server</p>
+</div>
+<div class="section" id="install-the-requirements-for-server">
+<h3>Install the requirements for server<a class="headerlink" href="#install-the-requirements-for-server" title="Permalink to this headline"></a></h3>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> funasr/runtime/python/websocket
 pip install -r requirements_server.txt
 </pre></div>
 </div>
-<p>Start server</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python ASR_server.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --asr_model <span class="s2">&quot;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&quot;</span>
+</div>
+<div class="section" id="start-server">
+<h3>Start server<a class="headerlink" href="#start-server" title="Permalink to this headline"></a></h3>
+<div class="section" id="asr-offline-server">
+<h4>ASR offline server<a class="headerlink" href="#asr-offline-server" title="Permalink to this headline"></a></h4>
+</div>
+<div class="section" id="asr-streaming-server">
+<h4>ASR streaming server<a class="headerlink" href="#asr-streaming-server" title="Permalink to this headline"></a></h4>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python ws_server_online.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span>
 </pre></div>
+</div>
+</div>
+<div class="section" id="id1">
+<h4><a class="headerlink" href="#id1" title="Permalink to this headline"></a></h4>
+</div>
+<div class="section" id="asr-offline-online-2pass-server">
+<h4>ASR offline/online 2pass server<a class="headerlink" href="#asr-offline-online-2pass-server" title="Permalink to this headline"></a></h4>
+</div>
 </div>
 </div>
 <div class="section" id="for-the-client">
@@ -164,13 +193,15 @@ pip install -r requirements_client.txt
 </pre></div>
 </div>
 <p>Start client</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python ASR_client.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --chunk_size <span class="m">300</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># --chunk_size, &quot;5,10,5&quot;=600ms, &quot;8,8,4&quot;=480ms</span>
+python ws_client.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10096</span> --chunk_size <span class="s2">&quot;5,10,5&quot;</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="acknowledge">
 <h2>Acknowledge<a class="headerlink" href="#acknowledge" title="Permalink to this headline"></a></h2>
 <ol class="simple">
+<li><p>This project is maintained by <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR">FunASR community</a>.</p></li>
 <li><p>We acknowledge <a class="reference external" href="https://github.com/cgisky1980/FunASR">cgisky1980</a> for contributing the websocket service.</p></li>
 </ol>
 </div>
