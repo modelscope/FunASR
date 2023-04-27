@@ -1,4 +1,3 @@
-from json import decoder
 import logging
 from contextlib import contextmanager
 from distutils.version import LooseVersion
@@ -7,35 +6,24 @@ from typing import List
 from typing import Optional
 from typing import Tuple
 from typing import Union
-import random
-from unicodedata import bidirectional
 import numpy as np
 
 import torch
 from typeguard import check_argument_types
 
 from funasr.layers.abs_normalize import AbsNormalize
-from funasr.losses.label_smoothing_loss import (
-    LabelSmoothingLoss,  # noqa: H301
-)
 from funasr.models.ctc import CTC
 from funasr.models.decoder.abs_decoder import AbsDecoder
-from funasr.models.e2e_asr_common import ErrorCalculator
 from funasr.models.encoder.abs_encoder import AbsEncoder
 from funasr.models.frontend.abs_frontend import AbsFrontend
 from funasr.models.postencoder.abs_postencoder import AbsPostEncoder
-from funasr.models.predictor.cif import mae_loss
 from funasr.models.preencoder.abs_preencoder import AbsPreEncoder
 from funasr.models.specaug.abs_specaug import AbsSpecAug
 from funasr.modules.add_sos_eos import add_sos_eos
 from funasr.modules.nets_utils import make_pad_mask, pad_list
 from funasr.modules.nets_utils import th_accuracy
 from funasr.torch_utils.device_funcs import force_gatherable
-from funasr.train.abs_espnet_model import AbsESPnetModel
-from funasr.models.predictor.cif import CifPredictorV3
-from funasr.modules.streaming_utils import utils as myutils
 from funasr.models.e2e_asr_paraformer import Paraformer
-from funasr.modules.layer_norm import LayerNorm
 
 
 if LooseVersion(torch.__version__) >= LooseVersion("1.6.0"):
@@ -47,7 +35,7 @@ else:
         yield
 
 
-class AdvancedContextualParaformer(Paraformer):
+class NeatContextualParaformer(Paraformer):
     def __init__(
         self,
         vocab_size: int,
