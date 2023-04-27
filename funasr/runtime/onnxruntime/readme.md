@@ -80,4 +80,5 @@ Where:
 ## Acknowledge
 1. This project is maintained by [FunASR community](https://github.com/alibaba-damo-academy/FunASR).
 2. We acknowledge mayong for contributing the onnxruntime of Paraformer and CT_Transformer, [repo-asr](https://github.com/RapidAI/RapidASR/tree/main/cpp_onnx), [repo-punc](https://github.com/RapidAI/RapidPunc).
-3. We borrowed a lot of code from [FastASR](https://github.com/chenkui164/FastASR) for audio frontend and text-postprocess.
+3. We acknowledge [ChinaTelecom](https://github.com/zhuzizyf/damo-fsmn-vad-infer-httpserver) for contributing the VAD runtime.
+4. We borrowed a lot of code from [FastASR](https://github.com/chenkui164/FastASR) for audio frontend and text-postprocess.
