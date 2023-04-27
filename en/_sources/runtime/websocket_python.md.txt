@@ -32,7 +32,6 @@ pip install -r requirements_server.txt
 ```shell
 python ws_server_online.py --host "0.0.0.0" --port 10095 --asr_model_online "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online"
 ```
-#### 
 
 #### ASR offline/online 2pass server
 
@@ -55,12 +54,12 @@ pip install -r requirements_client.txt
 #### Recording from mircrophone
 ```shell
 # --chunk_size, "5,10,5"=600ms, "8,8,4"=480ms
-python ws_client.py --host "127.0.0.1" --port 10096 --chunk_size "5,10,5"
+python ws_client.py --host "127.0.0.1" --port 10095 --chunk_size "5,10,5"
 ```
 #### Loadding from wav.scp(kaldi style)
 ```shell
 # --chunk_size, "5,10,5"=600ms, "8,8,4"=480ms
-python ws_client.py --host "127.0.0.1" --port 10096 --chunk_size "5,10,5" --audio_in "./data/wav.scp"
+python ws_client.py --host "127.0.0.1" --port 10095 --chunk_size "5,10,5" --audio_in "./data/wav.scp"
 ```
 
 ## Acknowledge

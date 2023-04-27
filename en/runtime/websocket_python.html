@@ -83,7 +83,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#start-server">Start server</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#asr-offline-server">ASR offline server</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#asr-streaming-server">ASR streaming server</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id1"></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#asr-offline-online-2pass-server">ASR offline/online 2pass server</a></li>
 </ul>
 </li>
@@ -182,9 +181,6 @@ pip install -r requirements_server.txt
 </pre></div>
 </div>
 </div>
-<div class="section" id="id1">
-<h4><a class="headerlink" href="#id1" title="Permalink to this headline"></a></h4>
-</div>
 <div class="section" id="asr-offline-online-2pass-server">
 <h4>ASR offline/online 2pass server<a class="headerlink" href="#asr-offline-online-2pass-server" title="Permalink to this headline"></a></h4>
 </div>
@@ -203,14 +199,14 @@ pip install -r requirements_client.txt
 <div class="section" id="recording-from-mircrophone">
 <h4>Recording from mircrophone<a class="headerlink" href="#recording-from-mircrophone" title="Permalink to this headline"></a></h4>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># --chunk_size, &quot;5,10,5&quot;=600ms, &quot;8,8,4&quot;=480ms</span>
-python ws_client.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10096</span> --chunk_size <span class="s2">&quot;5,10,5&quot;</span>
+python ws_client.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --chunk_size <span class="s2">&quot;5,10,5&quot;</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="loadding-from-wav-scp-kaldi-style">
 <h4>Loadding from wav.scp(kaldi style)<a class="headerlink" href="#loadding-from-wav-scp-kaldi-style" title="Permalink to this headline"></a></h4>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># --chunk_size, &quot;5,10,5&quot;=600ms, &quot;8,8,4&quot;=480ms</span>
-python ws_client.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10096</span> --chunk_size <span class="s2">&quot;5,10,5&quot;</span> --audio_in <span class="s2">&quot;./data/wav.scp&quot;</span>
+python ws_client.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --chunk_size <span class="s2">&quot;5,10,5&quot;</span> --audio_in <span class="s2">&quot;./data/wav.scp&quot;</span>
 </pre></div>
 </div>
 </div>
