@@ -58,8 +58,7 @@
 <li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="asr_pipeline.html">Speech Recognition</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vad_pipeline.html">Voice Activity Detection</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Punctuation Restoration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#voice-activity-detection">Voice Activity Detection</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Punctuation Restoration</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#inference">Inference</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#quick-start">Quick start</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#ct-transformer-model">CT-Transformer model</a></li>
@@ -148,9 +147,6 @@
              
   <div class="section" id="punctuation-restoration">
 <h1>Punctuation Restoration<a class="headerlink" href="#punctuation-restoration" title="Permalink to this headline"></a></h1>
-</div>
-<div class="section" id="voice-activity-detection">
-<h1>Voice Activity Detection<a class="headerlink" href="#voice-activity-detection" title="Permalink to this headline"></a></h1>
 <blockquote>
 <div><p><strong>Note</strong>:
 The modelscope pipeline supports all the models in <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope">model zoo</a> to inference and finetune. Here we take the model of the punctuation model of CT-Transformer as example to demonstrate the usage.</p>
@@ -239,7 +235,7 @@ In this case of <code class="docutils literal notranslate"><span class="pre">tex
 </div>
 <div class="section" id="inference-with-multi-thread-cpus-or-multi-gpus">
 <h3>Inference with multi-thread CPUs or multi GPUs<a class="headerlink" href="#inference-with-multi-thread-cpus-or-multi-gpus" title="Permalink to this headline"></a></h3>
-<p>FunASR also offer recipes <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/punc/TEMPLATE/infer.sh">egs_modelscope/punc/TEMPLATE/infer.sh</a> to decode with multi-thread CPUs, or multi GPUs. It is an offline recipe and only support offline model.</p>
+<p>FunASR also offer recipes <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/punctuation/TEMPLATE/infer.sh">egs_modelscope/punctuation/TEMPLATE/infer.sh</a> to decode with multi-thread CPUs, or multi GPUs. It is an offline recipe and only support offline model.</p>
 <ul class="simple">
 <li><p>Setting parameters in <code class="docutils literal notranslate"><span class="pre">infer.sh</span></code></p>
 <ul>
@@ -259,7 +255,7 @@ In this case of <code class="docutils literal notranslate"><span class="pre">tex
     --model <span class="s2">&quot;damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch&quot;</span> <span class="se">\</span>
     --data_dir <span class="s2">&quot;./data/test&quot;</span> <span class="se">\</span>
     --output_dir <span class="s2">&quot;./results&quot;</span> <span class="se">\</span>
-    --batch_size <span class="m">64</span> <span class="se">\</span>
+    --batch_size <span class="m">1</span> <span class="se">\</span>
     --gpu_inference <span class="nb">true</span> <span class="se">\</span>
     --gpuid_list <span class="s2">&quot;0,1&quot;</span>
 </pre></div>
@@ -272,7 +268,7 @@ In this case of <code class="docutils literal notranslate"><span class="pre">tex
     --data_dir <span class="s2">&quot;./data/test&quot;</span> <span class="se">\</span>
     --output_dir <span class="s2">&quot;./results&quot;</span> <span class="se">\</span>
     --gpu_inference <span class="nb">false</span> <span class="se">\</span>
-    --njob <span class="m">64</span>
+    --njob <span class="m">1</span>
 </pre></div>
 </div>
 </div>

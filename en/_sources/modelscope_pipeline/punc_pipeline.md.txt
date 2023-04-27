@@ -1,5 +1,4 @@
 # Punctuation Restoration
-# Voice Activity Detection
 
 > **Note**: 
 > The modelscope pipeline supports all the models in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope) to inference and finetune. Here we take the model of the punctuation model of CT-Transformer as example to demonstrate the usage.
@@ -69,7 +68,7 @@ Full code of demo, please ref to [demo](https://github.com/alibaba-damo-academy/
 - `param_dict`: reserving the cache which is necessary in realtime mode. 
 
 ### Inference with multi-thread CPUs or multi GPUs
-FunASR also offer recipes [egs_modelscope/punc/TEMPLATE/infer.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/punc/TEMPLATE/infer.sh) to decode with multi-thread CPUs, or multi GPUs. It is an offline recipe and only support offline model.
+FunASR also offer recipes [egs_modelscope/punctuation/TEMPLATE/infer.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/punctuation/TEMPLATE/infer.sh) to decode with multi-thread CPUs, or multi GPUs. It is an offline recipe and only support offline model.
 
 - Setting parameters in `infer.sh`
     - `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
@@ -87,7 +86,7 @@ FunASR also offer recipes [egs_modelscope/punc/TEMPLATE/infer.sh](https://github
     --model "damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch" \
     --data_dir "./data/test" \
     --output_dir "./results" \
-    --batch_size 64 \
+    --batch_size 1 \
     --gpu_inference true \
     --gpuid_list "0,1"
 ```
@@ -98,7 +97,7 @@ FunASR also offer recipes [egs_modelscope/punc/TEMPLATE/infer.sh](https://github
     --data_dir "./data/test" \
     --output_dir "./results" \
     --gpu_inference false \
-    --njob 64
+    --njob 1
 ```
 
 
