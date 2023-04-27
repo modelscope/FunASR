@@ -51,11 +51,16 @@ cd funasr/runtime/python/websocket
 pip install -r requirements_client.txt
 ```
 
-Start client
-
+### Start client
+#### Recording from mircrophone
 ```shell
 # --chunk_size, "5,10,5"=600ms, "8,8,4"=480ms
 python ws_client.py --host "127.0.0.1" --port 10096 --chunk_size "5,10,5"
+```
+#### Loadding from wav.scp(kaldi style)
+```shell
+# --chunk_size, "5,10,5"=600ms, "8,8,4"=480ms
+python ws_client.py --host "127.0.0.1" --port 10096 --chunk_size "5,10,5" --audio_in "./data/wav.scp"
 ```
 
 ## Acknowledge
