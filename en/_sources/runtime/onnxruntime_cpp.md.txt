@@ -4,9 +4,10 @@
 ### Install [modelscope and funasr](https://github.com/alibaba-damo-academy/FunASR#installation)
 
 ```shell
-pip3 install torch torchaudio
-pip install -U modelscope
-pip install -U funasr
+# pip3 install torch torchaudio
+pip install -U modelscope funasr
+# For the users in China, you could install with the command:
+# pip install -U modelscope funasr -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html -i https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
 
 ### Export [onnx model](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export)
