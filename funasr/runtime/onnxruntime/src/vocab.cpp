@@ -1,5 +1,6 @@
 #include "vocab.h"
-#include "yaml-cpp/yaml.h"
+#include <yaml-cpp/yaml.h>
+#include <glog/logging.h>
 
 #include <fstream>
 #include <iostream>
@@ -22,8 +23,8 @@ void Vocab::LoadVocabFromYaml(const char* filename){
     YAML::Node config;
     try{
         config = YAML::LoadFile(filename);
-    }catch(...){
-        printf("error loading file, yaml file error or not exist.\n");
+    }catch(exception const &e){
+        LOG(INFO) << "Error loading file, yaml file error or not exist.";
         exit(-1);
     }
     YAML::Node myList = config["token_list"];
