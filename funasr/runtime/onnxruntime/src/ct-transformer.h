@@ -1,3 +1,8 @@
+/**
+ * Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+ * MIT License  (https://opensource.org/licenses/MIT)
+*/
+
 #pragma once 
 
 class CTTransformer {
@@ -19,7 +24,8 @@ private:
     Ort::SessionOptions session_options;
 public:
 
-	CTTransformer(const char* sz_model_dir, int thread_num);
+	CTTransformer();
+	void InitPunc(const std::string &punc_model, const std::string &punc_config, int thread_num);
 	~CTTransformer();
 	vector<int>  Infer(vector<int64_t> input_data);
 	string AddPunc(const char* sz_input);

@@ -22,12 +22,18 @@ pip install -r requirements.txt
 
 #### Recipe
 
-set the model, data path and output_dir
 
+##### test_rtf
+set the model, data path and output_dir
 ```shell
 nohup bash test_rtf.sh &> log.txt &
 ```
 
+##### test_cer
+set the model, data path and output_dir
+```shell
+nohup bash test_cer.sh &> log.txt &
+```
 
 ## [Paraformer-large](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary) 
 

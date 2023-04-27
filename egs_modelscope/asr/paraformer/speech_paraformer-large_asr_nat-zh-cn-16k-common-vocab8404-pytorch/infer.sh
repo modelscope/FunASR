@@ -12,7 +12,9 @@ output_dir="./results"
 batch_size=64
 gpu_inference=true    # whether to perform gpu decoding
 gpuid_list="0,1"    # set gpus, e.g., gpuid_list="0,1"
-njob=4    # the number of jobs for CPU decoding, if gpu_inference=false, use CPU decoding, please set njob
+njob=64    # the number of jobs for CPU decoding, if gpu_inference=false, use CPU decoding, please set njob
+checkpoint_dir=
+checkpoint_name="valid.cer_ctc.ave.pb"
 
 . utils/parse_options.sh || exit 1;
 
@@ -33,6 +35,11 @@ for JOB in $(seq ${nj}); do
     split_scps="$split_scps $output_dir/split/wav.$JOB.scp"
 done
 perl utils/split_scp.pl ${data_dir}/wav.scp ${split_scps}
+
+if [ -n "${checkpoint_dir}" ]; then
+  python utils/prepare_checkpoint.py ${model} ${checkpoint_dir} ${checkpoint_name}
+  model=${checkpoint_dir}/${model}
+fi
 
 if [ $stage -le 1 ] && [ $stop_stage -ge 1 ];then
     echo "Decoding ..."

@@ -3,6 +3,7 @@
 #define MODEL_H
 
 #include <string>
+#include <map>
 
 class Model {
   public:
@@ -13,7 +14,9 @@ class Model {
     virtual std::string Rescoring() = 0;
     virtual std::vector<std::vector<int>> VadSeg(std::vector<float>& pcm_data)=0;
     virtual std::string AddPunc(const char* sz_input)=0;
+    virtual bool UseVad() =0;
+    virtual bool UsePunc() =0; 
 };
 
-Model *CreateModel(const char *path,int thread_num=1,bool quantize=false, bool use_vad=false, bool use_punc=false);
+Model *CreateModel(std::map<std::string, std::string>& model_path,int thread_num=1);
 #endif

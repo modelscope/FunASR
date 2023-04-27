@@ -42,16 +42,22 @@ add_custom_command(
         "${rg_proto}"
       DEPENDS "${rg_proto}")
 
-
 # Include generated *.pb.h files
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
-include_directories(../onnxruntime/include/)
-link_directories(../onnxruntime/build/src/)
-link_directories(../onnxruntime/build/third_party/yaml-cpp/)
-
 link_directories(${ONNXRUNTIME_DIR}/lib)
+
+include_directories(${PROJECT_SOURCE_DIR}/../onnxruntime/include/)
+include_directories(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/yaml-cpp/include/)
+include_directories(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/kaldi-native-fbank)
+
+add_subdirectory(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/yaml-cpp yaml-cpp)
+add_subdirectory(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/kaldi-native-fbank/kaldi-native-fbank/csrc csrc)
 add_subdirectory("../onnxruntime/src" onnx_src)
+
+include_directories(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/glog)
+set(BUILD_TESTING OFF)
+add_subdirectory(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/glog glog)
 
 # rg_grpc_proto
 add_library(rg_grpc_proto
@@ -60,16 +66,13 @@ add_library(rg_grpc_proto
   ${rg_proto_srcs}
   ${rg_proto_hdrs})
 
-
-
 target_link_libraries(rg_grpc_proto
   ${_REFLECTION}
   ${_GRPC_GRPCPP}
   ${_PROTOBUF_LIBPROTOBUF})
 
-# Targets paraformer_(server)
 foreach(_target
-  paraformer_server)
+  paraformer-server)
   add_executable(${_target}
     "${_target}.cc")
   target_link_libraries(${_target}
