@@ -30,7 +30,7 @@ pip install -r requirements_server.txt
 [//]: # (```)
 #### ASR streaming server
 ```shell
-python ws_server_online.py --host "0.0.0.0" --port 10095
+python ws_server_online.py --host "0.0.0.0" --port 10095 --asr_model_online "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online"
 ```
 #### 
 
