@@ -57,10 +57,10 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ];then
     wait
 
     mkdir -p ${output_dir}/final_res
-    if [ -f "${output_dir}/output.1/output.res" ]; then
+    if [ -f "${output_dir}/output.1/infer.out" ]; then
       for i in $(seq "${nj}"); do
-          cat "${output_dir}/output.${i}/output.res"
-      done | sort -k1 >"${output_dir}/output.res"
+          cat "${output_dir}/output.${i}/infer.out"
+      done | sort -k1 >"${output_dir}/infer.out"
     fi
 fi
 
