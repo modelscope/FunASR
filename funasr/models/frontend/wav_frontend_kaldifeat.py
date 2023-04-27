@@ -6,8 +6,11 @@ from typing import Tuple
 import numpy as np
 import torch
 import torchaudio.compliance.kaldi as kaldi
+from funasr.models.frontend.abs_frontend import AbsFrontend
 from typeguard import check_argument_types
 from torch.nn.utils.rnn import pad_sequence
+
+
 # import kaldifeat
 
 def load_cmvn(cmvn_file):
@@ -32,9 +35,9 @@ def load_cmvn(cmvn_file):
     means = np.array(means_list).astype(np.float)
     vars = np.array(vars_list).astype(np.float)
     cmvn = np.array([means, vars])
-    cmvn = torch.as_tensor(cmvn) 
-    return cmvn 
-          
+    cmvn = torch.as_tensor(cmvn)
+    return cmvn
+
 
 def apply_cmvn(inputs, cmvn_file):  # noqa
     """
@@ -72,7 +75,6 @@ def apply_lfr(inputs, lfr_m, lfr_n):
             LFR_inputs.append(frame)
     LFR_outputs = torch.vstack(LFR_inputs)
     return LFR_outputs.type(torch.float32)
-
 
 # class WavFrontend_kaldifeat(AbsFrontend):
 #     """Conventional frontend structure for ASR.

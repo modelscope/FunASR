@@ -10,6 +10,7 @@ import humanfriendly
 import torch
 from typeguard import check_argument_types
 
+from funasr.models.frontend.abs_frontend import AbsFrontend
 from funasr.modules.frontends.frontend import Frontend
 from funasr.modules.nets_utils import pad_list
 from funasr.utils.get_default_kwargs import get_default_kwargs
@@ -26,7 +27,7 @@ def base_s3prl_setup(args):
     return args
 
 
-class S3prlFrontend(torch.nn.Module):
+class S3prlFrontend(AbsFrontend):
     """Speech Pretrained Representation frontend structure for ASR."""
 
     def __init__(
@@ -99,7 +100,6 @@ class S3prlFrontend(torch.nn.Module):
 
     def _tile_representations(self, feature):
         """Tile up the representations by `tile_factor`.
-
         Input - sequence of representations
                 shape: (batch_size, seq_len, feature_dim)
         Output - sequence of tiled representations

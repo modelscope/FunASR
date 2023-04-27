@@ -4,19 +4,18 @@
 
 """Sliding Window for raw audio input data."""
 
+from funasr.models.frontend.abs_frontend import AbsFrontend
 import torch
 from typeguard import check_argument_types
 from typing import Tuple
 
 
-class SlidingWindow(torch.nn.Module):
+class SlidingWindow(AbsFrontend):
     """Sliding Window.
-
     Provides a sliding window over a batched continuous raw audio tensor.
     Optionally, provides padding (Currently not implemented).
     Combine this module with a pre-encoder compatible with raw audio data,
     for example Sinc convolutions.
-
     Known issues:
     Output length is calculated incorrectly if audio shorter than win_length.
     WARNING: trailing values are discarded - padding not implemented yet.
@@ -32,7 +31,6 @@ class SlidingWindow(torch.nn.Module):
         fs=None,
     ):
         """Initialize.
-
         Args:
             win_length: Length of frame.
             hop_length: Relative starting point of next frame.
@@ -52,11 +50,9 @@ class SlidingWindow(torch.nn.Module):
         self, input: torch.Tensor, input_lengths: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Apply a sliding window on the input.
-
         Args:
             input: Input (B, T, C*D) or (B, T*C*D), with D=C=1.
             input_lengths: Input lengths within batch.
-
         Returns:
             Tensor: Output with dimensions (B, T, C, D), with D=win_length.
             Tensor: Output lengths within batch.
