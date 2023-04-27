@@ -70,17 +70,17 @@ Full code of demo, please ref to [demo](https://github.com/alibaba-damo-academy/
 ### Inference with multi-thread CPUs or multi GPUs
 FunASR also offer recipes [egs_modelscope/punctuation/TEMPLATE/infer.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/punctuation/TEMPLATE/infer.sh) to decode with multi-thread CPUs, or multi GPUs. It is an offline recipe and only support offline model.
 
-- Setting parameters in `infer.sh`
-    - `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
-    - `data_dir`: the dataset dir needs to include `punc.txt`
-    - `output_dir`: output dir of the recognition results
-    - `gpu_inference`: `true` (Default), whether to perform gpu decoding, set false for CPU inference
-    - `gpuid_list`: `0,1` (Default), which gpu_ids are used to infer
-    - `njob`: only used for CPU inference (`gpu_inference`=`false`), `64` (Default), the number of jobs for CPU decoding
-    - `checkpoint_dir`: only used for infer finetuned models, the path dir of finetuned models
-    - `checkpoint_name`: only used for infer finetuned models, `punc.pb` (Default), which checkpoint is used to infer
+#### Settings of `infer.sh`
+- `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
+- `data_dir`: the dataset dir needs to include `punc.txt`
+- `output_dir`: output dir of the recognition results
+- `gpu_inference`: `true` (Default), whether to perform gpu decoding, set false for CPU inference
+- `gpuid_list`: `0,1` (Default), which gpu_ids are used to infer
+- `njob`: only used for CPU inference (`gpu_inference`=`false`), `64` (Default), the number of jobs for CPU decoding
+- `checkpoint_dir`: only used for infer finetuned models, the path dir of finetuned models
+- `checkpoint_name`: only used for infer finetuned models, `punc.pb` (Default), which checkpoint is used to infer
 
-- Decode with multi GPUs:
+#### Decode with multi GPUs:
 ```shell
     bash infer.sh \
     --model "damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch" \
@@ -90,7 +90,7 @@ FunASR also offer recipes [egs_modelscope/punctuation/TEMPLATE/infer.sh](https:/
     --gpu_inference true \
     --gpuid_list "0,1"
 ```
-- Decode with multi-thread CPUs:
+#### Decode with multi-thread CPUs:
 ```shell
     bash infer.sh \
     --model "damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch" \
@@ -99,7 +99,6 @@ FunASR also offer recipes [egs_modelscope/punctuation/TEMPLATE/infer.sh](https:/
     --gpu_inference false \
     --njob 1
 ```
-
 
 ## Finetune with pipeline
 

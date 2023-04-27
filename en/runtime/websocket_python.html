@@ -89,7 +89,14 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#for-the-client">For the client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#for-the-client">For the client</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#start-client">Start client</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#recording-from-mircrophone">Recording from mircrophone</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#loadding-from-wav-scp-kaldi-style">Loadding from wav.scp(kaldi style)</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#acknowledge">Acknowledge</a></li>
 </ul>
 </li>
@@ -191,10 +198,22 @@ pip install -r requirements_server.txt
 pip install -r requirements_client.txt
 </pre></div>
 </div>
-<p>Start client</p>
+<div class="section" id="start-client">
+<h3>Start client<a class="headerlink" href="#start-client" title="Permalink to this headline"></a></h3>
+<div class="section" id="recording-from-mircrophone">
+<h4>Recording from mircrophone<a class="headerlink" href="#recording-from-mircrophone" title="Permalink to this headline"></a></h4>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># --chunk_size, &quot;5,10,5&quot;=600ms, &quot;8,8,4&quot;=480ms</span>
 python ws_client.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10096</span> --chunk_size <span class="s2">&quot;5,10,5&quot;</span>
 </pre></div>
+</div>
+</div>
+<div class="section" id="loadding-from-wav-scp-kaldi-style">
+<h4>Loadding from wav.scp(kaldi style)<a class="headerlink" href="#loadding-from-wav-scp-kaldi-style" title="Permalink to this headline"></a></h4>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># --chunk_size, &quot;5,10,5&quot;=600ms, &quot;8,8,4&quot;=480ms</span>
+python ws_client.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10096</span> --chunk_size <span class="s2">&quot;5,10,5&quot;</span> --audio_in <span class="s2">&quot;./data/wav.scp&quot;</span>
+</pre></div>
+</div>
+</div>
 </div>
 </div>
 <div class="section" id="acknowledge">

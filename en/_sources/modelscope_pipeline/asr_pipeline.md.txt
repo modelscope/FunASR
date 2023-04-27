@@ -102,20 +102,20 @@ print(rec_result)
 ### Inference with multi-thread CPUs or multi GPUs
 FunASR also offer recipes [egs_modelscope/asr/TEMPLATE/infer.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/TEMPLATE/infer.sh) to decode with multi-thread CPUs, or multi GPUs.
 
-- Setting parameters in `infer.sh`
-    - `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
-    - `data_dir`: the dataset dir needs to include `wav.scp`. If `${data_dir}/text` is also exists, CER will be computed
-    - `output_dir`: output dir of the recognition results
-    - `batch_size`: `64` (Default), batch size of inference on gpu
-    - `gpu_inference`: `true` (Default), whether to perform gpu decoding, set false for CPU inference
-    - `gpuid_list`: `0,1` (Default), which gpu_ids are used to infer
-    - `njob`: only used for CPU inference (`gpu_inference`=`false`), `64` (Default), the number of jobs for CPU decoding
-    - `checkpoint_dir`: only used for infer finetuned models, the path dir of finetuned models
-    - `checkpoint_name`: only used for infer finetuned models, `valid.cer_ctc.ave.pb` (Default), which checkpoint is used to infer
-    - `decoding_mode`: `normal` (Default), decoding mode for UniASR model(fast、normal、offline)
-    - `hotword_txt`: `None` (Default), hotword file for contextual paraformer model(the hotword file name ends with .txt")
+#### Settings of `infer.sh`
+- `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
+- `data_dir`: the dataset dir needs to include `wav.scp`. If `${data_dir}/text` is also exists, CER will be computed
+- `output_dir`: output dir of the recognition results
+- `batch_size`: `64` (Default), batch size of inference on gpu
+- `gpu_inference`: `true` (Default), whether to perform gpu decoding, set false for CPU inference
+- `gpuid_list`: `0,1` (Default), which gpu_ids are used to infer
+- `njob`: only used for CPU inference (`gpu_inference`=`false`), `64` (Default), the number of jobs for CPU decoding
+- `checkpoint_dir`: only used for infer finetuned models, the path dir of finetuned models
+- `checkpoint_name`: only used for infer finetuned models, `valid.cer_ctc.ave.pb` (Default), which checkpoint is used to infer
+- `decoding_mode`: `normal` (Default), decoding mode for UniASR model(fast、normal、offline)
+- `hotword_txt`: `None` (Default), hotword file for contextual paraformer model(the hotword file name ends with .txt")
 
-- Decode with multi GPUs:
+#### Decode with multi GPUs:
 ```shell
     bash infer.sh \
     --model "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch" \
@@ -125,7 +125,7 @@ FunASR also offer recipes [egs_modelscope/asr/TEMPLATE/infer.sh](https://github.
     --gpu_inference true \
     --gpuid_list "0,1"
 ```
-- Decode with multi-thread CPUs:
+#### Decode with multi-thread CPUs:
 ```shell
     bash infer.sh \
     --model "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch" \
@@ -135,7 +135,7 @@ FunASR also offer recipes [egs_modelscope/asr/TEMPLATE/infer.sh](https://github.
     --njob 64
 ```
 
-- Results
+#### Results
 
 The decoding results can be found in `$output_dir/1best_recog/text.cer`, which includes recognition results of each sample and the CER metric of the whole test set.
 
