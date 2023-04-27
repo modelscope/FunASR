@@ -40,7 +40,7 @@ using namespace std;
 #include "util.h"
 #include "resample.h"
 #include "model.h"
-#include "vad-model.h"
+//#include "vad-model.h"
 #include "paraformer.h"
 #include "libfunasrapi.h"
 
