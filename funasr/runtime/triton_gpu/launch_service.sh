@@ -1,3 +1,7 @@
+if [ $# != 2 ]; then
+    echo "./launch_service.sh [model_type] [instance_num]"
+    exit
+fi
 model_type=$1
 instance_num=$2
 
@@ -18,9 +22,9 @@ fi
 rm -f $model_repo/encoder/1/$model_name
 rm -f $model_repo/feature_extractor/am.mvn
 rm -f $model_repo/feature_extractor/config.yaml
-ln -s `realpath export_dir/$model_type/$model_name` $model_repo/encoder/1/
-ln -s `realpath export_dir/$model_type/am.mvn` $model_repo/feature_extractor/
-ln -s `realpath export_dir/$model_type/config.yaml` $model_repo/feature_extractor/
+ln -s `realpath export_dir/$model_type/$model_name` $model_repo/encoder/1/$model_name
+ln -s `realpath export_dir/$model_type/am.mvn` $model_repo/feature_extractor/am.mvn
+ln -s `realpath export_dir/$model_type/config.yaml` $model_repo/feature_extractor/config.yaml
 
 config_file=$model_repo/encoder/config.pbtxt
 cp $config_file config.pbtxt
