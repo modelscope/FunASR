@@ -37,7 +37,7 @@ from funasr.modules.subsampling import TooShortUttError
 from funasr.modules.subsampling import check_short_utt
 
 
-class EncoderLayer(AbsEncoder):
+class EncoderLayer(nn.Module):
     """Encoder layer module.
 
     Args:
@@ -144,7 +144,7 @@ class EncoderLayer(AbsEncoder):
         return x, mask
 
 
-class TransformerEncoder(torch.nn.Module):
+class TransformerEncoder(AbsEncoder):
     """Transformer encoder module.
 
     Args:
