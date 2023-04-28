@@ -4,9 +4,7 @@ project(FunASRWebscoket)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
- 
 
- 
 option(ENABLE_WEBSOCKET "Whether to build websocket server" ON)
  
 if(ENABLE_WEBSOCKET)
@@ -57,9 +55,6 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/../onnxruntime/src src)
 include_directories(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/glog)
 set(BUILD_TESTING OFF)
 add_subdirectory(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/glog glog)
- 
-message("********************************${PROJECT_SOURCE_DIR}/../onnxruntime/include/" )
-
  
 
 add_executable(websocketmain "websocketmain.cpp" "websocketsrv.cpp")
