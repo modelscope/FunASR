@@ -106,7 +106,7 @@ model_choices = ClassChoices(
         sond=DiarSondModel,
         eend_ola=DiarEENDOLAModel,
     ),
-    type_check=AbsESPnetModel,
+    type_check=FunASRModel,
     default="sond",
 )
 encoder_choices = ClassChoices(

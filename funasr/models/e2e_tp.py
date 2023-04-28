@@ -29,7 +29,7 @@ else:
         yield
 
 
-class TimestampPredictor(AbsESPnetModel):
+class TimestampPredictor(FunASRModel):
     """
     Author: Speech Lab of DAMO Academy, Alibaba Group
     """
