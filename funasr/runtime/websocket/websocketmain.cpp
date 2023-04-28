@@ -92,7 +92,6 @@ int main(int argc, char* argv[]) {
     GetValue(wav_path, WAV_PATH, model_path);
     GetValue(wav_scp, WAV_SCP, model_path);
 
-    //  /funasr/runtime/onnxruntime/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/"
 
     std::string s_listen_ip = listen_ip.getValue();
     int s_port = port.getValue();
@@ -101,7 +100,7 @@ int main(int argc, char* argv[]) {
 
     int s_model_thread_num = model_thread_num.getValue();
 
-    // asio::io_context io_thread;  // context for network
+ 
     asio::io_context io_decoder;  // context for decoding
 
     std::vector<std::thread> decoder_threads;
