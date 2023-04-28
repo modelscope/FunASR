@@ -1,4 +1,4 @@
-# ONNXRuntime-cpp for Websocket Server
+# Service with websocket-cpp
 
 ## Export the model
 ### Install [modelscope and funasr](https://github.com/alibaba-damo-academy/FunASR#installation)
