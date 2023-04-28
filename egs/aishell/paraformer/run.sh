@@ -16,11 +16,9 @@ infer_cmd=utils/run.pl
 feats_dir="../DATA" #feature output dictionary
 exp_dir="."
 lang=zh
-dumpdir=dump/fbank
-feats_type=fbank
 token_type=char
-scp=wav.scp
 type=sound
+scp=wav.scp
 stage=1
 stop_stage=3
 
@@ -48,7 +46,7 @@ valid_set=dev
 test_sets="dev test"
 
 asr_config=conf/train_asr_paraformer_conformer_12e_6d_2048_256.yaml
-model_dir="baseline_$(basename "${asr_config}" .yaml)_${feats_type}_${lang}_${token_type}_${tag}"
+model_dir="baseline_$(basename "${asr_config}" .yaml)_${lang}_${token_type}_${tag}"
 
 inference_config=conf/decode_asr_transformer_noctc_1best.yaml
 inference_asr_model=valid.acc.ave_10best.pb
@@ -145,58 +143,58 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
         wait
 fi
 
-## Testing Stage
-#if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
-#    echo "stage 4: Inference"
-#    for dset in ${test_sets}; do
-#        asr_exp=${exp_dir}/exp/${model_dir}
-#        inference_tag="$(basename "${inference_config}" .yaml)"
-#        _dir="${asr_exp}/${inference_tag}/${inference_asr_model}/${dset}"
-#        _logdir="${_dir}/logdir"
-#        if [ -d ${_dir} ]; then
-#            echo "${_dir} is already exists. if you want to decode again, please delete this dir first."
-#            exit 0
-#        fi
-#        mkdir -p "${_logdir}"
-#        _data="${feats_dir}/${dumpdir}/${dset}"
-#        key_file=${_data}/${scp}
-#        num_scp_file="$(<${key_file} wc -l)"
-#        _nj=$([ $inference_nj -le $num_scp_file ] && echo "$inference_nj" || echo "$num_scp_file")
-#        split_scps=
-#        for n in $(seq "${_nj}"); do
-#            split_scps+=" ${_logdir}/keys.${n}.scp"
-#        done
-#        # shellcheck disable=SC2086
-#        utils/split_scp.pl "${key_file}" ${split_scps}
-#        _opts=
-#        if [ -n "${inference_config}" ]; then
-#            _opts+="--config ${inference_config} "
-#        fi
-#        ${infer_cmd} --gpu "${_ngpu}" --max-jobs-run "${_nj}" JOB=1:"${_nj}" "${_logdir}"/asr_inference.JOB.log \
-#            python -m funasr.bin.asr_inference_launch \
-#                --batch_size 1 \
-#                --ngpu "${_ngpu}" \
-#                --njob ${njob} \
-#                --gpuid_list ${gpuid_list} \
-#                --data_path_and_name_and_type "${_data}/${scp},speech,${type}" \
-#                --key_file "${_logdir}"/keys.JOB.scp \
-#                --asr_train_config "${asr_exp}"/config.yaml \
-#                --asr_model_file "${asr_exp}"/"${inference_asr_model}" \
-#                --output_dir "${_logdir}"/output.JOB \
-#                --mode paraformer \
-#                ${_opts}
-#
-#        for f in token token_int score text; do
-#            if [ -f "${_logdir}/output.1/1best_recog/${f}" ]; then
-#                for i in $(seq "${_nj}"); do
-#                    cat "${_logdir}/output.${i}/1best_recog/${f}"
-#                done | sort -k1 >"${_dir}/${f}"
-#            fi
-#        done
-#        python utils/proce_text.py ${_dir}/text ${_dir}/text.proc
-#        python utils/proce_text.py ${_data}/text ${_data}/text.proc
-#        python utils/compute_wer.py ${_data}/text.proc ${_dir}/text.proc ${_dir}/text.cer
-#        tail -n 3 ${_dir}/text.cer > ${_dir}/text.cer.txt
-#        cat ${_dir}/text.cer.txt
-#    done
-#fi
+# Testing Stage
+if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
+    echo "stage 4: Inference"
+    for dset in ${test_sets}; do
+        asr_exp=${exp_dir}/exp/${model_dir}
+        inference_tag="$(basename "${inference_config}" .yaml)"
+        _dir="${asr_exp}/${inference_tag}/${inference_asr_model}/${dset}"
+        _logdir="${_dir}/logdir"
+        if [ -d ${_dir} ]; then
+            echo "${_dir} is already exists. if you want to decode again, please delete this dir first."
+            exit 0
+        fi
+        mkdir -p "${_logdir}"
+        _data="${feats_dir}/data/${dset}"
+        key_file=${_data}/${scp}
+        num_scp_file="$(<${key_file} wc -l)"
+        _nj=$([ $inference_nj -le $num_scp_file ] && echo "$inference_nj" || echo "$num_scp_file")
+        split_scps=
+        for n in $(seq "${_nj}"); do
+            split_scps+=" ${_logdir}/keys.${n}.scp"
+        done
+        # shellcheck disable=SC2086
+        utils/split_scp.pl "${key_file}" ${split_scps}
+        _opts=
+        if [ -n "${inference_config}" ]; then
+            _opts+="--config ${inference_config} "
+        fi
+        ${infer_cmd} --gpu "${_ngpu}" --max-jobs-run "${_nj}" JOB=1:"${_nj}" "${_logdir}"/asr_inference.JOB.log \
+            python -m funasr.bin.asr_inference_launch \
+                --batch_size 1 \
+                --ngpu "${_ngpu}" \
+                --njob ${njob} \
+                --gpuid_list ${gpuid_list} \
+                --data_path_and_name_and_type "${_data}/${scp},speech,${type}" \
+                --key_file "${_logdir}"/keys.JOB.scp \
+                --asr_train_config "${asr_exp}"/config.yaml \
+                --asr_model_file "${asr_exp}"/"${inference_asr_model}" \
+                --output_dir "${_logdir}"/output.JOB \
+                --mode paraformer \
+                ${_opts}
+
+        for f in token token_int score text; do
+            if [ -f "${_logdir}/output.1/1best_recog/${f}" ]; then
+                for i in $(seq "${_nj}"); do
+                    cat "${_logdir}/output.${i}/1best_recog/${f}"
+                done | sort -k1 >"${_dir}/${f}"
+            fi
+        done
+        python utils/proce_text.py ${_dir}/text ${_dir}/text.proc
+        python utils/proce_text.py ${_data}/text ${_data}/text.proc
+        python utils/compute_wer.py ${_data}/text.proc ${_dir}/text.proc ${_dir}/text.cer
+        tail -n 3 ${_dir}/text.cer > ${_dir}/text.cer.txt
+        cat ${_dir}/text.cer.txt
+    done
+fi
