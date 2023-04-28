@@ -380,7 +380,7 @@ class SANMEncoder(AbsEncoder):
         else:
             xs_pad = self.embed(xs_pad, cache)
         if cache["tail_chunk"]:
-            xs_pad = cache["feats"]
+            xs_pad = to_device(cache["feats"], device=xs_pad.device)
         else:
             xs_pad = self._add_overlap_chunk(xs_pad, cache)
         encoder_outs = self.encoders0(xs_pad, None, None, None, None)

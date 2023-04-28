@@ -205,9 +205,12 @@ class Speech2Text:
         results = []
         cache_en = cache["encoder"]
         if speech.shape[1] < 16 * 60 and cache_en["is_final"]:
+            if cache_en["start_idx"] == 0:
+                return []
             cache_en["tail_chunk"] = True
             feats = cache_en["feats"]
             feats_len = torch.tensor([feats.shape[1]])
+            self.asr_model.frontend = None
             results = self.infer(feats, feats_len, cache)
             return results
         else:
