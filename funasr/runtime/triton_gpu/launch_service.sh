@@ -3,7 +3,7 @@ instance_num=$2
 
 if [ "$model_type" = "onnx" ]; then
     model_repo="model_repo_paraformer_large_offline"
-    model_name="onnx.model"
+    model_name="model.onnx"
 elif [ "$model_type" = "libtorch" ]; then
     model_repo="model_repo_paraformer_torchscritpts"
     model_name="model.torchscripts"
