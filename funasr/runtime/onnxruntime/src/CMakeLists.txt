@@ -25,6 +25,14 @@ endif()
 include_directories(${CMAKE_SOURCE_DIR}/include)
 target_link_libraries(funasr PUBLIC onnxruntime ${EXTRA_LIBS})
 
+if(ENABLE_WEBSOCKET)
+  add_executable(websocketmain "websocketmain.cpp")
+  add_executable(websocketclient "websocketclient.cpp")
+
+  target_link_libraries(websocketclient PUBLIC funasr)
+  target_link_libraries(websocketmain PUBLIC funasr)
+endif()
+
 add_executable(funasr-onnx-offline "funasr-onnx-offline.cpp")
 add_executable(funasr-onnx-offline-rtf "funasr-onnx-offline-rtf.cpp")
 target_link_libraries(funasr-onnx-offline PUBLIC funasr)
