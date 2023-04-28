@@ -43,7 +43,7 @@ from funasr.modules.subsampling import TooShortUttError
 from funasr.modules.subsampling import check_short_utt
 from funasr.modules.subsampling import Conv2dSubsamplingPad
 
-class ConvolutionModule(AbsEncoder):
+class ConvolutionModule(nn.Module):
     """ConvolutionModule in Conformer model.
 
     Args:
@@ -278,7 +278,7 @@ class EncoderLayer(nn.Module):
         return x, mask
 
 
-class ConformerEncoder(torch.nn.Module):
+class ConformerEncoder(AbsEncoder):
     """Conformer encoder module.
 
     Args:
