@@ -8,7 +8,7 @@
 // take some ideas from https://github.com/k2-fsa/sherpa-onnx
 // online-websocket-server-impl.cc, thanks. The websocket server has two threads
 // pools, one for handle network data and one for asr decoder.
-// now only support offline engine. 
+// now only support offline engine.
 
 #ifndef WEBSOCKETSRV_SERVER_H_
 #define WEBSOCKETSRV_SERVER_H_

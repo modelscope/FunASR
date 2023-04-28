@@ -12,7 +12,8 @@
 #include <websocketpp/common/thread.hpp>
 #include <websocketpp/config/asio_no_tls_client.hpp>
 
-#include "libfunasrapi.cpp"
+#include "audio.h"
+
 /**
  * Define a semi-cross platform helper method that waits/sleeps for a bit.
  */
@@ -88,28 +89,28 @@ class websocket_client {
     asio_thread.join();
   }
 
-  // The open handler will signal that we are ready to start sending telemetry
+  // The open handler will signal that we are ready to start sending data
   void on_open(websocketpp::connection_hdl) {
     m_client.get_alog().write(websocketpp::log::alevel::app,
-                              "Connection opened, starting telemetry!");
+                              "Connection opened, starting data!");
 
     scoped_lock guard(m_lock);
     m_open = true;
   }
 
-  // The close handler will signal that we should stop sending telemetry
+  // The close handler will signal that we should stop sending data
   void on_close(websocketpp::connection_hdl) {
     m_client.get_alog().write(websocketpp::log::alevel::app,
-                              "Connection closed, stopping telemetry!");
+                              "Connection closed, stopping data!");
 
     scoped_lock guard(m_lock);
     m_done = true;
   }
 
-  // The fail handler will signal that we should stop sending telemetry
+  // The fail handler will signal that we should stop sending data
   void on_fail(websocketpp::connection_hdl) {
     m_client.get_alog().write(websocketpp::log::alevel::app,
-                              "Connection failed, stopping telemetry!");
+                              "Connection failed, stopping data!");
 
     scoped_lock guard(m_lock);
     m_done = true;
@@ -134,7 +135,7 @@ class websocket_client {
     while (1) {
       {
         scoped_lock guard(m_lock);
-        // If the connection has been closed, stop generating telemetry
+        // If the connection has been closed, stop generating data
         if (m_done) {
           break;
         }
@@ -171,7 +172,7 @@ class websocket_client {
       // not in the right state. Usually this means we tried to send a
       // message to a connection that was closed or in the process of
       // closing. While many errors here can be easily recovered from,
-      // in this simple example, we'll stop the telemetry loop.
+      // in this simple example, we'll stop the data loop.
       if (ec) {
         m_client.get_alog().write(websocketpp::log::alevel::app,
                                   "Send Error: " + ec.message());
