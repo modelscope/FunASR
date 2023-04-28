@@ -13,16 +13,16 @@ logger.setLevel(logging.CRITICAL)
 os.environ["MODELSCOPE_CACHE"] = "./"
 inference_pipeline = pipeline(
     task=Tasks.auto_speech_recognition,
-    model='damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8404-online',
+    model='damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online',
     model_revision='v1.0.4'
 )
 
-model_dir = os.path.join(os.environ["MODELSCOPE_CACHE"], "damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8404-online")
+model_dir = os.path.join(os.environ["MODELSCOPE_CACHE"], "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online")
 speech, sample_rate = soundfile.read(os.path.join(model_dir, "example/asr_example.wav"))
 speech_length = speech.shape[0]
 
 sample_offset = 0
-chunk_size = [8, 8, 4] #[5, 10, 5] 600ms, [8, 8, 4] 480ms
+chunk_size = [5, 10, 5] #[5, 10, 5] 600ms, [8, 8, 4] 480ms
 stride_size =  chunk_size[1] * 960
 param_dict = {"cache": dict(), "is_final": False, "chunk_size": chunk_size}
 final_result = ""
