@@ -440,7 +440,7 @@ class ASRTask(AbsTask):
                 token_type=args.token_type,
                 token_list=args.token_list,
                 bpemodel=args.bpemodel,
-                non_linguistic_symbols=args.non_linguistic_symbols,
+                non_linguistic_symbols=args.non_linguistic_symbols if hasattr(args, "non_linguistic_symbols") else None,
                 text_cleaner=args.cleaner,
                 g2p_type=args.g2p,
                 split_with_space=args.split_with_space if hasattr(args, "split_with_space") else False,
