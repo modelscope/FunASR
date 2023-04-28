@@ -99,7 +99,7 @@ class SpecAug(AbsSpecAug):
             x, x_lengths = self.time_mask(x, x_lengths)
         return x, x_lengths
 
-class SpecAugLFR(torch.nn.Module):
+class SpecAugLFR(AbsSpecAug):
     """Implementation of SpecAug.
     lfr_rate：low frame rate
     """
