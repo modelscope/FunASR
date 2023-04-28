@@ -88,9 +88,15 @@ example:
 ```
 
 ## Run websocket client test
+
+```shell
 Usage: websocketclient server_ip port wav_path threads_num
+
 example:
+
 websocketclient 127.0.0.1 8889 funasr/runtime/websocket/test.pcm.wav 64
+
 result json, example like:
 {"text":"一二三四五六七八九十一二三四五六七八九十"}
+```
 
