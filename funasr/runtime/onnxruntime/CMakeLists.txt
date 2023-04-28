@@ -39,4 +39,3 @@ if(ENABLE_GLOG)
     set(BUILD_TESTING OFF)
     add_subdirectory(third_party/glog)
 endif()
-

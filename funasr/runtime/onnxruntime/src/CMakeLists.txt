@@ -29,4 +29,3 @@ add_executable(funasr-onnx-offline "funasr-onnx-offline.cpp")
 add_executable(funasr-onnx-offline-rtf "funasr-onnx-offline-rtf.cpp")
 target_link_libraries(funasr-onnx-offline PUBLIC funasr)
 target_link_libraries(funasr-onnx-offline-rtf PUBLIC funasr)
-
