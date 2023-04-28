@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ONNXRuntime-cpp &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <title>Service with websocket-cpp &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -17,8 +17,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Libtorch-python" href="libtorch_python.html" />
-    <link rel="prev" title="ONNXRuntime-python" href="onnxruntime_python.html" /> 
+    <link rel="next" title="CPU Benchmark (ONNX-python)" href="../benchmark/benchmark_onnx.html" />
+    <link rel="prev" title="Service with websocket-python" href="websocket_python.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -72,7 +72,12 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="export.html">Export models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="onnxruntime_python.html">ONNXRuntime-python</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">ONNXRuntime-cpp</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="onnxruntime_cpp.html">ONNXRuntime-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libtorch_python.html">Libtorch-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grpc_python.html">Service with grpc-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grpc_cpp.html">Service with grpc-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="websocket_python.html">Service with websocket-python</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Service with websocket-cpp</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#export-the-model">Export the model</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#install-modelscope-and-funasr">Install modelscope and funasr</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#export-onnx-model">Export onnx model</a></li>
@@ -84,15 +89,10 @@
 <li class="toctree-l3"><a class="reference internal" href="#build-runtime">Build runtime</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#run-the-demo">Run the demo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#acknowledge">Acknowledge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#run-the-websocket-server">Run the websocket server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#run-websocket-client-test">Run websocket client test</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="libtorch_python.html">Libtorch-python</a></li>
-<li class="toctree-l1"><a class="reference internal" href="grpc_python.html">Service with grpc-python</a></li>
-<li class="toctree-l1"><a class="reference internal" href="grpc_cpp.html">Service with grpc-cpp</a></li>
-<li class="toctree-l1"><a class="reference internal" href="websocket_python.html">Service with websocket-python</a></li>
-<li class="toctree-l1"><a class="reference internal" href="websocket_cpp.html">Service with websocket-cpp</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Benchmark and Leadboard</span></p>
 <ul>
@@ -133,9 +133,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">ONNXRuntime-cpp</li>
+      <li class="breadcrumb-item active">Service with websocket-cpp</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/runtime/onnxruntime_cpp.md.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/runtime/websocket_cpp.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -143,8 +143,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="onnxruntime-cpp">
-<h1>ONNXRuntime-cpp<a class="headerlink" href="#onnxruntime-cpp" title="Permalink to this headline"></a></h1>
+  <div class="section" id="service-with-websocket-cpp">
+<h1>Service with websocket-cpp<a class="headerlink" href="#service-with-websocket-cpp" title="Permalink to this headline"></a></h1>
 <div class="section" id="export-the-model">
 <h2>Export the model<a class="headerlink" href="#export-the-model" title="Permalink to this headline"></a></h2>
 <div class="section" id="install-modelscope-and-funasr">
@@ -183,7 +183,7 @@ tar -zxvf onnxruntime-linux-x64-1.14.0.tgz
 </div>
 <div class="section" id="build-runtime">
 <h3>Build runtime<a class="headerlink" href="#build-runtime" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/alibaba-damo-academy/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> funasr/runtime/onnxruntime
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/alibaba-damo-academy/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> funasr/runtime/websocket
 mkdir build <span class="o">&amp;&amp;</span> <span class="nb">cd</span> build
 cmake  -DCMAKE_BUILD_TYPE<span class="o">=</span>release .. -DONNXRUNTIME_DIR<span class="o">=</span>/path/to/onnxruntime-linux-x64-1.14.0
 make
@@ -191,14 +191,17 @@ make
 </div>
 </div>
 </div>
-<div class="section" id="run-the-demo">
-<h2>Run the demo<a class="headerlink" href="#run-the-demo" title="Permalink to this headline"></a></h2>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-onnx-offline     <span class="o">[</span>--wav-scp &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--wav-path &lt;string&gt;<span class="o">]</span>
-                          <span class="o">[</span>--punc-config &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-model &lt;string&gt;<span class="o">]</span>
-                          --am-config &lt;string&gt; --am-cmvn &lt;string&gt;
-                          --am-model &lt;string&gt; <span class="o">[</span>--vad-config &lt;string&gt;<span class="o">]</span>
-                          <span class="o">[</span>--vad-cmvn &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--vad-model &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--<span class="o">]</span>
-                          <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
+<div class="section" id="run-the-websocket-server">
+<h2>Run the websocket server<a class="headerlink" href="#run-the-websocket-server" title="Permalink to this headline"></a></h2>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> bin
+websocketmain  <span class="o">[</span>--model_thread_num &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--decoder_thread_num
+                        &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--io_thread_num &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--port &lt;int&gt;<span class="o">]</span>
+                        <span class="o">[</span>--listen_ip &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--wav-scp &lt;string&gt;<span class="o">]</span>
+                        <span class="o">[</span>--wav-path &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-config &lt;string&gt;<span class="o">]</span>
+                        <span class="o">[</span>--punc-model &lt;string&gt;<span class="o">]</span> --am-config &lt;string&gt;
+                        --am-cmvn &lt;string&gt; --am-model &lt;string&gt;
+                        <span class="o">[</span>--vad-config &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--vad-cmvn &lt;string&gt;<span class="o">]</span>
+                        <span class="o">[</span>--vad-model &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--<span class="o">]</span> <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
 Where:
    --wav-scp &lt;string&gt;
      wave scp path
@@ -223,21 +226,31 @@ Where:
      vad cmvn path
    --vad-model &lt;string&gt;
      vad model path
+   --decoder_thread_num &lt;int&gt;
+     number of threads <span class="k">for</span> decoder
+   --io_thread_num &lt;int&gt;
+     number of threads <span class="k">for</span> network io
   
    Required: --am-config &lt;string&gt; --am-cmvn &lt;string&gt; --am-model &lt;string&gt; 
    If use vad, please add: <span class="o">[</span>--vad-config &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--vad-cmvn &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--vad-model &lt;string&gt;<span class="o">]</span>
    If use punc, please add: <span class="o">[</span>--punc-config &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-model &lt;string&gt;<span class="o">]</span> 
+example:
+   websocketmain --am-config /FunASR/funasr/runtime/onnxruntime/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/config.yaml --am-model /FunASR/funasr/runtime/onnxruntime/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/model.onnx --am-cmvn /FunASR/funasr/runtime/onnxruntime/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/am.mvn
 </pre></div>
 </div>
 </div>
-<div class="section" id="acknowledge">
-<h2>Acknowledge<a class="headerlink" href="#acknowledge" title="Permalink to this headline"></a></h2>
-<ol class="simple">
-<li><p>This project is maintained by <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR">FunASR community</a>.</p></li>
-<li><p>We acknowledge mayong for contributing the onnxruntime of Paraformer and CT_Transformer, <a class="reference external" href="https://github.com/RapidAI/RapidASR/tree/main/cpp_onnx">repo-asr</a>, <a class="reference external" href="https://github.com/RapidAI/RapidPunc">repo-punc</a>.</p></li>
-<li><p>We acknowledge <a class="reference external" href="https://github.com/zhuzizyf/damo-fsmn-vad-infer-httpserver">ChinaTelecom</a> for contributing the VAD runtime.</p></li>
-<li><p>We borrowed a lot of code from <a class="reference external" href="https://github.com/chenkui164/FastASR">FastASR</a> for audio frontend and text-postprocess.</p></li>
-</ol>
+<div class="section" id="run-websocket-client-test">
+<h2>Run websocket client test<a class="headerlink" href="#run-websocket-client-test" title="Permalink to this headline"></a></h2>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>Usage: websocketclient server_ip port wav_path threads_num
+
+example:
+
+websocketclient <span class="m">127</span>.0.0.1 <span class="m">8889</span> funasr/runtime/websocket/test.pcm.wav <span class="m">64</span>
+
+result json, example like:
+<span class="o">{</span><span class="s2">&quot;text&quot;</span>:<span class="s2">&quot;一二三四五六七八九十一二三四五六七八九十&quot;</span><span class="o">}</span>
+</pre></div>
+</div>
 </div>
 </div>
 
@@ -245,8 +258,8 @@ Where:
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="onnxruntime_python.html" class="btn btn-neutral float-left" title="ONNXRuntime-python" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="libtorch_python.html" class="btn btn-neutral float-right" title="Libtorch-python" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="websocket_python.html" class="btn btn-neutral float-left" title="Service with websocket-python" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../benchmark/benchmark_onnx.html" class="btn btn-neutral float-right" title="CPU Benchmark (ONNX-python)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
