@@ -492,8 +492,9 @@ async def main():
             latency_data += ans[2]
 
     rtf = elapsed / total_duration
+    speed = 1 / rtf
 
-    s = f"RTF: {rtf:.4f}\n"
+    s = f"RTF: {rtf:.4f}, SPEED: {speed:.4f}\n"
     s += f"total_duration: {total_duration:.3f} seconds\n"
     s += f"({total_duration/3600:.2f} hours)\n"
     s += (

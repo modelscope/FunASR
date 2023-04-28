@@ -12,7 +12,7 @@ parameters [
   {
     key: "model_path"
     value: {
-      string_value: "./model_repo_paraformer_torchscritpts/encoder/model.torchscripts"
+      string_value: "./model_repo_paraformer_torchscritpts/encoder/1/model.torchscripts"
     }
   },
   {

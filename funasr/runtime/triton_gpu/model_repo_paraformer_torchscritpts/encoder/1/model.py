@@ -4,6 +4,7 @@ import numpy as np
 import torch
 import triton_python_backend_utils as pb_utils
 import yaml
+from torch.utils.dlpack import from_dlpack
 
 
 class TritonPythonModel:
@@ -83,8 +84,7 @@ class TritonPythonModel:
             # Perform inference on the request and append it to responses list...
             _speech = pb_utils.get_input_tensor_by_name(request, 'speech')
             _speech_len = pb_utils.get_input_tensor_by_name(request, 'speech_lengths')
-            _speech = _speech.as_numpy()
-            _speech = torch.tensor(_speech, dtype=torch.float32).to(self.device)
+            _speech = from_dlpack(_speech.to_dlpack()).to(self.device)
             _speech_len = int(_speech_len.as_numpy())
             while _speech.dim() > 2:
                 _speech = _speech.squeeze(0)
