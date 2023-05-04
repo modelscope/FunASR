@@ -13,7 +13,7 @@ def padding(data, float_pad_value=0.0, int_pad_value=-1):
     batch = {}
     data_names = data[0].keys()
     for data_name in data_names:
-        if data_name == "key" or data_name =="sampling_rate":
+        if data_name == "key" or data_name == "sampling_rate" or data_name == 'hotword_indxs':
             continue
         else:
             if data[0][data_name].dtype.kind == "i":
