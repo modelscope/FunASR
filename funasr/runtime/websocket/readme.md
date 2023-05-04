@@ -100,3 +100,9 @@ result json, example like:
 {"text":"一二三四五六七八九十一二三四五六七八九十"}
 ```
 
+
+## Acknowledge
+1. This project is maintained by [FunASR community](https://github.com/alibaba-damo-academy/FunASR).
+2. We acknowledge [zhaoming](https://github.com/zhaomingwork/FunASR/tree/add-offline-websocket-srv/funasr/runtime/websocket) for contributing the websocket(cpp-api).
+
+
