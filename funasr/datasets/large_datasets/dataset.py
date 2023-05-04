@@ -101,7 +101,7 @@ class AudioDataset(IterableDataset):
                 if data_type == "kaldi_ark":
                     ark_reader = ReadHelper('ark:{}'.format(data_file))
                     reader_list.append(ark_reader)
-                elif data_type == "text" or data_type == "sound":
+                elif data_type == "text" or data_type == "sound" or data_type == 'text_hotword':
                     text_reader = open(data_file, "r")
                     reader_list.append(text_reader)
                 elif data_type == "none":
