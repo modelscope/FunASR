@@ -239,7 +239,7 @@ class Speech2Text:
                         feats_len = torch.tensor([feats_chunk2.shape[1]])
                         results_chunk2 = self.infer(feats_chunk2, feats_len, cache)
 
-                        return ["".join(results_chunk1 + results_chunk2)]
+                        return [" ".join(results_chunk1 + results_chunk2)]
 
                 results = self.infer(feats, feats_len, cache)
 
@@ -299,12 +299,13 @@ class Speech2Text:
 
                 # Change integer-ids to tokens
                 token = self.converter.ids2tokens(token_int)
+                token = " ".join(token)
 
-                if self.tokenizer is not None:
-                    text = self.tokenizer.tokens2text(token)
-                else:
-                    text = None
-                results.append(text)
+                #if self.tokenizer is not None:
+                #    text = self.tokenizer.tokens2text(token)
+                #else:
+                #    text = None
+                results.append(token)
 
         # assert check_return_type(results)
         return results
