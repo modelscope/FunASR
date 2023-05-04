@@ -1,3 +1,4 @@
+from itertools import count
 import os
 import tempfile
 import codecs
@@ -19,11 +20,15 @@ if __name__ == '__main__':
         os.makedirs(work_dir)
     wav_file_path = os.path.join(work_dir, "wav.scp")
     
+    counter = 0
     with codecs.open(wav_file_path, 'w') as fin: 
         for line in ds_dict:
+            counter += 1
             wav = line["Audio:FILE"]
             idx = wav.split("/")[-1].split(".")[0]
             fin.writelines(idx + " " + wav + "\n")
+            if counter == 50:
+                break
     audio_in = wav_file_path         
 
     inference_pipeline = pipeline(
