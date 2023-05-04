@@ -131,8 +131,9 @@ def build_trainer(modelscope_dict,
     if batch_bins is not None:
         if args.dataset_type == "small":
             args.batch_bins = batch_bins
-        elif args.dataset_type == "large" and "batch_size" not in args.dataset_conf["batch_conf"]:
-            args.dataset_conf["batch_conf"]["batch_size"] = batch_bins
+        elif args.dataset_type == "large":
+            if "batch_size" not in args.dataset_conf["batch_conf"]:
+                args.dataset_conf["batch_conf"]["batch_size"] = batch_bins
         else:
             raise ValueError(f"Not supported dataset_type={args.dataset_type}")
     if args.normalize in ["null", "none", "None"]:
