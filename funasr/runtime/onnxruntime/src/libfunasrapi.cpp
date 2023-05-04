@@ -11,6 +11,12 @@ extern "C" {
 		return mm;
 	}
 
+	_FUNASRAPI FUNASR_HANDLE  FunVadInit(std::map<std::string, std::string>& model_path, int thread_num)
+	{
+		Model* mm = CreateModel(model_path, thread_num);
+		return mm;
+	}
+
 	_FUNASRAPI FUNASR_RESULT FunASRRecogBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, FUNASR_MODE mode, QM_CALLBACK fn_callback)
 	{
 		Model* recog_obj = (Model*)handle;

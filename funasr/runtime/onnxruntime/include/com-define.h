@@ -24,6 +24,7 @@
 #define WAV_PATH "wav-path"
 #define WAV_SCP "wav-scp"
 #define THREAD_NUM "thread-num"
+#define PORT_ID "port-id"
 
 // vad
 #ifndef VAD_SILENCE_DURATION

@@ -4,9 +4,10 @@
 ### Install [modelscope and funasr](https://github.com/alibaba-damo-academy/FunASR#installation)
 
 ```shell
-pip3 install torch torchaudio
-pip install -U modelscope
-pip install -U funasr
+# pip3 install torch torchaudio
+pip install -U modelscope funasr
+# For the users in China, you could install with the command:
+# pip install -U modelscope funasr -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html -i https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
 
 ### Export [onnx model](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export)
@@ -79,5 +80,6 @@ Where:
 
 ## Acknowledge
 1. This project is maintained by [FunASR community](https://github.com/alibaba-damo-academy/FunASR).
-2. We acknowledge [mayong](https://github.com/RapidAI/RapidASR/tree/main/cpp_onnx) for contributing the onnxruntime(cpp api).
-3. We borrowed a lot of code from [FastASR](https://github.com/chenkui164/FastASR) for audio frontend and text-postprocess.
+2. We acknowledge mayong for contributing the onnxruntime of Paraformer and CT_Transformer, [repo-asr](https://github.com/RapidAI/RapidASR/tree/main/cpp_onnx), [repo-punc](https://github.com/RapidAI/RapidPunc).
+3. We acknowledge [ChinaTelecom](https://github.com/zhuzizyf/damo-fsmn-vad-infer-httpserver) for contributing the VAD runtime.
+4. We borrowed a lot of code from [FastASR](https://github.com/chenkui164/FastASR) for audio frontend and text-postprocess.

@@ -19,22 +19,24 @@ inference_pipeline = pipeline(
 rec_result = inference_pipeline(audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
 print(rec_result)
 ```
-#### [Paraformer-online Model](https://www.modelscope.cn/models/damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8404-online/summary)
+#### [Paraformer-online Model](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary)
 ```python
 inference_pipeline = pipeline(
     task=Tasks.auto_speech_recognition,
-    model='damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8404-online',
+    model='damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online',
+    model_revision='v1.0.4'
     )
 import soundfile
 speech, sample_rate = soundfile.read("example/asr_example.wav")
 
-param_dict = {"cache": dict(), "is_final": False}
-chunk_stride = 7680# 480ms
-# first chunk, 480ms
+chunk_size = [5, 10, 5] #[5, 10, 5] 600ms, [8, 8, 4] 480ms
+param_dict = {"cache": dict(), "is_final": False, "chunk_size": chunk_size}
+chunk_stride = chunk_size[1] * 960 # 600ms、480ms
+# first chunk, 600ms
 speech_chunk = speech[0:chunk_stride] 
 rec_result = inference_pipeline(audio_in=speech_chunk, param_dict=param_dict)
 print(rec_result)
-# next chunk, 480ms
+# next chunk, 600ms
 speech_chunk = speech[chunk_stride:chunk_stride+chunk_stride]
 rec_result = inference_pipeline(audio_in=speech_chunk, param_dict=param_dict)
 print(rec_result)
@@ -74,15 +76,15 @@ rec_result = inference_pipeline(audio_in='https://isv-data.oss-cn-hangzhou.aliyu
 print(rec_result)
 ```
 
-#### API-reference
-##### Define pipeline
+### API-reference
+#### Define pipeline
 - `task`: `Tasks.auto_speech_recognition`
 - `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
 - `ngpu`: `1` (Default), decoding on GPU. If ngpu=0, decoding on CPU
 - `ncpu`: `1` (Default), sets the number of threads used for intraop parallelism on CPU 
 - `output_dir`: `None` (Default), the output path of results if set
 - `batch_size`: `1` (Default), batch size when decoding
-##### Infer pipeline
+#### Infer pipeline
 - `audio_in`: the input to decode, which could be: 
   - wav_path, `e.g.`: asr_example.wav,
   - pcm_path, `e.g.`: asr_example.pcm, 
@@ -100,20 +102,20 @@ print(rec_result)
 ### Inference with multi-thread CPUs or multi GPUs
 FunASR also offer recipes [egs_modelscope/asr/TEMPLATE/infer.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/TEMPLATE/infer.sh) to decode with multi-thread CPUs, or multi GPUs.
 
-- Setting parameters in `infer.sh`
-    - `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
-    - `data_dir`: the dataset dir needs to include `wav.scp`. If `${data_dir}/text` is also exists, CER will be computed
-    - `output_dir`: output dir of the recognition results
-    - `batch_size`: `64` (Default), batch size of inference on gpu
-    - `gpu_inference`: `true` (Default), whether to perform gpu decoding, set false for CPU inference
-    - `gpuid_list`: `0,1` (Default), which gpu_ids are used to infer
-    - `njob`: only used for CPU inference (`gpu_inference`=`false`), `64` (Default), the number of jobs for CPU decoding
-    - `checkpoint_dir`: only used for infer finetuned models, the path dir of finetuned models
-    - `checkpoint_name`: only used for infer finetuned models, `valid.cer_ctc.ave.pb` (Default), which checkpoint is used to infer
-    - `decoding_mode`: `normal` (Default), decoding mode for UniASR model(fast、normal、offline)
-    - `hotword_txt`: `None` (Default), hotword file for contextual paraformer model(the hotword file name ends with .txt")
+#### Settings of `infer.sh`
+- `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
+- `data_dir`: the dataset dir needs to include `wav.scp`. If `${data_dir}/text` is also exists, CER will be computed
+- `output_dir`: output dir of the recognition results
+- `batch_size`: `64` (Default), batch size of inference on gpu
+- `gpu_inference`: `true` (Default), whether to perform gpu decoding, set false for CPU inference
+- `gpuid_list`: `0,1` (Default), which gpu_ids are used to infer
+- `njob`: only used for CPU inference (`gpu_inference`=`false`), `64` (Default), the number of jobs for CPU decoding
+- `checkpoint_dir`: only used for infer finetuned models, the path dir of finetuned models
+- `checkpoint_name`: only used for infer finetuned models, `valid.cer_ctc.ave.pb` (Default), which checkpoint is used to infer
+- `decoding_mode`: `normal` (Default), decoding mode for UniASR model(fast、normal、offline)
+- `hotword_txt`: `None` (Default), hotword file for contextual paraformer model(the hotword file name ends with .txt")
 
-- Decode with multi GPUs:
+#### Decode with multi GPUs:
 ```shell
     bash infer.sh \
     --model "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch" \
@@ -123,7 +125,7 @@ FunASR also offer recipes [egs_modelscope/asr/TEMPLATE/infer.sh](https://github.
     --gpu_inference true \
     --gpuid_list "0,1"
 ```
-- Decode with multi-thread CPUs:
+#### Decode with multi-thread CPUs:
 ```shell
     bash infer.sh \
     --model "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch" \
@@ -133,7 +135,7 @@ FunASR also offer recipes [egs_modelscope/asr/TEMPLATE/infer.sh](https://github.
     --njob 64
 ```
 
-- Results
+#### Results
 
 The decoding results can be found in `$output_dir/1best_recog/text.cer`, which includes recognition results of each sample and the CER metric of the whole test set.
 

@@ -380,8 +380,10 @@ bool Audio::LoadPcmwav(const char* filename, int32_t* sampling_rate)
     FILE* fp;
     fp = fopen(filename, "rb");
     if (fp == nullptr)
+	{
         LOG(ERROR) << "Failed to read " << filename;
         return false;
+	}
     fseek(fp, 0, SEEK_END);
     uint32_t n_file_len = ftell(fp);
     fseek(fp, 0, SEEK_SET);

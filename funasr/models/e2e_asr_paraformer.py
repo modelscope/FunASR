@@ -712,9 +712,9 @@ class ParaformerOnline(Paraformer):
 
     def calc_predictor_chunk(self, encoder_out, cache=None):
 
-        pre_acoustic_embeds, pre_token_length, alphas, pre_peak_index = \
+        pre_acoustic_embeds, pre_token_length = \
             self.predictor.forward_chunk(encoder_out, cache["encoder"])
-        return pre_acoustic_embeds, pre_token_length, alphas, pre_peak_index
+        return pre_acoustic_embeds, pre_token_length
 
     def cal_decoder_with_predictor_chunk(self, encoder_out, sematic_embeds, cache=None):
         decoder_outs = self.decoder.forward_chunk(

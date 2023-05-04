@@ -1,17 +1,8 @@
-# Using funasr with grpc-cpp
+# Service with grpc-cpp
 
 ## For the Server
 
 ### Build [onnxruntime](./onnxruntime_cpp.md) as it's document
-
-```
-#put onnx-lib & onnx-asr-model into /path/to/asrmodel(eg: /data/asrmodel)
-ls /data/asrmodel/
-onnxruntime-linux-x64-1.14.0  speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
-
-#make sure you have config.yaml, am.mvn, model.onnx(or model_quant.onnx) under speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
-
-```
 
 ### Compile and install grpc v1.52.0 in case of grpc bugs
 ```
@@ -46,8 +37,39 @@ source ~/.bashrc
 
 ### Start grpc paraformer server
 ```
-Usage: ./cmake/build/paraformer_server port thread_num /path/to/model_file quantize(true or false)
-./cmake/build/paraformer_server 10108 4 /data/asrmodel/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch false
+./cmake/build/paraformer-server     --port-id <string> [--punc-config
+                                    <string>] [--punc-model <string>]
+                                    --am-config <string> --am-cmvn <string>
+                                    --am-model <string> [--vad-config
+                                    <string>] [--vad-cmvn <string>]
+                                    [--vad-model <string>] [--] [--version]
+                                    [-h]
+Where:
+   --port-id <string>
+     (required)  port id
+
+   --am-config <string>
+     (required)  am config path
+   --am-cmvn <string>
+     (required)  am cmvn path
+   --am-model <string>
+     (required)  am model path
+
+   --punc-config <string>
+     punc config path
+   --punc-model <string>
+     punc model path
+
+   --vad-config <string>
+     vad config path
+   --vad-cmvn <string>
+     vad cmvn path
+   --vad-model <string>
+     vad model path
+
+   Required: --port-id <string> --am-config <string> --am-cmvn <string> --am-model <string> 
+   If use vad, please add: [--vad-config <string>] [--vad-cmvn <string>] [--vad-model <string>]
+   If use punc, please add: [--punc-config <string>] [--punc-model <string>] 
 ```
 
 ## For the client

@@ -70,6 +70,7 @@ Overview
    ./runtime/grpc_python.md
    ./runtime/grpc_cpp.md
    ./runtime/websocket_python.md
+   ./runtime/websocket_cpp.md
 
 .. toctree::
    :maxdepth: 1
