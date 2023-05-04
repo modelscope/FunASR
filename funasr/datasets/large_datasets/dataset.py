@@ -181,7 +181,8 @@ def Dataset(data_list_file,
     hw_config = {"sample_rate": conf.get("sample_rate", 0.6),
                  "double_rate": conf.get("double_rate", 0.1),
                  "hotword_min_length": conf.get("hotword_min_length", 2),
-                 "hotword_max_length": conf.get("hotword_max_length", 8)}
+                 "hotword_max_length": conf.get("hotword_max_length", 8),
+                 "pre_prob": conf.get("pre_prob", 0.0)}
 
     if pre_hwfile is not None:
         pre_hwlist = []
