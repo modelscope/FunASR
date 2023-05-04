@@ -57,7 +57,7 @@ def tokenize(data,
     length = len(text)
     if 'hw_tag' in data:
         hotword_indxs = sample_hotword(length, **hw_config)
-        data[hotword_indxs] = hotword_indxs
+        data['hotword_indxs'] = hotword_indxs
         del data['hw_tag']
     for i in range(length):
         x = text[i]
