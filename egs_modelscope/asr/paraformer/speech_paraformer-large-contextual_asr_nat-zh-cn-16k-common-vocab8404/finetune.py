@@ -3,6 +3,7 @@ import os
 from modelscope.metainfo import Trainers
 from modelscope.trainers import build_trainer
 
+import funasr
 from funasr.datasets.ms_dataset import MsDataset
 from funasr.utils.modelscope_param import modelscope_args
 
@@ -28,7 +29,7 @@ if __name__ == '__main__':
     params = modelscope_args(model="damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404", data_path="./data")
     params.output_dir = "./checkpoint"              # m模型保存路径
     params.data_path = "./example_data/"            # 数据路径
-    params.dataset_type = "small"                   # 小数据量设置small，若数据量大于1000小时，请使用large
+    params.dataset_type = "large"                   # 小数据量设置small，若数据量大于1000小时，请使用large
     params.batch_bins = 2000                       # batch size，如果dataset_type="small"，batch_bins单位为fbank特征帧数，如果dataset_type="large"，batch_bins单位为毫秒，
     params.max_epoch = 50                           # 最大训练轮数
     params.lr = 0.00005                             # 设置学习率
