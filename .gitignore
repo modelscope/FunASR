@@ -17,3 +17,4 @@ MaaS-lib
 dist
 build
 funasr.egg-info
+docs/_build
