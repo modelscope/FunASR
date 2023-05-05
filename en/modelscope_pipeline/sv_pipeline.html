@@ -153,7 +153,7 @@
 <blockquote>
 <div><p><strong>Note</strong>:
 The modelscope pipeline supports all the models in
-<a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope">model zoo</a>
+<a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope">model zoo</a>
 to inference and finetine. Here we take the model of xvector_sv as example to demonstrate the usage.</p>
 </div></blockquote>
 <div class="section" id="inference-with-pipeline">
@@ -209,7 +209,7 @@ to inference and finetine. Here we take the model of xvector_sv as example to de
 <h4>Define pipeline<a class="headerlink" href="#define-pipeline" title="Permalink to this headline"></a></h4>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">task</span></code>: <code class="docutils literal notranslate"><span class="pre">Tasks.speaker_verification</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">model</span></code>: model name in <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope">model zoo</a>, or model path in local disk</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model</span></code>: model name in <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope">model zoo</a>, or model path in local disk</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ngpu</span></code>: <code class="docutils literal notranslate"><span class="pre">1</span></code> (Default), decoding on GPU. If ngpu=0, decoding on CPU</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">output_dir</span></code>: <code class="docutils literal notranslate"><span class="pre">None</span></code> (Default), the output path of results if set</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>: <code class="docutils literal notranslate"><span class="pre">1</span></code> (Default), batch size when decoding</p></li>

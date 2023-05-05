@@ -160,7 +160,7 @@
 <h1>Voice Activity Detection<a class="headerlink" href="#voice-activity-detection" title="Permalink to this headline"></a></h1>
 <blockquote>
 <div><p><strong>Note</strong>:
-The modelscope pipeline supports all the models in <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope">model zoo</a> to inference and finetune. Here we take the model of FSMN-VAD as example to demonstrate the usage.</p>
+The modelscope pipeline supports all the models in <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope">model zoo</a> to inference and finetune. Here we take the model of FSMN-VAD as example to demonstrate the usage.</p>
 </div></blockquote>
 <div class="section" id="inference">
 <h2>Inference<a class="headerlink" href="#inference" title="Permalink to this headline"></a></h2>
@@ -211,7 +211,7 @@ The modelscope pipeline supports all the models in <a class="reference external"
 <h4>Define pipeline<a class="headerlink" href="#define-pipeline" title="Permalink to this headline"></a></h4>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">task</span></code>: <code class="docutils literal notranslate"><span class="pre">Tasks.voice_activity_detection</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">model</span></code>: model name in <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope">model zoo</a>, or model path in local disk</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model</span></code>: model name in <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope">model zoo</a>, or model path in local disk</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ngpu</span></code>: <code class="docutils literal notranslate"><span class="pre">1</span></code> (Default), decoding on GPU. If ngpu=0, decoding on CPU</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ncpu</span></code>: <code class="docutils literal notranslate"><span class="pre">1</span></code> (Default), sets the number of threads used for intraop parallelism on CPU</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">output_dir</span></code>: <code class="docutils literal notranslate"><span class="pre">None</span></code> (Default), the output path of results if set</p></li>
@@ -246,7 +246,7 @@ asr_example2  ./audios/asr_example2.wav
 <div class="section" id="settings-of-infer-sh">
 <h4>Settings of <code class="docutils literal notranslate"><span class="pre">infer.sh</span></code><a class="headerlink" href="#settings-of-infer-sh" title="Permalink to this headline"></a></h4>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">model</span></code>: model name in <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope">model zoo</a>, or model path in local disk</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model</span></code>: model name in <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope">model zoo</a>, or model path in local disk</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">data_dir</span></code>: the dataset dir needs to include <code class="docutils literal notranslate"><span class="pre">wav.scp</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">output_dir</span></code>: output dir of the recognition results</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>: <code class="docutils literal notranslate"><span class="pre">64</span></code> (Default), batch size of inference on gpu</p></li>

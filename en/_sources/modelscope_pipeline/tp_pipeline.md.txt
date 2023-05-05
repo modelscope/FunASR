@@ -26,7 +26,7 @@ Timestamp pipeline can also be used after ASR pipeline to compose complete ASR f
 ### API-reference
 #### Define pipeline
 - `task`: `Tasks.speech_timestamp`
-- `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
+- `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
 - `ngpu`: `1` (Default), decoding on GPU. If ngpu=0, decoding on CPU
 - `ncpu`: `1` (Default), sets the number of threads used for intraop parallelism on CPU 
 - `output_dir`: `None` (Default), the output path of results if set
@@ -62,7 +62,7 @@ Timestamp pipeline can also be used after ASR pipeline to compose complete ASR f
 FunASR also offer recipes [egs_modelscope/tp/TEMPLATE/infer.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/tp/TEMPLATE/infer.sh) to decode with multi-thread CPUs, or multi GPUs.
 
 #### Settings of `infer.sh`
-- `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
+- `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
 - `data_dir`: the dataset dir **must** include `wav.scp` and `text.txt`
 - `output_dir`: output dir of the recognition results
 - `batch_size`: `64` (Default), batch size of inference on gpu
