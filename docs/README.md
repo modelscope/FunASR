@@ -12,8 +12,8 @@ pip install requests sphinx nbsphinx sphinx_markdown_tables sphinx_rtd_theme rec
 Then you can generate HTML manually.
 
 ```sh
-cd FunASR/docs
+cd docs
 make html
 ```
 
-The generated files are all contained in the "FunASR/docs/_build" directory. You can access the FunASR documentation by simply opening the "html/index.html" file in your browser from this directory.~~
+The generated files are all contained in the "FunASR/docs/_build" directory. You can access the FunASR documentation by simply opening the "html/index.html" file in your browser from this directory.
