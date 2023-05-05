@@ -34,6 +34,6 @@ for sample_offset in range(0, speech_length, min(stride_size, speech_length - sa
     rec_result = inference_pipeline(audio_in=speech[sample_offset: sample_offset + stride_size],
                                     param_dict=param_dict)
     if len(rec_result) != 0:
-        final_result += rec_result['text'][0]
+        final_result += " ".join(rec_result['text']) + " "
         print(rec_result)
 print(final_result)
