@@ -110,16 +110,16 @@ Here we provided several pretrained models on different datasets. The details of
 
 ### Inverse Text Normalization (ITN) Models
 
-|                                                    Model Name                                                    | Language | Parameters | Notes |
-|:----------------------------------------------------------------------------------------------------------------:|:--------:|:----------:|:------|
-| [English](https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-en/summary) |    EN    | 1.54M | ITN, ASR post processing |
-| [Russian](https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-ru/summary) |    RU    | 1.28M | ITN, ASR post processing |
-| [Japanese](https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-ja/summary) |    JA    | 6.8M | ITN, ASR post processing |
-| [Korean](https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-ko/summary) |    KO    | 1.28M | InverASR post processing |
-| [Indonesian](https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-id/summary) |    ID    | 2.06M | ITN, ASR post processing |
-| [Vietnamese](https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-vi/summary) |    VI    | 0.92M | ITN, ASR post processing |
-| [Tagalog](https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-tl/summary) |    TL    | 1.28M | ITN, ASR post processing |
-| [Spanish](https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-es/summary) |    ES    | 1.28M | ITN, ASR post processing |
-| [Portuguese](https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-pt/summary) |    PT    | 1.28M | ITN, ASR post processing |
-| [French](https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-fr/summary) |    FR    | 1.28M | InverASR post processing |
-| [German](https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-de/summary)|    GE    | 1.28M | ITN, ASR post processing |
+|                                                    Model Name                                                    | Language | Parameters | Notes                    |
+|:----------------------------------------------------------------------------------------------------------------:|:--------:|:----------:|:-------------------------|
+| [English](https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-en/summary) |    EN    |   1.54M    | ITN, ASR post-processing |
+| [Russian](https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-ru/summary) |    RU    |   17.79M   | ITN, ASR post-processing |
+| [Japanese](https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-ja/summary) |    JA    |    6.8M    | ITN, ASR post-processing |
+| [Korean](https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-ko/summary) |    KO    |   1.28M    | ITN, ASR post-processing |
+| [Indonesian](https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-id/summary) |    ID    |   2.06M    | ITN, ASR post-processing |
+| [Vietnamese](https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-vi/summary) |    VI    |   0.92M    | ITN, ASR post-processing |
+| [Tagalog](https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-tl/summary) |    TL    |    0.65M     | ITN, ASR post-processing |
+| [Spanish](https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-es/summary) |    ES    |   1.32M    | ITN, ASR post-processing |
+| [Portuguese](https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-pt/summary) |    PT    |   1.28M    | ITN, ASR post-processing |
+| [French](https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-fr/summary) |    FR    |   4.39M    | ITN, ASR post-processing |
+| [German](https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-de/summary)|    GE    |   3.95M    | ITN, ASR post-processing |

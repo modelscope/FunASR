@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inverse Text Normalization (ITN) &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            FunASR
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../docker.html">Docker</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Academic Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../academic_recipe/asr_recipe.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../academic_recipe/punc_recipe.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../academic_recipe/vad_recipe.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../academic_recipe/sv_recipe.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../academic_recipe/sd_recipe.html">Speaker Diarization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">ModelScope Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="asr_pipeline.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vad_pipeline.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="punc_pipeline.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tp_pipeline.html">Timestamp Prediction (FA)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sv_pipeline.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sd_pipeline.html">Speaker Diarization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Zoo</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modelscope_models.html">Pretrained Models on ModelScope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../huggingface_models.html">Pretrained Models on Huggingface</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Runtime and Service</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/export.html">Export models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/onnxruntime_python.html">ONNXRuntime-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/onnxruntime_cpp.html">ONNXRuntime-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/libtorch_python.html">Libtorch-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/grpc_python.html">Service with grpc-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/grpc_cpp.html">Service with grpc-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/websocket_python.html">Service with websocket-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/websocket_cpp.html">Service with websocket-cpp</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark and Leadboard</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../benchmark/benchmark_onnx.html">CPU Benchmark (ONNX-python)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmark/benchmark_onnx_cpp.html">CPU Benchmark (ONNX-cpp)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmark/benchmark_libtorch.html">CPU Benchmark (Libtorch)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Funasr Library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../build_task.html">Build custom tasks</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Papers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../papers.html">Papers</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Application</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../application.html">Audio Cut</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../application.html#realtime-speech-recognition">Realtime Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../application.html#audio-chat">Audio Chat</a></li>
+</ul>
+<p class="caption"><span class="caption-text">FQA</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../FQA.html">FQA</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">FunASR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Inverse Text Normalization (ITN)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modelscope_pipeline/itn_pipeline.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="inverse-text-normalization-itn">
+<h1>Inverse Text Normalization (ITN)<a class="headerlink" href="#inverse-text-normalization-itn" title="Permalink to this headline"></a></h1>
+<blockquote>
+<div><p><strong>Note</strong>:
+The modelscope pipeline supports all the models in <a class="reference external" href="https://modelscope.cn/models?page=1&amp;tasks=inverse-text-processing&amp;type=audio">model zoo</a> to inference. Here we take the model of the Japanese ITN model as example to demonstrate the usage.</p>
+</div></blockquote>
+<div class="section" id="inference">
+<h2>Inference<a class="headerlink" href="#inference" title="Permalink to this headline"></a></h2>
+<div class="section" id="quick-start">
+<h3>Quick start<a class="headerlink" href="#quick-start" title="Permalink to this headline"></a></h3>
+<div class="section" id="japanese-itn-model">
+<h4><a class="reference external" href="https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-ja/summary">Japanese ITN model</a><a class="headerlink" href="#japanese-itn-model" title="Permalink to this headline"></a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
+<span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
+
+<span class="n">itn_inference_pipline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
+    <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">inverse_text_processing</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_inverse_text_processing_fun-text-processing-itn-ja&#39;</span><span class="p">,</span>
+    <span class="n">model_revision</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+<span class="n">itn_result</span> <span class="o">=</span> <span class="n">itn_inference_pipline</span><span class="p">(</span><span class="n">text_in</span><span class="o">=</span><span class="s1">&#39;百二十三&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">itn_result</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>read text data directly.</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">text_in</span><span class="o">=</span><span class="s1">&#39;一九九九年に誕生した同商品にちなみ、約三十年前、二十四歳の頃の幸四郎の写真を公開。&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>text stored via url，example：https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_text/ja_itn_example.txt</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">text_in</span><span class="o">=</span><span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_text/ja_itn_example.txt&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Full code of demo, please ref to <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/fun_text_processing/inverse_text_normalization">demo</a></p>
+</div>
+<div class="section" id="modify-your-own-itn-model">
+<h4>Modify Your Own ITN Model<a class="headerlink" href="#modify-your-own-itn-model" title="Permalink to this headline"></a></h4>
+<p>The rule-based ITN code is open-sourced in <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/fun_text_processing">FunTextProcessing</a>, users can modify by their own grammar rules. After modify the rules, the users can export their own ITN models in local directory.</p>
+<div class="section" id="export-itn-model">
+<h5>Export ITN Model<a class="headerlink" href="#export-itn-model" title="Permalink to this headline"></a></h5>
+<p>Use the code in FunASR to export ITN model. An example to export ITN model to local folder is shown as below.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> fun_text_processing/inverse_text_normalization/
+python export_models.py --language ja --export_dir ./itn_models/
+</pre></div>
+</div>
+</div>
+<div class="section" id="evaluate-itn-model">
+<h5>Evaluate ITN Model<a class="headerlink" href="#evaluate-itn-model" title="Permalink to this headline"></a></h5>
+<p>Users can evaluate their own ITN model in local directory. Here is an example:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python fun_text_processing/inverse_text_normalization/inverse_normalize.py --input_file ja_itn_example.txt --cache_dir ./itn_models/ --output_file output.txt --language<span class="o">=</span>ja
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="api-reference">
+<h3>API-reference<a class="headerlink" href="#api-reference" title="Permalink to this headline"></a></h3>
+<div class="section" id="define-pipeline">
+<h4>Define pipeline<a class="headerlink" href="#define-pipeline" title="Permalink to this headline"></a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">task</span></code>: <code class="docutils literal notranslate"><span class="pre">Tasks.inverse_text_processing</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model</span></code>: model name in <a class="reference external" href="https://modelscope.cn/models?page=1&amp;tasks=inverse-text-processing&amp;type=audio">model zoo</a>, or model path in local disk</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">output_dir</span></code>: <code class="docutils literal notranslate"><span class="pre">None</span></code> (Default), the output path of results if set</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model_revision</span></code>: <code class="docutils literal notranslate"><span class="pre">None</span></code> (Default), setting the model version</p></li>
+</ul>
+</div>
+<div class="section" id="infer-pipeline">
+<h4>Infer pipeline<a class="headerlink" href="#infer-pipeline" title="Permalink to this headline"></a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">text_in</span></code>: the input to decode, which could be:</p>
+<ul>
+<li><p>text bytes, <code class="docutils literal notranslate"><span class="pre">e.g.</span></code>: “一九九九年に誕生した同商品にちなみ、約三十年前、二十四歳の頃の幸四郎の写真を公開。”</p></li>
+<li><p>text file, <code class="docutils literal notranslate"><span class="pre">e.g.</span></code>: https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_text/ja_itn_example.txt
+In this case of <code class="docutils literal notranslate"><span class="pre">text</span> <span class="pre">file</span></code> input, <code class="docutils literal notranslate"><span class="pre">output_dir</span></code> must be set to save the output results</p></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="finetune-with-pipeline">
+<h2>Finetune with pipeline<a class="headerlink" href="#finetune-with-pipeline" title="Permalink to this headline"></a></h2>
+<div class="section" id="id1">
+<h3>Quick start<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h3>
+</div>
+<div class="section" id="finetune-with-your-data">
+<h3>Finetune with your data<a class="headerlink" href="#finetune-with-your-data" title="Permalink to this headline"></a></h3>
+</div>
+</div>
+<div class="section" id="inference-with-your-finetuned-model">
+<h2>Inference with your finetuned model<a class="headerlink" href="#inference-with-your-finetuned-model" title="Permalink to this headline"></a></h2>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Speech Lab, Alibaba Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
