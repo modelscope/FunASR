@@ -1,7 +1,7 @@
 # Punctuation Restoration
 
 > **Note**: 
-> The modelscope pipeline supports all the models in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope) to inference and finetune. Here we take the model of the punctuation model of CT-Transformer as example to demonstrate the usage.
+> The modelscope pipeline supports all the models in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope) to inference and finetune. Here we take the model of the punctuation model of CT-Transformer as example to demonstrate the usage.
 
 ## Inference
 
@@ -55,7 +55,7 @@ Full code of demo, please ref to [demo](https://github.com/alibaba-damo-academy/
 ### API-reference
 #### Define pipeline
 - `task`: `Tasks.punctuation`
-- `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
+- `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
 - `ngpu`: `1` (Default), decoding on GPU. If ngpu=0, decoding on CPU
 - `output_dir`: `None` (Default), the output path of results if set
 - `model_revision`: `None` (Default), setting the model version
@@ -71,7 +71,7 @@ Full code of demo, please ref to [demo](https://github.com/alibaba-damo-academy/
 FunASR also offer recipes [egs_modelscope/punctuation/TEMPLATE/infer.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/punctuation/TEMPLATE/infer.sh) to decode with multi-thread CPUs, or multi GPUs. It is an offline recipe and only support offline model.
 
 #### Settings of `infer.sh`
-- `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
+- `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
 - `data_dir`: the dataset dir needs to include `punc.txt`
 - `output_dir`: output dir of the recognition results
 - `gpu_inference`: `true` (Default), whether to perform gpu decoding, set false for CPU inference

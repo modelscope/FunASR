@@ -2,7 +2,7 @@
 
 > **Note**: 
 > The modelscope pipeline supports all the models in 
-[model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope) 
+[model zoo](https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope) 
 to inference and finetine. Here we take the model of xvector_sv as example to demonstrate the usage.
 
 ## Inference with pipeline
@@ -50,7 +50,7 @@ Full code of demo, please ref to [infer.py](https://github.com/alibaba-damo-acad
 ### API-reference
 #### Define pipeline
 - `task`: `Tasks.speaker_verification`
-- `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
+- `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
 - `ngpu`: `1` (Default), decoding on GPU. If ngpu=0, decoding on CPU
 - `output_dir`: `None` (Default), the output path of results if set
 - `batch_size`: `1` (Default), batch size when decoding
