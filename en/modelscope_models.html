@@ -85,6 +85,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#speaker-verification-models">Speaker Verification Models</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#speaker-diarization-models">Speaker Diarization Models</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#timestamp-prediction-models">Timestamp Prediction Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#inverse-text-normalization-itn-models">Inverse Text Normalization (ITN) Models</a></li>
 </ul>
 </li>
 </ul>
@@ -289,7 +290,7 @@
 <tr>
 <td style="text-align: center;"><a href="https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-zh-cn-16k-common-vocab8358-tensorflow1-online/summary">UniASR</a></td>
 <td style="text-align: center;">CN &amp; EN</td>
-<td style="text-align: center;">Alibaba Speech Data (60000hours)</td>
+<td style="text-align: center;">Alibaba Speech Data (60000 hours)</td>
 <td style="text-align: center;">8358</td>
 <td style="text-align: center;">100M</td>
 <td style="text-align: center;">Online</td>
@@ -298,16 +299,124 @@
 <tr>
 <td style="text-align: center;"><a href="https://modelscope.cn/models/damo/speech_UniASR-large_asr_2pass-zh-cn-16k-common-vocab8358-tensorflow1-offline/summary">UniASR-large</a></td>
 <td style="text-align: center;">CN &amp; EN</td>
-<td style="text-align: center;">Alibaba Speech Data (60000hours)</td>
+<td style="text-align: center;">Alibaba Speech Data (60000 hours)</td>
 <td style="text-align: center;">8358</td>
 <td style="text-align: center;">220M</td>
 <td style="text-align: center;">Offline</td>
 <td style="text-align: left;">UniASR streaming offline unifying models</td>
 </tr>
 <tr>
+<td style="text-align: center;"><a href="https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-en-16k-common-vocab1080-tensorflow1-online/summary">UniASR English</a></td>
+<td style="text-align: center;">EN</td>
+<td style="text-align: center;">Alibaba Speech Data (10000 hours)</td>
+<td style="text-align: center;">1080</td>
+<td style="text-align: center;">95M</td>
+<td style="text-align: center;">Online</td>
+<td style="text-align: left;">UniASR streaming online unifying models</td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-ru-16k-common-vocab1664-tensorflow1-online/summary">UniASR Russian</a></td>
+<td style="text-align: center;">RU</td>
+<td style="text-align: center;">Alibaba Speech Data (5000 hours)</td>
+<td style="text-align: center;">1664</td>
+<td style="text-align: center;">95M</td>
+<td style="text-align: center;">Online</td>
+<td style="text-align: left;">UniASR streaming online unifying models</td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-ja-16k-common-vocab93-tensorflow1-online/summary">UniASR Japanese</a></td>
+<td style="text-align: center;">JA</td>
+<td style="text-align: center;">Alibaba Speech Data (5000 hours)</td>
+<td style="text-align: center;">5977</td>
+<td style="text-align: center;">95M</td>
+<td style="text-align: center;">Online</td>
+<td style="text-align: left;">UniASR streaming offline unifying models</td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-ko-16k-common-vocab6400-tensorflow1-online/summary">UniASR Korean</a></td>
+<td style="text-align: center;">KO</td>
+<td style="text-align: center;">Alibaba Speech Data (2000 hours)</td>
+<td style="text-align: center;">6400</td>
+<td style="text-align: center;">95M</td>
+<td style="text-align: center;">Online</td>
+<td style="text-align: left;">UniASR streaming online unifying models</td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-cantonese-CHS-16k-common-vocab1468-tensorflow1-online/summary">UniASR Cantonese (CHS)</a></td>
+<td style="text-align: center;">Cantonese (CHS)</td>
+<td style="text-align: center;">Alibaba Speech Data (5000 hours)</td>
+<td style="text-align: center;">1468</td>
+<td style="text-align: center;">95M</td>
+<td style="text-align: center;">Online</td>
+<td style="text-align: left;">UniASR streaming online unifying models</td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-id-16k-common-vocab1067-tensorflow1-online/summary">UniASR Indonesian</a></td>
+<td style="text-align: center;">ID</td>
+<td style="text-align: center;">Alibaba Speech Data (1000 hours)</td>
+<td style="text-align: center;">1067</td>
+<td style="text-align: center;">95M</td>
+<td style="text-align: center;">Online</td>
+<td style="text-align: left;">UniASR streaming offline unifying models</td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-vi-16k-common-vocab1001-pytorch-online/summary">UniASR Vietnamese</a></td>
+<td style="text-align: center;">VI</td>
+<td style="text-align: center;">Alibaba Speech Data (1000 hours)</td>
+<td style="text-align: center;">1001</td>
+<td style="text-align: center;">95M</td>
+<td style="text-align: center;">Online</td>
+<td style="text-align: left;">UniASR streaming offline unifying models</td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-es-16k-common-vocab3445-tensorflow1-online/summary">UniASR Spanish</a></td>
+<td style="text-align: center;">ES</td>
+<td style="text-align: center;">Alibaba Speech Data (1000 hours)</td>
+<td style="text-align: center;">3445</td>
+<td style="text-align: center;">95M</td>
+<td style="text-align: center;">Online</td>
+<td style="text-align: left;">UniASR streaming online unifying models</td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-pt-16k-common-vocab1617-tensorflow1-online/summary">UniASR Portuguese</a></td>
+<td style="text-align: center;">PT</td>
+<td style="text-align: center;">Alibaba Speech Data (1000 hours)</td>
+<td style="text-align: center;">1617</td>
+<td style="text-align: center;">95M</td>
+<td style="text-align: center;">Online</td>
+<td style="text-align: left;">UniASR streaming offline unifying models</td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-fr-16k-common-vocab3472-tensorflow1-online/summary">UniASR French</a></td>
+<td style="text-align: center;">FR</td>
+<td style="text-align: center;">Alibaba Speech Data (1000 hours)</td>
+<td style="text-align: center;">3472</td>
+<td style="text-align: center;">95M</td>
+<td style="text-align: center;">Online</td>
+<td style="text-align: left;">UniASR streaming online unifying models</td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-de-16k-common-vocab3690-tensorflow1-online/summary">UniASR German</a></td>
+<td style="text-align: center;">GE</td>
+<td style="text-align: center;">Alibaba Speech Data (1000 hours)</td>
+<td style="text-align: center;">3690</td>
+<td style="text-align: center;">95M</td>
+<td style="text-align: center;">Online</td>
+<td style="text-align: left;">UniASR streaming online unifying models</td>
+</tr>
+<tr>
+<td style="text-align: center;"><a href="https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-fa-16k-common-vocab1257-pytorch-online/summary">UniASR Persian</a></td>
+<td style="text-align: center;">FA</td>
+<td style="text-align: center;">Alibaba Speech Data (1000 hours)</td>
+<td style="text-align: center;">1257</td>
+<td style="text-align: center;">95M</td>
+<td style="text-align: center;">Online</td>
+<td style="text-align: left;">UniASR streaming offline unifying models</td>
+</tr>
+<tr>
 <td style="text-align: center;"><a href="https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-my-16k-common-vocab696-pytorch/summary">UniASR Burmese</a></td>
-<td style="text-align: center;">Burmese</td>
-<td style="text-align: center;">Alibaba Speech Data (? hours)</td>
+<td style="text-align: center;">MY</td>
+<td style="text-align: center;">Alibaba Speech Data (1000 hours)</td>
 <td style="text-align: center;">696</td>
 <td style="text-align: center;">95M</td>
 <td style="text-align: center;">Online</td>
@@ -315,8 +424,8 @@
 </tr>
 <tr>
 <td style="text-align: center;"><a href="https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-he-16k-common-vocab1085-pytorch/summary">UniASR Hebrew</a></td>
-<td style="text-align: center;">Hebrew</td>
-<td style="text-align: center;">Alibaba Speech Data (? hours)</td>
+<td style="text-align: center;">HE</td>
+<td style="text-align: center;">Alibaba Speech Data (1000 hours)</td>
 <td style="text-align: center;">1085</td>
 <td style="text-align: center;">95M</td>
 <td style="text-align: center;">Online</td>
@@ -324,8 +433,8 @@
 </tr>
 <tr>
 <td style="text-align: center;"><a href="https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-ur-16k-common-vocab877-pytorch/summary">UniASR Urdu</a></td>
-<td style="text-align: center;">Urdu</td>
-<td style="text-align: center;">Alibaba Speech Data (? hours)</td>
+<td style="text-align: center;">UR</td>
+<td style="text-align: center;">Alibaba Speech Data (1000 hours)</td>
 <td style="text-align: center;">877</td>
 <td style="text-align: center;">95M</td>
 <td style="text-align: center;">Online</td>
@@ -561,6 +670,22 @@
 </tr>
 </tbody>
 </table></div>
+<div class="section" id="inverse-text-normalization-itn-models">
+<h3>Inverse Text Normalization (ITN) Models<a class="headerlink" href="#inverse-text-normalization-itn-models" title="Permalink to this headline"></a></h3>
+<p>|                                                    Model Name                                                    | Language | Parameters | Notes |
+|:—————————————————————————————————————-:|:——–:|:———-:|:——|
+| <a class="reference external" href="https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-en/summary">English</a> |    EN    | 1.54M | ITN, ASR post processing |
+| <a class="reference external" href="https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-ru/summary">Russian</a> |    RU    | 1.28M | ITN, ASR post processing |
+| <a class="reference external" href="https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-ja/summary">Japanese</a> |    JA    | 6.8M | ITN, ASR post processing |
+| <a class="reference external" href="https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-ko/summary">Korean</a> |    KO    | 1.28M | InverASR post processing |
+| <a class="reference external" href="https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-id/summary">Indonesian</a> |    ID    | 2.06M | ITN, ASR post processing |
+| <a class="reference external" href="https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-vi/summary">Vietnamese</a> |    VI    | 0.92M | ITN, ASR post processing |
+| <a class="reference external" href="https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-tl/summary">Tagalog</a> |    TL    | 1.28M | ITN, ASR post processing |
+| <a class="reference external" href="https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-es/summary">Spanish</a> |    ES    | 1.28M | ITN, ASR post processing |
+| <a class="reference external" href="https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-pt/summary">Portuguese</a> |    PT    | 1.28M | ITN, ASR post processing |
+| <a class="reference external" href="https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-fr/summary">French</a> |    FR    | 1.28M | InverASR post processing |
+| <a class="reference external" href="https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-de/summary">German</a>|    GE    | 1.28M | ITN, ASR post processing |</p>
+</div>
 </div>
 </div>
 
