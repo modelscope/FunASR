@@ -53,6 +53,7 @@ Here we provided several pretrained models on different datasets. The details of
 |:----------------------------------------------------------------------------------------------------------------------:|:--------:|:---------------------:|:----------:|:---------:|:--------------:|:--------------------------------------------------------------------------------------------------------------------------------|
 | [Conformer](https://modelscope.cn/models/damo/speech_conformer_asr_nat-zh-cn-16k-aishell1-vocab4234-pytorch/summary)   |   CN     |  AISHELL (178hours)   |    4234    |    44M    |    Offline     | Duration of input wav <= 20s                                                                                                    |
 | [Conformer](https://www.modelscope.cn/models/damo/speech_conformer_asr_nat-zh-cn-16k-aishell2-vocab5212-pytorch/summary)   |   CN     | AISHELL-2 (1000hours) |    5212    |    44M    |    Offline     | Duration of input wav <= 20s                                                                                                    |
+| [Conformer](https://modelscope.cn/models/damo/speech_conformer_asr-en-16k-vocab4199-pytorch/summary)   |   EN     | Alibaba Speech Data (10000hours) |    4199    |    220M    |    Offline     | Duration of input wav <= 20s                                                                                                    |
 
 
 #### RNN-T Models
