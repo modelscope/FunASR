@@ -3,7 +3,6 @@
 
 """Trainer module."""
 import argparse
-from audioop import bias
 from contextlib import contextmanager
 import dataclasses
 from dataclasses import is_dataclass
