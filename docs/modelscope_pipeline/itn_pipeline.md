@@ -30,17 +30,17 @@ rec_result = inference_pipeline(text_in='https://isv-data.oss-cn-hangzhou.aliyun
 
 Full code of demo, please ref to [demo](https://github.com/alibaba-damo-academy/FunASR/tree/main/fun_text_processing/inverse_text_normalization)
 
-#### Modify Your Own ITN Model
+### Modify Your Own ITN Model
 The rule-based ITN code is open-sourced in [FunTextProcessing](https://github.com/alibaba-damo-academy/FunASR/tree/main/fun_text_processing), users can modify by their own grammar rules. After modify the rules, the users can export their own ITN models in local directory.
 
-##### Export ITN Model
+### Export ITN Model
 Use the code in FunASR to export ITN model. An example to export ITN model to local folder is shown as below.
 ```shell
 cd fun_text_processing/inverse_text_normalization/
 python export_models.py --language ja --export_dir ./itn_models/
 ```
 
-##### Evaluate ITN Model
+### Evaluate ITN Model
 Users can evaluate their own ITN model in local directory. Here is an example:
 ```shell
 python fun_text_processing/inverse_text_normalization/inverse_normalize.py --input_file ja_itn_example.txt --cache_dir ./itn_models/ --output_file output.txt --language=ja
@@ -58,13 +58,4 @@ python fun_text_processing/inverse_text_normalization/inverse_normalize.py --inp
   - text bytes, `e.g.`: "一九九九年に誕生した同商品にちなみ、約三十年前、二十四歳の頃の幸四郎の写真を公開。"
   - text file, `e.g.`: https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_text/ja_itn_example.txt
   In this case of `text file` input, `output_dir` must be set to save the output results
-
-
-## Finetune with pipeline
-
-### Quick start
-
-### Finetune with your data
-
-## Inference with your finetuned model
-
+  
