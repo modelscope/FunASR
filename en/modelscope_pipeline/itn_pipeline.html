@@ -148,12 +148,14 @@ The modelscope pipeline supports all the models in <a class="reference external"
 
 <span class="n">itn_result</span> <span class="o">=</span> <span class="n">itn_inference_pipline</span><span class="p">(</span><span class="n">text_in</span><span class="o">=</span><span class="s1">&#39;百二十三&#39;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">itn_result</span><span class="p">)</span>
+<span class="c1"># 123</span>
 </pre></div>
 </div>
 <ul class="simple">
 <li><p>read text data directly.</p></li>
 </ul>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">text_in</span><span class="o">=</span><span class="s1">&#39;一九九九年に誕生した同商品にちなみ、約三十年前、二十四歳の頃の幸四郎の写真を公開。&#39;</span><span class="p">)</span>
+<span class="c1"># 1999年に誕生した同商品にちなみ、約30年前、24歳の頃の幸四郎の写真を公開。</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -163,25 +165,6 @@ The modelscope pipeline supports all the models in <a class="reference external"
 </pre></div>
 </div>
 <p>Full code of demo, please ref to <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/fun_text_processing/inverse_text_normalization">demo</a></p>
-</div>
-<div class="section" id="modify-your-own-itn-model">
-<h4>Modify Your Own ITN Model<a class="headerlink" href="#modify-your-own-itn-model" title="Permalink to this headline"></a></h4>
-<p>The rule-based ITN code is open-sourced in <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/fun_text_processing">FunTextProcessing</a>, users can modify by their own grammar rules. After modify the rules, the users can export their own ITN models in local directory.</p>
-<div class="section" id="export-itn-model">
-<h5>Export ITN Model<a class="headerlink" href="#export-itn-model" title="Permalink to this headline"></a></h5>
-<p>Use the code in FunASR to export ITN model. An example to export ITN model to local folder is shown as below.</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> fun_text_processing/inverse_text_normalization/
-python export_models.py --language ja --export_dir ./itn_models/
-</pre></div>
-</div>
-</div>
-<div class="section" id="evaluate-itn-model">
-<h5>Evaluate ITN Model<a class="headerlink" href="#evaluate-itn-model" title="Permalink to this headline"></a></h5>
-<p>Users can evaluate their own ITN model in local directory. Here is an example:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python fun_text_processing/inverse_text_normalization/inverse_normalize.py --input_file ja_itn_example.txt --cache_dir ./itn_models/ --output_file output.txt --language<span class="o">=</span>ja
-</pre></div>
-</div>
-</div>
 </div>
 </div>
 <div class="section" id="api-reference">
@@ -209,17 +192,25 @@ In this case of <code class="docutils literal notranslate"><span class="pre">tex
 </div>
 </div>
 </div>
-<div class="section" id="finetune-with-pipeline">
-<h2>Finetune with pipeline<a class="headerlink" href="#finetune-with-pipeline" title="Permalink to this headline"></a></h2>
-<div class="section" id="id1">
-<h3>Quick start<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h3>
+<div class="section" id="modify-your-own-itn-model">
+<h2>Modify Your Own ITN Model<a class="headerlink" href="#modify-your-own-itn-model" title="Permalink to this headline"></a></h2>
+<p>The rule-based ITN code is open-sourced in <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/fun_text_processing">FunTextProcessing</a>, users can modify by their own grammar rules for different languages. Let’s take Japanese as an example, users can add their own whitelist in <code class="docutils literal notranslate"><span class="pre">FunASR/fun_text_processing/inverse_text_normalization/ja/data/whitelist.tsv</span></code>. After modified the grammar rules, the users can export and evaluate their own ITN models in local directory.</p>
+<div class="section" id="export-itn-model">
+<h3>Export ITN Model<a class="headerlink" href="#export-itn-model" title="Permalink to this headline"></a></h3>
+<p>Export ITN model via <code class="docutils literal notranslate"><span class="pre">FunASR/fun_text_processing/inverse_text_normalization/export_models.py</span></code>. An example to export ITN model to local folder is shown as below.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> FunASR/fun_text_processing/inverse_text_normalization/
+python export_models.py --language ja --export_dir ./itn_models/
+</pre></div>
 </div>
-<div class="section" id="finetune-with-your-data">
-<h3>Finetune with your data<a class="headerlink" href="#finetune-with-your-data" title="Permalink to this headline"></a></h3>
+</div>
+<div class="section" id="evaluate-itn-model">
+<h3>Evaluate ITN Model<a class="headerlink" href="#evaluate-itn-model" title="Permalink to this headline"></a></h3>
+<p>Users can evaluate their own ITN model in local directory via <code class="docutils literal notranslate"><span class="pre">FunASR/fun_text_processing/inverse_text_normalization/inverse_normalize.py</span></code>. Here is an example:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> FunASR/fun_text_processing/inverse_text_normalization/
+python inverse_normalize.py --input_file ja_itn_example.txt --cache_dir ./itn_models/ --output_file output.txt --language<span class="o">=</span>ja
+</pre></div>
 </div>
 </div>
-<div class="section" id="inference-with-your-finetuned-model">
-<h2>Inference with your finetuned model<a class="headerlink" href="#inference-with-your-finetuned-model" title="Permalink to this headline"></a></h2>
 </div>
 </div>
 
