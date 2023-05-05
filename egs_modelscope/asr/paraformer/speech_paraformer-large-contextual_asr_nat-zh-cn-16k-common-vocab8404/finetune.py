@@ -31,6 +31,6 @@ if __name__ == '__main__':
     params.dataset_type = "large"                   # finetune contextual paraformer模型只能使用large dataset
     params.batch_bins = 200000                      # batch size，如果dataset_type="small"，batch_bins单位为fbank特征帧数，如果dataset_type="large"，batch_bins单位为毫秒，
     params.max_epoch = 20                           # 最大训练轮数
-    params.lr = 0.00005                             # 设置学习率
+    params.lr = 0.0002                              # 设置学习率
 
     modelscope_finetune(params)
