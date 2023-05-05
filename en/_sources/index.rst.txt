@@ -44,6 +44,7 @@ Overview
    ./modelscope_pipeline/tp_pipeline.md
    ./modelscope_pipeline/sv_pipeline.md
    ./modelscope_pipeline/sd_pipeline.md
+   ./modelscope_pipeline/itn_pipeline.md
 
 .. toctree::
    :maxdepth: 1

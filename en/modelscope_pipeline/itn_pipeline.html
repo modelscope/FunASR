@@ -16,7 +16,9 @@
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Pretrained Models on ModelScope" href="../modelscope_models.html" />
+    <link rel="prev" title="Speaker Diarization" href="sd_pipeline.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -52,7 +54,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../academic_recipe/sd_recipe.html">Speaker Diarization</a></li>
 </ul>
 <p class="caption"><span class="caption-text">ModelScope Egs</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="asr_pipeline.html">Speech Recognition</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vad_pipeline.html">Voice Activity Detection</a></li>
@@ -60,6 +62,26 @@
 <li class="toctree-l1"><a class="reference internal" href="tp_pipeline.html">Timestamp Prediction (FA)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sv_pipeline.html">Speaker Verification</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sd_pipeline.html">Speaker Diarization</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Inverse Text Normalization (ITN)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#inference">Inference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#quick-start">Quick start</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#japanese-itn-model">Japanese ITN model</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#api-reference">API-reference</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#define-pipeline">Define pipeline</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#infer-pipeline">Infer pipeline</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#modify-your-own-itn-model">Modify Your Own ITN Model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#export-itn-model">Export ITN Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#evaluate-itn-model">Evaluate ITN Model</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 <p class="caption"><span class="caption-text">Model Zoo</span></p>
 <ul>
@@ -217,7 +239,10 @@ python inverse_normalize.py --input_file ja_itn_example.txt --cache_dir ./itn_mo
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="sd_pipeline.html" class="btn btn-neutral float-left" title="Speaker Diarization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../modelscope_models.html" class="btn btn-neutral float-right" title="Pretrained Models on ModelScope" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 
