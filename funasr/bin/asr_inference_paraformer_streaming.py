@@ -239,7 +239,7 @@ class Speech2Text:
                         feats_len = torch.tensor([feats_chunk2.shape[1]])
                         results_chunk2 = self.infer(feats_chunk2, feats_len, cache)
 
-                        return ["".join(results_chunk1 + results_chunk2)]
+                        return [" ".join(results_chunk1 + results_chunk2)]
 
                 results = self.infer(feats, feats_len, cache)
 
@@ -299,12 +299,9 @@ class Speech2Text:
 
                 # Change integer-ids to tokens
                 token = self.converter.ids2tokens(token_int)
+                token = " ".join(token)
 
-                if self.tokenizer is not None:
-                    text = self.tokenizer.tokens2text(token)
-                else:
-                    text = None
-                results.append(text)
+                results.append(token)
 
         # assert check_return_type(results)
         return results
@@ -555,8 +552,8 @@ def inference_modelscope(
                 input_lens = torch.tensor([stride_size])
                 asr_result = speech2text(cache, raw_inputs[:, sample_offset: sample_offset + stride_size], input_lens)
                 if len(asr_result) != 0: 
-                    final_result += asr_result[0]
-            item = {'key': "utt", 'value': [final_result]}
+                    final_result += " ".join(asr_result) + " "
+            item = {'key': "utt", 'value': [final_result.strip()]}
         else:
             input_lens = torch.tensor([raw_inputs.shape[1]])
             cache["encoder"]["is_final"] = is_final
@@ -750,12 +747,3 @@ def main(cmd=None):
 if __name__ == "__main__":
     main()
 
-    # from modelscope.pipelines import pipeline
-    # from modelscope.utils.constant import Tasks
-    #
-    # inference_16k_pipline = pipeline(
-    #     task=Tasks.auto_speech_recognition,
-    #     model='damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch')
-    #
-    # rec_result = inference_16k_pipline(audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
-    # print(rec_result)
