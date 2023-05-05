@@ -238,6 +238,15 @@ bool Audio::LoadWav(const char *filename, int32_t* sampling_rate)
         return false;
     }
     
+    if (!header.Validate()) {
+        return false;
+    }
+
+    header.SeekToDataChunk(is);
+    if (!is) {
+        return false;
+    }
+    
     *sampling_rate = header.sample_rate;
     // header.subchunk2_size contains the number of bytes in the data.
     // As we assume each sample contains two bytes, so it is divided by 2 here
