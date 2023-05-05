@@ -108,6 +108,7 @@ Here we provided several pretrained models on different datasets. The details of
 | [TP-Aligner](https://modelscope.cn/models/damo/speech_timestamp_prediction-v1-16k-offline/summary) | CN | Alibaba Speech Data (50000hours) |   37.8M    |    Timestamp prediction, Mandarin, middle size |
 
 ### Inverse Text Normalization (ITN) Models
+
 |                                                    Model Name                                                    | Language | Parameters | Notes |
 |:----------------------------------------------------------------------------------------------------------------:|:--------:|:----------:|:------|
 | [English](https://modelscope.cn/models/damo/speech_inverse_text_processing_fun-text-processing-itn-en/summary) |    EN    | 1.54M | ITN, ASR post processing |
