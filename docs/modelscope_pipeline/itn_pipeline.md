@@ -46,17 +46,18 @@ Full code of demo, please ref to [demo](https://github.com/alibaba-damo-academy/
   In this case of `text file` input, `output_dir` must be set to save the output results
 
 ## Modify Your Own ITN Model
-The rule-based ITN code is open-sourced in [FunTextProcessing](https://github.com/alibaba-damo-academy/FunASR/tree/main/fun_text_processing), users can modify by their own grammar rules for different languages. Let's take Japanese as an example, users can add their own whitelist in fun_text_processing/inverse_text_normalization/ja/data/whitelist.tsv. After modify the rules, the users can export their own ITN models in local directory.
+The rule-based ITN code is open-sourced in [FunTextProcessing](https://github.com/alibaba-damo-academy/FunASR/tree/main/fun_text_processing), users can modify by their own grammar rules for different languages. Let's take Japanese as an example, users can add their own whitelist in ```FunASR/fun_text_processing/inverse_text_normalization/ja/data/whitelist.tsv```. After modified the grammar rules, the users can export and evaluate their own ITN models in local directory.
 
 ### Export ITN Model
-Use the code in FunASR to export ITN model. An example to export ITN model to local folder is shown as below.
+Export ITN model via ```FunASR/fun_text_processing/inverse_text_normalization/export_models.py```. An example to export ITN model to local folder is shown as below.
 ```shell
-cd fun_text_processing/inverse_text_normalization/
+cd FunASR/fun_text_processing/inverse_text_normalization/
 python export_models.py --language ja --export_dir ./itn_models/
 ```
 
 ### Evaluate ITN Model
-Users can evaluate their own ITN model in local directory. Here is an example:
+Users can evaluate their own ITN model in local directory via ```FunASR/fun_text_processing/inverse_text_normalization/inverse_normalize.py```. Here is an example:
 ```shell
-python fun_text_processing/inverse_text_normalization/inverse_normalize.py --input_file ja_itn_example.txt --cache_dir ./itn_models/ --output_file output.txt --language=ja
+cd FunASR/fun_text_processing/inverse_text_normalization/
+python inverse_normalize.py --input_file ja_itn_example.txt --cache_dir ./itn_models/ --output_file output.txt --language=ja
 ```
