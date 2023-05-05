@@ -492,7 +492,7 @@ private:
         if (cur_seg.end_ms != start_frm * vad_opts.frame_in_ms) {
             std::cout << "warning\n";
         }
-        int out_pos = (int) cur_seg.buffer.size();
+
         int data_to_pop;
         if (end_point_is_sent_end) {
             data_to_pop = expected_sample_number;
@@ -505,14 +505,7 @@ private:
             expected_sample_number = data_buf_size;
         }
         cur_seg.doa = 0;
-        for (int sample_cpy_out = 0; sample_cpy_out < data_to_pop; sample_cpy_out++) {
-            cur_seg.buffer.push_back(data_buf.back());
-            out_pos++;
-        }
-        for (int sample_cpy_out = data_to_pop; sample_cpy_out < expected_sample_number; sample_cpy_out++) {
-            cur_seg.buffer.push_back(data_buf.back());
-            out_pos++;
-        }
+        
         if (cur_seg.end_ms != start_frm * vad_opts.frame_in_ms) {
             std::cout << "Something wrong with the VAD algorithm\n";
         }
