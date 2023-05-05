@@ -83,7 +83,8 @@ def build_trainer(modelscope_dict,
         finetune_configs = yaml.safe_load(f)
         # set data_types
         if dataset_type == "large":
-            finetune_configs["dataset_conf"]["data_types"] = "sound,text"
+            if 'data_types' not in finetune_configs['dataset_conf']:
+                finetune_configs["dataset_conf"]["data_types"] = "sound,text"
     finetune_configs = update_dct(configs, finetune_configs)
     for key, value in finetune_configs.items():
         if hasattr(args, key):
@@ -131,7 +132,8 @@ def build_trainer(modelscope_dict,
         if args.dataset_type == "small":
             args.batch_bins = batch_bins
         elif args.dataset_type == "large":
-            args.dataset_conf["batch_conf"]["batch_size"] = batch_bins
+            if "batch_size" not in args.dataset_conf["batch_conf"]:
+                args.dataset_conf["batch_conf"]["batch_size"] = batch_bins
         else:
             raise ValueError(f"Not supported dataset_type={args.dataset_type}")
     if args.normalize in ["null", "none", "None"]:
