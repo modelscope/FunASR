@@ -94,7 +94,7 @@ elif [ -f $data/wav.scp ]; then
       nj=$num_utts
     fi
 
-    utils/data/split_data.sh --per-utt $data $nj
+    local/data/split_data.sh --per-utt $data $nj
     sdata=$data/split${nj}utt
 
     $cmd JOB=1:$nj $data/log/get_durations.JOB.log \

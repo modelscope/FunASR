@@ -434,14 +434,14 @@ if ! "${skip_data_prep}"; then
            log "Stage 2: Speed perturbation: data/${train_set} -> data/${train_set}_sp"
            for factor in ${speed_perturb_factors}; do
                if [[ $(bc <<<"${factor} != 1.0") == 1 ]]; then
-                   scripts/utils/perturb_data_dir_speed.sh "${factor}" "data/${train_set}" "data/${train_set}_sp${factor}"
+                   local/perturb_data_dir_speed.sh "${factor}" "data/${train_set}" "data/${train_set}_sp${factor}"
                    _dirs+="data/${train_set}_sp${factor} "
                else
                    # If speed factor is 1, same as the original
                    _dirs+="data/${train_set} "
                fi
            done
-           utils/combine_data.sh "data/${train_set}_sp" ${_dirs}
+           local/combine_data.sh "data/${train_set}_sp" ${_dirs}
         else
            log "Skip stage 2: Speed perturbation"
         fi
@@ -473,7 +473,7 @@ if ! "${skip_data_prep}"; then
                         _suf=""
                     fi
                 fi
-                utils/copy_data_dir.sh --validate_opts --non-print data/"${dset}" "${data_feats}${_suf}/${dset}"
+                local/copy_data_dir.sh --validate_opts --non-print data/"${dset}" "${data_feats}${_suf}/${dset}"
                 
                 cp data/"${dset}"/utt2spk_all_fifo "${data_feats}${_suf}/${dset}/"
 
@@ -488,7 +488,7 @@ if ! "${skip_data_prep}"; then
                     _opts+="--segments data/${dset}/segments "
                 fi
                 # shellcheck disable=SC2086
-                scripts/audio/format_wav_scp.sh --nj "${nj}" --cmd "${train_cmd}" \
+                local/format_wav_scp.sh --nj "${nj}" --cmd "${train_cmd}" \
                     --audio-format "${audio_format}" --fs "${fs}" ${_opts} \
                     "data/${dset}/wav.scp" "${data_feats}${_suf}/${dset}"
 
@@ -515,7 +515,7 @@ if ! "${skip_data_prep}"; then
         for dset in $rm_dset; do
 
             # Copy data dir
-            utils/copy_data_dir.sh --validate_opts --non-print "${data_feats}/org/${dset}" "${data_feats}/${dset}"
+            local/copy_data_dir.sh --validate_opts --non-print "${data_feats}/org/${dset}" "${data_feats}/${dset}"
             cp "${data_feats}/org/${dset}/feats_type" "${data_feats}/${dset}/feats_type"
 
             # Remove short utterances
@@ -564,7 +564,7 @@ if ! "${skip_data_prep}"; then
                 awk ' { if( NF != 1 ) print $0; } ' >"${data_feats}/${dset}/text"
 
             # fix_data_dir.sh leaves only utts which exist in all files
-            utils/fix_data_dir.sh "${data_feats}/${dset}"
+            local/fix_data_dir.sh "${data_feats}/${dset}"
 
             # generate uttid
             cut -d ' ' -f 1 "${data_feats}/${dset}/wav.scp" > "${data_feats}/${dset}/uttid"
@@ -1283,6 +1283,7 @@ if ! "${skip_eval}"; then
             ${_cmd} --gpu "${_ngpu}" --max-jobs-run "${_nj}" JOB=1:"${_nj}" "${_logdir}"/asr_inference.JOB.log \
                 python -m funasr.bin.asr_inference_launch \
                     --batch_size 1 \
+                    --mc True   \
                     --nbest 1   \
                     --ngpu "${_ngpu}" \
                     --njob ${njob_infer} \
@@ -1312,10 +1313,10 @@ if ! "${skip_eval}"; then
             _data="${data_feats}/${dset}"
             _dir="${asr_exp}/${inference_tag}/${dset}"
 
-            python local/proce_text.py ${_data}/text ${_data}/text.proc
-            python local/proce_text.py ${_dir}/text ${_dir}/text.proc
+            python utils/proce_text.py ${_data}/text ${_data}/text.proc
+            python utils/proce_text.py ${_dir}/text ${_dir}/text.proc
 
-            python local/compute_wer.py ${_data}/text.proc ${_dir}/text.proc ${_dir}/text.cer
+            python utils/compute_wer.py ${_data}/text.proc ${_dir}/text.proc ${_dir}/text.cer
             tail -n 3 ${_dir}/text.cer > ${_dir}/text.cer.txt
             cat ${_dir}/text.cer.txt
             
@@ -1390,6 +1391,7 @@ if ! "${skip_eval}"; then
             ${_cmd} --gpu "${_ngpu}" --max-jobs-run "${_nj}" JOB=1:"${_nj}" "${_logdir}"/asr_inference.JOB.log \
                 python -m funasr.bin.asr_inference_launch \
                     --batch_size 1 \
+                    --mc True   \
                     --nbest 1   \
                     --ngpu "${_ngpu}" \
                     --njob ${njob_infer} \
@@ -1421,10 +1423,10 @@ if ! "${skip_eval}"; then
             _data="${data_feats}/${dset}"
             _dir="${sa_asr_exp}/${sa_asr_inference_tag}.oracle/${dset}"
 
-            python local/proce_text.py ${_data}/text ${_data}/text.proc
-            python local/proce_text.py ${_dir}/text ${_dir}/text.proc
+            python utils/proce_text.py ${_data}/text ${_data}/text.proc
+            python utils/proce_text.py ${_dir}/text ${_dir}/text.proc
 
-            python local/compute_wer.py ${_data}/text.proc ${_dir}/text.proc ${_dir}/text.cer
+            python utils/compute_wer.py ${_data}/text.proc ${_dir}/text.proc ${_dir}/text.cer
             tail -n 3 ${_dir}/text.cer > ${_dir}/text.cer.txt
             cat ${_dir}/text.cer.txt
 
@@ -1506,6 +1508,7 @@ if ! "${skip_eval}"; then
             ${_cmd} --gpu "${_ngpu}" --max-jobs-run "${_nj}" JOB=1:"${_nj}" "${_logdir}"/asr_inference.JOB.log \
                 python -m funasr.bin.asr_inference_launch \
                     --batch_size 1 \
+                    --mc True   \
                     --nbest 1   \
                     --ngpu "${_ngpu}" \
                     --njob ${njob_infer} \
@@ -1536,10 +1539,10 @@ if ! "${skip_eval}"; then
             _data="${data_feats}/${dset}"
             _dir="${sa_asr_exp}/${sa_asr_inference_tag}.cluster/${dset}"
 
-            python local/proce_text.py ${_data}/text ${_data}/text.proc
-            python local/proce_text.py ${_dir}/text ${_dir}/text.proc
+            python utils/proce_text.py ${_data}/text ${_data}/text.proc
+            python utils/proce_text.py ${_dir}/text ${_dir}/text.proc
 
-            python local/compute_wer.py ${_data}/text.proc ${_dir}/text.proc ${_dir}/text.cer
+            python utils/compute_wer.py ${_data}/text.proc ${_dir}/text.proc ${_dir}/text.cer
             tail -n 3 ${_dir}/text.cer > ${_dir}/text.cer.txt
             cat ${_dir}/text.cer.txt
 

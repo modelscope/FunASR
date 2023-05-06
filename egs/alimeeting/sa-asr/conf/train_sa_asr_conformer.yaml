@@ -4,7 +4,6 @@ frontend_conf:
     n_fft: 400
     win_length: 400
     hop_length: 160
-    use_channel: 0
 
 # encoder related
 asr_encoder: conformer

@@ -113,7 +113,7 @@ fi
 check_sorted_and_uniq $data/spk2utt
 
 ! cmp -s <(cat $data/utt2spk | awk '{print $1, $2;}') \
-     <(utils/spk2utt_to_utt2spk.pl $data/spk2utt)  && \
+     <(local/spk2utt_to_utt2spk.pl $data/spk2utt)  && \
    echo "$0: spk2utt and utt2spk do not seem to match" && exit 1;
 
 cat $data/utt2spk | awk '{print $1;}' > $tmpdir/utts
@@ -135,7 +135,7 @@ if ! $no_text; then
     echo "$0: text contains $n_non_print lines with non-printable characters" &&\
     exit 1;
   fi
-  utils/validate_text.pl $data/text || exit 1;
+  local/validate_text.pl $data/text || exit 1;
   check_sorted_and_uniq $data/text
   text_len=`cat $data/text | wc -l`
   illegal_sym_list="<s> </s> #0"

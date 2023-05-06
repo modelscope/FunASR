@@ -2,14 +2,6 @@
 
 import os
 
-import logging
-
-logging.basicConfig(
-    level='INFO',
-    format=f"[{os.uname()[1].split('.')[0]}]"
-           f" %(asctime)s (%(module)s:%(lineno)d) %(levelname)s: %(message)s",
-)
-
 from funasr.tasks.asr import ASRTask
 
 

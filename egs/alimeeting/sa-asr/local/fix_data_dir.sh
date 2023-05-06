@@ -112,7 +112,7 @@ function filter_recordings {
 
 function filter_speakers {
   # throughout this program, we regard utt2spk as primary and spk2utt as derived, so...
-  utils/utt2spk_to_spk2utt.pl $data/utt2spk > $data/spk2utt
+  local/utt2spk_to_spk2utt.pl $data/utt2spk > $data/spk2utt
 
   cat $data/spk2utt | awk '{print $1}' > $tmpdir/speakers
   for s in cmvn.scp spk2gender; do
@@ -123,7 +123,7 @@ function filter_speakers {
   done
 
   filter_file $tmpdir/speakers $data/spk2utt
-  utils/spk2utt_to_utt2spk.pl $data/spk2utt > $data/utt2spk
+  local/spk2utt_to_utt2spk.pl $data/spk2utt > $data/utt2spk
 
   for s in cmvn.scp spk2gender $spk_extra_files; do
     f=$data/$s
@@ -210,6 +210,6 @@ filter_utts
 filter_speakers
 filter_recordings
 
-utils/utt2spk_to_spk2utt.pl $data/utt2spk > $data/spk2utt
+local/utt2spk_to_spk2utt.pl $data/utt2spk > $data/spk2utt
 
 echo "fix_data_dir.sh: old files are kept in $data/.backup"

@@ -78,7 +78,7 @@ if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
     utils/filter_scp.pl -f 1 $near_dir/text $near_dir/utt2spk_all | sort -u > $near_dir/utt2spk
     #sed -e 's/ [a-z,A-Z,_,0-9,-]\+SPK/ SPK/'  $near_dir/utt2spk_old >$near_dir/tmp1
     #sed -e 's/-[a-z,A-Z,0-9]\+$//' $near_dir/tmp1 | sort -u > $near_dir/utt2spk
-    utils/utt2spk_to_spk2utt.pl $near_dir/utt2spk > $near_dir/spk2utt
+    local/utt2spk_to_spk2utt.pl $near_dir/utt2spk > $near_dir/spk2utt
     utils/filter_scp.pl -f 1 $near_dir/text $near_dir/segments_all | sort -u > $near_dir/segments
     sed -e 's/ $//g' $near_dir/text> $near_dir/tmp1
     sed -e 's/！//g' $near_dir/tmp1> $near_dir/tmp2
@@ -109,7 +109,7 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     utils/filter_scp.pl -f 1 $far_dir/text $far_dir/utt2spk_all | sort -u > $far_dir/utt2spk
     #sed -e 's/ [a-z,A-Z,_,0-9,-]\+SPK/ SPK/'  $far_dir/utt2spk_old >$far_dir/utt2spk
     
-    utils/utt2spk_to_spk2utt.pl $far_dir/utt2spk > $far_dir/spk2utt
+    local/utt2spk_to_spk2utt.pl $far_dir/utt2spk > $far_dir/spk2utt
     utils/filter_scp.pl -f 1 $far_dir/text $far_dir/segments_all | sort -u > $far_dir/segments
     sed -e 's/SRC/$/g' $far_dir/text> $far_dir/tmp1
     sed -e 's/ $//g' $far_dir/tmp1> $far_dir/tmp2
@@ -121,8 +121,8 @@ fi
 if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
     log "stage 3: finali data process"
 
-    utils/copy_data_dir.sh $near_dir data/${tgt}_Ali_near
-    utils/copy_data_dir.sh $far_dir data/${tgt}_Ali_far
+    local/copy_data_dir.sh $near_dir data/${tgt}_Ali_near
+    local/copy_data_dir.sh $far_dir data/${tgt}_Ali_far
 
     sort $far_dir/utt2spk_all_fifo > data/${tgt}_Ali_far/utt2spk_all_fifo
     sed -i "s/src/$/g" data/${tgt}_Ali_far/utt2spk_all_fifo
@@ -146,10 +146,10 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
     python local/process_textgrid_to_single_speaker_wav.py  --path $far_single_speaker_dir
     
     cp $far_single_speaker_dir/utt2spk $far_single_speaker_dir/text    
-    utils/utt2spk_to_spk2utt.pl $far_single_speaker_dir/utt2spk > $far_single_speaker_dir/spk2utt
+    local/utt2spk_to_spk2utt.pl $far_single_speaker_dir/utt2spk > $far_single_speaker_dir/spk2utt
 
-    ./utils/fix_data_dir.sh $far_single_speaker_dir 
-    utils/copy_data_dir.sh $far_single_speaker_dir data/${tgt}_Ali_far_single_speaker
+    ./local/fix_data_dir.sh $far_single_speaker_dir 
+    local/copy_data_dir.sh $far_single_speaker_dir data/${tgt}_Ali_far_single_speaker
 
     # remove space in text
     for x in ${tgt}_Ali_far_single_speaker; do

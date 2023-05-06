@@ -98,7 +98,7 @@ if $has_segments; then
   for in_dir in $*; do
     if [ ! -f $in_dir/segments ]; then
       echo "$0 [info]: will generate missing segments for $in_dir" 1>&2
-      utils/data/get_segments_for_data.sh $in_dir
+      local/data/get_segments_for_data.sh $in_dir
     else
       cat $in_dir/segments
     fi
@@ -133,14 +133,14 @@ for file in utt2spk utt2lang utt2dur utt2num_frames reco2dur feats.scp text cmvn
   fi
 done
 
-utils/utt2spk_to_spk2utt.pl <$dest/utt2spk >$dest/spk2utt
+local/utt2spk_to_spk2utt.pl <$dest/utt2spk >$dest/spk2utt
 
 if [[ $dir_with_frame_shift ]]; then
   cp $dir_with_frame_shift/frame_shift $dest
 fi
 
 if ! $skip_fix ; then
-  utils/fix_data_dir.sh $dest || exit 1;
+  local/fix_data_dir.sh $dest || exit 1;
 fi
 
 exit 0

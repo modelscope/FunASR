@@ -71,7 +71,13 @@ def get_parser():
     )
     group.add_argument("--key_file", type=str_or_none)
     group.add_argument("--allow_variable_data_keys", type=str2bool, default=False)
-
+    group.add_argument(
+            "--mc",
+            type=bool,
+            default=False,
+            help="MultiChannel input",
+        )
+        
     group = parser.add_argument_group("The model configuration related")
     group.add_argument(
         "--vad_infer_config",

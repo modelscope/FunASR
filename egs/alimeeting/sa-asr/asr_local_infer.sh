@@ -436,7 +436,7 @@ if ! "${skip_data_prep}"; then
             
                 _suf=""
 
-                utils/copy_data_dir.sh --validate_opts --non-print data/"${dset}" "${data_feats}${_suf}/${dset}"
+                local/copy_data_dir.sh --validate_opts --non-print data/"${dset}" "${data_feats}${_suf}/${dset}"
                 
                 rm -f ${data_feats}${_suf}/${dset}/{segments,wav.scp,reco2file_and_channel,reco2dur}
                 _opts=
@@ -548,6 +548,7 @@ if ! "${skip_eval}"; then
             ${_cmd} --gpu "${_ngpu}" --max-jobs-run "${_nj}" JOB=1:"${_nj}" "${_logdir}"/asr_inference.JOB.log \
                 python -m funasr.bin.asr_inference_launch \
                     --batch_size 1 \
+                    --mc True   \
                     --nbest 1   \
                     --ngpu "${_ngpu}" \
                     --njob ${njob_infer} \

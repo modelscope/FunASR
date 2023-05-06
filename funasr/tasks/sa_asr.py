@@ -28,7 +28,7 @@ from funasr.models.decoder.sanm_decoder import ParaformerSANMDecoder, FsmnDecode
 from funasr.models.decoder.transformer_decoder import (
     DynamicConvolution2DTransformerDecoder,  # noqa: H301
 )
-from funasr.models.decoder.transformer_decoder_sa_asr import SAAsrTransformerDecoder
+from funasr.models.decoder.transformer_decoder import SAAsrTransformerDecoder
 from funasr.models.decoder.transformer_decoder import DynamicConvolutionTransformerDecoder
 from funasr.models.decoder.transformer_decoder import (
     LightweightConvolution2DTransformerDecoder,  # noqa: H301
