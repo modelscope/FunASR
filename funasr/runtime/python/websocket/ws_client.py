@@ -6,7 +6,8 @@ import asyncio
 # import threading
 import argparse
 import json
-
+import traceback
+from multiprocessing import  Process
 parser = argparse.ArgumentParser()
 parser.add_argument("--host",
                     type=str,
@@ -30,6 +31,11 @@ parser.add_argument("--audio_in",
                     type=str,
                     default=None,
                     help="audio_in")
+
+parser.add_argument("--test_thread_num",
+                    type=int,
+                    default=1,
+                    help="test_thread_num")
 
 args = parser.parse_args()
 args.chunk_size = [int(x) for x in args.chunk_size.split(",")]
@@ -129,12 +135,14 @@ async def ws_send():
                 await websocket.send(data) # 通过ws对象发送数据
             except Exception as e:
                 print('Exception occurred:', e)
+                traceback.print_exc()
+                exit(0)
             await asyncio.sleep(0.005)
         await asyncio.sleep(0.005)
 
 
 
-async def message():
+async def message(id):
     global websocket
     text_print = ""
     while True:
@@ -146,11 +154,12 @@ async def message():
             text = meg["text"]
             text_print += text
             text_print = text_print[-55:]
-            os.system('clear')
-            print("\r"+text_print)
+            #os.system('clear')
+            print("\r"+str(id)+":"+text_print)
         except Exception as e:
             print("Exception:", e)
-
+            traceback.print_exc()
+            exit(0)
 
 async def print_messge():
     global websocket
@@ -161,9 +170,10 @@ async def print_messge():
             print(meg)
         except Exception as e:
             print("Exception:", e)
+            traceback.print_exc()
+            exit(0)
 
-
-async def ws_client():
+async def ws_client(id):
     global websocket # 定义一个全局变量ws，用于保存websocket连接对象
     # uri = "ws://11.167.134.197:8899"
     uri = "ws://{}:{}".format(args.host, args.port)
@@ -174,9 +184,24 @@ async def ws_client():
         else:
             task = asyncio.create_task(record_microphone())  # 创建一个后台任务录音
         task2 = asyncio.create_task(ws_send()) # 创建一个后台任务发送
-        task3 = asyncio.create_task(message()) # 创建一个后台接收消息的任务
+        task3 = asyncio.create_task(message(id)) # 创建一个后台接收消息的任务
         await asyncio.gather(task, task2, task3)
 
+def one_thread(id):
+   asyncio.get_event_loop().run_until_complete(ws_client(id)) # 启动协程
+   asyncio.get_event_loop().run_forever()
 
-asyncio.get_event_loop().run_until_complete(ws_client()) # 启动协程
-asyncio.get_event_loop().run_forever()
+
+if __name__ == '__main__':
+    process_list = []
+    for i in range(args.test_thread_num):   
+        p = Process(target=one_thread,args=(i,)) #实例化进程对象
+        p.start()
+        process_list.append(p)
+
+    for i in process_list:
+        p.join()
+
+    print('结束测试')
+ 
+
