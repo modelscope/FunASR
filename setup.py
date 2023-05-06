@@ -13,7 +13,7 @@ requirements = {
     "install": [
         "setuptools>=38.5.1",
         # "configargparse>=1.2.1",
-        "typeguard<=2.13.3",
+        "typeguard==2.13.3",
         "humanfriendly",
         "scipy>=1.4.1",
         # "filelock",
@@ -42,7 +42,10 @@ requirements = {
         "oss2",
         # "kaldi-native-fbank",
         # timestamp
-        "edit-distance"
+        "edit-distance",
+        # textgrid
+        "textgrid",
+        "protobuf==3.20.0",
     ],
     # train: The modules invoked when training only.
     "train": [

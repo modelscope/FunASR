@@ -106,18 +106,17 @@ def abbr_dispose(words: List[Any], time_stamp: List[List] = None) -> List[Any]:
         if num in abbr_begin:
             if time_stamp is not None:
                 begin = time_stamp[ts_nums[num]][0]
-            abbr_word = words[num].upper()
+            word_lists.append(words[num].upper())
             num += 1
             while num < words_size:
                 if num in abbr_end:
-                    abbr_word += words[num].upper()
+                    word_lists.append(words[num].upper())
                     last_num = num
                     break
                 else:
                     if words[num].encode('utf-8').isalpha():
-                        abbr_word += words[num].upper()
+                        word_lists.append(words[num].upper())
                 num += 1
-            word_lists.append(abbr_word)
             if time_stamp is not None:
                 end = time_stamp[ts_nums[num]][1]
                 ts_lists.append([begin, end])

@@ -288,6 +288,9 @@ def inference_launch_funasr(**kwargs):
     if mode == "asr":
         from funasr.bin.asr_inference import inference
         return inference(**kwargs)
+    elif mode == "sa_asr":
+        from funasr.bin.sa_asr_inference import inference
+        return inference(**kwargs)
     elif mode == "uniasr":
         from funasr.bin.asr_inference_uniasr import inference
         return inference(**kwargs)

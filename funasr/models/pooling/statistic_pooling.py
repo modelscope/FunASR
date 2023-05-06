@@ -83,9 +83,9 @@ def windowed_statistic_pooling(
     num_chunk = int(math.ceil(tt / pooling_stride))
     pad = pooling_size // 2
     if len(xs_pad.shape) == 4:
-        features = F.pad(xs_pad, (0, 0, pad, pad), "reflect")
+        features = F.pad(xs_pad, (0, 0, pad, pad), "replicate")
     else:
-        features = F.pad(xs_pad, (pad, pad), "reflect")
+        features = F.pad(xs_pad, (pad, pad), "replicate")
     stat_list = []
 
     for i in range(num_chunk):

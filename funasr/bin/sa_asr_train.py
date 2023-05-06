@@ -10,7 +10,7 @@ logging.basicConfig(
            f" %(asctime)s (%(module)s:%(lineno)d) %(levelname)s: %(message)s",
 )
 
-from funasr.tasks.asr import ASRTask
+from funasr.tasks.sa_asr import ASRTask
 
 
 # for ASR Training
