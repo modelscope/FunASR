@@ -44,7 +44,7 @@ print(rec_result)
 Full code of demo, please ref to [demo](https://github.com/alibaba-damo-academy/FunASR/discussions/241)
 
 #### [UniASR Model](https://www.modelscope.cn/models/damo/speech_UniASR_asr_2pass-zh-cn-8k-common-vocab3445-pytorch-online/summary)
-There are three decoding mode for UniASR model(`fast`、`normal`、`offline`), for more model detailes, please refer to [docs](https://www.modelscope.cn/models/damo/speech_UniASR_asr_2pass-zh-cn-8k-common-vocab3445-pytorch-online/summary)
+There are three decoding mode for UniASR model(`fast`、`normal`、`offline`), for more model details, please refer to [docs](https://www.modelscope.cn/models/damo/speech_UniASR_asr_2pass-zh-cn-8k-common-vocab3445-pytorch-online/summary)
 ```python
 decoding_model = "fast" # "fast"、"normal"、"offline"
 inference_pipeline = pipeline(
@@ -61,7 +61,7 @@ Full code of demo, please ref to [demo](https://github.com/alibaba-damo-academy/
 Undo
 
 #### [MFCCA Model](https://www.modelscope.cn/models/NPU-ASLP/speech_mfcca_asr-zh-cn-16k-alimeeting-vocab4950/summary)
-For more model detailes, please refer to [docs](https://www.modelscope.cn/models/NPU-ASLP/speech_mfcca_asr-zh-cn-16k-alimeeting-vocab4950/summary)
+For more model details, please refer to [docs](https://www.modelscope.cn/models/NPU-ASLP/speech_mfcca_asr-zh-cn-16k-alimeeting-vocab4950/summary)
 ```python
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
