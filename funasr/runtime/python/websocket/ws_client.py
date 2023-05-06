@@ -36,6 +36,10 @@ parser.add_argument("--test_thread_num",
                     type=int,
                     default=1,
                     help="test_thread_num")
+parser.add_argument("--words_max_print",
+                    type=int,
+                    default=100,
+                    help="chunk")
 
 args = parser.parse_args()
 args.chunk_size = [int(x) for x in args.chunk_size.split(",")]
@@ -152,7 +156,7 @@ async def message(id):
             # print(meg, end = '')
             # print("\r")
             text_print += " {}".format(meg["text"][0]) 
-            text_print = text_print[-55:]
+            text_print = text_print[-args.words_max_print:]
             #os.system('clear')
             print("\r"+str(id)+":"+text_print)
         except Exception as e:
