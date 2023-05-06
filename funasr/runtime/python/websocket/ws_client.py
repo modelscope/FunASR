@@ -151,8 +151,7 @@ async def message(id):
             meg = json.loads(meg)
             # print(meg, end = '')
             # print("\r")
-            text = meg["text"]
-            text_print += text
+            text_print += " {}".format(meg["text"][0]) 
             text_print = text_print[-55:]
             #os.system('clear')
             print("\r"+str(id)+":"+text_print)
