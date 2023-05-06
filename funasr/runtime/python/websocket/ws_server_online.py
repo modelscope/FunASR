@@ -80,7 +80,7 @@ async def async_asr_online(websocket,audio_in): # ASR推理
                 if "text" in rec_result:
                     if rec_result["text"] != "sil" and rec_result["text"] != "waiting_for_more_voice":
                         if len(rec_result["text"])>0:
-                            rec_result["text"][0]=rec_result["text"][0].replace(" ","")
+                            rec_result["text"][0]=rec_result["text"][0] #.replace(" ","")
                         message = json.dumps({"mode": "online", "text": rec_result["text"]})
                         await websocket.send(message)
 
