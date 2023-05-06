@@ -41,8 +41,6 @@ async def ws_serve(websocket, path):
     websocket_users.add(websocket)
     websocket.param_dict_asr_online = {"cache": dict()}
     websocket.speek_online = Queue()
-    ss_online = threading.Thread(target=asr_online, args=(websocket,))
-    ss_online.start()
 
     try:
         async for message in websocket:
@@ -56,18 +54,12 @@ async def ws_serve(websocket, path):
 
                 websocket.param_dict_asr_online["chunk_size"] = message["chunk_size"]
                 
-    
                 frames_online.append(audio)
-    
                 if len(frames_online) % message["chunk_interval"] == 0 or not is_speaking:
-                    
                     audio_in = b"".join(frames_online)
-                    websocket.speek_online.put(audio_in)
+                    await async_asr_online(websocket,audio_in)
                     frames_online = []
 
-            if not websocket.send_msg.empty():
-                await websocket.send(websocket.send_msg.get())
-                websocket.send_msg.task_done()
 
      
     except websockets.ConnectionClosed:
@@ -78,29 +70,21 @@ async def ws_serve(websocket, path):
     except Exception as e:
         print("Exception:", e)
  
-
-
-def asr_online(websocket):  # ASR推理
-    global websocket_users
-    while websocket in websocket_users:
-        if not websocket.speek_online.empty():
-            audio_in = websocket.speek_online.get()
-            websocket.speek_online.task_done()
+async def async_asr_online(websocket,audio_in): # ASR推理
             if len(audio_in) > 0:
-                # print(len(audio_in))
                 audio_in = load_bytes(audio_in)
                 rec_result = inference_pipeline_asr_online(audio_in=audio_in,
                                                            param_dict=websocket.param_dict_asr_online)
                 if websocket.param_dict_asr_online["is_final"]:
                     websocket.param_dict_asr_online["cache"] = dict()
-                
                 if "text" in rec_result:
                     if rec_result["text"] != "sil" and rec_result["text"] != "waiting_for_more_voice":
-                        print(rec_result["text"])
+                        if len(rec_result["text"])>0:
+                            rec_result["text"][0]=rec_result["text"][0].replace(" ","")
                         message = json.dumps({"mode": "online", "text": rec_result["text"]})
-                        websocket.send_msg.put(message)
-        
-        time.sleep(0.005)
+                        await websocket.send(message)
+
+ 
 
 
 start_server = websockets.serve(ws_serve, args.host, args.port, subprotocols=["binary"], ping_interval=None)
