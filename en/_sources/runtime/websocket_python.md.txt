@@ -64,4 +64,5 @@ python ws_client.py --host "127.0.0.1" --port 10095 --chunk_size "5,10,5" --audi
 
 ## Acknowledge
 1. This project is maintained by [FunASR community](https://github.com/alibaba-damo-academy/FunASR).
-2. We acknowledge [cgisky1980](https://github.com/cgisky1980/FunASR) for contributing the websocket service.
+2. We acknowledge [zhaoming](https://github.com/zhaomingwork/FunASR/tree/fix_bug_for_python_websocket) for contributing the websocket service.
+3. We acknowledge [cgisky1980](https://github.com/cgisky1980/FunASR) for contributing the websocket service of offline model.
