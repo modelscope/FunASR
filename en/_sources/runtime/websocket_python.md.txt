@@ -54,12 +54,12 @@ pip install -r requirements_client.txt
 #### Recording from mircrophone
 ```shell
 # --chunk_size, "5,10,5"=600ms, "8,8,4"=480ms
-python ws_client.py --host "127.0.0.1" --port 10095 --chunk_size "5,10,5"
+python ws_client.py --host "127.0.0.1" --port 10095 --chunk_size "5,10,5" --words_max_print 100
 ```
 #### Loadding from wav.scp(kaldi style)
 ```shell
 # --chunk_size, "5,10,5"=600ms, "8,8,4"=480ms
-python ws_client.py --host "127.0.0.1" --port 10095 --chunk_size "5,10,5" --audio_in "./data/wav.scp"
+python ws_client.py --host "127.0.0.1" --port 10095 --chunk_size "5,10,5" --audio_in "./data/wav.scp" --words_max_print 100
 ```
 
 ## Acknowledge
