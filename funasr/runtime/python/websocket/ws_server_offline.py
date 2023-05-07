@@ -97,7 +97,7 @@ async def ws_serve(websocket, path):
                         websocket.vad_pre_idx = 0
                         frames = []
                     else:
-                        frames = frames[-10:]
+                        frames = frames[-20:]
 
      
     except websockets.ConnectionClosed:
