@@ -78,6 +78,7 @@ async def ws_serve(websocket, path):
 
                 is_speaking = message["is_speaking"]
                 websocket.param_dict_vad["is_final"] = not is_speaking
+                websocket.wav_name = message.get("wav_name", "demo")
                 if speech_start:
                     frames_asr.append(audio)
                 speech_start_i, speech_end_i = await async_vad(websocket, audio)
@@ -136,8 +137,9 @@ async def async_asr(websocket, audio_in):
                     rec_result = inference_pipeline_punc(text_in=rec_result['text'],
                                                          param_dict=websocket.param_dict_punc)
                     # print(rec_result)
-                    message = json.dumps({"mode": "offline", "text": [rec_result["text"]]})
-                    await websocket.send(message)
+                message = json.dumps({"mode": "offline", "text": [rec_result["text"]], "wav_name": websocket.wav_name})
+                await websocket.send(message)
+                
                     
  
 

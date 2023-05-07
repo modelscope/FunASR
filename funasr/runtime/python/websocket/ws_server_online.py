@@ -53,7 +53,7 @@ async def ws_serve(websocket, path):
 
                 is_speaking = message["is_speaking"]
                 websocket.param_dict_asr_online["is_final"] = not is_speaking
-
+                websocket.wav_name = message.get("wav_name", "demo")
                 websocket.param_dict_asr_online["chunk_size"] = message["chunk_size"]
                 
                 frames_online.append(audio)
@@ -81,9 +81,9 @@ async def async_asr_online(websocket,audio_in):
                     websocket.param_dict_asr_online["cache"] = dict()
                 if "text" in rec_result:
                     if rec_result["text"] != "sil" and rec_result["text"] != "waiting_for_more_voice":
-                        if len(rec_result["text"])>0:
-                            rec_result["text"][0]=rec_result["text"][0] #.replace(" ","")
-                        message = json.dumps({"mode": "online", "text": rec_result["text"]})
+                        # if len(rec_result["text"])>0:
+                        #     rec_result["text"][0]=rec_result["text"][0] #.replace(" ","")
+                        message = json.dumps({"mode": "online", "text": rec_result["text"], "wav_name": websocket.wav_name})
                         await websocket.send(message)
 
 
