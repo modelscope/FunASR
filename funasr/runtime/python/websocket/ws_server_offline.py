@@ -96,6 +96,7 @@ async def ws_serve(websocket, path):
                     if not is_speaking:
                         websocket.vad_pre_idx = 0
                         frames = []
+                        websocket.param_dict_vad = {'in_cache': dict()}
                     else:
                         frames = frames[-20:]
 
