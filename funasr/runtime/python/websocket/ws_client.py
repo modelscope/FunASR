@@ -7,7 +7,9 @@ import asyncio
 import argparse
 import json
 import traceback
-from multiprocessing import  Process
+from multiprocessing import Process
+from funasr.fileio.datadir_writer import DatadirWriter
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--host",
                     type=str,
@@ -43,6 +45,10 @@ parser.add_argument("--words_max_print",
                     type=int,
                     default=100,
                     help="chunk")
+parser.add_argument("--output_dir",
+                    type=str,
+                    default=None,
+                    help="output_dir")
 
 args = parser.parse_args()
 args.chunk_size = [int(x) for x in args.chunk_size.split(",")]
@@ -50,6 +56,11 @@ print(args)
 # voices = asyncio.Queue()
 from queue import Queue
 voices = Queue()
+
+ibest_writer = None
+if args.output_dir is not None:
+    writer = DatadirWriter(args.output_dir)
+    ibest_writer = writer[f"1best_recog"]
 
 async def record_microphone():
     is_finished = False
@@ -91,7 +102,9 @@ async def record_from_scp():
         wavs = [args.audio_in]
     for wav in wavs:
         wav_splits = wav.strip().split()
+        wav_name = wav_splits[0] if len(wav_splits) > 1 else "demo"
         wav_path = wav_splits[1] if len(wav_splits) > 1 else wav_splits[0]
+        
         # bytes_f = open(wav_path, "rb")
         # bytes_data = bytes_f.read()
         with wave.open(wav_path, "rb") as wav_file:
@@ -112,7 +125,7 @@ async def record_from_scp():
             beg = i*stride
             data = audio_bytes[beg:beg+stride]
             data = data.decode('ISO-8859-1')
-            message = json.dumps({"chunk_size": args.chunk_size, "chunk_interval": args.chunk_interval, "is_speaking": is_speaking, "audio": data, "is_finished": is_finished})
+            message = json.dumps({"chunk_size": args.chunk_size, "chunk_interval": args.chunk_interval, "is_speaking": is_speaking, "audio": data, "is_finished": is_finished, "wav_name": wav_name})
             voices.put(message)
             # print("data_chunk: ", len(data_chunk))
             # print(voices.qsize())
@@ -152,14 +165,18 @@ async def message(id):
             # print(meg, end = '')
             # print("\r")
             # print(meg)
+            wav_name = meg.get("wav_name", "demo")
+            print(wav_name)
             text = meg["text"][0]
+            if ibest_writer is not None:
+                ibest_writer["text"][wav_name] = text
             if meg["mode"] == "online":
                 text_print += " {}".format(text)
             else:
                 text_print += "{}".format(text)
             text_print = text_print[-args.words_max_print:]
             os.system('clear')
-            print("\r"+str(id)+":"+text_print)
+            print("\rpid"+str(id)+": "+text_print)
         except Exception as e:
             print("Exception:", e)
             traceback.print_exc()
