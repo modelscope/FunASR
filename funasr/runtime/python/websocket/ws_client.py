@@ -31,7 +31,10 @@ parser.add_argument("--audio_in",
                     type=str,
                     default=None,
                     help="audio_in")
-
+parser.add_argument("--send_without_sleep",
+                    action="store_true",
+                    default=False,
+                    help="if audio_in is set, send_without_sleep")
 parser.add_argument("--test_thread_num",
                     type=int,
                     default=1,
@@ -43,12 +46,11 @@ parser.add_argument("--words_max_print",
 
 args = parser.parse_args()
 args.chunk_size = [int(x) for x in args.chunk_size.split(",")]
-
+print(args)
 # voices = asyncio.Queue()
 from queue import Queue
 voices = Queue()
 
-# 其他函数可以通过调用send(data)来发送数据，例如：
 async def record_microphone():
     is_finished = False
     import pyaudio
@@ -75,11 +77,9 @@ async def record_microphone():
         message = json.dumps({"chunk_size": args.chunk_size, "chunk_interval": args.chunk_interval, "audio": data, "is_speaking": is_speaking, "is_finished": is_finished})
         
         voices.put(message)
-        #print(voices.qsize())
 
         await asyncio.sleep(0.005)
 
-# 其他函数可以通过调用send(data)来发送数据，例如：
 async def record_from_scp():
     import wave
     global voices
@@ -95,15 +95,11 @@ async def record_from_scp():
         # bytes_f = open(wav_path, "rb")
         # bytes_data = bytes_f.read()
         with wave.open(wav_path, "rb") as wav_file:
-            # 获取音频参数
             params = wav_file.getparams()
-            # 获取头信息的长度
             # header_length = wav_file.getheaders()[0][1]
-            # 读取音频帧数据，跳过头信息
             # wav_file.setpos(header_length)
             frames = wav_file.readframes(wav_file.getnframes())
 
-        # 将音频帧数据转换为字节类型的数据
         audio_bytes = bytes(frames)
         # stride = int(args.chunk_size/1000*16000*2)
         stride = int(60*args.chunk_size[1]/args.chunk_interval/1000*16000*2)
@@ -120,8 +116,8 @@ async def record_from_scp():
             voices.put(message)
             # print("data_chunk: ", len(data_chunk))
             # print(voices.qsize())
-        
-            await asyncio.sleep(60*args.chunk_size[1]/args.chunk_interval/1000)
+            sleep_duration = 0.001 if args.send_without_sleep else 60*args.chunk_size[1]/args.chunk_interval/1000
+            await asyncio.sleep(sleep_duration)
 
     is_finished = True
     message = json.dumps({"is_finished": is_finished})
@@ -136,7 +132,7 @@ async def ws_send():
             data = voices.get()
             voices.task_done()
             try:
-                await websocket.send(data) # 通过ws对象发送数据
+                await websocket.send(data)
             except Exception as e:
                 print('Exception occurred:', e)
                 traceback.print_exc()
@@ -155,9 +151,14 @@ async def message(id):
             meg = json.loads(meg)
             # print(meg, end = '')
             # print("\r")
-            text_print += " {}".format(meg["text"][0]) 
+            # print(meg)
+            text = meg["text"][0]
+            if meg["mode"] == "online":
+                text_print += " {}".format(text)
+            else:
+                text_print += "{}".format(text)
             text_print = text_print[-args.words_max_print:]
-            #os.system('clear')
+            os.system('clear')
             print("\r"+str(id)+":"+text_print)
         except Exception as e:
             print("Exception:", e)
@@ -177,17 +178,15 @@ async def print_messge():
             exit(0)
 
 async def ws_client(id):
-    global websocket # 定义一个全局变量ws，用于保存websocket连接对象
-    # uri = "ws://11.167.134.197:8899"
+    global websocket
     uri = "ws://{}:{}".format(args.host, args.port)
-    #ws = await websockets.connect(uri, subprotocols=["binary"]) # 创建一个长连接
     async for websocket in websockets.connect(uri, subprotocols=["binary"], ping_interval=None):
         if args.audio_in is not None:
-            task = asyncio.create_task(record_from_scp()) # 创建一个后台任务录音
+            task = asyncio.create_task(record_from_scp())
         else:
-            task = asyncio.create_task(record_microphone())  # 创建一个后台任务录音
-        task2 = asyncio.create_task(ws_send()) # 创建一个后台任务发送
-        task3 = asyncio.create_task(message(id)) # 创建一个后台接收消息的任务
+            task = asyncio.create_task(record_microphone())
+        task2 = asyncio.create_task(ws_send())
+        task3 = asyncio.create_task(message(id))
         await asyncio.gather(task, task2, task3)
 
 def one_thread(id):
@@ -198,13 +197,13 @@ def one_thread(id):
 if __name__ == '__main__':
     process_list = []
     for i in range(args.test_thread_num):   
-        p = Process(target=one_thread,args=(i,)) #实例化进程对象
+        p = Process(target=one_thread,args=(i,))
         p.start()
         process_list.append(p)
 
     for i in process_list:
         p.join()
 
-    print('结束测试')
+    print('end')
  
 

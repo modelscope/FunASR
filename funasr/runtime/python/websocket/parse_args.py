@@ -31,5 +31,10 @@ parser.add_argument("--ngpu",
                     type=int,
                     default=1,
                     help="0 for cpu, 1 for gpu")
+parser.add_argument("--ncpu",
+                    type=int,
+                    default=1,
+                    help="cpu cores")
 
 args = parser.parse_args()
+print(args)
