@@ -12,7 +12,7 @@ from parse_args import args
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
 from modelscope.utils.logger import get_logger
-from funasr_onnx.utils.frontend import load_bytes
+from funasr.runtime.python.onnxruntime.funasr_onnx.utils.frontend import load_bytes
 
 tracemalloc.start()
 
@@ -28,6 +28,8 @@ print("model loading")
 inference_pipeline_asr_online = pipeline(
     task=Tasks.auto_speech_recognition,
     model=args.asr_model_online,
+    ngpu=args.ngpu,
+    ncpu=args.ncpu,
     model_revision='v1.0.4')
 
 print("model loaded")
@@ -63,14 +65,14 @@ async def ws_serve(websocket, path):
 
      
     except websockets.ConnectionClosed:
-        print("ConnectionClosed...", websocket_users)    # 链接断开
+        print("ConnectionClosed...", websocket_users)
         websocket_users.remove(websocket)
     except websockets.InvalidState:
-        print("InvalidState...")    # 无效状态
+        print("InvalidState...")
     except Exception as e:
         print("Exception:", e)
  
-async def async_asr_online(websocket,audio_in): # ASR推理
+async def async_asr_online(websocket,audio_in):
             if len(audio_in) > 0:
                 audio_in = load_bytes(audio_in)
                 rec_result = inference_pipeline_asr_online(audio_in=audio_in,
@@ -84,7 +86,6 @@ async def async_asr_online(websocket,audio_in): # ASR推理
                         message = json.dumps({"mode": "online", "text": rec_result["text"]})
                         await websocket.send(message)
 
- 
 
 
 start_server = websockets.serve(ws_serve, args.host, args.port, subprotocols=["binary"], ping_interval=None)
