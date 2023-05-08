@@ -553,12 +553,12 @@ def inference_modelscope(
                 asr_result = speech2text(cache, raw_inputs[:, sample_offset: sample_offset + stride_size], input_lens)
                 if len(asr_result) != 0: 
                     final_result += " ".join(asr_result) + " "
-            item = {'key': "utt", 'value': [final_result.strip()]}
+            item = {'key': "utt", 'value': final_result.strip()}
         else:
             input_lens = torch.tensor([raw_inputs.shape[1]])
             cache["encoder"]["is_final"] = is_final
             asr_result = speech2text(cache, raw_inputs, input_lens)
-            item = {'key': "utt", 'value': asr_result}
+            item = {'key': "utt", 'value': " ".join(asr_result)}
 
         asr_result_list.append(item)
         if is_final:
