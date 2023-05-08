@@ -11,6 +11,7 @@
 #endif
 
 using namespace std;
+namespace funasr {
 
 class AudioFrame {
   private:
@@ -60,4 +61,5 @@ class Audio {
     int GetQueueSize() { return (int)frame_queue.size(); }
 };
 
+} // namespace funasr
 #endif

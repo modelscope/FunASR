@@ -6,6 +6,7 @@
 #include <map>
 #include <vector>
 
+namespace funasr {
 class VadModel {
   public:
     virtual ~VadModel(){};
@@ -24,4 +25,5 @@ class VadModel {
 };
 
 VadModel *CreateVadModel(std::map<std::string, std::string>& model_path, int thread_num);
+} // namespace funasr
 #endif

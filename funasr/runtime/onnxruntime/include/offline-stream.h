@@ -8,6 +8,7 @@
 #include "punc-model.h"
 #include "vad-model.h"
 
+namespace funasr {
 class OfflineStream {
   public:
     OfflineStream(std::map<std::string, std::string>& model_path, int thread_num);
@@ -25,4 +26,5 @@ class OfflineStream {
 };
 
 OfflineStream *CreateOfflineStream(std::map<std::string, std::string>& model_path, int thread_num=1);
+} // namespace funasr
 #endif

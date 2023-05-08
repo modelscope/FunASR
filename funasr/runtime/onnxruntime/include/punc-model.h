@@ -6,6 +6,7 @@
 #include <map>
 #include <vector>
 
+namespace funasr {
 class PuncModel {
   public:
     virtual ~PuncModel(){};
@@ -15,4 +16,5 @@ class PuncModel {
 };
 
 PuncModel *CreatePuncModel(std::map<std::string, std::string>& model_path, int thread_num);
+} // namespace funasr
 #endif

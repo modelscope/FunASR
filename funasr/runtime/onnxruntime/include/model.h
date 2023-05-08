@@ -4,7 +4,7 @@
 
 #include <string>
 #include <map>
-
+namespace funasr {
 class Model {
   public:
     virtual ~Model(){};
@@ -16,4 +16,5 @@ class Model {
 };
 
 Model *CreateModel(std::map<std::string, std::string>& model_path,int thread_num=1);
+} // namespace funasr
 #endif
