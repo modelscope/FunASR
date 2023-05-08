@@ -63,13 +63,13 @@ _FUNASRAPI void			FunASRUninit(FUNASR_HANDLE handle);
 _FUNASRAPI const float	FunASRGetRetSnippetTime(FUNASR_RESULT result);
 
 // VAD
-_FUNASRAPI FUNASR_HANDLE  	FunVadInit(std::map<std::string, std::string>& model_path, int thread_num);
+_FUNASRAPI FUNASR_HANDLE  	FsmnVadInit(std::map<std::string, std::string>& model_path, int thread_num);
 
-_FUNASRAPI FUNASR_RESULT	FunVadWavFile(FUNASR_HANDLE handle, const char* sz_wavfile, FUNASR_MODE mode, QM_CALLBACK fn_callback);
-_FUNASRAPI std::vector<std::vector<int>>*	FunVadGetResult(FUNASR_RESULT result,int n_index);
-_FUNASRAPI void			 	FunVadFreeResult(FUNASR_RESULT result);
-_FUNASRAPI void				FunVadUninit(FUNASR_HANDLE handle);
-_FUNASRAPI const float		FunVadGetRetSnippetTime(FUNASR_RESULT result);
+_FUNASRAPI FUNASR_RESULT	FsmnVadWavFile(FUNASR_HANDLE handle, const char* sz_wavfile, FUNASR_MODE mode, QM_CALLBACK fn_callback);
+_FUNASRAPI std::vector<std::vector<int>>*	FsmnVadGetResult(FUNASR_RESULT result,int n_index);
+_FUNASRAPI void			 	FsmnVadFreeResult(FUNASR_RESULT result);
+_FUNASRAPI void				FsmnVadUninit(FUNASR_HANDLE handle);
+_FUNASRAPI const float		FsmnVadGetRetSnippetTime(FUNASR_RESULT result);
 
 // PUNC
 _FUNASRAPI FUNASR_HANDLE  		FunPuncInit(std::map<std::string, std::string>& model_path, int thread_num);
@@ -78,7 +78,8 @@ _FUNASRAPI void					FunPuncUninit(FUNASR_HANDLE handle);
 
 //OfflineStream
 _FUNASRAPI FUNASR_HANDLE  	FunOfflineInit(std::map<std::string, std::string>& model_path, int thread_num);
-_FUNASRAPI FUNASR_RESULT 	FunOfflineStream(FUNASR_HANDLE handle, const char* sz_wavfile, FUNASR_MODE mode, QM_CALLBACK fn_callback);
+_FUNASRAPI FUNASR_RESULT 	FunOfflineRecogFile(FUNASR_HANDLE handle, const char* sz_wavfile, FUNASR_MODE mode, QM_CALLBACK fn_callback);
+_FUNASRAPI FUNASR_RESULT	FunOfflineRecogPCMBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, int sampling_rate, FUNASR_MODE mode, QM_CALLBACK fn_callback);
 _FUNASRAPI void				FunOfflineUninit(FUNASR_HANDLE handle);
 
 #ifdef __cplusplus 

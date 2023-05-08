@@ -45,6 +45,6 @@ using namespace std;
 #include "resample.h"
 #include "paraformer.h"
 #include "offline-stream.h"
-#include "libfunasrapi.h"
+#include "funasrruntime.h"
 
 using namespace paraformer;

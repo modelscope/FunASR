@@ -14,7 +14,7 @@
 #include <sstream>
 #include <map>
 #include <glog/logging.h>
-#include "libfunasrapi.h"
+#include "funasrruntime.h"
 #include "tclap/CmdLine.h"
 #include "com-define.h"
 
@@ -107,7 +107,7 @@ int main(int argc, char** argv)
     long taking_micros = 0;
     for(auto& wav_file : wav_list){
         gettimeofday(&start, NULL);
-        FUNASR_RESULT result=FunOfflineStream(asr_hanlde, wav_file.c_str(), RASR_NONE, NULL);
+        FUNASR_RESULT result=FunOfflineRecogFile(asr_hanlde, wav_file.c_str(), RASR_NONE, NULL);
         gettimeofday(&end, NULL);
         seconds = (end.tv_sec - start.tv_sec);
         taking_micros += ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);

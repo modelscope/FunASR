@@ -37,39 +37,32 @@ source ~/.bashrc
 
 ### Start grpc paraformer server
 ```
-./cmake/build/paraformer-server     --port-id <string> [--punc-config
-                                    <string>] [--punc-model <string>]
-                                    --am-config <string> --am-cmvn <string>
-                                    --am-model <string> [--vad-config
-                                    <string>] [--vad-cmvn <string>]
-                                    [--vad-model <string>] [--] [--version]
-                                    [-h]
+
+./cmake/build/paraformer-server   --port-id <string> [--punc-quant <string>]
+                                  [--punc-dir <string>] [--vad-quant <string>]
+                                  [--vad-dir <string>] [--quantize <string>]
+                                  --model-dir <string> [--] [--version] [-h]
 Where:
    --port-id <string>
      (required)  port id
+   --model-dir <string>
+     (required)  the asr model path, which contains model.onnx, config.yaml, am.mvn
+   --quantize <string>
+     false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir
 
-   --am-config <string>
-     (required)  am config path
-   --am-cmvn <string>
-     (required)  am cmvn path
-   --am-model <string>
-     (required)  am model path
+   --vad-dir <string>
+     the vad model path, which contains model.onnx, vad.yaml, vad.mvn
+   --vad-quant <string>
+     false (Default), load the model of model.onnx in vad_dir. If set true, load the model of model_quant.onnx in vad_dir
 
-   --punc-config <string>
-     punc config path
-   --punc-model <string>
-     punc model path
-
-   --vad-config <string>
-     vad config path
-   --vad-cmvn <string>
-     vad cmvn path
-   --vad-model <string>
-     vad model path
-
-   Required: --port-id <string> --am-config <string> --am-cmvn <string> --am-model <string> 
-   If use vad, please add: [--vad-config <string>] [--vad-cmvn <string>] [--vad-model <string>]
-   If use punc, please add: [--punc-config <string>] [--punc-model <string>] 
+   --punc-dir <string>
+     the punc model path, which contains model.onnx, punc.yaml
+   --punc-quant <string>
+     false (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir
+  
+   Required: --port-id <string>  --model-dir <string>
+   If use vad, please add: --vad-dir <string>
+   If use punc, please add: --punc-dir <string>
 ```
 
 ## For the client
