@@ -1,5 +1,6 @@
 #include "precomp.h"
 
+namespace funasr {
 Model *CreateModel(std::map<std::string, std::string>& model_path, int thread_num)
 {
     string am_model_path;
@@ -14,7 +15,9 @@ Model *CreateModel(std::map<std::string, std::string>& model_path, int thread_nu
     am_config_path = PathAppend(model_path.at(MODEL_DIR), AM_CONFIG_NAME);
 
     Model *mm;
-    mm = new paraformer::Paraformer();
+    mm = new Paraformer();
     mm->InitAsr(am_model_path, am_cmvn_path, am_config_path, thread_num);
     return mm;
 }
+
+} // namespace funasr

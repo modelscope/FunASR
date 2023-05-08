@@ -7,44 +7,44 @@ extern "C" {
 	// APIs for Init
 	_FUNASRAPI FUNASR_HANDLE  FunASRInit(std::map<std::string, std::string>& model_path, int thread_num)
 	{
-		Model* mm = CreateModel(model_path, thread_num);
+		funasr::Model* mm = funasr::CreateModel(model_path, thread_num);
 		return mm;
 	}
 
 	_FUNASRAPI FUNASR_HANDLE  FsmnVadInit(std::map<std::string, std::string>& model_path, int thread_num)
 	{
-		VadModel* mm = CreateVadModel(model_path, thread_num);
+		funasr::VadModel* mm = funasr::CreateVadModel(model_path, thread_num);
 		return mm;
 	}
 
 	_FUNASRAPI FUNASR_HANDLE  FunPuncInit(std::map<std::string, std::string>& model_path, int thread_num)
 	{
-		PuncModel* mm = CreatePuncModel(model_path, thread_num);
+		funasr::PuncModel* mm = funasr::CreatePuncModel(model_path, thread_num);
 		return mm;
 	}
 
 	_FUNASRAPI FUNASR_HANDLE  FunOfflineInit(std::map<std::string, std::string>& model_path, int thread_num)
 	{
-		OfflineStream* mm = CreateOfflineStream(model_path, thread_num);
+		funasr::OfflineStream* mm = funasr::CreateOfflineStream(model_path, thread_num);
 		return mm;
 	}
 
 	// APIs for ASR Infer
 	_FUNASRAPI FUNASR_RESULT FunASRRecogBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, FUNASR_MODE mode, QM_CALLBACK fn_callback)
 	{
-		Model* recog_obj = (Model*)handle;
+		funasr::Model* recog_obj = (funasr::Model*)handle;
 		if (!recog_obj)
 			return nullptr;
 
 		int32_t sampling_rate = -1;
-		Audio audio(1);
+		funasr::Audio audio(1);
 		if (!audio.LoadWav(sz_buf, n_len, &sampling_rate))
 			return nullptr;
 
 		float* buff;
 		int len;
 		int flag=0;
-		FUNASR_RECOG_RESULT* p_result = new FUNASR_RECOG_RESULT;
+		funasr::FUNASR_RECOG_RESULT* p_result = new funasr::FUNASR_RECOG_RESULT;
 		p_result->snippet_time = audio.GetTimeLen();
 		int n_step = 0;
 		int n_total = audio.GetQueueSize();
@@ -61,18 +61,18 @@ extern "C" {
 
 	_FUNASRAPI FUNASR_RESULT FunASRRecogPCMBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, int sampling_rate, FUNASR_MODE mode, QM_CALLBACK fn_callback)
 	{
-		Model* recog_obj = (Model*)handle;
+		funasr::Model* recog_obj = (funasr::Model*)handle;
 		if (!recog_obj)
 			return nullptr;
 
-		Audio audio(1);
+		funasr::Audio audio(1);
 		if (!audio.LoadPcmwav(sz_buf, n_len, &sampling_rate))
 			return nullptr;
 
 		float* buff;
 		int len;
 		int flag = 0;
-		FUNASR_RECOG_RESULT* p_result = new FUNASR_RECOG_RESULT;
+		funasr::FUNASR_RECOG_RESULT* p_result = new funasr::FUNASR_RECOG_RESULT;
 		p_result->snippet_time = audio.GetTimeLen();
 		int n_step = 0;
 		int n_total = audio.GetQueueSize();
@@ -89,18 +89,18 @@ extern "C" {
 
 	_FUNASRAPI FUNASR_RESULT FunASRRecogPCMFile(FUNASR_HANDLE handle, const char* sz_filename, int sampling_rate, FUNASR_MODE mode, QM_CALLBACK fn_callback)
 	{
-		Model* recog_obj = (Model*)handle;
+		funasr::Model* recog_obj = (funasr::Model*)handle;
 		if (!recog_obj)
 			return nullptr;
 
-		Audio audio(1);
+		funasr::Audio audio(1);
 		if (!audio.LoadPcmwav(sz_filename, &sampling_rate))
 			return nullptr;
 
 		float* buff;
 		int len;
 		int flag = 0;
-		FUNASR_RECOG_RESULT* p_result = new FUNASR_RECOG_RESULT;
+		funasr::FUNASR_RECOG_RESULT* p_result = new funasr::FUNASR_RECOG_RESULT;
 		p_result->snippet_time = audio.GetTimeLen();
 		int n_step = 0;
 		int n_total = audio.GetQueueSize();
@@ -117,12 +117,12 @@ extern "C" {
 
 	_FUNASRAPI FUNASR_RESULT FunASRRecogFile(FUNASR_HANDLE handle, const char* sz_wavfile, FUNASR_MODE mode, QM_CALLBACK fn_callback)
 	{
-		Model* recog_obj = (Model*)handle;
+		funasr::Model* recog_obj = (funasr::Model*)handle;
 		if (!recog_obj)
 			return nullptr;
 		
 		int32_t sampling_rate = -1;
-		Audio audio(1);
+		funasr::Audio audio(1);
 		if(!audio.LoadWav(sz_wavfile, &sampling_rate))
 			return nullptr;
 
@@ -131,7 +131,7 @@ extern "C" {
 		int flag = 0;
 		int n_step = 0;
 		int n_total = audio.GetQueueSize();
-		FUNASR_RECOG_RESULT* p_result = new FUNASR_RECOG_RESULT;
+		funasr::FUNASR_RECOG_RESULT* p_result = new funasr::FUNASR_RECOG_RESULT;
 		p_result->snippet_time = audio.GetTimeLen();
 		while (audio.Fetch(buff, len, flag) > 0) {
 			string msg = recog_obj->Forward(buff, len, flag);
@@ -147,16 +147,16 @@ extern "C" {
 	// APIs for VAD Infer
 	_FUNASRAPI FUNASR_RESULT FsmnVadWavFile(FUNASR_HANDLE handle, const char* sz_wavfile, FUNASR_MODE mode, QM_CALLBACK fn_callback)
 	{
-		VadModel* vad_obj = (VadModel*)handle;
+		funasr::VadModel* vad_obj = (funasr::VadModel*)handle;
 		if (!vad_obj)
 			return nullptr;
 		
 		int32_t sampling_rate = -1;
-		Audio audio(1);
+		funasr::Audio audio(1);
 		if(!audio.LoadWav(sz_wavfile, &sampling_rate))
 			return nullptr;
 
-		FUNASR_VAD_RESULT* p_result = new FUNASR_VAD_RESULT;
+		funasr::FUNASR_VAD_RESULT* p_result = new funasr::FUNASR_VAD_RESULT;
 		p_result->snippet_time = audio.GetTimeLen();
 		
 		vector<std::vector<int>> vad_segments;
@@ -169,7 +169,7 @@ extern "C" {
 	// APIs for PUNC Infer
 	_FUNASRAPI const std::string FunPuncInfer(FUNASR_HANDLE handle, const char* sz_sentence, FUNASR_MODE mode, QM_CALLBACK fn_callback)
 	{
-		PuncModel* punc_obj = (PuncModel*)handle;
+		funasr::PuncModel* punc_obj = (funasr::PuncModel*)handle;
 		if (!punc_obj)
 			return nullptr;
 
@@ -180,12 +180,12 @@ extern "C" {
 	// APIs for Offline-stream Infer
 	_FUNASRAPI FUNASR_RESULT FunOfflineRecogFile(FUNASR_HANDLE handle, const char* sz_wavfile, FUNASR_MODE mode, QM_CALLBACK fn_callback)
 	{
-		OfflineStream* offline_stream = (OfflineStream*)handle;
+		funasr::OfflineStream* offline_stream = (funasr::OfflineStream*)handle;
 		if (!offline_stream)
 			return nullptr;
 		
 		int32_t sampling_rate = -1;
-		Audio audio(1);
+		funasr::Audio audio(1);
 		if(!audio.LoadWav(sz_wavfile, &sampling_rate))
 			return nullptr;
 		if(offline_stream->UseVad()){
@@ -197,7 +197,7 @@ extern "C" {
 		int flag = 0;
 		int n_step = 0;
 		int n_total = audio.GetQueueSize();
-		FUNASR_RECOG_RESULT* p_result = new FUNASR_RECOG_RESULT;
+		funasr::FUNASR_RECOG_RESULT* p_result = new funasr::FUNASR_RECOG_RESULT;
 		p_result->snippet_time = audio.GetTimeLen();
 		while (audio.Fetch(buff, len, flag) > 0) {
 			string msg = (offline_stream->asr_handle)->Forward(buff, len, flag);
@@ -216,11 +216,11 @@ extern "C" {
 
 	_FUNASRAPI FUNASR_RESULT FunOfflineRecogPCMBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, int sampling_rate, FUNASR_MODE mode, QM_CALLBACK fn_callback)
 	{
-		OfflineStream* offline_stream = (OfflineStream*)handle;
+		funasr::OfflineStream* offline_stream = (funasr::OfflineStream*)handle;
 		if (!offline_stream)
 			return nullptr;
 
-		Audio audio(1);
+		funasr::Audio audio(1);
 		if (!audio.LoadPcmwav(sz_buf, n_len, &sampling_rate))
 			return nullptr;
 		if(offline_stream->UseVad()){
@@ -230,7 +230,7 @@ extern "C" {
 		float* buff;
 		int len;
 		int flag = 0;
-		FUNASR_RECOG_RESULT* p_result = new FUNASR_RECOG_RESULT;
+		funasr::FUNASR_RECOG_RESULT* p_result = new funasr::FUNASR_RECOG_RESULT;
 		p_result->snippet_time = audio.GetTimeLen();
 		int n_step = 0;
 		int n_total = audio.GetQueueSize();
@@ -263,7 +263,7 @@ extern "C" {
 		if (!result)
 			return 0.0f;
 
-		return ((FUNASR_RECOG_RESULT*)result)->snippet_time;
+		return ((funasr::FUNASR_RECOG_RESULT*)result)->snippet_time;
 	}
 
 	_FUNASRAPI const float FsmnVadGetRetSnippetTime(FUNASR_RESULT result)
@@ -271,13 +271,13 @@ extern "C" {
 		if (!result)
 			return 0.0f;
 
-		return ((FUNASR_VAD_RESULT*)result)->snippet_time;
+		return ((funasr::FUNASR_VAD_RESULT*)result)->snippet_time;
 	}
 
 	// APIs for GetResult
 	_FUNASRAPI const char* FunASRGetResult(FUNASR_RESULT result,int n_index)
 	{
-		FUNASR_RECOG_RESULT * p_result = (FUNASR_RECOG_RESULT*)result;
+		funasr::FUNASR_RECOG_RESULT * p_result = (funasr::FUNASR_RECOG_RESULT*)result;
 		if(!p_result)
 			return nullptr;
 
@@ -286,7 +286,7 @@ extern "C" {
 
 	_FUNASRAPI vector<std::vector<int>>* FsmnVadGetResult(FUNASR_RESULT result,int n_index)
 	{
-		FUNASR_VAD_RESULT * p_result = (FUNASR_VAD_RESULT*)result;
+		funasr::FUNASR_VAD_RESULT * p_result = (funasr::FUNASR_VAD_RESULT*)result;
 		if(!p_result)
 			return nullptr;
 
@@ -298,13 +298,13 @@ extern "C" {
 	{
 		if (result)
 		{
-			delete (FUNASR_RECOG_RESULT*)result;
+			delete (funasr::FUNASR_RECOG_RESULT*)result;
 		}
 	}
 
 	_FUNASRAPI void FsmnVadFreeResult(FUNASR_RESULT result)
 	{
-		FUNASR_VAD_RESULT * p_result = (FUNASR_VAD_RESULT*)result;
+		funasr::FUNASR_VAD_RESULT * p_result = (funasr::FUNASR_VAD_RESULT*)result;
 		if (p_result)
 		{
 			if(p_result->segments){
@@ -317,7 +317,7 @@ extern "C" {
 	// APIs for Uninit
 	_FUNASRAPI void FunASRUninit(FUNASR_HANDLE handle)
 	{
-		Model* recog_obj = (Model*)handle;
+		funasr::Model* recog_obj = (funasr::Model*)handle;
 
 		if (!recog_obj)
 			return;
@@ -327,7 +327,7 @@ extern "C" {
 
 	_FUNASRAPI void FsmnVadUninit(FUNASR_HANDLE handle)
 	{
-		VadModel* recog_obj = (VadModel*)handle;
+		funasr::VadModel* recog_obj = (funasr::VadModel*)handle;
 
 		if (!recog_obj)
 			return;
@@ -337,7 +337,7 @@ extern "C" {
 
 	_FUNASRAPI void FunPuncUninit(FUNASR_HANDLE handle)
 	{
-		PuncModel* punc_obj = (PuncModel*)handle;
+		funasr::PuncModel* punc_obj = (funasr::PuncModel*)handle;
 
 		if (!punc_obj)
 			return;
@@ -347,7 +347,7 @@ extern "C" {
 
 	_FUNASRAPI void FunOfflineUninit(FUNASR_HANDLE handle)
 	{
-		OfflineStream* offline_stream = (OfflineStream*)handle;
+		funasr::OfflineStream* offline_stream = (funasr::OfflineStream*)handle;
 
 		if (!offline_stream)
 			return;

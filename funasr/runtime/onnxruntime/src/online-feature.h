@@ -2,12 +2,12 @@
  * Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
  * MIT License  (https://opensource.org/licenses/MIT)
 */
-
+#pragma once 
 #include <vector>
 #include "precomp.h"
 
 using namespace std;
-
+namespace funasr {
 class OnlineFeature {
 
 public:
@@ -53,3 +53,5 @@ private:
   bool input_finished_ = false;
 
 };
+
+} // namespace funasr

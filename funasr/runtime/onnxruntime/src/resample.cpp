@@ -31,6 +31,7 @@
 #include <cstdlib>
 #include <type_traits>
 
+namespace funasr {
 #ifndef M_2PI
 #define M_2PI 6.283185307179586476925286766559005
 #endif
@@ -303,3 +304,4 @@ void LinearResample::SetRemainder(const float *input, int32_t input_dim) {
     }
   }
 }
+} // namespace funasr

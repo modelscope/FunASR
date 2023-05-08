@@ -7,6 +7,7 @@
 #include <vector>
 using namespace std;
 
+namespace funasr {
 class Vocab {
   private:
     vector<string> vocab;
@@ -22,4 +23,5 @@ class Vocab {
     string Vector2StringV2(vector<int> in);
 };
 
+} // namespace funasr
 #endif

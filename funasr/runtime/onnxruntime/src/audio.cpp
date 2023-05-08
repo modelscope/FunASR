@@ -11,6 +11,7 @@
 
 using namespace std;
 
+namespace funasr {
 // see http://soundfile.sapp.org/doc/WaveFormat/
 // Note: We assume little endian here
 struct WaveHeader {
@@ -553,3 +554,5 @@ void Audio::Split(VadModel* vad_obj, vector<std::vector<int>>& vad_segments)
     std::vector<float> pcm_data(speech_data, speech_data+sp_len);
     vad_segments = vad_obj->Infer(pcm_data);
 }
+
+} // namespace funasr

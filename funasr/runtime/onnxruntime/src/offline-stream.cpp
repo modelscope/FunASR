@@ -1,5 +1,6 @@
 #include "precomp.h"
 
+namespace funasr {
 OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int thread_num)
 {
     // VAD model
@@ -59,3 +60,5 @@ OfflineStream *CreateOfflineStream(std::map<std::string, std::string>& model_pat
     mm = new OfflineStream(model_path, thread_num);
     return mm;
 }
+
+} // namespace funasr
