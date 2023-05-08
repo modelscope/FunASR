@@ -178,7 +178,7 @@ extern "C" {
 	}
 
 	// APIs for Offline-stream Infer
-	_FUNASRAPI FUNASR_RESULT FunOfflineStream(FUNASR_HANDLE handle, const char* sz_wavfile, FUNASR_MODE mode, QM_CALLBACK fn_callback)
+	_FUNASRAPI FUNASR_RESULT FunOfflineRecogFile(FUNASR_HANDLE handle, const char* sz_wavfile, FUNASR_MODE mode, QM_CALLBACK fn_callback)
 	{
 		OfflineStream* offline_stream = (OfflineStream*)handle;
 		if (!offline_stream)
@@ -211,6 +211,41 @@ extern "C" {
 			p_result->msg = punc_res;
 		}
 	
+		return p_result;
+	}
+
+	_FUNASRAPI FUNASR_RESULT FunOfflineRecogPCMBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, int sampling_rate, FUNASR_MODE mode, QM_CALLBACK fn_callback)
+	{
+		OfflineStream* offline_stream = (OfflineStream*)handle;
+		if (!offline_stream)
+			return nullptr;
+
+		Audio audio(1);
+		if (!audio.LoadPcmwav(sz_buf, n_len, &sampling_rate))
+			return nullptr;
+		if(offline_stream->UseVad()){
+			audio.Split(offline_stream);
+		}
+
+		float* buff;
+		int len;
+		int flag = 0;
+		FUNASR_RECOG_RESULT* p_result = new FUNASR_RECOG_RESULT;
+		p_result->snippet_time = audio.GetTimeLen();
+		int n_step = 0;
+		int n_total = audio.GetQueueSize();
+		while (audio.Fetch(buff, len, flag) > 0) {
+			string msg = (offline_stream->asr_handle)->Forward(buff, len, flag);
+			p_result->msg += msg;
+			n_step++;
+			if (fn_callback)
+				fn_callback(n_step, n_total);
+		}
+		if(offline_stream->UsePunc()){
+			string punc_res = (offline_stream->punc_handle)->AddPunc((p_result->msg).c_str());
+			p_result->msg = punc_res;
+		}
+
 		return p_result;
 	}
 

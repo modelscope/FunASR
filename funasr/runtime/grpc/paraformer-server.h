@@ -15,7 +15,7 @@
 #include <chrono>
 
 #include "paraformer.grpc.pb.h"
-#include "libfunasrapi.h"
+#include "funasrruntime.h"
 
 
 using grpc::Server;

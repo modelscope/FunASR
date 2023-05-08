@@ -78,7 +78,8 @@ _FUNASRAPI void					FunPuncUninit(FUNASR_HANDLE handle);
 
 //OfflineStream
 _FUNASRAPI FUNASR_HANDLE  	FunOfflineInit(std::map<std::string, std::string>& model_path, int thread_num);
-_FUNASRAPI FUNASR_RESULT 	FunOfflineStream(FUNASR_HANDLE handle, const char* sz_wavfile, FUNASR_MODE mode, QM_CALLBACK fn_callback);
+_FUNASRAPI FUNASR_RESULT 	FunOfflineRecogFile(FUNASR_HANDLE handle, const char* sz_wavfile, FUNASR_MODE mode, QM_CALLBACK fn_callback);
+_FUNASRAPI FUNASR_RESULT	FunOfflineRecogPCMBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, int sampling_rate, FUNASR_MODE mode, QM_CALLBACK fn_callback);
 _FUNASRAPI void				FunOfflineUninit(FUNASR_HANDLE handle);
 
 #ifdef __cplusplus 
