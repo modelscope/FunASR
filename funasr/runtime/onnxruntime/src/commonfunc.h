@@ -6,6 +6,12 @@ typedef struct
     float  snippet_time;
 }FUNASR_RECOG_RESULT;
 
+typedef struct
+{
+    std::vector<std::vector<int>>* segments;
+    float  snippet_time;
+}FUNASR_VAD_RESULT;
+
 
 #ifdef _WIN32
 #include <codecvt>

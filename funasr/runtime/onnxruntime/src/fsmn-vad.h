@@ -8,7 +8,7 @@
 
 #include "precomp.h"
 
-class FsmnVad {
+class FsmnVad : public VadModel {
 /**
  * Author: Speech Lab of DAMO Academy, Alibaba Group
  * Deep-FSMN for Large Vocabulary Continuous Speech Recognition
@@ -17,9 +17,9 @@ class FsmnVad {
 
 public:
     FsmnVad();
+    ~FsmnVad();
     void Test();
-    void InitVad(const std::string &vad_model, const std::string &vad_cmvn, const std::string &vad_config);
-
+    void InitVad(const std::string &vad_model, const std::string &vad_cmvn, const std::string &vad_config, int thread_num);
     std::vector<std::vector<int>> Infer(const std::vector<float> &waves);
     void Reset();
 

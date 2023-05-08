@@ -17,6 +17,7 @@ public:
 
 	CTokenizer(const char* sz_yamlfile);
 	CTokenizer();
+	~CTokenizer();
 	bool OpenYaml(const char* sz_yamlfile);
 	void ReadYaml(const YAML::Node& node);
 	vector<string> Id2String(vector<int> input);
