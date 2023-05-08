@@ -11,7 +11,7 @@ extern "C" {
 		return mm;
 	}
 
-	_FUNASRAPI FUNASR_HANDLE  FunVadInit(std::map<std::string, std::string>& model_path, int thread_num)
+	_FUNASRAPI FUNASR_HANDLE  FsmnVadInit(std::map<std::string, std::string>& model_path, int thread_num)
 	{
 		VadModel* mm = CreateVadModel(model_path, thread_num);
 		return mm;
@@ -145,7 +145,7 @@ extern "C" {
 	}
 
 	// APIs for VAD Infer
-	_FUNASRAPI FUNASR_RESULT FunVadWavFile(FUNASR_HANDLE handle, const char* sz_wavfile, FUNASR_MODE mode, QM_CALLBACK fn_callback)
+	_FUNASRAPI FUNASR_RESULT FsmnVadWavFile(FUNASR_HANDLE handle, const char* sz_wavfile, FUNASR_MODE mode, QM_CALLBACK fn_callback)
 	{
 		VadModel* vad_obj = (VadModel*)handle;
 		if (!vad_obj)
@@ -231,7 +231,7 @@ extern "C" {
 		return ((FUNASR_RECOG_RESULT*)result)->snippet_time;
 	}
 
-	_FUNASRAPI const float FunVadGetRetSnippetTime(FUNASR_RESULT result)
+	_FUNASRAPI const float FsmnVadGetRetSnippetTime(FUNASR_RESULT result)
 	{
 		if (!result)
 			return 0.0f;
@@ -249,7 +249,7 @@ extern "C" {
 		return p_result->msg.c_str();
 	}
 
-	_FUNASRAPI vector<std::vector<int>>* FunVadGetResult(FUNASR_RESULT result,int n_index)
+	_FUNASRAPI vector<std::vector<int>>* FsmnVadGetResult(FUNASR_RESULT result,int n_index)
 	{
 		FUNASR_VAD_RESULT * p_result = (FUNASR_VAD_RESULT*)result;
 		if(!p_result)
@@ -267,7 +267,7 @@ extern "C" {
 		}
 	}
 
-	_FUNASRAPI void FunVadFreeResult(FUNASR_RESULT result)
+	_FUNASRAPI void FsmnVadFreeResult(FUNASR_RESULT result)
 	{
 		FUNASR_VAD_RESULT * p_result = (FUNASR_VAD_RESULT*)result;
 		if (p_result)
@@ -290,7 +290,7 @@ extern "C" {
 		delete recog_obj;
 	}
 
-	_FUNASRAPI void FunVadUninit(FUNASR_HANDLE handle)
+	_FUNASRAPI void FsmnVadUninit(FUNASR_HANDLE handle)
 	{
 		VadModel* recog_obj = (VadModel*)handle;
 

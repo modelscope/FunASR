@@ -15,7 +15,7 @@
 #include <map>
 #include <vector>
 #include <glog/logging.h>
-#include "libfunasrapi.h"
+#include "funasrruntime.h"
 #include "tclap/CmdLine.h"
 #include "com-define.h"
 
@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
     struct timeval start, end;
     gettimeofday(&start, NULL);
     int thread_num = 1;
-    FUNASR_HANDLE vad_hanlde=FunVadInit(model_path, thread_num);
+    FUNASR_HANDLE vad_hanlde=FsmnVadInit(model_path, thread_num);
 
     if (!vad_hanlde)
     {
@@ -116,17 +116,17 @@ int main(int argc, char *argv[])
     long taking_micros = 0;
     for(auto& wav_file : wav_list){
         gettimeofday(&start, NULL);
-        FUNASR_RESULT result=FunVadWavFile(vad_hanlde, wav_file.c_str(), RASR_NONE, NULL);
+        FUNASR_RESULT result=FsmnVadWavFile(vad_hanlde, wav_file.c_str(), RASR_NONE, NULL);
         gettimeofday(&end, NULL);
         seconds = (end.tv_sec - start.tv_sec);
         taking_micros += ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
 
         if (result)
         {
-            vector<std::vector<int>>* vad_segments = FunVadGetResult(result, 0);
+            vector<std::vector<int>>* vad_segments = FsmnVadGetResult(result, 0);
             print_segs(vad_segments);
-            snippet_time += FunVadGetRetSnippetTime(result);
-            FunVadFreeResult(result);
+            snippet_time += FsmnVadGetRetSnippetTime(result);
+            FsmnVadFreeResult(result);
         }
         else
         {
@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
     LOG(INFO) << "Audio length: " << (double)snippet_time << " s";
     LOG(INFO) << "Model inference takes: " << (double)taking_micros / 1000000 <<" s";
     LOG(INFO) << "Model inference RTF: " << (double)taking_micros/ (snippet_time*1000000);
-    FunVadUninit(vad_hanlde);
+    FsmnVadUninit(vad_hanlde);
     return 0;
 }
 

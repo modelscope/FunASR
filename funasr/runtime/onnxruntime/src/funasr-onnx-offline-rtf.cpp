@@ -10,7 +10,7 @@
 #endif
 
 #include <glog/logging.h>
-#include "libfunasrapi.h"
+#include "funasrruntime.h"
 #include "tclap/CmdLine.h"
 #include "com-define.h"
 
