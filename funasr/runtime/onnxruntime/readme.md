@@ -124,6 +124,28 @@ For example:
     --model-dir  ./asrmodel/punc_ct-transformer_zh-cn-common-vocab272727-pytorch \
     --txt-path   ./punc_example.txt
 ```
+### funasr-onnx-offline-rtf
+```shell
+./funasr-onnx-offline-rtf     --thread-num <int32_t> --wav-scp <string>
+                              [--quantize <string>] --model-dir <string>
+                              [--] [--version] [-h]
+Where:
+   --thread-num <int32_t>
+     (required)  multi-thread num for rtf
+   --model-dir <string>
+     (required)  the model path, which contains model.onnx, config.yaml, am.mvn
+   --quantize <string>
+     false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir
+   --wav-scp <string>
+     (required)  wave scp path
+
+For example:
+./funasr-onnx-offline-rtf \
+    --model-dir    ./asrmodel/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch \
+    --quantize  true \
+    --wav-scp     ./aishell1_test.scp  \
+    --thread-num 32
+```
 
 ## Acknowledge
 1. This project is maintained by [FunASR community](https://github.com/alibaba-damo-academy/FunASR).
