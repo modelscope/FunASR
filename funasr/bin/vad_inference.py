@@ -274,8 +274,7 @@ def inference_modelscope(
     assert check_argument_types()
     if batch_size > 1:
         raise NotImplementedError("batch decoding is not implemented")
-    if ngpu > 1:
-        raise NotImplementedError("only single GPU decoding is supported")
+
 
     logging.basicConfig(
         level=log_level,
@@ -286,7 +285,7 @@ def inference_modelscope(
         device = "cuda"
     else:
         device = "cpu"
-
+        batch_size = 1
     # 1. Set random-seed
     set_all_random_seed(seed)
 
@@ -376,10 +375,7 @@ def inference_modelscope_online(
         **kwargs,
 ):
     assert check_argument_types()
-    if batch_size > 1:
-        raise NotImplementedError("batch decoding is not implemented")
-    if ngpu > 1:
-        raise NotImplementedError("only single GPU decoding is supported")
+
 
     logging.basicConfig(
         level=log_level,
@@ -390,6 +386,7 @@ def inference_modelscope_online(
         device = "cuda"
     else:
         device = "cpu"
+        batch_size = 1
 
     # 1. Set random-seed
     set_all_random_seed(seed)
