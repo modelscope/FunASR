@@ -37,12 +37,10 @@ print("model loaded")
 
 
 async def ws_serve(websocket, path):
-    frames_online = []
+    frames_asr_online = []
     global websocket_users
-    websocket.send_msg = Queue()
     websocket_users.add(websocket)
     websocket.param_dict_asr_online = {"cache": dict()}
-    websocket.speek_online = Queue()
 
     try:
         async for message in websocket:
@@ -56,11 +54,11 @@ async def ws_serve(websocket, path):
                 websocket.wav_name = message.get("wav_name", "demo")
                 websocket.param_dict_asr_online["chunk_size"] = message["chunk_size"]
                 
-                frames_online.append(audio)
-                if len(frames_online) % message["chunk_interval"] == 0 or not is_speaking:
-                    audio_in = b"".join(frames_online)
+                frames_asr_online.append(audio)
+                if len(frames_asr_online) % message["chunk_interval"] == 0 or not is_speaking:
+                    audio_in = b"".join(frames_asr_online)
                     await async_asr_online(websocket,audio_in)
-                    frames_online = []
+                    frames_asr_online = []
 
 
      
@@ -81,8 +79,6 @@ async def async_asr_online(websocket,audio_in):
                     websocket.param_dict_asr_online["cache"] = dict()
                 if "text" in rec_result:
                     if rec_result["text"] != "sil" and rec_result["text"] != "waiting_for_more_voice":
-                        # if len(rec_result["text"])>0:
-                        #     rec_result["text"][0]=rec_result["text"][0] #.replace(" ","")
                         message = json.dumps({"mode": "online", "text": rec_result["text"], "wav_name": websocket.wav_name})
                         await websocket.send(message)
 

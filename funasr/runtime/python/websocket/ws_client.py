@@ -10,6 +10,10 @@ import traceback
 from multiprocessing import Process
 from funasr.fileio.datadir_writer import DatadirWriter
 
+import logging
+
+logging.basicConfig(level=logging.ERROR)
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--host",
                     type=str,
@@ -158,25 +162,40 @@ async def ws_send():
 async def message(id):
     global websocket
     text_print = ""
+    text_print_2pass_online = ""
+    text_print_2pass_offline = ""
     while True:
         try:
             meg = await websocket.recv()
             meg = json.loads(meg)
-            # print(meg, end = '')
-            # print("\r")
-            # print(meg)
             wav_name = meg.get("wav_name", "demo")
-            print(wav_name)
+            # print(wav_name)
             text = meg["text"]
             if ibest_writer is not None:
                 ibest_writer["text"][wav_name] = text
+            
             if meg["mode"] == "online":
                 text_print += " {}".format(text)
-            else:
+                text_print = text_print[-args.words_max_print:]
+                os.system('clear')
+                print("\rpid"+str(id)+": "+text_print)
+            elif meg["mode"] == "online":
                 text_print += "{}".format(text)
-            text_print = text_print[-args.words_max_print:]
-            os.system('clear')
-            print("\rpid"+str(id)+": "+text_print)
+                text_print = text_print[-args.words_max_print:]
+                os.system('clear')
+                print("\rpid"+str(id)+": "+text_print)
+            else:
+                if meg["mode"] == "2pass-online":
+                    text_print_2pass_online += " {}".format(text)
+                    text_print = text_print_2pass_offline + text_print_2pass_online
+                else:
+                    text_print_2pass_online = " "
+                    text_print = text_print_2pass_offline + "{}".format(text)
+                    text_print_2pass_offline += "{}".format(text)
+                text_print = text_print[-args.words_max_print:]
+                os.system('clear')
+                print("\rpid" + str(id) + ": " + text_print)
+
         except Exception as e:
             print("Exception:", e)
             traceback.print_exc()
@@ -207,7 +226,7 @@ async def ws_client(id):
         await asyncio.gather(task, task2, task3)
 
 def one_thread(id):
-   asyncio.get_event_loop().run_until_complete(ws_client(id)) # 启动协程
+   asyncio.get_event_loop().run_until_complete(ws_client(id))
    asyncio.get_event_loop().run_forever()
 
 

@@ -61,7 +61,7 @@ class Text2Punc:
             text_name="text",
             non_linguistic_symbols=train_args.non_linguistic_symbols,
         )
-        print("start decoding!!!")
+        
 
     @torch.no_grad()
     def __call__(self, text: Union[list, str], cache: list, split_size=20):

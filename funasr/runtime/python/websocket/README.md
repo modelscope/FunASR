@@ -33,11 +33,9 @@ python ws_server_online.py --port 10095 --asr_model_online "damo/speech_paraform
 
 #### ASR offline/online 2pass server
 
-[//]: # (```shell)
-
-[//]: # (python ws_server_online.py --host "0.0.0.0" --port 10095 --asr_model "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch")
-
-[//]: # (```)
+```shell
+python ws_server_2pass.py --port 10095 --asr_model "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"  --asr_model_online "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online"
+```
 
 ## For the client
 
@@ -49,6 +47,7 @@ pip install -r requirements_client.txt
 ```
 
 ### Start client
+
 #### ASR offline client
 ##### Recording from mircrophone
 ```shell
@@ -60,6 +59,7 @@ python ws_client.py --host "0.0.0.0" --port 10095 --chunk_interval 10 --words_ma
 # --chunk_interval, "10": 600/10=60ms, "5"=600/5=120ms, "20": 600/12=30ms
 python ws_client.py --host "0.0.0.0" --port 10095 --chunk_interval 10 --words_max_print 100 --audio_in "./data/wav.scp" --send_without_sleep --output_dir "./results"
 ```
+
 #### ASR streaming client
 ##### Recording from mircrophone
 ```shell
@@ -73,7 +73,16 @@ python ws_client.py --host "0.0.0.0" --port 10095 --chunk_size "5,10,5" --audio_
 ```
 
 #### ASR offline/online 2pass client
-
+##### Recording from mircrophone
+```shell
+# --chunk_size, "5,10,5"=600ms, "8,8,4"=480ms
+python ws_client.py --host "0.0.0.0" --port 10095 --chunk_size "8,8,4" --words_max_print 10000
+```
+##### Loadding from wav.scp(kaldi style)
+```shell
+# --chunk_size, "5,10,5"=600ms, "8,8,4"=480ms
+python ws_client.py --host "0.0.0.0" --port 10095 --chunk_size "8,8,4" --audio_in "./data/wav.scp" --words_max_print 10000 --output_dir "./results"
+```
 ## Acknowledge
 1. This project is maintained by [FunASR community](https://github.com/alibaba-damo-academy/FunASR).
 2. We acknowledge [zhaoming](https://github.com/zhaomingwork/FunASR/tree/fix_bug_for_python_websocket) for contributing the websocket service.
