@@ -264,53 +264,41 @@ pip install -r requirements_client.txt
 <h4>Usage examples<a class="headerlink" href="#id6" title="Permalink to this headline"></a></h4>
 <div class="section" id="asr-offline-client">
 <h5>ASR offline client<a class="headerlink" href="#asr-offline-client" title="Permalink to this headline"></a></h5>
-<div class="section" id="recording-from-mircrophone">
-<h6>Recording from mircrophone<a class="headerlink" href="#recording-from-mircrophone" title="Permalink to this headline"></a></h6>
+<p>Recording from mircrophone</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># --chunk_interval, &quot;10&quot;: 600/10=60ms, &quot;5&quot;=600/5=120ms, &quot;20&quot;: 600/12=30ms</span>
 python ws_client.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --chunk_interval <span class="m">10</span> --words_max_print <span class="m">100</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="loadding-from-wav-scp-kaldi-style">
-<h6>Loadding from wav.scp(kaldi style)<a class="headerlink" href="#loadding-from-wav-scp-kaldi-style" title="Permalink to this headline"></a></h6>
+<p>Loadding from wav.scp(kaldi style)</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># --chunk_interval, &quot;10&quot;: 600/10=60ms, &quot;5&quot;=600/5=120ms, &quot;20&quot;: 600/12=30ms</span>
 python ws_client.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --chunk_interval <span class="m">10</span> --words_max_print <span class="m">100</span> --audio_in <span class="s2">&quot;./data/wav.scp&quot;</span> --send_without_sleep --output_dir <span class="s2">&quot;./results&quot;</span>
 </pre></div>
 </div>
 </div>
-</div>
 <div class="section" id="asr-streaming-client">
 <h5>ASR streaming client<a class="headerlink" href="#asr-streaming-client" title="Permalink to this headline"></a></h5>
-<div class="section" id="id7">
-<h6>Recording from mircrophone<a class="headerlink" href="#id7" title="Permalink to this headline"></a></h6>
+<p>Recording from mircrophone</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># --chunk_size, &quot;5,10,5&quot;=600ms, &quot;8,8,4&quot;=480ms</span>
 python ws_client.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --chunk_size <span class="s2">&quot;5,10,5&quot;</span> --words_max_print <span class="m">100</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="id8">
-<h6>Loadding from wav.scp(kaldi style)<a class="headerlink" href="#id8" title="Permalink to this headline"></a></h6>
+<p>Loadding from wav.scp(kaldi style)</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># --chunk_size, &quot;5,10,5&quot;=600ms, &quot;8,8,4&quot;=480ms</span>
 python ws_client.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --chunk_size <span class="s2">&quot;5,10,5&quot;</span> --audio_in <span class="s2">&quot;./data/wav.scp&quot;</span> --words_max_print <span class="m">100</span> --output_dir <span class="s2">&quot;./results&quot;</span>
 </pre></div>
 </div>
 </div>
-</div>
 <div class="section" id="asr-offline-online-2pass-client">
 <h5>ASR offline/online 2pass client<a class="headerlink" href="#asr-offline-online-2pass-client" title="Permalink to this headline"></a></h5>
-<div class="section" id="id9">
-<h6>Recording from mircrophone<a class="headerlink" href="#id9" title="Permalink to this headline"></a></h6>
+<p>Recording from mircrophone</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># --chunk_size, &quot;5,10,5&quot;=600ms, &quot;8,8,4&quot;=480ms</span>
 python ws_client.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --chunk_size <span class="s2">&quot;8,8,4&quot;</span> --words_max_print <span class="m">10000</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="id10">
-<h6>Loadding from wav.scp(kaldi style)<a class="headerlink" href="#id10" title="Permalink to this headline"></a></h6>
+<p>Loadding from wav.scp(kaldi style)</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># --chunk_size, &quot;5,10,5&quot;=600ms, &quot;8,8,4&quot;=480ms</span>
 python ws_client.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --chunk_size <span class="s2">&quot;8,8,4&quot;</span> --audio_in <span class="s2">&quot;./data/wav.scp&quot;</span> --words_max_print <span class="m">10000</span> --output_dir <span class="s2">&quot;./results&quot;</span>
 </pre></div>
-</div>
 </div>
 </div>
 </div>
