@@ -48,6 +48,18 @@ pip install -r requirements_client.txt
 
 ### Start client
 
+```shell
+python ws_client.py \
+--host [ip_address] \
+--port [port id] \
+--chunk_size ["5,10,5"=600ms, "8,8,4"=480ms] \
+--chunk_interval [duration of send chunk_size/chunk_interval] \
+--words_max_print [max number of words to print] \
+--audio_in [if set, loadding from wav.scp, else recording from mircrophone] \
+--output_dir [if set, write the results to output_dir] \
+--send_without_sleep [only set for offline]
+```
+
 #### ASR offline client
 ##### Recording from mircrophone
 ```shell
