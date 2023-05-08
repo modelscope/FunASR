@@ -85,7 +85,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#build-runtime">Build runtime</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#run-the-demo">Run the demo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#run-the-demo">Run the demo</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#funasr-onnx-offline">funasr-onnx-offline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#funasr-onnx-offline-vad">funasr-onnx-offline-vad</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#funasr-onnx-offline-punc">funasr-onnx-offline-punc</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#acknowledge">Acknowledge</a></li>
 </ul>
 </li>
@@ -194,41 +199,92 @@ make
 </div>
 <div class="section" id="run-the-demo">
 <h2>Run the demo<a class="headerlink" href="#run-the-demo" title="Permalink to this headline"></a></h2>
+<div class="section" id="funasr-onnx-offline">
+<h3>funasr-onnx-offline<a class="headerlink" href="#funasr-onnx-offline" title="Permalink to this headline"></a></h3>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-onnx-offline     <span class="o">[</span>--wav-scp &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--wav-path &lt;string&gt;<span class="o">]</span>
-                          <span class="o">[</span>--punc-config &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-model &lt;string&gt;<span class="o">]</span>
-                          --am-config &lt;string&gt; --am-cmvn &lt;string&gt;
-                          --am-model &lt;string&gt; <span class="o">[</span>--vad-config &lt;string&gt;<span class="o">]</span>
-                          <span class="o">[</span>--vad-cmvn &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--vad-model &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--<span class="o">]</span>
-                          <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
+                          <span class="o">[</span>--punc-quant &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-dir &lt;string&gt;<span class="o">]</span>
+                          <span class="o">[</span>--vad-quant &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--vad-dir &lt;string&gt;<span class="o">]</span>
+                          <span class="o">[</span>--quantize &lt;string&gt;<span class="o">]</span> --model-dir &lt;string&gt;
+                          <span class="o">[</span>--<span class="o">]</span> <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
 Where:
+   --model-dir &lt;string&gt;
+     <span class="o">(</span>required<span class="o">)</span>  the asr model path, which contains model.onnx, config.yaml, am.mvn
+   --quantize &lt;string&gt;
+     <span class="nb">false</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in model_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in model_dir
+
+   --vad-dir &lt;string&gt;
+     the vad model path, which contains model.onnx, vad.yaml, vad.mvn
+   --vad-quant &lt;string&gt;
+     <span class="nb">false</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in vad_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in vad_dir
+
+   --punc-dir &lt;string&gt;
+     the punc model path, which contains model.onnx, punc.yaml
+   --punc-quant &lt;string&gt;
+     <span class="nb">false</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in punc_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in punc_dir
+
+   --wav-scp &lt;string&gt;
+     wave scp path
+   --wav-path &lt;string&gt;
+     wave file path
+  
+   Required: --model-dir &lt;string&gt;
+   If use vad, please add: --vad-dir &lt;string&gt;
+   If use punc, please add: --punc-dir &lt;string&gt;
+
+For example:
+./funasr-onnx-offline <span class="se">\</span>
+    --model-dir    ./asrmodel/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch <span class="se">\</span>
+    --quantize  <span class="nb">true</span> <span class="se">\</span>
+    --vad-dir   ./asrmodel/speech_fsmn_vad_zh-cn-16k-common-pytorch <span class="se">\</span>
+    --punc-dir  ./asrmodel/punc_ct-transformer_zh-cn-common-vocab272727-pytorch <span class="se">\</span>
+    --wav-path    ./vad_example.wav
+</pre></div>
+</div>
+</div>
+<div class="section" id="funasr-onnx-offline-vad">
+<h3>funasr-onnx-offline-vad<a class="headerlink" href="#funasr-onnx-offline-vad" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-onnx-offline-vad     <span class="o">[</span>--wav-scp &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--wav-path &lt;string&gt;<span class="o">]</span>
+                              <span class="o">[</span>--quantize &lt;string&gt;<span class="o">]</span> --model-dir &lt;string&gt;
+                              <span class="o">[</span>--<span class="o">]</span> <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
+Where:
+   --model-dir &lt;string&gt;
+     <span class="o">(</span>required<span class="o">)</span>  the vad model path, which contains model.onnx, vad.yaml, vad.mvn
+   --quantize &lt;string&gt;
+     <span class="nb">false</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in model_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in model_dir
    --wav-scp &lt;string&gt;
      wave scp path
    --wav-path &lt;string&gt;
      wave file path
 
-   --punc-config &lt;string&gt;
-     punc config path
-   --punc-model &lt;string&gt;
-     punc model path
+   Required: --model-dir &lt;string&gt;
 
-   --am-config &lt;string&gt;
-     <span class="o">(</span>required<span class="o">)</span>  am config path
-   --am-cmvn &lt;string&gt;
-     <span class="o">(</span>required<span class="o">)</span>  am cmvn path
-   --am-model &lt;string&gt;
-     <span class="o">(</span>required<span class="o">)</span>  am model path
-
-   --vad-config &lt;string&gt;
-     vad config path
-   --vad-cmvn &lt;string&gt;
-     vad cmvn path
-   --vad-model &lt;string&gt;
-     vad model path
-  
-   Required: --am-config &lt;string&gt; --am-cmvn &lt;string&gt; --am-model &lt;string&gt; 
-   If use vad, please add: <span class="o">[</span>--vad-config &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--vad-cmvn &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--vad-model &lt;string&gt;<span class="o">]</span>
-   If use punc, please add: <span class="o">[</span>--punc-config &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-model &lt;string&gt;<span class="o">]</span> 
+For example:
+./funasr-onnx-offline-vad <span class="se">\</span>
+    --model-dir   ./asrmodel/speech_fsmn_vad_zh-cn-16k-common-pytorch <span class="se">\</span>
+    --wav-path    ./vad_example.wav
 </pre></div>
+</div>
+</div>
+<div class="section" id="funasr-onnx-offline-punc">
+<h3>funasr-onnx-offline-punc<a class="headerlink" href="#funasr-onnx-offline-punc" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-onnx-offline-punc    <span class="o">[</span>--txt-path &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--quantize &lt;string&gt;<span class="o">]</span>
+                               --model-dir &lt;string&gt; <span class="o">[</span>--<span class="o">]</span> <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
+Where:
+   --model-dir &lt;string&gt;
+     <span class="o">(</span>required<span class="o">)</span>  the punc model path, which contains model.onnx, punc.yaml
+   --quantize &lt;string&gt;
+     <span class="nb">false</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in model_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in model_dir
+   --txt-path &lt;string&gt;
+     txt file path, one sentence per line
+
+   Required: --model-dir &lt;string&gt;
+
+For example:
+./funasr-onnx-offline-punc <span class="se">\</span>
+    --model-dir  ./asrmodel/punc_ct-transformer_zh-cn-common-vocab272727-pytorch <span class="se">\</span>
+    --txt-path   ./punc_example.txt
+</pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="acknowledge">
