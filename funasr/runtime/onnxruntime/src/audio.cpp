@@ -247,6 +247,15 @@ bool Audio::LoadWav(const char *filename, int32_t* sampling_rate)
         return false;
     }
     
+    if (!header.Validate()) {
+        return false;
+    }
+
+    header.SeekToDataChunk(is);
+    if (!is) {
+        return false;
+    }
+    
     *sampling_rate = header.sample_rate;
     // header.subchunk2_size contains the number of bytes in the data.
     // As we assume each sample contains two bytes, so it is divided by 2 here
@@ -389,8 +398,10 @@ bool Audio::LoadPcmwav(const char* filename, int32_t* sampling_rate)
     FILE* fp;
     fp = fopen(filename, "rb");
     if (fp == nullptr)
+	{
         LOG(ERROR) << "Failed to read " << filename;
         return false;
+	}
     fseek(fp, 0, SEEK_END);
     uint32_t n_file_len = ftell(fp);
     fseek(fp, 0, SEEK_SET);

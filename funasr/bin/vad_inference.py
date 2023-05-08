@@ -352,7 +352,6 @@ def inference_modelscope(
                 item = {'key': keys[i], 'value': results[i]}
                 vad_results.append(item)
                 if writer is not None:
-                    results[i] = json.loads(results[i])
                     ibest_writer["text"][keys[i]] = "{}".format(results[i])
 
         return vad_results
@@ -466,7 +465,6 @@ def inference_modelscope_online(
                         item = {'key': keys[i], 'value': results[i]}
                         vad_results.append(item)
                         if writer is not None:
-                            results[i] = json.loads(results[i])
                             ibest_writer["text"][keys[i]] = "{}".format(results[i])
 
         return vad_results

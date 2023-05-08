@@ -16,14 +16,14 @@ def modelscope_infer_core(output_dir, split_dir, njob, idx):
         os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_list[gpu_id])
     else:
         os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_id)
-    inference_pipline = pipeline(
+    inference_pipeline = pipeline(
         task=Tasks.auto_speech_recognition,
         model="damo/speech_paraformer-tiny-commandword_asr_nat-zh-cn-16k-vocab544-pytorch",
         output_dir=output_dir_job,
         batch_size=64
     )
     audio_in = os.path.join(split_dir, "wav.{}.scp".format(idx))
-    inference_pipline(audio_in=audio_in)
+    inference_pipeline(audio_in=audio_in)
 
 
 def modelscope_infer(params):

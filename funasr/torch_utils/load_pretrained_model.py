@@ -120,6 +120,6 @@ def load_pretrained_model(
     if ignore_init_mismatch:
         src_state = filter_state_dict(dst_state, src_state)
 
-    logging.info("Loaded src_state keys: {}".format(src_state.keys()))
+    # logging.info("Loaded src_state keys: {}".format(src_state.keys()))
     dst_state.update(src_state)
     obj.load_state_dict(dst_state)
