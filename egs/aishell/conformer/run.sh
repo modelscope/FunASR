@@ -3,7 +3,7 @@
 . ./path.sh || exit 1;
 
 # machines configuration
-CUDA_VISIBLE_DEVICES="2,3"
+CUDA_VISIBLE_DEVICES="0,1"
 gpu_num=2
 count=1
 gpu_inference=true  # Whether to perform gpu decoding, set false for cpu decoding
@@ -21,7 +21,7 @@ token_type=char
 scp=wav.scp
 type=sound
 stage=3
-stop_stage=3
+stop_stage=4
 
 # feature configuration
 feats_dim=80
