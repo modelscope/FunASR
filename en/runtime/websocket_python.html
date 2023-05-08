@@ -177,18 +177,45 @@ pip install -r requirements_server.txt
 <h3>Start server<a class="headerlink" href="#start-server" title="Permalink to this headline"></a></h3>
 <div class="section" id="asr-offline-server">
 <h4>ASR offline server<a class="headerlink" href="#asr-offline-server" title="Permalink to this headline"></a></h4>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python ws_server_offline.py <span class="se">\</span>
+--port <span class="o">[</span>port id<span class="o">]</span> <span class="se">\</span>
+--asr_model <span class="o">[</span>asr model_name<span class="o">]</span> <span class="se">\</span>
+--punc_model <span class="o">[</span>punc model_name<span class="o">]</span> <span class="se">\</span>
+--ngpu <span class="o">[</span><span class="m">0</span> or <span class="m">1</span><span class="o">]</span> <span class="se">\</span>
+--ncpu <span class="o">[</span><span class="m">1</span> or <span class="m">4</span><span class="o">]</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">e.g.</span></code></p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python ws_server_offline.py --port <span class="m">10095</span> --asr_model <span class="s2">&quot;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&quot;</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="asr-streaming-server">
 <h4>ASR streaming server<a class="headerlink" href="#asr-streaming-server" title="Permalink to this headline"></a></h4>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python ws_server_online.py <span class="se">\</span>
+--port <span class="o">[</span>port id<span class="o">]</span> <span class="se">\</span>
+--asr_model_online <span class="o">[</span>asr model_name<span class="o">]</span> <span class="se">\</span>
+--ngpu <span class="o">[</span><span class="m">0</span> or <span class="m">1</span><span class="o">]</span> <span class="se">\</span>
+--ncpu <span class="o">[</span><span class="m">1</span> or <span class="m">4</span><span class="o">]</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">e.g.</span></code></p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python ws_server_online.py --port <span class="m">10095</span> --asr_model_online <span class="s2">&quot;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online&quot;</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="asr-offline-online-2pass-server">
 <h4>ASR offline/online 2pass server<a class="headerlink" href="#asr-offline-online-2pass-server" title="Permalink to this headline"></a></h4>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python ws_server_2pass.py <span class="se">\</span>
+--port <span class="o">[</span>port id<span class="o">]</span> <span class="se">\</span>
+--asr_model <span class="o">[</span>asr model_name<span class="o">]</span> <span class="se">\</span>
+--asr_model_online <span class="o">[</span>asr model_name<span class="o">]</span> <span class="se">\</span>
+--punc_model <span class="o">[</span>punc model_name<span class="o">]</span> <span class="se">\</span>
+--ngpu <span class="o">[</span><span class="m">0</span> or <span class="m">1</span><span class="o">]</span> <span class="se">\</span>
+--ncpu <span class="o">[</span><span class="m">1</span> or <span class="m">4</span><span class="o">]</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">e.g.</span></code></p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python ws_server_2pass.py --port <span class="m">10095</span> --asr_model <span class="s2">&quot;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&quot;</span>  --asr_model_online <span class="s2">&quot;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online&quot;</span>
 </pre></div>
 </div>

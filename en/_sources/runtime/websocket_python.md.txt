@@ -23,16 +23,42 @@ pip install -r requirements_server.txt
 ### Start server
 #### ASR offline server
 ```shell
+python ws_server_offline.py \
+--port [port id] \
+--asr_model [asr model_name] \
+--punc_model [punc model_name] \
+--ngpu [0 or 1] \
+--ncpu [1 or 4]
+```
+`e.g.`
+```shell
 python ws_server_offline.py --port 10095 --asr_model "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
 ```
 
 #### ASR streaming server
 ```shell
+python ws_server_online.py \
+--port [port id] \
+--asr_model_online [asr model_name] \
+--ngpu [0 or 1] \
+--ncpu [1 or 4]
+```
+`e.g.`
+```shell
 python ws_server_online.py --port 10095 --asr_model_online "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online"
 ```
 
 #### ASR offline/online 2pass server
-
+```shell
+python ws_server_2pass.py \
+--port [port id] \
+--asr_model [asr model_name] \
+--asr_model_online [asr model_name] \
+--punc_model [punc model_name] \
+--ngpu [0 or 1] \
+--ncpu [1 or 4]
+```
+`e.g.`
 ```shell
 python ws_server_2pass.py --port 10095 --asr_model "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"  --asr_model_online "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online"
 ```
