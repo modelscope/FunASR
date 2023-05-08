@@ -70,7 +70,7 @@ class Text2Punc:
         else:
             precache = ""
             cache = []
-        data = {"text": precache + text}
+        data = {"text": precache + " " + text}
         result = self.preprocessor(data=data, uid="12938712838719")
         split_text = self.preprocessor.pop_split_text_data(result)
         mini_sentences = split_to_mini_sentence(split_text, split_size)
