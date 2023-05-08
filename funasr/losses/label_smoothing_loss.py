@@ -97,7 +97,7 @@ class NllLoss(nn.Module):
         normalize_length=False,
         criterion=nn.NLLLoss(reduction='none'),
     ):
-        """Construct an LabelSmoothingLoss object."""
+        """Construct an NllLoss object."""
         super(NllLoss, self).__init__()
         self.criterion = criterion
         self.padding_idx = padding_idx

@@ -89,7 +89,7 @@ class Speech2Text:
         frontend = None
         if asr_train_args.frontend is not None and asr_train_args.frontend_conf is not None:
             if asr_train_args.frontend=='wav_frontend':
-                frontend = WavFrontend(cmvn_file=cmvn_file, **asr_train_args.frontend_conf).eval()
+                frontend = WavFrontend(cmvn_file=cmvn_file, **asr_train_args.frontend_conf)
             else:
                 frontend_class=frontend_choices.get_class(asr_train_args.frontend)
                 frontend = frontend_class(**asr_train_args.frontend_conf).eval()
@@ -141,13 +141,6 @@ class Speech2Text:
             token_list=token_list,
             pre_beam_score_key=None if ctc_weight == 1.0 else "full",
         )
-
-        beam_search.to(device=device, dtype=getattr(torch, dtype)).eval()
-        for scorer in scorers.values():
-            if isinstance(scorer, torch.nn.Module):
-                scorer.to(device=device, dtype=getattr(torch, dtype)).eval()
-        logging.info(f"Beam_search: {beam_search}")
-        logging.info(f"Decoding device={device}, dtype={dtype}")
 
         # 5. [Optional] Build Text converter: e.g. bpe-sym -> Text
         if token_type is None:

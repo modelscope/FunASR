@@ -63,20 +63,20 @@ else
 fi
 
 
-<"${srcdir}"/utt2spk utils/apply_map.pl -f 1 "${destdir}"/utt_map | \
-  utils/apply_map.pl -f 2 "${destdir}"/spk_map >"${destdir}"/utt2spk
+<"${srcdir}"/utt2spk local/apply_map.pl -f 1 "${destdir}"/utt_map | \
+  local/apply_map.pl -f 2 "${destdir}"/spk_map >"${destdir}"/utt2spk
 
-utils/utt2spk_to_spk2utt.pl <"${destdir}"/utt2spk >"${destdir}"/spk2utt
+local/utt2spk_to_spk2utt.pl <"${destdir}"/utt2spk >"${destdir}"/spk2utt
 
 if [[ -f ${srcdir}/segments ]]; then
 
-  utils/apply_map.pl -f 1 "${destdir}"/utt_map <"${srcdir}"/segments | \
-      utils/apply_map.pl -f 2 "${destdir}"/reco_map | \
+  local/apply_map.pl -f 1 "${destdir}"/utt_map <"${srcdir}"/segments | \
+      local/apply_map.pl -f 2 "${destdir}"/reco_map | \
           awk -v factor="${factor}" \
             '{s=$3/factor; e=$4/factor; if (e > s + 0.01) { printf("%s %s %.2f %.2f\n", $1, $2, $3/factor, $4/factor);} }' \
             >"${destdir}"/segments
 
-  utils/apply_map.pl -f 1 "${destdir}"/reco_map <"${srcdir}"/wav.scp | sed 's/| *$/ |/' | \
+  local/apply_map.pl -f 1 "${destdir}"/reco_map <"${srcdir}"/wav.scp | sed 's/| *$/ |/' | \
       # Handle three cases of rxfilenames appropriately; "input piped command", "file offset" and "filename"
       awk -v factor="${factor}" \
           '{wid=$1; $1=""; if ($NF=="|") {print wid $_ " sox -t wav - -t wav - speed " factor " |"}
@@ -84,13 +84,13 @@ if [[ -f ${srcdir}/segments ]]; then
             else  {print wid " sox" $_ " -t wav - speed " factor " |"}}' \
              > "${destdir}"/wav.scp
   if [[ -f ${srcdir}/reco2file_and_channel ]]; then
-      utils/apply_map.pl -f 1 "${destdir}"/reco_map \
+      local/apply_map.pl -f 1 "${destdir}"/reco_map \
        <"${srcdir}"/reco2file_and_channel >"${destdir}"/reco2file_and_channel
   fi
 
 else # no segments->wav indexed by utterance.
     if [[ -f ${srcdir}/wav.scp ]]; then
-        utils/apply_map.pl -f 1 "${destdir}"/utt_map <"${srcdir}"/wav.scp | sed 's/| *$/ |/' | \
+        local/apply_map.pl -f 1 "${destdir}"/utt_map <"${srcdir}"/wav.scp | sed 's/| *$/ |/' | \
          # Handle three cases of rxfilenames appropriately; "input piped command", "file offset" and "filename"
          awk -v factor="${factor}" \
            '{wid=$1; $1=""; if ($NF=="|") {print wid $_ " sox -t wav - -t wav - speed " factor " |"}
@@ -101,16 +101,16 @@ else # no segments->wav indexed by utterance.
 fi
 
 if [[ -f ${srcdir}/text ]]; then
-    utils/apply_map.pl -f 1 "${destdir}"/utt_map <"${srcdir}"/text >"${destdir}"/text
+    local/apply_map.pl -f 1 "${destdir}"/utt_map <"${srcdir}"/text >"${destdir}"/text
 fi
 if [[ -f ${srcdir}/spk2gender ]]; then
-    utils/apply_map.pl -f 1 "${destdir}"/spk_map <"${srcdir}"/spk2gender >"${destdir}"/spk2gender
+    local/apply_map.pl -f 1 "${destdir}"/spk_map <"${srcdir}"/spk2gender >"${destdir}"/spk2gender
 fi
 if [[ -f ${srcdir}/utt2lang ]]; then
-    utils/apply_map.pl -f 1 "${destdir}"/utt_map <"${srcdir}"/utt2lang >"${destdir}"/utt2lang
+    local/apply_map.pl -f 1 "${destdir}"/utt_map <"${srcdir}"/utt2lang >"${destdir}"/utt2lang
 fi
 
 rm "${destdir}"/spk_map "${destdir}"/utt_map "${destdir}"/reco_map 2>/dev/null
 echo "$0: generated speed-perturbed version of data in ${srcdir}, in ${destdir}"
 
-utils/validate_data_dir.sh --no-feats --no-text "${destdir}"
+local/validate_data_dir.sh --no-feats --no-text "${destdir}"

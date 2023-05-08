@@ -8,7 +8,6 @@ set -o pipefail
 ngpu=4
 device="0,1,2,3"
 
-#stage 1 creat both near and far
 stage=1
 stop_stage=18
 

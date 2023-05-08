@@ -22,7 +22,7 @@ inference_config=conf/decode_asr_rnn.yaml
 lm_config=conf/train_lm_transformer.yaml
 use_lm=false
 use_wordlm=false
-./asr_local_infer.sh                                         \
+./asr_local_m2met_2023_infer.sh                                         \
     --device ${device}                                 \
     --ngpu ${ngpu}                                     \
     --stage ${stage}                                   \

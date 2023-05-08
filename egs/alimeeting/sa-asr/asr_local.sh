@@ -475,7 +475,9 @@ if ! "${skip_data_prep}"; then
                 fi
                 local/copy_data_dir.sh --validate_opts --non-print data/"${dset}" "${data_feats}${_suf}/${dset}"
                 
-                cp data/"${dset}"/utt2spk_all_fifo "${data_feats}${_suf}/${dset}/"
+                if [ "${dset}" = "Train_Ali_far" ] || [ "${dset}" = "Eval_Ali_far" ] || [ "${dset}" = "Test_Ali_far" ]; then
+                    cp data/"${dset}"/utt2spk_all_fifo "${data_feats}${_suf}/${dset}/"
+                fi
 
                 rm -f ${data_feats}${_suf}/${dset}/{segments,wav.scp,reco2file_and_channel,reco2dur}
                 _opts=
@@ -568,8 +570,11 @@ if ! "${skip_data_prep}"; then
 
             # generate uttid
             cut -d ' ' -f 1 "${data_feats}/${dset}/wav.scp" > "${data_feats}/${dset}/uttid"
-            # filter utt2spk_all_fifo
-            python local/filter_utt2spk_all_fifo.py ${data_feats}/${dset}/uttid ${data_feats}/org/${dset} ${data_feats}/${dset}
+            
+            if [ "${dset}" = "Train_Ali_far" ] || [ "${dset}" = "Eval_Ali_far" ] || [ "${dset}" = "Test_Ali_far" ]; then
+                # filter utt2spk_all_fifo
+                python local/filter_utt2spk_all_fifo.py ${data_feats}/${dset}/uttid ${data_feats}/org/${dset} ${data_feats}/${dset}
+            fi
         done
 
         # shellcheck disable=SC2002
@@ -585,7 +590,7 @@ if ! "${skip_data_prep}"; then
         echo "<blank>" > ${token_list}
         echo "<s>" >> ${token_list}
         echo "</s>" >> ${token_list}
-        local/text2token.py -s 1 -n 1 --space "" ${data_feats}/lm_train.txt | cut -f 2- -d" " | tr " " "\n" \
+        utils/text2token.py -s 1 -n 1 --space "" ${data_feats}/lm_train.txt | cut -f 2- -d" " | tr " " "\n" \
             | sort | uniq | grep -a -v -e '^\s*$' | awk '{print $0}' >> ${token_list}
         num_token=$(cat ${token_list} | wc -l)
         echo "<unk>" >> ${token_list}
@@ -603,6 +608,7 @@ if ! "${skip_data_prep}"; then
             python local/process_text_id.py ${data_feats}/${dset}
             log "Successfully generate ${data_feats}/${dset}/text_id_train"
             # generate oracle_embedding from single-speaker audio segment
+            log "oracle_embedding is being generated in the background, and the log is profile_log/gen_oracle_embedding_${dset}.log"
             python local/gen_oracle_embedding.py "${data_feats}/${dset}" "data/local/${dset}_correct_single_speaker" &> "profile_log/gen_oracle_embedding_${dset}.log"
             log "Successfully generate oracle embedding for ${dset} (${data_feats}/${dset}/oracle_embedding.scp)"
             # generate oracle_profile and cluster_profile from oracle_embedding and cluster_embedding (padding the speaker during training)
@@ -615,6 +621,7 @@ if ! "${skip_data_prep}"; then
             fi
             # generate cluster_profile with spectral-cluster directly (for infering and without oracle information)
             if [ "${dset}" = "${valid_set}" ] || [ "${dset}" = "${test_sets}" ]; then
+                log "cluster_profile is being generated in the background, and the log is profile_log/gen_cluster_profile_infer_${dset}.log"
                 python local/gen_cluster_profile_infer.py "${data_feats}/${dset}" "data/local/${dset}" 0.996 0.815 &> "profile_log/gen_cluster_profile_infer_${dset}.log"
                 log "Successfully generate cluster profile for ${dset} (${data_feats}/${dset}/cluster_profile_infer.scp)"
             fi
