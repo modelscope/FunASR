@@ -3,6 +3,8 @@
  * MIT License  (https://opensource.org/licenses/MIT)
 */
 
+#pragma once 
+
 #include <utility>
 #include <vector>
 #include <string>
@@ -13,7 +15,7 @@
 #include <numeric>
 #include <cassert>
 
-
+namespace funasr {
 enum class VadStateMachine {
     kVadInStateStartPointNotDetected = 1,
     kVadInStateInSpeechSegment = 2,
@@ -779,5 +781,4 @@ private:
 
 };
 
-
-
+} // namespace funasr

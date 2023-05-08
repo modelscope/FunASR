@@ -1,5 +1,7 @@
 #pragma once 
 #include <algorithm>
+
+namespace funasr {
 typedef struct
 {
     std::string msg;
@@ -58,3 +60,4 @@ template <class ForwardIterator>
 inline static size_t Argmax(ForwardIterator first, ForwardIterator last) {
     return std::distance(first, std::max_element(first, last));
 }
+} // namespace funasr

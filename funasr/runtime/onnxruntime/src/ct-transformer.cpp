@@ -5,6 +5,7 @@
 
 #include "precomp.h"
 
+namespace funasr {
 CTTransformer::CTTransformer()
 :env_(ORT_LOGGING_LEVEL_ERROR, ""),session_options{}
 {
@@ -186,3 +187,4 @@ vector<int> CTTransformer::Infer(vector<int32_t> input_data)
     return punction;
 }
 
+} // namespace funasr

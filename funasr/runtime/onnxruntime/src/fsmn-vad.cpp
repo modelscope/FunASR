@@ -6,6 +6,7 @@
 #include <fstream>
 #include "precomp.h"
 
+namespace funasr {
 void FsmnVad::InitVad(const std::string &vad_model, const std::string &vad_cmvn, const std::string &vad_config, int thread_num) {
     session_options_.SetIntraOpNumThreads(thread_num);
     session_options_.SetGraphOptimizationLevel(ORT_ENABLE_ALL);
@@ -301,3 +302,5 @@ FsmnVad::~FsmnVad() {
 
 FsmnVad::FsmnVad():env_(ORT_LOGGING_LEVEL_ERROR, ""),session_options_{} {
 }
+
+} // namespace funasr

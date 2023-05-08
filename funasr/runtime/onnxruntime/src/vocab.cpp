@@ -10,6 +10,7 @@
 
 using namespace std;
 
+namespace funasr {
 Vocab::Vocab(const char *filename)
 {
     ifstream in(filename);
@@ -151,3 +152,5 @@ int Vocab::Size()
 {
     return vocab.size();
 }
+
+} // namespace funasr

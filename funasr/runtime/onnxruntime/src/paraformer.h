@@ -4,12 +4,9 @@
 */
 #pragma once
 
-#ifndef PARAFORMER_MODELIMP_H
-#define PARAFORMER_MODELIMP_H
-
 #include "precomp.h"
 
-namespace paraformer {
+namespace funasr {
 
     class Paraformer : public Model {
     /**
@@ -52,5 +49,4 @@ namespace paraformer {
         string Rescoring();
     };
 
-} // namespace paraformer
-#endif
+} // namespace funasr
