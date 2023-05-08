@@ -39,7 +39,7 @@ else:
         yield
 
 
-class ESPnetASRModel(FunASRModel):
+class ASRModel(FunASRModel):
     """CTC-attention hybrid Encoder-Decoder model"""
 
     def __init__(
@@ -49,9 +49,7 @@ class ESPnetASRModel(FunASRModel):
             frontend: Optional[AbsFrontend],
             specaug: Optional[AbsSpecAug],
             normalize: Optional[AbsNormalize],
-            preencoder: Optional[AbsPreEncoder],
             encoder: AbsEncoder,
-            postencoder: Optional[AbsPostEncoder],
             decoder: AbsDecoder,
             ctc: CTC,
             ctc_weight: float = 0.5,
@@ -64,6 +62,8 @@ class ESPnetASRModel(FunASRModel):
             sym_space: str = "<space>",
             sym_blank: str = "<blank>",
             extract_feats_in_collect_stats: bool = True,
+            preencoder: Optional[AbsPreEncoder] = None,
+            postencoder: Optional[AbsPostEncoder] = None,
     ):
         assert check_argument_types()
         assert 0.0 <= ctc_weight <= 1.0, ctc_weight

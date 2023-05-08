@@ -51,7 +51,6 @@ class MFCCA(FunASRModel):
             frontend: Optional[AbsFrontend],
             specaug: Optional[AbsSpecAug],
             normalize: Optional[AbsNormalize],
-            preencoder: Optional[AbsPreEncoder],
             encoder: AbsEncoder,
             decoder: AbsDecoder,
             ctc: CTC,
@@ -65,6 +64,7 @@ class MFCCA(FunASRModel):
             report_wer: bool = True,
             sym_space: str = "<space>",
             sym_blank: str = "<blank>",
+            preencoder: Optional[AbsPreEncoder] = None,
     ):
         assert check_argument_types()
         assert 0.0 <= ctc_weight <= 1.0, ctc_weight
