@@ -167,7 +167,7 @@ async def message(id):
             # print(meg)
             wav_name = meg.get("wav_name", "demo")
             print(wav_name)
-            text = meg["text"][0]
+            text = meg["text"]
             if ibest_writer is not None:
                 ibest_writer["text"][wav_name] = text
             if meg["mode"] == "online":

@@ -138,10 +138,10 @@ async def async_asr(websocket, audio_in):
                     rec_result = inference_pipeline_punc(text_in=rec_result['text'],
                                                          param_dict=websocket.param_dict_punc)
                     # print(rec_result)
-                message = json.dumps({"mode": "offline", "text": [rec_result["text"]], "wav_name": websocket.wav_name})
+                message = json.dumps({"mode": "offline", "text": rec_result["text"], "wav_name": websocket.wav_name})
                 await websocket.send(message)
                 
-                    
+                
  
 
 
