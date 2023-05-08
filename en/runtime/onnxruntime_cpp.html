@@ -89,6 +89,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#funasr-onnx-offline">funasr-onnx-offline</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#funasr-onnx-offline-vad">funasr-onnx-offline-vad</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#funasr-onnx-offline-punc">funasr-onnx-offline-punc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#funasr-onnx-offline-rtf">funasr-onnx-offline-rtf</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#acknowledge">Acknowledge</a></li>
@@ -283,6 +284,30 @@ For example:
 ./funasr-onnx-offline-punc <span class="se">\</span>
     --model-dir  ./asrmodel/punc_ct-transformer_zh-cn-common-vocab272727-pytorch <span class="se">\</span>
     --txt-path   ./punc_example.txt
+</pre></div>
+</div>
+</div>
+<div class="section" id="funasr-onnx-offline-rtf">
+<h3>funasr-onnx-offline-rtf<a class="headerlink" href="#funasr-onnx-offline-rtf" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-onnx-offline-rtf     --thread-num &lt;int32_t&gt; --wav-scp &lt;string&gt;
+                              <span class="o">[</span>--quantize &lt;string&gt;<span class="o">]</span> --model-dir &lt;string&gt;
+                              <span class="o">[</span>--<span class="o">]</span> <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
+Where:
+   --thread-num &lt;int32_t&gt;
+     <span class="o">(</span>required<span class="o">)</span>  multi-thread num <span class="k">for</span> rtf
+   --model-dir &lt;string&gt;
+     <span class="o">(</span>required<span class="o">)</span>  the model path, which contains model.onnx, config.yaml, am.mvn
+   --quantize &lt;string&gt;
+     <span class="nb">false</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in model_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in model_dir
+   --wav-scp &lt;string&gt;
+     <span class="o">(</span>required<span class="o">)</span>  wave scp path
+
+For example:
+./funasr-onnx-offline-rtf <span class="se">\</span>
+    --model-dir    ./asrmodel/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch <span class="se">\</span>
+    --quantize  <span class="nb">true</span> <span class="se">\</span>
+    --wav-scp     ./aishell1_test.scp  <span class="se">\</span>
+    --thread-num <span class="m">32</span>
 </pre></div>
 </div>
 </div>
