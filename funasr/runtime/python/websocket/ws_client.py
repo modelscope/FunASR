@@ -189,7 +189,7 @@ async def message(id):
                     text_print_2pass_online += " {}".format(text)
                     text_print = text_print_2pass_offline + text_print_2pass_online
                 else:
-                    text_print_2pass_online = " "
+                    text_print_2pass_online = ""
                     text_print = text_print_2pass_offline + "{}".format(text)
                     text_print_2pass_offline += "{}".format(text)
                 text_print = text_print[-args.words_max_print:]
