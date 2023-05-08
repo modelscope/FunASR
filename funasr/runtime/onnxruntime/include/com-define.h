@@ -1,7 +1,6 @@
+#pragma once 
 
-#ifndef COMDEFINE_H
-#define COMDEFINE_H
-
+namespace funasr {
 #define S_BEGIN  0
 #define S_MIDDLE 1
 #define S_END    2
@@ -77,4 +76,4 @@
 #define DUN_INDEX 5
 #define CACHE_POP_TRIGGER_LIMIT   200
 
-#endif
+} // namespace funasr

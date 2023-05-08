@@ -1,5 +1,6 @@
 #include "precomp.h"
 
+namespace funasr {
 VadModel *CreateVadModel(std::map<std::string, std::string>& model_path, int thread_num)
 {
     VadModel *mm;
@@ -19,3 +20,5 @@ VadModel *CreateVadModel(std::map<std::string, std::string>& model_path, int thr
     mm->InitVad(vad_model_path, vad_cmvn_path, vad_config_path, thread_num);
     return mm;
 }
+
+} // namespace funasr

@@ -5,6 +5,7 @@
 
 #pragma once 
 
+namespace funasr {
 class CTTransformer : public PuncModel {
 /**
  * Author: Speech Lab of DAMO Academy, Alibaba Group
@@ -30,3 +31,4 @@ public:
 	vector<int>  Infer(vector<int32_t> input_data);
 	string AddPunc(const char* sz_input);
 };
+} // namespace funasr

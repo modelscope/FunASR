@@ -6,6 +6,7 @@
 #pragma once
 #include <yaml-cpp/yaml.h>
 
+namespace funasr {
 class CTokenizer {
 private:
 
@@ -31,3 +32,5 @@ public:
 	void Tokenize(const char* str_info, vector<string>& str_out, vector<int>& id_out);
 
 };
+
+} // namespace funasr

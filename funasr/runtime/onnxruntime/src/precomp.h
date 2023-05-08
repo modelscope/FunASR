@@ -46,5 +46,3 @@ using namespace std;
 #include "paraformer.h"
 #include "offline-stream.h"
 #include "funasrruntime.h"
-
-using namespace paraformer;

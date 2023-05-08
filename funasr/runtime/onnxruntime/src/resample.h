@@ -21,11 +21,11 @@
  */
 // this file is copied and modified from
 // kaldi/src/feat/resample.h
-
+#pragma once 
 #include <cstdint>
 #include <vector>
 
-
+namespace funasr {
 /*
    We require that the input and output sampling rate be specified as
    integers, as this is an easy way to specify that their ratio be rational.
@@ -135,3 +135,4 @@ class LinearResample {
   std::vector<float> input_remainder_;  ///< A small trailing part of the
                                         ///< previously seen input signal.
 };
+} // namespace funasr

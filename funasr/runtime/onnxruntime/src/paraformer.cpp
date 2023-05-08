@@ -6,7 +6,8 @@
 #include "precomp.h"
 
 using namespace std;
-using namespace paraformer;
+
+namespace funasr {
 
 Paraformer::Paraformer()
 :env_(ORT_LOGGING_LEVEL_ERROR, "paraformer"),session_options{}{
@@ -238,3 +239,4 @@ string Paraformer::Rescoring()
     LOG(ERROR)<<"Not Imp!!!!!!";
     return "";
 }
+} // namespace funasr

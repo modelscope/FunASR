@@ -1,10 +1,9 @@
-
-
 #ifndef UTIL_H
 #define UTIL_H
 
 using namespace std;
 
+namespace funasr {
 extern float *LoadParams(const char *filename);
 
 extern void SaveDataFile(const char *filename, void *data, uint32_t len);
@@ -27,4 +26,5 @@ extern void Glu(Tensor<float> *din, Tensor<float> *dout);
 
 string PathAppend(const string &p1, const string &p2);
 
+} // namespace funasr
 #endif

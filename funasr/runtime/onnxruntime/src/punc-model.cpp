@@ -1,5 +1,6 @@
 #include "precomp.h"
 
+namespace funasr {
 PuncModel *CreatePuncModel(std::map<std::string, std::string>& model_path, int thread_num)
 {
     PuncModel *mm;
@@ -17,3 +18,5 @@ PuncModel *CreatePuncModel(std::map<std::string, std::string>& model_path, int t
     mm->InitPunc(punc_model_path, punc_config_path, thread_num);
     return mm;
 }
+
+} // namespace funasr

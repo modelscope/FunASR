@@ -8,6 +8,7 @@
 
 #include "precomp.h"
 
+namespace funasr {
 class FsmnVad : public VadModel {
 /**
  * Author: Speech Lab of DAMO Academy, Alibaba Group
@@ -63,5 +64,5 @@ private:
     int lfr_n = VAD_LFR_N;
 };
 
-
+} // namespace funasr
 #endif //VAD_SERVER_FSMNVAD_H
