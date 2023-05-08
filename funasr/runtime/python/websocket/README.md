@@ -1,6 +1,6 @@
 # Service with websocket-python
 
-This is a demo using funasr pipeline with websocket python-api. 
+This is a demo using funasr pipeline with websocket python-api. It supports the offline, online, offline/online-2pass unifying speech recognition. 
 
 ## For the Server
 
@@ -22,6 +22,7 @@ pip install -r requirements_server.txt
 
 ### Start server
 #### ASR offline server
+##### API-reference
 ```shell
 python ws_server_offline.py \
 --port [port id] \
@@ -30,12 +31,13 @@ python ws_server_offline.py \
 --ngpu [0 or 1] \
 --ncpu [1 or 4]
 ```
-`e.g.`
+##### Usage examples
 ```shell
 python ws_server_offline.py --port 10095 --asr_model "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
 ```
 
 #### ASR streaming server
+##### API-reference
 ```shell
 python ws_server_online.py \
 --port [port id] \
@@ -43,12 +45,13 @@ python ws_server_online.py \
 --ngpu [0 or 1] \
 --ncpu [1 or 4]
 ```
-`e.g.`
+##### Usage examples
 ```shell
 python ws_server_online.py --port 10095 --asr_model_online "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online"
 ```
 
 #### ASR offline/online 2pass server
+##### API-reference
 ```shell
 python ws_server_2pass.py \
 --port [port id] \
@@ -58,7 +61,7 @@ python ws_server_2pass.py \
 --ngpu [0 or 1] \
 --ncpu [1 or 4]
 ```
-`e.g.`
+##### Usage examples
 ```shell
 python ws_server_2pass.py --port 10095 --asr_model "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"  --asr_model_online "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online"
 ```
@@ -73,7 +76,7 @@ pip install -r requirements_client.txt
 ```
 
 ### Start client
-
+#### API-reference
 ```shell
 python ws_client.py \
 --host [ip_address] \
@@ -85,38 +88,38 @@ python ws_client.py \
 --output_dir [if set, write the results to output_dir] \
 --send_without_sleep [only set for offline]
 ```
-
-#### ASR offline client
-##### Recording from mircrophone
+#### Usage examples
+##### ASR offline client
+###### Recording from mircrophone
 ```shell
 # --chunk_interval, "10": 600/10=60ms, "5"=600/5=120ms, "20": 600/12=30ms
 python ws_client.py --host "0.0.0.0" --port 10095 --chunk_interval 10 --words_max_print 100
 ```
-##### Loadding from wav.scp(kaldi style)
+###### Loadding from wav.scp(kaldi style)
 ```shell
 # --chunk_interval, "10": 600/10=60ms, "5"=600/5=120ms, "20": 600/12=30ms
 python ws_client.py --host "0.0.0.0" --port 10095 --chunk_interval 10 --words_max_print 100 --audio_in "./data/wav.scp" --send_without_sleep --output_dir "./results"
 ```
 
-#### ASR streaming client
-##### Recording from mircrophone
+##### ASR streaming client
+###### Recording from mircrophone
 ```shell
 # --chunk_size, "5,10,5"=600ms, "8,8,4"=480ms
 python ws_client.py --host "0.0.0.0" --port 10095 --chunk_size "5,10,5" --words_max_print 100
 ```
-##### Loadding from wav.scp(kaldi style)
+###### Loadding from wav.scp(kaldi style)
 ```shell
 # --chunk_size, "5,10,5"=600ms, "8,8,4"=480ms
 python ws_client.py --host "0.0.0.0" --port 10095 --chunk_size "5,10,5" --audio_in "./data/wav.scp" --words_max_print 100 --output_dir "./results"
 ```
 
-#### ASR offline/online 2pass client
-##### Recording from mircrophone
+##### ASR offline/online 2pass client
+###### Recording from mircrophone
 ```shell
 # --chunk_size, "5,10,5"=600ms, "8,8,4"=480ms
 python ws_client.py --host "0.0.0.0" --port 10095 --chunk_size "8,8,4" --words_max_print 10000
 ```
-##### Loadding from wav.scp(kaldi style)
+###### Loadding from wav.scp(kaldi style)
 ```shell
 # --chunk_size, "5,10,5"=600ms, "8,8,4"=480ms
 python ws_client.py --host "0.0.0.0" --port 10095 --chunk_size "8,8,4" --audio_in "./data/wav.scp" --words_max_print 10000 --output_dir "./results"
