@@ -112,6 +112,22 @@ class TestParaformerInferencePipelines(unittest.TestCase):
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
         logger.info("asr inference result: {0}".format(rec_result))
 
+    def test_paraformer_large_online_common(self):
+        inference_pipeline = pipeline(
+            task=Tasks.auto_speech_recognition,
+            model='damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online')
+        rec_result = inference_pipeline(
+            audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
+        logger.info("asr inference result: {0}".format(rec_result))
+
+    def test_paraformer_online_common(self):
+        inference_pipeline = pipeline(
+            task=Tasks.auto_speech_recognition,
+            model='damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8404-online')
+        rec_result = inference_pipeline(
+            audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
+        logger.info("asr inference result: {0}".format(rec_result))
+
     def test_paraformer_tiny_commandword(self):
         inference_pipeline = pipeline(
             task=Tasks.auto_speech_recognition,
