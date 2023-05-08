@@ -237,6 +237,15 @@ bool Audio::LoadWav(const char *filename, int32_t* sampling_rate)
         LOG(ERROR) << "Failed to read " << filename;
         return false;
     }
+
+    if (!header.Validate()) {
+        return false;
+    }
+
+    header.SeekToDataChunk(is);
+    if (!is) {
+        return false;
+    }
     
     if (!header.Validate()) {
         return false;
@@ -505,7 +514,7 @@ void Audio::Padding()
     delete frame;
 }
 
-void Audio::Split(Model* recog_obj)
+void Audio::Split(OfflineStream* offline_stream)
 {
     AudioFrame *frame;
 
@@ -516,7 +525,7 @@ void Audio::Split(Model* recog_obj)
     frame = NULL;
 
     std::vector<float> pcm_data(speech_data, speech_data+sp_len);
-    vector<std::vector<int>> vad_segments = recog_obj->VadSeg(pcm_data);
+    vector<std::vector<int>> vad_segments = (offline_stream->vad_handle)->Infer(pcm_data);
     int seg_sample = MODEL_SAMPLE_RATE/1000;
     for(vector<int> segment:vad_segments)
     {
@@ -528,4 +537,19 @@ void Audio::Split(Model* recog_obj)
         frame_queue.push(frame);
         frame = NULL;
     }
+}
+
+
+void Audio::Split(VadModel* vad_obj, vector<std::vector<int>>& vad_segments)
+{
+    AudioFrame *frame;
+
+    frame = frame_queue.front();
+    frame_queue.pop();
+    int sp_len = frame->GetLen();
+    delete frame;
+    frame = NULL;
+
+    std::vector<float> pcm_data(speech_data, speech_data+sp_len);
+    vad_segments = vad_obj->Infer(pcm_data);
 }

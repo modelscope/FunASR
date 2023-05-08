@@ -41,41 +41,88 @@ make
 ```
 ## Run the demo
 
+### funasr-onnx-offline
 ```shell
 ./funasr-onnx-offline     [--wav-scp <string>] [--wav-path <string>]
-                          [--punc-config <string>] [--punc-model <string>]
-                          --am-config <string> --am-cmvn <string>
-                          --am-model <string> [--vad-config <string>]
-                          [--vad-cmvn <string>] [--vad-model <string>] [--]
-                          [--version] [-h]
+                          [--punc-quant <string>] [--punc-dir <string>]
+                          [--vad-quant <string>] [--vad-dir <string>]
+                          [--quantize <string>] --model-dir <string>
+                          [--] [--version] [-h]
 Where:
+   --model-dir <string>
+     (required)  the asr model path, which contains model.onnx, config.yaml, am.mvn
+   --quantize <string>
+     false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir
+
+   --vad-dir <string>
+     the vad model path, which contains model.onnx, vad.yaml, vad.mvn
+   --vad-quant <string>
+     false (Default), load the model of model.onnx in vad_dir. If set true, load the model of model_quant.onnx in vad_dir
+
+   --punc-dir <string>
+     the punc model path, which contains model.onnx, punc.yaml
+   --punc-quant <string>
+     false (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir
+
+   --wav-scp <string>
+     wave scp path
+   --wav-path <string>
+     wave file path
+  
+   Required: --model-dir <string>
+   If use vad, please add: --vad-dir <string>
+   If use punc, please add: --punc-dir <string>
+
+For example:
+./funasr-onnx-offline \
+    --model-dir    ./asrmodel/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch \
+    --quantize  true \
+    --vad-dir   ./asrmodel/speech_fsmn_vad_zh-cn-16k-common-pytorch \
+    --punc-dir  ./asrmodel/punc_ct-transformer_zh-cn-common-vocab272727-pytorch \
+    --wav-path    ./vad_example.wav
+```
+
+### funasr-onnx-offline-vad
+```shell
+./funasr-onnx-offline-vad     [--wav-scp <string>] [--wav-path <string>]
+                              [--quantize <string>] --model-dir <string>
+                              [--] [--version] [-h]
+Where:
+   --model-dir <string>
+     (required)  the vad model path, which contains model.onnx, vad.yaml, vad.mvn
+   --quantize <string>
+     false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir
    --wav-scp <string>
      wave scp path
    --wav-path <string>
      wave file path
 
-   --punc-config <string>
-     punc config path
-   --punc-model <string>
-     punc model path
+   Required: --model-dir <string>
 
-   --am-config <string>
-     (required)  am config path
-   --am-cmvn <string>
-     (required)  am cmvn path
-   --am-model <string>
-     (required)  am model path
+For example:
+./funasr-onnx-offline-vad \
+    --model-dir   ./asrmodel/speech_fsmn_vad_zh-cn-16k-common-pytorch \
+    --wav-path    ./vad_example.wav
+```
 
-   --vad-config <string>
-     vad config path
-   --vad-cmvn <string>
-     vad cmvn path
-   --vad-model <string>
-     vad model path
-  
-   Required: --am-config <string> --am-cmvn <string> --am-model <string> 
-   If use vad, please add: [--vad-config <string>] [--vad-cmvn <string>] [--vad-model <string>]
-   If use punc, please add: [--punc-config <string>] [--punc-model <string>] 
+### funasr-onnx-offline-punc
+```shell
+./funasr-onnx-offline-punc    [--txt-path <string>] [--quantize <string>]
+                               --model-dir <string> [--] [--version] [-h]
+Where:
+   --model-dir <string>
+     (required)  the punc model path, which contains model.onnx, punc.yaml
+   --quantize <string>
+     false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir
+   --txt-path <string>
+     txt file path, one sentence per line
+
+   Required: --model-dir <string>
+
+For example:
+./funasr-onnx-offline-punc \
+    --model-dir  ./asrmodel/punc_ct-transformer_zh-cn-common-vocab272727-pytorch \
+    --txt-path   ./punc_example.txt
 ```
 
 ## Acknowledge

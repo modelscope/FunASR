@@ -14,6 +14,10 @@ CTokenizer::CTokenizer():m_ready(false)
 {
 }
 
+CTokenizer::~CTokenizer()
+{
+}
+
 void CTokenizer::ReadYaml(const YAML::Node& node) 
 {
 	if (node.IsMap()) 

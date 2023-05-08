@@ -5,7 +5,7 @@
 
 #pragma once 
 
-class CTTransformer {
+class CTTransformer : public PuncModel {
 /**
  * Author: Speech Lab of DAMO Academy, Alibaba Group
  * CT-Transformer: Controllable time-delay transformer for real-time punctuation prediction and disfluency detection
@@ -27,6 +27,6 @@ public:
 	CTTransformer();
 	void InitPunc(const std::string &punc_model, const std::string &punc_config, int thread_num);
 	~CTTransformer();
-	vector<int>  Infer(vector<int64_t> input_data);
+	vector<int>  Infer(vector<int32_t> input_data);
 	string AddPunc(const char* sz_input);
 };

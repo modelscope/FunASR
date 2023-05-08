@@ -30,6 +30,10 @@ using namespace std;
 #include "com-define.h"
 #include "commonfunc.h"
 #include "predefine-coe.h"
+#include "model.h"
+#include "vad-model.h"
+#include "punc-model.h"
+#include "offline-stream.h"
 #include "tokenizer.h"
 #include "ct-transformer.h"
 #include "fsmn-vad.h"
@@ -39,9 +43,8 @@ using namespace std;
 #include "tensor.h"
 #include "util.h"
 #include "resample.h"
-#include "model.h"
-//#include "vad-model.h"
 #include "paraformer.h"
+#include "offline-stream.h"
 #include "libfunasrapi.h"
 
 using namespace paraformer;
