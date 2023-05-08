@@ -91,9 +91,8 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#for-the-client">For the client</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#start-client">Start client</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#asr-offline-client">ASR offline client</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#asr-streaming-client">ASR streaming client</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#asr-offline-online-2pass-client">ASR offline/online 2pass client</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">API-reference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">Usage examples</a></li>
 </ul>
 </li>
 </ul>
@@ -154,7 +153,7 @@
              
   <div class="section" id="service-with-websocket-python">
 <h1>Service with websocket-python<a class="headerlink" href="#service-with-websocket-python" title="Permalink to this headline"></a></h1>
-<p>This is a demo using funasr pipeline with websocket python-api.</p>
+<p>This is a demo using funasr pipeline with websocket python-api. It supports the offline, online, offline/online-2pass unifying speech recognition.</p>
 <div class="section" id="for-the-server">
 <h2>For the Server<a class="headerlink" href="#for-the-server" title="Permalink to this headline"></a></h2>
 <div class="section" id="install-the-modelscope-and-funasr">
@@ -177,6 +176,8 @@ pip install -r requirements_server.txt
 <h3>Start server<a class="headerlink" href="#start-server" title="Permalink to this headline"></a></h3>
 <div class="section" id="asr-offline-server">
 <h4>ASR offline server<a class="headerlink" href="#asr-offline-server" title="Permalink to this headline"></a></h4>
+<div class="section" id="api-reference">
+<h5>API-reference<a class="headerlink" href="#api-reference" title="Permalink to this headline"></a></h5>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python ws_server_offline.py <span class="se">\</span>
 --port <span class="o">[</span>port id<span class="o">]</span> <span class="se">\</span>
 --asr_model <span class="o">[</span>asr model_name<span class="o">]</span> <span class="se">\</span>
@@ -185,13 +186,18 @@ pip install -r requirements_server.txt
 --ncpu <span class="o">[</span><span class="m">1</span> or <span class="m">4</span><span class="o">]</span>
 </pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">e.g.</span></code></p>
+</div>
+<div class="section" id="usage-examples">
+<h5>Usage examples<a class="headerlink" href="#usage-examples" title="Permalink to this headline"></a></h5>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python ws_server_offline.py --port <span class="m">10095</span> --asr_model <span class="s2">&quot;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&quot;</span>
 </pre></div>
 </div>
 </div>
+</div>
 <div class="section" id="asr-streaming-server">
 <h4>ASR streaming server<a class="headerlink" href="#asr-streaming-server" title="Permalink to this headline"></a></h4>
+<div class="section" id="id1">
+<h5>API-reference<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h5>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python ws_server_online.py <span class="se">\</span>
 --port <span class="o">[</span>port id<span class="o">]</span> <span class="se">\</span>
 --asr_model_online <span class="o">[</span>asr model_name<span class="o">]</span> <span class="se">\</span>
@@ -199,13 +205,18 @@ pip install -r requirements_server.txt
 --ncpu <span class="o">[</span><span class="m">1</span> or <span class="m">4</span><span class="o">]</span>
 </pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">e.g.</span></code></p>
+</div>
+<div class="section" id="id2">
+<h5>Usage examples<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h5>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python ws_server_online.py --port <span class="m">10095</span> --asr_model_online <span class="s2">&quot;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online&quot;</span>
 </pre></div>
 </div>
 </div>
+</div>
 <div class="section" id="asr-offline-online-2pass-server">
 <h4>ASR offline/online 2pass server<a class="headerlink" href="#asr-offline-online-2pass-server" title="Permalink to this headline"></a></h4>
+<div class="section" id="id3">
+<h5>API-reference<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h5>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python ws_server_2pass.py <span class="se">\</span>
 --port <span class="o">[</span>port id<span class="o">]</span> <span class="se">\</span>
 --asr_model <span class="o">[</span>asr model_name<span class="o">]</span> <span class="se">\</span>
@@ -215,9 +226,12 @@ pip install -r requirements_server.txt
 --ncpu <span class="o">[</span><span class="m">1</span> or <span class="m">4</span><span class="o">]</span>
 </pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">e.g.</span></code></p>
+</div>
+<div class="section" id="id4">
+<h5>Usage examples<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h5>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python ws_server_2pass.py --port <span class="m">10095</span> --asr_model <span class="s2">&quot;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&quot;</span>  --asr_model_online <span class="s2">&quot;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online&quot;</span>
 </pre></div>
+</div>
 </div>
 </div>
 </div>
@@ -232,6 +246,8 @@ pip install -r requirements_client.txt
 </div>
 <div class="section" id="start-client">
 <h3>Start client<a class="headerlink" href="#start-client" title="Permalink to this headline"></a></h3>
+<div class="section" id="id5">
+<h4>API-reference<a class="headerlink" href="#id5" title="Permalink to this headline"></a></h4>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python ws_client.py <span class="se">\</span>
 --host <span class="o">[</span>ip_address<span class="o">]</span> <span class="se">\</span>
 --port <span class="o">[</span>port id<span class="o">]</span> <span class="se">\</span>
@@ -243,17 +259,20 @@ pip install -r requirements_client.txt
 --send_without_sleep <span class="o">[</span>only <span class="nb">set</span> <span class="k">for</span> offline<span class="o">]</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="id6">
+<h4>Usage examples<a class="headerlink" href="#id6" title="Permalink to this headline"></a></h4>
 <div class="section" id="asr-offline-client">
-<h4>ASR offline client<a class="headerlink" href="#asr-offline-client" title="Permalink to this headline"></a></h4>
+<h5>ASR offline client<a class="headerlink" href="#asr-offline-client" title="Permalink to this headline"></a></h5>
 <div class="section" id="recording-from-mircrophone">
-<h5>Recording from mircrophone<a class="headerlink" href="#recording-from-mircrophone" title="Permalink to this headline"></a></h5>
+<h6>Recording from mircrophone<a class="headerlink" href="#recording-from-mircrophone" title="Permalink to this headline"></a></h6>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># --chunk_interval, &quot;10&quot;: 600/10=60ms, &quot;5&quot;=600/5=120ms, &quot;20&quot;: 600/12=30ms</span>
 python ws_client.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --chunk_interval <span class="m">10</span> --words_max_print <span class="m">100</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="loadding-from-wav-scp-kaldi-style">
-<h5>Loadding from wav.scp(kaldi style)<a class="headerlink" href="#loadding-from-wav-scp-kaldi-style" title="Permalink to this headline"></a></h5>
+<h6>Loadding from wav.scp(kaldi style)<a class="headerlink" href="#loadding-from-wav-scp-kaldi-style" title="Permalink to this headline"></a></h6>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># --chunk_interval, &quot;10&quot;: 600/10=60ms, &quot;5&quot;=600/5=120ms, &quot;20&quot;: 600/12=30ms</span>
 python ws_client.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --chunk_interval <span class="m">10</span> --words_max_print <span class="m">100</span> --audio_in <span class="s2">&quot;./data/wav.scp&quot;</span> --send_without_sleep --output_dir <span class="s2">&quot;./results&quot;</span>
 </pre></div>
@@ -261,16 +280,16 @@ python ws_client.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <s
 </div>
 </div>
 <div class="section" id="asr-streaming-client">
-<h4>ASR streaming client<a class="headerlink" href="#asr-streaming-client" title="Permalink to this headline"></a></h4>
-<div class="section" id="id1">
-<h5>Recording from mircrophone<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h5>
+<h5>ASR streaming client<a class="headerlink" href="#asr-streaming-client" title="Permalink to this headline"></a></h5>
+<div class="section" id="id7">
+<h6>Recording from mircrophone<a class="headerlink" href="#id7" title="Permalink to this headline"></a></h6>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># --chunk_size, &quot;5,10,5&quot;=600ms, &quot;8,8,4&quot;=480ms</span>
 python ws_client.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --chunk_size <span class="s2">&quot;5,10,5&quot;</span> --words_max_print <span class="m">100</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="id2">
-<h5>Loadding from wav.scp(kaldi style)<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h5>
+<div class="section" id="id8">
+<h6>Loadding from wav.scp(kaldi style)<a class="headerlink" href="#id8" title="Permalink to this headline"></a></h6>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># --chunk_size, &quot;5,10,5&quot;=600ms, &quot;8,8,4&quot;=480ms</span>
 python ws_client.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --chunk_size <span class="s2">&quot;5,10,5&quot;</span> --audio_in <span class="s2">&quot;./data/wav.scp&quot;</span> --words_max_print <span class="m">100</span> --output_dir <span class="s2">&quot;./results&quot;</span>
 </pre></div>
@@ -278,19 +297,20 @@ python ws_client.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <s
 </div>
 </div>
 <div class="section" id="asr-offline-online-2pass-client">
-<h4>ASR offline/online 2pass client<a class="headerlink" href="#asr-offline-online-2pass-client" title="Permalink to this headline"></a></h4>
-<div class="section" id="id3">
-<h5>Recording from mircrophone<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h5>
+<h5>ASR offline/online 2pass client<a class="headerlink" href="#asr-offline-online-2pass-client" title="Permalink to this headline"></a></h5>
+<div class="section" id="id9">
+<h6>Recording from mircrophone<a class="headerlink" href="#id9" title="Permalink to this headline"></a></h6>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># --chunk_size, &quot;5,10,5&quot;=600ms, &quot;8,8,4&quot;=480ms</span>
 python ws_client.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --chunk_size <span class="s2">&quot;8,8,4&quot;</span> --words_max_print <span class="m">10000</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="id4">
-<h5>Loadding from wav.scp(kaldi style)<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h5>
+<div class="section" id="id10">
+<h6>Loadding from wav.scp(kaldi style)<a class="headerlink" href="#id10" title="Permalink to this headline"></a></h6>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># --chunk_size, &quot;5,10,5&quot;=600ms, &quot;8,8,4&quot;=480ms</span>
 python ws_client.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --chunk_size <span class="s2">&quot;8,8,4&quot;</span> --audio_in <span class="s2">&quot;./data/wav.scp&quot;</span> --words_max_print <span class="m">10000</span> --output_dir <span class="s2">&quot;./results&quot;</span>
 </pre></div>
+</div>
 </div>
 </div>
 </div>
