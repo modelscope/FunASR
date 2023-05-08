@@ -148,7 +148,7 @@ class CT_Transformer_VadRealtime(CT_Transformer):
         else:
             precache = ""
             cache = []
-        full_text = precache + text
+        full_text = precache + " " + text
         split_text = code_mix_split_words(full_text)
         split_text_id = self.converter.tokens2ids(split_text)
         mini_sentences = split_to_mini_sentence(split_text, split_size)
