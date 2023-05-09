@@ -185,7 +185,7 @@ class ModelExport:
                 else:
                     mode = config_data['model']['model_config']['mode']
         if mode.startswith('uniasr'):
-            from funasr.tasks.asr import ASRTaskParaformer as ASRTask
+            from funasr.tasks.asr import ASRTaskUniASR as ASRTask
             config = os.path.join(model_dir, 'config.yaml')
             model_file = os.path.join(model_dir, 'model.pb')
             cmvn_file = os.path.join(model_dir, 'am.mvn')
@@ -193,7 +193,7 @@ class ModelExport:
                 config, model_file, cmvn_file, 'cpu'
             )
             self.frontend = model.frontend
-        if mode.startswith('paraformer'):
+        elif mode.startswith('paraformer'):
             from funasr.tasks.asr import ASRTaskParaformer as ASRTask
             config = os.path.join(model_dir, 'config.yaml')
             model_file = os.path.join(model_dir, 'model.pb')
