@@ -120,7 +120,7 @@ class websocket_client {
     uint64_t count = 0;
     std::stringstream val;
 
-    Audio audio(1);
+    funasr::Audio audio(1);
     int32_t sampling_rate = 16000;
 
     if (!audio.LoadPcmwav(wav_path.c_str(), &sampling_rate)) {
