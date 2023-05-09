@@ -1,7 +1,3 @@
-#!/usr/bin/env python3
-# Copyright ESPnet (https://github.com/espnet/espnet). All Rights Reserved.
-#  Apache 2.0  (http://www.apache.org/licenses/LICENSE-2.0)
-
 import argparse
 import logging
 import sys
@@ -20,15 +16,14 @@ from typeguard import check_argument_types
 from typeguard import check_return_type
 
 from funasr.fileio.datadir_writer import DatadirWriter
-from funasr.modules.beam_search.batch_beam_search import BatchBeamSearch
 from funasr.modules.beam_search.batch_beam_search_online_sim import BatchBeamSearchOnlineSim
-from funasr.modules.beam_search.beam_search import BeamSearch
-from funasr.modules.beam_search.beam_search import Hypothesis
+from funasr.modules.beam_search.beam_search_sa_asr import BeamSearch
+from funasr.modules.beam_search.beam_search_sa_asr import Hypothesis
 from funasr.modules.scorers.ctc import CTCPrefixScorer
 from funasr.modules.scorers.length_bonus import LengthBonus
 from funasr.modules.scorers.scorer_interface import BatchScorerInterface
 from funasr.modules.subsampling import TooShortUttError
-from funasr.tasks.asr import ASRTask
+from funasr.tasks.sa_asr import ASRTask
 from funasr.tasks.lm import LMTask
 from funasr.text.build_tokenizer import build_tokenizer
 from funasr.text.token_id_converter import TokenIDConverter
@@ -180,9 +175,10 @@ class Speech2Text:
 
     @torch.no_grad()
     def __call__(
-            self, speech: Union[torch.Tensor, np.ndarray], speech_lengths: Union[torch.Tensor, np.ndarray] = None
+            self, speech: Union[torch.Tensor, np.ndarray], speech_lengths: Union[torch.Tensor, np.ndarray], profile: Union[torch.Tensor, np.ndarray], profile_lengths: Union[torch.Tensor, np.ndarray]
     ) -> List[
         Tuple[
+            Optional[str],
             Optional[str],
             List[str],
             List[int],
@@ -194,14 +190,17 @@ class Speech2Text:
         Args:
             speech: Input speech data
         Returns:
-            text, token, token_int, hyp
+            text, text_id, token, token_int, hyp
 
         """
         assert check_argument_types()
-        
+
         # Input as audio signal
         if isinstance(speech, np.ndarray):
             speech = torch.tensor(speech)
+
+        if isinstance(profile, np.ndarray):
+            profile = torch.tensor(profile)
 
         if self.frontend is not None:
             feats, feats_len = self.frontend.forward(speech, speech_lengths)
@@ -218,14 +217,17 @@ class Speech2Text:
         batch = to_device(batch, device=self.device)
 
         # b. Forward Encoder
-        enc, _ = self.asr_model.encode(**batch)
-        if isinstance(enc, tuple):
-            enc = enc[0]
-        assert len(enc) == 1, len(enc)
+        asr_enc, _, spk_enc = self.asr_model.encode(**batch)
+        if isinstance(asr_enc, tuple):
+            asr_enc = asr_enc[0]
+        if isinstance(spk_enc, tuple):
+            spk_enc = spk_enc[0]
+        assert len(asr_enc) == 1, len(asr_enc)
+        assert len(spk_enc) == 1, len(spk_enc)
 
         # c. Passed the encoder result and the beam search
         nbest_hyps = self.beam_search(
-            x=enc[0], maxlenratio=self.maxlenratio, minlenratio=self.minlenratio
+            asr_enc[0], spk_enc[0], profile[0], maxlenratio=self.maxlenratio, minlenratio=self.minlenratio
         )
 
         nbest_hyps = nbest_hyps[: self.nbest]
@@ -237,9 +239,26 @@ class Speech2Text:
             # remove sos/eos and get results
             last_pos = -1
             if isinstance(hyp.yseq, list):
-                token_int = hyp.yseq[1:last_pos]
+                token_int = hyp.yseq[1: last_pos]
             else:
-                token_int = hyp.yseq[1:last_pos].tolist()
+                token_int = hyp.yseq[1: last_pos].tolist()
+
+            spk_weigths=torch.stack(hyp.spk_weigths, dim=0)
+
+            token_ori = self.converter.ids2tokens(token_int)
+            text_ori = self.tokenizer.tokens2text(token_ori)
+
+            text_ori_spklist = text_ori.split('$')
+            cur_index = 0
+            spk_choose = []
+            for i in range(len(text_ori_spklist)):
+                text_ori_split = text_ori_spklist[i]
+                n = len(text_ori_split)
+                spk_weights_local = spk_weigths[cur_index: cur_index + n]
+                cur_index = cur_index + n + 1
+                spk_weights_local = spk_weights_local.mean(dim=0)
+                spk_choose_local = spk_weights_local.argmax(-1)
+                spk_choose.append(spk_choose_local.item() + 1)
 
             # remove blank symbol id, which is assumed to be 0
             token_int = list(filter(lambda x: x != 0, token_int))
@@ -251,7 +270,21 @@ class Speech2Text:
                 text = self.tokenizer.tokens2text(token)
             else:
                 text = None
-            results.append((text, token, token_int, hyp))
+
+            text_spklist = text.split('$')
+            assert len(spk_choose) == len(text_spklist)
+
+            spk_list=[]
+            for i in range(len(text_spklist)):
+                text_split = text_spklist[i]
+                n = len(text_split)
+                spk_list.append(str(spk_choose[i]) * n)
+            
+            text_id = '$'.join(spk_list)
+            
+            assert len(text) == len(text_id)
+
+            results.append((text, text_id, token, token_int, hyp))
 
         assert check_return_type(results)
         return results
@@ -354,18 +387,16 @@ def inference_modelscope(
     **kwargs,
 ):
     assert check_argument_types()
-    ncpu = kwargs.get("ncpu", 1)
-    torch.set_num_threads(ncpu)
     if batch_size > 1:
         raise NotImplementedError("batch decoding is not implemented")
     if word_lm_train_config is not None:
         raise NotImplementedError("Word LM is not implemented")
     if ngpu > 1:
         raise NotImplementedError("only single GPU decoding is supported")
-    
+
     for handler in logging.root.handlers[:]:
         logging.root.removeHandler(handler)
-
+    
     logging.basicConfig(
         level=log_level,
         format="%(asctime)s (%(module)s:%(lineno)d) %(levelname)s: %(message)s",
@@ -428,7 +459,7 @@ def inference_modelscope(
             allow_variable_data_keys=allow_variable_data_keys,
             inference=True,
         )
-
+        
         finish_count = 0
         file_count = 1
         # 7 .Start for-loop
@@ -446,7 +477,6 @@ def inference_modelscope(
             _bs = len(next(iter(batch.values())))
             assert len(keys) == _bs, f"{len(keys)} != {_bs}"
             # batch = {k: v[0] for k, v in batch.items() if not k.endswith("_lengths")}
-            
             # N-best list of (text, token, token_int, hyp_object)
             try:
                 results = speech2text(**batch)
@@ -457,7 +487,7 @@ def inference_modelscope(
             
             # Only supporting batch_size==1
             key = keys[0]
-            for n, (text, token, token_int, hyp) in zip(range(1, nbest + 1), results):
+            for n, (text, text_id, token, token_int, hyp) in zip(range(1, nbest + 1), results):
                 # Create a directory: outdir/{n}best_recog
                 if writer is not None:
                     ibest_writer = writer[f"{n}best_recog"]
@@ -466,6 +496,7 @@ def inference_modelscope(
                     ibest_writer["token"][key] = " ".join(token)
                     ibest_writer["token_int"][key] = " ".join(map(str, token_int))
                     ibest_writer["score"][key] = str(hyp.score)
+                    ibest_writer["text_id"][key] = text_id
                 
                 if text is not None:
                     text_postprocessed, _ = postprocess_utils.sentence_postprocess(token)
@@ -477,7 +508,8 @@ def inference_modelscope(
                         ibest_writer["text"][key] = text
 
                 logging.info("uttid: {}".format(key))
-                logging.info("text predictions: {}\n".format(text))
+                logging.info("text predictions: {}".format(text))
+                logging.info("text_id predictions: {}\n".format(text_id))
         return asr_result_list
     
     return _forward

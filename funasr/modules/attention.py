@@ -13,6 +13,9 @@ import torch
 from torch import nn
 from typing import Optional, Tuple
 
+import torch.nn.functional as F
+from funasr.modules.nets_utils import make_pad_mask
+
 class MultiHeadedAttention(nn.Module):
     """Multi-Head Attention layer.
 
@@ -959,3 +962,37 @@ class RelPositionMultiHeadedAttentionChunk(torch.nn.Module):
         q, k, v = self.forward_qkv(query, key, value)
         scores = self.compute_att_score(q, k, pos_enc, left_context=left_context)
         return self.forward_attention(v, scores, mask, chunk_mask=chunk_mask)
+
+
+class CosineDistanceAttention(nn.Module):
+    """ Compute Cosine Distance between spk decoder output and speaker profile 
+    Args:
+        profile_path: speaker profile file path (.npy file)
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.softmax = nn.Softmax(dim=-1)
+
+    def forward(self, spk_decoder_out, profile, profile_lens=None):
+        """
+        Args:
+            spk_decoder_out(torch.Tensor):(B, L, D)
+            spk_profiles(torch.Tensor):(B, N, D)
+        """
+        x = spk_decoder_out.unsqueeze(2)  # (B, L, 1, D)
+        if profile_lens is not None:
+            
+            mask = (make_pad_mask(profile_lens)[:, None, :]).to(profile.device)
+            min_value = float(
+                numpy.finfo(torch.tensor(0, dtype=x.dtype).numpy().dtype).min
+            )
+            weights_not_softmax=F.cosine_similarity(x, profile.unsqueeze(1), dim=-1).masked_fill(mask, min_value)
+            weights = self.softmax(weights_not_softmax).masked_fill(mask, 0.0)  # (B, L, N)
+        else:
+            x = x[:, -1:, :, :]
+            weights_not_softmax=F.cosine_similarity(x, profile.unsqueeze(1).to(x.device), dim=-1)
+            weights = self.softmax(weights_not_softmax)  # (B, 1, N)
+        spk_embedding = torch.matmul(weights, profile.to(weights.device))  # (B, L, D)
+
+        return spk_embedding, weights

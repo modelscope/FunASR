@@ -38,6 +38,7 @@ class DefaultFrontend(AbsFrontend):
             htk: bool = False,
             frontend_conf: Optional[dict] = get_default_kwargs(Frontend),
             apply_stft: bool = True,
+            use_channel: int = None,
     ):
         assert check_argument_types()
         super().__init__()
@@ -77,6 +78,7 @@ class DefaultFrontend(AbsFrontend):
         )
         self.n_mels = n_mels
         self.frontend_type = "default"
+        self.use_channel = use_channel
 
     def output_size(self) -> int:
         return self.n_mels
@@ -100,9 +102,12 @@ class DefaultFrontend(AbsFrontend):
         if input_stft.dim() == 4:
             # h: (B, T, C, F) -> h: (B, T, F)
             if self.training:
-                # Select 1ch randomly
-                ch = np.random.randint(input_stft.size(2))
-                input_stft = input_stft[:, :, ch, :]
+                if self.use_channel == None:
+                    input_stft = input_stft[:, :, 0, :]
+                else:
+                    # Select 1ch randomly
+                    ch = np.random.randint(input_stft.size(2))
+                    input_stft = input_stft[:, :, ch, :]
             else:
                 # Use the first channel
                 input_stft = input_stft[:, :, 0, :]

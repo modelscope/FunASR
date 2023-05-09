@@ -2,7 +2,7 @@
 
 import os
 
-from funasr.tasks.asr import ASRTask
+from funasr.tasks.sa_asr import ASRTask
 
 
 # for ASR Training
