@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
     struct timeval start, end;
     gettimeofday(&start, NULL);
     int thread_num = 1;
-    FUNASR_HANDLE punc_hanlde=FunPuncInit(model_path, thread_num);
+    FUNASR_HANDLE punc_hanlde=CTTransformerInit(model_path, thread_num);
 
     if (!punc_hanlde)
     {
@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
     long taking_micros = 0;
     for(auto& txt_str : txt_list){
         gettimeofday(&start, NULL);
-        string result=FunPuncInfer(punc_hanlde, txt_str.c_str(), RASR_NONE, NULL);
+        string result=CTTransformerInfer(punc_hanlde, txt_str.c_str(), RASR_NONE, NULL);
         gettimeofday(&end, NULL);
         seconds = (end.tv_sec - start.tv_sec);
         taking_micros += ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
     }
 
     LOG(INFO) << "Model inference takes: " << (double)taking_micros / 1000000 <<" s";
-    FunPuncUninit(punc_hanlde);
+    CTTransformerUninit(punc_hanlde);
     return 0;
 }
 

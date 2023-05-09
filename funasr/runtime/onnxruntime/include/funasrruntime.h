@@ -72,9 +72,9 @@ _FUNASRAPI void				FsmnVadUninit(FUNASR_HANDLE handle);
 _FUNASRAPI const float		FsmnVadGetRetSnippetTime(FUNASR_RESULT result);
 
 // PUNC
-_FUNASRAPI FUNASR_HANDLE  		FunPuncInit(std::map<std::string, std::string>& model_path, int thread_num);
-_FUNASRAPI const std::string	FunPuncInfer(FUNASR_HANDLE handle, const char* sz_sentence, FUNASR_MODE mode, QM_CALLBACK fn_callback);
-_FUNASRAPI void					FunPuncUninit(FUNASR_HANDLE handle);
+_FUNASRAPI FUNASR_HANDLE  		CTTransformerInit(std::map<std::string, std::string>& model_path, int thread_num);
+_FUNASRAPI const std::string	CTTransformerInfer(FUNASR_HANDLE handle, const char* sz_sentence, FUNASR_MODE mode, QM_CALLBACK fn_callback);
+_FUNASRAPI void					CTTransformerUninit(FUNASR_HANDLE handle);
 
 //OfflineStream
 _FUNASRAPI FUNASR_HANDLE  	FunOfflineInit(std::map<std::string, std::string>& model_path, int thread_num);
