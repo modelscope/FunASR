@@ -307,7 +307,7 @@ class ChunkEncoderLayer(torch.nn.Module):
         feed_forward: torch.nn.Module,
         feed_forward_macaron: torch.nn.Module,
         conv_mod: torch.nn.Module,
-        norm_class: torch.nn.Module = torch.nn.LayerNorm,
+        norm_class: torch.nn.Module = LayerNorm,
         norm_args: Dict = {},
         dropout_rate: float = 0.0,
     ) -> None:
@@ -1145,7 +1145,7 @@ class ConformerChunkEncoder(AbsEncoder):
             x = x[:,::self.time_reduction_factor,:]
             olens = torch.floor_divide(olens-1, self.time_reduction_factor) + 1
 
-        return x, olens
+        return x, olens, None
 
     def simu_chunk_forward(
         self,
