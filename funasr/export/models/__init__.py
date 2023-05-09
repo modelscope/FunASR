@@ -1,6 +1,8 @@
 from funasr.models.e2e_asr_paraformer import Paraformer, BiCifParaformer
 from funasr.export.models.e2e_asr_paraformer import Paraformer as Paraformer_export
 from funasr.export.models.e2e_asr_paraformer import BiCifParaformer as BiCifParaformer_export
+from funasr.models.e2e_uni_asr import UniASR
+from funasr.export.models.e2e_uni_asr import UniASR as UniASR_export
 from funasr.models.e2e_vad import E2EVadModel
 from funasr.export.models.e2e_vad import E2EVadModel as E2EVadModel_export
 from funasr.models.target_delay_transformer import TargetDelayTransformer
@@ -12,6 +14,8 @@ from funasr.export.models.CT_Transformer import CT_Transformer_VadRealtime as CT
 def get_model(model, export_config=None):
     if isinstance(model, BiCifParaformer):
         return BiCifParaformer_export(model, **export_config)
+    elif isinstance(model, UniASR):
+        return UniASR_export(model, **export_config)
     elif isinstance(model, Paraformer):
         return Paraformer_export(model, **export_config)
     elif isinstance(model, E2EVadModel):

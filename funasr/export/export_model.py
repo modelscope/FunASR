@@ -184,6 +184,7 @@ class ModelExport:
                     mode = config_data['model']['punc_model_config']['mode']
                 else:
                     mode = config_data['model']['model_config']['mode']
+        print(mode)
         if mode.startswith('uniasr'):
             from funasr.tasks.asr import ASRTaskUniASR as ASRTask
             config = os.path.join(model_dir, 'config.yaml')
