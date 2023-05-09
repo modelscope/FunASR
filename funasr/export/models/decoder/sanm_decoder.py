@@ -22,8 +22,7 @@ class FsmnDecoderSCAMAOpt(nn.Module):
                  model_name='decoder',
                  onnx: bool = True,):
         super().__init__()
-        # self.embed = model.embed #Embedding(model.embed, max_seq_len)
-        
+        self.embed = model.embed #Embedding(model.embed, max_seq_len)
         self.model = model
         if onnx:
             self.make_pad_mask = MakePadMask(max_seq_len, flip=False)
@@ -55,9 +54,7 @@ class FsmnDecoderSCAMAOpt(nn.Module):
         self.output_layer = model.output_layer
         self.after_norm = model.after_norm
         self.model_name = model_name
-        vocab_size = 5978
-        attention_dim = 256
-        self.embed = torch.nn.Sequential(torch.nn.Embedding(vocab_size, attention_dim),)
+        
        
     def prepare_mask(self, mask):
         mask_3d_btd = mask[:, :, None]
@@ -94,7 +91,7 @@ class FsmnDecoderSCAMAOpt(nn.Module):
             if tgt_mask.size(1) != memory_mask.size(1):
                 memory_mask = torch.cat((memory_mask, memory_mask[:, -2:-1, :]), dim=1)
         
-        x = self.embed(tgt)
+        x = self.embed(tgt.long())
 
         if pre_acoustic_embeds is not None and self.concat_embeds:
             x = torch.cat((x, pre_acoustic_embeds), dim=-1)
