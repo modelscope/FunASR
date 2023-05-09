@@ -184,6 +184,15 @@ class ModelExport:
                     mode = config_data['model']['punc_model_config']['mode']
                 else:
                     mode = config_data['model']['model_config']['mode']
+        if mode.startswith('uniasr'):
+            from funasr.tasks.asr import ASRTaskParaformer as ASRTask
+            config = os.path.join(model_dir, 'config.yaml')
+            model_file = os.path.join(model_dir, 'model.pb')
+            cmvn_file = os.path.join(model_dir, 'am.mvn')
+            model, asr_train_args = ASRTask.build_model_from_file(
+                config, model_file, cmvn_file, 'cpu'
+            )
+            self.frontend = model.frontend
         if mode.startswith('paraformer'):
             from funasr.tasks.asr import ASRTaskParaformer as ASRTask
             config = os.path.join(model_dir, 'config.yaml')
