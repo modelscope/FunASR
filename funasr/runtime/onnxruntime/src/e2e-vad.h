@@ -442,7 +442,7 @@ private:
         } else {
           data_buf_all_size += waveform.size();
         }
-        for (int offset = 0; offset < waveform.size() - frame_sample_length + 1; offset += frame_shift_length) {
+        for (int offset = 0; offset + frame_sample_length -1 < waveform.size(); offset += frame_shift_length) {
             float sum = 0.0;
             for (int i = 0; i < frame_sample_length; i++) {
                 sum += waveform[offset + i] * waveform[offset + i];
