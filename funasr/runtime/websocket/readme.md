@@ -43,48 +43,39 @@ make
 
 ```shell
 cd bin
-websocketmain  [--model_thread_num <int>] [--decoder_thread_num
-                        <int>] [--io_thread_num <int>] [--port <int>]
-                        [--listen_ip <string>] [--wav-scp <string>]
-                        [--wav-path <string>] [--punc-config <string>]
-                        [--punc-model <string>] --am-config <string>
-                        --am-cmvn <string> --am-model <string>
-                        [--vad-config <string>] [--vad-cmvn <string>]
-                        [--vad-model <string>] [--] [--version] [-h]
+./websocketmain  [--model_thread_num <int>] [--decoder_thread_num <int>]
+                    [--io_thread_num <int>] [--port <int>] [--listen_ip
+                    <string>] [--punc-quant <string>] [--punc-dir <string>]
+                    [--vad-quant <string>] [--vad-dir <string>] [--quantize
+                    <string>] --model-dir <string> [--] [--version] [-h]
 Where:
-   --wav-scp <string>
-     wave scp path
-   --wav-path <string>
-     wave file path
+   --model-dir <string>
+     (required)  the asr model path, which contains model.onnx, config.yaml, am.mvn
+   --quantize <string>
+     false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir
 
-   --punc-config <string>
-     punc config path
-   --punc-model <string>
-     punc model path
+   --vad-dir <string>
+     the vad model path, which contains model.onnx, vad.yaml, vad.mvn
+   --vad-quant <string>
+     false (Default), load the model of model.onnx in vad_dir. If set true, load the model of model_quant.onnx in vad_dir
 
-   --am-config <string>
-     (required)  am config path
-   --am-cmvn <string>
-     (required)  am cmvn path
-   --am-model <string>
-     (required)  am model path
+   --punc-dir <string>
+     the punc model path, which contains model.onnx, punc.yaml
+   --punc-quant <string>
+     false (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir
 
-   --vad-config <string>
-     vad config path
-   --vad-cmvn <string>
-     vad cmvn path
-   --vad-model <string>
-     vad model path
    --decoder_thread_num <int>
-     number of threads for decoder
+     number of threads for decoder, default:8
    --io_thread_num <int>
-     number of threads for network io
+     number of threads for network io, default:8
+   --port <int>
+     listen port, default:8889
   
-   Required: --am-config <string> --am-cmvn <string> --am-model <string> 
-   If use vad, please add: [--vad-config <string>] [--vad-cmvn <string>] [--vad-model <string>]
-   If use punc, please add: [--punc-config <string>] [--punc-model <string>] 
+   Required:  --model-dir <string>
+   If use vad, please add: --vad-dir <string>
+   If use punc, please add: --punc-dir <string>
 example:
-   websocketmain --am-config /FunASR/funasr/runtime/onnxruntime/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/config.yaml --am-model /FunASR/funasr/runtime/onnxruntime/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/model.onnx --am-cmvn /FunASR/funasr/runtime/onnxruntime/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/am.mvn
+   websocketmain --model-dir /FunASR/funasr/runtime/onnxruntime/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
 ```
 
 ## Run websocket client test

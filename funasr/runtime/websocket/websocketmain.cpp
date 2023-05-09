@@ -5,14 +5,11 @@
 /* 2022-2023 by zhaomingwork */
 
 // io server
-// Usage:websocketmain  [--model_thread_num <int>] [--decoder_thread_num
-//                        <int>] [--io_thread_num <int>] [--port <int>]
-//                        [--listen_ip <string>] [--wav-scp <string>]
-//                        [--wav-path <string>] [--punc-config <string>]
-//                        [--punc-model <string>] --am-config <string>
-//                        --am-cmvn <string> --am-model <string>
-//                        [--vad-config <string>] [--vad-cmvn <string>]
-//                        [--vad-model <string>] [--] [--version] [-h]
+// Usage:websocketmain  [--model_thread_num <int>] [--decoder_thread_num <int>]
+//                    [--io_thread_num <int>] [--port <int>] [--listen_ip
+//                    <string>] [--punc-quant <string>] [--punc-dir <string>]
+//                    [--vad-quant <string>] [--vad-dir <string>] [--quantize
+//                    <string>] --model-dir <string> [--] [--version] [-h]
 #include "websocketsrv.h"
 
 using namespace std;
@@ -29,29 +26,33 @@ int main(int argc, char* argv[]) {
     FLAGS_logtostderr = true;
 
     TCLAP::CmdLine cmd("websocketmain", ' ', "1.0");
-    TCLAP::ValueArg<std::string> vad_model("", VAD_MODEL_PATH, "vad model path",
-                                           false, "", "string");
-    TCLAP::ValueArg<std::string> vad_cmvn("", VAD_CMVN_PATH, "vad cmvn path",
-                                          false, "", "string");
-    TCLAP::ValueArg<std::string> vad_config(
-        "", VAD_CONFIG_PATH, "vad config path", false, "", "string");
-
-    TCLAP::ValueArg<std::string> am_model("", AM_MODEL_PATH, "am model path",
-                                          true, "", "string");
-    TCLAP::ValueArg<std::string> am_cmvn("", AM_CMVN_PATH, "am cmvn path", true,
-                                         "", "string");
-    TCLAP::ValueArg<std::string> am_config("", AM_CONFIG_PATH, "am config path",
-                                           true, "", "string");
-
-    TCLAP::ValueArg<std::string> punc_model(
-        "", PUNC_MODEL_PATH, "punc model path", false, "", "string");
-    TCLAP::ValueArg<std::string> punc_config(
-        "", PUNC_CONFIG_PATH, "punc config path", false, "", "string");
-
-    TCLAP::ValueArg<std::string> wav_path("", WAV_PATH, "wave file path", false,
-                                          "", "string");
-    TCLAP::ValueArg<std::string> wav_scp("", WAV_SCP, "wave scp path", false,
-                                         "", "string");
+    TCLAP::ValueArg<std::string> model_dir(
+        "", MODEL_DIR,
+        "the asr model path, which contains model.onnx, config.yaml, am.mvn",
+        true, "", "string");
+    TCLAP::ValueArg<std::string> quantize(
+        "", QUANTIZE,
+        "false (Default), load the model of model.onnx in model_dir. If set "
+        "true, load the model of model_quant.onnx in model_dir",
+        false, "false", "string");
+    TCLAP::ValueArg<std::string> vad_dir(
+        "", VAD_DIR,
+        "the vad model path, which contains model.onnx, vad.yaml, vad.mvn",
+        false, "", "string");
+    TCLAP::ValueArg<std::string> vad_quant(
+        "", VAD_QUANT,
+        "false (Default), load the model of model.onnx in vad_dir. If set "
+        "true, load the model of model_quant.onnx in vad_dir",
+        false, "false", "string");
+    TCLAP::ValueArg<std::string> punc_dir(
+        "", PUNC_DIR,
+        "the punc model path, which contains model.onnx, punc.yaml", false, "",
+        "string");
+    TCLAP::ValueArg<std::string> punc_quant(
+        "", PUNC_QUANT,
+        "false (Default), load the model of model.onnx in punc_dir. If set "
+        "true, load the model of model_quant.onnx in punc_dir",
+        false, "false", "string");
 
     TCLAP::ValueArg<std::string> listen_ip("", "listen_ip", "listen_ip", false,
                                            "0.0.0.0", "string");
@@ -63,16 +64,13 @@ int main(int argc, char* argv[]) {
     TCLAP::ValueArg<int> model_thread_num("", "model_thread_num",
                                           "model_thread_num", false, 1, "int");
 
-    cmd.add(vad_model);
-    cmd.add(vad_cmvn);
-    cmd.add(vad_config);
-    cmd.add(am_model);
-    cmd.add(am_cmvn);
-    cmd.add(am_config);
-    cmd.add(punc_model);
-    cmd.add(punc_config);
-    cmd.add(wav_path);
-    cmd.add(wav_scp);
+    cmd.add(model_dir);
+    cmd.add(quantize);
+    cmd.add(vad_dir);
+    cmd.add(vad_quant);
+    cmd.add(punc_dir);
+    cmd.add(punc_quant);
+
     cmd.add(listen_ip);
     cmd.add(port);
     cmd.add(io_thread_num);
@@ -81,17 +79,12 @@ int main(int argc, char* argv[]) {
     cmd.parse(argc, argv);
 
     std::map<std::string, std::string> model_path;
-    GetValue(vad_model, VAD_MODEL_PATH, model_path);
-    GetValue(vad_cmvn, VAD_CMVN_PATH, model_path);
-    GetValue(vad_config, VAD_CONFIG_PATH, model_path);
-    GetValue(am_model, AM_MODEL_PATH, model_path);
-    GetValue(am_cmvn, AM_CMVN_PATH, model_path);
-    GetValue(am_config, AM_CONFIG_PATH, model_path);
-    GetValue(punc_model, PUNC_MODEL_PATH, model_path);
-    GetValue(punc_config, PUNC_CONFIG_PATH, model_path);
-    GetValue(wav_path, WAV_PATH, model_path);
-    GetValue(wav_scp, WAV_SCP, model_path);
-
+    GetValue(model_dir, MODEL_DIR, model_path);
+    GetValue(quantize, QUANTIZE, model_path);
+    GetValue(vad_dir, VAD_DIR, model_path);
+    GetValue(vad_quant, VAD_QUANT, model_path);
+    GetValue(punc_dir, PUNC_DIR, model_path);
+    GetValue(punc_quant, PUNC_QUANT, model_path);
 
     std::string s_listen_ip = listen_ip.getValue();
     int s_port = port.getValue();
@@ -100,7 +93,6 @@ int main(int argc, char* argv[]) {
 
     int s_model_thread_num = model_thread_num.getValue();
 
- 
     asio::io_context io_decoder;  // context for decoding
 
     std::vector<std::thread> decoder_threads;

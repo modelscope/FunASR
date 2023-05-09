@@ -25,7 +25,7 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
     if (!buffer.empty()) {
       // fout.write(buffer.data(), buffer.size());
       // feed data to asr engine
-      FUNASR_RESULT Result = FunASRRecogPCMBuffer(
+      FUNASR_RESULT Result = FunOfflineRecogPCMBuffer(
           asr_hanlde, buffer.data(), buffer.size(), 16000, RASR_NONE, NULL);
 
       std::string asr_result =
@@ -149,7 +149,7 @@ void WebSocketServer::initAsr(std::map<std::string, std::string>& model_path,
   try {
     // init model with api
 
-    asr_hanlde = FunASRInit(model_path, thread_num);
+    asr_hanlde = FunOfflineInit(model_path, thread_num);
     std::cout << "model ready" << std::endl;
 
   } catch (const std::exception& e) {
