@@ -7,7 +7,7 @@
 """Repeat the same layer definition."""
 
 from typing import Dict, List, Optional
-
+from funasr.modules.layer_norm import LayerNorm
 import torch
 
 
@@ -48,7 +48,7 @@ class MultiBlocks(torch.nn.Module):
         self,
         block_list: List[torch.nn.Module],
         output_size: int,
-        norm_class: torch.nn.Module = torch.nn.LayerNorm,
+        norm_class: torch.nn.Module = LayerNorm,
     ) -> None:
         """Construct a MultiBlocks object."""
         super().__init__()

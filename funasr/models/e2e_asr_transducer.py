@@ -12,7 +12,7 @@ from funasr.models.frontend.abs_frontend import AbsFrontend
 from funasr.models.specaug.abs_specaug import AbsSpecAug
 from funasr.models.decoder.rnnt_decoder import RNNTDecoder
 from funasr.models.decoder.abs_decoder import AbsDecoder as AbsAttDecoder
-from funasr.models.encoder.conformer_encoder import ConformerChunkEncoder as Encoder
+from funasr.models.encoder.abs_encoder import AbsEncoder
 from funasr.models.joint_net.joint_network import JointNetwork
 from funasr.modules.nets_utils import get_transducer_task_io
 from funasr.layers.abs_normalize import AbsNormalize
@@ -62,7 +62,7 @@ class TransducerModel(AbsESPnetModel):
         frontend: Optional[AbsFrontend],
         specaug: Optional[AbsSpecAug],
         normalize: Optional[AbsNormalize],
-        encoder: Encoder,
+        encoder: AbsEncoder,
         decoder: RNNTDecoder,
         joint_network: JointNetwork,
         att_decoder: Optional[AbsAttDecoder] = None,
@@ -286,7 +286,7 @@ class TransducerModel(AbsESPnetModel):
                 feats, feats_lengths = self.normalize(feats, feats_lengths)
 
         # 4. Forward encoder
-        encoder_out, encoder_out_lens = self.encoder(feats, feats_lengths)
+        encoder_out, encoder_out_lens, _ = self.encoder(feats, feats_lengths)
 
         assert encoder_out.size(0) == speech.size(0), (
             encoder_out.size(),
@@ -515,7 +515,7 @@ class UnifiedTransducerModel(AbsESPnetModel):
         frontend: Optional[AbsFrontend],
         specaug: Optional[AbsSpecAug],
         normalize: Optional[AbsNormalize],
-        encoder: Encoder,
+        encoder: AbsEncoder,
         decoder: RNNTDecoder,
         joint_network: JointNetwork,
         att_decoder: Optional[AbsAttDecoder] = None,
