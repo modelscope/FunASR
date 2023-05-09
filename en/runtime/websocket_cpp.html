@@ -196,48 +196,39 @@ make
 <div class="section" id="run-the-websocket-server">
 <h2>Run the websocket server<a class="headerlink" href="#run-the-websocket-server" title="Permalink to this headline"></a></h2>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> bin
-websocketmain  <span class="o">[</span>--model_thread_num &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--decoder_thread_num
-                        &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--io_thread_num &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--port &lt;int&gt;<span class="o">]</span>
-                        <span class="o">[</span>--listen_ip &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--wav-scp &lt;string&gt;<span class="o">]</span>
-                        <span class="o">[</span>--wav-path &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-config &lt;string&gt;<span class="o">]</span>
-                        <span class="o">[</span>--punc-model &lt;string&gt;<span class="o">]</span> --am-config &lt;string&gt;
-                        --am-cmvn &lt;string&gt; --am-model &lt;string&gt;
-                        <span class="o">[</span>--vad-config &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--vad-cmvn &lt;string&gt;<span class="o">]</span>
-                        <span class="o">[</span>--vad-model &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--<span class="o">]</span> <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
+./websocketmain  <span class="o">[</span>--model_thread_num &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--decoder_thread_num &lt;int&gt;<span class="o">]</span>
+                    <span class="o">[</span>--io_thread_num &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--port &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--listen_ip
+                    &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-quant &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-dir &lt;string&gt;<span class="o">]</span>
+                    <span class="o">[</span>--vad-quant &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--vad-dir &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--quantize
+                    &lt;string&gt;<span class="o">]</span> --model-dir &lt;string&gt; <span class="o">[</span>--<span class="o">]</span> <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
 Where:
-   --wav-scp &lt;string&gt;
-     wave scp path
-   --wav-path &lt;string&gt;
-     wave file path
+   --model-dir &lt;string&gt;
+     <span class="o">(</span>required<span class="o">)</span>  the asr model path, which contains model.onnx, config.yaml, am.mvn
+   --quantize &lt;string&gt;
+     <span class="nb">false</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in model_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in model_dir
 
-   --punc-config &lt;string&gt;
-     punc config path
-   --punc-model &lt;string&gt;
-     punc model path
+   --vad-dir &lt;string&gt;
+     the vad model path, which contains model.onnx, vad.yaml, vad.mvn
+   --vad-quant &lt;string&gt;
+     <span class="nb">false</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in vad_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in vad_dir
 
-   --am-config &lt;string&gt;
-     <span class="o">(</span>required<span class="o">)</span>  am config path
-   --am-cmvn &lt;string&gt;
-     <span class="o">(</span>required<span class="o">)</span>  am cmvn path
-   --am-model &lt;string&gt;
-     <span class="o">(</span>required<span class="o">)</span>  am model path
+   --punc-dir &lt;string&gt;
+     the punc model path, which contains model.onnx, punc.yaml
+   --punc-quant &lt;string&gt;
+     <span class="nb">false</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in punc_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in punc_dir
 
-   --vad-config &lt;string&gt;
-     vad config path
-   --vad-cmvn &lt;string&gt;
-     vad cmvn path
-   --vad-model &lt;string&gt;
-     vad model path
    --decoder_thread_num &lt;int&gt;
-     number of threads <span class="k">for</span> decoder
+     number of threads <span class="k">for</span> decoder, default:8
    --io_thread_num &lt;int&gt;
-     number of threads <span class="k">for</span> network io
+     number of threads <span class="k">for</span> network io, default:8
+   --port &lt;int&gt;
+     listen port, default:8889
   
-   Required: --am-config &lt;string&gt; --am-cmvn &lt;string&gt; --am-model &lt;string&gt; 
-   If use vad, please add: <span class="o">[</span>--vad-config &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--vad-cmvn &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--vad-model &lt;string&gt;<span class="o">]</span>
-   If use punc, please add: <span class="o">[</span>--punc-config &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-model &lt;string&gt;<span class="o">]</span> 
+   Required:  --model-dir &lt;string&gt;
+   If use vad, please add: --vad-dir &lt;string&gt;
+   If use punc, please add: --punc-dir &lt;string&gt;
 example:
-   websocketmain --am-config /FunASR/funasr/runtime/onnxruntime/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/config.yaml --am-model /FunASR/funasr/runtime/onnxruntime/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/model.onnx --am-cmvn /FunASR/funasr/runtime/onnxruntime/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/am.mvn
+   websocketmain --model-dir /FunASR/funasr/runtime/onnxruntime/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
 </pre></div>
 </div>
 </div>
