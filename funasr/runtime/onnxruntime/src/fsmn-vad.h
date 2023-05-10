@@ -36,7 +36,7 @@ private:
     void FbankKaldi(float sample_rate, std::vector<std::vector<float>> &vad_feats,
                     const std::vector<float> &waves);
 
-    std::vector<std::vector<float>> &LfrCmvn(std::vector<std::vector<float>> &vad_feats);
+    void LfrCmvn(std::vector<std::vector<float>> &vad_feats);
 
     void Forward(
             const std::vector<std::vector<float>> &chunk_feats,
