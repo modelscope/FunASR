@@ -607,75 +607,84 @@ def inference_modelscope(
             assert len(keys) == _bs, f"{len(keys)} != {_bs}"
 
             vad_results = speech2vadsegment(**batch)
-            _, vadsegments = vad_results[0], vad_results[1]
+            _, vadsegments = vad_results[0], vad_results[1][0]
+            
             speech, speech_lengths = batch["speech"],  batch["speech_lengths"]
-            for i, segments in enumerate(vadsegments):
-                result_segments = [["", [], [], []]]
-                # for j, segment_idx in enumerate(segments):
-                for j, beg_idx in enumerate(range(0, len(segments), batch_size)):
-                    end_idx = min(len(segments), beg_idx + batch_size)
-                    speech_j, speech_lengths_j = slice_padding_fbank(speech, speech_lengths, segments[beg_idx:end_idx])
 
-                    batch = {"speech": speech_j, "speech_lengths": speech_lengths_j}
-                    batch = to_device(batch, device=device)
-                    results = speech2text(**batch)
-                    if len(results) < 1:
-                        continue
+            n = len(vadsegments)
+            data_with_index = [(vadsegments[i], i) for i in range(n)]
+            sorted_data = sorted(data_with_index, key=lambda x: x[0][1] - x[0][0])
+            results_sorted = []
+            for j, beg_idx in enumerate(range(0, n, batch_size)):
+                end_idx = min(n, beg_idx + batch_size)
+                speech_j, speech_lengths_j = slice_padding_fbank(speech, speech_lengths, sorted_data[beg_idx:end_idx])
 
-                    result_cur = [results[0][:-2]]
-                    if j == 0:
-                        result_segments = result_cur
-                    else:
-                        result_segments = [
-                            [result_segments[0][i] + result_cur[0][i] for i in range(len(result_cur[0]))]]
+                batch = {"speech": speech_j, "speech_lengths": speech_lengths_j}
+                batch = to_device(batch, device=device)
+                results = speech2text(**batch)
+                
+                if len(results) < 1:
+                    results = [["", [], [], [], [], [], []]]
+                results_sorted.extend(results)
+            restored_data = [0] * n
+            for j in range(n):
+                index = sorted_data[j][1]
+                restored_data[index] = results_sorted[j]
+            result = ["", [], [], [], [], [], []]
+            for j in range(n):
+                result[0] += restored_data[j][0]
+                result[1] += restored_data[j][1]
+                result[2] += restored_data[j][2]
+                result[4] += restored_data[j][4]
+                # result = [result[k]+restored_data[j][k] for k in range(len(result[:-2]))]
 
-                key = keys[0]
-                result = result_segments[0]
-                text, token, token_int, hyp = result[0], result[1], result[2], result[3]
-                time_stamp = None if len(result) < 5 else result[4]
+            key = keys[0]
+            # result = result_segments[0]
+            text, token, token_int = result[0], result[1], result[2]
+            time_stamp = None if len(result) < 5 else result[4]
 
 
-                if use_timestamp and time_stamp is not None: 
-                    postprocessed_result = postprocess_utils.sentence_postprocess(token, time_stamp)
-                else:
-                    postprocessed_result = postprocess_utils.sentence_postprocess(token)
-                text_postprocessed = ""
-                time_stamp_postprocessed = ""
-                text_postprocessed_punc = postprocessed_result
-                if len(postprocessed_result) == 3:
-                    text_postprocessed, time_stamp_postprocessed, word_lists = postprocessed_result[0], \
-                                                                               postprocessed_result[1], \
-                                                                               postprocessed_result[2]
-                else:
-                    text_postprocessed, word_lists = postprocessed_result[0], postprocessed_result[1]
+            if use_timestamp and time_stamp is not None:
+                postprocessed_result = postprocess_utils.sentence_postprocess(token, time_stamp)
+            else:
+                postprocessed_result = postprocess_utils.sentence_postprocess(token)
+            text_postprocessed = ""
+            time_stamp_postprocessed = ""
+            text_postprocessed_punc = postprocessed_result
+            if len(postprocessed_result) == 3:
+                text_postprocessed, time_stamp_postprocessed, word_lists = postprocessed_result[0], \
+                                                                           postprocessed_result[1], \
+                                                                           postprocessed_result[2]
+            else:
+                text_postprocessed, word_lists = postprocessed_result[0], postprocessed_result[1]
 
-                text_postprocessed_punc = text_postprocessed
-                punc_id_list = []
-                if len(word_lists) > 0 and text2punc is not None:
-                    text_postprocessed_punc, punc_id_list = text2punc(word_lists, 20)
+            text_postprocessed_punc = text_postprocessed
+            punc_id_list = []
+            if len(word_lists) > 0 and text2punc is not None:
+                text_postprocessed_punc, punc_id_list = text2punc(word_lists, 20)
 
-                item = {'key': key, 'value': text_postprocessed_punc}
-                if text_postprocessed != "":
-                    item['text_postprocessed'] = text_postprocessed
-                if time_stamp_postprocessed != "":
-                    item['time_stamp'] = time_stamp_postprocessed
+            item = {'key': key, 'value': text_postprocessed_punc}
+            if text_postprocessed != "":
+                item['text_postprocessed'] = text_postprocessed
+            if time_stamp_postprocessed != "":
+                item['time_stamp'] = time_stamp_postprocessed
 
-                item['sentences'] = time_stamp_sentence(punc_id_list, time_stamp_postprocessed, text_postprocessed)
+            item['sentences'] = time_stamp_sentence(punc_id_list, time_stamp_postprocessed, text_postprocessed)
 
-                asr_result_list.append(item)
-                finish_count += 1
-                # asr_utils.print_progress(finish_count / file_count)
-                if writer is not None:
-                    # Write the result to each file
-                    ibest_writer["token"][key] = " ".join(token)
-                    ibest_writer["token_int"][key] = " ".join(map(str, token_int))
-                    ibest_writer["vad"][key] = "{}".format(vadsegments)
-                    ibest_writer["text"][key] = " ".join(word_lists)
-                    ibest_writer["text_with_punc"][key] = text_postprocessed_punc
-                    if time_stamp_postprocessed is not None:
-                        ibest_writer["time_stamp"][key] = "{}".format(time_stamp_postprocessed)
+            asr_result_list.append(item)
+            finish_count += 1
+            # asr_utils.print_progress(finish_count / file_count)
+            if writer is not None:
+                # Write the result to each file
+                ibest_writer["token"][key] = " ".join(token)
+                ibest_writer["token_int"][key] = " ".join(map(str, token_int))
+                ibest_writer["vad"][key] = "{}".format(vadsegments)
+                ibest_writer["text"][key] = " ".join(word_lists)
+                ibest_writer["text_with_punc"][key] = text_postprocessed_punc
+                if time_stamp_postprocessed is not None:
+                    ibest_writer["time_stamp"][key] = "{}".format(time_stamp_postprocessed)
 
-                logging.info("decoding, utt: {}, predictions: {}".format(key, text_postprocessed_punc))
+            logging.info("decoding, utt: {}, predictions: {}".format(key, text_postprocessed_punc))
         return asr_result_list
 
     return _forward
