@@ -19,8 +19,8 @@ lang=en
 token_type=bpe
 type=sound
 scp=wav.scp
-stage=1
-stop_stage=1
+stage=0
+stop_stage=0
 
 # feature configuration
 feats_dim=80
@@ -80,7 +80,7 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     echo "stage 0: Data preparation"
     # Data preparation
     for x in train-clean-100 train-clean-360 train-other-500 dev-clean dev-other test-clean test-other; do
-        local/data_prep_librispeech.sh ${data_librispeech}/LibriSpeech/${x} ${feats_dir}/data/${x//-/_}
+        local/data_prep_librispeech.sh ${raw_data}/LibriSpeech/${x} ${feats_dir}/data/${x//-/_}
     done
 fi
 
