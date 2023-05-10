@@ -29,19 +29,11 @@ mkdir -p $dst || exit 1
 
 wav_scp=$dst/wav.scp; [[ -f "$wav_scp" ]] && rm $wav_scp
 trans=$dst/text; [[ -f "$trans" ]] && rm $trans
-utt2spk=$dst/utt2spk; [[ -f "$utt2spk" ]] && rm $utt2spk
-spk2gender=$dst/spk2gender; [[ -f $spk2gender ]] && rm $spk2gender
 
 for reader_dir in $(find -L $src -mindepth 1 -maxdepth 1 -type d | sort); do
   reader=$(basename $reader_dir)
   if ! [ $reader -eq $reader ]; then  # not integer.
     echo "$0: unexpected subdirectory name $reader"
-    exit 1
-  fi
-
-  reader_gender=$(egrep "^$reader[ ]+\|" $spk_file | awk -F'|' '{gsub(/[ ]+/, ""); print tolower($2)}')
-  if [ "$reader_gender" != 'm' ] && [ "$reader_gender" != 'f' ]; then
-    echo "Unexpected gender: '$reader_gender'"
     exit 1
   fi
 
@@ -53,32 +45,13 @@ for reader_dir in $(find -L $src -mindepth 1 -maxdepth 1 -type d | sort); do
     fi
 
     find -L $chapter_dir/ -iname "*.flac" | sort | xargs -I% basename % .flac | \
-      awk -v "dir=$chapter_dir" '{printf "%s flac -c -d -s %s/%s.flac |\n", $0, dir, $0}' >>$wav_scp|| exit 1
+      awk -v "dir=$chapter_dir" '{printf "%s %s/%s.flac \n", $0, dir, $0}' >>$wav_scp|| exit 1
 
     chapter_trans=$chapter_dir/${reader}-${chapter}.trans.txt
     [ ! -f  $chapter_trans ] && echo "$0: expected file $chapter_trans to exist" && exit 1
     cat $chapter_trans >>$trans
-
-    # NOTE: For now we are using per-chapter utt2spk. That is each chapter is considered
-    #       to be a different speaker. This is done for simplicity and because we want
-    #       e.g. the CMVN to be calculated per-chapter
-    awk -v "reader=$reader" -v "chapter=$chapter" '{printf "%s %s-%s\n", $1, reader, chapter}' \
-      <$chapter_trans >>$utt2spk || exit 1
-
-    # reader -> gender map (again using per-chapter granularity)
-    echo "${reader}-${chapter} $reader_gender" >>$spk2gender
   done
 done
-
-spk2utt=$dst/spk2utt
-utils/utt2spk_to_spk2utt.pl <$utt2spk >$spk2utt || exit 1
-
-ntrans=$(wc -l <$trans)
-nutt2spk=$(wc -l <$utt2spk)
-! [ "$ntrans" -eq "$nutt2spk" ] && \
-  echo "Inconsistent #transcripts($ntrans) and #utt2spk($nutt2spk)" && exit 1
-
-utils/validate_data_dir.sh --no-feats $dst || exit 1
 
 echo "$0: successfully prepared data in $dst"
 
