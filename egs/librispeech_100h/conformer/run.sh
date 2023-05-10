@@ -27,7 +27,7 @@ feats_dim=80
 nj=64
 
 # data
-raw_data=
+raw_data=/nfs/wangjiaming.wjm/librispeech
 data_url=www.openslr.org/resources/12
 
 # bpe model
