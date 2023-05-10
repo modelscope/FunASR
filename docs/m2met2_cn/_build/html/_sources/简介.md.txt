@@ -1,5 +1,6 @@
 # 简介
 ## 竞赛介绍
+
 语音识别（Automatic Speech Recognition）、说话人日志（Speaker Diarization）等语音处理技术的最新发展激发了众多智能语音的广泛应用。然而会议场景由于其复杂的声学条件和不同的讲话风格，包括重叠的讲话、不同数量的发言者、大会议室的远场信号以及环境噪声和混响，仍然属于一项极具挑战性的任务。
 
 为了推动会议场景语音识别的发展，已经有很多相关的挑战赛，如 Rich Transcription evaluation 和 CHIME（Computational Hearing in Multisource Environments） 挑战赛。最新的CHIME挑战赛关注于远距离自动语音识别和开发能在各种不同拓扑结构的阵列和应用场景中通用的系统。然而不同语言之间的差异限制了非英语会议转录的进展。MISP（Multimodal Information Based Speech Processing）和M2MeT（Multi-Channel Multi-Party Meeting Transcription）挑战赛为推动普通话会议场景语音识别做出了贡献。MISP挑战赛侧重于用视听多模态的方法解决日常家庭环境中的远距离多麦克风信号处理问题，而M2MeT挑战则侧重于解决离线会议室中会议转录的语音重叠问题。
@@ -14,18 +15,18 @@ IASSP2022 M2MeT挑战的侧重点是会议场景，它包括两个赛道：说�
 ## 时间安排(AOE时间)
 
 - $ 2023.4.29: $ 开放注册
-- $ 2023.5.8: $ 基线发布
-- $ 2023.5.15: $ 注册截止
-- $ 2023.6.9: $ 测试集数据发布
-- $ 2023.6.13: $ 最终结果提交截止
-- $ 2023.6.19: $ 评估结果和排名发布
-- $ 2023.7.3: $ 论文提交截止
-- $ 2023.7.10: $ 最终版论文提交截止
-- $ 2023.12.12: $ ASRU Workshop & challenge session
+- $ 2023.5.11: $ 基线发布
+- $ 2023.5.22: $ 注册截止
+- $ 2023.6.16: $ 测试集数据发布，排行榜开放
+- $ 2023.6.20: $ 最终结果提交截止，排行榜关闭
+- $ 2023.6.26: $ 评估结果和排名发布
+- $ 2023.7.3: $ 论文提交截止（通过ASRU2023官方投稿，选择竞赛Session）
+- $ 2023.7.10: $ 最终版论文提交截止（通过ASRU2023官方投稿，选择竞赛Session）
+- $ 2023.12.12: $ ASRU Workshop & Challenge Session
 
 ## 竞赛报名
 
-来自学术界和工业界的有意向参赛者均应在2023年5月15日及之前填写下方的谷歌表单：
+来自学术界和工业界的有意向参赛者均应在2023年5月22日及之前填写下方的谷歌表单。同时欢迎广大参赛者加入[官方交流微信群](https://alibaba-damo-academy.github.io/FunASR/m2met2_cn/%E8%81%94%E7%B3%BB%E6%96%B9%E5%BC%8F.html)交流并及时获取竞赛最新消息：
 
 [M2MET2.0报名](https://docs.google.com/forms/d/e/1FAIpQLSf77T9vAl7Ym-u5g8gXu18SBofoWRaFShBo26Ym0-HDxHW9PQ/viewform?usp=sf_link)
 
