@@ -260,7 +260,7 @@ asr_example2  ./audios/asr_example2.wav
 <div class="section" id="decode-with-multi-gpus">
 <h4>Decode with multi GPUs:<a class="headerlink" href="#decode-with-multi-gpus" title="Permalink to this headline"></a></h4>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>    bash infer.sh <span class="se">\</span>
-    --model <span class="s2">&quot;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&quot;</span> <span class="se">\</span>
+    --model <span class="s2">&quot;damo/speech_fsmn_vad_zh-cn-16k-common-pytorch&quot;</span> <span class="se">\</span>
     --data_dir <span class="s2">&quot;./data/test&quot;</span> <span class="se">\</span>
     --output_dir <span class="s2">&quot;./results&quot;</span> <span class="se">\</span>
     --batch_size <span class="m">1</span> <span class="se">\</span>
@@ -272,11 +272,11 @@ asr_example2  ./audios/asr_example2.wav
 <div class="section" id="decode-with-multi-thread-cpus">
 <h4>Decode with multi-thread CPUs:<a class="headerlink" href="#decode-with-multi-thread-cpus" title="Permalink to this headline"></a></h4>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>    bash infer.sh <span class="se">\</span>
-    --model <span class="s2">&quot;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&quot;</span> <span class="se">\</span>
+    --model <span class="s2">&quot;damo/speech_fsmn_vad_zh-cn-16k-common-pytorch&quot;</span> <span class="se">\</span>
     --data_dir <span class="s2">&quot;./data/test&quot;</span> <span class="se">\</span>
     --output_dir <span class="s2">&quot;./results&quot;</span> <span class="se">\</span>
     --gpu_inference <span class="nb">false</span> <span class="se">\</span>
-    --njob <span class="m">1</span>
+    --njob <span class="m">64</span>
 </pre></div>
 </div>
 </div>

@@ -202,11 +202,10 @@ make
 <h2>Run the demo<a class="headerlink" href="#run-the-demo" title="Permalink to this headline"></a></h2>
 <div class="section" id="funasr-onnx-offline">
 <h3>funasr-onnx-offline<a class="headerlink" href="#funasr-onnx-offline" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-onnx-offline     <span class="o">[</span>--wav-scp &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--wav-path &lt;string&gt;<span class="o">]</span>
-                          <span class="o">[</span>--punc-quant &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-dir &lt;string&gt;<span class="o">]</span>
-                          <span class="o">[</span>--vad-quant &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--vad-dir &lt;string&gt;<span class="o">]</span>
-                          <span class="o">[</span>--quantize &lt;string&gt;<span class="o">]</span> --model-dir &lt;string&gt;
-                          <span class="o">[</span>--<span class="o">]</span> <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-onnx-offline     --model-dir &lt;string&gt; <span class="o">[</span>--quantize &lt;string&gt;<span class="o">]</span>
+                          <span class="o">[</span>--vad-dir &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--vad-quant &lt;string&gt;<span class="o">]</span>
+                          <span class="o">[</span>--punc-dir &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-quant &lt;string&gt;<span class="o">]</span>
+                          --wav-path &lt;string&gt; <span class="o">[</span>--<span class="o">]</span> <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
 Where:
    --model-dir &lt;string&gt;
      <span class="o">(</span>required<span class="o">)</span>  the asr model path, which contains model.onnx, config.yaml, am.mvn
@@ -223,12 +222,13 @@ Where:
    --punc-quant &lt;string&gt;
      <span class="nb">false</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in punc_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in punc_dir
 
-   --wav-scp &lt;string&gt;
-     wave scp path
    --wav-path &lt;string&gt;
-     wave file path
+     <span class="o">(</span>required<span class="o">)</span>  the input could be: 
+      wav_path, e.g.: asr_example.wav<span class="p">;</span>
+      pcm_path, e.g.: asr_example.pcm<span class="p">;</span> 
+      wav.scp, kaldi style wav list <span class="o">(</span>wav_id <span class="se">\t</span> wav_path<span class="o">)</span>
   
-   Required: --model-dir &lt;string&gt;
+   Required: --model-dir &lt;string&gt; --wav-path &lt;string&gt;
    If use vad, please add: --vad-dir &lt;string&gt;
    If use punc, please add: --punc-dir &lt;string&gt;
 
@@ -244,20 +244,20 @@ For example:
 </div>
 <div class="section" id="funasr-onnx-offline-vad">
 <h3>funasr-onnx-offline-vad<a class="headerlink" href="#funasr-onnx-offline-vad" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-onnx-offline-vad     <span class="o">[</span>--wav-scp &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--wav-path &lt;string&gt;<span class="o">]</span>
-                              <span class="o">[</span>--quantize &lt;string&gt;<span class="o">]</span> --model-dir &lt;string&gt;
-                              <span class="o">[</span>--<span class="o">]</span> <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-onnx-offline-vad     --model-dir &lt;string&gt; <span class="o">[</span>--quantize &lt;string&gt;<span class="o">]</span>
+                              --wav-path &lt;string&gt; <span class="o">[</span>--<span class="o">]</span> <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
 Where:
    --model-dir &lt;string&gt;
      <span class="o">(</span>required<span class="o">)</span>  the vad model path, which contains model.onnx, vad.yaml, vad.mvn
    --quantize &lt;string&gt;
      <span class="nb">false</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in model_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in model_dir
-   --wav-scp &lt;string&gt;
-     wave scp path
    --wav-path &lt;string&gt;
-     wave file path
+     <span class="o">(</span>required<span class="o">)</span>  the input could be: 
+      wav_path, e.g.: asr_example.wav<span class="p">;</span>
+      pcm_path, e.g.: asr_example.pcm<span class="p">;</span> 
+      wav.scp, kaldi style wav list <span class="o">(</span>wav_id <span class="se">\t</span> wav_path<span class="o">)</span>
 
-   Required: --model-dir &lt;string&gt;
+   Required: --model-dir &lt;string&gt; --wav-path &lt;string&gt;
 
 For example:
 ./funasr-onnx-offline-vad <span class="se">\</span>
@@ -268,17 +268,17 @@ For example:
 </div>
 <div class="section" id="funasr-onnx-offline-punc">
 <h3>funasr-onnx-offline-punc<a class="headerlink" href="#funasr-onnx-offline-punc" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-onnx-offline-punc    <span class="o">[</span>--txt-path &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--quantize &lt;string&gt;<span class="o">]</span>
-                               --model-dir &lt;string&gt; <span class="o">[</span>--<span class="o">]</span> <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-onnx-offline-punc    --model-dir &lt;string&gt; <span class="o">[</span>--quantize &lt;string&gt;<span class="o">]</span>
+                              --txt-path &lt;string&gt; <span class="o">[</span>--<span class="o">]</span> <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
 Where:
    --model-dir &lt;string&gt;
      <span class="o">(</span>required<span class="o">)</span>  the punc model path, which contains model.onnx, punc.yaml
    --quantize &lt;string&gt;
      <span class="nb">false</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in model_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in model_dir
    --txt-path &lt;string&gt;
-     txt file path, one sentence per line
+     <span class="o">(</span>required<span class="o">)</span>  txt file path, one sentence per line
 
-   Required: --model-dir &lt;string&gt;
+   Required: --model-dir &lt;string&gt; --txt-path &lt;string&gt;
 
 For example:
 ./funasr-onnx-offline-punc <span class="se">\</span>
@@ -289,8 +289,8 @@ For example:
 </div>
 <div class="section" id="funasr-onnx-offline-rtf">
 <h3>funasr-onnx-offline-rtf<a class="headerlink" href="#funasr-onnx-offline-rtf" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-onnx-offline-rtf     --thread-num &lt;int32_t&gt; --wav-scp &lt;string&gt;
-                              <span class="o">[</span>--quantize &lt;string&gt;<span class="o">]</span> --model-dir &lt;string&gt;
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-onnx-offline-rtf     --model-dir &lt;string&gt; <span class="o">[</span>--quantize &lt;string&gt;<span class="o">]</span>
+                              --wav-path &lt;string&gt; --thread-num &lt;int32_t&gt;
                               <span class="o">[</span>--<span class="o">]</span> <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
 Where:
    --thread-num &lt;int32_t&gt;
@@ -299,8 +299,11 @@ Where:
      <span class="o">(</span>required<span class="o">)</span>  the model path, which contains model.onnx, config.yaml, am.mvn
    --quantize &lt;string&gt;
      <span class="nb">false</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in model_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in model_dir
-   --wav-scp &lt;string&gt;
-     <span class="o">(</span>required<span class="o">)</span>  wave scp path
+   --wav-path &lt;string&gt;
+     <span class="o">(</span>required<span class="o">)</span>  the input could be: 
+      wav_path, e.g.: asr_example.wav<span class="p">;</span>
+      pcm_path, e.g.: asr_example.pcm<span class="p">;</span> 
+      wav.scp, kaldi style wav list <span class="o">(</span>wav_id <span class="se">\t</span> wav_path<span class="o">)</span>
 
 For example:
 ./funasr-onnx-offline-rtf <span class="se">\</span>

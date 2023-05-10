@@ -15,7 +15,7 @@
   <link rel="stylesheet" type="text/css" href="_static/css/bootstrap-theme.min.css" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-    <title>Baseline &#8212; MULTI-PARTY MEETING TRANSCRIPTION CHALLENGE 2.0</title>
+    <title>Baseline &#8212; m2met2  documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/guzzle.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="Track_setting_and_evaluation.html" title="Track &amp; Evaluation"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">MULTI-PARTY MEETING TRANSCRIPTION CHALLENGE 2.0</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">m2met2  documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Baseline</a></li> 
       </ul>
     </div>
@@ -55,7 +55,7 @@
       </div>
   <div id="left-column">
     <div class="sphinxsidebar"><a href="
-    index.html" class="text-logo">MULTI-PARTY MEETING TRANSCRIPTION CHALLENGE 2.0</a>
+    index.html" class="text-logo">m2met2  documentation</a>
 <div class="sidebar-block">
   <div class="sidebar-wrapper">
     <div id="main-search">
@@ -126,33 +126,12 @@
 <h1>Baseline<a class="headerlink" href="#baseline" title="Permalink to this heading">¶</a></h1>
 <section id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Permalink to this heading">¶</a></h2>
-<p>We will release an E2E SA-ASR baseline conducted on <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR">FunASR</a> at the time according to the timeline. The model architecture is shown in Figure 3. The SpeakerEncoder is initialized with a pre-trained speaker verification model from ModelScope. This speaker verification model is also be used to extract the speaker embedding in the speaker profile.</p>
+<p>We will release an E2E SA-ASR~\cite{kanda21b_interspeech} baseline conducted on <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR">FunASR</a> at the time according to the timeline. The model architecture is shown in Figure 3. The SpeakerEncoder is initialized with a pre-trained speaker verification model from ModelScope. This speaker verification model is also be used to extract the speaker embedding in the speaker profile.</p>
 <p><img alt="model archietecture" src="_images/sa_asr_arch.png" /></p>
 </section>
 <section id="quick-start">
 <h2>Quick start<a class="headerlink" href="#quick-start" title="Permalink to this heading">¶</a></h2>
-<p>To run the baseline, first you need to install FunASR and ModelScope. (<a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/installation.html">installation</a>)<br />
-There are two startup scripts, <code class="docutils literal notranslate"><span class="pre">run.sh</span></code> for training and evaluating on the old eval and test sets, and <code class="docutils literal notranslate"><span class="pre">run_m2met_2023_infer.sh</span></code> for inference on the new test set of the Multi-Channel Multi-Party Meeting Transcription 2.0 (<a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/m2met2/index.html">M2MeT2.0</a>) Challenge.<br />
-Before running <code class="docutils literal notranslate"><span class="pre">run.sh</span></code>, you must manually download and unpack the <a class="reference external" href="http://www.openslr.org/119/">AliMeeting</a> corpus and place it in the <code class="docutils literal notranslate"><span class="pre">./dataset</span></code> directory:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>dataset
-<span class="p">|</span>——<span class="w"> </span>Eval_Ali_far
-<span class="p">|</span>——<span class="w"> </span>Eval_Ali_near
-<span class="p">|</span>——<span class="w"> </span>Test_Ali_far
-<span class="p">|</span>——<span class="w"> </span>Test_Ali_near
-<span class="p">|</span>——<span class="w"> </span>Train_Ali_far
-<span class="p">|</span>——<span class="w"> </span>Train_Ali_near
-</pre></div>
-</div>
-<p>Before running <code class="docutils literal notranslate"><span class="pre">run_m2met_2023_infer.sh</span></code>, you need to place the new test set <code class="docutils literal notranslate"><span class="pre">Test_2023_Ali_far</span></code> (to be released after the challenge starts) in the <code class="docutils literal notranslate"><span class="pre">./dataset</span></code> directory, which contains only raw audios. Then put the given <code class="docutils literal notranslate"><span class="pre">wav.scp</span></code>, <code class="docutils literal notranslate"><span class="pre">wav_raw.scp</span></code>, <code class="docutils literal notranslate"><span class="pre">segments</span></code>, <code class="docutils literal notranslate"><span class="pre">utt2spk</span></code> and <code class="docutils literal notranslate"><span class="pre">spk2utt</span></code> in the <code class="docutils literal notranslate"><span class="pre">./data/Test_2023_Ali_far</span></code> directory.</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>data/Test_2023_Ali_far
-<span class="p">|</span>——<span class="w"> </span>wav.scp
-<span class="p">|</span>——<span class="w"> </span>wav_raw.scp
-<span class="p">|</span>——<span class="w"> </span>segments
-<span class="p">|</span>——<span class="w"> </span>utt2spk
-<span class="p">|</span>——<span class="w"> </span>spk2utt
-</pre></div>
-</div>
-<p>For more details you can see <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/egs/alimeeting/sa-asr/README.md">here</a></p>
+<p>#TODO: fill with the README.md of the baseline</p>
 </section>
 <section id="baseline-results">
 <h2>Baseline results<a class="headerlink" href="#baseline-results" title="Permalink to this heading">¶</a></h2>
@@ -191,7 +170,7 @@ Before running <code class="docutils literal notranslate"><span class="pre">run.
         <li class="right" >
           <a href="Track_setting_and_evaluation.html" title="Track &amp; Evaluation"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">MULTI-PARTY MEETING TRANSCRIPTION CHALLENGE 2.0</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">m2met2  documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Baseline</a></li> 
       </ul>
     </div>
