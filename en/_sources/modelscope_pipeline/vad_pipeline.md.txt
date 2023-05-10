@@ -97,7 +97,7 @@ FunASR also offer recipes [egs_modelscope/vad/TEMPLATE/infer.sh](https://github.
     --data_dir "./data/test" \
     --output_dir "./results" \
     --gpu_inference false \
-    --njob 1
+    --njob 64
 ```
 
 ## Finetune with pipeline
