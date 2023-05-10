@@ -83,7 +83,7 @@ FunASR also offer recipes [egs_modelscope/vad/TEMPLATE/infer.sh](https://github.
 #### Decode with multi GPUs:
 ```shell
     bash infer.sh \
-    --model "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch" \
+    --model "damo/speech_fsmn_vad_zh-cn-16k-common-pytorch" \
     --data_dir "./data/test" \
     --output_dir "./results" \
     --batch_size 1 \
@@ -93,7 +93,7 @@ FunASR also offer recipes [egs_modelscope/vad/TEMPLATE/infer.sh](https://github.
 #### Decode with multi-thread CPUs:
 ```shell
     bash infer.sh \
-    --model "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch" \
+    --model "damo/speech_fsmn_vad_zh-cn-16k-common-pytorch" \
     --data_dir "./data/test" \
     --output_dir "./results" \
     --gpu_inference false \

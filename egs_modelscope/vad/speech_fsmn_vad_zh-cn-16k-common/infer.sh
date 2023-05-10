@@ -1,1 +1,1 @@
-../../TEMPLATE/infer.sh
+../TEMPLATE/infer.sh
