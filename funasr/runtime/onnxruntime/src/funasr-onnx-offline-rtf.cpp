@@ -10,7 +10,7 @@
 #endif
 
 #include <glog/logging.h>
-#include "libfunasrapi.h"
+#include "funasrruntime.h"
 #include "tclap/CmdLine.h"
 #include "com-define.h"
 
@@ -91,41 +91,21 @@ int main(int argc, char *argv[])
     FLAGS_logtostderr = true;
 
     TCLAP::CmdLine cmd("funasr-onnx-offline-rtf", ' ', "1.0");
-    TCLAP::ValueArg<std::string> vad_model("", VAD_MODEL_PATH, "vad model path", false, "", "string");
-    TCLAP::ValueArg<std::string> vad_cmvn("", VAD_CMVN_PATH, "vad cmvn path", false, "", "string");
-    TCLAP::ValueArg<std::string> vad_config("", VAD_CONFIG_PATH, "vad config path", false, "", "string");
-
-    TCLAP::ValueArg<std::string> am_model("", AM_MODEL_PATH, "am model path", false, "", "string");
-    TCLAP::ValueArg<std::string> am_cmvn("", AM_CMVN_PATH, "am cmvn path", false, "", "string");
-    TCLAP::ValueArg<std::string> am_config("", AM_CONFIG_PATH, "am config path", false, "", "string");
-
-    TCLAP::ValueArg<std::string> punc_model("", PUNC_MODEL_PATH, "punc model path", false, "", "string");
-    TCLAP::ValueArg<std::string> punc_config("", PUNC_CONFIG_PATH, "punc config path", false, "", "string");
+    TCLAP::ValueArg<std::string>    model_dir("", MODEL_DIR, "the model path, which contains model.onnx, config.yaml, am.mvn", true, "", "string");
+    TCLAP::ValueArg<std::string>    quantize("", QUANTIZE, "false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir", false, "false", "string");
 
     TCLAP::ValueArg<std::string> wav_scp("", WAV_SCP, "wave scp path", true, "", "string");
     TCLAP::ValueArg<std::int32_t> thread_num("", THREAD_NUM, "multi-thread num for rtf", true, 0, "int32_t");
 
-    cmd.add(vad_model);
-    cmd.add(vad_cmvn);
-    cmd.add(vad_config);
-    cmd.add(am_model);
-    cmd.add(am_cmvn);
-    cmd.add(am_config);
-    cmd.add(punc_model);
-    cmd.add(punc_config);
+    cmd.add(model_dir);
+    cmd.add(quantize);
     cmd.add(wav_scp);
     cmd.add(thread_num);
     cmd.parse(argc, argv);
 
     std::map<std::string, std::string> model_path;
-    GetValue(vad_model, VAD_MODEL_PATH, model_path);
-    GetValue(vad_cmvn, VAD_CMVN_PATH, model_path);
-    GetValue(vad_config, VAD_CONFIG_PATH, model_path);
-    GetValue(am_model, AM_MODEL_PATH, model_path);
-    GetValue(am_cmvn, AM_CMVN_PATH, model_path);
-    GetValue(am_config, AM_CONFIG_PATH, model_path);
-    GetValue(punc_model, PUNC_MODEL_PATH, model_path);
-    GetValue(punc_config, PUNC_CONFIG_PATH, model_path);
+    GetValue(model_dir, MODEL_DIR, model_path);
+    GetValue(quantize, QUANTIZE, model_path);
     GetValue(wav_scp, WAV_SCP, model_path);
 
     struct timeval start, end;

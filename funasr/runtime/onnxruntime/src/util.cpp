@@ -1,6 +1,7 @@
 
 #include "precomp.h"
 
+namespace funasr {
 float *LoadParams(const char *filename)
 {
 
@@ -178,3 +179,5 @@ void Glu(Tensor<float> *din, Tensor<float> *dout)
         }
     }
 }
+
+} // namespace funasr

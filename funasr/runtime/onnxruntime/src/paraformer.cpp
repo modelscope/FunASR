@@ -6,67 +6,14 @@
 #include "precomp.h"
 
 using namespace std;
-using namespace paraformer;
 
-Paraformer::Paraformer(std::map<std::string, std::string>& model_path,int thread_num)
+namespace funasr {
+
+Paraformer::Paraformer()
 :env_(ORT_LOGGING_LEVEL_ERROR, "paraformer"),session_options{}{
-
-    // VAD model
-    if(model_path.find(VAD_MODEL_PATH) != model_path.end()){
-        use_vad = true;
-        string vad_model_path;
-        string vad_cmvn_path;
-        string vad_config_path;
-    
-        try{
-            vad_model_path = model_path.at(VAD_MODEL_PATH);
-            vad_cmvn_path = model_path.at(VAD_CMVN_PATH);
-            vad_config_path = model_path.at(VAD_CONFIG_PATH);
-        }catch(const out_of_range& e){
-            LOG(ERROR) << "Error when read "<< VAD_CMVN_PATH << " or " << VAD_CONFIG_PATH <<" :" << e.what();
-            exit(0);
-        }
-        vad_handle = make_unique<FsmnVad>();
-        vad_handle->InitVad(vad_model_path, vad_cmvn_path, vad_config_path);
-    }
-
-    // AM model
-    if(model_path.find(AM_MODEL_PATH) != model_path.end()){
-        string am_model_path;
-        string am_cmvn_path;
-        string am_config_path;
-    
-        try{
-            am_model_path = model_path.at(AM_MODEL_PATH);
-            am_cmvn_path = model_path.at(AM_CMVN_PATH);
-            am_config_path = model_path.at(AM_CONFIG_PATH);
-        }catch(const out_of_range& e){
-            LOG(ERROR) << "Error when read "<< AM_CONFIG_PATH << " or " << AM_CMVN_PATH <<" :" << e.what();
-            exit(0);
-        }
-        InitAM(am_model_path, am_cmvn_path, am_config_path, thread_num);
-    }
-
-    // PUNC model
-    if(model_path.find(PUNC_MODEL_PATH) != model_path.end()){
-        use_punc = true;
-        string punc_model_path;
-        string punc_config_path;
-    
-        try{
-            punc_model_path = model_path.at(PUNC_MODEL_PATH);
-            punc_config_path = model_path.at(PUNC_CONFIG_PATH);
-        }catch(const out_of_range& e){
-            LOG(ERROR) << "Error when read "<< PUNC_CONFIG_PATH <<" :" << e.what();
-            exit(0);
-        }
-
-        punc_handle = make_unique<CTTransformer>();
-        punc_handle->InitPunc(punc_model_path, punc_config_path, thread_num);
-    }
 }
 
-void Paraformer::InitAM(const std::string &am_model, const std::string &am_cmvn, const std::string &am_config, int thread_num){
+void Paraformer::InitAsr(const std::string &am_model, const std::string &am_cmvn, const std::string &am_config, int thread_num){
     // knf options
     fbank_opts.frame_opts.dither = 0;
     fbank_opts.mel_opts.num_bins = 80;
@@ -118,14 +65,6 @@ Paraformer::~Paraformer()
 
 void Paraformer::Reset()
 {
-}
-
-vector<std::vector<int>> Paraformer::VadSeg(std::vector<float>& pcm_data){
-    return vad_handle->Infer(pcm_data);
-}
-
-string Paraformer::AddPunc(const char* sz_input){
-    return punc_handle->AddPunc(sz_input);
 }
 
 vector<float> Paraformer::FbankKaldi(float sample_rate, const float* waves, int len) {
@@ -282,7 +221,7 @@ string Paraformer::Forward(float* din, int len, int flag)
     }
     catch (std::exception const &e)
     {
-        printf(e.what());
+        LOG(ERROR)<<e.what();
     }
 
     return result;
@@ -291,12 +230,13 @@ string Paraformer::Forward(float* din, int len, int flag)
 string Paraformer::ForwardChunk(float* din, int len, int flag)
 {
 
-    printf("Not Imp!!!!!!\n");
-    return "Hello";
+    LOG(ERROR)<<"Not Imp!!!!!!";
+    return "";
 }
 
 string Paraformer::Rescoring()
 {
-    printf("Not Imp!!!!!!\n");
-    return "Hello";
+    LOG(ERROR)<<"Not Imp!!!!!!";
+    return "";
 }
+} // namespace funasr

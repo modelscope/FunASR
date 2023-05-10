@@ -5,12 +5,17 @@
 
 #include "precomp.h"
 
+namespace funasr {
 CTokenizer::CTokenizer(const char* sz_yamlfile):m_ready(false)
 {
 	OpenYaml(sz_yamlfile);
 }
 
 CTokenizer::CTokenizer():m_ready(false)
+{
+}
+
+CTokenizer::~CTokenizer()
 {
 }
 
@@ -216,3 +221,5 @@ void CTokenizer::StrSplit(const string& str, const char split, vector<string>& r
 	}
 	id_out= String2Ids(str_out);
 }
+
+} // namespace funasr

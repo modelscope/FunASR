@@ -2,7 +2,7 @@
 
 > **Note**: 
 > The modelscope pipeline supports all the models in 
-[model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope) 
+[model zoo](https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope) 
 to inference and finetine. Here we take the model of xvector_sv as example to demonstrate the usage.
 
 ## Inference with pipeline
@@ -37,10 +37,10 @@ results = inference_diar_pipline(audio_in=audio_list)
 print(results)
 ```
 
-#### API-reference
-##### Define pipeline
+### API-reference
+#### Define pipeline
 - `task`: `Tasks.speaker_diarization`
-- `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
+- `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
 - `ngpu`: `1` (Default), decoding on GPU. If ngpu=0, decoding on CPU
 - `output_dir`: `None` (Default), the output path of results if set
 - `batch_size`: `1` (Default), batch size when decoding
@@ -50,7 +50,7 @@ print(results)
   - vad format: spk1: [1.0, 3.0], [5.0, 8.0]
   - rttm format: "SPEAKER test1 0 1.00 2.00 <NA> <NA> spk1 <NA> <NA>" and "SPEAKER test1 0 5.00 3.00 <NA> <NA> spk1 <NA> <NA>"
 
-##### Infer pipeline for speaker embedding extraction
+#### Infer pipeline for speaker embedding extraction
 - `audio_in`: the input to process, which could be: 
   - list of url: `e.g.`: waveform files at a website
   - list of local file path: `e.g.`: path/to/a.wav

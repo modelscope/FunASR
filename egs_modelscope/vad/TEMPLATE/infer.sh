@@ -9,7 +9,7 @@ stop_stage=2
 model="damo/speech_fsmn_vad_zh-cn-16k-common"
 data_dir="./data/test"
 output_dir="./results"
-batch_size=64
+batch_size=1
 gpu_inference=true    # whether to perform gpu decoding
 gpuid_list="0,1"    # set gpus, e.g., gpuid_list="0,1"
 njob=64    # the number of jobs for CPU decoding, if gpu_inference=false, use CPU decoding, please set njob

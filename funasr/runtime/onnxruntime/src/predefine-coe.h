@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 
+namespace funasr {
 const int32_t melcoe_hex[] = {
 
     0x3f01050c, 0x3e0afb11, 0x3f5d413c, 0x3f547fd0, 0x3e2e00c1, 0x3f132970,
@@ -590,3 +591,5 @@ const int pos_enc_div_term_hex[] = {
     0x39164323, 0x3910f3c6, 0x390bd472, 0x3906e374, 0x39021f2b, 0x38fb0c03,
     0x38f22ce3, 0x38e99e04, 0x38e15c92, 0x38d965ce};
 #endif
+
+} // namespace funasr

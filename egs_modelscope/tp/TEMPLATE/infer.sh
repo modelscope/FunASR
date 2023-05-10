@@ -37,7 +37,7 @@ for JOB in $(seq ${nj}); do
     split_texts="$split_texts $output_dir/split/text.$JOB.scp"
 done
 perl utils/split_scp.pl ${data_dir}/wav.scp ${split_scps}
-perl utils/split_scp.pl ${data_dir}/text.scp ${split_texts}
+perl utils/split_scp.pl ${data_dir}/text.txt ${split_texts}
 
 if [ -n "${checkpoint_dir}" ]; then
   python utils/prepare_checkpoint.py ${model} ${checkpoint_dir} ${checkpoint_name}

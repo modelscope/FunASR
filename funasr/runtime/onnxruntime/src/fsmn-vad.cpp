@@ -6,8 +6,9 @@
 #include <fstream>
 #include "precomp.h"
 
-void FsmnVad::InitVad(const std::string &vad_model, const std::string &vad_cmvn, const std::string &vad_config) {
-    session_options_.SetIntraOpNumThreads(1);
+namespace funasr {
+void FsmnVad::InitVad(const std::string &vad_model, const std::string &vad_cmvn, const std::string &vad_config, int thread_num) {
+    session_options_.SetIntraOpNumThreads(thread_num);
     session_options_.SetGraphOptimizationLevel(ORT_ENABLE_ALL);
     session_options_.DisableCpuMemArena();
 
@@ -296,5 +297,10 @@ void FsmnVad::Reset(){
 void FsmnVad::Test() {
 }
 
+FsmnVad::~FsmnVad() {
+}
+
 FsmnVad::FsmnVad():env_(ORT_LOGGING_LEVEL_ERROR, ""),session_options_{} {
 }
+
+} // namespace funasr

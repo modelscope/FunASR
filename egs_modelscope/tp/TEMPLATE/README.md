@@ -8,12 +8,12 @@
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
 
-inference_pipline = pipeline(
+inference_pipeline = pipeline(
     task=Tasks.speech_timestamp,
     model='damo/speech_timestamp_prediction-v1-16k-offline',
     output_dir=None)
 
-rec_result = inference_pipline(
+rec_result = inference_pipeline(
     audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_timestamps.wav',
     text_in='一 个 东 太 平 洋 国 家 为 什 么 跑 到 西 太 平 洋 来 了 呢',)
 print(rec_result)
@@ -23,15 +23,15 @@ Timestamp pipeline can also be used after ASR pipeline to compose complete ASR f
 
 
 
-#### API-reference
-##### Define pipeline
+### API-reference
+#### Define pipeline
 - `task`: `Tasks.speech_timestamp`
-- `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
+- `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
 - `ngpu`: `1` (Default), decoding on GPU. If ngpu=0, decoding on CPU
 - `ncpu`: `1` (Default), sets the number of threads used for intraop parallelism on CPU 
 - `output_dir`: `None` (Default), the output path of results if set
 - `batch_size`: `1` (Default), batch size when decoding
-##### Infer pipeline
+#### Infer pipeline
 - `audio_in`: the input speech to predict, which could be: 
   - wav_path, `e.g.`: asr_example.wav (wav in local or url), 
   - wav.scp, kaldi style wav list (`wav_id wav_path`), `e.g.`: 
@@ -59,37 +59,37 @@ Timestamp pipeline can also be used after ASR pipeline to compose complete ASR f
     ```
 
 ### Inference with multi-thread CPUs or multi GPUs
-FunASR also offer recipes [egs_modelscope/vad/TEMPLATE/infer.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/vad/TEMPLATE/infer.sh) to decode with multi-thread CPUs, or multi GPUs.
+FunASR also offer recipes [egs_modelscope/tp/TEMPLATE/infer.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/tp/TEMPLATE/infer.sh) to decode with multi-thread CPUs, or multi GPUs.
 
-- Setting parameters in `infer.sh`
-    - `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
-    - `data_dir`: the dataset dir **must** include `wav.scp` and `text.scp`
-    - `output_dir`: output dir of the recognition results
-    - `batch_size`: `64` (Default), batch size of inference on gpu
-    - `gpu_inference`: `true` (Default), whether to perform gpu decoding, set false for CPU inference
-    - `gpuid_list`: `0,1` (Default), which gpu_ids are used to infer
-    - `njob`: only used for CPU inference (`gpu_inference`=`false`), `64` (Default), the number of jobs for CPU decoding
-    - `checkpoint_dir`: only used for infer finetuned models, the path dir of finetuned models
-    - `checkpoint_name`: only used for infer finetuned models, `valid.cer_ctc.ave.pb` (Default), which checkpoint is used to infer
+#### Settings of `infer.sh`
+- `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
+- `data_dir`: the dataset dir **must** include `wav.scp` and `text.txt`
+- `output_dir`: output dir of the recognition results
+- `batch_size`: `64` (Default), batch size of inference on gpu
+- `gpu_inference`: `true` (Default), whether to perform gpu decoding, set false for CPU inference
+- `gpuid_list`: `0,1` (Default), which gpu_ids are used to infer
+- `njob`: only used for CPU inference (`gpu_inference`=`false`), `64` (Default), the number of jobs for CPU decoding
+- `checkpoint_dir`: only used for infer finetuned models, the path dir of finetuned models
+- `checkpoint_name`: only used for infer finetuned models, `valid.cer_ctc.ave.pb` (Default), which checkpoint is used to infer
 
-- Decode with multi GPUs:
+#### Decode with multi GPUs:
 ```shell
     bash infer.sh \
     --model "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch" \
     --data_dir "./data/test" \
     --output_dir "./results" \
-    --batch_size 64 \
+    --batch_size 1 \
     --gpu_inference true \
     --gpuid_list "0,1"
 ```
-- Decode with multi-thread CPUs:
+#### Decode with multi-thread CPUs:
 ```shell
     bash infer.sh \
     --model "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch" \
     --data_dir "./data/test" \
     --output_dir "./results" \
     --gpu_inference false \
-    --njob 64
+    --njob 1
 ```
 
 ## Finetune with pipeline

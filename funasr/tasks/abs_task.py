@@ -445,6 +445,12 @@ class AbsTask(ABC):
             help='Perform on "collect stats" mode',
         )
         group.add_argument(
+            "--mc",
+            type=bool,
+            default=False,
+            help="MultiChannel input",
+        )
+        group.add_argument(
             "--write_collected_feats",
             type=str2bool,
             default=False,
@@ -549,6 +555,12 @@ class AbsTask(ABC):
             help="The number of gradient accumulation",
         )
         group.add_argument(
+            "--bias_grad_times",
+            type=float,
+            default=1.0,
+            help="To scale the gradient of contextual related params",
+        )
+        group.add_argument(
             "--no_forward_run",
             type=str2bool,
             default=False,
@@ -635,8 +647,8 @@ class AbsTask(ABC):
         group.add_argument(
             "--init_param",
             type=str,
+            action="append",
             default=[],
-            nargs="*",
             help="Specify the file path used for initialization of parameters. "
                  "The format is '<file_path>:<src_key>:<dst_key>:<exclude_keys>', "
                  "where file_path is the model file path, "
@@ -662,7 +674,7 @@ class AbsTask(ABC):
             "--freeze_param",
             type=str,
             default=[],
-            nargs="*",
+            action="append",
             help="Freeze parameters",
         )
 
@@ -1153,10 +1165,10 @@ class AbsTask(ABC):
         elif args.distributed and args.simple_ddp:
             distributed_option.init_torch_distributed_pai(args)
             args.ngpu = dist.get_world_size()
-            if args.dataset_type == "small":
+            if args.dataset_type == "small" and args.ngpu > 0:
                 if args.batch_size is not None:
                     args.batch_size = args.batch_size * args.ngpu
-                if args.batch_bins is not None:
+                if args.batch_bins is not None and args.ngpu > 0:
                     args.batch_bins = args.batch_bins * args.ngpu
 
         # filter samples if wav.scp and text are mismatch
@@ -1316,6 +1328,7 @@ class AbsTask(ABC):
                     data_path_and_name_and_type=args.train_data_path_and_name_and_type,
                     key_file=train_key_file,
                     batch_size=args.batch_size,
+                    mc=args.mc,
                     dtype=args.train_dtype,
                     num_workers=args.num_workers,
                     allow_variable_data_keys=args.allow_variable_data_keys,
@@ -1327,6 +1340,7 @@ class AbsTask(ABC):
                     data_path_and_name_and_type=args.valid_data_path_and_name_and_type,
                     key_file=valid_key_file,
                     batch_size=args.valid_batch_size,
+                    mc=args.mc,
                     dtype=args.train_dtype,
                     num_workers=args.num_workers,
                     allow_variable_data_keys=args.allow_variable_data_keys,

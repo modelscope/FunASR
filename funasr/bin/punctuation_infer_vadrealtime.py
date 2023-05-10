@@ -61,7 +61,7 @@ class Text2Punc:
             text_name="text",
             non_linguistic_symbols=train_args.non_linguistic_symbols,
         )
-        print("start decoding!!!")
+        
 
     @torch.no_grad()
     def __call__(self, text: Union[list, str], cache: list, split_size=20):
@@ -70,7 +70,7 @@ class Text2Punc:
         else:
             precache = ""
             cache = []
-        data = {"text": precache + text}
+        data = {"text": precache + " " + text}
         result = self.preprocessor(data=data, uid="12938712838719")
         split_text = self.preprocessor.pop_split_text_data(result)
         mini_sentences = split_to_mini_sentence(split_text, split_size)

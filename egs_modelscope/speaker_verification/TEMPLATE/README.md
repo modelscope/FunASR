@@ -2,7 +2,7 @@
 
 > **Note**: 
 > The modelscope pipeline supports all the models in 
-[model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope) 
+[model zoo](https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope) 
 to inference and finetine. Here we take the model of xvector_sv as example to demonstrate the usage.
 
 ## Inference with pipeline
@@ -47,17 +47,17 @@ speaker_embedding = rec_result["spk_embedding"]
 ```
 Full code of demo, please ref to [infer.py](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/speaker_verification/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch/infer.py).
 
-#### API-reference
-##### Define pipeline
+### API-reference
+#### Define pipeline
 - `task`: `Tasks.speaker_verification`
-- `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
+- `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
 - `ngpu`: `1` (Default), decoding on GPU. If ngpu=0, decoding on CPU
 - `output_dir`: `None` (Default), the output path of results if set
 - `batch_size`: `1` (Default), batch size when decoding
 - `sv_threshold`: `0.9465` (Default), the similarity threshold to determine 
 whether utterances belong to the same speaker (it should be in (0, 1))
 
-##### Infer pipeline for speaker embedding extraction
+#### Infer pipeline for speaker embedding extraction
 - `audio_in`: the input to process, which could be: 
   - url (str): `e.g.`: https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/sv_example_enroll.wav
   - local_path: `e.g.`: path/to/a.wav
@@ -71,7 +71,7 @@ whether utterances belong to the same speaker (it should be in (0, 1))
   - fbank1.scp,speech,kaldi_ark: `e.g.`: extracted 80-dimensional fbank features
 with kaldi toolkits.
 
-##### Infer pipeline for speaker verification
+#### Infer pipeline for speaker verification
 - `audio_in`: the input to process, which could be: 
   - Tuple(url1, url2): `e.g.`: (https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/sv_example_enroll.wav, https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/sv_example_different.wav)
   - Tuple(local_path1, local_path2): `e.g.`: (path/to/a.wav, path/to/b.wav)  
