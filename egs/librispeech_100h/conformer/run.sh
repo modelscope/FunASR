@@ -79,7 +79,7 @@ fi
 if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     echo "stage 0: Data preparation"
     # Data preparation
-    for x in train-clean-100 train-clean-360 train-other-500 dev-clean dev-other test-clean test-other; do
+    for x in dev-clean dev-other test-clean test-other train-clean-100; do
         local/data_prep.sh ${raw_data}/LibriSpeech/${x} ${feats_dir}/data/${x//-/_}
     done
 fi
