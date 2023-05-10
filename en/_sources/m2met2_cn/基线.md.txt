@@ -6,7 +6,7 @@
 
 ## 快速开始
 首先需要安装FunASR和ModelScope. ([installation](https://alibaba-damo-academy.github.io/FunASR/en/installation.html))  
-基线系统有训练和测试两个脚本，`run.sh` 是用于训练基线系统并在M2MET的验证与测试集上评估的，而 `run_m2met_2023_infer.sh` 用于此次竞赛预备开放的全新测试集上测试同时生成符合竞赛最终提交格式的文件。
+基线系统有训练和测试两个脚本，`run.sh` 是用于训练基线系统并在M2MeT的验证与测试集上评估的，而 `run_m2met_2023_infer.sh` 用于此次竞赛预备开放的全新测试集上测试同时生成符合竞赛最终提交格式的文件。
 在运行 `run.sh`前，需要自行下载并解压[AliMeeting](http://www.openslr.org/119/)数据集并放置于`./dataset`目录下：
 ```shell
 dataset
