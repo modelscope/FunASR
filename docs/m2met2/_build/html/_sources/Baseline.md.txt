@@ -16,6 +16,7 @@ dataset
 |—— Test_Ali_near
 |—— Train_Ali_far
 |—— Train_Ali_near
+```
 Before running `run_m2met_2023_infer.sh`, you need to place the new test set `Test_2023_Ali_far` (to be released after the challenge starts) in the `./dataset` directory, which contains only raw audios. Then put the given `wav.scp`, `wav_raw.scp`, `segments`, `utt2spk` and `spk2utt` in the `./data/Test_2023_Ali_far` directory.  
 ```shell
 data/Test_2023_Ali_far
