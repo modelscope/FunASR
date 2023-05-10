@@ -3,8 +3,8 @@
 . ./path.sh || exit 1;
 
 # machines configuration
-CUDA_VISIBLE_DEVICES="0,1,2,3,4,5,6,7"
-gpu_num=8
+CUDA_VISIBLE_DEVICES="0,1"
+gpu_num=2
 count=1
 gpu_inference=true  # Whether to perform gpu decoding, set false for cpu decoding
 # for gpu decoding, inference_nj=ngpu*njob; for cpu decoding, inference_nj=njob
@@ -16,30 +16,26 @@ infer_cmd=utils/run.pl
 feats_dir="../DATA" #feature output dictionary
 exp_dir="."
 lang=en
-dumpdir=dump/fbank
-feats_type=fbank
 token_type=bpe
-dataset_type=large
-scp=feats.scp
-type=kaldi_ark
-stage=3
-stop_stage=4
+type=sound
+scp=wav.scp
+stage=1
+stop_stage=1
 
 # feature configuration
 feats_dim=80
-sample_frequency=16000
-nj=100
-speed_perturb="0.9,1.0,1.1"
+nj=64
 
 # data
-data_librispeech=
+raw_data=
+data_url=www.openslr.org/resources/12
 
 # bpe model
 nbpe=5000
 bpemode=unigram
 
 # exp tag
-tag=""
+tag="exp1"
 
 . utils/parse_options.sh || exit 1;
 
@@ -54,8 +50,7 @@ valid_set=dev
 test_sets="test_clean test_other dev_clean dev_other"
 
 asr_config=conf/train_asr_conformer.yaml
-#asr_config=conf/train_asr_conformer_uttnorm.yaml
-model_dir="baseline_$(basename "${asr_config}" .yaml)_${feats_type}_${lang}_${token_type}_${tag}"
+model_dir="baseline_$(basename "${asr_config}" .yaml)_${lang}_${token_type}_${tag}"
 
 inference_config=conf/decode_asr_transformer.yaml
 #inference_config=conf/decode_asr_transformer_beam60_ctc0.3.yaml
@@ -71,6 +66,14 @@ if ${gpu_inference}; then
 else
     inference_nj=$njob
     _ngpu=0
+fi
+
+
+if [ ${stage} -le -1 ] && [ ${stop_stage} -ge -1 ]; then
+    echo "stage -1: Data Download"
+    for part in dev-clean test-clean dev-other test-other train-clean-100; do
+        local/download_and_untar.sh ${raw_data} ${data_url} ${part}
+    done
 fi
 
 if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then

@@ -8,7 +8,7 @@ gpu_num=2
 count=1
 gpu_inference=true  # Whether to perform gpu decoding, set false for cpu decoding
 # for gpu decoding, inference_nj=ngpu*njob; for cpu decoding, inference_nj=njob
-njob=1
+njob=5
 train_cmd=utils/run.pl
 infer_cmd=utils/run.pl
 
@@ -16,10 +16,9 @@ infer_cmd=utils/run.pl
 feats_dir="../DATA" #feature output dictionary
 exp_dir="."
 lang=zh
-feats_type=fbank
 token_type=char
-scp=wav.scp
 type=sound
+scp=wav.scp
 stage=3
 stop_stage=4
 
@@ -47,7 +46,7 @@ valid_set=dev
 test_sets="dev test"
 
 asr_config=conf/train_asr_conformer.yaml
-model_dir="baseline_$(basename "${asr_config}" .yaml)_${feats_type}_${lang}_${token_type}_${tag}"
+model_dir="baseline_$(basename "${asr_config}" .yaml)_${lang}_${token_type}_${tag}"
 
 inference_config=conf/decode_asr_transformer.yaml
 inference_asr_model=valid.acc.ave_10best.pb
