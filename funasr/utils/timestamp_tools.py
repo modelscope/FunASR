@@ -80,6 +80,7 @@ def ts_prediction_lfr6_standard(us_alphas,
 
 
 def time_stamp_sentence(punc_id_list, time_stamp_postprocessed, text_postprocessed):
+    punc_list = ['，', '。', '？', '、']
     res = []
     if text_postprocessed is None:
         return res
@@ -124,34 +125,8 @@ def time_stamp_sentence(punc_id_list, time_stamp_postprocessed, text_postprocess
         punc_id = int(punc_id) if punc_id is not None else 1
         sentence_end = time_stamp[1] if time_stamp is not None else sentence_end
 
-        if punc_id == 2:
-            sentence_text += ','
-            res.append({
-                'text': sentence_text,
-                "start": sentence_start,
-                "end": sentence_end,
-                "text_seg": sentence_text_seg,
-                "ts_list": ts_list
-            })
-            sentence_text = ''
-            sentence_text_seg = ''
-            ts_list = []
-            sentence_start = sentence_end
-        elif punc_id == 3:
-            sentence_text += '.'
-            res.append({
-                'text': sentence_text,
-                "start": sentence_start,
-                "end": sentence_end,
-                "text_seg": sentence_text_seg,
-                "ts_list": ts_list
-            })
-            sentence_text = ''
-            sentence_text_seg = ''
-            ts_list = []
-            sentence_start = sentence_end
-        elif punc_id == 4:
-            sentence_text += '?'
+        if punc_id > 1:
+            sentence_text += punc_list[punc_id - 2]
             res.append({
                 'text': sentence_text,
                 "start": sentence_start,
