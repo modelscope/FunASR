@@ -137,7 +137,7 @@ grpc::Status ASRServicer::Recognize(
                     stream->Write(res);
                 }
                 else {
-                    FUNASR_RESULT Result= FunOfflineRecogPCMBuffer(AsrHanlde, tmp_data.c_str(), data_len_int, 16000, RASR_NONE, NULL);
+                    FUNASR_RESULT Result= FunOfflineInferBuffer(AsrHanlde, tmp_data.c_str(), data_len_int, RASR_NONE, NULL, 16000);
                     std::string asr_result = ((FUNASR_RECOG_RESULT*)Result)->msg;
 
                     auto end_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
