@@ -21,6 +21,15 @@
 
 using namespace std;
 
+bool is_target_file(const std::string& filename, const std::string target) {
+    std::size_t pos = filename.find_last_of(".");
+    if (pos == std::string::npos) {
+        return false;
+    }
+    std::string extension = filename.substr(pos + 1);
+    return (extension == target);
+}
+
 void GetValue(TCLAP::ValueArg<std::string>& value_arg, string key, std::map<std::string, std::string>& model_path)
 {
     if (value_arg.isSet()){
@@ -58,20 +67,17 @@ int main(int argc, char *argv[])
     TCLAP::ValueArg<std::string>    model_dir("", MODEL_DIR, "the vad model path, which contains model.onnx, vad.yaml, vad.mvn", true, "", "string");
     TCLAP::ValueArg<std::string>    quantize("", QUANTIZE, "false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir", false, "false", "string");
 
-    TCLAP::ValueArg<std::string> wav_path("", WAV_PATH, "wave file path", false, "", "string");
-    TCLAP::ValueArg<std::string> wav_scp("", WAV_SCP, "wave scp path", false, "", "string");
+    TCLAP::ValueArg<std::string>    wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", true, "", "string");
 
     cmd.add(model_dir);
     cmd.add(quantize);
     cmd.add(wav_path);
-    cmd.add(wav_scp);
     cmd.parse(argc, argv);
 
     std::map<std::string, std::string> model_path;
     GetValue(model_dir, MODEL_DIR, model_path);
     GetValue(quantize, QUANTIZE, model_path);
     GetValue(wav_path, WAV_PATH, model_path);
-    GetValue(wav_scp, WAV_SCP, model_path);
 
     struct timeval start, end;
     gettimeofday(&start, NULL);
@@ -89,14 +95,14 @@ int main(int argc, char *argv[])
     long modle_init_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
     LOG(INFO) << "Model initialization takes " << (double)modle_init_micros / 1000000 << " s";
 
-    // read wav_path and wav_scp
+    // read wav_path
     vector<string> wav_list;
-
-    if(model_path.find(WAV_PATH)!=model_path.end()){
-        wav_list.emplace_back(model_path.at(WAV_PATH));
+    string wav_path_ = model_path.at(WAV_PATH);
+    if(is_target_file(wav_path_, "wav") || is_target_file(wav_path_, "pcm")){
+        wav_list.emplace_back(wav_path_);
     }
-    if(model_path.find(WAV_SCP)!=model_path.end()){
-        ifstream in(model_path.at(WAV_SCP));
+    else if(is_target_file(wav_path_, "scp")){
+        ifstream in(wav_path_);
         if (!in.is_open()) {
             LOG(ERROR) << "Failed to open file: " << model_path.at(WAV_SCP) ;
             return 0;
@@ -110,13 +116,16 @@ int main(int argc, char *argv[])
             wav_list.emplace_back(column2); 
         }
         in.close();
+    }else{
+        LOG(ERROR)<<"Please check the wav extension!";
+        exit(-1);
     }
     
     float snippet_time = 0.0f;
     long taking_micros = 0;
     for(auto& wav_file : wav_list){
         gettimeofday(&start, NULL);
-        FUNASR_RESULT result=FsmnVadWavFile(vad_hanlde, wav_file.c_str(), RASR_NONE, NULL);
+        FUNASR_RESULT result=FsmnVadInfer(vad_hanlde, wav_file.c_str(), FSMN_VAD_OFFLINE, NULL, 16000);
         gettimeofday(&end, NULL);
         seconds = (end.tv_sec - start.tv_sec);
         taking_micros += ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);

@@ -1,10 +1,14 @@
 #include "precomp.h"
 
 namespace funasr {
-VadModel *CreateVadModel(std::map<std::string, std::string>& model_path, int thread_num)
+VadModel *CreateVadModel(std::map<std::string, std::string>& model_path, int thread_num, int mode)
 {
     VadModel *mm;
-    mm = new FsmnVad();
+    if(mode == FSMN_VAD_OFFLINE){
+        mm = new FsmnVad();
+    }else{
+        LOG(ERROR)<<"Online fsmn vad not imp!";
+    }
 
     string vad_model_path;
     string vad_cmvn_path;
