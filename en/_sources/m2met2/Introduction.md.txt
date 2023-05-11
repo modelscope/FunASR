@@ -10,14 +10,14 @@ Building on the success of the previous M2MeT challenge, we are excited to propo
 
 ## Timeline(AOE Time)
 - $ April~29, 2023: $ Challenge and registration open.
-- $ May~8, 2023: $ Baseline release.
-- $ May~15, 2023: $ Registration deadline, the due date for participants to join the Challenge.
-- $ June~9, 2023: $ Test data release and leaderboard open.
-- $ June~13, 2023: $ Final submission deadline and leaderboar close.
-- $ June~19, 2023: $ Evaluation result and ranking release.
+- $ May~11, 2023: $ Baseline release.
+- $ May~22, 2023: $ Registration deadline, the due date for participants to join the Challenge.
+- $ June~16, 2023: $ Test data release and leaderboard open.
+- $ June~20, 2023: $ Final submission deadline and leaderboar close.
+- $ June~26, 2023: $ Evaluation result and ranking release.
 - $ July~3, 2023: $ Deadline for paper submission.
 - $ July~10, 2023: $ Deadline for final paper submission.
-- $ December~12\ to\ 16, 2023: $ ASRU Workshop and challenge Session
+- $ December~12\ to\ 16, 2023: $ ASRU Workshop and Challenge Session.
 
 ## Guidelines
 

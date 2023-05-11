@@ -29,4 +29,5 @@ data/Test_2023_Ali_far
 更多基线系统详情见[此处](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs/alimeeting/sa-asr/README.md)
 ## 基线结果
 基线系统的结果如表3所示。在训练期间，说话人档案采用了真实说话人嵌入。然而由于在评估过程中缺乏真实说话人标签，因此使用了由额外的谱聚类提供的说话人特征。同时我们还提供了在评估和测试集上使用真实说话人档案的结果，以显示说话人档案准确性的影响。
-![baseline result](images/baseline_result.png)
+
+![baseline_result](images/baseline_result.png)
