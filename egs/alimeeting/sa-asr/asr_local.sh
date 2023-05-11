@@ -1226,9 +1226,9 @@ fi
 
 if ${infer_with_pretrained_model}; then
     log "Use ${download_sa_asr_model} for decoding and evaluation"
-
     sa_asr_exp="${expdir}/${download_sa_asr_model}"
     mkdir -p "${sa_asr_exp}"
+
 
     python local/download_pretrained_model_from_modelscope.py $download_sa_asr_model ${expdir}
     inference_sa_asr_model="model.pb"
@@ -1335,8 +1335,11 @@ if ! "${skip_eval}"; then
             _data="${data_feats}/${dset}"
             _dir="${sa_asr_exp}/${sa_asr_inference_tag}.oracle/${dset}"
 
-            python utils/proce_text.py ${_data}/text ${_data}/text.proc
-            python utils/proce_text.py ${_dir}/text ${_dir}/text.proc
+            sed 's/\$//g' ${_data}/text > ${_data}/text_nosrc
+            sed 's/\$//g' ${_dir}/text > ${_dir}/text_nosrc
+
+            python utils/proce_text.py ${_data}/text_nosrc ${_data}/text.proc
+            python utils/proce_text.py ${_dir}/text_nosrc ${_dir}/text.proc
 
             python utils/compute_wer.py ${_data}/text.proc ${_dir}/text.proc ${_dir}/text.cer
             tail -n 3 ${_dir}/text.cer > ${_dir}/text.cer.txt
@@ -1451,8 +1454,11 @@ if ! "${skip_eval}"; then
             _data="${data_feats}/${dset}"
             _dir="${sa_asr_exp}/${sa_asr_inference_tag}.cluster/${dset}"
 
-            python utils/proce_text.py ${_data}/text ${_data}/text.proc
-            python utils/proce_text.py ${_dir}/text ${_dir}/text.proc
+            sed 's/\$//g' ${_data}/text > ${_data}/text_nosrc
+            sed 's/\$//g' ${_dir}/text > ${_dir}/text_nosrc
+
+            python utils/proce_text.py ${_data}/text_nosrc ${_data}/text.proc
+            python utils/proce_text.py ${_dir}/text_nosrc ${_dir}/text.proc
 
             python utils/compute_wer.py ${_data}/text.proc ${_dir}/text.proc ${_dir}/text.cer
             tail -n 3 ${_dir}/text.cer > ${_dir}/text.cer.txt
