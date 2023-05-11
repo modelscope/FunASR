@@ -19,8 +19,8 @@ lang=zh
 token_type=char
 type=sound
 scp=wav.scp
-stage=1
-stop_stage=3
+stage=3
+stop_stage=4
 
 # feature configuration
 feats_dim=80
