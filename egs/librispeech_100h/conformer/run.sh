@@ -19,8 +19,8 @@ lang=en
 token_type=bpe
 type=sound
 scp=wav.scp
-stage=2
-stop_stage=2
+stage=3
+stop_stage=4
 
 # feature configuration
 feats_dim=80
@@ -89,22 +89,21 @@ if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
     utils/compute_cmvn.sh --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} ${feats_dir}/data/${train_set}
 fi
 
-dict=${feats_dir}/data/lang_char/${train_set}_${bpemode}${nbpe}_units.txt
+token_list=${feats_dir}/data/lang_char/${train_set}_${bpemode}${nbpe}_units.txt
 bpemodel=${feats_dir}/data/lang_char/${train_set}_${bpemode}${nbpe}
-echo "dictionary: ${dict}"
+echo "dictionary: ${token_list}"
 if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     ### Task dependent. You have to check non-linguistic symbols used in the corpus.
     echo "stage 2: Dictionary and Json Data Preparation"
     mkdir -p ${feats_dir}/data/lang_char/
-    echo "<blank>" > ${dict}
-    echo "<s>" >> ${dict}
-    echo "</s>" >> ${dict}
+    echo "<blank>" > ${token_list}
+    echo "<s>" >> ${token_list}
+    echo "</s>" >> ${token_list}
     cut -f 2- -d" " ${feats_dir}/data/${train_set}/text > ${feats_dir}/data/lang_char/input.txt
     local/spm_train.py --input=${feats_dir}/data/lang_char/input.txt --vocab_size=${nbpe} --model_type=${bpemode} --model_prefix=${bpemodel} --input_sentence_size=100000000
-    local/spm_encode.py --model=${bpemodel}.model --output_format=piece < ${feats_dir}/data/lang_char/input.txt | tr ' ' '\n' | sort | uniq | awk '{print $0}' >> ${dict}
-    echo "<unk>" >> ${dict}
+    local/spm_encode.py --model=${bpemodel}.model --output_format=piece < ${feats_dir}/data/lang_char/input.txt | tr ' ' '\n' | sort | uniq | awk '{print $0}' >> ${token_list}
+    echo "<unk>" >> ${token_list}
 fi
-
 
 # Training Stage
 world_size=$gpu_num  # run on one machine
@@ -123,16 +122,17 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
             rank=$i
             local_rank=$i
             gpu_id=$(echo $CUDA_VISIBLE_DEVICES | cut -d',' -f$[$i+1])
-            asr_train.py \
+            train.py \
+                --task_name asr \
                 --gpu_id $gpu_id \
                 --use_preprocessor true \
                 --split_with_space false \
                 --bpemodel ${bpemodel}.model \
                 --token_type $token_type \
-                --dataset_type $dataset_type \
-                --token_list $dict \
-                --train_data_file $feats_dir/$dumpdir/${train_set}/ark_txt.scp \
-                --valid_data_file $feats_dir/$dumpdir/${valid_set}/ark_txt.scp \
+                --token_list $token_list \
+                --data_dir ${feats_dir}/data \
+                --train_set ${train_set} \
+                --valid_set ${valid_set} \
                 --resume true \
                 --output_dir ${exp_dir}/exp/${model_dir} \
                 --config $asr_config \
@@ -183,6 +183,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
                 --njob ${njob} \
                 --gpuid_list ${gpuid_list} \
                 --data_path_and_name_and_type "${_data}/${scp},speech,${type}" \
+                --cmvn_file ${feats_dir}/data/${train_set}/cmvn/cmvn.mvn \
                 --key_file "${_logdir}"/keys.JOB.scp \
                 --asr_train_config "${asr_exp}"/config.yaml \
                 --asr_model_file "${asr_exp}"/"${inference_asr_model}" \
