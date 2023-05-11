@@ -19,15 +19,15 @@ lang=en
 token_type=bpe
 type=sound
 scp=wav.scp
-stage=0
-stop_stage=0
+stage=1
+stop_stage=1
 
 # feature configuration
 feats_dim=80
 nj=64
 
 # data
-raw_data=/nfs/wangjiaming.wjm/librispeech
+raw_data=
 data_url=www.openslr.org/resources/12
 
 # bpe model
@@ -45,7 +45,7 @@ set -e
 set -u
 set -o pipefail
 
-train_set=train_960
+train_set=train_clean_100
 valid_set=dev
 test_sets="test_clean test_other dev_clean dev_other"
 
@@ -84,61 +84,9 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     done
 fi
 
-feat_train_dir=${feats_dir}/${dumpdir}/$train_set; mkdir -p ${feat_train_dir}
-feat_dev_clean_dir=${feats_dir}/${dumpdir}/dev_clean; mkdir -p ${feat_dev_clean_dir}
-feat_dev_other_dir=${feats_dir}/${dumpdir}/dev_other; mkdir -p ${feat_dev_other_dir}
-feat_test_clean_dir=${feats_dir}/${dumpdir}/test_clean; mkdir -p ${feat_test_clean_dir}
-feat_test_other_dir=${feats_dir}/${dumpdir}/test_other; mkdir -p ${feat_test_other_dir}
-feat_dev_dir=${feats_dir}/${dumpdir}/$valid_set; mkdir -p ${feat_dev_dir}
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
-    echo "stage 1: Feature Generation"
-    # compute fbank features
-    fbankdir=${feats_dir}/fbank
-    for x in dev_clean dev_other test_clean test_other; do
-        utils/compute_fbank.sh --cmd "$train_cmd" --nj 1 --max_lengths 3000 --feats_dim ${feats_dim} --sample_frequency ${sample_frequency} \
-            ${feats_dir}/data/${x} ${exp_dir}/exp/make_fbank/${x} ${fbankdir}/${x}
-        utils/fix_data_feat.sh ${fbankdir}/${x}
-    done
-
-    mkdir ${feats_dir}/data/$train_set
-    train_sets="train_clean_100 train_clean_360 train_other_500"
-    for file in wav.scp text; do
-        ( for f in $train_sets; do cat $feats_dir/data/$f/$file; done ) | sort -k1 > $feats_dir/data/$train_set/$file || exit 1;
-    done
-    utils/compute_fbank.sh --cmd "$train_cmd" --nj $nj --max_lengths 3000 --feats_dim ${feats_dim} --sample_frequency ${sample_frequency} --speed_perturb ${speed_perturb} \
-    ${feats_dir}/data/$train_set ${exp_dir}/exp/make_fbank/$train_set ${fbankdir}/$train_set
-    utils/fix_data_feat.sh ${fbankdir}/$train_set
-
-    # compute global cmvn
-    utils/compute_cmvn.sh --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} \
-        ${fbankdir}/$train_set ${exp_dir}/exp/make_fbank/$train_set
-
-    # apply cmvn
-    utils/apply_cmvn.sh --cmd "$train_cmd" --nj $nj \
-        ${fbankdir}/$train_set ${fbankdir}/$train_set/cmvn.json ${exp_dir}/exp/make_fbank/$train_set ${feat_train_dir}
-    utils/apply_cmvn.sh --cmd "$train_cmd" --nj 1 \
-        ${fbankdir}/dev_clean ${fbankdir}/$train_set/cmvn.json ${exp_dir}/exp/make_fbank/dev_clean ${feat_dev_clean_dir}
-    utils/apply_cmvn.sh --cmd "$train_cmd" --nj 1\
-        ${fbankdir}/dev_other ${fbankdir}/$train_set/cmvn.json ${exp_dir}/exp/make_fbank/dev_other ${feat_dev_other_dir}
-    utils/apply_cmvn.sh --cmd "$train_cmd" --nj 1 \
-        ${fbankdir}/test_clean ${fbankdir}/$train_set/cmvn.json ${exp_dir}/exp/make_fbank/test_clean ${feat_test_clean_dir}
-    utils/apply_cmvn.sh --cmd "$train_cmd" --nj 1 \
-        ${fbankdir}/test_other ${fbankdir}/$train_set/cmvn.json ${exp_dir}/exp/make_fbank/test_other ${feat_test_other_dir}
-
-    cp ${fbankdir}/$train_set/text ${fbankdir}/$train_set/speech_shape ${fbankdir}/$train_set/text_shape ${feat_train_dir}
-    cp ${fbankdir}/dev_clean/text ${fbankdir}/dev_clean/speech_shape ${fbankdir}/dev_clean/text_shape ${feat_dev_clean_dir}
-    cp ${fbankdir}/dev_other/text ${fbankdir}/dev_other/speech_shape ${fbankdir}/dev_other/text_shape ${feat_dev_other_dir}
-    cp ${fbankdir}/test_clean/text ${fbankdir}/test_clean/speech_shape ${fbankdir}/test_clean/text_shape ${feat_test_clean_dir}
-    cp ${fbankdir}/test_other/text ${fbankdir}/test_other/speech_shape ${fbankdir}/test_other/text_shape ${feat_test_other_dir}
-
-    dev_sets="dev_clean dev_other"
-    for file in feats.scp text speech_shape text_shape; do
-        ( for f in $dev_sets; do cat $feats_dir/${dumpdir}/$f/$file; done ) | sort -k1 > $feat_dev_dir/$file || exit 1;
-    done
-
-    #generate ark list
-    utils/gen_ark_list.sh --cmd "$train_cmd" --nj $nj ${feat_train_dir} ${fbankdir}/${train_set} ${feat_train_dir}
-    utils/gen_ark_list.sh --cmd "$train_cmd" --nj $nj ${feat_dev_dir} ${fbankdir}/${valid_set} ${feat_dev_dir}
+    echo "stage 1: Feature and CMVN Generation"
+    utils/compute_cmvn.sh --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} ${feats_dir}/data/${train_set}
 fi
 
 dict=${feats_dir}/data/lang_char/${train_set}_${bpemode}${nbpe}_units.txt
