@@ -1,5 +1,5 @@
 # Organizers
-***Lei Xie, Professor, Northwestern Polytechnical University, China***
+***Lei Xie, Professor, AISHELL foundation, China***
 
 Email: [lxie@nwpu.edu.cn](mailto:lxie@nwpu.edu.cn)
 
