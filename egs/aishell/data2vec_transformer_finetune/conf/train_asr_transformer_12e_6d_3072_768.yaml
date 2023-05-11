@@ -30,25 +30,28 @@ encoder_conf:
   require_same_masks: true
   mask_dropout: 0
 
+# frontend related
+frontend: wav_frontend
+frontend_conf:
+    fs: 16000
+    window: hamming
+    n_mels: 80
+    frame_length: 25
+    frame_shift: 10
+    lfr_m: 1
+    lfr_n: 1
+
 # hybrid CTC/attention
 model_conf:
     ctc_weight: 1.0
     lsm_weight: 0.1     # label smoothing option
     length_normalized_loss: false
 
-# for logger
-log_interval: 50
-
-# minibatch related
-batch_type: length
-batch_bins: 16000
-num_workers: 16
-
 # optimization related
 accum_grad: 1
 grad_clip: 5
 patience: none
-max_epoch: 50
+max_epoch: 150
 val_scheduler_criterion:
     - valid
     - acc
@@ -57,8 +60,6 @@ best_model_criterion:
     - cer_ctc
     - min
 keep_nbest_models: 10
-unused_parameters: true
-normalize: None
 
 # NoamLR is deprecated. Use WarmupLR.
 # The following is equivalent setting for NoamLR:
@@ -93,3 +94,17 @@ specaug_conf:
     - 0
     - 40
     num_time_mask: 2
+
+dataset_conf:
+    shuffle: True
+    shuffle_conf:
+        shuffle_size: 2048
+        sort_size: 500
+    batch_conf:
+        batch_type: token
+        batch_size: 25000
+    num_workers: 8
+
+log_interval: 50
+unused_parameters: true
+normalize: None

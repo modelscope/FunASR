@@ -30,7 +30,6 @@ encoder_conf:
     require_same_masks: true
     mask_dropout: 0
 
-
 # decoder related
 decoder: paraformer_decoder_san
 decoder_conf:
@@ -53,6 +52,7 @@ frontend_conf:
     lfr_m: 1
     lfr_n: 1
 
+# hybrid CTC/attention
 model: paraformer
 model_conf:
     ctc_weight: 0.3
