@@ -188,18 +188,15 @@ class Speech2Text:
         self.frontend = frontend
         self.window_size = self.chunk_size + self.right_context
         
-        self._ctx = self.asr_model.encoder.get_encoder_input_size(
-            self.window_size
-        )
+        if self.streaming:
+            self._ctx = self.asr_model.encoder.get_encoder_input_size(
+                self.window_size
+            )
        
-        #self.last_chunk_length = (
-        #    self.asr_model.encoder.embed.min_frame_length + self.right_context + 1
-        #) * self.hop_length
-
-        self.last_chunk_length = (
-            self.asr_model.encoder.embed.min_frame_length + self.right_context + 1
-        )
-        self.reset_inference_cache()
+            self.last_chunk_length = (
+                self.asr_model.encoder.embed.min_frame_length + self.right_context + 1
+            )
+            self.reset_inference_cache()
 
     def reset_inference_cache(self) -> None:
         """Reset Speech2Text parameters."""

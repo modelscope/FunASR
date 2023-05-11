@@ -8,7 +8,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 option(ENABLE_WEBSOCKET "Whether to build websocket server" ON)
  
 if(ENABLE_WEBSOCKET)
-  cmake_policy(SET CMP0135 NEW)
+  # cmake_policy(SET CMP0135 NEW)
 
   include(FetchContent)
   FetchContent_Declare(websocketpp

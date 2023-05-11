@@ -1,1 +1,1 @@
-../../TEMPLATE/infer.py
+../TEMPLATE/infer.py

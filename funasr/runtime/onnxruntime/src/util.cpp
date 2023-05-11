@@ -180,4 +180,13 @@ void Glu(Tensor<float> *din, Tensor<float> *dout)
     }
 }
 
+bool is_target_file(const std::string& filename, const std::string target) {
+    std::size_t pos = filename.find_last_of(".");
+    if (pos == std::string::npos) {
+        return false;
+    }
+    std::string extension = filename.substr(pos + 1);
+    return (extension == target);
+}
+
 } // namespace funasr

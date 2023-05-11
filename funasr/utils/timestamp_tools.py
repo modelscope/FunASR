@@ -80,6 +80,7 @@ def ts_prediction_lfr6_standard(us_alphas,
 
 
 def time_stamp_sentence(punc_id_list, time_stamp_postprocessed, text_postprocessed):
+    punc_list = ['，', '。', '？', '、']
     res = []
     if text_postprocessed is None:
         return res
@@ -94,48 +95,48 @@ def time_stamp_sentence(punc_id_list, time_stamp_postprocessed, text_postprocess
         res.append({
             'text': text_postprocessed.split(),
             "start": time_stamp_postprocessed[0][0],
-            "end": time_stamp_postprocessed[-1][1]
+            "end": time_stamp_postprocessed[-1][1],
+            'text_seg': text_postprocessed.split(),
+            "ts_list": time_stamp_postprocessed,
         })
         return res
     if len(punc_id_list) != len(time_stamp_postprocessed):
         print("  warning length mistach!!!!!!")
-    sentence_text = ''
+    sentence_text = ""
+    sentence_text_seg = ""
+    ts_list = []
     sentence_start = time_stamp_postprocessed[0][0]
     sentence_end = time_stamp_postprocessed[0][1]
     texts = text_postprocessed.split()
     punc_stamp_text_list = list(zip_longest(punc_id_list, time_stamp_postprocessed, texts, fillvalue=None))
     for punc_stamp_text in punc_stamp_text_list:
         punc_id, time_stamp, text = punc_stamp_text
-        sentence_text += text if text is not None else ''
+        # sentence_text += text if text is not None else ''
+        if text is not None:
+            if 'a' <= text[0] <= 'z' or 'A' <= text[0] <= 'Z':
+                sentence_text += ' ' + text
+            elif len(sentence_text) and ('a' <= sentence_text[-1] <= 'z' or 'A' <= sentence_text[-1] <= 'Z'):
+                sentence_text += ' ' + text
+            else:
+                sentence_text += text
+            sentence_text_seg += text + ' '
+        ts_list.append(time_stamp)
+
         punc_id = int(punc_id) if punc_id is not None else 1
         sentence_end = time_stamp[1] if time_stamp is not None else sentence_end
 
-        if punc_id == 2:
-            sentence_text += ','
+        if punc_id > 1:
+            sentence_text += punc_list[punc_id - 2]
             res.append({
                 'text': sentence_text,
                 "start": sentence_start,
-                "end": sentence_end
+                "end": sentence_end,
+                "text_seg": sentence_text_seg,
+                "ts_list": ts_list
             })
             sentence_text = ''
-            sentence_start = sentence_end
-        elif punc_id == 3:
-            sentence_text += '.'
-            res.append({
-                'text': sentence_text,
-                "start": sentence_start,
-                "end": sentence_end
-            })
-            sentence_text = ''
-            sentence_start = sentence_end
-        elif punc_id == 4:
-            sentence_text += '?'
-            res.append({
-                'text': sentence_text,
-                "start": sentence_start,
-                "end": sentence_end
-            })
-            sentence_text = ''
+            sentence_text_seg = ''
+            ts_list = []
             sentence_start = sentence_end
     return res
 

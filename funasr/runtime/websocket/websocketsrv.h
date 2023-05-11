@@ -30,7 +30,7 @@
 
 #include "asio.hpp"
 #include "com-define.h"
-#include "libfunasrapi.h"
+#include "funasrruntime.h"
 #include "nlohmann/json.hpp"
 #include "tclap/CmdLine.h"
 typedef websocketpp::server<websocketpp::config::asio> server;

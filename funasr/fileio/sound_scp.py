@@ -46,13 +46,15 @@ class SoundScpReader(collections.abc.Mapping):
         if self.normalize:
             # soundfile.read normalizes data to [-1,1] if dtype is not given
             array, rate = librosa.load(
-                wav, sr=self.dest_sample_rate, mono=not self.always_2d
+                wav, sr=self.dest_sample_rate, mono=self.always_2d
             )
         else:
             array, rate = librosa.load(
-                wav, sr=self.dest_sample_rate, mono=not self.always_2d, dtype=self.dtype
+                wav, sr=self.dest_sample_rate, mono=self.always_2d, dtype=self.dtype
             )
 
+        if array.ndim==2:
+            array=array.transpose((1, 0))
         return rate, array
 
     def get_path(self, key):
