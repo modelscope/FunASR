@@ -103,7 +103,7 @@ specaug_choices = ClassChoices(
     name="specaug",
     classes=dict(
         specaug=SpecAug,
-        specaug_lfr=FSpecAugLR,
+        specaug_lfr=SpecAugLFR,
     ),
     type_check=AbsSpecAug,
     default=None,
