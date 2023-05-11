@@ -254,27 +254,15 @@ def inference_launch(**kwargs):
     elif mode == "uniasr":
         from funasr.bin.asr_inference_uniasr import inference_modelscope
         return inference_modelscope(**kwargs)
-    elif mode == "uniasr_vad":
-        from funasr.bin.asr_inference_uniasr_vad import inference_modelscope
-        return inference_modelscope(**kwargs)
     elif mode == "paraformer":
         from funasr.bin.asr_inference_paraformer import inference_modelscope
         return inference_modelscope(**kwargs)
     elif mode == "paraformer_streaming":
         from funasr.bin.asr_inference_paraformer_streaming import inference_modelscope
         return inference_modelscope(**kwargs)
-    elif mode == "paraformer_vad":
-        from funasr.bin.asr_inference_paraformer_vad import inference_modelscope
-        return inference_modelscope(**kwargs)
-    elif mode == "paraformer_punc":
-        logging.info("Unknown decoding mode: {}".format(mode))
-        return None
-    elif mode == "paraformer_vad_punc":
-        from funasr.bin.asr_inference_paraformer_vad_punc import inference_modelscope
-        return inference_modelscope(**kwargs)
-    elif mode == "vad":
-        from funasr.bin.vad_inference import inference_modelscope
-        return inference_modelscope(**kwargs)
+    elif mode.startswith("paraformer_vad"):
+        from funasr.bin.asr_inference_paraformer import inference_modelscope_vad_punc
+        return inference_modelscope_vad_punc(**kwargs)
     elif mode == "mfcca":
         from funasr.bin.asr_inference_mfcca import inference_modelscope
         return inference_modelscope(**kwargs)
@@ -301,14 +289,13 @@ def inference_launch_funasr(**kwargs):
         from funasr.bin.asr_inference_uniasr import inference
         return inference(**kwargs)
     elif mode == "paraformer":
-        from funasr.bin.asr_inference_paraformer import inference
-        return inference(**kwargs)
-    elif mode == "paraformer_vad_punc":
-        from funasr.bin.asr_inference_paraformer_vad_punc import inference
-        return inference(**kwargs)
-    elif mode == "vad":
-        from funasr.bin.vad_inference import inference
-        return inference(**kwargs)
+        from funasr.bin.asr_inference_paraformer import inference_modelscope
+        inference_pipeline = inference_modelscope(**kwargs)
+        return inference_pipeline(kwargs["data_path_and_name_and_type"])
+    elif mode.startswith("paraformer_vad"):
+        from funasr.bin.asr_inference_paraformer import inference_modelscope_vad_punc
+        inference_pipeline = inference_modelscope_vad_punc(**kwargs)
+        return inference_pipeline(kwargs["data_path_and_name_and_type"])
     elif mode == "mfcca":
         from funasr.bin.asr_inference_mfcca import inference_modelscope
         return inference_modelscope(**kwargs)
