@@ -1,1 +1,1 @@
-../../TEMPLATE/README.md
+../TEMPLATE/README.md
