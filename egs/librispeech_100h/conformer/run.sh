@@ -19,8 +19,8 @@ lang=en
 token_type=bpe
 type=sound
 scp=wav.scp
-stage=1
-stop_stage=1
+stage=2
+stop_stage=2
 
 # feature configuration
 feats_dim=80
