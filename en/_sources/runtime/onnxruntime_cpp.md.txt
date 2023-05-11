@@ -146,7 +146,7 @@ For example:
 ./funasr-onnx-offline-rtf \
     --model-dir    ./asrmodel/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch \
     --quantize  true \
-    --wav-scp     ./aishell1_test.scp  \
+    --wav-path     ./aishell1_test.scp  \
     --thread-num 32
 ```
 
