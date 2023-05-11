@@ -8,7 +8,8 @@
 
 #include "precomp.h"
 
-class FsmnVad {
+namespace funasr {
+class FsmnVad : public VadModel {
 /**
  * Author: Speech Lab of DAMO Academy, Alibaba Group
  * Deep-FSMN for Large Vocabulary Continuous Speech Recognition
@@ -17,9 +18,9 @@ class FsmnVad {
 
 public:
     FsmnVad();
+    ~FsmnVad();
     void Test();
-    void InitVad(const std::string &vad_model, const std::string &vad_cmvn, const std::string &vad_config);
-
+    void InitVad(const std::string &vad_model, const std::string &vad_cmvn, const std::string &vad_config, int thread_num);
     std::vector<std::vector<int>> Infer(const std::vector<float> &waves);
     void Reset();
 
@@ -35,7 +36,7 @@ private:
     void FbankKaldi(float sample_rate, std::vector<std::vector<float>> &vad_feats,
                     const std::vector<float> &waves);
 
-    std::vector<std::vector<float>> &LfrCmvn(std::vector<std::vector<float>> &vad_feats);
+    void LfrCmvn(std::vector<std::vector<float>> &vad_feats);
 
     void Forward(
             const std::vector<std::vector<float>> &chunk_feats,
@@ -63,5 +64,5 @@ private:
     int lfr_n = VAD_LFR_N;
 };
 
-
+} // namespace funasr
 #endif //VAD_SERVER_FSMNVAD_H

@@ -5,6 +5,8 @@
 
 using namespace std;
 
+namespace funasr {
+
 template <typename T> class Tensor {
   private:
     void alloc_buff();
@@ -152,4 +154,6 @@ template <typename T> void Tensor<T>::dump(const char *mode)
     fwrite(buff, 1, buff_size * sizeof(T), fp);
     fclose(fp);
 }
+
+} // namespace funasr
 #endif

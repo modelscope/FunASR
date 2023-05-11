@@ -17,8 +17,8 @@ Overview
    :maxdepth: 1
    :caption: Installation
 
-   ./installation.md
-   ./docker.md
+   ./installation/installation.md
+   ./installation/docker.md
 
 .. toctree::
    :maxdepth: 1
@@ -44,6 +44,7 @@ Overview
    ./modelscope_pipeline/tp_pipeline.md
    ./modelscope_pipeline/sv_pipeline.md
    ./modelscope_pipeline/sd_pipeline.md
+   ./modelscope_pipeline/itn_pipeline.md
 
 .. toctree::
    :maxdepth: 1
@@ -56,8 +57,8 @@ Overview
    :maxdepth: 1
    :caption: Model Zoo
 
-   ./modelscope_models.md
-   ./huggingface_models.md
+   ./model_zoo/modelscope_models.md
+   ./model_zoo/huggingface_models.md
 
 .. toctree::
    :maxdepth: 1
@@ -85,25 +86,25 @@ Overview
    :maxdepth: 1
    :caption: Funasr Library
 
-   ./build_task.md
+   ./reference/build_task.md
 
 .. toctree::
    :maxdepth: 1
    :caption: Papers
 
-   ./papers.md
+   ./reference/papers.md
 
 .. toctree::
    :maxdepth: 1
    :caption: Application
 
-   ./application.md
+   ./reference/application.md
 
 .. toctree::
    :maxdepth: 1
    :caption: FQA
 
-   ./FQA.md
+   ./reference/FQA.md
 
 
 Indices and tables

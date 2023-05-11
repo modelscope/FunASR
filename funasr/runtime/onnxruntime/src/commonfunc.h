@@ -1,10 +1,18 @@
 #pragma once 
 #include <algorithm>
+
+namespace funasr {
 typedef struct
 {
     std::string msg;
     float  snippet_time;
 }FUNASR_RECOG_RESULT;
+
+typedef struct
+{
+    std::vector<std::vector<int>>* segments;
+    float  snippet_time;
+}FUNASR_VAD_RESULT;
 
 
 #ifdef _WIN32
@@ -52,3 +60,4 @@ template <class ForwardIterator>
 inline static size_t Argmax(ForwardIterator first, ForwardIterator last) {
     return std::distance(first, std::max_element(first, last));
 }
+} // namespace funasr

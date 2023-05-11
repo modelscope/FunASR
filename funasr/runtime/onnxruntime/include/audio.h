@@ -1,16 +1,17 @@
-
 #ifndef AUDIO_H
 #define AUDIO_H
 
 #include <queue>
 #include <stdint.h>
-#include "model.h"
+#include "vad-model.h"
+#include "offline-stream.h"
 
 #ifndef WAV_HEADER_SIZE
 #define WAV_HEADER_SIZE 44
 #endif
 
 using namespace std;
+namespace funasr {
 
 class AudioFrame {
   private:
@@ -54,9 +55,11 @@ class Audio {
     int FetchChunck(float *&dout, int len);
     int Fetch(float *&dout, int &len, int &flag);
     void Padding();
-    void Split(Model* recog_obj);
+    void Split(OfflineStream* offline_streamj);
+    void Split(VadModel* vad_obj, vector<std::vector<int>>& vad_segments);
     float GetTimeLen();
     int GetQueueSize() { return (int)frame_queue.size(); }
 };
 
+} // namespace funasr
 #endif

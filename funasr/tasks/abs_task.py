@@ -555,6 +555,12 @@ class AbsTask(ABC):
             help="The number of gradient accumulation",
         )
         group.add_argument(
+            "--bias_grad_times",
+            type=float,
+            default=1.0,
+            help="To scale the gradient of contextual related params",
+        )
+        group.add_argument(
             "--no_forward_run",
             type=str2bool,
             default=False,

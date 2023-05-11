@@ -156,8 +156,6 @@ def inference_modelscope(
     
     if batch_size > 1:
         raise NotImplementedError("batch decoding is not implemented")
-    if ngpu > 1:
-        raise NotImplementedError("only single GPU decoding is supported")
 
     logging.basicConfig(
         level=log_level,
@@ -168,7 +166,7 @@ def inference_modelscope(
         device = "cuda"
     else:
         device = "cpu"
-
+        batch_size = 1
     # 1. Set random-seed
     set_all_random_seed(seed)
 
@@ -243,7 +241,6 @@ def inference_modelscope(
                         item = {'key': keys[i], 'value': results[i]}
                         vad_results.append(item)
                         if writer is not None:
-                            results[i] = json.loads(results[i])
                             ibest_writer["text"][keys[i]] = "{}".format(results[i])
 
         return vad_results

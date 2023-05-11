@@ -10,7 +10,7 @@
 #endif
 
 #include <glog/logging.h>
-#include "libfunasrapi.h"
+#include "funasrruntime.h"
 #include "tclap/CmdLine.h"
 #include "com-define.h"
 
@@ -39,7 +39,7 @@ void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list,
     // warm up
     for (size_t i = 0; i < 1; i++)
     {
-        FUNASR_RESULT result=FunASRRecogFile(asr_handle, wav_list[0].c_str(), RASR_NONE, NULL);
+        FUNASR_RESULT result=FunASRInfer(asr_handle, wav_list[0].c_str(), RASR_NONE, NULL, 16000);
     }
 
     while (true) {
@@ -50,7 +50,7 @@ void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list,
         }
 
         gettimeofday(&start, NULL);
-        FUNASR_RESULT result=FunASRRecogFile(asr_handle, wav_list[i].c_str(), RASR_NONE, NULL);
+        FUNASR_RESULT result=FunASRInfer(asr_handle, wav_list[i].c_str(), RASR_NONE, NULL, 16000);
 
         gettimeofday(&end, NULL);
         seconds = (end.tv_sec - start.tv_sec);
@@ -77,6 +77,15 @@ void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list,
     }
 }
 
+bool is_target_file(const std::string& filename, const std::string target) {
+    std::size_t pos = filename.find_last_of(".");
+    if (pos == std::string::npos) {
+        return false;
+    }
+    std::string extension = filename.substr(pos + 1);
+    return (extension == target);
+}
+
 void GetValue(TCLAP::ValueArg<std::string>& value_arg, string key, std::map<std::string, std::string>& model_path)
 {
     if (value_arg.isSet()){
@@ -91,42 +100,22 @@ int main(int argc, char *argv[])
     FLAGS_logtostderr = true;
 
     TCLAP::CmdLine cmd("funasr-onnx-offline-rtf", ' ', "1.0");
-    TCLAP::ValueArg<std::string> vad_model("", VAD_MODEL_PATH, "vad model path", false, "", "string");
-    TCLAP::ValueArg<std::string> vad_cmvn("", VAD_CMVN_PATH, "vad cmvn path", false, "", "string");
-    TCLAP::ValueArg<std::string> vad_config("", VAD_CONFIG_PATH, "vad config path", false, "", "string");
+    TCLAP::ValueArg<std::string>    model_dir("", MODEL_DIR, "the model path, which contains model.onnx, config.yaml, am.mvn", true, "", "string");
+    TCLAP::ValueArg<std::string>    quantize("", QUANTIZE, "false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir", false, "false", "string");
 
-    TCLAP::ValueArg<std::string> am_model("", AM_MODEL_PATH, "am model path", false, "", "string");
-    TCLAP::ValueArg<std::string> am_cmvn("", AM_CMVN_PATH, "am cmvn path", false, "", "string");
-    TCLAP::ValueArg<std::string> am_config("", AM_CONFIG_PATH, "am config path", false, "", "string");
-
-    TCLAP::ValueArg<std::string> punc_model("", PUNC_MODEL_PATH, "punc model path", false, "", "string");
-    TCLAP::ValueArg<std::string> punc_config("", PUNC_CONFIG_PATH, "punc config path", false, "", "string");
-
-    TCLAP::ValueArg<std::string> wav_scp("", WAV_SCP, "wave scp path", true, "", "string");
+    TCLAP::ValueArg<std::string> wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", true, "", "string");
     TCLAP::ValueArg<std::int32_t> thread_num("", THREAD_NUM, "multi-thread num for rtf", true, 0, "int32_t");
 
-    cmd.add(vad_model);
-    cmd.add(vad_cmvn);
-    cmd.add(vad_config);
-    cmd.add(am_model);
-    cmd.add(am_cmvn);
-    cmd.add(am_config);
-    cmd.add(punc_model);
-    cmd.add(punc_config);
-    cmd.add(wav_scp);
+    cmd.add(model_dir);
+    cmd.add(quantize);
+    cmd.add(wav_path);
     cmd.add(thread_num);
     cmd.parse(argc, argv);
 
     std::map<std::string, std::string> model_path;
-    GetValue(vad_model, VAD_MODEL_PATH, model_path);
-    GetValue(vad_cmvn, VAD_CMVN_PATH, model_path);
-    GetValue(vad_config, VAD_CONFIG_PATH, model_path);
-    GetValue(am_model, AM_MODEL_PATH, model_path);
-    GetValue(am_cmvn, AM_CMVN_PATH, model_path);
-    GetValue(am_config, AM_CONFIG_PATH, model_path);
-    GetValue(punc_model, PUNC_MODEL_PATH, model_path);
-    GetValue(punc_config, PUNC_CONFIG_PATH, model_path);
-    GetValue(wav_scp, WAV_SCP, model_path);
+    GetValue(model_dir, MODEL_DIR, model_path);
+    GetValue(quantize, QUANTIZE, model_path);
+    GetValue(wav_path, WAV_PATH, model_path);
 
     struct timeval start, end;
     gettimeofday(&start, NULL);
@@ -145,10 +134,14 @@ int main(int argc, char *argv[])
 
     // read wav_scp
     vector<string> wav_list;
-    if(model_path.find(WAV_SCP)!=model_path.end()){
-        ifstream in(model_path.at(WAV_SCP));
+    string wav_path_ = model_path.at(WAV_PATH);
+    if(is_target_file(wav_path_, "wav") || is_target_file(wav_path_, "pcm")){
+        wav_list.emplace_back(wav_path_);
+    }
+    else if(is_target_file(wav_path_, "scp")){
+        ifstream in(wav_path_);
         if (!in.is_open()) {
-            LOG(ERROR) << "Failed to open file: " << model_path.at(WAV_SCP);
+            LOG(ERROR) << "Failed to open file: " << model_path.at(WAV_SCP) ;
             return 0;
         }
         string line;
@@ -160,6 +153,9 @@ int main(int argc, char *argv[])
             wav_list.emplace_back(column2); 
         }
         in.close();
+    }else{
+        LOG(ERROR)<<"Please check the wav extension!";
+        exit(-1);
     }
 
     // 多线程测试

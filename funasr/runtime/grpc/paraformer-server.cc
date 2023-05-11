@@ -31,7 +31,7 @@ using paraformer::Response;
 using paraformer::ASR;
 
 ASRServicer::ASRServicer(std::map<std::string, std::string>& model_path) {
-    AsrHanlde=FunASRInit(model_path, 1);
+    AsrHanlde=FunOfflineInit(model_path, 1);
     std::cout << "ASRServicer init" << std::endl;
     init_flag = 0;
 }
@@ -137,7 +137,7 @@ grpc::Status ASRServicer::Recognize(
                     stream->Write(res);
                 }
                 else {
-                    FUNASR_RESULT Result= FunASRRecogPCMBuffer(AsrHanlde, tmp_data.c_str(), data_len_int, 16000, RASR_NONE, NULL);
+                    FUNASR_RESULT Result= FunOfflineInferBuffer(AsrHanlde, tmp_data.c_str(), data_len_int, RASR_NONE, NULL, 16000);
                     std::string asr_result = ((FUNASR_RECOG_RESULT*)Result)->msg;
 
                     auto end_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
@@ -204,38 +204,30 @@ int main(int argc, char* argv[]) {
     FLAGS_logtostderr = true;
 
     TCLAP::CmdLine cmd("paraformer-server", ' ', "1.0");
-    TCLAP::ValueArg<std::string> vad_model("", VAD_MODEL_PATH, "vad model path", false, "", "string");
-    TCLAP::ValueArg<std::string> vad_cmvn("", VAD_CMVN_PATH, "vad cmvn path", false, "", "string");
-    TCLAP::ValueArg<std::string> vad_config("", VAD_CONFIG_PATH, "vad config path", false, "", "string");
+    TCLAP::ValueArg<std::string>    model_dir("", MODEL_DIR, "the asr model path, which contains model.onnx, config.yaml, am.mvn", true, "", "string");
+    TCLAP::ValueArg<std::string>    quantize("", QUANTIZE, "false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir", false, "false", "string");
+    TCLAP::ValueArg<std::string>    vad_dir("", VAD_DIR, "the vad model path, which contains model.onnx, vad.yaml, vad.mvn", false, "", "string");
+    TCLAP::ValueArg<std::string>    vad_quant("", VAD_QUANT, "false (Default), load the model of model.onnx in vad_dir. If set true, load the model of model_quant.onnx in vad_dir", false, "false", "string");
+    TCLAP::ValueArg<std::string>    punc_dir("", PUNC_DIR, "the punc model path, which contains model.onnx, punc.yaml", false, "", "string");
+    TCLAP::ValueArg<std::string>    punc_quant("", PUNC_QUANT, "false (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "false", "string");
+    TCLAP::ValueArg<std::string>    port_id("", PORT_ID, "port id", true, "", "string");
 
-    TCLAP::ValueArg<std::string> am_model("", AM_MODEL_PATH, "am model path", true, "", "string");
-    TCLAP::ValueArg<std::string> am_cmvn("", AM_CMVN_PATH, "am cmvn path", true, "", "string");
-    TCLAP::ValueArg<std::string> am_config("", AM_CONFIG_PATH, "am config path", true, "", "string");
-
-    TCLAP::ValueArg<std::string> punc_model("", PUNC_MODEL_PATH, "punc model path", false, "", "string");
-    TCLAP::ValueArg<std::string> punc_config("", PUNC_CONFIG_PATH, "punc config path", false, "", "string");
-    TCLAP::ValueArg<std::string> port_id("", PORT_ID, "port id", true, "", "string");
-
-    cmd.add(vad_model);
-    cmd.add(vad_cmvn);
-    cmd.add(vad_config);
-    cmd.add(am_model);
-    cmd.add(am_cmvn);
-    cmd.add(am_config);
-    cmd.add(punc_model);
-    cmd.add(punc_config);
+    cmd.add(model_dir);
+    cmd.add(quantize);
+    cmd.add(vad_dir);
+    cmd.add(vad_quant);
+    cmd.add(punc_dir);
+    cmd.add(punc_quant);
     cmd.add(port_id);
     cmd.parse(argc, argv);
 
     std::map<std::string, std::string> model_path;
-    GetValue(vad_model, VAD_MODEL_PATH, model_path);
-    GetValue(vad_cmvn, VAD_CMVN_PATH, model_path);
-    GetValue(vad_config, VAD_CONFIG_PATH, model_path);
-    GetValue(am_model, AM_MODEL_PATH, model_path);
-    GetValue(am_cmvn, AM_CMVN_PATH, model_path);
-    GetValue(am_config, AM_CONFIG_PATH, model_path);
-    GetValue(punc_model, PUNC_MODEL_PATH, model_path);
-    GetValue(punc_config, PUNC_CONFIG_PATH, model_path);
+    GetValue(model_dir, MODEL_DIR, model_path);
+    GetValue(quantize, QUANTIZE, model_path);
+    GetValue(vad_dir, VAD_DIR, model_path);
+    GetValue(vad_quant, VAD_QUANT, model_path);
+    GetValue(punc_dir, PUNC_DIR, model_path);
+    GetValue(punc_quant, PUNC_QUANT, model_path);
     GetValue(port_id, PORT_ID, model_path);
 
     RunServer(model_path);

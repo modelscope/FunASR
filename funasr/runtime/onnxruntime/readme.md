@@ -41,41 +41,113 @@ make
 ```
 ## Run the demo
 
+### funasr-onnx-offline
 ```shell
-./funasr-onnx-offline     [--wav-scp <string>] [--wav-path <string>]
-                          [--punc-config <string>] [--punc-model <string>]
-                          --am-config <string> --am-cmvn <string>
-                          --am-model <string> [--vad-config <string>]
-                          [--vad-cmvn <string>] [--vad-model <string>] [--]
-                          [--version] [-h]
+./funasr-onnx-offline     --model-dir <string> [--quantize <string>]
+                          [--vad-dir <string>] [--vad-quant <string>]
+                          [--punc-dir <string>] [--punc-quant <string>]
+                          --wav-path <string> [--] [--version] [-h]
 Where:
-   --wav-scp <string>
-     wave scp path
+   --model-dir <string>
+     (required)  the asr model path, which contains model.onnx, config.yaml, am.mvn
+   --quantize <string>
+     false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir
+
+   --vad-dir <string>
+     the vad model path, which contains model.onnx, vad.yaml, vad.mvn
+   --vad-quant <string>
+     false (Default), load the model of model.onnx in vad_dir. If set true, load the model of model_quant.onnx in vad_dir
+
+   --punc-dir <string>
+     the punc model path, which contains model.onnx, punc.yaml
+   --punc-quant <string>
+     false (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir
+
    --wav-path <string>
-     wave file path
-
-   --punc-config <string>
-     punc config path
-   --punc-model <string>
-     punc model path
-
-   --am-config <string>
-     (required)  am config path
-   --am-cmvn <string>
-     (required)  am cmvn path
-   --am-model <string>
-     (required)  am model path
-
-   --vad-config <string>
-     vad config path
-   --vad-cmvn <string>
-     vad cmvn path
-   --vad-model <string>
-     vad model path
+     (required)  the input could be: 
+      wav_path, e.g.: asr_example.wav;
+      pcm_path, e.g.: asr_example.pcm; 
+      wav.scp, kaldi style wav list (wav_id \t wav_path)
   
-   Required: --am-config <string> --am-cmvn <string> --am-model <string> 
-   If use vad, please add: [--vad-config <string>] [--vad-cmvn <string>] [--vad-model <string>]
-   If use punc, please add: [--punc-config <string>] [--punc-model <string>] 
+   Required: --model-dir <string> --wav-path <string>
+   If use vad, please add: --vad-dir <string>
+   If use punc, please add: --punc-dir <string>
+
+For example:
+./funasr-onnx-offline \
+    --model-dir    ./asrmodel/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch \
+    --quantize  true \
+    --vad-dir   ./asrmodel/speech_fsmn_vad_zh-cn-16k-common-pytorch \
+    --punc-dir  ./asrmodel/punc_ct-transformer_zh-cn-common-vocab272727-pytorch \
+    --wav-path    ./vad_example.wav
+```
+
+### funasr-onnx-offline-vad
+```shell
+./funasr-onnx-offline-vad     --model-dir <string> [--quantize <string>]
+                              --wav-path <string> [--] [--version] [-h]
+Where:
+   --model-dir <string>
+     (required)  the vad model path, which contains model.onnx, vad.yaml, vad.mvn
+   --quantize <string>
+     false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir
+   --wav-path <string>
+     (required)  the input could be: 
+      wav_path, e.g.: asr_example.wav;
+      pcm_path, e.g.: asr_example.pcm; 
+      wav.scp, kaldi style wav list (wav_id \t wav_path)
+
+   Required: --model-dir <string> --wav-path <string>
+
+For example:
+./funasr-onnx-offline-vad \
+    --model-dir   ./asrmodel/speech_fsmn_vad_zh-cn-16k-common-pytorch \
+    --wav-path    ./vad_example.wav
+```
+
+### funasr-onnx-offline-punc
+```shell
+./funasr-onnx-offline-punc    --model-dir <string> [--quantize <string>]
+                              --txt-path <string> [--] [--version] [-h]
+Where:
+   --model-dir <string>
+     (required)  the punc model path, which contains model.onnx, punc.yaml
+   --quantize <string>
+     false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir
+   --txt-path <string>
+     (required)  txt file path, one sentence per line
+
+   Required: --model-dir <string> --txt-path <string>
+
+For example:
+./funasr-onnx-offline-punc \
+    --model-dir  ./asrmodel/punc_ct-transformer_zh-cn-common-vocab272727-pytorch \
+    --txt-path   ./punc_example.txt
+```
+### funasr-onnx-offline-rtf
+```shell
+./funasr-onnx-offline-rtf     --model-dir <string> [--quantize <string>]
+                              --wav-path <string> --thread-num <int32_t>
+                              [--] [--version] [-h]
+Where:
+   --thread-num <int32_t>
+     (required)  multi-thread num for rtf
+   --model-dir <string>
+     (required)  the model path, which contains model.onnx, config.yaml, am.mvn
+   --quantize <string>
+     false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir
+   --wav-path <string>
+     (required)  the input could be: 
+      wav_path, e.g.: asr_example.wav;
+      pcm_path, e.g.: asr_example.pcm; 
+      wav.scp, kaldi style wav list (wav_id \t wav_path)
+
+For example:
+./funasr-onnx-offline-rtf \
+    --model-dir    ./asrmodel/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch \
+    --quantize  true \
+    --wav-path     ./aishell1_test.scp  \
+    --thread-num 32
 ```
 
 ## Acknowledge

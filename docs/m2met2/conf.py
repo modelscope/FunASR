@@ -7,7 +7,7 @@ import guzzle_sphinx_theme
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'm2met2'
+project = 'MULTI-PARTY MEETING TRANSCRIPTION CHALLENGE 2.0'
 copyright = '2023, Speech Lab, Alibaba Group; ASLP Group, Northwestern Polytechnical University'
 author = 'Speech Lab, Alibaba Group; Audio, Speech and Language Processing Group, Northwestern Polytechnical University'
 

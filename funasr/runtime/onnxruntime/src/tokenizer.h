@@ -6,6 +6,7 @@
 #pragma once
 #include <yaml-cpp/yaml.h>
 
+namespace funasr {
 class CTokenizer {
 private:
 
@@ -17,6 +18,7 @@ public:
 
 	CTokenizer(const char* sz_yamlfile);
 	CTokenizer();
+	~CTokenizer();
 	bool OpenYaml(const char* sz_yamlfile);
 	void ReadYaml(const YAML::Node& node);
 	vector<string> Id2String(vector<int> input);
@@ -30,3 +32,5 @@ public:
 	void Tokenize(const char* str_info, vector<string>& str_out, vector<int>& id_out);
 
 };
+
+} // namespace funasr

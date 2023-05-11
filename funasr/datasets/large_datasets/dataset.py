@@ -101,7 +101,7 @@ class AudioDataset(IterableDataset):
                 if data_type == "kaldi_ark":
                     ark_reader = ReadHelper('ark:{}'.format(data_file))
                     reader_list.append(ark_reader)
-                elif data_type == "text" or data_type == "sound":
+                elif data_type == "text" or data_type == "sound" or data_type == 'text_hotword':
                     text_reader = open(data_file, "r")
                     reader_list.append(text_reader)
                 elif data_type == "none":
@@ -131,6 +131,13 @@ class AudioDataset(IterableDataset):
                         sample_dict["sampling_rate"] = sampling_rate
                         if data_name == "speech":
                             sample_dict["key"] = key
+                    elif data_type == "text_hotword":
+                        text = item
+                        segs = text.strip().split()
+                        sample_dict[data_name] = segs[1:]
+                        if "key" not in sample_dict:
+                            sample_dict["key"] = segs[0]
+                        sample_dict['hw_tag'] = 1
                     else:
                         text = item
                         segs = text.strip().split()
@@ -167,14 +174,38 @@ def Dataset(data_list_file,
     shuffle = conf.get('shuffle', True)
     data_names = conf.get("data_names", "speech,text")
     data_types = conf.get("data_types", "kaldi_ark,text")
-    dataset = AudioDataset(scp_lists, data_names, data_types, frontend_conf=frontend_conf, shuffle=shuffle, mode=mode)
+
+    pre_hwfile = conf.get("pre_hwlist", None)
+    pre_prob = conf.get("pre_prob", 0)  # unused yet
+
+    hw_config = {"sample_rate": conf.get("sample_rate", 0.6),
+                 "double_rate": conf.get("double_rate", 0.1),
+                 "hotword_min_length": conf.get("hotword_min_length", 2),
+                 "hotword_max_length": conf.get("hotword_max_length", 8),
+                 "pre_prob": conf.get("pre_prob", 0.0)}
+
+    if pre_hwfile is not None:
+        pre_hwlist = []
+        with open(pre_hwfile, 'r') as fin:
+            for line in fin.readlines():
+                pre_hwlist.append(line.strip())
+    else:
+        pre_hwlist = None
+
+    dataset = AudioDataset(scp_lists, 
+                           data_names, 
+                           data_types, 
+                           frontend_conf=frontend_conf, 
+                           shuffle=shuffle, 
+                           mode=mode, 
+                           )
 
     filter_conf = conf.get('filter_conf', {})
     filter_fn = partial(filter, **filter_conf)
     dataset = FilterIterDataPipe(dataset, fn=filter_fn)
 
     if "text" in data_names:
-        vocab = {'vocab': dict, 'seg_dict': seg_dict, 'punc_dict': punc_dict, 'bpe_tokenizer': bpe_tokenizer}
+        vocab = {'vocab': dict, 'seg_dict': seg_dict, 'punc_dict': punc_dict, 'bpe_tokenizer': bpe_tokenizer, 'hw_config': hw_config}
         tokenize_fn = partial(tokenize, **vocab)
         dataset = MapperIterDataPipe(dataset, fn=tokenize_fn)
 

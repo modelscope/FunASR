@@ -1,7 +1,7 @@
 # Voice Activity Detection
 
 > **Note**: 
-> The modelscope pipeline supports all the models in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope) to inference and finetune. Here we take the model of FSMN-VAD as example to demonstrate the usage.
+> The modelscope pipeline supports all the models in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope) to inference and finetune. Here we take the model of FSMN-VAD as example to demonstrate the usage.
 
 ## Inference
 
@@ -46,7 +46,7 @@ Full code of demo, please ref to [demo](https://github.com/alibaba-damo-academy/
 ### API-reference
 #### Define pipeline
 - `task`: `Tasks.voice_activity_detection`
-- `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
+- `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
 - `ngpu`: `1` (Default), decoding on GPU. If ngpu=0, decoding on CPU
 - `ncpu`: `1` (Default), sets the number of threads used for intraop parallelism on CPU 
 - `output_dir`: `None` (Default), the output path of results if set
@@ -70,7 +70,7 @@ Full code of demo, please ref to [demo](https://github.com/alibaba-damo-academy/
 FunASR also offer recipes [egs_modelscope/vad/TEMPLATE/infer.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/vad/TEMPLATE/infer.sh) to decode with multi-thread CPUs, or multi GPUs.
 
 #### Settings of `infer.sh`
-- `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
+- `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
 - `data_dir`: the dataset dir needs to include `wav.scp`
 - `output_dir`: output dir of the recognition results
 - `batch_size`: `64` (Default), batch size of inference on gpu
@@ -83,7 +83,7 @@ FunASR also offer recipes [egs_modelscope/vad/TEMPLATE/infer.sh](https://github.
 #### Decode with multi GPUs:
 ```shell
     bash infer.sh \
-    --model "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch" \
+    --model "damo/speech_fsmn_vad_zh-cn-16k-common-pytorch" \
     --data_dir "./data/test" \
     --output_dir "./results" \
     --batch_size 1 \
@@ -93,11 +93,11 @@ FunASR also offer recipes [egs_modelscope/vad/TEMPLATE/infer.sh](https://github.
 #### Decode with multi-thread CPUs:
 ```shell
     bash infer.sh \
-    --model "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch" \
+    --model "damo/speech_fsmn_vad_zh-cn-16k-common-pytorch" \
     --data_dir "./data/test" \
     --output_dir "./results" \
     --gpu_inference false \
-    --njob 1
+    --njob 64
 ```
 
 ## Finetune with pipeline

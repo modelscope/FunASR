@@ -1,11 +1,13 @@
 /**
  * Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
  * MIT License  (https://opensource.org/licenses/MIT)
+ * Contributed by zhuzizyf(China Telecom).
 */
 
 #include "online-feature.h"
 #include <utility>
 
+namespace funasr {
 OnlineFeature::OnlineFeature(int sample_rate, knf::FbankOptions fbank_opts, int lfr_m, int lfr_n,
                              std::vector<std::vector<float>> cmvns)
   : sample_rate_(sample_rate),
@@ -131,3 +133,5 @@ void OnlineFeature::OnlineFbank(vector<std::vector<float>> &vad_feats,
   }
 
 }
+
+} // namespace funasr

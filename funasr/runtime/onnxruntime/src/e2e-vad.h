@@ -1,8 +1,10 @@
 /**
  * Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
  * MIT License  (https://opensource.org/licenses/MIT)
- * Collaborators: zhuzizyf(China Telecom Shanghai)
+ * Contributed by zhuzizyf(China Telecom).
 */
+
+#pragma once 
 
 #include <utility>
 #include <vector>
@@ -14,7 +16,7 @@
 #include <numeric>
 #include <cassert>
 
-
+namespace funasr {
 enum class VadStateMachine {
     kVadInStateStartPointNotDetected = 1,
     kVadInStateInSpeechSegment = 2,
@@ -441,7 +443,7 @@ private:
         } else {
           data_buf_all_size += waveform.size();
         }
-        for (int offset = 0; offset < waveform.size() - frame_sample_length + 1; offset += frame_shift_length) {
+        for (int offset = 0; offset + frame_sample_length -1 < waveform.size(); offset += frame_shift_length) {
             float sum = 0.0;
             for (int i = 0; i < frame_sample_length; i++) {
                 sum += waveform[offset + i] * waveform[offset + i];
@@ -492,7 +494,7 @@ private:
         if (cur_seg.end_ms != start_frm * vad_opts.frame_in_ms) {
             std::cout << "warning\n";
         }
-        int out_pos = (int) cur_seg.buffer.size();
+
         int data_to_pop;
         if (end_point_is_sent_end) {
             data_to_pop = expected_sample_number;
@@ -505,14 +507,7 @@ private:
             expected_sample_number = data_buf_size;
         }
         cur_seg.doa = 0;
-        for (int sample_cpy_out = 0; sample_cpy_out < data_to_pop; sample_cpy_out++) {
-            cur_seg.buffer.push_back(data_buf.back());
-            out_pos++;
-        }
-        for (int sample_cpy_out = data_to_pop; sample_cpy_out < expected_sample_number; sample_cpy_out++) {
-            cur_seg.buffer.push_back(data_buf.back());
-            out_pos++;
-        }
+        
         if (cur_seg.end_ms != start_frm * vad_opts.frame_in_ms) {
             std::cout << "Something wrong with the VAD algorithm\n";
         }
@@ -787,5 +782,4 @@ private:
 
 };
 
-
-
+} // namespace funasr

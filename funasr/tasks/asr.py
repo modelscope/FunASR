@@ -42,6 +42,7 @@ from funasr.models.decoder.rnnt_decoder import RNNTDecoder
 from funasr.models.joint_net.joint_network import JointNetwork
 from funasr.models.e2e_asr import ESPnetASRModel
 from funasr.models.e2e_asr_paraformer import Paraformer, ParaformerOnline, ParaformerBert, BiCifParaformer, ContextualParaformer
+from funasr.models.e2e_asr_contextual_paraformer import NeatContextualParaformer
 from funasr.models.e2e_tp import TimestampPredictor
 from funasr.models.e2e_asr_mfcca import MFCCA
 from funasr.models.e2e_uni_asr import UniASR
@@ -128,6 +129,7 @@ model_choices = ClassChoices(
         paraformer_bert=ParaformerBert,
         bicif_paraformer=BiCifParaformer,
         contextual_paraformer=ContextualParaformer,
+        neatcontextual_paraformer=NeatContextualParaformer,
         mfcca=MFCCA,
         timestamp_prediction=TimestampPredictor,
     ),
@@ -1647,7 +1649,6 @@ class ASRTransducerTask(AbsTask):
             normalize = None
 
         # 4. Encoder
-
         if getattr(args, "encoder", None) is not None:
             encoder_class = encoder_choices.get_class(args.encoder)
             encoder = encoder_class(input_size, **args.encoder_conf)
@@ -1683,7 +1684,7 @@ class ASRTransducerTask(AbsTask):
 
         # 7. Build model
 
-        if encoder.unified_model_training:
+        if hasattr(encoder, 'unified_model_training') and encoder.unified_model_training:
             model = UnifiedTransducerModel(
                 vocab_size=vocab_size,
                 token_list=token_list,

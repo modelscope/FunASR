@@ -64,7 +64,7 @@ class CT_Transformer():
             mini_sentence = mini_sentences[mini_sentence_i]
             mini_sentence_id = mini_sentences_id[mini_sentence_i]
             mini_sentence = cache_sent + mini_sentence
-            mini_sentence_id = np.array(cache_sent_id + mini_sentence_id, dtype='int64')
+            mini_sentence_id = np.array(cache_sent_id + mini_sentence_id, dtype='int32')
             data = {
                 "text": mini_sentence_id[None,:],
                 "text_lengths": np.array([len(mini_sentence_id)], dtype='int32'),
@@ -148,7 +148,7 @@ class CT_Transformer_VadRealtime(CT_Transformer):
         else:
             precache = ""
             cache = []
-        full_text = precache + text
+        full_text = precache + " " + text
         split_text = code_mix_split_words(full_text)
         split_text_id = self.converter.tokens2ids(split_text)
         mini_sentences = split_to_mini_sentence(split_text, split_size)
@@ -166,7 +166,7 @@ class CT_Transformer_VadRealtime(CT_Transformer):
             mini_sentence = mini_sentences[mini_sentence_i]
             mini_sentence_id = mini_sentences_id[mini_sentence_i]
             mini_sentence = cache_sent + mini_sentence
-            mini_sentence_id = np.concatenate((cache_sent_id, mini_sentence_id), axis=0)
+            mini_sentence_id = np.concatenate((cache_sent_id, mini_sentence_id), axis=0,dtype='int32')
             text_length = len(mini_sentence_id)
             data = {
                 "input": mini_sentence_id[None,:],

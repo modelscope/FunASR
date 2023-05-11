@@ -19,7 +19,7 @@ stage 6: Generate speaker profiles (Stage 6 takes a lot of time).
 stage 7 - 9: Language model training (Optional).
 stage 10 - 11: ASR training (SA-ASR requires loading the pre-trained ASR model).
 stage 12: SA-ASR training.
-stage 13 - 18: Inference and evaluation.
+stage 13 - 16: Inference and evaluation.
 ```
 Before running `run_m2met_2023_infer.sh`, you need to place the new test set `Test_2023_Ali_far` (to be released after the challenge starts) in the `./dataset` directory, which contains only raw audios. Then put the given `wav.scp`, `wav_raw.scp`, `segments`, `utt2spk` and `spk2utt` in the `./data/Test_2023_Ali_far` directory.  
 ```shell
@@ -37,6 +37,10 @@ stage 2: Generate speaker profiles for inference.
 stage 3: Inference.
 stage 4: Generation of SA-ASR results required for final submission.
 ```
+
+The baseline model is available on [ModelScope](https://www.modelscope.cn/models/damo/speech_saasr_asr-zh-cn-16k-alimeeting/summary).
+After generate stats of AliMeeting corpus(stage 10 in `run.sh`), you can set the `infer_with_pretrained_model=true` in `run.sh` to infer with our official baseline model released on ModelScope without training.
+
 # Format of Final Submission
 Finally, you need to submit a file called `text_spk_merge` with the following format:
 ```shell

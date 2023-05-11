@@ -6,8 +6,9 @@
 #include <fstream>
 #include "precomp.h"
 
-void FsmnVad::InitVad(const std::string &vad_model, const std::string &vad_cmvn, const std::string &vad_config) {
-    session_options_.SetIntraOpNumThreads(1);
+namespace funasr {
+void FsmnVad::InitVad(const std::string &vad_model, const std::string &vad_cmvn, const std::string &vad_config, int thread_num) {
+    session_options_.SetIntraOpNumThreads(thread_num);
     session_options_.SetGraphOptimizationLevel(ORT_ENABLE_ALL);
     session_options_.DisableCpuMemArena();
 
@@ -224,7 +225,7 @@ void FsmnVad::LoadCmvn(const char *filename)
     }
 }
 
-std::vector<std::vector<float>> &FsmnVad::LfrCmvn(std::vector<std::vector<float>> &vad_feats) {
+void FsmnVad::LfrCmvn(std::vector<std::vector<float>> &vad_feats) {
 
     std::vector<std::vector<float>> out_feats;
     int T = vad_feats.size();
@@ -263,7 +264,6 @@ std::vector<std::vector<float>> &FsmnVad::LfrCmvn(std::vector<std::vector<float>
         }
     }
     vad_feats = out_feats;
-    return vad_feats;
 }
 
 std::vector<std::vector<int>>
@@ -271,7 +271,7 @@ FsmnVad::Infer(const std::vector<float> &waves) {
     std::vector<std::vector<float>> vad_feats;
     std::vector<std::vector<float>> vad_probs;
     FbankKaldi(vad_sample_rate_, vad_feats, waves);
-    vad_feats = LfrCmvn(vad_feats);
+    LfrCmvn(vad_feats);
     Forward(vad_feats, &vad_probs);
 
     E2EVadModel vad_scorer = E2EVadModel();
@@ -296,5 +296,10 @@ void FsmnVad::Reset(){
 void FsmnVad::Test() {
 }
 
+FsmnVad::~FsmnVad() {
+}
+
 FsmnVad::FsmnVad():env_(ORT_LOGGING_LEVEL_ERROR, ""),session_options_{} {
 }
+
+} // namespace funasr
