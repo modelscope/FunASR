@@ -225,7 +225,7 @@ void FsmnVad::LoadCmvn(const char *filename)
     }
 }
 
-std::vector<std::vector<float>> &FsmnVad::LfrCmvn(std::vector<std::vector<float>> &vad_feats) {
+void FsmnVad::LfrCmvn(std::vector<std::vector<float>> &vad_feats) {
 
     std::vector<std::vector<float>> out_feats;
     int T = vad_feats.size();
@@ -264,7 +264,6 @@ std::vector<std::vector<float>> &FsmnVad::LfrCmvn(std::vector<std::vector<float>
         }
     }
     vad_feats = out_feats;
-    return vad_feats;
 }
 
 std::vector<std::vector<int>>
@@ -272,7 +271,7 @@ FsmnVad::Infer(const std::vector<float> &waves) {
     std::vector<std::vector<float>> vad_feats;
     std::vector<std::vector<float>> vad_probs;
     FbankKaldi(vad_sample_rate_, vad_feats, waves);
-    vad_feats = LfrCmvn(vad_feats);
+    LfrCmvn(vad_feats);
     Forward(vad_feats, &vad_probs);
 
     E2EVadModel vad_scorer = E2EVadModel();
