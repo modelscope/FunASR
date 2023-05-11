@@ -642,7 +642,16 @@ def inference_modelscope(
             # result = result_segments[0]
             text, token, token_int = result[0], result[1], result[2]
             time_stamp = None if len(result) < 5 else result[4]
-
+            # post process timestamp
+            offset_list = [0]
+            offset = 0
+            for i in range(1, len(time_stamp)):
+                if time_stamp[i][0] < time_stamp[i-1][1]:
+                    offset += time_stamp[i-1][1]
+                offset_list.append(offset)
+            for i in range(1, len(time_stamp)):
+                time_stamp[i][0] += offset_list[i]
+                time_stamp[i][1] += offset_list[i]
 
             if use_timestamp and time_stamp is not None:
                 postprocessed_result = postprocess_utils.sentence_postprocess(token, time_stamp)
