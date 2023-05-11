@@ -8,8 +8,8 @@ set -o pipefail
 ngpu=4
 device="0,1,2,3"
 
-stage=12
-stop_stage=13
+stage=1
+stop_stage=16
 
 
 train_set=Train_Ali_far
@@ -18,7 +18,7 @@ test_sets="Test_Ali_far"
 asr_config=conf/train_asr_conformer.yaml
 sa_asr_config=conf/train_sa_asr_conformer.yaml
 inference_config=conf/decode_asr_rnn.yaml
-infer_with_pretrained_model=true
+infer_with_pretrained_model=false
 download_sa_asr_model="damo/speech_saasr_asr-zh-cn-16k-alimeeting"
 
 lm_config=conf/train_lm_transformer.yaml
