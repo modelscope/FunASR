@@ -293,8 +293,8 @@ class Speech2Text:
                     text = None
 
                 if isinstance(self.asr_model, BiCifParaformer):
-                    _, timestamp = ts_prediction_lfr6_standard(us_alphas[i], 
-                                                            us_peaks[i], 
+                    _, timestamp = ts_prediction_lfr6_standard(us_alphas[i][:enc_len[i]*3], 
+                                                            us_peaks[i][:enc_len[i]*3], 
                                                             copy.copy(token), 
                                                             vad_offset=begin_time)
                     results.append((text, token, token_int, hyp, timestamp, enc_len_batch_total, lfr_factor))
