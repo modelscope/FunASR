@@ -103,15 +103,6 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     spm_train --input=${feats_dir}/data/lang_char/input.txt --vocab_size=${nbpe} --model_type=${bpemode} --model_prefix=${bpemodel} --input_sentence_size=100000000
     spm_encode --model=${bpemodel}.model --output_format=piece < ${feats_dir}/data/lang_char/input.txt | tr ' ' '\n' | sort | uniq | awk '{print $0}' >> ${dict}
     echo "<unk>" >> ${dict}
-    wc -l ${dict}
-
-    vocab_size=$(cat ${dict} | wc -l)
-    awk -v v=,${vocab_size} '{print $0v}' ${feat_train_dir}/text_shape > ${feat_train_dir}/text_shape.char
-    awk -v v=,${vocab_size} '{print $0v}' ${feat_dev_dir}/text_shape > ${feat_dev_dir}/text_shape.char
-    mkdir -p ${feats_dir}/asr_stats_fbank_zh_char/$train_set
-    mkdir -p ${feats_dir}/asr_stats_fbank_zh_char/$valid_set
-    cp ${feat_train_dir}/speech_shape ${feat_train_dir}/text_shape ${feat_train_dir}/text_shape.char ${feats_dir}/asr_stats_fbank_zh_char/$train_set
-    cp ${feat_dev_dir}/speech_shape ${feat_dev_dir}/text_shape ${feat_dev_dir}/text_shape.char ${feats_dir}/asr_stats_fbank_zh_char/$valid_set
 fi
 
 
