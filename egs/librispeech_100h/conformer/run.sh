@@ -166,7 +166,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
             exit 0
         fi
         mkdir -p "${_logdir}"
-        _data="${feats_dir}/${dumpdir}/${dset}"
+        _data="${feats_dir}/data/${dset}"
         key_file=${_data}/${scp}
         num_scp_file="$(<${key_file} wc -l)"
         _nj=$([ $inference_nj -le $num_scp_file ] && echo "$inference_nj" || echo "$num_scp_file")
