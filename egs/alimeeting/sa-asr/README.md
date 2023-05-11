@@ -12,7 +12,7 @@ dataset
 |—— Train_Ali_far
 |—— Train_Ali_near
 ```
-There are 18 stages in `run.sh`:
+There are 16 stages in `run.sh`:
 ```shell
 stage 1 - 5: Data preparation and processing.
 stage 6: Generate speaker profiles (Stage 6 takes a lot of time).
