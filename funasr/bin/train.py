@@ -160,6 +160,7 @@ def get_parser():
     )
     parser.add_argument(
         "--patience",
+        type=int_or_none,
         default=None,
         help="Number of epochs to wait without improvement "
              "before stopping the training",
