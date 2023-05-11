@@ -1,8 +1,8 @@
 encoder: conformer
 encoder_conf:
-    output_size: 512
-    attention_heads: 8
-    linear_units: 2048
+    output_size: 256
+    attention_heads: 4
+    linear_units: 1024
     num_blocks: 12
     dropout_rate: 0.1
     positional_dropout_rate: 0.1
@@ -19,7 +19,7 @@ encoder_conf:
 
 decoder: transformer
 decoder_conf:
-    attention_heads: 8
+    attention_heads: 4
     linear_units: 2048
     num_blocks: 6
     dropout_rate: 0.1
@@ -27,13 +27,25 @@ decoder_conf:
     self_attention_dropout_rate: 0.1
     src_attention_dropout_rate: 0.1
 
+# frontend related
+frontend: wav_frontend
+frontend_conf:
+    fs: 16000
+    window: hamming
+    n_mels: 80
+    frame_length: 25
+    frame_shift: 10
+    lfr_m: 1
+    lfr_n: 1
+
+# hybrid CTC/attention
 model_conf:
     ctc_weight: 0.3
     lsm_weight: 0.1
     length_normalized_loss: false
 
-accum_grad: 2
-max_epoch: 50
+accum_grad: 1
+max_epoch: 210
 patience: none
 init: none
 best_model_criterion:
@@ -44,11 +56,11 @@ keep_nbest_models: 10
 
 optim: adam
 optim_conf:
-    lr: 0.0025
+    lr: 0.002
     weight_decay: 0.000001
 scheduler: warmuplr
 scheduler_conf:
-    warmup_steps: 40000
+    warmup_steps: 15000
 
 specaug: specaug
 specaug_conf:
@@ -64,7 +76,7 @@ specaug_conf:
     time_mask_width_ratio_range:
     - 0.
     - 0.05
-    num_time_mask: 10
+    num_time_mask: 5
 
 dataset_conf:
     shuffle: True
