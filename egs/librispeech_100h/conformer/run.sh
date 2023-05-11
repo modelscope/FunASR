@@ -19,8 +19,8 @@ lang=en
 token_type=bpe
 type=sound
 scp=wav.scp
-stage=3
-stop_stage=4
+stage=0
+stop_stage=0
 
 # feature configuration
 feats_dim=80
@@ -79,8 +79,12 @@ fi
 if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     echo "stage 0: Data preparation"
     # Data preparation
-    for x in dev-clean dev-other test-clean test-other train-clean-100; do
-        local/data_prep.sh ${raw_data}/LibriSpeech/${x} ${feats_dir}/data/${x//-/_}
+#    for x in dev-clean dev-other test-clean test-other train-clean-100; do
+#        local/data_prep.sh ${raw_data}/LibriSpeech/${x} ${feats_dir}/data/${x//-/_}
+#    done
+    dev_sets="dev_clean dev_other"
+    for file in wav.scp text; do
+        ( for f in $dev_sets; do cat $feats_dir/data/$f/$file; done ) | sort -k1 > $feats_dir/data/$valid_set/$file || exit 1;
     done
 fi
 
