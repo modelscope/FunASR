@@ -1,7 +1,7 @@
 # Get Started
 Speaker Attributed Automatic Speech Recognition (SA-ASR) is a task proposed to solve "who spoke what". Specifically, the goal of SA-ASR is not only to obtain multi-speaker transcriptions, but also to identify the corresponding speaker for each utterance. The method used in this example is referenced in the paper: [End-to-End Speaker-Attributed ASR with Transformer](https://www.isca-speech.org/archive/pdfs/interspeech_2021/kanda21b_interspeech.pdf).  
 To run this receipe, first you need to install FunASR and ModelScope. ([installation](https://alibaba-damo-academy.github.io/FunASR/en/installation.html))  
-There are two startup scripts, `run.sh` for training and evaluating on the old eval and test sets, and `run_m2met_2023_infer.sh` for inference on the new test set of the Multi-Channel Multi-Party Meeting Transcription 2.0 ([M2MET2.0](https://alibaba-damo-academy.github.io/FunASR/m2met2/index.html)) Challenge.  
+There are two startup scripts, `run.sh` for training and evaluating on the old eval and test sets, and `run_m2met_2023_infer.sh` for inference on the new test set of the Multi-Channel Multi-Party Meeting Transcription 2.0 ([M2MeT2.0](https://alibaba-damo-academy.github.io/FunASR/m2met2/index.html)) Challenge.  
 Before running `run.sh`, you must manually download and unpack the [AliMeeting](http://www.openslr.org/119/) corpus and place it in the `./dataset` directory:
 ```shell
 dataset
@@ -19,7 +19,7 @@ stage 6: Generate speaker profiles (Stage 6 takes a lot of time).
 stage 7 - 9: Language model training (Optional).
 stage 10 - 11: ASR training (SA-ASR requires loading the pre-trained ASR model).
 stage 12: SA-ASR training.
-stage 13 - 18: Inference and evaluation.
+stage 13 - 16: Inference and evaluation.
 ```
 Before running `run_m2met_2023_infer.sh`, you need to place the new test set `Test_2023_Ali_far` (to be released after the challenge starts) in the `./dataset` directory, which contains only raw audios. Then put the given `wav.scp`, `wav_raw.scp`, `segments`, `utt2spk` and `spk2utt` in the `./data/Test_2023_Ali_far` directory.  
 ```shell
@@ -37,6 +37,10 @@ stage 2: Generate speaker profiles for inference.
 stage 3: Inference.
 stage 4: Generation of SA-ASR results required for final submission.
 ```
+
+The baseline model is available on [ModelScope](https://www.modelscope.cn/models/damo/speech_saasr_asr-zh-cn-16k-alimeeting/summary).
+After generate stats of AliMeeting corpus(stage 10 in `run.sh`), you can set the `infer_with_pretrained_model=true` in `run.sh` to infer with our official baseline model released on ModelScope without training.
+
 # Format of Final Submission
 Finally, you need to submit a file called `text_spk_merge` with the following format:
 ```shell
@@ -61,17 +65,17 @@ The results of the baseline system are as follows. The baseline results include 
 	</tr>
     <tr>
 	    <td>oracle profile</td>
-        <td>31.93</td>
-        <td>32.75</td>
-	    <td>48.56</td>
-        <td>53.33</td>
+        <td>32.05</td>
+        <td>32.70</td>
+	    <td>47.40</td>
+        <td>52.57</td>
 	</tr>
     <tr>
 	    <td>cluster profile</td>
-        <td>31.94</td>
-        <td>32.77</td>
-	    <td>55.49</td>
-        <td>58.17</td>
+        <td>32.05</td>
+        <td>32.70</td>
+	    <td>53.76</td>
+        <td>55.95</td>
 	</tr>
 </table>
 
