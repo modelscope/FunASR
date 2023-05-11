@@ -82,6 +82,7 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
 #    for x in dev-clean dev-other test-clean test-other train-clean-100; do
 #        local/data_prep.sh ${raw_data}/LibriSpeech/${x} ${feats_dir}/data/${x//-/_}
 #    done
+    mkdir $feats_dir/data/$valid_set
     dev_sets="dev_clean dev_other"
     for file in wav.scp text; do
         ( for f in $dev_sets; do cat $feats_dir/data/$f/$file; done ) | sort -k1 > $feats_dir/data/$valid_set/$file || exit 1;
