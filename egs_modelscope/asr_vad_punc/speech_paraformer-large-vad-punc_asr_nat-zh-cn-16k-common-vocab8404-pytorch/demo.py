@@ -10,7 +10,7 @@ if __name__ == '__main__':
         vad_model='damo/speech_fsmn_vad_zh-cn-16k-common-pytorch',
         punc_model='damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch',
         output_dir=output_dir,
-        batch_size=8,
+        batch_size=64,
     )
     rec_result = inference_pipeline(audio_in=audio_in)
     print(rec_result)

@@ -48,6 +48,8 @@ from funasr.bin.tp_inference import SpeechText2Timestamp
 from funasr.bin.vad_inference import Speech2VadSegment
 from funasr.bin.punctuation_infer import Text2Punc
 from funasr.utils.vad_utils import slice_padding_fbank
+from funasr.tasks.vad import VADTask
+from funasr.utils.timestamp_tools import time_stamp_sentence, ts_prediction_lfr6_standard
 
 class Speech2Text:
     """Speech2Text class
@@ -293,15 +295,14 @@ class Speech2Text:
                     text = self.tokenizer.tokens2text(token)
                 else:
                     text = None
-
+                timestamp = []
                 if isinstance(self.asr_model, BiCifParaformer):
                     _, timestamp = ts_prediction_lfr6_standard(us_alphas[i][:enc_len[i]*3], 
                                                             us_peaks[i][:enc_len[i]*3], 
                                                             copy.copy(token), 
                                                             vad_offset=begin_time)
-                    results.append((text, token, token_int, hyp, timestamp, enc_len_batch_total, lfr_factor))
-                else:
-                    results.append((text, token, token_int, hyp, [], enc_len_batch_total, lfr_factor))
+                results.append((text, token, token_int, hyp, timestamp, enc_len_batch_total, lfr_factor))
+
 
         # assert check_return_type(results)
         return results
@@ -471,7 +472,7 @@ def inference_modelscope(
         hotword_list_or_file = None
         if param_dict is not None:
             hotword_list_or_file = param_dict.get('hotword')
-        if 'hotword' in kwargs:
+        if 'hotword' in kwargs and kwargs['hotword'] is not None:
             hotword_list_or_file = kwargs['hotword']
         if hotword_list_or_file is not None or 'hotword' in kwargs:
             speech2text.hotword_list = speech2text.generate_hotwords_list(hotword_list_or_file)
@@ -1018,18 +1019,9 @@ def main(cmd=None):
     kwargs = vars(args)
     kwargs.pop("config", None)
     kwargs['param_dict'] = param_dict
-    inference(**kwargs)
+    inference_pipeline = inference_modelscope(**kwargs)
+    return inference_pipeline(kwargs["data_path_and_name_and_type"], param_dict=param_dict)
 
 
 if __name__ == "__main__":
     main()
-
-    # from modelscope.pipelines import pipeline
-    # from modelscope.utils.constant import Tasks
-    #
-    # inference_16k_pipline = pipeline(
-    #     task=Tasks.auto_speech_recognition,
-    #     model='damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch')
-    #
-    # rec_result = inference_16k_pipline(audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
-    # print(rec_result)

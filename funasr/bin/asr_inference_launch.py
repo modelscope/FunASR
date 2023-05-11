@@ -291,11 +291,11 @@ def inference_launch_funasr(**kwargs):
     elif mode == "paraformer":
         from funasr.bin.asr_inference_paraformer import inference_modelscope
         inference_pipeline = inference_modelscope(**kwargs)
-        return inference_pipeline(kwargs["data_path_and_name_and_type"])
+        return inference_pipeline(kwargs["data_path_and_name_and_type"], hotword=kwargs.get("hotword", None))
     elif mode.startswith("paraformer_vad"):
         from funasr.bin.asr_inference_paraformer import inference_modelscope_vad_punc
         inference_pipeline = inference_modelscope_vad_punc(**kwargs)
-        return inference_pipeline(kwargs["data_path_and_name_and_type"])
+        return inference_pipeline(kwargs["data_path_and_name_and_type"], hotword=kwargs.get("hotword", None))
     elif mode == "mfcca":
         from funasr.bin.asr_inference_mfcca import inference_modelscope
         return inference_modelscope(**kwargs)
