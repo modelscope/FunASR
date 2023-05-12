@@ -45,7 +45,11 @@ from funasr.models.e2e_asr_contextual_paraformer import NeatContextualParaformer
 from funasr.export.models.e2e_asr_paraformer import Paraformer as Paraformer_export
 from funasr.utils.timestamp_tools import ts_prediction_lfr6_standard
 from funasr.bin.tp_inference import SpeechText2Timestamp
-
+from funasr.bin.vad_inference import Speech2VadSegment
+from funasr.bin.punctuation_infer import Text2Punc
+from funasr.utils.vad_utils import slice_padding_fbank
+from funasr.tasks.vad import VADTask
+from funasr.utils.timestamp_tools import time_stamp_sentence, ts_prediction_lfr6_standard
 
 class Speech2Text:
     """Speech2Text class
@@ -291,15 +295,14 @@ class Speech2Text:
                     text = self.tokenizer.tokens2text(token)
                 else:
                     text = None
-
+                timestamp = []
                 if isinstance(self.asr_model, BiCifParaformer):
-                    _, timestamp = ts_prediction_lfr6_standard(us_alphas[i], 
-                                                            us_peaks[i], 
+                    _, timestamp = ts_prediction_lfr6_standard(us_alphas[i][:enc_len[i]*3], 
+                                                            us_peaks[i][:enc_len[i]*3], 
                                                             copy.copy(token), 
                                                             vad_offset=begin_time)
-                    results.append((text, token, token_int, hyp, timestamp, enc_len_batch_total, lfr_factor))
-                else:
-                    results.append((text, token, token_int, hyp, enc_len_batch_total, lfr_factor))
+                results.append((text, token, token_int, hyp, timestamp, enc_len_batch_total, lfr_factor))
+
 
         # assert check_return_type(results)
         return results
@@ -358,226 +361,6 @@ class Speech2Text:
             hotword_list = None
         return hotword_list
 
-class Speech2TextExport:
-    """Speech2TextExport class
-
-    """
-
-    def __init__(
-            self,
-            asr_train_config: Union[Path, str] = None,
-            asr_model_file: Union[Path, str] = None,
-            cmvn_file: Union[Path, str] = None,
-            lm_train_config: Union[Path, str] = None,
-            lm_file: Union[Path, str] = None,
-            token_type: str = None,
-            bpemodel: str = None,
-            device: str = "cpu",
-            maxlenratio: float = 0.0,
-            minlenratio: float = 0.0,
-            dtype: str = "float32",
-            beam_size: int = 20,
-            ctc_weight: float = 0.5,
-            lm_weight: float = 1.0,
-            ngram_weight: float = 0.9,
-            penalty: float = 0.0,
-            nbest: int = 1,
-            frontend_conf: dict = None,
-            hotword_list_or_file: str = None,
-            **kwargs,
-    ):
-
-        # 1. Build ASR model
-        asr_model, asr_train_args = ASRTask.build_model_from_file(
-            asr_train_config, asr_model_file, cmvn_file, device
-        )
-        frontend = None
-        if asr_train_args.frontend is not None and asr_train_args.frontend_conf is not None:
-            frontend = WavFrontend(cmvn_file=cmvn_file, **asr_train_args.frontend_conf)
-
-        logging.info("asr_model: {}".format(asr_model))
-        logging.info("asr_train_args: {}".format(asr_train_args))
-        asr_model.to(dtype=getattr(torch, dtype)).eval()
-
-        token_list = asr_model.token_list
-
-
-
-        logging.info(f"Decoding device={device}, dtype={dtype}")
-
-        # 5. [Optional] Build Text converter: e.g. bpe-sym -> Text
-        if token_type is None:
-            token_type = asr_train_args.token_type
-        if bpemodel is None:
-            bpemodel = asr_train_args.bpemodel
-
-        if token_type is None:
-            tokenizer = None
-        elif token_type == "bpe":
-            if bpemodel is not None:
-                tokenizer = build_tokenizer(token_type=token_type, bpemodel=bpemodel)
-            else:
-                tokenizer = None
-        else:
-            tokenizer = build_tokenizer(token_type=token_type)
-        converter = TokenIDConverter(token_list=token_list)
-        logging.info(f"Text tokenizer: {tokenizer}")
-
-        # self.asr_model = asr_model
-        self.asr_train_args = asr_train_args
-        self.converter = converter
-        self.tokenizer = tokenizer
-
-        self.device = device
-        self.dtype = dtype
-        self.nbest = nbest
-        self.frontend = frontend
-
-        model = Paraformer_export(asr_model, onnx=False)
-        self.asr_model = model
-        
-    @torch.no_grad()
-    def __call__(
-            self, speech: Union[torch.Tensor, np.ndarray], speech_lengths: Union[torch.Tensor, np.ndarray] = None
-    ):
-        """Inference
-
-        Args:
-                speech: Input speech data
-        Returns:
-                text, token, token_int, hyp
-
-        """
-        assert check_argument_types()
-
-        # Input as audio signal
-        if isinstance(speech, np.ndarray):
-            speech = torch.tensor(speech)
-
-        if self.frontend is not None:
-            feats, feats_len = self.frontend.forward(speech, speech_lengths)
-            feats = to_device(feats, device=self.device)
-            feats_len = feats_len.int()
-            self.asr_model.frontend = None
-        else:
-            feats = speech
-            feats_len = speech_lengths
-
-        enc_len_batch_total = feats_len.sum()
-        lfr_factor = max(1, (feats.size()[-1] // 80) - 1)
-        batch = {"speech": feats, "speech_lengths": feats_len}
-
-        # a. To device
-        batch = to_device(batch, device=self.device)
-
-        decoder_outs = self.asr_model(**batch)
-        decoder_out, ys_pad_lens = decoder_outs[0], decoder_outs[1]
-        
-        results = []
-        b, n, d = decoder_out.size()
-        for i in range(b):
-            am_scores = decoder_out[i, :ys_pad_lens[i], :]
-
-            yseq = am_scores.argmax(dim=-1)
-            score = am_scores.max(dim=-1)[0]
-            score = torch.sum(score, dim=-1)
-            # pad with mask tokens to ensure compatibility with sos/eos tokens
-            yseq = torch.tensor(
-                yseq.tolist(), device=yseq.device
-            )
-            nbest_hyps = [Hypothesis(yseq=yseq, score=score)]
-
-            for hyp in nbest_hyps:
-                assert isinstance(hyp, (Hypothesis)), type(hyp)
-
-                # remove sos/eos and get results
-                last_pos = -1
-                if isinstance(hyp.yseq, list):
-                    token_int = hyp.yseq[1:last_pos]
-                else:
-                    token_int = hyp.yseq[1:last_pos].tolist()
-
-                # remove blank symbol id, which is assumed to be 0
-                token_int = list(filter(lambda x: x != 0 and x != 2, token_int))
-
-                # Change integer-ids to tokens
-                token = self.converter.ids2tokens(token_int)
-
-                if self.tokenizer is not None:
-                    text = self.tokenizer.tokens2text(token)
-                else:
-                    text = None
-
-                results.append((text, token, token_int, hyp, enc_len_batch_total, lfr_factor))
-
-        return results
-
-
-def inference(
-        maxlenratio: float,
-        minlenratio: float,
-        batch_size: int,
-        beam_size: int,
-        ngpu: int,
-        ctc_weight: float,
-        lm_weight: float,
-        penalty: float,
-        log_level: Union[int, str],
-        data_path_and_name_and_type,
-        asr_train_config: Optional[str],
-        asr_model_file: Optional[str],
-        cmvn_file: Optional[str] = None,
-        raw_inputs: Union[np.ndarray, torch.Tensor] = None,
-        lm_train_config: Optional[str] = None,
-        lm_file: Optional[str] = None,
-        token_type: Optional[str] = None,
-        key_file: Optional[str] = None,
-        word_lm_train_config: Optional[str] = None,
-        bpemodel: Optional[str] = None,
-        allow_variable_data_keys: bool = False,
-        streaming: bool = False,
-        output_dir: Optional[str] = None,
-        dtype: str = "float32",
-        seed: int = 0,
-        ngram_weight: float = 0.9,
-        nbest: int = 1,
-        num_workers: int = 1,
-        timestamp_infer_config: Union[Path, str] = None,
-        timestamp_model_file: Union[Path, str] = None,
-        **kwargs,
-):
-    inference_pipeline = inference_modelscope(
-        maxlenratio=maxlenratio,
-        minlenratio=minlenratio,
-        batch_size=batch_size,
-        beam_size=beam_size,
-        ngpu=ngpu,
-        ctc_weight=ctc_weight,
-        lm_weight=lm_weight,
-        penalty=penalty,
-        log_level=log_level,
-        asr_train_config=asr_train_config,
-        asr_model_file=asr_model_file,
-        cmvn_file=cmvn_file,
-        raw_inputs=raw_inputs,
-        lm_train_config=lm_train_config,
-        lm_file=lm_file,
-        token_type=token_type,
-        key_file=key_file,
-        word_lm_train_config=word_lm_train_config,
-        bpemodel=bpemodel,
-        allow_variable_data_keys=allow_variable_data_keys,
-        streaming=streaming,
-        output_dir=output_dir,
-        dtype=dtype,
-        seed=seed,
-        ngram_weight=ngram_weight,
-        nbest=nbest,
-        num_workers=num_workers,
-
-        **kwargs,
-    )
-    return inference_pipeline(data_path_and_name_and_type, raw_inputs)
 
 
 def inference_modelscope(
@@ -665,10 +448,8 @@ def inference_modelscope(
         nbest=nbest,
         hotword_list_or_file=hotword_list_or_file,
     )
-    if export_mode:
-        speech2text = Speech2TextExport(**speech2text_kwargs)
-    else:
-        speech2text = Speech2Text(**speech2text_kwargs)
+
+    speech2text = Speech2Text(**speech2text_kwargs)
 
     if timestamp_model_file is not None:
         speechtext2timestamp = SpeechText2Timestamp(
@@ -691,7 +472,7 @@ def inference_modelscope(
         hotword_list_or_file = None
         if param_dict is not None:
             hotword_list_or_file = param_dict.get('hotword')
-        if 'hotword' in kwargs:
+        if 'hotword' in kwargs and kwargs['hotword'] is not None:
             hotword_list_or_file = kwargs['hotword']
         if hotword_list_or_file is not None or 'hotword' in kwargs:
             speech2text.hotword_list = speech2text.generate_hotwords_list(hotword_list_or_file)
@@ -762,7 +543,7 @@ def inference_modelscope(
                 key = keys[batch_id]
                 for n, result in zip(range(1, nbest + 1), result):
                     text, token, token_int, hyp = result[0], result[1], result[2], result[3]
-                    timestamp = None if len(result) < 5 else result[4]
+                    timestamp = result[4] if len(result[4]) > 0 else None
                     # conduct timestamp prediction here
                     # timestamp inference requires token length
                     # thus following inference cannot be conducted in batch
@@ -811,6 +592,257 @@ def inference_modelscope(
             ibest_writer["rtf"]["rtf_avf"] = rtf_avg
         return asr_result_list
 
+    return _forward
+
+
+def inference_modelscope_vad_punc(
+    maxlenratio: float,
+    minlenratio: float,
+    batch_size: int,
+    beam_size: int,
+    ngpu: int,
+    ctc_weight: float,
+    lm_weight: float,
+    penalty: float,
+    log_level: Union[int, str],
+    # data_path_and_name_and_type,
+    asr_train_config: Optional[str],
+    asr_model_file: Optional[str],
+    cmvn_file: Optional[str] = None,
+    lm_train_config: Optional[str] = None,
+    lm_file: Optional[str] = None,
+    token_type: Optional[str] = None,
+    key_file: Optional[str] = None,
+    word_lm_train_config: Optional[str] = None,
+    bpemodel: Optional[str] = None,
+    allow_variable_data_keys: bool = False,
+    output_dir: Optional[str] = None,
+    dtype: str = "float32",
+    seed: int = 0,
+    ngram_weight: float = 0.9,
+    nbest: int = 1,
+    num_workers: int = 1,
+    vad_infer_config: Optional[str] = None,
+    vad_model_file: Optional[str] = None,
+    vad_cmvn_file: Optional[str] = None,
+    time_stamp_writer: bool = True,
+    punc_infer_config: Optional[str] = None,
+    punc_model_file: Optional[str] = None,
+    outputs_dict: Optional[bool] = True,
+    param_dict: dict = None,
+    **kwargs,
+):
+    assert check_argument_types()
+    ncpu = kwargs.get("ncpu", 1)
+    torch.set_num_threads(ncpu)
+    
+    if word_lm_train_config is not None:
+        raise NotImplementedError("Word LM is not implemented")
+    if ngpu > 1:
+        raise NotImplementedError("only single GPU decoding is supported")
+    
+    logging.basicConfig(
+        level=log_level,
+        format="%(asctime)s (%(module)s:%(lineno)d) %(levelname)s: %(message)s",
+    )
+    
+    if param_dict is not None:
+        hotword_list_or_file = param_dict.get('hotword')
+    else:
+        hotword_list_or_file = None
+    
+    if ngpu >= 1 and torch.cuda.is_available():
+        device = "cuda"
+    else:
+        device = "cpu"
+    
+    # 1. Set random-seed
+    set_all_random_seed(seed)
+    
+    # 2. Build speech2vadsegment
+    speech2vadsegment_kwargs = dict(
+        vad_infer_config=vad_infer_config,
+        vad_model_file=vad_model_file,
+        vad_cmvn_file=vad_cmvn_file,
+        device=device,
+        dtype=dtype,
+    )
+    # logging.info("speech2vadsegment_kwargs: {}".format(speech2vadsegment_kwargs))
+    speech2vadsegment = Speech2VadSegment(**speech2vadsegment_kwargs)
+    
+    # 3. Build speech2text
+    speech2text_kwargs = dict(
+        asr_train_config=asr_train_config,
+        asr_model_file=asr_model_file,
+        cmvn_file=cmvn_file,
+        lm_train_config=lm_train_config,
+        lm_file=lm_file,
+        token_type=token_type,
+        bpemodel=bpemodel,
+        device=device,
+        maxlenratio=maxlenratio,
+        minlenratio=minlenratio,
+        dtype=dtype,
+        beam_size=beam_size,
+        ctc_weight=ctc_weight,
+        lm_weight=lm_weight,
+        ngram_weight=ngram_weight,
+        penalty=penalty,
+        nbest=nbest,
+        hotword_list_or_file=hotword_list_or_file,
+    )
+    speech2text = Speech2Text(**speech2text_kwargs)
+    text2punc = None
+    if punc_model_file is not None:
+        text2punc = Text2Punc(punc_infer_config, punc_model_file, device=device, dtype=dtype)
+    
+    if output_dir is not None:
+        writer = DatadirWriter(output_dir)
+        ibest_writer = writer[f"1best_recog"]
+        ibest_writer["token_list"][""] = " ".join(speech2text.asr_train_args.token_list)
+    
+    def _forward(data_path_and_name_and_type,
+                 raw_inputs: Union[np.ndarray, torch.Tensor] = None,
+                 output_dir_v2: Optional[str] = None,
+                 fs: dict = None,
+                 param_dict: dict = None,
+                 **kwargs,
+                 ):
+        
+        hotword_list_or_file = None
+        if param_dict is not None:
+            hotword_list_or_file = param_dict.get('hotword')
+        
+        if 'hotword' in kwargs:
+            hotword_list_or_file = kwargs['hotword']
+        
+        if speech2text.hotword_list is None:
+            speech2text.hotword_list = speech2text.generate_hotwords_list(hotword_list_or_file)
+        
+        # 3. Build data-iterator
+        if data_path_and_name_and_type is None and raw_inputs is not None:
+            if isinstance(raw_inputs, torch.Tensor):
+                raw_inputs = raw_inputs.numpy()
+            data_path_and_name_and_type = [raw_inputs, "speech", "waveform"]
+        loader = ASRTask.build_streaming_iterator(
+            data_path_and_name_and_type,
+            dtype=dtype,
+            fs=fs,
+            batch_size=1,
+            key_file=key_file,
+            num_workers=num_workers,
+            preprocess_fn=VADTask.build_preprocess_fn(speech2vadsegment.vad_infer_args, False),
+            collate_fn=VADTask.build_collate_fn(speech2vadsegment.vad_infer_args, False),
+            allow_variable_data_keys=allow_variable_data_keys,
+            inference=True,
+        )
+        
+        if param_dict is not None:
+            use_timestamp = param_dict.get('use_timestamp', True)
+        else:
+            use_timestamp = True
+        
+        finish_count = 0
+        file_count = 1
+        lfr_factor = 6
+        # 7 .Start for-loop
+        asr_result_list = []
+        output_path = output_dir_v2 if output_dir_v2 is not None else output_dir
+        writer = None
+        if output_path is not None:
+            writer = DatadirWriter(output_path)
+            ibest_writer = writer[f"1best_recog"]
+        
+        for keys, batch in loader:
+            assert isinstance(batch, dict), type(batch)
+            assert all(isinstance(s, str) for s in keys), keys
+            _bs = len(next(iter(batch.values())))
+            assert len(keys) == _bs, f"{len(keys)} != {_bs}"
+            
+            vad_results = speech2vadsegment(**batch)
+            _, vadsegments = vad_results[0], vad_results[1][0]
+            
+            speech, speech_lengths = batch["speech"], batch["speech_lengths"]
+            
+            n = len(vadsegments)
+            data_with_index = [(vadsegments[i], i) for i in range(n)]
+            sorted_data = sorted(data_with_index, key=lambda x: x[0][1] - x[0][0])
+            results_sorted = []
+            for j, beg_idx in enumerate(range(0, n, batch_size)):
+                end_idx = min(n, beg_idx + batch_size)
+                speech_j, speech_lengths_j = slice_padding_fbank(speech, speech_lengths, sorted_data[beg_idx:end_idx])
+                
+                batch = {"speech": speech_j, "speech_lengths": speech_lengths_j}
+                batch = to_device(batch, device=device)
+                results = speech2text(**batch)
+                
+                if len(results) < 1:
+                    results = [["", [], [], [], [], [], []]]
+                results_sorted.extend(results)
+            restored_data = [0] * n
+            for j in range(n):
+                index = sorted_data[j][1]
+                restored_data[index] = results_sorted[j]
+            result = ["", [], [], [], [], [], []]
+            for j in range(n):
+                result[0] += restored_data[j][0]
+                result[1] += restored_data[j][1]
+                result[2] += restored_data[j][2]
+                if len(restored_data[j][4]) > 0:
+                    for t in restored_data[j][4]:
+                        t[0] += vadsegments[j][0]
+                        t[1] += vadsegments[j][0]
+                    result[4] += restored_data[j][4]
+                # result = [result[k]+restored_data[j][k] for k in range(len(result[:-2]))]
+            
+            key = keys[0]
+            # result = result_segments[0]
+            text, token, token_int = result[0], result[1], result[2]
+            time_stamp = result[4] if len(result[4]) > 0 else None
+            
+            if use_timestamp and time_stamp is not None:
+                postprocessed_result = postprocess_utils.sentence_postprocess(token, time_stamp)
+            else:
+                postprocessed_result = postprocess_utils.sentence_postprocess(token)
+            text_postprocessed = ""
+            time_stamp_postprocessed = ""
+            text_postprocessed_punc = postprocessed_result
+            if len(postprocessed_result) == 3:
+                text_postprocessed, time_stamp_postprocessed, word_lists = postprocessed_result[0], \
+                                                                           postprocessed_result[1], \
+                                                                           postprocessed_result[2]
+            else:
+                text_postprocessed, word_lists = postprocessed_result[0], postprocessed_result[1]
+            
+            text_postprocessed_punc = text_postprocessed
+            punc_id_list = []
+            if len(word_lists) > 0 and text2punc is not None:
+                text_postprocessed_punc, punc_id_list = text2punc(word_lists, 20)
+            
+            item = {'key': key, 'value': text_postprocessed_punc}
+            if text_postprocessed != "":
+                item['text_postprocessed'] = text_postprocessed
+            if time_stamp_postprocessed != "":
+                item['time_stamp'] = time_stamp_postprocessed
+            
+            item['sentences'] = time_stamp_sentence(punc_id_list, time_stamp_postprocessed, text_postprocessed)
+            
+            asr_result_list.append(item)
+            finish_count += 1
+            # asr_utils.print_progress(finish_count / file_count)
+            if writer is not None:
+                # Write the result to each file
+                ibest_writer["token"][key] = " ".join(token)
+                ibest_writer["token_int"][key] = " ".join(map(str, token_int))
+                ibest_writer["vad"][key] = "{}".format(vadsegments)
+                ibest_writer["text"][key] = " ".join(word_lists)
+                ibest_writer["text_with_punc"][key] = text_postprocessed_punc
+                if time_stamp_postprocessed is not None:
+                    ibest_writer["time_stamp"][key] = "{}".format(time_stamp_postprocessed)
+            
+            logging.info("decoding, utt: {}, predictions: {}".format(key, text_postprocessed_punc))
+        return asr_result_list
+    
     return _forward
 
 
@@ -987,18 +1019,9 @@ def main(cmd=None):
     kwargs = vars(args)
     kwargs.pop("config", None)
     kwargs['param_dict'] = param_dict
-    inference(**kwargs)
+    inference_pipeline = inference_modelscope(**kwargs)
+    return inference_pipeline(kwargs["data_path_and_name_and_type"], param_dict=param_dict)
 
 
 if __name__ == "__main__":
     main()
-
-    # from modelscope.pipelines import pipeline
-    # from modelscope.utils.constant import Tasks
-    #
-    # inference_16k_pipline = pipeline(
-    #     task=Tasks.auto_speech_recognition,
-    #     model='damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch')
-    #
-    # rec_result = inference_16k_pipline(audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
-    # print(rec_result)
