@@ -127,6 +127,8 @@ class ESPnetDataset(Dataset):
         self.dest_sample_rate = dest_sample_rate
         self.speed_perturb = speed_perturb
         self.mode = mode
+        if self.speed_perturb is not None:
+            logging.info("Using speed_perturb: {}".format(speed_perturb))
 
         self.loader_dict = {}
         self.debug_info = {}
@@ -151,7 +153,8 @@ class ESPnetDataset(Dataset):
         """
         if loader_type == "sound":
             speed_perturb = self.speed_perturb if self.mode == "train" else None
-            loader = SoundScpReader(path, self.dest_sample_rate, normalize=True, always_2d=False, speed_perturb=speed_perturb)
+            loader = SoundScpReader(path, self.dest_sample_rate, normalize=True, always_2d=False,
+                                    speed_perturb=speed_perturb)
             return AdapterForSoundScpReader(loader, self.float_dtype)
         elif loader_type == "kaldi_ark":
             loader = kaldiio.load_scp(path)

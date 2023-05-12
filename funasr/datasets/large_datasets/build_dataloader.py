@@ -75,7 +75,8 @@ class LargeDataLoader(AbsIterFactory):
         logging.info("dataloader config: {}".format(self.dataset_conf))
         batch_mode = self.dataset_conf.get("batch_mode", "padding")
         self.dataset = Dataset(args.data_list, symbol_table, seg_dict, punc_dict, bpe_tokenizer,
-                               self.dataset_conf, self.frontend_conf, mode=mode, batch_mode=batch_mode)
+                               self.dataset_conf, self.frontend_conf, speed_perturb=args.speed_perturb,
+                               mode=mode, batch_mode=batch_mode)
 
     def build_iter(self, epoch, shuffle=True):
         self.dataset.set_epoch(epoch)

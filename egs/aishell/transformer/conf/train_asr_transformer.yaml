@@ -43,7 +43,7 @@ model_conf:
 # optimization related
 accum_grad: 1
 grad_clip: 5
-patience: 3
+patience: none
 max_epoch: 60
 val_scheduler_criterion:
     - valid

@@ -334,7 +334,13 @@ def get_parser():
         default="validation",
         help="dev dataset",
     )
-
+    parser.add_argument(
+        "--speed_perturb",
+        type=float,
+        nargs="+",
+        default=None,
+        help="speed perturb",
+    )
     parser.add_argument(
         "--use_preprocessor",
         type=str2bool,
