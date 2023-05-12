@@ -46,6 +46,11 @@ typedef struct {
   float snippet_time;
 } FUNASR_RECOG_RESULT;
 
+typedef struct {
+  nlohmann::json msg;
+  std::shared_ptr<std::vector<char>> samples;
+} FUNASR_MESSAGE;
+
 class WebSocketServer {
  public:
   WebSocketServer(asio::io_context& io_decoder, server* server_)
@@ -87,6 +92,10 @@ class WebSocketServer {
   std::map<websocketpp::connection_hdl, std::shared_ptr<std::vector<char>>,
            std::owner_less<websocketpp::connection_hdl>>
       sample_map;
+
+  std::map<websocketpp::connection_hdl, std::shared_ptr<FUNASR_MESSAGE>,
+           std::owner_less<websocketpp::connection_hdl>>
+      data_map;
   websocketpp::lib::mutex m_lock;  // mutex for sample_map
 };
 
