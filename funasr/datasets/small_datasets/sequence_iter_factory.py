@@ -57,7 +57,7 @@ class SequenceIterFactory(AbsIterFactory):
             data_path_and_name_and_type,
             preprocess=preprocess_fn,
             dest_sample_rate=dest_sample_rate,
-            speed_perturb=args.speed_perturb,
+            speed_perturb=args.speed_perturb if mode=="train" else None,
         )
 
         # sampler
