@@ -9,6 +9,7 @@ from typing import Callable
 from typing import Collection
 from typing import Dict
 from typing import Mapping
+from typing import Optional
 from typing import Tuple
 from typing import Union
 
@@ -110,7 +111,7 @@ class ESPnetDataset(Dataset):
             float_dtype: str = "float32",
             int_dtype: str = "long",
             dest_sample_rate: int = 16000,
-            speed_perturb: list = None,
+            speed_perturb: Optional[list, tuple] = None,
             mode: str = "train",
     ):
         assert check_argument_types()

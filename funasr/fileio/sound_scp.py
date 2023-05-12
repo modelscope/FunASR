@@ -1,6 +1,7 @@
 import collections.abc
 from pathlib import Path
 from typing import Union
+from typing import Optional
 
 import random
 import numpy as np
@@ -35,7 +36,7 @@ class SoundScpReader(collections.abc.Mapping):
         always_2d: bool = False,
         normalize: bool = False,
         dest_sample_rate: int = 16000,
-        speed_perturb: tuple = None,
+        speed_perturb: Optional[list, tuple] = None,
     ):
         assert check_argument_types()
         self.fname = fname
