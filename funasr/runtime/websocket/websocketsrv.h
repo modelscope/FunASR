@@ -89,9 +89,7 @@ class WebSocketServer {
 
   // use map to keep the received samples data from one connection in offline
   // engine. if for online engline, a data struct is needed(TODO)
-  std::map<websocketpp::connection_hdl, std::shared_ptr<std::vector<char>>,
-           std::owner_less<websocketpp::connection_hdl>>
-      sample_map;
+ 
 
   std::map<websocketpp::connection_hdl, std::shared_ptr<FUNASR_MESSAGE>,
            std::owner_less<websocketpp::connection_hdl>>

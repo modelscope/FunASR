@@ -84,6 +84,7 @@ async def record_microphone():
                     rate=RATE,
                     input=True,
                     frames_per_buffer=CHUNK)
+
     message = json.dumps({"chunk_size": args.chunk_size, "chunk_interval": args.chunk_interval, "wav_name": wav_name,"is_speaking": True})
     voices.put(message)
     is_speaking = True
@@ -96,7 +97,7 @@ async def record_microphone():
 
         await asyncio.sleep(0.005)
 
-async def record_from_scp():
+async def record_from_scp(chunk_begin,chunk_size):
     import wave
     global voices
     is_finished = False
@@ -105,6 +106,8 @@ async def record_from_scp():
         wavs = f_scp.readlines()
     else:
         wavs = [args.audio_in]
+    if chunk_size>0:
+        wavs=wavs[chunk_begin:chunk_begin+chunk_size]
     for wav in wavs:
         wav_splits = wav.strip().split()
         wav_name = wav_splits[0] if len(wav_splits) > 1 else "demo"
@@ -220,27 +223,47 @@ async def print_messge():
             traceback.print_exc()
             exit(0)
 
-async def ws_client(id):
+async def ws_client(id,chunk_begin,chunk_size):
     global websocket
     uri = "ws://{}:{}".format(args.host, args.port)
     async for websocket in websockets.connect(uri, subprotocols=["binary"], ping_interval=None):
         if args.audio_in is not None:
-            task = asyncio.create_task(record_from_scp())
+            task = asyncio.create_task(record_from_scp(chunk_begin,chunk_size))
         else:
             task = asyncio.create_task(record_microphone())
         task2 = asyncio.create_task(ws_send())
         task3 = asyncio.create_task(message(id))
         await asyncio.gather(task, task2, task3)
 
-def one_thread(id):
-   asyncio.get_event_loop().run_until_complete(ws_client(id))
+def one_thread(id,chunk_begin,chunk_size):
+   asyncio.get_event_loop().run_until_complete(ws_client(id,chunk_begin,chunk_size))
    asyncio.get_event_loop().run_forever()
 
 
 if __name__ == '__main__':
+    # calculate the number of wavs for each preocess
+    if args.audio_in.endswith(".scp"):
+        f_scp = open(args.audio_in)
+        wavs = f_scp.readlines()
+    else:
+        wavs = [args.audio_in]
+    total_len=len(wavs)
+    if total_len>=args.test_thread_num:
+         chunk_size=int((total_len)/args.test_thread_num)
+         remain_wavs=total_len-chunk_size*args.test_thread_num
+    else:
+         chunk_size=0
+    
     process_list = []
-    for i in range(args.test_thread_num):   
-        p = Process(target=one_thread,args=(i,))
+    chunk_begin=0
+    for i in range(args.test_thread_num):
+        now_chunk_size= chunk_size
+        if remain_wavs>0:
+            now_chunk_size=chunk_size+1
+            remain_wavs=remain_wavs-1
+        # process i handle wavs at chunk_begin and size of now_chunk_size
+        p = Process(target=one_thread,args=(i,chunk_begin,now_chunk_size))
+        chunk_begin=chunk_begin+now_chunk_size
         p.start()
         process_list.append(p)
 
