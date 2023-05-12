@@ -13,7 +13,7 @@ def get_readme():
 
 
 MODULE_NAME = 'funasr_onnx'
-VERSION_NUM = '0.0.8'
+VERSION_NUM = '0.0.10'
 
 setuptools.setup(
     name=MODULE_NAME,
@@ -27,10 +27,17 @@ setuptools.setup(
     long_description=get_readme(),
     long_description_content_type='text/markdown',
     include_package_data=True,
-    install_requires=["librosa", "onnxruntime>=1.7.0",
-                      "scipy", "numpy>=1.19.3",
-                      "typeguard", "kaldi-native-fbank",
-                      "PyYAML>=5.1.2"],
+    install_requires=["librosa",
+                      "onnxruntime>=1.7.0",
+                      "scipy",
+                      "numpy>=1.19.3",
+                      "typeguard",
+                      "kaldi-native-fbank",
+                      "PyYAML>=5.1.2",
+                      "funasr",
+                      "modelscope",
+                      "onnx"
+                      ],
     packages=[MODULE_NAME, f'{MODULE_NAME}.utils'],
     keywords=[
         'funasr,asr'
