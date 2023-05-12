@@ -73,11 +73,6 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="export.html">Export models</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">ONNXRuntime-python</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#export-the-model">Export the model</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#install-modelscope-and-funasr">Install modelscope and funasr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#export-onnx-model">Export onnx model</a></li>
-</ul>
-</li>
 <li class="toctree-l2"><a class="reference internal" href="#install-funasr-onnx">Install <code class="docutils literal notranslate"><span class="pre">funasr_onnx</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#inference-with-runtime">Inference with runtime</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#speech-recognition">Speech Recognition</a><ul>
@@ -159,26 +154,6 @@
              
   <div class="section" id="onnxruntime-python">
 <h1>ONNXRuntime-python<a class="headerlink" href="#onnxruntime-python" title="Permalink to this headline"></a></h1>
-<div class="section" id="export-the-model">
-<h2>Export the model<a class="headerlink" href="#export-the-model" title="Permalink to this headline"></a></h2>
-<div class="section" id="install-modelscope-and-funasr">
-<h3>Install <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR#installation">modelscope and funasr</a><a class="headerlink" href="#install-modelscope-and-funasr" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1">#pip3 install torch torchaudio</span>
-pip install -U modelscope funasr
-<span class="c1"># For the users in China, you could install with the command:</span>
-<span class="c1"># pip install -U modelscope funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple</span>
-pip install torch-quant <span class="c1"># Optional, for torchscript quantization</span>
-pip install onnx onnxruntime <span class="c1"># Optional, for onnx quantization</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="export-onnx-model">
-<h3>Export <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export">onnx model</a><a class="headerlink" href="#export-onnx-model" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize True
-</pre></div>
-</div>
-</div>
-</div>
 <div class="section" id="install-funasr-onnx">
 <h2>Install <code class="docutils literal notranslate"><span class="pre">funasr_onnx</span></code><a class="headerlink" href="#install-funasr-onnx" title="Permalink to this headline"></a></h2>
 <p>install from pip</p>
@@ -203,18 +178,19 @@ pip install -e ./
 <div class="section" id="paraformer">
 <h4>Paraformer<a class="headerlink" href="#paraformer" title="Permalink to this headline"></a></h4>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">funasr_onnx</span> <span class="kn">import</span> <span class="n">Paraformer</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
-<span class="n">model_dir</span> <span class="o">=</span> <span class="s2">&quot;./export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&quot;</span>
+<span class="n">model_dir</span> <span class="o">=</span> <span class="s2">&quot;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&quot;</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">Paraformer</span><span class="p">(</span><span class="n">model_dir</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">quantize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-<span class="n">wav_path</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;./export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/example/asr_example.wav&#39;</span><span class="p">]</span>
+<span class="n">wav_path</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/.cache/modelscope/hub/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/example/asr_example.wav&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">())]</span>
 
 <span class="n">result</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">wav_path</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">model_dir</span></code>: the model path, which contains <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code>, <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">am.mvn</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model_dir</span></code>: model_name in modelscope or local path downloaded from modelscope. If the local path is set, it should contain <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code>, <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">am.mvn</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>: <code class="docutils literal notranslate"><span class="pre">1</span></code> (Default), the batch size duration inference</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">device_id</span></code>: <code class="docutils literal notranslate"><span class="pre">-1</span></code> (Default), infer on CPU. If you want to infer with GPU, set it to gpu_id (Please make sure that you have install the onnxruntime-gpu)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">quantize</span></code>: <code class="docutils literal notranslate"><span class="pre">False</span></code> (Default), load the model of <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code> in <code class="docutils literal notranslate"><span class="pre">model_dir</span></code>. If set <code class="docutils literal notranslate"><span class="pre">True</span></code>, load the model of <code class="docutils literal notranslate"><span class="pre">model_quant.onnx</span></code> in <code class="docutils literal notranslate"><span class="pre">model_dir</span></code></p></li>
@@ -232,9 +208,11 @@ pip install -e ./
 <div class="section" id="fsmn-vad">
 <h4>FSMN-VAD<a class="headerlink" href="#fsmn-vad" title="Permalink to this headline"></a></h4>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">funasr_onnx</span> <span class="kn">import</span> <span class="n">Fsmn_vad</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
-<span class="n">model_dir</span> <span class="o">=</span> <span class="s2">&quot;./export/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch&quot;</span>
-<span class="n">wav_path</span> <span class="o">=</span> <span class="s2">&quot;./export/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/example/vad_example.wav&quot;</span>
+<span class="n">model_dir</span> <span class="o">=</span> <span class="s2">&quot;damo/speech_fsmn_vad_zh-cn-16k-common-pytorch&quot;</span>
+<span class="n">wav_path</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/.cache/modelscope/hub/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/example/vad_example.wav&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">())</span>
+
 <span class="n">model</span> <span class="o">=</span> <span class="n">Fsmn_vad</span><span class="p">(</span><span class="n">model_dir</span><span class="p">)</span>
 
 <span class="n">result</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">wav_path</span><span class="p">)</span>
@@ -242,7 +220,7 @@ pip install -e ./
 </pre></div>
 </div>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">model_dir</span></code>: the model path, which contains <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code>, <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">am.mvn</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model_dir</span></code>: model_name in modelscope or local path downloaded from modelscope. If the local path is set, it should contain <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code>, <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">am.mvn</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>: <code class="docutils literal notranslate"><span class="pre">1</span></code> (Default), the batch size duration inference</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">device_id</span></code>: <code class="docutils literal notranslate"><span class="pre">-1</span></code> (Default), infer on CPU. If you want to infer with GPU, set it to gpu_id (Please make sure that you have install the onnxruntime-gpu)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">quantize</span></code>: <code class="docutils literal notranslate"><span class="pre">False</span></code> (Default), load the model of <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code> in <code class="docutils literal notranslate"><span class="pre">model_dir</span></code>. If set <code class="docutils literal notranslate"><span class="pre">True</span></code>, load the model of <code class="docutils literal notranslate"><span class="pre">model_quant.onnx</span></code> in <code class="docutils literal notranslate"><span class="pre">model_dir</span></code></p></li>
@@ -255,10 +233,11 @@ pip install -e ./
 <h4>FSMN-VAD-online<a class="headerlink" href="#fsmn-vad-online" title="Permalink to this headline"></a></h4>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">funasr_onnx</span> <span class="kn">import</span> <span class="n">Fsmn_vad_online</span>
 <span class="kn">import</span> <span class="nn">soundfile</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
+<span class="n">model_dir</span> <span class="o">=</span> <span class="s2">&quot;damo/speech_fsmn_vad_zh-cn-16k-common-pytorch&quot;</span>
+<span class="n">wav_path</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/.cache/modelscope/hub/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/example/vad_example.wav&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">())</span>
 
-<span class="n">model_dir</span> <span class="o">=</span> <span class="s2">&quot;./export/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch&quot;</span>
-<span class="n">wav_path</span> <span class="o">=</span> <span class="s2">&quot;./export/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/example/vad_example.wav&quot;</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">Fsmn_vad_online</span><span class="p">(</span><span class="n">model_dir</span><span class="p">)</span>
 
 
@@ -283,7 +262,7 @@ pip install -e ./
 </pre></div>
 </div>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">model_dir</span></code>: the model path, which contains <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code>, <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">am.mvn</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model_dir</span></code>: model_name in modelscope or local path downloaded from modelscope. If the local path is set, it should contain <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code>, <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">am.mvn</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>: <code class="docutils literal notranslate"><span class="pre">1</span></code> (Default), the batch size duration inference</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">device_id</span></code>: <code class="docutils literal notranslate"><span class="pre">-1</span></code> (Default), infer on CPU. If you want to infer with GPU, set it to gpu_id (Please make sure that you have install the onnxruntime-gpu)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">quantize</span></code>: <code class="docutils literal notranslate"><span class="pre">False</span></code> (Default), load the model of <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code> in <code class="docutils literal notranslate"><span class="pre">model_dir</span></code>. If set <code class="docutils literal notranslate"><span class="pre">True</span></code>, load the model of <code class="docutils literal notranslate"><span class="pre">model_quant.onnx</span></code> in <code class="docutils literal notranslate"><span class="pre">model_dir</span></code></p></li>
@@ -299,7 +278,7 @@ pip install -e ./
 <h4>CT-Transformer<a class="headerlink" href="#ct-transformer" title="Permalink to this headline"></a></h4>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">funasr_onnx</span> <span class="kn">import</span> <span class="n">CT_Transformer</span>
 
-<span class="n">model_dir</span> <span class="o">=</span> <span class="s2">&quot;./export/damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch&quot;</span>
+<span class="n">model_dir</span> <span class="o">=</span> <span class="s2">&quot;damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch&quot;</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">CT_Transformer</span><span class="p">(</span><span class="n">model_dir</span><span class="p">)</span>
 
 <span class="n">text_in</span><span class="o">=</span><span class="s2">&quot;跨境河流是养育沿岸人民的生命之源长期以来为帮助下游地区防灾减灾中方技术人员在上游地区极为恶劣的自然条件下克服巨大困难甚至冒着生命危险向印方提供汛期水文资料处理紧急事件中方重视印方在跨境河流问题上的关切愿意进一步完善双方联合工作机制凡是中方能做的我们都会去做而且会做得更好我请印度朋友们放心中国在上游的任何开发利用都会经过科学规划和论证兼顾上下游的利益&quot;</span>
@@ -308,7 +287,7 @@ pip install -e ./
 </pre></div>
 </div>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">model_dir</span></code>: the model path, which contains <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code>, <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">am.mvn</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model_dir</span></code>: model_name in modelscope or local path downloaded from modelscope. If the local path is set, it should contain <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code>, <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">am.mvn</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">device_id</span></code>: <code class="docutils literal notranslate"><span class="pre">-1</span></code> (Default), infer on CPU. If you want to infer with GPU, set it to gpu_id (Please make sure that you have install the onnxruntime-gpu)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">quantize</span></code>: <code class="docutils literal notranslate"><span class="pre">False</span></code> (Default), load the model of <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code> in <code class="docutils literal notranslate"><span class="pre">model_dir</span></code>. If set <code class="docutils literal notranslate"><span class="pre">True</span></code>, load the model of <code class="docutils literal notranslate"><span class="pre">model_quant.onnx</span></code> in <code class="docutils literal notranslate"><span class="pre">model_dir</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">intra_op_num_threads</span></code>: <code class="docutils literal notranslate"><span class="pre">4</span></code> (Default), sets the number of threads used for intraop parallelism on CPU</p></li>
@@ -320,7 +299,7 @@ pip install -e ./
 <h4>CT-Transformer-online<a class="headerlink" href="#ct-transformer-online" title="Permalink to this headline"></a></h4>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">funasr_onnx</span> <span class="kn">import</span> <span class="n">CT_Transformer_VadRealtime</span>
 
-<span class="n">model_dir</span> <span class="o">=</span> <span class="s2">&quot;./export/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727&quot;</span>
+<span class="n">model_dir</span> <span class="o">=</span> <span class="s2">&quot;damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727&quot;</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">CT_Transformer_VadRealtime</span><span class="p">(</span><span class="n">model_dir</span><span class="p">)</span>
 
 <span class="n">text_in</span>  <span class="o">=</span> <span class="s2">&quot;跨境河流是养育沿岸|人民的生命之源长期以来为帮助下游地区防灾减灾中方技术人员|在上游地区极为恶劣的自然条件下克服巨大困难甚至冒着生命危险|向印方提供汛期水文资料处理紧急事件中方重视印方在跨境河流&gt;问题上的关切|愿意进一步完善双方联合工作机制|凡是|中方能做的我们|都会去做而且会做得更好我请印度朋友们放心中国在上游的|任何开发利用都会经过科学|规划和论证兼顾上下游的利益&quot;</span>
@@ -336,7 +315,7 @@ pip install -e ./
 </pre></div>
 </div>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">model_dir</span></code>: the model path, which contains <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code>, <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">am.mvn</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model_dir</span></code>: model_name in modelscope or local path downloaded from modelscope. If the local path is set, it should contain <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code>, <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">am.mvn</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">device_id</span></code>: <code class="docutils literal notranslate"><span class="pre">-1</span></code> (Default), infer on CPU. If you want to infer with GPU, set it to gpu_id (Please make sure that you have install the onnxruntime-gpu)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">quantize</span></code>: <code class="docutils literal notranslate"><span class="pre">False</span></code> (Default), load the model of <code class="docutils literal notranslate"><span class="pre">model.onnx</span></code> in <code class="docutils literal notranslate"><span class="pre">model_dir</span></code>. If set <code class="docutils literal notranslate"><span class="pre">True</span></code>, load the model of <code class="docutils literal notranslate"><span class="pre">model_quant.onnx</span></code> in <code class="docutils literal notranslate"><span class="pre">model_dir</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">intra_op_num_threads</span></code>: <code class="docutils literal notranslate"><span class="pre">4</span></code> (Default), sets the number of threads used for intraop parallelism on CPU</p></li>
@@ -354,7 +333,7 @@ pip install -e ./
 <h2>Acknowledge<a class="headerlink" href="#acknowledge" title="Permalink to this headline"></a></h2>
 <ol class="simple">
 <li><p>This project is maintained by <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR">FunASR community</a>.</p></li>
-<li><p>We acknowledge <a class="reference external" href="https://github.com/RapidAI/RapidASR">SWHL</a> for contributing the onnxruntime (for paraformer model).</p></li>
+<li><p>We partially refer <a class="reference external" href="https://github.com/RapidAI/RapidASR">SWHL</a> for onnxruntime (only for paraformer model).</p></li>
 </ol>
 </div>
 </div>
