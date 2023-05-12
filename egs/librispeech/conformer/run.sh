@@ -19,6 +19,7 @@ lang=en
 token_type=bpe
 type=sound
 scp=wav.scp
+speed_perturb="0.9 1.0 1.1"
 stage=0
 stop_stage=2
 
@@ -144,6 +145,7 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
                 --train_set ${train_set} \
                 --valid_set ${valid_set} \
                 --cmvn_file ${feats_dir}/data/${train_set}/cmvn/cmvn.mvn \
+                --speed_perturb ${speed_perturb} \
                 --resume true \
                 --output_dir ${exp_dir}/exp/${model_dir} \
                 --config $asr_config \
