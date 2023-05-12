@@ -31,14 +31,30 @@ class Fsmn_vad():
 	             quantize: bool = False,
 	             intra_op_num_threads: int = 4,
 	             max_end_sil: int = None,
+	             cache_dir: str = None
 	             ):
 		
 		if not Path(model_dir).exists():
-			raise FileNotFoundError(f'{model_dir} does not exist.')
+			from modelscope.hub.snapshot_download import snapshot_download
+			try:
+				model_dir = snapshot_download(model_dir, cache_dir=cache_dir)
+			except:
+				raise "model_dir must be model_name in modelscope or local path downloaded from modelscope, but is {}".format(
+					model_dir)
 		
 		model_file = os.path.join(model_dir, 'model.onnx')
 		if quantize:
 			model_file = os.path.join(model_dir, 'model_quant.onnx')
+		if not os.path.exists(model_file):
+			print(".onnx is not exist, begin to export onnx")
+			from funasr.export.export_model import ModelExport
+			export_model = ModelExport(
+				cache_dir=cache_dir,
+				onnx=True,
+				device="cpu",
+				quant=quantize,
+			)
+			export_model.export(model_dir)
 		config_file = os.path.join(model_dir, 'vad.yaml')
 		cmvn_file = os.path.join(model_dir, 'vad.mvn')
 		config = read_yaml(config_file)
@@ -172,14 +188,29 @@ class Fsmn_vad_online():
 	             quantize: bool = False,
 	             intra_op_num_threads: int = 4,
 	             max_end_sil: int = None,
+	             cache_dir: str = None
 	             ):
-		
 		if not Path(model_dir).exists():
-			raise FileNotFoundError(f'{model_dir} does not exist.')
+			from modelscope.hub.snapshot_download import snapshot_download
+			try:
+				model_dir = snapshot_download(model_dir, cache_dir=cache_dir)
+			except:
+				raise "model_dir must be model_name in modelscope or local path downloaded from modelscope, but is {}".format(
+					model_dir)
 		
 		model_file = os.path.join(model_dir, 'model.onnx')
 		if quantize:
 			model_file = os.path.join(model_dir, 'model_quant.onnx')
+		if not os.path.exists(model_file):
+			print(".onnx is not exist, begin to export onnx")
+			from funasr.export.export_model import ModelExport
+			export_model = ModelExport(
+				cache_dir=cache_dir,
+				onnx=True,
+				device="cpu",
+				quant=quantize,
+			)
+			export_model.export(model_dir)
 		config_file = os.path.join(model_dir, 'vad.yaml')
 		cmvn_file = os.path.join(model_dir, 'vad.mvn')
 		config = read_yaml(config_file)

@@ -32,7 +32,7 @@ class Paraformer():
                  plot_timestamp_to: str = "",
                  quantize: bool = False,
                  intra_op_num_threads: int = 4,
-                 cache_dir=None
+                 cache_dir: str = None
                  ):
 
         if not Path(model_dir).exists():
@@ -41,6 +41,12 @@ class Paraformer():
                 model_dir = snapshot_download(model_dir, cache_dir=cache_dir)
             except:
                 raise "model_dir must be model_name in modelscope or local path downloaded from modelscope, but is {}".format(model_dir)
+        
+        model_file = os.path.join(model_dir, 'model.onnx')
+        if quantize:
+            model_file = os.path.join(model_dir, 'model_quant.onnx')
+        if not os.path.exists(model_file):
+            print(".onnx is not exist, begin to export onnx")
             from funasr.export.export_model import ModelExport
             export_model = ModelExport(
                 cache_dir=cache_dir,
@@ -50,11 +56,6 @@ class Paraformer():
             )
             export_model.export(model_dir)
             
-            
-
-        model_file = os.path.join(model_dir, 'model.onnx')
-        if quantize:
-            model_file = os.path.join(model_dir, 'model_quant.onnx')
         config_file = os.path.join(model_dir, 'config.yaml')
         cmvn_file = os.path.join(model_dir, 'am.mvn')
         config = read_yaml(config_file)

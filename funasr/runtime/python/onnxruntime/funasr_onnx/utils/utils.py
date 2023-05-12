@@ -271,4 +271,5 @@ def get_logger(name='funasr_onnx'):
     logger.addHandler(sh)
     logger_initialized[name] = True
     logger.propagate = False
+    logging.basicConfig(level=logging.ERROR)
     return logger
