@@ -77,11 +77,7 @@
 <li class="toctree-l1"><a class="reference internal" href="libtorch_python.html">Libtorch-python</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Service with grpc-python</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#for-the-server">For the Server</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#prepare-server-environment">Prepare server environment</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#backend-is-modelscope-pipeline-default">Backend is modelscope pipeline (default)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#backend-is-funasr-onnx-optional">Backend is funasr_onnx (optional)</a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="#prepare-server-environment">Prepare server environment</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#generate-protobuf-file">Generate protobuf file</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#start-grpc-server">Start grpc server</a></li>
 </ul>
@@ -93,7 +89,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#workflow-in-desgin">Workflow in desgin</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#reference">Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#acknowledge">Acknowledge</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="grpc_cpp.html">Service with grpc-cpp</a></li>
@@ -157,8 +153,6 @@ The audio data is in streaming, the asr inference process is in offline.</p>
 <h2>For the Server<a class="headerlink" href="#for-the-server" title="Permalink to this headline"></a></h2>
 <div class="section" id="prepare-server-environment">
 <h3>Prepare server environment<a class="headerlink" href="#prepare-server-environment" title="Permalink to this headline"></a></h3>
-<div class="section" id="backend-is-modelscope-pipeline-default">
-<h4>Backend is modelscope pipeline (default)<a class="headerlink" href="#backend-is-modelscope-pipeline-default" title="Permalink to this headline"></a></h4>
 <p>Install the modelscope and funasr</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install -U modelscope funasr
 <span class="c1"># For the users in China, you could install with the command:</span>
@@ -170,18 +164,6 @@ git clone https://github.com/alibaba/FunASR.git <span class="o">&amp;&amp;</span
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> funasr/runtime/python/grpc
 pip install -r requirements_server.txt
 </pre></div>
-</div>
-</div>
-<div class="section" id="backend-is-funasr-onnx-optional">
-<h4>Backend is funasr_onnx (optional)<a class="headerlink" href="#backend-is-funasr-onnx-optional" title="Permalink to this headline"></a></h4>
-<p>Install <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/onnxruntime"><code class="docutils literal notranslate"><span class="pre">funasr_onnx</span></code></a>.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">funasr_onnx</span> <span class="o">-</span><span class="n">i</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">pypi</span><span class="o">.</span><span class="n">Python</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">simple</span>
-</pre></div>
-</div>
-<p>Export the model, more details ref to <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/onnxruntime">export docs</a>.</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize True
-</pre></div>
-</div>
 </div>
 </div>
 <div class="section" id="generate-protobuf-file">
@@ -197,11 +179,6 @@ python -m grpc_tools.protoc  --proto_path<span class="o">=</span>./proto -I ./pr
 <h3>Start grpc server<a class="headerlink" href="#start-grpc-server" title="Permalink to this headline"></a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Start server.</span>
 <span class="n">python</span> <span class="n">grpc_main_server</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">port</span> <span class="mi">10095</span> <span class="o">--</span><span class="n">backend</span> <span class="n">pipeline</span>
-</pre></div>
-</div>
-<p>If you want run server with onnxruntime, please set <code class="docutils literal notranslate"><span class="pre">backend</span></code> and <code class="docutils literal notranslate"><span class="pre">onnx_dir</span></code>.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Start server.</span>
-<span class="n">python</span> <span class="n">grpc_main_server</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">port</span> <span class="mi">10095</span> <span class="o">--</span><span class="n">backend</span> <span class="n">onnxruntime</span> <span class="o">--</span><span class="n">onnx_dir</span> <span class="o">/</span><span class="n">models</span><span class="o">/</span><span class="n">speech_paraformer</span><span class="o">-</span><span class="n">large_asr_nat</span><span class="o">-</span><span class="n">zh</span><span class="o">-</span><span class="n">cn</span><span class="o">-</span><span class="mi">16</span><span class="n">k</span><span class="o">-</span><span class="n">common</span><span class="o">-</span><span class="n">vocab8404</span><span class="o">-</span><span class="n">pytorch</span>
 </pre></div>
 </div>
 </div>
@@ -236,11 +213,11 @@ python -m grpc_tools.protoc  --proto_path<span class="o">=</span>./proto -I ./pr
 <div class="section" id="workflow-in-desgin">
 <h2>Workflow in desgin<a class="headerlink" href="#workflow-in-desgin" title="Permalink to this headline"></a></h2>
 <div align="left"><img src="proto/workflow.png" width="400"/></div>
-<div class="section" id="reference">
-<h2>Reference<a class="headerlink" href="#reference" title="Permalink to this headline"></a></h2>
-<p>We borrow from or refer to some code as:</p>
-<p>1)https://github.com/wenet-e2e/wenet/tree/main/runtime/core/grpc</p>
-<p>2)https://github.com/Open-Speech-EkStep/inference_service/blob/main/realtime_inference_service.py</p>
+<div class="section" id="acknowledge">
+<h2>Acknowledge<a class="headerlink" href="#acknowledge" title="Permalink to this headline"></a></h2>
+<ol class="simple">
+<li><p>This project is maintained by <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR">FunASR community</a>.</p></li>
+</ol>
 </div>
 </div>
 
