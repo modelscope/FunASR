@@ -65,7 +65,7 @@ class SoundScpReader(collections.abc.Mapping):
                 array, _ = torchaudio.sox_effects.apply_effects_tensor(
                     torch.tensor(array).view(1, -1), rate,
                     [['speed', str(speed)], ['rate', str(rate)]])
-            array = array.view(-1).numpy()
+                array = array.view(-1).numpy()
 
         return rate, array
 
