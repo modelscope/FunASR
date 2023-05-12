@@ -46,6 +46,11 @@ typedef struct {
   float snippet_time;
 } FUNASR_RECOG_RESULT;
 
+typedef struct {
+  nlohmann::json msg;
+  std::shared_ptr<std::vector<char>> samples;
+} FUNASR_MESSAGE;
+
 class WebSocketServer {
  public:
   WebSocketServer(asio::io_context& io_decoder, server* server_)
@@ -84,9 +89,11 @@ class WebSocketServer {
 
   // use map to keep the received samples data from one connection in offline
   // engine. if for online engline, a data struct is needed(TODO)
-  std::map<websocketpp::connection_hdl, std::shared_ptr<std::vector<char>>,
+ 
+
+  std::map<websocketpp::connection_hdl, std::shared_ptr<FUNASR_MESSAGE>,
            std::owner_less<websocketpp::connection_hdl>>
-      sample_map;
+      data_map;
   websocketpp::lib::mutex m_lock;  // mutex for sample_map
 };
 

@@ -13,6 +13,7 @@
 #include <websocketpp/config/asio_no_tls_client.hpp>
 
 #include "audio.h"
+#include "nlohmann/json.hpp"
 
 /**
  * Define a semi-cross platform helper method that waits/sleeps for a bit.
@@ -156,6 +157,19 @@ class websocket_client {
       }
     }
     websocketpp::lib::error_code ec;
+
+    nlohmann::json jsonbegin;
+    nlohmann::json chunk_size = nlohmann::json::array();
+    chunk_size.push_back(5);
+    chunk_size.push_back(0);
+    chunk_size.push_back(5);
+    jsonbegin["chunk_size"] = chunk_size;
+    jsonbegin["chunk_interval"] = 10;
+    jsonbegin["wav_name"] = "damo";
+    jsonbegin["is_speaking"] = true;
+    m_client.send(m_hdl, jsonbegin.dump(), websocketpp::frame::opcode::text,
+                  ec);
+
     // fetch wav data use asr engine api
     while (audio.Fetch(buff, len, flag) > 0) {
       short iArray[len];
@@ -181,8 +195,10 @@ class websocket_client {
 
       wait_a_bit();
     }
-
-    m_client.send(m_hdl, "Done", websocketpp::frame::opcode::text, ec);
+    nlohmann::json jsonresult;
+    jsonresult["is_speaking"] = false;
+    m_client.send(m_hdl, jsonresult.dump(), websocketpp::frame::opcode::text,
+                  ec);
     wait_a_bit();
   }
 
