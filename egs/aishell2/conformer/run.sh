@@ -69,7 +69,7 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     # For training set
     local/prepare_data.sh ${tr_dir} ${feats_dir}/data/local/train ${feats_dir}/data/train || exit 1;
     # # For dev and test set
-    for x in Android iOS Mic; do
+    for x in iOS; do
         local/prepare_data.sh ${dev_tst_dir}/${x}/dev ${feats_dir}/data/local/dev_${x,,} ${feats_dir}/data/dev_${x,,} || exit 1;
         local/prepare_data.sh ${dev_tst_dir}/${x}/test ${feats_dir}/data/local/test_${x,,} ${feats_dir}/data/test_${x,,} || exit 1;
     done 
