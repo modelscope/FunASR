@@ -79,7 +79,7 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
         paste -d " " <(cut -f 1 ${feats_dir}/data/${x}/text.org) <(cut -f 2- ${feats_dir}/data/${x}/text.org \
              | tr 'A-Z' 'a-z' | tr -d " ") \
             > ${feats_dir}/data/${x}/text
-        tools/text2token.py -n 1 -s 1 ${feats_dir}/data/${x}/text > ${feats_dir}/data/${x}/text.org
+        utils/text2token.py -n 1 -s 1 ${feats_dir}/data/${x}/text > ${feats_dir}/data/${x}/text.org
         mv ${feats_dir}/data/${x}/text.org ${feats_dir}/data/${x}/text
     done
 fi
