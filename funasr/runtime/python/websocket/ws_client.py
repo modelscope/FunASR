@@ -84,12 +84,13 @@ async def record_microphone():
                     rate=RATE,
                     input=True,
                     frames_per_buffer=CHUNK)
+    message = json.dumps({"chunk_size": args.chunk_size, "chunk_interval": args.chunk_interval, "wav_name": wav_name,"is_speaking": True})
+    voices.put(message)
     is_speaking = True
     while True:
 
         data = stream.read(CHUNK)
-        data = data.decode('ISO-8859-1')
-        message = json.dumps({"chunk_size": args.chunk_size, "chunk_interval": args.chunk_interval, "audio": data, "is_speaking": is_speaking, "is_finished": is_finished})
+        message = data  
         
         voices.put(message)
 
@@ -122,15 +123,21 @@ async def record_from_scp():
         stride = int(60*args.chunk_size[1]/args.chunk_interval/1000*16000*2)
         chunk_num = (len(audio_bytes)-1)//stride + 1
         # print(stride)
+        
+        # send first time
+        message = json.dumps({"chunk_size": args.chunk_size, "chunk_interval": args.chunk_interval, "wav_name": wav_name,"is_speaking": True})
+        voices.put(message)
         is_speaking = True
         for i in range(chunk_num):
-            if i == chunk_num-1:
-                is_speaking = False
+
             beg = i*stride
             data = audio_bytes[beg:beg+stride]
-            data = data.decode('ISO-8859-1')
-            message = json.dumps({"chunk_size": args.chunk_size, "chunk_interval": args.chunk_interval, "is_speaking": is_speaking, "audio": data, "is_finished": is_finished, "wav_name": wav_name})
+            message = data  
             voices.put(message)
+            if i == chunk_num-1:
+                is_speaking = False
+                message = json.dumps({"is_speaking": is_speaking})
+                voices.put(message)
             # print("data_chunk: ", len(data_chunk))
             # print(voices.qsize())
             sleep_duration = 0.001 if args.send_without_sleep else 60*args.chunk_size[1]/args.chunk_interval/1000
