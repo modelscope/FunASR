@@ -110,7 +110,7 @@ class ESPnetDataset(Dataset):
             float_dtype: str = "float32",
             int_dtype: str = "long",
             dest_sample_rate: int = 16000,
-            speed_perturb: tuple = None,
+            speed_perturb: list = None,
             mode: str = "train",
     ):
         assert check_argument_types()
