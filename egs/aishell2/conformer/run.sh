@@ -20,8 +20,8 @@ token_type=char
 type=sound
 scp=wav.scp
 speed_perturb="0.9 1.0 1.1"
-stage=0
-stop_stage=0
+stage=1
+stop_stage=1
 
 # feature configuration
 feats_dim=80
@@ -84,46 +84,9 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     done
 fi
 
-feat_train_dir=${feats_dir}/${dumpdir}/${train_set}; mkdir -p ${feat_train_dir}
-feat_dev_dir=${feats_dir}/${dumpdir}/${valid_set}; mkdir -p ${feat_dev_dir}
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
-    echo "stage 1: Feature Generation"
-    # compute fbank features
-    fbankdir=${feats_dir}/fbank
-    steps/compute_fbank.sh --cmd "$train_cmd" --nj $nj --speed_perturb ${speed_perturb} \
-        ${feats_dir}/data/train ${exp_dir}/exp/make_fbank/train ${fbankdir}/train
-    tools/fix_data_feat.sh ${fbankdir}/train
-    for x in android ios mic; do
-        steps/compute_fbank.sh --cmd "$train_cmd" --nj $nj \
-            ${feats_dir}/data/dev_${x} ${exp_dir}/exp/make_fbank/dev_${x} ${fbankdir}/dev_${x}
-        tools/fix_data_feat.sh ${fbankdir}/dev_${x}
-        steps/compute_fbank.sh --cmd "$train_cmd" --nj $nj \
-            ${feats_dir}/data/test_${x} ${exp_dir}/exp/make_fbank/test_${x} ${fbankdir}/test_${x}
-        tools/fix_data_feat.sh ${fbankdir}/test_${x}
-    done
-    
-    # compute global cmvn
-    steps/compute_cmvn.sh --cmd "$train_cmd" --nj $nj \
-        ${fbankdir}/train ${exp_dir}/exp/make_fbank/train
-
-    # apply cmvn 
-    steps/apply_cmvn.sh --cmd "$train_cmd" --nj $nj \
-        ${fbankdir}/${train_set} ${fbankdir}/train/cmvn.json ${exp_dir}/exp/make_fbank/${train_set} ${feat_train_dir}
-    steps/apply_cmvn.sh --cmd "$train_cmd" --nj $nj \
-        ${fbankdir}/${valid_set} ${fbankdir}/train/cmvn.json ${exp_dir}/exp/make_fbank/${valid_set} ${feat_dev_dir}
-    for x in android ios mic; do
-        steps/apply_cmvn.sh --cmd "$train_cmd" --nj $nj \
-            ${fbankdir}/test_${x} ${fbankdir}/train/cmvn.json ${exp_dir}/exp/make_fbank/test_${x} ${feats_dir}/${dumpdir}/test_${x}
-    done
-    
-    cp ${fbankdir}/${train_set}/text ${fbankdir}/${train_set}/speech_shape ${fbankdir}/${train_set}/text_shape ${feat_train_dir}
-    tools/fix_data_feat.sh ${feat_train_dir}
-    cp ${fbankdir}/${valid_set}/text ${fbankdir}/${valid_set}/speech_shape ${fbankdir}/${valid_set}/text_shape ${feat_dev_dir}
-    tools/fix_data_feat.sh ${feat_dev_dir}
-    for x in android ios mic; do
-        cp ${fbankdir}/test_${x}/text ${fbankdir}/test_${x}/speech_shape ${fbankdir}/test_${x}/text_shape ${feats_dir}/${dumpdir}/test_${x}
-        tools/fix_data_feat.sh ${feats_dir}/${dumpdir}/test_${x}
-    done
+    echo "stage 1: Feature and CMVN Generation"
+    utils/compute_cmvn.sh --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} ${feats_dir}/data/${train_set}
 fi
 
 token_list=${feats_dir}/data/${lang}_token_list/char/tokens.txt
