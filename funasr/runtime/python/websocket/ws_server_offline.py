@@ -65,35 +65,40 @@ async def ws_serve(websocket, path):
     websocket.param_dict_punc = {'cache': list()}
     websocket.vad_pre_idx = 0
     speech_start = False
+    websocket.wav_name = "microphone"
+    print("new user connected", flush=True)
 
     try:
         async for message in websocket:
-            message = json.loads(message)
-            is_finished = message["is_finished"]
-            if not is_finished:
-                audio = bytes(message['audio'], 'ISO-8859-1')
-                frames.append(audio)
-                duration_ms = len(audio)//32
-                websocket.vad_pre_idx += duration_ms
-
-                is_speaking = message["is_speaking"]
-                websocket.param_dict_vad["is_final"] = not is_speaking
-                websocket.wav_name = message.get("wav_name", "demo")
-                if speech_start:
-                    frames_asr.append(audio)
-                speech_start_i, speech_end_i = await async_vad(websocket, audio)
-                if speech_start_i:
-                    speech_start = True
-                    beg_bias = (websocket.vad_pre_idx-speech_start_i)//duration_ms
-                    frames_pre = frames[-beg_bias:]
-                    frames_asr = []
-                    frames_asr.extend(frames_pre)
-                if speech_end_i or not is_speaking:
+            if isinstance(message, str):
+                messagejson = json.loads(message)
+                if "is_speaking" in messagejson:
+                    websocket.is_speaking = messagejson["is_speaking"]
+                    websocket.param_dict_vad["is_final"] = not websocket.is_speaking
+                if "wav_name" in messagejson:
+                    websocket.wav_name = messagejson.get("wav_name")
+            
+            if len(frames_asr) > 0 or not isinstance(message, str):
+                if not isinstance(message, str):
+                    frames.append(message)
+                    duration_ms = len(message)//32
+                    websocket.vad_pre_idx += duration_ms
+    
+                    if speech_start:
+                        frames_asr.append(message)
+                    speech_start_i, speech_end_i = await async_vad(websocket, message)
+                    if speech_start_i:
+                        speech_start = True
+                        beg_bias = (websocket.vad_pre_idx-speech_start_i)//duration_ms
+                        frames_pre = frames[-beg_bias:]
+                        frames_asr = []
+                        frames_asr.extend(frames_pre)
+                if speech_end_i or not websocket.is_speaking:
                     audio_in = b"".join(frames_asr)
                     await async_asr(websocket, audio_in)
                     frames_asr = []
                     speech_start = False
-                    if not is_speaking:
+                    if not websocket.is_speaking:
                         websocket.vad_pre_idx = 0
                         frames = []
                         websocket.param_dict_vad = {'in_cache': dict()}
@@ -133,7 +138,7 @@ async def async_asr(websocket, audio_in):
                 
                 rec_result = inference_pipeline_asr(audio_in=audio_in,
                                                     param_dict=websocket.param_dict_asr)
-                # print(rec_result)
+                print(rec_result)
                 if inference_pipeline_punc is not None and 'text' in rec_result and len(rec_result["text"])>0:
                     rec_result = inference_pipeline_punc(text_in=rec_result['text'],
                                                          param_dict=websocket.param_dict_punc)

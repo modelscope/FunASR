@@ -26,74 +26,72 @@ websocket_users = set()
 print("model loading")
 
 inference_pipeline_asr_online = pipeline(
-    task=Tasks.auto_speech_recognition,
-    model=args.asr_model_online,
-    ngpu=args.ngpu,
-    ncpu=args.ncpu,
-    model_revision='v1.0.4')
+	task=Tasks.auto_speech_recognition,
+	model=args.asr_model_online,
+	ngpu=args.ngpu,
+	ncpu=args.ncpu,
+	model_revision='v1.0.4')
 
 print("model loaded")
 
 
 
 async def ws_serve(websocket, path):
-    frames_asr_online = []
-    global websocket_users
-    websocket_users.add(websocket)
-    websocket.param_dict_asr_online = {"cache": dict()}
-    print("new user connected",flush=True)
-    try:
-        async for message in websocket:
-            
- 
-            if isinstance(message,str):
-              messagejson = json.loads(message)
-               
-              if "is_speaking" in messagejson:
-                  websocket.is_speaking = messagejson["is_speaking"]  
-                  websocket.param_dict_asr_online["is_final"] = not websocket.is_speaking
-              if "is_finished" in messagejson:
-                  websocket.is_speaking = False
-                  websocket.param_dict_asr_online["is_final"] = True
-              if "chunk_interval" in messagejson:
-                  websocket.chunk_interval=messagejson["chunk_interval"]
-              if "wav_name" in messagejson:
-                  websocket.wav_name = messagejson.get("wav_name", "demo")
-              if "chunk_size" in messagejson:
-                  websocket.param_dict_asr_online["chunk_size"] = messagejson["chunk_size"]
-            # if has bytes in buffer or message is bytes
-            if len(frames_asr_online)>0 or not isinstance(message,str):
-               if not isinstance(message,str):
-                 frames_asr_online.append(message)
-               if len(frames_asr_online) % websocket.chunk_interval == 0 or not websocket.is_speaking:
-                    audio_in = b"".join(frames_asr_online)
-                    if not websocket.is_speaking:
-                       #padding 0.5s at end gurantee that asr engine can fire out last word
-                       audio_in=audio_in+b''.join(np.zeros(int(16000*0.5),dtype=np.int16))
-                    await async_asr_online(websocket,audio_in)
-                    frames_asr_online = []
+	frames_asr_online = []
+	global websocket_users
+	websocket_users.add(websocket)
+	websocket.param_dict_asr_online = {"cache": dict()}
+	websocket.wav_name = "microphone"
+	print("new user connected",flush=True)
+	try:
+		async for message in websocket:
+			
+			
+			if isinstance(message, str):
+				messagejson = json.loads(message)
+				
+				if "is_speaking" in messagejson:
+					websocket.is_speaking = messagejson["is_speaking"]
+					websocket.param_dict_asr_online["is_final"] = not websocket.is_speaking
+				if "chunk_interval" in messagejson:
+					websocket.chunk_interval=messagejson["chunk_interval"]
+				if "wav_name" in messagejson:
+					websocket.wav_name = messagejson.get("wav_name")
+				if "chunk_size" in messagejson:
+					websocket.param_dict_asr_online["chunk_size"] = messagejson["chunk_size"]
+			# if has bytes in buffer or message is bytes
+			if len(frames_asr_online) > 0 or not isinstance(message, str):
+				if not isinstance(message,str):
+					frames_asr_online.append(message)
+				if len(frames_asr_online) % websocket.chunk_interval == 0 or not websocket.is_speaking:
+					audio_in = b"".join(frames_asr_online)
+					# if not websocket.is_speaking:
+						#padding 0.5s at end gurantee that asr engine can fire out last word
+						# audio_in=audio_in+b''.join(np.zeros(int(16000*0.5),dtype=np.int16))
+					await async_asr_online(websocket,audio_in)
+					frames_asr_online = []
+	
+	
+	except websockets.ConnectionClosed:
+		print("ConnectionClosed...", websocket_users)
+		websocket_users.remove(websocket)
+	except websockets.InvalidState:
+		print("InvalidState...")
+	except Exception as e:
+		print("Exception:", e)
 
-     
-    except websockets.ConnectionClosed:
-        print("ConnectionClosed...", websocket_users)
-        websocket_users.remove(websocket)
-    except websockets.InvalidState:
-        print("InvalidState...")
-    except Exception as e:
-        print("Exception:", e)
 
- 
 async def async_asr_online(websocket,audio_in):
-            if len(audio_in) > 0:
-                audio_in = load_bytes(audio_in)
-                rec_result = inference_pipeline_asr_online(audio_in=audio_in,
-                                                           param_dict=websocket.param_dict_asr_online)
-                if websocket.param_dict_asr_online["is_final"]:
-                    websocket.param_dict_asr_online["cache"] = dict()
-                if "text" in rec_result:
-                    if rec_result["text"] != "sil" and rec_result["text"] != "waiting_for_more_voice":
-                        message = json.dumps({"mode": "online", "text": rec_result["text"], "wav_name": websocket.wav_name})
-                        await websocket.send(message)
+	if len(audio_in) > 0:
+		audio_in = load_bytes(audio_in)
+		rec_result = inference_pipeline_asr_online(audio_in=audio_in,
+		                                           param_dict=websocket.param_dict_asr_online)
+		if websocket.param_dict_asr_online.get("is_final", False):
+			websocket.param_dict_asr_online["cache"] = dict()
+		if "text" in rec_result:
+			if rec_result["text"] != "sil" and rec_result["text"] != "waiting_for_more_voice":
+				message = json.dumps({"mode": "online", "text": rec_result["text"], "wav_name": websocket.wav_name})
+				await websocket.send(message)
 
 
 
