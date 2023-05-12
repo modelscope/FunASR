@@ -16,24 +16,20 @@ infer_cmd=utils/run.pl
 feats_dir="../DATA" #feature output dictionary
 exp_dir="."
 lang=zh
-dumpdir=dump/fbank
-feats_type=fbank
 token_type=char
-dataset_type=large
-scp=feats.scp
-type=kaldi_ark
+type=sound
+scp=wav.scp
+speed_perturb="0.9 1.0 1.1"
 stage=0
-stop_stage=4
+stop_stage=0
 
 # feature configuration
 feats_dim=80
-sample_frequency=16000
-nj=100
-speed_perturb="0.9,1.0,1.1"
+nj=64
 
 # data
-tr_dir=
-dev_tst_dir=
+tr_dir=/nfs/wangjiaming.wjm/asr_data/aishell2/AISHELL-2/iOS/data
+dev_tst_dir=/nfs/wangjiaming.wjm/asr_data/aishell2/AISHELL-DEV-TEST-SET
 
 # exp tag
 tag="exp1"
@@ -51,13 +47,13 @@ valid_set=dev_ios
 test_sets="dev_ios test_ios"
 
 asr_config=conf/train_asr_conformer.yaml
-model_dir="baseline_$(basename "${asr_config}" .yaml)_${feats_type}_${lang}_${token_type}_${tag}"
+model_dir="baseline_$(basename "${asr_config}" .yaml)_${lang}_${token_type}_${tag}"
 
 inference_config=conf/decode_asr_transformer.yaml
 inference_asr_model=valid.acc.ave_10best.pb
 
 # you can set gpu num for decoding here
-gpuid_list=$CUDA_VISIBLE_DEVICES  # set gpus for decoding, e.g., gpuid_list=2,3, the same as training stage by default
+gpuid_list=$CUDA_VISIBLE_DEVICES  # set gpus for decoding, the same as training stage by default
 ngpu=$(echo $gpuid_list | awk -F "," '{print NF}')
 
 if ${gpu_inference}; then
