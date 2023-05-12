@@ -135,7 +135,8 @@ class AudioDataset(IterableDataset):
                             speed = random.choice(self.speed_perturb)
                             if speed != 1.0:
                                 mat, _ = torchaudio.sox_effects.apply_effects_tensor(
-                                    mat, sampling_rate, [['speed', str(speed)], ['rate', str(sampling_rate)]])
+                                    torch.tensor(mat).view(1, -1), sampling_rate, [['speed', str(speed)], ['rate', str(sampling_rate)]])
+                                mat = mat.view(-1).numpy()
                         sample_dict[data_name] = mat
                         sample_dict["sampling_rate"] = sampling_rate
                         if data_name == "speech":

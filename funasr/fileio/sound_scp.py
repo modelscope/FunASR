@@ -8,6 +8,7 @@ import soundfile
 import librosa
 from typeguard import check_argument_types
 
+import torch
 import torchaudio
 
 from funasr.fileio.read_text import read_2column_text
@@ -62,8 +63,9 @@ class SoundScpReader(collections.abc.Mapping):
             speed = random.choice(self.speed_perturb)
             if speed != 1.0:
                 array, _ = torchaudio.sox_effects.apply_effects_tensor(
-                    array, rate,
+                    torch.tensor(array).view(1, -1), rate,
                     [['speed', str(speed)], ['rate', str(rate)]])
+            array = array.view(-1).numpy()
 
         return rate, array
 
