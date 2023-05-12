@@ -27,15 +27,13 @@ class ModelExport:
     ):
         assert check_argument_types()
         self.set_all_random_seed(0)
-        if cache_dir is None:
-            cache_dir = Path.home() / ".cache" / "export"
 
-        self.cache_dir = Path(cache_dir)
+        self.cache_dir = cache_dir
         self.export_config = dict(
             feats_dim=560,
             onnx=False,
         )
-        print("output dir: {}".format(self.cache_dir))
+        
         self.onnx = onnx
         self.device = device
         self.quant = quant
@@ -52,7 +50,7 @@ class ModelExport:
         verbose: bool = False,
     ):
 
-        export_dir = self.cache_dir / tag_name.replace(' ', '-')
+        export_dir = self.cache_dir
         os.makedirs(export_dir, exist_ok=True)
 
         # export encoder1
@@ -174,6 +172,7 @@ class ModelExport:
         if model_dir.startswith('damo'):
             from modelscope.hub.snapshot_download import snapshot_download
             model_dir = snapshot_download(model_dir, cache_dir=self.cache_dir)
+        self.cache_dir = model_dir
 
         if mode is None:
             import json

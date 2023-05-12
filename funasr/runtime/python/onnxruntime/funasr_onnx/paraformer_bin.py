@@ -32,10 +32,25 @@ class Paraformer():
                  plot_timestamp_to: str = "",
                  quantize: bool = False,
                  intra_op_num_threads: int = 4,
+                 cache_dir=None
                  ):
 
         if not Path(model_dir).exists():
-            raise FileNotFoundError(f'{model_dir} does not exist.')
+            from modelscope.hub.snapshot_download import snapshot_download
+            try:
+                model_dir = snapshot_download(model_dir, cache_dir=cache_dir)
+            except:
+                raise "model_dir must be model_name in modelscope or local path downloaded from modelscope, but is {}".format(model_dir)
+            from funasr.export.export_model import ModelExport
+            export_model = ModelExport(
+                cache_dir=cache_dir,
+                onnx=True,
+                device="cpu",
+                quant=quantize,
+            )
+            export_model.export(model_dir)
+            
+            
 
         model_file = os.path.join(model_dir, 'model.onnx')
         if quantize:
