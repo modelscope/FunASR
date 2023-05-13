@@ -237,48 +237,43 @@ def one_thread(id,chunk_begin,chunk_size):
 
 
 if __name__ == '__main__':
-    process_list = []
-    for i in range(args.test_thread_num):
-        p = Process(target=one_thread,args=(i, 0, 0))
-        p.start()
-        process_list.append(p)
+   # for microphone 
+   if  args.audio_in is  None:
+     p = Process(target=one_thread,args=(0, 0, 0))
+     p.start()
+     p.join()
+     print('end')
+   else:
+     # calculate the number of wavs for each preocess
+     if args.audio_in.endswith(".scp"):
+         f_scp = open(args.audio_in)
+         wavs = f_scp.readlines()
+     else:
+         wavs = [args.audio_in]
+     total_len=len(wavs)
+     if total_len>=args.test_thread_num:
+          chunk_size=int((total_len)/args.test_thread_num)
+          remain_wavs=total_len-chunk_size*args.test_thread_num
+     else:
+          chunk_size=1
+          remain_wavs=0
 
-    for i in process_list:
-        p.join()
+     process_list = []
+     chunk_begin=0
+     for i in range(args.test_thread_num):
+         now_chunk_size= chunk_size
+         if remain_wavs>0:
+             now_chunk_size=chunk_size+1
+             remain_wavs=remain_wavs-1
+         # process i handle wavs at chunk_begin and size of now_chunk_size
+         p = Process(target=one_thread,args=(i,chunk_begin,now_chunk_size))
+         chunk_begin=chunk_begin+now_chunk_size
+         p.start()
+         process_list.append(p)
 
-    print('end')
+     for i in process_list:
+         p.join()
 
-#
-# if __name__ == '__main__':
-#     # calculate the number of wavs for each preocess
-#     if args.audio_in.endswith(".scp"):
-#         f_scp = open(args.audio_in)
-#         wavs = f_scp.readlines()
-#     else:
-#         wavs = [args.audio_in]
-#     total_len=len(wavs)
-#     if total_len>=args.test_thread_num:
-#          chunk_size=int((total_len)/args.test_thread_num)
-#          remain_wavs=total_len-chunk_size*args.test_thread_num
-#     else:
-#          chunk_size=0
-#
-#     process_list = []
-#     chunk_begin=0
-#     for i in range(args.test_thread_num):
-#         now_chunk_size= chunk_size
-#         if remain_wavs>0:
-#             now_chunk_size=chunk_size+1
-#             remain_wavs=remain_wavs-1
-#         # process i handle wavs at chunk_begin and size of now_chunk_size
-#         p = Process(target=one_thread,args=(i,chunk_begin,now_chunk_size))
-#         chunk_begin=chunk_begin+now_chunk_size
-#         p.start()
-#         process_list.append(p)
-#
-#     for i in process_list:
-#         p.join()
-#
-#     print('end')
-#
+     print('end')
+
 
