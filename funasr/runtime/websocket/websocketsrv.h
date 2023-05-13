@@ -72,7 +72,7 @@ class WebSocketServer {
     server_->clear_access_channels(websocketpp::log::alevel::all);
   }
   void do_decoder(const std::vector<char>& buffer,
-                  websocketpp::connection_hdl& hdl);
+                  websocketpp::connection_hdl& hdl, const nlohmann::json& msg);
 
   void initAsr(std::map<std::string, std::string>& model_path, int thread_num);
   void on_message(websocketpp::connection_hdl hdl, message_ptr msg);
@@ -89,7 +89,6 @@ class WebSocketServer {
 
   // use map to keep the received samples data from one connection in offline
   // engine. if for online engline, a data struct is needed(TODO)
- 
 
   std::map<websocketpp::connection_hdl, std::shared_ptr<FUNASR_MESSAGE>,
            std::owner_less<websocketpp::connection_hdl>>

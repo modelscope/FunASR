@@ -18,7 +18,8 @@
 
 // feed buffer to asr engine for decoder
 void WebSocketServer::do_decoder(const std::vector<char>& buffer,
-                                 websocketpp::connection_hdl& hdl) {
+                                 websocketpp::connection_hdl& hdl,
+                                 const nlohmann::json& msg) {
   try {
     int num_samples = buffer.size();  // the size of the buf
 
@@ -35,13 +36,8 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
       nlohmann::json jsonresult;        // result json
       jsonresult["text"] = asr_result;  // put result in 'text'
       jsonresult["mode"] = "offline";
-      std::shared_ptr<FUNASR_MESSAGE> msg_data = nullptr;
-      auto it_data = data_map.find(hdl);
-      if (it_data != data_map.end()) {
-        msg_data = it_data->second;
-      }
 
-      jsonresult["wav_name"] = msg_data->msg["wav_name"];
+      jsonresult["wav_name"] = msg["wav_name"];
 
       // send the json to client
       server_->send(hdl, jsonresult.dump(), websocketpp::frame::opcode::text,
@@ -125,6 +121,7 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
       if (jsonresult["wav_name"] != nullptr) {
         msg_data->msg["wav_name"] = jsonresult["wav_name"];
       }
+
       if (jsonresult["is_speaking"] == false ||
           jsonresult["is_finished"] == true) {
         std::cout << "client done" << std::endl;
@@ -137,9 +134,10 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
           sample_data_p->insert(sample_data_p->end(), padding.data(),
                                 padding.data() + padding.size());
           // for offline, send all receive data to decoder engine
-          asio::post(io_decoder_, std::bind(&WebSocketServer::do_decoder, this,
-                                            std::move(*(sample_data_p.get())),
-                                            std::move(hdl)));
+          asio::post(io_decoder_,
+                     std::bind(&WebSocketServer::do_decoder, this,
+                               std::move(*(sample_data_p.get())),
+                               std::move(hdl), std::move(msg_data->msg)));
         }
       }
       break;
@@ -152,8 +150,9 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
       if (isonline) {
         // if online TODO(zhaoming) still not done
         std::vector<char> s(pcm_data, pcm_data + num_samples);
-        asio::post(io_decoder_, std::bind(&WebSocketServer::do_decoder, this,
-                                          std::move(s), std::move(hdl)));
+        asio::post(io_decoder_,
+                   std::bind(&WebSocketServer::do_decoder, this, std::move(s),
+                             std::move(hdl), std::move(msg_data->msg)));
       } else {
         // for offline, we add receive data to end of the sample data vector
         sample_data_p->insert(sample_data_p->end(), pcm_data,

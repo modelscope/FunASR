@@ -255,7 +255,8 @@ if __name__ == '__main__':
           chunk_size=int((total_len)/args.test_thread_num)
           remain_wavs=total_len-chunk_size*args.test_thread_num
      else:
-          chunk_size=0
+          chunk_size=1
+          remain_wavs=0
 
      process_list = []
      chunk_begin=0
