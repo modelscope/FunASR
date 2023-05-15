@@ -79,7 +79,8 @@ class LargeDataLoader(AbsIterFactory):
         self.frontend_conf = args.frontend_conf
         logging.info("dataloader config: {}".format(self.dataset_conf))
         batch_mode = self.dataset_conf.get("batch_mode", "padding")
-        self.dataset = Dataset(args.data_list, symbol_table, seg_dict, punc_dict, bpe_tokenizer,
+        data_list = args.train_data_file if mode == "train" else args.valid_data_file
+        self.dataset = Dataset(data_list, symbol_table, seg_dict, punc_dict, bpe_tokenizer,
                                self.dataset_conf, self.frontend_conf,
                                speed_perturb=args.speed_perturb if mode == "train" else None,
                                mode=mode, batch_mode=batch_mode)
