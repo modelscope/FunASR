@@ -59,6 +59,7 @@ function getConnState( connState ) {
 	} else if ( connState === 2 ) {
 		stop();
 		console.log( 'connecttion error' );
+		setTimeout(function(){btnStart.disabled = true;info_div.innerHTML='connecttion error';}, 4000 );
 	}
 }
 

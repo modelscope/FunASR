@@ -72,6 +72,7 @@ function WebSocketConnectMethod( config ) { //定义socket连接方法类
 	}
 	
 	function onError( e ) {
+		info_div.innerHTML="连接"+e;
 		console.log(e);
 		stateHandle(2);
 	}

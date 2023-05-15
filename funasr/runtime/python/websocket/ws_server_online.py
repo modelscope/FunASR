@@ -7,7 +7,7 @@ import threading
 import logging
 import tracemalloc
 import numpy as np
-
+import ssl
 from parse_args import args
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
@@ -94,7 +94,16 @@ async def async_asr_online(websocket,audio_in):
 				await websocket.send(message)
 
 
+if len(args.certfile)>0:
+  ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 
-start_server = websockets.serve(ws_serve, args.host, args.port, subprotocols=["binary"], ping_interval=None)
+  # Generate with Lets Encrypt, copied to this location, chown to current user and 400 permissions
+  ssl_cert = args.certfile
+  ssl_key = args.keyfile
+
+  ssl_context.load_cert_chain(ssl_cert, keyfile=ssl_key)
+  start_server = websockets.serve(ws_serve, args.host, args.port, subprotocols=["binary"], ping_interval=None,ssl=ssl_context)
+else:
+  start_server = websockets.serve(ws_serve, args.host, args.port, subprotocols=["binary"], ping_interval=None)
 asyncio.get_event_loop().run_until_complete(start_server)
 asyncio.get_event_loop().run_forever()

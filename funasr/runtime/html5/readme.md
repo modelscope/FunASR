@@ -17,9 +17,15 @@ Recorder
 ### demo页面如下
 ![img](https://github.com/alibaba-damo-academy/FunASR/blob/for-html5-demo/funasr/runtime/html5/demo.gif)
 
-## 具体数据流向：
-浏览器https麦克风 --> html5 demo服务 --> js wss接口 --> nginx服务 --> ws asr online srv
-
+## 两种ws_server_online连接模式
+### 1)直接连接模式，浏览器https麦克风 --> html5 demo服务 --> js wss接口 --> wss asr online srv(证书生成请往后看)
+```shell
+python ws_server_online.py --certfile server.crt --keyfile server.key  --port 5921
+```
+### 2)nginx中转，浏览器https麦克风 --> html5 demo服务 --> js wss接口 --> nginx服务 --> ws asr online srv
+```shell
+python ws_server_online.py  --port 5921
+```
 ## 1.html5 demo服务启动
 ### 启动html5服务，需要ssl证书(自己生成请往后看)
 
@@ -28,17 +34,15 @@ usage: h5Server.py [-h] [--host HOST] [--port PORT] [--certfile CERTFILE]
                    [--keyfile KEYFILE]
 python h5Server.py --port 1337
 ```
-## 2.启动ws asr online srv
+## 2.启动ws or wss asr online srv
 [具体请看online asr](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket)
-目前online asr只提供ws接口，需要通过nginx将wss转发到该online asr端口上
+online asr只提供两种ws和wss模式，wss模式可以直接启动，无需nginx中转。否则需要通过nginx将wss转发到该online asr的ws端口上
 
 ## 3.修改wsconnecter.js里asr接口地址
-wsconnecter.js里配置online asr服务地址路径，这里配置的是nginx的wss端口
+wsconnecter.js里配置online asr服务地址路径，这里配置的是wss端口
 var Uri = "wss://xxx:xxx/" 
 
-## 4.配置nginx并启动
-
-## 5.浏览器打开地址测试
+## 4.浏览器打开地址测试
 https://127.0.0.1:1337/static/index.html
 
 
