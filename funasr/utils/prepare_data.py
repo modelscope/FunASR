@@ -181,6 +181,11 @@ def prepare_data(args, distributed_option):
             ["{}/{}/wav.scp".format(args.data_dir, args.valid_set), data_names[0], data_types[0]],
             ["{}/{}/text".format(args.data_dir, args.valid_set), data_names[1], data_types[1]]
         ]
+        if args.embed_path is not None:
+            args.train_data_path_and_name_and_type[0].append(
+                "{}/embed/kaldi_ark".format(os.path.join(args.embed_path, args.train_set, "embeds.scp")))
+            args.valid_data_path_and_name_and_type[0].append(
+                "{}/embed/kaldi_ark".format(os.path.join(args.embed_path, args.dev_set, "embeds.scp")))
     else:
         args.train_data_file = os.path.join(args.data_dir, args.train_set, "data.list")
         args.valid_data_file = os.path.join(args.data_dir, args.valid_set, "data.list")

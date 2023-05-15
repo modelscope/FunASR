@@ -347,6 +347,12 @@ def get_parser():
         default=True,
         help="Apply preprocessing to data or not",
     )
+    parser.add_argument(
+        "--embed_path",
+        type=str,
+        default=None,
+        help="for model which requires embeds",
+    )
 
     # optimization related
     parser.add_argument(
