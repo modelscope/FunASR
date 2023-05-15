@@ -185,7 +185,7 @@ def prepare_data(args, distributed_option):
             args.train_data_path_and_name_and_type[0].append(
                 "{}/embed/kaldi_ark".format(os.path.join(args.embed_path, "embeds", args.train_set, "embeds.scp")))
             args.valid_data_path_and_name_and_type[0].append(
-                "{}/embed/kaldi_ark".format(os.path.join(args.embed_path, "embeds", args.dev_set, "embeds.scp")))
+                "{}/embed/kaldi_ark".format(os.path.join(args.embed_path, "embeds", args.valid_set, "embeds.scp")))
     else:
         args.train_data_file = os.path.join(args.data_dir, args.train_set, "data.list")
         args.valid_data_file = os.path.join(args.data_dir, args.valid_set, "data.list")
