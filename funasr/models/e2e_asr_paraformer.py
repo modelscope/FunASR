@@ -906,9 +906,9 @@ class ParaformerBert(Paraformer):
         self.step_cur += 1
         # for data-parallel
         text = text[:, : text_lengths.max()]
-        speech = speech[:, :speech_lengths.max(), :]
+        speech = speech[:, :speech_lengths.max()]
         if embed is not None:
-            embed = embed[:, :embed_lengths.max(), :]
+            embed = embed[:, :embed_lengths.max()]
 
         # 1. Encoder
         encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
