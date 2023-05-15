@@ -32,13 +32,13 @@ https://127.0.0.1:1337/static/index.html
 ![img](https://github.com/alibaba-damo-academy/FunASR/blob/for-html5-demo/funasr/runtime/html5/demo.gif)
 
 
-##后端配置
+## 后端配置
 h5打开麦克风需要https协议，同时后端的asr websocket也必须是wss协议，而目前[online asr](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket)模型只支持ws协议，所以我们通过nginx配置实现wss协议到ws协议的转换。
 
-##具体过程如下：
+## 具体过程如下：
 浏览器htts --> html5 demo服务 --> js wss接口 --> nginx服务 --> ws asr online srv
 
-##配置nginx wss协议(了解的可以跳过）
+## 配置nginx wss协议(了解的可以跳过）
 生成证书(注意这种证书并不能被所有浏览器认可，部分手动授权可以访问,最好使用其他认证的官方ssl证书)
 
 ### 生成私钥，按照提示填写内容
@@ -54,7 +54,7 @@ openssl rsa -in server.key.org -out server.key
 ### 生成crt文件，有效期1年（365天）
 openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
 
-##nginx转发配置示例
+## nginx转发配置示例
 ```shell
 events {                                                                                                            [0/1548]
     worker_connections  1024;
