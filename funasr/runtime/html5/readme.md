@@ -29,7 +29,7 @@ https://127.0.0.1:1337/static/index.html
 
 
 ### demo页面如下
-![img](https://github.com/zhaomingwork/FunASR/tree/for-html5-demo/funasr/runtime/html5/demo.gif)
+![img](https://github.com/alibaba-damo-academy/FunASR/blob/for-html5-demo/funasr/runtime/html5/demo.gif)
 
 
 ##后端配置
