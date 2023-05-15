@@ -24,7 +24,6 @@ stage=3
 stop_stage=4
 
 skip_extract_embed=false
-bert_model_root="../../huggingface_models"
 bert_model_name="bert-base-chinese"
 
 # feature configuration
@@ -115,7 +114,6 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
     if ! "${skip_extract_embed}"; then
         echo "extract embeddings..."
         local/extract_embeds.sh \
-            --bert_model_root ${bert_model_root} \
             --bert_model_name ${bert_model_name} \
             --raw_dataset_path ${feats_dir}
     fi
