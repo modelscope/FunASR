@@ -3,10 +3,9 @@
 stage=1
 stop_stage=3
 
-bert_model_root="../../huggingface_models"
 bert_model_name="bert-base-chinese"
 raw_dataset_path="../DATA"
-model_path=${bert_model_root}/${bert_model_name}
+model_path=${bert_model_name}
 
 . utils/parse_options.sh || exit 1;
 
