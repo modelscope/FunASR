@@ -40,7 +40,6 @@ frontend_conf:
     lfr_m: 1
     lfr_n: 1
 
-
 # hybrid CTC/attention
 model: paraformer
 model_conf:

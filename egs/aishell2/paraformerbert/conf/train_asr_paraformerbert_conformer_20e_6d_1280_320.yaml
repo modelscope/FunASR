@@ -29,6 +29,17 @@ decoder_conf:
     self_attention_dropout_rate: 0.0
     src_attention_dropout_rate: 0.0
 
+# frontend related
+frontend: wav_frontend
+frontend_conf:
+    fs: 16000
+    window: hamming
+    n_mels: 80
+    frame_length: 25
+    frame_shift: 10
+    lfr_m: 1
+    lfr_n: 1
+
 # hybrid CTC/attention
 model: paraformer_bert
 model_conf:
@@ -45,7 +56,7 @@ model_conf:
 accum_grad: 2
 grad_clip: 5
 patience: none
-max_epoch: 50
+max_epoch: 150
 val_scheduler_criterion:
     - valid
     - acc
@@ -85,17 +96,16 @@ predictor_conf:
   l_order: 1
   r_order: 1
 
-log_interval: 50
-normalize: None
-
 dataset_conf:
-    data_names: speech,text,embed
-    data_types: kaldi_ark,text,kaldi_ark
+    data_types: sound,text
     shuffle: True
     shuffle_conf:
-        shuffle_size: 10240
+        shuffle_size: 2048
         sort_size: 500
     batch_conf:
         batch_type: token
         batch_size: 25000
     num_workers: 8
+
+log_interval: 50
+normalize: None
