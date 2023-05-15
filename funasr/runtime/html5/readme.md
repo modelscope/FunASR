@@ -33,7 +33,7 @@ python h5Server.py --port 1337
 目前online asr只提供ws接口，需要通过nginx将wss转发到该online asr端口上
 
 ## 3.修改wsconnecter.js里asr接口地址
-wsconnecter.js里配置online asr服务地址路径，这里配置的是nginx的wss端口)
+wsconnecter.js里配置online asr服务地址路径，这里配置的是nginx的wss端口
 var Uri = "wss://xxx:xxx/" 
 
 ## 4.配置nginx并启动
