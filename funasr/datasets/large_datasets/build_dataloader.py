@@ -66,10 +66,15 @@ class SentencepiecesTokenizer(AbsTokenizer):
 
 class LargeDataLoader(AbsIterFactory):
     def __init__(self, args, mode="train"):
-        symbol_table = read_symbol_table(args.token_list) if args.token_list is not None else None
-        seg_dict = load_seg_dict(args.seg_dict_file) if args.seg_dict_file is not None else None
-        punc_dict = load_seg_dict(args.punc_dict_file) if args.punc_dict_file is not None else None
-        bpe_tokenizer = load_seg_dict(args.bpemodel_file) if args.bpemodel_file is not None else None
+        symbol_table, seg_dict, punc_dict, bpe_tokenizer = None, None, None, None
+        if hasattr(args, "token_list") and args.token_list is not None:
+            symbol_table = read_symbol_table(args.token_list)
+        if hasattr(args, "seg_dict_file") and args.seg_dict_file is not None:
+            seg_dict = load_seg_dict(args.seg_dict_file)
+        if hasattr(args, "punc_dict_file") and args.punc_dict_file is not None:
+            punc_dict = read_symbol_table(args.punc_dict_file)
+        if hasattr(args, "bpemodel_file") and args.bpemodel_file is not None:
+            bpe_tokenizer = SentencepiecesTokenizer(args.bpemodel_file)
         self.dataset_conf = args.dataset_conf
         self.frontend_conf = args.frontend_conf
         logging.info("dataloader config: {}".format(self.dataset_conf))
