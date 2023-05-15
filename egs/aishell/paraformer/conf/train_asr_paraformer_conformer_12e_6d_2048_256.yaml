@@ -84,7 +84,7 @@ specaug_conf:
     - 40
     num_time_mask: 2
 
-predictor: cif_predictor_v2
+predictor: cif_predictor
 predictor_conf:
     idim: 256
     threshold: 1.0
