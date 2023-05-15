@@ -306,7 +306,7 @@ public:
         max_end_sil_frame_cnt_thresh = max_end_sil - vad_opts.speech_to_sil_time_thres;
         this->waveform = waveform;
         this->vad_opts.max_single_segment_time = max_single_segment_time;
-        this->vad_opts.speech_noise_thres = speech_noise_thres;
+        this->speech_noise_thres = speech_noise_thres;
         this->vad_opts.sample_rate = sample_rate;
 
         ComputeDecibel();
