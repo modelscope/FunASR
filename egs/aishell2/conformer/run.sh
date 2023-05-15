@@ -20,8 +20,8 @@ token_type=char
 type=sound
 scp=wav.scp
 speed_perturb="0.9 1.0 1.1"
-stage=1
-stop_stage=1
+stage=2
+stop_stage=2
 
 # feature configuration
 feats_dim=80
@@ -101,16 +101,10 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     echo "</s>" >> ${token_list}
     tools/text2token.py -s 1 -n 1 --space "" ${feats_dir}/data/${train_set}/text | cut -f 2- -d" " | tr " " "\n" \
         | sort | uniq | grep -a -v -e '^\s*$' | awk '{print $0}' >> ${token_list}
-    num_token=$(cat ${token_list} | wc -l)
     echo "<unk>" >> ${token_list}
-    vocab_size=$(cat ${token_list} | wc -l)
-    awk -v v=,${vocab_size} '{print $0v}' ${feat_train_dir}/text_shape > ${feat_train_dir}/text_shape.char
-    awk -v v=,${vocab_size} '{print $0v}' ${feat_dev_dir}/text_shape > ${feat_dev_dir}/text_shape.char
     mkdir -p ${feats_dir}/asr_stats_fbank_zh_char/${train_set}
     mkdir -p ${feats_dir}/asr_stats_fbank_zh_char/${valid_set}
-    cp ${feat_train_dir}/speech_shape ${feat_train_dir}/text_shape ${feat_train_dir}/text_shape.char ${feats_dir}/asr_stats_fbank_zh_char/${train_set} 
-    cp ${feat_dev_dir}/speech_shape ${feat_dev_dir}/text_shape ${feat_dev_dir}/text_shape.char ${feats_dir}/asr_stats_fbank_zh_char/${valid_set}
-fi
+ fi
 
 # Training Stage
 world_size=$gpu_num  # run on one machine
