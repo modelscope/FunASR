@@ -13,7 +13,7 @@ model_path=${bert_model_root}/${bert_model_name}
 nj=32
 
 for data_set in train dev test;do
-    scp=$raw_dataset_path/dump/fbank/${data_set}/text
+    scp=$raw_dataset_path/data/${data_set}/text
     local_scp_dir_raw=${raw_dataset_path}/data/embeds/${data_set}
     local_scp_dir=$local_scp_dir_raw/split$nj
     local_records_dir=$local_scp_dir_raw/ark
