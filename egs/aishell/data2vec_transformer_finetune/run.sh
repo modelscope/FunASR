@@ -53,7 +53,7 @@ asr_config=conf/train_asr_transformer_12e_6d_3072_768.yaml
 model_dir="baseline_$(basename "${asr_config}" .yaml)_${lang}_${token_type}_${tag}"
 
 inference_config=conf/decode_asr_transformer.yaml
-inference_asr_model=valid.acc.ave_10best.pb
+inference_asr_model=valid.cer_ctc.ave_10best.pb
 
 # you can set gpu num for decoding here
 gpuid_list=$CUDA_VISIBLE_DEVICES  # set gpus for decoding, the same as training stage by default
@@ -189,7 +189,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
                 --asr_train_config "${asr_exp}"/config.yaml \
                 --asr_model_file "${asr_exp}"/"${inference_asr_model}" \
                 --output_dir "${_logdir}"/output.JOB \
-                --mode paraformer \
+                --mode asr \
                 ${_opts}
 
         for f in token token_int score text; do

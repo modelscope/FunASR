@@ -8,7 +8,7 @@ gpu_num=2
 count=1
 gpu_inference=true  # Whether to perform gpu decoding, set false for cpu decoding
 # for gpu decoding, inference_nj=ngpu*njob; for cpu decoding, inference_nj=njob
-njob=5
+njob=1
 train_cmd=utils/run.pl
 infer_cmd=utils/run.pl
 
