@@ -53,6 +53,9 @@ async def ws_serve(websocket, path):
 				if "is_speaking" in messagejson:
 					websocket.is_speaking = messagejson["is_speaking"]
 					websocket.param_dict_asr_online["is_final"] = not websocket.is_speaking
+					# need to fire engine manually if no data received any more
+					if not websocket.is_speaking:
+						await async_asr_online(websocket,b"")
 				if "chunk_interval" in messagejson:
 					websocket.chunk_interval=messagejson["chunk_interval"]
 				if "wav_name" in messagejson:
@@ -82,7 +85,7 @@ async def ws_serve(websocket, path):
 
 
 async def async_asr_online(websocket,audio_in):
-	if len(audio_in) > 0:
+	if len(audio_in) >=0:
 		audio_in = load_bytes(audio_in)
 		rec_result = inference_pipeline_asr_online(audio_in=audio_in,
 		                                           param_dict=websocket.param_dict_asr_online)
