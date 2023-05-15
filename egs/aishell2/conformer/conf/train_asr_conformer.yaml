@@ -50,7 +50,7 @@ model_conf:
 accum_grad: 2
 grad_clip: 5
 patience: none
-max_epoch: 50
+max_epoch: 150
 val_scheduler_criterion:
     - valid
     - acc
@@ -83,9 +83,6 @@ specaug_conf:
     - 40
     num_time_mask: 2
 
-log_interval: 50
-normalize: None
-
 dataset_conf:
     data_types: sound,text
     shuffle: True
@@ -96,3 +93,6 @@ dataset_conf:
         batch_type: token
         batch_size: 25000
     num_workers: 8
+
+log_interval: 50
+normalize: None
