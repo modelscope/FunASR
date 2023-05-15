@@ -29,6 +29,17 @@ decoder_conf:
     self_attention_dropout_rate: 0.0
     src_attention_dropout_rate: 0.0
 
+# frontend related
+frontend: wav_frontend
+frontend_conf:
+    fs: 16000
+    window: hamming
+    n_mels: 80
+    frame_length: 25
+    frame_shift: 10
+    lfr_m: 1
+    lfr_n: 1
+
 # hybrid CTC/attention
 model_conf:
     ctc_weight: 0.3
