@@ -211,4 +211,3 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
         cat ${_dir}/text.cer.txt
     done
 fi
-

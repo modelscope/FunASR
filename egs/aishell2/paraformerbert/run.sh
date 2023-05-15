@@ -117,7 +117,6 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
     if ! "${skip_extract_embed}"; then
         echo "extract embeddings..."
         local/extract_embeds.sh \
-            --bert_model_root ${bert_model_root} \
             --bert_model_name ${bert_model_name} \
             --raw_dataset_path ${feats_dir}
     fi
@@ -134,22 +133,24 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
             rank=$i
             local_rank=$i
             gpu_id=$(echo $CUDA_VISIBLE_DEVICES | cut -d',' -f$[$i+1])
-            asr_train_paraformer.py \
+            train.py \
+                --task_name asr \
                 --gpu_id $gpu_id \
                 --use_preprocessor true \
-                --dataset_type $dataset_type \
-                --token_type $token_type \
+                --token_type char \
                 --token_list $token_list \
-                --train_data_file $feats_dir/$dumpdir/${train_set}/data_bert.list \
-                --valid_data_file $feats_dir/$dumpdir/${valid_set}/data_bert.list \
+                --data_dir ${feats_dir}/data \
+                --train_set ${train_set} \
+                --valid_set ${valid_set} \
+                --embed_path ${feats_dir}/data \
+                --cmvn_file ${feats_dir}/data/${train_set}/cmvn/cmvn.mvn \
+                --speed_perturb ${speed_perturb} \
+                --dataset_type $dataset_type \
                 --resume true \
                 --output_dir ${exp_dir}/exp/${model_dir} \
                 --config $asr_config \
-                --allow_variable_data_keys true \
-                --input_size $feats_dim \
                 --ngpu $gpu_num \
                 --num_worker_count $count \
-                --multiprocessing_distributed true \
                 --dist_init_method $init_method \
                 --dist_world_size $world_size \
                 --dist_rank $rank \
@@ -214,4 +215,3 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
         cat ${_dir}/text.cer.txt
     done
 fi
-
