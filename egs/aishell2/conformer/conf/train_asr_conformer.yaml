@@ -76,6 +76,7 @@ log_interval: 50
 normalize: None
 
 dataset_conf:
+    data_types: sound,text
     shuffle: True
     shuffle_conf:
         shuffle_size: 2048
