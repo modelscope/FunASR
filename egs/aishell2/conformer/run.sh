@@ -20,6 +20,7 @@ token_type=char
 type=sound
 scp=wav.scp
 speed_perturb="0.9 1.0 1.1"
+dataset_type=large
 stage=2
 stop_stage=2
 
@@ -99,7 +100,7 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     echo "<blank>" > ${token_list}
     echo "<s>" >> ${token_list}
     echo "</s>" >> ${token_list}
-    tools/text2token.py -s 1 -n 1 --space "" ${feats_dir}/data/${train_set}/text | cut -f 2- -d" " | tr " " "\n" \
+    utils/text2token.py -s 1 -n 1 --space "" ${feats_dir}/data/${train_set}/text | cut -f 2- -d" " | tr " " "\n" \
         | sort | uniq | grep -a -v -e '^\s*$' | awk '{print $0}' >> ${token_list}
     echo "<unk>" >> ${token_list}
     mkdir -p ${feats_dir}/asr_stats_fbank_zh_char/${train_set}
@@ -123,21 +124,23 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
             rank=$i
             local_rank=$i
             gpu_id=$(echo $CUDA_VISIBLE_DEVICES | cut -d',' -f$[$i+1])
-            asr_train.py \
+            train.py \
+                --task_name asr \
                 --gpu_id $gpu_id \
                 --use_preprocessor true \
-                --dataset_type $dataset_type \
                 --token_type char \
                 --token_list $token_list \
-                --train_data_file $feats_dir/$dumpdir/${train_set}/data.list \
-                --valid_data_file $feats_dir/$dumpdir/${valid_set}/data.list \
+                --data_dir ${feats_dir}/data \
+                --train_set ${train_set} \
+                --valid_set ${valid_set} \
+                --cmvn_file ${feats_dir}/data/${train_set}/cmvn/cmvn.mvn \
+                --speed_perturb ${speed_perturb} \
+                --dataset_type $dataset_type \
                 --resume true \
                 --output_dir ${exp_dir}/exp/${model_dir} \
                 --config $asr_config \
-                --input_size $feats_dim \
                 --ngpu $gpu_num \
                 --num_worker_count $count \
-                --multiprocessing_distributed true \
                 --dist_init_method $init_method \
                 --dist_world_size $world_size \
                 --dist_rank $rank \
