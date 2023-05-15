@@ -89,7 +89,7 @@ def build_pretrain_model(args):
         **args.encoder_conf,
     )
 
-    if args.model_name == "data2vec":
+    if args.model == "data2vec":
         model_class = model_choices.get_class("data2vec")
         model = model_class(
             frontend=frontend,
