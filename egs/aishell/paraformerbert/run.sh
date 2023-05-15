@@ -111,12 +111,12 @@ fi
 world_size=$gpu_num  # run on one machine
 if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
     echo "stage 3: Training"
-#    if ! "${skip_extract_embed}"; then
-#        echo "extract embeddings..."
-#        local/extract_embeds.sh \
-#            --bert_model_name ${bert_model_name} \
-#            --raw_dataset_path ${feats_dir}
-#    fi
+    if ! "${skip_extract_embed}"; then
+        echo "extract embeddings..."
+        local/extract_embeds.sh \
+            --bert_model_name ${bert_model_name} \
+            --raw_dataset_path ${feats_dir}
+    fi
     mkdir -p ${exp_dir}/exp/${model_dir}
     mkdir -p ${exp_dir}/exp/${model_dir}/log
     INIT_FILE=${exp_dir}/exp/${model_dir}/ddp_init
