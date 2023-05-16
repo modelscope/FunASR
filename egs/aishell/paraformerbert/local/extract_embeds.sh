@@ -3,20 +3,16 @@
 stage=1
 stop_stage=3
 
-bert_model_root="../../huggingface_models"
 bert_model_name="bert-base-chinese"
-#bert_model_name="chinese-roberta-wwm-ext"
-#bert_model_name="mengzi-bert-base"
 raw_dataset_path="../DATA"
-model_path=${bert_model_root}/${bert_model_name}
+nj=64
+model_path=${bert_model_name}
 
 . utils/parse_options.sh || exit 1;
 
-nj=32
-
 for data_set in train dev test;do
-    scp=$raw_dataset_path/dump/fbank/${data_set}/text
-    local_scp_dir_raw=$raw_dataset_path/embeds/$bert_model_name/${data_set}
+    scp=$raw_dataset_path/data/${data_set}/text
+    local_scp_dir_raw=${raw_dataset_path}/data/embeds/${data_set}
     local_scp_dir=$local_scp_dir_raw/split$nj
     local_records_dir=$local_scp_dir_raw/ark
 
