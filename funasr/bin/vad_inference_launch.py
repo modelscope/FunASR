@@ -17,6 +17,255 @@ from funasr.utils.types import str2bool
 from funasr.utils.types import str2triple_str
 from funasr.utils.types import str_or_none
 
+import argparse
+import logging
+import os
+import sys
+import json
+from pathlib import Path
+from typing import Any
+from typing import List
+from typing import Optional
+from typing import Sequence
+from typing import Tuple
+from typing import Union
+from typing import Dict
+
+import math
+import numpy as np
+import torch
+from typeguard import check_argument_types
+from typeguard import check_return_type
+
+from funasr.fileio.datadir_writer import DatadirWriter
+from funasr.modules.scorers.scorer_interface import BatchScorerInterface
+from funasr.modules.subsampling import TooShortUttError
+from funasr.tasks.vad import VADTask
+from funasr.torch_utils.device_funcs import to_device
+from funasr.torch_utils.set_all_random_seed import set_all_random_seed
+from funasr.utils import config_argparse
+from funasr.utils.cli_utils import get_commandline_args
+from funasr.utils.types import str2bool
+from funasr.utils.types import str2triple_str
+from funasr.utils.types import str_or_none
+from funasr.utils import asr_utils, wav_utils, postprocess_utils
+from funasr.models.frontend.wav_frontend import WavFrontend, WavFrontendOnline
+from funasr.bin.vad_infer import Speech2VadSegment, Speech2VadSegmentOnline
+
+def inference_vad(
+        batch_size: int,
+        ngpu: int,
+        log_level: Union[int, str],
+        # data_path_and_name_and_type,
+        vad_infer_config: Optional[str],
+        vad_model_file: Optional[str],
+        vad_cmvn_file: Optional[str] = None,
+        # raw_inputs: Union[np.ndarray, torch.Tensor] = None,
+        key_file: Optional[str] = None,
+        allow_variable_data_keys: bool = False,
+        output_dir: Optional[str] = None,
+        dtype: str = "float32",
+        seed: int = 0,
+        num_workers: int = 1,
+        **kwargs,
+):
+    assert check_argument_types()
+    if batch_size > 1:
+        raise NotImplementedError("batch decoding is not implemented")
+
+
+    logging.basicConfig(
+        level=log_level,
+        format="%(asctime)s (%(module)s:%(lineno)d) %(levelname)s: %(message)s",
+    )
+
+    if ngpu >= 1 and torch.cuda.is_available():
+        device = "cuda"
+    else:
+        device = "cpu"
+        batch_size = 1
+    # 1. Set random-seed
+    set_all_random_seed(seed)
+
+    # 2. Build speech2vadsegment
+    speech2vadsegment_kwargs = dict(
+        vad_infer_config=vad_infer_config,
+        vad_model_file=vad_model_file,
+        vad_cmvn_file=vad_cmvn_file,
+        device=device,
+        dtype=dtype,
+    )
+    logging.info("speech2vadsegment_kwargs: {}".format(speech2vadsegment_kwargs))
+    speech2vadsegment = Speech2VadSegment(**speech2vadsegment_kwargs)
+
+    def _forward(
+            data_path_and_name_and_type,
+            raw_inputs: Union[np.ndarray, torch.Tensor] = None,
+            output_dir_v2: Optional[str] = None,
+            fs: dict = None,
+            param_dict: dict = None
+    ):
+        # 3. Build data-iterator
+        if data_path_and_name_and_type is None and raw_inputs is not None:
+            if isinstance(raw_inputs, torch.Tensor):
+                raw_inputs = raw_inputs.numpy()
+            data_path_and_name_and_type = [raw_inputs, "speech", "waveform"]
+        loader = VADTask.build_streaming_iterator(
+            data_path_and_name_and_type,
+            dtype=dtype,
+            batch_size=batch_size,
+            key_file=key_file,
+            num_workers=num_workers,
+            preprocess_fn=VADTask.build_preprocess_fn(speech2vadsegment.vad_infer_args, False),
+            collate_fn=VADTask.build_collate_fn(speech2vadsegment.vad_infer_args, False),
+            allow_variable_data_keys=allow_variable_data_keys,
+            inference=True,
+        )
+
+        finish_count = 0
+        file_count = 1
+        # 7 .Start for-loop
+        # FIXME(kamo): The output format should be discussed about
+        output_path = output_dir_v2 if output_dir_v2 is not None else output_dir
+        if output_path is not None:
+            writer = DatadirWriter(output_path)
+            ibest_writer = writer[f"1best_recog"]
+        else:
+            writer = None
+            ibest_writer = None
+
+        vad_results = []
+        for keys, batch in loader:
+            assert isinstance(batch, dict), type(batch)
+            assert all(isinstance(s, str) for s in keys), keys
+            _bs = len(next(iter(batch.values())))
+            assert len(keys) == _bs, f"{len(keys)} != {_bs}"
+
+            # do vad segment
+            _, results = speech2vadsegment(**batch)
+            for i, _ in enumerate(keys):
+                if "MODELSCOPE_ENVIRONMENT" in os.environ and os.environ["MODELSCOPE_ENVIRONMENT"] == "eas":
+                    results[i] = json.dumps(results[i])
+                item = {'key': keys[i], 'value': results[i]}
+                vad_results.append(item)
+                if writer is not None:
+                    ibest_writer["text"][keys[i]] = "{}".format(results[i])
+
+        return vad_results
+
+    return _forward
+
+def inference_vad_online(
+        batch_size: int,
+        ngpu: int,
+        log_level: Union[int, str],
+        # data_path_and_name_and_type,
+        vad_infer_config: Optional[str],
+        vad_model_file: Optional[str],
+        vad_cmvn_file: Optional[str] = None,
+        # raw_inputs: Union[np.ndarray, torch.Tensor] = None,
+        key_file: Optional[str] = None,
+        allow_variable_data_keys: bool = False,
+        output_dir: Optional[str] = None,
+        dtype: str = "float32",
+        seed: int = 0,
+        num_workers: int = 1,
+        **kwargs,
+):
+    assert check_argument_types()
+
+
+    logging.basicConfig(
+        level=log_level,
+        format="%(asctime)s (%(module)s:%(lineno)d) %(levelname)s: %(message)s",
+    )
+
+    if ngpu >= 1 and torch.cuda.is_available():
+        device = "cuda"
+    else:
+        device = "cpu"
+        batch_size = 1
+
+    # 1. Set random-seed
+    set_all_random_seed(seed)
+
+    # 2. Build speech2vadsegment
+    speech2vadsegment_kwargs = dict(
+        vad_infer_config=vad_infer_config,
+        vad_model_file=vad_model_file,
+        vad_cmvn_file=vad_cmvn_file,
+        device=device,
+        dtype=dtype,
+    )
+    logging.info("speech2vadsegment_kwargs: {}".format(speech2vadsegment_kwargs))
+    speech2vadsegment = Speech2VadSegmentOnline(**speech2vadsegment_kwargs)
+
+    def _forward(
+            data_path_and_name_and_type,
+            raw_inputs: Union[np.ndarray, torch.Tensor] = None,
+            output_dir_v2: Optional[str] = None,
+            fs: dict = None,
+            param_dict: dict = None,
+    ):
+        # 3. Build data-iterator
+        if data_path_and_name_and_type is None and raw_inputs is not None:
+            if isinstance(raw_inputs, torch.Tensor):
+                raw_inputs = raw_inputs.numpy()
+            data_path_and_name_and_type = [raw_inputs, "speech", "waveform"]
+        loader = VADTask.build_streaming_iterator(
+            data_path_and_name_and_type,
+            dtype=dtype,
+            batch_size=batch_size,
+            key_file=key_file,
+            num_workers=num_workers,
+            preprocess_fn=VADTask.build_preprocess_fn(speech2vadsegment.vad_infer_args, False),
+            collate_fn=VADTask.build_collate_fn(speech2vadsegment.vad_infer_args, False),
+            allow_variable_data_keys=allow_variable_data_keys,
+            inference=True,
+        )
+
+        finish_count = 0
+        file_count = 1
+        # 7 .Start for-loop
+        # FIXME(kamo): The output format should be discussed about
+        output_path = output_dir_v2 if output_dir_v2 is not None else output_dir
+        if output_path is not None:
+            writer = DatadirWriter(output_path)
+            ibest_writer = writer[f"1best_recog"]
+        else:
+            writer = None
+            ibest_writer = None
+
+        vad_results = []
+        batch_in_cache = param_dict['in_cache'] if param_dict is not None else dict()
+        is_final = param_dict.get('is_final', False) if param_dict is not None else False
+        max_end_sil = param_dict.get('max_end_sil', 800) if param_dict is not None else 800
+        for keys, batch in loader:
+            assert isinstance(batch, dict), type(batch)
+            assert all(isinstance(s, str) for s in keys), keys
+            _bs = len(next(iter(batch.values())))
+            assert len(keys) == _bs, f"{len(keys)} != {_bs}"
+            batch['in_cache'] = batch_in_cache
+            batch['is_final'] = is_final
+            batch['max_end_sil'] = max_end_sil
+
+            # do vad segment
+            _, results, param_dict['in_cache'] = speech2vadsegment(**batch)
+            # param_dict['in_cache'] = batch['in_cache']
+            if results:
+                for i, _ in enumerate(keys):
+                    if results[i]:
+                        if "MODELSCOPE_ENVIRONMENT" in os.environ and os.environ["MODELSCOPE_ENVIRONMENT"] == "eas":
+                            results[i] = json.dumps(results[i])
+                        item = {'key': keys[i], 'value': results[i]}
+                        vad_results.append(item)
+                        if writer is not None:
+                            ibest_writer["text"][keys[i]] = "{}".format(results[i])
+
+        return vad_results
+
+    return _forward
+
 
 def get_parser():
     parser = config_argparse.ArgumentParser(
@@ -111,11 +360,9 @@ def get_parser():
 
 def inference_launch(mode, **kwargs):
     if mode == "offline":
-        from funasr.bin.vad_inference import inference_modelscope
-        return inference_modelscope(**kwargs)
+        return inference_vad(**kwargs)
     elif mode == "online":
-        from funasr.bin.vad_inference import inference_modelscope_online
-        return inference_modelscope_online(**kwargs)
+        return inference_vad_online(**kwargs)
     else:
         logging.info("Unknown decoding mode: {}".format(mode))
         return None
@@ -147,8 +394,8 @@ def main(cmd=None):
         os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
         os.environ["CUDA_VISIBLE_DEVICES"] = gpuid
 
-    inference_launch(**kwargs)
-
+    inference_pipeline = inference_launch(**kwargs)
+    return inference_pipeline(kwargs["data_path_and_name_and_type"])
 
 if __name__ == "__main__":
     main()

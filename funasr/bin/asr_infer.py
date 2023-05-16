@@ -46,11 +46,12 @@ from funasr.models.e2e_asr_paraformer import BiCifParaformer, ContextualParaform
 from funasr.models.e2e_asr_contextual_paraformer import NeatContextualParaformer
 from funasr.export.models.e2e_asr_paraformer import Paraformer as Paraformer_export
 from funasr.utils.timestamp_tools import ts_prediction_lfr6_standard
-from funasr.bin.tp_inference import SpeechText2Timestamp
+from funasr.bin.tp_infer import Speech2Timestamp
 from funasr.bin.vad_inference import Speech2VadSegment
-from funasr.bin.punctuation_infer import Text2Punc
+from funasr.bin.punc_infer import Text2Punc
 from funasr.utils.vad_utils import slice_padding_fbank
 from funasr.tasks.vad import VADTask
+
 from funasr.utils.timestamp_tools import time_stamp_sentence, ts_prediction_lfr6_standard
 
 
@@ -616,6 +617,7 @@ class Speech2TextParaformerOnline:
 
         # 1. Build ASR model
         scorers = {}
+        from funasr.tasks.asr import ASRTaskParaformer as ASRTask
         asr_model, asr_train_args = ASRTask.build_model_from_file(
             asr_train_config, asr_model_file, cmvn_file, device
         )

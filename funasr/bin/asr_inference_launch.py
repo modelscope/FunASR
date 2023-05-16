@@ -852,7 +852,7 @@ def inference_uniasr(
         decoding_ind=decoding_ind,
         decoding_mode=decoding_mode,
     )
-    speech2text = Speech2Text(**speech2text_kwargs)
+    speech2text = Speech2TextUniASR(**speech2text_kwargs)
     
     def _forward(data_path_and_name_and_type,
                  raw_inputs: Union[np.ndarray, torch.Tensor] = None,

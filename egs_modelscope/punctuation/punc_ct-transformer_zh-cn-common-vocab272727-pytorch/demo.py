@@ -1,12 +1,12 @@
 
-##################text.scp文件路径###################
-inputs = "./egs_modelscope/punctuation/punc_ct-transformer_zh-cn-common-vocab272727-pytorch/data/punc_example.txt"
+##################text.scp###################
+# inputs = "./egs_modelscope/punctuation/punc_ct-transformer_zh-cn-common-vocab272727-pytorch/data/punc_example.txt"
 
-##################text二进制数据#####################
+##################text#####################
 #inputs = "我们都是木头人不会讲话不会动"
 
-##################text文件url#######################
-#inputs = "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_text/punc_example.txt"
+##################text file url#######################
+inputs = "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_text/punc_example.txt"
 
 
 from modelscope.pipelines import pipeline
