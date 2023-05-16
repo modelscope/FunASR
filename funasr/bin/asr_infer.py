@@ -1640,7 +1640,7 @@ class Speech2TextSAASR:
         assert check_argument_types()
         
         # 1. Build ASR model
-        from funasr.modules.beam_search.beam_search_sa_asr import BeamSearch
+        from funasr.tasks.sa_asr import ASRTask
         scorers = {}
         asr_model, asr_train_args = ASRTask.build_model_from_file(
             asr_train_config, asr_model_file, cmvn_file, device
@@ -1682,6 +1682,7 @@ class Speech2TextSAASR:
         # 4. Build BeamSearch object
         # transducer is not supported now
         beam_search_transducer = None
+        from funasr.modules.beam_search.beam_search_sa_asr import BeamSearch
         
         weights = dict(
             decoder=1.0 - ctc_weight,
