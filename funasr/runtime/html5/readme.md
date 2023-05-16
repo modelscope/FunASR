@@ -106,4 +106,4 @@ http {
 
 ## Acknowledge
 1. This project is maintained by [FunASR community](https://github.com/alibaba-damo-academy/FunASR).
-2. We acknowledge [爱医声](http://www.aihealthx.com/) for contributing the html5 demo.
+2. We acknowledge [AiHealthx](http://www.aihealthx.com/) for contributing the html5 demo.
