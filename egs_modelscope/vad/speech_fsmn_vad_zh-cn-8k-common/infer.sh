@@ -1,0 +1,1 @@
+../TEMPLATE/infer.sh

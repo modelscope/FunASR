@@ -1,27 +1,39 @@
-# Benchmark 
+# CPU Benchmark (ONNX-python)
 
+## Configuration
 ### Data set:
 Aishell1 [test set](https://www.openslr.org/33/) , the total audio duration is 36108.919 seconds.
 
 ### Tools
-- Install ModelScope and FunASR
+#### Install Requirements
+Install ModelScope and FunASR
+```shell
+pip install -U modelscope funasr
+# For the users in China, you could install with the command:
+#pip install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple
+```
 
-    ```shell
-    pip install "modelscope[audio_asr]" --upgrade -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html
-    git clone https://github.com/alibaba-damo-academy/FunASR.git && cd FunASR
-    pip install --editable ./
-    cd funasr/runtime/python/utils
-    pip install -r requirements.txt
-    ```
+Install requirements
+```shell
+git clone https://github.com/alibaba-damo-academy/FunASR.git && cd FunASR
+cd funasr/runtime/python/utils
+pip install -r requirements.txt
+```
 
-- recipe
+#### Recipe
 
-    set the model, data path and output_dir
 
-    ```shell
-    nohup bash test_rtf.sh &> log.txt &
-    ```
+##### test_rtf
+set the model, data path and output_dir
+```shell
+nohup bash test_rtf.sh &> log.txt &
+```
 
+##### test_cer
+set the model, data path and output_dir
+```shell
+nohup bash test_cer.sh &> log.txt &
+```
 
 ## [Paraformer-large](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary) 
 

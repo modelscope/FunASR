@@ -1,4 +1,6 @@
 # -*- encoding: utf-8 -*-
+# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+#  MIT License  (https://opensource.org/licenses/MIT)
 
 import os.path
 from pathlib import Path
@@ -13,19 +15,41 @@ logging = get_logger()
 
 
 class CT_Transformer():
+    """
+    Author: Speech Lab of DAMO Academy, Alibaba Group
+    CT-Transformer: Controllable time-delay transformer for real-time punctuation prediction and disfluency detection
+    https://arxiv.org/pdf/2003.01309.pdf
+    """
     def __init__(self, model_dir: Union[str, Path] = None,
                  batch_size: int = 1,
                  device_id: Union[str, int] = "-1",
                  quantize: bool = False,
-                 intra_op_num_threads: int = 4
+                 intra_op_num_threads: int = 4,
+                 cache_dir: str = None,
                  ):
-
+    
         if not Path(model_dir).exists():
-            raise FileNotFoundError(f'{model_dir} does not exist.')
-
+            from modelscope.hub.snapshot_download import snapshot_download
+            try:
+                model_dir = snapshot_download(model_dir, cache_dir=cache_dir)
+            except:
+                raise "model_dir must be model_name in modelscope or local path downloaded from modelscope, but is {}".format(
+                    model_dir)
+    
         model_file = os.path.join(model_dir, 'model.onnx')
         if quantize:
             model_file = os.path.join(model_dir, 'model_quant.onnx')
+        if not os.path.exists(model_file):
+            print(".onnx is not exist, begin to export onnx")
+            from funasr.export.export_model import ModelExport
+            export_model = ModelExport(
+                cache_dir=cache_dir,
+                onnx=True,
+                device="cpu",
+                quant=quantize,
+            )
+            export_model.export(model_dir)
+            
         config_file = os.path.join(model_dir, 'punc.yaml')
         config = read_yaml(config_file)
 
@@ -57,7 +81,7 @@ class CT_Transformer():
             mini_sentence = mini_sentences[mini_sentence_i]
             mini_sentence_id = mini_sentences_id[mini_sentence_i]
             mini_sentence = cache_sent + mini_sentence
-            mini_sentence_id = np.array(cache_sent_id + mini_sentence_id, dtype='int64')
+            mini_sentence_id = np.array(cache_sent_id + mini_sentence_id, dtype='int32')
             data = {
                 "text": mini_sentence_id[None,:],
                 "text_lengths": np.array([len(mini_sentence_id)], dtype='int32'),
@@ -119,13 +143,19 @@ class CT_Transformer():
 
 
 class CT_Transformer_VadRealtime(CT_Transformer):
+    """
+    Author: Speech Lab of DAMO Academy, Alibaba Group
+    CT-Transformer: Controllable time-delay transformer for real-time punctuation prediction and disfluency detection
+    https://arxiv.org/pdf/2003.01309.pdf
+    """
     def __init__(self, model_dir: Union[str, Path] = None,
                  batch_size: int = 1,
                  device_id: Union[str, int] = "-1",
                  quantize: bool = False,
-                 intra_op_num_threads: int = 4
+                 intra_op_num_threads: int = 4,
+                 cache_dir: str = None
                  ):
-        super(CT_Transformer_VadRealtime, self).__init__(model_dir, batch_size, device_id, quantize, intra_op_num_threads)
+        super(CT_Transformer_VadRealtime, self).__init__(model_dir, batch_size, device_id, quantize, intra_op_num_threads, cache_dir=cache_dir)
 
     def __call__(self, text: str, param_dict: map, split_size=20):
         cache_key = "cache"
@@ -136,7 +166,7 @@ class CT_Transformer_VadRealtime(CT_Transformer):
         else:
             precache = ""
             cache = []
-        full_text = precache + text
+        full_text = precache + " " + text
         split_text = code_mix_split_words(full_text)
         split_text_id = self.converter.tokens2ids(split_text)
         mini_sentences = split_to_mini_sentence(split_text, split_size)
@@ -154,12 +184,12 @@ class CT_Transformer_VadRealtime(CT_Transformer):
             mini_sentence = mini_sentences[mini_sentence_i]
             mini_sentence_id = mini_sentences_id[mini_sentence_i]
             mini_sentence = cache_sent + mini_sentence
-            mini_sentence_id = np.concatenate((cache_sent_id, mini_sentence_id), axis=0)
+            mini_sentence_id = np.concatenate((cache_sent_id, mini_sentence_id), axis=0,dtype='int32')
             text_length = len(mini_sentence_id)
             data = {
                 "input": mini_sentence_id[None,:],
                 "text_lengths": np.array([text_length], dtype='int32'),
-                "vad_mask": self.vad_mask(text_length, len(cache) - 1)[None, None, :, :].astype(np.float32),
+                "vad_mask": self.vad_mask(text_length, len(cache))[None, None, :, :].astype(np.float32),
                 "sub_masks": np.tril(np.ones((text_length, text_length), dtype=np.float32))[None, None, :, :].astype(np.float32)
             }
             try:

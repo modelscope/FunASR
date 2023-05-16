@@ -1,3 +1,7 @@
+# -*- encoding: utf-8 -*-
+# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+#  MIT License  (https://opensource.org/licenses/MIT)
+
 from enum import Enum
 from typing import List, Tuple, Dict, Any
 
@@ -189,6 +193,11 @@ class WindowDetector(object):
 
 
 class E2EVadModel():
+    """
+    Author: Speech Lab of DAMO Academy, Alibaba Group
+    Deep-FSMN for Large Vocabulary Continuous Speech Recognition
+    https://arxiv.org/abs/1803.05030
+    """
     def __init__(self, vad_post_args: Dict[str, Any]):
         super(E2EVadModel, self).__init__()
         self.vad_opts = VADXOptions(**vad_post_args)
@@ -220,10 +229,11 @@ class E2EVadModel():
         self.max_end_sil_frame_cnt_thresh = self.vad_opts.max_end_silence_time - self.vad_opts.speech_to_sil_time_thres
         self.speech_noise_thres = self.vad_opts.speech_noise_thres
         self.scores = None
+        self.idx_pre_chunk = 0
         self.max_time_out = False
         self.decibel = []
-        self.data_buf = None
-        self.data_buf_all = None
+        self.data_buf_size = 0
+        self.data_buf_all_size = 0
         self.waveform = None
         self.ResetDetection()
 
@@ -250,10 +260,11 @@ class E2EVadModel():
         self.max_end_sil_frame_cnt_thresh = self.vad_opts.max_end_silence_time - self.vad_opts.speech_to_sil_time_thres
         self.speech_noise_thres = self.vad_opts.speech_noise_thres
         self.scores = None
+        self.idx_pre_chunk = 0
         self.max_time_out = False
         self.decibel = []
-        self.data_buf = None
-        self.data_buf_all = None
+        self.data_buf_size = 0
+        self.data_buf_all_size = 0
         self.waveform = None
         self.ResetDetection()
 
@@ -271,11 +282,11 @@ class E2EVadModel():
     def ComputeDecibel(self) -> None:
         frame_sample_length = int(self.vad_opts.frame_length_ms * self.vad_opts.sample_rate / 1000)
         frame_shift_length = int(self.vad_opts.frame_in_ms * self.vad_opts.sample_rate / 1000)
-        if self.data_buf_all is None:
-            self.data_buf_all = self.waveform[0]  # self.data_buf is pointed to self.waveform[0]
-            self.data_buf = self.data_buf_all
+        if self.data_buf_all_size == 0:
+            self.data_buf_all_size = len(self.waveform[0])
+            self.data_buf_size = self.data_buf_all_size
         else:
-            self.data_buf_all = np.concatenate((self.data_buf_all, self.waveform[0]))
+            self.data_buf_all_size += len(self.waveform[0])
         for offset in range(0, self.waveform.shape[1] - frame_sample_length + 1, frame_shift_length):
             self.decibel.append(
                 10 * math.log10(np.square((self.waveform[0][offset: offset + frame_sample_length])).sum() + \
@@ -285,17 +296,14 @@ class E2EVadModel():
         # scores = self.encoder(feats, in_cache)  # return B * T * D
         self.vad_opts.nn_eval_block_size = scores.shape[1]
         self.frm_cnt += scores.shape[1]  # count total frames
-        if self.scores is None:
-            self.scores = scores  # the first calculation
-        else:
-            self.scores = np.concatenate((self.scores, scores), axis=1)
+        self.scores=scores
 
     def PopDataBufTillFrame(self, frame_idx: int) -> None:  # need check again
         while self.data_buf_start_frame < frame_idx:
-            if len(self.data_buf) >= int(self.vad_opts.frame_in_ms * self.vad_opts.sample_rate / 1000):
+            if self.data_buf_size >= int(self.vad_opts.frame_in_ms * self.vad_opts.sample_rate / 1000):
                 self.data_buf_start_frame += 1
-                self.data_buf = self.data_buf_all[self.data_buf_start_frame * int(
-                    self.vad_opts.frame_in_ms * self.vad_opts.sample_rate / 1000):]
+                self.data_buf_size = self.data_buf_all_size-self.data_buf_start_frame * int(
+                    self.vad_opts.frame_in_ms * self.vad_opts.sample_rate / 1000)
 
     def PopDataToOutputBuf(self, start_frm: int, frm_cnt: int, first_frm_is_start_point: bool,
                            last_frm_is_end_point: bool, end_point_is_sent_end: bool) -> None:
@@ -306,8 +314,8 @@ class E2EVadModel():
                                       self.vad_opts.sample_rate * self.vad_opts.frame_in_ms / 1000))
             expected_sample_number += int(extra_sample)
         if end_point_is_sent_end:
-            expected_sample_number = max(expected_sample_number, len(self.data_buf))
-        if len(self.data_buf) < expected_sample_number:
+            expected_sample_number = max(expected_sample_number, self.data_buf_size)
+        if self.data_buf_size < expected_sample_number:
             print('error in calling pop data_buf\n')
 
         if len(self.output_data_buf) == 0 or first_frm_is_start_point:
@@ -325,10 +333,10 @@ class E2EVadModel():
             data_to_pop = expected_sample_number
         else:
             data_to_pop = int(frm_cnt * self.vad_opts.frame_in_ms * self.vad_opts.sample_rate / 1000)
-        if data_to_pop > len(self.data_buf):
-            print('VAD data_to_pop is bigger than self.data_buf.size()!!!\n')
-            data_to_pop = len(self.data_buf)
-            expected_sample_number = len(self.data_buf)
+        if data_to_pop > self.data_buf_size:
+            print('VAD data_to_pop is bigger than self.data_buf_size!!!\n')
+            data_to_pop = self.data_buf_size
+            expected_sample_number = self.data_buf_size
 
         cur_seg.doa = 0
         for sample_cpy_out in range(0, data_to_pop):
@@ -411,7 +419,7 @@ class E2EVadModel():
         assert len(self.sil_pdf_ids) == self.vad_opts.silence_pdf_num
         if len(self.sil_pdf_ids) > 0:
             assert len(self.scores) == 1  # 只支持batch_size = 1的测试
-            sil_pdf_scores = [self.scores[0][t][sil_pdf_id] for sil_pdf_id in self.sil_pdf_ids]
+            sil_pdf_scores = [self.scores[0][t - self.idx_pre_chunk][sil_pdf_id] for sil_pdf_id in self.sil_pdf_ids]
             sum_score = sum(sil_pdf_scores)
             noise_prob = math.log(sum_score) * self.vad_opts.speech_2_noise_ratio
             total_score = 1.0
@@ -439,10 +447,9 @@ class E2EVadModel():
                         - 1)) / self.vad_opts.noise_frame_num_used_for_snr
 
         return frame_state
-     
 
     def __call__(self, score: np.ndarray, waveform: np.ndarray,
-                is_final: bool = False, max_end_sil: int = 800
+                is_final: bool = False, max_end_sil: int = 800, online: bool = False
                 ):
         self.max_end_sil_frame_cnt_thresh = max_end_sil - self.vad_opts.speech_to_sil_time_thres
         self.waveform = waveform  # compute decibel for each frame
@@ -457,20 +464,29 @@ class E2EVadModel():
             segment_batch = []
             if len(self.output_data_buf) > 0:
                 for i in range(self.output_data_buf_offset, len(self.output_data_buf)):
-                    if not self.output_data_buf[i].contain_seg_start_point:
-                        continue
-                    if not self.next_seg and not self.output_data_buf[i].contain_seg_end_point:
-                        continue
-                    start_ms = self.output_data_buf[i].start_ms if self.next_seg else -1
-                    if self.output_data_buf[i].contain_seg_end_point:
-                        end_ms = self.output_data_buf[i].end_ms
-                        self.next_seg = True
-                        self.output_data_buf_offset += 1
+                    if online:
+                        if not self.output_data_buf[i].contain_seg_start_point:
+                            continue
+                        if not self.next_seg and not self.output_data_buf[i].contain_seg_end_point:
+                            continue
+                        start_ms = self.output_data_buf[i].start_ms if self.next_seg else -1
+                        if self.output_data_buf[i].contain_seg_end_point:
+                            end_ms = self.output_data_buf[i].end_ms
+                            self.next_seg = True
+                            self.output_data_buf_offset += 1
+                        else:
+                            end_ms = -1
+                            self.next_seg = False
                     else:
-                        end_ms = -1
-                        self.next_seg = False
+                        if not is_final and (not self.output_data_buf[i].contain_seg_start_point or not self.output_data_buf[
+                            i].contain_seg_end_point):
+                            continue
+                        start_ms = self.output_data_buf[i].start_ms
+                        end_ms = self.output_data_buf[i].end_ms
+                        self.output_data_buf_offset += 1
                     segment = [start_ms, end_ms]
                     segment_batch.append(segment)
+
             if segment_batch:
                 segments.append(segment_batch)
         if is_final:
@@ -485,7 +501,7 @@ class E2EVadModel():
             frame_state = FrameState.kFrameStateInvalid
             frame_state = self.GetFrameState(self.frm_cnt - 1 - i)
             self.DetectOneFrame(frame_state, self.frm_cnt - 1 - i, False)
-
+        self.idx_pre_chunk += self.scores.shape[1]
         return 0
 
     def DetectLastFrames(self) -> int:
@@ -605,3 +621,4 @@ class E2EVadModel():
         if self.vad_state_machine == VadStateMachine.kVadInStateEndPointDetected and \
                 self.vad_opts.detect_mode == VadDetectMode.kVadMutipleUtteranceDetectMode.value:
             self.ResetDetection()
+

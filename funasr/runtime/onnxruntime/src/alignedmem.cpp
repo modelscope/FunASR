@@ -1,5 +1,7 @@
 #include "precomp.h"
-void *aligned_malloc(size_t alignment, size_t required_bytes)
+
+namespace funasr {
+void *AlignedMalloc(size_t alignment, size_t required_bytes)
 {
     void *p1;  // original block
     void **p2; // aligned block
@@ -12,7 +14,8 @@ void *aligned_malloc(size_t alignment, size_t required_bytes)
     return p2;
 }
 
-void aligned_free(void *p)
+void AlignedFree(void *p)
 {
     free(((void **)p)[-1]);
 }
+} // namespace funasr

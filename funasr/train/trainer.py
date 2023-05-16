@@ -95,6 +95,7 @@ class TrainerOptions:
     use_pai: bool
     oss_bucket: Union[oss2.Bucket, None]
     batch_interval: int
+    bias_grad_times: float
 
 class Trainer:
     """Trainer having a optimizer.
@@ -186,9 +187,6 @@ class Trainer:
                 logging.warning("No keep_nbest_models is given. Change to [1]")
                 trainer_options.keep_nbest_models = [1]
             keep_nbest_models = trainer_options.keep_nbest_models
-     
-        #assert batch_interval is set and >0
-        assert trainer_options.batch_interval > 0
  
         output_dir = Path(trainer_options.output_dir)
         reporter = Reporter()
@@ -549,8 +547,11 @@ class Trainer:
         no_forward_run = options.no_forward_run
         ngpu = options.ngpu
         use_wandb = options.use_wandb
+        bias_grad_times = options.bias_grad_times
         distributed = distributed_option.distributed
 
+        if bias_grad_times != 1.0:
+            logging.warning("Using bias_grad_times: {} for gradient scaling".format(bias_grad_times))
         if log_interval is None:
             try:
                 log_interval = max(len(iterator) // 20, 10)
@@ -571,8 +572,7 @@ class Trainer:
         #ouput dir
         output_dir = Path(options.output_dir)
         #batch interval
-        batch_interval = options.batch_interval       
-        assert batch_interval > 0
+        batch_interval = options.batch_interval
  
         start_time = time.perf_counter()
         for iiter, (_, batch) in enumerate(
@@ -580,14 +580,23 @@ class Trainer:
         ):
             assert isinstance(batch, dict), type(batch)
 
-            if rank == 0:
+            if batch_interval > 0 and (not distributed_option.distributed or rank == 0):
                 if hasattr(model, "num_updates") or (hasattr(model, "module") and hasattr(model.module, "num_updates")):
                     num_batch_updates = model.get_num_updates() if hasattr(model,"num_updates") else model.module.get_num_updates()
-                if (num_batch_updates%batch_interval == 0) and (options.oss_bucket is not None) and options.use_pai:
-                    buffer = BytesIO()
-                    torch.save(model.state_dict(), buffer)
-                    options.oss_bucket.put_object(os.path.join(output_dir, f"{num_batch_updates}batch.pth"), buffer.getvalue())
- 
+                if num_batch_updates % batch_interval == 0:
+                    if options.use_pai and options.oss_bucket is not None:
+                        buffer = BytesIO()
+                        if hasattr(model, "module"):
+                            torch.save(model.module.state_dict(), buffer)
+                        else:
+                            torch.save(model.state_dict(), buffer)
+                        options.oss_bucket.put_object(os.path.join(output_dir, f"{num_batch_updates}step.pb"), buffer.getvalue())
+                    else:
+                        if hasattr(model, "module"):
+                            torch.save(model.module.state_dict(), os.path.join(output_dir, f"{num_batch_updates}step.pb"))
+                        else:
+                            torch.save(model.state_dict(), os.path.join(output_dir, f"{num_batch_updates}step.pb"))
+
             if distributed:
                 torch.distributed.all_reduce(iterator_stop, ReduceOp.SUM)
                 if iterator_stop > 0:
@@ -684,6 +693,16 @@ class Trainer:
                         eta=1.0,
                         scale_factor=0.55,
                     )
+
+                # for contextual training
+                if bias_grad_times != 1.0:
+                    # contextual related parameter names
+                    cr_pnames = ["bias_encoder", "bias_embed", "decoder.bias_decoder", "decoder.bias_output"]
+                    for name, param in model.named_parameters():
+                        for cr_pname in cr_pnames:
+                            if cr_pname in name:
+                                param.grad *= bias_grad_times
+                                continue
 
                 # compute the gradient norm to check if it is normal or not
                 grad_norm = torch.nn.utils.clip_grad_norm_(

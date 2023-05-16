@@ -40,7 +40,6 @@ class VADXOptions:
     Deep-FSMN for Large Vocabulary Continuous Speech Recognition
     https://arxiv.org/abs/1803.05030
     """
-
     def __init__(
             self,
             sample_rate: int = 16000,
@@ -110,7 +109,6 @@ class E2EVadSpeechBufWithDoa(object):
     Deep-FSMN for Large Vocabulary Continuous Speech Recognition
     https://arxiv.org/abs/1803.05030
     """
-
     def __init__(self):
         self.start_ms = 0
         self.end_ms = 0
@@ -134,7 +132,6 @@ class E2EVadFrameProb(object):
     Deep-FSMN for Large Vocabulary Continuous Speech Recognition
     https://arxiv.org/abs/1803.05030
     """
-
     def __init__(self):
         self.noise_prob = 0.0
         self.speech_prob = 0.0
@@ -149,7 +146,6 @@ class WindowDetector(object):
     Deep-FSMN for Large Vocabulary Continuous Speech Recognition
     https://arxiv.org/abs/1803.05030
     """
-
     def __init__(self, window_size_ms: int, sil_to_speech_time: int,
                  speech_to_sil_time: int, frame_size_ms: int):
         self.window_size_ms = window_size_ms
@@ -221,7 +217,6 @@ class E2EVadModel(nn.Module):
     Deep-FSMN for Large Vocabulary Continuous Speech Recognition
     https://arxiv.org/abs/1803.05030
     """
-
     def __init__(self, encoder: FSMN, vad_post_args: Dict[str, Any], frontend=None):
         super(E2EVadModel, self).__init__()
         self.vad_opts = VADXOptions(**vad_post_args)
@@ -490,8 +485,7 @@ class E2EVadModel(nn.Module):
             segment_batch = []
             if len(self.output_data_buf) > 0:
                 for i in range(self.output_data_buf_offset, len(self.output_data_buf)):
-                    if not is_final and (
-                            not self.output_data_buf[i].contain_seg_start_point or not self.output_data_buf[
+                    if not is_final and (not self.output_data_buf[i].contain_seg_start_point or not self.output_data_buf[
                         i].contain_seg_end_point):
                         continue
                     segment = [self.output_data_buf[i].start_ms, self.output_data_buf[i].end_ms]

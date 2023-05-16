@@ -1,4 +1,3 @@
-
 """
 Author: Speech Lab, Alibaba Group, China
 """

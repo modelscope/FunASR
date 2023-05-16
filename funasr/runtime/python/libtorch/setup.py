@@ -15,10 +15,10 @@ def get_readme():
 
 setuptools.setup(
     name='funasr_torch',
-    version='0.0.3',
+    version='0.0.4',
     platforms="Any",
     url="https://github.com/alibaba-damo-academy/FunASR.git",
-    author="Speech Lab, Alibaba Group, China",
+    author="Speech Lab of DAMO Academy, Alibaba Group",
     author_email="funasr@list.alibaba-inc.com",
     description="FunASR: A Fundamental End-to-End Speech Recognition Toolkit",
     license="The MIT License",
@@ -31,7 +31,7 @@ setuptools.setup(
                       "PyYAML>=5.1.2", "torch-quant >= 0.4.0"],
     packages=find_packages(include=["torch_paraformer*"]),
     keywords=[
-        'funasr,paraformer, funasr_torch'
+        'funasr, paraformer, funasr_torch'
     ],
     classifiers=[
         'Programming Language :: Python :: 3.6',

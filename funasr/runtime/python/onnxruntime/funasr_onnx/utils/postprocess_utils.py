@@ -1,4 +1,6 @@
-# Copyright (c) Alibaba, Inc. and its affiliates.
+# -*- encoding: utf-8 -*-
+# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+#  MIT License  (https://opensource.org/licenses/MIT)
 
 import string
 import logging

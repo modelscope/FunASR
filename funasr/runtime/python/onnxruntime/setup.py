@@ -13,24 +13,31 @@ def get_readme():
 
 
 MODULE_NAME = 'funasr_onnx'
-VERSION_NUM = '0.0.3'
+VERSION_NUM = '0.1.0'
 
 setuptools.setup(
     name=MODULE_NAME,
     version=VERSION_NUM,
     platforms="Any",
     url="https://github.com/alibaba-damo-academy/FunASR.git",
-    author="Speech Lab, Alibaba Group, China",
+    author="Speech Lab of DAMO Academy, Alibaba Group",
     author_email="funasr@list.alibaba-inc.com",
     description="FunASR: A Fundamental End-to-End Speech Recognition Toolkit",
     license='MIT',
     long_description=get_readme(),
     long_description_content_type='text/markdown',
     include_package_data=True,
-    install_requires=["librosa", "onnxruntime>=1.7.0",
-                      "scipy", "numpy>=1.19.3",
-                      "typeguard", "kaldi-native-fbank",
-                      "PyYAML>=5.1.2"],
+    install_requires=["librosa",
+                      "onnxruntime>=1.7.0",
+                      "scipy",
+                      "numpy>=1.19.3",
+                      "typeguard",
+                      "kaldi-native-fbank",
+                      "PyYAML>=5.1.2",
+                      "funasr",
+                      "modelscope",
+                      "onnx"
+                      ],
     packages=[MODULE_NAME, f'{MODULE_NAME}.utils'],
     keywords=[
         'funasr,asr'

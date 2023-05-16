@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import re
 import numpy as np
+from funasr.datasets.large_datasets.utils.hotword_utils import sample_hotword
 
 def forward_segment(text, seg_dict):
     word_list = []
@@ -17,19 +18,29 @@ def forward_segment(text, seg_dict):
     return word_list
 
 def seg_tokenize(txt, seg_dict):
+    pattern = re.compile(r'^[\u4E00-\u9FA50-9]+$')
     out_txt = ""
     for word in txt:
+        word = word.lower()
         if word in seg_dict:
             out_txt += seg_dict[word] + " "
         else:
-            out_txt += "<unk>" + " "
+            if pattern.match(word):
+                for char in word:
+                    if char in seg_dict:
+                        out_txt += seg_dict[char] + " "
+                    else:
+                        out_txt += "<unk>" + " "
+            else:
+                out_txt += "<unk>" + " "
     return out_txt.strip().split()
 
 def tokenize(data,
              vocab=None,
              seg_dict=None,
              punc_dict=None,
-             bpe_tokenizer=None):
+             bpe_tokenizer=None,
+             hw_config=None):
     assert "text" in data
     assert isinstance(vocab, dict)
     text = data["text"]
@@ -41,14 +52,17 @@ def tokenize(data,
 
     if seg_dict is not None:
         assert isinstance(seg_dict, dict)
-        txt = forward_segment("".join(text).lower(), seg_dict)
-        text = seg_tokenize(txt, seg_dict)
+        text = seg_tokenize(text, seg_dict)
 
     length = len(text)
+    if 'hw_tag' in data:
+        hotword_indxs = sample_hotword(length, **hw_config)
+        data['hotword_indxs'] = hotword_indxs
+        del data['hw_tag']
     for i in range(length):
         x = text[i]
-        if i == length-1 and "punc" in data and text[i].startswith("vad:"):
-            vad = x[-1][4:]
+        if i == length-1 and "punc" in data and x.startswith("vad:"):
+            vad = x[4:]
             if len(vad) == 0:
                 vad = -1
             else:

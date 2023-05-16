@@ -1,7 +1,8 @@
 
 #include "precomp.h"
 
-float *loadparams(const char *filename)
+namespace funasr {
+float *LoadParams(const char *filename)
 {
 
     FILE *fp;
@@ -10,20 +11,20 @@ float *loadparams(const char *filename)
     uint32_t nFileLen = ftell(fp);
     fseek(fp, 0, SEEK_SET);
 
-    float *params_addr = (float *)aligned_malloc(32, nFileLen);
+    float *params_addr = (float *)AlignedMalloc(32, nFileLen);
     int n = fread(params_addr, 1, nFileLen, fp);
     fclose(fp);
 
     return params_addr;
 }
 
-int val_align(int val, int align)
+int ValAlign(int val, int align)
 {
     float tmp = ceil((float)val / (float)align) * (float)align;
     return (int)tmp;
 }
 
-void disp_params(float *din, int size)
+void DispParams(float *din, int size)
 {
     int i;
     for (i = 0; i < size; i++) {
@@ -39,7 +40,7 @@ void SaveDataFile(const char *filename, void *data, uint32_t len)
     fclose(fp);
 }
 
-void basic_norm(Tensor<float> *&din, float norm)
+void BasicNorm(Tensor<float> *&din, float norm)
 {
 
     int Tmax = din->size[2];
@@ -59,7 +60,7 @@ void basic_norm(Tensor<float> *&din, float norm)
     }
 }
 
-void findmax(float *din, int len, float &max_val, int &max_idx)
+void FindMax(float *din, int len, float &max_val, int &max_idx)
 {
     int i;
     max_val = -INFINITY;
@@ -72,7 +73,7 @@ void findmax(float *din, int len, float &max_val, int &max_idx)
     }
 }
 
-string pathAppend(const string &p1, const string &p2)
+string PathAppend(const string &p1, const string &p2)
 {
 
     char sep = '/';
@@ -89,7 +90,7 @@ string pathAppend(const string &p1, const string &p2)
         return (p1 + p2);
 }
 
-void relu(Tensor<float> *din)
+void Relu(Tensor<float> *din)
 {
     int i;
     for (i = 0; i < din->buff_size; i++) {
@@ -98,7 +99,7 @@ void relu(Tensor<float> *din)
     }
 }
 
-void swish(Tensor<float> *din)
+void Swish(Tensor<float> *din)
 {
     int i;
     for (i = 0; i < din->buff_size; i++) {
@@ -107,7 +108,7 @@ void swish(Tensor<float> *din)
     }
 }
 
-void sigmoid(Tensor<float> *din)
+void Sigmoid(Tensor<float> *din)
 {
     int i;
     for (i = 0; i < din->buff_size; i++) {
@@ -116,7 +117,7 @@ void sigmoid(Tensor<float> *din)
     }
 }
 
-void doubleswish(Tensor<float> *din)
+void DoubleSwish(Tensor<float> *din)
 {
     int i;
     for (i = 0; i < din->buff_size; i++) {
@@ -125,7 +126,7 @@ void doubleswish(Tensor<float> *din)
     }
 }
 
-void softmax(float *din, int mask, int len)
+void Softmax(float *din, int mask, int len)
 {
     float *tmp = (float *)malloc(mask * sizeof(float));
     int i;
@@ -149,7 +150,7 @@ void softmax(float *din, int mask, int len)
     }
 }
 
-void log_softmax(float *din, int len)
+void LogSoftmax(float *din, int len)
 {
     float *tmp = (float *)malloc(len * sizeof(float));
     int i;
@@ -164,7 +165,7 @@ void log_softmax(float *din, int len)
     free(tmp);
 }
 
-void glu(Tensor<float> *din, Tensor<float> *dout)
+void Glu(Tensor<float> *din, Tensor<float> *dout)
 {
     int mm = din->buff_size / 1024;
     int i, j;
@@ -178,3 +179,14 @@ void glu(Tensor<float> *din, Tensor<float> *dout)
         }
     }
 }
+
+bool is_target_file(const std::string& filename, const std::string target) {
+    std::size_t pos = filename.find_last_of(".");
+    if (pos == std::string::npos) {
+        return false;
+    }
+    std::string extension = filename.substr(pos + 1);
+    return (extension == target);
+}
+
+} // namespace funasr

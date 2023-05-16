@@ -36,7 +36,6 @@ import pdb
 import random
 import math
 
-
 class MFCCA(FunASRModel):
     """
     Author: Audio, Speech and Language Processing Group (ASLP@NPU), Northwestern Polytechnical University

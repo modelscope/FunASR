@@ -23,7 +23,6 @@ class Paraformer():
                  batch_size: int = 1,
                  device_id: Union[str, int] = "-1",
                  plot_timestamp_to: str = "",
-                 pred_bias: int = 1,
                  quantize: bool = False,
                  intra_op_num_threads: int = 1,
                  ):
@@ -48,7 +47,10 @@ class Paraformer():
         self.batch_size = batch_size
         self.device_id = device_id
         self.plot_timestamp_to = plot_timestamp_to
-        self.pred_bias = pred_bias
+        if "predictor_bias" in config['model_conf'].keys():
+            self.pred_bias = config['model_conf']['predictor_bias']
+        else:
+            self.pred_bias = 0
 
     def __call__(self, wav_content: Union[str, np.ndarray, List[str]], **kwargs) -> List:
         waveform_list = self.load_data(wav_content, self.frontend.opts.frame_opts.samp_freq)

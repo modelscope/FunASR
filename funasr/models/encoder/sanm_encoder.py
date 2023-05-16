@@ -6,12 +6,14 @@ from typing import Union
 import logging
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from funasr.modules.streaming_utils.chunk_utilis import overlap_chunk
 from typeguard import check_argument_types
 import numpy as np
+from funasr.torch_utils.device_funcs import to_device
 from funasr.modules.nets_utils import make_pad_mask
 from funasr.modules.attention import MultiHeadedAttention, MultiHeadedAttentionSANM, MultiHeadedAttentionSANMwithMask
-from funasr.modules.embedding import SinusoidalPositionEncoder
+from funasr.modules.embedding import SinusoidalPositionEncoder, StreamSinusoidalPositionEncoder
 from funasr.modules.layer_norm import LayerNorm
 from funasr.modules.multi_layer_conv import Conv1dLinear
 from funasr.modules.multi_layer_conv import MultiLayeredConv1d
@@ -118,7 +120,7 @@ class EncoderLayerSANM(nn.Module):
 
 class SANMEncoder(AbsEncoder):
     """
-    author: Speech Lab, Alibaba Group, China
+    Author: Speech Lab of DAMO Academy, Alibaba Group
     San-m: Memory equipped self-attention for end-to-end speech recognition
     https://arxiv.org/abs/2006.01713
 
@@ -181,6 +183,8 @@ class SANMEncoder(AbsEncoder):
                 self.embed = torch.nn.Linear(input_size, output_size)
         elif input_layer == "pe":
             self.embed = SinusoidalPositionEncoder()
+        elif input_layer == "pe_online":
+            self.embed = StreamSinusoidalPositionEncoder()
         else:
             raise ValueError("unknown input_layer: " + input_layer)
         self.normalize_before = normalize_before
@@ -348,6 +352,23 @@ class SANMEncoder(AbsEncoder):
             return (xs_pad, intermediate_outs), olens, None
         return xs_pad, olens, None
 
+    def _add_overlap_chunk(self, feats: np.ndarray, cache: dict = {}):
+        if len(cache) == 0:
+            return feats
+        # process last chunk
+        cache["feats"] = to_device(cache["feats"], device=feats.device)
+        overlap_feats = torch.cat((cache["feats"], feats), dim=1)
+        if cache["is_final"]:
+            cache["feats"] = overlap_feats[:, -cache["chunk_size"][0]:, :]
+            if not cache["last_chunk"]:
+               padding_length = sum(cache["chunk_size"]) - overlap_feats.shape[1]
+               overlap_feats = overlap_feats.transpose(1, 2)
+               overlap_feats = F.pad(overlap_feats, (0, padding_length))
+               overlap_feats = overlap_feats.transpose(1, 2)
+        else:
+            cache["feats"] = overlap_feats[:, -(cache["chunk_size"][0] + cache["chunk_size"][2]):, :]
+        return overlap_feats
+
     def forward_chunk(self,
                       xs_pad: torch.Tensor,
                       ilens: torch.Tensor,
@@ -358,8 +379,11 @@ class SANMEncoder(AbsEncoder):
         if self.embed is None:
             xs_pad = xs_pad
         else:
-            xs_pad = self.embed.forward_chunk(xs_pad, cache)
-
+            xs_pad = self.embed(xs_pad, cache)
+        if cache["tail_chunk"]:
+            xs_pad = to_device(cache["feats"], device=xs_pad.device)
+        else:
+            xs_pad = self._add_overlap_chunk(xs_pad, cache)
         encoder_outs = self.encoders0(xs_pad, None, None, None, None)
         xs_pad, masks = encoder_outs[0], encoder_outs[1]
         intermediate_outs = []
@@ -550,7 +574,7 @@ class SANMEncoder(AbsEncoder):
 
 class SANMEncoderChunkOpt(AbsEncoder):
     """
-    author: Speech Lab, Alibaba Group, China
+    Author: Speech Lab of DAMO Academy, Alibaba Group
     SCAMA: Streaming chunk-aware multihead attention for online end-to-end speech recognition
     https://arxiv.org/abs/2006.01713
 
@@ -963,7 +987,7 @@ class SANMEncoderChunkOpt(AbsEncoder):
 
 class SANMVadEncoder(AbsEncoder):
     """
-    author: Speech Lab, Alibaba Group, China
+    Author: Speech Lab of DAMO Academy, Alibaba Group
 
     """
 
