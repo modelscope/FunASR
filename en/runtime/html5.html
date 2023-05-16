@@ -16,7 +16,9 @@
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Service with websocket-python" href="websocket_python.html" />
+    <link rel="prev" title="Libtorch-python" href="libtorch_python.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -68,15 +70,42 @@
 <li class="toctree-l1"><a class="reference internal" href="../model_zoo/huggingface_models.html">Pretrained Models on Huggingface</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Runtime and Service</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="export.html">Export models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="onnxruntime_python.html">ONNXRuntime-python</a></li>
 <li class="toctree-l1"><a class="reference internal" href="onnxruntime_cpp.html">ONNXRuntime-cpp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="libtorch_python.html">Libtorch-python</a></li>
-<li class="toctree-l1"><a class="reference internal" href="grpc_python.html">Service with grpc-python</a></li>
-<li class="toctree-l1"><a class="reference internal" href="grpc_cpp.html">Service with grpc-cpp</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">online asr demo for html5</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#requirement">requirement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#python">python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#javascript">javascript</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#demo">demo</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#wss-or-ws-protocol-for-ws-server-online">wss or ws protocol for ws_server_online</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#html5-demo-start">1.html5 demo start</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ssl-certificate-is-required">ssl certificate is required</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#asr-online-srv-start">2.asr online srv start</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#wss-way-ssl-certificate-is-required">wss way, ssl certificate is required</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ws-way">ws way</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#modify-asr-address-in-wsconnecter-js-according-to-your-environment">3.modify asr address in wsconnecter.js according to your environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#open-browser-to-access-html5-demo">4.open browser to access html5 demo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#certificate-generation-by-yourself">certificate generation by yourself</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#nginx-configuration-you-can-skip-it-if-you-known">nginx configuration (you can skip it if you known)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#nginx-wss-ws-configuration-example">nginx wss-&gt;ws configuration example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#acknowledge">Acknowledge</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="websocket_python.html">Service with websocket-python</a></li>
 <li class="toctree-l1"><a class="reference internal" href="websocket_cpp.html">Service with websocket-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grpc_python.html">Service with grpc-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grpc_cpp.html">Service with grpc-cpp</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Benchmark and Leadboard</span></p>
 <ul>
@@ -262,7 +291,10 @@ http <span class="o">{</span>
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="libtorch_python.html" class="btn btn-neutral float-left" title="Libtorch-python" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="websocket_python.html" class="btn btn-neutral float-right" title="Service with websocket-python" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 
