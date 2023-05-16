@@ -20,8 +20,8 @@ token_type=char
 type=sound
 scp=wav.scp
 speed_perturb="0.9 1.0 1.1"
-stage=3
-stop_stage=4
+stage=0
+stop_stage=5
 
 skip_extract_embed=false
 bert_model_name="bert-base-chinese"
@@ -107,10 +107,16 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     echo "<unk>" >> ${token_list}
 fi
 
-# Training Stage
+# LM Training Stage
 world_size=$gpu_num  # run on one machine
 if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
-    echo "stage 3: Training"
+    echo "stage 3: LM Training"
+fi
+
+# Training Stage
+world_size=$gpu_num  # run on one machine
+if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
+    echo "stage 4: ASR Training"
     if ! "${skip_extract_embed}"; then
         echo "extract embeddings..."
         local/extract_embeds.sh \
@@ -158,8 +164,8 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
 fi
 
 # Testing Stage
-if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
-    echo "stage 4: Inference"
+if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
+    echo "stage 5: Inference"
     for dset in ${test_sets}; do
         asr_exp=${exp_dir}/exp/${model_dir}
         inference_tag="$(basename "${inference_config}" .yaml)"
@@ -170,7 +176,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
             exit 0
         fi
         mkdir -p "${_logdir}"
-        _data="${feats_dir}/${dumpdir}/${dset}"
+        _data="${feats_dir}/data/${dset}"
         key_file=${_data}/${scp}
         num_scp_file="$(<${key_file} wc -l)"
         _nj=$([ $inference_nj -le $num_scp_file ] && echo "$inference_nj" || echo "$num_scp_file")
@@ -191,6 +197,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
                 --njob ${njob} \
                 --gpuid_list ${gpuid_list} \
                 --data_path_and_name_and_type "${_data}/${scp},speech,${type}" \
+                --cmvn_file ${feats_dir}/data/${train_set}/cmvn/cmvn.mvn \
                 --key_file "${_logdir}"/keys.JOB.scp \
                 --asr_train_config "${asr_exp}"/config.yaml \
                 --asr_model_file "${asr_exp}"/"${inference_asr_model}" \

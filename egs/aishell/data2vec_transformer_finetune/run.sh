@@ -20,8 +20,8 @@ token_type=char
 type=sound
 scp=wav.scp
 speed_perturb="0.9 1.0 1.1"
-stage=3
-stop_stage=4
+stage=0
+stop_stage=5
 
 # feature configuration
 feats_dim=80
@@ -106,11 +106,17 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     echo "<unk>" >> ${token_list}
 fi
 
-# Training Stage
+# LM Training Stage
 world_size=$gpu_num  # run on one machine
 if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
-    echo "stage 3: Training"
-     python utils/download_model.py  --model_name ${model_name}  # download pretrained model on ModelScope
+    echo "stage 3: LM Training"
+fi
+
+# Training Stage
+world_size=$gpu_num  # run on one machine
+if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
+    echo "stage 4: ASR Training"
+    python utils/download_model.py  --model_name ${model_name}  # download pretrained model on ModelScope
     mkdir -p ${exp_dir}/exp/${model_dir}
     mkdir -p ${exp_dir}/exp/${model_dir}/log
     INIT_FILE=${exp_dir}/exp/${model_dir}/ddp_init
@@ -151,8 +157,8 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
 fi
 
 # Testing Stage
-if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
-    echo "stage 4: Inference"
+if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
+    echo "stage 5: Inference"
     for dset in ${test_sets}; do
         asr_exp=${exp_dir}/exp/${model_dir}
         inference_tag="$(basename "${inference_config}" .yaml)"
