@@ -24,8 +24,8 @@ feats_dim=80
 nj=64
 
 # data
-tr_dir=/nfs/wangjiaming.wjm/asr_data/aishell2/AISHELL-2/iOS/data
-dev_tst_dir=/nfs/wangjiaming.wjm/asr_data/aishell2/AISHELL-DEV-TEST-SET
+tr_dir=
+dev_tst_dir=
 
 # exp tag
 tag="exp1"
