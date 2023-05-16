@@ -469,7 +469,7 @@ class E2EVadModel(nn.Module):
                         - 1)) / self.vad_opts.noise_frame_num_used_for_snr
 
         return frame_state
-     
+
     def forward(self, feats: torch.Tensor, waveform: torch.tensor, in_cache: Dict[str, torch.Tensor] = dict(),
                 is_final: bool = False
                 ) -> Tuple[List[List[List[int]]], Dict[str, torch.Tensor]]:
@@ -499,11 +499,11 @@ class E2EVadModel(nn.Module):
         return segments, in_cache
 
     def forward_online(self, feats: torch.Tensor, waveform: torch.tensor, in_cache: Dict[str, torch.Tensor] = dict(),
-                is_final: bool = False, max_end_sil: int = 800
-                ) -> Tuple[List[List[List[int]]], Dict[str, torch.Tensor]]:
+                       is_final: bool = False, max_end_sil: int = 800
+                       ) -> Tuple[List[List[List[int]]], Dict[str, torch.Tensor]]:
         self.max_end_sil_frame_cnt_thresh = max_end_sil - self.vad_opts.speech_to_sil_time_thres
         self.waveform = waveform  # compute decibel for each frame
-        
+
         self.ComputeScores(feats, in_cache)
         self.ComputeDecibel()
         if not is_final:

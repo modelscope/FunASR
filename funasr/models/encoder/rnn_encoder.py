@@ -1,3 +1,4 @@
+
 from typing import Optional
 from typing import Sequence
 from typing import Tuple
@@ -14,7 +15,6 @@ from funasr.models.encoder.abs_encoder import AbsEncoder
 
 class RNNEncoder(AbsEncoder):
     """RNNEncoder class.
-
     Args:
         input_size: The number of expected features in the input
         output_size: The number of output features
@@ -23,7 +23,6 @@ class RNNEncoder(AbsEncoder):
         use_projection: Use projection layer or not
         num_layers: Number of recurrent layers
         dropout: dropout probability
-
     """
 
     def __init__(

@@ -23,22 +23,28 @@ decoder_conf:
     self_attention_dropout_rate: 0.0
     src_attention_dropout_rate: 0.0
 
+# frontend related
+frontend: wav_frontend
+frontend_conf:
+    fs: 16000
+    window: hamming
+    n_mels: 80
+    frame_length: 25
+    frame_shift: 10
+    lfr_m: 1
+    lfr_n: 1
+
 # hybrid CTC/attention
 model_conf:
     ctc_weight: 0.3
     lsm_weight: 0.1     # label smoothing option
     length_normalized_loss: false
 
-# minibatch related
-batch_type: length
-batch_bins: 32000
-num_workers: 8
-
 # optimization related
 accum_grad: 1
 grad_clip: 5
-patience: 3
-max_epoch: 20
+patience: none
+max_epoch: 60
 val_scheduler_criterion:
     - valid
     - acc
@@ -65,6 +71,16 @@ optim_conf:
 scheduler: warmuplr     # pytorch v1.1.0+ required
 scheduler_conf:
     warmup_steps: 25000
+
+dataset_conf:
+    shuffle: True
+    shuffle_conf:
+        shuffle_size: 2048
+        sort_size: 500
+    batch_conf:
+        batch_type: token
+        batch_size: 25000
+    num_workers: 8
 
 log_interval: 50
 normalize: None

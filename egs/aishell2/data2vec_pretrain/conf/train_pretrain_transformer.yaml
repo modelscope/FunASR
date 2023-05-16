@@ -2,47 +2,52 @@
 # encoder related
 encoder: data2vec_encoder
 encoder_conf:
-  extractor_mode: layer_norm
-  encoder_layerdrop: 0.05
-  dropout_input: 0.0
-  dropout_features: 0.0
-  feature_grad_mult: 1.0
-  encoder_embed_dim: 768
+    extractor_mode: layer_norm
+    encoder_layerdrop: 0.05
+    dropout_input: 0.0
+    dropout_features: 0.0
+    feature_grad_mult: 1.0
+    encoder_embed_dim: 768
 
-  mask_prob: 0.65
-  mask_length: 10
+    mask_prob: 0.65
+    mask_length: 10
 
-  loss_beta: 0
-  loss_scale: null
+    loss_beta: 0
+    loss_scale: null
 
-  instance_norm_target_layer: true
-  average_top_k_layers: 8
+    instance_norm_target_layer: true
+    average_top_k_layers: 8
 
-  pos_conv_depth: 5
-  conv_pos: 95
+    pos_conv_depth: 5
+    conv_pos: 95
 
-  ema_decay: 0.999
-  ema_end_decay: 0.9999
-  ema_anneal_end_step: 30000
-  ema_transformer_only: true
-  ema_layers_only: true
+    ema_decay: 0.999
+    ema_end_decay: 0.9999
+    ema_anneal_end_step: 30000
+    ema_transformer_only: true
+    ema_layers_only: true
 
-  require_same_masks: true
-  mask_dropout: 0
+    require_same_masks: true
+    mask_dropout: 0
 
-log_interval: 50
-normalize: None
+# frontend related
+frontend: wav_frontend
+frontend_conf:
+    fs: 16000
+    window: hamming
+    n_mels: 80
+    frame_length: 25
+    frame_shift: 10
+    lfr_m: 1
+    lfr_n: 1
 
-# minibatch related
-batch_type: length
-batch_bins: 64000
-num_workers: 16
+model: data2vec
 
 # optimization related
 accum_grad: 1
 grad_clip: 5
 patience: none
-max_epoch: 600
+max_epoch: 1800
 val_scheduler_criterion:
     - valid
     - acc
@@ -68,7 +73,7 @@ scheduler_conf:
 dataset_conf:
     batch_mode: clipping
     data_names: speech,none
-    data_types: kaldi_ark,none
+    data_types: sound,none
     shuffle: true
     shuffle_conf:
         shuffle_size: 12800
@@ -77,3 +82,6 @@ dataset_conf:
         batch_type: token
         batch_size: 64000
     num_workers: 8
+
+log_interval: 50
+normalize: None

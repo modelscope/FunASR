@@ -12,34 +12,12 @@ from typeguard import check_argument_types
 
 from funasr.modules.nets_utils import make_pad_mask
 from funasr.torch_utils.device_funcs import force_gatherable
-from funasr.train.abs_espnet_model import AbsESPnetModel
-
-from funasr.modules.scorers.scorer_interface import BatchScorerInterface
+from funasr.models.base_model import FunASRModel
 
 
-class AbsPunctuation(torch.nn.Module, BatchScorerInterface, ABC):
-    """The abstract class
-
-    To share the loss calculation way among different models,
-    We uses delegate pattern here:
-    The instance of this class should be passed to "LanguageModel"
-
-    This "model" is one of mediator objects for "Task" class.
-
-    """
-
-    @abstractmethod
-    def forward(self, input: torch.Tensor, hidden: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
-        raise NotImplementedError
-
-    @abstractmethod
-    def with_vad(self) -> bool:
-        raise NotImplementedError
-
-
-class PunctuationModel(AbsESPnetModel):
+class PunctuationModel(FunASRModel):
     
-    def __init__(self, punc_model: AbsPunctuation, vocab_size: int, ignore_id: int = 0, punc_weight: list = None):
+    def __init__(self, punc_model: torch.nn.Module, vocab_size: int, ignore_id: int = 0, punc_weight: list = None):
         assert check_argument_types()
         super().__init__()
         self.punc_model = punc_model
