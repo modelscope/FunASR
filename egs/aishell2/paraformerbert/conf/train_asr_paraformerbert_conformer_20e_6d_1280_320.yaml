@@ -47,7 +47,7 @@ model_conf:
     lsm_weight: 0.1     # label smoothing option
     length_normalized_loss: false
     predictor_weight: 1.0
-    glat_context_p: 0.4
+    sampling_ratio: 0.4
     embeds_id: 3
     embed_dims: 768
     embeds_loss_weight: 2.0
@@ -89,7 +89,7 @@ specaug_conf:
     - 40
     num_time_mask: 2
 
-predictor: cif_predictor_sanm
+predictor: cif_predictor
 predictor_conf:
   idim: 320
   threshold: 1.0

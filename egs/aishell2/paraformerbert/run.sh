@@ -106,8 +106,6 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     utils/text2token.py -s 1 -n 1 --space "" ${feats_dir}/data/${train_set}/text | cut -f 2- -d" " | tr " " "\n" \
         | sort | uniq | grep -a -v -e '^\s*$' | awk '{print $0}' >> ${token_list}
     echo "<unk>" >> ${token_list}
-    mkdir -p ${feats_dir}/asr_stats_fbank_zh_char/${train_set}
-    mkdir -p ${feats_dir}/asr_stats_fbank_zh_char/${valid_set}
  fi
 
 # Training Stage
