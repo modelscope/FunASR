@@ -483,7 +483,7 @@ class TransducerModel(FunASRModel):
 
         return loss_lm
 
-class UnifiedTransducerModel(AbsESPnetModel):
+class UnifiedTransducerModel(FunASRModel):
     """ESPnet2ASRTransducerModel module definition.
     Args:
         vocab_size: Size of complete vocabulary (w/ EOS and blank included).
