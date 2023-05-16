@@ -16,7 +16,7 @@ lang=zh
 token_type=char
 speed_perturb="0.9 1.0 1.1"
 dataset_type=large
-stage=3
+stage=0
 stop_stage=3
 
 # feature configuration
@@ -85,49 +85,6 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     mkdir -p ${feats_dir}/asr_stats_fbank_zh_char/${train_set}
     mkdir -p ${feats_dir}/asr_stats_fbank_zh_char/${valid_set}
  fi
-
-# Training Stage
-world_size=$gpu_num  # run on one machine
-if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
-    echo "stage 3: Training"
-    mkdir -p ${exp_dir}/exp/${model_dir}
-    mkdir -p ${exp_dir}/exp/${model_dir}/log
-    INIT_FILE=${exp_dir}/exp/${model_dir}/ddp_init
-    if [ -f $INIT_FILE ];then
-        rm -f $INIT_FILE
-    fi
-    init_method=file://$(readlink -f $INIT_FILE)
-    echo "$0: init method is $init_method"
-    for ((i = 0; i < $gpu_num; ++i)); do
-        {
-            rank=$i
-            local_rank=$i
-            gpu_id=$(echo $CUDA_VISIBLE_DEVICES | cut -d',' -f$[$i+1])
-            train.py \
-                --task_name asr \
-                --gpu_id $gpu_id \
-                --use_preprocessor true \
-                --token_type char \
-                --token_list $token_list \
-                --data_dir ${feats_dir}/data \
-                --train_set ${train_set} \
-                --valid_set ${valid_set} \
-                --cmvn_file ${feats_dir}/data/${train_set}/cmvn/cmvn.mvn \
-                --speed_perturb ${speed_perturb} \
-                --dataset_type $dataset_type \
-                --resume true \
-                --output_dir ${exp_dir}/exp/${model_dir} \
-                --config $asr_config \
-                --ngpu $gpu_num \
-                --num_worker_count $count \
-                --dist_init_method $init_method \
-                --dist_world_size $world_size \
-                --dist_rank $rank \
-                --local_rank $local_rank 1> ${exp_dir}/exp/${model_dir}/log/train.log.$i 2>&1
-        } &
-        done
-        wait
-fi
 
 # Training Stage
 world_size=$gpu_num  # run on one machine
