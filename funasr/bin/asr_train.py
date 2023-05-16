@@ -12,6 +12,12 @@ from funasr.tasks.asr import ASRTask
 def parse_args():
     parser = ASRTask.get_parser()
     parser.add_argument(
+        "--mode",
+        type=str,
+        default="asr",
+        help=" ",
+    )
+    parser.add_argument(
         "--gpu_id",
         type=int,
         default=0,
@@ -22,7 +28,13 @@ def parse_args():
 
 
 def main(args=None, cmd=None):
+    
     # for ASR Training
+    if args.mode == "asr":
+        from funasr.tasks.asr import ASRTask
+    if args.mode == "paraformer":
+        from funasr.tasks.asr import ASRTaskParaformer as ASRTask
+
     ASRTask.main(args=args, cmd=cmd)
 
 
