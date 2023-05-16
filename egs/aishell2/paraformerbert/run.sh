@@ -116,7 +116,8 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
         echo "extract embeddings..."
         local/extract_embeds.sh \
             --bert_model_name ${bert_model_name} \
-            --raw_dataset_path ${feats_dir}
+            --raw_dataset_path ${feats_dir} \
+            --nj $nj
     fi
     mkdir -p ${exp_dir}/exp/${model_dir}
     mkdir -p ${exp_dir}/exp/${model_dir}/log
