@@ -1,4 +1,7 @@
+# -*- encoding: utf-8 -*-
 #!/usr/bin/env python3
+# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+#  MIT License  (https://opensource.org/licenses/MIT)
 
 
 import argparse
@@ -179,6 +182,15 @@ def inference_tp(
     return _forward
 
 
+
+
+def inference_launch(mode, **kwargs):
+    if mode == "tp_norm":
+        return inference_tp(**kwargs)
+    else:
+        logging.info("Unknown decoding mode: {}".format(mode))
+        return None
+
 def get_parser():
     parser = config_argparse.ArgumentParser(
         description="Timestamp Prediction Inference",
@@ -264,13 +276,6 @@ def get_parser():
     )
     return parser
 
-
-def inference_launch(mode, **kwargs):
-    if mode == "tp_norm":
-        return inference_tp(**kwargs)
-    else:
-        logging.info("Unknown decoding mode: {}".format(mode))
-        return None
 
 def main(cmd=None):
     print(get_commandline_args(), file=sys.stderr)

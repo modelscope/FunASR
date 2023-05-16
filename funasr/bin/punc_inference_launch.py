@@ -1,5 +1,7 @@
+# -*- encoding: utf-8 -*-
 #!/usr/bin/env python3
-
+# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+#  MIT License  (https://opensource.org/licenses/MIT)
 
 import argparse
 import logging
@@ -175,6 +177,16 @@ def inference_punc_vad_realtime(
     return _forward
 
 
+
+def inference_launch(mode, **kwargs):
+    if mode == "punc":
+        return inference_punc(**kwargs)
+    if mode == "punc_VadRealtime":
+        return inference_punc_vad_realtime(**kwargs)
+    else:
+        logging.info("Unknown decoding mode: {}".format(mode))
+        return None
+
 def get_parser():
     parser = config_argparse.ArgumentParser(
         description="Punctuation inference",
@@ -228,16 +240,6 @@ def get_parser():
     group.add_argument("--model_file", type=str)
     group.add_argument("--mode", type=str, default="punc")
     return parser
-
-
-def inference_launch(mode, **kwargs):
-    if mode == "punc":
-        return inference_punc(**kwargs)
-    if mode == "punc_VadRealtime":
-        return inference_punc_vad_realtime(**kwargs)
-    else:
-        logging.info("Unknown decoding mode: {}".format(mode))
-        return None
 
 
 def main(cmd=None):

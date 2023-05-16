@@ -1,6 +1,8 @@
+# -*- encoding: utf-8 -*-
 #!/usr/bin/env python3
-# Copyright ESPnet (https://github.com/espnet/espnet). All Rights Reserved.
-#  Apache 2.0  (http://www.apache.org/licenses/LICENSE-2.0)
+# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+#  MIT License  (https://opensource.org/licenses/MIT)
+
 
 import torch
 torch.set_num_threads(1)
@@ -267,6 +269,17 @@ def inference_vad_online(
     return _forward
 
 
+
+
+def inference_launch(mode, **kwargs):
+    if mode == "offline":
+        return inference_vad(**kwargs)
+    elif mode == "online":
+        return inference_vad_online(**kwargs)
+    else:
+        logging.info("Unknown decoding mode: {}".format(mode))
+        return None
+
 def get_parser():
     parser = config_argparse.ArgumentParser(
         description="VAD Decoding",
@@ -357,15 +370,6 @@ def get_parser():
     )
     return parser
 
-
-def inference_launch(mode, **kwargs):
-    if mode == "offline":
-        return inference_vad(**kwargs)
-    elif mode == "online":
-        return inference_vad_online(**kwargs)
-    else:
-        logging.info("Unknown decoding mode: {}".format(mode))
-        return None
 
 def main(cmd=None):
     print(get_commandline_args(), file=sys.stderr)

@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 #!/usr/bin/env python3
 # Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
 #  MIT License  (https://opensource.org/licenses/MIT)
@@ -362,6 +363,30 @@ def inference_eend(
     return _forward
 
 
+
+
+def inference_launch(mode, **kwargs):
+    if mode == "sond":
+        return inference_sond(mode=mode, **kwargs)
+    elif mode == "sond_demo":
+        param_dict = {
+            "extract_profile": True,
+            "sv_train_config": "sv.yaml",
+            "sv_model_file": "sv.pb",
+        }
+        if "param_dict" in kwargs and kwargs["param_dict"] is not None:
+            for key in param_dict:
+                if key not in kwargs["param_dict"]:
+                    kwargs["param_dict"][key] = param_dict[key]
+        else:
+            kwargs["param_dict"] = param_dict
+        return inference_sond(mode=mode, **kwargs)
+    elif mode == "eend-ola":
+        return inference_eend(mode=mode, **kwargs)
+    else:
+        logging.info("Unknown decoding mode: {}".format(mode))
+        return None
+
 def get_parser():
     parser = config_argparse.ArgumentParser(
         description="Speaker Verification",
@@ -469,29 +494,6 @@ def get_parser():
     )
 
     return parser
-
-
-def inference_launch(mode, **kwargs):
-    if mode == "sond":
-        return inference_sond(mode=mode, **kwargs)
-    elif mode == "sond_demo":
-        param_dict = {
-            "extract_profile": True,
-            "sv_train_config": "sv.yaml",
-            "sv_model_file": "sv.pb",
-        }
-        if "param_dict" in kwargs and kwargs["param_dict"] is not None:
-            for key in param_dict:
-                if key not in kwargs["param_dict"]:
-                    kwargs["param_dict"][key] = param_dict[key]
-        else:
-            kwargs["param_dict"] = param_dict
-        return inference_sond(mode=mode, **kwargs)
-    elif mode == "eend-ola":
-        return inference_eend(mode=mode, **kwargs)
-    else:
-        logging.info("Unknown decoding mode: {}".format(mode))
-        return None
 
 
 def main(cmd=None):
