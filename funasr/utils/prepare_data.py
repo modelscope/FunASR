@@ -190,18 +190,19 @@ def prepare_data(args, distributed_option):
         args.train_data_file = os.path.join(args.data_dir, args.train_set, "data.list")
         args.valid_data_file = os.path.join(args.data_dir, args.valid_set, "data.list")
         if args.embed_path is not None:
-            for d in [args.train_set, args.valid_set]:
-                file = os.path.join(args.data_dir, d, "data.list")
-                with open(file) as f:
-                    lines = f.readlines()
-                out_file = os.path.join(args.data_dir, d, "data_with_embed.list")
-                with open(out_file, "w") as out_f:
-                    for line in lines:
-                        parts = line.strip().split()
-                        idx = parts[0].split("/")[-2]
-                        embed_file = os.path.join(args.embed_path, "embeds", args.valid_set, "ark",
-                                                  "embeds.{}.ark".format(idx))
-                        out_f.write(parts[0] + " " + parts[1] + " " + embed_file + "\n")
+            if not distributed or distributed_option.dist_rank == 0:
+                for d in [args.train_set, args.valid_set]:
+                    file = os.path.join(args.data_dir, d, "data.list")
+                    with open(file) as f:
+                        lines = f.readlines()
+                    out_file = os.path.join(args.data_dir, d, "data_with_embed.list")
+                    with open(out_file, "w") as out_f:
+                        for line in lines:
+                            parts = line.strip().split()
+                            idx = parts[0].split("/")[-2]
+                            embed_file = os.path.join(args.embed_path, "embeds", args.valid_set, "ark",
+                                                      "embeds.{}.ark".format(idx))
+                            out_f.write(parts[0] + " " + parts[1] + " " + embed_file + "\n")
             args.train_data_file = os.path.join(args.data_dir, args.train_set, "data_with_embed.list")
             args.valid_data_file = os.path.join(args.data_dir, args.valid_set, "data_with_embed.list")
     if distributed:
