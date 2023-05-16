@@ -97,7 +97,8 @@ predictor_conf:
   r_order: 1
 
 dataset_conf:
-    data_types: sound,text
+    data_names: speech,text,embed
+    data_types: sound,text,kaldi_ark
     shuffle: True
     shuffle_conf:
         shuffle_size: 2048
