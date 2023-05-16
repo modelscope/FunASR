@@ -280,6 +280,8 @@ class ASRTask(AbsTask):
         postencoder_choices,
         # --decoder and --decoder_conf
         decoder_choices,
+        # --predictor and --predictor_conf
+        predictor_choices,
     ]
 
     # If you need to modify train() or eval() procedures, change Trainer class here
