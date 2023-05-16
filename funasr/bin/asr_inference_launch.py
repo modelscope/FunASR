@@ -1526,6 +1526,12 @@ def get_parser():
         action="append",
     )
     group.add_argument("--key_file", type=str_or_none)
+    parser.add_argument(
+        "--hotword",
+        type=str_or_none,
+        default=None,
+        help="hotword file path or hotwords seperated by space"
+    )
     group.add_argument("--allow_variable_data_keys", type=str2bool, default=False)
     group.add_argument(
         "--mc",
