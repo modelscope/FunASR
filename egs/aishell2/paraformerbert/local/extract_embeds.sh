@@ -5,11 +5,10 @@ stop_stage=3
 
 bert_model_name="bert-base-chinese"
 raw_dataset_path="../DATA"
+nj=64
 model_path=${bert_model_name}
 
 . utils/parse_options.sh || exit 1;
-
-nj=32
 
 for data_set in train dev_ios;do
     scp=$raw_dataset_path/data/${data_set}/text
