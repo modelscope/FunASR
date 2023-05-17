@@ -55,7 +55,7 @@ model_dir="baseline_$(basename "${asr_config}" .yaml)_${lang}_${token_type}_${ta
 
 inference_config=conf/decode_asr_transformer.yaml
 #inference_config=conf/decode_asr_transformer_beam60_ctc0.3.yaml
-inference_asr_model=valid.acc.ave_10best.pth
+inference_asr_model=valid.acc.ave_10best.pb
 
 # you can set gpu num for decoding here
 gpuid_list=$CUDA_VISIBLE_DEVICES  # set gpus for decoding, the same as training stage by default
