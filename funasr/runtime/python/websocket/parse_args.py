@@ -35,6 +35,16 @@ parser.add_argument("--ncpu",
                     type=int,
                     default=1,
                     help="cpu cores")
-
+parser.add_argument("--certfile",
+                    type=str,
+                    default="",
+                    required=False,
+                    help="certfile for ssl")
+                    
+parser.add_argument("--keyfile",
+                    type=str,
+                    default="",
+                    required=False,
+                    help="keyfile for ssl")
 args = parser.parse_args()
 print(args)

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<title>语音识别</title>
+ 
+	</head>
+	<body style="margin-left: 3%">
+		<script src="recorder-core.js" charset="UTF-8"></script>
+		<script src="wav.js" charset="UTF-8"></script>
+		<script src="pcm.js" charset="UTF-8"></script>
+
+		 
+
+
+		<div class="div_class_topArea">
+      
+			<div class="div_class_recordControl">
+				语音识别结果显示：
+				<br>
+				
+				<textarea rows="10"  id="varArea" readonly="true" style=" width: 100%;height:100%" ></textarea>
+				<br>
+                <div id="info_div">请点击开始</div>
+				<div class="div_class_buttons">
+					<button id="btnStart">开始</button>
+					<button id="btnStop">停止</button>
+ 
+				</div>
+                
+				<audio id="audio_record" type="audio/wav" controls style="margin-top: 12px; width: 100%;"></audio>
+			</div>
+		</div>
+
+ 		<script src="wsconnecter.js" charset="utf-8"></script>
+		<script src="main.js" charset="utf-8"></script>
+		
+
+ 
+				
+	</body>
+</html>
