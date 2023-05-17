@@ -162,10 +162,10 @@ void FsmnVad::Forward(
     }
   
     // get 4 caches outputs,each size is 128*19
-    for (int i = 1; i < 5; i++) {
-      float* data = vad_ort_outputs[i].GetTensorMutableData<float>();
-      memcpy(in_cache_[i-1].data(), data, sizeof(float) * 128*19);
-    }
+    // for (int i = 1; i < 5; i++) {
+    //   float* data = vad_ort_outputs[i].GetTensorMutableData<float>();
+    //   memcpy(in_cache_[i-1].data(), data, sizeof(float) * 128*19);
+    // }
 }
 
 void FsmnVad::FbankKaldi(float sample_rate, std::vector<std::vector<float>> &vad_feats,
