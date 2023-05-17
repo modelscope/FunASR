@@ -291,6 +291,8 @@ For example:
 <div class="section" id="funasr-onnx-offline-rtf">
 <h3>funasr-onnx-offline-rtf<a class="headerlink" href="#funasr-onnx-offline-rtf" title="Permalink to this headline"></a></h3>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-onnx-offline-rtf     --model-dir &lt;string&gt; <span class="o">[</span>--quantize &lt;string&gt;<span class="o">]</span>
+                              <span class="o">[</span>--vad-dir &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--vad-quant &lt;string&gt;<span class="o">]</span>
+                              <span class="o">[</span>--punc-dir &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-quant &lt;string&gt;<span class="o">]</span>
                               --wav-path &lt;string&gt; --thread-num &lt;int32_t&gt;
                               <span class="o">[</span>--<span class="o">]</span> <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
 Where:
@@ -300,6 +302,17 @@ Where:
      <span class="o">(</span>required<span class="o">)</span>  the model path, which contains model.onnx, config.yaml, am.mvn
    --quantize &lt;string&gt;
      <span class="nb">false</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in model_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in model_dir
+
+   --vad-dir &lt;string&gt;
+     the vad model path, which contains model.onnx, vad.yaml, vad.mvn
+   --vad-quant &lt;string&gt;
+     <span class="nb">false</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in vad_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in vad_dir
+
+   --punc-dir &lt;string&gt;
+     the punc model path, which contains model.onnx, punc.yaml
+   --punc-quant &lt;string&gt;
+     <span class="nb">false</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in punc_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in punc_dir
+     
    --wav-path &lt;string&gt;
      <span class="o">(</span>required<span class="o">)</span>  the input could be: 
       wav_path, e.g.: asr_example.wav<span class="p">;</span>
