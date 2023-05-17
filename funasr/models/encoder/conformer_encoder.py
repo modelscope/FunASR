@@ -1078,7 +1078,7 @@ class ConformerChunkEncoder(AbsEncoder):
                 limit_size,
             )
 
-        mask = make_source_mask(x_len)
+        mask = make_source_mask(x_len).to(x.device)
 
         if self.unified_model_training:
             chunk_size = self.default_chunk_size + torch.randint(-self.jitter_range, self.jitter_range+1, (1,)).item()

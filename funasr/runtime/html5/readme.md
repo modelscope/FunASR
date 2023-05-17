@@ -9,70 +9,70 @@ pyOpenSSL
 ```
 
 ### javascript
-[html5录音](https://github.com/xiangyuecn/Recorder)
+[html5 recorder.js](https://github.com/xiangyuecn/Recorder)
 ```shell
 Recorder 
 ```
 
-### demo页面如下
-![img](https://github.com/alibaba-damo-academy/FunASR/blob/for-html5-demo/funasr/runtime/html5/demo.gif)
+### demo
+![img](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/html5/demo.gif)
 
-## 两种ws_server_online连接模式
-### 1)直接连接模式，浏览器https麦克风 --> html5 demo服务 --> js wss接口 --> wss asr online srv(证书生成请往后看)
+## wss or ws protocol for ws_server_online
+1) wss: browser microphone data --> html5 demo server --> js wss api --> wss asr online srv #for certificate generation just look back
 
-### 2)nginx中转，浏览器https麦克风 --> html5 demo服务 --> js wss接口 --> nginx服务 --> ws asr online srv
+2) ws: browser microphone data  --> html5 demo server --> js wss api --> nginx wss server --> ws asr online srv
 
-## 1.html5 demo服务启动
-### 启动html5服务，需要ssl证书(自己生成请往后看)
+## 1.html5 demo start
+### ssl certificate is required
 
 ```shell
 usage: h5Server.py [-h] [--host HOST] [--port PORT] [--certfile CERTFILE]
                    [--keyfile KEYFILE]
 python h5Server.py --port 1337
 ```
-## 2.启动ws or wss asr online srv
-[具体请看online asr](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket)
-online asr提供两种ws和wss模式，wss模式可以直接启动，无需nginx中转。否则需要通过nginx将wss转发到该online asr的ws端口上
-### wss方式
+## 2.asr online srv start
+[detail for online asr](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket)
+Online asr provides wss or ws way. if started in ws way, nginx is required for relay.
+### wss way, ssl certificate is required
 ```shell
 python ws_server_online.py --certfile server.crt --keyfile server.key  --port 5921
 ```
-### ws方式
+### ws way
 ```shell
 python ws_server_online.py  --port 5921
 ```
-## 3.修改wsconnecter.js里asr接口地址
-wsconnecter.js里配置online asr服务地址路径，这里配置的是wss端口
+## 3.modify asr address in wsconnecter.js according to your environment
+asr address in wsconnecter.js must be wss, just like
 var Uri = "wss://xxx:xxx/" 
 
-## 4.浏览器打开地址测试
-https://127.0.0.1:1337/static/index.html
+## 4.open browser to access html5 demo
+https://youraddress:port/static/index.html
 
 
 
 
-## 自行生成证书
-生成证书(注意这种证书并不能被所有浏览器认可，部分手动授权可以访问,最好使用其他认证的官方ssl证书)
+## certificate generation by yourself
+generated certificate may not suitable for all browsers due to security concerns. you'd better buy or download an authenticated ssl certificate from authorized agency.
 
 ```shell
-### 1)生成私钥，按照提示填写内容
+### 1) Generate a private key
 openssl genrsa -des3 -out server.key 1024
  
-### 2)生成csr文件 ，按照提示填写内容
+### 2) Generate a csr file
 openssl req -new -key server.key -out server.csr
  
-### 去掉pass
+### 3) Remove pass
 cp server.key server.key.org 
 openssl rsa -in server.key.org -out server.key
  
-### 生成crt文件，有效期1年（365天）
+### 4) Generated a crt file, valid for 1 year
 openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
 ```
 
-## nginx配置说明(了解的可以跳过)
-h5打开麦克风需要https协议，同时后端的asr websocket也必须是wss协议，如果[online asr](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket)以ws方式运行，我们可以通过nginx配置实现wss协议到ws协议的转换。
-
-### nginx转发配置示例
+## nginx configuration (you can skip it if you known)
+https and wss protocol are required by browsers when want to open microphone and websocket.  
+if [online asr](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket) run in ws way, you should use nginx to convert wss to ws.
+### nginx wss->ws configuration example
 ```shell
 events {                                                                                                            [0/1548]
     worker_connections  1024;

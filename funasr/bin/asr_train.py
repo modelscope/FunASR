@@ -36,6 +36,8 @@ def main(args=None, cmd=None):
         from funasr.tasks.asr import ASRTaskParaformer as ASRTask
     if args.mode == "uniasr":
         from funasr.tasks.asr import ASRTaskUniASR as ASRTask
+    if args.mode == "rnnt":
+        from funasr.tasks.asr import ASRTransducerTask as ASRTask    
 
     ASRTask.main(args=args, cmd=cmd)
 
