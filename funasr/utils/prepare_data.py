@@ -3,6 +3,7 @@ import os
 import shutil
 from multiprocessing import Pool
 
+import kaldiio
 import numpy as np
 import torch.distributed as dist
 import torchaudio
@@ -48,49 +49,80 @@ def wav2num_frame(wav_path, frontend_conf):
 
 
 def calc_shape_core(root_path, args, idx):
-    wav_scp_file = os.path.join(root_path, "wav.scp.{}".format(idx))
-    shape_file = os.path.join(root_path, "speech_shape.{}".format(idx))
-    with open(wav_scp_file) as f:
+    file_name = args.data_file_names.split(",")[0]
+    data_name = args.dataset_conf.get("data_names", "speech,text").split(",")[0]
+    scp_file = os.path.join(root_path, "{}.{}".format(file_name, idx))
+    shape_file = os.path.join(root_path, "{}_shape.{}".format(data_name, idx))
+    with open(scp_file) as f:
         lines = f.readlines()
-    frontend_conf = args.frontend_conf
-    dataset_conf = args.dataset_conf
-    speech_length_min = dataset_conf.speech_length_min if hasattr(dataset_conf, "speech_length_min") else -1
-    speech_length_max = dataset_conf.speech_length_max if hasattr(dataset_conf, "speech_length_max") else -1
-    with open(shape_file, "w") as f:
-        for line in lines:
-            sample_name, wav_path = line.strip().split()
-            n_frames, feature_dim = wav2num_frame(wav_path, frontend_conf)
-            write_flag = True
-            if n_frames > 0 and speech_length_min > 0:
-                write_flag = n_frames >= speech_length_min
-            if n_frames > 0 and speech_length_max > 0:
-                write_flag = n_frames <= speech_length_max
-            if write_flag:
-                f.write("{} {},{}\n".format(sample_name, str(int(np.ceil(n_frames))), str(int(feature_dim))))
+    data_type = args.dataset_conf.get("data_types", "sound,text").split(",")[0]
+    if data_type == "sound":
+        frontend_conf = args.frontend_conf
+        dataset_conf = args.dataset_conf
+        length_min = dataset_conf.speech_length_min if hasattr(dataset_conf, "{}_length_min".format(data_name)) else -1
+        length_max = dataset_conf.speech_length_max if hasattr(dataset_conf, "{}_length_max".format(data_name)) else -1
+        with open(shape_file, "w") as f:
+            for line in lines:
+                sample_name, wav_path = line.strip().split()
+                n_frames, feature_dim = wav2num_frame(wav_path, frontend_conf)
+                write_flag = True
+                if n_frames > 0 and length_min > 0:
+                    write_flag = n_frames >= length_min
+                if n_frames > 0 and length_max > 0:
+                    write_flag = n_frames <= length_max
+                if write_flag:
+                    f.write("{} {},{}\n".format(sample_name, str(int(np.ceil(n_frames))), str(int(feature_dim))))
+                    f.flush()
+    elif data_type == "kaldi_ark":
+        dataset_conf = args.dataset_conf
+        length_min = dataset_conf.speech_length_min if hasattr(dataset_conf, "{}_length_min".format(data_name)) else -1
+        length_max = dataset_conf.speech_length_max if hasattr(dataset_conf, "{}_length_max".format(data_name)) else -1
+        with open(shape_file, "w") as f:
+            for line in lines:
+                sample_name, feature_path = line.strip().split()
+                feature = kaldiio.load_mat(feature_path)
+                n_frames, feature_dim = feature.shape
+                if n_frames > 0 and length_min > 0:
+                    write_flag = n_frames >= length_min
+                if n_frames > 0 and length_max > 0:
+                    write_flag = n_frames <= length_max
+                if write_flag:
+                    f.write("{} {},{}\n".format(sample_name, str(int(np.ceil(n_frames))), str(int(feature_dim))))
+                    f.flush()
+    elif data_type == "text":
+        with open(shape_file, "w") as f:
+            for line in lines:
+                sample_name, text = line.strip().split(maxsplit=1)
+                n_tokens = len(text.split())
+                f.write("{} {}\n".format(sample_name, str(int(np.ceil(n_tokens)))))
                 f.flush()
+    else:
+        raise RuntimeError("Unsupported data_type: {}".format(data_type))
 
 
 def calc_shape(args, dataset, nj=64):
-    shape_path = os.path.join(args.data_dir, dataset, "speech_shape")
+    data_name = args.dataset_conf.get("data_names", "speech,text").split(",")[0]
+    shape_path = os.path.join(args.data_dir, dataset, "{}_shape".format(data_name))
     if os.path.exists(shape_path):
         logging.info('Shape file for small dataset already exists.')
         return
 
-    split_shape_path = os.path.join(args.data_dir, dataset, "shape_files")
+    split_shape_path = os.path.join(args.data_dir, dataset, "{}_shape_files".format(data_name))
     if os.path.exists(split_shape_path):
         shutil.rmtree(split_shape_path)
     os.mkdir(split_shape_path)
 
     # split
-    wav_scp_file = os.path.join(args.data_dir, dataset, "wav.scp")
-    with open(wav_scp_file) as f:
+    file_name = args.data_file_names.split(",")[0]
+    scp_file = os.path.join(args.data_dir, dataset, file_name)
+    with open(scp_file) as f:
         lines = f.readlines()
         num_lines = len(lines)
         num_job_lines = num_lines // nj
     start = 0
     for i in range(nj):
         end = start + num_job_lines
-        file = os.path.join(split_shape_path, "wav.scp.{}".format(str(i + 1)))
+        file = os.path.join(split_shape_path, "{}.{}".format(file_name, str(i + 1)))
         with open(file, "w") as f:
             if i == nj - 1:
                 f.writelines(lines[start:])
@@ -108,15 +140,18 @@ def calc_shape(args, dataset, nj=64):
     # combine
     with open(shape_path, "w") as f:
         for i in range(nj):
-            job_file = os.path.join(split_shape_path, "speech_shape.{}".format(str(i + 1)))
+            job_file = os.path.join(split_shape_path, "{}_shape.{}".format(data_name, str(i + 1)))
             with open(job_file) as job_f:
                 lines = job_f.readlines()
                 f.writelines(lines)
     logging.info('Generating shape files done.')
 
 
-def generate_data_list(data_dir, dataset, nj=64):
-    list_file = os.path.join(data_dir, dataset, "data.list")
+def generate_data_list(args, data_dir, dataset, nj=64):
+    data_names = args.dataset_conf.get("data_names", "speech,text").split(",")
+    file_names = args.data_file_names.split(",")
+    concat_data_name = "_".join(data_names)
+    list_file = os.path.join(data_dir, dataset, "{}_data.list".format(concat_data_name))
     if os.path.exists(list_file):
         logging.info('Data list for large dataset already exists.')
         return
@@ -125,85 +160,67 @@ def generate_data_list(data_dir, dataset, nj=64):
         shutil.rmtree(split_path)
     os.mkdir(split_path)
 
-    with open(os.path.join(data_dir, dataset, "wav.scp")) as f_wav:
-        wav_lines = f_wav.readlines()
-    with open(os.path.join(data_dir, dataset, "text")) as f_text:
-        text_lines = f_text.readlines()
-    num_lines = len(wav_lines)
+    data_lines_list = []
+    for file_name in file_names:
+        with open(os.path.join(data_dir, dataset, file_name)) as f:
+            lines = f.readlines()
+            data_lines_list.append(lines)
+    num_lines = len(data_lines_list[0])
     num_job_lines = num_lines // nj
     start = 0
     for i in range(nj):
         end = start + num_job_lines
         split_path_nj = os.path.join(split_path, str(i + 1))
         os.mkdir(split_path_nj)
-        wav_file = os.path.join(split_path_nj, "wav.scp")
-        text_file = os.path.join(split_path_nj, "text")
-        with open(wav_file, "w") as fw, open(text_file, "w") as ft:
-            if i == nj - 1:
-                fw.writelines(wav_lines[start:])
-                ft.writelines(text_lines[start:])
-            else:
-                fw.writelines(wav_lines[start:end])
-                ft.writelines(text_lines[start:end])
+        for file_id, file_name in enumerate(file_names):
+            file = os.path.join(split_path_nj, file_name)
+            with open(file, "w") as f:
+                if i == nj - 1:
+                    f.writelines(data_lines_list[file_id][start:])
+                else:
+                    f.writelines(data_lines_list[file_id][start:end])
         start = end
 
     with open(list_file, "w") as f_data:
         for i in range(nj):
-            wav_path = os.path.join(split_path, str(i + 1), "wav.scp")
-            text_path = os.path.join(split_path, str(i + 1), "text")
-            f_data.write(wav_path + " " + text_path + "\n")
+            path = ""
+            for file_name in file_names:
+                path = path + os.path.join(split_path, str(i + 1), file_name)
+            f_data.write(path + "\n")
 
 
 def prepare_data(args, distributed_option):
     distributed = distributed_option.distributed
     if not distributed or distributed_option.dist_rank == 0:
-        filter_wav_text(args.data_dir, args.train_set)
-        filter_wav_text(args.data_dir, args.valid_set)
+        if hasattr(args, "filter_input") and args.filter_input:
+            filter_wav_text(args.data_dir, args.train_set)
+            filter_wav_text(args.data_dir, args.valid_set)
 
         if args.dataset_type == "small":
             calc_shape(args, args.train_set)
             calc_shape(args, args.valid_set)
 
         if args.dataset_type == "large":
-            generate_data_list(args.data_dir, args.train_set)
-            generate_data_list(args.data_dir, args.valid_set)
+            generate_data_list(args, args.data_dir, args.train_set)
+            generate_data_list(args, args.data_dir, args.valid_set)
 
+    data_names = args.dataset_conf.get("data_names", "speech,text").split(",")
+    data_types = args.dataset_conf.get("data_types", "sound,text").split(",")
+    file_names = args.data_file_names.split(",")
+    print("data_names: {}, data_types: {}, file_names: {}".format(data_names, data_types, file_names))
+    assert len(data_names) == len(data_types) == len(file_names)
     if args.dataset_type == "small":
-        args.train_shape_file = [os.path.join(args.data_dir, args.train_set, "speech_shape")]
-        args.valid_shape_file = [os.path.join(args.data_dir, args.valid_set, "speech_shape")]
-        data_names = args.dataset_conf.get("data_names", "speech,text").split(",")
-        data_types = args.dataset_conf.get("data_types", "sound,text").split(",")
-        args.train_data_path_and_name_and_type = [
-            ["{}/{}/wav.scp".format(args.data_dir, args.train_set), data_names[0], data_types[0]],
-            ["{}/{}/text".format(args.data_dir, args.train_set), data_names[1], data_types[1]]
-        ]
-        args.valid_data_path_and_name_and_type = [
-            ["{}/{}/wav.scp".format(args.data_dir, args.valid_set), data_names[0], data_types[0]],
-            ["{}/{}/text".format(args.data_dir, args.valid_set), data_names[1], data_types[1]]
-        ]
-        if args.embed_path is not None:
+        args.train_shape_file = [os.path.join(args.data_dir, args.train_set, "{}_shape".format(data_names[0]))]
+        args.valid_shape_file = [os.path.join(args.data_dir, args.valid_set, "{}_shape".format(data_names[0]))]
+        args.train_data_path_and_name_and_type, args.valid_data_path_and_name_and_type = [], []
+        for file_name, data_name, data_type in zip(file_names, data_names, data_types):
             args.train_data_path_and_name_and_type.append(
-                [os.path.join(args.embed_path, "embeds", args.train_set, "embeds.scp"), "embed", "kaldi_ark"])
+                ["{}/{}/{}".format(args.data_dir, args.train_set, file_name), data_name, data_type])
             args.valid_data_path_and_name_and_type.append(
-                [os.path.join(args.embed_path, "embeds", args.valid_set, "embeds.scp"), "embed", "kaldi_ark"])
+                ["{}/{}/{}".format(args.data_dir, args.valid_set, file_name), data_name, data_type])
     else:
-        args.train_data_file = os.path.join(args.data_dir, args.train_set, "data.list")
-        args.valid_data_file = os.path.join(args.data_dir, args.valid_set, "data.list")
-        if args.embed_path is not None:
-            if not distributed or distributed_option.dist_rank == 0:
-                for d in [args.train_set, args.valid_set]:
-                    file = os.path.join(args.data_dir, d, "data.list")
-                    with open(file) as f:
-                        lines = f.readlines()
-                    out_file = os.path.join(args.data_dir, d, "data_with_embed.list")
-                    with open(out_file, "w") as out_f:
-                        for line in lines:
-                            parts = line.strip().split()
-                            idx = parts[0].split("/")[-2]
-                            embed_file = os.path.join(args.embed_path, "embeds", args.valid_set, "ark",
-                                                      "embeds.{}.ark".format(idx))
-                            out_f.write(parts[0] + " " + parts[1] + " " + embed_file + "\n")
-            args.train_data_file = os.path.join(args.data_dir, args.train_set, "data_with_embed.list")
-            args.valid_data_file = os.path.join(args.data_dir, args.valid_set, "data_with_embed.list")
+        concat_data_name = "_".join(data_names)
+        args.train_data_file = os.path.join(args.data_dir, args.train_set, "{}_data.list".format(concat_data_name))
+        args.valid_data_file = os.path.join(args.data_dir, args.valid_set, "{}_data.list".format(concat_data_name))
     if distributed:
         dist.barrier()

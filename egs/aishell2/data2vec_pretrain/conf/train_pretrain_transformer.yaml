@@ -72,8 +72,8 @@ scheduler_conf:
 # for dataset
 dataset_conf:
     batch_mode: clipping
-    data_names: speech,none
-    data_types: sound,none
+    data_names: speech
+    data_types: sound
     shuffle: true
     shuffle_conf:
         shuffle_size: 12800

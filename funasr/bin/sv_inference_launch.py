@@ -34,7 +34,6 @@ from typeguard import check_return_type
 
 from funasr.utils.cli_utils import get_commandline_args
 from funasr.tasks.sv import SVTask
-from funasr.tasks.asr import ASRTask
 from funasr.torch_utils.device_funcs import to_device
 from funasr.torch_utils.set_all_random_seed import set_all_random_seed
 from funasr.utils import config_argparse
@@ -115,7 +114,7 @@ def inference_sv(
             data_path_and_name_and_type = [raw_inputs, "speech", "waveform"]
         
         # 3. Build data-iterator
-        loader = ASRTask.build_streaming_iterator(
+        loader = SVTask.build_streaming_iterator(
             data_path_and_name_and_type,
             dtype=dtype,
             batch_size=batch_size,
