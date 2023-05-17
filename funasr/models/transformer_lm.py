@@ -8,7 +8,7 @@ import torch.nn as nn
 from funasr.modules.embedding import PositionalEncoding
 from funasr.models.encoder.transformer_encoder import TransformerEncoder_s0 as Encoder
 from funasr.modules.mask import subsequent_mask
-from funasr.lm.abs_model import AbsLM
+from funasr.train.abs_model import AbsLM
 
 
 class TransformerLM(AbsLM):

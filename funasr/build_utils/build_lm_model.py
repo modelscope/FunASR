@@ -1,9 +1,9 @@
 import logging
 
-from funasr.lm.abs_model import AbsLM
-from funasr.lm.abs_model import LanguageModel
-from funasr.lm.seq_rnn_lm import SequentialRNNLM
-from funasr.lm.transformer_lm import TransformerLM
+from funasr.train.abs_model import AbsLM
+from funasr.train.abs_model import LanguageModel
+from funasr.models.seq_rnn_lm import SequentialRNNLM
+from funasr.models.transformer_lm import TransformerLM
 from funasr.torch_utils.initialize import initialize
 from funasr.train.class_choices import ClassChoices
 
