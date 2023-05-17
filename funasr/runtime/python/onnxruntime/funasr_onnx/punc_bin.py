@@ -190,7 +190,7 @@ class CT_Transformer_VadRealtime(CT_Transformer):
             data = {
                 "input": mini_sentence_id[None,:],
                 "text_lengths": np.array([text_length], dtype='int32'),
-                "vad_mask": vad_mask
+                "vad_mask": vad_mask,
                 "sub_masks": vad_mask
             }
             try:
