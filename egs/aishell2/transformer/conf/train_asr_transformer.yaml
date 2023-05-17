@@ -78,6 +78,7 @@ specaug_conf:
     num_time_mask: 2
 
 dataset_conf:
+    data_names: speech,text
     data_types: sound,text
     shuffle: True
     shuffle_conf:

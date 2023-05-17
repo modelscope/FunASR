@@ -54,6 +54,8 @@ for data_set in train dev_ios;do
             cat ${local_records_dir}/embeds.${JOB}.shape || exit 1;
         done > ${local_scp_dir_raw}/embeds.shape
     fi
+
+    cp ${local_scp_dir_raw}/embeds.scp  ${raw_dataset_path}/data/${data_set}/embeds.scp
 done
 
 echo "embeds is in: ${local_scp_dir_raw}"
