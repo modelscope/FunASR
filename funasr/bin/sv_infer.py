@@ -23,7 +23,6 @@ from typeguard import check_return_type
 
 from funasr.utils.cli_utils import get_commandline_args
 from funasr.tasks.sv import SVTask
-from funasr.tasks.asr import ASRTask
 from funasr.torch_utils.device_funcs import to_device
 from funasr.torch_utils.set_all_random_seed import set_all_random_seed
 from funasr.utils import config_argparse

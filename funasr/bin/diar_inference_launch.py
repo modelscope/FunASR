@@ -38,7 +38,6 @@ from typeguard import check_return_type
 from scipy.signal import medfilt
 from funasr.utils.cli_utils import get_commandline_args
 from funasr.tasks.diar import DiarTask
-from funasr.tasks.asr import ASRTask
 from funasr.tasks.diar import EENDOLADiarTask
 from funasr.torch_utils.device_funcs import to_device
 from funasr.torch_utils.set_all_random_seed import set_all_random_seed
@@ -187,7 +186,7 @@ def inference_sond(
                 raise TypeError("raw_inputs must be a list or tuple in [speech, profile1, profile2, ...] ")
         else:
             # 3. Build data-iterator
-            loader = ASRTask.build_streaming_iterator(
+            loader = DiarTask.build_streaming_iterator(
                 data_path_and_name_and_type,
                 dtype=dtype,
                 batch_size=batch_size,
