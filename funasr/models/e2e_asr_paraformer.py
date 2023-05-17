@@ -78,6 +78,7 @@ class Paraformer(FunASRModel):
             share_embedding: bool = False,
             preencoder: Optional[AbsPreEncoder] = None,
             postencoder: Optional[AbsPostEncoder] = None,
+            use_1st_decoder_loss: bool = False,
     ):
         assert check_argument_types()
         assert 0.0 <= ctc_weight <= 1.0, ctc_weight
@@ -144,6 +145,8 @@ class Paraformer(FunASRModel):
         if self.share_embedding:
             self.decoder.embed = None
 
+        self.use_1st_decoder_loss = use_1st_decoder_loss
+
     def forward(
             self,
             speech: torch.Tensor,
@@ -179,7 +182,7 @@ class Paraformer(FunASRModel):
             intermediate_outs = encoder_out[1]
             encoder_out = encoder_out[0]
 
-        loss_att, acc_att, cer_att, wer_att = None, None, None, None
+        loss_att, pre_loss_att, acc_att, cer_att, wer_att = None, None, None, None, None
         loss_ctc, cer_ctc = None, None
         loss_pre = None
         stats = dict()
@@ -220,7 +223,7 @@ class Paraformer(FunASRModel):
 
         # 2b. Attention decoder branch
         if self.ctc_weight != 1.0:
-            loss_att, acc_att, cer_att, wer_att, loss_pre = self._calc_att_loss(
+            loss_att, acc_att, cer_att, wer_att, loss_pre, pre_loss_att = self._calc_att_loss(
                 encoder_out, encoder_out_lens, text, text_lengths
             )
 
@@ -231,6 +234,9 @@ class Paraformer(FunASRModel):
             loss = loss_ctc
         else:
             loss = self.ctc_weight * loss_ctc + (1 - self.ctc_weight) * loss_att + loss_pre * self.predictor_weight
+
+        if self.use_1st_decoder_loss and pre_loss_att is not None:
+            loss = loss + pre_loss_att
 
         # Collect Attn branch stats
         stats["loss_att"] = loss_att.detach() if loss_att is not None else None
@@ -456,11 +462,16 @@ class Paraformer(FunASRModel):
 
         # 0. sampler
         decoder_out_1st = None
+        pre_loss_att = None
         if self.sampling_ratio > 0.0:
             if self.step_cur < 2:
                 logging.info("enable sampler in paraformer, sampling_ratio: {}".format(self.sampling_ratio))
-            sematic_embeds, decoder_out_1st = self.sampler(encoder_out, encoder_out_lens, ys_pad, ys_pad_lens,
-                                                           pre_acoustic_embeds)
+            if self.use_1st_decoder_loss:
+                sematic_embeds, decoder_out_1st, pre_loss_att = self.sampler_with_grad(encoder_out, encoder_out_lens, ys_pad, ys_pad_lens,
+                                                               pre_acoustic_embeds)
+            else:
+                sematic_embeds, decoder_out_1st = self.sampler(encoder_out, encoder_out_lens, ys_pad, ys_pad_lens,
+                                                               pre_acoustic_embeds)
         else:
             if self.step_cur < 2:
                 logging.info("disable sampler in paraformer, sampling_ratio: {}".format(self.sampling_ratio))
@@ -490,7 +501,7 @@ class Paraformer(FunASRModel):
             ys_hat = decoder_out_1st.argmax(dim=-1)
             cer_att, wer_att = self.error_calculator(ys_hat.cpu(), ys_pad.cpu())
 
-        return loss_att, acc_att, cer_att, wer_att, loss_pre
+        return loss_att, acc_att, cer_att, wer_att, loss_pre, pre_loss_att
 
     def sampler(self, encoder_out, encoder_out_lens, ys_pad, ys_pad_lens, pre_acoustic_embeds):
 
@@ -522,6 +533,37 @@ class Paraformer(FunASRModel):
         sematic_embeds = pre_acoustic_embeds.masked_fill(~input_mask_expand_dim, 0) + ys_pad_embed.masked_fill(
             input_mask_expand_dim, 0)
         return sematic_embeds * tgt_mask, decoder_out * tgt_mask
+
+    def sampler_with_grad(self, encoder_out, encoder_out_lens, ys_pad, ys_pad_lens, pre_acoustic_embeds):
+        tgt_mask = (~make_pad_mask(ys_pad_lens, maxlen=ys_pad_lens.max())[:, :, None]).to(ys_pad.device)
+        ys_pad_masked = ys_pad * tgt_mask[:, :, 0]
+        if self.share_embedding:
+            ys_pad_embed = self.decoder.output_layer.weight[ys_pad_masked]
+        else:
+            ys_pad_embed = self.decoder.embed(ys_pad_masked)
+        decoder_outs = self.decoder(
+            encoder_out, encoder_out_lens, pre_acoustic_embeds, ys_pad_lens
+        )
+        pre_loss_att = self.criterion_att(decoder_outs[0], ys_pad)
+        decoder_out, _ = decoder_outs[0], decoder_outs[1]
+        pred_tokens = decoder_out.argmax(-1)
+        nonpad_positions = ys_pad.ne(self.ignore_id)
+        seq_lens = (nonpad_positions).sum(1)
+        same_num = ((pred_tokens == ys_pad) & nonpad_positions).sum(1)
+        input_mask = torch.ones_like(nonpad_positions)
+        bsz, seq_len = ys_pad.size()
+        for li in range(bsz):
+            target_num = (((seq_lens[li] - same_num[li].sum()).float()) * self.sampling_ratio).long()
+            if target_num > 0:
+                input_mask[li].scatter_(dim=0, index=torch.randperm(seq_lens[li])[:target_num].cuda(), value=0)
+        input_mask = input_mask.eq(1)
+        input_mask = input_mask.masked_fill(~nonpad_positions, False)
+        input_mask_expand_dim = input_mask.unsqueeze(2).to(pre_acoustic_embeds.device)
+
+        sematic_embeds = pre_acoustic_embeds.masked_fill(~input_mask_expand_dim, 0) + ys_pad_embed.masked_fill(
+            input_mask_expand_dim, 0)
+
+        return sematic_embeds * tgt_mask, decoder_out * tgt_mask, pre_loss_att
 
     def _calc_ctc_loss(
             self,

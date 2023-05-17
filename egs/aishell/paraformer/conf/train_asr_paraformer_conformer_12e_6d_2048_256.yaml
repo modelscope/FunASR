@@ -47,6 +47,7 @@ model_conf:
     length_normalized_loss: false
     predictor_weight: 1.0
     sampling_ratio: 0.4
+    use_1st_decoder_loss: true
 
 # optimization related
 accum_grad: 1
