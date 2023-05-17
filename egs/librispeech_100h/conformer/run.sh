@@ -53,8 +53,8 @@ test_sets="test_clean test_other dev_clean dev_other"
 asr_config=conf/train_asr_conformer.yaml
 model_dir="baseline_$(basename "${asr_config}" .yaml)_${lang}_${token_type}_${tag}"
 
-inference_config=conf/decode_asr_transformer.yaml
-#inference_config=conf/decode_asr_transformer_beam60_ctc0.3.yaml
+inference_config=conf/decode_asr_transformer_ctc0.3_beam1.yaml
+#inference_config=conf/decode_asr_transformer_ctc0.3_beam20.yaml
 inference_asr_model=valid.acc.ave_10best.pb
 
 # you can set gpu num for decoding here
