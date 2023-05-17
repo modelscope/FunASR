@@ -280,6 +280,16 @@ class ASRTask(AbsTask):
         postencoder_choices,
         # --decoder and --decoder_conf
         decoder_choices,
+        # --predictor and --predictor_conf
+        predictor_choices,
+        # --encoder2 and --encoder2_conf
+        encoder_choices2,
+        # --decoder2 and --decoder2_conf
+        decoder_choices2,
+        # --predictor2 and --predictor2_conf
+        predictor_choices2,
+        # --stride_conv and --stride_conv_conf
+        stride_conv_choices,
     ]
 
     # If you need to modify train() or eval() procedures, change Trainer class here
@@ -899,27 +909,27 @@ class ASRTaskParaformer(ASRTask):
     # If you need more than one optimizers, change this value
     num_optimizers: int = 1
 
-    # Add variable objects configurations
-    class_choices_list = [
-        # --frontend and --frontend_conf
-        frontend_choices,
-        # --specaug and --specaug_conf
-        specaug_choices,
-        # --normalize and --normalize_conf
-        normalize_choices,
-        # --model and --model_conf
-        model_choices,
-        # --preencoder and --preencoder_conf
-        preencoder_choices,
-        # --encoder and --encoder_conf
-        encoder_choices,
-        # --postencoder and --postencoder_conf
-        postencoder_choices,
-        # --decoder and --decoder_conf
-        decoder_choices,
-        # --predictor and --predictor_conf
-        predictor_choices,
-    ]
+    # # Add variable objects configurations
+    # class_choices_list = [
+    #     # --frontend and --frontend_conf
+    #     frontend_choices,
+    #     # --specaug and --specaug_conf
+    #     specaug_choices,
+    #     # --normalize and --normalize_conf
+    #     normalize_choices,
+    #     # --model and --model_conf
+    #     model_choices,
+    #     # --preencoder and --preencoder_conf
+    #     preencoder_choices,
+    #     # --encoder and --encoder_conf
+    #     encoder_choices,
+    #     # --postencoder and --postencoder_conf
+    #     postencoder_choices,
+    #     # --decoder and --decoder_conf
+    #     decoder_choices,
+    #     # --predictor and --predictor_conf
+    #     predictor_choices,
+    # ]
 
     # If you need to modify train() or eval() procedures, change Trainer class here
     trainer = Trainer
