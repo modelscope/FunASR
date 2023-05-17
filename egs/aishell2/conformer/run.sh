@@ -103,8 +103,6 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     utils/text2token.py -s 1 -n 1 --space "" ${feats_dir}/data/${train_set}/text | cut -f 2- -d" " | tr " " "\n" \
         | sort | uniq | grep -a -v -e '^\s*$' | awk '{print $0}' >> ${token_list}
     echo "<unk>" >> ${token_list}
-    mkdir -p ${feats_dir}/asr_stats_fbank_zh_char/${train_set}
-    mkdir -p ${feats_dir}/asr_stats_fbank_zh_char/${valid_set}
  fi
 
 # LM Training Stage
@@ -139,6 +137,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
                 --data_dir ${feats_dir}/data \
                 --train_set ${train_set} \
                 --valid_set ${valid_set} \
+                --data_file_names "wav.scp,text" \
                 --cmvn_file ${feats_dir}/data/${train_set}/cmvn/cmvn.mvn \
                 --speed_perturb ${speed_perturb} \
                 --dataset_type $dataset_type \

@@ -139,6 +139,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
                 --data_dir ${feats_dir}/data \
                 --train_set ${train_set} \
                 --valid_set ${valid_set} \
+                --data_file_names "wav.scp,text" \
                 --init_param ${init_param} \
                 --cmvn_file ${feats_dir}/data/${train_set}/cmvn/cmvn.mvn \
                 --resume true \

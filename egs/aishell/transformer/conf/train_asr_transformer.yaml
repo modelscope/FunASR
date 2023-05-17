@@ -73,6 +73,8 @@ scheduler_conf:
     warmup_steps: 25000
 
 dataset_conf:
+    data_names: speech,text
+    data_types: sound,text
     shuffle: True
     shuffle_conf:
         shuffle_size: 2048

@@ -335,6 +335,12 @@ def get_parser():
         help="dev dataset",
     )
     parser.add_argument(
+        "--data_file_names",
+        type=str,
+        default="wav.scp,text",
+        help="input data files",
+    )
+    parser.add_argument(
         "--speed_perturb",
         type=float,
         nargs="+",

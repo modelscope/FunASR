@@ -93,6 +93,8 @@ predictor_conf:
     tail_threshold: 0.45
 
 dataset_conf:
+    data_names: speech,text
+    data_types: sound,text
     shuffle: True
     shuffle_conf:
         shuffle_size: 2048
