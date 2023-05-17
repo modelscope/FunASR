@@ -42,8 +42,8 @@ if __name__=="__main__":
             global_spk_list_tmp = global_spk_list[: ]
             for spk in meeting_map_tmp[meeting]:
                 global_spk_list_tmp.remove(spk)
-                padding_spk = random.sample(global_spk_list_tmp, 4 - num)
-                meeting_map_tmp[meeting] = meeting_map_tmp[meeting] + padding_spk
+            padding_spk = random.sample(global_spk_list_tmp, 4 - num)
+            meeting_map_tmp[meeting] = meeting_map_tmp[meeting] + padding_spk
     
     meeting_map = {}
     os.system('mkdir -p ' + path + '/oracle_profile_padding')
