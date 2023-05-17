@@ -762,23 +762,6 @@ class Speech2TextParaformerOnline:
                 feats_len = speech_lengths
 
             if feats.shape[1] != 0:
-                if cache_en["is_final"]:
-                    if feats.shape[1] + cache_en["chunk_size"][2] < cache_en["chunk_size"][1]:
-                        cache_en["last_chunk"] = True
-                    else:
-                        # first chunk
-                        feats_chunk1 = feats[:, :cache_en["chunk_size"][1], :]
-                        feats_len = torch.tensor([feats_chunk1.shape[1]])
-                        results_chunk1 = self.infer(feats_chunk1, feats_len, cache)
-
-                        # last chunk
-                        cache_en["last_chunk"] = True
-                        feats_chunk2 = feats[:, -(feats.shape[1] + cache_en["chunk_size"][2] - cache_en["chunk_size"][1]):, :]
-                        feats_len = torch.tensor([feats_chunk2.shape[1]])
-                        results_chunk2 = self.infer(feats_chunk2, feats_len, cache)
-
-                        return [" ".join(results_chunk1 + results_chunk2)]
-
                 results = self.infer(feats, feats_len, cache)
 
         return results
