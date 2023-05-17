@@ -191,6 +191,6 @@ int main(int argc, char *argv[])
     LOG(INFO) << "total_rtf " << (double)total_time/ (total_length*1000000);
     LOG(INFO) << "speedup " << 1.0/((double)total_time/ (total_length*1000000));
 
-    FunASRUninit(asr_handle);
+    FunOfflineUninit(asr_handle);
     return 0;
 }
