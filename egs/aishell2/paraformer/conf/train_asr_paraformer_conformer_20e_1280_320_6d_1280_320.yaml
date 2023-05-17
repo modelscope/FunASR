@@ -94,6 +94,7 @@ predictor_conf:
   r_order: 1
 
 dataset_conf:
+    data_names: speech,text
     data_types: sound,text
     shuffle: True
     shuffle_conf:
