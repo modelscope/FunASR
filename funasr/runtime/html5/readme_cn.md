@@ -28,7 +28,7 @@ Recorder
 ```shell
 usage: h5Server.py [-h] [--host HOST] [--port PORT] [--certfile CERTFILE]
                    [--keyfile KEYFILE]
-python h5Server.py --port 1337
+python h5Server.py --port 1337 --keyfile server.key
 ```
 ## 2.启动ws or wss asr online srv
 [具体请看online asr](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket)

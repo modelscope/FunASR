@@ -106,8 +106,10 @@ async def ws_serve(websocket, path):
 async def async_asr_online(websocket,audio_in):
 	if len(audio_in) >= 0:
 		audio_in = load_bytes(audio_in)
+		# print(websocket.param_dict_asr_online.get("is_final", False))
 		rec_result = inference_pipeline_asr_online(audio_in=audio_in,
 		                                           param_dict=websocket.param_dict_asr_online)
+		# print(rec_result)
 		if websocket.param_dict_asr_online.get("is_final", False):
 			websocket.param_dict_asr_online["cache"] = dict()
 		if "text" in rec_result:
