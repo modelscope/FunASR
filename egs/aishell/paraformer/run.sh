@@ -28,7 +28,7 @@ feats_dim=80
 nj=64
 
 # data
-raw_data=
+raw_data=../raw_data
 data_url=www.openslr.org/resources/33
 
 # exp tag
@@ -103,13 +103,13 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     echo "<unk>" >> ${token_list}
 fi
 
-# ASR Training Stage
+# LM Training Stage
 world_size=$gpu_num  # run on one machine
 if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
     echo "stage 3: LM Training"
 fi
 
-# Training Stage
+# ASR Training Stage
 world_size=$gpu_num  # run on one machine
 if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
     echo "stage 4: ASR Training"

@@ -1,9 +1,19 @@
 # Speech Recognition
-Here we take "Training a paraformer model from scratch using the AISHELL-1 dataset" as an example to introduce how to use FunASR. According to this example, users can similarly employ other datasets (such as AISHELL-2 dataset, etc.) to train other models (such as conformer, transformer, etc.).
+In FunASR, we provide several ASR benchmarks, such as AISHLL, Librispeech, WenetSpeech, while different model architectures are supported, including conformer, paraformer, uniasr.
 
 ## Quick Start
+After downloaded and installed FunASR, users can use our provided recipes to easily reproduce the relevant experimental results. Here we take "paraformer on AISHELL-1" as an example. 
 
-
+First, move to the corresponding dictionary of the AISHELL-1 paraformer example.
+```sh
+cd egs/aishell/paraformer
+```
+Then you can directly start the recipe as follows:
+```sh
+conda activate funasr
+. ./run.sh
+```
+The training log files are saved in `exp/*_train_*/log/train.log.*` and the inference results are saved in `exp/*_train_*/decode_asr_*`.
 
 ## Introduction
 We provide a recipe `egs/aishell/paraformer/run.sh` for training a paraformer model on AISHELL-1 dataset. This recipe consists of five stages, supporting training on multiple GPUs and decoding by CPU or GPU. Before introducing each stage in detail, we first explain several parameters which should be set by users.
@@ -58,7 +68,9 @@ This stage processes the dictionary, which is used as a mapping between label ch
 * `</s>`: indicates the end-of-sentence token
 * `<unk>`: indicates the out-of-vocabulary token
 
-### Stage 3: Training
+### Stage 3: LM Training
+
+### Stage 4: ASR Training
 This stage achieves the training of the specified model. To start training, users should manually set `exp_dir`, `CUDA_VISIBLE_DEVICES` and `gpu_num`, which have already been explained above. By default, the best `$keep_nbest_models` checkpoints on validation dataset will be averaged to generate a better model and adopted for decoding.
 
 * DDP Training
@@ -84,7 +96,7 @@ Users can use tensorboard to observe the loss, learning rate, etc. Please run th
 tensorboard --logdir ${exp_dir}/exp/${model_dir}/tensorboard/train
 ```
 
-### Stage 4: Decoding
+### Stage 5: Decoding
 This stage generates the recognition results and calculates the `CER` to verify the performance of the trained model. 
 
 * Mode Selection
@@ -112,3 +124,47 @@ res:    构 建 良 好 的 旅 游 市 场 环 境
 ```
 
 ## Change settings
+Here we explain how to perform common custom settings, which can help users to modify scripts according to their own needs.
+
+* Training with specified GPUs
+
+For example, if users want to use 2 GPUs with id `2` and `3, users can run the following command:
+```sh
+. ./run.sh --CUDA_VISIBLE_DEVICES "2,3" --gpu_num 2 
+```
+
+* Start from/Stop at a specified stage
+
+The recipe includes several stages. Users can start form or stop at any stage. For example, the following command achieves starting from the third stage and stopping at the fifth stage:
+```sh
+. ./run.sh --stage 3 --stop_stage 5
+```
+
+* Change the configuration of the model
+
+The configuration of the model is set in the config file `conf/train_*.yaml`. Specifically, the default encoder configuration of paraformer is as follows:
+```
+encoder: conformer
+encoder_conf:
+    output_size: 256    # dimension of attention
+    attention_heads: 4  # number of heads in multi-head attention
+    linear_units: 2048  # the number of units of position-wise feed forward
+    num_blocks: 12      # the number of encoder blocks
+    dropout_rate: 0.1
+    positional_dropout_rate: 0.1
+    attention_dropout_rate: 0.0
+    input_layer: conv2d  # encoder input layer architecture type
+    normalize_before: true
+    pos_enc_layer_type: rel_pos
+    selfattention_layer_type: rel_selfattn
+    activation_type: swish
+    macaron_style: true
+    use_cnn_module: true
+    cnn_module_kernel: 15
+
+```
+Users can change the encoder configuration by modify these values. For example, if users want to use an encoder with 16 conformer blocks and each block has 8 attention heads, users just need to change `num_blocks` from 12 to 16 and change `attention_heads` from 4 to 8. Besides, the batch_size, learning rate and other training hyper-parameters are also set in this config file. To change these hyper-parameters, users just need to directly change the corresponding values in this file. For example, the default learning rate is `0.0005`. If users want to change the learning rate to 0.0002, set the value of lr as `lr: 0.0002`.
+
+* Decoding by CPU or GPU
+
+We support CPU and GPU decoding. For CPU decoding, 
