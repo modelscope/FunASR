@@ -39,7 +39,7 @@ void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list,
     // warm up
     for (size_t i = 0; i < 1; i++)
     {
-        FUNASR_RESULT result=FunASRInfer(asr_handle, wav_list[0].c_str(), RASR_NONE, NULL, 16000);
+        FUNASR_RESULT result=FunOfflineInfer(asr_handle, wav_list[0].c_str(), RASR_NONE, NULL, 16000);
     }
 
     while (true) {
@@ -50,7 +50,7 @@ void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list,
         }
 
         gettimeofday(&start, NULL);
-        FUNASR_RESULT result=FunASRInfer(asr_handle, wav_list[i].c_str(), RASR_NONE, NULL, 16000);
+        FUNASR_RESULT result=FunOfflineInfer(asr_handle, wav_list[i].c_str(), RASR_NONE, NULL, 16000);
 
         gettimeofday(&end, NULL);
         seconds = (end.tv_sec - start.tv_sec);
@@ -102,12 +102,20 @@ int main(int argc, char *argv[])
     TCLAP::CmdLine cmd("funasr-onnx-offline-rtf", ' ', "1.0");
     TCLAP::ValueArg<std::string>    model_dir("", MODEL_DIR, "the model path, which contains model.onnx, config.yaml, am.mvn", true, "", "string");
     TCLAP::ValueArg<std::string>    quantize("", QUANTIZE, "false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir", false, "false", "string");
+    TCLAP::ValueArg<std::string>    vad_dir("", VAD_DIR, "the vad model path, which contains model.onnx, vad.yaml, vad.mvn", false, "", "string");
+    TCLAP::ValueArg<std::string>    vad_quant("", VAD_QUANT, "false (Default), load the model of model.onnx in vad_dir. If set true, load the model of model_quant.onnx in vad_dir", false, "false", "string");
+    TCLAP::ValueArg<std::string>    punc_dir("", PUNC_DIR, "the punc model path, which contains model.onnx, punc.yaml", false, "", "string");
+    TCLAP::ValueArg<std::string>    punc_quant("", PUNC_QUANT, "false (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "false", "string");
 
     TCLAP::ValueArg<std::string> wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", true, "", "string");
     TCLAP::ValueArg<std::int32_t> thread_num("", THREAD_NUM, "multi-thread num for rtf", true, 0, "int32_t");
 
     cmd.add(model_dir);
     cmd.add(quantize);
+    cmd.add(vad_dir);
+    cmd.add(vad_quant);
+    cmd.add(punc_dir);
+    cmd.add(punc_quant);
     cmd.add(wav_path);
     cmd.add(thread_num);
     cmd.parse(argc, argv);
@@ -115,11 +123,15 @@ int main(int argc, char *argv[])
     std::map<std::string, std::string> model_path;
     GetValue(model_dir, MODEL_DIR, model_path);
     GetValue(quantize, QUANTIZE, model_path);
+    GetValue(vad_dir, VAD_DIR, model_path);
+    GetValue(vad_quant, VAD_QUANT, model_path);
+    GetValue(punc_dir, PUNC_DIR, model_path);
+    GetValue(punc_quant, PUNC_QUANT, model_path);
     GetValue(wav_path, WAV_PATH, model_path);
 
     struct timeval start, end;
     gettimeofday(&start, NULL);
-    FUNASR_HANDLE asr_handle=FunASRInit(model_path, 1);
+    FUNASR_HANDLE asr_handle=FunOfflineInit(model_path, 1);
 
     if (!asr_handle)
     {
@@ -132,7 +144,7 @@ int main(int argc, char *argv[])
     long modle_init_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
     LOG(INFO) << "Model initialization takes " << (double)modle_init_micros / 1000000 << " s";
 
-    // read wav_scp
+    // read wav_path
     vector<string> wav_list;
     string wav_path_ = model_path.at(WAV_PATH);
     if(is_target_file(wav_path_, "wav") || is_target_file(wav_path_, "pcm")){
@@ -179,6 +191,6 @@ int main(int argc, char *argv[])
     LOG(INFO) << "total_rtf " << (double)total_time/ (total_length*1000000);
     LOG(INFO) << "speedup " << 1.0/((double)total_time/ (total_length*1000000));
 
-    FunASRUninit(asr_handle);
+    FunOfflineUninit(asr_handle);
     return 0;
 }
