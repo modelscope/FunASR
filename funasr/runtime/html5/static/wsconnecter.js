@@ -5,7 +5,7 @@
 /* 2021-2023 by zhaoming,mali aihealthx.com */
 
 function WebSocketConnectMethod( config ) { //定义socket连接方法类
-	var Uri = "wss://111.205.137.58:5821/wss/" //设置wss asr online接口地址 如 wss://X.X.X.X:port/wss/
+    var Uri = "wss://30.220.136.139:5921/"  //	var Uri = "wss://30.221.177.46:5921/" //设置wss asr online接口地址 如 wss://X.X.X.X:port/wss/
 	var speechSokt;
 	var connKeeperID;
 	

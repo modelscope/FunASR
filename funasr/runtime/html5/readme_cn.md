@@ -103,7 +103,9 @@ http {
     }
   }
 ```
-
+### 修改wsconnecter.js里asr接口地址
+wsconnecter.js里配置online asr服务地址路径，这里配置的是wss端口
+var Uri = "wss://xxx:xxx/wss/" 
 ## Acknowledge
 1. This project is maintained by [FunASR community](https://github.com/alibaba-damo-academy/FunASR).
 2. We acknowledge [AiHealthx](http://www.aihealthx.com/) for contributing the html5 demo.
