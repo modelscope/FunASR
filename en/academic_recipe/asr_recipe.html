@@ -48,12 +48,17 @@
 <p class="caption"><span class="caption-text">Academic Egs</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Speech Recognition</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#overall-introduction">Overall Introduction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#stage-0-data-preparation">Stage 0: Data preparation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#stage-1-feature-generation">Stage 1: Feature Generation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#stage-2-dictionary-preparation">Stage 2: Dictionary Preparation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#stage-3-training">Stage 3: Training</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#stage-4-decoding">Stage 4: Decoding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#quick-start">Quick Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#stage-0-data-preparation">Stage 0: Data preparation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stage-1-feature-and-cmvn-generation">Stage 1: Feature and CMVN Generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stage-2-dictionary-preparation">Stage 2: Dictionary Preparation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stage-3-lm-training">Stage 3: LM Training</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stage-4-asr-training">Stage 4: ASR Training</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stage-5-decoding">Stage 5: Decoding</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#change-settings">Change settings</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="punc_recipe.html">Punctuation Restoration</a></li>
@@ -140,26 +145,39 @@
              
   <div class="section" id="speech-recognition">
 <h1>Speech Recognition<a class="headerlink" href="#speech-recognition" title="Permalink to this headline"></a></h1>
-<p>Here we take “Training a paraformer model from scratch using the AISHELL-1 dataset” as an example to introduce how to use FunASR. According to this example, users can similarly employ other datasets (such as AISHELL-2 dataset, etc.) to train other models (such as conformer, transformer, etc.).</p>
-<div class="section" id="overall-introduction">
-<h2>Overall Introduction<a class="headerlink" href="#overall-introduction" title="Permalink to this headline"></a></h2>
+<p>In FunASR, we provide several ASR benchmarks, such as AISHLL, Librispeech, WenetSpeech, while different model architectures are supported, including conformer, paraformer, uniasr.</p>
+<div class="section" id="quick-start">
+<h2>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline"></a></h2>
+<p>After downloaded and installed FunASR, users can use our provided recipes to easily reproduce the relevant experimental results. Here we take “paraformer on AISHELL-1” as an example.</p>
+<p>First, move to the corresponding dictionary of the AISHELL-1 paraformer example.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> egs/aishell/paraformer
+</pre></div>
+</div>
+<p>Then you can directly start the recipe as follows:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>conda activate funasr
+. ./run.sh
+</pre></div>
+</div>
+<p>The training log files are saved in <code class="docutils literal notranslate"><span class="pre">exp/*_train_*/log/train.log.*</span></code> and the inference results are saved in <code class="docutils literal notranslate"><span class="pre">exp/*_train_*/decode_asr_*</span></code>.</p>
+</div>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline"></a></h2>
 <p>We provide a recipe <code class="docutils literal notranslate"><span class="pre">egs/aishell/paraformer/run.sh</span></code> for training a paraformer model on AISHELL-1 dataset. This recipe consists of five stages, supporting training on multiple GPUs and decoding by CPU or GPU. Before introducing each stage in detail, we first explain several parameters which should be set by users.</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">CUDA_VISIBLE_DEVICES</span></code>: visible gpu list</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">gpu_num</span></code>: the number of GPUs used for training</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">gpu_inference</span></code>: whether to use GPUs for decoding</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">njob</span></code>: for CPU decoding, indicating the total number of CPU jobs; for GPU decoding, indicating the number of jobs on each GPU</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">data_aishell</span></code>: the raw path of AISHELL-1 dataset</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">raw_data</span></code>: the raw path of AISHELL-1 dataset</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">feats_dir</span></code>: the path for saving processed data</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">nj</span></code>: the number of jobs for data preparation</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">speed_perturb</span></code>: the range of speech perturbed</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">exp_dir</span></code>: the path for saving experimental results</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">tag</span></code>: the suffix of experimental result directory</p></li>
 </ul>
-</div>
 <div class="section" id="stage-0-data-preparation">
-<h2>Stage 0: Data preparation<a class="headerlink" href="#stage-0-data-preparation" title="Permalink to this headline"></a></h2>
-<p>This stage processes raw AISHELL-1 dataset <code class="docutils literal notranslate"><span class="pre">$data_aishell</span></code> and generates the corresponding <code class="docutils literal notranslate"><span class="pre">wav.scp</span></code> and <code class="docutils literal notranslate"><span class="pre">text</span></code> in <code class="docutils literal notranslate"><span class="pre">$feats_dir/data/xxx</span></code>. <code class="docutils literal notranslate"><span class="pre">xxx</span></code> means <code class="docutils literal notranslate"><span class="pre">train/dev/test</span></code>. Here we assume users have already downloaded AISHELL-1 dataset. If not, users can download data <a class="reference external" href="https://www.openslr.org/33/">here</a> and set the path for <code class="docutils literal notranslate"><span class="pre">$data_aishell</span></code>. The examples of <code class="docutils literal notranslate"><span class="pre">wav.scp</span></code> and <code class="docutils literal notranslate"><span class="pre">text</span></code> are as follows:</p>
+<h3>Stage 0: Data preparation<a class="headerlink" href="#stage-0-data-preparation" title="Permalink to this headline"></a></h3>
+<p>This stage processes raw AISHELL-1 dataset <code class="docutils literal notranslate"><span class="pre">$raw_data</span></code> and generates the corresponding <code class="docutils literal notranslate"><span class="pre">wav.scp</span></code> and <code class="docutils literal notranslate"><span class="pre">text</span></code> in <code class="docutils literal notranslate"><span class="pre">$feats_dir/data/xxx</span></code>. <code class="docutils literal notranslate"><span class="pre">xxx</span></code> means <code class="docutils literal notranslate"><span class="pre">train/dev/test</span></code>. Here we assume users have already downloaded AISHELL-1 dataset. If not, users can download data <a class="reference external" href="https://www.openslr.org/33/">here</a> and set the path for <code class="docutils literal notranslate"><span class="pre">$raw_data</span></code>. The examples of <code class="docutils literal notranslate"><span class="pre">wav.scp</span></code> and <code class="docutils literal notranslate"><span class="pre">text</span></code> are as follows:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">wav.scp</span></code></p></li>
 </ul>
@@ -180,38 +198,12 @@
 </div>
 <p>These two files both have two columns, while the first column is wav ids and the second column is the corresponding wav paths/label tokens.</p>
 </div>
-<div class="section" id="stage-1-feature-generation">
-<h2>Stage 1: Feature Generation<a class="headerlink" href="#stage-1-feature-generation" title="Permalink to this headline"></a></h2>
-<p>This stage extracts FBank features from <code class="docutils literal notranslate"><span class="pre">wav.scp</span></code> and apply speed perturbation as data augmentation according to <code class="docutils literal notranslate"><span class="pre">speed_perturb</span></code>. Users can set <code class="docutils literal notranslate"><span class="pre">nj</span></code> to control the number of jobs for feature generation. The generated features are saved in <code class="docutils literal notranslate"><span class="pre">$feats_dir/dump/xxx/ark</span></code> and the corresponding <code class="docutils literal notranslate"><span class="pre">feats.scp</span></code> files are saved as <code class="docutils literal notranslate"><span class="pre">$feats_dir/dump/xxx/feats.scp</span></code>. An example of <code class="docutils literal notranslate"><span class="pre">feats.scp</span></code> can be seen as follows:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">feats.scp</span></code></p></li>
-</ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
-<span class="n">BAC009S0002W0122_sp0</span><span class="o">.</span><span class="mi">9</span> <span class="o">/</span><span class="n">nfs</span><span class="o">/</span><span class="n">funasr_data</span><span class="o">/</span><span class="n">aishell</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">dump</span><span class="o">/</span><span class="n">fbank</span><span class="o">/</span><span class="n">train</span><span class="o">/</span><span class="n">ark</span><span class="o">/</span><span class="n">feats</span><span class="o">.</span><span class="mf">16.</span><span class="n">ark</span><span class="p">:</span><span class="mi">592751055</span>
-<span class="o">...</span>
-</pre></div>
-</div>
-<p>Note that samples in this file have already been shuffled randomly. This file contains two columns. The first column is wav ids while the second column is kaldi-ark feature paths. Besides, <code class="docutils literal notranslate"><span class="pre">speech_shape</span></code> and <code class="docutils literal notranslate"><span class="pre">text_shape</span></code> are also generated in this stage, denoting the speech feature shape and text length of each sample. The examples are shown as follows:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">speech_shape</span></code></p></li>
-</ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
-<span class="n">BAC009S0002W0122_sp0</span><span class="o">.</span><span class="mi">9</span> <span class="mi">665</span><span class="p">,</span><span class="mi">80</span>
-<span class="o">...</span>
-</pre></div>
-</div>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">text_shape</span></code></p></li>
-</ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
-<span class="n">BAC009S0002W0122_sp0</span><span class="o">.</span><span class="mi">9</span> <span class="mi">15</span>
-<span class="o">...</span>
-</pre></div>
-</div>
-<p>These two files have two columns. The first column is wav ids and the second column is the corresponding speech feature shape and text length.</p>
+<div class="section" id="stage-1-feature-and-cmvn-generation">
+<h3>Stage 1: Feature and CMVN Generation<a class="headerlink" href="#stage-1-feature-and-cmvn-generation" title="Permalink to this headline"></a></h3>
+<p>This stage computes CMVN based on <code class="docutils literal notranslate"><span class="pre">train</span></code> dataset, which is used in the following stages. Users can set <code class="docutils literal notranslate"><span class="pre">nj</span></code> to control the number of jobs for computing CMVN. The generated CMVN file is saved as <code class="docutils literal notranslate"><span class="pre">$feats_dir/data/train/cmvn/cmvn.mvn</span></code>.</p>
 </div>
 <div class="section" id="stage-2-dictionary-preparation">
-<h2>Stage 2: Dictionary Preparation<a class="headerlink" href="#stage-2-dictionary-preparation" title="Permalink to this headline"></a></h2>
+<h3>Stage 2: Dictionary Preparation<a class="headerlink" href="#stage-2-dictionary-preparation" title="Permalink to this headline"></a></h3>
 <p>This stage processes the dictionary, which is used as a mapping between label characters and integer indices during ASR training. The processed dictionary file is saved as <code class="docutils literal notranslate"><span class="pre">$feats_dir/data/$lang_toekn_list/$token_type/tokens.txt</span></code>. An example of <code class="docutils literal notranslate"><span class="pre">tokens.txt</span></code> is as follows:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">tokens.txt</span></code></p></li>
@@ -234,8 +226,11 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">&lt;unk&gt;</span></code>: indicates the out-of-vocabulary token</p></li>
 </ul>
 </div>
-<div class="section" id="stage-3-training">
-<h2>Stage 3: Training<a class="headerlink" href="#stage-3-training" title="Permalink to this headline"></a></h2>
+<div class="section" id="stage-3-lm-training">
+<h3>Stage 3: LM Training<a class="headerlink" href="#stage-3-lm-training" title="Permalink to this headline"></a></h3>
+</div>
+<div class="section" id="stage-4-asr-training">
+<h3>Stage 4: ASR Training<a class="headerlink" href="#stage-4-asr-training" title="Permalink to this headline"></a></h3>
 <p>This stage achieves the training of the specified model. To start training, users should manually set <code class="docutils literal notranslate"><span class="pre">exp_dir</span></code>, <code class="docutils literal notranslate"><span class="pre">CUDA_VISIBLE_DEVICES</span></code> and <code class="docutils literal notranslate"><span class="pre">gpu_num</span></code>, which have already been explained above. By default, the best <code class="docutils literal notranslate"><span class="pre">$keep_nbest_models</span></code> checkpoints on validation dataset will be averaged to generate a better model and adopted for decoding.</p>
 <ul class="simple">
 <li><p>DDP Training</p></li>
@@ -261,8 +256,8 @@
 </pre></div>
 </div>
 </div>
-<div class="section" id="stage-4-decoding">
-<h2>Stage 4: Decoding<a class="headerlink" href="#stage-4-decoding" title="Permalink to this headline"></a></h2>
+<div class="section" id="stage-5-decoding">
+<h3>Stage 5: Decoding<a class="headerlink" href="#stage-5-decoding" title="Permalink to this headline"></a></h3>
 <p>This stage generates the recognition results and calculates the <code class="docutils literal notranslate"><span class="pre">CER</span></code> to verify the performance of the trained model.</p>
 <ul class="simple">
 <li><p>Mode Selection</p></li>
@@ -279,7 +274,7 @@
 <ul class="simple">
 <li><p>Performance</p></li>
 </ul>
-<p>We adopt <code class="docutils literal notranslate"><span class="pre">CER</span></code> to verify the performance. The results are in <code class="docutils literal notranslate"><span class="pre">$exp_dir/exp/$model_dir/$decoding_yaml_name/$average_model_name/$dset</span></code>, namely <code class="docutils literal notranslate"><span class="pre">text.cer</span></code> and <code class="docutils literal notranslate"><span class="pre">text.cer.txt</span></code>. <code class="docutils literal notranslate"><span class="pre">text.cer</span></code> saves the comparison between the recognized text and the reference text while <code class="docutils literal notranslate"><span class="pre">text.cer.txt</span></code> saves the final <code class="docutils literal notranslate"><span class="pre">CER</span></code> result. The following is an example of <code class="docutils literal notranslate"><span class="pre">text.cer</span></code>:</p>
+<p>We adopt <code class="docutils literal notranslate"><span class="pre">CER</span></code> to verify the performance. The results are in <code class="docutils literal notranslate"><span class="pre">$exp_dir/exp/$model_dir/$decoding_yaml_name/$average_model_name/$dset</span></code>, namely <code class="docutils literal notranslate"><span class="pre">text.cer</span></code> and <code class="docutils literal notranslate"><span class="pre">text.cer.txt</span></code>. <code class="docutils literal notranslate"><span class="pre">text.cer</span></code> saves the comparison between the recognized text and the reference text while <code class="docutils literal notranslate"><span class="pre">text.cer.txt</span></code> saves the final <code class="docutils literal notranslate"><span class="pre">CER</span></code> results. The following is an example of <code class="docutils literal notranslate"><span class="pre">text.cer</span></code>:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">text.cer</span></code></p></li>
 </ul>
@@ -290,6 +285,53 @@
 <span class="o">...</span>
 </pre></div>
 </div>
+</div>
+</div>
+<div class="section" id="change-settings">
+<h2>Change settings<a class="headerlink" href="#change-settings" title="Permalink to this headline"></a></h2>
+<p>Here we explain how to perform common custom settings, which can help users to modify scripts according to their own needs.</p>
+<ul class="simple">
+<li><p>Training with specified GPUs</p></li>
+</ul>
+<p>For example, if users want to use 2 GPUs with id <code class="docutils literal notranslate"><span class="pre">2</span></code> and `3, users can run the following command:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>. ./run.sh --CUDA_VISIBLE_DEVICES <span class="s2">&quot;2,3&quot;</span> --gpu_num <span class="m">2</span> 
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Start from/Stop at a specified stage</p></li>
+</ul>
+<p>The recipe includes several stages. Users can start form or stop at any stage. For example, the following command achieves starting from the third stage and stopping at the fifth stage:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>. ./run.sh --stage <span class="m">3</span> --stop_stage <span class="m">5</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Change the configuration of the model</p></li>
+</ul>
+<p>The configuration of the model is set in the config file <code class="docutils literal notranslate"><span class="pre">conf/train_*.yaml</span></code>. Specifically, the default encoder configuration of paraformer is as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">encoder</span><span class="p">:</span> <span class="n">conformer</span>
+<span class="n">encoder_conf</span><span class="p">:</span>
+    <span class="n">output_size</span><span class="p">:</span> <span class="mi">256</span>    <span class="c1"># dimension of attention</span>
+    <span class="n">attention_heads</span><span class="p">:</span> <span class="mi">4</span>  <span class="c1"># number of heads in multi-head attention</span>
+    <span class="n">linear_units</span><span class="p">:</span> <span class="mi">2048</span>  <span class="c1"># the number of units of position-wise feed forward</span>
+    <span class="n">num_blocks</span><span class="p">:</span> <span class="mi">12</span>      <span class="c1"># the number of encoder blocks</span>
+    <span class="n">dropout_rate</span><span class="p">:</span> <span class="mf">0.1</span>
+    <span class="n">positional_dropout_rate</span><span class="p">:</span> <span class="mf">0.1</span>
+    <span class="n">attention_dropout_rate</span><span class="p">:</span> <span class="mf">0.0</span>
+    <span class="n">input_layer</span><span class="p">:</span> <span class="n">conv2d</span>  <span class="c1"># encoder input layer architecture type</span>
+    <span class="n">normalize_before</span><span class="p">:</span> <span class="n">true</span>
+    <span class="n">pos_enc_layer_type</span><span class="p">:</span> <span class="n">rel_pos</span>
+    <span class="n">selfattention_layer_type</span><span class="p">:</span> <span class="n">rel_selfattn</span>
+    <span class="n">activation_type</span><span class="p">:</span> <span class="n">swish</span>
+    <span class="n">macaron_style</span><span class="p">:</span> <span class="n">true</span>
+    <span class="n">use_cnn_module</span><span class="p">:</span> <span class="n">true</span>
+    <span class="n">cnn_module_kernel</span><span class="p">:</span> <span class="mi">15</span>
+</pre></div>
+</div>
+<p>Users can change the encoder configuration by modify these values. For example, if users want to use an encoder with 16 conformer blocks and each block has 8 attention heads, users just need to change <code class="docutils literal notranslate"><span class="pre">num_blocks</span></code> from 12 to 16 and change <code class="docutils literal notranslate"><span class="pre">attention_heads</span></code> from 4 to 8. Besides, the batch_size, learning rate and other training hyper-parameters are also set in this config file. To change these hyper-parameters, users just need to directly change the corresponding values in this file. For example, the default learning rate is <code class="docutils literal notranslate"><span class="pre">0.0005</span></code>. If users want to change the learning rate to 0.0002, set the value of lr as <code class="docutils literal notranslate"><span class="pre">lr:</span> <span class="pre">0.0002</span></code>.</p>
+<ul class="simple">
+<li><p>Decoding by CPU or GPU</p></li>
+</ul>
+<p>We support CPU and GPU decoding. For CPU decoding, set <code class="docutils literal notranslate"><span class="pre">gpu_inference=false</span></code> and <code class="docutils literal notranslate"><span class="pre">njob</span></code> to specific the total number of CPU jobs. For GPU decoding, first set <code class="docutils literal notranslate"><span class="pre">gpu_inference=true</span></code>. Then set <code class="docutils literal notranslate"><span class="pre">gpuid_list</span></code> to specific which GPUs for decoding and <code class="docutils literal notranslate"><span class="pre">njob</span></code> to specific the number of decoding jobs on each GPU.</p>
 </div>
 </div>
 
