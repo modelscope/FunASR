@@ -749,10 +749,13 @@ class Speech2TextParaformerOnline:
             feats = cache_en["feats"]
             feats_len = torch.tensor([feats.shape[1]])
             self.asr_model.frontend = None
+            self.frontend.cache_reset()
             results = self.infer(feats, feats_len, cache)
             return results
         else:
             if self.frontend is not None:
+                if cache_en["start_idx"] == 0:
+                    self.frontend.cache_reset()
                 feats, feats_len = self.frontend.forward(speech, speech_lengths, cache_en["is_final"])
                 feats = to_device(feats, device=self.device)
                 feats_len = feats_len.int()
