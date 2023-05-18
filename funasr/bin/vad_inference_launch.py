@@ -240,9 +240,9 @@ def inference_vad_online(
 
         vad_results = []
         if param_dict is None:
-                param_dict = dict()
-                param_dict['in_cache'] = dict()
-                param_dict['is_final'] = True
+            param_dict = dict()
+            param_dict['in_cache'] = dict()
+            param_dict['is_final'] = True
         batch_in_cache = param_dict.get('in_cache', dict())
         is_final = param_dict.get('is_final', False)
         max_end_sil = param_dict.get('max_end_sil', 800)
