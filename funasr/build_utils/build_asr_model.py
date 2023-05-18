@@ -19,12 +19,15 @@ from funasr.models.decoder.transformer_decoder import (
 )
 from funasr.models.decoder.transformer_decoder import ParaformerDecoderSAN
 from funasr.models.decoder.transformer_decoder import TransformerDecoder
+from funasr.models.decoder.rnnt_decoder import RNNTDecoder
+from funasr.models.joint_net.joint_network import JointNetwork
 from funasr.models.e2e_asr import ASRModel
 from funasr.models.e2e_asr_mfcca import MFCCA
 from funasr.models.e2e_asr_paraformer import Paraformer, ParaformerBert, BiCifParaformer, ContextualParaformer
 from funasr.models.e2e_tp import TimestampPredictor
 from funasr.models.e2e_uni_asr import UniASR
-from funasr.models.encoder.conformer_encoder import ConformerEncoder
+from funasr.models.e2e_asr_transducer import TransducerModel, UnifiedTransducerModel
+from funasr.models.encoder.conformer_encoder import ConformerEncoder, ConformerChunkEncoder
 from funasr.models.encoder.data2vec_encoder import Data2VecEncoder
 from funasr.models.encoder.mfcca_encoder import MFCCAEncoder
 from funasr.models.encoder.rnn_encoder import RNNEncoder
@@ -84,6 +87,8 @@ model_choices = ClassChoices(
         contextual_paraformer=ContextualParaformer,
         mfcca=MFCCA,
         timestamp_prediction=TimestampPredictor,
+        rnnt=TransducerModel,
+        rnnt_unified=UnifiedTransducerModel,
     ),
     default="asr",
 )
@@ -97,6 +102,7 @@ encoder_choices = ClassChoices(
         sanm_chunk_opt=SANMEncoderChunkOpt,
         data2vec_encoder=Data2VecEncoder,
         mfcca_enc=MFCCAEncoder,
+        chunk_conformer=ConformerChunkEncoder,
     ),
     default="rnn",
 )
@@ -171,6 +177,23 @@ stride_conv_choices = ClassChoices(
     default="stride_conv1d",
     optional=True,
 )
+rnnt_decoder_choices = ClassChoices(
+    name="rnnt_decoder",
+    classes=dict(
+        rnnt=RNNTDecoder,
+    ),
+    default="rnnt",
+    optional=True,
+)
+joint_network_choices = ClassChoices(
+    name="joint_network",
+    classes=dict(
+        joint_network=JointNetwork,
+    ),
+    default="joint_network",
+    optional=True,
+)
+
 class_choices_list = [
     # --frontend and --frontend_conf
     frontend_choices,
@@ -194,6 +217,10 @@ class_choices_list = [
     predictor_choices2,
     # --stride_conv and --stride_conv_conf
     stride_conv_choices,
+    # --rnnt_decoder and --rnnt_decoder_conf
+    rnnt_decoder_choices,
+    # --joint_network and --joint_network_conf
+    joint_network_choices,
 ]
 
 
@@ -342,6 +369,50 @@ def build_asr_model(args):
             token_list=token_list,
             **args.model_conf,
         )
+    elif args.model == "rnnt" or args.model == "rnnt_unified":
+        # 5. Decoder
+        encoder_output_size = encoder.output_size()
+
+        rnnt_decoder_class = rnnt_decoder_choices.get_class(args.rnnt_decoder)
+        decoder = rnnt_decoder_class(
+            vocab_size,
+            **args.rnnt_decoder_conf,
+        )
+        decoder_output_size = decoder.output_size
+
+        if getattr(args, "decoder", None) is not None:
+            att_decoder_class = decoder_choices.get_class(args.decoder)
+
+            att_decoder = att_decoder_class(
+                vocab_size=vocab_size,
+                encoder_output_size=encoder_output_size,
+                **args.decoder_conf,
+            )
+        else:
+            att_decoder = None
+        # 6. Joint Network
+        joint_network = JointNetwork(
+            vocab_size,
+            encoder_output_size,
+            decoder_output_size,
+            **args.joint_network_conf,
+        )
+
+        model_class = model_choices.get_class(args.model)
+        # 7. Build model
+        model = model_class(
+            vocab_size=vocab_size,
+            token_list=token_list,
+            frontend=frontend,
+            specaug=specaug,
+            normalize=normalize,
+            encoder=encoder,
+            decoder=decoder,
+            att_decoder=att_decoder,
+            joint_network=joint_network,
+            **args.model_conf,
+        )
+
     else:
         raise NotImplementedError("Not supported model: {}".format(args.model))
 

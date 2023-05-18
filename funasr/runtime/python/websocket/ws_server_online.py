@@ -32,15 +32,29 @@ inference_pipeline_asr_online = pipeline(
 	ncpu=args.ncpu,
 	model_revision='v1.0.4')
 
+# vad
+inference_pipeline_vad = pipeline(
+    task=Tasks.voice_activity_detection,
+    model=args.vad_model,
+    model_revision=None,
+    output_dir=None,
+    batch_size=1,
+    mode='online',
+    ngpu=args.ngpu,
+    ncpu=1,
+)
+
 print("model loaded")
 
 
 
 async def ws_serve(websocket, path):
+	frames = []
 	frames_asr_online = []
 	global websocket_users
 	websocket_users.add(websocket)
 	websocket.param_dict_asr_online = {"cache": dict()}
+	websocket.param_dict_vad = {'in_cache': dict()}
 	websocket.wav_name = "microphone"
 	print("new user connected",flush=True)
 	try:
@@ -53,9 +67,10 @@ async def ws_serve(websocket, path):
 				if "is_speaking" in messagejson:
 					websocket.is_speaking = messagejson["is_speaking"]
 					websocket.param_dict_asr_online["is_final"] = not websocket.is_speaking
+					websocket.param_dict_vad["is_final"] = not websocket.is_speaking
 					# need to fire engine manually if no data received any more
 					if not websocket.is_speaking:
-						await async_asr_online(websocket,b"")
+						await async_asr_online(websocket, b"")
 				if "chunk_interval" in messagejson:
 					websocket.chunk_interval=messagejson["chunk_interval"]
 				if "wav_name" in messagejson:
@@ -64,14 +79,18 @@ async def ws_serve(websocket, path):
 					websocket.param_dict_asr_online["chunk_size"] = messagejson["chunk_size"]
 			# if has bytes in buffer or message is bytes
 			if len(frames_asr_online) > 0 or not isinstance(message, str):
-				if not isinstance(message,str):
+				if not isinstance(message, str):
 					frames_asr_online.append(message)
+					# frames.append(message)
+					# duration_ms = len(message) // 32
+					# websocket.vad_pre_idx += duration_ms
+					speech_start_i, speech_end_i = await async_vad(websocket, message)
+					websocket.is_speaking = not speech_end_i
+					
 				if len(frames_asr_online) % websocket.chunk_interval == 0 or not websocket.is_speaking:
+					websocket.param_dict_asr_online["is_final"] = not websocket.is_speaking
 					audio_in = b"".join(frames_asr_online)
-					# if not websocket.is_speaking:
-						#padding 0.5s at end gurantee that asr engine can fire out last word
-						# audio_in=audio_in+b''.join(np.zeros(int(16000*0.5),dtype=np.int16))
-					await async_asr_online(websocket,audio_in)
+					await async_asr_online(websocket, audio_in)
 					frames_asr_online = []
 	
 	
@@ -85,7 +104,7 @@ async def ws_serve(websocket, path):
 
 
 async def async_asr_online(websocket,audio_in):
-	if len(audio_in) >=0:
+	if len(audio_in) >= 0:
 		audio_in = load_bytes(audio_in)
 		rec_result = inference_pipeline_asr_online(audio_in=audio_in,
 		                                           param_dict=websocket.param_dict_asr_online)
@@ -97,16 +116,30 @@ async def async_asr_online(websocket,audio_in):
 				await websocket.send(message)
 
 
+async def async_vad(websocket, audio_in):
+	segments_result = inference_pipeline_vad(audio_in=audio_in, param_dict=websocket.param_dict_vad)
+	
+	speech_start = False
+	speech_end = False
+	
+	if len(segments_result) == 0 or len(segments_result["text"]) > 1:
+		return speech_start, speech_end
+	if segments_result["text"][0][0] != -1:
+		speech_start = segments_result["text"][0][0]
+	if segments_result["text"][0][1] != -1:
+		speech_end = True
+	return speech_start, speech_end
+
 if len(args.certfile)>0:
-  ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-
-  # Generate with Lets Encrypt, copied to this location, chown to current user and 400 permissions
-  ssl_cert = args.certfile
-  ssl_key = args.keyfile
-
-  ssl_context.load_cert_chain(ssl_cert, keyfile=ssl_key)
-  start_server = websockets.serve(ws_serve, args.host, args.port, subprotocols=["binary"], ping_interval=None,ssl=ssl_context)
+	ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+	
+	# Generate with Lets Encrypt, copied to this location, chown to current user and 400 permissions
+	ssl_cert = args.certfile
+	ssl_key = args.keyfile
+	
+	ssl_context.load_cert_chain(ssl_cert, keyfile=ssl_key)
+	start_server = websockets.serve(ws_serve, args.host, args.port, subprotocols=["binary"], ping_interval=None,ssl=ssl_context)
 else:
-  start_server = websockets.serve(ws_serve, args.host, args.port, subprotocols=["binary"], ping_interval=None)
+	start_server = websockets.serve(ws_serve, args.host, args.port, subprotocols=["binary"], ping_interval=None)
 asyncio.get_event_loop().run_until_complete(start_server)
 asyncio.get_event_loop().run_forever()
