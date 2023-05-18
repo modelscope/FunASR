@@ -87,6 +87,8 @@ model_choices = ClassChoices(
         contextual_paraformer=ContextualParaformer,
         mfcca=MFCCA,
         timestamp_prediction=TimestampPredictor,
+        rnnt=TransducerModel,
+        rnnt_unified=UnifiedTransducerModel,
     ),
     default="asr",
 )
@@ -367,7 +369,7 @@ def build_asr_model(args):
             token_list=token_list,
             **args.model_conf,
         )
-    elif args.model == "rnnt":
+    elif args.model == "rnnt" or args.model == "rnnt_unified":
         # 5. Decoder
         encoder_output_size = encoder.output_size()
 
@@ -396,34 +398,21 @@ def build_asr_model(args):
             **args.joint_network_conf,
         )
 
+        model_class = model_choices.get_class(args.model)
         # 7. Build model
-        if hasattr(encoder, 'unified_model_training') and encoder.unified_model_training:
-            model = UnifiedTransducerModel(
-                vocab_size=vocab_size,
-                token_list=token_list,
-                frontend=frontend,
-                specaug=specaug,
-                normalize=normalize,
-                encoder=encoder,
-                decoder=decoder,
-                att_decoder=att_decoder,
-                joint_network=joint_network,
-                **args.model_conf,
-            )
+        model = model_class(
+            vocab_size=vocab_size,
+            token_list=token_list,
+            frontend=frontend,
+            specaug=specaug,
+            normalize=normalize,
+            encoder=encoder,
+            decoder=decoder,
+            att_decoder=att_decoder,
+            joint_network=joint_network,
+            **args.model_conf,
+        )
 
-        else:
-            model = TransducerModel(
-                vocab_size=vocab_size,
-                token_list=token_list,
-                frontend=frontend,
-                specaug=specaug,
-                normalize=normalize,
-                encoder=encoder,
-                decoder=decoder,
-                att_decoder=att_decoder,
-                joint_network=joint_network,
-                **args.model_conf,
-            )
     else:
         raise NotImplementedError("Not supported model: {}".format(args.model))
 

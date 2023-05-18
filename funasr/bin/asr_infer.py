@@ -1581,7 +1581,7 @@ class Speech2TextTransducer:
             d = ModelDownloader()
             kwargs.update(**d.download_and_unpack(model_tag))
         
-        return Speech2Text(**kwargs)
+        return Speech2TextTransducer(**kwargs)
 
 
 class Speech2TextSAASR:
