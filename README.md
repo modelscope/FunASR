@@ -94,22 +94,18 @@ This project is licensed under the [The MIT License](https://opensource.org/lice
 ## Citations
 
 ``` bibtex
-@inproceedings{gao2022paraformer,
-  title={Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition},
-  author={Gao, Zhifu and Zhang, Shiliang and McLoughlin, Ian and Yan, Zhijie},
+@inproceedings{gao2023funasr,
+  author={Zhifu Gao and Zerui Li and Jiaming Wang and Haoneng Luo and Xian Shi and Mengzhe Chen and Yabin Li and Lingyun Zuo and Zhihao Du and Zhangyu Xiao and Shiliang Zhang},
+  title={FunASR: A Fundamental End-to-End Speech Recognition Toolkit},
+  year={2023},
   booktitle={INTERSPEECH},
-  year={2022}
 }
-@inproceedings{gao2020universal,
-  title={Universal ASR: Unifying Streaming and Non-Streaming ASR Using a Single Encoder-Decoder Model},
-  author={Gao, Zhifu and Zhang, Shiliang and Lei, Ming and McLoughlin, Ian},
-  booktitle={arXiv preprint arXiv:2010.14099},
-  year={2020}
-}
-@inproceedings{Shi2023AchievingTP,
-  title={Achieving Timestamp Prediction While Recognizing with Non-Autoregressive End-to-End ASR Model},
-  author={Xian Shi and Yanni Chen and Shiliang Zhang and Zhijie Yan},
-  booktitle={arXiv preprint arXiv:2301.12343}
-  year={2023}
+@inproceedings{gao22b_interspeech,
+  author={Zhifu Gao and ShiLiang Zhang and Ian McLoughlin and Zhijie Yan},
+  title={{Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition}},
+  year=2022,
+  booktitle={Proc. Interspeech 2022},
+  pages={2063--2067},
+  doi={10.21437/Interspeech.2022-9996}
 }
 ```
