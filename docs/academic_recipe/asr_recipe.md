@@ -7,7 +7,7 @@ We provide a recipe `egs/aishell/paraformer/run.sh` for training a paraformer mo
 - `gpu_num`: the number of GPUs used for training
 - `gpu_inference`: whether to use GPUs for decoding
 - `njob`: for CPU decoding, indicating the total number of CPU jobs; for GPU decoding, indicating the number of jobs on each GPU
-- `data_aishell`: the raw path of AISHELL-1 dataset
+- `raw_data`: the raw path of AISHELL-1 dataset
 - `feats_dir`: the path for saving processed data
 - `nj`: the number of jobs for data preparation
 - `speed_perturb`: the range of speech perturbed
@@ -15,7 +15,7 @@ We provide a recipe `egs/aishell/paraformer/run.sh` for training a paraformer mo
 - `tag`: the suffix of experimental result directory
 
 ## Stage 0: Data preparation
-This stage processes raw AISHELL-1 dataset `$data_aishell` and generates the corresponding `wav.scp` and `text` in `$feats_dir/data/xxx`. `xxx` means `train/dev/test`. Here we assume users have already downloaded AISHELL-1 dataset. If not, users can download data [here](https://www.openslr.org/33/) and set the path for `$data_aishell`. The examples of `wav.scp` and `text` are as follows:
+This stage processes raw AISHELL-1 dataset `$raw_data` and generates the corresponding `wav.scp` and `text` in `$feats_dir/data/xxx`. `xxx` means `train/dev/test`. Here we assume users have already downloaded AISHELL-1 dataset. If not, users can download data [here](https://www.openslr.org/33/) and set the path for `$raw_data`. The examples of `wav.scp` and `text` are as follows:
 * `wav.scp`
 ```
 BAC009S0002W0122 /nfs/ASR_DATA/AISHELL-1/data_aishell/wav/train/S0002/BAC009S0002W0122.wav
@@ -32,28 +32,8 @@ BAC009S0002W0124 自 六 月 底 呼 和 浩 特 市 率 先 宣 布 取 消 限
 ```
 These two files both have two columns, while the first column is wav ids and the second column is the corresponding wav paths/label tokens.
 
-## Stage 1: Feature Generation
-This stage extracts FBank features from `wav.scp` and apply speed perturbation as data augmentation according to `speed_perturb`. Users can set `nj` to control the number of jobs for feature generation. The generated features are saved in `$feats_dir/dump/xxx/ark` and the corresponding `feats.scp` files are saved as `$feats_dir/dump/xxx/feats.scp`. An example of `feats.scp` can be seen as follows:
-* `feats.scp`
-```
-...
-BAC009S0002W0122_sp0.9 /nfs/funasr_data/aishell-1/dump/fbank/train/ark/feats.16.ark:592751055
-...
-```
-Note that samples in this file have already been shuffled randomly. This file contains two columns. The first column is wav ids while the second column is kaldi-ark feature paths. Besides, `speech_shape` and `text_shape` are also generated in this stage, denoting the speech feature shape and text length of each sample. The examples are shown as follows:
-* `speech_shape`
-```
-...
-BAC009S0002W0122_sp0.9 665,80
-...
-```
-* `text_shape`
-```
-...
-BAC009S0002W0122_sp0.9 15
-...
-```
-These two files have two columns. The first column is wav ids and the second column is the corresponding speech feature shape and text length.
+## Stage 1: Feature and CMVN Generation
+This stage computes CMVN based on `train` dataset, which is used in the following stages. Users can set `nj` to control the number of jobs for computing CMVN. The generated CMVN file is saved as `$feats_dir/data/train/cmvn/cmvn.mvn`.
 
 ## Stage 2: Dictionary Preparation
 This stage processes the dictionary, which is used as a mapping between label characters and integer indices during ASR training. The processed dictionary file is saved as `$feats_dir/data/$lang_toekn_list/$token_type/tokens.txt`. An example of `tokens.txt` is as follows:
@@ -117,7 +97,7 @@ We support CPU and GPU decoding in FunASR. For CPU decoding, you should set `gpu
 
 * Performance
 
-We adopt `CER` to verify the performance. The results are in `$exp_dir/exp/$model_dir/$decoding_yaml_name/$average_model_name/$dset`, namely `text.cer` and `text.cer.txt`. `text.cer` saves the comparison between the recognized text and the reference text while `text.cer.txt` saves the final `CER` result. The following is an example of `text.cer`:
+We adopt `CER` to verify the performance. The results are in `$exp_dir/exp/$model_dir/$decoding_yaml_name/$average_model_name/$dset`, namely `text.cer` and `text.cer.txt`. `text.cer` saves the comparison between the recognized text and the reference text while `text.cer.txt` saves the final `CER` results. The following is an example of `text.cer`:
 * `text.cer`
 ```
 ...
