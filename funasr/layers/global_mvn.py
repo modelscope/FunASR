@@ -13,9 +13,7 @@ from funasr.layers.inversible_interface import InversibleInterface
 
 class GlobalMVN(AbsNormalize, InversibleInterface):
     """Apply global mean and variance normalization
-
     TODO(kamo): Make this class portable somehow
-
     Args:
         stats_file: npy file
         norm_means: Apply mean normalization
@@ -66,7 +64,6 @@ class GlobalMVN(AbsNormalize, InversibleInterface):
         self, x: torch.Tensor, ilens: torch.Tensor = None
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Forward function
-
         Args:
             x: (B, L, ...)
             ilens: (B,)

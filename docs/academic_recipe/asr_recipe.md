@@ -1,21 +1,35 @@
 # Speech Recognition
-Here we take "Training a paraformer model from scratch using the AISHELL-1 dataset" as an example to introduce how to use FunASR. According to this example, users can similarly employ other datasets (such as AISHELL-2 dataset, etc.) to train other models (such as conformer, transformer, etc.).
+In FunASR, we provide several ASR benchmarks, such as AISHLL, Librispeech, WenetSpeech, while different model architectures are supported, including conformer, paraformer, uniasr.
 
-## Overall Introduction
+## Quick Start
+After downloaded and installed FunASR, users can use our provided recipes to easily reproduce the relevant experimental results. Here we take "paraformer on AISHELL-1" as an example. 
+
+First, move to the corresponding dictionary of the AISHELL-1 paraformer example.
+```sh
+cd egs/aishell/paraformer
+```
+Then you can directly start the recipe as follows:
+```sh
+conda activate funasr
+. ./run.sh
+```
+The training log files are saved in `exp/*_train_*/log/train.log.*` and the inference results are saved in `exp/*_train_*/decode_asr_*`.
+
+## Introduction
 We provide a recipe `egs/aishell/paraformer/run.sh` for training a paraformer model on AISHELL-1 dataset. This recipe consists of five stages, supporting training on multiple GPUs and decoding by CPU or GPU. Before introducing each stage in detail, we first explain several parameters which should be set by users.
 - `CUDA_VISIBLE_DEVICES`: visible gpu list
 - `gpu_num`: the number of GPUs used for training
 - `gpu_inference`: whether to use GPUs for decoding
 - `njob`: for CPU decoding, indicating the total number of CPU jobs; for GPU decoding, indicating the number of jobs on each GPU
-- `data_aishell`: the raw path of AISHELL-1 dataset
+- `raw_data`: the raw path of AISHELL-1 dataset
 - `feats_dir`: the path for saving processed data
 - `nj`: the number of jobs for data preparation
 - `speed_perturb`: the range of speech perturbed
 - `exp_dir`: the path for saving experimental results
 - `tag`: the suffix of experimental result directory
 
-## Stage 0: Data preparation
-This stage processes raw AISHELL-1 dataset `$data_aishell` and generates the corresponding `wav.scp` and `text` in `$feats_dir/data/xxx`. `xxx` means `train/dev/test`. Here we assume users have already downloaded AISHELL-1 dataset. If not, users can download data [here](https://www.openslr.org/33/) and set the path for `$data_aishell`. The examples of `wav.scp` and `text` are as follows:
+### Stage 0: Data preparation
+This stage processes raw AISHELL-1 dataset `$raw_data` and generates the corresponding `wav.scp` and `text` in `$feats_dir/data/xxx`. `xxx` means `train/dev/test`. Here we assume users have already downloaded AISHELL-1 dataset. If not, users can download data [here](https://www.openslr.org/33/) and set the path for `$raw_data`. The examples of `wav.scp` and `text` are as follows:
 * `wav.scp`
 ```
 BAC009S0002W0122 /nfs/ASR_DATA/AISHELL-1/data_aishell/wav/train/S0002/BAC009S0002W0122.wav
@@ -32,30 +46,10 @@ BAC009S0002W0124 自 六 月 底 呼 和 浩 特 市 率 先 宣 布 取 消 限
 ```
 These two files both have two columns, while the first column is wav ids and the second column is the corresponding wav paths/label tokens.
 
-## Stage 1: Feature Generation
-This stage extracts FBank features from `wav.scp` and apply speed perturbation as data augmentation according to `speed_perturb`. Users can set `nj` to control the number of jobs for feature generation. The generated features are saved in `$feats_dir/dump/xxx/ark` and the corresponding `feats.scp` files are saved as `$feats_dir/dump/xxx/feats.scp`. An example of `feats.scp` can be seen as follows:
-* `feats.scp`
-```
-...
-BAC009S0002W0122_sp0.9 /nfs/funasr_data/aishell-1/dump/fbank/train/ark/feats.16.ark:592751055
-...
-```
-Note that samples in this file have already been shuffled randomly. This file contains two columns. The first column is wav ids while the second column is kaldi-ark feature paths. Besides, `speech_shape` and `text_shape` are also generated in this stage, denoting the speech feature shape and text length of each sample. The examples are shown as follows:
-* `speech_shape`
-```
-...
-BAC009S0002W0122_sp0.9 665,80
-...
-```
-* `text_shape`
-```
-...
-BAC009S0002W0122_sp0.9 15
-...
-```
-These two files have two columns. The first column is wav ids and the second column is the corresponding speech feature shape and text length.
+### Stage 1: Feature and CMVN Generation
+This stage computes CMVN based on `train` dataset, which is used in the following stages. Users can set `nj` to control the number of jobs for computing CMVN. The generated CMVN file is saved as `$feats_dir/data/train/cmvn/cmvn.mvn`.
 
-## Stage 2: Dictionary Preparation
+### Stage 2: Dictionary Preparation
 This stage processes the dictionary, which is used as a mapping between label characters and integer indices during ASR training. The processed dictionary file is saved as `$feats_dir/data/$lang_toekn_list/$token_type/tokens.txt`. An example of `tokens.txt` is as follows:
 * `tokens.txt`
 ```
@@ -74,7 +68,9 @@ This stage processes the dictionary, which is used as a mapping between label ch
 * `</s>`: indicates the end-of-sentence token
 * `<unk>`: indicates the out-of-vocabulary token
 
-## Stage 3: Training
+### Stage 3: LM Training
+
+### Stage 4: ASR Training
 This stage achieves the training of the specified model. To start training, users should manually set `exp_dir`, `CUDA_VISIBLE_DEVICES` and `gpu_num`, which have already been explained above. By default, the best `$keep_nbest_models` checkpoints on validation dataset will be averaged to generate a better model and adopted for decoding.
 
 * DDP Training
@@ -100,7 +96,7 @@ Users can use tensorboard to observe the loss, learning rate, etc. Please run th
 tensorboard --logdir ${exp_dir}/exp/${model_dir}/tensorboard/train
 ```
 
-## Stage 4: Decoding
+### Stage 5: Decoding
 This stage generates the recognition results and calculates the `CER` to verify the performance of the trained model. 
 
 * Mode Selection
@@ -117,7 +113,7 @@ We support CPU and GPU decoding in FunASR. For CPU decoding, you should set `gpu
 
 * Performance
 
-We adopt `CER` to verify the performance. The results are in `$exp_dir/exp/$model_dir/$decoding_yaml_name/$average_model_name/$dset`, namely `text.cer` and `text.cer.txt`. `text.cer` saves the comparison between the recognized text and the reference text while `text.cer.txt` saves the final `CER` result. The following is an example of `text.cer`:
+We adopt `CER` to verify the performance. The results are in `$exp_dir/exp/$model_dir/$decoding_yaml_name/$average_model_name/$dset`, namely `text.cer` and `text.cer.txt`. `text.cer` saves the comparison between the recognized text and the reference text while `text.cer.txt` saves the final `CER` results. The following is an example of `text.cer`:
 * `text.cer`
 ```
 ...
@@ -127,3 +123,48 @@ res:    构 建 良 好 的 旅 游 市 场 环 境
 ...
 ```
 
+## Change settings
+Here we explain how to perform common custom settings, which can help users to modify scripts according to their own needs.
+
+* Training with specified GPUs
+
+For example, if users want to use 2 GPUs with id `2` and `3, users can run the following command:
+```sh
+. ./run.sh --CUDA_VISIBLE_DEVICES "2,3" --gpu_num 2 
+```
+
+* Start from/Stop at a specified stage
+
+The recipe includes several stages. Users can start form or stop at any stage. For example, the following command achieves starting from the third stage and stopping at the fifth stage:
+```sh
+. ./run.sh --stage 3 --stop_stage 5
+```
+
+* Change the configuration of the model
+
+The configuration of the model is set in the config file `conf/train_*.yaml`. Specifically, the default encoder configuration of paraformer is as follows:
+```
+encoder: conformer
+encoder_conf:
+    output_size: 256    # dimension of attention
+    attention_heads: 4  # number of heads in multi-head attention
+    linear_units: 2048  # the number of units of position-wise feed forward
+    num_blocks: 12      # the number of encoder blocks
+    dropout_rate: 0.1
+    positional_dropout_rate: 0.1
+    attention_dropout_rate: 0.0
+    input_layer: conv2d  # encoder input layer architecture type
+    normalize_before: true
+    pos_enc_layer_type: rel_pos
+    selfattention_layer_type: rel_selfattn
+    activation_type: swish
+    macaron_style: true
+    use_cnn_module: true
+    cnn_module_kernel: 15
+
+```
+Users can change the encoder configuration by modify these values. For example, if users want to use an encoder with 16 conformer blocks and each block has 8 attention heads, users just need to change `num_blocks` from 12 to 16 and change `attention_heads` from 4 to 8. Besides, the batch_size, learning rate and other training hyper-parameters are also set in this config file. To change these hyper-parameters, users just need to directly change the corresponding values in this file. For example, the default learning rate is `0.0005`. If users want to change the learning rate to 0.0002, set the value of lr as `lr: 0.0002`.
+
+* Decoding by CPU or GPU
+
+We support CPU and GPU decoding. For CPU decoding, set `gpu_inference=false` and `njob` to specific the total number of CPU jobs. For GPU decoding, first set `gpu_inference=true`. Then set `gpuid_list` to specific which GPUs for decoding and `njob` to specific the number of decoding jobs on each GPU.

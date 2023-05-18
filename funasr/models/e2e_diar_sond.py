@@ -22,7 +22,7 @@ from funasr.models.frontend.abs_frontend import AbsFrontend
 from funasr.models.specaug.abs_specaug import AbsSpecAug
 from funasr.layers.abs_normalize import AbsNormalize
 from funasr.torch_utils.device_funcs import force_gatherable
-from funasr.train.abs_espnet_model import AbsESPnetModel
+from funasr.models.base_model import FunASRModel
 from funasr.losses.label_smoothing_loss import LabelSmoothingLoss, SequenceBinaryCrossEntropy
 from funasr.utils.misc import int2vec
 
@@ -35,7 +35,7 @@ else:
         yield
 
 
-class DiarSondModel(AbsESPnetModel):
+class DiarSondModel(FunASRModel):
     """
     Author: Speech Lab, Alibaba Group, China
     SOND: Speaker Overlap-aware Neural Diarization for Multi-party Meeting Analysis
@@ -115,7 +115,6 @@ class DiarSondModel(AbsESPnetModel):
         binary_labels_lengths: torch.Tensor = None,
     ) -> Tuple[torch.Tensor, Dict[str, torch.Tensor], torch.Tensor]:
         """Frontend + Encoder + Speaker Encoder + CI Scorer + CD Scorer + Decoder + Calc loss
-
         Args:
             speech: (Batch, samples) or (Batch, frames, input_size)
             speech_lengths: (Batch,) default None for chunk interator,
@@ -391,7 +390,6 @@ class DiarSondModel(AbsESPnetModel):
         self, speech: torch.Tensor, speech_lengths: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Frontend + Encoder
-
         Args:
             speech: (Batch, Length, ...)
             speech_lengths: (Batch,)
