@@ -1,7 +1,11 @@
 # Speech Recognition
 Here we take "Training a paraformer model from scratch using the AISHELL-1 dataset" as an example to introduce how to use FunASR. According to this example, users can similarly employ other datasets (such as AISHELL-2 dataset, etc.) to train other models (such as conformer, transformer, etc.).
 
-## Overall Introduction
+## Quick Start
+
+
+
+## Introduction
 We provide a recipe `egs/aishell/paraformer/run.sh` for training a paraformer model on AISHELL-1 dataset. This recipe consists of five stages, supporting training on multiple GPUs and decoding by CPU or GPU. Before introducing each stage in detail, we first explain several parameters which should be set by users.
 - `CUDA_VISIBLE_DEVICES`: visible gpu list
 - `gpu_num`: the number of GPUs used for training
@@ -14,7 +18,7 @@ We provide a recipe `egs/aishell/paraformer/run.sh` for training a paraformer mo
 - `exp_dir`: the path for saving experimental results
 - `tag`: the suffix of experimental result directory
 
-## Stage 0: Data preparation
+### Stage 0: Data preparation
 This stage processes raw AISHELL-1 dataset `$raw_data` and generates the corresponding `wav.scp` and `text` in `$feats_dir/data/xxx`. `xxx` means `train/dev/test`. Here we assume users have already downloaded AISHELL-1 dataset. If not, users can download data [here](https://www.openslr.org/33/) and set the path for `$raw_data`. The examples of `wav.scp` and `text` are as follows:
 * `wav.scp`
 ```
@@ -32,10 +36,10 @@ BAC009S0002W0124 自 六 月 底 呼 和 浩 特 市 率 先 宣 布 取 消 限
 ```
 These two files both have two columns, while the first column is wav ids and the second column is the corresponding wav paths/label tokens.
 
-## Stage 1: Feature and CMVN Generation
+### Stage 1: Feature and CMVN Generation
 This stage computes CMVN based on `train` dataset, which is used in the following stages. Users can set `nj` to control the number of jobs for computing CMVN. The generated CMVN file is saved as `$feats_dir/data/train/cmvn/cmvn.mvn`.
 
-## Stage 2: Dictionary Preparation
+### Stage 2: Dictionary Preparation
 This stage processes the dictionary, which is used as a mapping between label characters and integer indices during ASR training. The processed dictionary file is saved as `$feats_dir/data/$lang_toekn_list/$token_type/tokens.txt`. An example of `tokens.txt` is as follows:
 * `tokens.txt`
 ```
@@ -54,7 +58,7 @@ This stage processes the dictionary, which is used as a mapping between label ch
 * `</s>`: indicates the end-of-sentence token
 * `<unk>`: indicates the out-of-vocabulary token
 
-## Stage 3: Training
+### Stage 3: Training
 This stage achieves the training of the specified model. To start training, users should manually set `exp_dir`, `CUDA_VISIBLE_DEVICES` and `gpu_num`, which have already been explained above. By default, the best `$keep_nbest_models` checkpoints on validation dataset will be averaged to generate a better model and adopted for decoding.
 
 * DDP Training
@@ -80,7 +84,7 @@ Users can use tensorboard to observe the loss, learning rate, etc. Please run th
 tensorboard --logdir ${exp_dir}/exp/${model_dir}/tensorboard/train
 ```
 
-## Stage 4: Decoding
+### Stage 4: Decoding
 This stage generates the recognition results and calculates the `CER` to verify the performance of the trained model. 
 
 * Mode Selection
@@ -107,3 +111,4 @@ res:    构 建 良 好 的 旅 游 市 场 环 境
 ...
 ```
 
+## Change settings

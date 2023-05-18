@@ -173,8 +173,8 @@ class ESPnetDataset(Dataset):
                         raise RuntimeError(f"{k} is duplicated ({path}:{linenum})")
                     text_loader[k] = v
             return text_loader
-        elif loader_type == "text_in":
-            text_in_loader = {}
+        elif loader_type == "text_int":
+            text_int_loader = {}
             with open(path, "r", encoding="utf-8") as f:
                 for linenum, line in enumerate(f, 1):
                     sps = line.rstrip().split(maxsplit=1)
@@ -182,10 +182,10 @@ class ESPnetDataset(Dataset):
                         k, v = sps[0], ""
                     else:
                         k, v = sps
-                    if k in text_in_loader:
+                    if k in text_int_loader:
                         raise RuntimeError(f"{k} is duplicated ({path}:{linenum})")
-                    text_in_loader[k] = [int(i) for i in v.split()]
-            return text_in_loader
+                    text_int_loader[k] = [int(i) for i in v.split()]
+            return text_int_loader
         else:
             raise RuntimeError(f"Not supported: loader_type={loader_type}")
 
