@@ -5,8 +5,7 @@ from typing import Union
 import torch
 import torch.nn as nn
 from typeguard import check_argument_types
-
-from funasr.lm.abs_model import AbsLM
+from funasr.train.abs_model import AbsLM
 
 
 class SequentialRNNLM(AbsLM):
