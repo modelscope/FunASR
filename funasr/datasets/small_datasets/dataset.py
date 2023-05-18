@@ -9,9 +9,7 @@ from typing import Callable
 from typing import Collection
 from typing import Dict
 from typing import Mapping
-from typing import Optional
-from typing import Tuple
-from typing import Union
+from typing import Union, List, Tuple
 
 import kaldiio
 import numpy as np
@@ -145,7 +143,7 @@ class ESPnetDataset(Dataset):
 
     def _build_loader(
             self, path: str, loader_type: str
-    ) -> Mapping[str, Union[np.ndarray, torch.Tensor, str, numbers.Number]]:
+    ) -> Mapping[str, Union[np.ndarray, torch.Tensor, str, List[int], numbers.Number]]:
         """Helper function to instantiate Loader.
 
         Args:
@@ -175,6 +173,19 @@ class ESPnetDataset(Dataset):
                         raise RuntimeError(f"{k} is duplicated ({path}:{linenum})")
                     text_loader[k] = v
             return text_loader
+        elif loader_type == "text_in":
+            text_in_loader = {}
+            with open(path, "r", encoding="utf-8") as f:
+                for linenum, line in enumerate(f, 1):
+                    sps = line.rstrip().split(maxsplit=1)
+                    if len(sps) == 1:
+                        k, v = sps[0], ""
+                    else:
+                        k, v = sps
+                    if k in text_in_loader:
+                        raise RuntimeError(f"{k} is duplicated ({path}:{linenum})")
+                    text_in_loader[k] = [int(i) for i in v.split()]
+            return text_in_loader
         else:
             raise RuntimeError(f"Not supported: loader_type={loader_type}")
 
