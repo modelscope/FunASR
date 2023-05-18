@@ -167,4 +167,4 @@ Users can change the encoder configuration by modify these values. For example, 
 
 * Decoding by CPU or GPU
 
-We support CPU and GPU decoding. For CPU decoding, 
+We support CPU and GPU decoding. For CPU decoding, set `gpu_inference=false` and `njob` to specific the total number of CPU jobs. For GPU decoding, first set `gpu_inference=true`. Then set `gpuid_list` to specific which GPUs for decoding and `njob` to specific the number of decoding jobs on each GPU.
