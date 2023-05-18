@@ -91,7 +91,6 @@
 <li class="toctree-l4"><a class="reference internal" href="#install-modelscope-and-funasr">Install modelscope and funasr</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#export-onnx-model">Export onnx model</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#building-for-linux-unix">Building for Linux/Unix</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#recipe">Recipe</a></li>
 </ul>
 </li>
 </ul>
@@ -99,6 +98,11 @@
 <li class="toctree-l2"><a class="reference internal" href="#paraformer-large">Paraformer-large</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#intel-r-xeon-r-platinum-8369b-cpu-2-90ghz-16core-32processor-with-avx512-vnni">Intel(R) Xeon(R) Platinum 8369B CPU &#64; 2.90GHz   16core-32processor    with avx512_vnni</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#intel-r-xeon-r-platinum-8163-cpu-2-50ghz-32core-64processor-without-avx512-vnni">Intel(R) Xeon(R) Platinum 8163 CPU &#64; 2.50GHz    32core-64processor   without avx512_vnni</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#fsmn-vad-paraformer-large-ct-transformer">FSMN-VAD + Paraformer-large + CT-Transformer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Intel(R) Xeon(R) Platinum 8369B CPU &#64; 2.90GHz   16core-32processor    with avx512_vnni</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Intel(R) Xeon(R) Platinum 8163 CPU &#64; 2.50GHz    32core-64processor   without avx512_vnni</a></li>
 </ul>
 </li>
 </ul>
@@ -194,21 +198,19 @@ make
 </pre></div>
 </div>
 </div>
-<div class="section" id="recipe">
-<h4>Recipe<a class="headerlink" href="#recipe" title="Permalink to this headline"></a></h4>
-<p>set the model, data path and output_dir</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./bin/funasr-onnx-offline-rtf /path/to/model_dir /path/to/wav.scp quantize<span class="o">(</span><span class="nb">true</span> or <span class="nb">false</span><span class="o">)</span> thread_num
-</pre></div>
-</div>
-<p>The structure of /path/to/models_dir</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">config</span><span class="o">.</span><span class="n">yaml</span><span class="p">,</span> <span class="n">am</span><span class="o">.</span><span class="n">mvn</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">onnx</span><span class="p">(</span><span class="ow">or</span> <span class="n">model_quant</span><span class="o">.</span><span class="n">onnx</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
 </div>
 </div>
 <div class="section" id="paraformer-large">
 <h2><a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary">Paraformer-large</a><a class="headerlink" href="#paraformer-large" title="Permalink to this headline"></a></h2>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-onnx-offline-rtf <span class="se">\</span>
+    --model-dir    ./asrmodel/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch <span class="se">\</span>
+    --quantize  <span class="nb">true</span> <span class="se">\</span>
+    --wav-path     ./aishell1_test.scp  <span class="se">\</span>
+    --thread-num <span class="m">32</span>
+
+Node: <span class="s1">&#39;--quantize false&#39;</span> means fp32, otherwise it will be int8 
+</pre></div>
+</div>
 <p>Number of Parameter: 220M</p>
 <p>Storage size: 880MB</p>
 <p>Storage size after int8-quant: 237MB</p>
@@ -306,83 +308,269 @@ make
 <thead>
 <tr>
 <th>concurrent-tasks</th>
-<th>processing time(s)</th>
+<th style="text-align: center;">processing time(s)</th>
 <th>RTF</th>
-<th>Speedup Rate</th>
+<th style="text-align: center;">Speedup Rate</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>1   (onnx fp32)</td>
-<td>2903s</td>
+<td style="text-align: center;">2903s</td>
 <td>0.080404</td>
-<td>12</td>
+<td style="text-align: center;">12</td>
 </tr>
 <tr>
 <td>1   (onnx int8)</td>
-<td>2714s</td>
+<td style="text-align: center;">2714s</td>
 <td>0.075168</td>
-<td>13</td>
+<td style="text-align: center;">13</td>
 </tr>
 <tr>
 <td>8   (onnx fp32)</td>
-<td>373s</td>
+<td style="text-align: center;">373s</td>
 <td>0.010329</td>
-<td>97</td>
+<td style="text-align: center;">97</td>
 </tr>
 <tr>
 <td>8   (onnx int8)</td>
-<td>340s</td>
+<td style="text-align: center;">340s</td>
 <td>0.009428</td>
-<td>106</td>
+<td style="text-align: center;">106</td>
 </tr>
 <tr>
 <td>16   (onnx fp32)</td>
-<td>189s</td>
+<td style="text-align: center;">189s</td>
 <td>0.005252</td>
-<td>190</td>
+<td style="text-align: center;">190</td>
 </tr>
 <tr>
 <td>16   (onnx int8)</td>
-<td>174s</td>
+<td style="text-align: center;">174s</td>
 <td>0.004817</td>
-<td>207</td>
+<td style="text-align: center;">207</td>
 </tr>
 <tr>
 <td>32   (onnx fp32)</td>
-<td>109s</td>
+<td style="text-align: center;">109s</td>
 <td>0.00301</td>
-<td>332</td>
+<td style="text-align: center;">332</td>
 </tr>
 <tr>
 <td>32   (onnx int8)</td>
-<td>88s</td>
+<td style="text-align: center;">88s</td>
 <td>0.00245</td>
-<td>408</td>
+<td style="text-align: center;">408</td>
 </tr>
 <tr>
 <td>64   (onnx fp32)</td>
-<td>113s</td>
+<td style="text-align: center;">113s</td>
 <td>0.003129</td>
-<td>320</td>
+<td style="text-align: center;">320</td>
 </tr>
 <tr>
 <td>64   (onnx int8)</td>
-<td>79s</td>
+<td style="text-align: center;">79s</td>
 <td>0.002201</td>
-<td>454</td>
+<td style="text-align: center;">454</td>
 </tr>
 <tr>
 <td>96   (onnx fp32)</td>
-<td>115s</td>
+<td style="text-align: center;">115s</td>
 <td>0.003183</td>
-<td>314</td>
+<td style="text-align: center;">314</td>
 </tr>
 <tr>
 <td>96   (onnx int8)</td>
-<td>80s</td>
+<td style="text-align: center;">80s</td>
 <td>0.002222</td>
-<td>450</td>
+<td style="text-align: center;">450</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="section" id="fsmn-vad-paraformer-large-ct-transformer">
+<h2><a class="reference external" href="https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary">FSMN-VAD</a> + <a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary">Paraformer-large</a> + <a class="reference external" href="https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch/summary">CT-Transformer</a><a class="headerlink" href="#fsmn-vad-paraformer-large-ct-transformer" title="Permalink to this headline"></a></h2>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-onnx-offline-rtf <span class="se">\</span>
+    --model-dir    ./asrmodel/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch <span class="se">\</span>
+    --quantize  <span class="nb">true</span> <span class="se">\</span>
+    --vad-dir   ./asrmodel/speech_fsmn_vad_zh-cn-16k-common-pytorch <span class="se">\</span>
+    --punc-dir  ./asrmodel/punc_ct-transformer_zh-cn-common-vocab272727-pytorch <span class="se">\</span>
+    --wav-path     ./aishell1_test.scp  <span class="se">\</span>
+    --thread-num <span class="m">32</span>
+
+Node: <span class="s1">&#39;--quantize false&#39;</span> means fp32, otherwise it will be int8 
+</pre></div>
+</div>
+<div class="section" id="id1">
+<h3>Intel(R) Xeon(R) Platinum 8369B CPU &#64; 2.90GHz   16core-32processor    with avx512_vnni<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h3>
+<table border="1" class="docutils">
+<thead>
+<tr>
+<th>concurrent-tasks</th>
+<th style="text-align: center;">processing time(s)</th>
+<th style="text-align: center;">RTF</th>
+<th style="text-align: center;">Speedup Rate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1   (onnx fp32)</td>
+<td style="text-align: center;">2134s</td>
+<td style="text-align: center;">0.0591</td>
+<td style="text-align: center;">17</td>
+</tr>
+<tr>
+<td>1   (onnx int8)</td>
+<td style="text-align: center;">1047s</td>
+<td style="text-align: center;">0.029</td>
+<td style="text-align: center;">34</td>
+</tr>
+<tr>
+<td>8   (onnx fp32)</td>
+<td style="text-align: center;">273s</td>
+<td style="text-align: center;">0.007557</td>
+<td style="text-align: center;">132</td>
+</tr>
+<tr>
+<td>8   (onnx int8)</td>
+<td style="text-align: center;">132s</td>
+<td style="text-align: center;">0.003647</td>
+<td style="text-align: center;">274</td>
+</tr>
+<tr>
+<td>16   (onnx fp32)</td>
+<td style="text-align: center;">147s</td>
+<td style="text-align: center;">0.004061</td>
+<td style="text-align: center;">246</td>
+</tr>
+<tr>
+<td>16   (onnx int8)</td>
+<td style="text-align: center;">69s</td>
+<td style="text-align: center;">0.001916</td>
+<td style="text-align: center;">521</td>
+</tr>
+<tr>
+<td>32   (onnx fp32)</td>
+<td style="text-align: center;">133s</td>
+<td style="text-align: center;">0.003675</td>
+<td style="text-align: center;">272</td>
+</tr>
+<tr>
+<td>32   (onnx int8)</td>
+<td style="text-align: center;">65s</td>
+<td style="text-align: center;">0.001786</td>
+<td style="text-align: center;">559</td>
+</tr>
+<tr>
+<td>64   (onnx fp32)</td>
+<td style="text-align: center;">136s</td>
+<td style="text-align: center;">0.003767</td>
+<td style="text-align: center;">265</td>
+</tr>
+<tr>
+<td>64   (onnx int8)</td>
+<td style="text-align: center;">67s</td>
+<td style="text-align: center;">0.001867</td>
+<td style="text-align: center;">535</td>
+</tr>
+<tr>
+<td>96   (onnx fp32)</td>
+<td style="text-align: center;">137s</td>
+<td style="text-align: center;">0.003802</td>
+<td style="text-align: center;">262</td>
+</tr>
+<tr>
+<td>96   (onnx int8)</td>
+<td style="text-align: center;">69s</td>
+<td style="text-align: center;">0.001904</td>
+<td style="text-align: center;">524</td>
+</tr>
+</tbody>
+</table></div>
+<div class="section" id="id2">
+<h3>Intel(R) Xeon(R) Platinum 8163 CPU &#64; 2.50GHz    32core-64processor   without avx512_vnni<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h3>
+<table border="1" class="docutils">
+<thead>
+<tr>
+<th>concurrent-tasks</th>
+<th style="text-align: center;">processing time(s)</th>
+<th>RTF</th>
+<th style="text-align: center;">Speedup Rate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1   (onnx fp32)</td>
+<td style="text-align: center;">3073s</td>
+<td>0.0851</td>
+<td style="text-align: center;">12</td>
+</tr>
+<tr>
+<td>1   (onnx int8)</td>
+<td style="text-align: center;">2840s</td>
+<td>0.0787</td>
+<td style="text-align: center;">13</td>
+</tr>
+<tr>
+<td>8   (onnx fp32)</td>
+<td style="text-align: center;">389s</td>
+<td>0.01079</td>
+<td style="text-align: center;">93</td>
+</tr>
+<tr>
+<td>8   (onnx int8)</td>
+<td style="text-align: center;">355s</td>
+<td>0.0098</td>
+<td style="text-align: center;">101</td>
+</tr>
+<tr>
+<td>16   (onnx fp32)</td>
+<td style="text-align: center;">199s</td>
+<td>0.005513</td>
+<td style="text-align: center;">181</td>
+</tr>
+<tr>
+<td>16   (onnx int8)</td>
+<td style="text-align: center;">171s</td>
+<td>0.004784</td>
+<td style="text-align: center;">210</td>
+</tr>
+<tr>
+<td>32   (onnx fp32)</td>
+<td style="text-align: center;">113s</td>
+<td>0.00314</td>
+<td style="text-align: center;">318</td>
+</tr>
+<tr>
+<td>32   (onnx int8)</td>
+<td style="text-align: center;">92s</td>
+<td>0.00255</td>
+<td style="text-align: center;">391</td>
+</tr>
+<tr>
+<td>64   (onnx fp32)</td>
+<td style="text-align: center;">115s</td>
+<td>0.0032</td>
+<td style="text-align: center;">312</td>
+</tr>
+<tr>
+<td>64   (onnx int8)</td>
+<td style="text-align: center;">81s</td>
+<td>0.002232</td>
+<td style="text-align: center;">448</td>
+</tr>
+<tr>
+<td>96   (onnx fp32)</td>
+<td style="text-align: center;">117s</td>
+<td>0.003257</td>
+<td style="text-align: center;">307</td>
+</tr>
+<tr>
+<td>96   (onnx int8)</td>
+<td style="text-align: center;">81s</td>
+<td>0.002258</td>
+<td style="text-align: center;">442</td>
 </tr>
 </tbody>
 </table></div>
