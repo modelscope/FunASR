@@ -3,7 +3,8 @@
 FunASR have implemented the following paper code
 
 ### Speech Recognition
-- [Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition](https://arxiv.org/abs/2206.08317), INTERSPEECH 2022.
+- [FunASR: A Fundamental End-to-End Speech Recognition Toolkit](https://arxiv.org/abs/2305.11013), INTERSPEECH 2023
+- [Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition](https://arxiv.org/abs/2206.08317), INTERSPEECH 2022
 - [Universal ASR: Unifying Streaming and Non-Streaming ASR Using a Single Encoder-Decoder Model](https://arxiv.org/abs/2010.14099), arXiv preprint arXiv:2010.14099, 2020.
 - [San-m: Memory equipped self-attention for end-to-end speech recognition](https://arxiv.org/pdf/2006.01713), INTERSPEECH 2020
 - [Streaming Chunk-Aware Multihead Attention for Online End-to-End Speech Recognition](https://arxiv.org/abs/2006.01712), INTERSPEECH 2020

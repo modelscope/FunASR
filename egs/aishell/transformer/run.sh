@@ -28,7 +28,7 @@ feats_dim=80
 nj=64
 
 # data
-raw_data=
+raw_data=../raw_data
 data_url=www.openslr.org/resources/33
 
 # exp tag
