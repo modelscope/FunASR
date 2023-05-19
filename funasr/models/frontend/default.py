@@ -24,9 +24,9 @@ class DefaultFrontend(AbsFrontend):
     def __init__(
             self,
             fs: Union[int, str] = 16000,
-            n_fft: int = 512,
-            win_length: int = None,
-            hop_length: int = 128,
+            n_fft: int = 400,
+            frame_length: int = 25,
+            frame_shift: int = 10,
             window: Optional[str] = "hann",
             center: bool = True,
             normalized: bool = False,
@@ -38,6 +38,8 @@ class DefaultFrontend(AbsFrontend):
             frontend_conf: Optional[dict] = get_default_kwargs(Frontend),
             apply_stft: bool = True,
             use_channel: int = None,
+            lfr_m: int = 1,
+            lfr_n: int = 1,
     ):
         assert check_argument_types()
         super().__init__()
@@ -46,13 +48,14 @@ class DefaultFrontend(AbsFrontend):
 
         # Deepcopy (In general, dict shouldn't be used as default arg)
         frontend_conf = copy.deepcopy(frontend_conf)
-        self.hop_length = hop_length
+        self.win_length = frame_length * 16
+        self.hop_length = frame_shift * 16
 
         if apply_stft:
             self.stft = Stft(
                 n_fft=n_fft,
-                win_length=win_length,
-                hop_length=hop_length,
+                win_length=self.win_length,
+                hop_length=self.hop_length,
                 center=center,
                 window=window,
                 normalized=normalized,

@@ -9,7 +9,7 @@ import soundfile
 if __name__=="__main__":
     path = sys.argv[1] # dump2/raw/Eval_Ali_far
     raw_path = sys.argv[2] # data/local/Eval_Ali_far_correct_single_speaker
-    raw_meeting_scp_file = open(raw_path + '/wav_raw.scp', 'r')
+    raw_meeting_scp_file = open(raw_path + '/wav.scp', 'r')
     raw_meeting_scp = raw_meeting_scp_file.readlines()
     raw_meeting_scp_file.close()
     segments_scp_file = open(raw_path + '/segments', 'r')
@@ -22,8 +22,8 @@ if __name__=="__main__":
 
     raw_wav_map = {}
     for line in raw_meeting_scp:
-        meeting = line.strip().split('\t')[0]
-        wav_path = line.strip().split('\t')[1]
+        meeting = line.strip().split(' ')[0]
+        wav_path = line.strip().split(' ')[1]
         raw_wav_map[meeting] = wav_path
     
     spk_map = {}

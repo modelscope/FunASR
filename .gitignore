@@ -19,3 +19,6 @@ build
 funasr.egg-info
 docs/_build
 modelscope
+egs/alimeeting/sa_asr/exp
+egs/alimeeting/sa_asr/data
+egs/alimeeting/sa_asr/profile_log

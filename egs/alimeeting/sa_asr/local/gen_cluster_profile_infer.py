@@ -63,7 +63,7 @@ if __name__ == "__main__":
     wav_scp_file = open(path+'/wav.scp', 'r')
     wav_scp = wav_scp_file.readlines()
     wav_scp_file.close()
-    raw_meeting_scp_file = open(raw_path + '/wav_raw.scp', 'r')
+    raw_meeting_scp_file = open(raw_path + '/wav.scp', 'r')
     raw_meeting_scp = raw_meeting_scp_file.readlines()
     raw_meeting_scp_file.close()
     segments_scp_file = open(raw_path + '/segments', 'r')
@@ -92,8 +92,8 @@ if __name__ == "__main__":
     cluster_spk_num_file = open(path + '/cluster_spk_num', 'w')
     meeting_map = {}
     for line in raw_meeting_scp:
-        meeting = line.strip().split('\t')[0]
-        wav_path = line.strip().split('\t')[1]
+        meeting = line.strip().split(' ')[0]
+        wav_path = line.strip().split(' ')[1]
         wav = soundfile.read(wav_path)[0]
         # take the first channel
         if wav.ndim == 2:

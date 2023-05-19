@@ -5,7 +5,7 @@ import sys
 
 
 if __name__=="__main__":
-    path = sys.argv[1] # dump2/raw/Train_Ali_far
+    path = sys.argv[1] 
     wav_scp_file = open(path+"/wav.scp", 'r')
     wav_scp = wav_scp_file.readlines()
     wav_scp_file.close()

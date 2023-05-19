@@ -43,6 +43,7 @@ spk_encoder_conf:
   pooling_type: statistic
   num_nodes_resnet1: 256
   num_nodes_last_layer: 256
+  batchnorm_momentum: 0.5
 
 # decoder related
 decoder: sa_decoder

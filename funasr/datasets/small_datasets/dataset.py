@@ -174,7 +174,11 @@ class ESPnetDataset(Dataset):
                     text_loader[k] = v
             return text_loader
         elif loader_type == "text_int":
+<<<<<<< Updated upstream
             text_int_loader = {}
+=======
+            text_in_loader = {}
+>>>>>>> Stashed changes
             with open(path, "r", encoding="utf-8") as f:
                 for linenum, line in enumerate(f, 1):
                     sps = line.rstrip().split(maxsplit=1)
