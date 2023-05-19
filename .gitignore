@@ -22,3 +22,8 @@ modelscope
 egs/alimeeting/sa_asr/exp
 egs/alimeeting/sa_asr/data
 egs/alimeeting/sa_asr/profile_log
+egs/alimeeting/sa_asr_deprecated/dataset
+egs/alimeeting/sa_asr_deprecated/data
+egs/alimeeting/sa_asr_deprecated/profile_log
+egs/alimeeting/sa_asr_deprecated/run_new.sh
+

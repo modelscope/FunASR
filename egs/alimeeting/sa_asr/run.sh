@@ -22,6 +22,7 @@ scp=wav.scp
 speed_perturb="1.0"
 min_wav_duration=0.1
 max_wav_duration=20
+profile_modes="oracle cluster"
 stage=2
 stop_stage=2
 
@@ -47,6 +48,7 @@ set -o pipefail
 train_set=Train_Ali_far
 valid_set=Eval_Ali_far
 test_sets="Test_Ali_far"
+test_2023=
 
 asr_config=conf/train_asr_conformer.yaml
 sa_asr_config=conf/train_sa_asr_conformer.yaml
@@ -100,6 +102,15 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
             >"${feats_dir}/${x}/utt2spk_all_fifo_rmls"
         mv "${feats_dir}/${x}/utt2spk_all_fifo_rmls" "${feats_dir}/${x}/utt2spk_all_fifo"
     done
+    for x in ${test_2023}; do
+        local/format_wav_scp.sh --nj "${nj}" --cmd "${train_cmd}" \
+            --audio-format wav --segments ${feats_dir}/org/${x}/segments \
+            "${feats_dir}/org/${x}/${scp}" "${feats_dir}/${x}"
+        cut -d " " -f1 ${feats_dir}/${x}/wav.scp > ${feats_dir}/${x}/uttid
+        paste -d " " ${feats_dir}/${x}/uttid ${feats_dir}/${x}/uttid > ${feats_dir}/${x}/utt2spk
+        cp ${feats_dir}/${x}/utt2spk ${feats_dir}/${x}/spk2utt
+        cp ${feats_dir}/${x}/utt2spk ${feats_dir}/${x}/text
+    done
 fi
 
 token_list=${feats_dir}/${lang}_token_list/char/tokens.txt
@@ -121,31 +132,37 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     echo "stage 2: Feature and CMVN Generation"
     
     mkdir -p "profile_log"
-    for dset in "${train_set}" "${valid_set}" "${test_sets}"; do
+    for x in "${train_set}" "${valid_set}" "${test_sets}"; do
         # generate text_id spk2id
-        python local/process_sot_fifo_textchar2spk.py --path ${feats_dir}/${dset}
-        echo "Successfully generate ${feats_dir}/${dset}/text_id ${feats_dir}/${dset}/spk2id"
+        python local/process_sot_fifo_textchar2spk.py --path ${feats_dir}/${x}
+        echo "Successfully generate ${feats_dir}/${x}/text_id ${feats_dir}/${x}/spk2id"
         # generate text_id_train for sot
-        python local/process_text_id.py ${feats_dir}/${dset}
-        echo "Successfully generate ${feats_dir}/${dset}/text_id_train"
+        python local/process_text_id.py ${feats_dir}/${x}
+        echo "Successfully generate ${feats_dir}/${x}/text_id_train"
         # generate oracle_embedding from single-speaker audio segment
-        echo "oracle_embedding is being generated in the background, and the log is profile_log/gen_oracle_embedding_${dset}.log"
-        python local/gen_oracle_embedding.py "${feats_dir}/${dset}" "data/org/${dset}_single_speaker" &> "profile_log/gen_oracle_embedding_${dset}.log"
-        echo "Successfully generate oracle embedding for ${dset} (${feats_dir}/${dset}/oracle_embedding.scp)"
+        echo "oracle_embedding is being generated in the background, and the log is profile_log/gen_oracle_embedding_${x}.log"
+        python local/gen_oracle_embedding.py "${feats_dir}/${x}" "data/org/${x}_single_speaker" &> "profile_log/gen_oracle_embedding_${x}.log"
+        echo "Successfully generate oracle embedding for ${x} (${feats_dir}/${x}/oracle_embedding.scp)"
         generate oracle_profile and cluster_profile from oracle_embedding and cluster_embedding (padding the speaker during training)
-        if [ "${dset}" = "${train_set}" ]; then
-            python local/gen_oracle_profile_padding.py ${feats_dir}/${dset}
-            echo "Successfully generate oracle profile for ${dset} (${feats_dir}/${dset}/oracle_profile_padding.scp)"
+        if [ "${x}" = "${train_set}" ]; then
+            python local/gen_oracle_profile_padding.py ${feats_dir}/${x}
+            echo "Successfully generate oracle profile for ${x} (${feats_dir}/${x}/oracle_profile_padding.scp)"
         else
-            python local/gen_oracle_profile_nopadding.py ${feats_dir}/${dset}
-            echo "Successfully generate oracle profile for ${dset} (${feats_dir}/${dset}/oracle_profile_nopadding.scp)"
+            python local/gen_oracle_profile_nopadding.py ${feats_dir}/${x}
+            echo "Successfully generate oracle profile for ${x} (${feats_dir}/${x}/oracle_profile_nopadding.scp)"
         fi
         # generate cluster_profile with spectral-cluster directly (for infering and without oracle information)
-        if [ "${dset}" = "${valid_set}" ] || [ "${dset}" = "${test_sets}" ]; then
-            echo "cluster_profile is being generated in the background, and the log is profile_log/gen_cluster_profile_infer_${dset}.log"
-            python local/gen_cluster_profile_infer.py "${feats_dir}/${dset}" "${feats_dir}/org/${dset}" 0.996 0.815 &> "profile_log/gen_cluster_profile_infer_${dset}.log"
-            echo "Successfully generate cluster profile for ${dset} (${feats_dir}/${dset}/cluster_profile_infer.scp)"
+        if [ "${x}" = "${valid_set}" ] || [ "${x}" = "${test_sets}" ]; then
+            echo "cluster_profile is being generated in the background, and the log is profile_log/gen_cluster_profile_infer_${x}.log"
+            python local/gen_cluster_profile_infer.py "${feats_dir}/${x}" "${feats_dir}/org/${x}" 0.996 0.815 &> "profile_log/gen_cluster_profile_infer_${x}.log"
+            echo "Successfully generate cluster profile for ${x} (${feats_dir}/${x}/cluster_profile_infer.scp)"
         fi
+    done
+
+    for x in "${test_2023}"; do
+        # generate cluster_profile with spectral-cluster directly (for infering and without oracle information)
+        python local/gen_cluster_profile_infer.py "${data_feats}/${x}" "data/${x}" 0.996 0.815 &> "profile_log/gen_cluster_profile_infer_${x}.log"
+        log "Successfully generate cluster profile for ${x} (${data_feats}/${x}/cluster_profile_infer.scp)"
     done
 
     utils/compute_cmvn.sh --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} ${feats_dir}/${train_set}
@@ -216,10 +233,10 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
         ln -s ${feats_dir}/${valid_set}/oracle_profile_nopadding.scp ${feats_dir}/${valid_set}/profile.scp
     fi
     
-    if [ ! -f "${exp_dir}/damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch/sv.pb" ]; then
+    if [ ! -f "${exp_dir}/damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch/sv.pth" ]; then
         # download xvector extractor model file
         python local/download_xvector_model.py ${exp_dir}
-        echo "Successfully download the pretrained xvector extractor to exp/damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch/sv.pb"
+        echo "Successfully download the pretrained xvector extractor to exp/damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch/sv.pth"
     fi
     
     if [ -f $INIT_FILE ];then
@@ -276,88 +293,93 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
 fi
                 
 
-# Testing Stage
 if [ ${stage} -le 6 ] && [ ${stop_stage} -ge 6 ]; then
-    echo "stage 6: Inference with oracle profile"
-    for dset in ${test_sets}; do
-        asr_exp=${exp_dir}/${model_dir}
-        inference_tag="$(basename "${inference_config}" .yaml)"
-        _dir="${asr_exp}/${inference_tag}_oracle/${inference_asr_model}/${dset}"
-        _logdir="${_dir}/logdir"
-        if [ -d ${_dir} ]; then
-            echo "${_dir} is already exists. if you want to decode again, please delete this dir first."
-            exit 0
-        fi
-        mkdir -p "${_logdir}"
-        _data="${feats_dir}/${dset}"
-        key_file=${_data}/${scp}
-        num_scp_file="$(<${key_file} wc -l)"
-        _nj=$([ $inference_nj -le $num_scp_file ] && echo "$inference_nj" || echo "$num_scp_file")
-        split_scps=
-        for n in $(seq "${_nj}"); do
-            split_scps+=" ${_logdir}/keys.${n}.scp"
-        done
-        # shellcheck disable=SC2086
-        utils/split_scp.pl "${key_file}" ${split_scps}
-        _opts=
-        if [ -n "${inference_config}" ]; then
-            _opts+="--config ${inference_config} "
-        fi
-        ${infer_cmd} --gpu "${_ngpu}" --max-jobs-run "${_nj}" JOB=1:"${_nj}" "${_logdir}"/asr_inference.JOB.log \
-            python -m funasr.bin.asr_inference_launch \
-                --batch_size 1 \
-                --mc True \
-                --ngpu "${_ngpu}" \
-                --njob ${njob} \
-                --gpuid_list ${gpuid_list} \
-                --data_path_and_name_and_type "${_data}/${scp},speech,${type}" \
-                --data_path_and_name_and_type "${_data}/oracle_profile_nopadding.scp,profile,npy" \
-                --key_file "${_logdir}"/keys.JOB.scp \
-                --asr_train_config "${sa_asr_exp}"/config.yaml \
-                --asr_model_file "${sa_asr_exp}"/"${inference_sa_asr_model}" \
-                --output_dir "${_logdir}"/output.JOB \
-                --mode sa_asr \
-                ${_opts}
-
-        for f in token token_int score text; do
-            if [ -f "${_logdir}/output.1/1best_recog/${f}" ]; then
-                for i in $(seq "${_nj}"); do
-                    cat "${_logdir}/output.${i}/1best_recog/${f}"
-                done | sort -k1 >"${_dir}/${f}"
+    echo "stage 6: Inference test sets"
+    for x in ${test_sets}; do
+        for profile_mode in ${profile_modes}; do
+            asr_exp=${exp_dir}/${model_dir}
+            inference_tag="$(basename "${inference_config}" .yaml)"
+            _dir="${asr_exp}/${inference_tag}_${profile_mode}/${inference_asr_model}/${x}"
+            _logdir="${_dir}/logdir"
+            if [ -d ${_dir} ]; then
+                echo "${_dir} is already exists. if you want to decode again, please delete this dir first."
+                exit 0
             fi
+            mkdir -p "${_logdir}"
+            _data="${feats_dir}/${x}"
+            key_file=${_data}/${scp}
+            num_scp_file="$(<${key_file} wc -l)"
+            _nj=$([ $inference_nj -le $num_scp_file ] && echo "$inference_nj" || echo "$num_scp_file")
+            split_scps=
+            for n in $(seq "${_nj}"); do
+                split_scps+=" ${_logdir}/keys.${n}.scp"
+            done
+            # shellcheck disable=SC2086
+            utils/split_scp.pl "${key_file}" ${split_scps}
+            _opts=
+            if [ -n "${inference_config}" ]; then
+                _opts+="--config ${inference_config} "
+            fi
+            if [ $profile_mode = "oracle" ]; then
+                profile_scp=${profile_mode}_profile_nopadding.scp
+            else
+                profile_scp=${profile_mode}_profile_infer.scp
+            fi
+            ${infer_cmd} --gpu "${_ngpu}" --max-jobs-run "${_nj}" JOB=1:"${_nj}" "${_logdir}"/asr_inference.JOB.log \
+                python -m funasr.bin.asr_inference_launch \
+                    --batch_size 1 \
+                    --mc True \
+                    --ngpu "${_ngpu}" \
+                    --njob ${njob} \
+                    --gpuid_list ${gpuid_list} \
+                    --data_path_and_name_and_type "${_data}/${scp},speech,${type}" \
+                    --data_path_and_name_and_type "${_data}/$profile_scp,profile,npy" \
+                    --key_file "${_logdir}"/keys.JOB.scp \
+                    --asr_train_config "${sa_asr_exp}"/config.yaml \
+                    --asr_model_file "${sa_asr_exp}"/"${inference_sa_asr_model}" \
+                    --output_dir "${_logdir}"/output.JOB \
+                    --mode sa_asr \
+                    ${_opts}
+
+            for f in token token_int score text; do
+                if [ -f "${_logdir}/output.1/1best_recog/${f}" ]; then
+                    for i in $(seq "${_nj}"); do
+                        cat "${_logdir}/output.${i}/1best_recog/${f}"
+                    done | sort -k1 >"${_dir}/${f}"
+                fi
+            done
+            sed 's/\$//g' ${_data}/text > ${_data}/text_nosrc
+            sed 's/\$//g' ${_dir}/text > ${_dir}/text_nosrc
+            python utils/proce_text.py ${_data}/text_nosrc ${_data}/text.proc
+            python utils/proce_text.py ${_dir}/text_nosrc ${_dir}/text.proc
+
+            python utils/compute_wer.py ${_data}/text.proc ${_dir}/text.proc ${_dir}/text.cer
+            tail -n 3 ${_dir}/text.cer > ${_dir}/text.cer.txt
+            cat ${_dir}/text.cer.txt
+
+            python local/process_text_spk_merge.py ${_dir}
+            python local/process_text_spk_merge.py ${_data}
+            
+            python local/compute_cpcer.py ${_data}/text_spk_merge ${_dir}/text_spk_merge ${_dir}/text.cpcer
+            tail -n 1 ${_dir}/text.cpcer > ${_dir}/text.cpcer.txt
+            cat ${_dir}/text.cpcer.txt
         done
-        sed 's/\$//g' ${_data}/text > ${_data}/text_nosrc
-        sed 's/\$//g' ${_dir}/text > ${_dir}/text_nosrc
-        python utils/proce_text.py ${_data}/text_nosrc ${_data}/text.proc
-        python utils/proce_text.py ${_dir}/text_nosrc ${_dir}/text.proc
-
-        python utils/compute_wer.py ${_data}/text.proc ${_dir}/text.proc ${_dir}/text.cer
-        tail -n 3 ${_dir}/text.cer > ${_dir}/text.cer.txt
-        cat ${_dir}/text.cer.txt
-
-        python local/process_text_spk_merge.py ${_dir}
-        python local/process_text_spk_merge.py ${_data}
-        
-        python local/compute_cpcer.py ${_data}/text_spk_merge ${_dir}/text_spk_merge ${_dir}/text.cpcer
-        tail -n 1 ${_dir}/text.cpcer > ${_dir}/text.cpcer.txt
-        cat ${_dir}/text.cpcer.txt
     done
 fi
 
-# Testing Stage
 if [ ${stage} -le 7 ] && [ ${stop_stage} -ge 7 ]; then
-    echo "stage 7: Inference with cluster profile"
-    for dset in ${test_sets}; do
+    echo "stage 7: Inference test 2023"
+    for x in ${test_2023}; do
         asr_exp=${exp_dir}/${model_dir}
         inference_tag="$(basename "${inference_config}" .yaml)"
-        _dir="${asr_exp}/${inference_tag}_cluster/${inference_asr_model}/${dset}"
+        _dir="${asr_exp}/${inference_tag}_cluster/${inference_asr_model}/${x}"
         _logdir="${_dir}/logdir"
         if [ -d ${_dir} ]; then
             echo "${_dir} is already exists. if you want to decode again, please delete this dir first."
             exit 0
         fi
         mkdir -p "${_logdir}"
-        _data="${feats_dir}/${dset}"
+        _data="${feats_dir}/${x}"
         key_file=${_data}/${scp}
         num_scp_file="$(<${key_file} wc -l)"
         _nj=$([ $inference_nj -le $num_scp_file ] && echo "$inference_nj" || echo "$num_scp_file")
@@ -380,6 +402,7 @@ if [ ${stage} -le 7 ] && [ ${stop_stage} -ge 7 ]; then
                 --gpuid_list ${gpuid_list} \
                 --data_path_and_name_and_type "${_data}/${scp},speech,${type}" \
                 --data_path_and_name_and_type "${_data}/cluster_profile_infer.scp,profile,npy" \
+                --cmvn_file ${feats_dir}/${train_set}/cmvn/cmvn.mvn \
                 --key_file "${_logdir}"/keys.JOB.scp \
                 --asr_train_config "${sa_asr_exp}"/config.yaml \
                 --asr_model_file "${sa_asr_exp}"/"${inference_sa_asr_model}" \
@@ -394,20 +417,8 @@ if [ ${stage} -le 7 ] && [ ${stop_stage} -ge 7 ]; then
                 done | sort -k1 >"${_dir}/${f}"
             fi
         done
-        sed 's/\$//g' ${_data}/text > ${_data}/text_nosrc
-        sed 's/\$//g' ${_dir}/text > ${_dir}/text_nosrc
-        python utils/proce_text.py ${_data}/text_nosrc ${_data}/text.proc
-        python utils/proce_text.py ${_dir}/text_nosrc ${_dir}/text.proc
-
-        python utils/compute_wer.py ${_data}/text.proc ${_dir}/text.proc ${_dir}/text.cer
-        tail -n 3 ${_dir}/text.cer > ${_dir}/text.cer.txt
-        cat ${_dir}/text.cer.txt
 
         python local/process_text_spk_merge.py ${_dir}
-        python local/process_text_spk_merge.py ${_data}
-        
-        python local/compute_cpcer.py ${_data}/text_spk_merge ${_dir}/text_spk_merge ${_dir}/text.cpcer
-        tail -n 1 ${_dir}/text.cpcer > ${_dir}/text.cpcer.txt
-        cat ${_dir}/text.cpcer.txt
+
     done
 fi
