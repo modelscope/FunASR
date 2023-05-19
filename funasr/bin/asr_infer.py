@@ -9,6 +9,7 @@ import sys
 import time
 import copy
 import os
+import re
 import codecs
 import tempfile
 import requests
