@@ -18,7 +18,6 @@ from funasr.utils.get_default_kwargs import get_default_kwargs
 
 class DefaultFrontend(AbsFrontend):
     """Conventional frontend structure for ASR.
-
     Stft -> WPE -> MVDR-Beamformer -> Power-spec -> Mel-Fbank -> CMVN
     """
 
@@ -142,7 +141,6 @@ class DefaultFrontend(AbsFrontend):
 
 class MultiChannelFrontend(AbsFrontend):
     """Conventional frontend structure for ASR.
-
     Stft -> WPE -> MVDR-Beamformer -> Power-spec -> Mel-Fbank -> CMVN
     """
 

@@ -34,9 +34,7 @@ Ref to [docs](https://docs.conda.io/en/latest/miniconda.html#windows-installers)
 ```sh
 pip install torch torchaudio
 ```
-
-For more details about torch, please see [https://pytorch.org/get-started/locally](https://pytorch.org/get-started/locally)
-
+If there exists CUDAs in your environments, you should install the pytorch with the version matching the CUDA. The matching list could be found in [docs](https://pytorch.org/get-started/previous-versions/).
 ### Install funasr
 
 #### Install from pip

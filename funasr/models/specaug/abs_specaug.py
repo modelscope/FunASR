@@ -6,9 +6,7 @@ import torch
 
 class AbsSpecAug(torch.nn.Module):
     """Abstract class for the augmentation of spectrogram
-
     The process-flow:
-
     Frontend  -> SpecAug -> Normalization -> Encoder -> Decoder
     """
 

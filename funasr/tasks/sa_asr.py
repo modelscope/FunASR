@@ -70,11 +70,11 @@ from funasr.models.preencoder.sinc import LightweightSincConvs
 from funasr.models.specaug.abs_specaug import AbsSpecAug
 from funasr.models.specaug.specaug import SpecAug
 from funasr.models.specaug.specaug import SpecAugLFR
+from funasr.models.base_model import FunASRModel
 from funasr.modules.subsampling import Conv1dSubsampling
 from funasr.tasks.abs_task import AbsTask
 from funasr.text.phoneme_tokenizer import g2p_choices
 from funasr.torch_utils.initialize import initialize
-from funasr.train.abs_espnet_model import AbsESPnetModel
 from funasr.train.class_choices import ClassChoices
 from funasr.train.trainer import Trainer
 from funasr.utils.get_default_kwargs import get_default_kwargs
@@ -129,7 +129,7 @@ model_choices = ClassChoices(
         mfcca=MFCCA,
         timestamp_prediction=TimestampPredictor,
     ),
-    type_check=AbsESPnetModel,
+    type_check=FunASRModel,
     default="asr",
 )
 preencoder_choices = ClassChoices(

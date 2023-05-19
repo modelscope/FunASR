@@ -16,30 +16,27 @@ infer_cmd=utils/run.pl
 feats_dir="../DATA" #feature output dictionary
 exp_dir="."
 lang=en
-dumpdir=dump/fbank
-feats_type=fbank
 token_type=bpe
-dataset_type=large
-scp=feats.scp
-type=kaldi_ark
-stage=3
-stop_stage=4
+type=sound
+scp=wav.scp
+speed_perturb="0.9 1.0 1.1"
+stage=0
+stop_stage=5
 
 # feature configuration
 feats_dim=80
-sample_frequency=16000
-nj=100
-speed_perturb="0.9,1.0,1.1"
+nj=64
 
 # data
-data_librispeech=
+raw_data=
+data_url=www.openslr.org/resources/12
 
 # bpe model
 nbpe=5000
 bpemode=unigram
 
 # exp tag
-tag=""
+tag="exp1"
 
 . utils/parse_options.sh || exit 1;
 
@@ -54,12 +51,11 @@ valid_set=dev
 test_sets="test_clean test_other dev_clean dev_other"
 
 asr_config=conf/train_asr_conformer.yaml
-#asr_config=conf/train_asr_conformer_uttnorm.yaml
-model_dir="baseline_$(basename "${asr_config}" .yaml)_${feats_type}_${lang}_${token_type}_${tag}"
+model_dir="baseline_$(basename "${asr_config}" .yaml)_${lang}_${token_type}_${tag}"
 
-inference_config=conf/decode_asr_transformer.yaml
-#inference_config=conf/decode_asr_transformer_beam60_ctc0.3.yaml
-inference_asr_model=valid.acc.ave_10best.pth
+inference_config=conf/decode_asr_transformer_ctc0.3_beam5yaml
+#inference_config=conf/decode_asr_transformer_ctc0.3_beam60.yaml
+inference_asr_model=valid.acc.ave_10best.pb
 
 # you can set gpu num for decoding here
 gpuid_list=$CUDA_VISIBLE_DEVICES  # set gpus for decoding, the same as training stage by default
@@ -73,101 +69,63 @@ else
     _ngpu=0
 fi
 
-if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
-    echo "stage 0: Data preparation"
-    # Data preparation
-    for x in train-clean-100 train-clean-360 train-other-500 dev-clean dev-other test-clean test-other; do
-        local/data_prep_librispeech.sh ${data_librispeech}/LibriSpeech/${x} ${feats_dir}/data/${x//-/_}
+
+if [ ${stage} -le -1 ] && [ ${stop_stage} -ge -1 ]; then
+    echo "stage -1: Data Download"
+    for part in dev-clean test-clean dev-other test-other train-clean-100 train-clean-360 train-other-500; do
+        local/download_and_untar.sh ${raw_data} ${data_url} ${part}
     done
 fi
 
-feat_train_dir=${feats_dir}/${dumpdir}/$train_set; mkdir -p ${feat_train_dir}
-feat_dev_clean_dir=${feats_dir}/${dumpdir}/dev_clean; mkdir -p ${feat_dev_clean_dir}
-feat_dev_other_dir=${feats_dir}/${dumpdir}/dev_other; mkdir -p ${feat_dev_other_dir}
-feat_test_clean_dir=${feats_dir}/${dumpdir}/test_clean; mkdir -p ${feat_test_clean_dir}
-feat_test_other_dir=${feats_dir}/${dumpdir}/test_other; mkdir -p ${feat_test_other_dir}
-feat_dev_dir=${feats_dir}/${dumpdir}/$valid_set; mkdir -p ${feat_dev_dir}
-if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
-    echo "stage 1: Feature Generation"
-    # compute fbank features
-    fbankdir=${feats_dir}/fbank
-    for x in dev_clean dev_other test_clean test_other; do
-        utils/compute_fbank.sh --cmd "$train_cmd" --nj 1 --max_lengths 3000 --feats_dim ${feats_dim} --sample_frequency ${sample_frequency} \
-            ${feats_dir}/data/${x} ${exp_dir}/exp/make_fbank/${x} ${fbankdir}/${x}
-        utils/fix_data_feat.sh ${fbankdir}/${x}
+if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
+    echo "stage 0: Data preparation"
+    # Data preparation
+    for x in dev-clean dev-other test-clean test-other train-clean-100 train-clean-360 train-other-500; do
+        local/data_prep.sh ${raw_data}/LibriSpeech/${x} ${feats_dir}/data/${x//-/_}
     done
-
-    mkdir ${feats_dir}/data/$train_set
+    mkdir $feats_dir/data/$valid_set
+    dev_sets="dev_clean dev_other"
+    for file in wav.scp text; do
+        ( for f in $dev_sets; do cat $feats_dir/data/$f/$file; done ) | sort -k1 > $feats_dir/data/$valid_set/$file || exit 1;
+    done
+    mkdir $feats_dir/data/$train_set
     train_sets="train_clean_100 train_clean_360 train_other_500"
     for file in wav.scp text; do
         ( for f in $train_sets; do cat $feats_dir/data/$f/$file; done ) | sort -k1 > $feats_dir/data/$train_set/$file || exit 1;
     done
-    utils/compute_fbank.sh --cmd "$train_cmd" --nj $nj --max_lengths 3000 --feats_dim ${feats_dim} --sample_frequency ${sample_frequency} --speed_perturb ${speed_perturb} \
-    ${feats_dir}/data/$train_set ${exp_dir}/exp/make_fbank/$train_set ${fbankdir}/$train_set
-    utils/fix_data_feat.sh ${fbankdir}/$train_set
-
-    # compute global cmvn
-    utils/compute_cmvn.sh --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} \
-        ${fbankdir}/$train_set ${exp_dir}/exp/make_fbank/$train_set
-
-    # apply cmvn
-    utils/apply_cmvn.sh --cmd "$train_cmd" --nj $nj \
-        ${fbankdir}/$train_set ${fbankdir}/$train_set/cmvn.json ${exp_dir}/exp/make_fbank/$train_set ${feat_train_dir}
-    utils/apply_cmvn.sh --cmd "$train_cmd" --nj 1 \
-        ${fbankdir}/dev_clean ${fbankdir}/$train_set/cmvn.json ${exp_dir}/exp/make_fbank/dev_clean ${feat_dev_clean_dir}
-    utils/apply_cmvn.sh --cmd "$train_cmd" --nj 1\
-        ${fbankdir}/dev_other ${fbankdir}/$train_set/cmvn.json ${exp_dir}/exp/make_fbank/dev_other ${feat_dev_other_dir}
-    utils/apply_cmvn.sh --cmd "$train_cmd" --nj 1 \
-        ${fbankdir}/test_clean ${fbankdir}/$train_set/cmvn.json ${exp_dir}/exp/make_fbank/test_clean ${feat_test_clean_dir}
-    utils/apply_cmvn.sh --cmd "$train_cmd" --nj 1 \
-        ${fbankdir}/test_other ${fbankdir}/$train_set/cmvn.json ${exp_dir}/exp/make_fbank/test_other ${feat_test_other_dir}
-
-    cp ${fbankdir}/$train_set/text ${fbankdir}/$train_set/speech_shape ${fbankdir}/$train_set/text_shape ${feat_train_dir}
-    cp ${fbankdir}/dev_clean/text ${fbankdir}/dev_clean/speech_shape ${fbankdir}/dev_clean/text_shape ${feat_dev_clean_dir}
-    cp ${fbankdir}/dev_other/text ${fbankdir}/dev_other/speech_shape ${fbankdir}/dev_other/text_shape ${feat_dev_other_dir}
-    cp ${fbankdir}/test_clean/text ${fbankdir}/test_clean/speech_shape ${fbankdir}/test_clean/text_shape ${feat_test_clean_dir}
-    cp ${fbankdir}/test_other/text ${fbankdir}/test_other/speech_shape ${fbankdir}/test_other/text_shape ${feat_test_other_dir}
-
-    dev_sets="dev_clean dev_other"
-    for file in feats.scp text speech_shape text_shape; do
-        ( for f in $dev_sets; do cat $feats_dir/${dumpdir}/$f/$file; done ) | sort -k1 > $feat_dev_dir/$file || exit 1;
-    done
-
-    #generate ark list
-    utils/gen_ark_list.sh --cmd "$train_cmd" --nj $nj ${feat_train_dir} ${fbankdir}/${train_set} ${feat_train_dir}
-    utils/gen_ark_list.sh --cmd "$train_cmd" --nj $nj ${feat_dev_dir} ${fbankdir}/${valid_set} ${feat_dev_dir}
 fi
 
-dict=${feats_dir}/data/lang_char/${train_set}_${bpemode}${nbpe}_units.txt
+if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
+    echo "stage 1: Feature and CMVN Generation"
+    utils/compute_cmvn.sh --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} ${feats_dir}/data/${train_set}
+fi
+
+token_list=${feats_dir}/data/lang_char/${train_set}_${bpemode}${nbpe}_units.txt
 bpemodel=${feats_dir}/data/lang_char/${train_set}_${bpemode}${nbpe}
-echo "dictionary: ${dict}"
+echo "dictionary: ${token_list}"
 if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     ### Task dependent. You have to check non-linguistic symbols used in the corpus.
     echo "stage 2: Dictionary and Json Data Preparation"
     mkdir -p ${feats_dir}/data/lang_char/
-    echo "<blank>" > ${dict}
-    echo "<s>" >> ${dict}
-    echo "</s>" >> ${dict}
+    echo "<blank>" > ${token_list}
+    echo "<s>" >> ${token_list}
+    echo "</s>" >> ${token_list}
     cut -f 2- -d" " ${feats_dir}/data/${train_set}/text > ${feats_dir}/data/lang_char/input.txt
-    spm_train --input=${feats_dir}/data/lang_char/input.txt --vocab_size=${nbpe} --model_type=${bpemode} --model_prefix=${bpemodel} --input_sentence_size=100000000
-    spm_encode --model=${bpemodel}.model --output_format=piece < ${feats_dir}/data/lang_char/input.txt | tr ' ' '\n' | sort | uniq | awk '{print $0}' >> ${dict}
-    echo "<unk>" >> ${dict}
-    wc -l ${dict}
-
-    vocab_size=$(cat ${dict} | wc -l)
-    awk -v v=,${vocab_size} '{print $0v}' ${feat_train_dir}/text_shape > ${feat_train_dir}/text_shape.char
-    awk -v v=,${vocab_size} '{print $0v}' ${feat_dev_dir}/text_shape > ${feat_dev_dir}/text_shape.char
-    mkdir -p ${feats_dir}/asr_stats_fbank_zh_char/$train_set
-    mkdir -p ${feats_dir}/asr_stats_fbank_zh_char/$valid_set
-    cp ${feat_train_dir}/speech_shape ${feat_train_dir}/text_shape ${feat_train_dir}/text_shape.char ${feats_dir}/asr_stats_fbank_zh_char/$train_set
-    cp ${feat_dev_dir}/speech_shape ${feat_dev_dir}/text_shape ${feat_dev_dir}/text_shape.char ${feats_dir}/asr_stats_fbank_zh_char/$valid_set
+    local/spm_train.py --input=${feats_dir}/data/lang_char/input.txt --vocab_size=${nbpe} --model_type=${bpemode} --model_prefix=${bpemodel} --input_sentence_size=100000000
+    local/spm_encode.py --model=${bpemodel}.model --output_format=piece < ${feats_dir}/data/lang_char/input.txt | tr ' ' '\n' | sort | uniq | awk '{print $0}' >> ${token_list}
+    echo "<unk>" >> ${token_list}
 fi
 
-
-# Training Stage
+# LM Training Stage
 world_size=$gpu_num  # run on one machine
 if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
-    echo "stage 3: Training"
+    echo "stage 3: LM Training"
+fi
+
+# ASR Training Stage
+world_size=$gpu_num  # run on one machine
+if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
+    echo "stage 4: ASR Training"
     mkdir -p ${exp_dir}/exp/${model_dir}
     mkdir -p ${exp_dir}/exp/${model_dir}/log
     INIT_FILE=${exp_dir}/exp/${model_dir}/ddp_init
@@ -181,20 +139,22 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
             rank=$i
             local_rank=$i
             gpu_id=$(echo $CUDA_VISIBLE_DEVICES | cut -d',' -f$[$i+1])
-            asr_train.py \
+            train.py \
+                --task_name asr \
                 --gpu_id $gpu_id \
                 --use_preprocessor true \
                 --split_with_space false \
                 --bpemodel ${bpemodel}.model \
                 --token_type $token_type \
-                --dataset_type $dataset_type \
-                --token_list $dict \
-                --train_data_file $feats_dir/$dumpdir/${train_set}/ark_txt.scp \
-                --valid_data_file $feats_dir/$dumpdir/${valid_set}/ark_txt.scp \
+                --token_list $token_list \
+                --data_dir ${feats_dir}/data \
+                --train_set ${train_set} \
+                --valid_set ${valid_set} \
+                --cmvn_file ${feats_dir}/data/${train_set}/cmvn/cmvn.mvn \
+                --speed_perturb ${speed_perturb} \
                 --resume true \
                 --output_dir ${exp_dir}/exp/${model_dir} \
                 --config $asr_config \
-                --input_size $feats_dim \
                 --ngpu $gpu_num \
                 --num_worker_count $count \
                 --multiprocessing_distributed true \
@@ -208,8 +168,8 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
 fi
 
 # Testing Stage
-if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
-    echo "stage 4: Inference"
+if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
+    echo "stage 5: Inference"
     for dset in ${test_sets}; do
         asr_exp=${exp_dir}/exp/${model_dir}
         inference_tag="$(basename "${inference_config}" .yaml)"
@@ -220,7 +180,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
             exit 0
         fi
         mkdir -p "${_logdir}"
-        _data="${feats_dir}/${dumpdir}/${dset}"
+        _data="${feats_dir}/data/${dset}"
         key_file=${_data}/${scp}
         num_scp_file="$(<${key_file} wc -l)"
         _nj=$([ $inference_nj -le $num_scp_file ] && echo "$inference_nj" || echo "$num_scp_file")
@@ -241,6 +201,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
                 --njob ${njob} \
                 --gpuid_list ${gpuid_list} \
                 --data_path_and_name_and_type "${_data}/${scp},speech,${type}" \
+                --cmvn_file ${feats_dir}/data/${train_set}/cmvn/cmvn.mvn \
                 --key_file "${_logdir}"/keys.JOB.scp \
                 --asr_train_config "${asr_exp}"/config.yaml \
                 --asr_model_file "${asr_exp}"/"${inference_asr_model}" \

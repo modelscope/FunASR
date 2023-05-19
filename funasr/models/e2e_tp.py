@@ -17,9 +17,8 @@ from funasr.models.predictor.cif import mae_loss
 from funasr.modules.add_sos_eos import add_sos_eos
 from funasr.modules.nets_utils import make_pad_mask, pad_list
 from funasr.torch_utils.device_funcs import force_gatherable
-from funasr.train.abs_espnet_model import AbsESPnetModel
+from funasr.models.base_model import FunASRModel
 from funasr.models.predictor.cif import CifPredictorV3
-
 
 if LooseVersion(torch.__version__) >= LooseVersion("1.6.0"):
     from torch.cuda.amp import autocast
@@ -30,7 +29,7 @@ else:
         yield
 
 
-class TimestampPredictor(AbsESPnetModel):
+class TimestampPredictor(FunASRModel):
     """
     Author: Speech Lab of DAMO Academy, Alibaba Group
     """
@@ -56,7 +55,7 @@ class TimestampPredictor(AbsESPnetModel):
         self.predictor_bias = predictor_bias
         self.criterion_pre = mae_loss()
         self.token_list = token_list
-    
+
     def forward(
             self,
             speech: torch.Tensor,
@@ -65,7 +64,6 @@ class TimestampPredictor(AbsESPnetModel):
             text_lengths: torch.Tensor,
     ) -> Tuple[torch.Tensor, Dict[str, torch.Tensor], torch.Tensor]:
         """Frontend + Encoder + Decoder + Calc loss
-
         Args:
                 speech: (Batch, Length, ...)
                 speech_lengths: (Batch, )
@@ -113,7 +111,6 @@ class TimestampPredictor(AbsESPnetModel):
             self, speech: torch.Tensor, speech_lengths: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Frontend + Encoder. Note that this method is used by asr_inference.py
-
         Args:
                 speech: (Batch, Length, ...)
                 speech_lengths: (Batch, )
@@ -128,7 +125,7 @@ class TimestampPredictor(AbsESPnetModel):
         encoder_out, encoder_out_lens, _ = self.encoder(feats, feats_lengths)
 
         return encoder_out, encoder_out_lens
-    
+
     def _extract_feats(
             self, speech: torch.Tensor, speech_lengths: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
@@ -151,8 +148,8 @@ class TimestampPredictor(AbsESPnetModel):
         encoder_out_mask = (~make_pad_mask(encoder_out_lens, maxlen=encoder_out.size(1))[:, None, :]).to(
             encoder_out.device)
         ds_alphas, ds_cif_peak, us_alphas, us_peaks = self.predictor.get_upsample_timestamp(encoder_out,
-                                                                                               encoder_out_mask,
-                                                                                               token_num)
+                                                                                            encoder_out_mask,
+                                                                                            token_num)
         return ds_alphas, ds_cif_peak, us_alphas, us_peaks
 
     def collect_feats(
