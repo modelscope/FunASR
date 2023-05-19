@@ -285,7 +285,7 @@ python ws_client.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <s
 </div>
 <p>Loadding from wav.scp(kaldi style)</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># --chunk_size, &quot;5,10,5&quot;=600ms, &quot;8,8,4&quot;=480ms</span>
-python ws_client.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --chunk_size <span class="s2">&quot;5,10,5&quot;</span> --audio_in <span class="s2">&quot;./data/wav.scp&quot;</span> --output_dir <span class="s2">&quot;./results&quot;</span>
+python ws_client.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --chunk_size <span class="s2">&quot;5,10,5&quot;</span> --audio_in <span class="s2">&quot;./data/wav.scp&quot;</span> --words_max_print <span class="m">100</span> --output_dir <span class="s2">&quot;./results&quot;</span>
 </pre></div>
 </div>
 </div>
@@ -293,12 +293,12 @@ python ws_client.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <s
 <h5>ASR offline/online 2pass client<a class="headerlink" href="#asr-offline-online-2pass-client" title="Permalink to this headline"></a></h5>
 <p>Recording from mircrophone</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># --chunk_size, &quot;5,10,5&quot;=600ms, &quot;8,8,4&quot;=480ms</span>
-python ws_client.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --chunk_size <span class="s2">&quot;8,8,4&quot;</span>
+python ws_client.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --chunk_size <span class="s2">&quot;8,8,4&quot;</span> --words_max_print <span class="m">10000</span>
 </pre></div>
 </div>
 <p>Loadding from wav.scp(kaldi style)</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># --chunk_size, &quot;5,10,5&quot;=600ms, &quot;8,8,4&quot;=480ms</span>
-python ws_client.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --chunk_size <span class="s2">&quot;8,8,4&quot;</span> --audio_in <span class="s2">&quot;./data/wav.scp&quot;</span> --output_dir <span class="s2">&quot;./results&quot;</span>
+python ws_client.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --chunk_size <span class="s2">&quot;8,8,4&quot;</span> --audio_in <span class="s2">&quot;./data/wav.scp&quot;</span> --words_max_print <span class="m">10000</span> --output_dir <span class="s2">&quot;./results&quot;</span>
 </pre></div>
 </div>
 </div>
