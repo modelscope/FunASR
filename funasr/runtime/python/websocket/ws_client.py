@@ -47,7 +47,7 @@ parser.add_argument("--test_thread_num",
                     help="test_thread_num")
 parser.add_argument("--words_max_print",
                     type=int,
-                    default=100,
+                    default=10000,
                     help="chunk")
 parser.add_argument("--output_dir",
                     type=str,

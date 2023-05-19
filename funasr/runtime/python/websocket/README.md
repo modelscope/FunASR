@@ -110,19 +110,19 @@ python ws_client.py --host "0.0.0.0" --port 10095 --chunk_size "5,10,5" --words_
 Loadding from wav.scp(kaldi style)
 ```shell
 # --chunk_size, "5,10,5"=600ms, "8,8,4"=480ms
-python ws_client.py --host "0.0.0.0" --port 10095 --chunk_size "5,10,5" --audio_in "./data/wav.scp" --words_max_print 100 --output_dir "./results"
+python ws_client.py --host "0.0.0.0" --port 10095 --chunk_size "5,10,5" --audio_in "./data/wav.scp" --output_dir "./results"
 ```
 
 ##### ASR offline/online 2pass client
 Recording from mircrophone
 ```shell
 # --chunk_size, "5,10,5"=600ms, "8,8,4"=480ms
-python ws_client.py --host "0.0.0.0" --port 10095 --chunk_size "8,8,4" --words_max_print 10000
+python ws_client.py --host "0.0.0.0" --port 10095 --chunk_size "8,8,4"
 ```
 Loadding from wav.scp(kaldi style)
 ```shell
 # --chunk_size, "5,10,5"=600ms, "8,8,4"=480ms
-python ws_client.py --host "0.0.0.0" --port 10095 --chunk_size "8,8,4" --audio_in "./data/wav.scp" --words_max_print 10000 --output_dir "./results"
+python ws_client.py --host "0.0.0.0" --port 10095 --chunk_size "8,8,4" --audio_in "./data/wav.scp" --output_dir "./results"
 ```
 ## Acknowledge
 1. This project is maintained by [FunASR community](https://github.com/alibaba-damo-academy/FunASR).
