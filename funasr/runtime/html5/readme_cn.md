@@ -41,14 +41,12 @@ python ws_server_online.py --certfile server.crt --keyfile server.key  --port 59
 ```shell
 python ws_server_online.py  --port 5921
 ```
-## 3.修改wsconnecter.js里asr接口地址
-wsconnecter.js里配置online asr服务地址路径，这里配置的是wss端口
-var Uri = "wss://xxx:xxx/" 
 
-## 4.浏览器打开地址测试
+## 3.浏览器打开地址测试,请根据实际ip填写
 https://127.0.0.1:1337/static/index.html
 
-
+## 4.修改网页里asr接口地址
+直接网页里修改后，点击开始即可使用。注意h5服务和asr服务需要在同一个服务器上，否则存在跨域问题。
 
 
 ## 自行生成证书

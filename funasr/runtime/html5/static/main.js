@@ -32,7 +32,11 @@ btnStop.disabled = true;
  
 var rec_text=""
 var info_div = document.getElementById('info_div');
- 
+
+var now_ipaddress=window.location.href;
+now_ipaddress=now_ipaddress.replace("https://","wss://");   
+now_ipaddress=now_ipaddress.replace("static/index.html","");   
+document.getElementById('wssip').value=now_ipaddress;
 
 // 语音识别结果; 对jsonMsg数据解析,将识别结果附加到编辑框中
 function getJsonMessage( jsonMsg ) {
@@ -59,23 +63,30 @@ function getConnState( connState ) {
 	} else if ( connState === 2 ) {
 		stop();
 		console.log( 'connecttion error' );
-		setTimeout(function(){btnStart.disabled = true;info_div.innerHTML='connecttion error';}, 4000 );
+		 
+		alert("连接地址"+document.getElementById('wssip').value+"失败,请检查asr地址和端口，并确保h5服务和asr服务在同一个域内。或换个浏览器试试。");
+		btnStart.disabled = true;
+		info_div.innerHTML='请点击开始';
 	}
 }
 
 
 // 识别启动、停止、清空操作
 function start() {
-	info_div.innerHTML="正在连接asr服务器，请等待...";
+	
 	// 清除显示
 	clear();
 	//控件状态更新
  	    
-	isRec = true;
-	btnStart.disabled = true;
-	btnStop.disabled = false;
+
 	//启动连接
-	wsconnecter.wsStart();
+	var ret=wsconnecter.wsStart();
+	if(ret==1){
+		isRec = true;
+		btnStart.disabled = true;
+		btnStop.disabled = false;
+	    info_div.innerHTML="正在连接asr服务器，请等待...";
+	}
 }
 
  
