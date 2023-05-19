@@ -41,13 +41,12 @@ python ws_server_online.py --certfile server.crt --keyfile server.key  --port 59
 ```shell
 python ws_server_online.py  --port 5921
 ```
-## 3.modify asr address in wsconnecter.js according to your environment
-asr address in wsconnecter.js must be wss, just like
-var Uri = "wss://xxx:xxx/" 
 
-## 4.open browser to access html5 demo
+## 3.open browser to access html5 demo
 https://youraddress:port/static/index.html
 
+## 4.modify asr address in html according to your environment
+asr address in index.html must be wss
 
 
 
