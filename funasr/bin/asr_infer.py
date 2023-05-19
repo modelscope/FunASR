@@ -828,9 +828,16 @@ class Speech2TextParaformerOnline:
 
                 # Change integer-ids to tokens
                 token = self.converter.ids2tokens(token_int)
-                token = " ".join(token)
-
-                results.append(token)
+                postprocessed_result = ""
+                for item in token:
+                    if item.endswith('@@'):
+                        postprocessed_result += item[:-2]
+                    elif re.match('^[a-zA-Z]+$', item):
+                        postprocessed_result += item + " "
+                    else:
+                        postprocessed_result += item
+                        
+                results.append(postprocessed_result)
 
         # assert check_return_type(results)
         return results
