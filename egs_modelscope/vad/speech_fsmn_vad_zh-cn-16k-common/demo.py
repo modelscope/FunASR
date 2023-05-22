@@ -3,7 +3,7 @@ from modelscope.utils.constant import Tasks
 
 if __name__ == '__main__':
     audio_in = 'https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/vad_example.wav'
-    output_dir = None
+    output_dir = "./results"
     inference_pipeline = pipeline(
         task=Tasks.voice_activity_detection,
         model="damo/speech_fsmn_vad_zh-cn-16k-common-pytorch",

@@ -7,7 +7,7 @@ logger.setLevel(logging.CRITICAL)
 import soundfile
 
 if __name__ == '__main__':
-    output_dir = None
+    output_dir = "./results"
     inference_pipeline = pipeline(
         task=Tasks.voice_activity_detection,
         model="damo/speech_fsmn_vad_zh-cn-16k-common-pytorch",
