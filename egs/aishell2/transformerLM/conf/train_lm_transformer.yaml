@@ -13,7 +13,7 @@ grad_clip: 5.0
 batch_type: numel
 batch_bins: 6000000
 accum_grad: 1
-max_epoch: 15  # 15epoch is enougth
+max_epoch: 15  # 15epoch is enough
 
 optim: adam
 optim_conf:
