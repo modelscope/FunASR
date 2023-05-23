@@ -45,7 +45,7 @@ Here we provided several pretrained models on different datasets. The details of
 |                [UniASR Burmese](https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-my-16k-common-vocab696-pytorch/summary)                 |       MY        | Alibaba Speech Data (1000 hours)  |    696     |    95M    |     Online     | UniASR streaming offline unifying models                                                                                                    |
 |                [UniASR Hebrew](https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-he-16k-common-vocab1085-pytorch/summary)                 |       HE        | Alibaba Speech Data (1000 hours)  |    1085    |    95M    |     Online     | UniASR streaming offline unifying models                                                                                                    |
 |              [UniASR Urdu](https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-ur-16k-common-vocab877-pytorch/summary)                      |       UR        | Alibaba Speech Data (1000 hours)  |    877     |    95M    |     Online     | UniASR streaming offline unifying models                                                                                                    |
-
+|              [UniASR Turkish](https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-tr-16k-common-vocab1582-pytorch/summary)                      |       TR        | Alibaba Speech Data (1000 hours)  |    1582     |    95M    |     Online     | UniASR streaming offline unifying models                                                                                                    |
 
 
 #### Conformer Models
