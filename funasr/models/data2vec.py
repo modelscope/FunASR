@@ -18,7 +18,7 @@ from funasr.models.frontend.abs_frontend import AbsFrontend
 from funasr.models.preencoder.abs_preencoder import AbsPreEncoder
 from funasr.models.specaug.abs_specaug import AbsSpecAug
 from funasr.torch_utils.device_funcs import force_gatherable
-from funasr.train.abs_espnet_model import AbsESPnetModel
+from funasr.models.base_model import FunASRModel
 
 if LooseVersion(torch.__version__) >= LooseVersion("1.6.0"):
     from torch.cuda.amp import autocast
@@ -29,7 +29,7 @@ else:
         yield
 
 
-class Data2VecPretrainModel(AbsESPnetModel):
+class Data2VecPretrainModel(FunASRModel):
     """Data2Vec Pretrain model"""
 
     def __init__(
@@ -57,7 +57,6 @@ class Data2VecPretrainModel(AbsESPnetModel):
             speech_lengths: torch.Tensor,
     ) -> Tuple[torch.Tensor, Dict[str, torch.Tensor], torch.Tensor]:
         """Frontend + Encoder + Calc loss
-
         Args:
             speech: (Batch, Length, ...)
             speech_lengths: (Batch, )
@@ -106,7 +105,6 @@ class Data2VecPretrainModel(AbsESPnetModel):
             speech_lengths: torch.Tensor,
     ):
         """Frontend + Encoder.
-
         Args:
             speech: (Batch, Length, ...)
             speech_lengths: (Batch, )

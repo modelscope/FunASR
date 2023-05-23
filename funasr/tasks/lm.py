@@ -14,10 +14,10 @@ from typeguard import check_return_type
 
 from funasr.datasets.collate_fn import CommonCollateFn
 from funasr.datasets.preprocessor import CommonPreprocessor
-from funasr.lm.abs_model import AbsLM
-from funasr.lm.abs_model import LanguageModel
-from funasr.lm.seq_rnn_lm import SequentialRNNLM
-from funasr.lm.transformer_lm import TransformerLM
+from funasr.train.abs_model import AbsLM
+from funasr.train.abs_model import LanguageModel
+from funasr.models.seq_rnn_lm import SequentialRNNLM
+from funasr.models.transformer_lm import TransformerLM
 from funasr.tasks.abs_task import AbsTask
 from funasr.text.phoneme_tokenizer import g2p_choices
 from funasr.torch_utils.initialize import initialize
@@ -206,6 +206,4 @@ class LMTask(AbsTask):
         # 3. Initialize
         if args.init is not None:
             initialize(model, args.init)
-
-        assert check_return_type(model)
         return model

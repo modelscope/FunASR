@@ -83,8 +83,7 @@ def build_trainer(modelscope_dict,
         finetune_configs = yaml.safe_load(f)
         # set data_types
         if dataset_type == "large":
-            if 'data_types' not in finetune_configs['dataset_conf']:
-                finetune_configs["dataset_conf"]["data_types"] = "sound,text"
+            finetune_configs["dataset_conf"]["data_types"] = "sound,text"
     finetune_configs = update_dct(configs, finetune_configs)
     for key, value in finetune_configs.items():
         if hasattr(args, key):

@@ -127,6 +127,8 @@ For example:
 ### funasr-onnx-offline-rtf
 ```shell
 ./funasr-onnx-offline-rtf     --model-dir <string> [--quantize <string>]
+                              [--vad-dir <string>] [--vad-quant <string>]
+                              [--punc-dir <string>] [--punc-quant <string>]
                               --wav-path <string> --thread-num <int32_t>
                               [--] [--version] [-h]
 Where:
@@ -136,6 +138,17 @@ Where:
      (required)  the model path, which contains model.onnx, config.yaml, am.mvn
    --quantize <string>
      false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir
+
+   --vad-dir <string>
+     the vad model path, which contains model.onnx, vad.yaml, vad.mvn
+   --vad-quant <string>
+     false (Default), load the model of model.onnx in vad_dir. If set true, load the model of model_quant.onnx in vad_dir
+
+   --punc-dir <string>
+     the punc model path, which contains model.onnx, punc.yaml
+   --punc-quant <string>
+     false (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir
+     
    --wav-path <string>
      (required)  the input could be: 
       wav_path, e.g.: asr_example.wav;

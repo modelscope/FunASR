@@ -21,7 +21,7 @@ public:
     ~FsmnVad();
     void Test();
     void InitVad(const std::string &vad_model, const std::string &vad_cmvn, const std::string &vad_config, int thread_num);
-    std::vector<std::vector<int>> Infer(const std::vector<float> &waves);
+    std::vector<std::vector<int>> Infer(std::vector<float> &waves, bool input_finished=true);
     void Reset();
 
 private:
@@ -34,7 +34,7 @@ private:
             std::vector<const char *> *in_names, std::vector<const char *> *out_names);
 
     void FbankKaldi(float sample_rate, std::vector<std::vector<float>> &vad_feats,
-                    const std::vector<float> &waves);
+                    std::vector<float> &waves);
 
     void LfrCmvn(std::vector<std::vector<float>> &vad_feats);
 

@@ -46,7 +46,7 @@ if args.punc_model != "":
     inference_pipeline_punc = pipeline(
         task=Tasks.punctuation,
         model=args.punc_model,
-        model_revision=None,
+        model_revision="v1.0.2",
         ngpu=args.ngpu,
         ncpu=args.ncpu,
     )
@@ -74,6 +74,7 @@ async def ws_serve(websocket, path):
     websocket.param_dict_punc = {'cache': list()}
     websocket.vad_pre_idx = 0
     speech_start = False
+    speech_end_i = False
     websocket.wav_name = "microphone"
     print("new user connected", flush=True)
 
@@ -99,7 +100,9 @@ async def ws_serve(websocket, path):
         
                     # asr online
                     frames_asr_online.append(message)
-                    if len(frames_asr_online) % websocket.chunk_interval == 0:
+                    websocket.param_dict_asr_online["is_final"] = speech_end_i
+                    if len(frames_asr_online) % websocket.chunk_interval == 0 or websocket.param_dict_asr_online["is_final"]:
+                        
                         audio_in = b"".join(frames_asr_online)
                         await async_asr_online(websocket, audio_in)
                         frames_asr_online = []
@@ -115,12 +118,13 @@ async def ws_serve(websocket, path):
                         frames_asr.extend(frames_pre)
                 # asr punc offline
                 if speech_end_i or not websocket.is_speaking:
+                    # print("vad end point")
                     audio_in = b"".join(frames_asr)
                     await async_asr(websocket, audio_in)
                     frames_asr = []
                     speech_start = False
-                    frames_asr_online = []
-                    websocket.param_dict_asr_online = {"cache": dict()}
+                    # frames_asr_online = []
+                    # websocket.param_dict_asr_online = {"cache": dict()}
                     if not websocket.is_speaking:
                         websocket.vad_pre_idx = 0
                         frames = []
@@ -166,17 +170,21 @@ async def async_asr(websocket, audio_in):
                     rec_result = inference_pipeline_punc(text_in=rec_result['text'],
                                                          param_dict=websocket.param_dict_punc)
                     # print("offline", rec_result)
-                message = json.dumps({"mode": "2pass-offline", "text": rec_result["text"], "wav_name": websocket.wav_name})
-                await websocket.send(message)
+                if 'text' in rec_result:
+                    message = json.dumps({"mode": "2pass-offline", "text": rec_result["text"], "wav_name": websocket.wav_name})
+                    await websocket.send(message)
 
 
 async def async_asr_online(websocket, audio_in):
     if len(audio_in) > 0:
         audio_in = load_bytes(audio_in)
+        # print(websocket.param_dict_asr_online.get("is_final", False))
         rec_result = inference_pipeline_asr_online(audio_in=audio_in,
                                                    param_dict=websocket.param_dict_asr_online)
+        # print(rec_result)
         if websocket.param_dict_asr_online.get("is_final", False):
-            websocket.param_dict_asr_online["cache"] = dict()
+            return
+            #     websocket.param_dict_asr_online["cache"] = dict()
         if "text" in rec_result:
             if rec_result["text"] != "sil" and rec_result["text"] != "waiting_for_more_voice":
                 # print("online", rec_result)

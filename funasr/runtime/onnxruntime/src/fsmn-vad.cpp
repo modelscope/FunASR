@@ -162,17 +162,21 @@ void FsmnVad::Forward(
     }
   
     // get 4 caches outputs,each size is 128*19
-    for (int i = 1; i < 5; i++) {
-      float* data = vad_ort_outputs[i].GetTensorMutableData<float>();
-      memcpy(in_cache_[i-1].data(), data, sizeof(float) * 128*19);
-    }
+    // for (int i = 1; i < 5; i++) {
+    //   float* data = vad_ort_outputs[i].GetTensorMutableData<float>();
+    //   memcpy(in_cache_[i-1].data(), data, sizeof(float) * 128*19);
+    // }
 }
 
 void FsmnVad::FbankKaldi(float sample_rate, std::vector<std::vector<float>> &vad_feats,
-                         const std::vector<float> &waves) {
+                         std::vector<float> &waves) {
     knf::OnlineFbank fbank(fbank_opts);
 
-    fbank.AcceptWaveform(sample_rate, &waves[0], waves.size());
+    std::vector<float> buf(waves.size());
+    for (int32_t i = 0; i != waves.size(); ++i) {
+        buf[i] = waves[i] * 32768;
+    }
+    fbank.AcceptWaveform(sample_rate, buf.data(), buf.size());
     int32_t frames = fbank.NumFramesReady();
     for (int32_t i = 0; i != frames; ++i) {
         const float *frame = fbank.GetFrame(i);
@@ -267,7 +271,7 @@ void FsmnVad::LfrCmvn(std::vector<std::vector<float>> &vad_feats) {
 }
 
 std::vector<std::vector<int>>
-FsmnVad::Infer(const std::vector<float> &waves) {
+FsmnVad::Infer(std::vector<float> &waves, bool input_finished) {
     std::vector<std::vector<float>> vad_feats;
     std::vector<std::vector<float>> vad_probs;
     FbankKaldi(vad_sample_rate_, vad_feats, waves);

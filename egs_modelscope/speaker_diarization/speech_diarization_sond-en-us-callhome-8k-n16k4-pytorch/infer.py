@@ -7,8 +7,9 @@ https://arxiv.org/abs/2303.05397
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
 
-# 初始化推理 pipeline
-# 当以原始音频作为输入时使用配置文件 sond.yaml，并设置 mode 为sond_demo
+# initialize the pipeline for inference
+# when using the raw waveform files to inference, please use the config file `sond.yaml`
+# and set mode to `sond_demo`
 inference_diar_pipline = pipeline(
     mode="sond_demo",
     num_workers=0,
@@ -19,7 +20,8 @@ inference_diar_pipline = pipeline(
     sv_model_revision="master",
 )
 
-# 以 audio_list 作为输入，其中第一个音频为待检测语音，后面的音频为不同说话人的声纹注册语音
+# use audio_list as the input, where the first one is the record to be detected
+# and the following files are enrollments for different speakers
 audio_list = [
     "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/record.wav",
     "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_data/spk_A.wav",
