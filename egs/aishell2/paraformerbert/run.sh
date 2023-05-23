@@ -148,7 +148,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
                 --train_set ${train_set} \
                 --valid_set ${valid_set} \
                 --data_file_names "wav.scp,text,embeds.scp" \
-                --cmvn_file ${feats_dir}/data/${train_set}/cmvn/cmvn.mvn \
+                --cmvn_file ${feats_dir}/data/${train_set}/cmvn/am.mvn \
                 --speed_perturb ${speed_perturb} \
                 --dataset_type $dataset_type \
                 --resume true \
@@ -199,7 +199,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
                 --njob ${njob} \
                 --gpuid_list ${gpuid_list} \
                 --data_path_and_name_and_type "${_data}/${scp},speech,${type}" \
-                --cmvn_file ${feats_dir}/data/${train_set}/cmvn/cmvn.mvn \
+                --cmvn_file ${feats_dir}/data/${train_set}/cmvn/am.mvn \
                 --key_file "${_logdir}"/keys.JOB.scp \
                 --asr_train_config "${asr_exp}"/config.yaml \
                 --asr_model_file "${asr_exp}"/"${inference_asr_model}" \
