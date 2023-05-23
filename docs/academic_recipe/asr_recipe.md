@@ -13,7 +13,14 @@ Then you can directly start the recipe as follows:
 conda activate funasr
 . ./run.sh
 ```
-The training log files are saved in `exp/*_train_*/log/train.log.*` and the inference results are saved in `exp/*_train_*/decode_asr_*`.
+The training log files are saved in `exp/*_train_*/log/train.log.*`， which can be viewed using the following command:
+```sh
+vim exp/*_train_*/log/train.log.0
+```
+It should be looked like as follows:
+
+
+and the inference results are saved in `exp/*_train_*/decode_asr_*`.
 
 ## Introduction
 We provide a recipe `egs/aishell/paraformer/run.sh` for training a paraformer model on AISHELL-1 dataset. This recipe consists of five stages, supporting training on multiple GPUs and decoding by CPU or GPU. Before introducing each stage in detail, we first explain several parameters which should be set by users.
