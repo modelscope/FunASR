@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 import os
 import time
-import websockets
+import websockets,ssl
 import asyncio
 # import threading
 import argparse
@@ -53,6 +53,11 @@ parser.add_argument("--output_dir",
                     type=str,
                     default=None,
                     help="output_dir")
+                    
+parser.add_argument("--ssl",
+                    type=int,
+                    default=1,
+                    help="1 for ssl connect, 0 for no ssl")
 
 args = parser.parse_args()
 args.chunk_size = [int(x) for x in args.chunk_size.split(",")]
@@ -221,8 +226,16 @@ async def print_messge():
 
 async def ws_client(id,chunk_begin,chunk_size):
     global websocket
-    uri = "ws://{}:{}".format(args.host, args.port)
-    async for websocket in websockets.connect(uri, subprotocols=["binary"], ping_interval=None):
+    if  args.ssl==1:
+       ssl_context = ssl.SSLContext()
+       ssl_context.check_hostname = False
+       ssl_context.verify_mode = ssl.CERT_NONE
+       uri = "wss://{}:{}".format(args.host, args.port)
+    else:
+       uri = "ws://{}:{}".format(args.host, args.port)
+       ssl_context=None
+    print("connect to",uri)
+    async for websocket in websockets.connect(uri, subprotocols=["binary"], ping_interval=None,ssl=ssl_context):
         if args.audio_in is not None:
             task = asyncio.create_task(record_from_scp(chunk_begin,chunk_size))
         else:
