@@ -35,7 +35,7 @@ python ws_server_offline.py \
 ```
 ##### Usage examples
 ```shell
-python ws_server_offline.py --port 10095 --asr_model "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch" --certfile ./server.crt --keyfile ./server.key
+python ws_server_offline.py --port 10095 --asr_model "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
 ```
 
 #### ASR streaming server
@@ -51,7 +51,7 @@ python ws_server_online.py \
 ```
 ##### Usage examples
 ```shell
-python ws_server_online.py --port 10095 --asr_model_online "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online" --certfile ./server.crt --keyfile ./server.key
+python ws_server_online.py --port 10095 --asr_model_online "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online"
 ```
 
 #### ASR offline/online 2pass server

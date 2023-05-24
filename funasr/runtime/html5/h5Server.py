@@ -37,13 +37,13 @@ parser.add_argument("--port",
 
 parser.add_argument("--certfile",
                     type=str,
-                    default="server.crt",
+                    default="./ssl_key/server.crt",
                     required=False,
                     help="certfile for ssl")
                     
 parser.add_argument("--keyfile",
                     type=str,
-                    default="server.key",
+                    default="./ssl_key/server.key",
                     required=False,
                     help="keyfile for ssl")
 
