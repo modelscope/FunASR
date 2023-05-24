@@ -32,6 +32,7 @@ usage: h5Server.py [-h] [--host HOST] [--port PORT] [--certfile CERTFILE] [--key
 ```
 `e.g.`
 ```shell
+cd funasr/runtime/html5
 python h5Server.py --host 0.0.0.0 --port 1337 
 ```
 ### asr service
