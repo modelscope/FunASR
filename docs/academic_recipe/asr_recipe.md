@@ -111,23 +111,22 @@ This stage processes the dictionary, which is used as a mapping between label ch
 ### Stage 3: LM Training
 
 ### Stage 4: ASR Training
-This stage achieves the training of the specified model. To start training, users should manually set `exp_dir`, `CUDA_VISIBLE_DEVICES` and `gpu_num`, which have already been explained above. By default, the best `$keep_nbest_models` checkpoints on validation dataset will be averaged to generate a better model and adopted for decoding.
+This stage achieves the training of the specified model. To start training, users should manually set `exp_dir` to specify the path for saving experimental results. By default, the best `$keep_nbest_models` checkpoints on validation dataset will be averaged to generate a better model and adopted for decoding. FunASR implements `train.py` for training different models and users can configure the following parameters if necessary.
 
-* DDP Training
-
-We support the DistributedDataParallel (DDP) training and the detail can be found [here](https://pytorch.org/tutorials/intermediate/ddp_tutorial.html). To enable DDP training, please set `gpu_num` greater than 1. For example, if you set `CUDA_VISIBLE_DEVICES=0,1,5,6,7` and `gpu_num=3`, then the gpus with ids 0, 1 and 5 will be used for training.
+* `task_name`: `asr` (Default), specify the task type of the current recipe
+* `gpu_num`: `2` (Default), specify the number of GPUs for training. When `gpu_num > 1`, DistributedDataParallel (DDP, the detail can be found [here](https://pytorch.org/tutorials/intermediate/ddp_tutorial.html)) training will be enabled. Correspondingly, `CUDA_VISIBLE_DEVICES` should be set to specify which ids of GPUs will be used.
+* `use_preprocessor`: `true` (Default), specify whether to use pre-processing on each sample
+* `token_list`: the path of token list for training
+* `dataset_type`: 
+* `data_dir`: the path of data. Specifically, the data for training is saved in `$data_dir/data/$train_set` while the data for validation is saved in `$data_dir/data/$valid_set`
+* `data_file_names`: `"wav.scp,text"` specify the speech and text file names for ASR
+* `cmvn_file`: the path of cmvn file
+* `resume`: `true`, whether to enable "checkpoint training"
+* `config`: the path of configuration file, which is usually a YAML file in `conf` directory. In FunASR, the parameters of the training, including model, optimization, dataset, etc., can also be set in this file. Note that if the same parameters are specified in both recipe and config file, the parameters of recipe will be employed
 
 * DataLoader
 
-We support an optional iterable-style DataLoader based on [Pytorch Iterable-style DataPipes](https://pytorch.org/data/beta/torchdata.datapipes.iter.html) for large dataset and users can set `dataset_type=large` to enable it. 
-
-* Configuration
-
-The parameters of the training, including model, optimization, dataset, etc., can be set by a YAML file in `conf` directory. Also, users can directly set the parameters in `run.sh` recipe. Please avoid to set the same parameters in both the YAML file and the recipe.
-
-* Training Steps
-
-We support two parameters to specify the training steps, namely `max_epoch` and `max_update`. `max_epoch` indicates the total training epochs while `max_update` indicates the total training steps. If these two parameters are specified at the same time, once the training reaches any one of these two parameters, the training will be stopped.
+We support an optional iterable-style DataLoader based on [Pytorch Iterable-style DataPipes](https://pytorch.org/data/beta/torchdata.datapipes.iter.html) for large dataset and users can set `dataset_type=large` to enable it.
 
 ### Stage 5: Decoding
 This stage generates the recognition results and calculates the `CER` to verify the performance of the trained model. 
@@ -171,6 +170,9 @@ The recipe includes several stages. Users can start form or stop at any stage. F
 ```sh
 . ./run.sh --stage 3 --stop_stage 5
 ```
+
+* Training Steps
+FunASR supports two parameters to specify the training steps, namely `max_epoch` and `max_update`. `max_epoch` indicates the total training epochs while `max_update` indicates the total training steps. If these two parameters are specified at the same time, once the training reaches any one of these two parameters, the training will be stopped.
 
 * Change the configuration of the model
 
