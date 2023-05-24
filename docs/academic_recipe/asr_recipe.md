@@ -47,9 +47,12 @@ We provide a recipe `egs/aishell/paraformer/run.sh` for training a paraformer mo
 - `CUDA_VISIBLE_DEVICES`: `0,1` (Default), visible gpu list
 - `gpu_num`: `2` (Default), the number of GPUs used for training
 - `gpu_inference`: `true` (Default), whether to use GPUs for decoding
-- `njob`: `1` (Default), for CPU decoding, indicating the total number of CPU jobs; for GPU decoding, indicating the number of jobs on each GPU
+- `njob`: `1`  (Default),for CPU decoding, indicating the total number of CPU jobs; for GPU decoding, indicating the number of jobs on each GPU
 - `raw_data`: the raw path of AISHELL-1 dataset
 - `feats_dir`: the path for saving processed data
+- `token_type`: `char` (Default), indicate how to process text
+- `type`: `sound` (Default), set the input type
+- `scp`: `wav.scp` (Default), set the input file
 - `nj`: `64` (Default), the number of jobs for data preparation
 - `speed_perturb`: `"0.9, 1.0 ,1.1"` (Default), the range of speech perturbed
 - `exp_dir`: the path for saving experimental results
