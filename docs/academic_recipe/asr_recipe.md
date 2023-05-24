@@ -44,18 +44,18 @@ Scored ... sentences, ...
 
 ## Introduction
 We provide a recipe `egs/aishell/paraformer/run.sh` for training a paraformer model on AISHELL-1 dataset. This recipe consists of five stages, supporting training on multiple GPUs and decoding by CPU or GPU. Before introducing each stage in detail, we first explain several parameters which should be set by users.
-- `CUDA_VISIBLE_DEVICES`: visible gpu list
-- `gpu_num`: the number of GPUs used for training
-- `gpu_inference`: whether to use GPUs for decoding
-- `njob`: for CPU decoding, indicating the total number of CPU jobs; for GPU decoding, indicating the number of jobs on each GPU
+- `CUDA_VISIBLE_DEVICES`: `0,1` (Default), visible gpu list
+- `gpu_num`: `2` (Default), the number of GPUs used for training
+- `gpu_inference`: `true` (Default), whether to use GPUs for decoding
+- `njob`: `1` (Default), for CPU decoding, indicating the total number of CPU jobs; for GPU decoding, indicating the number of jobs on each GPU
 - `raw_data`: the raw path of AISHELL-1 dataset
 - `feats_dir`: the path for saving processed data
-- `nj`: the number of jobs for data preparation
-- `speed_perturb`: the range of speech perturbed
+- `nj`: `64` (Default), the number of jobs for data preparation
+- `speed_perturb`: `"0.9, 1.0 ,1.1"` (Default), the range of speech perturbed
 - `exp_dir`: the path for saving experimental results
-- `tag`: the suffix of experimental result directory
-- `stage` start the recipe from the specified stage
-- `stop_stage` stop the recipe from the specified stage
+- `tag`: `exp1` (Default), the suffix of experimental result directory
+- `stage` `0` (Default), start the recipe from the specified stage
+- `stop_stage` `5` (Default), stop the recipe from the specified stage
 
 ### Stage 0: Data preparation
 This stage processes raw AISHELL-1 dataset `$raw_data` and generates the corresponding `wav.scp` and `text` in `$feats_dir/data/xxx`. `xxx` means `train/dev/test`. Here we assume users have already downloaded AISHELL-1 dataset. If not, users can download data [here](https://www.openslr.org/33/) and set the path for `$raw_data`. The examples of `wav.scp` and `text` are as follows:
