@@ -73,8 +73,8 @@ class LargeDataLoader(AbsIterFactory):
             seg_dict = load_seg_dict(args.seg_dict_file)
         if hasattr(args, "punc_dict_file") and args.punc_dict_file is not None:
             punc_dict = read_symbol_table(args.punc_dict_file)
-        if hasattr(args, "bpemodel_file") and args.bpemodel_file is not None:
-            bpe_tokenizer = SentencepiecesTokenizer(args.bpemodel_file)
+        if hasattr(args, "bpemodel") and args.bpemodel is not None:
+            bpe_tokenizer = SentencepiecesTokenizer(args.bpemodel)
         self.dataset_conf = args.dataset_conf
         self.frontend_conf = args.frontend_conf
         logging.info("dataloader config: {}".format(self.dataset_conf))
