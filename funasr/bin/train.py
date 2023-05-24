@@ -273,7 +273,7 @@ def get_parser():
         "--init_param",
         type=str,
         default=[],
-        nargs="*",
+        action="append",
         help="Specify the file path used for initialization of parameters. "
              "The format is '<file_path>:<src_key>:<dst_key>:<exclude_keys>', "
              "where file_path is the model file path, "
@@ -299,7 +299,7 @@ def get_parser():
         "--freeze_param",
         type=str,
         default=[],
-        nargs="*",
+        action="append",
         help="Freeze parameters",
     )
 

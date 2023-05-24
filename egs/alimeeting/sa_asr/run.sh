@@ -3,12 +3,12 @@
 . ./path.sh || exit 1;
 
 # machines configuration
-CUDA_VISIBLE_DEVICES="4,5,6,7"
+CUDA_VISIBLE_DEVICES="0,1,2,3"
 gpu_num=4
 count=1
 gpu_inference=true  # Whether to perform gpu decoding, set false for cpu decoding
 # for gpu decoding, inference_nj=ngpu*njob; for cpu decoding, inference_nj=njob
-njob=5
+njob=4
 train_cmd=utils/run.pl
 infer_cmd=utils/run.pl
 
@@ -22,9 +22,9 @@ scp=wav.scp
 speed_perturb="1.0"
 min_wav_duration=0.1
 max_wav_duration=20
-profile_modes="oracle cluster"
-stage=2
-stop_stage=2
+profile_modes="cluster oracle"
+stage=5
+stop_stage=6
 
 # feature configuration
 feats_dim=80
@@ -35,7 +35,7 @@ raw_data=
 data_url=
 
 # exp tag
-tag="exp197_0"
+tag="exp197_ch0_smh"
 
 . utils/parse_options.sh || exit 1;
 
@@ -47,15 +47,15 @@ set -o pipefail
 
 train_set=Train_Ali_far
 valid_set=Eval_Ali_far
-test_sets="Test_Ali_far"
+test_sets="Test_Ali_far Eval_Ali_far"
 test_2023=
 
 asr_config=conf/train_asr_conformer.yaml
 sa_asr_config=conf/train_sa_asr_conformer.yaml
 asr_model_dir="baseline_$(basename "${asr_config}" .yaml)_${lang}_${token_type}_${tag}"
 sa_asr_model_dir="baseline_$(basename "${sa_asr_config}" .yaml)_${lang}_${token_type}_${tag}"
-inference_config=conf/decode_asr_transformer.yaml
-inference_sa_asr_model=valid.acc.ave_10best.pb
+inference_config=conf/decode_asr_rnn.yaml
+inference_sa_asr_model=valid.acc_spk.ave.pb
 
 # you can set gpu num for decoding here
 gpuid_list=$CUDA_VISIBLE_DEVICES  # set gpus for decoding, the same as training stage by default
@@ -69,7 +69,6 @@ else
     _ngpu=0
 fi
 
-
 if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     echo "stage 0: Data preparation"
     # Data preparation
@@ -78,7 +77,7 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     ./local/alimeeting_data_prep.sh --tgt Train --min_wav_duration $min_wav_duration --max_wav_duration $max_wav_duration
     # remove long/short data
     for x in ${train_set} ${valid_set} ${test_sets}; do
-        cp -r ${feats_dir}/org/${x}/* ${feats_dir}/${x}
+        cp -r ${feats_dir}/org/${x} ${feats_dir}/${x}
         rm ${feats_dir}/"${x}"/wav.scp ${feats_dir}/"${x}"/segments
         local/format_wav_scp.sh --nj "${nj}" --cmd "${train_cmd}" \
             --audio-format wav --segments ${feats_dir}/org/${x}/segments \
@@ -113,23 +112,8 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     done
 fi
 
-token_list=${feats_dir}/${lang}_token_list/char/tokens.txt
-echo "dictionary: ${token_list}"
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
-    echo "stage 1: Dictionary Preparation"
-    mkdir -p ${feats_dir}/${lang}_token_list/char/
-
-    echo "make a dictionary"
-    echo "<blank>" > ${token_list}
-    echo "<s>" >> ${token_list}
-    echo "</s>" >> ${token_list}
-    utils/text2token.py -s 1 -n 1 --space "" ${feats_dir}/$train_set/text | cut -f 2- -d" " | tr " " "\n" \
-        | sort | uniq | grep -a -v -e '^\s*$' | awk '{print $0}' >> ${token_list}
-    echo "<unk>" >> ${token_list}
-fi
-
-if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
-    echo "stage 2: Feature and CMVN Generation"
+    echo "stage 1: Speaker profile and CMVN Generation"
     
     mkdir -p "profile_log"
     for x in "${train_set}" "${valid_set}" "${test_sets}"; do
@@ -143,7 +127,7 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
         echo "oracle_embedding is being generated in the background, and the log is profile_log/gen_oracle_embedding_${x}.log"
         python local/gen_oracle_embedding.py "${feats_dir}/${x}" "data/org/${x}_single_speaker" &> "profile_log/gen_oracle_embedding_${x}.log"
         echo "Successfully generate oracle embedding for ${x} (${feats_dir}/${x}/oracle_embedding.scp)"
-        generate oracle_profile and cluster_profile from oracle_embedding and cluster_embedding (padding the speaker during training)
+        # generate oracle_profile and cluster_profile from oracle_embedding and cluster_embedding (padding the speaker during training)
         if [ "${x}" = "${train_set}" ]; then
             python local/gen_oracle_profile_padding.py ${feats_dir}/${x}
             echo "Successfully generate oracle profile for ${x} (${feats_dir}/${x}/oracle_profile_padding.scp)"
@@ -157,17 +141,33 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
             python local/gen_cluster_profile_infer.py "${feats_dir}/${x}" "${feats_dir}/org/${x}" 0.996 0.815 &> "profile_log/gen_cluster_profile_infer_${x}.log"
             echo "Successfully generate cluster profile for ${x} (${feats_dir}/${x}/cluster_profile_infer.scp)"
         fi
+        # compute CMVN
+        if [ "${x}" = "${train_set}" ]; then
+            utils/compute_cmvn.sh --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} ${feats_dir}/${train_set}
+        fi
     done
 
     for x in "${test_2023}"; do
         # generate cluster_profile with spectral-cluster directly (for infering and without oracle information)
-        python local/gen_cluster_profile_infer.py "${data_feats}/${x}" "data/${x}" 0.996 0.815 &> "profile_log/gen_cluster_profile_infer_${x}.log"
-        log "Successfully generate cluster profile for ${x} (${data_feats}/${x}/cluster_profile_infer.scp)"
+        python local/gen_cluster_profile_infer.py "${feats_dir}/${x}" "${feats_dir}/${x}" 0.996 0.815 &> "profile_log/gen_cluster_profile_infer_${x}.log"
+        log "Successfully generate cluster profile for ${x} (${feats_dir}/${x}/cluster_profile_infer.scp)"
     done
-
-    utils/compute_cmvn.sh --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} ${feats_dir}/${train_set}
 fi
 
+token_list=${feats_dir}/${lang}_token_list/char/tokens.txt
+echo "dictionary: ${token_list}"
+if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
+    echo "stage 2: Dictionary Preparation"
+    mkdir -p ${feats_dir}/${lang}_token_list/char/
+
+    echo "make a dictionary"
+    echo "<blank>" > ${token_list}
+    echo "<s>" >> ${token_list}
+    echo "</s>" >> ${token_list}
+    utils/text2token.py -s 1 -n 1 --space "" ${feats_dir}/$train_set/text | cut -f 2- -d" " | tr " " "\n" \
+        | sort | uniq | grep -a -v -e '^\s*$' | awk '{print $0}' >> ${token_list}
+    echo "<unk>" >> ${token_list}
+fi
 
 # LM Training Stage
 world_size=$gpu_num  # run on one machine
@@ -222,15 +222,18 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
 
 fi
 
+
+
 if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
     echo "SA-ASR training"
+    asr_exp=${exp_dir}/${asr_model_dir}
     sa_asr_exp=${exp_dir}/${sa_asr_model_dir}
     mkdir -p ${sa_asr_exp}
     mkdir -p ${sa_asr_exp}/log
     INIT_FILE=${sa_asr_exp}/ddp_init
-    if [ ! -f ${feats_dir}/${train_set}/profile.scp ]; then
-        ln -s ${feats_dir}/${train_set}/oracle_profile_padding.scp ${feats_dir}/${train_set}/profile.scp
-        ln -s ${feats_dir}/${valid_set}/oracle_profile_nopadding.scp ${feats_dir}/${valid_set}/profile.scp
+    if [ ! -L ${feats_dir}/${train_set}/profile.scp ]; then
+        ln -sr ${feats_dir}/${train_set}/oracle_profile_padding.scp ${feats_dir}/${train_set}/profile.scp
+        ln -sr ${feats_dir}/${valid_set}/oracle_profile_nopadding.scp ${feats_dir}/${valid_set}/profile.scp
     fi
     
     if [ ! -f "${exp_dir}/damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch/sv.pth" ]; then
@@ -264,7 +267,6 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
                 --data_file_names "wav.scp,text,profile.scp,text_id_train" \
                 --cmvn_file ${feats_dir}/${train_set}/cmvn/cmvn.mvn \
                 --speed_perturb ${speed_perturb} \
-                --resume true \
                 --init_param "${asr_exp}/valid.acc.ave.pb:encoder:asr_encoder"   \
                 --init_param "${asr_exp}/valid.acc.ave.pb:ctc:ctc"   \
                 --init_param "${asr_exp}/valid.acc.ave.pb:decoder.embed:decoder.embed" \
@@ -279,7 +281,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
                 --init_param "${asr_exp}/valid.acc.ave.pb:decoder.decoders.5:decoder.decoder4.4" \
                 --init_param "exp/damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch/sv.pth:encoder:spk_encoder"   \
                 --init_param "exp/damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch/sv.pth:decoder:spk_encoder:decoder.output_dense"   \
-                --output_dir ${exp_dir}/${asr_model_dir} \
+                --output_dir ${exp_dir}/${sa_asr_model_dir} \
                 --config $sa_asr_config \
                 --ngpu $gpu_num \
                 --num_worker_count $count \
@@ -297,9 +299,10 @@ if [ ${stage} -le 6 ] && [ ${stop_stage} -ge 6 ]; then
     echo "stage 6: Inference test sets"
     for x in ${test_sets}; do
         for profile_mode in ${profile_modes}; do
-            asr_exp=${exp_dir}/${model_dir}
+            echo "decoding ${x} with ${profile_mode} profile"
+            sa_asr_exp=${exp_dir}/${sa_asr_model_dir}
             inference_tag="$(basename "${inference_config}" .yaml)"
-            _dir="${asr_exp}/${inference_tag}_${profile_mode}/${inference_asr_model}/${x}"
+            _dir="${sa_asr_exp}/${inference_tag}_${profile_mode}/${inference_sa_asr_model}/${x}"
             _logdir="${_dir}/logdir"
             if [ -d ${_dir} ]; then
                 echo "${_dir} is already exists. if you want to decode again, please delete this dir first."
@@ -332,6 +335,7 @@ if [ ${stage} -le 6 ] && [ ${stop_stage} -ge 6 ]; then
                     --ngpu "${_ngpu}" \
                     --njob ${njob} \
                     --gpuid_list ${gpuid_list} \
+                    --allow_variable_data_keys true \
                     --data_path_and_name_and_type "${_data}/${scp},speech,${type}" \
                     --data_path_and_name_and_type "${_data}/$profile_scp,profile,npy" \
                     --key_file "${_logdir}"/keys.JOB.scp \
@@ -341,7 +345,7 @@ if [ ${stage} -le 6 ] && [ ${stop_stage} -ge 6 ]; then
                     --mode sa_asr \
                     ${_opts}
 
-            for f in token token_int score text; do
+            for f in token token_int score text text_id; do
                 if [ -f "${_logdir}/output.1/1best_recog/${f}" ]; then
                     for i in $(seq "${_nj}"); do
                         cat "${_logdir}/output.${i}/1best_recog/${f}"
@@ -372,7 +376,7 @@ if [ ${stage} -le 7 ] && [ ${stop_stage} -ge 7 ]; then
     for x in ${test_2023}; do
         asr_exp=${exp_dir}/${model_dir}
         inference_tag="$(basename "${inference_config}" .yaml)"
-        _dir="${asr_exp}/${inference_tag}_cluster/${inference_asr_model}/${x}"
+        _dir="${asr_exp}/${inference_tag}_cluster/${inference_sa_asr_model}/${x}"
         _logdir="${_dir}/logdir"
         if [ -d ${_dir} ]; then
             echo "${_dir} is already exists. if you want to decode again, please delete this dir first."
@@ -400,6 +404,7 @@ if [ ${stage} -le 7 ] && [ ${stop_stage} -ge 7 ]; then
                 --ngpu "${_ngpu}" \
                 --njob ${njob} \
                 --gpuid_list ${gpuid_list} \
+                --allow_variable_data_keys true \
                 --data_path_and_name_and_type "${_data}/${scp},speech,${type}" \
                 --data_path_and_name_and_type "${_data}/cluster_profile_infer.scp,profile,npy" \
                 --cmvn_file ${feats_dir}/${train_set}/cmvn/cmvn.mvn \

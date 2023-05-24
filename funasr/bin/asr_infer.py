@@ -1649,9 +1649,9 @@ class Speech2TextSAASR:
         assert check_argument_types()
         
         # 1. Build ASR model
-        from funasr.tasks.sa_asr import ASRTask
+        from funasr.tasks.asr import ASRTaskSAASR
         scorers = {}
-        asr_model, asr_train_args = ASRTask.build_model_from_file(
+        asr_model, asr_train_args = ASRTaskSAASR.build_model_from_file(
             asr_train_config, asr_model_file, cmvn_file, device
         )
         frontend = None
