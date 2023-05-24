@@ -29,7 +29,9 @@ python ws_server_offline.py \
 --asr_model [asr model_name] \
 --punc_model [punc model_name] \
 --ngpu [0 or 1] \
---ncpu [1 or 4]
+--ncpu [1 or 4] \
+--certfile [path of certfile for ssl] \
+--keyfile [path of keyfile for ssl] 
 ```
 ##### Usage examples
 ```shell
@@ -43,7 +45,9 @@ python ws_server_online.py \
 --port [port id] \
 --asr_model_online [asr model_name] \
 --ngpu [0 or 1] \
---ncpu [1 or 4]
+--ncpu [1 or 4] \
+--certfile [path of certfile for ssl] \
+--keyfile [path of keyfile for ssl] 
 ```
 ##### Usage examples
 ```shell
@@ -59,7 +63,9 @@ python ws_server_2pass.py \
 --asr_model_online [asr model_name] \
 --punc_model [punc model_name] \
 --ngpu [0 or 1] \
---ncpu [1 or 4]
+--ncpu [1 or 4] \
+--certfile [path of certfile for ssl] \
+--keyfile [path of keyfile for ssl] 
 ```
 ##### Usage examples
 ```shell
@@ -86,7 +92,8 @@ python ws_client.py \
 --words_max_print [max number of words to print] \
 --audio_in [if set, loadding from wav.scp, else recording from mircrophone] \
 --output_dir [if set, write the results to output_dir] \
---send_without_sleep [only set for offline]
+--send_without_sleep [only set for offline] \
+--ssl [1 for wss connect, 0 for ws, default is 1]
 ```
 #### Usage examples
 ##### ASR offline client
