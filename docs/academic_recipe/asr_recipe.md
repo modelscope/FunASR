@@ -117,16 +117,12 @@ This stage achieves the training of the specified model. To start training, user
 * `gpu_num`: `2` (Default), specify the number of GPUs for training. When `gpu_num > 1`, DistributedDataParallel (DDP, the detail can be found [here](https://pytorch.org/tutorials/intermediate/ddp_tutorial.html)) training will be enabled. Correspondingly, `CUDA_VISIBLE_DEVICES` should be set to specify which ids of GPUs will be used.
 * `use_preprocessor`: `true` (Default), specify whether to use pre-processing on each sample
 * `token_list`: the path of token list for training
-* `dataset_type`: 
+* `dataset_type`: `small` (Default). FunASR supports `small` dataset type for training small datasets. Besides, an optional iterable-style DataLoader based on [Pytorch Iterable-style DataPipes](https://pytorch.org/data/beta/torchdata.datapipes.iter.html) for large datasets is supported and users can specify `dataset_type=large` to enable it.
 * `data_dir`: the path of data. Specifically, the data for training is saved in `$data_dir/data/$train_set` while the data for validation is saved in `$data_dir/data/$valid_set`
 * `data_file_names`: `"wav.scp,text"` specify the speech and text file names for ASR
 * `cmvn_file`: the path of cmvn file
 * `resume`: `true`, whether to enable "checkpoint training"
 * `config`: the path of configuration file, which is usually a YAML file in `conf` directory. In FunASR, the parameters of the training, including model, optimization, dataset, etc., can also be set in this file. Note that if the same parameters are specified in both recipe and config file, the parameters of recipe will be employed
-
-* DataLoader
-
-We support an optional iterable-style DataLoader based on [Pytorch Iterable-style DataPipes](https://pytorch.org/data/beta/torchdata.datapipes.iter.html) for large dataset and users can set `dataset_type=large` to enable it.
 
 ### Stage 5: Decoding
 This stage generates the recognition results and calculates the `CER` to verify the performance of the trained model. 
