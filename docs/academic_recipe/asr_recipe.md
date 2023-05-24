@@ -8,26 +8,35 @@ First, move to the corresponding dictionary of the AISHELL-1 paraformer example.
 ```sh
 cd egs/aishell/paraformer
 ```
+
 Then you can directly start the recipe as follows:
 ```sh
 conda activate funasr
 . ./run.sh
 ```
-The training log files are saved in `exp/*_train_*/log/train.log.*`， which can be viewed using the following command:
+
+The training log files are saved in `${exp_dir}/exp/${model_dir}/log/train.log.*`， which can be viewed using the following command:
 ```sh
 vim exp/*_train_*/log/train.log.0
 ```
+
 Users can observe the training loss, prediction accuracy and other training information, like follows:
 ```text
 ... 1epoch:train:751-800batch:800num_updates: ... loss_ctc=106.703, loss_att=86.877, acc=0.029, loss_pre=1.552 ...
 ... 1epoch:train:801-850batch:850num_updates: ... loss_ctc=107.890, loss_att=87.832, acc=0.029, loss_pre=1.702 ...
 ```
+
+Also, users can use tensorboard to observe these training information by the following command:
+```sh
+tensorboard --logdir ${exp_dir}/exp/${model_dir}/tensorboard/train
+```
+
 At the end of each epoch, the evaluation metrics are calculated on the validation set, like follows:
 ```text
 ... [valid] loss_ctc=99.914, cer_ctc=1.000, loss_att=80.512, acc=0.029, cer=0.971, wer=1.000, loss_pre=1.952, loss=88.285 ...
 ```
 
-The inference results are saved in `exp/*_train_*/decode_asr_*/$dset`. The main two files are `text.cer` and `text.cer.txt`. `text.cer` saves the comparison between the recognized text and the reference text, like follows:
+The inference results are saved in `${exp_dir}/exp/${model_dir}/decode_asr_*/$dset`. The main two files are `text.cer` and `text.cer.txt`. `text.cer` saves the comparison between the recognized text and the reference text, like follows:
 ```text
 ...
 BAC009S0764W0213(nwords=11,cor=11,ins=0,del=0,sub=0) corr=100.00%,cer=0.00%
@@ -119,13 +128,6 @@ The parameters of the training, including model, optimization, dataset, etc., ca
 * Training Steps
 
 We support two parameters to specify the training steps, namely `max_epoch` and `max_update`. `max_epoch` indicates the total training epochs while `max_update` indicates the total training steps. If these two parameters are specified at the same time, once the training reaches any one of these two parameters, the training will be stopped.
-
-* Tensorboard
-
-Users can use tensorboard to observe the loss, learning rate, etc. Please run the following command:
-```
-tensorboard --logdir ${exp_dir}/exp/${model_dir}/tensorboard/train
-```
 
 ### Stage 5: Decoding
 This stage generates the recognition results and calculates the `CER` to verify the performance of the trained model. 
