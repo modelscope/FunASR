@@ -123,10 +123,10 @@ bash infer.sh
         <td>Online</td>
         <td>3.34</td>
         <td>3.99</td>
-        <td>4.52</td>
-        <td>4.73</td>
-        <td>4.77</td>
         <td>4.62</td>
+        <td>4.52</td>
+        <td>4.77</td>
+        <td>4.73</td>
         <td>4.51</td>
         <td>10.63</td>
         <td>9.70</td>
@@ -136,10 +136,10 @@ bash infer.sh
         <td>Offline</td>      
         <td>2.93</td>
         <td>3.48</td>
+        <td>3.95</td>
         <td>3.87</td>
         <td>4.11</td>
         <td>4.11</td>
-        <td>3.95</td>
         <td>4.16</td>
         <td></td>
         <td></td>
