@@ -101,6 +101,7 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     utils/text2token.py -s 1 -n 1 --space "" ${feats_dir}/data/$train_set/text | cut -f 2- -d" " | tr " " "\n" \
         | sort | uniq | grep -a -v -e '^\s*$' | awk '{print $0}' >> ${token_list}
     echo "<unk>" >> ${token_list}
+    vocab_size=$(cat ${token_list} | wc -l)
 fi
 
 # LM Training Stage
@@ -213,4 +214,14 @@ fi
 # Prepare files for ModelScope fine-tuning and inference
 if [ ${stage} -le 6 ] && [ ${stop_stage} -ge 6 ]; then
     echo "stage 6: ModelScope Preparation"
+    cp ${feats_dir}/data/${train_set}/cmvn/am.mvn ${exp_dir}/exp/${model_dir}/am.mvn
+    python utils/gen_modelscope_configuration.py \
+        --am_model_file $inference_asr_model \
+        --mode paraformer \
+        --model_name paraformer \
+        --model $model_dir \
+        --output_dir $exp_dir/exp/$model_dir \
+        --vocab_size $vocab_size \
+        --nar _nat \
+        --tag $tag
 fi
