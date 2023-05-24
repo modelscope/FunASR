@@ -114,4 +114,4 @@ if __name__ == '__main__':
     }
 
     with open(os.path.join(args.output_dir, "configuration.json"), "w") as f:
-        json.dump(json_dict, f)
+        json.dump(json_dict, f, indent=4)
