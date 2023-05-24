@@ -83,7 +83,6 @@ This stage computes CMVN based on `train` dataset, which is used in the followin
 
 ### Stage 2: Dictionary Preparation
 This stage processes the dictionary, which is used as a mapping between label characters and integer indices during ASR training. The processed dictionary file is saved as `$feats_dir/data/$lang_toekn_list/$token_type/tokens.txt`. An example of `tokens.txt` is as follows:
-* `tokens.txt`
 ```
 <blank>
 <s>
@@ -95,10 +94,10 @@ This stage processes the dictionary, which is used as a mapping between label ch
 龟
 <unk>
 ```
-* `<blank>`: indicates the blank token for CTC
-* `<s>`: indicates the start-of-sentence token
-* `</s>`: indicates the end-of-sentence token
-* `<unk>`: indicates the out-of-vocabulary token
+* `<blank>`: indicates the blank token for CTC, must be in the first line
+* `<s>`: indicates the start-of-sentence token, must be in the second line
+* `</s>`: indicates the end-of-sentence token, must be in the third line
+* `<unk>`: indicates the out-of-vocabulary token, must be in the last line
 
 ### Stage 3: LM Training
 
@@ -146,7 +145,6 @@ We support CPU and GPU decoding in FunASR. For CPU decoding, you should set `gpu
 * Performance
 
 We adopt `CER` to verify the performance. The results are in `$exp_dir/exp/$model_dir/$decoding_yaml_name/$average_model_name/$dset`, namely `text.cer` and `text.cer.txt`. `text.cer` saves the comparison between the recognized text and the reference text while `text.cer.txt` saves the final `CER` results. The following is an example of `text.cer`:
-* `text.cer`
 ```
 ...
 BAC009S0764W0213(nwords=11,cor=11,ins=0,del=0,sub=0) corr=100.00%,cer=0.00%
