@@ -1,7 +1,14 @@
 # Html5 server for asr service
 
 ## Requirement
-### python
+#### Install the modelscope and funasr
+```shell
+pip install -U modelscope funasr
+# For the users in China, you could install with the command:
+# pip install -U modelscope funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple
+git clone https://github.com/alibaba/FunASR.git && cd FunASR
+```
+#### Install the requirements for server
 ```shell
 pip install flask
 # pip install gevent (Optional)
@@ -28,7 +35,7 @@ usage: h5Server.py [-h] [--host HOST] [--port PORT] [--certfile CERTFILE] [--key
 python h5Server.py --host 0.0.0.0 --port 1337 
 ```
 ### asr service
-[detail for asr]((../python/websocket))
+[detail for asr](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket)
 
 `Tips:` asr service and html5 service should be deployed on the same device.
 ```shell

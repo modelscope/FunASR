@@ -77,7 +77,8 @@
 <li class="toctree-l1"><a class="reference internal" href="libtorch_python.html">Libtorch-python</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Html5 server for asr service</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#requirement">Requirement</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#python">python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#install-the-modelscope-and-funasr">Install the modelscope and funasr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#install-the-requirements-for-server">Install the requirements for server</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#javascript-optional">javascript (Optional)</a></li>
 </ul>
 </li>
@@ -150,8 +151,17 @@
 <h1>Html5 server for asr service<a class="headerlink" href="#html5-server-for-asr-service" title="Permalink to this headline"></a></h1>
 <div class="section" id="requirement">
 <h2>Requirement<a class="headerlink" href="#requirement" title="Permalink to this headline"></a></h2>
-<div class="section" id="python">
-<h3>python<a class="headerlink" href="#python" title="Permalink to this headline"></a></h3>
+<div class="section" id="install-the-modelscope-and-funasr">
+<h3>Install the modelscope and funasr<a class="headerlink" href="#install-the-modelscope-and-funasr" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install -U modelscope funasr
+<span class="c1"># For the users in China, you could install with the command:</span>
+<span class="c1"># pip install -U modelscope funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple</span>
+git clone https://github.com/alibaba/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> FunASR
+</pre></div>
+</div>
+</div>
+<div class="section" id="install-the-requirements-for-server">
+<h3>Install the requirements for server<a class="headerlink" href="#install-the-requirements-for-server" title="Permalink to this headline"></a></h3>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install flask
 <span class="c1"># pip install gevent (Optional)</span>
 <span class="c1"># pip install pyOpenSSL (Optional)</span>
@@ -183,7 +193,7 @@
 </div>
 <div class="section" id="asr-service">
 <h3>asr service<a class="headerlink" href="#asr-service" title="Permalink to this headline"></a></h3>
-<p><a class="reference external" href="(../python/websocket)">detail for asr</a></p>
+<p><a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket">detail for asr</a></p>
 <p><code class="docutils literal notranslate"><span class="pre">Tips:</span></code> asr service and html5 service should be deployed on the same device.</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> ../python/websocket
 python ws_server_online.py --port <span class="m">1095</span>
