@@ -33,10 +33,10 @@ btnStop.disabled = true;
 var rec_text=""
 var info_div = document.getElementById('info_div');
 
-var now_ipaddress=window.location.href;
-now_ipaddress=now_ipaddress.replace("https://","wss://");   
-now_ipaddress=now_ipaddress.replace("static/index.html","");   
-document.getElementById('wssip').value=now_ipaddress;
+//var now_ipaddress=window.location.href;
+//now_ipaddress=now_ipaddress.replace("https://","wss://");
+//now_ipaddress=now_ipaddress.replace("static/index.html","");
+//document.getElementById('wssip').value=now_ipaddress;
 
 // 语音识别结果; 对jsonMsg数据解析,将识别结果附加到编辑框中
 function getJsonMessage( jsonMsg ) {
