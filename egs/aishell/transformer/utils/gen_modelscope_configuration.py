@@ -81,7 +81,7 @@ if __name__ == '__main__':
         "--nat",
         type=str,
         default="",
-        help="vocab_size",
+        help="nat",
     )
     parser.add_argument(
         "--tag",
@@ -107,9 +107,9 @@ if __name__ == '__main__':
         }
     }
     json_dict = {
-        "model": model,
         "framework": "pytorch",
         "task": args.task,
+        "model": model,
         "pipeline": args.pipeline_type,
     }
 

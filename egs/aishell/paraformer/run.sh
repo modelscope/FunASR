@@ -219,7 +219,7 @@ if [ ${stage} -le 6 ] && [ ${stop_stage} -ge 6 ]; then
         --am_model_name $inference_asr_model \
         --mode paraformer \
         --model_name paraformer \
-        --model $model_dir \
+        --dataset aishell \
         --output_dir $exp_dir/exp/$model_dir \
         --vocab_size $vocab_size \
         --nat _nat \
