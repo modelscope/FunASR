@@ -1,52 +1,64 @@
-# online asr demo for html5
+# Html5 server for asr service
 
-## requirement
+## Requirement
 ### python
 ```shell
-flask
-gevent
-pyOpenSSL
+pip install flask
+# pip install gevent (Optional)
+# pip install pyOpenSSL (Optional)
 ```
 
-### javascript
+### javascript (Optional)
 [html5录音](https://github.com/xiangyuecn/Recorder)
 ```shell
 Recorder 
 ```
 
-### demo页面如下
+## demo页面如下
 ![img](https://github.com/alibaba-damo-academy/FunASR/blob/for-html5-demo/funasr/runtime/html5/demo.gif)
 
-## 两种ws_server_online连接模式
+## 两种ws_server连接模式
 ### 1)直接连接模式，浏览器https麦克风 --> html5 demo服务 --> js wss接口 --> wss asr online srv(证书生成请往后看)
 
 ### 2)nginx中转，浏览器https麦克风 --> html5 demo服务 --> js wss接口 --> nginx服务 --> ws asr online srv
 
-## 1.html5 demo服务启动
-### 启动html5服务，需要ssl证书(自己生成请往后看)
+## 操作步骤
+### html5 demo服务启动
+#### 启动html5服务，需要ssl证书(已生成，如需要自己生成请往后看)
+用法如下:
+```shell
+h5Server.py [-h] [--host HOST] [--port PORT] [--certfile CERTFILE] [--keyfile KEYFILE]             
+```
+例子如下，需要注意ip地址，如果从其他设备访问需求（例如手机端），需要将ip地址设为真实ip 
+```shell
+python h5Server.py --host 0.0.0.0 --port 1337 --keyfile server.key
+# python h5Server.py --host 30.220.136.139 --port 1337 --keyfile server.key
+```
+### 启动ws or wss asr online srv
+[具体请看online asr](../python/websocket)
+online asr提供两种wss和ws模式，wss模式可以直接启动，无需nginx中转。否则需要通过nginx将wss转发到该online asr的ws端口上
 
+`Tips:` asr 服务需要与html5服务部署到同一个物理机器上
+#### wss方式
 ```shell
-usage: h5Server.py [-h] [--host HOST] [--port PORT] [--certfile CERTFILE]
-                   [--keyfile KEYFILE]
-python h5Server.py --port 1337 --keyfile server.key
+cd ../python/websocket
+python ws_server_online.py --certfile ../../html5/server.crt --keyfile ../../html5/server.key  --port 1095
 ```
-## 2.启动ws or wss asr online srv
-[具体请看online asr](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket)
-online asr提供两种ws和wss模式，wss模式可以直接启动，无需nginx中转。否则需要通过nginx将wss转发到该online asr的ws端口上
-### wss方式
+#### ws方式
 ```shell
-python ws_server_online.py --certfile server.crt --keyfile server.key  --port 5921
-```
-### ws方式
-```shell
-python ws_server_online.py  --port 5921
+cd ../python/websocket
+python ws_server_online.py  --port 1095
 ```
 
-## 3.浏览器打开地址测试,请根据实际ip填写
+### 浏览器打开地址
+ip地址需要与html5 server保持一致，如果是本地机器，可以用127.0.0.1
+```shell
 https://127.0.0.1:1337/static/index.html
+# https://30.220.136.139:1337/static/index.html
+```
 
-## 4.修改网页里asr接口地址
-直接网页里修改后，点击开始即可使用。注意h5服务和asr服务需要在同一个服务器上，否则存在跨域问题。
+### 修改网页里asr接口地址
+修改网页中，asr服务器地址（websocket srv的ip与端口），点击开始即可使用。注意h5服务和asr服务需要在同一个服务器上，否则存在跨域问题。
 
 
 ## 自行生成证书
