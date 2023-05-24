@@ -17,10 +17,30 @@ The training log files are saved in `exp/*_train_*/log/train.log.*`， which can
 ```sh
 vim exp/*_train_*/log/train.log.0
 ```
-It should be looked like as follows:
+Users can observe the training loss, prediction accuracy and other training information, like follows:
+```text
+... 1epoch:train:751-800batch:800num_updates: ... loss_ctc=106.703, loss_att=86.877, acc=0.029, loss_pre=1.552 ...
+... 1epoch:train:801-850batch:850num_updates: ... loss_ctc=107.890, loss_att=87.832, acc=0.029, loss_pre=1.702 ...
+```
+At the end of each epoch, the evaluation metrics are calculated on the validation set, like follows:
+```text
+... [valid] loss_ctc=99.914, cer_ctc=1.000, loss_att=80.512, acc=0.029, cer=0.971, wer=1.000, loss_pre=1.952, loss=88.285 ...
+```
 
-
-and the inference results are saved in `exp/*_train_*/decode_asr_*`.
+The inference results are saved in `exp/*_train_*/decode_asr_*/$dset`. The main two files are `text.cer` and `text.cer.txt`. `text.cer` saves the comparison between the recognized text and the reference text, like follows:
+```text
+...
+BAC009S0764W0213(nwords=11,cor=11,ins=0,del=0,sub=0) corr=100.00%,cer=0.00%
+ref:    构 建 良 好 的 旅 游 市 场 环 境
+res:    构 建 良 好 的 旅 游 市 场 环 境
+...
+```
+`text.cer.txt` saves the final results, like follows:
+```text
+%WER ...
+%SER ...
+Scored ... sentences, ...
+```
 
 ## Introduction
 We provide a recipe `egs/aishell/paraformer/run.sh` for training a paraformer model on AISHELL-1 dataset. This recipe consists of five stages, supporting training on multiple GPUs and decoding by CPU or GPU. Before introducing each stage in detail, we first explain several parameters which should be set by users.
@@ -34,6 +54,8 @@ We provide a recipe `egs/aishell/paraformer/run.sh` for training a paraformer mo
 - `speed_perturb`: the range of speech perturbed
 - `exp_dir`: the path for saving experimental results
 - `tag`: the suffix of experimental result directory
+- `stage` start the recipe from the specified stage
+- `stop_stage` stop the recipe from the specified stage
 
 ### Stage 0: Data preparation
 This stage processes raw AISHELL-1 dataset `$raw_data` and generates the corresponding `wav.scp` and `text` in `$feats_dir/data/xxx`. `xxx` means `train/dev/test`. Here we assume users have already downloaded AISHELL-1 dataset. If not, users can download data [here](https://www.openslr.org/33/) and set the path for `$raw_data`. The examples of `wav.scp` and `text` are as follows:
