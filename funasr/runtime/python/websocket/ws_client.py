@@ -47,7 +47,7 @@ parser.add_argument("--test_thread_num",
                     help="test_thread_num")
 parser.add_argument("--words_max_print",
                     type=int,
-                    default=100,
+                    default=10000,
                     help="chunk")
 parser.add_argument("--output_dir",
                     type=str,
@@ -181,7 +181,7 @@ async def message(id):
                 ibest_writer["text"][wav_name] = text
             
             if meg["mode"] == "online":
-                text_print += " {}".format(text)
+                text_print += "{}".format(text)
                 text_print = text_print[-args.words_max_print:]
                 os.system('clear')
                 print("\rpid"+str(id)+": "+text_print)
@@ -192,7 +192,7 @@ async def message(id):
                 print("\rpid"+str(id)+": "+text_print)
             else:
                 if meg["mode"] == "2pass-online":
-                    text_print_2pass_online += " {}".format(text)
+                    text_print_2pass_online += "{}".format(text)
                     text_print = text_print_2pass_offline + text_print_2pass_online
                 else:
                     text_print_2pass_online = ""

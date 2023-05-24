@@ -401,7 +401,8 @@ def main(cmd=None):
 
     kwargs.pop("gpuid_list", None)
     kwargs.pop("njob", None)
-    results = inference_launch(**kwargs)
+    inference_pipeline = inference_launch(**kwargs)
+    return inference_pipeline(kwargs["data_path_and_name_and_type"])
 
 
 if __name__ == "__main__":

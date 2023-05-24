@@ -373,12 +373,6 @@ class ASRTask(AbsTask):
             default=get_default_kwargs(CTC),
             help="The keyword arguments for CTC class.",
         )
-        group.add_argument(
-            "--joint_network_conf",
-            action=NestedDictAction,
-            default=None,
-            help="The keyword arguments for joint network class.",
-        )
 
         group = parser.add_argument_group(description="Preprocess related")
         group.add_argument(
@@ -1389,6 +1383,7 @@ class ASRTransducerTask(ASRTask):
     num_optimizers: int = 1
 
     class_choices_list = [
+        model_choices,
         frontend_choices,
         specaug_choices,
         normalize_choices,
@@ -1486,7 +1481,7 @@ class ASRTransducerTask(ASRTask):
         try:
             model_class = model_choices.get_class(args.model)
         except AttributeError:
-            model_class = model_choices.get_class("asr")
+            model_class = model_choices.get_class("rnnt_unified")
 
         model = model_class(
             vocab_size=vocab_size,
