@@ -216,12 +216,12 @@ if [ ${stage} -le 6 ] && [ ${stop_stage} -ge 6 ]; then
     cp ${feats_dir}/data/${train_set}/cmvn/am.mvn ${exp_dir}/exp/${model_dir}/am.mvn
     vocab_size=$(cat ${token_list} | wc -l)
     python utils/gen_modelscope_configuration.py \
-        --am_model_file $inference_asr_model \
+        --am_model_name $inference_asr_model \
         --mode paraformer \
         --model_name paraformer \
         --model $model_dir \
         --output_dir $exp_dir/exp/$model_dir \
         --vocab_size $vocab_size \
-        --nar _nat \
+        --nat _nat \
         --tag $tag
 fi
