@@ -15,7 +15,7 @@ Recorder
 ```
 
 ## demo页面如下
-![img](https://github.com/alibaba-damo-academy/FunASR/blob/for-html5-demo/funasr/runtime/html5/demo.gif)
+<div align="center"><img src="./demo.gif" width="140"/> </div>
 
 ## 两种ws_server连接模式
 ### 1)直接连接模式，浏览器https麦克风 --> html5 demo服务 --> js wss接口 --> wss asr online srv(证书生成请往后看)
