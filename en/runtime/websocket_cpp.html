@@ -186,7 +186,11 @@ tar -zxvf onnxruntime-linux-x64-1.14.0.tgz
 </div>
 <div class="section" id="build-runtime">
 <h3>Build runtime<a class="headerlink" href="#build-runtime" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/alibaba-damo-academy/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> funasr/runtime/websocket
+<p>required openssl lib</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1">#install openssl lib first</span>
+apt-get install libssl-dev
+
+git clone https://github.com/alibaba-damo-academy/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> funasr/runtime/websocket
 mkdir build <span class="o">&amp;&amp;</span> <span class="nb">cd</span> build
 cmake  -DCMAKE_BUILD_TYPE<span class="o">=</span>release .. -DONNXRUNTIME_DIR<span class="o">=</span>/path/to/onnxruntime-linux-x64-1.14.0
 make
@@ -197,11 +201,12 @@ make
 <div class="section" id="run-the-websocket-server">
 <h2>Run the websocket server<a class="headerlink" href="#run-the-websocket-server" title="Permalink to this headline"></a></h2>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> bin
-./websocketmain  <span class="o">[</span>--model_thread_num &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--decoder_thread_num &lt;int&gt;<span class="o">]</span>
+   ./websocketmain  <span class="o">[</span>--model_thread_num &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--decoder_thread_num &lt;int&gt;<span class="o">]</span>
                     <span class="o">[</span>--io_thread_num &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--port &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--listen_ip
                     &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-quant &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-dir &lt;string&gt;<span class="o">]</span>
                     <span class="o">[</span>--vad-quant &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--vad-dir &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--quantize
-                    &lt;string&gt;<span class="o">]</span> --model-dir &lt;string&gt; <span class="o">[</span>--<span class="o">]</span> <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
+                    &lt;string&gt;<span class="o">]</span> --model-dir &lt;string&gt; <span class="o">[</span>--keyfile &lt;string&gt;<span class="o">]</span>
+                    <span class="o">[</span>--certfile &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--<span class="o">]</span> <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
 Where:
    --model-dir &lt;string&gt;
      <span class="o">(</span>required<span class="o">)</span>  the asr model path, which contains model.onnx, config.yaml, am.mvn
@@ -224,6 +229,10 @@ Where:
      number of threads <span class="k">for</span> network io, default:8
    --port &lt;int&gt;
      listen port, default:8889
+   --certfile &lt;string&gt;
+     path of certficate <span class="k">for</span> WSS connection. <span class="k">if</span> it is empty, it will be in WS mode.
+   --keyfile &lt;string&gt;
+     path of keyfile <span class="k">for</span> WSS connection
   
    Required:  --model-dir &lt;string&gt;
    If use vad, please add: --vad-dir &lt;string&gt;
@@ -235,14 +244,16 @@ example:
 </div>
 <div class="section" id="run-websocket-client-test">
 <h2>Run websocket client test<a class="headerlink" href="#run-websocket-client-test" title="Permalink to this headline"></a></h2>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>Usage: websocketclient server_ip port wav_path threads_num
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>Usage: ./websocketclient server_ip port wav_path threads_num is_ssl
+
+is_ssl is <span class="m">1</span> means use wss connection, or use ws connection
 
 example:
 
-websocketclient <span class="m">127</span>.0.0.1 <span class="m">8889</span> funasr/runtime/websocket/test.pcm.wav <span class="m">64</span>
+websocketclient <span class="m">127</span>.0.0.1 <span class="m">8889</span> funasr/runtime/websocket/test.pcm.wav <span class="m">64</span> <span class="m">0</span>
 
 result json, example like:
-<span class="o">{</span><span class="s2">&quot;text&quot;</span>:<span class="s2">&quot;一二三四五六七八九十一二三四五六七八九十&quot;</span><span class="o">}</span>
+<span class="o">{</span><span class="s2">&quot;mode&quot;</span>:<span class="s2">&quot;offline&quot;</span>,<span class="s2">&quot;text&quot;</span>:<span class="s2">&quot;欢迎大家来体验达摩院推出的语音识别模型&quot;</span>,<span class="s2">&quot;wav_name&quot;</span>:<span class="s2">&quot;wav2&quot;</span><span class="o">}</span>
 </pre></div>
 </div>
 </div>
