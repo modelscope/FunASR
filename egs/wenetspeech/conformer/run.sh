@@ -75,6 +75,6 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     mkdir $feats_dir/data
     mv $feats_dir/$train_set $feats_dir/data/$train_set
     for x in $test_sets; do
-        mv mv $feats_dir/$x $feats_dir/data/
-    done 
+        mv $feats_dir/$x $feats_dir/data/
+    done
 fi
