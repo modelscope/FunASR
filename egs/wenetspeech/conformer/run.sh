@@ -41,6 +41,7 @@ set -e
 set -u
 set -o pipefail
 
+set=L
 train_set=train_l
 valid_set=dev
 test_sets="dev test_net test_meeting"
@@ -71,15 +72,15 @@ fi
 if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     echo "stage 0: Data preparation"
     # Data preparation
-    local/wenetspeech_data_prep.sh $raw_data $feats_dir
-    mkdir $feats_dir/data
-    mv $feats_dir/$train_set $feats_dir/data/$train_set
-    for x in $test_sets; do
-        mv $feats_dir/$x $feats_dir/data/
-    done
+    local/data.sh "--set ${set}"
+#    mkdir $feats_dir/data
+#    mv $feats_dir/$train_set $feats_dir/data/$train_set
+#    for x in $test_sets; do
+#        mv $feats_dir/$x $feats_dir/data/
+#    done
 fi
 
-if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
-    echo "stage 1: Feature and CMVN Generation"
-    utils/compute_cmvn.sh --fbankdir ${feats_dir}/data/${train_set} --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} --config_file "$asr_config" --scale 0.1
-fi
+#if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
+#    echo "stage 1: Feature and CMVN Generation"
+#    utils/compute_cmvn.sh --fbankdir ${feats_dir}/data/${train_set} --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} --config_file "$asr_config" --scale 0.1
+#fi

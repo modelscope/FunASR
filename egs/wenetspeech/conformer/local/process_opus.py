@@ -16,14 +16,15 @@
 
 # usage: python3 process_opus.py wav.scp segments output_wav.scp
 
-from pydub import AudioSegment
-import sys
 import os
+import sys
+
+from pydub import AudioSegment
 
 
 def read_file(wav_scp, segments):
     wav_scp_dict = {}
-    with open(wav_scp, 'r', encoding='UTF-8') as fin:
+    with open(wav_scp, "r", encoding="UTF-8") as fin:
         for line_str in fin:
             wav_id, path = line_str.strip().split()
             wav_scp_dict[wav_id] = path
@@ -32,7 +33,7 @@ def read_file(wav_scp, segments):
     seg_path_list = []
     start_time_list = []
     end_time_list = []
-    with open(segments, 'r', encoding='UTF-8') as fin:
+    with open(segments, "r", encoding="UTF-8") as fin:
         for line_str in fin:
             arr = line_str.strip().split()
             assert len(arr) == 4
@@ -44,30 +45,27 @@ def read_file(wav_scp, segments):
 
 
 # TODO(Qijie): Fix the process logic
-def output(output_wav_scp, utt_list, seg_path_list, start_time_list,
-           end_time_list):
+def output(output_wav_scp, utt_list, seg_path_list, start_time_list, end_time_list):
     num_utts = len(utt_list)
     step = int(num_utts * 0.01)
-    with open(output_wav_scp, 'w', encoding='UTF-8') as fout:
+    with open(output_wav_scp, "w", encoding="UTF-8") as fout:
         previous_wav_path = ""
         for i in range(num_utts):
             utt_id = utt_list[i]
             current_wav_path = seg_path_list[i]
-            output_dir = (os.path.dirname(current_wav_path)) \
-                .replace("audio", 'audio_seg')
-            seg_wav_path = os.path.join(output_dir, utt_id + '.wav')
+            output_dir = (os.path.dirname(current_wav_path)).replace(
+                "audio", "audio_seg"
+            )
+            seg_wav_path = os.path.join(output_dir, utt_id + ".wav")
 
-            # if not os.path.exists(output_dir):
-            #     os.makedirs(output_dir)
-
+            os.makedirs(output_dir, exist_ok=True)
             if current_wav_path != previous_wav_path:
                 source_wav = AudioSegment.from_file(current_wav_path)
             previous_wav_path = current_wav_path
 
             start = int(start_time_list[i] * 1000)
             end = int(end_time_list[i] * 1000)
-            target_audio = source_wav[start:end].set_frame_rate(16000) \
-                .set_sample_width(2)
+            target_audio = source_wav[start:end].set_frame_rate(16000)
             target_audio.export(seg_wav_path, format="wav")
 
             fout.write("{} {}\n".format(utt_id, seg_wav_path))
@@ -80,11 +78,11 @@ def main():
     segments = sys.argv[2]
     output_wav_scp = sys.argv[3]
 
-    utt_list, seg_path_list, start_time_list, end_time_list \
-        = read_file(wav_scp, segments)
-    output(output_wav_scp, utt_list, seg_path_list, start_time_list,
-           end_time_list)
+    utt_list, seg_path_list, start_time_list, end_time_list = read_file(
+        wav_scp, segments
+    )
+    output(output_wav_scp, utt_list, seg_path_list, start_time_list, end_time_list)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
