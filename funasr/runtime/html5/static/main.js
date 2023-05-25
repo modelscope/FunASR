@@ -30,7 +30,8 @@ btnStop.disabled = true;
  
 
  
-var rec_text=""
+var rec_text="";
+var offline_text="";
 var info_div = document.getElementById('info_div');
 
 //var now_ipaddress=window.location.href;
@@ -38,12 +39,40 @@ var info_div = document.getElementById('info_div');
 //now_ipaddress=now_ipaddress.replace("static/index.html","");
 //document.getElementById('wssip').value=now_ipaddress;
 
+function getAsrMode(){
+
+            var item = null;
+            var obj = document.getElementsByName("asr_mode");
+            for (var i = 0; i < obj.length; i++) { //遍历Radio 
+                if (obj[i].checked) {
+                    item = obj[i].value;  
+					break;
+                }
+		    
+
+           }
+		   console.log("asr mode"+item);
+		   return item;
+}
+		   
+
 // 语音识别结果; 对jsonMsg数据解析,将识别结果附加到编辑框中
 function getJsonMessage( jsonMsg ) {
+	//console.log(jsonMsg);
 	console.log( "message: " + JSON.parse(jsonMsg.data)['text'] );
 	var rectxt=""+JSON.parse(jsonMsg.data)['text'];
+	var asrmodel=JSON.parse(jsonMsg.data)['mode'];
+	if(asrmodel=="2pass-offline")
+	{
+		offline_text=offline_text+rectxt.replace(/ +/g,"");
+		rec_text=offline_text;
+	}
+	else
+	{
+		rec_text=rec_text+rectxt.replace(/ +/g,"");
+	}
 	var varArea=document.getElementById('varArea');
-	rec_text=rec_text+rectxt.replace(/ +/g,"");
+	
 	varArea.value=rec_text;
 	 
  
@@ -97,7 +126,9 @@ function stop() {
 			"wav_name":  "h5",
 			"is_speaking":  false,
 			"chunk_interval":10,
+			"mode":getAsrMode(),
 		};
+		console.log(request);
 		if(sampleBuf.length>0){
 		wsconnecter.wsSend(sampleBuf,false);
 		console.log("sampleBuf.length"+sampleBuf.length);
@@ -149,6 +180,7 @@ function clear() {
  
 	varArea.value="";
     rec_text="";
+	offline_text="";
  
 }
 

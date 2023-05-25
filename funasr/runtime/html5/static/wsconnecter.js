@@ -69,7 +69,9 @@ function WebSocketConnectMethod( config ) { //定义socket连接方法类
 			"wav_name":  "h5",
 			"is_speaking":  true,
 			"chunk_interval":10,
+			"mode":getAsrMode(),
 		};
+		console.log(request);
 		speechSokt.send( JSON.stringify(request) );
 		console.log("连接成功");
 		stateHandle(0);
