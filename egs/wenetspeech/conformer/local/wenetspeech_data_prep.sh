@@ -24,7 +24,7 @@ stage=1
 prefix=
 train_subset=L
 
-. ./tools/parse_options.sh || exit 1;
+. ./utils/parse_options.sh || exit 1;
 
 filter_by_id () {
   idlist=$1
