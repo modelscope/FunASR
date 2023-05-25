@@ -72,7 +72,7 @@ fi
 if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     echo "stage 0: Data preparation"
     # Data preparation
-    local/data.sh "--set ${set}"
+    local/data.sh --set ${set} --nj 64 --data_dir $feats_dir --WENETSPEECH $raw_data
 #    mkdir $feats_dir/data
 #    mv $feats_dir/$train_set $feats_dir/data/$train_set
 #    for x in $test_sets; do

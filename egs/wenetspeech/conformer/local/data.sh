@@ -17,19 +17,10 @@ stage=1
 stop_stage=100
 set=L
 data_dir="data"
+WENETSPEECH=
 
 log "$0 $*"
 . utils/parse_options.sh
-
-. ./path.sh || exit 1;
-. ./cmd.sh || exit 1;
-. ./db.sh || exit 1;
-
-if [ ! -e "${WENETSPEECH}" ]; then
-    log "Fill the value of 'WENETSPEECH' of db.sh"
-    log "or download the data set follwing the instruction in https://wenet-e2e.github.io/WenetSpeech/"
-    exit 1
-fi
 
 if [ ! -d "${WENETSPEECH}/audio" ] && [ ! -f "${WENETSPEECH}/WenetSpeech.json" ]; then
     echo "Valid WENETSPEECH data not found in ${WENETSPEECH}."
