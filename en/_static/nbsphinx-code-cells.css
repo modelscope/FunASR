@@ -62,12 +62,16 @@ div.nblast.container {
 }
 
 /* input prompt */
-div.nbinput.container div.prompt pre {
+div.nbinput.container div.prompt pre,
+/* for sphinx_immaterial theme: */
+div.nbinput.container div.prompt pre > code {
     color: #307FC1;
 }
 
 /* output prompt */
-div.nboutput.container div.prompt pre {
+div.nboutput.container div.prompt pre,
+/* for sphinx_immaterial theme: */
+div.nboutput.container div.prompt pre > code {
     color: #BF5B3D;
 }
 
@@ -204,8 +208,10 @@ div.nboutput.container div.output_area > div[class^='highlight']{
     overflow-y: hidden;
 }
 
-/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt .copybtn {
+/* hide copy button on prompts for 'sphinx_copybutton' extension ... */
+.prompt .copybtn,
+/* ... and 'sphinx_immaterial' theme */
+.prompt .md-clipboard.md-icon {
     display: none;
 }
 

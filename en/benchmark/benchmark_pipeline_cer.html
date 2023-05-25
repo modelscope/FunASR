@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Benchmark (ModeScope Pipeline) &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            FunASR
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation/docker.html">Docker</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Academic Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../academic_recipe/asr_recipe.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../academic_recipe/punc_recipe.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../academic_recipe/vad_recipe.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../academic_recipe/sv_recipe.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../academic_recipe/sd_recipe.html">Speaker Diarization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">ModelScope Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modelscope_pipeline/quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modelscope_pipeline/asr_pipeline.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modelscope_pipeline/vad_pipeline.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modelscope_pipeline/punc_pipeline.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modelscope_pipeline/tp_pipeline.html">Timestamp Prediction (FA)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modelscope_pipeline/sv_pipeline.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modelscope_pipeline/sd_pipeline.html">Speaker Diarization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modelscope_pipeline/itn_pipeline.html">Inverse Text Normalization (ITN)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Zoo</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_zoo/modelscope_models.html">Pretrained Models on ModelScope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_zoo/huggingface_models.html">Pretrained Models on Huggingface</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Runtime and Service</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/export.html">Export models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/onnxruntime_python.html">ONNXRuntime-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/onnxruntime_cpp.html">ONNXRuntime-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/libtorch_python.html">Libtorch-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/html5.html">Html5 server for asr service</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/websocket_python.html">Service with websocket-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/websocket_cpp.html">Service with websocket-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/grpc_python.html">Service with grpc-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/grpc_cpp.html">Service with grpc-cpp</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark and Leadboard</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="benchmark_onnx.html">CPU Benchmark (ONNX-python)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmark_onnx_cpp.html">CPU Benchmark (ONNX-cpp)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmark_libtorch.html">CPU Benchmark (Libtorch)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Funasr Library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/build_task.html">Build custom tasks</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Papers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/papers.html">Papers</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Application</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/application.html">Audio Cut</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/application.html#realtime-speech-recognition">Realtime Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/application.html#audio-chat">Audio Chat</a></li>
+</ul>
+<p class="caption"><span class="caption-text">FQA</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/FQA.html">FQA</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">FunASR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Benchmark (ModeScope Pipeline)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/benchmark/benchmark_pipeline_cer.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="benchmark-modescope-pipeline">
+<h1>Benchmark (ModeScope Pipeline)<a class="headerlink" href="#benchmark-modescope-pipeline" title="Permalink to this headline"></a></h1>
+<div class="section" id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline"></a></h2>
+<div class="section" id="data-set">
+<h3>Data set:<a class="headerlink" href="#data-set" title="Permalink to this headline"></a></h3>
+<p><a class="reference external" href="https://www.openslr.org/33/">Aishell1</a>: dev, test</p>
+<p><a class="reference external" href="https://www.aishelltech.com/aishell_2">Aishell2</a>: dev_ios, test_ios, test_android, test_mic</p>
+<p><a class="reference external" href="https://github.com/wenet-e2e/WenetSpeech">WenetSpeech</a>: dev, test_meeting, test_net</p>
+</div>
+<div class="section" id="tools">
+<h3>Tools<a class="headerlink" href="#tools" title="Permalink to this headline"></a></h3>
+<div class="section" id="install-requirements">
+<h4><a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/installation/installation.html#installation">Install Requirements</a><a class="headerlink" href="#install-requirements" title="Permalink to this headline"></a></h4>
+<p>Install ModelScope and FunASR from pip</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install -U modelscope funasr
+<span class="c1"># For the users in China, you could install with the command:</span>
+<span class="c1">#pip install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple</span>
+</pre></div>
+</div>
+<p>Or install FunASR from source code</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/alibaba/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> FunASR
+pip install -e ./
+<span class="c1"># For the users in China, you could install with the command:</span>
+<span class="c1"># pip install -e ./ -i https://mirror.sjtu.edu.cn/pypi/web/simple</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="recipe">
+<h4>Recipe<a class="headerlink" href="#recipe" title="Permalink to this headline"></a></h4>
+<div class="section" id="test-cer">
+<h5><a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/modelscope_pipeline/asr_pipeline.html#inference-with-multi-thread-cpus-or-multi-gpus">Test CER</a><a class="headerlink" href="#test-cer" title="Permalink to this headline"></a></h5>
+<p>set the <code class="docutils literal notranslate"><span class="pre">model</span></code>, <code class="docutils literal notranslate"><span class="pre">data_dir</span></code> and <code class="docutils literal notranslate"><span class="pre">output_dir</span></code> in <code class="docutils literal notranslate"><span class="pre">infer.sh</span></code>.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> egs_modelscope/asr/TEMPLATE
+bash infer.sh
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="benchmark-cer">
+<h2>Benchmark CER<a class="headerlink" href="#benchmark-cer" title="Permalink to this headline"></a></h2>
+<div class="section" id="chinese-dataset">
+<h3>Chinese Dataset<a class="headerlink" href="#chinese-dataset" title="Permalink to this headline"></a></h3>
+<table>
+    <tr align="center">
+        <td>Model</td>
+        <td>Offline/Online</td>
+        <td colspan="2">Aishell1</td>
+        <td colspan="4">Aishell2</td>
+        <td colspan="3">WenetSpeech</td>
+    </tr>
+    <tr align="center">
+        <td></td>
+        <td></td>
+        <td>dev</td> 
+        <td>test</td>
+        <td>dev_ios</td>
+        <td>test_ios</td>
+        <td>test_android</td>
+        <td>test_mic</td>
+        <td>dev</td>
+        <td>test_meeting</td>
+        <td>test_net</td>
+    </tr>
+    <tr align="center">
+        <td> <a href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary">Paraformer-large</a> </td>
+        <td>Offline</td>
+        <td>1.76</td>
+        <td>1.94</td>
+        <td>2.79</td>
+        <td>2.84</td>
+        <td>3.08</td>
+        <td>3.03</td>
+        <td>3.43</td>
+        <td>7.01</td>
+        <td>6.66</td>
+    </tr>
+    <tr align="center">
+        <td> <a href="https://www.modelscope.cn/models/damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary">Paraformer-large-long</a> </td> 
+        <td>Offline</td>      
+        <td>1.80</td>
+        <td>2.10</td>
+        <td>2.78</td>
+        <td>2.87</td>
+        <td>3.12</td>
+        <td>3.11</td>
+        <td>3.44</td>
+        <td>13.28</td>
+        <td>7.08</td>
+    </tr>
+    <tr align="center">
+        <td> <a href="https://www.modelscope.cn/models/damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404/summary">Paraformer-large-contextual</a> </td>
+        <td>Offline</td>
+        <td>1.76</td>
+        <td>2.02</td>
+        <td>2.73</td>
+        <td>2.85</td>
+        <td>2.98</td>
+        <td>2.95</td>
+        <td>3.42</td>
+        <td>7.16</td>
+        <td>6.72</td>
+    </tr>
+    <tr align="center">
+        <td> <a href="https://modelscope.cn/models/damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8358-tensorflow1/summary">Paraformer</a> </td> 
+        <td>Offline</td>
+        <td>3.24</td>
+        <td>3.69</td>
+        <td>4.58</td>
+        <td>4.63</td>
+        <td>4.83</td>
+        <td>4.71</td>
+        <td>4.19</td>
+        <td>8.32</td>
+        <td>9.19</td>
+    </tr>
+   <tr align="center">
+        <td> <a href="https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-zh-cn-16k-common-vocab8358-tensorflow1-online/summary">UniASR</a> </td> 
+        <td>Online</td>
+        <td>3.34</td>
+        <td>3.99</td>
+        <td>4.62</td>
+        <td>4.52</td>
+        <td>4.77</td>
+        <td>4.73</td>
+        <td>4.51</td>
+        <td>10.63</td>
+        <td>9.70</td>
+    </tr>
+   <tr align="center">
+        <td> <a href="https://modelscope.cn/models/damo/speech_UniASR-large_asr_2pass-zh-cn-16k-common-vocab8358-tensorflow1-offline/summary">UniASR-large</a> </td> 
+        <td>Offline</td>      
+        <td>2.93</td>
+        <td>3.48</td>
+        <td>3.95</td>
+        <td>3.87</td>
+        <td>4.11</td>
+        <td>4.11</td>
+        <td>4.16</td>
+        <td>10.09</td>
+        <td>8.69</td>
+    </tr>
+    <tr align="center">
+        <td> <a href="https://www.modelscope.cn/models/damo/speech_paraformer_asr_nat-aishell1-pytorch/summary">Paraformer-aishell</a> </td>
+        <td>Offline</td>
+        <td>4.88</td>
+        <td>5.43</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+    </tr>
+   <tr align="center">
+        <td> <a href="https://modelscope.cn/models/damo/speech_paraformerbert_asr_nat-zh-cn-16k-aishell1-vocab4234-pytorch/summary">ParaformerBert-aishell</a> </td>
+        <td>Offline</td>
+        <td>6.14</td>
+        <td>7.01</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+    </tr>
+   <tr align="center">
+        <td> <a href="https://www.modelscope.cn/models/damo/speech_paraformer_asr_nat-zh-cn-16k-aishell2-vocab5212-pytorch/summary">Paraformer-aishell2</a> </td> 
+        <td>Offline</td>
+        <td>-</td>
+        <td>-</td>
+        <td>5.82</td>
+        <td>6.30</td>
+        <td>6.60</td>
+        <td>5.83</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+    </tr>
+   <tr align="center">
+        <td> <a href="https://www.modelscope.cn/models/damo/speech_paraformerbert_asr_nat-zh-cn-16k-aishell2-vocab5212-pytorch/summary">ParaformerBert-aishell2</a> </td> 
+        <td>Offline</td>
+        <td>-</td>
+        <td>-</td>
+        <td>4.95</td>
+        <td>5.45</td>
+        <td>5.59</td>
+        <td>5.83</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+    </tr>
+</table></div>
+<div class="section" id="english-dataset">
+<h3>English Dataset<a class="headerlink" href="#english-dataset" title="Permalink to this headline"></a></h3>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Speech Lab, Alibaba Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
