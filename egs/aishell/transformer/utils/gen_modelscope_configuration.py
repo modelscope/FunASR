@@ -106,11 +106,12 @@ if __name__ == '__main__':
                                                                            args.dataset, args.vocab_size, args.tag),
         }
     }
+    pipeline = {"type": args.pipeline_type}
     json_dict = {
         "framework": "pytorch",
         "task": args.task,
         "model": model,
-        "pipeline": args.pipeline_type,
+        "pipeline": pipeline,
     }
 
     with open(os.path.join(args.output_dir, "configuration.json"), "w") as f:
