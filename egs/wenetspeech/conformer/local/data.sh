@@ -13,11 +13,12 @@ SECONDS=0
 
 # general configuration
 nj=10
-stage=1
+stage=2
 stop_stage=100
 set=L
 data_dir="data"
 WENETSPEECH=
+train_cmd=
 
 log "$0 $*"
 . utils/parse_options.sh
