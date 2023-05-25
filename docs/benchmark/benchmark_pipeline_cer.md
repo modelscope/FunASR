@@ -141,8 +141,8 @@ bash infer.sh
         <td>4.11</td>
         <td>4.11</td>
         <td>4.16</td>
-        <td></td>
-        <td></td>
+        <td>10.09</td>
+        <td>8.69</td>
     </tr>
     <tr align="center">
         <td> <a href="https://www.modelscope.cn/models/damo/speech_paraformer_asr_nat-aishell1-pytorch/summary">Paraformer-aishell</a> </td>
