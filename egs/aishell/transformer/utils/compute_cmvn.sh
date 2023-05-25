@@ -2,7 +2,7 @@
 
 . ./path.sh || exit 1;
 # Begin configuration section.
-fbankdir=$1
+fbankdir=
 nj=32
 cmd=./utils/run.pl
 feats_dim=80
