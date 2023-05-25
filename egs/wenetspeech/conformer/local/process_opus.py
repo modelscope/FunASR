@@ -19,7 +19,7 @@
 import os
 import sys
 
-import torchaudio.backend.sox_io_backend as sox
+import torchaudio
 
 
 def read_file(wav_scp, segments):
@@ -60,12 +60,12 @@ def output(output_wav_scp, utt_list, seg_path_list, start_time_list, end_time_li
 
             os.makedirs(output_dir, exist_ok=True)
             if current_wav_path != previous_wav_path:
-                source_wav, sampling_rate = sox.load(current_wav_path, normalize=False)
+                waveform, sample_rate = torchaudio.load(current_wav_path)
             previous_wav_path = current_wav_path
 
-            start = int(start_time_list[i] * 1000)
-            end = int(end_time_list[i] * 1000)
-            target_audio = source_wav[start:end].set_frame_rate(16000)
+            start = int(start_time_list[i] * sample_rate)
+            end = int(end_time_list[i] * sample_rate)
+            target_audio = waveform[:, start:end].transpose(0, 1).contiguous()
             target_audio.export(seg_wav_path, format="wav")
 
             fout.write("{} {}\n".format(utt_id, seg_wav_path))
