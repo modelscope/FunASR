@@ -222,8 +222,12 @@ sudo sh test-docker.sh
 </div>
 <div class="section" id="run-docker">
 <h2>Run Docker<a class="headerlink" href="#run-docker" title="Permalink to this headline"></a></h2>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo docker run -itd --name funasr &lt;image-name&gt;:&lt;tag&gt; bash
-sudo docker <span class="nb">exec</span> -it funasr bash
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># cpu</span>
+sudo docker run -itd --name funasr -v &lt;local_dir:dir_in_docker&gt; &lt;image-name&gt;:&lt;tag&gt; /bin/bash
+<span class="c1"># gpu</span>
+sudo docker run -itd --gpus all --name funasr -v &lt;local_dir:dir_in_docker&gt; &lt;image-name&gt;:&lt;tag&gt; /bin/bash
+
+sudo docker <span class="nb">exec</span> -it funasr /bin/bash
 </pre></div>
 </div>
 </div>
