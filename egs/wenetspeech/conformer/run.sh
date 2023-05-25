@@ -28,7 +28,7 @@ feats_dim=80
 nj=64
 
 # data
-raw_data=/nfs/zhifu.gzf/wenetspeech_proc/audio_seg
+raw_data=/nfs/zhifu.gzf/wenetspeech_proc
 
 # exp tag
 tag="exp1"
