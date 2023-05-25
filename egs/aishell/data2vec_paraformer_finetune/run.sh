@@ -226,5 +226,6 @@ if [ ${stage} -le 6 ] && [ ${stop_stage} -ge 6 ]; then
         --dataset aishell \
         --output_dir $exp_dir/exp/$model_dir \
         --vocab_size $vocab_size \
+        --nat _nat \
         --tag $tag
 fi

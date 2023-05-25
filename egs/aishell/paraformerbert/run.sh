@@ -219,3 +219,19 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
         cat ${_dir}/text.cer.txt
     done
 fi
+
+# Prepare files for ModelScope fine-tuning and inference
+if [ ${stage} -le 6 ] && [ ${stop_stage} -ge 6 ]; then
+    echo "stage 6: ModelScope Preparation"
+    cp ${feats_dir}/data/${train_set}/cmvn/am.mvn ${exp_dir}/exp/${model_dir}/am.mvn
+    vocab_size=$(cat ${token_list} | wc -l)
+    python utils/gen_modelscope_configuration.py \
+        --am_model_name $inference_asr_model \
+        --mode paraformer \
+        --model_name paraformer_bert \
+        --dataset aishell \
+        --output_dir $exp_dir/exp/$model_dir \
+        --vocab_size $vocab_size \
+        --nat _nat \
+        --tag $tag
+fi
