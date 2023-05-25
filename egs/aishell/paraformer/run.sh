@@ -85,7 +85,7 @@ fi
 
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
     echo "stage 1: Feature and CMVN Generation"
-    utils/compute_cmvn.sh --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} ${feats_dir}/data/${train_set}
+    utils/compute_cmvn.sh ${feats_dir}/data/${train_set} --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} --config $asr_config --scale 1.0
 fi
 
 token_list=${feats_dir}/data/${lang}_token_list/char/tokens.txt
@@ -132,11 +132,12 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
                 --use_preprocessor true \
                 --token_type char \
                 --token_list $token_list \
+                --dataset_type small \
                 --data_dir ${feats_dir}/data \
                 --train_set ${train_set} \
                 --valid_set ${valid_set} \
                 --data_file_names "wav.scp,text" \
-                --cmvn_file ${feats_dir}/data/${train_set}/cmvn/cmvn.mvn \
+                --cmvn_file ${feats_dir}/data/${train_set}/cmvn/am.mvn \
                 --speed_perturb ${speed_perturb} \
                 --resume true \
                 --output_dir ${exp_dir}/exp/${model_dir} \
@@ -186,7 +187,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
                 --njob ${njob} \
                 --gpuid_list ${gpuid_list} \
                 --data_path_and_name_and_type "${_data}/${scp},speech,${type}" \
-                --cmvn_file ${feats_dir}/data/${train_set}/cmvn/cmvn.mvn \
+                --cmvn_file ${feats_dir}/data/${train_set}/cmvn/am.mvn \
                 --key_file "${_logdir}"/keys.JOB.scp \
                 --asr_train_config "${asr_exp}"/config.yaml \
                 --asr_model_file "${asr_exp}"/"${inference_asr_model}" \
@@ -207,4 +208,20 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
         tail -n 3 ${_dir}/text.cer > ${_dir}/text.cer.txt
         cat ${_dir}/text.cer.txt
     done
+fi
+
+# Prepare files for ModelScope fine-tuning and inference
+if [ ${stage} -le 6 ] && [ ${stop_stage} -ge 6 ]; then
+    echo "stage 6: ModelScope Preparation"
+    cp ${feats_dir}/data/${train_set}/cmvn/am.mvn ${exp_dir}/exp/${model_dir}/am.mvn
+    vocab_size=$(cat ${token_list} | wc -l)
+    python utils/gen_modelscope_configuration.py \
+        --am_model_name $inference_asr_model \
+        --mode paraformer \
+        --model_name paraformer \
+        --dataset aishell \
+        --output_dir $exp_dir/exp/$model_dir \
+        --vocab_size $vocab_size \
+        --nat _nat \
+        --tag $tag
 fi
