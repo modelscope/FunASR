@@ -38,6 +38,7 @@ h5Server.py [-h] [--host HOST] [--port PORT] [--certfile CERTFILE] [--keyfile KE
 ```
 例子如下，需要注意ip地址，如果从其他设备访问需求（例如手机端），需要将ip地址设为真实ip 
 ```shell
+cd funasr/runtime/html5
 python h5Server.py --host 0.0.0.0 --port 1337
 # python h5Server.py --host 30.220.136.139 --port 1337
 ```

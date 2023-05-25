@@ -5,6 +5,7 @@ import os
 import numpy as np
 import torchaudio
 import torchaudio.compliance.kaldi as kaldi
+import yaml
 
 
 def get_parser():
@@ -24,6 +25,11 @@ def get_parser():
         required=True,
         type=str,
         help="the path of wav scps",
+    )
+    parser.add_argument(
+        "--config",
+        type=str,
+        help="the config file for computing cmvn",
     )
     parser.add_argument(
         "--idx",
@@ -82,11 +88,27 @@ def main():
     #         mean_stats += np.sum(mat, axis=0)
     #         var_stats += np.sum(np.square(mat), axis=0)
     #         total_frames += mat.shape[0]
+
+    with open(args.config) as f:
+        configs = yaml.safe_load(f)
+        frontend_configs = configs.get("frontend_conf", {})
+        num_mel_bins = frontend_configs.get("n_mels", 80)
+        frame_length = frontend_configs.get("frame_length", 25)
+        frame_shift = frontend_configs.get("frame_shift", 10)
+        window_type = frontend_configs.get("window", "hamming")
+        resample_rate = frontend_configs.get("fs", 16000)
+        assert num_mel_bins == args.dim
+
     with open(wav_scp_file) as f:
         lines = f.readlines()
         for line in lines:
             _, wav_file = line.strip().split()
-            fbank = compute_fbank(wav_file, num_mel_bins=args.dim)
+            fbank = compute_fbank(wav_file,
+                                  num_mel_bins=args.dim,
+                                  frame_length=frame_length,
+                                  frame_shift=frame_shift,
+                                  resample_rate=resample_rate,
+                                  window_type=window_type)
             mean_stats += np.sum(fbank, axis=0)
             var_stats += np.sum(np.square(fbank), axis=0)
             total_frames += fbank.shape[0]
