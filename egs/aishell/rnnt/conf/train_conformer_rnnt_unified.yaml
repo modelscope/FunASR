@@ -25,19 +25,28 @@ rnnt_decoder_conf:
     hidden_size: 512
     embed_dropout_rate: 0.5
     dropout_rate: 0.5
-
 joint_network_conf:
     joint_space_size: 512
 
+# frontend related
+frontend: wav_frontend
+frontend_conf:
+    fs: 16000
+    window: hamming
+    n_mels: 80
+    frame_length: 25
+    frame_shift: 10
+    lfr_m: 1
+    lfr_n: 1
+
+
 # Auxiliary CTC
+model: rnnt_unified
 model_conf:
     auxiliary_ctc_weight: 0.0
 
 # minibatch related
 use_amp: true
-batch_type: unsorted
-batch_size: 16
-num_workers: 16
 
 # optimization related
 accum_grad: 1
@@ -59,8 +68,6 @@ scheduler: warmuplr
 scheduler_conf:
    warmup_steps: 25000
 
-normalize: None
-
 specaug: specaug
 specaug_conf:
     apply_time_warp: true
@@ -76,5 +83,17 @@ specaug_conf:
     - 0
     - 50
     num_time_mask: 5
+
+dataset_conf:
+    data_names: speech,text
+    data_types: sound,text
+    shuffle: True
+    shuffle_conf:
+        shuffle_size: 2048
+        sort_size: 500
+    batch_conf:
+        batch_type: token
+        batch_size: 16000
+    num_workers: 8
 
 log_interval: 50
