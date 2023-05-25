@@ -66,7 +66,7 @@ def output(output_wav_scp, utt_list, seg_path_list, start_time_list, end_time_li
             start = int(start_time_list[i] * sample_rate)
             end = int(end_time_list[i] * sample_rate)
             target_audio = waveform[:, start:end].transpose(0, 1).contiguous()
-            target_audio.export(seg_wav_path, format="wav")
+            torchaudio.save(seg_wav_path, target_audio, sample_rate)
 
             fout.write("{} {}\n".format(utt_id, seg_wav_path))
             if i % step == 0:
