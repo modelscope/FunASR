@@ -68,3 +68,12 @@ if [ ${stage} -le -1 ] && [ ${stop_stage} -ge -1 ]; then
     echo "For downloading data, please refer to https://github.com/wenet-e2e/WenetSpeech."
     exit 0;
 fi
+
+if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
+    echo "stage 0: Data preparation"
+    # Data preparation
+    local/wenetspeech_data_prep.sh \
+    --train-subset $set \
+    $wenetspeech_data_dir \
+    data || exit 1;
+fi
