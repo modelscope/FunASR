@@ -19,7 +19,7 @@
 import os
 import sys
 
-from pydub import AudioSegment
+import torchaudio.backend.sox_io_backend as sox
 
 
 def read_file(wav_scp, segments):
@@ -60,7 +60,7 @@ def output(output_wav_scp, utt_list, seg_path_list, start_time_list, end_time_li
 
             os.makedirs(output_dir, exist_ok=True)
             if current_wav_path != previous_wav_path:
-                source_wav = AudioSegment.from_file(current_wav_path)
+                source_wav, sampling_rate = sox.load(current_wav_path, normalize=False)
             previous_wav_path = current_wav_path
 
             start = int(start_time_list[i] * 1000)
