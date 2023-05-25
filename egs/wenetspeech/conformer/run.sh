@@ -41,7 +41,7 @@ set -e
 set -u
 set -o pipefail
 
-train_set=train
+train_set=train_l
 valid_set=dev
 test_sets="dev test_net test_meeting"
 
@@ -69,7 +69,12 @@ if [ ${stage} -le -1 ] && [ ${stop_stage} -ge -1 ]; then
 fi
 
 if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
-    echo "stage 0: Data preparation"
-    # Data preparation
-    local/wenetspeech_data_prep.sh $raw_data $feats_dir
+#    echo "stage 0: Data preparation"
+#    # Data preparation
+#    local/wenetspeech_data_prep.sh $raw_data $feats_dir
+    mkdir $feats_dir/data
+    mv $feats_dir/$train_set $feats_dir/data/$train_set
+    for x in $test_sets; do
+        mv mv $feats_dir/$x $feats_dir/data/
+    done 
 fi
