@@ -41,7 +41,7 @@ python h5Server.py --host 0.0.0.0 --port 1337
 `Tips:` asr service and html5 service should be deployed on the same device.
 ```shell
 cd ../python/websocket
-python ws_server_online.py --port 1095
+python wss_srv_asr.py --port 1095
 ```
 
 
