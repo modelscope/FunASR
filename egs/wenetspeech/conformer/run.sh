@@ -28,8 +28,7 @@ feats_dim=80
 nj=64
 
 # data
-raw_data=../raw_data
-data_url=www.openslr.org/resources/33
+raw_data=/nfs/zhifu.gzf/wenetspeech_proc/audio_seg
 
 # exp tag
 tag="exp1"
@@ -72,8 +71,5 @@ fi
 if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     echo "stage 0: Data preparation"
     # Data preparation
-    local/wenetspeech_data_prep.sh \
-    --train-subset $set \
-    $wenetspeech_data_dir \
-    data || exit 1;
+    local/wenetspeech_data_prep.sh $raw_data $feats_dir
 fi
