@@ -16,6 +16,44 @@
 #include <utility>
 #include <vector>
 
+context_ptr WebSocketServer::on_tls_init(tls_mode mode,
+                                         websocketpp::connection_hdl hdl,
+                                         std::string& s_certfile,
+                                         std::string& s_keyfile) {
+  namespace asio = websocketpp::lib::asio;
+
+  std::cout << "on_tls_init called with hdl: " << hdl.lock().get() << std::endl;
+  std::cout << "using TLS mode: "
+            << (mode == MOZILLA_MODERN ? "Mozilla Modern"
+                                       : "Mozilla Intermediate")
+            << std::endl;
+
+  context_ptr ctx = websocketpp::lib::make_shared<asio::ssl::context>(
+      asio::ssl::context::sslv23);
+
+  try {
+    if (mode == MOZILLA_MODERN) {
+      // Modern disables TLSv1
+      ctx->set_options(
+          asio::ssl::context::default_workarounds |
+          asio::ssl::context::no_sslv2 | asio::ssl::context::no_sslv3 |
+          asio::ssl::context::no_tlsv1 | asio::ssl::context::single_dh_use);
+    } else {
+      ctx->set_options(asio::ssl::context::default_workarounds |
+                       asio::ssl::context::no_sslv2 |
+                       asio::ssl::context::no_sslv3 |
+                       asio::ssl::context::single_dh_use);
+    }
+
+    ctx->use_certificate_chain_file(s_certfile);
+    ctx->use_private_key_file(s_keyfile, asio::ssl::context::pem);
+
+  } catch (std::exception& e) {
+    std::cout << "Exception: " << e.what() << std::endl;
+  }
+  return ctx;
+}
+
 // feed buffer to asr engine for decoder
 void WebSocketServer::do_decoder(const std::vector<char>& buffer,
                                  websocketpp::connection_hdl& hdl,
@@ -40,8 +78,13 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
       jsonresult["wav_name"] = msg["wav_name"];
 
       // send the json to client
-      server_->send(hdl, jsonresult.dump(), websocketpp::frame::opcode::text,
-                    ec);
+      if (is_ssl) {
+        wss_server_->send(hdl, jsonresult.dump(),
+                          websocketpp::frame::opcode::text, ec);
+      } else {
+        server_->send(hdl, jsonresult.dump(), websocketpp::frame::opcode::text,
+                      ec);
+      }
 
       std::cout << "buffer.size=" << buffer.size()
                 << ",result json=" << jsonresult.dump() << std::endl;
@@ -83,10 +126,19 @@ void WebSocketServer::check_and_clean_connection() {
   auto iter = data_map.begin();
   while (iter != data_map.end()) {  // loop to find closed connection
     websocketpp::connection_hdl hdl = iter->first;
-    server::connection_ptr con = server_->get_con_from_hdl(hdl);
-    if (con->get_state() != 1) {  // session::state::open ==1
-      to_remove.push_back(hdl);
+
+    if (is_ssl) {
+      wss_server::connection_ptr con = wss_server_->get_con_from_hdl(hdl);
+      if (con->get_state() != 1) {  // session::state::open ==1
+        to_remove.push_back(hdl);
+      }
+    } else {
+      server::connection_ptr con = server_->get_con_from_hdl(hdl);
+      if (con->get_state() != 1) {  // session::state::open ==1
+        to_remove.push_back(hdl);
+      }
     }
+
     iter++;
   }
   for (auto hdl : to_remove) {

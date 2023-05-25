@@ -33,7 +33,12 @@ sudo apt-get install libopenblas-dev #ubuntu
 ```
 
 ### Build runtime
+required openssl lib
+
 ```shell
+#install openssl lib first
+apt-get install libssl-dev
+
 git clone https://github.com/alibaba-damo-academy/FunASR.git && cd funasr/runtime/websocket
 mkdir build && cd build
 cmake  -DCMAKE_BUILD_TYPE=release .. -DONNXRUNTIME_DIR=/path/to/onnxruntime-linux-x64-1.14.0
@@ -43,11 +48,12 @@ make
 
 ```shell
 cd bin
-./websocketmain  [--model_thread_num <int>] [--decoder_thread_num <int>]
+   ./websocketmain  [--model_thread_num <int>] [--decoder_thread_num <int>]
                     [--io_thread_num <int>] [--port <int>] [--listen_ip
                     <string>] [--punc-quant <string>] [--punc-dir <string>]
                     [--vad-quant <string>] [--vad-dir <string>] [--quantize
-                    <string>] --model-dir <string> [--] [--version] [-h]
+                    <string>] --model-dir <string> [--keyfile <string>]
+                    [--certfile <string>] [--] [--version] [-h]
 Where:
    --model-dir <string>
      (required)  the asr model path, which contains model.onnx, config.yaml, am.mvn
@@ -70,6 +76,10 @@ Where:
      number of threads for network io, default:8
    --port <int>
      listen port, default:8889
+   --certfile <string>
+     path of certficate for WSS connection. if it is empty, it will be in WS mode.
+   --keyfile <string>
+     path of keyfile for WSS connection
   
    Required:  --model-dir <string>
    If use vad, please add: --vad-dir <string>
@@ -81,14 +91,16 @@ example:
 ## Run websocket client test
 
 ```shell
-Usage: websocketclient server_ip port wav_path threads_num
+Usage: ./websocketclient server_ip port wav_path threads_num is_ssl
+
+is_ssl is 1 means use wss connection, or use ws connection
 
 example:
 
-websocketclient 127.0.0.1 8889 funasr/runtime/websocket/test.pcm.wav 64
+websocketclient 127.0.0.1 8889 funasr/runtime/websocket/test.pcm.wav 64 0
 
 result json, example like:
-{"text":"一二三四五六七八九十一二三四五六七八九十"}
+{"mode":"offline","text":"欢迎大家来体验达摩院推出的语音识别模型","wav_name":"wav2"}
 ```
 
 

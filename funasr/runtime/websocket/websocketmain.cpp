@@ -64,6 +64,14 @@ int main(int argc, char* argv[]) {
     TCLAP::ValueArg<int> model_thread_num("", "model_thread_num",
                                           "model_thread_num", false, 1, "int");
 
+    TCLAP::ValueArg<std::string> certfile("", "certfile", "certfile", false, "",
+                                          "string");
+    TCLAP::ValueArg<std::string> keyfile("", "keyfile", "keyfile", false, "",
+                                         "string");
+
+    cmd.add(certfile);
+    cmd.add(keyfile);
+
     cmd.add(model_dir);
     cmd.add(quantize);
     cmd.add(vad_dir);
@@ -97,6 +105,14 @@ int main(int argc, char* argv[]) {
 
     std::vector<std::thread> decoder_threads;
 
+    std::string s_certfile = certfile.getValue();
+    std::string s_keyfile = keyfile.getValue();
+
+    bool is_ssl = false;
+    if (!s_certfile.empty()) {
+      is_ssl = true;
+    }
+
     auto conn_guard = asio::make_work_guard(
         io_decoder);  // make sure threads can wait in the queue
 
@@ -105,30 +121,55 @@ int main(int argc, char* argv[]) {
       decoder_threads.emplace_back([&io_decoder]() { io_decoder.run(); });
     }
 
-    server server_;       // server for websocket
-    server_.init_asio();  // init asio
-    server_.set_reuse_addr(
-        true);  // reuse address as we create multiple threads
+    server server_;  // server for websocket
+    wss_server wss_server_;
+    if (is_ssl) {
+      wss_server_.init_asio();  // init asio
+      wss_server_.set_reuse_addr(
+          true);  // reuse address as we create multiple threads
 
-    // list on port for accept
-    server_.listen(asio::ip::address::from_string(s_listen_ip), s_port);
+      // list on port for accept
+      wss_server_.listen(asio::ip::address::from_string(s_listen_ip), s_port);
+      WebSocketServer websocket_srv(
+          io_decoder, is_ssl, nullptr, &wss_server_, s_certfile,
+          s_keyfile);  // websocket server for asr engine
+      websocket_srv.initAsr(model_path, s_model_thread_num);  // init asr model
 
-    WebSocketServer websocket_srv(io_decoder,
-                                  &server_);  // websocket server for asr engine
-    websocket_srv.initAsr(model_path, s_model_thread_num);  // init asr model
+    } else {
+      server_.init_asio();  // init asio
+      server_.set_reuse_addr(
+          true);  // reuse address as we create multiple threads
+
+      // list on port for accept
+      server_.listen(asio::ip::address::from_string(s_listen_ip), s_port);
+      WebSocketServer websocket_srv(
+          io_decoder, is_ssl, &server_, nullptr, s_certfile,
+          s_keyfile);  // websocket server for asr engine
+      websocket_srv.initAsr(model_path, s_model_thread_num);  // init asr model
+    }
+
     std::cout << "asr model init finished. listen on port:" << s_port
               << std::endl;
 
     // Start the ASIO network io_service run loop
     if (s_io_thread_num == 1) {
-      server_.run();
+      if (is_ssl) {
+        wss_server_.run();
+      } else {
+        server_.run();
+      }
     } else {
       typedef websocketpp::lib::shared_ptr<websocketpp::lib::thread> thread_ptr;
       std::vector<thread_ptr> ts;
       // create threads for io network
       for (size_t i = 0; i < s_io_thread_num; i++) {
-        ts.push_back(websocketpp::lib::make_shared<websocketpp::lib::thread>(
-            &server::run, &server_));
+        if (is_ssl) {
+          ts.push_back(websocketpp::lib::make_shared<websocketpp::lib::thread>(
+              &wss_server::run, &wss_server_));
+        } else {
+          ts.push_back(websocketpp::lib::make_shared<websocketpp::lib::thread>(
+              &server::run, &server_));
+        }
       }
       // wait for theads
       for (size_t i = 0; i < s_io_thread_num; i++) {
