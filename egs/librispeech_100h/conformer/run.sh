@@ -93,7 +93,7 @@ fi
 
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
     echo "stage 1: Feature and CMVN Generation"
-    utils/compute_cmvn.sh ${feats_dir}/data/${train_set} --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} --config $asr_config --scale 1.0
+    utils/compute_cmvn.sh --fbankdir ${feats_dir}/data/${train_set} --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} --config_file "$asr_config" --scale 1.0
 fi
 
 token_list=${feats_dir}/data/lang_char/${train_set}_${bpemode}${nbpe}_units.txt
