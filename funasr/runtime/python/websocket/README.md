@@ -69,36 +69,36 @@ python wss_client_asr.py \
 Recording from mircrophone
 ```shell
 # --chunk_interval, "10": 600/10=60ms, "5"=600/5=120ms, "20": 600/12=30ms
-python ws_client.py --host "0.0.0.0" --port 10095 --mode offline --chunk_interval 10 --words_max_print 100
+python wss_client_asr.py --host "0.0.0.0" --port 10095 --mode offline --chunk_interval 10 --words_max_print 100
 ```
 Loadding from wav.scp(kaldi style)
 ```shell
 # --chunk_interval, "10": 600/10=60ms, "5"=600/5=120ms, "20": 600/12=30ms
-python ws_client.py --host "0.0.0.0" --port 10095 --mode offline --chunk_interval 10 --words_max_print 100 --audio_in "./data/wav.scp" --send_without_sleep --output_dir "./results"
+python wss_client_asr.py --host "0.0.0.0" --port 10095 --mode offline --chunk_interval 10 --words_max_print 100 --audio_in "./data/wav.scp" --send_without_sleep --output_dir "./results"
 ```
 
 ##### ASR streaming client
 Recording from mircrophone
 ```shell
 # --chunk_size, "5,10,5"=600ms, "8,8,4"=480ms
-python ws_client.py --host "0.0.0.0" --port 10095 --mode online --chunk_size "5,10,5" --words_max_print 100
+python wss_client_asr.py --host "0.0.0.0" --port 10095 --mode online --chunk_size "5,10,5" --words_max_print 100
 ```
 Loadding from wav.scp(kaldi style)
 ```shell
 # --chunk_size, "5,10,5"=600ms, "8,8,4"=480ms
-python ws_client.py --host "0.0.0.0" --port 10095 --mode online --chunk_size "5,10,5" --audio_in "./data/wav.scp" --output_dir "./results"
+python wss_client_asr.py --host "0.0.0.0" --port 10095 --mode online --chunk_size "5,10,5" --audio_in "./data/wav.scp" --output_dir "./results"
 ```
 
 ##### ASR offline/online 2pass client
 Recording from mircrophone
 ```shell
 # --chunk_size, "5,10,5"=600ms, "8,8,4"=480ms
-python ws_client.py --host "0.0.0.0" --port 10095 --mode 2pass --chunk_size "8,8,4"
+python wss_client_asr.py --host "0.0.0.0" --port 10095 --mode 2pass --chunk_size "8,8,4"
 ```
 Loadding from wav.scp(kaldi style)
 ```shell
 # --chunk_size, "5,10,5"=600ms, "8,8,4"=480ms
-python ws_client.py --host "0.0.0.0" --port 10095 --mode 2pass --chunk_size "8,8,4" --audio_in "./data/wav.scp" --output_dir "./results"
+python wss_client_asr.py --host "0.0.0.0" --port 10095 --mode 2pass --chunk_size "8,8,4" --audio_in "./data/wav.scp" --output_dir "./results"
 ```
 ## Acknowledge
 1. This project is maintained by [FunASR community](https://github.com/alibaba-damo-academy/FunASR).
