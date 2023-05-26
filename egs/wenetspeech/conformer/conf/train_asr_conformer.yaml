@@ -90,7 +90,7 @@ specaug_conf:
 
 dataset_conf:
     data_names: speech,text
-    data_types: sound,text
+    data_types: sound,text_nospace
     shuffle: True
     shuffle_conf:
         shuffle_size: 2048
