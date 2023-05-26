@@ -20,7 +20,7 @@ token_type=char
 type=sound
 scp=wav.scp
 speed_perturb="0.9 1.0 1.1"
-stage=0
+stage=2
 stop_stage=5
 
 # feature configuration
@@ -72,7 +72,7 @@ fi
 if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     echo "stage 0: Data preparation"
     # Data preparation
-#    local/data.sh --set ${set} --nj $nj --data_dir $feats_dir --WENETSPEECH $raw_data --train_cmd $train_cmd
+    local/data.sh --set ${set} --nj $nj --data_dir $feats_dir --WENETSPEECH $raw_data --train_cmd $train_cmd
     mkdir $feats_dir/data
     mv $feats_dir/$train_set $feats_dir/data/$train_set
     for x in $test_sets; do
