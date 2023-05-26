@@ -129,6 +129,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
                 --use_preprocessor true \
                 --token_type $token_type \
                 --token_list $token_list \
+                --dataset_type large \
                 --data_dir ${feats_dir}/data \
                 --train_set ${train_set} \
                 --valid_set ${valid_set} \
