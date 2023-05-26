@@ -20,7 +20,7 @@ token_type=char
 type=sound
 scp=wav.scp
 speed_perturb="0.9 1.0 1.1"
-stage=2
+stage=3
 stop_stage=5
 
 # feature configuration
