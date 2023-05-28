@@ -120,7 +120,7 @@ fi
 
 # ASR Training Stage
 world_size=$gpu_num  # run on one machine
-if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4; then
+if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
     echo "stage 4: ASR Training"
     mkdir -p ${exp_dir}/exp/${model_dir}
     mkdir -p ${exp_dir}/exp/${model_dir}/log
