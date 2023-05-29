@@ -216,7 +216,7 @@ if [ ${stage} -le 6 ] && [ ${stop_stage} -ge 6 ]; then
         --am_model_name $inference_asr_model \
         --mode asr \
         --model_name conformer \
-        --dataset aishell \
+        --dataset wenetspeech \
         --output_dir $exp_dir/exp/$model_dir \
         --vocab_size $vocab_size \
         --tag $tag
