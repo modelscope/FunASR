@@ -27,7 +27,7 @@ def get_parser():
         help="the path of wav scps",
     )
     parser.add_argument(
-        "--config",
+        "--config_file",
         type=str,
         help="the config file for computing cmvn",
     )
@@ -89,7 +89,7 @@ def main():
     #         var_stats += np.sum(np.square(mat), axis=0)
     #         total_frames += mat.shape[0]
 
-    with open(args.config) as f:
+    with open(args.config_file) as f:
         configs = yaml.safe_load(f)
         frontend_configs = configs.get("frontend_conf", {})
         num_mel_bins = frontend_configs.get("n_mels", 80)

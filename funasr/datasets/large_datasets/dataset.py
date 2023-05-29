@@ -148,6 +148,12 @@ class AudioDataset(IterableDataset):
                         if "key" not in sample_dict:
                             sample_dict["key"] = segs[0]
                         sample_dict['hw_tag'] = 1
+                    elif data_type == "text_nospace":
+                        text = item
+                        segs = text.strip().split(maxsplit=1)
+                        sample_dict[data_name] = [x for x in segs[1]]
+                        if "key" not in sample_dict:
+                            sample_dict["key"] = segs[0]
                     else:
                         text = item
                         segs = text.strip().split()

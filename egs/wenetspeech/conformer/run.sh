@@ -20,8 +20,7 @@ token_type=char
 type=sound
 scp=wav.scp
 speed_perturb="0.9 1.0 1.1"
-dataset_type=large
-stage=0
+stage=3
 stop_stage=5
 
 # feature configuration
@@ -29,8 +28,7 @@ feats_dim=80
 nj=64
 
 # data
-tr_dir=
-dev_tst_dir=
+raw_data=/nfs/zhifu.gzf/wenetspeech_proc
 
 # exp tag
 tag="exp1"
@@ -43,14 +41,15 @@ set -e
 set -u
 set -o pipefail
 
-train_set=train
-valid_set=dev_ios
-test_sets="dev_ios test_ios"
+set=L
+train_set=train_l
+valid_set=dev
+test_sets="dev test_net test_meeting"
 
 asr_config=conf/train_asr_conformer.yaml
 model_dir="baseline_$(basename "${asr_config}" .yaml)_${lang}_${token_type}_${tag}"
 
-inference_config=conf/decode_asr_transformer.yaml
+inference_config=conf/decode_asr_transformer_5beam.yaml
 inference_asr_model=valid.acc.ave_10best.pb
 
 # you can set gpu num for decoding here
@@ -65,29 +64,25 @@ else
     _ngpu=0
 fi
 
+if [ ${stage} -le -1 ] && [ ${stop_stage} -ge -1 ]; then
+    echo "For downloading data, please refer to https://github.com/wenet-e2e/WenetSpeech."
+    exit 0;
+fi
+
 if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     echo "stage 0: Data preparation"
-    # For training set
-    local/prepare_data.sh ${tr_dir} ${feats_dir}/data/local/train ${feats_dir}/data/train || exit 1;
-    # # For dev and test set
-    for x in iOS; do
-        local/prepare_data.sh ${dev_tst_dir}/${x}/dev ${feats_dir}/data/local/dev_${x,,} ${feats_dir}/data/dev_${x,,} || exit 1;
-        local/prepare_data.sh ${dev_tst_dir}/${x}/test ${feats_dir}/data/local/test_${x,,} ${feats_dir}/data/test_${x,,} || exit 1;
-    done 
-    # Normalize text to capital letters
-    for x in train dev_ios test_ios; do
-        mv ${feats_dir}/data/${x}/text ${feats_dir}/data/${x}/text.org
-        paste -d " " <(cut -f 1 ${feats_dir}/data/${x}/text.org) <(cut -f 2- ${feats_dir}/data/${x}/text.org \
-             | tr 'A-Z' 'a-z' | tr -d " ") \
-            > ${feats_dir}/data/${x}/text
-        utils/text2token.py -n 1 -s 1 ${feats_dir}/data/${x}/text > ${feats_dir}/data/${x}/text.org
-        mv ${feats_dir}/data/${x}/text.org ${feats_dir}/data/${x}/text
+    # Data preparation
+    local/data.sh --set ${set} --nj $nj --data_dir $feats_dir --WENETSPEECH $raw_data --train_cmd $train_cmd
+    mkdir $feats_dir/data
+    mv $feats_dir/$train_set $feats_dir/data/$train_set
+    for x in $test_sets; do
+        mv $feats_dir/$x $feats_dir/data/
     done
 fi
 
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
     echo "stage 1: Feature and CMVN Generation"
-    utils/compute_cmvn.sh --fbankdir ${feats_dir}/data/${train_set} --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} --config_file "$asr_config" --scale 1.0
+    utils/compute_cmvn.sh --fbankdir ${feats_dir}/data/${train_set} --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} --config_file "$asr_config" --scale 0.1
 fi
 
 token_list=${feats_dir}/data/${lang}_token_list/$token_type/tokens.txt
@@ -95,15 +90,15 @@ echo "dictionary: ${token_list}"
 if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     echo "stage 2: Dictionary Preparation"
     mkdir -p ${feats_dir}/data/${lang}_token_list/$token_type/
-   
+
     echo "make a dictionary"
     echo "<blank>" > ${token_list}
     echo "<s>" >> ${token_list}
     echo "</s>" >> ${token_list}
-    utils/text2token.py -s 1 -n 1 --space "" ${feats_dir}/data/${train_set}/text | cut -f 2- -d" " | tr " " "\n" \
+    utils/text2token.py -s 1 -n 1 --space "" ${feats_dir}/data/$train_set/text | cut -f 2- -d" " | tr " " "\n" \
         | sort | uniq | grep -a -v -e '^\s*$' | awk '{print $0}' >> ${token_list}
     echo "<unk>" >> ${token_list}
- fi
+fi
 
 # LM Training Stage
 world_size=$gpu_num  # run on one machine
@@ -134,13 +129,13 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
                 --use_preprocessor true \
                 --token_type $token_type \
                 --token_list $token_list \
+                --dataset_type large \
                 --data_dir ${feats_dir}/data \
                 --train_set ${train_set} \
                 --valid_set ${valid_set} \
                 --data_file_names "wav.scp,text" \
                 --cmvn_file ${feats_dir}/data/${train_set}/cmvn/am.mvn \
                 --speed_perturb ${speed_perturb} \
-                --dataset_type $dataset_type \
                 --resume true \
                 --output_dir ${exp_dir}/exp/${model_dir} \
                 --config $asr_config \
@@ -221,10 +216,8 @@ if [ ${stage} -le 6 ] && [ ${stop_stage} -ge 6 ]; then
         --am_model_name $inference_asr_model \
         --mode asr \
         --model_name conformer \
-        --dataset aishell2 \
+        --dataset wenetspeech \
         --output_dir $exp_dir/exp/$model_dir \
         --vocab_size $vocab_size \
         --tag $tag
 fi
-
-

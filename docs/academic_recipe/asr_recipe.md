@@ -12,7 +12,7 @@ cd egs/aishell/paraformer
 Then you can directly start the recipe as follows:
 ```sh
 conda activate funasr
-. ./run.sh
+. ./run.sh --CUDA_VISIBLE_DEVICES="0,1" --gpu_num=2
 ```
 
 The training log files are saved in `${exp_dir}/exp/${model_dir}/log/train.log.*`， which can be viewed using the following command:
@@ -26,15 +26,18 @@ Users can observe the training loss, prediction accuracy and other training info
 ... 1epoch:train:801-850batch:850num_updates: ... loss_ctc=107.890, loss_att=87.832, acc=0.029, loss_pre=1.702 ...
 ```
 
-Also, users can use tensorboard to observe these training information by the following command:
-```sh
-tensorboard --logdir ${exp_dir}/exp/${model_dir}/tensorboard/train
-```
-
 At the end of each epoch, the evaluation metrics are calculated on the validation set, like follows:
 ```text
 ... [valid] loss_ctc=99.914, cer_ctc=1.000, loss_att=80.512, acc=0.029, cer=0.971, wer=1.000, loss_pre=1.952, loss=88.285 ...
 ```
+
+Also, users can use tensorboard to observe these training information by the following command:
+```sh
+tensorboard --logdir ${exp_dir}/exp/${model_dir}/tensorboard/train
+```
+Here is an example of loss:
+
+<img src="images/loss.png" width="200"/>
 
 The inference results are saved in `${exp_dir}/exp/${model_dir}/decode_asr_*/$dset`. The main two files are `text.cer` and `text.cer.txt`. `text.cer` saves the comparison between the recognized text and the reference text, like follows:
 ```text
@@ -177,7 +180,7 @@ The configuration of the model is set in the config file `conf/train_*.yaml`. Sp
 encoder: conformer
 encoder_conf:
     output_size: 256    # dimension of attention
-    attention_heads: 4  # number of heads in multi-head attention
+    attention_heads: 4  # the number of heads in multi-head attention
     linear_units: 2048  # the number of units of position-wise feed forward
     num_blocks: 12      # the number of encoder blocks
     dropout_rate: 0.1
