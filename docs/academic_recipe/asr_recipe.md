@@ -35,6 +35,9 @@ Also, users can use tensorboard to observe these training information by the fol
 ```sh
 tensorboard --logdir ${exp_dir}/exp/${model_dir}/tensorboard/train
 ```
+Here is an example of loss:
+
+<img src="images/loss.png" width="200"/>
 
 The inference results are saved in `${exp_dir}/exp/${model_dir}/decode_asr_*/$dset`. The main two files are `text.cer` and `text.cer.txt`. `text.cer` saves the comparison between the recognized text and the reference text, like follows:
 ```text
@@ -177,7 +180,7 @@ The configuration of the model is set in the config file `conf/train_*.yaml`. Sp
 encoder: conformer
 encoder_conf:
     output_size: 256    # dimension of attention
-    attention_heads: 4  # number of heads in multi-head attention
+    attention_heads: 4  # the number of heads in multi-head attention
     linear_units: 2048  # the number of units of position-wise feed forward
     num_blocks: 12      # the number of encoder blocks
     dropout_rate: 0.1
