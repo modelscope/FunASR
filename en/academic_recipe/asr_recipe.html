@@ -155,7 +155,7 @@
 </div>
 <p>Then you can directly start the recipe as follows:</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>conda activate funasr
-. ./run.sh
+. ./run.sh --CUDA_VISIBLE_DEVICES<span class="o">=</span><span class="s2">&quot;0,1&quot;</span> --gpu_num<span class="o">=</span><span class="m">2</span>
 </pre></div>
 </div>
 <p>The training log files are saved in <code class="docutils literal notranslate"><span class="pre">${exp_dir}/exp/${model_dir}/log/train.log.*</span></code>， which can be viewed using the following command:</p>
@@ -167,15 +167,16 @@
 ... 1epoch:train:801-850batch:850num_updates: ... loss_ctc=107.890, loss_att=87.832, acc=0.029, loss_pre=1.702 ...
 </pre></div>
 </div>
-<p>Also, users can use tensorboard to observe these training information by the following command:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>tensorboard --logdir <span class="si">${</span><span class="nv">exp_dir</span><span class="si">}</span>/exp/<span class="si">${</span><span class="nv">model_dir</span><span class="si">}</span>/tensorboard/train
-</pre></div>
-</div>
 <p>At the end of each epoch, the evaluation metrics are calculated on the validation set, like follows:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>... [valid] loss_ctc=99.914, cer_ctc=1.000, loss_att=80.512, acc=0.029, cer=0.971, wer=1.000, loss_pre=1.952, loss=88.285 ...
 </pre></div>
 </div>
-<p>The inference results are saved in <code class="docutils literal notranslate"><span class="pre">${exp_dir}/exp/${model_dir}/decode_asr_*/$dset</span></code>. The main two files are <code class="docutils literal notranslate"><span class="pre">text.cer</span></code> and <code class="docutils literal notranslate"><span class="pre">text.cer.txt</span></code>. <code class="docutils literal notranslate"><span class="pre">text.cer</span></code> saves the comparison between the recognized text and the reference text, like follows:</p>
+<p>Also, users can use tensorboard to observe these training information by the following command:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>tensorboard --logdir <span class="si">${</span><span class="nv">exp_dir</span><span class="si">}</span>/exp/<span class="si">${</span><span class="nv">model_dir</span><span class="si">}</span>/tensorboard/train
+</pre></div>
+</div>
+<p>Here is an example of loss:</p>
+<img src="images/loss.png" width="200"/><p>The inference results are saved in <code class="docutils literal notranslate"><span class="pre">${exp_dir}/exp/${model_dir}/decode_asr_*/$dset</span></code>. The main two files are <code class="docutils literal notranslate"><span class="pre">text.cer</span></code> and <code class="docutils literal notranslate"><span class="pre">text.cer.txt</span></code>. <code class="docutils literal notranslate"><span class="pre">text.cer</span></code> saves the comparison between the recognized text and the reference text, like follows:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>...
 BAC009S0764W0213(nwords=11,cor=11,ins=0,del=0,sub=0) corr=100.00%,cer=0.00%
 ref:    构 建 良 好 的 旅 游 市 场 环 境
@@ -331,7 +332,7 @@ FunASR supports two parameters to specify the training steps, namely <code class
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">encoder</span><span class="p">:</span> <span class="n">conformer</span>
 <span class="n">encoder_conf</span><span class="p">:</span>
     <span class="n">output_size</span><span class="p">:</span> <span class="mi">256</span>    <span class="c1"># dimension of attention</span>
-    <span class="n">attention_heads</span><span class="p">:</span> <span class="mi">4</span>  <span class="c1"># number of heads in multi-head attention</span>
+    <span class="n">attention_heads</span><span class="p">:</span> <span class="mi">4</span>  <span class="c1"># the number of heads in multi-head attention</span>
     <span class="n">linear_units</span><span class="p">:</span> <span class="mi">2048</span>  <span class="c1"># the number of units of position-wise feed forward</span>
     <span class="n">num_blocks</span><span class="p">:</span> <span class="mi">12</span>      <span class="c1"># the number of encoder blocks</span>
     <span class="n">dropout_rate</span><span class="p">:</span> <span class="mf">0.1</span>
