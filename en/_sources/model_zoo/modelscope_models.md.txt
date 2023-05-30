@@ -1,7 +1,8 @@
 # Pretrained Models on ModelScope
 
 ## Model License
--  Apache License 2.0
+You are free to use, copy, modify, and share FunASR under the conditions of this agreement. To upload FunASR to any third-party platform for download and use, you need to obtain an additional license, which can be applied for free through official email (funasr@list.alibaba-inc.com). You must also indicate the code and model source and author information when using, copying, modifying and sharing FunASR. Full license could see [license](https://github.com/alibaba-damo-academy/FunASR/blob/main/LICENSE)
+
 
 ## Model Zoo
 Here we provided several pretrained models on different datasets. The details of models and datasets can be found on [ModelScope](https://www.modelscope.cn/models?page=1&tasks=auto-speech-recognition).
