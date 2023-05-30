@@ -1160,8 +1160,8 @@ class ParaformerOnline(Paraformer):
                                                                                            mask_chunk_predictor=mask_chunk_predictor,
                                                                                            target_label_length=None,
                                                                                            )
-        predictor_alignments, predictor_alignments_len = self.predictor.gen_frame_alignments(pre_alphas[:, :-1],
-                                                                                             encoder_out_lens)
+        predictor_alignments, predictor_alignments_len = self.predictor.gen_frame_alignments(pre_alphas,
+                                                                                             encoder_out_lens+1 if self.predictor.tail_threshold > 0.0 else encoder_out_lens)
 
         scama_mask = None
         if self.encoder.overlap_chunk_cls is not None and self.decoder_attention_chunk_type == 'chunk':
