@@ -1,21 +1,73 @@
-MIT License
+FunASR 模型开源协议
 
-Copyright (c) 2022 Alibaba
+版本号：1.0
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+版权所有 (C) [2023-2028] [阿里巴巴集团]。保留所有权利。
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+感谢您选择 FunASR 开源模型。FunASR 开源模型是一款免费且开源的语音模型，让大家可以使用、修改、分享和学习该模型。
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+为了保证更好的社区合作，我们制定了以下协议，希望您仔细阅读并遵守本协议。
+
+1 定义
+本协议中，FunASR 指 FunASR 开源代码、模型及其衍生品，包括您finetune后的模型；您指使用、修改、分享和学习 FunASR 的个人或组织。
+
+2 许可和限制
+2.1 许可
+
+您可以在遵守本协议的前提下，自由地使用、复制、修改和分享 FunASR。
+
+2.2 限制
+
+将 FunASR 上传至任何第三方平台以供下载和使用，需要获得额外许可，可通过官方邮件（funasr@list.alibaba-inc.com）进行申请（免费）。同时，您在使用、复制、修改和分享 FunASR 时，必须注明代码与模型出处以及作者信息。
+
+3 责任和风险承担
+FunASR 仅作为参考和学习使用，不对您使用或修改 FunASR 造成的任何直接或间接损失承担任何责任。您对 FunASR 的使用和修改应该自行承担风险。
+
+4 终止
+如果您违反本协议的任何条款，您的许可将自动终止，您必须停止使用、复制、修改和分享 FunASR。
+
+5 修订
+本协议可能会不时更新和修订。修订后的协议将在 FunASR 官方仓库发布，并自动生效。如果您继续使用、复制、修改和分享 FunASR，即表示您同意修订后的协议。
+
+6 其他规定
+本协议受到 [国家/地区] 的法律管辖。如果任何条款被裁定为不合法、无效或无法执行，则该条款应被视为从本协议中删除，而其余条款应继续有效并具有约束力。
+
+如果您对本协议有任何问题或意见，请联系我们。
+
+版权所有© [2023-2028] [阿里巴巴集团]。保留所有权利。
+
+FunASR Model Open Source License
+Version 1.0
+
+Copyright (C) [2023-2028] Alibaba Group. All rights reserved.
+
+Thank you for choosing the FunASR open source model. The FunASR open source model is a free and open-source speech model that allows everyone to use, modify, share, and learn from it.
+
+To ensure better community collaboration, we have developed the following agreement and hope that you carefully read and abide by it.
+
+1 Definitions
+In this agreement, FunASR refers to the FunASR open source code, model, and its derivatives, including your fine-tuned models. You refer to individuals or organizations who use, modify, share, and learn from FunASR.
+
+2 License and Restrictions
+
+2.1 License
+You are free to use, copy, modify, and share FunASR under the conditions of this agreement.
+
+2.2 Restrictions
+To upload FunASR to any third-party platform for download and use, you need to obtain an additional license, which can be applied for free through official email (funasr@list.alibaba-inc.com). You must also indicate the code and model source and author information when using, copying, modifying and sharing FunASR.
+
+3 Responsibility and Risk
+FunASR is for reference and learning purposes only and is not responsible for any direct or indirect losses caused by your use or modification of FunASR. You should take responsibility and risks for your use and modification of FunASR.
+
+4 Termination
+If you violate any terms of this agreement, your license will be automatically terminated, and you must stop using, copying, modifying, and sharing FunASR.
+
+5 Revision
+This agreement may be updated and revised from time to time. The revised agreement will be published in the FunASR official repository and automatically take effect. If you continue to use, copy, modify, and share FunASR, it means you agree to the revised agreement.
+
+6 Other Provisions
+This agreement is subject to the laws of [Country/Region]. If any provisions are found to be illegal, invalid, or unenforceable, they shall be deemed deleted from this agreement, and the remaining provisions shall remain valid and binding.
+
+If you have any questions or comments about this agreement, please contact us.
+
+Copyright (c) [2023-2028] Alibaba Group. All rights reserved.
