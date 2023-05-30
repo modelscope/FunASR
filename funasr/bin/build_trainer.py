@@ -23,6 +23,8 @@ def parse_args(mode):
         from funasr.tasks.asr import ASRTask as ASRTask
     elif mode == "paraformer":
         from funasr.tasks.asr import ASRTaskParaformer as ASRTask
+    elif mode == "paraformer_online":
+        from funasr.tasks.asr import ASRTaskParaformer as ASRTask
     elif mode == "paraformer_vad_punc":
         from funasr.tasks.asr import ASRTaskParaformer as ASRTask
     elif mode == "uniasr":
