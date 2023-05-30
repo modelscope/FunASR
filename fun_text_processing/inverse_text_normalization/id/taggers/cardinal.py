@@ -26,11 +26,10 @@ class CardinalFst(GraphFst):
         graph_teen = pynini.string_file(get_abs_path("data/numbers/teen.tsv"))
         graph_hundreds = pynini.string_file(get_abs_path("data/numbers/hundreds.tsv"))
         graph_thousand = pynini.string_file(get_abs_path("data/numbers/thousand.tsv"))
-
-        graph_cents = pynini.cross("seratus", "100") | pynini.cross("ratus", "100") | pynini.union(graph_hundreds, pynutil.insert("0"))
+        
         graph_hundred = pynini.cross("ratus", "") | pynini.cross("seratus", "")
 
-        graph_hundred_component = pynini.union(graph_digit + delete_space + graph_hundred, pynutil.insert("00"))
+        graph_hundred_component = pynini.union(graph_digit + delete_space + graph_hundred, pynutil.insert("0"))
         graph_hundred_component += delete_space
         graph_hundred_component += pynini.union(
             graph_teen | pynutil.insert("00"),
@@ -44,8 +43,8 @@ class CardinalFst(GraphFst):
                 (graph_ties | pynutil.insert("0")) + delete_space + (
                             graph_digit | pynutil.insert("0")),
         )
-        graph_hundred_component = graph_hundred_component | graph_cents | graph_one_hundred_component
-
+       graph_hundred_component = graph_hundred_component | graph_one_hundred_component
+    
         graph_hundred_component_at_least_one_none_zero_digit = graph_hundred_component @ (
             pynini.closure(DAMO_DIGIT) + (DAMO_DIGIT - "0") + pynini.closure(DAMO_DIGIT)
         )
@@ -54,14 +53,12 @@ class CardinalFst(GraphFst):
         )
         graph_thousand = pynini.cross("ribu", "") | pynini.cross("seribu", "")
         graph_one_thousand_component = pynini.union(pynini.cross("ribu", "1") | pynini.cross("seribu", "1"))
-        graph_thousand_cents = pynini.cross("seribu", "10") | pynini.cross("ribu","10") | pynini.union(graph_thousand, pynutil.insert(""))
+       
         graph_thousands = pynini.union(
             graph_hundred_component_at_least_one_none_zero_digit + delete_space + (pynutil.delete("ribu") | pynutil.delete("seribu")),
             pynutil.insert("000", weight=0.1),
         )
-        graph_thousand_component = pynini.union(graph_digit + delete_space + graph_thousand, pynutil.insert("000"))
-        graph_thousand_component += delete_space
-        graph_thousands = graph_thousands | graph_thousand_cents | graph_thousand_component | graph_one_thousand_component
+        graph_thousands = graph_thousands | (pynutil.insert("00") + graph_one_thousand_component)
 
         graph_million = pynini.union(
             graph_hundred_component_at_least_one_none_zero_digit + delete_space + (pynutil.delete("juta") | pynutil.delete("sejuta")),
