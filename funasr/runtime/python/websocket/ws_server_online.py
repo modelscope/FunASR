@@ -30,7 +30,8 @@ inference_pipeline_asr_online = pipeline(
 	model=args.asr_model_online,
 	ngpu=args.ngpu,
 	ncpu=args.ncpu,
-	model_revision='v1.0.4')
+	model_revision='v1.0.6',
+        mode="paraformer_streaming")
 
 # vad
 inference_pipeline_vad = pipeline(
