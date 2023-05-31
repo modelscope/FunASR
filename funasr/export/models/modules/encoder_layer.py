@@ -24,6 +24,7 @@ class EncoderLayerSANM(nn.Module):
         residual = x
         x = self.norm1(x)
         x = self.self_attn(x, mask)
+        # x = x / scale
         if self.in_size == self.size:
             x = x + residual
         residual = x

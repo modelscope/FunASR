@@ -72,6 +72,7 @@ class SANMEncoder(nn.Module):
         else:
             xs_pad = self.embed(speech)
 
+        # xs_pad = xs_pad / scale
         encoder_outs = self.model.encoders0(xs_pad, mask)
         xs_pad, masks = encoder_outs[0], encoder_outs[1]
 
