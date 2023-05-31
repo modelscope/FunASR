@@ -14,6 +14,7 @@ def modelscope_finetune(params):
     ds_dict = MsDataset.load(params.data_path)
     kwargs = dict(
         model=params.model,
+        model_revision='v1.0.6',
         data_dir=ds_dict,
         dataset_type=params.dataset_type,
         work_dir=params.output_dir,
