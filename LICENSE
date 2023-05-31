@@ -18,7 +18,7 @@ FunASR 模型开源协议
 
 2.2 限制
 
-您在使用、复制、修改和分享 FunASR 时，必须注明代码与模型出处以及作者信息。并且，将 FunASR 工业模型上传至任何第三方平台以供下载和使用，需要获得额外许可，可通过官方邮件（funasr@list.alibaba-inc.com）进行申请（免费）。
+您在使用、复制、修改和分享 FunASR 时，必须注明代码与模型出处以及作者信息。并且，将 FunASR 工业模型上传至其他第三方平台以供下载，需要获得额外许可，可通过官方邮件（funasr@list.alibaba-inc.com）进行申请（免费）。
 
 3 责任和风险承担
 FunASR 仅作为参考和学习使用，不对您使用或修改 FunASR 造成的任何直接或间接损失承担任何责任。您对 FunASR 的使用和修改应该自行承担风险。
@@ -54,7 +54,7 @@ In this agreement, FunASR refers to the FunASR open source code, model, and its 
 You are free to use, copy, modify, and share FunASR under the conditions of this agreement.
 
 2.2 Restrictions
-You should indicate the code and model source and author information when using, copying, modifying and sharing FunASR. To upload the FunASR industrial model to any third-party platform for download and use, an additional license is required, which can be applied for free by sending an email to the official email address (funasr@list.alibaba-inc.com).
+You should indicate the code and model source and author information when using, copying, modifying and sharing FunASR. To upload the FunASR industrial model to other third-party platforms for download, an additional license is required, which can be applied for free by sending an email to the official email address (funasr@list.alibaba-inc.com).
 
 3 Responsibility and Risk
 FunASR is for reference and learning purposes only and is not responsible for any direct or indirect losses caused by your use or modification of FunASR. You should take responsibility and risks for your use and modification of FunASR.
