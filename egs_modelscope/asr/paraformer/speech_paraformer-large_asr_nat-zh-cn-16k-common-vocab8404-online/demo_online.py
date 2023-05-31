@@ -14,7 +14,7 @@ os.environ["MODELSCOPE_CACHE"] = "./"
 inference_pipeline = pipeline(
     task=Tasks.auto_speech_recognition,
     model='damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online',
-    model_revision='v1.0.4',
+    model_revision='v1.0.5',
     mode="paraformer_streaming"
 )
 
