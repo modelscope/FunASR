@@ -9,10 +9,10 @@ stop_stage=2
 model="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online"
 data_dir="./data/test"
 output_dir="./results"
-batch_size=64
+batch_size=32
 gpu_inference=true    # whether to perform gpu decoding
 gpuid_list="0,1"    # set gpus, e.g., gpuid_list="0,1"
-njob=64    # the number of jobs for CPU decoding, if gpu_inference=false, use CPU decoding, please set njob
+njob=32    # the number of jobs for CPU decoding, if gpu_inference=false, use CPU decoding, please set njob
 checkpoint_dir=
 checkpoint_name="valid.cer_ctc.ave.pb"
 
