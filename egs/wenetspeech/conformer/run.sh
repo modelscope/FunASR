@@ -158,8 +158,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
         inference_tag="$(basename "${inference_config}" .yaml)"
         _dir="${asr_exp}/${inference_tag}/${inference_asr_model}/${dset}"
         _logdir="${_dir}/logdir"
-        if [ -d ${_dir} ]; then
-            echo "${_dir} is already exists. if you want to decode again, please delete this dir first."
+          you want to decode again, please delete this dir first."
             exit 0
         fi
         mkdir -p "${_logdir}"
