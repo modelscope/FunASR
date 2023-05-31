@@ -171,6 +171,7 @@ The recipe includes several stages. Users can start form or stop at any stage. F
 ```
 
 * Training Steps
+
 FunASR supports two parameters to specify the training steps, namely `max_epoch` and `max_update`. `max_epoch` indicates the total training epochs while `max_update` indicates the total training steps. If these two parameters are specified at the same time, once the training reaches any one of these two parameters, the training will be stopped.
 
 * Change the configuration of the model
@@ -197,6 +198,28 @@ encoder_conf:
 
 ```
 Users can change the encoder configuration by modify these values. For example, if users want to use an encoder with 16 conformer blocks and each block has 8 attention heads, users just need to change `num_blocks` from 12 to 16 and change `attention_heads` from 4 to 8. Besides, the batch_size, learning rate and other training hyper-parameters are also set in this config file. To change these hyper-parameters, users just need to directly change the corresponding values in this file. For example, the default learning rate is `0.0005`. If users want to change the learning rate to 0.0002, set the value of lr as `lr: 0.0002`.
+
+* Use different input data type
+
+FunASR supports different input data types, including `sound`, `kaldi_ark`, `npy`, `text` and `text_int`. Users can specify any number and any type of input, which is achieved by `data_file_names` (in `run.sh`), `data_names` and `data_types` (in config file). For example, ASR task usually requires speech and the corresponding transcripts as input. If speech is saved as raw audio (such as wav format) and transcripts are saved as text format, users need to set `data_file_names=wav.scp,text` (any name is allowed, denoting wav list and text list), set `data_names=speech,text` and set `data_types=sound,text`. When the input type changes to FBank, users just need to modify `data_types=kaldi_ark,text`.
+
+* How to start from pre-trained models
+
+Users can start training from a pre-trained model by specifying the `init_param` parameter. Here `init_param` indicates the path of the pre-trained model. In addition to directly loading all the parameters from one pre-trained model, loading part of the parameters from different pre-trained models is supported. For example, to load encoder parameters from the pre-trained model A and decoder parameters from the pre-trained model B, users can set `init_param` twice as follows:
+```sh
+train.py ... --init_param ${model_A_path}:encoder  --init_param ${model_B_path}:decoder ...
+```
+
+* How to freeze part model parameters
+
+In certain situations, users may want to fix part of the model parameters update the rest model parameters. FunASR employs `freeze_param` to achieve this. For example, to fix all parameters like `encoder.*`, users need to set `freeze_param ` as follows:
+```sh
+train.py ... --freeze_param encoder ...
+```
+
+* ModelScope Usage
+
+Users can use ModelScope for inference and fine-tuning based on a trained academic model. To achieve this, users need to run the stage 6 in the script. In this stage, relevant files required by ModelScope will be generated automatically. Users can then use the corresponding ModelScope interface by replacing the model name with the local trained model path. For the detailed usage of the ModelScope interface, please refer to [ModelScope Usage](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_pipeline/quick_start.html).
 
 * Decoding by CPU or GPU
 
