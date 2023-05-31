@@ -395,7 +395,7 @@ class WavFrontendOnline(AbsFrontend):
         return feats_pad, feats_lens, lfr_splice_frame_idxs
 
     def forward(
-        self, input: torch.Tensor, input_lengths: torch.Tensor, is_final: bool = False, reset: bool = True
+        self, input: torch.Tensor, input_lengths: torch.Tensor, is_final: bool = False, reset: bool = False
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         if reset:
             self.cache_reset()
