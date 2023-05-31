@@ -9,16 +9,14 @@ def get_parser():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument(
-        "--cmvn-json",
-        "-c",
+        "--cmvn_json",
         default=False,
         required=True,
         type=str,
         help="cmvn json file",
     )
     parser.add_argument(
-        "--am-mvn",
-        "-a",
+        "--am_mvn",
         default=False,
         required=True,
         type=str,

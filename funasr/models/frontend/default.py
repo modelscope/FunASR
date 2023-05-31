@@ -18,7 +18,6 @@ from funasr.utils.get_default_kwargs import get_default_kwargs
 
 class DefaultFrontend(AbsFrontend):
     """Conventional frontend structure for ASR.
-
     Stft -> WPE -> MVDR-Beamformer -> Power-spec -> Mel-Fbank -> CMVN
     """
 
@@ -102,8 +101,8 @@ class DefaultFrontend(AbsFrontend):
         if input_stft.dim() == 4:
             # h: (B, T, C, F) -> h: (B, T, F)
             if self.training:
-                if self.use_channel == None:
-                    input_stft = input_stft[:, :, 0, :]
+                if self.use_channel is not None:
+                    input_stft = input_stft[:, :, self.use_channel, :]
                 else:
                     # Select 1ch randomly
                     ch = np.random.randint(input_stft.size(2))
@@ -142,7 +141,6 @@ class DefaultFrontend(AbsFrontend):
 
 class MultiChannelFrontend(AbsFrontend):
     """Conventional frontend structure for ASR.
-
     Stft -> WPE -> MVDR-Beamformer -> Power-spec -> Mel-Fbank -> CMVN
     """
 

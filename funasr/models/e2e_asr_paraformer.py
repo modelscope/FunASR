@@ -29,9 +29,8 @@ from funasr.modules.add_sos_eos import add_sos_eos
 from funasr.modules.nets_utils import make_pad_mask, pad_list
 from funasr.modules.nets_utils import th_accuracy
 from funasr.torch_utils.device_funcs import force_gatherable
-from funasr.train.abs_espnet_model import AbsESPnetModel
+from funasr.models.base_model import FunASRModel
 from funasr.models.predictor.cif import CifPredictorV3
-
 
 if LooseVersion(torch.__version__) >= LooseVersion("1.6.0"):
     from torch.cuda.amp import autocast
@@ -42,7 +41,7 @@ else:
         yield
 
 
-class Paraformer(AbsESPnetModel):
+class Paraformer(FunASRModel):
     """
     Author: Speech Lab of DAMO Academy, Alibaba Group
     Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition
@@ -56,9 +55,7 @@ class Paraformer(AbsESPnetModel):
             frontend: Optional[AbsFrontend],
             specaug: Optional[AbsSpecAug],
             normalize: Optional[AbsNormalize],
-            preencoder: Optional[AbsPreEncoder],
             encoder: AbsEncoder,
-            postencoder: Optional[AbsPostEncoder],
             decoder: AbsDecoder,
             ctc: CTC,
             ctc_weight: float = 0.5,
@@ -79,6 +76,9 @@ class Paraformer(AbsESPnetModel):
             predictor_bias: int = 0,
             sampling_ratio: float = 0.2,
             share_embedding: bool = False,
+            preencoder: Optional[AbsPreEncoder] = None,
+            postencoder: Optional[AbsPostEncoder] = None,
+            use_1st_decoder_loss: bool = False,
     ):
         assert check_argument_types()
         assert 0.0 <= ctc_weight <= 1.0, ctc_weight
@@ -145,6 +145,8 @@ class Paraformer(AbsESPnetModel):
         if self.share_embedding:
             self.decoder.embed = None
 
+        self.use_1st_decoder_loss = use_1st_decoder_loss
+
     def forward(
             self,
             speech: torch.Tensor,
@@ -153,7 +155,6 @@ class Paraformer(AbsESPnetModel):
             text_lengths: torch.Tensor,
     ) -> Tuple[torch.Tensor, Dict[str, torch.Tensor], torch.Tensor]:
         """Frontend + Encoder + Decoder + Calc loss
-
         Args:
                 speech: (Batch, Length, ...)
                 speech_lengths: (Batch, )
@@ -181,7 +182,7 @@ class Paraformer(AbsESPnetModel):
             intermediate_outs = encoder_out[1]
             encoder_out = encoder_out[0]
 
-        loss_att, acc_att, cer_att, wer_att = None, None, None, None
+        loss_att, pre_loss_att, acc_att, cer_att, wer_att = None, None, None, None, None
         loss_ctc, cer_ctc = None, None
         loss_pre = None
         stats = dict()
@@ -222,7 +223,7 @@ class Paraformer(AbsESPnetModel):
 
         # 2b. Attention decoder branch
         if self.ctc_weight != 1.0:
-            loss_att, acc_att, cer_att, wer_att, loss_pre = self._calc_att_loss(
+            loss_att, acc_att, cer_att, wer_att, loss_pre, pre_loss_att = self._calc_att_loss(
                 encoder_out, encoder_out_lens, text, text_lengths
             )
 
@@ -234,8 +235,12 @@ class Paraformer(AbsESPnetModel):
         else:
             loss = self.ctc_weight * loss_ctc + (1 - self.ctc_weight) * loss_att + loss_pre * self.predictor_weight
 
+        if self.use_1st_decoder_loss and pre_loss_att is not None:
+            loss = loss + (1 - self.ctc_weight) * pre_loss_att
+
         # Collect Attn branch stats
         stats["loss_att"] = loss_att.detach() if loss_att is not None else None
+        stats["pre_loss_att"] = pre_loss_att.detach() if pre_loss_att is not None else None
         stats["acc"] = acc_att
         stats["cer"] = cer_att
         stats["wer"] = wer_att
@@ -270,7 +275,6 @@ class Paraformer(AbsESPnetModel):
             self, speech: torch.Tensor, speech_lengths: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Frontend + Encoder. Note that this method is used by asr_inference.py
-
         Args:
                 speech: (Batch, Length, ...)
                 speech_lengths: (Batch, )
@@ -368,9 +372,7 @@ class Paraformer(AbsESPnetModel):
             ys_pad_lens: torch.Tensor,
     ) -> torch.Tensor:
         """Compute negative log likelihood(nll) from transformer-decoder
-
         Normally, this function is called in batchify_nll.
-
         Args:
                 encoder_out: (Batch, Length, Dim)
                 encoder_out_lens: (Batch,)
@@ -407,7 +409,6 @@ class Paraformer(AbsESPnetModel):
             batch_size: int = 100,
     ):
         """Compute negative log likelihood(nll) from transformer-decoder
-
         To avoid OOM, this fuction seperate the input into batches.
         Then call nll for each batch and combine and return results.
         Args:
@@ -462,11 +463,16 @@ class Paraformer(AbsESPnetModel):
 
         # 0. sampler
         decoder_out_1st = None
+        pre_loss_att = None
         if self.sampling_ratio > 0.0:
             if self.step_cur < 2:
                 logging.info("enable sampler in paraformer, sampling_ratio: {}".format(self.sampling_ratio))
-            sematic_embeds, decoder_out_1st = self.sampler(encoder_out, encoder_out_lens, ys_pad, ys_pad_lens,
-                                                           pre_acoustic_embeds)
+            if self.use_1st_decoder_loss:
+                sematic_embeds, decoder_out_1st, pre_loss_att = self.sampler_with_grad(encoder_out, encoder_out_lens, ys_pad, ys_pad_lens,
+                                                               pre_acoustic_embeds)
+            else:
+                sematic_embeds, decoder_out_1st = self.sampler(encoder_out, encoder_out_lens, ys_pad, ys_pad_lens,
+                                                               pre_acoustic_embeds)
         else:
             if self.step_cur < 2:
                 logging.info("disable sampler in paraformer, sampling_ratio: {}".format(self.sampling_ratio))
@@ -496,7 +502,7 @@ class Paraformer(AbsESPnetModel):
             ys_hat = decoder_out_1st.argmax(dim=-1)
             cer_att, wer_att = self.error_calculator(ys_hat.cpu(), ys_pad.cpu())
 
-        return loss_att, acc_att, cer_att, wer_att, loss_pre
+        return loss_att, acc_att, cer_att, wer_att, loss_pre, pre_loss_att
 
     def sampler(self, encoder_out, encoder_out_lens, ys_pad, ys_pad_lens, pre_acoustic_embeds):
 
@@ -528,6 +534,37 @@ class Paraformer(AbsESPnetModel):
         sematic_embeds = pre_acoustic_embeds.masked_fill(~input_mask_expand_dim, 0) + ys_pad_embed.masked_fill(
             input_mask_expand_dim, 0)
         return sematic_embeds * tgt_mask, decoder_out * tgt_mask
+
+    def sampler_with_grad(self, encoder_out, encoder_out_lens, ys_pad, ys_pad_lens, pre_acoustic_embeds):
+        tgt_mask = (~make_pad_mask(ys_pad_lens, maxlen=ys_pad_lens.max())[:, :, None]).to(ys_pad.device)
+        ys_pad_masked = ys_pad * tgt_mask[:, :, 0]
+        if self.share_embedding:
+            ys_pad_embed = self.decoder.output_layer.weight[ys_pad_masked]
+        else:
+            ys_pad_embed = self.decoder.embed(ys_pad_masked)
+        decoder_outs = self.decoder(
+            encoder_out, encoder_out_lens, pre_acoustic_embeds, ys_pad_lens
+        )
+        pre_loss_att = self.criterion_att(decoder_outs[0], ys_pad)
+        decoder_out, _ = decoder_outs[0], decoder_outs[1]
+        pred_tokens = decoder_out.argmax(-1)
+        nonpad_positions = ys_pad.ne(self.ignore_id)
+        seq_lens = (nonpad_positions).sum(1)
+        same_num = ((pred_tokens == ys_pad) & nonpad_positions).sum(1)
+        input_mask = torch.ones_like(nonpad_positions)
+        bsz, seq_len = ys_pad.size()
+        for li in range(bsz):
+            target_num = (((seq_lens[li] - same_num[li].sum()).float()) * self.sampling_ratio).long()
+            if target_num > 0:
+                input_mask[li].scatter_(dim=0, index=torch.randperm(seq_lens[li])[:target_num].cuda(), value=0)
+        input_mask = input_mask.eq(1)
+        input_mask = input_mask.masked_fill(~nonpad_positions, False)
+        input_mask_expand_dim = input_mask.unsqueeze(2).to(pre_acoustic_embeds.device)
+
+        sematic_embeds = pre_acoustic_embeds.masked_fill(~input_mask_expand_dim, 0) + ys_pad_embed.masked_fill(
+            input_mask_expand_dim, 0)
+
+        return sematic_embeds * tgt_mask, decoder_out * tgt_mask, pre_loss_att
 
     def _calc_ctc_loss(
             self,
@@ -664,7 +701,10 @@ class ParaformerOnline(Paraformer):
             self, speech: torch.Tensor, speech_lengths: torch.Tensor, cache: dict = None
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Frontend + Encoder. Note that this method is used by asr_inference.py
+<<<<<<< HEAD
+=======
 
+>>>>>>> 4cd79db451786548d8a100f25c3b03da0eb30f4b
         Args:
                 speech: (Batch, Length, ...)
                 speech_lengths: (Batch, )
@@ -738,9 +778,7 @@ class ParaformerBert(Paraformer):
             frontend: Optional[AbsFrontend],
             specaug: Optional[AbsSpecAug],
             normalize: Optional[AbsNormalize],
-            preencoder: Optional[AbsPreEncoder],
             encoder: AbsEncoder,
-            postencoder: Optional[AbsPostEncoder],
             decoder: AbsDecoder,
             ctc: CTC,
             ctc_weight: float = 0.5,
@@ -763,6 +801,8 @@ class ParaformerBert(Paraformer):
             embeds_id: int = 2,
             embeds_loss_weight: float = 0.0,
             embed_dims: int = 768,
+            preencoder: Optional[AbsPreEncoder] = None,
+            postencoder: Optional[AbsPostEncoder] = None,
     ):
         assert check_argument_types()
         assert 0.0 <= ctc_weight <= 1.0, ctc_weight
@@ -894,7 +934,6 @@ class ParaformerBert(Paraformer):
             embed_lengths: torch.Tensor = None,
     ) -> Tuple[torch.Tensor, Dict[str, torch.Tensor], torch.Tensor]:
         """Frontend + Encoder + Decoder + Calc loss
-
         Args:
                 speech: (Batch, Length, ...)
                 speech_lengths: (Batch, )
@@ -913,9 +952,9 @@ class ParaformerBert(Paraformer):
         self.step_cur += 1
         # for data-parallel
         text = text[:, : text_lengths.max()]
-        speech = speech[:, :speech_lengths.max(), :]
+        speech = speech[:, :speech_lengths.max()]
         if embed is not None:
-            embed = embed[:, :embed_lengths.max(), :]
+            embed = embed[:, :embed_lengths.max()]
 
         # 1. Encoder
         encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
@@ -1003,74 +1042,73 @@ class ParaformerBert(Paraformer):
 
 
 class BiCifParaformer(Paraformer):
-
     """
     Paraformer model with an extra cif predictor
     to conduct accurate timestamp prediction
     """
 
     def __init__(
-        self,
-        vocab_size: int,
-        token_list: Union[Tuple[str, ...], List[str]],
-        frontend: Optional[AbsFrontend],
-        specaug: Optional[AbsSpecAug],
-        normalize: Optional[AbsNormalize],
-        preencoder: Optional[AbsPreEncoder],
-        encoder: AbsEncoder,
-        postencoder: Optional[AbsPostEncoder],
-        decoder: AbsDecoder,
-        ctc: CTC,
-        ctc_weight: float = 0.5,
-        interctc_weight: float = 0.0,
-        ignore_id: int = -1,
-        blank_id: int = 0,
-        sos: int = 1,
-        eos: int = 2,
-        lsm_weight: float = 0.0,
-        length_normalized_loss: bool = False,
-        report_cer: bool = True,
-        report_wer: bool = True,
-        sym_space: str = "<space>",
-        sym_blank: str = "<blank>",
-        extract_feats_in_collect_stats: bool = True,
-        predictor = None,
-        predictor_weight: float = 0.0,
-        predictor_bias: int = 0,
-        sampling_ratio: float = 0.2,
+            self,
+            vocab_size: int,
+            token_list: Union[Tuple[str, ...], List[str]],
+            frontend: Optional[AbsFrontend],
+            specaug: Optional[AbsSpecAug],
+            normalize: Optional[AbsNormalize],
+            encoder: AbsEncoder,
+            decoder: AbsDecoder,
+            ctc: CTC,
+            ctc_weight: float = 0.5,
+            interctc_weight: float = 0.0,
+            ignore_id: int = -1,
+            blank_id: int = 0,
+            sos: int = 1,
+            eos: int = 2,
+            lsm_weight: float = 0.0,
+            length_normalized_loss: bool = False,
+            report_cer: bool = True,
+            report_wer: bool = True,
+            sym_space: str = "<space>",
+            sym_blank: str = "<blank>",
+            extract_feats_in_collect_stats: bool = True,
+            predictor=None,
+            predictor_weight: float = 0.0,
+            predictor_bias: int = 0,
+            sampling_ratio: float = 0.2,
+            preencoder: Optional[AbsPreEncoder] = None,
+            postencoder: Optional[AbsPostEncoder] = None,
     ):
         assert check_argument_types()
         assert 0.0 <= ctc_weight <= 1.0, ctc_weight
         assert 0.0 <= interctc_weight < 1.0, interctc_weight
 
         super().__init__(
-        vocab_size=vocab_size,
-        token_list=token_list,
-        frontend=frontend,
-        specaug=specaug,
-        normalize=normalize,
-        preencoder=preencoder,
-        encoder=encoder,
-        postencoder=postencoder,
-        decoder=decoder,
-        ctc=ctc,
-        ctc_weight=ctc_weight,
-        interctc_weight=interctc_weight,
-        ignore_id=ignore_id,
-        blank_id=blank_id,
-        sos=sos,
-        eos=eos,
-        lsm_weight=lsm_weight,
-        length_normalized_loss=length_normalized_loss,
-        report_cer=report_cer,
-        report_wer=report_wer,
-        sym_space=sym_space,
-        sym_blank=sym_blank,
-        extract_feats_in_collect_stats=extract_feats_in_collect_stats,
-        predictor=predictor,
-        predictor_weight=predictor_weight,
-        predictor_bias=predictor_bias,
-        sampling_ratio=sampling_ratio,
+            vocab_size=vocab_size,
+            token_list=token_list,
+            frontend=frontend,
+            specaug=specaug,
+            normalize=normalize,
+            preencoder=preencoder,
+            encoder=encoder,
+            postencoder=postencoder,
+            decoder=decoder,
+            ctc=ctc,
+            ctc_weight=ctc_weight,
+            interctc_weight=interctc_weight,
+            ignore_id=ignore_id,
+            blank_id=blank_id,
+            sos=sos,
+            eos=eos,
+            lsm_weight=lsm_weight,
+            length_normalized_loss=length_normalized_loss,
+            report_cer=report_cer,
+            report_wer=report_wer,
+            sym_space=sym_space,
+            sym_blank=sym_blank,
+            extract_feats_in_collect_stats=extract_feats_in_collect_stats,
+            predictor=predictor,
+            predictor_weight=predictor_weight,
+            predictor_bias=predictor_bias,
+            sampling_ratio=sampling_ratio,
         )
         assert isinstance(self.predictor, CifPredictorV3), "BiCifParaformer should use CIFPredictorV3"
 
@@ -1145,21 +1183,23 @@ class BiCifParaformer(Paraformer):
             cer_att, wer_att = self.error_calculator(ys_hat.cpu(), ys_pad.cpu())
 
         return loss_att, acc_att, cer_att, wer_att, loss_pre
-    
+
     def calc_predictor(self, encoder_out, encoder_out_lens):
 
         encoder_out_mask = (~make_pad_mask(encoder_out_lens, maxlen=encoder_out.size(1))[:, None, :]).to(
             encoder_out.device)
-        pre_acoustic_embeds, pre_token_length, alphas, pre_peak_index, pre_token_length2 = self.predictor(encoder_out, None, encoder_out_mask,
-                                                                                  ignore_id=self.ignore_id)
+        pre_acoustic_embeds, pre_token_length, alphas, pre_peak_index, pre_token_length2 = self.predictor(encoder_out,
+                                                                                                          None,
+                                                                                                          encoder_out_mask,
+                                                                                                          ignore_id=self.ignore_id)
         return pre_acoustic_embeds, pre_token_length, alphas, pre_peak_index
-    
+
     def calc_predictor_timestamp(self, encoder_out, encoder_out_lens, token_num):
         encoder_out_mask = (~make_pad_mask(encoder_out_lens, maxlen=encoder_out.size(1))[:, None, :]).to(
             encoder_out.device)
         ds_alphas, ds_cif_peak, us_alphas, us_peaks = self.predictor.get_upsample_timestamp(encoder_out,
-                                                                                               encoder_out_mask,
-                                                                                               token_num)
+                                                                                            encoder_out_mask,
+                                                                                            token_num)
         return ds_alphas, ds_cif_peak, us_alphas, us_peaks
 
     def forward(
@@ -1170,7 +1210,6 @@ class BiCifParaformer(Paraformer):
             text_lengths: torch.Tensor,
     ) -> Tuple[torch.Tensor, Dict[str, torch.Tensor], torch.Tensor]:
         """Frontend + Encoder + Decoder + Calc loss
-
         Args:
                 speech: (Batch, Length, ...)
                 speech_lengths: (Batch, )
@@ -1253,7 +1292,8 @@ class BiCifParaformer(Paraformer):
         elif self.ctc_weight == 1.0:
             loss = loss_ctc
         else:
-            loss = self.ctc_weight * loss_ctc + (1 - self.ctc_weight) * loss_att + loss_pre * self.predictor_weight + loss_pre2 * self.predictor_weight * 0.5
+            loss = self.ctc_weight * loss_ctc + (
+                        1 - self.ctc_weight) * loss_att + loss_pre * self.predictor_weight + loss_pre2 * self.predictor_weight * 0.5
 
         # Collect Attn branch stats
         stats["loss_att"] = loss_att.detach() if loss_att is not None else None
@@ -1282,9 +1322,7 @@ class ContextualParaformer(Paraformer):
             frontend: Optional[AbsFrontend],
             specaug: Optional[AbsSpecAug],
             normalize: Optional[AbsNormalize],
-            preencoder: Optional[AbsPreEncoder],
             encoder: AbsEncoder,
-            postencoder: Optional[AbsPostEncoder],
             decoder: AbsDecoder,
             ctc: CTC,
             ctc_weight: float = 0.5,
@@ -1314,6 +1352,8 @@ class ContextualParaformer(Paraformer):
             bias_encoder_type: str = 'lstm',
             label_bracket: bool = False,
             use_decoder_embedding: bool = False,
+            preencoder: Optional[AbsPreEncoder] = None,
+            postencoder: Optional[AbsPostEncoder] = None,
     ):
         assert check_argument_types()
         assert 0.0 <= ctc_weight <= 1.0, ctc_weight
@@ -1377,7 +1417,6 @@ class ContextualParaformer(Paraformer):
             text_lengths: torch.Tensor,
     ) -> Tuple[torch.Tensor, Dict[str, torch.Tensor], torch.Tensor]:
         """Frontend + Encoder + Decoder + Calc loss
-
         Args:
                 speech: (Batch, Length, ...)
                 speech_lengths: (Batch, )

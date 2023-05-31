@@ -43,20 +43,16 @@ cmake  -DCMAKE_BUILD_TYPE=release .. -DONNXRUNTIME_DIR=/path/to/onnxruntime-linu
 make
 ```
 
-#### Recipe
-
-set the model, data path and output_dir
-
-```shell
-./bin/funasr-onnx-offline-rtf /path/to/model_dir /path/to/wav.scp quantize(true or false) thread_num
-```
-
-The structure of /path/to/models_dir
-```
-config.yaml, am.mvn, model.onnx(or model_quant.onnx)
-```
-
 ## [Paraformer-large](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary) 
+```shell
+./funasr-onnx-offline-rtf \
+    --model-dir    ./asrmodel/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch \
+    --quantize  true \
+    --wav-path     ./aishell1_test.scp  \
+    --thread-num 32
+
+Node: '--quantize false' means fp32, otherwise it will be int8 
+```
 
 Number of Parameter: 220M 
 
@@ -90,18 +86,66 @@ CER after int8-quant: 1.95%
 ### Intel(R) Xeon(R) Platinum 8163 CPU @ 2.50GHz    32core-64processor   without avx512_vnni
 
 | concurrent-tasks    | processing time(s) | RTF      | Speedup Rate |
-|---------------------|--------------------|----------|--------------|
-|  1   (onnx fp32)    | 2903s              | 0.080404 | 12           |
-|  1   (onnx int8)    | 2714s              | 0.075168 | 13           |
-|  8   (onnx fp32)    | 373s               | 0.010329 | 97           |
-|  8   (onnx int8)    | 340s               | 0.009428 | 106          |
-|  16   (onnx fp32)   | 189s               | 0.005252 | 190          |
-|  16   (onnx int8)   | 174s               | 0.004817 | 207          |
-|  32   (onnx fp32)   | 109s               | 0.00301  | 332          |
-|  32   (onnx int8)   | 88s                | 0.00245  | 408          |
-|  64   (onnx fp32)   | 113s               | 0.003129 | 320          |
-|  64   (onnx int8)   | 79s                | 0.002201 | 454          |
-|  96   (onnx fp32)   | 115s               | 0.003183 | 314          |
-|  96   (onnx int8)   | 80s                | 0.002222 | 450          |
+|---------------------|:------------------:|----------|:------------:|
+|  1   (onnx fp32)    |       2903s        | 0.080404 |      12      |
+|  1   (onnx int8)    |       2714s        | 0.075168 |      13      |
+|  8   (onnx fp32)    |        373s        | 0.010329 |      97      |
+|  8   (onnx int8)    |        340s        | 0.009428 |     106      |
+|  16   (onnx fp32)   |        189s        | 0.005252 |     190      |
+|  16   (onnx int8)   |        174s        | 0.004817 |     207      |
+|  32   (onnx fp32)   |        109s        | 0.00301  |     332      |
+|  32   (onnx int8)   |        88s         | 0.00245  |     408      |
+|  64   (onnx fp32)   |        113s        | 0.003129 |     320      |
+|  64   (onnx int8)   |        79s         | 0.002201 |     454      |
+|  96   (onnx fp32)   |        115s        | 0.003183 |     314      |
+|  96   (onnx int8)   |        80s         | 0.002222 |     450      |
+
+## [FSMN-VAD](https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary) + [Paraformer-large](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary) + [CT-Transformer](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch/summary)
+
+```shell
+./funasr-onnx-offline-rtf \
+    --model-dir    ./asrmodel/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch \
+    --quantize  true \
+    --vad-dir   ./asrmodel/speech_fsmn_vad_zh-cn-16k-common-pytorch \
+    --punc-dir  ./asrmodel/punc_ct-transformer_zh-cn-common-vocab272727-pytorch \
+    --wav-path     ./aishell1_test.scp  \
+    --thread-num 32
+
+Node: '--quantize false' means fp32, otherwise it will be int8 
+```
+
+ ### Intel(R) Xeon(R) Platinum 8369B CPU @ 2.90GHz   16core-32processor    with avx512_vnni
+
+| concurrent-tasks    | processing time(s) |   RTF    | Speedup Rate |
+|---------------------|:------------------:|:--------:|:------------:|
+|  1   (onnx fp32)    |       2134s        |  0.0591  |      17      |
+|  1   (onnx int8)    |       1047s        |  0.029   |      34      |
+|  8   (onnx fp32)    |        273s        | 0.007557 |     132      |
+|  8   (onnx int8)    |        132s        | 0.003647 |     274      |
+|  16   (onnx fp32)   |        147s        | 0.004061 |     246      |
+|  16   (onnx int8)   |        69s         | 0.001916 |     521      |
+|  32   (onnx fp32)   |        133s        | 0.003675 |     272      |
+|  32   (onnx int8)   |        65s         | 0.001786 |     559      |
+|  64   (onnx fp32)   |        136s        | 0.003767 |     265      |
+|  64   (onnx int8)   |        67s         | 0.001867 |     535      |
+|  96   (onnx fp32)   |        137s        | 0.003802 |     262      |
+|  96   (onnx int8)   |        69s         | 0.001904 |     524      |
 
 
+
+### Intel(R) Xeon(R) Platinum 8163 CPU @ 2.50GHz    32core-64processor   without avx512_vnni
+
+| concurrent-tasks    | processing time(s) | RTF      | Speedup Rate |
+|---------------------|:------------------:|----------|:------------:|
+|  1   (onnx fp32)    |       3073s        | 0.0851   |      12      |
+|  1   (onnx int8)    |       2840s        | 0.0787   |      13      |
+|  8   (onnx fp32)    |        389s        | 0.01079  |      93      |
+|  8   (onnx int8)    |        355s        | 0.0098   |     101      |
+|  16   (onnx fp32)   |        199s        | 0.005513 |     181      |
+|  16   (onnx int8)   |        171s        | 0.004784 |     210      |
+|  32   (onnx fp32)   |        113s        | 0.00314  |     318      |
+|  32   (onnx int8)   |        92s         | 0.00255  |     391      |
+|  64   (onnx fp32)   |        115s        | 0.0032   |     312      |
+|  64   (onnx int8)   |        81s         | 0.002232 |     448      |
+|  96   (onnx fp32)   |        117s        | 0.003257 |     307      |
+|  96   (onnx int8)   |        81s         | 0.002258 |     442      |

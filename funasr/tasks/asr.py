@@ -38,9 +38,9 @@ from funasr.models.decoder.transformer_decoder import (
 from funasr.models.decoder.transformer_decoder import ParaformerDecoderSAN
 from funasr.models.decoder.transformer_decoder import TransformerDecoder
 from funasr.models.decoder.contextual_decoder import ContextualParaformerDecoder
+from funasr.models.e2e_asr import ASRModel
 from funasr.models.decoder.rnnt_decoder import RNNTDecoder
 from funasr.models.joint_net.joint_network import JointNetwork
-from funasr.models.e2e_asr import ESPnetASRModel
 from funasr.models.e2e_asr_paraformer import Paraformer, ParaformerOnline, ParaformerBert, BiCifParaformer, ContextualParaformer
 from funasr.models.e2e_asr_contextual_paraformer import NeatContextualParaformer
 from funasr.models.e2e_tp import TimestampPredictor
@@ -76,7 +76,7 @@ from funasr.modules.subsampling import Conv1dSubsampling
 from funasr.tasks.abs_task import AbsTask
 from funasr.text.phoneme_tokenizer import g2p_choices
 from funasr.torch_utils.initialize import initialize
-from funasr.train.abs_espnet_model import AbsESPnetModel
+from funasr.models.base_model import FunASRModel
 from funasr.train.class_choices import ClassChoices
 from funasr.train.trainer import Trainer
 from funasr.utils.get_default_kwargs import get_default_kwargs
@@ -122,7 +122,7 @@ normalize_choices = ClassChoices(
 model_choices = ClassChoices(
     "model",
     classes=dict(
-        asr=ESPnetASRModel,
+        asr=ASRModel,
         uniasr=UniASR,
         paraformer=Paraformer,
         paraformer_online=ParaformerOnline,
@@ -132,8 +132,10 @@ model_choices = ClassChoices(
         neatcontextual_paraformer=NeatContextualParaformer,
         mfcca=MFCCA,
         timestamp_prediction=TimestampPredictor,
+        rnnt=TransducerModel,
+        rnnt_unified=UnifiedTransducerModel,
     ),
-    type_check=AbsESPnetModel,
+    type_check=FunASRModel,
     default="asr",
 )
 preencoder_choices = ClassChoices(
@@ -224,6 +226,15 @@ rnnt_decoder_choices = ClassChoices(
     default="rnnt",
 )
 
+joint_network_choices = ClassChoices(
+    name="joint_network",
+    classes=dict(
+        joint_network=JointNetwork,
+    ),
+    default="joint_network",
+    optional=True,
+)
+
 predictor_choices = ClassChoices(
     name="predictor",
     classes=dict(
@@ -280,6 +291,18 @@ class ASRTask(AbsTask):
         postencoder_choices,
         # --decoder and --decoder_conf
         decoder_choices,
+        # --predictor and --predictor_conf
+        predictor_choices,
+        # --encoder2 and --encoder2_conf
+        encoder_choices2,
+        # --decoder2 and --decoder2_conf
+        decoder_choices2,
+        # --predictor2 and --predictor2_conf
+        predictor_choices2,
+        # --stride_conv and --stride_conv_conf
+        stride_conv_choices,
+        # --rnnt_decoder and --rnnt_decoder_conf
+        rnnt_decoder_choices,
     ]
 
     # If you need to modify train() or eval() procedures, change Trainer class here
@@ -339,12 +362,6 @@ class ASRTask(AbsTask):
             action=NestedDictAction,
             default=get_default_kwargs(CTC),
             help="The keyword arguments for CTC class.",
-        )
-        group.add_argument(
-            "--joint_net_conf",
-            action=NestedDictAction,
-            default=None,
-            help="The keyword arguments for joint network class.",
         )
 
         group = parser.add_argument_group(description="Preprocess related")
@@ -457,7 +474,7 @@ class ASRTask(AbsTask):
                 token_type=args.token_type,
                 token_list=args.token_list,
                 bpemodel=args.bpemodel,
-                non_linguistic_symbols=args.non_linguistic_symbols,
+                non_linguistic_symbols=args.non_linguistic_symbols if hasattr(args, "non_linguistic_symbols") else None,
                 text_cleaner=args.cleaner,
                 g2p_type=args.g2p,
                 split_with_space=args.split_with_space if hasattr(args, "split_with_space") else False,
@@ -827,9 +844,9 @@ class ASRTaskUniASR(ASRTask):
             args["cmvn_file"] = cmvn_file
         args = argparse.Namespace(**args)
         model = cls.build_model(args)
-        if not isinstance(model, AbsESPnetModel):
+        if not isinstance(model, FunASRModel):
             raise RuntimeError(
-                f"model must inherit {AbsESPnetModel.__name__}, but got {type(model)}"
+                f"model must inherit {FunASRModel.__name__}, but got {type(model)}"
             )
         model.to(device)
         model_dict = dict()
@@ -899,27 +916,27 @@ class ASRTaskParaformer(ASRTask):
     # If you need more than one optimizers, change this value
     num_optimizers: int = 1
 
-    # Add variable objects configurations
-    class_choices_list = [
-        # --frontend and --frontend_conf
-        frontend_choices,
-        # --specaug and --specaug_conf
-        specaug_choices,
-        # --normalize and --normalize_conf
-        normalize_choices,
-        # --model and --model_conf
-        model_choices,
-        # --preencoder and --preencoder_conf
-        preencoder_choices,
-        # --encoder and --encoder_conf
-        encoder_choices,
-        # --postencoder and --postencoder_conf
-        postencoder_choices,
-        # --decoder and --decoder_conf
-        decoder_choices,
-        # --predictor and --predictor_conf
-        predictor_choices,
-    ]
+    # # Add variable objects configurations
+    # class_choices_list = [
+    #     # --frontend and --frontend_conf
+    #     frontend_choices,
+    #     # --specaug and --specaug_conf
+    #     specaug_choices,
+    #     # --normalize and --normalize_conf
+    #     normalize_choices,
+    #     # --model and --model_conf
+    #     model_choices,
+    #     # --preencoder and --preencoder_conf
+    #     preencoder_choices,
+    #     # --encoder and --encoder_conf
+    #     encoder_choices,
+    #     # --postencoder and --postencoder_conf
+    #     postencoder_choices,
+    #     # --decoder and --decoder_conf
+    #     decoder_choices,
+    #     # --predictor and --predictor_conf
+    #     predictor_choices,
+    # ]
 
     # If you need to modify train() or eval() procedures, change Trainer class here
     trainer = Trainer
@@ -1074,9 +1091,9 @@ class ASRTaskParaformer(ASRTask):
             args["cmvn_file"] = cmvn_file
         args = argparse.Namespace(**args)
         model = cls.build_model(args)
-        if not isinstance(model, AbsESPnetModel):
+        if not isinstance(model, FunASRModel):
             raise RuntimeError(
-                f"model must inherit {AbsESPnetModel.__name__}, but got {type(model)}"
+                f"model must inherit {FunASRModel.__name__}, but got {type(model)}"
             )
         model.to(device)
         model_dict = dict()
@@ -1350,254 +1367,22 @@ class ASRTaskAligner(ASRTaskParaformer):
         return retval
 
 
-class ASRTransducerTask(AbsTask):
+class ASRTransducerTask(ASRTask):
     """ASR Transducer Task definition."""
 
     num_optimizers: int = 1
 
     class_choices_list = [
+        model_choices,
         frontend_choices,
         specaug_choices,
         normalize_choices,
         encoder_choices,
         rnnt_decoder_choices,
+        joint_network_choices,
     ]
 
     trainer = Trainer
-
-    @classmethod
-    def add_task_arguments(cls, parser: argparse.ArgumentParser):
-        """Add Transducer task arguments.
-        Args:
-            cls: ASRTransducerTask object.
-            parser: Transducer arguments parser.
-        """
-        group = parser.add_argument_group(description="Task related.")
-
-        # required = parser.get_default("required")
-        # required += ["token_list"]
-
-        group.add_argument(
-            "--token_list",
-            type=str_or_none,
-            default=None,
-            help="Integer-string mapper for tokens.",
-        )
-        group.add_argument(
-            "--split_with_space",
-            type=str2bool,
-            default=True,
-            help="whether to split text using <space>",
-        )
-        group.add_argument(
-            "--input_size",
-            type=int_or_none,
-            default=None,
-            help="The number of dimensions for input features.",
-        )
-        group.add_argument(
-            "--init",
-            type=str_or_none,
-            default=None,
-            help="Type of model initialization to use.",
-        )
-        group.add_argument(
-            "--model_conf",
-            action=NestedDictAction,
-            default=get_default_kwargs(TransducerModel),
-            help="The keyword arguments for the model class.",
-        )
-        # group.add_argument(
-        #     "--encoder_conf",
-        #     action=NestedDictAction,
-        #     default={},
-        #     help="The keyword arguments for the encoder class.",
-        # )
-        group.add_argument(
-            "--joint_network_conf",
-            action=NestedDictAction,
-            default={},
-            help="The keyword arguments for the joint network class.",
-        )
-        group = parser.add_argument_group(description="Preprocess related.")
-        group.add_argument(
-            "--use_preprocessor",
-            type=str2bool,
-            default=True,
-            help="Whether to apply preprocessing to input data.",
-        )
-        group.add_argument(
-            "--token_type",
-            type=str,
-            default="bpe",
-            choices=["bpe", "char", "word", "phn"],
-            help="The type of tokens to use during tokenization.",
-        )
-        group.add_argument(
-            "--bpemodel",
-            type=str_or_none,
-            default=None,
-            help="The path of the sentencepiece model.",
-        )
-        parser.add_argument(
-            "--non_linguistic_symbols",
-            type=str_or_none,
-            help="The 'non_linguistic_symbols' file path.",
-        )
-        parser.add_argument(
-            "--cleaner",
-            type=str_or_none,
-            choices=[None, "tacotron", "jaconv", "vietnamese"],
-            default=None,
-            help="Text cleaner to use.",
-        )
-        parser.add_argument(
-            "--g2p",
-            type=str_or_none,
-            choices=g2p_choices,
-            default=None,
-            help="g2p method to use if --token_type=phn.",
-        )
-        parser.add_argument(
-            "--speech_volume_normalize",
-            type=float_or_none,
-            default=None,
-            help="Normalization value for maximum amplitude scaling.",
-        )
-        parser.add_argument(
-            "--rir_scp",
-            type=str_or_none,
-            default=None,
-            help="The RIR SCP file path.",
-        )
-        parser.add_argument(
-            "--rir_apply_prob",
-            type=float,
-            default=1.0,
-            help="The probability of the applied RIR convolution.",
-        )
-        parser.add_argument(
-            "--noise_scp",
-            type=str_or_none,
-            default=None,
-            help="The path of noise SCP file.",
-        )
-        parser.add_argument(
-            "--noise_apply_prob",
-            type=float,
-            default=1.0,
-            help="The probability of the applied noise addition.",
-        )
-        parser.add_argument(
-            "--noise_db_range",
-            type=str,
-            default="13_15",
-            help="The range of the noise decibel level.",
-        )
-        for class_choices in cls.class_choices_list:
-            # Append --<name> and --<name>_conf.
-            # e.g. --decoder and --decoder_conf
-            class_choices.add_arguments(group)
-
-    @classmethod
-    def build_collate_fn(
-        cls, args: argparse.Namespace, train: bool
-    ) -> Callable[
-        [Collection[Tuple[str, Dict[str, np.ndarray]]]],
-        Tuple[List[str], Dict[str, torch.Tensor]],
-    ]:
-        """Build collate function.
-        Args:
-            cls: ASRTransducerTask object.
-            args: Task arguments.
-            train: Training mode.
-        Return:
-            : Callable collate function.
-        """
-        assert check_argument_types()
-
-        return CommonCollateFn(float_pad_value=0.0, int_pad_value=-1)
-
-    @classmethod
-    def build_preprocess_fn(
-        cls, args: argparse.Namespace, train: bool
-    ) -> Optional[Callable[[str, Dict[str, np.array]], Dict[str, np.ndarray]]]:
-        """Build pre-processing function.
-        Args:
-            cls: ASRTransducerTask object.
-            args: Task arguments.
-            train: Training mode.
-        Return:
-            : Callable pre-processing function.
-        """
-        assert check_argument_types()
-
-        if args.use_preprocessor:
-            retval = CommonPreprocessor(
-                train=train,
-                token_type=args.token_type,
-                token_list=args.token_list,
-                bpemodel=args.bpemodel,
-                non_linguistic_symbols=args.non_linguistic_symbols,
-                text_cleaner=args.cleaner,
-                g2p_type=args.g2p,
-                split_with_space=args.split_with_space if hasattr(args, "split_with_space") else False,
-                rir_scp=args.rir_scp if hasattr(args, "rir_scp") else None,
-                rir_apply_prob=args.rir_apply_prob
-                if hasattr(args, "rir_apply_prob")
-                else 1.0,
-                noise_scp=args.noise_scp if hasattr(args, "noise_scp") else None,
-                noise_apply_prob=args.noise_apply_prob
-                if hasattr(args, "noise_apply_prob")
-                else 1.0,
-                noise_db_range=args.noise_db_range
-                if hasattr(args, "noise_db_range")
-                else "13_15",
-                speech_volume_normalize=args.speech_volume_normalize
-                if hasattr(args, "rir_scp")
-                else None,
-            )
-        else:
-            retval = None
-
-        assert check_return_type(retval)
-        return retval
-
-    @classmethod
-    def required_data_names(
-        cls, train: bool = True, inference: bool = False
-    ) -> Tuple[str, ...]:
-        """Required data depending on task mode.
-        Args:
-            cls: ASRTransducerTask object.
-            train: Training mode.
-            inference: Inference mode.
-        Return:
-            retval: Required task data.
-        """
-        if not inference:
-            retval = ("speech", "text")
-        else:
-            retval = ("speech",)
-
-        return retval
-
-    @classmethod
-    def optional_data_names(
-        cls, train: bool = True, inference: bool = False
-    ) -> Tuple[str, ...]:
-        """Optional data depending on task mode.
-        Args:
-            cls: ASRTransducerTask object.
-            train: Training mode.
-            inference: Inference mode.
-        Return:
-            retval: Optional task data.
-        """
-        retval = ()
-        assert check_return_type(retval)
-
-        return retval
 
     @classmethod
     def build_model(cls, args: argparse.Namespace) -> TransducerModel:
@@ -1665,7 +1450,7 @@ class ASRTransducerTask(AbsTask):
         decoder_output_size = decoder.output_size
 
         if getattr(args, "decoder", None) is not None:
-            att_decoder_class = decoder_choices.get_class(args.att_decoder)
+            att_decoder_class = decoder_choices.get_class(args.decoder)
 
             att_decoder = att_decoder_class(
                 vocab_size=vocab_size,
@@ -1683,35 +1468,23 @@ class ASRTransducerTask(AbsTask):
         )
 
         # 7. Build model
+        try:
+            model_class = model_choices.get_class(args.model)
+        except AttributeError:
+            model_class = model_choices.get_class("rnnt_unified")
 
-        if hasattr(encoder, 'unified_model_training') and encoder.unified_model_training:
-            model = UnifiedTransducerModel(
-                vocab_size=vocab_size,
-                token_list=token_list,
-                frontend=frontend,
-                specaug=specaug,
-                normalize=normalize,
-                encoder=encoder,
-                decoder=decoder,
-                att_decoder=att_decoder,
-                joint_network=joint_network,
-                **args.model_conf,
-            )
-
-        else:
-            model = TransducerModel(
-                vocab_size=vocab_size,
-                token_list=token_list,
-                frontend=frontend,
-                specaug=specaug,
-                normalize=normalize,
-                encoder=encoder,
-                decoder=decoder,
-                att_decoder=att_decoder,
-                joint_network=joint_network,
-                **args.model_conf,
-            )
-
+        model = model_class(
+            vocab_size=vocab_size,
+            token_list=token_list,
+            frontend=frontend,
+            specaug=specaug,
+            normalize=normalize,
+            encoder=encoder,
+            decoder=decoder,
+            att_decoder=att_decoder,
+            joint_network=joint_network,
+            **args.model_conf,
+        )
         # 8. Initialize model
         if args.init is not None:
             raise NotImplementedError(

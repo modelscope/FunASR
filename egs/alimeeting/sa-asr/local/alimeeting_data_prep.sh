@@ -61,9 +61,9 @@ mkdir -p $near_dir
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then 
     log "stage 1:process alimeeting near dir"
     
-    find -L $near_raw_dir/audio_dir -iname "*.wav" >  $near_dir/wavlist
+    find -L $near_raw_dir/audio_dir -iname "*.wav" | sort >  $near_dir/wavlist
     awk -F '/' '{print $NF}' $near_dir/wavlist | awk -F '.' '{print $1}' > $near_dir/uttid   
-    find -L $near_raw_dir/textgrid_dir  -iname "*.TextGrid" > $near_dir/textgrid.flist
+    find -L $near_raw_dir/textgrid_dir  -iname "*.TextGrid" | sort > $near_dir/textgrid.flist
     n1_wav=$(wc -l < $near_dir/wavlist)
     n2_text=$(wc -l < $near_dir/textgrid.flist)
     log  near file found $n1_wav wav and $n2_text text.
@@ -90,9 +90,9 @@ fi
 if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     log "stage 2:process alimeeting far dir"
     
-    find -L $far_raw_dir/audio_dir -iname "*.wav" >  $far_dir/wavlist
+    find -L $far_raw_dir/audio_dir -iname "*.wav" | sort >  $far_dir/wavlist
     awk -F '/' '{print $NF}' $far_dir/wavlist | awk -F '.' '{print $1}' > $far_dir/uttid   
-    find -L $far_raw_dir/textgrid_dir  -iname "*.TextGrid" > $far_dir/textgrid.flist
+    find -L $far_raw_dir/textgrid_dir  -iname "*.TextGrid" | sort > $far_dir/textgrid.flist
     n1_wav=$(wc -l < $far_dir/wavlist)
     n2_text=$(wc -l < $far_dir/textgrid.flist)
     log  far file found $n1_wav wav and $n2_text text.
@@ -120,7 +120,8 @@ fi
 
 if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
     log "stage 3: finali data process"
-
+    local/fix_data_dir.sh $near_dir
+    local/fix_data_dir.sh $far_dir
     local/copy_data_dir.sh $near_dir data/${tgt}_Ali_near
     local/copy_data_dir.sh $far_dir data/${tgt}_Ali_far
 

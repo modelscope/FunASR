@@ -25,7 +25,7 @@ from funasr.models.preencoder.abs_preencoder import AbsPreEncoder
 from funasr.models.specaug.abs_specaug import AbsSpecAug
 from funasr.layers.abs_normalize import AbsNormalize
 from funasr.torch_utils.device_funcs import force_gatherable
-from funasr.train.abs_espnet_model import AbsESPnetModel
+from funasr.models.base_model import FunASRModel
 from funasr.modules.streaming_utils.chunk_utilis import sequence_mask
 from funasr.models.predictor.cif import mae_loss
 
@@ -38,7 +38,7 @@ else:
         yield
 
 
-class UniASR(AbsESPnetModel):
+class UniASR(FunASRModel):
     """
     Author: Speech Lab of DAMO Academy, Alibaba Group
     """
@@ -179,7 +179,6 @@ class UniASR(AbsESPnetModel):
         decoding_ind: int = None,
     ) -> Tuple[torch.Tensor, Dict[str, torch.Tensor], torch.Tensor]:
         """Frontend + Encoder + Decoder + Calc loss
-
         Args:
                         speech: (Batch, Length, ...)
                         speech_lengths: (Batch, )
@@ -469,7 +468,6 @@ class UniASR(AbsESPnetModel):
         self, speech: torch.Tensor, speech_lengths: torch.Tensor, ind: int = 0,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Frontend + Encoder. Note that this method is used by asr_inference.py
-
         Args:
                         speech: (Batch, Length, ...)
                         speech_lengths: (Batch, )
@@ -533,7 +531,6 @@ class UniASR(AbsESPnetModel):
         ind: int = 0,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Frontend + Encoder. Note that this method is used by asr_inference.py
-
         Args:
                         speech: (Batch, Length, ...)
                         speech_lengths: (Batch, )
@@ -627,9 +624,7 @@ class UniASR(AbsESPnetModel):
         ys_pad_lens: torch.Tensor,
     ) -> torch.Tensor:
         """Compute negative log likelihood(nll) from transformer-decoder
-
         Normally, this function is called in batchify_nll.
-
         Args:
                         encoder_out: (Batch, Length, Dim)
                         encoder_out_lens: (Batch,)
@@ -666,7 +661,6 @@ class UniASR(AbsESPnetModel):
         batch_size: int = 100,
     ):
         """Compute negative log likelihood(nll) from transformer-decoder
-
         To avoid OOM, this fuction seperate the input into batches.
         Then call nll for each batch and combine and return results.
         Args:
@@ -1072,4 +1066,3 @@ class UniASR(AbsESPnetModel):
             ys_hat = self.ctc2.argmax(encoder_out).data
             cer_ctc = self.error_calculator(ys_hat.cpu(), ys_pad.cpu(), is_ctc=True)
         return loss_ctc, cer_ctc
-

@@ -4,6 +4,7 @@ frontend_conf:
     n_fft: 400
     win_length: 400
     hop_length: 160
+    use_channel: 0
 
 # encoder related
 asr_encoder: conformer
@@ -43,7 +44,6 @@ spk_encoder_conf:
   pooling_type: statistic
   num_nodes_resnet1: 256
   num_nodes_last_layer: 256
-  batchnorm_momentum: 0.5
 
 # decoder related
 decoder: sa_decoder

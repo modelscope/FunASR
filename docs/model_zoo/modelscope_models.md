@@ -1,7 +1,8 @@
 # Pretrained Models on ModelScope
 
 ## Model License
--  Apache License 2.0
+You are free to use, copy, modify, and share FunASR under the conditions of this agreement. You should indicate the code and model source and author information when using, copying, modifying and sharing FunASR. To upload the FunASR industrial model to any third-party platform for download and use, an additional license is required, which can be applied for free by sending an email to the official email address (funasr@list.alibaba-inc.com). Full license could see [license](https://github.com/alibaba-damo-academy/FunASR/blob/main/LICENSE)
+
 
 ## Model Zoo
 Here we provided several pretrained models on different datasets. The details of models and datasets can be found on [ModelScope](https://www.modelscope.cn/models?page=1&tasks=auto-speech-recognition).
@@ -45,7 +46,7 @@ Here we provided several pretrained models on different datasets. The details of
 |                [UniASR Burmese](https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-my-16k-common-vocab696-pytorch/summary)                 |       MY        | Alibaba Speech Data (1000 hours)  |    696     |    95M    |     Online     | UniASR streaming offline unifying models                                                                                                    |
 |                [UniASR Hebrew](https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-he-16k-common-vocab1085-pytorch/summary)                 |       HE        | Alibaba Speech Data (1000 hours)  |    1085    |    95M    |     Online     | UniASR streaming offline unifying models                                                                                                    |
 |              [UniASR Urdu](https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-ur-16k-common-vocab877-pytorch/summary)                      |       UR        | Alibaba Speech Data (1000 hours)  |    877     |    95M    |     Online     | UniASR streaming offline unifying models                                                                                                    |
-
+|              [UniASR Turkish](https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-tr-16k-common-vocab1582-pytorch/summary)                      |       TR        | Alibaba Speech Data (1000 hours)  |    1582     |    95M    |     Online     | UniASR streaming offline unifying models                                                                                                    |
 
 
 #### Conformer Models

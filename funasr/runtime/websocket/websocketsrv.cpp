@@ -16,9 +16,48 @@
 #include <utility>
 #include <vector>
 
+context_ptr WebSocketServer::on_tls_init(tls_mode mode,
+                                         websocketpp::connection_hdl hdl,
+                                         std::string& s_certfile,
+                                         std::string& s_keyfile) {
+  namespace asio = websocketpp::lib::asio;
+
+  std::cout << "on_tls_init called with hdl: " << hdl.lock().get() << std::endl;
+  std::cout << "using TLS mode: "
+            << (mode == MOZILLA_MODERN ? "Mozilla Modern"
+                                       : "Mozilla Intermediate")
+            << std::endl;
+
+  context_ptr ctx = websocketpp::lib::make_shared<asio::ssl::context>(
+      asio::ssl::context::sslv23);
+
+  try {
+    if (mode == MOZILLA_MODERN) {
+      // Modern disables TLSv1
+      ctx->set_options(
+          asio::ssl::context::default_workarounds |
+          asio::ssl::context::no_sslv2 | asio::ssl::context::no_sslv3 |
+          asio::ssl::context::no_tlsv1 | asio::ssl::context::single_dh_use);
+    } else {
+      ctx->set_options(asio::ssl::context::default_workarounds |
+                       asio::ssl::context::no_sslv2 |
+                       asio::ssl::context::no_sslv3 |
+                       asio::ssl::context::single_dh_use);
+    }
+
+    ctx->use_certificate_chain_file(s_certfile);
+    ctx->use_private_key_file(s_keyfile, asio::ssl::context::pem);
+
+  } catch (std::exception& e) {
+    std::cout << "Exception: " << e.what() << std::endl;
+  }
+  return ctx;
+}
+
 // feed buffer to asr engine for decoder
 void WebSocketServer::do_decoder(const std::vector<char>& buffer,
-                                 websocketpp::connection_hdl& hdl) {
+                                 websocketpp::connection_hdl& hdl,
+                                 const nlohmann::json& msg) {
   try {
     int num_samples = buffer.size();  // the size of the buf
 
@@ -34,16 +73,24 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
       websocketpp::lib::error_code ec;
       nlohmann::json jsonresult;        // result json
       jsonresult["text"] = asr_result;  // put result in 'text'
+      jsonresult["mode"] = "offline";
+
+      jsonresult["wav_name"] = msg["wav_name"];
 
       // send the json to client
-      server_->send(hdl, jsonresult.dump(), websocketpp::frame::opcode::text,
-                    ec);
+      if (is_ssl) {
+        wss_server_->send(hdl, jsonresult.dump(),
+                          websocketpp::frame::opcode::text, ec);
+      } else {
+        server_->send(hdl, jsonresult.dump(), websocketpp::frame::opcode::text,
+                      ec);
+      }
 
       std::cout << "buffer.size=" << buffer.size()
                 << ",result json=" << jsonresult.dump() << std::endl;
       if (!isonline) {
         //  close the client if it is not online asr
-        server_->close(hdl, websocketpp::close::status::normal, "DONE", ec);
+        // server_->close(hdl, websocketpp::close::status::normal, "DONE", ec);
         // fout.close();
       }
     }
@@ -56,34 +103,46 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
 void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
   scoped_lock guard(m_lock);     // for threads safty
   check_and_clean_connection();  // remove closed connection
-  sample_map.emplace(
-      hdl, std::make_shared<std::vector<char>>());  // put a new data vector for
-                                                    // new connection
-  std::cout << "on_open, active connections: " << sample_map.size()
-            << std::endl;
+
+  std::shared_ptr<FUNASR_MESSAGE> data_msg =
+      std::make_shared<FUNASR_MESSAGE>();  // put a new data vector for new
+                                           // connection
+  data_msg->samples = std::make_shared<std::vector<char>>();
+  data_msg->msg = nlohmann::json::parse("{}");
+  data_map.emplace(hdl, data_msg);
+  std::cout << "on_open, active connections: " << data_map.size() << std::endl;
 }
 
 void WebSocketServer::on_close(websocketpp::connection_hdl hdl) {
   scoped_lock guard(m_lock);
-  sample_map.erase(hdl);  // remove data vector when  connection is closed
-  std::cout << "on_close, active connections: " << sample_map.size()
-            << std::endl;
+  data_map.erase(hdl);  // remove data vector when  connection is closed
+
+  std::cout << "on_close, active connections: " << data_map.size() << std::endl;
 }
 
 // remove closed connection
 void WebSocketServer::check_and_clean_connection() {
   std::vector<websocketpp::connection_hdl> to_remove;  // remove list
-  auto iter = sample_map.begin();
-  while (iter != sample_map.end()) {  // loop to find closed connection
+  auto iter = data_map.begin();
+  while (iter != data_map.end()) {  // loop to find closed connection
     websocketpp::connection_hdl hdl = iter->first;
-    server::connection_ptr con = server_->get_con_from_hdl(hdl);
-    if (con->get_state() != 1) {  // session::state::open ==1
-      to_remove.push_back(hdl);
+
+    if (is_ssl) {
+      wss_server::connection_ptr con = wss_server_->get_con_from_hdl(hdl);
+      if (con->get_state() != 1) {  // session::state::open ==1
+        to_remove.push_back(hdl);
+      }
+    } else {
+      server::connection_ptr con = server_->get_con_from_hdl(hdl);
+      if (con->get_state() != 1) {  // session::state::open ==1
+        to_remove.push_back(hdl);
+      }
     }
+
     iter++;
   }
   for (auto hdl : to_remove) {
-    sample_map.erase(hdl);
+    data_map.erase(hdl);
     std::cout << "remove one connection " << std::endl;
   }
 }
@@ -91,12 +150,15 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
                                  message_ptr msg) {
   unique_lock lock(m_lock);
   // find the sample data vector according to one connection
-  std::shared_ptr<std::vector<char>> sample_data_p = nullptr;
 
-  auto it = sample_map.find(hdl);
-  if (it != sample_map.end()) {
-    sample_data_p = it->second;
+  std::shared_ptr<FUNASR_MESSAGE> msg_data = nullptr;
+
+  auto it_data = data_map.find(hdl);
+  if (it_data != data_map.end()) {
+    msg_data = it_data->second;
   }
+  std::shared_ptr<std::vector<char>> sample_data_p = msg_data->samples;
+
   lock.unlock();
   if (sample_data_p == nullptr) {
     std::cout << "error when fetch sample data vector" << std::endl;
@@ -106,20 +168,32 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
   const std::string& payload = msg->get_payload();  // get msg type
 
   switch (msg->get_opcode()) {
-    case websocketpp::frame::opcode::text:
-      if (payload == "Done") {
+    case websocketpp::frame::opcode::text: {
+      nlohmann::json jsonresult = nlohmann::json::parse(payload);
+      if (jsonresult["wav_name"] != nullptr) {
+        msg_data->msg["wav_name"] = jsonresult["wav_name"];
+      }
+
+      if (jsonresult["is_speaking"] == false ||
+          jsonresult["is_finished"] == true) {
         std::cout << "client done" << std::endl;
 
         if (isonline) {
           // do_close(ws);
         } else {
+          // add padding to the end of the wav data
+          std::vector<short> padding(static_cast<short>(0.3 * 16000));
+          sample_data_p->insert(sample_data_p->end(), padding.data(),
+                                padding.data() + padding.size());
           // for offline, send all receive data to decoder engine
-          asio::post(io_decoder_, std::bind(&WebSocketServer::do_decoder, this,
-                                            std::move(*(sample_data_p.get())),
-                                            std::move(hdl)));
+          asio::post(io_decoder_,
+                     std::bind(&WebSocketServer::do_decoder, this,
+                               std::move(*(sample_data_p.get())),
+                               std::move(hdl), std::move(msg_data->msg)));
         }
       }
       break;
+    }
     case websocketpp::frame::opcode::binary: {
       // recived binary data
       const auto* pcm_data = static_cast<const char*>(payload.data());
@@ -128,8 +202,9 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
       if (isonline) {
         // if online TODO(zhaoming) still not done
         std::vector<char> s(pcm_data, pcm_data + num_samples);
-        asio::post(io_decoder_, std::bind(&WebSocketServer::do_decoder, this,
-                                          std::move(s), std::move(hdl)));
+        asio::post(io_decoder_,
+                   std::bind(&WebSocketServer::do_decoder, this, std::move(s),
+                             std::move(hdl), std::move(msg_data->msg)));
       } else {
         // for offline, we add receive data to end of the sample data vector
         sample_data_p->insert(sample_data_p->end(), pcm_data,

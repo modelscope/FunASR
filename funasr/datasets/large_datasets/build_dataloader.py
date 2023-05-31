@@ -64,28 +64,26 @@ class SentencepiecesTokenizer(AbsTokenizer):
         return self.sp.DecodePieces(list(tokens))
 
 
-class ArkDataLoader(AbsIterFactory):
-    def __init__(self, data_list, dict_file, dataset_conf, frontend_conf=None, seg_dict_file=None, punc_dict_file=None,
-                 bpemodel_file=None, mode="train"):
-        symbol_table = read_symbol_table(dict_file) if dict_file is not None else None
-        if seg_dict_file is not None:
-            seg_dict = load_seg_dict(seg_dict_file)
-        else:
-            seg_dict = None
-        if punc_dict_file is not None:
-            punc_dict = read_symbol_table(punc_dict_file)
-        else:
-            punc_dict = None
-        self.dataset_conf = dataset_conf
-        self.frontend_conf = frontend_conf
+class LargeDataLoader(AbsIterFactory):
+    def __init__(self, args, mode="train"):
+        symbol_table, seg_dict, punc_dict, bpe_tokenizer = None, None, None, None
+        if hasattr(args, "token_list") and args.token_list is not None:
+            symbol_table = read_symbol_table(args.token_list)
+        if hasattr(args, "seg_dict_file") and args.seg_dict_file is not None:
+            seg_dict = load_seg_dict(args.seg_dict_file)
+        if hasattr(args, "punc_dict_file") and args.punc_dict_file is not None:
+            punc_dict = read_symbol_table(args.punc_dict_file)
+        if hasattr(args, "bpemodel") and args.bpemodel is not None:
+            bpe_tokenizer = SentencepiecesTokenizer(args.bpemodel)
+        self.dataset_conf = args.dataset_conf
+        self.frontend_conf = args.frontend_conf
         logging.info("dataloader config: {}".format(self.dataset_conf))
         batch_mode = self.dataset_conf.get("batch_mode", "padding")
-        if bpemodel_file is not None:
-            bpe_tokenizer = SentencepiecesTokenizer(bpemodel_file)
-        else:
-            bpe_tokenizer = None
+        data_list = args.train_data_file if mode == "train" else args.valid_data_file
         self.dataset = Dataset(data_list, symbol_table, seg_dict, punc_dict, bpe_tokenizer,
-                               self.dataset_conf, self.frontend_conf, mode=mode, batch_mode=batch_mode)
+                               self.dataset_conf, self.frontend_conf,
+                               speed_perturb=args.speed_perturb if mode == "train" else None,
+                               mode=mode, batch_mode=batch_mode)
 
     def build_iter(self, epoch, shuffle=True):
         self.dataset.set_epoch(epoch)

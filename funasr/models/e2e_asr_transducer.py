@@ -17,7 +17,7 @@ from funasr.models.joint_net.joint_network import JointNetwork
 from funasr.modules.nets_utils import get_transducer_task_io
 from funasr.layers.abs_normalize import AbsNormalize
 from funasr.torch_utils.device_funcs import force_gatherable
-from funasr.train.abs_espnet_model import AbsESPnetModel
+from funasr.models.base_model import FunASRModel
 
 if V(torch.__version__) >= V("1.6.0"):
     from torch.cuda.amp import autocast
@@ -28,7 +28,7 @@ else:
         yield
 
 
-class TransducerModel(AbsESPnetModel):
+class TransducerModel(FunASRModel):
     """ESPnet2ASRTransducerModel module definition.
 
     Args:
@@ -108,7 +108,7 @@ class TransducerModel(AbsESPnetModel):
         self.use_auxiliary_lm_loss = auxiliary_lm_loss_weight > 0
 
         if self.use_auxiliary_ctc:
-            self.ctc_lin = torch.nn.Linear(encoder.output_size, vocab_size)
+            self.ctc_lin = torch.nn.Linear(encoder.output_size(), vocab_size)
             self.ctc_dropout_rate = auxiliary_ctc_dropout_rate
 
         if self.use_auxiliary_lm_loss:
@@ -162,7 +162,9 @@ class TransducerModel(AbsESPnetModel):
 
         # 1. Encoder
         encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
-
+        if hasattr(self.encoder, 'overlap_chunk_cls') and self.encoder.overlap_chunk_cls is not None:
+            encoder_out, encoder_out_lens = self.encoder.overlap_chunk_cls.remove_chunk(encoder_out, encoder_out_lens,
+                                                                                        chunk_outs=None)
         # 2. Transducer-related I/O preparation
         decoder_in, target, t_len, u_len = get_transducer_task_io(
             text,
@@ -483,7 +485,7 @@ class TransducerModel(AbsESPnetModel):
 
         return loss_lm
 
-class UnifiedTransducerModel(AbsESPnetModel):
+class UnifiedTransducerModel(FunASRModel):
     """ESPnet2ASRTransducerModel module definition.
     Args:
         vocab_size: Size of complete vocabulary (w/ EOS and blank included).
@@ -577,7 +579,7 @@ class UnifiedTransducerModel(AbsESPnetModel):
         self.use_auxiliary_lm_loss = auxiliary_lm_loss_weight > 0
 
         if self.use_auxiliary_ctc:
-            self.ctc_lin = torch.nn.Linear(encoder.output_size, vocab_size)
+            self.ctc_lin = torch.nn.Linear(encoder.output_size(), vocab_size)
             self.ctc_dropout_rate = auxiliary_ctc_dropout_rate
 
         if self.use_auxiliary_att:

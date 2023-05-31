@@ -6,13 +6,10 @@ import torch
 import torch.nn as nn
 
 from funasr.modules.embedding import SinusoidalPositionEncoder
-#from funasr.models.encoder.transformer_encoder import TransformerEncoder as Encoder
 from funasr.models.encoder.sanm_encoder import SANMEncoder as Encoder
-#from funasr.modules.mask import subsequent_n_mask
-from funasr.train.abs_model import AbsPunctuation
 
 
-class TargetDelayTransformer(AbsPunctuation):
+class TargetDelayTransformer(torch.nn.Module):
     """
     Author: Speech Lab of DAMO Academy, Alibaba Group
     CT-Transformer: Controllable time-delay transformer for real-time punctuation prediction and disfluency detection

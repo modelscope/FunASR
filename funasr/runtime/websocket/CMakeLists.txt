@@ -55,10 +55,12 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/../onnxruntime/src src)
 include_directories(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/glog)
 set(BUILD_TESTING OFF)
 add_subdirectory(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/glog glog)
- 
+
+# install openssl first apt-get install libssl-dev
+find_package(OpenSSL REQUIRED)
 
 add_executable(websocketmain "websocketmain.cpp" "websocketsrv.cpp")
 add_executable(websocketclient "websocketclient.cpp")
 
-target_link_libraries(websocketclient PUBLIC funasr)
-target_link_libraries(websocketmain PUBLIC funasr)
+target_link_libraries(websocketclient PUBLIC funasr ssl crypto)
+target_link_libraries(websocketmain PUBLIC funasr ssl crypto)

@@ -14,7 +14,6 @@ from typeguard import check_return_type
 
 from funasr.datasets.collate_fn import CommonCollateFn
 from funasr.datasets.preprocessor import PuncTrainTokenizerCommonPreprocessor
-from funasr.train.abs_model import AbsPunctuation
 from funasr.train.abs_model import PunctuationModel
 from funasr.models.target_delay_transformer import TargetDelayTransformer
 from funasr.models.vad_realtime_transformer import VadRealtimeTransformer
@@ -31,7 +30,6 @@ from funasr.utils.types import str_or_none
 punc_choices = ClassChoices(
     "punctuation",
     classes=dict(target_delay=TargetDelayTransformer, vad_realtime=VadRealtimeTransformer),
-    type_check=AbsPunctuation,
     default="target_delay",
 )
 
