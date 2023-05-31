@@ -9,7 +9,7 @@ FunASR 模型开源协议
 为了保证更好的社区合作，我们制定了以下协议，希望您仔细阅读并遵守本协议。
 
 1 定义
-本协议中，[FunASR 软件]指 FunASR 开源模型及其衍生品，包括您 Finetune 后的模型；[您]指使用、修改、分享和学习[FunASR 软件]的个人或组织。
+本协议中，[FunASR 软件]指 FunASR 开源模型及其衍生品，包括 Finetune 后的模型；[您]指使用、修改、分享和学习[FunASR 软件]的个人或组织。
 
 2 许可和限制
 2.1 许可
@@ -46,7 +46,7 @@ Thank you for choosing the FunASR open source models. The FunASR open source mod
 To ensure better community collaboration, we have developed the following agreement and hope that you carefully read and abide by it.
 
 1 Definitions
-In this agreement, [FunASR software] refers to the FunASR open source model, and its derivatives, including your fine-tuned models. [You] refer to individuals or organizations who use, modify, share, and learn from [FunASR software].
+In this agreement, [FunASR software] refers to the FunASR open source model, and its derivatives, including fine-tuned models. [You] refer to individuals or organizations who use, modify, share, and learn from [FunASR software].
 
 2 License and Restrictions
 
