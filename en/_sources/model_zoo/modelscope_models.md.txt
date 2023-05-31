@@ -1,7 +1,7 @@
 # Pretrained Models on ModelScope
 
 ## Model License
-You are free to use, copy, modify, and share FunASR under the conditions of this agreement. You should indicate the code and model source and author information when using, copying, modifying and sharing FunASR. To upload the FunASR industrial model to other third-party platforms for download, an additional license is required, which can be applied for free by sending an email to the official email address (funasr@list.alibaba-inc.com). Full license could see [license](https://github.com/alibaba-damo-academy/FunASR/blob/main/LICENSE)
+You are free to use, copy, modify, and share FunASR models under the conditions of this agreement. You should indicate the model source and author information when using, copying, modifying and sharing FunASR models. To upload the FunASR models to other third-party platforms for download, an additional license is required, which can be applied for free by sending an email to the official email address (funasr@list.alibaba-inc.com). Full model license could see [license](https://github.com/alibaba-damo-academy/FunASR/blob/main/MODEL_LICENSE)
 
 
 ## Model Zoo
