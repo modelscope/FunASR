@@ -24,7 +24,8 @@ print(rec_result)
 inference_pipeline = pipeline(
     task=Tasks.auto_speech_recognition,
     model='damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online',
-    model_revision='v1.0.4'
+    model_revision='v1.0.6',
+    mode='paraformer_streaming'
     )
 import soundfile
 speech, sample_rate = soundfile.read("example/asr_example.wav")
