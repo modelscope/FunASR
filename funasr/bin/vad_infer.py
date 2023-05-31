@@ -175,7 +175,8 @@ class Speech2VadSegmentOnline(Speech2VadSegment):
         batch_size = speech.shape[0]
         segments = [[]] * batch_size
         if self.frontend is not None:
-            feats, feats_len = self.frontend.forward(speech, speech_lengths, is_final)
+            reset = in_cache == dict()
+            feats, feats_len = self.frontend.forward(speech, speech_lengths, is_final, reset)
             fbanks, _ = self.frontend.get_fbank()
         else:
             raise Exception("Need to extract feats first, please configure frontend configuration")
