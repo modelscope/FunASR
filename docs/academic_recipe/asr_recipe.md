@@ -37,7 +37,7 @@ tensorboard --logdir ${exp_dir}/exp/${model_dir}/tensorboard/train
 ```
 Here is an example of loss:
 
-<img src="images/loss.png" width="200"/>
+<img src="./academic_recipe/images/loss.png" width="200"/>
 
 The inference results are saved in `${exp_dir}/exp/${model_dir}/decode_asr_*/$dset`. The main two files are `text.cer` and `text.cer.txt`. `text.cer` saves the comparison between the recognized text and the reference text, like follows:
 ```text
@@ -106,18 +106,37 @@ This stage processes the dictionary, which is used as a mapping between label ch
 龟
 <unk>
 ```
-* `<blank>`: indicates the blank token for CTC, must be in the first line
-* `<s>`: indicates the start-of-sentence token, must be in the second line
-* `</s>`: indicates the end-of-sentence token, must be in the third line
-* `<unk>`: indicates the out-of-vocabulary token, must be in the last line
+There are four tokens must be specified:
+* `<blank>`: (required), indicates the blank token for CTC, must be in the first line
+* `<s>`: (required), indicates the start-of-sentence token, must be in the second line
+* `</s>`: (required), indicates the end-of-sentence token, must be in the third line
+* `<unk>`: (required), indicates the out-of-vocabulary token, must be in the last line
 
 ### Stage 3: LM Training
 
 ### Stage 4: ASR Training
-This stage achieves the training of the specified model. To start training, users should manually set `exp_dir` to specify the path for saving experimental results. By default, the best `$keep_nbest_models` checkpoints on validation dataset will be averaged to generate a better model and adopted for decoding. FunASR implements `train.py` for training different models and users can configure the following parameters if necessary.
+This stage achieves the training of the specified model. To start training, users should manually set `exp_dir` to specify the path for saving experimental results. By default, the best `$keep_nbest_models` checkpoints on validation dataset will be averaged to generate a better model and adopted for decoding. FunASR implements `train.py` for training different models and users can configure the following parameters if necessary. The training command is as follows:
+
+```sh
+train.py \
+    --task_name asr \
+    --use_preprocessor true \
+    --token_list $token_list \
+    --data_dir ${feats_dir}/data \
+    --train_set ${train_set} \
+    --valid_set ${valid_set} \
+    --data_file_names "wav.scp,text" \
+    --cmvn_file ${feats_dir}/data/${train_set}/cmvn/am.mvn \
+    --speed_perturb ${speed_perturb} \
+    --resume true \
+    --output_dir ${exp_dir}/exp/${model_dir} \
+    --config $asr_config \
+    --ngpu $gpu_num \
+    ...
+```
 
 * `task_name`: `asr` (Default), specify the task type of the current recipe
-* `gpu_num`: `2` (Default), specify the number of GPUs for training. When `gpu_num > 1`, DistributedDataParallel (DDP, the detail can be found [here](https://pytorch.org/tutorials/intermediate/ddp_tutorial.html)) training will be enabled. Correspondingly, `CUDA_VISIBLE_DEVICES` should be set to specify which ids of GPUs will be used.
+* `ngpu`: `2` (Default), specify the number of GPUs for training. When `ngpu > 1`, DistributedDataParallel (DDP, the detail can be found [here](https://pytorch.org/tutorials/intermediate/ddp_tutorial.html)) training will be enabled. Correspondingly, `CUDA_VISIBLE_DEVICES` should be set to specify which ids of GPUs will be used.
 * `use_preprocessor`: `true` (Default), specify whether to use pre-processing on each sample
 * `token_list`: the path of token list for training
 * `dataset_type`: `small` (Default). FunASR supports `small` dataset type for training small datasets. Besides, an optional iterable-style DataLoader based on [Pytorch Iterable-style DataPipes](https://pytorch.org/data/beta/torchdata.datapipes.iter.html) for large datasets is supported and users can specify `dataset_type=large` to enable it.
@@ -125,6 +144,7 @@ This stage achieves the training of the specified model. To start training, user
 * `data_file_names`: `"wav.scp,text"` specify the speech and text file names for ASR
 * `cmvn_file`: the path of cmvn file
 * `resume`: `true`, whether to enable "checkpoint training"
+* `output_dir`: the path for saving training results
 * `config`: the path of configuration file, which is usually a YAML file in `conf` directory. In FunASR, the parameters of the training, including model, optimization, dataset, etc., can also be set in this file. Note that if the same parameters are specified in both recipe and config file, the parameters of recipe will be employed
 
 ### Stage 5: Decoding
@@ -156,25 +176,25 @@ res:    构 建 良 好 的 旅 游 市 场 环 境
 ## Change settings
 Here we explain how to perform common custom settings, which can help users to modify scripts according to their own needs.
 
-* Training with specified GPUs
+### Training with specified GPUs
 
-For example, if users want to use 2 GPUs with id `2` and `3, users can run the following command:
+For example, if users want to use 2 GPUs with id `2` and `3`, users can run the following command:
 ```sh
 . ./run.sh --CUDA_VISIBLE_DEVICES "2,3" --gpu_num 2 
 ```
 
-* Start from/Stop at a specified stage
+### Start from/Stop at a specified stage
 
 The recipe includes several stages. Users can start form or stop at any stage. For example, the following command achieves starting from the third stage and stopping at the fifth stage:
 ```sh
 . ./run.sh --stage 3 --stop_stage 5
 ```
 
-* Training Steps
+### Specify total training steps
 
 FunASR supports two parameters to specify the training steps, namely `max_epoch` and `max_update`. `max_epoch` indicates the total training epochs while `max_update` indicates the total training steps. If these two parameters are specified at the same time, once the training reaches any one of these two parameters, the training will be stopped.
 
-* Change the configuration of the model
+### Change the configuration of the model
 
 The configuration of the model is set in the config file `conf/train_*.yaml`. Specifically, the default encoder configuration of paraformer is as follows:
 ```
@@ -199,28 +219,49 @@ encoder_conf:
 ```
 Users can change the encoder configuration by modify these values. For example, if users want to use an encoder with 16 conformer blocks and each block has 8 attention heads, users just need to change `num_blocks` from 12 to 16 and change `attention_heads` from 4 to 8. Besides, the batch_size, learning rate and other training hyper-parameters are also set in this config file. To change these hyper-parameters, users just need to directly change the corresponding values in this file. For example, the default learning rate is `0.0005`. If users want to change the learning rate to 0.0002, set the value of lr as `lr: 0.0002`.
 
-* Use different input data type
+### Change different input data type
 
-FunASR supports different input data types, including `sound`, `kaldi_ark`, `npy`, `text` and `text_int`. Users can specify any number and any type of input, which is achieved by `data_file_names` (in `run.sh`), `data_names` and `data_types` (in config file). For example, ASR task usually requires speech and the corresponding transcripts as input. If speech is saved as raw audio (such as wav format) and transcripts are saved as text format, users need to set `data_file_names=wav.scp,text` (any name is allowed, denoting wav list and text list), set `data_names=speech,text` and set `data_types=sound,text`. When the input type changes to FBank, users just need to modify `data_types=kaldi_ark,text`.
+FunASR supports different input data types, including `sound`, `kaldi_ark`, `npy`, `text` and `text_int`. Users can specify any number and any type of input, which is achieved by `data_names` and `data_types` (in `config/train_*.yaml`). For example, ASR task usually requires speech and the transcripts as input. In FunASR, by default, speech is saved as raw audio (such as wav format) and transcripts are saved as text format. Correspondingly, `data_names` and `data_types` are set as follows (seen in `config/train_*.yaml`):
+```text
+dataset_conf:
+    data_names: speech,text
+    data_types: sound,text
+    ...
+```
+When the input type changes to FBank, users just need to modify as `data_types: kaldi_ark,text` in the config file. Note `data_file_names` used in `train.py` should also be changed to the new file name.
 
-* How to start from pre-trained models
-
-Users can start training from a pre-trained model by specifying the `init_param` parameter. Here `init_param` indicates the path of the pre-trained model. In addition to directly loading all the parameters from one pre-trained model, loading part of the parameters from different pre-trained models is supported. For example, to load encoder parameters from the pre-trained model A and decoder parameters from the pre-trained model B, users can set `init_param` twice as follows:
-```sh
-train.py ... --init_param ${model_A_path}:encoder  --init_param ${model_B_path}:decoder ...
+### How to resume training process
+FunASR supports resuming training as follows:
+```shell
+train.py ... --resume true ...
 ```
 
-* How to freeze part model parameters
+### How to transfer / fine-tuning from pre-trained models
+
+FunASR supports transferring / fine-tuning from a pre-trained model by specifying the `init_param` parameter. The usage format is as follows:
+```shell
+train.py ... --init_param <file_path>:<src_key>:<dst_key>:<exclude_keys>  ..
+```
+For example, the following command achieves loading all pretrained parameters starting from decoder except decoder.embed and set it to model.decoder2: 
+```shell
+train.py ... --init_param model.pb:decoder:decoder2:decoder.embed  ...
+```
+Besides, loading parameters from multiple pre-trained models is supported. For example, the following command achieves loading encoder parameters from the pre-trained model1 and decoder parameters from the pre-trained model2:
+```sh
+train.py ... --init_param model1.pb:encoder  --init_param model2.pb:decoder ...
+```
+
+### How to freeze part of the model parameters
 
 In certain situations, users may want to fix part of the model parameters update the rest model parameters. FunASR employs `freeze_param` to achieve this. For example, to fix all parameters like `encoder.*`, users need to set `freeze_param ` as follows:
 ```sh
 train.py ... --freeze_param encoder ...
 ```
 
-* ModelScope Usage
+### ModelScope Usage
 
 Users can use ModelScope for inference and fine-tuning based on a trained academic model. To achieve this, users need to run the stage 6 in the script. In this stage, relevant files required by ModelScope will be generated automatically. Users can then use the corresponding ModelScope interface by replacing the model name with the local trained model path. For the detailed usage of the ModelScope interface, please refer to [ModelScope Usage](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_pipeline/quick_start.html).
 
-* Decoding by CPU or GPU
+### Decoding by CPU or GPU
 
 We support CPU and GPU decoding. For CPU decoding, set `gpu_inference=false` and `njob` to specific the total number of CPU jobs. For GPU decoding, first set `gpu_inference=true`. Then set `gpuid_list` to specific which GPUs for decoding and `njob` to specific the number of decoding jobs on each GPU.

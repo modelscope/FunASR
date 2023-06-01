@@ -1638,6 +1638,8 @@ def inference_launch(**kwargs):
         return inference_uniasr(**kwargs)
     elif mode == "paraformer":
         return inference_paraformer(**kwargs)
+    elif mode == "paraformer_fake_streaming":
+        return inference_paraformer(**kwargs)
     elif mode == "paraformer_streaming":
         return inference_paraformer_online(**kwargs)
     elif mode.startswith("paraformer_vad"):

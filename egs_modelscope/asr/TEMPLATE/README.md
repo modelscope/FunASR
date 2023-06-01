@@ -20,11 +20,14 @@ rec_result = inference_pipeline(audio_in='https://isv-data.oss-cn-hangzhou.aliyu
 print(rec_result)
 ```
 #### [Paraformer-online Model](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary)
+##### Streaming Decoding
 ```python
 inference_pipeline = pipeline(
     task=Tasks.auto_speech_recognition,
     model='damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online',
-    model_revision='v1.0.4'
+    model_revision='v1.0.6',
+    update_model='v1.0.6',
+    mode='paraformer_streaming'
     )
 import soundfile
 speech, sample_rate = soundfile.read("example/asr_example.wav")
@@ -39,6 +42,23 @@ print(rec_result)
 # next chunk, 600ms
 speech_chunk = speech[chunk_stride:chunk_stride+chunk_stride]
 rec_result = inference_pipeline(audio_in=speech_chunk, param_dict=param_dict)
+print(rec_result)
+```
+
+##### Fake Streaming Decoding
+```python
+from modelscope.pipelines import pipeline
+from modelscope.utils.constant import Tasks
+
+inference_pipeline = pipeline(
+    task=Tasks.auto_speech_recognition,
+    model='damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online',
+    model_revision='v1.0.6',
+    update_model='v1.0.6',
+    mode="paraformer_fake_streaming"
+)
+audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav'
+rec_result = inference_pipeline(audio_in=audio_in)
 print(rec_result)
 ```
 Full code of demo, please ref to [demo](https://github.com/alibaba-damo-academy/FunASR/discussions/241)
