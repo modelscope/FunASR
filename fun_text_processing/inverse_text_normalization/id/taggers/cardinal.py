@@ -43,7 +43,7 @@ class CardinalFst(GraphFst):
                 (graph_ties | pynutil.insert("0")) + delete_space + (
                             graph_digit | pynutil.insert("0")),
         )
-       graph_hundred_component = graph_hundred_component | graph_one_hundred_component
+        graph_hundred_component = graph_hundred_component | graph_one_hundred_component
     
         graph_hundred_component_at_least_one_none_zero_digit = graph_hundred_component @ (
             pynini.closure(DAMO_DIGIT) + (DAMO_DIGIT - "0") + pynini.closure(DAMO_DIGIT)
