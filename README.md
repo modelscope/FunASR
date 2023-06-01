@@ -88,6 +88,7 @@ If you have any questions about FunASR, please contact us by
 
 ## License
 This project is licensed under the [The MIT License](https://opensource.org/licenses/MIT). FunASR also contains various third-party components and some code modified from other repos under other open source licenses.
+The use of pretraining model is subject to [model licencs](./MODEL_LICENSE)
 
 ## Citations
 
