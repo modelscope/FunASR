@@ -61,7 +61,7 @@ inference_pipeline_asr_online = pipeline(
     model_revision='v1.0.6',
     mode='paraformer_streaming')
 
-print("model loaded")
+print("model loaded! only support one client at the same time now!!!!")
 
 async def ws_reset(websocket):
     print("ws reset now, total num is ",len(websocket_users))
