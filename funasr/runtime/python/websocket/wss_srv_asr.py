@@ -58,7 +58,8 @@ inference_pipeline_asr_online = pipeline(
     model=args.asr_model_online,
     ngpu=args.ngpu,
     ncpu=args.ncpu,
-    model_revision='v1.0.6',
+    model_revision='v1.0.4',
+    update_model='v1.0.4'
     mode='paraformer_streaming')
 
 print("model loaded")
