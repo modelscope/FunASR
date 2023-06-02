@@ -58,16 +58,36 @@ inference_pipeline_asr_online = pipeline(
     model=args.asr_model_online,
     ngpu=args.ngpu,
     ncpu=args.ncpu,
-    model_revision='v1.0.6',
+    model_revision='v1.0.4',
+    update_model='v1.0.4',
     mode='paraformer_streaming')
 
-print("model loaded")
+print("model loaded! only support one client at the same time now!!!!")
 
+async def ws_reset(websocket):
+    print("ws reset now, total num is ",len(websocket_users))
+    websocket.param_dict_asr_online = {"cache": dict()}
+    websocket.param_dict_vad = {'in_cache': dict(), "is_final": True}
+    websocket.param_dict_asr_online["is_final"]=True
+    audio_in=b''.join(np.zeros(int(16000),dtype=np.int16))
+    inference_pipeline_vad(audio_in=audio_in, param_dict=websocket.param_dict_vad)
+    inference_pipeline_asr_online(audio_in=audio_in, param_dict=websocket.param_dict_asr_online)
+    await websocket.close()
+    
+    
+async def clear_websocket():
+   for websocket in websocket_users:
+       await ws_reset(websocket)
+   websocket_users.clear()
+ 
+ 
+       
 async def ws_serve(websocket, path):
     frames = []
     frames_asr = []
     frames_asr_online = []
     global websocket_users
+    await clear_websocket()
     websocket_users.add(websocket)
     websocket.param_dict_asr = {}
     websocket.param_dict_asr_online = {"cache": dict()}
@@ -139,7 +159,8 @@ async def ws_serve(websocket, path):
 
      
     except websockets.ConnectionClosed:
-        print("ConnectionClosed...", websocket_users)
+        print("ConnectionClosed...", websocket_users,flush=True)
+        await ws_reset(websocket)
         websocket_users.remove(websocket)
     except websockets.InvalidState:
         print("InvalidState...")
