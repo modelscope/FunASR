@@ -176,12 +176,12 @@ Audio::~Audio()
 {
     if (speech_buff != NULL) {
         free(speech_buff);
-        
     }
-
     if (speech_data != NULL) {
-        
         free(speech_data);
+    }
+    if (speech_char != NULL) {
+        free(speech_char);
     }
 }
 
@@ -296,8 +296,47 @@ bool Audio::LoadWav(const char *filename, int32_t* sampling_rate)
         return false;
 }
 
-bool Audio::LoadWav(const char* buf, int n_file_len, int32_t* sampling_rate)
+bool Audio::LoadWav2Char(const char *filename, int32_t* sampling_rate)
 {
+    WaveHeader header;
+    if (speech_char != NULL) {
+        free(speech_char);
+    }
+    offset = 0;
+    std::ifstream is(filename, std::ifstream::binary);
+    is.read(reinterpret_cast<char *>(&header), sizeof(header));
+    if(!is){
+        LOG(ERROR) << "Failed to read " << filename;
+        return false;
+    }
+    if (!header.Validate()) {
+        return false;
+    }
+    header.SeekToDataChunk(is);
+        if (!is) {
+            return false;
+    }
+    if (!header.Validate()) {
+        return false;
+    }
+    header.SeekToDataChunk(is);
+    if (!is) {
+        return false;
+    }
+    
+    *sampling_rate = header.sample_rate;
+    // header.subchunk2_size contains the number of bytes in the data.
+    // As we assume each sample contains two bytes, so it is divided by 2 here
+    speech_len = header.subchunk2_size / 2;
+    speech_char = (char *)malloc(header.subchunk2_size);
+    memset(speech_char, 0, header.subchunk2_size);
+    is.read(speech_char, header.subchunk2_size);
+
+    return true;
+}
+
+bool Audio::LoadWav(const char* buf, int n_file_len, int32_t* sampling_rate)
+{ 
     WaveHeader header;
     if (speech_data != NULL) {
         free(speech_data);
@@ -441,6 +480,33 @@ bool Audio::LoadPcmwav(const char* filename, int32_t* sampling_rate)
 
 }
 
+bool Audio::LoadPcmwav2Char(const char* filename, int32_t* sampling_rate)
+{
+    if (speech_char != NULL) {
+        free(speech_char);
+    }
+    offset = 0;
+
+    FILE* fp;
+    fp = fopen(filename, "rb");
+    if (fp == nullptr)
+	{
+        LOG(ERROR) << "Failed to read " << filename;
+        return false;
+	}
+    fseek(fp, 0, SEEK_END);
+    uint32_t n_file_len = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+
+    speech_len = (n_file_len) / 2;
+    speech_char = (char *)malloc(n_file_len);
+    memset(speech_char, 0, n_file_len);
+    fread(speech_char, sizeof(int16_t), n_file_len/2, fp);
+    fclose(fp);
+    
+    return true;
+}
+
 int Audio::FetchChunck(float *&dout, int len)
 {
     if (offset >= speech_align_len) {
@@ -541,7 +607,7 @@ void Audio::Split(OfflineStream* offline_stream)
 }
 
 
-void Audio::Split(VadModel* vad_obj, vector<std::vector<int>>& vad_segments)
+void Audio::Split(VadModel* vad_obj, vector<std::vector<int>>& vad_segments, bool input_finished)
 {
     AudioFrame *frame;
 
@@ -552,7 +618,7 @@ void Audio::Split(VadModel* vad_obj, vector<std::vector<int>>& vad_segments)
     frame = NULL;
 
     std::vector<float> pcm_data(speech_data, speech_data+sp_len);
-    vad_segments = vad_obj->Infer(pcm_data);
+    vad_segments = vad_obj->Infer(pcm_data, input_finished);
 }
 
 } // namespace funasr

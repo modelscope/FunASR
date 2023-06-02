@@ -11,9 +11,15 @@ extern "C" {
 		return mm;
 	}
 
-	_FUNASRAPI FUNASR_HANDLE  FsmnVadInit(std::map<std::string, std::string>& model_path, int thread_num, FSMN_VAD_MODE mode)
+	_FUNASRAPI FUNASR_HANDLE  FsmnVadInit(std::map<std::string, std::string>& model_path, int thread_num)
 	{
-		funasr::VadModel* mm = funasr::CreateVadModel(model_path, thread_num, mode);
+		funasr::VadModel* mm = funasr::CreateVadModel(model_path, thread_num);
+		return mm;
+	}
+
+	_FUNASRAPI FUNASR_HANDLE  FsmnVadOnlineInit(FUNASR_HANDLE fsmnvad_handle)
+	{
+		funasr::VadModel* mm = funasr::CreateVadModel(fsmnvad_handle);
 		return mm;
 	}
 
@@ -96,7 +102,7 @@ extern "C" {
 	}
 
 	// APIs for VAD Infer
-	_FUNASRAPI FUNASR_RESULT FsmnVadInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, FSMN_VAD_MODE mode, QM_CALLBACK fn_callback, int sampling_rate)
+	_FUNASRAPI FUNASR_RESULT FsmnVadInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, QM_CALLBACK fn_callback, bool input_finished, int sampling_rate)
 	{
 		funasr::VadModel* vad_obj = (funasr::VadModel*)handle;
 		if (!vad_obj)
@@ -110,13 +116,13 @@ extern "C" {
 		p_result->snippet_time = audio.GetTimeLen();
 		
 		vector<std::vector<int>> vad_segments;
-		audio.Split(vad_obj, vad_segments);
+		audio.Split(vad_obj, vad_segments, input_finished);
 		p_result->segments = new vector<std::vector<int>>(vad_segments);
 
 		return p_result;
 	}
 
-	_FUNASRAPI FUNASR_RESULT FsmnVadInfer(FUNASR_HANDLE handle, const char* sz_filename, FSMN_VAD_MODE mode, QM_CALLBACK fn_callback, int sampling_rate)
+	_FUNASRAPI FUNASR_RESULT FsmnVadInfer(FUNASR_HANDLE handle, const char* sz_filename, QM_CALLBACK fn_callback, int sampling_rate)
 	{
 		funasr::VadModel* vad_obj = (funasr::VadModel*)handle;
 		if (!vad_obj)
@@ -139,7 +145,7 @@ extern "C" {
 		p_result->snippet_time = audio.GetTimeLen();
 		
 		vector<std::vector<int>> vad_segments;
-		audio.Split(vad_obj, vad_segments);
+		audio.Split(vad_obj, vad_segments, true);
 		p_result->segments = new vector<std::vector<int>>(vad_segments);
 
 		return p_result;
