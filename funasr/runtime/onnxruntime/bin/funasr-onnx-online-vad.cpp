@@ -39,11 +39,11 @@ void GetValue(TCLAP::ValueArg<std::string>& value_arg, string key, std::map<std:
     }
 }
 
-void print_segs(vector<vector<int>>* vec) {
+void print_segs(vector<vector<int>>* vec, string &wav_id) {
     if((*vec).size() == 0){
         return;
     }    
-    string seg_out="[";
+    string seg_out=wav_id + ": [";
     for (int i = 0; i < vec->size(); i++) {
         vector<int> inner_vec = (*vec)[i];
         if(inner_vec.size() == 0){
@@ -104,9 +104,12 @@ int main(int argc, char *argv[])
 
     // read wav_path
     vector<string> wav_list;
+    vector<string> wav_ids;
+    string default_id = "wav_default_id";
     string wav_path_ = model_path.at(WAV_PATH);
     if(is_target_file(wav_path_, "wav") || is_target_file(wav_path_, "pcm")){
         wav_list.emplace_back(wav_path_);
+        wav_ids.emplace_back(default_id);
     }
     else if(is_target_file(wav_path_, "scp")){
         ifstream in(wav_path_);
@@ -120,7 +123,8 @@ int main(int argc, char *argv[])
             istringstream iss(line);
             string column1, column2;
             iss >> column1 >> column2;
-            wav_list.emplace_back(column2); 
+            wav_list.emplace_back(column2);
+            wav_ids.emplace_back(column1);
         }
         in.close();
     }else{
@@ -131,7 +135,9 @@ int main(int argc, char *argv[])
     FUNASR_HANDLE online_hanlde=FsmnVadOnlineInit(vad_hanlde);
     float snippet_time = 0.0f;
     long taking_micros = 0;
-    for(auto& wav_file : wav_list){
+    for (int i = 0; i < wav_list.size(); i++) {
+        auto& wav_file = wav_list[i];
+        auto& wav_id = wav_ids[i];
 
         int32_t sampling_rate_ = -1;
         funasr::Audio audio(1);
@@ -172,7 +178,7 @@ int main(int argc, char *argv[])
             if (result)
             {
                 vector<std::vector<int>>* vad_segments = FsmnVadGetResult(result, 0);
-                print_segs(vad_segments);
+                print_segs(vad_segments, wav_id);
                 snippet_time += FsmnVadGetRetSnippetTime(result);
                 FsmnVadFreeResult(result);
             }
