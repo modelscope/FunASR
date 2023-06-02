@@ -28,7 +28,7 @@ using namespace std;
 std::atomic<int> wav_index(0);
 std::mutex mtx;
 
-void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, 
+void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, vector<string> wav_ids,
             float* total_length, long* total_time, int core_id) {
     
     struct timeval start, end;
@@ -59,7 +59,7 @@ void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list,
 
         if(result){
             string msg = FunASRGetResult(result, 0);
-            LOG(INFO) << "Thread: " << this_thread::get_id() <<" Result: " << msg.c_str();
+            LOG(INFO) << "Thread: " << this_thread::get_id() << "," << wav_ids[i] << " : " << msg.c_str();
 
             float snippet_time = FunASRGetRetSnippetTime(result);
             n_total_length += snippet_time;
@@ -146,9 +146,12 @@ int main(int argc, char *argv[])
 
     // read wav_path
     vector<string> wav_list;
+    vector<string> wav_ids;
+    string default_id = "wav_default_id";
     string wav_path_ = model_path.at(WAV_PATH);
     if(is_target_file(wav_path_, "wav") || is_target_file(wav_path_, "pcm")){
         wav_list.emplace_back(wav_path_);
+        wav_ids.emplace_back(default_id);
     }
     else if(is_target_file(wav_path_, "scp")){
         ifstream in(wav_path_);
@@ -162,7 +165,8 @@ int main(int argc, char *argv[])
             istringstream iss(line);
             string column1, column2;
             iss >> column1 >> column2;
-            wav_list.emplace_back(column2); 
+            wav_list.emplace_back(column2);
+            wav_ids.emplace_back(column1);
         }
         in.close();
     }else{
@@ -178,7 +182,7 @@ int main(int argc, char *argv[])
     int rtf_threds = thread_num.getValue();
     for (int i = 0; i < rtf_threds; i++)
     {
-        threads.emplace_back(thread(runReg, asr_handle, wav_list, &total_length, &total_time, i));
+        threads.emplace_back(thread(runReg, asr_handle, wav_list, wav_ids, &total_length, &total_time, i));
     }
 
     for (auto& thread : threads)
