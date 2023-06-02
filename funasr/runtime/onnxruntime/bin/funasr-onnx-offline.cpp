@@ -88,9 +88,12 @@ int main(int argc, char** argv)
 
     // read wav_path
     vector<string> wav_list;
-    string wav_path_ = model_path.at(WAV_PATH); 
+    vector<string> wav_ids;
+    string default_id = "wav_default_id";
+    string wav_path_ = model_path.at(WAV_PATH);
     if(is_target_file(wav_path_, "wav") || is_target_file(wav_path_, "pcm")){
         wav_list.emplace_back(wav_path_);
+        wav_ids.emplace_back(default_id);
     }
     else if(is_target_file(wav_path_, "scp")){
         ifstream in(wav_path_);
@@ -104,7 +107,8 @@ int main(int argc, char** argv)
             istringstream iss(line);
             string column1, column2;
             iss >> column1 >> column2;
-            wav_list.emplace_back(column2); 
+            wav_list.emplace_back(column2);
+            wav_ids.emplace_back(column1);
         }
         in.close();
     }else{
@@ -114,7 +118,9 @@ int main(int argc, char** argv)
     
     float snippet_time = 0.0f;
     long taking_micros = 0;
-    for(auto& wav_file : wav_list){
+    for (int i = 0; i < wav_list.size(); i++) {
+        auto& wav_file = wav_list[i];
+        auto& wav_id = wav_ids[i];
         gettimeofday(&start, NULL);
         FUNASR_RESULT result=FunOfflineInfer(asr_hanlde, wav_file.c_str(), RASR_NONE, NULL, 16000);
         gettimeofday(&end, NULL);
@@ -124,7 +130,7 @@ int main(int argc, char** argv)
         if (result)
         {
             string msg = FunASRGetResult(result, 0);
-            LOG(INFO)<<"Result: "<<msg;
+            LOG(INFO)<< wav_id <<" : "<<msg;
             snippet_time += FunASRGetRetSnippetTime(result);
             FunASRFreeResult(result);
         }
