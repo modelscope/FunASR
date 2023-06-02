@@ -10,9 +10,9 @@
 - Model size: 90M
 
 ## Results (CER)
-- Decode config: conf/train_conformer_rnnt_unified.yaml
+- Decode config: conf/decode_rnnt_conformer_streaming.yaml
 
-|      testset   | CER(%)  |
+|      testset   |  WER(%) |
 |:--------------:|:-------:|
-|    test_clean  |  3.58   |
-|    test_other  |  9.27   |
+|    test_clean  |   3.58  |
+|    test_other  |   9.27  |
