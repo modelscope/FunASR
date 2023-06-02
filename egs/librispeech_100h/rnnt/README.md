@@ -8,7 +8,7 @@
 - Model size: 30.54M
 
 ## Results (CER)
-- Decode config: conf/decode_rnnt_transformer.yaml (ctc weight:0.5)
+- Decode config: conf/decode_rnnt_transformer.yaml
 
 |      testset   | WER(%)  |
 |:--------------:|:-------:|
