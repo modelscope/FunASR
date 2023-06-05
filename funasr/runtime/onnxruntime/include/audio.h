@@ -33,8 +33,9 @@ class AudioFrame {
 
 class Audio {
   private:
-    float *speech_data;
-    int16_t *speech_buff;
+    float *speech_data=nullptr;
+    int16_t *speech_buff=nullptr;
+    char* speech_char=nullptr;
     int speech_len;
     int speech_align_len;
     int offset;
@@ -47,18 +48,22 @@ class Audio {
     Audio(int data_type, int size);
     ~Audio();
     void Disp();
-    bool LoadWav(const char* filename, int32_t* sampling_rate);
     void WavResample(int32_t sampling_rate, const float *waveform, int32_t n);
     bool LoadWav(const char* buf, int n_len, int32_t* sampling_rate);
+    bool LoadWav(const char* filename, int32_t* sampling_rate);
+    bool LoadWav2Char(const char* filename, int32_t* sampling_rate);
     bool LoadPcmwav(const char* buf, int n_file_len, int32_t* sampling_rate);
     bool LoadPcmwav(const char* filename, int32_t* sampling_rate);
+    bool LoadPcmwav2Char(const char* filename, int32_t* sampling_rate);
     int FetchChunck(float *&dout, int len);
     int Fetch(float *&dout, int &len, int &flag);
     void Padding();
     void Split(OfflineStream* offline_streamj);
-    void Split(VadModel* vad_obj, vector<std::vector<int>>& vad_segments);
+    void Split(VadModel* vad_obj, vector<std::vector<int>>& vad_segments, bool input_finished=true);
     float GetTimeLen();
     int GetQueueSize() { return (int)frame_queue.size(); }
+    char* GetSpeechChar(){return speech_char;}
+    int GetSpeechLen(){return speech_len;}
 };
 
 } // namespace funasr

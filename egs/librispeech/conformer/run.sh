@@ -97,7 +97,7 @@ fi
 
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
     echo "stage 1: Feature and CMVN Generation"
-    utils/compute_cmvn.sh --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} ${feats_dir}/data/${train_set}
+    utils/compute_cmvn.sh --fbankdir ${feats_dir}/data/${train_set} --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} --config_file "$asr_config" --scale 1.0
 fi
 
 token_list=${feats_dir}/data/lang_char/${train_set}_${bpemode}${nbpe}_units.txt
@@ -150,7 +150,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
                 --data_dir ${feats_dir}/data \
                 --train_set ${train_set} \
                 --valid_set ${valid_set} \
-                --cmvn_file ${feats_dir}/data/${train_set}/cmvn/cmvn.mvn \
+                --cmvn_file ${feats_dir}/data/${train_set}/cmvn/am.mvn \
                 --speed_perturb ${speed_perturb} \
                 --resume true \
                 --output_dir ${exp_dir}/exp/${model_dir} \
@@ -201,7 +201,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
                 --njob ${njob} \
                 --gpuid_list ${gpuid_list} \
                 --data_path_and_name_and_type "${_data}/${scp},speech,${type}" \
-                --cmvn_file ${feats_dir}/data/${train_set}/cmvn/cmvn.mvn \
+                --cmvn_file ${feats_dir}/data/${train_set}/cmvn/am.mvn \
                 --key_file "${_logdir}"/keys.JOB.scp \
                 --asr_train_config "${asr_exp}"/config.yaml \
                 --asr_model_file "${asr_exp}"/"${inference_asr_model}" \

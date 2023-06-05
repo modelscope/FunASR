@@ -1153,10 +1153,10 @@ if ! "${skip_train}"; then
         mkdir -p ${sa_asr_exp}/log
         INIT_FILE=${sa_asr_exp}/ddp_init
         
-        if [ ! -f "exp/damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch/sv.pb" ]; then
+        if [ ! -f "exp/damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch/sv.pth" ]; then
             # download xvector extractor model file
             python local/download_xvector_model.py exp
-            log "Successfully download the pretrained xvector extractor to exp/damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch/sv.pb"
+            log "Successfully download the pretrained xvector extractor to exp/damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch/sv.pth"
         fi
         
         if [ -f $INIT_FILE ];then
@@ -1195,8 +1195,8 @@ if ! "${skip_train}"; then
                     --init_param "${asr_exp}/valid.acc.ave.pb:decoder.decoders.3:decoder.decoder4.2" \
                     --init_param "${asr_exp}/valid.acc.ave.pb:decoder.decoders.4:decoder.decoder4.3" \
                     --init_param "${asr_exp}/valid.acc.ave.pb:decoder.decoders.5:decoder.decoder4.4" \
-                    --init_param "exp/damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch/sv.pb:encoder:spk_encoder"   \
-                    --init_param "exp/damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch/sv.pb:decoder:spk_encoder:decoder.output_dense"   \
+                    --init_param "exp/damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch/sv.pth:encoder:spk_encoder"   \
+                    --init_param "exp/damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch/sv.pth:decoder:spk_encoder:decoder.output_dense"   \
                     --valid_data_path_and_name_and_type "${_asr_valid_dir}/${_scp},speech,${_type}" \
                     --valid_data_path_and_name_and_type "${_asr_valid_dir}/text,text,text" \
                     --valid_data_path_and_name_and_type "${_asr_valid_dir}/oracle_profile_nopadding.scp,profile,npy" \

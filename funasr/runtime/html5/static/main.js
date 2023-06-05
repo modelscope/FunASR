@@ -30,16 +30,49 @@ btnStop.disabled = true;
  
 
  
-var rec_text=""
+var rec_text="";
+var offline_text="";
 var info_div = document.getElementById('info_div');
- 
+
+//var now_ipaddress=window.location.href;
+//now_ipaddress=now_ipaddress.replace("https://","wss://");
+//now_ipaddress=now_ipaddress.replace("static/index.html","");
+//document.getElementById('wssip').value=now_ipaddress;
+
+function getAsrMode(){
+
+            var item = null;
+            var obj = document.getElementsByName("asr_mode");
+            for (var i = 0; i < obj.length; i++) { //遍历Radio 
+                if (obj[i].checked) {
+                    item = obj[i].value;  
+					break;
+                }
+		    
+
+           }
+		   console.log("asr mode"+item);
+		   return item;
+}
+		   
 
 // 语音识别结果; 对jsonMsg数据解析,将识别结果附加到编辑框中
 function getJsonMessage( jsonMsg ) {
+	//console.log(jsonMsg);
 	console.log( "message: " + JSON.parse(jsonMsg.data)['text'] );
 	var rectxt=""+JSON.parse(jsonMsg.data)['text'];
+	var asrmodel=JSON.parse(jsonMsg.data)['mode'];
+	if(asrmodel=="2pass-offline")
+	{
+		offline_text=offline_text+rectxt.replace(/ +/g,"");
+		rec_text=offline_text;
+	}
+	else
+	{
+		rec_text=rec_text+rectxt.replace(/ +/g,"");
+	}
 	var varArea=document.getElementById('varArea');
-	rec_text=rec_text+rectxt.replace(/ +/g,"");
+	
 	varArea.value=rec_text;
 	 
  
@@ -59,23 +92,30 @@ function getConnState( connState ) {
 	} else if ( connState === 2 ) {
 		stop();
 		console.log( 'connecttion error' );
-		setTimeout(function(){btnStart.disabled = true;info_div.innerHTML='connecttion error';}, 4000 );
+		 
+		alert("连接地址"+document.getElementById('wssip').value+"失败,请检查asr地址和端口，并确保h5服务和asr服务在同一个域内。或换个浏览器试试。");
+		btnStart.disabled = true;
+		info_div.innerHTML='请点击开始';
 	}
 }
 
 
 // 识别启动、停止、清空操作
 function start() {
-	info_div.innerHTML="正在连接asr服务器，请等待...";
+	
 	// 清除显示
 	clear();
 	//控件状态更新
  	    
-	isRec = true;
-	btnStart.disabled = true;
-	btnStop.disabled = false;
+
 	//启动连接
-	wsconnecter.wsStart();
+	var ret=wsconnecter.wsStart();
+	if(ret==1){
+		isRec = true;
+		btnStart.disabled = true;
+		btnStop.disabled = false;
+	    info_div.innerHTML="正在连接asr服务器，请等待...";
+	}
 }
 
  
@@ -86,7 +126,9 @@ function stop() {
 			"wav_name":  "h5",
 			"is_speaking":  false,
 			"chunk_interval":10,
+			"mode":getAsrMode(),
 		};
+		console.log(request);
 		if(sampleBuf.length>0){
 		wsconnecter.wsSend(sampleBuf,false);
 		console.log("sampleBuf.length"+sampleBuf.length);
@@ -103,7 +145,9 @@ function stop() {
 	isRec = false;
     info_div.innerHTML="请等候...";
 	btnStop.disabled = true;
-	setTimeout(function(){btnStart.disabled = false;info_div.innerHTML="请点击开始";}, 3000 );
+	setTimeout(function(){
+		console.log("call stop ws!");
+		wsconnecter.wsStop();btnStart.disabled = false;info_div.innerHTML="请点击开始";}, 3000 );
 	rec.stop(function(blob,duration){
   
 		console.log(blob);
@@ -138,6 +182,7 @@ function clear() {
  
 	varArea.value="";
     rec_text="";
+	offline_text="";
  
 }
 

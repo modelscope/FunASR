@@ -226,7 +226,6 @@ class E2EVadModel(nn.Module):
                                                self.vad_opts.frame_in_ms)
         self.encoder = encoder
         # init variables
-        self.is_final = False
         self.data_buf_start_frame = 0
         self.frm_cnt = 0
         self.latest_confirmed_speech_frame = 0
@@ -257,7 +256,6 @@ class E2EVadModel(nn.Module):
         self.frontend = frontend
 
     def AllResetDetection(self):
-        self.is_final = False
         self.data_buf_start_frame = 0
         self.frm_cnt = 0
         self.latest_confirmed_speech_frame = 0
@@ -473,6 +471,8 @@ class E2EVadModel(nn.Module):
     def forward(self, feats: torch.Tensor, waveform: torch.tensor, in_cache: Dict[str, torch.Tensor] = dict(),
                 is_final: bool = False
                 ) -> Tuple[List[List[List[int]]], Dict[str, torch.Tensor]]:
+        if not in_cache:
+            self.AllResetDetection()
         self.waveform = waveform  # compute decibel for each frame
         self.ComputeDecibel()
         self.ComputeScores(feats, in_cache)
@@ -501,6 +501,8 @@ class E2EVadModel(nn.Module):
     def forward_online(self, feats: torch.Tensor, waveform: torch.tensor, in_cache: Dict[str, torch.Tensor] = dict(),
                        is_final: bool = False, max_end_sil: int = 800
                        ) -> Tuple[List[List[List[int]]], Dict[str, torch.Tensor]]:
+        if not in_cache:
+            self.AllResetDetection()
         self.max_end_sil_frame_cnt_thresh = max_end_sil - self.vad_opts.speech_to_sil_time_thres
         self.waveform = waveform  # compute decibel for each frame
 

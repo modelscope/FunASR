@@ -128,7 +128,7 @@ string CTTransformer::AddPunc(const char* sz_input)
                 NewPuncOut.assign(NewPunctuation.begin(), NewPunctuation.end() - 1);
                 NewPuncOut.push_back(PERIOD_INDEX);
             }
-            else if (NewString[NewString.size() - 1] == m_tokenizer.Id2Punc(PERIOD_INDEX) && NewString[NewString.size() - 1] == m_tokenizer.Id2Punc(QUESTION_INDEX))
+            else if (NewString[NewString.size() - 1] != m_tokenizer.Id2Punc(PERIOD_INDEX) && NewString[NewString.size() - 1] != m_tokenizer.Id2Punc(QUESTION_INDEX))
             {
                 NewSentenceOut = NewString;
                 NewSentenceOut.push_back(m_tokenizer.Id2Punc(PERIOD_INDEX));
