@@ -77,12 +77,13 @@ class LargeDataLoader(AbsIterFactory):
             bpe_tokenizer = SentencepiecesTokenizer(args.bpemodel)
         self.dataset_conf = args.dataset_conf
         self.frontend_conf = args.frontend_conf
+        self.speed_perturb = args.speed_perturb if hasattr(args, "speed_perturb") else None 
         logging.info("dataloader config: {}".format(self.dataset_conf))
         batch_mode = self.dataset_conf.get("batch_mode", "padding")
         data_list = args.train_data_file if mode == "train" else args.valid_data_file
         self.dataset = Dataset(data_list, symbol_table, seg_dict, punc_dict, bpe_tokenizer,
                                self.dataset_conf, self.frontend_conf,
-                               speed_perturb=args.speed_perturb if mode == "train" else None,
+                               speed_perturb=self.speed_perturb if mode == "train" else None,
                                mode=mode, batch_mode=batch_mode)
 
     def build_iter(self, epoch, shuffle=True):
