@@ -13,10 +13,10 @@ train_cmd=utils/run.pl
 infer_cmd=utils/run.pl
 
 # general configuration
-feats_dir="../DATA" #feature output dictionary
-exp_dir="."
-lang=zh
-token_type=char
+feats_dir="" #feature output dictionary
+exp_dir=""
+lang=en
+token_type=bpe
 type=sound
 scp=wav.scp
 speed_perturb="0.9 1.0 1.1"
@@ -28,8 +28,12 @@ feats_dim=80
 nj=64
 
 # data
-raw_data=../raw_data
-data_url=www.openslr.org/resources/33
+raw_data=
+data_url=www.openslr.org/resources/12
+
+# bpe model
+nbpe=5000
+bpemode=unigram
 
 # exp tag
 tag="exp1"
@@ -42,9 +46,9 @@ set -e
 set -u
 set -o pipefail
 
-train_set=train
+train_set=train_960
 valid_set=dev
-test_sets="dev test"
+test_sets="test_clean test_other dev_clean dev_other"
 
 asr_config=conf/train_conformer_rnnt_unified.yaml
 model_dir="baseline_$(basename "${asr_config}" .yaml)_${lang}_${token_type}_${tag}"
@@ -64,22 +68,29 @@ else
     _ngpu=0
 fi
 
+
 if [ ${stage} -le -1 ] && [ ${stop_stage} -ge -1 ]; then
     echo "stage -1: Data Download"
-    local/download_and_untar.sh ${raw_data} ${data_url} data_aishell
-    local/download_and_untar.sh ${raw_data} ${data_url} resource_aishell
+    for part in dev-clean test-clean dev-other test-other train-clean-100 train-clean-360 train-other-500; do
+        local/download_and_untar.sh ${raw_data} ${data_url} ${part}
+    done
 fi
 
 if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     echo "stage 0: Data preparation"
     # Data preparation
-    local/aishell_data_prep.sh ${raw_data}/data_aishell/wav ${raw_data}/data_aishell/transcript ${feats_dir}
-    for x in train dev test; do
-        cp ${feats_dir}/data/${x}/text ${feats_dir}/data/${x}/text.org
-        paste -d " " <(cut -f 1 -d" " ${feats_dir}/data/${x}/text.org) <(cut -f 2- -d" " ${feats_dir}/data/${x}/text.org | tr -d " ") \
-            > ${feats_dir}/data/${x}/text
-        utils/text2token.py -n 1 -s 1 ${feats_dir}/data/${x}/text > ${feats_dir}/data/${x}/text.org
-        mv ${feats_dir}/data/${x}/text.org ${feats_dir}/data/${x}/text
+    for x in dev-clean dev-other test-clean test-other train-clean-100 train-clean-360 train-other-500; do
+        local/data_prep.sh ${raw_data}/LibriSpeech/${x} ${feats_dir}/data/${x//-/_}
+    done
+    mkdir $feats_dir/data/$valid_set
+    dev_sets="dev_clean dev_other"
+    for file in wav.scp text; do
+        ( for f in $dev_sets; do cat $feats_dir/data/$f/$file; done ) | sort -k1 > $feats_dir/data/$valid_set/$file || exit 1;
+    done
+    mkdir $feats_dir/data/$train_set
+    train_sets="train_clean_100 train_clean_360 train_other_500"
+    for file in wav.scp text; do
+        ( for f in $train_sets; do cat $feats_dir/data/$f/$file; done ) | sort -k1 > $feats_dir/data/$train_set/$file || exit 1;
     done
 fi
 
@@ -88,18 +99,19 @@ if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
     utils/compute_cmvn.sh --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} ${feats_dir}/data/${train_set}
 fi
 
-token_list=${feats_dir}/data/${lang}_token_list/char/tokens.txt
+token_list=${feats_dir}/data/lang_char/${train_set}_${bpemode}${nbpe}_units.txt
+bpemodel=${feats_dir}/data/lang_char/${train_set}_${bpemode}${nbpe}
 echo "dictionary: ${token_list}"
 if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
-    echo "stage 2: Dictionary Preparation"
-    mkdir -p ${feats_dir}/data/${lang}_token_list/char/
-
-    echo "make a dictionary"
+    ### Task dependent. You have to check non-linguistic symbols used in the corpus.
+    echo "stage 2: Dictionary and Json Data Preparation"
+    mkdir -p ${feats_dir}/data/lang_char/
     echo "<blank>" > ${token_list}
     echo "<s>" >> ${token_list}
     echo "</s>" >> ${token_list}
-    utils/text2token.py -s 1 -n 1 --space "" ${feats_dir}/data/$train_set/text | cut -f 2- -d" " | tr " " "\n" \
-        | sort | uniq | grep -a -v -e '^\s*$' | awk '{print $0}' >> ${token_list}
+    cut -f 2- -d" " ${feats_dir}/data/${train_set}/text > ${feats_dir}/data/lang_char/input.txt
+    local/spm_train.py --input=${feats_dir}/data/lang_char/input.txt --vocab_size=${nbpe} --model_type=${bpemode} --model_prefix=${bpemodel} --input_sentence_size=100000000
+    local/spm_encode.py --model=${bpemodel}.model --output_format=piece < ${feats_dir}/data/lang_char/input.txt | tr ' ' '\n' | sort | uniq | awk '{print $0}' >> ${token_list}
     echo "<unk>" >> ${token_list}
 fi
 
@@ -118,7 +130,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
     INIT_FILE=./ddp_init
     if [ -f $INIT_FILE ];then
         rm -f $INIT_FILE
-    fi 
+    fi
     init_method=file://$(readlink -f $INIT_FILE)
     echo "$0: init method is $init_method"
     for ((i = 0; i < $gpu_num; ++i)); do
@@ -130,12 +142,13 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
                 --task_name asr \
                 --gpu_id $gpu_id \
                 --use_preprocessor true \
-                --token_type char \
+                --split_with_space false \
+                --bpemodel ${bpemodel}.model \
+                --token_type $token_type \
                 --token_list $token_list \
                 --data_dir ${feats_dir}/data \
                 --train_set ${train_set} \
                 --valid_set ${valid_set} \
-                --data_file_names "wav.scp,text" \
                 --cmvn_file ${feats_dir}/data/${train_set}/cmvn/cmvn.mvn \
                 --speed_perturb ${speed_perturb} \
                 --resume true \
@@ -143,6 +156,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
                 --config $asr_config \
                 --ngpu $gpu_num \
                 --num_worker_count $count \
+                --multiprocessing_distributed true \
                 --dist_init_method $init_method \
                 --dist_world_size $world_size \
                 --dist_rank $rank \
@@ -191,7 +205,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
                 --asr_train_config "${asr_exp}"/config.yaml \
                 --asr_model_file "${asr_exp}"/"${inference_asr_model}" \
                 --output_dir "${_logdir}"/output.JOB \
-                --mode rnnt \
+                --mode asr \
                 ${_opts}
 
         for f in token token_int score text; do
@@ -201,9 +215,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
                 done | sort -k1 >"${_dir}/${f}"
             fi
         done
-        python utils/proce_text.py ${_dir}/text ${_dir}/text.proc
-        python utils/proce_text.py ${_data}/text ${_data}/text.proc
-        python utils/compute_wer.py ${_data}/text.proc ${_dir}/text.proc ${_dir}/text.cer
+        python utils/compute_wer.py ${_data}/text ${_dir}/text ${_dir}/text.cer
         tail -n 3 ${_dir}/text.cer > ${_dir}/text.cer.txt
         cat ${_dir}/text.cer.txt
     done

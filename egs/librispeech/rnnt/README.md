@@ -12,7 +12,7 @@
 ## Results (CER)
 - Decode config: conf/decode_rnnt_conformer_streaming.yaml
 
-|   testset   |  CER(%) |
-|:-----------:|:-------:|
-|     dev     |  5.43   |
-|    test     |  6.04   |
+|      testset   |  WER(%) |
+|:--------------:|:-------:|
+|    test_clean  |   3.58  |
+|    test_other  |   9.27  |
