@@ -54,7 +54,7 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ];then
             --audio_in ${output_dir}/split/wav.$JOB.scp \
             --output_dir ${output_dir}/output.$JOB \
             --batch_size ${batch_size} \
-            --gpuid ${gpuid}
+            --gpuid ${gpuid} \
             --mode "paraformer_fake_streaming"
         }&
     done
