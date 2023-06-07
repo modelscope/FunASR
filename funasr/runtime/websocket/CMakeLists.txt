@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 
 project(FunASRWebscoket) 
 
+set(CMAKE_CXX_STANDARD 14 CACHE STRING "The C++ version to be used.")
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 
