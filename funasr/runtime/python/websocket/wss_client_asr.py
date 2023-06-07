@@ -194,7 +194,7 @@ async def message(id):
                 text_print = text_print[-args.words_max_print:]
                 os.system('clear')
                 print("\rpid"+str(id)+": "+text_print)
-            elif meg["mode"] == "online":
+            elif meg["mode"] == "offline":
                 text_print += "{}".format(text)
                 text_print = text_print[-args.words_max_print:]
                 os.system('clear')
