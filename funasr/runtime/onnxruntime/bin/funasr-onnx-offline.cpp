@@ -9,73 +9,16 @@
 #include <win_func.h>
 #endif
 
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <map>
 #include <glog/logging.h>
 #include "funasrruntime.h"
 #include "tclap/CmdLine.h"
 #include "com-define.h"
 
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <vector>
-#include <atomic>
-#include <mutex>
-#include <thread>
-#include <map>
-
 using namespace std;
-
-std::atomic<int> wav_index(0);
-std::mutex mtx;
-
-void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, 
-            float* total_length, long* total_time, int core_id) {
-    
-    struct timeval start, end;
-    long seconds = 0;
-    float n_total_length = 0.0f;
-    long n_total_time = 0;
-    
-    // warm up
-    for (size_t i = 0; i < 1; i++)
-    {
-        FUNASR_RESULT result=FunOfflineInfer(asr_handle, wav_list[0].c_str(), RASR_NONE, NULL, 16000);
-    }
-
-    while (true) {
-        // 使用原子变量获取索引并递增
-        int i = wav_index.fetch_add(1);
-        if (i >= wav_list.size()) {
-            break;
-        }
-
-        gettimeofday(&start, NULL);
-        FUNASR_RESULT result=FunOfflineInfer(asr_handle, wav_list[i].c_str(), RASR_NONE, NULL, 16000);
-
-        gettimeofday(&end, NULL);
-        seconds = (end.tv_sec - start.tv_sec);
-        long taking_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
-        n_total_time += taking_micros;
-
-        if(result){
-            string msg = FunASRGetResult(result, 0);
-            LOG(INFO) << "Thread: " << this_thread::get_id() <<" Result: " << msg.c_str();
-
-            float snippet_time = FunASRGetRetSnippetTime(result);
-            n_total_length += snippet_time;
-            FunASRFreeResult(result);
-        }else{
-            LOG(ERROR) << ("No return data!\n");
-        }
-    }
-    {
-        lock_guard<mutex> guard(mtx);
-        *total_length += n_total_length;
-        if(*total_time < n_total_time){
-            *total_time = n_total_time;
-        }
-    }
-}
 
 bool is_target_file(const std::string& filename, const std::string target) {
     std::size_t pos = filename.find_last_of(".");
@@ -94,13 +37,13 @@ void GetValue(TCLAP::ValueArg<std::string>& value_arg, string key, std::map<std:
     }
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char** argv)
 {
     google::InitGoogleLogging(argv[0]);
     FLAGS_logtostderr = true;
 
-    TCLAP::CmdLine cmd("funasr-onnx-offline-rtf", ' ', "1.0");
-    TCLAP::ValueArg<std::string>    model_dir("", MODEL_DIR, "the model path, which contains model.onnx, config.yaml, am.mvn", true, "", "string");
+    TCLAP::CmdLine cmd("funasr-onnx-offline", ' ', "1.0");
+    TCLAP::ValueArg<std::string>    model_dir("", MODEL_DIR, "the asr model path, which contains model.onnx, config.yaml, am.mvn", true, "", "string");
     TCLAP::ValueArg<std::string>    quantize("", QUANTIZE, "false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir", false, "false", "string");
     TCLAP::ValueArg<std::string>    vad_dir("", VAD_DIR, "the vad model path, which contains model.onnx, vad.yaml, vad.mvn", false, "", "string");
     TCLAP::ValueArg<std::string>    vad_quant("", VAD_QUANT, "false (Default), load the model of model.onnx in vad_dir. If set true, load the model of model_quant.onnx in vad_dir", false, "false", "string");
@@ -108,7 +51,6 @@ int main(int argc, char *argv[])
     TCLAP::ValueArg<std::string>    punc_quant("", PUNC_QUANT, "false (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "false", "string");
 
     TCLAP::ValueArg<std::string> wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", true, "", "string");
-    TCLAP::ValueArg<std::int32_t> thread_num("", THREAD_NUM, "multi-thread num for rtf", true, 0, "int32_t");
 
     cmd.add(model_dir);
     cmd.add(quantize);
@@ -117,7 +59,6 @@ int main(int argc, char *argv[])
     cmd.add(punc_dir);
     cmd.add(punc_quant);
     cmd.add(wav_path);
-    cmd.add(thread_num);
     cmd.parse(argc, argv);
 
     std::map<std::string, std::string> model_path;
@@ -131,9 +72,10 @@ int main(int argc, char *argv[])
 
     struct timeval start, end;
     gettimeofday(&start, NULL);
-    FUNASR_HANDLE asr_handle=FunOfflineInit(model_path, 1);
+    int thread_num = 1;
+    FUNASR_HANDLE asr_hanlde=FunOfflineInit(model_path, thread_num);
 
-    if (!asr_handle)
+    if (!asr_hanlde)
     {
         LOG(ERROR) << "FunASR init failed";
         exit(-1);
@@ -146,9 +88,12 @@ int main(int argc, char *argv[])
 
     // read wav_path
     vector<string> wav_list;
+    vector<string> wav_ids;
+    string default_id = "wav_default_id";
     string wav_path_ = model_path.at(WAV_PATH);
     if(is_target_file(wav_path_, "wav") || is_target_file(wav_path_, "pcm")){
         wav_list.emplace_back(wav_path_);
+        wav_ids.emplace_back(default_id);
     }
     else if(is_target_file(wav_path_, "scp")){
         ifstream in(wav_path_);
@@ -162,35 +107,43 @@ int main(int argc, char *argv[])
             istringstream iss(line);
             string column1, column2;
             iss >> column1 >> column2;
-            wav_list.emplace_back(column2); 
+            wav_list.emplace_back(column2);
+            wav_ids.emplace_back(column1);
         }
         in.close();
     }else{
         LOG(ERROR)<<"Please check the wav extension!";
         exit(-1);
     }
+    
+    float snippet_time = 0.0f;
+    long taking_micros = 0;
+    for (int i = 0; i < wav_list.size(); i++) {
+        auto& wav_file = wav_list[i];
+        auto& wav_id = wav_ids[i];
+        gettimeofday(&start, NULL);
+        FUNASR_RESULT result=FunOfflineInfer(asr_hanlde, wav_file.c_str(), RASR_NONE, NULL, 16000);
+        gettimeofday(&end, NULL);
+        seconds = (end.tv_sec - start.tv_sec);
+        taking_micros += ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
 
-    // 多线程测试
-    float total_length = 0.0f;
-    long total_time = 0;
-    std::vector<std::thread> threads;
-
-    int rtf_threds = thread_num.getValue();
-    for (int i = 0; i < rtf_threds; i++)
-    {
-        threads.emplace_back(thread(runReg, asr_handle, wav_list, &total_length, &total_time, i));
+        if (result)
+        {
+            string msg = FunASRGetResult(result, 0);
+            LOG(INFO)<< wav_id <<" : "<<msg;
+            snippet_time += FunASRGetRetSnippetTime(result);
+            FunASRFreeResult(result);
+        }
+        else
+        {
+            LOG(ERROR) << ("No return data!\n");
+        }
     }
-
-    for (auto& thread : threads)
-    {
-        thread.join();
-    }
-
-    LOG(INFO) << "total_time_wav " << (long)(total_length * 1000) << " ms";
-    LOG(INFO) << "total_time_comput " << total_time / 1000 << " ms";
-    LOG(INFO) << "total_rtf " << (double)total_time/ (total_length*1000000);
-    LOG(INFO) << "speedup " << 1.0/((double)total_time/ (total_length*1000000));
-
-    FunOfflineUninit(asr_handle);
+ 
+    LOG(INFO) << "Audio length: " << (double)snippet_time << " s";
+    LOG(INFO) << "Model inference takes: " << (double)taking_micros / 1000000 <<" s";
+    LOG(INFO) << "Model inference RTF: " << (double)taking_micros/ (snippet_time*1000000);
+    FunOfflineUninit(asr_hanlde);
     return 0;
 }
+

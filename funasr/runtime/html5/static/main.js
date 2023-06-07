@@ -145,7 +145,9 @@ function stop() {
 	isRec = false;
     info_div.innerHTML="请等候...";
 	btnStop.disabled = true;
-	setTimeout(function(){btnStart.disabled = false;info_div.innerHTML="请点击开始";}, 3000 );
+	setTimeout(function(){
+		console.log("call stop ws!");
+		wsconnecter.wsStop();btnStart.disabled = false;info_div.innerHTML="请点击开始";}, 3000 );
 	rec.stop(function(blob,duration){
   
 		console.log(blob);

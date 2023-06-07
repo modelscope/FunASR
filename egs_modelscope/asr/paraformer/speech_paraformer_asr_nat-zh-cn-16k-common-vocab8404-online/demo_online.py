@@ -15,7 +15,7 @@ inference_pipeline = pipeline(
     task=Tasks.auto_speech_recognition,
     model='damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8404-online',
     model_revision='v1.0.6',
-    update_model='v1.0.6',
+    update_model=False,
     mode="paraformer_streaming"
 )
 

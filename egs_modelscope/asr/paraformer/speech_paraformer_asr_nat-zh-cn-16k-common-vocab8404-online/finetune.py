@@ -15,6 +15,7 @@ def modelscope_finetune(params):
     kwargs = dict(
         model=params.model,
         model_revision='v1.0.6',
+        update_model=False,
         data_dir=ds_dict,
         dataset_type=params.dataset_type,
         work_dir=params.output_dir,
