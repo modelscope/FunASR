@@ -103,7 +103,7 @@ string CTTransformer::AddPunc(const char* sz_input)
         vector<string> WordWithPunc;
         for (int i = 0; i < InputStr.size(); i++)
         {
-            #if (i > 0 && !(InputStr[i][0] & 0x80) && (i + 1) <InputStr.size() && !(InputStr[i+1][0] & 0x80))// �м��Ӣ�ģ�
+            // if (i > 0 && !(InputStr[i][0] & 0x80) && (i + 1) <InputStr.size() && !(InputStr[i+1][0] & 0x80))// �м��Ӣ�ģ�
             if (i > 0 && !(InputStr[i-1][0] & 0x80) && !(InputStr[i][0] & 0x80))
             {
                 InputStr[i] = " " + InputStr[i];
