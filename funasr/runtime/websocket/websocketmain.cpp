@@ -102,6 +102,7 @@ int main(int argc, char* argv[]) {
     int s_model_thread_num = model_thread_num.getValue();
 
     asio::io_context io_decoder;  // context for decoding
+    asio::io_context io_server;   // context for server
 
     std::vector<std::thread> decoder_threads;
 
@@ -115,7 +116,8 @@ int main(int argc, char* argv[]) {
 
     auto conn_guard = asio::make_work_guard(
         io_decoder);  // make sure threads can wait in the queue
-
+    auto server_guard = asio::make_work_guard(
+        io_server);  // make sure threads can wait in the queue
     // create threads pool
     for (int32_t i = 0; i < s_decoder_thread_num; ++i) {
       decoder_threads.emplace_back([&io_decoder]() { io_decoder.run(); });
@@ -124,7 +126,7 @@ int main(int argc, char* argv[]) {
     server server_;  // server for websocket
     wss_server wss_server_;
     if (is_ssl) {
-      wss_server_.init_asio();  // init asio
+      wss_server_.init_asio(&io_server);  // init asio
       wss_server_.set_reuse_addr(
           true);  // reuse address as we create multiple threads
 
@@ -136,7 +138,7 @@ int main(int argc, char* argv[]) {
       websocket_srv.initAsr(model_path, s_model_thread_num);  // init asr model
 
     } else {
-      server_.init_asio();  // init asio
+      server_.init_asio(&io_server);  // init asio
       server_.set_reuse_addr(
           true);  // reuse address as we create multiple threads
 
@@ -152,29 +154,14 @@ int main(int argc, char* argv[]) {
               << std::endl;
 
     // Start the ASIO network io_service run loop
-    if (s_io_thread_num == 1) {
-      if (is_ssl) {
-        wss_server_.run();
-      } else {
-        server_.run();
-      }
-    } else {
-      typedef websocketpp::lib::shared_ptr<websocketpp::lib::thread> thread_ptr;
-      std::vector<thread_ptr> ts;
-      // create threads for io network
-      for (size_t i = 0; i < s_io_thread_num; i++) {
-        if (is_ssl) {
-          ts.push_back(websocketpp::lib::make_shared<websocketpp::lib::thread>(
-              &wss_server::run, &wss_server_));
-        } else {
-          ts.push_back(websocketpp::lib::make_shared<websocketpp::lib::thread>(
-              &server::run, &server_));
-        }
-      }
-      // wait for theads
-      for (size_t i = 0; i < s_io_thread_num; i++) {
-        ts[i]->join();
-      }
+    std::vector<std::thread> ts;
+    // create threads for io network
+    for (size_t i = 0; i < s_io_thread_num; i++) {
+      ts.emplace_back([&io_server]() { io_server.run(); });
+    }
+    // wait for theads
+    for (size_t i = 0; i < s_io_thread_num; i++) {
+      ts[i].join();
     }
 
     // wait for theads
