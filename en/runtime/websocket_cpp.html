@@ -187,8 +187,11 @@ tar -zxvf onnxruntime-linux-x64-1.14.0.tgz
 <div class="section" id="build-runtime">
 <h3>Build runtime<a class="headerlink" href="#build-runtime" title="Permalink to this headline"></a></h3>
 <p>required openssl lib</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1">#install openssl lib first</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1">#install openssl lib for ubuntu </span>
 apt-get install libssl-dev
+<span class="c1">#install openssl lib for centos</span>
+yum install openssl-devel
+
 
 git clone https://github.com/alibaba-damo-academy/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> funasr/runtime/websocket
 mkdir build <span class="o">&amp;&amp;</span> <span class="nb">cd</span> build
