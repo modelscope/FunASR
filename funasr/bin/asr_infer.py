@@ -493,9 +493,9 @@ class Speech2TextParaformer:
             else:
                 if pre_token_length[i] == 0:
                     yseq = torch.tensor(
-                        [self.asr_model.sos] + [self.asr_model.eos], device=yseq.device
+                        [self.asr_model.sos] + [self.asr_model.eos], device=pre_acoustic_embeds.device
                     )
-                    score = torch.tensor(0.0, device=yseq.device)
+                    score = torch.tensor(0.0, device=pre_acoustic_embeds.device)
                 else:
                     yseq = am_scores.argmax(dim=-1)
                     score = am_scores.max(dim=-1)[0]
