@@ -204,7 +204,7 @@ make
 <div class="section" id="run-the-websocket-server">
 <h2>Run the websocket server<a class="headerlink" href="#run-the-websocket-server" title="Permalink to this headline"></a></h2>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> bin
-   ./websocketmain  <span class="o">[</span>--model_thread_num &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--decoder_thread_num &lt;int&gt;<span class="o">]</span>
+   ./funasr-ws-server  <span class="o">[</span>--model_thread_num &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--decoder_thread_num &lt;int&gt;<span class="o">]</span>
                     <span class="o">[</span>--io_thread_num &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--port &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--listen_ip
                     &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-quant &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-dir &lt;string&gt;<span class="o">]</span>
                     <span class="o">[</span>--vad-quant &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--vad-dir &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--quantize
@@ -241,19 +241,38 @@ Where:
    If use vad, please add: --vad-dir &lt;string&gt;
    If use punc, please add: --punc-dir &lt;string&gt;
 example:
-   websocketmain --model-dir /FunASR/funasr/runtime/onnxruntime/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
+   funasr-ws-server --model-dir /FunASR/funasr/runtime/onnxruntime/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
 </pre></div>
 </div>
 </div>
 <div class="section" id="run-websocket-client-test">
 <h2>Run websocket client test<a class="headerlink" href="#run-websocket-client-test" title="Permalink to this headline"></a></h2>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>Usage: ./websocketclient server_ip port wav_path threads_num is_ssl
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-ws-client  --server-ip &lt;string&gt;
+                    --port &lt;string&gt;
+                    --wav-path &lt;string&gt;
+                    <span class="o">[</span>--thread-num &lt;int&gt;<span class="o">]</span> 
+                    <span class="o">[</span>--is-ssl &lt;int&gt;<span class="o">]</span>  <span class="o">[</span>--<span class="o">]</span>
+                    <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
 
-is_ssl is <span class="m">1</span> means use wss connection, or use ws connection
+Where:
+   --server-ip &lt;string&gt;
+     <span class="o">(</span>required<span class="o">)</span>  server-ip
+
+   --port &lt;string&gt;
+     <span class="o">(</span>required<span class="o">)</span>  port
+
+   --wav-path &lt;string&gt;
+     <span class="o">(</span>required<span class="o">)</span>  the input could be: wav_path, e.g.: asr_example.wav<span class="p">;</span>
+     pcm_path, e.g.: asr_example.pcm<span class="p">;</span> wav.scp, kaldi style wav list <span class="o">(</span>wav_id <span class="se">\t</span> wav_path<span class="o">)</span>
+
+   --thread-num &lt;int&gt;
+     thread-num
+
+   --is-ssl &lt;int&gt;
+     is-ssl is <span class="m">1</span> means use wss connection, or use ws connection
 
 example:
-
-websocketclient <span class="m">127</span>.0.0.1 <span class="m">8889</span> funasr/runtime/websocket/test.pcm.wav <span class="m">64</span> <span class="m">0</span>
+./funasr-ws-client --server-ip <span class="m">127</span>.0.0.1 --port <span class="m">8889</span> --wav-path test.wav --thread-num <span class="m">1</span> --is-ssl <span class="m">0</span>
 
 result json, example like:
 <span class="o">{</span><span class="s2">&quot;mode&quot;</span>:<span class="s2">&quot;offline&quot;</span>,<span class="s2">&quot;text&quot;</span>:<span class="s2">&quot;欢迎大家来体验达摩院推出的语音识别模型&quot;</span>,<span class="s2">&quot;wav_name&quot;</span>:<span class="s2">&quot;wav2&quot;</span><span class="o">}</span>
