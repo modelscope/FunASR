@@ -10,7 +10,7 @@
 //                    <string>] [--punc-quant <string>] [--punc-dir <string>]
 //                    [--vad-quant <string>] [--vad-dir <string>] [--quantize
 //                    <string>] --model-dir <string> [--] [--version] [-h]
-#include "websocketsrv.h"
+#include "websocket-server.h"
 
 using namespace std;
 void GetValue(TCLAP::ValueArg<std::string>& value_arg, string key,
