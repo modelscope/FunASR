@@ -296,13 +296,14 @@ class E2EVadModel(nn.Module):
         self.sil_frame = 0
         self.frame_probs = []
 
-        assert self.output_data_buf[-1].contain_seg_end_point == True
-        drop_frames = int(self.output_data_buf[-1].end_ms / self.vad_opts.frame_in_ms)
-        real_drop_frames = drop_frames - self.last_drop_frames
-        self.last_drop_frames = drop_frames
-        self.data_buf_all = self.data_buf_all[real_drop_frames * int(self.vad_opts.frame_in_ms * self.vad_opts.sample_rate / 1000):]
-        self.decibel = self.decibel[real_drop_frames:]
-        self.scores = self.scores[:, real_drop_frames:, :]
+        if self.output_data_buf:
+            assert self.output_data_buf[-1].contain_seg_end_point == True
+            drop_frames = int(self.output_data_buf[-1].end_ms / self.vad_opts.frame_in_ms)
+            real_drop_frames = drop_frames - self.last_drop_frames
+            self.last_drop_frames = drop_frames
+            self.data_buf_all = self.data_buf_all[real_drop_frames * int(self.vad_opts.frame_in_ms * self.vad_opts.sample_rate / 1000):]
+            self.decibel = self.decibel[real_drop_frames:]
+            self.scores = self.scores[:, real_drop_frames:, :]
 
     def ComputeDecibel(self) -> None:
         frame_sample_length = int(self.vad_opts.frame_length_ms * self.vad_opts.sample_rate / 1000)

@@ -33,7 +33,7 @@ parser.add_argument("--ngpu",
                     help="0 for cpu, 1 for gpu")
 parser.add_argument("--ncpu",
                     type=int,
-                    default=1,
+                    default=4,
                     help="cpu cores")
 parser.add_argument("--certfile",
                     type=str,
