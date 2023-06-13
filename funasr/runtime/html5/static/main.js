@@ -66,16 +66,18 @@ function getJsonMessage( jsonMsg ) {
 	var asrmodel=JSON.parse(jsonMsg.data)['mode'];
 	if(asrmodel=="2pass-offline")
 	{
-		offline_text=offline_text+rectxt.replace(/ +/g,"");
+		offline_text=offline_text+rectxt; //.replace(/ +/g,"");
 		rec_text=offline_text;
 	}
 	else
 	{
-		rec_text=rec_text+rectxt.replace(/ +/g,"");
+		rec_text=rec_text+rectxt; //.replace(/ +/g,"");
 	}
 	var varArea=document.getElementById('varArea');
 	
 	varArea.value=rec_text;
+	console.log( "offline_text: " + asrmodel+","+offline_text);
+	console.log( "rec_text: " + rec_text);
 	 
  
 }
