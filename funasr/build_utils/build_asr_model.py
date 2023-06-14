@@ -241,7 +241,7 @@ def build_asr_model(args):
         vocab_size = None
 
     # frontend
-    if args.input_size is None:
+    if hasattr(args, "input_size") and args.input_size is None:
         frontend_class = frontend_choices.get_class(args.frontend)
         if args.frontend == 'wav_frontend':
             frontend = frontend_class(cmvn_file=args.cmvn_file, **args.frontend_conf)
