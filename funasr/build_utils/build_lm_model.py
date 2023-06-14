@@ -51,6 +51,7 @@ def build_lm_model(args):
     lm_class = lm_choices.get_class(args.lm)
     lm = lm_class(vocab_size=vocab_size, **args.lm_conf)
 
+    args.model = args.model if hasattr(args, "model") else "lm"
     model_class = model_choices.get_class(args.model)
     model = model_class(lm=lm, vocab_size=vocab_size, **args.model_conf)
 
