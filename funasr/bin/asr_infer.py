@@ -83,7 +83,7 @@ class Speech2Text:
         # 1. Build ASR model
         scorers = {}
         asr_model, asr_train_args = build_model_from_file(
-            asr_train_config, asr_model_file, cmvn_file, device, mode="asr"
+            asr_train_config, asr_model_file, cmvn_file, device
         )
         frontend = None
         if asr_train_args.frontend is not None and asr_train_args.frontend_conf is not None:

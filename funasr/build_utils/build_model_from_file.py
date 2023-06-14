@@ -17,6 +17,7 @@ def build_model_from_file(
         model_file: Union[Path, str] = None,
         cmvn_file: Union[Path, str] = None,
         device: str = "cpu",
+        task_name: str = "asr",
         mode: str = "paraformer",
 ):
     """Build model from the files.
@@ -44,6 +45,7 @@ def build_model_from_file(
     if cmvn_file is not None:
         args["cmvn_file"] = cmvn_file
     args = argparse.Namespace(**args)
+    args.task_name = task_name
     model = build_model(args)
     if not isinstance(model, FunASRModel):
         raise RuntimeError(
