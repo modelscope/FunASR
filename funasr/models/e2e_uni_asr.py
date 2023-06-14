@@ -50,9 +50,7 @@ class UniASR(FunASRModel):
         frontend: Optional[AbsFrontend],
         specaug: Optional[AbsSpecAug],
         normalize: Optional[AbsNormalize],
-        preencoder: Optional[AbsPreEncoder],
         encoder: AbsEncoder,
-        postencoder: Optional[AbsPostEncoder],
         decoder: AbsDecoder,
         ctc: CTC,
         ctc_weight: float = 0.5,
@@ -80,6 +78,8 @@ class UniASR(FunASRModel):
         loss_weight_model1: float = 0.5,
         enable_maas_finetune: bool = False,
         freeze_encoder2: bool = False,
+        preencoder: Optional[AbsPreEncoder] = None,
+        postencoder: Optional[AbsPostEncoder] = None,
         encoder1_encoder2_joint_training: bool = True,
     ):
         assert check_argument_types()
