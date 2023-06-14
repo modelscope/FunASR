@@ -24,7 +24,10 @@ def build_streaming_iterator(
     assert check_argument_types()
 
     # preprocess
-    preprocess_fn = build_preprocess(preprocess_args, train)
+    if preprocess_args is not None:
+        preprocess_fn = build_preprocess(preprocess_args, train)
+    else:
+        preprocess_fn = None
 
     # collate
     if task_name in ["punc", "lm"]:
