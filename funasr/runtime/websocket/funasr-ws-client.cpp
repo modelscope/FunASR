@@ -132,8 +132,14 @@ class WebsocketClient {
             }
             send_wav_data(wav_list[i], wav_ids[i]);
         }
+        WaitABit();
+		m_client.close(m_hdl,websocketpp::close::status::going_away, "", ec);
+        if (ec) {
+                std::cout << "> Error closing connection " << ec.message() << std::endl;
+            }
         //send_wav_data();
         asio_thread.join();
+
     }
 
     // The open handler will signal that we are ready to start sending data
