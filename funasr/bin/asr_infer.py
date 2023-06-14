@@ -316,7 +316,7 @@ class Speech2TextParaformer:
         # 2. Build Language model
         if lm_train_config is not None:
             lm, lm_train_args = build_model_from_file(
-                lm_train_config, lm_file, device
+                lm_train_config, lm_file, None, device, task_name="lm"
             )
             scorers["lm"] = lm.lm
 
@@ -636,7 +636,7 @@ class Speech2TextParaformerOnline:
         # 2. Build Language model
         if lm_train_config is not None:
             lm, lm_train_args = build_model_from_file(
-                lm_train_config, lm_file, device
+                lm_train_config, lm_file, None, device, task_name="lm"
             )
             scorers["lm"] = lm.lm
 
@@ -1120,7 +1120,7 @@ class Speech2TextMFCCA:
         # 2. Build Language model
         if lm_train_config is not None:
             lm, lm_train_args = build_model_from_file(
-                lm_train_config, lm_file, device
+                lm_train_config, lm_file, None, device, task_name="lm"
             )
             lm.to(device)
             scorers["lm"] = lm.lm
@@ -1343,7 +1343,7 @@ class Speech2TextTransducer:
 
         if lm_train_config is not None:
             lm, lm_train_args = build_model_from_file(
-                lm_train_config, lm_file, device
+                lm_train_config, lm_file, None, device, task_name="lm"
             )
             lm_scorer = lm.lm
         else:
@@ -1659,7 +1659,7 @@ class Speech2TextSAASR:
         # 2. Build Language model
         if lm_train_config is not None:
             lm, lm_train_args = build_model_from_file(
-                lm_train_config, lm_file, None, device
+                lm_train_config, lm_file, None, device, task_name="lm"
             )
             scorers["lm"] = lm.lm
 
