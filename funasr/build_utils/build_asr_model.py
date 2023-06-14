@@ -227,10 +227,14 @@ class_choices_list = [
 
 def build_asr_model(args):
     # token_list
-    if args.token_list is not None:
-        with open(args.token_list) as f:
+    if isinstance(args.token_list, str):
+        with open(args.token_list, encoding="utf-8") as f:
             token_list = [line.rstrip() for line in f]
         args.token_list = list(token_list)
+        vocab_size = len(token_list)
+        logging.info(f"Vocabulary size: {vocab_size}")
+    elif isinstance(args.token_list, (tuple, list)):
+        token_list = list(args.token_list)
         vocab_size = len(token_list)
         logging.info(f"Vocabulary size: {vocab_size}")
     else:
