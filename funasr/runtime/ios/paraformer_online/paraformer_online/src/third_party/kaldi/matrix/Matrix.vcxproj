@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;PARANOID;HAVE_MKL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>mkl/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+    </ClCompile>
+    <Link>
+      <TargetMachine>MachineX86</TargetMachine>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <AdditionalLibraryDirectories>c:\Program Files\Intel\MKL\10.2.5.035\ia32\lib;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;libguide.lib;libguide40.lib;libiomp5md.lib;libiomp5mt.lib;mkl_blacs_intelmpi.lib;mkl_blacs_mpich2.lib;mkl_blas95.lib;mkl_cdft_core.lib;mkl_core.lib;mkl_intel_c.lib;mkl_intel_s.lib;mkl_intel_thread.lib;mkl_lapack95.lib;mkl_pgi_thread.lib;mkl_scalapack_core.lib;mkl_sequential.lib;mkl_solver.lib;mkl_solver_sequential.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;PARANOID;HAVE_MKL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>mkl/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <TargetMachine>MachineX86</TargetMachine>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>c:\Program Files\Intel\MKL\ia32\lib;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;mkl_c.lib;mkl_p4.lib;mkl_lapack.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="KaldiCommon.cc" />
+    <ClCompile Include="MathAux.cc" />
+    <ClCompile Include="KaldiMatrix.cc" />
+    <ClCompile Include="PackedMatrix.cc" />
+    <ClCompile Include="SpMatrix.cc" />
+    <ClCompile Include="TestMatrix.cc" />
+    <ClCompile Include="TpMatrix.cc" />
+    <ClCompile Include="KaldiVector.cc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="atlas_include\cblas.h" />
+    <ClInclude Include="atlas_include\clapack.h" />
+    <ClInclude Include="clapack-3.1.1.1\include\blaswrap.h" />
+    <ClInclude Include="clapack-3.1.1.1\include\cblas.h" />
+    <ClInclude Include="clapack-3.1.1.1\include\clapack.h" />
+    <ClInclude Include="clapack-3.1.1.1\include\f2c.h" />
+    <ClInclude Include="KaldiError.h" />
+    <ClInclude Include="KaldiBlas.h" />
+    <ClInclude Include="KaldiCommon.h" />
+    <ClInclude Include="kaldimatrix\kaldimatrix\stdafx.h" />
+    <ClInclude Include="kaldimatrix\kaldimatrix\targetver.h" />
+    <ClInclude Include="MathAux.h" />
+    <ClInclude Include="KaldiMatrix.h" />
+    <ClInclude Include="MatrixInclude.h" />
+    <ClInclude Include="mkl\i_malloc.h" />
+    <ClInclude Include="mkl\mkl.h" />
+    <ClInclude Include="mkl\mkl_blas.h" />
+    <ClInclude Include="mkl\mkl_cblas.h" />
+    <ClInclude Include="mkl\mkl_cdft.h" />
+    <ClInclude Include="mkl\mkl_dfti.h" />
+    <ClInclude Include="mkl\mkl_dss.h" />
+    <ClInclude Include="mkl\mkl_dss_pardiso.h" />
+    <ClInclude Include="mkl\mkl_gmp.h" />
+    <ClInclude Include="mkl\mkl_lapack.h" />
+    <ClInclude Include="mkl\mkl_pardiso.h" />
+    <ClInclude Include="mkl\mkl_poisson.h" />
+    <ClInclude Include="mkl\mkl_rci.h" />
+    <ClInclude Include="mkl\mkl_scalapack.h" />
+    <ClInclude Include="mkl\mkl_service.h" />
+    <ClInclude Include="mkl\mkl_solver.h" />
+    <ClInclude Include="mkl\mkl_spblas.h" />
+    <ClInclude Include="mkl\mkl_trans.h" />
+    <ClInclude Include="mkl\mkl_trig_transforms.h" />
+    <ClInclude Include="mkl\mkl_types.h" />
+    <ClInclude Include="mkl\mkl_vml.h" />
+    <ClInclude Include="mkl\mkl_vml_defines.h" />
+    <ClInclude Include="mkl\mkl_vml_functions.h" />
+    <ClInclude Include="mkl\mkl_vml_types.h" />
+    <ClInclude Include="mkl\mkl_vsl.h" />
+    <ClInclude Include="mkl\mkl_vsl_defines.h" />
+    <ClInclude Include="mkl\mkl_vsl_functions.h" />
+    <ClInclude Include="mkl\mkl_vsl_types.h" />
+    <ClInclude Include="PackedMatrix.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="SpMatrix.h" />
+    <ClInclude Include="TpMatrix.h" />
+    <ClInclude Include="Types.h" />
+    <ClInclude Include="KaldiVector.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="KaldiMatrix.tcc" />
+    <None Include="PackedMatrix.tcc" />
+    <None Include="SpMatrix.tcc" />
+    <None Include="TpMatrix.tcc" />
+    <None Include="KaldiVector.tcc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
