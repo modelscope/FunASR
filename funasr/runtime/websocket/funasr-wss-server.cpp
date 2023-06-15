@@ -63,10 +63,12 @@ int main(int argc, char* argv[]) {
     TCLAP::ValueArg<int> model_thread_num("", "model_thread_num",
                                           "model_thread_num", false, 1, "int");
 
-    TCLAP::ValueArg<std::string> certfile("", "certfile", "certfile", false, "../../../ssl_key/server.crt",
-                                          "string");
-    TCLAP::ValueArg<std::string> keyfile("", "keyfile", "keyfile", false, "../../../ssl_key/server.key",
-                                         "string");
+    TCLAP::ValueArg<std::string> certfile("", "certfile", 
+        "default: ../../../ssl_key/server.crt, path of certficate for WSS connection. if it is empty, it will be in WS mode.", 
+        false, "../../../ssl_key/server.crt", "string");
+    TCLAP::ValueArg<std::string> keyfile("", "keyfile", 
+        "default: ../../../ssl_key/server.key, path of keyfile for WSS connection", 
+        false, "../../../ssl_key/server.key", "string");
 
     cmd.add(certfile);
     cmd.add(keyfile);
