@@ -5,7 +5,7 @@
 /* 2022-2023 by zhaomingwork */
 
 // io server
-// Usage:websocketmain  [--model_thread_num <int>] [--decoder_thread_num <int>]
+// Usage:funasr-ws-server  [--model_thread_num <int>] [--decoder_thread_num <int>]
 //                    [--io_thread_num <int>] [--port <int>] [--listen_ip
 //                    <string>] [--punc-quant <string>] [--punc-dir <string>]
 //                    [--vad-quant <string>] [--vad-dir <string>] [--quantize
@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
     google::InitGoogleLogging(argv[0]);
     FLAGS_logtostderr = true;
 
-    TCLAP::CmdLine cmd("websocketmain", ' ', "1.0");
+    TCLAP::CmdLine cmd("funasr-ws-server", ' ', "1.0");
     TCLAP::ValueArg<std::string> model_dir(
         "", MODEL_DIR,
         "the asr model path, which contains model.onnx, config.yaml, am.mvn",

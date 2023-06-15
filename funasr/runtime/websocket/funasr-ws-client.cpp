@@ -5,7 +5,14 @@
 /* 2022-2023 by zhaomingwork */
 
 // client for websocket, support multiple threads
-// Usage: websocketclient server_ip port wav_path threads_num
+// ./funasr-ws-client  --server-ip <string>
+//                     --port <string>
+//                     --wav-path <string>
+//                     [--thread-num <int>] 
+//                     [--is-ssl <int>]  [--]
+//                     [--version] [-h]
+// example:
+// ./funasr-ws-client --server-ip 127.0.0.1 --port 8889 --wav-path test.wav --thread-num 1 --is-ssl 0
 
 #define ASIO_STANDALONE 1
 #include <websocketpp/client.hpp>
@@ -55,7 +62,7 @@ context_ptr OnTlsInit(websocketpp::connection_hdl) {
             asio::ssl::context::no_sslv3 | asio::ssl::context::single_dh_use);
 
     } catch (std::exception& e) {
-        std::cout << e.what() << std::endl;
+        LOG(ERROR) << e.what();
     }
     return ctx;
 }
@@ -99,7 +106,12 @@ class WebsocketClient {
         const std::string& payload = msg->get_payload();
         switch (msg->get_opcode()) {
             case websocketpp::frame::opcode::text:
-                std::cout << "on_message = " << payload << std::endl;
+                LOG(INFO)<<"on_message = " << payload;
+				websocketpp::lib::error_code ec;
+		        m_client.close(m_hdl, websocketpp::close::status::going_away, "", ec);
+                if (ec){
+                        LOG(ERROR)<< "Error closing connection " << ec.message();
+                }
         }
     }
 
@@ -132,12 +144,8 @@ class WebsocketClient {
             }
             send_wav_data(wav_list[i], wav_ids[i]);
         }
-        WaitABit();
-		m_client.close(m_hdl,websocketpp::close::status::going_away, "", ec);
-        if (ec) {
-                std::cout << "> Error closing connection " << ec.message() << std::endl;
-            }
-        //send_wav_data();
+        WaitABit(); 
+
         asio_thread.join();
 
     }
@@ -206,7 +214,7 @@ class WebsocketClient {
                 }
             }
             if (wait) {
-                std::cout << "wait.." << m_open << std::endl;
+                LOG(INFO) << "wait.." << m_open;
                 WaitABit();
                 continue;
             }
@@ -236,7 +244,7 @@ class WebsocketClient {
             // send data to server
             m_client.send(m_hdl, iArray, len * sizeof(short),
                           websocketpp::frame::opcode::binary, ec);
-            std::cout << "sended data len=" << len * sizeof(short) << std::endl;
+            LOG(INFO) << "sended data len=" << len * sizeof(short);
             // The most likely error that we will get is that the connection is
             // not in the right state. Usually this means we tried to send a
             // message to a connection that was closed or in the process of
@@ -247,14 +255,13 @@ class WebsocketClient {
                                         "Send Error: " + ec.message());
               break;
             }
-
-            WaitABit();
+            // WaitABit();
         }
         nlohmann::json jsonresult;
         jsonresult["is_speaking"] = false;
         m_client.send(m_hdl, jsonresult.dump(), websocketpp::frame::opcode::text,
                       ec);
-        WaitABit();
+        // WaitABit();
     }
     websocketpp::client<T> m_client;
 
