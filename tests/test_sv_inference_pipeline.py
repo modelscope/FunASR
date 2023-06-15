@@ -37,12 +37,13 @@ class TestXVectorInferencePipelines(unittest.TestCase):
         same_cos = np.sum(enroll * same) / (np.linalg.norm(enroll) * np.linalg.norm(same))
         same_cos = max(same_cos - sv_threshold, 0.0) / (1.0 - sv_threshold) * 100.0
         logger.info("Similarity: {}".format(same_cos))
+        assert int(same_cos) == 85
 
         # 对不同的说话人计算余弦相似度
         diff_cos = np.sum(enroll * different) / (np.linalg.norm(enroll) * np.linalg.norm(different))
         diff_cos = max(diff_cos - sv_threshold, 0.0) / (1.0 - sv_threshold) * 100.0
         logger.info("Similarity: {}".format(diff_cos))
-
+        assert int(diff_cos) == 0.0
 
 if __name__ == '__main__':
     unittest.main()
