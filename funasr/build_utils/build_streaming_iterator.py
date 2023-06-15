@@ -5,7 +5,7 @@ from typeguard import check_argument_types
 from funasr.datasets.iterable_dataset import IterableESPnetDataset
 from funasr.datasets.small_datasets.collate_fn import CommonCollateFn
 from funasr.datasets.small_datasets.preprocessor import build_preprocess
-from funasr.build_utils.build_model_from_file import build_model_from_file
+
 
 def build_streaming_iterator(
         task_name,
@@ -20,7 +20,7 @@ def build_streaming_iterator(
         use_collate_fn: bool = True,
         preprocess_fn=None,
         ngpu: int = 0,
-        train: bool=False,
+        train: bool = False,
 ) -> DataLoader:
     """Build DataLoader using iterable dataset"""
     assert check_argument_types()
