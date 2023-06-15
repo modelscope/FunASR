@@ -52,8 +52,12 @@ sudo docker images
 
 ## Run Docker
 ```shell
-sudo docker run -itd --name funasr <image-name>:<tag> bash
-sudo docker exec -it funasr bash
+# cpu
+sudo docker run -itd --name funasr -v <local_dir:dir_in_docker> <image-name>:<tag> /bin/bash
+# gpu
+sudo docker run -itd --gpus all --name funasr -v <local_dir:dir_in_docker> <image-name>:<tag> /bin/bash
+
+sudo docker exec -it funasr /bin/bash
 ```
 
 ## Stop Docker

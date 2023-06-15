@@ -28,7 +28,11 @@ function WebSocketConnectMethod( config ) { //定义socket连接方法类
 		if ( 'WebSocket' in window ) {
 			speechSokt = new WebSocket( Uri ); // 定义socket连接对象
 			speechSokt.onopen = function(e){onOpen(e);}; // 定义响应函数
-			speechSokt.onclose = function(e){onClose(e);};
+			speechSokt.onclose = function(e){
+			    console.log("onclose ws!");
+			    speechSokt.close();
+				onClose(e);
+				};
 			speechSokt.onmessage = function(e){onMessage(e);};
 			speechSokt.onerror = function(e){onError(e);};
 			return 1;
@@ -42,6 +46,7 @@ function WebSocketConnectMethod( config ) { //定义socket连接方法类
 	// 定义停止与发送函数
 	this.wsStop = function () {
 		if(speechSokt != undefined) {
+			console.log("stop ws!");
 			speechSokt.close();
 		}
 	};
@@ -69,7 +74,9 @@ function WebSocketConnectMethod( config ) { //定义socket连接方法类
 			"wav_name":  "h5",
 			"is_speaking":  true,
 			"chunk_interval":10,
+			"mode":getAsrMode(),
 		};
+		console.log(request);
 		speechSokt.send( JSON.stringify(request) );
 		console.log("连接成功");
 		stateHandle(0);

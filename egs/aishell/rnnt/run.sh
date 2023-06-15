@@ -3,8 +3,8 @@
 . ./path.sh || exit 1;
 
 # machines configuration
-CUDA_VISIBLE_DEVICES="0,1,2,3"
-gpu_num=4
+CUDA_VISIBLE_DEVICES="0,1,2,3,4,5,6,7"
+gpu_num=8
 count=1
 gpu_inference=true  # Whether to perform gpu decoding, set false for cpu decoding
 # for gpu decoding, inference_nj=ngpu*njob; for cpu decoding, inference_nj=njob
@@ -13,25 +13,23 @@ train_cmd=utils/run.pl
 infer_cmd=utils/run.pl
 
 # general configuration
-feats_dir= #feature output dictionary
-exp_dir=
+feats_dir="../DATA" #feature output dictionary
+exp_dir="."
 lang=zh
-dumpdir=dump/fbank
-feats_type=fbank
 token_type=char
-scp=feats.scp
-type=kaldi_ark
+type=sound
+scp=wav.scp
+speed_perturb="0.9 1.0 1.1"
 stage=0
-stop_stage=4
+stop_stage=5
 
 # feature configuration
 feats_dim=80
-sample_frequency=16000
-nj=32
-speed_perturb="0.9,1.0,1.1"
+nj=64
 
 # data
-data_aishell=
+raw_data=../raw_data
+data_url=www.openslr.org/resources/33
 
 # exp tag
 tag="exp1"
@@ -49,10 +47,10 @@ valid_set=dev
 test_sets="dev test"
 
 asr_config=conf/train_conformer_rnnt_unified.yaml
-model_dir="baseline_$(basename "${asr_config}" .yaml)_${feats_type}_${lang}_${token_type}_${tag}"
+model_dir="baseline_$(basename "${asr_config}" .yaml)_${lang}_${token_type}_${tag}"
 
 inference_config=conf/decode_rnnt_conformer_streaming.yaml
-inference_asr_model=valid.cer_transducer_chunk.ave_5best.pth
+inference_asr_model=valid.cer_transducer_chunk.ave_10best.pb
 
 # you can set gpu num for decoding here
 gpuid_list=$CUDA_VISIBLE_DEVICES  # set gpus for decoding, the same as training stage by default
@@ -66,10 +64,16 @@ else
     _ngpu=0
 fi
 
+if [ ${stage} -le -1 ] && [ ${stop_stage} -ge -1 ]; then
+    echo "stage -1: Data Download"
+    local/download_and_untar.sh ${raw_data} ${data_url} data_aishell
+    local/download_and_untar.sh ${raw_data} ${data_url} resource_aishell
+fi
+
 if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     echo "stage 0: Data preparation"
     # Data preparation
-    local/aishell_data_prep.sh ${data_aishell}/data_aishell/wav ${data_aishell}/data_aishell/transcript ${feats_dir}
+    local/aishell_data_prep.sh ${raw_data}/data_aishell/wav ${raw_data}/data_aishell/transcript ${feats_dir}
     for x in train dev test; do
         cp ${feats_dir}/data/${x}/text ${feats_dir}/data/${x}/text.org
         paste -d " " <(cut -f 1 -d" " ${feats_dir}/data/${x}/text.org) <(cut -f 2- -d" " ${feats_dir}/data/${x}/text.org | tr -d " ") \
@@ -79,46 +83,9 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     done
 fi
 
-feat_train_dir=${feats_dir}/${dumpdir}/train; mkdir -p ${feat_train_dir}
-feat_dev_dir=${feats_dir}/${dumpdir}/dev; mkdir -p ${feat_dev_dir}
-feat_test_dir=${feats_dir}/${dumpdir}/test; mkdir -p ${feat_test_dir}
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
-    echo "stage 1: Feature Generation"
-    # compute fbank features
-    fbankdir=${feats_dir}/fbank
-    utils/compute_fbank.sh --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} --sample_frequency ${sample_frequency} --speed_perturb ${speed_perturb} \
-        ${feats_dir}/data/train ${exp_dir}/exp/make_fbank/train ${fbankdir}/train
-    utils/fix_data_feat.sh ${fbankdir}/train
-    utils/compute_fbank.sh --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} --sample_frequency ${sample_frequency} \
-        ${feats_dir}/data/dev ${exp_dir}/exp/make_fbank/dev ${fbankdir}/dev
-    utils/fix_data_feat.sh ${fbankdir}/dev
-    utils/compute_fbank.sh --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} --sample_frequency ${sample_frequency} \
-        ${feats_dir}/data/test ${exp_dir}/exp/make_fbank/test ${fbankdir}/test
-    utils/fix_data_feat.sh ${fbankdir}/test
-     
-    # compute global cmvn
-    utils/compute_cmvn.sh --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} \
-        ${fbankdir}/train ${exp_dir}/exp/make_fbank/train
-
-    # apply cmvn 
-    utils/apply_cmvn.sh --cmd "$train_cmd" --nj $nj \
-        ${fbankdir}/train ${fbankdir}/train/cmvn.json ${exp_dir}/exp/make_fbank/train ${feat_train_dir}
-    utils/apply_cmvn.sh --cmd "$train_cmd" --nj $nj \
-        ${fbankdir}/dev ${fbankdir}/train/cmvn.json ${exp_dir}/exp/make_fbank/dev ${feat_dev_dir}
-    utils/apply_cmvn.sh --cmd "$train_cmd" --nj $nj \
-        ${fbankdir}/test ${fbankdir}/train/cmvn.json ${exp_dir}/exp/make_fbank/test ${feat_test_dir}
-    
-    cp ${fbankdir}/train/text ${fbankdir}/train/speech_shape ${fbankdir}/train/text_shape ${feat_train_dir}
-    cp ${fbankdir}/dev/text ${fbankdir}/dev/speech_shape ${fbankdir}/dev/text_shape ${feat_dev_dir}
-    cp ${fbankdir}/test/text ${fbankdir}/test/speech_shape ${fbankdir}/test/text_shape ${feat_test_dir}
-
-    utils/fix_data_feat.sh ${feat_train_dir}
-    utils/fix_data_feat.sh ${feat_dev_dir}
-    utils/fix_data_feat.sh ${feat_test_dir}
-
-    #generate ark list 
-    utils/gen_ark_list.sh --cmd "$train_cmd" --nj $nj ${feat_train_dir} ${fbankdir}/train ${feat_train_dir}
-    utils/gen_ark_list.sh --cmd "$train_cmd" --nj $nj ${feat_dev_dir} ${fbankdir}/dev ${feat_dev_dir}
+    echo "stage 1: Feature and CMVN Generation"
+    utils/compute_cmvn.sh --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} ${feats_dir}/data/${train_set}
 fi
 
 token_list=${feats_dir}/data/${lang}_token_list/char/tokens.txt
@@ -126,31 +93,29 @@ echo "dictionary: ${token_list}"
 if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     echo "stage 2: Dictionary Preparation"
     mkdir -p ${feats_dir}/data/${lang}_token_list/char/
-   
+
     echo "make a dictionary"
     echo "<blank>" > ${token_list}
     echo "<s>" >> ${token_list}
     echo "</s>" >> ${token_list}
-    utils/text2token.py -s 1 -n 1 --space "" ${feats_dir}/data/train/text | cut -f 2- -d" " | tr " " "\n" \
+    utils/text2token.py -s 1 -n 1 --space "" ${feats_dir}/data/$train_set/text | cut -f 2- -d" " | tr " " "\n" \
         | sort | uniq | grep -a -v -e '^\s*$' | awk '{print $0}' >> ${token_list}
-    num_token=$(cat ${token_list} | wc -l)
     echo "<unk>" >> ${token_list}
-    vocab_size=$(cat ${token_list} | wc -l)
-    awk -v v=,${vocab_size} '{print $0v}' ${feat_train_dir}/text_shape > ${feat_train_dir}/text_shape.char
-    awk -v v=,${vocab_size} '{print $0v}' ${feat_dev_dir}/text_shape > ${feat_dev_dir}/text_shape.char
-    mkdir -p ${feats_dir}/asr_stats_fbank_zh_char/train 
-    mkdir -p ${feats_dir}/asr_stats_fbank_zh_char/dev
-    cp ${feat_train_dir}/speech_shape ${feat_train_dir}/text_shape ${feat_train_dir}/text_shape.char ${feats_dir}/asr_stats_fbank_zh_char/train
-    cp ${feat_dev_dir}/speech_shape ${feat_dev_dir}/text_shape ${feat_dev_dir}/text_shape.char ${feats_dir}/asr_stats_fbank_zh_char/dev
 fi
 
-# Training Stage
+# LM Training Stage
 world_size=$gpu_num  # run on one machine
 if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
-    echo "stage 3: Training"
+    echo "stage 3: LM Training"
+fi
+
+# ASR Training Stage
+world_size=$gpu_num  # run on one machine
+if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
+    echo "stage 4: ASR Training"
     mkdir -p ${exp_dir}/exp/${model_dir}
     mkdir -p ${exp_dir}/exp/${model_dir}/log
-    INIT_FILE=${exp_dir}/exp/${model_dir}/ddp_init
+    INIT_FILE=./ddp_init
     if [ -f $INIT_FILE ];then
         rm -f $INIT_FILE
     fi 
@@ -161,26 +126,23 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
             rank=$i
             local_rank=$i
             gpu_id=$(echo $CUDA_VISIBLE_DEVICES | cut -d',' -f$[$i+1])
-            asr_train_transducer.py \
+            train.py \
+                --task_name asr \
                 --gpu_id $gpu_id \
                 --use_preprocessor true \
                 --token_type char \
                 --token_list $token_list \
-                --train_data_path_and_name_and_type ${feats_dir}/${dumpdir}/${train_set}/${scp},speech,${type} \
-                --train_data_path_and_name_and_type ${feats_dir}/${dumpdir}/${train_set}/text,text,text \
-                --train_shape_file ${feats_dir}/asr_stats_fbank_zh_char/${train_set}/speech_shape \
-                --train_shape_file ${feats_dir}/asr_stats_fbank_zh_char/${train_set}/text_shape.char \
-                --valid_data_path_and_name_and_type ${feats_dir}/${dumpdir}/${valid_set}/${scp},speech,${type} \
-                --valid_data_path_and_name_and_type ${feats_dir}/${dumpdir}/${valid_set}/text,text,text \
-                --valid_shape_file ${feats_dir}/asr_stats_fbank_zh_char/${valid_set}/speech_shape \
-                --valid_shape_file ${feats_dir}/asr_stats_fbank_zh_char/${valid_set}/text_shape.char  \
+                --data_dir ${feats_dir}/data \
+                --train_set ${train_set} \
+                --valid_set ${valid_set} \
+                --data_file_names "wav.scp,text" \
+                --cmvn_file ${feats_dir}/data/${train_set}/cmvn/cmvn.mvn \
+                --speed_perturb ${speed_perturb} \
                 --resume true \
                 --output_dir ${exp_dir}/exp/${model_dir} \
                 --config $asr_config \
-                --input_size $feats_dim \
                 --ngpu $gpu_num \
                 --num_worker_count $count \
-                --multiprocessing_distributed true \
                 --dist_init_method $init_method \
                 --dist_world_size $world_size \
                 --dist_rank $rank \
@@ -191,8 +153,8 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
 fi
 
 # Testing Stage
-if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
-    echo "stage 4: Inference"
+if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
+    echo "stage 5: Inference"
     for dset in ${test_sets}; do
         asr_exp=${exp_dir}/exp/${model_dir}
         inference_tag="$(basename "${inference_config}" .yaml)"
@@ -203,7 +165,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
             exit 0
         fi
         mkdir -p "${_logdir}"
-        _data="${feats_dir}/${dumpdir}/${dset}"
+        _data="${feats_dir}/data/${dset}"
         key_file=${_data}/${scp}
         num_scp_file="$(<${key_file} wc -l)"
         _nj=$([ $inference_nj -le $num_scp_file ] && echo "$inference_nj" || echo "$num_scp_file")
@@ -224,6 +186,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
                 --njob ${njob} \
                 --gpuid_list ${gpuid_list} \
                 --data_path_and_name_and_type "${_data}/${scp},speech,${type}" \
+                --cmvn_file ${feats_dir}/data/${train_set}/cmvn/cmvn.mvn \
                 --key_file "${_logdir}"/keys.JOB.scp \
                 --asr_train_config "${asr_exp}"/config.yaml \
                 --asr_model_file "${asr_exp}"/"${inference_asr_model}" \

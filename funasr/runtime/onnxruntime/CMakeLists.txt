@@ -7,6 +7,8 @@ option(ENABLE_GLOG "Whether to build glog" ON)
 # set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD 14 CACHE STRING "The C++ version to be used.")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
 
 include(TestBigEndian)
 test_big_endian(BIG_ENDIAN)
@@ -30,12 +32,13 @@ endif()
 include_directories(${PROJECT_SOURCE_DIR}/third_party/kaldi-native-fbank)
 include_directories(${PROJECT_SOURCE_DIR}/third_party/yaml-cpp/include)
 
-add_subdirectory(third_party/yaml-cpp)
-add_subdirectory(third_party/kaldi-native-fbank/kaldi-native-fbank/csrc)
-add_subdirectory(src)
-
 if(ENABLE_GLOG)
     include_directories(${PROJECT_SOURCE_DIR}/third_party/glog)
     set(BUILD_TESTING OFF)
     add_subdirectory(third_party/glog)
 endif()
+
+add_subdirectory(third_party/yaml-cpp)
+add_subdirectory(third_party/kaldi-native-fbank/kaldi-native-fbank/csrc)
+add_subdirectory(src)
+add_subdirectory(bin)

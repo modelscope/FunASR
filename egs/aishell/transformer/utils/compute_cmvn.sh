@@ -2,11 +2,11 @@
 
 . ./path.sh || exit 1;
 # Begin configuration section.
-fbankdir=$1
+fbankdir=
 nj=32
 cmd=./utils/run.pl
 feats_dim=80
-config=
+config_file=
 scale=1.0
 
 echo "$0 $@"
@@ -29,7 +29,7 @@ $cmd JOB=1:$nj $logdir/cmvn.JOB.log \
     python utils/compute_cmvn.py \
       --dim ${feats_dim} \
       --wav_path $split_dir \
-      --config $config \
+      --config_file $config_file \
       --idx JOB \
 
 python utils/combine_cmvn_file.py --dim ${feats_dim} --cmvn_dir $split_dir --nj $nj --output_dir ${fbankdir}/cmvn

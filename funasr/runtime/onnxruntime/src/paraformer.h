@@ -18,7 +18,7 @@ namespace funasr {
         //std::unique_ptr<knf::OnlineFbank> fbank_;
         knf::FbankOptions fbank_opts;
 
-        Vocab* vocab;
+        Vocab* vocab = nullptr;
         vector<float> means_list;
         vector<float> vars_list;
         const float scale = 22.6274169979695;
@@ -30,7 +30,7 @@ namespace funasr {
         void ApplyCmvn(vector<float> *v);
         string GreedySearch( float* in, int n_len, int64_t token_nums);
 
-        std::shared_ptr<Ort::Session> m_session;
+        std::shared_ptr<Ort::Session> m_session = nullptr;
         Ort::Env env_;
         Ort::SessionOptions session_options;
 

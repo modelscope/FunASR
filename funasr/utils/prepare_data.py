@@ -185,7 +185,7 @@ def generate_data_list(args, data_dir, dataset, nj=64):
         for i in range(nj):
             path = ""
             for file_name in file_names:
-                path = path + os.path.join(split_path, str(i + 1), file_name)
+                path = path + " " + os.path.join(split_path, str(i + 1), file_name)
             f_data.write(path + "\n")
 
 

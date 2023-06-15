@@ -305,6 +305,7 @@ class Speech2TextParaformer:
             nbest: int = 1,
             frontend_conf: dict = None,
             hotword_list_or_file: str = None,
+            decoding_ind: int = 0,
             **kwargs,
     ):
         assert check_argument_types()
@@ -415,6 +416,7 @@ class Speech2TextParaformer:
         self.nbest = nbest
         self.frontend = frontend
         self.encoder_downsampling_factor = 1
+        self.decoding_ind = decoding_ind
         if asr_train_args.encoder == "data2vec_encoder" or asr_train_args.encoder_conf["input_layer"] == "conv2d":
             self.encoder_downsampling_factor = 4
 
@@ -452,7 +454,7 @@ class Speech2TextParaformer:
         batch = to_device(batch, device=self.device)
 
         # b. Forward Encoder
-        enc, enc_len = self.asr_model.encode(**batch)
+        enc, enc_len = self.asr_model.encode(**batch, ind=self.decoding_ind)
         if isinstance(enc, tuple):
             enc = enc[0]
         # assert len(enc) == 1, len(enc)
@@ -491,9 +493,9 @@ class Speech2TextParaformer:
             else:
                 if pre_token_length[i] == 0:
                     yseq = torch.tensor(
-                        [self.asr_model.sos] + [self.asr_model.eos], device=yseq.device
+                        [self.asr_model.sos] + [self.asr_model.eos], device=pre_acoustic_embeds.device
                     )
-                    score = torch.tensor(0.0, device=yseq.device)
+                    score = torch.tensor(0.0, device=pre_acoustic_embeds.device)
                 else:
                     yseq = am_scores.argmax(dim=-1)
                     score = am_scores.max(dim=-1)[0]

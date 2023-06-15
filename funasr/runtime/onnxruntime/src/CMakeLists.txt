@@ -1,11 +1,8 @@
 
 file(GLOB files1 "*.cpp")
-file(GLOB files2 "*.cc")
+set(files ${files1})
 
-set(files ${files1} ${files2})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
-add_library(funasr ${files})
+add_library(funasr SHARED ${files})
 
 if(WIN32)
     set(EXTRA_LIBS pthread yaml-cpp csrc glog)
@@ -24,13 +21,3 @@ endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 target_link_libraries(funasr PUBLIC onnxruntime ${EXTRA_LIBS})
-
-add_executable(funasr-onnx-offline "funasr-onnx-offline.cpp")
-add_executable(funasr-onnx-offline-vad "funasr-onnx-offline-vad.cpp")
-add_executable(funasr-onnx-offline-punc "funasr-onnx-offline-punc.cpp")
-add_executable(funasr-onnx-offline-rtf "funasr-onnx-offline-rtf.cpp")
-target_link_libraries(funasr-onnx-offline PUBLIC funasr)
-target_link_libraries(funasr-onnx-offline-vad PUBLIC funasr)
-target_link_libraries(funasr-onnx-offline-punc PUBLIC funasr)
-target_link_libraries(funasr-onnx-offline-rtf PUBLIC funasr)
-

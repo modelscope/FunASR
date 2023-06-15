@@ -26,6 +26,7 @@ class TestParaformerInferencePipelines(unittest.TestCase):
         rec_result = inference_pipeline(
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
         logger.info("asr_vad_punc inference result: {0}".format(rec_result))
+        assert rec_result["text"] == "欢迎大家来体验达摩院推出的语音识别模型。"
 
 
 if __name__ == '__main__':
