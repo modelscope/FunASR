@@ -17,6 +17,7 @@ def build_streaming_iterator(
         mc: bool = False,
         dtype: str = np.float32,
         num_workers: int = 1,
+        use_collate_fn: bool = True,
         ngpu: int = 0,
         train: bool=False,
 ) -> DataLoader:
@@ -30,7 +31,9 @@ def build_streaming_iterator(
         preprocess_fn = None
 
     # collate
-    if task_name in ["punc", "lm"]:
+    if not use_collate_fn:
+        collate_fn = None
+    elif task_name in ["punc", "lm"]:
         collate_fn = CommonCollateFn(int_pad_value=0)
     else:
         collate_fn = CommonCollateFn(float_pad_value=0.0, int_pad_value=-1)
