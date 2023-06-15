@@ -324,9 +324,10 @@ class SAASRModel(FunASRModel):
         )
 
         if intermediate_outs is not None:
-            return (encoder_out, intermediate_outs), encoder_out_lens
+            return (encoder_out, intermediate_outs), encoder_out_lens, encoder_out_spk
 
         return encoder_out, encoder_out_lens, encoder_out_spk
+        # return encoder_out, encoder_out_lens, encoder_out
 
     def _extract_feats(
             self, speech: torch.Tensor, speech_lengths: torch.Tensor

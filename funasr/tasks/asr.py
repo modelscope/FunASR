@@ -1719,7 +1719,7 @@ class ASRTaskSAASR(ASRTask):
         if args.input_size is None:
             # Extract features in the model
             frontend_class = frontend_choices.get_class(args.frontend)
-            if args.frontend == 'wav_frontend':
+            if args.frontend == 'wav_frontend' or args.frontend == "multichannelfrontend":
                 frontend = frontend_class(cmvn_file=args.cmvn_file, **args.frontend_conf)
             else:
                 frontend = frontend_class(**args.frontend_conf)

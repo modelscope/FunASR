@@ -5,7 +5,9 @@ import os
 import numpy as np
 import torchaudio
 import torchaudio.compliance.kaldi as kaldi
-
+import yaml
+from funasr.models.frontend.default import DefaultFrontend
+import torch
 
 def get_parser():
     parser = argparse.ArgumentParser(
@@ -24,6 +26,11 @@ def get_parser():
         required=True,
         type=str,
         help="the path of wav scps",
+    )
+    parser.add_argument(
+        "--config_file",
+        type=str,
+        help="the config file for computing cmvn",
     )
     parser.add_argument(
         "--idx",
@@ -82,11 +89,34 @@ def main():
     #         mean_stats += np.sum(mat, axis=0)
     #         var_stats += np.sum(np.square(mat), axis=0)
     #         total_frames += mat.shape[0]
+
+    with open(args.config_file) as f:
+        configs = yaml.safe_load(f)
+        frontend_configs = configs.get("frontend_conf", {})
+        num_mel_bins = frontend_configs.get("n_mels", 80)
+        frame_length = frontend_configs.get("frame_length", 25)
+        frame_shift = frontend_configs.get("frame_shift", 10)
+        window_type = frontend_configs.get("window", "hamming")
+        resample_rate = frontend_configs.get("fs", 16000)
+        n_fft = frontend_configs.get("n_fft", "400")
+        use_channel = frontend_configs.get("use_channel", None)
+        assert num_mel_bins == args.dim
+    frontend = DefaultFrontend(
+        fs=resample_rate,
+        n_fft=n_fft,
+        win_length=frame_length * 16,
+        hop_length=frame_shift * 16,
+        window=window_type,
+        n_mels=num_mel_bins,
+        use_channel=use_channel,
+    )
     with open(wav_scp_file) as f:
         lines = f.readlines()
         for line in lines:
             _, wav_file = line.strip().split()
-            fbank = compute_fbank(wav_file, num_mel_bins=args.dim)
+            wavform, _ = torchaudio.load(wav_file)
+            fbank, _ = frontend(wavform.transpose(0, 1).unsqueeze(0), torch.tensor([wavform.shape[1]]))
+            fbank = fbank.squeeze(0).numpy()
             mean_stats += np.sum(fbank, axis=0)
             var_stats += np.sum(np.square(fbank), axis=0)
             total_frames += fbank.shape[0]

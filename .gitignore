@@ -26,4 +26,4 @@ egs/alimeeting/sa_asr_deprecated/dataset
 egs/alimeeting/sa_asr_deprecated/data
 egs/alimeeting/sa_asr_deprecated/profile_log
 egs/alimeeting/sa_asr_deprecated/run_new.sh
-
+egs/alimeeting/sa_asr/local/convert_model.py

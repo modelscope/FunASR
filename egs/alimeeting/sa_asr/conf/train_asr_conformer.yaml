@@ -1,5 +1,5 @@
 # network architecture
-frontend: default
+frontend: multichannelfrontend
 frontend_conf:
     fs: 16000
     window: hann
