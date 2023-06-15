@@ -50,7 +50,8 @@ class Speech2Xvector:
             model_file=sv_model_file,
             cmvn_file=None,
             device=device,
-            task_name="sv"
+            task_name="sv",
+            mode="sv",
         )
         logging.info("sv_model: {}".format(sv_model))
         logging.info("model parameter number: {}".format(statistic_model_parameters(sv_model)))
