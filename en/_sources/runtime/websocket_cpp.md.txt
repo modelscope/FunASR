@@ -80,9 +80,9 @@ Where:
    --port <int>
      listen port, default:8889
    --certfile <string>
-     path of certficate for WSS connection. if it is empty, it will be in WS mode.
+     default: ../../../ssl_key/server.crt, path of certficate for WSS connection. if it is empty, it will be in WS mode.
    --keyfile <string>
-     path of keyfile for WSS connection
+     default: ../../../ssl_key/server.key, path of keyfile for WSS connection
   
 example:
    funasr-wss-server --model-dir /FunASR/funasr/runtime/onnxruntime/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
