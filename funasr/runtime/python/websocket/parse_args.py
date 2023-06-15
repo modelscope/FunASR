@@ -33,17 +33,17 @@ parser.add_argument("--ngpu",
                     help="0 for cpu, 1 for gpu")
 parser.add_argument("--ncpu",
                     type=int,
-                    default=1,
+                    default=4,
                     help="cpu cores")
 parser.add_argument("--certfile",
                     type=str,
-                    default="",
+                    default="./ssl_key/server.crt",
                     required=False,
                     help="certfile for ssl")
                     
 parser.add_argument("--keyfile",
                     type=str,
-                    default="",
+                    default="./ssl_key/server.key",
                     required=False,
                     help="keyfile for ssl")
 args = parser.parse_args()

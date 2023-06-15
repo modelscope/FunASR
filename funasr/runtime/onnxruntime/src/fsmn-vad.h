@@ -22,7 +22,30 @@ public:
     void Test();
     void InitVad(const std::string &vad_model, const std::string &vad_cmvn, const std::string &vad_config, int thread_num);
     std::vector<std::vector<int>> Infer(std::vector<float> &waves, bool input_finished=true);
+    void Forward(
+        const std::vector<std::vector<float>> &chunk_feats,
+        std::vector<std::vector<float>> *out_prob,
+        std::vector<std::vector<float>> *in_cache,
+        bool is_final);
     void Reset();
+    
+    std::shared_ptr<Ort::Session> vad_session_ = nullptr;
+    Ort::Env env_;
+    Ort::SessionOptions session_options_;
+    std::vector<const char *> vad_in_names_;
+    std::vector<const char *> vad_out_names_;
+    std::vector<std::vector<float>> in_cache_;
+    
+    knf::FbankOptions fbank_opts_;
+    std::vector<float> means_list_;
+    std::vector<float> vars_list_;
+
+    int vad_sample_rate_ = MODEL_SAMPLE_RATE;
+    int vad_silence_duration_ = VAD_SILENCE_DURATION;
+    int vad_max_len_ = VAD_MAX_LEN;
+    double vad_speech_noise_thres_ = VAD_SPEECH_NOISE_THRES;
+    int lfr_m = VAD_LFR_M;
+    int lfr_n = VAD_LFR_N;
 
 private:
 
@@ -37,31 +60,9 @@ private:
                     std::vector<float> &waves);
 
     void LfrCmvn(std::vector<std::vector<float>> &vad_feats);
-
-    void Forward(
-            const std::vector<std::vector<float>> &chunk_feats,
-            std::vector<std::vector<float>> *out_prob);
-
     void LoadCmvn(const char *filename);
     void InitCache();
 
-    std::shared_ptr<Ort::Session> vad_session_ = nullptr;
-    Ort::Env env_;
-    Ort::SessionOptions session_options_;
-    std::vector<const char *> vad_in_names_;
-    std::vector<const char *> vad_out_names_;
-    std::vector<std::vector<float>> in_cache_;
-    
-    knf::FbankOptions fbank_opts;
-    std::vector<float> means_list;
-    std::vector<float> vars_list;
-
-    int vad_sample_rate_ = MODEL_SAMPLE_RATE;
-    int vad_silence_duration_ = VAD_SILENCE_DURATION;
-    int vad_max_len_ = VAD_MAX_LEN;
-    double vad_speech_noise_thres_ = VAD_SPEECH_NOISE_THRES;
-    int lfr_m = VAD_LFR_M;
-    int lfr_n = VAD_LFR_N;
 };
 
 } // namespace funasr

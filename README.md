@@ -13,7 +13,6 @@
 | [**Highlights**](#highlights)
 | [**Installation**](#installation)
 | [**Docs**](https://alibaba-damo-academy.github.io/FunASR/en/index.html)
-| [**Tutorial_CN**](https://github.com/alibaba-damo-academy/FunASR/wiki#funasr%E7%94%A8%E6%88%B7%E6%89%8B%E5%86%8C)
 | [**Papers**](https://github.com/alibaba-damo-academy/FunASR#citations)
 | [**Runtime**](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime)
 | [**Model Zoo**](https://github.com/alibaba-damo-academy/FunASR/blob/main/docs/model_zoo/modelscope_models.md)
@@ -88,6 +87,7 @@ If you have any questions about FunASR, please contact us by
 
 ## License
 This project is licensed under the [The MIT License](https://opensource.org/licenses/MIT). FunASR also contains various third-party components and some code modified from other repos under other open source licenses.
+The use of pretraining model is subject to [model licencs](./MODEL_LICENSE)
 
 ## Citations
 

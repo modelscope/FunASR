@@ -66,7 +66,7 @@ fi
 
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
     echo "stage 1: Feature and CMVN Generation"
-    utils/compute_cmvn.sh --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} ${feats_dir}/data/${train_set}
+    utils/compute_cmvn.sh --fbankdir ${feats_dir}/data/${train_set} --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} --config_file "$asr_config" --scale 1.0
 fi
 
 token_list=${feats_dir}/data/${lang}_token_list/char/tokens.txt
@@ -109,7 +109,7 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
                 --train_set ${train_set} \
                 --valid_set ${valid_set} \
                 --data_file_names "wav.scp" \
-                --cmvn_file ${feats_dir}/data/${train_set}/cmvn/cmvn.mvn \
+                --cmvn_file ${feats_dir}/data/${train_set}/cmvn/am.mvn \
                 --speed_perturb ${speed_perturb} \
                 --dataset_type $dataset_type \
                 --resume true \

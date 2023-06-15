@@ -1,0 +1,3 @@
+# The conformer transducer decoding configuration from @jeon30c
+beam_size: 10
+
