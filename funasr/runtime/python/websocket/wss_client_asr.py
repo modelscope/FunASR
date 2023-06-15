@@ -71,6 +71,8 @@ print(args)
 from queue import Queue
 
 voices = Queue()
+offline_msg_done=False
+ 
 ibest_writer = None
 if args.output_dir is not None:
     writer = DatadirWriter(args.output_dir)
@@ -158,13 +160,20 @@ async def record_from_scp(chunk_begin, chunk_size):
                 message = json.dumps({"is_speaking": is_speaking})
                 #voices.put(message)
                 await websocket.send(message)
-            # print("data_chunk: ", len(data_chunk))
-            # print(voices.qsize())
+ 
             sleep_duration = 0.001 if args.send_without_sleep else 60 * args.chunk_size[1] / args.chunk_interval / 1000
             await asyncio.sleep(sleep_duration)
+    # when all data sent, we need to close websocket
     while not voices.empty():
          await asyncio.sleep(1)
     await asyncio.sleep(3)
+    # offline model need to wait for message recved
+    
+    if args.mode=="offline":
+      global offline_msg_done
+      while  not  offline_msg_done:
+         await asyncio.sleep(1)
+    
     await websocket.close()
      
  
@@ -173,7 +182,7 @@ async def record_from_scp(chunk_begin, chunk_size):
  
              
 async def message(id):
-    global websocket,voices
+    global websocket,voices,offline_msg_done
     text_print = ""
     text_print_2pass_online = ""
     text_print_2pass_offline = ""
@@ -183,7 +192,6 @@ async def message(id):
             meg = await websocket.recv()
             meg = json.loads(meg)
             wav_name = meg.get("wav_name", "demo")
-            # print(wav_name)
             text = meg["text"]
             if ibest_writer is not None:
                 ibest_writer["text"][wav_name] = text
@@ -198,6 +206,7 @@ async def message(id):
                 text_print = text_print[-args.words_max_print:]
                 os.system('clear')
                 print("\rpid" + str(id) + ": " + text_print)
+                offline_msg_done=True
             else:
                 if meg["mode"] == "2pass-online":
                     text_print_2pass_online += "{}".format(text)
@@ -233,8 +242,10 @@ async def ws_client(id, chunk_begin, chunk_size):
   if args.audio_in is None:
        chunk_begin=0
        chunk_size=1
-  global websocket,voices
+  global websocket,voices,offline_msg_done
+ 
   for i in range(chunk_begin,chunk_begin+chunk_size):
+    offline_msg_done=False
     voices = Queue()
     if args.ssl == 1:
         ssl_context = ssl.SSLContext()
@@ -251,7 +262,7 @@ async def ws_client(id, chunk_begin, chunk_size):
         else:
             task = asyncio.create_task(record_microphone())
         #task2 = asyncio.create_task(ws_send())
-        task3 = asyncio.create_task(message(id))
+        task3 = asyncio.create_task(message(str(id)+"_"+str(i))) #processid+fileid
         await asyncio.gather(task, task3)
   exit(0)
     
