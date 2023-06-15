@@ -1,35 +1,24 @@
-# -*- encoding: utf-8 -*-
 #!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
 # Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
 #  MIT License  (https://opensource.org/licenses/MIT)
 
-import argparse
 import logging
-import os
-import sys
 from pathlib import Path
 from typing import Any
-from typing import List
 from typing import Optional
-from typing import Sequence
 from typing import Tuple
 from typing import Union
 
 import numpy as np
 import torch
-from kaldiio import WriteHelper
 from typeguard import check_argument_types
 from typeguard import check_return_type
 
-from funasr.utils.cli_utils import get_commandline_args
-from funasr.tasks.sv import SVTask
+from funasr.build_utils.build_model_from_file import build_model_from_file
 from funasr.torch_utils.device_funcs import to_device
-from funasr.torch_utils.set_all_random_seed import set_all_random_seed
-from funasr.utils import config_argparse
-from funasr.utils.types import str2bool
-from funasr.utils.types import str2triple_str
-from funasr.utils.types import str_or_none
 from funasr.utils.misc import statistic_model_parameters
+
 
 class Speech2Xvector:
     """Speech2Xvector class
@@ -56,10 +45,12 @@ class Speech2Xvector:
         assert check_argument_types()
 
         # TODO: 1. Build SV model
-        sv_model, sv_train_args = SVTask.build_model_from_file(
+        sv_model, sv_train_args = build_model_from_file(
             config_file=sv_train_config,
             model_file=sv_model_file,
-            device=device
+            cmvn_file=None,
+            device=device,
+            task_name="sv"
         )
         logging.info("sv_model: {}".format(sv_model))
         logging.info("model parameter number: {}".format(statistic_model_parameters(sv_model)))
@@ -157,7 +148,3 @@ class Speech2Xvector:
             kwargs.update(**d.download_and_unpack(model_tag))
 
         return Speech2Xvector(**kwargs)
-
-
-
-
