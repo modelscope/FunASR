@@ -46,7 +46,7 @@ class Speech2VadSegment:
 
         # 1. Build vad model
         vad_model, vad_infer_args = build_model_from_file(
-            vad_infer_config, vad_model_file, "None", device, task_name="vad"
+            vad_infer_config, vad_model_file, None, device, task_name="vad"
         )
         frontend = None
         if vad_infer_args.frontend is not None:
