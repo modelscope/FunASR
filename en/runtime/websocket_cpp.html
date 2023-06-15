@@ -204,7 +204,7 @@ make
 <div class="section" id="run-the-websocket-server">
 <h2>Run the websocket server<a class="headerlink" href="#run-the-websocket-server" title="Permalink to this headline"></a></h2>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> bin
-   ./funasr-wss-server  <span class="o">[</span>--model_thread_num &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--decoder_thread_num &lt;int&gt;<span class="o">]</span>
+./funasr-wss-server  <span class="o">[</span>--model_thread_num &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--decoder_thread_num &lt;int&gt;<span class="o">]</span>
                     <span class="o">[</span>--io_thread_num &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--port &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--listen_ip
                     &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-quant &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-dir &lt;string&gt;<span class="o">]</span>
                     <span class="o">[</span>--vad-quant &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--vad-dir &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--quantize
@@ -238,7 +238,7 @@ Where:
      default: ../../../ssl_key/server.key, path of keyfile <span class="k">for</span> WSS connection
   
 example:
-   funasr-wss-server --model-dir /FunASR/funasr/runtime/onnxruntime/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
+./funasr-wss-server --model-dir /FunASR/funasr/runtime/onnxruntime/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
 </pre></div>
 </div>
 </div>
