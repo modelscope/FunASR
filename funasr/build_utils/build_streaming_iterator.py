@@ -26,6 +26,7 @@ def build_streaming_iterator(
 
     # preprocess
     if preprocess_args is not None:
+        preprocess_args.task_name = task_name
         preprocess_fn = build_preprocess(preprocess_args, train)
     else:
         preprocess_fn = None
