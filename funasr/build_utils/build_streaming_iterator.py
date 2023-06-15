@@ -5,7 +5,7 @@ from typeguard import check_argument_types
 from funasr.datasets.iterable_dataset import IterableESPnetDataset
 from funasr.datasets.small_datasets.collate_fn import CommonCollateFn
 from funasr.datasets.small_datasets.preprocessor import build_preprocess
-
+from funasr.build_utils.build_model_from_file import build_model_from_file
 
 def build_streaming_iterator(
         task_name,
@@ -18,6 +18,7 @@ def build_streaming_iterator(
         dtype: str = np.float32,
         num_workers: int = 1,
         use_collate_fn: bool = True,
+        preprocess_fn=None,
         ngpu: int = 0,
         train: bool=False,
 ) -> DataLoader:
@@ -25,7 +26,9 @@ def build_streaming_iterator(
     assert check_argument_types()
 
     # preprocess
-    if preprocess_args is not None:
+    if preprocess_fn is not None:
+        preprocess_fn = preprocess_fn
+    elif preprocess_args is not None:
         preprocess_args.task_name = task_name
         preprocess_fn = build_preprocess(preprocess_args, train)
     else:
