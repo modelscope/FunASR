@@ -106,7 +106,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../runtime/onnxruntime_python.html">ONNXRuntime-python</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../runtime/onnxruntime_cpp.html">ONNXRuntime-cpp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../runtime/libtorch_python.html">Libtorch-python</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../runtime/html5.html">online asr demo for html5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/html5.html">Html5 server for asr service</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../runtime/websocket_python.html">Service with websocket-python</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../runtime/websocket_cpp.html">Service with websocket-cpp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../runtime/grpc_python.html">Service with grpc-python</a></li>
@@ -188,10 +188,14 @@ The modelscope pipeline supports all the models in <a class="reference external"
 </div>
 <div class="section" id="paraformer-online-model">
 <h4><a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary">Paraformer-online Model</a><a class="headerlink" href="#paraformer-online-model" title="Permalink to this headline"></a></h4>
+<div class="section" id="streaming-decoding">
+<h5>Streaming Decoding<a class="headerlink" href="#streaming-decoding" title="Permalink to this headline"></a></h5>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
     <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">auto_speech_recognition</span><span class="p">,</span>
     <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online&#39;</span><span class="p">,</span>
-    <span class="n">model_revision</span><span class="o">=</span><span class="s1">&#39;v1.0.4&#39;</span>
+    <span class="n">model_revision</span><span class="o">=</span><span class="s1">&#39;v1.0.6&#39;</span><span class="p">,</span>
+    <span class="n">update_model</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;paraformer_streaming&#39;</span>
     <span class="p">)</span>
 <span class="kn">import</span> <span class="nn">soundfile</span>
 <span class="n">speech</span><span class="p">,</span> <span class="n">sample_rate</span> <span class="o">=</span> <span class="n">soundfile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;example/asr_example.wav&quot;</span><span class="p">)</span>
@@ -209,7 +213,26 @@ The modelscope pipeline supports all the models in <a class="reference external"
 <span class="nb">print</span><span class="p">(</span><span class="n">rec_result</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="fake-streaming-decoding">
+<h5>Fake Streaming Decoding<a class="headerlink" href="#fake-streaming-decoding" title="Permalink to this headline"></a></h5>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
+<span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
+
+<span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
+    <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">auto_speech_recognition</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online&#39;</span><span class="p">,</span>
+    <span class="n">model_revision</span><span class="o">=</span><span class="s1">&#39;v1.0.6&#39;</span><span class="p">,</span>
+    <span class="n">update_model</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;paraformer_fake_streaming&quot;</span>
+<span class="p">)</span>
+<span class="n">audio_in</span><span class="o">=</span><span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav&#39;</span>
+<span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="n">audio_in</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">rec_result</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>Full code of demo, please ref to <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/discussions/241">demo</a></p>
+</div>
 </div>
 <div class="section" id="uniasr-model">
 <h4><a class="reference external" href="https://www.modelscope.cn/models/damo/speech_UniASR_asr_2pass-zh-cn-8k-common-vocab3445-pytorch-online/summary">UniASR Model</a><a class="headerlink" href="#uniasr-model" title="Permalink to this headline"></a></h4>

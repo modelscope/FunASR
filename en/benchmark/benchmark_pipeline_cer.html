@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CPU Benchmark (Libtorch) &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <title>Benchmark (ModeScope Pipeline) &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -16,9 +16,7 @@
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Build custom tasks" href="../reference/build_task.html" />
-    <link rel="prev" title="CPU Benchmark (ONNX-cpp)" href="benchmark_onnx_cpp.html" /> 
+    <link rel="search" title="Search" href="../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -82,26 +80,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../runtime/grpc_cpp.html">Service with grpc-cpp</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Benchmark and Leadboard</span></p>
-<ul class="current">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="benchmark_onnx.html">CPU Benchmark (ONNX-python)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="benchmark_onnx_cpp.html">CPU Benchmark (ONNX-cpp)</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">CPU Benchmark (Libtorch)</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#configuration">Configuration</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#data-set">Data set:</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#tools">Tools</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#install-requirements">Install Requirements</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#recipe">Recipe</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#paraformer-large">Paraformer-large</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#intel-r-xeon-r-platinum-8269cy-cpu-2-50ghz-16core-32processor-with-avx512-vnni">Intel(R) Xeon(R) Platinum 8269CY CPU &#64; 2.50GHz   16core-32processor    with avx512_vnni</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#paraformer">Paraformer</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="benchmark_libtorch.html">CPU Benchmark (Libtorch)</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Funasr Library</span></p>
 <ul>
@@ -136,9 +118,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">CPU Benchmark (Libtorch)</li>
+      <li class="breadcrumb-item active">Benchmark (ModeScope Pipeline)</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/benchmark/benchmark_libtorch.md.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/benchmark/benchmark_pipeline_cer.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -146,115 +128,213 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="cpu-benchmark-libtorch">
-<h1>CPU Benchmark (Libtorch)<a class="headerlink" href="#cpu-benchmark-libtorch" title="Permalink to this headline"></a></h1>
+  <div class="section" id="benchmark-modescope-pipeline">
+<h1>Benchmark (ModeScope Pipeline)<a class="headerlink" href="#benchmark-modescope-pipeline" title="Permalink to this headline"></a></h1>
 <div class="section" id="configuration">
 <h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline"></a></h2>
 <div class="section" id="data-set">
 <h3>Data set:<a class="headerlink" href="#data-set" title="Permalink to this headline"></a></h3>
-<p>Aishell1 <a class="reference external" href="https://www.openslr.org/33/">test set</a> , the total audio duration is 36108.919 seconds.</p>
+<p><a class="reference external" href="https://www.openslr.org/33/">Aishell1</a>: dev, test</p>
+<p><a class="reference external" href="https://www.aishelltech.com/aishell_2">Aishell2</a>: dev_ios, test_ios, test_android, test_mic</p>
+<p><a class="reference external" href="https://github.com/wenet-e2e/WenetSpeech">WenetSpeech</a>: dev, test_meeting, test_net</p>
 </div>
 <div class="section" id="tools">
 <h3>Tools<a class="headerlink" href="#tools" title="Permalink to this headline"></a></h3>
 <div class="section" id="install-requirements">
-<h4>Install Requirements<a class="headerlink" href="#install-requirements" title="Permalink to this headline"></a></h4>
-<p>Install ModelScope and FunASR</p>
+<h4><a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/installation/installation.html#installation">Install Requirements</a><a class="headerlink" href="#install-requirements" title="Permalink to this headline"></a></h4>
+<p>Install ModelScope and FunASR from pip</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install -U modelscope funasr
 <span class="c1"># For the users in China, you could install with the command:</span>
 <span class="c1">#pip install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple</span>
 </pre></div>
 </div>
-<p>Install requirements</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/alibaba-damo-academy/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> FunASR
-<span class="nb">cd</span> funasr/runtime/python/utils
-pip install -r requirements.txt
+<p>Or install FunASR from source code</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/alibaba/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> FunASR
+pip install -e ./
+<span class="c1"># For the users in China, you could install with the command:</span>
+<span class="c1"># pip install -e ./ -i https://mirror.sjtu.edu.cn/pypi/web/simple</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="recipe">
 <h4>Recipe<a class="headerlink" href="#recipe" title="Permalink to this headline"></a></h4>
-<div class="section" id="test-rtf">
-<h5>test_rtf<a class="headerlink" href="#test-rtf" title="Permalink to this headline"></a></h5>
-<p>set the model, data path and output_dir</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>nohup bash test_rtf.sh <span class="p">&amp;</span>&gt; log.txt <span class="p">&amp;</span>
-</pre></div>
-</div>
-</div>
 <div class="section" id="test-cer">
-<h5>test_cer<a class="headerlink" href="#test-cer" title="Permalink to this headline"></a></h5>
-<p>set the model, data path and output_dir</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>nohup bash test_cer.sh <span class="p">&amp;</span>&gt; log.txt <span class="p">&amp;</span>
+<h5><a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/modelscope_pipeline/asr_pipeline.html#inference-with-multi-thread-cpus-or-multi-gpus">Test CER</a><a class="headerlink" href="#test-cer" title="Permalink to this headline"></a></h5>
+<p>set the <code class="docutils literal notranslate"><span class="pre">model</span></code>, <code class="docutils literal notranslate"><span class="pre">data_dir</span></code> and <code class="docutils literal notranslate"><span class="pre">output_dir</span></code> in <code class="docutils literal notranslate"><span class="pre">infer.sh</span></code>.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> egs_modelscope/asr/TEMPLATE
+bash infer.sh
 </pre></div>
 </div>
 </div>
 </div>
 </div>
 </div>
-<div class="section" id="paraformer-large">
-<h2><a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary">Paraformer-large</a><a class="headerlink" href="#paraformer-large" title="Permalink to this headline"></a></h2>
-<div class="section" id="intel-r-xeon-r-platinum-8269cy-cpu-2-50ghz-16core-32processor-with-avx512-vnni">
-<h3>Intel(R) Xeon(R) Platinum 8269CY CPU &#64; 2.50GHz   16core-32processor    with avx512_vnni<a class="headerlink" href="#intel-r-xeon-r-platinum-8269cy-cpu-2-50ghz-16core-32processor-with-avx512-vnni" title="Permalink to this headline"></a></h3>
-<table border="1" class="docutils">
-<thead>
-<tr>
-<th style="text-align: center;">concurrent-tasks</th>
-<th style="text-align: center;">processing time(s)</th>
-<th style="text-align: center;">RTF</th>
-<th style="text-align: center;">Speedup Rate</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: center;">1 (torch fp32)</td>
-<td style="text-align: center;">3522</td>
-<td style="text-align: center;">0.0976</td>
-<td style="text-align: center;">10.3</td>
-</tr>
-<tr>
-<td style="text-align: center;">1 (torch int8)</td>
-<td style="text-align: center;">1746</td>
-<td style="text-align: center;">0.0484</td>
-<td style="text-align: center;">20.7</td>
-</tr>
-<tr>
-<td style="text-align: center;">32 (torch fp32)</td>
-<td style="text-align: center;">236</td>
-<td style="text-align: center;">0.0066</td>
-<td style="text-align: center;">152.7</td>
-</tr>
-<tr>
-<td style="text-align: center;">32 (torch int8)</td>
-<td style="text-align: center;">114</td>
-<td style="text-align: center;">0.0032</td>
-<td style="text-align: center;">317.4</td>
-</tr>
-<tr>
-<td style="text-align: center;">64 (torch fp32)</td>
-<td style="text-align: center;">235</td>
-<td style="text-align: center;">0.0065</td>
-<td style="text-align: center;">153.7</td>
-</tr>
-<tr>
-<td style="text-align: center;">64 (torch int8)</td>
-<td style="text-align: center;">113</td>
-<td style="text-align: center;">0.0031</td>
-<td style="text-align: center;">319.2</td>
-</tr>
-</tbody>
+<div class="section" id="benchmark-cer">
+<h2>Benchmark CER<a class="headerlink" href="#benchmark-cer" title="Permalink to this headline"></a></h2>
+<div class="section" id="chinese-dataset">
+<h3>Chinese Dataset<a class="headerlink" href="#chinese-dataset" title="Permalink to this headline"></a></h3>
+<table>
+    <tr align="center">
+        <td>Model</td>
+        <td>Offline/Online</td>
+        <td colspan="2">Aishell1</td>
+        <td colspan="4">Aishell2</td>
+        <td colspan="3">WenetSpeech</td>
+    </tr>
+    <tr align="center">
+        <td></td>
+        <td></td>
+        <td>dev</td> 
+        <td>test</td>
+        <td>dev_ios</td>
+        <td>test_ios</td>
+        <td>test_android</td>
+        <td>test_mic</td>
+        <td>dev</td>
+        <td>test_meeting</td>
+        <td>test_net</td>
+    </tr>
+    <tr align="center">
+        <td> <a href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary">Paraformer-large</a> </td>
+        <td>Offline</td>
+        <td>1.76</td>
+        <td>1.94</td>
+        <td>2.79</td>
+        <td>2.84</td>
+        <td>3.08</td>
+        <td>3.03</td>
+        <td>3.43</td>
+        <td>7.01</td>
+        <td>6.66</td>
+    </tr>
+    <tr align="center">
+        <td> <a href="https://www.modelscope.cn/models/damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary">Paraformer-large-long</a> </td> 
+        <td>Offline</td>      
+        <td>1.80</td>
+        <td>2.10</td>
+        <td>2.78</td>
+        <td>2.87</td>
+        <td>3.12</td>
+        <td>3.11</td>
+        <td>3.44</td>
+        <td>13.28</td>
+        <td>7.08</td>
+    </tr>
+    <tr align="center">
+        <td> <a href="https://www.modelscope.cn/models/damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404/summary">Paraformer-large-contextual</a> </td>
+        <td>Offline</td>
+        <td>1.76</td>
+        <td>2.02</td>
+        <td>2.73</td>
+        <td>2.85</td>
+        <td>2.98</td>
+        <td>2.95</td>
+        <td>3.42</td>
+        <td>7.16</td>
+        <td>6.72</td>
+    </tr>
+    <tr align="center">
+        <td> <a href="https://modelscope.cn/models/damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8358-tensorflow1/summary">Paraformer</a> </td> 
+        <td>Offline</td>
+        <td>3.24</td>
+        <td>3.69</td>
+        <td>4.58</td>
+        <td>4.63</td>
+        <td>4.83</td>
+        <td>4.71</td>
+        <td>4.19</td>
+        <td>8.32</td>
+        <td>9.19</td>
+    </tr>
+   <tr align="center">
+        <td> <a href="https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-zh-cn-16k-common-vocab8358-tensorflow1-online/summary">UniASR</a> </td> 
+        <td>Online</td>
+        <td>3.34</td>
+        <td>3.99</td>
+        <td>4.62</td>
+        <td>4.52</td>
+        <td>4.77</td>
+        <td>4.73</td>
+        <td>4.51</td>
+        <td>10.63</td>
+        <td>9.70</td>
+    </tr>
+   <tr align="center">
+        <td> <a href="https://modelscope.cn/models/damo/speech_UniASR-large_asr_2pass-zh-cn-16k-common-vocab8358-tensorflow1-offline/summary">UniASR-large</a> </td> 
+        <td>Offline</td>      
+        <td>2.93</td>
+        <td>3.48</td>
+        <td>3.95</td>
+        <td>3.87</td>
+        <td>4.11</td>
+        <td>4.11</td>
+        <td>4.16</td>
+        <td>10.09</td>
+        <td>8.69</td>
+    </tr>
+    <tr align="center">
+        <td> <a href="https://www.modelscope.cn/models/damo/speech_paraformer_asr_nat-aishell1-pytorch/summary">Paraformer-aishell</a> </td>
+        <td>Offline</td>
+        <td>4.88</td>
+        <td>5.43</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+    </tr>
+   <tr align="center">
+        <td> <a href="https://modelscope.cn/models/damo/speech_paraformerbert_asr_nat-zh-cn-16k-aishell1-vocab4234-pytorch/summary">ParaformerBert-aishell</a> </td>
+        <td>Offline</td>
+        <td>6.14</td>
+        <td>7.01</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+    </tr>
+   <tr align="center">
+        <td> <a href="https://www.modelscope.cn/models/damo/speech_paraformer_asr_nat-zh-cn-16k-aishell2-vocab5212-pytorch/summary">Paraformer-aishell2</a> </td> 
+        <td>Offline</td>
+        <td>-</td>
+        <td>-</td>
+        <td>5.82</td>
+        <td>6.30</td>
+        <td>6.60</td>
+        <td>5.83</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+    </tr>
+   <tr align="center">
+        <td> <a href="https://www.modelscope.cn/models/damo/speech_paraformerbert_asr_nat-zh-cn-16k-aishell2-vocab5212-pytorch/summary">ParaformerBert-aishell2</a> </td> 
+        <td>Offline</td>
+        <td>-</td>
+        <td>-</td>
+        <td>4.95</td>
+        <td>5.45</td>
+        <td>5.59</td>
+        <td>5.83</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+    </tr>
 </table></div>
+<div class="section" id="english-dataset">
+<h3>English Dataset<a class="headerlink" href="#english-dataset" title="Permalink to this headline"></a></h3>
 </div>
-<div class="section" id="paraformer">
-<h2><a class="reference external" href="https://modelscope.cn/models/damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8358-tensorflow1/summary">Paraformer</a><a class="headerlink" href="#paraformer" title="Permalink to this headline"></a></h2>
 </div>
 </div>
 
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="benchmark_onnx_cpp.html" class="btn btn-neutral float-left" title="CPU Benchmark (ONNX-cpp)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../reference/build_task.html" class="btn btn-neutral float-right" title="Build custom tasks" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 

@@ -101,7 +101,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../runtime/onnxruntime_python.html">ONNXRuntime-python</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../runtime/onnxruntime_cpp.html">ONNXRuntime-cpp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../runtime/libtorch_python.html">Libtorch-python</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../runtime/html5.html">online asr demo for html5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/html5.html">Html5 server for asr service</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../runtime/websocket_python.html">Service with websocket-python</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../runtime/websocket_cpp.html">Service with websocket-cpp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../runtime/grpc_python.html">Service with grpc-python</a></li>
@@ -170,7 +170,7 @@
 <span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
     <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">speech_timestamp</span><span class="p">,</span>
     <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_timestamp_prediction-v1-16k-offline&#39;</span><span class="p">,</span>
-    <span class="n">output_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">model_revision</span><span class="o">=</span><span class="s1">&#39;v1.1.0&#39;</span><span class="p">)</span>
 
 <span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span>
     <span class="n">audio_in</span><span class="o">=</span><span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_timestamps.wav&#39;</span><span class="p">,</span>

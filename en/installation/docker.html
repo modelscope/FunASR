@@ -98,7 +98,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../runtime/onnxruntime_python.html">ONNXRuntime-python</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../runtime/onnxruntime_cpp.html">ONNXRuntime-cpp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../runtime/libtorch_python.html">Libtorch-python</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../runtime/html5.html">online asr demo for html5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/html5.html">Html5 server for asr service</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../runtime/websocket_python.html">Service with websocket-python</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../runtime/websocket_cpp.html">Service with websocket-cpp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../runtime/grpc_python.html">Service with grpc-python</a></li>
@@ -200,11 +200,11 @@ sudo sh test-docker.sh
 <h3>Image<a class="headerlink" href="#image" title="Permalink to this headline"></a></h3>
 <div class="section" id="cpu">
 <h4>CPU<a class="headerlink" href="#cpu" title="Permalink to this headline"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">registry.cn-hangzhou.aliyuncs.com/modelscope-repo/modelscope:ubuntu20.04-py37-torch1.11.0-tf1.15.5-1.5.0</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">registry.cn-hangzhou.aliyuncs.com/modelscope-repo/modelscope:ubuntu20.04-py37-torch1.11.0-tf1.15.5-1.6.0</span></code></p>
 </div>
 <div class="section" id="gpu">
 <h4>GPU<a class="headerlink" href="#gpu" title="Permalink to this headline"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">registry.cn-hangzhou.aliyuncs.com/modelscope-repo/modelscope:ubuntu20.04-cuda11.3.0-py37-torch1.11.0-tf1.15.5-1.5.0</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">registry.cn-hangzhou.aliyuncs.com/modelscope-repo/modelscope:ubuntu20.04-cuda11.3.0-py37-torch1.11.0-tf1.15.5-1.6.0</span></code></p>
 </div>
 </div>
 <div class="section" id="pull-image">
@@ -222,8 +222,12 @@ sudo sh test-docker.sh
 </div>
 <div class="section" id="run-docker">
 <h2>Run Docker<a class="headerlink" href="#run-docker" title="Permalink to this headline"></a></h2>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo docker run -itd --name funasr &lt;image-name&gt;:&lt;tag&gt; bash
-sudo docker <span class="nb">exec</span> -it funasr bash
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># cpu</span>
+sudo docker run -itd --name funasr -v &lt;local_dir:dir_in_docker&gt; &lt;image-name&gt;:&lt;tag&gt; /bin/bash
+<span class="c1"># gpu</span>
+sudo docker run -itd --gpus all --name funasr -v &lt;local_dir:dir_in_docker&gt; &lt;image-name&gt;:&lt;tag&gt; /bin/bash
+
+sudo docker <span class="nb">exec</span> -it funasr /bin/bash
 </pre></div>
 </div>
 </div>

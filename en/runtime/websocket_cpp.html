@@ -75,7 +75,7 @@
 <li class="toctree-l1"><a class="reference internal" href="onnxruntime_python.html">ONNXRuntime-python</a></li>
 <li class="toctree-l1"><a class="reference internal" href="onnxruntime_cpp.html">ONNXRuntime-cpp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="libtorch_python.html">Libtorch-python</a></li>
-<li class="toctree-l1"><a class="reference internal" href="html5.html">online asr demo for html5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="html5.html">Html5 server for asr service</a></li>
 <li class="toctree-l1"><a class="reference internal" href="websocket_python.html">Service with websocket-python</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Service with websocket-cpp</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#export-the-model">Export the model</a><ul>
@@ -186,7 +186,14 @@ tar -zxvf onnxruntime-linux-x64-1.14.0.tgz
 </div>
 <div class="section" id="build-runtime">
 <h3>Build runtime<a class="headerlink" href="#build-runtime" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/alibaba-damo-academy/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> funasr/runtime/websocket
+<p>required openssl lib</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1">#install openssl lib for ubuntu </span>
+apt-get install libssl-dev
+<span class="c1">#install openssl lib for centos</span>
+yum install openssl-devel
+
+
+git clone https://github.com/alibaba-damo-academy/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> funasr/runtime/websocket
 mkdir build <span class="o">&amp;&amp;</span> <span class="nb">cd</span> build
 cmake  -DCMAKE_BUILD_TYPE<span class="o">=</span>release .. -DONNXRUNTIME_DIR<span class="o">=</span>/path/to/onnxruntime-linux-x64-1.14.0
 make
@@ -197,26 +204,27 @@ make
 <div class="section" id="run-the-websocket-server">
 <h2>Run the websocket server<a class="headerlink" href="#run-the-websocket-server" title="Permalink to this headline"></a></h2>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> bin
-./websocketmain  <span class="o">[</span>--model_thread_num &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--decoder_thread_num &lt;int&gt;<span class="o">]</span>
+./funasr-wss-server  <span class="o">[</span>--model_thread_num &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--decoder_thread_num &lt;int&gt;<span class="o">]</span>
                     <span class="o">[</span>--io_thread_num &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--port &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--listen_ip
                     &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-quant &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-dir &lt;string&gt;<span class="o">]</span>
                     <span class="o">[</span>--vad-quant &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--vad-dir &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--quantize
-                    &lt;string&gt;<span class="o">]</span> --model-dir &lt;string&gt; <span class="o">[</span>--<span class="o">]</span> <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
+                    &lt;string&gt;<span class="o">]</span> --model-dir &lt;string&gt; <span class="o">[</span>--keyfile &lt;string&gt;<span class="o">]</span>
+                    <span class="o">[</span>--certfile &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--<span class="o">]</span> <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
 Where:
    --model-dir &lt;string&gt;
-     <span class="o">(</span>required<span class="o">)</span>  the asr model path, which contains model.onnx, config.yaml, am.mvn
+     default: /workspace/models/asr, the asr model path, which contains model.onnx, config.yaml, am.mvn
    --quantize &lt;string&gt;
-     <span class="nb">false</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in model_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in model_dir
+     <span class="nb">true</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in model_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in model_dir
 
    --vad-dir &lt;string&gt;
-     the vad model path, which contains model.onnx, vad.yaml, vad.mvn
+     default: /workspace/models/vad, the vad model path, which contains model.onnx, vad.yaml, vad.mvn
    --vad-quant &lt;string&gt;
-     <span class="nb">false</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in vad_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in vad_dir
+     <span class="nb">true</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in vad_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in vad_dir
 
    --punc-dir &lt;string&gt;
-     the punc model path, which contains model.onnx, punc.yaml
+     default: /workspace/models/punc, the punc model path, which contains model.onnx, punc.yaml
    --punc-quant &lt;string&gt;
-     <span class="nb">false</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in punc_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in punc_dir
+     <span class="nb">true</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in punc_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in punc_dir
 
    --decoder_thread_num &lt;int&gt;
      number of threads <span class="k">for</span> decoder, default:8
@@ -224,25 +232,47 @@ Where:
      number of threads <span class="k">for</span> network io, default:8
    --port &lt;int&gt;
      listen port, default:8889
+   --certfile &lt;string&gt;
+     default: ../../../ssl_key/server.crt, path of certficate <span class="k">for</span> WSS connection. <span class="k">if</span> it is empty, it will be in WS mode.
+   --keyfile &lt;string&gt;
+     default: ../../../ssl_key/server.key, path of keyfile <span class="k">for</span> WSS connection
   
-   Required:  --model-dir &lt;string&gt;
-   If use vad, please add: --vad-dir &lt;string&gt;
-   If use punc, please add: --punc-dir &lt;string&gt;
 example:
-   websocketmain --model-dir /FunASR/funasr/runtime/onnxruntime/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
+./funasr-wss-server --model-dir /FunASR/funasr/runtime/onnxruntime/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
 </pre></div>
 </div>
 </div>
 <div class="section" id="run-websocket-client-test">
 <h2>Run websocket client test<a class="headerlink" href="#run-websocket-client-test" title="Permalink to this headline"></a></h2>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>Usage: websocketclient server_ip port wav_path threads_num
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-wss-client  --server-ip &lt;string&gt;
+                    --port &lt;string&gt;
+                    --wav-path &lt;string&gt;
+                    <span class="o">[</span>--thread-num &lt;int&gt;<span class="o">]</span> 
+                    <span class="o">[</span>--is-ssl &lt;int&gt;<span class="o">]</span>  <span class="o">[</span>--<span class="o">]</span>
+                    <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
+
+Where:
+   --server-ip &lt;string&gt;
+     <span class="o">(</span>required<span class="o">)</span>  server-ip
+
+   --port &lt;string&gt;
+     <span class="o">(</span>required<span class="o">)</span>  port
+
+   --wav-path &lt;string&gt;
+     <span class="o">(</span>required<span class="o">)</span>  the input could be: wav_path, e.g.: asr_example.wav<span class="p">;</span>
+     pcm_path, e.g.: asr_example.pcm<span class="p">;</span> wav.scp, kaldi style wav list <span class="o">(</span>wav_id <span class="se">\t</span> wav_path<span class="o">)</span>
+
+   --thread-num &lt;int&gt;
+     thread-num
+
+   --is-ssl &lt;int&gt;
+     is-ssl is <span class="m">1</span> means use wss connection, or use ws connection
 
 example:
-
-websocketclient <span class="m">127</span>.0.0.1 <span class="m">8889</span> funasr/runtime/websocket/test.pcm.wav <span class="m">64</span>
+./funasr-wss-client --server-ip <span class="m">127</span>.0.0.1 --port <span class="m">8889</span> --wav-path test.wav --thread-num <span class="m">1</span> --is-ssl <span class="m">1</span>
 
 result json, example like:
-<span class="o">{</span><span class="s2">&quot;text&quot;</span>:<span class="s2">&quot;一二三四五六七八九十一二三四五六七八九十&quot;</span><span class="o">}</span>
+<span class="o">{</span><span class="s2">&quot;mode&quot;</span>:<span class="s2">&quot;offline&quot;</span>,<span class="s2">&quot;text&quot;</span>:<span class="s2">&quot;欢迎大家来体验达摩院推出的语音识别模型&quot;</span>,<span class="s2">&quot;wav_name&quot;</span>:<span class="s2">&quot;wav2&quot;</span><span class="o">}</span>
 </pre></div>
 </div>
 </div>
