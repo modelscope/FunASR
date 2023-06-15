@@ -10,8 +10,8 @@
 // pools, one for handle network data and one for asr decoder.
 // now only support offline engine.
 
-#ifndef WEBSOCKETSRV_SERVER_H_
-#define WEBSOCKETSRV_SERVER_H_
+#ifndef WEBSOCKET_SERVER_H_
+#define WEBSOCKET_SERVER_H_
 
 #include <iostream>
 #include <map>
@@ -134,4 +134,4 @@ class WebSocketServer {
   websocketpp::lib::mutex m_lock;  // mutex for sample_map
 };
 
-#endif  // WEBSOCKETSRV_SERVER_H_
+#endif  // WEBSOCKET_SERVER_H_

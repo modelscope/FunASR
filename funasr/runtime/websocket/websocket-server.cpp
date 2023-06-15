@@ -10,7 +10,7 @@
 // pools, one for handle network data and one for asr decoder.
 // now only support offline engine.
 
-#include "websocketsrv.h"
+#include "websocket-server.h"
 
 #include <thread>
 #include <utility>
@@ -22,12 +22,11 @@ context_ptr WebSocketServer::on_tls_init(tls_mode mode,
                                          std::string& s_keyfile) {
   namespace asio = websocketpp::lib::asio;
 
-  std::cout << "on_tls_init called with hdl: " << hdl.lock().get() << std::endl;
-  std::cout << "using TLS mode: "
+  LOG(INFO) << "on_tls_init called with hdl: " << hdl.lock().get();
+  LOG(INFO) << "using TLS mode: "
             << (mode == MOZILLA_MODERN ? "Mozilla Modern"
-                                       : "Mozilla Intermediate")
-            << std::endl;
-
+                                       : "Mozilla Intermediate");
+                                       
   context_ptr ctx = websocketpp::lib::make_shared<asio::ssl::context>(
       asio::ssl::context::sslv23);
 
@@ -49,7 +48,7 @@ context_ptr WebSocketServer::on_tls_init(tls_mode mode,
     ctx->use_private_key_file(s_keyfile, asio::ssl::context::pem);
 
   } catch (std::exception& e) {
-    std::cout << "Exception: " << e.what() << std::endl;
+    LOG(INFO) << "Exception: " << e.what();
   }
   return ctx;
 }
@@ -86,8 +85,7 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
                       ec);
       }
 
-      std::cout << "buffer.size=" << buffer.size()
-                << ",result json=" << jsonresult.dump() << std::endl;
+      LOG(INFO) << "buffer.size=" << buffer.size() << ",result json=" << jsonresult.dump();
       if (!isonline) {
         //  close the client if it is not online asr
         // server_->close(hdl, websocketpp::close::status::normal, "DONE", ec);
@@ -110,14 +108,14 @@ void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
   data_msg->samples = std::make_shared<std::vector<char>>();
   data_msg->msg = nlohmann::json::parse("{}");
   data_map.emplace(hdl, data_msg);
-  std::cout << "on_open, active connections: " << data_map.size() << std::endl;
+  LOG(INFO) << "on_open, active connections: " << data_map.size();
 }
 
 void WebSocketServer::on_close(websocketpp::connection_hdl hdl) {
   scoped_lock guard(m_lock);
   data_map.erase(hdl);  // remove data vector when  connection is closed
 
-  std::cout << "on_close, active connections: " << data_map.size() << std::endl;
+  LOG(INFO) << "on_close, active connections: " << data_map.size();
 }
 
 // remove closed connection
@@ -143,7 +141,7 @@ void WebSocketServer::check_and_clean_connection() {
   }
   for (auto hdl : to_remove) {
     data_map.erase(hdl);
-    std::cout << "remove one connection " << std::endl;
+    LOG(INFO)<< "remove one connection ";
   }
 }
 void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
@@ -161,7 +159,7 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
 
   lock.unlock();
   if (sample_data_p == nullptr) {
-    std::cout << "error when fetch sample data vector" << std::endl;
+    LOG(INFO) << "error when fetch sample data vector";
     return;
   }
 
@@ -176,7 +174,7 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
 
       if (jsonresult["is_speaking"] == false ||
           jsonresult["is_finished"] == true) {
-        std::cout << "client done" << std::endl;
+        LOG(INFO) << "client done";
 
         if (isonline) {
           // do_close(ws);
@@ -225,9 +223,9 @@ void WebSocketServer::initAsr(std::map<std::string, std::string>& model_path,
     // init model with api
 
     asr_hanlde = FunOfflineInit(model_path, thread_num);
-    std::cout << "model ready" << std::endl;
+    LOG(INFO) << "model successfully inited";
 
   } catch (const std::exception& e) {
-    std::cout << e.what() << std::endl;
+    LOG(INFO) << e.what();
   }
 }

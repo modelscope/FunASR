@@ -51,7 +51,7 @@ make
 
 ```shell
 cd bin
-   ./websocketmain  [--model_thread_num <int>] [--decoder_thread_num <int>]
+   ./funasr-ws-server  [--model_thread_num <int>] [--decoder_thread_num <int>]
                     [--io_thread_num <int>] [--port <int>] [--listen_ip
                     <string>] [--punc-quant <string>] [--punc-dir <string>]
                     [--vad-quant <string>] [--vad-dir <string>] [--quantize
@@ -88,19 +88,38 @@ Where:
    If use vad, please add: --vad-dir <string>
    If use punc, please add: --punc-dir <string>
 example:
-   websocketmain --model-dir /FunASR/funasr/runtime/onnxruntime/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
+   funasr-ws-server --model-dir /FunASR/funasr/runtime/onnxruntime/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
 ```
 
 ## Run websocket client test
 
 ```shell
-Usage: ./websocketclient server_ip port wav_path threads_num is_ssl
+./funasr-ws-client  --server-ip <string>
+                    --port <string>
+                    --wav-path <string>
+                    [--thread-num <int>] 
+                    [--is-ssl <int>]  [--]
+                    [--version] [-h]
 
-is_ssl is 1 means use wss connection, or use ws connection
+Where:
+   --server-ip <string>
+     (required)  server-ip
+
+   --port <string>
+     (required)  port
+
+   --wav-path <string>
+     (required)  the input could be: wav_path, e.g.: asr_example.wav;
+     pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)
+
+   --thread-num <int>
+     thread-num
+
+   --is-ssl <int>
+     is-ssl is 1 means use wss connection, or use ws connection
 
 example:
-
-websocketclient 127.0.0.1 8889 funasr/runtime/websocket/test.pcm.wav 64 0
+./funasr-ws-client --server-ip 127.0.0.1 --port 8889 --wav-path test.wav --thread-num 1 --is-ssl 0
 
 result json, example like:
 {"mode":"offline","text":"欢迎大家来体验达摩院推出的语音识别模型","wav_name":"wav2"}
