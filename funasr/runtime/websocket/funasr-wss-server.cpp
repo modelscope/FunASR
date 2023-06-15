@@ -15,10 +15,8 @@
 using namespace std;
 void GetValue(TCLAP::ValueArg<std::string>& value_arg, string key,
               std::map<std::string, std::string>& model_path) {
-  if (value_arg.isSet()) {
     model_path.insert({key, value_arg.getValue()});
     LOG(INFO) << key << " : " << value_arg.getValue();
-  }
 }
 int main(int argc, char* argv[]) {
   try {
@@ -28,31 +26,32 @@ int main(int argc, char* argv[]) {
     TCLAP::CmdLine cmd("funasr-ws-server", ' ', "1.0");
     TCLAP::ValueArg<std::string> model_dir(
         "", MODEL_DIR,
-        "the asr model path, which contains model.onnx, config.yaml, am.mvn",
-        true, "", "string");
+        "default: /workspace/models/asr, the asr model path, which contains model.onnx, config.yaml, am.mvn",
+        false, "/workspace/models/asr", "string");
     TCLAP::ValueArg<std::string> quantize(
         "", QUANTIZE,
-        "false (Default), load the model of model.onnx in model_dir. If set "
+        "true (Default), load the model of model.onnx in model_dir. If set "
         "true, load the model of model_quant.onnx in model_dir",
-        false, "false", "string");
+        false, "true", "string");
     TCLAP::ValueArg<std::string> vad_dir(
         "", VAD_DIR,
-        "the vad model path, which contains model.onnx, vad.yaml, vad.mvn",
-        false, "", "string");
+        "default: /workspace/models/vad, the vad model path, which contains model.onnx, vad.yaml, vad.mvn",
+        false, "/workspace/models/vad", "string");
     TCLAP::ValueArg<std::string> vad_quant(
         "", VAD_QUANT,
-        "false (Default), load the model of model.onnx in vad_dir. If set "
+        "true (Default), load the model of model.onnx in vad_dir. If set "
         "true, load the model of model_quant.onnx in vad_dir",
-        false, "false", "string");
+        false, "true", "string");
     TCLAP::ValueArg<std::string> punc_dir(
         "", PUNC_DIR,
-        "the punc model path, which contains model.onnx, punc.yaml", false, "",
+        "default: /workspace/models/punc, the punc model path, which contains model.onnx, punc.yaml", 
+        false, "/workspace/models/punc",
         "string");
     TCLAP::ValueArg<std::string> punc_quant(
         "", PUNC_QUANT,
-        "false (Default), load the model of model.onnx in punc_dir. If set "
+        "true (Default), load the model of model.onnx in punc_dir. If set "
         "true, load the model of model_quant.onnx in punc_dir",
-        false, "false", "string");
+        false, "true", "string");
 
     TCLAP::ValueArg<std::string> listen_ip("", "listen_ip", "listen_ip", false,
                                            "0.0.0.0", "string");
@@ -64,9 +63,9 @@ int main(int argc, char* argv[]) {
     TCLAP::ValueArg<int> model_thread_num("", "model_thread_num",
                                           "model_thread_num", false, 1, "int");
 
-    TCLAP::ValueArg<std::string> certfile("", "certfile", "certfile", false, "",
+    TCLAP::ValueArg<std::string> certfile("", "certfile", "certfile", false, "../../../ssl_key/server.crt",
                                           "string");
-    TCLAP::ValueArg<std::string> keyfile("", "keyfile", "keyfile", false, "",
+    TCLAP::ValueArg<std::string> keyfile("", "keyfile", "keyfile", false, "../../../ssl_key/server.key",
                                          "string");
 
     cmd.add(certfile);

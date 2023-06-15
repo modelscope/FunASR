@@ -51,7 +51,7 @@ make
 
 ```shell
 cd bin
-   ./funasr-ws-server  [--model_thread_num <int>] [--decoder_thread_num <int>]
+   ./funasr-wss-server  [--model_thread_num <int>] [--decoder_thread_num <int>]
                     [--io_thread_num <int>] [--port <int>] [--listen_ip
                     <string>] [--punc-quant <string>] [--punc-dir <string>]
                     [--vad-quant <string>] [--vad-dir <string>] [--quantize
@@ -59,19 +59,19 @@ cd bin
                     [--certfile <string>] [--] [--version] [-h]
 Where:
    --model-dir <string>
-     (required)  the asr model path, which contains model.onnx, config.yaml, am.mvn
+     default: /workspace/models/asr, the asr model path, which contains model.onnx, config.yaml, am.mvn
    --quantize <string>
-     false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir
+     true (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir
 
    --vad-dir <string>
-     the vad model path, which contains model.onnx, vad.yaml, vad.mvn
+     default: /workspace/models/vad, the vad model path, which contains model.onnx, vad.yaml, vad.mvn
    --vad-quant <string>
-     false (Default), load the model of model.onnx in vad_dir. If set true, load the model of model_quant.onnx in vad_dir
+     true (Default), load the model of model.onnx in vad_dir. If set true, load the model of model_quant.onnx in vad_dir
 
    --punc-dir <string>
-     the punc model path, which contains model.onnx, punc.yaml
+     default: /workspace/models/punc, the punc model path, which contains model.onnx, punc.yaml
    --punc-quant <string>
-     false (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir
+     true (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir
 
    --decoder_thread_num <int>
      number of threads for decoder, default:8
@@ -84,17 +84,14 @@ Where:
    --keyfile <string>
      path of keyfile for WSS connection
   
-   Required:  --model-dir <string>
-   If use vad, please add: --vad-dir <string>
-   If use punc, please add: --punc-dir <string>
 example:
-   funasr-ws-server --model-dir /FunASR/funasr/runtime/onnxruntime/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
+   funasr-wss-server --model-dir /FunASR/funasr/runtime/onnxruntime/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
 ```
 
 ## Run websocket client test
 
 ```shell
-./funasr-ws-client  --server-ip <string>
+./funasr-wss-client  --server-ip <string>
                     --port <string>
                     --wav-path <string>
                     [--thread-num <int>] 
@@ -119,7 +116,7 @@ Where:
      is-ssl is 1 means use wss connection, or use ws connection
 
 example:
-./funasr-ws-client --server-ip 127.0.0.1 --port 8889 --wav-path test.wav --thread-num 1 --is-ssl 0
+./funasr-wss-client --server-ip 127.0.0.1 --port 8889 --wav-path test.wav --thread-num 1 --is-ssl 1
 
 result json, example like:
 {"mode":"offline","text":"欢迎大家来体验达摩院推出的语音识别模型","wav_name":"wav2"}
