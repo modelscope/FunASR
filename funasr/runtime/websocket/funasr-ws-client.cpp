@@ -106,12 +106,16 @@ class WebsocketClient {
         const std::string& payload = msg->get_payload();
         switch (msg->get_opcode()) {
             case websocketpp::frame::opcode::text:
-                LOG(INFO)<<"on_message = " << payload;
-				websocketpp::lib::error_code ec;
-		        m_client.close(m_hdl, websocketpp::close::status::going_away, "", ec);
-                if (ec){
+				total_num=total_num+1;
+                LOG(INFO)<<total_num<<",on_message = " << payload;
+				if((total_num+1)==wav_index)
+				{
+					websocketpp::lib::error_code ec;
+					m_client.close(m_hdl, websocketpp::close::status::going_away, "", ec);
+					if (ec){
                         LOG(ERROR)<< "Error closing connection " << ec.message();
-                }
+					}
+				}
         }
     }
 
@@ -270,6 +274,7 @@ class WebsocketClient {
     websocketpp::lib::mutex m_lock;
     bool m_open;
     bool m_done;
+	int total_num=0;
 };
 
 int main(int argc, char* argv[]) {
