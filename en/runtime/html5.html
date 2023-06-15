@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Html5 server for asr service &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <title>online asr demo for html5 &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -75,19 +75,28 @@
 <li class="toctree-l1"><a class="reference internal" href="onnxruntime_python.html">ONNXRuntime-python</a></li>
 <li class="toctree-l1"><a class="reference internal" href="onnxruntime_cpp.html">ONNXRuntime-cpp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="libtorch_python.html">Libtorch-python</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Html5 server for asr service</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#requirement">Requirement</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#install-the-modelscope-and-funasr">Install the modelscope and funasr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#install-the-requirements-for-server">Install the requirements for server</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#javascript-optional">javascript (Optional)</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">online asr demo for html5</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#requirement">requirement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#python">python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#javascript">javascript</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#demo">demo</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#demo">demo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#steps">Steps</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#html5-demo">Html5 demo</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#asr-service">asr service</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#open-browser-to-access-html5-demo">open browser to access html5 demo</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#modify-asr-address-in-html-according-to-your-environment">modify asr address in html according to your environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#wss-or-ws-protocol-for-ws-server-online">wss or ws protocol for ws_server_online</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#html5-demo-start">1.html5 demo start</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ssl-certificate-is-required">ssl certificate is required</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#asr-online-srv-start">2.asr online srv start</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#wss-way-ssl-certificate-is-required">wss way, ssl certificate is required</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ws-way">ws way</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#open-browser-to-access-html5-demo">3.open browser to access html5 demo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#modify-asr-address-in-html-according-to-your-environment">4.modify asr address in html according to your environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#certificate-generation-by-yourself">certificate generation by yourself</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#nginx-configuration-you-can-skip-it-if-you-known">nginx configuration (you can skip it if you known)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#nginx-wss-ws-configuration-example">nginx wss-&gt;ws configuration example</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#acknowledge">Acknowledge</a></li>
@@ -137,7 +146,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Html5 server for asr service</li>
+      <li class="breadcrumb-item active">online asr demo for html5</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/runtime/html5.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -147,70 +156,126 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="html5-server-for-asr-service">
-<h1>Html5 server for asr service<a class="headerlink" href="#html5-server-for-asr-service" title="Permalink to this headline"></a></h1>
+  <div class="section" id="online-asr-demo-for-html5">
+<h1>online asr demo for html5<a class="headerlink" href="#online-asr-demo-for-html5" title="Permalink to this headline"></a></h1>
 <div class="section" id="requirement">
-<h2>Requirement<a class="headerlink" href="#requirement" title="Permalink to this headline"></a></h2>
-<div class="section" id="install-the-modelscope-and-funasr">
-<h3>Install the modelscope and funasr<a class="headerlink" href="#install-the-modelscope-and-funasr" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install -U modelscope funasr
-<span class="c1"># For the users in China, you could install with the command:</span>
-<span class="c1"># pip install -U modelscope funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple</span>
-git clone https://github.com/alibaba/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> FunASR
+<h2>requirement<a class="headerlink" href="#requirement" title="Permalink to this headline"></a></h2>
+<div class="section" id="python">
+<h3>python<a class="headerlink" href="#python" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>flask
+gevent
+pyOpenSSL
 </pre></div>
 </div>
 </div>
-<div class="section" id="install-the-requirements-for-server">
-<h3>Install the requirements for server<a class="headerlink" href="#install-the-requirements-for-server" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install flask
-<span class="c1"># pip install gevent (Optional)</span>
-<span class="c1"># pip install pyOpenSSL (Optional)</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="javascript-optional">
-<h3>javascript (Optional)<a class="headerlink" href="#javascript-optional" title="Permalink to this headline"></a></h3>
+<div class="section" id="javascript">
+<h3>javascript<a class="headerlink" href="#javascript" title="Permalink to this headline"></a></h3>
 <p><a class="reference external" href="https://github.com/xiangyuecn/Recorder">html5 recorder.js</a></p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>Recorder 
 </pre></div>
 </div>
 </div>
-</div>
 <div class="section" id="demo">
-<h2>demo<a class="headerlink" href="#demo" title="Permalink to this headline"></a></h2>
-<div align="center"><img src="./demo.gif" width="150"/> </div></div>
-<div class="section" id="steps">
-<h2>Steps<a class="headerlink" href="#steps" title="Permalink to this headline"></a></h2>
-<div class="section" id="html5-demo">
-<h3>Html5 demo<a class="headerlink" href="#html5-demo" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>usage: h5Server.py <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--host HOST<span class="o">]</span> <span class="o">[</span>--port PORT<span class="o">]</span> <span class="o">[</span>--certfile CERTFILE<span class="o">]</span> <span class="o">[</span>--keyfile KEYFILE<span class="o">]</span>
-</pre></div>
-</div>
-<p><code class="docutils literal notranslate"><span class="pre">e.g.</span></code></p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> funasr/runtime/html5
-python h5Server.py --host <span class="m">0</span>.0.0.0 --port <span class="m">1337</span> 
-</pre></div>
+<h3>demo<a class="headerlink" href="#demo" title="Permalink to this headline"></a></h3>
+<p><img alt="img" src="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/html5/demo.gif" /></p>
 </div>
 </div>
-<div class="section" id="asr-service">
-<h3>asr service<a class="headerlink" href="#asr-service" title="Permalink to this headline"></a></h3>
-<p><a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket">detail for asr</a></p>
-<p><code class="docutils literal notranslate"><span class="pre">Tips:</span></code> asr service and html5 service should be deployed on the same device.</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> ../python/websocket
-python wss_srv_asr.py --port <span class="m">10095</span>
+<div class="section" id="wss-or-ws-protocol-for-ws-server-online">
+<h2>wss or ws protocol for ws_server_online<a class="headerlink" href="#wss-or-ws-protocol-for-ws-server-online" title="Permalink to this headline"></a></h2>
+<ol class="simple">
+<li><p>wss: browser microphone data –&gt; html5 demo server –&gt; js wss api –&gt; wss asr online srv #for certificate generation just look back</p></li>
+<li><p>ws: browser microphone data  –&gt; html5 demo server –&gt; js wss api –&gt; nginx wss server –&gt; ws asr online srv</p></li>
+</ol>
+</div>
+<div class="section" id="html5-demo-start">
+<h2>1.html5 demo start<a class="headerlink" href="#html5-demo-start" title="Permalink to this headline"></a></h2>
+<div class="section" id="ssl-certificate-is-required">
+<h3>ssl certificate is required<a class="headerlink" href="#ssl-certificate-is-required" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>usage: h5Server.py <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--host HOST<span class="o">]</span> <span class="o">[</span>--port PORT<span class="o">]</span> <span class="o">[</span>--certfile CERTFILE<span class="o">]</span>
+                   <span class="o">[</span>--keyfile KEYFILE<span class="o">]</span>
+python h5Server.py --port <span class="m">1337</span>
 </pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="asr-online-srv-start">
+<h2>2.asr online srv start<a class="headerlink" href="#asr-online-srv-start" title="Permalink to this headline"></a></h2>
+<p><a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket">detail for online asr</a>
+Online asr provides wss or ws way. if started in ws way, nginx is required for relay.</p>
+<div class="section" id="wss-way-ssl-certificate-is-required">
+<h3>wss way, ssl certificate is required<a class="headerlink" href="#wss-way-ssl-certificate-is-required" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python ws_server_online.py --certfile server.crt --keyfile server.key  --port <span class="m">5921</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="ws-way">
+<h3>ws way<a class="headerlink" href="#ws-way" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python ws_server_online.py  --port <span class="m">5921</span>
+</pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="open-browser-to-access-html5-demo">
-<h3>open browser to access html5 demo<a class="headerlink" href="#open-browser-to-access-html5-demo" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>https://127.0.0.1:1337/static/index.html
-<span class="c1"># https://30.220.136.139:1337/static/index.html</span>
+<h2>3.open browser to access html5 demo<a class="headerlink" href="#open-browser-to-access-html5-demo" title="Permalink to this headline"></a></h2>
+<p>https://youraddress:port/static/index.html</p>
+</div>
+<div class="section" id="modify-asr-address-in-html-according-to-your-environment">
+<h2>4.modify asr address in html according to your environment<a class="headerlink" href="#modify-asr-address-in-html-according-to-your-environment" title="Permalink to this headline"></a></h2>
+<p>asr address in index.html must be wss</p>
+</div>
+<div class="section" id="certificate-generation-by-yourself">
+<h2>certificate generation by yourself<a class="headerlink" href="#certificate-generation-by-yourself" title="Permalink to this headline"></a></h2>
+<p>generated certificate may not suitable for all browsers due to security concerns. you’d better buy or download an authenticated ssl certificate from authorized agency.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1">### 1) Generate a private key</span>
+openssl genrsa -des3 -out server.key <span class="m">1024</span>
+ 
+<span class="c1">### 2) Generate a csr file</span>
+openssl req -new -key server.key -out server.csr
+ 
+<span class="c1">### 3) Remove pass</span>
+cp server.key server.key.org 
+openssl rsa -in server.key.org -out server.key
+ 
+<span class="c1">### 4) Generated a crt file, valid for 1 year</span>
+openssl x509 -req -days <span class="m">365</span> -in server.csr -signkey server.key -out server.crt
 </pre></div>
 </div>
 </div>
-<div class="section" id="modify-asr-address-in-html-according-to-your-environment">
-<h3>modify asr address in html according to your environment<a class="headerlink" href="#modify-asr-address-in-html-according-to-your-environment" title="Permalink to this headline"></a></h3>
-<p>asr address in index.html must be wss</p>
+<div class="section" id="nginx-configuration-you-can-skip-it-if-you-known">
+<h2>nginx configuration (you can skip it if you known)<a class="headerlink" href="#nginx-configuration-you-can-skip-it-if-you-known" title="Permalink to this headline"></a></h2>
+<p>https and wss protocol are required by browsers when want to open microphone and websocket.<br />if <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket">online asr</a> run in ws way, you should use nginx to convert wss to ws.</p>
+<div class="section" id="nginx-wss-ws-configuration-example">
+<h3>nginx wss-&gt;ws configuration example<a class="headerlink" href="#nginx-wss-ws-configuration-example" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>events <span class="o">{</span>                                                                                                            <span class="o">[</span><span class="m">0</span>/1548<span class="o">]</span>
+    worker_connections  <span class="m">1024</span><span class="p">;</span>
+    accept_mutex on<span class="p">;</span>
+  <span class="o">}</span>
+http <span class="o">{</span>
+  error_log  error.log<span class="p">;</span>
+  access_log  access.log<span class="p">;</span>
+  server <span class="o">{</span>
+
+    listen <span class="m">5921</span> ssl http2<span class="p">;</span>  <span class="c1"># nginx listen port for wss</span>
+    server_name www.test.com<span class="p">;</span>
+
+    ssl_certificate     /funasr/server.crt<span class="p">;</span>
+    ssl_certificate_key /funasr/server.key<span class="p">;</span>
+    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2<span class="p">;</span>
+    ssl_ciphers         HIGH:!aNULL:!MD5<span class="p">;</span>
+
+    location /wss/ <span class="o">{</span>
+
+
+      proxy_pass http://127.0.0.1:1111/<span class="p">;</span>  <span class="c1"># asr online model ws address and port</span>
+      proxy_http_version <span class="m">1</span>.1<span class="p">;</span>
+      proxy_set_header Upgrade <span class="nv">$http_upgrade</span><span class="p">;</span>
+      proxy_set_header Connection <span class="s2">&quot;upgrade&quot;</span><span class="p">;</span>
+      proxy_read_timeout 600s<span class="p">;</span>
+
+    <span class="o">}</span>
+  <span class="o">}</span>
+</pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="acknowledge">

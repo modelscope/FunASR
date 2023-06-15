@@ -58,19 +58,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#stage-5-decoding">Stage 5: Decoding</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#change-settings">Change settings</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#training-with-specified-gpus">Training with specified GPUs</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#start-from-stop-at-a-specified-stage">Start from/Stop at a specified stage</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#specify-total-training-steps">Specify total training steps</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#change-the-configuration-of-the-model">Change the configuration of the model</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#change-different-input-data-type">Change different input data type</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#how-to-resume-training-process">How to resume training process</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#how-to-transfer-fine-tuning-from-pre-trained-models">How to transfer / fine-tuning from pre-trained models</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#how-to-freeze-part-of-the-model-parameters">How to freeze part of the model parameters</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#modelscope-usage">ModelScope Usage</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#decoding-by-cpu-or-gpu">Decoding by CPU or GPU</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#change-settings">Change settings</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="punc_recipe.html">Punctuation Restoration</a></li>
@@ -100,7 +88,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../runtime/onnxruntime_python.html">ONNXRuntime-python</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../runtime/onnxruntime_cpp.html">ONNXRuntime-cpp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../runtime/libtorch_python.html">Libtorch-python</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../runtime/html5.html">Html5 server for asr service</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runtime/html5.html">online asr demo for html5</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../runtime/websocket_python.html">Service with websocket-python</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../runtime/websocket_cpp.html">Service with websocket-cpp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../runtime/grpc_python.html">Service with grpc-python</a></li>
@@ -167,61 +155,25 @@
 </div>
 <p>Then you can directly start the recipe as follows:</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>conda activate funasr
-. ./run.sh --CUDA_VISIBLE_DEVICES<span class="o">=</span><span class="s2">&quot;0,1&quot;</span> --gpu_num<span class="o">=</span><span class="m">2</span>
+. ./run.sh
 </pre></div>
 </div>
-<p>The training log files are saved in <code class="docutils literal notranslate"><span class="pre">${exp_dir}/exp/${model_dir}/log/train.log.*</span></code>， which can be viewed using the following command:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>vim exp/*_train_*/log/train.log.0
-</pre></div>
-</div>
-<p>Users can observe the training loss, prediction accuracy and other training information, like follows:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>... 1epoch:train:751-800batch:800num_updates: ... loss_ctc=106.703, loss_att=86.877, acc=0.029, loss_pre=1.552 ...
-... 1epoch:train:801-850batch:850num_updates: ... loss_ctc=107.890, loss_att=87.832, acc=0.029, loss_pre=1.702 ...
-</pre></div>
-</div>
-<p>At the end of each epoch, the evaluation metrics are calculated on the validation set, like follows:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>... [valid] loss_ctc=99.914, cer_ctc=1.000, loss_att=80.512, acc=0.029, cer=0.971, wer=1.000, loss_pre=1.952, loss=88.285 ...
-</pre></div>
-</div>
-<p>Also, users can use tensorboard to observe these training information by the following command:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>tensorboard --logdir <span class="si">${</span><span class="nv">exp_dir</span><span class="si">}</span>/exp/<span class="si">${</span><span class="nv">model_dir</span><span class="si">}</span>/tensorboard/train
-</pre></div>
-</div>
-<p>Here is an example of loss:</p>
-<img src="./academic_recipe/images/loss.png" width="200"/><p>The inference results are saved in <code class="docutils literal notranslate"><span class="pre">${exp_dir}/exp/${model_dir}/decode_asr_*/$dset</span></code>. The main two files are <code class="docutils literal notranslate"><span class="pre">text.cer</span></code> and <code class="docutils literal notranslate"><span class="pre">text.cer.txt</span></code>. <code class="docutils literal notranslate"><span class="pre">text.cer</span></code> saves the comparison between the recognized text and the reference text, like follows:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>...
-BAC009S0764W0213(nwords=11,cor=11,ins=0,del=0,sub=0) corr=100.00%,cer=0.00%
-ref:    构 建 良 好 的 旅 游 市 场 环 境
-res:    构 建 良 好 的 旅 游 市 场 环 境
-...
-</pre></div>
-</div>
-<p><code class="docutils literal notranslate"><span class="pre">text.cer.txt</span></code> saves the final results, like follows:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>%WER ...
-%SER ...
-Scored ... sentences, ...
-</pre></div>
-</div>
+<p>The training log files are saved in <code class="docutils literal notranslate"><span class="pre">exp/*_train_*/log/train.log.*</span></code> and the inference results are saved in <code class="docutils literal notranslate"><span class="pre">exp/*_train_*/decode_asr_*</span></code>.</p>
 </div>
 <div class="section" id="introduction">
 <h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline"></a></h2>
 <p>We provide a recipe <code class="docutils literal notranslate"><span class="pre">egs/aishell/paraformer/run.sh</span></code> for training a paraformer model on AISHELL-1 dataset. This recipe consists of five stages, supporting training on multiple GPUs and decoding by CPU or GPU. Before introducing each stage in detail, we first explain several parameters which should be set by users.</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">CUDA_VISIBLE_DEVICES</span></code>: <code class="docutils literal notranslate"><span class="pre">0,1</span></code> (Default), visible gpu list</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">gpu_num</span></code>: <code class="docutils literal notranslate"><span class="pre">2</span></code> (Default), the number of GPUs used for training</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">gpu_inference</span></code>: <code class="docutils literal notranslate"><span class="pre">true</span></code> (Default), whether to use GPUs for decoding</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">njob</span></code>: <code class="docutils literal notranslate"><span class="pre">1</span></code>  (Default),for CPU decoding, indicating the total number of CPU jobs; for GPU decoding, indicating the number of jobs on each GPU</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CUDA_VISIBLE_DEVICES</span></code>: visible gpu list</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gpu_num</span></code>: the number of GPUs used for training</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gpu_inference</span></code>: whether to use GPUs for decoding</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">njob</span></code>: for CPU decoding, indicating the total number of CPU jobs; for GPU decoding, indicating the number of jobs on each GPU</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">raw_data</span></code>: the raw path of AISHELL-1 dataset</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">feats_dir</span></code>: the path for saving processed data</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">token_type</span></code>: <code class="docutils literal notranslate"><span class="pre">char</span></code> (Default), indicate how to process text</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">type</span></code>: <code class="docutils literal notranslate"><span class="pre">sound</span></code> (Default), set the input type</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">scp</span></code>: <code class="docutils literal notranslate"><span class="pre">wav.scp</span></code> (Default), set the input file</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">nj</span></code>: <code class="docutils literal notranslate"><span class="pre">64</span></code> (Default), the number of jobs for data preparation</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">speed_perturb</span></code>: <code class="docutils literal notranslate"><span class="pre">&quot;0.9,</span> <span class="pre">1.0</span> <span class="pre">,1.1&quot;</span></code> (Default), the range of speech perturbed</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nj</span></code>: the number of jobs for data preparation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">speed_perturb</span></code>: the range of speech perturbed</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">exp_dir</span></code>: the path for saving experimental results</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">tag</span></code>: <code class="docutils literal notranslate"><span class="pre">exp1</span></code> (Default), the suffix of experimental result directory</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">stage</span></code> <code class="docutils literal notranslate"><span class="pre">0</span></code> (Default), start the recipe from the specified stage</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">stop_stage</span></code> <code class="docutils literal notranslate"><span class="pre">5</span></code> (Default), stop the recipe from the specified stage</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tag</span></code>: the suffix of experimental result directory</p></li>
 </ul>
 <div class="section" id="stage-0-data-preparation">
 <h3>Stage 0: Data preparation<a class="headerlink" href="#stage-0-data-preparation" title="Permalink to this headline"></a></h3>
@@ -248,11 +200,14 @@ Scored ... sentences, ...
 </div>
 <div class="section" id="stage-1-feature-and-cmvn-generation">
 <h3>Stage 1: Feature and CMVN Generation<a class="headerlink" href="#stage-1-feature-and-cmvn-generation" title="Permalink to this headline"></a></h3>
-<p>This stage computes CMVN based on <code class="docutils literal notranslate"><span class="pre">train</span></code> dataset, which is used in the following stages. Users can set <code class="docutils literal notranslate"><span class="pre">nj</span></code> to control the number of jobs for computing CMVN. The generated CMVN file is saved as <code class="docutils literal notranslate"><span class="pre">$feats_dir/data/train/cmvn/am.mvn</span></code>.</p>
+<p>This stage computes CMVN based on <code class="docutils literal notranslate"><span class="pre">train</span></code> dataset, which is used in the following stages. Users can set <code class="docutils literal notranslate"><span class="pre">nj</span></code> to control the number of jobs for computing CMVN. The generated CMVN file is saved as <code class="docutils literal notranslate"><span class="pre">$feats_dir/data/train/cmvn/cmvn.mvn</span></code>.</p>
 </div>
 <div class="section" id="stage-2-dictionary-preparation">
 <h3>Stage 2: Dictionary Preparation<a class="headerlink" href="#stage-2-dictionary-preparation" title="Permalink to this headline"></a></h3>
 <p>This stage processes the dictionary, which is used as a mapping between label characters and integer indices during ASR training. The processed dictionary file is saved as <code class="docutils literal notranslate"><span class="pre">$feats_dir/data/$lang_toekn_list/$token_type/tokens.txt</span></code>. An example of <code class="docutils literal notranslate"><span class="pre">tokens.txt</span></code> is as follows:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">tokens.txt</span></code></p></li>
+</ul>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">blank</span><span class="o">&gt;</span>
 <span class="o">&lt;</span><span class="n">s</span><span class="o">&gt;</span>
 <span class="o">&lt;/</span><span class="n">s</span><span class="o">&gt;</span>
@@ -264,12 +219,11 @@ Scored ... sentences, ...
 <span class="o">&lt;</span><span class="n">unk</span><span class="o">&gt;</span>
 </pre></div>
 </div>
-<p>There are four tokens must be specified:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">&lt;blank&gt;</span></code>: (required), indicates the blank token for CTC, must be in the first line</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&lt;s&gt;</span></code>: (required), indicates the start-of-sentence token, must be in the second line</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&lt;/s&gt;</span></code>: (required), indicates the end-of-sentence token, must be in the third line</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&lt;unk&gt;</span></code>: (required), indicates the out-of-vocabulary token, must be in the last line</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;blank&gt;</span></code>: indicates the blank token for CTC</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;s&gt;</span></code>: indicates the start-of-sentence token</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;/s&gt;</span></code>: indicates the end-of-sentence token</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;unk&gt;</span></code>: indicates the out-of-vocabulary token</p></li>
 </ul>
 </div>
 <div class="section" id="stage-3-lm-training">
@@ -277,37 +231,30 @@ Scored ... sentences, ...
 </div>
 <div class="section" id="stage-4-asr-training">
 <h3>Stage 4: ASR Training<a class="headerlink" href="#stage-4-asr-training" title="Permalink to this headline"></a></h3>
-<p>This stage achieves the training of the specified model. To start training, users should manually set <code class="docutils literal notranslate"><span class="pre">exp_dir</span></code> to specify the path for saving experimental results. By default, the best <code class="docutils literal notranslate"><span class="pre">$keep_nbest_models</span></code> checkpoints on validation dataset will be averaged to generate a better model and adopted for decoding. FunASR implements <code class="docutils literal notranslate"><span class="pre">train.py</span></code> for training different models and users can configure the following parameters if necessary. The training command is as follows:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>train.py <span class="se">\</span>
-    --task_name asr <span class="se">\</span>
-    --use_preprocessor <span class="nb">true</span> <span class="se">\</span>
-    --token_list <span class="nv">$token_list</span> <span class="se">\</span>
-    --data_dir <span class="si">${</span><span class="nv">feats_dir</span><span class="si">}</span>/data <span class="se">\</span>
-    --train_set <span class="si">${</span><span class="nv">train_set</span><span class="si">}</span> <span class="se">\</span>
-    --valid_set <span class="si">${</span><span class="nv">valid_set</span><span class="si">}</span> <span class="se">\</span>
-    --data_file_names <span class="s2">&quot;wav.scp,text&quot;</span> <span class="se">\</span>
-    --cmvn_file <span class="si">${</span><span class="nv">feats_dir</span><span class="si">}</span>/data/<span class="si">${</span><span class="nv">train_set</span><span class="si">}</span>/cmvn/am.mvn <span class="se">\</span>
-    --speed_perturb <span class="si">${</span><span class="nv">speed_perturb</span><span class="si">}</span> <span class="se">\</span>
-    --resume <span class="nb">true</span> <span class="se">\</span>
-    --output_dir <span class="si">${</span><span class="nv">exp_dir</span><span class="si">}</span>/exp/<span class="si">${</span><span class="nv">model_dir</span><span class="si">}</span> <span class="se">\</span>
-    --config <span class="nv">$asr_config</span> <span class="se">\</span>
-    --ngpu <span class="nv">$gpu_num</span> <span class="se">\</span>
-    ...
+<p>This stage achieves the training of the specified model. To start training, users should manually set <code class="docutils literal notranslate"><span class="pre">exp_dir</span></code>, <code class="docutils literal notranslate"><span class="pre">CUDA_VISIBLE_DEVICES</span></code> and <code class="docutils literal notranslate"><span class="pre">gpu_num</span></code>, which have already been explained above. By default, the best <code class="docutils literal notranslate"><span class="pre">$keep_nbest_models</span></code> checkpoints on validation dataset will be averaged to generate a better model and adopted for decoding.</p>
+<ul class="simple">
+<li><p>DDP Training</p></li>
+</ul>
+<p>We support the DistributedDataParallel (DDP) training and the detail can be found <a class="reference external" href="https://pytorch.org/tutorials/intermediate/ddp_tutorial.html">here</a>. To enable DDP training, please set <code class="docutils literal notranslate"><span class="pre">gpu_num</span></code> greater than 1. For example, if you set <code class="docutils literal notranslate"><span class="pre">CUDA_VISIBLE_DEVICES=0,1,5,6,7</span></code> and <code class="docutils literal notranslate"><span class="pre">gpu_num=3</span></code>, then the gpus with ids 0, 1 and 5 will be used for training.</p>
+<ul class="simple">
+<li><p>DataLoader</p></li>
+</ul>
+<p>We support an optional iterable-style DataLoader based on <a class="reference external" href="https://pytorch.org/data/beta/torchdata.datapipes.iter.html">Pytorch Iterable-style DataPipes</a> for large dataset and users can set <code class="docutils literal notranslate"><span class="pre">dataset_type=large</span></code> to enable it.</p>
+<ul class="simple">
+<li><p>Configuration</p></li>
+</ul>
+<p>The parameters of the training, including model, optimization, dataset, etc., can be set by a YAML file in <code class="docutils literal notranslate"><span class="pre">conf</span></code> directory. Also, users can directly set the parameters in <code class="docutils literal notranslate"><span class="pre">run.sh</span></code> recipe. Please avoid to set the same parameters in both the YAML file and the recipe.</p>
+<ul class="simple">
+<li><p>Training Steps</p></li>
+</ul>
+<p>We support two parameters to specify the training steps, namely <code class="docutils literal notranslate"><span class="pre">max_epoch</span></code> and <code class="docutils literal notranslate"><span class="pre">max_update</span></code>. <code class="docutils literal notranslate"><span class="pre">max_epoch</span></code> indicates the total training epochs while <code class="docutils literal notranslate"><span class="pre">max_update</span></code> indicates the total training steps. If these two parameters are specified at the same time, once the training reaches any one of these two parameters, the training will be stopped.</p>
+<ul class="simple">
+<li><p>Tensorboard</p></li>
+</ul>
+<p>Users can use tensorboard to observe the loss, learning rate, etc. Please run the following command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>tensorboard --logdir ${exp_dir}/exp/${model_dir}/tensorboard/train
 </pre></div>
 </div>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">task_name</span></code>: <code class="docutils literal notranslate"><span class="pre">asr</span></code> (Default), specify the task type of the current recipe</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ngpu</span></code>: <code class="docutils literal notranslate"><span class="pre">2</span></code> (Default), specify the number of GPUs for training. When <code class="docutils literal notranslate"><span class="pre">ngpu</span> <span class="pre">&gt;</span> <span class="pre">1</span></code>, DistributedDataParallel (DDP, the detail can be found <a class="reference external" href="https://pytorch.org/tutorials/intermediate/ddp_tutorial.html">here</a>) training will be enabled. Correspondingly, <code class="docutils literal notranslate"><span class="pre">CUDA_VISIBLE_DEVICES</span></code> should be set to specify which ids of GPUs will be used.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">use_preprocessor</span></code>: <code class="docutils literal notranslate"><span class="pre">true</span></code> (Default), specify whether to use pre-processing on each sample</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">token_list</span></code>: the path of token list for training</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">dataset_type</span></code>: <code class="docutils literal notranslate"><span class="pre">small</span></code> (Default). FunASR supports <code class="docutils literal notranslate"><span class="pre">small</span></code> dataset type for training small datasets. Besides, an optional iterable-style DataLoader based on <a class="reference external" href="https://pytorch.org/data/beta/torchdata.datapipes.iter.html">Pytorch Iterable-style DataPipes</a> for large datasets is supported and users can specify <code class="docutils literal notranslate"><span class="pre">dataset_type=large</span></code> to enable it.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">data_dir</span></code>: the path of data. Specifically, the data for training is saved in <code class="docutils literal notranslate"><span class="pre">$data_dir/data/$train_set</span></code> while the data for validation is saved in <code class="docutils literal notranslate"><span class="pre">$data_dir/data/$valid_set</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">data_file_names</span></code>: <code class="docutils literal notranslate"><span class="pre">&quot;wav.scp,text&quot;</span></code> specify the speech and text file names for ASR</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">cmvn_file</span></code>: the path of cmvn file</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">resume</span></code>: <code class="docutils literal notranslate"><span class="pre">true</span></code>, whether to enable “checkpoint training”</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">output_dir</span></code>: the path for saving training results</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">config</span></code>: the path of configuration file, which is usually a YAML file in <code class="docutils literal notranslate"><span class="pre">conf</span></code> directory. In FunASR, the parameters of the training, including model, optimization, dataset, etc., can also be set in this file. Note that if the same parameters are specified in both recipe and config file, the parameters of recipe will be employed</p></li>
-</ul>
 </div>
 <div class="section" id="stage-5-decoding">
 <h3>Stage 5: Decoding<a class="headerlink" href="#stage-5-decoding" title="Permalink to this headline"></a></h3>
@@ -328,6 +275,9 @@ Scored ... sentences, ...
 <li><p>Performance</p></li>
 </ul>
 <p>We adopt <code class="docutils literal notranslate"><span class="pre">CER</span></code> to verify the performance. The results are in <code class="docutils literal notranslate"><span class="pre">$exp_dir/exp/$model_dir/$decoding_yaml_name/$average_model_name/$dset</span></code>, namely <code class="docutils literal notranslate"><span class="pre">text.cer</span></code> and <code class="docutils literal notranslate"><span class="pre">text.cer.txt</span></code>. <code class="docutils literal notranslate"><span class="pre">text.cer</span></code> saves the comparison between the recognized text and the reference text while <code class="docutils literal notranslate"><span class="pre">text.cer.txt</span></code> saves the final <code class="docutils literal notranslate"><span class="pre">CER</span></code> results. The following is an example of <code class="docutils literal notranslate"><span class="pre">text.cer</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">text.cer</span></code></p></li>
+</ul>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
 <span class="n">BAC009S0764W0213</span><span class="p">(</span><span class="n">nwords</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span><span class="n">cor</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span><span class="n">ins</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="k">del</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">sub</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="n">corr</span><span class="o">=</span><span class="mf">100.00</span><span class="o">%</span><span class="p">,</span><span class="n">cer</span><span class="o">=</span><span class="mf">0.00</span><span class="o">%</span>
 <span class="n">ref</span><span class="p">:</span>    <span class="n">构</span> <span class="n">建</span> <span class="n">良</span> <span class="n">好</span> <span class="n">的</span> <span class="n">旅</span> <span class="n">游</span> <span class="n">市</span> <span class="n">场</span> <span class="n">环</span> <span class="n">境</span>
@@ -340,31 +290,28 @@ Scored ... sentences, ...
 <div class="section" id="change-settings">
 <h2>Change settings<a class="headerlink" href="#change-settings" title="Permalink to this headline"></a></h2>
 <p>Here we explain how to perform common custom settings, which can help users to modify scripts according to their own needs.</p>
-<div class="section" id="training-with-specified-gpus">
-<h3>Training with specified GPUs<a class="headerlink" href="#training-with-specified-gpus" title="Permalink to this headline"></a></h3>
-<p>For example, if users want to use 2 GPUs with id <code class="docutils literal notranslate"><span class="pre">2</span></code> and <code class="docutils literal notranslate"><span class="pre">3</span></code>, users can run the following command:</p>
+<ul class="simple">
+<li><p>Training with specified GPUs</p></li>
+</ul>
+<p>For example, if users want to use 2 GPUs with id <code class="docutils literal notranslate"><span class="pre">2</span></code> and `3, users can run the following command:</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>. ./run.sh --CUDA_VISIBLE_DEVICES <span class="s2">&quot;2,3&quot;</span> --gpu_num <span class="m">2</span> 
 </pre></div>
 </div>
-</div>
-<div class="section" id="start-from-stop-at-a-specified-stage">
-<h3>Start from/Stop at a specified stage<a class="headerlink" href="#start-from-stop-at-a-specified-stage" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>Start from/Stop at a specified stage</p></li>
+</ul>
 <p>The recipe includes several stages. Users can start form or stop at any stage. For example, the following command achieves starting from the third stage and stopping at the fifth stage:</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>. ./run.sh --stage <span class="m">3</span> --stop_stage <span class="m">5</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="specify-total-training-steps">
-<h3>Specify total training steps<a class="headerlink" href="#specify-total-training-steps" title="Permalink to this headline"></a></h3>
-<p>FunASR supports two parameters to specify the training steps, namely <code class="docutils literal notranslate"><span class="pre">max_epoch</span></code> and <code class="docutils literal notranslate"><span class="pre">max_update</span></code>. <code class="docutils literal notranslate"><span class="pre">max_epoch</span></code> indicates the total training epochs while <code class="docutils literal notranslate"><span class="pre">max_update</span></code> indicates the total training steps. If these two parameters are specified at the same time, once the training reaches any one of these two parameters, the training will be stopped.</p>
-</div>
-<div class="section" id="change-the-configuration-of-the-model">
-<h3>Change the configuration of the model<a class="headerlink" href="#change-the-configuration-of-the-model" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>Change the configuration of the model</p></li>
+</ul>
 <p>The configuration of the model is set in the config file <code class="docutils literal notranslate"><span class="pre">conf/train_*.yaml</span></code>. Specifically, the default encoder configuration of paraformer is as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">encoder</span><span class="p">:</span> <span class="n">conformer</span>
 <span class="n">encoder_conf</span><span class="p">:</span>
     <span class="n">output_size</span><span class="p">:</span> <span class="mi">256</span>    <span class="c1"># dimension of attention</span>
-    <span class="n">attention_heads</span><span class="p">:</span> <span class="mi">4</span>  <span class="c1"># the number of heads in multi-head attention</span>
+    <span class="n">attention_heads</span><span class="p">:</span> <span class="mi">4</span>  <span class="c1"># number of heads in multi-head attention</span>
     <span class="n">linear_units</span><span class="p">:</span> <span class="mi">2048</span>  <span class="c1"># the number of units of position-wise feed forward</span>
     <span class="n">num_blocks</span><span class="p">:</span> <span class="mi">12</span>      <span class="c1"># the number of encoder blocks</span>
     <span class="n">dropout_rate</span><span class="p">:</span> <span class="mf">0.1</span>
@@ -381,55 +328,10 @@ Scored ... sentences, ...
 </pre></div>
 </div>
 <p>Users can change the encoder configuration by modify these values. For example, if users want to use an encoder with 16 conformer blocks and each block has 8 attention heads, users just need to change <code class="docutils literal notranslate"><span class="pre">num_blocks</span></code> from 12 to 16 and change <code class="docutils literal notranslate"><span class="pre">attention_heads</span></code> from 4 to 8. Besides, the batch_size, learning rate and other training hyper-parameters are also set in this config file. To change these hyper-parameters, users just need to directly change the corresponding values in this file. For example, the default learning rate is <code class="docutils literal notranslate"><span class="pre">0.0005</span></code>. If users want to change the learning rate to 0.0002, set the value of lr as <code class="docutils literal notranslate"><span class="pre">lr:</span> <span class="pre">0.0002</span></code>.</p>
-</div>
-<div class="section" id="change-different-input-data-type">
-<h3>Change different input data type<a class="headerlink" href="#change-different-input-data-type" title="Permalink to this headline"></a></h3>
-<p>FunASR supports different input data types, including <code class="docutils literal notranslate"><span class="pre">sound</span></code>, <code class="docutils literal notranslate"><span class="pre">kaldi_ark</span></code>, <code class="docutils literal notranslate"><span class="pre">npy</span></code>, <code class="docutils literal notranslate"><span class="pre">text</span></code> and <code class="docutils literal notranslate"><span class="pre">text_int</span></code>. Users can specify any number and any type of input, which is achieved by <code class="docutils literal notranslate"><span class="pre">data_names</span></code> and <code class="docutils literal notranslate"><span class="pre">data_types</span></code> (in <code class="docutils literal notranslate"><span class="pre">config/train_*.yaml</span></code>). For example, ASR task usually requires speech and the transcripts as input. In FunASR, by default, speech is saved as raw audio (such as wav format) and transcripts are saved as text format. Correspondingly, <code class="docutils literal notranslate"><span class="pre">data_names</span></code> and <code class="docutils literal notranslate"><span class="pre">data_types</span></code> are set as follows (seen in <code class="docutils literal notranslate"><span class="pre">config/train_*.yaml</span></code>):</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>dataset_conf:
-    data_names: speech,text
-    data_types: sound,text
-    ...
-</pre></div>
-</div>
-<p>When the input type changes to FBank, users just need to modify as <code class="docutils literal notranslate"><span class="pre">data_types:</span> <span class="pre">kaldi_ark,text</span></code> in the config file. Note <code class="docutils literal notranslate"><span class="pre">data_file_names</span></code> used in <code class="docutils literal notranslate"><span class="pre">train.py</span></code> should also be changed to the new file name.</p>
-</div>
-<div class="section" id="how-to-resume-training-process">
-<h3>How to resume training process<a class="headerlink" href="#how-to-resume-training-process" title="Permalink to this headline"></a></h3>
-<p>FunASR supports resuming training as follows:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>train.py ... --resume <span class="nb">true</span> ...
-</pre></div>
-</div>
-</div>
-<div class="section" id="how-to-transfer-fine-tuning-from-pre-trained-models">
-<h3>How to transfer / fine-tuning from pre-trained models<a class="headerlink" href="#how-to-transfer-fine-tuning-from-pre-trained-models" title="Permalink to this headline"></a></h3>
-<p>FunASR supports transferring / fine-tuning from a pre-trained model by specifying the <code class="docutils literal notranslate"><span class="pre">init_param</span></code> parameter. The usage format is as follows:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>train.py ... --init_param &lt;file_path&gt;:&lt;src_key&gt;:&lt;dst_key&gt;:&lt;exclude_keys&gt;  ..
-</pre></div>
-</div>
-<p>For example, the following command achieves loading all pretrained parameters starting from decoder except decoder.embed and set it to model.decoder2:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>train.py ... --init_param model.pb:decoder:decoder2:decoder.embed  ...
-</pre></div>
-</div>
-<p>Besides, loading parameters from multiple pre-trained models is supported. For example, the following command achieves loading encoder parameters from the pre-trained model1 and decoder parameters from the pre-trained model2:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>train.py ... --init_param model1.pb:encoder  --init_param model2.pb:decoder ...
-</pre></div>
-</div>
-</div>
-<div class="section" id="how-to-freeze-part-of-the-model-parameters">
-<h3>How to freeze part of the model parameters<a class="headerlink" href="#how-to-freeze-part-of-the-model-parameters" title="Permalink to this headline"></a></h3>
-<p>In certain situations, users may want to fix part of the model parameters update the rest model parameters. FunASR employs <code class="docutils literal notranslate"><span class="pre">freeze_param</span></code> to achieve this. For example, to fix all parameters like <code class="docutils literal notranslate"><span class="pre">encoder.*</span></code>, users need to set <code class="docutils literal notranslate"><span class="pre">freeze_param</span> </code> as follows:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>train.py ... --freeze_param encoder ...
-</pre></div>
-</div>
-</div>
-<div class="section" id="modelscope-usage">
-<h3>ModelScope Usage<a class="headerlink" href="#modelscope-usage" title="Permalink to this headline"></a></h3>
-<p>Users can use ModelScope for inference and fine-tuning based on a trained academic model. To achieve this, users need to run the stage 6 in the script. In this stage, relevant files required by ModelScope will be generated automatically. Users can then use the corresponding ModelScope interface by replacing the model name with the local trained model path. For the detailed usage of the ModelScope interface, please refer to <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/modelscope_pipeline/quick_start.html">ModelScope Usage</a>.</p>
-</div>
-<div class="section" id="decoding-by-cpu-or-gpu">
-<h3>Decoding by CPU or GPU<a class="headerlink" href="#decoding-by-cpu-or-gpu" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>Decoding by CPU or GPU</p></li>
+</ul>
 <p>We support CPU and GPU decoding. For CPU decoding, set <code class="docutils literal notranslate"><span class="pre">gpu_inference=false</span></code> and <code class="docutils literal notranslate"><span class="pre">njob</span></code> to specific the total number of CPU jobs. For GPU decoding, first set <code class="docutils literal notranslate"><span class="pre">gpu_inference=true</span></code>. Then set <code class="docutils literal notranslate"><span class="pre">gpuid_list</span></code> to specific which GPUs for decoding and <code class="docutils literal notranslate"><span class="pre">njob</span></code> to specific the number of decoding jobs on each GPU.</p>
-</div>
 </div>
 </div>
 
