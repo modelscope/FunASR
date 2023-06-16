@@ -5,7 +5,7 @@ import sys
 
 
 if __name__=="__main__":
-    path = sys.argv[1] # dump2/raw/Train_Ali_far
+    path = sys.argv[1] 
     wav_scp_file = open(path+"/wav.scp", 'r')
     wav_scp = wav_scp_file.readlines()
     wav_scp_file.close()
@@ -29,7 +29,7 @@ if __name__=="__main__":
         line_list = line.strip().split(' ')
         meeting = line_list[0].split('-')[0]
         spk_id = line_list[0].split('-')[-1].split('_')[-1]
-        spk = meeting+'_' + spk_id
+        spk = meeting + '_' + spk_id
         global_spk_list.append(spk)
         if meeting in meeting_map_tmp.keys():
             meeting_map_tmp[meeting].append(spk)
