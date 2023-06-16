@@ -51,7 +51,7 @@ make
 
 ```shell
 cd bin
-   ./funasr-wss-server  [--model_thread_num <int>] [--decoder_thread_num <int>]
+./funasr-wss-server  [--model_thread_num <int>] [--decoder_thread_num <int>]
                     [--io_thread_num <int>] [--port <int>] [--listen_ip
                     <string>] [--punc-quant <string>] [--punc-dir <string>]
                     [--vad-quant <string>] [--vad-dir <string>] [--quantize
@@ -85,7 +85,7 @@ Where:
      default: ../../../ssl_key/server.key, path of keyfile for WSS connection
   
 example:
-   funasr-wss-server --model-dir /FunASR/funasr/runtime/onnxruntime/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
+./funasr-wss-server --model-dir /FunASR/funasr/runtime/onnxruntime/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
 ```
 
 ## Run websocket client test
