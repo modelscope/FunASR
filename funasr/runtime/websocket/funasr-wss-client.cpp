@@ -91,7 +91,6 @@ class WebsocketClient {
         using websocketpp::lib::placeholders::_1;
         m_client.set_open_handler(bind(&WebsocketClient::on_open, this, _1));
         m_client.set_close_handler(bind(&WebsocketClient::on_close, this, _1));
-        // m_client.set_close_handler(bind(&WebsocketClient::on_close, this, _1));
 
         m_client.set_message_handler(
             [this](websocketpp::connection_hdl hdl, message_ptr msg) {
