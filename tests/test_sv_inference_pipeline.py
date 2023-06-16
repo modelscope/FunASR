@@ -19,31 +19,21 @@ class TestXVectorInferencePipelines(unittest.TestCase):
             task=Tasks.speaker_verification,
             model='damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch'
         )
-        # 提取不同句子的说话人嵌入码
-        rec_result = inference_sv_pipline(
-            audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/sv_example_enroll.wav')
-        enroll = rec_result["spk_embedding"]
 
-        rec_result = inference_sv_pipline(
-            audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/sv_example_same.wav')
-        same = rec_result["spk_embedding"]
+        # the same speaker
+        rec_result = inference_sv_pipline(audio_in=(
+            'https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/sv_example_enroll.wav',
+            'https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/sv_example_same.wav'))
+        assert abs(rec_result["scores"][0] - 0.85) < 0.1 and abs(rec_result["scores"][1] - 0.14) < 0.1
+        logger.info(f"Similarity {rec_result['scores']}")
 
-        rec_result = inference_sv_pipline(
-            audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/sv_example_different.wav')
-        different = rec_result["spk_embedding"]
+        # different speaker
+        rec_result = inference_sv_pipline(audio_in=(
+            'https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/sv_example_enroll.wav',
+            'https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/sv_example_different.wav'))
+        assert abs(rec_result["scores"][0] - 0.0) < 0.1 and abs(rec_result["scores"][1] - 1.0) < 0.1
+        logger.info(f"Similarity {rec_result['scores']}")
 
-        # 对相同的说话人计算余弦相似度
-        sv_threshold = 0.9465
-        same_cos = np.sum(enroll * same) / (np.linalg.norm(enroll) * np.linalg.norm(same))
-        same_cos = max(same_cos - sv_threshold, 0.0) / (1.0 - sv_threshold) * 100.0
-        logger.info("Similarity: {}".format(same_cos))
-        assert int(same_cos) == 85
-
-        # 对不同的说话人计算余弦相似度
-        diff_cos = np.sum(enroll * different) / (np.linalg.norm(enroll) * np.linalg.norm(different))
-        diff_cos = max(diff_cos - sv_threshold, 0.0) / (1.0 - sv_threshold) * 100.0
-        logger.info("Similarity: {}".format(diff_cos))
-        assert int(diff_cos) == 0.0
 
 if __name__ == '__main__':
     unittest.main()
