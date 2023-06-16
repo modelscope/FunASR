@@ -41,7 +41,7 @@ def build_args(args, parser, extra_task_params):
             "--cmvn_file",
             type=str_or_none,
             default=None,
-            help="The file path of noise scp file.",
+            help="The path of cmvn file.",
         )
 
     elif args.task_name == "pretrain":
@@ -74,6 +74,12 @@ def build_args(args, parser, extra_task_params):
             type=int_or_none,
             default=None,
             help="The number of input dimension of the feature",
+        )
+        task_parser.add_argument(
+            "--cmvn_file",
+            type=str_or_none,
+            default=None,
+            help="The path of cmvn file.",
         )
 
     elif args.task_name == "diar":
