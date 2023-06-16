@@ -419,7 +419,7 @@ if [ ${stage} -le 7 ] && [ ${stop_stage} -ge 7 ]; then
                 --mode sa_asr \
                 ${_opts}
 
-        for f in token token_int score text; do
+        for f in token token_int score text text_id; do
             if [ -f "${_logdir}/output.1/1best_recog/${f}" ]; then
                 for i in $(seq "${_nj}"); do
                     cat "${_logdir}/output.${i}/1best_recog/${f}"
