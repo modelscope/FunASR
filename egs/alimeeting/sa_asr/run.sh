@@ -76,7 +76,7 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     ./local/alimeeting_data_prep.sh --tgt Test --min_wav_duration $min_wav_duration --max_wav_duration $max_wav_duration
     ./local/alimeeting_data_prep.sh --tgt Eval --min_wav_duration $min_wav_duration --max_wav_duration $max_wav_duration
     ./local/alimeeting_data_prep.sh --tgt Train --min_wav_duration $min_wav_duration --max_wav_duration $max_wav_duration
-    remove long/short data
+    # remove long/short data
     for x in ${train_set} ${valid_set} ${test_sets}; do
         cp -r ${feats_dir}/org/${x} ${feats_dir}/${x}
         rm ${feats_dir}/"${x}"/wav.scp ${feats_dir}/"${x}"/segments
