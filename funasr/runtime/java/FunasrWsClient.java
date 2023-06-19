@@ -6,7 +6,8 @@
  * // 2022-2023 by zhaomingwork@qq.com
  */
 // java FunasrWsClient
-// usage: FunasrWsClient srvIp srvPort wavPath numThreads
+// usage:  FunasrWsClient [-h] [--port PORT] [--host HOST] [--audio_in AUDIO_IN] [--num_threads NUM_THREADS]
+//                 [--chunk_size CHUNK_SIZE] [--chunk_interval CHUNK_INTERVAL] [--mode MODE]
 package websocket;
 
 import java.io.*;
@@ -122,21 +123,23 @@ public class FunasrWsClient extends WebSocketClient {
     int readSize = 0;
     try (FileInputStream fis = new FileInputStream(file)) {
       if (FunasrWsClient.wavPath.endsWith(".wav")) {
-        fis.read(bytes, 0, 88);
+        fis.read(bytes, 0, 44); //skip first 44 wav header
       }
       readSize = fis.read(bytes, 0, chunkSize);
       while (readSize > 0) {
+        // send when it is chunk size
         if (readSize == chunkSize) {
           send(bytes); // send buf to server
 
         } else {
+          // send when at last or not is chunk size
           byte[] tmpBytes = new byte[readSize];
           for (int i = 0; i < readSize; i++) {
             tmpBytes[i] = bytes[i];
           }
           send(tmpBytes);
         }
-        // if not in offline mode, we simulate online stream way by sleep
+        // if not in offline mode, we simulate online stream by sleep
         if (!mode.equals("offline")) {
           Thread.sleep(Integer.valueOf(chunkSize / 32));
         }

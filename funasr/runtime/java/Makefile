@@ -54,7 +54,7 @@ clean:
  
 
 runclient:
-		java   -cp $(BUILD_DIR):lib/Java-WebSocket-1.5.3.jar:lib/slf4j-simple-1.7.25.jar:lib/slf4j-api-1.7.25.jar:lib/json-simple-1.1.1.jar:lib/argparse4j-0.9.0.jar   $(RUNJFLAGS)    websocket.FunasrWsClient --hos1t localhost --port 8889 --audio_in ./asr_example.wav --num_threads 1 --mode 2pass
+		java   -cp $(BUILD_DIR):lib/Java-WebSocket-1.5.3.jar:lib/slf4j-simple-1.7.25.jar:lib/slf4j-api-1.7.25.jar:lib/json-simple-1.1.1.jar:lib/argparse4j-0.9.0.jar   $(RUNJFLAGS)    websocket.FunasrWsClient --host localhost --port 8889 --audio_in ./asr_example.wav --num_threads 1 --mode 2pass
 
  
 
