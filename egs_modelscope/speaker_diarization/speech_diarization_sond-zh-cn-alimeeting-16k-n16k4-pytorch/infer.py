@@ -17,7 +17,7 @@ inference_diar_pipline = pipeline(
     diar_model_config="sond.yaml",
     model='damo/speech_diarization_sond-zh-cn-alimeeting-16k-n16k4-pytorch',
     sv_model="damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch",
-    sv_model_revision="master",
+    sv_model_revision="v1.2.2",
 )
 
 # use audio_list as the input, where the first one is the record to be detected

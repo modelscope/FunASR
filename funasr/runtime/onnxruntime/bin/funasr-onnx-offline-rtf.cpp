@@ -65,7 +65,7 @@ void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, vector<string> wa
             n_total_length += snippet_time;
             FunASRFreeResult(result);
         }else{
-            LOG(ERROR) << ("No return data!\n");
+            LOG(ERROR) << wav_ids[i] << (": No return data!\n");
         }
     }
     {

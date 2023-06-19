@@ -3,7 +3,7 @@ generated certificate may not suitable for all browsers due to security concerns
 
 ```shell
 ### 1) Generate a private key
-openssl genrsa -des3 -out server.key 1024
+openssl genrsa -des3 -out server.key 2048
  
 ### 2) Generate a csr file
 openssl req -new -key server.key -out server.csr

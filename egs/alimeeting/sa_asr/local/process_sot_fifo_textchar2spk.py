@@ -30,8 +30,7 @@ def main(args):
     meetingid_map = {}
     for line in spk2utt:
         spkid = line.strip().split(" ")[0]
-        meeting_id_list = spkid.split("_")[:3]
-        meeting_id = meeting_id_list[0] + "_" + meeting_id_list[1] + "_" + meeting_id_list[2]
+        meeting_id = spkid.split("-")[0]
         if meeting_id not in meetingid_map:
             meetingid_map[meeting_id] = 1     
         else:

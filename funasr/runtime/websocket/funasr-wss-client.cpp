@@ -5,7 +5,14 @@
 /* 2022-2023 by zhaomingwork */
 
 // client for websocket, support multiple threads
-// Usage: websocketclient server_ip port wav_path threads_num
+// ./funasr-ws-client  --server-ip <string>
+//                     --port <string>
+//                     --wav-path <string>
+//                     [--thread-num <int>] 
+//                     [--is-ssl <int>]  [--]
+//                     [--version] [-h]
+// example:
+// ./funasr-ws-client --server-ip 127.0.0.1 --port 8889 --wav-path test.wav --thread-num 1 --is-ssl 0
 
 #define ASIO_STANDALONE 1
 #include <websocketpp/client.hpp>
@@ -55,7 +62,7 @@ context_ptr OnTlsInit(websocketpp::connection_hdl) {
             asio::ssl::context::no_sslv3 | asio::ssl::context::single_dh_use);
 
     } catch (std::exception& e) {
-        std::cout << e.what() << std::endl;
+        LOG(ERROR) << e.what();
     }
     return ctx;
 }
@@ -84,7 +91,6 @@ class WebsocketClient {
         using websocketpp::lib::placeholders::_1;
         m_client.set_open_handler(bind(&WebsocketClient::on_open, this, _1));
         m_client.set_close_handler(bind(&WebsocketClient::on_close, this, _1));
-        // m_client.set_close_handler(bind(&WebsocketClient::on_close, this, _1));
 
         m_client.set_message_handler(
             [this](websocketpp::connection_hdl hdl, message_ptr msg) {
@@ -99,7 +105,16 @@ class WebsocketClient {
         const std::string& payload = msg->get_payload();
         switch (msg->get_opcode()) {
             case websocketpp::frame::opcode::text:
-                std::cout << "on_message = " << payload << std::endl;
+				total_num=total_num+1;
+                LOG(INFO)<<total_num<<",on_message = " << payload;
+				if((total_num+1)==wav_index)
+				{
+					websocketpp::lib::error_code ec;
+					m_client.close(m_hdl, websocketpp::close::status::going_away, "", ec);
+					if (ec){
+                        LOG(ERROR)<< "Error closing connection " << ec.message();
+					}
+				}
         }
     }
 
@@ -132,8 +147,10 @@ class WebsocketClient {
             }
             send_wav_data(wav_list[i], wav_ids[i]);
         }
-        //send_wav_data();
+        WaitABit(); 
+
         asio_thread.join();
+
     }
 
     // The open handler will signal that we are ready to start sending data
@@ -200,7 +217,7 @@ class WebsocketClient {
                 }
             }
             if (wait) {
-                std::cout << "wait.." << m_open << std::endl;
+                // LOG(INFO) << "wait.." << m_open;
                 WaitABit();
                 continue;
             }
@@ -230,7 +247,7 @@ class WebsocketClient {
             // send data to server
             m_client.send(m_hdl, iArray, len * sizeof(short),
                           websocketpp::frame::opcode::binary, ec);
-            std::cout << "sended data len=" << len * sizeof(short) << std::endl;
+            LOG(INFO) << "sended data len=" << len * sizeof(short);
             // The most likely error that we will get is that the connection is
             // not in the right state. Usually this means we tried to send a
             // message to a connection that was closed or in the process of
@@ -241,14 +258,13 @@ class WebsocketClient {
                                         "Send Error: " + ec.message());
               break;
             }
-
-            WaitABit();
+            // WaitABit();
         }
         nlohmann::json jsonresult;
         jsonresult["is_speaking"] = false;
         m_client.send(m_hdl, jsonresult.dump(), websocketpp::frame::opcode::text,
                       ec);
-        WaitABit();
+        // WaitABit();
     }
     websocketpp::client<T> m_client;
 
@@ -257,6 +273,7 @@ class WebsocketClient {
     websocketpp::lib::mutex m_lock;
     bool m_open;
     bool m_done;
+	int total_num=0;
 };
 
 int main(int argc, char* argv[]) {
@@ -274,7 +291,7 @@ int main(int argc, char* argv[]) {
                                        false, 1, "int");
     TCLAP::ValueArg<int> is_ssl_(
         "", "is-ssl", "is-ssl is 1 means use wss connection, or use ws connection", 
-        false, 0, "int");
+        false, 1, "int");
 
     cmd.add(server_ip_);
     cmd.add(port_);
