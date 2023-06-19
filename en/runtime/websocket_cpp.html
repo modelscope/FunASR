@@ -231,7 +231,7 @@ Where:
    --io-thread-num &lt;int&gt;
      number of threads <span class="k">for</span> network io, default:8
    --port &lt;int&gt;
-     listen port, default:8889
+     listen port, default:10095
    --certfile &lt;string&gt;
      default: ../../../ssl_key/server.crt, path of certficate <span class="k">for</span> WSS connection. <span class="k">if</span> it is empty, it will be in WS mode.
    --keyfile &lt;string&gt;
@@ -269,7 +269,7 @@ Where:
      is-ssl is <span class="m">1</span> means use wss connection, or use ws connection
 
 example:
-./funasr-wss-client --server-ip <span class="m">127</span>.0.0.1 --port <span class="m">8889</span> --wav-path test.wav --thread-num <span class="m">1</span> --is-ssl <span class="m">1</span>
+./funasr-wss-client --server-ip <span class="m">127</span>.0.0.1 --port <span class="m">10095</span> --wav-path test.wav --thread-num <span class="m">1</span> --is-ssl <span class="m">1</span>
 
 result json, example like:
 <span class="o">{</span><span class="s2">&quot;mode&quot;</span>:<span class="s2">&quot;offline&quot;</span>,<span class="s2">&quot;text&quot;</span>:<span class="s2">&quot;欢迎大家来体验达摩院推出的语音识别模型&quot;</span>,<span class="s2">&quot;wav_name&quot;</span>:<span class="s2">&quot;wav2&quot;</span><span class="o">}</span>

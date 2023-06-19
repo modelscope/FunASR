@@ -78,7 +78,7 @@ Where:
    --io-thread-num <int>
      number of threads for network io, default:8
    --port <int>
-     listen port, default:8889
+     listen port, default:10095
    --certfile <string>
      default: ../../../ssl_key/server.crt, path of certficate for WSS connection. if it is empty, it will be in WS mode.
    --keyfile <string>
@@ -116,7 +116,7 @@ Where:
      is-ssl is 1 means use wss connection, or use ws connection
 
 example:
-./funasr-wss-client --server-ip 127.0.0.1 --port 8889 --wav-path test.wav --thread-num 1 --is-ssl 1
+./funasr-wss-client --server-ip 127.0.0.1 --port 10095 --wav-path test.wav --thread-num 1 --is-ssl 1
 
 result json, example like:
 {"mode":"offline","text":"欢迎大家来体验达摩院推出的语音识别模型","wav_name":"wav2"}
