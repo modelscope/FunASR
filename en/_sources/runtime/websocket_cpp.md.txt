@@ -51,8 +51,8 @@ make
 
 ```shell
 cd bin
-./funasr-wss-server  [--model_thread_num <int>] [--decoder_thread_num <int>]
-                    [--io_thread_num <int>] [--port <int>] [--listen_ip
+./funasr-wss-server  [--model-thread-num <int>] [--decoder-thread-num <int>]
+                    [--io-thread-num <int>] [--port <int>] [--listen_ip
                     <string>] [--punc-quant <string>] [--punc-dir <string>]
                     [--vad-quant <string>] [--vad-dir <string>] [--quantize
                     <string>] --model-dir <string> [--keyfile <string>]
@@ -73,9 +73,9 @@ Where:
    --punc-quant <string>
      true (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir
 
-   --decoder_thread_num <int>
+   --decoder-thread-num <int>
      number of threads for decoder, default:8
-   --io_thread_num <int>
+   --io-thread-num <int>
      number of threads for network io, default:8
    --port <int>
      listen port, default:8889

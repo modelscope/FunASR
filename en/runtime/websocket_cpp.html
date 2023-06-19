@@ -204,8 +204,8 @@ make
 <div class="section" id="run-the-websocket-server">
 <h2>Run the websocket server<a class="headerlink" href="#run-the-websocket-server" title="Permalink to this headline"></a></h2>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> bin
-./funasr-wss-server  <span class="o">[</span>--model_thread_num &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--decoder_thread_num &lt;int&gt;<span class="o">]</span>
-                    <span class="o">[</span>--io_thread_num &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--port &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--listen_ip
+./funasr-wss-server  <span class="o">[</span>--model-thread-num &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--decoder-thread-num &lt;int&gt;<span class="o">]</span>
+                    <span class="o">[</span>--io-thread-num &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--port &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--listen_ip
                     &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-quant &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-dir &lt;string&gt;<span class="o">]</span>
                     <span class="o">[</span>--vad-quant &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--vad-dir &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--quantize
                     &lt;string&gt;<span class="o">]</span> --model-dir &lt;string&gt; <span class="o">[</span>--keyfile &lt;string&gt;<span class="o">]</span>
@@ -226,9 +226,9 @@ Where:
    --punc-quant &lt;string&gt;
      <span class="nb">true</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in punc_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in punc_dir
 
-   --decoder_thread_num &lt;int&gt;
+   --decoder-thread-num &lt;int&gt;
      number of threads <span class="k">for</span> decoder, default:8
-   --io_thread_num &lt;int&gt;
+   --io-thread-num &lt;int&gt;
      number of threads <span class="k">for</span> network io, default:8
    --port &lt;int&gt;
      listen port, default:8889
