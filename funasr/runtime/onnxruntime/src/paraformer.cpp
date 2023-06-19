@@ -33,6 +33,7 @@ void Paraformer::InitAsr(const std::string &am_model, const std::string &am_cmvn
 
     try {
         m_session = std::make_unique<Ort::Session>(env_, am_model.c_str(), session_options);
+        LOG(INFO) << "Successfully load model from " << am_model;
     } catch (std::exception const &e) {
         LOG(ERROR) << "Error when load am onnx model: " << e.what();
         exit(0);

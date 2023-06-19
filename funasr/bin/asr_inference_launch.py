@@ -619,7 +619,12 @@ def inference_paraformer_vad_punc(
             data_with_index = [(vadsegments[i], i) for i in range(n)]
             sorted_data = sorted(data_with_index, key=lambda x: x[0][1] - x[0][0])
             results_sorted = []
-            batch_size_token_ms = batch_size_token * 60
+            
+            batch_size_token_ms = batch_size_token*60
+            if speech2text.device == "cpu":
+                batch_size_token_ms = 0
+            batch_size_token_ms = max(batch_size_token_ms, sorted_data[0][0][1] - sorted_data[0][0][0])
+            
             batch_size_token_ms_cum = 0
             beg_idx = 0
             for j, _ in enumerate(range(0, n)):

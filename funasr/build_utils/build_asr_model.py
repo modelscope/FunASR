@@ -6,7 +6,6 @@ from funasr.models.ctc import CTC
 from funasr.models.decoder.abs_decoder import AbsDecoder
 from funasr.models.decoder.contextual_decoder import ContextualParaformerDecoder
 from funasr.models.decoder.rnn_decoder import RNNDecoder
-from funasr.models.decoder.rnnt_decoder import RNNTDecoder
 from funasr.models.decoder.sanm_decoder import ParaformerSANMDecoder, FsmnDecoderSCAMAOpt
 from funasr.models.decoder.transformer_decoder import (
     DynamicConvolution2DTransformerDecoder,  # noqa: H301
@@ -20,17 +19,23 @@ from funasr.models.decoder.transformer_decoder import (
 )
 from funasr.models.decoder.transformer_decoder import ParaformerDecoderSAN
 from funasr.models.decoder.transformer_decoder import TransformerDecoder
+from funasr.models.decoder.rnnt_decoder import RNNTDecoder
+from funasr.models.decoder.transformer_decoder import SAAsrTransformerDecoder
 from funasr.models.e2e_asr import ASRModel
 from funasr.models.e2e_asr_contextual_paraformer import NeatContextualParaformer
 from funasr.models.e2e_asr_mfcca import MFCCA
-from funasr.models.e2e_asr_paraformer import Paraformer, ParaformerOnline, ParaformerBert, BiCifParaformer, \
-    ContextualParaformer
+
 from funasr.models.e2e_asr_transducer import TransducerModel, UnifiedTransducerModel
+
+from funasr.models.e2e_sa_asr import SAASRModel
+from funasr.models.e2e_asr_paraformer import Paraformer, ParaformerOnline, ParaformerBert, BiCifParaformer, ContextualParaformer
+
 from funasr.models.e2e_tp import TimestampPredictor
 from funasr.models.e2e_uni_asr import UniASR
 from funasr.models.encoder.conformer_encoder import ConformerEncoder, ConformerChunkEncoder
 from funasr.models.encoder.data2vec_encoder import Data2VecEncoder
 from funasr.models.encoder.mfcca_encoder import MFCCAEncoder
+from funasr.models.encoder.resnet34_encoder import ResNet34Diar
 from funasr.models.encoder.rnn_encoder import RNNEncoder
 from funasr.models.encoder.sanm_encoder import SANMEncoder, SANMEncoderChunkOpt
 from funasr.models.encoder.transformer_encoder import TransformerEncoder
@@ -93,6 +98,8 @@ model_choices = ClassChoices(
         timestamp_prediction=TimestampPredictor,
         rnnt=TransducerModel,
         rnnt_unified=UnifiedTransducerModel,
+        sa_asr=SAASRModel,
+
     ),
     default="asr",
 )
@@ -109,6 +116,27 @@ encoder_choices = ClassChoices(
         chunk_conformer=ConformerChunkEncoder,
     ),
     default="rnn",
+)
+asr_encoder_choices = ClassChoices(
+    "asr_encoder",
+    classes=dict(
+        conformer=ConformerEncoder,
+        transformer=TransformerEncoder,
+        rnn=RNNEncoder,
+        sanm=SANMEncoder,
+        sanm_chunk_opt=SANMEncoderChunkOpt,
+        data2vec_encoder=Data2VecEncoder,
+        mfcca_enc=MFCCAEncoder,
+    ),
+    default="rnn",
+)
+
+spk_encoder_choices = ClassChoices(
+    "spk_encoder",
+    classes=dict(
+        resnet34_diar=ResNet34Diar,
+    ),
+    default="resnet34_diar",
 )
 encoder_choices2 = ClassChoices(
     "encoder2",
@@ -134,6 +162,7 @@ decoder_choices = ClassChoices(
         paraformer_decoder_sanm=ParaformerSANMDecoder,
         paraformer_decoder_san=ParaformerDecoderSAN,
         contextual_paraformer_decoder=ContextualParaformerDecoder,
+        sa_decoder=SAAsrTransformerDecoder,
     ),
     default="rnn",
 )
@@ -225,6 +254,10 @@ class_choices_list = [
     rnnt_decoder_choices,
     # --joint_network and --joint_network_conf
     joint_network_choices,
+    # --asr_encoder and --asr_encoder_conf
+    asr_encoder_choices,
+    # --spk_encoder and --spk_encoder_conf
+    spk_encoder_choices,
 ]
 
 
@@ -247,7 +280,7 @@ def build_asr_model(args):
     # frontend
     if hasattr(args, "input_size") and args.input_size is None:
         frontend_class = frontend_choices.get_class(args.frontend)
-        if args.frontend == 'wav_frontend':
+        if args.frontend == 'wav_frontend' or args.frontend == 'multichannelfrontend':
             frontend = frontend_class(cmvn_file=args.cmvn_file, **args.frontend_conf)
         else:
             frontend = frontend_class(**args.frontend_conf)
@@ -423,6 +456,33 @@ def build_asr_model(args):
             decoder=decoder,
             att_decoder=att_decoder,
             joint_network=joint_network,
+            **args.model_conf,
+        )
+    elif args.model == "sa_asr":
+        asr_encoder_class = asr_encoder_choices.get_class(args.asr_encoder)
+        asr_encoder = asr_encoder_class(input_size=input_size, **args.asr_encoder_conf)
+        spk_encoder_class = spk_encoder_choices.get_class(args.spk_encoder)
+        spk_encoder = spk_encoder_class(input_size=input_size, **args.spk_encoder_conf)
+        decoder = decoder_class(
+            vocab_size=vocab_size,
+            encoder_output_size=asr_encoder.output_size(),
+            **args.decoder_conf,
+        )
+        ctc = CTC(
+            odim=vocab_size, encoder_output_size=asr_encoder.output_size(), **args.ctc_conf
+        )
+
+        model_class = model_choices.get_class(args.model)
+        model = model_class(
+            vocab_size=vocab_size,
+            frontend=frontend,
+            specaug=specaug,
+            normalize=normalize,
+            asr_encoder=asr_encoder,
+            spk_encoder=spk_encoder,
+            decoder=decoder,
+            ctc=ctc,
+            token_list=token_list,
             **args.model_conf,
         )
 

@@ -91,7 +91,6 @@ class WebsocketClient {
         using websocketpp::lib::placeholders::_1;
         m_client.set_open_handler(bind(&WebsocketClient::on_open, this, _1));
         m_client.set_close_handler(bind(&WebsocketClient::on_close, this, _1));
-        // m_client.set_close_handler(bind(&WebsocketClient::on_close, this, _1));
 
         m_client.set_message_handler(
             [this](websocketpp::connection_hdl hdl, message_ptr msg) {
@@ -218,7 +217,7 @@ class WebsocketClient {
                 }
             }
             if (wait) {
-                LOG(INFO) << "wait.." << m_open;
+                // LOG(INFO) << "wait.." << m_open;
                 WaitABit();
                 continue;
             }
@@ -292,7 +291,7 @@ int main(int argc, char* argv[]) {
                                        false, 1, "int");
     TCLAP::ValueArg<int> is_ssl_(
         "", "is-ssl", "is-ssl is 1 means use wss connection, or use ws connection", 
-        false, 0, "int");
+        false, 1, "int");
 
     cmd.add(server_ip_);
     cmd.add(port_);
