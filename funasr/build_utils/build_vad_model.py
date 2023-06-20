@@ -50,6 +50,10 @@ class_choices_list = [
 
 def build_vad_model(args):
     # frontend
+    if not hasattr(args, "cmvn_file"):
+        args.cmvn_file = None
+    if not hasattr(args, "init"):
+        args.init = None
     if args.input_size is None:
         frontend_class = frontend_choices.get_class(args.frontend)
         if args.frontend == 'wav_frontend':

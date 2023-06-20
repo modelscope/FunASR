@@ -43,9 +43,7 @@ class NeatContextualParaformer(Paraformer):
         frontend: Optional[AbsFrontend],
         specaug: Optional[AbsSpecAug],
         normalize: Optional[AbsNormalize],
-        preencoder: Optional[AbsPreEncoder],
         encoder: AbsEncoder,
-        postencoder: Optional[AbsPostEncoder],
         decoder: AbsDecoder,
         ctc: CTC,
         ctc_weight: float = 0.5,
@@ -72,6 +70,8 @@ class NeatContextualParaformer(Paraformer):
         crit_attn_weight: float = 0.0,
         crit_attn_smooth: float = 0.0,
         bias_encoder_dropout_rate: float = 0.0,
+        preencoder: Optional[AbsPreEncoder] = None,
+        postencoder: Optional[AbsPostEncoder] = None,
     ):
         assert check_argument_types()
         assert 0.0 <= ctc_weight <= 1.0, ctc_weight

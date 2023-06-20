@@ -53,7 +53,7 @@ class MFCCA(FunASRModel):
             encoder: AbsEncoder,
             decoder: AbsDecoder,
             ctc: CTC,
-            rnnt_decoder: None,
+            rnnt_decoder: None = None,
             ctc_weight: float = 0.5,
             ignore_id: int = -1,
             lsm_weight: float = 0.0,

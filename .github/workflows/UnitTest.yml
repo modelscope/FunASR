@@ -8,6 +8,7 @@ on:
     branches:
       - dev_wjm
       - dev_jy
+      - dev_wjm_infer
 
 jobs:
   build:
@@ -18,6 +19,12 @@ jobs:
         python-version: ["3.7"]
 
     steps:
+      - name: Remove unnecessary files
+        run:
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4

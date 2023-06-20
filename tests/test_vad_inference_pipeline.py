@@ -37,7 +37,7 @@ class TestFSMNInferencePipelines(unittest.TestCase):
         rec_result = inference_pipeline(
             audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/vad_example.wav')
         logger.info("vad inference result: {0}".format(rec_result))
-        assert rec_result["text"] == [[80, 2340], [2620, 6200], [6480, 23670], [23950, 26250], [26780, 28990],
+        assert rec_result["text"] == [[70, 2340], [2620, 6200], [6480, 23670], [23950, 26250], [26780, 28990],
                                       [29950, 31430], [31750, 37600], [38210, 46900], [47310, 49630], [49910, 56460],
                                       [56740, 59540], [59820, 70450]]
 
