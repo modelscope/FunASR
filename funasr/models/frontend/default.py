@@ -274,6 +274,7 @@ class MultiChannelFrontend(AbsFrontend):
         if self.mc:
             # MFCCA
             if input_feats.dim() ==4:
+                bt = input_feats.size(0)
                 channel_size = input_feats.size(2)
                 input_feats = input_feats.transpose(1,2).reshape(bt*channel_size,-1,80).contiguous()
                 feats_lens = feats_lens.repeat(1,channel_size).squeeze()
