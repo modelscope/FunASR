@@ -178,14 +178,18 @@ class_choices_list = [
 
 def build_diar_model(args):
     # token_list
-    if args.token_list is not None:
-        with open(args.token_list) as f:
+    if isinstance(args.token_list, str):
+        with open(args.token_list, encoding="utf-8") as f:
             token_list = [line.rstrip() for line in f]
+
+        # Overwriting token_list to keep it as "portable".
         args.token_list = list(token_list)
-        vocab_size = len(token_list)
-        logging.info(f"Vocabulary size: {vocab_size}")
+    elif isinstance(args.token_list, (tuple, list)):
+        token_list = list(args.token_list)
     else:
-        vocab_size = None
+        raise RuntimeError("token_list must be str or list")
+    vocab_size = len(token_list)
+    logging.info(f"Vocabulary size: {vocab_size}")
 
     # frontend
     if args.input_size is None:
@@ -205,7 +209,7 @@ def build_diar_model(args):
     encoder_class = encoder_choices.get_class(args.encoder)
     encoder = encoder_class(input_size=input_size, **args.encoder_conf)
 
-    if args.model_name == "sond":
+    if args.model == "sond":
         # data augmentation for spectrogram
         if args.specaug is not None:
             specaug_class = specaug_choices.get_class(args.specaug)
@@ -243,11 +247,7 @@ def build_diar_model(args):
 
         # decoder
         decoder_class = decoder_choices.get_class(args.decoder)
-        decoder = decoder_class(
-            vocab_size=vocab_size,
-            encoder_output_size=encoder.output_size(),
-            **args.decoder_conf,
-        )
+        decoder = decoder_class(**args.decoder_conf)
 
         # logger aggregator
         if getattr(args, "label_aggregator", None) is not None:

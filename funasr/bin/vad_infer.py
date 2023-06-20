@@ -1,42 +1,23 @@
-# -*- encoding: utf-8 -*-
 #!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
 # Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
 #  MIT License  (https://opensource.org/licenses/MIT)
 
-import argparse
 import logging
-import os
-import sys
-import json
+import math
 from pathlib import Path
-from typing import Any
+from typing import Dict
 from typing import List
-from typing import Optional
-from typing import Sequence
 from typing import Tuple
 from typing import Union
-from typing import Dict
 
-import math
 import numpy as np
 import torch
 from typeguard import check_argument_types
-from typeguard import check_return_type
 
-from funasr.fileio.datadir_writer import DatadirWriter
-from funasr.modules.scorers.scorer_interface import BatchScorerInterface
-from funasr.modules.subsampling import TooShortUttError
-from funasr.tasks.vad import VADTask
-from funasr.torch_utils.device_funcs import to_device
-from funasr.torch_utils.set_all_random_seed import set_all_random_seed
-from funasr.utils import config_argparse
-from funasr.utils.cli_utils import get_commandline_args
-from funasr.utils.types import str2bool
-from funasr.utils.types import str2triple_str
-from funasr.utils.types import str_or_none
-from funasr.utils import asr_utils, wav_utils, postprocess_utils
+from funasr.build_utils.build_model_from_file import build_model_from_file
 from funasr.models.frontend.wav_frontend import WavFrontend, WavFrontendOnline
-
+from funasr.torch_utils.device_funcs import to_device
 
 
 class Speech2VadSegment:
@@ -64,8 +45,8 @@ class Speech2VadSegment:
         assert check_argument_types()
 
         # 1. Build vad model
-        vad_model, vad_infer_args = VADTask.build_model_from_file(
-            vad_infer_config, vad_model_file, device
+        vad_model, vad_infer_args = build_model_from_file(
+            vad_infer_config, vad_model_file, None, device, task_name="vad"
         )
         frontend = None
         if vad_infer_args.frontend is not None:
@@ -128,12 +109,13 @@ class Speech2VadSegment:
                 "in_cache": in_cache
             }
             # a. To device
-            #batch = to_device(batch, device=self.device)
+            # batch = to_device(batch, device=self.device)
             segments_part, in_cache = self.vad_model(**batch)
             if segments_part:
                 for batch_num in range(0, self.batch_size):
                     segments[batch_num] += segments_part[batch_num]
         return fbanks, segments
+
 
 class Speech2VadSegmentOnline(Speech2VadSegment):
     """Speech2VadSegmentOnline class
@@ -146,13 +128,13 @@ class Speech2VadSegmentOnline(Speech2VadSegment):
         [[10, 230], [245, 450], ...]
 
     """
+
     def __init__(self, **kwargs):
         super(Speech2VadSegmentOnline, self).__init__(**kwargs)
         vad_cmvn_file = kwargs.get('vad_cmvn_file', None)
         self.frontend = None
         if self.vad_infer_args.frontend is not None:
             self.frontend = WavFrontendOnline(cmvn_file=vad_cmvn_file, **self.vad_infer_args.frontend_conf)
-
 
     @torch.no_grad()
     def __call__(
@@ -198,5 +180,3 @@ class Speech2VadSegmentOnline(Speech2VadSegment):
             # in_cache.update(batch['in_cache'])
             # in_cache = {key: value for key, value in batch['in_cache'].items()}
         return fbanks, segments, in_cache
-
-

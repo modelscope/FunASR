@@ -41,7 +41,7 @@ def build_args(args, parser, extra_task_params):
             "--cmvn_file",
             type=str_or_none,
             default=None,
-            help="The file path of noise scp file.",
+            help="The path of cmvn file.",
         )
 
     elif args.task_name == "pretrain":
@@ -75,11 +75,28 @@ def build_args(args, parser, extra_task_params):
             default=None,
             help="The number of input dimension of the feature",
         )
+        task_parser.add_argument(
+            "--cmvn_file",
+            type=str_or_none,
+            default=None,
+            help="The path of cmvn file.",
+        )
 
     elif args.task_name == "diar":
         from funasr.build_utils.build_diar_model import class_choices_list
         for class_choices in class_choices_list:
             class_choices.add_arguments(task_parser)
+
+    elif args.task_name == "sv":
+        from funasr.build_utils.build_sv_model import class_choices_list
+        for class_choices in class_choices_list:
+            class_choices.add_arguments(task_parser)
+        task_parser.add_argument(
+            "--input_size",
+            type=int_or_none,
+            default=None,
+            help="The number of input dimension of the feature",
+        )
 
     else:
         raise NotImplementedError("Not supported task: {}".format(args.task_name))
