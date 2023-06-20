@@ -21,14 +21,35 @@
 				<br>
 				<input id="wssip" type="text" style=" width: 100%;height:100%" value="wss://127.0.0.1:10095/"/>
 				<br>
+			<br>  
+			<div  style="border:2px solid #ccc;">
+				选择录音模式:<br/>
+    
+        <label><input name="recoder_mode" onclick="on_recoder_mode_change()" type="radio" value="mic" checked="true"/>麦克风 </label>&nbsp;&nbsp;
+        <label><input name="recoder_mode" onclick="on_recoder_mode_change()" type="radio" value="file" />文件 </label> 
+
+				</div>
+				
 				<br>
-				<div style="border:2px solid #ccc;">
+				 <div id="mic_mode_div" style="border:2px solid #ccc;display:block;">
 				选择asr模型模式:<br/>
+    
       <label><input name="asr_mode" type="radio" value="2pass" checked="true"/>2pass </label>&nbsp;&nbsp;
       <label><input name="asr_mode" type="radio" value="online" />online </label>&nbsp;&nbsp;
-      <label><input name="asr_mode" type="radio" value="offline" />offline </label> 
+      <label><input name="asr_mode" type="radio" value="offline" />offline </label>
+
+				</div>
+				
+				<div id="rec_mode_div" style="border:2px solid #ccc;display:none;">
+		 
+    
+		          <input type="file" id="upfile">
+
 				</div>
 				<br>
+		
+				
+			 
 				语音识别结果显示：
 				<br>
 				
