@@ -146,7 +146,7 @@ class MultiChannelFrontend(AbsFrontend):
     def __init__(
             self,
             fs: Union[int, str] = 16000,
-            n_fft: int = 400,
+            n_fft: int = 512,
             win_length: int = None,
             hop_length: int = None,
             frame_length: int = None,
