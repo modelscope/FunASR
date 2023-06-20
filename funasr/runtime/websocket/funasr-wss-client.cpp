@@ -277,13 +277,14 @@ class WebsocketClient {
 };
 
 int main(int argc, char* argv[]) {
+
     google::InitGoogleLogging(argv[0]);
     FLAGS_logtostderr = true;
 
     TCLAP::CmdLine cmd("funasr-ws-client", ' ', "1.0");
     TCLAP::ValueArg<std::string> server_ip_("", "server-ip", "server-ip", true,
                                            "127.0.0.1", "string");
-    TCLAP::ValueArg<std::string> port_("", "port", "port", true, "8889", "string");
+    TCLAP::ValueArg<std::string> port_("", "port", "port", true, "10095", "string");
     TCLAP::ValueArg<std::string> wav_path_("", "wav-path", 
         "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", 
         true, "", "string");
