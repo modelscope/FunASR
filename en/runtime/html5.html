@@ -87,7 +87,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#html5-demo">Html5 demo</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#asr-service">asr service</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#open-browser-to-access-html5-demo">open browser to access html5 demo</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#modify-asr-address-in-html-according-to-your-environment">modify asr address in html according to your environment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#open-browser-to-open-html5-file-directly-without-h5server">open browser to open html5 file directly without h5Server</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#acknowledge">Acknowledge</a></li>
@@ -208,9 +208,18 @@ python wss_srv_asr.py --port <span class="m">10095</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="modify-asr-address-in-html-according-to-your-environment">
-<h3>modify asr address in html according to your environment<a class="headerlink" href="#modify-asr-address-in-html-according-to-your-environment" title="Permalink to this headline"></a></h3>
-<p>asr address in index.html must be wss</p>
+<div class="section" id="open-browser-to-open-html5-file-directly-without-h5server">
+<h3>open browser to open html5 file directly without h5Server<a class="headerlink" href="#open-browser-to-open-html5-file-directly-without-h5server" title="Permalink to this headline"></a></h3>
+<p>you can run html5 client by just clicking the index.html file directly in your computer.</p>
+<ol class="simple">
+<li><p>lauch asr service without ssl, it must be in ws mode as ssl protocol will prohibit such access.</p></li>
+<li><p>copy whole directory /funasr/runtime/html5/static to your computer</p></li>
+<li><p>open /funasr/runtime/html5/static/index.html by browser</p></li>
+<li><p>enter asr service ws address and connect</p></li>
+</ol>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="acknowledge">
