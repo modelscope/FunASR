@@ -5,7 +5,7 @@
 /* 2022-2023 by zhaomingwork */
 
 // io server
-// Usage:funasr-ws-server  [--model_thread_num <int>] [--decoder_thread_num <int>]
+// Usage:funasr-wss-server  [--model_thread_num <int>] [--decoder_thread_num <int>]
 //                    [--io_thread_num <int>] [--port <int>] [--listen_ip
 //                    <string>] [--punc-quant <string>] [--punc-dir <string>]
 //                    [--vad-quant <string>] [--vad-dir <string>] [--quantize

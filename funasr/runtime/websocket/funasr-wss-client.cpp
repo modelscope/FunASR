@@ -5,14 +5,14 @@
 /* 2022-2023 by zhaomingwork */
 
 // client for websocket, support multiple threads
-// ./funasr-ws-client  --server-ip <string>
+// ./funasr-wss-client  --server-ip <string>
 //                     --port <string>
 //                     --wav-path <string>
 //                     [--thread-num <int>] 
 //                     [--is-ssl <int>]  [--]
 //                     [--version] [-h]
 // example:
-// ./funasr-ws-client --server-ip 127.0.0.1 --port 8889 --wav-path test.wav --thread-num 1 --is-ssl 0
+// ./funasr-wss-client --server-ip 127.0.0.1 --port 10095 --wav-path test.wav --thread-num 1 --is-ssl 1
 
 #define ASIO_STANDALONE 1
 #include <websocketpp/client.hpp>
@@ -281,7 +281,7 @@ int main(int argc, char* argv[]) {
     google::InitGoogleLogging(argv[0]);
     FLAGS_logtostderr = true;
 
-    TCLAP::CmdLine cmd("funasr-ws-client", ' ', "1.0");
+    TCLAP::CmdLine cmd("funasr-wss-client", ' ', "1.0");
     TCLAP::ValueArg<std::string> server_ip_("", "server-ip", "server-ip", true,
                                            "127.0.0.1", "string");
     TCLAP::ValueArg<std::string> port_("", "port", "port", true, "10095", "string");
