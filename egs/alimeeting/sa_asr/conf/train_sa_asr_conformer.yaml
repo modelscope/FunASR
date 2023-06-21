@@ -10,6 +10,7 @@ frontend_conf:
     lfr_m: 1
     lfr_n: 1
     use_channel: 0
+    mc: False
 
 # encoder related
 asr_encoder: conformer
