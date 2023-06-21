@@ -88,6 +88,11 @@ If you have any questions about FunASR, please contact us by
 This project is licensed under the [The MIT License](https://opensource.org/licenses/MIT). FunASR also contains various third-party components and some code modified from other repos under other open source licenses.
 The use of pretraining model is subject to [model licencs](./MODEL_LICENSE)
 
+
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/alibaba-damo-academy/FunASR.svg)](https://starchart.cc/alibaba-damo-academy/FunASR)
+
 ## Citations
 
 ``` bibtex
