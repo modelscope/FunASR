@@ -35,7 +35,7 @@ requirements = {
         # ENH
         # "ci_sdr",
         "pytorch_wpe",
-        "editdistance==0.5.2",
+        "editdistance>=0.5.2",
         "tensorboard==1.15",
         "g2p",
         # PAI
