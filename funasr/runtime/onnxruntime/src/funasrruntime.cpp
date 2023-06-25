@@ -227,6 +227,9 @@ extern "C" {
 		int n_total = audio.GetQueueSize();
 		funasr::FUNASR_RECOG_RESULT* p_result = new funasr::FUNASR_RECOG_RESULT;
 		p_result->snippet_time = audio.GetTimeLen();
+		if(p_result->snippet_time == 0){
+            return p_result;
+        }
 		while (audio.Fetch(buff, len, flag) > 0) {
 			string msg = (offline_stream->asr_handle)->Forward(buff, len, flag);
 			p_result->msg+= msg;
