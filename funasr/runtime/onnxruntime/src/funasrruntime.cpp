@@ -51,6 +51,9 @@ extern "C" {
 		int flag = 0;
 		funasr::FUNASR_RECOG_RESULT* p_result = new funasr::FUNASR_RECOG_RESULT;
 		p_result->snippet_time = audio.GetTimeLen();
+		if(p_result->snippet_time == 0){
+            return p_result;
+        }
 		int n_step = 0;
 		int n_total = audio.GetQueueSize();
 		while (audio.Fetch(buff, len, flag) > 0) {
@@ -90,6 +93,9 @@ extern "C" {
 		int n_total = audio.GetQueueSize();
 		funasr::FUNASR_RECOG_RESULT* p_result = new funasr::FUNASR_RECOG_RESULT;
 		p_result->snippet_time = audio.GetTimeLen();
+		if(p_result->snippet_time == 0){
+            return p_result;
+        }
 		while (audio.Fetch(buff, len, flag) > 0) {
 			string msg = recog_obj->Forward(buff, len, flag);
 			p_result->msg += msg;
@@ -114,6 +120,9 @@ extern "C" {
 
 		funasr::FUNASR_VAD_RESULT* p_result = new funasr::FUNASR_VAD_RESULT;
 		p_result->snippet_time = audio.GetTimeLen();
+		if(p_result->snippet_time == 0){
+            return p_result;
+        }
 		
 		vector<std::vector<int>> vad_segments;
 		audio.Split(vad_obj, vad_segments, input_finished);
@@ -143,6 +152,9 @@ extern "C" {
 
 		funasr::FUNASR_VAD_RESULT* p_result = new funasr::FUNASR_VAD_RESULT;
 		p_result->snippet_time = audio.GetTimeLen();
+		if(p_result->snippet_time == 0){
+            return p_result;
+        }
 		
 		vector<std::vector<int>> vad_segments;
 		audio.Split(vad_obj, vad_segments, true);
@@ -181,6 +193,9 @@ extern "C" {
 		int flag = 0;
 		funasr::FUNASR_RECOG_RESULT* p_result = new funasr::FUNASR_RECOG_RESULT;
 		p_result->snippet_time = audio.GetTimeLen();
+		if(p_result->snippet_time == 0){
+            return p_result;
+        }
 		int n_step = 0;
 		int n_total = audio.GetQueueSize();
 		while (audio.Fetch(buff, len, flag) > 0) {
