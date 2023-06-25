@@ -184,6 +184,11 @@ extern "C" {
 		funasr::Audio audio(1);
 		if (!audio.LoadPcmwav(sz_buf, n_len, &sampling_rate))
 			return nullptr;
+		funasr::FUNASR_RECOG_RESULT* p_result = new funasr::FUNASR_RECOG_RESULT;
+		p_result->snippet_time = audio.GetTimeLen();
+		if(p_result->snippet_time == 0){
+            return p_result;
+        }
 		if(offline_stream->UseVad()){
 			audio.Split(offline_stream);
 		}
@@ -191,11 +196,7 @@ extern "C" {
 		float* buff;
 		int len;
 		int flag = 0;
-		funasr::FUNASR_RECOG_RESULT* p_result = new funasr::FUNASR_RECOG_RESULT;
-		p_result->snippet_time = audio.GetTimeLen();
-		if(p_result->snippet_time == 0){
-            return p_result;
-        }
+
 		int n_step = 0;
 		int n_total = audio.GetQueueSize();
 		while (audio.Fetch(buff, len, flag) > 0) {
@@ -231,6 +232,11 @@ extern "C" {
 			LOG(ERROR)<<"Wrong wav extension";
 			exit(-1);
 		}
+		funasr::FUNASR_RECOG_RESULT* p_result = new funasr::FUNASR_RECOG_RESULT;
+		p_result->snippet_time = audio.GetTimeLen();
+		if(p_result->snippet_time == 0){
+            return p_result;
+        }
 		if(offline_stream->UseVad()){
 			audio.Split(offline_stream);
 		}
@@ -240,11 +246,6 @@ extern "C" {
 		int flag = 0;
 		int n_step = 0;
 		int n_total = audio.GetQueueSize();
-		funasr::FUNASR_RECOG_RESULT* p_result = new funasr::FUNASR_RECOG_RESULT;
-		p_result->snippet_time = audio.GetTimeLen();
-		if(p_result->snippet_time == 0){
-            return p_result;
-        }
 		while (audio.Fetch(buff, len, flag) > 0) {
 			string msg = (offline_stream->asr_handle)->Forward(buff, len, flag);
 			p_result->msg+= msg;
