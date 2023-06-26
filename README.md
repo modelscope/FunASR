@@ -96,10 +96,12 @@ More examples could be found in [docs](https://alibaba-damo-academy.github.io/Fu
 ### runtime
 
 An example with websocket:
+
 For the server:
 ```shell
 python wss_srv_asr.py --port 10095
 ```
+
 For the client:
 ```shell
 python wss_client_asr.py --host "0.0.0.0" --port 10095 --mode 2pass --chunk_size "5,10,5"
