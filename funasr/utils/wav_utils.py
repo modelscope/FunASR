@@ -11,6 +11,7 @@ import librosa
 import numpy as np
 import torch
 import torchaudio
+import soundfile
 import torchaudio.compliance.kaldi as kaldi
 
 
@@ -162,7 +163,11 @@ def compute_fbank(wav_file,
         waveform = torch.from_numpy(waveform.reshape(1, -1))
     else:
         # load pcm from wav, and resample
-        waveform, audio_sr = torchaudio.load(wav_file)
+        try:
+            waveform, audio_sr = torchaudio.load(wav_file)
+        except:
+            waveform, audio_sr = soundfile.read(wav_file)
+            waveform = torch.tensor(np.expand_dims(waveform, axis=0))
         waveform = waveform * (1 << 15)
         waveform = torch_resample(waveform, audio_sr, model_sr)
 
@@ -181,7 +186,11 @@ def compute_fbank(wav_file,
 
 
 def wav2num_frame(wav_path, frontend_conf):
-    waveform, sampling_rate = torchaudio.load(wav_path)
+    try:
+        waveform, audio_sr = torchaudio.load(wav_file)
+    except:
+        waveform, audio_sr = soundfile.read(wav_file)
+        waveform = torch.tensor(np.expand_dims(waveform, axis=0))
     speech_length = (waveform.shape[1] / sampling_rate) * 1000.
     n_frames = (waveform.shape[1] * 1000.0) / (sampling_rate * frontend_conf["frame_shift"] * frontend_conf["lfr_n"])
     feature_dim = frontend_conf["n_mels"] * frontend_conf["lfr_m"]
