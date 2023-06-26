@@ -609,7 +609,7 @@ class Speech2TextParaformer:
             hotword_str_list = []
             for hw in hotword_list_or_file.strip().split():
                 hotword_str_list.append(hw)
-                hw_list = hw
+                hw_list = hw.strip().split()
                 if seg_dict is not None:
                     hw_list = seg_tokenize(hw_list, seg_dict)
                 hotword_list.append(self.converter.tokens2ids(hw_list))
