@@ -19,6 +19,7 @@ from typing import Union
 import numpy as np
 import torch
 import torchaudio
+import soundfile
 import yaml
 from typeguard import check_argument_types
 
@@ -863,7 +864,10 @@ def inference_paraformer_online(
             raw_inputs = _load_bytes(data_path_and_name_and_type[0])
             raw_inputs = torch.tensor(raw_inputs)
         if data_path_and_name_and_type is not None and data_path_and_name_and_type[2] == "sound":
-            raw_inputs = torchaudio.load(data_path_and_name_and_type[0])[0][0]
+            try:
+                raw_inputs = torchaudio.load(data_path_and_name_and_type[0])[0][0]
+            except:
+                raw_inputs = torch.tensor(soundfile.read(data_path_and_name_and_type[0])[0])
         if data_path_and_name_and_type is None and raw_inputs is not None:
             if isinstance(raw_inputs, np.ndarray):
                 raw_inputs = torch.tensor(raw_inputs)
