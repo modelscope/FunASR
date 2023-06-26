@@ -1,4 +1,4 @@
-# Benchmark (ModeScope Pipeline)
+# Leaderboard IO
 
 
 ## Configuration
