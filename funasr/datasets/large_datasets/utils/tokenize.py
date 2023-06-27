@@ -58,10 +58,11 @@ def tokenize(data,
             # enable preset hotword detect in sampling
             pre_index = None
             for hw in hw_config['pre_hwlist']:
-                _find = data['text'].find(hw)
+                _find = data['text'][0].find(hw)
                 if _find != -1:
-                    _find = text[:_find].count(" ")  # bpe sometimes
+                    _find = data['text'][0][:_find].count(" ")  # bpe sometimes
                     pre_index = [_find, _find + max(hw.count(" "), 1)]
+                    import pdb; pdb.set_trace()
                     break
         hotword_indxs = sample_hotword(length, **hw_config, pre_index=pre_index)
         data['hotword_indxs'] = hotword_indxs
