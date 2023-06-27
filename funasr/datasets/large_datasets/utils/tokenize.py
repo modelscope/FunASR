@@ -59,7 +59,7 @@ def tokenize(data,
             pre_index = None
             for hw in hw_config['pre_hwlist']:
                 hw = " ".join(seg_tokenize(hw, seg_dict))
-                _find = text.find(hw)
+                _find = " ".join(text.find(hw))
                 if _find != -1:
                     _find = text[:_find].count(" ")  # bpe sometimes
                     pre_index = [_find, _find + max(hw.count(" "), 1)]
