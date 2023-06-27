@@ -1150,6 +1150,7 @@ class AbsTask(ABC):
     def main_worker(cls, args: argparse.Namespace):
         assert check_argument_types()
 
+        args.ngpu = 0
         # 0. Init distributed process
         distributed_option = build_dataclass(DistributedOption, args)
         # Setting distributed_option.dist_rank, etc.
