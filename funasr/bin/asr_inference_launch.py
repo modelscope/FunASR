@@ -260,6 +260,7 @@ def inference_paraformer(
         export_mode = param_dict.get("export_mode", False)
     else:
         hotword_list_or_file = None
+    clas_scale = param_dict.get('clas_scale', 1.0)
 
     if kwargs.get("device", None) == "cpu":
         ngpu = 0
@@ -292,6 +293,7 @@ def inference_paraformer(
         penalty=penalty,
         nbest=nbest,
         hotword_list_or_file=hotword_list_or_file,
+        clas_sacle=clas_scale,
     )
 
     speech2text = Speech2TextParaformer(**speech2text_kwargs)
