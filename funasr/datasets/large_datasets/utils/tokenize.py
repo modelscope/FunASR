@@ -54,6 +54,9 @@ def tokenize(data,
 
     length = len(text)
     if 'hw_tag' in data:
+        if hw_config['pre_hwlist'] is not None and hw_config['pre_prob'] > 0:
+            # enable preset hotword detect in sampling
+            import pdb; pdb.set_trace()
         hotword_indxs = sample_hotword(length, **hw_config)
         data['hotword_indxs'] = hotword_indxs
         del data['hw_tag']
