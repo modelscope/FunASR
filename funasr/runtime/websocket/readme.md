@@ -36,10 +36,8 @@ sudo apt-get install libopenblas-dev #ubuntu
 required openssl lib
 
 ```shell
-#install openssl lib for ubuntu 
-apt-get install libssl-dev
-#install openssl lib for centos
-yum install openssl-devel
+apt-get install libssl-dev #ubuntu 
+# yum install openssl-devel #centos
 
 
 git clone https://github.com/alibaba-damo-academy/FunASR.git && cd funasr/runtime/websocket
