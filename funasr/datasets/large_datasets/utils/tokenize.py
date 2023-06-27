@@ -61,9 +61,9 @@ def tokenize(data,
                 hw = " ".join(seg_tokenize(hw, seg_dict))
                 _find = " ".join(text).find(hw)
                 if _find != -1:
-                    _find = text[:_find].count(" ")  # bpe sometimes
+                    # _find = text[:_find].count(" ")  # bpe sometimes
                     pre_index = [_find, _find + max(hw.count(" "), 1)]
-                    import pdb; pdb.set_trace()
+                    # import pdb; pdb.set_trace()
                     break
         hotword_indxs = sample_hotword(length, **hw_config, pre_index=pre_index)
         data['hotword_indxs'] = hotword_indxs
