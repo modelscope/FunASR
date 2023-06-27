@@ -122,7 +122,7 @@ int main(int argc, char* argv[]) {
         std::string s_asr_quant = model_path[QUANTIZE];
         std::string s_punc_path = model_path[PUNC_DIR];
         std::string s_punc_quant = model_path[PUNC_QUANT];
-        std::string python_cmd = "python -m funasr.export.export_model --type onnx --quantize True ";
+        std::string python_cmd = "python -m funasr.utils.runtime_sdk_download_tool --type onnx --quantize True ";
         if(vad_dir.isSet() && !s_vad_path.empty()){
             std::string python_cmd_vad = python_cmd + " --model-name " + s_vad_path + " --export-dir " + s_download_model_dir;
             if(is_download){
