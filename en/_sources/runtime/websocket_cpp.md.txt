@@ -5,15 +5,15 @@
 
 ```shell
 # pip3 install torch torchaudio
-pip3 install -U modelscope funasr
+pip install -U modelscope funasr
 # For the users in China, you could install with the command:
-# pip3 install -U modelscope funasr -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html -i https://mirror.sjtu.edu.cn/pypi/web/simple
+# pip install -U modelscope funasr -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html -i https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
 
 ### Export [onnx model](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export)
 
 ```shell
-python3 -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize True
+python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize True
 ```
 
 ## Building for Linux/Unix
@@ -36,11 +36,13 @@ sudo apt-get install libopenblas-dev #ubuntu
 required openssl lib
 
 ```shell
-apt-get install libssl-dev #ubuntu 
-# yum install openssl-devel #centos
+#install openssl lib for ubuntu 
+apt-get install libssl-dev
+#install openssl lib for centos
+yum install openssl-devel
 
 
-git clone https://github.com/alibaba-damo-academy/FunASR.git && cd FunASR/funasr/runtime/websocket
+git clone https://github.com/alibaba-damo-academy/FunASR.git && cd funasr/runtime/websocket
 mkdir build && cd build
 cmake  -DCMAKE_BUILD_TYPE=release .. -DONNXRUNTIME_DIR=/path/to/onnxruntime-linux-x64-1.14.0
 make
