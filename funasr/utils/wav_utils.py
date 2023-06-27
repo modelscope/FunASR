@@ -166,7 +166,9 @@ def compute_fbank(wav_file,
         try:
             waveform, audio_sr = torchaudio.load(wav_file)
         except:
-            waveform, audio_sr = soundfile.read(wav_file)
+            waveform, audio_sr = soundfile.read(wav_file, dtype='float32')
+            if waveform.ndim == 2:
+                waveform = waveform[:, 0]
             waveform = torch.tensor(np.expand_dims(waveform, axis=0))
         waveform = waveform * (1 << 15)
         waveform = torch_resample(waveform, audio_sr, model_sr)
