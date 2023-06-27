@@ -154,15 +154,15 @@
 <div class="section" id="install-modelscope-and-funasr">
 <h3>Install <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR#installation">modelscope and funasr</a><a class="headerlink" href="#install-modelscope-and-funasr" title="Permalink to this headline"></a></h3>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># pip3 install torch torchaudio</span>
-pip install -U modelscope funasr
+pip3 install -U modelscope funasr
 <span class="c1"># For the users in China, you could install with the command:</span>
-<span class="c1"># pip install -U modelscope funasr -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html -i https://mirror.sjtu.edu.cn/pypi/web/simple</span>
+<span class="c1"># pip3 install -U modelscope funasr -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html -i https://mirror.sjtu.edu.cn/pypi/web/simple</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="export-onnx-model">
 <h3>Export <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export">onnx model</a><a class="headerlink" href="#export-onnx-model" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize True
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize True
 </pre></div>
 </div>
 </div>
