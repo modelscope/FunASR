@@ -56,10 +56,9 @@ def tokenize(data,
     if 'hw_tag' in data:
         if hw_config['pre_hwlist'] is not None and hw_config['pre_prob'] > 0:
             # enable preset hotword detect in sampling
-            import pdb; pdb.set_trace()
             pre_index = None
             for hw in hw_config['pre_hwlist']:
-                _find = text.find(hw)
+                _find = data['text'].find(hw)
                 if _find != -1:
                     _find = text[:_find].count(" ")  # bpe sometimes
                     pre_index = [_find, _find + max(hw.count(" "), 1)]
