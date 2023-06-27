@@ -166,7 +166,9 @@ def compute_fbank(wav_file,
         try:
             waveform, audio_sr = torchaudio.load(wav_file)
         except:
-            waveform, audio_sr = soundfile.read(wav_file)
+            waveform, audio_sr = soundfile.read(wav_file, dtype='float32')
+            if waveform.ndim == 2:
+                waveform = waveform[:, 0]
             waveform = torch.tensor(np.expand_dims(waveform, axis=0))
         waveform = waveform * (1 << 15)
         waveform = torch_resample(waveform, audio_sr, model_sr)
@@ -187,9 +189,9 @@ def compute_fbank(wav_file,
 
 def wav2num_frame(wav_path, frontend_conf):
     try:
-        waveform, audio_sr = torchaudio.load(wav_file)
+        waveform, sampling_rate = torchaudio.load(wav_path)
     except:
-        waveform, audio_sr = soundfile.read(wav_file)
+        waveform, sampling_rate = soundfile.read(wav_path)
         waveform = torch.tensor(np.expand_dims(waveform, axis=0))
     speech_length = (waveform.shape[1] / sampling_rate) * 1000.
     n_frames = (waveform.shape[1] * 1000.0) / (sampling_rate * frontend_conf["frame_shift"] * frontend_conf["lfr_n"])

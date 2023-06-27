@@ -867,7 +867,10 @@ def inference_paraformer_online(
             try:
                 raw_inputs = torchaudio.load(data_path_and_name_and_type[0])[0][0]
             except:
-                raw_inputs = torch.tensor(soundfile.read(data_path_and_name_and_type[0])[0])
+                raw_inputs = soundfile.read(data_path_and_name_and_type[0], dtype='float32')[0]
+                if raw_inputs.ndim == 2:
+                    raw_inputs = raw_inputs[:, 0]
+                raw_inputs = torch.tensor(raw_inputs)
         if data_path_and_name_and_type is None and raw_inputs is not None:
             if isinstance(raw_inputs, np.ndarray):
                 raw_inputs = torch.tensor(raw_inputs)

@@ -71,7 +71,10 @@ def load_wav(input):
     try:
         return torchaudio.load(input)[0].numpy()
     except:
-        return np.expand_dims(soundfile.read(input)[0], axis=0)
+        waveform, _ = soundfile.read(input, dtype='float32')
+        if waveform.ndim == 2:
+            waveform = waveform[:, 0]
+        return np.expand_dims(waveform, axis=0)
 
 DATA_TYPES = {
     "sound": load_wav,
