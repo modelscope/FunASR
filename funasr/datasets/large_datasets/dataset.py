@@ -128,7 +128,9 @@ class AudioDataset(IterableDataset):
                         try:
                             waveform, sampling_rate = torchaudio.load(path)
                         except:
-                            waveform, sampling_rate = soundfile.read(path)
+                            waveform, sampling_rate = soundfile.read(path, dtype='float32')
+                            if waveform.ndim == 2:
+                                waveform = waveform[:, 0]
                             waveform = np.expand_dims(waveform, axis=0)
                             waveform = torch.tensor(waveform)
                         if self.frontend_conf is not None:
