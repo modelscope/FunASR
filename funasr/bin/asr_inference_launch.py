@@ -293,7 +293,7 @@ def inference_paraformer(
         penalty=penalty,
         nbest=nbest,
         hotword_list_or_file=hotword_list_or_file,
-        clas_sacle=clas_scale,
+        clas_scale=clas_scale,
     )
 
     speech2text = Speech2TextParaformer(**speech2text_kwargs)
