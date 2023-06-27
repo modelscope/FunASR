@@ -34,9 +34,9 @@ For the release notes, please ref to [news](https://github.com/alibaba-damo-acad
 
 Install from pip
 ```shell
-pip install -U funasr
+pip3 install -U funasr
 # For the users in China, you could install with the command:
-# pip install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple
+# pip3 install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
 
 Or install from source code
@@ -96,14 +96,17 @@ More examples could be found in [docs](https://alibaba-damo-academy.github.io/Fu
 ### runtime
 
 An example with websocket:
+
 For the server:
 ```shell
+cd funasr/runtime/python/websocket
 python wss_srv_asr.py --port 10095
 ```
+
 For the client:
 ```shell
-python wss_client_asr.py --host "0.0.0.0" --port 10095 --mode 2pass --chunk_size "5,10,5"
-#python wss_client_asr.py --host "0.0.0.0" --port 10095 --mode 2pass --chunk_size "8,8,4" --audio_in "./data/wav.scp" --output_dir "./results"
+python wss_client_asr.py --host "127.0.0.1" --port 10095 --mode 2pass --chunk_size "5,10,5"
+#python wss_client_asr.py --host "127.0.0.1" --port 10095 --mode 2pass --chunk_size "8,8,4" --audio_in "./data/wav.scp" --output_dir "./results"
 ```
 More examples could be found in [docs](https://alibaba-damo-academy.github.io/FunASR/en/runtime/websocket_python.html#id2)
 ## Contact

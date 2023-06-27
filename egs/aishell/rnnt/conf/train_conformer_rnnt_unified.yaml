@@ -6,7 +6,7 @@ encoder_conf:
       unified_model_training: true
       default_chunk_size: 16
       jitter_range: 4
-      left_chunk_size: 0
+      left_chunk_size: 1
       embed_vgg_like: false
       subsampling_factor: 4
       linear_units: 2048
@@ -51,7 +51,7 @@ use_amp: true
 # optimization related
 accum_grad: 1
 grad_clip: 5
-max_epoch: 200
+max_epoch: 120
 val_scheduler_criterion:
     - valid
     - loss

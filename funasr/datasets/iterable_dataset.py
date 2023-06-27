@@ -14,6 +14,7 @@ import kaldiio
 import numpy as np
 import torch
 import torchaudio
+import soundfile
 from torch.utils.data.dataset import IterableDataset
 from typeguard import check_argument_types
 import os.path
@@ -66,8 +67,17 @@ def load_pcm(input):
         bytes = f.read()
     return load_bytes(bytes)
 
+def load_wav(input):
+    try:
+        return torchaudio.load(input)[0].numpy()
+    except:
+        waveform, _ = soundfile.read(input, dtype='float32')
+        if waveform.ndim == 2:
+            waveform = waveform[:, 0]
+        return np.expand_dims(waveform, axis=0)
+
 DATA_TYPES = {
-    "sound": lambda x: torchaudio.load(x)[0].numpy(),
+    "sound": load_wav,
     "pcm": load_pcm,
     "kaldi_ark": load_kaldi,
     "bytes": load_bytes,
