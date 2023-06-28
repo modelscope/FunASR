@@ -18,5 +18,6 @@ To facilitate reproducible research, we provide a comprehensive overview of the 
    ./Track_setting_and_evaluation
    ./Baseline
    ./Rules
+   ./Challenge_result
    ./Organizers
    ./Contact
