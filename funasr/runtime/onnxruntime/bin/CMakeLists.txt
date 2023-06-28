@@ -12,5 +12,8 @@ target_link_libraries(funasr-onnx-online-vad PUBLIC funasr)
 add_executable(funasr-onnx-offline-punc "funasr-onnx-offline-punc.cpp")
 target_link_libraries(funasr-onnx-offline-punc PUBLIC funasr)
 
+add_executable(funasr-onnx-online-punc "funasr-onnx-online-punc.cpp")
+target_link_libraries(funasr-onnx-online-punc PUBLIC funasr)
+
 add_executable(funasr-onnx-offline-rtf "funasr-onnx-offline-rtf.cpp")
 target_link_libraries(funasr-onnx-offline-rtf PUBLIC funasr)

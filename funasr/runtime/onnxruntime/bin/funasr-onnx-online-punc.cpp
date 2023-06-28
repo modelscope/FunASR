@@ -28,12 +28,32 @@ void GetValue(TCLAP::ValueArg<std::string>& value_arg, string key, std::map<std:
     }
 }
 
+void splitString(vector<string>& strings, const string& org_string, const string& seq) {
+	string::size_type p1 = 0;
+	string::size_type p2 = org_string.find(seq);
+
+	while (p2 != string::npos) {
+		if (p2 == p1) {
+			++p1;
+			p2 = org_string.find(seq, p1);
+			continue;
+		}
+		strings.push_back(org_string.substr(p1, p2 - p1));
+		p1 = p2 + seq.size();
+		p2 = org_string.find(seq, p1);
+	}
+
+	if (p1 != org_string.size()) {
+		strings.push_back(org_string.substr(p1));
+	}
+}
+
 int main(int argc, char *argv[])
 {
     google::InitGoogleLogging(argv[0]);
     FLAGS_logtostderr = true;
 
-    TCLAP::CmdLine cmd("funasr-onnx-offline-punc", ' ', "1.0");
+    TCLAP::CmdLine cmd("funasr-onnx-online-punc", ' ', "1.0");
     TCLAP::ValueArg<std::string>    model_dir("", MODEL_DIR, "the punc model path, which contains model.onnx, punc.yaml", true, "", "string");
     TCLAP::ValueArg<std::string>    quantize("", QUANTIZE, "false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir", false, "false", "string");
     TCLAP::ValueArg<std::string> txt_path("", TXT_PATH, "txt file path, one sentence per line", true, "", "string");
@@ -51,7 +71,7 @@ int main(int argc, char *argv[])
     struct timeval start, end;
     gettimeofday(&start, NULL);
     int thread_num = 1;
-    FUNASR_HANDLE punc_hanlde=CTTransformerInit(model_path, thread_num);
+    FUNASR_HANDLE punc_hanlde=CTTransformerInit(model_path, thread_num, PUNC_ONLINE);
 
     if (!punc_hanlde)
     {
@@ -83,13 +103,23 @@ int main(int argc, char *argv[])
     
     long taking_micros = 0;
     for(auto& txt_str : txt_list){
+        vector<string> vad_strs;
+        splitString(vad_strs, txt_str, "|");
+        string str_out;
+        FUNASR_RESULT result = nullptr;
         gettimeofday(&start, NULL);
-        FUNASR_RESULT result=CTTransformerInfer(punc_hanlde, txt_str.c_str(), RASR_NONE, NULL);
+        for(auto& vad_str:vad_strs){
+            result=CTTransformerInfer(punc_hanlde, vad_str.c_str(), RASR_NONE, NULL, PUNC_ONLINE, result);
+            if(result){
+                string msg = CTTransformerGetResult(result, 0);
+                str_out += msg;
+                LOG(INFO)<<"Online result: "<<msg;
+            }
+        }
         gettimeofday(&end, NULL);
         seconds = (end.tv_sec - start.tv_sec);
         taking_micros += ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
-        string msg = FunASRGetResult(result, 0);
-        LOG(INFO)<<"Results: "<<msg;
+        LOG(INFO)<<"Results: "<<str_out;
         CTTransformerFreeResult(result);
     }
 
