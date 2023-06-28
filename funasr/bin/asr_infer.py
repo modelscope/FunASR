@@ -1612,32 +1612,6 @@ class Speech2TextTransducer:
 
         return results
 
-    @staticmethod
-    def from_pretrained(
-            model_tag: Optional[str] = None,
-            **kwargs: Optional[Any],
-    ) -> Speech2Text:
-        """Build Speech2Text instance from the pretrained model.
-        Args:
-            model_tag: Model tag of the pretrained models.
-        Return:
-            : Speech2Text instance.
-        """
-        if model_tag is not None:
-            try:
-                from espnet_model_zoo.downloader import ModelDownloader
-
-            except ImportError:
-                logging.error(
-                    "`espnet_model_zoo` is not installed. "
-                    "Please install via `pip install -U espnet_model_zoo`."
-                )
-                raise
-            d = ModelDownloader()
-            kwargs.update(**d.download_and_unpack(model_tag))
-
-        return Speech2TextTransducer(**kwargs)
-
 
 class Speech2TextSAASR:
     """Speech2Text class

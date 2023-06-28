@@ -107,36 +107,6 @@ class Speech2DiarizationEEND:
 
         return results
 
-    @staticmethod
-    def from_pretrained(
-            model_tag: Optional[str] = None,
-            **kwargs: Optional[Any],
-    ):
-        """Build Speech2Diarization instance from the pretrained model.
-
-        Args:
-            model_tag (Optional[str]): Model tag of the pretrained models.
-                Currently, the tags of espnet_model_zoo are supported.
-
-        Returns:
-            Speech2Diarization: Speech2Diarization instance.
-
-        """
-        if model_tag is not None:
-            try:
-                from espnet_model_zoo.downloader import ModelDownloader
-
-            except ImportError:
-                logging.error(
-                    "`espnet_model_zoo` is not installed. "
-                    "Please install via `pip install -U espnet_model_zoo`."
-                )
-                raise
-            d = ModelDownloader()
-            kwargs.update(**d.download_and_unpack(model_tag))
-
-        return Speech2DiarizationEEND(**kwargs)
-
 
 class Speech2DiarizationSOND:
     """Speech2Xvector class
@@ -305,33 +275,3 @@ class Speech2DiarizationSOND:
         results, pse_labels = self.post_processing(logits, profile.shape[1], output_format)
 
         return results, pse_labels
-
-    @staticmethod
-    def from_pretrained(
-            model_tag: Optional[str] = None,
-            **kwargs: Optional[Any],
-    ):
-        """Build Speech2Xvector instance from the pretrained model.
-
-        Args:
-            model_tag (Optional[str]): Model tag of the pretrained models.
-                Currently, the tags of espnet_model_zoo are supported.
-
-        Returns:
-            Speech2Xvector: Speech2Xvector instance.
-
-        """
-        if model_tag is not None:
-            try:
-                from espnet_model_zoo.downloader import ModelDownloader
-
-            except ImportError:
-                logging.error(
-                    "`espnet_model_zoo` is not installed. "
-                    "Please install via `pip install -U espnet_model_zoo`."
-                )
-                raise
-            d = ModelDownloader()
-            kwargs.update(**d.download_and_unpack(model_tag))
-
-        return Speech2DiarizationSOND(**kwargs)
