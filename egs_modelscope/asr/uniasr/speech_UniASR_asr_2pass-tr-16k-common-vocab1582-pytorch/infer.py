@@ -1,33 +1,3 @@
-<<<<<<< HEAD
-import os
-import shutil
-import argparse
-from modelscope.pipelines import pipeline
-from modelscope.utils.constant import Tasks
-
-def modelscope_infer(args):
-    os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpuid)
-    inference_pipeline = pipeline(
-        task=Tasks.auto_speech_recognition,
-        model=args.model,
-        output_dir=args.output_dir,
-        batch_size=args.batch_size,
-        param_dict={"decoding_model": args.decoding_mode, "hotword": args.hotword_txt}
-    )
-    inference_pipeline(audio_in=args.audio_in)
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--model', type=str, default="damo/speech_UniASR_asr_2pass-tr-16k-common-vocab1582-pytorch")
-    parser.add_argument('--audio_in', type=str, default="./data/test/wav.scp")
-    parser.add_argument('--output_dir', type=str, default="./results/")
-    parser.add_argument('--decoding_mode', type=str, default="normal")
-    parser.add_argument('--hotword_txt', type=str, default=None)
-    parser.add_argument('--batch_size', type=int, default=64)
-    parser.add_argument('--gpuid', type=str, default="0")
-    args = parser.parse_args()
-    modelscope_infer(args)
-=======
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
 
@@ -41,4 +11,3 @@ if __name__ == "__main__":
     )
     rec_result = inference_pipeline(audio_in=audio_in, param_dict={"decoding_model":"offline"})
     print(rec_result)
->>>>>>> main
