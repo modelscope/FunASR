@@ -9,7 +9,6 @@ from typing import Any, Dict, Iterable, List, NamedTuple, Set, Tuple, Union
 import numpy as np
 import yaml
 
-from typeguard import check_argument_types
 
 import warnings
 

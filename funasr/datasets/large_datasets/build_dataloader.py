@@ -6,7 +6,6 @@ from typing import Union
 
 import sentencepiece as spm
 from torch.utils.data import DataLoader
-from typeguard import check_argument_types
 
 from funasr.datasets.large_datasets.dataset import Dataset
 from funasr.iterators.abs_iter_factory import AbsIterFactory

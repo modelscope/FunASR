@@ -1,5 +1,4 @@
 import torch
-from typeguard import check_argument_types
 
 
 class SGD(torch.optim.SGD):

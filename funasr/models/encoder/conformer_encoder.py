@@ -12,7 +12,6 @@ from typing import Dict
 
 import torch
 from torch import nn
-from typeguard import check_argument_types
 
 from funasr.models.ctc import CTC
 from funasr.modules.attention import (

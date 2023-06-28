@@ -6,7 +6,6 @@ from typing import Union
 
 import torch
 import yaml
-from typeguard import check_argument_types
 
 from funasr.build_utils.build_model import build_model
 from funasr.models.base_model import FunASRModel

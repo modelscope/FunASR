@@ -9,7 +9,6 @@ from typing import Union
 
 import numpy as np
 import torch
-from typeguard import check_argument_types
 from funasr.build_utils.build_model_from_file import build_model_from_file
 from funasr.models.frontend.wav_frontend import WavFrontend
 from funasr.text.token_id_converter import TokenIDConverter

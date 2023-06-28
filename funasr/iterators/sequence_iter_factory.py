@@ -4,7 +4,6 @@ from typing import Union
 
 import numpy as np
 from torch.utils.data import DataLoader
-from typeguard import check_argument_types
 
 from funasr.iterators.abs_iter_factory import AbsIterFactory
 from funasr.samplers.abs_sampler import AbsSampler

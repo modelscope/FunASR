@@ -8,7 +8,6 @@ import os
 from io import BytesIO
 
 import torch
-from typeguard import check_argument_types
 from typing import Collection
 
 from funasr.train.reporter import Reporter

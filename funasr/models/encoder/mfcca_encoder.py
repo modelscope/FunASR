@@ -5,7 +5,6 @@ import logging
 import torch
 from torch import nn
 
-from typeguard import check_argument_types
 
 from funasr.models.encoder.encoder_layer_mfcca import EncoderLayer
 from funasr.modules.nets_utils import get_activation

@@ -18,7 +18,6 @@ import numpy as np
 import soundfile
 import torch
 from scipy.signal import medfilt
-from typeguard import check_argument_types
 
 from funasr.bin.diar_infer import Speech2DiarizationSOND, Speech2DiarizationEEND
 from funasr.datasets.iterable_dataset import load_bytes

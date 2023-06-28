@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import Iterable
 from typing import Union
 
-from typeguard import check_argument_types
 
 from funasr.text.abs_tokenizer import AbsTokenizer
 from funasr.text.char_tokenizer import CharTokenizer

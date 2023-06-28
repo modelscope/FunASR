@@ -2,7 +2,6 @@ import logging
 
 import torch
 import torch.nn.functional as F
-from typeguard import check_argument_types
 
 
 class CTC(torch.nn.Module):

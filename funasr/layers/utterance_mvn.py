@@ -1,7 +1,6 @@
 from typing import Tuple
 
 import torch
-from typeguard import check_argument_types
 
 from funasr.modules.nets_utils import make_pad_mask
 from funasr.layers.abs_normalize import AbsNormalize

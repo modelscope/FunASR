@@ -9,7 +9,6 @@ from typing import Union
 
 import torch
 import numpy as np
-from typeguard import check_argument_types
 
 from funasr.models.encoder.abs_encoder import AbsEncoder
 from funasr.models.frontend.abs_frontend import AbsFrontend

@@ -25,7 +25,6 @@ import oss2
 import torch
 import torch.nn
 import torch.optim
-from typeguard import check_argument_types
 
 from funasr.iterators.abs_iter_factory import AbsIterFactory
 from funasr.main_funcs.average_nbest_models import average_nbest_models

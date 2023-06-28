@@ -3,7 +3,6 @@ from funasr.models.frontend.default import DefaultFrontend
 from funasr.models.frontend.s3prl import S3prlFrontend
 import numpy as np
 import torch
-from typeguard import check_argument_types
 from typing import Tuple
 
 

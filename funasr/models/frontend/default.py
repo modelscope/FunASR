@@ -7,7 +7,6 @@ import humanfriendly
 import numpy as np
 import torch
 from torch_complex.tensor import ComplexTensor
-from typeguard import check_argument_types
 
 from funasr.layers.log_mel import LogMel
 from funasr.layers.stft import Stft

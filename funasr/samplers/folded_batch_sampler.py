@@ -4,7 +4,6 @@ from typing import Sequence
 from typing import Tuple
 from typing import Union
 
-from typeguard import check_argument_types
 
 from funasr.fileio.read_text import load_num_sequence_text
 from funasr.fileio.read_text import read_2column_text

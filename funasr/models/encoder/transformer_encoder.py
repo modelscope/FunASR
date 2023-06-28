@@ -9,7 +9,6 @@ from typing import Tuple
 
 import torch
 from torch import nn
-from typeguard import check_argument_types
 import logging
 
 from funasr.models.ctc import CTC

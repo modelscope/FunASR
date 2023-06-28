@@ -11,7 +11,6 @@ import numpy as np
 import resampy
 import soundfile
 from tqdm import tqdm
-from typeguard import check_argument_types
 
 from funasr.utils.cli_utils import get_commandline_args
 from funasr.fileio.read_text import read_2column_text

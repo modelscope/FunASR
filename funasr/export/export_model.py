@@ -1,7 +1,6 @@
 import json
 from typing import Union, Dict
 from pathlib import Path
-from typeguard import check_argument_types
 
 import os
 import logging

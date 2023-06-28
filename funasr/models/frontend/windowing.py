@@ -6,7 +6,6 @@
 
 from funasr.models.frontend.abs_frontend import AbsFrontend
 import torch
-from typeguard import check_argument_types
 from typing import Tuple
 
 

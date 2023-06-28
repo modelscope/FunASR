@@ -9,7 +9,6 @@ import warnings
 
 # import g2p_en
 import jamo
-from typeguard import check_argument_types
 
 from funasr.text.abs_tokenizer import AbsTokenizer
 

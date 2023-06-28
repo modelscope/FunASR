@@ -9,7 +9,6 @@ import logging
 
 from distutils.version import LooseVersion
 from functools import partial
-from typeguard import check_argument_types
 from typing import Optional
 
 import librosa

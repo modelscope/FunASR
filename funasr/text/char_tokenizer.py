@@ -4,7 +4,6 @@ from typing import List
 from typing import Union
 import warnings
 
-from typeguard import check_argument_types
 
 from funasr.text.abs_tokenizer import AbsTokenizer
 

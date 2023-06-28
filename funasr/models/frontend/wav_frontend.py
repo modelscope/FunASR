@@ -6,7 +6,6 @@ import numpy as np
 import torch
 import torchaudio.compliance.kaldi as kaldi
 from torch.nn.utils.rnn import pad_sequence
-from typeguard import check_argument_types
 
 import funasr.models.frontend.eend_ola_feature as eend_ola_feature
 from funasr.models.frontend.abs_frontend import AbsFrontend

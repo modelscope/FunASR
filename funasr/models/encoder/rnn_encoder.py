@@ -5,7 +5,6 @@ from typing import Tuple
 
 import numpy as np
 import torch
-from typeguard import check_argument_types
 
 from funasr.modules.nets_utils import make_pad_mask
 from funasr.modules.rnn.encoders import RNN

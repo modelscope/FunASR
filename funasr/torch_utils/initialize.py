@@ -4,7 +4,6 @@
 
 import math
 import torch
-from typeguard import check_argument_types
 
 
 def initialize(model: torch.nn.Module, init: str):

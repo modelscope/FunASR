@@ -4,7 +4,6 @@ from typing import Collection
 from typing import Iterator
 
 import numpy as np
-from typeguard import check_argument_types
 
 from funasr.iterators.abs_iter_factory import AbsIterFactory
 

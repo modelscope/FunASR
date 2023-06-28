@@ -3,7 +3,6 @@
 from typing import List, Optional, Tuple
 
 import torch
-from typeguard import check_argument_types
 
 from funasr.modules.beam_search.beam_search_transducer import Hypothesis
 from funasr.models.specaug.specaug import SpecAug

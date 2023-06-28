@@ -10,7 +10,6 @@ from typing import Optional
 from typing import Tuple
 
 import torch
-from typeguard import check_argument_types
 
 from funasr.layers.abs_normalize import AbsNormalize
 from funasr.models.encoder.abs_encoder import AbsEncoder

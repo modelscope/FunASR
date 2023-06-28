@@ -5,7 +5,6 @@
 """Linear Projection."""
 
 from funasr.models.preencoder.abs_preencoder import AbsPreEncoder
-from typeguard import check_argument_types
 from typing import Tuple
 
 import torch

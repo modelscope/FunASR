@@ -9,7 +9,6 @@ from typing import Tuple
 
 import torch
 from torch import nn
-from typeguard import check_argument_types
 
 from funasr.models.decoder.abs_decoder import AbsDecoder
 from funasr.modules.attention import MultiHeadedAttention

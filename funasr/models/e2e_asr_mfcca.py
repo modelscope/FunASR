@@ -7,7 +7,6 @@ from typing import Tuple
 from typing import Union
 import logging
 import torch
-from typeguard import check_argument_types
 
 from funasr.modules.e2e_asr_common import ErrorCalculator
 from funasr.modules.nets_utils import th_accuracy

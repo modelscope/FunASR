@@ -8,7 +8,6 @@ from typing import Optional, List
 
 import torch
 from torch.optim.lr_scheduler import _LRScheduler
-from typeguard import check_argument_types
 
 from funasr.schedulers.abs_scheduler import AbsBatchStepScheduler
 

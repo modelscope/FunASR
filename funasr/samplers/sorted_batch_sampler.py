@@ -2,7 +2,6 @@ import logging
 from typing import Iterator
 from typing import Tuple
 
-from typeguard import check_argument_types
 
 from funasr.fileio.read_text import load_num_sequence_text
 from funasr.samplers.abs_sampler import AbsSampler

@@ -10,7 +10,6 @@ import numpy as np
 import yaml
 from onnxruntime import (GraphOptimizationLevel, InferenceSession,
                          SessionOptions, get_available_providers, get_device)
-from typeguard import check_argument_types
 
 import warnings
 

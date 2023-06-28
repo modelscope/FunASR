@@ -9,7 +9,6 @@ from typing import Union
 
 import numpy as np
 import torch
-from typeguard import check_argument_types
 
 from funasr.iterators.abs_iter_factory import AbsIterFactory
 from funasr.iterators.sequence_iter_factory import SequenceIterFactory

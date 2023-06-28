@@ -15,7 +15,6 @@ import numpy as np
 import torch
 from scipy.ndimage import median_filter
 from torch.nn import functional as F
-from typeguard import check_argument_types
 
 from funasr.models.frontend.wav_frontend import WavFrontendMel23
 from funasr.tasks.diar import DiarTask

@@ -14,7 +14,6 @@ from typing import Optional
 from typing import Union
 
 import torch
-from typeguard import check_argument_types
 
 from funasr.bin.punc_infer import Text2Punc, Text2PuncVADRealtime
 from funasr.torch_utils.set_all_random_seed import set_all_random_seed

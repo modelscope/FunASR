@@ -6,7 +6,6 @@
 
 from funasr.modules.nets_utils import make_pad_mask
 from funasr.models.postencoder.abs_postencoder import AbsPostEncoder
-from typeguard import check_argument_types
 from typing import Tuple
 
 import copy

@@ -5,7 +5,6 @@ from typing import List
 from typing import Union
 
 import numpy as np
-from typeguard import check_argument_types
 
 
 class TokenIDConverter:

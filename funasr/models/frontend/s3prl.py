@@ -8,7 +8,6 @@ from typing import Union
 
 import humanfriendly
 import torch
-from typeguard import check_argument_types
 
 from funasr.models.frontend.abs_frontend import AbsFrontend
 from funasr.modules.frontends.frontend import Frontend

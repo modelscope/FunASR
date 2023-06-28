@@ -10,7 +10,6 @@ from funasr.layers.sinc_conv import LogCompression
 from funasr.layers.sinc_conv import SincConv
 import humanfriendly
 import torch
-from typeguard import check_argument_types
 from typing import Optional
 from typing import Tuple
 from typing import Union

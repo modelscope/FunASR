@@ -10,7 +10,6 @@ import torch
 import torch.distributed as dist
 import torch.nn as nn
 import torch.nn.functional as F
-from typeguard import check_argument_types
 
 from funasr.models.encoder.abs_encoder import AbsEncoder
 from funasr.modules.data2vec.data_utils import compute_mask_indices

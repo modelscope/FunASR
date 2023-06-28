@@ -1,5 +1,4 @@
 import torch
-from typeguard import check_argument_types
 from typing import Optional
 from typing import Tuple
 

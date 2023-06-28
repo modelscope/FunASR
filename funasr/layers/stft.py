@@ -5,7 +5,6 @@ from typing import Union
 
 import torch
 from torch_complex.tensor import ComplexTensor
-from typeguard import check_argument_types
 
 from funasr.modules.nets_utils import make_pad_mask
 from funasr.layers.complex_utils import is_complex

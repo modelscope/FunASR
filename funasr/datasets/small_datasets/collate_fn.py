@@ -6,7 +6,6 @@ from typing import Union
 
 import numpy as np
 import torch
-from typeguard import check_argument_types
 from typeguard import check_return_type
 
 from funasr.modules.nets_utils import pad_list

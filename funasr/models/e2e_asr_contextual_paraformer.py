@@ -9,7 +9,6 @@ from typing import Union
 import numpy as np
 
 import torch
-from typeguard import check_argument_types
 
 from funasr.layers.abs_normalize import AbsNormalize
 from funasr.models.ctc import CTC

@@ -4,7 +4,6 @@ from typing import Dict
 from typing import List
 from typing import Union
 
-from typeguard import check_argument_types
 
 
 def read_2column_text(path: Union[Path, str]) -> Dict[str, str]:

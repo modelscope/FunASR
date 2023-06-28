@@ -16,7 +16,6 @@ import torch
 import torchaudio
 import soundfile
 from torch.utils.data.dataset import IterableDataset
-from typeguard import check_argument_types
 import os.path
 
 from funasr.datasets.dataset import ESPnetDataset

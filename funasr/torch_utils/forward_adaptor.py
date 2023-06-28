@@ -1,5 +1,4 @@
 import torch
-from typeguard import check_argument_types
 
 
 class ForwardAdaptor(torch.nn.Module):

@@ -9,7 +9,6 @@ from typing import Tuple
 
 import numpy as np
 import torch
-from typeguard import check_argument_types
 from typeguard import check_return_type
 
 from funasr.datasets.collate_fn import CommonCollateFn

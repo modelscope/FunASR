@@ -2,7 +2,6 @@ from typing import Collection
 
 from jaconv import jaconv
 import tacotron_cleaner.cleaners
-from typeguard import check_argument_types
 
 try:
     from vietnamese_cleaner import vietnamese_cleaners
