@@ -30,7 +30,7 @@ function WebSocketConnectMethod( config ) { //定义socket连接方法类
 			speechSokt.onopen = function(e){onOpen(e);}; // 定义响应函数
 			speechSokt.onclose = function(e){
 			    console.log("onclose ws!");
-			    speechSokt.close();
+			    //speechSokt.close();
 				onClose(e);
 				};
 			speechSokt.onmessage = function(e){onMessage(e);};
@@ -51,16 +51,13 @@ function WebSocketConnectMethod( config ) { //定义socket连接方法类
 		}
 	};
 	
-	this.wsSend = function ( oneData,stop ) {
+	this.wsSend = function ( oneData ) {
  
 		if(speechSokt == undefined) return;
 		if ( speechSokt.readyState === 1 ) { // 0:CONNECTING, 1:OPEN, 2:CLOSING, 3:CLOSED
  
 			speechSokt.send( oneData );
-			if(stop){
-				setTimeout(speechSokt.close(), 3000 );
  
-			}
 			
 		}
 	};
@@ -80,7 +77,7 @@ function WebSocketConnectMethod( config ) { //定义socket连接方法类
 		speechSokt.send( JSON.stringify(request) );
 		console.log("连接成功");
 		stateHandle(0);
-		isconnected=1;
+ 
 	}
 	
 	function onClose( e ) {
@@ -93,7 +90,7 @@ function WebSocketConnectMethod( config ) { //定义socket连接方法类
 	}
 	
 	function onError( e ) {
-		isconnected=-1;
+ 
 		info_div.innerHTML="连接"+e;
 		console.log(e);
 		stateHandle(2);

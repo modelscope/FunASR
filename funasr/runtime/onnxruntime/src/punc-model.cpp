@@ -1,11 +1,17 @@
 #include "precomp.h"
 
 namespace funasr {
-PuncModel *CreatePuncModel(std::map<std::string, std::string>& model_path, int thread_num)
+PuncModel *CreatePuncModel(std::map<std::string, std::string>& model_path, int thread_num, PUNC_TYPE type)
 {
     PuncModel *mm;
-    mm = new CTTransformer();
-
+    if (type==PUNC_OFFLINE){
+        mm = new CTTransformer();
+    }else if(type==PUNC_ONLINE){
+        mm = new CTTransformerOnline();
+    }else{
+        LOG(ERROR) << "Wrong PUNC TYPE";
+        exit(-1);
+    }
     string punc_model_path;
     string punc_config_path;
 

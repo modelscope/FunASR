@@ -36,6 +36,7 @@ using namespace std;
 #include "offline-stream.h"
 #include "tokenizer.h"
 #include "ct-transformer.h"
+#include "ct-transformer-online.h"
 #include "e2e-vad.h"
 #include "fsmn-vad.h"
 #include "fsmn-vad-online.h"
