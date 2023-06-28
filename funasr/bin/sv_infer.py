@@ -40,7 +40,6 @@ class Speech2Xvector:
             streaming: bool = False,
             embedding_node: str = "resnet1_dense",
     ):
-        assert check_argument_types()
 
         # TODO: 1. Build SV model
         sv_model, sv_train_args = build_model_from_file(
@@ -106,7 +105,6 @@ class Speech2Xvector:
             embedding, ref_embedding, similarity_score
 
         """
-        assert check_argument_types()
         self.sv_model.eval()
         embedding = self.calculate_embedding(speech)
         ref_emb, score = None, None

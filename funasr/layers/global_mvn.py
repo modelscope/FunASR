@@ -27,7 +27,6 @@ class GlobalMVN(AbsNormalize, InversibleInterface):
         norm_vars: bool = True,
         eps: float = 1.0e-20,
     ):
-        assert check_argument_types()
         super().__init__()
         self.norm_means = norm_means
         self.norm_vars = norm_vars

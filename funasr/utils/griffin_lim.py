@@ -137,7 +137,6 @@ class Spectrogram2Waveform(object):
             griffin_lim_iters: The number of iterations.
 
         """
-        assert check_argument_types()
         self.fs = fs
         self.logmel2linear = (
             partial(

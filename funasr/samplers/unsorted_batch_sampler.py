@@ -27,7 +27,6 @@ class UnsortedBatchSampler(AbsSampler):
         drop_last: bool = False,
         utt2category_file: str = None,
     ):
-        assert check_argument_types()
         assert batch_size > 0
         self.batch_size = batch_size
         self.key_file = key_file

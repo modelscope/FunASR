@@ -22,7 +22,6 @@ class FoldedBatchSampler(AbsSampler):
         drop_last: bool = False,
         utt2category_file: str = None,
     ):
-        assert check_argument_types()
         assert batch_size > 0
         if sort_batch != "ascending" and sort_batch != "descending":
             raise ValueError(

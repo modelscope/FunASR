@@ -29,7 +29,6 @@ def build_model_from_file(
         device: Device type, "cpu", "cuda", or "cuda:N".
 
     """
-    assert check_argument_types()
     if config_file is None:
         assert model_file is not None, (
             "The argument 'model_file' must be provided "

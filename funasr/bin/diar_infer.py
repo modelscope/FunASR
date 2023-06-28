@@ -44,7 +44,6 @@ class Speech2DiarizationEEND:
             device: str = "cpu",
             dtype: str = "float32",
     ):
-        assert check_argument_types()
 
         # 1. Build Diarization model
         diar_model, diar_train_args = build_model_from_file(
@@ -87,7 +86,6 @@ class Speech2DiarizationEEND:
             diarization results
 
         """
-        assert check_argument_types()
         # Input as audio signal
         if isinstance(speech, np.ndarray):
             speech = torch.tensor(speech)
@@ -132,7 +130,6 @@ class Speech2DiarizationSOND:
             smooth_size: int = 83,
             dur_threshold: float = 10,
     ):
-        assert check_argument_types()
 
         # TODO: 1. Build Diarization model
         diar_model, diar_train_args = build_model_from_file(
@@ -252,7 +249,6 @@ class Speech2DiarizationSOND:
             diarization results for each speaker
 
         """
-        assert check_argument_types()
         # Input as audio signal
         if isinstance(speech, np.ndarray):
             speech = torch.tensor(speech)

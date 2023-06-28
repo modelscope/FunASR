@@ -36,7 +36,6 @@ def collect_stats(
     This method is used before executing train().
 
     """
-    assert check_argument_types()
 
     npy_scp_writers = {}
     for itr, mode in zip([train_iter, valid_iter], ["train", "valid"]):

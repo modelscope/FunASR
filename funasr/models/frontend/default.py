@@ -39,7 +39,6 @@ class DefaultFrontend(AbsFrontend):
             apply_stft: bool = True,
             use_channel: int = None,
     ):
-        assert check_argument_types()
         super().__init__()
         if isinstance(fs, str):
             fs = humanfriendly.parse_size(fs)
@@ -166,7 +165,6 @@ class MultiChannelFrontend(AbsFrontend):
             cmvn_file: str = None,
             mc: bool = True
     ):
-        assert check_argument_types()
         super().__init__()
         if isinstance(fs, str):
             fs = humanfriendly.parse_size(fs)

@@ -37,7 +37,6 @@ class RNNTDecoder(torch.nn.Module):
         """Construct a RNNDecoder object."""
         super().__init__()
 
-        assert check_argument_types()
 
         if rnn_type not in ("lstm", "gru"):
             raise ValueError(f"Not supported: rnn_type={rnn_type}")

@@ -30,7 +30,6 @@ def str2int_tuple(integers: str) -> Optional[Tuple[int, ...]]:
     (3, 4, 5)
 
     """
-    assert check_argument_types()
     if integers.strip() in ("none", "None", "NONE", "null", "Null", "NULL"):
         return None
     return tuple(map(int, integers.strip().split(",")))

@@ -25,7 +25,6 @@ class ModelExport:
         calib_num: int = 200,
         model_revision: str = None,
     ):
-        assert check_argument_types()
         self.set_all_random_seed(0)
 
         self.cache_dir = cache_dir

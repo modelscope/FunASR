@@ -125,7 +125,6 @@ class ContextualParaformerDecoder(ParaformerSANMDecoder):
         kernel_size: int = 21,
         sanm_shfit: int = 0,
     ):
-        assert check_argument_types()
         super().__init__(
             vocab_size=vocab_size,
             encoder_output_size=encoder_output_size,

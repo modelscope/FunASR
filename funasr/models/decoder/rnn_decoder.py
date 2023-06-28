@@ -96,7 +96,6 @@ class RNNDecoder(AbsDecoder):
         att_conf: dict = get_default_kwargs(build_attention_list),
     ):
         # FIXME(kamo): The parts of num_spk should be refactored more more more
-        assert check_argument_types()
         if rnn_type not in {"lstm", "gru"}:
             raise ValueError(f"Not supported: rnn_type={rnn_type}")
 

@@ -254,14 +254,12 @@ class Data2VecTask(AbsTask):
         [Collection[Tuple[str, Dict[str, np.ndarray]]]],
         Tuple[List[str], Dict[str, torch.Tensor]],
     ]:
-        assert check_argument_types()
         return CommonCollateFn(clipping=True)
 
     @classmethod
     def build_preprocess_fn(
             cls, args: argparse.Namespace, train: bool
     ) -> Optional[Callable[[str, Dict[str, np.array]], Dict[str, np.ndarray]]]:
-        assert check_argument_types()
         if args.use_preprocessor:
             retval = CommonPreprocessor(
                 train=train,
@@ -308,7 +306,6 @@ class Data2VecTask(AbsTask):
 
     @classmethod
     def build_model(cls, args: argparse.Namespace):
-        assert check_argument_types()
 
         # 1. frontend
         if args.input_size is None:

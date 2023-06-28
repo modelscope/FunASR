@@ -81,7 +81,6 @@ class UniASR(FunASRModel):
         postencoder: Optional[AbsPostEncoder] = None,
         encoder1_encoder2_joint_training: bool = True,
     ):
-        assert check_argument_types()
         assert 0.0 <= ctc_weight <= 1.0, ctc_weight
         assert 0.0 <= interctc_weight < 1.0, interctc_weight
 

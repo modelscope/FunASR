@@ -102,7 +102,6 @@ def build_batch_sampler(
         padding: Whether sequences are input as a padded tensor or not.
             used for "numel" mode
     """
-    assert check_argument_types()
     if len(shape_files) == 0:
         raise ValueError("No shape file are given")
 

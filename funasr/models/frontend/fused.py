@@ -11,7 +11,6 @@ class FusedFrontends(AbsFrontend):
         self, frontends=None, align_method="linear_projection", proj_dim=100, fs=16000
     ):
 
-        assert check_argument_types()
         super().__init__()
         self.align_method = (
             align_method  # fusing method : linear_projection only for now

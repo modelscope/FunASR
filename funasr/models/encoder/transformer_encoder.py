@@ -188,7 +188,6 @@ class TransformerEncoder(AbsEncoder):
             interctc_layer_idx: List[int] = [],
             interctc_use_conditioning: bool = False,
     ):
-        assert check_argument_types()
         super().__init__()
         self._output_size = output_size
 

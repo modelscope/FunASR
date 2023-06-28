@@ -22,7 +22,6 @@ def build_streaming_iterator(
         train: bool = False,
 ) -> DataLoader:
     """Build DataLoader using iterable dataset"""
-    assert check_argument_types()
 
     # preprocess
     if preprocess_fn is not None:

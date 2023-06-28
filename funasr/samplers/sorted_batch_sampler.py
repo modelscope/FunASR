@@ -25,7 +25,6 @@ class SortedBatchSampler(AbsSampler):
         sort_batch: str = "ascending",
         drop_last: bool = False,
     ):
-        assert check_argument_types()
         assert batch_size > 0
         self.batch_size = batch_size
         self.shape_file = shape_file

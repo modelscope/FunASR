@@ -38,7 +38,6 @@ class ClassChoices:
         default: str = None,
         optional: bool = False,
     ):
-        assert check_argument_types()
         self.name = name
         self.base_type = type_check
         self.classes = {k.lower(): v for k, v in classes.items()}
@@ -62,7 +61,6 @@ class ClassChoices:
             return retval
 
     def get_class(self, name: Optional[str]) -> Optional[type]:
-        assert check_argument_types()
         if name is None or (self.optional and name.lower() == ("none", "null", "nil")):
             retval = None
         elif name.lower() in self.classes:

@@ -18,7 +18,6 @@ class DatadirWriter:
     """
 
     def __init__(self, p: Union[Path, str]):
-        assert check_argument_types()
         self.path = Path(p)
         self.chilidren = {}
         self.fd = None
@@ -29,7 +28,6 @@ class DatadirWriter:
         return self
 
     def __getitem__(self, key: str) -> "DatadirWriter":
-        assert check_argument_types()
         if self.fd is not None:
             raise RuntimeError("This writer points out a file")
 
@@ -43,7 +41,6 @@ class DatadirWriter:
         return retval
 
     def __setitem__(self, key: str, value: str):
-        assert check_argument_types()
         if self.has_children:
             raise RuntimeError("This writer points out a directory")
         if key in self.keys:

@@ -80,7 +80,6 @@ def tokenize(
     cleaner: Optional[str],
     g2p: Optional[str],
 ):
-    assert check_argument_types()
 
     logging.basicConfig(
         level=log_level,

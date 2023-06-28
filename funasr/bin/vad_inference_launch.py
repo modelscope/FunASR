@@ -46,7 +46,6 @@ def inference_vad(
         num_workers: int = 1,
         **kwargs,
 ):
-    assert check_argument_types()
     if batch_size > 1:
         raise NotImplementedError("batch decoding is not implemented")
 
@@ -147,7 +146,6 @@ def inference_vad_online(
         num_workers: int = 1,
         **kwargs,
 ):
-    assert check_argument_types()
 
     logging.basicConfig(
         level=log_level,

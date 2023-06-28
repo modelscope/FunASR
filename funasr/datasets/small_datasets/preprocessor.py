@@ -258,7 +258,6 @@ class CommonPreprocessor(AbsPreprocessor):
     def _speech_process(
             self, data: Dict[str, Union[str, np.ndarray]]
     ) -> Dict[str, Union[str, np.ndarray]]:
-        assert check_argument_types()
         if self.speech_name in data:
             if self.train and (self.rirs is not None or self.noises is not None):
                 speech = data[self.speech_name]
@@ -369,7 +368,6 @@ class CommonPreprocessor(AbsPreprocessor):
     def __call__(
             self, uid: str, data: Dict[str, Union[str, np.ndarray]]
     ) -> Dict[str, np.ndarray]:
-        assert check_argument_types()
 
         data = self._speech_process(data)
         data = self._text_process(data)
@@ -500,7 +498,6 @@ class CommonPreprocessor_multi(AbsPreprocessor):
     def __call__(
             self, uid: str, data: Dict[str, Union[str, np.ndarray]]
     ) -> Dict[str, np.ndarray]:
-        assert check_argument_types()
 
         if self.speech_name in data:
             # Nothing now: candidates:
@@ -683,7 +680,6 @@ class CodeMixTokenizerCommonPreprocessor(CommonPreprocessor):
     def __call__(
             self, uid: str, data: Dict[str, Union[list, str, np.ndarray]]
     ) -> Dict[str, Union[list, np.ndarray]]:
-        assert check_argument_types()
         # Split words.
         if isinstance(data[self.text_name], str):
             split_text = self.split_words(data[self.text_name])

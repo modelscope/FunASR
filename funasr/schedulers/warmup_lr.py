@@ -29,7 +29,6 @@ class WarmupLR(_LRScheduler, AbsBatchStepScheduler):
         warmup_steps: Union[int, float] = 25000,
         last_epoch: int = -1,
     ):
-        assert check_argument_types()
         self.warmup_steps = warmup_steps
 
         # __init__() must be invoked before setting field

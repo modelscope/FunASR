@@ -45,7 +45,6 @@ class SequenceIterFactory(AbsIterFactory):
         collate_fn=None,
         pin_memory: bool = False,
     ):
-        assert check_argument_types()
 
         if not isinstance(batches, AbsSampler):
             self.sampler = RawSampler(batches)

@@ -94,7 +94,6 @@ class WavFrontend(AbsFrontend):
             snip_edges: bool = True,
             upsacle_samples: bool = True,
     ):
-        assert check_argument_types()
         super().__init__()
         self.fs = fs
         self.window = window
@@ -226,7 +225,6 @@ class WavFrontendOnline(AbsFrontend):
             snip_edges: bool = True,
             upsacle_samples: bool = True,
     ):
-        assert check_argument_types()
         super().__init__()
         self.fs = fs
         self.window = window
@@ -465,7 +463,6 @@ class WavFrontendMel23(AbsFrontend):
             lfr_m: int = 1,
             lfr_n: int = 1,
     ):
-        assert check_argument_types()
         super().__init__()
         self.fs = fs
         self.frame_length = frame_length

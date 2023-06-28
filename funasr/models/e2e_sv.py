@@ -55,7 +55,6 @@ class ESPnetSVModel(FunASRModel):
             pooling_layer: torch.nn.Module,
             decoder: AbsDecoder,
     ):
-        assert check_argument_types()
 
         super().__init__()
         # note that eos is the same as sos (equivalent ID)

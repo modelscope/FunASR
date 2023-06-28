@@ -120,7 +120,6 @@ class IterableESPnetDataset(IterableDataset):
             int_dtype: str = "long",
             key_file: str = None,
     ):
-        assert check_argument_types()
         if len(path_name_type_list) == 0:
             raise ValueError(
                 '1 or more elements are required for "path_name_type_list"'

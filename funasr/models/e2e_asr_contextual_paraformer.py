@@ -72,7 +72,6 @@ class NeatContextualParaformer(Paraformer):
         preencoder: Optional[AbsPreEncoder] = None,
         postencoder: Optional[AbsPostEncoder] = None,
     ):
-        assert check_argument_types()
         assert 0.0 <= ctc_weight <= 1.0, ctc_weight
         assert 0.0 <= interctc_weight < 1.0, interctc_weight
 

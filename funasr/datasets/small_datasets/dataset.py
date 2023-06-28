@@ -22,7 +22,6 @@ from funasr.fileio.sound_scp import SoundScpReader
 
 class AdapterForSoundScpReader(collections.abc.Mapping):
     def __init__(self, loader, dtype=None):
-        assert check_argument_types()
         self.loader = loader
         self.dtype = dtype
         self.rate = None
@@ -110,7 +109,6 @@ class ESPnetDataset(Dataset):
             speed_perturb: Union[list, tuple] = None,
             mode: str = "train",
     ):
-        assert check_argument_types()
         if len(path_name_type_list) == 0:
             raise ValueError(
                 '1 or more elements are required for "path_name_type_list"'
@@ -205,7 +203,6 @@ class ESPnetDataset(Dataset):
         return _mes
 
     def __getitem__(self, uid: Union[str, int]) -> Tuple[str, Dict[str, np.ndarray]]:
-        assert check_argument_types()
 
         # Change integer-id to string-id
         if isinstance(uid, int):

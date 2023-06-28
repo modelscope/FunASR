@@ -47,7 +47,6 @@ class DiarEENDOLAModel(FunASRModel):
             mapping_dict=None,
             **kwargs,
     ):
-        assert check_argument_types()
 
         super().__init__()
         self.frontend = frontend

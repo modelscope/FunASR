@@ -41,7 +41,6 @@ class TimestampPredictor(FunASRModel):
             predictor_bias: int = 0,
             token_list=None,
     ):
-        assert check_argument_types()
 
         super().__init__()
         # note that eos is the same as sos (equivalent ID)

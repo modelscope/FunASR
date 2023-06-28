@@ -13,7 +13,6 @@ class UtteranceMVN(AbsNormalize):
         norm_vars: bool = False,
         eps: float = 1.0e-20,
     ):
-        assert check_argument_types()
         super().__init__()
         self.norm_means = norm_means
         self.norm_vars = norm_vars

@@ -24,7 +24,6 @@ class CTC(torch.nn.Module):
         reduce: bool = True,
         ignore_nan_grad: bool = True,
     ):
-        assert check_argument_types()
         super().__init__()
         eprojs = encoder_output_size
         self.dropout_rate = dropout_rate

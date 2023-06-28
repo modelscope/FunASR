@@ -37,7 +37,6 @@ class SlidingWindow(AbsFrontend):
             padding: Padding (placeholder, currently not implemented).
             fs:  Sampling rate (placeholder for compatibility, not used).
         """
-        assert check_argument_types()
         super().__init__()
         self.fs = fs
         self.win_length = win_length

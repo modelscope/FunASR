@@ -24,7 +24,6 @@ class NpyScpWriter:
     """
 
     def __init__(self, outdir: Union[Path, str], scpfile: Union[Path, str]):
-        assert check_argument_types()
         self.dir = Path(outdir)
         self.dir.mkdir(parents=True, exist_ok=True)
         scpfile = Path(scpfile)
@@ -72,7 +71,6 @@ class NpyScpReader(collections.abc.Mapping):
     """
 
     def __init__(self, fname: Union[Path, str]):
-        assert check_argument_types()
         self.fname = Path(fname)
         self.data = read_2column_text(fname)
 

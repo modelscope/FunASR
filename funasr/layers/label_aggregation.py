@@ -12,7 +12,6 @@ class LabelAggregate(torch.nn.Module):
         hop_length: int = 128,
         center: bool = True,
     ):
-        assert check_argument_types()
         super().__init__()
 
         self.win_length = win_length

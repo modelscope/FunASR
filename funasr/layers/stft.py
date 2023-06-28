@@ -29,7 +29,6 @@ class Stft(torch.nn.Module, InversibleInterface):
         normalized: bool = False,
         onesided: bool = True,
     ):
-        assert check_argument_types()
         super().__init__()
         self.n_fft = n_fft
         if win_length is None:

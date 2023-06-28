@@ -15,7 +15,6 @@ class MultipleIterFactory(AbsIterFactory):
         seed: int = 0,
         shuffle: bool = False,
     ):
-        assert check_argument_types()
         self.build_funcs = list(build_funcs)
         self.seed = seed
         self.shuffle = shuffle

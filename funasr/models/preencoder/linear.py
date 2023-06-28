@@ -19,7 +19,6 @@ class LinearProjection(AbsPreEncoder):
         output_size: int,
     ):
         """Initialize the module."""
-        assert check_argument_types()
         super().__init__()
 
         self.output_dim = output_size

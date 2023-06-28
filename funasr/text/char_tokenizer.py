@@ -15,7 +15,6 @@ class CharTokenizer(AbsTokenizer):
         space_symbol: str = "<space>",
         remove_non_linguistic_symbols: bool = False,
     ):
-        assert check_argument_types()
         self.space_symbol = space_symbol
         if non_linguistic_symbols is None:
             self.non_linguistic_symbols = set()

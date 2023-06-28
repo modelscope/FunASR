@@ -20,7 +20,6 @@ class TextCleaner:
     """
 
     def __init__(self, cleaner_types: Collection[str] = None):
-        assert check_argument_types()
 
         if cleaner_types is None:
             self.cleaner_types = []

@@ -29,7 +29,6 @@ class HuggingFaceTransformersPostEncoder(AbsPostEncoder):
         model_name_or_path: str,
     ):
         """Initialize the module."""
-        assert check_argument_types()
         super().__init__()
 
         if not is_transformers_available:

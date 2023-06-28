@@ -20,7 +20,6 @@ class ForwardAdaptor(torch.nn.Module):
     """
 
     def __init__(self, module: torch.nn.Module, name: str):
-        assert check_argument_types()
         super().__init__()
         self.module = module
         self.name = name

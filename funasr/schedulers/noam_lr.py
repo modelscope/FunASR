@@ -30,7 +30,6 @@ class NoamLR(_LRScheduler, AbsBatchStepScheduler):
         warmup_steps: Union[int, float] = 25000,
         last_epoch: int = -1,
     ):
-        assert check_argument_types()
         self.model_size = model_size
         self.warmup_steps = warmup_steps
 

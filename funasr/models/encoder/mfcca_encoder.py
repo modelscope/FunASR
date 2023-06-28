@@ -160,7 +160,6 @@ class MFCCAEncoder(AbsEncoder):
             cnn_module_kernel: int = 31,
             padding_idx: int = -1,
     ):
-        assert check_argument_types()
         super().__init__()
         self._output_size = output_size
 

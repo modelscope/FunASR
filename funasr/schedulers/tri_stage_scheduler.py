@@ -21,7 +21,6 @@ class TriStageLR(_LRScheduler, AbsBatchStepScheduler):
             init_lr_scale: float = 0.01,
             final_lr_scale: float = 0.01,
     ):
-        assert check_argument_types()
         self.optimizer = optimizer
         self.last_epoch = last_epoch
         self.phase_ratio = phase_ratio

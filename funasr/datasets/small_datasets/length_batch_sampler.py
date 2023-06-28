@@ -20,7 +20,6 @@ class LengthBatchSampler(AbsSampler):
         drop_last: bool = False,
         padding: bool = True,
     ):
-        assert check_argument_types()
         assert batch_bins > 0
         if sort_batch != "ascending" and sort_batch != "descending":
             raise ValueError(

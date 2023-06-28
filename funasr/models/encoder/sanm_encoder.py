@@ -150,7 +150,6 @@ class SANMEncoder(AbsEncoder):
         tf2torch_tensor_name_prefix_torch: str = "encoder",
         tf2torch_tensor_name_prefix_tf: str = "seq2seq/encoder",
     ):
-        assert check_argument_types()
         super().__init__()
         self._output_size = output_size
 
@@ -600,7 +599,6 @@ class SANMEncoderChunkOpt(AbsEncoder):
             tf2torch_tensor_name_prefix_torch: str = "encoder",
             tf2torch_tensor_name_prefix_tf: str = "seq2seq/encoder",
     ):
-        assert check_argument_types()
         super().__init__()
         self._output_size = output_size
 
@@ -1059,7 +1057,6 @@ class SANMVadEncoder(AbsEncoder):
         sanm_shfit : int = 0,
         selfattention_layer_type: str = "sanm",
     ):
-        assert check_argument_types()
         super().__init__()
         self._output_size = output_size
 

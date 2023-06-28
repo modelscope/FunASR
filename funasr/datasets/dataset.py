@@ -35,7 +35,6 @@ from funasr.utils.sized_dict import SizedDict
 
 class AdapterForSoundScpReader(collections.abc.Mapping):
     def __init__(self, loader, dtype=None):
-        assert check_argument_types()
         self.loader = loader
         self.dtype = dtype
         self.rate = None
@@ -282,7 +281,6 @@ class ESPnetDataset(AbsDataset):
         max_cache_fd: int = 0,
         dest_sample_rate: int = 16000,
     ):
-        assert check_argument_types()
         if len(path_name_type_list) == 0:
             raise ValueError(
                 '1 or more elements are required for "path_name_type_list"'
@@ -377,7 +375,6 @@ class ESPnetDataset(AbsDataset):
         return _mes
 
     def __getitem__(self, uid: Union[str, int]) -> Tuple[str, Dict[str, np.ndarray]]:
-        assert check_argument_types()
 
         # Change integer-id to string-id
         if isinstance(uid, int):

@@ -39,7 +39,6 @@ class Data2VecPretrainModel(FunASRModel):
             preencoder: Optional[AbsPreEncoder],
             encoder: AbsEncoder,
     ):
-        assert check_argument_types()
 
         super().__init__()
 

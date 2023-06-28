@@ -96,7 +96,6 @@ class Data2VecEncoder(AbsEncoder):
             # FP16 optimization
             required_seq_len_multiple: int = 2,
     ):
-        assert check_argument_types()
         super().__init__()
 
         # ConvFeatureExtractionModel
