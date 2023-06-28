@@ -34,6 +34,10 @@ int main(int argc, char* argv[]) {
         "", MODEL_DIR,
         "default: /workspace/models/asr, the asr model path, which contains model.onnx, config.yaml, am.mvn",
         false, "/workspace/models/asr", "string");
+    TCLAP::ValueArg<std::string> model_revision(
+        "", "model-revision",
+        "ASR model revision",
+        false, "v1.2.1", "string");
     TCLAP::ValueArg<std::string> quantize(
         "", QUANTIZE,
         "true (Default), load the model of model.onnx in model_dir. If set "
@@ -43,6 +47,10 @@ int main(int argc, char* argv[]) {
         "", VAD_DIR,
         "default: /workspace/models/vad, the vad model path, which contains model.onnx, vad.yaml, vad.mvn",
         false, "/workspace/models/vad", "string");
+    TCLAP::ValueArg<std::string> vad_revision(
+        "", "vad-revision",
+        "VAD model revision",
+        false, "v1.2.0", "string");
     TCLAP::ValueArg<std::string> vad_quant(
         "", VAD_QUANT,
         "true (Default), load the model of model.onnx in vad_dir. If set "
@@ -53,6 +61,10 @@ int main(int argc, char* argv[]) {
         "default: /workspace/models/punc, the punc model path, which contains model.onnx, punc.yaml", 
         false, "/workspace/models/punc",
         "string");
+    TCLAP::ValueArg<std::string> punc_revision(
+        "", "punc-revision",
+        "PUNC model revision",
+        false, "v1.1.7", "string");
     TCLAP::ValueArg<std::string> punc_quant(
         "", PUNC_QUANT,
         "true (Default), load the model of model.onnx in punc_dir. If set "
@@ -81,10 +93,13 @@ int main(int argc, char* argv[]) {
 
     cmd.add(download_model_dir);
     cmd.add(model_dir);
+    cmd.add(model_revision);
     cmd.add(quantize);
     cmd.add(vad_dir);
+    cmd.add(vad_revision);
     cmd.add(vad_quant);
     cmd.add(punc_dir);
+    cmd.add(punc_revision);
     cmd.add(punc_quant);
 
     cmd.add(listen_ip);
@@ -101,6 +116,10 @@ int main(int argc, char* argv[]) {
     GetValue(vad_quant, VAD_QUANT, model_path);
     GetValue(punc_dir, PUNC_DIR, model_path);
     GetValue(punc_quant, PUNC_QUANT, model_path);
+
+    GetValue(model_revision, "model-revision", model_path);
+    GetValue(vad_revision, "vad-revision", model_path);
+    GetValue(punc_revision, "punc-revision", model_path);
 
     // Download model form Modelscope
     try{
@@ -124,7 +143,7 @@ int main(int argc, char* argv[]) {
         std::string s_punc_quant = model_path[PUNC_QUANT];
         std::string python_cmd = "python -m funasr.utils.runtime_sdk_download_tool --type onnx --quantize True ";
         if(vad_dir.isSet() && !s_vad_path.empty()){
-            std::string python_cmd_vad = python_cmd + " --model-name " + s_vad_path + " --export-dir " + s_download_model_dir;
+            std::string python_cmd_vad = python_cmd + " --model-name " + s_vad_path + " --export-dir " + s_download_model_dir + " --model_revision " + model_path["vad-revision"];
             if(is_download){
                 LOG(INFO) << "Download model: " <<  s_vad_path << " from modelscope: ";
             }else{
@@ -159,7 +178,7 @@ int main(int argc, char* argv[]) {
         }
 
         if(model_dir.isSet() && !s_asr_path.empty()){
-            std::string python_cmd_asr = python_cmd + " --model-name " + s_asr_path + " --export-dir " + s_download_model_dir;
+            std::string python_cmd_asr = python_cmd + " --model-name " + s_asr_path + " --export-dir " + s_download_model_dir + " --model_revision " + model_path["model-revision"];
             if(is_download){
                 LOG(INFO) << "Download model: " <<  s_asr_path << " from modelscope: ";
             }else{
@@ -194,7 +213,7 @@ int main(int argc, char* argv[]) {
         }
 
         if(punc_dir.isSet() && !s_punc_path.empty()){
-            std::string python_cmd_punc = python_cmd + " --model-name " + s_punc_path + " --export-dir " + s_download_model_dir;
+            std::string python_cmd_punc = python_cmd + " --model-name " + s_punc_path + " --export-dir " + s_download_model_dir + " --model_revision " + model_path["punc-revision"];
             if(is_download){
                 LOG(INFO) << "Download model: " <<  s_punc_path << " from modelscope: ";
             }else{
