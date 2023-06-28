@@ -31,6 +31,9 @@ btnStart.disabled = true;
  
 btnConnect= document.getElementById('btnConnect');
 btnConnect.onclick = start;
+
+var awsslink= document.getElementById('wsslink');
+
  
 var rec_text="";  // for online rec asr result
 var offline_text=""; // for offline rec asr result
@@ -45,6 +48,27 @@ var file_data_array;  // array to save file data
  
 var totalsend=0;
 
+
+var now_ipaddress=window.location.href;
+now_ipaddress=now_ipaddress.replace("https://","wss://");
+now_ipaddress=now_ipaddress.replace("static/index.html","");
+var localport=window.location.port;
+now_ipaddress=now_ipaddress.replace(localport,"10095");
+document.getElementById('wssip').value=now_ipaddress;
+addresschange();
+function addresschange()
+{   
+	
+    var Uri = document.getElementById('wssip').value; 
+	document.getElementById('info_wslink').innerHTML="手工授权"+Uri;
+	Uri=Uri.replace(/wss/g,"https");
+	console.log("addresschange uri=",Uri);
+	
+	awsslink.onclick=function(){
+		window.open(Uri, '_blank');
+		}
+	
+}
 upfile.onclick=function()
 {
 		btnStart.disabled = true;
@@ -77,7 +101,7 @@ function play_file()
 		  var audio_record = document.getElementById('audio_record');
 		  audio_record.src =  (window.URL||webkitURL).createObjectURL(audioblob); 
           audio_record.controls=true;
-		  audio_record.play(); 
+		  //audio_record.play();  //not auto play
 }
 function start_file_send()
 {
@@ -223,7 +247,7 @@ function getConnState( connState ) {
 		stop();
 		console.log( 'connecttion error' );
 		 
-		alert("连接地址"+document.getElementById('wssip').value+"失败,请检查asr地址和端口，并确保h5服务和asr服务在同一个域内。或换个浏览器试试。");
+		alert("连接地址"+document.getElementById('wssip').value+"失败,请检查asr地址和端口。或试试界面上手动授权，再连接。");
 		btnStart.disabled = true;
 		btnStop.disabled = true;
 		btnConnect.disabled=false;
@@ -329,7 +353,7 @@ function stop() {
 		var audio_record = document.getElementById('audio_record');
 		audio_record.src =  (window.URL||webkitURL).createObjectURL(theblob); 
         audio_record.controls=true;
-		audio_record.play(); 
+		//audio_record.play(); 
          	
 
 	}   ,function(msg){
