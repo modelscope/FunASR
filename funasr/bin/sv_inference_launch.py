@@ -77,10 +77,7 @@ def inference_sv(
         embedding_node=embedding_node
     )
     logging.info("speech2xvector_kwargs: {}".format(speech2xvector_kwargs))
-    speech2xvector = Speech2Xvector.from_pretrained(
-        model_tag=model_tag,
-        **speech2xvector_kwargs,
-    )
+    speech2xvector = Speech2Xvector(**speech2xvector_kwargs)
     speech2xvector.sv_model.eval()
 
     def _forward(
