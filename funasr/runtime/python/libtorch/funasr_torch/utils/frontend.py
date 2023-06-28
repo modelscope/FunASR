@@ -27,7 +27,6 @@ class WavFrontend():
             dither: float = 1.0,
             **kwargs,
     ) -> None:
-        check_argument_types()
 
         opts = knf.FbankOptions()
         opts.frame_opts.samp_freq = fs

@@ -75,7 +75,6 @@ def common_collate_fn(
             output[key + "_lengths"] = lens
 
     output = (uttids, output)
-    assert check_return_type(output)
     return output
 
 def crop_to_max_size(feature, target_size):

@@ -305,7 +305,6 @@ class SVTask(AbsTask):
             )
         else:
             retval = None
-        assert check_return_type(retval)
         return retval
 
     @classmethod
@@ -326,7 +325,6 @@ class SVTask(AbsTask):
         retval = ()
         if inference:
             retval = ("ref_speech",)
-        assert check_return_type(retval)
         return retval
 
     @classmethod
@@ -444,7 +442,6 @@ class SVTask(AbsTask):
         if args.init is not None:
             initialize(model, args.init)
 
-        assert check_return_type(model)
         return model
 
     # ~~~~~~~~~ The methods below are mainly used for inference ~~~~~~~~~

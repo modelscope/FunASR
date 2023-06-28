@@ -127,7 +127,6 @@ class LMTask(AbsTask):
         for class_choices in cls.class_choices_list:
             class_choices.add_arguments(group)
 
-        assert check_return_type(parser)
         return parser
 
     @classmethod
@@ -155,7 +154,6 @@ class LMTask(AbsTask):
             )
         else:
             retval = None
-        assert check_return_type(retval)
         return retval
 
     @classmethod

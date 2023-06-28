@@ -161,5 +161,4 @@ def build_batch_sampler(
 
     else:
         raise ValueError(f"Not supported: {type}")
-    assert check_return_type(retval)
     return retval

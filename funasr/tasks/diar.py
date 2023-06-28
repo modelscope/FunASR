@@ -378,7 +378,6 @@ class DiarTask(AbsTask):
             )
         else:
             retval = None
-        assert check_return_type(retval)
         return retval
 
     @classmethod
@@ -397,7 +396,6 @@ class DiarTask(AbsTask):
             cls, train: bool = True, inference: bool = False
     ) -> Tuple[str, ...]:
         retval = ()
-        assert check_return_type(retval)
         return retval
 
     @classmethod
@@ -500,7 +498,6 @@ class DiarTask(AbsTask):
         if args.init is not None:
             initialize(model, args.init)
 
-        assert check_return_type(model)
         return model
 
     # ~~~~~~~~~ The methods below are mainly used for inference ~~~~~~~~~
@@ -794,7 +791,6 @@ class EENDOLADiarTask(AbsTask):
         #     )
         # else:
         #     retval = None
-        # assert check_return_type(retval)
         return None
 
     @classmethod
@@ -813,7 +809,6 @@ class EENDOLADiarTask(AbsTask):
             cls, train: bool = True, inference: bool = False
     ) -> Tuple[str, ...]:
         retval = ()
-        assert check_return_type(retval)
         return retval
 
     @classmethod
@@ -856,7 +851,6 @@ class EENDOLADiarTask(AbsTask):
         if args.init is not None:
             initialize(model, args.init)
 
-        assert check_return_type(model)
         return model
 
     # ~~~~~~~~~ The methods below are mainly used for inference ~~~~~~~~~

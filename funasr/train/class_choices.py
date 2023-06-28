@@ -65,7 +65,6 @@ class ClassChoices:
             retval = None
         elif name.lower() in self.classes:
             class_obj = self.classes[name]
-            assert check_return_type(class_obj)
             retval = class_obj
         else:
             raise ValueError(

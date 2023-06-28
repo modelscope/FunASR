@@ -219,7 +219,6 @@ class VADTask(AbsTask):
         # else:
         #    retval = None
         retval = None
-        assert check_return_type(retval)
         return retval
 
     @classmethod
@@ -238,7 +237,6 @@ class VADTask(AbsTask):
             cls, train: bool = True, inference: bool = False
     ) -> Tuple[str, ...]:
         retval = ()
-        assert check_return_type(retval)
         return retval
 
     @classmethod

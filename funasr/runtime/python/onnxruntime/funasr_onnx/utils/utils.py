@@ -21,7 +21,6 @@ logger_initialized = {}
 class TokenIDConverter():
     def __init__(self, token_list: Union[List, str],
                  ):
-        check_argument_types()
 
         self.token_list = token_list
         self.unk_symbol = token_list[-1]
@@ -51,7 +50,6 @@ class CharTokenizer():
         space_symbol: str = "<space>",
         remove_non_linguistic_symbols: bool = False,
     ):
-        check_argument_types()
 
         self.space_symbol = space_symbol
         self.non_linguistic_symbols = self.load_symbols(symbol_value)

@@ -253,5 +253,4 @@ def build_sv_model(args):
     if args.init is not None:
         initialize(model, args.init)
 
-    assert check_return_type(model)
     return model

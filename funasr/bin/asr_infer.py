@@ -244,7 +244,6 @@ class Speech2Text:
                 text = None
             results.append((text, token, token_int, hyp))
 
-        assert check_return_type(results)
         return results
 
 
@@ -510,7 +509,6 @@ class Speech2TextParaformer:
                                                                vad_offset=begin_time)
                 results.append((text, token, token_int, hyp, timestamp, enc_len_batch_total, lfr_factor))
 
-        # assert check_return_type(results)
         return results
 
     def generate_hotwords_list(self, hotword_list_or_file):
@@ -863,7 +861,6 @@ class Speech2TextParaformerOnline:
 
                 results.append(postprocessed_result)
 
-        # assert check_return_type(results)
         return results
 
 
@@ -1094,7 +1091,6 @@ class Speech2TextUniASR:
                 text = None
             results.append((text, token, token_int, hyp))
 
-        assert check_return_type(results)
         return results
 
 
@@ -1286,7 +1282,6 @@ class Speech2TextMFCCA:
                 text = None
             results.append((text, token, token_int, hyp))
 
-        assert check_return_type(results)
         return results
 
 
@@ -1593,7 +1588,6 @@ class Speech2TextTransducer:
                 text = None
             results.append((text, token, token_int, hyp))
 
-            assert check_return_type(results)
 
         return results
 
@@ -1843,5 +1837,4 @@ class Speech2TextSAASR:
 
             results.append((text, text_id, token, token_int, hyp))
 
-        assert check_return_type(results)
         return results

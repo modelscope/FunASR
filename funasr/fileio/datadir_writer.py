@@ -37,7 +37,6 @@ class DatadirWriter:
             self.has_children = True
 
         retval = self.chilidren[key]
-        assert check_return_type(retval)
         return retval
 
     def __setitem__(self, key: str, value: str):

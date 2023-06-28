@@ -260,5 +260,4 @@ class ESPnetDataset(Dataset):
             data[name] = value
 
         retval = uid, data
-        assert check_return_type(retval)
         return retval

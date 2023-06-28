@@ -39,7 +39,6 @@ def to_reported_value(v: Num, weight: Num = None) -> "ReportedValue":
         retval = WeightedAverage(v, weight)
     else:
         retval = Average(v)
-    assert check_return_type(retval)
     return retval
 
 
@@ -82,7 +81,6 @@ def aggregate(values: Sequence["ReportedValue"]) -> Num:
 
     else:
         raise NotImplementedError(f"type={type(values[0])}")
-    assert check_return_type(retval)
     return retval
 
 

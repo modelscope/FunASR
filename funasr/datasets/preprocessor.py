@@ -352,7 +352,6 @@ class CommonPreprocessor(AbsPreprocessor):
                 speech = data[self.speech_name]
                 ma = np.max(np.abs(speech))
                 data[self.speech_name] = speech * self.speech_volume_normalize / ma
-        assert check_return_type(data)
         return data
 
     def _text_process(
@@ -369,7 +368,6 @@ class CommonPreprocessor(AbsPreprocessor):
                 tokens = self.tokenizer.text2tokens(text)
             text_ints = self.token_id_converter.tokens2ids(tokens)
             data[self.text_name] = np.array(text_ints, dtype=np.int64)
-        assert check_return_type(data)
         return data
 
     def __call__(
@@ -441,7 +439,6 @@ class LMPreprocessor(CommonPreprocessor):
                 tokens = self.tokenizer.text2tokens(text)
             text_ints = self.token_id_converter.tokens2ids(tokens)
             data[self.text_name] = np.array(text_ints, dtype=np.int64)
-        assert check_return_type(data)
         return data
 
 
@@ -498,7 +495,6 @@ class CommonPreprocessor_multi(AbsPreprocessor):
                 tokens = self.tokenizer.text2tokens(text)
                 text_ints = self.token_id_converter.tokens2ids(tokens)
                 data[text_n] = np.array(text_ints, dtype=np.int64)
-        assert check_return_type(data)
         return data
 
     def __call__(
@@ -607,7 +603,6 @@ class MutliTokenizerCommonPreprocessor(CommonPreprocessor):
                 tokens = self.tokenizer[i].text2tokens(text)
                 text_ints = self.token_id_converter[i].tokens2ids(tokens)
                 data[text_name] = np.array(text_ints, dtype=np.int64)
-        assert check_return_type(data)
         return data
 
 class CodeMixTokenizerCommonPreprocessor(CommonPreprocessor):

@@ -439,5 +439,4 @@ class ESPnetDataset(AbsDataset):
             self.cache[uid] = data
 
         retval = uid, data
-        assert check_return_type(retval)
         return retval

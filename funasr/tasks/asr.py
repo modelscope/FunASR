@@ -525,7 +525,6 @@ class ASRTask(AbsTask):
             )
         else:
             retval = None
-        assert check_return_type(retval)
         return retval
 
     @classmethod
@@ -544,7 +543,6 @@ class ASRTask(AbsTask):
             cls, train: bool = True, inference: bool = False
     ) -> Tuple[str, ...]:
         retval = ()
-        assert check_return_type(retval)
         return retval
 
     @classmethod
@@ -653,7 +651,6 @@ class ASRTask(AbsTask):
         if args.init is not None:
             initialize(model, args.init)
 
-        assert check_return_type(model)
         return model
 
 
@@ -832,7 +829,6 @@ class ASRTaskUniASR(ASRTask):
         if args.init is not None:
             initialize(model, args.init)
 
-        assert check_return_type(model)
         return model
 
     # ~~~~~~~~~ The methods below are mainly used for inference ~~~~~~~~~
@@ -1077,7 +1073,6 @@ class ASRTaskParaformer(ASRTask):
         if args.init is not None:
             initialize(model, args.init)
 
-        assert check_return_type(model)
         return model
 
     # ~~~~~~~~~ The methods below are mainly used for inference ~~~~~~~~~
@@ -1298,7 +1293,6 @@ class ASRTaskMFCCA(ASRTask):
         if args.init is not None:
             initialize(model, args.init)
 
-        assert check_return_type(model)
         return model
 
 
@@ -1377,7 +1371,6 @@ class ASRTaskAligner(ASRTaskParaformer):
         if args.init is not None:
             initialize(model, args.init)
 
-        assert check_return_type(model)
         return model
 
     @classmethod
@@ -1512,7 +1505,6 @@ class ASRTransducerTask(ASRTask):
                 "Initialization part will be reworked in a short future.",
             )
 
-        #assert check_return_type(model)
 
         return model
 
@@ -1632,5 +1624,4 @@ class ASRTaskSAASR(ASRTask):
         if args.init is not None:
             initialize(model, args.init)
 
-        assert check_return_type(model)
         return model

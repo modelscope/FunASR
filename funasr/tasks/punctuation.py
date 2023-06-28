@@ -123,7 +123,6 @@ class PunctuationTask(AbsTask):
             # e.g. --encoder and --encoder_conf
             class_choices.add_arguments(group)
 
-        assert check_return_type(parser)
         return parser
 
     @classmethod
@@ -156,7 +155,6 @@ class PunctuationTask(AbsTask):
             )
         else:
             retval = None
-        assert check_return_type(retval)
         return retval
 
     @classmethod
@@ -217,5 +215,4 @@ class PunctuationTask(AbsTask):
         if args.init is not None:
             initialize(model, args.init)
 
-        assert check_return_type(model)
         return model

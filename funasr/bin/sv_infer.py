@@ -113,5 +113,4 @@ class Speech2Xvector:
             score = torch.cosine_similarity(embedding, ref_emb)
 
         results = (embedding, ref_emb, score)
-        assert check_return_type(results)
         return results
