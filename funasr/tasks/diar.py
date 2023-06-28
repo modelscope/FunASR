@@ -21,7 +21,6 @@ from typing import Union
 import numpy as np
 import torch
 import yaml
-from typeguard import check_return_type
 
 from funasr.datasets.collate_fn import CommonCollateFn
 from funasr.datasets.preprocessor import CommonPreprocessor

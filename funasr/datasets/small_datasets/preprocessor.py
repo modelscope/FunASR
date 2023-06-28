@@ -10,7 +10,6 @@ from typing import Union
 import numpy as np
 import scipy.signal
 import soundfile
-from typeguard import check_return_type
 
 from funasr.text.build_tokenizer import build_tokenizer
 from funasr.text.cleaner import TextCleaner

@@ -15,7 +15,6 @@ import kaldiio
 import numpy as np
 import torch
 from torch.utils.data.dataset import Dataset
-from typeguard import check_return_type
 
 from funasr.fileio.npy_scp import NpyScpReader
 from funasr.fileio.sound_scp import SoundScpReader

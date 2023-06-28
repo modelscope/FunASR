@@ -4,7 +4,6 @@ from typing import Sequence
 from typing import Tuple
 from typing import Union
 
-from typeguard import check_return_type
 
 from funasr.samplers.abs_sampler import AbsSampler
 from funasr.samplers.folded_batch_sampler import FoldedBatchSampler

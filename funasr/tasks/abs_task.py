@@ -32,7 +32,6 @@ import torch.optim
 import yaml
 from funasr.models.base_model import FunASRModel
 from torch.utils.data import DataLoader
-from typeguard import check_return_type
 
 from funasr import __version__
 from funasr.datasets.dataset import AbsDataset

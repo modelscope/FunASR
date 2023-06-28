@@ -12,7 +12,6 @@ from typing import Union
 
 import numpy as np
 import torch
-from typeguard import check_return_type
 
 from funasr.build_utils.build_model_from_file import build_model_from_file
 from funasr.torch_utils.device_funcs import to_device

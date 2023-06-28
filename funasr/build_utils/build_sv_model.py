@@ -1,7 +1,6 @@
 import logging
 
 import torch
-from typeguard import check_return_type
 
 from funasr.layers.abs_normalize import AbsNormalize
 from funasr.layers.global_mvn import GlobalMVN

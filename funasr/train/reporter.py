@@ -18,7 +18,6 @@ from typing import Union
 import humanfriendly
 import numpy as np
 import torch
-from typeguard import check_return_type
 
 Num = Union[float, int, complex, torch.Tensor, np.ndarray]
 
