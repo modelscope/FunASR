@@ -46,6 +46,11 @@ typedef enum {
 	FUNASR_MODEL_PARAFORMER = 3,
 }FUNASR_MODEL_TYPE;
 
+typedef enum {
+	PUNC_OFFLINE=0,
+	PUNC_ONLINE=1,
+}PUNC_TYPE;
+
 typedef void (* QM_CALLBACK)(int cur_step, int n_total); // n_total: total steps; cur_step: Current Step.
 	
 // ASR
@@ -75,8 +80,10 @@ _FUNASRAPI void				FsmnVadUninit(FUNASR_HANDLE handle);
 _FUNASRAPI const float		FsmnVadGetRetSnippetTime(FUNASR_RESULT result);
 
 // PUNC
-_FUNASRAPI FUNASR_HANDLE  		CTTransformerInit(std::map<std::string, std::string>& model_path, int thread_num);
-_FUNASRAPI const std::string	CTTransformerInfer(FUNASR_HANDLE handle, const char* sz_sentence, FUNASR_MODE mode, QM_CALLBACK fn_callback);
+_FUNASRAPI FUNASR_HANDLE  		CTTransformerInit(std::map<std::string, std::string>& model_path, int thread_num, PUNC_TYPE type=PUNC_OFFLINE);
+_FUNASRAPI FUNASR_RESULT     	CTTransformerInfer(FUNASR_HANDLE handle, const char* sz_sentence, FUNASR_MODE mode, QM_CALLBACK fn_callback, PUNC_TYPE type=PUNC_OFFLINE, FUNASR_RESULT pre_result=nullptr);
+_FUNASRAPI const char* 			CTTransformerGetResult(FUNASR_RESULT result,int n_index);
+_FUNASRAPI void					CTTransformerFreeResult(FUNASR_RESULT result);
 _FUNASRAPI void					CTTransformerUninit(FUNASR_HANDLE handle);
 
 //OfflineStream

@@ -69,6 +69,7 @@ namespace funasr {
 
 #define CANDIDATE_NUM   6
 #define UNKNOW_INDEX 0
+#define NOTPUNC  "_"
 #define NOTPUNC_INDEX 1
 #define COMMA_INDEX 2
 #define PERIOD_INDEX 3

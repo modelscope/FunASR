@@ -142,6 +142,14 @@ vector<int> CTokenizer::Punc2Ids(vector<string> input)
 	return result;
 }
 
+bool CTokenizer::IsPunc(string& Punc)
+{
+	if (m_punc2id.find(Punc) != m_punc2id.end())
+		return true;
+	else
+		return false;
+}
+
 vector<string> CTokenizer::SplitChineseString(const string & str_info)
 {
 	vector<string> list;
