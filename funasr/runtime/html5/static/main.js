@@ -60,7 +60,7 @@ function addresschange()
 {   
 	
     var Uri = document.getElementById('wssip').value; 
-	document.getElementById('info_wslink').innerHTML="手工授权"+Uri;
+	document.getElementById('info_wslink').innerHTML="点此处手工授权（IOS手机）"+Uri;
 	Uri=Uri.replace(/wss/g,"https");
 	console.log("addresschange uri=",Uri);
 	
