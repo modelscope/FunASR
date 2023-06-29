@@ -12,7 +12,6 @@ from typing import Tuple
 from typing import Union
 
 import torch
-from typeguard import check_argument_types
 
 from funasr.layers.abs_normalize import AbsNormalize
 from funasr.losses.label_smoothing_loss import (
@@ -56,7 +55,6 @@ class ESPnetSVModel(FunASRModel):
             pooling_layer: torch.nn.Module,
             decoder: AbsDecoder,
     ):
-        assert check_argument_types()
 
         super().__init__()
         # note that eos is the same as sos (equivalent ID)

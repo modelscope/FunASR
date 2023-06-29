@@ -9,7 +9,6 @@ from typing import Union
 import numpy as np
 
 import torch
-from typeguard import check_argument_types
 
 from funasr.layers.abs_normalize import AbsNormalize
 from funasr.models.ctc import CTC
@@ -73,7 +72,6 @@ class NeatContextualParaformer(Paraformer):
         preencoder: Optional[AbsPreEncoder] = None,
         postencoder: Optional[AbsPostEncoder] = None,
     ):
-        assert check_argument_types()
         assert 0.0 <= ctc_weight <= 1.0, ctc_weight
         assert 0.0 <= interctc_weight < 1.0, interctc_weight
 

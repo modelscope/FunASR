@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import Union
 
 import numpy as np
-from typeguard import check_argument_types
 
 from funasr.fileio.read_text import load_num_sequence_text
 
@@ -29,7 +28,6 @@ class FloatRandomGenerateDataset(collections.abc.Mapping):
         dtype: Union[str, np.dtype] = "float32",
         loader_type: str = "csv_int",
     ):
-        assert check_argument_types()
         shape_file = Path(shape_file)
         self.utt2shape = load_num_sequence_text(shape_file, loader_type)
         self.dtype = np.dtype(dtype)
@@ -68,7 +66,6 @@ class IntRandomGenerateDataset(collections.abc.Mapping):
         dtype: Union[str, np.dtype] = "int64",
         loader_type: str = "csv_int",
     ):
-        assert check_argument_types()
         shape_file = Path(shape_file)
         self.utt2shape = load_num_sequence_text(shape_file, loader_type)
         self.dtype = np.dtype(dtype)

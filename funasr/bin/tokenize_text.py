@@ -7,7 +7,6 @@ import sys
 from typing import List
 from typing import Optional
 
-from typeguard import check_argument_types
 
 from funasr.utils.cli_utils import get_commandline_args
 from funasr.text.build_tokenizer import build_tokenizer
@@ -81,7 +80,6 @@ def tokenize(
     cleaner: Optional[str],
     g2p: Optional[str],
 ):
-    assert check_argument_types()
 
     logging.basicConfig(
         level=log_level,

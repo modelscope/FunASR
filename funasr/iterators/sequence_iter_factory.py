@@ -4,7 +4,6 @@ from typing import Union
 
 import numpy as np
 from torch.utils.data import DataLoader
-from typeguard import check_argument_types
 
 from funasr.iterators.abs_iter_factory import AbsIterFactory
 from funasr.samplers.abs_sampler import AbsSampler
@@ -46,7 +45,6 @@ class SequenceIterFactory(AbsIterFactory):
         collate_fn=None,
         pin_memory: bool = False,
     ):
-        assert check_argument_types()
 
         if not isinstance(batches, AbsSampler):
             self.sampler = RawSampler(batches)

@@ -9,7 +9,6 @@ from typing import Union
 
 import numpy as np
 import torch
-from typeguard import check_argument_types
 from funasr.build_utils.build_model_from_file import build_model_from_file
 from funasr.models.frontend.wav_frontend import WavFrontend
 from funasr.text.token_id_converter import TokenIDConverter
@@ -26,7 +25,6 @@ class Speech2Timestamp:
             dtype: str = "float32",
             **kwargs,
     ):
-        assert check_argument_types()
         # 1. Build ASR model
         tp_model, tp_train_args = build_model_from_file(
             timestamp_infer_config, timestamp_model_file, cmvn_file=None, device=device, task_name="asr", mode="tp"
@@ -64,7 +62,6 @@ class Speech2Timestamp:
             speech_lengths: Union[torch.Tensor, np.ndarray] = None,
             text_lengths: Union[torch.Tensor, np.ndarray] = None
     ):
-        assert check_argument_types()
 
         # Input as audio signal
         if isinstance(speech, np.ndarray):

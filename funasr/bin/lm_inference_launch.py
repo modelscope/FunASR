@@ -15,7 +15,6 @@ from typing import Union
 import numpy as np
 import torch
 from torch.nn.parallel import data_parallel
-from typeguard import check_argument_types
 
 from funasr.build_utils.build_model_from_file import build_model_from_file
 from funasr.build_utils.build_streaming_iterator import build_streaming_iterator
@@ -50,7 +49,6 @@ def inference_lm(
         param_dict: dict = None,
         **kwargs,
 ):
-    assert check_argument_types()
     ncpu = kwargs.get("ncpu", 1)
     torch.set_num_threads(ncpu)
 

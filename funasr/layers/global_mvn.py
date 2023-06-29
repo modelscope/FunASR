@@ -4,7 +4,6 @@ from typing import Union
 
 import numpy as np
 import torch
-from typeguard import check_argument_types
 
 from funasr.modules.nets_utils import make_pad_mask
 from funasr.layers.abs_normalize import AbsNormalize
@@ -28,7 +27,6 @@ class GlobalMVN(AbsNormalize, InversibleInterface):
         norm_vars: bool = True,
         eps: float = 1.0e-20,
     ):
-        assert check_argument_types()
         super().__init__()
         self.norm_means = norm_means
         self.norm_vars = norm_vars

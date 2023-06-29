@@ -9,7 +9,6 @@ from typing import Tuple
 
 import torch
 from torch import nn
-from typeguard import check_argument_types
 import logging
 
 from funasr.models.ctc import CTC
@@ -189,7 +188,6 @@ class TransformerEncoder(AbsEncoder):
             interctc_layer_idx: List[int] = [],
             interctc_use_conditioning: bool = False,
     ):
-        assert check_argument_types()
         super().__init__()
         self._output_size = output_size
 

@@ -18,8 +18,6 @@ from typing import Union
 import humanfriendly
 import numpy as np
 import torch
-from typeguard import check_argument_types
-from typeguard import check_return_type
 
 Num = Union[float, int, complex, torch.Tensor, np.ndarray]
 
@@ -27,7 +25,6 @@ _reserved = {"time", "total_count"}
 
 
 def to_reported_value(v: Num, weight: Num = None) -> "ReportedValue":
-    assert check_argument_types()
     if isinstance(v, (torch.Tensor, np.ndarray)):
         if np.prod(v.shape) != 1:
             raise ValueError(f"v must be 0 or 1 dimension: {len(v.shape)}")
@@ -42,12 +39,10 @@ def to_reported_value(v: Num, weight: Num = None) -> "ReportedValue":
         retval = WeightedAverage(v, weight)
     else:
         retval = Average(v)
-    assert check_return_type(retval)
     return retval
 
 
 def aggregate(values: Sequence["ReportedValue"]) -> Num:
-    assert check_argument_types()
 
     for v in values:
         if not isinstance(v, type(values[0])):
@@ -86,7 +81,6 @@ def aggregate(values: Sequence["ReportedValue"]) -> Num:
 
     else:
         raise NotImplementedError(f"type={type(values[0])}")
-    assert check_return_type(retval)
     return retval
 
 
@@ -122,7 +116,6 @@ class SubReporter:
     """
 
     def __init__(self, key: str, epoch: int, total_count: int):
-        assert check_argument_types()
         self.key = key
         self.epoch = epoch
         self.start_time = time.perf_counter()
@@ -160,7 +153,6 @@ class SubReporter:
             stats: Dict[str, Optional[Union[Num, Dict[str, Num]]]],
             weight: Num = None,
     ) -> None:
-        assert check_argument_types()
         if self._finished:
             raise RuntimeError("Already finished")
         if len(self._seen_keys_in_the_step) == 0:
@@ -293,7 +285,6 @@ class Reporter:
     """
 
     def __init__(self, epoch: int = 0):
-        assert check_argument_types()
         if epoch < 0:
             raise ValueError(f"epoch must be 0 or more: {epoch}")
         self.epoch = epoch

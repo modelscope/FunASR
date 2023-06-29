@@ -15,7 +15,6 @@ from typing import Union
 import numpy as np
 import torch
 from kaldiio import WriteHelper
-from typeguard import check_argument_types
 
 from funasr.bin.sv_infer import Speech2Xvector
 from funasr.build_utils.build_streaming_iterator import build_streaming_iterator
@@ -46,7 +45,6 @@ def inference_sv(
         param_dict: Optional[dict] = None,
         **kwargs,
 ):
-    assert check_argument_types()
     ncpu = kwargs.get("ncpu", 1)
     torch.set_num_threads(ncpu)
 
@@ -79,10 +77,7 @@ def inference_sv(
         embedding_node=embedding_node
     )
     logging.info("speech2xvector_kwargs: {}".format(speech2xvector_kwargs))
-    speech2xvector = Speech2Xvector.from_pretrained(
-        model_tag=model_tag,
-        **speech2xvector_kwargs,
-    )
+    speech2xvector = Speech2Xvector(**speech2xvector_kwargs)
     speech2xvector.sv_model.eval()
 
     def _forward(

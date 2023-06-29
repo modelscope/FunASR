@@ -10,8 +10,6 @@ from typing import Union
 import numpy as np
 import scipy.signal
 import soundfile
-from typeguard import check_argument_types
-from typeguard import check_return_type
 
 from funasr.text.build_tokenizer import build_tokenizer
 from funasr.text.cleaner import TextCleaner
@@ -260,7 +258,6 @@ class CommonPreprocessor(AbsPreprocessor):
     def _speech_process(
             self, data: Dict[str, Union[str, np.ndarray]]
     ) -> Dict[str, Union[str, np.ndarray]]:
-        assert check_argument_types()
         if self.speech_name in data:
             if self.train and (self.rirs is not None or self.noises is not None):
                 speech = data[self.speech_name]
@@ -347,7 +344,6 @@ class CommonPreprocessor(AbsPreprocessor):
                 speech = data[self.speech_name]
                 ma = np.max(np.abs(speech))
                 data[self.speech_name] = speech * self.speech_volume_normalize / ma
-        assert check_return_type(data)
         return data
 
     def _text_process(
@@ -365,13 +361,11 @@ class CommonPreprocessor(AbsPreprocessor):
                 tokens = self.tokenizer.text2tokens(text)
             text_ints = self.token_id_converter.tokens2ids(tokens)
             data[self.text_name] = np.array(text_ints, dtype=np.int64)
-        assert check_return_type(data)
         return data
 
     def __call__(
             self, uid: str, data: Dict[str, Union[str, np.ndarray]]
     ) -> Dict[str, np.ndarray]:
-        assert check_argument_types()
 
         data = self._speech_process(data)
         data = self._text_process(data)
@@ -439,7 +433,6 @@ class LMPreprocessor(CommonPreprocessor):
                 tokens = self.tokenizer.text2tokens(text)
             text_ints = self.token_id_converter.tokens2ids(tokens)
             data[self.text_name] = np.array(text_ints, dtype=np.int64)
-        assert check_return_type(data)
         return data
 
 
@@ -496,13 +489,11 @@ class CommonPreprocessor_multi(AbsPreprocessor):
                 tokens = self.tokenizer.text2tokens(text)
                 text_ints = self.token_id_converter.tokens2ids(tokens)
                 data[text_n] = np.array(text_ints, dtype=np.int64)
-        assert check_return_type(data)
         return data
 
     def __call__(
             self, uid: str, data: Dict[str, Union[str, np.ndarray]]
     ) -> Dict[str, np.ndarray]:
-        assert check_argument_types()
 
         if self.speech_name in data:
             # Nothing now: candidates:
@@ -606,7 +597,6 @@ class MutliTokenizerCommonPreprocessor(CommonPreprocessor):
                 tokens = self.tokenizer[i].text2tokens(text)
                 text_ints = self.token_id_converter[i].tokens2ids(tokens)
                 data[text_name] = np.array(text_ints, dtype=np.int64)
-        assert check_return_type(data)
         return data
 
 
@@ -685,7 +675,6 @@ class CodeMixTokenizerCommonPreprocessor(CommonPreprocessor):
     def __call__(
             self, uid: str, data: Dict[str, Union[list, str, np.ndarray]]
     ) -> Dict[str, Union[list, np.ndarray]]:
-        assert check_argument_types()
         # Split words.
         if isinstance(data[self.text_name], str):
             split_text = self.split_words(data[self.text_name])

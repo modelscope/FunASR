@@ -22,9 +22,7 @@ import numpy as np
 import requests
 import torch
 from packaging.version import parse as V
-from typeguard import check_argument_types
-from typeguard import check_return_type
-from  funasr.build_utils.build_model_from_file import build_model_from_file
+from funasr.build_utils.build_model_from_file import build_model_from_file
 from funasr.models.e2e_asr_contextual_paraformer import NeatContextualParaformer
 from funasr.models.e2e_asr_paraformer import BiCifParaformer, ContextualParaformer
 from funasr.models.frontend.wav_frontend import WavFrontend, WavFrontendOnline
@@ -78,7 +76,6 @@ class Speech2Text:
             frontend_conf: dict = None,
             **kwargs,
     ):
-        assert check_argument_types()
 
         # 1. Build ASR model
         scorers = {}
@@ -192,7 +189,6 @@ class Speech2Text:
             text, token, token_int, hyp
 
         """
-        assert check_argument_types()
 
         # Input as audio signal
         if isinstance(speech, np.ndarray):
@@ -248,7 +244,6 @@ class Speech2Text:
                 text = None
             results.append((text, token, token_int, hyp))
 
-        assert check_return_type(results)
         return results
 
 
@@ -288,7 +283,6 @@ class Speech2TextParaformer:
             decoding_ind: int = 0,
             **kwargs,
     ):
-        assert check_argument_types()
 
         # 1. Build ASR model
         scorers = {}
@@ -413,7 +407,6 @@ class Speech2TextParaformer:
                 text, token, token_int, hyp
 
         """
-        assert check_argument_types()
 
         # Input as audio signal
         if isinstance(speech, np.ndarray):
@@ -516,7 +509,6 @@ class Speech2TextParaformer:
                                                                vad_offset=begin_time)
                 results.append((text, token, token_int, hyp, timestamp, enc_len_batch_total, lfr_factor))
 
-        # assert check_return_type(results)
         return results
 
     def generate_hotwords_list(self, hotword_list_or_file):
@@ -656,7 +648,6 @@ class Speech2TextParaformerOnline:
             hotword_list_or_file: str = None,
             **kwargs,
     ):
-        assert check_argument_types()
 
         # 1. Build ASR model
         scorers = {}
@@ -776,7 +767,6 @@ class Speech2TextParaformerOnline:
                 text, token, token_int, hyp
 
         """
-        assert check_argument_types()
         results = []
         cache_en = cache["encoder"]
         if speech.shape[1] < 16 * 60 and cache_en["is_final"]:
@@ -871,7 +861,6 @@ class Speech2TextParaformerOnline:
 
                 results.append(postprocessed_result)
 
-        # assert check_return_type(results)
         return results
 
 
@@ -912,7 +901,6 @@ class Speech2TextUniASR:
             frontend_conf: dict = None,
             **kwargs,
     ):
-        assert check_argument_types()
 
         # 1. Build ASR model
         scorers = {}
@@ -1036,7 +1024,6 @@ class Speech2TextUniASR:
             text, token, token_int, hyp
 
         """
-        assert check_argument_types()
 
         # Input as audio signal
         if isinstance(speech, np.ndarray):
@@ -1104,7 +1091,6 @@ class Speech2TextUniASR:
                 text = None
             results.append((text, token, token_int, hyp))
 
-        assert check_return_type(results)
         return results
 
 
@@ -1143,7 +1129,6 @@ class Speech2TextMFCCA:
             streaming: bool = False,
             **kwargs,
     ):
-        assert check_argument_types()
 
         # 1. Build ASR model
         scorers = {}
@@ -1248,7 +1233,6 @@ class Speech2TextMFCCA:
             text, token, token_int, hyp
 
         """
-        assert check_argument_types()
         # Input as audio signal
         if isinstance(speech, np.ndarray):
             speech = torch.tensor(speech)
@@ -1298,7 +1282,6 @@ class Speech2TextMFCCA:
                 text = None
             results.append((text, token, token_int, hyp))
 
-        assert check_return_type(results)
         return results
 
 
@@ -1355,7 +1338,6 @@ class Speech2TextTransducer:
         """Construct a Speech2Text object."""
         super().__init__()
 
-        assert check_argument_types()
         asr_model, asr_train_args = build_model_from_file(
             asr_train_config, asr_model_file, cmvn_file, device
         )
@@ -1534,7 +1516,6 @@ class Speech2TextTransducer:
         Returns:
             nbest_hypothesis: N-best hypothesis.
         """
-        assert check_argument_types()
 
         if isinstance(speech, np.ndarray):
             speech = torch.tensor(speech)
@@ -1566,7 +1547,6 @@ class Speech2TextTransducer:
         Returns:
             nbest_hypothesis: N-best hypothesis.
         """
-        assert check_argument_types()
 
         if isinstance(speech, np.ndarray):
             speech = torch.tensor(speech)
@@ -1608,35 +1588,8 @@ class Speech2TextTransducer:
                 text = None
             results.append((text, token, token_int, hyp))
 
-            assert check_return_type(results)
 
         return results
-
-    @staticmethod
-    def from_pretrained(
-            model_tag: Optional[str] = None,
-            **kwargs: Optional[Any],
-    ) -> Speech2Text:
-        """Build Speech2Text instance from the pretrained model.
-        Args:
-            model_tag: Model tag of the pretrained models.
-        Return:
-            : Speech2Text instance.
-        """
-        if model_tag is not None:
-            try:
-                from espnet_model_zoo.downloader import ModelDownloader
-
-            except ImportError:
-                logging.error(
-                    "`espnet_model_zoo` is not installed. "
-                    "Please install via `pip install -U espnet_model_zoo`."
-                )
-                raise
-            d = ModelDownloader()
-            kwargs.update(**d.download_and_unpack(model_tag))
-
-        return Speech2TextTransducer(**kwargs)
 
 
 class Speech2TextSAASR:
@@ -1675,7 +1628,6 @@ class Speech2TextSAASR:
             frontend_conf: dict = None,
             **kwargs,
     ):
-        assert check_argument_types()
 
         # 1. Build ASR model
         scorers = {}
@@ -1793,7 +1745,6 @@ class Speech2TextSAASR:
             text, text_id, token, token_int, hyp
 
         """
-        assert check_argument_types()
 
         # Input as audio signal
         if isinstance(speech, np.ndarray):
@@ -1886,5 +1837,4 @@ class Speech2TextSAASR:
 
             results.append((text, text_id, token, token_int, hyp))
 
-        assert check_return_type(results)
         return results
