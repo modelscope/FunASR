@@ -162,7 +162,13 @@ pip3 install -U modelscope funasr
 </div>
 <div class="section" id="export-onnx-model">
 <h3>Export <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export">onnx model</a><a class="headerlink" href="#export-onnx-model" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize True
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model <span class="se">\</span>
+--export-dir ./export <span class="se">\</span>
+--type onnx <span class="se">\</span>
+--quantize True <span class="se">\</span>
+--model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch <span class="se">\</span>
+--model-name damo/speech_fsmn_vad_zh-cn-16k-common-pytorch <span class="se">\</span>
+--model-name damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch
 </pre></div>
 </div>
 </div>
