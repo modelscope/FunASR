@@ -408,10 +408,15 @@ def build_asr_model(args):
             **args.model_conf,
         )
     elif args.model == "timestamp_prediction":
+        # predictor
+        predictor_class = predictor_choices.get_class(args.predictor)
+        predictor = predictor_class(**args.predictor_conf)
+        
         model_class = model_choices.get_class(args.model)
         model = model_class(
             frontend=frontend,
             encoder=encoder,
+            predictor=predictor,
             token_list=token_list,
             **args.model_conf,
         )

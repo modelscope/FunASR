@@ -4,8 +4,7 @@ from modelscope.utils.constant import Tasks
 inference_pipeline = pipeline(
     task=Tasks.speech_timestamp,
     model='damo/speech_timestamp_prediction-v1-16k-offline',
-    model_revision='v1.1.0',
-    output_dir=None)
+    model_revision='v1.1.0')
 
 rec_result = inference_pipeline(
     audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_timestamps.wav',
