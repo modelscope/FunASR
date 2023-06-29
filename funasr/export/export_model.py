@@ -192,6 +192,7 @@ class ModelExport:
                 config, model_file, cmvn_file, 'cpu'
             )
             self.frontend = model.frontend
+            self.export_config["feats_dim"] = 560
         elif mode.startswith('offline'):
             from funasr.tasks.vad import VADTask
             config = os.path.join(model_dir, 'vad.yaml')
