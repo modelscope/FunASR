@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
     TCLAP::ValueArg<std::string> download_model_dir(
         "", "download-model-dir",
         "Download model from Modelscope to download_model_dir",
-        false, "", "string");
+        false, "/workspace/models", "string");
     TCLAP::ValueArg<std::string> model_dir(
         "", MODEL_DIR,
         "default: /workspace/models/asr, the asr model path, which contains model_quant.onnx, config.yaml, am.mvn",
@@ -124,48 +124,47 @@ int main(int argc, char* argv[]) {
     // Download model form Modelscope
     try{
         std::string s_download_model_dir = download_model_dir.getValue();
-        // download model from modelscope when the model-dir is model ID or local path
-        bool is_download = false;
-        if(download_model_dir.isSet() && !s_download_model_dir.empty()){
-            is_download = true;
-            if (access(s_download_model_dir.c_str(), F_OK) != 0){
-                LOG(ERROR) << s_download_model_dir << " do not exists."; 
-                exit(-1);
-            }
-        }else{
-            s_download_model_dir="./";
+
+        // 判断 s_download_model_dir 是否存在，目前用不到
+        if (access(s_download_model_dir.c_str(), F_OK) != 0){
+            LOG(ERROR) << s_download_model_dir << " do not exists."; 
+            exit(-1);
         }
+
         std::string s_vad_path = model_path[VAD_DIR];
         std::string s_vad_quant = model_path[VAD_QUANT];
         std::string s_asr_path = model_path[MODEL_DIR];
         std::string s_asr_quant = model_path[QUANTIZE];
         std::string s_punc_path = model_path[PUNC_DIR];
         std::string s_punc_quant = model_path[PUNC_QUANT];
+
         std::string python_cmd = "python -m funasr.utils.runtime_sdk_download_tool --type onnx --quantize True ";
+
         if(vad_dir.isSet() && !s_vad_path.empty()){
-            std::string python_cmd_vad = python_cmd + " --model-name " + s_vad_path + " --export-dir " + s_download_model_dir + " --model_revision " + model_path["vad-revision"];
-            if(is_download){
-                LOG(INFO) << "Download model: " <<  s_vad_path << " from modelscope: ";
-            }else{
-                LOG(INFO) << "Check local model: " <<  s_vad_path;
-                if (access(s_vad_path.c_str(), F_OK) != 0){
-                    LOG(ERROR) << s_vad_path << " do not exists."; 
-                    exit(-1);
-                }                
-            }
-            system(python_cmd_vad.c_str());
+            std::string python_cmd_vad;
             std::string down_vad_path;
-            std::string down_vad_model;            
-            if(is_download){
-                down_vad_path  = s_download_model_dir+"/"+s_vad_path;
-                down_vad_model = s_download_model_dir+"/"+s_vad_path+"/model_quant.onnx";
-            }else{
+            std::string down_vad_model;  
+
+            if (access(s_vad_path.c_str(), F_OK) == 0){
+                // local
+                python_cmd_vad = python_cmd + " --model-name " + s_vad_path + " --export-dir ./ " + " --model_revision " + model_path["vad-revision"];
                 down_vad_path  = s_vad_path;
-                down_vad_model = s_vad_path+"/model_quant.onnx";
-                if(s_vad_quant=="false" || s_vad_quant=="False" || s_vad_quant=="FALSE"){
-                    down_vad_model = s_vad_path+"/model.onnx";
-                }
+            }else{
+                // modelscope
+                LOG(INFO) << "Download model: " <<  s_vad_path << " from modelscope: ";
+                python_cmd_vad = python_cmd + " --model-name " + s_vad_path + " --export-dir " + s_download_model_dir + " --model_revision " + model_path["vad-revision"];
+                down_vad_path  = s_download_model_dir+"/"+s_vad_path;
             }
+                
+            int ret = system(python_cmd_vad.c_str());
+            if(ret !=0){
+                LOG(INFO) << "Failed to download model from modelscope. If you set local model path, you can ignore the errors.";
+            }
+            down_vad_model = down_vad_path+"/model_quant.onnx";
+            if(s_vad_quant=="false" || s_vad_quant=="False" || s_vad_quant=="FALSE"){
+                down_vad_model = down_vad_path+"/model.onnx";
+            }
+
             if (access(down_vad_model.c_str(), F_OK) != 0){
                 LOG(ERROR) << down_vad_model << " do not exists."; 
                 exit(-1);
@@ -178,74 +177,77 @@ int main(int argc, char* argv[]) {
         }
 
         if(model_dir.isSet() && !s_asr_path.empty()){
-            std::string python_cmd_asr = python_cmd + " --model-name " + s_asr_path + " --export-dir " + s_download_model_dir + " --model_revision " + model_path["model-revision"];
-            if(is_download){
-                LOG(INFO) << "Download model: " <<  s_asr_path << " from modelscope: ";
-            }else{
-                LOG(INFO) << "Check local model: " <<  s_asr_path;
-                if (access(s_asr_path.c_str(), F_OK) != 0){
-                    LOG(ERROR) << s_asr_path << " do not exists."; 
-                    exit(-1);
-                }                
-            }
-            system(python_cmd_asr.c_str());
+            std::string python_cmd_asr;
             std::string down_asr_path;
-            std::string down_asr_model;     
-            if(is_download){
-                down_asr_path  = s_download_model_dir+"/"+s_asr_path;
-                down_asr_model = s_download_model_dir+"/"+s_asr_path+"/model_quant.onnx";
-            }else{
+            std::string down_asr_model;  
+
+            if (access(s_asr_path.c_str(), F_OK) == 0){
+                // local
+                python_cmd_asr = python_cmd + " --model-name " + s_asr_path + " --export-dir ./ " + " --model_revision " + model_path["model-revision"];
                 down_asr_path  = s_asr_path;
-                down_asr_model = s_asr_path+"/model_quant.onnx";
-                if(s_asr_quant=="false" || s_asr_quant=="False" || s_asr_quant=="FALSE"){
-                    down_asr_model = s_asr_path+"/model.onnx";
-                }
-            }
-            if (access(down_asr_model.c_str(), F_OK) != 0){
-              LOG(ERROR) << down_asr_model << " do not exists."; 
-              exit(-1);
             }else{
-              model_path[MODEL_DIR]=down_asr_path;
-              LOG(INFO) << "Set " << MODEL_DIR << " : " << model_path[MODEL_DIR];
+                // modelscope
+                LOG(INFO) << "Download model: " <<  s_asr_path << " from modelscope: ";
+                python_cmd_asr = python_cmd + " --model-name " + s_asr_path + " --export-dir " + s_download_model_dir + " --model_revision " + model_path["model-revision"];
+                down_asr_path  = s_download_model_dir+"/"+s_asr_path;
+            }
+                
+            int ret = system(python_cmd_asr.c_str());
+            if(ret !=0){
+                LOG(INFO) << "Failed to download model from modelscope. If you set local model path, you can ignore the errors.";
+            }
+            down_asr_model = down_asr_path+"/model_quant.onnx";
+            if(s_asr_quant=="false" || s_asr_quant=="False" || s_asr_quant=="FALSE"){
+                down_asr_model = down_asr_path+"/model.onnx";
+            }
+
+            if (access(down_asr_model.c_str(), F_OK) != 0){
+                LOG(ERROR) << down_asr_model << " do not exists."; 
+                exit(-1);
+            }else{
+                model_path[MODEL_DIR]=down_asr_path;
+                LOG(INFO) << "Set " << MODEL_DIR << " : " << model_path[MODEL_DIR];
             }
         }else{
-          LOG(INFO) << "ASR model is not set, use default.";
+            LOG(INFO) << "ASR model is not set, use default.";
         }
 
         if(punc_dir.isSet() && !s_punc_path.empty()){
-            std::string python_cmd_punc = python_cmd + " --model-name " + s_punc_path + " --export-dir " + s_download_model_dir + " --model_revision " + model_path["punc-revision"];
-            if(is_download){
-                LOG(INFO) << "Download model: " <<  s_punc_path << " from modelscope: ";
-            }else{
-                LOG(INFO) << "Check local model: " <<  s_punc_path;
-                if (access(s_punc_path.c_str(), F_OK) != 0){
-                    LOG(ERROR) << s_punc_path << " do not exists."; 
-                    exit(-1);
-                }                
-            }
-            system(python_cmd_punc.c_str());
+            std::string python_cmd_punc;
             std::string down_punc_path;
-            std::string down_punc_model;            
-            if(is_download){
-                down_punc_path  = s_download_model_dir+"/"+s_punc_path;
-                down_punc_model = s_download_model_dir+"/"+s_punc_path+"/model_quant.onnx";
-            }else{
+            std::string down_punc_model;  
+
+            if (access(s_punc_path.c_str(), F_OK) == 0){
+                // local
+                python_cmd_punc = python_cmd + " --model-name " + s_punc_path + " --export-dir ./ " + " --model_revision " + model_path["punc-revision"];
                 down_punc_path  = s_punc_path;
-                down_punc_model = s_punc_path+"/model_quant.onnx";
-                if(s_punc_quant=="false" || s_punc_quant=="False" || s_punc_quant=="FALSE"){
-                    down_punc_model = s_punc_path+"/model.onnx";
-                }
-            }
-            if (access(down_punc_model.c_str(), F_OK) != 0){
-              LOG(ERROR) << down_punc_model << " do not exists."; 
-              exit(-1);
             }else{
-              model_path[PUNC_DIR]=down_punc_path;
-              LOG(INFO) << "Set " << PUNC_DIR << " : " << model_path[PUNC_DIR];
+                // modelscope
+                LOG(INFO) << "Download model: " <<  s_punc_path << " from modelscope: ";
+                python_cmd_punc = python_cmd + " --model-name " + s_punc_path + " --export-dir " + s_download_model_dir + " --model_revision " + model_path["punc-revision"];
+                down_punc_path  = s_download_model_dir+"/"+s_punc_path;
+            }
+                
+            int ret = system(python_cmd_punc.c_str());
+            if(ret !=0){
+                LOG(INFO) << "Failed to download model from modelscope. If you set local model path, you can ignore the errors.";
+            }
+            down_punc_model = down_punc_path+"/model_quant.onnx";
+            if(s_punc_quant=="false" || s_punc_quant=="False" || s_punc_quant=="FALSE"){
+                down_punc_model = down_punc_path+"/model.onnx";
+            }
+
+            if (access(down_punc_model.c_str(), F_OK) != 0){
+                LOG(ERROR) << down_punc_model << " do not exists."; 
+                exit(-1);
+            }else{
+                model_path[PUNC_DIR]=down_punc_path;
+                LOG(INFO) << "Set " << PUNC_DIR << " : " << model_path[PUNC_DIR];
             }
         }else{
-          LOG(INFO) << "PUNC model is not set, use default.";
+            LOG(INFO) << "PUNC model is not set, use default.";
         }
+
     } catch (std::exception const& e) {
         LOG(ERROR) << "Error: " << e.what();
     }
