@@ -4,7 +4,7 @@ FunASR提供可便捷本地或者云端服务器部署的离线文件转写服�
 
 ## 环境安装与启动服务
 
-环境准备与配置（[点击此处](../../docs/runtime/aliyun_server_tutorial.md)）
+环境准备与配置（[点击此处](./aliyun_server_tutorial.md)）
 ### 获得脚本工具并一键部署
 
 通过以下命令运行一键部署服务，按照提示逐步完成FunASR runtime-SDK服务的部署和运行。目前暂时仅支持Linux环境，其他环境参考文档[高阶开发指南]()。
