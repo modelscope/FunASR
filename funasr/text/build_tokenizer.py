@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import Iterable
 from typing import Union
 
-from typeguard import check_argument_types
 
 from funasr.text.abs_tokenizer import AbsTokenizer
 from funasr.text.char_tokenizer import CharTokenizer
@@ -21,7 +20,6 @@ def build_tokenizer(
     g2p_type: str = None,
 ) -> AbsTokenizer:
     """A helper function to instantiate Tokenizer"""
-    assert check_argument_types()
     if token_type == "bpe":
         if bpemodel is None:
             raise ValueError('bpemodel is required if token_type = "bpe"')

@@ -12,7 +12,6 @@ from typing import Dict
 
 import torch
 from torch import nn
-from typeguard import check_argument_types
 
 from funasr.models.ctc import CTC
 from funasr.modules.attention import (
@@ -533,7 +532,6 @@ class ConformerEncoder(AbsEncoder):
             interctc_use_conditioning: bool = False,
             stochastic_depth_rate: Union[float, List[float]] = 0.0,
     ):
-        assert check_argument_types()
         super().__init__()
         self._output_size = output_size
 
@@ -943,7 +941,6 @@ class ConformerChunkEncoder(AbsEncoder):
         """Construct an Encoder object."""
         super().__init__()
 
-        assert check_argument_types()
 
         self.embed = StreamingConvInput(
             input_size,

@@ -4,7 +4,6 @@ from typing import Sequence
 from typing import Tuple
 from typing import Union
 
-from typeguard import check_argument_types
 
 from funasr.fileio.read_text import load_num_sequence_text
 from funasr.fileio.read_text import read_2column_text
@@ -23,7 +22,6 @@ class FoldedBatchSampler(AbsSampler):
         drop_last: bool = False,
         utt2category_file: str = None,
     ):
-        assert check_argument_types()
         assert batch_size > 0
         if sort_batch != "ascending" and sort_batch != "descending":
             raise ValueError(

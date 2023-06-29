@@ -4,8 +4,6 @@ from typing import Sequence
 from typing import Tuple
 from typing import Union
 
-from typeguard import check_argument_types
-from typeguard import check_return_type
 
 from funasr.samplers.abs_sampler import AbsSampler
 from funasr.samplers.folded_batch_sampler import FoldedBatchSampler
@@ -104,7 +102,6 @@ def build_batch_sampler(
         padding: Whether sequences are input as a padded tensor or not.
             used for "numel" mode
     """
-    assert check_argument_types()
     if len(shape_files) == 0:
         raise ValueError("No shape file are given")
 
@@ -164,5 +161,4 @@ def build_batch_sampler(
 
     else:
         raise ValueError(f"Not supported: {type}")
-    assert check_return_type(retval)
     return retval

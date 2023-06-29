@@ -11,7 +11,6 @@ import numpy as np
 import resampy
 import soundfile
 from tqdm import tqdm
-from typeguard import check_argument_types
 
 from funasr.utils.cli_utils import get_commandline_args
 from funasr.fileio.read_text import read_2column_text
@@ -31,7 +30,6 @@ def str2int_tuple(integers: str) -> Optional[Tuple[int, ...]]:
     (3, 4, 5)
 
     """
-    assert check_argument_types()
     if integers.strip() in ("none", "None", "NONE", "null", "Null", "NULL"):
         return None
     return tuple(map(int, integers.strip().split(",")))

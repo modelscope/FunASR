@@ -6,7 +6,6 @@ import random
 import numpy as np
 import soundfile
 import librosa
-from typeguard import check_argument_types
 
 import torch
 import torchaudio
@@ -106,7 +105,6 @@ class SoundScpReader(collections.abc.Mapping):
         dest_sample_rate: int = 16000,
         speed_perturb: Union[list, tuple] = None,
     ):
-        assert check_argument_types()
         self.fname = fname
         self.dtype = dtype
         self.always_2d = always_2d
@@ -179,7 +177,6 @@ class SoundScpWriter:
         format="wav",
         dtype=None,
     ):
-        assert check_argument_types()
         self.dir = Path(outdir)
         self.dir.mkdir(parents=True, exist_ok=True)
         scpfile = Path(scpfile)

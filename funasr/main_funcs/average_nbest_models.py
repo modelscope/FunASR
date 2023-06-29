@@ -8,7 +8,6 @@ import os
 from io import BytesIO
 
 import torch
-from typeguard import check_argument_types
 from typing import Collection
 
 from funasr.train.reporter import Reporter
@@ -34,7 +33,6 @@ def average_nbest_models(
         nbest: Number of best model files to be averaged
         suffix: A suffix added to the averaged model file name
     """
-    assert check_argument_types()
     if isinstance(nbest, int):
         nbests = [nbest]
     else:

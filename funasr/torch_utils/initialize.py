@@ -4,7 +4,6 @@
 
 import math
 import torch
-from typeguard import check_argument_types
 
 
 def initialize(model: torch.nn.Module, init: str):
@@ -19,7 +18,6 @@ def initialize(model: torch.nn.Module, init: str):
         model: Target.
         init: Method of initialization.
     """
-    assert check_argument_types()
 
     if init == "chainer":
         # 1. lecun_normal_init_parameters

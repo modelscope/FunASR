@@ -7,7 +7,6 @@ import logging
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
-from typeguard import check_argument_types
 import numpy as np
 from funasr.modules.nets_utils import make_pad_mask
 from funasr.modules.layer_norm import LayerNorm
