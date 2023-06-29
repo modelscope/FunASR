@@ -6,7 +6,9 @@ from typing import Dict, List, Optional, Tuple, Union
 
 import torch
 from packaging.version import parse as V
-
+from funasr.losses.label_smoothing_loss import (
+    LabelSmoothingLoss,  # noqa: H301
+)
 from funasr.models.frontend.abs_frontend import AbsFrontend
 from funasr.models.specaug.abs_specaug import AbsSpecAug
 from funasr.models.decoder.rnnt_decoder import RNNTDecoder
@@ -14,6 +16,8 @@ from funasr.models.decoder.abs_decoder import AbsDecoder as AbsAttDecoder
 from funasr.models.encoder.abs_encoder import AbsEncoder
 from funasr.models.joint_net.joint_network import JointNetwork
 from funasr.modules.nets_utils import get_transducer_task_io
+from funasr.modules.nets_utils import th_accuracy
+from funasr.modules.add_sos_eos import add_sos_eos
 from funasr.layers.abs_normalize import AbsNormalize
 from funasr.torch_utils.device_funcs import force_gatherable
 from funasr.models.base_model import FunASRModel
@@ -80,7 +84,6 @@ class TransducerModel(FunASRModel):
     ) -> None:
         """Construct an ESPnetASRTransducerModel object."""
         super().__init__()
-
 
         # The following labels ID are reserved: 0 (blank) and vocab_size - 1 (sos/eos)
         self.blank_id = 0
@@ -540,7 +543,6 @@ class UnifiedTransducerModel(FunASRModel):
         """Construct an ESPnetASRTransducerModel object."""
         super().__init__()
 
-
         # The following labels ID are reserved: 0 (blank) and vocab_size - 1 (sos/eos)
         self.blank_id = 0
 
@@ -706,7 +708,7 @@ class UnifiedTransducerModel(FunASRModel):
             loss_lm = self._calc_lm_loss(decoder_out, target)
 
         loss_trans = loss_trans_utt + loss_trans_chunk
-        loss_ctc = loss_ctc + loss_ctc_chunk 
+        loss_ctc = loss_ctc + loss_ctc_chunk
         loss_ctc = loss_att + loss_att_chunk
 
         loss = (
