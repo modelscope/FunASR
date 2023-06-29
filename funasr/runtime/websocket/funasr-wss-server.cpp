@@ -125,12 +125,6 @@ int main(int argc, char* argv[]) {
     try{
         std::string s_download_model_dir = download_model_dir.getValue();
 
-        // 判断 s_download_model_dir 是否存在，目前用不到
-        if (access(s_download_model_dir.c_str(), F_OK) != 0){
-            LOG(ERROR) << s_download_model_dir << " do not exists."; 
-            exit(-1);
-        }
-
         std::string s_vad_path = model_path[VAD_DIR];
         std::string s_vad_quant = model_path[VAD_QUANT];
         std::string s_asr_path = model_path[MODEL_DIR];
