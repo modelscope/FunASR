@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>云服务器申请教程 &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            FunASR
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation/docker.html">Docker</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Academic Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../academic_recipe/asr_recipe.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../academic_recipe/punc_recipe.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../academic_recipe/vad_recipe.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../academic_recipe/sv_recipe.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../academic_recipe/sd_recipe.html">Speaker Diarization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">ModelScope Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modelscope_pipeline/quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modelscope_pipeline/asr_pipeline.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modelscope_pipeline/vad_pipeline.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modelscope_pipeline/punc_pipeline.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modelscope_pipeline/tp_pipeline.html">Timestamp Prediction (FA)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modelscope_pipeline/sv_pipeline.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modelscope_pipeline/sd_pipeline.html">Speaker Diarization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modelscope_pipeline/itn_pipeline.html">Inverse Text Normalization (ITN)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Zoo</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_zoo/modelscope_models.html">Pretrained Models on ModelScope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_zoo/huggingface_models.html">Pretrained Models on Huggingface</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Runtime and Service</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="export.html">Export models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="onnxruntime_python.html">ONNXRuntime-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="onnxruntime_cpp.html">ONNXRuntime-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libtorch_python.html">Libtorch-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="html5.html">Html5 server for asr service</a></li>
+<li class="toctree-l1"><a class="reference internal" href="websocket_python.html">Service with websocket-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="websocket_cpp.html">Service with websocket-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grpc_python.html">Service with grpc-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grpc_cpp.html">Service with grpc-cpp</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark and Leaderboard</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../benchmark/benchmark_onnx.html">CPU Benchmark (ONNX-python)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmark/benchmark_onnx_cpp.html">CPU Benchmark (ONNX-cpp)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmark/benchmark_libtorch.html">CPU Benchmark (Libtorch)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmark/benchmark_pipeline_cer.html">Leaderboard IO</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Funasr Library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/build_task.html">Build custom tasks</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Papers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/papers.html">Papers</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Application</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/application.html">Audio Cut</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/application.html#realtime-speech-recognition">Realtime Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/application.html#audio-chat">Audio Chat</a></li>
+</ul>
+<p class="caption"><span class="caption-text">FQA</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/FQA.html">FQA</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">FunASR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">云服务器申请教程</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/runtime/aliyun_server_tutorial.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="id1">
+<h1>云服务器申请教程<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h1>
+<p>我们以阿里云（<a class="reference external" href="https://www.aliyun.com/">点此链接</a>）为例，演示如何申请云服务器</p>
+<div class="section" id="id2">
+<h2>服务器配置<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h2>
+<p>用户可以根据自己的业务需求，选择合适的服务器配置，推荐配置为：</p>
+<ul class="simple">
+<li><p>配置一（高配）：X86架构，32/64核8369CPU，内存8G以上；</p></li>
+<li><p>配置二：X86架构，32/64核8132CPU，内存8G以上；</p></li>
+</ul>
+<p>详细性能测试报告：<a class="reference external" href="../../funasr/runtime/python/benchmark_onnx_cpp">点此链接</a></p>
+<p>我们以免费试用（1～3个月）为例，演示如何申请服务器流程，图文步骤如下：</p>
+<div class="section" id="id3">
+<h3>登陆个人账号<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h3>
+<p>打开阿里云官网<a class="reference external" href="https://www.aliyun.com/">点此链接</a>，注册并登陆个人账号，如下图标号1所示</p>
+<img src="images/aliyun1.png" width="500"/></div>
+<div class="section" id="id4">
+<h3>免费试用<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h3>
+<p>点击如上图所以标号2，出现如下界面
+<img src="images/aliyun2.png" width="500"/></p>
+<p>再点击标号3，出现如下界面</p>
+<img src="images/aliyun3.png" width="500"/><p>个人账号可以免费试用1核2GB内存，每月750小时，企业认证后，可以免费试用2核8GB内存 3个月，根据账号情况，点击上图中标号4，出现如下界面：</p>
+<img src="images/aliyun4.png" width="500"/><p>一次按照上图标号5、6、7选择后，点击立即试用，出现如下界面</p>
+<img src="images/aliyun5.png" width="500"/><p>点击安全组（标号9），出现如下界面</p>
+<img src="images/aliyun6.png" width="500"/><p>再点击标号10，出现如下界面</p>
+<img src="images/aliyun7.png" width="500"/><p>点击手动添加（标号11），分别按照标号12、13填入内容，后点击保存（标号14），再点击实例（标号15），出现如下界面</p>
+<img src="images/aliyun8.png" width="500"/><p>点击示例名称（标号16），出现如下页面</p>
+<img src="images/aliyun9.png" width="500"/><p>点击远程启动（标号17），出现页面后，点击立即登陆，出现如下界面</p>
+<img src="images/aliyun10.png" width="500"/><p>首次登陆需要点击重置密码（上图中绿色箭头），设置好密码后，输入密码（标号18），点击确认（标号19）</p>
+<img src="images/aliyun11.png" width="500"/><p>首次登陆会遇到上图所示问题，点击标号20，根据文档操作后，重新登陆，登陆成功后出现如下页面</p>
+<img src="images/aliyun12.png" width="500"/><p>上图表示已经成功申请了云服务器，后续可以根据FunASR runtime-SDK部署文档进行一键部署（<a class="reference external" href="#">点击此处</a>）</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Speech Lab, Alibaba Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
