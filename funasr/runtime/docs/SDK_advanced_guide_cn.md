@@ -2,7 +2,7 @@
 
 FunASR提供可一键本地或者云端服务器部署的中文离线文件转写服务，内核为FunASR已开源runtime-SDK。FunASR-runtime结合了达摩院语音实验室在Modelscope社区开源的语音端点检测(VAD)、Paraformer-large语音识别(ASR)、标点检测(PUNC) 等相关能力，可以准确、高效的对音频进行高并发转写。
 
-本文档为FunASR离线文件转写服务开发指南。如果您想快速体验离线文件转写服务，请参考FunASR离线文件转写服务一键部署示例（[点击此处](./SDK_tutorial.md)）。
+本文档为FunASR离线文件转写服务开发指南。如果您想快速体验离线文件转写服务，请参考FunASR离线文件转写服务一键部署示例（[点击此处](./SDK_tutorial_cn.md)）。
 
 ## Docker安装
 
@@ -53,7 +53,7 @@ sudo docker run -p 10095:10095 -it --privileged=true -v /root:/workspace/models 
 
 docker启动之后，启动 funasr-wss-server服务程序：
 
-funasr-wss-server支持从Modelscope下载模型，需要设置同时设置模型下载地址（--download-model-dir）及model ID（--model-dir、--vad-dir、--punc-dir）,示例如下：
+funasr-wss-server支持从Modelscope下载模型，设置模型下载地址（--download-model-dir，默认为/workspace/models）及model ID（--model-dir、--vad-dir、--punc-dir）,示例如下：
 ```shell
 cd /workspace/FunASR/funasr/runtime/websocket/build/bin
 ./funasr-wss-server  \
@@ -83,10 +83,9 @@ cd /workspace/FunASR/funasr/runtime/websocket/build/bin
 --keyfile <string> # ssl的密钥文件，默认为：../../../ssl_key/server.key
 ```
 
-funasr-wss-server同时也支持从本地路径加载模型（本地模型资源准备详见[模型资源准备](#anchor-1)），需要设置模型本地路径（--download-model-dir）示例如下：
+funasr-wss-server同时也支持从本地路径加载模型（本地模型资源准备详见[模型资源准备](#anchor-1)）示例如下：
 ```shell
 cd /workspace/FunASR/funasr/runtime/websocket/build/bin
-
 ./funasr-wss-server  \
   --model-dir /workspace/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx \
   --vad-dir /workspace/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
