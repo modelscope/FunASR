@@ -130,7 +130,13 @@ FunASR离线文件转写服务中的vad、asr和punc模型资源均来自Modelsc
 从Modelscope网站下载对应model name的模型，然后导出量化后的ONNX模型：
 
 ```shell
-python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize True
+python -m funasr.export.export_model \
+--export-dir ./export \
+--type onnx \
+--quantize True \
+--model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch \
+--model-name damo/speech_fsmn_vad_zh-cn-16k-common-pytorch \
+--model-name damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch
 ```
 
 命令参数介绍：
