@@ -1,6 +1,5 @@
 import numpy as np
 from torch.utils.data import DataLoader
-from typeguard import check_argument_types
 
 from funasr.datasets.iterable_dataset import IterableESPnetDataset
 from funasr.datasets.small_datasets.collate_fn import CommonCollateFn
@@ -23,7 +22,6 @@ def build_streaming_iterator(
         train: bool = False,
 ) -> DataLoader:
     """Build DataLoader using iterable dataset"""
-    assert check_argument_types()
 
     # preprocess
     if preprocess_fn is not None:

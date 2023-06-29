@@ -2,7 +2,7 @@ import copy
 import numpy as np
 import time
 import torch
-from eend.utils.power import create_powerlabel
+from funasr.modules.eend_ola.utils.power import create_powerlabel
 from itertools import combinations
 
 metrics = [

@@ -12,7 +12,6 @@ from typing import Tuple, List
 import numpy as np
 import torch
 from torch.nn import functional as F
-from typeguard import check_argument_types
 
 from funasr.modules.nets_utils import to_device
 from funasr.modules.nets_utils import make_pad_mask
@@ -66,7 +65,6 @@ class DiarSondModel(FunASRModel):
         inter_score_loss_weight: float = 0.0,
         inputs_type: str = "raw",
     ):
-        assert check_argument_types()
 
         super().__init__()
 

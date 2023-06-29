@@ -8,7 +8,6 @@ from typing import Union
 
 import humanfriendly
 import torch
-from typeguard import check_argument_types
 
 from funasr.models.frontend.abs_frontend import AbsFrontend
 from funasr.modules.frontends.frontend import Frontend
@@ -37,7 +36,6 @@ class S3prlFrontend(AbsFrontend):
             download_dir: str = None,
             multilayer_feature: bool = False,
     ):
-        assert check_argument_types()
         super().__init__()
         if isinstance(fs, str):
             fs = humanfriendly.parse_size(fs)

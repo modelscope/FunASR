@@ -26,7 +26,6 @@ import numpy as np
 import torch
 import torch.nn
 import torch.optim
-from typeguard import check_argument_types
 
 from funasr.iterators.abs_iter_factory import AbsIterFactory
 from funasr.main_funcs.average_nbest_models import average_nbest_models
@@ -127,7 +126,6 @@ class Trainer:
     @classmethod
     def build_options(cls, args: argparse.Namespace) -> TrainerOptions:
         """Build options consumed by train(), eval()"""
-        assert check_argument_types()
         return build_dataclass(TrainerOptions, args)
 
     @classmethod
@@ -188,7 +186,6 @@ class Trainer:
         distributed_option: DistributedOption,
     ) -> None:
         """Perform training. This method performs the main process of training."""
-        assert check_argument_types()
         # NOTE(kamo): Don't check the type more strictly as far trainer_options
         assert is_dataclass(trainer_options), type(trainer_options)
         assert len(optimizers) == len(schedulers), (len(optimizers), len(schedulers))
@@ -551,7 +548,6 @@ class Trainer:
         options: TrainerOptions,
         distributed_option: DistributedOption,
     ) -> Tuple[bool, bool]:
-        assert check_argument_types()
 
         grad_noise = options.grad_noise
         accum_grad = options.accum_grad
@@ -845,7 +841,6 @@ class Trainer:
         options: TrainerOptions,
         distributed_option: DistributedOption,
     ) -> None:
-        assert check_argument_types()
         ngpu = options.ngpu
         no_forward_run = options.no_forward_run
         distributed = distributed_option.distributed

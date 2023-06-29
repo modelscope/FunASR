@@ -2,8 +2,6 @@ from typing import Mapping
 from typing import Optional
 from typing import Tuple
 
-from typeguard import check_argument_types
-from typeguard import check_return_type
 
 from funasr.utils.nested_dict_action import NestedDictAction
 from funasr.utils.types import str_or_none
@@ -40,7 +38,6 @@ class ClassChoices:
         default: str = None,
         optional: bool = False,
     ):
-        assert check_argument_types()
         self.name = name
         self.base_type = type_check
         self.classes = {k.lower(): v for k, v in classes.items()}
@@ -64,12 +61,10 @@ class ClassChoices:
             return retval
 
     def get_class(self, name: Optional[str]) -> Optional[type]:
-        assert check_argument_types()
         if name is None or (self.optional and name.lower() == ("none", "null", "nil")):
             retval = None
         elif name.lower() in self.classes:
             class_obj = self.classes[name]
-            assert check_return_type(class_obj)
             retval = class_obj
         else:
             raise ValueError(

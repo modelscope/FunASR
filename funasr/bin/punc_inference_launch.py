@@ -14,7 +14,6 @@ from typing import Optional
 from typing import Union
 
 import torch
-from typeguard import check_argument_types
 
 from funasr.bin.punc_infer import Text2Punc, Text2PuncVADRealtime
 from funasr.torch_utils.set_all_random_seed import set_all_random_seed
@@ -38,7 +37,6 @@ def inference_punc(
         param_dict: dict = None,
         **kwargs,
 ):
-    assert check_argument_types()
     logging.basicConfig(
         level=log_level,
         format="%(asctime)s (%(module)s:%(lineno)d) %(levelname)s: %(message)s",
@@ -118,7 +116,6 @@ def inference_punc_vad_realtime(
         param_dict: dict = None,
         **kwargs,
 ):
-    assert check_argument_types()
     ncpu = kwargs.get("ncpu", 1)
     torch.set_num_threads(ncpu)
 

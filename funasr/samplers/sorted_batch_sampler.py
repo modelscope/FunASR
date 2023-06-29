@@ -2,7 +2,6 @@ import logging
 from typing import Iterator
 from typing import Tuple
 
-from typeguard import check_argument_types
 
 from funasr.fileio.read_text import load_num_sequence_text
 from funasr.samplers.abs_sampler import AbsSampler
@@ -26,7 +25,6 @@ class SortedBatchSampler(AbsSampler):
         sort_batch: str = "ascending",
         drop_last: bool = False,
     ):
-        assert check_argument_types()
         assert batch_size > 0
         self.batch_size = batch_size
         self.shape_file = shape_file

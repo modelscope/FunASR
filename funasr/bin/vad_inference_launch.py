@@ -18,7 +18,6 @@ from typing import Union
 
 import numpy as np
 import torch
-from typeguard import check_argument_types
 from funasr.build_utils.build_streaming_iterator import build_streaming_iterator
 from funasr.fileio.datadir_writer import DatadirWriter
 from funasr.torch_utils.set_all_random_seed import set_all_random_seed
@@ -47,7 +46,6 @@ def inference_vad(
         num_workers: int = 1,
         **kwargs,
 ):
-    assert check_argument_types()
     if batch_size > 1:
         raise NotImplementedError("batch decoding is not implemented")
 
@@ -148,7 +146,6 @@ def inference_vad_online(
         num_workers: int = 1,
         **kwargs,
 ):
-    assert check_argument_types()
 
     logging.basicConfig(
         level=log_level,

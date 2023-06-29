@@ -7,7 +7,6 @@ import logging
 import torch
 import torch.nn as nn
 from funasr.modules.streaming_utils.chunk_utilis import overlap_chunk
-from typeguard import check_argument_types
 import numpy as np
 from funasr.modules.nets_utils import make_pad_mask
 from funasr.modules.attention import MultiHeadSelfAttention, MultiHeadedAttentionSANM
@@ -144,7 +143,6 @@ class SelfAttentionEncoder(AbsEncoder):
         tf2torch_tensor_name_prefix_tf: str = "seq2seq/encoder",
         out_units=None,
     ):
-        assert check_argument_types()
         super().__init__()
         self._output_size = output_size
 

@@ -13,7 +13,6 @@ from typing import Union
 
 import numpy as np
 import torch
-from typeguard import check_argument_types
 
 from funasr.bin.tp_infer import Speech2Timestamp
 from funasr.build_utils.build_streaming_iterator import build_streaming_iterator
@@ -47,7 +46,6 @@ def inference_tp(
         seg_dict_file: Optional[str] = None,
         **kwargs,
 ):
-    assert check_argument_types()
     ncpu = kwargs.get("ncpu", 1)
     torch.set_num_threads(ncpu)
 

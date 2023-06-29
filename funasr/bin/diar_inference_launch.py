@@ -18,7 +18,6 @@ import numpy as np
 import soundfile
 import torch
 from scipy.signal import medfilt
-from typeguard import check_argument_types
 
 from funasr.bin.diar_infer import Speech2DiarizationSOND, Speech2DiarizationEEND
 from funasr.datasets.iterable_dataset import load_bytes
@@ -52,7 +51,6 @@ def inference_sond(
         mode: str = "sond",
         **kwargs,
 ):
-    assert check_argument_types()
     ncpu = kwargs.get("ncpu", 1)
     torch.set_num_threads(ncpu)
     if batch_size > 1:
@@ -233,7 +231,6 @@ def inference_eend(
         param_dict: Optional[dict] = None,
         **kwargs,
 ):
-    assert check_argument_types()
     ncpu = kwargs.get("ncpu", 1)
     torch.set_num_threads(ncpu)
     if batch_size > 1:

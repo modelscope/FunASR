@@ -10,7 +10,6 @@ from typing import Optional
 from typing import Tuple
 
 import torch
-from typeguard import check_argument_types
 
 from funasr.layers.abs_normalize import AbsNormalize
 from funasr.models.encoder.abs_encoder import AbsEncoder
@@ -40,7 +39,6 @@ class Data2VecPretrainModel(FunASRModel):
             preencoder: Optional[AbsPreEncoder],
             encoder: AbsEncoder,
     ):
-        assert check_argument_types()
 
         super().__init__()
 

@@ -11,7 +11,6 @@ import numpy as np
 import torch
 from torch.nn.parallel import data_parallel
 from torch.utils.data import DataLoader
-from typeguard import check_argument_types
 
 from funasr.fileio.datadir_writer import DatadirWriter
 from funasr.fileio.npy_scp import NpyScpWriter
@@ -37,7 +36,6 @@ def collect_stats(
     This method is used before executing train().
 
     """
-    assert check_argument_types()
 
     npy_scp_writers = {}
     for itr, mode in zip([train_iter, valid_iter], ["train", "valid"]):

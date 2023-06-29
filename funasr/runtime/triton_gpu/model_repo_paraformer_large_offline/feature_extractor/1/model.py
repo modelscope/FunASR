@@ -109,7 +109,6 @@ class WavFrontend():
             lfr_n: int = 6,
             dither: float = 1.0
     ) -> None:
-        # check_argument_types()
 
         self.fs = fs
         self.window = window

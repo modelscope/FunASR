@@ -9,7 +9,6 @@ from typing import Union
 
 import numpy as np
 import torch
-from typeguard import check_argument_types
 
 from funasr.iterators.abs_iter_factory import AbsIterFactory
 from funasr.iterators.sequence_iter_factory import SequenceIterFactory
@@ -51,7 +50,6 @@ class ChunkIterFactory(AbsIterFactory):
         collate_fn=None,
         pin_memory: bool = False,
     ):
-        assert check_argument_types()
         assert all(len(x) == 1 for x in batches), "batch-size must be 1"
 
         self.per_sample_iter_factory = SequenceIterFactory(
