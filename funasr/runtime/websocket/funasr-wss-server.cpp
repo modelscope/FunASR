@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
         false, "", "string");
     TCLAP::ValueArg<std::string> model_dir(
         "", MODEL_DIR,
-        "default: /workspace/models/asr, the asr model path, which contains model.onnx, config.yaml, am.mvn",
+        "default: /workspace/models/asr, the asr model path, which contains model_quant.onnx, config.yaml, am.mvn",
         false, "/workspace/models/asr", "string");
     TCLAP::ValueArg<std::string> model_revision(
         "", "model-revision",
@@ -40,12 +40,12 @@ int main(int argc, char* argv[]) {
         false, "v1.2.1", "string");
     TCLAP::ValueArg<std::string> quantize(
         "", QUANTIZE,
-        "true (Default), load the model of model.onnx in model_dir. If set "
-        "true, load the model of model_quant.onnx in model_dir",
+        "true (Default), load the model of model_quant.onnx in model_dir. If set "
+        "false, load the model of model.onnx in model_dir",
         false, "true", "string");
     TCLAP::ValueArg<std::string> vad_dir(
         "", VAD_DIR,
-        "default: /workspace/models/vad, the vad model path, which contains model.onnx, vad.yaml, vad.mvn",
+        "default: /workspace/models/vad, the vad model path, which contains model_quant.onnx, vad.yaml, vad.mvn",
         false, "/workspace/models/vad", "string");
     TCLAP::ValueArg<std::string> vad_revision(
         "", "vad-revision",
@@ -53,12 +53,12 @@ int main(int argc, char* argv[]) {
         false, "v1.2.0", "string");
     TCLAP::ValueArg<std::string> vad_quant(
         "", VAD_QUANT,
-        "true (Default), load the model of model.onnx in vad_dir. If set "
-        "true, load the model of model_quant.onnx in vad_dir",
+        "true (Default), load the model of model_quant.onnx in vad_dir. If set "
+        "false, load the model of model.onnx in vad_dir",
         false, "true", "string");
     TCLAP::ValueArg<std::string> punc_dir(
         "", PUNC_DIR,
-        "default: /workspace/models/punc, the punc model path, which contains model.onnx, punc.yaml", 
+        "default: /workspace/models/punc, the punc model path, which contains model_quant.onnx, punc.yaml", 
         false, "/workspace/models/punc",
         "string");
     TCLAP::ValueArg<std::string> punc_revision(
@@ -67,8 +67,8 @@ int main(int argc, char* argv[]) {
         false, "v1.1.7", "string");
     TCLAP::ValueArg<std::string> punc_quant(
         "", PUNC_QUANT,
-        "true (Default), load the model of model.onnx in punc_dir. If set "
-        "true, load the model of model_quant.onnx in punc_dir",
+        "true (Default), load the model of model_quant.onnx in punc_dir. If set "
+        "false, load the model of model.onnx in punc_dir",
         false, "true", "string");
 
     TCLAP::ValueArg<std::string> listen_ip("", "listen-ip", "listen ip", false,
