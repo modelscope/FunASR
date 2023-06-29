@@ -6,7 +6,6 @@ from typing import Union
 
 import sentencepiece as spm
 from torch.utils.data import DataLoader
-from typeguard import check_argument_types
 
 from funasr.datasets.large_datasets.dataset import Dataset
 from funasr.iterators.abs_iter_factory import AbsIterFactory
@@ -43,7 +42,6 @@ def load_seg_dict(seg_dict_file):
 
 class SentencepiecesTokenizer(AbsTokenizer):
     def __init__(self, model: Union[Path, str]):
-        assert check_argument_types()
         self.model = str(model)
         self.sp = None
 

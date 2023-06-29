@@ -21,7 +21,6 @@ import torch
 import torchaudio
 import soundfile
 import yaml
-from typeguard import check_argument_types
 
 from funasr.bin.asr_infer import Speech2Text
 from funasr.bin.asr_infer import Speech2TextMFCCA
@@ -80,7 +79,6 @@ def inference_asr(
         param_dict: dict = None,
         **kwargs,
 ):
-    assert check_argument_types()
     ncpu = kwargs.get("ncpu", 1)
     torch.set_num_threads(ncpu)
     if batch_size > 1:
@@ -240,7 +238,6 @@ def inference_paraformer(
         param_dict: dict = None,
         **kwargs,
 ):
-    assert check_argument_types()
     ncpu = kwargs.get("ncpu", 1)
     torch.set_num_threads(ncpu)
 
@@ -481,7 +478,6 @@ def inference_paraformer_vad_punc(
         param_dict: dict = None,
         **kwargs,
 ):
-    assert check_argument_types()
     ncpu = kwargs.get("ncpu", 1)
     torch.set_num_threads(ncpu)
 
@@ -749,7 +745,6 @@ def inference_paraformer_online(
         param_dict: dict = None,
         **kwargs,
 ):
-    assert check_argument_types()
 
     if word_lm_train_config is not None:
         raise NotImplementedError("Word LM is not implemented")
@@ -957,7 +952,6 @@ def inference_uniasr(
         param_dict: dict = None,
         **kwargs,
 ):
-    assert check_argument_types()
     ncpu = kwargs.get("ncpu", 1)
     torch.set_num_threads(ncpu)
     if batch_size > 1:
@@ -1126,7 +1120,6 @@ def inference_mfcca(
         param_dict: dict = None,
         **kwargs,
 ):
-    assert check_argument_types()
     ncpu = kwargs.get("ncpu", 1)
     torch.set_num_threads(ncpu)
     if batch_size > 1:
@@ -1314,7 +1307,6 @@ def inference_transducer(
         right_context: Number of frames in right context AFTER subsampling.
         display_partial_hypotheses: Whether to display partial hypotheses.
     """
-    assert check_argument_types()
 
     if batch_size > 1:
         raise NotImplementedError("batch decoding is not implemented")
@@ -1464,7 +1456,6 @@ def inference_sa_asr(
         param_dict: dict = None,
         **kwargs,
 ):
-    assert check_argument_types()
     if batch_size > 1:
         raise NotImplementedError("batch decoding is not implemented")
     if word_lm_train_config is not None:

@@ -10,7 +10,6 @@ from funasr.layers.sinc_conv import LogCompression
 from funasr.layers.sinc_conv import SincConv
 import humanfriendly
 import torch
-from typeguard import check_argument_types
 from typing import Optional
 from typing import Tuple
 from typing import Union
@@ -60,7 +59,6 @@ class LightweightSincConvs(AbsPreEncoder):
             windowing_type: Choice of windowing function.
             scale_type:  Choice of filter-bank initialization scale.
         """
-        assert check_argument_types()
         super().__init__()
         if isinstance(fs, str):
             fs = humanfriendly.parse_size(fs)
@@ -268,7 +266,6 @@ class SpatialDropout(torch.nn.Module):
             dropout_probability: Dropout probability.
             shape (tuple, list): Shape of input tensors.
         """
-        assert check_argument_types()
         super().__init__()
         if shape is None:
             shape = (0, 2, 1)

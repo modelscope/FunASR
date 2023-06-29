@@ -4,7 +4,6 @@ from typing import List
 from typing import Union
 import warnings
 
-from typeguard import check_argument_types
 
 from funasr.text.abs_tokenizer import AbsTokenizer
 
@@ -16,7 +15,6 @@ class WordTokenizer(AbsTokenizer):
         non_linguistic_symbols: Union[Path, str, Iterable[str]] = None,
         remove_non_linguistic_symbols: bool = False,
     ):
-        assert check_argument_types()
         self.delimiter = delimiter
 
         if not remove_non_linguistic_symbols and non_linguistic_symbols is not None:

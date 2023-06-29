@@ -7,7 +7,6 @@ from typing import Tuple
 from typing import Union
 import logging
 import torch
-from typeguard import check_argument_types
 
 from funasr.modules.e2e_asr_common import ErrorCalculator
 from funasr.modules.nets_utils import th_accuracy
@@ -65,7 +64,6 @@ class MFCCA(FunASRModel):
             sym_blank: str = "<blank>",
             preencoder: Optional[AbsPreEncoder] = None,
     ):
-        assert check_argument_types()
         assert 0.0 <= ctc_weight <= 1.0, ctc_weight
         assert rnnt_decoder is None, "Not implemented"
 

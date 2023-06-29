@@ -4,7 +4,6 @@ from typing import Collection
 from typing import Iterator
 
 import numpy as np
-from typeguard import check_argument_types
 
 from funasr.iterators.abs_iter_factory import AbsIterFactory
 
@@ -16,7 +15,6 @@ class MultipleIterFactory(AbsIterFactory):
         seed: int = 0,
         shuffle: bool = False,
     ):
-        assert check_argument_types()
         self.build_funcs = list(build_funcs)
         self.seed = seed
         self.shuffle = shuffle

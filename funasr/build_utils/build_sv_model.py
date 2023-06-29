@@ -1,7 +1,6 @@
 import logging
 
 import torch
-from typeguard import check_return_type
 
 from funasr.layers.abs_normalize import AbsNormalize
 from funasr.layers.global_mvn import GlobalMVN
@@ -254,5 +253,4 @@ def build_sv_model(args):
     if args.init is not None:
         initialize(model, args.init)
 
-    assert check_return_type(model)
     return model

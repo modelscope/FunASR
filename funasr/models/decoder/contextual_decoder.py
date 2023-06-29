@@ -7,7 +7,6 @@ import numpy as np
 
 from funasr.modules.streaming_utils import utils as myutils
 from funasr.models.decoder.transformer_decoder import BaseTransformerDecoder
-from typeguard import check_argument_types
 
 from funasr.modules.attention import MultiHeadedAttentionSANMDecoder, MultiHeadedAttentionCrossAtt
 from funasr.modules.embedding import PositionalEncoding
@@ -126,7 +125,6 @@ class ContextualParaformerDecoder(ParaformerSANMDecoder):
         kernel_size: int = 21,
         sanm_shfit: int = 0,
     ):
-        assert check_argument_types()
         super().__init__(
             vocab_size=vocab_size,
             encoder_output_size=encoder_output_size,

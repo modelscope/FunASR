@@ -13,7 +13,6 @@ from typing import Union
 
 import numpy as np
 import torch
-from typeguard import check_argument_types
 
 from funasr.build_utils.build_model_from_file import build_model_from_file
 from funasr.models.frontend.wav_frontend import WavFrontend, WavFrontendOnline
@@ -42,7 +41,6 @@ class Speech2VadSegment:
             dtype: str = "float32",
             **kwargs,
     ):
-        assert check_argument_types()
 
         # 1. Build vad model
         vad_model, vad_infer_args = build_model_from_file(
@@ -76,7 +74,6 @@ class Speech2VadSegment:
             text, token, token_int, hyp
 
         """
-        assert check_argument_types()
 
         # Input as audio signal
         if isinstance(speech, np.ndarray):
@@ -149,7 +146,6 @@ class Speech2VadSegmentOnline(Speech2VadSegment):
             text, token, token_int, hyp
 
         """
-        assert check_argument_types()
 
         # Input as audio signal
         if isinstance(speech, np.ndarray):
