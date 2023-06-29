@@ -7,7 +7,7 @@ FunASR提供可便捷本地或者云端服务器部署的离线文件转写服�
 环境准备与配置（[点击此处](./aliyun_server_tutorial.md)）
 ### 获得脚本工具并一键部署
 
-通过以下命令运行一键部署服务，按照提示逐步完成FunASR runtime-SDK服务的部署和运行。目前暂时仅支持Linux环境，其他环境参考文档[高阶开发指南]()。
+通过以下命令运行一键部署服务，按照提示逐步完成FunASR runtime-SDK服务的部署和运行。目前暂时仅支持Linux环境，其他环境参考文档[高阶开发指南](./SDK_advanced_guide_cn.md)。
 受限于网络，funasr-runtime-deploy.sh一键部署工具的下载可能不顺利，遇到数秒还未下载进入一键部署工具的情况，请Ctrl + C 终止后再次运行以下命令。
 
 ```shell
@@ -19,10 +19,10 @@ curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR-APP/main/T
 ##### 选择FunASR Docker镜像
 推荐选择latest使用我们的最新镜像，也可选择历史版本。
 ```text
-[1/10]
+[1/9]
   Please choose the Docker image.
     1) registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-latest
-    2) registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.0.1
+    2) registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.1.0
   Enter your choice: 1
   You have chosen the Docker image: registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-latest
 ```
@@ -32,39 +32,44 @@ curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR-APP/main/T
 你可以选择ModelScope中的模型，也可以选<model_name>自行填入ModelScope中的模型名，将会在Docker运行时自动下载。同时也可以选择<model_path>填入宿主机中的本地模型路径。
 
 ```text
-[2/10]
-  Please input [y/n] to confirm whether to automatically download model_id in ModelScope or use a local model.
+[2/9]
+  Please input [Y/n] to confirm whether to automatically download model_id in ModelScope or use a local model.
   [y] With the model in ModelScope, the model will be automatically downloaded to Docker(/workspace/models).
+      If you select both the local model and the model in ModelScope, select [y].
   [n] Use the models on the localhost, the directory where the model is located will be mapped to Docker.
   Setting confirmation[Y/n]: 
-  You have chosen to use the model in ModelScope, please set the model ID in the next steps, and the model will be automatically downloaded during the run.
+  You have chosen to use the model in ModelScope, please set the model ID in the next steps, and the model will be automatically downloaded in (/workspace/models) during the run.
 
-  [2.1/10]
+  Please enter the local path to download models, the corresponding path in Docker is /workspace/models.
+  Setting the local path to download models, default(/root/models): 
+  The local path(/root/models) set will store models during the run.
+
+  [2.1/9]
     Please select ASR model_id in ModelScope from the list below.
     1) damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx
     2) model_name
     3) model_path
   Enter your choice: 1
     The model ID is damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx
-    The model dir in Docker is /workspace/models/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx
+    The model dir in Docker is /workspace/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx
 
-  [2.2/10]
+  [2.2/9]
     Please select VAD model_id in ModelScope from the list below.
     1) damo/speech_fsmn_vad_zh-cn-16k-common-onnx
     2) model_name
     3) model_path
   Enter your choice: 1
     The model ID is damo/speech_fsmn_vad_zh-cn-16k-common-onnx
-    The model dir in Docker is /workspace/models/speech_fsmn_vad_zh-cn-16k-common-onnx
+    The model dir in Docker is /workspace/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx
 
-  [2.3/10]
+  [2.3/9]
     Please select PUNC model_id in ModelScope from the list below.
     1) damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
     2) model_name
     3) model_path
   Enter your choice: 1
     The model ID is damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
-    The model dir in Docker is /workspace/models/punc_ct-transformer_zh-cn-common-vocab272727-onnx
+    The model dir in Docker is /workspace/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
 ```
 
 ##### 输入宿主机中FunASR服务可执行程序路径
@@ -72,40 +77,32 @@ curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR-APP/main/T
 输入FunASR服务可执行程序的宿主机路径，Docker运行时将自动挂载到Docker中运行。默认不输入的情况下将指定Docker中默认的/workspace/FunASR/funasr/runtime/websocket/build/bin/funasr-wss-server。
 
 ```text
-[3/10]
+[3/9]
   Please enter the path to the excutor of the FunASR service on the localhost.
   If not set, the default /workspace/FunASR/funasr/runtime/websocket/build/bin/funasr-wss-server in Docker is used.
-  Setting the path to the excutor of the FunASR service on the localhost:
+  Setting the path to the excutor of the FunASR service on the localhost: 
   Corresponding, the path of FunASR in Docker is /workspace/FunASR/funasr/runtime/websocket/build/bin/funasr-wss-server
 ```
 
 ##### 设置宿主机提供给FunASR的端口
 设置提供给Docker的宿主机端口，默认为10095。请保证此端口可用。
 ```text
-[4/10]
+[4/9]
   Please input the opened port in the host used for FunASR server.
   Default: 10095
-  Setting the opened host port [1-65535]:
+  Setting the opened host port [1-65535]: 
   The port of the host is 10095
-```
-
-##### 设置Docker中提供给FunASR的端口
-设置Docker中FunASR服务使用的端口，默认为10095，此端口将于step1.4中设置的宿主机端口进行映射。
-```text
-5/10]
-  Please input port for docker mapped.
-  Default: 10095, the opened port of current host is 10095
-  Setting the port in Docker for FunASR server [1-65535]:
   The port in Docker for FunASR server is 10095
 ```
+
 
 ##### 设置FunASR服务的推理线程数
 设置FunASR服务的推理线程数，默认为宿主机核数，同时自动设置服务的IO线程数，为推理线程数的四分之一。
 ```text
-[6/10]
+[5/9]
   Please input thread number for FunASR decoder.
   Default: 1
-  Setting the number of decoder thread:
+  Setting the number of decoder thread: 
 
   The number of decoder threads is 1
   The number of IO threads is 1
@@ -116,17 +113,19 @@ curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR-APP/main/T
 展示前面6步设置的参数，确认则将所有参数存储到/var/funasr/config，并开始启动Docker，否则提示用户进行重新设置。
 
 ```text
-[7/10]
+
+[6/9]
   Show parameters of FunASR server setting and confirm to run ...
 
   The current Docker image is                                    : registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-latest
+  The model is downloaded or stored to this directory in local   : /root/models
   The model will be automatically downloaded to the directory    : /workspace/models
   The ASR model_id used                                          : damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx
-  The ASR model directory corresponds to the directory in Docker : /workspace/models/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx
+  The ASR model directory corresponds to the directory in Docker : /workspace/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx
   The VAD model_id used                                          : damo/speech_fsmn_vad_zh-cn-16k-common-onnx
-  The VAD model directory corresponds to the directory in Docker : /workspace/models/speech_fsmn_vad_zh-cn-16k-common-onnx
+  The VAD model directory corresponds to the directory in Docker : /workspace/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx
   The PUNC model_id used                                         : damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
-  The PUNC model directory corresponds to the directory in Docker: /workspace/models/punc_ct-transformer_zh-cn-common-vocab272727-onnx
+  The PUNC model directory corresponds to the directory in Docker: /workspace/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
 
   The path in the docker of the FunASR service executor          : /workspace/FunASR/funasr/runtime/websocket/build/bin/funasr-wss-server
   Set the host port used for use by the FunASR service           : 10095
@@ -134,10 +133,10 @@ curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR-APP/main/T
   Set the number of threads used for decoding the FunASR service : 1
   Set the number of threads used for IO the FunASR service       : 1
 
-  Please input [y/n] to confirm the parameters.
+  Please input [Y/n] to confirm the parameters.
   [y] Verify that these parameters are correct and that the service will run.
   [n] The parameters set are incorrect, it will be rolled out, please rerun.
-  read confirmation[y/n]: 
+  read confirmation[Y/n]: 
 
   Will run FunASR server later ...
   Parameters are stored in the file /var/funasr/config
@@ -148,7 +147,7 @@ curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR-APP/main/T
 检查当前宿主机是否安装了Docker服务，若未安装，则安装Docker并启动。
 
 ```text
-[8/10]
+[7/9]
   Start install docker for ubuntu 
   Get docker installer: curl -fsSL https://test.docker.com -o test-docker.sh
   Get docker run: sudo sh test-docker.sh
@@ -176,7 +175,7 @@ Client: Docker Engine - Community
 下载并更新step1.1中选择的FunASR Docker镜像。
 
 ```text
-[9/10]
+[8/9]
   Pull docker image(registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-latest)...
 funasr-runtime-cpu-0.0.1: Pulling from funasr_repo/funasr
 7608715873ec: Pull complete 
@@ -191,7 +190,7 @@ funasr-runtime-cpu-0.0.1: Pulling from funasr_repo/funasr
 启动FunASR Docker，等待step1.2选择的模型下载完成并启动FunASR服务。
 
 ```text
-[10/10]
+[9/9]
   Construct command and run docker ...
 943d8f02b4e5011b71953a0f6c1c1b9bc5aff63e5a96e7406c83e80943b23474
 
@@ -231,7 +230,7 @@ sudo bash funasr-runtime-deploy.sh restart
 sudo bash scripts/funasr-runtime-deploy.sh update model <model ID in ModelScope>
 
 e.g
-sudo bash scripts/funasr-runtime-deploy.sh update model damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx
+sudo bash scripts/funasr-runtime-deploy.sh update model damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
 ```
 
 ### 测试与使用离线文件转写服务
