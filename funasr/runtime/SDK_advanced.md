@@ -38,7 +38,7 @@ sudo docker run -p 10095:10095 -it --privileged=true -v /root:/workspace/models 
 
 
 ## 服务端启动
-镜像启动之后，启动 funasr-wss-server服务程序：
+docker启动之后，启动 funasr-wss-server服务程序：
 
 funasr-wss-server支持从Modelscope下载模型，需要设置同时设置模型下载地址（--download-model-dir）及model ID（--model-dir、--vad-dir、--punc-dir）,示例如下：
 ```shell
