@@ -43,7 +43,6 @@ docker启动之后，启动 funasr-wss-server服务程序：
 funasr-wss-server支持从Modelscope下载模型，需要设置同时设置模型下载地址（--download-model-dir）及model ID（--model-dir、--vad-dir、--punc-dir）,示例如下：
 ```shell
 cd /workspace/FunASR/funasr/runtime/websocket/build/bin
-
 ./funasr-wss-server  \
   --download-model-dir /workspace/models \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx \
@@ -63,13 +62,13 @@ cd /workspace/FunASR/funasr/runtime/websocket/build/bin
 --vad-quant  # True为量化VAD模型，False为非量化VAD模型，默认是True
 --punc-dir # modelscope model ID
 --punc-quant  # True为量化PUNC模型，False为非量化PUNC模型，默认是True
---port # 服务端监听的端口号，默认为 8889
+--port # 服务端监听的端口号，默认为 10095
 --decoder-thread-num # 服务端启动的推理线程数，默认为 8
 --io-thread-num # 服务端启动的IO线程数，默认为 1
 --certfile <string> # ssl的证书文件，默认为：../../../ssl_key/server.crt
 --keyfile <string> # ssl的密钥文件，默认为：../../../ssl_key/server.key
 ```
-funasr-wss-server同时也支持从本地路径加载模型（本地模型资源准备详见[模型资源准备](#anchor-1)），需要设置设置模型本地路径（--download-model-dir）示例如下：
+funasr-wss-server同时也支持从本地路径加载模型（本地模型资源准备详见[模型资源准备](#anchor-1)），需要设置模型本地路径（--download-model-dir）示例如下：
 ```shell
 cd /workspace/FunASR/funasr/runtime/websocket/build/bin
 
@@ -84,13 +83,13 @@ cd /workspace/FunASR/funasr/runtime/websocket/build/bin
   --keyfile ../../../ssl_key/server.key
  ```
 ```text
---model-dir # ASR模型路径D，默认为：/workspace/models/asr
+--model-dir # ASR模型路径，默认为：/workspace/models/asr
 --quantize  # True为量化ASR模型，False为非量化ASR模型，默认是True
 --vad-dir # VAD模型路径，默认为：/workspace/models/vad
 --vad-quant  # True为量化VAD模型，False为非量化VAD模型，默认是True
 --punc-dir # PUNC模型路径，默认为：/workspace/models/punc
 --punc-quant  # True为量化PUNC模型，False为非量化PUNC模型，默认是True
---port # 服务端监听的端口号，默认为 8889
+--port # 服务端监听的端口号，默认为 10095
 --decoder-thread-num # 服务端启动的推理线程数，默认为 8
 --io-thread-num # 服务端启动的IO线程数，默认为 1
 --certfile <string> # ssl的证书文件，默认为：../../../ssl_key/server.crt
@@ -182,7 +181,7 @@ bytes数据
 FunASR-runtime的代码已开源，如果服务端和客户端不能很好的满足您的需求，您可以根据自己的需求进行进一步的开发：
 ### c++ 客户端：
 https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/websocket
-###python 客户端：
+### python 客户端：
 https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket
 ### c++ 服务端：
 #### VAD
