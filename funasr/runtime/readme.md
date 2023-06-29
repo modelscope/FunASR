@@ -1,30 +1,30 @@
 # FunASR runtime-SDK
+中文文档（[点击此处](./readme_cn.md)）
 
-FunASR是由达摩院语音实验室开源的一款语音识别基础框架，集成了语音端点检测、语音识别、标点断句等领域的工业级别模型，吸引了众多开发者参与体验和开发。为了解决工业落地的最后一公里，将模型集成到业务中去，我们开发了FunASR runtime-SDK。
-SDK 支持以下几种服务部署：
+FunASR is a speech recognition framework developed by the Speech Lab of DAMO Academy, which integrates industrial-level models in the fields of speech endpoint detection, speech recognition, punctuation segmentation, and more. 
+It has attracted many developers to participate in experiencing and developing. To solve the last mile of industrial landing and integrate models into business, we have developed the FunASR runtime-SDK. The SDK supports several service deployments, including:
 
-- 中文离线文件转写服务（CPU版本），已完成
-- 中文离线文件转写服务（GPU版本），进行中
-- 英文离线转写服务，进行中
-- 流式语音识别服务，进行中
-- 。。。
-
-
-## 中文离线文件转写服务部署（CPU版本）
-
-目前FunASR runtime-SDK-0.0.1版本已支持中文语音离线文件服务部署（CPU版本），拥有完整的语音识别链路，可以将几十个小时的音频识别成带标点的文字，而且支持上百路并发同时进行识别。
-
-为了支持不同用户的需求，我们分别针对小白与高阶开发者，准备了不同的图文教程：
-
-### Runtime-SDK 技术揭秘
+- File transcription service, Mandarin, CPU version, done
+- File transcription service, Mandarin, GPU version, in progress
+- File transcription service, Mandarin, in progress
+- Streaming speech recognition service, is in progress
+- and more.
 
 
-文档介绍了背后技术原理，识别准确率，计算效率等，以及核心优势介绍：便捷、高精度、高效率、长音频链路，详细文档参考（[点击此处]()）
+## File Transcription Service, Mandarin (CPU)
 
-### Runtime-SDK 一键部署教程
+Currently, the FunASR runtime-SDK-0.0.1 version supports the deployment of file transcription service, Mandarin (CPU version), with a complete speech recognition chain that can transcribe tens of hours of audio into punctuated text, and supports recognition for more than a hundred concurrent streams. 
 
-文档主要针对小白用户，无修改定制需求，支持从modelscope中下载模型部署，也支持用户finetune后的模型部署，详细教程参考（[点击此处](./SDK_tutorial.md)）
+To meet the needs of different users, we have prepared different tutorials with text and images for both novice and advanced developers.
 
-### Runtime-SDK 高阶开发指南
+### Technical Principles
 
-文档主要针对高阶开发者，需要对服务进行修改与定制，支持从modelscope中下载模型部署，也支持用户finetune后的模型部署，详细文档参考（[点击此处]()）
+The technical principles and documentation behind FunASR explain the underlying technology, recognition accuracy, computational efficiency, and core advantages of the framework, including convenience, high precision, high efficiency, and support for long audio chains. For detailed information, please refer to the documentation available by [docs](). 
+
+### Deployment Tutorial
+
+The documentation mainly targets novice users who have no need for modifications or customization. It supports downloading model deployments from modelscope and also supports deploying models that users have fine-tuned. For detailed tutorials, please refer to [docs]().
+
+### Advanced Development Guide
+
+The documentation mainly targets advanced developers who require modifications and customization of the service. It supports downloading model deployments from modelscope and also supports deploying models that users have fine-tuned. For detailed information, please refer to the documentation available by [docs]()
