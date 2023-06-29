@@ -36,7 +36,7 @@ curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR-APP/main/T
   Please input [y/n] to confirm whether to automatically download model_id in ModelScope or use a local model.
   [y] With the model in ModelScope, the model will be automatically downloaded to Docker(/workspace/models).
   [n] Use the models on the localhost, the directory where the model is located will be mapped to Docker.
-  Setting confirmation[y/n]: 
+  Setting confirmation[Y/n]: 
   You have chosen to use the model in ModelScope, please set the model ID in the next steps, and the model will be automatically downloaded during the run.
 
   [2.1/10]
