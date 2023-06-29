@@ -203,27 +203,31 @@ make
 <div class="section" id="run-the-websocket-server">
 <h2>Run the websocket server<a class="headerlink" href="#run-the-websocket-server" title="Permalink to this headline"></a></h2>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> bin
-./funasr-wss-server  <span class="o">[</span>--model-thread-num &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--decoder-thread-num &lt;int&gt;<span class="o">]</span>
+./funasr-wss-server <span class="o">[</span>--download-model-dir &lt;string&gt;<span class="o">]</span>
+                    <span class="o">[</span>--model-thread-num &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--decoder-thread-num &lt;int&gt;<span class="o">]</span>
                     <span class="o">[</span>--io-thread-num &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--port &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--listen_ip
                     &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-quant &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-dir &lt;string&gt;<span class="o">]</span>
                     <span class="o">[</span>--vad-quant &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--vad-dir &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--quantize
                     &lt;string&gt;<span class="o">]</span> --model-dir &lt;string&gt; <span class="o">[</span>--keyfile &lt;string&gt;<span class="o">]</span>
                     <span class="o">[</span>--certfile &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--<span class="o">]</span> <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
 Where:
+   --download-model-dir &lt;string&gt;
+     Download model from Modelscope to download_model_dir
+
    --model-dir &lt;string&gt;
-     default: /workspace/models/asr, the asr model path, which contains model.onnx, config.yaml, am.mvn
+     default: /workspace/models/asr, the asr model path, which contains model_quant.onnx, config.yaml, am.mvn
    --quantize &lt;string&gt;
-     <span class="nb">true</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in model_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in model_dir
+     <span class="nb">true</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model_quant.onnx in model_dir. If <span class="nb">set</span> false, load the model of model.onnx in model_dir
 
    --vad-dir &lt;string&gt;
-     default: /workspace/models/vad, the vad model path, which contains model.onnx, vad.yaml, vad.mvn
+     default: /workspace/models/vad, the vad model path, which contains model_quant.onnx, vad.yaml, vad.mvn
    --vad-quant &lt;string&gt;
-     <span class="nb">true</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in vad_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in vad_dir
+     <span class="nb">true</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model_quant.onnx in vad_dir. If <span class="nb">set</span> false, load the model of model.onnx in vad_dir
 
    --punc-dir &lt;string&gt;
-     default: /workspace/models/punc, the punc model path, which contains model.onnx, punc.yaml
+     default: /workspace/models/punc, the punc model path, which contains model_quant.onnx, punc.yaml
    --punc-quant &lt;string&gt;
-     <span class="nb">true</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in punc_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in punc_dir
+     <span class="nb">true</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model_quant.onnx in punc_dir. If <span class="nb">set</span> false, load the model of model.onnx in punc_dir
 
    --decoder-thread-num &lt;int&gt;
      number of threads <span class="k">for</span> decoder, default:8
@@ -237,7 +241,19 @@ Where:
      default: ../../../ssl_key/server.key, path of keyfile <span class="k">for</span> WSS connection
   
 example:
-./funasr-wss-server --model-dir /FunASR/funasr/runtime/onnxruntime/export/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
+<span class="c1"># you can use models downloaded from modelscope or local models:</span>
+<span class="c1"># download models from modelscope</span>
+./funasr-wss-server  <span class="se">\</span>
+  --download-model-dir /workspace/models <span class="se">\</span>
+  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx <span class="se">\</span>
+  --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
+  --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
+
+<span class="c1"># load models from local paths</span>
+./funasr-wss-server  <span class="se">\</span>
+  --model-dir /workspace/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx <span class="se">\</span>
+  --vad-dir /workspace/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
+  --punc-dir /workspace/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
 </pre></div>
 </div>
 </div>
