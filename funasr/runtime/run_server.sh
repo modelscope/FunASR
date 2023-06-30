@@ -9,7 +9,7 @@ port=10095
 certfile="../../../ssl_key/server.crt"
 keyfile="../../../ssl_key/server.key"
 
-. ../../../egs/aishell/transformer/utils/parse_options.sh || exit 1;
+. ../../egs/aishell/transformer/utils/parse_options.sh || exit 1;
 
 cd /workspace/FunASR/funasr/runtime/websocket/build/bin
 ./funasr-wss-server  \
