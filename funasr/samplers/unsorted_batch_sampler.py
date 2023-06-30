@@ -2,7 +2,6 @@ import logging
 from typing import Iterator
 from typing import Tuple
 
-from typeguard import check_argument_types
 
 from funasr.fileio.read_text import read_2column_text
 from funasr.samplers.abs_sampler import AbsSampler
@@ -28,7 +27,6 @@ class UnsortedBatchSampler(AbsSampler):
         drop_last: bool = False,
         utt2category_file: str = None,
     ):
-        assert check_argument_types()
         assert batch_size > 0
         self.batch_size = batch_size
         self.key_file = key_file

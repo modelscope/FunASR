@@ -7,6 +7,7 @@ import kaldiio
 import numpy as np
 import torch.distributed as dist
 import torchaudio
+import soundfile
 
 
 def filter_wav_text(data_dir, dataset):
@@ -42,7 +43,11 @@ def filter_wav_text(data_dir, dataset):
 
 
 def wav2num_frame(wav_path, frontend_conf):
-    waveform, sampling_rate = torchaudio.load(wav_path)
+    try:
+        waveform, sampling_rate = torchaudio.load(wav_path)
+    except:
+        waveform, sampling_rate = soundfile.read(wav_path)
+        waveform = np.expand_dims(waveform, axis=0)
     n_frames = (waveform.shape[1] * 1000.0) / (sampling_rate * frontend_conf["frame_shift"] * frontend_conf["lfr_n"])
     feature_dim = frontend_conf["n_mels"] * frontend_conf["lfr_m"]
     return n_frames, feature_dim

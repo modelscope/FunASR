@@ -35,8 +35,6 @@ inference_pipeline_vad = pipeline(
     task=Tasks.voice_activity_detection,
     model=args.vad_model,
     model_revision=None,
-    output_dir=None,
-    batch_size=1,
     mode='online',
     ngpu=args.ngpu,
     ncpu=args.ncpu,
@@ -69,9 +67,9 @@ async def ws_reset(websocket):
     websocket.param_dict_asr_online = {"cache": dict()}
     websocket.param_dict_vad = {'in_cache': dict(), "is_final": True}
     websocket.param_dict_asr_online["is_final"]=True
-    audio_in=b''.join(np.zeros(int(16000),dtype=np.int16))
-    inference_pipeline_vad(audio_in=audio_in, param_dict=websocket.param_dict_vad)
-    inference_pipeline_asr_online(audio_in=audio_in, param_dict=websocket.param_dict_asr_online)
+    # audio_in=b''.join(np.zeros(int(16000),dtype=np.int16))
+    # inference_pipeline_vad(audio_in=audio_in, param_dict=websocket.param_dict_vad)
+    # inference_pipeline_asr_online(audio_in=audio_in, param_dict=websocket.param_dict_asr_online)
     await websocket.close()
     
     

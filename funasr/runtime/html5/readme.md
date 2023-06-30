@@ -41,7 +41,7 @@ python h5Server.py --host 0.0.0.0 --port 1337
 `Tips:` asr service and html5 service should be deployed on the same device.
 ```shell
 cd ../python/websocket
-python wss_srv_asr.py --port 1095
+python wss_srv_asr.py --port 10095
 ```
 
 
@@ -51,8 +51,18 @@ https://127.0.0.1:1337/static/index.html
 # https://30.220.136.139:1337/static/index.html
 ```
 
-### modify asr address in html according to your environment
-asr address in index.html must be wss
+### open browser to open html5 file directly without h5Server
+you can run html5 client by just clicking the index.html file directly in your computer.
+1) lauch asr service without ssl, it must be in ws mode as ssl protocol will prohibit such access.
+2) copy whole directory /funasr/runtime/html5/static to your computer
+3) open /funasr/runtime/html5/static/index.html by browser
+4) enter asr service ws address and connect
+
+
+```shell
+
+```
+ 
 
 
 ## Acknowledge

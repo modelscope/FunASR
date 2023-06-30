@@ -14,21 +14,46 @@
 		 
 
         <h1>FunASR Demo</h1>
+						<h3>这里是FunASR开源项目体验demo，集成了VAD、ASR与标点等工业级别的模型，支持长音频离线文件转写，实时语音识别等，开源项目地址：https://github.com/alibaba-damo-academy/FunASR</h3>
+
 		<div class="div_class_topArea">
 
 			<div class="div_class_recordControl">
 				asr服务器地址(必填):
 				<br>
-				<input id="wssip" type="text" style=" width: 100%;height:100%" value="wss://127.0.0.1:1095/"/>
+				<input id="wssip" type="text" onchange="addresschange()" style=" width: 100%;height:100%" value="wss://127.0.0.1:10095/"/>
 				<br>
+				<a id="wsslink"  href="#" onclick="window.open('https://127.0.0.1:10095/', '_blank')"><div id="info_wslink">点此处手工授权wss://127.0.0.1:10095/</div></a>
 				<br>
-				<div style="border:2px solid #ccc;">
+			<br>  
+			<div  style="border:2px solid #ccc;">
+				选择录音模式:<br/>
+    
+        <label><input name="recoder_mode" onclick="on_recoder_mode_change()" type="radio" value="mic" checked="true"/>麦克风 </label>&nbsp;&nbsp;
+        <label><input name="recoder_mode" onclick="on_recoder_mode_change()" type="radio" value="file" />文件 </label> 
+
+				</div>
+				
+				<br>
+				 <div id="mic_mode_div" style="border:2px solid #ccc;display:block;">
 				选择asr模型模式:<br/>
+    
       <label><input name="asr_mode" type="radio" value="2pass" checked="true"/>2pass </label>&nbsp;&nbsp;
       <label><input name="asr_mode" type="radio" value="online" />online </label>&nbsp;&nbsp;
-      <label><input name="asr_mode" type="radio" value="offline" />offline </label> 
+      <label><input name="asr_mode" type="radio" value="offline" />offline </label>
+
+				</div>
+				
+				<div id="rec_mode_div" style="border:2px solid #ccc;display:none;">
+		 
+    
+		          <input type="file" id="upfile">
+
 				</div>
 				<br>
+		
+				
+			 
 				语音识别结果显示：
 				<br>
 				
@@ -36,6 +61,7 @@
 				<br>
                 <div id="info_div">请点击开始</div>
 				<div class="div_class_buttons">
+					<button id="btnConnect">连接</button>
 					<button id="btnStart">开始</button>
 					<button id="btnStop">停止</button>
  

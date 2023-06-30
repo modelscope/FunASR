@@ -4,7 +4,6 @@ from typing import Dict
 from typing import Tuple
 from typing import Union
 
-from typeguard import check_argument_types
 
 from funasr.fileio.read_text import load_num_sequence_text
 from funasr.samplers.abs_sampler import AbsSampler
@@ -21,7 +20,6 @@ class LengthBatchSampler(AbsSampler):
         drop_last: bool = False,
         padding: bool = True,
     ):
-        assert check_argument_types()
         assert batch_bins > 0
         if sort_batch != "ascending" and sort_batch != "descending":
             raise ValueError(

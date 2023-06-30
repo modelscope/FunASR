@@ -5,7 +5,6 @@ from typing import Union
 
 import torch
 from torch_complex.tensor import ComplexTensor
-from typeguard import check_argument_types
 
 from funasr.modules.nets_utils import make_pad_mask
 from funasr.layers.complex_utils import is_complex
@@ -30,7 +29,6 @@ class Stft(torch.nn.Module, InversibleInterface):
         normalized: bool = False,
         onesided: bool = True,
     ):
-        assert check_argument_types()
         super().__init__()
         self.n_fft = n_fft
         if win_length is None:

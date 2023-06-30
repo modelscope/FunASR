@@ -9,7 +9,6 @@ import logging
 
 from distutils.version import LooseVersion
 from functools import partial
-from typeguard import check_argument_types
 from typing import Optional
 
 import librosa
@@ -138,7 +137,6 @@ class Spectrogram2Waveform(object):
             griffin_lim_iters: The number of iterations.
 
         """
-        assert check_argument_types()
         self.fs = fs
         self.logmel2linear = (
             partial(

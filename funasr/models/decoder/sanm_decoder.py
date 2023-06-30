@@ -7,7 +7,6 @@ import numpy as np
 
 from funasr.modules.streaming_utils import utils as myutils
 from funasr.models.decoder.transformer_decoder import BaseTransformerDecoder
-from typeguard import check_argument_types
 
 from funasr.modules.attention import MultiHeadedAttentionSANMDecoder, MultiHeadedAttentionCrossAtt
 from funasr.modules.embedding import PositionalEncoding
@@ -181,7 +180,6 @@ class FsmnDecoderSCAMAOpt(BaseTransformerDecoder):
             tf2torch_tensor_name_prefix_tf: str = "seq2seq/decoder",
             embed_tensor_name_prefix_tf: str = None,
     ):
-        assert check_argument_types()
         super().__init__(
             vocab_size=vocab_size,
             encoder_output_size=encoder_output_size,
@@ -838,7 +836,6 @@ class ParaformerSANMDecoder(BaseTransformerDecoder):
         tf2torch_tensor_name_prefix_torch: str = "decoder",
         tf2torch_tensor_name_prefix_tf: str = "seq2seq/decoder",
     ):
-        assert check_argument_types()
         super().__init__(
             vocab_size=vocab_size,
             encoder_output_size=encoder_output_size,

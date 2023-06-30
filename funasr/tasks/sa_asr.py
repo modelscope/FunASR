@@ -13,8 +13,6 @@ from typing import Union
 import numpy as np
 import torch
 import yaml
-from typeguard import check_argument_types
-from typeguard import check_return_type
 
 from funasr.datasets.collate_fn import CommonCollateFn
 from funasr.datasets.preprocessor import CommonPreprocessor
@@ -39,7 +37,7 @@ from funasr.models.decoder.transformer_decoder import (
 from funasr.models.decoder.transformer_decoder import ParaformerDecoderSAN
 from funasr.models.decoder.transformer_decoder import TransformerDecoder
 from funasr.models.decoder.contextual_decoder import ContextualParaformerDecoder
-from funasr.models.e2e_sa_asr import ESPnetASRModel
+from funasr.models.e2e_sa_asr import SAASRModel
 from funasr.models.e2e_asr_paraformer import Paraformer, ParaformerBert, BiCifParaformer, ContextualParaformer
 from funasr.models.e2e_tp import TimestampPredictor
 from funasr.models.e2e_asr_mfcca import MFCCA
@@ -120,7 +118,7 @@ normalize_choices = ClassChoices(
 model_choices = ClassChoices(
     "model",
     classes=dict(
-        asr=ESPnetASRModel,
+        asr=SAASRModel,
         uniasr=UniASR,
         paraformer=Paraformer,
         paraformer_bert=ParaformerBert,
@@ -445,7 +443,6 @@ class ASRTask(AbsTask):
         [Collection[Tuple[str, Dict[str, np.ndarray]]]],
         Tuple[List[str], Dict[str, torch.Tensor]],
     ]:
-        assert check_argument_types()
         # NOTE(kamo): int value = 0 is reserved by CTC-blank symbol
         return CommonCollateFn(float_pad_value=0.0, int_pad_value=-1)
 
@@ -453,7 +450,6 @@ class ASRTask(AbsTask):
     def build_preprocess_fn(
             cls, args: argparse.Namespace, train: bool
     ) -> Optional[Callable[[str, Dict[str, np.array]], Dict[str, np.ndarray]]]:
-        assert check_argument_types()
         if args.use_preprocessor:
             retval = CommonPreprocessor(
                 train=train,
@@ -483,7 +479,6 @@ class ASRTask(AbsTask):
             )
         else:
             retval = None
-        assert check_return_type(retval)
         return retval
 
     @classmethod
@@ -502,12 +497,10 @@ class ASRTask(AbsTask):
             cls, train: bool = True, inference: bool = False
     ) -> Tuple[str, ...]:
         retval = ()
-        assert check_return_type(retval)
         return retval
 
     @classmethod
     def build_model(cls, args: argparse.Namespace):
-        assert check_argument_types()
         if isinstance(args.token_list, str):
             with open(args.token_list, encoding="utf-8") as f:
                 token_list = [line.rstrip() for line in f]
@@ -619,5 +612,4 @@ class ASRTask(AbsTask):
         if args.init is not None:
             initialize(model, args.init)
 
-        assert check_return_type(model)
         return model

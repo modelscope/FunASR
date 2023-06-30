@@ -18,6 +18,7 @@ void CTTransformer::InitPunc(const std::string &punc_model, const std::string &p
 
     try{
         m_session = std::make_unique<Ort::Session>(env_, punc_model.c_str(), session_options);
+        LOG(INFO) << "Successfully load model from " << punc_model;
     }
     catch (std::exception const &e) {
         LOG(ERROR) << "Error when load punc onnx model: " << e.what();

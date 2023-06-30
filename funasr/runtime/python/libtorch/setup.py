@@ -25,10 +25,13 @@ setuptools.setup(
     long_description=get_readme(),
     long_description_content_type='text/markdown',
     include_package_data=True,
-    install_requires=["librosa", "onnxruntime>=1.7.0",
-                      "scipy", "numpy>=1.19.3",
-                      "typeguard", "kaldi-native-fbank",
-                      "PyYAML>=5.1.2", "torch-quant >= 0.4.0"],
+    install_requires=["librosa",
+                      "onnxruntime>=1.7.0",
+                      "scipy",
+                      "numpy>=1.19.3",
+                      "kaldi-native-fbank",
+                      "PyYAML>=5.1.2",
+                      "torch-quant >= 0.4.0"],
     packages=find_packages(include=["torch_paraformer*"]),
     keywords=[
         'funasr, paraformer, funasr_torch'

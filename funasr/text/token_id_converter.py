@@ -5,7 +5,6 @@ from typing import List
 from typing import Union
 
 import numpy as np
-from typeguard import check_argument_types
 
 
 class TokenIDConverter:
@@ -14,7 +13,6 @@ class TokenIDConverter:
         token_list: Union[Path, str, Iterable[str]],
         unk_symbol: str = "<unk>",
     ):
-        assert check_argument_types()
 
         if isinstance(token_list, (Path, str)):
             token_list = Path(token_list)

@@ -13,7 +13,7 @@ def get_readme():
 
 
 MODULE_NAME = 'funasr_onnx'
-VERSION_NUM = '0.1.0'
+VERSION_NUM = '0.1.1'
 
 setuptools.setup(
     name=MODULE_NAME,
@@ -31,7 +31,6 @@ setuptools.setup(
                       "onnxruntime>=1.7.0",
                       "scipy",
                       "numpy>=1.19.3",
-                      "typeguard",
                       "kaldi-native-fbank",
                       "PyYAML>=5.1.2",
                       "funasr",

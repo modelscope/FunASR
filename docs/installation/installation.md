@@ -32,7 +32,7 @@ Ref to [docs](https://docs.conda.io/en/latest/miniconda.html#windows-installers)
 ### Install Pytorch (version >= 1.11.0):
 
 ```sh
-pip install torch torchaudio
+pip3 install torch torchaudio
 ```
 If there exists CUDAs in your environments, you should install the pytorch with the version matching the CUDA. The matching list could be found in [docs](https://pytorch.org/get-started/previous-versions/).
 ### Install funasr
@@ -40,27 +40,27 @@ If there exists CUDAs in your environments, you should install the pytorch with 
 #### Install from pip
 
 ```shell
-pip install -U funasr
+pip3 install -U funasr
 # For the users in China, you could install with the command:
-# pip install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple
+# pip3 install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
 
 #### Or install from source code
 
 ``` sh
 git clone https://github.com/alibaba/FunASR.git && cd FunASR
-pip install -e ./
+pip3 install -e ./
 # For the users in China, you could install with the command:
-# pip install -e ./ -i https://mirror.sjtu.edu.cn/pypi/web/simple
+# pip3 install -e ./ -i https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
 
 ### Install modelscope (Optional)
 If you want to use the pretrained models in ModelScope, you should install the modelscope:
 
 ```shell
-pip install -U modelscope
+pip3 install -U modelscope
 # For the users in China, you could install with the command:
-# pip install -U modelscope -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html -i https://mirror.sjtu.edu.cn/pypi/web/simple
+# pip3 install -U modelscope -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html -i https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
 
 ### FQA

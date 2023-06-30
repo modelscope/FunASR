@@ -77,11 +77,12 @@ Overview
 
 .. toctree::
    :maxdepth: 1
-   :caption: Benchmark and Leadboard
+   :caption: Benchmark and Leaderboard
 
    ./benchmark/benchmark_onnx.md
    ./benchmark/benchmark_onnx_cpp.md
    ./benchmark/benchmark_libtorch.md
+   ./benchmark/benchmark_pipeline_cer.md
 
 
 .. toctree::

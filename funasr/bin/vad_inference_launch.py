@@ -1,58 +1,33 @@
-# -*- encoding: utf-8 -*-
 #!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
 # Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
 #  MIT License  (https://opensource.org/licenses/MIT)
 
 
 import torch
+
 torch.set_num_threads(1)
 
 import argparse
 import logging
 import os
 import sys
-from typing import Union, Dict, Any
-
-from funasr.utils import config_argparse
-from funasr.utils.cli_utils import get_commandline_args
-from funasr.utils.types import str2bool
-from funasr.utils.types import str2triple_str
-from funasr.utils.types import str_or_none
-
-import argparse
-import logging
-import os
-import sys
 import json
-from pathlib import Path
-from typing import Any
-from typing import List
 from typing import Optional
-from typing import Sequence
-from typing import Tuple
 from typing import Union
-from typing import Dict
 
-import math
 import numpy as np
 import torch
-from typeguard import check_argument_types
-from typeguard import check_return_type
-
+from funasr.build_utils.build_streaming_iterator import build_streaming_iterator
 from funasr.fileio.datadir_writer import DatadirWriter
-from funasr.modules.scorers.scorer_interface import BatchScorerInterface
-from funasr.modules.subsampling import TooShortUttError
-from funasr.tasks.vad import VADTask
-from funasr.torch_utils.device_funcs import to_device
 from funasr.torch_utils.set_all_random_seed import set_all_random_seed
 from funasr.utils import config_argparse
 from funasr.utils.cli_utils import get_commandline_args
 from funasr.utils.types import str2bool
 from funasr.utils.types import str2triple_str
 from funasr.utils.types import str_or_none
-from funasr.utils import asr_utils, wav_utils, postprocess_utils
-from funasr.models.frontend.wav_frontend import WavFrontend, WavFrontendOnline
 from funasr.bin.vad_infer import Speech2VadSegment, Speech2VadSegmentOnline
+
 
 def inference_vad(
         batch_size: int,
@@ -71,10 +46,8 @@ def inference_vad(
         num_workers: int = 1,
         **kwargs,
 ):
-    assert check_argument_types()
     if batch_size > 1:
         raise NotImplementedError("batch decoding is not implemented")
-
 
     logging.basicConfig(
         level=log_level,
@@ -112,16 +85,14 @@ def inference_vad(
             if isinstance(raw_inputs, torch.Tensor):
                 raw_inputs = raw_inputs.numpy()
             data_path_and_name_and_type = [raw_inputs, "speech", "waveform"]
-        loader = VADTask.build_streaming_iterator(
-            data_path_and_name_and_type,
+        loader = build_streaming_iterator(
+            task_name="vad",
+            preprocess_args=None,
+            data_path_and_name_and_type=data_path_and_name_and_type,
             dtype=dtype,
             batch_size=batch_size,
             key_file=key_file,
             num_workers=num_workers,
-            preprocess_fn=VADTask.build_preprocess_fn(speech2vadsegment.vad_infer_args, False),
-            collate_fn=VADTask.build_collate_fn(speech2vadsegment.vad_infer_args, False),
-            allow_variable_data_keys=allow_variable_data_keys,
-            inference=True,
         )
 
         finish_count = 0
@@ -157,6 +128,7 @@ def inference_vad(
 
     return _forward
 
+
 def inference_vad_online(
         batch_size: int,
         ngpu: int,
@@ -174,8 +146,6 @@ def inference_vad_online(
         num_workers: int = 1,
         **kwargs,
 ):
-    assert check_argument_types()
-
 
     logging.basicConfig(
         level=log_level,
@@ -214,16 +184,14 @@ def inference_vad_online(
             if isinstance(raw_inputs, torch.Tensor):
                 raw_inputs = raw_inputs.numpy()
             data_path_and_name_and_type = [raw_inputs, "speech", "waveform"]
-        loader = VADTask.build_streaming_iterator(
-            data_path_and_name_and_type,
+        loader = build_streaming_iterator(
+            task_name="vad",
+            preprocess_args=None,
+            data_path_and_name_and_type=data_path_and_name_and_type,
             dtype=dtype,
             batch_size=batch_size,
             key_file=key_file,
             num_workers=num_workers,
-            preprocess_fn=VADTask.build_preprocess_fn(speech2vadsegment.vad_infer_args, False),
-            collate_fn=VADTask.build_collate_fn(speech2vadsegment.vad_infer_args, False),
-            allow_variable_data_keys=allow_variable_data_keys,
-            inference=True,
         )
 
         finish_count = 0
@@ -273,8 +241,6 @@ def inference_vad_online(
     return _forward
 
 
-
-
 def inference_launch(mode, **kwargs):
     if mode == "offline":
         return inference_vad(**kwargs)
@@ -283,6 +249,7 @@ def inference_launch(mode, **kwargs):
     else:
         logging.info("Unknown decoding mode: {}".format(mode))
         return None
+
 
 def get_parser():
     parser = config_argparse.ArgumentParser(
@@ -404,6 +371,7 @@ def main(cmd=None):
 
     inference_pipeline = inference_launch(**kwargs)
     return inference_pipeline(kwargs["data_path_and_name_and_type"])
+
 
 if __name__ == "__main__":
     main()

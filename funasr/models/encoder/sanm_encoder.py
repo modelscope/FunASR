@@ -8,7 +8,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from funasr.modules.streaming_utils.chunk_utilis import overlap_chunk
-from typeguard import check_argument_types
 import numpy as np
 from funasr.torch_utils.device_funcs import to_device
 from funasr.modules.nets_utils import make_pad_mask
@@ -151,7 +150,6 @@ class SANMEncoder(AbsEncoder):
         tf2torch_tensor_name_prefix_torch: str = "encoder",
         tf2torch_tensor_name_prefix_tf: str = "seq2seq/encoder",
     ):
-        assert check_argument_types()
         super().__init__()
         self._output_size = output_size
 
@@ -601,7 +599,6 @@ class SANMEncoderChunkOpt(AbsEncoder):
             tf2torch_tensor_name_prefix_torch: str = "encoder",
             tf2torch_tensor_name_prefix_tf: str = "seq2seq/encoder",
     ):
-        assert check_argument_types()
         super().__init__()
         self._output_size = output_size
 
@@ -1060,7 +1057,6 @@ class SANMVadEncoder(AbsEncoder):
         sanm_shfit : int = 0,
         selfattention_layer_type: str = "sanm",
     ):
-        assert check_argument_types()
         super().__init__()
         self._output_size = output_size
 

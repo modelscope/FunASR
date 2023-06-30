@@ -12,7 +12,7 @@
 [**News**](https://github.com/alibaba-damo-academy/FunASR#whats-new) 
 | [**Highlights**](#highlights)
 | [**Installation**](#installation)
-| [**Docs**](https://alibaba-damo-academy.github.io/FunASR/en/index.html)
+| [**Usage**](#usage)
 | [**Papers**](https://github.com/alibaba-damo-academy/FunASR#citations)
 | [**Runtime**](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime)
 | [**Model Zoo**](https://github.com/alibaba-damo-academy/FunASR/blob/main/docs/model_zoo/modelscope_models.md)
@@ -34,9 +34,9 @@ For the release notes, please ref to [news](https://github.com/alibaba-damo-acad
 
 Install from pip
 ```shell
-pip install -U funasr
+pip3 install -U funasr
 # For the users in China, you could install with the command:
-# pip install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple
+# pip3 install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
 
 Or install from source code
@@ -44,22 +44,71 @@ Or install from source code
 
 ``` sh
 git clone https://github.com/alibaba/FunASR.git && cd FunASR
-pip install -e ./
+pip3 install -e ./
 # For the users in China, you could install with the command:
-# pip install -e ./ -i https://mirror.sjtu.edu.cn/pypi/web/simple
+# pip3 install -e ./ -i https://mirror.sjtu.edu.cn/pypi/web/simple
 
 ```
 If you want to use the pretrained models in ModelScope, you should install the modelscope:
 
 ```shell
-pip install -U modelscope
+pip3 install -U modelscope
 # For the users in China, you could install with the command:
-# pip install -U modelscope -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html -i https://mirror.sjtu.edu.cn/pypi/web/simple
+# pip3 install -U modelscope -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html -i https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
 
 For more details, please ref to [installation](https://alibaba-damo-academy.github.io/FunASR/en/installation/installation.html)
 
+## Usage
 
+You could use FunASR by:
+
+- egs
+- egs_modelscope
+- runtime
+
+### egs
+If you want to train the model from scratch, you could use funasr directly by recipe, as the following:
+```shell
+cd egs/aishell/paraformer
+. ./run.sh --CUDA_VISIBLE_DEVICES="0,1" --gpu_num=2
+```
+More examples could be found in [docs](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_pipeline/quick_start.html)
+
+### egs_modelscope
+If you want to infer or finetune pretraining models from modelscope, you could use funasr by modelscope pipeline, as the following:
+
+```python
+from modelscope.pipelines import pipeline
+from modelscope.utils.constant import Tasks
+
+inference_pipeline = pipeline(
+    task=Tasks.auto_speech_recognition,
+    model='damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch',
+)
+
+rec_result = inference_pipeline(audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
+print(rec_result)
+# {'text': '欢迎大家来体验达摩院推出的语音识别模型'}
+```
+More examples could be found in [docs](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_pipeline/quick_start.html)
+
+### runtime
+
+An example with websocket:
+
+For the server:
+```shell
+cd funasr/runtime/python/websocket
+python wss_srv_asr.py --port 10095
+```
+
+For the client:
+```shell
+python wss_client_asr.py --host "127.0.0.1" --port 10095 --mode 2pass --chunk_size "5,10,5"
+#python wss_client_asr.py --host "127.0.0.1" --port 10095 --mode 2pass --chunk_size "8,8,4" --audio_in "./data/wav.scp" --output_dir "./results"
+```
+More examples could be found in [docs](https://alibaba-damo-academy.github.io/FunASR/en/runtime/websocket_python.html#id2)
 ## Contact
 
 If you have any questions about FunASR, please contact us by
@@ -72,8 +121,8 @@ If you have any questions about FunASR, please contact us by
 
 ## Contributors
 
-| <div align="left"><img src="docs/images/damo.png" width="180"/> | <div align="left"><img src="docs/images/nwpu.png" width="260"/> | <img src="docs/images/China_Telecom.png" width="200"/> </div>  | <img src="docs/images/RapidAI.png" width="200"/> </div> | <img src="docs/images/DeepScience.png" width="200"/> </div> | <img src="docs/images/aihealthx.png" width="200"/> </div> |
-|:---------------------------------------------------------------:|:---------------------------------------------------------------:|:--------------------------------------------------------------:|:-------------------------------------------------------:|:-----------------------------------------------------------:|:-----------------------------------------------------------:|
+| <div align="left"><img src="docs/images/damo.png" width="180"/> | <div align="left"><img src="docs/images/nwpu.png" width="260"/> | <img src="docs/images/China_Telecom.png" width="200"/> </div>  | <img src="docs/images/RapidAI.png" width="200"/> </div> | <img src="docs/images/aihealthx.png" width="200"/> </div> |
+|:---------------------------------------------------------------:|:---------------------------------------------------------------:|:--------------------------------------------------------------:|:-------------------------------------------------------:|:-----------------------------------------------------------:|
 
 ## Acknowledge
 
@@ -82,12 +131,16 @@ If you have any questions about FunASR, please contact us by
 3. We referred [Wenet](https://github.com/wenet-e2e/wenet) for building dataloader for large scale data training.
 4. We acknowledge [ChinaTelecom](https://github.com/zhuzizyf/damo-fsmn-vad-infer-httpserver) for contributing the VAD runtime. 
 5. We acknowledge [RapidAI](https://github.com/RapidAI) for contributing the Paraformer and CT_Transformer-punc runtime.
-6. We acknowledge [DeepScience](https://www.deepscience.cn) for contributing the grpc service.
 6. We acknowledge [AiHealthx](http://www.aihealthx.com/) for contributing the websocket service and html5.
 
 ## License
 This project is licensed under the [The MIT License](https://opensource.org/licenses/MIT). FunASR also contains various third-party components and some code modified from other repos under other open source licenses.
 The use of pretraining model is subject to [model licencs](./MODEL_LICENSE)
+
+
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/alibaba-damo-academy/FunASR.svg)](https://starchart.cc/alibaba-damo-academy/FunASR)
 
 ## Citations
 

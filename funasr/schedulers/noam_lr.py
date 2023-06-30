@@ -4,7 +4,6 @@ import warnings
 
 import torch
 from torch.optim.lr_scheduler import _LRScheduler
-from typeguard import check_argument_types
 
 from funasr.schedulers.abs_scheduler import AbsBatchStepScheduler
 
@@ -31,7 +30,6 @@ class NoamLR(_LRScheduler, AbsBatchStepScheduler):
         warmup_steps: Union[int, float] = 25000,
         last_epoch: int = -1,
     ):
-        assert check_argument_types()
         self.model_size = model_size
         self.warmup_steps = warmup_steps
 

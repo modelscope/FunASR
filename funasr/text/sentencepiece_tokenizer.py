@@ -4,14 +4,12 @@ from typing import List
 from typing import Union
 
 import sentencepiece as spm
-from typeguard import check_argument_types
 
 from funasr.text.abs_tokenizer import AbsTokenizer
 
 
 class SentencepiecesTokenizer(AbsTokenizer):
     def __init__(self, model: Union[Path, str]):
-        assert check_argument_types()
         self.model = str(model)
         # NOTE(kamo):
         # Don't build SentencePieceProcessor in __init__()
