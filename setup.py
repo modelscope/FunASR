@@ -11,7 +11,6 @@ from setuptools import setup
 requirements = {
     "install": [
         "setuptools>=38.5.1",
-        "typeguard>=3.0.1",
         "humanfriendly",
         "scipy>=1.4.1",
         "librosa",

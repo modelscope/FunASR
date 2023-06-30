@@ -224,13 +224,13 @@ sudo bash funasr-runtime-deploy.sh restart
 
 #### 替换模型并重启FunASR服务
 
-替换正在使用的模型，并重新启动FunASR服务。模型需为ModelScope中的ASR/VAD/PUNC模型。
+替换正在使用的模型，并重新启动FunASR服务。模型需为ModelScope中的ASR/VAD/PUNC模型，或者从ModelScope中模型finetune后的模型。
 
 ```shell
-sudo bash scripts/funasr-runtime-deploy.sh update model <model ID in ModelScope>
+sudo bash funasr-runtime-deploy.sh update model <model ID>
 
 e.g
-sudo bash scripts/funasr-runtime-deploy.sh update model damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
+sudo bash funasr-runtime-deploy.sh update model damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
 ```
 
 ### 测试与使用离线文件转写服务

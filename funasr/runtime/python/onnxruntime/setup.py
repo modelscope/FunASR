@@ -31,7 +31,6 @@ setuptools.setup(
                       "onnxruntime>=1.7.0",
                       "scipy",
                       "numpy>=1.19.3",
-                      "typeguard==2.13.3",
                       "kaldi-native-fbank",
                       "PyYAML>=5.1.2",
                       "funasr",
