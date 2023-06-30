@@ -1613,6 +1613,8 @@ def inference_launch(**kwargs):
         return inference_mfcca(**kwargs)
     elif mode == "rnnt":
         return inference_transducer(**kwargs)
+    elif mode == "bat":
+        return inference_transducer(**kwargs)
     elif mode == "sa_asr":
         return inference_sa_asr(**kwargs)
     else:
