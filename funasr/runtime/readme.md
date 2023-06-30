@@ -6,7 +6,7 @@ It has attracted many developers to participate in experiencing and developing. 
 
 - File transcription service, Mandarin, CPU version, done
 - File transcription service, Mandarin, GPU version, in progress
-- File transcription service, Mandarin, in progress
+- File transcription service, English, in progress
 - Streaming speech recognition service, is in progress
 - and more.
 
