@@ -28,4 +28,4 @@ SDK 支持以下几种服务部署：
 
 ### 高阶开发指南
 
-文档主要针对高阶开发者，需要对服务进行修改与定制，支持从modelscope中下载模型部署，也支持用户finetune后的模型部署，详细文档参考（[点击此处](./docs/SDK_advanced_guide_cn.md)）
+文档主要针对高阶开发者，需要对服务进行修改与定制，支持从modelscope中下载模型部署，也支持用户finetune后的模型部署，详细文档参考（[点击此处](./docs/SDK_advanced_guide_offline_cn.md)）
