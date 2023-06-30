@@ -7,8 +7,9 @@ FunASR提供可便捷本地或者云端服务器部署的离线文件转写服�
 服务器配置与申请（免费试用1～3个月）（[点击此处](./aliyun_server_tutorial.md)）
 ### 获得脚本工具并一键部署
 
-通过以下命令运行一键部署服务，按照提示逐步完成FunASR runtime-SDK服务的部署和运行。目前暂时仅支持Linux环境，其他环境参考文档[高阶开发指南](./SDK_advanced_guide_cn.md)。
-受限于网络，funasr-runtime-deploy.sh一键部署工具的下载可能不顺利，遇到数秒还未下载进入一键部署工具的情况，请Ctrl + C 终止后再次运行以下命令。
+通过以下命令运行一键部署服务，按照提示逐步完成FunASR runtime-SDK服务的部署和运行。目前暂时仅支持Linux环境，其他环境参考文档[高阶开发指南](./SDK_advanced_guide_cn.md)
+
+[//]: # (受限于网络，funasr-runtime-deploy.sh一键部署工具的下载可能不顺利，遇到数秒还未下载进入一键部署工具的情况，请Ctrl + C 终止后再次运行以下命令。)
 
 ```shell
 curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/funasr/runtime/funasr-runtime-deploy.sh; sudo bash funasr-runtime-deploy.sh install
