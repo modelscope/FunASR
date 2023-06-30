@@ -6,7 +6,6 @@ from typing import Dict, List, Optional, Tuple, Union
 
 import torch
 from packaging.version import parse as V
-from typeguard import check_argument_types
 from funasr.losses.label_smoothing_loss import (
     LabelSmoothingLoss,  # noqa: H301
 )
@@ -93,8 +92,6 @@ class BATModel(FunASRModel):
     ) -> None:
         """Construct an BATModel object."""
         super().__init__()
-
-        assert check_argument_types()
 
         # The following labels ID are reserved: 0 (blank) and vocab_size - 1 (sos/eos)
         self.blank_id = 0
