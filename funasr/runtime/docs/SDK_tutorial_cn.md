@@ -11,7 +11,10 @@ FunASR提供可便捷本地或者云端服务器部署的离线文件转写服�
 受限于网络，funasr-runtime-deploy.sh一键部署工具的下载可能不顺利，遇到数秒还未下载进入一键部署工具的情况，请Ctrl + C 终止后再次运行以下命令。
 
 ```shell
-curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR-APP/main/TransAudio/funasr-runtime-deploy.sh; sudo bash funasr-runtime-deploy.sh install
+curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/funasr/runtime/funasr-runtime-deploy.sh; sudo bash funasr-runtime-deploy.sh install
+# 由于网络问题，中国大陆用户，可以用个下面的命令：
+# curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy.sh; sudo bash funasr-runtime-deploy.sh install
+
 ```
 
 #### 启动过程配置详解

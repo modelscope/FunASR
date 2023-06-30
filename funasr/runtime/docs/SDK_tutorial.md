@@ -12,6 +12,8 @@ Run the following command to perform a one-click deployment of the FunASR runtim
 
 ```shell
 curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR-APP/main/TransAudio/funasr-runtime-deploy.sh; sudo bash funasr-runtime-deploy.sh install
+# For the users in China, you could install with the command:
+# curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy.sh; sudo bash funasr-runtime-deploy.sh install
 ```
 
 #### Details of Configuration
