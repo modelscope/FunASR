@@ -52,6 +52,15 @@ Introduction to command parameters:
 
 ## Starting the server
 
+Use the flollowing script to start the server ：
+```shell
+./run_server.sh --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
+  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
+  --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
+```
+
+More details about the script run_server.sh:
+
 The FunASR-wss-server supports downloading models from Modelscope. You can set the model download address (--download-model-dir, default is /workspace/models) and the model ID (--model-dir, --vad-dir, --punc-dir). Here is an example:
 
 ```shell
