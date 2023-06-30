@@ -36,7 +36,7 @@ curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/funas
 
 我们以Python语言客户端为例，进行说明，其他版本客户端请参考[开发指南]()
 
-#### python-client
+### python-client
 若想直接运行client进行测试，可参考如下简易说明，以python版本为例：
 
 ```shell
