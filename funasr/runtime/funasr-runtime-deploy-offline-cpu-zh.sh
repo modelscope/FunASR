@@ -391,7 +391,6 @@ setupLocalWorkspaceDir(){
         read PARAMS_FUNASR_LOCAL_WORKSPACE
         if [ -z "$PARAMS_FUNASR_LOCAL_WORKSPACE" ]; then
             if [ -z "$params_local_workspace" ]; then
-
                 continue
             else
                 PARAMS_FUNASR_LOCAL_WORKSPACE=$params_local_workspace
@@ -401,6 +400,7 @@ setupLocalWorkspaceDir(){
         if [ ! -d "$PARAMS_FUNASR_LOCAL_WORKSPACE" ]; then
             echo -e "    ${RED}The local workspace(${PARAMS_FUNASR_LOCAL_WORKSPACE}) set does not exist, please setup again.${PLAIN}"
         else
+            PARAMS_FUNASR_LOCAL_MODELS_DIR="${PARAMS_FUNASR_LOCAL_WORKSPACE}/models"
             echo -e "  The local workspace path is ${GREEN}${PARAMS_FUNASR_LOCAL_WORKSPACE}${PLAIN} ."
             echo -e "  The models will store in local path(${GREEN}${PARAMS_FUNASR_LOCAL_MODELS_DIR}${PLAIN}) during the run."
 
@@ -1130,6 +1130,27 @@ displayHelp(){
     echo -e "   Modify Date: ${scriptDate}"
 }
 
+parseInput(){
+    local menu
+    menu=($(echo "$@"))
+    len=${#menu[@]}
+
+    stage=""
+    if [ $len -ge 2 ]; then
+        for val in ${menu[@]}
+        do
+            result=$(echo $val | grep "\-\-")
+            if [ "$result" != "" ]; then
+                stage=$result
+            else
+                if [ "$stage" = "--workspace" ]; then
+                    DEFAULT_FUNASR_LOCAL_WORKSPACE=$val
+                fi
+            fi
+        done
+    fi
+}
+
 # OS
 OSID=$(grep ^ID= /etc/os-release | cut -d= -f2)
 OSVER=$(lsb_release -cs)
@@ -1215,6 +1236,7 @@ echo
 case "$1" in
     install|-i|--install)
         rootNess
+        parseInput $@
         paramsConfigure
         result=$?
         result=`expr ${result} + 0`

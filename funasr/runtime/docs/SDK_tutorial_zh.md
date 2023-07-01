@@ -20,7 +20,7 @@ FunASR提供可便捷本地或者云端服务器部署的离线文件转写服�
 通过以下命令运行一键部署服务，按照提示逐步完成FunASR runtime-SDK服务的部署和运行。目前暂时仅支持Linux环境，其他环境参考文档[高阶开发指南](./SDK_advanced_guide_cn.md)
 
 ```shell
-curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/funasr/runtime/funasr-runtime-deploy-offline-cpu-zh.sh; sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install
+curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/dev_deploy/funasr/runtime/funasr-runtime-deploy-offline-cpu-zh.sh; sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install
 # 如遇到网络问题，中国大陆用户，可以用个下面的命令：
 # curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy-offline-cpu-zh.sh; sudo bash funasr-runtime-deploy-offline-cpu-zh install
 ```
