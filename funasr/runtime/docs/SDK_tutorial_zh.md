@@ -92,20 +92,20 @@ python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode offline --audio
 一键部署后若出现重启电脑等关闭Docker的动作，可通过如下命令直接启动FunASR服务，启动配置为上次一键部署的设置。
 
 ```shell
-sudo bash funasr-runtime-deploy.sh start
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh start
 ```
 
 ### 关闭FunASR服务
 
 ```shell
-sudo bash funasr-runtime-deploy.sh stop
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh stop
 ```
 
 ### 重启FunASR服务
 
 根据上次一键部署的设置重启启动FunASR服务。
 ```shell
-sudo bash funasr-runtime-deploy.sh restart
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh restart
 ```
 
 ### 替换模型并重启FunASR服务
@@ -113,49 +113,59 @@ sudo bash funasr-runtime-deploy.sh restart
 替换正在使用的模型，并重新启动FunASR服务。模型需为ModelScope中的ASR/VAD/PUNC模型，或者从ModelScope中模型finetune后的模型。
 
 ```shell
-sudo bash funasr-runtime-deploy.sh update model <model ID>
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update [asr_model | vad_model | punc_model] <model_id or local model path>
 
 e.g
-sudo bash funasr-runtime-deploy.sh update model damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update asr_model damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
+```
+
+### 更新参数并重启FunASR服务
+
+更新已配置参数，并重新启动FunASR服务生效。可更新参数包括宿主机和Docker的端口号，以及推理和IO的线程数量。
+
+```shell
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update [host_port | docker_port] <port number>
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update [decode_thread_num | io_thread_num] <the number of threads>
+
+e.g
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update decode_thread_num 32
 ```
 
 
 ## 服务端启动过程配置详解
 
-##### 选择FunASR Docker镜像
-推荐选择latest使用我们的最新镜像，也可选择历史版本。
+##### 设置宿主机的工作空间路径
+默认将在操作目录下创建funasr-runtime-sdk作为工作空间路径
 ```text
-[1/9]
+[1/6]
+  Please enter the local path of workspace.
+  Setting the local path of workspace, default(/root/funasr-runtime-sdk): 
+  The local workspace path is /root/funasr-runtime-sdk .
+  The models will store in local path(/root/funasr-runtime-sdk/models) during the run.
+```
+
+##### 选择FunASR Docker镜像
+推荐选择1)使用我们的最新发布版镜像，也可选择历史版本。
+```text
+[2/6]
+  Getting the list of docker images, please wait a few seconds.
+    [DONE]
+
   Please choose the Docker image.
-    1) registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-latest
-    2) registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.1.0
-  Enter your choice: 1
-  You have chosen the Docker image: registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-latest
+    1) registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.1.0
+  Enter your choice, default(1): 
+  You have chosen the Docker image: registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.1.0
 ```
 
 
 ##### 设置宿主机提供给FunASR的端口
 设置提供给Docker的宿主机端口，默认为10095。请保证此端口可用。
 ```text
-[4/9]
+[3/6]
   Please input the opened port in the host used for FunASR server.
-  Default: 10095
-  Setting the opened host port [1-65535]: 
+  Setting the opened host port [1-65535], default(10095): 
   The port of the host is 10095
   The port in Docker for FunASR server is 10095
-```
-
-
-##### 设置FunASR服务的推理线程数
-设置FunASR服务的推理线程数，默认为宿主机核数，同时自动设置服务的IO线程数，为推理线程数的四分之一。
-```text
-[5/9]
-  Please input thread number for FunASR decoder.
-  Default: 1
-  Setting the number of decoder thread: 
-
-  The number of decoder threads is 1
-  The number of IO threads is 1
 ```
 
 
