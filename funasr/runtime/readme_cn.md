@@ -19,7 +19,7 @@ SDK 支持以下几种服务部署：
 
 ### 便捷部署教程
 
-适用场景为，对服务部署SDK无修改需求，部署模型来自于ModelScope，或者用户finetune，详细教程参考（[点击此处](./docs/SDK_tutorial_cn.md)）
+适用场景为，对服务部署SDK无修改需求，部署模型来自于ModelScope，或者用户finetune，详细教程参考（[点击此处](./docs/SDK_tutorial_zh.md)）
 
 ### 技术原理揭秘
 
