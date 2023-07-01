@@ -16,7 +16,7 @@ FunASR提供可便捷本地或者云端服务器部署的离线文件转写服�
 
 ## 快速上手
 
-### 启动服务
+### 服务端启动
 通过以下命令运行一键部署服务，按照提示逐步完成FunASR runtime-SDK服务的部署和运行。目前暂时仅支持Linux环境，其他环境参考文档[高阶开发指南](./SDK_advanced_guide_cn.md)
 
 ```shell
@@ -25,7 +25,7 @@ curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/funas
 # curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy.sh; sudo bash funasr-runtime-deploy.sh install
 ```
 
-### 测试与使用
+### 客户端测试与使用
 
 我们以Python语言客户端为例，进行说明，其他版本客户端请参考[开发指南]()
 
@@ -120,7 +120,7 @@ sudo bash funasr-runtime-deploy.sh update model damo/speech_paraformer-large_asr
 ```
 
 
-### 服务端启动过程配置详解
+## 服务端启动过程配置详解
 
 ##### 选择FunASR Docker镜像
 推荐选择latest使用我们的最新镜像，也可选择历史版本。
