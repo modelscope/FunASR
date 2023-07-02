@@ -26,12 +26,12 @@ curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/funas
 
 执行部署工具，在提示处输入回车键即可完成服务端安装与部署。目前便捷部署工具暂时仅支持Linux环境，其他环境部署参考开发指南（[点击此处](./SDK_advanced_guide_zh.md)）
 ```shell
-sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace /root/funasr-runtime-sdk
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace /root/funasr-runtime-resources
 ```
 
 ### 客户端测试与使用
 
-运行上面安装指令后，会在/root/funasr-runtime-sdk（默认安装目录）中下载客户端测试工具目录funasr_samples，
+运行上面安装指令后，会在/root/funasr-runtime-resources（默认安装目录）中下载客户端测试工具目录funasr_samples，
 我们以Python语言客户端为例，进行说明，支持多种音频格式输入（.wav, .pcm, .mp3等），也支持视频输入(.mp4等)，以及多文件列表wav.scp输入，其他版本客户端请参考文档（[点击此处](#客户端用法详解)）
 
 ```shell
@@ -115,10 +115,10 @@ sudo bash funasr-runtime-deploy-offline-cpu-zh.sh restart
 替换正在使用的模型，并重新启动FunASR服务。模型需为ModelScope中的ASR/VAD/PUNC模型，或者从ModelScope中模型finetune后的模型。
 
 ```shell
-sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update [asr_model | vad_model | punc_model] <model_id or local model path>
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update [--asr_model | --vad_model | --punc_model] <model_id or local model path>
 
 e.g
-sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update asr_model damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update --asr_model damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
 ```
 
 ### 更新参数并重启FunASR服务
@@ -126,36 +126,28 @@ sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update asr_model damo/speech_p
 更新已配置参数，并重新启动FunASR服务生效。可更新参数包括宿主机和Docker的端口号，以及推理和IO的线程数量。
 
 ```shell
-sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update [host_port | docker_port] <port number>
-sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update [decode_thread_num | io_thread_num] <the number of threads>
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update [--host_port | --docker_port] <port number>
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update [--decode_thread_num | --io_thread_num] <the number of threads>
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update [--workspace] <workspace in local>
 
 e.g
-sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update decode_thread_num 32
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update --decode_thread_num 32
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update --workspace /root/funasr-runtime-resources
 ```
 
 
 ## 服务端启动过程配置详解
 
-##### 设置宿主机的工作空间路径
-默认将在操作目录下创建funasr-runtime-sdk作为工作空间路径
-```text
-[1/6]
-  Please enter the local path of workspace.
-  Setting the local path of workspace, default(/root/funasr-runtime-sdk): 
-  The local workspace path is /root/funasr-runtime-sdk .
-  The models will store in local path(/root/funasr-runtime-sdk/models) during the run.
-```
-
 ##### 选择FunASR Docker镜像
 推荐选择1)使用我们的最新发布版镜像，也可选择历史版本。
 ```text
-[2/6]
+[1/5]
   Getting the list of docker images, please wait a few seconds.
     [DONE]
 
   Please choose the Docker image.
     1) registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.1.0
-  Enter your choice, default(1): 
+  Enter your choice, default(1):
   You have chosen the Docker image: registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.1.0
 ```
 
@@ -163,9 +155,9 @@ sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update decode_thread_num 32
 ##### 设置宿主机提供给FunASR的端口
 设置提供给Docker的宿主机端口，默认为10095。请保证此端口可用。
 ```text
-[3/6]
+[2/5]
   Please input the opened port in the host used for FunASR server.
-  Setting the opened host port [1-65535], default(10095): 
+  Setting the opened host port [1-65535], default(10095):
   The port of the host is 10095
   The port in Docker for FunASR server is 10095
 ```
