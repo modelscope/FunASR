@@ -45,7 +45,6 @@ python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode offline --audio
 
 - [Python](#python-client)
 - [CPP](#cpp-client)
-- [Java]()
 - [html网页版本](#Html网页版)
 
 更多版本客户端支持请参考[开发指南](./SDK_advanced_guide_offline_zh.md)
