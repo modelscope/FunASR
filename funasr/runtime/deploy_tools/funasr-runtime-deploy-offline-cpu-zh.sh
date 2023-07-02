@@ -1112,7 +1112,7 @@ sampleClientRun(){
     echo -e "${YELLOW}Will download sample tools for the client to show how speech recognition works.${PLAIN}"
 
     download_cmd="curl ${DEFAULT_SAMPLES_URL} -o ${PARAMS_FUNASR_SAMPLES_LOCAL_PATH}"
-    untar_cmd="tar -zxf ${PARAMS_FUNASR_SAMPLES_LOCAL_PATH} ${PARAMS_FUNASR_LOCAL_WORKSPACE}"
+    untar_cmd="tar -zxf ${PARAMS_FUNASR_SAMPLES_LOCAL_PATH} -C ${PARAMS_FUNASR_LOCAL_WORKSPACE}"
 
     if [ ! -f "$PARAMS_FUNASR_SAMPLES_LOCAL_PATH" ]; then
         $download_cmd
