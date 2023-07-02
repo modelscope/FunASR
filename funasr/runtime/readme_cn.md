@@ -27,5 +27,5 @@ SDK 支持以下几种服务部署：
 
 ### 开发指南
 
-适用场景为，对服务部署SDK有修改需求，部署模型来自于ModelScope，或者用户finetune，详细文档参考（[点击此处](./docs/SDK_advanced_guide_offline_cn.md)）
+适用场景为，对服务部署SDK有修改需求，部署模型来自于ModelScope，或者用户finetune，详细文档参考（[点击此处](./docs/SDK_advanced_guide_offline_zh.md)）
 
