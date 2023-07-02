@@ -804,67 +804,67 @@ dockerRun(){
     echo -e "${UNDERLINE}${BOLD}[5/5]${PLAIN}"
     echo -e "  ${YELLOW}Construct command and run docker ...${PLAIN}"
 
-    RUN_CMD="sudo docker run"
-    PORT_MAP=" -p ${PARAMS_HOST_PORT}:${PARAMS_DOCKER_PORT}"
-    DIR_PARAMS=" --privileged=true"
-    DIR_MAP_PARAMS=""
+    run_cmd="sudo docker run"
+    port_map=" -p ${PARAMS_HOST_PORT}:${PARAMS_DOCKER_PORT}"
+    dir_params=" --privileged=true"
+    dir_map_params=""
     if [ ! -z "$PARAMS_LOCAL_ASR_DIR" ]; then
-        if [ -z "$DIR_MAP_PARAMS" ]; then
-            DIR_MAP_PARAMS="${DIR_PARAMS} -v ${PARAMS_LOCAL_ASR_DIR}:${PARAMS_DOCKER_ASR_DIR}"
+        if [ -z "$dir_map_params" ]; then
+            dir_map_params="${dir_params} -v ${PARAMS_LOCAL_ASR_DIR}:${PARAMS_DOCKER_ASR_DIR}"
         else
-            DIR_MAP_PARAMS="${DIR_MAP_PARAMS} -v ${PARAMS_LOCAL_ASR_DIR}:${PARAMS_DOCKER_ASR_DIR}"
+            dir_map_params="${dir_map_params} -v ${PARAMS_LOCAL_ASR_DIR}:${PARAMS_DOCKER_ASR_DIR}"
         fi
     fi
     if [ ! -z "$PARAMS_LOCAL_VAD_DIR" ]; then
-        if [ -z "$DIR_MAP_PARAMS" ]; then
-            DIR_MAP_PARAMS="${DIR_PARAMS} -v ${PARAMS_LOCAL_VAD_DIR}:${PARAMS_DOCKER_VAD_DIR}"
+        if [ -z "$dir_map_params" ]; then
+            dir_map_params="${dir_params} -v ${PARAMS_LOCAL_VAD_DIR}:${PARAMS_DOCKER_VAD_DIR}"
         else
-            DIR_MAP_PARAMS="${DIR_MAP_PARAMS} -v ${PARAMS_LOCAL_VAD_DIR}:${PARAMS_DOCKER_VAD_DIR}"
+            dir_map_params="${dir_map_params} -v ${PARAMS_LOCAL_VAD_DIR}:${PARAMS_DOCKER_VAD_DIR}"
         fi
     fi
     if [ ! -z "$PARAMS_LOCAL_PUNC_DIR" ]; then
-        if [ -z "$DIR_MAP_PARAMS" ]; then
-            DIR_MAP_PARAMS="${DIR_PARAMS} -v ${PARAMS_LOCAL_PUNC_DIR}:${PARAMS_DOCKER_PUNC_DIR}"
+        if [ -z "$dir_map_params" ]; then
+            dir_map_params="${dir_params} -v ${PARAMS_LOCAL_PUNC_DIR}:${PARAMS_DOCKER_PUNC_DIR}"
         else
-            DIR_MAP_PARAMS="${DIR_MAP_PARAMS} -v ${PARAMS_LOCAL_VAD_DIR}:${PARAMS_DOCKER_VAD_DIR}"
+            dir_map_params="${dir_map_params} -v ${PARAMS_LOCAL_VAD_DIR}:${PARAMS_DOCKER_VAD_DIR}"
         fi
     fi
 
-    EXEC_PARAMS="\"exec\":\"${PARAMS_DOCKER_EXEC_PATH}\""
+    exec_params="\"exec\":\"${PARAMS_DOCKER_EXEC_PATH}\""
     if [ ! -z "$PARAMS_ASR_ID" ]; then
-        ASR_PARAMS="\"--model-dir\":\"${PARAMS_ASR_ID}\""
+        asr_params="\"--model-dir\":\"${PARAMS_ASR_ID}\""
     else
-        ASR_PARAMS="\"--model-dir\":\"${PARAMS_DOCKER_ASR_PATH}\""
+        asr_params="\"--model-dir\":\"${PARAMS_DOCKER_ASR_PATH}\""
     fi
     if [ ! -z "$PARAMS_VAD_ID" ]; then
-        VAD_PARAMS="\"--vad-dir\":\"${PARAMS_VAD_ID}\""
+        vad_params="\"--vad-dir\":\"${PARAMS_VAD_ID}\""
     else
-        VAD_PARAMS="\"--vad-dir\":\"${PARAMS_DOCKER_VAD_PATH}\""
+        vad_params="\"--vad-dir\":\"${PARAMS_DOCKER_VAD_PATH}\""
     fi
     if [ ! -z "$PARAMS_PUNC_ID" ]; then
-        PUNC_PARAMS="\"--punc-dir\":\"${PARAMS_PUNC_ID}\""
+        punc_params="\"--punc-dir\":\"${PARAMS_PUNC_ID}\""
     else
-        PUNC_PARAMS="\"--punc-dir\":\"${PARAMS_DOCKER_PUNC_PATH}\""
+        punc_params="\"--punc-dir\":\"${PARAMS_DOCKER_PUNC_PATH}\""
     fi
-    DOWNLOAD_PARARMS="\"--download-model-dir\":\"${PARAMS_DOWNLOAD_MODEL_DIR}\""
+    download_params="\"--download-model-dir\":\"${PARAMS_DOWNLOAD_MODEL_DIR}\""
     if [ -z "$PARAMS_DOWNLOAD_MODEL_DIR" ]; then
-        MODEL_PARAMS="${ASR_PARAMS},${VAD_PARAMS},${PUNC_PARAMS}"
+        model_params="${asr_params},${vad_params},${punc_params}"
     else
-        MODEL_PARAMS="${ASR_PARAMS},${VAD_PARAMS},${PUNC_PARAMS},${DOWNLOAD_PARARMS}"
+        model_params="${asr_params},${vad_params},${punc_params},${download_params}"
     fi
 
-    DECODER_PARAMS="\"--decoder-thread-num\":\"${PARAMS_DECODER_THREAD_NUM}\""
-    IO_PARAMS="\"--io-thread-num\":\"${PARAMS_IO_THREAD_NUM}\""
-    THREAD_PARAMS=${DECODER_PARAMS},${IO_PARAMS}
-    PORT_PARAMS="\"--port\":\"${PARAMS_DOCKER_PORT}\""
-    CRT_PATH="\"--certfile\":\"/workspace/FunASR/funasr/runtime/ssl_key/server.crt\""
-    KEY_PATH="\"--keyfile\":\"/workspace/FunASR/funasr/runtime/ssl_key/server.key\""
+    decoder_params="\"--decoder-thread-num\":\"${PARAMS_DECODER_THREAD_NUM}\""
+    io_params="\"--io-thread-num\":\"${PARAMS_IO_THREAD_NUM}\""
+    thread_params=${decoder_params},${io_params}
+    port_params="\"--port\":\"${PARAMS_DOCKER_PORT}\""
+    crt_path="\"--certfile\":\"/workspace/FunASR/funasr/runtime/ssl_key/server.crt\""
+    key_path="\"--keyfile\":\"/workspace/FunASR/funasr/runtime/ssl_key/server.key\""
 
-    ENV_PARAMS=" -v ${DEFAULT_FUNASR_CONFIG_DIR}:/workspace/.config"
-    ENV_PARAMS=" ${ENV_PARAMS} --env DAEMON_SERVER_CONFIG={\"server\":[{${EXEC_PARAMS},${MODEL_PARAMS},${THREAD_PARAMS},${PORT_PARAMS},${CRT_PATH},${KEY_PATH}}]}"
+    env_params=" -v ${DEFAULT_FUNASR_CONFIG_DIR}:/workspace/.config"
+    env_params=" ${env_params} --env DAEMON_SERVER_CONFIG={\"server\":[{${exec_params},${model_params},${thread_params},${port_params},${crt_path},${key_path}}]}"
 
-    RUN_CMD="${RUN_CMD}${PORT_MAP}${DIR_MAP_PARAMS}${ENV_PARAMS}"
-    RUN_CMD="${RUN_CMD} -it -d ${PARAMS_DOCKER_IMAGE}"
+    run_cmd="${run_cmd}${port_map}${dir_map_params}${env_params}"
+    run_cmd="${run_cmd} -it -d ${PARAMS_DOCKER_IMAGE}"
 
     # check Docker
     checkDockerExist
@@ -877,7 +877,7 @@ dockerRun(){
     rm -f ${DEFAULT_FUNASR_PROGRESS_TXT}
     rm -f ${DEFAULT_FUNASR_SERVER_LOG}
 
-    $RUN_CMD
+    $run_cmd
 
     echo
     echo -e "  ${YELLOW}Loading models:${PLAIN}"
@@ -913,23 +913,75 @@ dockerRun(){
     echo -e "  ${GREEN}The service has been started.${PLAIN}"
     echo
 
-    downloadSamples
+    deploySamples
     echo -e "  ${BOLD}The sample code is already stored in the ${PLAIN}(${GREEN}${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}${PLAIN}) ."
     echo -e "  ${BOLD}If you want to see an example of how to use the client, you can run ${PLAIN}${GREEN}sudo bash funasr-runtime-deploy-offline-cpu-zh.sh client${PLAIN} ."
     echo
 }
 
-downloadSamples(){
-    if [ ! -d $PARAMS_FUNASR_SAMPLES_LOCAL_DIR ]; then
-        echo -e "${YELLOW}Downloading samples to $PARAMS_FUNASR_LOCAL_WORKSPACE ...${PLAIN}"
+installPythonDependencyForPython(){
+    echo -e "${YELLOW}Install Python dependent environments ...${PLAIN}"
 
-        DOWNLOAD_CMD="curl ${DEFAULT_SAMPLES_URL} -o ${PARAMS_FUNASR_SAMPLES_LOCAL_PATH}"
-        UNTAR_CMD="tar -zxf ${PARAMS_FUNASR_SAMPLES_LOCAL_PATH} -C ${PARAMS_FUNASR_LOCAL_WORKSPACE}"
+    echo -e "  Export dependency of Cpp sample."
+    pre_cmd="export LD_LIBRARY_PATH=${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/cpp/libs:\$LD_LIBRARY_PATH"
+    $pre_cmd
+    echo
+
+    echo -e "  Install requirements of Python sample."
+    pre_cmd="pip3 install click>=8.0.4"
+    $pre_cmd
+    echo
+
+    pre_cmd="pip3 install -r ${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/python/requirements_client.txt"
+    echo -e "  Run ${BLUE}${pre_cmd}${PLAIN}"
+    $pre_cmd
+    echo
+
+    lowercase_osid=$(echo ${OSID} | tr '[A-Z]' '[a-z]')
+    case "$lowercase_osid" in
+        ubuntu)
+            pre_cmd="sudo apt-get install -y ffmpeg"
+            ;;
+        centos)
+            pre_cmd="sudo yum install -y ffmpeg"
+            ;;
+        debian)
+            pre_cmd="sudo apt-get install -y ffmpeg"
+            ;;
+        \"alios\")
+            pre_cmd="sudo yum install -y ffmpeg"
+            ;;
+        \"alinux\")
+            pre_cmd="sudo yum install -y ffmpeg"
+            ;;
+        *)
+            echo -e "  ${RED}$lowercase_osid is not supported.${PLAIN}"
+            ;;
+    esac
+    echo -e "  Run ${BLUE}${pre_cmd}${PLAIN}"
+    echo
+
+    pre_cmd="pip3 install ffmpeg-python"
+    echo -e "  Run ${BLUE}${pre_cmd}${PLAIN}"
+    $pre_cmd
+    echo
+}
+
+deploySamples(){
+    if [ ! -d $PARAMS_FUNASR_SAMPLES_LOCAL_DIR ]; then
+        echo -e "${YELLOW}Downloading samples to${PLAIN} ${CYAN}${PARAMS_FUNASR_LOCAL_WORKSPACE}${PLAIN} ${YELLOW}...${PLAIN}"
+
+        download_cmd="curl ${DEFAULT_SAMPLES_URL} -o ${PARAMS_FUNASR_SAMPLES_LOCAL_PATH}"
+        untar_cmd="tar -zxf ${PARAMS_FUNASR_SAMPLES_LOCAL_PATH} -C ${PARAMS_FUNASR_LOCAL_WORKSPACE}"
 
         if [ ! -f "$PARAMS_FUNASR_SAMPLES_LOCAL_PATH" ]; then
-            $DOWNLOAD_CMD
+            $download_cmd
         fi
-        $UNTAR_CMD
+        $untar_cmd
+        echo
+
+        installPythonDependencyForPython
+        echo
     fi
 }
 
@@ -1064,14 +1116,14 @@ portChange() {
 sampleClientRun(){
     echo -e "${YELLOW}Will download sample tools for the client to show how speech recognition works.${PLAIN}"
 
-    DOWNLOAD_CMD="curl ${DEFAULT_SAMPLES_URL} -o ${PARAMS_FUNASR_SAMPLES_LOCAL_PATH}"
-    UNTAR_CMD="tar -zxf ${PARAMS_FUNASR_SAMPLES_LOCAL_PATH} ${PARAMS_FUNASR_LOCAL_WORKSPACE}"
+    download_cmd="curl ${DEFAULT_SAMPLES_URL} -o ${PARAMS_FUNASR_SAMPLES_LOCAL_PATH}"
+    untar_cmd="tar -zxf ${PARAMS_FUNASR_SAMPLES_LOCAL_PATH} -C ${PARAMS_FUNASR_LOCAL_WORKSPACE}"
 
     if [ ! -f "$PARAMS_FUNASR_SAMPLES_LOCAL_PATH" ]; then
-        $DOWNLOAD_CMD
+        $download_cmd
     fi    
     if [ -f "$PARAMS_FUNASR_SAMPLES_LOCAL_PATH" ]; then
-        $UNTAR_CMD
+        $untar_cmd
     fi
     if [ -d "$PARAMS_FUNASR_SAMPLES_LOCAL_DIR" ]; then
         echo -e "  Please select the client you want to run."
@@ -1109,26 +1161,26 @@ sampleClientRun(){
         fi
 
         echo
-        PRE_CMD=”“
+        pre_cmd=”“
         case "$lang" in
             Linux_Cpp)
-                PRE_CMD="export LD_LIBRARY_PATH=${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/cpp/libs:\$LD_LIBRARY_PATH"
-                CLIENT_EXEC="${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/cpp/funasr-wss-client"
-                RUN_CMD="${CLIENT_EXEC} --server-ip ${server_ip} --port ${host_port} --wav-path ${wav_path}"
-                echo -e "  Run ${BLUE}${PRE_CMD}${PLAIN}"
-                $PRE_CMD
+                pre_cmd="export LD_LIBRARY_PATH=${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/cpp/libs:\$LD_LIBRARY_PATH"
+                client_exec="${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/cpp/funasr-wss-client"
+                run_cmd="${client_exec} --server-ip ${server_ip} --port ${host_port} --wav-path ${wav_path}"
+                echo -e "  Run ${BLUE}${pre_cmd}${PLAIN}"
+                $pre_cmd
                 echo
                 ;;
             Python)
-                CLIENT_EXEC="${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/python/wss_client_asr.py"
-                RUN_CMD="python3 ${CLIENT_EXEC} --host ${server_ip} --port ${host_port} --mode offline --audio_in ${wav_path} --send_without_sleep --output_dir ${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/python"
-                PRE_CMD="pip3 install click>=8.0.4"
-                echo -e "  Run ${BLUE}${PRE_CMD}${PLAIN}"
-                $PRE_CMD
+                client_exec="${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/python/wss_client_asr.py"
+                run_cmd="python3 ${client_exec} --host ${server_ip} --port ${host_port} --mode offline --audio_in ${wav_path} --send_without_sleep --output_dir ${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/python"
+                pre_cmd="pip3 install click>=8.0.4"
+                echo -e "  Run ${BLUE}${pre_cmd}${PLAIN}"
+                $pre_cmd
                 echo
-                PRE_CMD="pip3 install -r ${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/python/requirements_client.txt"
-                echo -e "  Run ${BLUE}${PRE_CMD}${PLAIN}"
-                $PRE_CMD
+                pre_cmd="pip3 install -r ${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/python/requirements_client.txt"
+                echo -e "  Run ${BLUE}${pre_cmd}${PLAIN}"
+                $pre_cmd
                 echo
                 ;;
             *)
@@ -1136,10 +1188,10 @@ sampleClientRun(){
                 ;;
         esac
 
-        echo -e "  Run ${BLUE}${RUN_CMD}${PLAIN}"
-        $RUN_CMD
+        echo -e "  Run ${BLUE}${run_cmd}${PLAIN}"
+        $run_cmd
         echo
-        echo -e "  If failed, you can try (${GREEN}${RUN_CMD}${PLAIN}) in your Shell."
+        echo -e "  If failed, you can try (${GREEN}${run_cmd}${PLAIN}) in your Shell."
         echo
     fi
 }
