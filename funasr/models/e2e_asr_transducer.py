@@ -353,11 +353,6 @@ class TransducerModel(FunASRModel):
         """
         if self.criterion_transducer is None:
             try:
-                # from warprnnt_pytorch import RNNTLoss
-	        # self.criterion_transducer = RNNTLoss(
-                    # reduction="mean",
-                    # fastemit_lambda=self.fastemit_lambda,
-                # )
                 from warp_rnnt import rnnt_loss as RNNTLoss
                 self.criterion_transducer = RNNTLoss
 
@@ -368,12 +363,6 @@ class TransducerModel(FunASRModel):
                 )
                 exit(1)
 
-        # loss_transducer = self.criterion_transducer(
-        #     joint_out,
-        #     target,
-        #     t_len,
-        #     u_len,
-        # )
         log_probs = torch.log_softmax(joint_out, dim=-1)
 
         loss_transducer = self.criterion_transducer(
@@ -637,7 +626,6 @@ class UnifiedTransducerModel(FunASRModel):
 
         batch_size = speech.shape[0]
         text = text[:, : text_lengths.max()]
-        #print(speech.shape)
         # 1. Encoder
         encoder_out, encoder_out_chunk, encoder_out_lens = self.encode(speech, speech_lengths)
 
@@ -854,11 +842,6 @@ class UnifiedTransducerModel(FunASRModel):
         """
         if self.criterion_transducer is None:
             try:
-                # from warprnnt_pytorch import RNNTLoss
-            # self.criterion_transducer = RNNTLoss(
-                    # reduction="mean",
-                    # fastemit_lambda=self.fastemit_lambda,
-                # )
                 from warp_rnnt import rnnt_loss as RNNTLoss
                 self.criterion_transducer = RNNTLoss
 
@@ -869,12 +852,6 @@ class UnifiedTransducerModel(FunASRModel):
                 )
                 exit(1)
 
-        # loss_transducer = self.criterion_transducer(
-        #     joint_out,
-        #     target,
-        #     t_len,
-        #     u_len,
-        # )
         log_probs = torch.log_softmax(joint_out, dim=-1)
 
         loss_transducer = self.criterion_transducer(
