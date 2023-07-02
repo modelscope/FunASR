@@ -74,7 +74,7 @@ python wss_client_asr.py --host "0.0.0.0" --port 10095 --mode offline --chunk_in
 Loadding from wav.scp(kaldi style)
 ```shell
 # --chunk_interval, "10": 600/10=60ms, "5"=600/5=120ms, "20": 600/12=30ms
-python wss_client_asr.py --host "0.0.0.0" --port 10095 --mode offline --chunk_interval 10 --words_max_print 100 --audio_in "./data/wav.scp" --send_without_sleep --output_dir "./results"
+python wss_client_asr.py --host "0.0.0.0" --port 10095 --mode offline --chunk_interval 10 --words_max_print 100 --audio_in "./data/wav.scp" --output_dir "./results"
 ```
 
 ##### ASR streaming client

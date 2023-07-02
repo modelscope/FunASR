@@ -10,27 +10,28 @@ FunASR提供可便捷本地或者云端服务器部署的离线文件转写服�
 - 配置2: （X86，计算型），16核vCPU，内存32G，单机可以支持大约64路的请求
 - 配置3: （X86，计算型），64核vCPU，内存128G，单机可以支持大约200路的请求
 
-详细性能测试报告：[点此链接](./benchmark_onnx_cpp.md)
-
 云服务厂商，针对新用户，有3个月免费试用活动，申请教程（[点击此处](./aliyun_server_tutorial.md)）
 
 ## 快速上手
 
 ### 服务端启动
-通过以下命令运行一键部署服务，按照提示逐步完成FunASR runtime-SDK服务的部署和运行。目前暂时仅支持Linux环境，其他环境参考文档[高阶开发指南](./SDK_advanced_guide_cn.md)
+
+将下面指令拷贝至终端运行，在提示处输入回车键即可完成服务端安装与部署。目前便捷部署工具暂时仅支持Linux环境，其他环境部署参考开发指南（[点击此处](./SDK_advanced_guide_cn.md)）
 
 ```shell
-curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/dev_deploy/funasr/runtime/funasr-runtime-deploy-offline-cpu-zh.sh; sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install
+curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/funasr/runtime/deploy_tools/funasr-runtime-deploy-offline-cpu-zh.sh; \
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace /root/funasr-runtime-sdk
 # 如遇到网络问题，中国大陆用户，可以用个下面的命令：
-# curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy-offline-cpu-zh.sh; sudo bash funasr-runtime-deploy-offline-cpu-zh install
+# curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy-offline-cpu-zh.sh; sudo bash funasr-runtime-deploy-offline-cpu-zh install --workspace /root/funasr-runtime-sdk
 ```
 
 ### 客户端测试与使用
 
-我们以Python语言客户端为例，进行说明，其他版本客户端请参考[开发指南]()
+运行上面安装指令后，会在/root/funasr-runtime-sdk（默认安装目录）中下载客户端测试工具目录funasr_samples，
+我们以Python语言客户端为例，进行说明，支持多种音频格式输入（.wav, .pcm, .mp3等），也支持视频输入(.mp4等)，以及多文件列表wav.scp输入，其他版本客户端请参考文档（[点击此处](##客户端用法详解)）
 
 ```shell
-python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.wav" --send_without_sleep --output_dir "./results"
+python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.wav" --output_dir "./results"
 ```
 
 ## 客户端用法详解
@@ -38,18 +39,18 @@ python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode offline --audio
 在服务器上完成FunASR服务部署以后，可以通过如下的步骤来测试和使用离线文件转写服务。
 目前分别支持以下几种编程语言客户端
 
-- Python
-- C++
-- Java 
-- html网页版本
+- [Python](###python-client)
+- [CPP](###cpp-client)
+- [Java]()
+- [html网页版本]()
 
-我们以Python语言客户端为例，进行说明，其他版本客户端请参考[开发指南]()
+更多版本客户端支持请参考[开发指南](./SDK_advanced_guide_offline_zh.md)
 
 ### python-client
 若想直接运行client进行测试，可参考如下简易说明，以python版本为例：
 
 ```shell
-python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.wav" --send_without_sleep --output_dir "./results"
+python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.wav" --output_dir "./results"
 ```
 
 命令参数说明：
@@ -61,30 +62,20 @@ python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode offline --audio
 --output_dir 识别结果保存路径
 ```
 
-[//]: # (#### cpp-client)
+### cpp-client
 
-[//]: # ()
-[//]: # (```shell)
+```shell
+export LD_LIBRARY_PATH=/root/funasr_samples/cpp/libs:$LD_LIBRARY_PATH
+/root/funasr_samples/cpp/funasr-wss-client --server-ip 127.0.0.1 --port 10095 --wav-path /root/funasr_samples/audio/asr_example.wav
+```
 
-[//]: # (export LD_LIBRARY_PATH=/root/funasr_samples/cpp/libs:$LD_LIBRARY_PATH)
+命令参数说明：
 
-[//]: # (/root/funasr_samples/cpp/funasr-wss-client --server-ip 127.0.0.1 --port 10095 --wav-path /root/funasr_samples/audio/asr_example.wav)
-
-[//]: # (```)
-
-[//]: # ()
-[//]: # (命令参数说明：)
-
-[//]: # ()
-[//]: # (```text)
-
-[//]: # (--server-ip 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，需要改为部署机器ip)
-
-[//]: # (--port 10095 部署端口号)
-
-[//]: # (--wav-path 需要进行转写的音频文件，支持文件路径)
-
-[//]: # (```)
+```text
+--server-ip 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，需要改为部署机器ip
+--port 10095 部署端口号
+--wav-path 需要进行转写的音频文件，支持文件路径
+```
 
 ## 服务端用法详解
 

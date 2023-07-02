@@ -40,7 +40,7 @@ parser.add_argument("--audio_in",
                     help="audio_in")
 parser.add_argument("--send_without_sleep",
                     action="store_true",
-                    default=False,
+                    default=True,
                     help="if audio_in is set, send_without_sleep")
 parser.add_argument("--test_thread_num",
                     type=int,
@@ -161,7 +161,8 @@ async def record_from_scp(chunk_begin, chunk_size):
                 #voices.put(message)
                 await websocket.send(message)
  
-            sleep_duration = 0.001 if args.send_without_sleep else 60 * args.chunk_size[1] / args.chunk_interval / 1000
+            sleep_duration = 0.001 if args.mode == "offline" else 60 * args.chunk_size[1] / args.chunk_interval / 1000
+            
             await asyncio.sleep(sleep_duration)
     # when all data sent, we need to close websocket
     while not voices.empty():
