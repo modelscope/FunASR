@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 scriptVersion="0.0.4"
-scriptDate="20230701"
+scriptDate="20230702"
 
 
 # Set color
@@ -28,10 +28,12 @@ cur_dir=`pwd`
 DEFAULT_DOCKER_OFFLINE_CPU_ZH_LISTS="https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/funasr/runtime/docs/docker_offline_cpu_zh_lists"
 DEFAULT_DOCKER_IMAGE_LISTS=$DEFAULT_DOCKER_OFFLINE_CPU_ZH_LISTS
 DEFAULT_FUNASR_DOCKER_URL="registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr"
-DEFAULT_FUNASR_RUNTIME_SDK_NAME="funasr-runtime-sdk"
-DEFAULT_FUNASR_LOCAL_WORKSPACE="${cur_dir}/${DEFAULT_FUNASR_RUNTIME_SDK_NAME}"
+DEFAULT_FUNASR_RUNTIME_RESOURCES="funasr-runtime-resources"
+DEFAULT_FUNASR_LOCAL_WORKSPACE="${cur_dir}/${DEFAULT_FUNASR_RUNTIME_RESOURCES}"
 DEFAULT_FUNASR_CONFIG_DIR="/var/funasr"
 DEFAULT_FUNASR_CONFIG_FILE="${DEFAULT_FUNASR_CONFIG_DIR}/config"
+DEFAULT_FUNASR_PROGRESS_TXT="${DEFAULT_FUNASR_CONFIG_DIR}/progress.txt"
+DEFAULT_FUNASR_SERVER_LOG="${DEFAULT_FUNASR_CONFIG_DIR}/server_console.log"
 DEFAULT_FUNASR_WORKSPACE_DIR="/workspace/models"
 DEFAULT_DOCKER_PORT="10095"
 DEFAULT_PROGRESS_FILENAME="progress.txt"
@@ -39,32 +41,32 @@ DEFAULT_SERVER_EXEC_NAME="funasr-wss-server"
 DEFAULT_DOCKER_EXEC_DIR="/workspace/FunASR/funasr/runtime/websocket/build/bin"
 DEFAULT_DOCKER_EXEC_PATH=${DEFAULT_DOCKER_EXEC_DIR}/${DEFAULT_SERVER_EXEC_NAME}
 DEFAULT_SAMPLES_NAME="funasr_samples"
+DEFAULT_SAMPLES_DIR="samples"
 DEFAULT_SAMPLES_URL="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/${DEFAULT_SAMPLES_NAME}.tar.gz"
-
 
 SAMPLE_CLIENTS=( \
 "Python" \
 "Linux_Cpp" \
 )
 DOCKER_IMAGES=()
-PROGRESS_TXT="/var/funasr/progress.txt"
-ASR_PERCENT_INT=0
-VAD_PERCENT_INT=0
-PUNC_PERCENT_INT=0
-ASR_TITLE="Downloading"
-ASR_PERCENT="0"
-ASR_SPEED="0KB/s"
-ASR_REVISION=""
-VAD_TITLE="Downloading"
-VAD_PERCENT="0"
-VAD_SPEED="0KB/s"
-VAD_REVISION=""
-PUNC_TITLE="Downloading"
-PUNC_PERCENT="0"
-PUNC_SPEED="0KB/s"
-PUNC_REVISION=""
 
-ServerProgress(){
+# Handles the download progress bar
+asr_percent_int=0
+vad_percent_int=0
+punc_percent_int=0
+asr_title="Downloading"
+asr_percent="0"
+asr_speed="0KB/s"
+asr_revision=""
+vad_title="Downloading"
+vad_percent="0"
+vad_speed="0KB/s"
+vad_revision=""
+punc_title="Downloading"
+punc_percent="0"
+punc_speed="0KB/s"
+punc_revision=""
+serverProgress(){
     status_flag="STATUS:"
     stage=0
     wait=0
@@ -72,7 +74,7 @@ ServerProgress(){
 
     while true
     do
-        if [ -f "$PROGRESS_TXT" ]; then
+        if [ -f "$DEFAULT_FUNASR_PROGRESS_TXT" ]; then
             break
         else
             sleep 1
@@ -83,8 +85,8 @@ ServerProgress(){
         fi
     done
 
-    if [ ! -f "$PROGRESS_TXT" ]; then
-        echo -e "    ${RED}The note of progress does not exist.($PROGRESS_TXT) ${PLAIN}"
+    if [ ! -f "$DEFAULT_FUNASR_PROGRESS_TXT" ]; then
+        echo -e "    ${RED}The note of progress does not exist.($DEFAULT_FUNASR_PROGRESS_TXT) ${PLAIN}"
         return 98
     fi
 
@@ -116,22 +118,22 @@ ServerProgress(){
             fi
             result=$(echo $line | grep "title:")
             if [ "$result" != "" ]; then
-                ASR_TITLE=${line#*:}
+                asr_title=${line#*:}
                 continue
             fi
             result=$(echo $line | grep "percent:")
             if [ "$result" != "" ]; then
-                ASR_PERCENT=${line#*:}
+                asr_percent=${line#*:}
                 continue
             fi
             result=$(echo $line | grep "speed:")
             if [ "$result" != "" ]; then
-                ASR_SPEED=${line#*:}
+                asr_speed=${line#*:}
                 continue
             fi
             result=$(echo $line | grep "revision:")
             if [ "$result" != "" ]; then
-                ASR_REVISION=${line#*:}
+                asr_revision=${line#*:}
                 continue
             fi
         elif [ $stage -eq 4 ]; then
@@ -142,22 +144,22 @@ ServerProgress(){
             fi
             result=$(echo $line | grep "title:")
             if [ "$result" != "" ]; then
-                VAD_TITLE=${line#*:}
+                vad_title=${line#*:}
                 continue
             fi
             result=$(echo $line | grep "percent:")
             if [ "$result" != "" ]; then
-                VAD_PERCENT=${line#*:}
+                vad_percent=${line#*:}
                 continue
             fi
             result=$(echo $line | grep "speed:")
             if [ "$result" != "" ]; then
-                VAD_SPEED=${line#*:}
+                vad_speed=${line#*:}
                 continue
             fi
             result=$(echo $line | grep "revision:")
             if [ "$result" != "" ]; then
-                VAD_REVISION=${line#*:}
+                vad_revision=${line#*:}
                 continue
             fi
         elif [ $stage -eq 5 ]; then
@@ -169,42 +171,42 @@ ServerProgress(){
             fi
             result=$(echo $line | grep "title:")
             if [ "$result" != "" ]; then
-                PUNC_TITLE=${line#*:}
+                punc_title=${line#*:}
                 continue
             fi
             result=$(echo $line | grep "percent:")
             if [ "$result" != "" ]; then
-                PUNC_PERCENT=${line#*:}
+                punc_percent=${line#*:}
                 continue
             fi
             result=$(echo $line | grep "speed:")
             if [ "$result" != "" ]; then
-                PUNC_SPEED=${line#*:}
+                punc_speed=${line#*:}
                 continue
             fi
             result=$(echo $line | grep "revision:")
             if [ "$result" != "" ]; then
-                PUNC_REVISION=${line#*:}
+                punc_revision=${line#*:}
                 continue
             fi
         elif [ $stage -eq 99 ]; then
             echo -e "    ${RED}ERROR: $line${PLAIN}"
         fi
-    done < $PROGRESS_TXT
+    done < $DEFAULT_FUNASR_PROGRESS_TXT
 
     if [ $stage -ne 99 ]; then
-        DrawProgress "ASR " $ASR_TITLE $ASR_PERCENT $ASR_SPEED $ASR_REVISION $ASR_PERCENT_INT
-        ASR_PERCENT_INT=$?
-        DrawProgress "VAD " $VAD_TITLE $VAD_PERCENT $VAD_SPEED $VAD_REVISION $VAD_PERCENT_INT
-        VAD_PERCENT_INT=$?
-        DrawProgress "PUNC" $PUNC_TITLE $PUNC_PERCENT $PUNC_SPEED $PUNC_REVISION $PUNC_PERCENT_INT
-        PUNC_PERCENT_INT=$?
+        drawProgress "ASR " $asr_title $asr_percent $asr_speed $asr_revision $asr_percent_int
+        asr_percent_int=$?
+        drawProgress "VAD " $vad_title $vad_percent $vad_speed $vad_revision $vad_percent_int
+        vad_percent_int=$?
+        drawProgress "PUNC" $punc_title $punc_percent $punc_speed $punc_revision $punc_percent_int
+        punc_percent_int=$?
     fi
 
     return $stage
 }
 
-DrawProgress(){
+drawProgress(){
     model=$1
     title=$2
     percent_str=$3
@@ -221,8 +223,8 @@ DrawProgress(){
         fi
     fi
 
-    LOADING_FLAG="Loading"
-    if [ "$title" = "$LOADING_FLAG" ]; then
+    loading_flag="Loading"
+    if [ "$title" = "$loading_flag" ]; then
         progress=100
     fi
 
@@ -237,9 +239,9 @@ DrawProgress(){
     let color=36
     let index=max*2
     if [ -z "$speed" ]; then
-        printf "\r    \e[0;$color;1m[%s][%-11s][%-50s][%d%%][%s]\e[0m" "$model" "$title" "$str" "$$index" "$revision"
+        printf "\r    \e[0;${CYAN}[%s][%-11s][%-50s][%d%%][%s]\e[0m" "$model" "$title" "$str" "$$index" "$revision"
     else
-        printf "\r    \e[0;$color;1m[%s][%-11s][%-50s][%3d%%][%8s][%s]\e[0m" "$model" "$title" "$str" "$index" "$speed" "$revision"
+        printf "\r    \e[0;${CYAN}[%s][%-11s][%-50s][%3d%%][%8s][%s]\e[0m" "$model" "$title" "$str" "$index" "$speed" "$revision"
     fi
     printf "\n"
 
@@ -288,8 +290,27 @@ menuSelection(){
     return $result
 }
 
+
+full_path=""
+relativePathToFullPath(){
+    relativePath=$1
+    firstChar=${relativePath: 0: 1}
+    if [[ "$firstChar" == "" ]]; then
+        full_path=$relativePath
+    elif [[ "$firstChar" == "/" ]]; then
+        full_path=$relativePath
+    fi
+
+    tmpPath1=`dirname $relativePath`
+    tmpFullpath1=`cd $tmpPath1 && pwd`
+    tmpPath2=`basename $relativePath`
+    full_path=${tmpFullpath1}/${tmpPath2}
+}
+
 initConfiguration(){
-    mkdir -p $DEFAULT_FUNASR_CONFIG_DIR
+    if [ ! -z "$DEFAULT_FUNASR_CONFIG_DIR" ]; then
+        mkdir -p $DEFAULT_FUNASR_CONFIG_DIR
+    fi
     if [ ! -f $DEFAULT_FUNASR_CONFIG_FILE ]; then
         touch $DEFAULT_FUNASR_CONFIG_FILE
     fi
@@ -297,11 +318,16 @@ initConfiguration(){
 
 initParameters(){
     # Init workspace in local by new parameters.
-    PARAMS_FUNASR_SAMPLES_LOCAL_DIR=${PARAMS_FUNASR_LOCAL_WORKSPACE}/${DEFAULT_SAMPLES_NAME}
+    PARAMS_FUNASR_SAMPLES_LOCAL_PATH=${PARAMS_FUNASR_LOCAL_WORKSPACE}/${DEFAULT_SAMPLES_NAME}.tar.gz
+    PARAMS_FUNASR_SAMPLES_LOCAL_DIR=${PARAMS_FUNASR_LOCAL_WORKSPACE}/${DEFAULT_SAMPLES_DIR}
     PARAMS_FUNASR_LOCAL_MODELS_DIR="${PARAMS_FUNASR_LOCAL_WORKSPACE}/models"
 
-    mkdir -p $PARAMS_FUNASR_LOCAL_WORKSPACE
-    mkdir -p $PARAMS_FUNASR_LOCAL_MODELS_DIR
+    if [ ! -z "$PARAMS_FUNASR_LOCAL_WORKSPACE" ]; then
+        mkdir -p $PARAMS_FUNASR_LOCAL_WORKSPACE
+    fi
+    if [ ! -z "$PARAMS_FUNASR_LOCAL_MODELS_DIR" ]; then
+        mkdir -p $PARAMS_FUNASR_LOCAL_MODELS_DIR
+    fi
 }
 
 # Parse the parameters from the docker list file.
@@ -363,9 +389,8 @@ readDockerInfoFromUrl(){
 
 # Make sure root user.
 rootNess(){
-    echo -e "${UNDERLINE}${BOLD}[0/6]${PLAIN}"
+    echo -e "${UNDERLINE}${BOLD}[0/5]${PLAIN}"
     echo -e "  ${YELLOW}Please check root access.${PLAIN}"
-    echo
 
     echo -e "    ${WARNING} MUST RUN AS ${RED}ROOT${PLAIN} USER!"
     if [[ $EUID -ne 0 ]]; then
@@ -376,43 +401,9 @@ rootNess(){
     echo
 }
 
-# Set the host working path.
-setupLocalWorkspaceDir(){
-    echo -e "${UNDERLINE}${BOLD}[1/6]${PLAIN}"
-    params_local_workspace=`sed '/^PARAMS_FUNASR_LOCAL_WORKSPACE=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
-    if [ -z "$params_local_workspace" ]; then
-        params_local_workspace=$DEFAULT_FUNASR_LOCAL_WORKSPACE
-    fi
-
-    while true
-    do
-        echo -e "  ${YELLOW}Please enter the local path of workspace.${PLAIN}"
-        echo -e "  Setting the local path of workspace, default(${CYAN}${params_local_workspace}${PLAIN}): \c"
-        read PARAMS_FUNASR_LOCAL_WORKSPACE
-        if [ -z "$PARAMS_FUNASR_LOCAL_WORKSPACE" ]; then
-            if [ -z "$params_local_workspace" ]; then
-                continue
-            else
-                PARAMS_FUNASR_LOCAL_WORKSPACE=$params_local_workspace
-                mkdir -p $PARAMS_FUNASR_LOCAL_WORKSPACE
-            fi
-        fi
-        if [ ! -d "$PARAMS_FUNASR_LOCAL_WORKSPACE" ]; then
-            echo -e "    ${RED}The local workspace(${PARAMS_FUNASR_LOCAL_WORKSPACE}) set does not exist, please setup again.${PLAIN}"
-        else
-            PARAMS_FUNASR_LOCAL_MODELS_DIR="${PARAMS_FUNASR_LOCAL_WORKSPACE}/models"
-            echo -e "  The local workspace path is ${GREEN}${PARAMS_FUNASR_LOCAL_WORKSPACE}${PLAIN} ."
-            echo -e "  The models will store in local path(${GREEN}${PARAMS_FUNASR_LOCAL_MODELS_DIR}${PLAIN}) during the run."
-
-            break
-        fi
-    done
-    echo
-}
-
 # Get a list of docker images and select them.
 selectDockerImages(){
-    echo -e "${UNDERLINE}${BOLD}[2/6]${PLAIN}"
+    echo -e "${UNDERLINE}${BOLD}[1/5]${PLAIN}"
     echo -e "  ${YELLOW}Getting the list of docker images, please wait a few seconds.${PLAIN}"
     readDockerInfoFromUrl
     echo
@@ -437,7 +428,7 @@ selectDockerImages(){
 
 # Configure FunASR server host port setting.
 setupHostPort(){
-    echo -e "${UNDERLINE}${BOLD}[3/6]${PLAIN}"
+    echo -e "${UNDERLINE}${BOLD}[2/5]${PLAIN}"
 
     params_host_port=`sed '/^PARAMS_HOST_PORT=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
     if [ -z "$params_host_port" ]; then
@@ -520,32 +511,94 @@ complementParameters(){
 paramsFromDefault(){
     initConfiguration
 
-    echo -e "${UNDERLINE}${BOLD}[1-3/6]${PLAIN}"
-    echo -e "  ${YELLOW}Load parameters from ${DEFAULT_FUNASR_CONFIG_FILE}${PLAIN}"
+    echo -e "  ${YELLOW}Load parameters from${PLAIN} ${GREEN}${DEFAULT_FUNASR_CONFIG_FILE}${PLAIN}"
     echo
 
-    PARAMS_FUNASR_LOCAL_WORKSPACE=`sed '/^PARAMS_FUNASR_LOCAL_WORKSPACE=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
-    PARAMS_FUNASR_SAMPLES_LOCAL_DIR=`sed '/^PARAMS_FUNASR_SAMPLES_LOCAL_DIR=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
-    PARAMS_FUNASR_SAMPLES_LOCAL_PATH=`sed '/^PARAMS_FUNASR_SAMPLES_LOCAL_PATH=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
-    PARAMS_FUNASR_LOCAL_MODELS_DIR=`sed '/^PARAMS_FUNASR_LOCAL_MODELS_DIR=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
-    PARAMS_FUNASR_CONFIG_PATH=`sed '/^PARAMS_FUNASR_CONFIG_PATH=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+    funasr_local_workspace=`sed '/^PARAMS_FUNASR_LOCAL_WORKSPACE=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+    if [ ! -z "$funasr_local_workspace" ]; then
+        PARAMS_FUNASR_LOCAL_WORKSPACE=$funasr_local_workspace
+    fi
+    funasr_samples_local_dir=`sed '/^PARAMS_FUNASR_SAMPLES_LOCAL_DIR=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+    if [ ! -z "$funasr_samples_local_dir" ]; then
+        PARAMS_FUNASR_SAMPLES_LOCAL_DIR=$funasr_samples_local_dir
+    fi
+    funasr_samples_local_path=`sed '/^PARAMS_FUNASR_SAMPLES_LOCAL_PATH=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+    if [ ! -z "$funasr_samples_local_path" ]; then
+        PARAMS_FUNASR_SAMPLES_LOCAL_PATH=$funasr_samples_local_path
+    fi
+    funasr_local_models_dir=`sed '/^PARAMS_FUNASR_LOCAL_MODELS_DIR=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+    if [ ! -z "$funasr_local_models_dir" ]; then
+        PARAMS_FUNASR_LOCAL_MODELS_DIR=$funasr_local_models_dir
+    fi
+    funasr_config_path=`sed '/^PARAMS_FUNASR_CONFIG_PATH=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+    if [ ! -z "$funasr_config_path" ]; then
+        PARAMS_FUNASR_CONFIG_PATH=$funasr_config_path
+    fi
 
-    PARAMS_DOCKER_IMAGE=`sed '/^PARAMS_DOCKER_IMAGE=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
-    PARAMS_DOWNLOAD_MODEL_DIR=`sed '/^PARAMS_DOWNLOAD_MODEL_DIR=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+    docker_image=`sed '/^PARAMS_DOCKER_IMAGE=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+    if [ ! -z "$docker_image" ]; then
+        PARAMS_DOCKER_IMAGE=$docker_image
+    fi
+    download_model_dir=`sed '/^PARAMS_DOWNLOAD_MODEL_DIR=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+    if [ ! -z "$download_model_dir" ]; then
+        PARAMS_DOWNLOAD_MODEL_DIR=$download_model_dir
+    fi
     PARAMS_LOCAL_ASR_PATH=`sed '/^PARAMS_LOCAL_ASR_PATH=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
-    PARAMS_DOCKER_ASR_PATH=`sed '/^PARAMS_DOCKER_ASR_PATH=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
-    PARAMS_ASR_ID=`sed '/^PARAMS_ASR_ID=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
-    PARAMS_LOCAL_VAD_PATH=`sed '/^PARAMS_LOCAL_VAD_PATH=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
-    PARAMS_DOCKER_VAD_PATH=`sed '/^PARAMS_DOCKER_VAD_PATH=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
-    PARAMS_VAD_ID=`sed '/^PARAMS_VAD_ID=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
-    PARAMS_LOCAL_PUNC_PATH=`sed '/^PARAMS_LOCAL_PUNC_PATH=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
-    PARAMS_DOCKER_PUNC_PATH=`sed '/^PARAMS_DOCKER_PUNC_PATH=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
-    PARAMS_PUNC_ID=`sed '/^PARAMS_PUNC_ID=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
-    PARAMS_DOCKER_EXEC_PATH=`sed '/^PARAMS_DOCKER_EXEC_PATH=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
-    PARAMS_HOST_PORT=`sed '/^PARAMS_HOST_PORT=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
-    PARAMS_DOCKER_PORT=`sed '/^PARAMS_DOCKER_PORT=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
-    PARAMS_DECODER_THREAD_NUM=`sed '/^PARAMS_DECODER_THREAD_NUM=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
-    PARAMS_IO_THREAD_NUM=`sed '/^PARAMS_IO_THREAD_NUM=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+    if [ ! -z "$local_asr_path" ]; then
+        PARAMS_LOCAL_ASR_PATH=$local_asr_path
+    fi
+    docker_asr_path=`sed '/^PARAMS_DOCKER_ASR_PATH=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+    if [ ! -z "$docker_asr_path" ]; then
+        PARAMS_DOCKER_ASR_PATH=$docker_asr_path
+    fi
+    asr_id=`sed '/^PARAMS_ASR_ID=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+    if [ ! -z "$asr_id" ]; then
+        PARAMS_ASR_ID=$asr_id
+    fi
+    local_vad_path=`sed '/^PARAMS_LOCAL_VAD_PATH=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+    if [ ! -z "$local_vad_path" ]; then
+        PARAMS_LOCAL_VAD_PATH=$local_vad_path
+    fi
+    docker_vad_path=`sed '/^PARAMS_DOCKER_VAD_PATH=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+    if [ ! -z "$docker_vad_path" ]; then
+        PARAMS_DOCKER_VAD_PATH=$docker_vad_path
+    fi
+    vad_id=`sed '/^PARAMS_VAD_ID=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+    if [ ! -z "$vad_id" ]; then
+        PARAMS_VAD_ID=$vad_id
+    fi
+    local_punc_path=`sed '/^PARAMS_LOCAL_PUNC_PATH=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+    if [ ! -z "$local_punc_path" ]; then
+        PARAMS_LOCAL_PUNC_PATH=$local_punc_path
+    fi
+    docker_punc_path=`sed '/^PARAMS_DOCKER_PUNC_PATH=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+    if [ ! -z "$docker_punc_path" ]; then
+        PARAMS_DOCKER_PUNC_PATH=$docker_punc_path
+    fi
+    punc_id=`sed '/^PARAMS_PUNC_ID=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+    if [ ! -z "$punc_id" ]; then
+        PARAMS_PUNC_ID=$punc_id
+    fi
+    docker_exec_path=`sed '/^PARAMS_DOCKER_EXEC_PATH=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+    if [ ! -z "$docker_exec_path" ]; then
+        PARAMS_DOCKER_EXEC_PATH=$docker_exec_path
+    fi
+    host_port=`sed '/^PARAMS_HOST_PORT=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+    if [ ! -z "$host_port" ]; then
+        PARAMS_HOST_PORT=$host_port
+    fi
+    docker_port=`sed '/^PARAMS_DOCKER_PORT=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+    if [ ! -z "$docker_port" ]; then
+        PARAMS_DOCKER_PORT=$docker_port
+    fi
+    decode_thread_num=`sed '/^PARAMS_DECODER_THREAD_NUM=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+    if [ ! -z "$decode_thread_num" ]; then
+        PARAMS_DECODER_THREAD_NUM=$decode_thread_num
+    fi
+    io_thread_num=`sed '/^PARAMS_IO_THREAD_NUM=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+    if [ ! -z "$io_thread_num" ]; then
+        PARAMS_IO_THREAD_NUM=$io_thread_num
+    fi
 }
 
 saveParams(){
@@ -590,7 +643,7 @@ saveParams(){
 }
 
 showAllParams(){
-    echo -e "${UNDERLINE}${BOLD}[4/6]${PLAIN}"
+    echo -e "${UNDERLINE}${BOLD}[3/5]${PLAIN}"
     echo -e "  ${YELLOW}Show parameters of FunASR server setting and confirm to run ...${PLAIN}"
     echo
 
@@ -680,12 +733,12 @@ showAllParams(){
 
 # Install docker
 installFunasrDocker(){
-    echo -e "${UNDERLINE}${BOLD}[5/6]${PLAIN}"
+    echo -e "${UNDERLINE}${BOLD}[4/5]${PLAIN}"
 
     if [ $DOCKERINFOLEN -gt 30 ]; then
         echo -e "  ${YELLOW}Docker has installed.${PLAIN}"
     else
-        lowercase_osid=$(echo $OSID | tr '[A-Z]' '[a-z]')
+        lowercase_osid=$(echo ${OSID} | tr '[A-Z]' '[a-z]')
         echo -e "  ${YELLOW}Start install docker for ${lowercase_osid} ${PLAIN}"
         DOCKER_INSTALL_CMD="curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun"
         DOCKER_INSTALL_RUN_CMD=""
@@ -748,7 +801,7 @@ installFunasrDocker(){
 }
 
 dockerRun(){
-    echo -e "${UNDERLINE}${BOLD}[6/6]${PLAIN}"
+    echo -e "${UNDERLINE}${BOLD}[5/5]${PLAIN}"
     echo -e "  ${YELLOW}Construct command and run docker ...${PLAIN}"
 
     RUN_CMD="sudo docker run"
@@ -807,7 +860,7 @@ dockerRun(){
     CRT_PATH="\"--certfile\":\"/workspace/FunASR/funasr/runtime/ssl_key/server.crt\""
     KEY_PATH="\"--keyfile\":\"/workspace/FunASR/funasr/runtime/ssl_key/server.key\""
 
-    ENV_PARAMS=" -v /var/funasr:/workspace/.config"
+    ENV_PARAMS=" -v ${DEFAULT_FUNASR_CONFIG_DIR}:/workspace/.config"
     ENV_PARAMS=" ${ENV_PARAMS} --env DAEMON_SERVER_CONFIG={\"server\":[{${EXEC_PARAMS},${MODEL_PARAMS},${THREAD_PARAMS},${PORT_PARAMS},${CRT_PATH},${KEY_PATH}}]}"
 
     RUN_CMD="${RUN_CMD}${PORT_MAP}${DIR_MAP_PARAMS}${ENV_PARAMS}"
@@ -821,11 +874,10 @@ dockerRun(){
         return 50
     fi
 
-    server_log="/var/funasr/server_console.log"
-    rm -f ${PROGRESS_TXT}
-    rm -f ${server_log}
+    rm -f ${DEFAULT_FUNASR_PROGRESS_TXT}
+    rm -f ${DEFAULT_FUNASR_SERVER_LOG}
 
-    ${RUN_CMD}
+    $RUN_CMD
 
     echo
     echo -e "  ${YELLOW}Loading models:${PLAIN}"
@@ -834,7 +886,7 @@ dockerRun(){
     printf "\e[?25l"
     while true
     do
-        ServerProgress
+        serverProgress
         result=$?
         stage=`expr ${result} + 0`
         if [ ${stage} -eq 0 ]; then
@@ -863,7 +915,7 @@ dockerRun(){
 
     downloadSamples
     echo -e "  ${BOLD}The sample code is already stored in the ${PLAIN}(${GREEN}${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}${PLAIN}) ."
-    echo -e "  ${BOLD}If you want to see an example of how to use the client, you can run ${PLAIN}${GREEN}sudo bash funasr-runtime-deploy-offline-cpu-zh.sh -c${PLAIN} ."
+    echo -e "  ${BOLD}If you want to see an example of how to use the client, you can run ${PLAIN}${GREEN}sudo bash funasr-runtime-deploy-offline-cpu-zh.sh client${PLAIN} ."
     echo
 }
 
@@ -886,13 +938,13 @@ checkDockerExist(){
     result=`expr ${result} + 0`
     if [ ${result} -ne 0 ]; then
         echo
-        echo -e "  ${RED}Docker: ${PARAMS_DOCKER_IMAGE} has been launched, please run (${PLAIN}${GREEN}sudo bash funasr-runtime-deploy.sh -p${PLAIN}${RED}) to stop Docker first.${PLAIN}"
+        echo -e "  ${RED}Docker: ${PARAMS_DOCKER_IMAGE} has been launched, please run (${PLAIN}${GREEN}sudo bash funasr-runtime-deploy-offline-cpu-zh.sh stop${PLAIN}${RED}) to stop Docker first.${PLAIN}"
         return 50
     fi
 }
 
 dockerExit(){
-    echo -e "  ${YELLOW}Stop docker(${PARAMS_DOCKER_IMAGE}) server ...${PLAIN}"
+    echo -e "  ${YELLOW}Stop docker(${PLAIN}${GREEN}${PARAMS_DOCKER_IMAGE}${PLAIN}${YELLOW}) server ...${PLAIN}"
     sudo docker stop `sudo docker ps -a| grep ${PARAMS_DOCKER_IMAGE} | awk '{print $1}' `
     echo
     sleep 1
@@ -909,7 +961,7 @@ modelChange(){
         local_flag=0
     fi
 
-    result=$(echo $model_type | grep "asr_model")
+    result=$(echo $model_type | grep "--asr_model")
     if [ "$result" != "" ]; then
         if [ $local_flag -eq 0 ]; then
             PARAMS_ASR_ID=$model_id
@@ -931,7 +983,7 @@ modelChange(){
             fi
         fi
     fi
-    result=$(echo ${model_type} | grep "vad_model")
+    result=$(echo ${model_type} | grep "--vad_model")
     if [ "$result" != "" ]; then
         if [ $local_flag -eq 0 ]; then
             PARAMS_VAD_ID=$model_id
@@ -953,7 +1005,7 @@ modelChange(){
             fi
         fi
     fi
-    result=$(echo $model_type | grep "punc_model")
+    result=$(echo $model_type | grep "--punc_model")
     if [ "$result" != "" ]; then
         if [ $local_flag -eq 0 ]; then
             PARAMS_PUNC_ID=$model_id
@@ -978,11 +1030,11 @@ threadNumChange() {
     if [ -z "$val"]; then
         num=`expr ${val} + 0`
         if [ $num -ge 1 ] && [ $num -le 1024 ]; then
-            result=$(echo ${type} | grep "decode_thread_num")
+            result=$(echo ${type} | grep "--decode_thread_num")
             if [ "$result" != "" ]; then
                 PARAMS_DECODER_THREAD_NUM=$num
             fi
-            result=$(echo ${type} | grep "io_thread_num")
+            result=$(echo ${type} | grep "--io_thread_num")
             if [ "$result" != "" ]; then
                 PARAMS_IO_THREAD_NUM=$num
             fi
@@ -1022,7 +1074,6 @@ sampleClientRun(){
         $UNTAR_CMD
     fi
     if [ -d "$PARAMS_FUNASR_SAMPLES_LOCAL_DIR" ]; then
-
         echo -e "  Please select the client you want to run."
         menuSelection ${SAMPLE_CLIENTS[*]}
         result=$?
@@ -1030,49 +1081,52 @@ sampleClientRun(){
         lang=${SAMPLE_CLIENTS[${index}]}
         echo
 
-        SERVER_IP="127.0.0.1"
-        read -p "  Please enter the IP of server, default($SERVER_IP): " SERVER_IP
-        if [ -z "$SERVER_IP" ]; then
-            SERVER_IP="127.0.0.1"
+        server_ip="127.0.0.1"
+        echo -e "  Please enter the IP of server, default(${CYAN}${server_ip}${PLAIN}): \c"
+        read server_ip
+        if [ -z "$server_ip" ]; then
+            server_ip="127.0.0.1"
         fi
 
-        HOST_PORT=`sed '/^PARAMS_HOST_PORT=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
-        if [ -z "$HOST_PORT" ]; then
-            HOST_PORT="10095"
+        host_port=`sed '/^PARAMS_HOST_PORT=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+        if [ -z "$host_port" ]; then
+            host_port="10095"
         fi
-        read -p "  Please enter the port of server, default($HOST_PORT): " HOST_PORT
-        if [ -z "$HOST_PORT" ]; then
-            HOST_PORT=`sed '/^PARAMS_HOST_PORT=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
-            if [ -z "$HOST_PORT" ]; then
-                HOST_PORT="10095"
+        echo -e "  Please enter the port of server, default(${CYAN}${host_port}${PLAIN}): \c"
+        read host_port
+        if [ -z "$host_port" ]; then
+            host_port=`sed '/^PARAMS_HOST_PORT=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+            if [ -z "$host_port" ]; then
+                host_port="10095"
             fi
         fi
 
-        WAV_PATH="${PARAMS_FUNASR_LOCAL_WORKSPACE}/funasr_samples/audio/asr_example.wav"
-        read -p "  Please enter the audio path, default(${WAV_PATH}): " WAV_PATH
-        if [ -z "$WAV_PATH" ]; then
-            WAV_PATH="${PARAMS_FUNASR_LOCAL_WORKSPACE}/funasr_samples/audio/asr_example.wav"
+        wav_path="${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/audio/asr_example.wav"
+        echo -e "  Please enter the audio path, default(${CYAN}${wav_path}${PLAIN}): \c"
+        read WAV_PATH
+        if [ -z "$wav_path" ]; then
+            wav_path="${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/audio/asr_example.wav"
         fi
 
         echo
         PRE_CMD=”“
         case "$lang" in
             Linux_Cpp)
-                PRE_CMD="export LD_LIBRARY_PATH=${PARAMS_FUNASR_LOCAL_WORKSPACE}/funasr_samples/cpp/libs:\$LD_LIBRARY_PATH"
-                CLIENT_EXEC="${PARAMS_FUNASR_LOCAL_WORKSPACE}/funasr_samples/cpp/funasr-wss-client"
-                RUN_CMD="${CLIENT_EXEC} --server-ip ${SERVER_IP} --port ${HOST_PORT} --wav-path ${WAV_PATH}"
+                PRE_CMD="export LD_LIBRARY_PATH=${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/cpp/libs:\$LD_LIBRARY_PATH"
+                CLIENT_EXEC="${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/cpp/funasr-wss-client"
+                RUN_CMD="${CLIENT_EXEC} --server-ip ${server_ip} --port ${host_port} --wav-path ${wav_path}"
                 echo -e "  Run ${BLUE}${PRE_CMD}${PLAIN}"
                 $PRE_CMD
                 echo
                 ;;
             Python)
-                CLIENT_EXEC="${PARAMS_FUNASR_LOCAL_WORKSPACE}/funasr_samples/python/wss_client_asr.py"
-                RUN_CMD="python3 ${CLIENT_EXEC} --host ${SERVER_IP} --port ${HOST_PORT} --mode offline --audio_in ${WAV_PATH} --send_without_sleep --output_dir ${PARAMS_FUNASR_LOCAL_WORKSPACE}/funasr_samples/python"
+                CLIENT_EXEC="${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/python/wss_client_asr.py"
+                RUN_CMD="python3 ${CLIENT_EXEC} --host ${server_ip} --port ${host_port} --mode offline --audio_in ${wav_path} --send_without_sleep --output_dir ${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/python"
                 PRE_CMD="pip3 install click>=8.0.4"
                 echo -e "  Run ${BLUE}${PRE_CMD}${PLAIN}"
                 $PRE_CMD
                 echo
-                PRE_CMD="pip3 install -r ${PARAMS_FUNASR_LOCAL_WORKSPACE}/funasr_samples/python/requirements_client.txt"
+                PRE_CMD="pip3 install -r ${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/python/requirements_client.txt"
                 echo -e "  Run ${BLUE}${PRE_CMD}${PLAIN}"
                 $PRE_CMD
                 echo
@@ -1092,7 +1146,6 @@ sampleClientRun(){
 
 paramsConfigure(){
     initConfiguration
-    setupLocalWorkspaceDir
     initParameters
     selectDockerImages
     result=$?
@@ -1110,17 +1163,19 @@ displayHelp(){
     echo -e "${UNDERLINE}Usage${PLAIN}:"
     echo -e "  $0 [OPTIONAL FLAGS]"
     echo
-    echo -e "funasr-runtime-deploy-offline-cpu.sh - a Bash script to install&run FunASR docker."
+    echo -e "funasr-runtime-deploy-offline-cpu-zh.sh - a Bash script to install&run FunASR docker."
     echo
     echo -e "${UNDERLINE}Options${PLAIN}:"
     echo -e "   ${BOLD}-i, install, --install${PLAIN}    Install and run FunASR docker."
+    echo -e "                install [--workspace] <workspace in local>"
     echo -e "   ${BOLD}-s, start  , --start${PLAIN}      Run FunASR docker with configuration that has already been set."
     echo -e "   ${BOLD}-p, stop   , --stop${PLAIN}       Stop FunASR docker."
     echo -e "   ${BOLD}-r, restart, --restart${PLAIN}    Restart FunASR docker."
     echo -e "   ${BOLD}-u, update , --update${PLAIN}     Update parameters that has already been set."
-    echo -e "                --update [asr_model | vad_model | punc_model] <model_id or local model path>"
-    echo -e "                --update [host_port | docker_port] <port number>"
-    echo -e "                --update [decode_thread_num | io_thread_num] <the number of threads>"
+    echo -e "                update [--workspace] <workspace in local>"
+    echo -e "                update [--asr_model | --vad_model | --punc_model] <model_id or local model path>"
+    echo -e "                update [--host_port | --docker_port] <port number>"
+    echo -e "                update [--decode_thread_num | io_thread_num] <the number of threads>"
     echo -e "   ${BOLD}-c, client , --client${PLAIN}     Get a client example to show how to initiate speech recognition."
     echo -e "   ${BOLD}-o, show   , --show${PLAIN}       Displays all parameters that have been set."
     echo -e "   ${BOLD}-v, version, --version${PLAIN}    Display current script version."
@@ -1144,7 +1199,11 @@ parseInput(){
                 stage=$result
             else
                 if [ "$stage" = "--workspace" ]; then
-                    DEFAULT_FUNASR_LOCAL_WORKSPACE=$val
+                    relativePathToFullPath $val
+                    PARAMS_FUNASR_LOCAL_WORKSPACE=$full_path
+                    if [ ! -z "$PARAMS_FUNASR_LOCAL_WORKSPACE" ]; then
+                        mkdir -p $PARAMS_FUNASR_LOCAL_WORKSPACE
+                    fi
                 fi
             fi
         done
@@ -1163,7 +1222,7 @@ DOCKERINFOLEN=`expr ${DOCKERINFO} + 0`
 #  The workspace for FunASR in local
 PARAMS_FUNASR_LOCAL_WORKSPACE=$DEFAULT_FUNASR_LOCAL_WORKSPACE
 #  The dir stored sample code in local
-PARAMS_FUNASR_SAMPLES_LOCAL_DIR=${PARAMS_FUNASR_LOCAL_WORKSPACE}/${DEFAULT_SAMPLES_NAME}
+PARAMS_FUNASR_SAMPLES_LOCAL_DIR=${PARAMS_FUNASR_LOCAL_WORKSPACE}/${DEFAULT_SAMPLES_DIR}
 #  The path of sample code in local
 PARAMS_FUNASR_SAMPLES_LOCAL_PATH=${PARAMS_FUNASR_LOCAL_WORKSPACE}/${DEFAULT_SAMPLES_NAME}.tar.gz
 #  The dir stored models in local
@@ -1236,6 +1295,7 @@ echo
 case "$1" in
     install|-i|--install)
         rootNess
+        paramsFromDefault
         parseInput $@
         paramsConfigure
         result=$?
@@ -1289,21 +1349,27 @@ case "$1" in
         if [ $# -eq 3 ]; then
             type=$2
             val=$3
-            if [ "$type" = "asr_model" ] || [ "$type" = "vad_model" ] || [ "$type" = "punc_model" ]; then
+            if [ "$type" = "--asr_model" ] || [ "$type" = "--vad_model" ] || [ "$type" = "--punc_model" ]; then
                 modelChange $type $val
-            elif [ "$type" = "decode_thread_num" ] || [ "$type" = "io_thread_num" ]; then
+            elif [ "$type" = "--decode_thread_num" ] || [ "$type" = "--io_thread_num" ]; then
                 threadNumChange $type $val
-            elif [ "$type" = "host_port" ] || [ "$type" = "docker_port" ]; then
+            elif [ "$type" = "--host_port" ] || [ "$type" = "--docker_port" ]; then
                 portChange $type $val
+            elif [ "$type" = "--workspace" ]; then
+                relativePathToFullPath $val
+                PARAMS_FUNASR_LOCAL_WORKSPACE=$full_path
+                if [ ! -z "$PARAMS_FUNASR_LOCAL_WORKSPACE" ]; then
+                    mkdir -p $PARAMS_FUNASR_LOCAL_WORKSPACE
+                fi
             else
-                setupLocalWorkspaceDir
+                displayHelp
             fi
         else
-            setupLocalWorkspaceDir
+            displayHelp
         fi
 
-        complementParameters
         initParameters
+        complementParameters
         showAllParams
         dockerExit
         dockerRun
@@ -1317,6 +1383,7 @@ case "$1" in
     client|-c|--client)
         rootNess
         paramsFromDefault
+        parseInput $@
         sampleClientRun
         ;;
     show|-o|--show)
