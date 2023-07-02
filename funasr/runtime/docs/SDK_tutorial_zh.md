@@ -67,10 +67,10 @@ python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode offline --audio
 ```
 
 ### cpp-client
-
+进入samples/cpp目录后，可以用cpp进行测试，指令如下：
 ```shell
-export LD_LIBRARY_PATH=/root/funasr_samples/cpp/libs:$LD_LIBRARY_PATH
-/root/funasr_samples/cpp/funasr-wss-client --server-ip 127.0.0.1 --port 10095 --wav-path /root/funasr_samples/audio/asr_example.wav
+export LD_LIBRARY_PATH=./libs:$LD_LIBRARY_PATH
+./funasr-wss-client --server-ip 127.0.0.1 --port 10095 --wav-path ../audio/asr_example.wav
 ```
 
 命令参数说明：
