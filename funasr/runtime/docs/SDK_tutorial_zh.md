@@ -46,6 +46,7 @@ python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode offline --audio
 - [Python](#python-client)
 - [CPP](#cpp-client)
 - [html网页版本](#Html网页版)
+- [Java](#Java-client)
 
 更多版本客户端支持请参考[开发指南](./SDK_advanced_guide_offline_zh.md)
 
@@ -86,6 +87,12 @@ export LD_LIBRARY_PATH=./libs:$LD_LIBRARY_PATH
 
 <img src="images/html.png"  width="900"/>
 
+### Java-client
+
+```shell
+FunasrWsClient --host localhost --port 10095 --audio_in ./asr_example.wav --mode offline
+```
+详细可以参考文档（[点击此处](../java/readme.md)）
 
 ## 服务端用法详解
 
