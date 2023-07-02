@@ -28,7 +28,7 @@ sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace /root/funa
 ### 客户端测试与使用
 
 运行上面安装指令后，会在/root/funasr-runtime-sdk（默认安装目录）中下载客户端测试工具目录funasr_samples，
-我们以Python语言客户端为例，进行说明，支持多种音频格式输入（.wav, .pcm, .mp3等），也支持视频输入(.mp4等)，以及多文件列表wav.scp输入，其他版本客户端请参考文档（[点击此处](##客户端用法详解)）
+我们以Python语言客户端为例，进行说明，支持多种音频格式输入（.wav, .pcm, .mp3等），也支持视频输入(.mp4等)，以及多文件列表wav.scp输入，其他版本客户端请参考文档（[点击此处](#客户端用法详解)）
 
 ```shell
 python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.wav" --output_dir "./results"
@@ -39,10 +39,10 @@ python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode offline --audio
 在服务器上完成FunASR服务部署以后，可以通过如下的步骤来测试和使用离线文件转写服务。
 目前分别支持以下几种编程语言客户端
 
-- [Python](###python-client)
-- [CPP](###cpp-client)
+- [Python](#python-client)
+- [CPP](#cpp-client)
 - [Java]()
-- [html网页版本]()
+- [html网页版本](#Html网页版)
 
 更多版本客户端支持请参考[开发指南](./SDK_advanced_guide_offline_zh.md)
 
@@ -76,6 +76,13 @@ export LD_LIBRARY_PATH=/root/funasr_samples/cpp/libs:$LD_LIBRARY_PATH
 --port 10095 部署端口号
 --wav-path 需要进行转写的音频文件，支持文件路径
 ```
+
+### Html网页版
+
+在浏览器中打开 html/static/index.html，即可出现如下页面，支持麦克风输入与文件上传，直接进行体验
+
+<img src="images/html.png"  width="900"/>
+
 
 ## 服务端用法详解
 
