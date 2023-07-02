@@ -922,6 +922,11 @@ dockerRun(){
 installPythonDependencyForPython(){
     echo -e "${YELLOW}Install Python dependent environments ...${PLAIN}"
 
+    echo -e "  Export dependency of Cpp sample."
+    pre_cmd="export LD_LIBRARY_PATH=${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/cpp/libs:\$LD_LIBRARY_PATH"
+    $pre_cmd
+    echo
+
     echo -e "  Install requirements of Python sample."
     pre_cmd="pip3 install click>=8.0.4"
     $pre_cmd
