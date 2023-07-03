@@ -23,7 +23,7 @@
 
 ### FunASR runtime-SDK
 
-- 2023.07.02: 
+- 2023.07.03: 
 We have release the FunASR runtime-SDK-0.1.0, file transcription service (Mandarin) is now supported ([ZH](funasr/runtime/readme_cn.md)/[EN](funasr/runtime/readme.md))
 
 ### Multi-Channel Multi-Party Meeting Transcription 2.0 (M2MeT2.0) Challenge
