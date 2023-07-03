@@ -42,10 +42,10 @@ parser.add_argument("--send_without_sleep",
                     action="store_true",
                     default=True,
                     help="if audio_in is set, send_without_sleep")
-parser.add_argument("--test_thread_num",
+parser.add_argument("--thread_num",
                     type=int,
                     default=1,
-                    help="test_thread_num")
+                    help="thread_num")
 parser.add_argument("--words_max_print",
                     type=int,
                     default=10000,
@@ -311,16 +311,16 @@ if __name__ == '__main__':
                     f'Not supported audio type: {audio_type}')
 
         total_len = len(wavs)
-        if total_len >= args.test_thread_num:
-            chunk_size = int(total_len / args.test_thread_num)
-            remain_wavs = total_len - chunk_size * args.test_thread_num
+        if total_len >= args.thread_num:
+            chunk_size = int(total_len / args.thread_num)
+            remain_wavs = total_len - chunk_size * args.thread_num
         else:
             chunk_size = 1
             remain_wavs = 0
 
         process_list = []
         chunk_begin = 0
-        for i in range(args.test_thread_num):
+        for i in range(args.thread_num):
             now_chunk_size = chunk_size
             if remain_wavs > 0:
                 now_chunk_size = chunk_size + 1
