@@ -244,6 +244,7 @@ class ContextualParaformerDecoder(ParaformerSANMDecoder):
         ys_in_pad: torch.Tensor,
         ys_in_lens: torch.Tensor,
         contextual_info: torch.Tensor,
+        clas_scale: float = 1.0,
         return_hidden: bool = False,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Forward decoder.
@@ -283,7 +284,7 @@ class ContextualParaformerDecoder(ParaformerSANMDecoder):
         cx, tgt_mask, _, _, _ = self.bias_decoder(x_self_attn, tgt_mask, contextual_info, memory_mask=contextual_mask)
 
         if self.bias_output is not None:
-            x = torch.cat([x_src_attn, cx], dim=2)
+            x = torch.cat([x_src_attn, cx*clas_scale], dim=2)
             x = self.bias_output(x.transpose(1, 2)).transpose(1, 2)  # 2D -> D
             x = x_self_attn + self.dropout(x)
 
