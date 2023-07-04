@@ -1,1 +1,2 @@
 websockets
+typeguard==2.13.3 # fix cannot import name 'check_argument_types' from 'typeguard'

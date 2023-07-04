@@ -20,7 +20,7 @@ app = Flask(__name__,static_folder='static',static_url_path="/static")
 
 @app.route('/')
 def homePage():
-    return render_template('recorderapp_test.html')
+    return render_template('index.html')
 
  
 parser = argparse.ArgumentParser()

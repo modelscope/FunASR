@@ -7,9 +7,9 @@
  
 	</head>
 	<body style="margin-left: 3%">
-		<script src="recorder-core.js" charset="UTF-8"></script>
-		<script src="wav.js" charset="UTF-8"></script>
-		<script src="pcm.js" charset="UTF-8"></script>
+		<script src="{{url_for('static',filename='recorder-core.js')}}" charset="UTF-8"></script>
+		<script src="{{url_for('static',filename='wav.js')}}" charset="UTF-8"></script>
+		<script src="{{url_for('static',filename='pcm.js')}}" charset="UTF-8"></script>
 
 		 
 
@@ -71,8 +71,8 @@
 			</div>
 		</div>
 
- 		<script src="wsconnecter.js" charset="utf-8"></script>
-		<script src="main.js" charset="utf-8"></script>
+ 		<script src="{{url_for('static',filename='wsconnecter.js')}}" charset="utf-8"></script>
+		<script src="{{url_for('static',filename='main.js')}}" charset="utf-8"></script>
 		
 
  
