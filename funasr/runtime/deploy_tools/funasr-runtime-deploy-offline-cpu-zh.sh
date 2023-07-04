@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-scriptVersion="0.0.4"
-scriptDate="20230702"
+scriptVersion="0.0.5"
+scriptDate="20230704"
 
 
 # Set color
@@ -22,15 +22,18 @@ BOLD="\033[1m"
 UNDERLINE="\033[4m"
 
 # Current folder
-cur_dir=`pwd`
+CUR_DIR=`pwd`
+SUDO_CMD="sudo"
 
 
-DEFAULT_DOCKER_OFFLINE_CPU_ZH_LISTS="https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/funasr/runtime/docs/docker_offline_cpu_zh_lists"
-DEFAULT_DOCKER_IMAGE_LISTS=$DEFAULT_DOCKER_OFFLINE_CPU_ZH_LISTS
+DEFAULT_DOCKER_OFFLINE_CPU_ZH_LISTS_OSS="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/docker_lists/docker_offline_cpu_zh_lists"
+DEFAULT_DOCKER_OFFLINE_CPU_ZH_LISTS_GIT="https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/funasr/runtime/docs/docker_offline_cpu_zh_lists"
+DEFAULT_DOCKER_IMAGE_LISTS=$DEFAULT_DOCKER_OFFLINE_CPU_ZH_LISTS_OSS
 DEFAULT_FUNASR_DOCKER_URL="registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr"
 DEFAULT_FUNASR_RUNTIME_RESOURCES="funasr-runtime-resources"
-DEFAULT_FUNASR_LOCAL_WORKSPACE="${cur_dir}/${DEFAULT_FUNASR_RUNTIME_RESOURCES}"
-DEFAULT_FUNASR_CONFIG_DIR="/var/funasr"
+DEFAULT_FUNASR_LOCAL_WORKSPACE=${CUR_DIR}/${DEFAULT_FUNASR_RUNTIME_RESOURCES}
+DEFAULT_FUNASR_CONFIG_DIR=""
+DEFAULT_FUNASR_CONFIG_DIR_BAK="/var/funasr"
 DEFAULT_FUNASR_CONFIG_FILE="${DEFAULT_FUNASR_CONFIG_DIR}/config"
 DEFAULT_FUNASR_PROGRESS_TXT="${DEFAULT_FUNASR_CONFIG_DIR}/progress.txt"
 DEFAULT_FUNASR_SERVER_LOG="${DEFAULT_FUNASR_CONFIG_DIR}/server_console.log"
@@ -308,11 +311,34 @@ relativePathToFullPath(){
 }
 
 initConfiguration(){
-    if [ ! -z "$DEFAULT_FUNASR_CONFIG_DIR" ]; then
-        mkdir -p $DEFAULT_FUNASR_CONFIG_DIR
+    if [ -z "$DEFAULT_FUNASR_CONFIG_DIR" ];then
+        DEFAULT_FUNASR_CONFIG_DIR="$HOME"
+        if [ -z "$DEFAULT_FUNASR_CONFIG_DIR" ];then
+            $DEFAULT_FUNASR_CONFIG_DIR=$(echo ~/)
+            if [ -z "$DEFAULT_FUNASR_CONFIG_DIR" ];then
+                $DEFAULT_FUNASR_CONFIG_DIR=$DEFAULT_FUNASR_CONFIG_DIR_BAK
+            fi
+        fi
+        DEFAULT_FUNASR_CONFIG_DIR=${DEFAULT_FUNASR_CONFIG_DIR}/.funasr
     fi
+
+    if [ ! -z "$DEFAULT_FUNASR_CONFIG_DIR" ]; then
+        $SUDO_CMD mkdir -p $DEFAULT_FUNASR_CONFIG_DIR
+    else
+        echo -e "    ${RED}DEFAULT_FUNASR_CONFIG_DIR is empty!${PLAIN}"
+        exit 1
+    fi
+    if [ ! -d "$DEFAULT_FUNASR_CONFIG_DIR" ]; then
+        echo -e "    ${RED}${DEFAULT_FUNASR_CONFIG_DIR} does not exist!${PLAIN}"
+        exit 2
+    fi
+
+    DEFAULT_FUNASR_CONFIG_FILE="${DEFAULT_FUNASR_CONFIG_DIR}/config"
+    DEFAULT_FUNASR_PROGRESS_TXT="${DEFAULT_FUNASR_CONFIG_DIR}/progress.txt"
+    DEFAULT_FUNASR_SERVER_LOG="${DEFAULT_FUNASR_CONFIG_DIR}/server_console.log"
+
     if [ ! -f $DEFAULT_FUNASR_CONFIG_FILE ]; then
-        touch $DEFAULT_FUNASR_CONFIG_FILE
+        $SUDO_CMD touch $DEFAULT_FUNASR_CONFIG_FILE
     fi
 }
 
@@ -346,14 +372,21 @@ findTypeOfDockerInfo(){
 
 # Get a list of docker images.
 readDockerInfoFromUrl(){
-    list_url=$DEFAULT_DOCKER_IMAGE_LISTS
     while true
     do
+        list_url=$DEFAULT_DOCKER_IMAGE_LISTS
         content=$(curl --connect-timeout 10 -m 10 -s $list_url)
         if [ ! -z "$content" ]; then
             break
         else
             echo -e "    ${RED}Unable to get docker image list due to network issues, try again.${PLAIN}"
+
+            # switch sources of docker image lists
+            if [ "$list_url" = "$DEFAULT_DOCKER_OFFLINE_CPU_ZH_LISTS_OSS" ]; then
+                DEFAULT_DOCKER_IMAGE_LISTS=$DEFAULT_DOCKER_OFFLINE_CPU_ZH_LISTS_GIT
+            else
+                DEFAULT_DOCKER_IMAGE_LISTS=$DEFAULT_DOCKER_OFFLINE_CPU_ZH_LISTS_OSS
+            fi
         fi
     done
     array=($(echo "$content"))
@@ -397,7 +430,12 @@ rootNess(){
         echo -e "  ${ERROR} MUST RUN AS ${RED}ROOT${PLAIN} USER!"
     fi
 
-    cd $cur_dir
+    check_sudo=$(which sudo | wc -l)
+    if [ $check_sudo -eq 0 ]; then
+        SUDO_CMD=""
+    fi
+
+    cd $CUR_DIR
     echo
 }
 
@@ -408,22 +446,42 @@ selectDockerImages(){
     readDockerInfoFromUrl
     echo
 
+    the_latest_docker_image=$PARAMS_DOCKER_IMAGE
+
     echo -e "  ${YELLOW}Please choose the Docker image.${PLAIN}"
     menuSelection ${DOCKER_IMAGES[*]}
     result=$?
-    index=`expr $result - 1`
+    index=`expr ${result} - 1`
 
     PARAMS_DOCKER_IMAGE=${DOCKER_IMAGES[${index}]}
     echo -e "  ${UNDERLINE}You have chosen the Docker image:${PLAIN} ${GREEN}${PARAMS_DOCKER_IMAGE}${PLAIN}"
 
-    checkDockerExist
-    result=$?
-    result=`expr $result + 0`
-    if [ ${result} -eq 50 ]; then
-        return 50
+    if [ -z "$the_latest_docker_image" ] && [ -z "$PARAMS_FUNASR_DOCKER_ID" ]; then
+        result=0
+    else
+        #  0: DOCKER is not running
+        # 60: DOCKER_ID is empty
+        # 61: DOCKER_IMAGE is empty
+        # 62: DOCKER is running
+        # 63: DOCKER_ID and DOCKER_IMAGE are empty
+        checkDockerIdExist "install"
+        result=$?
+        result=`expr ${result} + 0`
+        if [ $result -eq 60 ]; then
+            result=0
+        elif [ $result -eq 61 ]; then
+            echo
+            echo -e "  ${RED}Please run (${PLAIN}${GREEN}${SUDO_CMD} bash funasr-runtime-deploy-offline-cpu-zh.sh install${PLAIN}${RED}) to install Docker first.${PLAIN}"
+        elif [ $result -eq 62 ]; then
+            echo
+            echo -e "  ${RED}Docker: ${PARAMS_DOCKER_IMAGE} ${PARAMS_FUNASR_DOCKER_ID} has been launched, please run (${PLAIN}${GREEN}${SUDO_CMD} bash funasr-runtime-deploy-offline-cpu-zh.sh remove${PLAIN}${RED}) to remove Docker first ant then install.${PLAIN}"
+        elif [ $result -eq 63 ]; then
+            result=0
+        fi
     fi
 
     echo
+    return $result
 }
 
 # Configure FunASR server host port setting.
@@ -530,10 +588,6 @@ paramsFromDefault(){
     if [ ! -z "$funasr_local_models_dir" ]; then
         PARAMS_FUNASR_LOCAL_MODELS_DIR=$funasr_local_models_dir
     fi
-    funasr_config_path=`sed '/^PARAMS_FUNASR_CONFIG_PATH=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
-    if [ ! -z "$funasr_config_path" ]; then
-        PARAMS_FUNASR_CONFIG_PATH=$funasr_config_path
-    fi
 
     docker_image=`sed '/^PARAMS_DOCKER_IMAGE=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
     if [ ! -z "$docker_image" ]; then
@@ -599,6 +653,15 @@ paramsFromDefault(){
     if [ ! -z "$io_thread_num" ]; then
         PARAMS_IO_THREAD_NUM=$io_thread_num
     fi
+
+    ssl_flag=`sed '/^PARAMS_SSL_FLAG=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+    if [ ! -z "$ssl_flag" ]; then
+        PARAMS_SSL_FLAG=$ssl_flag
+    fi
+    docker_id=`sed '/^PARAMS_FUNASR_DOCKER_ID=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+    if [ ! -z "$docker_id" ]; then
+        PARAMS_FUNASR_DOCKER_ID=$docker_id
+    fi
 }
 
 saveParams(){
@@ -611,7 +674,6 @@ saveParams(){
     echo "PARAMS_FUNASR_SAMPLES_LOCAL_DIR=${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}" >> $DEFAULT_FUNASR_CONFIG_FILE
     echo "PARAMS_FUNASR_SAMPLES_LOCAL_PATH=${PARAMS_FUNASR_SAMPLES_LOCAL_PATH}" >> $DEFAULT_FUNASR_CONFIG_FILE
     echo "PARAMS_FUNASR_LOCAL_MODELS_DIR=${PARAMS_FUNASR_LOCAL_MODELS_DIR}" >> $DEFAULT_FUNASR_CONFIG_FILE
-    echo "PARAMS_FUNASR_CONFIG_PATH=${PARAMS_FUNASR_CONFIG_PATH}" >> $DEFAULT_FUNASR_CONFIG_FILE
 
     echo "PARAMS_DOWNLOAD_MODEL_DIR=${PARAMS_DOWNLOAD_MODEL_DIR}" >> $DEFAULT_FUNASR_CONFIG_FILE
 
@@ -640,12 +702,16 @@ saveParams(){
     echo "PARAMS_DOCKER_PORT=${PARAMS_DOCKER_PORT}" >> $DEFAULT_FUNASR_CONFIG_FILE
     echo "PARAMS_DECODER_THREAD_NUM=${PARAMS_DECODER_THREAD_NUM}" >> $DEFAULT_FUNASR_CONFIG_FILE
     echo "PARAMS_IO_THREAD_NUM=${PARAMS_IO_THREAD_NUM}" >> $DEFAULT_FUNASR_CONFIG_FILE
+    echo "PARAMS_SSL_FLAG=${PARAMS_SSL_FLAG}" >> $DEFAULT_FUNASR_CONFIG_FILE
+    echo "PARAMS_FUNASR_DOCKER_ID=${PARAMS_FUNASR_DOCKER_ID}" >> $DEFAULT_FUNASR_CONFIG_FILE
 }
 
 showAllParams(){
     echo -e "${UNDERLINE}${BOLD}[3/5]${PLAIN}"
     echo -e "  ${YELLOW}Show parameters of FunASR server setting and confirm to run ...${PLAIN}"
     echo
+
+    only_show_flag=$1
 
     if [ ! -z "$PARAMS_DOCKER_IMAGE" ]; then
         echo -e "  The current Docker image is                                    : ${GREEN}${PARAMS_DOCKER_IMAGE}${PLAIN}"
@@ -696,8 +762,19 @@ showAllParams(){
     if [ ! -z "$PARAMS_FUNASR_SAMPLES_LOCAL_DIR" ]; then
         echo -e "  Sample code will be store in local                             : ${GREEN}${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}${PLAIN}"
     fi
+    if [ ! -z "$PARAMS_SSL_FLAG" ]; then
+        echo -e "  The flag for the use of SSL                                    : ${GREEN}${PARAMS_SSL_FLAG}${PLAIN}"
+    fi
+    if [ "$only_show_flag" = "only_show" ] && [ ! -z "$PARAMS_FUNASR_DOCKER_ID" ]; then
+        echo -e "  The docker ID that already exists is                           : ${GREEN}${PARAMS_FUNASR_DOCKER_ID}${PLAIN}"
+    fi
 
     echo
+
+    if [ "$only_show_flag" = "only_show" ]; then
+        return 0
+    fi
+
     while true
     do
         params_confirm="y"
@@ -746,22 +823,22 @@ installFunasrDocker(){
         case "$lowercase_osid" in
             ubuntu)
                 DOCKER_INSTALL_CMD="curl -fsSL https://test.docker.com -o test-docker.sh"
-                DOCKER_INSTALL_RUN_CMD="sudo sh test-docker.sh"
+                DOCKER_INSTALL_RUN_CMD="${SUDO_CMD} sh test-docker.sh"
                 ;;
             centos)
                 DOCKER_INSTALL_CMD="curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun"
                 ;;
             debian)
                 DOCKER_INSTALL_CMD="curl -fsSL https://get.docker.com -o get-docker.sh"
-                DOCKER_INSTALL_RUN_CMD="sudo sh get-docker.sh"
+                DOCKER_INSTALL_RUN_CMD="${SUDO_CMD} sh get-docker.sh"
                 ;;
             \"alios\")
                 DOCKER_INSTALL_CMD="curl -fsSL https://get.docker.com -o get-docker.sh"
-                DOCKER_INSTALL_RUN_CMD="sudo sh get-docker.sh"
+                DOCKER_INSTALL_RUN_CMD="${SUDO_CMD} sh get-docker.sh"
                 ;;
             \"alinux\")
-                DOCKER_INSTALL_CMD="sudo yum -y install dnf"
-                DOCKER_INSTALL_RUN_CMD="sudo dnf -y install docker"
+                DOCKER_INSTALL_CMD="${SUDO_CMD} yum -y install dnf"
+                DOCKER_INSTALL_RUN_CMD="${SUDO_CMD} dnf -y install docker"
                 ;;
             *)
                 echo -e "  ${RED}$lowercase_osid is not supported.${PLAIN}"
@@ -775,13 +852,13 @@ installFunasrDocker(){
         if [ ! -z "$DOCKER_INSTALL_RUN_CMD" ]; then
             $DOCKER_INSTALL_RUN_CMD
         fi
-        sudo systemctl start docker
+        $SUDO_CMD systemctl start docker
 
-        DOCKERINFO=$(sudo docker info | wc -l)
+        DOCKERINFO=$(${SUDO_CMD} docker info | wc -l)
         DOCKERINFOLEN=`expr ${DOCKERINFO} + 0`
         if [ $DOCKERINFOLEN -gt 30 ]; then
             echo -e "  ${GREEN}Docker install success, start docker server.${PLAIN}"
-            sudo systemctl start docker
+            $SUDO_CMD systemctl start docker
         else
             echo -e "  ${RED}Docker install failed!${PLAIN}"
             exit 1
@@ -794,7 +871,7 @@ installFunasrDocker(){
     # Download docker image
     echo -e "  ${YELLOW}Pull docker image(${PARAMS_DOCKER_IMAGE})...${PLAIN}"
 
-    sudo docker pull $PARAMS_DOCKER_IMAGE
+    ${SUDO_CMD} docker pull $PARAMS_DOCKER_IMAGE
 
     echo
     sleep 1
@@ -804,74 +881,81 @@ dockerRun(){
     echo -e "${UNDERLINE}${BOLD}[5/5]${PLAIN}"
     echo -e "  ${YELLOW}Construct command and run docker ...${PLAIN}"
 
-    run_cmd="sudo docker run"
-    port_map=" -p ${PARAMS_HOST_PORT}:${PARAMS_DOCKER_PORT}"
-    dir_params=" --privileged=true"
-    dir_map_params=""
-    if [ ! -z "$PARAMS_LOCAL_ASR_DIR" ]; then
-        if [ -z "$dir_map_params" ]; then
-            dir_map_params="${dir_params} -v ${PARAMS_LOCAL_ASR_DIR}:${PARAMS_DOCKER_ASR_DIR}"
-        else
-            dir_map_params="${dir_map_params} -v ${PARAMS_LOCAL_ASR_DIR}:${PARAMS_DOCKER_ASR_DIR}"
-        fi
-    fi
-    if [ ! -z "$PARAMS_LOCAL_VAD_DIR" ]; then
-        if [ -z "$dir_map_params" ]; then
-            dir_map_params="${dir_params} -v ${PARAMS_LOCAL_VAD_DIR}:${PARAMS_DOCKER_VAD_DIR}"
-        else
-            dir_map_params="${dir_map_params} -v ${PARAMS_LOCAL_VAD_DIR}:${PARAMS_DOCKER_VAD_DIR}"
-        fi
-    fi
-    if [ ! -z "$PARAMS_LOCAL_PUNC_DIR" ]; then
-        if [ -z "$dir_map_params" ]; then
-            dir_map_params="${dir_params} -v ${PARAMS_LOCAL_PUNC_DIR}:${PARAMS_DOCKER_PUNC_DIR}"
-        else
-            dir_map_params="${dir_map_params} -v ${PARAMS_LOCAL_VAD_DIR}:${PARAMS_DOCKER_VAD_DIR}"
-        fi
-    fi
+    start_flag=$1
+    if [ "$start_flag" = "install" ]; then
+        run_cmd="${SUDO_CMD} docker run"
+        port_map=" -p ${PARAMS_HOST_PORT}:${PARAMS_DOCKER_PORT}"
+        env_params=" --privileged=true"
+        dir_map_params=" -v ${DEFAULT_FUNASR_CONFIG_DIR}:/workspace/.config -v ${PARAMS_FUNASR_LOCAL_MODELS_DIR}:${PARAMS_DOWNLOAD_MODEL_DIR}"
 
-    exec_params="\"exec\":\"${PARAMS_DOCKER_EXEC_PATH}\""
-    if [ ! -z "$PARAMS_ASR_ID" ]; then
-        asr_params="\"--model-dir\":\"${PARAMS_ASR_ID}\""
-    else
-        asr_params="\"--model-dir\":\"${PARAMS_DOCKER_ASR_PATH}\""
-    fi
-    if [ ! -z "$PARAMS_VAD_ID" ]; then
-        vad_params="\"--vad-dir\":\"${PARAMS_VAD_ID}\""
-    else
-        vad_params="\"--vad-dir\":\"${PARAMS_DOCKER_VAD_PATH}\""
-    fi
-    if [ ! -z "$PARAMS_PUNC_ID" ]; then
-        punc_params="\"--punc-dir\":\"${PARAMS_PUNC_ID}\""
-    else
-        punc_params="\"--punc-dir\":\"${PARAMS_DOCKER_PUNC_PATH}\""
-    fi
-    download_params="\"--download-model-dir\":\"${PARAMS_DOWNLOAD_MODEL_DIR}\""
-    if [ -z "$PARAMS_DOWNLOAD_MODEL_DIR" ]; then
-        model_params="${asr_params},${vad_params},${punc_params}"
-    else
+        if [ ! -z "$PARAMS_ASR_ID" ]; then
+            asr_params="\"--model-dir\":\"${PARAMS_ASR_ID}\""
+        else
+            if [ ! -z "$PARAMS_LOCAL_ASR_PATH" ]; then
+                dir_map_params="${dir_map_params} -v ${PARAMS_LOCAL_ASR_PATH}:${PARAMS_DOCKER_ASR_PATH}"
+            fi
+            asr_params="\"--model-dir\":\"${PARAMS_DOCKER_ASR_PATH}\""
+        fi
+        if [ ! -z "$PARAMS_VAD_ID" ]; then
+            vad_params="\"--vad-dir\":\"${PARAMS_VAD_ID}\""
+        else
+            if [ ! -z "$PARAMS_LOCAL_VAD_PATH" ]; then
+                dir_map_params="${dir_map_params} -v ${PARAMS_LOCAL_VAD_PATH}:${PARAMS_DOCKER_VAD_PATH}"
+            fi
+            vad_params="\"--vad-dir\":\"${PARAMS_DOCKER_VAD_PATH}\""
+        fi
+        if [ ! -z "$PARAMS_PUNC_ID" ]; then
+            punc_params="\"--punc-dir\":\"${PARAMS_PUNC_ID}\""
+        else
+            if [ ! -z "$PARAMS_LOCAL_PUNC_PATH" ]; then
+                dir_map_params="${dir_map_params} -v ${PARAMS_LOCAL_VAD_PATH}:${PARAMS_DOCKER_VAD_PATH}"
+            fi
+            punc_params="\"--punc-dir\":\"${PARAMS_DOCKER_PUNC_PATH}\""
+        fi
+
+        download_params="\"--download-model-dir\":\"${PARAMS_DOWNLOAD_MODEL_DIR}\""
         model_params="${asr_params},${vad_params},${punc_params},${download_params}"
-    fi
 
-    decoder_params="\"--decoder-thread-num\":\"${PARAMS_DECODER_THREAD_NUM}\""
-    io_params="\"--io-thread-num\":\"${PARAMS_IO_THREAD_NUM}\""
-    thread_params=${decoder_params},${io_params}
-    port_params="\"--port\":\"${PARAMS_DOCKER_PORT}\""
-    crt_path="\"--certfile\":\"/workspace/FunASR/funasr/runtime/ssl_key/server.crt\""
-    key_path="\"--keyfile\":\"/workspace/FunASR/funasr/runtime/ssl_key/server.key\""
+        decoder_params="\"--decoder-thread-num\":\"${PARAMS_DECODER_THREAD_NUM}\""
+        io_params="\"--io-thread-num\":\"${PARAMS_IO_THREAD_NUM}\""
+        thread_params=${decoder_params},${io_params}
+        port_params="\"--port\":\"${PARAMS_DOCKER_PORT}\""
+        if [ $PARAMS_SSL_FLAG -eq 0 ]; then
+            crt_path="\"--certfile\":\"\""
+            key_path="\"--keyfile\":\"\""
+        else
+            crt_path="\"--certfile\":\"/workspace/FunASR/funasr/runtime/ssl_key/server.crt\""
+            key_path="\"--keyfile\":\"/workspace/FunASR/funasr/runtime/ssl_key/server.key\""
+        fi
 
-    env_params=" -v ${DEFAULT_FUNASR_CONFIG_DIR}:/workspace/.config"
-    env_params=" ${env_params} --env DAEMON_SERVER_CONFIG={\"server\":[{${exec_params},${model_params},${thread_params},${port_params},${crt_path},${key_path}}]}"
+        exec_params="\"exec\":\"${PARAMS_DOCKER_EXEC_PATH}\""
+        env_params=" ${env_params} --env DAEMON_SERVER_CONFIG={\"server\":[{${exec_params},${model_params},${thread_params},${port_params},${crt_path},${key_path}}]}"
 
-    run_cmd="${run_cmd}${port_map}${dir_map_params}${env_params}"
-    run_cmd="${run_cmd} -it -d ${PARAMS_DOCKER_IMAGE}"
+        run_cmd="${run_cmd}${port_map}${dir_map_params}${env_params}"
+        run_cmd="${run_cmd} -it -d ${PARAMS_DOCKER_IMAGE}"
+    else
+        #  0: DOCKER is not running
+        # 60: DOCKER_ID is empty
+        # 61: DOCKER_IMAGE is empty
+        # 62: DOCKER is running
+        checkDockerIdExist $start_flag
+        result=$?
+        result=`expr ${result} + 0`
+        if [ $result -eq 60 ]; then
+            echo
+            echo -e "  ${RED}Please run (${PLAIN}${GREEN}${SUDO_CMD} bash funasr-runtime-deploy-offline-cpu-zh.sh install${PLAIN}${RED}) to install Docker first.${PLAIN}"
+            return $result
+        elif [ $result -eq 61 ]; then
+            echo
+            echo -e "  ${RED}Please run (${PLAIN}${GREEN}${SUDO_CMD} bash funasr-runtime-deploy-offline-cpu-zh.sh install${PLAIN}${RED}) to install Docker first.${PLAIN}"
+            return $result
+        elif [ $result -eq 62 ]; then
+            echo
+            echo -e "  ${RED}Docker: ${PARAMS_DOCKER_IMAGE} ${PARAMS_FUNASR_DOCKER_ID} has been launched, please run (${PLAIN}${GREEN}${SUDO_CMD} bash funasr-runtime-deploy-offline-cpu-zh.sh stop${PLAIN}${RED}) to stop Docker first.${PLAIN}"
+            return $result
+        fi
 
-    # check Docker
-    checkDockerExist
-    result=$?
-    result=`expr ${result} + 0`
-    if [ ${result} -eq 50 ]; then
-        return 50
+        run_cmd="${SUDO_CMD} docker restart ${PARAMS_FUNASR_DOCKER_ID}"
     fi
 
     rm -f ${DEFAULT_FUNASR_PROGRESS_TXT}
@@ -913,9 +997,11 @@ dockerRun(){
     echo -e "  ${GREEN}The service has been started.${PLAIN}"
     echo
 
+    getDockerId
     deploySamples
+    saveParams
     echo -e "  ${BOLD}The sample code is already stored in the ${PLAIN}(${GREEN}${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}${PLAIN}) ."
-    echo -e "  ${BOLD}If you want to see an example of how to use the client, you can run ${PLAIN}${GREEN}sudo bash funasr-runtime-deploy-offline-cpu-zh.sh client${PLAIN} ."
+    echo -e "  ${BOLD}If you want to see an example of how to use the client, you can run ${PLAIN}${GREEN}${SUDO_CMD} bash funasr-runtime-deploy-offline-cpu-zh.sh client${PLAIN} ."
     echo
 }
 
@@ -940,19 +1026,19 @@ installPythonDependencyForPython(){
     lowercase_osid=$(echo ${OSID} | tr '[A-Z]' '[a-z]')
     case "$lowercase_osid" in
         ubuntu)
-            pre_cmd="sudo apt-get install -y ffmpeg"
+            pre_cmd="${SUDO_CMD} apt-get install -y ffmpeg"
             ;;
         centos)
-            pre_cmd="sudo yum install -y ffmpeg"
+            pre_cmd="${SUDO_CMD} yum install -y ffmpeg"
             ;;
         debian)
-            pre_cmd="sudo apt-get install -y ffmpeg"
+            pre_cmd="${SUDO_CMD} apt-get install -y ffmpeg"
             ;;
         \"alios\")
-            pre_cmd="sudo yum install -y ffmpeg"
+            pre_cmd="${SUDO_CMD} yum install -y ffmpeg"
             ;;
         \"alinux\")
-            pre_cmd="sudo yum install -y ffmpeg"
+            pre_cmd="${SUDO_CMD} yum install -y ffmpeg"
             ;;
         *)
             echo -e "  ${RED}$lowercase_osid is not supported.${PLAIN}"
@@ -985,21 +1071,86 @@ deploySamples(){
     fi
 }
 
-checkDockerExist(){
-    result=$(sudo docker ps | grep ${PARAMS_DOCKER_IMAGE} | wc -l)
-    result=`expr ${result} + 0`
-    if [ ${result} -ne 0 ]; then
-        echo
-        echo -e "  ${RED}Docker: ${PARAMS_DOCKER_IMAGE} has been launched, please run (${PLAIN}${GREEN}sudo bash funasr-runtime-deploy-offline-cpu-zh.sh stop${PLAIN}${RED}) to stop Docker first.${PLAIN}"
-        return 50
+getDockerId(){
+    id=""
+    array=($(${SUDO_CMD} docker ps -a | grep ${PARAMS_DOCKER_IMAGE} | awk '{print $1}'))
+    len=${#array[@]}
+    if [ $len -ge 1 ]; then
+        # get the first id
+        id=$array
+        if [ ! -z "$id" ]; then
+            PARAMS_FUNASR_DOCKER_ID=$id
+        fi
     fi
 }
 
-dockerExit(){
-    echo -e "  ${YELLOW}Stop docker(${PLAIN}${GREEN}${PARAMS_DOCKER_IMAGE}${PLAIN}${YELLOW}) server ...${PLAIN}"
-    sudo docker stop `sudo docker ps -a| grep ${PARAMS_DOCKER_IMAGE} | awk '{print $1}' `
+checkDockerImageExist(){
+    result=1
+    if [ -z "$PARAMS_DOCKER_IMAGE" ]; then
+        return 50
+    else
+        result=$(${SUDO_CMD} docker ps | grep ${PARAMS_DOCKER_IMAGE} | wc -l)
+    fi
+    result=`expr ${result} + 0`
+    echo "checkDockerImageExist result0: " $result
+    if [ $result -ne 0 ]; then
+        # found docker
+        return 51
+    else
+        return 0
+    fi
+}
+
+checkDockerIdExist(){
+    result=0
+    if [ -z "$PARAMS_FUNASR_DOCKER_ID" ]; then
+        if [ -z "$PARAMS_DOCKER_IMAGE" ]; then
+            return 63
+        else
+            return 60
+        fi
+    else
+        if [ -z "$PARAMS_DOCKER_IMAGE" ]; then
+            return 61
+        else
+            if [ "$1" = "install" ]; then
+                result=$(${SUDO_CMD} docker ps -a | grep ${PARAMS_DOCKER_IMAGE} | grep ${PARAMS_FUNASR_DOCKER_ID} | wc -l)
+            else
+                result=$(${SUDO_CMD} docker ps | grep ${PARAMS_DOCKER_IMAGE} | grep ${PARAMS_FUNASR_DOCKER_ID} | wc -l)
+            fi
+        fi
+    fi
+    result=`expr ${result} + 0`
+    if [ $result -eq 1 ]; then
+        # found docker
+        return 62
+    else
+        return 0
+    fi
+}
+
+dockerStop(){
+    # echo -e "  ${YELLOW}Stop docker(${PLAIN}${GREEN}${PARAMS_DOCKER_IMAGE} ${PARAMS_FUNASR_DOCKER_ID}${PLAIN}${YELLOW}) server ...${PLAIN}"
+    # ${SUDO_CMD} docker stop `${SUDO_CMD} docker ps -a | grep ${PARAMS_DOCKER_IMAGE} | awk '{print $1}' `
+    if [ -z "$PARAMS_FUNASR_DOCKER_ID" ]; then
+        echo -e "  ${RED}DOCKER_ID is empty, cannot stop docker.${PLAIN}"
+    else
+        echo -e "  ${YELLOW}Stop docker(${PLAIN}${GREEN}${PARAMS_DOCKER_IMAGE} ${PARAMS_FUNASR_DOCKER_ID}${PLAIN}${YELLOW}) server ...${PLAIN}"
+        ${SUDO_CMD} docker stop ${PARAMS_FUNASR_DOCKER_ID}
+    fi
     echo
-    sleep 1
+}
+
+dockerRemove(){
+    # echo -e "  ${YELLOW}Stop docker(${PLAIN}${GREEN}${PARAMS_DOCKER_IMAGE} ${PARAMS_FUNASR_DOCKER_ID}${PLAIN}${YELLOW}) server ...${PLAIN}"
+    # ${SUDO_CMD} docker stop `${SUDO_CMD} docker ps -a | grep ${PARAMS_DOCKER_IMAGE} | awk '{print $1}' `
+    if [ -z "$PARAMS_FUNASR_DOCKER_ID" ]; then
+        echo -e "  ${RED}DOCKER_ID is empty, cannot remove docker.${PLAIN}"
+    else
+        echo -e "  ${YELLOW}Remove docker(${PLAIN}${GREEN}${PARAMS_DOCKER_IMAGE} ${PARAMS_FUNASR_DOCKER_ID}${PLAIN}${YELLOW}) ...${PLAIN}"
+        ${SUDO_CMD} docker rm ${PARAMS_FUNASR_DOCKER_ID}
+    fi
+    echo
 }
 
 modelChange(){
@@ -1007,13 +1158,16 @@ modelChange(){
     model_id=$2
     local_flag=0
 
-    if [ -d "$model_id" ]; then
+    relativePathToFullPath $model_id
+    if [ -d "$full_path" ]; then
         local_flag=1
+        model_id=$full_path
     else
         local_flag=0
     fi
+    full_path=""
 
-    result=$(echo $model_type | grep "--asr_model")
+    result=$(echo ${model_type} | grep "\-\-asr_model")
     if [ "$result" != "" ]; then
         if [ $local_flag -eq 0 ]; then
             PARAMS_ASR_ID=$model_id
@@ -1029,13 +1183,12 @@ modelChange(){
             else
                 model_name=$(basename "${PARAMS_LOCAL_ASR_PATH}")
                 PARAMS_LOCAL_ASR_DIR=$(dirname "${PARAMS_LOCAL_ASR_PATH}")
-                middle=${PARAMS_LOCAL_ASR_DIR#*"${PARAMS_FUNASR_LOCAL_MODELS_DIR}"}
                 PARAMS_DOCKER_ASR_DIR=$PARAMS_DOWNLOAD_MODEL_DIR
-                PARAMS_DOCKER_ASR_PATH=${PARAMS_DOCKER_ASR_DIR}/${middle}/${model_name}
+                PARAMS_DOCKER_ASR_PATH=${PARAMS_DOCKER_ASR_DIR}/${model_name}
             fi
         fi
     fi
-    result=$(echo ${model_type} | grep "--vad_model")
+    result=$(echo ${model_type} | grep "\-\-vad_model")
     if [ "$result" != "" ]; then
         if [ $local_flag -eq 0 ]; then
             PARAMS_VAD_ID=$model_id
@@ -1051,13 +1204,12 @@ modelChange(){
             else
                 model_name=$(basename "${PARAMS_LOCAL_VAD_PATH}")
                 PARAMS_LOCAL_VAD_DIR=$(dirname "${PARAMS_LOCAL_VAD_PATH}")
-                middle=${PARAMS_LOCAL_VAD_DIR#*"${PARAMS_FUNASR_LOCAL_MODELS_DIR}"}
                 PARAMS_DOCKER_VAD_DIR=$PARAMS_DOWNLOAD_MODEL_DIR
-                PARAMS_DOCKER_VAD_PATH=${PARAMS_DOCKER_VAD_DIR}/${middle}/${model_name}
+                PARAMS_DOCKER_VAD_PATH=${PARAMS_DOCKER_VAD_DIR}/${model_name}
             fi
         fi
     fi
-    result=$(echo $model_type | grep "--punc_model")
+    result=$(echo ${model_type} | grep "\-\-punc_model")
     if [ "$result" != "" ]; then
         if [ $local_flag -eq 0 ]; then
             PARAMS_PUNC_ID=$model_id
@@ -1068,9 +1220,8 @@ modelChange(){
         else
             model_name=$(basename "${PARAMS_LOCAL_PUNC_PATH}")
             PARAMS_LOCAL_PUNC_DIR=$(dirname "${PARAMS_LOCAL_PUNC_PATH}")
-            middle=${PARAMS_LOCAL_PUNC_DIR#*"${PARAMS_FUNASR_LOCAL_MODELS_DIR}"}
             PARAMS_DOCKER_PUNC_DIR=$PARAMS_DOWNLOAD_MODEL_DIR
-            PARAMS_DOCKER_PUNC_PATH=${PARAMS_DOCKER_PUNC_DIR}/${middle}/${model_name}
+            PARAMS_DOCKER_PUNC_PATH=${PARAMS_DOCKER_PUNC_DIR}/${model_name}
         fi
     fi
 }
@@ -1082,11 +1233,11 @@ threadNumChange() {
     if [ -z "$val"]; then
         num=`expr ${val} + 0`
         if [ $num -ge 1 ] && [ $num -le 1024 ]; then
-            result=$(echo ${type} | grep "--decode_thread_num")
+            result=$(echo ${type} | grep "\-\-decode_thread_num")
             if [ "$result" != "" ]; then
                 PARAMS_DECODER_THREAD_NUM=$num
             fi
-            result=$(echo ${type} | grep "--io_thread_num")
+            result=$(echo ${type} | grep "\-\-io_thread_num")
             if [ "$result" != "" ]; then
                 PARAMS_IO_THREAD_NUM=$num
             fi
@@ -1164,12 +1315,8 @@ sampleClientRun(){
         pre_cmd=”“
         case "$lang" in
             Linux_Cpp)
-                pre_cmd="export LD_LIBRARY_PATH=${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/cpp/libs:\$LD_LIBRARY_PATH"
                 client_exec="${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/cpp/funasr-wss-client"
                 run_cmd="${client_exec} --server-ip ${server_ip} --port ${host_port} --wav-path ${wav_path}"
-                echo -e "  Run ${BLUE}${pre_cmd}${PLAIN}"
-                $pre_cmd
-                echo
                 ;;
             Python)
                 client_exec="${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/python/wss_client_asr.py"
@@ -1202,12 +1349,13 @@ paramsConfigure(){
     selectDockerImages
     result=$?
     result=`expr ${result} + 0`
-    if [ ${result} -eq 50 ]; then
-        return 50
+    if [ $result -ne 0 ]; then
+        return $result
     fi
 
     setupHostPort
     complementParameters
+    return 0
 }
 
 # Display Help info
@@ -1222,6 +1370,7 @@ displayHelp(){
     echo -e "                install [--workspace] <workspace in local>"
     echo -e "   ${BOLD}-s, start  , --start${PLAIN}      Run FunASR docker with configuration that has already been set."
     echo -e "   ${BOLD}-p, stop   , --stop${PLAIN}       Stop FunASR docker."
+    echo -e "   ${BOLD}-m, remove , --remove${PLAIN}     Remove FunASR docker installed."
     echo -e "   ${BOLD}-r, restart, --restart${PLAIN}    Restart FunASR docker."
     echo -e "   ${BOLD}-u, update , --update${PLAIN}     Update parameters that has already been set."
     echo -e "                update [--workspace] <workspace in local>"
@@ -1253,6 +1402,7 @@ parseInput(){
                 if [ "$stage" = "--workspace" ]; then
                     relativePathToFullPath $val
                     PARAMS_FUNASR_LOCAL_WORKSPACE=$full_path
+                    full_path=""
                     if [ ! -z "$PARAMS_FUNASR_LOCAL_WORKSPACE" ]; then
                         mkdir -p $PARAMS_FUNASR_LOCAL_WORKSPACE
                     fi
@@ -1266,8 +1416,8 @@ parseInput(){
 OSID=$(grep ^ID= /etc/os-release | cut -d= -f2)
 OSVER=$(lsb_release -cs)
 OSNUM=$(grep -oE  "[0-9.]+" /etc/issue)
-CPUNUM=$(cat /proc/cpuinfo |grep "processor"|wc -l)
-DOCKERINFO=$(sudo docker info | wc -l)
+CPUNUM=$(cat /proc/cpuinfo | grep "processor"|wc -l)
+DOCKERINFO=$(${SUDO_CMD} docker info | wc -l)
 DOCKERINFOLEN=`expr ${DOCKERINFO} + 0`
 
 # PARAMS
@@ -1279,8 +1429,8 @@ PARAMS_FUNASR_SAMPLES_LOCAL_DIR=${PARAMS_FUNASR_LOCAL_WORKSPACE}/${DEFAULT_SAMPL
 PARAMS_FUNASR_SAMPLES_LOCAL_PATH=${PARAMS_FUNASR_LOCAL_WORKSPACE}/${DEFAULT_SAMPLES_NAME}.tar.gz
 #  The dir stored models in local
 PARAMS_FUNASR_LOCAL_MODELS_DIR="${PARAMS_FUNASR_LOCAL_WORKSPACE}/models"
-#  The path of configuration in local
-PARAMS_FUNASR_CONFIG_PATH="${PARAMS_FUNASR_LOCAL_WORKSPACE}/config"
+#  The id of started docker
+PARAMS_FUNASR_DOCKER_ID=""
 
 #  The server excutor in local
 PARAMS_DOCKER_EXEC_PATH=$DEFAULT_DOCKER_EXEC_PATH
@@ -1329,6 +1479,7 @@ PARAMS_HOST_PORT="10095"
 PARAMS_DOCKER_PORT="10095"
 PARAMS_DECODER_THREAD_NUM="32"
 PARAMS_IO_THREAD_NUM="8"
+PARAMS_SSL_FLAG=1
 
 
 echo -e "#############################################################"
@@ -1352,47 +1503,98 @@ case "$1" in
         paramsConfigure
         result=$?
         result=`expr ${result} + 0`
-        if [ ${result} -ne 50 ]; then
-            showAllParams
+        if [ $result -eq 0 ]; then
+            showAllParams "install"
             installFunasrDocker
-            dockerRun
+            dockerRun "install"
             result=$?
-            stage=`expr ${result} + 0`
-            if [ $stage -eq 98 ]; then
-                dockerExit
-                dockerRun
-            fi
+
+            try_count=1
+            while true
+            do
+                stage=`expr ${result} + 0`
+                if [ $try_count -ge 10 ]; then
+                    break
+                else
+                    # 98: cannot find progress from Docker
+                    if [ $stage -eq 98 ]; then
+                        dockerStop
+                        dockerRun "start"
+                        result=$?
+                        let try_count=try_count+1
+                    else
+                        break
+                    fi
+                fi
+            done
         fi
         ;;
     start|-s|--start)
         rootNess
         paramsFromDefault
-        showAllParams
-        dockerRun
+        showAllParams "only_show"
+        dockerRun "start"
         result=$?
-        stage=`expr ${result} + 0`
-        if [ $stage -eq 98 ]; then
-            dockerExit
-            dockerRun
-        fi
+
+        try_count=1
+        while true
+        do
+            stage=`expr ${result} + 0`
+            if [ $try_count -ge 10 ]; then
+                break
+            else
+                # 98: cannot find progress from Docker
+                if [ $stage -eq 98 ]; then
+                    dockerStop
+                    dockerRun "start"
+                    result=$?
+                    let try_count=try_count+1
+                else
+                    break
+                fi
+            fi
+        done
         ;;
     restart|-r|--restart)
         rootNess
         paramsFromDefault
-        showAllParams
-        dockerExit
-        dockerRun
+        showAllParams "only_show"
+        dockerStop
+        dockerRun "start"
         result=$?
-        stage=`expr ${result} + 0`
-        if [ $stage -eq 98 ]; then
-            dockerExit
-            dockerRun
-        fi
+        
+        try_count=1
+        while true
+        do
+            stage=`expr ${result} + 0`
+            if [ $try_count -ge 10 ]; then
+                break
+            else
+                # 98: cannot find progress from Docker
+                if [ $stage -eq 98 ]; then
+                    dockerStop
+                    dockerRun "start"
+                    result=$?
+                    let try_count=try_count+1
+                else
+                    break
+                fi
+            fi
+        done
         ;;
     stop|-p|--stop)
         rootNess
         paramsFromDefault
-        dockerExit
+        dockerStop
+        ;;
+    remove|-m|--remove)
+        rootNess
+        paramsFromDefault
+        dockerStop
+        dockerRemove
+        PARAMS_FUNASR_DOCKER_ID=""
+        PARAMS_DOCKER_IMAGE=""
+        saveParams
         ;;
     update|-u|--update)
         rootNess
@@ -1413,6 +1615,13 @@ case "$1" in
                 if [ ! -z "$PARAMS_FUNASR_LOCAL_WORKSPACE" ]; then
                     mkdir -p $PARAMS_FUNASR_LOCAL_WORKSPACE
                 fi
+            elif [ "$type" = "--ssl" ]; then
+                switch=`expr ${val} + 0`
+                if [ $switch -eq 0]; then
+                    PARAMS_SSL_FLAG=0
+                else
+                    PARAMS_SSL_FLAG=1
+                fi
             else
                 displayHelp
             fi
@@ -1422,15 +1631,33 @@ case "$1" in
 
         initParameters
         complementParameters
-        showAllParams
-        dockerExit
-        dockerRun
+        showAllParams "install"
+        dockerStop
+        dockerRemove
+        PARAMS_FUNASR_DOCKER_ID=""
+        saveParams
+        dockerRun "install"
         result=$?
-        stage=`expr ${result} + 0`
-        if [ $stage -eq 98 ]; then
-            dockerExit
-            dockerRun
-        fi
+
+        try_count=1
+        while true
+        do
+            stage=`expr ${result} + 0`
+            if [ $try_count -ge 10 ]; then
+                break
+            else
+                # 98: cannot find progress from Docker
+                # 60: DOCKER_ID is empty
+                if [ $stage -eq 98 ] || [ $stage -eq 60 ]; then
+                    dockerStop
+                    dockerRun "start"
+                    result=$?
+                    let try_count=try_count+1
+                else
+                    break
+                fi
+            fi
+        done
         ;;
     client|-c|--client)
         rootNess
@@ -1441,7 +1668,7 @@ case "$1" in
     show|-o|--show)
         rootNess
         paramsFromDefault
-        showAllParams
+        showAllParams "only_show"
         ;;
     *)
         displayHelp
