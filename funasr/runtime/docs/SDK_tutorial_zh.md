@@ -169,6 +169,15 @@ sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update --workspace /root/funas
   The port in Docker for FunASR server is 10095
 ```
 
+## 联系我们
+
+在您使用过程中，如果遇到问题，欢迎加入用户群进行反馈
+
+
+|                                    钉钉用户群                                     |                                      微信               |
+|:----------------------------------------------------------------------------:|:-----------------------------------------------------:|
+| <div align="left"><img src="../../../docs/images/dingding.jpg" width="250"/> | <img src="../../../docs/images/wechat.png" width="232"/></div> |
+
 
 ## 视频demo
 
