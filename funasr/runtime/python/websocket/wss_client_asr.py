@@ -40,12 +40,12 @@ parser.add_argument("--audio_in",
                     help="audio_in")
 parser.add_argument("--send_without_sleep",
                     action="store_true",
-                    default=False,
+                    default=True,
                     help="if audio_in is set, send_without_sleep")
-parser.add_argument("--test_thread_num",
+parser.add_argument("--thread_num",
                     type=int,
                     default=1,
-                    help="test_thread_num")
+                    help="thread_num")
 parser.add_argument("--words_max_print",
                     type=int,
                     default=10000,
@@ -161,7 +161,8 @@ async def record_from_scp(chunk_begin, chunk_size):
                 #voices.put(message)
                 await websocket.send(message)
  
-            sleep_duration = 0.001 if args.send_without_sleep else 60 * args.chunk_size[1] / args.chunk_interval / 1000
+            sleep_duration = 0.001 if args.mode == "offline" else 60 * args.chunk_size[1] / args.chunk_interval / 1000
+            
             await asyncio.sleep(sleep_duration)
     # when all data sent, we need to close websocket
     while not voices.empty():
@@ -175,9 +176,24 @@ async def record_from_scp(chunk_begin, chunk_size):
          await asyncio.sleep(1)
     
     await websocket.close()
-     
- 
- 
+
+
+async def ws_send():
+    global voices
+    global websocket
+    print("started to sending data!")
+    while True:
+        while not voices.empty():
+            data = voices.get()
+            voices.task_done()
+            try:
+                await websocket.send(data)
+            except Exception as e:
+                print('Exception occurred:', e)
+                traceback.print_exc()
+                exit(0)
+            await asyncio.sleep(0.005)
+        await asyncio.sleep(0.005)
 
  
              
@@ -261,9 +277,9 @@ async def ws_client(id, chunk_begin, chunk_size):
             task = asyncio.create_task(record_from_scp(i, 1))
         else:
             task = asyncio.create_task(record_microphone())
-        #task2 = asyncio.create_task(ws_send())
+        task2 = asyncio.create_task(ws_send())
         task3 = asyncio.create_task(message(str(id)+"_"+str(i))) #processid+fileid
-        await asyncio.gather(task, task3)
+        await asyncio.gather(task, task2, task3)
   exit(0)
     
 
@@ -295,16 +311,16 @@ if __name__ == '__main__':
                     f'Not supported audio type: {audio_type}')
 
         total_len = len(wavs)
-        if total_len >= args.test_thread_num:
-            chunk_size = int(total_len / args.test_thread_num)
-            remain_wavs = total_len - chunk_size * args.test_thread_num
+        if total_len >= args.thread_num:
+            chunk_size = int(total_len / args.thread_num)
+            remain_wavs = total_len - chunk_size * args.thread_num
         else:
             chunk_size = 1
             remain_wavs = 0
 
         process_list = []
         chunk_begin = 0
-        for i in range(args.test_thread_num):
+        for i in range(args.thread_num):
             now_chunk_size = chunk_size
             if remain_wavs > 0:
                 now_chunk_size = chunk_size + 1

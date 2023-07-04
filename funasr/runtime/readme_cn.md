@@ -9,23 +9,23 @@ SDK 支持以下几种服务部署：
 - 中文离线文件转写服务（GPU版本），进行中
 - 英文离线转写服务，进行中
 - 流式语音识别服务，进行中
-- 。。。
+- 更多支持中
 
 
 ## 中文离线文件转写服务部署（CPU版本）
 
-目前FunASR runtime-SDK-0.0.1版本已支持中文语音离线文件服务部署（CPU版本），拥有完整的语音识别链路，可以将几十个小时的音频识别成带标点的文字，而且支持上百路并发同时进行识别。
-
-为了支持不同用户的需求，我们分别针对小白与高阶开发者，准备了不同的图文教程：
-
-### 技术原理揭秘
-
-文档介绍了背后技术原理，识别准确率，计算效率等，以及核心优势介绍：便捷、高精度、高效率、长音频链路，详细文档参考（[点击此处](https://mp.weixin.qq.com/s?__biz=MzA3MTQ0NTUyMw==&tempkey=MTIyNF84d05USjMxSEpPdk5GZXBJUFNJNzY0bU1DTkxhV19mcWY4MTNWQTJSYXhUaFgxOWFHZTZKR0JzWC1JRmRCdUxCX2NoQXg0TzFpNmVJX2R1WjdrcC02N2FEcUc3MDhzVVhpNWQ5clU4QUdqNFdkdjFYb18xRjlZMmc5c3RDOTl0U0NiRkJLb05ZZ0RmRlVkVjFCZnpXNWFBVlRhbXVtdWs4bUMwSHZnfn4%3D&chksm=1f2c3254285bbb42bc8f76a82e9c5211518a0bb1ff8c357d085c1b78f675ef2311f3be6e282c#rd)）
+中文语音离线文件服务部署（CPU版本），拥有完整的语音识别链路，可以将几十个小时的长音频与视频识别成带标点的文字，而且支持上百路请求同时进行转写。
+为了支持不同用户的需求，针对不同场景，准备了不同的图文教程：
 
 ### 便捷部署教程
 
-文档主要针对小白用户与初级开发者，没有修改、定制需求，支持从modelscope中下载模型部署，也支持用户finetune后的模型部署，详细教程参考（[点击此处](./docs/SDK_tutorial_cn.md)）
+适用场景为，对服务部署SDK无修改需求，部署模型来自于ModelScope，或者用户finetune，详细教程参考（[点击此处](./docs/SDK_tutorial_zh.md)）
 
-### 高阶开发指南
 
-文档主要针对高阶开发者，需要对服务进行修改与定制，支持从modelscope中下载模型部署，也支持用户finetune后的模型部署，详细文档参考（[点击此处](./docs/SDK_advanced_guide_cn.md)）
+### 开发指南
+
+适用场景为，对服务部署SDK有修改需求，部署模型来自于ModelScope，或者用户finetune，详细文档参考（[点击此处](./docs/SDK_advanced_guide_offline_zh.md)）
+
+### 技术原理揭秘
+
+文档介绍了背后技术原理，识别准确率，计算效率等，以及核心优势介绍：便捷、高精度、高效率、长音频链路，详细文档参考（[点击此处](https://mp.weixin.qq.com/s/DHQwbgdBWcda0w_L60iUww)）

@@ -5,8 +5,8 @@ import time
 import logging
 import tracemalloc
 import numpy as np
+import argparse
 import ssl
-from parse_args import args
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
 from modelscope.utils.logger import get_logger
@@ -16,6 +16,54 @@ tracemalloc.start()
 
 logger = get_logger(log_level=logging.CRITICAL)
 logger.setLevel(logging.CRITICAL)
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--host",
+                    type=str,
+                    default="0.0.0.0",
+                    required=False,
+                    help="host ip, localhost, 0.0.0.0")
+parser.add_argument("--port",
+                    type=int,
+                    default=10095,
+                    required=False,
+                    help="grpc server port")
+parser.add_argument("--asr_model",
+                    type=str,
+                    default="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch",
+                    help="model from modelscope")
+parser.add_argument("--asr_model_online",
+                    type=str,
+                    default="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online",
+                    help="model from modelscope")
+parser.add_argument("--vad_model",
+                    type=str,
+                    default="damo/speech_fsmn_vad_zh-cn-16k-common-pytorch",
+                    help="model from modelscope")
+parser.add_argument("--punc_model",
+                    type=str,
+                    default="damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727",
+                    help="model from modelscope")
+parser.add_argument("--ngpu",
+                    type=int,
+                    default=1,
+                    help="0 for cpu, 1 for gpu")
+parser.add_argument("--ncpu",
+                    type=int,
+                    default=4,
+                    help="cpu cores")
+parser.add_argument("--certfile",
+                    type=str,
+                    default="./ssl_key/server.crt",
+                    required=False,
+                    help="certfile for ssl")
+
+parser.add_argument("--keyfile",
+                    type=str,
+                    default="./ssl_key/server.key",
+                    required=False,
+                    help="keyfile for ssl")
+args = parser.parse_args()
 
 
 websocket_users = set()

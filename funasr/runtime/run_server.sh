@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 
 download_model_dir="/workspace/models"
 model_dir="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx"
@@ -10,7 +9,7 @@ port=10095
 certfile="../../../ssl_key/server.crt"
 keyfile="../../../ssl_key/server.key"
 
-. ../../../egs/aishell/transformer/utils/parse_options.sh || exit 1;
+. ../../egs/aishell/transformer/utils/parse_options.sh || exit 1;
 
 cd /workspace/FunASR/funasr/runtime/websocket/build/bin
 ./funasr-wss-server  \
@@ -23,3 +22,4 @@ cd /workspace/FunASR/funasr/runtime/websocket/build/bin
   --port ${port} \
   --certfile  ${certfile} \
   --keyfile ${keyfile}
+

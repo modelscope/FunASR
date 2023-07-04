@@ -35,9 +35,9 @@ sudo systemctl start docker
 通过下述命令拉取并启动FunASR runtime-SDK的docker镜像：
 
 ```shell
-sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.0.1
+sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-latest
 
-sudo docker run -p 10095:10095 -it --privileged=true -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.0.1
+sudo docker run -p 10095:10095 -it --privileged=true -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-latest
 ```
 
 命令参数介绍：
@@ -52,6 +52,13 @@ sudo docker run -p 10095:10095 -it --privileged=true -v /root:/workspace/models 
 ## 服务端启动
 
 docker启动之后，启动 funasr-wss-server服务程序：
+```shell
+./run_server.sh --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
+  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
+  --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
+```
+
+详细命令参数介绍：
 
 funasr-wss-server支持从Modelscope下载模型，设置模型下载地址（--download-model-dir，默认为/workspace/models）及model ID（--model-dir、--vad-dir、--punc-dir）,示例如下：
 ```shell
