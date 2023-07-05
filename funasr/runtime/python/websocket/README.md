@@ -47,6 +47,14 @@ git clone https://github.com/alibaba/FunASR.git && cd FunASR
 cd funasr/runtime/python/websocket
 pip install -r requirements_client.txt
 ```
+If you want infer from videos, you should install `ffmpeg`
+```shell
+apt-get install -y ffmpeg #ubuntu
+# yum install -y ffmpeg # centos
+# brew install ffmpeg # mac
+# winget install ffmpeg # wins
+pip3 install websockets ffmpeg-python
+```
 
 ### Start client
 #### API-reference

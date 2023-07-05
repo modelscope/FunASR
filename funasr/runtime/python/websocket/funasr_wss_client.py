@@ -138,8 +138,17 @@ async def record_from_scp(chunk_begin, chunk_size):
                 frames = wav_file.readframes(wav_file.getnframes())
                 audio_bytes = bytes(frames)
         else:
-            raise NotImplementedError(
-                f'Not supported audio type')
+            import ffmpeg
+            try:
+                # This launches a subprocess to decode audio while down-mixing and resampling as necessary.
+                # Requires the ffmpeg CLI and `ffmpeg-python` package to be installed.
+                audio_bytes, _ = (
+                    ffmpeg.input(wav_path, threads=0)
+                    .output("-", format="s16le", acodec="pcm_s16le", ac=1, ar=16000)
+                    .run(cmd=["ffmpeg", "-nostdin"], capture_stdout=True, capture_stderr=True)
+                )
+            except ffmpeg.Error as e:
+                raise RuntimeError(f"Failed to load audio: {e.stderr.decode()}") from e
 
         # stride = int(args.chunk_size/1000*16000*2)
         stride = int(60 * args.chunk_size[1] / args.chunk_interval / 1000 * 16000 * 2)
