@@ -296,9 +296,9 @@ if __name__ == '__main__':
             wav_name = wav_splits[0] if len(wav_splits) > 1 else "demo"
             wav_path = wav_splits[1] if len(wav_splits) > 1 else wav_splits[0]
             audio_type = os.path.splitext(wav_path)[-1].lower()
-            if audio_type not in SUPPORT_AUDIO_TYPE_SETS:
-                raise NotImplementedError(
-                    f'Not supported audio type: {audio_type}')
+            # if audio_type not in SUPPORT_AUDIO_TYPE_SETS:
+            #    raise NotImplementedError(
+            #        f'Not supported audio type: {audio_type}')
 
         total_len = len(wavs)
         if total_len >= args.thread_num:
