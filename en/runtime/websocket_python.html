@@ -177,7 +177,7 @@ pip install -r requirements_server.txt
 <h3>Start server<a class="headerlink" href="#start-server" title="Permalink to this headline"></a></h3>
 <div class="section" id="api-reference">
 <h4>API-reference<a class="headerlink" href="#api-reference" title="Permalink to this headline"></a></h4>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python wss_srv_asr.py <span class="se">\</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python funasr_wss_server.py <span class="se">\</span>
 --port <span class="o">[</span>port id<span class="o">]</span> <span class="se">\</span>
 --asr_model <span class="o">[</span>asr model_name<span class="o">]</span> <span class="se">\</span>
 --asr_model_online <span class="o">[</span>asr model_name<span class="o">]</span> <span class="se">\</span>
@@ -191,7 +191,7 @@ pip install -r requirements_server.txt
 </div>
 <div class="section" id="usage-examples">
 <h4>Usage examples<a class="headerlink" href="#usage-examples" title="Permalink to this headline"></a></h4>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python wss_srv_asr.py --port <span class="m">10095</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python funasr_wss_server.py --port <span class="m">10095</span>
 </pre></div>
 </div>
 </div>
@@ -209,7 +209,7 @@ pip install -r requirements_client.txt
 <h3>Start client<a class="headerlink" href="#start-client" title="Permalink to this headline"></a></h3>
 <div class="section" id="id1">
 <h4>API-reference<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h4>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python wss_client_asr.py <span class="se">\</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python funasr_wss_client.py <span class="se">\</span>
 --host <span class="o">[</span>ip_address<span class="o">]</span> <span class="se">\</span>
 --port <span class="o">[</span>port id<span class="o">]</span> <span class="se">\</span>
 --chunk_size <span class="o">[</span><span class="s2">&quot;5,10,5&quot;</span><span class="o">=</span>600ms, <span class="s2">&quot;8,8,4&quot;</span><span class="o">=</span>480ms<span class="o">]</span> <span class="se">\</span>
@@ -228,12 +228,12 @@ pip install -r requirements_client.txt
 <h5>ASR offline client<a class="headerlink" href="#asr-offline-client" title="Permalink to this headline"></a></h5>
 <p>Recording from mircrophone</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># --chunk_interval, &quot;10&quot;: 600/10=60ms, &quot;5&quot;=600/5=120ms, &quot;20&quot;: 600/12=30ms</span>
-python wss_client_asr.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --mode offline
+python funasr_wss_client.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --mode offline
 </pre></div>
 </div>
 <p>Loadding from wav.scp(kaldi style)</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># --chunk_interval, &quot;10&quot;: 600/10=60ms, &quot;5&quot;=600/5=120ms, &quot;20&quot;: 600/12=30ms</span>
-python wss_client_asr.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --mode offline --audio_in <span class="s2">&quot;./data/wav.scp&quot;</span> --output_dir <span class="s2">&quot;./results&quot;</span>
+python funasr_wss_client.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --mode offline --audio_in <span class="s2">&quot;./data/wav.scp&quot;</span> --output_dir <span class="s2">&quot;./results&quot;</span>
 </pre></div>
 </div>
 </div>
@@ -241,12 +241,12 @@ python wss_client_asr.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --po
 <h5>ASR streaming client<a class="headerlink" href="#asr-streaming-client" title="Permalink to this headline"></a></h5>
 <p>Recording from mircrophone</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># --chunk_size, &quot;5,10,5&quot;=600ms, &quot;8,8,4&quot;=480ms</span>
-python wss_client_asr.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --mode online --chunk_size <span class="s2">&quot;5,10,5&quot;</span>
+python funasr_wss_client.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --mode online --chunk_size <span class="s2">&quot;5,10,5&quot;</span>
 </pre></div>
 </div>
 <p>Loadding from wav.scp(kaldi style)</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># --chunk_size, &quot;5,10,5&quot;=600ms, &quot;8,8,4&quot;=480ms</span>
-python wss_client_asr.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --mode online --chunk_size <span class="s2">&quot;5,10,5&quot;</span> --audio_in <span class="s2">&quot;./data/wav.scp&quot;</span> --output_dir <span class="s2">&quot;./results&quot;</span>
+python funasr_wss_client.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --mode online --chunk_size <span class="s2">&quot;5,10,5&quot;</span> --audio_in <span class="s2">&quot;./data/wav.scp&quot;</span> --output_dir <span class="s2">&quot;./results&quot;</span>
 </pre></div>
 </div>
 </div>
@@ -254,12 +254,12 @@ python wss_client_asr.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --po
 <h5>ASR offline/online 2pass client<a class="headerlink" href="#asr-offline-online-2pass-client" title="Permalink to this headline"></a></h5>
 <p>Recording from mircrophone</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># --chunk_size, &quot;5,10,5&quot;=600ms, &quot;8,8,4&quot;=480ms</span>
-python wss_client_asr.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --mode 2pass --chunk_size <span class="s2">&quot;8,8,4&quot;</span>
+python funasr_wss_client.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --mode 2pass --chunk_size <span class="s2">&quot;8,8,4&quot;</span>
 </pre></div>
 </div>
 <p>Loadding from wav.scp(kaldi style)</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># --chunk_size, &quot;5,10,5&quot;=600ms, &quot;8,8,4&quot;=480ms</span>
-python wss_client_asr.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --mode 2pass --chunk_size <span class="s2">&quot;8,8,4&quot;</span> --audio_in <span class="s2">&quot;./data/wav.scp&quot;</span> --output_dir <span class="s2">&quot;./results&quot;</span>
+python funasr_wss_client.py --host <span class="s2">&quot;0.0.0.0&quot;</span> --port <span class="m">10095</span> --mode 2pass --chunk_size <span class="s2">&quot;8,8,4&quot;</span> --audio_in <span class="s2">&quot;./data/wav.scp&quot;</span> --output_dir <span class="s2">&quot;./results&quot;</span>
 </pre></div>
 </div>
 </div>
