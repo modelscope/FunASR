@@ -37,7 +37,7 @@ sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace /root/funa
 我们以Python语言客户端为例，进行说明，支持多种音频格式输入（.wav, .pcm, .mp3等），也支持视频输入(.mp4等)，以及多文件列表wav.scp输入，其他版本客户端请参考文档（[点击此处](#客户端用法详解)）
 
 ```shell
-python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.wav" --output_dir "./results"
+python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.wav"
 ```
 
 ## 客户端用法详解
@@ -56,7 +56,7 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --au
 若想直接运行client进行测试，可参考如下简易说明，以python版本为例：
 
 ```shell
-python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.wav" --output_dir "./results"
+python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.wav"
 ```
 
 命令参数说明：
@@ -65,7 +65,8 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --au
 --port 10095 部署端口号
 --mode offline表示离线文件转写
 --audio_in 需要进行转写的音频文件，支持文件路径，文件列表wav.scp
---output_dir 识别结果保存路径
+--thread_num 设置并发发送线程数，默认为1
+--ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
 ```
 
 ### cpp-client
@@ -80,6 +81,8 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --au
 --server-ip 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，需要改为部署机器ip
 --port 10095 部署端口号
 --wav-path 需要进行转写的音频文件，支持文件路径
+--thread_num 设置并发发送线程数，默认为1
+--ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
 ```
 
 ### Html网页版
@@ -145,7 +148,7 @@ sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update --workspace /root/funas
 
 ## 服务端启动过程配置详解
 
-##### 选择FunASR Docker镜像
+### 选择FunASR Docker镜像
 推荐选择1)使用我们的最新发布版镜像，也可选择历史版本。
 ```text
 [1/5]
@@ -159,7 +162,7 @@ sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update --workspace /root/funas
 ```
 
 
-##### 设置宿主机提供给FunASR的端口
+### 设置宿主机提供给FunASR的端口
 设置提供给Docker的宿主机端口，默认为10095。请保证此端口可用。
 ```text
 [2/5]
@@ -167,6 +170,13 @@ sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update --workspace /root/funas
   Setting the opened host port [1-65535], default(10095):
   The port of the host is 10095
   The port in Docker for FunASR server is 10095
+```
+
+### 设置SSL
+
+默认开启SSL校验，如果需要关闭，可以在启动时设置
+```shell
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh --ssl 0
 ```
 
 ## 联系我们
