@@ -126,7 +126,7 @@ sudo bash funasr-runtime-deploy-offline-cpu-zh.sh restart
 
 ### 替换模型并重启FunASR服务
 
-替换正在使用的模型，并重新启动FunASR服务。模型需为ModelScope中的ASR/VAD/PUNC模型，或者从ModelScope中模型finetune后的模型。注意，由于参数变化，重启FunASR服务的过程中会释放已经存在
+替换正在使用的模型，并重新启动FunASR服务。模型需为ModelScope中的ASR/VAD/PUNC模型，或者从ModelScope中模型finetune后的模型。
 
 ```shell
 sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update [--asr_model | --vad_model | --punc_model] <model_id or local model path>
@@ -137,12 +137,13 @@ sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update --asr_model damo/speech
 
 ### 更新参数并重启FunASR服务
 
-更新已配置参数，并重新启动FunASR服务生效。可更新参数包括宿主机和Docker的端口号，以及推理和IO的线程数量。注意，由于参数变化，重启FunASR服务的过程中会释放已经存在的FunASR服务。
+更新已配置参数，并重新启动FunASR服务生效。可更新参数包括宿主机和Docker的端口号，以及推理和IO的线程数量。
 
 ```shell
 sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update [--host_port | --docker_port] <port number>
 sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update [--decode_thread_num | --io_thread_num] <the number of threads>
 sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update [--workspace] <workspace in local>
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update [--ssl] <0: close SSL; 1: open SSL, default:1>
 
 e.g
 sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update --decode_thread_num 32

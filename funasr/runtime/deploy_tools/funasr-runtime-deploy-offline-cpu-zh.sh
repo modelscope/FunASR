@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-scriptVersion="0.0.5"
+scriptVersion="0.0.6"
 scriptDate="20230705"
 
 
@@ -35,6 +35,7 @@ DEFAULT_FUNASR_LOCAL_WORKSPACE=${CUR_DIR}/${DEFAULT_FUNASR_RUNTIME_RESOURCES}
 DEFAULT_FUNASR_CONFIG_DIR=""
 DEFAULT_FUNASR_CONFIG_DIR_BAK="/var/funasr"
 DEFAULT_FUNASR_CONFIG_FILE="${DEFAULT_FUNASR_CONFIG_DIR}/config"
+DEFAULT_FUNASR_SERVER_CONFIG_FILE="${DEFAULT_FUNASR_CONFIG_DIR}/server_config"
 DEFAULT_FUNASR_PROGRESS_TXT="${DEFAULT_FUNASR_CONFIG_DIR}/progress.txt"
 DEFAULT_FUNASR_SERVER_LOG="${DEFAULT_FUNASR_CONFIG_DIR}/server_console.log"
 DEFAULT_FUNASR_WORKSPACE_DIR="/workspace/models"
@@ -334,11 +335,15 @@ initConfiguration(){
     fi
 
     DEFAULT_FUNASR_CONFIG_FILE="${DEFAULT_FUNASR_CONFIG_DIR}/config"
+    DEFAULT_FUNASR_SERVER_CONFIG_FILE="${DEFAULT_FUNASR_CONFIG_DIR}/server_config"
     DEFAULT_FUNASR_PROGRESS_TXT="${DEFAULT_FUNASR_CONFIG_DIR}/progress.txt"
     DEFAULT_FUNASR_SERVER_LOG="${DEFAULT_FUNASR_CONFIG_DIR}/server_console.log"
 
     if [ ! -f $DEFAULT_FUNASR_CONFIG_FILE ]; then
         $SUDO_CMD touch $DEFAULT_FUNASR_CONFIG_FILE
+    fi
+    if [ ! -f $DEFAULT_FUNASR_SERVER_CONFIG_FILE ]; then
+        $SUDO_CMD touch $DEFAULT_FUNASR_SERVER_CONFIG_FILE
     fi
 }
 
@@ -704,6 +709,9 @@ saveParams(){
     echo "PARAMS_IO_THREAD_NUM=${PARAMS_IO_THREAD_NUM}" >> $DEFAULT_FUNASR_CONFIG_FILE
     echo "PARAMS_SSL_FLAG=${PARAMS_SSL_FLAG}" >> $DEFAULT_FUNASR_CONFIG_FILE
     echo "PARAMS_FUNASR_DOCKER_ID=${PARAMS_FUNASR_DOCKER_ID}" >> $DEFAULT_FUNASR_CONFIG_FILE
+
+    serverConfigGeneration
+    echo "${daemon_server_config}" > $DEFAULT_FUNASR_SERVER_CONFIG_FILE
 }
 
 showAllParams(){
@@ -888,48 +896,8 @@ dockerRun(){
         env_params=" --privileged=true"
         dir_map_params=" -v ${DEFAULT_FUNASR_CONFIG_DIR}:/workspace/.config -v ${PARAMS_FUNASR_LOCAL_MODELS_DIR}:${PARAMS_DOWNLOAD_MODEL_DIR}"
 
-        if [ ! -z "$PARAMS_ASR_ID" ]; then
-            asr_params="\"--model-dir\":\"${PARAMS_ASR_ID}\""
-        else
-            if [ ! -z "$PARAMS_LOCAL_ASR_PATH" ]; then
-                dir_map_params="${dir_map_params} -v ${PARAMS_LOCAL_ASR_PATH}:${PARAMS_DOCKER_ASR_PATH}"
-            fi
-            asr_params="\"--model-dir\":\"${PARAMS_DOCKER_ASR_PATH}\""
-        fi
-        if [ ! -z "$PARAMS_VAD_ID" ]; then
-            vad_params="\"--vad-dir\":\"${PARAMS_VAD_ID}\""
-        else
-            if [ ! -z "$PARAMS_LOCAL_VAD_PATH" ]; then
-                dir_map_params="${dir_map_params} -v ${PARAMS_LOCAL_VAD_PATH}:${PARAMS_DOCKER_VAD_PATH}"
-            fi
-            vad_params="\"--vad-dir\":\"${PARAMS_DOCKER_VAD_PATH}\""
-        fi
-        if [ ! -z "$PARAMS_PUNC_ID" ]; then
-            punc_params="\"--punc-dir\":\"${PARAMS_PUNC_ID}\""
-        else
-            if [ ! -z "$PARAMS_LOCAL_PUNC_PATH" ]; then
-                dir_map_params="${dir_map_params} -v ${PARAMS_LOCAL_VAD_PATH}:${PARAMS_DOCKER_VAD_PATH}"
-            fi
-            punc_params="\"--punc-dir\":\"${PARAMS_DOCKER_PUNC_PATH}\""
-        fi
-
-        download_params="\"--download-model-dir\":\"${PARAMS_DOWNLOAD_MODEL_DIR}\""
-        model_params="${asr_params},${vad_params},${punc_params},${download_params}"
-
-        decoder_params="\"--decoder-thread-num\":\"${PARAMS_DECODER_THREAD_NUM}\""
-        io_params="\"--io-thread-num\":\"${PARAMS_IO_THREAD_NUM}\""
-        thread_params=${decoder_params},${io_params}
-        port_params="\"--port\":\"${PARAMS_DOCKER_PORT}\""
-        if [ $PARAMS_SSL_FLAG -eq 0 ]; then
-            crt_path="\"--certfile\":\"\""
-            key_path="\"--keyfile\":\"\""
-        else
-            crt_path="\"--certfile\":\"/workspace/FunASR/funasr/runtime/ssl_key/server.crt\""
-            key_path="\"--keyfile\":\"/workspace/FunASR/funasr/runtime/ssl_key/server.key\""
-        fi
-
-        exec_params="\"exec\":\"${PARAMS_DOCKER_EXEC_PATH}\""
-        env_params=" ${env_params} --env DAEMON_SERVER_CONFIG={\"server\":[{${exec_params},${model_params},${thread_params},${port_params},${crt_path},${key_path}}]}"
+        serverConfigGeneration
+        env_params=" ${env_params} --env DAEMON_SERVER_CONFIG=${daemon_server_config}"
 
         run_cmd="${run_cmd}${port_map}${dir_map_params}${env_params}"
         run_cmd="${run_cmd} -it -d ${PARAMS_DOCKER_IMAGE}"
@@ -1004,6 +972,56 @@ dockerRun(){
     echo -e "  ${BOLD}The sample code is already stored in the ${PLAIN}(${GREEN}${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}${PLAIN}) ."
     echo -e "  ${BOLD}If you want to see an example of how to use the client, you can run ${PLAIN}${GREEN}${SUDO_CMD} bash funasr-runtime-deploy-offline-cpu-zh.sh client${PLAIN} ."
     echo
+}
+
+daemon_server_config=""
+serverConfigGeneration(){
+    # params about models
+	if [ ! -z "$PARAMS_ASR_ID" ]; then
+        asr_params="\"--model-dir\":\"${PARAMS_ASR_ID}\""
+    else
+        if [ ! -z "$PARAMS_LOCAL_ASR_PATH" ]; then
+            dir_map_params="${dir_map_params} -v ${PARAMS_LOCAL_ASR_PATH}:${PARAMS_DOCKER_ASR_PATH}"
+        fi
+        asr_params="\"--model-dir\":\"${PARAMS_DOCKER_ASR_PATH}\""
+    fi
+    if [ ! -z "$PARAMS_VAD_ID" ]; then
+        vad_params="\"--vad-dir\":\"${PARAMS_VAD_ID}\""
+    else
+        if [ ! -z "$PARAMS_LOCAL_VAD_PATH" ]; then
+            dir_map_params="${dir_map_params} -v ${PARAMS_LOCAL_VAD_PATH}:${PARAMS_DOCKER_VAD_PATH}"
+        fi
+        vad_params="\"--vad-dir\":\"${PARAMS_DOCKER_VAD_PATH}\""
+    fi
+    if [ ! -z "$PARAMS_PUNC_ID" ]; then
+        punc_params="\"--punc-dir\":\"${PARAMS_PUNC_ID}\""
+    else
+        if [ ! -z "$PARAMS_LOCAL_PUNC_PATH" ]; then
+            dir_map_params="${dir_map_params} -v ${PARAMS_LOCAL_VAD_PATH}:${PARAMS_DOCKER_VAD_PATH}"
+        fi
+        punc_params="\"--punc-dir\":\"${PARAMS_DOCKER_PUNC_PATH}\""
+    fi
+    download_params="\"--download-model-dir\":\"${PARAMS_DOWNLOAD_MODEL_DIR}\""
+    model_params="${asr_params},${vad_params},${punc_params},${download_params}"
+
+    # params about thread_num
+    decoder_params="\"--decoder-thread-num\":\"${PARAMS_DECODER_THREAD_NUM}\""
+    io_params="\"--io-thread-num\":\"${PARAMS_IO_THREAD_NUM}\""
+    thread_params=${decoder_params},${io_params}
+
+    # params about port and ssl
+    port_params="\"--port\":\"${PARAMS_DOCKER_PORT}\""
+    if [ $PARAMS_SSL_FLAG -eq 0 ]; then
+        crt_path="\"--certfile\":\"\""
+        key_path="\"--keyfile\":\"\""
+    else
+        crt_path="\"--certfile\":\"/workspace/FunASR/funasr/runtime/ssl_key/server.crt\""
+        key_path="\"--keyfile\":\"/workspace/FunASR/funasr/runtime/ssl_key/server.key\""
+    fi
+
+    exec_params="\"exec\":\"${PARAMS_DOCKER_EXEC_PATH}\""
+
+    daemon_server_config="{\"server\":[{${exec_params},${model_params},${thread_params},${port_params},${crt_path},${key_path}}]}"
 }
 
 installPythonDependencyForPython(){
@@ -1131,8 +1149,6 @@ checkDockerIdExist(){
 }
 
 dockerStop(){
-    # echo -e "  ${YELLOW}Stop docker(${PLAIN}${GREEN}${PARAMS_DOCKER_IMAGE} ${PARAMS_FUNASR_DOCKER_ID}${PLAIN}${YELLOW}) server ...${PLAIN}"
-    # ${SUDO_CMD} docker stop `${SUDO_CMD} docker ps -a | grep ${PARAMS_DOCKER_IMAGE} | awk '{print $1}' `
     if [ -z "$PARAMS_FUNASR_DOCKER_ID" ]; then
         echo -e "  ${RED}DOCKER_ID is empty, cannot stop docker.${PLAIN}"
     else
@@ -1143,14 +1159,13 @@ dockerStop(){
 }
 
 dockerRemove(){
-    # echo -e "  ${YELLOW}Stop docker(${PLAIN}${GREEN}${PARAMS_DOCKER_IMAGE} ${PARAMS_FUNASR_DOCKER_ID}${PLAIN}${YELLOW}) server ...${PLAIN}"
-    # ${SUDO_CMD} docker stop `${SUDO_CMD} docker ps -a | grep ${PARAMS_DOCKER_IMAGE} | awk '{print $1}' `
     if [ -z "$PARAMS_FUNASR_DOCKER_ID" ]; then
         echo -e "  ${RED}DOCKER_ID is empty, cannot remove docker.${PLAIN}"
     else
         echo -e "  ${YELLOW}Remove docker(${PLAIN}${GREEN}${PARAMS_DOCKER_IMAGE} ${PARAMS_FUNASR_DOCKER_ID}${PLAIN}${YELLOW}) ...${PLAIN}"
         ${SUDO_CMD} docker rm ${PARAMS_FUNASR_DOCKER_ID}
     fi
+
     echo
 }
 
@@ -1369,6 +1384,7 @@ displayHelp(){
     echo -e "${UNDERLINE}Options${PLAIN}:"
     echo -e "   ${BOLD}-i, install, --install${PLAIN}    Install and run FunASR docker."
     echo -e "                install [--workspace] <workspace in local>"
+    echo -e "                install [--ssl] <0: close SSL; 1: open SSL, default:1>"
     echo -e "   ${BOLD}-s, start  , --start${PLAIN}      Run FunASR docker with configuration that has already been set."
     echo -e "   ${BOLD}-p, stop   , --stop${PLAIN}       Stop FunASR docker."
     echo -e "   ${BOLD}-m, remove , --remove${PLAIN}     Remove FunASR docker installed."
@@ -1408,6 +1424,8 @@ parseInput(){
                     if [ ! -z "$PARAMS_FUNASR_LOCAL_WORKSPACE" ]; then
                         mkdir -p $PARAMS_FUNASR_LOCAL_WORKSPACE
                     fi
+                elif [ "$stage" = "--ssl" ]; then
+                    PARAMS_SSL_FLAG=`expr ${val} + 0`
                 fi
             fi
         done
@@ -1594,9 +1612,8 @@ case "$1" in
         paramsFromDefault
         dockerStop
         dockerRemove
-        PARAMS_FUNASR_DOCKER_ID=""
-        PARAMS_DOCKER_IMAGE=""
-        saveParams
+        rm -f ${DEFAULT_FUNASR_CONFIG_FILE}
+        rm -f ${DEFAULT_FUNASR_SERVER_CONFIG_FILE}
         ;;
     update|-u|--update)
         rootNess
@@ -1635,10 +1652,7 @@ case "$1" in
         complementParameters
         showAllParams "install"
         dockerStop
-        dockerRemove
-        PARAMS_FUNASR_DOCKER_ID=""
-        saveParams
-        dockerRun "install"
+        dockerRun "start"
         result=$?
 
         try_count=1
