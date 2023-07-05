@@ -22,7 +22,7 @@ FunASR提供可便捷本地或者云端服务器部署的离线文件转写服�
 
 ```shell
 curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/funasr/runtime/deploy_tools/funasr-runtime-deploy-offline-cpu-zh.sh;
-# 如遇到网络问题，中国大陆用户，可以用个下面的命令：
+# 如遇到网络问题，中国大陆用户，可以使用下面的命令：
 # curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy-offline-cpu-zh.sh;
 ```
 
