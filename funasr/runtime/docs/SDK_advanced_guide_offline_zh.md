@@ -53,6 +53,7 @@ sudo docker run -p 10095:10095 -it --privileged=true -v /root:/workspace/models 
 
 docker启动之后，启动 funasr-wss-server服务程序：
 ```shell
+cd FunASR/funasr/runtime
 ./run_server.sh --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
