@@ -100,11 +100,13 @@ async def record_microphone():
 
     message = json.dumps({"mode": args.mode, "chunk_size": args.chunk_size, "chunk_interval": args.chunk_interval,
                           "wav_name": "microphone", "is_speaking": True})
-    voices.put(message)
+    #voices.put(message)
+    await websocket.send(message)
     while True:
         data = stream.read(CHUNK)
         message = data
-        voices.put(message)
+        #voices.put(message)
+        await websocket.send(message)
         await asyncio.sleep(0.005)
 
 async def record_from_scp(chunk_begin, chunk_size):
