@@ -275,7 +275,7 @@ Requirement already satisfied: click>=8.0.4 in /usr/local/lib/python3.8/dist-pac
 Looking in indexes: http://mirrors.cloud.aliyuncs.com/pypi/simple/
 Requirement already satisfied: websockets in /usr/local/lib/python3.8/dist-packages (from -r /root/funasr_samples/python/requirements_client.txt (line 1)) (11.0.3)
 
-  Run python3 /root/funasr_samples/python/wss_client_asr.py --host 127.0.0.1 --port 10095 --mode offline --audio_in /root/funasr_samples/audio/asr_example.wav --send_without_sleep --output_dir ./funasr_samples/python
+  Run python3 /root/funasr_samples/python/funasr_wss_client.py --host 127.0.0.1 --port 10095 --mode offline --audio_in /root/funasr_samples/audio/asr_example.wav --send_without_sleep --output_dir ./funasr_samples/python
 
   ...
   ...
@@ -284,7 +284,7 @@ Requirement already satisfied: websockets in /usr/local/lib/python3.8/dist-packa
 Exception: sent 1000 (OK); then received 1000 (OK)
 end
 
-  If failed, you can try (python3 /root/funasr_samples/python/wss_client_asr.py --host 127.0.0.1 --port 10095 --mode offline --audio_in /root/funasr_samples/audio/asr_example.wav --send_without_sleep --output_dir ./funasr_samples/python) in your Shell.
+  If failed, you can try (python3 /root/funasr_samples/python/funasr_wss_client.py --host 127.0.0.1 --port 10095 --mode offline --audio_in /root/funasr_samples/audio/asr_example.wav --send_without_sleep --output_dir ./funasr_samples/python) in your Shell.
 
 ```
 
@@ -292,7 +292,7 @@ end
 
 If you want to directly run the client for testing, you can refer to the following simple instructions, taking the Python version as an example:
 ```shell
-python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.wav" --send_without_sleep --output_dir "./results"
+python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.wav" --send_without_sleep --output_dir "./results"
 ```
 
 Command parameter instructions: 

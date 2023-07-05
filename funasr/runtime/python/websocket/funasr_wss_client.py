@@ -8,7 +8,7 @@ import argparse
 import json
 import traceback
 from multiprocessing import Process
-from funasr.fileio.datadir_writer import DatadirWriter
+# from funasr.fileio.datadir_writer import DatadirWriter
 
 import logging
 
@@ -72,11 +72,13 @@ from queue import Queue
 
 voices = Queue()
 offline_msg_done=False
- 
-ibest_writer = None
+
 if args.output_dir is not None:
-    writer = DatadirWriter(args.output_dir)
-    ibest_writer = writer[f"1best_recog"]
+    # if os.path.exists(args.output_dir):
+    #     os.remove(args.output_dir)
+        
+    if not os.path.exists(args.output_dir):
+        os.makedirs(args.output_dir)
 
 
 async def record_microphone():
@@ -136,8 +138,17 @@ async def record_from_scp(chunk_begin, chunk_size):
                 frames = wav_file.readframes(wav_file.getnframes())
                 audio_bytes = bytes(frames)
         else:
-            raise NotImplementedError(
-                f'Not supported audio type')
+            import ffmpeg
+            try:
+                # This launches a subprocess to decode audio while down-mixing and resampling as necessary.
+                # Requires the ffmpeg CLI and `ffmpeg-python` package to be installed.
+                audio_bytes, _ = (
+                    ffmpeg.input(wav_path, threads=0)
+                    .output("-", format="s16le", acodec="pcm_s16le", ac=1, ar=16000)
+                    .run(cmd=["ffmpeg", "-nostdin"], capture_stdout=True, capture_stderr=True)
+                )
+            except ffmpeg.Error as e:
+                raise RuntimeError(f"Failed to load audio: {e.stderr.decode()}") from e
 
         # stride = int(args.chunk_size/1000*16000*2)
         stride = int(60 * args.chunk_size[1] / args.chunk_interval / 1000 * 16000 * 2)
@@ -186,6 +197,10 @@ async def message(id):
     text_print = ""
     text_print_2pass_online = ""
     text_print_2pass_offline = ""
+    if args.output_dir is not None:
+        ibest_writer = open(os.path.join(args.output_dir, "text.{}".format(id)), "w+", encoding="utf-8")
+    else:
+        ibest_writer = None
     try:
        while True:
         
@@ -193,9 +208,11 @@ async def message(id):
             meg = json.loads(meg)
             wav_name = meg.get("wav_name", "demo")
             text = meg["text"]
-            if ibest_writer is not None:
-                ibest_writer["text"][wav_name] = text
 
+            if ibest_writer is not None:
+                text_write_line = "{}\t{}\n".format(wav_name, text)
+                ibest_writer.write(text_write_line)
+                
             if meg["mode"] == "online":
                 text_print += "{}".format(text)
                 text_print = text_print[-args.words_max_print:]
@@ -204,7 +221,7 @@ async def message(id):
             elif meg["mode"] == "offline":
                 text_print += "{}".format(text)
                 text_print = text_print[-args.words_max_print:]
-                os.system('clear')
+                # os.system('clear')
                 print("\rpid" + str(id) + ": " + text_print)
                 offline_msg_done=True
             else:
@@ -227,17 +244,6 @@ async def message(id):
  
 
 
-async def print_messge():
-    global websocket
-    while True:
-        try:
-            meg = await websocket.recv()
-            meg = json.loads(meg)
-            print(meg)
-        except Exception as e:
-            print("Exception:", e)
-            #traceback.print_exc()
-            exit(0)
 
 async def ws_client(id, chunk_begin, chunk_size):
   if args.audio_in is None:
@@ -290,9 +296,9 @@ if __name__ == '__main__':
             wav_name = wav_splits[0] if len(wav_splits) > 1 else "demo"
             wav_path = wav_splits[1] if len(wav_splits) > 1 else wav_splits[0]
             audio_type = os.path.splitext(wav_path)[-1].lower()
-            if audio_type not in SUPPORT_AUDIO_TYPE_SETS:
-                raise NotImplementedError(
-                    f'Not supported audio type: {audio_type}')
+            # if audio_type not in SUPPORT_AUDIO_TYPE_SETS:
+            #    raise NotImplementedError(
+            #        f'Not supported audio type: {audio_type}')
 
         total_len = len(wavs)
         if total_len >= args.thread_num:
