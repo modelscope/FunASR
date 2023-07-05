@@ -18,6 +18,8 @@ FunASR提供可便捷本地或者云端服务器部署的离线文件转写服�
 
 ### 服务端启动
 
+`注意`：一键部署工具，过程分为：安装docker、下载docker镜像、启动服务。如果用户希望直接从FunASR docker镜像启动，可以参考开发指南（[点击此处](./SDK_advanced_guide_offline_zh.md)）
+
 下载部署工具`funasr-runtime-deploy-offline-cpu-zh.sh`
 
 ```shell
