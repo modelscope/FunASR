@@ -255,9 +255,10 @@ def inference_paraformer(
     if param_dict is not None:
         hotword_list_or_file = param_dict.get('hotword')
         export_mode = param_dict.get("export_mode", False)
+        clas_scale = param_dict.get('clas_scale', 1.0)
     else:
         hotword_list_or_file = None
-    clas_scale = param_dict.get('clas_scale', 1.0)
+        clas_scale = 1.0
 
     if kwargs.get("device", None) == "cpu":
         ngpu = 0

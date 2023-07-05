@@ -100,11 +100,13 @@ async def record_microphone():
 
     message = json.dumps({"mode": args.mode, "chunk_size": args.chunk_size, "chunk_interval": args.chunk_interval,
                           "wav_name": "microphone", "is_speaking": True})
-    voices.put(message)
+    #voices.put(message)
+    await websocket.send(message)
     while True:
         data = stream.read(CHUNK)
         message = data
-        voices.put(message)
+        #voices.put(message)
+        await websocket.send(message)
         await asyncio.sleep(0.005)
 
 async def record_from_scp(chunk_begin, chunk_size):
@@ -178,25 +180,7 @@ async def record_from_scp(chunk_begin, chunk_size):
     await websocket.close()
 
 
-async def ws_send():
-    global voices
-    global websocket
-    print("started to sending data!")
-    while True:
-        while not voices.empty():
-            data = voices.get()
-            voices.task_done()
-            try:
-                await websocket.send(data)
-            except Exception as e:
-                print('Exception occurred:', e)
-                traceback.print_exc()
-                exit(0)
-            await asyncio.sleep(0.005)
-        await asyncio.sleep(0.005)
-
- 
-             
+          
 async def message(id):
     global websocket,voices,offline_msg_done
     text_print = ""
@@ -215,12 +199,12 @@ async def message(id):
             if meg["mode"] == "online":
                 text_print += "{}".format(text)
                 text_print = text_print[-args.words_max_print:]
-                os.system('clear')
+                # os.system('clear')
                 print("\rpid" + str(id) + ": " + text_print)
             elif meg["mode"] == "offline":
                 text_print += "{}".format(text)
                 text_print = text_print[-args.words_max_print:]
-                os.system('clear')
+                # os.system('clear')
                 print("\rpid" + str(id) + ": " + text_print)
                 offline_msg_done=True
             else:
@@ -232,8 +216,9 @@ async def message(id):
                     text_print = text_print_2pass_offline + "{}".format(text)
                     text_print_2pass_offline += "{}".format(text)
                 text_print = text_print[-args.words_max_print:]
-                os.system('clear')
+                # os.system('clear')
                 print("\rpid" + str(id) + ": " + text_print)
+                offline_msg_done=True
 
     except Exception as e:
             print("Exception:", e)
@@ -277,9 +262,8 @@ async def ws_client(id, chunk_begin, chunk_size):
             task = asyncio.create_task(record_from_scp(i, 1))
         else:
             task = asyncio.create_task(record_microphone())
-        task2 = asyncio.create_task(ws_send())
         task3 = asyncio.create_task(message(str(id)+"_"+str(i))) #processid+fileid
-        await asyncio.gather(task, task2, task3)
+        await asyncio.gather(task, task3)
   exit(0)
     
 
