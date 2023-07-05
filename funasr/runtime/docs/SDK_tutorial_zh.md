@@ -110,6 +110,13 @@ sudo bash funasr-runtime-deploy-offline-cpu-zh.sh start
 sudo bash funasr-runtime-deploy-offline-cpu-zh.sh stop
 ```
 
+### 释放FunASR服务
+
+释放已经部署的FunASR服务。
+```shell
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh remove
+```
+
 ### 重启FunASR服务
 
 根据上次一键部署的设置重启启动FunASR服务。
@@ -136,6 +143,7 @@ sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update --asr_model damo/speech
 sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update [--host_port | --docker_port] <port number>
 sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update [--decode_thread_num | --io_thread_num] <the number of threads>
 sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update [--workspace] <workspace in local>
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update [--ssl] <0: close SSL; 1: open SSL, default:1>
 
 e.g
 sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update --decode_thread_num 32
