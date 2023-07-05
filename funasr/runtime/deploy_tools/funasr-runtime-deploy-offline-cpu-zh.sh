@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 scriptVersion="0.0.5"
-scriptDate="20230704"
+scriptDate="20230705"
 
 
 # Set color
@@ -966,6 +966,9 @@ dockerRun(){
     echo
     echo -e "  ${YELLOW}Loading models:${PLAIN}"
 
+    getDockerId
+    saveParams
+
     # Hide the cursor, start draw progress.
     printf "\e[?25l"
     while true
@@ -997,9 +1000,7 @@ dockerRun(){
     echo -e "  ${GREEN}The service has been started.${PLAIN}"
     echo
 
-    getDockerId
     deploySamples
-    saveParams
     echo -e "  ${BOLD}The sample code is already stored in the ${PLAIN}(${GREEN}${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}${PLAIN}) ."
     echo -e "  ${BOLD}If you want to see an example of how to use the client, you can run ${PLAIN}${GREEN}${SUDO_CMD} bash funasr-runtime-deploy-offline-cpu-zh.sh client${PLAIN} ."
     echo
@@ -1377,6 +1378,7 @@ displayHelp(){
     echo -e "                update [--asr_model | --vad_model | --punc_model] <model_id or local model path>"
     echo -e "                update [--host_port | --docker_port] <port number>"
     echo -e "                update [--decode_thread_num | io_thread_num] <the number of threads>"
+    echo -e "                update [--ssl] <0: close SSL; 1: open SSL, default:1>"
     echo -e "   ${BOLD}-c, client , --client${PLAIN}     Get a client example to show how to initiate speech recognition."
     echo -e "   ${BOLD}-o, show   , --show${PLAIN}       Displays all parameters that have been set."
     echo -e "   ${BOLD}-v, version, --version${PLAIN}    Display current script version."
@@ -1617,7 +1619,7 @@ case "$1" in
                 fi
             elif [ "$type" = "--ssl" ]; then
                 switch=`expr ${val} + 0`
-                if [ $switch -eq 0]; then
+                if [ $switch -eq 0 ]; then
                     PARAMS_SSL_FLAG=0
                 else
                     PARAMS_SSL_FLAG=1
