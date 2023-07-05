@@ -3,8 +3,8 @@
 . ./path.sh || exit 1;
 
 # machines configuration
-CUDA_VISIBLE_DEVICES="0,1"
-gpu_num=2
+CUDA_VISIBLE_DEVICES="0,1,2,3"
+gpu_num=4
 count=1
 gpu_inference=true  # Whether to perform gpu decoding, set false for cpu decoding
 # for gpu decoding, inference_nj=ngpu*njob; for cpu decoding, inference_nj=njob

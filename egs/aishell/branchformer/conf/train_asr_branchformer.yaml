@@ -34,20 +34,27 @@ decoder_conf:
     self_attention_dropout_rate: 0.
     src_attention_dropout_rate: 0.
 
+# frontend related
+frontend: wav_frontend
+frontend_conf:
+    fs: 16000
+    window: hamming
+    n_mels: 80
+    frame_length: 25
+    frame_shift: 10
+    lfr_m: 1
+    lfr_n: 1
+
 # hybrid CTC/attention
 model_conf:
     ctc_weight: 0.3
     lsm_weight: 0.1     # label smoothing option
     length_normalized_loss: false
 
-# minibatch related
-batch_type: numel
-batch_bins: 25000000
-
 # optimization related
 accum_grad: 1
 grad_clip: 5
-max_epoch: 60
+max_epoch: 180
 val_scheduler_criterion:
     - valid
     - acc
@@ -65,10 +72,6 @@ scheduler: warmuplr
 scheduler_conf:
    warmup_steps: 35000
 
-num_workers: 4      # num of workers of data loader
-use_amp: true      # automatic mixed precision
-unused_parameters: false    # set as true if some params are unused in DDP
-
 specaug: specaug
 specaug_conf:
     apply_time_warp: true
@@ -84,3 +87,18 @@ specaug_conf:
     - 0.
     - 0.05
     num_time_mask: 10
+
+dataset_conf:
+    data_names: speech,text
+    data_types: sound,text
+    shuffle: True
+    shuffle_conf:
+        shuffle_size: 2048
+        sort_size: 500
+    batch_conf:
+        batch_type: token
+        batch_size: 25000
+    num_workers: 8
+
+log_interval: 50
+normalize: None

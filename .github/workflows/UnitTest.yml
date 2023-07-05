@@ -6,9 +6,7 @@ on:
         - main
   push:
     branches:
-      - dev_wjm
       - dev_jy
-      - dev_wjm_infer
 
 jobs:
   build:
