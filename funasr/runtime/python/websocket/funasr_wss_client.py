@@ -199,12 +199,12 @@ async def message(id):
             if meg["mode"] == "online":
                 text_print += "{}".format(text)
                 text_print = text_print[-args.words_max_print:]
-                os.system('clear')
+                # os.system('clear')
                 print("\rpid" + str(id) + ": " + text_print)
             elif meg["mode"] == "offline":
                 text_print += "{}".format(text)
                 text_print = text_print[-args.words_max_print:]
-                os.system('clear')
+                # os.system('clear')
                 print("\rpid" + str(id) + ": " + text_print)
                 offline_msg_done=True
             else:
@@ -216,7 +216,7 @@ async def message(id):
                     text_print = text_print_2pass_offline + "{}".format(text)
                     text_print_2pass_offline += "{}".format(text)
                 text_print = text_print[-args.words_max_print:]
-                os.system('clear')
+                # os.system('clear')
                 print("\rpid" + str(id) + ": " + text_print)
                 offline_msg_done=True
 
