@@ -1,0 +1,86 @@
+# network architecture
+# encoder related
+encoder: branchformer
+encoder_conf:
+    output_size: 256
+    use_attn: true
+    attention_heads: 4
+    attention_layer_type: rel_selfattn
+    pos_enc_layer_type: rel_pos
+    rel_pos_type: latest
+    use_cgmlp: true
+    cgmlp_linear_units: 2048
+    cgmlp_conv_kernel: 31
+    use_linear_after_conv: false
+    gate_activation: identity
+    merge_method: concat
+    cgmlp_weight: 0.5               # used only if merge_method is "fixed_ave"
+    attn_branch_drop_rate: 0.0      # used only if merge_method is "learned_ave"
+    num_blocks: 24
+    dropout_rate: 0.1
+    positional_dropout_rate: 0.1
+    attention_dropout_rate: 0.1
+    input_layer: conv2d
+    stochastic_depth_rate: 0.0
+
+# decoder related
+decoder: transformer
+decoder_conf:
+    attention_heads: 4
+    linear_units: 2048
+    num_blocks: 6
+    dropout_rate: 0.1
+    positional_dropout_rate: 0.1
+    self_attention_dropout_rate: 0.
+    src_attention_dropout_rate: 0.
+
+# hybrid CTC/attention
+model_conf:
+    ctc_weight: 0.3
+    lsm_weight: 0.1     # label smoothing option
+    length_normalized_loss: false
+
+# minibatch related
+batch_type: numel
+batch_bins: 25000000
+
+# optimization related
+accum_grad: 1
+grad_clip: 5
+max_epoch: 60
+val_scheduler_criterion:
+    - valid
+    - acc
+best_model_criterion:
+-   - valid
+    - acc
+    - max
+keep_nbest_models: 10
+
+optim: adam
+optim_conf:
+   lr: 0.001
+   weight_decay: 0.000001
+scheduler: warmuplr
+scheduler_conf:
+   warmup_steps: 35000
+
+num_workers: 4      # num of workers of data loader
+use_amp: true      # automatic mixed precision
+unused_parameters: false    # set as true if some params are unused in DDP
+
+specaug: specaug
+specaug_conf:
+    apply_time_warp: true
+    time_warp_window: 5
+    time_warp_mode: bicubic
+    apply_freq_mask: true
+    freq_mask_width_range:
+    - 0
+    - 27
+    num_freq_mask: 2
+    apply_time_mask: true
+    time_mask_width_ratio_range:
+    - 0.
+    - 0.05
+    num_time_mask: 10
