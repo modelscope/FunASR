@@ -10,7 +10,6 @@ import ssl
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
 from modelscope.utils.logger import get_logger
-from funasr.runtime.python.onnxruntime.funasr_onnx.utils.frontend import load_bytes
 
 tracemalloc.start()
 
@@ -233,8 +232,6 @@ async def async_vad(websocket, audio_in):
 async def async_asr(websocket, audio_in):
             if len(audio_in) > 0:
                 # print(len(audio_in))
-                audio_in = load_bytes(audio_in)
-                
                 rec_result = inference_pipeline_asr(audio_in=audio_in,
                                                     param_dict=websocket.param_dict_asr)
                 # print(rec_result)
@@ -243,13 +240,12 @@ async def async_asr(websocket, audio_in):
                                                          param_dict=websocket.param_dict_punc)
                     # print("offline", rec_result)
                 if 'text' in rec_result:
-                    message = json.dumps({"mode": "2pass-offline", "text": rec_result["text"], "wav_name": websocket.wav_name})
+                    message = json.dumps({"mode": websocket.mode, "text": rec_result["text"], "wav_name": websocket.wav_name})
                     await websocket.send(message)
 
 
 async def async_asr_online(websocket, audio_in):
     if len(audio_in) > 0:
-        audio_in = load_bytes(audio_in)
         # print(websocket.param_dict_asr_online.get("is_final", False))
         rec_result = inference_pipeline_asr_online(audio_in=audio_in,
                                                    param_dict=websocket.param_dict_asr_online)
@@ -260,7 +256,7 @@ async def async_asr_online(websocket, audio_in):
         if "text" in rec_result:
             if rec_result["text"] != "sil" and rec_result["text"] != "waiting_for_more_voice":
                 # print("online", rec_result)
-                message = json.dumps({"mode": "2pass-online", "text": rec_result["text"], "wav_name": websocket.wav_name})
+                message = json.dumps({"mode": websocket.mode, "text": rec_result["text"], "wav_name": websocket.wav_name})
                 await websocket.send(message)
 
 if len(args.certfile)>0:

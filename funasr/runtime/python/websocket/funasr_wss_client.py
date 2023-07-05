@@ -8,7 +8,7 @@ import argparse
 import json
 import traceback
 from multiprocessing import Process
-from funasr.fileio.datadir_writer import DatadirWriter
+# from funasr.fileio.datadir_writer import DatadirWriter
 
 import logging
 
@@ -72,11 +72,13 @@ from queue import Queue
 
 voices = Queue()
 offline_msg_done=False
- 
-ibest_writer = None
+
 if args.output_dir is not None:
-    writer = DatadirWriter(args.output_dir)
-    ibest_writer = writer[f"1best_recog"]
+    # if os.path.exists(args.output_dir):
+    #     os.remove(args.output_dir)
+        
+    if not os.path.exists(args.output_dir):
+        os.makedirs(args.output_dir)
 
 
 async def record_microphone():
@@ -186,6 +188,10 @@ async def message(id):
     text_print = ""
     text_print_2pass_online = ""
     text_print_2pass_offline = ""
+    if args.output_dir is not None:
+        ibest_writer = open(os.path.join(args.output_dir, "text.{}".format(id)), "w+", encoding="utf-8")
+    else:
+        ibest_writer = None
     try:
        while True:
         
@@ -193,13 +199,15 @@ async def message(id):
             meg = json.loads(meg)
             wav_name = meg.get("wav_name", "demo")
             text = meg["text"]
-            if ibest_writer is not None:
-                ibest_writer["text"][wav_name] = text
 
+            if ibest_writer is not None:
+                text_write_line = "{}\t{}\n".format(wav_name, text)
+                ibest_writer.write(text_write_line)
+                
             if meg["mode"] == "online":
                 text_print += "{}".format(text)
                 text_print = text_print[-args.words_max_print:]
-                # os.system('clear')
+                os.system('clear')
                 print("\rpid" + str(id) + ": " + text_print)
             elif meg["mode"] == "offline":
                 text_print += "{}".format(text)
@@ -216,7 +224,7 @@ async def message(id):
                     text_print = text_print_2pass_offline + "{}".format(text)
                     text_print_2pass_offline += "{}".format(text)
                 text_print = text_print[-args.words_max_print:]
-                # os.system('clear')
+                os.system('clear')
                 print("\rpid" + str(id) + ": " + text_print)
                 offline_msg_done=True
 
@@ -227,17 +235,6 @@ async def message(id):
  
 
 
-async def print_messge():
-    global websocket
-    while True:
-        try:
-            meg = await websocket.recv()
-            meg = json.loads(meg)
-            print(meg)
-        except Exception as e:
-            print("Exception:", e)
-            #traceback.print_exc()
-            exit(0)
 
 async def ws_client(id, chunk_begin, chunk_size):
   if args.audio_in is None:
