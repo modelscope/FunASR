@@ -34,7 +34,7 @@ cd FunASR/funasr/runtime
 ```shell
 wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz
 ```
-我们以Python语言客户端为例，进行说明，支持多种音频格式输入（.wav, .pcm, .mp3等），也支持视频输入(.mp4等)，以及多文件列表wav.scp输入，其他版本客户端请参考文档（[点击此处](#客户端用法详解)）,定制服务部署请参考[如何定制服务部署](#如何定制服务部署)
+我们以Python语言客户端为例，进行说明，支持多种音频格式输入（.wav, .pcm, .mp3等），也支持视频输入(.mp4等)，以及多文件列表wav.scp输入，其他版本客户端请参考文档（[点击此处](#客户端用法详解)），定制服务部署请参考[如何定制服务部署](#如何定制服务部署)
 ```shell
 python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.wav" --output_dir "./results"
 ```
@@ -140,18 +140,18 @@ cd /workspace/FunASR/funasr/runtime/websocket/build/bin
  ```
 命令参数介绍：
 ```text
---download-model-dir #模型下载地址，通过设置model ID从Modelscope下载模型
---model-dir # modelscope model ID
---quantize  # True为量化ASR模型，False为非量化ASR模型，默认是True
---vad-dir # modelscope model ID
---vad-quant  # True为量化VAD模型，False为非量化VAD模型，默认是True
---punc-dir # modelscope model ID
---punc-quant  # True为量化PUNC模型，False为非量化PUNC模型，默认是True
---port # 服务端监听的端口号，默认为 10095
---decoder-thread-num # 服务端启动的推理线程数，默认为 8
---io-thread-num # 服务端启动的IO线程数，默认为 1
---certfile <string> # ssl的证书文件，默认为：../../../ssl_key/server.crt
---keyfile <string> # ssl的密钥文件，默认为：../../../ssl_key/server.key
+--download-model-dir 模型下载地址，通过设置model ID从Modelscope下载模型
+--model-dir  modelscope model ID
+--quantize  True为量化ASR模型，False为非量化ASR模型，默认是True
+--vad-dir  modelscope model ID
+--vad-quant   True为量化VAD模型，False为非量化VAD模型，默认是True
+--punc-dir  modelscope model ID
+--punc-quant   True为量化PUNC模型，False为非量化PUNC模型，默认是True
+--port  服务端监听的端口号，默认为 10095
+--decoder-thread-num  服务端启动的推理线程数，默认为 8
+--io-thread-num  服务端启动的IO线程数，默认为 1
+--certfile  ssl的证书文件，默认为：../../../ssl_key/server.crt
+--keyfile   ssl的密钥文件，默认为：../../../ssl_key/server.key
 ```
 
 funasr-wss-server同时也支持从本地路径加载模型（本地模型资源准备详见[模型资源准备](#模型资源准备)）示例如下：
@@ -169,20 +169,20 @@ cd /workspace/FunASR/funasr/runtime/websocket/build/bin
  ```
 命令参数介绍：
 ```text
---model-dir # ASR模型路径，默认为：/workspace/models/asr
---quantize  # True为量化ASR模型，False为非量化ASR模型，默认是True
---vad-dir # VAD模型路径，默认为：/workspace/models/vad
---vad-quant  # True为量化VAD模型，False为非量化VAD模型，默认是True
---punc-dir # PUNC模型路径，默认为：/workspace/models/punc
---punc-quant  # True为量化PUNC模型，False为非量化PUNC模型，默认是True
---port # 服务端监听的端口号，默认为 10095
---decoder-thread-num # 服务端启动的推理线程数，默认为 8
---io-thread-num # 服务端启动的IO线程数，默认为 1
---certfile <string> # ssl的证书文件，默认为：../../../ssl_key/server.crt
---keyfile <string> # ssl的密钥文件，默认为：../../../ssl_key/server.key
+--model-dir  ASR模型路径，默认为：/workspace/models/asr
+--quantize   True为量化ASR模型，False为非量化ASR模型，默认是True
+--vad-dir  VAD模型路径，默认为：/workspace/models/vad
+--vad-quant   True为量化VAD模型，False为非量化VAD模型，默认是True
+--punc-dir  PUNC模型路径，默认为：/workspace/models/punc
+--punc-quant   True为量化PUNC模型，False为非量化PUNC模型，默认是True
+--port  服务端监听的端口号，默认为 10095
+--decoder-thread-num  服务端启动的推理线程数，默认为 8
+--io-thread-num  服务端启动的IO线程数，默认为 1
+--certfile ssl的证书文件，默认为：../../../ssl_key/server.crt
+--keyfile  ssl的密钥文件，默认为：../../../ssl_key/server.key
 ```
 
-##模型资源准备
+## 模型资源准备
 
 如果您选择通过funasr-wss-server从Modelscope下载模型，可以跳过本步骤。
 
