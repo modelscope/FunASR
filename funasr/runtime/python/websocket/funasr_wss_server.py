@@ -10,7 +10,6 @@ import ssl
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
 from modelscope.utils.logger import get_logger
-from funasr.runtime.python.onnxruntime.funasr_onnx.utils.frontend import load_bytes
 
 tracemalloc.start()
 
@@ -233,8 +232,6 @@ async def async_vad(websocket, audio_in):
 async def async_asr(websocket, audio_in):
             if len(audio_in) > 0:
                 # print(len(audio_in))
-                audio_in = load_bytes(audio_in)
-                
                 rec_result = inference_pipeline_asr(audio_in=audio_in,
                                                     param_dict=websocket.param_dict_asr)
                 # print(rec_result)
@@ -249,7 +246,6 @@ async def async_asr(websocket, audio_in):
 
 async def async_asr_online(websocket, audio_in):
     if len(audio_in) > 0:
-        audio_in = load_bytes(audio_in)
         # print(websocket.param_dict_asr_online.get("is_final", False))
         rec_result = inference_pipeline_asr_online(audio_in=audio_in,
                                                    param_dict=websocket.param_dict_asr_online)
