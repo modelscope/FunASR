@@ -22,7 +22,7 @@ FunASR提供可便捷本地或者云端服务器部署的离线文件转写服�
 
 ```shell
 curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/funasr/runtime/deploy_tools/funasr-runtime-deploy-offline-cpu-zh.sh;
-# 如遇到网络问题，中国大陆用户，可以用个下面的命令：
+# 如遇到网络问题，中国大陆用户，可以使用下面的命令：
 # curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy-offline-cpu-zh.sh;
 ```
 
@@ -33,7 +33,7 @@ sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace /root/funa
 
 ### 客户端测试与使用
 
-运行上面安装指令后，会在/root/funasr-runtime-resources（默认安装目录）中下载客户端测试工具目录samples，
+运行上面安装指令后，会在/root/funasr-runtime-resources（默认安装目录）中下载客户端测试工具目录samples（手动下载，[点击此处](https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz)），
 我们以Python语言客户端为例，进行说明，支持多种音频格式输入（.wav, .pcm, .mp3等），也支持视频输入(.mp4等)，以及多文件列表wav.scp输入，其他版本客户端请参考文档（[点击此处](#客户端用法详解)）
 
 ```shell
