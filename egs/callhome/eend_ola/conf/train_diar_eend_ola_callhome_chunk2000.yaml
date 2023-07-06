@@ -12,7 +12,7 @@ encoder_decoder_attractor_conf:
     n_units: 256
 
 # model related
-model: eend_ola_similar_eend
+model: eend_ola
 model_conf:
     attractor_loss_weight:  0.01
     max_n_speaker: 8
