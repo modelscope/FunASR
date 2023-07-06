@@ -178,18 +178,22 @@ class_choices_list = [
 
 def build_diar_model(args):
     # token_list
-    if isinstance(args.token_list, str):
-        with open(args.token_list, encoding="utf-8") as f:
-            token_list = [line.rstrip() for line in f]
+    if args.token_list is not None:
+        if isinstance(args.token_list, str):
+            with open(args.token_list, encoding="utf-8") as f:
+                token_list = [line.rstrip() for line in f]
 
-        # Overwriting token_list to keep it as "portable".
-        args.token_list = list(token_list)
-    elif isinstance(args.token_list, (tuple, list)):
-        token_list = list(args.token_list)
+            # Overwriting token_list to keep it as "portable".
+            args.token_list = list(token_list)
+        elif isinstance(args.token_list, (tuple, list)):
+            token_list = list(args.token_list)
+        else:
+            raise RuntimeError("token_list must be str or list")
+        vocab_size = len(token_list)
+        logging.info(f"Vocabulary size: {vocab_size}")
     else:
-        raise RuntimeError("token_list must be str or list")
-    vocab_size = len(token_list)
-    logging.info(f"Vocabulary size: {vocab_size}")
+        token_list = None
+        vocab_size = None
 
     # frontend
     if args.input_size is None:
