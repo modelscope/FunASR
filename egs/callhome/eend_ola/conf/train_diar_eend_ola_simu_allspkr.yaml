@@ -1,0 +1,52 @@
+# network architecture
+# encoder related
+encoder: eend_ola_transformer
+encoder_conf:
+    idim: 345
+    n_layers: 4
+    n_units: 256
+
+# encoder-decoder attractor related
+encoder_decoder_attractor: eda
+encoder_decoder_attractor_conf:
+    n_units: 256
+
+# model related
+model: eend_ola_similar_eend
+model_conf:
+    max_n_speaker: 8
+
+# optimization related
+accum_grad: 1
+grad_clip: 5
+max_epoch: 25
+val_scheduler_criterion:
+    - valid
+    - loss
+best_model_criterion:
+-   - valid
+    - loss
+    - min
+keep_nbest_models: 100
+
+optim: adam
+optim_conf:
+    lr: 1.0
+    betas:
+      - 0.9
+      - 0.98
+    eps: 1.0e-9
+scheduler: noamlr
+scheduler_conf:
+    model_size: 256
+    warmup_steps: 100000
+
+dataset_conf:
+    data_names: speech_speaker_labels
+    data_types: kaldi_ark
+    batch_conf:
+        batch_type: unsorted
+        batch_size: 64
+    num_workers: 8
+
+log_interval: 50
