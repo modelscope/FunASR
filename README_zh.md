@@ -11,15 +11,20 @@
 
 FunASR希望在语音识别的学术研究和工业应用之间架起一座桥梁。通过支持在[ModelScope](https://www.modelscope.cn/models?page=1&tasks=auto-speech-recognition)上发布的工业级语音识别模型的训练和微调，研究人员和开发人员可以更方便地进行语音识别模型的研究和生产，并推动语音识别生态的发展。让语音识别更有趣！
 
-[**最新动态**](#最新动态) 
-| [**核心功能**](#核心功能)
-| [**安装教程**](#安装教程)
-| [**如何使用**](#如何使用)
-| [**服务部署**](./funasr/runtime/readme_cn.md)
-| [**模型仓库**](./docs/model_zoo/modelscope_models.md)
-| [**联系我们**](#contact)
-| [**M2MET2.0比赛**](https://github.com/alibaba-damo-academy/FunASR#multi-channel-multi-party-meeting-transcription-20-m2met20-challenge)
+<div align="center">  
+<h4>
+<a href="#最新动态"> 最新动态 </a>
+｜<a href="#安装教程"> 安装 </a>
+｜<a href="#快速开始"> 快速开始 </a>
+｜<a href="https://alibaba-damo-academy.github.io/FunASR/en/index.html"> 教程文档 </a>
+｜<a href="#核心功能"> 核心功能 </a>
+｜<a href="#模型仓库"> 模型仓库 </a>
+｜<a href="./funasr/runtime/readme_cn.md"> 服务部署 </a>
+｜<a href="#联系我们"> 联系我们 </a>
+</h4>
+</div>
 
+<a name="最新动态"></a>
 ## 最新动态
 
 ### 服务部署SDK
@@ -38,11 +43,13 @@ FunASR希望在语音识别的学术研究和工业应用之间架起一座桥�
 
 - 2023/07/06 
 
+<a name="核心功能"></a>
 ## 核心功能
 - FunASR是一个基础语音识别工具包，提供多种功能，包括语音识别（ASR）、语音活动检测（VAD）、标点恢复、语言模型、说话人验证、说话人分离和多人对话语音识别。
 - 我们在[ModelScope](https://www.modelscope.cn/models?page=1&tasks=auto-speech-recognition)上发布了大量的学术和工业预训练模型，可以通过我们的[模型仓库](https://github.com/alibaba-damo-academy/FunASR/blob/main/docs/model_zoo/modelscope_models.md)访问。代表性的[Paraformer-large](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary)模型在许多语音识别任务中实现了SOTA性能。
 - FunASR提供了一个易于使用的接口，可以直接基于ModelScope中托管模型进行推理与微调。此外，FunASR中的优化数据加载器可以加速大规模数据集的训练速度。
 
+<a name="安装教程"></a>
 ## 安装教程
 
 直接安装发布软件包
@@ -72,7 +79,8 @@ pip3 install -U modelscope
 
 更详细安装过程介绍（[点击此处](https://alibaba-damo-academy.github.io/FunASR/en/installation/installation.html)）
 
-## 如何使用
+<a name="快速开始"></a>
+## 快速开始
 
 您可以通过如下几种方式使用FunASR功能:
 
@@ -151,7 +159,7 @@ cd egs/aishell/paraformer
 
 更多例子可以参考（[点击此处](https://alibaba-damo-academy.github.io/FunASR/en/academic_recipe/asr_recipe.html)）
 
-
+<a name="联系我们"></a>
 ## 联系我们
 
 如果您在使用中遇到困难，可以通过一下方式联系我们
