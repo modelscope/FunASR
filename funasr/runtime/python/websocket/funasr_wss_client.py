@@ -12,7 +12,6 @@ from multiprocessing import Process
 
 import logging
 
-SUPPORT_AUDIO_TYPE_SETS = ['.wav', '.pcm']
 logging.basicConfig(level=logging.ERROR)
 
 parser = argparse.ArgumentParser()
@@ -197,7 +196,7 @@ async def message(id):
     text_print_2pass_online = ""
     text_print_2pass_offline = ""
     if args.output_dir is not None:
-        ibest_writer = open(os.path.join(args.output_dir, "text.{}".format(id)), "w+", encoding="utf-8")
+        ibest_writer = open(os.path.join(args.output_dir, "text.{}".format(id)), "a", encoding="utf-8")
     else:
         ibest_writer = None
     try:
@@ -219,10 +218,10 @@ async def message(id):
                 print("\rpid" + str(id) + ": " + text_print)
             elif meg["mode"] == "offline":
                 text_print += "{}".format(text)
-                text_print = text_print[-args.words_max_print:]
+                # text_print = text_print[-args.words_max_print:]
                 # os.system('clear')
-                print("\rpid" + str(id) + ": " + text_print)
-                offline_msg_done=True
+                print("\rpid" + str(id) + ": " + wav_name + ": " + text_print)
+                offline_msg_done = True
             else:
                 if meg["mode"] == "2pass-online":
                     text_print_2pass_online += "{}".format(text)
@@ -295,9 +294,7 @@ if __name__ == '__main__':
             wav_name = wav_splits[0] if len(wav_splits) > 1 else "demo"
             wav_path = wav_splits[1] if len(wav_splits) > 1 else wav_splits[0]
             audio_type = os.path.splitext(wav_path)[-1].lower()
-            # if audio_type not in SUPPORT_AUDIO_TYPE_SETS:
-            #    raise NotImplementedError(
-            #        f'Not supported audio type: {audio_type}')
+
 
         total_len = len(wavs)
         if total_len >= args.thread_num:
