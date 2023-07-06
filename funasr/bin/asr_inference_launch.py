@@ -639,7 +639,8 @@ def inference_paraformer_vad_punc(
             batch_size_token_ms = batch_size_token*60
             if speech2text.device == "cpu":
                 batch_size_token_ms = 0
-            batch_size_token_ms = max(batch_size_token_ms, sorted_data[0][0][1] - sorted_data[0][0][0])
+            if len(sorted_data) > 0 and len(sorted_data[0]) > 0:
+                batch_size_token_ms = max(batch_size_token_ms, sorted_data[0][0][1] - sorted_data[0][0][0])
             
             batch_size_token_ms_cum = 0
             beg_idx = 0

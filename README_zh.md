@@ -92,7 +92,7 @@ pip3 install -U modelscope
 
 #### python版本示例
 
-支持实时流式语音识别，并且会用非流式模型进行纠错，输出文本带有标点。目前只支持单个client，如需多并发请参考c++版本服务部署SDK（[点击此处]()）
+支持实时流式语音识别，并且会用非流式模型进行纠错，输出文本带有标点。目前只支持单个client，如需多并发请参考下方c++版本服务部署SDK
 
 ##### 服务端部署
 ```shell
@@ -107,6 +107,7 @@ python funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass --chunk
 ```
 更多例子可以参考（[点击此处](https://alibaba-damo-academy.github.io/FunASR/en/runtime/websocket_python.html#id2)）
 
+<a name="cpp版本示例"></a>
 #### c++版本示例
 
 目前已支持离线文件转写服务（CPU），支持上百路并发请求
@@ -162,9 +163,9 @@ cd egs/aishell/paraformer
 <a name="联系我们"></a>
 ## 联系我们
 
-如果您在使用中遇到困难，可以通过一下方式联系我们
+如果您在使用中遇到困难，可以通过以下方式联系我们
 
-- email: [funasr@list.alibaba-inc.com](funasr@list.alibaba-inc.com)
+- 邮件: [funasr@list.alibaba-inc.com](funasr@list.alibaba-inc.com)
 
 |                                  钉钉群                                  |                          微信                           |
 |:---------------------------------------------------------------------:|:-----------------------------------------------------:|

@@ -105,7 +105,7 @@ def compute_mask_indices(
             for length in sorted(lengths, reverse=True):
                 lens = np.fromiter(
                     (e - s if e - s >= length + min_space else 0 for s, e in parts),
-                    np.int,
+                    np.int32,
                 )
                 l_sum = np.sum(lens)
                 if l_sum == 0:

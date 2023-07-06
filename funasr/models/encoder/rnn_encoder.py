@@ -46,12 +46,12 @@ class RNNEncoder(AbsEncoder):
             raise ValueError(f"Not supported rnn_type={rnn_type}")
 
         if subsample is None:
-            subsample = np.ones(num_layers + 1, dtype=np.int)
+            subsample = np.ones(num_layers + 1, dtype=np.int32)
         else:
             subsample = subsample[:num_layers]
             # Append 1 at the beginning because the second or later is used
             subsample = np.pad(
-                np.array(subsample, dtype=np.int),
+                np.array(subsample, dtype=np.int32),
                 [1, num_layers - len(subsample)],
                 mode="constant",
                 constant_values=1,
