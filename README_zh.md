@@ -18,7 +18,7 @@ FunASR希望在语音识别的学术研究和工业应用之间架起一座桥�
 ｜<a href="#快速开始"> 快速开始 </a>
 ｜<a href="https://alibaba-damo-academy.github.io/FunASR/en/index.html"> 教程文档 </a>
 ｜<a href="#核心功能"> 核心功能 </a>
-｜<a href="#模型仓库"> 模型仓库 </a>
+｜<a href="./docs/model_zoo/modelscope_models.md"> 模型仓库 </a>
 ｜<a href="./funasr/runtime/readme_cn.md"> 服务部署 </a>
 ｜<a href="#联系我们"> 联系我们 </a>
 </h4>
