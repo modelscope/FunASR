@@ -177,10 +177,9 @@ async def record_from_scp(chunk_begin, chunk_size):
             sleep_duration = 0.001 if args.mode == "offline" else 60 * args.chunk_size[1] / args.chunk_interval / 1000
             
             await asyncio.sleep(sleep_duration)
-    # when all data sent, we need to close websocket
-    while not voices.empty():
-         await asyncio.sleep(1)
-    await asyncio.sleep(3)
+    
+    if not args.mode=="offline":
+        await asyncio.sleep(2)
     # offline model need to wait for message recved
     
     if args.mode=="offline":
