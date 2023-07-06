@@ -20,6 +20,7 @@
 #include <websocketpp/config/asio_client.hpp>
 #include <fstream>
 #include <atomic>
+#include <thread>
 #include <glog/logging.h>
 
 #include "audio.h"
@@ -106,7 +107,7 @@ class WebsocketClient {
         switch (msg->get_opcode()) {
             case websocketpp::frame::opcode::text:
 				total_num=total_num+1;
-                LOG(INFO)<<total_num<<",on_message = " << payload;
+                LOG(INFO)<< "Thread: " << this_thread::get_id() <<",on_message = " << payload;
 				if((total_num+1)==wav_index)
 				{
 					websocketpp::lib::error_code ec;
