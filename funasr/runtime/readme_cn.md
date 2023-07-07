@@ -14,7 +14,7 @@ SDK 支持以下几种服务部署：
 
 ## 中文离线文件转写服务部署（CPU版本）
 
-中文语音离线文件服务部署（CPU版本），拥有完整的语音识别链路，可以将几十个小时的音频与视频识别成带标点的文字，而且支持上百路请求同时进行转写。
+中文语音离线文件服务部署（CPU版本），拥有完整的语音识别链路，可以将几十个小时的长音频与视频识别成带标点的文字，而且支持上百路请求同时进行转写。
 为了支持不同用户的需求，针对不同场景，准备了不同的图文教程：
 
 ### 便捷部署教程
@@ -28,4 +28,4 @@ SDK 支持以下几种服务部署：
 
 ### 技术原理揭秘
 
-文档介绍了背后技术原理，识别准确率，计算效率等，以及核心优势介绍：便捷、高精度、高效率、长音频链路，详细文档参考（[点击此处](https://mp.weixin.qq.com/s?__biz=MzA3MTQ0NTUyMw==&tempkey=MTIyNF84d05USjMxSEpPdk5GZXBJUFNJNzY0bU1DTkxhV19mcWY4MTNWQTJSYXhUaFgxOWFHZTZKR0JzWC1JRmRCdUxCX2NoQXg0TzFpNmVJX2R1WjdrcC02N2FEcUc3MDhzVVhpNWQ5clU4QUdqNFdkdjFYb18xRjlZMmc5c3RDOTl0U0NiRkJLb05ZZ0RmRlVkVjFCZnpXNWFBVlRhbXVtdWs4bUMwSHZnfn4%3D&chksm=1f2c3254285bbb42bc8f76a82e9c5211518a0bb1ff8c357d085c1b78f675ef2311f3be6e282c#rd)）
+文档介绍了背后技术原理，识别准确率，计算效率等，以及核心优势介绍：便捷、高精度、高效率、长音频链路，详细文档参考（[点击此处](https://mp.weixin.qq.com/s/DHQwbgdBWcda0w_L60iUww)）

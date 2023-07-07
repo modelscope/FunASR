@@ -1,5 +1,7 @@
 [//]: # (<div align="left"><img src="docs/images/funasr_logo.jpg" width="400"/></div>)
 
+([简体中文](./README_zh.md)|English)
+
 # FunASR: A Fundamental End-to-End Speech Recognition Toolkit
 <p align="left">
     <a href=""><img src="https://img.shields.io/badge/OS-Linux%2C%20Win%2C%20Mac-brightgreen.svg"></a>
@@ -23,7 +25,7 @@
 
 ### FunASR runtime-SDK
 
-- 2023.07.02: 
+- 2023.07.03: 
 We have release the FunASR runtime-SDK-0.1.0, file transcription service (Mandarin) is now supported ([ZH](funasr/runtime/readme_cn.md)/[EN](funasr/runtime/readme.md))
 
 ### Multi-Channel Multi-Party Meeting Transcription 2.0 (M2MeT2.0) Challenge
@@ -109,13 +111,13 @@ An example with websocket:
 For the server:
 ```shell
 cd funasr/runtime/python/websocket
-python wss_srv_asr.py --port 10095
+python funasr_wss_server.py --port 10095
 ```
 
 For the client:
 ```shell
-python wss_client_asr.py --host "127.0.0.1" --port 10095 --mode 2pass --chunk_size "5,10,5"
-#python wss_client_asr.py --host "127.0.0.1" --port 10095 --mode 2pass --chunk_size "8,8,4" --audio_in "./data/wav.scp" --output_dir "./results"
+python funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass --chunk_size "5,10,5"
+#python funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass --chunk_size "8,8,4" --audio_in "./data/wav.scp" --output_dir "./results"
 ```
 More examples could be found in [docs](https://alibaba-damo-academy.github.io/FunASR/en/runtime/websocket_python.html#id2)
 ## Contact

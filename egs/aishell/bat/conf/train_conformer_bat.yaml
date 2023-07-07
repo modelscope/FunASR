@@ -1,0 +1,108 @@
+encoder: chunk_conformer
+encoder_conf:
+      activation_type: swish
+      positional_dropout_rate: 0.5
+      time_reduction_factor: 2
+      embed_vgg_like: false
+      subsampling_factor: 4
+      linear_units: 2048
+      output_size: 512
+      attention_heads: 8
+      dropout_rate: 0.5
+      positional_dropout_rate: 0.5
+      attention_dropout_rate: 0.5
+      cnn_module_kernel: 15
+      num_blocks: 12    
+
+# decoder related
+rnnt_decoder: rnnt
+rnnt_decoder_conf:
+    embed_size: 512
+    hidden_size: 512
+    embed_dropout_rate: 0.5
+    dropout_rate: 0.5
+    use_embed_mask: true
+
+predictor: bat_predictor
+predictor_conf:
+  idim: 512
+  threshold: 1.0
+  l_order: 1
+  r_order: 1
+  return_accum: true
+
+joint_network_conf:
+    joint_space_size: 512
+
+# frontend related
+frontend: wav_frontend
+frontend_conf:
+    fs: 16000
+    window: hamming
+    n_mels: 80
+    frame_length: 25
+    frame_shift: 10
+    lfr_m: 1
+    lfr_n: 1
+
+
+# Auxiliary CTC
+model: bat
+model_conf:
+    auxiliary_ctc_weight: 0.0
+    cif_weight: 1.0
+    r_d: 3
+    r_u: 5
+
+# minibatch related
+use_amp: true
+
+# optimization related
+accum_grad: 1
+grad_clip: 5
+max_epoch: 100
+val_scheduler_criterion:
+    - valid
+    - loss
+best_model_criterion:
+-   - valid
+    - cer_transducer
+    - min
+keep_nbest_models: 10
+
+optim: adam
+optim_conf:
+   lr: 0.001
+scheduler: warmuplr
+scheduler_conf:
+   warmup_steps: 25000
+
+specaug: specaug
+specaug_conf:
+    apply_time_warp: true
+    time_warp_window: 5
+    time_warp_mode: bicubic
+    apply_freq_mask: true
+    freq_mask_width_range:
+    - 0
+    - 40
+    num_freq_mask: 2
+    apply_time_mask: true
+    time_mask_width_range:
+    - 0
+    - 50
+    num_time_mask: 5
+
+dataset_conf:
+    data_names: speech,text
+    data_types: sound,text
+    shuffle: True
+    shuffle_conf:
+        shuffle_size: 2048
+        sort_size: 500
+    batch_conf:
+        batch_type: token
+        batch_size: 25000
+    num_workers: 8
+
+log_interval: 50

@@ -13,7 +13,7 @@ from funasr.modules.rnn.encoders import RNNP
 class MaskEstimator(torch.nn.Module):
     def __init__(self, type, idim, layers, units, projs, dropout, nmask=1):
         super().__init__()
-        subsample = np.ones(layers + 1, dtype=np.int)
+        subsample = np.ones(layers + 1, dtype=np.int32)
 
         typ = type.lstrip("vgg").rstrip("p")
         if type[-1] == "p":

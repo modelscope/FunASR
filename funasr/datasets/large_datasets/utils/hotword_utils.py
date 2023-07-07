@@ -6,7 +6,8 @@ def sample_hotword(length,
                    sample_rate,
                    double_rate,
                    pre_prob,
-                   pre_index=None):
+                   pre_index=None,
+                   pre_hwlist=None):
         if length < hotword_min_length:
             return [-1]
         if random.random() < sample_rate:

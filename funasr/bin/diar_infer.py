@@ -179,7 +179,7 @@ class Speech2DiarizationSOND:
 
     @staticmethod
     def seq2arr(seq, vec_dim=8):
-        def int2vec(x, vec_dim=8, dtype=np.int):
+        def int2vec(x, vec_dim=8, dtype=np.int32):
             b = ('{:0' + str(vec_dim) + 'b}').format(x)
             # little-endian order: lower bit first
             return (np.array(list(b)[::-1]) == '1').astype(dtype)

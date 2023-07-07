@@ -169,7 +169,7 @@ After completing the deployment of FunASR offline file transcription service on 
 
 ### python-client
 ```shell
-python wss_client_asr.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "./data/wav.scp" --send_without_sleep --output_dir "./results"
+python funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "./data/wav.scp" --send_without_sleep --output_dir "./results"
 ```
 
 Introduction to command parameters:
