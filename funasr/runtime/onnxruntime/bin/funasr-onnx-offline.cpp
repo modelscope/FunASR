@@ -91,11 +91,8 @@ int main(int argc, char** argv)
     vector<string> wav_ids;
     string default_id = "wav_default_id";
     string wav_path_ = model_path.at(WAV_PATH);
-    if(is_target_file(wav_path_, "wav") || is_target_file(wav_path_, "pcm")){
-        wav_list.emplace_back(wav_path_);
-        wav_ids.emplace_back(default_id);
-    }
-    else if(is_target_file(wav_path_, "scp")){
+
+    if(is_target_file(wav_path_, "scp")){
         ifstream in(wav_path_);
         if (!in.is_open()) {
             LOG(ERROR) << "Failed to open file: " << model_path.at(WAV_SCP) ;
@@ -112,8 +109,8 @@ int main(int argc, char** argv)
         }
         in.close();
     }else{
-        LOG(ERROR)<<"Please check the wav extension!";
-        exit(-1);
+        wav_list.emplace_back(wav_path_);
+        wav_ids.emplace_back(default_id);
     }
     
     float snippet_time = 0.0f;
