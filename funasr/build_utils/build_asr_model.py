@@ -40,6 +40,7 @@ from funasr.models.encoder.resnet34_encoder import ResNet34Diar
 from funasr.models.encoder.rnn_encoder import RNNEncoder
 from funasr.models.encoder.sanm_encoder import SANMEncoder, SANMEncoderChunkOpt
 from funasr.models.encoder.branchformer_encoder import BranchformerEncoder
+from funasr.models.encoder.e_branchformer_encoder import EBranchformerEncoder
 from funasr.models.encoder.transformer_encoder import TransformerEncoder
 from funasr.models.frontend.default import DefaultFrontend
 from funasr.models.frontend.default import MultiChannelFrontend
@@ -115,6 +116,7 @@ encoder_choices = ClassChoices(
         sanm_chunk_opt=SANMEncoderChunkOpt,
         data2vec_encoder=Data2VecEncoder,
         branchformer=BranchformerEncoder,
+        e_branchformer=EBranchformerEncoder,
         mfcca_enc=MFCCAEncoder,
         chunk_conformer=ConformerChunkEncoder,
     ),
