@@ -32,6 +32,12 @@ wget https://github.com/microsoft/onnxruntime/releases/download/v1.14.0/onnxrunt
 tar -zxvf onnxruntime-linux-x64-1.14.0.tgz
 ```
 
+### Download ffmpeg
+```shell
+wget https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2023-07-09-12-50/ffmpeg-N-111383-g20b8688092-linux64-gpl-shared.tar.xz
+tar -zxvf ffmpeg-N-111383-g20b8688092-linux64-gpl-shared.tar.xz
+```
+
 ### Install openblas
 ```shell
 sudo apt-get install libopenblas-dev #ubuntu
@@ -48,7 +54,7 @@ apt-get install libssl-dev #ubuntu
 
 git clone https://github.com/alibaba-damo-academy/FunASR.git && cd FunASR/funasr/runtime/websocket
 mkdir build && cd build
-cmake  -DCMAKE_BUILD_TYPE=release .. -DONNXRUNTIME_DIR=/path/to/onnxruntime-linux-x64-1.14.0
+cmake  -DCMAKE_BUILD_TYPE=release .. -DONNXRUNTIME_DIR=/path/to/onnxruntime-linux-x64-1.14.0 --DFFMPEG_DIR=/path/to/ffmpeg-N-111383-g20b8688092-linux64-gpl-shared
 make
 ```
 ## Run the websocket server
