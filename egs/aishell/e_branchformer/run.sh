@@ -46,7 +46,8 @@ train_set=train
 valid_set=dev
 test_sets="dev test"
 
-asr_config=conf/train_asr_e_branchformer.yaml
+#asr_config=conf/train_asr_e_branchformer.yaml
+asr_config=conf/train_asr_e_branchformer_bs16000.yaml
 model_dir="baseline_$(basename "${asr_config}" .yaml)_${lang}_${token_type}_${tag}"
 
 inference_config=conf/decode_asr_transformer.yaml
