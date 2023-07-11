@@ -155,7 +155,9 @@ int main(int argc, char* argv[]) {
         }
         av_packet_unref(packet);
     }
+    fclose(out_file);
 
+    avio_context_free(&avio_ctx);
     avformat_close_input(&formatContext);
     avformat_free_context(formatContext);
     avcodec_free_context(&codecContext);

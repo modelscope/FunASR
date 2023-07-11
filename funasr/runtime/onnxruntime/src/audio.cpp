@@ -256,20 +256,21 @@ bool Audio::FfmpegLoad(const char *filename){
     if (!codecContext) {
         fprintf(stderr, "Failed to allocate codec context\n");
         avformat_close_input(&formatContext);
+        avformat_free_context(formatContext);
         return false;
     }
     if (avcodec_parameters_to_context(codecContext, codecParameters) != 0) {
         printf("Error: Could not copy codec parameters to codec context.");
-        avcodec_free_context(&codecContext);
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
+        avcodec_free_context(&codecContext);
         return false;
     }
     if (avcodec_open2(codecContext, codec, NULL) < 0) {
         printf("Error: Could not open audio decoder.");
-        avcodec_free_context(&codecContext);
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
+        avcodec_free_context(&codecContext);
         return false;
     }
     SwrContext *swr_ctx = swr_alloc_set_opts(
@@ -285,17 +286,17 @@ bool Audio::FfmpegLoad(const char *filename){
     );
     if (swr_ctx == nullptr) {
         std::cerr << "Could not initialize resampler" << std::endl;
-        avcodec_free_context(&codecContext);
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
+        avcodec_free_context(&codecContext);
         return false;
     }
     if (swr_init(swr_ctx) != 0) {
         std::cerr << "Could not initialize resampler" << std::endl;
-        swr_free(&swr_ctx);
-        avcodec_free_context(&codecContext);
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
+        avcodec_free_context(&codecContext);
+        swr_free(&swr_ctx);
         return false;
     }
 
@@ -384,8 +385,11 @@ bool Audio::FfmpegLoad(const char *filename){
 
 bool Audio::FfmpegLoad(const char* buf, int n_file_len){
     // from buf
+    char* buf_copy = (char *)malloc(n_file_len);
+    memcpy(buf_copy, buf, n_file_len);
+
     AVIOContext* avio_ctx = avio_alloc_context(
-        (unsigned char*)buf, // buffer
+        (unsigned char*)buf_copy, // buffer
         n_file_len, // buffer size
         0, // write flag (0 for read-only)
         nullptr, // opaque pointer (not used here)
@@ -397,6 +401,7 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
     formatContext->pb = avio_ctx;
     if (avformat_open_input(&formatContext, "", NULL, NULL) != 0) {
         printf("Error: Could not open input file.");
+        avio_context_free(&avio_ctx);
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
         return false;
@@ -404,6 +409,7 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
 
     if (avformat_find_stream_info(formatContext, NULL) < 0) {
         printf("Error: Could not find stream information.");
+        avio_context_free(&avio_ctx);
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
         return false;
@@ -417,21 +423,25 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
     AVCodecContext* codecContext = avcodec_alloc_context3(codec);
     if (!codecContext) {
         fprintf(stderr, "Failed to allocate codec context\n");
+        avio_context_free(&avio_ctx);
         avformat_close_input(&formatContext);
+        avformat_free_context(formatContext);
         return false;
     }
     if (avcodec_parameters_to_context(codecContext, codecParameters) != 0) {
         printf("Error: Could not copy codec parameters to codec context.");
-        avcodec_free_context(&codecContext);
+        avio_context_free(&avio_ctx);
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
+        avcodec_free_context(&codecContext);
         return false;
     }
     if (avcodec_open2(codecContext, codec, NULL) < 0) {
         printf("Error: Could not open audio decoder.");
-        avcodec_free_context(&codecContext);
+        avio_context_free(&avio_ctx);
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
+        avcodec_free_context(&codecContext);
         return false;
     }
     SwrContext *swr_ctx = swr_alloc_set_opts(
@@ -447,17 +457,19 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
     );
     if (swr_ctx == nullptr) {
         std::cerr << "Could not initialize resampler" << std::endl;
-        avcodec_free_context(&codecContext);
+        avio_context_free(&avio_ctx);
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
+        avcodec_free_context(&codecContext);
         return false;
     }
     if (swr_init(swr_ctx) != 0) {
         std::cerr << "Could not initialize resampler" << std::endl;
-        swr_free(&swr_ctx);
-        avcodec_free_context(&codecContext);
+        avio_context_free(&avio_ctx);
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
+        avcodec_free_context(&codecContext);
+        swr_free(&swr_ctx);
         return false;
     }
 
