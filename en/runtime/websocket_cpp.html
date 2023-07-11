@@ -211,7 +211,7 @@ tar -xvf ffmpeg-N-111383-g20b8688092-linux64-gpl-shared.tar.xz
 
 git clone https://github.com/alibaba-damo-academy/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> FunASR/funasr/runtime/websocket
 mkdir build <span class="o">&amp;&amp;</span> <span class="nb">cd</span> build
-cmake  -DCMAKE_BUILD_TYPE<span class="o">=</span>release .. -DONNXRUNTIME_DIR<span class="o">=</span>/path/to/onnxruntime-linux-x64-1.14.0 --DFFMPEG_DIR<span class="o">=</span>/path/to/ffmpeg-N-111383-g20b8688092-linux64-gpl-shared
+cmake  -DCMAKE_BUILD_TYPE<span class="o">=</span>release .. -DONNXRUNTIME_DIR<span class="o">=</span>/path/to/onnxruntime-linux-x64-1.14.0 -DFFMPEG_DIR<span class="o">=</span>/path/to/ffmpeg-N-111383-g20b8688092-linux64-gpl-shared
 make
 </pre></div>
 </div>
