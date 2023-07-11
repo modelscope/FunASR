@@ -6,8 +6,7 @@ from funasr.export.utils.torch_function import MakePadMask
 from funasr.export.utils.torch_function import sequence_mask
 from funasr.models.encoder.conformer_encoder import ConformerEncoder
 from funasr.export.models.encoder.conformer_encoder import ConformerEncoder as ConformerEncoder_export
-from funasr.models.decoder.transformer_decoder import TransformerDecoder as TransformerDecoder_export
-
+from funasr.export.models.decoder.xformer_decoder import XformerDecoder as TransformerDecoder_export
 
 class Conformer(nn.Module):
     """
