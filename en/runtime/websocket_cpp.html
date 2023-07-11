@@ -85,6 +85,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#building-for-linux-unix">Building for Linux/Unix</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#download-onnxruntime">Download onnxruntime</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#download-ffmpeg">Download ffmpeg</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#install-openblas">Install openblas</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#build-runtime">Build runtime</a></li>
 </ul>
@@ -184,6 +185,16 @@ tar -zxvf onnxruntime-linux-x64-1.14.0.tgz
 </pre></div>
 </div>
 </div>
+<div class="section" id="download-ffmpeg">
+<h3>Download ffmpeg<a class="headerlink" href="#download-ffmpeg" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>wget https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2023-07-09-12-50/ffmpeg-N-111383-g20b8688092-linux64-gpl-shared.tar.xz
+tar -xvf ffmpeg-N-111383-g20b8688092-linux64-gpl-shared.tar.xz
+<span class="c1"># 国内可以使用下述方式</span>
+<span class="c1"># wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/dep_libs/ffmpeg-N-111383-g20b8688092-linux64-gpl-shared.tar.xz</span>
+<span class="c1"># tar -xvf ffmpeg-N-111383-g20b8688092-linux64-gpl-shared.tar.xz</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="install-openblas">
 <h3>Install openblas<a class="headerlink" href="#install-openblas" title="Permalink to this headline"></a></h3>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo apt-get install libopenblas-dev <span class="c1">#ubuntu</span>
@@ -200,7 +211,7 @@ tar -zxvf onnxruntime-linux-x64-1.14.0.tgz
 
 git clone https://github.com/alibaba-damo-academy/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> FunASR/funasr/runtime/websocket
 mkdir build <span class="o">&amp;&amp;</span> <span class="nb">cd</span> build
-cmake  -DCMAKE_BUILD_TYPE<span class="o">=</span>release .. -DONNXRUNTIME_DIR<span class="o">=</span>/path/to/onnxruntime-linux-x64-1.14.0
+cmake  -DCMAKE_BUILD_TYPE<span class="o">=</span>release .. -DONNXRUNTIME_DIR<span class="o">=</span>/path/to/onnxruntime-linux-x64-1.14.0 --DFFMPEG_DIR<span class="o">=</span>/path/to/ffmpeg-N-111383-g20b8688092-linux64-gpl-shared
 make
 </pre></div>
 </div>
