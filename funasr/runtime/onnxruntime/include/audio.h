@@ -55,6 +55,9 @@ class Audio {
     bool LoadPcmwav(const char* buf, int n_file_len, int32_t* sampling_rate);
     bool LoadPcmwav(const char* filename, int32_t* sampling_rate);
     bool LoadPcmwav2Char(const char* filename, int32_t* sampling_rate);
+    bool LoadOthers2Char(const char* filename);
+    bool FfmpegLoad(const char *filename);
+    bool FfmpegLoad(const char* buf, int n_file_len);
     int FetchChunck(float *&dout, int len);
     int Fetch(float *&dout, int &len, int &flag);
     void Padding();
