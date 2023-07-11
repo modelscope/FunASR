@@ -40,6 +40,7 @@ endif()
 
 # Include generated *.pb.h files
 link_directories(${ONNXRUNTIME_DIR}/lib)
+link_directories(${FFMPEG_DIR}/lib)
 
 include_directories(${PROJECT_SOURCE_DIR}/../onnxruntime/include/)
 include_directories(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/yaml-cpp/include/)
