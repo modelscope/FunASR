@@ -187,6 +187,7 @@ class WebsocketClient {
 
 		funasr::Audio audio(1);
         int32_t sampling_rate = 16000;
+        std::string wav_format = "pcm";
 		if(IsTargetFile(wav_path.c_str(), "wav")){
 			int32_t sampling_rate = -1;
 			if(!audio.LoadWav(wav_path.c_str(), &sampling_rate))
@@ -195,8 +196,9 @@ class WebsocketClient {
 			if (!audio.LoadPcmwav(wav_path.c_str(), &sampling_rate))
 				return ;
 		}else{
-			printf("Wrong wav extension");
-			exit(-1);
+			wav_format = "others";
+            if (!audio.LoadOthers2Char(wav_path.c_str()))
+				return ;
 		}
 
         float* buff;
@@ -233,20 +235,54 @@ class WebsocketClient {
         jsonbegin["chunk_size"] = chunk_size;
         jsonbegin["chunk_interval"] = 10;
         jsonbegin["wav_name"] = wav_id;
+        jsonbegin["wav_format"] = wav_format;
         jsonbegin["is_speaking"] = true;
         m_client.send(m_hdl, jsonbegin.dump(), websocketpp::frame::opcode::text,
                       ec);
 
         // fetch wav data use asr engine api
-        while (audio.Fetch(buff, len, flag) > 0) {
-            short* iArray = new short[len];
-            for (size_t i = 0; i < len; ++i) {
-              iArray[i] = (short)(buff[i]*32768);
-            }
+        if(wav_format == "pcm"){
+            while (audio.Fetch(buff, len, flag) > 0) {
+                short* iArray = new short[len];
+                for (size_t i = 0; i < len; ++i) {
+                iArray[i] = (short)(buff[i]*32768);
+                }
 
-            // send data to server
+                // send data to server
+                int offset = 0;
+                int block_size = 102400;
+                while(offset < len){
+                    int send_block = 0;
+                    if (offset + block_size <= len){
+                        send_block = block_size;
+                    }else{
+                        send_block = len - offset;
+                    }
+                    m_client.send(m_hdl, iArray+offset, send_block * sizeof(short),
+                        websocketpp::frame::opcode::binary, ec);
+                    offset += send_block;
+                }
+
+                LOG(INFO) << "sended data len=" << len * sizeof(short);
+                // The most likely error that we will get is that the connection is
+                // not in the right state. Usually this means we tried to send a
+                // message to a connection that was closed or in the process of
+                // closing. While many errors here can be easily recovered from,
+                // in this simple example, we'll stop the data loop.
+                if (ec) {
+                m_client.get_alog().write(websocketpp::log::alevel::app,
+                                            "Send Error: " + ec.message());
+                break;
+                }
+                delete[] iArray;
+                // WaitABit();
+            }
+        }else{
             int offset = 0;
-            int block_size = 102400;
+            int block_size = 204800;
+            len = audio.GetSpeechLen();
+            char* others_buff = audio.GetSpeechChar();
+
             while(offset < len){
                 int send_block = 0;
                 if (offset + block_size <= len){
@@ -254,25 +290,23 @@ class WebsocketClient {
                 }else{
                     send_block = len - offset;
                 }
-                m_client.send(m_hdl, iArray+offset, send_block * sizeof(short),
+                m_client.send(m_hdl, others_buff+offset, send_block,
                     websocketpp::frame::opcode::binary, ec);
                 offset += send_block;
             }
 
-            LOG(INFO) << "sended data len=" << len * sizeof(short);
+            LOG(INFO) << "sended data len=" << len;
             // The most likely error that we will get is that the connection is
             // not in the right state. Usually this means we tried to send a
             // message to a connection that was closed or in the process of
             // closing. While many errors here can be easily recovered from,
             // in this simple example, we'll stop the data loop.
             if (ec) {
-              m_client.get_alog().write(websocketpp::log::alevel::app,
+                m_client.get_alog().write(websocketpp::log::alevel::app,
                                         "Send Error: " + ec.message());
-              break;
             }
-            delete[] iArray;
-            // WaitABit();
         }
+
         nlohmann::json jsonresult;
         jsonresult["is_speaking"] = false;
         m_client.send(m_hdl, jsonresult.dump(), websocketpp::frame::opcode::text,
@@ -332,11 +366,7 @@ int main(int argc, char* argv[]) {
     std::vector<string> wav_list;
     std::vector<string> wav_ids;
     string default_id = "wav_default_id";
-    if(IsTargetFile(wav_path, "wav") || IsTargetFile(wav_path, "pcm")){
-        wav_list.emplace_back(wav_path);
-        wav_ids.emplace_back(default_id);
-    }
-    else if(IsTargetFile(wav_path, "scp")){
+    if(IsTargetFile(wav_path, "scp")){
         ifstream in(wav_path);
         if (!in.is_open()) {
             printf("Failed to open scp file");
@@ -353,8 +383,8 @@ int main(int argc, char* argv[]) {
         }
         in.close();
     }else{
-        printf("Please check the wav extension!");
-        exit(-1);
+        wav_list.emplace_back(wav_path);
+        wav_ids.emplace_back(default_id);
     }
     
     for (size_t i = 0; i < threads_num; i++) {
