@@ -17,7 +17,7 @@ import torch
 from funasr.build_utils.build_model_from_file import build_model_from_file
 from funasr.models.frontend.wav_frontend import WavFrontend, WavFrontendOnline
 from funasr.torch_utils.device_funcs import to_device
-
+from funasr.runtime.python.onnxruntime.funasr_onnx.utils.e2e_vad import E2EVadModel
 
 class Speech2VadSegment:
     """Speech2VadSegment class
@@ -60,6 +60,7 @@ class Speech2VadSegment:
         self.dtype = dtype
         self.frontend = frontend
         self.batch_size = batch_size
+        self.max_end_sil = vad_infer_args.vad_post_conf["max_end_silence_time"]
 
     @torch.no_grad()
     def __call__(
@@ -74,7 +75,7 @@ class Speech2VadSegment:
             text, token, token_int, hyp
 
         """
-
+        vad_scorer = E2EVadModel(self.vad_infer_args.vad_post_conf)
         # Input as audio signal
         if isinstance(speech, np.ndarray):
             speech = torch.tensor(speech)
@@ -101,13 +102,16 @@ class Speech2VadSegment:
                 is_final = False
             batch = {
                 "feats": feats[:, t_offset:t_offset + step, :],
-                "waveform": speech[:, t_offset * 160:min(speech.shape[-1], (t_offset + step - 1) * 160 + 400)],
+                "in_cache": in_cache,
                 "is_final": is_final,
-                "in_cache": in_cache
             }
+            waveform = speech[:, t_offset * 160:min(speech.shape[-1], (t_offset + step - 1) * 160 + 400)]
             # a. To device
             # batch = to_device(batch, device=self.device)
-            segments_part, in_cache = self.vad_model(**batch)
+            # segments_part, in_cache = self.vad_model(**batch)
+            scores, out_caches = self.vad_model.forward_score(**batch) # vad encoder, fsmn
+            segments_part = vad_scorer(scores, waveform, is_final=is_final, max_end_sil=self.max_end_sil, online=False)
+            
             if segments_part:
                 for batch_num in range(0, self.batch_size):
                     segments[batch_num] += segments_part[batch_num]

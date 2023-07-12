@@ -479,6 +479,20 @@ class E2EVadModel(FunASRModel):
 
         return frame_state
 
+    def forward_score(self, feats: torch.Tensor, waveform: torch.tensor = None, in_cache: Dict[str, torch.Tensor] = dict(),
+                is_final: bool = False
+                ) -> Tuple[List[List[List[int]]], Dict[str, torch.Tensor]]:
+        if not in_cache:
+            self.AllResetDetection()
+        # self.waveform = waveform  # compute decibel for each frame
+        # self.ComputeDecibel()
+        # self.ComputeScores(feats, in_cache)
+        scores = self.encoder(feats, in_cache).to('cpu')  # return B * T * D
+        
+
+        return scores, in_cache
+
+
     def forward(self, feats: torch.Tensor, waveform: torch.tensor, in_cache: Dict[str, torch.Tensor] = dict(),
                 is_final: bool = False
                 ) -> Tuple[List[List[List[int]]], Dict[str, torch.Tensor]]:
