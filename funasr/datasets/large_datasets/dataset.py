@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 import random
 from functools import partial
 
@@ -107,7 +108,8 @@ class AudioDataset(IterableDataset):
                 if data_type == "kaldi_ark":
                     ark_reader = ReadHelper('ark:{}'.format(data_file))
                     reader_list.append(ark_reader)
-                elif data_type == "text" or data_type == "sound" or data_type == 'text_hotword':
+                elif data_type == "text" or data_type == 'text_nospace' \
+                        or data_type == "sound" or data_type == 'text_hotword':
                     text_reader = open(data_file, "r")
                     reader_list.append(text_reader)
                 elif data_type == "none":
@@ -160,7 +162,19 @@ class AudioDataset(IterableDataset):
                     elif data_type == "text_nospace":
                         text = item
                         segs = text.strip().split(maxsplit=1)
-                        sample_dict[data_name] = [x for x in segs[1]]
+                        # sample_dict[data_name] = [x for x in segs[1]]  # the English word is split into chars
+
+                        txt = segs[1] # text without space between Chinese
+                        # CJK(China Japan Korea) unicode range is [U+4E00, U+9FFF], ref:
+                        # https://en.wikipedia.org/wiki/CJK_Unified_Ideographs_(Unicode_block)
+                        pattern = re.compile(r'([\u4e00-\u9fff0-9])')
+                        # Example:
+                        #   txt   = "你好 ITS'S OKAY 的"
+                        #   chars = ["你", "好", " ITS'S OKAY ", "的"]
+                        chars = pattern.split(' '.join(txt))
+                        txt = [w for w in chars if len(w.strip()) > 0]
+                        sample_dict[data_name] = txt
+
                         if "key" not in sample_dict:
                             sample_dict["key"] = segs[0]
                     else:
