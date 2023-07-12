@@ -30,7 +30,7 @@ from funasr.bin.asr_infer import Speech2TextTransducer
 from funasr.bin.asr_infer import Speech2TextUniASR
 from funasr.bin.punc_infer import Text2Punc
 from funasr.bin.tp_infer import Speech2Timestamp
-from funasr.bin.vad_infer import Speech2VadSegment
+from funasr.bin.vad_infer import Speech2VadSegment, Speech2VadSegment4ClipVideo
 from funasr.build_utils.build_streaming_iterator import build_streaming_iterator
 from funasr.fileio.datadir_writer import DatadirWriter
 from funasr.modules.beam_search.beam_search import Hypothesis
@@ -516,7 +516,7 @@ def inference_paraformer_vad_punc_clipvideo(
         dtype=dtype,
     )
     # logging.info("speech2vadsegment_kwargs: {}".format(speech2vadsegment_kwargs))
-    speech2vadsegment = Speech2VadSegment(**speech2vadsegment_kwargs)
+    speech2vadsegment = Speech2VadSegment4ClipVideo(**speech2vadsegment_kwargs)
     
     # 3. Build speech2text
     speech2text_kwargs = dict(
@@ -1920,10 +1920,10 @@ def inference_launch(**kwargs):
         return inference_paraformer(**kwargs)
     elif mode == "paraformer_streaming":
         return inference_paraformer_online(**kwargs)
+    elif mode == "paraformer_vad_clipvideo":
+        return inference_paraformer_vad_punc_clipvideo(**kwargs)
     elif mode.startswith("paraformer_vad"):
         return inference_paraformer_vad_punc(**kwargs)
-    elif mode.startswith("paraformer_vad_clipvideo"):
-        return inference_paraformer_vad_punc_clipvideo(**kwargs)
     elif mode == "mfcca":
         return inference_mfcca(**kwargs)
     elif mode == "rnnt":

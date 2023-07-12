@@ -19,7 +19,102 @@ from funasr.models.frontend.wav_frontend import WavFrontend, WavFrontendOnline
 from funasr.torch_utils.device_funcs import to_device
 from funasr.runtime.python.onnxruntime.funasr_onnx.utils.e2e_vad import E2EVadModel
 
+
 class Speech2VadSegment:
+    """Speech2VadSegment class
+
+    Examples:
+        >>> import soundfile
+        >>> speech2segment = Speech2VadSegment("vad_config.yml", "vad.pt")
+        >>> audio, rate = soundfile.read("speech.wav")
+        >>> speech2segment(audio)
+        [[10, 230], [245, 450], ...]
+
+    """
+
+    def __init__(
+            self,
+            vad_infer_config: Union[Path, str] = None,
+            vad_model_file: Union[Path, str] = None,
+            vad_cmvn_file: Union[Path, str] = None,
+            device: str = "cpu",
+            batch_size: int = 1,
+            dtype: str = "float32",
+            **kwargs,
+    ):
+
+        # 1. Build vad model
+        vad_model, vad_infer_args = build_model_from_file(
+            vad_infer_config, vad_model_file, None, device, task_name="vad"
+        )
+        frontend = None
+        if vad_infer_args.frontend is not None:
+            frontend = WavFrontend(cmvn_file=vad_cmvn_file, **vad_infer_args.frontend_conf)
+
+        logging.info("vad_model: {}".format(vad_model))
+        logging.info("vad_infer_args: {}".format(vad_infer_args))
+        vad_model.to(dtype=getattr(torch, dtype)).eval()
+
+        self.vad_model = vad_model
+        self.vad_infer_args = vad_infer_args
+        self.device = device
+        self.dtype = dtype
+        self.frontend = frontend
+        self.batch_size = batch_size
+
+    @torch.no_grad()
+    def __call__(
+            self, speech: Union[torch.Tensor, np.ndarray], speech_lengths: Union[torch.Tensor, np.ndarray] = None,
+            in_cache: Dict[str, torch.Tensor] = dict()
+    ) -> Tuple[List[List[int]], Dict[str, torch.Tensor]]:
+        """Inference
+
+        Args:
+            speech: Input speech data
+        Returns:
+            text, token, token_int, hyp
+
+        """
+        # Input as audio signal
+        if isinstance(speech, np.ndarray):
+            speech = torch.tensor(speech)
+
+        if self.frontend is not None:
+            self.frontend.filter_length_max = math.inf
+            fbanks, fbanks_len = self.frontend.forward_fbank(speech, speech_lengths)
+            feats, feats_len = self.frontend.forward_lfr_cmvn(fbanks, fbanks_len)
+            fbanks = to_device(fbanks, device=self.device)
+            feats = to_device(feats, device=self.device)
+            feats_len = feats_len.int()
+        else:
+            raise Exception("Need to extract feats first, please configure frontend configuration")
+
+        # b. Forward Encoder streaming
+        t_offset = 0
+        step = min(feats_len.max(), 6000)
+        segments = [[]] * self.batch_size
+        for t_offset in range(0, feats_len, min(step, feats_len - t_offset)):
+            if t_offset + step >= feats_len - 1:
+                step = feats_len - t_offset
+                is_final = True
+            else:
+                is_final = False
+            batch = {
+                "feats": feats[:, t_offset:t_offset + step, :],
+                "waveform": speech[:, t_offset * 160:min(speech.shape[-1], (t_offset + step - 1) * 160 + 400)],
+                "is_final": is_final,
+                "in_cache": in_cache
+            }
+            # a. To device
+            # batch = to_device(batch, device=self.device)
+            segments_part, in_cache = self.vad_model(**batch)
+            if segments_part:
+                for batch_num in range(0, self.batch_size):
+                    segments[batch_num] += segments_part[batch_num]
+        return fbanks, segments
+
+
+class Speech2VadSegment4ClipVideo:
     """Speech2VadSegment class
 
     Examples:
@@ -109,6 +204,7 @@ class Speech2VadSegment:
             # a. To device
             # batch = to_device(batch, device=self.device)
             # segments_part, in_cache = self.vad_model(**batch)
+            # TODO: batch inference here
             scores, out_caches = self.vad_model.forward_score(**batch) # vad encoder, fsmn
             segments_part = vad_scorer(scores, waveform, is_final=is_final, max_end_sil=self.max_end_sil, online=False)
             
