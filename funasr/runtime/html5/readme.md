@@ -1,3 +1,5 @@
+([简体中文](./readme_zh.md)|English)
+
 # Html5 server for asr service
 
 ## Requirement
