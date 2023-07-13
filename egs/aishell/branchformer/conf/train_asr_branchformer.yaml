@@ -97,7 +97,7 @@ dataset_conf:
         sort_size: 500
     batch_conf:
         batch_type: token
-        batch_size: 20000
+        batch_size: 10000
     num_workers: 8
 
 log_interval: 50
