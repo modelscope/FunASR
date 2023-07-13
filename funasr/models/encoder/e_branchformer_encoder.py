@@ -13,7 +13,6 @@ import logging
 from typing import List, Optional, Tuple
 
 import torch
-from typeguard import check_argument_types
 
 from funasr.models.ctc import CTC
 from funasr.models.encoder.abs_encoder import AbsEncoder
@@ -210,7 +209,6 @@ class EBranchformerEncoder(AbsEncoder):
         interctc_layer_idx=None,
         interctc_use_conditioning: bool = False,
     ):
-        assert check_argument_types()
         super().__init__()
         self._output_size = output_size
 
