@@ -201,7 +201,7 @@ cd egs/aishell/paraformer
 
 
 ## 许可协议
-项目遵循[The MIT License](https://opensource.org/licenses/MIT)开源协议. 工业模型许可协议请参考（[点击此处](./MODEL_LICENSE)）
+项目遵循[The MIT License](https://opensource.org/licenses/MIT)开源协议。 工业模型许可协议请参考（[点击此处](./MODEL_LICENSE)）
 
 
 ## Stargazers over time
