@@ -17,7 +17,7 @@
 
 - python版本
   
-  直接部署python pipeline，支持流式实时语音识别模型，离线语音识别模型，流式离线一体化纠错模型，输出待标点文字。单个server，支持单个client。
+  直接部署python pipeline，支持流式实时语音识别模型，离线语音识别模型，流式离线一体化纠错模型，输出带标点文字。单个server，支持单个client。
 
 - c++版本
   
@@ -55,10 +55,9 @@ h5Server.py [-h] [--host HOST] [--port PORT] [--certfile CERTFILE] [--keyfile KE
 ```shell
 cd funasr/runtime/html5
 python h5Server.py --host 0.0.0.0 --port 1337
-# python h5Server.py --host 30.220.136.139 --port 1337
 ```
 
-启动后，在浏览器中输入（https://127.0.0.1:1337/static/index.html）即可访问
+启动后，在浏览器中输入（[https://127.0.0.1:1337/static/index.html](https://127.0.0.1:1337/static/index.html)）即可访问
 
 ### c++ 版本服务启动
 
