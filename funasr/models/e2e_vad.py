@@ -1,4 +1,5 @@
 from enum import Enum
+from turtle import left
 from typing import List, Tuple, Dict, Any
 
 import torch
@@ -480,16 +481,38 @@ class E2EVadModel(FunASRModel):
         return frame_state
 
     def forward_score(self, feats: torch.Tensor, waveform: torch.tensor = None, in_cache: Dict[str, torch.Tensor] = dict(),
-                is_final: bool = False
+                is_final: bool = False, force_split: int = 0,
                 ) -> Tuple[List[List[List[int]]], Dict[str, torch.Tensor]]:
         if not in_cache:
             self.AllResetDetection()
-        # self.waveform = waveform  # compute decibel for each frame
-        # self.ComputeDecibel()
-        # self.ComputeScores(feats, in_cache)
-        scores = self.encoder(feats, in_cache).to('cpu')  # return B * T * D
-        
-
+        # force_split 0 for not splitting, encoder forward with batch_size=1
+        # else splitting feats with overlap and encoder forward with multi-batch
+        # splitting
+        _scores = self.encoder(feats, in_cache).to('cpu')
+        in_cache = {}
+        T = feats.shape[1]
+        D = feats.shape[-1]
+        if force_split != 0 and T > force_split:
+            # padding
+            assert force_split > 100, "FSMN VAD has left context 80 frames, force_split>100 supposed."
+            if T % force_split:
+                _to_pad = force_split - T % force_split
+                feats = torch.concat([feats, torch.zeros([1, _to_pad, D])], dim=1)
+            else:
+                _to_pad = 0
+            # reshape
+            B = (T + _to_pad) // force_split
+            # import pdb; pdb.set_trace()
+            feats = feats.reshape([B, force_split, D])
+            left_context = feats[:,-80:,:]
+            feats = torch.concat([left_context, feats], dim=1)
+            scores = self.encoder(feats, in_cache).to('cpu')  # return B * T * D
+            # recover frames
+            new_D = scores.shape[-1]
+            scores = scores[:, 80:,].reshape(1, -1, new_D)
+            import pdb; pdb.set_trace()
+        else:
+            scores = self.encoder(feats, in_cache).to('cpu')  # return B * T * D
         return scores, in_cache
 
 

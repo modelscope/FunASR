@@ -10,6 +10,7 @@ from typing import Dict
 from typing import List
 from typing import Tuple
 from typing import Union
+import wave
 
 import numpy as np
 import torch
@@ -185,32 +186,49 @@ class Speech2VadSegment4ClipVideo:
         else:
             raise Exception("Need to extract feats first, please configure frontend configuration")
 
-        # b. Forward Encoder streaming
-        t_offset = 0
-        step = min(feats_len.max(), 6000)
-        segments = [[]] * self.batch_size
-        for t_offset in range(0, feats_len, min(step, feats_len - t_offset)):
-            if t_offset + step >= feats_len - 1:
-                step = feats_len - t_offset
-                is_final = True
+        segments = [[]]
+        # vad fsmn encoder forward in batch
+        # split batch
+        import time
+        import copy
+        start_time = time.time()
+        raw_feats = copy.copy(feats)
+        for i in range(20):
+            feats = copy.copy(raw_feats)
+            force_split = 1200
+            _in_cache = {}
+            T = feats.shape[1]
+            D = feats.shape[-1]
+            if force_split != 0 and T > force_split:
+                # padding
+                assert force_split > 100, "FSMN VAD has left context 80 frames, force_split>100 supposed."
+                if T % force_split:
+                    _to_pad = force_split - T % force_split
+                    feats = torch.concat([feats, torch.zeros([1, _to_pad, D])], dim=1)
+                else:
+                    _to_pad = 0
+                # reshape
+                B = (T + _to_pad) // force_split
+                feats = feats.reshape([B, force_split, D])
+                # padding left and right context
+                empty_left_context = torch.zeros(1, 80, D)
+                left_context = torch.concat([empty_left_context, feats[:,-80:,:][:-1]], dim=0)
+                right_context = feats[:,-1,:].unsqueeze(1)
+                feats = torch.concat([left_context, feats, right_context, right_context], dim=1)
+                scores = self.vad_model.encoder(feats, _in_cache).to('cpu')  # return B * T * D
+                # recover frames
+                new_D = scores.shape[-1]
+                scores = scores[:, 80:force_split+80,].reshape(1, -1, new_D)[:,:T,:]
             else:
-                is_final = False
-            batch = {
-                "feats": feats[:, t_offset:t_offset + step, :],
-                "in_cache": in_cache,
-                "is_final": is_final,
-            }
-            waveform = speech[:, t_offset * 160:min(speech.shape[-1], (t_offset + step - 1) * 160 + 400)]
-            # a. To device
-            # batch = to_device(batch, device=self.device)
-            # segments_part, in_cache = self.vad_model(**batch)
-            # TODO: batch inference here
-            scores, out_caches = self.vad_model.forward_score(**batch) # vad encoder, fsmn
-            segments_part = vad_scorer(scores, waveform, is_final=is_final, max_end_sil=self.max_end_sil, online=False)
-            
+                scores = self.vad_model.encoder(feats, _in_cache).to('cpu')  # return B * T * D
+            waveform = speech
+            segments_part = vad_scorer(scores, waveform, is_final=True, max_end_sil=self.max_end_sil, online=False)
             if segments_part:
                 for batch_num in range(0, self.batch_size):
                     segments[batch_num] += segments_part[batch_num]
+        end_time = time.time()
+        print(end_time-start_time)
+        import pdb; pdb.set_trace()
         return fbanks, segments
 
 
