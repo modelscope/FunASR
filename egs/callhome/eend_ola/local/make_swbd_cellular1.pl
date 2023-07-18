@@ -47,13 +47,13 @@ while (<CS>) {
     } else {
       die "Unknown Gender in $line";
     }
-    if (-e "$db_base/$wav.sph") {
+    if (-e "$db_base/data/$wav.sph") {
       $uttId = $spkr1 . "-swbdc_" . $wav ."_1";
       if (!$spk2gender{$spkr1}) {
         $spk2gender{$spkr1} = $gender1;
         print GNDR "$spkr1"," $gender1\n";
       }
-      print WAV "$uttId"," sph2pipe -f wav -p -c 1 $db_base/$wav.sph |\n";
+      print WAV "$uttId"," sph2pipe -f wav -p -c 1 $db_base/data/$wav.sph |\n";
       print SPKR "$uttId"," $spkr1","\n";
 
       $uttId = $spkr2 . "-swbdc_" . $wav ."_2";
@@ -61,10 +61,10 @@ while (<CS>) {
         $spk2gender{$spkr2} = $gender2;
         print GNDR "$spkr2"," $gender2\n";
       }
-      print WAV "$uttId"," sph2pipe -f wav -p -c 2 $db_base/$wav.sph |\n";
+      print WAV "$uttId"," sph2pipe -f wav -p -c 2 $db_base/data/$wav.sph |\n";
       print SPKR "$uttId"," $spkr2","\n";
     } else {
-      print STDERR "Missing $db_base/$wav.sph\n";
+      print STDERR "Missing $db_base/data/$wav.sph\n";
     }
   }
 }
