@@ -52,7 +52,7 @@ callhome_model_dir="baseline_$(basename "${callhome_diar_config}" .yaml)_${tag}"
 
 # simulate mixture data for training and inference
 if [ ${stage} -le -1 ] && [ ${stop_stage} -ge -1 ]; then
-    echo "stage 0: Simulate mixture data for training and inference"
+    echo "stage -1: Simulate mixture data for training and inference"
     echo "The detail can be found in https://github.com/hitachi-speech/EEND"
     echo "Before running this step, you should download and compile kaldi and set KALDI_ROOT in this script and path.sh"
     echo "This stage may take a long time, please waiting..."
