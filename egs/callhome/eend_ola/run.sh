@@ -33,7 +33,7 @@ stop_stage=-1
 # exp tag
 tag="exp_fix"
 
-. utils/parse_options.sh || exit 1;
+. local/parse_options.sh || exit 1;
 
 # Set bash to 'debug' mode, it will exit on :
 # -e 'error', -u 'undefined variable', -o ... 'error in pipeline', -x 'print commands',
@@ -54,7 +54,7 @@ callhome_model_dir="baseline_$(basename "${callhome_diar_config}" .yaml)_${tag}"
 if [ ${stage} -le -1 ] && [ ${stop_stage} -ge -1 ]; then
     echo "stage 0: Simulate mixture data for training and inference"
     echo "The detail can be found in https://github.com/hitachi-speech/EEND"
-    ehco "Before running this step, you should download and compile kaldi and set KALDI_ROOT in this script and path.sh"
+    echo "Before running this step, you should download and compile kaldi and set KALDI_ROOT in this script and path.sh"
     echo "This stage may take a long time, please waiting..."
     KALDI_ROOT=
     ln -s $KALDI_ROOT/egs/wsj/s5/steps steps
