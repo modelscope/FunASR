@@ -27,8 +27,8 @@ callhome_average_end=100
 
 exp_dir="."
 input_size=345
-stage=1
-stop_stage=4
+stage=-1
+stop_stage=-1
 
 # exp tag
 tag="exp_fix"
@@ -50,10 +50,25 @@ simu_allspkr_model_dir="baseline_$(basename "${simu_allspkr_diar_config}" .yaml)
 simu_allspkr_chunk2000_model_dir="baseline_$(basename "${simu_allspkr_chunk2000_diar_config}" .yaml)_${tag}"
 callhome_model_dir="baseline_$(basename "${callhome_diar_config}" .yaml)_${tag}"
 
-# Prepare data for training and inference
-if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
-    echo "stage 0: Prepare data for training and inference"
+# simulate mixture data for training and inference
+if [ ${stage} -le -1 ] && [ ${stop_stage} -ge -1 ]; then
+    echo "stage 0: Simulate mixture data for training and inference"
+    echo "The detail can be found in https://github.com/hitachi-speech/EEND"
+    ehco "Before running this step, you should download and compile kaldi and set KALDI_ROOT in this script and path.sh"
+    echo "This stage may take a long time, please waiting..."
+    KALDI_ROOT=
+    ln -s $KALDI_ROOT/egs/wsj/s5/steps steps
+    ln -s $KALDI_ROOT/egs/wsj/s5/utils utils
+    . local/run_prepare_shared_eda.sh
 fi
+
+## Prepare data for training and inference
+#if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
+#    echo "stage 0: Prepare data for training and inference"
+#    echo "The detail can be found in https://github.com/hitachi-speech/EEND"
+#    . ./local/
+#fi
+#
 
 # Training on simulated two-speaker data
 world_size=$gpu_num
