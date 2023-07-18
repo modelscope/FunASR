@@ -59,7 +59,7 @@ if [ ${stage} -le -1 ] && [ ${stop_stage} -ge -1 ]; then
     KALDI_ROOT=
     ln -s $KALDI_ROOT/egs/wsj/s5/steps steps
     ln -s $KALDI_ROOT/egs/wsj/s5/utils utils
-    . local/run_prepare_shared_eda.sh
+    local/run_prepare_shared_eda.sh
 fi
 
 ## Prepare data for training and inference
