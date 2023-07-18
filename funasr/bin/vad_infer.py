@@ -10,7 +10,6 @@ from typing import Dict
 from typing import List
 from typing import Tuple
 from typing import Union
-import wave
 
 import numpy as np
 import torch
@@ -195,7 +194,7 @@ class Speech2VadSegment4ClipVideo:
         raw_feats = copy.copy(feats)
         for i in range(20):
             feats = copy.copy(raw_feats)
-            force_split = 1200
+            force_split = 400
             _in_cache = {}
             T = feats.shape[1]
             D = feats.shape[-1]
