@@ -14,13 +14,13 @@
 [**News**](https://github.com/alibaba-damo-academy/FunASR#whats-new) 
 | [**Highlights**](#highlights)
 | [**Installation**](#installation)
-| [**Usage**](#usage)
-| [**Papers**](https://github.com/alibaba-damo-academy/FunASR#citations)
-| [**Runtime**](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime)
-| [**Model Zoo**](https://github.com/alibaba-damo-academy/FunASR/blob/main/docs/model_zoo/modelscope_models.md)
+| [**Quick Start**](#quick-start)
+| [**Runtime**](./funasr/runtime/readme.md)
+| [**Model Zoo**](./docs/model_zoo/modelscope_models.md)
 | [**Contact**](#contact)
-| [**M2MET2.0 Challenge**](https://github.com/alibaba-damo-academy/FunASR#multi-channel-multi-party-meeting-transcription-20-m2met20-challenge)
 
+
+<a name="whats-new"></a>
 ## What's new: 
 
 ### FunASR runtime-SDK
@@ -36,11 +36,13 @@ We are pleased to announce that the M2MeT2.0 challenge has been accepted by the 
 
 For the release notes, please ref to [news](https://github.com/alibaba-damo-academy/FunASR/releases)
 
+<a name="highlights"></a>
 ## Highlights
 - FunASR is a fundamental speech recognition toolkit that offers a variety of features, including speech recognition (ASR), Voice Activity Detection (VAD), Punctuation Restoration, Language Models, Speaker Verification, Speaker diarization and multi-talker ASR.
 - We have released a vast collection of academic and industrial pretrained models on the [ModelScope](https://www.modelscope.cn/models?page=1&tasks=auto-speech-recognition), which can be accessed through our [Model Zoo](https://github.com/alibaba-damo-academy/FunASR/blob/main/docs/model_zoo/modelscope_models.md). The representative [Paraformer-large](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary) model has achieved SOTA performance in many speech recognition tasks. 
 - FunASR offers a user-friendly pipeline for fine-tuning pretrained models from the [ModelScope](https://www.modelscope.cn/models?page=1&tasks=auto-speech-recognition). Additionally, the optimized dataloader in FunASR enables faster training speeds for large-scale datasets. This feature enhances the efficiency of the speech recognition process for researchers and practitioners.
 
+<a name="Installation"></a>
 ## Installation
 
 Install from pip
@@ -70,7 +72,8 @@ pip3 install -U modelscope
 
 For more details, please ref to [installation](https://alibaba-damo-academy.github.io/FunASR/en/installation/installation.html)
 
-## Usage
+<a name="quick-start"></a>
+## Quick Start
 
 You could use FunASR by:
 
@@ -120,6 +123,8 @@ python funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass --chunk
 #python funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass --chunk_size "8,8,4" --audio_in "./data/wav.scp" --output_dir "./results"
 ```
 More examples could be found in [docs](https://alibaba-damo-academy.github.io/FunASR/en/runtime/websocket_python.html#id2)
+
+<a name="contact"></a>
 ## Contact
 
 If you have any questions about FunASR, please contact us by

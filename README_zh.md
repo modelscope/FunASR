@@ -37,11 +37,32 @@ FunASR希望在语音识别的学术研究和工业应用之间架起一座桥�
 详情请参考文档（[点击此处](https://alibaba-damo-academy.github.io/FunASR/m2met2_cn/index.html)）
 
 
-### 学术模型更新
+### 语音识别
 
-### 工业模型更新
+- 学术模型：
+  - Encoder-Decoder模型：[Transformer](egs/aishell/transformer)，[Conformer](egs/aishell/conformer)，[Branchformer](egs/aishell/branchformer)
+  - Transducer模型：[RNNT（流式）](egs/aishell/rnnt)，[BAT](egs/aishell/bat)
+  - 非自回归模型：[Paraformer](egs/aishell/paraformer)
+  - 多说话人识别模型：[MFCCA](egs_modelscope/asr/mfcca)
+    
+- 工业模型：
+  - 中文通用模型：[Paraformer-large](egs_modelscope/asr/paraformer/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch)，[Paraformer-large长音频版本](egs_modelscope/asr_vad_punc/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch)，[Paraformer-large流式版本](egs_modelscope/asr/paraformer/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online)
+  - 中文通用热词模型：[Paraformer-large-contextual](egs_modelscope/asr/paraformer/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404)，
+  - 英文通用模型：[Conformer]()
+  - 流式离线一体化模型：[UniASR]()
+    
+### 说话人识别
+  - 说话人确认模型：[xvector](egs_modelscope/speaker_verification)
+  - 说话人日志模型：[SOND](egs/callhome/diarization/sond)
 
-- 2023/07/06 
+### 标点恢复
+  - 中文标点模型：[CT-Transformer](egs_modelscope/punctuation/punc_ct-transformer_zh-cn-common-vocab272727-pytorch)，[CT-Transformer流式](egs_modelscope/punctuation/punc_ct-transformer_zh-cn-common-vadrealtime-vocab272727)
+
+### 端点检测
+  - [FSMN-VAD](egs_modelscope/vad/speech_fsmn_vad_zh-cn-16k-common)
+
+### 时间戳预测
+  - 字级别模型：[TP-Aligner](egs_modelscope/tp/speech_timestamp_prediction-v1-16k-offline)
 
 <a name="核心功能"></a>
 ## 核心功能
@@ -180,7 +201,7 @@ cd egs/aishell/paraformer
 
 
 ## 许可协议
-项目遵循[The MIT License](https://opensource.org/licenses/MIT)开源协议. 工业模型许可协议请参考（[点击此处](./MODEL_LICENSE)）
+项目遵循[The MIT License](https://opensource.org/licenses/MIT)开源协议。 工业模型许可协议请参考（[点击此处](./MODEL_LICENSE)）
 
 
 ## Stargazers over time

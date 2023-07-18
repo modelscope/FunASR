@@ -123,7 +123,7 @@ def inference_vad(
                 vad_results.append(item)
                 if writer is not None:
                     ibest_writer["text"][keys[i]] = "{}".format(results[i])
-
+        torch.cuda.empty_cache()
         return vad_results
 
     return _forward

@@ -439,6 +439,7 @@ def inference_paraformer(
         logging.info(rtf_avg)
         if writer is not None:
             ibest_writer["rtf"]["rtf_avf"] = rtf_avg
+        torch.cuda.empty_cache()
         return asr_result_list
 
     return _forward
@@ -730,6 +731,7 @@ def inference_paraformer_vad_punc(
                     ibest_writer["time_stamp"][key] = "{}".format(time_stamp_postprocessed)
 
             logging.info("decoding, utt: {}, predictions: {}".format(key, text_postprocessed_punc))
+        torch.cuda.empty_cache()
         return asr_result_list
 
     return _forward
@@ -1327,7 +1329,6 @@ def inference_transducer(
         right_context: Number of frames in right context AFTER subsampling.
         display_partial_hypotheses: Whether to display partial hypotheses.
     """
-    # assert check_argument_types()
 
     if batch_size > 1:
         raise NotImplementedError("batch decoding is not implemented")
