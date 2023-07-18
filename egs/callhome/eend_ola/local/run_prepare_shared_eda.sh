@@ -22,16 +22,16 @@ stage=0
 #    LDC2011S10, LDC2012S01, LDC2011S05, LDC2011S08
 #  - musan_root
 #    MUSAN corpus (https://www.openslr.org/17/)
-callhome_dir=/export/corpora/NIST/LDC2001S97
-swb2_phase1_train=/export/corpora/LDC/LDC98S75
-data_root=/export/corpora5/LDC
-musan_root=/export/corpora/JHU/musan
+callhome_dir=/nfs/wangjiaming.wjm/speech-data/NIST/LDC2001S97
+swb2_phase1_train=/nfs/wangjiaming.wjm/speech-data/LDC/LDC98S75
+data_root=/nfs/wangjiaming.wjm/speech-data/LDC
+musan_root=/nfs/wangjiaming.wjm/speech-data/JHU/musan
 # Modify simulated data storage area.
 # This script distributes simulated data under these directories
 simu_actual_dirs=(
-/export/c05/$USER/diarization-data
-/export/c08/$USER/diarization-data
-/export/c09/$USER/diarization-data
+/nfs/wangjiaming.wjm/EEND_DATA_sad30_snr10n15n20_funasr_test/s05/$USER/diarization-data
+/nfs/wangjiaming.wjm/EEND_DATA_sad30_snr10n15n20_funasr_test/s08/$USER/diarization-data
+/nfs/wangjiaming.wjm/EEND_DATA_sad30_snr10n15n20_funasr_test/s09/$USER/diarization-data
 )
 
 # data preparation options
@@ -115,9 +115,9 @@ if [ $stage -le 0 ]; then
     # simu rirs 8k
     if ! validate_data_dir.sh --no-text --no-feats data/simu_rirs_8k; then
         mkdir -p data/simu_rirs_8k
-        if [ ! -e sim_rir_8k.zip ]; then
-            wget --no-check-certificate http://www.openslr.org/resources/26/sim_rir_8k.zip
-        fi
+#        if [ ! -e sim_rir_8k.zip ]; then
+#            wget --no-check-certificate http://www.openslr.org/resources/26/sim_rir_8k.zip
+#        fi
         unzip sim_rir_8k.zip -d data/sim_rir_8k
         find $PWD/data/sim_rir_8k -iname "*.wav" \
             | awk '{n=split($1,A,/[\/\.]/); print A[n-3]"_"A[n-1], $1}' \
@@ -132,7 +132,7 @@ if [ $stage -le 0 ]; then
     sad_work_dir=exp/segmentation_1a/tdnn_stats_asr_sad_1a
     if ! validate_data_dir.sh --no-text $sad_work_dir/swb_sre_comb_seg; then
         if [ ! -d exp/segmentation_1a ]; then
-            wget http://kaldi-asr.org/models/4/0004_tdnn_stats_asr_sad_1a.tar.gz
+#            wget http://kaldi-asr.org/models/4/0004_tdnn_stats_asr_sad_1a.tar.gz
             tar zxf 0004_tdnn_stats_asr_sad_1a.tar.gz
         fi
         steps/segmentation/detect_speech_activity.sh \
