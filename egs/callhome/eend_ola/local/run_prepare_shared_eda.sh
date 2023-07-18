@@ -9,7 +9,7 @@
 #   - data/simu_${simu_outputs}
 #     simulation mixtures generated with various options
 
-stage=0
+stage=1
 
 # Modify corpus directories
 #  - callhome_dir
@@ -156,8 +156,8 @@ simudir=data/simu
 if [ $stage -le 1 ]; then
     echo "simulation of mixture"
     mkdir -p $simudir/.work
-    local/random_mixture_cmd=random_mixture.py
-    local/make_mixture_cmd=make_mixture.py
+    random_mixture_cmd=local/random_mixture.py
+    make_mixture_cmd=local/make_mixture.py
 
     for ((i=0; i<${#simu_opts_sil_scale_array[@]}; ++i)); do
         simu_opts_num_speaker=${simu_opts_num_speaker_array[i]}

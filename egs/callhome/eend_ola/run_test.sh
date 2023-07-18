@@ -27,8 +27,8 @@ callhome_average_end=100
 
 exp_dir="."
 input_size=345
-stage=-1
-stop_stage=-1
+stage=5
+stop_stage=5
 
 # exp tag
 tag="exp1"
@@ -245,13 +245,13 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
     python local/model_averaging.py ${exp_dir}/exp/${callhome_model_dir}/$callhome_ave_id.pb $models
 fi
 
-## inference
-#if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
-#    echo "Inference"
-#    mkdir -p ${exp_dir}/exp/${callhome_model_dir}/inference/log
-#    CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES python local/infer.py \
-#        --config_file ${exp_dir}/exp/${callhome_model_dir}/config.yaml \
-#        --model_file ${exp_dir}/exp/${callhome_model_dir}/$callhome_ave_id.pb \
-#        --output_rttm_file ${exp_dir}/exp/${callhome_model_dir}/inference/rttm \
-#        --wav_scp_file ${callhome_feats_dir_chunk2000}/${callhome_valid_dataset}/${callhome2_wav_scp_file} 1> ${exp_dir}/exp/${callhome_model_dir}/inference/log/infer.log 2>&1
-#fi
+# inference
+if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
+    echo "Inference"
+    mkdir -p ${exp_dir}/exp/${callhome_model_dir}/inference/log
+    CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES python local/infer.py \
+        --config_file ${exp_dir}/exp/${callhome_model_dir}/config.yaml \
+        --model_file ${exp_dir}/exp/${callhome_model_dir}/$callhome_ave_id.pb \
+        --output_rttm_file ${exp_dir}/exp/${callhome_model_dir}/inference/rttm \
+        --wav_scp_file ${callhome_feats_dir_chunk2000}/${callhome_valid_dataset}/${callhome2_wav_scp_file} 1> ${exp_dir}/exp/${callhome_model_dir}/inference/log/infer.log 2>&1
+fi

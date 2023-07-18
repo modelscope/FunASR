@@ -13,7 +13,7 @@
 
 import argparse
 import os
-from eend import kaldi_data
+from funasr.modules.eend_ola.utils import kaldi_data
 import numpy as np
 import math
 import soundfile as sf
