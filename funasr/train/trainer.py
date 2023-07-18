@@ -369,7 +369,7 @@ class Trainer:
                             ],
                             "scaler": scaler.state_dict() if scaler is not None else None,
                             "ema_model": model.encoder.ema.model.state_dict()
-                            if hasattr(model.encoder, "ema") and model.encoder.ema is not None else None,
+                            if hasattr(model, "encoder") and hasattr(model.encoder, "ema") and model.encoder.ema is not None else None,
                         },
                         buffer,
                     )

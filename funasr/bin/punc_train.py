@@ -44,4 +44,10 @@ if __name__ == "__main__":
     else:
         args.distributed = False
 
+    if args.dataset_type == "small":
+        if args.batch_size is not None:
+            args.batch_size = args.batch_size * args.ngpu * args.num_worker_count
+        if args.batch_bins is not None:
+            args.batch_bins = args.batch_bins * args.ngpu * args.num_worker_count
+
     main(args=args)
