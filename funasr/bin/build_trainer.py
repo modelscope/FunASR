@@ -144,6 +144,8 @@ def build_trainer(modelscope_dict,
         args.patience = None
     args.local_rank = local_rank
     args.distributed = distributed
+    for key, value in kwargs.items():
+        args.key = value
     ASRTask.finetune_args = args
 
     return ASRTask
