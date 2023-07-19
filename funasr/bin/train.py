@@ -489,7 +489,7 @@ def get_parser():
         "--lora_bias",
         type=str,
         default="none",
-        help="oss bucket.",
+        help="lora bias.",
     )
 
     return parser

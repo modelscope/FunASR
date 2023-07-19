@@ -55,7 +55,7 @@ def build_trainer(modelscope_dict,
                   scheduler_conf=None,
                   specaug=None,
                   specaug_conf=None,
-                  param_dict=None,
+                  meta_dict=None,
                   **kwargs):
     mode = modelscope_dict['mode']
     args, ASRTask = parse_args(mode=mode)
@@ -144,8 +144,9 @@ def build_trainer(modelscope_dict,
         args.patience = None
     args.local_rank = local_rank
     args.distributed = distributed
-    for key, value in kwargs.items():
-        args.key = value
+    if meta_dict is not None:
+        for key, value in meta_dict.items():
+            args.key = value
     ASRTask.finetune_args = args
 
     return ASRTask
