@@ -253,5 +253,6 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
         --config_file ${exp_dir}/exp/${callhome_model_dir}/config.yaml \
         --model_file ${exp_dir}/exp/${callhome_model_dir}/$callhome_ave_id.pb \
         --output_rttm_file ${exp_dir}/exp/${callhome_model_dir}/inference/rttm \
-        --wav_scp_file ${callhome_feats_dir_chunk2000}/${callhome_valid_dataset}/${callhome2_wav_scp_file} 1> ${exp_dir}/exp/${callhome_model_dir}/inference/log/infer.log 2>&1
+        --wav_scp_file ${callhome_feats_dir_chunk2000}/${callhome_valid_dataset}/${callhome2_wav_scp_file} \
+        1> ${exp_dir}/exp/${callhome_model_dir}/inference/log/infer.log 2>&1
 fi

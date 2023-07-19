@@ -64,6 +64,12 @@ if __name__ == '__main__':
         help="setting subsampling",
     )
     parser.add_argument(
+        "--shuffle",
+        type=bool,
+        default=True,
+        help="shuffle speech in time",
+    )
+    parser.add_argument(
         "--attractor_threshold",
         type=float,
         default=0.5,
