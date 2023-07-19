@@ -42,7 +42,7 @@ The actual data dir and wav files are generated using make_mixture.py:
 
 import argparse
 import os
-from eend import kaldi_data
+from funasr.modules.eend_ola.utils import kaldi_data
 import random
 import numpy as np
 import json

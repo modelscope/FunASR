@@ -9,7 +9,7 @@
 #   - data/simu_${simu_outputs}
 #     simulation mixtures generated with various options
 
-stage=1
+stage=0
 
 # Modify corpus directories
 #  - callhome_dir
