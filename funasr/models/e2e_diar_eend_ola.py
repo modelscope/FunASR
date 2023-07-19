@@ -157,12 +157,11 @@ class DiarEENDOLAModel(FunASRModel):
 
     def estimate_sequential(self,
                             speech: torch.Tensor,
-                            speech_lengths: torch.Tensor,
                             n_speakers: int = None,
                             shuffle: bool = True,
                             threshold: float = 0.5,
                             **kwargs):
-        speech = [s[:s_len] for s, s_len in zip(speech, speech_lengths)]
+        speech_lengths = torch.tensor([len(sph) for sph in speech]).to(torch.int64)
         emb = self.forward_encoder(speech, speech_lengths)
         if shuffle:
             orders = [np.arange(e.shape[0]) for e in emb]

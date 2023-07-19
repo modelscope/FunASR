@@ -54,7 +54,7 @@ if __name__ == '__main__':
     parser.add_argument(
         "--sampling_rate",
         type=int,
-        default=10,
+        default=8000,
         help="sampling rate",
     )
     parser.add_argument(
@@ -104,7 +104,7 @@ if __name__ == '__main__':
     print("Start inference")
     with open(args.output_rttm_file, "w") as wf:
         for wav_id in wav_items.keys():
-            print("Process wav: {}\n".format(wav_id))
+            print("Process wav: {}".format(wav_id))
             data, rate = sf.read(wav_items[wav_id])
             speech = eend_ola_feature.stft(data, args.frame_size, args.frame_shift)
             speech = eend_ola_feature.transform(speech)

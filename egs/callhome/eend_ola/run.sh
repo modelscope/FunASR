@@ -245,13 +245,17 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
     python local/model_averaging.py ${exp_dir}/exp/${callhome_model_dir}/$callhome_ave_id.pb $models
 fi
 
-## inference
-#if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
-#    echo "Inference"
-#    mkdir -p ${exp_dir}/exp/${callhome_model_dir}/inference/log
-#    CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES python local/infer.py \
-#        --config_file ${exp_dir}/exp/${callhome_model_dir}/config.yaml \
-#        --model_file ${exp_dir}/exp/${callhome_model_dir}/$callhome_ave_id.pb \
-#        --output_rttm_file ${exp_dir}/exp/${callhome_model_dir}/inference/rttm \
-#        --wav_scp_file ${callhome_feats_dir_chunk2000}/${callhome_valid_dataset}/${callhome2_wav_scp_file} 1> ${exp_dir}/exp/${callhome_model_dir}/inference/log/infer.log 2>&1
-#fi
+# inference and compute DER
+if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
+    echo "Inference"
+    mkdir -p ${exp_dir}/exp/${callhome_model_dir}/inference/log
+    CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES python local/infer.py \
+        --config_file ${exp_dir}/exp/${callhome_model_dir}/config.yaml \
+        --model_file ${exp_dir}/exp/${callhome_model_dir}/$callhome_ave_id.pb \
+        --output_rttm_file ${exp_dir}/exp/${callhome_model_dir}/inference/rttm \
+        --wav_scp_file ${callhome_feats_dir_chunk2000}/${callhome_valid_dataset}/${callhome2_wav_scp_file} \
+        1> ${exp_dir}/exp/${callhome_model_dir}/inference/log/infer.log 2>&1
+    md-eval.pl -c 0.25 \
+          -r ${callhome_feats_dir_chunk2000}/${callhome_valid_dataset}/rttm \
+          -s ${exp_dir}/exp/${callhome_model_dir}/inference/rttm > ${exp_dir}/exp/${callhome_model_dir}/inference/result_med11_collar0.25 2>/dev/null || exit
+fi
