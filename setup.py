@@ -23,6 +23,7 @@ requirements = {
         "nltk>=3.4.5",
         # ASR
         "sentencepiece",
+        "jieba",
         # TTS
         "pypinyin>=0.44.0",
         "espnet_tts_frontend",
