@@ -11,7 +11,7 @@ from typing import Union
 import numpy as np
 import scipy.signal
 import soundfile
-import jieba
+
 
 from funasr.text.build_tokenizer import build_tokenizer
 from funasr.text.cleaner import TextCleaner
@@ -659,6 +659,7 @@ class CodeMixTokenizerCommonPreprocessor(CommonPreprocessor):
         self.split_text_name = split_text_name
         self.seg_jieba = seg_jieba
         if self.seg_jieba:
+            import jieba
             jieba.load_userdict(seg_dict_file)
 
     @classmethod
