@@ -72,8 +72,6 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     echo "stage 0: Prepare data for training and inference"
     simu_opts_num_speaker_array=(1 2 3 4)
     simu_opts_sil_scale_array=(2 2 5 9)
-    simu_opts_num_speaker=${simu_opts_num_speaker_array[i]}
-    simu_opts_sil_scale=${simu_opts_sil_scale_array[i]}
     simu_opts_num_train=100000
 
     # for simulated data of chunk500
@@ -84,7 +82,7 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
             n_mixtures=500
         fi
         simu_data_dir=${dset}_ns"$(IFS="n"; echo "${simu_opts_num_speaker_array[*]}")"_beta"$(IFS="n"; echo "${simu_opts_sil_scale_array[*]}")"_${n_mixtures}
-        mkdir ${data_dir}/simu/data/${simu_data_dir}/.work
+        mkdir -p ${data_dir}/simu/data/${simu_data_dir}/.work
         split_scps=
         for n in $(seq $nj); do
             split_scps="$split_scps ${data_dir}/simu/data/${simu_data_dir}/.work/wav.$n.scp"
