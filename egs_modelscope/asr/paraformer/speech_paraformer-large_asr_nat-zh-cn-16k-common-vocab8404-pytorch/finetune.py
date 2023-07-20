@@ -31,7 +31,7 @@ if __name__ == '__main__':
     params.data_path = "./example_data/"            # 数据路径
     params.dataset_type = "small"                   # 小数据量设置small，若数据量大于1000小时，请使用large
     params.batch_bins = 2000                       # batch size，如果dataset_type="small"，batch_bins单位为fbank特征帧数，如果dataset_type="large"，batch_bins单位为毫秒，
-    params.max_epoch = 5                           # 最大训练轮数
+    params.max_epoch = 20                           # 最大训练轮数
     params.lr = 0.00005                             # 设置学习率
     init_param = []
     freeze_param = []

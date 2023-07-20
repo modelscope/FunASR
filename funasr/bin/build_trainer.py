@@ -1,7 +1,6 @@
 import os
 
 import yaml
-import logging
 
 def update_dct(fin_configs, root):
     if root == {}:
