@@ -370,7 +370,7 @@ def inference_paraformer(
             results = speech2text(**batch)
             if len(results) < 1:
                 hyp = Hypothesis(score=0.0, scores={}, states={}, yseq=[])
-                results = [[" ", ["sil"], [2], hyp, 10, 6]] * nbest
+                results = [[" ", ["sil"], [2], hyp, 10, 6, []]] * nbest
             time_end = time.time()
             forward_time = time_end - time_beg
             lfr_factor = results[0][-1]
@@ -565,6 +565,7 @@ def inference_paraformer_vad_punc(
         if 'hotword' in kwargs:
             hotword_list_or_file = kwargs['hotword']
 
+        speech2vadsegment.vad_model.vad_opts.max_single_segment_time = kwargs.get("max_single_segment_time", 60000)
         batch_size_token = kwargs.get("batch_size_token", 6000)
         print("batch_size_token: ", batch_size_token)
 
@@ -647,8 +648,7 @@ def inference_paraformer_vad_punc(
             beg_idx = 0
             for j, _ in enumerate(range(0, n)):
                 batch_size_token_ms_cum += (sorted_data[j][0][1] - sorted_data[j][0][0])
-                if j < n - 1 and (batch_size_token_ms_cum + sorted_data[j + 1][0][1] - sorted_data[j + 1][0][
-                    0]) < batch_size_token_ms:
+                if j < n - 1 and (batch_size_token_ms_cum + sorted_data[j + 1][0][1] - sorted_data[j + 1][0][0]) < batch_size_token_ms and (sorted_data[j + 1][0][1] - sorted_data[j + 1][0][0]) < speech2vadsegment.vad_model.vad_opts.max_single_segment_time:
                     continue
                 batch_size_token_ms_cum = 0
                 end_idx = j + 1
@@ -1340,7 +1340,7 @@ def inference_transducer(
         format="%(asctime)s (%(module)s:%(lineno)d) %(levelname)s: %(message)s",
     )
 
-    if ngpu >= 1:
+    if ngpu >= 1 and torch.cuda.is_available():
         device = "cuda"
     else:
         device = "cpu"
@@ -1371,10 +1371,7 @@ def inference_transducer(
         left_context=left_context,
         right_context=right_context,
     )
-    speech2text = Speech2TextTransducer.from_pretrained(
-        model_tag=model_tag,
-        **speech2text_kwargs,
-    )
+    speech2text = Speech2TextTransducer(**speech2text_kwargs)
 
     def _forward(data_path_and_name_and_type,
                  raw_inputs: Union[np.ndarray, torch.Tensor] = None,
