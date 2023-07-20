@@ -92,6 +92,14 @@ def build_trainer(modelscope_dict,
     for key, value in finetune_configs.items():
         if hasattr(args, key):
             setattr(args, key, value)
+    if mate_params is not None:
+        for key, value in mate_params.items():
+            if hasattr(args, key):
+                setattr(args, key, value)
+    if mate_params is not None and "lora_params" in mate_params:
+        lora_params = mate_params['lora_params']
+        configs['encoder_conf'].update(lora_params) 
+        configs['decoder_conf'].update(lora_params) 
 
     # prepare data
     args.dataset_type = dataset_type
@@ -106,6 +114,9 @@ def build_trainer(modelscope_dict,
     else:
         raise ValueError(f"Not supported dataset_type={args.dataset_type}")
     args.init_param = [init_param]
+    if mate_params is not None and "init_param" in mate_params:
+        if len(mate_params["init_param"]) != 0:
+            args.init_param = mate_params["init_param"]
     args.cmvn_file = cmvn_file
     if os.path.exists(seg_dict_file):
         args.seg_dict_file = seg_dict_file
@@ -144,10 +155,6 @@ def build_trainer(modelscope_dict,
         args.patience = None
     args.local_rank = local_rank
     args.distributed = distributed
-    if mate_params is not None:
-        for key, value in mate_params.items():
-            if hasattr(args, key):
-                setattr(args, key, value)
     ASRTask.finetune_args = args
 
     return ASRTask
