@@ -34,7 +34,7 @@ class KaldiData:
         utt2spk_file = os.path.join(self.data_dir, 'utt2spk.{}'.format(idx))
         self.utt2spk = load_utt2spk(utt2spk_file)
 
-        wav_file = os.path.join(self.data_dir, 'wav.scp.{}'.format(idx))
+        wav_file = os.path.join(self.data_dir, 'wav.{}.scp'.format(idx))
         self.wavs = load_wav_scp(wav_file)
 
         reco2dur_file = os.path.join(self.data_dir, 'reco2dur.{}'.format(idx))
