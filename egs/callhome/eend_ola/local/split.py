@@ -11,14 +11,14 @@ if __name__ == '__main__':
     scp_files = os.listdir(work_path)
 
     reco2dur_dict = {}
-    with open(root_path + 'reco2dur') as f:
+    with (os.path.join(root_path, 'reco2dur')) as f:
         lines = f.readlines()
         for line in lines:
             parts = line.strip().split()
             reco2dur_dict[parts[0]] = parts[1]
 
     spk2utt_dict = {}
-    with open(root_path + 'spk2utt') as f:
+    with open(os.path.join(root_path, 'spk2utt')) as f:
         lines = f.readlines()
         for line in lines:
             parts = line.strip().split()
@@ -34,7 +34,7 @@ if __name__ == '__main__':
                     spk2utt_dict[rec].append((spk, utt))
 
     segment_dict = {}
-    with open(root_path + 'segments') as f:
+    with open(os.path.join(root_path, 'segments')) as f:
         lines = f.readlines()
         for line in lines:
             parts = line.strip().split()
@@ -45,7 +45,7 @@ if __name__ == '__main__':
                 segment_dict[parts[1]].append((parts[0], parts[2], parts[3]))
 
     utt2spk_dict = {}
-    with open(root_path + 'utt2spk') as f:
+    with open(os.path.join(root_path, 'utt2spk')) as f:
         lines = f.readlines()
         for line in lines:
             parts = line.strip().split()
@@ -61,10 +61,10 @@ if __name__ == '__main__':
     for file in scp_files:
         scp_file = work_path + file
         idx = scp_file.split('.')[-2]
-        reco2dur_file = work_path + 'reco2dur.' + idx
-        spk2utt_file = work_path + 'spk2utt.' + idx
-        segment_file = work_path + 'segments.' + idx
-        utt2spk_file = work_path + 'utt2spk.' + idx
+        reco2dur_file = os.path.join(work_path, 'reco2dur.'.format(str(idx)))
+        spk2utt_file = os.path.join(work_path, 'spk2utt.'.format(str(idx)))
+        segment_file = os.path.join(work_path, 'segments.'.format(str(idx)))
+        utt2spk_file = os.path.join(work_path, 'utt2spk.'.format(str(idx)))
 
         fpp = open(scp_file)
         scp_lines = fpp.readlines()
