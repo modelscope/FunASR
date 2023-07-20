@@ -78,17 +78,26 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     for dset in swb_sre_tr swb_sre_cv; do
         if [ "$dset" == "swb_sre_tr" ]; then
             n_mixtures=${simu_opts_num_train}
+            dataset=train
         else
             n_mixtures=500
+            dataset=dev
         fi
         simu_data_dir=${dset}_ns"$(IFS="n"; echo "${simu_opts_num_speaker_array[*]}")"_beta"$(IFS="n"; echo "${simu_opts_sil_scale_array[*]}")"_${n_mixtures}
-        mkdir -p ${data_dir}/simu/data/${simu_data_dir}/.work
-        split_scps=
-        for n in $(seq $nj); do
-            split_scps="$split_scps ${data_dir}/simu/data/${simu_data_dir}/.work/wav.$n.scp"
-        done
-        utils/split_scp.pl "${data_dir}/simu/data/${simu_data_dir}/wav.scp" $split_scps || exit 1
-        python local/split.py ${data_dir}/simu/data/${simu_data_dir}
+#        mkdir -p ${data_dir}/simu/data/${simu_data_dir}/.work
+#        split_scps=
+#        for n in $(seq $nj); do
+#            split_scps="$split_scps ${data_dir}/simu/data/${simu_data_dir}/.work/wav.$n.scp"
+#        done
+#        utils/split_scp.pl "${data_dir}/simu/data/${simu_data_dir}/wav.scp" $split_scps || exit 1
+#        python local/split.py ${data_dir}/simu/data/${simu_data_dir}
+        output_dir=${data_dir}/ark_data/dump/simu_data/$dataset
+        mkdir -p $output_dir/.logs
+        $dump_cmd --max-jobs-run $nj JOB=1:$nj $output_dir/.logs/dump.JOB.log \
+        python local/dump_feature.py \
+              --data_dir ${data_dir}/simu/data/${simu_data_dir}/.work \
+              --output_dir ${data_dir}/ark_data/dump/simu_data/$dataset \
+              --index JOB
     done
 fi
 
