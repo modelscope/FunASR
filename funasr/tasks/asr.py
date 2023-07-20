@@ -1538,7 +1538,6 @@ class ASRBATTask(ASRTask):
         Return:
             model: ASR BAT model.
         """
-        assert check_argument_types()
 
         if isinstance(args.token_list, str):
             with open(args.token_list, encoding="utf-8") as f:

@@ -4,9 +4,9 @@
 For convenience, we provide users with the ability to generate local HTML manually.
 
 First, you should install the following packages, which is required for building HTML:
+
 ```sh
-conda activate funasr
-pip install requests sphinx nbsphinx sphinx_markdown_tables sphinx_rtd_theme recommonmark
+pip3 install -U "funasr[docs]"
 ```
 
 Then you can generate HTML manually.
