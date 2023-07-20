@@ -1,7 +1,7 @@
 import os
 
 import yaml
-
+import logging
 
 def update_dct(fin_configs, root):
     if root == {}:
@@ -55,7 +55,7 @@ def build_trainer(modelscope_dict,
                   scheduler_conf=None,
                   specaug=None,
                   specaug_conf=None,
-                  meta_dict=None,
+                  mate_params=None,
                   **kwargs):
     mode = modelscope_dict['mode']
     args, ASRTask = parse_args(mode=mode)
@@ -144,9 +144,10 @@ def build_trainer(modelscope_dict,
         args.patience = None
     args.local_rank = local_rank
     args.distributed = distributed
-    if meta_dict is not None:
-        for key, value in meta_dict.items():
-            args.key = value
+    if mate_params is not None:
+        for key, value in mate_params.items():
+            if hasattr(args, key):
+                setattr(args, key, value)
     ASRTask.finetune_args = args
 
     return ASRTask
