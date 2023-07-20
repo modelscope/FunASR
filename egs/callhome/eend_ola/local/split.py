@@ -11,7 +11,7 @@ if __name__ == '__main__':
     scp_files = os.listdir(work_path)
 
     reco2dur_dict = {}
-    with (os.path.join(root_path, 'reco2dur')) as f:
+    with open(os.path.join(root_path, 'reco2dur')) as f:
         lines = f.readlines()
         for line in lines:
             parts = line.strip().split()
@@ -61,10 +61,10 @@ if __name__ == '__main__':
     for file in scp_files:
         scp_file = work_path + file
         idx = scp_file.split('.')[-2]
-        reco2dur_file = os.path.join(work_path, 'reco2dur.'.format(str(idx)))
-        spk2utt_file = os.path.join(work_path, 'spk2utt.'.format(str(idx)))
-        segment_file = os.path.join(work_path, 'segments.'.format(str(idx)))
-        utt2spk_file = os.path.join(work_path, 'utt2spk.'.format(str(idx)))
+        reco2dur_file = os.path.join(work_path, 'reco2dur.{}'.format(str(idx)))
+        spk2utt_file = os.path.join(work_path, 'spk2utt.{}'.format(str(idx)))
+        segment_file = os.path.join(work_path, 'segments.{}'.format(str(idx)))
+        utt2spk_file = os.path.join(work_path, 'utt2spk.{}'.format(str(idx)))
 
         fpp = open(scp_file)
         scp_lines = fpp.readlines()
