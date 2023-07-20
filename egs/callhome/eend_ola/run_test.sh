@@ -8,6 +8,11 @@ gpu_num=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
 count=1
 
 # general configuration
+dump_cmd=utils/run.pl
+nj=64
+
+# feature configuration
+data_dir="/nfs/wangjiaming.wjm/EEND_DATA_sad30_snr10n15n20/convert_chunk2000/data"
 simu_feats_dir="/nfs/wangjiaming.wjm/EEND_ARK_DATA/dump/simu_data/data"
 simu_feats_dir_chunk2000="/nfs/wangjiaming.wjm/EEND_ARK_DATA/dump/simu_data_chunk2000/data"
 callhome_feats_dir_chunk2000="/nfs/wangjiaming.wjm/EEND_ARK_DATA/dump/callhome_chunk2000/data"
@@ -27,8 +32,8 @@ callhome_average_end=100
 
 exp_dir="."
 input_size=345
-stage=5
-stop_stage=5
+stage=0
+stop_stage=0
 
 # exp tag
 tag="exp1"
@@ -62,13 +67,32 @@ if [ ${stage} -le -1 ] && [ ${stop_stage} -ge -1 ]; then
     local/run_prepare_shared_eda.sh
 fi
 
-## Prepare data for training and inference
-#if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
-#    echo "stage 0: Prepare data for training and inference"
-#    echo "The detail can be found in https://github.com/hitachi-speech/EEND"
-#    . ./local/
-#fi
-#
+# Prepare data for training and inference
+if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
+    echo "stage 0: Prepare data for training and inference"
+    simu_opts_num_speaker_array=(1 2 3 4)
+    simu_opts_sil_scale_array=(2 2 5 9)
+    simu_opts_num_speaker=${simu_opts_num_speaker_array[i]}
+    simu_opts_sil_scale=${simu_opts_sil_scale_array[i]}
+    simu_opts_num_train=100000
+
+    # for simulated data of chunk500
+    for dset in swb_sre_tr swb_sre_cv; do
+        if [ "$dset" == "swb_sre_tr" ]; then
+            n_mixtures=${simu_opts_num_train}
+        else
+            n_mixtures=500
+        fi
+        simu_data_dir=${dset}_ns${simu_opts_num_speaker}_beta${simu_opts_sil_scale}_${n_mixtures}
+        mkdir ${data_dir}/simu/data/${simu_data_dir}/.work
+        split_scps=
+        for n in $(seq $nj); do
+            split_scps="$split_scps ${data_dir}/simu/data/${simu_data_dir}/.work/wav.$n.scp"
+        done
+        utils/split_scp.pl "${data_dir}/simu/data/${simu_data_dir}/wav.scp" $split_scps || exit 1
+        python local/split.py ${data_dir}/simu/data/${simu_data_dir}
+    done
+fi
 
 # Training on simulated two-speaker data
 world_size=$gpu_num

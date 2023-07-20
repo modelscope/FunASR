@@ -94,7 +94,6 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     done
 fi
 
-
 # Training on simulated two-speaker data
 world_size=$gpu_num
 simu_2spkr_ave_id=avg${simu_average_2spkr_start}-${simu_average_2spkr_end}
