@@ -59,7 +59,7 @@ if __name__ == '__main__':
                 utt2spk_dict[rec].append((parts[0], parts[1]))
 
     for file in scp_files:
-        scp_file = work_path + file
+        scp_file = os.path.join(work_path, file)
         idx = scp_file.split('.')[-2]
         reco2dur_file = os.path.join(work_path, 'reco2dur.{}'.format(str(idx)))
         spk2utt_file = os.path.join(work_path, 'spk2utt.{}'.format(str(idx)))
