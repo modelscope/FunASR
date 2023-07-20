@@ -131,14 +131,14 @@ def convert(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("data_dir")
-    parser.add_argument("output_dir")
-    parser.add_argument("index")
-    parser.add_argument("num_frames", default=500)
-    parser.add_argument("context_size", default=7)
-    parser.add_argument("frame_size", default=200)
-    parser.add_argument("frame_shift", default=80)
-    parser.add_argument("subsampling", default=10)
+    parser.add_argument("--data_dir", type=str)
+    parser.add_argument("--output_dir", type=str)
+    parser.add_argument("--index", type=str)
+    parser.add_argument("--num_frames", type=int, default=500)
+    parser.add_argument("--context_size", type=int, default=7)
+    parser.add_argument("--frame_size", type=int, default=200)
+    parser.add_argument("--frame_shift", type=int, default=80)
+    parser.add_argument("--subsampling", type=int, default=10)
 
     args = parser.parse_args()
     convert(args)
