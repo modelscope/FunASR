@@ -32,7 +32,7 @@ FunASR希望在语音识别的学术研究和工业应用之间架起一座桥�
 <a name="最新动态"></a>
 ## 最新动态
 - 2023.07.17: BAT一种低延迟低内存消耗的RNN-T模型发布，详细信息参阅（[BAT](egs/aishell/bat)）
-- 2023.07.03: 中文离线文件转写服务一键部署的CPU版本发布，详细信息参阅([一键部署文档]([funasr/runtime/readme_cn.md](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/docs/SDK_tutorial_zh.md)))
+- 2023.07.03: 中文离线文件转写服务一键部署的CPU版本发布，详细信息参阅([一键部署文档](funasr/runtime/docs/SDK_tutorial_zh.md))
 - 2023.06.26: ASRU2023 多通道多方会议转录挑战赛2.0完成竞赛结果公布，详细信息参阅（[M2MeT2.0](https://alibaba-damo-academy.github.io/FunASR/m2met2_cn/index.html)）
 
 <a name="安装教程"></a>
@@ -41,7 +41,7 @@ FunASR安装教程请阅读（[Installation](https://alibaba-damo-academy.github
 
 <a name="服务部署"></a>
 ## 服务部署
-FunASR支持预训练或者进一步微调的模型进行服务部署。目前中文离线文件转写服务一键部署的CPU版本已经发布，详细信息参阅([一键部署文档]([funasr/runtime/readme_cn.md](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/docs/SDK_tutorial_zh.md)))。更多服务部署详细信息可以参阅([服务部署文档](funasr/runtime/readme_cn.md))。
+FunASR支持预训练或者进一步微调的模型进行服务部署。目前中文离线文件转写服务一键部署的CPU版本已经发布，详细信息参阅([一键部署文档](funasr/runtime/docs/SDK_tutorial_zh.md)。更多服务部署详细信息可以参阅([服务部署文档](funasr/runtime/readme_cn.md))。
 
 <a name="快速开始"></a>
 ## 快速开始
@@ -60,11 +60,11 @@ FunASR支持数万小时工业数据训练的模型的推理和微调，详细�
 | <div align="left"><img src="docs/images/damo.png" width="180"/> | <div align="left"><img src="docs/images/nwpu.png" width="260"/> | <img src="docs/images/China_Telecom.png" width="200"/> </div>  | <img src="docs/images/RapidAI.png" width="200"/> </div> | <img src="docs/images/aihealthx.png" width="200"/> </div> |
 |:---------------------------------------------------------------:|:---------------------------------------------------------------:|:--------------------------------------------------------------:|:-------------------------------------------------------:|:-----------------------------------------------------------:|
 
-贡献者名单请参考（[点击此处](./Acknowledge)）
+贡献者名单请参考（[致谢名单](./Acknowledge)）
 
 
 ## 许可协议
-项目遵循[The MIT License](https://opensource.org/licenses/MIT)开源协议，许可协议请参考（[点击此处](./MODEL_LICENSE)）
+项目遵循[The MIT License](https://opensource.org/licenses/MIT)开源协议，模型许可协议请参考（[模型协议](./MODEL_LICENSE)）
 
 
 ## 论文引用
