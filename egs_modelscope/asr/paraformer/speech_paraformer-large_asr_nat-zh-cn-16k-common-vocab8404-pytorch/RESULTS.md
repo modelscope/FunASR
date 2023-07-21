@@ -2,14 +2,6 @@
 - Model link: <https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary>
 - Model size: 220M
 
-# Environments
-- date: `Tue Nov 22 18:48:39 CST 2022`
-- python version: `3.7.12`
-- FunASR version: `0.1.0`
-- pytorch version: `pytorch 1.7.0`
-- Git hash: ``
-- Commit date: ``
-
 # Beachmark Results
 
 ## AISHELL-1
@@ -73,3 +65,50 @@
 |SPEECHIO_ASR_ZH000013| 2.57 | 2.25 |
 |SPEECHIO_ASR_ZH000014| 3.86 | 3.08 |
 |SPEECHIO_ASR_ZH000015| 3.34 | 2.67 |
+
+
+# Fine-tuning Results
+
+## Fine-tuning
+- Train config: 
+  - Training data: aishell-1
+  - Training info: lr 0.0002, batch size 2000, 2 gpu, acc_grad 1, 20 epochs
+  - Decoding info: beam_size 1, average_num 10
+
+| model    | dev cer(%) | test cer(%) |
+|:---------:|:-------------:|:-------------:|
+| Pretrain       | 1.75          |1.95           |
+| Finetune      | 1.62          |1.78           |
+
+- Train config: 
+  - Training data: 16k sichuan dialect
+  - Training info: lr 0.0002, batch size 2000, 2 gpu, acc_grad 1, 20 epochs
+  - Decoding info: beam_size 1, average_num 10
+  
+  
+|   model  | Training Data(h) | cn cer(%) | sichuan cer(%) |
+|:--------:|:-------------:|:-------:|:------------:|
+| Pretrain |               |   8.57  |     19.81    |
+| Finetune |      50      |   8.8   |      12      |
+|          |      100     |   9.24  |     11.63    |
+|          |      200     |   9.82  |     10.47    |
+|          |      300     |   9.95  |     10.44    |
+|          |     1000     |   9.99  |     9.78     |
+
+
+## Lora Fine-tuning
+- Train config: 
+  - Training data: 16k sichuan dialect
+  - Training info: lr 0.0002, batch size 2000, 2 gpu, acc_grad 1, 20 epochs
+  - Lora info: lora_bias: "all", lora_list ['q','v'], lora_rank:8, lora_alpha:16, lora_dropout:0.1
+  - Decoding info: beam_size 1, average_num 10
+  
+|     model     | Training Data(h) | Trainable Parameters(M) | cn cer(%) | sichuan cer(%) |
+|:-------------:|:----------------:|:-----------------------:|:---------:|:--------------:|
+|    Pretrain   |                  |                         |    8.57   |      19.81     |
+|               |                  |                         |           |                |
+|    Finetune   |        50        |          220.9          |    8.8    |       12       |
+| Lora Finetune |        50        |           2.29          |    9.13   |      12.13     |
+|               |                  |                         |           |                |
+|    Finetune   |        200       |          220.9          |    9.82   |      10.47     |
+| Lora Finetune |        200       |           2.29          |    9.21   |      11.28     |
