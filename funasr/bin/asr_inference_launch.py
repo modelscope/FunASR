@@ -648,7 +648,7 @@ def inference_paraformer_vad_punc(
             beg_idx = 0
             for j, _ in enumerate(range(0, n)):
                 batch_size_token_ms_cum += (sorted_data[j][0][1] - sorted_data[j][0][0])
-                if j < n - 1 and (batch_size_token_ms_cum + sorted_data[j + 1][0][1] - sorted_data[j + 1][0][0]) < batch_size_token_ms and (sorted_data[j + 1][0][1] - sorted_data[j + 1][0][0]) < speech2vadsegment.vad_model.vad_opts.max_single_segment_time:
+                if j < n - 1 and (batch_size_token_ms_cum + sorted_data[j + 1][0][1] - sorted_data[j + 1][0][0]) < batch_size_token_ms and (sorted_data[j + 1][0][1] - sorted_data[j + 1][0][0]) < int(speech2vadsegment.vad_model.vad_opts.max_single_segment_time*0.67):
                     continue
                 batch_size_token_ms_cum = 0
                 end_idx = j + 1
