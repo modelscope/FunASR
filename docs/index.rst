@@ -22,6 +22,12 @@ Overview
 
 .. toctree::
    :maxdepth: 1
+   :caption: Quick Start
+
+   ./qick_start.md
+
+.. toctree::
+   :maxdepth: 1
    :caption: Academic Egs
 
    ./academic_recipe/asr_recipe.md
