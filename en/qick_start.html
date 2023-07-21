@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FunASR document generation &mdash; FunASR  documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <title>Quick Start &mdash; FunASR  documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
@@ -16,7 +16,9 @@
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Speech Recognition" href="academic_recipe/asr_recipe.html" />
+    <link rel="prev" title="Docker" href="installation/docker.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -44,8 +46,25 @@
 <li class="toctree-l1"><a class="reference internal" href="installation/docker.html">Docker</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Quick Start</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="qick_start.html">Quick Start</a></li>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Quick Start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#service-deployment-sdk">Service Deployment SDK</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#python-version-example">Python version Example</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#server-deployment">Server Deployment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#client-testing">Client Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#c-version-example">C++ version Example</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">Server Deployment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">Client Testing</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#industrial-model-egs">Industrial Model Egs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#academic-model-egs">Academic model egs</a></li>
+</ul>
+</li>
 </ul>
 <p class="caption"><span class="caption-text">Academic Egs</span></p>
 <ul>
@@ -123,9 +142,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">FunASR document generation</li>
+      <li class="breadcrumb-item active">Quick Start</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/README.md.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/qick_start.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -133,28 +152,90 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="funasr-document-generation">
-<h1>FunASR document generation<a class="headerlink" href="#funasr-document-generation" title="Permalink to this headline"></a></h1>
-<div class="section" id="generate-html">
-<h2>Generate HTML<a class="headerlink" href="#generate-html" title="Permalink to this headline"></a></h2>
-<p>For convenience, we provide users with the ability to generate local HTML manually.</p>
-<p>First, you should install the following packages, which is required for building HTML:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip3 install -U <span class="s2">&quot;funasr[docs]&quot;</span>
+  <div class="section" id="quick-start">
+<h1>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline"></a></h1>
+<p>You can use FunASR in the following ways:</p>
+<ul class="simple">
+<li><p>Service Deployment SDK</p></li>
+<li><p>Industrial model egs</p></li>
+<li><p>Academic model egs</p></li>
+</ul>
+<div class="section" id="service-deployment-sdk">
+<h2>Service Deployment SDK<a class="headerlink" href="#service-deployment-sdk" title="Permalink to this headline"></a></h2>
+<div class="section" id="python-version-example">
+<h3>Python version Example<a class="headerlink" href="#python-version-example" title="Permalink to this headline"></a></h3>
+<p>Supports real-time streaming speech recognition, uses non-streaming models for error correction, and outputs text with punctuation. Currently, only single client is supported. For multi-concurrency, please refer to the C++ version service deployment SDK below.</p>
+<div class="section" id="server-deployment">
+<h4>Server Deployment<a class="headerlink" href="#server-deployment" title="Permalink to this headline"></a></h4>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> funasr/runtime/python/websocket
+python funasr_wss_server.py --port <span class="m">10095</span>
 </pre></div>
 </div>
-<p>Then you can generate HTML manually.</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> docs
-make html
+</div>
+<div class="section" id="client-testing">
+<h4>Client Testing<a class="headerlink" href="#client-testing" title="Permalink to this headline"></a></h4>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python funasr_wss_client.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode 2pass --chunk_size <span class="s2">&quot;5,10,5&quot;</span>
 </pre></div>
 </div>
-<p>The generated files are all contained in the “FunASR/docs/_build” directory. You can access the FunASR documentation by simply opening the “html/index.html” file in your browser from this directory.</p>
+<p>For more examples, please refer to <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/runtime/websocket_python.html#id2">docs</a>.</p>
+</div>
+</div>
+<div class="section" id="c-version-example">
+<h3>C++ version Example<a class="headerlink" href="#c-version-example" title="Permalink to this headline"></a></h3>
+<p>Currently, offline file transcription service (CPU) is supported, and concurrent requests of hundreds of channels are supported.</p>
+<div class="section" id="id1">
+<h4>Server Deployment<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h4>
+<p>You can use the following command to complete the deployment with one click:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy-offline-cpu-zh.sh
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace ./funasr-runtime-resources
+</pre></div>
+</div>
+</div>
+<div class="section" id="id2">
+<h4>Client Testing<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h4>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 funasr_wss_client.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode offline --audio_in <span class="s2">&quot;../audio/asr_example.wav&quot;</span>
+</pre></div>
+</div>
+<p>For more examples, please refer to <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/docs/SDK_tutorial_zh.md">docs</a></p>
+</div>
+</div>
+</div>
+<div class="section" id="industrial-model-egs">
+<h2>Industrial Model Egs<a class="headerlink" href="#industrial-model-egs" title="Permalink to this headline"></a></h2>
+<p>If you want to use the pre-trained industrial models in ModelScope for inference or fine-tuning training, you can refer to the following command:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
+<span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
+
+<span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
+    <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">auto_speech_recognition</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">rec_result</span><span class="p">)</span>
+<span class="c1"># {&#39;text&#39;: &#39;欢迎大家来体验达摩院推出的语音识别模型&#39;}</span>
+</pre></div>
+</div>
+<p>More examples could be found in <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/modelscope_pipeline/quick_start.html">docs</a></p>
+</div>
+<div class="section" id="academic-model-egs">
+<h2>Academic model egs<a class="headerlink" href="#academic-model-egs" title="Permalink to this headline"></a></h2>
+<p>If you want to train from scratch, usually for academic models, you can start training and inference with the following command:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> egs/aishell/paraformer
+. ./run.sh --CUDA_VISIBLE_DEVICES<span class="o">=</span><span class="s2">&quot;0,1&quot;</span> --gpu_num<span class="o">=</span><span class="m">2</span>
+</pre></div>
+</div>
+<p>More examples could be found in <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/modelscope_pipeline/quick_start.html">docs</a></p>
 </div>
 </div>
 
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation/docker.html" class="btn btn-neutral float-left" title="Docker" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="academic_recipe/asr_recipe.html" class="btn btn-neutral float-right" title="Speech Recognition" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 
