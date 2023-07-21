@@ -72,7 +72,7 @@
 ## Fine-tuning
 - Train config: 
   - Training data: aishell-1
-  - Training info: lr 0.0002, batch size 2000, 2 gpu, acc_grad 1, 20 epochs
+  - Training info: lr 0.0002, dataset_type: small, batch bins 2000, 2 gpu, acc_grad 1, 20 epochs
   - Decoding info: beam_size 1, average_num 10
 
 | model    | dev cer(%) | test cer(%) |
@@ -82,7 +82,7 @@
 
 - Train config: 
   - Training data: 16k sichuan dialect
-  - Training info: lr 0.0002, batch size 2000, 2 gpu, acc_grad 1, 20 epochs
+  - Training info: lr 0.0002, dataset_type: small, batch bins 2000, 2 gpu, acc_grad 1, 20 epochs
   - Decoding info: beam_size 1, average_num 10
   
   
@@ -99,7 +99,7 @@
 ## Lora Fine-tuning
 - Train config: 
   - Training data: 16k sichuan dialect
-  - Training info: lr 0.0002, batch size 2000, 2 gpu, acc_grad 1, 20 epochs
+  - Training info: lr 0.0002, dataset_type: small, batch bins 2000, 2 gpu, acc_grad 1, 20 epochs
   - Lora info: lora_bias: "all", lora_list ['q','v'], lora_rank:8, lora_alpha:16, lora_dropout:0.1
   - Decoding info: beam_size 1, average_num 10
   
