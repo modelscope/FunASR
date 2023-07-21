@@ -11,8 +11,8 @@
 
 <strong>FunASR</strong> hopes to build a bridge between academic research and industrial applications on speech recognition. By supporting the training & finetuning of the industrial-grade speech recognition model released on [ModelScope](https://www.modelscope.cn/models?page=1&tasks=auto-speech-recognition), researchers and developers can conduct research and production of speech recognition models more conveniently, and promote the development of speech recognition ecology. ASR for Fun！
 
-[**News**](https://github.com/alibaba-damo-academy/FunASR#whats-new) 
-| [**Highlights**](#highlights)
+[**Highlights**](#highlights)
+| [**News**](https://github.com/alibaba-damo-academy/FunASR#whats-new) 
 | [**Installation**](#installation)
 | [**Quick Start**](#quick-start)
 | [**Runtime**](./funasr/runtime/readme.md)
@@ -29,14 +29,13 @@
 <a name="whats-new"></a>
 ## What's new: 
 
-- 2023/07/17: BAT released a low-latency and low-memory-consumption RNN-T model. For more details, please refer to ([BAT](egs/aishell/bat)).
-- 2023/07/03: The CPU version of the Chinese offline file transcription service has been released with one-click deployment. For more details, please refer to ([Deployment documentation](funasr/runtime/docs/SDK_tutorial.md)).
+- 2023/07/17: BAT is released, which is a low-latency and low-memory-consumption RNN-T model. For more details, please refer to ([BAT](egs/aishell/bat)).
+- 2023/07/03: The CPU version of the Chinese offline file transcription service has been released. For more details, please refer to ([Deployment documentation](funasr/runtime/docs/SDK_tutorial.md)).
 - 2023/06/26: ASRU2023 Multi-Channel Multi-Party Meeting Transcription Challenge 2.0 completed the competition and announced the results. For more details, please refer to ([M2MeT2.0](https://alibaba-damo-academy.github.io/FunASR/m2met2/index.html)).
 
 
 <a name="Installation"></a>
 ## Installation
-
 
 Please ref to [installation docs](https://alibaba-damo-academy.github.io/FunASR/en/installation/installation.html)
 
@@ -50,14 +49,13 @@ FunASR supports pre-trained or further fine-tuned models for deployment as a ser
 
 FunASR supports inference and fine-tuning of models trained on industrial datasets of tens of thousands of hours. For more details, please refer to ([modelscope_egs](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_pipeline/quick_start.html)). It also supports training and fine-tuning of models on academic standard datasets. For more details, please refer to([egs](https://alibaba-damo-academy.github.io/FunASR/en/academic_recipe/asr_recipe.html)). The models include speech recognition (ASR), speech activity detection (VAD), punctuation recovery, language model, speaker verification, speaker separation, and multi-party conversation speech recognition. For a detailed list of models, please refer to the [Model Zoo](https://github.com/alibaba-damo-academy/FunASR/blob/main/docs/model_zoo/modelscope_models.md):
 
-<a name="contact"></a>
-## Contact
+<a name="Community Communication"></a>
+## Community Communication
+If you encounter problems in use, you can directly raise Issues on the github page.
 
-If you have any questions about FunASR, please contact us by
+You can also scan the following DingTalk group or WeChat group QR code to join the community group for communication and discussion.
 
-- email: [funasr@list.alibaba-inc.com](funasr@list.alibaba-inc.com)
-
-|Dingding group |                     Wechat group                      |
+|DingTalk group |                     WeChat group                      |
 |:---:|:-----------------------------------------------------:|
 |<div align="left"><img src="docs/images/dingding.jpg" width="250"/> | <img src="docs/images/wechat.png" width="232"/></div> |
 
@@ -66,18 +64,24 @@ If you have any questions about FunASR, please contact us by
 | <div align="left"><img src="docs/images/damo.png" width="180"/> | <div align="left"><img src="docs/images/nwpu.png" width="260"/> | <img src="docs/images/China_Telecom.png" width="200"/> </div>  | <img src="docs/images/RapidAI.png" width="200"/> </div> | <img src="docs/images/aihealthx.png" width="200"/> </div> |
 |:---------------------------------------------------------------:|:---------------------------------------------------------------:|:--------------------------------------------------------------:|:-------------------------------------------------------:|:-----------------------------------------------------------:|
 
-he contributor list can be found in [contributors]((./Acknowledge))
+The contributors can be found in [contributors list]((./Acknowledge))
+
 ## License
 This project is licensed under the [The MIT License](https://opensource.org/licenses/MIT). FunASR also contains various third-party components and some code modified from other repos under other open source licenses.
 The use of pretraining model is subject to [model licencs](./MODEL_LICENSE)
 
 
 ## Citations
-
 ``` bibtex
 @inproceedings{gao2023funasr,
   author={Zhifu Gao and Zerui Li and Jiaming Wang and Haoneng Luo and Xian Shi and Mengzhe Chen and Yabin Li and Lingyun Zuo and Zhihao Du and Zhangyu Xiao and Shiliang Zhang},
   title={FunASR: A Fundamental End-to-End Speech Recognition Toolkit},
+  year={2023},
+  booktitle={INTERSPEECH},
+}
+@inproceedings{An2023bat,
+  author={Keyu An and Xian Shi and Shiliang Zhang},
+  title={BAT: Boundary aware transducer for memory-efficient and low-latency ASR},
   year={2023},
   booktitle={INTERSPEECH},
 }
