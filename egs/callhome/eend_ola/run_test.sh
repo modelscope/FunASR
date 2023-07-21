@@ -12,7 +12,7 @@ dump_cmd=utils/run.pl
 nj=64
 
 # feature configuration
-data_dir="/nfs/wangjiaming.wjm/EEND_DATA_sad30_snr10n15n20/convert_chunk2000/data"
+data_dir="/nfs/wangjiaming.wjm/EEND_DATA_sad30_snr10n15n20/convert_test/data"
 simu_feats_dir="/nfs/wangjiaming.wjm/EEND_ARK_DATA/dump/simu_data/data"
 simu_feats_dir_chunk2000="/nfs/wangjiaming.wjm/EEND_ARK_DATA/dump/simu_data_chunk2000/data"
 callhome_feats_dir_chunk2000="/nfs/wangjiaming.wjm/EEND_ARK_DATA/dump/callhome_chunk2000/data"
@@ -74,7 +74,7 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     simu_opts_sil_scale_array=(2 2 5 9)
     simu_opts_num_train=100000
 
-    # for simulated data of chunk500
+    # for simulated data of chunk500 and chunk2000
     for dset in swb_sre_tr swb_sre_cv; do
         if [ "$dset" == "swb_sre_tr" ]; then
             n_mixtures=${simu_opts_num_train}
@@ -91,13 +91,19 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
 #        done
 #        utils/split_scp.pl "${data_dir}/simu/data/${simu_data_dir}/wav.scp" $split_scps || exit 1
 #        python local/split.py ${data_dir}/simu/data/${simu_data_dir}
-        output_dir=${data_dir}/ark_data/dump/simu_data/$dataset
-        mkdir -p $output_dir/.logs
-        $dump_cmd --max-jobs-run $nj JOB=1:$nj $output_dir/.logs/dump.JOB.log \
-        python local/dump_feature.py \
-              --data_dir ${data_dir}/simu/data/${simu_data_dir}/.work \
-              --output_dir ${data_dir}/ark_data/dump/simu_data/$dataset \
-              --index JOB
+#        # for chunk_size=500
+#        output_dir=${data_dir}/ark_data/dump/simu_data/$dataset
+#        mkdir -p $output_dir/.logs
+#        $dump_cmd --max-jobs-run $nj JOB=1:$nj $output_dir/.logs/dump.JOB.log \
+#        python local/dump_feature.py \
+#              --data_dir ${data_dir}/simu/data/${simu_data_dir}/.work \
+#              --output_dir ${data_dir}/ark_data/dump/simu_data/$dataset \
+#              --index JOB
+        mkdir -p ${data_dir}/ark_data/dump/simu_data/data/$dataset
+        python local_rank/gen_feats_scp.py \
+              --root_path ${data_dir}/ark_data/dump/simu_data \
+              --out_path ${data_dir}/ark_data/dump/simu_data/data/$dataset \
+              --split_num $nj
     done
 fi
 
