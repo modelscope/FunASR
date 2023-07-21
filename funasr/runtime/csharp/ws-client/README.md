@@ -11,8 +11,9 @@ VAD模型参数请参考cshape/AliFsmnVadSharp项目
 serverUri:使用前请在代码内修改后台IP和端口
 AudioFileQueue:转录文件路径保存在此队列中
 ##### 模型获取
-AliFsmnVadSharp.Examples\bin\Debug\net6.0\speech_fsmn_vad_zh-cn-16k-common-pytorch
+speech_fsmn_vad_zh-cn-16k-common-pytorch
 ##### 调用方式：
+编译完成后将config文件夹内文件复制到可执行程序路径下，如：AliFsmnVadSharp.Examples\bin\Debug\net6.0\
 ###### 1.添加项目引用
 using AliFsmnVadSharp;
 
