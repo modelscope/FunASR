@@ -103,12 +103,10 @@
   - Lora info: lora_bias: "all", lora_list ['q','v'], lora_rank:8, lora_alpha:16, lora_dropout:0.1
   - Decoding info: beam_size 1, average_num 10
   
-|     model     | Training Data(h) | Trainable Parameters(M) | cn cer(%) | sichuan cer(%) |
-|:-------------:|:----------------:|:-----------------------:|:---------:|:--------------:|
-|    Pretrain   |                  |                         |    8.57   |      19.81     |
-|               |                  |                         |           |                |
-|    Full-tuning   |        50        |          220.9          |    8.8    |       12       |
-| Lora Finetune |        50        |           2.29          |    9.13   |      12.13     |
-|               |                  |                         |           |                |
-|    Full-tuning   |        200       |          220.9          |    9.82   |      10.47     |
-| Lora Finetune |        200       |           2.29          |    9.21   |      11.28     |
+| model         | Training Data(h) | Trainable Parameters(M) | Memory Usage(G) | common cer(%) | sichuan cer(%) |
+|:---------------:|:------------------:|:-------------------------:|:-----------------:|:---------------:|:----------------:|
+| Pretrain      |                  |                         |                 | 8.57          | 19.81          |
+| Full-tuning   | 50               | 220.9                   | 15              | 8.8           | 12             |
+| Lora Finetune | 50               | 2.29                    | 7               | 9.13          | 12.13          |
+| Full-tuning   | 200              | 220.9                   | 15              | 9.82          | 10.47          |
+| Lora Finetune | 200              | 2.29                    | 7               | 9.21          | 11.28          |
