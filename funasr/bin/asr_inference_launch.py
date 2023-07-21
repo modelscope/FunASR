@@ -566,6 +566,7 @@ def inference_paraformer_vad_punc(
             hotword_list_or_file = kwargs['hotword']
 
         speech2vadsegment.vad_model.vad_opts.max_single_segment_time = kwargs.get("max_single_segment_time", 60000)
+        batch_size_token_threshold_ms = kwargs.get("batch_size_token_threshold_ms", int(speech2vadsegment.vad_model.vad_opts.max_single_segment_time*0.67))
         batch_size_token = kwargs.get("batch_size_token", 6000)
         print("batch_size_token: ", batch_size_token)
 
@@ -648,7 +649,7 @@ def inference_paraformer_vad_punc(
             beg_idx = 0
             for j, _ in enumerate(range(0, n)):
                 batch_size_token_ms_cum += (sorted_data[j][0][1] - sorted_data[j][0][0])
-                if j < n - 1 and (batch_size_token_ms_cum + sorted_data[j + 1][0][1] - sorted_data[j + 1][0][0]) < batch_size_token_ms and (sorted_data[j + 1][0][1] - sorted_data[j + 1][0][0]) < int(speech2vadsegment.vad_model.vad_opts.max_single_segment_time*0.67):
+                if j < n - 1 and (batch_size_token_ms_cum + sorted_data[j + 1][0][1] - sorted_data[j + 1][0][0]) < batch_size_token_ms and (sorted_data[j + 1][0][1] - sorted_data[j + 1][0][0]) < batch_size_token_threshold_ms:
                     continue
                 batch_size_token_ms_cum = 0
                 end_idx = j + 1
