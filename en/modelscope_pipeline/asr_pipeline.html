@@ -205,7 +205,7 @@ The modelscope pipeline supports all the models in <a class="reference external"
 <span class="n">param_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;cache&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(),</span> <span class="s2">&quot;is_final&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;chunk_size&quot;</span><span class="p">:</span> <span class="n">chunk_size</span><span class="p">}</span>
 <span class="n">chunk_stride</span> <span class="o">=</span> <span class="n">chunk_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">960</span> <span class="c1"># 600ms、480ms</span>
 <span class="c1"># first chunk, 600ms</span>
-<span class="n">speech_chunk</span> <span class="o">=</span> <span class="n">speech</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">chunk_stride</span><span class="p">]</span> 
+<span class="n">speech_chunk</span> <span class="o">=</span> <span class="n">speech</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">chunk_stride</span><span class="p">]</span>
 <span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="n">speech_chunk</span><span class="p">,</span> <span class="n">param_dict</span><span class="o">=</span><span class="n">param_dict</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">rec_result</span><span class="p">)</span>
 <span class="c1"># next chunk, 600ms</span>
@@ -363,15 +363,19 @@ asr_example2  ./audios/asr_example2.wav
 <h3>Quick start<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h3>
 <p><a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/TEMPLATE/finetune.py">finetune.py</a></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+
 <span class="kn">from</span> <span class="nn">modelscope.metainfo</span> <span class="kn">import</span> <span class="n">Trainers</span>
 <span class="kn">from</span> <span class="nn">modelscope.trainers</span> <span class="kn">import</span> <span class="n">build_trainer</span>
-<span class="kn">from</span> <span class="nn">modelscope.msdatasets.audio.asr_dataset</span> <span class="kn">import</span> <span class="n">ASRDataset</span>
+
+<span class="kn">from</span> <span class="nn">funasr.datasets.ms_dataset</span> <span class="kn">import</span> <span class="n">MsDataset</span>
+<span class="kn">from</span> <span class="nn">funasr.utils.modelscope_param</span> <span class="kn">import</span> <span class="n">modelscope_args</span>
+
 
 <span class="k">def</span> <span class="nf">modelscope_finetune</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">output_dir</span><span class="p">):</span>
         <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="c1"># dataset split [&quot;train&quot;, &quot;validation&quot;]</span>
-    <span class="n">ds_dict</span> <span class="o">=</span> <span class="n">ASRDataset</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">data_path</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">&#39;speech_asr&#39;</span><span class="p">)</span>
+    <span class="n">ds_dict</span> <span class="o">=</span> <span class="n">MsDataset</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">data_path</span><span class="p">)</span>
     <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
         <span class="n">model</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
         <span class="n">data_dir</span><span class="o">=</span><span class="n">ds_dict</span><span class="p">,</span>
@@ -379,21 +383,32 @@ asr_example2  ./audios/asr_example2.wav
         <span class="n">work_dir</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">output_dir</span><span class="p">,</span>
         <span class="n">batch_bins</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">batch_bins</span><span class="p">,</span>
         <span class="n">max_epoch</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">max_epoch</span><span class="p">,</span>
-        <span class="n">lr</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">lr</span><span class="p">)</span>
+        <span class="n">lr</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">lr</span><span class="p">,</span>
+        <span class="n">mate_params</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">param_dict</span><span class="p">)</span>
     <span class="n">trainer</span> <span class="o">=</span> <span class="n">build_trainer</span><span class="p">(</span><span class="n">Trainers</span><span class="o">.</span><span class="n">speech_asr_trainer</span><span class="p">,</span> <span class="n">default_args</span><span class="o">=</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">funasr.utils.modelscope_param</span> <span class="kn">import</span> <span class="n">modelscope_args</span>
-    <span class="n">params</span> <span class="o">=</span> <span class="n">modelscope_args</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">&quot;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&quot;</span><span class="p">)</span>
-    <span class="n">params</span><span class="o">.</span><span class="n">output_dir</span> <span class="o">=</span> <span class="s2">&quot;./checkpoint&quot;</span>                      <span class="c1"># 模型保存路径</span>
-    <span class="n">params</span><span class="o">.</span><span class="n">data_path</span> <span class="o">=</span> <span class="s2">&quot;speech_asr_aishell1_trainsets&quot;</span>      <span class="c1"># 数据路径，可以为modelscope中已上传数据，也可以是本地数据</span>
-    <span class="n">params</span><span class="o">.</span><span class="n">dataset_type</span> <span class="o">=</span> <span class="s2">&quot;small&quot;</span>                           <span class="c1"># 小数据量设置small，若数据量大于1000小时，请使用large</span>
-    <span class="n">params</span><span class="o">.</span><span class="n">batch_bins</span> <span class="o">=</span> <span class="mi">2000</span>                                <span class="c1"># batch size，如果dataset_type=&quot;small&quot;，batch_bins单位为fbank特征帧数，如果dataset_type=&quot;large&quot;，batch_bins单位为毫秒，</span>
-    <span class="n">params</span><span class="o">.</span><span class="n">max_epoch</span> <span class="o">=</span> <span class="mi">50</span>                                   <span class="c1"># 最大训练轮数</span>
-    <span class="n">params</span><span class="o">.</span><span class="n">lr</span> <span class="o">=</span> <span class="mf">0.00005</span>                                     <span class="c1"># 设置学习率</span>
-    
+    <span class="n">params</span> <span class="o">=</span> <span class="n">modelscope_args</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">&quot;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&quot;</span><span class="p">,</span> <span class="n">data_path</span><span class="o">=</span><span class="s2">&quot;./data&quot;</span><span class="p">)</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">output_dir</span> <span class="o">=</span> <span class="s2">&quot;./checkpoint&quot;</span>              <span class="c1"># m模型保存路径</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">data_path</span> <span class="o">=</span> <span class="s2">&quot;./example_data/&quot;</span>            <span class="c1"># 数据路径</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">dataset_type</span> <span class="o">=</span> <span class="s2">&quot;small&quot;</span>                   <span class="c1"># 小数据量设置small，若数据量大于1000小时，请使用large</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">batch_bins</span> <span class="o">=</span> <span class="mi">2000</span>                       <span class="c1"># batch size，如果dataset_type=&quot;small&quot;，batch_bins单位为fbank特征帧数，如果dataset_type=&quot;large&quot;，batch_bins单位为毫秒，</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">max_epoch</span> <span class="o">=</span> <span class="mi">20</span>                           <span class="c1"># 最大训练轮数</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">lr</span> <span class="o">=</span> <span class="mf">0.00005</span>                             <span class="c1"># 设置学习率</span>
+    <span class="n">init_param</span> <span class="o">=</span> <span class="p">[]</span>                                 <span class="c1"># 初始模型路径，默认加载modelscope模型初始化，例如: [&quot;checkpoint/20epoch.pb&quot;]</span>
+    <span class="n">freeze_param</span> <span class="o">=</span> <span class="p">[]</span>                               <span class="c1"># 模型参数freeze, 例如: [&quot;encoder&quot;]</span>
+    <span class="n">ignore_init_mismatch</span> <span class="o">=</span> <span class="kc">True</span>                     <span class="c1"># 是否忽略模型参数初始化不匹配</span>
+    <span class="n">use_lora</span> <span class="o">=</span> <span class="kc">False</span>                                <span class="c1"># 是否使用lora进行模型微调</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">param_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;init_param&quot;</span><span class="p">:</span><span class="n">init_param</span><span class="p">,</span> <span class="s2">&quot;freeze_param&quot;</span><span class="p">:</span> <span class="n">freeze_param</span><span class="p">,</span> <span class="s2">&quot;ignore_init_mismatch&quot;</span><span class="p">:</span> <span class="n">ignore_init_mismatch</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">use_lora</span><span class="p">:</span>
+        <span class="n">enable_lora</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">lora_bias</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span>
+        <span class="n">lora_params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;lora_list&quot;</span><span class="p">:[</span><span class="s1">&#39;q&#39;</span><span class="p">,</span><span class="s1">&#39;v&#39;</span><span class="p">],</span> <span class="s2">&quot;lora_rank&quot;</span><span class="p">:</span><span class="mi">8</span><span class="p">,</span> <span class="s2">&quot;lora_alpha&quot;</span><span class="p">:</span><span class="mi">16</span><span class="p">,</span> <span class="s2">&quot;lora_dropout&quot;</span><span class="p">:</span><span class="mf">0.1</span><span class="p">}</span>
+        <span class="n">lora_config</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;enable_lora&quot;</span><span class="p">:</span> <span class="n">enable_lora</span><span class="p">,</span> <span class="s2">&quot;lora_bias&quot;</span><span class="p">:</span> <span class="n">lora_bias</span><span class="p">,</span> <span class="s2">&quot;lora_params&quot;</span><span class="p">:</span> <span class="n">lora_params</span><span class="p">}</span>
+        <span class="n">params</span><span class="o">.</span><span class="n">param_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">lora_config</span><span class="p">)</span>
+
     <span class="n">modelscope_finetune</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -412,6 +427,10 @@ asr_example2  ./audios/asr_example2.wav
 <li><p><code class="docutils literal notranslate"><span class="pre">batch_bins</span></code>: batch size. For dataset_type is <code class="docutils literal notranslate"><span class="pre">small</span></code>, <code class="docutils literal notranslate"><span class="pre">batch_bins</span></code> indicates the feature frames. For dataset_type is <code class="docutils literal notranslate"><span class="pre">large</span></code>, <code class="docutils literal notranslate"><span class="pre">batch_bins</span></code> indicates the duration in ms</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">max_epoch</span></code>: number of training epoch</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">lr</span></code>: learning rate</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">init_param</span></code>: init model path, load modelscope model initialization by default. For example: [“checkpoint/20epoch.pb”]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">freeze_param</span></code>: Freeze model parameters. For example：[“encoder”]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ignore_init_mismatch</span></code>: Ignore size mismatch when loading pre-trained model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">use_lora</span></code>: Fine-tuning model use lora, more detail please refer to <a class="reference external" href="https://arxiv.org/pdf/2106.09685.pdf">LORA</a></p></li>
 </ul>
 </li>
 <li><p>Training data formats：</p></li>
