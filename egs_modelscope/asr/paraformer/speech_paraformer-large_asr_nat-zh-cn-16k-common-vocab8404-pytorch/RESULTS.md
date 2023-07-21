@@ -78,7 +78,7 @@
 | model    | dev cer(%) | test cer(%) |
 |:---------:|:-------------:|:-------------:|
 | Pretrain       | 1.75          |1.95           |
-| Finetune      | 1.62          |1.78           |
+| Full-tuning      | 1.62          |1.78           |
 
 - Train config: 
   - Training data: 16k sichuan dialect
