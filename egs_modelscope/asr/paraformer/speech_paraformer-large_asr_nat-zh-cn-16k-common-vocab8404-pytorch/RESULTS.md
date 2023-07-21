@@ -86,7 +86,7 @@
   - Decoding info: beam_size 1, average_num 10
   
   
-|   model  | Training Data(h) | cn cer(%) | sichuan cer(%) |
+|   model  | Training Data(h) | common cer(%) | sichuan cer(%) |
 |:--------:|:-------------:|:-------:|:------------:|
 | Pretrain |               |   8.57  |     19.81    |
 | Full-tuning |      50      |   8.8   |      12      |
