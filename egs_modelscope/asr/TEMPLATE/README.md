@@ -1,6 +1,6 @@
 # Speech Recognition
 
-> **Note**: 
+> **Note**:
 > The modelscope pipeline supports all the models in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope) to inference and finetine. Here we take the typic models as examples to demonstrate the usage.
 
 ## Inference
@@ -36,7 +36,7 @@ chunk_size = [5, 10, 5] #[5, 10, 5] 600ms, [8, 8, 4] 480ms
 param_dict = {"cache": dict(), "is_final": False, "chunk_size": chunk_size}
 chunk_stride = chunk_size[1] * 960 # 600ms、480ms
 # first chunk, 600ms
-speech_chunk = speech[0:chunk_stride] 
+speech_chunk = speech[0:chunk_stride]
 rec_result = inference_pipeline(audio_in=speech_chunk, param_dict=param_dict)
 print(rec_result)
 # next chunk, 600ms
@@ -101,16 +101,16 @@ print(rec_result)
 - `task`: `Tasks.auto_speech_recognition`
 - `model`: model name in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope), or model path in local disk
 - `ngpu`: `1` (Default), decoding on GPU. If ngpu=0, decoding on CPU
-- `ncpu`: `1` (Default), sets the number of threads used for intraop parallelism on CPU 
+- `ncpu`: `1` (Default), sets the number of threads used for intraop parallelism on CPU
 - `output_dir`: `None` (Default), the output path of results if set
 - `batch_size`: `1` (Default), batch size when decoding
 #### Infer pipeline
-- `audio_in`: the input to decode, which could be: 
+- `audio_in`: the input to decode, which could be:
   - wav_path, `e.g.`: asr_example.wav,
-  - pcm_path, `e.g.`: asr_example.pcm, 
+  - pcm_path, `e.g.`: asr_example.pcm,
   - audio bytes stream, `e.g.`: bytes data from a microphone
   - audio sample point，`e.g.`: `audio, rate = soundfile.read("asr_example_zh.wav")`, the dtype is numpy.ndarray or torch.Tensor
-  - wav.scp, kaldi style wav list (`wav_id \t wav_path`), `e.g.`: 
+  - wav.scp, kaldi style wav list (`wav_id \t wav_path`), `e.g.`:
   ```text
   asr_example1  ./audios/asr_example1.wav
   asr_example2  ./audios/asr_example2.wav
@@ -168,15 +168,19 @@ If you decode the SpeechIO test sets, you can use textnorm with `stage`=3, and `
 [finetune.py](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/TEMPLATE/finetune.py)
 ```python
 import os
+
 from modelscope.metainfo import Trainers
 from modelscope.trainers import build_trainer
-from modelscope.msdatasets.audio.asr_dataset import ASRDataset
+
+from funasr.datasets.ms_dataset import MsDataset
+from funasr.utils.modelscope_param import modelscope_args
+
 
 def modelscope_finetune(params):
     if not os.path.exists(params.output_dir):
         os.makedirs(params.output_dir, exist_ok=True)
     # dataset split ["train", "validation"]
-    ds_dict = ASRDataset.load(params.data_path, namespace='speech_asr')
+    ds_dict = MsDataset.load(params.data_path)
     kwargs = dict(
         model=params.model,
         data_dir=ds_dict,
@@ -184,21 +188,32 @@ def modelscope_finetune(params):
         work_dir=params.output_dir,
         batch_bins=params.batch_bins,
         max_epoch=params.max_epoch,
-        lr=params.lr)
+        lr=params.lr,
+        mate_params=params.param_dict)
     trainer = build_trainer(Trainers.speech_asr_trainer, default_args=kwargs)
     trainer.train()
 
 
 if __name__ == '__main__':
-    from funasr.utils.modelscope_param import modelscope_args
-    params = modelscope_args(model="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch")
-    params.output_dir = "./checkpoint"                      # 模型保存路径
-    params.data_path = "speech_asr_aishell1_trainsets"      # 数据路径，可以为modelscope中已上传数据，也可以是本地数据
-    params.dataset_type = "small"                           # 小数据量设置small，若数据量大于1000小时，请使用large
-    params.batch_bins = 2000                                # batch size，如果dataset_type="small"，batch_bins单位为fbank特征帧数，如果dataset_type="large"，batch_bins单位为毫秒，
-    params.max_epoch = 50                                   # 最大训练轮数
-    params.lr = 0.00005                                     # 设置学习率
-    
+    params = modelscope_args(model="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch", data_path="./data")
+    params.output_dir = "./checkpoint"              # m模型保存路径
+    params.data_path = "./example_data/"            # 数据路径
+    params.dataset_type = "small"                   # 小数据量设置small，若数据量大于1000小时，请使用large
+    params.batch_bins = 2000                       # batch size，如果dataset_type="small"，batch_bins单位为fbank特征帧数，如果dataset_type="large"，batch_bins单位为毫秒，
+    params.max_epoch = 20                           # 最大训练轮数
+    params.lr = 0.00005                             # 设置学习率
+    init_param = []                                 # 初始模型路径，默认加载modelscope模型初始化，例如: ["checkpoint/20epoch.pb"]
+    freeze_param = []                               # 模型参数freeze, 例如: ["encoder"]
+    ignore_init_mismatch = True                     # 是否忽略模型参数初始化不匹配
+    use_lora = False                                # 是否使用lora进行模型微调
+    params.param_dict = {"init_param":init_param, "freeze_param": freeze_param, "ignore_init_mismatch": ignore_init_mismatch}
+    if use_lora:
+        enable_lora = True
+        lora_bias = "all"
+        lora_params = {"lora_list":['q','v'], "lora_rank":8, "lora_alpha":16, "lora_dropout":0.1}
+        lora_config = {"enable_lora": enable_lora, "lora_bias": lora_bias, "lora_params": lora_params}
+        params.param_dict.update(lora_config)
+
     modelscope_finetune(params)
 ```
 
@@ -215,6 +230,10 @@ python finetune.py &> log.txt &
     - `batch_bins`: batch size. For dataset_type is `small`, `batch_bins` indicates the feature frames. For dataset_type is `large`, `batch_bins` indicates the duration in ms
     - `max_epoch`: number of training epoch
     - `lr`: learning rate
+    - `init_param`: init model path, load modelscope model initialization by default. For example: ["checkpoint/20epoch.pb"]
+    - `freeze_param`: Freeze model parameters. For example：["encoder"]
+    - `ignore_init_mismatch`: Ignore size mismatch when loading pre-trained model
+    - `use_lora`: Fine-tuning model use lora, more detail please refer to [LORA](https://arxiv.org/pdf/2106.09685.pdf)
 
 - Training data formats：
 ```sh
