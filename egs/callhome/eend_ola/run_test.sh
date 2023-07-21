@@ -101,8 +101,8 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
 #              --index JOB
         mkdir -p ${data_dir}/ark_data/dump/simu_data/data/$dataset
         python local/gen_feats_scp.py \
-              --root_path ${data_dir}/ark_data/dump/simu_data \
-              --out_path ${data_dir}/ark_data/dump/simu_data/data \
+              --root_path ${data_dir}/ark_data/dump/simu_data/$dataset \
+              --out_path ${data_dir}/ark_data/dump/simu_data/data/$dataset \
               --split_num $nj
     done
 fi
