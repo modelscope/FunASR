@@ -60,11 +60,11 @@ FunASR支持数万小时工业数据训练的模型的推理和微调，详细�
 | <div align="left"><img src="docs/images/damo.png" width="180"/> | <div align="left"><img src="docs/images/nwpu.png" width="260"/> | <img src="docs/images/China_Telecom.png" width="200"/> </div>  | <img src="docs/images/RapidAI.png" width="200"/> </div> | <img src="docs/images/aihealthx.png" width="200"/> </div> |
 |:---------------------------------------------------------------:|:---------------------------------------------------------------:|:--------------------------------------------------------------:|:-------------------------------------------------------:|:-----------------------------------------------------------:|
 
-贡献者名单请参考（[点击此处](./Acknowledge)）
+贡献者名单请参考（[致谢名单](./Acknowledge)）
 
 
 ## 许可协议
-项目遵循[The MIT License](https://opensource.org/licenses/MIT)开源协议，许可协议请参考（[点击此处](./MODEL_LICENSE)）
+项目遵循[The MIT License](https://opensource.org/licenses/MIT)开源协议，模型许可协议请参考（[模型协议](./MODEL_LICENSE)）
 
 
 ## 论文引用
