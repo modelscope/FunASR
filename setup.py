@@ -16,7 +16,7 @@ requirements = {
         "librosa",
         "jamo",  # For kss
         "PyYAML>=5.1.2",
-        "soundfile>=0.10.2",
+        "soundfile>=0.12.1",
         "h5py>=2.10.0",
         "kaldiio>=2.17.0",
         "torch_complex",
