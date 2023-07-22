@@ -3,7 +3,7 @@
 . ./path.sh || exit 1;
 
 # machines configuration
-CUDA_VISIBLE_DEVICES="7"
+CUDA_VISIBLE_DEVICES="0"
 gpu_num=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
 count=1
 
@@ -13,14 +13,13 @@ nj=64
 
 # feature configuration
 data_dir="./data"
-simu_feats_dir="/nfs/wangjiaming.wjm/EEND_ARK_DATA/dump/simu_data/data"
-simu_feats_dir_chunk2000="/nfs/wangjiaming.wjm/EEND_ARK_DATA/dump/simu_data_chunk2000/data"
-callhome_feats_dir_chunk2000="/nfs/wangjiaming.wjm/EEND_ARK_DATA/dump/callhome_chunk2000/data"
+simu_feats_dir=$data_dir/simu/ark_data/dump/simu_data/data
+simu_feats_dir_chunk2000=$data_dir/simu/ark_data/dump/simu_data_chunk2000/data
+callhome_feats_dir_chunk2000=$data_dir/simu/ark_data/dump/callhome_chunk2000/data
 simu_train_dataset=train
 simu_valid_dataset=dev
-callhome_train_dataset=callhome1_allspk
-callhome_valid_dataset=callhome2_allspk
-callhome2_wav_scp_file=wav.scp
+callhome_train_dataset=callhome1_spkall
+callhome_valid_dataset=callhome2_spkall
 
 # model average
 simu_average_2spkr_start=91
@@ -32,8 +31,8 @@ callhome_average_end=100
 
 exp_dir="."
 input_size=345
-stage=-1
-stop_stage=-1
+stage=0
+stop_stage=5
 
 # exp tag
 tag="exp1"
@@ -74,21 +73,69 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     simu_opts_sil_scale_array=(2 2 5 9)
     simu_opts_num_train=100000
 
-    # for simulated data of chunk500
-    for dset in swb_sre_tr swb_sre_cv; do
+    # for simulated data of chunk500 and chunk2000
+    for dset in swb_sre_cv swb_sre_tr; do
         if [ "$dset" == "swb_sre_tr" ]; then
             n_mixtures=${simu_opts_num_train}
+            dataset=train
         else
             n_mixtures=500
+            dataset=dev
         fi
         simu_data_dir=${dset}_ns"$(IFS="n"; echo "${simu_opts_num_speaker_array[*]}")"_beta"$(IFS="n"; echo "${simu_opts_sil_scale_array[*]}")"_${n_mixtures}
         mkdir -p ${data_dir}/simu/data/${simu_data_dir}/.work
         split_scps=
         for n in $(seq $nj); do
-            split_scps="$split_scps ${data_dir}/simu/data/${simu_data_dir}/.work/wav.$n.scp"
+            split_scps="$split_scps ${data_dir}/simu/data/${simu_data_dir}/.work/wav.scp.$n"
         done
         utils/split_scp.pl "${data_dir}/simu/data/${simu_data_dir}/wav.scp" $split_scps || exit 1
         python local/split.py ${data_dir}/simu/data/${simu_data_dir}
+        # for chunk_size=500
+        output_dir=${data_dir}/ark_data/dump/simu_data/$dataset
+        mkdir -p $output_dir/.logs
+        $dump_cmd --max-jobs-run $nj JOB=1:$nj $output_dir/.logs/dump.JOB.log \
+        python local/dump_feature.py \
+              --data_dir ${data_dir}/simu/data/${simu_data_dir}/.work \
+              --output_dir $output_dir \
+              --index JOB
+        mkdir -p ${data_dir}/ark_data/dump/simu_data/data/$dataset
+        python local/gen_feats_scp.py \
+              --root_path ${data_dir}/ark_data/dump/simu_data/$dataset \
+              --out_path ${data_dir}/ark_data/dump/simu_data/data/$dataset \
+              --split_num $nj
+        grep "ns2" ${data_dir}/ark_data/dump/simu_data/data/$dataset/feats.scp > ${data_dir}/ark_data/dump/simu_data/data/$dataset/feats_2spkr.scp
+        # for chunk_size=2000
+        output_dir=${data_dir}/ark_data/dump/simu_data_chunk2000/$dataset
+        mkdir -p $output_dir/.logs
+        $dump_cmd --max-jobs-run $nj JOB=1:$nj $output_dir/.logs/dump.JOB.log \
+        python local/dump_feature.py \
+              --data_dir ${data_dir}/simu/data/${simu_data_dir}/.work \
+              --output_dir $output_dir \
+              --index JOB \
+              --num_frames 2000
+        mkdir -p ${data_dir}/ark_data/dump/simu_data_chunk2000/data/$dataset
+        python local/gen_feats_scp.py \
+              --root_path ${data_dir}/ark_data/dump/simu_data_chunk2000/$dataset \
+              --out_path ${data_dir}/ark_data/dump/simu_data_chunk2000/data/$dataset \
+              --split_num $nj
+        grep "ns2" ${data_dir}/ark_data/dump/simu_data_chunk2000/data/$dataset/feats.scp > ${data_dir}/ark_data/dump/simu_data_chunk2000/data/$dataset/feats_2spkr.scp
+    done
+
+    # for callhome data
+    for dset in callhome1_spkall callhome2_spkall; do
+        find  $data_dir/eval/$dset  -maxdepth 1 -type f -exec cp {} {}.1 \;
+        output_dir=${data_dir}/ark_data/dump/callhome/$dset
+        mkdir -p $output_dir
+        python local/dump_feature.py \
+              --data_dir $data_dir/eval/$dset \
+              --output_dir $output_dir \
+              --index 1 \
+              --num_frames 2000
+        mkdir -p ${data_dir}/ark_data/dump/callhome/data/$dset
+        python local/gen_feats_scp.py \
+              --root_path ${data_dir}/ark_data/dump/callhome/$dset \
+              --out_path ${data_dir}/ark_data/dump/callhome/data/$dset \
+              --split_num 1
     done
 fi
 
@@ -275,7 +322,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
         --config_file ${exp_dir}/exp/${callhome_model_dir}/config.yaml \
         --model_file ${exp_dir}/exp/${callhome_model_dir}/$callhome_ave_id.pb \
         --output_rttm_file ${exp_dir}/exp/${callhome_model_dir}/inference/rttm \
-        --wav_scp_file ${callhome_feats_dir_chunk2000}/${callhome_valid_dataset}/${callhome2_wav_scp_file} \
+        --wav_scp_file $data_dir/eval/callhome2_spkall/wav.scp \
         1> ${exp_dir}/exp/${callhome_model_dir}/inference/log/infer.log 2>&1
     md-eval.pl -c 0.25 \
           -r ${callhome_feats_dir_chunk2000}/${callhome_valid_dataset}/rttm \
