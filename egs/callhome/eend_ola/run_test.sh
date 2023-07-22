@@ -3,7 +3,7 @@
 . ./path.sh || exit 1;
 
 # machines configuration
-CUDA_VISIBLE_DEVICES="7"
+CUDA_VISIBLE_DEVICES="0"
 gpu_num=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
 count=1
 
@@ -12,7 +12,7 @@ dump_cmd=utils/run.pl
 nj=64
 
 # feature configuration
-data_dir="/nfs/wangjiaming.wjm/EEND_DATA_sad30_snr10n15n20/convert_test/data"
+data_dir="./data"
 simu_feats_dir="/nfs/wangjiaming.wjm/EEND_ARK_DATA/dump/simu_data/data"
 simu_feats_dir_chunk2000="/nfs/wangjiaming.wjm/EEND_ARK_DATA/dump/simu_data_chunk2000/data"
 callhome_feats_dir_chunk2000="/nfs/wangjiaming.wjm/EEND_ARK_DATA/dump/callhome_chunk2000/data"
@@ -74,36 +74,68 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     simu_opts_sil_scale_array=(2 2 5 9)
     simu_opts_num_train=100000
 
-    # for simulated data of chunk500 and chunk2000
-    for dset in swb_sre_cv swb_sre_tr; do
-        if [ "$dset" == "swb_sre_tr" ]; then
-            n_mixtures=${simu_opts_num_train}
-            dataset=train
-        else
-            n_mixtures=500
-            dataset=dev
-        fi
-        simu_data_dir=${dset}_ns"$(IFS="n"; echo "${simu_opts_num_speaker_array[*]}")"_beta"$(IFS="n"; echo "${simu_opts_sil_scale_array[*]}")"_${n_mixtures}
-        mkdir -p ${data_dir}/simu/data/${simu_data_dir}/.work
-        split_scps=
-        for n in $(seq $nj); do
-            split_scps="$split_scps ${data_dir}/simu/data/${simu_data_dir}/.work/wav.$n.scp"
-        done
-        utils/split_scp.pl "${data_dir}/simu/data/${simu_data_dir}/wav.scp" $split_scps || exit 1
-        python local/split.py ${data_dir}/simu/data/${simu_data_dir}
-        # for chunk_size=500
-        output_dir=${data_dir}/ark_data/dump/simu_data/$dataset
-        mkdir -p $output_dir/.logs
-        $dump_cmd --max-jobs-run $nj JOB=1:$nj $output_dir/.logs/dump.JOB.log \
+#    # for simulated data of chunk500 and chunk2000
+#    for dset in swb_sre_cv swb_sre_tr; do
+#        if [ "$dset" == "swb_sre_tr" ]; then
+#            n_mixtures=${simu_opts_num_train}
+#            dataset=train
+#        else
+#            n_mixtures=500
+#            dataset=dev
+#        fi
+#        simu_data_dir=${dset}_ns"$(IFS="n"; echo "${simu_opts_num_speaker_array[*]}")"_beta"$(IFS="n"; echo "${simu_opts_sil_scale_array[*]}")"_${n_mixtures}
+#        mkdir -p ${data_dir}/simu/data/${simu_data_dir}/.work
+#        split_scps=
+#        for n in $(seq $nj); do
+#            split_scps="$split_scps ${data_dir}/simu/data/${simu_data_dir}/.work/wav.scp.$n"
+#        done
+#        utils/split_scp.pl "${data_dir}/simu/data/${simu_data_dir}/wav.scp" $split_scps || exit 1
+#        python local/split.py ${data_dir}/simu/data/${simu_data_dir}
+#        # for chunk_size=500
+#        output_dir=${data_dir}/ark_data/dump/simu_data/$dataset
+#        mkdir -p $output_dir/.logs
+#        $dump_cmd --max-jobs-run $nj JOB=1:$nj $output_dir/.logs/dump.JOB.log \
+#        python local/dump_feature.py \
+#              --data_dir ${data_dir}/simu/data/${simu_data_dir}/.work \
+#              --output_dir $output_dir \
+#              --index JOB
+#        mkdir -p ${data_dir}/ark_data/dump/simu_data/data/$dataset
+#        python local/gen_feats_scp.py \
+#              --root_path ${data_dir}/ark_data/dump/simu_data/$dataset \
+#              --out_path ${data_dir}/ark_data/dump/simu_data/data/$dataset \
+#              --split_num $nj
+#        grep "ns2" ${data_dir}/ark_data/dump/simu_data/data/$dataset/feats.scp > ${data_dir}/ark_data/dump/simu_data/data/$dataset/feats_2spkr.scp
+#        # for chunk_size=2000
+#        output_dir=${data_dir}/ark_data/dump/simu_data_chunk2000/$dataset
+#        mkdir -p $output_dir/.logs
+#        $dump_cmd --max-jobs-run $nj JOB=1:$nj $output_dir/.logs/dump.JOB.log \
+#        python local/dump_feature.py \
+#              --data_dir ${data_dir}/simu/data/${simu_data_dir}/.work \
+#              --output_dir $output_dir \
+#              --index JOB \
+#              --num_frames 2000
+#        mkdir -p ${data_dir}/ark_data/dump/simu_data_chunk2000/data/$dataset
+#        python local/gen_feats_scp.py \
+#              --root_path ${data_dir}/ark_data/dump/simu_data_chunk2000/$dataset \
+#              --out_path ${data_dir}/ark_data/dump/simu_data_chunk2000/data/$dataset \
+#              --split_num $nj
+#        grep "ns2" ${data_dir}/ark_data/dump/simu_data_chunk2000/data/$dataset/feats.scp > ${data_dir}/ark_data/dump/simu_data_chunk2000/data/$dataset/feats_2spkr.scp
+#    done
+
+    # for callhome data
+    for dset in callhome1_spkall callhome2_spkall; do
+        find  $data_dir/eval/$dset  -maxdepth 1 -type f -exec cp {} {}.1 \;
+        output_dir=${data_dir}/ark_data/dump/callhome/$dset
         python local/dump_feature.py \
-              --data_dir ${data_dir}/simu/data/${simu_data_dir}/.work \
-              --output_dir ${data_dir}/ark_data/dump/simu_data/$dataset \
-              --index JOB
-        mkdir -p ${data_dir}/ark_data/dump/simu_data/data/$dataset
+              --data_dir $data_dir/eval/$dset \
+              --output_dir $output_dir \
+              --index 1 \
+              --num_frames 2000
+        mkdir -p ${data_dir}/ark_data/dump/callhome/data/$dset
         python local/gen_feats_scp.py \
-              --root_path ${data_dir}/ark_data/dump/simu_data/$dataset \
-              --out_path ${data_dir}/ark_data/dump/simu_data/data/$dataset \
-              --split_num $nj
+              --root_path ${data_dir}/ark_data/dump/callhome/$dset \
+              --out_path ${data_dir}/ark_data/dump/callhome/data/$dset \
+              --split_num 1
     done
 fi
 
