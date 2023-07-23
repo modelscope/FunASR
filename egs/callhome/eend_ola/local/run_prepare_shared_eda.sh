@@ -22,16 +22,16 @@ stage=0
 #    LDC2011S10, LDC2012S01, LDC2011S05, LDC2011S08
 #  - musan_root
 #    MUSAN corpus (https://www.openslr.org/17/)
-callhome_dir=/nfs/wangjiaming.wjm/speech-data/NIST/LDC2001S97
-swb2_phase1_train=/nfs/wangjiaming.wjm/speech-data/LDC/LDC98S75
-data_root=/nfs/wangjiaming.wjm/speech-data/LDC
-musan_root=/nfs/wangjiaming.wjm/speech-data/JHU/musan
+callhome_dir=
+swb2_phase1_train=
+data_root=
+musan_root=
 # Modify simulated data storage area.
 # This script distributes simulated data under these directories
 simu_actual_dirs=(
-/nfs/wangjiaming.wjm/EEND_DATA_sad30_snr10n15n20_funasr_test/s05/$USER/diarization-data
-/nfs/wangjiaming.wjm/EEND_DATA_sad30_snr10n15n20_funasr_test/s08/$USER/diarization-data
-/nfs/wangjiaming.wjm/EEND_DATA_sad30_snr10n15n20_funasr_test/s09/$USER/diarization-data
+./s05/$USER/diarization-data
+./s08/$USER/diarization-data
+./s09/$USER/diarization-data
 )
 
 # data preparation options

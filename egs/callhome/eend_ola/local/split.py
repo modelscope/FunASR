@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
     for file in scp_files:
         scp_file = os.path.join(work_path, file)
-        idx = scp_file.split('.')[-2]
+        idx = scp_file.split('.')[-1]
         reco2dur_file = os.path.join(work_path, 'reco2dur.{}'.format(str(idx)))
         spk2utt_file = os.path.join(work_path, 'spk2utt.{}'.format(str(idx)))
         segment_file = os.path.join(work_path, 'segments.{}'.format(str(idx)))

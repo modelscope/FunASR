@@ -13,9 +13,9 @@ nj=64
 
 # feature configuration
 data_dir="./data"
-simu_feats_dir=$data_dir/simu/ark_data/dump/simu_data/data
-simu_feats_dir_chunk2000=$data_dir/simu/ark_data/dump/simu_data_chunk2000/data
-callhome_feats_dir_chunk2000=$data_dir/simu/ark_data/dump/callhome_chunk2000/data
+simu_feats_dir=$data_dir/ark_data/dump/simu_data/data
+simu_feats_dir_chunk2000=$data_dir/ark_data/dump/simu_data_chunk2000/data
+callhome_feats_dir_chunk2000=$data_dir/ark_data/dump/callhome_chunk2000/data
 simu_train_dataset=train
 simu_valid_dataset=dev
 callhome_train_dataset=callhome1_spkall
@@ -31,7 +31,7 @@ callhome_average_end=100
 
 exp_dir="."
 input_size=345
-stage=0
+stage=1
 stop_stage=5
 
 # exp tag
