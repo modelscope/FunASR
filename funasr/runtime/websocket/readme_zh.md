@@ -3,7 +3,7 @@
 # 采用websocket协议的c++部署方案
 
 ## 快速上手
-### 镜像启动
+### 启动docker镜像
 
 通过下述命令拉取并启动FunASR runtime-SDK的docker镜像：
 
@@ -12,7 +12,7 @@ sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-run
 
 sudo docker run -p 10095:10095 -it --privileged=true -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.1.0
 ```
-如果您没有安装docker，可参考[Docker安装](#Docker安装)
+如果您没有安装docker，可参考[Docker安装](https://alibaba-damo-academy.github.io/FunASR/en/installation/docker.html)
 
 ### 服务端启动
 
@@ -25,7 +25,7 @@ cd FunASR/funasr/runtime
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
 ```
-服务端详细参数介绍可参考[服务端参数介绍](#服务端参数介绍)
+服务端详细参数介绍可参考[服务端参数介绍](#命令参数介绍)
 
 ### 客户端测试与使用
 
@@ -44,22 +44,8 @@ python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode offline --audio
 
 ### 依赖库下载
 
-#### Download onnxruntime
-```shell
-bash third_party/download_onnxruntime.sh
-```
+Docker中已经预安装了依赖三方库，如果不用docker，请手动下载并安装（[三方库下载与安装](requirements_install.md)）
 
-#### Download ffmpeg
-```shell
-bash third_party/download_ffmpeg.sh
-```
-
-#### Install openblas and openssl
-```shell
-sudo apt-get install libopenblas-dev libssl-dev #ubuntu
-# sudo yum -y install openblas-devel openssl-devel #centos
-
-```
 
 ### 编译
 
@@ -71,6 +57,22 @@ make
 ```
 
 ### 启动服务部署
+
+#### 命令参数介绍：
+```text
+--download-model-dir 模型下载地址，通过设置model ID从Modelscope下载模型。如果从本地模型启动，可以不设置。
+--model-dir  modelscope 中 ASR model ID，或者本地模型绝对路径
+--quantize  True为量化ASR模型，False为非量化ASR模型，默认是True
+--vad-dir  modelscope 中 VAD model ID，或者本地模型绝对路径
+--vad-quant   True为量化VAD模型，False为非量化VAD模型，默认是True
+--punc-dir  modelscope 中 标点 model ID，或者本地模型绝对路径
+--punc-quant   True为量化PUNC模型，False为非量化PUNC模型，默认是True
+--port  服务端监听的端口号，默认为 10095
+--decoder-thread-num  服务端启动的推理线程数，默认为 8
+--io-thread-num  服务端启动的IO线程数，默认为 1
+--certfile  ssl的证书文件，默认为：../../../ssl_key/server.crt
+--keyfile   ssl的密钥文件，默认为：../../../ssl_key/server.key
+```
 
 #### 从modelscope中模型启动示例
 ```shell
@@ -107,21 +109,7 @@ python -m funasr.export.export_model \
   --punc-dir ./export/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
 ```
 
-#### 命令参数介绍：
-```text
---download-model-dir 模型下载地址，通过设置model ID从Modelscope下载模型。如果从本地模型启动，可以不设置。
---model-dir  modelscope 中 ASR model ID，或者本地模型绝对路径
---quantize  True为量化ASR模型，False为非量化ASR模型，默认是True
---vad-dir  modelscope 中 VAD model ID，或者本地模型绝对路径
---vad-quant   True为量化VAD模型，False为非量化VAD模型，默认是True
---punc-dir  modelscope 中 标点 model ID，或者本地模型绝对路径
---punc-quant   True为量化PUNC模型，False为非量化PUNC模型，默认是True
---port  服务端监听的端口号，默认为 10095
---decoder-thread-num  服务端启动的推理线程数，默认为 8
---io-thread-num  服务端启动的IO线程数，默认为 1
---certfile  ssl的证书文件，默认为：../../../ssl_key/server.crt
---keyfile   ssl的密钥文件，默认为：../../../ssl_key/server.key
-```
+
 
 ### 客户端用法详解
 
