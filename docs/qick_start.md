@@ -1,3 +1,4 @@
+([简体中文](./quick_start_zh.md)|English)
 
 # Quick Start
 
