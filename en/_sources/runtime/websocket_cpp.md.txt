@@ -44,7 +44,7 @@ We take the Python language client as an example to explain. It supports various
 python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.wav"
 ```
 
-## Building for Linux/Unix
+## Detailed Steps
 
 ### Dependencies Download and Install
 
