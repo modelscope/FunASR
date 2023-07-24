@@ -76,7 +76,7 @@ The results of the baseline system are as follows. The baseline results include 
         <td>49.37</td>
 	</tr>
 </table> -->
-|                |SI-CER(%)     |cp-CER(%)  |
+|                |SI-CER(%)     |cpCER(%)  |
 |:---------------|:------------:|----------:|
 |oracle profile  |32.72         |42.92      |
 |cluster  profile|32.73         |49.37      |
