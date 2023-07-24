@@ -13,6 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
+      - name: cp funasr
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev_wjm' || github.ref == 'refs/heads/dev_lyh'
+        run: |
+           ln -s funasr ./
       - uses: ammaraskar/sphinx-action@master
         with:
           docs-folder: "docs/"

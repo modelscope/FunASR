@@ -21,10 +21,10 @@ Overview
    ./installation/docker.md
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 5
    :caption: Quick Start
 
-   ./qick_start.md
+   ./funasr/quick_start.md
 
 .. toctree::
    :maxdepth: 1
