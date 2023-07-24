@@ -166,8 +166,27 @@
 <div class="section" id="baseline-results">
 <h2>Baseline results<a class="headerlink" href="#baseline-results" title="Permalink to this headline"></a></h2>
 <p>The results of the baseline system are shown in Table 3. The speaker profile adopts the oracle speaker embedding during training. However, due to the lack of oracle speaker label during evaluation, the speaker profile provided by an additional spectral clustering is used. Meanwhile, the results of using the oracle speaker profile on Eval and Test Set are also provided to show the impact of speaker profile accuracy.</p>
-<p><img alt="baseline_result" src="../_images/baseline_result.png" /></p>
-</div>
+<table border="1" class="docutils">
+<thead>
+<tr>
+<th style="text-align: left;"></th>
+<th style="text-align: center;">SI-CER(%)</th>
+<th style="text-align: right;">cpCER(%)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">oracle profile</td>
+<td style="text-align: center;">32.72</td>
+<td style="text-align: right;">42.92</td>
+</tr>
+<tr>
+<td style="text-align: left;">cluster  profile</td>
+<td style="text-align: center;">32.73</td>
+<td style="text-align: right;">49.37</td>
+</tr>
+</tbody>
+</table></div>
 </div>
 
 
