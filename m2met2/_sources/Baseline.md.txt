@@ -31,4 +31,8 @@ For more details you can see [here](https://github.com/alibaba-damo-academy/FunA
 ## Baseline results
 The results of the baseline system are shown in Table 3. The speaker profile adopts the oracle speaker embedding during training. However, due to the lack of oracle speaker label during evaluation, the speaker profile provided by an additional spectral clustering is used. Meanwhile, the results of using the oracle speaker profile on Eval and Test Set are also provided to show the impact of speaker profile accuracy. 
 
-![baseline_result](images/baseline_result.png)
+
+|                |SI-CER(%)     |cpCER(%)  |
+|:---------------|:------------:|----------:|
+|oracle profile  |32.72         |42.92      |
+|cluster  profile|32.73         |49.37      |

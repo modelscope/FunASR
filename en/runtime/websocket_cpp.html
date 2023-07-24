@@ -77,34 +77,25 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="export.html">Export models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="onnxruntime_python.html">ONNXRuntime-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="onnxruntime_cpp.html">ONNXRuntime-cpp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="libtorch_python.html">Libtorch-python</a></li>
 <li class="toctree-l1"><a class="reference internal" href="html5.html">Html5 server for asr service</a></li>
 <li class="toctree-l1"><a class="reference internal" href="websocket_python.html">Service with websocket-python</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Service with websocket-cpp</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#quick-start">Quick Start</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#docker-image-start">Docker Image start</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#server-start">Server Start</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#client-testing-and-usage">Client Testing and Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#export-the-model">Export the model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#install-modelscope-and-funasr">Install modelscope and funasr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#export-onnx-model">Export onnx model</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#detailed-steps">Detailed Steps</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#dependencies-download-and-install">Dependencies Download and Install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#building-for-linux-unix">Building for Linux/Unix</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#download-onnxruntime">Download onnxruntime</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#download-ffmpeg">Download ffmpeg</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#install-openblas">Install openblas</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#build-runtime">Build runtime</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#start-service-deployment">Start Service Deployment</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#api-reference">API-reference：</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#example-of-starting-from-modelscope">Example of Starting from Modelscope</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#example-of-starting-from-local-model">Example of Starting from Local Model</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#client-usage">Client Usage</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#python-client">python-client</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#cpp-client">cpp-client</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#html-client">Html-client</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#java-client">Java-client</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#run-the-websocket-server">Run the websocket server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#run-websocket-client-test">Run websocket client test</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#acknowledge">Acknowledge</a></li>
 </ul>
 </li>
@@ -164,92 +155,19 @@
   <p>(<a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/websocket/readme_zh.md">简体中文</a>|English)</p>
 <div class="section" id="service-with-websocket-cpp">
 <h1>Service with websocket-cpp<a class="headerlink" href="#service-with-websocket-cpp" title="Permalink to this headline"></a></h1>
-<div class="section" id="quick-start">
-<h2>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline"></a></h2>
-<div class="section" id="docker-image-start">
-<h3>Docker Image start<a class="headerlink" href="#docker-image-start" title="Permalink to this headline"></a></h3>
-<p>Pull and start the FunASR runtime-SDK Docker image using the following command:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.1.0
-
-sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span class="o">=</span><span class="nb">true</span> -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.1.0
-</pre></div>
-</div>
-<p>If you have not installed Docker, please refer to <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/installation/docker.html">Docker Installation</a>.</p>
-</div>
-<div class="section" id="server-start">
-<h3>Server Start<a class="headerlink" href="#server-start" title="Permalink to this headline"></a></h3>
-<p>After Docker is started, start the funasr-wss-server service program:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> FunASR/funasr/runtime
-./run_server.sh <span class="se">\</span>
-  --download-model-dir /workspace/models <span class="se">\</span>
-  --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
-  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  <span class="se">\</span>
-  --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
-</pre></div>
-</div>
-<p>For detailed server parameters, please refer to [Server Parameter Introduction](#Server Parameter Introduction).</p>
-</div>
-<div class="section" id="client-testing-and-usage">
-<h3>Client Testing and Usage<a class="headerlink" href="#client-testing-and-usage" title="Permalink to this headline"></a></h3>
-<p>Download the client test tool directory samples:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz
-</pre></div>
-</div>
-<p>We take the Python language client as an example to explain. It supports various audio formats (.wav, .pcm, .mp3, etc.), video input (.mp4, etc.), and multi-file list wav.scp input. For other versions of clients, please refer to the document ([click here](#Detailed Usage of Clients)). For customized service deployment, please refer to [How to Customize Service Deployment](#How to Customize Service Deployment).</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 wss_client_asr.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode offline --audio_in <span class="s2">&quot;../audio/asr_example.wav&quot;</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="detailed-steps">
-<h2>Detailed Steps<a class="headerlink" href="#detailed-steps" title="Permalink to this headline"></a></h2>
-<div class="section" id="dependencies-download-and-install">
-<h3>Dependencies Download and Install<a class="headerlink" href="#dependencies-download-and-install" title="Permalink to this headline"></a></h3>
-<p>The third-party libraries have been pre-installed in Docker. If not using Docker, please download and install them manually (<a class="reference external" href="requirements_install">Download and Install Third-Party Libraries</a>).</p>
-</div>
-<div class="section" id="build-runtime">
-<h3>Build runtime<a class="headerlink" href="#build-runtime" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/alibaba-damo-academy/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> FunASR/funasr/runtime/websocket
-mkdir build <span class="o">&amp;&amp;</span> <span class="nb">cd</span> build
-cmake  -DCMAKE_BUILD_TYPE<span class="o">=</span>release .. -DONNXRUNTIME_DIR<span class="o">=</span>/path/to/onnxruntime-linux-x64-1.14.0 -DFFMPEG_DIR<span class="o">=</span>/path/to/ffmpeg-N-111383-g20b8688092-linux64-gpl-shared
-make
-</pre></div>
-</div>
-</div>
-<div class="section" id="start-service-deployment">
-<h3>Start Service Deployment<a class="headerlink" href="#start-service-deployment" title="Permalink to this headline"></a></h3>
-<div class="section" id="api-reference">
-<h4>API-reference：<a class="headerlink" href="#api-reference" title="Permalink to this headline"></a></h4>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--download-model-dir Model download address, download the model from Modelscope by setting the model ID. If starting from a local model, this parameter can be left out.
---model-dir ASR model ID in Modelscope or the absolute path of local model
---quantize True for quantized ASR model, False for non-quantized ASR model. Default is True.
---vad-dir VAD model ID in Modelscope or the absolute path of local model
---vad-quant True for quantized VAD model, False for non-quantized VAD model. Default is True.
---punc-dir PUNC model ID in Modelscope or the absolute path of local model
---punc-quant True for quantized PUNC model, False for non-quantized PUNC model. Default is True.
---port Port number for the server to listen on. Default is 10095.
---decoder-thread-num Number of inference threads started by the server. Default is 8.
---io-thread-num Number of IO threads started by the server. Default is 1.
---certfile SSL certificate file. Default is: ../../../ssl_key/server.crt.
---keyfile SSL key file. Default is: ../../../ssl_key/server.key.
-</pre></div>
-</div>
-</div>
-<div class="section" id="example-of-starting-from-modelscope">
-<h4>Example of Starting from Modelscope<a class="headerlink" href="#example-of-starting-from-modelscope" title="Permalink to this headline"></a></h4>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-wss-server  <span class="se">\</span>
-  --download-model-dir /workspace/models <span class="se">\</span>
-  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx <span class="se">\</span>
-  --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
-  --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
-</pre></div>
-</div>
-<p>Note: In the above example, <code class="docutils literal notranslate"><span class="pre">model-dir</span></code>，<code class="docutils literal notranslate"><span class="pre">vad-dir</span></code>，<code class="docutils literal notranslate"><span class="pre">punc-dir</span></code> are the model names in Modelscope, downloaded directly from Modelscope and exported as quantized onnx. If starting from a local model, please change the parameter to the absolute path of the local model.</p>
-</div>
-<div class="section" id="example-of-starting-from-local-model">
-<h4>Example of Starting from Local Model<a class="headerlink" href="#example-of-starting-from-local-model" title="Permalink to this headline"></a></h4>
 <div class="section" id="export-the-model">
-<h5>Export the Model<a class="headerlink" href="#export-the-model" title="Permalink to this headline"></a></h5>
+<h2>Export the model<a class="headerlink" href="#export-the-model" title="Permalink to this headline"></a></h2>
+<div class="section" id="install-modelscope-and-funasr">
+<h3>Install <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR#installation">modelscope and funasr</a><a class="headerlink" href="#install-modelscope-and-funasr" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># pip3 install torch torchaudio</span>
+pip3 install -U modelscope funasr
+<span class="c1"># For the users in China, you could install with the command:</span>
+<span class="c1"># pip3 install -U modelscope funasr -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html -i https://mirror.sjtu.edu.cn/pypi/web/simple</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="export-onnx-model">
+<h3>Export <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export">onnx model</a><a class="headerlink" href="#export-onnx-model" title="Permalink to this headline"></a></h3>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model <span class="se">\</span>
 --export-dir ./export <span class="se">\</span>
 --type onnx <span class="se">\</span>
@@ -259,72 +177,140 @@ make
 --model-name damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch
 </pre></div>
 </div>
-<p>Export Detailed Introduction（<a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export">docs</a>）</p>
 </div>
-<div class="section" id="start-the-service">
-<h5>Start the Service<a class="headerlink" href="#start-the-service" title="Permalink to this headline"></a></h5>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-wss-server  <span class="se">\</span>
+</div>
+<div class="section" id="building-for-linux-unix">
+<h2>Building for Linux/Unix<a class="headerlink" href="#building-for-linux-unix" title="Permalink to this headline"></a></h2>
+<div class="section" id="download-onnxruntime">
+<h3>Download onnxruntime<a class="headerlink" href="#download-onnxruntime" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># download an appropriate onnxruntime from https://github.com/microsoft/onnxruntime/releases/tag/v1.14.0</span>
+<span class="c1"># here we get a copy of onnxruntime for linux 64</span>
+wget https://github.com/microsoft/onnxruntime/releases/download/v1.14.0/onnxruntime-linux-x64-1.14.0.tgz
+tar -zxvf onnxruntime-linux-x64-1.14.0.tgz
+</pre></div>
+</div>
+</div>
+<div class="section" id="download-ffmpeg">
+<h3>Download ffmpeg<a class="headerlink" href="#download-ffmpeg" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>wget https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2023-07-09-12-50/ffmpeg-N-111383-g20b8688092-linux64-gpl-shared.tar.xz
+tar -xvf ffmpeg-N-111383-g20b8688092-linux64-gpl-shared.tar.xz
+<span class="c1"># 国内可以使用下述方式</span>
+<span class="c1"># wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/dep_libs/ffmpeg-N-111383-g20b8688092-linux64-gpl-shared.tar.xz</span>
+<span class="c1"># tar -xvf ffmpeg-N-111383-g20b8688092-linux64-gpl-shared.tar.xz</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="install-openblas">
+<h3>Install openblas<a class="headerlink" href="#install-openblas" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo apt-get install libopenblas-dev <span class="c1">#ubuntu</span>
+<span class="c1"># sudo yum -y install openblas-devel #centos</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="build-runtime">
+<h3>Build runtime<a class="headerlink" href="#build-runtime" title="Permalink to this headline"></a></h3>
+<p>required openssl lib</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>apt-get install libssl-dev <span class="c1">#ubuntu </span>
+<span class="c1"># yum install openssl-devel #centos</span>
+
+
+git clone https://github.com/alibaba-damo-academy/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> FunASR/funasr/runtime/websocket
+mkdir build <span class="o">&amp;&amp;</span> <span class="nb">cd</span> build
+cmake  -DCMAKE_BUILD_TYPE<span class="o">=</span>release .. -DONNXRUNTIME_DIR<span class="o">=</span>/path/to/onnxruntime-linux-x64-1.14.0 -DFFMPEG_DIR<span class="o">=</span>/path/to/ffmpeg-N-111383-g20b8688092-linux64-gpl-shared
+make
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="run-the-websocket-server">
+<h2>Run the websocket server<a class="headerlink" href="#run-the-websocket-server" title="Permalink to this headline"></a></h2>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> bin
+./funasr-wss-server <span class="o">[</span>--download-model-dir &lt;string&gt;<span class="o">]</span>
+                    <span class="o">[</span>--model-thread-num &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--decoder-thread-num &lt;int&gt;<span class="o">]</span>
+                    <span class="o">[</span>--io-thread-num &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--port &lt;int&gt;<span class="o">]</span> <span class="o">[</span>--listen_ip
+                    &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-quant &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-dir &lt;string&gt;<span class="o">]</span>
+                    <span class="o">[</span>--vad-quant &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--vad-dir &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--quantize
+                    &lt;string&gt;<span class="o">]</span> --model-dir &lt;string&gt; <span class="o">[</span>--keyfile &lt;string&gt;<span class="o">]</span>
+                    <span class="o">[</span>--certfile &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--<span class="o">]</span> <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
+Where:
+   --download-model-dir &lt;string&gt;
+     Download model from Modelscope to download_model_dir
+
+   --model-dir &lt;string&gt;
+     default: /workspace/models/asr, the asr model path, which contains model_quant.onnx, config.yaml, am.mvn
+   --quantize &lt;string&gt;
+     <span class="nb">true</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model_quant.onnx in model_dir. If <span class="nb">set</span> false, load the model of model.onnx in model_dir
+
+   --vad-dir &lt;string&gt;
+     default: /workspace/models/vad, the vad model path, which contains model_quant.onnx, vad.yaml, vad.mvn
+   --vad-quant &lt;string&gt;
+     <span class="nb">true</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model_quant.onnx in vad_dir. If <span class="nb">set</span> false, load the model of model.onnx in vad_dir
+
+   --punc-dir &lt;string&gt;
+     default: /workspace/models/punc, the punc model path, which contains model_quant.onnx, punc.yaml
+   --punc-quant &lt;string&gt;
+     <span class="nb">true</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model_quant.onnx in punc_dir. If <span class="nb">set</span> false, load the model of model.onnx in punc_dir
+
+   --decoder-thread-num &lt;int&gt;
+     number of threads <span class="k">for</span> decoder, default:8
+   --io-thread-num &lt;int&gt;
+     number of threads <span class="k">for</span> network io, default:8
+   --port &lt;int&gt;
+     listen port, default:10095
+   --certfile &lt;string&gt;
+     default: ../../../ssl_key/server.crt, path of certficate <span class="k">for</span> WSS connection. <span class="k">if</span> it is empty, it will be in WS mode.
+   --keyfile &lt;string&gt;
+     default: ../../../ssl_key/server.key, path of keyfile <span class="k">for</span> WSS connection
+  
+example:
+<span class="c1"># you can use models downloaded from modelscope or local models:</span>
+<span class="c1"># download models from modelscope</span>
+./funasr-wss-server  <span class="se">\</span>
   --download-model-dir /workspace/models <span class="se">\</span>
-  --model-dir ./exportdamo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx <span class="se">\</span>
-  --vad-dir ./exportdamo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
-  --punc-dir ./export/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
+  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx <span class="se">\</span>
+  --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
+  --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
+
+<span class="c1"># load models from local paths</span>
+./funasr-wss-server  <span class="se">\</span>
+  --model-dir /workspace/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx <span class="se">\</span>
+  --vad-dir /workspace/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
+  --punc-dir /workspace/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
 </pre></div>
 </div>
 </div>
-</div>
-</div>
-<div class="section" id="client-usage">
-<h3>Client Usage<a class="headerlink" href="#client-usage" title="Permalink to this headline"></a></h3>
-<p>Download the client test tool directory <a class="reference external" href="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz">samples</a></p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz
+<div class="section" id="run-websocket-client-test">
+<h2>Run websocket client test<a class="headerlink" href="#run-websocket-client-test" title="Permalink to this headline"></a></h2>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-wss-client  --server-ip &lt;string&gt;
+                    --port &lt;string&gt;
+                    --wav-path &lt;string&gt;
+                    <span class="o">[</span>--thread-num &lt;int&gt;<span class="o">]</span> 
+                    <span class="o">[</span>--is-ssl &lt;int&gt;<span class="o">]</span>  <span class="o">[</span>--<span class="o">]</span>
+                    <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
+
+Where:
+   --server-ip &lt;string&gt;
+     <span class="o">(</span>required<span class="o">)</span>  server-ip
+
+   --port &lt;string&gt;
+     <span class="o">(</span>required<span class="o">)</span>  port
+
+   --wav-path &lt;string&gt;
+     <span class="o">(</span>required<span class="o">)</span>  the input could be: wav_path, e.g.: asr_example.wav<span class="p">;</span>
+     pcm_path, e.g.: asr_example.pcm<span class="p">;</span> wav.scp, kaldi style wav list <span class="o">(</span>wav_id <span class="se">\t</span> wav_path<span class="o">)</span>
+
+   --thread-num &lt;int&gt;
+     thread-num
+
+   --is-ssl &lt;int&gt;
+     is-ssl is <span class="m">1</span> means use wss connection, or use ws connection
+
+example:
+./funasr-wss-client --server-ip <span class="m">127</span>.0.0.1 --port <span class="m">10095</span> --wav-path test.wav --thread-num <span class="m">1</span> --is-ssl <span class="m">1</span>
+
+result json, example like:
+<span class="o">{</span><span class="s2">&quot;mode&quot;</span>:<span class="s2">&quot;offline&quot;</span>,<span class="s2">&quot;text&quot;</span>:<span class="s2">&quot;欢迎大家来体验达摩院推出的语音识别模型&quot;</span>,<span class="s2">&quot;wav_name&quot;</span>:<span class="s2">&quot;wav2&quot;</span><span class="o">}</span>
 </pre></div>
-</div>
-<p>After deploying the FunASR service on the server, you can test and use the offline file transcription service through the following steps. Currently, the following programming language client is supported:</p>
-<ul class="simple">
-<li><p><a class="reference internal" href="#python-client"><span class="std std-ref">Python</span></a></p></li>
-<li><p><a class="reference internal" href="#cpp-client"><span class="std std-ref">CPP</span></a></p></li>
-<li><p><a class="reference internal" href="#html-client"><span class="std std-ref">html</span></a></p></li>
-<li><p><a class="reference internal" href="#java-client"><span class="std std-ref">Java</span></a></p></li>
-</ul>
-<div class="section" id="python-client">
-<h4>python-client<a class="headerlink" href="#python-client" title="Permalink to this headline"></a></h4>
-<p>If you want to run the client directly for testing, you can refer to the following simple instructions, taking the Python version as an example:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 wss_client_asr.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode offline --audio_in <span class="s2">&quot;../audio/asr_example.wav&quot;</span> --output_dir <span class="s2">&quot;./results&quot;</span>
-</pre></div>
-</div>
-<p>API-reference</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--host: IP address of the machine where FunASR runtime-SDK service is deployed. The default value is the IP address of the local machine (127.0.0.1). If the client and service are not on the same server, it needs to be changed to the IP address of the deployment machine.
---port: The port number of the deployed service is 10095.
---mode: &quot;offline&quot; means offline file transcription.
---audio_in: The audio file that needs to be transcribed, which supports file path and file list (wav.scp).
---output_dir: The path to save the recognition result.
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="cpp-client">
-<h3>cpp-client<a class="headerlink" href="#cpp-client" title="Permalink to this headline"></a></h3>
-<p>After entering the directory samples/cpp, you can test it with CPP, as follows:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-wss-client --server-ip <span class="m">127</span>.0.0.1 --port <span class="m">10095</span> --wav-path ../audio/asr_example.wav
-</pre></div>
-</div>
-<p>API-reference:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--server-ip: The IP address of the machine where FunASR runtime-SDK service is deployed. The default value is the IP address of the local machine (127.0.0.1). If the client and service are not on the same server, it needs to be changed to the IP address of the deployment machine.
---port: The port number of the deployed service is 10095.
---wav-path: The audio file that needs to be transcribed, which supports file path.
-</pre></div>
-</div>
-</div>
-<div class="section" id="html-client">
-<h3>Html-client<a class="headerlink" href="#html-client" title="Permalink to this headline"></a></h3>
-<p>Open <code class="docutils literal notranslate"><span class="pre">html/static/index.html</span></code> in the browser, and you can see the following page, which supports microphone input and file upload for direct experience.</p>
-<img src="images/html.png"  width="900"/></div>
-<div class="section" id="java-client">
-<h3>Java-client<a class="headerlink" href="#java-client" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>FunasrWsClient --host localhost --port <span class="m">10095</span> --audio_in ./asr_example.wav --mode offline
-</pre></div>
-</div>
-<p>For more details, please refer to the <a class="reference external" href="../java/readme">documentation</a></p>
 </div>
 </div>
 <div class="section" id="acknowledge">
