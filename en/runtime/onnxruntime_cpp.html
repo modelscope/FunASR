@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ONNXRuntime-cpp &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <title>&lt;no title&gt; &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -74,31 +74,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../model_zoo/huggingface_models.html">Pretrained Models on Huggingface</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Runtime and Service</span></p>
-<ul class="current">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="export.html">Export models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="onnxruntime_python.html">ONNXRuntime-python</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">ONNXRuntime-cpp</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#export-the-model">Export the model</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#install-modelscope-and-funasr">Install modelscope and funasr</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#export-onnx-model">Export onnx model</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#building-for-linux-unix">Building for Linux/Unix</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#download-onnxruntime">Download onnxruntime</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#install-openblas">Install openblas</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#build-runtime">Build runtime</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#run-the-demo">Run the demo</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#funasr-onnx-offline">funasr-onnx-offline</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#funasr-onnx-offline-vad">funasr-onnx-offline-vad</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#funasr-onnx-offline-punc">funasr-onnx-offline-punc</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#funasr-onnx-offline-rtf">funasr-onnx-offline-rtf</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#acknowledge">Acknowledge</a></li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="libtorch_python.html">Libtorch-python</a></li>
 <li class="toctree-l1"><a class="reference internal" href="html5.html">Html5 server for asr service</a></li>
 <li class="toctree-l1"><a class="reference internal" href="websocket_python.html">Service with websocket-python</a></li>
@@ -146,7 +124,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">ONNXRuntime-cpp</li>
+      <li class="breadcrumb-item active">&lt;no title&gt;</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/runtime/onnxruntime_cpp.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -156,194 +134,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="onnxruntime-cpp">
-<h1>ONNXRuntime-cpp<a class="headerlink" href="#onnxruntime-cpp" title="Permalink to this headline"></a></h1>
-<div class="section" id="export-the-model">
-<h2>Export the model<a class="headerlink" href="#export-the-model" title="Permalink to this headline"></a></h2>
-<div class="section" id="install-modelscope-and-funasr">
-<h3>Install <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR#installation">modelscope and funasr</a><a class="headerlink" href="#install-modelscope-and-funasr" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># pip3 install torch torchaudio</span>
-pip install -U modelscope funasr
-<span class="c1"># For the users in China, you could install with the command:</span>
-<span class="c1"># pip install -U modelscope funasr -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html -i https://mirror.sjtu.edu.cn/pypi/web/simple</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="export-onnx-model">
-<h3>Export <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export">onnx model</a><a class="headerlink" href="#export-onnx-model" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize True
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="building-for-linux-unix">
-<h2>Building for Linux/Unix<a class="headerlink" href="#building-for-linux-unix" title="Permalink to this headline"></a></h2>
-<div class="section" id="download-onnxruntime">
-<h3>Download onnxruntime<a class="headerlink" href="#download-onnxruntime" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># download an appropriate onnxruntime from https://github.com/microsoft/onnxruntime/releases/tag/v1.14.0</span>
-<span class="c1"># here we get a copy of onnxruntime for linux 64</span>
-wget https://github.com/microsoft/onnxruntime/releases/download/v1.14.0/onnxruntime-linux-x64-1.14.0.tgz
-tar -zxvf onnxruntime-linux-x64-1.14.0.tgz
-</pre></div>
-</div>
-</div>
-<div class="section" id="install-openblas">
-<h3>Install openblas<a class="headerlink" href="#install-openblas" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo apt-get install libopenblas-dev <span class="c1">#ubuntu</span>
-<span class="c1"># sudo yum -y install openblas-devel #centos</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="build-runtime">
-<h3>Build runtime<a class="headerlink" href="#build-runtime" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/alibaba-damo-academy/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> funasr/runtime/onnxruntime
-mkdir build <span class="o">&amp;&amp;</span> <span class="nb">cd</span> build
-cmake  -DCMAKE_BUILD_TYPE<span class="o">=</span>release .. -DONNXRUNTIME_DIR<span class="o">=</span>/path/to/onnxruntime-linux-x64-1.14.0
-make
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="run-the-demo">
-<h2>Run the demo<a class="headerlink" href="#run-the-demo" title="Permalink to this headline"></a></h2>
-<div class="section" id="funasr-onnx-offline">
-<h3>funasr-onnx-offline<a class="headerlink" href="#funasr-onnx-offline" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-onnx-offline     --model-dir &lt;string&gt; <span class="o">[</span>--quantize &lt;string&gt;<span class="o">]</span>
-                          <span class="o">[</span>--vad-dir &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--vad-quant &lt;string&gt;<span class="o">]</span>
-                          <span class="o">[</span>--punc-dir &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-quant &lt;string&gt;<span class="o">]</span>
-                          --wav-path &lt;string&gt; <span class="o">[</span>--<span class="o">]</span> <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
-Where:
-   --model-dir &lt;string&gt;
-     <span class="o">(</span>required<span class="o">)</span>  the asr model path, which contains model.onnx, config.yaml, am.mvn
-   --quantize &lt;string&gt;
-     <span class="nb">false</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in model_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in model_dir
-
-   --vad-dir &lt;string&gt;
-     the vad model path, which contains model.onnx, vad.yaml, vad.mvn
-   --vad-quant &lt;string&gt;
-     <span class="nb">false</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in vad_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in vad_dir
-
-   --punc-dir &lt;string&gt;
-     the punc model path, which contains model.onnx, punc.yaml
-   --punc-quant &lt;string&gt;
-     <span class="nb">false</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in punc_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in punc_dir
-
-   --wav-path &lt;string&gt;
-     <span class="o">(</span>required<span class="o">)</span>  the input could be: 
-      wav_path, e.g.: asr_example.wav<span class="p">;</span>
-      pcm_path, e.g.: asr_example.pcm<span class="p">;</span> 
-      wav.scp, kaldi style wav list <span class="o">(</span>wav_id <span class="se">\t</span> wav_path<span class="o">)</span>
-  
-   Required: --model-dir &lt;string&gt; --wav-path &lt;string&gt;
-   If use vad, please add: --vad-dir &lt;string&gt;
-   If use punc, please add: --punc-dir &lt;string&gt;
-
-For example:
-./funasr-onnx-offline <span class="se">\</span>
-    --model-dir    ./asrmodel/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch <span class="se">\</span>
-    --quantize  <span class="nb">true</span> <span class="se">\</span>
-    --vad-dir   ./asrmodel/speech_fsmn_vad_zh-cn-16k-common-pytorch <span class="se">\</span>
-    --punc-dir  ./asrmodel/punc_ct-transformer_zh-cn-common-vocab272727-pytorch <span class="se">\</span>
-    --wav-path    ./vad_example.wav
-</pre></div>
-</div>
-</div>
-<div class="section" id="funasr-onnx-offline-vad">
-<h3>funasr-onnx-offline-vad<a class="headerlink" href="#funasr-onnx-offline-vad" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-onnx-offline-vad     --model-dir &lt;string&gt; <span class="o">[</span>--quantize &lt;string&gt;<span class="o">]</span>
-                              --wav-path &lt;string&gt; <span class="o">[</span>--<span class="o">]</span> <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
-Where:
-   --model-dir &lt;string&gt;
-     <span class="o">(</span>required<span class="o">)</span>  the vad model path, which contains model.onnx, vad.yaml, vad.mvn
-   --quantize &lt;string&gt;
-     <span class="nb">false</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in model_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in model_dir
-   --wav-path &lt;string&gt;
-     <span class="o">(</span>required<span class="o">)</span>  the input could be: 
-      wav_path, e.g.: asr_example.wav<span class="p">;</span>
-      pcm_path, e.g.: asr_example.pcm<span class="p">;</span> 
-      wav.scp, kaldi style wav list <span class="o">(</span>wav_id <span class="se">\t</span> wav_path<span class="o">)</span>
-
-   Required: --model-dir &lt;string&gt; --wav-path &lt;string&gt;
-
-For example:
-./funasr-onnx-offline-vad <span class="se">\</span>
-    --model-dir   ./asrmodel/speech_fsmn_vad_zh-cn-16k-common-pytorch <span class="se">\</span>
-    --wav-path    ./vad_example.wav
-</pre></div>
-</div>
-</div>
-<div class="section" id="funasr-onnx-offline-punc">
-<h3>funasr-onnx-offline-punc<a class="headerlink" href="#funasr-onnx-offline-punc" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-onnx-offline-punc    --model-dir &lt;string&gt; <span class="o">[</span>--quantize &lt;string&gt;<span class="o">]</span>
-                              --txt-path &lt;string&gt; <span class="o">[</span>--<span class="o">]</span> <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
-Where:
-   --model-dir &lt;string&gt;
-     <span class="o">(</span>required<span class="o">)</span>  the punc model path, which contains model.onnx, punc.yaml
-   --quantize &lt;string&gt;
-     <span class="nb">false</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in model_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in model_dir
-   --txt-path &lt;string&gt;
-     <span class="o">(</span>required<span class="o">)</span>  txt file path, one sentence per line
-
-   Required: --model-dir &lt;string&gt; --txt-path &lt;string&gt;
-
-For example:
-./funasr-onnx-offline-punc <span class="se">\</span>
-    --model-dir  ./asrmodel/punc_ct-transformer_zh-cn-common-vocab272727-pytorch <span class="se">\</span>
-    --txt-path   ./punc_example.txt
-</pre></div>
-</div>
-</div>
-<div class="section" id="funasr-onnx-offline-rtf">
-<h3>funasr-onnx-offline-rtf<a class="headerlink" href="#funasr-onnx-offline-rtf" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-onnx-offline-rtf     --model-dir &lt;string&gt; <span class="o">[</span>--quantize &lt;string&gt;<span class="o">]</span>
-                              <span class="o">[</span>--vad-dir &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--vad-quant &lt;string&gt;<span class="o">]</span>
-                              <span class="o">[</span>--punc-dir &lt;string&gt;<span class="o">]</span> <span class="o">[</span>--punc-quant &lt;string&gt;<span class="o">]</span>
-                              --wav-path &lt;string&gt; --thread-num &lt;int32_t&gt;
-                              <span class="o">[</span>--<span class="o">]</span> <span class="o">[</span>--version<span class="o">]</span> <span class="o">[</span>-h<span class="o">]</span>
-Where:
-   --thread-num &lt;int32_t&gt;
-     <span class="o">(</span>required<span class="o">)</span>  multi-thread num <span class="k">for</span> rtf
-   --model-dir &lt;string&gt;
-     <span class="o">(</span>required<span class="o">)</span>  the model path, which contains model.onnx, config.yaml, am.mvn
-   --quantize &lt;string&gt;
-     <span class="nb">false</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in model_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in model_dir
-
-   --vad-dir &lt;string&gt;
-     the vad model path, which contains model.onnx, vad.yaml, vad.mvn
-   --vad-quant &lt;string&gt;
-     <span class="nb">false</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in vad_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in vad_dir
-
-   --punc-dir &lt;string&gt;
-     the punc model path, which contains model.onnx, punc.yaml
-   --punc-quant &lt;string&gt;
-     <span class="nb">false</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in punc_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in punc_dir
-     
-   --wav-path &lt;string&gt;
-     <span class="o">(</span>required<span class="o">)</span>  the input could be: 
-      wav_path, e.g.: asr_example.wav<span class="p">;</span>
-      pcm_path, e.g.: asr_example.pcm<span class="p">;</span> 
-      wav.scp, kaldi style wav list <span class="o">(</span>wav_id <span class="se">\t</span> wav_path<span class="o">)</span>
-
-For example:
-./funasr-onnx-offline-rtf <span class="se">\</span>
-    --model-dir    ./asrmodel/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch <span class="se">\</span>
-    --quantize  <span class="nb">true</span> <span class="se">\</span>
-    --wav-path     ./aishell1_test.scp  <span class="se">\</span>
-    --thread-num <span class="m">32</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="acknowledge">
-<h2>Acknowledge<a class="headerlink" href="#acknowledge" title="Permalink to this headline"></a></h2>
-<ol class="simple">
-<li><p>This project is maintained by <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR">FunASR community</a>.</p></li>
-<li><p>We acknowledge mayong for contributing the onnxruntime of Paraformer and CT_Transformer, <a class="reference external" href="https://github.com/RapidAI/RapidASR/tree/main/cpp_onnx">repo-asr</a>, <a class="reference external" href="https://github.com/RapidAI/RapidPunc">repo-punc</a>.</p></li>
-<li><p>We acknowledge <a class="reference external" href="https://github.com/zhuzizyf/damo-fsmn-vad-infer-httpserver">ChinaTelecom</a> for contributing the VAD runtime.</p></li>
-<li><p>We borrowed a lot of code from <a class="reference external" href="https://github.com/chenkui164/FastASR">FastASR</a> for audio frontend and text-postprocess.</p></li>
-</ol>
-</div>
-</div>
+  <p>Please ref to <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/websocket">websocket service</a></p>
 
 
            </div>

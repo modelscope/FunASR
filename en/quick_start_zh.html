@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; FunASR  documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <title>快速开始 &mdash; FunASR  documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
@@ -16,7 +15,7 @@
         <script src="_static/language_data.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/js/theme.js"></script>
-    <link rel="index" title="Index" href="#" />
+    <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" /> 
 </head>
 
@@ -123,8 +122,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Index</li>
+      <li class="breadcrumb-item active">快速开始</li>
       <li class="wy-breadcrumbs-aside">
+            <a href="_sources/quick_start_zh.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -132,11 +132,85 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
+  <p>(简体中文|<a class="reference internal" href="qick_start.html"><span class="doc">English</span></a>)</p>
+<p><a name="快速开始"></a></p>
+<div class="section" id="id1">
+<h1>快速开始<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h1>
+<p>您可以通过如下几种方式使用FunASR功能:</p>
+<ul class="simple">
+<li><p>服务部署SDK</p></li>
+<li><p>工业模型egs</p></li>
+<li><p>学术模型egs</p></li>
+</ul>
+<div class="section" id="sdk">
+<h2>服务部署SDK<a class="headerlink" href="#sdk" title="Permalink to this headline"></a></h2>
+<div class="section" id="python">
+<h3>python版本示例<a class="headerlink" href="#python" title="Permalink to this headline"></a></h3>
+<p>支持实时流式语音识别，并且会用非流式模型进行纠错，输出文本带有标点。目前只支持单个client，如需多并发请参考下方c++版本服务部署SDK</p>
+<div class="section" id="id2">
+<h4>服务端部署<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h4>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> funasr/runtime/python/websocket
+python funasr_wss_server.py --port <span class="m">10095</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id3">
+<h4>客户端测试<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h4>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python funasr_wss_client.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode 2pass --chunk_size <span class="s2">&quot;5,10,5&quot;</span>
+<span class="c1">#python funasr_wss_client.py --host &quot;127.0.0.1&quot; --port 10095 --mode 2pass --chunk_size &quot;8,8,4&quot; --audio_in &quot;./data/wav.scp&quot;</span>
+</pre></div>
+</div>
+<p>更多例子可以参考（<a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/runtime/websocket_python.html#id2">点击此处</a>）</p>
+<p><a name="cpp版本示例"></a></p>
+</div>
+</div>
+<div class="section" id="c">
+<h3>c++版本示例<a class="headerlink" href="#c" title="Permalink to this headline"></a></h3>
+<p>目前已支持离线文件转写服务（CPU），支持上百路并发请求</p>
+<div class="section" id="id4">
+<h4>服务端部署<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h4>
+<p>可以用个下面指令，一键部署完成部署</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy-offline-cpu-zh.sh
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace ./funasr-runtime-resources
+</pre></div>
+</div>
+</div>
+<div class="section" id="id5">
+<h4>客户端测试<a class="headerlink" href="#id5" title="Permalink to this headline"></a></h4>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 funasr_wss_client.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode offline --audio_in <span class="s2">&quot;../audio/asr_example.wav&quot;</span>
+</pre></div>
+</div>
+<p>更多例子参考（<a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/docs/SDK_tutorial_zh.md">点击此处</a>）</p>
+</div>
+</div>
+</div>
+<div class="section" id="egs">
+<h2>工业模型egs<a class="headerlink" href="#egs" title="Permalink to this headline"></a></h2>
+<p>如果您希望使用ModelScope中预训练好的工业模型，进行推理或者微调训练，您可以参考下面指令：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
+<span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
 
-<h1 id="index">Index</h1>
+<span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
+    <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">auto_speech_recognition</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&#39;</span><span class="p">,</span>
+<span class="p">)</span>
 
-<div class="genindex-jumpbox">
- 
+<span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">rec_result</span><span class="p">)</span>
+<span class="c1"># {&#39;text&#39;: &#39;欢迎大家来体验达摩院推出的语音识别模型&#39;}</span>
+</pre></div>
+</div>
+<p>更多例子可以参考（<a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/modelscope_pipeline/quick_start.html">点击此处</a>）</p>
+</div>
+<div class="section" id="id6">
+<h2>学术模型egs<a class="headerlink" href="#id6" title="Permalink to this headline"></a></h2>
+<p>如果您希望从头开始训练，通常为学术模型，您可以通过下面的指令启动训练与推理：</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> egs/aishell/paraformer
+. ./run.sh --CUDA_VISIBLE_DEVICES<span class="o">=</span><span class="s2">&quot;0,1&quot;</span> --gpu_num<span class="o">=</span><span class="m">2</span>
+</pre></div>
+</div>
+<p>更多例子可以参考（<a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/academic_recipe/asr_recipe.html">点击此处</a>）</p>
+</div>
 </div>
 
 
