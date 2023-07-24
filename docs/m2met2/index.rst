@@ -9,6 +9,7 @@ Building on the success of the M2MeT challenge, we are delighted to propose the 
 To advance the current state-of-the-art in multi-talker automatic speech recognition, the M2MeT2.0 challenge proposes a speaker-attributed ASR task, comprising two sub-tracks: fixed and open training conditions.
 To facilitate reproducible research, we provide a comprehensive overview of the dataset, challenge rules, evaluation metrics, and baseline systems. 
 
+
 .. toctree::
    :maxdepth: 1
    :caption: Contents:
@@ -21,3 +22,4 @@ To facilitate reproducible research, we provide a comprehensive overview of the 
    ./Challenge_result
    ./Organizers
    ./Contact
+
