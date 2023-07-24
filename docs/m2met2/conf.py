@@ -38,6 +38,7 @@ myst_highlight_code_blocks=True
 myst_update_mathjax=False
 
 templates_path = ['_templates']
+source_suffix = [".rst", ".md"]
 
 pygments_style = "sphinx"
 
