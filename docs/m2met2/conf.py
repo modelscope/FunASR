@@ -11,11 +11,19 @@ project = 'MULTI-PARTY MEETING TRANSCRIPTION CHALLENGE 2.0'
 copyright = '2023, Speech Lab, Alibaba Group; ASLP Group, Northwestern Polytechnical University'
 author = 'Speech Lab, Alibaba Group; Audio, Speech and Language Processing Group, Northwestern Polytechnical University'
 
-# -- General configuration ---------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
+
 extensions = [
+    "nbsphinx",
+    "sphinx.ext.autodoc",
+    'sphinx.ext.napoleon',
+    'sphinx.ext.viewcode',
+    "sphinx.ext.mathjax",
+    "sphinx.ext.todo",
+    # "sphinxarg.ext",
+    "sphinx_markdown_tables",
+    # 'recommonmark',
+    'sphinx_rtd_theme',
     'myst_parser',
-    'guzzle_sphinx_theme'
 ]
 
 myst_enable_extensions = [
@@ -28,23 +36,10 @@ myst_enable_extensions = [
 myst_heading_anchors = 2
 myst_highlight_code_blocks=True
 myst_update_mathjax=False
+
 templates_path = ['_templates']
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
+pygments_style = "sphinx"
 
-# -- Options for HTML output -------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
-html_sidebars = {
-    '**': ['logo-text.html',
-            'searchbox.html',
-            'globaltoc.html']
-}
-html_theme_path = guzzle_sphinx_theme.html_theme_path()
-html_theme = 'guzzle_sphinx_theme'
-html_static_path = ['_static']
-# html_sidebars = {'**': ['fulltoc.html', 'searchbox.html', 'layout.html']}
-html_theme_options = {
-    "globaltoc_collapse": False,
-    "globaltoc_includehidden": True,
-}
+html_theme = "sphinx_rtd_theme"
 
