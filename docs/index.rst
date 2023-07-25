@@ -26,6 +26,7 @@ Overview
 
    ./funasr/quick_start.md
 
+
 .. toctree::
    :maxdepth: 1
    :caption: Academic Egs
@@ -70,15 +71,13 @@ Overview
    :maxdepth: 1
    :caption: Runtime and Service
 
-   ./runtime/export.md
-   ./runtime/onnxruntime_python.md
-   ./runtime/onnxruntime_cpp.md
-   ./runtime/libtorch_python.md
-   ./runtime/html5.md
-   ./runtime/websocket_python.md
-   ./runtime/websocket_cpp.md
-   ./runtime/grpc_python.md
-   ./runtime/grpc_cpp.md
+   ./funasr/export/README.md
+   ./funasr/runtime/python/onnxruntime/README.md
+   ./funasr/runtime/python/websocket/README.md
+   ./funasr/runtime/websocket/readme.md
+   ./funasr/runtime/html5/readme.md
+   ./funasr/runtime/python/libtorch/README.md
+
 
 
 .. toctree::

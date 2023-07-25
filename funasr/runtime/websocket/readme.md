@@ -1,4 +1,4 @@
-([简体中文](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/websocket/readme_zh.md)|English)
+([简体中文](./readme_zh.md)|English)
 
 # Service with websocket-cpp
 

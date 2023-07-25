@@ -1,4 +1,4 @@
-(简体中文|[English](./qick_start.md))
+(简体中文|[English](./quick_start.md))
 
 <a name="快速开始"></a>
 ## 快速开始

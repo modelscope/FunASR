@@ -1,4 +1,4 @@
-(简体中文|[English](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/websocket/readme.md))
+(简体中文|[English](./readme.md))
 
 # 采用websocket协议的c++部署方案
 
