@@ -56,6 +56,7 @@ namespace funasr {
             else
                 return 0;
         }
+        void LoadConfigFromYaml(const char* filename);
 
         // The reserved waveforms by fbank
         std::vector<float> reserve_waveforms_;
@@ -70,21 +71,23 @@ namespace funasr {
         std::vector<std::vector<float>> hidden_cache_;
         std::vector<std::vector<float>> feats_cache_;
         std::vector<std::vector<std::vector<std::vector<float>>>> fsmn_caches_;
-        // std::vector<Ort::Value> fsmn_caches_;
-        //
+
         bool is_first_chunk = true;
         bool is_last_chunk = false;
         
         // configs
-        int frame_sample_length_ = MODEL_SAMPLE_RATE / 1000 * 25;;
-        int frame_shift_sample_length_ = MODEL_SAMPLE_RATE / 1000 * 10;
+        string window_type = "hamming";
+        int frame_length = 25;
+        int frame_shift = 10;
+        int frame_sample_length_ = MODEL_SAMPLE_RATE / 1000 * frame_length;
+        int frame_shift_sample_length_ = MODEL_SAMPLE_RATE / 1000 * frame_shift;
         int n_mels = 80;
         int lfr_m = PARA_LFR_M;
         int lfr_n = PARA_LFR_N;
         std::vector<int> chunk_size = {5,10,5};
         int encoder_size = 512;
         int fsmn_layers = 16;
-        int fsmn_lorder = 11-1;
+        int fsmn_lorder = 10;
         int fsmn_dims = 512;
         int feat_dims = lfr_m*n_mels;
         float cif_threshold = 1.0;

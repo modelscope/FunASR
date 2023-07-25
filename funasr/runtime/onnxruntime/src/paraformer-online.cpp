@@ -14,13 +14,15 @@ ParaformerOnline::ParaformerOnline()
 }
 
 void ParaformerOnline::InitAsr(const std::string &en_model, const std::string &de_model, const std::string &am_cmvn, const std::string &am_config, int thread_num){
+    
+    LoadConfigFromYaml(am_config.c_str());
     // knf options
     fbank_opts_.frame_opts.dither = 0;
     fbank_opts_.mel_opts.num_bins = n_mels;
     fbank_opts_.frame_opts.samp_freq = MODEL_SAMPLE_RATE;
-    fbank_opts_.frame_opts.window_type = "hamming";
-    fbank_opts_.frame_opts.frame_shift_ms = 10;
-    fbank_opts_.frame_opts.frame_length_ms = 25;
+    fbank_opts_.frame_opts.window_type = window_type;
+    fbank_opts_.frame_opts.frame_shift_ms = frame_shift;
+    fbank_opts_.frame_opts.frame_length_ms = frame_length;
     fbank_opts_.energy_floor = 0;
     fbank_opts_.mel_opts.debug_mel = false;
     // fbank_ = std::make_unique<knf::OnlineFbank>(fbank_opts_);
@@ -88,6 +90,44 @@ void ParaformerOnline::InitAsr(const std::string &en_model, const std::string &d
     LoadCmvn(am_cmvn.c_str());
 
     InitCache();
+}
+
+void ParaformerOnline::LoadConfigFromYaml(const char* filename){
+
+    YAML::Node config;
+    try{
+        config = YAML::LoadFile(filename);
+    }catch(exception const &e){
+        LOG(ERROR) << "Error loading file, yaml file error or not exist.";
+        exit(-1);
+    }
+
+    try{
+        YAML::Node frontend_conf = config["frontend_conf"];
+        YAML::Node encoder_conf = config["encoder_conf"];
+        YAML::Node decoder_conf = config["decoder_conf"];
+        YAML::Node predictor_conf = config["predictor_conf"];
+
+        this->window_type = frontend_conf["window"].as<string>();
+        this->n_mels = frontend_conf["n_mels"].as<int>();
+        this->frame_length = frontend_conf["frame_length"].as<int>();
+        this->frame_shift = frontend_conf["frame_shift"].as<int>();
+        this->lfr_m = frontend_conf["lfr_m"].as<int>();
+        this->lfr_n = frontend_conf["lfr_n"].as<int>();
+
+        this->encoder_size = encoder_conf["output_size"].as<int>();
+        this->fsmn_dims = encoder_conf["output_size"].as<int>();
+
+        this->fsmn_layers = decoder_conf["num_blocks"].as<int>();
+        this->fsmn_lorder = decoder_conf["kernel_size"].as<int>()-1;
+
+        this->cif_threshold = predictor_conf["threshold"].as<double>();
+        this->tail_alphas = predictor_conf["tail_threshold"].as<double>();
+
+    }catch(exception const &e){
+        LOG(ERROR) << "Error when load argument from vad config YAML.";
+        exit(-1);
+    }
 }
 
 void ParaformerOnline::FbankKaldi(float sample_rate, std::vector<std::vector<float>> &wav_feats,
