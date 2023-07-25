@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FunASR离线文件转写服务开发指南 &mdash; FunASR  documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            FunASR
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/docker.html">Docker</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Quick Start</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Academic Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/asr_recipe.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/punc_recipe.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/vad_recipe.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/sv_recipe.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/sd_recipe.html">Speaker Diarization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">ModelScope Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/asr_pipeline.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/vad_pipeline.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/punc_pipeline.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/tp_pipeline.html">Timestamp Prediction (FA)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/sv_pipeline.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/sd_pipeline.html">Speaker Diarization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/itn_pipeline.html">Inverse Text Normalization (ITN)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Zoo</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_zoo/modelscope_models.html">Pretrained Models on ModelScope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_zoo/huggingface_models.html">Pretrained Models on Huggingface</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Runtime and Service</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../export/README.html">Export models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/onnxruntime/README.html">ONNXRuntime-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/websocket/README.html">Service with websocket-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../websocket/readme.html">Service with websocket-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../html5/readme.html">Html5 server for asr service</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/libtorch/README.html">Libtorch-python</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark and Leaderboard</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_onnx.html">CPU Benchmark (ONNX-python)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_onnx_cpp.html">CPU Benchmark (ONNX-cpp)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_libtorch.html">CPU Benchmark (Libtorch)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_pipeline_cer.html">Leaderboard IO</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Funasr Library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/build_task.html">Build custom tasks</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Papers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/papers.html">Papers</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Application</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html">Audio Cut</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html#realtime-speech-recognition">Realtime Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html#audio-chat">Audio Chat</a></li>
+</ul>
+<p class="caption"><span class="caption-text">FQA</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/FQA.html">FQA</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">FunASR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">FunASR离线文件转写服务开发指南</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/funasr/runtime/docs/SDK_advanced_guide_offline_zh.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="funasr">
+<h1>FunASR离线文件转写服务开发指南<a class="headerlink" href="#funasr" title="Permalink to this headline"></a></h1>
+<p>FunASR提供可一键本地或者云端服务器部署的中文离线文件转写服务，内核为FunASR已开源runtime-SDK。FunASR-runtime结合了达摩院语音实验室在Modelscope社区开源的语音端点检测(VAD)、Paraformer-large语音识别(ASR)、标点检测(PUNC) 等相关能力，可以准确、高效的对音频进行高并发转写。</p>
+<p>本文档为FunASR离线文件转写服务开发指南。如果您想快速体验离线文件转写服务，可参考快速上手。</p>
+<div class="section" id="id1">
+<h2>快速上手<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h2>
+<div class="section" id="id2">
+<h3>镜像启动<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h3>
+<p>通过下述命令拉取并启动FunASR runtime-SDK的docker镜像：</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.1.0
+
+sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span class="o">=</span><span class="nb">true</span> -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.1.0
+</pre></div>
+</div>
+<p>如果您没有安装docker，可参考Docker安装</p>
+</div>
+<div class="section" id="id3">
+<h3>服务端启动<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h3>
+<p>docker启动之后，启动 funasr-wss-server服务程序：</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> FunASR/funasr/runtime
+./run_server.sh <span class="se">\</span>
+  --download-model-dir /workspace/models <span class="se">\</span>
+  --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
+  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  <span class="se">\</span>
+  --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
+</pre></div>
+</div>
+<p>服务端详细参数介绍可参考服务端参数介绍</p>
+</div>
+<div class="section" id="id4">
+<h3>客户端测试与使用<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h3>
+<p>下载客户端测试工具目录samples</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz
+</pre></div>
+</div>
+<p>我们以Python语言客户端为例，进行说明，支持多种音频格式输入（.wav, .pcm, .mp3等），也支持视频输入(.mp4等)，以及多文件列表wav.scp输入，其他版本客户端请参考文档（点击此处），定制服务部署请参考如何定制服务部署</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 wss_client_asr.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode offline --audio_in <span class="s2">&quot;../audio/asr_example.wav&quot;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<hr class="docutils" />
+<div class="section" id="docker">
+<h2>Docker安装<a class="headerlink" href="#docker" title="Permalink to this headline"></a></h2>
+<p>下述步骤为手动安装docker环境的步骤：</p>
+<div class="section" id="id5">
+<h3>docker环境安装<a class="headerlink" href="#id5" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Ubuntu：</span>
+curl -fsSL https://test.docker.com -o test-docker.sh 
+sudo sh test-docker.sh 
+<span class="c1"># Debian：</span>
+curl -fsSL https://get.docker.com -o get-docker.sh 
+sudo sh get-docker.sh 
+<span class="c1"># CentOS：</span>
+curl -fsSL https://get.docker.com <span class="p">|</span> bash -s docker --mirror Aliyun 
+<span class="c1"># MacOS：</span>
+brew install --cask --appdir<span class="o">=</span>/Applications docker
+</pre></div>
+</div>
+<p>安装详见：https://alibaba-damo-academy.github.io/FunASR/en/installation/docker.html</p>
+</div>
+<div class="section" id="id6">
+<h3>docker启动<a class="headerlink" href="#id6" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo systemctl start docker
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="id7">
+<h2>客户端用法详解<a class="headerlink" href="#id7" title="Permalink to this headline"></a></h2>
+<p>在服务器上完成FunASR服务部署以后，可以通过如下的步骤来测试和使用离线文件转写服务。
+目前分别支持以下几种编程语言客户端</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#python-client"><span class="std std-ref">Python</span></a></p></li>
+<li><p><a class="reference internal" href="#cpp-client"><span class="std std-ref">CPP</span></a></p></li>
+<li><p>html网页版本</p></li>
+<li><p><a class="reference internal" href="#java-client"><span class="std std-ref">Java</span></a></p></li>
+</ul>
+<div class="section" id="python-client">
+<h3>python-client<a class="headerlink" href="#python-client" title="Permalink to this headline"></a></h3>
+<p>若想直接运行client进行测试，可参考如下简易说明，以python版本为例：</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 wss_client_asr.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode offline --audio_in <span class="s2">&quot;../audio/asr_example.wav&quot;</span> --output_dir <span class="s2">&quot;./results&quot;</span>
+</pre></div>
+</div>
+<p>命令参数说明：</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--host 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，需要改为部署机器ip
+--port 10095 部署端口号
+--mode offline表示离线文件转写
+--audio_in 需要进行转写的音频文件，支持文件路径，文件列表wav.scp
+--output_dir 识别结果保存路径
+</pre></div>
+</div>
+</div>
+<div class="section" id="cpp-client">
+<h3>cpp-client<a class="headerlink" href="#cpp-client" title="Permalink to this headline"></a></h3>
+<p>进入samples/cpp目录后，可以用cpp进行测试，指令如下：</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-wss-client --server-ip <span class="m">127</span>.0.0.1 --port <span class="m">10095</span> --wav-path ../audio/asr_example.wav
+</pre></div>
+</div>
+<p>命令参数说明：</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--server-ip 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，需要改为部署机器ip
+--port 10095 部署端口号
+--wav-path 需要进行转写的音频文件，支持文件路径
+</pre></div>
+</div>
+</div>
+<div class="section" id="html">
+<h3>Html网页版<a class="headerlink" href="#html" title="Permalink to this headline"></a></h3>
+<p>在浏览器中打开 html/static/index.html，即可出现如下页面，支持麦克风输入与文件上传，直接进行体验</p>
+<img src="images/html.png"  width="900"/></div>
+<div class="section" id="java-client">
+<h3>Java-client<a class="headerlink" href="#java-client" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>FunasrWsClient --host localhost --port <span class="m">10095</span> --audio_in ./asr_example.wav --mode offline
+</pre></div>
+</div>
+<p>详细可以参考文档（<a class="reference internal" href="../java/readme.html"><span class="doc">点击此处</span></a>）</p>
+</div>
+</div>
+<div class="section" id="id8">
+<h2>服务端参数介绍：<a class="headerlink" href="#id8" title="Permalink to this headline"></a></h2>
+<p>funasr-wss-server支持从Modelscope下载模型，设置模型下载地址（–download-model-dir，默认为/workspace/models）及model ID（–model-dir、–vad-dir、–punc-dir）,示例如下：</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> /workspace/FunASR/funasr/runtime/websocket/build/bin
+./funasr-wss-server  <span class="se">\</span>
+  --download-model-dir /workspace/models <span class="se">\</span>
+  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx <span class="se">\</span>
+  --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
+  --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx <span class="se">\</span>
+  --decoder-thread-num <span class="m">32</span> <span class="se">\</span>
+  --io-thread-num  <span class="m">8</span> <span class="se">\</span>
+  --port <span class="m">10095</span> <span class="se">\</span>
+  --certfile  ../../../ssl_key/server.crt <span class="se">\</span>
+  --keyfile ../../../ssl_key/server.key
+</pre></div>
+</div>
+<p>命令参数介绍：</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--download-model-dir 模型下载地址，通过设置model ID从Modelscope下载模型
+--model-dir  modelscope model ID
+--quantize  True为量化ASR模型，False为非量化ASR模型，默认是True
+--vad-dir  modelscope model ID
+--vad-quant   True为量化VAD模型，False为非量化VAD模型，默认是True
+--punc-dir  modelscope model ID
+--punc-quant   True为量化PUNC模型，False为非量化PUNC模型，默认是True
+--port  服务端监听的端口号，默认为 10095
+--decoder-thread-num  服务端启动的推理线程数，默认为 8
+--io-thread-num  服务端启动的IO线程数，默认为 1
+--certfile  ssl的证书文件，默认为：../../../ssl_key/server.crt
+--keyfile   ssl的密钥文件，默认为：../../../ssl_key/server.key
+</pre></div>
+</div>
+<p>funasr-wss-server同时也支持从本地路径加载模型（本地模型资源准备详见模型资源准备）示例如下：</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> /workspace/FunASR/funasr/runtime/websocket/build/bin
+./funasr-wss-server  <span class="se">\</span>
+  --model-dir /workspace/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx <span class="se">\</span>
+  --vad-dir /workspace/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
+  --punc-dir /workspace/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx <span class="se">\</span>
+  --decoder-thread-num <span class="m">32</span> <span class="se">\</span>
+  --io-thread-num  <span class="m">8</span> <span class="se">\</span>
+  --port <span class="m">10095</span> <span class="se">\</span>
+  --certfile  ../../../ssl_key/server.crt <span class="se">\</span>
+  --keyfile ../../../ssl_key/server.key
+</pre></div>
+</div>
+<p>命令参数介绍：</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--model-dir  ASR模型路径，默认为：/workspace/models/asr
+--quantize   True为量化ASR模型，False为非量化ASR模型，默认是True
+--vad-dir  VAD模型路径，默认为：/workspace/models/vad
+--vad-quant   True为量化VAD模型，False为非量化VAD模型，默认是True
+--punc-dir  PUNC模型路径，默认为：/workspace/models/punc
+--punc-quant   True为量化PUNC模型，False为非量化PUNC模型，默认是True
+--port  服务端监听的端口号，默认为 10095
+--decoder-thread-num  服务端启动的推理线程数，默认为 8
+--io-thread-num  服务端启动的IO线程数，默认为 1
+--certfile ssl的证书文件，默认为：../../../ssl_key/server.crt
+--keyfile  ssl的密钥文件，默认为：../../../ssl_key/server.key
+</pre></div>
+</div>
+</div>
+<div class="section" id="id9">
+<h2>模型资源准备<a class="headerlink" href="#id9" title="Permalink to this headline"></a></h2>
+<p>如果您选择通过funasr-wss-server从Modelscope下载模型，可以跳过本步骤。</p>
+<p>FunASR离线文件转写服务中的vad、asr和punc模型资源均来自Modelscope，模型地址详见下表：</p>
+<table border="1" class="docutils">
+<thead>
+<tr>
+<th>模型</th>
+<th>Modelscope链接</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VAD</td>
+<td>https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary</td>
+</tr>
+<tr>
+<td>ASR</td>
+<td>https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary</td>
+</tr>
+<tr>
+<td>PUNC</td>
+<td>https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx/summary</td>
+</tr>
+</tbody>
+</table><p>离线文件转写服务中部署的是量化后的ONNX模型，下面介绍下如何导出ONNX模型及其量化：您可以选择从Modelscope导出ONNX模型、从finetune后的资源导出模型：</p>
+<div class="section" id="modelscopeonnx">
+<h3>从Modelscope导出ONNX模型<a class="headerlink" href="#modelscopeonnx" title="Permalink to this headline"></a></h3>
+<p>从Modelscope网站下载对应model name的模型，然后导出量化后的ONNX模型：</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model <span class="se">\</span>
+--export-dir ./export <span class="se">\</span>
+--type onnx <span class="se">\</span>
+--quantize True <span class="se">\</span>
+--model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch <span class="se">\</span>
+--model-name damo/speech_fsmn_vad_zh-cn-16k-common-pytorch <span class="se">\</span>
+--model-name damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch
+</pre></div>
+</div>
+<p>命令参数介绍：</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--model-name  Modelscope上的模型名称，例如damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
+--export-dir  ONNX模型导出地址
+--type 模型类型，目前支持 ONNX、torch
+--quantize  int8模型量化
+</pre></div>
+</div>
+</div>
+<div class="section" id="finetune">
+<h3>从finetune后的资源导出模型<a class="headerlink" href="#finetune" title="Permalink to this headline"></a></h3>
+<p>假如您想部署finetune后的模型，可以参考如下步骤：</p>
+<p>将您finetune后需要部署的模型（例如10epoch.pb），重命名为model.pb，并将原modelscope中模型model.pb替换掉，假如替换后的模型路径为/path/to/finetune/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch，通过下述命令把finetune后的模型转成onnx模型：</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model --model-name /path/to/finetune/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize True
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="id10">
+<h2>如何定制服务部署<a class="headerlink" href="#id10" title="Permalink to this headline"></a></h2>
+<p>FunASR-runtime的代码已开源，如果服务端和客户端不能很好的满足您的需求，您可以根据自己的需求进行进一步的开发：</p>
+<div class="section" id="c">
+<h3>c++ 客户端：<a class="headerlink" href="#c" title="Permalink to this headline"></a></h3>
+<p>https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/websocket</p>
+</div>
+<div class="section" id="python">
+<h3>python 客户端：<a class="headerlink" href="#python" title="Permalink to this headline"></a></h3>
+<p>https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket</p>
+</div>
+<div class="section" id="id11">
+<h3>自定义客户端：<a class="headerlink" href="#id11" title="Permalink to this headline"></a></h3>
+<p>如果您想定义自己的client，websocket通信协议为：</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 首次通信
+{&quot;mode&quot;: &quot;offline&quot;, &quot;wav_name&quot;: wav_name, &quot;is_speaking&quot;: True}
+# 发送wav数据
+bytes数据
+# 发送结束标志
+{&quot;is_speaking&quot;: False}
+</pre></div>
+</div>
+</div>
+<div class="section" id="id12">
+<h3>c++ 服务端：<a class="headerlink" href="#id12" title="Permalink to this headline"></a></h3>
+<div class="section" id="vad">
+<h4>VAD<a class="headerlink" href="#vad" title="Permalink to this headline"></a></h4>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// VAD模型的使用分为FsmnVadInit和FsmnVadInfer两个步骤：</span>
+<span class="n">FUNASR_HANDLE</span> <span class="n">vad_hanlde</span><span class="o">=</span><span class="n">FsmnVadInit</span><span class="p">(</span><span class="n">model_path</span><span class="p">,</span> <span class="n">thread_num</span><span class="p">);</span>
+<span class="c1">// 其中：model_path 包含&quot;model-dir&quot;、&quot;quantize&quot;，thread_num为onnx线程数；</span>
+<span class="n">FUNASR_RESULT</span> <span class="n">result</span><span class="o">=</span><span class="n">FsmnVadInfer</span><span class="p">(</span><span class="n">vad_hanlde</span><span class="p">,</span> <span class="n">wav_file</span><span class="p">.</span><span class="n">c_str</span><span class="p">(),</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">16000</span><span class="p">);</span>
+<span class="c1">// 其中：vad_hanlde为FunOfflineInit返回值，wav_file为音频路径，sampling_rate为采样率(默认16k)</span>
+</pre></div>
+</div>
+<p>使用示例详见：https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/onnxruntime/bin/funasr-onnx-offline-vad.cpp</p>
+</div>
+<div class="section" id="asr">
+<h4>ASR<a class="headerlink" href="#asr" title="Permalink to this headline"></a></h4>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>// ASR模型的使用分为FunOfflineInit和FunOfflineInfer两个步骤：
+FUNASR_HANDLE asr_hanlde=FunOfflineInit(model_path, thread_num);
+// 其中：model_path 包含&quot;model-dir&quot;、&quot;quantize&quot;，thread_num为onnx线程数；
+FUNASR_RESULT result=FunOfflineInfer(asr_hanlde, wav_file.c_str(), RASR_NONE, NULL, 16000);
+// 其中：asr_hanlde为FunOfflineInit返回值，wav_file为音频路径，sampling_rate为采样率(默认16k)
+</pre></div>
+</div>
+<p>使用示例详见：https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/onnxruntime/bin/funasr-onnx-offline.cpp</p>
+</div>
+<div class="section" id="punc">
+<h4>PUNC<a class="headerlink" href="#punc" title="Permalink to this headline"></a></h4>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>// PUNC模型的使用分为CTTransformerInit和CTTransformerInfer两个步骤：
+FUNASR_HANDLE punc_hanlde=CTTransformerInit(model_path, thread_num);
+// 其中：model_path 包含&quot;model-dir&quot;、&quot;quantize&quot;，thread_num为onnx线程数；
+FUNASR_RESULT result=CTTransformerInfer(punc_hanlde, txt_str.c_str(), RASR_NONE, NULL);
+// 其中：punc_hanlde为CTTransformerInit返回值，txt_str为文本
+</pre></div>
+</div>
+<p>使用示例详见：https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/onnxruntime/bin/funasr-onnx-offline-punc.cpp</p>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Speech Lab, Alibaba Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

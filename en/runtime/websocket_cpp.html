@@ -16,9 +16,7 @@
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Service with grpc-python" href="grpc_python.html" />
-    <link rel="prev" title="Service with websocket-python" href="websocket_python.html" /> 
+    <link rel="search" title="Search" href="../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -47,7 +45,7 @@
 </ul>
 <p class="caption"><span class="caption-text">Quick Start</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../qick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../funasr/quick_start.html">Quick Start</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Academic Egs</span></p>
 <ul>
@@ -74,42 +72,13 @@
 <li class="toctree-l1"><a class="reference internal" href="../model_zoo/huggingface_models.html">Pretrained Models on Huggingface</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Runtime and Service</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="export.html">Export models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="onnxruntime_python.html">ONNXRuntime-python</a></li>
-<li class="toctree-l1"><a class="reference internal" href="libtorch_python.html">Libtorch-python</a></li>
-<li class="toctree-l1"><a class="reference internal" href="html5.html">Html5 server for asr service</a></li>
-<li class="toctree-l1"><a class="reference internal" href="websocket_python.html">Service with websocket-python</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Service with websocket-cpp</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#quick-start">Quick Start</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#docker-image-start">Docker Image start</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#server-start">Server Start</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#client-testing-and-usage">Client Testing and Usage</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#detailed-steps">Detailed Steps</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#dependencies-download-and-install">Dependencies Download and Install</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#build-runtime">Build runtime</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#start-service-deployment">Start Service Deployment</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#api-reference">API-reference：</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#example-of-starting-from-modelscope">Example of Starting from Modelscope</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#example-of-starting-from-local-model">Example of Starting from Local Model</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#client-usage">Client Usage</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#python-client">python-client</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#cpp-client">cpp-client</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#html-client">Html-client</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#java-client">Java-client</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#acknowledge">Acknowledge</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="grpc_python.html">Service with grpc-python</a></li>
-<li class="toctree-l1"><a class="reference internal" href="grpc_cpp.html">Service with grpc-cpp</a></li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../funasr/export/README.html">Export models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../funasr/runtime/python/onnxruntime/README.html">ONNXRuntime-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../funasr/runtime/python/websocket/README.html">Service with websocket-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../funasr/runtime/websocket/readme.html">Service with websocket-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../funasr/runtime/html5/readme.html">Html5 server for asr service</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../funasr/runtime/python/libtorch/README.html">Libtorch-python</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Benchmark and Leaderboard</span></p>
 <ul>
@@ -161,7 +130,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <p>(<a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/websocket/readme_zh.md">简体中文</a>|English)</p>
+  <p>(<a class="reference external" href="./readme_zh">简体中文</a>|English)</p>
 <div class="section" id="service-with-websocket-cpp">
 <h1>Service with websocket-cpp<a class="headerlink" href="#service-with-websocket-cpp" title="Permalink to this headline"></a></h1>
 <div class="section" id="quick-start">
@@ -339,10 +308,7 @@ make
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="websocket_python.html" class="btn btn-neutral float-left" title="Service with websocket-python" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="grpc_python.html" class="btn btn-neutral float-right" title="Service with grpc-python" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 

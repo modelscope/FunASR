@@ -1,0 +1,1 @@
+Please ref to [websocket service](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/websocket)

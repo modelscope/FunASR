@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>语音识别服务Html5客户端访问界面 &mdash; FunASR  documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            FunASR
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/docker.html">Docker</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Quick Start</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Academic Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/asr_recipe.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/punc_recipe.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/vad_recipe.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/sv_recipe.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/sd_recipe.html">Speaker Diarization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">ModelScope Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/asr_pipeline.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/vad_pipeline.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/punc_pipeline.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/tp_pipeline.html">Timestamp Prediction (FA)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/sv_pipeline.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/sd_pipeline.html">Speaker Diarization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/itn_pipeline.html">Inverse Text Normalization (ITN)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Zoo</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_zoo/modelscope_models.html">Pretrained Models on ModelScope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_zoo/huggingface_models.html">Pretrained Models on Huggingface</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Runtime and Service</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../export/README.html">Export models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/onnxruntime/README.html">ONNXRuntime-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/websocket/README.html">Service with websocket-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../websocket/readme.html">Service with websocket-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readme.html">Html5 server for asr service</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/libtorch/README.html">Libtorch-python</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark and Leaderboard</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_onnx.html">CPU Benchmark (ONNX-python)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_onnx_cpp.html">CPU Benchmark (ONNX-cpp)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_libtorch.html">CPU Benchmark (Libtorch)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_pipeline_cer.html">Leaderboard IO</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Funasr Library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/build_task.html">Build custom tasks</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Papers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/papers.html">Papers</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Application</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html">Audio Cut</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html#realtime-speech-recognition">Realtime Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html#audio-chat">Audio Chat</a></li>
+</ul>
+<p class="caption"><span class="caption-text">FQA</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/FQA.html">FQA</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">FunASR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">语音识别服务Html5客户端访问界面</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/funasr/runtime/html5/readme_zh.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <p>(简体中文|<a class="reference internal" href="readme.html"><span class="doc">English</span></a>)</p>
+<div class="section" id="html5">
+<h1>语音识别服务Html5客户端访问界面<a class="headerlink" href="#html5" title="Permalink to this headline"></a></h1>
+<p>服务端部署采用websocket协议，客户端可以支持html5网页访问，支持麦克风输入与文件输入，可以通过如下2种方式访问：</p>
+<ul>
+<li><p>方式一：</p>
+<p>html客户端直连，手动下载客户端（<a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/html5/static">点击此处</a>）至本地，打开<code class="docutils literal notranslate"><span class="pre">index.html</span></code>网页，输入wss地址与端口号</p>
+</li>
+<li><p>方式二：</p>
+<p>html5服务端，自动下载客户端至本地，支持手机等端上访问</p>
+</li>
+</ul>
+<div class="section" id="id1">
+<h2>语音识别服务启动<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h2>
+<p>支持python版本与c++版本服务部署，其中</p>
+<ul>
+<li><p>python版本</p>
+<p>直接部署python pipeline，支持流式实时语音识别模型，离线语音识别模型，流式离线一体化纠错模型，输出带标点文字。单个server，支持单个client。</p>
+</li>
+<li><p>c++版本</p>
+<p>funasr-runtime-sdk，支持一键部署，0.1.0版本，支持离线文件转写。单个server，支持上百路client请求。</p>
+</li>
+</ul>
+<div class="section" id="python">
+<h3>python版本服务启动<a class="headerlink" href="#python" title="Permalink to this headline"></a></h3>
+<div class="section" id="id2">
+<h4>安装依赖环境<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h4>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip3 install -U modelscope funasr flask
+<span class="c1"># 中国大陆用户，如果遇到网络问题，可以通过下面指令安装：</span>
+<span class="c1"># pip3 install -U modelscope funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple</span>
+git clone https://github.com/alibaba/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> FunASR
+</pre></div>
+</div>
+</div>
+<div class="section" id="asr">
+<h4>启动ASR服务<a class="headerlink" href="#asr" title="Permalink to this headline"></a></h4>
+</div>
+<div class="section" id="wss">
+<h4>wss方式<a class="headerlink" href="#wss" title="Permalink to this headline"></a></h4>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> funasr/runtime/python/websocket
+python funasr_wss_server.py --port <span class="m">10095</span>
+</pre></div>
+</div>
+<p>详细参数配置与解析（<a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket">点击此处</a>）</p>
+</div>
+<div class="section" id="id3">
+<h4>html5服务（可选）<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h4>
+<p>如果需要使用上面所说的客户端方式二，进行访问，可以启动html5服务</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>h5Server.py <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--host HOST<span class="o">]</span> <span class="o">[</span>--port PORT<span class="o">]</span> <span class="o">[</span>--certfile CERTFILE<span class="o">]</span> <span class="o">[</span>--keyfile KEYFILE<span class="o">]</span>             
+</pre></div>
+</div>
+<p>例子如下，需要注意ip地址，如果从其他设备访问需求（例如手机端），需要将ip地址设为真实公网ip</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> funasr/runtime/html5
+python h5Server.py --host <span class="m">0</span>.0.0.0 --port <span class="m">1337</span>
+</pre></div>
+</div>
+<p>启动后，在浏览器中输入（<a class="reference external" href="https://127.0.0.1:1337/static/index.html">https://127.0.0.1:1337/static/index.html</a>）即可访问</p>
+</div>
+</div>
+<div class="section" id="c">
+<h3>c++ 版本服务启动<a class="headerlink" href="#c" title="Permalink to this headline"></a></h3>
+<p>由于c++依赖环境较多，建议采用docker部署，支持一键启动服务</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy-offline-cpu-zh.sh<span class="p">;</span>
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace /root/funasr-runtime-resources
+</pre></div>
+</div>
+<p>详细参数配置与解析（<a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/docs/SDK_tutorial_zh.md">点击此处</a>）</p>
+</div>
+</div>
+<div class="section" id="id4">
+<h2>客户端测试<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h2>
+<div class="section" id="id5">
+<h3>方式一<a class="headerlink" href="#id5" title="Permalink to this headline"></a></h3>
+<p>html客户端直连，手动下载客户端（<a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/html5/static">点击此处</a>）至本地，打开<code class="docutils literal notranslate"><span class="pre">index.html</span></code>网页，输入wss地址与端口号即可使用</p>
+</div>
+<div class="section" id="id6">
+<h3>方式二<a class="headerlink" href="#id6" title="Permalink to this headline"></a></h3>
+<p>html5服务端，自动下载客户端至本地，支持手机等端上访问，ip地址需要与html5 server保持一致，如果是本地机器，可以用127.0.0.1</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>https://127.0.0.1:1337/static/index.html
+</pre></div>
+</div>
+<p>输入wss地址与端口号即可使用</p>
+</div>
+</div>
+<div class="section" id="acknowledge">
+<h2>Acknowledge<a class="headerlink" href="#acknowledge" title="Permalink to this headline"></a></h2>
+<ol class="simple">
+<li><p>This project is maintained by <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR">FunASR community</a>.</p></li>
+<li><p>We acknowledge <a class="reference external" href="http://www.aihealthx.com/">AiHealthx</a> for contributing the html5 demo.</p></li>
+</ol>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Speech Lab, Alibaba Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

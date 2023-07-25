@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inference with Triton &mdash; FunASR  documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            FunASR
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/docker.html">Docker</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Quick Start</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Academic Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/asr_recipe.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/punc_recipe.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/vad_recipe.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/sv_recipe.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/sd_recipe.html">Speaker Diarization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">ModelScope Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/asr_pipeline.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/vad_pipeline.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/punc_pipeline.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/tp_pipeline.html">Timestamp Prediction (FA)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/sv_pipeline.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/sd_pipeline.html">Speaker Diarization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/itn_pipeline.html">Inverse Text Normalization (ITN)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Zoo</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_zoo/modelscope_models.html">Pretrained Models on ModelScope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_zoo/huggingface_models.html">Pretrained Models on Huggingface</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Runtime and Service</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../export/README.html">Export models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/onnxruntime/README.html">ONNXRuntime-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/websocket/README.html">Service with websocket-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../websocket/readme.html">Service with websocket-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../html5/readme.html">Html5 server for asr service</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/libtorch/README.html">Libtorch-python</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark and Leaderboard</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_onnx.html">CPU Benchmark (ONNX-python)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_onnx_cpp.html">CPU Benchmark (ONNX-cpp)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_libtorch.html">CPU Benchmark (Libtorch)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_pipeline_cer.html">Leaderboard IO</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Funasr Library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/build_task.html">Build custom tasks</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Papers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/papers.html">Papers</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Application</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html">Audio Cut</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html#realtime-speech-recognition">Realtime Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html#audio-chat">Audio Chat</a></li>
+</ul>
+<p class="caption"><span class="caption-text">FQA</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/FQA.html">FQA</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">FunASR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Inference with Triton</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/funasr/runtime/triton_gpu/README.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="inference-with-triton">
+<h1>Inference with Triton<a class="headerlink" href="#inference-with-triton" title="Permalink to this headline"></a></h1>
+<div class="section" id="steps">
+<h2>Steps:<a class="headerlink" href="#steps" title="Permalink to this headline"></a></h2>
+<ol class="simple">
+<li><p>Prepare model repo files</p></li>
+</ol>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git-lfs install
+git clone https://www.modelscope.cn/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch.git
+
+<span class="nv">pretrained_model_dir</span><span class="o">=</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
+
+cp <span class="nv">$pretrained_model_dir</span>/am.mvn ./model_repo_paraformer_large_offline/feature_extractor/
+cp <span class="nv">$pretrained_model_dir</span>/config.yaml ./model_repo_paraformer_large_offline/feature_extractor/
+
+<span class="c1"># Refer here to get model.onnx (https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/export/README.md)</span>
+cp &lt;exported_onnx_dir&gt;/model.onnx ./model_repo_paraformer_large_offline/encoder/1/
+</pre></div>
+</div>
+<p>Log of directory tree:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>model_repo_paraformer_large_offline/
+<span class="p">|</span>-- encoder
+<span class="p">|</span>   <span class="p">|</span>-- <span class="m">1</span>
+<span class="p">|</span>   <span class="p">|</span>   <span class="sb">`</span>-- model.onnx
+<span class="p">|</span>   <span class="sb">`</span>-- config.pbtxt
+<span class="p">|</span>-- feature_extractor
+<span class="p">|</span>   <span class="p">|</span>-- <span class="m">1</span>
+<span class="p">|</span>   <span class="p">|</span>   <span class="sb">`</span>-- model.py
+<span class="p">|</span>   <span class="p">|</span>-- config.pbtxt
+<span class="p">|</span>   <span class="p">|</span>-- am.mvn
+<span class="p">|</span>   <span class="sb">`</span>-- config.yaml
+<span class="p">|</span>-- infer_pipeline
+<span class="p">|</span>   <span class="p">|</span>-- <span class="m">1</span>
+<span class="p">|</span>   <span class="sb">`</span>-- config.pbtxt
+<span class="sb">`</span>-- scoring
+    <span class="p">|</span>-- <span class="m">1</span>
+    <span class="p">|</span>   <span class="sb">`</span>-- model.py
+    <span class="sb">`</span>-- config.pbtxt
+
+<span class="m">8</span> directories, <span class="m">9</span> files
+</pre></div>
+</div>
+<ol class="simple">
+<li><p>Follow below instructions to launch triton server</p></li>
+</ol>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># using docker image Dockerfile/Dockerfile.server</span>
+docker build . -f Dockerfile/Dockerfile.server -t triton-paraformer:23.01 
+docker run -it --rm --name <span class="s2">&quot;paraformer_triton_server&quot;</span> --gpus all -v &lt;path_host/model_repo_paraformer_large_offline&gt;:/workspace/ --shm-size 1g --net host triton-paraformer:23.01 
+
+<span class="c1"># launch the service </span>
+tritonserver --model-repository /workspace/model_repo_paraformer_large_offline <span class="se">\</span>
+             --pinned-memory-pool-byte-size<span class="o">=</span><span class="m">512000000</span> <span class="se">\</span>
+             --cuda-memory-pool-byte-size<span class="o">=</span><span class="m">0</span>:1024000000
+</pre></div>
+</div>
+</div>
+<div class="section" id="performance-benchmark">
+<h2>Performance benchmark<a class="headerlink" href="#performance-benchmark" title="Permalink to this headline"></a></h2>
+<p>Benchmark <a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary">speech_paraformer</a> based on Aishell1 test set with a single V100, the total audio duration is 36108.919 seconds.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># For client container:</span>
+docker run -it --rm --name <span class="s2">&quot;client_test&quot;</span> --net host --gpus all -v &lt;path_host/triton_gpu/client&gt;:/workpace/ soar97/triton-k2:22.12.1 <span class="c1"># noqa</span>
+<span class="c1"># For aishell manifests:</span>
+apt-get install git-lfs
+git-lfs install
+git clone https://huggingface.co/csukuangfj/aishell-test-dev-manifests
+sudo mkdir -p /root/fangjun/open-source/icefall-aishell/egs/aishell/ASR/download/aishell
+tar xf ./aishell-test-dev-manifests/data_aishell.tar.gz -C /root/fangjun/open-source/icefall-aishell/egs/aishell/ASR/download/aishell/ <span class="c1"># noqa</span>
+
+<span class="nv">serveraddr</span><span class="o">=</span>localhost
+<span class="nv">manifest_path</span><span class="o">=</span>/workspace/aishell-test-dev-manifests/data/fbank/aishell_cuts_test.jsonl.gz
+<span class="nv">num_task</span><span class="o">=</span><span class="m">60</span>
+python3 client/decode_manifest_triton.py <span class="se">\</span>
+    --server-addr <span class="nv">$serveraddr</span> <span class="se">\</span>
+    --compute-cer <span class="se">\</span>
+    --model-name infer_pipeline <span class="se">\</span>
+    --num-tasks <span class="nv">$num_task</span> <span class="se">\</span>
+    --manifest-filename <span class="nv">$manifest_path</span>
+</pre></div>
+</div>
+<p>(Note: The service has been fully warm up.)
+|concurrent-tasks | processing time(s) | RTF |
+|———-|——————–|————|
+| 60 (onnx fp32)                | 116.0 | 0.0032|</p>
+</div>
+</div>
+<div class="section" id="acknowledge">
+<h1>Acknowledge<a class="headerlink" href="#acknowledge" title="Permalink to this headline"></a></h1>
+<p>This part originates from NVIDIA CISI project. We also have TTS and NLP solutions deployed on triton inference server. If you are interested, please contact us.</p>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Speech Lab, Alibaba Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

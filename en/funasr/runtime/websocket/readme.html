@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Service with websocket-cpp &mdash; FunASR  documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Html5 server for asr service" href="../html5/readme.html" />
+    <link rel="prev" title="Service with websocket-python" href="../python/websocket/README.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            FunASR
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/docker.html">Docker</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Quick Start</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Academic Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/asr_recipe.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/punc_recipe.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/vad_recipe.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/sv_recipe.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/sd_recipe.html">Speaker Diarization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">ModelScope Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/asr_pipeline.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/vad_pipeline.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/punc_pipeline.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/tp_pipeline.html">Timestamp Prediction (FA)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/sv_pipeline.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/sd_pipeline.html">Speaker Diarization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/itn_pipeline.html">Inverse Text Normalization (ITN)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Zoo</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_zoo/modelscope_models.html">Pretrained Models on ModelScope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_zoo/huggingface_models.html">Pretrained Models on Huggingface</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Runtime and Service</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../export/README.html">Export models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/onnxruntime/README.html">ONNXRuntime-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/websocket/README.html">Service with websocket-python</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Service with websocket-cpp</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#quick-start">Quick Start</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#docker-image-start">Docker Image start</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#server-start">Server Start</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#client-testing-and-usage">Client Testing and Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#detailed-steps">Detailed Steps</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#dependencies-download-and-install">Dependencies Download and Install</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#build-runtime">Build runtime</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#start-service-deployment">Start Service Deployment</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#api-reference">API-reference：</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#example-of-starting-from-modelscope">Example of Starting from Modelscope</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#example-of-starting-from-local-model">Example of Starting from Local Model</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#client-usage">Client Usage</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#python-client">python-client</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#cpp-client">cpp-client</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#html-client">Html-client</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#java-client">Java-client</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#acknowledge">Acknowledge</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../html5/readme.html">Html5 server for asr service</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/libtorch/README.html">Libtorch-python</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark and Leaderboard</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_onnx.html">CPU Benchmark (ONNX-python)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_onnx_cpp.html">CPU Benchmark (ONNX-cpp)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_libtorch.html">CPU Benchmark (Libtorch)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_pipeline_cer.html">Leaderboard IO</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Funasr Library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/build_task.html">Build custom tasks</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Papers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/papers.html">Papers</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Application</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html">Audio Cut</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html#realtime-speech-recognition">Realtime Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html#audio-chat">Audio Chat</a></li>
+</ul>
+<p class="caption"><span class="caption-text">FQA</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/FQA.html">FQA</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">FunASR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Service with websocket-cpp</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/funasr/runtime/websocket/readme.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <p>(<a class="reference internal" href="readme_zh.html"><span class="doc">简体中文</span></a>|English)</p>
+<div class="section" id="service-with-websocket-cpp">
+<h1>Service with websocket-cpp<a class="headerlink" href="#service-with-websocket-cpp" title="Permalink to this headline"></a></h1>
+<div class="section" id="quick-start">
+<h2>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline"></a></h2>
+<div class="section" id="docker-image-start">
+<h3>Docker Image start<a class="headerlink" href="#docker-image-start" title="Permalink to this headline"></a></h3>
+<p>Pull and start the FunASR runtime-SDK Docker image using the following command:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.1.0
+
+sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span class="o">=</span><span class="nb">true</span> -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.1.0
+</pre></div>
+</div>
+<p>If you have not installed Docker, please refer to <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/installation/docker.html">Docker Installation</a>.</p>
+</div>
+<div class="section" id="server-start">
+<h3>Server Start<a class="headerlink" href="#server-start" title="Permalink to this headline"></a></h3>
+<p>After Docker is started, start the funasr-wss-server service program:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> FunASR/funasr/runtime
+./run_server.sh <span class="se">\</span>
+  --download-model-dir /workspace/models <span class="se">\</span>
+  --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
+  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  <span class="se">\</span>
+  --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
+</pre></div>
+</div>
+<p>For detailed server parameters, please refer to [Server Parameter Introduction](#Server Parameter Introduction).</p>
+</div>
+<div class="section" id="client-testing-and-usage">
+<h3>Client Testing and Usage<a class="headerlink" href="#client-testing-and-usage" title="Permalink to this headline"></a></h3>
+<p>Download the client test tool directory samples:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz
+</pre></div>
+</div>
+<p>We take the Python language client as an example to explain. It supports various audio formats (.wav, .pcm, .mp3, etc.), video input (.mp4, etc.), and multi-file list wav.scp input. For other versions of clients, please refer to the document ([click here](#Detailed Usage of Clients)). For customized service deployment, please refer to [How to Customize Service Deployment](#How to Customize Service Deployment).</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 wss_client_asr.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode offline --audio_in <span class="s2">&quot;../audio/asr_example.wav&quot;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="detailed-steps">
+<h2>Detailed Steps<a class="headerlink" href="#detailed-steps" title="Permalink to this headline"></a></h2>
+<div class="section" id="dependencies-download-and-install">
+<h3>Dependencies Download and Install<a class="headerlink" href="#dependencies-download-and-install" title="Permalink to this headline"></a></h3>
+<p>The third-party libraries have been pre-installed in Docker. If not using Docker, please download and install them manually (<a class="reference internal" href="requirements_install.html"><span class="doc">Download and Install Third-Party Libraries</span></a>).</p>
+</div>
+<div class="section" id="build-runtime">
+<h3>Build runtime<a class="headerlink" href="#build-runtime" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/alibaba-damo-academy/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> FunASR/funasr/runtime/websocket
+mkdir build <span class="o">&amp;&amp;</span> <span class="nb">cd</span> build
+cmake  -DCMAKE_BUILD_TYPE<span class="o">=</span>release .. -DONNXRUNTIME_DIR<span class="o">=</span>/path/to/onnxruntime-linux-x64-1.14.0 -DFFMPEG_DIR<span class="o">=</span>/path/to/ffmpeg-N-111383-g20b8688092-linux64-gpl-shared
+make
+</pre></div>
+</div>
+</div>
+<div class="section" id="start-service-deployment">
+<h3>Start Service Deployment<a class="headerlink" href="#start-service-deployment" title="Permalink to this headline"></a></h3>
+<div class="section" id="api-reference">
+<h4>API-reference：<a class="headerlink" href="#api-reference" title="Permalink to this headline"></a></h4>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--download-model-dir Model download address, download the model from Modelscope by setting the model ID. If starting from a local model, this parameter can be left out.
+--model-dir ASR model ID in Modelscope or the absolute path of local model
+--quantize True for quantized ASR model, False for non-quantized ASR model. Default is True.
+--vad-dir VAD model ID in Modelscope or the absolute path of local model
+--vad-quant True for quantized VAD model, False for non-quantized VAD model. Default is True.
+--punc-dir PUNC model ID in Modelscope or the absolute path of local model
+--punc-quant True for quantized PUNC model, False for non-quantized PUNC model. Default is True.
+--port Port number for the server to listen on. Default is 10095.
+--decoder-thread-num Number of inference threads started by the server. Default is 8.
+--io-thread-num Number of IO threads started by the server. Default is 1.
+--certfile SSL certificate file. Default is: ../../../ssl_key/server.crt.
+--keyfile SSL key file. Default is: ../../../ssl_key/server.key.
+</pre></div>
+</div>
+</div>
+<div class="section" id="example-of-starting-from-modelscope">
+<h4>Example of Starting from Modelscope<a class="headerlink" href="#example-of-starting-from-modelscope" title="Permalink to this headline"></a></h4>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-wss-server  <span class="se">\</span>
+  --download-model-dir /workspace/models <span class="se">\</span>
+  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx <span class="se">\</span>
+  --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
+  --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
+</pre></div>
+</div>
+<p>Note: In the above example, <code class="docutils literal notranslate"><span class="pre">model-dir</span></code>，<code class="docutils literal notranslate"><span class="pre">vad-dir</span></code>，<code class="docutils literal notranslate"><span class="pre">punc-dir</span></code> are the model names in Modelscope, downloaded directly from Modelscope and exported as quantized onnx. If starting from a local model, please change the parameter to the absolute path of the local model.</p>
+</div>
+<div class="section" id="example-of-starting-from-local-model">
+<h4>Example of Starting from Local Model<a class="headerlink" href="#example-of-starting-from-local-model" title="Permalink to this headline"></a></h4>
+<div class="section" id="export-the-model">
+<h5>Export the Model<a class="headerlink" href="#export-the-model" title="Permalink to this headline"></a></h5>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model <span class="se">\</span>
+--export-dir ./export <span class="se">\</span>
+--type onnx <span class="se">\</span>
+--quantize True <span class="se">\</span>
+--model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch <span class="se">\</span>
+--model-name damo/speech_fsmn_vad_zh-cn-16k-common-pytorch <span class="se">\</span>
+--model-name damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch
+</pre></div>
+</div>
+<p>Export Detailed Introduction（<a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export">docs</a>）</p>
+</div>
+<div class="section" id="start-the-service">
+<h5>Start the Service<a class="headerlink" href="#start-the-service" title="Permalink to this headline"></a></h5>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-wss-server  <span class="se">\</span>
+  --download-model-dir /workspace/models <span class="se">\</span>
+  --model-dir ./exportdamo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx <span class="se">\</span>
+  --vad-dir ./exportdamo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
+  --punc-dir ./export/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="client-usage">
+<h3>Client Usage<a class="headerlink" href="#client-usage" title="Permalink to this headline"></a></h3>
+<p>Download the client test tool directory <a class="reference external" href="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz">samples</a></p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz
+</pre></div>
+</div>
+<p>After deploying the FunASR service on the server, you can test and use the offline file transcription service through the following steps. Currently, the following programming language client is supported:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#python-client"><span class="std std-ref">Python</span></a></p></li>
+<li><p><a class="reference internal" href="#cpp-client"><span class="std std-ref">CPP</span></a></p></li>
+<li><p><a class="reference internal" href="#html-client"><span class="std std-ref">html</span></a></p></li>
+<li><p><a class="reference internal" href="#java-client"><span class="std std-ref">Java</span></a></p></li>
+</ul>
+<div class="section" id="python-client">
+<h4>python-client<a class="headerlink" href="#python-client" title="Permalink to this headline"></a></h4>
+<p>If you want to run the client directly for testing, you can refer to the following simple instructions, taking the Python version as an example:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 wss_client_asr.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode offline --audio_in <span class="s2">&quot;../audio/asr_example.wav&quot;</span> --output_dir <span class="s2">&quot;./results&quot;</span>
+</pre></div>
+</div>
+<p>API-reference</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--host: IP address of the machine where FunASR runtime-SDK service is deployed. The default value is the IP address of the local machine (127.0.0.1). If the client and service are not on the same server, it needs to be changed to the IP address of the deployment machine.
+--port: The port number of the deployed service is 10095.
+--mode: &quot;offline&quot; means offline file transcription.
+--audio_in: The audio file that needs to be transcribed, which supports file path and file list (wav.scp).
+--output_dir: The path to save the recognition result.
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="cpp-client">
+<h3>cpp-client<a class="headerlink" href="#cpp-client" title="Permalink to this headline"></a></h3>
+<p>After entering the directory samples/cpp, you can test it with CPP, as follows:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-wss-client --server-ip <span class="m">127</span>.0.0.1 --port <span class="m">10095</span> --wav-path ../audio/asr_example.wav
+</pre></div>
+</div>
+<p>API-reference:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--server-ip: The IP address of the machine where FunASR runtime-SDK service is deployed. The default value is the IP address of the local machine (127.0.0.1). If the client and service are not on the same server, it needs to be changed to the IP address of the deployment machine.
+--port: The port number of the deployed service is 10095.
+--wav-path: The audio file that needs to be transcribed, which supports file path.
+</pre></div>
+</div>
+</div>
+<div class="section" id="html-client">
+<h3>Html-client<a class="headerlink" href="#html-client" title="Permalink to this headline"></a></h3>
+<p>Open <code class="docutils literal notranslate"><span class="pre">html/static/index.html</span></code> in the browser, and you can see the following page, which supports microphone input and file upload for direct experience.</p>
+<img src="images/html.png"  width="900"/></div>
+<div class="section" id="java-client">
+<h3>Java-client<a class="headerlink" href="#java-client" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>FunasrWsClient --host localhost --port <span class="m">10095</span> --audio_in ./asr_example.wav --mode offline
+</pre></div>
+</div>
+<p>For more details, please refer to the <a class="reference internal" href="../java/readme.html"><span class="doc">documentation</span></a></p>
+</div>
+</div>
+<div class="section" id="acknowledge">
+<h2>Acknowledge<a class="headerlink" href="#acknowledge" title="Permalink to this headline"></a></h2>
+<ol class="simple">
+<li><p>This project is maintained by <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR">FunASR community</a>.</p></li>
+<li><p>We acknowledge <a class="reference external" href="https://github.com/zhaomingwork/FunASR/tree/add-offline-websocket-srv/funasr/runtime/websocket">zhaoming</a> for contributing the websocket(cpp-api).</p></li>
+</ol>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../python/websocket/README.html" class="btn btn-neutral float-left" title="Service with websocket-python" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../html5/readme.html" class="btn btn-neutral float-right" title="Html5 server for asr service" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Speech Lab, Alibaba Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

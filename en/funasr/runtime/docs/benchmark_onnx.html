@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CPU Benchmark (ONNX-python) &mdash; FunASR  documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            FunASR
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/docker.html">Docker</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Quick Start</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Academic Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/asr_recipe.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/punc_recipe.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/vad_recipe.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/sv_recipe.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/sd_recipe.html">Speaker Diarization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">ModelScope Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/asr_pipeline.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/vad_pipeline.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/punc_pipeline.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/tp_pipeline.html">Timestamp Prediction (FA)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/sv_pipeline.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/sd_pipeline.html">Speaker Diarization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/itn_pipeline.html">Inverse Text Normalization (ITN)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Zoo</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_zoo/modelscope_models.html">Pretrained Models on ModelScope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_zoo/huggingface_models.html">Pretrained Models on Huggingface</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Runtime and Service</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../export/README.html">Export models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/onnxruntime/README.html">ONNXRuntime-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/websocket/README.html">Service with websocket-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../websocket/readme.html">Service with websocket-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../html5/readme.html">Html5 server for asr service</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/libtorch/README.html">Libtorch-python</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark and Leaderboard</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_onnx.html">CPU Benchmark (ONNX-python)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_onnx_cpp.html">CPU Benchmark (ONNX-cpp)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_libtorch.html">CPU Benchmark (Libtorch)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_pipeline_cer.html">Leaderboard IO</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Funasr Library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/build_task.html">Build custom tasks</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Papers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/papers.html">Papers</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Application</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html">Audio Cut</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html#realtime-speech-recognition">Realtime Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html#audio-chat">Audio Chat</a></li>
+</ul>
+<p class="caption"><span class="caption-text">FQA</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/FQA.html">FQA</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">FunASR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">CPU Benchmark (ONNX-python)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/funasr/runtime/docs/benchmark_onnx.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="cpu-benchmark-onnx-python">
+<h1>CPU Benchmark (ONNX-python)<a class="headerlink" href="#cpu-benchmark-onnx-python" title="Permalink to this headline"></a></h1>
+<div class="section" id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline"></a></h2>
+<div class="section" id="data-set">
+<h3>Data set:<a class="headerlink" href="#data-set" title="Permalink to this headline"></a></h3>
+<p>Aishell1 <a class="reference external" href="https://www.openslr.org/33/">test set</a> , the total audio duration is 36108.919 seconds.</p>
+</div>
+<div class="section" id="tools">
+<h3>Tools<a class="headerlink" href="#tools" title="Permalink to this headline"></a></h3>
+<div class="section" id="install-requirements">
+<h4>Install Requirements<a class="headerlink" href="#install-requirements" title="Permalink to this headline"></a></h4>
+<p>Install ModelScope and FunASR</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install -U modelscope funasr
+<span class="c1"># For the users in China, you could install with the command:</span>
+<span class="c1">#pip install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple</span>
+</pre></div>
+</div>
+<p>Install requirements</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/alibaba-damo-academy/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> FunASR
+<span class="nb">cd</span> funasr/runtime/python/utils
+pip install -r requirements.txt
+</pre></div>
+</div>
+</div>
+<div class="section" id="recipe">
+<h4>Recipe<a class="headerlink" href="#recipe" title="Permalink to this headline"></a></h4>
+<div class="section" id="test-rtf">
+<h5>test_rtf<a class="headerlink" href="#test-rtf" title="Permalink to this headline"></a></h5>
+<p>set the model, data path and output_dir</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>nohup bash test_rtf.sh <span class="p">&amp;</span>&gt; log.txt <span class="p">&amp;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="test-cer">
+<h5>test_cer<a class="headerlink" href="#test-cer" title="Permalink to this headline"></a></h5>
+<p>set the model, data path and output_dir</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>nohup bash test_cer.sh <span class="p">&amp;</span>&gt; log.txt <span class="p">&amp;</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="paraformer-large">
+<h2><a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary">Paraformer-large</a><a class="headerlink" href="#paraformer-large" title="Permalink to this headline"></a></h2>
+<p>Number of Parameter: 220M</p>
+<p>Storage size: 880MB</p>
+<p>Storage size after int8-quant: 237MB</p>
+<p>CER: 1.95%</p>
+<p>CER after int8-quant: 1.95%</p>
+<div class="section" id="intel-r-xeon-r-platinum-8369b-cpu-2-90ghz-16core-32processor-with-avx512-vnni">
+<h3>Intel(R) Xeon(R) Platinum 8369B CPU &#64; 2.90GHz   16core-32processor    with avx512_vnni<a class="headerlink" href="#intel-r-xeon-r-platinum-8369b-cpu-2-90ghz-16core-32processor-with-avx512-vnni" title="Permalink to this headline"></a></h3>
+<table border="1" class="docutils">
+<thead>
+<tr>
+<th style="text-align: center;">concurrent-tasks</th>
+<th style="text-align: center;">processing time(s)</th>
+<th style="text-align: center;">RTF</th>
+<th style="text-align: center;">Speedup Rate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1 (onnx fp32)</td>
+<td style="text-align: center;">2806</td>
+<td style="text-align: center;">0.0777</td>
+<td style="text-align: center;">12.9</td>
+</tr>
+<tr>
+<td style="text-align: center;">1 (onnx int8)</td>
+<td style="text-align: center;">1611</td>
+<td style="text-align: center;">0.0446</td>
+<td style="text-align: center;">22.4</td>
+</tr>
+<tr>
+<td style="text-align: center;">8 (onnx fp32)</td>
+<td style="text-align: center;">538</td>
+<td style="text-align: center;">0.0149</td>
+<td style="text-align: center;">67.1</td>
+</tr>
+<tr>
+<td style="text-align: center;">8 (onnx int8)</td>
+<td style="text-align: center;">210</td>
+<td style="text-align: center;">0.0058</td>
+<td style="text-align: center;">172.4</td>
+</tr>
+<tr>
+<td style="text-align: center;">16 (onnx fp32)</td>
+<td style="text-align: center;">288</td>
+<td style="text-align: center;">0.0080</td>
+<td style="text-align: center;">125.2</td>
+</tr>
+<tr>
+<td style="text-align: center;">16 (onnx int8)</td>
+<td style="text-align: center;">117</td>
+<td style="text-align: center;">0.0032</td>
+<td style="text-align: center;">309.9</td>
+</tr>
+<tr>
+<td style="text-align: center;">32 (onnx fp32)</td>
+<td style="text-align: center;">167</td>
+<td style="text-align: center;">0.0046</td>
+<td style="text-align: center;">216.5</td>
+</tr>
+<tr>
+<td style="text-align: center;">32 (onnx int8)</td>
+<td style="text-align: center;">86</td>
+<td style="text-align: center;">0.0024</td>
+<td style="text-align: center;">420.0</td>
+</tr>
+<tr>
+<td style="text-align: center;">64 (onnx fp32)</td>
+<td style="text-align: center;">158</td>
+<td style="text-align: center;">0.0044</td>
+<td style="text-align: center;">228.1</td>
+</tr>
+<tr>
+<td style="text-align: center;">64 (onnx int8)</td>
+<td style="text-align: center;">82</td>
+<td style="text-align: center;">0.0023</td>
+<td style="text-align: center;">442.8</td>
+</tr>
+<tr>
+<td style="text-align: center;">96 (onnx fp32)</td>
+<td style="text-align: center;">151</td>
+<td style="text-align: center;">0.0042</td>
+<td style="text-align: center;">238.0</td>
+</tr>
+<tr>
+<td style="text-align: center;">96 (onnx int8)</td>
+<td style="text-align: center;">80</td>
+<td style="text-align: center;">0.0022</td>
+<td style="text-align: center;">452.0</td>
+</tr>
+</tbody>
+</table></div>
+<div class="section" id="intel-r-xeon-r-platinum-8269cy-cpu-2-50ghz-16core-32processor-with-avx512-vnni">
+<h3>Intel(R) Xeon(R) Platinum 8269CY CPU &#64; 2.50GHz   16core-32processor    with avx512_vnni<a class="headerlink" href="#intel-r-xeon-r-platinum-8269cy-cpu-2-50ghz-16core-32processor-with-avx512-vnni" title="Permalink to this headline"></a></h3>
+<table border="1" class="docutils">
+<thead>
+<tr>
+<th style="text-align: center;">concurrent-tasks</th>
+<th style="text-align: center;">processing time(s)</th>
+<th style="text-align: center;">RTF</th>
+<th style="text-align: center;">Speedup Rate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1 (onnx fp32)</td>
+<td style="text-align: center;">2613</td>
+<td style="text-align: center;">0.0724</td>
+<td style="text-align: center;">13.8</td>
+</tr>
+<tr>
+<td style="text-align: center;">1 (onnx int8)</td>
+<td style="text-align: center;">1321</td>
+<td style="text-align: center;">0.0366</td>
+<td style="text-align: center;">22.4</td>
+</tr>
+<tr>
+<td style="text-align: center;">32 (onnx fp32)</td>
+<td style="text-align: center;">170</td>
+<td style="text-align: center;">0.0047</td>
+<td style="text-align: center;">212.7</td>
+</tr>
+<tr>
+<td style="text-align: center;">32 (onnx int8)</td>
+<td style="text-align: center;">89</td>
+<td style="text-align: center;">0.0025</td>
+<td style="text-align: center;">407.0</td>
+</tr>
+<tr>
+<td style="text-align: center;">64 (onnx fp32)</td>
+<td style="text-align: center;">166</td>
+<td style="text-align: center;">0.0046</td>
+<td style="text-align: center;">217.1</td>
+</tr>
+<tr>
+<td style="text-align: center;">64 (onnx int8)</td>
+<td style="text-align: center;">87</td>
+<td style="text-align: center;">0.0024</td>
+<td style="text-align: center;">414.7</td>
+</tr>
+</tbody>
+</table></div>
+<div class="section" id="intel-r-xeon-r-platinum-8163-cpu-2-50ghz-32core-64processor-without-avx512-vnni">
+<h3>Intel(R) Xeon(R) Platinum 8163 CPU &#64; 2.50GHz    32core-64processor   without avx512_vnni<a class="headerlink" href="#intel-r-xeon-r-platinum-8163-cpu-2-50ghz-32core-64processor-without-avx512-vnni" title="Permalink to this headline"></a></h3>
+<table border="1" class="docutils">
+<thead>
+<tr>
+<th style="text-align: center;">concurrent-tasks</th>
+<th style="text-align: center;">processing time(s)</th>
+<th style="text-align: center;">RTF</th>
+<th style="text-align: center;">Speedup Rate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1 (onnx fp32)</td>
+<td style="text-align: center;">2959</td>
+<td style="text-align: center;">0.0820</td>
+<td style="text-align: center;">12.2</td>
+</tr>
+<tr>
+<td style="text-align: center;">1 (onnx int8)</td>
+<td style="text-align: center;">2814</td>
+<td style="text-align: center;">0.0778</td>
+<td style="text-align: center;">12.8</td>
+</tr>
+<tr>
+<td style="text-align: center;">16 (onnx fp32)</td>
+<td style="text-align: center;">373</td>
+<td style="text-align: center;">0.0103</td>
+<td style="text-align: center;">96.9</td>
+</tr>
+<tr>
+<td style="text-align: center;">16 (onnx int8)</td>
+<td style="text-align: center;">331</td>
+<td style="text-align: center;">0.0091</td>
+<td style="text-align: center;">109.0</td>
+</tr>
+<tr>
+<td style="text-align: center;">32 (onnx fp32)</td>
+<td style="text-align: center;">211</td>
+<td style="text-align: center;">0.0058</td>
+<td style="text-align: center;">171.4</td>
+</tr>
+<tr>
+<td style="text-align: center;">32 (onnx int8)</td>
+<td style="text-align: center;">181</td>
+<td style="text-align: center;">0.0050</td>
+<td style="text-align: center;">200.0</td>
+</tr>
+<tr>
+<td style="text-align: center;">64 (onnx fp32)</td>
+<td style="text-align: center;">153</td>
+<td style="text-align: center;">0.0042</td>
+<td style="text-align: center;">235.9</td>
+</tr>
+<tr>
+<td style="text-align: center;">64 (onnx int8)</td>
+<td style="text-align: center;">103</td>
+<td style="text-align: center;">0.0029</td>
+<td style="text-align: center;">349.9</td>
+</tr>
+<tr>
+<td style="text-align: center;">96 (onnx fp32)</td>
+<td style="text-align: center;">146</td>
+<td style="text-align: center;">0.0041</td>
+<td style="text-align: center;">247.0</td>
+</tr>
+<tr>
+<td style="text-align: center;">96 (onnx int8)</td>
+<td style="text-align: center;">108</td>
+<td style="text-align: center;">0.0030</td>
+<td style="text-align: center;">334.1</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="section" id="paraformer">
+<h2><a class="reference external" href="https://modelscope.cn/models/damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8358-tensorflow1/summary">Paraformer</a><a class="headerlink" href="#paraformer" title="Permalink to this headline"></a></h2>
+<p>Number of Parameter: 68M</p>
+<p>Storage size: 275MB</p>
+<p>Storage size after int8-quant: 81MB</p>
+<p>CER: 3.73%</p>
+<p>CER after int8-quant: 3.78%</p>
+<div class="section" id="id1">
+<h3>Intel(R) Xeon(R) Platinum 8369B CPU &#64; 2.90GHz   16core-32processor    with avx512_vnni<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h3>
+<table border="1" class="docutils">
+<thead>
+<tr>
+<th style="text-align: center;">concurrent-tasks</th>
+<th style="text-align: center;">processing time(s)</th>
+<th style="text-align: center;">RTF</th>
+<th style="text-align: center;">Speedup Rate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1 (onnx fp32)</td>
+<td style="text-align: center;">1173</td>
+<td style="text-align: center;">0.0325</td>
+<td style="text-align: center;">30.8</td>
+</tr>
+<tr>
+<td style="text-align: center;">1 (onnx int8)</td>
+<td style="text-align: center;">976</td>
+<td style="text-align: center;">0.0270</td>
+<td style="text-align: center;">37.0</td>
+</tr>
+<tr>
+<td style="text-align: center;">16 (onnx fp32)</td>
+<td style="text-align: center;">91</td>
+<td style="text-align: center;">0.0025</td>
+<td style="text-align: center;">395.2</td>
+</tr>
+<tr>
+<td style="text-align: center;">16 (onnx int8)</td>
+<td style="text-align: center;">78</td>
+<td style="text-align: center;">0.0022</td>
+<td style="text-align: center;">463.0</td>
+</tr>
+<tr>
+<td style="text-align: center;">32 (onnx fp32)</td>
+<td style="text-align: center;">60</td>
+<td style="text-align: center;">0.0017</td>
+<td style="text-align: center;">598.8</td>
+</tr>
+<tr>
+<td style="text-align: center;">32 (onnx int8)</td>
+<td style="text-align: center;">40</td>
+<td style="text-align: center;">0.0011</td>
+<td style="text-align: center;">892.9</td>
+</tr>
+<tr>
+<td style="text-align: center;">64 (onnx fp32)</td>
+<td style="text-align: center;">55</td>
+<td style="text-align: center;">0.0015</td>
+<td style="text-align: center;">653.6</td>
+</tr>
+<tr>
+<td style="text-align: center;">64 (onnx int8)</td>
+<td style="text-align: center;">31</td>
+<td style="text-align: center;">0.0009</td>
+<td style="text-align: center;">1162.8</td>
+</tr>
+<tr>
+<td style="text-align: center;">96 (onnx fp32)</td>
+<td style="text-align: center;">57</td>
+<td style="text-align: center;">0.0016</td>
+<td style="text-align: center;">632.9</td>
+</tr>
+<tr>
+<td style="text-align: center;">96 (onnx int8)</td>
+<td style="text-align: center;">33</td>
+<td style="text-align: center;">0.0009</td>
+<td style="text-align: center;">1098.9</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Speech Lab, Alibaba Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

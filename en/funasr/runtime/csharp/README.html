@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AliFsmnVadSharp &mdash; FunASR  documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            FunASR
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/docker.html">Docker</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Quick Start</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Academic Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/asr_recipe.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/punc_recipe.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/vad_recipe.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/sv_recipe.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/sd_recipe.html">Speaker Diarization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">ModelScope Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/asr_pipeline.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/vad_pipeline.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/punc_pipeline.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/tp_pipeline.html">Timestamp Prediction (FA)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/sv_pipeline.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/sd_pipeline.html">Speaker Diarization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/itn_pipeline.html">Inverse Text Normalization (ITN)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Zoo</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_zoo/modelscope_models.html">Pretrained Models on ModelScope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_zoo/huggingface_models.html">Pretrained Models on Huggingface</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Runtime and Service</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../export/README.html">Export models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/onnxruntime/README.html">ONNXRuntime-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/websocket/README.html">Service with websocket-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../websocket/readme.html">Service with websocket-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../html5/readme.html">Html5 server for asr service</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/libtorch/README.html">Libtorch-python</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark and Leaderboard</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_onnx.html">CPU Benchmark (ONNX-python)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_onnx_cpp.html">CPU Benchmark (ONNX-cpp)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_libtorch.html">CPU Benchmark (Libtorch)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_pipeline_cer.html">Leaderboard IO</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Funasr Library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/build_task.html">Build custom tasks</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Papers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/papers.html">Papers</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Application</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html">Audio Cut</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html#realtime-speech-recognition">Realtime Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html#audio-chat">Audio Chat</a></li>
+</ul>
+<p class="caption"><span class="caption-text">FQA</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/FQA.html">FQA</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">FunASR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">AliFsmnVadSharp</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/funasr/runtime/csharp/README.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="alifsmnvadsharp">
+<h1>AliFsmnVadSharp<a class="headerlink" href="#alifsmnvadsharp" title="Permalink to this headline"></a></h1>
+<div class="section" id="id1">
+<h2>简介：<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h2>
+<p>项目中使用的VAD模型是阿里巴巴达摩院提供的FSMN-Monophone VAD模型。
+<strong>项目基于Net 6.0，使用C#编写，调用Microsoft.ML.OnnxRuntime对onnx模型进行解码，支持跨平台编译。项目以库的形式进行调用，部署非常方便。</strong>
+VAD整体流程的rtf在0.008左右。</p>
+</div>
+<div class="section" id="id2">
+<h2>用途：<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h2>
+<p>16k中文通用VAD模型：可用于检测长语音片段中有效语音的起止时间点.
+FSMN-Monophone VAD是达摩院语音团队提出的高效语音端点检测模型，用于检测输入音频中有效语音的起止时间点信息，并将检测出来的有效音频片段输入识别引擎进行识别，减少无效语音带来的识别错误。</p>
+</div>
+<div class="section" id="vad-vad-yaml">
+<h2>VAD常用参数调整说明（参考：vad.yaml文件）：<a class="headerlink" href="#vad-vad-yaml" title="Permalink to this headline"></a></h2>
+<p>max_end_silence_time：尾部连续检测到多长时间静音进行尾点判停，参数范围500ms～6000ms，默认值800ms(该值过低容易出现语音提前截断的情况)。
+speech_noise_thres：speech的得分减去noise的得分大于此值则判断为speech，参数范围：（-1,1）
+取值越趋于-1，噪音被误判定为语音的概率越大，FA越高
+取值越趋于+1，语音被误判定为噪音的概率越大，Pmiss越高
+通常情况下，该值会根据当前模型在长语音测试集上的效果取balance</p>
+</div>
+<div class="section" id="id3">
+<h2>模型获取<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h2>
+</div>
+<div class="section" id="id4">
+<h2>调用方式：<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h2>
+<div class="section" id="id5">
+<h3>1.添加项目引用<a class="headerlink" href="#id5" title="Permalink to this headline"></a></h3>
+<p>using AliFsmnVadSharp;</p>
+</div>
+<div class="section" id="id6">
+<h3>2.初始化模型和配置<a class="headerlink" href="#id6" title="Permalink to this headline"></a></h3>
+<div class="highlight-csharp notranslate"><div class="highlight"><pre><span></span><span class="kt">string</span> <span class="n">applicationBase</span> <span class="p">=</span> <span class="n">AppDomain</span><span class="p">.</span><span class="n">CurrentDomain</span><span class="p">.</span><span class="n">BaseDirectory</span><span class="p">;</span>
+<span class="kt">string</span> <span class="n">modelFilePath</span> <span class="p">=</span> <span class="n">applicationBase</span> <span class="p">+</span> <span class="s">&quot;./speech_fsmn_vad_zh-cn-16k-common-pytorch/model.onnx&quot;</span><span class="p">;</span>
+<span class="kt">string</span> <span class="n">configFilePath</span> <span class="p">=</span> <span class="n">applicationBase</span> <span class="p">+</span> <span class="s">&quot;./speech_fsmn_vad_zh-cn-16k-common-pytorch/vad.yaml&quot;</span><span class="p">;</span>
+<span class="kt">string</span> <span class="n">mvnFilePath</span> <span class="p">=</span> <span class="n">applicationBase</span> <span class="p">+</span> <span class="s">&quot;./speech_fsmn_vad_zh-cn-16k-common-pytorch/vad.mvn&quot;</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">batchSize</span> <span class="p">=</span> <span class="m">2</span><span class="p">;</span><span class="c1">//批量解码</span>
+<span class="n">AliFsmnVad</span> <span class="n">aliFsmnVad</span> <span class="p">=</span> <span class="k">new</span> <span class="n">AliFsmnVad</span><span class="p">(</span><span class="n">modelFilePath</span><span class="p">,</span> <span class="n">configFilePath</span><span class="p">,</span> <span class="n">mvnFilePath</span><span class="p">,</span> <span class="n">batchSize</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id7">
+<h3>3.调用<a class="headerlink" href="#id7" title="Permalink to this headline"></a></h3>
+<p>方法一(适用于小文件)：</p>
+<div class="highlight-csharp notranslate"><div class="highlight"><pre><span></span><span class="n">SegmentEntity</span><span class="p">[]</span> <span class="n">segments_duration</span> <span class="p">=</span> <span class="n">aliFsmnVad</span><span class="p">.</span><span class="n">GetSegments</span><span class="p">(</span><span class="n">samples</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>方法二(适用于大文件)：</p>
+<div class="highlight-csharp notranslate"><div class="highlight"><pre><span></span><span class="n">SegmentEntity</span><span class="p">[]</span> <span class="n">segments_duration</span> <span class="p">=</span> <span class="n">aliFsmnVad</span><span class="p">.</span><span class="n">GetSegmentsByStep</span><span class="p">(</span><span class="n">samples</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id8">
+<h3>4.输出结果：<a class="headerlink" href="#id8" title="Permalink to this headline"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">load</span> <span class="n">model</span> <span class="ow">and</span> <span class="n">init</span> <span class="n">config</span> <span class="n">elapsed_milliseconds</span><span class="p">:</span><span class="mf">463.5390625</span>
+<span class="n">vad</span> <span class="n">infer</span> <span class="n">result</span><span class="p">:</span>
+<span class="p">[[</span><span class="mi">70</span><span class="p">,</span><span class="mi">2340</span><span class="p">][</span><span class="mi">2620</span><span class="p">,</span><span class="mi">6200</span><span class="p">][</span><span class="mi">6480</span><span class="p">,</span><span class="mi">23670</span><span class="p">][</span><span class="mi">23950</span><span class="p">,</span><span class="mi">26250</span><span class="p">][</span><span class="mi">26780</span><span class="p">,</span><span class="mi">28990</span><span class="p">][</span><span class="mi">29950</span><span class="p">,</span><span class="mi">31430</span><span class="p">][</span><span class="mi">31750</span><span class="p">,</span><span class="mi">37600</span><span class="p">][</span><span class="mi">38210</span><span class="p">,</span><span class="mi">46900</span><span class="p">][</span><span class="mi">47310</span><span class="p">,</span><span class="mi">49630</span><span class="p">][</span><span class="mi">49910</span><span class="p">,</span><span class="mi">56460</span><span class="p">][</span><span class="mi">56740</span><span class="p">,</span><span class="mi">59540</span><span class="p">][</span><span class="mi">59820</span><span class="p">,</span><span class="mi">70450</span><span class="p">]]</span>
+<span class="n">elapsed_milliseconds</span><span class="p">:</span><span class="mf">662.796875</span>
+<span class="n">total_duration</span><span class="p">:</span><span class="mf">70470.625</span>
+<span class="n">rtf</span><span class="p">:</span><span class="mf">0.009405292985552491</span>
+</pre></div>
+</div>
+<p>输出的数据，例如：[70,2340]，是以毫秒为单位的segement的起止时间，可以以此为依据对音频进行分片。其中静音噪音部分已被去除。</p>
+<p>其他说明：
+测试用例：AliFsmnVadSharp.Examples。
+测试环境：windows11。
+测试用例中samples的计算,使用的是NAudio库。</p>
+<p>通过以下链接了解更多：
+https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Speech Lab, Alibaba Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

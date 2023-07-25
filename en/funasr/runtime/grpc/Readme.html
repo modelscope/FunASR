@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Service with grpc-cpp &mdash; FunASR  documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            FunASR
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/docker.html">Docker</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Quick Start</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Academic Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/asr_recipe.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/punc_recipe.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/vad_recipe.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/sv_recipe.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/sd_recipe.html">Speaker Diarization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">ModelScope Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/asr_pipeline.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/vad_pipeline.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/punc_pipeline.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/tp_pipeline.html">Timestamp Prediction (FA)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/sv_pipeline.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/sd_pipeline.html">Speaker Diarization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/itn_pipeline.html">Inverse Text Normalization (ITN)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Zoo</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_zoo/modelscope_models.html">Pretrained Models on ModelScope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_zoo/huggingface_models.html">Pretrained Models on Huggingface</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Runtime and Service</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../export/README.html">Export models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/onnxruntime/README.html">ONNXRuntime-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/websocket/README.html">Service with websocket-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../websocket/readme.html">Service with websocket-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../html5/readme.html">Html5 server for asr service</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../python/libtorch/README.html">Libtorch-python</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark and Leaderboard</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_onnx.html">CPU Benchmark (ONNX-python)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_onnx_cpp.html">CPU Benchmark (ONNX-cpp)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_libtorch.html">CPU Benchmark (Libtorch)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_pipeline_cer.html">Leaderboard IO</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Funasr Library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/build_task.html">Build custom tasks</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Papers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/papers.html">Papers</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Application</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html">Audio Cut</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html#realtime-speech-recognition">Realtime Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html#audio-chat">Audio Chat</a></li>
+</ul>
+<p class="caption"><span class="caption-text">FQA</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/FQA.html">FQA</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">FunASR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Service with grpc-cpp</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/funasr/runtime/grpc/Readme.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="service-with-grpc-cpp">
+<h1>Service with grpc-cpp<a class="headerlink" href="#service-with-grpc-cpp" title="Permalink to this headline"></a></h1>
+<div class="section" id="for-the-server">
+<h2>For the Server<a class="headerlink" href="#for-the-server" title="Permalink to this headline"></a></h2>
+<div class="section" id="build-onnxruntime-as-it-s-document">
+<h3>Build <a class="reference external" href="./onnxruntime_cpp">onnxruntime</a> as it’s document<a class="headerlink" href="#build-onnxruntime-as-it-s-document" title="Permalink to this headline"></a></h3>
+</div>
+<div class="section" id="compile-and-install-grpc-v1-52-0-in-case-of-grpc-bugs">
+<h3>Compile and install grpc v1.52.0 in case of grpc bugs<a class="headerlink" href="#compile-and-install-grpc-v1-52-0-in-case-of-grpc-bugs" title="Permalink to this headline"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>export GRPC_INSTALL_DIR=/data/soft/grpc
+export PKG_CONFIG_PATH=$GRPC_INSTALL_DIR/lib/pkgconfig
+
+git clone -b v1.52.0 --depth=1  https://github.com/grpc/grpc.git
+cd grpc
+git submodule update --init --recursive
+
+mkdir -p cmake/build
+pushd cmake/build
+cmake -DgRPC_INSTALL=ON \
+      -DgRPC_BUILD_TESTS=OFF \
+      -DCMAKE_INSTALL_PREFIX=$GRPC_INSTALL_DIR \
+      ../..
+make
+make install
+popd
+
+echo &quot;export GRPC_INSTALL_DIR=/data/soft/grpc&quot; &gt;&gt; ~/.bashrc
+echo &quot;export PKG_CONFIG_PATH=\$GRPC_INSTALL_DIR/lib/pkgconfig&quot; &gt;&gt; ~/.bashrc
+echo &quot;export PATH=\$GRPC_INSTALL_DIR/bin/:\$PKG_CONFIG_PATH:\$PATH&quot; &gt;&gt; ~/.bashrc
+source ~/.bashrc
+</pre></div>
+</div>
+</div>
+<div class="section" id="compile-and-start-grpc-onnx-paraformer-server">
+<h3>Compile and start grpc onnx paraformer server<a class="headerlink" href="#compile-and-start-grpc-onnx-paraformer-server" title="Permalink to this headline"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># set -DONNXRUNTIME_DIR=/path/to/asrmodel/onnxruntime-linux-x64-1.14.0</span>
+<span class="o">./</span><span class="n">rebuild</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="start-grpc-paraformer-server">
+<h3>Start grpc paraformer server<a class="headerlink" href="#start-grpc-paraformer-server" title="Permalink to this headline"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>
+<span class="o">./</span><span class="n">cmake</span><span class="o">/</span><span class="n">build</span><span class="o">/</span><span class="n">paraformer</span><span class="o">-</span><span class="n">server</span>   <span class="o">--</span><span class="n">port</span><span class="o">-</span><span class="nb">id</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="p">[</span><span class="o">--</span><span class="n">punc</span><span class="o">-</span><span class="n">quant</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span><span class="p">]</span>
+                                  <span class="p">[</span><span class="o">--</span><span class="n">punc</span><span class="o">-</span><span class="nb">dir</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">vad</span><span class="o">-</span><span class="n">quant</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span><span class="p">]</span>
+                                  <span class="p">[</span><span class="o">--</span><span class="n">vad</span><span class="o">-</span><span class="nb">dir</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">quantize</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span><span class="p">]</span>
+                                  <span class="o">--</span><span class="n">model</span><span class="o">-</span><span class="nb">dir</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="p">[</span><span class="o">--</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">version</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span>
+<span class="n">Where</span><span class="p">:</span>
+   <span class="o">--</span><span class="n">port</span><span class="o">-</span><span class="nb">id</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span>
+     <span class="p">(</span><span class="n">required</span><span class="p">)</span>  <span class="n">port</span> <span class="nb">id</span>
+   <span class="o">--</span><span class="n">model</span><span class="o">-</span><span class="nb">dir</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span>
+     <span class="p">(</span><span class="n">required</span><span class="p">)</span>  <span class="n">the</span> <span class="n">asr</span> <span class="n">model</span> <span class="n">path</span><span class="p">,</span> <span class="n">which</span> <span class="n">contains</span> <span class="n">model</span><span class="o">.</span><span class="n">onnx</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">yaml</span><span class="p">,</span> <span class="n">am</span><span class="o">.</span><span class="n">mvn</span>
+   <span class="o">--</span><span class="n">quantize</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span>
+     <span class="n">false</span> <span class="p">(</span><span class="n">Default</span><span class="p">),</span> <span class="n">load</span> <span class="n">the</span> <span class="n">model</span> <span class="n">of</span> <span class="n">model</span><span class="o">.</span><span class="n">onnx</span> <span class="ow">in</span> <span class="n">model_dir</span><span class="o">.</span> <span class="n">If</span> <span class="nb">set</span> <span class="n">true</span><span class="p">,</span> <span class="n">load</span> <span class="n">the</span> <span class="n">model</span> <span class="n">of</span> <span class="n">model_quant</span><span class="o">.</span><span class="n">onnx</span> <span class="ow">in</span> <span class="n">model_dir</span>
+
+   <span class="o">--</span><span class="n">vad</span><span class="o">-</span><span class="nb">dir</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span>
+     <span class="n">the</span> <span class="n">vad</span> <span class="n">model</span> <span class="n">path</span><span class="p">,</span> <span class="n">which</span> <span class="n">contains</span> <span class="n">model</span><span class="o">.</span><span class="n">onnx</span><span class="p">,</span> <span class="n">vad</span><span class="o">.</span><span class="n">yaml</span><span class="p">,</span> <span class="n">vad</span><span class="o">.</span><span class="n">mvn</span>
+   <span class="o">--</span><span class="n">vad</span><span class="o">-</span><span class="n">quant</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span>
+     <span class="n">false</span> <span class="p">(</span><span class="n">Default</span><span class="p">),</span> <span class="n">load</span> <span class="n">the</span> <span class="n">model</span> <span class="n">of</span> <span class="n">model</span><span class="o">.</span><span class="n">onnx</span> <span class="ow">in</span> <span class="n">vad_dir</span><span class="o">.</span> <span class="n">If</span> <span class="nb">set</span> <span class="n">true</span><span class="p">,</span> <span class="n">load</span> <span class="n">the</span> <span class="n">model</span> <span class="n">of</span> <span class="n">model_quant</span><span class="o">.</span><span class="n">onnx</span> <span class="ow">in</span> <span class="n">vad_dir</span>
+
+   <span class="o">--</span><span class="n">punc</span><span class="o">-</span><span class="nb">dir</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span>
+     <span class="n">the</span> <span class="n">punc</span> <span class="n">model</span> <span class="n">path</span><span class="p">,</span> <span class="n">which</span> <span class="n">contains</span> <span class="n">model</span><span class="o">.</span><span class="n">onnx</span><span class="p">,</span> <span class="n">punc</span><span class="o">.</span><span class="n">yaml</span>
+   <span class="o">--</span><span class="n">punc</span><span class="o">-</span><span class="n">quant</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span>
+     <span class="n">false</span> <span class="p">(</span><span class="n">Default</span><span class="p">),</span> <span class="n">load</span> <span class="n">the</span> <span class="n">model</span> <span class="n">of</span> <span class="n">model</span><span class="o">.</span><span class="n">onnx</span> <span class="ow">in</span> <span class="n">punc_dir</span><span class="o">.</span> <span class="n">If</span> <span class="nb">set</span> <span class="n">true</span><span class="p">,</span> <span class="n">load</span> <span class="n">the</span> <span class="n">model</span> <span class="n">of</span> <span class="n">model_quant</span><span class="o">.</span><span class="n">onnx</span> <span class="ow">in</span> <span class="n">punc_dir</span>
+  
+   <span class="n">Required</span><span class="p">:</span> <span class="o">--</span><span class="n">port</span><span class="o">-</span><span class="nb">id</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span>  <span class="o">--</span><span class="n">model</span><span class="o">-</span><span class="nb">dir</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span>
+   <span class="n">If</span> <span class="n">use</span> <span class="n">vad</span><span class="p">,</span> <span class="n">please</span> <span class="n">add</span><span class="p">:</span> <span class="o">--</span><span class="n">vad</span><span class="o">-</span><span class="nb">dir</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span>
+   <span class="n">If</span> <span class="n">use</span> <span class="n">punc</span><span class="p">,</span> <span class="n">please</span> <span class="n">add</span><span class="p">:</span> <span class="o">--</span><span class="n">punc</span><span class="o">-</span><span class="nb">dir</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="for-the-client">
+<h2>For the client<a class="headerlink" href="#for-the-client" title="Permalink to this headline"></a></h2>
+<div class="section" id="install-the-requirements-as-in-grpc-python">
+<h3>Install the requirements as in <a class="reference external" href="./docs/grpc_python">grpc-python</a><a class="headerlink" href="#install-the-requirements-as-in-grpc-python" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/alibaba/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> FunASR
+<span class="nb">cd</span> funasr/runtime/python/grpc
+pip install -r requirements_client.txt
+</pre></div>
+</div>
+</div>
+<div class="section" id="generate-protobuf-file">
+<h3>Generate protobuf file<a class="headerlink" href="#generate-protobuf-file" title="Permalink to this headline"></a></h3>
+<p>Run on server, the two generated pb files are both used for server and client</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># paraformer_pb2.py and paraformer_pb2_grpc.py are already generated, </span>
+<span class="c1"># regenerate it only when you make changes to ./proto/paraformer.proto file.</span>
+python -m grpc_tools.protoc  --proto_path<span class="o">=</span>./proto -I ./proto    --python_out<span class="o">=</span>. --grpc_python_out<span class="o">=</span>./ ./proto/paraformer.proto
+</pre></div>
+</div>
+</div>
+<div class="section" id="start-grpc-client">
+<h3>Start grpc client<a class="headerlink" href="#start-grpc-client" title="Permalink to this headline"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Start client.</span>
+<span class="n">python</span> <span class="n">grpc_main_client_mic</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">host</span> <span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span> <span class="o">--</span><span class="n">port</span> <span class="mi">10095</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="acknowledge">
+<h2>Acknowledge<a class="headerlink" href="#acknowledge" title="Permalink to this headline"></a></h2>
+<ol class="simple">
+<li><p>This project is maintained by <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR">FunASR community</a>.</p></li>
+<li><p>We acknowledge <a class="reference external" href="https://www.deepscience.cn">DeepScience</a> for contributing the grpc service.</p></li>
+</ol>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Speech Lab, Alibaba Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
