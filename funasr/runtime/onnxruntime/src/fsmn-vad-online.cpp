@@ -86,7 +86,7 @@ void FsmnVadOnline::ExtractFeats(float sample_rate, vector<std::vector<float>> &
 int FsmnVadOnline::OnlineLfrCmvn(vector<vector<float>> &vad_feats, bool input_finished) {
     vector<vector<float>> out_feats;
     int T = vad_feats.size();
-    int T_lrf = ceil((T - (lfr_m - 1) / 2) / lfr_n);
+    int T_lrf = ceil((T - (lfr_m - 1) / 2) / (float)lfr_n);
     int lfr_splice_frame_idxs = T_lrf;
     vector<float> p;
     for (int i = 0; i < T_lrf; i++) {

@@ -63,6 +63,15 @@ namespace funasr {
 #define VAD_LFR_N 1
 #endif
 
+// asr
+#ifndef PARA_LFR_M
+#define PARA_LFR_M 7
+#endif
+
+#ifndef PARA_LFR_N
+#define PARA_LFR_N 6
+#endif
+
 // punc
 #define UNK_CHAR "<unk>"
 #define TOKEN_LEN     20

@@ -44,7 +44,6 @@ namespace funasr {
         void InitAsr(const std::string &am_model, const std::string &am_cmvn, const std::string &am_config, int thread_num);
         void Reset();
         vector<float> FbankKaldi(float sample_rate, const float* waves, int len);
-        string ForwardChunk(float* din, int len, int flag);
         string Forward(float* din, int len, int flag);
         string Rescoring();
     };

@@ -232,13 +232,6 @@ string Paraformer::Forward(float* din, int len, int flag)
     return result;
 }
 
-string Paraformer::ForwardChunk(float* din, int len, int flag)
-{
-
-    LOG(ERROR)<<"Not Imp!!!!!!";
-    return "";
-}
-
 string Paraformer::Rescoring()
 {
     LOG(ERROR)<<"Not Imp!!!!!!";

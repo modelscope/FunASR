@@ -5,9 +5,9 @@ extern "C" {
 #endif
 
 	// APIs for Init
-	_FUNASRAPI FUNASR_HANDLE  FunASRInit(std::map<std::string, std::string>& model_path, int thread_num)
+	_FUNASRAPI FUNASR_HANDLE  FunASRInit(std::map<std::string, std::string>& model_path, int thread_num, int mode)
 	{
-		funasr::Model* mm = funasr::CreateModel(model_path, thread_num);
+		funasr::Model* mm = funasr::CreateModel(model_path, thread_num, mode);
 		return mm;
 	}
 
@@ -36,7 +36,7 @@ extern "C" {
 	}
 
 	// APIs for ASR Infer
-	_FUNASRAPI FUNASR_RESULT FunASRInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, FUNASR_MODE mode, QM_CALLBACK fn_callback, int sampling_rate, std::string wav_format)
+	_FUNASRAPI FUNASR_RESULT FunASRInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, FUNASR_MODE mode, QM_CALLBACK fn_callback, bool input_finished, int sampling_rate, std::string wav_format)
 	{
 		funasr::Model* recog_obj = (funasr::Model*)handle;
 		if (!recog_obj)
@@ -57,12 +57,12 @@ extern "C" {
 		funasr::FUNASR_RECOG_RESULT* p_result = new funasr::FUNASR_RECOG_RESULT;
 		p_result->snippet_time = audio.GetTimeLen();
 		if(p_result->snippet_time == 0){
-            return p_result;
-        }
+			return p_result;
+		}
 		int n_step = 0;
 		int n_total = audio.GetQueueSize();
 		while (audio.Fetch(buff, len, flag) > 0) {
-			string msg = recog_obj->Forward(buff, len, flag);
+			string msg = recog_obj->Forward(buff, len, input_finished);
 			p_result->msg += msg;
 			n_step++;
 			if (fn_callback)
