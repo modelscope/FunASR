@@ -6,7 +6,8 @@ set -o pipefail
 
 stage=1
 stop_stage=2
-model="damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch"
+model="damo/punc_ct-transformer_cn-en-common-vocab471067-large"
+model_revision="v1.0.0"
 data_dir="./data"
 output_dir="./results"
 gpu_inference=true    # whether to perform gpu decoding
@@ -51,6 +52,7 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ];then
             --model ${model} \
             --text_in ${output_dir}/split/text.$JOB.scp \
             --output_dir ${output_dir}/output.$JOB \
+            --model_revision ${model_revision}
             --gpuid ${gpuid}
         }&
     done
