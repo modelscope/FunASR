@@ -8,9 +8,9 @@ import librosa
 import soundfile as sf
 
 param_dict = dict()
-param_dict['hotword'] = "信诺"
+param_dict['hotword'] = "你的热词"
 
-test_wav = '/Users/shixian/Downloads/tpdebug.wav'
+test_wav = 'YOUR_LONG_WAV.wav'
 output_dir = './tmp'
 os.system("mkdir -p {}".format(output_dir))
 
