@@ -26,7 +26,7 @@ python funasr_wss_server.py --port 10095
 python funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass --chunk_size "5,10,5"
 #python funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass --chunk_size "8,8,4" --audio_in "./data/wav.scp"
 ```
-更多例子可以参考（[点击此处](https://alibaba-damo-academy.github.io/FunASR/en/runtime/websocket_python.html#id2)）
+更多例子可以参考（[点击此处](runtime/websocket_python.html#id2)）
 
 <a name="cpp版本示例"></a>
 #### c++版本示例
@@ -45,7 +45,7 @@ sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace ./funasr-r
 ```shell
 python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.wav"
 ```
-更多例子参考（[点击此处](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/docs/SDK_tutorial_zh.md)）
+更多例子参考（[点击此处](funasr/runtime/docs/SDK_tutorial_zh.md)）
 
 
 ### 工业模型egs
