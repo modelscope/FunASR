@@ -45,7 +45,7 @@ Overview
    :caption: ModelScope Egs
 
    ./modelscope_pipeline/quick_start.md
-   ./modelscope_pipeline/asr_pipeline.md
+   ./egs_modelscope/asr/TEMPLATE/README.md
    ./modelscope_pipeline/vad_pipeline.md
    ./modelscope_pipeline/punc_pipeline.md
    ./modelscope_pipeline/tp_pipeline.md

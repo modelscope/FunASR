@@ -16,9 +16,7 @@
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Voice Activity Detection" href="vad_pipeline.html" />
-    <link rel="prev" title="Quick Start" href="quick_start.html" /> 
+    <link rel="search" title="Search" href="../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -58,40 +56,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../academic_recipe/sd_recipe.html">Speaker Diarization</a></li>
 </ul>
 <p class="caption"><span class="caption-text">ModelScope Egs</span></p>
-<ul class="current">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Speech Recognition</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#inference">Inference</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#quick-start">Quick start</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#paraformer-model">Paraformer Model</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#paraformer-online-model">Paraformer-online Model</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#uniasr-model">UniASR Model</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#rnn-t-online-model">RNN-T-online model</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mfcca-model">MFCCA Model</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#api-reference">API-reference</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#define-pipeline">Define pipeline</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#infer-pipeline">Infer pipeline</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#inference-with-multi-thread-cpus-or-multi-gpus">Inference with multi-thread CPUs or multi GPUs</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#settings-of-infer-sh">Settings of <code class="docutils literal notranslate"><span class="pre">infer.sh</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#decode-with-multi-gpus">Decode with multi GPUs:</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#decode-with-multi-thread-cpus">Decode with multi-thread CPUs:</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#results">Results</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#finetune-with-pipeline">Finetune with pipeline</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id1">Quick start</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#finetune-with-your-data">Finetune with your data</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#inference-with-your-finetuned-model">Inference with your finetuned model</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../egs_modelscope/asr/TEMPLATE/README.html">Speech Recognition</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vad_pipeline.html">Voice Activity Detection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="punc_pipeline.html">Punctuation Restoration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tp_pipeline.html">Timestamp Prediction (FA)</a></li>
@@ -163,7 +130,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="speech-recognition">
+  <p>(<a class="reference external" href="./README_zh">简体中文</a>|English)</p>
+<div class="section" id="speech-recognition">
 <h1>Speech Recognition<a class="headerlink" href="#speech-recognition" title="Permalink to this headline"></a></h1>
 <blockquote>
 <div><p><strong>Note</strong>:
@@ -428,10 +396,10 @@ asr_example2  ./audios/asr_example2.wav
 <li><p><code class="docutils literal notranslate"><span class="pre">batch_bins</span></code>: batch size. For dataset_type is <code class="docutils literal notranslate"><span class="pre">small</span></code>, <code class="docutils literal notranslate"><span class="pre">batch_bins</span></code> indicates the feature frames. For dataset_type is <code class="docutils literal notranslate"><span class="pre">large</span></code>, <code class="docutils literal notranslate"><span class="pre">batch_bins</span></code> indicates the duration in ms</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">max_epoch</span></code>: number of training epoch</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">lr</span></code>: learning rate</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">init_param</span></code>: init model path, load modelscope model initialization by default. For example: [“checkpoint/20epoch.pb”]</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">freeze_param</span></code>: Freeze model parameters. For example：[“encoder”]</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ignore_init_mismatch</span></code>: Ignore size mismatch when loading pre-trained model</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">use_lora</span></code>: Fine-tuning model use lora, more detail please refer to <a class="reference external" href="https://arxiv.org/pdf/2106.09685.pdf">LORA</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">init_param</span></code>: <code class="docutils literal notranslate"><span class="pre">[]</span></code>(Default), init model path, load modelscope model initialization by default. For example: [“checkpoint/20epoch.pb”]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">freeze_param</span></code>: <code class="docutils literal notranslate"><span class="pre">[]</span></code>(Default), Freeze model parameters. For example：[“encoder”]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ignore_init_mismatch</span></code>: <code class="docutils literal notranslate"><span class="pre">True</span></code>(Default), Ignore size mismatch when loading pre-trained model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">use_lora</span></code>: <code class="docutils literal notranslate"><span class="pre">False</span></code>(Default), Fine-tuning model use lora, more detail please refer to <a class="reference external" href="https://arxiv.org/pdf/2106.09685.pdf">LORA</a></p></li>
 </ul>
 </li>
 <li><p>Training data formats：</p></li>
@@ -497,10 +465,7 @@ english_example_2 /mnt/data/wav/train/S0002/english_example_2.wav
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="quick_start.html" class="btn btn-neutral float-left" title="Quick Start" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="vad_pipeline.html" class="btn btn-neutral float-right" title="Voice Activity Detection" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 

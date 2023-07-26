@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Speaker Verification &mdash; FunASR  documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            FunASR
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/docker.html">Docker</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Quick Start</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../funasr/quick_start.html">Quick Start</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Academic Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/asr_recipe.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/punc_recipe.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/vad_recipe.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/sv_recipe.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/sd_recipe.html">Speaker Diarization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">ModelScope Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../asr/TEMPLATE/README.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/vad_pipeline.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/punc_pipeline.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/tp_pipeline.html">Timestamp Prediction (FA)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/sv_pipeline.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/sd_pipeline.html">Speaker Diarization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/itn_pipeline.html">Inverse Text Normalization (ITN)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Zoo</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_zoo/modelscope_models.html">Pretrained Models on ModelScope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_zoo/huggingface_models.html">Pretrained Models on Huggingface</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Runtime and Service</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../funasr/export/README.html">Export models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../funasr/runtime/python/onnxruntime/README.html">ONNXRuntime-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../funasr/runtime/python/websocket/README.html">Service with websocket-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../funasr/runtime/websocket/readme.html">Service with websocket-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../funasr/runtime/html5/readme.html">Html5 server for asr service</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../funasr/runtime/python/libtorch/README.html">Libtorch-python</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark and Leaderboard</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_onnx.html">CPU Benchmark (ONNX-python)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_onnx_cpp.html">CPU Benchmark (ONNX-cpp)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_libtorch.html">CPU Benchmark (Libtorch)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_pipeline_cer.html">Leaderboard IO</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Funasr Library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/build_task.html">Build custom tasks</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Papers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/papers.html">Papers</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Application</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html">Audio Cut</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html#realtime-speech-recognition">Realtime Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html#audio-chat">Audio Chat</a></li>
+</ul>
+<p class="caption"><span class="caption-text">FQA</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/FQA.html">FQA</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">FunASR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Speaker Verification</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/egs_modelscope/speaker_verification/TEMPLATE/README.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="speaker-verification">
+<h1>Speaker Verification<a class="headerlink" href="#speaker-verification" title="Permalink to this headline"></a></h1>
+<blockquote>
+<div><p><strong>Note</strong>:
+The modelscope pipeline supports all the models in
+<a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope">model zoo</a>
+to inference and finetine. Here we take the model of xvector_sv as example to demonstrate the usage.</p>
+</div></blockquote>
+<div class="section" id="inference-with-pipeline">
+<h2>Inference with pipeline<a class="headerlink" href="#inference-with-pipeline" title="Permalink to this headline"></a></h2>
+<div class="section" id="quick-start">
+<h3>Quick start<a class="headerlink" href="#quick-start" title="Permalink to this headline"></a></h3>
+<div class="section" id="id1">
+<h4>Speaker verification<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
+<span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
+
+<span class="n">inference_sv_pipline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
+    <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">speaker_verification</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch&#39;</span>
+<span class="p">)</span>
+
+<span class="c1"># The same speaker</span>
+<span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_sv_pipline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="p">(</span>
+    <span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/sv_example_enroll.wav&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/sv_example_same.wav&#39;</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Similarity&quot;</span><span class="p">,</span> <span class="n">rec_result</span><span class="p">[</span><span class="s2">&quot;scores&quot;</span><span class="p">])</span>
+
+<span class="c1"># Different speakers</span>
+<span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_sv_pipline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="p">(</span>
+    <span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/sv_example_enroll.wav&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/sv_example_different.wav&#39;</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Similarity&quot;</span><span class="p">,</span> <span class="n">rec_result</span><span class="p">[</span><span class="s2">&quot;scores&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="speaker-embedding-extraction">
+<h4>Speaker embedding extraction<a class="headerlink" href="#speaker-embedding-extraction" title="Permalink to this headline"></a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
+<span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
+
+<span class="c1"># Define extraction pipeline</span>
+<span class="n">inference_sv_pipline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
+    <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">speaker_verification</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch&#39;</span>
+<span class="p">)</span>
+<span class="c1"># Extract speaker embedding</span>
+<span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_sv_pipline</span><span class="p">(</span>
+    <span class="n">audio_in</span><span class="o">=</span><span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/sv_example_enroll.wav&#39;</span><span class="p">)</span>
+<span class="n">speaker_embedding</span> <span class="o">=</span> <span class="n">rec_result</span><span class="p">[</span><span class="s2">&quot;spk_embedding&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Full code of demo, please ref to <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/speaker_verification/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch/infer.py">infer.py</a>.</p>
+</div>
+</div>
+<div class="section" id="api-reference">
+<h3>API-reference<a class="headerlink" href="#api-reference" title="Permalink to this headline"></a></h3>
+<div class="section" id="define-pipeline">
+<h4>Define pipeline<a class="headerlink" href="#define-pipeline" title="Permalink to this headline"></a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">task</span></code>: <code class="docutils literal notranslate"><span class="pre">Tasks.speaker_verification</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model</span></code>: model name in <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope">model zoo</a>, or model path in local disk</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ngpu</span></code>: <code class="docutils literal notranslate"><span class="pre">1</span></code> (Default), decoding on GPU. If ngpu=0, decoding on CPU</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">output_dir</span></code>: <code class="docutils literal notranslate"><span class="pre">None</span></code> (Default), the output path of results if set</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>: <code class="docutils literal notranslate"><span class="pre">1</span></code> (Default), batch size when decoding</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sv_threshold</span></code>: <code class="docutils literal notranslate"><span class="pre">0.9465</span></code> (Default), the similarity threshold to determine
+whether utterances belong to the same speaker (it should be in (0, 1))</p></li>
+</ul>
+</div>
+<div class="section" id="infer-pipeline-for-speaker-embedding-extraction">
+<h4>Infer pipeline for speaker embedding extraction<a class="headerlink" href="#infer-pipeline-for-speaker-embedding-extraction" title="Permalink to this headline"></a></h4>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">audio_in</span></code>: the input to process, which could be:</p>
+<ul>
+<li><p>url (str): <code class="docutils literal notranslate"><span class="pre">e.g.</span></code>: https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/sv_example_enroll.wav</p></li>
+<li><p>local_path: <code class="docutils literal notranslate"><span class="pre">e.g.</span></code>: path/to/a.wav</p></li>
+<li><p>wav.scp: <code class="docutils literal notranslate"><span class="pre">e.g.</span></code>: path/to/wav1.scp</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>wav.scp
+test1 path/to/enroll1.wav
+test2 path/to/enroll2.wav
+</pre></div>
+</div>
+</li>
+<li><p>bytes: <code class="docutils literal notranslate"><span class="pre">e.g.</span></code>: raw bytes data from a microphone</p></li>
+<li><p>fbank1.scp,speech,kaldi_ark: <code class="docutils literal notranslate"><span class="pre">e.g.</span></code>: extracted 80-dimensional fbank features
+with kaldi toolkits.</p></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="infer-pipeline-for-speaker-verification">
+<h4>Infer pipeline for speaker verification<a class="headerlink" href="#infer-pipeline-for-speaker-verification" title="Permalink to this headline"></a></h4>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">audio_in</span></code>: the input to process, which could be:</p>
+<ul>
+<li><p>Tuple(url1, url2): <code class="docutils literal notranslate"><span class="pre">e.g.</span></code>: (https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/sv_example_enroll.wav, https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/sv_example_different.wav)</p></li>
+<li><p>Tuple(local_path1, local_path2): <code class="docutils literal notranslate"><span class="pre">e.g.</span></code>: (path/to/a.wav, path/to/b.wav)</p></li>
+<li><p>Tuple(wav1.scp, wav2.scp): <code class="docutils literal notranslate"><span class="pre">e.g.</span></code>: (path/to/wav1.scp, path/to/wav2.scp)</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>wav1.scp
+test1 path/to/enroll1.wav
+test2 path/to/enroll2.wav
+
+wav2.scp
+test1 path/to/same1.wav
+test2 path/to/diff2.wav
+</pre></div>
+</div>
+</li>
+<li><p>Tuple(bytes, bytes): <code class="docutils literal notranslate"><span class="pre">e.g.</span></code>: raw bytes data from a microphone</p></li>
+<li><p>Tuple(“fbank1.scp,speech,kaldi_ark”, “fbank2.scp,speech,kaldi_ark”): <code class="docutils literal notranslate"><span class="pre">e.g.</span></code>: extracted 80-dimensional fbank features
+with kaldi toolkits.</p></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="inference-with-you-data">
+<h3>Inference with you data<a class="headerlink" href="#inference-with-you-data" title="Permalink to this headline"></a></h3>
+<p>Use wav1.scp or fbank.scp to organize your own data to extract speaker embeddings or perform speaker verification.
+In this case, the <code class="docutils literal notranslate"><span class="pre">output_dir</span></code> should be set to save all the embeddings or scores.</p>
+</div>
+<div class="section" id="inference-with-multi-threads-on-cpu">
+<h3>Inference with multi-threads on CPU<a class="headerlink" href="#inference-with-multi-threads-on-cpu" title="Permalink to this headline"></a></h3>
+<p>You can inference with multi-threads on CPU as follow steps:</p>
+<ol class="simple">
+<li><p>Set <code class="docutils literal notranslate"><span class="pre">ngpu=0</span></code> while defining the pipeline in <code class="docutils literal notranslate"><span class="pre">infer.py</span></code>.</p></li>
+<li><p>Split wav.scp to several files <code class="docutils literal notranslate"><span class="pre">e.g.:</span> <span class="pre">4</span></code></p></li>
+</ol>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>split -l <span class="k">$((</span><span class="sb">`</span>wc -l &lt; wav.scp<span class="sb">`</span><span class="o">/</span><span class="m">4</span><span class="o">+</span><span class="m">1</span><span class="k">))</span> --numeric-suffixes wav.scp splits/wav.scp.
+</pre></div>
+</div>
+<ol class="simple">
+<li><p>Start to extract embeddings</p></li>
+</ol>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> wav_scp in <span class="sb">`</span>ls splits/wav.scp.*<span class="sb">`</span><span class="p">;</span> <span class="k">do</span>
+  infer.py <span class="si">${</span><span class="nv">wav_scp</span><span class="si">}</span> outputs/<span class="k">$((</span>basename <span class="si">${</span><span class="nv">wav_scp</span><span class="si">}</span><span class="k">))</span>
+<span class="k">done</span>
+</pre></div>
+</div>
+<ol class="simple">
+<li><p>The embeddings will be saved in <code class="docutils literal notranslate"><span class="pre">outputs/*</span></code></p></li>
+</ol>
+</div>
+<div class="section" id="inference-with-multi-gpu">
+<h3>Inference with multi GPU<a class="headerlink" href="#inference-with-multi-gpu" title="Permalink to this headline"></a></h3>
+<p>Similar to inference on CPU, the difference are as follows:</p>
+<p>Step 1. Set <code class="docutils literal notranslate"><span class="pre">ngpu=1</span></code> while defining the pipeline in <code class="docutils literal notranslate"><span class="pre">infer.py</span></code>.</p>
+<p>Step 3. specify the gpu device with <code class="docutils literal notranslate"><span class="pre">CUDA_VISIBLE_DEVICES</span></code>:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>  <span class="k">for</span> wav_scp in <span class="sb">`</span>ls splits/wav.scp.*<span class="sb">`</span><span class="p">;</span> <span class="k">do</span>
+    <span class="nv">CUDA_VISIBLE_DEVICES</span><span class="o">=</span><span class="m">1</span> infer.py <span class="si">${</span><span class="nv">wav_scp</span><span class="si">}</span> outputs/<span class="k">$((</span>basename <span class="si">${</span><span class="nv">wav_scp</span><span class="si">}</span><span class="k">))</span>
+  <span class="k">done</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Speech Lab, Alibaba Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
