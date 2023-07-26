@@ -11,6 +11,6 @@ if __name__ == '__main__':
         punc_model='damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch',
         output_dir=output_dir,
     )
-    rec_result = inference_pipeline(audio_in=audio_in, batch_size_token=5000)
+    rec_result = inference_pipeline(audio_in=audio_in, batch_size_token=5000, batch_size_token_threshold_s=40)
     print(rec_result)
 
