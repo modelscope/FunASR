@@ -38,7 +38,7 @@ Download the client test tool directory samples:
 wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz
 ```
 
-We take the Python language client as an example to explain. It supports various audio formats (.wav, .pcm, .mp3, etc.), video input (.mp4, etc.), and multi-file list wav.scp input. For other versions of clients, please refer to the ([docs](##client-usage)).
+We take the Python language client as an example to explain. It supports various audio formats (.wav, .pcm, .mp3, etc.), video input (.mp4, etc.), and multi-file list wav.scp input. For other versions of clients, please refer to the ([docs](#client-usage)).
 
 ```shell
 python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.wav"
