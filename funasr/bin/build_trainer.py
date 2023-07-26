@@ -529,13 +529,14 @@ def build_trainer(modelscope_dict,
                   **kwargs):
     parser = get_parser()
     args, extra_task_params = parser.parse_known_args()
-    if extra_task_params:
-        args = build_args(args, parser, extra_task_params)
+    args = build_args(args, parser, extra_task_params)
 
     if args.local_rank is not None:
         args.distributed = True
+        args.simple_ddp = True
     else:
         args.distributed = False
+        args.ngpu = 1
     args.local_rank = args.local_rank if args.local_rank is not None else 0
     local_rank = args.local_rank
     if "CUDA_VISIBLE_DEVICES" in os.environ.keys():
@@ -588,6 +589,10 @@ def build_trainer(modelscope_dict,
     args.output_dir = output_dir
     args.gpu_id = args.local_rank
     args.config = finetune_config
+    args.use_pai = False
+    args.batch_type = "length"
+    args.oss_bucket = None
+    args.input_size = None
     if optim is not None:
         args.optim = optim
     if lr is not None:
