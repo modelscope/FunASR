@@ -627,8 +627,6 @@ def build_trainer(modelscope_dict,
     torch.backends.cudnn.deterministic = args.cudnn_deterministic
 
     # ddp init
-    os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu_id)
-    args.distributed = args.ngpu > 1 or args.dist_world_size > 1
     distributed_option = build_distributed(args)
 
     # for logging
