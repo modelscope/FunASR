@@ -1,4 +1,4 @@
-([简体中文](./installation_zh.md)|English)
+(简体中文|[English](./installation.md))
 
 <p align="left">
     <a href=""><img src="https://img.shields.io/badge/OS-Linux%2C%20Win%2C%20Mac-brightgreen.svg"></a>
@@ -6,9 +6,9 @@
     <a href=""><img src="https://img.shields.io/badge/Pytorch-%3E%3D1.11-blue"></a>
 </p>
 
-## Installation
+## 安装
 
-### Install Conda (Optional):
+### 安装Conda（可选）：
 
 #### Linux
 ```sh
@@ -31,42 +31,43 @@ conda activate funasr
 #### Windows
 Ref to [docs](https://docs.conda.io/en/latest/miniconda.html#windows-installers)
 
-### Install Pytorch (version >= 1.11.0):
+### 安装Pytorch（版本 >= 1.11.0）：
 
 ```sh
 pip3 install torch torchaudio
 ```
-If there exists CUDAs in your environments, you should install the pytorch with the version matching the CUDA. The matching list could be found in [docs](https://pytorch.org/get-started/previous-versions/).
-### Install funasr
+如果您的环境中存在CUDAs，则应安装与CUDA匹配版本的pytorch，匹配列表可在文档中找到（[文档](https://pytorch.org/get-started/previous-versions/)）。
+### 安装funasr
 
-#### Install from pip
+#### 从pip安装
 
 ```shell
 pip3 install -U funasr
-# For the users in China, you could install with the command:
+# 对于中国大陆用户，可以使用以下命令进行安装：
 # pip3 install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
 
-#### Or install from source code
+#### 或者从源代码安装
 
 ``` sh
 git clone https://github.com/alibaba/FunASR.git && cd FunASR
 pip3 install -e ./
-# For the users in China, you could install with the command:
+# 对于中国大陆用户，可以使用以下命令进行安装：
 # pip3 install -e ./ -i https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
 
-### Install modelscope (Optional)
-If you want to use the pretrained models in ModelScope, you should install the modelscope:
+### 安装modelscope（可选）
+
+如果您想要使用ModelScope中的预训练模型，则应安装modelscope:
 
 ```shell
 pip3 install -U modelscope
-# For the users in China, you could install with the command:
+# 对于中国大陆用户，可以使用以下命令进行安装：
 # pip3 install -U modelscope -i https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
 
-### FQA
-- For installation on MAC M1 chip, the following error may happen:
+### 常见问题解答
+- 在MAC M1芯片上安装时，可能会出现以下错误：
 - - _cffi_backend.cpython-38-darwin.so' (mach-o file, but is an incompatible architecture (have (x86_64), need (arm64e)))
     ```shell
     pip uninstall cffi pycparser
