@@ -3,7 +3,7 @@
 > **Note**: 
 > The modelscope pipeline supports all the models in 
 [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope) 
-to inference and finetine. Here we take the model of xvector_sv as example to demonstrate the usage.
+to inference and finetune. Here we take the model of xvector_sv as example to demonstrate the usage.
 
 ## Inference with pipeline
 ### Quick start

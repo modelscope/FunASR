@@ -243,14 +243,14 @@ def Dataset(data_list_file,
                            mode=mode, 
                            )
 
-    filter_conf = conf.get('filter_conf', {})
-    filter_fn = partial(filter, **filter_conf)
-    dataset = FilterIterDataPipe(dataset, fn=filter_fn)
-
     if "text" in data_names:
         vocab = {'vocab': dict, 'seg_dict': seg_dict, 'punc_dict': punc_dict, 'bpe_tokenizer': bpe_tokenizer, 'hw_config': hw_config}
         tokenize_fn = partial(tokenize, **vocab)
         dataset = MapperIterDataPipe(dataset, fn=tokenize_fn)
+
+    filter_conf = conf.get('filter_conf', {})
+    filter_fn = partial(filter, **filter_conf)
+    dataset = FilterIterDataPipe(dataset, fn=filter_fn)
 
     if shuffle:
         buffer_conf = conf.get('shuffle_conf', {})

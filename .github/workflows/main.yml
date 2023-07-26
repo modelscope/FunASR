@@ -5,7 +5,6 @@ on:
       - main
   push:
     branches:
-      - dev_wjm
       - main
       - dev_lyh
 
@@ -18,6 +17,10 @@ jobs:
         with:
           docs-folder: "docs/"
           pre-build-command: "pip install sphinx-markdown-tables nbsphinx jinja2 recommonmark sphinx_rtd_theme"
+      - uses: ammaraskar/sphinx-action@master
+        with:
+          docs-folder: "docs/m2met2/"
+          pre-build-command: "pip install sphinx-markdown-tables nbsphinx jinja2 recommonmark sphinx_rtd_theme myst-parser"
 
       - name: deploy copy
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev_wjm' || github.ref == 'refs/heads/dev_lyh'
@@ -30,9 +33,6 @@ jobs:
           mkdir public/m2met2
           touch public/m2met2/.nojekyll
           cp -r docs/m2met2/_build/html/* public/m2met2/
-          mkdir public/m2met2_cn
-          touch public/m2met2_cn/.nojekyll
-          cp -r docs/m2met2_cn/_build/html/* public/m2met2_cn/
 
       - name: deploy github.io pages
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev_wjm' || github.ref == 'refs/heads/dev_lyh'

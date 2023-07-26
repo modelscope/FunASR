@@ -11,122 +11,51 @@
 
 <strong>FunASR</strong> hopes to build a bridge between academic research and industrial applications on speech recognition. By supporting the training & finetuning of the industrial-grade speech recognition model released on [ModelScope](https://www.modelscope.cn/models?page=1&tasks=auto-speech-recognition), researchers and developers can conduct research and production of speech recognition models more conveniently, and promote the development of speech recognition ecology. ASR for Fun！
 
-[**News**](https://github.com/alibaba-damo-academy/FunASR#whats-new) 
-| [**Highlights**](#highlights)
+[**Highlights**](#highlights)
+| [**News**](https://github.com/alibaba-damo-academy/FunASR#whats-new) 
 | [**Installation**](#installation)
-| [**Usage**](#usage)
-| [**Papers**](https://github.com/alibaba-damo-academy/FunASR#citations)
-| [**Runtime**](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime)
-| [**Model Zoo**](https://github.com/alibaba-damo-academy/FunASR/blob/main/docs/model_zoo/modelscope_models.md)
+| [**Quick Start**](#quick-start)
+| [**Runtime**](./funasr/runtime/readme.md)
+| [**Model Zoo**](./docs/model_zoo/modelscope_models.md)
 | [**Contact**](#contact)
-| [**M2MET2.0 Challenge**](https://github.com/alibaba-damo-academy/FunASR#multi-channel-multi-party-meeting-transcription-20-m2met20-challenge)
 
+
+<a name="highlights"></a>
+## Highlights
+- FunASR is a fundamental speech recognition toolkit that offers a variety of features, including speech recognition (ASR), Voice Activity Detection (VAD), Punctuation Restoration, Language Models, Speaker Verification, Speaker Diarization and multi-talker ASR. FunASR provides convenient scripts and tutorials, supporting inference and fine-tuning of pre-trained models.
+- We have released a vast collection of academic and industrial pretrained models on the [ModelScope](https://www.modelscope.cn/models?page=1&tasks=auto-speech-recognition), which can be accessed through our [Model Zoo](https://github.com/alibaba-damo-academy/FunASR/blob/main/docs/model_zoo/modelscope_models.md). The representative [Paraformer-large](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary), a non-autoregressive end-to-end speech recognition model, has the advantages of high accuracy, high efficiency, and convenient deployment, supporting the rapid construction of speech recognition services. For more details on service deployment, please refer to the [service deployment document](funasr/runtime/readme_cn.md). 
+
+
+<a name="whats-new"></a>
 ## What's new: 
 
-### FunASR runtime-SDK
+- 2023/07/17: BAT is released, which is a low-latency and low-memory-consumption RNN-T model. For more details, please refer to ([BAT](egs/aishell/bat)).
+- 2023/07/03: The CPU version of the Chinese offline file transcription service has been released. For more details, please refer to ([Deployment documentation](funasr/runtime/docs/SDK_tutorial.md)).
+- 2023/06/26: ASRU2023 Multi-Channel Multi-Party Meeting Transcription Challenge 2.0 completed the competition and announced the results. For more details, please refer to ([M2MeT2.0](https://alibaba-damo-academy.github.io/FunASR/m2met2/index.html)).
 
-- 2023.07.03: 
-We have release the FunASR runtime-SDK-0.1.0, file transcription service (Mandarin) is now supported ([ZH](funasr/runtime/readme_cn.md)/[EN](funasr/runtime/readme.md))
 
-### Multi-Channel Multi-Party Meeting Transcription 2.0 (M2MeT2.0) Challenge
-
-We are pleased to announce that the M2MeT2.0 challenge has been accepted by the ASRU 2023 challenge special session. The registration is now open. The baseline system is conducted on FunASR and is provided as a receipe of AliMeeting corpus. For more details you can see the guidence of M2MET2.0 ([CN](https://alibaba-damo-academy.github.io/FunASR/m2met2_cn/index.html)/[EN](https://alibaba-damo-academy.github.io/FunASR/m2met2/index.html)).
-
-### Release notes
-
-For the release notes, please ref to [news](https://github.com/alibaba-damo-academy/FunASR/releases)
-
-## Highlights
-- FunASR is a fundamental speech recognition toolkit that offers a variety of features, including speech recognition (ASR), Voice Activity Detection (VAD), Punctuation Restoration, Language Models, Speaker Verification, Speaker diarization and multi-talker ASR.
-- We have released a vast collection of academic and industrial pretrained models on the [ModelScope](https://www.modelscope.cn/models?page=1&tasks=auto-speech-recognition), which can be accessed through our [Model Zoo](https://github.com/alibaba-damo-academy/FunASR/blob/main/docs/model_zoo/modelscope_models.md). The representative [Paraformer-large](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary) model has achieved SOTA performance in many speech recognition tasks. 
-- FunASR offers a user-friendly pipeline for fine-tuning pretrained models from the [ModelScope](https://www.modelscope.cn/models?page=1&tasks=auto-speech-recognition). Additionally, the optimized dataloader in FunASR enables faster training speeds for large-scale datasets. This feature enhances the efficiency of the speech recognition process for researchers and practitioners.
-
+<a name="Installation"></a>
 ## Installation
 
-Install from pip
-```shell
-pip3 install -U funasr
-# For the users in China, you could install with the command:
-# pip3 install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple
-```
+Please ref to [installation docs](https://alibaba-damo-academy.github.io/FunASR/en/installation/installation.html)
 
-Or install from source code
+## Deployment Service
+
+FunASR supports pre-trained or further fine-tuned models for deployment as a service. The CPU version of the Chinese offline file conversion service has been released, details can be found in [docs](funasr/runtime/docs/SDK_tutorial.md). More detailed information about service deployment can be found in the [deployment roadmap](funasr/runtime/readme_cn.md).
 
 
-``` sh
-git clone https://github.com/alibaba/FunASR.git && cd FunASR
-pip3 install -e ./
-# For the users in China, you could install with the command:
-# pip3 install -e ./ -i https://mirror.sjtu.edu.cn/pypi/web/simple
+<a name="quick-start"></a>
+## Quick Start
 
-```
-If you want to use the pretrained models in ModelScope, you should install the modelscope:
+FunASR supports inference and fine-tuning of models trained on industrial datasets of tens of thousands of hours. For more details, please refer to ([modelscope_egs](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_pipeline/quick_start.html)). It also supports training and fine-tuning of models on academic standard datasets. For more details, please refer to([egs](https://alibaba-damo-academy.github.io/FunASR/en/academic_recipe/asr_recipe.html)). The models include speech recognition (ASR), speech activity detection (VAD), punctuation recovery, language model, speaker verification, speaker separation, and multi-party conversation speech recognition. For a detailed list of models, please refer to the [Model Zoo](https://github.com/alibaba-damo-academy/FunASR/blob/main/docs/model_zoo/modelscope_models.md):
 
-```shell
-pip3 install -U modelscope
-# For the users in China, you could install with the command:
-# pip3 install -U modelscope -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html -i https://mirror.sjtu.edu.cn/pypi/web/simple
-```
+<a name="Community Communication"></a>
+## Community Communication
+If you encounter problems in use, you can directly raise Issues on the github page.
 
-For more details, please ref to [installation](https://alibaba-damo-academy.github.io/FunASR/en/installation/installation.html)
+You can also scan the following DingTalk group or WeChat group QR code to join the community group for communication and discussion.
 
-## Usage
-
-You could use FunASR by:
-
-- egs
-- egs_modelscope
-- runtime
-
-### egs
-If you want to train the model from scratch, you could use funasr directly by recipe, as the following:
-```shell
-cd egs/aishell/paraformer
-. ./run.sh --CUDA_VISIBLE_DEVICES="0,1" --gpu_num=2
-```
-More examples could be found in [docs](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_pipeline/quick_start.html)
-
-### egs_modelscope
-If you want to infer or finetune pretraining models from modelscope, you could use funasr by modelscope pipeline, as the following:
-
-```python
-from modelscope.pipelines import pipeline
-from modelscope.utils.constant import Tasks
-
-inference_pipeline = pipeline(
-    task=Tasks.auto_speech_recognition,
-    model='damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch',
-)
-
-rec_result = inference_pipeline(audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
-print(rec_result)
-# {'text': '欢迎大家来体验达摩院推出的语音识别模型'}
-```
-More examples could be found in [docs](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_pipeline/quick_start.html)
-
-### runtime
-
-An example with websocket:
-
-For the server:
-```shell
-cd funasr/runtime/python/websocket
-python funasr_wss_server.py --port 10095
-```
-
-For the client:
-```shell
-python funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass --chunk_size "5,10,5"
-#python funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass --chunk_size "8,8,4" --audio_in "./data/wav.scp" --output_dir "./results"
-```
-More examples could be found in [docs](https://alibaba-damo-academy.github.io/FunASR/en/runtime/websocket_python.html#id2)
-## Contact
-
-If you have any questions about FunASR, please contact us by
-
-- email: [funasr@list.alibaba-inc.com](funasr@list.alibaba-inc.com)
-
-|Dingding group |                     Wechat group                      |
+|DingTalk group |                     WeChat group                      |
 |:---:|:-----------------------------------------------------:|
 |<div align="left"><img src="docs/images/dingding.jpg" width="250"/> | <img src="docs/images/wechat.png" width="232"/></div> |
 
@@ -135,30 +64,24 @@ If you have any questions about FunASR, please contact us by
 | <div align="left"><img src="docs/images/damo.png" width="180"/> | <div align="left"><img src="docs/images/nwpu.png" width="260"/> | <img src="docs/images/China_Telecom.png" width="200"/> </div>  | <img src="docs/images/RapidAI.png" width="200"/> </div> | <img src="docs/images/aihealthx.png" width="200"/> </div> |
 |:---------------------------------------------------------------:|:---------------------------------------------------------------:|:--------------------------------------------------------------:|:-------------------------------------------------------:|:-----------------------------------------------------------:|
 
-## Acknowledge
-
-1. We borrowed a lot of code from [Kaldi](http://kaldi-asr.org/) for data preparation.
-2. We borrowed a lot of code from [ESPnet](https://github.com/espnet/espnet). FunASR follows up the training and finetuning pipelines of ESPnet.
-3. We referred [Wenet](https://github.com/wenet-e2e/wenet) for building dataloader for large scale data training.
-4. We acknowledge [ChinaTelecom](https://github.com/zhuzizyf/damo-fsmn-vad-infer-httpserver) for contributing the VAD runtime. 
-5. We acknowledge [RapidAI](https://github.com/RapidAI) for contributing the Paraformer and CT_Transformer-punc runtime.
-6. We acknowledge [AiHealthx](http://www.aihealthx.com/) for contributing the websocket service and html5.
+The contributors can be found in [contributors list]((./Acknowledge))
 
 ## License
 This project is licensed under the [The MIT License](https://opensource.org/licenses/MIT). FunASR also contains various third-party components and some code modified from other repos under other open source licenses.
 The use of pretraining model is subject to [model licencs](./MODEL_LICENSE)
 
 
-## Stargazers over time
-
-[![Stargazers over time](https://starchart.cc/alibaba-damo-academy/FunASR.svg)](https://starchart.cc/alibaba-damo-academy/FunASR)
-
 ## Citations
-
 ``` bibtex
 @inproceedings{gao2023funasr,
   author={Zhifu Gao and Zerui Li and Jiaming Wang and Haoneng Luo and Xian Shi and Mengzhe Chen and Yabin Li and Lingyun Zuo and Zhihao Du and Zhangyu Xiao and Shiliang Zhang},
   title={FunASR: A Fundamental End-to-End Speech Recognition Toolkit},
+  year={2023},
+  booktitle={INTERSPEECH},
+}
+@inproceedings{An2023bat,
+  author={Keyu An and Xian Shi and Shiliang Zhang},
+  title={BAT: Boundary aware transducer for memory-efficient and low-latency ASR},
   year={2023},
   booktitle={INTERSPEECH},
 }

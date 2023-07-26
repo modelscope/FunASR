@@ -204,6 +204,7 @@ async def message(id):
         
             meg = await websocket.recv()
             meg = json.loads(meg)
+            print(meg)
             wav_name = meg.get("wav_name", "demo")
             text = meg["text"]
 
