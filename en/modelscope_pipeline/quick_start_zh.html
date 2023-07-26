@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quick Start &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <title>快速使用 &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -16,9 +16,7 @@
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Speech Recognition" href="asr_pipeline.html" />
-    <link rel="prev" title="Speaker Diarization" href="../academic_recipe/sd_recipe.html" /> 
+    <link rel="search" title="Search" href="../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -58,51 +56,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../academic_recipe/sd_recipe.html">Speaker Diarization</a></li>
 </ul>
 <p class="caption"><span class="caption-text">ModelScope Egs</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Quick Start</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#inference-with-pipeline">Inference with pipeline</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#speech-recognition">Speech Recognition</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#paraformer-model">Paraformer Model</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#voice-activity-detection">Voice Activity Detection</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#fsmn-vad-model">FSMN-VAD Model</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#punctuation-restoration">Punctuation Restoration</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#ct-transformer-model">CT_Transformer Model</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#timestamp-prediction">Timestamp Prediction</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#tp-aligner-model">TP-Aligner Model</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#speaker-verification">Speaker Verification</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#x-vector-model">X-vector Model</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#speaker-diarization">Speaker Diarization</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#sond-model">SOND Model</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#faq">FAQ</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#how-to-switch-device-from-gpu-to-cpu-with-pipeline">How to switch device from GPU to CPU with pipeline</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#how-to-infer-from-local-model-path">How to infer from local model path</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#finetune-with-pipeline">Finetune with pipeline</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id1">Speech Recognition</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id2">Paraformer Model</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#id3">FAQ</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#multi-gpus-training-and-distributed-training">Multi GPUs training and distributed training</a></li>
-</ul>
-</li>
-</ul>
-</li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="asr_pipeline.html">Speech Recognition</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vad_pipeline.html">Voice Activity Detection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="punc_pipeline.html">Punctuation Restoration</a></li>
@@ -165,9 +120,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Quick Start</li>
+      <li class="breadcrumb-item active">快速使用</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/modelscope_pipeline/quick_start.md.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/modelscope_pipeline/quick_start_zh.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -175,19 +130,19 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <p>(<a class="reference internal" href="quick_start_zh.html"><span class="doc">简体中文</span></a>|English)</p>
-<div class="section" id="quick-start">
-<h1>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline"></a></h1>
+  <p>(简体中文|<a class="reference internal" href="quick_start.html"><span class="doc">English</span></a>)</p>
+<div class="section" id="id1">
+<h1>快速使用<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h1>
 <blockquote>
-<div><p><strong>Note</strong>:
-The modelscope pipeline supports all the models in <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope">model zoo</a> to inference and finetine. Here we take typic model as example to demonstrate the usage.</p>
+<div><p><strong>注意</strong>:
+modelscope pipeline支持model zoo中的所有模型进行推理和微调。这里我们以typic模型为例来演示用法。</p>
 </div></blockquote>
-<div class="section" id="inference-with-pipeline">
-<h2>Inference with pipeline<a class="headerlink" href="#inference-with-pipeline" title="Permalink to this headline"></a></h2>
-<div class="section" id="speech-recognition">
-<h3>Speech Recognition<a class="headerlink" href="#speech-recognition" title="Permalink to this headline"></a></h3>
-<div class="section" id="paraformer-model">
-<h4>Paraformer Model<a class="headerlink" href="#paraformer-model" title="Permalink to this headline"></a></h4>
+<div class="section" id="pipeline">
+<h2>使用pipeline进行推理<a class="headerlink" href="#pipeline" title="Permalink to this headline"></a></h2>
+<div class="section" id="id2">
+<h3>语音识别<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h3>
+<div class="section" id="paraformer">
+<h4>Paraformer模型<a class="headerlink" href="#paraformer" title="Permalink to this headline"></a></h4>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
 <span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
 
@@ -203,10 +158,10 @@ The modelscope pipeline supports all the models in <a class="reference external"
 </div>
 </div>
 </div>
-<div class="section" id="voice-activity-detection">
-<h3>Voice Activity Detection<a class="headerlink" href="#voice-activity-detection" title="Permalink to this headline"></a></h3>
-<div class="section" id="fsmn-vad-model">
-<h4>FSMN-VAD Model<a class="headerlink" href="#fsmn-vad-model" title="Permalink to this headline"></a></h4>
+<div class="section" id="id3">
+<h3>语音端点检测<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h3>
+<div class="section" id="fsmn-vad">
+<h4>FSMN-VAD模型<a class="headerlink" href="#fsmn-vad" title="Permalink to this headline"></a></h4>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
 <span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
 <span class="kn">from</span> <span class="nn">modelscope.utils.logger</span> <span class="kn">import</span> <span class="n">get_logger</span>
@@ -226,10 +181,10 @@ The modelscope pipeline supports all the models in <a class="reference external"
 </div>
 </div>
 </div>
-<div class="section" id="punctuation-restoration">
-<h3>Punctuation Restoration<a class="headerlink" href="#punctuation-restoration" title="Permalink to this headline"></a></h3>
-<div class="section" id="ct-transformer-model">
-<h4>CT_Transformer Model<a class="headerlink" href="#ct-transformer-model" title="Permalink to this headline"></a></h4>
+<div class="section" id="id4">
+<h3>标点恢复<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h3>
+<div class="section" id="ct-transformer">
+<h4>CT_Transformer模型<a class="headerlink" href="#ct-transformer" title="Permalink to this headline"></a></h4>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
 <span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
 
@@ -245,10 +200,10 @@ The modelscope pipeline supports all the models in <a class="reference external"
 </div>
 </div>
 </div>
-<div class="section" id="timestamp-prediction">
-<h3>Timestamp Prediction<a class="headerlink" href="#timestamp-prediction" title="Permalink to this headline"></a></h3>
-<div class="section" id="tp-aligner-model">
-<h4>TP-Aligner Model<a class="headerlink" href="#tp-aligner-model" title="Permalink to this headline"></a></h4>
+<div class="section" id="id5">
+<h3>时间戳预测<a class="headerlink" href="#id5" title="Permalink to this headline"></a></h3>
+<div class="section" id="tp-aligner">
+<h4>TP-Aligner模型<a class="headerlink" href="#tp-aligner" title="Permalink to this headline"></a></h4>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
 <span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
 
@@ -265,10 +220,10 @@ The modelscope pipeline supports all the models in <a class="reference external"
 </div>
 </div>
 </div>
-<div class="section" id="speaker-verification">
-<h3>Speaker Verification<a class="headerlink" href="#speaker-verification" title="Permalink to this headline"></a></h3>
-<div class="section" id="x-vector-model">
-<h4>X-vector Model<a class="headerlink" href="#x-vector-model" title="Permalink to this headline"></a></h4>
+<div class="section" id="id6">
+<h3>说话人确认<a class="headerlink" href="#id6" title="Permalink to this headline"></a></h3>
+<div class="section" id="x-vector">
+<h4>X-vector模型<a class="headerlink" href="#x-vector" title="Permalink to this headline"></a></h4>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
 <span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -289,10 +244,10 @@ The modelscope pipeline supports all the models in <a class="reference external"
 </div>
 </div>
 </div>
-<div class="section" id="speaker-diarization">
-<h3>Speaker Diarization<a class="headerlink" href="#speaker-diarization" title="Permalink to this headline"></a></h3>
-<div class="section" id="sond-model">
-<h4>SOND Model<a class="headerlink" href="#sond-model" title="Permalink to this headline"></a></h4>
+<div class="section" id="id7">
+<h3>说话人日志<a class="headerlink" href="#id7" title="Permalink to this headline"></a></h3>
+<div class="section" id="sond">
+<h4>SOND模型<a class="headerlink" href="#sond" title="Permalink to this headline"></a></h4>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
 <span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
 
@@ -321,10 +276,10 @@ The modelscope pipeline supports all the models in <a class="reference external"
 </div>
 </div>
 </div>
-<div class="section" id="faq">
-<h3>FAQ<a class="headerlink" href="#faq" title="Permalink to this headline"></a></h3>
-<div class="section" id="how-to-switch-device-from-gpu-to-cpu-with-pipeline">
-<h4>How to switch device from GPU to CPU with pipeline<a class="headerlink" href="#how-to-switch-device-from-gpu-to-cpu-with-pipeline" title="Permalink to this headline"></a></h4>
+<div class="section" id="id8">
+<h3>常见问题<a class="headerlink" href="#id8" title="Permalink to this headline"></a></h3>
+<div class="section" id="pipeline-cpugpu">
+<h4>使用pipeline进行推理，如何在CPU与GPU进行切换<a class="headerlink" href="#pipeline-cpugpu" title="Permalink to this headline"></a></h4>
 <p>The pipeline defaults to decoding with GPU (<code class="docutils literal notranslate"><span class="pre">ngpu=1</span></code>) when GPU is available. If you want to switch to CPU, you could set <code class="docutils literal notranslate"><span class="pre">ngpu=0</span></code></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
     <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">auto_speech_recognition</span><span class="p">,</span>
@@ -334,22 +289,22 @@ The modelscope pipeline supports all the models in <a class="reference external"
 </pre></div>
 </div>
 </div>
-<div class="section" id="how-to-infer-from-local-model-path">
-<h4>How to infer from local model path<a class="headerlink" href="#how-to-infer-from-local-model-path" title="Permalink to this headline"></a></h4>
-<p>Download model to local dir, by modelscope-sdk</p>
+<div class="section" id="id9">
+<h4>如何从本地模型进行推理（不联网使用）<a class="headerlink" href="#id9" title="Permalink to this headline"></a></h4>
+<p>使用modelscope-sdk将模型下载到本地</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.hub.snapshot_download</span> <span class="kn">import</span> <span class="n">snapshot_download</span>
 
 <span class="n">local_dir_root</span> <span class="o">=</span> <span class="s2">&quot;./models_from_modelscope&quot;</span>
 <span class="n">model_dir</span> <span class="o">=</span> <span class="n">snapshot_download</span><span class="p">(</span><span class="s1">&#39;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&#39;</span><span class="p">,</span> <span class="n">cache_dir</span><span class="o">=</span><span class="n">local_dir_root</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Or download model to local dir, by git lfs</p>
+<p>或者使用git将模型下载到本地</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git lfs install
 <span class="c1"># git clone https://www.modelscope.cn/&lt;namespace&gt;/&lt;model-name&gt;.git</span>
 git clone https://www.modelscope.cn/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch.git
 </pre></div>
 </div>
-<p>Infer with local model path</p>
+<p>从下载的本地模型进行推理（可以不联网使用）</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">local_dir_root</span> <span class="o">=</span> <span class="s2">&quot;./models_from_modelscope/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&quot;</span>
 <span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
     <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">auto_speech_recognition</span><span class="p">,</span>
@@ -360,12 +315,12 @@ git clone https://www.modelscope.cn/damo/speech_paraformer-large_asr_nat-zh-cn-1
 </div>
 </div>
 </div>
-<div class="section" id="finetune-with-pipeline">
-<h2>Finetune with pipeline<a class="headerlink" href="#finetune-with-pipeline" title="Permalink to this headline"></a></h2>
-<div class="section" id="id1">
-<h3>Speech Recognition<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h3>
-<div class="section" id="id2">
-<h4>Paraformer Model<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h4>
+<div class="section" id="id10">
+<h2>使用pipeline进行微调<a class="headerlink" href="#id10" title="Permalink to this headline"></a></h2>
+<div class="section" id="id11">
+<h3>语音识别<a class="headerlink" href="#id11" title="Permalink to this headline"></a></h3>
+<div class="section" id="id12">
+<h4>Paraformer模型<a class="headerlink" href="#id12" title="Permalink to this headline"></a></h4>
 <p>finetune.py</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">modelscope.metainfo</span> <span class="kn">import</span> <span class="n">Trainers</span>
@@ -414,12 +369,12 @@ git clone https://www.modelscope.cn/damo/speech_paraformer-large_asr_nat-zh-cn-1
 </div>
 </div>
 </div>
-<div class="section" id="id3">
-<h3>FAQ<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h3>
+<div class="section" id="id13">
+<h3>常见问题<a class="headerlink" href="#id13" title="Permalink to this headline"></a></h3>
 </div>
-<div class="section" id="multi-gpus-training-and-distributed-training">
-<h3>Multi GPUs training and distributed training<a class="headerlink" href="#multi-gpus-training-and-distributed-training" title="Permalink to this headline"></a></h3>
-<p>If you want finetune with multi-GPUs, you could:</p>
+<div class="section" id="gpu">
+<h3>多GPU训练<a class="headerlink" href="#gpu" title="Permalink to this headline"></a></h3>
+<p>可以使用下面的指令进行多GPU训练</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nv">CUDA_VISIBLE_DEVICES</span><span class="o">=</span><span class="m">1</span>,2 python -m torch.distributed.launch --nproc_per_node <span class="m">2</span> finetune.py &gt; log.txt <span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span>
 </pre></div>
 </div>
@@ -430,10 +385,7 @@ git clone https://www.modelscope.cn/damo/speech_paraformer-large_asr_nat-zh-cn-1
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../academic_recipe/sd_recipe.html" class="btn btn-neutral float-left" title="Speaker Diarization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="asr_pipeline.html" class="btn btn-neutral float-right" title="Speech Recognition" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 

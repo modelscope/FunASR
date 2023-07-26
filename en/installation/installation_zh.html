@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Docker &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <title>安装 &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -16,9 +16,7 @@
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Quick Start" href="../funasr/quick_start.html" />
-    <link rel="prev" title="Installation" href="installation.html" /> 
+    <link rel="search" title="Search" href="../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -41,32 +39,9 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption"><span class="caption-text">Installation</span></p>
-<ul class="current">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Docker</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#install-docker">Install Docker</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#ubuntu">Ubuntu</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#debian">Debian</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#centos">CentOS</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#macos">MacOS</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#windows">Windows</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#start-docker">Start Docker</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#download-image">Download image</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#image-hub">Image Hub</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#cpu">CPU</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#gpu">GPU</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#pull-image">Pull Image</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#check-image">Check Image</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#run-docker">Run Docker</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#stop-docker">Stop Docker</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">Docker</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Quick Start</span></p>
 <ul>
@@ -145,9 +120,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Docker</li>
+      <li class="breadcrumb-item active">安装</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/installation/docker.md.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/installation/installation_zh.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -155,102 +130,99 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <p>(<a class="reference internal" href="docker_zh.html"><span class="doc">简体中文</span></a>|English)</p>
-<div class="section" id="docker">
-<h1>Docker<a class="headerlink" href="#docker" title="Permalink to this headline"></a></h1>
-<div class="section" id="install-docker">
-<h2>Install Docker<a class="headerlink" href="#install-docker" title="Permalink to this headline"></a></h2>
-<div class="section" id="ubuntu">
-<h3>Ubuntu<a class="headerlink" href="#ubuntu" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>curl -fsSL https://test.docker.com -o test-docker.sh
-sudo sh test-docker.sh
+  <p>(简体中文|<a class="reference internal" href="installation.html"><span class="doc">English</span></a>)</p>
+<p align="left">
+    <a href=""><img src="https://img.shields.io/badge/OS-Linux%2C%20Win%2C%20Mac-brightgreen.svg"></a>
+    <a href=""><img src="https://img.shields.io/badge/Python->=3.7,<=3.10-aff.svg"></a>
+    <a href=""><img src="https://img.shields.io/badge/Pytorch-%3E%3D1.11-blue"></a>
+</p><div class="section" id="id1">
+<h1>安装<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h1>
+<div class="section" id="conda">
+<h2>安装Conda（可选）：<a class="headerlink" href="#conda" title="Permalink to this headline"></a></h2>
+<div class="section" id="linux">
+<h3>Linux<a class="headerlink" href="#linux" title="Permalink to this headline"></a></h3>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+sh Miniconda3-latest-Linux-x86_64.sh
+<span class="nb">source</span> ~/.bashrc
+conda create -n funasr <span class="nv">python</span><span class="o">=</span><span class="m">3</span>.8
+conda activate funasr
 </pre></div>
 </div>
 </div>
-<div class="section" id="debian">
-<h3>Debian<a class="headerlink" href="#debian" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span> curl -fsSL https://get.docker.com -o get-docker.sh
- sudo sh get-docker.sh
-</pre></div>
-</div>
-</div>
-<div class="section" id="centos">
-<h3>CentOS<a class="headerlink" href="#centos" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>curl -fsSL https://get.docker.com <span class="p">|</span> bash -s docker --mirror Aliyun
-</pre></div>
-</div>
-</div>
-<div class="section" id="macos">
-<h3>MacOS<a class="headerlink" href="#macos" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>brew install --cask --appdir<span class="o">=</span>/Applications docker
+<div class="section" id="mac">
+<h3>Mac<a class="headerlink" href="#mac" title="Permalink to this headline"></a></h3>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>wget https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
+<span class="c1"># For M1 chip</span>
+<span class="c1"># wget https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-arm64.sh</span>
+sh Miniconda3-latest-MacOSX*
+<span class="nb">source</span> ~/.zashrc
+conda create -n funasr <span class="nv">python</span><span class="o">=</span><span class="m">3</span>.8
+conda activate funasr
 </pre></div>
 </div>
 </div>
 <div class="section" id="windows">
 <h3>Windows<a class="headerlink" href="#windows" title="Permalink to this headline"></a></h3>
-<p>Ref to <a class="reference external" href="https://docs.docker.com/desktop/install/windows-install/">docs</a></p>
+<p>Ref to <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html#windows-installers">docs</a></p>
 </div>
 </div>
-<div class="section" id="start-docker">
-<h2>Start Docker<a class="headerlink" href="#start-docker" title="Permalink to this headline"></a></h2>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo systemctl start docker
+<div class="section" id="pytorch-1-11-0">
+<h2>安装Pytorch（版本 &gt;= 1.11.0）：<a class="headerlink" href="#pytorch-1-11-0" title="Permalink to this headline"></a></h2>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip3 install torch torchaudio
+</pre></div>
+</div>
+<p>如果您的环境中存在CUDAs，则应安装与CUDA匹配版本的pytorch，匹配列表可在文档中找到（<a class="reference external" href="https://pytorch.org/get-started/previous-versions/">文档</a>）。</p>
+</div>
+<div class="section" id="funasr">
+<h2>安装funasr<a class="headerlink" href="#funasr" title="Permalink to this headline"></a></h2>
+<div class="section" id="pip">
+<h3>从pip安装<a class="headerlink" href="#pip" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip3 install -U funasr
+<span class="c1"># 对于中国大陆用户，可以使用以下命令进行安装：</span>
+<span class="c1"># pip3 install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="download-image">
-<h2>Download image<a class="headerlink" href="#download-image" title="Permalink to this headline"></a></h2>
-<div class="section" id="image-hub">
-<h3>Image Hub<a class="headerlink" href="#image-hub" title="Permalink to this headline"></a></h3>
-<div class="section" id="cpu">
-<h4>CPU<a class="headerlink" href="#cpu" title="Permalink to this headline"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.1.0</span></code></p>
-</div>
-<div class="section" id="gpu">
-<h4>GPU<a class="headerlink" href="#gpu" title="Permalink to this headline"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">registry.cn-hangzhou.aliyuncs.com/modelscope-repo/modelscope:ubuntu20.04-cuda11.3.0-py37-torch1.11.0-tf1.15.5-1.6.0</span></code></p>
-</div>
-</div>
-<div class="section" id="pull-image">
-<h3>Pull Image<a class="headerlink" href="#pull-image" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo docker pull &lt;image-name&gt;:&lt;tag&gt;
-</pre></div>
-</div>
-</div>
-<div class="section" id="check-image">
-<h3>Check Image<a class="headerlink" href="#check-image" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo docker images
+<div class="section" id="id2">
+<h3>或者从源代码安装<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h3>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/alibaba/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> FunASR
+pip3 install -e ./
+<span class="c1"># 对于中国大陆用户，可以使用以下命令进行安装：</span>
+<span class="c1"># pip3 install -e ./ -i https://mirror.sjtu.edu.cn/pypi/web/simple</span>
 </pre></div>
 </div>
 </div>
 </div>
-<div class="section" id="run-docker">
-<h2>Run Docker<a class="headerlink" href="#run-docker" title="Permalink to this headline"></a></h2>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># cpu</span>
-sudo docker run -itd --name funasr -v &lt;local_dir:dir_in_docker&gt; &lt;image-name&gt;:&lt;tag&gt; /bin/bash
-<span class="c1"># gpu</span>
-sudo docker run -itd --gpus all --name funasr -v &lt;local_dir:dir_in_docker&gt; &lt;image-name&gt;:&lt;tag&gt; /bin/bash
-
-sudo docker <span class="nb">exec</span> -it funasr /bin/bash
+<div class="section" id="modelscope">
+<h2>安装modelscope（可选）<a class="headerlink" href="#modelscope" title="Permalink to this headline"></a></h2>
+<p>如果您想要使用ModelScope中的预训练模型，则应安装modelscope:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip3 install -U modelscope
+<span class="c1"># 对于中国大陆用户，可以使用以下命令进行安装：</span>
+<span class="c1"># pip3 install -U modelscope -i https://mirror.sjtu.edu.cn/pypi/web/simple</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="stop-docker">
-<h2>Stop Docker<a class="headerlink" href="#stop-docker" title="Permalink to this headline"></a></h2>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">exit</span>
-sudo docker ps
-sudo docker stop funasr
+<div class="section" id="id3">
+<h2>常见问题解答<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h2>
+<ul>
+<li><p>在MAC M1芯片上安装时，可能会出现以下错误：</p></li>
+<li><ul>
+<li><p>_cffi_backend.cpython-38-darwin.so’ (mach-o file, but is an incompatible architecture (have (x86_64), need (arm64e)))</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip uninstall cffi pycparser
+<span class="nv">ARCHFLAGS</span><span class="o">=</span><span class="s2">&quot;-arch arm64&quot;</span> pip install cffi pycparser --compile --no-cache-dir
 </pre></div>
 </div>
+</li>
+</ul>
+</li>
+</ul>
 </div>
 </div>
 
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../funasr/quick_start.html" class="btn btn-neutral float-right" title="Quick Start" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 

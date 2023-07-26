@@ -16,9 +16,7 @@
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Quick Start" href="../funasr/quick_start.html" />
-    <link rel="prev" title="Installation" href="installation.html" /> 
+    <link rel="search" title="Search" href="../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -41,32 +39,9 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption"><span class="caption-text">Installation</span></p>
-<ul class="current">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Docker</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#install-docker">Install Docker</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#ubuntu">Ubuntu</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#debian">Debian</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#centos">CentOS</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#macos">MacOS</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#windows">Windows</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#start-docker">Start Docker</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#download-image">Download image</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#image-hub">Image Hub</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#cpu">CPU</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#gpu">GPU</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#pull-image">Pull Image</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#check-image">Check Image</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#run-docker">Run Docker</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#stop-docker">Stop Docker</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">Docker</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Quick Start</span></p>
 <ul>
@@ -147,7 +122,7 @@
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
       <li class="breadcrumb-item active">Docker</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/installation/docker.md.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/installation/docker_zh.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -155,11 +130,11 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <p>(<a class="reference internal" href="docker_zh.html"><span class="doc">简体中文</span></a>|English)</p>
+  <p>(简体中文|<a class="reference internal" href="docker.html"><span class="doc">English</span></a>)</p>
 <div class="section" id="docker">
 <h1>Docker<a class="headerlink" href="#docker" title="Permalink to this headline"></a></h1>
-<div class="section" id="install-docker">
-<h2>Install Docker<a class="headerlink" href="#install-docker" title="Permalink to this headline"></a></h2>
+<div class="section" id="id1">
+<h2>安装Docker<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h2>
 <div class="section" id="ubuntu">
 <h3>Ubuntu<a class="headerlink" href="#ubuntu" title="Permalink to this headline"></a></h3>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>curl -fsSL https://test.docker.com -o test-docker.sh
@@ -188,43 +163,43 @@ sudo sh test-docker.sh
 </div>
 <div class="section" id="windows">
 <h3>Windows<a class="headerlink" href="#windows" title="Permalink to this headline"></a></h3>
-<p>Ref to <a class="reference external" href="https://docs.docker.com/desktop/install/windows-install/">docs</a></p>
+<p>请参考<a class="reference external" href="https://docs.docker.com/desktop/install/windows-install/">文档</a></p>
 </div>
 </div>
-<div class="section" id="start-docker">
-<h2>Start Docker<a class="headerlink" href="#start-docker" title="Permalink to this headline"></a></h2>
+<div class="section" id="id2">
+<h2>启动Docker<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h2>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo systemctl start docker
 </pre></div>
 </div>
 </div>
-<div class="section" id="download-image">
-<h2>Download image<a class="headerlink" href="#download-image" title="Permalink to this headline"></a></h2>
-<div class="section" id="image-hub">
-<h3>Image Hub<a class="headerlink" href="#image-hub" title="Permalink to this headline"></a></h3>
+<div class="section" id="id3">
+<h2>下载Docker镜像<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h2>
+<div class="section" id="id4">
+<h3>镜像仓库<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h3>
 <div class="section" id="cpu">
 <h4>CPU<a class="headerlink" href="#cpu" title="Permalink to this headline"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.1.0</span></code></p>
 </div>
 <div class="section" id="gpu">
 <h4>GPU<a class="headerlink" href="#gpu" title="Permalink to this headline"></a></h4>
-<p><code class="docutils literal notranslate"><span class="pre">registry.cn-hangzhou.aliyuncs.com/modelscope-repo/modelscope:ubuntu20.04-cuda11.3.0-py37-torch1.11.0-tf1.15.5-1.6.0</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">registry.cn-beijing.aliyuncs.com/modelscope-repo/modelscope:ubuntu20.04-cuda11.7.1-py38-torch2.0.1-tf1.15.5-1.7.0</span></code></p>
 </div>
 </div>
-<div class="section" id="pull-image">
-<h3>Pull Image<a class="headerlink" href="#pull-image" title="Permalink to this headline"></a></h3>
+<div class="section" id="id5">
+<h3>拉取镜像<a class="headerlink" href="#id5" title="Permalink to this headline"></a></h3>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo docker pull &lt;image-name&gt;:&lt;tag&gt;
 </pre></div>
 </div>
 </div>
-<div class="section" id="check-image">
-<h3>Check Image<a class="headerlink" href="#check-image" title="Permalink to this headline"></a></h3>
+<div class="section" id="id6">
+<h3>查看镜像<a class="headerlink" href="#id6" title="Permalink to this headline"></a></h3>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo docker images
 </pre></div>
 </div>
 </div>
 </div>
-<div class="section" id="run-docker">
-<h2>Run Docker<a class="headerlink" href="#run-docker" title="Permalink to this headline"></a></h2>
+<div class="section" id="id7">
+<h2>运行Docker<a class="headerlink" href="#id7" title="Permalink to this headline"></a></h2>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># cpu</span>
 sudo docker run -itd --name funasr -v &lt;local_dir:dir_in_docker&gt; &lt;image-name&gt;:&lt;tag&gt; /bin/bash
 <span class="c1"># gpu</span>
@@ -234,8 +209,8 @@ sudo docker <span class="nb">exec</span> -it funasr /bin/bash
 </pre></div>
 </div>
 </div>
-<div class="section" id="stop-docker">
-<h2>Stop Docker<a class="headerlink" href="#stop-docker" title="Permalink to this headline"></a></h2>
+<div class="section" id="id8">
+<h2>停止Docker<a class="headerlink" href="#id8" title="Permalink to this headline"></a></h2>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">exit</span>
 sudo docker ps
 sudo docker stop funasr
@@ -247,10 +222,7 @@ sudo docker stop funasr
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../funasr/quick_start.html" class="btn btn-neutral float-right" title="Quick Start" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 
