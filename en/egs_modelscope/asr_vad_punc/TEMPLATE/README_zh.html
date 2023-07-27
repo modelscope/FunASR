@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>语音识别 &mdash; FunASR  documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            FunASR
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/docker.html">Docker</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Quick Start</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../funasr/quick_start.html">Quick Start</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Academic Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/asr_recipe.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/punc_recipe.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/vad_recipe.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/sv_recipe.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/sd_recipe.html">Speaker Diarization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">ModelScope Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../asr/TEMPLATE/README.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/vad_pipeline.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/punc_pipeline.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/tp_pipeline.html">Timestamp Prediction (FA)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/sv_pipeline.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/sd_pipeline.html">Speaker Diarization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/itn_pipeline.html">Inverse Text Normalization (ITN)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Zoo</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_zoo/modelscope_models.html">Pretrained Models on ModelScope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_zoo/huggingface_models.html">Pretrained Models on Huggingface</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Runtime and Service</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../funasr/runtime/docs/SDK_tutorial.html">FunASR Offline File Transcription Service Convenient Deployment Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../funasr/runtime/python/websocket/README.html">Service with websocket-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../funasr/runtime/websocket/readme.html">Service with websocket-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../funasr/runtime/html5/readme.html">Speech Recognition Service Html5 Client Access Interface</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark and Leaderboard</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_onnx.html">CPU Benchmark (ONNX-python)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_onnx_cpp.html">CPU Benchmark (ONNX-cpp)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_libtorch.html">CPU Benchmark (Libtorch)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_pipeline_cer.html">Leaderboard IO</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Funasr Library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/build_task.html">Build custom tasks</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Papers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/papers.html">Papers</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Application</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html">Audio Cut</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html#realtime-speech-recognition">Realtime Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html#audio-chat">Audio Chat</a></li>
+</ul>
+<p class="caption"><span class="caption-text">FQA</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/FQA.html">FQA</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">FunASR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">语音识别</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/egs_modelscope/asr_vad_punc/TEMPLATE/README_zh.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <p>(简体中文|<a class="reference internal" href="README.html"><span class="doc">English</span></a>)</p>
+<div class="section" id="id1">
+<h1>语音识别<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h1>
+<blockquote>
+<div><p><strong>注意</strong>:
+pipeline 支持 <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope">modelscope模型仓库</a> 中的所有模型进行推理和微调。这里我们以典型模型作为示例来演示使用方法。</p>
+</div></blockquote>
+<div class="section" id="id2">
+<h2>推理<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h2>
+<div class="section" id="id3">
+<h3>快速使用<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h3>
+<div class="section" id="paraformer">
+<h4><a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary">Paraformer 模型</a><a class="headerlink" href="#paraformer" title="Permalink to this headline"></a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
+<span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
+
+<span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
+    <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">auto_speech_recognition</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">rec_result</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id4">
+<h4><a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary">Paraformer-实时模型</a><a class="headerlink" href="#id4" title="Permalink to this headline"></a></h4>
+<div class="section" id="id5">
+<h5>实时推理<a class="headerlink" href="#id5" title="Permalink to this headline"></a></h5>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
+    <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">auto_speech_recognition</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online&#39;</span><span class="p">,</span>
+    <span class="n">model_revision</span><span class="o">=</span><span class="s1">&#39;v1.0.6&#39;</span><span class="p">,</span>
+    <span class="n">update_model</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;paraformer_streaming&#39;</span>
+    <span class="p">)</span>
+<span class="kn">import</span> <span class="nn">soundfile</span>
+<span class="n">speech</span><span class="p">,</span> <span class="n">sample_rate</span> <span class="o">=</span> <span class="n">soundfile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;example/asr_example.wav&quot;</span><span class="p">)</span>
+
+<span class="n">chunk_size</span> <span class="o">=</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span> <span class="c1">#[5, 10, 5] 600ms, [8, 8, 4] 480ms</span>
+<span class="n">param_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;cache&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(),</span> <span class="s2">&quot;is_final&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;chunk_size&quot;</span><span class="p">:</span> <span class="n">chunk_size</span><span class="p">}</span>
+<span class="n">chunk_stride</span> <span class="o">=</span> <span class="n">chunk_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">960</span> <span class="c1"># 600ms、480ms</span>
+<span class="c1"># first chunk, 600ms</span>
+<span class="n">speech_chunk</span> <span class="o">=</span> <span class="n">speech</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">chunk_stride</span><span class="p">]</span>
+<span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="n">speech_chunk</span><span class="p">,</span> <span class="n">param_dict</span><span class="o">=</span><span class="n">param_dict</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">rec_result</span><span class="p">)</span>
+<span class="c1"># next chunk, 600ms</span>
+<span class="n">speech_chunk</span> <span class="o">=</span> <span class="n">speech</span><span class="p">[</span><span class="n">chunk_stride</span><span class="p">:</span><span class="n">chunk_stride</span><span class="o">+</span><span class="n">chunk_stride</span><span class="p">]</span>
+<span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="n">speech_chunk</span><span class="p">,</span> <span class="n">param_dict</span><span class="o">=</span><span class="n">param_dict</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">rec_result</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id6">
+<h5>伪实时推理<a class="headerlink" href="#id6" title="Permalink to this headline"></a></h5>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
+<span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
+
+<span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
+    <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">auto_speech_recognition</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online&#39;</span><span class="p">,</span>
+    <span class="n">model_revision</span><span class="o">=</span><span class="s1">&#39;v1.0.6&#39;</span><span class="p">,</span>
+    <span class="n">update_model</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;paraformer_fake_streaming&quot;</span>
+<span class="p">)</span>
+<span class="n">audio_in</span><span class="o">=</span><span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav&#39;</span>
+<span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="n">audio_in</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">rec_result</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>演示代码完整版本，请参考<a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/discussions/241">demo</a></p>
+</div>
+</div>
+<div class="section" id="uniasr">
+<h4><a class="reference external" href="https://www.modelscope.cn/models/damo/speech_UniASR_asr_2pass-zh-cn-8k-common-vocab3445-pytorch-online/summary">UniASR 模型</a><a class="headerlink" href="#uniasr" title="Permalink to this headline"></a></h4>
+<p>UniASR 模型有三种解码模式(fast、normal、offline)，更多模型细节请参考<a class="reference external" href="https://www.modelscope.cn/models/damo/speech_UniASR_asr_2pass-zh-cn-8k-common-vocab3445-pytorch-online/summary">文档</a></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">decoding_model</span> <span class="o">=</span> <span class="s2">&quot;fast&quot;</span> <span class="c1"># &quot;fast&quot;、&quot;normal&quot;、&quot;offline&quot;</span>
+<span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
+    <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">auto_speech_recognition</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_UniASR_asr_2pass-minnan-16k-common-vocab3825&#39;</span><span class="p">,</span>
+    <span class="n">param_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;decoding_model&quot;</span><span class="p">:</span> <span class="n">decoding_model</span><span class="p">})</span>
+
+<span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">rec_result</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>fast 和 normal 的解码模式是假流式解码，可用于评估识别准确性。
+演示的完整代码，请参见 <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/discussions/151">demo</a></p>
+</div>
+<div class="section" id="rnn-t-online">
+<h4><a class="reference external" href="#">RNN-T-online 模型</a><a class="headerlink" href="#rnn-t-online" title="Permalink to this headline"></a></h4>
+<p>Undo</p>
+</div>
+<div class="section" id="mfcca">
+<h4><a class="reference external" href="https://www.modelscope.cn/models/NPU-ASLP/speech_mfcca_asr-zh-cn-16k-alimeeting-vocab4950/summary">MFCCA 模型</a><a class="headerlink" href="#mfcca" title="Permalink to this headline"></a></h4>
+<p>更多模型细节请参考<a class="reference external" href="https://www.modelscope.cn/models/NPU-ASLP/speech_mfcca_asr-zh-cn-16k-alimeeting-vocab4950/summary">文档</a></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
+<span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
+
+<span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
+    <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">auto_speech_recognition</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s1">&#39;NPU-ASLP/speech_mfcca_asr-zh-cn-16k-alimeeting-vocab4950&#39;</span><span class="p">,</span>
+    <span class="n">model_revision</span><span class="o">=</span><span class="s1">&#39;v3.0.0&#39;</span>
+<span class="p">)</span>
+
+<span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">rec_result</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="api">
+<h3>API接口说明<a class="headerlink" href="#api" title="Permalink to this headline"></a></h3>
+<div class="section" id="pipeline">
+<h4>pipeline定义<a class="headerlink" href="#pipeline" title="Permalink to this headline"></a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">task</span></code>: <code class="docutils literal notranslate"><span class="pre">Tasks.auto_speech_recognition</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model</span></code>: <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope">模型仓库</a> 中的模型名称，或本地磁盘中的模型路径</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ngpu</span></code>: <code class="docutils literal notranslate"><span class="pre">1</span></code>（默认），使用 GPU 进行推理。如果 ngpu=0，则使用 CPU 进行推理</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ncpu</span></code>: <code class="docutils literal notranslate"><span class="pre">1</span></code> （默认），设置用于 CPU 内部操作并行性的线程数</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">output_dir</span></code>: <code class="docutils literal notranslate"><span class="pre">None</span></code> （默认），如果设置，输出结果的输出路径</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>: <code class="docutils literal notranslate"><span class="pre">1</span></code> （默认），解码时的批处理大小</p></li>
+</ul>
+</div>
+<div class="section" id="id7">
+<h4>pipeline 推理<a class="headerlink" href="#id7" title="Permalink to this headline"></a></h4>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">audio_in</span></code>: 要解码的输入，可以是：</p>
+<ul class="simple">
+<li><p>wav文件路径, 例如: asr_example.wav,</p></li>
+<li><p>pcm文件路径, 例如: asr_example.pcm,</p></li>
+<li><p>音频字节数流，例如：麦克风的字节数数据</p></li>
+<li><p>音频采样点，例如：<code class="docutils literal notranslate"><span class="pre">audio,</span> <span class="pre">rate</span> <span class="pre">=</span> <span class="pre">soundfile.read(&quot;asr_example_zh.wav&quot;)</span></code>, 数据类型为 numpy.ndarray 或者 torch.Tensor</p></li>
+<li><p>wav.scp，kaldi 样式的 wav 列表 (<code class="docutils literal notranslate"><span class="pre">wav_id</span> <span class="pre">\t</span> <span class="pre">wav_path</span></code>), 例如:</p></li>
+</ul>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>asr_example1  ./audios/asr_example1.wav
+asr_example2  ./audios/asr_example2.wav
+</pre></div>
+</div>
+<p>在这种输入 <code class="docutils literal notranslate"><span class="pre">wav.scp</span></code> 的情况下，必须设置 <code class="docutils literal notranslate"><span class="pre">output_dir</span></code> 以保存输出结果</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">audio_fs</span></code>: 音频采样率，仅在 audio_in 为 pcm 音频时设置</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">output_dir</span></code>: None （默认），如果设置，输出结果的输出路径</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="cpu-gpu">
+<h3>使用多线程 CPU 或多个 GPU 进行推理<a class="headerlink" href="#cpu-gpu" title="Permalink to this headline"></a></h3>
+<p>FunASR 还提供了 <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/TEMPLATE/infer.sh">egs_modelscope/asr/TEMPLATE/infer.sh</a> 脚本，以使用多线程 CPU 或多个 GPU 进行解码。</p>
+<div class="section" id="infer-sh">
+<h4><code class="docutils literal notranslate"><span class="pre">infer.sh</span></code> 设置<a class="headerlink" href="#infer-sh" title="Permalink to this headline"></a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">model</span></code>: <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope">modelscope模型仓库</a>中的模型名称，或本地磁盘中的模型路径</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">data_dir</span></code>: 数据集目录需要包括 <code class="docutils literal notranslate"><span class="pre">wav.scp</span></code> 文件。如果 <code class="docutils literal notranslate"><span class="pre">${data_dir}/text</span></code> 也存在，则将计算 CER</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">output_dir</span></code>: 识别结果的输出目录</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>: <code class="docutils literal notranslate"><span class="pre">64</span></code>（默认），在 GPU 上进行推理的批处理大小</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gpu_inference</span></code>: <code class="docutils literal notranslate"><span class="pre">true</span></code> （默认），是否执行 GPU 解码，如果进行 CPU 推理，则设置为 <code class="docutils literal notranslate"><span class="pre">false</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gpuid_list</span></code>: <code class="docutils literal notranslate"><span class="pre">0,1</span></code> （默认），用于推理的 GPU ID</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">njob</span></code>: 仅用于 CPU 推理（<code class="docutils literal notranslate"><span class="pre">gpu_inference=false</span></code>），<code class="docutils literal notranslate"><span class="pre">64</span></code>（默认），CPU 解码的作业数</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">checkpoint_dir</span></code>: 仅用于推理微调模型，微调模型的路径目录</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">checkpoint_name</span></code>: 仅用于推理微调模型，<code class="docutils literal notranslate"><span class="pre">valid.cer_ctc.ave.pb</span></code>（默认），用于推理的检查点</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">decoding_mode</span></code>: <code class="docutils literal notranslate"><span class="pre">normal</span></code>（默认），UniASR 模型的解码模式（<code class="docutils literal notranslate"><span class="pre">fast</span></code>、<code class="docutils literal notranslate"><span class="pre">normal</span></code>、<code class="docutils literal notranslate"><span class="pre">offline</span></code>）</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hotword_txt</span></code>: <code class="docutils literal notranslate"><span class="pre">None</span></code> （默认），上下文语料库模型的热词文件（热词文件名以 .txt 结尾）</p></li>
+</ul>
+</div>
+<div class="section" id="gpu">
+<h4>使用多个 GPU 进行解码：<a class="headerlink" href="#gpu" title="Permalink to this headline"></a></h4>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>    bash infer.sh <span class="se">\</span>
+    --model <span class="s2">&quot;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&quot;</span> <span class="se">\</span>
+    --data_dir <span class="s2">&quot;./data/test&quot;</span> <span class="se">\</span>
+    --output_dir <span class="s2">&quot;./results&quot;</span> <span class="se">\</span>
+    --batch_size <span class="m">64</span> <span class="se">\</span>
+    --gpu_inference <span class="nb">true</span> <span class="se">\</span>
+    --gpuid_list <span class="s2">&quot;0,1&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="cpu">
+<h4>使用多线程 CPU 进行解码：<a class="headerlink" href="#cpu" title="Permalink to this headline"></a></h4>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>    bash infer.sh <span class="se">\</span>
+    --model <span class="s2">&quot;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&quot;</span> <span class="se">\</span>
+    --data_dir <span class="s2">&quot;./data/test&quot;</span> <span class="se">\</span>
+    --output_dir <span class="s2">&quot;./results&quot;</span> <span class="se">\</span>
+    --gpu_inference <span class="nb">false</span> <span class="se">\</span>
+    --njob <span class="m">64</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id8">
+<h4>推理结果<a class="headerlink" href="#id8" title="Permalink to this headline"></a></h4>
+<p>解码结果可以在 <code class="docutils literal notranslate"><span class="pre">$output_dir/1best_recog/text.cer</span></code> 中找到，其中包括每个样本的识别结果和整个测试集的 CER 指标。
+如果您对 SpeechIO 测试集进行解码，则可以使用 <code class="docutils literal notranslate"><span class="pre">stage=3</span></code> 的 textnorm，<code class="docutils literal notranslate"><span class="pre">DETAILS.txt</span></code> 和 <code class="docutils literal notranslate"><span class="pre">RESULTS.txt</span></code> 记录了文本标准化后的结果和 CER。</p>
+</div>
+</div>
+</div>
+<div class="section" id="id9">
+<h2>使用pipeline进行微调<a class="headerlink" href="#id9" title="Permalink to this headline"></a></h2>
+<div class="section" id="id10">
+<h3>快速上手<a class="headerlink" href="#id10" title="Permalink to this headline"></a></h3>
+<p><a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/TEMPLATE/finetune.py">finetune.py</a></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">modelscope.metainfo</span> <span class="kn">import</span> <span class="n">Trainers</span>
+<span class="kn">from</span> <span class="nn">modelscope.trainers</span> <span class="kn">import</span> <span class="n">build_trainer</span>
+
+<span class="kn">from</span> <span class="nn">funasr.datasets.ms_dataset</span> <span class="kn">import</span> <span class="n">MsDataset</span>
+<span class="kn">from</span> <span class="nn">funasr.utils.modelscope_param</span> <span class="kn">import</span> <span class="n">modelscope_args</span>
+
+
+<span class="k">def</span> <span class="nf">modelscope_finetune</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">output_dir</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># dataset split [&quot;train&quot;, &quot;validation&quot;]</span>
+    <span class="n">ds_dict</span> <span class="o">=</span> <span class="n">MsDataset</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">data_path</span><span class="p">)</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+        <span class="n">data_dir</span><span class="o">=</span><span class="n">ds_dict</span><span class="p">,</span>
+        <span class="n">dataset_type</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">dataset_type</span><span class="p">,</span>
+        <span class="n">work_dir</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">output_dir</span><span class="p">,</span>
+        <span class="n">batch_bins</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">batch_bins</span><span class="p">,</span>
+        <span class="n">max_epoch</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">max_epoch</span><span class="p">,</span>
+        <span class="n">lr</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">lr</span><span class="p">,</span>
+        <span class="n">mate_params</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">param_dict</span><span class="p">)</span>
+    <span class="n">trainer</span> <span class="o">=</span> <span class="n">build_trainer</span><span class="p">(</span><span class="n">Trainers</span><span class="o">.</span><span class="n">speech_asr_trainer</span><span class="p">,</span> <span class="n">default_args</span><span class="o">=</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">modelscope_args</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">&quot;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&quot;</span><span class="p">)</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">output_dir</span> <span class="o">=</span> <span class="s2">&quot;./checkpoint&quot;</span>                 <span class="c1"># m模型保存路径</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">data_path</span> <span class="o">=</span> <span class="s2">&quot;speech_asr_aishell1_trainsets&quot;</span> <span class="c1"># 数据路径</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">dataset_type</span> <span class="o">=</span> <span class="s2">&quot;small&quot;</span>                      <span class="c1"># 小数据量设置small，若数据量大于1000小时，请使用large</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">batch_bins</span> <span class="o">=</span> <span class="mi">2000</span>                           <span class="c1"># batch size，如果dataset_type=&quot;small&quot;，batch_bins单位为fbank特征帧数，如果dataset_type=&quot;large&quot;，batch_bins单位为毫秒，</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">max_epoch</span> <span class="o">=</span> <span class="mi">20</span>                              <span class="c1"># 最大训练轮数</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">lr</span> <span class="o">=</span> <span class="mf">0.00005</span>                                <span class="c1"># 设置学习率</span>
+    <span class="n">init_param</span> <span class="o">=</span> <span class="p">[]</span>                                    <span class="c1"># 初始模型路径，默认加载modelscope模型初始化，例如: [&quot;checkpoint/20epoch.pb&quot;]</span>
+    <span class="n">freeze_param</span> <span class="o">=</span> <span class="p">[]</span>                                  <span class="c1"># 模型参数freeze, 例如: [&quot;encoder&quot;]</span>
+    <span class="n">ignore_init_mismatch</span> <span class="o">=</span> <span class="kc">True</span>                        <span class="c1"># 是否忽略模型参数初始化不匹配</span>
+    <span class="n">use_lora</span> <span class="o">=</span> <span class="kc">False</span>                                   <span class="c1"># 是否使用lora进行模型微调</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">param_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;init_param&quot;</span><span class="p">:</span><span class="n">init_param</span><span class="p">,</span> <span class="s2">&quot;freeze_param&quot;</span><span class="p">:</span> <span class="n">freeze_param</span><span class="p">,</span> <span class="s2">&quot;ignore_init_mismatch&quot;</span><span class="p">:</span> <span class="n">ignore_init_mismatch</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">use_lora</span><span class="p">:</span>
+        <span class="n">enable_lora</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">lora_bias</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span>
+        <span class="n">lora_params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;lora_list&quot;</span><span class="p">:[</span><span class="s1">&#39;q&#39;</span><span class="p">,</span><span class="s1">&#39;v&#39;</span><span class="p">],</span> <span class="s2">&quot;lora_rank&quot;</span><span class="p">:</span><span class="mi">8</span><span class="p">,</span> <span class="s2">&quot;lora_alpha&quot;</span><span class="p">:</span><span class="mi">16</span><span class="p">,</span> <span class="s2">&quot;lora_dropout&quot;</span><span class="p">:</span><span class="mf">0.1</span><span class="p">}</span>
+        <span class="n">lora_config</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;enable_lora&quot;</span><span class="p">:</span> <span class="n">enable_lora</span><span class="p">,</span> <span class="s2">&quot;lora_bias&quot;</span><span class="p">:</span> <span class="n">lora_bias</span><span class="p">,</span> <span class="s2">&quot;lora_params&quot;</span><span class="p">:</span> <span class="n">lora_params</span><span class="p">}</span>
+        <span class="n">params</span><span class="o">.</span><span class="n">param_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">lora_config</span><span class="p">)</span>
+
+    <span class="n">modelscope_finetune</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python finetune.py <span class="p">&amp;</span>&gt; log.txt <span class="p">&amp;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id11">
+<h3>使用私有数据进行微调<a class="headerlink" href="#id11" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>修改 <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/TEMPLATE/finetune.py">finetune.py</a> 中微调训练相关参数</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">output_dir</span></code>: 微调模型保存路径</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">data_dir</span></code>: 数据集目录需要包括以下文件：<code class="docutils literal notranslate"><span class="pre">train/wav.scp</span></code>, <code class="docutils literal notranslate"><span class="pre">train/text</span></code>; <code class="docutils literal notranslate"><span class="pre">validation/wav.scp</span></code>, <code class="docutils literal notranslate"><span class="pre">validation/text</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dataset_type</span></code>: 对于大于 1000 小时的数据集，设置为 <code class="docutils literal notranslate"><span class="pre">large</span></code>，否则设置为 <code class="docutils literal notranslate"><span class="pre">small</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">batch_bins</span></code>: 批处理大小。对于 <code class="docutils literal notranslate"><span class="pre">dataset_type</span></code> 为 <code class="docutils literal notranslate"><span class="pre">small</span></code>，<code class="docutils literal notranslate"><span class="pre">batch_bins</span></code> 表示特征帧数。对于 <code class="docutils literal notranslate"><span class="pre">dataset_type</span></code> 为 <code class="docutils literal notranslate"><span class="pre">large</span></code>，<code class="docutils literal notranslate"><span class="pre">batch_bins</span></code> 表示以毫秒为单位的持续时间</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_epoch</span></code>: 最大训练 epoch 数量</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lr</span></code>: 学习率</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">init_param</span></code>: <code class="docutils literal notranslate"><span class="pre">[]</span></code>（默认值），初始化模型路径，按默认设置加载 modelscope 模型初始化。例如：[“checkpoint/20epoch.pb”]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">freeze_param</span></code>: <code class="docutils literal notranslate"><span class="pre">[]</span></code>（默认值），冻结模型参数。例如：[“encoder”]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ignore_init_mismatch</span></code>: <code class="docutils literal notranslate"><span class="pre">True</span></code>（默认值），在加载预训练模型时忽略大小不匹配</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">use_lora</span></code>: <code class="docutils literal notranslate"><span class="pre">False</span></code>（默认值），微调模型使用 LORA，请参阅 <a class="reference external" href="https://arxiv.org/pdf/2106.09685.pdf">LORA论文</a></p></li>
+</ul>
+</li>
+<li><p>训练数据格式</p></li>
+</ul>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>cat ./example_data/text
+BAC009S0002W0122 而 对 楼 市 成 交 抑 制 作 用 最 大 的 限 购
+BAC009S0002W0123 也 成 为 地 方 政 府 的 眼 中 钉
+english_example_1 hello world
+english_example_2 go swim 去 游 泳
+
+cat ./example_data/wav.scp
+BAC009S0002W0122 /mnt/data/wav/train/S0002/BAC009S0002W0122.wav
+BAC009S0002W0123 /mnt/data/wav/train/S0002/BAC009S0002W0123.wav
+english_example_1 /mnt/data/wav/train/S0002/english_example_1.wav
+english_example_2 /mnt/data/wav/train/S0002/english_example_2.wav
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>然后，您可以使用以下命令运行pipeline进行微调：</p></li>
+</ul>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python finetune.py
+</pre></div>
+</div>
+<p>如果您想使用多个 GPU 进行微调，可以使用以下命令：</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nv">CUDA_VISIBLE_DEVICES</span><span class="o">=</span><span class="m">1</span>,2 python -m torch.distributed.launch --nproc_per_node <span class="m">2</span> finetune.py &gt; log.txt <span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="id12">
+<h2>使用微调模型进行推理<a class="headerlink" href="#id12" title="Permalink to this headline"></a></h2>
+<p><a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr/TEMPLATE/infer.sh">egs_modelscope/asr/TEMPLATE/infer.sh</a> 参数设置与上面<code class="docutils literal notranslate"><span class="pre">infer.sh</span></code>相同</p>
+<ul class="simple">
+<li><p>使用多个 GPU 进行解码：</p></li>
+</ul>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>    bash infer.sh <span class="se">\</span>
+    --model <span class="s2">&quot;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&quot;</span> <span class="se">\</span>
+    --data_dir <span class="s2">&quot;./data/test&quot;</span> <span class="se">\</span>
+    --output_dir <span class="s2">&quot;./results&quot;</span> <span class="se">\</span>
+    --batch_size <span class="m">64</span> <span class="se">\</span>
+    --gpu_inference <span class="nb">true</span> <span class="se">\</span>
+    --gpuid_list <span class="s2">&quot;0,1&quot;</span> <span class="se">\</span>
+    --checkpoint_dir <span class="s2">&quot;./checkpoint&quot;</span> <span class="se">\</span>
+    --checkpoint_name <span class="s2">&quot;valid.cer_ctc.ave.pb&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>使用多线程 CPU 进行解码：</p></li>
+</ul>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>    bash infer.sh <span class="se">\</span>
+    --model <span class="s2">&quot;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&quot;</span> <span class="se">\</span>
+    --data_dir <span class="s2">&quot;./data/test&quot;</span> <span class="se">\</span>
+    --output_dir <span class="s2">&quot;./results&quot;</span> <span class="se">\</span>
+    --gpu_inference <span class="nb">false</span> <span class="se">\</span>
+    --njob <span class="m">64</span> <span class="se">\</span>
+    --checkpoint_dir <span class="s2">&quot;./checkpoint&quot;</span> <span class="se">\</span>
+    --checkpoint_name <span class="s2">&quot;valid.cer_ctc.ave.pb&quot;</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Speech Lab, Alibaba Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

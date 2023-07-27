@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>标点预测 &mdash; FunASR  documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            FunASR
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/docker.html">Docker</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Quick Start</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../funasr/quick_start.html">Quick Start</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Academic Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/asr_recipe.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/punc_recipe.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/vad_recipe.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/sv_recipe.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/sd_recipe.html">Speaker Diarization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">ModelScope Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../asr/TEMPLATE/README.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/vad_pipeline.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/punc_pipeline.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/tp_pipeline.html">Timestamp Prediction (FA)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/sv_pipeline.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/sd_pipeline.html">Speaker Diarization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/itn_pipeline.html">Inverse Text Normalization (ITN)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Zoo</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_zoo/modelscope_models.html">Pretrained Models on ModelScope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_zoo/huggingface_models.html">Pretrained Models on Huggingface</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Runtime and Service</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../funasr/runtime/docs/SDK_tutorial.html">FunASR Offline File Transcription Service Convenient Deployment Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../funasr/runtime/python/websocket/README.html">Service with websocket-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../funasr/runtime/websocket/readme.html">Service with websocket-cpp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../funasr/runtime/html5/readme.html">Speech Recognition Service Html5 Client Access Interface</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark and Leaderboard</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_onnx.html">CPU Benchmark (ONNX-python)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_onnx_cpp.html">CPU Benchmark (ONNX-cpp)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_libtorch.html">CPU Benchmark (Libtorch)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_pipeline_cer.html">Leaderboard IO</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Funasr Library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/build_task.html">Build custom tasks</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Papers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/papers.html">Papers</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Application</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html">Audio Cut</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html#realtime-speech-recognition">Realtime Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html#audio-chat">Audio Chat</a></li>
+</ul>
+<p class="caption"><span class="caption-text">FQA</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/FQA.html">FQA</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">FunASR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">标点预测</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/egs_modelscope/punctuation/punc_ct-transformer_zh-cn-common-vadrealtime-vocab272727/README_zh.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <p>(简体中文|<a class="reference external" href="./README">English</a>)</p>
+<div class="section" id="id1">
+<h1>标点预测<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h1>
+<blockquote>
+<div><p><strong>Note</strong>:
+Pipeline 支持在<a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope">modelscope模型仓库</a>中的所有模型进行推理和微调。在这里，我们以 CT-Transformer 模型为例来演示使用方法。</p>
+</div></blockquote>
+<div class="section" id="id2">
+<h2>推理<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h2>
+<div class="section" id="id3">
+<h3>快速使用<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h3>
+<div class="section" id="ct-transformer">
+<h4><a class="reference external" href="https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch/summary">CT-Transformer 模型</a><a class="headerlink" href="#ct-transformer" title="Permalink to this headline"></a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
+<span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
+
+<span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
+    <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">punctuation</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch&#39;</span><span class="p">,</span>
+    <span class="n">model_revision</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+<span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">text_in</span><span class="o">=</span><span class="s1">&#39;example/punc_example.txt&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">rec_result</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>text二进制数据，例如：用户直接从文件里读出bytes数据</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">text_in</span><span class="o">=</span><span class="s1">&#39;我们都是木头人不会讲话不会动&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>text文件url，例如：https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_text/punc_example.txt</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">text_in</span><span class="o">=</span><span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_text/punc_example.txt&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id4">
+<h4><a class="reference external" href="https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727/summary">CT-Transformer 实时模型</a><a class="headerlink" href="#id4" title="Permalink to this headline"></a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
+<span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
+
+<span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
+    <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">punctuation</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727&#39;</span><span class="p">,</span>
+    <span class="n">model_revision</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">inputs</span> <span class="o">=</span> <span class="s2">&quot;跨境河流是养育沿岸|人民的生命之源长期以来为帮助下游地区防灾减灾中方技术人员|在上游地区极为恶劣的自然条件下克服巨大困难甚至冒着生命危险|向印方提供汛期水文资料处理紧急事件中方重视印方在跨境河流问题上的关切|愿意进一步完善双方联合工作机制|凡是|中方能做的我们|都会去做而且会做得更好我请印度朋友们放心中国在上游的|任何开发利用都会经过科学|规划和论证兼顾上下游的利益&quot;</span>
+<span class="n">vads</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+<span class="n">rec_result_all</span><span class="o">=</span><span class="s2">&quot;outputs:&quot;</span>
+<span class="n">param_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;cache&quot;</span><span class="p">:</span> <span class="p">[]}</span>
+<span class="k">for</span> <span class="n">vad</span> <span class="ow">in</span> <span class="n">vads</span><span class="p">:</span>
+    <span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">text_in</span><span class="o">=</span><span class="n">vad</span><span class="p">,</span> <span class="n">param_dict</span><span class="o">=</span><span class="n">param_dict</span><span class="p">)</span>
+    <span class="n">rec_result_all</span> <span class="o">+=</span> <span class="n">rec_result</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">rec_result_all</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>演示例子完整代码请参考 <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/discussions/238">demo</a></p>
+</div>
+</div>
+<div class="section" id="api">
+<h3>API接口说明<a class="headerlink" href="#api" title="Permalink to this headline"></a></h3>
+<div class="section" id="pipeline">
+<h4>pipeline定义<a class="headerlink" href="#pipeline" title="Permalink to this headline"></a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">task</span></code>: <code class="docutils literal notranslate"><span class="pre">Tasks.punctuation</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model</span></code>: <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope">模型仓库</a> 中的模型名称，或本地磁盘中的模型路径</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ngpu</span></code>: <code class="docutils literal notranslate"><span class="pre">1</span></code>（默认），使用 GPU 进行推理。如果 ngpu=0，则使用 CPU 进行推理</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ncpu</span></code>: <code class="docutils literal notranslate"><span class="pre">1</span></code> （默认），设置用于 CPU 内部操作并行性的线程数</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">output_dir</span></code>: <code class="docutils literal notranslate"><span class="pre">None</span></code> （默认），如果设置，输出结果的输出路径</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model_revision</span></code>: <code class="docutils literal notranslate"><span class="pre">None</span></code>（默认），modelscope中版本版本号</p></li>
+</ul>
+</div>
+<div class="section" id="id5">
+<h4>pipeline推理<a class="headerlink" href="#id5" title="Permalink to this headline"></a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">text_in</span></code>: 需要进行推理的输入，支持一下输入：</p>
+<ul>
+<li><p>文本字符，例如：”我们都是木头人不会讲话不会动”</p></li>
+<li><p>文本文件，例如：example/punc_example.txt。
+在使用文本文件 输入时，必须设置 <code class="docutils literal notranslate"><span class="pre">output_dir</span></code> 以保存输出结果。</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">param_dict</span></code>: 在实时模式下必要的缓存。</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="inference-with-multi-thread-cpus-or-multi-gpus">
+<h3>Inference with multi-thread CPUs or multi GPUs<a class="headerlink" href="#inference-with-multi-thread-cpus-or-multi-gpus" title="Permalink to this headline"></a></h3>
+<p>FunASR 还提供了 <a class="reference external" href="infer.sh">egs_modelscope/punctuation/TEMPLATE/infer.sh</a> 脚本，以使用多线程 CPU 或多个 GPU 进行解码。</p>
+<div class="section" id="infer-sh">
+<h4><code class="docutils literal notranslate"><span class="pre">infer.sh</span></code> 设置<a class="headerlink" href="#infer-sh" title="Permalink to this headline"></a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">model</span></code>: <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope">modelscope模型仓库</a>中的模型名称，或本地磁盘中的模型路径</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">data_dir</span></code>: 数据集目录需要包括 <code class="docutils literal notranslate"><span class="pre">punc.txt</span></code> 文件</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">output_dir</span></code>: 识别结果的输出目录</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">batch_size</span></code>: <code class="docutils literal notranslate"><span class="pre">1</span></code>（默认），在 GPU 上进行推理的批处理大小</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gpu_inference</span></code>: <code class="docutils literal notranslate"><span class="pre">true</span></code> （默认），是否执行 GPU 解码，如果进行 CPU 推理，则设置为 <code class="docutils literal notranslate"><span class="pre">false</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gpuid_list</span></code>: <code class="docutils literal notranslate"><span class="pre">0,1</span></code> （默认），用于推理的 GPU ID</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">njob</span></code>: 仅用于 CPU 推理（<code class="docutils literal notranslate"><span class="pre">gpu_inference=false</span></code>），<code class="docutils literal notranslate"><span class="pre">64</span></code>（默认），CPU 解码的作业数</p></li>
+</ul>
+</div>
+<div class="section" id="gpu">
+<h4>使用多个 GPU 进行解码：<a class="headerlink" href="#gpu" title="Permalink to this headline"></a></h4>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>    bash infer.sh <span class="se">\</span>
+    --model <span class="s2">&quot;damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch&quot;</span> <span class="se">\</span>
+    --data_dir <span class="s2">&quot;./data/test&quot;</span> <span class="se">\</span>
+    --output_dir <span class="s2">&quot;./results&quot;</span> <span class="se">\</span>
+    --batch_size <span class="m">1</span> <span class="se">\</span>
+    --gpu_inference <span class="nb">true</span> <span class="se">\</span>
+    --gpuid_list <span class="s2">&quot;0,1&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="cpu">
+<h4>使用多线程 CPU 进行解码：<a class="headerlink" href="#cpu" title="Permalink to this headline"></a></h4>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>    bash infer.sh <span class="se">\</span>
+    --model <span class="s2">&quot;damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch&quot;</span> <span class="se">\</span>
+    --data_dir <span class="s2">&quot;./data/test&quot;</span> <span class="se">\</span>
+    --output_dir <span class="s2">&quot;./results&quot;</span> <span class="se">\</span>
+    --gpu_inference <span class="nb">false</span> <span class="se">\</span>
+    --njob <span class="m">1</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="finetune-with-pipeline">
+<h2>Finetune with pipeline<a class="headerlink" href="#finetune-with-pipeline" title="Permalink to this headline"></a></h2>
+<div class="section" id="quick-start">
+<h3>Quick start<a class="headerlink" href="#quick-start" title="Permalink to this headline"></a></h3>
+</div>
+<div class="section" id="finetune-with-your-data">
+<h3>Finetune with your data<a class="headerlink" href="#finetune-with-your-data" title="Permalink to this headline"></a></h3>
+</div>
+</div>
+<div class="section" id="inference-with-your-finetuned-model">
+<h2>Inference with your finetuned model<a class="headerlink" href="#inference-with-your-finetuned-model" title="Permalink to this headline"></a></h2>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Speech Lab, Alibaba Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

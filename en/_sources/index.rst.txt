@@ -71,12 +71,10 @@ Overview
    :maxdepth: 1
    :caption: Runtime and Service
 
-   ./funasr/export/README.md
-   ./funasr/runtime/python/onnxruntime/README.md
+   ./funasr/runtime/docs/SDK_tutorial.md
    ./funasr/runtime/python/websocket/README.md
    ./funasr/runtime/websocket/readme.md
    ./funasr/runtime/html5/readme.md
-   ./funasr/runtime/python/libtorch/README.md
 
 
 

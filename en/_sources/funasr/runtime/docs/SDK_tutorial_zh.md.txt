@@ -1,3 +1,5 @@
+(简体中文|[English](./SDK_tutorial.md))
+
 # FunASR离线文件转写服务便捷部署教程
 
 FunASR提供可便捷本地或者云端服务器部署的离线文件转写服务，内核为FunASR已开源runtime-SDK。

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Html5 server for asr service &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <title>Speech Recognition Service Html5 Client Access Interface &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -73,12 +73,10 @@
 </ul>
 <p class="caption"><span class="caption-text">Runtime and Service</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../funasr/export/README.html">Export models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../funasr/runtime/python/onnxruntime/README.html">ONNXRuntime-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../funasr/runtime/docs/SDK_tutorial.html">FunASR Offline File Transcription Service Convenient Deployment Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../funasr/runtime/python/websocket/README.html">Service with websocket-python</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../funasr/runtime/websocket/readme.html">Service with websocket-cpp</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../funasr/runtime/html5/readme.html">Html5 server for asr service</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../funasr/runtime/python/libtorch/README.html">Libtorch-python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../funasr/runtime/html5/readme.html">Speech Recognition Service Html5 Client Access Interface</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Benchmark and Leaderboard</span></p>
 <ul>
@@ -120,7 +118,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Html5 server for asr service</li>
+      <li class="breadcrumb-item active">Speech Recognition Service Html5 Client Access Interface</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/runtime/html5.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -131,79 +129,87 @@
            <div itemprop="articleBody">
              
   <p>(<a class="reference external" href="./readme_zh">简体中文</a>|English)</p>
-<div class="section" id="html5-server-for-asr-service">
-<h1>Html5 server for asr service<a class="headerlink" href="#html5-server-for-asr-service" title="Permalink to this headline"></a></h1>
-<div class="section" id="requirement">
-<h2>Requirement<a class="headerlink" href="#requirement" title="Permalink to this headline"></a></h2>
-<div class="section" id="install-the-modelscope-and-funasr">
-<h3>Install the modelscope and funasr<a class="headerlink" href="#install-the-modelscope-and-funasr" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install -U modelscope funasr
-<span class="c1"># For the users in China, you could install with the command:</span>
-<span class="c1"># pip install -U modelscope funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple</span>
+<div class="section" id="speech-recognition-service-html5-client-access-interface">
+<h1>Speech Recognition Service Html5 Client Access Interface<a class="headerlink" href="#speech-recognition-service-html5-client-access-interface" title="Permalink to this headline"></a></h1>
+<p>The server deployment uses the websocket protocol. The client can support html5 webpage access and microphone input or file input. There are two ways to access the service:</p>
+<ul>
+<li><p>Method 1:</p>
+<p>Directly connect to the html client, manually download the client (<a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/html5/static">click here</a>) to the local computer, and open the index.html webpage to enter the wss address and port number.</p>
+</li>
+<li><p>Method 2:</p>
+<p>Html5 server, automatically download the client to the local computer, and support access by mobile phones and other devices.</p>
+</li>
+</ul>
+<div class="section" id="starting-speech-recognition-service">
+<h2>Starting Speech Recognition Service<a class="headerlink" href="#starting-speech-recognition-service" title="Permalink to this headline"></a></h2>
+<p>Support the deployment of Python and C++ versions, where</p>
+<ul>
+<li><p>Python version</p>
+<p>Directly deploy the Python pipeline, support streaming real-time speech recognition models, offline speech recognition models, streaming offline integrated error correction models, and output text with punctuation marks. Single server, supporting a single client.</p>
+</li>
+<li><p>C++ version</p>
+<p>funasr-runtime-sdk, supports one-key deployment, version 0.1.0, supports offline file transcription. Single server, supporting requests from hundreds of clients.</p>
+</li>
+</ul>
+<div class="section" id="starting-python-version-service">
+<h3>Starting Python Version Service<a class="headerlink" href="#starting-python-version-service" title="Permalink to this headline"></a></h3>
+<div class="section" id="install-dependencies">
+<h4>Install Dependencies<a class="headerlink" href="#install-dependencies" title="Permalink to this headline"></a></h4>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip3 install -U modelscope funasr flask
+<span class="c1"># Users in mainland China, if encountering network issues, can install with the following command:</span>
+<span class="c1"># pip3 install -U modelscope funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple</span>
 git clone https://github.com/alibaba/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> FunASR
 </pre></div>
 </div>
 </div>
-<div class="section" id="install-the-requirements-for-server">
-<h3>Install the requirements for server<a class="headerlink" href="#install-the-requirements-for-server" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install flask
-<span class="c1"># pip install gevent (Optional)</span>
-<span class="c1"># pip install pyOpenSSL (Optional)</span>
-</pre></div>
+<div class="section" id="start-asr-service">
+<h4>Start ASR Service<a class="headerlink" href="#start-asr-service" title="Permalink to this headline"></a></h4>
 </div>
-</div>
-<div class="section" id="javascript-optional">
-<h3>javascript (Optional)<a class="headerlink" href="#javascript-optional" title="Permalink to this headline"></a></h3>
-<p><a class="reference external" href="https://github.com/xiangyuecn/Recorder">html5 recorder.js</a></p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>Recorder 
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="demo">
-<h2>demo<a class="headerlink" href="#demo" title="Permalink to this headline"></a></h2>
-<div align="center"><img src="./demo.gif" width="150"/> </div></div>
-<div class="section" id="steps">
-<h2>Steps<a class="headerlink" href="#steps" title="Permalink to this headline"></a></h2>
-<div class="section" id="html5-demo">
-<h3>Html5 demo<a class="headerlink" href="#html5-demo" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>usage: h5Server.py <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--host HOST<span class="o">]</span> <span class="o">[</span>--port PORT<span class="o">]</span> <span class="o">[</span>--certfile CERTFILE<span class="o">]</span> <span class="o">[</span>--keyfile KEYFILE<span class="o">]</span>
-</pre></div>
-</div>
-<p><code class="docutils literal notranslate"><span class="pre">e.g.</span></code></p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> funasr/runtime/html5
-python h5Server.py --host <span class="m">0</span>.0.0.0 --port <span class="m">1337</span> 
-</pre></div>
-</div>
-</div>
-<div class="section" id="asr-service">
-<h3>asr service<a class="headerlink" href="#asr-service" title="Permalink to this headline"></a></h3>
-<p><a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket">detail for asr</a></p>
-<p><code class="docutils literal notranslate"><span class="pre">Tips:</span></code> asr service and html5 service should be deployed on the same device.</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> ../python/websocket
+<div class="section" id="wss-method">
+<h4>wss Method<a class="headerlink" href="#wss-method" title="Permalink to this headline"></a></h4>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> funasr/runtime/python/websocket
 python funasr_wss_server.py --port <span class="m">10095</span>
 </pre></div>
 </div>
+<p>For detailed parameter configuration and analysis, please click <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket">here</a>.</p>
 </div>
-<div class="section" id="open-browser-to-access-html5-demo">
-<h3>open browser to access html5 demo<a class="headerlink" href="#open-browser-to-access-html5-demo" title="Permalink to this headline"></a></h3>
+<div class="section" id="html5-service-optional">
+<h4>Html5 Service (Optional)<a class="headerlink" href="#html5-service-optional" title="Permalink to this headline"></a></h4>
+<p>If you need to use the client method mentioned above to access it, you can start the html5 service</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>h5Server.py <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--host HOST<span class="o">]</span> <span class="o">[</span>--port PORT<span class="o">]</span> <span class="o">[</span>--certfile CERTFILE<span class="o">]</span> <span class="o">[</span>--keyfile KEYFILE<span class="o">]</span>             
+</pre></div>
+</div>
+<p>As shown in the example below, pay attention to the IP address. If accessing from another device (such as a mobile phone), you need to set the IP address to the real public IP address.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> funasr/runtime/html5
+python h5Server.py --host <span class="m">0</span>.0.0.0 --port <span class="m">1337</span>
+</pre></div>
+</div>
+<p>After starting, enter (<a class="reference external" href="https://127.0.0.1:1337/static/index.html">https://127.0.0.1:1337/static/index.html</a>) in the browser to access it.</p>
+</div>
+</div>
+<div class="section" id="starting-c-version-service">
+<h3>Starting C++ Version Service<a class="headerlink" href="#starting-c-version-service" title="Permalink to this headline"></a></h3>
+<p>Since there are many dependencies for C++, it is recommended to deploy it using docker, which supports one-key start of the service.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy-offline-cpu-zh.sh<span class="p">;</span>
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace /root/funasr-runtime-resources
+</pre></div>
+</div>
+<p>For detailed parameter configuration and analysis, please click <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/docs/SDK_tutorial_zh.md">here</a>.</p>
+</div>
+</div>
+<div class="section" id="client-testing">
+<h2>Client Testing<a class="headerlink" href="#client-testing" title="Permalink to this headline"></a></h2>
+<div class="section" id="method-1">
+<h3>Method 1<a class="headerlink" href="#method-1" title="Permalink to this headline"></a></h3>
+<p>Directly connect to the html client, manually download the client (<a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/html5/static">click here</a>) to the local computer, and open the index.html webpage, enter the wss address and port number to use.</p>
+</div>
+<div class="section" id="method-2">
+<h3>Method 2<a class="headerlink" href="#method-2" title="Permalink to this headline"></a></h3>
+<p>Html5 server, automatically download the client to the local computer, and support access by mobile phones and other devices. The IP address needs to be consistent with the html5 server. If it is a local computer, you can use 127.0.0.1.</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>https://127.0.0.1:1337/static/index.html
-<span class="c1"># https://30.220.136.139:1337/static/index.html</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="open-browser-to-open-html5-file-directly-without-h5server">
-<h3>open browser to open html5 file directly without h5Server<a class="headerlink" href="#open-browser-to-open-html5-file-directly-without-h5server" title="Permalink to this headline"></a></h3>
-<p>you can run html5 client by just clicking the index.html file directly in your computer.</p>
-<ol class="simple">
-<li><p>lauch asr service without ssl, it must be in ws mode as ssl protocol will prohibit such access.</p></li>
-<li><p>copy whole directory /funasr/runtime/html5/static to your computer</p></li>
-<li><p>open /funasr/runtime/html5/static/index.html by browser</p></li>
-<li><p>enter asr service ws address and connect</p></li>
-</ol>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>
-</pre></div>
-</div>
+<p>Enter the wss address and port number to use.</p>
 </div>
 </div>
 <div class="section" id="acknowledge">
