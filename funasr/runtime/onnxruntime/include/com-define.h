@@ -42,6 +42,11 @@ namespace funasr {
 #define AM_CONFIG_NAME "config.yaml"
 #define PUNC_CONFIG_NAME "punc.yaml"
 
+#define ENCODER_NAME "encoder.onnx"
+#define QUANT_ENCODER_NAME "encoder_quant.onnx"
+#define DECODER_NAME "decoder.onnx"
+#define QUANT_DECODER_NAME "decoder_quant.onnx"
+
 // vad
 #ifndef VAD_SILENCE_DURATION
 #define VAD_SILENCE_DURATION 800

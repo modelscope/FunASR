@@ -16,32 +16,6 @@ namespace funasr {
      * https://arxiv.org/pdf/2206.08317.pdf
     */
     private:
-        //std::unique_ptr<knf::OnlineFbank> fbank_;
-        knf::FbankOptions fbank_opts_;
-
-        Vocab* vocab = nullptr;
-        vector<float> means_list_;
-        vector<float> vars_list_;
-        // const float scale = 22.6274169979695;
-        const float scale = 1;
-        int32_t lfr_window_size = 7;
-        int32_t lfr_window_shift = 6;
-
-        void LoadCmvn(const char *filename);
-        string GreedySearch( float* in, int n_len, int64_t token_nums);
-
-        std::shared_ptr<Ort::Session> encoder_session = nullptr;
-        std::shared_ptr<Ort::Session> decoder_session = nullptr;
-        Ort::Env env_;
-        Ort::SessionOptions session_options;
-
-        vector<string> en_strInputNames, en_strOutputNames;
-        vector<const char*> en_szInputNames;
-        vector<const char*> en_szOutputNames;
-
-        vector<string> de_strInputNames, de_strOutputNames;
-        vector<const char*> de_szInputNames;
-        vector<const char*> de_szOutputNames;
 
         void FbankKaldi(float sample_rate, std::vector<std::vector<float>> &wav_feats,
                 std::vector<float> &waves);
@@ -56,7 +30,47 @@ namespace funasr {
             else
                 return 0;
         }
-        void LoadConfigFromYaml(const char* filename);
+        void InitOnline(
+            knf::FbankOptions &fbank_opts,
+            std::shared_ptr<Ort::Session> &encoder_session,
+            std::shared_ptr<Ort::Session> &decoder_session,
+            vector<const char*> &en_szInputNames,
+            vector<const char*> &en_szOutputNames,
+            vector<const char*> &de_szInputNames,
+            vector<const char*> &de_szOutputNames,
+            vector<float> &means_list,
+            vector<float> &vars_list);
+        
+        Paraformer* para_handle_ = nullptr;
+        // from para_handle_
+        knf::FbankOptions fbank_opts_;
+        std::shared_ptr<Ort::Session> encoder_session_ = nullptr;
+        std::shared_ptr<Ort::Session> decoder_session_ = nullptr;
+        Ort::SessionOptions session_options_;
+        vector<const char*> en_szInputNames_;
+        vector<const char*> en_szOutputNames_;
+        vector<const char*> de_szInputNames_;
+        vector<const char*> de_szOutputNames_;
+        vector<float> means_list_;
+        vector<float> vars_list_;
+        // configs from para_handle_
+        int frame_length = 25;
+        int frame_shift = 10;
+        int n_mels = 80;
+        int lfr_m = PARA_LFR_M;
+        int lfr_n = PARA_LFR_N;
+        int encoder_size = 512;
+        int fsmn_layers = 16;
+        int fsmn_lorder = 10;
+        int fsmn_dims = 512;
+        float cif_threshold = 1.0;
+        float tail_alphas = 0.45;
+
+        // configs
+        int feat_dims = lfr_m*n_mels;
+        std::vector<int> chunk_size = {5,10,5};        
+        int frame_sample_length_ = MODEL_SAMPLE_RATE / 1000 * frame_length;
+        int frame_shift_sample_length_ = MODEL_SAMPLE_RATE / 1000 * frame_shift;
 
         // The reserved waveforms by fbank
         std::vector<float> reserve_waveforms_;
@@ -70,36 +84,20 @@ namespace funasr {
         std::vector<float> alphas_cache_;
         std::vector<std::vector<float>> hidden_cache_;
         std::vector<std::vector<float>> feats_cache_;
-        std::vector<std::vector<std::vector<std::vector<float>>>> fsmn_caches_;
+        // fsmn init caches
+        std::vector<float> fsmn_init_cache_;
+        std::vector<Ort::Value> decoder_onnx;
 
         bool is_first_chunk = true;
         bool is_last_chunk = false;
-        
-        // configs
-        string window_type = "hamming";
-        int frame_length = 25;
-        int frame_shift = 10;
-        int frame_sample_length_ = MODEL_SAMPLE_RATE / 1000 * frame_length;
-        int frame_shift_sample_length_ = MODEL_SAMPLE_RATE / 1000 * frame_shift;
-        int n_mels = 80;
-        int lfr_m = PARA_LFR_M;
-        int lfr_n = PARA_LFR_N;
-        std::vector<int> chunk_size = {5,10,5};
-        int encoder_size = 512;
-        int fsmn_layers = 16;
-        int fsmn_lorder = 10;
-        int fsmn_dims = 512;
-        int feat_dims = lfr_m*n_mels;
-        float cif_threshold = 1.0;
-        float tail_alphas = 0.45;
 
     public:
-        ParaformerOnline();
+        ParaformerOnline(Paraformer* para_handle);
         ~ParaformerOnline();
-        void InitAsr(const std::string &en_model, const std::string &de_model, const std::string &am_cmvn, const std::string &am_config, int thread_num);
         void Reset();
         void ResetCache();
         void InitCache();
+        void InitFsmnCache();
         void ExtractFeats(float sample_rate, vector<vector<float>> &wav_feats, vector<float> &waves, bool input_finished);
         void AddOverlapChunk(std::vector<std::vector<float>> &wav_feats, bool input_finished);
         

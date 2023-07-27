@@ -11,6 +11,12 @@ extern "C" {
 		return mm;
 	}
 
+	_FUNASRAPI FUNASR_HANDLE  FunASROnlineInit(FUNASR_HANDLE asr_hanlde)
+	{
+		funasr::Model* mm = funasr::CreateModel(asr_hanlde);
+		return mm;
+	}
+
 	_FUNASRAPI FUNASR_HANDLE  FsmnVadInit(std::map<std::string, std::string>& model_path, int thread_num)
 	{
 		funasr::VadModel* mm = funasr::CreateVadModel(model_path, thread_num);
@@ -102,7 +108,7 @@ extern "C" {
             return p_result;
         }
 		while (audio.Fetch(buff, len, flag) > 0) {
-			string msg = recog_obj->Forward(buff, len, flag);
+			string msg = recog_obj->Forward(buff, len, true);
 			p_result->msg += msg;
 			n_step++;
 			if (fn_callback)
@@ -230,7 +236,7 @@ extern "C" {
 		int n_step = 0;
 		int n_total = audio.GetQueueSize();
 		while (audio.Fetch(buff, len, flag) > 0) {
-			string msg = (offline_stream->asr_handle)->Forward(buff, len, flag);
+			string msg = (offline_stream->asr_handle)->Forward(buff, len, true);
 			p_result->msg += msg;
 			n_step++;
 			if (fn_callback)
@@ -277,7 +283,7 @@ extern "C" {
 		int n_step = 0;
 		int n_total = audio.GetQueueSize();
 		while (audio.Fetch(buff, len, flag) > 0) {
-			string msg = (offline_stream->asr_handle)->Forward(buff, len, flag);
+			string msg = (offline_stream->asr_handle)->Forward(buff, len, true);
 			p_result->msg+= msg;
 			n_step++;
 			if (fn_callback)

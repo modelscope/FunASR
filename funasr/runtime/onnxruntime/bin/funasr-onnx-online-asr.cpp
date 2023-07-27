@@ -132,6 +132,7 @@ int main(int argc, char *argv[])
         exit(-1);
     }
     // init online features
+    FUNASR_HANDLE online_hanlde=FunASROnlineInit(asr_hanlde);
     float snippet_time = 0.0f;
     long taking_micros = 0;
     for (int i = 0; i < wav_list.size(); i++) {
@@ -161,6 +162,7 @@ int main(int argc, char *argv[])
         int step = 9600*2;
         bool is_final = false;
 
+        string final_res="";
         for (int sample_offset = 0; sample_offset < buff_len; sample_offset += std::min(step, buff_len - sample_offset)) {
             if (sample_offset + step >= buff_len - 1) {
                     step = buff_len - sample_offset;
@@ -169,7 +171,7 @@ int main(int argc, char *argv[])
                     is_final = false;
             }
             gettimeofday(&start, NULL);
-            FUNASR_RESULT result = FunASRInferBuffer(asr_hanlde, speech_buff+sample_offset, step, RASR_NONE, NULL, is_final, 16000);
+            FUNASR_RESULT result = FunASRInferBuffer(online_hanlde, speech_buff+sample_offset, step, RASR_NONE, NULL, is_final, 16000);
             gettimeofday(&end, NULL);
             seconds = (end.tv_sec - start.tv_sec);
             taking_micros += ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
@@ -177,6 +179,7 @@ int main(int argc, char *argv[])
             if (result)
             {
                 string msg = FunASRGetResult(result, 0);
+                final_res += msg;
                 LOG(INFO)<< wav_id <<" : "<<msg;
                 snippet_time += FunASRGetRetSnippetTime(result);
                 FunASRFreeResult(result);
@@ -186,6 +189,7 @@ int main(int argc, char *argv[])
                 LOG(ERROR) << ("No return data!\n");
             }
         }
+        LOG(INFO)<<"Final results " << wav_id <<" : "<<final_res;
     }
 
     LOG(INFO) << "Audio length: " << (double)snippet_time << " s";

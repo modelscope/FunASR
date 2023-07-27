@@ -9,126 +9,55 @@ using namespace std;
 
 namespace funasr {
 
-ParaformerOnline::ParaformerOnline()
-:env_(ORT_LOGGING_LEVEL_ERROR, "ParaformerOnline"),session_options{}{
-}
-
-void ParaformerOnline::InitAsr(const std::string &en_model, const std::string &de_model, const std::string &am_cmvn, const std::string &am_config, int thread_num){
-    
-    LoadConfigFromYaml(am_config.c_str());
-    // knf options
-    fbank_opts_.frame_opts.dither = 0;
-    fbank_opts_.mel_opts.num_bins = n_mels;
-    fbank_opts_.frame_opts.samp_freq = MODEL_SAMPLE_RATE;
-    fbank_opts_.frame_opts.window_type = window_type;
-    fbank_opts_.frame_opts.frame_shift_ms = frame_shift;
-    fbank_opts_.frame_opts.frame_length_ms = frame_length;
-    fbank_opts_.energy_floor = 0;
-    fbank_opts_.mel_opts.debug_mel = false;
-    // fbank_ = std::make_unique<knf::OnlineFbank>(fbank_opts_);
-
-    // session_options.SetInterOpNumThreads(1);
-    session_options.SetIntraOpNumThreads(thread_num);
-    session_options.SetGraphOptimizationLevel(ORT_ENABLE_ALL);
-    // DisableCpuMemArena can improve performance
-    session_options.DisableCpuMemArena();
-
-    try {
-        encoder_session = std::make_unique<Ort::Session>(env_, en_model.c_str(), session_options);
-        LOG(INFO) << "Successfully load model from " << en_model;
-    } catch (std::exception const &e) {
-        LOG(ERROR) << "Error when load am encoder model: " << e.what();
-        exit(0);
-    }
-
-    try {
-        decoder_session = std::make_unique<Ort::Session>(env_, de_model.c_str(), session_options);
-        LOG(INFO) << "Successfully load model from " << de_model;
-    } catch (std::exception const &e) {
-        LOG(ERROR) << "Error when load am decoder model: " << e.what();
-        exit(0);
-    }
-
-    // encoder
-    string strName;
-    GetInputName(encoder_session.get(), strName);
-    en_strInputNames.push_back(strName.c_str());
-    GetInputName(encoder_session.get(), strName,1);
-    en_strInputNames.push_back(strName);
-    
-    GetOutputName(encoder_session.get(), strName);
-    en_strOutputNames.push_back(strName);
-    GetOutputName(encoder_session.get(), strName,1);
-    en_strOutputNames.push_back(strName);
-    GetOutputName(encoder_session.get(), strName,2);
-    en_strOutputNames.push_back(strName);
-
-    for (auto& item : en_strInputNames)
-        en_szInputNames.push_back(item.c_str());
-    for (auto& item : en_strOutputNames)
-        en_szOutputNames.push_back(item.c_str());
-
-    // decoder
-    int de_input_len = 4 + fsmn_layers;
-    int de_out_len = 2 + fsmn_layers;
-    for(int i=0;i<de_input_len; i++){
-        GetInputName(decoder_session.get(), strName, i);
-        de_strInputNames.push_back(strName.c_str());
-    }
-
-    for(int i=0;i<de_out_len; i++){
-        GetOutputName(decoder_session.get(), strName,i);
-        de_strOutputNames.push_back(strName);
-    }
-
-    for (auto& item : de_strInputNames)
-        de_szInputNames.push_back(item.c_str());
-    for (auto& item : de_strOutputNames)
-        de_szOutputNames.push_back(item.c_str());
-
-    vocab = new Vocab(am_config.c_str());
-    LoadCmvn(am_cmvn.c_str());
-
+ParaformerOnline::ParaformerOnline(Paraformer* para_handle)
+:para_handle_(std::move(para_handle)),session_options_{}{
+    InitOnline(
+        para_handle_->fbank_opts_,
+        para_handle_->encoder_session_,
+        para_handle_->decoder_session_,
+        para_handle_->en_szInputNames_,
+        para_handle_->en_szOutputNames_,
+        para_handle_->de_szInputNames_,
+        para_handle_->de_szOutputNames_,
+        para_handle_->means_list_,
+        para_handle_->vars_list_);
+    InitFsmnCache();
     InitCache();
 }
 
-void ParaformerOnline::LoadConfigFromYaml(const char* filename){
+void ParaformerOnline::InitOnline(
+        knf::FbankOptions &fbank_opts,
+        std::shared_ptr<Ort::Session> &encoder_session,
+        std::shared_ptr<Ort::Session> &decoder_session,
+        vector<const char*> &en_szInputNames,
+        vector<const char*> &en_szOutputNames,
+        vector<const char*> &de_szInputNames,
+        vector<const char*> &de_szOutputNames,
+        vector<float> &means_list,
+        vector<float> &vars_list){
+    fbank_opts_ = fbank_opts;
+    encoder_session_ = encoder_session;
+    decoder_session_ = decoder_session;
+    en_szInputNames_ = en_szInputNames;
+    en_szOutputNames_ = en_szOutputNames;
+    de_szInputNames_ = de_szInputNames;
+    de_szOutputNames_ = de_szOutputNames;
+    means_list_ = means_list;
+    vars_list_ = vars_list;
 
-    YAML::Node config;
-    try{
-        config = YAML::LoadFile(filename);
-    }catch(exception const &e){
-        LOG(ERROR) << "Error loading file, yaml file error or not exist.";
-        exit(-1);
-    }
-
-    try{
-        YAML::Node frontend_conf = config["frontend_conf"];
-        YAML::Node encoder_conf = config["encoder_conf"];
-        YAML::Node decoder_conf = config["decoder_conf"];
-        YAML::Node predictor_conf = config["predictor_conf"];
-
-        this->window_type = frontend_conf["window"].as<string>();
-        this->n_mels = frontend_conf["n_mels"].as<int>();
-        this->frame_length = frontend_conf["frame_length"].as<int>();
-        this->frame_shift = frontend_conf["frame_shift"].as<int>();
-        this->lfr_m = frontend_conf["lfr_m"].as<int>();
-        this->lfr_n = frontend_conf["lfr_n"].as<int>();
-
-        this->encoder_size = encoder_conf["output_size"].as<int>();
-        this->fsmn_dims = encoder_conf["output_size"].as<int>();
-
-        this->fsmn_layers = decoder_conf["num_blocks"].as<int>();
-        this->fsmn_lorder = decoder_conf["kernel_size"].as<int>()-1;
-
-        this->cif_threshold = predictor_conf["threshold"].as<double>();
-        this->tail_alphas = predictor_conf["tail_threshold"].as<double>();
-
-    }catch(exception const &e){
-        LOG(ERROR) << "Error when load argument from vad config YAML.";
-        exit(-1);
-    }
+    frame_length = para_handle_->frame_length;
+    frame_shift = para_handle_->frame_shift;
+    n_mels = para_handle_->n_mels;
+    lfr_m = para_handle_->lfr_m;
+    lfr_n = para_handle_->lfr_n;
+    encoder_size = para_handle_->encoder_size;
+    fsmn_layers = para_handle_->fsmn_layers;
+    fsmn_lorder = para_handle_->fsmn_lorder;
+    fsmn_dims = para_handle_->fsmn_dims;
+    cif_threshold = para_handle_->cif_threshold;
+    tail_alphas = para_handle_->tail_alphas;
 }
+
 
 void ParaformerOnline::FbankKaldi(float sample_rate, std::vector<std::vector<float>> &wav_feats,
                                std::vector<float> &waves) {
@@ -150,7 +79,6 @@ void ParaformerOnline::FbankKaldi(float sample_rate, std::vector<std::vector<flo
         buf[i] = waves[i] * 32768;
     }
     fbank.AcceptWaveform(sample_rate, buf.data(), buf.size());
-    // fbank.AcceptWaveform(sample_rate, &waves[0], waves.size());
     int32_t frames = fbank.NumFramesReady();
     for (int32_t i = 0; i != frames; ++i) {
         const float *frame = fbank.GetFrame(i);
@@ -301,7 +229,7 @@ void ParaformerOnline::CifSearch(std::vector<std::vector<float>> hidden, std::ve
         alphas_cache_.clear();
     }
     
-    if (is_last_chunk) { // TODD: finish final part
+    if (is_last_chunk) {
         std::vector<float> tail_hidden(hidden_size, 0);
         hidden.emplace_back(tail_hidden);
         alphas.emplace_back(tail_alphas);
@@ -349,6 +277,12 @@ void ParaformerOnline::CifSearch(std::vector<std::vector<float>> hidden, std::ve
     }
 }
 
+void ParaformerOnline::InitFsmnCache(){
+    for(int i=0; i<fsmn_lorder*fsmn_dims; i++){
+        fsmn_init_cache_.emplace_back(0);
+    }
+}
+
 void ParaformerOnline::InitCache(){
     
     start_idx_cache_ = 0;
@@ -357,13 +291,13 @@ void ParaformerOnline::InitCache(){
     hidden_cache_.clear();
     alphas_cache_.clear();
     feats_cache_.clear();
-    fsmn_caches_.clear();
+    decoder_onnx.clear();
 
     // cif cache
     std::vector<float> hidden_cache(encoder_size, 0);
     hidden_cache_.emplace_back(hidden_cache);
     alphas_cache_.emplace_back(0);
-    
+
     // feats
     std::vector<float> feat_cache(feat_dims, 0);
     for(int i=0; i<(chunk_size[0]+chunk_size[2]); i++){
@@ -371,15 +305,20 @@ void ParaformerOnline::InitCache(){
     }
 
     // fsmn cache
-    std::vector<float> tmp(fsmn_lorder, 0);
-    std::vector<std::vector<float>> tmp_dims;
-    for(int i=0; i<fsmn_dims; i++){
-        tmp_dims.emplace_back(tmp);
-    }
-    std::vector<std::vector<std::vector<float>>> fsmn_cache;
-    fsmn_cache.emplace_back(tmp_dims);
-    for(int i=0; i<fsmn_layers; i++){
-        fsmn_caches_.emplace_back(fsmn_cache);
+#ifdef _WIN_X86
+    Ort::MemoryInfo m_memoryInfo = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
+#else
+    Ort::MemoryInfo m_memoryInfo = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
+#endif
+    const int64_t fsmn_shape_[3] = {1, fsmn_dims, fsmn_lorder};
+    for(int l=0; l<fsmn_layers; l++){
+        Ort::Value onnx_fsmn_cache = Ort::Value::CreateTensor<float>(
+            m_memoryInfo,
+            fsmn_init_cache_.data(),
+            fsmn_init_cache_.size(),
+            fsmn_shape_,
+            3);
+        decoder_onnx.emplace_back(std::move(onnx_fsmn_cache));
     }
 };
 
@@ -443,7 +382,7 @@ string ParaformerOnline::ForwardChunk(std::vector<std::vector<float>> &chunk_fea
     input_onnx.emplace_back(std::move(onnx_feats));
     input_onnx.emplace_back(std::move(onnx_feats_len));
     
-    auto encoder_tensor = encoder_session->Run(Ort::RunOptions{nullptr}, en_szInputNames.data(), input_onnx.data(), input_onnx.size(), en_szOutputNames.data(), en_szOutputNames.size());
+    auto encoder_tensor = encoder_session_->Run(Ort::RunOptions{nullptr}, en_szInputNames_.data(), input_onnx.data(), input_onnx.size(), en_szOutputNames_.data(), en_szOutputNames_.size());
     // get enc_vec
     std::vector<int64_t> enc_shape = encoder_tensor[0].GetTensorTypeAndShapeInfo().GetShape();
     float* enc_data = encoder_tensor[0].GetTensorMutableData<float>();
@@ -467,26 +406,13 @@ string ParaformerOnline::ForwardChunk(std::vector<std::vector<float>> &chunk_fea
 
     string result;
     if(list_frame.size()>0){
-        std::vector<Ort::Value> decoder_onnx;
         // enc
-        const int64_t enc_shape_[3] = {1, enc_vec.size(), enc_vec[0].size()};
-        std::vector<float> enc_input;
-        for (const auto &enc_vec_: enc_vec) {
-            enc_input.insert(enc_input.end(), enc_vec_.begin(), enc_vec_.end());
-        }
-        Ort::Value onnx_enc = Ort::Value::CreateTensor<float>(
-            m_memoryInfo,
-            enc_input.data(),
-            enc_input.size(),
-            enc_shape_,
-            3);
-        decoder_onnx.emplace_back(std::move(onnx_enc));
-
-        // enc_lens, encoder_tensor[1]
-        decoder_onnx.emplace_back(std::move(encoder_tensor[1]));
+        decoder_onnx.insert(decoder_onnx.begin(), std::move(encoder_tensor[0]));
+        // enc_lens
+        decoder_onnx.insert(decoder_onnx.begin()+1, std::move(encoder_tensor[1]));
 
         // acoustic_embeds
-        const int64_t emb_shape_[3] = {1, list_frame.size(), list_frame[0].size()};
+        const int64_t emb_shape_[3] = {1, (int64_t)list_frame.size(), (int64_t)list_frame[0].size()};
         std::vector<float> emb_input;
         for (const auto &list_frame_: list_frame) {
             emb_input.insert(emb_input.end(), list_frame_.begin(), list_frame_.end());
@@ -497,7 +423,7 @@ string ParaformerOnline::ForwardChunk(std::vector<std::vector<float>> &chunk_fea
             emb_input.size(),
             emb_shape_,
             3);
-        decoder_onnx.emplace_back(std::move(onnx_emb));
+        decoder_onnx.insert(decoder_onnx.begin()+2, std::move(onnx_emb));
 
         // acoustic_embeds_len
         const int64_t emb_length_shape[1] = {1};
@@ -505,51 +431,18 @@ string ParaformerOnline::ForwardChunk(std::vector<std::vector<float>> &chunk_fea
         emb_length.emplace_back(list_frame.size());
         Ort::Value onnx_emb_len = Ort::Value::CreateTensor<int32_t>(
             m_memoryInfo, emb_length.data(), emb_length.size(), emb_length_shape, 1);
-        decoder_onnx.emplace_back(std::move(onnx_emb_len));
+        decoder_onnx.insert(decoder_onnx.begin()+3, std::move(onnx_emb_len));
 
-        // fsmn_caches
-        std::vector<std::vector<float>> fsmn_inputs;
-        for (auto &fsmn_cache_s3: fsmn_caches_) {
-            std::vector<float> fsmn_input;
-            for (auto &fsmn_cache_s2: fsmn_cache_s3) {
-                for (auto &fsmn_cache_s1: fsmn_cache_s2){
-                    fsmn_input.insert(fsmn_input.end(), fsmn_cache_s1.begin(), fsmn_cache_s1.end());
-                }
-            }
-            fsmn_inputs.emplace_back(fsmn_input);
-        }
-        const int64_t fsmn_shape_[3] = {1, fsmn_dims, fsmn_lorder};
-
-        for(int l=0; l<fsmn_layers; l++){
-            Ort::Value onnx_fsmn_cache = Ort::Value::CreateTensor<float>(
-                m_memoryInfo,
-                fsmn_inputs[l].data(),
-                fsmn_inputs[l].size(),
-                fsmn_shape_,
-                3);
-            decoder_onnx.emplace_back(std::move(onnx_fsmn_cache));
-        }
-        std::vector<int64_t> fsmn_shape__ = decoder_onnx[4].GetTensorTypeAndShapeInfo().GetShape();
-        float* fsmn_data = decoder_onnx[4].GetTensorMutableData<float>();
-
-        auto decoder_tensor = decoder_session->Run(Ort::RunOptions{nullptr}, de_szInputNames.data(), decoder_onnx.data(), decoder_onnx.size(), de_szOutputNames.data(), de_szOutputNames.size());
+        auto decoder_tensor = decoder_session_->Run(Ort::RunOptions{nullptr}, de_szInputNames_.data(), decoder_onnx.data(), decoder_onnx.size(), de_szOutputNames_.data(), de_szOutputNames_.size());
+        // fsmn cache
+        decoder_onnx.clear();
         for(int l=0;l<fsmn_layers;l++){
-            std::vector<int64_t> fsmn_shape = decoder_tensor[2+l].GetTensorTypeAndShapeInfo().GetShape();
-            float* fsmn_data = decoder_tensor[2+l].GetTensorMutableData<float>();
-            for(int b=0; b<fsmn_shape[0]; b++){
-                for(int dim1=0; dim1<fsmn_shape[1]; dim1++){
-                    for(int dim2=fsmn_shape[2]-fsmn_lorder; dim2<fsmn_shape[2]; dim2++){
-                        fsmn_caches_[l][b][dim1][dim2-(fsmn_shape[2]-fsmn_lorder)] = fsmn_data[b*fsmn_shape[1]*fsmn_shape[2]+dim1*fsmn_shape[2]+dim2];
-                    }
-
-                }
-            }
+            decoder_onnx.emplace_back(std::move(decoder_tensor[2+l]));
         }
 
         std::vector<int64_t> decoder_shape = decoder_tensor[0].GetTensorTypeAndShapeInfo().GetShape();
-        float* floatData = decoder_tensor[0].GetTensorMutableData<float>();
-        result = GreedySearch(floatData, list_frame.size(), decoder_shape[2]);
-
+        float* float_data = decoder_tensor[0].GetTensorMutableData<float>();
+        result = para_handle_->GreedySearch(float_data, list_frame.size(), decoder_shape[2]);
     }
 
     return result;
@@ -559,7 +452,7 @@ string ParaformerOnline::Forward(float* din, int len, bool input_finished)
 {
     std::vector<std::vector<float>> wav_feats;
     std::vector<float> waves(din, din+len);
-    
+
     string result="";
     if(len <16*60 && input_finished && !is_first_chunk){
         is_last_chunk = true;
@@ -569,6 +462,9 @@ string ParaformerOnline::Forward(float* din, int len, bool input_finished)
         ResetCache();
         Reset();
         return result;
+    }
+    if(is_first_chunk){
+        is_first_chunk = false;
     }
     ExtractFeats(MODEL_SAMPLE_RATE, wav_feats, waves, input_finished);
     if(wav_feats.size() == 0){
@@ -589,7 +485,7 @@ string ParaformerOnline::Forward(float* din, int len, bool input_finished)
         }else{
             // first chunk
             std::vector<std::vector<float>> first_chunk;
-            first_chunk.insert(first_chunk.begin(), wav_feats.begin(), wav_feats.begin()+chunk_size[1]);
+            first_chunk.insert(first_chunk.begin(), wav_feats.begin(), wav_feats.end());
             AddOverlapChunk(first_chunk, input_finished);
             string str_first_chunk = ForwardChunk(first_chunk, is_last_chunk);
 
@@ -620,61 +516,8 @@ string ParaformerOnline::Forward(float* din, int len, bool input_finished)
     return result;
 }
 
-string ParaformerOnline::GreedySearch(float * in, int n_len,  int64_t token_nums)
-{
-    vector<int> hyps;
-    int Tmax = n_len;
-    for (int i = 0; i < Tmax; i++) {
-        int max_idx;
-        float max_val;
-        FindMax(in + i * token_nums, token_nums, max_val, max_idx);
-        hyps.push_back(max_idx);
-    }
-
-    return vocab->Vector2StringV2(hyps);
-}
-
 ParaformerOnline::~ParaformerOnline()
 {
-    if(vocab)
-        delete vocab;
-}
-
-void ParaformerOnline::LoadCmvn(const char *filename)
-{
-    ifstream cmvn_stream(filename);
-    if (!cmvn_stream.is_open()) {
-        LOG(ERROR) << "Failed to open file: " << filename;
-        exit(0);
-    }
-    string line;
-
-    while (getline(cmvn_stream, line)) {
-        istringstream iss(line);
-        vector<string> line_item{istream_iterator<string>{iss}, istream_iterator<string>{}};
-        if (line_item[0] == "<AddShift>") {
-            getline(cmvn_stream, line);
-            istringstream means_lines_stream(line);
-            vector<string> means_lines{istream_iterator<string>{means_lines_stream}, istream_iterator<string>{}};
-            if (means_lines[0] == "<LearnRateCoef>") {
-                for (int j = 3; j < means_lines.size() - 1; j++) {
-                    means_list_.push_back(stof(means_lines[j]));
-                }
-                continue;
-            }
-        }
-        else if (line_item[0] == "<Rescale>") {
-            getline(cmvn_stream, line);
-            istringstream vars_lines_stream(line);
-            vector<string> vars_lines{istream_iterator<string>{vars_lines_stream}, istream_iterator<string>{}};
-            if (vars_lines[0] == "<LearnRateCoef>") {
-                for (int j = 3; j < vars_lines.size() - 1; j++) {
-                    vars_list_.push_back(stof(vars_lines[j])*scale);
-                }
-                continue;
-            }
-        }
-    }
 }
 
 string ParaformerOnline::Rescoring()
