@@ -99,10 +99,9 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
               --output_dir $output_dir \
               --index JOB
         mkdir -p ${data_dir}/ark_data/dump/simu_data/data/$dataset
-        python local/gen_feats_scp.py \
-              --root_path ${data_dir}/ark_data/dump/simu_data/$dataset \
-              --out_path ${data_dir}/ark_data/dump/simu_data/data/$dataset \
-              --split_num $nj
+        cat ${data_dir}/ark_data/dump/simu_data/$dataset/feature.scp.* > ${data_dir}/ark_data/dump/simu_data/data/$dataset/feature.scp
+        cat ${data_dir}/ark_data/dump/simu_data/$dataset/label.scp.* > ${data_dir}/ark_data/dump/simu_data/data/$dataset/label.scp
+        paste -d" " ${data_dir}/ark_data/dump/simu_data/data/$dataset/feature.scp <(cut -f2 -d" " ${data_dir}/ark_data/dump/simu_data/data/$dataset/label.scp) > ${data_dir}/ark_data/dump/simu_data/data/$dataset/feats.scp
         grep "ns2" ${data_dir}/ark_data/dump/simu_data/data/$dataset/feats.scp > ${data_dir}/ark_data/dump/simu_data/data/$dataset/feats_2spkr.scp
         # for chunk_size=2000
         output_dir=${data_dir}/ark_data/dump/simu_data_chunk2000/$dataset
@@ -114,10 +113,9 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
               --index JOB \
               --num_frames 2000
         mkdir -p ${data_dir}/ark_data/dump/simu_data_chunk2000/data/$dataset
-        python local/gen_feats_scp.py \
-              --root_path ${data_dir}/ark_data/dump/simu_data_chunk2000/$dataset \
-              --out_path ${data_dir}/ark_data/dump/simu_data_chunk2000/data/$dataset \
-              --split_num $nj
+        cat ${data_dir}/ark_data/dump/simu_data_chunk2000/$dataset/feature.scp.* > ${data_dir}/ark_data/dump/simu_data_chunk2000/data/$dataset/feature.scp
+        cat ${data_dir}/ark_data/dump/simu_data_chunk2000/$dataset/label.scp.* > ${data_dir}/ark_data/dump/simu_data_chunk2000/data/$dataset/label.scp
+        paste -d" " ${data_dir}/ark_data/dump/simu_data_chunk2000/data/$dataset/feature.scp <(cut -f2 -d" " ${data_dir}/ark_data/dump/simu_data_chunk2000/data/$dataset/label.scp) > ${data_dir}/ark_data/dump/simu_data_chunk2000/data/$dataset/feats.scp
         grep "ns2" ${data_dir}/ark_data/dump/simu_data_chunk2000/data/$dataset/feats.scp > ${data_dir}/ark_data/dump/simu_data_chunk2000/data/$dataset/feats_2spkr.scp
     done
 
@@ -132,10 +130,7 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
               --index 1 \
               --num_frames 2000
         mkdir -p ${data_dir}/ark_data/dump/callhome/data/$dset
-        python local/gen_feats_scp.py \
-              --root_path ${data_dir}/ark_data/dump/callhome/$dset \
-              --out_path ${data_dir}/ark_data/dump/callhome/data/$dset \
-              --split_num 1
+        paste -d" " ${data_dir}/ark_data/dump/callhome/$dset/feature.scp.1 <(cut -f2 -d" " ${data_dir}/ark_data/dump/callhome/$dset/label.scp.1) > ${data_dir}/ark_data/dump/callhome/data/$dset/feats.scp
     done
 fi
 
