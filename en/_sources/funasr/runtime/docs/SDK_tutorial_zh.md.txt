@@ -51,8 +51,8 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --au
 
 - [Python](#python-client)
 - [CPP](#cpp-client)
-- [html网页版本](#Html网页版)
-- [Java](#Java-client)
+- [html](#html-client)
+- [java](#java-client)
 
 更多版本客户端支持请参考[开发指南](./SDK_advanced_guide_offline_zh.md)
 
@@ -89,13 +89,13 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --au
 --ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
 ```
 
-### Html网页版
+### html-client
 
 在浏览器中打开 html/static/index.html，即可出现如下页面，支持麦克风输入与文件上传，直接进行体验
 
 <img src="images/html.png"  width="900"/>
 
-### Java-client
+### java-client
 
 ```shell
 FunasrWsClient --host localhost --port 10095 --audio_in ./asr_example.wav --mode offline
