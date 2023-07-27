@@ -5,8 +5,6 @@
 #pragma once
 
 #include "precomp.h"
-#include <sys/time.h>
-
 
 namespace funasr {
 
@@ -92,18 +90,6 @@ namespace funasr {
         bool is_first_chunk = true;
         bool is_last_chunk = false;
         double sqrt_factor;
-
-        // time stat
-        struct timeval start, end;
-        long seconds = 0, taking_micros=0;
-        long n_total_endata = 0;
-        long n_total_enfwd = 0;
-        long n_total_enout = 0;
-        long n_total_cif = 0;
-        long n_total_dedata = 0;
-        long n_total_defwd = 0;
-        long n_total_deout = 0;
-        long n_total_forward = 0;
 
     public:
         ParaformerOnline(Paraformer* para_handle);
