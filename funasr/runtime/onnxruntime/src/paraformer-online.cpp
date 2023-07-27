@@ -21,7 +21,6 @@ ParaformerOnline::ParaformerOnline(Paraformer* para_handle)
         para_handle_->de_szOutputNames_,
         para_handle_->means_list_,
         para_handle_->vars_list_);
-    InitFsmnCache();
     InitCache();
 }
 
@@ -56,6 +55,12 @@ void ParaformerOnline::InitOnline(
     fsmn_dims = para_handle_->fsmn_dims;
     cif_threshold = para_handle_->cif_threshold;
     tail_alphas = para_handle_->tail_alphas;
+
+    // other vars
+    sqrt_factor = std::sqrt(encoder_size);
+    for(int i=0; i<fsmn_lorder*fsmn_dims; i++){
+        fsmn_init_cache_.emplace_back(0);
+    }
 }
 
 
@@ -89,47 +94,47 @@ void ParaformerOnline::FbankKaldi(float sample_rate, std::vector<std::vector<flo
 
 void ParaformerOnline::ExtractFeats(float sample_rate, vector<std::vector<float>> &wav_feats,
                                  vector<float> &waves, bool input_finished) {
-  FbankKaldi(sample_rate, wav_feats, waves);
-  // cache deal & online lfr,cmvn
-  if (wav_feats.size() > 0) {
-    if (!reserve_waveforms_.empty()) {
-      waves.insert(waves.begin(), reserve_waveforms_.begin(), reserve_waveforms_.end());
-    }
-    if (lfr_splice_cache_.empty()) {
-      for (int i = 0; i < (lfr_m - 1) / 2; i++) {
-        lfr_splice_cache_.emplace_back(wav_feats[0]);
-      }
-    }
-    if (wav_feats.size() + lfr_splice_cache_.size() >= lfr_m) {
-      wav_feats.insert(wav_feats.begin(), lfr_splice_cache_.begin(), lfr_splice_cache_.end());
-      int frame_from_waves = (waves.size() - frame_sample_length_) / frame_shift_sample_length_ + 1;
-      int minus_frame = reserve_waveforms_.empty() ? (lfr_m - 1) / 2 : 0;
-      int lfr_splice_frame_idxs = OnlineLfrCmvn(wav_feats, input_finished);
-      int reserve_frame_idx = lfr_splice_frame_idxs - minus_frame;
-      reserve_waveforms_.clear();
-      reserve_waveforms_.insert(reserve_waveforms_.begin(),
-                                waves.begin() + reserve_frame_idx * frame_shift_sample_length_,
-                                waves.begin() + frame_from_waves * frame_shift_sample_length_);
-      int sample_length = (frame_from_waves - 1) * frame_shift_sample_length_ + frame_sample_length_;
-      waves.erase(waves.begin() + sample_length, waves.end());
+    FbankKaldi(sample_rate, wav_feats, waves);
+    // cache deal & online lfr,cmvn
+    if (wav_feats.size() > 0) {
+        if (!reserve_waveforms_.empty()) {
+        waves.insert(waves.begin(), reserve_waveforms_.begin(), reserve_waveforms_.end());
+        }
+        if (lfr_splice_cache_.empty()) {
+        for (int i = 0; i < (lfr_m - 1) / 2; i++) {
+            lfr_splice_cache_.emplace_back(wav_feats[0]);
+        }
+        }
+        if (wav_feats.size() + lfr_splice_cache_.size() >= lfr_m) {
+        wav_feats.insert(wav_feats.begin(), lfr_splice_cache_.begin(), lfr_splice_cache_.end());
+        int frame_from_waves = (waves.size() - frame_sample_length_) / frame_shift_sample_length_ + 1;
+        int minus_frame = reserve_waveforms_.empty() ? (lfr_m - 1) / 2 : 0;
+        int lfr_splice_frame_idxs = OnlineLfrCmvn(wav_feats, input_finished);
+        int reserve_frame_idx = lfr_splice_frame_idxs - minus_frame;
+        reserve_waveforms_.clear();
+        reserve_waveforms_.insert(reserve_waveforms_.begin(),
+                                    waves.begin() + reserve_frame_idx * frame_shift_sample_length_,
+                                    waves.begin() + frame_from_waves * frame_shift_sample_length_);
+        int sample_length = (frame_from_waves - 1) * frame_shift_sample_length_ + frame_sample_length_;
+        waves.erase(waves.begin() + sample_length, waves.end());
+        } else {
+        reserve_waveforms_.clear();
+        reserve_waveforms_.insert(reserve_waveforms_.begin(),
+                                    waves.begin() + frame_sample_length_ - frame_shift_sample_length_, waves.end());
+        lfr_splice_cache_.insert(lfr_splice_cache_.end(), wav_feats.begin(), wav_feats.end());
+        }
     } else {
-      reserve_waveforms_.clear();
-      reserve_waveforms_.insert(reserve_waveforms_.begin(),
-                                waves.begin() + frame_sample_length_ - frame_shift_sample_length_, waves.end());
-      lfr_splice_cache_.insert(lfr_splice_cache_.end(), wav_feats.begin(), wav_feats.end());
+        if (input_finished) {
+        if (!reserve_waveforms_.empty()) {
+            waves = reserve_waveforms_;
+        }
+        wav_feats = lfr_splice_cache_;
+        OnlineLfrCmvn(wav_feats, input_finished);
+        }
     }
-  } else {
-    if (input_finished) {
-      if (!reserve_waveforms_.empty()) {
-        waves = reserve_waveforms_;
-      }
-      wav_feats = lfr_splice_cache_;
-      OnlineLfrCmvn(wav_feats, input_finished);
+    if(input_finished){
+        ResetCache();
     }
-  }
-  if(input_finished){
-      ResetCache();
-  }
 }
 
 int ParaformerOnline::OnlineLfrCmvn(vector<vector<float>> &wav_feats, bool input_finished) {
@@ -277,14 +282,8 @@ void ParaformerOnline::CifSearch(std::vector<std::vector<float>> hidden, std::ve
     }
 }
 
-void ParaformerOnline::InitFsmnCache(){
-    for(int i=0; i<fsmn_lorder*fsmn_dims; i++){
-        fsmn_init_cache_.emplace_back(0);
-    }
-}
-
 void ParaformerOnline::InitCache(){
-    
+
     start_idx_cache_ = 0;
     is_first_chunk = true;
     is_last_chunk = false;
@@ -353,6 +352,9 @@ void ParaformerOnline::AddOverlapChunk(std::vector<std::vector<float>> &wav_feat
 
 string ParaformerOnline::ForwardChunk(std::vector<std::vector<float>> &chunk_feats, bool input_finished)
 {
+    struct timeval start_, end_;
+    gettimeofday(&start_, NULL);
+    gettimeofday(&start, NULL);
     int32_t num_frames = chunk_feats.size();
 
 #ifdef _WIN_X86
@@ -382,7 +384,22 @@ string ParaformerOnline::ForwardChunk(std::vector<std::vector<float>> &chunk_fea
     input_onnx.emplace_back(std::move(onnx_feats));
     input_onnx.emplace_back(std::move(onnx_feats_len));
     
+    gettimeofday(&end, NULL);
+    seconds = (end.tv_sec - start.tv_sec);
+    taking_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
+    LOG(INFO) << "Encoder data times: " << taking_micros;
+    n_total_endata += taking_micros;
+    gettimeofday(&start, NULL);   
+    
     auto encoder_tensor = encoder_session_->Run(Ort::RunOptions{nullptr}, en_szInputNames_.data(), input_onnx.data(), input_onnx.size(), en_szOutputNames_.data(), en_szOutputNames_.size());
+    
+    gettimeofday(&end, NULL);
+    seconds = (end.tv_sec - start.tv_sec);
+    taking_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
+    LOG(INFO) << "Encoder fwd times: " << taking_micros;
+    n_total_enfwd += taking_micros;
+    gettimeofday(&start, NULL);   
+
     // get enc_vec
     std::vector<int64_t> enc_shape = encoder_tensor[0].GetTensorTypeAndShapeInfo().GetShape();
     float* enc_data = encoder_tensor[0].GetTensorMutableData<float>();
@@ -400,12 +417,24 @@ string ParaformerOnline::ForwardChunk(std::vector<std::vector<float>> &chunk_fea
     for (int i = 0; i < alpha_shape[1]; i++) {
         alpha_vec[i] = alpha_data[i];
     }
+    gettimeofday(&end, NULL);
+    seconds = (end.tv_sec - start.tv_sec);
+    taking_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
+    LOG(INFO) << "Encoder output times: " << taking_micros;
+    n_total_enout += taking_micros;
+    gettimeofday(&start, NULL);  
 
     std::vector<std::vector<float>> list_frame;
     CifSearch(enc_vec, alpha_vec, input_finished, list_frame);
+    gettimeofday(&end, NULL);
+    seconds = (end.tv_sec - start.tv_sec);
+    taking_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
+    LOG(INFO) << "Cif times: " << taking_micros;
+    n_total_cif += taking_micros;
 
     string result;
     if(list_frame.size()>0){
+        gettimeofday(&start, NULL);
         // enc
         decoder_onnx.insert(decoder_onnx.begin(), std::move(encoder_tensor[0]));
         // enc_lens
@@ -433,17 +462,44 @@ string ParaformerOnline::ForwardChunk(std::vector<std::vector<float>> &chunk_fea
             m_memoryInfo, emb_length.data(), emb_length.size(), emb_length_shape, 1);
         decoder_onnx.insert(decoder_onnx.begin()+3, std::move(onnx_emb_len));
 
+        gettimeofday(&end, NULL);
+        seconds = (end.tv_sec - start.tv_sec);
+        taking_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
+        LOG(INFO) << "Decoder data times: " << taking_micros;
+        n_total_dedata += taking_micros;
+        gettimeofday(&start, NULL);
+
         auto decoder_tensor = decoder_session_->Run(Ort::RunOptions{nullptr}, de_szInputNames_.data(), decoder_onnx.data(), decoder_onnx.size(), de_szOutputNames_.data(), de_szOutputNames_.size());
+
+        gettimeofday(&end, NULL);
+        seconds = (end.tv_sec - start.tv_sec);
+        taking_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
+        LOG(INFO) << "Decoder fwd times: " << taking_micros;
+        n_total_defwd += taking_micros;
+        gettimeofday(&start, NULL);
+
         // fsmn cache
         decoder_onnx.clear();
         for(int l=0;l<fsmn_layers;l++){
             decoder_onnx.emplace_back(std::move(decoder_tensor[2+l]));
         }
 
+        gettimeofday(&end, NULL);
+        seconds = (end.tv_sec - start.tv_sec);
+        taking_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
+        LOG(INFO) << "Decoder output times: " << taking_micros;
+        n_total_deout += taking_micros;
+
         std::vector<int64_t> decoder_shape = decoder_tensor[0].GetTensorTypeAndShapeInfo().GetShape();
         float* float_data = decoder_tensor[0].GetTensorMutableData<float>();
         result = para_handle_->GreedySearch(float_data, list_frame.size(), decoder_shape[2]);
     }
+
+    gettimeofday(&end_, NULL);
+    seconds = (end_.tv_sec - start_.tv_sec);
+    taking_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
+    LOG(INFO) << "ForwardChunk times: " << taking_micros;
+    n_total_forward += taking_micros;
 
     return result;
 }
@@ -470,10 +526,10 @@ string ParaformerOnline::Forward(float* din, int len, bool input_finished)
     if(wav_feats.size() == 0){
         return result;
     }
-    double factor = std::sqrt(encoder_size);
+    
     for (auto& row : wav_feats) {
         for (auto& val : row) {
-            val *= factor;
+            val *= sqrt_factor;
         }
     }
 
@@ -518,6 +574,14 @@ string ParaformerOnline::Forward(float* din, int len, bool input_finished)
 
 ParaformerOnline::~ParaformerOnline()
 {
+    LOG(INFO)<<"Total endata : " << n_total_endata ;
+    LOG(INFO)<<"Total enfwd : " << n_total_enfwd ;
+    LOG(INFO)<<"Total enout : " << n_total_enout ;
+    LOG(INFO)<<"Total cif : " << n_total_cif ;
+    LOG(INFO)<<"Total dedata : " << n_total_dedata ;
+    LOG(INFO)<<"Total defwd : " << n_total_defwd ;
+    LOG(INFO)<<"Total deout : " << n_total_deout ;
+    LOG(INFO)<<"Total forward : " << n_total_forward;
 }
 
 string ParaformerOnline::Rescoring()

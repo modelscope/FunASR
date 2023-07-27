@@ -195,7 +195,8 @@ int main(int argc, char *argv[])
     LOG(INFO) << "Audio length: " << (double)snippet_time << " s";
     LOG(INFO) << "Model inference takes: " << (double)taking_micros / 1000000 <<" s";
     LOG(INFO) << "Model inference RTF: " << (double)taking_micros/ (snippet_time*1000000);
-    FsmnVadUninit(asr_hanlde);
+    FunASRUninit(asr_hanlde);
+    FunASRUninit(online_hanlde);
     return 0;
 }
 
