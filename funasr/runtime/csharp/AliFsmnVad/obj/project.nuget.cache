@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "dgSpecHash": "OoMPNn8pq0hrHnl9BdBg0Sj0lKExuVOvDiQwB5PfiNyD6hED2aJWBR6nNSanYYFjbv9tQch9H+izHLJvGX29oA==",
+  "success": true,
+  "projectFilePath": "M:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230727-bak\\funasr\\runtime\\csharp\\AliFsmnVad\\AliFsmnVad.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\zx520_000.000\\.nuget\\packages\\kaldinativefbanksharp\\1.0.3\\kaldinativefbanksharp.1.0.3.nupkg.sha512",
+    "C:\\Users\\zx520_000.000\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\7.0.0\\microsoft.extensions.dependencyinjection.7.0.0.nupkg.sha512",
+    "C:\\Users\\zx520_000.000\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\7.0.0\\microsoft.extensions.dependencyinjection.abstractions.7.0.0.nupkg.sha512",
+    "C:\\Users\\zx520_000.000\\.nuget\\packages\\microsoft.extensions.logging\\7.0.0\\microsoft.extensions.logging.7.0.0.nupkg.sha512",
+    "C:\\Users\\zx520_000.000\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\7.0.0\\microsoft.extensions.logging.abstractions.7.0.0.nupkg.sha512",
+    "C:\\Users\\zx520_000.000\\.nuget\\packages\\microsoft.extensions.options\\7.0.0\\microsoft.extensions.options.7.0.0.nupkg.sha512",
+    "C:\\Users\\zx520_000.000\\.nuget\\packages\\microsoft.extensions.primitives\\7.0.0\\microsoft.extensions.primitives.7.0.0.nupkg.sha512",
+    "C:\\Users\\zx520_000.000\\.nuget\\packages\\microsoft.ml.onnxruntime\\1.15.0\\microsoft.ml.onnxruntime.1.15.0.nupkg.sha512",
+    "C:\\Users\\zx520_000.000\\.nuget\\packages\\microsoft.ml.onnxruntime.managed\\1.15.0\\microsoft.ml.onnxruntime.managed.1.15.0.nupkg.sha512",
+    "C:\\Users\\zx520_000.000\\.nuget\\packages\\system.memory\\4.5.3\\system.memory.4.5.3.nupkg.sha512",
+    "C:\\Users\\zx520_000.000\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\6.0.0\\system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512",
+    "C:\\Users\\zx520_000.000\\.nuget\\packages\\yamldotnet\\13.1.0\\yamldotnet.13.1.0.nupkg.sha512"
+  ],
+  "logs": []
+}

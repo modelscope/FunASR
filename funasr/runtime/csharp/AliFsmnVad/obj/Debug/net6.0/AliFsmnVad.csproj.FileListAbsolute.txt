@@ -1,0 +1,17 @@
+D:\Docker\App\manyeyes_mlnet\git-kit\AliFsmnVad\AliFsmnVad\bin\Debug\net6.0\speech_fsmn_vad_zh-cn-16k-common-pytorch\example\0.wav
+D:\Docker\App\manyeyes_mlnet\git-kit\AliFsmnVad\AliFsmnVad\bin\Debug\net6.0\speech_fsmn_vad_zh-cn-16k-common-pytorch\example\1.wav
+D:\Docker\App\manyeyes_mlnet\git-kit\AliFsmnVad\AliFsmnVad\bin\Debug\net6.0\speech_fsmn_vad_zh-cn-16k-common-pytorch\model.onnx
+D:\Docker\App\manyeyes_mlnet\git-kit\AliFsmnVad\AliFsmnVad\bin\Debug\net6.0\speech_fsmn_vad_zh-cn-16k-common-pytorch\vad.mvn
+D:\Docker\App\manyeyes_mlnet\git-kit\AliFsmnVad\AliFsmnVad\bin\Debug\net6.0\speech_fsmn_vad_zh-cn-16k-common-pytorch\vad.yaml
+D:\Docker\App\manyeyes_mlnet\git-kit\AliFsmnVad\AliFsmnVad\bin\Debug\net6.0\AliFsmnVad.deps.json
+D:\Docker\App\manyeyes_mlnet\git-kit\AliFsmnVad\AliFsmnVad\bin\Debug\net6.0\AliFsmnVad.dll
+D:\Docker\App\manyeyes_mlnet\git-kit\AliFsmnVad\AliFsmnVad\bin\Debug\net6.0\AliFsmnVad.pdb
+D:\Docker\App\manyeyes_mlnet\git-kit\AliFsmnVad\AliFsmnVad\obj\Debug\net6.0\AliFsmnVad.csproj.AssemblyReference.cache
+D:\Docker\App\manyeyes_mlnet\git-kit\AliFsmnVad\AliFsmnVad\obj\Debug\net6.0\AliFsmnVad.GeneratedMSBuildEditorConfig.editorconfig
+D:\Docker\App\manyeyes_mlnet\git-kit\AliFsmnVad\AliFsmnVad\obj\Debug\net6.0\AliFsmnVad.AssemblyInfoInputs.cache
+D:\Docker\App\manyeyes_mlnet\git-kit\AliFsmnVad\AliFsmnVad\obj\Debug\net6.0\AliFsmnVad.AssemblyInfo.cs
+D:\Docker\App\manyeyes_mlnet\git-kit\AliFsmnVad\AliFsmnVad\obj\Debug\net6.0\AliFsmnVad.csproj.CoreCompileInputs.cache
+D:\Docker\App\manyeyes_mlnet\git-kit\AliFsmnVad\AliFsmnVad\obj\Debug\net6.0\AliFsmnVad.dll
+D:\Docker\App\manyeyes_mlnet\git-kit\AliFsmnVad\AliFsmnVad\obj\Debug\net6.0\refint\AliFsmnVad.dll
+D:\Docker\App\manyeyes_mlnet\git-kit\AliFsmnVad\AliFsmnVad\obj\Debug\net6.0\AliFsmnVad.pdb
+D:\Docker\App\manyeyes_mlnet\git-kit\AliFsmnVad\AliFsmnVad\obj\Debug\net6.0\ref\AliFsmnVad.dll
