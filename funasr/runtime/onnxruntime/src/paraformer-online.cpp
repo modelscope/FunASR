@@ -497,7 +497,7 @@ string ParaformerOnline::ForwardChunk(std::vector<std::vector<float>> &chunk_fea
 
     gettimeofday(&end_, NULL);
     seconds = (end_.tv_sec - start_.tv_sec);
-    taking_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
+    taking_micros = ((seconds * 1000000) + end_.tv_usec) - (start_.tv_usec);
     LOG(INFO) << "ForwardChunk times: " << taking_micros;
     n_total_forward += taking_micros;
 
