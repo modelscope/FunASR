@@ -46,9 +46,9 @@ Overview
 
    ./modelscope_pipeline/quick_start.md
    ./egs_modelscope/asr/TEMPLATE/README.md
-   ./modelscope_pipeline/vad_pipeline.md
-   ./modelscope_pipeline/punc_pipeline.md
-   ./modelscope_pipeline/tp_pipeline.md
+   ./egs_modelscope/vad/TEMPLATE/README.md
+   ./egs_modelscope/punctuation/TEMPLATE/README.md
+   ./egs_modelscope/tp/TEMPLATE/README.md
    ./modelscope_pipeline/sv_pipeline.md
    ./modelscope_pipeline/sd_pipeline.md
    ./modelscope_pipeline/itn_pipeline.md
