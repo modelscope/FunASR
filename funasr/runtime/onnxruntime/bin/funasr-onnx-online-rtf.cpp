@@ -22,11 +22,21 @@
 #include <mutex>
 #include <thread>
 #include <map>
+#include "audio.h"
 
 using namespace std;
 
 std::atomic<int> wav_index(0);
 std::mutex mtx;
+
+bool is_target_file(const std::string& filename, const std::string target) {
+    std::size_t pos = filename.find_last_of(".");
+    if (pos == std::string::npos) {
+        return false;
+    }
+    std::string extension = filename.substr(pos + 1);
+    return (extension == target);
+}
 
 void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, vector<string> wav_ids,
             float* total_length, long* total_time, int core_id) {
@@ -36,12 +46,49 @@ void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, vector<string> wa
     float n_total_length = 0.0f;
     long n_total_time = 0;
     
+    // init online features
+    FUNASR_HANDLE online_handle=FunASROnlineInit(asr_handle);
+
     // warm up
-    for (size_t i = 0; i < 1; i++)
+    for (size_t i = 0; i < 10; i++)
     {
-        FUNASR_RESULT result=FunOfflineInfer(asr_handle, wav_list[0].c_str(), RASR_NONE, NULL, 16000);
-        if(result){
-            FunASRFreeResult(result);
+        int32_t sampling_rate_ = -1;
+        funasr::Audio audio(1);
+		if(is_target_file(wav_list[0].c_str(), "wav")){
+			if(!audio.LoadWav2Char(wav_list[0].c_str(), &sampling_rate_)){
+				LOG(ERROR)<<"Failed to load "<< wav_list[0];
+                exit(-1);
+            }
+		}else if(is_target_file(wav_list[0].c_str(), "pcm")){
+			if (!audio.LoadPcmwav2Char(wav_list[0].c_str(), &sampling_rate_)){
+				LOG(ERROR)<<"Failed to load "<< wav_list[0];
+                exit(-1);
+            }
+		}else{
+			if (!audio.FfmpegLoad(wav_list[0].c_str(), true)){
+				LOG(ERROR)<<"Failed to load "<< wav_list[0];
+                exit(-1);
+            }
+		}
+        char* speech_buff = audio.GetSpeechChar();
+        int buff_len = audio.GetSpeechLen()*2;
+
+        int step = 9600*2;
+        bool is_final = false;
+
+        string final_res="";
+        for (int sample_offset = 0; sample_offset < buff_len; sample_offset += std::min(step, buff_len - sample_offset)) {
+            if (sample_offset + step >= buff_len - 1) {
+                    step = buff_len - sample_offset;
+                    is_final = true;
+                } else {
+                    is_final = false;
+            }
+            FUNASR_RESULT result = FunASRInferBuffer(online_handle, speech_buff+sample_offset, step, RASR_NONE, NULL, is_final, 16000);
+            if (result)
+            {
+                FunASRFreeResult(result);
+            }
         }
     }
 
@@ -51,25 +98,61 @@ void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, vector<string> wa
         if (i >= wav_list.size()) {
             break;
         }
+        int32_t sampling_rate_ = -1;
+        funasr::Audio audio(1);
+		if(is_target_file(wav_list[i].c_str(), "wav")){
+			if(!audio.LoadWav2Char(wav_list[i].c_str(), &sampling_rate_)){
+				LOG(ERROR)<<"Failed to load "<< wav_list[i];
+                exit(-1);
+            }
+		}else if(is_target_file(wav_list[i].c_str(), "pcm")){
+			if (!audio.LoadPcmwav2Char(wav_list[i].c_str(), &sampling_rate_)){
+				LOG(ERROR)<<"Failed to load "<< wav_list[i];
+                exit(-1);
+            }
+		}else{
+			if (!audio.FfmpegLoad(wav_list[i].c_str(), true)){
+				LOG(ERROR)<<"Failed to load "<< wav_list[i];
+                exit(-1);
+            }
+		}
+        char* speech_buff = audio.GetSpeechChar();
+        int buff_len = audio.GetSpeechLen()*2;
 
-        gettimeofday(&start, NULL);
-        FUNASR_RESULT result=FunOfflineInfer(asr_handle, wav_list[i].c_str(), RASR_NONE, NULL, 16000);
+        int step = 9600*2;
+        bool is_final = false;
 
-        gettimeofday(&end, NULL);
-        seconds = (end.tv_sec - start.tv_sec);
-        long taking_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
-        n_total_time += taking_micros;
+        string final_res="";
+        for (int sample_offset = 0; sample_offset < buff_len; sample_offset += std::min(step, buff_len - sample_offset)) {
+            if (sample_offset + step >= buff_len - 1) {
+                    step = buff_len - sample_offset;
+                    is_final = true;
+                } else {
+                    is_final = false;
+            }
+            gettimeofday(&start, NULL);
+            FUNASR_RESULT result = FunASRInferBuffer(online_handle, speech_buff+sample_offset, step, RASR_NONE, NULL, is_final, 16000);
+            gettimeofday(&end, NULL);
+            seconds = (end.tv_sec - start.tv_sec);
+            long taking_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
+            n_total_time += taking_micros;
 
-        if(result){
-            string msg = FunASRGetResult(result, 0);
-            LOG(INFO) << "Thread: " << this_thread::get_id() << "," << wav_ids[i] << " : " << msg;
-
-            float snippet_time = FunASRGetRetSnippetTime(result);
-            n_total_length += snippet_time;
-            FunASRFreeResult(result);
-        }else{
-            LOG(ERROR) << wav_ids[i] << (": No return data!\n");
+            if (result)
+            {
+                string msg = FunASRGetResult(result, 0);
+                final_res += msg;
+                LOG(INFO) << "Thread: " << this_thread::get_id() << "," << wav_ids[i] << " : " << msg;
+                float snippet_time = FunASRGetRetSnippetTime(result);
+                n_total_length += snippet_time;
+                FunASRFreeResult(result);
+            }
+            else
+            {
+                LOG(ERROR) << ("No return data!\n");
+            }
         }
+        LOG(INFO) << "Thread: " << this_thread::get_id() << ", Final results " << wav_ids[i] << " : " << final_res;
+
     }
     {
         lock_guard<mutex> guard(mtx);
@@ -78,15 +161,7 @@ void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, vector<string> wa
             *total_time = n_total_time;
         }
     }
-}
-
-bool is_target_file(const std::string& filename, const std::string target) {
-    std::size_t pos = filename.find_last_of(".");
-    if (pos == std::string::npos) {
-        return false;
-    }
-    std::string extension = filename.substr(pos + 1);
-    return (extension == target);
+    FunASRUninit(online_handle);
 }
 
 void GetValue(TCLAP::ValueArg<std::string>& value_arg, string key, std::map<std::string, std::string>& model_path)
@@ -102,7 +177,7 @@ int main(int argc, char *argv[])
     google::InitGoogleLogging(argv[0]);
     FLAGS_logtostderr = true;
 
-    TCLAP::CmdLine cmd("funasr-onnx-offline-rtf", ' ', "1.0");
+    TCLAP::CmdLine cmd("funasr-onnx-online-rtf", ' ', "1.0");
     TCLAP::ValueArg<std::string>    model_dir("", MODEL_DIR, "the model path, which contains model.onnx, config.yaml, am.mvn", true, "", "string");
     TCLAP::ValueArg<std::string>    quantize("", QUANTIZE, "false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir", false, "false", "string");
     TCLAP::ValueArg<std::string>    vad_dir("", VAD_DIR, "the vad model path, which contains model.onnx, vad.yaml, vad.mvn", false, "", "string");
@@ -134,7 +209,8 @@ int main(int argc, char *argv[])
 
     struct timeval start, end;
     gettimeofday(&start, NULL);
-    FUNASR_HANDLE asr_handle=FunOfflineInit(model_path, 1);
+    int online_mode = 1;
+    FUNASR_HANDLE asr_handle=FunASRInit(model_path, 1, online_mode);
 
     if (!asr_handle)
     {
@@ -198,6 +274,6 @@ int main(int argc, char *argv[])
     LOG(INFO) << "total_rtf " << (double)total_time/ (total_length*1000000);
     LOG(INFO) << "speedup " << 1.0/((double)total_time/ (total_length*1000000));
 
-    FunOfflineUninit(asr_handle);
+    FunASRUninit(asr_handle);
     return 0;
 }

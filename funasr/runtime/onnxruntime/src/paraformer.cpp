@@ -13,6 +13,7 @@ Paraformer::Paraformer()
 :env_(ORT_LOGGING_LEVEL_ERROR, "paraformer"),session_options_{}{
 }
 
+// offline
 void Paraformer::InitAsr(const std::string &am_model, const std::string &am_cmvn, const std::string &am_config, int thread_num){
     // knf options
     fbank_opts_.frame_opts.dither = 0;
@@ -58,6 +59,7 @@ void Paraformer::InitAsr(const std::string &am_model, const std::string &am_cmvn
     LoadCmvn(am_cmvn.c_str());
 }
 
+// online
 void Paraformer::InitAsr(const std::string &en_model, const std::string &de_model, const std::string &am_cmvn, const std::string &am_config, int thread_num){
     
     LoadOnlineConfigFromYaml(am_config.c_str());

@@ -230,7 +230,7 @@ void Audio::WavResample(int32_t sampling_rate, const float *waveform,
     copy(samples.begin(), samples.end(), speech_data);
 }
 
-bool Audio::FfmpegLoad(const char *filename){
+bool Audio::FfmpegLoad(const char *filename, bool copy2char){
     // from file
     AVFormatContext* formatContext = avformat_alloc_context();
     if (avformat_open_input(&formatContext, filename, NULL, NULL) != 0) {
@@ -353,8 +353,17 @@ bool Audio::FfmpegLoad(const char *filename){
     if (speech_buff != NULL) {
         free(speech_buff);
     }
+    if (speech_char != NULL) {
+        free(speech_char);
+    }
     offset = 0;
     
+    if(copy2char){
+        speech_char = (char *)malloc(resampled_buffers.size());
+        memset(speech_char, 0, resampled_buffers.size());
+        memcpy((void*)speech_char, (const void*)resampled_buffers.data(), resampled_buffers.size());
+    }
+
     speech_len = (resampled_buffers.size()) / 2;
     speech_buff = (int16_t*)malloc(sizeof(int16_t) * speech_len);
     if (speech_buff)

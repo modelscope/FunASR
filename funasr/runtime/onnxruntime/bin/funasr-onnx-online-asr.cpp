@@ -39,32 +39,6 @@ void GetValue(TCLAP::ValueArg<std::string>& value_arg, string key, std::map<std:
     }
 }
 
-void print_segs(vector<vector<int>>* vec, string &wav_id) {
-    if((*vec).size() == 0){
-        return;
-    }    
-    string seg_out=wav_id + ": [";
-    for (int i = 0; i < vec->size(); i++) {
-        vector<int> inner_vec = (*vec)[i];
-        if(inner_vec.size() == 0){
-            continue;
-        }
-        seg_out += "[";
-        for (int j = 0; j < inner_vec.size(); j++) {
-            seg_out += to_string(inner_vec[j]);
-            if (j != inner_vec.size() - 1) {
-                seg_out += ",";
-            }
-        }
-        seg_out += "]";
-        if (i != vec->size() - 1) {
-            seg_out += ",";
-        }
-    }
-    seg_out += "]";
-    LOG(INFO)<<seg_out;
-}
-
 int main(int argc, char *argv[])
 {
     google::InitGoogleLogging(argv[0]);
@@ -89,9 +63,9 @@ int main(int argc, char *argv[])
     struct timeval start, end;
     gettimeofday(&start, NULL);
     int thread_num = 1;
-    FUNASR_HANDLE asr_hanlde=FunASRInit(model_path, thread_num, 1);
+    FUNASR_HANDLE asr_handle=FunASRInit(model_path, thread_num, 1);
 
-    if (!asr_hanlde)
+    if (!asr_handle)
     {
         LOG(ERROR) << "FunVad init failed";
         exit(-1);
@@ -107,11 +81,7 @@ int main(int argc, char *argv[])
     vector<string> wav_ids;
     string default_id = "wav_default_id";
     string wav_path_ = model_path.at(WAV_PATH);
-    if(is_target_file(wav_path_, "wav") || is_target_file(wav_path_, "pcm")){
-        wav_list.emplace_back(wav_path_);
-        wav_ids.emplace_back(default_id);
-    }
-    else if(is_target_file(wav_path_, "scp")){
+    if(is_target_file(wav_path_, "scp")){
         ifstream in(wav_path_);
         if (!in.is_open()) {
             LOG(ERROR) << "Failed to open file: " << model_path.at(WAV_SCP) ;
@@ -128,11 +98,12 @@ int main(int argc, char *argv[])
         }
         in.close();
     }else{
-        LOG(ERROR)<<"Please check the wav extension!";
-        exit(-1);
+        wav_list.emplace_back(wav_path_);
+        wav_ids.emplace_back(default_id);
     }
+
     // init online features
-    FUNASR_HANDLE online_hanlde=FunASROnlineInit(asr_hanlde);
+    FUNASR_HANDLE online_handle=FunASROnlineInit(asr_handle);
     float snippet_time = 0.0f;
     long taking_micros = 0;
     for (int i = 0; i < wav_list.size(); i++) {
@@ -142,7 +113,6 @@ int main(int argc, char *argv[])
         int32_t sampling_rate_ = -1;
         funasr::Audio audio(1);
 		if(is_target_file(wav_file.c_str(), "wav")){
-			int32_t sampling_rate_ = -1;
 			if(!audio.LoadWav2Char(wav_file.c_str(), &sampling_rate_)){
 				LOG(ERROR)<<"Failed to load "<< wav_file;
                 exit(-1);
@@ -153,8 +123,10 @@ int main(int argc, char *argv[])
                 exit(-1);
             }
 		}else{
-			LOG(ERROR)<<"Wrong wav extension";
-			exit(-1);
+			if (!audio.FfmpegLoad(wav_file.c_str(), true)){
+				LOG(ERROR)<<"Failed to load "<< wav_file;
+                exit(-1);
+            }
 		}
         char* speech_buff = audio.GetSpeechChar();
         int buff_len = audio.GetSpeechLen()*2;
@@ -171,7 +143,7 @@ int main(int argc, char *argv[])
                     is_final = false;
             }
             gettimeofday(&start, NULL);
-            FUNASR_RESULT result = FunASRInferBuffer(online_hanlde, speech_buff+sample_offset, step, RASR_NONE, NULL, is_final, 16000);
+            FUNASR_RESULT result = FunASRInferBuffer(online_handle, speech_buff+sample_offset, step, RASR_NONE, NULL, is_final, 16000);
             gettimeofday(&end, NULL);
             seconds = (end.tv_sec - start.tv_sec);
             taking_micros += ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
@@ -195,8 +167,8 @@ int main(int argc, char *argv[])
     LOG(INFO) << "Audio length: " << (double)snippet_time << " s";
     LOG(INFO) << "Model inference takes: " << (double)taking_micros / 1000000 <<" s";
     LOG(INFO) << "Model inference RTF: " << (double)taking_micros/ (snippet_time*1000000);
-    FunASRUninit(asr_hanlde);
-    FunASRUninit(online_hanlde);
+    FunASRUninit(asr_handle);
+    FunASRUninit(online_handle);
     return 0;
 }
 
