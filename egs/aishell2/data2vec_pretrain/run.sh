@@ -42,7 +42,7 @@ train_set=train
 valid_set=dev_ios
 
 asr_config=conf/train_pretrain_transformer.yaml
-model_dir="baseline_$(basename "${asr_config}" .yaml) _${lang}_${token_type}_${tag}"
+model_dir="baseline_$(basename "${asr_config}" .yaml)_${lang}_${token_type}_${tag}"
 
 if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     echo "stage 0: Data preparation"
