@@ -260,8 +260,6 @@ def inference_paraformer(
         hotword_list_or_file = None
         clas_scale = 1.0
 
-    if kwargs.get("device", None) == "cpu":
-        ngpu = 0
     if ngpu >= 1 and torch.cuda.is_available():
         device = "cuda"
     else:
