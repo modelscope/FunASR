@@ -20,7 +20,6 @@ stage=0
 stop_stage=3
 
 # feature configuration
-feats_dim=80
 nj=64
 
 # data
@@ -115,7 +114,6 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
                 --resume true \
                 --output_dir ${exp_dir}/exp/${model_dir} \
                 --config $asr_config \
-                --input_size $feats_dim \
                 --ngpu $gpu_num \
                 --num_worker_count $count \
                 --multiprocessing_distributed true \
