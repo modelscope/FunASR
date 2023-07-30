@@ -122,15 +122,15 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     # for callhome data
     for dset in callhome1_spkall callhome2_spkall; do
         find  $data_dir/eval/$dset  -maxdepth 1 -type f -exec cp {} {}.1 \;
-        output_dir=${data_dir}/ark_data/dump/callhome/$dset
+        output_dir=${data_dir}/ark_data/dump/callhome_chunk2000/$dset
         mkdir -p $output_dir
         python local/dump_feature.py \
               --data_dir $data_dir/eval/$dset \
               --output_dir $output_dir \
               --index 1 \
               --num_frames 2000
-        mkdir -p ${data_dir}/ark_data/dump/callhome/data/$dset
-        paste -d" " ${data_dir}/ark_data/dump/callhome/$dset/feature.scp.1 <(cut -f2 -d" " ${data_dir}/ark_data/dump/callhome/$dset/label.scp.1) > ${data_dir}/ark_data/dump/callhome/data/$dset/feats.scp
+        mkdir -p ${data_dir}/ark_data/dump/callhome_chunk2000/data/$dset
+        paste -d" " ${data_dir}/ark_data/dump/callhome_chunk2000/$dset/feature.scp.1 <(cut -f2 -d" " ${data_dir}/ark_data/dump/callhome_chunk2000/$dset/label.scp.1) > ${data_dir}/ark_data/dump/callhome_chunk2000/data/$dset/feats.scp
     done
 fi
 
