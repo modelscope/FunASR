@@ -116,7 +116,6 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
         cat ${data_dir}/ark_data/dump/simu_data_chunk2000/$dataset/feature.scp.* > ${data_dir}/ark_data/dump/simu_data_chunk2000/data/$dataset/feature.scp
         cat ${data_dir}/ark_data/dump/simu_data_chunk2000/$dataset/label.scp.* > ${data_dir}/ark_data/dump/simu_data_chunk2000/data/$dataset/label.scp
         paste -d" " ${data_dir}/ark_data/dump/simu_data_chunk2000/data/$dataset/feature.scp <(cut -f2 -d" " ${data_dir}/ark_data/dump/simu_data_chunk2000/data/$dataset/label.scp) > ${data_dir}/ark_data/dump/simu_data_chunk2000/data/$dataset/feats.scp
-        grep "ns2" ${data_dir}/ark_data/dump/simu_data_chunk2000/data/$dataset/feats.scp > ${data_dir}/ark_data/dump/simu_data_chunk2000/data/$dataset/feats_2spkr.scp
     done
 
     # for callhome data
@@ -320,6 +319,6 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
         --wav_scp_file $data_dir/eval/callhome2_spkall/wav.scp \
         1> ${exp_dir}/exp/${callhome_model_dir}/inference/log/infer.log 2>&1
     md-eval.pl -c 0.25 \
-          -r ${callhome_feats_dir_chunk2000}/${callhome_valid_dataset}/rttm \
+          -r ${data_dir}/eval/${callhome_valid_dataset}/rttm \
           -s ${exp_dir}/exp/${callhome_model_dir}/inference/rttm > ${exp_dir}/exp/${callhome_model_dir}/inference/result_med11_collar0.25 2>/dev/null || exit
 fi
