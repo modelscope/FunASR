@@ -1,4 +1,6 @@
-﻿using System;
+﻿// See https://github.com/manyeyes for more information
+// Copyright (c)  2023 by manyeyes
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -67,7 +69,7 @@ namespace AliCTTransformerPunc.Utils
             {
                 string[] sentences;
                 int length = words.Length;
-                int sentenceLen = length / wordLimit;
+                int sentenceLen = (int)Math.Floor((double)(length / wordLimit)); ;//length / wordLimit;
                 for (int i = 0; i < sentenceLen; i++)
                 {
                     T[] vs = new T[wordLimit];
@@ -77,7 +79,7 @@ namespace AliCTTransformerPunc.Utils
                 int tailLength = length % wordLimit;
                 if (tailLength > 0)
                 {
-                    T[] vs = new T[wordLimit];
+                    T[] vs = new T[tailLength];
                     Array.Copy(words, sentenceLen * wordLimit, vs, 0, tailLength);
                     wordsList.Add(vs);
                 }

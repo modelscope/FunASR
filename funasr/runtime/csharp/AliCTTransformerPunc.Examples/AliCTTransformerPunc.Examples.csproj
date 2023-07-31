@@ -11,4 +11,13 @@
     <ProjectReference Include="..\AliCTTransformerPunc\AliCTTransformerPunc.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="punc_ct-transformer_zh-cn-common-vocab272727-onnx\punc.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="punc_ct-transformer_zh-cn-common-vocab272727-onnx\tokens.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

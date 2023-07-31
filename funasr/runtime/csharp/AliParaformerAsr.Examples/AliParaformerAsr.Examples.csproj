@@ -19,4 +19,31 @@
     <ProjectReference Include="..\AliParaformerAsr\AliParaformerAsr.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx\am.mvn">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx\asr.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx\example\0.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx\example\1.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx\example\2.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx\example\3.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx\example\4.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx\tokens.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

@@ -1,24 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "M:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230727-bak\\funasr\\runtime\\csharp\\AliParaformerAsr.Examples\\AliParaformerAsr.Examples.csproj": {}
+    "D:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230731\\funasr\\runtime\\csharp\\AliParaformerAsr.Examples\\AliParaformerAsr.Examples.csproj": {}
   },
   "projects": {
-    "M:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230727-bak\\funasr\\runtime\\csharp\\AliParaformerAsr.Examples\\AliParaformerAsr.Examples.csproj": {
+    "D:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230731\\funasr\\runtime\\csharp\\AliParaformerAsr.Examples\\AliParaformerAsr.Examples.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "M:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230727-bak\\funasr\\runtime\\csharp\\AliParaformerAsr.Examples\\AliParaformerAsr.Examples.csproj",
+        "projectUniqueName": "D:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230731\\funasr\\runtime\\csharp\\AliParaformerAsr.Examples\\AliParaformerAsr.Examples.csproj",
         "projectName": "AliParaformerAsr.Examples",
-        "projectPath": "M:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230727-bak\\funasr\\runtime\\csharp\\AliParaformerAsr.Examples\\AliParaformerAsr.Examples.csproj",
-        "packagesPath": "C:\\Users\\zx520_000.000\\.nuget\\packages\\",
-        "outputPath": "M:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230727-bak\\funasr\\runtime\\csharp\\AliParaformerAsr.Examples\\obj\\",
+        "projectPath": "D:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230731\\funasr\\runtime\\csharp\\AliParaformerAsr.Examples\\AliParaformerAsr.Examples.csproj",
+        "packagesPath": "C:\\Users\\admin\\.nuget\\packages\\",
+        "outputPath": "D:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230731\\funasr\\runtime\\csharp\\AliParaformerAsr.Examples\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
-          "D:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
-          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\zx520_000.000\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -28,15 +27,14 @@
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {},
-          "https://nuget.cnblogs.com/v3/index.json": {},
           "https://www.nuget.org/api/v2/": {}
         },
         "frameworks": {
           "net6.0": {
             "targetAlias": "net6.0",
             "projectReferences": {
-              "M:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230727-bak\\funasr\\runtime\\csharp\\AliParaformerAsr\\AliParaformerAsr.csproj": {
-                "projectPath": "M:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230727-bak\\funasr\\runtime\\csharp\\AliParaformerAsr\\AliParaformerAsr.csproj"
+              "D:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230731\\funasr\\runtime\\csharp\\AliParaformerAsr\\AliParaformerAsr.csproj": {
+                "projectPath": "D:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230731\\funasr\\runtime\\csharp\\AliParaformerAsr\\AliParaformerAsr.csproj"
               }
             }
           }
@@ -62,8 +60,7 @@
             "net47",
             "net471",
             "net472",
-            "net48",
-            "net481"
+            "net48"
           ],
           "assetTargetFallback": true,
           "warn": true,
@@ -72,25 +69,24 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.302\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.200\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "M:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230727-bak\\funasr\\runtime\\csharp\\AliParaformerAsr\\AliParaformerAsr.csproj": {
+    "D:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230731\\funasr\\runtime\\csharp\\AliParaformerAsr\\AliParaformerAsr.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "M:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230727-bak\\funasr\\runtime\\csharp\\AliParaformerAsr\\AliParaformerAsr.csproj",
+        "projectUniqueName": "D:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230731\\funasr\\runtime\\csharp\\AliParaformerAsr\\AliParaformerAsr.csproj",
         "projectName": "AliParaformerAsr",
-        "projectPath": "M:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230727-bak\\funasr\\runtime\\csharp\\AliParaformerAsr\\AliParaformerAsr.csproj",
-        "packagesPath": "C:\\Users\\zx520_000.000\\.nuget\\packages\\",
-        "outputPath": "M:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230727-bak\\funasr\\runtime\\csharp\\AliParaformerAsr\\obj\\",
+        "projectPath": "D:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230731\\funasr\\runtime\\csharp\\AliParaformerAsr\\AliParaformerAsr.csproj",
+        "packagesPath": "C:\\Users\\admin\\.nuget\\packages\\",
+        "outputPath": "D:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230731\\funasr\\runtime\\csharp\\AliParaformerAsr\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
-          "D:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
-          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\zx520_000.000\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -100,7 +96,6 @@
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {},
-          "https://nuget.cnblogs.com/v3/index.json": {},
           "https://www.nuget.org/api/v2/": {}
         },
         "frameworks": {
@@ -142,8 +137,7 @@
             "net47",
             "net471",
             "net472",
-            "net48",
-            "net481"
+            "net48"
           ],
           "assetTargetFallback": true,
           "warn": true,
@@ -152,7 +146,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.302\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.200\\RuntimeIdentifierGraph.json"
         }
       }
     }

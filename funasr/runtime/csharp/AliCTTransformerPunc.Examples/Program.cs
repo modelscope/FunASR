@@ -6,9 +6,10 @@ internal static class Program
 	private static void Main()
 	{
         string applicationBase = AppDomain.CurrentDomain.BaseDirectory;
-        string modelFilePath = applicationBase + "./punc_ct-transformer_zh-cn-common-vocab272727-pytorch/model.onnx";
-        string configFilePath = applicationBase + "./punc_ct-transformer_zh-cn-common-vocab272727-pytorch/punc.yaml";
-        string tokensFilePath = applicationBase + "./punc_ct-transformer_zh-cn-common-vocab272727-pytorch/tokens.txt";
+        string modelName = "punc_ct-transformer_zh-cn-common-vocab272727-onnx";
+        string modelFilePath = applicationBase + "./"+ modelName + "/model.onnx";
+        string configFilePath = applicationBase + "./"+modelName+"/punc.yaml";
+        string tokensFilePath = applicationBase + "./"+modelName+"/tokens.txt";
         TimeSpan start_time1 = new TimeSpan(DateTime.Now.Ticks);
         AliCTTransformerPunc.CTTransformer ctTransformer = new CTTransformer(modelFilePath, configFilePath, tokensFilePath);
         TimeSpan end_time1 = new TimeSpan(DateTime.Now.Ticks);

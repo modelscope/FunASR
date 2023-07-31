@@ -16,16 +16,4 @@
     <PackageReference Include="YamlDotNet" Version="13.1.1" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="punc_ct-transformer_zh-cn-common-vocab272727-pytorch\model.onnx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="punc_ct-transformer_zh-cn-common-vocab272727-pytorch\punc.yaml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="punc_ct-transformer_zh-cn-common-vocab272727-pytorch\tokens.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>

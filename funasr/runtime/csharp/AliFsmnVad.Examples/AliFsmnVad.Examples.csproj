@@ -15,4 +15,16 @@
     <ProjectReference Include="..\AliFsmnVad\AliFsmnVad.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="speech_fsmn_vad_zh-cn-16k-common-onnx\example\0.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="speech_fsmn_vad_zh-cn-16k-common-onnx\vad.mvn">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="speech_fsmn_vad_zh-cn-16k-common-onnx\vad.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

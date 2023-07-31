@@ -6,10 +6,11 @@ internal static class Program
 	private static void Main()
 	{
         string applicationBase = AppDomain.CurrentDomain.BaseDirectory;
-        string modelFilePath = applicationBase + "./speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/model_quant.onnx";
-        string configFilePath = applicationBase + "./speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/asr.yaml";
-        string mvnFilePath = applicationBase + "./speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/am.mvn";
-        string tokensFilePath = applicationBase + "./speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/tokens.txt";
+        string modelName = "speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx";
+        string modelFilePath = applicationBase + "./"+ modelName + "/model_quant.onnx";
+        string configFilePath = applicationBase + "./"+ modelName + "/asr.yaml";
+        string mvnFilePath = applicationBase + "./"+ modelName + "/am.mvn";
+        string tokensFilePath = applicationBase + "./"+ modelName + "/tokens.txt";
         AliParaformerAsr.OfflineRecognizer offlineRecognizer = new OfflineRecognizer(modelFilePath, configFilePath, mvnFilePath, tokensFilePath);
         List<float[]>? samples = null;
         TimeSpan total_duration = new TimeSpan(0L);
@@ -18,7 +19,7 @@ internal static class Program
             samples = new List<float[]>();
             for (int i = 0; i < 5; i++)
             {
-                string wavFilePath = string.Format(applicationBase + "./speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/example/{0}.wav", i.ToString());
+                string wavFilePath = string.Format(applicationBase + "./"+ modelName + "/example/{0}.wav", i.ToString());
                 if (!File.Exists(wavFilePath))
                 {
                     break;

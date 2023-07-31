@@ -70,16 +70,13 @@ namespace AliCTTransformerPunc
             int[] split_text_id = Utils.SentenceHelper.Tokens2ids(_tokens, splitText);
             List<string[]> mini_sentences = Utils.SentenceHelper.SplitToMiniSentence(splitText, splitSize);
             List<int[]> mini_sentences_id = Utils.SentenceHelper.SplitToMiniSentence(split_text_id, splitSize);
-            Trace.Assert(mini_sentences.Count== mini_sentences_id.Count, "There were some errors in the 'SplitToMiniSentence' method. ");
+            Trace.Assert(mini_sentences.Count == mini_sentences_id.Count, "There were some errors in the 'SplitToMiniSentence' method. ");
             string[] cache_sent;
-            int[] cache_sent_id=new int[] {};
-            List<string[]> new_mini_sentence;
-            List<string[]> new_mini_sentence_punc;
+            int[] cache_sent_id = new int[] { };
             List<int[]> new_mini_sentences_id = new List<int[]>();
             int cache_pop_trigger_limit = 200;
 
             this._logger.LogInformation("punc begin");
-            //List<PuncInputEntity> offlineInputEntities = ExtractFeats(text);
             int j = 0;
             foreach (int[] mini_sentence_id in mini_sentences_id)
             {
@@ -88,7 +85,7 @@ namespace AliCTTransformerPunc
                 if (cache_sent_id.Length > 0)
                 {
                     miniSentenceId = new int[cache_sent_id.Length + mini_sentence_id.Length];
-                    Array.Copy(cache_sent_id,0, miniSentenceId,0, cache_sent_id.Length);
+                    Array.Copy(cache_sent_id, 0, miniSentenceId, 0, cache_sent_id.Length);
                     Array.Copy(mini_sentence_id, 0, miniSentenceId, cache_sent_id.Length, mini_sentence_id.Length);
                 }
                 else
@@ -96,13 +93,13 @@ namespace AliCTTransformerPunc
                     miniSentenceId = new int[mini_sentence_id.Length];
                     miniSentenceId = mini_sentence_id;
                 }
-                puncInputEntities.MiniSentenceId = miniSentenceId;
+                puncInputEntities.MiniSentenceId = miniSentenceId.Select(x => x == 0 ? -1 : x).ToArray();
                 puncInputEntities.TextLengths = miniSentenceId.Length;
                 PuncOutputEntity modelOutput = this.Forward(puncInputEntities);
 
                 int[] punctuations = modelOutput.Punctuations[0];
-                if (j < mini_sentences_id.Count - 1)
-                {                    
+                if (j < mini_sentences_id.Count)
+                {
                     int sentenceEnd = -1;
                     int last_comma_index = -1;
                     for (int i = punctuations.Length - 2; i > 1; i--)
@@ -127,26 +124,27 @@ namespace AliCTTransformerPunc
                     Array.Copy(miniSentenceId, sentenceEnd + 1, cache_sent_id, 0, cache_sent_id.Length);
                     if (sentenceEnd > 0)
                     {
-                        int[] temp_punctuations = new int[sentenceEnd+1];
+                        int[] temp_punctuations = new int[sentenceEnd + 1];
                         Array.Copy(punctuations, 0, temp_punctuations, 0, temp_punctuations.Length);
                         new_mini_sentences_id.Add(temp_punctuations);
                     }
                 }
                 if (j == mini_sentences_id.Count - 1)
                 {
-
                     if (_punc_list[punctuations.Last()] == "," || _punc_list[punctuations.Last()] == "、")
                     {
-                        punctuations[punctuations.Length-1] = _period;
-                        new_mini_sentences_id.Add(punctuations);
+                        punctuations[punctuations.Length - 1] = _period;
                     }
-                    else if(_punc_list[punctuations.Last()] != "。" && _punc_list[punctuations.Last()] != "？")
+                    else if (_punc_list[punctuations.Last()] != "。" && _punc_list[punctuations.Last()] != "？")
                     {
                         punctuations[punctuations.Length - 1] = _period;
-                        new_mini_sentences_id.Add(punctuations);
+                        int[] temp_punctuations = new int[punctuations.Length + 1];
+                        Array.Copy(punctuations, 0, temp_punctuations, 0, punctuations.Length);
+                        temp_punctuations.LastOrDefault(_period);
+                        punctuations = temp_punctuations;
                     }
+                    new_mini_sentences_id.Add(punctuations);
                 }
-
                 j++;
             }
 
@@ -154,28 +152,24 @@ namespace AliCTTransformerPunc
             return text_result;
         }
 
-        private string Decode(List<int[]> new_mini_sentences_id,string[] splitText)
+        private string Decode(List<int[]> new_mini_sentences_id, string[] splitText)
         {
             int m = 0;
             StringBuilder sb = new StringBuilder();
             foreach (int[] sentence_id in new_mini_sentences_id)
             {
-                if (m >= splitText.Length)
-                {
-                    break;
-                }
                 foreach (int id in sentence_id)
                 {
-                    if (m >= splitText.Length)
+                    if (m < splitText.Length)
                     {
-                        break;
+                        sb.Append(splitText[m]);
+                        m++;
                     }
-                    sb.Append(splitText[m]);
                     if (id > 1)
                     {
                         sb.Append(_punc_list[id]);
                     }
-                    m++;
+
                 }
             }
             return sb.ToString();
@@ -206,6 +200,9 @@ namespace AliCTTransformerPunc
                     container.Add(NamedOnnxValue.CreateFromTensor<int>(name, tensor));
                 }
             }
+            IReadOnlyCollection<string> outputNames = new List<string>();
+            outputNames.Append("logits");
+            outputNames.Append("token_num");
             IDisposableReadOnlyCollection<DisposableNamedOnnxValue> results = null;
             try
             {

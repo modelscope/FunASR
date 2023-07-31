@@ -35,14 +35,10 @@
           "Microsoft.Extensions.DependencyInjection.Abstractions": "7.0.0"
         },
         "compile": {
-          "lib/net6.0/Microsoft.Extensions.DependencyInjection.dll": {
-            "related": ".xml"
-          }
+          "lib/net6.0/Microsoft.Extensions.DependencyInjection.dll": {}
         },
         "runtime": {
-          "lib/net6.0/Microsoft.Extensions.DependencyInjection.dll": {
-            "related": ".xml"
-          }
+          "lib/net6.0/Microsoft.Extensions.DependencyInjection.dll": {}
         },
         "build": {
           "buildTransitive/net6.0/_._": {}
@@ -51,14 +47,10 @@
       "Microsoft.Extensions.DependencyInjection.Abstractions/7.0.0": {
         "type": "package",
         "compile": {
-          "lib/net6.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
-            "related": ".xml"
-          }
+          "lib/net6.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
         },
         "runtime": {
-          "lib/net6.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
-            "related": ".xml"
-          }
+          "lib/net6.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
         },
         "build": {
           "buildTransitive/net6.0/_._": {}
@@ -73,14 +65,10 @@
           "Microsoft.Extensions.Options": "7.0.0"
         },
         "compile": {
-          "lib/net6.0/Microsoft.Extensions.Logging.dll": {
-            "related": ".xml"
-          }
+          "lib/net6.0/Microsoft.Extensions.Logging.dll": {}
         },
         "runtime": {
-          "lib/net6.0/Microsoft.Extensions.Logging.dll": {
-            "related": ".xml"
-          }
+          "lib/net6.0/Microsoft.Extensions.Logging.dll": {}
         },
         "build": {
           "buildTransitive/net6.0/_._": {}
@@ -89,14 +77,10 @@
       "Microsoft.Extensions.Logging.Abstractions/7.0.0": {
         "type": "package",
         "compile": {
-          "lib/net6.0/Microsoft.Extensions.Logging.Abstractions.dll": {
-            "related": ".xml"
-          }
+          "lib/net6.0/Microsoft.Extensions.Logging.Abstractions.dll": {}
         },
         "runtime": {
-          "lib/net6.0/Microsoft.Extensions.Logging.Abstractions.dll": {
-            "related": ".xml"
-          }
+          "lib/net6.0/Microsoft.Extensions.Logging.Abstractions.dll": {}
         },
         "build": {
           "buildTransitive/net6.0/Microsoft.Extensions.Logging.Abstractions.targets": {}
@@ -109,14 +93,10 @@
           "Microsoft.Extensions.Primitives": "7.0.0"
         },
         "compile": {
-          "lib/net6.0/Microsoft.Extensions.Options.dll": {
-            "related": ".xml"
-          }
+          "lib/net6.0/Microsoft.Extensions.Options.dll": {}
         },
         "runtime": {
-          "lib/net6.0/Microsoft.Extensions.Options.dll": {
-            "related": ".xml"
-          }
+          "lib/net6.0/Microsoft.Extensions.Options.dll": {}
         },
         "build": {
           "buildTransitive/net6.0/_._": {}
@@ -128,14 +108,10 @@
           "System.Runtime.CompilerServices.Unsafe": "6.0.0"
         },
         "compile": {
-          "lib/net6.0/Microsoft.Extensions.Primitives.dll": {
-            "related": ".xml"
-          }
+          "lib/net6.0/Microsoft.Extensions.Primitives.dll": {}
         },
         "runtime": {
-          "lib/net6.0/Microsoft.Extensions.Primitives.dll": {
-            "related": ".xml"
-          }
+          "lib/net6.0/Microsoft.Extensions.Primitives.dll": {}
         },
         "build": {
           "buildTransitive/net6.0/_._": {}
@@ -302,14 +278,10 @@
           "System.Memory": "4.5.3"
         },
         "compile": {
-          "lib/net6.0/Microsoft.ML.OnnxRuntime.dll": {
-            "related": ".pdb"
-          }
+          "lib/net6.0/Microsoft.ML.OnnxRuntime.dll": {}
         },
         "runtime": {
-          "lib/net6.0/Microsoft.ML.OnnxRuntime.dll": {
-            "related": ".pdb"
-          }
+          "lib/net6.0/Microsoft.ML.OnnxRuntime.dll": {}
         },
         "build": {
           "build/netstandard2.0/_._": {}
@@ -331,14 +303,10 @@
           "System.Security.Principal.Windows": "4.7.0"
         },
         "compile": {
-          "ref/netstandard2.0/Microsoft.Win32.Registry.dll": {
-            "related": ".xml"
-          }
+          "ref/netstandard2.0/Microsoft.Win32.Registry.dll": {}
         },
         "runtime": {
-          "lib/netstandard2.0/Microsoft.Win32.Registry.dll": {
-            "related": ".xml"
-          }
+          "lib/netstandard2.0/Microsoft.Win32.Registry.dll": {}
         },
         "runtimeTargets": {
           "runtimes/unix/lib/netstandard2.0/Microsoft.Win32.Registry.dll": {
@@ -361,14 +329,10 @@
           "NAudio.WinMM": "2.1.0"
         },
         "compile": {
-          "lib/net6.0/NAudio.dll": {
-            "related": ".xml"
-          }
+          "lib/net6.0/NAudio.dll": {}
         },
         "runtime": {
-          "lib/net6.0/NAudio.dll": {
-            "related": ".xml"
-          }
+          "lib/net6.0/NAudio.dll": {}
         }
       },
       "NAudio.Asio/2.1.0": {
@@ -442,14 +406,10 @@
       "System.Runtime.CompilerServices.Unsafe/6.0.0": {
         "type": "package",
         "compile": {
-          "lib/net6.0/System.Runtime.CompilerServices.Unsafe.dll": {
-            "related": ".xml"
-          }
+          "lib/net6.0/System.Runtime.CompilerServices.Unsafe.dll": {}
         },
         "runtime": {
-          "lib/net6.0/System.Runtime.CompilerServices.Unsafe.dll": {
-            "related": ".xml"
-          }
+          "lib/net6.0/System.Runtime.CompilerServices.Unsafe.dll": {}
         },
         "build": {
           "buildTransitive/netcoreapp3.1/_._": {}
@@ -462,14 +422,10 @@
           "System.Security.Principal.Windows": "4.7.0"
         },
         "compile": {
-          "ref/netstandard2.0/System.Security.AccessControl.dll": {
-            "related": ".xml"
-          }
+          "ref/netstandard2.0/System.Security.AccessControl.dll": {}
         },
         "runtime": {
-          "lib/netstandard2.0/System.Security.AccessControl.dll": {
-            "related": ".xml"
-          }
+          "lib/netstandard2.0/System.Security.AccessControl.dll": {}
         },
         "runtimeTargets": {
           "runtimes/win/lib/netcoreapp2.0/System.Security.AccessControl.dll": {
@@ -481,14 +437,10 @@
       "System.Security.Principal.Windows/4.7.0": {
         "type": "package",
         "compile": {
-          "ref/netcoreapp3.0/System.Security.Principal.Windows.dll": {
-            "related": ".xml"
-          }
+          "ref/netcoreapp3.0/System.Security.Principal.Windows.dll": {}
         },
         "runtime": {
-          "lib/netstandard2.0/System.Security.Principal.Windows.dll": {
-            "related": ".xml"
-          }
+          "lib/netstandard2.0/System.Security.Principal.Windows.dll": {}
         },
         "runtimeTargets": {
           "runtimes/unix/lib/netcoreapp2.1/System.Security.Principal.Windows.dll": {
@@ -504,14 +456,10 @@
       "YamlDotNet/13.1.1": {
         "type": "package",
         "compile": {
-          "lib/net6.0/YamlDotNet.dll": {
-            "related": ".xml"
-          }
+          "lib/net6.0/YamlDotNet.dll": {}
         },
         "runtime": {
-          "lib/net6.0/YamlDotNet.dll": {
-            "related": ".xml"
-          }
+          "lib/net6.0/YamlDotNet.dll": {}
         }
       },
       "AliParaformerAsr/1.0.0": {
@@ -1215,25 +1163,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\zx520_000.000\\.nuget\\packages\\": {},
-    "D:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {},
-    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
+    "C:\\Users\\admin\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "M:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230727-bak\\funasr\\runtime\\csharp\\AliParaformerAsr.Examples\\AliParaformerAsr.Examples.csproj",
+      "projectUniqueName": "D:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230731\\funasr\\runtime\\csharp\\AliParaformerAsr.Examples\\AliParaformerAsr.Examples.csproj",
       "projectName": "AliParaformerAsr.Examples",
-      "projectPath": "M:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230727-bak\\funasr\\runtime\\csharp\\AliParaformerAsr.Examples\\AliParaformerAsr.Examples.csproj",
-      "packagesPath": "C:\\Users\\zx520_000.000\\.nuget\\packages\\",
-      "outputPath": "M:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230727-bak\\funasr\\runtime\\csharp\\AliParaformerAsr.Examples\\obj\\",
+      "projectPath": "D:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230731\\funasr\\runtime\\csharp\\AliParaformerAsr.Examples\\AliParaformerAsr.Examples.csproj",
+      "packagesPath": "C:\\Users\\admin\\.nuget\\packages\\",
+      "outputPath": "D:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230731\\funasr\\runtime\\csharp\\AliParaformerAsr.Examples\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
-        "D:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
-        "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\zx520_000.000\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -1243,15 +1189,14 @@
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {},
-        "https://nuget.cnblogs.com/v3/index.json": {},
         "https://www.nuget.org/api/v2/": {}
       },
       "frameworks": {
         "net6.0": {
           "targetAlias": "net6.0",
           "projectReferences": {
-            "M:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230727-bak\\funasr\\runtime\\csharp\\AliParaformerAsr\\AliParaformerAsr.csproj": {
-              "projectPath": "M:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230727-bak\\funasr\\runtime\\csharp\\AliParaformerAsr\\AliParaformerAsr.csproj"
+            "D:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230731\\funasr\\runtime\\csharp\\AliParaformerAsr\\AliParaformerAsr.csproj": {
+              "projectPath": "D:\\Docker\\App\\alibaba_asr\\workspace\\FunASR-20230731\\funasr\\runtime\\csharp\\AliParaformerAsr\\AliParaformerAsr.csproj"
             }
           }
         }
@@ -1277,8 +1222,7 @@
           "net47",
           "net471",
           "net472",
-          "net48",
-          "net481"
+          "net48"
         ],
         "assetTargetFallback": true,
         "warn": true,
@@ -1287,7 +1231,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.302\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.200\\RuntimeIdentifierGraph.json"
       }
     }
   }

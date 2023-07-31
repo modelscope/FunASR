@@ -13,19 +13,4 @@
     <PackageReference Include="YamlDotNet" Version="13.1.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="speech_fsmn_vad_zh-cn-16k-common-pytorch\example\0.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="speech_fsmn_vad_zh-cn-16k-common-pytorch\example\1.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="speech_fsmn_vad_zh-cn-16k-common-pytorch\vad.mvn">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="speech_fsmn_vad_zh-cn-16k-common-pytorch\vad.yaml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>
