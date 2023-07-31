@@ -1,8 +1,8 @@
-([简体中文](./docker_zh.md)|English)
+(简体中文|[English](./docker.md))
 
 # Docker
 
-## Install Docker
+## 安装Docker
 
 ### Ubuntu
 ```shell
@@ -26,34 +26,34 @@ brew install --cask --appdir=/Applications docker
 ```
 
 ### Windows
-Ref to [docs](https://docs.docker.com/desktop/install/windows-install/)
+请参考[文档](https://docs.docker.com/desktop/install/windows-install/)
 
-## Start Docker
+## 启动Docker
 ```shell
 sudo systemctl start docker
 ```
-## Download image
+## 下载Docker镜像
 
-### Image Hub
+### 镜像仓库
 
 #### CPU
 `registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.1.0`
 
 #### GPU
 
-`registry.cn-hangzhou.aliyuncs.com/modelscope-repo/modelscope:ubuntu20.04-cuda11.3.0-py37-torch1.11.0-tf1.15.5-1.6.0`
+`registry.cn-beijing.aliyuncs.com/modelscope-repo/modelscope:ubuntu20.04-cuda11.7.1-py38-torch2.0.1-tf1.15.5-1.7.0`
 
-### Pull Image
+### 拉取镜像
 ```shell
 sudo docker pull <image-name>:<tag>
 ```
 
-### Check Image 
+### 查看镜像
 ```shell
 sudo docker images
 ```
 
-## Run Docker
+## 运行Docker
 ```shell
 # cpu
 sudo docker run -itd --name funasr -v <local_dir:dir_in_docker> <image-name>:<tag> /bin/bash
@@ -63,7 +63,7 @@ sudo docker run -itd --gpus all --name funasr -v <local_dir:dir_in_docker> <imag
 sudo docker exec -it funasr /bin/bash
 ```
 
-## Stop Docker
+## 停止Docker
 ```shell
 exit
 sudo docker ps

@@ -1,15 +1,15 @@
-([简体中文](./quick_start_zh.md)|English)
+(简体中文|[English](./quick_start.md))
 
-# Quick Start
+# 快速使用
 
-> **Note**: 
-> The modelscope pipeline supports all the models in [model zoo](https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope) to inference and finetine. Here we take typic model as example to demonstrate the usage.
+> **注意**: 
+> modelscope pipeline支持model zoo中的所有模型进行推理和微调。这里我们以typic模型为例来演示用法。
 
 
-## Inference with pipeline
+## 使用pipeline进行推理
 
-### Speech Recognition
-#### Paraformer Model
+### 语音识别
+#### Paraformer模型
 ```python
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
@@ -24,8 +24,8 @@ print(rec_result)
 # {'text': '欢迎大家来体验达摩院推出的语音识别模型'}
 ```
 
-### Voice Activity Detection
-#### FSMN-VAD Model
+### 语音端点检测
+#### FSMN-VAD模型
 ```python
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
@@ -44,8 +44,8 @@ print(segments_result)
 # {'text': [[70, 2340], [2620, 6200], [6480, 23670], [23950, 26250], [26780, 28990], [29950, 31430], [31750, 37600], [38210, 46900], [47310, 49630], [49910, 56460], [56740, 59540], [59820, 70450]]}
 ```
 
-### Punctuation Restoration
-#### CT_Transformer Model
+### 标点恢复
+#### CT_Transformer模型
 ```python
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
@@ -60,8 +60,8 @@ print(rec_result)
 # {'text': '我们都是木头人，不会讲话，不会动。'}
 ```
 
-### Timestamp Prediction
-#### TP-Aligner Model
+### 时间戳预测
+#### TP-Aligner模型
 ```python
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
@@ -77,8 +77,8 @@ print(rec_result)
 # {'text': '<sil> 0.000 0.380;一 0.380 0.560;个 0.560 0.800;东 0.800 0.980;太 0.980 1.140;平 1.140 1.260;洋 1.260 1.440;国 1.440 1.680;家 1.680 1.920;<sil> 1.920 2.040;为 2.040 2.200;什 2.200 2.320;么 2.320 2.500;跑 2.500 2.680;到 2.680 2.860;西 2.860 3.040;太 3.040 3.200;平 3.200 3.380;洋 3.380 3.500;来 3.500 3.640;了 3.640 3.800;呢 3.800 4.150;<sil> 4.150 4.440;', 'timestamp': [[380, 560], [560, 800], [800, 980], [980, 1140], [1140, 1260], [1260, 1440], [1440, 1680], [1680, 1920], [2040, 2200], [2200, 2320], [2320, 2500], [2500, 2680], [2680, 2860], [2860, 3040], [3040, 3200], [3200, 3380], [3380, 3500], [3500, 3640], [3640, 3800], [3800, 4150]]}
 ```
 
-### Speaker Verification
-#### X-vector Model
+### 说话人确认
+#### X-vector模型
 ```python
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
@@ -98,8 +98,8 @@ print(rec_result["scores"][0])
 # 0.8540499500025098
 ```
 
-### Speaker Diarization
-#### SOND Model
+### 说话人日志
+#### SOND模型
 ```python
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
@@ -127,8 +127,8 @@ print(results)
 # {'text': 'spk1 [(0.8, 1.84), (2.8, 6.16), (7.04, 10.64), (12.08, 12.8), (14.24, 15.6)]\nspk2 [(0.0, 1.12), (1.68, 3.2), (4.48, 7.12), (8.48, 9.04), (10.56, 14.48), (15.44, 16.0)]'}
 ```
 
-### FAQ
-#### How to switch device from GPU to CPU with pipeline
+### 常见问题
+#### 使用pipeline进行推理，如何在CPU与GPU进行切换
 
 The pipeline defaults to decoding with GPU (`ngpu=1`) when GPU is available. If you want to switch to CPU, you could set `ngpu=0`
 ```python
@@ -139,8 +139,8 @@ inference_pipeline = pipeline(
 )
 ```
 
-#### How to infer from local model path
-Download model to local dir, by modelscope-sdk
+#### 如何从本地模型进行推理（不联网使用）
+使用modelscope-sdk将模型下载到本地
 
 ```python
 from modelscope.hub.snapshot_download import snapshot_download
@@ -149,14 +149,14 @@ local_dir_root = "./models_from_modelscope"
 model_dir = snapshot_download('damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch', cache_dir=local_dir_root)
 ```
 
-Or download model to local dir, by git lfs
+或者使用git将模型下载到本地
 ```shell
 git lfs install
 # git clone https://www.modelscope.cn/<namespace>/<model-name>.git
 git clone https://www.modelscope.cn/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch.git
 ```
 
-Infer with local model path
+从下载的本地模型进行推理（可以不联网使用）
 ```python
 local_dir_root = "./models_from_modelscope/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
 inference_pipeline = pipeline(
@@ -165,9 +165,9 @@ inference_pipeline = pipeline(
 )
 ```
 
-## Finetune with pipeline
-### Speech Recognition
-#### Paraformer Model
+## 使用pipeline进行微调
+### 语音识别
+#### Paraformer模型
 
 finetune.py
 ```python
@@ -217,10 +217,11 @@ tail log.txt
 [bach-gpu011024008134] 2023-04-23 19:00:58,463 (trainer:777) INFO: 2epoch:train:101-150batch:150num_updates: iter_time=1.123e-04, forward_time=0.271, loss_att=0.204, acc=0.942, loss_pre=0.005, loss=0.210, backward_time=0.231, optim_step_time=0.116, optim0_lr0=7.651e-06, train_time=0.692
 ```
 
-### FAQ
-### Multi GPUs training and distributed training
+### 常见问题
+### 多GPU训练
 
-If you want finetune with multi-GPUs, you could:
+可以使用下面的指令进行多GPU训练
 ```shell
 CUDA_VISIBLE_DEVICES=1,2 python -m torch.distributed.launch --nproc_per_node 2 finetune.py > log.txt 2>&1
 ```
+

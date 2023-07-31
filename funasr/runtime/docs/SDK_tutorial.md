@@ -1,328 +1,206 @@
-# FunASR File Transcription Service Convenient Deployment Tutorial
+([简体中文](./SDK_tutorial_zh.md)|English)
 
-FunASR provides offline file transcription services that can be conveniently deployed on local or cloud servers. The core of the service is based on the open-source runtime-SDK of FunASR. It integrates various related capabilities, such as voice endpoint detection (VAD) and Paraformer-large speech recognition (ASR), as well as punctuation recovery (PUNC), which have been open-sourced by the speech laboratory of DAMO Academy on the Modelscope community. With these capabilities, the service can transcribe audio accurately and efficiently under high concurrency.
+# FunASR Offline File Transcription Service Convenient Deployment Tutorial
 
-## Installation and Start Service
+FunASR provides an offline file transcription service that can be easily deployed on a local or cloud server. The core is the FunASR open-source runtime-SDK. It integrates various capabilities such as speech endpoint detection (VAD) and Paraformer-large speech recognition (ASR) and punctuation restoration (PUNC) released by the speech laboratory of the Damo Academy in the Modelscope community. It has a complete speech recognition chain and can recognize audio or video of tens of hours into punctuated text. Moreover, it supports transcription for hundreds of simultaneous requests.
 
-Environment Preparation and Configuration（[docs](./aliyun_server_tutorial.md)）
+## Server Configuration
 
-### Downloading Tools and Deployment
+Users can choose appropriate server configurations based on their business needs. The recommended configurations are:
+- Configuration 1: (X86, computing-type) 4-core vCPU, 8GB memory, and a single machine can support about 32 requests.
+- Configuration 2: (X86, computing-type) 16-core vCPU, 32GB memory, and a single machine can support about 64 requests.
+- Configuration 3: (X86, computing-type) 64-core vCPU, 128GB memory, and a single machine can support about 200 requests. 
 
-Run the following command to perform a one-click deployment of the FunASR runtime-SDK service. Follow the prompts to complete the deployment and running of the service. Currently, only Linux environments are supported, and for other environments, please refer to the Advanced SDK Development Guide ([docs](./SDK_advanced_guide_offline.md)). 
+Detailed performance [report](./benchmark_onnx_cpp.md)
 
-[//]: # (Due to network restrictions, the download of the funasr-runtime-deploy.sh one-click deployment tool may not proceed smoothly. If the tool has not been downloaded and entered into the one-click deployment tool after several seconds, please terminate it with Ctrl + C and run the following command again.)
+Cloud service providers offer a 3-month free trial for new users. Application tutorial ([docs](./aliyun_server_tutorial.md)).
+
+## Quick Start
+
+### Server Startup
+
+`Note`: The one-click deployment tool process includes installing Docker, downloading Docker images, and starting the service. If the user wants to start from the FunASR Docker image, please refer to the development guide ([docs](./SDK_advanced_guide_offline.md).
+
+Download the deployment tool `funasr-runtime-deploy-offline-cpu-zh.sh`
 
 ```shell
-curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR-APP/main/TransAudio/funasr-runtime-deploy.sh; sudo bash funasr-runtime-deploy.sh install
-# For the users in China, you could install with the command:
-# curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy.sh; sudo bash funasr-runtime-deploy.sh install
+curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/funasr/runtime/deploy_tools/funasr-runtime-deploy-offline-cpu-en.sh;
+# If there is a network problem, users in mainland China can use the following command:
+# curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy-offline-cpu-en.sh;
 ```
 
-#### Details of Configuration
+Execute the deployment tool and press the Enter key at the prompt to complete the installation and deployment of the server. Currently, the convenient deployment tool only supports Linux environments. For other environments, please refer to the development guide ([docs](./SDK_advanced_guide_offline.md)).
+```shell
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace /root/funasr-runtime-resources
+```
 
-##### Choosing FunASR Docker Image
+### Client Testing and Usage
 
-We recommend selecting the "latest" tag to use our latest image, but you can also choose from our historical versions.
+After running the above installation instructions, the client testing tool directory samples will be downloaded in the default installation directory /root/funasr-runtime-resources ([download click](https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz)).
+We take the Python language client as an example to explain that it supports multiple audio format inputs (such as .wav, .pcm, .mp3, etc.), video inputs (.mp4, etc.), and multiple file list wav.scp inputs. For other client versions, please refer to the [documentation](#Detailed-Description-of-Client-Usage).
+
+```shell
+python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.wav"
+```
+
+## Detailed Description of Client Usage
+
+After completing the FunASR runtime-SDK service deployment on the server, you can test and use the offline file transcription service through the following steps. Currently, the following programming language client versions are supported:
+
+- [Python](#python-client)
+- [CPP](#cpp-client)
+- [html](#html-client)
+- [java](#java-client)
+
+For more client version support, please refer to the [development guide](./SDK_advanced_guide_offline_zh.md).
+
+### python-client
+If you want to run the client directly for testing, you can refer to the following simple instructions, using the Python version as an example:
+
+```shell
+python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.wav"
+```
+
+Command parameter instructions:
+```text
+--host is the IP address of the FunASR runtime-SDK service deployment machine, which defaults to the local IP address (127.0.0.1). If the client and the service are not on the same server, it needs to be changed to the deployment machine IP address.
+--port 10095 deployment port number
+--mode offline represents offline file transcription
+--audio_in is the audio file that needs to be transcribed, supporting file paths and file list wav.scp
+--thread_num sets the number of concurrent sending threads, default is 1
+--ssl sets whether to enable SSL certificate verification, default is 1 to enable, and 0 to disable
+```
+
+### cpp-client
+
+After entering the samples/cpp directory, you can test it with CPP. The command is as follows:
+```shell
+./funasr-wss-client --server-ip 127.0.0.1 --port 10095 --wav-path ../audio/asr_example.wav
+```
+
+Command parameter description:
+```text
+--server-ip specifies the IP address of the machine where the FunASR runtime-SDK service is deployed. The default value is the local IP address (127.0.0.1). If the client and the service are not on the same server, the IP address needs to be changed to the IP address of the deployment machine.
+--port specifies the deployment port number as 10095.
+--wav-path specifies the audio file to be transcribed, and supports file paths.
+--thread_num sets the number of concurrent send threads, with a default value of 1.
+--ssl sets whether to enable SSL certificate verification, with a default value of 1 for enabling and 0 for disabling.
+```
+
+### html-client
+
+To experience it directly, open `html/static/index.html` in your browser. You will see the following page, which supports microphone input and file upload.
+<img src="images/html.png"  width="900"/>
+
+### java-client
+
+```shell
+FunasrWsClient --host localhost --port 10095 --audio_in ./asr_example.wav --mode offline
+```
+For more details, please refer to the [docs](../java/readme.md)
+
+## Server Usage Details
+
+### Start the deployed FunASR service
+
+If you have restarted the computer or shut down Docker after one-click deployment, you can start the FunASR service directly with the following command. The startup configuration is the same as the last one-click deployment.
+
+```shell
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh start
+```
+
+### Stop the FunASR service
+
+```shell
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh stop
+```
+
+### Release the FunASR service
+
+Release the deployed FunASR service.
+```shell
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh remove
+```
+
+### Restart the FunASR service
+
+Restart the FunASR service with the same configuration as the last one-click deployment.
+```shell
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh restart
+```
+
+### Replace the model and restart the FunASR service
+
+Replace the currently used model, and restart the FunASR service. The model must be an ASR/VAD/PUNC model in ModelScope, or a finetuned model from ModelScope.
+
+```shell
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update [--asr_model | --vad_model | --punc_model] <model_id or local model path>
+
+e.g
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update --asr_model damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
+```
+
+### Update parameters and restart the FunASR service
+
+Update the configured parameters and restart the FunASR service to take effect. The parameters that can be updated include the host and Docker port numbers, as well as the number of inference and IO threads.
+
+```shell
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update [--host_port | --docker_port] <port number>
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update [--decode_thread_num | --io_thread_num] <the number of threads>
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update [--workspace] <workspace in local>
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update [--ssl] <0: close SSL; 1: open SSL, default:1>
+
+e.g
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update --decode_thread_num 32
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update --workspace /root/funasr-runtime-resources
+```
+
+
+## Detailed Configuration of Server Startup Process
+
+### Select FunASR Docker image
+We recommend choosing to use our latest released image, but you can also choose historical versions.
 
 ```text
-[1/9]
+[1/5]
+  Getting the list of docker images, please wait a few seconds.
+    [DONE]
+
   Please choose the Docker image.
-    1) registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-latest
-    2) registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.1.0
-  Enter your choice: 1
-  You have chosen the Docker image: registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-latest
+    1) registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.1.0
+  Enter your choice, default(1):
+  You have chosen the Docker image: registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.1.0
 ```
 
-##### Choosing ASR/VAD/PUNC Models
 
-You can choose a model from ModelScope by name, or fill in the name of a model in ModelScope as <model_name>. The model will be automatically downloaded during Docker runtime. You can also select <model_path> to fill in the local model path on the host machine.
-
-```text
-[2/9]
-  Please input [Y/n] to confirm whether to automatically download model_id in ModelScope or use a local model.
-  [y] With the model in ModelScope, the model will be automatically downloaded to Docker(/workspace/models).
-      If you select both the local model and the model in ModelScope, select [y].
-  [n] Use the models on the localhost, the directory where the model is located will be mapped to Docker.
-  Setting confirmation[Y/n]: 
-  You have chosen to use the model in ModelScope, please set the model ID in the next steps, and the model will be automatically downloaded in (/workspace/models) during the run.
-
-  Please enter the local path to download models, the corresponding path in Docker is /workspace/models.
-  Setting the local path to download models, default(/root/models): 
-  The local path(/root/models) set will store models during the run.
-
-  [2.1/9]
-    Please select ASR model_id in ModelScope from the list below.
-    1) damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx
-    2) model_name
-    3) model_path
-  Enter your choice: 1
-    The model ID is damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx
-    The model dir in Docker is /workspace/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx
-
-  [2.2/9]
-    Please select VAD model_id in ModelScope from the list below.
-    1) damo/speech_fsmn_vad_zh-cn-16k-common-onnx
-    2) model_name
-    3) model_path
-  Enter your choice: 1
-    The model ID is damo/speech_fsmn_vad_zh-cn-16k-common-onnx
-    The model dir in Docker is /workspace/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx
-
-  [2.3/9]
-    Please select PUNC model_id in ModelScope from the list below.
-    1) damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
-    2) model_name
-    3) model_path
-  Enter your choice: 1
-    The model ID is damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
-    The model dir in Docker is /workspace/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
-```
-
-##### Enter the executable path of the FunASR service on the host machine
-
-Enter the host path of the executable of the FunASR service. It will be automatically mounted and run in Docker at runtime. If left blank, the default path in Docker will be set to /workspace/FunASR/funasr/runtime/websocket/build/bin/funasr-wss-server.
+### Set the port provided by the host for FunASR
+Set the host port provided to Docker, which is 10095 by default. Please make sure that this port is available.
 
 ```text
-[3/9]
-  Please enter the path to the excutor of the FunASR service on the localhost.
-  If not set, the default /workspace/FunASR/funasr/runtime/websocket/build/bin/funasr-wss-server in Docker is used.
-  Setting the path to the excutor of the FunASR service on the localhost: 
-  Corresponding, the path of FunASR in Docker is /workspace/FunASR/funasr/runtime/websocket/build/bin/funasr-wss-server
-```
-
-##### Setting the port on the host machine for FunASR
-
-Setting the port on the host machine for Docker. The default port is 10095. Please ensure that this port is available.
-
-```text
-[4/9]
+[2/5]
   Please input the opened port in the host used for FunASR server.
-  Default: 10095
-  Setting the opened host port [1-65535]: 
+  Setting the opened host port [1-65535], default(10095):
   The port of the host is 10095
   The port in Docker for FunASR server is 10095
 ```
 
+### Set SSL
 
-##### Setting the number of inference threads for the FunASR service
-
-Setting the number of inference threads for the FunASR service. The default value is the number of cores on the host machine. The number of I/O threads for the service will also be automatically set to one-quarter of the number of inference threads.
-
-```text
-[5/9]
-  Please input thread number for FunASR decoder.
-  Default: 1
-  Setting the number of decoder thread: 
-
-  The number of decoder threads is 1
-  The number of IO threads is 1
-```
-
-##### Displaying all set parameters for confirmation
-
-Displaying the parameters set in the previous 6 steps. Confirming will save all parameters to /var/funasr/config and start Docker. Otherwise, users will be prompted to reset the parameters.
-
-```text
-
-[6/9]
-  Show parameters of FunASR server setting and confirm to run ...
-
-  The current Docker image is                                    : registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-latest
-  The model is downloaded or stored to this directory in local   : /root/models
-  The model will be automatically downloaded to the directory    : /workspace/models
-  The ASR model_id used                                          : damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx
-  The ASR model directory corresponds to the directory in Docker : /workspace/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx
-  The VAD model_id used                                          : damo/speech_fsmn_vad_zh-cn-16k-common-onnx
-  The VAD model directory corresponds to the directory in Docker : /workspace/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx
-  The PUNC model_id used                                         : damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
-  The PUNC model directory corresponds to the directory in Docker: /workspace/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
-
-  The path in the docker of the FunASR service executor          : /workspace/FunASR/funasr/runtime/websocket/build/bin/funasr-wss-server
-  Set the host port used for use by the FunASR service           : 10095
-  Set the docker port used by the FunASR service                 : 10095
-  Set the number of threads used for decoding the FunASR service : 1
-  Set the number of threads used for IO the FunASR service       : 1
-
-  Please input [Y/n] to confirm the parameters.
-  [y] Verify that these parameters are correct and that the service will run.
-  [n] The parameters set are incorrect, it will be rolled out, please rerun.
-  read confirmation[Y/n]: 
-
-  Will run FunASR server later ...
-  Parameters are stored in the file /var/funasr/config
-```
-
-##### Checking the Docker service
-
-Checking if Docker service is installed on the host machine. If not installed, installing and starting Docker
-
-```text
-[7/9]
-  Start install docker for ubuntu 
-  Get docker installer: curl -fsSL https://test.docker.com -o test-docker.sh
-  Get docker run: sudo sh test-docker.sh
-# Executing docker install script, commit: c2de0811708b6d9015ed1a2c80f02c9b70c8ce7b
-+ sh -c apt-get update -qq >/dev/null
-+ sh -c DEBIAN_FRONTEND=noninteractive apt-get install -y -qq apt-transport-https ca-certificates curl >/dev/null
-+ sh -c install -m 0755 -d /etc/apt/keyrings
-+ sh -c curl -fsSL "https://download.docker.com/linux/ubuntu/gpg" | gpg --dearmor --yes -o /etc/apt/keyrings/docker.gpg
-+ sh -c chmod a+r /etc/apt/keyrings/docker.gpg
-+ sh -c echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu focal test" > /etc/apt/sources.list.d/docker.list
-+ sh -c apt-get update -qq >/dev/null
-+ sh -c DEBIAN_FRONTEND=noninteractive apt-get install -y -qq docker-ce docker-ce-cli containerd.io docker-compose-plugin docker-ce-rootless-extras docker-buildx-plugin >/dev/null
-+ sh -c docker version
-Client: Docker Engine - Community
- Version:           24.0.2
-
- ...
- ...
-
-   Docker install success, start docker server.
-```
-
-##### Downloading the FunASR Docker image
-
-Downloading and updating the FunASR Docker image selected in step 1.1
-
-```text
-[8/9]
-  Pull docker image(registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-latest)...
-funasr-runtime-cpu-0.0.1: Pulling from funasr_repo/funasr
-7608715873ec: Pull complete 
-3e1014c56f38: Pull complete 
-
- ...
- ...
-```
-
-##### Starting the FunASR Docker
-
-Starting the FunASR Docker and waiting for the model selected in step 1.2 to finish downloading and start the FunASR service
-
-```text
-[9/9]
-  Construct command and run docker ...
-943d8f02b4e5011b71953a0f6c1c1b9bc5aff63e5a96e7406c83e80943b23474
-
-  Loading models:
-    [ASR ][Done       ][==================================================][100%][1.10MB/s][v1.2.1]
-    [VAD ][Done       ][==================================================][100%][7.26MB/s][v1.2.0]
-    [PUNC][Done       ][==================================================][100%][ 474kB/s][v1.1.7]
-  The service has been started.
-  If you want to see an example of how to use the client, you can run sudo bash funasr-runtime-deploy.sh -c .
-```
-
-#### Starting the deployed FunASR service
-
-If the computer is restarted or Docker is closed after one-click deployment, the following command can be used to start the FunASR service directly with the settings from the last one-click deployment.
-
+SSL verification is enabled by default. If you need to disable it, you can set it when starting.
 ```shell
-sudo bash funasr-runtime-deploy.sh start
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh --ssl 0
 ```
 
-#### Shutting down the FunASR service
+## Contact Us
 
-```shell
-sudo bash funasr-runtime-deploy.sh stop
-```
+If you encounter any problems during use, please join our user group for feedback.
 
-#### Restarting the FunASR service
 
-Restarting the FunASR service with the settings from the last one-click deployment
+|                                DingDing Group                                |                             Wechat                             |
+|:----------------------------------------------------------------------------:|:--------------------------------------------------------------:|
+| <div align="left"><img src="../../../docs/images/dingding.jpg" width="250"/> | <img src="../../../docs/images/wechat.png" width="232"/></div> |
 
-```shell
-sudo bash funasr-runtime-deploy.sh restart
-```
 
-#### Replacing the model and restarting the FunASR service
-
-Replacing the currently used model and restarting the FunASR service. The model must be an ASR/VAD/PUNC model from ModelScope.
-
-```shell
-sudo bash scripts/funasr-runtime-deploy.sh update model <model ID in ModelScope>
-
-e.g
-sudo bash scripts/funasr-runtime-deploy.sh update model damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
-```
-
-### How to test and use the offline file transcription service
-
-After completing the FunASR service deployment on the server, you can test and use the offline file transcription service by following these steps. Currently, command line running is supported for Python, C++, and Java client versions, as well as an HTML web page version that can be directly experienced in the browser. For more client language support, please refer to the "FunASR Advanced Development Guide" documentation.
-After the funasr-runtime-deploy.sh script finishes running, you can use the following command to automatically download the test samples to the funasr_samples directory in the current directory and run the program with the set parameters in an interactive manner:
-
-```shell
-sudo bash funasr-runtime-deploy.sh client
-```
-
-You can choose from the provided Python and Linux C++ sample programs. Taking the Python sample as an example:
-
-```text
-Will download sample tools for the client to show how speech recognition works.
-  Please select the client you want to run.
-    1) Python
-    2) Linux_Cpp
-  Enter your choice: 1
-
-  Please enter the IP of server, default(127.0.0.1): 
-  Please enter the port of server, default(10095): 
-  Please enter the audio path, default(/root/funasr_samples/audio/asr_example.wav): 
-
-  Run pip3 install click>=8.0.4
-Looking in indexes: http://mirrors.cloud.aliyuncs.com/pypi/simple/
-Requirement already satisfied: click>=8.0.4 in /usr/local/lib/python3.8/dist-packages (8.1.3)
-
-  Run pip3 install -r /root/funasr_samples/python/requirements_client.txt
-Looking in indexes: http://mirrors.cloud.aliyuncs.com/pypi/simple/
-Requirement already satisfied: websockets in /usr/local/lib/python3.8/dist-packages (from -r /root/funasr_samples/python/requirements_client.txt (line 1)) (11.0.3)
-
-  Run python3 /root/funasr_samples/python/funasr_wss_client.py --host 127.0.0.1 --port 10095 --mode offline --audio_in /root/funasr_samples/audio/asr_example.wav --send_without_sleep --output_dir ./funasr_samples/python
-
-  ...
-  ...
-
-  pid0_0: 欢迎大家来体验达摩院推出的语音识别模型。
-Exception: sent 1000 (OK); then received 1000 (OK)
-end
-
-  If failed, you can try (python3 /root/funasr_samples/python/funasr_wss_client.py --host 127.0.0.1 --port 10095 --mode offline --audio_in /root/funasr_samples/audio/asr_example.wav --send_without_sleep --output_dir ./funasr_samples/python) in your Shell.
-
-```
-
-#### python-client
-
-If you want to directly run the client for testing, you can refer to the following simple instructions, taking the Python version as an example:
-```shell
-python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.wav" --send_without_sleep --output_dir "./results"
-```
-
-Command parameter instructions: 
-
-```text
---host: The IP address of the machine where the FunASR runtime-SDK service is deployed. The default is the local IP address (127.0.0.1). If the client and service are not on the same server, the IP address should be changed to that of the deployment machine.
---port 10095: The deployment port number.
---mode offline: Indicates offline file transcription.
---audio_in: The audio file(s) to be transcribed, which can be a file path or a file list (wav.scp).
---output_dir: The path to save the recognition results.
-```
-
-#### cpp-client
-
-```shell
-export LD_LIBRARY_PATH=/root/funasr_samples/cpp/libs:$LD_LIBRARY_PATH
-/root/funasr_samples/cpp/funasr-wss-client --server-ip 127.0.0.1 --port 10095 --wav-path /root/funasr_samples/audio/asr_example.wav
-```
-
-Command parameter instructions: 
-
-```text
---server-ip: The IP address of the machine where the FunASR runtime-SDK service is deployed. The default is the local IP address (127.0.0.1). If the client and service are not on the same server, the IP address should be changed to that of the deployment machine.
---port 10095: The deployment port number.
---wav-path: The audio file(s) to be transcribed, which can be a file path.
-```
-
-### Video demo
-
-[demo]()
 
 
 
