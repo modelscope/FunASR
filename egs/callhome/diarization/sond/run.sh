@@ -876,7 +876,7 @@ if [ ${stage} -le 19 ] && [ ${stop_stage} -ge 19 ]; then
           --batch_size 1 \
           --ngpu "${_ngpu}" \
           --gpuid_list ${gpuid_list} \
-          --data_path_and_name_and_type "${key_file},speech,kaldi_ark" \
+          --data_path_and_name_and_type "${key_file},speech,sound" \
           --key_file "${_logdir}"/keys.JOB.scp \
           --sv_train_config ${sv_exp_dir}/sv.yaml \
           --sv_model_file ${sv_exp_dir}/sv.pth \

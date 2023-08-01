@@ -93,7 +93,7 @@ def process(task_args):
         extracted_spk = []
         count = 1
         for st, ed, spk in tqdm(turns, total=len(turns), ascii=True, disable=args.no_pbar):
-            if (ed - st) >= args.min_dur * args.sr:
+            if (ed - st) >= args.min_dur * args.sr and wav[st: ed] >= args.min_dur * args.sr:
                 seg = wav[st: ed]
                 save_path = os.path.join(args.out_dir, mid, spk, "{}_U{:04d}.wav".format(spk, count))
                 if not os.path.exists(os.path.dirname(save_path)):
