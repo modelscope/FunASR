@@ -453,7 +453,7 @@ def get_parser():
         help="The batch size for inference",
     )
     group.add_argument(
-        "--diar_smooth_size",
+        "--smooth_size",
         type=int,
         default=121,
         help="The smoothing size for post-processing"
