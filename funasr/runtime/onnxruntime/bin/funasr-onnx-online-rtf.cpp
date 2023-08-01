@@ -209,8 +209,7 @@ int main(int argc, char *argv[])
 
     struct timeval start, end;
     gettimeofday(&start, NULL);
-    int online_mode = 1;
-    FUNASR_HANDLE asr_handle=FunASRInit(model_path, 1, online_mode);
+    FUNASR_HANDLE asr_handle=FunASRInit(model_path, 1, ASR_ONLINE);
 
     if (!asr_handle)
     {

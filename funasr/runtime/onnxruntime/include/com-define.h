@@ -13,6 +13,8 @@ namespace funasr {
 
 // parser option
 #define MODEL_DIR "model-dir"
+#define OFFLINE_MODEL_DIR "offline-model-dir"
+#define ONLINE_MODEL_DIR "online-model-dir"
 #define VAD_DIR "vad-dir"
 #define PUNC_DIR "punc-dir"
 #define QUANTIZE "quantize"
@@ -75,6 +77,10 @@ namespace funasr {
 
 #ifndef PARA_LFR_N
 #define PARA_LFR_N 6
+#endif
+
+#ifndef ONLINE_STEP
+#define ONLINE_STEP 9600
 #endif
 
 // punc

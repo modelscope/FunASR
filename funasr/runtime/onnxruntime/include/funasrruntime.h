@@ -47,6 +47,12 @@ typedef enum {
 }FUNASR_MODEL_TYPE;
 
 typedef enum {
+	ASR_OFFLINE=0,
+	ASR_ONLINE=1,
+	ASR_TWO_PASS=2,
+}ASR_TYPE;
+
+typedef enum {
 	PUNC_OFFLINE=0,
 	PUNC_ONLINE=1,
 }PUNC_TYPE;
@@ -54,7 +60,7 @@ typedef enum {
 typedef void (* QM_CALLBACK)(int cur_step, int n_total); // n_total: total steps; cur_step: Current Step.
 
 // ASR
-_FUNASRAPI FUNASR_HANDLE  	FunASRInit(std::map<std::string, std::string>& model_path, int thread_num, int mode=0);
+_FUNASRAPI FUNASR_HANDLE  	FunASRInit(std::map<std::string, std::string>& model_path, int thread_num, ASR_TYPE type=ASR_OFFLINE);
 _FUNASRAPI FUNASR_HANDLE  	FunASROnlineInit(FUNASR_HANDLE asr_handle);
 // buffer
 _FUNASRAPI FUNASR_RESULT	FunASRInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, FUNASR_MODE mode, QM_CALLBACK fn_callback, bool input_finished=true, int sampling_rate=16000, std::string wav_format="pcm");
@@ -62,6 +68,7 @@ _FUNASRAPI FUNASR_RESULT	FunASRInferBuffer(FUNASR_HANDLE handle, const char* sz_
 _FUNASRAPI FUNASR_RESULT	FunASRInfer(FUNASR_HANDLE handle, const char* sz_filename, FUNASR_MODE mode, QM_CALLBACK fn_callback, int sampling_rate=16000);
 
 _FUNASRAPI const char*	FunASRGetResult(FUNASR_RESULT result,int n_index);
+_FUNASRAPI const char*	FunASRGetTpassResult(FUNASR_RESULT result,int n_index);
 _FUNASRAPI const int	FunASRGetRetNumber(FUNASR_RESULT result);
 _FUNASRAPI void			FunASRFreeResult(FUNASR_RESULT result);
 _FUNASRAPI void			FunASRUninit(FUNASR_HANDLE handle);
@@ -94,6 +101,13 @@ _FUNASRAPI FUNASR_RESULT	FunOfflineInferBuffer(FUNASR_HANDLE handle, const char*
 // file, support wav & pcm
 _FUNASRAPI FUNASR_RESULT	FunOfflineInfer(FUNASR_HANDLE handle, const char* sz_filename, FUNASR_MODE mode, QM_CALLBACK fn_callback, int sampling_rate=16000);
 _FUNASRAPI void				FunOfflineUninit(FUNASR_HANDLE handle);
+
+//2passStream
+_FUNASRAPI FUNASR_HANDLE  	FunTpassInit(std::map<std::string, std::string>& model_path, int thread_num);
+_FUNASRAPI void  	        FunTpassOnlineInit(FUNASR_HANDLE tpass_handle);
+// buffer
+_FUNASRAPI FUNASR_RESULT	FunTpassInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, FUNASR_MODE mode, QM_CALLBACK fn_callback, bool input_finished=true, int sampling_rate=16000, std::string wav_format="pcm");
+_FUNASRAPI void				FunTpassUninit(FUNASR_HANDLE handle);
 
 #ifdef __cplusplus 
 

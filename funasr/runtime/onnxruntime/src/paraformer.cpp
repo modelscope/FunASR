@@ -33,7 +33,7 @@ void Paraformer::InitAsr(const std::string &am_model, const std::string &am_cmvn
     session_options_.DisableCpuMemArena();
 
     try {
-        m_session = std::make_unique<Ort::Session>(env_, am_model.c_str(), session_options_);
+        m_session_ = std::make_unique<Ort::Session>(env_, am_model.c_str(), session_options_);
         LOG(INFO) << "Successfully load model from " << am_model;
     } catch (std::exception const &e) {
         LOG(ERROR) << "Error when load am onnx model: " << e.what();
@@ -41,14 +41,14 @@ void Paraformer::InitAsr(const std::string &am_model, const std::string &am_cmvn
     }
 
     string strName;
-    GetInputName(m_session.get(), strName);
+    GetInputName(m_session_.get(), strName);
     m_strInputNames.push_back(strName.c_str());
-    GetInputName(m_session.get(), strName,1);
+    GetInputName(m_session_.get(), strName,1);
     m_strInputNames.push_back(strName);
     
-    GetOutputName(m_session.get(), strName);
+    GetOutputName(m_session_.get(), strName);
     m_strOutputNames.push_back(strName);
-    GetOutputName(m_session.get(), strName,1);
+    GetOutputName(m_session_.get(), strName,1);
     m_strOutputNames.push_back(strName);
 
     for (auto& item : m_strInputNames)
@@ -134,6 +134,37 @@ void Paraformer::InitAsr(const std::string &en_model, const std::string &de_mode
 
     vocab = new Vocab(am_config.c_str());
     LoadCmvn(am_cmvn.c_str());
+}
+
+// 2pass
+void Paraformer::InitAsr(const std::string &am_model, const std::string &en_model, const std::string &de_model, const std::string &am_cmvn, const std::string &am_config, int thread_num){
+    // online
+    InitAsr(en_model, de_model, am_cmvn, am_config, thread_num);
+
+    // offline
+    try {
+        m_session_ = std::make_unique<Ort::Session>(env_, am_model.c_str(), session_options_);
+        LOG(INFO) << "Successfully load model from " << am_model;
+    } catch (std::exception const &e) {
+        LOG(ERROR) << "Error when load am onnx model: " << e.what();
+        exit(0);
+    }
+
+    string strName;
+    GetInputName(m_session_.get(), strName);
+    m_strInputNames.push_back(strName.c_str());
+    GetInputName(m_session_.get(), strName,1);
+    m_strInputNames.push_back(strName);
+    
+    GetOutputName(m_session_.get(), strName);
+    m_strOutputNames.push_back(strName);
+    GetOutputName(m_session_.get(), strName,1);
+    m_strOutputNames.push_back(strName);
+
+    for (auto& item : m_strInputNames)
+        m_szInputNames.push_back(item.c_str());
+    for (auto& item : m_strOutputNames)
+        m_szOutputNames.push_back(item.c_str());
 }
 
 void Paraformer::LoadOnlineConfigFromYaml(const char* filename){
@@ -332,7 +363,7 @@ string Paraformer::Forward(float* din, int len, bool input_finished)
 
     string result;
     try {
-        auto outputTensor = m_session->Run(Ort::RunOptions{nullptr}, m_szInputNames.data(), input_onnx.data(), input_onnx.size(), m_szOutputNames.data(), m_szOutputNames.size());
+        auto outputTensor = m_session_->Run(Ort::RunOptions{nullptr}, m_szInputNames.data(), input_onnx.data(), input_onnx.size(), m_szOutputNames.data(), m_szOutputNames.size());
         std::vector<int64_t> outputShape = outputTensor[0].GetTensorTypeAndShapeInfo().GetShape();
 
         int64_t outputCount = std::accumulate(outputShape.begin(), outputShape.end(), 1, std::multiplies<int64_t>());

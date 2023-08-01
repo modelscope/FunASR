@@ -30,6 +30,8 @@ namespace funasr {
         void InitAsr(const std::string &am_model, const std::string &am_cmvn, const std::string &am_config, int thread_num);
         // online
         void InitAsr(const std::string &en_model, const std::string &de_model, const std::string &am_cmvn, const std::string &am_config, int thread_num);
+        // 2pass
+        void InitAsr(const std::string &am_model, const std::string &en_model, const std::string &de_model, const std::string &am_cmvn, const std::string &am_config, int thread_num);
         void Reset();
         vector<float> FbankKaldi(float sample_rate, const float* waves, int len);
         string Forward(float* din, int len, bool input_finished=true);
@@ -42,7 +44,8 @@ namespace funasr {
         int lfr_m = PARA_LFR_M;
         int lfr_n = PARA_LFR_N;
 
-        std::shared_ptr<Ort::Session> m_session = nullptr;
+        // paraformer-offline
+        std::shared_ptr<Ort::Session> m_session_ = nullptr;
         Ort::Env env_;
         Ort::SessionOptions session_options_;
 
@@ -50,7 +53,7 @@ namespace funasr {
         vector<const char*> m_szInputNames;
         vector<const char*> m_szOutputNames;
 
-        //paraformer-online
+        // paraformer-online
         std::shared_ptr<Ort::Session> encoder_session_ = nullptr;
         std::shared_ptr<Ort::Session> decoder_session_ = nullptr;
         vector<string> en_strInputNames, en_strOutputNames;

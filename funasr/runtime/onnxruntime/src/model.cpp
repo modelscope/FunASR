@@ -1,9 +1,10 @@
 #include "precomp.h"
 
 namespace funasr {
-Model *CreateModel(std::map<std::string, std::string>& model_path, int thread_num, int mode)
+Model *CreateModel(std::map<std::string, std::string>& model_path, int thread_num, ASR_TYPE type)
 {
-    if(mode == 0){
+    // offline
+    if(type == ASR_OFFLINE){
         string am_model_path;
         string am_cmvn_path;
         string am_config_path;
@@ -19,7 +20,7 @@ Model *CreateModel(std::map<std::string, std::string>& model_path, int thread_nu
         mm = new Paraformer();
         mm->InitAsr(am_model_path, am_cmvn_path, am_config_path, thread_num);
         return mm;
-    }else if(mode == 1){
+    }else if(type == ASR_ONLINE){
         // online
         string en_model_path;
         string de_model_path;
@@ -39,6 +40,9 @@ Model *CreateModel(std::map<std::string, std::string>& model_path, int thread_nu
         mm = new Paraformer();
         mm->InitAsr(en_model_path, de_model_path, am_cmvn_path, am_config_path, thread_num);
         return mm;
+    }else{
+        LOG(ERROR)<<"Wrong ASR_TYPE : " << type;
+        exit(-1);
     }
 }
 

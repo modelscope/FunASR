@@ -175,6 +175,9 @@ void FsmnVadOnline::InitOnline(std::shared_ptr<Ort::Session> &vad_session,
     vad_silence_duration_ = vad_silence_duration;
     vad_max_len_ = vad_max_len;
     vad_speech_noise_thres_ = vad_speech_noise_thres;
+
+    // 2pass
+    audio_handle = make_unique<Audio>(1);
 }
 
 FsmnVadOnline::~FsmnVadOnline() {

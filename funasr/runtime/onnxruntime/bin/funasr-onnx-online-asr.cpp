@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     struct timeval start, end;
     gettimeofday(&start, NULL);
     int thread_num = 1;
-    FUNASR_HANDLE asr_handle=FunASRInit(model_path, thread_num, 1);
+    FUNASR_HANDLE asr_handle=FunASRInit(model_path, thread_num, ASR_ONLINE);
 
     if (!asr_handle)
     {
