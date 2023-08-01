@@ -222,7 +222,11 @@ async def message(id):
                 # text_print = text_print[-args.words_max_print:]
                 # os.system('clear')
                 print("\rpid" + str(id) + ": " + wav_name + ": " + text_print)
-                offline_msg_done = True
+                if ("is_final" in meg and meg["is_final"]==False):
+                    offline_msg_done = True
+                
+                if not "is_final" in meg:
+                    offline_msg_done = True
             else:
                 if meg["mode"] == "2pass-online":
                     text_print_2pass_online += "{}".format(text)
