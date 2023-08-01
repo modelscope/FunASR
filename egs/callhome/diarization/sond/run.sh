@@ -9,7 +9,7 @@
 # We recommend you run this script stage by stage.
 
 # environment configuration
-kaldi_root=/home/neo.dzh/kaldi
+kaldi_root=
 
 if [ -z "${kaldi_root}" ]; then
   echo "We need kaldi to prepare dataset, extract fbank features, please install kaldi first and set kaldi_root."
