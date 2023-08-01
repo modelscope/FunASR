@@ -872,6 +872,7 @@ if [ ${stage} -le 19 ] && [ ${stop_stage} -ge 19 ]; then
 
       ${infer_cmd} --gpu "${_ngpu}" --max-jobs-run "${_nj}" JOB=1:"${_nj}" "${_logdir}"/sv_inference.JOB.log \
         python -m funasr.bin.sv_inference_launch \
+          --njob ${njob} \
           --batch_size 1 \
           --ngpu "${_ngpu}" \
           --gpuid_list ${gpuid_list} \
