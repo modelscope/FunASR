@@ -109,7 +109,7 @@ if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
           rank=$i
           local_rank=$i
           gpu_id=$(echo $gpu_devices | cut -d',' -f$[$i+1])
-          diar_train.py \
+          python -m funasr.bin.diar_train \
               --gpu_id $gpu_id \
               --use_preprocessor false \
               --token_type char \
