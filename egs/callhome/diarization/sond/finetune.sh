@@ -46,7 +46,7 @@ init_param=
 freeze_param=
 
 # inference related
-inference_model=valid.der.ave_5best.pth
+inference_model=valid.der.ave_5best.pb
 inference_config=conf/basic_inference.yaml
 inference_tag=""
 test_sets="callhome2"
@@ -189,11 +189,14 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     done
 fi
 
-# Scoring for finetuned model, you may get a DER like
+# Scoring for finetuned model, you may get a DER like:
+# oracle_vad  |  system_vad
+#   7.28      |     8.06
 if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
   echo "stage 3: Scoring finetuned models"
   if [ ! -e dscore ]; then
     git clone https://github.com/nryant/dscore.git
+    pip install intervaltree
     # add intervaltree to setup.py
   fi
   for dset in ${test_sets}; do
@@ -226,17 +229,23 @@ fi
 # And convert the sph files to wav files (use scripts/dump_pipe_wav.py).
 # Then find the wav files to construct wav.scp and put it at data/callhome2/wav.scp.
 # After iteratively perform SOAP, you will get DER results like:
-# iters| oracle_vad  |  system_vad
+# iters : oracle_vad  |  system_vad
 # iter_0:   9.68      |     10.51
 # iter_1:   9.26      |     10.14  (reported in the paper)
 # iter_2:   9.18      |     10.08
 # iter_3:   9.24      |     10.15
 # iter_4:   9.27      |     10.17
 if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
+  if [ ! -e ${expdir}/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch ]; then
+    git lfs install
+    git clone https://www.modelscope.cn/damo/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch.git
+    mv speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch ${expdir}/
+  fi
+
   for dset in ${test_sets}; do
     echo "stage 4: Evaluating finetuned system on ${dset} set with medfilter_size=83 clustering=EEND-OLA"
     sv_exp_dir=${expdir}/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch
-    diar_exp=${expdir}/${model_dir}_phase3
+    diar_exp=${expdir}/${model_dir}
     _data="${datadir}/${dset}/dumped_files"
     _inference_tag="$(basename "${inference_config}" .yaml)${inference_tag}"
     _dir="${diar_exp}/${_inference_tag}/${inference_model}/${dset}"
