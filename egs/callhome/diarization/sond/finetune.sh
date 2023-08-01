@@ -221,13 +221,17 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
   done
 fi
 
-
-# You will get a DER like:
-# iter0: 9.68 10.51
-# iter1:
-# iter2:
-# iter3:
-# iter4:
+# In this stage, we need the raw waveform files of Callhome corpus.
+# Due to the data license, we can't provide them, please get them additionally.
+# And convert the sph files to wav files (use scripts/dump_pipe_wav.py).
+# Then find the wav files to construct wav.scp and put it at data/callhome2/wav.scp.
+# After iteratively perform SOAP, you will get DER results like:
+# iters| oracle_vad  |  system_vad
+# iter_0:   9.68      |     10.51
+# iter_1:   9.26      |     10.14  (reported in the paper)
+# iter_2:   9.18      |     10.08
+# iter_3:   9.24      |     10.15
+# iter_4:   9.27      |     10.17
 if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
   for dset in ${test_sets}; do
     echo "stage 4: Evaluating finetuned system on ${dset} set with medfilter_size=83 clustering=EEND-OLA"
