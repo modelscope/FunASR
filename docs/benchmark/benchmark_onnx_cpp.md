@@ -1,1 +1,1 @@
-../../funasr/runtime/python/benchmark_onnx_cpp.md
+../../funasr/runtime/docs/benchmark_onnx_cpp.md

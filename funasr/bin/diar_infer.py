@@ -1,41 +1,27 @@
-# -*- encoding: utf-8 -*-
 #!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
 # Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
 #  MIT License  (https://opensource.org/licenses/MIT)
 
-import argparse
 import logging
 import os
-import sys
+from collections import OrderedDict
 from pathlib import Path
 from typing import Any
-from typing import List
 from typing import Optional
-from typing import Sequence
-from typing import Tuple
 from typing import Union
 
-from collections import OrderedDict
 import numpy as np
-import soundfile
 import torch
-from torch.nn import functional as F
-from typeguard import check_argument_types
-from typeguard import check_return_type
-
-from funasr.utils.cli_utils import get_commandline_args
-from funasr.tasks.diar import DiarTask
-from funasr.tasks.diar import EENDOLADiarTask
-from funasr.torch_utils.device_funcs import to_device
-from funasr.torch_utils.set_all_random_seed import set_all_random_seed
-from funasr.utils import config_argparse
-from funasr.utils.types import str2bool
-from funasr.utils.types import str2triple_str
-from funasr.utils.types import str_or_none
 from scipy.ndimage import median_filter
-from funasr.utils.misc import statistic_model_parameters
-from funasr.datasets.iterable_dataset import load_bytes
+from torch.nn import functional as F
+
 from funasr.models.frontend.wav_frontend import WavFrontendMel23
+from funasr.tasks.diar import DiarTask
+from funasr.build_utils.build_model_from_file import build_model_from_file
+from funasr.torch_utils.device_funcs import to_device
+from funasr.utils.misc import statistic_model_parameters
+
 
 class Speech2DiarizationEEND:
     """Speech2Diarlization class
@@ -58,13 +44,14 @@ class Speech2DiarizationEEND:
             device: str = "cpu",
             dtype: str = "float32",
     ):
-        assert check_argument_types()
 
         # 1. Build Diarization model
-        diar_model, diar_train_args = EENDOLADiarTask.build_model_from_file(
+        diar_model, diar_train_args = build_model_from_file(
             config_file=diar_train_config,
             model_file=diar_model_file,
-            device=device
+            device=device,
+            task_name="diar",
+            mode="eend-ola",
         )
         frontend = None
         if diar_train_args.frontend is not None and diar_train_args.frontend_conf is not None:
@@ -99,7 +86,6 @@ class Speech2DiarizationEEND:
             diarization results
 
         """
-        assert check_argument_types()
         # Input as audio signal
         if isinstance(speech, np.ndarray):
             speech = torch.tensor(speech)
@@ -117,36 +103,6 @@ class Speech2DiarizationEEND:
         results = self.diar_model.estimate_sequential(**batch)
 
         return results
-
-    @staticmethod
-    def from_pretrained(
-            model_tag: Optional[str] = None,
-            **kwargs: Optional[Any],
-    ):
-        """Build Speech2Diarization instance from the pretrained model.
-
-        Args:
-            model_tag (Optional[str]): Model tag of the pretrained models.
-                Currently, the tags of espnet_model_zoo are supported.
-
-        Returns:
-            Speech2Diarization: Speech2Diarization instance.
-
-        """
-        if model_tag is not None:
-            try:
-                from espnet_model_zoo.downloader import ModelDownloader
-
-            except ImportError:
-                logging.error(
-                    "`espnet_model_zoo` is not installed. "
-                    "Please install via `pip install -U espnet_model_zoo`."
-                )
-                raise
-            d = ModelDownloader()
-            kwargs.update(**d.download_and_unpack(model_tag))
-
-        return Speech2DiarizationEEND(**kwargs)
 
 
 class Speech2DiarizationSOND:
@@ -174,13 +130,14 @@ class Speech2DiarizationSOND:
             smooth_size: int = 83,
             dur_threshold: float = 10,
     ):
-        assert check_argument_types()
 
         # TODO: 1. Build Diarization model
-        diar_model, diar_train_args = DiarTask.build_model_from_file(
+        diar_model, diar_train_args = build_model_from_file(
             config_file=diar_train_config,
             model_file=diar_model_file,
-            device=device
+            device=device,
+            task_name="diar",
+            mode="sond",
         )
         logging.info("diar_model: {}".format(diar_model))
         logging.info("model parameter number: {}".format(statistic_model_parameters(diar_model)))
@@ -222,7 +179,7 @@ class Speech2DiarizationSOND:
 
     @staticmethod
     def seq2arr(seq, vec_dim=8):
-        def int2vec(x, vec_dim=8, dtype=np.int):
+        def int2vec(x, vec_dim=8, dtype=np.int32):
             b = ('{:0' + str(vec_dim) + 'b}').format(x)
             # little-endian order: lower bit first
             return (np.array(list(b)[::-1]) == '1').astype(dtype)
@@ -248,7 +205,7 @@ class Speech2DiarizationSOND:
         ut = logits_idx.shape[1] * self.diar_model.encoder.time_ds_ratio
         logits_idx = F.upsample(
             logits_idx.unsqueeze(1).float(),
-            size=(ut, ),
+            size=(ut,),
             mode="nearest",
         ).squeeze(1).long()
         logits_idx = logits_idx[0].tolist()
@@ -268,7 +225,7 @@ class Speech2DiarizationSOND:
             if spk not in results:
                 results[spk] = []
             if dur > self.dur_threshold:
-                results[spk].append((st, st+dur))
+                results[spk].append((st, st + dur))
 
         # sort segments in start time ascending
         for spk in results:
@@ -292,7 +249,6 @@ class Speech2DiarizationSOND:
             diarization results for each speaker
 
         """
-        assert check_argument_types()
         # Input as audio signal
         if isinstance(speech, np.ndarray):
             speech = torch.tensor(speech)
@@ -314,37 +270,3 @@ class Speech2DiarizationSOND:
         results, pse_labels = self.post_processing(logits, profile.shape[1], output_format)
 
         return results, pse_labels
-
-    @staticmethod
-    def from_pretrained(
-            model_tag: Optional[str] = None,
-            **kwargs: Optional[Any],
-    ):
-        """Build Speech2Xvector instance from the pretrained model.
-
-        Args:
-            model_tag (Optional[str]): Model tag of the pretrained models.
-                Currently, the tags of espnet_model_zoo are supported.
-
-        Returns:
-            Speech2Xvector: Speech2Xvector instance.
-
-        """
-        if model_tag is not None:
-            try:
-                from espnet_model_zoo.downloader import ModelDownloader
-
-            except ImportError:
-                logging.error(
-                    "`espnet_model_zoo` is not installed. "
-                    "Please install via `pip install -U espnet_model_zoo`."
-                )
-                raise
-            d = ModelDownloader()
-            kwargs.update(**d.download_and_unpack(model_tag))
-
-        return Speech2DiarizationSOND(**kwargs)
-
-
-
-

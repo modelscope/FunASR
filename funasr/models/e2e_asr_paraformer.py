@@ -10,7 +10,6 @@ from typing import Union
 import torch
 import random
 import numpy as np
-from typeguard import check_argument_types
 
 from funasr.layers.abs_normalize import AbsNormalize
 from funasr.losses.label_smoothing_loss import (
@@ -80,7 +79,6 @@ class Paraformer(FunASRModel):
             postencoder: Optional[AbsPostEncoder] = None,
             use_1st_decoder_loss: bool = False,
     ):
-        assert check_argument_types()
         assert 0.0 <= ctc_weight <= 1.0, ctc_weight
         assert 0.0 <= interctc_weight < 1.0, interctc_weight
 
@@ -645,7 +643,6 @@ class ParaformerOnline(Paraformer):
             postencoder: Optional[AbsPostEncoder] = None,
             use_1st_decoder_loss: bool = False,
     ):
-        assert check_argument_types()
         assert 0.0 <= ctc_weight <= 1.0, ctc_weight
         assert 0.0 <= interctc_weight < 1.0, interctc_weight
 
@@ -1255,7 +1252,6 @@ class ParaformerBert(Paraformer):
             preencoder: Optional[AbsPreEncoder] = None,
             postencoder: Optional[AbsPostEncoder] = None,
     ):
-        assert check_argument_types()
         assert 0.0 <= ctc_weight <= 1.0, ctc_weight
         assert 0.0 <= interctc_weight < 1.0, interctc_weight
 
@@ -1528,7 +1524,6 @@ class BiCifParaformer(Paraformer):
             preencoder: Optional[AbsPreEncoder] = None,
             postencoder: Optional[AbsPostEncoder] = None,
     ):
-        assert check_argument_types()
         assert 0.0 <= ctc_weight <= 1.0, ctc_weight
         assert 0.0 <= interctc_weight < 1.0, interctc_weight
 
@@ -1806,7 +1801,6 @@ class ContextualParaformer(Paraformer):
             preencoder: Optional[AbsPreEncoder] = None,
             postencoder: Optional[AbsPostEncoder] = None,
     ):
-        assert check_argument_types()
         assert 0.0 <= ctc_weight <= 1.0, ctc_weight
         assert 0.0 <= interctc_weight < 1.0, interctc_weight
 
@@ -2113,7 +2107,7 @@ class ContextualParaformer(Paraformer):
 
         return loss_att, acc_att, cer_att, wer_att, loss_pre
 
-    def cal_decoder_with_predictor(self, encoder_out, encoder_out_lens, sematic_embeds, ys_pad_lens, hw_list=None):
+    def cal_decoder_with_predictor(self, encoder_out, encoder_out_lens, sematic_embeds, ys_pad_lens, hw_list=None, clas_scale=1.0):
         if hw_list is None:
             # default hotword list
             hw_list = [torch.Tensor([self.sos]).long().to(encoder_out.device)]  # empty hotword list

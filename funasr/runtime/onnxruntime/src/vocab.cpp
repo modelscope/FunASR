@@ -110,17 +110,16 @@ string Vocab::Vector2StringV2(vector<int> in)
             else {
                 // pre word is chinese
                 if (!is_pre_english) {
-                    word[0] = word[0] - 32;
+                    // word[0] = word[0] - 32;
                     words.push_back(word);
                     pre_english_len = word.size();
-
                 }
                 // pre word is english word
                 else {
                     // single letter turn to upper case
-                    if (word.size() == 1) {
-                        word[0] = word[0] - 32;
-                    }
+                    // if (word.size() == 1) {
+                    //     word[0] = word[0] - 32;
+                    // }
 
                     if (pre_english_len > 1) {
                         words.push_back(" ");

@@ -6,7 +6,6 @@ import numpy as np
 import torch
 import torchaudio.compliance.kaldi as kaldi
 from torch.nn.utils.rnn import pad_sequence
-from typeguard import check_argument_types
 
 import funasr.models.frontend.eend_ola_feature as eend_ola_feature
 from funasr.models.frontend.abs_frontend import AbsFrontend
@@ -31,8 +30,8 @@ def load_cmvn(cmvn_file):
                 rescale_line = line_item[3:(len(line_item) - 1)]
                 vars_list = list(rescale_line)
                 continue
-    means = np.array(means_list).astype(np.float)
-    vars = np.array(vars_list).astype(np.float)
+    means = np.array(means_list).astype(np.float32)
+    vars = np.array(vars_list).astype(np.float32)
     cmvn = np.array([means, vars])
     cmvn = torch.as_tensor(cmvn, dtype=torch.float32)
     return cmvn
@@ -95,7 +94,6 @@ class WavFrontend(AbsFrontend):
             snip_edges: bool = True,
             upsacle_samples: bool = True,
     ):
-        assert check_argument_types()
         super().__init__()
         self.fs = fs
         self.window = window
@@ -227,7 +225,6 @@ class WavFrontendOnline(AbsFrontend):
             snip_edges: bool = True,
             upsacle_samples: bool = True,
     ):
-        assert check_argument_types()
         super().__init__()
         self.fs = fs
         self.window = window
@@ -466,7 +463,6 @@ class WavFrontendMel23(AbsFrontend):
             lfr_m: int = 1,
             lfr_n: int = 1,
     ):
-        assert check_argument_types()
         super().__init__()
         self.fs = fs
         self.frame_length = frame_length

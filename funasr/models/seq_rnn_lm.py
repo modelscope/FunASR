@@ -4,7 +4,6 @@ from typing import Union
 
 import torch
 import torch.nn as nn
-from typeguard import check_argument_types
 from funasr.train.abs_model import AbsLM
 
 
@@ -27,7 +26,6 @@ class SequentialRNNLM(AbsLM):
         rnn_type: str = "lstm",
         ignore_id: int = 0,
     ):
-        assert check_argument_types()
         super().__init__()
 
         ninp = unit

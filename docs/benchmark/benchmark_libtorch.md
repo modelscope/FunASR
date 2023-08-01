@@ -1,1 +1,1 @@
-../../funasr/runtime/python/benchmark_libtorch.md
+../../funasr/runtime/docs/benchmark_libtorch.md

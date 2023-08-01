@@ -1,46 +1,33 @@
-# -*- encoding: utf-8 -*-
 #!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
 # Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
 #  MIT License  (https://opensource.org/licenses/MIT)
 
-import argparse
-import logging
-from pathlib import Path
-import sys
 from typing import Optional
-from typing import Sequence
-from typing import Tuple
 from typing import Union
-from typing import Any
-from typing import List
 
 import numpy as np
 import torch
-from typeguard import check_argument_types
+import os
 
+from funasr.build_utils.build_model_from_file import build_model_from_file
 from funasr.datasets.preprocessor import CodeMixTokenizerCommonPreprocessor
-from funasr.utils.cli_utils import get_commandline_args
-from funasr.tasks.punctuation import PunctuationTask
+from funasr.datasets.preprocessor import split_to_mini_sentence
 from funasr.torch_utils.device_funcs import to_device
 from funasr.torch_utils.forward_adaptor import ForwardAdaptor
-from funasr.torch_utils.set_all_random_seed import set_all_random_seed
-from funasr.utils import config_argparse
-from funasr.utils.types import str2triple_str
-from funasr.utils.types import str_or_none
-from funasr.datasets.preprocessor import split_to_mini_sentence
 
 
 class Text2Punc:
 
     def __init__(
-        self,
-        train_config: Optional[str],
-        model_file: Optional[str],
-        device: str = "cpu",
-        dtype: str = "float32",
+            self,
+            train_config: Optional[str],
+            model_file: Optional[str],
+            device: str = "cpu",
+            dtype: str = "float32",
     ):
         #  Build Model
-        model, train_args = PunctuationTask.build_model_from_file(train_config, model_file, device)
+        model, train_args = build_model_from_file(train_config, model_file, None, device, task_name="punc")
         self.device = device
         # Wrape model to make model.nll() data-parallel
         self.wrapped_model = ForwardAdaptor(model, "inference")
@@ -55,6 +42,11 @@ class Text2Punc:
                 self.punc_list[i] = "？"
             elif self.punc_list[i] == "。":
                 self.period = i
+        self.seg_dict_file = None
+        self.seg_jieba = False
+        if "seg_jieba" in train_args:
+            self.seg_jieba = train_args.seg_jieba
+            self.seg_dict_file = os.path.dirname(model_file)+"/"+ "jieba_usr_dict"
         self.preprocessor = CodeMixTokenizerCommonPreprocessor(
             train=False,
             token_type=train_args.token_type,
@@ -64,6 +56,8 @@ class Text2Punc:
             g2p_type=train_args.g2p,
             text_name="text",
             non_linguistic_symbols=train_args.non_linguistic_symbols,
+            seg_jieba=self.seg_jieba,
+            seg_dict_file=self.seg_dict_file
         )
 
     @torch.no_grad()
@@ -144,16 +138,16 @@ class Text2Punc:
 
 
 class Text2PuncVADRealtime:
-    
+
     def __init__(
-        self,
-        train_config: Optional[str],
-        model_file: Optional[str],
-        device: str = "cpu",
-        dtype: str = "float32",
+            self,
+            train_config: Optional[str],
+            model_file: Optional[str],
+            device: str = "cpu",
+            dtype: str = "float32",
     ):
         #  Build Model
-        model, train_args = PunctuationTask.build_model_from_file(train_config, model_file, device)
+        model, train_args = build_model_from_file(train_config, model_file, None, device, task_name="punc")
         self.device = device
         # Wrape model to make model.nll() data-parallel
         self.wrapped_model = ForwardAdaptor(model, "inference")
@@ -178,7 +172,7 @@ class Text2PuncVADRealtime:
             text_name="text",
             non_linguistic_symbols=train_args.non_linguistic_symbols,
         )
-    
+
     @torch.no_grad()
     def __call__(self, text: Union[list, str], cache: list, split_size=20):
         if cache is not None and len(cache) > 0:
@@ -215,7 +209,7 @@ class Text2PuncVADRealtime:
             if indices.size()[0] != 1:
                 punctuations = torch.squeeze(indices)
             assert punctuations.size()[0] == len(mini_sentence)
-            
+
             # Search for the last Period/QuestionMark as cache
             if mini_sentence_i < len(mini_sentences) - 1:
                 sentenceEnd = -1
@@ -226,7 +220,7 @@ class Text2PuncVADRealtime:
                         break
                     if last_comma_index < 0 and self.punc_list[punctuations[i]] == "，":
                         last_comma_index = i
-                
+
                 if sentenceEnd < 0 and len(mini_sentence) > cache_pop_trigger_limit and last_comma_index >= 0:
                     # The sentence it too long, cut off at a comma.
                     sentenceEnd = last_comma_index
@@ -235,11 +229,11 @@ class Text2PuncVADRealtime:
                 cache_sent_id = mini_sentence_id[sentenceEnd + 1:]
                 mini_sentence = mini_sentence[0:sentenceEnd + 1]
                 punctuations = punctuations[0:sentenceEnd + 1]
-            
+
             punctuations_np = punctuations.cpu().numpy()
             sentence_punc_list += [self.punc_list[int(x)] for x in punctuations_np]
             sentence_words_list += mini_sentence
-        
+
         assert len(sentence_punc_list) == len(sentence_words_list)
         words_with_punc = []
         sentence_punc_list_out = []
@@ -256,7 +250,7 @@ class Text2PuncVADRealtime:
                 if sentence_punc_list[i] != "_":
                     words_with_punc.append(sentence_punc_list[i])
         sentence_out = "".join(words_with_punc)
-        
+
         sentenceEnd = -1
         for i in range(len(sentence_punc_list) - 2, 1, -1):
             if sentence_punc_list[i] == "。" or sentence_punc_list[i] == "？":
@@ -267,5 +261,3 @@ class Text2PuncVADRealtime:
             sentence_out = sentence_out[:-1]
             sentence_punc_list_out[-1] = "_"
         return sentence_out, sentence_punc_list_out, cache_out
-
-

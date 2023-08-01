@@ -12,7 +12,7 @@ def statistic_model_parameters(model, prefix=None):
     return numel
 
 
-def int2vec(x, vec_dim=8, dtype=np.int):
+def int2vec(x, vec_dim=8, dtype=np.int32):
     b = ('{:0' + str(vec_dim) + 'b}').format(x)
     # little-endian order: lower bit first
     return (np.array(list(b)[::-1]) == '1').astype(dtype)

@@ -61,13 +61,13 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
     int num_samples = buffer.size();  // the size of the buf
 
     if (!buffer.empty()) {
-      // fout.write(buffer.data(), buffer.size());
       // feed data to asr engine
       FUNASR_RESULT Result = FunOfflineInferBuffer(
-          asr_hanlde, buffer.data(), buffer.size(), RASR_NONE, NULL, 16000);
+          asr_hanlde, buffer.data(), buffer.size(), RASR_NONE, NULL, 16000, msg["wav_format"]);
 
       std::string asr_result =
           ((FUNASR_RECOG_RESULT*)Result)->msg;  // get decode result
+      FunASRFreeResult(Result);
 
       websocketpp::lib::error_code ec;
       nlohmann::json jsonresult;        // result json
@@ -107,6 +107,7 @@ void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
                                            // connection
   data_msg->samples = std::make_shared<std::vector<char>>();
   data_msg->msg = nlohmann::json::parse("{}");
+  data_msg->msg["wav_format"] = "pcm";
   data_map.emplace(hdl, data_msg);
   LOG(INFO) << "on_open, active connections: " << data_map.size();
 }
@@ -171,6 +172,9 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
       if (jsonresult["wav_name"] != nullptr) {
         msg_data->msg["wav_name"] = jsonresult["wav_name"];
       }
+      if (jsonresult["wav_format"] != nullptr) {
+        msg_data->msg["wav_format"] = jsonresult["wav_format"];
+      }
 
       if (jsonresult["is_speaking"] == false ||
           jsonresult["is_finished"] == true) {
@@ -180,9 +184,9 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
           // do_close(ws);
         } else {
           // add padding to the end of the wav data
-          std::vector<short> padding(static_cast<short>(0.3 * 16000));
-          sample_data_p->insert(sample_data_p->end(), padding.data(),
-                                padding.data() + padding.size());
+          // std::vector<short> padding(static_cast<short>(0.3 * 16000));
+          // sample_data_p->insert(sample_data_p->end(), padding.data(),
+          //                       padding.data() + padding.size());
           // for offline, send all receive data to decoder engine
           asio::post(io_decoder_,
                      std::bind(&WebSocketServer::do_decoder, this,

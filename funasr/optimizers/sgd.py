@@ -1,5 +1,4 @@
 import torch
-from typeguard import check_argument_types
 
 
 class SGD(torch.optim.SGD):
@@ -21,7 +20,6 @@ class SGD(torch.optim.SGD):
         weight_decay: float = 0.0,
         nesterov: bool = False,
     ):
-        assert check_argument_types()
         super().__init__(
             params,
             lr=lr,

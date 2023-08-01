@@ -21,6 +21,13 @@ Overview
    ./installation/docker.md
 
 .. toctree::
+   :maxdepth: 5
+   :caption: Quick Start
+
+   ./funasr/quick_start.md
+
+
+.. toctree::
    :maxdepth: 1
    :caption: Academic Egs
 
@@ -38,10 +45,10 @@ Overview
    :caption: ModelScope Egs
 
    ./modelscope_pipeline/quick_start.md
-   ./modelscope_pipeline/asr_pipeline.md
-   ./modelscope_pipeline/vad_pipeline.md
-   ./modelscope_pipeline/punc_pipeline.md
-   ./modelscope_pipeline/tp_pipeline.md
+   ./egs_modelscope/asr/TEMPLATE/README.md
+   ./egs_modelscope/vad/TEMPLATE/README.md
+   ./egs_modelscope/punctuation/TEMPLATE/README.md
+   ./egs_modelscope/tp/TEMPLATE/README.md
    ./modelscope_pipeline/sv_pipeline.md
    ./modelscope_pipeline/sd_pipeline.md
    ./modelscope_pipeline/itn_pipeline.md
@@ -64,24 +71,21 @@ Overview
    :maxdepth: 1
    :caption: Runtime and Service
 
-   ./runtime/export.md
-   ./runtime/onnxruntime_python.md
-   ./runtime/onnxruntime_cpp.md
-   ./runtime/libtorch_python.md
-   ./runtime/html5.md
-   ./runtime/websocket_python.md
-   ./runtime/websocket_cpp.md
-   ./runtime/grpc_python.md
-   ./runtime/grpc_cpp.md
+   ./funasr/runtime/docs/SDK_tutorial.md
+   ./funasr/runtime/python/websocket/README.md
+   ./funasr/runtime/websocket/readme.md
+   ./funasr/runtime/html5/readme.md
+
 
 
 .. toctree::
    :maxdepth: 1
-   :caption: Benchmark and Leadboard
+   :caption: Benchmark and Leaderboard
 
    ./benchmark/benchmark_onnx.md
    ./benchmark/benchmark_onnx_cpp.md
    ./benchmark/benchmark_libtorch.md
+   ./benchmark/benchmark_pipeline_cer.md
 
 
 .. toctree::

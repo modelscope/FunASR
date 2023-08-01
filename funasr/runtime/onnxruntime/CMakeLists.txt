@@ -27,6 +27,7 @@ IF(WIN32)
 	endif()
 ELSE()
     link_directories(${ONNXRUNTIME_DIR}/lib)
+    link_directories(${FFMPEG_DIR}/lib)
 endif()
 
 include_directories(${PROJECT_SOURCE_DIR}/third_party/kaldi-native-fbank)

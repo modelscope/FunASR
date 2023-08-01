@@ -46,12 +46,17 @@ typedef enum {
 	FUNASR_MODEL_PARAFORMER = 3,
 }FUNASR_MODEL_TYPE;
 
+typedef enum {
+	PUNC_OFFLINE=0,
+	PUNC_ONLINE=1,
+}PUNC_TYPE;
+
 typedef void (* QM_CALLBACK)(int cur_step, int n_total); // n_total: total steps; cur_step: Current Step.
 	
 // ASR
 _FUNASRAPI FUNASR_HANDLE  	FunASRInit(std::map<std::string, std::string>& model_path, int thread_num);
 // buffer
-_FUNASRAPI FUNASR_RESULT	FunASRInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, FUNASR_MODE mode, QM_CALLBACK fn_callback, int sampling_rate=16000);
+_FUNASRAPI FUNASR_RESULT	FunASRInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, FUNASR_MODE mode, QM_CALLBACK fn_callback, int sampling_rate=16000, std::string wav_format="pcm");
 // file, support wav & pcm
 _FUNASRAPI FUNASR_RESULT	FunASRInfer(FUNASR_HANDLE handle, const char* sz_filename, FUNASR_MODE mode, QM_CALLBACK fn_callback, int sampling_rate=16000);
 
@@ -65,7 +70,7 @@ _FUNASRAPI const float	FunASRGetRetSnippetTime(FUNASR_RESULT result);
 _FUNASRAPI FUNASR_HANDLE  	FsmnVadInit(std::map<std::string, std::string>& model_path, int thread_num);
 _FUNASRAPI FUNASR_HANDLE  	FsmnVadOnlineInit(FUNASR_HANDLE fsmnvad_handle);
 // buffer
-_FUNASRAPI FUNASR_RESULT	FsmnVadInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, QM_CALLBACK fn_callback, bool input_finished=true, int sampling_rate=16000);
+_FUNASRAPI FUNASR_RESULT	FsmnVadInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, QM_CALLBACK fn_callback, bool input_finished=true, int sampling_rate=16000, std::string wav_format="pcm");
 // file, support wav & pcm
 _FUNASRAPI FUNASR_RESULT	FsmnVadInfer(FUNASR_HANDLE handle, const char* sz_filename, QM_CALLBACK fn_callback, int sampling_rate=16000);
 
@@ -75,14 +80,16 @@ _FUNASRAPI void				FsmnVadUninit(FUNASR_HANDLE handle);
 _FUNASRAPI const float		FsmnVadGetRetSnippetTime(FUNASR_RESULT result);
 
 // PUNC
-_FUNASRAPI FUNASR_HANDLE  		CTTransformerInit(std::map<std::string, std::string>& model_path, int thread_num);
-_FUNASRAPI const std::string	CTTransformerInfer(FUNASR_HANDLE handle, const char* sz_sentence, FUNASR_MODE mode, QM_CALLBACK fn_callback);
+_FUNASRAPI FUNASR_HANDLE  		CTTransformerInit(std::map<std::string, std::string>& model_path, int thread_num, PUNC_TYPE type=PUNC_OFFLINE);
+_FUNASRAPI FUNASR_RESULT     	CTTransformerInfer(FUNASR_HANDLE handle, const char* sz_sentence, FUNASR_MODE mode, QM_CALLBACK fn_callback, PUNC_TYPE type=PUNC_OFFLINE, FUNASR_RESULT pre_result=nullptr);
+_FUNASRAPI const char* 			CTTransformerGetResult(FUNASR_RESULT result,int n_index);
+_FUNASRAPI void					CTTransformerFreeResult(FUNASR_RESULT result);
 _FUNASRAPI void					CTTransformerUninit(FUNASR_HANDLE handle);
 
 //OfflineStream
 _FUNASRAPI FUNASR_HANDLE  	FunOfflineInit(std::map<std::string, std::string>& model_path, int thread_num);
 // buffer
-_FUNASRAPI FUNASR_RESULT	FunOfflineInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, FUNASR_MODE mode, QM_CALLBACK fn_callback, int sampling_rate=16000);
+_FUNASRAPI FUNASR_RESULT	FunOfflineInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, FUNASR_MODE mode, QM_CALLBACK fn_callback, int sampling_rate=16000, std::string wav_format="pcm");
 // file, support wav & pcm
 _FUNASRAPI FUNASR_RESULT	FunOfflineInfer(FUNASR_HANDLE handle, const char* sz_filename, FUNASR_MODE mode, QM_CALLBACK fn_callback, int sampling_rate=16000);
 _FUNASRAPI void				FunOfflineUninit(FUNASR_HANDLE handle);

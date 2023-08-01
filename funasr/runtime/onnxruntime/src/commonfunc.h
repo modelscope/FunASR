@@ -14,6 +14,11 @@ typedef struct
     float  snippet_time;
 }FUNASR_VAD_RESULT;
 
+typedef struct
+{
+    string msg;
+    vector<string> arr_cache;
+}FUNASR_PUNC_RESULT;
 
 #ifdef _WIN32
 #include <codecvt>

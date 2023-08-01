@@ -15,7 +15,7 @@ def modelscope_infer(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model', type=str, default="damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch")
+    parser.add_argument('--model', type=str, default="damo/punc_ct-transformer_cn-en-common-vocab471067-large")
     parser.add_argument('--text_in', type=str, default="./data/test/punc.txt")
     parser.add_argument('--output_dir', type=str, default="./results/")
     parser.add_argument('--gpuid', type=str, default="0")

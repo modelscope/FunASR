@@ -7,7 +7,6 @@ import logging
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
-from typeguard import check_argument_types
 import numpy as np
 from funasr.modules.nets_utils import make_pad_mask
 from funasr.modules.layer_norm import LayerNorm
@@ -90,7 +89,6 @@ class ConvEncoder(AbsEncoder):
             tf2torch_tensor_name_prefix_torch: str = "speaker_encoder",
             tf2torch_tensor_name_prefix_tf: str = "EAND/speaker_encoder",
     ):
-        assert check_argument_types()
         super().__init__()
         self._output_size = num_units
 

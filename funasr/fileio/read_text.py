@@ -4,7 +4,6 @@ from typing import Dict
 from typing import List
 from typing import Union
 
-from typeguard import check_argument_types
 
 
 def read_2column_text(path: Union[Path, str]) -> Dict[str, str]:
@@ -19,7 +18,6 @@ def read_2column_text(path: Union[Path, str]) -> Dict[str, str]:
         {'key1': '/some/path/a.wav', 'key2': '/some/path/b.wav'}
 
     """
-    assert check_argument_types()
 
     data = {}
     with Path(path).open("r", encoding="utf-8") as f:
@@ -47,7 +45,6 @@ def load_num_sequence_text(
         >>> d = load_num_sequence_text('text')
         >>> np.testing.assert_array_equal(d["key1"], np.array([1, 2, 3]))
     """
-    assert check_argument_types()
     if loader_type == "text_int":
         delimiter = " "
         dtype = int

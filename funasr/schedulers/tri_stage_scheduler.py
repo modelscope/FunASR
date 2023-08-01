@@ -8,7 +8,6 @@ from typing import Optional, List
 
 import torch
 from torch.optim.lr_scheduler import _LRScheduler
-from typeguard import check_argument_types
 
 from funasr.schedulers.abs_scheduler import AbsBatchStepScheduler
 
@@ -22,7 +21,6 @@ class TriStageLR(_LRScheduler, AbsBatchStepScheduler):
             init_lr_scale: float = 0.01,
             final_lr_scale: float = 0.01,
     ):
-        assert check_argument_types()
         self.optimizer = optimizer
         self.last_epoch = last_epoch
         self.phase_ratio = phase_ratio

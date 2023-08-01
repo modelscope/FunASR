@@ -7,7 +7,6 @@ import numpy as np
 
 from funasr.modules.streaming_utils import utils as myutils
 from funasr.models.decoder.transformer_decoder import BaseTransformerDecoder
-from typeguard import check_argument_types
 
 from funasr.modules.attention import MultiHeadedAttentionSANMDecoder, MultiHeadedAttentionCrossAtt
 from funasr.modules.embedding import PositionalEncoding
@@ -126,7 +125,6 @@ class ContextualParaformerDecoder(ParaformerSANMDecoder):
         kernel_size: int = 21,
         sanm_shfit: int = 0,
     ):
-        assert check_argument_types()
         super().__init__(
             vocab_size=vocab_size,
             encoder_output_size=encoder_output_size,
@@ -246,6 +244,7 @@ class ContextualParaformerDecoder(ParaformerSANMDecoder):
         ys_in_pad: torch.Tensor,
         ys_in_lens: torch.Tensor,
         contextual_info: torch.Tensor,
+        clas_scale: float = 1.0,
         return_hidden: bool = False,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Forward decoder.
@@ -285,7 +284,7 @@ class ContextualParaformerDecoder(ParaformerSANMDecoder):
         cx, tgt_mask, _, _, _ = self.bias_decoder(x_self_attn, tgt_mask, contextual_info, memory_mask=contextual_mask)
 
         if self.bias_output is not None:
-            x = torch.cat([x_src_attn, cx], dim=2)
+            x = torch.cat([x_src_attn, cx*clas_scale], dim=2)
             x = self.bias_output(x.transpose(1, 2)).transpose(1, 2)  # 2D -> D
             x = x_self_attn + self.dropout(x)
 

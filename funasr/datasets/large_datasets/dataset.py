@@ -6,6 +6,8 @@ from functools import partial
 import torch
 import torch.distributed as dist
 import torchaudio
+import numpy as np
+import soundfile
 from kaldiio import ReadHelper
 from torch.utils.data import IterableDataset
 
@@ -123,7 +125,14 @@ class AudioDataset(IterableDataset):
                             sample_dict["key"] = key
                     elif data_type == "sound":
                         key, path = item.strip().split()
-                        waveform, sampling_rate = torchaudio.load(path)
+                        try:
+                            waveform, sampling_rate = torchaudio.load(path)
+                        except:
+                            waveform, sampling_rate = soundfile.read(path, dtype='float32')
+                            if waveform.ndim == 2:
+                                waveform = waveform[:, 0]
+                            waveform = np.expand_dims(waveform, axis=0)
+                            waveform = torch.tensor(waveform)
                         if self.frontend_conf is not None:
                             if sampling_rate != self.frontend_conf["fs"]:
                                 waveform = torchaudio.transforms.Resample(orig_freq=sampling_rate,
@@ -193,14 +202,7 @@ def Dataset(data_list_file,
     data_types = conf.get("data_types", "kaldi_ark,text")
 
     pre_hwfile = conf.get("pre_hwlist", None)
-    pre_prob = conf.get("pre_prob", 0)  # unused yet
-
-    hw_config = {"sample_rate": conf.get("sample_rate", 0.6),
-                 "double_rate": conf.get("double_rate", 0.1),
-                 "hotword_min_length": conf.get("hotword_min_length", 2),
-                 "hotword_max_length": conf.get("hotword_max_length", 8),
-                 "pre_prob": conf.get("pre_prob", 0.0)}
-
+    # pre_prob = conf.get("pre_prob", 0)  # unused yet
     if pre_hwfile is not None:
         pre_hwlist = []
         with open(pre_hwfile, 'r') as fin:
@@ -208,6 +210,15 @@ def Dataset(data_list_file,
                 pre_hwlist.append(line.strip())
     else:
         pre_hwlist = None
+
+    hw_config = {"sample_rate": conf.get("sample_rate", 0.6),
+                 "double_rate": conf.get("double_rate", 0.1),
+                 "hotword_min_length": conf.get("hotword_min_length", 2),
+                 "hotword_max_length": conf.get("hotword_max_length", 8),
+                 "pre_prob": conf.get("pre_prob", 0.0),
+                 "pre_hwlist": pre_hwlist}
+
+    
 
     dataset = AudioDataset(scp_lists, 
                            data_names, 
@@ -218,14 +229,14 @@ def Dataset(data_list_file,
                            mode=mode, 
                            )
 
-    filter_conf = conf.get('filter_conf', {})
-    filter_fn = partial(filter, **filter_conf)
-    dataset = FilterIterDataPipe(dataset, fn=filter_fn)
-
     if "text" in data_names:
         vocab = {'vocab': dict, 'seg_dict': seg_dict, 'punc_dict': punc_dict, 'bpe_tokenizer': bpe_tokenizer, 'hw_config': hw_config}
         tokenize_fn = partial(tokenize, **vocab)
         dataset = MapperIterDataPipe(dataset, fn=tokenize_fn)
+
+    filter_conf = conf.get('filter_conf', {})
+    filter_fn = partial(filter, **filter_conf)
+    dataset = FilterIterDataPipe(dataset, fn=filter_fn)
 
     if shuffle:
         buffer_conf = conf.get('shuffle_conf', {})

@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+#  MIT License  (https://opensource.org/licenses/MIT)
 
 import argparse
 import logging
@@ -26,6 +28,7 @@ from funasr.utils.types import int_or_none
 from funasr.utils.types import str2bool
 from funasr.utils.types import str_or_none
 from funasr.utils.yaml_no_alias_safe_dump import yaml_no_alias_safe_dump
+from funasr.modules.lora.utils import mark_only_lora_as_trainable
 
 
 def get_parser():
@@ -299,7 +302,7 @@ def get_parser():
         "--freeze_param",
         type=str,
         default=[],
-        nargs="*",
+        action="append",
         help="Freeze parameters",
     )
 
@@ -476,6 +479,18 @@ def get_parser():
         default=None,
         help="oss bucket.",
     )
+    parser.add_argument(
+        "--enable_lora",
+        type=str2bool,
+        default=False,
+        help="Apply lora for finetuning.",
+    )
+    parser.add_argument(
+        "--lora_bias",
+        type=str,
+        default="none",
+        help="lora bias.",
+    )
 
     return parser
 
@@ -519,6 +534,8 @@ if __name__ == '__main__':
         dtype=getattr(torch, args.train_dtype),
         device="cuda" if args.ngpu > 0 else "cpu",
     )
+    if args.enable_lora:
+        mark_only_lora_as_trainable(model, args.lora_bias)
     for t in args.freeze_param:
         for k, p in model.named_parameters():
             if k.startswith(t + ".") or k == t:

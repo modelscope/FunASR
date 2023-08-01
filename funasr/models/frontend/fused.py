@@ -3,7 +3,6 @@ from funasr.models.frontend.default import DefaultFrontend
 from funasr.models.frontend.s3prl import S3prlFrontend
 import numpy as np
 import torch
-from typeguard import check_argument_types
 from typing import Tuple
 
 
@@ -12,7 +11,6 @@ class FusedFrontends(AbsFrontend):
         self, frontends=None, align_method="linear_projection", proj_dim=100, fs=16000
     ):
 
-        assert check_argument_types()
         super().__init__()
         self.align_method = (
             align_method  # fusing method : linear_projection only for now

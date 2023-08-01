@@ -6,7 +6,6 @@ from typing import Union
 
 import sentencepiece as spm
 from torch.utils.data import DataLoader
-from typeguard import check_argument_types
 
 from funasr.datasets.large_datasets.dataset import Dataset
 from funasr.iterators.abs_iter_factory import AbsIterFactory
@@ -43,7 +42,6 @@ def load_seg_dict(seg_dict_file):
 
 class SentencepiecesTokenizer(AbsTokenizer):
     def __init__(self, model: Union[Path, str]):
-        assert check_argument_types()
         self.model = str(model)
         self.sp = None
 
@@ -71,12 +69,15 @@ class LargeDataLoader(AbsIterFactory):
             symbol_table = read_symbol_table(args.token_list)
         if hasattr(args, "seg_dict_file") and args.seg_dict_file is not None:
             seg_dict = load_seg_dict(args.seg_dict_file)
-        if hasattr(args, "punc_dict_file") and args.punc_dict_file is not None:
-            punc_dict = read_symbol_table(args.punc_dict_file)
+        if hasattr(args, "punc_list") and args.punc_list is not None:
+            punc_dict = read_symbol_table(args.punc_list)
         if hasattr(args, "bpemodel") and args.bpemodel is not None:
             bpe_tokenizer = SentencepiecesTokenizer(args.bpemodel)
         self.dataset_conf = args.dataset_conf
-        self.frontend_conf = args.frontend_conf
+        if "frontend_conf" not in args:
+            self.frontend_conf =  None
+        else:
+            self.frontend_conf = args.frontend_conf
         self.speed_perturb = args.speed_perturb if hasattr(args, "speed_perturb") else None 
         logging.info("dataloader config: {}".format(self.dataset_conf))
         batch_mode = self.dataset_conf.get("batch_mode", "padding")

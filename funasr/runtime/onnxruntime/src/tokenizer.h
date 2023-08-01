@@ -30,7 +30,7 @@ public:
 	vector<string> SplitChineseString(const string& str_info);
 	void StrSplit(const string& str, const char split, vector<string>& res);
 	void Tokenize(const char* str_info, vector<string>& str_out, vector<int>& id_out);
-
+	bool IsPunc(string& Punc);
 };
 
 } // namespace funasr

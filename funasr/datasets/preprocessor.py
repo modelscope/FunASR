@@ -11,8 +11,7 @@ from typing import Union
 import numpy as np
 import scipy.signal
 import soundfile
-from typeguard import check_argument_types
-from typeguard import check_return_type
+import jieba
 
 from funasr.text.build_tokenizer import build_tokenizer
 from funasr.text.cleaner import TextCleaner
@@ -268,7 +267,6 @@ class CommonPreprocessor(AbsPreprocessor):
     def _speech_process(
             self, data: Dict[str, Union[str, np.ndarray]]
     ) -> Dict[str, Union[str, np.ndarray]]:
-        assert check_argument_types()
         if self.speech_name in data:
             if self.train and (self.rirs is not None or self.noises is not None):
                 speech = data[self.speech_name]
@@ -355,7 +353,6 @@ class CommonPreprocessor(AbsPreprocessor):
                 speech = data[self.speech_name]
                 ma = np.max(np.abs(speech))
                 data[self.speech_name] = speech * self.speech_volume_normalize / ma
-        assert check_return_type(data)
         return data
 
     def _text_process(
@@ -372,13 +369,11 @@ class CommonPreprocessor(AbsPreprocessor):
                 tokens = self.tokenizer.text2tokens(text)
             text_ints = self.token_id_converter.tokens2ids(tokens)
             data[self.text_name] = np.array(text_ints, dtype=np.int64)
-        assert check_return_type(data)
         return data
 
     def __call__(
             self, uid: str, data: Dict[str, Union[str, np.ndarray]]
     ) -> Dict[str, np.ndarray]:
-        assert check_argument_types()
 
         data = self._speech_process(data)
         data = self._text_process(data)
@@ -445,7 +440,6 @@ class LMPreprocessor(CommonPreprocessor):
                 tokens = self.tokenizer.text2tokens(text)
             text_ints = self.token_id_converter.tokens2ids(tokens)
             data[self.text_name] = np.array(text_ints, dtype=np.int64)
-        assert check_return_type(data)
         return data
 
 
@@ -502,13 +496,11 @@ class CommonPreprocessor_multi(AbsPreprocessor):
                 tokens = self.tokenizer.text2tokens(text)
                 text_ints = self.token_id_converter.tokens2ids(tokens)
                 data[text_n] = np.array(text_ints, dtype=np.int64)
-        assert check_return_type(data)
         return data
 
     def __call__(
             self, uid: str, data: Dict[str, Union[str, np.ndarray]]
     ) -> Dict[str, np.ndarray]:
-        assert check_argument_types()
 
         if self.speech_name in data:
             # Nothing now: candidates:
@@ -612,7 +604,6 @@ class MutliTokenizerCommonPreprocessor(CommonPreprocessor):
                 tokens = self.tokenizer[i].text2tokens(text)
                 text_ints = self.token_id_converter[i].tokens2ids(tokens)
                 data[text_name] = np.array(text_ints, dtype=np.int64)
-        assert check_return_type(data)
         return data
 
 class CodeMixTokenizerCommonPreprocessor(CommonPreprocessor):
@@ -638,6 +629,7 @@ class CodeMixTokenizerCommonPreprocessor(CommonPreprocessor):
             text_name: str = "text",
             split_text_name: str = "split_text",
             split_with_space: bool = False,
+            seg_jieba: bool = False,
             seg_dict_file: str = None,
     ):
         super().__init__(
@@ -665,6 +657,9 @@ class CodeMixTokenizerCommonPreprocessor(CommonPreprocessor):
         )
         # The data field name for split text.
         self.split_text_name = split_text_name
+        self.seg_jieba = seg_jieba
+        if self.seg_jieba:
+            jieba.load_userdict(seg_dict_file)
 
     @classmethod
     def split_words(cls, text: str):
@@ -687,13 +682,73 @@ class CodeMixTokenizerCommonPreprocessor(CommonPreprocessor):
                 words.append(current_word)
         return words
 
+    @classmethod
+    def isEnglish(cls, text:str):
+        if re.search('^[a-zA-Z\']+$', text):
+            return True
+        else:
+            return False
+
+    @classmethod
+    def join_chinese_and_english(cls, input_list):
+        line = ''
+        for token in input_list:
+            if cls.isEnglish(token):
+                line = line + ' ' + token
+            else:
+                line = line + token
+
+        line = line.strip()
+        return line   
+
+    @classmethod
+    def split_words_jieba(cls, text: str):
+        input_list = text.split()
+        token_list_all = []
+        langauge_list = []
+        token_list_tmp = []
+        language_flag = None
+        for token in input_list:
+            if cls.isEnglish(token) and language_flag == 'Chinese':
+                token_list_all.append(token_list_tmp)
+                langauge_list.append('Chinese')
+                token_list_tmp = []
+            elif not cls.isEnglish(token) and language_flag == 'English':
+                token_list_all.append(token_list_tmp)
+                langauge_list.append('English')
+                token_list_tmp = []
+
+            token_list_tmp.append(token)
+
+            if cls.isEnglish(token):
+                language_flag = 'English'
+            else:
+                language_flag = 'Chinese'
+
+        if token_list_tmp:
+            token_list_all.append(token_list_tmp)
+            langauge_list.append(language_flag)
+
+        result_list = []
+        for token_list_tmp, language_flag in zip(token_list_all, langauge_list):
+            if language_flag == 'English':
+                result_list.extend(token_list_tmp)
+            else:
+                seg_list = jieba.cut(cls.join_chinese_and_english(token_list_tmp), HMM=False)
+                result_list.extend(seg_list)
+
+        return result_list
+
     def __call__(
             self, uid: str, data: Dict[str, Union[list, str, np.ndarray]]
     ) -> Dict[str, Union[list, np.ndarray]]:
-        assert check_argument_types()
         # Split words.
         if isinstance(data[self.text_name], str):
-            split_text = self.split_words(data[self.text_name])
+            if self.seg_jieba:
+  #              jieba.load_userdict(seg_dict_file)
+                split_text = self.split_words_jieba(data[self.text_name])
+            else:
+                split_text = self.split_words(data[self.text_name])
         else:
             split_text = data[self.text_name]
         data[self.text_name] = " ".join(split_text)
@@ -793,7 +848,6 @@ class PuncTrainTokenizerCommonPreprocessor(CommonPreprocessor):
     ) -> Dict[str, np.ndarray]:
         for i in range(self.num_tokenizer):
             text_name = self.text_name[i]
-            #import pdb; pdb.set_trace()
             if text_name in data and self.tokenizer[i] is not None:
                 text = data[text_name]
                 text = self.text_cleaner(text)

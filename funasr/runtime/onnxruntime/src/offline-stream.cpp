@@ -1,11 +1,11 @@
 #include "precomp.h"
+#include <unistd.h>
 
 namespace funasr {
 OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int thread_num)
 {
     // VAD model
     if(model_path.find(VAD_DIR) != model_path.end()){
-        use_vad = true;
         string vad_model_path;
         string vad_cmvn_path;
         string vad_config_path;
@@ -16,8 +16,16 @@ OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int
         }
         vad_cmvn_path = PathAppend(model_path.at(VAD_DIR), VAD_CMVN_NAME);
         vad_config_path = PathAppend(model_path.at(VAD_DIR), VAD_CONFIG_NAME);
-        vad_handle = make_unique<FsmnVad>();
-        vad_handle->InitVad(vad_model_path, vad_cmvn_path, vad_config_path, thread_num);
+        if (access(vad_model_path.c_str(), F_OK) != 0 ||
+            access(vad_cmvn_path.c_str(), F_OK) != 0 ||
+            access(vad_config_path.c_str(), F_OK) != 0 )
+        {
+            LOG(INFO) << "VAD model file is not exist, skip load vad model.";
+        }else{
+            vad_handle = make_unique<FsmnVad>();
+            vad_handle->InitVad(vad_model_path, vad_cmvn_path, vad_config_path, thread_num);
+            use_vad = true;
+        }
     }
 
     // AM model
@@ -39,7 +47,6 @@ OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int
 
     // PUNC model
     if(model_path.find(PUNC_DIR) != model_path.end()){
-        use_punc = true;
         string punc_model_path;
         string punc_config_path;
     
@@ -49,8 +56,15 @@ OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int
         }
         punc_config_path = PathAppend(model_path.at(PUNC_DIR), PUNC_CONFIG_NAME);
 
-        punc_handle = make_unique<CTTransformer>();
-        punc_handle->InitPunc(punc_model_path, punc_config_path, thread_num);
+        if (access(punc_model_path.c_str(), F_OK) != 0 ||
+            access(punc_config_path.c_str(), F_OK) != 0 )
+        {
+            LOG(INFO) << "PUNC model file is not exist, skip load punc model.";
+        }else{
+            punc_handle = make_unique<CTTransformer>();
+            punc_handle->InitPunc(punc_model_path, punc_config_path, thread_num);
+            use_punc = true;
+        }
     }
 }
 

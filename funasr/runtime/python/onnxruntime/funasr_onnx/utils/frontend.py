@@ -4,7 +4,6 @@ from typing import Any, Dict, Iterable, List, NamedTuple, Set, Tuple, Union
 import copy
 
 import numpy as np
-from typeguard import check_argument_types
 import kaldi_native_fbank as knf
 
 root_dir = Path(__file__).resolve().parent
@@ -29,7 +28,6 @@ class WavFrontend():
             dither: float = 1.0,
             **kwargs,
     ) -> None:
-        check_argument_types()
 
         opts = knf.FbankOptions()
         opts.frame_opts.samp_freq = fs

@@ -9,7 +9,6 @@ from typing import Tuple
 import numpy as np
 import torch
 import torch.nn as  nn
-from typeguard import check_argument_types
 
 from funasr.models.frontend.wav_frontend import WavFrontendMel23
 from funasr.modules.eend_ola.encoder import EENDOLATransformerEncoder
@@ -48,7 +47,6 @@ class DiarEENDOLAModel(FunASRModel):
             mapping_dict=None,
             **kwargs,
     ):
-        assert check_argument_types()
 
         super().__init__()
         self.frontend = frontend

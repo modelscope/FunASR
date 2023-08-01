@@ -5,6 +5,7 @@ import torch
 from torch import nn
 import math
 from funasr.models.encoder.fsmn_encoder import FSMN
+from funasr.models.base_model import FunASRModel
 
 
 class VadStateMachine(Enum):
@@ -211,7 +212,7 @@ class WindowDetector(object):
         return int(self.frame_size_ms)
 
 
-class E2EVadModel(nn.Module):
+class E2EVadModel(FunASRModel):
     """
     Author: Speech Lab of DAMO Academy, Alibaba Group
     Deep-FSMN for Large Vocabulary Continuous Speech Recognition

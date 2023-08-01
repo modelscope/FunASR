@@ -8,7 +8,6 @@ from typing import Tuple
 
 import torch
 import torch.nn.functional as F
-from typeguard import check_argument_types
 
 from funasr.modules.nets_utils import make_pad_mask
 from funasr.torch_utils.device_funcs import force_gatherable
@@ -34,7 +33,6 @@ class AbsLM(torch.nn.Module, BatchScorerInterface, ABC):
 
 class LanguageModel(FunASRModel):
     def __init__(self, lm: AbsLM, vocab_size: int, ignore_id: int = 0):
-        assert check_argument_types()
         super().__init__()
         self.lm = lm
         self.sos = 1
@@ -154,7 +152,6 @@ class LanguageModel(FunASRModel):
 class PunctuationModel(FunASRModel):
     
     def __init__(self, punc_model: torch.nn.Module, vocab_size: int, ignore_id: int = 0, punc_weight: list = None):
-        assert check_argument_types()
         super().__init__()
         self.punc_model = punc_model
         self.punc_weight = torch.Tensor(punc_weight)
