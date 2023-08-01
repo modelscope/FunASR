@@ -458,6 +458,12 @@ def get_parser():
         default=121,
         help="The smoothing size for post-processing"
     )
+    group.add_argument(
+        "--dur_threshold",
+        type=int,
+        default=10,
+        help="The threshold of minimum duration"
+    )
 
     return parser
 
