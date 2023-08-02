@@ -20,6 +20,7 @@ namespace funasr {
 #define QUANTIZE "quantize"
 #define VAD_QUANT "vad-quant"
 #define PUNC_QUANT "punc-quant"
+#define ASR_MODE "asr-mode"
 
 #define WAV_PATH "wav-path"
 #define WAV_SCP "wav-scp"

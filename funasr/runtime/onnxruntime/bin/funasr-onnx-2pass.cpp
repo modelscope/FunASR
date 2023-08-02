@@ -48,10 +48,10 @@ int main(int argc, char** argv)
     TCLAP::ValueArg<std::string>    online_model_dir("", ONLINE_MODEL_DIR, "the asr online model path, which contains encoder.onnx, decoder.onnx, config.yaml, am.mvn", true, "", "string");
     TCLAP::ValueArg<std::string>    quantize("", QUANTIZE, "false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir", false, "false", "string");
     TCLAP::ValueArg<std::string>    vad_dir("", VAD_DIR, "the vad online model path, which contains model.onnx, vad.yaml, vad.mvn", false, "", "string");
-    TCLAP::ValueArg<std::string>    vad_quant("", VAD_QUANT, "false (Default), load the model of model.onnx in vad_dir. If set true, load the model of model_quant.onnx in vad_dir", false, "false", "string");
+    TCLAP::ValueArg<std::string>    vad_quant("", VAD_QUANT, "false (Default), load the model of model.onnx in vad_dir. If set true, load the model of model_quant.onnx in vad_dir", false, "true", "string");
     TCLAP::ValueArg<std::string>    punc_dir("", PUNC_DIR, "the punc online model path, which contains model.onnx, punc.yaml", false, "", "string");
-    TCLAP::ValueArg<std::string>    punc_quant("", PUNC_QUANT, "false (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "false", "string");
-    TCLAP::ValueArg<std::int32_t>   asr_mode("", "asr-mode", "0: offline, 1: online, 2: 2pass", false, 2, "int32_t");
+    TCLAP::ValueArg<std::string>    punc_quant("", PUNC_QUANT, "false (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "true", "string");
+    TCLAP::ValueArg<std::string>    asr_mode("", ASR_MODE, "offline, online, 2pass", false, "2pass", "string");
 
     TCLAP::ValueArg<std::string> wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", true, "", "string");
 
@@ -75,11 +75,22 @@ int main(int argc, char** argv)
     GetValue(punc_dir, PUNC_DIR, model_path);
     GetValue(punc_quant, PUNC_QUANT, model_path);
     GetValue(wav_path, WAV_PATH, model_path);
+    GetValue(asr_mode, ASR_MODE, model_path);
 
     struct timeval start, end;
     gettimeofday(&start, NULL);
     int thread_num = 1;
-    int asr_mode_ = asr_mode.getValue();
+    int asr_mode_ = -1;
+    if(model_path[ASR_MODE] == "offline"){
+        asr_mode_ = 0;
+    }else if(model_path[ASR_MODE] == "online"){
+        asr_mode_ = 1;
+    }else if(model_path[ASR_MODE] == "2pass"){
+        asr_mode_ = 2;
+    }else{
+        LOG(ERROR) << "Wrong asr-mode : " << model_path[ASR_MODE];
+        exit(-1);
+    }
     FUNASR_HANDLE tpass_hanlde=FunTpassInit(model_path, thread_num);
 
     if (!tpass_hanlde)
