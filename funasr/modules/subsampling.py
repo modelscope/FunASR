@@ -358,7 +358,8 @@ class Conv1dSubsampling(torch.nn.Module):
         """
         x = x.transpose(1, 2)  # (b, d ,t)
         x = self.pad_fn(x)
-        x = F.relu(self.conv(x))
+        #x = F.relu(self.conv(x))
+        x = F.leaky_relu(self.conv(x), negative_slope=0.)
         x = x.transpose(1, 2)  # (b, t ,d)
 
         if x_len is None:
