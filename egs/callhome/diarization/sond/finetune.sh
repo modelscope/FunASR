@@ -30,6 +30,13 @@ if [ ! -e utils ]; then
   ln -s ${kaldi_root}/egs/callhome_diarization/v2/utils ./utils
 fi
 
+# callhome data root like path/to/NIST/LDC2001S97
+callhome_root=
+if [ -z "${kaldi_root}" ]; then
+  echo "We need callhome corpus to prepare data."
+  exit;
+fi
+
 # machines configuration
 gpu_devices="0,1,2,3"  # for V100-16G, need 4 gpus.
 gpu_num=4
@@ -41,9 +48,6 @@ stop_stage=1
 # number of jobs for data process
 nj=16
 sr=8000
-
-# dataset related
-callhome_root=path/to/NIST/LDC2001S97
 
 # experiment configuration
 lang=en
@@ -97,15 +101,18 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
 
   # split ref.rttm
   for dset in callhome1 callhome2; do
-    rm -rf data/${dset}/ref.rttm
-    for name in `awk '{print $1}' data/${dset}/wav.scp`; do
-      grep ${name} data/callhome/fullref.rttm >> data/${dset}/ref.rttm;
+    rm -rf ${datadir}/${dset}/ref.rttm
+    for name in `awk '{print $1}' ${datadir}/${dset}/wav.scp`; do
+      grep ${name} ${datadir}/callhome/fullref.rttm >> ${datadir}/${dset}/ref.rttm;
     done
 
     # filter out records which don't have rttm labels.
-    awk '{print $2}' data/${dset}/ref.rttm | sort | uniq > data/${dset}/uttid
-    mv data/${dset}/wav.scp data/${dset}/wav.scp.bak
-    awk '{if (NR==FNR){a[$1]=1}else{if (a[$1]==1){print $0}}}' data/${dset}/uttid data/${dset}/wav.scp.bak > data/${dset}/wav.scp
+    awk '{print $2}' ${datadir}/${dset}/ref.rttm | sort | uniq > ${datadir}/${dset}/uttid
+    mv ${datadir}/${dset}/wav.scp ${datadir}/${dset}/wav.scp.bak
+    awk '{if (NR==FNR){a[$1]=1}else{if (a[$1]==1){print $0}}}' ${datadir}/${dset}/uttid ${datadir}/${dset}/wav.scp.bak > ${datadir}/${dset}/wav.scp
+    mkdir ${datadir}/${dset}/raw
+    mv ${datadir}/${dset}/{reco2num_spk,segments,spk2utt,utt2spk,uttid,wav.scp.bak} ${datadir}/${dset}/raw/
+    awk '{print $1,$1}' wav.scp > ${datadir}/${dset}/utt2spk
   done
 fi
 
