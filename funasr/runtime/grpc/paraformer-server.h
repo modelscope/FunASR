@@ -2,8 +2,12 @@
 #include <chrono>
 #include <cmath>
 #include <iostream>
+#include <sstream>
 #include <memory>
 #include <string>
+#include <unordered_map>
+#include <chrono>
+#include <thread>
 
 #include <grpc/grpc.h>
 #include <grpcpp/server.h>
@@ -11,21 +15,11 @@
 #include <grpcpp/server_context.h>
 #include <grpcpp/security/server_credentials.h>
 
-#include <unordered_map>
-#include <chrono>
-
 #include "paraformer.grpc.pb.h"
 #include "funasrruntime.h"
-
-
-using grpc::Server;
-using grpc::ServerBuilder;
-using grpc::ServerContext;
-using grpc::ServerReader;
-using grpc::ServerReaderWriter;
-using grpc::ServerWriter;
-using grpc::Status;
-
+#include "tclap/CmdLine.h"
+#include "com-define.h"
+#include "glog/logging.h"
 
 using paraformer::Request;
 using paraformer::Response;
@@ -33,23 +27,27 @@ using paraformer::ASR;
 
 typedef struct
 {
-    std::string msg;
-    float  snippet_time;
-}FUNASR_RECOG_RESULT;
+  std::string msg;
+  float  snippet_time;
+} FUNASR_RECOG_RESULT;
 
-class ASRServicer final : public ASR::Service {
-  private:
-    int init_flag;
-    std::unordered_map<std::string, std::string> client_buffers;
-    std::unordered_map<std::string, std::string> client_transcription;
+class GrpcEngine {
+ public:
+  GrpcEngine(grpc::ServerReaderWriter<Response, Request>* stream, std::shared_ptr<FUNASR_HANDLE> asr_handler);
+  void operator()();
 
+ private:
+  grpc::ServerReaderWriter<Response, Request>* stream_;
+  std::shared_ptr<FUNASR_HANDLE> asr_handler_;
+  std::unordered_map<std::string, std::string> client_buffers;
+};
+
+class GrpcService final : public ASR::Service {
   public:
-    ASRServicer(std::map<std::string, std::string>& model_path);
-    void clear_states(const std::string& user);
-    void clear_buffers(const std::string& user);
-    void clear_transcriptions(const std::string& user);
-    void disconnect(const std::string& user);
+    GrpcService(std::map<std::string, std::string>& config, int num_thread);
     grpc::Status Recognize(grpc::ServerContext* context, grpc::ServerReaderWriter<Response, Request>* stream);
-    FUNASR_HANDLE AsrHanlde;
-	
+
+  private:
+    std::map<std::string, std::string> config_;
+    std::shared_ptr<FUNASR_HANDLE> asr_handler_;
 };
