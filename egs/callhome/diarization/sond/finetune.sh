@@ -112,7 +112,7 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     awk '{if (NR==FNR){a[$1]=1}else{if (a[$1]==1){print $0}}}' ${datadir}/${dset}/uttid ${datadir}/${dset}/wav.scp.bak > ${datadir}/${dset}/wav.scp
     mkdir ${datadir}/${dset}/raw
     mv ${datadir}/${dset}/{reco2num_spk,segments,spk2utt,utt2spk,uttid,wav.scp.bak} ${datadir}/${dset}/raw/
-    awk '{print $1,$1}' wav.scp > ${datadir}/${dset}/utt2spk
+    awk '{print $1,$1}' ${datadir}/${dset}/wav.scp > ${datadir}/${dset}/utt2spk
   done
 fi
 
@@ -164,16 +164,9 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
 
   ln -s ${kaldi_root}/egs/callhome_diarization/v2/steps ./
   for dset in callhome1 callhome2; do
-    mv ${datadir}/${dset}/segments ${datadir}/${dset}/segs
+    utils/fix_data_dir.sh ${datadir}/${dset}
     steps/make_fbank.sh --write-utt2num-frames true --fbank-config conf/fbank.conf --nj ${nj} --cmd "$train_cmd" \
         ${datadir}/${dset} ${expdir}/make_fbank/${dset} ${dumpdir}/${dset}/fbank
-    utils/fix_data_dir.sh ${datadir}/${dset}
-  done
-
-  for dset in callhome1/nonoverlap_0s callhome2/nonoverlap_0s; do
-    steps/make_fbank.sh --write-utt2num-frames true --fbank-config conf/fbank.conf --nj ${nj} --cmd "$train_cmd" \
-        ${datadir}/${dset} ${expdir}/make_fbank/${dset} ${dumpdir}/${dset}/fbank
-    utils/fix_data_dir.sh ${datadir}/${dset}
   done
   rm -f steps
 
@@ -181,14 +174,16 @@ fi
 
 if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
   echo "Stage 4: Extract speaker embeddings."
-  git lfs install
-  git clone https://www.modelscope.cn/damo/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch.git
-  mv speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch ${expdir}/
-
   sv_exp_dir=exp/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch
-  sed "s/input_size: null/input_size: 80/g" ${sv_exp_dir}/sv.yaml > ${sv_exp_dir}/sv_fbank.yaml
+
+  if [ ! -e ${sv_exp_dir} ]; then
+    git lfs install
+    git clone https://www.modelscope.cn/damo/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch.git
+    mv speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch ${expdir}/
+  fi
+
   for dset in callhome1/nonoverlap_0s callhome2/nonoverlap_0s; do
-    key_file=${datadir}/${dset}/feats.scp
+    key_file=${datadir}/${dset}/wav.scp
     num_scp_file="$(<${key_file} wc -l)"
     _nj=$([ $inference_nj -le $num_scp_file ] && echo "$inference_nj" || echo "$num_scp_file")
     _logdir=${dumpdir}/${dset}/xvecs
@@ -206,9 +201,9 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
         --njob ${njob} \
         --ngpu "${_ngpu}" \
         --gpuid_list ${gpuid_list} \
-        --data_path_and_name_and_type "${key_file},speech,kaldi_ark" \
+        --data_path_and_name_and_type "${key_file},speech,sound" \
         --key_file "${_logdir}"/keys.JOB.scp \
-        --sv_train_config ${sv_exp_dir}/sv_fbank.yaml \
+        --sv_train_config ${sv_exp_dir}/sv.yaml \
         --sv_model_file ${sv_exp_dir}/sv.pth \
         --output_dir "${_logdir}"/output.JOB
     cat ${_logdir}/output.*/xvector.scp | sort > ${datadir}/${dset}/utt2xvec
