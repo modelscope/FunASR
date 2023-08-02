@@ -8,13 +8,18 @@
 # [2] Speaker Overlap-aware Neural Diarization for Multi-party Meeting Analysis, EMNLP 2022
 # We recommend you run this script stage by stage.
 
+# This recipe includes:
+# 1. downloading a pretrained model on the simulated data from switchboard and NIST,
+# 2. finetuning the pretrained model on Callhome1.
+# Finally, you will get a slightly better DER result 9.95% on Callhome2 than that in the paper 10.14%.
+
 # environment configuration
 if [ ! -e utils ]; then
   ln -s ../../../aishell/transformer/utils ./utils
 fi
 
 # machines configuration
-gpu_devices="0,1,2,3"
+gpu_devices="0,1,2,3"  # for V100-16G, need 4 gpus.
 gpu_num=4
 count=1
 
@@ -76,10 +81,14 @@ fi
 # Download required resources
 if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
   echo "Stage 0: Download required resources."
-  wget told_finetune_resources.zip
+  if [ ! -e told_finetune_resources.tar.gz ]; then
+    # MD5SUM: abc7424e4e86ce6f040e9cba4178123b
+    wget --no-check-certificate https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/Speaker_Diar/told_finetune_resources.tar.gz
+    tar zxf told_finetune_resources.tar.gz
+  fi
 fi
 
-# Finetune model on callhome1
+# Finetune model on callhome1, this will take about 1.5 hours.
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
   echo "Stage 1: Finetune pretrained model on callhome1."
   world_size=$gpu_num  # run on one machine
@@ -230,11 +239,11 @@ fi
 # Then find the wav files to construct wav.scp and put it at data/callhome2/wav.scp.
 # After iteratively perform SOAP, you will get DER results like:
 # iters : oracle_vad  |  system_vad
-# iter_0:   9.68      |     10.51
-# iter_1:   9.26      |     10.14  (reported in the paper)
-# iter_2:   9.18      |     10.08
-# iter_3:   9.24      |     10.15
-# iter_4:   9.27      |     10.17
+# iter_0:   9.63      |     10.43
+# iter_1:   9.17      |     10.03
+# iter_2:   9.11      |     9.98
+# iter_3:   9.08      |     9.96
+# iter_4:   9.07      |     9.95
 if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
   if [ ! -e ${expdir}/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch ]; then
     git lfs install
