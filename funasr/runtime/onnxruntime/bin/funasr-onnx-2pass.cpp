@@ -51,6 +51,7 @@ int main(int argc, char** argv)
     TCLAP::ValueArg<std::string>    vad_quant("", VAD_QUANT, "false (Default), load the model of model.onnx in vad_dir. If set true, load the model of model_quant.onnx in vad_dir", false, "false", "string");
     TCLAP::ValueArg<std::string>    punc_dir("", PUNC_DIR, "the punc online model path, which contains model.onnx, punc.yaml", false, "", "string");
     TCLAP::ValueArg<std::string>    punc_quant("", PUNC_QUANT, "false (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "false", "string");
+    TCLAP::ValueArg<std::int32_t>   asr_mode("", "asr-mode", "0: offline, 1: online, 2: 2pass", false, 2, "int32_t");
 
     TCLAP::ValueArg<std::string> wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", true, "", "string");
 
@@ -62,6 +63,7 @@ int main(int argc, char** argv)
     cmd.add(punc_dir);
     cmd.add(punc_quant);
     cmd.add(wav_path);
+    cmd.add(asr_mode);
     cmd.parse(argc, argv);
 
     std::map<std::string, std::string> model_path;
@@ -77,6 +79,7 @@ int main(int argc, char** argv)
     struct timeval start, end;
     gettimeofday(&start, NULL);
     int thread_num = 1;
+    int asr_mode_ = asr_mode.getValue();
     FUNASR_HANDLE tpass_hanlde=FunTpassInit(model_path, thread_num);
 
     if (!tpass_hanlde)
@@ -151,6 +154,7 @@ int main(int argc, char** argv)
 
         string online_res="";
         string tpass_res="";
+        std::vector<std::vector<string>> punc_cache(2);
         for (int sample_offset = 0; sample_offset < buff_len; sample_offset += std::min(step, buff_len - sample_offset)) {
             if (sample_offset + step >= buff_len - 1) {
                     step = buff_len - sample_offset;
@@ -159,7 +163,7 @@ int main(int argc, char** argv)
                     is_final = false;
             }
             gettimeofday(&start, NULL);
-            FUNASR_RESULT result = FunTpassInferBuffer(tpass_hanlde, speech_buff+sample_offset, step, RASR_NONE, NULL, is_final, 16000);
+            FUNASR_RESULT result = FunTpassInferBuffer(tpass_hanlde, speech_buff+sample_offset, step, punc_cache, is_final, 16000, "pcm", (ASR_TYPE)asr_mode_);
             gettimeofday(&end, NULL);
             seconds = (end.tv_sec - start.tv_sec);
             taking_micros += ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
@@ -174,14 +178,18 @@ int main(int argc, char** argv)
                 string tpass_msg = FunASRGetTpassResult(result, 0);
                 tpass_res += tpass_msg;
                 if(tpass_msg != ""){
-                    LOG(INFO)<< wav_id <<" 2pass results : "<<tpass_msg;
+                    LOG(INFO)<< wav_id <<" offline results : "<<tpass_msg;
                 }
                 snippet_time += FunASRGetRetSnippetTime(result);
                 FunASRFreeResult(result);
             }
         }
-        LOG(INFO)<<"Final online results " << wav_id <<" : "<<online_res;
-        LOG(INFO)<<"Final 2pass  results " << wav_id <<" : "<<tpass_res;
+        if(asr_mode_ != 0){
+            LOG(INFO) << wav_id <<"Final online  results "<<" : "<<online_res;
+        }
+        if(asr_mode_ != 1){
+            LOG(INFO) << wav_id << "Final offline results " <<" : "<<tpass_res;
+        }
     }
  
     LOG(INFO) << "Audio length: " << (double)snippet_time << " s";

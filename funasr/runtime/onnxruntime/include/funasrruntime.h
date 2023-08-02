@@ -106,7 +106,7 @@ _FUNASRAPI void				FunOfflineUninit(FUNASR_HANDLE handle);
 _FUNASRAPI FUNASR_HANDLE  	FunTpassInit(std::map<std::string, std::string>& model_path, int thread_num);
 _FUNASRAPI void  	        FunTpassOnlineInit(FUNASR_HANDLE tpass_handle);
 // buffer
-_FUNASRAPI FUNASR_RESULT	FunTpassInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, FUNASR_MODE mode, QM_CALLBACK fn_callback, bool input_finished=true, int sampling_rate=16000, std::string wav_format="pcm");
+_FUNASRAPI FUNASR_RESULT	FunTpassInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, std::vector<std::vector<std::string>> &punc_cache, bool input_finished=true, int sampling_rate=16000, std::string wav_format="pcm", ASR_TYPE mode=ASR_TWO_PASS);
 _FUNASRAPI void				FunTpassUninit(FUNASR_HANDLE handle);
 
 #ifdef __cplusplus 

@@ -309,7 +309,7 @@ extern "C" {
 	}
 
 	// APIs for 2pass-stream Infer
-	_FUNASRAPI FUNASR_RESULT FunTpassInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, FUNASR_MODE mode, QM_CALLBACK fn_callback, bool input_finished, int sampling_rate, std::string wav_format)
+	_FUNASRAPI FUNASR_RESULT FunTpassInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, std::vector<std::vector<std::string>> &punc_cache, bool input_finished, int sampling_rate, std::string wav_format, ASR_TYPE mode)
 	{
 		funasr::TpassStream* tpass_stream = (funasr::TpassStream*)handle;
 		if (!tpass_stream)
@@ -329,6 +329,10 @@ extern "C" {
 		if (!asr_handle)
 			return nullptr;
 
+		funasr::PuncModel* punc_online_handle = (tpass_stream->punc_online_handle).get();
+		if (!punc_online_handle)
+			return nullptr;
+
 		if(wav_format == "pcm" || wav_format == "PCM"){
 			if (!audio->LoadPcmwavOnline(sz_buf, n_len, &sampling_rate))
 				return nullptr;
@@ -345,12 +349,13 @@ extern "C" {
 			return p_result;
 		}
 
-		audio->Split(vad_online_handle, input_finished);
+		audio->Split(vad_online_handle, input_finished, mode);
 
 		funasr::AudioFrame* frame = NULL;
 		while(audio->FetchChunck(frame) > 0){
 			string msg = asr_online_handle->Forward(frame->data, frame->len, frame->is_final);
-			p_result->msg += msg;
+			string msg_punc = punc_online_handle->AddPunc(msg.c_str(), punc_cache[0]);
+			p_result->msg += msg_punc;
 			if(frame != NULL){
 				delete frame;
 				frame = NULL;
@@ -359,7 +364,8 @@ extern "C" {
 
 		while(audio->FetchTpass(frame) > 0){
 			string msg = asr_handle->Forward(frame->data, frame->len, frame->is_final);
-			p_result->tpass_msg += msg;
+			string msg_punc = punc_online_handle->AddPunc(msg.c_str(), punc_cache[1]);
+			p_result->tpass_msg = msg_punc;
 			if(frame != NULL){
 				delete frame;
 				frame = NULL;

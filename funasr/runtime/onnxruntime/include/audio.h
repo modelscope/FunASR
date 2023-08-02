@@ -72,7 +72,7 @@ class Audio {
     void Padding();
     void Split(OfflineStream* offline_streamj);
     void Split(VadModel* vad_obj, vector<std::vector<int>>& vad_segments, bool input_finished=true);
-    void Split(VadModel* vad_obj, bool input_finished=true);
+    void Split(VadModel* vad_obj, bool input_finished=true, ASR_TYPE asr_mode=ASR_TWO_PASS);
     float GetTimeLen();
     int GetQueueSize() { return (int)frame_queue.size(); }
     char* GetSpeechChar(){return speech_char;}

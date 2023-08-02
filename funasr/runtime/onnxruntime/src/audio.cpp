@@ -1056,7 +1056,7 @@ void Audio::Split(VadModel* vad_obj, vector<std::vector<int>>& vad_segments, boo
 }
 
 // 2pass
-void Audio::Split(VadModel* vad_obj, bool input_finished)
+void Audio::Split(VadModel* vad_obj, bool input_finished, ASR_TYPE asr_mode)
 {
     AudioFrame *frame;
 
@@ -1069,28 +1069,6 @@ void Audio::Split(VadModel* vad_obj, bool input_finished)
     std::vector<float> pcm_data(speech_data, speech_data+sp_len);
     vector<std::vector<int>> vad_segments = vad_obj->Infer(pcm_data, input_finished);
 
-    // print vad_segments
-    // string seg_out="[";
-    // for (int i = 0; i < vad_segments.size(); i++) {
-    //     vector<int> inner_vec = vad_segments[i];
-    //     if(inner_vec.size() == 0){
-    //         continue;
-    //     }
-    //     seg_out += "[";
-    //     for (int j = 0; j < inner_vec.size(); j++) {
-    //         seg_out += to_string(inner_vec[j]);
-    //         if (j != inner_vec.size() - 1) {
-    //             seg_out += ",";
-    //         }
-    //     }
-    //     seg_out += "]";
-    //     if (i != vad_segments.size() - 1) {
-    //         seg_out += ",";
-    //     }
-    // }
-    // seg_out += "]";
-    // LOG(INFO)<<seg_out;
-
     speech_end += sp_len/seg_sample;
     if(vad_segments.size() == 0){
         if(speech_start != -1){
@@ -1099,13 +1077,15 @@ void Audio::Split(VadModel* vad_obj, bool input_finished)
             int buff_len = end-start;
             int step = ONLINE_STEP;
 
-            if(buff_len >= step){
-                frame = new AudioFrame(step);
-                frame->data = (float*)malloc(sizeof(float) * step);
-                memcpy(frame->data, all_samples.data()+start-offset, step*sizeof(float));
-                asr_online_queue.push(frame);
-                frame = NULL;
-                speech_start += step/seg_sample;
+            if(asr_mode != ASR_OFFLINE){
+                if(buff_len >= step){
+                    frame = new AudioFrame(step);
+                    frame->data = (float*)malloc(sizeof(float) * step);
+                    memcpy(frame->data, all_samples.data()+start-offset, step*sizeof(float));
+                    asr_online_queue.push(frame);
+                    frame = NULL;
+                    speech_start += step/seg_sample;
+                }
             }
         }
     }else{
@@ -1123,19 +1103,23 @@ void Audio::Split(VadModel* vad_obj, bool input_finished)
                 int start = speech_start_i*seg_sample;
                 int end = speech_end_i*seg_sample;
 
-                frame = new AudioFrame(end-start);
-                frame->is_final = true;
-                frame->data = (float*)malloc(sizeof(float) * (end-start));
-                memcpy(frame->data, all_samples.data()+start-offset, (end-start)*sizeof(float));
-                asr_online_queue.push(frame);
-                frame = NULL;
+                if(asr_mode != ASR_OFFLINE){
+                    frame = new AudioFrame(end-start);
+                    frame->is_final = true;
+                    frame->data = (float*)malloc(sizeof(float) * (end-start));
+                    memcpy(frame->data, all_samples.data()+start-offset, (end-start)*sizeof(float));
+                    asr_online_queue.push(frame);
+                    frame = NULL;
+                }
 
-                frame = new AudioFrame(end-start);
-                frame->is_final = true;
-                frame->data = (float*)malloc(sizeof(float) * (end-start));
-                memcpy(frame->data, all_samples.data()+start-offset, (end-start)*sizeof(float));
-                asr_offline_queue.push(frame);
-                frame = NULL;
+                if(asr_mode != ASR_ONLINE){
+                    frame = new AudioFrame(end-start);
+                    frame->is_final = true;
+                    frame->data = (float*)malloc(sizeof(float) * (end-start));
+                    memcpy(frame->data, all_samples.data()+start-offset, (end-start)*sizeof(float));
+                    asr_offline_queue.push(frame);
+                    frame = NULL;
+                }
 
                 speech_start = -1;
                 speech_offline_start = -1;
@@ -1149,13 +1133,15 @@ void Audio::Split(VadModel* vad_obj, bool input_finished)
                 int buff_len = end-start;
                 int step = ONLINE_STEP;
 
-                if(buff_len >= step){
-                    frame = new AudioFrame(step);
-                    frame->data = (float*)malloc(sizeof(float) * step);
-                    memcpy(frame->data, all_samples.data()+start-offset, step*sizeof(float));
-                    asr_online_queue.push(frame);
-                    frame = NULL;
-                    speech_start += step/seg_sample;
+                if(asr_mode != ASR_OFFLINE){
+                    if(buff_len >= step){
+                        frame = new AudioFrame(step);
+                        frame->data = (float*)malloc(sizeof(float) * step);
+                        memcpy(frame->data, all_samples.data()+start-offset, step*sizeof(float));
+                        asr_online_queue.push(frame);
+                        frame = NULL;
+                        speech_start += step/seg_sample;
+                    }
                 }
 
             }else if(speech_end_i != -1){ // [-1,100]
@@ -1170,32 +1156,36 @@ void Audio::Split(VadModel* vad_obj, bool input_finished)
                 int buff_len = end-start;
                 int step = ONLINE_STEP;
 
-                frame = new AudioFrame(end-offline_start);
-                frame->is_final = true;
-                frame->data = (float*)malloc(sizeof(float) * (end-offline_start));
-                memcpy(frame->data, all_samples.data()+offline_start-offset, (end-offline_start)*sizeof(float));
-                asr_offline_queue.push(frame);
-                frame = NULL;
+                if(asr_mode != ASR_ONLINE){
+                    frame = new AudioFrame(end-offline_start);
+                    frame->is_final = true;
+                    frame->data = (float*)malloc(sizeof(float) * (end-offline_start));
+                    memcpy(frame->data, all_samples.data()+offline_start-offset, (end-offline_start)*sizeof(float));
+                    asr_offline_queue.push(frame);
+                    frame = NULL;
+                }
 
-                if(buff_len > 0){
-                    for (int sample_offset = 0; sample_offset < buff_len; sample_offset += std::min(step, buff_len - sample_offset)) {
-                        bool is_final = false;
-                        if (sample_offset + step >= buff_len - 1) {
-                            step = buff_len - sample_offset;
-                            is_final = true;
+                if(asr_mode != ASR_OFFLINE){
+                    if(buff_len > 0){
+                        for (int sample_offset = 0; sample_offset < buff_len; sample_offset += std::min(step, buff_len - sample_offset)) {
+                            bool is_final = false;
+                            if (sample_offset + step >= buff_len - 1) {
+                                step = buff_len - sample_offset;
+                                is_final = true;
+                            }
+                            frame = new AudioFrame(step);
+                            frame->is_final = is_final;
+                            frame->data = (float*)malloc(sizeof(float) * step);
+                            memcpy(frame->data, all_samples.data()+start-offset+sample_offset, step*sizeof(float));
+                            asr_online_queue.push(frame);
+                            frame = NULL;
                         }
-                        frame = new AudioFrame(step);
-                        frame->is_final = is_final;
-                        frame->data = (float*)malloc(sizeof(float) * step);
-                        memcpy(frame->data, all_samples.data()+start-offset+sample_offset, step*sizeof(float));
+                    }else{
+                        frame = new AudioFrame(0);
+                        frame->is_final = true;
                         asr_online_queue.push(frame);
                         frame = NULL;
                     }
-                }else{
-                    frame = new AudioFrame(0);
-                    frame->is_final = true;
-                    asr_online_queue.push(frame);
-                    frame = NULL;
                 }
                 speech_start = -1;
                 speech_offline_start = -1;
