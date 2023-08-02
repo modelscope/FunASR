@@ -43,8 +43,8 @@ gpu_num=4
 count=1
 
 # general configuration
-stage=1
-stop_stage=1
+stage=0
+stop_stage=10
 # number of jobs for data process
 nj=16
 sr=8000
@@ -398,7 +398,7 @@ fi
 
 # Scoring for finetuned model, you may get a DER like:
 # oracle_vad  |  system_vad
-#   7.27      |     8.08
+#   7.32      |     8.14
 if [ ${stage} -le 9 ] && [ ${stop_stage} -ge 9 ]; then
   echo "stage 9: Scoring finetuned models"
   if [ ! -e dscore ]; then
@@ -437,11 +437,11 @@ fi
 # Then find the wav files to construct wav.scp and put it at data/callhome2/wav.scp.
 # After iteratively perform SOAP, you will get DER results like:
 # iters : oracle_vad  |  system_vad
-# iter_0:   9.63      |     10.43
-# iter_1:   9.17      |     10.03
-# iter_2:   9.11      |     9.98
-# iter_3:   9.08      |     9.96
-# iter_4:   9.07      |     9.95
+# iter_0:   9.58      |     10.46
+# iter_1:   9.22      |     10.15
+# iter_2:   9.21      |     10.14
+# iter_3:   9.30      |     10.24
+# iter_4:   9.29      |     10.23
 if [ ${stage} -le 10 ] && [ ${stop_stage} -ge 10 ]; then
   if [ ! -e ${expdir}/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch ]; then
     git lfs install
