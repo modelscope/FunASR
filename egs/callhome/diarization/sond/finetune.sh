@@ -14,8 +14,20 @@
 # Finally, you will get a slightly better DER result 9.95% on Callhome2 than that in the paper 10.14%.
 
 # environment configuration
+kaldi_root=
+
+if [ -z "${kaldi_root}" ]; then
+  echo "We need kaldi to prepare dataset, extract fbank features, please install kaldi first and set kaldi_root."
+  echo "Kaldi installation guide can be found at https://kaldi-asr.org/"
+  exit;
+fi
+
+if [ ! -e local ]; then
+  ln -s ${kaldi_root}/egs/callhome_diarization/v2/local ./local
+fi
+
 if [ ! -e utils ]; then
-  ln -s ../../../aishell/transformer/utils ./utils
+  ln -s ${kaldi_root}/egs/callhome_diarization/v2/utils ./utils
 fi
 
 # machines configuration
@@ -31,7 +43,7 @@ nj=16
 sr=8000
 
 # dataset related
-data_root=
+callhome_root=path/to/NIST/LDC2001S97
 
 # experiment configuration
 lang=en
@@ -78,19 +90,171 @@ else
     _ngpu=0
 fi
 
-# Download required resources
+# Prepare datasets
 if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
-  echo "Stage 0: Download required resources."
-  if [ ! -e told_finetune_resources.tar.gz ]; then
-    # MD5SUM: abc7424e4e86ce6f040e9cba4178123b
-    wget --no-check-certificate https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/Speaker_Diar/told_finetune_resources.tar.gz
-    tar zxf told_finetune_resources.tar.gz
+  echp "Stage 0: Prepare callhome data."
+  local/make_callhome.sh ${callhome_root} ${datadir}/
+fi
+
+if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
+  echo "Stage 1: Dump sph file to wav"
+  export PATH=${kaldi_root}/tools/sph2pipe/:${PATH}
+  if [ ! -f ${kaldi_root}/tools/sph2pipe/sph2pipe ]; then
+    echo "Can not find sph2pipe in ${kaldi_root}/tools/sph2pipe/,"
+    echo "please install sph2pipe and put it in the right place."
+    exit;
   fi
+
+  for dset in callhome1 callhome2; do
+    echo "Stage 1: start to dump ${dset}."
+    mv ${datadir}/${dset}/wav.scp ${datadir}/${dset}/sph.scp
+
+    mkdir -p ${dumpdir}/${dset}/wavs
+    python -Wignore script/dump_pipe_wav.py ${datadir}/${dset}/sph.scp ${dumpdir}/${dset}/wavs \
+      --sr ${sr} --nj ${nj} --no_pbar
+    find `pwd`/${dumpdir}/${dset}/wavs -iname "*.wav" | sort | awk -F'[/.]' '{print $(NF-1),$0}' > ${datadir}/${dset}/wav.scp
+  done
+fi
+
+if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
+  echo "Stage 2: Extract non-overlap segments from callhome dataset"
+  for dset in callhome1 callhome2; do
+    echo "Stage 2: Extracting non-overlap segments for "${dset}
+    mkdir -p ${dumpdir}/${dset}/nonoverlap_0s
+    python -Wignore script/extract_nonoverlap_segments.py \
+      ${datadir}/${dset}/wav.scp ${datadir}/${dset}/ref.rttm ${dumpdir}/${dset}/nonoverlap_0s \
+      --min_dur 0 --max_spk_num 8 --sr ${sr} --no_pbar --nj ${nj}
+
+    mkdir -p ${datadir}/${dset}/nonoverlap_0s
+    find `pwd`/${dumpdir}/${dset}/nonoverlap_0s | sort | awk -F'[/.]' '{print $(NF-1),$0}' > ${datadir}/${dset}/nonoverlap_0s/wav.scp
+    awk -F'[/.]' '{print $(NF-1),$(NF-2)}' ${datadir}/${dset}/nonoverlap_0s/wav.scp > ${datadir}/${dset}/nonoverlap_0s/utt2spk
+    echo "Done."
+  done
+fi
+
+if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
+  echo "Stage 3: Generate fbank features"
+  home_path=`pwd`
+  cd ${kaldi_root}/egs/callhome_diarization/v2 || exit
+
+  . ./cmd.sh
+  . ./path.sh
+
+  for dset in callhome1 callhome2; do
+    steps/make_fbank.sh --write-utt2num-frames true --fbank-config conf/fbank.conf --nj ${nj} --cmd "$train_cmd" \
+        ${datadir}/${dset} ${expdir}/make_fbank/${dset} ${dumpdir}/${dset}/fbank
+    utils/fix_data_dir.sh ${datadir}/${dset}
+  done
+
+  for dset in callhome1/nonoverlap_0s callhome2/nonoverlap_0s; do
+    steps/make_fbank.sh --write-utt2num-frames true --fbank-config conf/fbank.conf --nj ${nj} --cmd "$train_cmd" \
+        ${datadir}/${dset} ${expdir}/make_fbank/${dset} ${dumpdir}/${dset}/fbank
+    utils/fix_data_dir.sh ${datadir}/${dset}
+  done
+
+  cd ${home_path} || exit
+fi
+
+if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
+  echo "Stage 4: Extract speaker embeddings."
+  git lfs install
+  git clone https://www.modelscope.cn/damo/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch.git
+  mv speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch ${expdir}/
+
+  sv_exp_dir=exp/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch
+  sed "s/input_size: null/input_size: 80/g" ${sv_exp_dir}/sv.yaml > ${sv_exp_dir}/sv_fbank.yaml
+  for dset in callhome1/nonoverlap_0s callhome2/nonoverlap_0s; do
+    key_file=${datadir}/${dset}/feats.scp
+    num_scp_file="$(<${key_file} wc -l)"
+    _nj=$([ $inference_nj -le $num_scp_file ] && echo "$inference_nj" || echo "$num_scp_file")
+    _logdir=${dumpdir}/${dset}/xvecs
+    mkdir -p ${_logdir}
+    split_scps=
+    for n in $(seq "${_nj}"); do
+        split_scps+=" ${_logdir}/keys.${n}.scp"
+    done
+    # shellcheck disable=SC2086
+    utils/split_scp.pl "${key_file}" ${split_scps}
+
+    ${infer_cmd} --gpu "${_ngpu}" --max-jobs-run "${_nj}" JOB=1:"${_nj}" "${_logdir}"/sv_inference.JOB.log \
+      python -m funasr.bin.sv_inference_launch \
+        --batch_size 1 \
+        --njob ${njob} \
+        --ngpu "${_ngpu}" \
+        --gpuid_list ${gpuid_list} \
+        --data_path_and_name_and_type "${key_file},speech,kaldi_ark" \
+        --key_file "${_logdir}"/keys.JOB.scp \
+        --sv_train_config ${sv_exp_dir}/sv_fbank.yaml \
+        --sv_model_file ${sv_exp_dir}/sv.pth \
+        --output_dir "${_logdir}"/output.JOB
+    cat ${_logdir}/output.*/xvector.scp | sort > ${datadir}/${dset}/utt2xvec
+  done
+
+fi
+
+if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
+  echo "Stage 5: Generate label files."
+
+  for dset in callhome1 callhome2; do
+    echo "Stage 5: Generate labels for ${dset}."
+    python -Wignore script/calc_real_meeting_frame_labels.py \
+          ${datadir}/${dset} ${dumpdir}/${dset}/labels \
+          --n_spk 8 --frame_shift 0.01 --nj 16 --sr 8000
+    find `pwd`/${dumpdir}/${dset}/labels -iname "*.lbl.mat" | awk -F'[/.]' '{print $(NF-2),$0}' | sort > ${datadir}/${dset}/labels.scp
+  done
+
+fi
+
+if [ ${stage} -le 6 ] && [ ${stop_stage} -ge 6 ]; then
+  echo "Stage 6: Make training and evaluation files."
+
+  # dump callhome1 data in training mode.
+  data_dir=${datadir}/callhome1/files_for_dump
+  mkdir ${data_dir}
+  # filter out zero duration segments
+  LC_ALL=C awk '{if ($5 > 0){print $0}}' ${datadir}/callhome1/ref.rttm > ${data_dir}/ref.rttm
+  cp ${datadir}/callhome1/{feats.scp,labels.scp} ${data_dir}/
+  cp ${datadir}/callhome1/nonoverlap_0s/{utt2spk,utt2xvec,utt2num_frames} ${data_dir}/
+
+  echo "Stage 6: start to dump for callhome1."
+  python -Wignore script/dump_meeting_chunks.py --dir ${data_dir} \
+    --out ${dumpdir}/callhome1/dumped_files/data --n_spk 16 --no_pbar --sr 8000 --mode test \
+    --chunk_size 1600 --chunk_shift 400 --add_mid_to_speaker true
+
+  mkdir -p ${datadir}/callhome1/dumped_files
+  cat ${dumpdir}/callhome1/dumped_files/data_parts*_feat.scp | sort > ${datadir}/callhome1/dumped_files/feats.scp
+  cat ${dumpdir}/callhome1/dumped_files/data_parts*_xvec.scp | sort > ${datadir}/callhome1/dumped_files/profile.scp
+  cat ${dumpdir}/callhome1/dumped_files/data_parts*_label.scp | sort > ${datadir}/callhome1/dumped_files/label.scp
+  mkdir -p ${expdir}/callhome1_states
+  awk '{print $1,"1600"}' ${datadir}/callhome1/dumped_files/feats.scp | shuf > ${expdir}/callhome1_states/speech_shape
+  python -Wignore script/convert_rttm_to_seg_file.py --rttm_scp ${data_dir}/ref.rttm --seg_file ${data_dir}/org_vad.txt
+
+  # dump callhome2 data in test mode.
+  data_dir=${datadir}/callhome2/files_for_dump
+  mkdir ${data_dir}
+  # filter out zero duration segments
+  LC_ALL=C awk '{if ($5 > 0){print $0}}' ${datadir}/callhome2/ref.rttm > ${data_dir}/ref.rttm
+  cp ${datadir}/callhome2/{feats.scp,labels.scp} ${data_dir}/
+  cp ${datadir}/callhome2/nonoverlap_0s/{utt2spk,utt2xvec,utt2num_frames} ${data_dir}/
+
+  echo "Stage 6: start to dump for callhome2."
+  python -Wignore script/dump_meeting_chunks.py --dir ${data_dir} \
+    --out ${dumpdir}/callhome2/dumped_files/data --n_spk 16 --no_pbar --sr 8000 --mode test \
+    --chunk_size 1600 --chunk_shift 400 --add_mid_to_speaker true
+
+  mkdir -p ${datadir}/callhome2/dumped_files
+  cat ${dumpdir}/callhome2/dumped_files/data_parts*_feat.scp | sort > ${datadir}/callhome2/dumped_files/feats.scp
+  cat ${dumpdir}/callhome2/dumped_files/data_parts*_xvec.scp | sort > ${datadir}/callhome2/dumped_files/profile.scp
+  cat ${dumpdir}/callhome2/dumped_files/data_parts*_label.scp | sort > ${datadir}/callhome2/dumped_files/label.scp
+  mkdir -p ${expdir}/callhome2_states
+  awk '{print $1,"1600"}' ${datadir}/callhome2/dumped_files/feats.scp | shuf > ${expdir}/callhome2_states/speech_shape
+  python -Wignore script/convert_rttm_to_seg_file.py --rttm_scp ${data_dir}/ref.rttm --seg_file ${data_dir}/org_vad.txt
+
 fi
 
 # Finetune model on callhome1, this will take about 1.5 hours.
-if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
-  echo "Stage 1: Finetune pretrained model on callhome1."
+if [ ${stage} -le 7 ] && [ ${stop_stage} -ge 7 ]; then
+  echo "Stage 7: Finetune pretrained model on callhome1."
   world_size=$gpu_num  # run on one machine
   mkdir -p ${expdir}/${model_dir}
   mkdir -p ${expdir}/${model_dir}/log
@@ -154,8 +318,8 @@ fi
 
 
 # evaluate for finetuned model
-if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
-    echo "stage 2: evaluation for finetuned model ${inference_model}."
+if [ ${stage} -le 8 ] && [ ${stop_stage} -ge 8 ]; then
+    echo "stage 8: evaluation for finetuned model ${inference_model}."
     for dset in ${test_sets}; do
         echo "Processing for $dset"
         exp_model_dir=${expdir}/${model_dir}
@@ -201,15 +365,15 @@ fi
 # Scoring for finetuned model, you may get a DER like:
 # oracle_vad  |  system_vad
 #   7.28      |     8.06
-if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
-  echo "stage 3: Scoring finetuned models"
+if [ ${stage} -le 9 ] && [ ${stop_stage} -ge 9 ]; then
+  echo "stage 9: Scoring finetuned models"
   if [ ! -e dscore ]; then
     git clone https://github.com/nryant/dscore.git
     pip install intervaltree
     # add intervaltree to setup.py
   fi
   for dset in ${test_sets}; do
-    echo "stage 3: Scoring for ${dset}"
+    echo "stage 9: Scoring for ${dset}"
     diar_exp=${expdir}/${model_dir}
     _data="${datadir}/${dset}"
     _inference_tag="$(basename "${inference_config}" .yaml)${inference_tag}"
@@ -244,7 +408,7 @@ fi
 # iter_2:   9.11      |     9.98
 # iter_3:   9.08      |     9.96
 # iter_4:   9.07      |     9.95
-if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
+if [ ${stage} -le 10 ] && [ ${stop_stage} -ge 10 ]; then
   if [ ! -e ${expdir}/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch ]; then
     git lfs install
     git clone https://www.modelscope.cn/damo/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch.git
@@ -252,7 +416,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
   fi
 
   for dset in ${test_sets}; do
-    echo "stage 4: Evaluating finetuned system on ${dset} set with medfilter_size=83 clustering=EEND-OLA"
+    echo "stage 10: Evaluating finetuned system on ${dset} set with medfilter_size=83 clustering=EEND-OLA"
     sv_exp_dir=${expdir}/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch
     diar_exp=${expdir}/${model_dir}
     _data="${datadir}/${dset}/dumped_files"
