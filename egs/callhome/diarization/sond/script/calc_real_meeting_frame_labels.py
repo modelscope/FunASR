@@ -1,6 +1,6 @@
 import numpy as np
-from opennmt.utils.job_runner import MultiProcessRunnerV3
-from opennmt.utils.misc import load_scp_as_list, load_scp_as_dict
+from funasr.utils.job_runner import MultiProcessRunnerV3
+from funasr.utils.misc import load_scp_as_list, load_scp_as_dict
 import os
 import librosa
 import scipy.io as sio
@@ -90,7 +90,7 @@ def process(task_args):
     for mid, wav_path, rttms in task_list:
         meeting_labels, spk_list = build_labels(wav_path, rttms, args.n_spk, args.remove_sil,
                                                 args.sr, args.frame_shift)
-        save_path = os.path.join(args.out_dir, "{}.lbl".format(mid))
+        save_path = os.path.join(args.out_dir, "{}.lbl.mat".format(mid))
         sio.savemat(save_path, {"labels": meeting_labels.astype(bool), "spk_list": spk_list})
         # print mid
     return None

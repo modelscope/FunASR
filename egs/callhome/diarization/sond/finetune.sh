@@ -180,9 +180,11 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
     git lfs install
     git clone https://www.modelscope.cn/damo/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch.git
     mv speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch ${expdir}/
+    echo "Done."
   fi
 
   for dset in callhome1/nonoverlap_0s callhome2/nonoverlap_0s; do
+    echo "Start to extract speaker embeddings for ${dset}"
     key_file=${datadir}/${dset}/wav.scp
     num_scp_file="$(<${key_file} wc -l)"
     _nj=$([ $inference_nj -le $num_scp_file ] && echo "$inference_nj" || echo "$num_scp_file")
@@ -207,6 +209,9 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
         --sv_model_file ${sv_exp_dir}/sv.pth \
         --output_dir "${_logdir}"/output.JOB
     cat ${_logdir}/output.*/xvector.scp | sort > ${datadir}/${dset}/utt2xvec
+
+    python script/calc_num_frames.py ${key_file} ${datadir}/${dset}/utt2num_frames
+    echo "Done."
   done
 
 fi
@@ -219,7 +224,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
     python -Wignore script/calc_real_meeting_frame_labels.py \
           ${datadir}/${dset} ${dumpdir}/${dset}/labels \
           --n_spk 8 --frame_shift 0.01 --nj 16 --sr 8000
-    find `pwd`/${dumpdir}/${dset}/labels -iname "*.lbl.mat" | awk -F'[/.]' '{print $(NF-2),$0}' | sort > ${datadir}/${dset}/labels.scp
+    find `pwd`/${dumpdir}/${dset}/labels/ -iname "*.lbl.mat" | awk -F'[/.]' '{print $(NF-2),$0}' | sort > ${datadir}/${dset}/labels.scp
   done
 
 fi
