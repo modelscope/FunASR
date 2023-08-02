@@ -177,6 +177,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
   sv_exp_dir=exp/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch
 
   if [ ! -e ${sv_exp_dir} ]; then
+    echo "start to download sv models"
     git lfs install
     git clone https://www.modelscope.cn/damo/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch.git
     mv speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch ${expdir}/
@@ -242,7 +243,7 @@ if [ ${stage} -le 6 ] && [ ${stop_stage} -ge 6 ]; then
 
   echo "Stage 6: start to dump for callhome1."
   python -Wignore script/dump_meeting_chunks.py --dir ${data_dir} \
-    --out ${dumpdir}/callhome1/dumped_files/data --n_spk 16 --no_pbar --sr 8000 --mode test \
+    --out ${dumpdir}/callhome1/dumped_files/data --n_spk 16 --no_pbar --sr 8000 --mode train \
     --chunk_size 1600 --chunk_shift 400 --add_mid_to_speaker true
 
   mkdir -p ${datadir}/callhome1/dumped_files
@@ -279,6 +280,15 @@ fi
 # Finetune model on callhome1, this will take about 1.5 hours.
 if [ ${stage} -le 7 ] && [ ${stop_stage} -ge 7 ]; then
   echo "Stage 7: Finetune pretrained model on callhome1."
+
+  if [ ! -e ${expdir}/speech_diarization_sond-en-us-swbd_sre-8k-n16k4-pytorch ]; then
+    echo "start to download pretrained models"
+    git lfs install
+    git clone https://www.modelscope.cn/damo/speech_diarization_sond-en-us-swbd_sre-8k-n16k4-pytorch.git
+    mv speech_diarization_sond-en-us-swbd_sre-8k-n16k4-pytorch ${expdir}/
+    echo "Done."
+  fi
+
   world_size=$gpu_num  # run on one machine
   mkdir -p ${expdir}/${model_dir}
   mkdir -p ${expdir}/${model_dir}/log
@@ -319,7 +329,7 @@ if [ ${stage} -le 7 ] && [ ${stop_stage} -ge 7 ]; then
               --valid_data_path_and_name_and_type ${datadir}/${valid_set}/dumped_files/profile.scp,profile,kaldi_ark \
               --valid_data_path_and_name_and_type ${datadir}/${valid_set}/dumped_files/label.scp,binary_labels,kaldi_ark \
               --valid_shape_file ${expdir}/${valid_set}_states/speech_shape \
-              --init_param exp/pretrained_models/phase2.pth \
+              --init_param ${expdir}/speech_diarization_sond-en-us-swbd_sre-8k-n16k4-pytorch/sond.pth \
               --unused_parameters true \
               ${init_opt} \
               ${freeze_opt} \
@@ -388,7 +398,7 @@ fi
 
 # Scoring for finetuned model, you may get a DER like:
 # oracle_vad  |  system_vad
-#   7.28      |     8.06
+#   7.27      |     8.08
 if [ ${stage} -le 9 ] && [ ${stop_stage} -ge 9 ]; then
   echo "stage 9: Scoring finetuned models"
   if [ ! -e dscore ]; then
