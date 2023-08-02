@@ -92,8 +92,21 @@ fi
 
 # Prepare datasets
 if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
-  echp "Stage 0: Prepare callhome data."
+  echo "Stage 0: Prepare callhome data."
   local/make_callhome.sh ${callhome_root} ${datadir}/
+
+  # split ref.rttm
+  for dset in callhome1 callhome2; do
+    rm -rf data/${dset}/ref.rttm
+    for name in `awk '{print $1}' data/${dset}/wav.scp`; do
+      grep ${name} data/callhome/fullref.rttm >> data/${dset}/ref.rttm;
+    done
+
+    # filter out records which don't have rttm labels.
+    awk '{print $2}' data/${dset}/ref.rttm | sort | uniq > data/${dset}/uttid
+    mv data/${dset}/wav.scp data/${dset}/wav.scp.bak
+    awk '{if (NR==FNR){a[$1]=1}else{if (a[$1]==1){print $0}}}' data/${dset}/uttid data/${dset}/wav.scp.bak > data/${dset}/wav.scp
+  done
 fi
 
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
@@ -123,10 +136,10 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     mkdir -p ${dumpdir}/${dset}/nonoverlap_0s
     python -Wignore script/extract_nonoverlap_segments.py \
       ${datadir}/${dset}/wav.scp ${datadir}/${dset}/ref.rttm ${dumpdir}/${dset}/nonoverlap_0s \
-      --min_dur 0 --max_spk_num 8 --sr ${sr} --no_pbar --nj ${nj}
+      --min_dur 0.1 --max_spk_num 8 --sr ${sr} --no_pbar --nj ${nj}
 
     mkdir -p ${datadir}/${dset}/nonoverlap_0s
-    find `pwd`/${dumpdir}/${dset}/nonoverlap_0s | sort | awk -F'[/.]' '{print $(NF-1),$0}' > ${datadir}/${dset}/nonoverlap_0s/wav.scp
+    find ${dumpdir}/${dset}/nonoverlap_0s/ -iname "*.wav" | sort | awk -F'[/.]' '{print $(NF-1),$0}' > ${datadir}/${dset}/nonoverlap_0s/wav.scp
     awk -F'[/.]' '{print $(NF-1),$(NF-2)}' ${datadir}/${dset}/nonoverlap_0s/wav.scp > ${datadir}/${dset}/nonoverlap_0s/utt2spk
     echo "Done."
   done
@@ -134,13 +147,17 @@ fi
 
 if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
   echo "Stage 3: Generate fbank features"
-  home_path=`pwd`
+  home_path=$(pwd)
   cd ${kaldi_root}/egs/callhome_diarization/v2 || exit
 
-  . ./cmd.sh
+  export train_cmd="run.pl"
+  export cmd="run.pl"
   . ./path.sh
+  cd $home_path || exit
 
+  ln -s ${kaldi_root}/egs/callhome_diarization/v2/steps ./
   for dset in callhome1 callhome2; do
+    mv ${datadir}/${dset}/segments ${datadir}/${dset}/segs
     steps/make_fbank.sh --write-utt2num-frames true --fbank-config conf/fbank.conf --nj ${nj} --cmd "$train_cmd" \
         ${datadir}/${dset} ${expdir}/make_fbank/${dset} ${dumpdir}/${dset}/fbank
     utils/fix_data_dir.sh ${datadir}/${dset}
@@ -151,8 +168,8 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
         ${datadir}/${dset} ${expdir}/make_fbank/${dset} ${dumpdir}/${dset}/fbank
     utils/fix_data_dir.sh ${datadir}/${dset}
   done
+  rm -f steps
 
-  cd ${home_path} || exit
 fi
 
 if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then

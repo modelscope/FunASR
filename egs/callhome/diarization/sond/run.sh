@@ -48,6 +48,7 @@ sr=8000
 
 # dataset related
 data_root=
+callhome_root=path/to/NIST/LDC2001S97
 
 # experiment configuration
 lang=en
@@ -124,7 +125,7 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
   utils/fix_data_dir.sh ${datadir}/swbd_sre
 
   # 3. Prepare the Callhome portion of NIST SRE 2000.
-  local/make_callhome.sh /nfs/wangjiaming.wjm/speech-data/NIST/LDC2001S97 ${datadir}/
+  local/make_callhome.sh ${callhome_root} ${datadir}/
 
 fi
 
