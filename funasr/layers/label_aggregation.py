@@ -1,7 +1,6 @@
 import torch
 from typing import Optional
 from typing import Tuple
-from typeguard import check_argument_types
 from torch.nn import functional as F
 from funasr.modules.nets_utils import make_pad_mask
 
@@ -86,7 +85,6 @@ class LabelAggregateMaxPooling(torch.nn.Module):
         self,
         hop_length: int = 8,
     ):
-        assert check_argument_types()
         super().__init__()
 
         self.hop_length = hop_length
