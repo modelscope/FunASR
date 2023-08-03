@@ -6,8 +6,6 @@ from typing import Union
 
 import numpy as np
 import torch
-from typeguard import check_argument_types
-from typeguard import check_return_type
 from funasr.modules.nets_utils import pad_list, pad_list_all_dim
 
 
@@ -89,7 +87,6 @@ class DiarCollateFn:
             not_sequence: Collection[str] = (),
             max_sample_size=None
     ):
-        assert check_argument_types()
         self.float_pad_value = float_pad_value
         self.int_pad_value = int_pad_value
         self.not_sequence = set(not_sequence)
@@ -120,7 +117,6 @@ def diar_collate_fn(
 ) -> Tuple[List[str], Dict[str, torch.Tensor]]:
     """Concatenate ndarray-list to an array and convert to torch.Tensor.
     """
-    assert check_argument_types()
     uttids = [u for u, _ in data]
     data = [d for _, d in data]
 
@@ -146,7 +142,6 @@ def diar_collate_fn(
             output[key + "_lengths"] = lens
 
     output = (uttids, output)
-    assert check_return_type(output)
     return output
 
 
