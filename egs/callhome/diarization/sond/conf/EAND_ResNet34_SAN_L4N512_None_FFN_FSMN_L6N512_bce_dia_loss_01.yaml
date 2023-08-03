@@ -1,0 +1,133 @@
+model: sond
+model_conf:
+    lsm_weight: 0.0
+    length_normalized_loss: true
+    max_spk_num: 16
+    normalize_speech_speaker: true
+    speaker_discrimination_loss_weight: 0
+    inter_score_loss_weight: 0.1
+    model_regularizer_weight: 0.0
+    freeze_encoder: true
+    onfly_shuffle_speaker: false
+# label aggregator
+label_aggregator: label_aggregator_max_pool
+label_aggregator_conf:
+    hop_length: 8
+
+# speech encoder
+encoder: resnet34_sp_l2reg
+encoder_conf:
+    # pass by model, equal to feature dim
+    # input_size: 80
+    batchnorm_momentum: 0.01
+    pooling_type: "window_shift"
+    pool_size: 20
+    stride: 1
+    tf2torch_tensor_name_prefix_torch: encoder
+    tf2torch_tensor_name_prefix_tf: EAND/speech_encoder
+
+speaker_encoder: null
+speaker_encoder_conf: {}
+
+ci_scorer: conv
+ci_scorer_conf:
+    input_units: 512
+    num_layers: 3
+    num_units: 512
+    kernel_size: 1
+    dropout_rate: 0.0
+    position_encoder: null
+    out_units: 1
+    out_norm: false
+    auxiliary_states: false
+    tf2torch_tensor_name_prefix_torch: ci_scorer
+    tf2torch_tensor_name_prefix_tf: EAND/compute_distance_layer/ci_scorer
+
+cd_scorer: san
+cd_scorer_conf:
+    input_size: 512
+    output_size: 512
+    out_units: 1
+    attention_heads: 4
+    linear_units: 1024
+    num_blocks: 4
+    dropout_rate: 0.0
+    positional_dropout_rate: 0.0
+    attention_dropout_rate: 0.0
+    # use string "null" to remove input layer
+    input_layer: "null"
+    pos_enc_class: null
+    normalize_before: true
+    tf2torch_tensor_name_prefix_torch: cd_scorer
+    tf2torch_tensor_name_prefix_tf: EAND/compute_distance_layer/cd_scorer
+
+# post net
+decoder: fsmn
+decoder_conf:
+    in_units: 32
+    out_units: 2517
+    filter_size: 31
+    fsmn_num_layers: 6
+    dnn_num_layers: 1
+    num_memory_units: 16
+    ffn_inner_dim: 512
+    dropout_rate: 0.0
+    tf2torch_tensor_name_prefix_torch: decoder
+    tf2torch_tensor_name_prefix_tf: EAND/post_net
+
+input_size: 80
+frontend: null
+frontend_conf:
+    fs: 16000
+    window: povey
+    n_mels: 80
+    frame_length: 25
+    frame_shift: 10
+    filter_length_min: -1
+    filter_length_max: -1
+    lfr_m: 1
+    lfr_n: 1
+    dither: 0.0
+    snip_edges: false
+    upsacle_samples: false
+
+# minibatch related
+batch_type: unsorted
+# 16 samples
+batch_size: 8
+num_workers: 8
+max_epoch: 20
+num_iters_per_epoch: 10000
+keep_nbest_models: 20
+
+# optimization related
+accum_grad: 1
+grad_clip: 5.0
+val_scheduler_criterion:
+    - valid
+    - der
+    - min
+best_model_criterion:
+-   - valid
+    - der
+    - min
+-   - valid
+    - forward_steps
+    - max
+
+optim: adamw
+optim_conf:
+   lr: 1.0
+   betas: [0.9, 0.998]
+   weight_decay: 0
+scheduler: noamlr
+scheduler_conf:
+   model_size: 512
+   warmup_steps: 10000
+
+# without spec aug
+specaug: null
+
+log_interval: 50
+# without normalize
+normalize: null
