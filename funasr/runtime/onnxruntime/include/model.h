@@ -18,7 +18,7 @@ class Model {
 };
 
 Model *CreateModel(std::map<std::string, std::string>& model_path, int thread_num=1, ASR_TYPE type=ASR_OFFLINE);
-Model *CreateModel(void* asr_handle);
+Model *CreateModel(void* asr_handle, std::vector<int> chunk_size);
 
 } // namespace funasr
 #endif

@@ -85,7 +85,7 @@ TpassStream *CreateTpassStream(std::map<std::string, std::string>& model_path, i
     return mm;
 }
 
-void CreateTpassOnlineStream(void* tpass_stream)
+void CreateTpassOnlineStream(void* tpass_stream, std::vector<int> chunk_size)
 {
     funasr::TpassStream* tpass_obj = (funasr::TpassStream*)tpass_stream;
     if(tpass_obj->vad_handle){
@@ -93,7 +93,7 @@ void CreateTpassOnlineStream(void* tpass_stream)
     }
 
     if(tpass_obj->asr_handle){
-        tpass_obj->asr_online_handle = make_unique<ParaformerOnline>((Paraformer*)(tpass_obj->asr_handle).get());
+        tpass_obj->asr_online_handle = make_unique<ParaformerOnline>((Paraformer*)(tpass_obj->asr_handle).get(), chunk_size);
     }else{
         LOG(ERROR)<<"asr_handle is null";
         exit(-1);

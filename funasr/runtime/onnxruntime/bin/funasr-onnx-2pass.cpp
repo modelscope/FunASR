@@ -32,10 +32,8 @@ bool is_target_file(const std::string& filename, const std::string target) {
 
 void GetValue(TCLAP::ValueArg<std::string>& value_arg, string key, std::map<std::string, std::string>& model_path)
 {
-    if (value_arg.isSet()){
-        model_path.insert({key, value_arg.getValue()});
-        LOG(INFO)<< key << " : " << value_arg.getValue();
-    }
+    model_path.insert({key, value_arg.getValue()});
+    LOG(INFO)<< key << " : " << value_arg.getValue();
 }
 
 int main(int argc, char** argv)
@@ -52,6 +50,7 @@ int main(int argc, char** argv)
     TCLAP::ValueArg<std::string>    punc_dir("", PUNC_DIR, "the punc online model path, which contains model.onnx, punc.yaml", false, "", "string");
     TCLAP::ValueArg<std::string>    punc_quant("", PUNC_QUANT, "false (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "true", "string");
     TCLAP::ValueArg<std::string>    asr_mode("", ASR_MODE, "offline, online, 2pass", false, "2pass", "string");
+    TCLAP::ValueArg<std::int32_t>   onnx_thread("", "onnx-inter-thread", "onnxruntime SetIntraOpNumThreads", false, 1, "int32_t");
 
     TCLAP::ValueArg<std::string> wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", true, "", "string");
 
@@ -64,6 +63,7 @@ int main(int argc, char** argv)
     cmd.add(punc_quant);
     cmd.add(wav_path);
     cmd.add(asr_mode);
+    cmd.add(onnx_thread);
     cmd.parse(argc, argv);
 
     std::map<std::string, std::string> model_path;
@@ -79,7 +79,7 @@ int main(int argc, char** argv)
 
     struct timeval start, end;
     gettimeofday(&start, NULL);
-    int thread_num = 1;
+    int thread_num = onnx_thread.getValue();
     int asr_mode_ = -1;
     if(model_path[ASR_MODE] == "offline"){
         asr_mode_ = 0;
@@ -132,14 +132,15 @@ int main(int argc, char** argv)
     }
 
     // init online features
-    FunTpassOnlineInit(tpass_hanlde);
+    std::vector<int> chunk_size = {5,10,5};
+    FunTpassOnlineInit(tpass_hanlde, chunk_size);
     float snippet_time = 0.0f;
     long taking_micros = 0;
     for (int i = 0; i < wav_list.size(); i++) {
         auto& wav_file = wav_list[i];
         auto& wav_id = wav_ids[i];
 
-        int32_t sampling_rate_ = -1;
+        int32_t sampling_rate_ = 16000;
         funasr::Audio audio(1);
 		if(is_target_file(wav_file.c_str(), "wav")){
 			if(!audio.LoadWav2Char(wav_file.c_str(), &sampling_rate_)){
@@ -174,7 +175,7 @@ int main(int argc, char** argv)
                     is_final = false;
             }
             gettimeofday(&start, NULL);
-            FUNASR_RESULT result = FunTpassInferBuffer(tpass_hanlde, speech_buff+sample_offset, step, punc_cache, is_final, 16000, "pcm", (ASR_TYPE)asr_mode_);
+            FUNASR_RESULT result = FunTpassInferBuffer(tpass_hanlde, speech_buff+sample_offset, step, punc_cache, is_final, sampling_rate_, "pcm", (ASR_TYPE)asr_mode_);
             gettimeofday(&end, NULL);
             seconds = (end.tv_sec - start.tv_sec);
             taking_micros += ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
@@ -196,10 +197,10 @@ int main(int argc, char** argv)
             }
         }
         if(asr_mode_ != 0){
-            LOG(INFO) << wav_id <<"Final online  results "<<" : "<<online_res;
+            LOG(INFO) << wav_id << " Final online  results "<<" : "<<online_res;
         }
         if(asr_mode_ != 1){
-            LOG(INFO) << wav_id << "Final offline results " <<" : "<<tpass_res;
+            LOG(INFO) << wav_id << " Final offline results " <<" : "<<tpass_res;
         }
     }
  

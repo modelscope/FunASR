@@ -1056,7 +1056,7 @@ void Audio::Split(VadModel* vad_obj, vector<std::vector<int>>& vad_segments, boo
 }
 
 // 2pass
-void Audio::Split(VadModel* vad_obj, bool input_finished, ASR_TYPE asr_mode)
+void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYPE asr_mode)
 {
     AudioFrame *frame;
 
@@ -1075,7 +1075,7 @@ void Audio::Split(VadModel* vad_obj, bool input_finished, ASR_TYPE asr_mode)
             int start = speech_start*seg_sample;
             int end = speech_end*seg_sample;
             int buff_len = end-start;
-            int step = ONLINE_STEP;
+            int step = chunk_len;
 
             if(asr_mode != ASR_OFFLINE){
                 if(buff_len >= step){
@@ -1131,7 +1131,7 @@ void Audio::Split(VadModel* vad_obj, bool input_finished, ASR_TYPE asr_mode)
                 int start = speech_start*seg_sample;
                 int end = speech_end*seg_sample;
                 int buff_len = end-start;
-                int step = ONLINE_STEP;
+                int step = chunk_len;
 
                 if(asr_mode != ASR_OFFLINE){
                     if(buff_len >= step){
@@ -1154,7 +1154,7 @@ void Audio::Split(VadModel* vad_obj, bool input_finished, ASR_TYPE asr_mode)
                 int offline_start = speech_offline_start*seg_sample;
                 int end = speech_end_i*seg_sample;
                 int buff_len = end-start;
-                int step = ONLINE_STEP;
+                int step = chunk_len;
 
                 if(asr_mode != ASR_ONLINE){
                     frame = new AudioFrame(end-offline_start);

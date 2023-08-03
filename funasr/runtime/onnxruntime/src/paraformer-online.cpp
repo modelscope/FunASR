@@ -9,8 +9,8 @@ using namespace std;
 
 namespace funasr {
 
-ParaformerOnline::ParaformerOnline(Paraformer* para_handle)
-:para_handle_(std::move(para_handle)),session_options_{}{
+ParaformerOnline::ParaformerOnline(Paraformer* para_handle, std::vector<int> chunk_size)
+:para_handle_(std::move(para_handle)),chunk_size(chunk_size),session_options_{}{
     InitOnline(
         para_handle_->fbank_opts_,
         para_handle_->encoder_session_,
@@ -61,6 +61,7 @@ void ParaformerOnline::InitOnline(
     for(int i=0; i<fsmn_lorder*fsmn_dims; i++){
         fsmn_init_cache_.emplace_back(0);
     }
+    chunk_len = chunk_size[1]*frame_shift*lfr_n*MODEL_SAMPLE_RATE/1000;
 }
 
 void ParaformerOnline::FbankKaldi(float sample_rate, std::vector<std::vector<float>> &wav_feats,
@@ -109,7 +110,7 @@ void ParaformerOnline::ExtractFeats(float sample_rate, vector<std::vector<float>
         int frame_from_waves = (waves.size() - frame_sample_length_) / frame_shift_sample_length_ + 1;
         int minus_frame = reserve_waveforms_.empty() ? (lfr_m - 1) / 2 : 0;
         int lfr_splice_frame_idxs = OnlineLfrCmvn(wav_feats, input_finished);
-        int reserve_frame_idx = lfr_splice_frame_idxs - minus_frame;
+        int reserve_frame_idx = std::abs(lfr_splice_frame_idxs - minus_frame);
         reserve_waveforms_.clear();
         reserve_waveforms_.insert(reserve_waveforms_.begin(),
                                     waves.begin() + reserve_frame_idx * frame_shift_sample_length_,

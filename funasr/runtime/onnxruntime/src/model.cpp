@@ -46,10 +46,10 @@ Model *CreateModel(std::map<std::string, std::string>& model_path, int thread_nu
     }
 }
 
-Model *CreateModel(void* asr_handle)
+Model *CreateModel(void* asr_handle, std::vector<int> chunk_size)
 {
     Model* mm;
-    mm = new ParaformerOnline((Paraformer*)asr_handle);
+    mm = new ParaformerOnline((Paraformer*)asr_handle, chunk_size);
     return mm;
 }
 

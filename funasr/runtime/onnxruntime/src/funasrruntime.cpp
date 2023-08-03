@@ -11,9 +11,9 @@ extern "C" {
 		return mm;
 	}
 
-	_FUNASRAPI FUNASR_HANDLE  FunASROnlineInit(FUNASR_HANDLE asr_hanlde)
+	_FUNASRAPI FUNASR_HANDLE  FunASROnlineInit(FUNASR_HANDLE asr_hanlde, std::vector<int> chunk_size)
 	{
-		funasr::Model* mm = funasr::CreateModel(asr_hanlde);
+		funasr::Model* mm = funasr::CreateModel(asr_hanlde, chunk_size);
 		return mm;
 	}
 
@@ -47,9 +47,9 @@ extern "C" {
 		return mm;
 	}
 
-	_FUNASRAPI void FunTpassOnlineInit(FUNASR_HANDLE tpass_handle)
+	_FUNASRAPI void FunTpassOnlineInit(FUNASR_HANDLE tpass_handle, std::vector<int> chunk_size)
 	{
-		funasr::CreateTpassOnlineStream(tpass_handle);
+		funasr::CreateTpassOnlineStream(tpass_handle, chunk_size);
 	}
 
 	// APIs for ASR Infer
@@ -324,6 +324,7 @@ extern "C" {
 		funasr::Model* asr_online_handle = (tpass_stream->asr_online_handle).get();
 		if (!asr_online_handle)
 			return nullptr;
+		int chunk_len = ((funasr::ParaformerOnline*)asr_online_handle)->chunk_len;
 		
 		funasr::Model* asr_handle = (tpass_stream->asr_handle).get();
 		if (!asr_handle)
@@ -348,14 +349,25 @@ extern "C" {
 		if(p_result->snippet_time == 0){
 			return p_result;
 		}
-
-		audio->Split(vad_online_handle, input_finished, mode);
+		
+		audio->Split(vad_online_handle, chunk_len, input_finished, mode);
 
 		funasr::AudioFrame* frame = NULL;
 		while(audio->FetchChunck(frame) > 0){
 			string msg = asr_online_handle->Forward(frame->data, frame->len, frame->is_final);
-			string msg_punc = punc_online_handle->AddPunc(msg.c_str(), punc_cache[0]);
-			p_result->msg += msg_punc;
+			if(mode == ASR_ONLINE){
+				((funasr::ParaformerOnline*)asr_online_handle)->online_res += msg;
+				if(frame->is_final){
+					string online_msg = ((funasr::ParaformerOnline*)asr_online_handle)->online_res;
+					string msg_punc = punc_online_handle->AddPunc(online_msg.c_str(), punc_cache[0]);
+					p_result->tpass_msg = msg_punc;
+					((funasr::ParaformerOnline*)asr_online_handle)->online_res = "";
+				}else{
+					p_result->msg += msg;
+				}
+			}else if(mode == ASR_TWO_PASS && !(frame->is_final)){
+				p_result->msg += msg;
+			}
 			if(frame != NULL){
 				delete frame;
 				frame = NULL;

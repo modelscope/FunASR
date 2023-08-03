@@ -55,7 +55,7 @@ void FsmnVadOnline::ExtractFeats(float sample_rate, vector<std::vector<float>> &
       int frame_from_waves = (waves.size() - frame_sample_length_) / frame_shift_sample_length_ + 1;
       int minus_frame = reserve_waveforms_.empty() ? (lfr_m - 1) / 2 : 0;
       int lfr_splice_frame_idxs = OnlineLfrCmvn(vad_feats, input_finished);
-      int reserve_frame_idx = lfr_splice_frame_idxs - minus_frame;
+      int reserve_frame_idx = std::abs(lfr_splice_frame_idxs - minus_frame);
       reserve_waveforms_.clear();
       reserve_waveforms_.insert(reserve_waveforms_.begin(),
                                 waves.begin() + reserve_frame_idx * frame_shift_sample_length_,

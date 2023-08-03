@@ -92,7 +92,7 @@ namespace funasr {
         double sqrt_factor;
 
     public:
-        ParaformerOnline(Paraformer* para_handle);
+        ParaformerOnline(Paraformer* para_handle, std::vector<int> chunk_size);
         ~ParaformerOnline();
         void Reset();
         void ResetCache();
@@ -103,6 +103,9 @@ namespace funasr {
         string ForwardChunk(std::vector<std::vector<float>> &wav_feats, bool input_finished);
         string Forward(float* din, int len, bool input_finished);
         string Rescoring();
+        // 2pass
+        std::string online_res;
+        int chunk_len;
     };
 
 } // namespace funasr

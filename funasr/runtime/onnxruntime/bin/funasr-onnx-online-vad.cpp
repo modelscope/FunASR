@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
         char* speech_buff = audio.GetSpeechChar();
         int buff_len = audio.GetSpeechLen()*2;
 
-        int step = 1600*2;
+        int step = 800*2;
         bool is_final = false;
 
         for (int sample_offset = 0; sample_offset < buff_len; sample_offset += std::min(step, buff_len - sample_offset)) {

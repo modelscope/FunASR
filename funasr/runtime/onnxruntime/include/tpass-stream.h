@@ -29,6 +29,6 @@ class TpassStream {
 };
 
 TpassStream *CreateTpassStream(std::map<std::string, std::string>& model_path, int thread_num=1);
-void CreateTpassOnlineStream(void* tpass_stream);
+void CreateTpassOnlineStream(void* tpass_stream, std::vector<int> chunk_size);
 } // namespace funasr
 #endif

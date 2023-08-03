@@ -61,7 +61,7 @@ typedef void (* QM_CALLBACK)(int cur_step, int n_total); // n_total: total steps
 
 // ASR
 _FUNASRAPI FUNASR_HANDLE  	FunASRInit(std::map<std::string, std::string>& model_path, int thread_num, ASR_TYPE type=ASR_OFFLINE);
-_FUNASRAPI FUNASR_HANDLE  	FunASROnlineInit(FUNASR_HANDLE asr_handle);
+_FUNASRAPI FUNASR_HANDLE  	FunASROnlineInit(FUNASR_HANDLE asr_handle, std::vector<int> chunk_size={5,10,5});
 // buffer
 _FUNASRAPI FUNASR_RESULT	FunASRInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, FUNASR_MODE mode, QM_CALLBACK fn_callback, bool input_finished=true, int sampling_rate=16000, std::string wav_format="pcm");
 // file, support wav & pcm
@@ -104,7 +104,7 @@ _FUNASRAPI void				FunOfflineUninit(FUNASR_HANDLE handle);
 
 //2passStream
 _FUNASRAPI FUNASR_HANDLE  	FunTpassInit(std::map<std::string, std::string>& model_path, int thread_num);
-_FUNASRAPI void  	        FunTpassOnlineInit(FUNASR_HANDLE tpass_handle);
+_FUNASRAPI void  	        FunTpassOnlineInit(FUNASR_HANDLE tpass_handle, std::vector<int> chunk_size={5,10,5});
 // buffer
 _FUNASRAPI FUNASR_RESULT	FunTpassInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, std::vector<std::vector<std::string>> &punc_cache, bool input_finished=true, int sampling_rate=16000, std::string wav_format="pcm", ASR_TYPE mode=ASR_TWO_PASS);
 _FUNASRAPI void				FunTpassUninit(FUNASR_HANDLE handle);
