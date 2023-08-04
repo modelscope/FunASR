@@ -16,9 +16,7 @@ class TpassStream {
 
     // std::unique_ptr<VadModel> vad_handle = nullptr;
     std::unique_ptr<VadModel> vad_handle = nullptr;
-    std::unique_ptr<VadModel> vad_online_handle = nullptr;
     std::unique_ptr<Model> asr_handle = nullptr;
-    std::unique_ptr<Model> asr_online_handle = nullptr;
     std::unique_ptr<PuncModel> punc_online_handle = nullptr;
     bool UseVad(){return use_vad;};
     bool UsePunc(){return use_punc;}; 
@@ -29,6 +27,5 @@ class TpassStream {
 };
 
 TpassStream *CreateTpassStream(std::map<std::string, std::string>& model_path, int thread_num=1);
-void CreateTpassOnlineStream(void* tpass_stream, std::vector<int> chunk_size);
 } // namespace funasr
 #endif

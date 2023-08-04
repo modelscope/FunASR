@@ -24,6 +24,9 @@ target_link_libraries(funasr-onnx-offline-rtf PUBLIC funasr)
 add_executable(funasr-onnx-2pass "funasr-onnx-2pass.cpp")
 target_link_libraries(funasr-onnx-2pass PUBLIC funasr)
 
+add_executable(funasr-onnx-2pass-rtf "funasr-onnx-2pass-rtf.cpp")
+target_link_libraries(funasr-onnx-2pass-rtf PUBLIC funasr)
+
 add_executable(funasr-onnx-online-rtf "funasr-onnx-online-rtf.cpp")
 target_link_libraries(funasr-onnx-online-rtf PUBLIC funasr)
 

@@ -91,9 +91,9 @@ int main(int argc, char** argv)
         LOG(ERROR) << "Wrong asr-mode : " << model_path[ASR_MODE];
         exit(-1);
     }
-    FUNASR_HANDLE tpass_hanlde=FunTpassInit(model_path, thread_num);
+    FUNASR_HANDLE tpass_handle=FunTpassInit(model_path, thread_num);
 
-    if (!tpass_hanlde)
+    if (!tpass_handle)
     {
         LOG(ERROR) << "FunTpassInit init failed";
         exit(-1);
@@ -133,7 +133,7 @@ int main(int argc, char** argv)
 
     // init online features
     std::vector<int> chunk_size = {5,10,5};
-    FunTpassOnlineInit(tpass_hanlde, chunk_size);
+    FUNASR_HANDLE tpass_online_handle=FunTpassOnlineInit(tpass_handle, chunk_size);
     float snippet_time = 0.0f;
     long taking_micros = 0;
     for (int i = 0; i < wav_list.size(); i++) {
@@ -175,7 +175,7 @@ int main(int argc, char** argv)
                     is_final = false;
             }
             gettimeofday(&start, NULL);
-            FUNASR_RESULT result = FunTpassInferBuffer(tpass_hanlde, speech_buff+sample_offset, step, punc_cache, is_final, sampling_rate_, "pcm", (ASR_TYPE)asr_mode_);
+            FUNASR_RESULT result = FunTpassInferBuffer(tpass_handle, tpass_online_handle, speech_buff+sample_offset, step, punc_cache, is_final, sampling_rate_, "pcm", (ASR_TYPE)asr_mode_);
             gettimeofday(&end, NULL);
             seconds = (end.tv_sec - start.tv_sec);
             taking_micros += ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
@@ -196,10 +196,13 @@ int main(int argc, char** argv)
                 FunASRFreeResult(result);
             }
         }
-        if(asr_mode_ != 0){
+        if(asr_mode_==2){
             LOG(INFO) << wav_id << " Final online  results "<<" : "<<online_res;
         }
-        if(asr_mode_ != 1){
+        if(asr_mode_==1){
+            LOG(INFO) << wav_id << " Final online  results "<<" : "<<tpass_res;
+        }
+        if(asr_mode_==0 || asr_mode_==2){
             LOG(INFO) << wav_id << " Final offline results " <<" : "<<tpass_res;
         }
     }
@@ -207,7 +210,8 @@ int main(int argc, char** argv)
     LOG(INFO) << "Audio length: " << (double)snippet_time << " s";
     LOG(INFO) << "Model inference takes: " << (double)taking_micros / 1000000 <<" s";
     LOG(INFO) << "Model inference RTF: " << (double)taking_micros/ (snippet_time*1000000);
-    FunTpassUninit(tpass_hanlde);
+    FunTpassOnlineUninit(tpass_online_handle);
+    FunTpassUninit(tpass_handle);
     return 0;
 }
 

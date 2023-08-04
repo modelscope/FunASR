@@ -48,4 +48,5 @@ using namespace std;
 #include "paraformer-online.h"
 #include "offline-stream.h"
 #include "tpass-stream.h"
+#include "tpass-online-stream.h"
 #include "funasrruntime.h"

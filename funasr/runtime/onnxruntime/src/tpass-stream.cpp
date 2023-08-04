@@ -84,20 +84,4 @@ TpassStream *CreateTpassStream(std::map<std::string, std::string>& model_path, i
     mm = new TpassStream(model_path, thread_num);
     return mm;
 }
-
-void CreateTpassOnlineStream(void* tpass_stream, std::vector<int> chunk_size)
-{
-    funasr::TpassStream* tpass_obj = (funasr::TpassStream*)tpass_stream;
-    if(tpass_obj->vad_handle){
-        tpass_obj->vad_online_handle = make_unique<FsmnVadOnline>((FsmnVad*)(tpass_obj->vad_handle).get());
-    }
-
-    if(tpass_obj->asr_handle){
-        tpass_obj->asr_online_handle = make_unique<ParaformerOnline>((Paraformer*)(tpass_obj->asr_handle).get(), chunk_size);
-    }else{
-        LOG(ERROR)<<"asr_handle is null";
-        exit(-1);
-    }
-}
-
 } // namespace funasr

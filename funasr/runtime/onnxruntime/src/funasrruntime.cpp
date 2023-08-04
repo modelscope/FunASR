@@ -47,9 +47,9 @@ extern "C" {
 		return mm;
 	}
 
-	_FUNASRAPI void FunTpassOnlineInit(FUNASR_HANDLE tpass_handle, std::vector<int> chunk_size)
+	_FUNASRAPI FUNASR_HANDLE FunTpassOnlineInit(FUNASR_HANDLE tpass_handle, std::vector<int> chunk_size)
 	{
-		funasr::CreateTpassOnlineStream(tpass_handle, chunk_size);
+		return funasr::CreateTpassOnlineStream(tpass_handle, chunk_size);
 	}
 
 	// APIs for ASR Infer
@@ -309,19 +309,20 @@ extern "C" {
 	}
 
 	// APIs for 2pass-stream Infer
-	_FUNASRAPI FUNASR_RESULT FunTpassInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, std::vector<std::vector<std::string>> &punc_cache, bool input_finished, int sampling_rate, std::string wav_format, ASR_TYPE mode)
+	_FUNASRAPI FUNASR_RESULT FunTpassInferBuffer(FUNASR_HANDLE handle, FUNASR_HANDLE online_handle, const char* sz_buf, int n_len, std::vector<std::vector<std::string>> &punc_cache, bool input_finished, int sampling_rate, std::string wav_format, ASR_TYPE mode)
 	{
 		funasr::TpassStream* tpass_stream = (funasr::TpassStream*)handle;
-		if (!tpass_stream)
+		funasr::TpassOnlineStream* tpass_online_stream = (funasr::TpassOnlineStream*)online_handle;
+		if (!tpass_stream || !tpass_online_stream)
 			return nullptr;
 		
-		funasr::VadModel* vad_online_handle = (tpass_stream->vad_online_handle).get();
+		funasr::VadModel* vad_online_handle = (tpass_online_stream->vad_online_handle).get();
 		if (!vad_online_handle)
 			return nullptr;
 
 		funasr::Audio* audio = ((funasr::FsmnVadOnline*)vad_online_handle)->audio_handle.get();
 
-		funasr::Model* asr_online_handle = (tpass_stream->asr_online_handle).get();
+		funasr::Model* asr_online_handle = (tpass_online_stream->asr_online_handle).get();
 		if (!asr_online_handle)
 			return nullptr;
 		int chunk_len = ((funasr::ParaformerOnline*)asr_online_handle)->chunk_len;
@@ -362,10 +363,11 @@ extern "C" {
 					string msg_punc = punc_online_handle->AddPunc(online_msg.c_str(), punc_cache[0]);
 					p_result->tpass_msg = msg_punc;
 					((funasr::ParaformerOnline*)asr_online_handle)->online_res = "";
+					p_result->msg += msg;
 				}else{
 					p_result->msg += msg;
 				}
-			}else if(mode == ASR_TWO_PASS && !(frame->is_final)){
+			}else if(mode == ASR_TWO_PASS){
 				p_result->msg += msg;
 			}
 			if(frame != NULL){
@@ -531,6 +533,16 @@ extern "C" {
 			return;
 
 		delete tpass_stream;
+	}
+
+	_FUNASRAPI void FunTpassOnlineUninit(FUNASR_HANDLE handle)
+	{
+		funasr::TpassOnlineStream* tpass_online_stream = (funasr::TpassOnlineStream*)handle;
+
+		if (!tpass_online_stream)
+			return;
+
+		delete tpass_online_stream;
 	}
 
 #ifdef __cplusplus 
