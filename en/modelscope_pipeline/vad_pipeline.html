@@ -157,7 +157,7 @@ The modelscope pipeline supports all the models in <a class="reference external"
 <div class="section" id="fsmn-vad-online-model">
 <h4><a class="reference external" href="https://modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary">FSMN-VAD-online model</a><a class="headerlink" href="#fsmn-vad-online-model" title="Permalink to this headline"></a></h4>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
-    <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">auto_speech_recognition</span><span class="p">,</span>
+    <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">voice_activity_detection</span><span class="p">,</span>
     <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_fsmn_vad_zh-cn-16k-common-pytorch&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 <span class="kn">import</span> <span class="nn">soundfile</span>
