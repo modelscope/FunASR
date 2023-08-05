@@ -222,10 +222,10 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     python local/model_averaging.py ${exp_dir}/exp/${simu_allspkr_model_dir}/$simu_allspkr_ave_id.pb $models
 fi
 
-# Training on simulated all-speaker data with chunk_size=2000
+# Training on simulated all-speaker data with chunk_size 2000
 world_size=$gpu_num
 if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
-    echo "stage 3: Training on simulated all-speaker data with chunk_size=2000"
+    echo "stage 3: Training on simulated all-speaker data with chunk_size 2000"
     mkdir -p ${exp_dir}/exp/${simu_allspkr_chunk2000_model_dir}
     mkdir -p ${exp_dir}/exp/${simu_allspkr_chunk2000_model_dir}/log
     INIT_FILE=${exp_dir}/exp/${simu_allspkr_chunk2000_model_dir}/ddp_init
@@ -263,11 +263,11 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
         wait
 fi
 
-# Training on callhome all-speaker data with chunk_size=2000
+# Training on callhome all-speaker data with chunk_size 2000
 world_size=$gpu_num
 callhome_ave_id=avg${callhome_average_start}-${callhome_average_end}
 if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
-    echo "stage 4: Training on callhome all-speaker data with chunk_size=2000"
+    echo "stage 4: Training on callhome all-speaker data with chunk_size 2000"
     mkdir -p ${exp_dir}/exp/${callhome_model_dir}
     mkdir -p ${exp_dir}/exp/${callhome_model_dir}/log
     INIT_FILE=${exp_dir}/exp/${callhome_model_dir}/ddp_init
