@@ -58,7 +58,9 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/glog glog)
 find_package(OpenSSL REQUIRED)
 
 add_executable(funasr-wss-server "funasr-wss-server.cpp" "websocket-server.cpp")
+add_executable(funasr-wss-server-2pass "funasr-wss-server-2pass.cpp" "websocket-server-2pass.cpp")
 add_executable(funasr-wss-client "funasr-wss-client.cpp")
 
 target_link_libraries(funasr-wss-client PUBLIC funasr ssl crypto)
 target_link_libraries(funasr-wss-server PUBLIC funasr ssl crypto)
+target_link_libraries(funasr-wss-server-2pass PUBLIC funasr ssl crypto)
