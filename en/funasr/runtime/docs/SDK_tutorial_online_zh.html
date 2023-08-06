@@ -180,7 +180,7 @@
 <li><p><a class="reference internal" href="#java-client"><span class="std std-ref">java</span></a></p></li>
 <li><p>c#</p></li>
 </ul>
-<p>更多版本客户端支持请参考<a class="reference internal" href="SDK_advanced_guide_offline_zh.html"><span class="doc">开发指南</span></a></p>
+<p>更多版本客户端支持请参考<a class="reference internal" href="websocket_protocol_zh.html"><span class="doc">websocket/grpc协议</span></a></p>
 <div class="section" id="python-client">
 <h3>python-client<a class="headerlink" href="#python-client" title="Permalink to this headline"></a></h3>
 <p>若想直接运行client进行测试，可参考如下简易说明，以python版本为例：</p>
@@ -232,51 +232,51 @@
 <div class="section" id="id7">
 <h3>启动已经部署过的FunASR服务<a class="headerlink" href="#id7" title="Permalink to this headline"></a></h3>
 <p>一键部署后若出现重启电脑等关闭Docker的动作，可通过如下命令直接启动FunASR服务，启动配置为上次一键部署的设置。</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-offline-cpu-zh.sh start
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-online-cpu-zh.sh start
 </pre></div>
 </div>
 </div>
 <div class="section" id="id8">
 <h3>关闭FunASR服务<a class="headerlink" href="#id8" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-offline-cpu-zh.sh stop
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-online-cpu-zh.sh stop
 </pre></div>
 </div>
 </div>
 <div class="section" id="id9">
 <h3>释放FunASR服务<a class="headerlink" href="#id9" title="Permalink to this headline"></a></h3>
 <p>释放已经部署的FunASR服务。</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-offline-cpu-zh.sh remove
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-online-cpu-zh.sh remove
 </pre></div>
 </div>
 </div>
 <div class="section" id="id10">
 <h3>重启FunASR服务<a class="headerlink" href="#id10" title="Permalink to this headline"></a></h3>
 <p>根据上次一键部署的设置重启启动FunASR服务。</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-offline-cpu-zh.sh restart
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-online-cpu-zh.sh restart
 </pre></div>
 </div>
 </div>
 <div class="section" id="id11">
 <h3>替换模型并重启FunASR服务<a class="headerlink" href="#id11" title="Permalink to this headline"></a></h3>
 <p>替换正在使用的模型，并重新启动FunASR服务。模型需为ModelScope中的ASR/VAD/PUNC模型，或者从ModelScope中模型finetune后的模型。</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update <span class="o">[</span>--asr_model <span class="p">|</span> --vad_model <span class="p">|</span> --punc_model<span class="o">]</span> &lt;model_id or <span class="nb">local</span> model path&gt;
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-online-cpu-zh.sh update <span class="o">[</span>--asr_model <span class="p">|</span> --vad_model <span class="p">|</span> --punc_model<span class="o">]</span> &lt;model_id or <span class="nb">local</span> model path&gt;
 
 e.g
-sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update --asr_model damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
+sudo bash funasr-runtime-deploy-online-cpu-zh.sh update --asr_model damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
 </pre></div>
 </div>
 </div>
 <div class="section" id="id12">
 <h3>更新参数并重启FunASR服务<a class="headerlink" href="#id12" title="Permalink to this headline"></a></h3>
 <p>更新已配置参数，并重新启动FunASR服务生效。可更新参数包括宿主机和Docker的端口号，以及推理和IO的线程数量。</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update <span class="o">[</span>--host_port <span class="p">|</span> --docker_port<span class="o">]</span> &lt;port number&gt;
-sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update <span class="o">[</span>--decode_thread_num <span class="p">|</span> --io_thread_num<span class="o">]</span> &lt;the number of threads&gt;
-sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update <span class="o">[</span>--workspace<span class="o">]</span> &lt;workspace in local&gt;
-sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update <span class="o">[</span>--ssl<span class="o">]</span> &lt;<span class="m">0</span>: close SSL<span class="p">;</span> <span class="m">1</span>: open SSL, default:1&gt;
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-online-cpu-zh.sh update <span class="o">[</span>--host_port <span class="p">|</span> --docker_port<span class="o">]</span> &lt;port number&gt;
+sudo bash funasr-runtime-deploy-online-cpu-zh.sh update <span class="o">[</span>--decode_thread_num <span class="p">|</span> --io_thread_num<span class="o">]</span> &lt;the number of threads&gt;
+sudo bash funasr-runtime-deploy-online-cpu-zh.sh update <span class="o">[</span>--workspace<span class="o">]</span> &lt;workspace in local&gt;
+sudo bash funasr-runtime-deploy-online-cpu-zh.sh update <span class="o">[</span>--ssl<span class="o">]</span> &lt;<span class="m">0</span>: close SSL<span class="p">;</span> <span class="m">1</span>: open SSL, default:1&gt;
 
 e.g
-sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update --decode_thread_num <span class="m">32</span>
-sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update --workspace /root/funasr-runtime-resources
+sudo bash funasr-runtime-deploy-online-cpu-zh.sh update --decode_thread_num <span class="m">32</span>
+sudo bash funasr-runtime-deploy-online-cpu-zh.sh update --workspace ./funasr-runtime-resources
 </pre></div>
 </div>
 </div>
@@ -311,7 +311,7 @@ sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update --workspace /root/funas
 <div class="section" id="ssl">
 <h3>设置SSL<a class="headerlink" href="#ssl" title="Permalink to this headline"></a></h3>
 <p>默认开启SSL校验，如果需要关闭，可以在启动时设置</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-offline-cpu-zh.sh --ssl <span class="m">0</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-online-cpu-zh.sh start --ssl <span class="m">0</span>
 </pre></div>
 </div>
 </div>

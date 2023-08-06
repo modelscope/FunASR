@@ -53,9 +53,9 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass
 - [CPP](#cpp-client)
 - [html](#html-client)
 - [java](#java-client)
-- [c#](#c#)
+- [c\#](#c\#)
 
-更多版本客户端支持请参考[开发指南](./SDK_advanced_guide_offline_zh.md)
+更多版本客户端支持请参考[websocket/grpc协议](./websocket_protocol_zh.md)
 
 ### python-client
 若想直接运行client进行测试，可参考如下简易说明，以python版本为例：
@@ -112,27 +112,27 @@ FunasrWsClient --host localhost --port 10095 --mode 2pass
 一键部署后若出现重启电脑等关闭Docker的动作，可通过如下命令直接启动FunASR服务，启动配置为上次一键部署的设置。
 
 ```shell
-sudo bash funasr-runtime-deploy-offline-cpu-zh.sh start
+sudo bash funasr-runtime-deploy-online-cpu-zh.sh start
 ```
 
 ### 关闭FunASR服务
 
 ```shell
-sudo bash funasr-runtime-deploy-offline-cpu-zh.sh stop
+sudo bash funasr-runtime-deploy-online-cpu-zh.sh stop
 ```
 
 ### 释放FunASR服务
 
 释放已经部署的FunASR服务。
 ```shell
-sudo bash funasr-runtime-deploy-offline-cpu-zh.sh remove
+sudo bash funasr-runtime-deploy-online-cpu-zh.sh remove
 ```
 
 ### 重启FunASR服务
 
 根据上次一键部署的设置重启启动FunASR服务。
 ```shell
-sudo bash funasr-runtime-deploy-offline-cpu-zh.sh restart
+sudo bash funasr-runtime-deploy-online-cpu-zh.sh restart
 ```
 
 ### 替换模型并重启FunASR服务
@@ -140,10 +140,10 @@ sudo bash funasr-runtime-deploy-offline-cpu-zh.sh restart
 替换正在使用的模型，并重新启动FunASR服务。模型需为ModelScope中的ASR/VAD/PUNC模型，或者从ModelScope中模型finetune后的模型。
 
 ```shell
-sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update [--asr_model | --vad_model | --punc_model] <model_id or local model path>
+sudo bash funasr-runtime-deploy-online-cpu-zh.sh update [--asr_model | --vad_model | --punc_model] <model_id or local model path>
 
 e.g
-sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update --asr_model damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
+sudo bash funasr-runtime-deploy-online-cpu-zh.sh update --asr_model damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
 ```
 
 ### 更新参数并重启FunASR服务
@@ -151,14 +151,14 @@ sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update --asr_model damo/speech
 更新已配置参数，并重新启动FunASR服务生效。可更新参数包括宿主机和Docker的端口号，以及推理和IO的线程数量。
 
 ```shell
-sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update [--host_port | --docker_port] <port number>
-sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update [--decode_thread_num | --io_thread_num] <the number of threads>
-sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update [--workspace] <workspace in local>
-sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update [--ssl] <0: close SSL; 1: open SSL, default:1>
+sudo bash funasr-runtime-deploy-online-cpu-zh.sh update [--host_port | --docker_port] <port number>
+sudo bash funasr-runtime-deploy-online-cpu-zh.sh update [--decode_thread_num | --io_thread_num] <the number of threads>
+sudo bash funasr-runtime-deploy-online-cpu-zh.sh update [--workspace] <workspace in local>
+sudo bash funasr-runtime-deploy-online-cpu-zh.sh update [--ssl] <0: close SSL; 1: open SSL, default:1>
 
 e.g
-sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update --decode_thread_num 32
-sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update --workspace /root/funasr-runtime-resources
+sudo bash funasr-runtime-deploy-online-cpu-zh.sh update --decode_thread_num 32
+sudo bash funasr-runtime-deploy-online-cpu-zh.sh update --workspace ./funasr-runtime-resources
 ```
 
 
@@ -192,7 +192,7 @@ sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update --workspace /root/funas
 
 默认开启SSL校验，如果需要关闭，可以在启动时设置
 ```shell
-sudo bash funasr-runtime-deploy-offline-cpu-zh.sh --ssl 0
+sudo bash funasr-runtime-deploy-online-cpu-zh.sh start --ssl 0
 ```
 
 ## 联系我们
