@@ -111,13 +111,13 @@ class WebsocketClient {
                 nlohmann::json jsonresult = nlohmann::json::parse(payload);
                 LOG(INFO)<< "Thread: " << this_thread::get_id() <<",on_message = " << payload;
 				
-                if (jsonresult["is_final"] == true){
-					websocketpp::lib::error_code ec;
-					m_client.close(m_hdl, websocketpp::close::status::going_away, "", ec);
-					if (ec){
-                        LOG(ERROR)<< "Error closing connection " << ec.message();
-					}
-                }
+                // if (jsonresult["is_final"] == true){
+				// 	websocketpp::lib::error_code ec;
+				// 	m_client.close(m_hdl, websocketpp::close::status::going_away, "", ec);
+				// 	if (ec){
+                //         LOG(ERROR)<< "Error closing connection " << ec.message();
+				// 	}
+                // }
         }
     }
 

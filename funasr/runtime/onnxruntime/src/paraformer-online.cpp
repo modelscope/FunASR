@@ -212,73 +212,78 @@ void ParaformerOnline::GetPosEmb(std::vector<std::vector<float>> &wav_feats, int
 
 void ParaformerOnline::CifSearch(std::vector<std::vector<float>> hidden, std::vector<float> alphas, bool is_final, std::vector<std::vector<float>>& list_frame)
 {
-    int hidden_size = 0;
-    if(hidden.size() > 0){
-        hidden_size = hidden[0].size();
-    }
-    // cache
-    int i,j;
-    int chunk_size_pre = chunk_size[0];
-    for (i = 0; i < chunk_size_pre; i++)
-        alphas[i] = 0.0;
+    try{
+        int hidden_size = 0;
+        if(hidden.size() > 0){
+            hidden_size = hidden[0].size();
+        }
+        // cache
+        int i,j;
+        int chunk_size_pre = chunk_size[0];
+        for (i = 0; i < chunk_size_pre; i++)
+            alphas[i] = 0.0;
 
-    int chunk_size_suf = std::accumulate(chunk_size.begin(), chunk_size.end()-1, 0);
-    for (i = chunk_size_suf; i < alphas.size(); i++){
-        alphas[i] = 0.0;
-    }
+        int chunk_size_suf = std::accumulate(chunk_size.begin(), chunk_size.end()-1, 0);
+        for (i = chunk_size_suf; i < alphas.size(); i++){
+            alphas[i] = 0.0;
+        }
 
-    if(hidden_cache_.size()>0){
-        hidden.insert(hidden.begin(), hidden_cache_.begin(), hidden_cache_.end());
-        alphas.insert(alphas.begin(), alphas_cache_.begin(), alphas_cache_.end());
-        hidden_cache_.clear();
-        alphas_cache_.clear();
-    }
-    
-    if (is_last_chunk) {
-        std::vector<float> tail_hidden(hidden_size, 0);
-        hidden.emplace_back(tail_hidden);
-        alphas.emplace_back(tail_alphas);
-    }
+        if(hidden_cache_.size()>0){
+            hidden.insert(hidden.begin(), hidden_cache_.begin(), hidden_cache_.end());
+            alphas.insert(alphas.begin(), alphas_cache_.begin(), alphas_cache_.end());
+            hidden_cache_.clear();
+            alphas_cache_.clear();
+        }
+        
+        if (is_last_chunk) {
+            std::vector<float> tail_hidden(hidden_size, 0);
+            hidden.emplace_back(tail_hidden);
+            alphas.emplace_back(tail_alphas);
+        }
 
-    float intergrate = 0.0;
-    int len_time = alphas.size();
-    std::vector<float> frames(hidden_size, 0);
-    std::vector<float> list_fire;
+        float intergrate = 0.0;
+        int len_time = alphas.size();
+        std::vector<float> frames(hidden_size, 0);
+        std::vector<float> list_fire;
 
-    for (i = 0; i < len_time; i++) {
-        float alpha = alphas[i];
-        if (alpha + intergrate < cif_threshold) {
-            intergrate += alpha;
-            list_fire.emplace_back(intergrate);
-            for (j = 0; j < hidden_size; j++) {
-                frames[j] += alpha * hidden[i][j];
+        for (i = 0; i < len_time; i++) {
+            float alpha = alphas[i];
+            if (alpha + intergrate < cif_threshold) {
+                intergrate += alpha;
+                list_fire.emplace_back(intergrate);
+                for (j = 0; j < hidden_size; j++) {
+                    frames[j] += alpha * hidden[i][j];
+                }
+            } else {
+                for (j = 0; j < hidden_size; j++) {
+                    frames[j] += (cif_threshold - intergrate) * hidden[i][j];
+                }
+                std::vector<float> frames_cp(frames);
+                list_frame.emplace_back(frames_cp);
+                intergrate += alpha;
+                list_fire.emplace_back(intergrate);
+                intergrate -= cif_threshold;
+                for (j = 0; j < hidden_size; j++) {
+                    frames[j] = intergrate * hidden[i][j];
+                }
             }
+        }
+
+        // cache
+        alphas_cache_.emplace_back(intergrate);
+        if (intergrate > 0.0) {
+            std::vector<float> hidden_cache(hidden_size, 0);
+            for (i = 0; i < hidden_size; i++) {
+                hidden_cache[i] = frames[i] / intergrate;
+            }
+            hidden_cache_.emplace_back(hidden_cache);
         } else {
-            for (j = 0; j < hidden_size; j++) {
-                frames[j] += (cif_threshold - intergrate) * hidden[i][j];
-            }
             std::vector<float> frames_cp(frames);
-            list_frame.emplace_back(frames_cp);
-            intergrate += alpha;
-            list_fire.emplace_back(intergrate);
-            intergrate -= cif_threshold;
-            for (j = 0; j < hidden_size; j++) {
-                frames[j] = intergrate * hidden[i][j];
-            }
+            hidden_cache_.emplace_back(frames_cp);
         }
-    }
-
-    // cache
-    alphas_cache_.emplace_back(intergrate);
-    if (intergrate > 0.0) {
-        std::vector<float> hidden_cache(hidden_size, 0);
-        for (i = 0; i < hidden_size; i++) {
-            hidden_cache[i] = frames[i] / intergrate;
-        }
-        hidden_cache_.emplace_back(hidden_cache);
-    } else {
-        std::vector<float> frames_cp(frames);
-        hidden_cache_.emplace_back(frames_cp);
+    }catch (std::exception const &e)
+    {
+        LOG(ERROR)<<e.what();
     }
 }
 
@@ -352,99 +357,111 @@ void ParaformerOnline::AddOverlapChunk(std::vector<std::vector<float>> &wav_feat
 
 string ParaformerOnline::ForwardChunk(std::vector<std::vector<float>> &chunk_feats, bool input_finished)
 {
-    int32_t num_frames = chunk_feats.size();
-
-#ifdef _WIN_X86
-        Ort::MemoryInfo m_memoryInfo = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
-#else
-        Ort::MemoryInfo m_memoryInfo = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
-#endif
-    const int64_t input_shape_[3] = {1, num_frames, feat_dims};
-    std::vector<float> wav_feats;
-    for (const auto &chunk_feat: chunk_feats) {
-        wav_feats.insert(wav_feats.end(), chunk_feat.begin(), chunk_feat.end());
-    }
-    Ort::Value onnx_feats = Ort::Value::CreateTensor<float>(
-        m_memoryInfo,
-        wav_feats.data(),
-        wav_feats.size(),
-        input_shape_,
-        3);
-
-    const int64_t paraformer_length_shape[1] = {1};
-    std::vector<int32_t> paraformer_length;
-    paraformer_length.emplace_back(num_frames);
-    Ort::Value onnx_feats_len = Ort::Value::CreateTensor<int32_t>(
-          m_memoryInfo, paraformer_length.data(), paraformer_length.size(), paraformer_length_shape, 1);
-    
-    std::vector<Ort::Value> input_onnx;
-    input_onnx.emplace_back(std::move(onnx_feats));
-    input_onnx.emplace_back(std::move(onnx_feats_len)); 
-    
-    auto encoder_tensor = encoder_session_->Run(Ort::RunOptions{nullptr}, en_szInputNames_.data(), input_onnx.data(), input_onnx.size(), en_szOutputNames_.data(), en_szOutputNames_.size());
-
-    // get enc_vec
-    std::vector<int64_t> enc_shape = encoder_tensor[0].GetTensorTypeAndShapeInfo().GetShape();
-    float* enc_data = encoder_tensor[0].GetTensorMutableData<float>();
-    std::vector<std::vector<float>> enc_vec(enc_shape[1], std::vector<float>(enc_shape[2]));
-    for (int i = 0; i < enc_shape[1]; i++) {
-        for (int j = 0; j < enc_shape[2]; j++) {
-            enc_vec[i][j] = enc_data[i * enc_shape[2] + j];
-        }
-    }
-
-    // get alpha_vec
-    std::vector<int64_t> alpha_shape = encoder_tensor[2].GetTensorTypeAndShapeInfo().GetShape();
-    float* alpha_data = encoder_tensor[2].GetTensorMutableData<float>();
-    std::vector<float> alpha_vec(alpha_shape[1]);
-    for (int i = 0; i < alpha_shape[1]; i++) {
-        alpha_vec[i] = alpha_data[i];
-    } 
-
-    std::vector<std::vector<float>> list_frame;
-    CifSearch(enc_vec, alpha_vec, input_finished, list_frame);
-
     string result;
-    if(list_frame.size()>0){
-        // enc
-        decoder_onnx.insert(decoder_onnx.begin(), std::move(encoder_tensor[0]));
-        // enc_lens
-        decoder_onnx.insert(decoder_onnx.begin()+1, std::move(encoder_tensor[1]));
+    try{
+        int32_t num_frames = chunk_feats.size();
 
-        // acoustic_embeds
-        const int64_t emb_shape_[3] = {1, (int64_t)list_frame.size(), (int64_t)list_frame[0].size()};
-        std::vector<float> emb_input;
-        for (const auto &list_frame_: list_frame) {
-            emb_input.insert(emb_input.end(), list_frame_.begin(), list_frame_.end());
+    #ifdef _WIN_X86
+            Ort::MemoryInfo m_memoryInfo = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
+    #else
+            Ort::MemoryInfo m_memoryInfo = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
+    #endif
+        const int64_t input_shape_[3] = {1, num_frames, feat_dims};
+        std::vector<float> wav_feats;
+        for (const auto &chunk_feat: chunk_feats) {
+            wav_feats.insert(wav_feats.end(), chunk_feat.begin(), chunk_feat.end());
         }
-        Ort::Value onnx_emb = Ort::Value::CreateTensor<float>(
+        Ort::Value onnx_feats = Ort::Value::CreateTensor<float>(
             m_memoryInfo,
-            emb_input.data(),
-            emb_input.size(),
-            emb_shape_,
+            wav_feats.data(),
+            wav_feats.size(),
+            input_shape_,
             3);
-        decoder_onnx.insert(decoder_onnx.begin()+2, std::move(onnx_emb));
 
-        // acoustic_embeds_len
-        const int64_t emb_length_shape[1] = {1};
-        std::vector<int32_t> emb_length;
-        emb_length.emplace_back(list_frame.size());
-        Ort::Value onnx_emb_len = Ort::Value::CreateTensor<int32_t>(
-            m_memoryInfo, emb_length.data(), emb_length.size(), emb_length_shape, 1);
-        decoder_onnx.insert(decoder_onnx.begin()+3, std::move(onnx_emb_len));
+        const int64_t paraformer_length_shape[1] = {1};
+        std::vector<int32_t> paraformer_length;
+        paraformer_length.emplace_back(num_frames);
+        Ort::Value onnx_feats_len = Ort::Value::CreateTensor<int32_t>(
+            m_memoryInfo, paraformer_length.data(), paraformer_length.size(), paraformer_length_shape, 1);
+        
+        std::vector<Ort::Value> input_onnx;
+        input_onnx.emplace_back(std::move(onnx_feats));
+        input_onnx.emplace_back(std::move(onnx_feats_len)); 
+        
+        auto encoder_tensor = encoder_session_->Run(Ort::RunOptions{nullptr}, en_szInputNames_.data(), input_onnx.data(), input_onnx.size(), en_szOutputNames_.data(), en_szOutputNames_.size());
 
-        auto decoder_tensor = decoder_session_->Run(Ort::RunOptions{nullptr}, de_szInputNames_.data(), decoder_onnx.data(), decoder_onnx.size(), de_szOutputNames_.data(), de_szOutputNames_.size());
-        // fsmn cache
-        decoder_onnx.clear();
-        for(int l=0;l<fsmn_layers;l++){
-            decoder_onnx.emplace_back(std::move(decoder_tensor[2+l]));
+        // get enc_vec
+        std::vector<int64_t> enc_shape = encoder_tensor[0].GetTensorTypeAndShapeInfo().GetShape();
+        float* enc_data = encoder_tensor[0].GetTensorMutableData<float>();
+        std::vector<std::vector<float>> enc_vec(enc_shape[1], std::vector<float>(enc_shape[2]));
+        for (int i = 0; i < enc_shape[1]; i++) {
+            for (int j = 0; j < enc_shape[2]; j++) {
+                enc_vec[i][j] = enc_data[i * enc_shape[2] + j];
+            }
         }
 
-        std::vector<int64_t> decoder_shape = decoder_tensor[0].GetTensorTypeAndShapeInfo().GetShape();
-        float* float_data = decoder_tensor[0].GetTensorMutableData<float>();
-        result = para_handle_->GreedySearch(float_data, list_frame.size(), decoder_shape[2]);
-    }
+        // get alpha_vec
+        std::vector<int64_t> alpha_shape = encoder_tensor[2].GetTensorTypeAndShapeInfo().GetShape();
+        float* alpha_data = encoder_tensor[2].GetTensorMutableData<float>();
+        std::vector<float> alpha_vec(alpha_shape[1]);
+        for (int i = 0; i < alpha_shape[1]; i++) {
+            alpha_vec[i] = alpha_data[i];
+        } 
 
+        std::vector<std::vector<float>> list_frame;
+        CifSearch(enc_vec, alpha_vec, input_finished, list_frame);
+
+        
+        if(list_frame.size()>0){
+            // enc
+            decoder_onnx.insert(decoder_onnx.begin(), std::move(encoder_tensor[0]));
+            // enc_lens
+            decoder_onnx.insert(decoder_onnx.begin()+1, std::move(encoder_tensor[1]));
+
+            // acoustic_embeds
+            const int64_t emb_shape_[3] = {1, (int64_t)list_frame.size(), (int64_t)list_frame[0].size()};
+            std::vector<float> emb_input;
+            for (const auto &list_frame_: list_frame) {
+                emb_input.insert(emb_input.end(), list_frame_.begin(), list_frame_.end());
+            }
+            Ort::Value onnx_emb = Ort::Value::CreateTensor<float>(
+                m_memoryInfo,
+                emb_input.data(),
+                emb_input.size(),
+                emb_shape_,
+                3);
+            decoder_onnx.insert(decoder_onnx.begin()+2, std::move(onnx_emb));
+
+            // acoustic_embeds_len
+            const int64_t emb_length_shape[1] = {1};
+            std::vector<int32_t> emb_length;
+            emb_length.emplace_back(list_frame.size());
+            Ort::Value onnx_emb_len = Ort::Value::CreateTensor<int32_t>(
+                m_memoryInfo, emb_length.data(), emb_length.size(), emb_length_shape, 1);
+            decoder_onnx.insert(decoder_onnx.begin()+3, std::move(onnx_emb_len));
+
+            auto decoder_tensor = decoder_session_->Run(Ort::RunOptions{nullptr}, de_szInputNames_.data(), decoder_onnx.data(), decoder_onnx.size(), de_szOutputNames_.data(), de_szOutputNames_.size());
+            // fsmn cache
+            try{
+                decoder_onnx.clear();
+            }catch (std::exception const &e)
+            {
+                LOG(ERROR)<<e.what();
+                return result;
+            }
+            for(int l=0;l<fsmn_layers;l++){
+                decoder_onnx.emplace_back(std::move(decoder_tensor[2+l]));
+            }
+
+            std::vector<int64_t> decoder_shape = decoder_tensor[0].GetTensorTypeAndShapeInfo().GetShape();
+            float* float_data = decoder_tensor[0].GetTensorMutableData<float>();
+            result = para_handle_->GreedySearch(float_data, list_frame.size(), decoder_shape[2]);
+        }
+    }catch (std::exception const &e)
+    {
+        LOG(ERROR)<<e.what();
+        return result;
+    }
     return result;
 }
 
@@ -454,63 +471,69 @@ string ParaformerOnline::Forward(float* din, int len, bool input_finished)
     std::vector<float> waves(din, din+len);
 
     string result="";
-    if(len <16*60 && input_finished && !is_first_chunk){
-        is_last_chunk = true;
-        wav_feats = feats_cache_;
-        result = ForwardChunk(wav_feats, is_last_chunk);
-        // reset
-        ResetCache();
-        Reset();
-        return result;
-    }
-    if(is_first_chunk){
-        is_first_chunk = false;
-    }
-    ExtractFeats(MODEL_SAMPLE_RATE, wav_feats, waves, input_finished);
-    if(wav_feats.size() == 0){
-        return result;
-    }
-    
-    for (auto& row : wav_feats) {
-        for (auto& val : row) {
-            val *= sqrt_factor;
-        }
-    }
-
-    GetPosEmb(wav_feats, wav_feats.size(), wav_feats[0].size());
-    if(input_finished){
-        if(wav_feats.size()+chunk_size[2] <= chunk_size[1]){
+    try{
+        if(len <16*60 && input_finished && !is_first_chunk){
             is_last_chunk = true;
-            AddOverlapChunk(wav_feats, input_finished);
-        }else{
-            // first chunk
-            std::vector<std::vector<float>> first_chunk;
-            first_chunk.insert(first_chunk.begin(), wav_feats.begin(), wav_feats.end());
-            AddOverlapChunk(first_chunk, input_finished);
-            string str_first_chunk = ForwardChunk(first_chunk, is_last_chunk);
-
-            // last chunk
-            is_last_chunk = true;
-            std::vector<std::vector<float>> last_chunk;
-            last_chunk.insert(last_chunk.begin(), wav_feats.end()-(wav_feats.size()+chunk_size[2]-chunk_size[1]), wav_feats.end());
-            AddOverlapChunk(last_chunk, input_finished);
-            string str_last_chunk = ForwardChunk(last_chunk, is_last_chunk);
-
-            result = str_first_chunk+str_last_chunk;
+            wav_feats = feats_cache_;
+            result = ForwardChunk(wav_feats, is_last_chunk);
             // reset
             ResetCache();
             Reset();
             return result;
         }
-    }else{
-        AddOverlapChunk(wav_feats, input_finished);
-    }
+        if(is_first_chunk){
+            is_first_chunk = false;
+        }
+        ExtractFeats(MODEL_SAMPLE_RATE, wav_feats, waves, input_finished);
+        if(wav_feats.size() == 0){
+            return result;
+        }
+        
+        for (auto& row : wav_feats) {
+            for (auto& val : row) {
+                val *= sqrt_factor;
+            }
+        }
 
-    result = ForwardChunk(wav_feats, is_last_chunk);
-    if(input_finished){
-        // reset
-        ResetCache();
-        Reset();
+        GetPosEmb(wav_feats, wav_feats.size(), wav_feats[0].size());
+        if(input_finished){
+            if(wav_feats.size()+chunk_size[2] <= chunk_size[1]){
+                is_last_chunk = true;
+                AddOverlapChunk(wav_feats, input_finished);
+            }else{
+                // first chunk
+                std::vector<std::vector<float>> first_chunk;
+                first_chunk.insert(first_chunk.begin(), wav_feats.begin(), wav_feats.end());
+                AddOverlapChunk(first_chunk, input_finished);
+                string str_first_chunk = ForwardChunk(first_chunk, is_last_chunk);
+
+                // last chunk
+                is_last_chunk = true;
+                std::vector<std::vector<float>> last_chunk;
+                last_chunk.insert(last_chunk.begin(), wav_feats.end()-(wav_feats.size()+chunk_size[2]-chunk_size[1]), wav_feats.end());
+                AddOverlapChunk(last_chunk, input_finished);
+                string str_last_chunk = ForwardChunk(last_chunk, is_last_chunk);
+
+                result = str_first_chunk+str_last_chunk;
+                // reset
+                ResetCache();
+                Reset();
+                return result;
+            }
+        }else{
+            AddOverlapChunk(wav_feats, input_finished);
+        }
+
+        result = ForwardChunk(wav_feats, is_last_chunk);
+        if(input_finished){
+            // reset
+            ResetCache();
+            Reset();
+        }
+    }catch (std::exception const &e)
+    {
+        LOG(ERROR)<<e.what();
+        return result;
     }
 
     return result;

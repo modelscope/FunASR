@@ -78,7 +78,7 @@ nlohmann::json handle_result(FUNASR_RESULT result, std::string& online_res,
     if (msg.contains("wav_name")) {
       jsonresult["wav_name"] = msg["wav_name"];
     }
-    FunASRFreeResult(result);
+
     return jsonresult;
 }
 // feed buffer to asr engine for decoder
@@ -115,10 +115,15 @@ void WebSocketServer::do_decoder(
                                       buffer.begin() + 800 * 2};
       buffer.erase(buffer.begin(), buffer.begin() + 800 * 2);
 
-      Result =
-          FunTpassInferBuffer(tpass_handle, tpass_online_handle,
-                              subvector.data(), subvector.size(), punc_cache,
-                              false, msg["audio_fs"], msg["wav_format"], (ASR_TYPE)asr_mode_);
+      try{
+        Result =
+            FunTpassInferBuffer(tpass_handle, tpass_online_handle,
+                                subvector.data(), subvector.size(), punc_cache,
+                                false, msg["audio_fs"], msg["wav_format"], (ASR_TYPE)asr_mode_);
+      }catch (std::exception const &e)
+      {
+          LOG(ERROR)<<e.what();
+      }
       if (Result) {
         websocketpp::lib::error_code ec;
         nlohmann::json jsonresult =
@@ -133,12 +138,23 @@ void WebSocketServer::do_decoder(
                           websocketpp::frame::opcode::text, ec);
           }
         }
+        FunASRFreeResult(Result);
       }
+
     }
     if(is_final){
-      Result = FunTpassInferBuffer(tpass_handle, tpass_online_handle,
-                                    buffer.data(), buffer.size(), punc_cache,
-                                    is_final, msg["audio_fs"], msg["wav_format"], (ASR_TYPE)asr_mode_);
+      
+      try{
+        Result = FunTpassInferBuffer(tpass_handle, tpass_online_handle,
+                                      buffer.data(), buffer.size(), punc_cache,
+                                      is_final, msg["audio_fs"], msg["wav_format"], (ASR_TYPE)asr_mode_);
+      }catch (std::exception const &e)
+      {
+          LOG(ERROR)<<e.what();
+      }
+      for(auto &vec:punc_cache){
+        vec.clear();
+      }
       if (Result) {
         websocketpp::lib::error_code ec;
         nlohmann::json jsonresult =
@@ -151,8 +167,10 @@ void WebSocketServer::do_decoder(
           server_->send(hdl, jsonresult.dump(),
                         websocketpp::frame::opcode::text, ec);
         }
+        FunASRFreeResult(Result);
       }
     }
+
 
   } catch (std::exception const& e) {
     std::cerr << "Error: " << e.what() << std::endl;
@@ -186,11 +204,18 @@ void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
 
 void WebSocketServer::on_close(websocketpp::connection_hdl hdl) {
   scoped_lock guard(m_lock);
-  // auto data_msg = data_map.find(hdl)->second;
-  // FunTpassOnlineUninit(data_msg->tpass_online_handle);
+  std::shared_ptr<FUNASR_MESSAGE> data_msg  = nullptr;
+  auto it_data = data_map.find(hdl);
+  if (it_data != data_map.end()) {
+    data_msg  = it_data->second;
+  }
+  else
+  {
+    return;
+  }
+  FunTpassOnlineUninit(data_msg->tpass_online_handle);
   data_map.erase(hdl);  // remove data vector when  connection is closed
-
-  LOG(INFO) << "on_close, active connections: " << data_map.size();
+  LOG(INFO) << "on_close, active connections: "<< data_map.size();
 }
 
 // remove closed connection
