@@ -55,31 +55,31 @@ context_ptr WebSocketServer::on_tls_init(tls_mode mode,
 
 nlohmann::json handle_result(FUNASR_RESULT result, std::string& online_res,
                              std::string& tpass_res, nlohmann::json msg) {
- 
-  std::string tmp_online_msg = FunASRGetResult(result, 0);
-  online_res += tmp_online_msg;
-  if (online_res != "") {
-    LOG(INFO) << "online_res :" << online_res;
-  }
-  std::string tmp_tpass_msg = FunASRGetTpassResult(result, 0);
-  tpass_res += tmp_tpass_msg;
-  if (tpass_res != "") {
-    LOG(INFO) << "offline results : " << tpass_res;
-  }
 
-  websocketpp::lib::error_code ec;
-  nlohmann::json jsonresult;               // result json
-  jsonresult["text"] = tmp_online_msg;     // put result in 'text'
-  jsonresult["offline_text"] = tpass_res;  // put result in 'offline text'
- 
-  if (msg.contains("wav_name")) {
-    jsonresult["wav_name"] = msg["wav_name"];
-  }
- 
- 
+    websocketpp::lib::error_code ec;
+    nlohmann::json jsonresult;
+    jsonresult["text"]="";
 
-  FunASRFreeResult(result);
-  return jsonresult;
+    std::string tmp_online_msg = FunASRGetResult(result, 0);
+    online_res += tmp_online_msg;
+    if (tmp_online_msg != "") {
+      LOG(INFO) << "online_res :" << tmp_online_msg;
+      jsonresult["text"] = tmp_online_msg; 
+      jsonresult["mode"] = "2pass-online";
+    }
+    std::string tmp_tpass_msg = FunASRGetTpassResult(result, 0);
+    tpass_res += tmp_tpass_msg;
+    if (tmp_tpass_msg != "") {
+      LOG(INFO) << "offline results : " << tmp_tpass_msg;
+      jsonresult["text"] = tmp_tpass_msg; 
+      jsonresult["mode"] = "2pass-offline";    
+    }
+
+    if (msg.contains("wav_name")) {
+      jsonresult["wav_name"] = msg["wav_name"];
+    }
+    FunASRFreeResult(result);
+    return jsonresult;
 }
 // feed buffer to asr engine for decoder
 void WebSocketServer::do_decoder(
@@ -91,97 +91,72 @@ void WebSocketServer::do_decoder(
  
   // lock for each connection
   scoped_lock guard(thread_lock);
+  FUNASR_RESULT Result = nullptr;
+  int asr_mode_ = 2;
+  if (msg.contains("mode")) {
+    std::string modeltype = msg["mode"];
+    if (modeltype == "offline") {
+      asr_mode_ = 0;
+    } else if (modeltype == "online") {
+      asr_mode_ = 1;
+    } else if (modeltype == "2pass") {
+      asr_mode_ = 2;
+    }
+  } else {
+    // default value
+    msg["mode"] = "2pass";
+    asr_mode_ = 2;
+  }
  
   try {
-    int num_samples = buffer.size();  // the size of the buf
+    // loop to send chunk_size 800*2 data to asr engine.   TODO: chunk_size need get from client 
+    while (buffer.size() >= 800 * 2) {
+      std::vector<char> subvector = {buffer.begin(),
+                                      buffer.begin() + 800 * 2};
+      buffer.erase(buffer.begin(), buffer.begin() + 800 * 2);
 
-    if (!buffer.empty()) {
-      FUNASR_RESULT Result = nullptr;
-
-      // bool is_final=false;
-      int asr_mode_ = 2;
-      if (msg.contains("mode")) {
-        std::string modeltype = msg["mode"];
-        if (modeltype == "offline") {
-          asr_mode_ = 0;
-        } else if (modeltype == "online") {
-          asr_mode_ = 1;
-        } else if (modeltype == "2pass") {
-          asr_mode_ = 2;
+      Result =
+          FunTpassInferBuffer(tpass_handle, tpass_online_handle,
+                              subvector.data(), subvector.size(), punc_cache,
+                              false, msg["audio_fs"], msg["wav_format"], (ASR_TYPE)asr_mode_);
+      if (Result) {
+        websocketpp::lib::error_code ec;
+        nlohmann::json jsonresult =
+            handle_result(Result, online_res, tpass_res, msg["wav_name"]);
+        jsonresult["is_final"] = false;
+        if(jsonresult["text"] != "") {
+          if (is_ssl) {
+            wss_server_->send(hdl, jsonresult.dump(),
+                              websocketpp::frame::opcode::text, ec);
+          } else {
+            server_->send(hdl, jsonresult.dump(),
+                          websocketpp::frame::opcode::text, ec);
+          }
         }
-      } else {
-        // default value
-        msg["mode"] = "2pass";
-        asr_mode_ = 2;
       }
- 
-      // loop to send chunk_size 1600*2 data to asr engine.   TODO: chunk_size need get from client 
-      while (buffer.size() >= 1600 * 2) {
-        std::vector<char> subvector = {buffer.begin(),
-                                       buffer.begin() + 1600 * 2};
-        buffer.erase(buffer.begin(), buffer.begin() + 1600 * 2);
-
-        Result =
-            FunTpassInferBuffer(tpass_handle, tpass_online_handle,
-                                subvector.data(), subvector.size(), punc_cache,
-                                false, 16000, "pcm", (ASR_TYPE)asr_mode_);
-        if (Result) {
-          websocketpp::lib::error_code ec;
-
-          nlohmann::json jsonresult =
-              handle_result(Result, online_res, tpass_res, msg["wav_name"]);
-
-          jsonresult["is_final"] = true;
-          jsonresult["mode"] = msg["mode"];
-          if (jsonresult["text"].size() > 0) {
-            if (is_ssl) {
-              wss_server_->send(hdl, jsonresult.dump(),
-                                websocketpp::frame::opcode::text, ec);
-            } else {
-              server_->send(hdl, jsonresult.dump(),
+    }
+    if(is_final){
+      Result = FunTpassInferBuffer(tpass_handle, tpass_online_handle,
+                                    buffer.data(), buffer.size(), punc_cache,
+                                    is_final, msg["audio_fs"], msg["wav_format"], (ASR_TYPE)asr_mode_);
+      if (Result) {
+        websocketpp::lib::error_code ec;
+        nlohmann::json jsonresult =
+            handle_result(Result, online_res, tpass_res, msg["wav_name"]);
+        jsonresult["is_final"] = true;
+        if (is_ssl) {
+          wss_server_->send(hdl, jsonresult.dump(),
                             websocketpp::frame::opcode::text, ec);
-            }
-          }
+        } else {
+          server_->send(hdl, jsonresult.dump(),
+                        websocketpp::frame::opcode::text, ec);
         }
       }
-	  // if it is in final message
-      if (is_final && buffer.size() > 0) {
-        LOG(INFO) << "is final, the buffer size=" << buffer.size();
-
-        Result = FunTpassInferBuffer(tpass_handle, tpass_online_handle,
-                                     buffer.data(), buffer.size(), punc_cache,
-                                     true, 16000, "pcm", (ASR_TYPE)asr_mode_);
- 
-        if (Result) {
-  
-          websocketpp::lib::error_code ec;
-
-          nlohmann::json jsonresult =
-              handle_result(Result, online_res, tpass_res, msg["wav_name"]);
-          jsonresult["is_final"] = false;
-          jsonresult["mode"] = msg["mode"];
-          if (asr_mode_ != 1) {
-            jsonresult["text"] = jsonresult["offline_text"];
-          }
-          if (jsonresult["offline_text"].size() > 0) {
-            if (is_ssl) {
-              wss_server_->send(hdl, jsonresult.dump(),
-                                websocketpp::frame::opcode::text, ec);
-            } else {
-              server_->send(hdl, jsonresult.dump(),
-                            websocketpp::frame::opcode::text, ec);
-            }
-          }
-        }
-      }
-
- 
     }
 
   } catch (std::exception const& e) {
     std::cerr << "Error: " << e.what() << std::endl;
   }
-
  
 }
 
@@ -197,6 +172,7 @@ void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
  
   data_msg->msg = nlohmann::json::parse("{}");
   data_msg->msg["wav_format"] = "pcm";
+  data_msg->msg["audio_fs"] = 16000;
   data_msg->punc_cache =
       std::make_shared<std::vector<std::vector<std::string>>>(2);
   std::vector<int> chunk_size = {5, 10, 5};  //TODO, need get from client 
@@ -204,14 +180,15 @@ void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
       FunTpassOnlineInit(tpass_handle, chunk_size);
   data_msg->tpass_online_handle = tpass_online_handle;
   data_map.emplace(hdl, data_msg);
-  FunTpassOnlineInit(tpass_handle);
   LOG(INFO) << "on_open, active connections: " << data_map.size();
  
 }
 
 void WebSocketServer::on_close(websocketpp::connection_hdl hdl) {
   scoped_lock guard(m_lock);
-  data_map.erase(hdl);  // remove data vector when  connection is closed
+  auto data_msg = data_map.find(hdl)->second;
+  // FunTpassOnlineUninit(data_msg->tpass_online_handle);
+  // data_map.erase(hdl);  // remove data vector when  connection is closed
 
   LOG(INFO) << "on_close, active connections: " << data_map.size();
 }
@@ -278,12 +255,11 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
       if (jsonresult.contains("mode")) {
         msg_data->msg["mode"] = jsonresult["mode"];
       }
-      if (jsonresult.contains("mode")) {
-        msg_data->msg["mode"] = jsonresult["mode"];
-      }
-
       if (jsonresult.contains("wav_format")) {
         msg_data->msg["wav_format"] = jsonresult["wav_format"];
+      }
+      if (jsonresult.contains("audio_fs")) {
+        msg_data->msg["audio_fs"] = jsonresult["audio_fs"];
       }
       LOG(INFO) << "jsonresult=" << jsonresult << "msg_data->msg"
                 << msg_data->msg;
@@ -310,39 +286,34 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
       int32_t num_samples = payload.size();
  
       if (isonline) {
- 
-        // need to split data to required chunksize(1600*2)
-		// put rev data to sample_data
         sample_data_p->insert(sample_data_p->end(), pcm_data,
                               pcm_data + num_samples);
-        int setpsize = 1600 * 2;  // TODO, need get from client 
-		// if sample_data size > setpsize, we post data to decode
+        int setpsize = 800 * 2;  // TODO, need get from client 
+		    // if sample_data size > setpsize, we post data to decode
         if (sample_data_p->size() > setpsize) {
-          int chunksize = floor(sample_data_p->size() / setpsize);
-		  // make sure the subvector size is an integer multiple of setpsize
-          std::vector<char> subvector = {
-              sample_data_p->begin(),
-              sample_data_p->begin() + chunksize * setpsize};
-		  // keep remain in sample_data
-          sample_data_p->erase(sample_data_p->begin(),
-                               sample_data_p->begin() + chunksize * setpsize);
-		  // post to decode
-          asio::post(io_decoder_,
-                     std::bind(&WebSocketServer::do_decoder, this,
-                               std::move(subvector), std::move(hdl),
-                               std::ref(msg_data->msg),
-                               std::ref(*(punc_cache_p.get())),
-                               std::ref(*thread_lock_p), std::move(false),
-                               std::ref(msg_data->tpass_online_handle),
-                               std::ref(msg_data->online_res),
-                               std::ref(msg_data->tpass_res)));
+            int chunksize = floor(sample_data_p->size() / setpsize);
+            // make sure the subvector size is an integer multiple of setpsize
+            std::vector<char> subvector = {
+                  sample_data_p->begin(),
+                  sample_data_p->begin() + chunksize * setpsize};
+            // keep remain in sample_data
+            sample_data_p->erase(sample_data_p->begin(),
+                                  sample_data_p->begin() + chunksize * setpsize);
+            // post to decode
+            asio::post(io_decoder_,
+                        std::bind(&WebSocketServer::do_decoder, this,
+                                  std::move(subvector), std::move(hdl),
+                                  std::ref(msg_data->msg),
+                                  std::ref(*(punc_cache_p.get())),
+                                  std::ref(*thread_lock_p), std::move(false),
+                                  std::ref(msg_data->tpass_online_handle),
+                                  std::ref(msg_data->online_res),
+                                  std::ref(msg_data->tpass_res)));
         }
       } else {
-        // for offline, we add receive data to end of the sample data vector
         sample_data_p->insert(sample_data_p->end(), pcm_data,
                               pcm_data + num_samples);
       }
-
       break;
     }
     default:
@@ -354,10 +325,6 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
 void WebSocketServer::initAsr(std::map<std::string, std::string>& model_path,
                               int thread_num) {
   try {
-    // init model with api
-
-    asr_handle = FunOfflineInit(model_path, thread_num);
-    LOG(INFO) << "model successfully inited";
     tpass_handle = FunTpassInit(model_path, thread_num);
     if (!tpass_handle) {
       LOG(ERROR) << "FunTpassInit init failed";

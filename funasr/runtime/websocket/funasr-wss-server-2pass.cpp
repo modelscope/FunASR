@@ -89,7 +89,7 @@ int main(int argc, char* argv[]) {
     TCLAP::ValueArg<int> decoder_thread_num(
         "", "decoder-thread-num", "decoder thread num", false, 8, "int");
     TCLAP::ValueArg<int> model_thread_num("", "model-thread-num",
-                                          "model thread num", false, 1, "int");
+                                          "model thread num", false, 4, "int");
 
     TCLAP::ValueArg<std::string> certfile(
         "", "certfile",
@@ -154,7 +154,7 @@ int main(int argc, char* argv[]) {
       std::string python_cmd =
           "python -m funasr.utils.runtime_sdk_download_tool --type onnx --quantize True ";
 
-        if (vad_dir.isSet() && !s_vad_path.empty()) {
+      if (vad_dir.isSet() && !s_vad_path.empty()) {
         std::string python_cmd_vad;
         std::string down_vad_path;
         std::string down_vad_model;
@@ -215,12 +215,12 @@ int main(int argc, char* argv[]) {
           // modelscope
           LOG(INFO) << "Download model: " << s_offline_asr_path
                     << " from modelscope : "; 
-			  python_cmd_asr = python_cmd + " --model-name " +
-                s_offline_asr_path +
-                " --export-dir " + s_download_model_dir +
-                " --model_revision " + model_path["offline-model-revision"]; 
-		  down_asr_path
-              = s_download_model_dir + "/" + s_offline_asr_path;
+          python_cmd_asr = python_cmd + " --model-name " +
+                  s_offline_asr_path +
+                  " --export-dir " + s_download_model_dir +
+                  " --model_revision " + model_path["offline-model-revision"]; 
+          down_asr_path
+                = s_download_model_dir + "/" + s_offline_asr_path;
         }
 
         int ret = system(python_cmd_asr.c_str());
@@ -259,12 +259,12 @@ int main(int argc, char* argv[]) {
           // modelscope
           LOG(INFO) << "Download model: " << s_online_asr_path
                     << " from modelscope : "; 
-		  python_cmd_asr = python_cmd + " --model-name " +
-                s_online_asr_path +
-                " --export-dir " + s_download_model_dir +
-                " --model_revision " + model_path["online-model-revision"]; 
-		  down_asr_path
-              = s_download_model_dir + "/" + s_online_asr_path;
+          python_cmd_asr = python_cmd + " --model-name " +
+                    s_online_asr_path +
+                    " --export-dir " + s_download_model_dir +
+                    " --model_revision " + model_path["online-model-revision"]; 
+          down_asr_path
+                  = s_download_model_dir + "/" + s_online_asr_path;
         }
 
         int ret = system(python_cmd_asr.c_str());
@@ -306,7 +306,7 @@ int main(int argc, char* argv[]) {
                 s_punc_path +
                 " --export-dir " + s_download_model_dir +
                 " --model_revision " + model_path["punc-revision "]; 
-		  down_punc_path  =
+          down_punc_path  =
                 s_download_model_dir +
                 "/" + s_punc_path;
         }

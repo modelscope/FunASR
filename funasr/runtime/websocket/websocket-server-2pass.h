@@ -129,7 +129,7 @@ class WebSocketServer {
   void check_and_clean_connection();
   asio::io_context& io_decoder_;  // threads for asr decoder
   // std::ofstream fout;
-  FUNASR_HANDLE asr_handle;  // asr engine handle
+  // FUNASR_HANDLE asr_handle;  // asr engine handle
   FUNASR_HANDLE tpass_handle;
   bool isonline = true;  // online or offline engine, now only support offline
   bool is_ssl = true;
