@@ -186,9 +186,9 @@ void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
 
 void WebSocketServer::on_close(websocketpp::connection_hdl hdl) {
   scoped_lock guard(m_lock);
-  auto data_msg = data_map.find(hdl)->second;
+  // auto data_msg = data_map.find(hdl)->second;
   // FunTpassOnlineUninit(data_msg->tpass_online_handle);
-  // data_map.erase(hdl);  // remove data vector when  connection is closed
+  data_map.erase(hdl);  // remove data vector when  connection is closed
 
   LOG(INFO) << "on_close, active connections: " << data_map.size();
 }
