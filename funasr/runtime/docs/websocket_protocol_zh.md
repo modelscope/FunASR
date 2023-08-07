@@ -52,7 +52,7 @@ message为（采用json序列化）
 #### 首次通信
 message为（需要用json序列化）：
 ```text
-{"mode": "offline", "wav_name": "wav_name", "is_speaking": True, "wav_format":"pcm", "chunk_size":[5,10,5]
+{"mode": "2pass", "wav_name": "wav_name", "is_speaking": True, "wav_format":"pcm", "chunk_size":[5,10,5]
 ```
 参数介绍：
 ```text
