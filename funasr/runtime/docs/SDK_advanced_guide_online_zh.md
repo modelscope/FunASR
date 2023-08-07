@@ -129,7 +129,7 @@ FunasrWsClient --host localhost --port 10095 --audio_in ./asr_example.wav --mode
 funasr-wss-server支持从Modelscope下载模型，设置模型下载地址（--download-model-dir，默认为/workspace/models）及model ID（--model-dir、--vad-dir、--punc-dir）,示例如下：
 ```shell
 cd /workspace/FunASR/funasr/runtime/websocket/build/bin
-./funasr-wss-server  \
+./funasr-wss-server-2pass  \
   --download-model-dir /workspace/models \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx \
   --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx  \
@@ -160,7 +160,7 @@ cd /workspace/FunASR/funasr/runtime/websocket/build/bin
 
 ## 模型资源准备
 
-如果您选择通过funasr-wss-server从Modelscope下载模型，可以跳过本步骤。
+如果您选择通过funasr-wss-server-2pass 从Modelscope下载模型，可以跳过本步骤。
 
 FunASR离线文件转写服务中的vad、asr和punc模型资源均来自Modelscope，模型地址详见下表：
 
@@ -203,3 +203,62 @@ python -m funasr.export.export_model \
 ```shell
 python -m funasr.export.export_model --model-name /path/to/finetune/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize True
 ```
+
+
+## 如何定制服务部署
+
+FunASR-runtime的代码已开源，如果服务端和客户端不能很好的满足您的需求，您可以根据自己的需求进行进一步的开发：
+### c++ 客户端：
+
+https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/websocket
+
+### python 客户端：
+
+https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket
+
+### 自定义客户端：
+
+如果您想定义自己的client，websocket通信协议为：
+
+```text
+# 首次通信
+{"mode": "offline", "wav_name": wav_name, "is_speaking": True}
+# 发送wav数据
+bytes数据
+# 发送结束标志
+{"is_speaking": False}
+```
+
+### c++ 服务端：
+
+#### VAD
+```c++
+// VAD模型的使用分为FsmnVadInit和FsmnVadInfer两个步骤：
+FUNASR_HANDLE vad_hanlde=FsmnVadInit(model_path, thread_num);
+// 其中：model_path 包含"model-dir"、"quantize"，thread_num为onnx线程数；
+FUNASR_RESULT result=FsmnVadInfer(vad_hanlde, wav_file.c_str(), NULL, 16000);
+// 其中：vad_hanlde为FunOfflineInit返回值，wav_file为音频路径，sampling_rate为采样率(默认16k)
+```
+
+使用示例详见：https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/onnxruntime/bin/funasr-onnx-offline-vad.cpp
+
+#### ASR
+```text
+// ASR模型的使用分为FunOfflineInit和FunOfflineInfer两个步骤：
+FUNASR_HANDLE asr_hanlde=FunOfflineInit(model_path, thread_num);
+// 其中：model_path 包含"model-dir"、"quantize"，thread_num为onnx线程数；
+FUNASR_RESULT result=FunOfflineInfer(asr_hanlde, wav_file.c_str(), RASR_NONE, NULL, 16000);
+// 其中：asr_hanlde为FunOfflineInit返回值，wav_file为音频路径，sampling_rate为采样率(默认16k)
+```
+
+使用示例详见：https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/onnxruntime/bin/funasr-onnx-offline.cpp
+
+#### PUNC
+```text
+// PUNC模型的使用分为CTTransformerInit和CTTransformerInfer两个步骤：
+FUNASR_HANDLE punc_hanlde=CTTransformerInit(model_path, thread_num);
+// 其中：model_path 包含"model-dir"、"quantize"，thread_num为onnx线程数；
+FUNASR_RESULT result=CTTransformerInfer(punc_hanlde, txt_str.c_str(), RASR_NONE, NULL);
+// 其中：punc_hanlde为CTTransformerInit返回值，txt_str为文本
+```
+使用示例详见：https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/onnxruntime/bin/funasr-onnx-offline-punc.cpp
