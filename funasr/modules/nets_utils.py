@@ -61,6 +61,48 @@ def pad_list(xs, pad_value):
     return pad
 
 
+def pad_list_all_dim(xs, pad_value):
+    """Perform padding for the list of tensors.
+
+    Args:
+        xs (List): List of Tensors [(T_1, `*`), (T_2, `*`), ..., (T_B, `*`)].
+        pad_value (float): Value for padding.
+
+    Returns:
+        Tensor: Padded tensor (B, Tmax, `*`).
+
+    Examples:
+        >>> x = [torch.ones(4), torch.ones(2), torch.ones(1)]
+        >>> x
+        [tensor([1., 1., 1., 1.]), tensor([1., 1.]), tensor([1.])]
+        >>> pad_list(x, 0)
+        tensor([[1., 1., 1., 1.],
+                [1., 1., 0., 0.],
+                [1., 0., 0., 0.]])
+
+    """
+    n_batch = len(xs)
+    num_dim = len(xs[0].shape)
+    max_len_all_dim = []
+    for i in range(num_dim):
+        max_len_all_dim.append(max(x.size(i) for x in xs))
+    pad = xs[0].new(n_batch, *max_len_all_dim).fill_(pad_value)
+
+    for i in range(n_batch):
+        if num_dim == 1:
+            pad[i, : xs[i].size(0)] = xs[i]
+        elif num_dim == 2:
+            pad[i, : xs[i].size(0), : xs[i].size(1)] = xs[i]
+        elif num_dim == 3:
+            pad[i, : xs[i].size(0), : xs[i].size(1), : xs[i].size(2)] = xs[i]
+        else:
+            raise ValueError(
+                "pad_list_all_dim only support 1-D, 2-D and 3-D tensors, not {}-D.".format(num_dim)
+            )
+
+    return pad
+
+
 def make_pad_mask(lengths, xs=None, length_dim=-1, maxlen=None):
     """Make mask tensor containing indices of padded part.
 
