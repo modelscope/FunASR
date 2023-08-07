@@ -120,7 +120,7 @@
       <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
       <li class="breadcrumb-item active">FunASR实时语音转写便捷部署教程</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../../../_sources/funasr/runtime/docs/SDK_tutorial_online_zh.md.txt" rel="nofollow"> View page source</a>
+            <a href="../../../_sources/funasr/runtime/docs/SDK_tutorial_online.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -128,144 +128,142 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <p>(简体中文|<a class="reference internal" href="SDK_tutorial_online.html"><span class="doc">English</span></a>)</p>
+  <p>(<a class="reference internal" href="SDK_tutorial_online_zh.html"><span class="doc">简体中文</span></a>|English)</p>
 <div class="section" id="funasr">
 <h1>FunASR实时语音转写便捷部署教程<a class="headerlink" href="#funasr" title="Permalink to this headline"></a></h1>
-<p>FunASR提供可便捷本地或者云端服务器部署的实时语音转写服务，内核为FunASR已开源runtime-SDK。
-集成了达摩院语音实验室在Modelscope社区开源的语音端点检测(VAD)、Paraformer-large非流式语音识别(ASR)、Paraformer-large流式语音识别(ASR)、标点恢复(PUNC) 等相关能力。软件包既可以实时地进行语音转文字，而且能够在说话句尾用高精度的转写文字修正输出，输出文字带有标点，支持高并发多路请求</p>
-<div class="section" id="id1">
-<h2>服务器配置<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h2>
-<p>用户可以根据自己的业务需求，选择合适的服务器配置，推荐配置为：</p>
+<p>FunASR offers a real-time speech-to-text service that can be easily deployed locally or on cloud servers. The service integrates various capabilities including voice activity detection (VAD) developed by the speech laboratory of DAMO Academy on the ModelScope, Paraformer-large non-streaming automatic speech recognition (ASR), Paraformer-large streaming ASR, and punctuation recovery (PUNC). The software package not only performs real-time speech-to-text conversion, but also allows high-precision transcription text correction at the end of each sentence and outputs text with punctuation, supporting high-concurrency multiple requests.</p>
+<div class="section" id="server-configuration">
+<h2>Server Configuration<a class="headerlink" href="#server-configuration" title="Permalink to this headline"></a></h2>
+<p>Users can choose appropriate server configurations based on their business needs. The recommended configurations are:</p>
 <ul class="simple">
-<li><p>配置1: （X86，计算型），4核vCPU，内存8G，单机可以支持大约16路的请求</p></li>
-<li><p>配置2: （X86，计算型），16核vCPU，内存32G，单机可以支持大约32路的请求</p></li>
-<li><p>配置3: （X86，计算型），64核vCPU，内存128G，单机可以支持大约100路的请求</p></li>
+<li><p>Configuration 1: (X86, computing-type) 4-core vCPU, 8GB memory, and a single machine can support about 32 requests.</p></li>
+<li><p>Configuration 2: (X86, computing-type) 16-core vCPU, 32GB memory, and a single machine can support about 64 requests.</p></li>
+<li><p>Configuration 3: (X86, computing-type) 64-core vCPU, 128GB memory, and a single machine can support about 200 requests.</p></li>
 </ul>
-<p>详细性能测试报告（<a class="reference internal" href="benchmark_onnx_cpp.html"><span class="doc">点击此处</span></a>）</p>
-<p>云服务厂商，针对新用户，有3个月免费试用活动，申请教程（<a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/docs/aliyun_server_tutorial.md">点击此处</a>）</p>
+<p>Detailed performance <a class="reference internal" href="benchmark_onnx_cpp.html"><span class="doc">report</span></a></p>
+<p>Cloud service providers offer a 3-month free trial for new users. Application tutorial (<a class="reference internal" href="aliyun_server_tutorial.html"><span class="doc">docs</span></a>).</p>
 </div>
-<div class="section" id="id2">
-<h2>快速上手<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h2>
-<div class="section" id="id3">
-<h3>服务端启动<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">注意</span></code>：一键部署工具，过程分为：安装docker、下载docker镜像、启动服务。如果用户希望直接从FunASR docker镜像启动，可以参考开发指南（<a class="reference internal" href="SDK_advanced_guide_online_zh.html"><span class="doc">点击此处</span></a>）</p>
-<p>下载部署工具<code class="docutils literal notranslate"><span class="pre">funasr-runtime-deploy-online-cpu-zh.sh</span></code></p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/funasr/runtime/deploy_tools/funasr-runtime-deploy-online-cpu-zh.sh<span class="p">;</span>
-<span class="c1"># 如遇到网络问题，中国大陆用户，可以使用下面的命令：</span>
-<span class="c1"># curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy-online-cpu-zh.sh;</span>
+<div class="section" id="quick-start">
+<h2>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline"></a></h2>
+<div class="section" id="server-startup">
+<h3>Server Startup<a class="headerlink" href="#server-startup" title="Permalink to this headline"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">Note</span></code>: The one-click deployment tool process includes installing Docker, downloading Docker images, and starting the service. If the user wants to start from the FunASR Docker image, please refer to the development guide (<a class="reference internal" href="SDK_advanced_guide_online.html"><span class="doc">docs</span></a>.</p>
+<p>Download the deployment tool <code class="docutils literal notranslate"><span class="pre">funasr-runtime-deploy-online-cpu-zh.sh</span></code></p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/funasr/runtime/deploy_tools/funasr-runtime-deploy-online-cpu-en.sh<span class="p">;</span>
+<span class="c1"># If there is a network problem, users in mainland China can use the following command:</span>
+<span class="c1"># curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy-online-cpu-en.sh;</span>
 </pre></div>
 </div>
-<p>执行部署工具，在提示处输入回车键即可完成服务端安装与部署。目前便捷部署工具暂时仅支持Linux环境，其他环境部署参考开发指南（<a class="reference internal" href="SDK_advanced_guide_online_zh.html"><span class="doc">点击此处</span></a>）</p>
+<p>Execute the deployment tool and press the Enter key at the prompt to complete the installation and deployment of the server. Currently, the convenient deployment tool only supports Linux environments. For other environments, please refer to the development guide (<a class="reference internal" href="SDK_advanced_guide_offline.html"><span class="doc">docs</span></a>).</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-online-cpu-zh.sh install --workspace ./funasr-runtime-resources
 </pre></div>
 </div>
 </div>
-<div class="section" id="id4">
-<h3>客户端测试与使用<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h3>
-<p>运行上面安装指令后，会在./funasr-runtime-resources（默认安装目录）中下载客户端测试工具目录samples（手动下载，<a class="reference external" href="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz">点击此处</a>），
-我们以Python语言客户端为例，支持麦克风输入，其他版本客户端请参考文档（点击此处）</p>
+<div class="section" id="client-testing-and-usage">
+<h3>Client Testing and Usage<a class="headerlink" href="#client-testing-and-usage" title="Permalink to this headline"></a></h3>
+<p>After running the above installation instructions, the client testing tool directory samples will be downloaded in the default installation directory ./funasr-runtime-resources (<a class="reference external" href="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz">download click</a>).
+We take the Python language client as an example to explain that it supports multiple audio format inputs (such as .wav, .pcm, .mp3, etc.), video inputs (.mp4, etc.), and multiple file list wav.scp inputs. For other client versions, please refer to the <a class="reference internal" href="#detailed-description-of-client-usage"><span class="std std-ref">documentation</span></a>.</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 funasr_wss_client.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode 2pass
 </pre></div>
 </div>
 </div>
 </div>
-<div class="section" id="id5">
-<h2>客户端用法详解<a class="headerlink" href="#id5" title="Permalink to this headline"></a></h2>
-<p>在服务器上完成FunASR服务部署以后，可以通过如下的步骤来测试和使用实时语音转写服务。
-目前分别支持以下几种编程语言客户端</p>
+<div class="section" id="detailed-description-of-client-usage">
+<h2>Detailed Description of Client Usage<a class="headerlink" href="#detailed-description-of-client-usage" title="Permalink to this headline"></a></h2>
+<p>After completing the FunASR runtime-SDK service deployment on the server, you can test and use the offline file transcription service through the following steps. Currently, the following programming language client versions are supported:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#python-client"><span class="std std-ref">Python</span></a></p></li>
 <li><p><a class="reference internal" href="#cpp-client"><span class="std std-ref">CPP</span></a></p></li>
 <li><p><a class="reference internal" href="#html-client"><span class="std std-ref">html</span></a></p></li>
 <li><p><a class="reference internal" href="#java-client"><span class="std std-ref">java</span></a></p></li>
-<li><p>c#</p></li>
 </ul>
-<p>更多版本客户端支持请参考<a class="reference internal" href="websocket_protocol_zh.html"><span class="doc">websocket/grpc协议</span></a></p>
+<p>For more client version support, please refer to the <a class="reference internal" href="websocket_protocol_zh.html"><span class="doc">websocket_protocol</span></a>.</p>
 <div class="section" id="python-client">
 <h3>python-client<a class="headerlink" href="#python-client" title="Permalink to this headline"></a></h3>
-<p>若想直接运行client进行测试，可参考如下简易说明，以python版本为例：</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 funasr_wss_client.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode 2pass
+<p>If you want to run the client directly for testing, you can refer to the following simple instructions, using the Python version as an example:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 funasr_wss_client.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode offline --audio_in <span class="s2">&quot;../audio/asr_example.wav&quot;</span>
 </pre></div>
 </div>
-<p>命令参数说明：</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--host 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，需要改为部署机器ip
---port 10095 部署端口号
---mode：`offline`，表示推理模式为一句话识别；`online`，表示推理模式为实时语音识别；`2pass`：表示为实时语音识别，并且说话句尾采用离线模型进行纠错。
---chunk_size：表示流式模型latency配置，`[5,10,5]`，表示当前音频为600ms，并且回看300ms，又看300ms。
---audio_in 需要进行转写的音频文件，支持文件路径，文件列表wav.scp
---thread_num 设置并发发送线程数，默认为1
---ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
+<p>Command parameter instructions:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--host is the IP address of the FunASR runtime-SDK service deployment machine, which defaults to the local IP address (127.0.0.1). If the client and the service are not on the same server, it needs to be changed to the deployment machine IP address.
+--port 10095 deployment port number
+--mode: `offline` indicates that the inference mode is one-sentence recognition; `online` indicates that the inference mode is real-time speech recognition; `2pass` indicates real-time speech recognition, and offline models are used for error correction at the end of each sentence.
+--chunk_size: indicates the latency configuration of the streaming model. [5,10,5] indicates that the current audio is 600ms, with a lookback of 300ms and a lookahead of 300ms.
+--audio_in is the audio file that needs to be transcribed, supporting file paths and file list wav.scp
+--thread_num sets the number of concurrent sending threads, default is 1
+--ssl sets whether to enable SSL certificate verification, default is 1 to enable, and 0 to disable
 </pre></div>
 </div>
 </div>
 <div class="section" id="cpp-client">
 <h3>cpp-client<a class="headerlink" href="#cpp-client" title="Permalink to this headline"></a></h3>
-<p>进入samples/cpp目录后，可以用cpp进行测试，指令如下：</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-wss-client --server-ip <span class="m">127</span>.0.0.1 --port <span class="m">10095</span> --mode 2pass
+<p>After entering the samples/cpp directory, you can test it with CPP. The command is as follows:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-wss-client --server-ip <span class="m">127</span>.0.0.1 --port <span class="m">10095</span> --wav-path ../audio/asr_example.wav
 </pre></div>
 </div>
-<p>命令参数说明：</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--server-ip 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，需要改为部署机器ip
---port 10095 部署端口号
---mode：`offline`，表示推理模式为一句话识别；`online`，表示推理模式为实时语音识别；`2pass`：表示为实时语音识别，并且说话句尾采用离线模型进行纠错。
---chunk_size：表示流式模型latency配置，`[5,10,5]`，表示当前音频为600ms，并且回看300ms，又看300ms。
---wav-path 需要进行转写的音频文件，支持文件路径
---thread_num 设置并发发送线程数，默认为1
---ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
+<p>Command parameter description:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--server-ip specifies the IP address of the machine where the FunASR runtime-SDK service is deployed. The default value is the local IP address (127.0.0.1). If the client and the service are not on the same server, the IP address needs to be changed to the IP address of the deployment machine.
+--port specifies the deployment port number as 10095.
+--mode: `offline` indicates that the inference mode is one-sentence recognition; `online` indicates that the inference mode is real-time speech recognition; `2pass` indicates real-time speech recognition, and offline models are used for error correction at the end of each sentence.
+--chunk_size: indicates the latency configuration of the streaming model. [5,10,5] indicates that the current audio is 600ms, with a lookback of 300ms and a lookahead of 300ms.
+--wav-path specifies the audio file to be transcribed, and supports file paths.
+--thread_num sets the number of concurrent send threads, with a default value of 1.
+--ssl sets whether to enable SSL certificate verification, with a default value of 1 for enabling and 0 for disabling.
 </pre></div>
 </div>
 </div>
 <div class="section" id="html-client">
 <h3>html-client<a class="headerlink" href="#html-client" title="Permalink to this headline"></a></h3>
-<p>在浏览器中打开 html/static/index.html，即可出现如下页面，支持麦克风输入与文件上传，直接进行体验</p>
-<img src="images/html.png"  width="900"/></div>
+<p>To experience it directly, open <code class="docutils literal notranslate"><span class="pre">html/static/index.html</span></code> in your browser. You will see the following page, which supports microphone input and file upload.
+<img src="images/html.png"  width="900"/></p>
+</div>
 <div class="section" id="java-client">
 <h3>java-client<a class="headerlink" href="#java-client" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>FunasrWsClient --host localhost --port <span class="m">10095</span> --mode 2pass
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>FunasrWsClient --host localhost --port <span class="m">10095</span> --audio_in ./asr_example.wav --mode offline
 </pre></div>
 </div>
-<p>详细可以参考文档（<a class="reference internal" href="../java/readme.html"><span class="doc">点击此处</span></a>）</p>
+<p>For more details, please refer to the <a class="reference internal" href="../java/readme.html"><span class="doc">docs</span></a></p>
 </div>
 </div>
-<div class="section" id="id6">
-<h2>服务端用法详解<a class="headerlink" href="#id6" title="Permalink to this headline"></a></h2>
-<div class="section" id="id7">
-<h3>启动已经部署过的FunASR服务<a class="headerlink" href="#id7" title="Permalink to this headline"></a></h3>
-<p>一键部署后若出现重启电脑等关闭Docker的动作，可通过如下命令直接启动FunASR服务，启动配置为上次一键部署的设置。</p>
+<div class="section" id="server-usage-details">
+<h2>Server Usage Details<a class="headerlink" href="#server-usage-details" title="Permalink to this headline"></a></h2>
+<div class="section" id="start-the-deployed-funasr-service">
+<h3>Start the deployed FunASR service<a class="headerlink" href="#start-the-deployed-funasr-service" title="Permalink to this headline"></a></h3>
+<p>If you have restarted the computer or shut down Docker after one-click deployment, you can start the FunASR service directly with the following command. The startup configuration is the same as the last one-click deployment.</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-online-cpu-zh.sh start
 </pre></div>
 </div>
 </div>
-<div class="section" id="ssl">
-<h3>设置SSL<a class="headerlink" href="#ssl" title="Permalink to this headline"></a></h3>
-<p>默认开启SSL校验，如果需要关闭，可以在启动时设置</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-online-cpu-zh.sh start --ssl <span class="m">0</span>
+<div class="section" id="set-ssl">
+<h3>Set SSL<a class="headerlink" href="#set-ssl" title="Permalink to this headline"></a></h3>
+<p>SSL verification is enabled by default. If you need to disable it, you can set it when starting.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-online-cpu-zh.sh --ssl <span class="m">0</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="id8">
-<h3>关闭FunASR服务<a class="headerlink" href="#id8" title="Permalink to this headline"></a></h3>
+<div class="section" id="stop-the-funasr-service">
+<h3>Stop the FunASR service<a class="headerlink" href="#stop-the-funasr-service" title="Permalink to this headline"></a></h3>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-online-cpu-zh.sh stop
 </pre></div>
 </div>
 </div>
-<div class="section" id="id9">
-<h3>释放FunASR服务<a class="headerlink" href="#id9" title="Permalink to this headline"></a></h3>
-<p>释放已经部署的FunASR服务。</p>
+<div class="section" id="release-the-funasr-service">
+<h3>Release the FunASR service<a class="headerlink" href="#release-the-funasr-service" title="Permalink to this headline"></a></h3>
+<p>Release the deployed FunASR service.</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-online-cpu-zh.sh remove
 </pre></div>
 </div>
 </div>
-<div class="section" id="id10">
-<h3>重启FunASR服务<a class="headerlink" href="#id10" title="Permalink to this headline"></a></h3>
-<p>根据上次一键部署的设置重启启动FunASR服务。</p>
+<div class="section" id="restart-the-funasr-service">
+<h3>Restart the FunASR service<a class="headerlink" href="#restart-the-funasr-service" title="Permalink to this headline"></a></h3>
+<p>Restart the FunASR service with the same configuration as the last one-click deployment.</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-online-cpu-zh.sh restart
 </pre></div>
 </div>
 </div>
-<div class="section" id="id11">
-<h3>替换模型并重启FunASR服务<a class="headerlink" href="#id11" title="Permalink to this headline"></a></h3>
-<p>替换正在使用的模型，并重新启动FunASR服务。模型需为ModelScope中的ASR/VAD/PUNC模型，或者从ModelScope中模型finetune后的模型。</p>
+<div class="section" id="replace-the-model-and-restart-the-funasr-service">
+<h3>Replace the model and restart the FunASR service<a class="headerlink" href="#replace-the-model-and-restart-the-funasr-service" title="Permalink to this headline"></a></h3>
+<p>Replace the currently used model, and restart the FunASR service. The model must be an ASR/VAD/PUNC model in ModelScope, or a finetuned model from ModelScope.</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-online-cpu-zh.sh update <span class="o">[</span>--asr_model <span class="p">|</span> --vad_model <span class="p">|</span> --punc_model<span class="o">]</span> &lt;model_id or <span class="nb">local</span> model path&gt;
 
 e.g
@@ -273,9 +271,9 @@ sudo bash funasr-runtime-deploy-online-cpu-zh.sh update --asr_model damo/speech_
 </pre></div>
 </div>
 </div>
-<div class="section" id="id12">
-<h3>更新参数并重启FunASR服务<a class="headerlink" href="#id12" title="Permalink to this headline"></a></h3>
-<p>更新已配置参数，并重新启动FunASR服务生效。可更新参数包括宿主机和Docker的端口号，以及推理和IO的线程数量。</p>
+<div class="section" id="update-parameters-and-restart-the-funasr-service">
+<h3>Update parameters and restart the FunASR service<a class="headerlink" href="#update-parameters-and-restart-the-funasr-service" title="Permalink to this headline"></a></h3>
+<p>Update the configured parameters and restart the FunASR service to take effect. The parameters that can be updated include the host and Docker port numbers, as well as the number of inference and IO threads.</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-online-cpu-zh.sh update <span class="o">[</span>--host_port <span class="p">|</span> --docker_port<span class="o">]</span> &lt;port number&gt;
 sudo bash funasr-runtime-deploy-online-cpu-zh.sh update <span class="o">[</span>--decode_thread_num <span class="p">|</span> --io_thread_num<span class="o">]</span> &lt;the number of threads&gt;
 sudo bash funasr-runtime-deploy-online-cpu-zh.sh update <span class="o">[</span>--workspace<span class="o">]</span> &lt;workspace in local&gt;
@@ -288,14 +286,14 @@ sudo bash funasr-runtime-deploy-online-cpu-zh.sh update --workspace ./funasr-run
 </div>
 </div>
 </div>
-<div class="section" id="id13">
-<h2>联系我们<a class="headerlink" href="#id13" title="Permalink to this headline"></a></h2>
-<p>在您使用过程中，如果遇到问题，欢迎加入用户群进行反馈</p>
+<div class="section" id="contact-us">
+<h2>Contact Us<a class="headerlink" href="#contact-us" title="Permalink to this headline"></a></h2>
+<p>If you encounter any problems during use, please join our user group for feedback.</p>
 <table border="1" class="docutils">
 <thead>
 <tr>
-<th style="text-align: center;">钉钉用户群</th>
-<th style="text-align: center;">微信</th>
+<th style="text-align: center;">DingDing Group</th>
+<th style="text-align: center;">Wechat</th>
 </tr>
 </thead>
 <tbody>
@@ -305,10 +303,6 @@ sudo bash funasr-runtime-deploy-online-cpu-zh.sh update --workspace ./funasr-run
 </tr>
 </tbody>
 </table></div>
-<div class="section" id="demo">
-<h2>视频demo<a class="headerlink" href="#demo" title="Permalink to this headline"></a></h2>
-<p><a class="reference external" href="#">点击此处</a></p>
-</div>
 </div>
 
 

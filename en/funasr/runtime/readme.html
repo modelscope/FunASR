@@ -135,11 +135,28 @@
 It has attracted many developers to participate in experiencing and developing. To solve the last mile of industrial landing and integrate models into business, we have developed the FunASR runtime-SDK. The SDK supports several service deployments, including:</p>
 <ul class="simple">
 <li><p>File transcription service, Mandarin, CPU version, done</p></li>
+<li><p>The real-time transcription service, Mandarin (CPU), done</p></li>
 <li><p>File transcription service, Mandarin, GPU version, in progress</p></li>
 <li><p>File transcription service, English, in progress</p></li>
-<li><p>Streaming speech recognition service, is in progress</p></li>
 <li><p>and more.</p></li>
 </ul>
+<div class="section" id="the-real-time-transcription-service-mandarin-cpu">
+<h2>The real-time transcription service, Mandarin (CPU)<a class="headerlink" href="#the-real-time-transcription-service-mandarin-cpu" title="Permalink to this headline"></a></h2>
+<p>The FunASR real-time speech-to-text service software package not only performs real-time speech-to-text conversion, but also allows high-precision transcription text correction at the end of each sentence and outputs text with punctuation, supporting high-concurrency multiple requests.
+In order to meet the needs of different users for different scenarios, different tutorials are prepared:</p>
+<div class="section" id="convenient-deployment-tutorial">
+<h3>Convenient Deployment Tutorial<a class="headerlink" href="#convenient-deployment-tutorial" title="Permalink to this headline"></a></h3>
+<p>This is suitable for scenarios where there is no need to modify the service deployment SDK and the deployed model comes from ModelScope or is finetuned by the user. For detailed tutorials, please refer to <a class="reference internal" href="docs/SDK_tutorial_online.html"><span class="doc">docs</span></a></p>
+</div>
+<div class="section" id="development-guide">
+<h3>Development Guide<a class="headerlink" href="#development-guide" title="Permalink to this headline"></a></h3>
+<p>This is suitable for scenarios where there is a need to modify the service deployment SDK and the deployed model comes from ModelScope or is finetuned by the user. For detailed documentation, please refer to <a class="reference internal" href="docs/SDK_advanced_guide_online.html"><span class="doc">docs</span></a></p>
+</div>
+<div class="section" id="technology-principles-revealed">
+<h3>Technology Principles Revealed<a class="headerlink" href="#technology-principles-revealed" title="Permalink to this headline"></a></h3>
+<p>The document introduces the technology principles behind the service, recognition accuracy, computing efficiency, and core advantages: convenience, high precision, high efficiency, and long audio chain. For detailed documentation, please refer to <a class="reference external" href="#">docs</a>.</p>
+</div>
+</div>
 <div class="section" id="file-transcription-service-mandarin-cpu">
 <h2>File Transcription Service, Mandarin (CPU)<a class="headerlink" href="#file-transcription-service-mandarin-cpu" title="Permalink to this headline"></a></h2>
 <p>Currently, the FunASR runtime-SDK-0.0.1 version supports the deployment of file transcription service, Mandarin (CPU version), with a complete speech recognition chain that can transcribe tens of hours of audio into punctuated text, and supports recognition for more than a hundred concurrent streams.</p>
