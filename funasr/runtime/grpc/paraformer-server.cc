@@ -143,10 +143,10 @@ void GrpcEngine::operator()() {
       }
       OnSpeechData();
       if (request_->is_final()) {
-        OnSpeechEnd();
         break;
       }
     }
+    OnSpeechEnd();
     LOG(INFO) << "Connect finish";
   } catch (std::exception const& e) {
     LOG(ERROR) << e.what();
