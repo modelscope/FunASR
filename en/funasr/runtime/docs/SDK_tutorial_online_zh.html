@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FunASR实时语音转写便捷部署教程 &mdash; FunASR  documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <title>FunASR实时语音听写便捷部署教程 &mdash; FunASR  documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
@@ -118,7 +118,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">FunASR实时语音转写便捷部署教程</li>
+      <li class="breadcrumb-item active">FunASR实时语音听写便捷部署教程</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../../_sources/funasr/runtime/docs/SDK_tutorial_online_zh.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -130,9 +130,9 @@
              
   <p>(简体中文|<a class="reference internal" href="SDK_tutorial_online.html"><span class="doc">English</span></a>)</p>
 <div class="section" id="funasr">
-<h1>FunASR实时语音转写便捷部署教程<a class="headerlink" href="#funasr" title="Permalink to this headline"></a></h1>
-<p>FunASR提供可便捷本地或者云端服务器部署的实时语音转写服务，内核为FunASR已开源runtime-SDK。
-集成了达摩院语音实验室在Modelscope社区开源的语音端点检测(VAD)、Paraformer-large非流式语音识别(ASR)、Paraformer-large流式语音识别(ASR)、标点恢复(PUNC) 等相关能力。软件包既可以实时地进行语音转文字，而且能够在说话句尾用高精度的转写文字修正输出，输出文字带有标点，支持高并发多路请求</p>
+<h1>FunASR实时语音听写便捷部署教程<a class="headerlink" href="#funasr" title="Permalink to this headline"></a></h1>
+<p>FunASR提供可便捷本地或者云端服务器部署的实时语音听写服务，内核为FunASR已开源的runtime-SDK。
+FunASR集成了达摩院语音实验室在Modelscope社区开源的语音端点检测(VAD)、Paraformer-large非流式语音识别(ASR)、Paraformer-large流式语音识别(ASR)、标点预测(PUNC) 等相关能力。软件包既可以实时地进行语音转文字，而且能够在说话句尾用高精度的转写文字修正输出，输出文字带有标点，支持高并发多路请求</p>
 <div class="section" id="id1">
 <h2>服务器配置<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h2>
 <p>用户可以根据自己的业务需求，选择合适的服务器配置，推荐配置为：</p>
@@ -171,7 +171,7 @@
 </div>
 <div class="section" id="id5">
 <h2>客户端用法详解<a class="headerlink" href="#id5" title="Permalink to this headline"></a></h2>
-<p>在服务器上完成FunASR服务部署以后，可以通过如下的步骤来测试和使用实时语音转写服务。
+<p>在服务器上完成FunASR服务部署以后，可以通过如下的步骤来测试和使用实时语音听写服务。
 目前分别支持以下几种编程语言客户端</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#python-client"><span class="std std-ref">Python</span></a></p></li>
@@ -190,8 +190,8 @@
 <p>命令参数说明：</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--host 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，需要改为部署机器ip
 --port 10095 部署端口号
---mode：`offline`，表示推理模式为一句话识别；`online`，表示推理模式为实时语音识别；`2pass`：表示为实时语音识别，并且说话句尾采用离线模型进行纠错。
---chunk_size：表示流式模型latency配置，`[5,10,5]`，表示当前音频为600ms，并且回看300ms，又看300ms。
+--mode：`offline`表示推理模式为一句话识别；`online`表示推理模式为实时语音识别；`2pass`表示为实时语音识别，并且说话句尾采用离线模型进行纠错。
+--chunk_size：表示流式模型latency配置`[5,10,5]`，表示当前音频解码片段为600ms，并且回看300ms，又看300ms。
 --audio_in 需要进行转写的音频文件，支持文件路径，文件列表wav.scp
 --thread_num 设置并发发送线程数，默认为1
 --ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
@@ -207,8 +207,8 @@
 <p>命令参数说明：</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--server-ip 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，需要改为部署机器ip
 --port 10095 部署端口号
---mode：`offline`，表示推理模式为一句话识别；`online`，表示推理模式为实时语音识别；`2pass`：表示为实时语音识别，并且说话句尾采用离线模型进行纠错。
---chunk_size：表示流式模型latency配置，`[5,10,5]`，表示当前音频为600ms，并且回看300ms，又看300ms。
+--mode：`offline`表示推理模式为一句话识别；`online`表示推理模式为实时语音识别；`2pass`表示为实时语音识别，并且说话句尾采用离线模型进行纠错。
+--chunk_size：表示流式模型latency配置`[5,10,5]`，表示当前音频解码片段为600ms，并且回看300ms，又看300ms。
 --wav-path 需要进行转写的音频文件，支持文件路径
 --thread_num 设置并发发送线程数，默认为1
 --ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭

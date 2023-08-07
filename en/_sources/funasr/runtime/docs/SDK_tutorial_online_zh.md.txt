@@ -1,9 +1,9 @@
 (简体中文|[English](./SDK_tutorial_online.md))
 
-# FunASR实时语音转写便捷部署教程
+# FunASR实时语音听写便捷部署教程
 
-FunASR提供可便捷本地或者云端服务器部署的实时语音转写服务，内核为FunASR已开源runtime-SDK。
-集成了达摩院语音实验室在Modelscope社区开源的语音端点检测(VAD)、Paraformer-large非流式语音识别(ASR)、Paraformer-large流式语音识别(ASR)、标点恢复(PUNC) 等相关能力。软件包既可以实时地进行语音转文字，而且能够在说话句尾用高精度的转写文字修正输出，输出文字带有标点，支持高并发多路请求
+FunASR提供可便捷本地或者云端服务器部署的实时语音听写服务，内核为FunASR已开源的runtime-SDK。
+FunASR集成了达摩院语音实验室在Modelscope社区开源的语音端点检测(VAD)、Paraformer-large非流式语音识别(ASR)、Paraformer-large流式语音识别(ASR)、标点预测(PUNC) 等相关能力。软件包既可以实时地进行语音转文字，而且能够在说话句尾用高精度的转写文字修正输出，输出文字带有标点，支持高并发多路请求
 
 ## 服务器配置
 
@@ -46,7 +46,7 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass
 
 ## 客户端用法详解
 
-在服务器上完成FunASR服务部署以后，可以通过如下的步骤来测试和使用实时语音转写服务。
+在服务器上完成FunASR服务部署以后，可以通过如下的步骤来测试和使用实时语音听写服务。
 目前分别支持以下几种编程语言客户端
 
 - [Python](#python-client)
@@ -68,8 +68,8 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass
 ```text
 --host 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，需要改为部署机器ip
 --port 10095 部署端口号
---mode：`offline`，表示推理模式为一句话识别；`online`，表示推理模式为实时语音识别；`2pass`：表示为实时语音识别，并且说话句尾采用离线模型进行纠错。
---chunk_size：表示流式模型latency配置，`[5,10,5]`，表示当前音频为600ms，并且回看300ms，又看300ms。
+--mode：`offline`表示推理模式为一句话识别；`online`表示推理模式为实时语音识别；`2pass`表示为实时语音识别，并且说话句尾采用离线模型进行纠错。
+--chunk_size：表示流式模型latency配置`[5,10,5]`，表示当前音频解码片段为600ms，并且回看300ms，又看300ms。
 --audio_in 需要进行转写的音频文件，支持文件路径，文件列表wav.scp
 --thread_num 设置并发发送线程数，默认为1
 --ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
@@ -86,8 +86,8 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass
 ```text
 --server-ip 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，需要改为部署机器ip
 --port 10095 部署端口号
---mode：`offline`，表示推理模式为一句话识别；`online`，表示推理模式为实时语音识别；`2pass`：表示为实时语音识别，并且说话句尾采用离线模型进行纠错。
---chunk_size：表示流式模型latency配置，`[5,10,5]`，表示当前音频为600ms，并且回看300ms，又看300ms。
+--mode：`offline`表示推理模式为一句话识别；`online`表示推理模式为实时语音识别；`2pass`表示为实时语音识别，并且说话句尾采用离线模型进行纠错。
+--chunk_size：表示流式模型latency配置`[5,10,5]`，表示当前音频解码片段为600ms，并且回看300ms，又看300ms。
 --wav-path 需要进行转写的音频文件，支持文件路径
 --thread_num 设置并发发送线程数，默认为1
 --ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
