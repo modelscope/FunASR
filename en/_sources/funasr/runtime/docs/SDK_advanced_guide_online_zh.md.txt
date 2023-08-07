@@ -83,14 +83,14 @@ sudo systemctl start docker
 若想直接运行client进行测试，可参考如下简易说明，以python版本为例：
 
 ```shell
-python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.wav" --output_dir "./results"
+python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode 2pass --audio_in "../audio/asr_example.wav" --output_dir "./results"
 ```
 
 命令参数说明：
 ```text
 --host 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，需要改为部署机器ip
 --port 10095 部署端口号
---mode offline表示离线文件转写
+--mode 2pass 表示online+offline
 --audio_in 需要进行转写的音频文件，支持文件路径，文件列表wav.scp
 --output_dir 识别结果保存路径
 ```
@@ -129,7 +129,7 @@ FunasrWsClient --host localhost --port 10095 --audio_in ./asr_example.wav --mode
 funasr-wss-server支持从Modelscope下载模型，设置模型下载地址（--download-model-dir，默认为/workspace/models）及model ID（--model-dir、--vad-dir、--punc-dir）,示例如下：
 ```shell
 cd /workspace/FunASR/funasr/runtime/websocket/build/bin
-./funasr-wss-server  \
+./funasr-wss-server-2pass  \
   --download-model-dir /workspace/models \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx \
   --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx  \
@@ -160,7 +160,7 @@ cd /workspace/FunASR/funasr/runtime/websocket/build/bin
 
 ## 模型资源准备
 
-如果您选择通过funasr-wss-server从Modelscope下载模型，可以跳过本步骤。
+如果您选择通过funasr-wss-server-2pass 从Modelscope下载模型，可以跳过本步骤。
 
 FunASR离线文件转写服务中的vad、asr和punc模型资源均来自Modelscope，模型地址详见下表：
 
@@ -202,4 +202,39 @@ python -m funasr.export.export_model \
 
 ```shell
 python -m funasr.export.export_model --model-name /path/to/finetune/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize True
+```
+
+
+## 如何定制服务部署
+
+FunASR-runtime的代码已开源，如果服务端和客户端不能很好的满足您的需求，您可以根据自己的需求进行进一步的开发：
+### c++ 客户端：
+
+https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/websocket
+
+### python 客户端：
+
+https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket
+
+### 自定义客户端：
+
+如果您想定义自己的client，websocket通信协议为：
+
+```text
+首次通信
+message为（需要用json序列化）：
+{"mode": "offline", "wav_name": "wav_name", "is_speaking": True, "wav_format":"pcm", "chunk_size":[5,10,5]}
+参数介绍：
+`mode`：`offline`，表示推理模式为一句话识别；`online`，表示推理模式为实时语音识别；`2pass`：表示为实时语音识别，并且说话句尾采用离线模型进行纠错。
+`wav_name`：表示需要推理音频文件名
+`wav_format`：表示音视频文件后缀名，可选pcm、mp3、mp4等（备注，1.0版本只支持pcm音频流）
+`is_speaking`：表示断句尾点，例如，vad切割点，或者一条wav结束
+`chunk_size`：表示流式模型latency配置，`[5,10,5]`，表示当前音频为600ms，并且回看300ms，右看300ms。
+`audio_fs`：当输入音频为pcm数据时，需要加上音频采样率参数
+
+发送音频数据
+直接将音频数据，移除头部信息后的bytes数据发送，支持音频采样率为80000，16000
+发送结束标志
+音频数据发送结束后，需要发送结束标志（需要用json序列化）：
+{"is_speaking": False}
 ```
