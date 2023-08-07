@@ -192,18 +192,22 @@ class_choices_list = [
 
 def build_diar_model(args):
     # token_list
-    if isinstance(args.token_list, str):
-        with open(args.token_list, encoding="utf-8") as f:
-            token_list = [line.rstrip() for line in f]
+    if args.token_list is not None:
+        if isinstance(args.token_list, str):
+            with open(args.token_list, encoding="utf-8") as f:
+                token_list = [line.rstrip() for line in f]
 
-        # Overwriting token_list to keep it as "portable".
-        args.token_list = list(token_list)
-    elif isinstance(args.token_list, (tuple, list)):
-        token_list = list(args.token_list)
+            # Overwriting token_list to keep it as "portable".
+            args.token_list = list(token_list)
+        elif isinstance(args.token_list, (tuple, list)):
+            token_list = list(args.token_list)
+        else:
+            raise RuntimeError("token_list must be str or list")
+        vocab_size = len(token_list)
+        logging.info(f"Vocabulary size: {vocab_size}")
     else:
-        raise RuntimeError("token_list must be str or list")
-    vocab_size = len(token_list)
-    logging.info(f"Vocabulary size: {vocab_size}")
+        token_list = None
+        vocab_size = None
 
     # frontend
     if args.input_size is None:
@@ -212,16 +216,14 @@ def build_diar_model(args):
             frontend = frontend_class(cmvn_file=args.cmvn_file, **args.frontend_conf)
         else:
             frontend = frontend_class(**args.frontend_conf)
-        input_size = frontend.output_size()
     else:
         args.frontend = None
         args.frontend_conf = {}
         frontend = None
-        input_size = args.input_size
 
     # encoder
     encoder_class = encoder_choices.get_class(args.encoder)
-    encoder = encoder_class(input_size=input_size, **args.encoder_conf)
+    encoder = encoder_class(**args.encoder_conf)
 
     if args.model == "sond":
         # data augmentation for spectrogram
@@ -294,7 +296,7 @@ def build_diar_model(args):
             **args.model_conf,
         )
 
-    elif args.model_name == "eend_ola":
+    elif args.model == "eend_ola":
         # encoder-decoder attractor
         encoder_decoder_attractor_class = encoder_decoder_attractor_choices.get_class(args.encoder_decoder_attractor)
         encoder_decoder_attractor = encoder_decoder_attractor_class(**args.encoder_decoder_attractor_conf)

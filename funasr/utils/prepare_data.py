@@ -196,12 +196,16 @@ def generate_data_list(args, data_dir, dataset, nj=64):
 
 def prepare_data(args, distributed_option):
     distributed = distributed_option.distributed
+    data_names = args.dataset_conf.get("data_names", "speech,text").split(",")
+    data_types = args.dataset_conf.get("data_types", "sound,text").split(",")
+    file_names = args.data_file_names.split(",")
+    batch_type = args.dataset_conf["batch_conf"]["batch_type"]
     if not distributed or distributed_option.dist_rank == 0:
         if hasattr(args, "filter_input") and args.filter_input:
             filter_wav_text(args.data_dir, args.train_set)
             filter_wav_text(args.data_dir, args.valid_set)
 
-        if args.dataset_type == "small":
+        if args.dataset_type == "small" and batch_type != "unsorted":
             calc_shape(args, args.train_set)
             calc_shape(args, args.valid_set)
 
@@ -209,9 +213,6 @@ def prepare_data(args, distributed_option):
             generate_data_list(args, args.data_dir, args.train_set)
             generate_data_list(args, args.data_dir, args.valid_set)
 
-    data_names = args.dataset_conf.get("data_names", "speech,text").split(",")
-    data_types = args.dataset_conf.get("data_types", "sound,text").split(",")
-    file_names = args.data_file_names.split(",")
     print("data_names: {}, data_types: {}, file_names: {}".format(data_names, data_types, file_names))
     assert len(data_names) == len(data_types) == len(file_names)
     if args.dataset_type == "small":
