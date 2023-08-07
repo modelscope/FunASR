@@ -39,7 +39,7 @@ class Paraformer():
         if quantize:
             encoder_model_file = os.path.join(model_dir, 'model_quant.onnx')
             decoder_model_file = os.path.join(model_dir, 'decoder_quant.onnx')
-        if not os.path.exists(model_file):
+        if not os.path.exists(encoder_model_file) or not os.path.exists(decoder_model_file):
             print(".onnx is not exist, begin to export onnx")
             from funasr.export.export_model import ModelExport
             export_model = ModelExport(

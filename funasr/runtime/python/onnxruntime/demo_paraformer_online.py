@@ -1,4 +1,5 @@
-from funasr_onnx import Paraformer
+import soundfile
+from funasr_onnx.paraformer_online_bin import Paraformer
 from pathlib import Path
 
 model_dir = "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online"
