@@ -37,9 +37,9 @@ int main(int argc, char* argv[]) {
         false, "/workspace/models/offline_asr", "string");
     TCLAP::ValueArg<std::string> online_model_dir(
         "", ONLINE_MODEL_DIR,
-        "default: damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx, the asr model path, which "
+        "default: damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx, the asr model path, which "
         "contains model_quant.onnx, config.yaml, am.mvn",
-        false, "damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx", "string");
+        false, "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx", "string");
 
     TCLAP::ValueArg<std::string> offline_model_revision(
         "", "offline-model-revision", "ASR offline model revision", false,
@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
         "model_quant.onnx, punc.yaml",
         false, "/workspace/models/punc", "string");
     TCLAP::ValueArg<std::string> punc_revision(
-        "", "punc-revision", "PUNC model revision", false, "1.0.2", "string");
+        "", "punc-revision", "PUNC model revision", false, "v1.0.2", "string");
     TCLAP::ValueArg<std::string> punc_quant(
         "", PUNC_QUANT,
         "true (Default), load the model of model_quant.onnx in punc_dir. If "
@@ -237,8 +237,8 @@ int main(int argc, char* argv[]) {
           LOG(ERROR) << down_asr_model << " do not exists.";
           exit(-1);
         } else {
-          model_path[MODEL_DIR] = down_asr_path;
-          LOG(INFO) << "Set " << MODEL_DIR << " : " << model_path[MODEL_DIR];
+          model_path[OFFLINE_MODEL_DIR] = down_asr_path;
+          LOG(INFO) << "Set " << OFFLINE_MODEL_DIR << " : " << model_path[OFFLINE_MODEL_DIR];
         }
       } else {
         LOG(INFO) << "ASR Offline model is not set, use default.";
@@ -281,8 +281,8 @@ int main(int argc, char* argv[]) {
           LOG(ERROR) << down_asr_model << " do not exists.";
           exit(-1);
         } else {
-          model_path[MODEL_DIR] = down_asr_path;
-          LOG(INFO) << "Set " << MODEL_DIR << " : " << model_path[MODEL_DIR];
+          model_path[ONLINE_MODEL_DIR] = down_asr_path;
+          LOG(INFO) << "Set " << ONLINE_MODEL_DIR << " : " << model_path[ONLINE_MODEL_DIR];
         }
       } else {
         LOG(INFO) << "ASR online model is not set, use default.";
@@ -305,7 +305,7 @@ int main(int argc, char* argv[]) {
                     << " from modelscope : "; python_cmd_punc = python_cmd + " --model-name " +
                 s_punc_path +
                 " --export-dir " + s_download_model_dir +
-                " --model_revision " + model_path["punc-revision "]; 
+                " --model_revision " + model_path["punc-revision"]; 
           down_punc_path  =
                 s_download_model_dir +
                 "/" + s_punc_path;
