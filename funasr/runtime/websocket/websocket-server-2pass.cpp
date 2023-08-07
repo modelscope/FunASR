@@ -211,6 +211,7 @@ void WebSocketServer::on_close(websocketpp::connection_hdl hdl) {
   {
     return;
   }
+  scoped_lock guard_decoder(*(data_msg->thread_lock));  //wait for do_decoder finished and avoid access freed tpass_online_handle 
   FunTpassOnlineUninit(data_msg->tpass_online_handle);
   data_map.erase(hdl);  // remove data vector when  connection is closed
   LOG(INFO) << "on_close, active connections: "<< data_map.size();
