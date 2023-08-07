@@ -17,8 +17,8 @@ def get_model(model, export_config=None):
     if isinstance(model, BiCifParaformer):
         return BiCifParaformer_export(model, **export_config)
     elif isinstance(model, ParaformerOnline):
-        return (ParaformerOnline_encoder_predictor_export(model, model_name=export_config.get('model_name', ['model', 'decoder'])[0]),
-                ParaformerOnline_decoder_export(model, model_name=export_config.get('model_name', ['model', 'decoder'])[1]))
+        return (ParaformerOnline_encoder_predictor_export(model, model_name="model"),
+                ParaformerOnline_decoder_export(model, model_name="decoder"))
     elif isinstance(model, Paraformer):
         return Paraformer_export(model, **export_config)
     elif isinstance(model, Conformer_export):
