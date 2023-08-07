@@ -6,7 +6,6 @@ import numpy as np
 import torch
 import torch.nn as  nn
 import torch.nn.functional as F
-from typeguard import check_argument_types
 
 from funasr.models.base_model import FunASRModel
 from funasr.models.frontend.wav_frontend import WavFrontendMel23
@@ -70,8 +69,6 @@ class DiarEENDOLAModel(FunASRModel):
             mapping_dict=None,
             **kwargs,
     ):
-        assert check_argument_types()
-
         super().__init__()
         self.frontend = frontend
         self.enc = encoder
