@@ -1,8 +1,7 @@
  # Advanced Development Guide (File transcription service)
  
-FunASR provides a Chinese offline file transcription service that can be deployed locally or on a cloud server with just one click. The core of the service is the FunASR runtime SDK, which has been open-sourced. FunASR-runtime combines various capabilities such as speech endpoint detection (VAD), large-scale speech recognition (ASR) using Paraformer-large, and punctuation detection (PUNC), which have all been open-sourced by the speech laboratory of DAMO Academy on the Modelscope community. This enables accurate and efficient high-concurrency transcription of audio files.
-
-This document serves as a development guide for the FunASR offline file transcription service. If you wish to quickly experience the offline file transcription service, please refer to the one-click deployment example for the FunASR offline file transcription service ([docs](./SDK_tutorial.md)).
+FunASR provides a Chinese online transcription service that can be deployed locally or on a cloud server with just one click. The core of the service is the FunASR runtime SDK, which has been open-sourced. FunASR-runtime combines various capabilities such as speech endpoint detection (VAD), large-scale speech recognition (ASR) using Paraformer-large, and punctuation detection (PUNC), which have all been open-sourced by the speech laboratory of DAMO Academy on the Modelscope community. 
+This document serves as a development guide for the FunASR online transcription service. If you wish to quickly experience the online transcription service, please refer to the one-click deployment example for the FunASR online transcription service ([docs](./SDK_tutorial_online.md)).
 
 ## Installation of Docker
 
@@ -36,9 +35,9 @@ sudo systemctl start docker
 Use the following command to pull and launch the Docker image for the FunASR runtime-SDK:
 
 ```shell
-sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-latest
+sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.0
 
-sudo docker run -p 10095:10095 -it --privileged=true -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-latest
+sudo docker run -p 10095:10095 -it --privileged=true -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.0
 ```
 
 Introduction to command parameters: 
@@ -54,22 +53,27 @@ Introduction to command parameters:
 
 Use the flollowing script to start the server ：
 ```shell
-./run_server.sh --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
+cd FunASR/funasr/runtime
+./run_server_2pass.sh \
+  --download-model-dir /workspace/models \
+  --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
-  --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
+  --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx  \
+  --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx
 ```
 
-More details about the script run_server.sh:
+More details about the script run_server_2pass.sh:
 
 The FunASR-wss-server supports downloading models from Modelscope. You can set the model download address (--download-model-dir, default is /workspace/models) and the model ID (--model-dir, --vad-dir, --punc-dir). Here is an example:
 
 ```shell
 cd /workspace/FunASR/funasr/runtime/websocket/build/bin
-./funasr-wss-server  \
+./funasr-wss-server-2pass  \
   --download-model-dir /workspace/models \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx \
+  --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx  \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
-  --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx \
+  --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx \
   --decoder-thread-num 32 \
   --io-thread-num  8 \
   --port 10095 \
@@ -94,33 +98,19 @@ Introduction to command parameters:
 --keyfile <string>: SSL key file. Default is ../../../ssl_key/server.key.
 ```
 
-The FunASR-wss-server also supports loading models from a local path (see Preparing Model Resources for detailed instructions on preparing local model resources). Here is an example:
-
-```shell
-cd /workspace/FunASR/funasr/runtime/websocket/build/bin
-./funasr-wss-server  \
-  --model-dir /workspace/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx \
-  --vad-dir /workspace/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
-  --punc-dir /workspace/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx \
-  --decoder-thread-num 32 \
-  --io-thread-num  8 \
-  --port 10095 \
-  --certfile  ../../../ssl_key/server.crt \
-  --keyfile ../../../ssl_key/server.key
- ```
-
-
 ## Preparing Model Resources
 
-If you choose to download models from Modelscope through the FunASR-wss-server, you can skip this step. The vad, asr, and punc model resources in the offline file transcription service of FunASR are all from Modelscope. The model addresses are shown in the table below:
+If you choose to download models from Modelscope through the FunASR-wss-server-2pass, you can skip this step. The vad, asr, and punc model resources in the offline file transcription service of FunASR are all from Modelscope. The model addresses are shown in the table below:
 
-| Model | Modelscope url                                                                                                   |
-|-------|------------------------------------------------------------------------------------------------------------------|
-| VAD   | https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary |
-| ASR   | https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary                           |
-| PUNC  | https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch/summary               |
 
-The offline file transcription service deploys quantized ONNX models. Below are instructions on how to export ONNX models and their quantization. You can choose to export ONNX models from Modelscope, local files, or finetuned resources: 
+| 模型 | Modelscope链接                                                                                                  |
+|------|---------------------------------------------------------------------------------------------------------------|
+| VAD  | https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary  |
+| ASR  | https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary                           |
+| ASR  | https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx/summary                          |
+| PUNC | https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx/summary               |
+
+The online transcription service deploys quantized ONNX models. Below are instructions on how to export ONNX models and their quantization. You can choose to export ONNX models from Modelscope, local files, or finetuned resources: 
 
 ### Exporting ONNX models from Modelscope
 
@@ -185,7 +175,7 @@ Introduction to command parameters:
 
 ### c++-client
 ```shell
-. /funasr-wss-client --server-ip 127.0.0.1 --port 10095 --wav-path test.wav --thread-num 1 --is-ssl 1
+. /funasr-wss-client-2pass --server-ip 127.0.0.1 --port 10095 --wav-path test.wav --thread-num 1 --is-ssl 1
 ```
 
 Introduction to command parameters:
