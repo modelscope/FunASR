@@ -54,6 +54,12 @@ def build_args(args, parser, extra_task_params):
             default=None,
             help="The number of input dimension of the feature",
         )
+        task_parser.add_argument(
+            "--cmvn_file",
+            type=str_or_none,
+            default=None,
+            help="The path of cmvn file.",
+        )
 
     elif args.task_name == "lm":
         from funasr.build_utils.build_lm_model import class_choices_list
