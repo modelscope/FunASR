@@ -13,7 +13,7 @@ namespace funasr {
 
 // parser option
 #define MODEL_DIR "model-dir"
-#define OFFLINE_MODEL_DIR "offline-model-dir"
+#define OFFLINE_MODEL_DIR "model-dir"
 #define ONLINE_MODEL_DIR "online-model-dir"
 #define VAD_DIR "vad-dir"
 #define PUNC_DIR "punc-dir"
@@ -45,8 +45,8 @@ namespace funasr {
 #define AM_CONFIG_NAME "config.yaml"
 #define PUNC_CONFIG_NAME "punc.yaml"
 
-#define ENCODER_NAME "encoder.onnx"
-#define QUANT_ENCODER_NAME "encoder_quant.onnx"
+#define ENCODER_NAME "model.onnx"
+#define QUANT_ENCODER_NAME "model_quant.onnx"
 #define DECODER_NAME "decoder.onnx"
 #define QUANT_DECODER_NAME "decoder_quant.onnx"
 

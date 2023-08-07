@@ -37,9 +37,9 @@ int main(int argc, char* argv[]) {
         false, "/workspace/models/offline_asr", "string");
     TCLAP::ValueArg<std::string> online_model_dir(
         "", ONLINE_MODEL_DIR,
-        "default: /workspace/models/online_asr, the asr model path, which "
+        "default: damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx, the asr model path, which "
         "contains model_quant.onnx, config.yaml, am.mvn",
-        false, "/workspace/models/online_asr", "string");
+        false, "damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx", "string");
 
     TCLAP::ValueArg<std::string> offline_model_revision(
         "", "offline-model-revision", "ASR offline model revision", false,
@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
 
     TCLAP::ValueArg<std::string> online_model_revision(
         "", "online-model-revision", "ASR online model revision", false,
-        "v1.0.4", "string");
+        "v1.0.6", "string");
 
     TCLAP::ValueArg<std::string> quantize(
         "", QUANTIZE,
@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
         "model_quant.onnx, punc.yaml",
         false, "/workspace/models/punc", "string");
     TCLAP::ValueArg<std::string> punc_revision(
-        "", "punc-revision", "PUNC model revision", false, "0.4.7", "string");
+        "", "punc-revision", "PUNC model revision", false, "1.0.2", "string");
     TCLAP::ValueArg<std::string> punc_quant(
         "", PUNC_QUANT,
         "true (Default), load the model of model_quant.onnx in punc_dir. If "
@@ -244,7 +244,7 @@ int main(int argc, char* argv[]) {
         LOG(INFO) << "ASR Offline model is not set, use default.";
       }
 
-      if (online_model_dir.isSet() && !s_online_asr_path.empty()) {
+      if (!s_online_asr_path.empty()) {
         std::string python_cmd_asr;
         std::string down_asr_path;
         std::string down_asr_model;
