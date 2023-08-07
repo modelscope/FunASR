@@ -11,6 +11,7 @@ set(CMAKE_CXX_STANDARD 14 CACHE STRING "The C++ version to be used.")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_VERBOSE_MAKEFILE on)
+set(BUILD_TESTING OFF)
 
 include(common.cmake)
 
@@ -48,23 +49,14 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/kaldi-native-f
 add_subdirectory(${PROJECT_SOURCE_DIR}/../onnxruntime/src src)
 
 include_directories(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/glog)
-set(BUILD_TESTING OFF)
 add_subdirectory(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/glog glog)
 
 # rg_grpc_proto
-add_library(rg_grpc_proto
-  ${rg_grpc_srcs}
-  ${rg_grpc_hdrs}
-  ${rg_proto_srcs}
-  ${rg_proto_hdrs})
+add_library(rg_grpc_proto ${rg_grpc_srcs} ${rg_grpc_hdrs} ${rg_proto_srcs} ${rg_proto_hdrs})
 
-target_link_libraries(rg_grpc_proto
-  ${_REFLECTION}
-  ${_GRPC_GRPCPP}
-  ${_PROTOBUF_LIBPROTOBUF})
+target_link_libraries(rg_grpc_proto ${_REFLECTION} ${_GRPC_GRPCPP} ${_PROTOBUF_LIBPROTOBUF})
 
-add_executable(paraformer-server
-  paraformer-server.cc)
+add_executable(paraformer-server paraformer-server.cc)
 target_link_libraries(paraformer-server
   rg_grpc_proto
   funasr

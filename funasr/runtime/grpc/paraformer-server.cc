@@ -100,7 +100,6 @@ void GrpcEngine::OnSpeechStart() {
   LOG(INFO) << "encoding is " << encoding_;
 
   std::string mode_str;
-  LOG(INFO) << request_->mode() << DecodeMode::offline << DecodeMode::online << DecodeMode::two_pass;
   switch(request_->mode()) {
     case DecodeMode::offline:
       mode_ = ASR_OFFLINE;
@@ -143,10 +142,10 @@ void GrpcEngine::operator()() {
       }
       OnSpeechData();
       if (request_->is_final()) {
-        OnSpeechEnd();
         break;
       }
     }
+    OnSpeechEnd();
     LOG(INFO) << "Connect finish";
   } catch (std::exception const& e) {
     LOG(ERROR) << e.what();
