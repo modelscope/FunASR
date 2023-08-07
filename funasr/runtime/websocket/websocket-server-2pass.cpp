@@ -143,7 +143,7 @@ void WebSocketServer::do_decoder(
 
     }
     if(is_final){
-      
+
       try{
         Result = FunTpassInferBuffer(tpass_handle, tpass_online_handle,
                                       buffer.data(), buffer.size(), punc_cache,
@@ -171,11 +171,9 @@ void WebSocketServer::do_decoder(
       }
     }
 
-
   } catch (std::exception const& e) {
     std::cerr << "Error: " << e.what() << std::endl;
   }
- 
 }
 
 void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
@@ -193,10 +191,10 @@ void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
   data_msg->msg["audio_fs"] = 16000;
   data_msg->punc_cache =
       std::make_shared<std::vector<std::vector<std::string>>>(2);
-  std::vector<int> chunk_size = {5, 10, 5};  //TODO, need get from client 
-  FUNASR_HANDLE tpass_online_handle =
-      FunTpassOnlineInit(tpass_handle, chunk_size);
-  data_msg->tpass_online_handle = tpass_online_handle;
+  // std::vector<int> chunk_size = {5, 10, 5};  //TODO, need get from client
+  // FUNASR_HANDLE tpass_online_handle =
+  //     FunTpassOnlineInit(tpass_handle, chunk_size);
+  // data_msg->tpass_online_handle = tpass_online_handle;
   data_map.emplace(hdl, data_msg);
   LOG(INFO) << "on_open, active connections: " << data_map.size();
  
@@ -286,7 +284,15 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
       if (jsonresult.contains("audio_fs")) {
         msg_data->msg["audio_fs"] = jsonresult["audio_fs"];
       }
-      LOG(INFO) << "jsonresult=" << jsonresult << "msg_data->msg"
+      if (jsonresult.contains("chunk_size")){
+        if(msg_data->tpass_online_handle == NULL){
+          std::vector<int> chunk_size_vec = jsonresult["chunk_size"].get<std::vector<int>>();
+          FUNASR_HANDLE tpass_online_handle =
+              FunTpassOnlineInit(tpass_handle, chunk_size_vec);
+          msg_data->tpass_online_handle = tpass_online_handle;
+        }
+      }
+      LOG(INFO) << "jsonresult=" << jsonresult << ", msg_data->msg="
                 << msg_data->msg;
       if (jsonresult["is_speaking"] == false ||
           jsonresult["is_finished"] == true) {
