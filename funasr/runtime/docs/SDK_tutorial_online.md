@@ -1,10 +1,10 @@
 ([简体中文](./SDK_tutorial_online_zh.md)|English)
 
-# FunASR实时语音转写便捷部署教程
+# FunASR-realtime-transcribe service
 
-FunASR offers a real-time speech-to-text service that can be easily deployed locally or on cloud servers. The service integrates various capabilities including voice activity detection (VAD) developed by the speech laboratory of DAMO Academy on the ModelScope, Paraformer-large non-streaming automatic speech recognition (ASR), Paraformer-large streaming ASR, and punctuation recovery (PUNC). The software package not only performs real-time speech-to-text conversion, but also allows high-precision transcription text correction at the end of each sentence and outputs text with punctuation, supporting high-concurrency multiple requests.
+FunASR offers a real-time speech-to-text service that can be easily deployed locally or on cloud servers. The service integrates various capabilities developed by the speech laboratory of DAMO Academy on the ModelScope, including voice activity detection (VAD), Paraformer-large non-streaming automatic speech recognition (ASR), Paraformer-large streaming ASR, and punctuation prediction (PUNC). The software package supports realtime speech-to-text service as well as high-precision transcription text correction at the end of each sentence and outputs text with punctuation.
 
-## Server Configuration
+## Server Configurations
 
 Users can choose appropriate server configurations based on their business needs. The recommended configurations are:
 - Configuration 1: (X86, computing-type) 4-core vCPU, 8GB memory, and a single machine can support about 32 requests.
