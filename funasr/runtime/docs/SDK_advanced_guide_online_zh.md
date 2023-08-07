@@ -83,14 +83,14 @@ sudo systemctl start docker
 若想直接运行client进行测试，可参考如下简易说明，以python版本为例：
 
 ```shell
-python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.wav" --output_dir "./results"
+python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode 2pass --audio_in "../audio/asr_example.wav" --output_dir "./results"
 ```
 
 命令参数说明：
 ```text
 --host 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，需要改为部署机器ip
 --port 10095 部署端口号
---mode offline表示离线文件转写
+--mode 2pass 表示online+offline
 --audio_in 需要进行转写的音频文件，支持文件路径，文件列表wav.scp
 --output_dir 识别结果保存路径
 ```
@@ -221,44 +221,20 @@ https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/w
 如果您想定义自己的client，websocket通信协议为：
 
 ```text
-# 首次通信
-{"mode": "offline", "wav_name": wav_name, "is_speaking": True}
-# 发送wav数据
-bytes数据
-# 发送结束标志
+首次通信
+message为（需要用json序列化）：
+{"mode": "offline", "wav_name": "wav_name", "is_speaking": True, "wav_format":"pcm", "chunk_size":[5,10,5]}
+参数介绍：
+`mode`：`offline`，表示推理模式为一句话识别；`online`，表示推理模式为实时语音识别；`2pass`：表示为实时语音识别，并且说话句尾采用离线模型进行纠错。
+`wav_name`：表示需要推理音频文件名
+`wav_format`：表示音视频文件后缀名，可选pcm、mp3、mp4等（备注，1.0版本只支持pcm音频流）
+`is_speaking`：表示断句尾点，例如，vad切割点，或者一条wav结束
+`chunk_size`：表示流式模型latency配置，`[5,10,5]`，表示当前音频为600ms，并且回看300ms，右看300ms。
+`audio_fs`：当输入音频为pcm数据时，需要加上音频采样率参数
+
+发送音频数据
+直接将音频数据，移除头部信息后的bytes数据发送，支持音频采样率为80000，16000
+发送结束标志
+音频数据发送结束后，需要发送结束标志（需要用json序列化）：
 {"is_speaking": False}
 ```
-
-### c++ 服务端：
-
-#### VAD
-```c++
-// VAD模型的使用分为FsmnVadInit和FsmnVadInfer两个步骤：
-FUNASR_HANDLE vad_hanlde=FsmnVadInit(model_path, thread_num);
-// 其中：model_path 包含"model-dir"、"quantize"，thread_num为onnx线程数；
-FUNASR_RESULT result=FsmnVadInfer(vad_hanlde, wav_file.c_str(), NULL, 16000);
-// 其中：vad_hanlde为FunOfflineInit返回值，wav_file为音频路径，sampling_rate为采样率(默认16k)
-```
-
-使用示例详见：https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/onnxruntime/bin/funasr-onnx-offline-vad.cpp
-
-#### ASR
-```text
-// ASR模型的使用分为FunOfflineInit和FunOfflineInfer两个步骤：
-FUNASR_HANDLE asr_hanlde=FunOfflineInit(model_path, thread_num);
-// 其中：model_path 包含"model-dir"、"quantize"，thread_num为onnx线程数；
-FUNASR_RESULT result=FunOfflineInfer(asr_hanlde, wav_file.c_str(), RASR_NONE, NULL, 16000);
-// 其中：asr_hanlde为FunOfflineInit返回值，wav_file为音频路径，sampling_rate为采样率(默认16k)
-```
-
-使用示例详见：https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/onnxruntime/bin/funasr-onnx-offline.cpp
-
-#### PUNC
-```text
-// PUNC模型的使用分为CTTransformerInit和CTTransformerInfer两个步骤：
-FUNASR_HANDLE punc_hanlde=CTTransformerInit(model_path, thread_num);
-// 其中：model_path 包含"model-dir"、"quantize"，thread_num为onnx线程数；
-FUNASR_RESULT result=CTTransformerInfer(punc_hanlde, txt_str.c_str(), RASR_NONE, NULL);
-// 其中：punc_hanlde为CTTransformerInit返回值，txt_str为文本
-```
-使用示例详见：https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/onnxruntime/bin/funasr-onnx-offline-punc.cpp
