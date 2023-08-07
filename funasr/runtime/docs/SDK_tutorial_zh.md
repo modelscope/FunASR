@@ -14,7 +14,7 @@ FunASR提供可便捷本地或者云端服务器部署的离线文件转写服�
 
 详细性能测试报告（[点击此处](./benchmark_onnx_cpp.md)）
 
-云服务厂商，针对新用户，有3个月免费试用活动，申请教程（[点击此处](./aliyun_server_tutorial.md)）
+云服务厂商，针对新用户，有3个月免费试用活动，申请教程（[点击此处](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/docs/aliyun_server_tutorial.md)）
 
 ## 快速上手
 
@@ -32,7 +32,7 @@ curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/funas
 
 执行部署工具，在提示处输入回车键即可完成服务端安装与部署。目前便捷部署工具暂时仅支持Linux环境，其他环境部署参考开发指南（[点击此处](./SDK_advanced_guide_offline_zh.md)）
 ```shell
-sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace /root/funasr-runtime-resources
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace ./funasr-runtime-resources
 ```
 
 ### 客户端测试与使用
@@ -54,7 +54,7 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --au
 - [html](#html-client)
 - [java](#java-client)
 
-更多版本客户端支持请参考[开发指南](./SDK_advanced_guide_offline_zh.md)
+更多版本客户端支持请参考[websocket/grpc协议](./websocket_protocol_zh.md)
 
 ### python-client
 若想直接运行client进行测试，可参考如下简易说明，以python版本为例：

@@ -31,6 +31,7 @@ FunASR希望在语音识别的学术研究和工业应用之间架起一座桥�
 
 <a name="最新动态"></a>
 ## 最新动态
+- 2023.08.07: 中文实时语音转写服务一键部署的CPU版本发布，详细信息参阅([一键部署文档](funasr/runtime/docs/SDK_tutorial_online_zh.md))
 - 2023.07.17: BAT一种低延迟低内存消耗的RNN-T模型发布，详细信息参阅（[BAT](egs/aishell/bat)）
 - 2023.07.03: 中文离线文件转写服务一键部署的CPU版本发布，详细信息参阅([一键部署文档](funasr/runtime/docs/SDK_tutorial_zh.md))
 - 2023.06.26: ASRU2023 多通道多方会议转录挑战赛2.0完成竞赛结果公布，详细信息参阅（[M2MeT2.0](https://alibaba-damo-academy.github.io/FunASR/m2met2_cn/index.html)）
@@ -45,6 +46,8 @@ FunASR支持预训练或者进一步微调的模型进行服务部署。目前�
 
 <a name="快速开始"></a>
 ## 快速开始
+快速使用教程（[新人文档](https://alibaba-damo-academy.github.io/FunASR/en/funasr/quick_start_zh.html)）
+
 FunASR支持数万小时工业数据训练的模型的推理和微调，详细信息可以参阅（[modelscope_egs](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_pipeline/quick_start.html)）；也支持学术标准数据集模型的训练和微调，详细信息可以参阅（[egs](https://alibaba-damo-academy.github.io/FunASR/en/academic_recipe/asr_recipe.html)）。 模型包含语音识别（ASR）、语音活动检测（VAD）、标点恢复、语言模型、说话人验证、说话人分离和多人对话语音识别等，详细模型列表可以参阅[模型仓库](https://github.com/alibaba-damo-academy/FunASR/blob/main/docs/model_zoo/modelscope_models.md)：
 
 <a name="社区交流"></a>
