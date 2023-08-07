@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FunASR实时语音转写便捷部署教程 &mdash; FunASR  documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <title>FunASR-realtime-transcribe service &mdash; FunASR  documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
@@ -118,7 +118,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">FunASR实时语音转写便捷部署教程</li>
+      <li class="breadcrumb-item active">FunASR-realtime-transcribe service</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../../_sources/funasr/runtime/docs/SDK_tutorial_online.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -129,11 +129,11 @@
            <div itemprop="articleBody">
              
   <p>(<a class="reference internal" href="SDK_tutorial_online_zh.html"><span class="doc">简体中文</span></a>|English)</p>
-<div class="section" id="funasr">
-<h1>FunASR实时语音转写便捷部署教程<a class="headerlink" href="#funasr" title="Permalink to this headline"></a></h1>
-<p>FunASR offers a real-time speech-to-text service that can be easily deployed locally or on cloud servers. The service integrates various capabilities including voice activity detection (VAD) developed by the speech laboratory of DAMO Academy on the ModelScope, Paraformer-large non-streaming automatic speech recognition (ASR), Paraformer-large streaming ASR, and punctuation recovery (PUNC). The software package not only performs real-time speech-to-text conversion, but also allows high-precision transcription text correction at the end of each sentence and outputs text with punctuation, supporting high-concurrency multiple requests.</p>
-<div class="section" id="server-configuration">
-<h2>Server Configuration<a class="headerlink" href="#server-configuration" title="Permalink to this headline"></a></h2>
+<div class="section" id="funasr-realtime-transcribe-service">
+<h1>FunASR-realtime-transcribe service<a class="headerlink" href="#funasr-realtime-transcribe-service" title="Permalink to this headline"></a></h1>
+<p>FunASR offers a real-time speech-to-text service that can be easily deployed locally or on cloud servers. The service integrates various capabilities developed by the speech laboratory of DAMO Academy on the ModelScope, including voice activity detection (VAD), Paraformer-large non-streaming automatic speech recognition (ASR), Paraformer-large streaming ASR, and punctuation prediction (PUNC). The software package supports realtime speech-to-text service as well as high-precision transcription text correction at the end of each sentence and outputs text with punctuation.</p>
+<div class="section" id="server-configurations">
+<h2>Server Configurations<a class="headerlink" href="#server-configurations" title="Permalink to this headline"></a></h2>
 <p>Users can choose appropriate server configurations based on their business needs. The recommended configurations are:</p>
 <ul class="simple">
 <li><p>Configuration 1: (X86, computing-type) 4-core vCPU, 8GB memory, and a single machine can support about 32 requests.</p></li>
