@@ -379,6 +379,9 @@ extern "C" {
 		while(audio->FetchTpass(frame) > 0){
 			string msg = asr_handle->Forward(frame->data, frame->len, frame->is_final);
 			string msg_punc = punc_online_handle->AddPunc(msg.c_str(), punc_cache[1]);
+			if(input_finished){
+				msg_punc += "。";
+			}
 			p_result->tpass_msg = msg_punc;
 			if(frame != NULL){
 				delete frame;
