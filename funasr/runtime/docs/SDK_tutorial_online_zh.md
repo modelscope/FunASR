@@ -78,7 +78,7 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass
 ### cpp-client
 进入samples/cpp目录后，可以用cpp进行测试，指令如下：
 ```shell
-./funasr-wss-client --server-ip 127.0.0.1 --port 10095 --mode 2pass
+./funasr-wss-client-2pass --server-ip 127.0.0.1 --port 10095 --mode 2pass
 ```
 
 命令参数说明：
