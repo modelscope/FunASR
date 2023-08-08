@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FunASR实时语音转写服务开发指南 &mdash; FunASR  documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <title>FunASR实时语音听写服务开发指南 &mdash; FunASR  documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
@@ -118,7 +118,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">FunASR实时语音转写服务开发指南</li>
+      <li class="breadcrumb-item active">FunASR实时语音听写服务开发指南</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../../_sources/funasr/runtime/docs/SDK_advanced_guide_online_zh.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -129,21 +129,21 @@
            <div itemprop="articleBody">
              
   <div class="section" id="funasr">
-<h1>FunASR实时语音转写服务开发指南<a class="headerlink" href="#funasr" title="Permalink to this headline"></a></h1>
-<p>FunASR提供可便捷本地或者云端服务器部署的实时语音转写服务，内核为FunASR已开源runtime-SDK。
+<h1>FunASR实时语音听写服务开发指南<a class="headerlink" href="#funasr" title="Permalink to this headline"></a></h1>
+<p>FunASR提供可便捷本地或者云端服务器部署的实时语音听写服务，内核为FunASR已开源runtime-SDK。
 集成了达摩院语音实验室在Modelscope社区开源的语音端点检测(VAD)、Paraformer-large非流式语音识别(ASR)、Paraformer-large流式语音识别(ASR)、标点(PUNC) 等相关能力。软件包既可以实时地进行语音转文字，而且能够在说话句尾用高精度的转写文字修正输出，输出文字带有标点，支持高并发多路请求</p>
-<p>本文档为FunASR实时转写服务开发指南。如果您想快速体验实时语音转写服务，可参考快速上手。</p>
+<p>本文档为FunASR实时转写服务开发指南。如果您想快速体验实时语音听写服务，可参考快速上手。</p>
 <div class="section" id="id1">
 <h2>快速上手<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h2>
 <div class="section" id="id2">
 <h3>镜像启动<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h3>
-<p>通过下述命令拉取并启动FunASR runtime-SDK的docker镜像：</p>
+<p>通过下述命令拉取并启动FunASR软件包的docker镜像：</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.0
-
-sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span class="o">=</span><span class="nb">true</span> -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.0
+mkdir -p ./funasr-runtime-resources/models
+sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span class="o">=</span><span class="nb">true</span> -v ./funasr-runtime-resources/models:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.0
 </pre></div>
 </div>
-<p>如果您没有安装docker，可参考Docker安装</p>
+<p>如果您没有安装docker，可参考<a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/installation/docker_zh.html">Docker安装</a></p>
 </div>
 <div class="section" id="id3">
 <h3>服务端启动<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h3>
@@ -172,103 +172,27 @@ sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span clas
 </div>
 </div>
 <hr class="docutils" />
-<div class="section" id="docker">
-<h2>Docker安装<a class="headerlink" href="#docker" title="Permalink to this headline"></a></h2>
-<p>下述步骤为手动安装docker环境的步骤：</p>
 <div class="section" id="id5">
-<h3>docker环境安装<a class="headerlink" href="#id5" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># Ubuntu：</span>
-curl -fsSL https://test.docker.com -o test-docker.sh 
-sudo sh test-docker.sh 
-<span class="c1"># Debian：</span>
-curl -fsSL https://get.docker.com -o get-docker.sh 
-sudo sh get-docker.sh 
-<span class="c1"># CentOS：</span>
-curl -fsSL https://get.docker.com <span class="p">|</span> bash -s docker --mirror Aliyun 
-<span class="c1"># MacOS：</span>
-brew install --cask --appdir<span class="o">=</span>/Applications docker
-</pre></div>
-</div>
-<p>安装详见：https://alibaba-damo-academy.github.io/FunASR/en/installation/docker.html</p>
-</div>
-<div class="section" id="id6">
-<h3>docker启动<a class="headerlink" href="#id6" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo systemctl start docker
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="id7">
-<h2>客户端用法详解<a class="headerlink" href="#id7" title="Permalink to this headline"></a></h2>
+<h2>客户端用法详解<a class="headerlink" href="#id5" title="Permalink to this headline"></a></h2>
 <p>在服务器上完成FunASR服务部署以后，可以通过如下的步骤来测试和使用离线文件转写服务。
 目前分别支持以下几种编程语言客户端</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="#python-client"><span class="std std-ref">Python</span></a></p></li>
-<li><p><a class="reference internal" href="#cpp-client"><span class="std std-ref">CPP</span></a></p></li>
-<li><p>html网页版本</p></li>
-<li><p><a class="reference internal" href="#java-client"><span class="std std-ref">Java</span></a></p></li>
+<li><p><a class="reference internal" href="SDK_tutorial_online_zh.html#python-client"><span class="std std-ref">Python</span></a></p></li>
+<li><p><a class="reference internal" href="SDK_tutorial_online_zh.html#cpp-client"><span class="std std-ref">CPP</span></a></p></li>
+<li><p><a class="reference internal" href="SDK_tutorial_online_zh.html#html-client"><span class="std std-ref">html网页版本</span></a></p></li>
+<li><p><a class="reference internal" href="SDK_tutorial_online_zh.html#java-client"><span class="std std-ref">Java</span></a></p></li>
+<li><p>c#</p></li>
 </ul>
-<div class="section" id="python-client">
-<h3>python-client<a class="headerlink" href="#python-client" title="Permalink to this headline"></a></h3>
-<p>若想直接运行client进行测试，可参考如下简易说明，以python版本为例：</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 wss_client_asr.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode 2pass --audio_in <span class="s2">&quot;../audio/asr_example.wav&quot;</span> --output_dir <span class="s2">&quot;./results&quot;</span>
-</pre></div>
+<p>详细用法可以点击进入查看。更多版本客户端支持请参考<a class="reference internal" href="websocket_protocol_zh.html"><span class="doc">websocket/grpc协议</span></a></p>
 </div>
-<p>命令参数说明：</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--host 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，需要改为部署机器ip
---port 10095 部署端口号
---mode：`offline`表示推理模式为一句话识别；`online`表示推理模式为实时语音识别；`2pass`表示为实时语音识别，并且说话句尾采用离线模型进行纠错。
---chunk_size：表示流式模型latency配置`[5,10,5]`，表示当前音频解码片段为600ms，并且回看300ms，右看300ms。
---audio_in 需要进行转写的音频文件，支持文件路径，文件列表wav.scp
---thread_num 设置并发发送线程数，默认为1
---ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
-</pre></div>
-</div>
-</div>
-<div class="section" id="cpp-client">
-<h3>cpp-client<a class="headerlink" href="#cpp-client" title="Permalink to this headline"></a></h3>
-<p>进入samples/cpp目录后，可以用cpp进行测试，指令如下：</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-wss-client-2pass --server-ip <span class="m">127</span>.0.0.1 --port <span class="m">10095</span> --wav-path ../audio/asr_example.wav
-</pre></div>
-</div>
-<p>命令参数说明：</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--server-ip 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，需要改为部署机器ip
---port 10095 部署端口号
---mode：`offline`表示推理模式为一句话识别；`online`表示推理模式为实时语音识别；`2pass`表示为实时语音识别，并且说话句尾采用离线模型进行纠错。
---chunk-size：表示流式模型latency配置`[5,10,5]`，表示当前音频解码片段为600ms，并且回看300ms，右看300ms。
---wav-path 需要进行转写的音频文件，支持文件路径
---thread-num 设置并发发送线程数，默认为1
---is-ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
-</pre></div>
-</div>
-</div>
-<div class="section" id="html">
-<h3>Html网页版<a class="headerlink" href="#html" title="Permalink to this headline"></a></h3>
-<p>在浏览器中打开 html/static/index.html，即可出现如下页面，支持麦克风输入与文件上传，直接进行体验</p>
-<img src="images/html.png"  width="900"/></div>
-<div class="section" id="java-client">
-<h3>Java-client<a class="headerlink" href="#java-client" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>FunasrWsClient --host localhost --port <span class="m">10095</span> --audio_in ./asr_example.wav --mode offline
-</pre></div>
-</div>
-<p>详细可以参考文档（<a class="reference internal" href="../java/readme.html"><span class="doc">点击此处</span></a>）</p>
-</div>
-</div>
-<div class="section" id="id8">
-<h2>服务端参数介绍：<a class="headerlink" href="#id8" title="Permalink to this headline"></a></h2>
-<p>funasr-wss-server支持从Modelscope下载模型，设置模型下载地址（–download-model-dir，默认为/workspace/models）及model ID（–model-dir、–vad-dir、–punc-dir）,示例如下：</p>
+<div class="section" id="id6">
+<h2>服务端参数介绍：<a class="headerlink" href="#id6" title="Permalink to this headline"></a></h2>
+<p>funasr-wss-server-2pass支持从Modelscope下载模型，或者从本地目录路径启动，示例如下：</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> /workspace/FunASR/funasr/runtime/websocket/build/bin
 ./funasr-wss-server-2pass  <span class="se">\</span>
-  --download-model-dir /workspace/models <span class="se">\</span>
-  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx <span class="se">\</span>
-  --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx  <span class="se">\</span>
-  --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
-  --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx <span class="se">\</span>
   --decoder-thread-num <span class="m">32</span> <span class="se">\</span>
   --io-thread-num  <span class="m">8</span> <span class="se">\</span>
-  --port <span class="m">10095</span> <span class="se">\</span>
-  --certfile  ../../../ssl_key/server.crt <span class="se">\</span>
-  --keyfile ../../../ssl_key/server.key
+  --port <span class="m">10095</span> 
 </pre></div>
 </div>
 <p>命令参数介绍：</p>
@@ -283,103 +207,16 @@ brew install --cask --appdir<span class="o">=</span>/Applications docker
 --port  服务端监听的端口号，默认为 10095
 --decoder-thread-num  服务端启动的推理线程数，默认为 8
 --io-thread-num  服务端启动的IO线程数，默认为 1
---certfile  ssl的证书文件，默认为：../../../ssl_key/server.crt
---keyfile   ssl的密钥文件，默认为：../../../ssl_key/server.key
+--certfile  ssl的证书文件，默认为：../../../ssl_key/server.crt，如需关闭，设置为&quot;&quot;
+--keyfile   ssl的密钥文件，默认为：../../../ssl_key/server.key，如需关闭，设置为&quot;&quot;
 </pre></div>
 </div>
-</div>
-<div class="section" id="id9">
-<h2>模型资源准备<a class="headerlink" href="#id9" title="Permalink to this headline"></a></h2>
-<p>如果您选择通过funasr-wss-server-2pass 从Modelscope下载模型，可以跳过本步骤。</p>
-<p>FunASR离线文件转写服务中的vad、asr和punc模型资源均来自Modelscope，模型地址详见下表：</p>
-<table border="1" class="docutils">
-<thead>
-<tr>
-<th>模型</th>
-<th>Modelscope链接</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>VAD</td>
-<td>https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary</td>
-</tr>
-<tr>
-<td>ASR</td>
-<td>https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary</td>
-</tr>
-<tr>
-<td>ASR</td>
-<td>https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx/summary</td>
-</tr>
-<tr>
-<td>PUNC</td>
-<td>https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx/summary</td>
-</tr>
-</tbody>
-</table><p>实时转写服务中部署的是量化后的ONNX模型，下面介绍下如何导出ONNX模型及其量化：您可以选择从Modelscope导出ONNX模型、从finetune后的资源导出模型：</p>
-<div class="section" id="modelscopeonnx">
-<h3>从Modelscope导出ONNX模型<a class="headerlink" href="#modelscopeonnx" title="Permalink to this headline"></a></h3>
-<p>从Modelscope网站下载对应model name的模型，然后导出量化后的ONNX模型：</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model <span class="se">\</span>
---export-dir ./export <span class="se">\</span>
---type onnx <span class="se">\</span>
---quantize True <span class="se">\</span>
---model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch <span class="se">\</span>
---model-name damo/speech_fsmn_vad_zh-cn-16k-common-pytorch <span class="se">\</span>
---model-name damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch
-</pre></div>
-</div>
-<p>命令参数介绍：</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--model-name  Modelscope上的模型名称，例如damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
---export-dir  ONNX模型导出地址
---type 模型类型，目前支持 ONNX、torch
---quantize  int8模型量化
-</pre></div>
-</div>
-</div>
-<div class="section" id="finetune">
-<h3>从finetune后的资源导出模型<a class="headerlink" href="#finetune" title="Permalink to this headline"></a></h3>
-<p>假如您想部署finetune后的模型，可以参考如下步骤：</p>
-<p>将您finetune后需要部署的模型（例如10epoch.pb），重命名为model.pb，并将原modelscope中模型model.pb替换掉，假如替换后的模型路径为/path/to/finetune/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch，通过下述命令把finetune后的模型转成onnx模型：</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model --model-name /path/to/finetune/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize True
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="id10">
-<h2>如何定制服务部署<a class="headerlink" href="#id10" title="Permalink to this headline"></a></h2>
-<p>FunASR-runtime的代码已开源，如果服务端和客户端不能很好的满足您的需求，您可以根据自己的需求进行进一步的开发：</p>
-<div class="section" id="c">
-<h3>c++ 客户端：<a class="headerlink" href="#c" title="Permalink to this headline"></a></h3>
-<p>https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/websocket</p>
-</div>
-<div class="section" id="python">
-<h3>python 客户端：<a class="headerlink" href="#python" title="Permalink to this headline"></a></h3>
-<p>https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket</p>
-</div>
-<div class="section" id="id11">
-<h3>自定义客户端：<a class="headerlink" href="#id11" title="Permalink to this headline"></a></h3>
-<p>如果您想定义自己的client，websocket通信协议为：</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>首次通信
-message为（需要用json序列化）：
-{&quot;mode&quot;: &quot;offline&quot;, &quot;wav_name&quot;: &quot;wav_name&quot;, &quot;is_speaking&quot;: True, &quot;wav_format&quot;:&quot;pcm&quot;, &quot;chunk_size&quot;:[5,10,5]}
-参数介绍：
-`mode`：`offline`，表示推理模式为一句话识别；`online`，表示推理模式为实时语音识别；`2pass`：表示为实时语音识别，并且说话句尾采用离线模型进行纠错。
-`wav_name`：表示需要推理音频文件名
-`wav_format`：表示音视频文件后缀名，可选pcm、mp3、mp4等（备注，1.0版本只支持pcm音频流）
-`is_speaking`：表示断句尾点，例如，vad切割点，或者一条wav结束
-`chunk_size`：表示流式模型latency配置，`[5,10,5]`，表示当前音频为600ms，并且回看300ms，右看300ms。
-`audio_fs`：当输入音频为pcm数据时，需要加上音频采样率参数
-
-发送音频数据
-直接将音频数据，移除头部信息后的bytes数据发送，支持音频采样率为80000，16000
-发送结束标志
-音频数据发送结束后，需要发送结束标志（需要用json序列化）：
-{&quot;is_speaking&quot;: False}
-</pre></div>
-</div>
-</div>
+<p>执行上述指令后，启动实时语音听写服务。如果模型指定为ModelScope中model id，会自动从MoldeScope中下载如下模型：
+<a class="reference external" href="https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary">FSMN-VAD模型</a>，
+<a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx/summary">Paraformer-lagre实时模型</a>
+<a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary">Paraformer-lagre非实时模型</a>
+<a class="reference external" href="https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx/summary">CT-Transformer标点预测模型</a></p>
+<p>如果，您希望部署您finetune后的模型（例如10epoch.pb），需要手动将模型重命名为model.pb，并将原modelscope中模型model.pb替换掉，将路径指定为<code class="docutils literal notranslate"><span class="pre">model_dir</span></code>即可。</p>
 </div>
 </div>
 
