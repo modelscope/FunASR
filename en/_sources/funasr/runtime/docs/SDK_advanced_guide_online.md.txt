@@ -1,7 +1,80 @@
  # Advanced Development Guide (File transcription service)
  
 FunASR provides a Chinese online transcription service that can be deployed locally or on a cloud server with just one click. The core of the service is the FunASR runtime SDK, which has been open-sourced. FunASR-runtime combines various capabilities such as speech endpoint detection (VAD), offline large-scale speech recognition (ASR) using Paraformer-large, online large-scale speech recognition (ASR) using Paraformer-large, and punctuation detection (PUNC), which have all been open-sourced by the speech laboratory of DAMO Academy on the Modelscope community. 
-This document serves as a development guide for the FunASR online transcription service. If you wish to quickly experience the online transcription service, please refer to the one-click deployment example for the FunASR online transcription service ([docs](./SDK_tutorial_online.md)).
+This document serves as a development guide for the FunASR online transcription service. If you wish to quickly experience the online transcription service, please refer to the one-click deployment example for the FunASR online transcription service [Quick Start](#Quick Start)。
+
+### 镜像启动
+
+通过下述命令拉取并启动FunASR软件包的docker镜像：
+
+```shell
+sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.0
+mkdir -p ./funasr-runtime-resources/models
+sudo docker run -p 10095:10095 -it --privileged=true -v ./funasr-runtime-resources/models:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.0
+```
+如果您没有安装docker，可参考[Docker安装](https://alibaba-damo-academy.github.io/FunASR/en/installation/docker_zh.html)
+
+### 服务端启动
+
+docker启动之后，启动 funasr-wss-server-2pass服务程序：
+```shell
+cd FunASR/funasr/runtime
+./run_server_2pass.sh \
+  --download-model-dir /workspace/models \
+  --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
+  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
+  --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx  \
+  --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx
+```
+服务端详细参数介绍可参考[服务端参数介绍](#服务端参数介绍)
+### 客户端测试与使用
+
+下载客户端测试工具目录samples
+```shell
+wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz
+```
+我们以Python语言客户端为例，进行说明，支持音频格式（.wav, .pcm），以及多文件列表wav.scp输入，其他版本客户端请参考文档（[点击此处](#客户端用法详解)），定制服务部署请参考[如何定制服务部署](#如何定制服务部署)
+```shell
+python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode 2pass
+```
+
+
+## Quick Start
+
+### Server Startup
+
+pull and run docker image:
+
+```shell
+sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.0
+mkdir -p ./funasr-runtime-resources/models
+sudo docker run -p 10095:10095 -it --privileged=true -v ./funasr-runtime-resources/models:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.0
+```
+
+start funasr-wss-server-2pass：
+```shell
+cd FunASR/funasr/runtime
+./run_server_2pass.sh \
+  --download-model-dir /workspace/models \
+  --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
+  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
+  --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx  \
+  --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx
+```
+
+
+
+### Client Testing and Usage
+
+After running the above installation instructions, the client testing tool directory samples will be downloaded in the default installation directory /root/funasr-runtime-resources ([download click](https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz)).
+We take the Python language client as an example to explain that it supports multiple audio format inputs (such as .wav, .pcm, .mp3, etc.), video inputs (.mp4, etc.), and multiple file list wav.scp inputs. For other client versions, please refer to the [documentation](#Detailed-Description-of-Client-Usage).
+
+```shell
+python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass --audio_in "../audio/asr_example.wav"
+```
+
+
+
 
 ## Installation of Docker
 
