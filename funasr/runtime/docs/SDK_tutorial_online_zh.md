@@ -89,8 +89,8 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass
 --mode：`offline`表示推理模式为一句话识别；`online`表示推理模式为实时语音识别；`2pass`表示为实时语音识别，并且说话句尾采用离线模型进行纠错。
 --chunk_size：表示流式模型latency配置`[5,10,5]`，表示当前音频解码片段为600ms，并且回看300ms，又看300ms。
 --wav-path 需要进行转写的音频文件，支持文件路径
---thread_num 设置并发发送线程数，默认为1
---ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
+--thread-num 设置并发发送线程数，默认为1
+--is-ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
 ```
 
 ### html-client
