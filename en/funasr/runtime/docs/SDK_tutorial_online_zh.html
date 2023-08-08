@@ -208,7 +208,7 @@ FunASR集成了达摩院语音实验室在Modelscope社区开源的语音端点�
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--server-ip 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，需要改为部署机器ip
 --port 10095 部署端口号
 --mode：`offline`表示推理模式为一句话识别；`online`表示推理模式为实时语音识别；`2pass`表示为实时语音识别，并且说话句尾采用离线模型进行纠错。
---chunk_size：表示流式模型latency配置`[5,10,5]`，表示当前音频解码片段为600ms，并且回看300ms，右看300ms。
+--chunk-size：表示流式模型latency配置`[5,10,5]`，表示当前音频解码片段为600ms，并且回看300ms，右看300ms。
 --wav-path 需要进行转写的音频文件，支持文件路径
 --thread-num 设置并发发送线程数，默认为1
 --is-ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
