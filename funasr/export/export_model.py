@@ -55,18 +55,21 @@ class ModelExport:
 
         # export encoder1
         self.export_config["model_name"] = "model"
-        model = get_model(
+        models = get_model(
             model,
             self.export_config,
         )
-        model.eval()
-        # self._export_onnx(model, verbose, export_dir)
-        if self.onnx:
-            self._export_onnx(model, verbose, export_dir)
-        else:
-            self._export_torchscripts(model, verbose, export_dir)
-
-        print("output dir: {}".format(export_dir))
+        if not isinstance(models, tuple):
+            models = (models,)
+            
+        for i, model in enumerate(models):
+            model.eval()
+            if self.onnx:
+                self._export_onnx(model, verbose, export_dir)
+            else:
+                self._export_torchscripts(model, verbose, export_dir)
+    
+            print("output dir: {}".format(export_dir))
 
 
     def _torch_quantize(self, model):
