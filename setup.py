@@ -16,13 +16,14 @@ requirements = {
         "librosa",
         "jamo",  # For kss
         "PyYAML>=5.1.2",
-        "soundfile>=0.10.2",
+        "soundfile>=0.12.1",
         "h5py>=2.10.0",
         "kaldiio>=2.17.0",
         "torch_complex",
         "nltk>=3.4.5",
         # ASR
         "sentencepiece",
+        "jieba",
         # TTS
         "pypinyin>=0.44.0",
         "espnet_tts_frontend",

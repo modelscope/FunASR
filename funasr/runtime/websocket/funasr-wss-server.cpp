@@ -79,7 +79,7 @@ int main(int argc, char* argv[]) {
     TCLAP::ValueArg<int> decoder_thread_num(
         "", "decoder-thread-num", "decoder thread num", false, 8, "int");
     TCLAP::ValueArg<int> model_thread_num("", "model-thread-num",
-                                          "model thread num", false, 1, "int");
+                                          "model thread num", false, 4, "int");
 
     TCLAP::ValueArg<std::string> certfile("", "certfile", 
         "default: ../../../ssl_key/server.crt, path of certficate for WSS connection. if it is empty, it will be in WS mode.", 

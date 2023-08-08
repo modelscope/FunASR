@@ -14,9 +14,9 @@ class OfflineStream {
     OfflineStream(std::map<std::string, std::string>& model_path, int thread_num);
     ~OfflineStream(){};
 
-    std::unique_ptr<VadModel> vad_handle;
-    std::unique_ptr<Model> asr_handle;
-    std::unique_ptr<PuncModel> punc_handle;
+    std::unique_ptr<VadModel> vad_handle= nullptr;
+    std::unique_ptr<Model> asr_handle= nullptr;
+    std::unique_ptr<PuncModel> punc_handle= nullptr;
     bool UseVad(){return use_vad;};
     bool UsePunc(){return use_punc;}; 
     

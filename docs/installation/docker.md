@@ -1,3 +1,5 @@
+([简体中文](./docker_zh.md)|English)
+
 # Docker
 
 ## Install Docker
@@ -32,9 +34,10 @@ sudo systemctl start docker
 ```
 ## Download image
 
-### Image
+### Image Hub
+
 #### CPU
-`registry.cn-hangzhou.aliyuncs.com/modelscope-repo/modelscope:ubuntu20.04-py37-torch1.11.0-tf1.15.5-1.6.0`
+`registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.1.0`
 
 #### GPU
 

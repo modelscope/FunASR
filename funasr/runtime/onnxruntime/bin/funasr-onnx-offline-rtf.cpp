@@ -40,6 +40,9 @@ void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, vector<string> wa
     for (size_t i = 0; i < 1; i++)
     {
         FUNASR_RESULT result=FunOfflineInfer(asr_handle, wav_list[0].c_str(), RASR_NONE, NULL, 16000);
+        if(result){
+            FunASRFreeResult(result);
+        }
     }
 
     while (true) {

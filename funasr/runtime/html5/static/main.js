@@ -195,6 +195,7 @@ function getJsonMessage( jsonMsg ) {
 	console.log( "message: " + JSON.parse(jsonMsg.data)['text'] );
 	var rectxt=""+JSON.parse(jsonMsg.data)['text'];
 	var asrmodel=JSON.parse(jsonMsg.data)['mode'];
+	var is_final=JSON.parse(jsonMsg.data)['is_final'];
 	if(asrmodel=="2pass-offline")
 	{
 		offline_text=offline_text+rectxt; //.replace(/ +/g,"");
@@ -209,7 +210,7 @@ function getJsonMessage( jsonMsg ) {
 	varArea.value=rec_text;
 	console.log( "offline_text: " + asrmodel+","+offline_text);
 	console.log( "rec_text: " + rec_text);
-	if (isfilemode==true){
+	if (isfilemode==true && is_final==false){
 		console.log("call stop ws!");
 		play_file();
 		wsconnecter.wsStop();

@@ -240,7 +240,8 @@ async def async_asr(websocket, audio_in):
                                                          param_dict=websocket.param_dict_punc)
                     # print("offline", rec_result)
                 if 'text' in rec_result:
-                    message = json.dumps({"mode": websocket.mode, "text": rec_result["text"], "wav_name": websocket.wav_name})
+                    mode = "2pass-offline" if "2pass" in websocket.mode else websocket.mode
+                    message = json.dumps({"mode": mode, "text": rec_result["text"], "wav_name": websocket.wav_name,"is_final":websocket.is_speaking})
                     await websocket.send(message)
 
 
@@ -256,7 +257,8 @@ async def async_asr_online(websocket, audio_in):
         if "text" in rec_result:
             if rec_result["text"] != "sil" and rec_result["text"] != "waiting_for_more_voice":
                 # print("online", rec_result)
-                message = json.dumps({"mode": websocket.mode, "text": rec_result["text"], "wav_name": websocket.wav_name})
+                mode = "2pass-online" if "2pass" in websocket.mode else websocket.mode
+                message = json.dumps({"mode": mode, "text": rec_result["text"], "wav_name": websocket.wav_name,"is_final":websocket.is_speaking})
                 await websocket.send(message)
 
 if len(args.certfile)>0:
