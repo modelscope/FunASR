@@ -76,7 +76,7 @@ Command parameter instructions:
 
 After entering the samples/cpp directory, you can test it with CPP. The command is as follows:
 ```shell
-./funasr-wss-client --server-ip 127.0.0.1 --port 10095 --wav-path ../audio/asr_example.wav
+./funasr-wss-client-2pass --server-ip 127.0.0.1 --port 10095 --wav-path ../audio/asr_example.wav
 ```
 
 Command parameter description:
