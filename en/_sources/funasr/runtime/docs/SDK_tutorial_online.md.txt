@@ -112,12 +112,7 @@ If you have restarted the computer or shut down Docker after one-click deploymen
 sudo bash funasr-runtime-deploy-online-cpu-zh.sh start
 ```
 
-### Set SSL
 
-SSL verification is enabled by default. If you need to disable it, you can set it when starting.
-```shell
-sudo bash funasr-runtime-deploy-online-cpu-zh.sh --ssl 0
-```
 
 ### Stop the FunASR service
 
@@ -165,6 +160,12 @@ sudo bash funasr-runtime-deploy-online-cpu-zh.sh update --decode_thread_num 32
 sudo bash funasr-runtime-deploy-online-cpu-zh.sh update --workspace ./funasr-runtime-resources
 ```
 
+### Set SSL
+
+SSL verification is enabled by default. If you need to disable it, you can set it when starting.
+```shell
+sudo bash funasr-runtime-deploy-online-cpu-zh.sh update --ssl 0
+```
 
 
 ## Contact Us

@@ -91,12 +91,12 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#server-usage-details">Server Usage Details</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#start-the-deployed-funasr-service">Start the deployed FunASR service</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#set-ssl">Set SSL</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#stop-the-funasr-service">Stop the FunASR service</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#release-the-funasr-service">Release the FunASR service</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#restart-the-funasr-service">Restart the FunASR service</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#replace-the-model-and-restart-the-funasr-service">Replace the model and restart the FunASR service</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#update-parameters-and-restart-the-funasr-service">Update parameters and restart the FunASR service</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#set-ssl">Set SSL</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#contact-us">Contact Us</a></li>
@@ -263,13 +263,6 @@ We take the Python language client as an example to explain that it supports mul
 </pre></div>
 </div>
 </div>
-<div class="section" id="set-ssl">
-<h3>Set SSL<a class="headerlink" href="#set-ssl" title="Permalink to this headline"></a></h3>
-<p>SSL verification is enabled by default. If you need to disable it, you can set it when starting.</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-online-cpu-zh.sh --ssl <span class="m">0</span>
-</pre></div>
-</div>
-</div>
 <div class="section" id="stop-the-funasr-service">
 <h3>Stop the FunASR service<a class="headerlink" href="#stop-the-funasr-service" title="Permalink to this headline"></a></h3>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-online-cpu-zh.sh stop
@@ -311,6 +304,13 @@ sudo bash funasr-runtime-deploy-online-cpu-zh.sh update <span class="o">[</span>
 e.g
 sudo bash funasr-runtime-deploy-online-cpu-zh.sh update --decode_thread_num <span class="m">32</span>
 sudo bash funasr-runtime-deploy-online-cpu-zh.sh update --workspace ./funasr-runtime-resources
+</pre></div>
+</div>
+</div>
+<div class="section" id="set-ssl">
+<h3>Set SSL<a class="headerlink" href="#set-ssl" title="Permalink to this headline"></a></h3>
+<p>SSL verification is enabled by default. If you need to disable it, you can set it when starting.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-online-cpu-zh.sh update --ssl <span class="m">0</span>
 </pre></div>
 </div>
 </div>

@@ -237,13 +237,6 @@ FunASR集成了达摩院语音实验室在Modelscope社区开源的语音端点�
 </pre></div>
 </div>
 </div>
-<div class="section" id="ssl">
-<h3>设置SSL<a class="headerlink" href="#ssl" title="Permalink to this headline"></a></h3>
-<p>默认开启SSL校验，如果需要关闭，可以在启动时设置</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-online-cpu-zh.sh start --ssl <span class="m">0</span>
-</pre></div>
-</div>
-</div>
 <div class="section" id="id8">
 <h3>关闭FunASR服务<a class="headerlink" href="#id8" title="Permalink to this headline"></a></h3>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-online-cpu-zh.sh stop
@@ -285,6 +278,12 @@ sudo bash funasr-runtime-deploy-online-cpu-zh.sh update <span class="o">[</span>
 e.g
 sudo bash funasr-runtime-deploy-online-cpu-zh.sh update --decode_thread_num <span class="m">32</span>
 sudo bash funasr-runtime-deploy-online-cpu-zh.sh update --workspace ./funasr-runtime-resources
+</pre></div>
+</div>
+</div>
+<div class="section" id="ssl">
+<h3>关闭SSL证书<a class="headerlink" href="#ssl" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-online-cpu-zh.sh update --ssl <span class="m">0</span>
 </pre></div>
 </div>
 </div>
