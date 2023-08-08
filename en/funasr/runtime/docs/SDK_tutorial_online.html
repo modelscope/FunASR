@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FunASR-realtime-transcribe service &mdash; FunASR  documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <title>FunASR Realtime Transcribe Service &mdash; FunASR  documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
@@ -16,7 +16,9 @@
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../search.html" /> 
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Service with websocket-python" href="../python/websocket/README.html" />
+    <link rel="prev" title="FunASR Offline File Transcription Service Convenient Deployment Tutorial" href="SDK_tutorial.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -72,8 +74,35 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../model_zoo/huggingface_models.html">Pretrained Models on Huggingface</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Runtime and Service</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="SDK_tutorial.html">FunASR Offline File Transcription Service Convenient Deployment Tutorial</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">FunASR Realtime Transcribe Service</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#server-configurations">Server Configurations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#quick-start">Quick Start</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#server-startup">Server Startup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#client-testing-and-usage">Client Testing and Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#detailed-description-of-client-usage">Detailed Description of Client Usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#python-client">python-client</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cpp-client">cpp-client</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#html-client">html-client</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#java-client">java-client</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#server-usage-details">Server Usage Details</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#start-the-deployed-funasr-service">Start the deployed FunASR service</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#set-ssl">Set SSL</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stop-the-funasr-service">Stop the FunASR service</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#release-the-funasr-service">Release the FunASR service</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#restart-the-funasr-service">Restart the FunASR service</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#replace-the-model-and-restart-the-funasr-service">Replace the model and restart the FunASR service</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#update-parameters-and-restart-the-funasr-service">Update parameters and restart the FunASR service</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#contact-us">Contact Us</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../python/websocket/README.html">Service with websocket-python</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../websocket/readme.html">Service with websocket-cpp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../html5/readme.html">Speech Recognition Service Html5 Client Access Interface</a></li>
@@ -118,7 +147,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">FunASR-realtime-transcribe service</li>
+      <li class="breadcrumb-item active">FunASR Realtime Transcribe Service</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../../_sources/funasr/runtime/docs/SDK_tutorial_online.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -130,7 +159,7 @@
              
   <p>(<a class="reference internal" href="SDK_tutorial_online_zh.html"><span class="doc">简体中文</span></a>|English)</p>
 <div class="section" id="funasr-realtime-transcribe-service">
-<h1>FunASR-realtime-transcribe service<a class="headerlink" href="#funasr-realtime-transcribe-service" title="Permalink to this headline"></a></h1>
+<h1>FunASR Realtime Transcribe Service<a class="headerlink" href="#funasr-realtime-transcribe-service" title="Permalink to this headline"></a></h1>
 <p>FunASR offers a real-time speech-to-text service that can be easily deployed locally or on cloud servers. The service integrates various capabilities developed by the speech laboratory of DAMO Academy on the ModelScope, including voice activity detection (VAD), Paraformer-large non-streaming automatic speech recognition (ASR), Paraformer-large streaming ASR, and punctuation prediction (PUNC). The software package supports realtime speech-to-text service as well as high-precision transcription text correction at the end of each sentence and outputs text with punctuation.</p>
 <div class="section" id="server-configurations">
 <h2>Server Configurations<a class="headerlink" href="#server-configurations" title="Permalink to this headline"></a></h2>
@@ -308,7 +337,10 @@ sudo bash funasr-runtime-deploy-online-cpu-zh.sh update --workspace ./funasr-run
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="SDK_tutorial.html" class="btn btn-neutral float-left" title="FunASR Offline File Transcription Service Convenient Deployment Tutorial" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../python/websocket/README.html" class="btn btn-neutral float-right" title="Service with websocket-python" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

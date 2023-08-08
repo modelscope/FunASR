@@ -1,6 +1,6 @@
 ([简体中文](./SDK_tutorial_online_zh.md)|English)
 
-# FunASR-realtime-transcribe service
+# FunASR Realtime Transcribe Service
 
 FunASR offers a real-time speech-to-text service that can be easily deployed locally or on cloud servers. The service integrates various capabilities developed by the speech laboratory of DAMO Academy on the ModelScope, including voice activity detection (VAD), Paraformer-large non-streaming automatic speech recognition (ASR), Paraformer-large streaming ASR, and punctuation prediction (PUNC). The software package supports realtime speech-to-text service as well as high-precision transcription text correction at the end of each sentence and outputs text with punctuation.
 

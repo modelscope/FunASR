@@ -72,6 +72,7 @@ Overview
    :caption: Runtime and Service
 
    ./funasr/runtime/docs/SDK_tutorial.md
+   ./funasr/runtime/docs/SDK_tutorial_online.md
    ./funasr/runtime/python/websocket/README.md
    ./funasr/runtime/websocket/readme.md
    ./funasr/runtime/html5/readme.md

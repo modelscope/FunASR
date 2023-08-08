@@ -74,6 +74,7 @@
 <p class="caption"><span class="caption-text">Runtime and Service</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="runtime/docs/SDK_tutorial.html">FunASR Offline File Transcription Service Convenient Deployment Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="runtime/docs/SDK_tutorial_online.html">FunASR Realtime Transcribe Service</a></li>
 <li class="toctree-l1"><a class="reference internal" href="runtime/python/websocket/README.html">Service with websocket-python</a></li>
 <li class="toctree-l1"><a class="reference internal" href="runtime/websocket/readme.html">Service with websocket-cpp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="runtime/html5/readme.html">Speech Recognition Service Html5 Client Access Interface</a></li>
@@ -162,22 +163,39 @@ python funasr_wss_server.py --port <span class="m">10095</span>
 </div>
 <div class="section" id="c">
 <h3>c++版本示例<a class="headerlink" href="#c" title="Permalink to this headline"></a></h3>
-<p>目前已支持离线文件转写服务（CPU），支持上百路并发请求</p>
+<p>集成有，VAD，ASR与标点恢复模型，支持上百路并发请求</p>
 <div class="section" id="id4">
-<h4>服务端部署<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h4>
-<p>可以用个下面指令，一键部署完成部署</p>
+<h4>实时语音听写服务部署<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h4>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy-online-cpu-zh.sh
+sudo bash funasr-runtime-deploy-online-cpu-zh.sh install --workspace ./funasr-runtime-resources
+</pre></div>
+</div>
+</div>
+<div class="section" id="id5">
+<h4>客户端测试与使用<a class="headerlink" href="#id5" title="Permalink to this headline"></a></h4>
+<p>客户端测试（<a class="reference external" href="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz">samples</a>）</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 funasr_wss_client.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode 2pass
+</pre></div>
+</div>
+<p>更多例子参考（<a class="reference internal" href="runtime/docs/SDK_tutorial_online_zh.html"><span class="doc">点击此处</span></a>）</p>
+</div>
+<div class="section" id="id6">
+<h4>离线文件转写服务部署<a class="headerlink" href="#id6" title="Permalink to this headline"></a></h4>
+<div class="section" id="id7">
+<h5>服务端部署<a class="headerlink" href="#id7" title="Permalink to this headline"></a></h5>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy-offline-cpu-zh.sh
 sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace ./funasr-runtime-resources
 </pre></div>
 </div>
 </div>
-<div class="section" id="id5">
-<h4>客户端测试<a class="headerlink" href="#id5" title="Permalink to this headline"></a></h4>
+<div class="section" id="id8">
+<h5>客户端测试<a class="headerlink" href="#id8" title="Permalink to this headline"></a></h5>
 <p>客户端测试（<a class="reference external" href="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz">samples</a>）</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 funasr_wss_client.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode offline --audio_in <span class="s2">&quot;../audio/asr_example.wav&quot;</span>
 </pre></div>
 </div>
-<p>更多例子参考（<a class="reference external" href="funasr/runtime/docs/SDK_tutorial_zh">点击此处</a>）</p>
+<p>更多例子参考（<a class="reference internal" href="runtime/docs/SDK_tutorial_zh.html"><span class="doc">点击此处</span></a>）</p>
+</div>
 </div>
 </div>
 </div>
@@ -199,8 +217,8 @@ sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace ./funasr-r
 </div>
 <p>更多例子可以参考（<a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/modelscope_pipeline/quick_start.html">点击此处</a>）</p>
 </div>
-<div class="section" id="id6">
-<h2>学术模型egs<a class="headerlink" href="#id6" title="Permalink to this headline"></a></h2>
+<div class="section" id="id9">
+<h2>学术模型egs<a class="headerlink" href="#id9" title="Permalink to this headline"></a></h2>
 <p>如果您希望从头开始训练，通常为学术模型，您可以通过下面的指令启动训练与推理：</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> egs/aishell/paraformer
 . ./run.sh --CUDA_VISIBLE_DEVICES<span class="o">=</span><span class="s2">&quot;0,1&quot;</span> --gpu_num<span class="o">=</span><span class="m">2</span>

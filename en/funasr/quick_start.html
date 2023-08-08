@@ -55,8 +55,8 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#c-version-example">C++ version Example</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id1">Server Deployment</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id2">Client Testing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#the-real-time-transcription-service-mandarin-cpu">The real-time transcription service, Mandarin (CPU)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#file-transcription-service-mandarin-cpu">File Transcription Service, Mandarin (CPU)</a></li>
 </ul>
 </li>
 </ul>
@@ -93,6 +93,7 @@
 <p class="caption"><span class="caption-text">Runtime and Service</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="runtime/docs/SDK_tutorial.html">FunASR Offline File Transcription Service Convenient Deployment Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="runtime/docs/SDK_tutorial_online.html">FunASR Realtime Transcribe Service</a></li>
 <li class="toctree-l1"><a class="reference internal" href="runtime/python/websocket/README.html">Service with websocket-python</a></li>
 <li class="toctree-l1"><a class="reference internal" href="runtime/websocket/readme.html">Service with websocket-cpp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="runtime/html5/readme.html">Speech Recognition Service Html5 Client Access Interface</a></li>
@@ -179,21 +180,43 @@ python funasr_wss_server.py --port <span class="m">10095</span>
 <div class="section" id="c-version-example">
 <h3>C++ version Example<a class="headerlink" href="#c-version-example" title="Permalink to this headline"></a></h3>
 <p>Currently, offline file transcription service (CPU) is supported, and concurrent requests of hundreds of channels are supported.</p>
+<div class="section" id="the-real-time-transcription-service-mandarin-cpu">
+<h4>The real-time transcription service, Mandarin (CPU)<a class="headerlink" href="#the-real-time-transcription-service-mandarin-cpu" title="Permalink to this headline"></a></h4>
 <div class="section" id="id1">
-<h4>Server Deployment<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h4>
-<p>You can use the following command to complete the deployment with one click:</p>
+<h5>Server Deployment<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h5>
+<p>You can use the following command to complete the deployment:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy-online-cpu-zh.sh
+sudo bash funasr-runtime-deploy-online-cpu-zh.sh install --workspace ./funasr-runtime-resources
+</pre></div>
+</div>
+</div>
+<div class="section" id="id2">
+<h5>Client Testing<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h5>
+<p>Testing <a class="reference external" href="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz">samples</a></p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 funasr_wss_client.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode 2pass
+</pre></div>
+</div>
+<p>For more examples, please refer to <a class="reference internal" href="runtime/docs/SDK_tutorial_online_zh.html"><span class="doc">docs</span></a></p>
+</div>
+</div>
+<div class="section" id="file-transcription-service-mandarin-cpu">
+<h4>File Transcription Service, Mandarin (CPU)<a class="headerlink" href="#file-transcription-service-mandarin-cpu" title="Permalink to this headline"></a></h4>
+<div class="section" id="id3">
+<h5>Server Deployment<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h5>
+<p>You can use the following command to complete the deployment:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy-offline-cpu-zh.sh
 sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace ./funasr-runtime-resources
 </pre></div>
 </div>
 </div>
-<div class="section" id="id2">
-<h4>Client Testing<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h4>
+<div class="section" id="id4">
+<h5>Client Testing<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h5>
 <p>Testing <a class="reference external" href="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz">samples</a></p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 funasr_wss_client.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode offline --audio_in <span class="s2">&quot;../audio/asr_example.wav&quot;</span>
 </pre></div>
 </div>
-<p>For more examples, please refer to <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/docs/SDK_tutorial_zh.md">docs</a></p>
+<p>For more examples, please refer to <a class="reference internal" href="runtime/docs/SDK_tutorial_zh.html"><span class="doc">docs</span></a></p>
+</div>
 </div>
 </div>
 </div>
