@@ -154,7 +154,7 @@ int main(int argc, char* argv[]) {
       std::string python_cmd =
           "python -m funasr.utils.runtime_sdk_download_tool --type onnx --quantize True ";
 
-      if (vad_dir.isSet() && !s_vad_path.empty()) {
+      if (!s_vad_path.empty()) {
         std::string python_cmd_vad;
         std::string down_vad_path;
         std::string down_vad_model;
@@ -200,7 +200,7 @@ int main(int argc, char* argv[]) {
         LOG(INFO) << "VAD model is not set, use default.";
       }
 
-      if (offline_model_dir.isSet() && !s_offline_asr_path.empty()) {
+      if (!s_offline_asr_path.empty()) {
         std::string python_cmd_asr;
         std::string down_asr_path;
         std::string down_asr_model;
@@ -288,7 +288,7 @@ int main(int argc, char* argv[]) {
         LOG(INFO) << "ASR online model is not set, use default.";
       }
 
-      if (punc_dir.isSet() && !s_punc_path.empty()) {
+      if (!s_punc_path.empty()) {
         std::string python_cmd_punc;
         std::string down_punc_path;
         std::string down_punc_model;
