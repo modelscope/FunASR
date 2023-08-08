@@ -34,9 +34,9 @@ cd FunASR/funasr/runtime
 
 下载客户端测试工具目录samples
 ```shell
-wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_online_samples.tar.gz
+wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz
 ```
-我们以Python语言客户端为例，进行说明，支持多种音频格式输入（.wav, .pcm, .mp3等），也支持视频输入(.mp4等)，以及多文件列表wav.scp输入，其他版本客户端请参考文档（[点击此处](#客户端用法详解)），定制服务部署请参考[如何定制服务部署](#如何定制服务部署)
+我们以Python语言客户端为例，进行说明，支持音频格式（.wav, .pcm），以及多文件列表wav.scp输入，其他版本客户端请参考文档（[点击此处](#客户端用法详解)），定制服务部署请参考[如何定制服务部署](#如何定制服务部署)
 ```shell
 python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode 2pass
 ```
@@ -90,9 +90,11 @@ python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode 2pass --audio_i
 ```text
 --host 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，需要改为部署机器ip
 --port 10095 部署端口号
---mode 2pass 表示online+offline
+--mode：`offline`表示推理模式为一句话识别；`online`表示推理模式为实时语音识别；`2pass`表示为实时语音识别，并且说话句尾采用离线模型进行纠错。
+--chunk_size：表示流式模型latency配置`[5,10,5]`，表示当前音频解码片段为600ms，并且回看300ms，右看300ms。
 --audio_in 需要进行转写的音频文件，支持文件路径，文件列表wav.scp
---output_dir 识别结果保存路径
+--thread_num 设置并发发送线程数，默认为1
+--ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
 ```
 
 ### cpp-client
@@ -106,7 +108,11 @@ python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode 2pass --audio_i
 ```text
 --server-ip 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，需要改为部署机器ip
 --port 10095 部署端口号
+--mode：`offline`表示推理模式为一句话识别；`online`表示推理模式为实时语音识别；`2pass`表示为实时语音识别，并且说话句尾采用离线模型进行纠错。
+--chunk_size：表示流式模型latency配置`[5,10,5]`，表示当前音频解码片段为600ms，并且回看300ms，右看300ms。
 --wav-path 需要进行转写的音频文件，支持文件路径
+--thread_num 设置并发发送线程数，默认为1
+--ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
 ```
 
 ### Html网页版

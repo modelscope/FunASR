@@ -162,10 +162,10 @@ sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span clas
 <div class="section" id="id4">
 <h3>客户端测试与使用<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h3>
 <p>下载客户端测试工具目录samples</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_online_samples.tar.gz
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz
 </pre></div>
 </div>
-<p>我们以Python语言客户端为例，进行说明，支持多种音频格式输入（.wav, .pcm, .mp3等），也支持视频输入(.mp4等)，以及多文件列表wav.scp输入，其他版本客户端请参考文档（点击此处），定制服务部署请参考如何定制服务部署</p>
+<p>我们以Python语言客户端为例，进行说明，支持音频格式（.wav, .pcm），以及多文件列表wav.scp输入，其他版本客户端请参考文档（点击此处），定制服务部署请参考如何定制服务部署</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 wss_client_asr.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode 2pass
 </pre></div>
 </div>
@@ -217,9 +217,11 @@ brew install --cask --appdir<span class="o">=</span>/Applications docker
 <p>命令参数说明：</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--host 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，需要改为部署机器ip
 --port 10095 部署端口号
---mode 2pass 表示online+offline
+--mode：`offline`表示推理模式为一句话识别；`online`表示推理模式为实时语音识别；`2pass`表示为实时语音识别，并且说话句尾采用离线模型进行纠错。
+--chunk_size：表示流式模型latency配置`[5,10,5]`，表示当前音频解码片段为600ms，并且回看300ms，右看300ms。
 --audio_in 需要进行转写的音频文件，支持文件路径，文件列表wav.scp
---output_dir 识别结果保存路径
+--thread_num 设置并发发送线程数，默认为1
+--ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
 </pre></div>
 </div>
 </div>
@@ -232,7 +234,11 @@ brew install --cask --appdir<span class="o">=</span>/Applications docker
 <p>命令参数说明：</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--server-ip 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，需要改为部署机器ip
 --port 10095 部署端口号
+--mode：`offline`表示推理模式为一句话识别；`online`表示推理模式为实时语音识别；`2pass`表示为实时语音识别，并且说话句尾采用离线模型进行纠错。
+--chunk_size：表示流式模型latency配置`[5,10,5]`，表示当前音频解码片段为600ms，并且回看300ms，右看300ms。
 --wav-path 需要进行转写的音频文件，支持文件路径
+--thread_num 设置并发发送线程数，默认为1
+--ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
 </pre></div>
 </div>
 </div>
