@@ -32,23 +32,43 @@ For more examples, please refer to [docs](https://alibaba-damo-academy.github.io
 
 Currently, offline file transcription service (CPU) is supported, and concurrent requests of hundreds of channels are supported.
 
-#### Server Deployment
+##### The real-time transcription service, Mandarin (CPU)
+###### Server Deployment
+You can use the following command to complete the deployment:
+```shell
+curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy-online-cpu-zh.sh
+sudo bash funasr-runtime-deploy-online-cpu-zh.sh install --workspace ./funasr-runtime-resources
+```
 
-You can use the following command to complete the deployment with one click:
+
+###### Client Testing
+Testing [samples](https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz)
+
+```shell
+python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass
+```
+For more examples, please refer to [docs](runtime/docs/SDK_tutorial_online_zh.md)
+
+
+#### File Transcription Service, Mandarin (CPU)
+
+##### Server Deployment
+
+You can use the following command to complete the deployment:
 
 ```shell
 curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy-offline-cpu-zh.sh
 sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace ./funasr-runtime-resources
 ```
 
-#### Client Testing
+##### Client Testing
 
 Testing [samples](https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz)
 ```shell
 python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.wav"
 ```
 
-For more examples, please refer to [docs](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/docs/SDK_tutorial_zh.md)
+For more examples, please refer to [docs](runtime/docs/SDK_tutorial_zh.md)
 
 
 ## Industrial Model Egs

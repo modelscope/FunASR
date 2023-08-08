@@ -1,6 +1,6 @@
 ([简体中文](./SDK_tutorial_zh.md)|English)
 
-# FunASR Offline File Transcription Service Convenient Deployment Tutorial
+# FunASR Offline File Transcription Service
 
 FunASR provides an offline file transcription service that can be easily deployed on a local or cloud server. The core is the FunASR open-source runtime-SDK. It integrates various capabilities such as speech endpoint detection (VAD) and Paraformer-large speech recognition (ASR) and punctuation restoration (PUNC) released by the speech laboratory of the Damo Academy in the Modelscope community. It has a complete speech recognition chain and can recognize audio or video of tens of hours into punctuated text. Moreover, it supports transcription for hundreds of simultaneous requests.
 
@@ -155,41 +155,14 @@ sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update --decode_thread_num 32
 sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update --workspace /root/funasr-runtime-resources
 ```
 
-
-## Detailed Configuration of Server Startup Process
-
-### Select FunASR Docker image
-We recommend choosing to use our latest released image, but you can also choose historical versions.
-
-```text
-[1/5]
-  Getting the list of docker images, please wait a few seconds.
-    [DONE]
-
-  Please choose the Docker image.
-    1) registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.1.0
-  Enter your choice, default(1):
-  You have chosen the Docker image: registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.1.0
-```
-
-
-### Set the port provided by the host for FunASR
-Set the host port provided to Docker, which is 10095 by default. Please make sure that this port is available.
-
-```text
-[2/5]
-  Please input the opened port in the host used for FunASR server.
-  Setting the opened host port [1-65535], default(10095):
-  The port of the host is 10095
-  The port in Docker for FunASR server is 10095
-```
-
 ### Set SSL
 
 SSL verification is enabled by default. If you need to disable it, you can set it when starting.
 ```shell
-sudo bash funasr-runtime-deploy-offline-cpu-zh.sh --ssl 0
+sudo bash funasr-runtime-deploy-online-cpu-zh.sh update --ssl 0
 ```
+
+
 
 ## Contact Us
 
