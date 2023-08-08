@@ -115,12 +115,7 @@ FunasrWsClient --host localhost --port 10095 --mode 2pass
 sudo bash funasr-runtime-deploy-online-cpu-zh.sh start
 ```
 
-### 设置SSL
 
-默认开启SSL校验，如果需要关闭，可以在启动时设置
-```shell
-sudo bash funasr-runtime-deploy-online-cpu-zh.sh start --ssl 0
-```
 
 ### 关闭FunASR服务
 
@@ -168,6 +163,11 @@ sudo bash funasr-runtime-deploy-online-cpu-zh.sh update --decode_thread_num 32
 sudo bash funasr-runtime-deploy-online-cpu-zh.sh update --workspace ./funasr-runtime-resources
 ```
 
+### 关闭SSL证书
+
+```shell
+sudo bash funasr-runtime-deploy-online-cpu-zh.sh update --ssl 0
+```
 
 ## 联系我们
 
