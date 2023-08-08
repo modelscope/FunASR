@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-scriptVersion="0.0.6"
-scriptDate="20230705"
+scriptVersion="0.0.1"
+scriptDate="20230807"
 
 
 # Set color
@@ -26,9 +26,9 @@ CUR_DIR=`pwd`
 SUDO_CMD="sudo"
 
 
-DEFAULT_DOCKER_OFFLINE_CPU_ZH_LISTS_OSS="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/docker_lists/docker_online_cpu_zh_lists"
-DEFAULT_DOCKER_OFFLINE_CPU_ZH_LISTS_GIT="https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/funasr/runtime/docs/docker_online_cpu_zh_lists"
-DEFAULT_DOCKER_IMAGE_LISTS=$DEFAULT_DOCKER_OFFLINE_CPU_ZH_LISTS_OSS
+DEFAULT_DOCKER_ONLINE_CPU_ZH_LISTS_OSS="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/docker_lists/docker_online_cpu_zh_lists"
+DEFAULT_DOCKER_ONLINE_CPU_ZH_LISTS_GIT="https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/funasr/runtime/docs/docker_online_cpu_zh_lists"
+DEFAULT_DOCKER_IMAGE_LISTS=$DEFAULT_DOCKER_ONLINE_CPU_ZH_LISTS_OSS
 DEFAULT_FUNASR_DOCKER_URL="registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr"
 DEFAULT_FUNASR_RUNTIME_RESOURCES="funasr-runtime-resources"
 DEFAULT_FUNASR_LOCAL_WORKSPACE=${CUR_DIR}/${DEFAULT_FUNASR_RUNTIME_RESOURCES}
@@ -41,7 +41,7 @@ DEFAULT_FUNASR_SERVER_LOG="${DEFAULT_FUNASR_CONFIG_DIR}/server_console.log"
 DEFAULT_FUNASR_WORKSPACE_DIR="/workspace/models"
 DEFAULT_DOCKER_PORT="10095"
 DEFAULT_PROGRESS_FILENAME="progress.txt"
-DEFAULT_SERVER_EXEC_NAME="funasr-wss-server"
+DEFAULT_SERVER_EXEC_NAME="funasr-wss-server-2pass"
 DEFAULT_DOCKER_EXEC_DIR="/workspace/FunASR/funasr/runtime/websocket/build/bin"
 DEFAULT_DOCKER_EXEC_PATH=${DEFAULT_DOCKER_EXEC_DIR}/${DEFAULT_SERVER_EXEC_NAME}
 DEFAULT_SAMPLES_NAME="funasr_samples"
@@ -387,10 +387,10 @@ readDockerInfoFromUrl(){
             echo -e "    ${RED}Unable to get docker image list due to network issues, try again.${PLAIN}"
 
             # switch sources of docker image lists
-            if [ "$list_url" = "$DEFAULT_DOCKER_OFFLINE_CPU_ZH_LISTS_OSS" ]; then
-                DEFAULT_DOCKER_IMAGE_LISTS=$DEFAULT_DOCKER_OFFLINE_CPU_ZH_LISTS_GIT
+            if [ "$list_url" = "$DEFAULT_DOCKER_ONLINE_CPU_ZH_LISTS_OSS" ]; then
+                DEFAULT_DOCKER_IMAGE_LISTS=$DEFAULT_DOCKER_ONLINE_CPU_ZH_LISTS_GIT
             else
-                DEFAULT_DOCKER_IMAGE_LISTS=$DEFAULT_DOCKER_OFFLINE_CPU_ZH_LISTS_OSS
+                DEFAULT_DOCKER_IMAGE_LISTS=$DEFAULT_DOCKER_ONLINE_CPU_ZH_LISTS_OSS
             fi
         fi
     done
@@ -476,10 +476,10 @@ selectDockerImages(){
             result=0
         elif [ $result -eq 61 ]; then
             echo
-            echo -e "  ${RED}Please run (${PLAIN}${GREEN}${SUDO_CMD} bash funasr-runtime-deploy-offline-cpu-zh.sh install${PLAIN}${RED}) to install Docker first.${PLAIN}"
+            echo -e "  ${RED}Please run (${PLAIN}${GREEN}${SUDO_CMD} bash funasr-runtime-deploy-online-cpu-zh.sh install${PLAIN}${RED}) to install Docker first.${PLAIN}"
         elif [ $result -eq 62 ]; then
             echo
-            echo -e "  ${RED}Docker: ${PARAMS_DOCKER_IMAGE} ${PARAMS_FUNASR_DOCKER_ID} has been launched, please run (${PLAIN}${GREEN}${SUDO_CMD} bash funasr-runtime-deploy-offline-cpu-zh.sh remove${PLAIN}${RED}) to remove Docker first ant then install.${PLAIN}"
+            echo -e "  ${RED}Docker: ${PARAMS_DOCKER_IMAGE} ${PARAMS_FUNASR_DOCKER_ID} has been launched, please run (${PLAIN}${GREEN}${SUDO_CMD} bash funasr-runtime-deploy-online-cpu-zh.sh remove${PLAIN}${RED}) to remove Docker first ant then install.${PLAIN}"
         elif [ $result -eq 63 ]; then
             result=0
         fi
@@ -911,15 +911,15 @@ dockerRun(){
         result=`expr ${result} + 0`
         if [ $result -eq 60 ]; then
             echo
-            echo -e "  ${RED}Please run (${PLAIN}${GREEN}${SUDO_CMD} bash funasr-runtime-deploy-offline-cpu-zh.sh install${PLAIN}${RED}) to install Docker first.${PLAIN}"
+            echo -e "  ${RED}Please run (${PLAIN}${GREEN}${SUDO_CMD} bash funasr-runtime-deploy-online-cpu-zh.sh install${PLAIN}${RED}) to install Docker first.${PLAIN}"
             return $result
         elif [ $result -eq 61 ]; then
             echo
-            echo -e "  ${RED}Please run (${PLAIN}${GREEN}${SUDO_CMD} bash funasr-runtime-deploy-offline-cpu-zh.sh install${PLAIN}${RED}) to install Docker first.${PLAIN}"
+            echo -e "  ${RED}Please run (${PLAIN}${GREEN}${SUDO_CMD} bash funasr-runtime-deploy-online-cpu-zh.sh install${PLAIN}${RED}) to install Docker first.${PLAIN}"
             return $result
         elif [ $result -eq 62 ]; then
             echo
-            echo -e "  ${RED}Docker: ${PARAMS_DOCKER_IMAGE} ${PARAMS_FUNASR_DOCKER_ID} has been launched, please run (${PLAIN}${GREEN}${SUDO_CMD} bash funasr-runtime-deploy-offline-cpu-zh.sh stop${PLAIN}${RED}) to stop Docker first.${PLAIN}"
+            echo -e "  ${RED}Docker: ${PARAMS_DOCKER_IMAGE} ${PARAMS_FUNASR_DOCKER_ID} has been launched, please run (${PLAIN}${GREEN}${SUDO_CMD} bash funasr-runtime-deploy-online-cpu-zh.sh stop${PLAIN}${RED}) to stop Docker first.${PLAIN}"
             return $result
         fi
 
@@ -970,7 +970,7 @@ dockerRun(){
 
     deploySamples
     echo -e "  ${BOLD}The sample code is already stored in the ${PLAIN}(${GREEN}${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}${PLAIN}) ."
-    echo -e "  ${BOLD}If you want to see an example of how to use the client, you can run ${PLAIN}${GREEN}${SUDO_CMD} bash funasr-runtime-deploy-offline-cpu-zh.sh client${PLAIN} ."
+    echo -e "  ${BOLD}If you want to see an example of how to use the client, you can run ${PLAIN}${GREEN}${SUDO_CMD} bash funasr-runtime-deploy-online-cpu-zh.sh client${PLAIN} ."
     echo
 }
 
@@ -1336,7 +1336,7 @@ sampleClientRun(){
                 ;;
             Python)
                 client_exec="${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/python/wss_client_asr.py"
-                run_cmd="python3 ${client_exec} --host ${server_ip} --port ${host_port} --mode offline --audio_in ${wav_path} --send_without_sleep --output_dir ${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/python"
+                run_cmd="python3 ${client_exec} --host ${server_ip} --port ${host_port} --mode 2pass --audio_in ${wav_path} --send_without_sleep --output_dir ${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/python"
                 pre_cmd="pip3 install click>=8.0.4"
                 echo -e "  Run ${BLUE}${pre_cmd}${PLAIN}"
                 $pre_cmd
@@ -1379,7 +1379,7 @@ displayHelp(){
     echo -e "${UNDERLINE}Usage${PLAIN}:"
     echo -e "  $0 [OPTIONAL FLAGS]"
     echo
-    echo -e "funasr-runtime-deploy-offline-cpu-zh.sh - a Bash script to install&run FunASR docker."
+    echo -e "funasr-runtime-deploy-online-cpu-zh.sh - a Bash script to install&run FunASR docker."
     echo
     echo -e "${UNDERLINE}Options${PLAIN}:"
     echo -e "   ${BOLD}-i, install, --install${PLAIN}    Install and run FunASR docker."
@@ -1471,7 +1471,7 @@ PARAMS_DOCKER_PUNC_DIR=""
 #  The path of punc model in docker
 PARAMS_DOCKER_PUNC_PATH=""
 #  The punc model ID in ModelScope
-PARAMS_PUNC_ID="damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx"
+PARAMS_PUNC_ID="damo/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx"
 
 #  The dir stored vad model in local
 PARAMS_LOCAL_VAD_DIR=""
