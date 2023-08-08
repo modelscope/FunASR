@@ -185,18 +185,18 @@ Introduction to command parameters:
 
 ### c++-client
 ```shell
-. /funasr-wss-client --server-ip 127.0.0.1 --port 10095 --wav-path test.wav --thread-num 1 --is-ssl 1
+. /funasr-wss-client-2pass --server-ip 127.0.0.1 --port 10095 --wav-path test.wav --thread-num 1 --is-ssl 1
 ```
 
 Introduction to command parameters:
 
 ```text
---host: the IP address of the server. It can be set to 127.0.0.1 for local testing.
+--server-ip: the IP address of the server. It can be set to 127.0.0.1 for local testing.
 --port: the port number of the server listener.
---audio_in: the audio input. Input can be a path to a wav file or a wav.scp file (a Kaldi-formatted wav list in which each line includes a wav_id followed by a tab and a wav_path).
---output_dir: the path to the recognition result output.
---ssl: whether to use SSL encryption. The default is to use SSL.
---mode: offline mode.
+--wav-path: the audio input. Input can be a path to a wav file or a wav.scp file (a Kaldi-formatted wav list in which each line includes a wav_id followed by a tab and a wav_path).
+--is-ssl: whether to use SSL encryption. The default is to use SSL.
+--mode: 2pass.
+--thread-num 1 
 ```
 
 ### Custom client
@@ -205,7 +205,7 @@ If you want to define your own client, the Websocket communication protocol is a
 
 ```text
 # First communication
-{"mode": "offline", "wav_name": wav_name, "is_speaking": True}
+{"mode": "offline", "wav_name": "wav_name", "is_speaking": True, "wav_format":"pcm", "chunk_size":[5,10,5]}
 # Send wav data
 Bytes data
 # Send end flag
@@ -223,37 +223,3 @@ https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/websocke
 ### Python client
 
 https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket
-
-### C++ server
-
-#### VAD
-```c++
-// The use of the VAD model consists of two steps: FsmnVadInit and FsmnVadInfer:
-FUNASR_HANDLE vad_hanlde=FsmnVadInit(model_path, thread_num);
-// Where: model_path contains "model-dir" and "quantize", thread_num is the ONNX thread count;
-FUNASR_RESULT result=FsmnVadInfer(vad_hanlde, wav_file.c_str(), NULL, 16000);
-// Where: vad_hanlde is the return value of FunOfflineInit, wav_file is the path to the audio file, and sampling_rate is the sampling rate (default 16k).
-```
-
-See the usage example for details [docs](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/onnxruntime/bin/funasr-onnx-offline-vad.cpp)
-
-#### ASR
-```text
-// The use of the ASR model consists of two steps: FunOfflineInit and FunOfflineInfer:
-FUNASR_HANDLE asr_hanlde=FunOfflineInit(model_path, thread_num);
-// Where: model_path contains "model-dir" and "quantize", thread_num is the ONNX thread count;
-FUNASR_RESULT result=FunOfflineInfer(asr_hanlde, wav_file.c_str(), RASR_NONE, NULL, 16000);
-// Where: asr_hanlde is the return value of FunOfflineInit, wav_file is the path to the audio file, and sampling_rate is the sampling rate (default 16k).
-```
-
-See the usage example for details, [docs](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/onnxruntime/bin/funasr-onnx-offline.cpp)
-
-#### PUNC
-```text
-// The use of the PUNC model consists of two steps: CTTransformerInit and CTTransformerInfer:
-FUNASR_HANDLE punc_hanlde=CTTransformerInit(model_path, thread_num);
-// Where: model_path contains "model-dir" and "quantize", thread_num is the ONNX thread count;
-FUNASR_RESULT result=CTTransformerInfer(punc_hanlde, txt_str.c_str(), RASR_NONE, NULL);
-// Where: punc_hanlde is the return value of CTTransformerInit, txt_str is the text
-```
-See the usage example for details, [docs](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/onnxruntime/bin/funasr-onnx-offline-punc.cpp)
