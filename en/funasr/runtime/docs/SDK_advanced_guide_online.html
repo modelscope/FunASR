@@ -306,11 +306,10 @@ Rename the model you want to deploy after finetuning (for example, 10epoch.pb) t
 </pre></div>
 </div>
 <p>Introduction to command parameters:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--host: the IP address of the server. It can be set to 127.0.0.1 for local testing.
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--server-ip: the IP address of the server. It can be set to 127.0.0.1 for local testing.
 --port: the port number of the server listener.
---audio_in: the audio input. Input can be a path to a wav file or a wav.scp file (a Kaldi-formatted wav list in which each line includes a wav_id followed by a tab and a wav_path).
---output_dir: the path to the recognition result output.
---ssl: whether to use SSL encryption. The default is to use SSL.
+--wav-path: the audio input. Input can be a path to a wav file or a wav.scp file (a Kaldi-formatted wav list in which each line includes a wav_id followed by a tab and a wav_path).
+--is-ssl: whether to use SSL encryption. The default is to use SSL.
 --mode: offline mode.
 </pre></div>
 </div>
@@ -319,8 +318,7 @@ Rename the model you want to deploy after finetuning (for example, 10epoch.pb) t
 <h3>Custom client<a class="headerlink" href="#custom-client" title="Permalink to this headline"></a></h3>
 <p>If you want to define your own client, the Websocket communication protocol is as follows:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span># First communication
-{&quot;mode&quot;: &quot;offline&quot;, &quot;wav_name&quot;: wav_name, &quot;is_speaking&quot;: True}
-# Send wav data
+{&quot;mode&quot;: &quot;offline&quot;, &quot;wav_name&quot;: &quot;wav_name&quot;, &quot;is_speaking&quot;: True, &quot;wav_format&quot;:&quot;pcm&quot;, &quot;chunk_size&quot;:[5,10,5]}# Send wav data
 Bytes data
 # Send end flag
 {&quot;is_speaking&quot;: False}
@@ -338,42 +336,6 @@ Bytes data
 <div class="section" id="id2">
 <h3>Python client<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h3>
 <p>https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket</p>
-</div>
-<div class="section" id="c-server">
-<h3>C++ server<a class="headerlink" href="#c-server" title="Permalink to this headline"></a></h3>
-<div class="section" id="vad">
-<h4>VAD<a class="headerlink" href="#vad" title="Permalink to this headline"></a></h4>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// The use of the VAD model consists of two steps: FsmnVadInit and FsmnVadInfer:</span>
-<span class="n">FUNASR_HANDLE</span> <span class="n">vad_hanlde</span><span class="o">=</span><span class="n">FsmnVadInit</span><span class="p">(</span><span class="n">model_path</span><span class="p">,</span> <span class="n">thread_num</span><span class="p">);</span>
-<span class="c1">// Where: model_path contains &quot;model-dir&quot; and &quot;quantize&quot;, thread_num is the ONNX thread count;</span>
-<span class="n">FUNASR_RESULT</span> <span class="n">result</span><span class="o">=</span><span class="n">FsmnVadInfer</span><span class="p">(</span><span class="n">vad_hanlde</span><span class="p">,</span> <span class="n">wav_file</span><span class="p">.</span><span class="n">c_str</span><span class="p">(),</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">16000</span><span class="p">);</span>
-<span class="c1">// Where: vad_hanlde is the return value of FunOfflineInit, wav_file is the path to the audio file, and sampling_rate is the sampling rate (default 16k).</span>
-</pre></div>
-</div>
-<p>See the usage example for details <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/onnxruntime/bin/funasr-onnx-offline-vad.cpp">docs</a></p>
-</div>
-<div class="section" id="asr">
-<h4>ASR<a class="headerlink" href="#asr" title="Permalink to this headline"></a></h4>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>// The use of the ASR model consists of two steps: FunOfflineInit and FunOfflineInfer:
-FUNASR_HANDLE asr_hanlde=FunOfflineInit(model_path, thread_num);
-// Where: model_path contains &quot;model-dir&quot; and &quot;quantize&quot;, thread_num is the ONNX thread count;
-FUNASR_RESULT result=FunOfflineInfer(asr_hanlde, wav_file.c_str(), RASR_NONE, NULL, 16000);
-// Where: asr_hanlde is the return value of FunOfflineInit, wav_file is the path to the audio file, and sampling_rate is the sampling rate (default 16k).
-</pre></div>
-</div>
-<p>See the usage example for details, <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/onnxruntime/bin/funasr-onnx-offline.cpp">docs</a></p>
-</div>
-<div class="section" id="punc">
-<h4>PUNC<a class="headerlink" href="#punc" title="Permalink to this headline"></a></h4>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>// The use of the PUNC model consists of two steps: CTTransformerInit and CTTransformerInfer:
-FUNASR_HANDLE punc_hanlde=CTTransformerInit(model_path, thread_num);
-// Where: model_path contains &quot;model-dir&quot; and &quot;quantize&quot;, thread_num is the ONNX thread count;
-FUNASR_RESULT result=CTTransformerInfer(punc_hanlde, txt_str.c_str(), RASR_NONE, NULL);
-// Where: punc_hanlde is the return value of CTTransformerInit, txt_str is the text
-</pre></div>
-</div>
-<p>See the usage example for details, <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/onnxruntime/bin/funasr-onnx-offline-punc.cpp">docs</a></p>
-</div>
 </div>
 </div>
 </div>
