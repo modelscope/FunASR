@@ -338,7 +338,7 @@ int main(int argc, char* argv[]) {
         "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", 
         true, "", "string");
     TCLAP::ValueArg<std::string>    asr_mode_("", ASR_MODE, "offline, online, 2pass", false, "2pass", "string");
-    TCLAP::ValueArg<std::string>    chunk_size_("", "chunk_size", "chunk_size: 5-10-5 or 5-12-5", false, "5-10-5", "string");
+    TCLAP::ValueArg<std::string>    chunk_size_("", "chunk-size", "chunk_size: 5-10-5 or 5-12-5", false, "5-10-5", "string");
     TCLAP::ValueArg<int> thread_num_("", "thread-num", "thread-num",
                                        false, 1, "int");
     TCLAP::ValueArg<int> is_ssl_(
