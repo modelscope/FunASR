@@ -9,8 +9,11 @@ from typing import Any, Dict, Iterable, List, NamedTuple, Set, Tuple, Union
 import re
 import numpy as np
 import yaml
-from onnxruntime import (GraphOptimizationLevel, InferenceSession,
-                         SessionOptions, get_available_providers, get_device)
+try:
+    from onnxruntime import (GraphOptimizationLevel, InferenceSession,
+                             SessionOptions, get_available_providers, get_device)
+except:
+    print("please pip3 install onnxruntime")
 import jieba
 import warnings
 
