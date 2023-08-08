@@ -97,11 +97,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#restart-the-funasr-service">Restart the FunASR service</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#replace-the-model-and-restart-the-funasr-service">Replace the model and restart the FunASR service</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#update-parameters-and-restart-the-funasr-service">Update parameters and restart the FunASR service</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#detailed-configuration-of-server-startup-process">Detailed Configuration of Server Startup Process</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#select-funasr-docker-image">Select FunASR Docker image</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#set-the-port-provided-by-the-host-for-funasr">Set the port provided by the host for FunASR</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#set-ssl">Set SSL</a></li>
 </ul>
 </li>
@@ -309,38 +304,10 @@ sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update --workspace /root/funas
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="detailed-configuration-of-server-startup-process">
-<h2>Detailed Configuration of Server Startup Process<a class="headerlink" href="#detailed-configuration-of-server-startup-process" title="Permalink to this headline"></a></h2>
-<div class="section" id="select-funasr-docker-image">
-<h3>Select FunASR Docker image<a class="headerlink" href="#select-funasr-docker-image" title="Permalink to this headline"></a></h3>
-<p>We recommend choosing to use our latest released image, but you can also choose historical versions.</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[1/5]
-  Getting the list of docker images, please wait a few seconds.
-    [DONE]
-
-  Please choose the Docker image.
-    1) registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.1.0
-  Enter your choice, default(1):
-  You have chosen the Docker image: registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.1.0
-</pre></div>
-</div>
-</div>
-<div class="section" id="set-the-port-provided-by-the-host-for-funasr">
-<h3>Set the port provided by the host for FunASR<a class="headerlink" href="#set-the-port-provided-by-the-host-for-funasr" title="Permalink to this headline"></a></h3>
-<p>Set the host port provided to Docker, which is 10095 by default. Please make sure that this port is available.</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[2/5]
-  Please input the opened port in the host used for FunASR server.
-  Setting the opened host port [1-65535], default(10095):
-  The port of the host is 10095
-  The port in Docker for FunASR server is 10095
-</pre></div>
-</div>
-</div>
 <div class="section" id="set-ssl">
 <h3>Set SSL<a class="headerlink" href="#set-ssl" title="Permalink to this headline"></a></h3>
 <p>SSL verification is enabled by default. If you need to disable it, you can set it when starting.</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-offline-cpu-zh.sh --ssl <span class="m">0</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-online-cpu-zh.sh update --ssl <span class="m">0</span>
 </pre></div>
 </div>
 </div>

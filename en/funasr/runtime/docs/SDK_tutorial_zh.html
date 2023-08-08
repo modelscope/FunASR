@@ -277,44 +277,15 @@ sudo bash funasr-runtime-deploy-offline-cpu-zh.sh update --workspace /root/funas
 </pre></div>
 </div>
 </div>
+<div class="section" id="ssl">
+<h3>关闭SSL证书<a class="headerlink" href="#ssl" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-online-cpu-zh.sh update --ssl <span class="m">0</span>
+</pre></div>
+</div>
+</div>
 </div>
 <div class="section" id="id13">
-<h2>服务端启动过程配置详解<a class="headerlink" href="#id13" title="Permalink to this headline"></a></h2>
-<div class="section" id="funasr-docker">
-<h3>选择FunASR Docker镜像<a class="headerlink" href="#funasr-docker" title="Permalink to this headline"></a></h3>
-<p>推荐选择1)使用我们的最新发布版镜像，也可选择历史版本。</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[1/5]
-  Getting the list of docker images, please wait a few seconds.
-    [DONE]
-
-  Please choose the Docker image.
-    1) registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.1.0
-  Enter your choice, default(1):
-  You have chosen the Docker image: registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.1.0
-</pre></div>
-</div>
-</div>
-<div class="section" id="id14">
-<h3>设置宿主机提供给FunASR的端口<a class="headerlink" href="#id14" title="Permalink to this headline"></a></h3>
-<p>设置提供给Docker的宿主机端口，默认为10095。请保证此端口可用。</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[2/5]
-  Please input the opened port in the host used for FunASR server.
-  Setting the opened host port [1-65535], default(10095):
-  The port of the host is 10095
-  The port in Docker for FunASR server is 10095
-</pre></div>
-</div>
-</div>
-<div class="section" id="ssl">
-<h3>设置SSL<a class="headerlink" href="#ssl" title="Permalink to this headline"></a></h3>
-<p>默认开启SSL校验，如果需要关闭，可以在启动时设置</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo bash funasr-runtime-deploy-offline-cpu-zh.sh --ssl <span class="m">0</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="id15">
-<h2>联系我们<a class="headerlink" href="#id15" title="Permalink to this headline"></a></h2>
+<h2>联系我们<a class="headerlink" href="#id13" title="Permalink to this headline"></a></h2>
 <p>在您使用过程中，如果遇到问题，欢迎加入用户群进行反馈</p>
 <table border="1" class="docutils">
 <thead>
