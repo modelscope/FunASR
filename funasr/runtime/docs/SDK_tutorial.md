@@ -1,6 +1,6 @@
 ([简体中文](./SDK_tutorial_zh.md)|English)
 
-# FunASR Offline File Transcription Service Convenient Deployment Tutorial
+# FunASR Offline File Transcription Service
 
 FunASR provides an offline file transcription service that can be easily deployed on a local or cloud server. The core is the FunASR open-source runtime-SDK. It integrates various capabilities such as speech endpoint detection (VAD) and Paraformer-large speech recognition (ASR) and punctuation restoration (PUNC) released by the speech laboratory of the Damo Academy in the Modelscope community. It has a complete speech recognition chain and can recognize audio or video of tens of hours into punctuated text. Moreover, it supports transcription for hundreds of simultaneous requests.
 
