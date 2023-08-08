@@ -267,6 +267,18 @@ make
 </pre></div>
 </div>
 </div>
+<div class="section" id="start-the-2pass-service">
+<h5>Start the 2pass Service<a class="headerlink" href="#start-the-2pass-service" title="Permalink to this headline"></a></h5>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-wss-server-2pass  <span class="se">\</span>
+  --download-model-dir /workspace/models <span class="se">\</span>
+  --offline-model-dir ./exportdamo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx <span class="se">\</span>
+  --vad-dir ./exportdamo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
+  --punc-dir ./export/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx <span class="se">\</span>
+  --online-model-dir ./exportdamo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online <span class="se">\</span>
+  --quantize <span class="nb">false</span>
+</pre></div>
+</div>
+</div>
 </div>
 </div>
 <div class="section" id="client-usage">

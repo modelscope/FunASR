@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Service with grpc-python &mdash; FunASR  documentation</title><link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <title>GRPC python Client for 2pass decoding &mdash; FunASR  documentation</title><link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
@@ -118,7 +118,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Service with grpc-python</li>
+      <li class="breadcrumb-item active">GRPC python Client for 2pass decoding</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../../../_sources/funasr/runtime/python/grpc/Readme.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -128,78 +128,37 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="service-with-grpc-python">
-<h1>Service with grpc-python<a class="headerlink" href="#service-with-grpc-python" title="Permalink to this headline"></a></h1>
-<p>We can send streaming audio data to server in real-time with grpc client every 10 ms e.g., and get transcribed text when stop speaking.
-The audio data is in streaming, the asr inference process is in offline.</p>
-<div class="section" id="for-the-server">
-<h2>For the Server<a class="headerlink" href="#for-the-server" title="Permalink to this headline"></a></h2>
-<div class="section" id="prepare-server-environment">
-<h3>Prepare server environment<a class="headerlink" href="#prepare-server-environment" title="Permalink to this headline"></a></h3>
-<p>Install the modelscope and funasr</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install -U modelscope funasr
-<span class="c1"># For the users in China, you could install with the command:</span>
-<span class="c1"># pip install -U modelscope funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple</span>
-git clone https://github.com/alibaba/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> FunASR
-</pre></div>
-</div>
-<p>Install the requirements</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> funasr/runtime/python/grpc
-pip install -r requirements_server.txt
+  <div class="section" id="grpc-python-client-for-2pass-decoding">
+<h1>GRPC python Client for 2pass decoding<a class="headerlink" href="#grpc-python-client-for-2pass-decoding" title="Permalink to this headline"></a></h1>
+<p>The client can send streaming or full audio data to server as you wish, and get transcribed text once the server respond (depends on mode)</p>
+<p>In the demo client, audio_chunk_duration is set to 1000ms, and send_interval is set to 100ms</p>
+<div class="section" id="install-the-requirements">
+<h2>1. Install the requirements<a class="headerlink" href="#install-the-requirements" title="Permalink to this headline"></a></h2>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/alibaba/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> FunASR/funasr/runtime/python/grpc
+pip install -r requirements.txt
 </pre></div>
 </div>
 </div>
 <div class="section" id="generate-protobuf-file">
-<h3>Generate protobuf file<a class="headerlink" href="#generate-protobuf-file" title="Permalink to this headline"></a></h3>
-<p>Run on server, the two generated pb files are both used for server and client</p>
+<h2>2. Generate protobuf file<a class="headerlink" href="#generate-protobuf-file" title="Permalink to this headline"></a></h2>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># paraformer_pb2.py and paraformer_pb2_grpc.py are already generated, </span>
 <span class="c1"># regenerate it only when you make changes to ./proto/paraformer.proto file.</span>
-python -m grpc_tools.protoc  --proto_path<span class="o">=</span>./proto -I ./proto    --python_out<span class="o">=</span>. --grpc_python_out<span class="o">=</span>./ ./proto/paraformer.proto
-</pre></div>
-</div>
-</div>
-<div class="section" id="start-grpc-server">
-<h3>Start grpc server<a class="headerlink" href="#start-grpc-server" title="Permalink to this headline"></a></h3>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Start server.</span>
-<span class="n">python</span> <span class="n">grpc_main_server</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">port</span> <span class="mi">10095</span> <span class="o">--</span><span class="n">backend</span> <span class="n">pipeline</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="for-the-client">
-<h2>For the client<a class="headerlink" href="#for-the-client" title="Permalink to this headline"></a></h2>
-<div class="section" id="install-the-requirements">
-<h3>Install the requirements<a class="headerlink" href="#install-the-requirements" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/alibaba/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> FunASR
-<span class="nb">cd</span> funasr/runtime/python/grpc
-pip install -r requirements_client.txt
-</pre></div>
-</div>
-</div>
-<div class="section" id="id1">
-<h3>Generate protobuf file<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h3>
-<p>Run on server, the two generated pb files are both used for server and client</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># paraformer_pb2.py and paraformer_pb2_grpc.py are already generated, </span>
-<span class="c1"># regenerate it only when you make changes to ./proto/paraformer.proto file.</span>
-python -m grpc_tools.protoc  --proto_path<span class="o">=</span>./proto -I ./proto    --python_out<span class="o">=</span>. --grpc_python_out<span class="o">=</span>./ ./proto/paraformer.proto
+python -m grpc_tools.protoc --proto_path<span class="o">=</span>./proto -I ./proto --python_out<span class="o">=</span>. --grpc_python_out<span class="o">=</span>./ ./proto/paraformer.proto
 </pre></div>
 </div>
 </div>
 <div class="section" id="start-grpc-client">
-<h3>Start grpc client<a class="headerlink" href="#start-grpc-client" title="Permalink to this headline"></a></h3>
+<h2>3. Start grpc client<a class="headerlink" href="#start-grpc-client" title="Permalink to this headline"></a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Start client.</span>
-<span class="n">python</span> <span class="n">grpc_main_client_mic</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">host</span> <span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span> <span class="o">--</span><span class="n">port</span> <span class="mi">10095</span>
+<span class="n">python</span> <span class="n">grpc_main_client</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">host</span> <span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span> <span class="o">--</span><span class="n">port</span> <span class="mi">10100</span> <span class="o">--</span><span class="n">wav_path</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">your_test_wav</span><span class="o">.</span><span class="n">wav</span>
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="workflow-in-desgin">
-<h2>Workflow in desgin<a class="headerlink" href="#workflow-in-desgin" title="Permalink to this headline"></a></h2>
-<div align="left"><img src="proto/workflow.png" width="400"/></div>
 <div class="section" id="acknowledge">
 <h2>Acknowledge<a class="headerlink" href="#acknowledge" title="Permalink to this headline"></a></h2>
 <ol class="simple">
 <li><p>This project is maintained by <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR">FunASR community</a>.</p></li>
+<li><p>We acknowledge burkliu (刘柏基, liubaiji&#64;xverse.cn) for contributing the grpc service.</p></li>
 </ol>
 </div>
 </div>

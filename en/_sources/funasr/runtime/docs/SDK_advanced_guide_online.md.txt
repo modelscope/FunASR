@@ -185,7 +185,9 @@ Introduction to command parameters:
 --port: the port number of the server listener.
 --wav-path: the audio input. Input can be a path to a wav file or a wav.scp file (a Kaldi-formatted wav list in which each line includes a wav_id followed by a tab and a wav_path).
 --is-ssl: whether to use SSL encryption. The default is to use SSL.
---mode: offline mode.
+--mode: 2pass.
+--thread-num 1 
+
 ```
 
 ### Custom client
@@ -194,7 +196,9 @@ If you want to define your own client, the Websocket communication protocol is a
 
 ```text
 # First communication
-{"mode": "offline", "wav_name": "wav_name", "is_speaking": True, "wav_format":"pcm", "chunk_size":[5,10,5]}# Send wav data
+{"mode": "offline", "wav_name": "wav_name", "is_speaking": True, "wav_format":"pcm", "chunk_size":[5,10,5]}
+# Send wav data
+
 Bytes data
 # Send end flag
 {"is_speaking": False}

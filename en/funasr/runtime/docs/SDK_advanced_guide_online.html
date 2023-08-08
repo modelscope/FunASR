@@ -310,7 +310,8 @@ Rename the model you want to deploy after finetuning (for example, 10epoch.pb) t
 --port: the port number of the server listener.
 --wav-path: the audio input. Input can be a path to a wav file or a wav.scp file (a Kaldi-formatted wav list in which each line includes a wav_id followed by a tab and a wav_path).
 --is-ssl: whether to use SSL encryption. The default is to use SSL.
---mode: offline mode.
+--mode: 2pass.
+--thread-num 1 
 </pre></div>
 </div>
 </div>
@@ -318,7 +319,9 @@ Rename the model you want to deploy after finetuning (for example, 10epoch.pb) t
 <h3>Custom client<a class="headerlink" href="#custom-client" title="Permalink to this headline"></a></h3>
 <p>If you want to define your own client, the Websocket communication protocol is as follows:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span># First communication
-{&quot;mode&quot;: &quot;offline&quot;, &quot;wav_name&quot;: &quot;wav_name&quot;, &quot;is_speaking&quot;: True, &quot;wav_format&quot;:&quot;pcm&quot;, &quot;chunk_size&quot;:[5,10,5]}# Send wav data
+{&quot;mode&quot;: &quot;offline&quot;, &quot;wav_name&quot;: &quot;wav_name&quot;, &quot;is_speaking&quot;: True, &quot;wav_format&quot;:&quot;pcm&quot;, &quot;chunk_size&quot;:[5,10,5]}
+# Send wav data
+
 Bytes data
 # Send end flag
 {&quot;is_speaking&quot;: False}
