@@ -1,1 +1,1 @@
-../TEMPLATE/README_zh.md
+../../TEMPLATE/README_zh.md
