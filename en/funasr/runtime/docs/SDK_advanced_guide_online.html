@@ -131,7 +131,7 @@
              
   <div class="section" id="advanced-development-guide-file-transcription-service">
 <h1>Advanced Development Guide (File transcription service)<a class="headerlink" href="#advanced-development-guide-file-transcription-service" title="Permalink to this headline"></a></h1>
-<p>FunASR provides a Chinese online transcription service that can be deployed locally or on a cloud server with just one click. The core of the service is the FunASR runtime SDK, which has been open-sourced. FunASR-runtime combines various capabilities such as speech endpoint detection (VAD), large-scale speech recognition (ASR) using Paraformer-large, and punctuation detection (PUNC), which have all been open-sourced by the speech laboratory of DAMO Academy on the Modelscope community.
+<p>FunASR provides a Chinese online transcription service that can be deployed locally or on a cloud server with just one click. The core of the service is the FunASR runtime SDK, which has been open-sourced. FunASR-runtime combines various capabilities such as speech endpoint detection (VAD), offline large-scale speech recognition (ASR) using Paraformer-large, online large-scale speech recognition (ASR) using Paraformer-large, and punctuation detection (PUNC), which have all been open-sourced by the speech laboratory of DAMO Academy on the Modelscope community.
 This document serves as a development guide for the FunASR online transcription service. If you wish to quickly experience the online transcription service, please refer to the one-click deployment example for the FunASR online transcription service (<a class="reference internal" href="SDK_tutorial_online.html"><span class="doc">docs</span></a>).</p>
 <div class="section" id="installation-of-docker">
 <h2>Installation of Docker<a class="headerlink" href="#installation-of-docker" title="Permalink to this headline"></a></h2>
@@ -187,19 +187,13 @@ sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span clas
 </pre></div>
 </div>
 <p>More details about the script run_server_2pass.sh:</p>
-<p>The FunASR-wss-server supports downloading models from Modelscope. You can set the model download address (–download-model-dir, default is /workspace/models) and the model ID (–model-dir, –vad-dir, –punc-dir). Here is an example:</p>
+<p>The FunASR-wss-server-2pass supports downloading models from Modelscope. You can set the model download address (–download-model-dir, default is /workspace/models) and the model ID (–model-dir, –vad-dir, –punc-dir). Here is an example:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> /workspace/FunASR/funasr/runtime/websocket/build/bin
 ./funasr-wss-server-2pass  <span class="se">\</span>
   --download-model-dir /workspace/models <span class="se">\</span>
-  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx <span class="se">\</span>
-  --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx  <span class="se">\</span>
-  --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
-  --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx <span class="se">\</span>
   --decoder-thread-num <span class="m">32</span> <span class="se">\</span>
   --io-thread-num  <span class="m">8</span> <span class="se">\</span>
   --port <span class="m">10095</span> <span class="se">\</span>
-  --certfile  ../../../ssl_key/server.crt <span class="se">\</span>
-  --keyfile ../../../ssl_key/server.key
 </pre></div>
 </div>
 <p>Introduction to command parameters:</p>
@@ -217,78 +211,23 @@ sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span clas
 --keyfile &lt;string&gt;: SSL key file. Default is ../../../ssl_key/server.key.
 </pre></div>
 </div>
-</div>
-<div class="section" id="preparing-model-resources">
-<h2>Preparing Model Resources<a class="headerlink" href="#preparing-model-resources" title="Permalink to this headline"></a></h2>
-<p>If you choose to download models from Modelscope through the FunASR-wss-server-2pass, you can skip this step. The vad, asr, and punc model resources in the offline file transcription service of FunASR are all from Modelscope. The model addresses are shown in the table below:</p>
-<table border="1" class="docutils">
-<thead>
-<tr>
-<th>模型</th>
-<th>Modelscope链接</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>VAD</td>
-<td>https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary</td>
-</tr>
-<tr>
-<td>ASR</td>
-<td>https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary</td>
-</tr>
-<tr>
-<td>ASR</td>
-<td>https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx/summary</td>
-</tr>
-<tr>
-<td>PUNC</td>
-<td>https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx/summary</td>
-</tr>
-</tbody>
-</table><p>The online transcription service deploys quantized ONNX models. Below are instructions on how to export ONNX models and their quantization. You can choose to export ONNX models from Modelscope, local files, or finetuned resources:</p>
-<div class="section" id="exporting-onnx-models-from-modelscope">
-<h3>Exporting ONNX models from Modelscope<a class="headerlink" href="#exporting-onnx-models-from-modelscope" title="Permalink to this headline"></a></h3>
-<p>Download the corresponding model with the given model name from the Modelscope website, and then export the quantized ONNX model</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model <span class="se">\</span>
---export-dir ./export <span class="se">\</span>
---type onnx <span class="se">\</span>
---quantize True <span class="se">\</span>
---model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch <span class="se">\</span>
---model-name damo/speech_fsmn_vad_zh-cn-16k-common-pytorch <span class="se">\</span>
---model-name damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch
-</pre></div>
-</div>
-<p>Introduction to command parameters:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--model-name: The name of the model on Modelscope, for example: damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
---export-dir: The export directory of ONNX model.
---type: Model type, currently supports ONNX and torch.
---quantize: Quantize the int8 model.
-</pre></div>
-</div>
-</div>
-<div class="section" id="exporting-onnx-models-from-local-files">
-<h3>Exporting ONNX models from local files<a class="headerlink" href="#exporting-onnx-models-from-local-files" title="Permalink to this headline"></a></h3>
-<p>Set the model name to the local path of the model, and export the quantized ONNX model:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model --model-name /workspace/models/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize True
-</pre></div>
-</div>
-</div>
+<p>After executing the above command, the real-time speech recognition service will be started. If the model is specified as the model ID in ModelScope, the following model will be automatically downloaded from ModelScope:
+<a class="reference external" href="https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary">FSMN-VAD</a>，
+<a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx/summary">Paraformer-lagre-online</a>
+<a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary">Paraformer-lagre-offline</a>
+<a class="reference external" href="https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx/summary">CT-Transformer-online</a></p>
 <div class="section" id="exporting-models-from-finetuned-resources">
 <h3>Exporting models from finetuned resources<a class="headerlink" href="#exporting-models-from-finetuned-resources" title="Permalink to this headline"></a></h3>
 <p>If you want to deploy a finetuned model, you can follow these steps:
-Rename the model you want to deploy after finetuning (for example, 10epoch.pb) to model.pb, and replace the original model.pb in Modelscope with this one. If the path of the replaced model is /path/to/finetune/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch, use the following command to convert the finetuned model to an ONNX model:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model --model-name /path/to/finetune/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize True
-</pre></div>
-</div>
+Rename the model you want to deploy after finetuning (for example, 10epoch.pb) to model.pb, and replace the original model.pb in Modelscope with this one. If the path of the replaced model is /path/to/finetune/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch, set the path to model-dir.</p>
 </div>
 </div>
 <div class="section" id="starting-the-client">
 <h2>Starting the client<a class="headerlink" href="#starting-the-client" title="Permalink to this headline"></a></h2>
-<p>After completing the deployment of FunASR offline file transcription service on the server, you can test and use the service by following these steps. Currently, FunASR-bin supports multiple ways to start the client. The following are command-line examples based on python-client, c++-client, and custom client Websocket communication protocol:</p>
+<p>After completing the deployment of FunASR online transcription service on the server, you can test and use the service by following these steps. Currently, FunASR-bin supports multiple ways to start the client. The following are command-line examples based on python-client, c++-client, and custom client Websocket communication protocol:</p>
 <div class="section" id="python-client">
 <h3>python-client<a class="headerlink" href="#python-client" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python funasr_wss_client.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode offline --audio_in <span class="s2">&quot;./data/wav.scp&quot;</span> --send_without_sleep --output_dir <span class="s2">&quot;./results&quot;</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python funasr_wss_client.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode 2pass --audio_in <span class="s2">&quot;./data/wav.scp&quot;</span> --send_without_sleep --output_dir <span class="s2">&quot;./results&quot;</span>
 </pre></div>
 </div>
 <p>Introduction to command parameters:</p>
@@ -297,7 +236,7 @@ Rename the model you want to deploy after finetuning (for example, 10epoch.pb) t
 --audio_in: the audio input. Input can be a path to a wav file or a wav.scp file (a Kaldi-formatted wav list in which each line includes a wav_id followed by a tab and a wav_path).
 --output_dir: the path to the recognition result output.
 --ssl: whether to use SSL encryption. The default is to use SSL.
---mode: offline mode.
+--mode: offline, online, 2pass
 </pre></div>
 </div>
 </div>
@@ -311,35 +250,10 @@ Rename the model you want to deploy after finetuning (for example, 10epoch.pb) t
 --port: the port number of the server listener.
 --wav-path: the audio input. Input can be a path to a wav file or a wav.scp file (a Kaldi-formatted wav list in which each line includes a wav_id followed by a tab and a wav_path).
 --is-ssl: whether to use SSL encryption. The default is to use SSL.
---mode: 2pass.
+--mode: offline, online, 2pass
 --thread-num 1 
 </pre></div>
 </div>
-</div>
-<div class="section" id="custom-client">
-<h3>Custom client<a class="headerlink" href="#custom-client" title="Permalink to this headline"></a></h3>
-<p>If you want to define your own client, the Websocket communication protocol is as follows:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># First communication
-{&quot;mode&quot;: &quot;offline&quot;, &quot;wav_name&quot;: &quot;wav_name&quot;, &quot;is_speaking&quot;: True, &quot;wav_format&quot;:&quot;pcm&quot;, &quot;chunk_size&quot;:[5,10,5]}
-# Send wav data
-
-Bytes data
-# Send end flag
-{&quot;is_speaking&quot;: False}
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="how-to-customize-service-deployment">
-<h2>How to customize service deployment<a class="headerlink" href="#how-to-customize-service-deployment" title="Permalink to this headline"></a></h2>
-<p>The code for FunASR-runtime is open source. If the server and client cannot fully meet your needs, you can further develop them based on your own requirements:</p>
-<div class="section" id="id1">
-<h3>C++ client<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h3>
-<p>https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/websocket</p>
-</div>
-<div class="section" id="id2">
-<h3>Python client<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h3>
-<p>https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket</p>
 </div>
 </div>
 </div>
