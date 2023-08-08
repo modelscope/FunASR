@@ -91,12 +91,6 @@ The use of pretraining model is subject to [model licencs](./MODEL_LICENSE)
   year={2023},
   booktitle={ICASSP},
 }
-@inproceedings{du2022sond,
-  author={Zhihao Du and Shiliang Zhang and Siqi Zheng and Zhi{-}Jie Yan},
-  title={Speaker Overlap-aware Neural Diarization for Multi-party Meeting Analysis},
-  booktitle={{EMNLP}},
-  year={2022}
-}
 @inproceedings{gao22b_interspeech,
   author={Zhifu Gao and ShiLiang Zhang and Ian McLoughlin and Zhijie Yan},
   title={{Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition}},
