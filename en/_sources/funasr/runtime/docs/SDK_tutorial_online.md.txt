@@ -84,10 +84,10 @@ Command parameter description:
 --server-ip specifies the IP address of the machine where the FunASR runtime-SDK service is deployed. The default value is the local IP address (127.0.0.1). If the client and the service are not on the same server, the IP address needs to be changed to the IP address of the deployment machine.
 --port specifies the deployment port number as 10095.
 --mode: `offline` indicates that the inference mode is one-sentence recognition; `online` indicates that the inference mode is real-time speech recognition; `2pass` indicates real-time speech recognition, and offline models are used for error correction at the end of each sentence.
---chunk_size: indicates the latency configuration of the streaming model. [5,10,5] indicates that the current audio is 600ms, with a lookback of 300ms and a lookahead of 300ms.
+--chunk-size: indicates the latency configuration of the streaming model. [5,10,5] indicates that the current audio is 600ms, with a lookback of 300ms and a lookahead of 300ms.
 --wav-path specifies the audio file to be transcribed, and supports file paths.
---thread_num sets the number of concurrent send threads, with a default value of 1.
---ssl sets whether to enable SSL certificate verification, with a default value of 1 for enabling and 0 for disabling.
+--threa-num sets the number of concurrent send threads, with a default value of 1.
+--is-ssl sets whether to enable SSL certificate verification, with a default value of 1 for enabling and 0 for disabling.
 ```
 
 ### html-client
