@@ -1471,7 +1471,7 @@ PARAMS_DOCKER_PUNC_DIR=""
 #  The path of punc model in docker
 PARAMS_DOCKER_PUNC_PATH=""
 #  The punc model ID in ModelScope
-PARAMS_PUNC_ID="damo/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx"
+PARAMS_PUNC_ID="damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx"
 
 #  The dir stored vad model in local
 PARAMS_LOCAL_VAD_DIR=""
