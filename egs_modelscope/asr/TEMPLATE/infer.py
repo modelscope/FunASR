@@ -11,6 +11,7 @@ def modelscope_infer(args):
         model=args.model,
         output_dir=args.output_dir,
         batch_size=args.batch_size,
+        update_model=False,
         param_dict={"decoding_model": args.decoding_mode, "hotword": args.hotword_txt}
     )
     inference_pipeline(audio_in=args.audio_in)
