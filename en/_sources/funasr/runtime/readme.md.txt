@@ -1,4 +1,4 @@
-# FunASR runtime-SDK
+# FunASR Runtime Roadmap
 中文文档（[点击此处](./readme_cn.md)）
 
 FunASR is a speech recognition framework developed by the Speech Lab of DAMO Academy, which integrates industrial-level models in the fields of speech endpoint detection, speech recognition, punctuation segmentation, and more. 
