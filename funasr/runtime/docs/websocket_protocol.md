@@ -47,7 +47,7 @@ Parameter explanation:
 ## Real-time Speech Recognition
 ### System Architecture Diagram
 
-<div align="left"><img src="images/2pass.jpg" width="400"/></div>
+<div align="left"><img src="images/2pass.jpg" width="600"/></div>
 
 ### Sending Data from Client to Server
 #### Message Format
