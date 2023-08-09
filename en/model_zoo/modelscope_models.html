@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pretrained Models on ModelScope &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <title>Pretrained Models Released on ModelScope &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -70,28 +70,24 @@
 </ul>
 <p class="caption"><span class="caption-text">Model Zoo</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Pretrained Models on ModelScope</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Pretrained Models Released on ModelScope</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#model-license">Model License</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#model-usage">Model Usage</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#model-zoo">Model Zoo</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#speech-recognition-models">Speech Recognition Models</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#paraformer-models">Paraformer Models</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#uniasr-models">UniASR Models</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#conformer-models">Conformer Models</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#rnn-t-models">RNN-T Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#speech-recognition">Speech Recognition</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#paraformer">Paraformer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#uniasr-unify-streaming-and-non-streaming">UniASR [Unify Streaming and Non-streaming]</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#conformer">Conformer</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#multi-talker-speech-recognition-models">Multi-talker Speech Recognition Models</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#mfcca-models">MFCCA Models</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#voice-activity-detection-models">Voice Activity Detection Models</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#punctuation-restoration-models">Punctuation Restoration Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#multi-talker-speech-recognition">Multi-talker Speech Recognition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#voice-activity-detection">Voice Activity Detection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#punctuation-restoration">Punctuation Restoration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#language-models">Language Models</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#speaker-verification-models">Speaker Verification Models</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#speaker-diarization-models">Speaker Diarization Models</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#timestamp-prediction-models">Timestamp Prediction Models</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#inverse-text-normalization-itn-models">Inverse Text Normalization (ITN) Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#speaker-verification">Speaker Verification</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#speaker-diarization">Speaker Diarization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#timestamp-prediction">Timestamp Prediction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#inverse-text-normalization-itn">Inverse Text Normalization (ITN)</a></li>
 </ul>
 </li>
 </ul>
@@ -145,7 +141,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Pretrained Models on ModelScope</li>
+      <li class="breadcrumb-item active">Pretrained Models Released on ModelScope</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/model_zoo/modelscope_models.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -156,8 +152,8 @@
            <div itemprop="articleBody">
              
   <p>(<a class="reference internal" href="modelscope_models_zh.html"><span class="doc">简体中文</span></a>|English)</p>
-<div class="section" id="pretrained-models-on-modelscope">
-<h1>Pretrained Models on ModelScope<a class="headerlink" href="#pretrained-models-on-modelscope" title="Permalink to this headline"></a></h1>
+<div class="section" id="pretrained-models-released-on-modelscope">
+<h1>Pretrained Models Released on ModelScope<a class="headerlink" href="#pretrained-models-released-on-modelscope" title="Permalink to this headline"></a></h1>
 <div class="section" id="model-license">
 <h2>Model License<a class="headerlink" href="#model-license" title="Permalink to this headline"></a></h2>
 <p>You are free to use, copy, modify, and share FunASR models under the conditions of this agreement. You should indicate the model source and author information when using, copying, modifying and sharing FunASR models. You should keep the relevant names of models in [FunASR software].. Full model license could see <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/MODEL_LICENSE">license</a></p>
@@ -169,10 +165,10 @@
 <div class="section" id="model-zoo">
 <h2>Model Zoo<a class="headerlink" href="#model-zoo" title="Permalink to this headline"></a></h2>
 <p>Here we provided several pretrained models on different datasets. The details of models and datasets can be found on <a class="reference external" href="https://www.modelscope.cn/models?page=1&amp;tasks=auto-speech-recognition">ModelScope</a>.</p>
-<div class="section" id="speech-recognition-models">
-<h3>Speech Recognition Models<a class="headerlink" href="#speech-recognition-models" title="Permalink to this headline"></a></h3>
-<div class="section" id="paraformer-models">
-<h4>Paraformer Models<a class="headerlink" href="#paraformer-models" title="Permalink to this headline"></a></h4>
+<div class="section" id="speech-recognition">
+<h3>Speech Recognition<a class="headerlink" href="#speech-recognition" title="Permalink to this headline"></a></h3>
+<div class="section" id="paraformer">
+<h4>Paraformer<a class="headerlink" href="#paraformer" title="Permalink to this headline"></a></h4>
 <table border="1" class="docutils">
 <thead>
 <tr>
@@ -287,8 +283,8 @@
 </tr>
 </tbody>
 </table></div>
-<div class="section" id="uniasr-models">
-<h4>UniASR Models<a class="headerlink" href="#uniasr-models" title="Permalink to this headline"></a></h4>
+<div class="section" id="uniasr-unify-streaming-and-non-streaming">
+<h4>UniASR [Unify Streaming and Non-streaming]<a class="headerlink" href="#uniasr-unify-streaming-and-non-streaming" title="Permalink to this headline"></a></h4>
 <table border="1" class="docutils">
 <thead>
 <tr>
@@ -466,58 +462,17 @@
 </tr>
 </tbody>
 </table></div>
-<div class="section" id="conformer-models">
-<h4>Conformer Models<a class="headerlink" href="#conformer-models" title="Permalink to this headline"></a></h4>
-<table border="1" class="docutils">
-<thead>
-<tr>
-<th style="text-align: center;">Model Name</th>
-<th style="text-align: center;">Language</th>
-<th style="text-align: center;">Training Data</th>
-<th style="text-align: center;">Vocab Size</th>
-<th style="text-align: center;">Parameter</th>
-<th style="text-align: center;">Offline/Online</th>
-<th style="text-align: left;">Notes</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: center;"><a href="https://modelscope.cn/models/damo/speech_conformer_asr_nat-zh-cn-16k-aishell1-vocab4234-pytorch/summary">Conformer</a></td>
-<td style="text-align: center;">CN</td>
-<td style="text-align: center;">AISHELL (178hours)</td>
-<td style="text-align: center;">4234</td>
-<td style="text-align: center;">44M</td>
-<td style="text-align: center;">Offline</td>
-<td style="text-align: left;">Duration of input wav &lt;= 20s</td>
-</tr>
-<tr>
-<td style="text-align: center;"><a href="https://www.modelscope.cn/models/damo/speech_conformer_asr_nat-zh-cn-16k-aishell2-vocab5212-pytorch/summary">Conformer</a></td>
-<td style="text-align: center;">CN</td>
-<td style="text-align: center;">AISHELL-2 (1000hours)</td>
-<td style="text-align: center;">5212</td>
-<td style="text-align: center;">44M</td>
-<td style="text-align: center;">Offline</td>
-<td style="text-align: left;">Duration of input wav &lt;= 20s</td>
-</tr>
-<tr>
-<td style="text-align: center;"><a href="https://modelscope.cn/models/damo/speech_conformer_asr-en-16k-vocab4199-pytorch/summary">Conformer</a></td>
-<td style="text-align: center;">EN</td>
-<td style="text-align: center;">Alibaba Speech Data (10000hours)</td>
-<td style="text-align: center;">4199</td>
-<td style="text-align: center;">220M</td>
-<td style="text-align: center;">Offline</td>
-<td style="text-align: left;">Duration of input wav &lt;= 20s</td>
-</tr>
-</tbody>
-</table></div>
-<div class="section" id="rnn-t-models">
-<h4>RNN-T Models<a class="headerlink" href="#rnn-t-models" title="Permalink to this headline"></a></h4>
+<div class="section" id="conformer">
+<h4>Conformer<a class="headerlink" href="#conformer" title="Permalink to this headline"></a></h4>
+<p>|                                                       Model Name                                                       | Language |     Training Data     | Vocab Size | Parameter | Offline/Online | Notes                                                                                                                           |
+|:———————————————————————————————————————-:|:——–:|:———————:|:———-:|:———:|:————–:|:——————————————————————————————————————————–|
+| <a class="reference external" href="https://modelscope.cn/models/damo/speech_conformer_asr_nat-zh-cn-16k-aishell1-vocab4234-pytorch/summary">Conformer</a>   |   CN     |  AISHELL (178hours)   |    4234    |    44M    |    Offline     | Duration of input wav &lt;= 20s                                                                                                    |
+| <a class="reference external" href="https://www.modelscope.cn/models/damo/speech_conformer_asr_nat-zh-cn-16k-aishell2-vocab5212-pytorch/summary">Conformer</a>   |   CN     | AISHELL-2 (1000hours) |    5212    |    44M    |    Offline     | Duration of input wav &lt;= 20s                                                                                                    |
+| <a class="reference external" href="https://modelscope.cn/models/damo/speech_conformer_asr-en-16k-vocab4199-pytorch/summary">Conformer</a>   |   EN     | Alibaba Speech Data (10000hours) |    4199    |    220M    |    Offline     | Duration of input wav &lt;= 20s                                                                                                    |</p>
 </div>
 </div>
-<div class="section" id="multi-talker-speech-recognition-models">
-<h3>Multi-talker Speech Recognition Models<a class="headerlink" href="#multi-talker-speech-recognition-models" title="Permalink to this headline"></a></h3>
-<div class="section" id="mfcca-models">
-<h4>MFCCA Models<a class="headerlink" href="#mfcca-models" title="Permalink to this headline"></a></h4>
+<div class="section" id="multi-talker-speech-recognition">
+<h3>Multi-talker Speech Recognition<a class="headerlink" href="#multi-talker-speech-recognition" title="Permalink to this headline"></a></h3>
 <table border="1" class="docutils">
 <thead>
 <tr>
@@ -542,9 +497,8 @@
 </tr>
 </tbody>
 </table></div>
-</div>
-<div class="section" id="voice-activity-detection-models">
-<h3>Voice Activity Detection Models<a class="headerlink" href="#voice-activity-detection-models" title="Permalink to this headline"></a></h3>
+<div class="section" id="voice-activity-detection">
+<h3>Voice Activity Detection<a class="headerlink" href="#voice-activity-detection" title="Permalink to this headline"></a></h3>
 <table border="1" class="docutils">
 <thead>
 <tr>
@@ -572,8 +526,8 @@
 </tr>
 </tbody>
 </table></div>
-<div class="section" id="punctuation-restoration-models">
-<h3>Punctuation Restoration Models<a class="headerlink" href="#punctuation-restoration-models" title="Permalink to this headline"></a></h3>
+<div class="section" id="punctuation-restoration">
+<h3>Punctuation Restoration<a class="headerlink" href="#punctuation-restoration" title="Permalink to this headline"></a></h3>
 <table border="1" class="docutils">
 <thead>
 <tr>
@@ -626,8 +580,8 @@
 </tr>
 </tbody>
 </table></div>
-<div class="section" id="speaker-verification-models">
-<h3>Speaker Verification Models<a class="headerlink" href="#speaker-verification-models" title="Permalink to this headline"></a></h3>
+<div class="section" id="speaker-verification">
+<h3>Speaker Verification<a class="headerlink" href="#speaker-verification" title="Permalink to this headline"></a></h3>
 <table border="1" class="docutils">
 <thead>
 <tr>
@@ -655,8 +609,8 @@
 </tr>
 </tbody>
 </table></div>
-<div class="section" id="speaker-diarization-models">
-<h3>Speaker Diarization Models<a class="headerlink" href="#speaker-diarization-models" title="Permalink to this headline"></a></h3>
+<div class="section" id="speaker-diarization">
+<h3>Speaker Diarization<a class="headerlink" href="#speaker-diarization" title="Permalink to this headline"></a></h3>
 <table border="1" class="docutils">
 <thead>
 <tr>
@@ -681,30 +635,14 @@
 </tr>
 </tbody>
 </table></div>
-<div class="section" id="timestamp-prediction-models">
-<h3>Timestamp Prediction Models<a class="headerlink" href="#timestamp-prediction-models" title="Permalink to this headline"></a></h3>
-<table border="1" class="docutils">
-<thead>
-<tr>
-<th style="text-align: center;">Model Name</th>
-<th style="text-align: center;">Language</th>
-<th style="text-align: center;">Training Data</th>
-<th style="text-align: center;">Parameters</th>
-<th style="text-align: left;">Notes</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: center;"><a href="https://modelscope.cn/models/damo/speech_timestamp_prediction-v1-16k-offline/summary">TP-Aligner</a></td>
-<td style="text-align: center;">CN</td>
-<td style="text-align: center;">Alibaba Speech Data (50000hours)</td>
-<td style="text-align: center;">37.8M</td>
-<td style="text-align: left;">Timestamp prediction, Mandarin, middle size</td>
-</tr>
-</tbody>
-</table></div>
-<div class="section" id="inverse-text-normalization-itn-models">
-<h3>Inverse Text Normalization (ITN) Models<a class="headerlink" href="#inverse-text-normalization-itn-models" title="Permalink to this headline"></a></h3>
+<div class="section" id="timestamp-prediction">
+<h3>Timestamp Prediction<a class="headerlink" href="#timestamp-prediction" title="Permalink to this headline"></a></h3>
+<p>|                                                    Model Name                                     |  Language  |    Training Data    | Parameters | Notes |
+|:————————————————————————————————–:|:————–:|:——————-:|:———-:|:——|
+| <a class="reference external" href="https://modelscope.cn/models/damo/speech_timestamp_prediction-v1-16k-offline/summary">TP-Aligner</a> | CN | Alibaba Speech Data (50000hours) |   37.8M    |    Timestamp prediction, Mandarin, middle size |</p>
+</div>
+<div class="section" id="inverse-text-normalization-itn">
+<h3>Inverse Text Normalization (ITN)<a class="headerlink" href="#inverse-text-normalization-itn" title="Permalink to this headline"></a></h3>
 <table border="1" class="docutils">
 <thead>
 <tr>
