@@ -123,7 +123,7 @@ void WebSocketServer::do_decoder(
       if (Result) {
         websocketpp::lib::error_code ec;
         nlohmann::json jsonresult =
-            handle_result(Result, msg["wav_name"]);
+            handle_result(Result, msg);
         jsonresult["is_final"] = false;
         if(jsonresult["text"] != "") {
           if (is_ssl) {
@@ -154,7 +154,7 @@ void WebSocketServer::do_decoder(
       if (Result) {
         websocketpp::lib::error_code ec;
         nlohmann::json jsonresult =
-            handle_result(Result, msg["wav_name"]);
+            handle_result(Result, msg);
         jsonresult["is_final"] = true;
         if (is_ssl) {
           wss_server_->send(hdl, jsonresult.dump(),
@@ -208,6 +208,7 @@ void WebSocketServer::on_close(websocketpp::connection_hdl hdl) {
     return;
   }
   scoped_lock guard_decoder(*(data_msg->thread_lock));  //wait for do_decoder finished and avoid access freed tpass_online_handle 
+  LOG(INFO) << "----------------FunTpassOnlineUninit----------------------";
   FunTpassOnlineUninit(data_msg->tpass_online_handle);
   data_map.erase(hdl);  // remove data vector when  connection is closed
   LOG(INFO) << "on_close, active connections: "<< data_map.size();
