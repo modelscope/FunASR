@@ -181,7 +181,11 @@ public class FunasrWsClient extends WebSocketClient {
     } catch (org.json.simple.parser.ParseException e) {
       e.printStackTrace();
     }
-    if (iseof && mode.equals("offline")) {
+    if (iseof && mode.equals("offline") && !jsonObject.containsKey("is_final")) {
+      close();
+    }
+	 
+    if (iseof && mode.equals("offline") && jsonObject.containsKey("is_final") && jsonObject.get("is_final").equals("false")) {
       close();
     }
   }

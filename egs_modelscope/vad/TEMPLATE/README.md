@@ -1,3 +1,5 @@
+([简体中文](./README_zh.md)|English)
+
 # Voice Activity Detection
 
 > **Note**: 
@@ -22,7 +24,7 @@ print(segments_result)
 #### [FSMN-VAD-online model](https://modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary)
 ```python
 inference_pipeline = pipeline(
-    task=Tasks.auto_speech_recognition,
+    task=Tasks.voice_activity_detection,
     model='damo/speech_fsmn_vad_zh-cn-16k-common-pytorch',
     )
 import soundfile

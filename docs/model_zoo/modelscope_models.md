@@ -1,3 +1,5 @@
+([简体中文](./modelscope_models_zh.md)|English)
+
 # Pretrained Models on ModelScope
 
 ## Model License

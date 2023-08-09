@@ -1,4 +1,0 @@
-pyaudio
-webrtcvad
-grpcio
-grpcio-tools

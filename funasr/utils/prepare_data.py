@@ -198,6 +198,7 @@ def prepare_data(args, distributed_option):
     data_names = args.dataset_conf.get("data_names", "speech,text").split(",")
     data_types = args.dataset_conf.get("data_types", "sound,text").split(",")
     file_names = args.data_file_names.split(",")
+    batch_type = args.dataset_conf["batch_conf"]["batch_type"]
     print("data_names: {}, data_types: {}, file_names: {}".format(data_names, data_types, file_names))
     assert len(data_names) == len(data_types) == len(file_names)
     if args.dataset_type == "small":
@@ -228,7 +229,7 @@ def prepare_data(args, distributed_option):
             filter_wav_text(args.data_dir, args.train_set)
             filter_wav_text(args.data_dir, args.valid_set)
 
-        if args.dataset_type == "small":
+        if args.dataset_type == "small" and batch_type != "unsorted":
             calc_shape(args, args.train_set)
             calc_shape(args, args.valid_set)
 

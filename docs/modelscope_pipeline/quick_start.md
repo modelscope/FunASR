@@ -1,3 +1,5 @@
+([简体中文](./quick_start_zh.md)|English)
+
 # Quick Start
 
 > **Note**: 
@@ -222,4 +224,3 @@ If you want finetune with multi-GPUs, you could:
 ```shell
 CUDA_VISIBLE_DEVICES=1,2 python -m torch.distributed.launch --nproc_per_node 2 finetune.py > log.txt 2>&1
 ```
-

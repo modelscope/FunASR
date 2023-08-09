@@ -232,7 +232,7 @@ gpu_num=1
 if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
     echo "Stage 3: Calc perplexity: ${lm_test_text}"
     
-    python ../../../funasr/bin/lm_inference.py \
+    python ../../../funasr/bin/lm_inference_launch.py \
         --output_dir "${lm_exp}/perplexity_test" \
         --ngpu "${gpu_num}" \
         --batch_size 1 \

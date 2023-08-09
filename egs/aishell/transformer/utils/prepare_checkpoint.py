@@ -16,3 +16,4 @@ if __name__ == '__main__':
     except BaseException:
         raise BaseException(f"Please download pretrain model from ModelScope firstly.")
     shutil.copy(os.path.join(checkpoint_dir, checkpoint_name), os.path.join(pretrained_model_path, "model.pb"))
+    shutil.copy(os.path.join(checkpoint_dir, "config.yaml"), os.path.join(pretrained_model_path, "config.yaml"))

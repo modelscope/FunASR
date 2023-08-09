@@ -45,10 +45,10 @@ Overview
    :caption: ModelScope Egs
 
    ./modelscope_pipeline/quick_start.md
-   ./modelscope_pipeline/asr_pipeline.md
-   ./modelscope_pipeline/vad_pipeline.md
-   ./modelscope_pipeline/punc_pipeline.md
-   ./modelscope_pipeline/tp_pipeline.md
+   ./egs_modelscope/asr/TEMPLATE/README.md
+   ./egs_modelscope/vad/TEMPLATE/README.md
+   ./egs_modelscope/punctuation/TEMPLATE/README.md
+   ./egs_modelscope/tp/TEMPLATE/README.md
    ./modelscope_pipeline/sv_pipeline.md
    ./modelscope_pipeline/sd_pipeline.md
    ./modelscope_pipeline/itn_pipeline.md
@@ -71,12 +71,10 @@ Overview
    :maxdepth: 1
    :caption: Runtime and Service
 
-   ./funasr/export/README.md
-   ./funasr/runtime/python/onnxruntime/README.md
-   ./funasr/runtime/python/websocket/README.md
-   ./funasr/runtime/websocket/readme.md
+   ./funasr/runtime/readme.md
+   ./funasr/runtime/docs/SDK_tutorial_online.md
+   ./funasr/runtime/docs/SDK_tutorial.md
    ./funasr/runtime/html5/readme.md
-   ./funasr/runtime/python/libtorch/README.md
 
 
 

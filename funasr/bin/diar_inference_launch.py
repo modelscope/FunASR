@@ -453,10 +453,16 @@ def get_parser():
         help="The batch size for inference",
     )
     group.add_argument(
-        "--diar_smooth_size",
+        "--smooth_size",
         type=int,
         default=121,
         help="The smoothing size for post-processing"
+    )
+    group.add_argument(
+        "--dur_threshold",
+        type=int,
+        default=10,
+        help="The threshold of minimum duration"
     )
 
     return parser

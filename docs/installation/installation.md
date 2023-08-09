@@ -1,3 +1,5 @@
+([简体中文](./installation_zh.md)|English)
+
 <p align="left">
     <a href=""><img src="https://img.shields.io/badge/OS-Linux%2C%20Win%2C%20Mac-brightgreen.svg"></a>
     <a href=""><img src="https://img.shields.io/badge/Python->=3.7,<=3.10-aff.svg"></a>
@@ -13,7 +15,7 @@
 wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
 sh Miniconda3-latest-Linux-x86_64.sh
 source ~/.bashrc
-conda create -n funasr python=3.7
+conda create -n funasr python=3.8
 conda activate funasr
 ```
 #### Mac
@@ -60,7 +62,7 @@ If you want to use the pretrained models in ModelScope, you should install the m
 ```shell
 pip3 install -U modelscope
 # For the users in China, you could install with the command:
-# pip3 install -U modelscope -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/repo.html -i https://mirror.sjtu.edu.cn/pypi/web/simple
+# pip3 install -U modelscope -i https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
 
 ### FQA
