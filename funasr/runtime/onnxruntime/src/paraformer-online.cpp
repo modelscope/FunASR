@@ -125,11 +125,15 @@ void ParaformerOnline::ExtractFeats(float sample_rate, vector<std::vector<float>
         }
     } else {
         if (input_finished) {
-        if (!reserve_waveforms_.empty()) {
-            waves = reserve_waveforms_;
-        }
-        wav_feats = lfr_splice_cache_;
-        OnlineLfrCmvn(wav_feats, input_finished);
+            if (!reserve_waveforms_.empty()) {
+                waves = reserve_waveforms_;
+            }
+            wav_feats = lfr_splice_cache_;
+            if(wav_feats.size() == 0){
+                LOG(ERROR) << "wav_feats's size is 0";
+            }else{
+                OnlineLfrCmvn(wav_feats, input_finished);
+            }
         }
     }
     if(input_finished){
