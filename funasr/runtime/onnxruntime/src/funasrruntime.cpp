@@ -347,9 +347,9 @@ extern "C" {
 
 		funasr::FUNASR_RECOG_RESULT* p_result = new funasr::FUNASR_RECOG_RESULT;
 		p_result->snippet_time = audio->GetTimeLen();
-		if(p_result->snippet_time == 0){
-			return p_result;
-		}
+		// if(p_result->snippet_time == 0){
+		// 	return p_result;
+		// }
 		
 		audio->Split(vad_online_handle, chunk_len, input_finished, mode);
 
