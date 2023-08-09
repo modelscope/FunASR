@@ -148,7 +148,7 @@ void FsmnVad::Forward(
                 vad_inputs.size(), vad_out_names_.data(), vad_out_names_.size());
     } catch (std::exception const &e) {
         LOG(ERROR) << "Error when run vad onnx forword: " << (e.what());
-        exit(-1);
+        return;
     }
 
     // 5. Change infer result to output shapes

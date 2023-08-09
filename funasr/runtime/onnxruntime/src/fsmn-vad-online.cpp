@@ -140,6 +140,9 @@ FsmnVadOnline::Infer(std::vector<float> &waves, bool input_finished) {
       return vad_segments;
     }
     fsmnvad_handle_->Forward(vad_feats, &vad_probs, &in_cache_, input_finished);
+    if(vad_probs.size() == 0){
+      return vad_segments;
+    }
 
     vad_segments = vad_scorer(vad_probs, waves, input_finished, true, vad_silence_duration_, vad_max_len_,
                               vad_speech_noise_thres_, vad_sample_rate_);
