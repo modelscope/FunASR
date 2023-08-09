@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>websocket/grpc通信协议 &mdash; FunASR  documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <title>WebSocket/gRPC Communication Protocol &mdash; FunASR  documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
@@ -118,9 +118,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">websocket/grpc通信协议</li>
+      <li class="breadcrumb-item active">WebSocket/gRPC Communication Protocol</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../../../_sources/funasr/runtime/docs/websocket_protocol_zh.md.txt" rel="nofollow"> View page source</a>
+            <a href="../../../_sources/funasr/runtime/docs/websocket_protocol.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -128,114 +128,114 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <p>(简体中文|<a class="reference internal" href="websocket_protocol.html"><span class="doc">English</span></a>)</p>
-<div class="section" id="websocket-grpc">
-<h1>websocket/grpc通信协议<a class="headerlink" href="#websocket-grpc" title="Permalink to this headline"></a></h1>
-<div class="section" id="id1">
-<h2>离线文件转写<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h2>
-<div class="section" id="id2">
-<h3>从客户端往服务端发送数据<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h3>
-<div class="section" id="id3">
-<h4>消息格式<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h4>
-<p>配置参数与meta信息用json，音频数据采用bytes</p>
+  <p>(<a class="reference internal" href="websocket_protocol_zh.html"><span class="doc">简体中文</span></a>|English)</p>
+<div class="section" id="websocket-grpc-communication-protocol">
+<h1>WebSocket/gRPC Communication Protocol<a class="headerlink" href="#websocket-grpc-communication-protocol" title="Permalink to this headline"></a></h1>
+<div class="section" id="offline-file-transcription">
+<h2>Offline File Transcription<a class="headerlink" href="#offline-file-transcription" title="Permalink to this headline"></a></h2>
+<div class="section" id="sending-data-from-client-to-server">
+<h3>Sending Data from Client to Server<a class="headerlink" href="#sending-data-from-client-to-server" title="Permalink to this headline"></a></h3>
+<div class="section" id="message-format">
+<h4>Message Format<a class="headerlink" href="#message-format" title="Permalink to this headline"></a></h4>
+<p>Configuration parameters and meta information are in JSON format, while audio data is in bytes.</p>
 </div>
-<div class="section" id="id4">
-<h4>首次通信<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h4>
-<p>message为（需要用json序列化）：</p>
+<div class="section" id="initial-communication">
+<h4>Initial Communication<a class="headerlink" href="#initial-communication" title="Permalink to this headline"></a></h4>
+<p>The message (which needs to be serialized in JSON) is:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{&quot;mode&quot;: &quot;offline&quot;, &quot;wav_name&quot;: &quot;wav_name&quot;, &quot;is_speaking&quot;: True,&quot;wav_format&quot;:&quot;pcm&quot;}
 </pre></div>
 </div>
-<p>参数介绍：</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>`mode`：`offline`，表示推理模式为离线文件转写
-`wav_name`：表示需要推理音频文件名
-`wav_format`：表示音视频文件后缀名，可选pcm、mp3、mp4等
-`is_speaking`：False 表示断句尾点，例如，vad切割点，或者一条wav结束
-`audio_fs`：当输入音频为pcm数据是，需要加上音频采样率参数
+<p>Parameter explanation:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>`mode`: `offline`, indicating the inference mode for offline file transcription
+`wav_name`: the name of the audio file to be transcribed
+`wav_format`: the audio and video file extension, such as pcm, mp3, mp4, etc.
+`is_speaking`: False indicates the end of a sentence, such as a VAD segmentation point or the end of a WAV file
+`audio_fs`: when the input audio is in PCM format, the audio sampling rate parameter needs to be added
 </pre></div>
 </div>
 </div>
-<div class="section" id="id5">
-<h4>发送音频数据<a class="headerlink" href="#id5" title="Permalink to this headline"></a></h4>
-<p>pcm直接将音频数据，其他格式音频数据，连同头部信息与音视频bytes数据发送，支持多种采样率与音视频格式</p>
+<div class="section" id="sending-audio-data">
+<h4>Sending Audio Data<a class="headerlink" href="#sending-audio-data" title="Permalink to this headline"></a></h4>
+<p>For PCM format, directly send the audio data. For other audio formats, send the header information and audio and video bytes data together. Multiple sampling rates and audio and video formats are supported.</p>
 </div>
-<div class="section" id="id6">
-<h4>发送音频结束标志<a class="headerlink" href="#id6" title="Permalink to this headline"></a></h4>
-<p>音频数据发送结束后，需要发送结束标志（需要用json序列化）：</p>
+<div class="section" id="sending-end-of-audio-flag">
+<h4>Sending End of Audio Flag<a class="headerlink" href="#sending-end-of-audio-flag" title="Permalink to this headline"></a></h4>
+<p>After sending the audio data, an end-of-audio flag needs to be sent (which needs to be serialized in JSON):</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{&quot;is_speaking&quot;: False}
 </pre></div>
 </div>
 </div>
 </div>
-<div class="section" id="id7">
-<h3>从服务端往客户端发数据<a class="headerlink" href="#id7" title="Permalink to this headline"></a></h3>
-<div class="section" id="id8">
-<h4>发送识别结果<a class="headerlink" href="#id8" title="Permalink to this headline"></a></h4>
-<p>message为（采用json序列化）</p>
+<div class="section" id="sending-data-from-server-to-client">
+<h3>Sending Data from Server to Client<a class="headerlink" href="#sending-data-from-server-to-client" title="Permalink to this headline"></a></h3>
+<div class="section" id="sending-recognition-results">
+<h4>Sending Recognition Results<a class="headerlink" href="#sending-recognition-results" title="Permalink to this headline"></a></h4>
+<p>The message (serialized in JSON) is:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{&quot;mode&quot;: &quot;offline&quot;, &quot;wav_name&quot;: &quot;wav_name&quot;, &quot;text&quot;: &quot;asr ouputs&quot;, &quot;is_final&quot;: True}
 </pre></div>
 </div>
-<p>参数介绍：</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>`mode`：`offline`，表示推理模式为离线文件转写
-`wav_name`：表示需要推理音频文件名
-`text`：表示语音识别输出文本
-`is_final`：表示识别结束
+<p>Parameter explanation:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>`mode`: `offline`, indicating the inference mode for offline file transcription
+`wav_name`: the name of the audio file to be transcribed
+`text`: the text output of speech recognition
+`is_final`: indicating the end of recognition
 </pre></div>
 </div>
 </div>
 </div>
 </div>
-<div class="section" id="id9">
-<h2>实时语音识别<a class="headerlink" href="#id9" title="Permalink to this headline"></a></h2>
-<div class="section" id="id10">
-<h3>系统架构图<a class="headerlink" href="#id10" title="Permalink to this headline"></a></h3>
+<div class="section" id="real-time-speech-recognition">
+<h2>Real-time Speech Recognition<a class="headerlink" href="#real-time-speech-recognition" title="Permalink to this headline"></a></h2>
+<div class="section" id="system-architecture-diagram">
+<h3>System Architecture Diagram<a class="headerlink" href="#system-architecture-diagram" title="Permalink to this headline"></a></h3>
 <div align="left"><img src="images/2pass.jpg" width="400"/></div></div>
-<div class="section" id="id11">
-<h3>从客户端往服务端发送数据<a class="headerlink" href="#id11" title="Permalink to this headline"></a></h3>
-<div class="section" id="id12">
-<h4>消息格式<a class="headerlink" href="#id12" title="Permalink to this headline"></a></h4>
-<p>配置参数与meta信息用json，音频数据采用bytes</p>
+<div class="section" id="id1">
+<h3>Sending Data from Client to Server<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h3>
+<div class="section" id="id2">
+<h4>Message Format<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h4>
+<p>Configuration parameters and meta information are in JSON format, while audio data is in bytes.</p>
 </div>
-<div class="section" id="id13">
-<h4>首次通信<a class="headerlink" href="#id13" title="Permalink to this headline"></a></h4>
-<p>message为（需要用json序列化）：</p>
+<div class="section" id="id3">
+<h4>Initial Communication<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h4>
+<p>The message (which needs to be serialized in JSON) is:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{&quot;mode&quot;: &quot;2pass&quot;, &quot;wav_name&quot;: &quot;wav_name&quot;, &quot;is_speaking&quot;: True, &quot;wav_format&quot;:&quot;pcm&quot;, &quot;chunk_size&quot;:[5,10,5]
 </pre></div>
 </div>
-<p>参数介绍：</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>`mode`：`offline`，表示推理模式为一句话识别；`online`，表示推理模式为实时语音识别；`2pass`：表示为实时语音识别，并且说话句尾采用离线模型进行纠错。
-`wav_name`：表示需要推理音频文件名
-`wav_format`：表示音视频文件后缀名，可选pcm、mp3、mp4等（备注，1.0版本只支持pcm音频流）
-`is_speaking`：表示断句尾点，例如，vad切割点，或者一条wav结束
-`chunk_size`：表示流式模型latency配置，`[5,10,5]`，表示当前音频为600ms，并且回看300ms，又看300ms。
-`audio_fs`：当输入音频为pcm数据是，需要加上音频采样率参数
+<p>Parameter explanation:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>`mode`: `offline` indicates the inference mode for single-sentence recognition; `online` indicates the inference mode for real-time speech recognition; `2pass` indicates real-time speech recognition and offline model correction for sentence endings.
+`wav_name`: the name of the audio file to be transcribed
+`wav_format`: the audio and video file extension, such as pcm, mp3, mp4, etc. (Note: only PCM audio streams are supported in version 1.0)
+`is_speaking`: False indicates the end of a sentence, such as a VAD segmentation point or the end of a WAV file
+`chunk_size`: indicates the latency configuration of the streaming model, `[5,10,5]` indicates that the current audio is 600ms long, with a 300ms look-ahead and look-back time.
+`audio_fs`: when the input audio is in PCM format, the audio sampling rate parameter needs to be added
 </pre></div>
 </div>
 </div>
-<div class="section" id="id14">
-<h4>发送音频数据<a class="headerlink" href="#id14" title="Permalink to this headline"></a></h4>
-<p>直接将音频数据，移除头部信息后的bytes数据发送，支持音频采样率为8000（<code class="docutils literal notranslate"><span class="pre">message</span></code>中需要指定<code class="docutils literal notranslate"><span class="pre">audio_fs</span></code>为8000），16000</p>
+<div class="section" id="id4">
+<h4>Sending Audio Data<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h4>
+<p>Directly send the audio data, removing the header information and sending only the bytes data. Supported audio sampling rates are 8000 (which needs to be specified as audio_fs in message), and 16000.</p>
 </div>
-<div class="section" id="id15">
-<h4>发送结束标志<a class="headerlink" href="#id15" title="Permalink to this headline"></a></h4>
-<p>音频数据发送结束后，需要发送结束标志（需要用json序列化）：</p>
+<div class="section" id="id5">
+<h4>Sending End of Audio Flag<a class="headerlink" href="#id5" title="Permalink to this headline"></a></h4>
+<p>After sending the audio data, an end-of-audio flag needs to be sent (which needs to be serialized in JSON):</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{&quot;is_speaking&quot;: False}
 </pre></div>
 </div>
 </div>
 </div>
-<div class="section" id="id16">
-<h3>从服务端往客户端发数据<a class="headerlink" href="#id16" title="Permalink to this headline"></a></h3>
-<div class="section" id="id17">
-<h4>发送识别结果<a class="headerlink" href="#id17" title="Permalink to this headline"></a></h4>
-<p>message为（采用json序列化）</p>
+<div class="section" id="id6">
+<h3>Sending Data from Server to Client<a class="headerlink" href="#id6" title="Permalink to this headline"></a></h3>
+<div class="section" id="id7">
+<h4>Sending Recognition Results<a class="headerlink" href="#id7" title="Permalink to this headline"></a></h4>
+<p>The message (serialized in JSON) is:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{&quot;mode&quot;: &quot;2pass-online&quot;, &quot;wav_name&quot;: &quot;wav_name&quot;, &quot;text&quot;: &quot;asr ouputs&quot;, &quot;is_final&quot;: True}
 </pre></div>
 </div>
-<p>参数介绍：</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>`mode`：表示推理模式，分为`2pass-online`，表示实时识别结果；`2pass-offline`，表示2遍修正识别结果
-`wav_name`：表示需要推理音频文件名
-`text`：表示语音识别输出文本
-`is_final`：表示识别结束
+<p>Parameter explanation:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>`mode`: indicates the inference mode, divided into `2pass-online` for real-time recognition results and `2pass-offline` for 2-pass corrected recognition results.
+`wav_name`: the name of the audio file to be transcribed
+`text`: the text output of speech recognition
+`is_final`: indicating the end of recognition
 </pre></div>
 </div>
 </div>

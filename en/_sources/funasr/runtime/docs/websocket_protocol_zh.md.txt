@@ -1,3 +1,4 @@
+(简体中文|[English](./websocket_protocol.md))
 # websocket/grpc通信协议
 ## 离线文件转写
 ### 从客户端往服务端发送数据
