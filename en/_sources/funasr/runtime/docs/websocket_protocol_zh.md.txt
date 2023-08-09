@@ -47,7 +47,7 @@ message为（采用json序列化）
 ## 实时语音识别
 ### 系统架构图
 
-<div align="left"><img src="images/2pass.jpg" width="400"/></div>
+<div align="left"><img src="images/2pass.jpg" width="600"/></div>
 
 ### 从客户端往服务端发送数据
 #### 消息格式
