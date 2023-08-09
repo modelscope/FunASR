@@ -1,6 +1,8 @@
 ([简体中文](./websocket_protocol_zh.md)|English)
 
 # WebSocket/gRPC Communication Protocol
+This protocol is the communication protocol for the FunASR software package, which includes offline file transcription ([deployment document](./SDK_tutorial.md)) and real-time speech recognition ([deployment document](./SDK_tutorial_online.md)).
+
 ## Offline File Transcription
 ### Sending Data from Client to Server
 #### Message Format
