@@ -115,6 +115,7 @@ class WebSocketServer {
                   nlohmann::json& msg,
                   std::vector<std::vector<std::string>>& punc_cache,
                   websocketpp::lib::mutex& thread_lock, bool& is_final,
+                  std::string wav_name,
                   FUNASR_HANDLE& tpass_online_handle);
 
   void initAsr(std::map<std::string, std::string>& model_path, int thread_num);
