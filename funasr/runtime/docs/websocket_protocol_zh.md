@@ -1,5 +1,8 @@
 (简体中文|[English](./websocket_protocol.md))
 # websocket/grpc通信协议
+
+本协议为FunASR软件包通信协议，分为离线文件转写（[部署文档](./SDK_tutorial_zh.md)），实时语音识别（[部署文档](./SDK_tutorial_online_zh.md)）
+
 ## 离线文件转写
 ### 从客户端往服务端发送数据
 #### 消息格式
