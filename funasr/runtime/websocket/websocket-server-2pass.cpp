@@ -320,14 +320,20 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
         LOG(INFO) << "client done";
 
         // if it is in final message, post the sample_data to decode
-        asio::post(
-            io_decoder_,
-            std::bind(&WebSocketServer::do_decoder, this,
-                      std::move(*(sample_data_p.get())), std::move(hdl),
-                      std::ref(msg_data->msg), std::ref(*(punc_cache_p.get())),
-                      std::ref(*thread_lock_p), std::move(true),
-                      msg_data->msg["wav_name"],
-                      std::ref(msg_data->tpass_online_handle)));
+        try{
+          asio::post(
+              io_decoder_,
+              std::bind(&WebSocketServer::do_decoder, this,
+                        std::move(*(sample_data_p.get())), std::move(hdl),
+                        std::ref(msg_data->msg), std::ref(*(punc_cache_p.get())),
+                        std::ref(*thread_lock_p), std::move(true),
+                        msg_data->msg["wav_name"],
+                        std::ref(msg_data->tpass_online_handle)));
+        }
+        catch (std::exception const &e)
+        {
+            LOG(ERROR)<<e.what();
+        }
       }
       break;
     }
@@ -351,15 +357,22 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
           // keep remain in sample_data
           sample_data_p->erase(sample_data_p->begin(),
                                sample_data_p->begin() + chunksize * setpsize);
-          // post to decode
-          asio::post(io_decoder_,
-                     std::bind(&WebSocketServer::do_decoder, this,
-                               std::move(subvector), std::move(hdl),
-                               std::ref(msg_data->msg),
-                               std::ref(*(punc_cache_p.get())),
-                               std::ref(*thread_lock_p), std::move(false),
-                               msg_data->msg["wav_name"],
-                               std::ref(msg_data->tpass_online_handle)));
+
+          try{
+            // post to decode
+            asio::post(io_decoder_,
+                      std::bind(&WebSocketServer::do_decoder, this,
+                                std::move(subvector), std::move(hdl),
+                                std::ref(msg_data->msg),
+                                std::ref(*(punc_cache_p.get())),
+                                std::ref(*thread_lock_p), std::move(false),
+                                msg_data->msg["wav_name"],
+                                std::ref(msg_data->tpass_online_handle)));
+          }
+          catch (std::exception const &e)
+          {
+              LOG(ERROR)<<e.what();
+          }
         }
       } else {
         sample_data_p->insert(sample_data_p->end(), pcm_data,
