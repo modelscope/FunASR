@@ -4,7 +4,6 @@
 
 import os
 
-from distutils.version import LooseVersion
 from setuptools import find_packages
 from setuptools import setup
 
@@ -12,15 +11,12 @@ from setuptools import setup
 requirements = {
     "install": [
         "setuptools>=38.5.1",
-        # "configargparse>=1.2.1",
-        "typeguard==2.13.3",
         "humanfriendly",
         "scipy>=1.4.1",
-        # "filelock",
         "librosa",
-        "jamo==0.4.1",  # For kss
+        "jamo",  # For kss
         "PyYAML>=5.1.2",
-        "soundfile>=0.11.0",
+        "soundfile>=0.12.1",
         "h5py>=2.10.0",
         "kaldiio>=2.17.0",
         "kaldi-io==0.9.8",
@@ -30,60 +26,35 @@ requirements = {
         "numexpr==2.8.4"
         # ASR
         "sentencepiece",
-        # "ctc-segmentation<1.8,>=1.6.6",
+        "jieba",
         # TTS
-        # "pyworld>=0.2.10",
-        "pypinyin<=0.44.0",
+        "pypinyin>=0.44.0",
         "espnet_tts_frontend",
         # ENH
-        # "ci_sdr",
         "pytorch_wpe",
         "editdistance>=0.5.2",
-        "tensorboard==1.15",
+        "tensorboard",
         "g2p",
         "nara_wpe",
         "Cython",
         # PAI
         "oss2",
-        # "kaldi-native-fbank",
-        # timestamp
         "edit-distance",
-        # textgrid
         "textgrid",
-        "protobuf==3.20.0",
+        "protobuf",
     ],
     # train: The modules invoked when training only.
     "train": [
-        # "pillow>=6.1.0",
-        "editdistance==0.5.2",
+        "editdistance",
         "wandb",
-    ],
-    # recipe: The modules actually are not invoked in the main module of funasr,
-    #         but are invoked for the python scripts in each recipe
-    "recipe": [
-        "espnet_model_zoo",
-        # "gdown",
-        # "resampy",
-        # "pysptk>=0.1.17",
-        # "morfessor",  # for zeroth-korean
-        # "youtube_dl",  # for laborotv
-        # "nnmnkwii",
-        # "museval>=0.2.1",
-        # "pystoi>=0.2.2",
-        # "mir-eval>=0.6",
-        # "fastdtw",
-        # "nara_wpe>=0.0.5",
-        # "sacrebleu>=1.5.1",
     ],
     # all: The modules should be optionally installled due to some reason.
     #      Please consider moving them to "install" occasionally
-    # NOTE(kamo): The modules in "train" and "recipe" are appended into "all"
     "all": [
         # NOTE(kamo): Append modules requiring specific pytorch version or torch>1.3.0
         "torch_optimizer",
         "fairscale",
         "transformers",
-        # "gtn==0.0.0",
     ],
     "setup": [
         "numpy",
@@ -103,17 +74,18 @@ requirements = {
         "black",
     ],
     "doc": [
-        "Jinja2<3.1",
-        "Sphinx==2.1.2",
+        "Jinja2",
+        "Sphinx",
         "sphinx-rtd-theme>=0.2.4",
         "sphinx-argparse>=0.2.5",
-        "commonmark==0.8.1",
+        "commonmark",
         "recommonmark>=0.4.0",
         "nbsphinx>=0.4.2",
         "sphinx-markdown-tables>=0.0.12",
+        "configargparse>=1.2.1"
     ],
 }
-requirements["all"].extend(requirements["train"] + requirements["recipe"])
+requirements["all"].extend(requirements["train"])
 requirements["test"].extend(requirements["train"])
 
 install_requires = requirements["install"]
