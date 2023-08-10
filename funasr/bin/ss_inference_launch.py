@@ -104,7 +104,7 @@ def inference_ss(
             ss_results = speech_separator(**batch)
             
             for spk in range(num_spks):
-                sf.write(os.path.join(output_path, keys[0].replace('.wav', '_s'+str(spk+1)+'.wav')), ss_results[spk], sample_rate)
+                sf.write(os.path.join(output_path, keys[0] + '_s' + str(spk+1)+'.wav'), ss_results[spk], sample_rate)
         torch.cuda.empty_cache()
         return ss_results
 
