@@ -54,7 +54,7 @@ typedef struct {
   nlohmann::json msg;
   std::shared_ptr<std::vector<char>> samples;
   std::shared_ptr<std::vector<std::vector<std::string>>> punc_cache;
-  websocketpp::lib::mutex* thread_lock; // lock for each connection
+  std::shared_ptr<websocketpp::lib::mutex> thread_lock; // lock for each connection
   FUNASR_HANDLE tpass_online_handle=NULL;
   std::string online_res = "";
   std::string tpass_res = "";
