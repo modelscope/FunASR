@@ -3,12 +3,12 @@ This is an official modular SA-ASR system used in M2MeT 2.0 challenge. We develo
 
 # Dependency
 
-To run this receipe, you should install [Kaldi](https://github.com/kaldi-asr/kaldi) and set the `KALDI_ROOT` in `path.sh`
+To run this receipe, you should install [Kaldi](https://github.com/kaldi-asr/kaldi) and set the `KALDI_ROOT` in `path.sh`.
 ```shell
 export KALDI_ROOT=/your_kaldi_path
 ```
 
-We use the [VBx] to provide initial diarization result to SOND and [dscore](https://github.com/nryant/dscore.git) to compute the DER. You should clone them before running this receipe.
+We use the [VBx](https://github.com/BUTSpeechFIT/VBx) to provide initial diarization result to SOND and [dscore](https://github.com/nryant/dscore.git) to compute the DER. You should clone them before running this receipe.
 ```shell
 $ mkdir VBx && cd VBx
 $ git init 
@@ -32,7 +32,7 @@ $ pip install -e .
 ```
 
 # Infer on the AliMeeting Test_2023 set
-We follow the workflow which is shown below.
+We follow the workflow shown below.
 
 <div align="left"><img src="figure/20230809161919.jpg" width="500"/>
 
@@ -92,9 +92,9 @@ sessionB-start_time-end_time sessionA start_time end_time
 sessionC-start_time-end_time sessionA start_time end_time
 ...
 ```
-Then set the `DATA_SOURCE` and `DATA_NAME` in `path.sh`. You can 
+Then you should set the `DATA_SOURCE` and `DATA_NAME` in `path.sh`. The rest of the process is the same as [Infer on the AliMeeting Test_2023 set](#infer-on-the-alimeeting-test_2023-set).
 
-
+# Result 
 
 |                |VBx DER(%)     | SOND DER(%)|cp-CER(%)  |
 |:---------------|:------------:|:------------:|----------:|
