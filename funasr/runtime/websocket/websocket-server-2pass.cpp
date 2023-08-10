@@ -81,6 +81,10 @@ void WebSocketServer::do_decoder(
     FUNASR_HANDLE& tpass_online_handle) {
   // lock for each connection
   scoped_lock guard(thread_lock);
+  if(!tpass_online_handle){
+	  LOG(INFO) << "tpass_online_handle  is free, return";
+	  return;
+  }
   FUNASR_RESULT Result = nullptr;
   int asr_mode_ = 2;
   if (msg.contains("mode")) {
@@ -180,7 +184,7 @@ void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
       std::make_shared<FUNASR_MESSAGE>();  // put a new data vector for new
                                            // connection
   data_msg->samples = std::make_shared<std::vector<char>>();
-  data_msg->thread_lock = new websocketpp::lib::mutex();
+  data_msg->thread_lock = std::make_shared<websocketpp::lib::mutex>();  
 
   data_msg->msg = nlohmann::json::parse("{}");
   data_msg->msg["wav_format"] = "pcm";
@@ -199,7 +203,7 @@ void remove_hdl(
     websocketpp::connection_hdl hdl,
     std::map<websocketpp::connection_hdl, std::shared_ptr<FUNASR_MESSAGE>,
              std::owner_less<websocketpp::connection_hdl>>& data_map) {
-  // return;
+ 
   std::shared_ptr<FUNASR_MESSAGE> data_msg = nullptr;
   auto it_data = data_map.find(hdl);
   if (it_data != data_map.end()) {
@@ -215,8 +219,9 @@ void remove_hdl(
     FunTpassOnlineUninit(data_msg->tpass_online_handle);
     data_msg->tpass_online_handle = nullptr;
   }
+  
+ 
   guard_decoder.unlock();
-  delete data_msg->thread_lock;
   data_map.erase(hdl);  // remove data vector when  connection is closed
 }
 
@@ -270,7 +275,7 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
   std::shared_ptr<std::vector<char>> sample_data_p = msg_data->samples;
   std::shared_ptr<std::vector<std::vector<std::string>>> punc_cache_p =
       msg_data->punc_cache;
-  websocketpp::lib::mutex* thread_lock_p = msg_data->thread_lock;
+  std::shared_ptr<websocketpp::lib::mutex> thread_lock_p = msg_data->thread_lock;
 
   lock.unlock();
 
