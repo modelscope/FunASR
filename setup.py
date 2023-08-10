@@ -19,8 +19,11 @@ requirements = {
         "soundfile>=0.12.1",
         "h5py>=2.10.0",
         "kaldiio>=2.17.0",
+        "kaldi-io==0.9.8",
         "torch_complex",
         "nltk>=3.4.5",
+        "onnxruntime"
+        "numexpr"
         # ASR
         "sentencepiece",
         "jieba",
@@ -32,6 +35,8 @@ requirements = {
         "editdistance>=0.5.2",
         "tensorboard",
         "g2p",
+        "nara_wpe",
+        "Cython",
         # PAI
         "oss2",
         "edit-distance",
