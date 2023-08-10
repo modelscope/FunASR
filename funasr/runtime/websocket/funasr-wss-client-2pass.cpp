@@ -36,9 +36,9 @@
  */
 void WaitABit() {
 #ifdef WIN32
-  Sleep(500);
+  Sleep(300);
 #else
-  usleep(500);
+  usleep(300);
 #endif
 }
 std::atomic<int> wav_index(0);
@@ -113,7 +113,7 @@ class WebsocketClient {
       case websocketpp::frame::opcode::text:
         nlohmann::json jsonresult = nlohmann::json::parse(payload);
         LOG(INFO) << "Thread: " << this_thread::get_id()
-                  << ",on_message = " << payload << "jsonresult" << jsonresult;
+                  << ",on_message = " << payload;
 
         if (jsonresult["is_final"] == true) {
           websocketpp::lib::error_code ec;
@@ -280,7 +280,6 @@ class WebsocketClient {
           break;
         }
         delete[] iArray;
-        // WaitABit();
       }
     } else {
       int offset = 0;
