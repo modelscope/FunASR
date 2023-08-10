@@ -152,8 +152,10 @@ void WebSocketServer::do_decoder(
       } catch (std::exception const& e) {
         LOG(ERROR) << e.what();
       }
-      for (auto& vec : punc_cache) {
-        vec.clear();
+      if(punc_cache.size()>0){
+        for (auto& vec : punc_cache) {
+          vec.clear();
+        }
       }
       if (Result) {
         websocketpp::lib::error_code ec;
