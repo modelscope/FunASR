@@ -24,6 +24,7 @@ requirements = {
         # ASR
         "sentencepiece",
         "jieba",
+        "rotary_embedding_torch",
         # TTS
         "pypinyin>=0.44.0",
         "espnet_tts_frontend",
