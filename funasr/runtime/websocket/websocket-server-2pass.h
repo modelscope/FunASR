@@ -58,7 +58,7 @@ typedef struct {
   FUNASR_HANDLE tpass_online_handle=NULL;
   std::string online_res = "";
   std::string tpass_res = "";
-  
+  std::shared_ptr<asio::io_context::strand>  strand_; // for data execute in order 
 } FUNASR_MESSAGE;
 
 // See https://wiki.mozilla.org/Security/Server_Side_TLS for more details about

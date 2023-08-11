@@ -203,6 +203,7 @@ void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
     data_msg->msg["is_eof"]=false; // if this connection is closed
     data_msg->punc_cache =
         std::make_shared<std::vector<std::vector<std::string>>>(2);
+	data_msg->strand_ =	std::make_shared<asio::io_context::strand>(io_decoder_);
     // std::vector<int> chunk_size = {5, 10, 5};  //TODO, need get from client
     // FUNASR_HANDLE tpass_online_handle =
     //     FunTpassOnlineInit(tpass_handle, chunk_size);
@@ -300,7 +301,7 @@ void WebSocketServer::check_and_clean_connection() {
     }
     for (auto hdl : to_remove) {
       remove_hdl(hdl, data_map);
-      LOG(INFO) << "remove one connection ";
+      //LOG(INFO) << "remove one connection ";
     }
   }
 }
@@ -369,8 +370,8 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
         // if it is in final message, post the sample_data to decode
         try{
 		  
-          asio::post(
-              io_decoder_,
+          msg_data->strand_->post(
+           
               std::bind(&WebSocketServer::do_decoder, this,
                         std::move(*(sample_data_p.get())), std::move(hdl),
                         std::ref(msg_data->msg), std::ref(*(punc_cache_p.get())),
@@ -410,7 +411,7 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
 
           try{
             // post to decode
-            asio::post(io_decoder_,
+            msg_data->strand_->post( 
                       std::bind(&WebSocketServer::do_decoder, this,
                                 std::move(subvector), std::move(hdl),
                                 std::ref(msg_data->msg),
