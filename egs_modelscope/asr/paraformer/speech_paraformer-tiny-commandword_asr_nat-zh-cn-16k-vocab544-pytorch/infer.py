@@ -20,7 +20,8 @@ def modelscope_infer_core(output_dir, split_dir, njob, idx):
         task=Tasks.auto_speech_recognition,
         model="damo/speech_paraformer-tiny-commandword_asr_nat-zh-cn-16k-vocab544-pytorch",
         output_dir=output_dir_job,
-        batch_size=64
+        batch_size=64,
+        update_model=False,
     )
     audio_in = os.path.join(split_dir, "wav.{}.scp".format(idx))
     inference_pipeline(audio_in=audio_in)

@@ -57,7 +57,7 @@ class SequenceIterFactory(AbsIterFactory):
             data_path_and_name_and_type,
             preprocess=preprocess_fn,
             dest_sample_rate=dest_sample_rate,
-            speed_perturb=args.speed_perturb if mode=="train" else None,
+            speed_perturb=args.speed_perturb if mode == "train" else None,
         )
 
         # sampler
@@ -66,8 +66,9 @@ class SequenceIterFactory(AbsIterFactory):
             batch_bins=dataset_conf["batch_conf"]["batch_size"] * args.ngpu,
             shape_files=shape_files,
             sort_in_batch=dataset_conf["sort_in_batch"] if hasattr(dataset_conf, "sort_in_batch") else "descending",
-            sort_batch=dataset_conf["sort_batch"] if hasattr(dataset_conf, "sort_batch") else "ascending",
+            sort_batch=dataset_conf["sort_batch"] if hasattr(dataset_conf, "sort_batch") else "descending",
             drop_last=False,
+            min_batch_size=torch.distributed.get_world_size(),
             padding=True,
         )
 
@@ -84,7 +85,7 @@ class SequenceIterFactory(AbsIterFactory):
             args.max_update = len(bs_list) * args.max_epoch
             logging.info("Max update: {}".format(args.max_update))
 
-        if args.distributed and mode=="train":
+        if args.distributed and mode == "train":
             world_size = torch.distributed.get_world_size()
             rank = torch.distributed.get_rank()
             for batch in batches:

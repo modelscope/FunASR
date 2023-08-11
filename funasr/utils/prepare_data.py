@@ -195,23 +195,10 @@ def generate_data_list(args, data_dir, dataset, nj=64):
 
 
 def prepare_data(args, distributed_option):
-    distributed = distributed_option.distributed
-    if not distributed or distributed_option.dist_rank == 0:
-        if hasattr(args, "filter_input") and args.filter_input:
-            filter_wav_text(args.data_dir, args.train_set)
-            filter_wav_text(args.data_dir, args.valid_set)
-
-        if args.dataset_type == "small":
-            calc_shape(args, args.train_set)
-            calc_shape(args, args.valid_set)
-
-        if args.dataset_type == "large":
-            generate_data_list(args, args.data_dir, args.train_set)
-            generate_data_list(args, args.data_dir, args.valid_set)
-
     data_names = args.dataset_conf.get("data_names", "speech,text").split(",")
     data_types = args.dataset_conf.get("data_types", "sound,text").split(",")
     file_names = args.data_file_names.split(",")
+    batch_type = args.dataset_conf["batch_conf"]["batch_type"]
     print("data_names: {}, data_types: {}, file_names: {}".format(data_names, data_types, file_names))
     assert len(data_names) == len(data_types) == len(file_names)
     if args.dataset_type == "small":
@@ -223,9 +210,32 @@ def prepare_data(args, distributed_option):
                 ["{}/{}/{}".format(args.data_dir, args.train_set, file_name), data_name, data_type])
             args.valid_data_path_and_name_and_type.append(
                 ["{}/{}/{}".format(args.data_dir, args.valid_set, file_name), data_name, data_type])
+        if os.path.exists(args.train_shape_file[0]):
+            assert os.path.exists(args.valid_shape_file[0])
+            print('shape file for small dataset already exists.')
+            return
     else:
         concat_data_name = "_".join(data_names)
         args.train_data_file = os.path.join(args.data_dir, args.train_set, "{}_data.list".format(concat_data_name))
         args.valid_data_file = os.path.join(args.data_dir, args.valid_set, "{}_data.list".format(concat_data_name))
+        if os.path.exists(args.train_data_file):
+            assert os.path.exists(args.valid_data_file)
+            print('data list for large dataset already exists.')
+            return
+
+    distributed = distributed_option.distributed
+    if not distributed or distributed_option.dist_rank == 0:
+        if hasattr(args, "filter_input") and args.filter_input:
+            filter_wav_text(args.data_dir, args.train_set)
+            filter_wav_text(args.data_dir, args.valid_set)
+
+        if args.dataset_type == "small" and batch_type != "unsorted":
+            calc_shape(args, args.train_set)
+            calc_shape(args, args.valid_set)
+
+        if args.dataset_type == "large":
+            generate_data_list(args, args.data_dir, args.train_set)
+            generate_data_list(args, args.data_dir, args.valid_set)
+
     if distributed:
         dist.barrier()

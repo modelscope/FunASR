@@ -350,6 +350,7 @@ class NeatContextualParaformer(Paraformer):
             else:
                 hw_embed = self.bias_embed(hw_list_pad)
             hw_embed, (h_n, _) = self.bias_encoder(hw_embed)
+            hw_embed = h_n.repeat(encoder_out.shape[0], 1, 1)
         else:
             hw_lengths = [len(i) for i in hw_list]
             hw_list_pad = pad_list([torch.Tensor(i).long() for i in hw_list], 0).to(encoder_out.device)

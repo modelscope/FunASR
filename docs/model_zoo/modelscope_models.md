@@ -1,6 +1,6 @@
 ([简体中文](./modelscope_models_zh.md)|English)
 
-# Pretrained Models on ModelScope
+# Pretrained Models Released on ModelScope
 
 ## Model License
 You are free to use, copy, modify, and share FunASR models under the conditions of this agreement. You should indicate the model source and author information when using, copying, modifying and sharing FunASR models. You should keep the relevant names of models in [FunASR software].. Full model license could see [license](https://github.com/alibaba-damo-academy/FunASR/blob/main/MODEL_LICENSE)
@@ -11,8 +11,8 @@ Ref to [docs](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_pipeli
 ## Model Zoo
 Here we provided several pretrained models on different datasets. The details of models and datasets can be found on [ModelScope](https://www.modelscope.cn/models?page=1&tasks=auto-speech-recognition).
 
-### Speech Recognition Models
-#### Paraformer Models
+### Speech Recognition
+#### Paraformer
 
 |                                                                     Model Name                                                                     | Language |          Training Data           | Vocab Size | Parameter | Offline/Online | Notes                                                                                                                           |
 |:--------------------------------------------------------------------------------------------------------------------------------------------------:|:--------:|:--------------------------------:|:----------:|:---------:|:--------------:|:--------------------------------------------------------------------------------------------------------------------------------|
@@ -29,7 +29,7 @@ Here we provided several pretrained models on different datasets. The details of
 |    [ParaformerBert-aishell2](https://www.modelscope.cn/models/damo/speech_paraformerbert_asr_nat-zh-cn-16k-aishell2-vocab5212-pytorch/summary)     |    CN    |      AISHELL-2 (1000hours)       |    5212    |    64M    |    Offline     |                                                                                                                                 |
 
 
-#### UniASR Models
+#### UniASR [Unify Streaming and Non-streaming]
 
 |                                                                    Model Name                                                                     |    Language     |           Training Data           | Vocab Size | Parameter | Offline/Online | Notes                                                                                                                           |
 |:-------------------------------------------------------------------------------------------------------------------------------------------------:|:---------------:|:---------------------------------:|:----------:|:---------:|:--------------:|:--------------------------------------------------------------------------------------------------------------------------------|
@@ -53,20 +53,14 @@ Here we provided several pretrained models on different datasets. The details of
 |              [UniASR Turkish](https://modelscope.cn/models/damo/speech_UniASR_asr_2pass-tr-16k-common-vocab1582-pytorch/summary)                      |       TR        | Alibaba Speech Data (1000 hours)  |    1582     |    95M    |     Online     | UniASR streaming offline unifying models                                                                                                    |
 
 
-#### Conformer Models
-
+#### Conformer
 |                                                       Model Name                                                       | Language |     Training Data     | Vocab Size | Parameter | Offline/Online | Notes                                                                                                                           |
 |:----------------------------------------------------------------------------------------------------------------------:|:--------:|:---------------------:|:----------:|:---------:|:--------------:|:--------------------------------------------------------------------------------------------------------------------------------|
 | [Conformer](https://modelscope.cn/models/damo/speech_conformer_asr_nat-zh-cn-16k-aishell1-vocab4234-pytorch/summary)   |   CN     |  AISHELL (178hours)   |    4234    |    44M    |    Offline     | Duration of input wav <= 20s                                                                                                    |
 | [Conformer](https://www.modelscope.cn/models/damo/speech_conformer_asr_nat-zh-cn-16k-aishell2-vocab5212-pytorch/summary)   |   CN     | AISHELL-2 (1000hours) |    5212    |    44M    |    Offline     | Duration of input wav <= 20s                                                                                                    |
 | [Conformer](https://modelscope.cn/models/damo/speech_conformer_asr-en-16k-vocab4199-pytorch/summary)   |   EN     | Alibaba Speech Data (10000hours) |    4199    |    220M    |    Offline     | Duration of input wav <= 20s                                                                                                    |
 
-
-#### RNN-T Models
-
-### Multi-talker Speech Recognition Models
-
-#### MFCCA Models
+### Multi-talker Speech Recognition
 
 |                                                  Model Name                                                   | Language |               Training Data                | Vocab Size | Parameter | Offline/Online | Notes                                                                                                                           |
 |:-------------------------------------------------------------------------------------------------------------:|:--------:|:------------------------------------------:|:----------:|:---------:|:--------------:|:--------------------------------------------------------------------------------------------------------------------------------|
@@ -74,14 +68,14 @@ Here we provided several pretrained models on different datasets. The details of
 
 
 
-### Voice Activity Detection Models
+### Voice Activity Detection
 
 |                                           Model Name                                           |        Training Data         | Parameters | Sampling Rate | Notes |
 |:----------------------------------------------------------------------------------------------:|:----------------------------:|:----------:|:-------------:|:------|
 | [FSMN-VAD](https://modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary) | Alibaba Speech Data (5000hours) |    0.4M    |     16000     |       |
 |   [FSMN-VAD](https://modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-8k-common/summary)        | Alibaba Speech Data (5000hours) |    0.4M    |     8000      |       |
 
-### Punctuation Restoration Models
+### Punctuation Restoration
 
 |                                                         Model Name                                                         |        Training Data         | Parameters | Vocab Size| Offline/Online | Notes |
 |:--------------------------------------------------------------------------------------------------------------------------:|:----------------------------:|:----------:|:----------:|:--------------:|:------|
@@ -94,27 +88,26 @@ Here we provided several pretrained models on different datasets. The details of
 |:----------------------------------------------------------------------------------------------------------------------:|:----------------------------:|:----------:|:----------:|:------|
 | [Transformer](https://www.modelscope.cn/models/damo/speech_transformer_lm_zh-cn-common-vocab8404-pytorch/summary)      | Alibaba Speech Data (?hours) |    57M     |    8404    |       |
 
-### Speaker Verification Models
+### Speaker Verification
 
 |                                                  Model Name                                                   |   Training Data   | Parameters | Number Speaker | Notes |
 |:-------------------------------------------------------------------------------------------------------------:|:-----------------:|:----------:|:----------:|:------|
 | [Xvector](https://www.modelscope.cn/models/damo/speech_xvector_sv-zh-cn-cnceleb-16k-spk3465-pytorch/summary) | CNCeleb (1,200 hours)  |   17.5M    |    3465    |    Xvector, speaker verification, Chinese   |
 | [Xvector](https://www.modelscope.cn/models/damo/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch/summary) | CallHome (60 hours) |    61M     |    6135    |   Xvector, speaker verification, English    |
 
-### Speaker Diarization Models
+### Speaker Diarization
 
 |                                                    Model Name                                                    |    Training Data    | Parameters | Notes |
 |:----------------------------------------------------------------------------------------------------------------:|:-------------------:|:----------:|:------|
 | [SOND](https://www.modelscope.cn/models/damo/speech_diarization_sond-zh-cn-alimeeting-16k-n16k4-pytorch/summary) | AliMeeting (120 hours) |   40.5M    |    Speaker diarization, profiles and records, Chinese |
 | [SOND](https://www.modelscope.cn/models/damo/speech_diarization_sond-en-us-callhome-8k-n16k4-pytorch/summary)    |  CallHome (60 hours)  |     12M     |    Speaker diarization, profiles and records, English   |
 
-### Timestamp Prediction Models
-
+### Timestamp Prediction
 |                                                    Model Name                                     |  Language  |    Training Data    | Parameters | Notes |
 |:--------------------------------------------------------------------------------------------------:|:--------------:|:-------------------:|:----------:|:------|
 | [TP-Aligner](https://modelscope.cn/models/damo/speech_timestamp_prediction-v1-16k-offline/summary) | CN | Alibaba Speech Data (50000hours) |   37.8M    |    Timestamp prediction, Mandarin, middle size |
 
-### Inverse Text Normalization (ITN) Models
+### Inverse Text Normalization (ITN)
 
 |                                                    Model Name                                                    | Language | Parameters | Notes                    |
 |:----------------------------------------------------------------------------------------------------------------:|:--------:|:----------:|:-------------------------|

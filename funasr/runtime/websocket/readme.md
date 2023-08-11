@@ -116,6 +116,18 @@ Export Detailed Introduction（[docs](https://github.com/alibaba-damo-academy/Fu
   --punc-dir ./export/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
 ```
 
+##### Start the 2pass Service
+```shell
+./funasr-wss-server-2pass  \
+  --download-model-dir /workspace/models \
+  --model-dir ./exportdamo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx \
+  --vad-dir ./exportdamo/speech_fsmn_vad_zh-cn-16k-common-onnx \
+  --punc-dir ./export/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx \
+  --online-model-dir ./exportdamo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online \
+  --quantize false
+```
+
+
 ### Client Usage
 
 
