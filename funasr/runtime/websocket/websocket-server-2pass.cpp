@@ -152,8 +152,10 @@ void WebSocketServer::do_decoder(
       } catch (std::exception const& e) {
         LOG(ERROR) << e.what();
       }
-      for (auto& vec : punc_cache) {
-        vec.clear();
+      if(punc_cache.size()>0){
+        for (auto& vec : punc_cache) {
+          vec.clear();
+        }
       }
       if (Result) {
         websocketpp::lib::error_code ec;
@@ -178,7 +180,11 @@ void WebSocketServer::do_decoder(
 
 void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
   scoped_lock guard(m_lock);     // for threads safty
-  check_and_clean_connection();  // remove closed connection
+  try{
+    check_and_clean_connection();  // remove closed connection 
+  }catch (std::exception const& e) {
+    std::cerr << "Error: " << e.what() << std::endl;
+  }
 
   std::shared_ptr<FUNASR_MESSAGE> data_msg =
       std::make_shared<FUNASR_MESSAGE>();  // put a new data vector for new

@@ -5,6 +5,7 @@ from funasr.build_utils.build_pretrain_model import build_pretrain_model
 from funasr.build_utils.build_punc_model import build_punc_model
 from funasr.build_utils.build_sv_model import build_sv_model
 from funasr.build_utils.build_vad_model import build_vad_model
+from funasr.build_utils.build_ss_model import build_ss_model
 
 
 def build_model(args):
@@ -22,6 +23,8 @@ def build_model(args):
         model = build_diar_model(args)
     elif args.task_name == "sv":
         model = build_sv_model(args)
+    elif args.task_name == "ss":
+        model = build_ss_model(args)
     else:
         raise NotImplementedError("Not supported task: {}".format(args.task_name))
 
