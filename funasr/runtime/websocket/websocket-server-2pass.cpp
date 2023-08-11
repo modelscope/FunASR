@@ -295,7 +295,7 @@ void WebSocketServer::check_and_clean_connection() {
 		  if (it_data != data_map.end()) {
  		     data_msg = it_data->second;
  		   } else {
-  		    return;
+  		    continue;
   		  }
 		    unique_lock guard_decoder(*(data_msg->thread_lock));
             data_msg->msg["is_eof"]=true;
