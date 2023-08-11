@@ -22,8 +22,8 @@ requirements = {
         "kaldi-io==0.9.8",
         "torch_complex",
         "nltk>=3.4.5",
-        "onnxruntime"
-        "numexpr"
+        "onnxruntime",
+        "numexpr",
         # ASR
         "sentencepiece",
         "jieba",
