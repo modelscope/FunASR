@@ -1816,6 +1816,7 @@ def get_parser():
     group.add_argument("--ngram_weight", type=float, default=0.9, help="ngram weight")
     group.add_argument("--streaming", type=str2bool, default=False)
     group.add_argument("--simu_streaming", type=str2bool, default=False)
+    group.add_argument("--full_utt", type=str2bool, default=False)
     group.add_argument("--chunk_size", type=int, default=16)
     group.add_argument("--left_context", type=int, default=16)
     group.add_argument("--right_context", type=int, default=0)
