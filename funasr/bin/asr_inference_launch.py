@@ -1290,6 +1290,7 @@ def inference_transducer(
         quantize_dtype: Optional[str] = "float16",
         streaming: Optional[bool] = False,
         simu_streaming: Optional[bool] = False,
+        full_utt: Optional[bool] = False,
         chunk_size: Optional[int] = 16,
         left_context: Optional[int] = 16,
         right_context: Optional[int] = 0,
@@ -1366,6 +1367,7 @@ def inference_transducer(
         quantize_dtype=quantize_dtype,
         streaming=streaming,
         simu_streaming=simu_streaming,
+        full_utt=full_utt,
         chunk_size=chunk_size,
         left_context=left_context,
         right_context=right_context,
@@ -1416,7 +1418,7 @@ def inference_transducer(
                         _end = (i + 1) * speech2text._ctx
 
                         speech2text.streaming_decode(
-                            speech[i * speech2text._ctx: _end], is_final=False
+                            speech[i * speech2text._ctx: _end + speech2text._right_ctx], is_final=False
                         )
 
                     final_hyps = speech2text.streaming_decode(
@@ -1424,6 +1426,8 @@ def inference_transducer(
                     )
                 elif speech2text.simu_streaming:
                     final_hyps = speech2text.simu_streaming_decode(**batch)
+                elif speech2text.full_utt:
+                    final_hyps = speech2text.full_utt_decode(**batch)
                 else:
                     final_hyps = speech2text(**batch)
 
