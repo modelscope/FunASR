@@ -1,6 +1,6 @@
 ([简体中文](./SDK_tutorial_online_zh.md)|English)
 
-# FunASR-realtime-transcribe service
+# FunASR Realtime Transcribe Service
 
 FunASR offers a real-time speech-to-text service that can be easily deployed locally or on cloud servers. The service integrates various capabilities developed by the speech laboratory of DAMO Academy on the ModelScope, including voice activity detection (VAD), Paraformer-large non-streaming automatic speech recognition (ASR), Paraformer-large streaming ASR, and punctuation prediction (PUNC). The software package supports realtime speech-to-text service as well as high-precision transcription text correction at the end of each sentence and outputs text with punctuation.
 
@@ -29,7 +29,7 @@ curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/funas
 # curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy-online-cpu-en.sh;
 ```
 
-Execute the deployment tool and press the Enter key at the prompt to complete the installation and deployment of the server. Currently, the convenient deployment tool only supports Linux environments. For other environments, please refer to the development guide ([docs](./SDK_advanced_guide_offline.md)).
+Execute the deployment tool and press the Enter key at the prompt to complete the installation and deployment of the server. Currently, the convenient deployment tool only supports Linux environments. For other environments, please refer to the development guide ([docs](./SDK_advanced_guide_online.md)).
 ```shell
 sudo bash funasr-runtime-deploy-online-cpu-zh.sh install --workspace ./funasr-runtime-resources
 ```
@@ -112,12 +112,7 @@ If you have restarted the computer or shut down Docker after one-click deploymen
 sudo bash funasr-runtime-deploy-online-cpu-zh.sh start
 ```
 
-### Set SSL
 
-SSL verification is enabled by default. If you need to disable it, you can set it when starting.
-```shell
-sudo bash funasr-runtime-deploy-online-cpu-zh.sh --ssl 0
-```
 
 ### Stop the FunASR service
 
@@ -165,6 +160,12 @@ sudo bash funasr-runtime-deploy-online-cpu-zh.sh update --decode_thread_num 32
 sudo bash funasr-runtime-deploy-online-cpu-zh.sh update --workspace ./funasr-runtime-resources
 ```
 
+### Set SSL
+
+SSL verification is enabled by default. If you need to disable it, you can set it when starting.
+```shell
+sudo bash funasr-runtime-deploy-online-cpu-zh.sh update --ssl 0
+```
 
 
 ## Contact Us

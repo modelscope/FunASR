@@ -31,7 +31,7 @@ FunASR希望在语音识别的学术研究和工业应用之间架起一座桥�
 
 <a name="最新动态"></a>
 ## 最新动态
-- 2023.08.07: 中文实时语音转写服务一键部署的CPU版本发布，详细信息参阅([一键部署文档](funasr/runtime/docs/SDK_tutorial_online_zh.md))
+- 2023.08.07: 中文实时语音听写服务一键部署的CPU版本发布，详细信息参阅([一键部署文档](funasr/runtime/docs/SDK_tutorial_online_zh.md))
 - 2023.07.17: BAT一种低延迟低内存消耗的RNN-T模型发布，详细信息参阅（[BAT](egs/aishell/bat)）
 - 2023.07.03: 中文离线文件转写服务一键部署的CPU版本发布，详细信息参阅([一键部署文档](funasr/runtime/docs/SDK_tutorial_zh.md))
 - 2023.06.26: ASRU2023 多通道多方会议转录挑战赛2.0完成竞赛结果公布，详细信息参阅（[M2MeT2.0](https://alibaba-damo-academy.github.io/FunASR/m2met2_cn/index.html)）
@@ -60,8 +60,8 @@ FunASR支持数万小时工业数据训练的模型的推理和微调，详细�
 
 ## 社区贡献者
 
-| <div align="left"><img src="docs/images/damo.png" width="180"/> | <div align="left"><img src="docs/images/nwpu.png" width="260"/> | <img src="docs/images/China_Telecom.png" width="200"/> </div>  | <img src="docs/images/RapidAI.png" width="200"/> </div> | <img src="docs/images/aihealthx.png" width="200"/> </div> |
-|:---------------------------------------------------------------:|:---------------------------------------------------------------:|:--------------------------------------------------------------:|:-------------------------------------------------------:|:-----------------------------------------------------------:|
+| <div align="left"><img src="docs/images/damo.png" width="180"/> | <div align="left"><img src="docs/images/nwpu.png" width="260"/> | <img src="docs/images/China_Telecom.png" width="200"/> </div>  | <img src="docs/images/RapidAI.png" width="200"/> </div> | <img src="docs/images/aihealthx.png" width="200"/> </div> | <img src="docs/images/XVERSE.png" width="250"/> </div> |
+|:---------------------------------------------------------------:|:---------------------------------------------------------------:|:--------------------------------------------------------------:|:-------------------------------------------------------:|:-----------------------------------------------------------:|:------------------------------------------------------:|
 
 贡献者名单请参考（[致谢名单](./Acknowledge)）
 

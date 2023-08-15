@@ -1,4 +1,8 @@
+(简体中文|[English](./websocket_protocol.md))
 # websocket/grpc通信协议
+
+本协议为FunASR软件包通信协议，分为离线文件转写（[部署文档](./SDK_tutorial_zh.md)），实时语音识别（[部署文档](./SDK_tutorial_online_zh.md)）
+
 ## 离线文件转写
 ### 从客户端往服务端发送数据
 #### 消息格式
@@ -43,7 +47,7 @@ message为（采用json序列化）
 ## 实时语音识别
 ### 系统架构图
 
-<div align="left"><img src="images/2pass.jpg" width="400"/></div>
+<div align="left"><img src="images/2pass.jpg" width="600"/></div>
 
 ### 从客户端往服务端发送数据
 #### 消息格式
@@ -64,7 +68,7 @@ message为（需要用json序列化）：
 `audio_fs`：当输入音频为pcm数据是，需要加上音频采样率参数
 ```
 #### 发送音频数据
-直接将音频数据，移除头部信息后的bytes数据发送，支持音频采样率为80000，16000
+直接将音频数据，移除头部信息后的bytes数据发送，支持音频采样率为8000（`message`中需要指定`audio_fs`为8000），16000
 #### 发送结束标志
 音频数据发送结束后，需要发送结束标志（需要用json序列化）：
 ```text

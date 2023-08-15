@@ -66,7 +66,7 @@ class SequenceIterFactory(AbsIterFactory):
             batch_bins=dataset_conf["batch_conf"]["batch_size"] * args.ngpu,
             shape_files=shape_files,
             sort_in_batch=dataset_conf["sort_in_batch"] if hasattr(dataset_conf, "sort_in_batch") else "descending",
-            sort_batch=dataset_conf["sort_batch"] if hasattr(dataset_conf, "sort_batch") else "ascending",
+            sort_batch=dataset_conf["sort_batch"] if hasattr(dataset_conf, "sort_batch") else "descending",
             drop_last=False,
             padding=True,
         )

@@ -54,11 +54,11 @@ typedef struct {
   nlohmann::json msg;
   std::shared_ptr<std::vector<char>> samples;
   std::shared_ptr<std::vector<std::vector<std::string>>> punc_cache;
-  websocketpp::lib::mutex* thread_lock; // lock for each connection
+  std::shared_ptr<websocketpp::lib::mutex> thread_lock; // lock for each connection
   FUNASR_HANDLE tpass_online_handle=NULL;
   std::string online_res = "";
   std::string tpass_res = "";
-  
+  std::shared_ptr<asio::io_context::strand>  strand_; // for data execute in order 
 } FUNASR_MESSAGE;
 
 // See https://wiki.mozilla.org/Security/Server_Side_TLS for more details about
@@ -115,8 +115,8 @@ class WebSocketServer {
                   nlohmann::json& msg,
                   std::vector<std::vector<std::string>>& punc_cache,
                   websocketpp::lib::mutex& thread_lock, bool& is_final,
-                  FUNASR_HANDLE& tpass_online_handle, std::string& online_res,
-                  std::string& tpass_res);
+                  std::string wav_name,
+                  FUNASR_HANDLE& tpass_online_handle);
 
   void initAsr(std::map<std::string, std::string>& model_path, int thread_num);
   void on_message(websocketpp::connection_hdl hdl, message_ptr msg);

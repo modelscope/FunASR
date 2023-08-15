@@ -32,9 +32,9 @@ int main(int argc, char* argv[]) {
         "/workspace/models", "string");
     TCLAP::ValueArg<std::string> offline_model_dir(
         "", OFFLINE_MODEL_DIR,
-        "default: /workspace/models/offline_asr, the asr model path, which "
+        "default: damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx, the asr model path, which "
         "contains model_quant.onnx, config.yaml, am.mvn",
-        false, "/workspace/models/offline_asr", "string");
+        false, "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx", "string");
     TCLAP::ValueArg<std::string> online_model_dir(
         "", ONLINE_MODEL_DIR,
         "default: damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx, the asr model path, which "
@@ -57,9 +57,9 @@ int main(int argc, char* argv[]) {
         false, "true", "string");
     TCLAP::ValueArg<std::string> vad_dir(
         "", VAD_DIR,
-        "default: /workspace/models/vad, the vad model path, which contains "
+        "default: damo/speech_fsmn_vad_zh-cn-16k-common-onnx, the vad model path, which contains "
         "model_quant.onnx, vad.yaml, vad.mvn",
-        false, "/workspace/models/vad", "string");
+        false, "damo/speech_fsmn_vad_zh-cn-16k-common-onnx", "string");
     TCLAP::ValueArg<std::string> vad_revision(
         "", "vad-revision", "VAD model revision", false, "v1.2.0", "string");
     TCLAP::ValueArg<std::string> vad_quant(
@@ -69,9 +69,9 @@ int main(int argc, char* argv[]) {
         false, "true", "string");
     TCLAP::ValueArg<std::string> punc_dir(
         "", PUNC_DIR,
-        "default: /workspace/models/punc, the punc model path, which contains "
+        "default: damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx, the punc model path, which contains "
         "model_quant.onnx, punc.yaml",
-        false, "/workspace/models/punc", "string");
+        false, "damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx", "string");
     TCLAP::ValueArg<std::string> punc_revision(
         "", "punc-revision", "PUNC model revision", false, "v1.0.2", "string");
     TCLAP::ValueArg<std::string> punc_quant(
@@ -154,7 +154,7 @@ int main(int argc, char* argv[]) {
       std::string python_cmd =
           "python -m funasr.utils.runtime_sdk_download_tool --type onnx --quantize True ";
 
-      if (vad_dir.isSet() && !s_vad_path.empty()) {
+      if (!s_vad_path.empty()) {
         std::string python_cmd_vad;
         std::string down_vad_path;
         std::string down_vad_model;
@@ -200,7 +200,7 @@ int main(int argc, char* argv[]) {
         LOG(INFO) << "VAD model is not set, use default.";
       }
 
-      if (offline_model_dir.isSet() && !s_offline_asr_path.empty()) {
+      if (!s_offline_asr_path.empty()) {
         std::string python_cmd_asr;
         std::string down_asr_path;
         std::string down_asr_model;
@@ -288,7 +288,7 @@ int main(int argc, char* argv[]) {
         LOG(INFO) << "ASR online model is not set, use default.";
       }
 
-      if (punc_dir.isSet() && !s_punc_path.empty()) {
+      if (!s_punc_path.empty()) {
         std::string python_cmd_punc;
         std::string down_punc_path;
         std::string down_punc_model;

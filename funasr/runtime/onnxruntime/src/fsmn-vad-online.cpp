@@ -74,7 +74,11 @@ void FsmnVadOnline::ExtractFeats(float sample_rate, vector<std::vector<float>> &
         waves = reserve_waveforms_;
       }
       vad_feats = lfr_splice_cache_;
-      OnlineLfrCmvn(vad_feats, input_finished);
+      if(vad_feats.size() == 0){
+        LOG(ERROR) << "vad_feats's size is 0";
+      }else{
+        OnlineLfrCmvn(vad_feats, input_finished);
+      }
     }
   }
   if(input_finished){
@@ -128,12 +132,18 @@ int FsmnVadOnline::OnlineLfrCmvn(vector<vector<float>> &vad_feats, bool input_fi
 
 std::vector<std::vector<int>>
 FsmnVadOnline::Infer(std::vector<float> &waves, bool input_finished) {
+    std::vector<std::vector<int>> vad_segments;
     std::vector<std::vector<float>> vad_feats;
     std::vector<std::vector<float>> vad_probs;
     ExtractFeats(vad_sample_rate_, vad_feats, waves, input_finished);
+    if(vad_feats.size() == 0){
+      return vad_segments;
+    }
     fsmnvad_handle_->Forward(vad_feats, &vad_probs, &in_cache_, input_finished);
+    if(vad_probs.size() == 0){
+      return vad_segments;
+    }
 
-    std::vector<std::vector<int>> vad_segments;
     vad_segments = vad_scorer(vad_probs, waves, input_finished, true, vad_silence_duration_, vad_max_len_,
                               vad_speech_noise_thres_, vad_sample_rate_);
     return vad_segments;

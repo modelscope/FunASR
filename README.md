@@ -63,10 +63,10 @@ You can also scan the following DingTalk group or WeChat group QR code to join t
 
 ## Contributors
 
-| <div align="left"><img src="docs/images/damo.png" width="180"/> | <div align="left"><img src="docs/images/nwpu.png" width="260"/> | <img src="docs/images/China_Telecom.png" width="200"/> </div>  | <img src="docs/images/RapidAI.png" width="200"/> </div> | <img src="docs/images/aihealthx.png" width="200"/> </div> |
-|:---------------------------------------------------------------:|:---------------------------------------------------------------:|:--------------------------------------------------------------:|:-------------------------------------------------------:|:-----------------------------------------------------------:|
+| <div align="left"><img src="docs/images/damo.png" width="180"/> | <div align="left"><img src="docs/images/nwpu.png" width="260"/> | <img src="docs/images/China_Telecom.png" width="200"/> </div>  | <img src="docs/images/RapidAI.png" width="200"/> </div> | <img src="docs/images/aihealthx.png" width="200"/> </div> | <img src="docs/images/XVERSE.png" width="250"/> </div> |
+|:---------------------------------------------------------------:|:---------------------------------------------------------------:|:--------------------------------------------------------------:|:-------------------------------------------------------:|:-----------------------------------------------------------:|:------------------------------------------------------:|
 
-The contributors can be found in [contributors list]((./Acknowledge))
+The contributors can be found in [contributors list](./Acknowledge)
 
 ## License
 This project is licensed under the [The MIT License](https://opensource.org/licenses/MIT). FunASR also contains various third-party components and some code modified from other repos under other open source licenses.
@@ -86,6 +86,12 @@ The use of pretraining model is subject to [model licencs](./MODEL_LICENSE)
   title={BAT: Boundary aware transducer for memory-efficient and low-latency ASR},
   year={2023},
   booktitle={INTERSPEECH},
+}
+@inproceedings{wang2023told,
+  author={Jiaming Wang and Zhihao Du and Shiliang Zhang},
+  title={{TOLD:} {A} Novel Two-Stage Overlap-Aware Framework for Speaker Diarization},
+  year={2023},
+  booktitle={ICASSP},
 }
 @inproceedings{gao22b_interspeech,
   author={Zhifu Gao and ShiLiang Zhang and Ian McLoughlin and Zhijie Yan},
