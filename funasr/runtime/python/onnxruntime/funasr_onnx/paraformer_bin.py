@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import List, Union, Tuple
 
 import copy
+import torch
 import librosa
 import numpy as np
 
@@ -16,6 +17,7 @@ from .utils.utils import (CharTokenizer, Hypothesis, ONNXRuntimeError,
 from .utils.postprocess_utils import sentence_postprocess
 from .utils.frontend import WavFrontend
 from .utils.timestamp_utils import time_stamp_lfr6_onnx
+from .utils.utils import pad_list, make_pad_mask
 
 logging = get_logger()
 
@@ -210,3 +212,145 @@ class Paraformer():
         # texts = sentence_postprocess(token)
         return token
 
+
+class ContextualParaformer(Paraformer):
+    """
+    Author: Speech Lab of DAMO Academy, Alibaba Group
+    Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition
+    https://arxiv.org/abs/2206.08317
+    """
+    def __init__(self, model_dir: Union[str, Path] = None,
+                 batch_size: int = 1,
+                 device_id: Union[str, int] = "-1",
+                 plot_timestamp_to: str = "",
+                 quantize: bool = False,
+                 intra_op_num_threads: int = 4,
+                 cache_dir: str = None
+                 ):
+
+        if not Path(model_dir).exists():
+            from modelscope.hub.snapshot_download import snapshot_download
+            try:
+                model_dir = snapshot_download(model_dir, cache_dir=cache_dir)
+            except:
+                raise "model_dir must be model_name in modelscope or local path downloaded from modelscope, but is {}".format(model_dir)
+        
+        model_bb_file = os.path.join(model_dir, 'model_bb.onnx')
+        model_eb_file = os.path.join(model_dir, 'model_eb.onnx')
+
+        token_list_file = os.path.join(model_dir, 'tokens.txt')
+        self.vocab = {}
+        with open(Path(token_list_file), 'r') as fin:
+            for i, line in enumerate(fin.readlines()):
+                self.vocab[line.strip()] = i
+
+        #if quantize:
+        #    model_file = os.path.join(model_dir, 'model_quant.onnx')
+        #if not os.path.exists(model_file):
+        #    logging.error(".onnx model not exist, please export first.")
+            
+        config_file = os.path.join(model_dir, 'config.yaml')
+        cmvn_file = os.path.join(model_dir, 'am.mvn')
+        config = read_yaml(config_file)
+
+        self.converter = TokenIDConverter(config['token_list'])
+        self.tokenizer = CharTokenizer()
+        self.frontend = WavFrontend(
+            cmvn_file=cmvn_file,
+            **config['frontend_conf']
+        )
+        self.ort_infer_bb = OrtInferSession(model_bb_file, device_id, intra_op_num_threads=intra_op_num_threads)
+        self.ort_infer_eb = OrtInferSession(model_eb_file, device_id, intra_op_num_threads=intra_op_num_threads)
+
+        self.batch_size = batch_size
+        self.plot_timestamp_to = plot_timestamp_to
+        if "predictor_bias" in config['model_conf'].keys():
+            self.pred_bias = config['model_conf']['predictor_bias']
+        else:
+            self.pred_bias = 0
+
+    def __call__(self, 
+                 wav_content: Union[str, np.ndarray, List[str]], 
+                 hotwords: str,
+                 **kwargs) -> List:
+        # make hotword list
+        hotwords, hotwords_length = self.proc_hotword(hotwords)
+        # import pdb; pdb.set_trace()
+        [bias_embed] = self.eb_infer(hotwords, hotwords_length)
+        # index from bias_embed
+        bias_embed = bias_embed.transpose(1, 0, 2)
+        _ind = np.arange(0, len(hotwords)).tolist()
+        bias_embed = bias_embed[_ind, hotwords_length.cpu().numpy().tolist()]
+        waveform_list = self.load_data(wav_content, self.frontend.opts.frame_opts.samp_freq)
+        waveform_nums = len(waveform_list)
+        asr_res = []
+        for beg_idx in range(0, waveform_nums, self.batch_size):
+            end_idx = min(waveform_nums, beg_idx + self.batch_size)
+            feats, feats_len = self.extract_feat(waveform_list[beg_idx:end_idx])
+            bias_embed = np.expand_dims(bias_embed, axis=0)
+            bias_embed = np.repeat(bias_embed, feats.shape[0], axis=0)
+            try:
+                outputs = self.bb_infer(feats, feats_len, bias_embed)
+                am_scores, valid_token_lens = outputs[0], outputs[1]
+            except ONNXRuntimeError:
+                #logging.warning(traceback.format_exc())
+                logging.warning("input wav is silence or noise")
+                preds = ['']
+            else:
+                preds = self.decode(am_scores, valid_token_lens)
+                for pred in preds:
+                    pred = sentence_postprocess(pred)
+                    asr_res.append({'preds': pred})
+        return asr_res
+
+    def proc_hotword(self, hotwords):
+        hotwords = hotwords.split(" ")
+        hotwords_length = [len(i) - 1 for i in hotwords]
+        hotwords_length.append(0)
+        hotwords_length = torch.Tensor(hotwords_length).to(torch.int32)
+        # hotwords.append('<s>')
+        def word_map(word):
+            return torch.tensor([self.vocab[i] for i in word])
+        hotword_int = [word_map(i) for i in hotwords]
+        # import pdb; pdb.set_trace()
+        hotword_int.append(torch.tensor([1]))
+        hotwords = pad_list(hotword_int, pad_value=0, max_len=10)
+        return hotwords, hotwords_length
+
+    def bb_infer(self, feats: np.ndarray,
+              feats_len: np.ndarray, bias_embed) -> Tuple[np.ndarray, np.ndarray]:
+        outputs = self.ort_infer_bb([feats, feats_len, bias_embed])
+        return outputs
+
+    def eb_infer(self, hotwords, hotwords_length):
+        outputs = self.ort_infer_eb([hotwords.to(torch.int32).numpy(), hotwords_length.to(torch.int32).numpy()])
+        return outputs
+
+    def decode(self, am_scores: np.ndarray, token_nums: int) -> List[str]:
+        return [self.decode_one(am_score, token_num)
+                for am_score, token_num in zip(am_scores, token_nums)]
+
+    def decode_one(self,
+                   am_score: np.ndarray,
+                   valid_token_num: int) -> List[str]:
+        yseq = am_score.argmax(axis=-1)
+        score = am_score.max(axis=-1)
+        score = np.sum(score, axis=-1)
+
+        # pad with mask tokens to ensure compatibility with sos/eos tokens
+        # asr_model.sos:1  asr_model.eos:2
+        yseq = np.array([1] + yseq.tolist() + [2])
+        hyp = Hypothesis(yseq=yseq, score=score)
+
+        # remove sos/eos and get results
+        last_pos = -1
+        token_int = hyp.yseq[1:last_pos].tolist()
+
+        # remove blank symbol id, which is assumed to be 0
+        token_int = list(filter(lambda x: x not in (0, 2), token_int))
+
+        # Change integer-ids to tokens
+        token = self.converter.ids2tokens(token_int)
+        token = token[:valid_token_num-self.pred_bias]
+        # texts = sentence_postprocess(token)
+        return token
