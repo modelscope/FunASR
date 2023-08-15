@@ -1,0 +1,1 @@
+../../sa_asr/local/format_wav_scp.sh

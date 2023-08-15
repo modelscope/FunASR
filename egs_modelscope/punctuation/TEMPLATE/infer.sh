@@ -7,7 +7,7 @@ set -o pipefail
 stage=1
 stop_stage=2
 model="damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch"
-data_dir="./data/test"
+data_dir="./data"
 output_dir="./results"
 gpu_inference=true    # whether to perform gpu decoding
 gpuid_list="0,1"    # set gpus, e.g., gpuid_list="0,1"
@@ -32,7 +32,7 @@ split_scps=""
 for JOB in $(seq ${nj}); do
     split_scps="$split_scps $output_dir/split/text.$JOB.scp"
 done
-perl utils/split_scp.pl ${data_dir}/punc.txt ${split_scps}
+perl utils/split_scp.pl ${data_dir}/punc_example.txt ${split_scps}
 
 if [ -n "${checkpoint_dir}" ]; then
   python utils/prepare_checkpoint.py ${model} ${checkpoint_dir} ${checkpoint_name}

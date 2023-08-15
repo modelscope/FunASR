@@ -29,8 +29,8 @@ if __name__ == '__main__':
     params = modelscope_args(model="damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404", data_path="./data")
     params.output_dir = "./checkpoint"              # 模型保存路径
     params.data_path = "./example_data/"            # 数据路径
-    params.dataset_type = "large"                   # finetune contextual paraformer模型只能使用large dataset
-    params.batch_bins = 200000                      # batch size，如果dataset_type="small"，batch_bins单位为fbank特征帧数，如果dataset_type="large"，batch_bins单位为毫秒，
+    params.dataset_type = "large"                   # finetune contextual_paraformer模型只能使用large dataset
+    params.batch_bins = 120000                      # batch size，如果dataset_type="small"，batch_bins单位为fbank特征帧数，如果dataset_type="large"，batch_bins单位为毫秒，
     params.max_epoch = 20                           # 最大训练轮数
     params.lr = 0.0002                              # 设置学习率
 

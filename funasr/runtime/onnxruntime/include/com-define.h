@@ -13,11 +13,14 @@ namespace funasr {
 
 // parser option
 #define MODEL_DIR "model-dir"
+#define OFFLINE_MODEL_DIR "model-dir"
+#define ONLINE_MODEL_DIR "online-model-dir"
 #define VAD_DIR "vad-dir"
 #define PUNC_DIR "punc-dir"
 #define QUANTIZE "quantize"
 #define VAD_QUANT "vad-quant"
 #define PUNC_QUANT "punc-quant"
+#define ASR_MODE "mode"
 
 #define WAV_PATH "wav-path"
 #define WAV_SCP "wav-scp"
@@ -47,6 +50,11 @@ namespace funasr {
 #define PUNC_CONFIG_NAME "punc.yaml"
 #define MODEL_SEG_DICT "seg_dict"
 
+#define ENCODER_NAME "model.onnx"
+#define QUANT_ENCODER_NAME "model_quant.onnx"
+#define DECODER_NAME "decoder.onnx"
+#define QUANT_DECODER_NAME "decoder_quant.onnx"
+
 // vad
 #ifndef VAD_SILENCE_DURATION
 #define VAD_SILENCE_DURATION 800
@@ -66,6 +74,19 @@ namespace funasr {
 
 #ifndef VAD_LFR_N
 #define VAD_LFR_N 1
+#endif
+
+// asr
+#ifndef PARA_LFR_M
+#define PARA_LFR_M 7
+#endif
+
+#ifndef PARA_LFR_N
+#define PARA_LFR_N 6
+#endif
+
+#ifndef ONLINE_STEP
+#define ONLINE_STEP 9600
 #endif
 
 // punc

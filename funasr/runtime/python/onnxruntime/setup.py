@@ -13,7 +13,7 @@ def get_readme():
 
 
 MODULE_NAME = 'funasr_onnx'
-VERSION_NUM = '0.1.2'
+VERSION_NUM = '0.2.0'
 
 setuptools.setup(
     name=MODULE_NAME,

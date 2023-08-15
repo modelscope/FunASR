@@ -697,7 +697,7 @@ class UnifiedTransducerModel(FunASRModel):
 
         loss_trans = loss_trans_utt + loss_trans_chunk
         loss_ctc = loss_ctc + loss_ctc_chunk
-        loss_ctc = loss_att + loss_att_chunk
+        loss_att = loss_att + loss_att_chunk
 
         loss = (
             self.transducer_weight * loss_trans

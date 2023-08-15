@@ -1,3 +1,5 @@
+([简体中文](./README_zh.md)|English)
+
 # Speech Recognition
 
 > **Note**:
@@ -230,10 +232,10 @@ python finetune.py &> log.txt &
     - `batch_bins`: batch size. For dataset_type is `small`, `batch_bins` indicates the feature frames. For dataset_type is `large`, `batch_bins` indicates the duration in ms
     - `max_epoch`: number of training epoch
     - `lr`: learning rate
-    - `init_param`: init model path, load modelscope model initialization by default. For example: ["checkpoint/20epoch.pb"]
-    - `freeze_param`: Freeze model parameters. For example：["encoder"]
-    - `ignore_init_mismatch`: Ignore size mismatch when loading pre-trained model
-    - `use_lora`: Fine-tuning model use lora, more detail please refer to [LORA](https://arxiv.org/pdf/2106.09685.pdf)
+    - `init_param`: `[]`(Default), init model path, load modelscope model initialization by default. For example: ["checkpoint/20epoch.pb"]
+    - `freeze_param`: `[]`(Default), Freeze model parameters. For example：["encoder"]
+    - `ignore_init_mismatch`: `True`(Default), Ignore size mismatch when loading pre-trained model
+    - `use_lora`: `False`(Default), Fine-tuning model use lora, more detail please refer to [LORA](https://arxiv.org/pdf/2106.09685.pdf)
 
 - Training data formats：
 ```sh

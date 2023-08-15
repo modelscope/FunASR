@@ -1,55 +1,65 @@
-#include <algorithm>
-#include <chrono>
-#include <cmath>
-#include <iostream>
-#include <memory>
+/**
+ * Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights
+ * Reserved. MIT License  (https://opensource.org/licenses/MIT)
+ */
+/* 2023 by burkliu(刘柏基) liubaiji@xverse.cn */
+
 #include <string>
+#include <thread>
+#include <unistd.h>
 
-#include <grpc/grpc.h>
-#include <grpcpp/server.h>
-#include <grpcpp/server_builder.h>
-#include <grpcpp/server_context.h>
-#include <grpcpp/security/server_credentials.h>
-
-#include <unordered_map>
-#include <chrono>
-
+#include "grpcpp/server_builder.h"
 #include "paraformer.grpc.pb.h"
 #include "funasrruntime.h"
+#include "tclap/CmdLine.h"
+#include "com-define.h"
+#include "glog/logging.h"
 
-
-using grpc::Server;
-using grpc::ServerBuilder;
-using grpc::ServerContext;
-using grpc::ServerReader;
-using grpc::ServerReaderWriter;
-using grpc::ServerWriter;
-using grpc::Status;
-
-
+using paraformer::WavFormat;
+using paraformer::DecodeMode;
 using paraformer::Request;
 using paraformer::Response;
 using paraformer::ASR;
 
 typedef struct
 {
-    std::string msg;
-    float  snippet_time;
-}FUNASR_RECOG_RESULT;
+  std::string msg;
+  float  snippet_time;
+} FUNASR_RECOG_RESULT;
 
-class ASRServicer final : public ASR::Service {
-  private:
-    int init_flag;
-    std::unordered_map<std::string, std::string> client_buffers;
-    std::unordered_map<std::string, std::string> client_transcription;
+class GrpcEngine {
+ public:
+  GrpcEngine(grpc::ServerReaderWriter<Response, Request>* stream, std::shared_ptr<FUNASR_HANDLE> asr_handler);
+  void operator()();
 
+ private:
+  void DecodeThreadFunc();
+  void OnSpeechStart();
+  void OnSpeechData();
+  void OnSpeechEnd();
+
+  grpc::ServerReaderWriter<Response, Request>* stream_;
+  std::shared_ptr<Request> request_;
+  std::shared_ptr<Response> response_;
+  std::shared_ptr<FUNASR_HANDLE> asr_handler_;
+  std::string audio_buffer_;
+  std::shared_ptr<std::thread> decode_thread_ = nullptr;
+  bool is_start_ = false;
+  bool is_end_ = false;
+
+  std::vector<int> chunk_size_ = {5, 10, 5};
+  int sampling_rate_ = 16000;
+  std::string encoding_;
+  ASR_TYPE mode_ = ASR_TWO_PASS;
+  int step_duration_ms_ = 100;
+};
+
+class GrpcService final : public ASR::Service {
   public:
-    ASRServicer(std::map<std::string, std::string>& model_path);
-    void clear_states(const std::string& user);
-    void clear_buffers(const std::string& user);
-    void clear_transcriptions(const std::string& user);
-    void disconnect(const std::string& user);
+    GrpcService(std::map<std::string, std::string>& config, int num_thread);
     grpc::Status Recognize(grpc::ServerContext* context, grpc::ServerReaderWriter<Response, Request>* stream);
-    FUNASR_HANDLE AsrHanlde;
-	
+
+  private:
+    std::map<std::string, std::string> config_;
+    std::shared_ptr<FUNASR_HANDLE> asr_handler_;
 };

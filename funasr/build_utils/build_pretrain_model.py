@@ -4,13 +4,18 @@ from funasr.models.data2vec import Data2VecPretrainModel
 from funasr.models.encoder.data2vec_encoder import Data2VecEncoder
 from funasr.models.frontend.default import DefaultFrontend
 from funasr.models.frontend.windowing import SlidingWindow
+from funasr.models.frontend.wav_frontend import WavFrontend
 from funasr.models.specaug.specaug import SpecAug
 from funasr.torch_utils.initialize import initialize
 from funasr.train.class_choices import ClassChoices
 
 frontend_choices = ClassChoices(
     name="frontend",
-    classes=dict(default=DefaultFrontend, sliding_window=SlidingWindow),
+    classes=dict(
+        default=DefaultFrontend,
+        sliding_window=SlidingWindow,
+        wav_frontend=WavFrontend,
+    ),
     default="default",
 )
 specaug_choices = ClassChoices(

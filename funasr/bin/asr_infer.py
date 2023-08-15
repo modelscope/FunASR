@@ -1336,6 +1336,7 @@ class Speech2TextTransducer:
             nbest: int = 1,
             streaming: bool = False,
             simu_streaming: bool = False,
+            full_utt: bool = False,
             chunk_size: int = 16,
             left_context: int = 32,
             right_context: int = 0,
@@ -1430,6 +1431,7 @@ class Speech2TextTransducer:
         self.beam_search = beam_search
         self.streaming = streaming
         self.simu_streaming = simu_streaming
+        self.full_utt = full_utt
         self.chunk_size = max(chunk_size, 0)
         self.left_context = left_context
         self.right_context = max(right_context, 0)
@@ -1449,6 +1451,7 @@ class Speech2TextTransducer:
             self._ctx = self.asr_model.encoder.get_encoder_input_size(
                 self.window_size
             )
+            self._right_ctx = right_context
 
             self.last_chunk_length = (
                     self.asr_model.encoder.embed.min_frame_length + self.right_context + 1
@@ -1541,6 +1544,37 @@ class Speech2TextTransducer:
         feats_lengths = to_device(feats_lengths, device=self.device)
         enc_out = self.asr_model.encoder.simu_chunk_forward(feats, feats_lengths, self.chunk_size, self.left_context,
                                                             self.right_context)
+        nbest_hyps = self.beam_search(enc_out[0])
+
+        return nbest_hyps
+
+    @torch.no_grad()
+    def full_utt_decode(self, speech: Union[torch.Tensor, np.ndarray]) -> List[HypothesisTransducer]:
+        """Speech2Text call.
+        Args:
+            speech: Speech data. (S)
+        Returns:
+            nbest_hypothesis: N-best hypothesis.
+        """
+        assert check_argument_types()
+
+        if isinstance(speech, np.ndarray):
+            speech = torch.tensor(speech)
+
+        if self.frontend is not None:
+            speech = torch.unsqueeze(speech, axis=0)
+            speech_lengths = speech.new_full([1], dtype=torch.long, fill_value=speech.size(1))
+            feats, feats_lengths = self.frontend(speech, speech_lengths)
+        else:
+            feats = speech.unsqueeze(0).to(getattr(torch, self.dtype))
+            feats_lengths = feats.new_full([1], dtype=torch.long, fill_value=feats.size(1))
+
+        if self.asr_model.normalize is not None:
+            feats, feats_lengths = self.asr_model.normalize(feats, feats_lengths)
+
+        feats = to_device(feats, device=self.device)
+        feats_lengths = to_device(feats_lengths, device=self.device)
+        enc_out = self.asr_model.encoder.full_utt_forward(feats, feats_lengths)
         nbest_hyps = self.beam_search(enc_out[0])
 
         return nbest_hyps
