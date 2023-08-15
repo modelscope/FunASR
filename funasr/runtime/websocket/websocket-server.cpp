@@ -60,10 +60,18 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
   try {
     int num_samples = buffer.size();  // the size of the buf
 
+    if (!msg["hotwords"].is_null() && !msg["hotwords"].empty()) {
+      std::string hw = msg["hotwords"];
+      hotwords_embedding = CompileHotwordEmbedding(asr_hanlde, hw);
+    } else {
+      std::string empty_hw = "";
+      hotwords_embedding = CompileHotwordEmbedding(asr_hanlde, empty_hw);
+    }
     if (!buffer.empty()) {
+      //LOG(INFO) << "do_decoder buffer size " << buffer.size();
       // feed data to asr engine
       FUNASR_RESULT Result = FunOfflineInferBuffer(
-          asr_hanlde, buffer.data(), buffer.size(), RASR_NONE, NULL, 16000, msg["wav_format"]);
+          asr_hanlde, buffer.data(), buffer.size(), RASR_NONE, NULL, hotwords_embedding, 16000, msg["wav_format"]);
 
       std::string asr_result =
           ((FUNASR_RECOG_RESULT*)Result)->msg;  // get decode result
@@ -110,6 +118,8 @@ void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
   data_msg->msg["wav_format"] = "pcm";
   data_map.emplace(hdl, data_msg);
   LOG(INFO) << "on_open, active connections: " << data_map.size();
+  std::string empty_hw = "";
+  hotwords_embedding = CompileHotwordEmbedding(asr_hanlde, empty_hw);
 }
 
 void WebSocketServer::on_close(websocketpp::connection_hdl hdl) {
@@ -175,6 +185,9 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
       if (jsonresult["wav_format"] != nullptr) {
         msg_data->msg["wav_format"] = jsonresult["wav_format"];
       }
+      if (jsonresult["hotwords"] != nullptr) {
+        msg_data->msg["hotwords"] = jsonresult["hotwords"];
+      }
 
       if (jsonresult["is_speaking"] == false ||
           jsonresult["is_finished"] == true) {
@@ -200,6 +213,7 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
       // recived binary data
       const auto* pcm_data = static_cast<const char*>(payload.data());
       int32_t num_samples = payload.size();
+      //LOG(INFO) << "recv binary num_samples " << num_samples;
 
       if (isonline) {
         // if online TODO(zhaoming) still not done

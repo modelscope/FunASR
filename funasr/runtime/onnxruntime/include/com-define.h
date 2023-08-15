@@ -38,12 +38,17 @@ namespace funasr {
 // #define PUNC_CONFIG_PATH "punc-config"
 
 #define MODEL_NAME "model.onnx"
+// hotword embedding compile model
+#define MODEL_EB_NAME "model_eb.onnx"
+#define MODEL_BB_NAME "model_bb.onnx"
 #define QUANT_MODEL_NAME "model_quant.onnx"
+#define QUANT_MODEL_BB_NAME "model_bb_quant.onnx"
 #define VAD_CMVN_NAME "vad.mvn"
 #define VAD_CONFIG_NAME "vad.yaml"
 #define AM_CMVN_NAME "am.mvn"
 #define AM_CONFIG_NAME "config.yaml"
 #define PUNC_CONFIG_NAME "punc.yaml"
+#define MODEL_SEG_DICT "seg_dict"
 
 #define ENCODER_NAME "model.onnx"
 #define QUANT_ENCODER_NAME "model_quant.onnx"

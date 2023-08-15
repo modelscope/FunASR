@@ -169,7 +169,6 @@ After entering the directory samples/cpp, you can test it with CPP, as follows:
 ```
 
 API-reference:
-
 ```text
 --server-ip: The IP address of the machine where FunASR runtime-SDK service is deployed. The default value is the IP address of the local machine (127.0.0.1). If the client and service are not on the same server, it needs to be changed to the IP address of the deployment machine.
 --port: The port number of the deployed service is 10095.

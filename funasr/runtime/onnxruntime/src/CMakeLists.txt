@@ -2,6 +2,8 @@
 file(GLOB files1 "*.cpp")
 set(files ${files1})
 
+message("files: "${files})
+
 add_library(funasr SHARED ${files})
 
 if(WIN32)
@@ -20,5 +22,6 @@ else()
     include_directories(${FFMPEG_DIR}/include)
 endif()
 
+#message("CXX_FLAGS "${CMAKE_CXX_FLAGS})
 include_directories(${CMAKE_SOURCE_DIR}/include)
 target_link_libraries(funasr PUBLIC onnxruntime ${EXTRA_LIBS})

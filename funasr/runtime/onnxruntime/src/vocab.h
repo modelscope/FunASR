@@ -5,12 +5,14 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
+#include <map>
 using namespace std;
 
 namespace funasr {
 class Vocab {
   private:
     vector<string> vocab;
+    std::map<string, int> token_id;
     bool IsChinese(string ch);
     bool IsEnglish(string ch);
     void LoadVocabFromYaml(const char* filename);
@@ -21,6 +23,7 @@ class Vocab {
     int Size();
     string Vector2String(vector<int> in);
     string Vector2StringV2(vector<int> in);
+    int GetIdByToken(const std::string &token);
 };
 
 } // namespace funasr
