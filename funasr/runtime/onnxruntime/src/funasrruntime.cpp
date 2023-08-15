@@ -1,4 +1,5 @@
 #include "precomp.h"
+#include <vector>
 #ifdef __cplusplus 
 
 extern "C" {
@@ -61,8 +62,10 @@ extern "C" {
         }
 		int n_step = 0;
 		int n_total = audio.GetQueueSize();
+    // TODO: hotword not implement, use a empty embedding
+    std::vector<std::vector<float>> emb;
 		while (audio.Fetch(buff, len, flag) > 0) {
-			string msg = recog_obj->Forward(buff, len, flag);
+			string msg = recog_obj->Forward(buff, len, flag, emb);
 			p_result->msg += msg;
 			n_step++;
 			if (fn_callback)
@@ -101,8 +104,10 @@ extern "C" {
 		if(p_result->snippet_time == 0){
             return p_result;
         }
+    // TODO: hotword not implement, use a empty embedding
+    std::vector<std::vector<float>> emb;
 		while (audio.Fetch(buff, len, flag) > 0) {
-			string msg = recog_obj->Forward(buff, len, flag);
+			string msg = recog_obj->Forward(buff, len, flag, emb);
 			p_result->msg += msg;
 			n_step++;
 			if (fn_callback)
@@ -199,7 +204,7 @@ extern "C" {
 	}
 
 	// APIs for Offline-stream Infer
-	_FUNASRAPI FUNASR_RESULT FunOfflineInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, FUNASR_MODE mode, QM_CALLBACK fn_callback, int sampling_rate, std::string wav_format)
+	_FUNASRAPI FUNASR_RESULT FunOfflineInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, FUNASR_MODE mode, QM_CALLBACK fn_callback, const std::vector<std::vector<float>> &hw_emb, int sampling_rate, std::string wav_format)
 	{
 		funasr::OfflineStream* offline_stream = (funasr::OfflineStream*)handle;
 		if (!offline_stream)
@@ -230,7 +235,8 @@ extern "C" {
 		int n_step = 0;
 		int n_total = audio.GetQueueSize();
 		while (audio.Fetch(buff, len, flag) > 0) {
-			string msg = (offline_stream->asr_handle)->Forward(buff, len, flag);
+      //LOG(INFO) << "InferBuffer len " << len;
+			string msg = (offline_stream->asr_handle)->Forward(buff, len, flag, hw_emb);
 			p_result->msg += msg;
 			n_step++;
 			if (fn_callback)
@@ -244,7 +250,7 @@ extern "C" {
 		return p_result;
 	}
 
-	_FUNASRAPI FUNASR_RESULT FunOfflineInfer(FUNASR_HANDLE handle, const char* sz_filename, FUNASR_MODE mode, QM_CALLBACK fn_callback, int sampling_rate)
+	_FUNASRAPI FUNASR_RESULT FunOfflineInfer(FUNASR_HANDLE handle, const char* sz_filename, FUNASR_MODE mode, QM_CALLBACK fn_callback, const std::vector<std::vector<float>> &hw_emb, int sampling_rate)
 	{
 		funasr::OfflineStream* offline_stream = (funasr::OfflineStream*)handle;
 		if (!offline_stream)
@@ -276,8 +282,9 @@ extern "C" {
 		int flag = 0;
 		int n_step = 0;
 		int n_total = audio.GetQueueSize();
+    //std::vector<std::vector<float>> emb;
 		while (audio.Fetch(buff, len, flag) > 0) {
-			string msg = (offline_stream->asr_handle)->Forward(buff, len, flag);
+			string msg = (offline_stream->asr_handle)->Forward(buff, len, flag, hw_emb);
 			p_result->msg+= msg;
 			n_step++;
 			if (fn_callback)
@@ -289,6 +296,15 @@ extern "C" {
 		}
 	
 		return p_result;
+	}
+
+	_FUNASRAPI const std::vector<std::vector<float>> CompileHotwordEmbedding(FUNASR_HANDLE handle, std::string &hotwords) {
+		funasr::OfflineStream* offline_stream = (funasr::OfflineStream*)handle;
+    std::vector<std::vector<float>> emb;
+		if (!offline_stream)
+			return emb;
+		return (offline_stream->asr_handle)->CompileHotwordEmbedding(hotwords);
+
 	}
 
 	_FUNASRAPI const int FunASRGetRetNumber(FUNASR_RESULT result)

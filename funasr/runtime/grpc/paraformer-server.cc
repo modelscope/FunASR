@@ -137,7 +137,9 @@ grpc::Status ASRServicer::Recognize(
                     stream->Write(res);
                 }
                 else {
-                    FUNASR_RESULT Result= FunOfflineInferBuffer(AsrHanlde, tmp_data.c_str(), data_len_int, RASR_NONE, NULL, 16000);
+                    // TODO: Hotword not implement yet, please send hotword list from client and compile embedding. Please refer to websocket server implement.
+                    std::vector<std::vector<float>> emb;
+                    FUNASR_RESULT Result= FunOfflineInferBuffer(AsrHanlde, tmp_data.c_str(), data_len_int, RASR_NONE, NULL, emb, 16000);
                     std::string asr_result = ((FUNASR_RECOG_RESULT*)Result)->msg;
 
                     auto end_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();

@@ -51,6 +51,7 @@ int main(int argc, char** argv)
     TCLAP::ValueArg<std::string>    punc_quant("", PUNC_QUANT, "false (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "false", "string");
 
     TCLAP::ValueArg<std::string> wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", true, "", "string");
+    TCLAP::ValueArg<std::string> hotwords_("", "hotwords", "hotwords seperate by |, could be: 阿里巴巴|达摩院", false, "", "string");
 
     cmd.add(model_dir);
     cmd.add(quantize);
@@ -59,6 +60,7 @@ int main(int argc, char** argv)
     cmd.add(punc_dir);
     cmd.add(punc_quant);
     cmd.add(wav_path);
+    cmd.add(hotwords_);
     cmd.parse(argc, argv);
 
     std::map<std::string, std::string> model_path;
@@ -69,6 +71,7 @@ int main(int argc, char** argv)
     GetValue(punc_dir, PUNC_DIR, model_path);
     GetValue(punc_quant, PUNC_QUANT, model_path);
     GetValue(wav_path, WAV_PATH, model_path);
+    std::string hotwords = hotwords_.getValue();
 
     struct timeval start, end;
     gettimeofday(&start, NULL);
@@ -115,11 +118,12 @@ int main(int argc, char** argv)
     
     float snippet_time = 0.0f;
     long taking_micros = 0;
+    std::vector<std::vector<float>> hotwords_embedding = CompileHotwordEmbedding(asr_hanlde, hotwords);
     for (int i = 0; i < wav_list.size(); i++) {
         auto& wav_file = wav_list[i];
         auto& wav_id = wav_ids[i];
         gettimeofday(&start, NULL);
-        FUNASR_RESULT result=FunOfflineInfer(asr_hanlde, wav_file.c_str(), RASR_NONE, NULL, 16000);
+        FUNASR_RESULT result=FunOfflineInfer(asr_hanlde, wav_file.c_str(), RASR_NONE, NULL, hotwords_embedding, 16000);
         gettimeofday(&end, NULL);
         seconds = (end.tv_sec - start.tv_sec);
         taking_micros += ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);

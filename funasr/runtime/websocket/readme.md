@@ -126,11 +126,13 @@ example:
 ./funasr-wss-client  --server-ip <string>
                     --port <string>
                     --wav-path <string>
-                    [--thread-num <int>] 
+                    [--thread-num <int>] [--hotwords <string>]
                     [--is-ssl <int>]  [--]
                     [--version] [-h]
 
 Where:
+   --hotwords <string>
+     hotwords seperate by |, could be: 阿里巴巴|达摩院
    --server-ip <string>
      (required)  server-ip
 

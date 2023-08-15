@@ -132,6 +132,11 @@ class WebSocketServer {
            std::owner_less<websocketpp::connection_hdl>>
       data_map;
   websocketpp::lib::mutex m_lock;  // mutex for sample_map
+
+  // the hotwords embedding, as an example code, we run compile and put the embedding in the vector.
+  // for better performance, one method is to cache the embedding as a file to avoid duplicate compiling when request comes with
+  // same hotwords list.
+  std::vector<std::vector<float>> hotwords_embedding;
 };
 
 #endif  // WEBSOCKET_SERVER_H_

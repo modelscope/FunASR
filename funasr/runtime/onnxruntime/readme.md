@@ -46,8 +46,11 @@ make
 ./funasr-onnx-offline     --model-dir <string> [--quantize <string>]
                           [--vad-dir <string>] [--vad-quant <string>]
                           [--punc-dir <string>] [--punc-quant <string>]
+                          [--hotwords <string>]
                           --wav-path <string> [--] [--version] [-h]
 Where:
+   --hotwords <string>
+     hotwords seperate by |, could be: 阿里巴巴|达摩院
    --model-dir <string>
      (required)  the asr model path, which contains model.onnx, config.yaml, am.mvn
    --quantize <string>
@@ -129,9 +132,12 @@ For example:
 ./funasr-onnx-offline-rtf     --model-dir <string> [--quantize <string>]
                               [--vad-dir <string>] [--vad-quant <string>]
                               [--punc-dir <string>] [--punc-quant <string>]
+                              [--hotwords <string>]
                               --wav-path <string> --thread-num <int32_t>
                               [--] [--version] [-h]
 Where:
+   --hotwords <string>
+     hotwords seperate by |, could be: 阿里巴巴|达摩院
    --thread-num <int32_t>
      (required)  multi-thread num for rtf
    --model-dir <string>
@@ -148,6 +154,7 @@ Where:
      the punc model path, which contains model.onnx, punc.yaml
    --punc-quant <string>
      false (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir
+
      
    --wav-path <string>
      (required)  the input could be: 

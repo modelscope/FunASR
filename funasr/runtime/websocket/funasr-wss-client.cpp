@@ -38,6 +38,7 @@ void WaitABit() {
     #endif
 }
 std::atomic<int> wav_index(0);
+std::string hotwords = "";
 
 bool IsTargetFile(const std::string& filename, const std::string target) {
     std::size_t pos = filename.find_last_of(".");
@@ -108,8 +109,10 @@ class WebsocketClient {
             case websocketpp::frame::opcode::text:
 				total_num=total_num+1;
                 LOG(INFO)<< "Thread: " << this_thread::get_id() <<",on_message = " << payload;
+        LOG(INFO) << "total_num=" << total_num << " wav_index=" <<wav_index;
 				if((total_num+1)==wav_index)
 				{
+          LOG(INFO) << "close client";
 					websocketpp::lib::error_code ec;
 					m_client.close(m_hdl, websocketpp::close::status::going_away, "", ec);
 					if (ec){
@@ -237,6 +240,9 @@ class WebsocketClient {
         jsonbegin["wav_name"] = wav_id;
         jsonbegin["wav_format"] = wav_format;
         jsonbegin["is_speaking"] = true;
+        //jsonbegin["hotwords"] = "阿里巴巴|达摩院";
+        std::cout << "hotwords: "<< hotwords << std::endl;
+        jsonbegin["hotwords"] = hotwords;
         m_client.send(m_hdl, jsonbegin.dump(), websocketpp::frame::opcode::text,
                       ec);
 
@@ -340,12 +346,14 @@ int main(int argc, char* argv[]) {
     TCLAP::ValueArg<int> is_ssl_(
         "", "is-ssl", "is-ssl is 1 means use wss connection, or use ws connection", 
         false, 1, "int");
+    TCLAP::ValueArg<std::string> hotwords_("", "hotwords", "hotwords seperate by |, could be: 阿里巴巴|达摩院", false, "", "string");
 
     cmd.add(server_ip_);
     cmd.add(port_);
     cmd.add(wav_path_);
     cmd.add(thread_num_);
     cmd.add(is_ssl_);
+    cmd.add(hotwords_);
     cmd.parse(argc, argv);
 
     std::string server_ip = server_ip_.getValue();
@@ -353,6 +361,7 @@ int main(int argc, char* argv[]) {
     std::string wav_path = wav_path_.getValue();
     int threads_num = thread_num_.getValue();
     int is_ssl = is_ssl_.getValue();
+    hotwords = hotwords_.getValue();
 
     std::vector<websocketpp::lib::thread> client_threads;
     std::string uri = "";
