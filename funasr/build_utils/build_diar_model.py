@@ -221,7 +221,7 @@ def build_diar_model(args):
         args.frontend = None
         args.frontend_conf = {}
         frontend = None
-        input_size = None
+        input_size = args.input_size
 
     if args.model == "sond":
         # encoder
