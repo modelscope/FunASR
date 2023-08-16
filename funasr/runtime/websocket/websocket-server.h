@@ -111,7 +111,7 @@ class WebSocketServer {
                   websocketpp::connection_hdl& hdl, 
                   websocketpp::lib::mutex& thread_lock,
                   std::vector<std::vector<float>> &hotwords_embedding,
-                  const nlohmann::json& msg);
+                  std::string wav_name, std::string wav_format);
 
   void initAsr(std::map<std::string, std::string>& model_path, int thread_num);
   void on_message(websocketpp::connection_hdl hdl, message_ptr msg);

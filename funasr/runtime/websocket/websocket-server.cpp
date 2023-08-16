@@ -58,7 +58,8 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
                                  websocketpp::connection_hdl& hdl,
                                  websocketpp::lib::mutex& thread_lock,
                                  std::vector<std::vector<float>> &hotwords_embedding,
-                                 const nlohmann::json& msg) {
+                                 std::string wav_name,
+                                 std::string wav_format) {
   scoped_lock guard(thread_lock);
   try {
     int num_samples = buffer.size();  // the size of the buf
@@ -67,7 +68,7 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
       std::string asr_result;
       try{
         FUNASR_RESULT Result = FunOfflineInferBuffer(
-            asr_hanlde, buffer.data(), buffer.size(), RASR_NONE, NULL, hotwords_embedding, 16000, msg["wav_format"]);
+            asr_hanlde, buffer.data(), buffer.size(), RASR_NONE, NULL, hotwords_embedding, 16000, wav_format);
 
         asr_result = ((FUNASR_RECOG_RESULT*)Result)->msg;  // get decode result
         FunASRFreeResult(Result);
@@ -81,7 +82,7 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
       jsonresult["text"] = asr_result;  // put result in 'text'
       jsonresult["mode"] = "offline";
 
-      jsonresult["wav_name"] = msg["wav_name"];
+      jsonresult["wav_name"] = wav_name;
 
       // send the json to client
       if (is_ssl) {
@@ -130,33 +131,6 @@ void WebSocketServer::on_close(websocketpp::connection_hdl hdl) {
 
   LOG(INFO) << "on_close, active connections: " << data_map.size();
 }
-
-// // remove closed connection
-// void WebSocketServer::check_and_clean_connection() {
-//   std::vector<websocketpp::connection_hdl> to_remove;  // remove list
-//   auto iter = data_map.begin();
-//   while (iter != data_map.end()) {  // loop to find closed connection
-//     websocketpp::connection_hdl hdl = iter->first;
-
-//     if (is_ssl) {
-//       wss_server::connection_ptr con = wss_server_->get_con_from_hdl(hdl);
-//       if (con->get_state() != 1) {  // session::state::open ==1
-//         to_remove.push_back(hdl);
-//       }
-//     } else {
-//       server::connection_ptr con = server_->get_con_from_hdl(hdl);
-//       if (con->get_state() != 1) {  // session::state::open ==1
-//         to_remove.push_back(hdl);
-//       }
-//     }
-
-//     iter++;
-//   }
-//   for (auto hdl : to_remove) {
-//     data_map.erase(hdl);
-//     LOG(INFO)<< "remove one connection ";
-//   }
-// }
 
 void remove_hdl(
     websocketpp::connection_hdl hdl,
@@ -289,7 +263,8 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
                               std::move(hdl), 
                               std::ref(*thread_lock_p),
                               std::move(hotwords_embedding_),
-                              std::move(msg_data->msg)));
+                              msg_data->msg["wav_name"],
+                              msg_data->msg["wav_format"]));
       }
       break;
     }
