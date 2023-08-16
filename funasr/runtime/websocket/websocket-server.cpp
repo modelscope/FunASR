@@ -61,7 +61,7 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
   try {
     int num_samples = buffer.size();  // the size of the buf
 
-    if (!buffer.empty()) {
+    if (!buffer.empty() && hotwords_embedding.size() >0 ) {
       std::string asr_result;
       try{
         FUNASR_RESULT Result = FunOfflineInferBuffer(
@@ -202,13 +202,12 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
         // sample_data_p->insert(sample_data_p->end(), padding.data(),
         //                       padding.data() + padding.size());
         // for offline, send all receive data to decoder engine
-        std::shared_ptr<std::vector<std::vector<float>>> hotwords_embedding_ =
-          msg_data->hotwords_embedding;
+        std::vector<std::vector<float>> hotwords_embedding_(*(msg_data->hotwords_embedding));
         asio::post(io_decoder_,
                     std::bind(&WebSocketServer::do_decoder, this,
                               std::move(*(sample_data_p.get())),
                               std::move(hdl), 
-                              std::ref(*(hotwords_embedding_.get())),
+                              std::move(hotwords_embedding_),
                               std::move(msg_data->msg)));
       }
       break;
