@@ -16,7 +16,7 @@ cd /workspace/FunASR/funasr/runtime/websocket/build/bin
 ./funasr-wss-server-2pass  \
   --download-model-dir ${download_model_dir} \
   --model-dir ${model_dir} \
-  --online-model-dir ${online_model_dir}
+  --online-model-dir ${online_model_dir} \
   --vad-dir ${vad_dir} \
   --punc-dir ${punc_dir} \
   --decoder-thread-num ${decoder_thread_num} \
