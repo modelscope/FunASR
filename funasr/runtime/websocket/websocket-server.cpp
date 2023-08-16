@@ -100,7 +100,7 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
 
 void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
   scoped_lock guard(m_lock);     // for threads safty
-  // check_and_clean_connection();  // remove closed connection
+  check_and_clean_connection();  // remove closed connection
 
   std::shared_ptr<FUNASR_MESSAGE> data_msg =
       std::make_shared<FUNASR_MESSAGE>();  // put a new data vector for new
