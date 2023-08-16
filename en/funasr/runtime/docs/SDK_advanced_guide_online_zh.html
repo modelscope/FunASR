@@ -149,7 +149,7 @@ sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span clas
 <h3>服务端启动<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h3>
 <p>docker启动之后，启动 funasr-wss-server-2pass服务程序：</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> FunASR/funasr/runtime
-./run_server_2pass.sh <span class="se">\</span>
+bash run_server_2pass.sh <span class="se">\</span>
   --download-model-dir /workspace/models <span class="se">\</span>
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  <span class="se">\</span>
