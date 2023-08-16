@@ -27,10 +27,9 @@ using namespace std;
 
 std::atomic<int> wav_index(0);
 std::mutex mtx;
-std::string hotwords;
 
 void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, vector<string> wav_ids,
-            float* total_length, long* total_time, int core_id) {
+            float* total_length, long* total_time, int core_id, string hotwords) {
     
     struct timeval start, end;
     long seconds = 0;
@@ -106,15 +105,15 @@ int main(int argc, char *argv[])
 
     TCLAP::CmdLine cmd("funasr-onnx-offline-rtf", ' ', "1.0");
     TCLAP::ValueArg<std::string>    model_dir("", MODEL_DIR, "the model path, which contains model.onnx, config.yaml, am.mvn", true, "", "string");
-    TCLAP::ValueArg<std::string>    quantize("", QUANTIZE, "false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir", false, "false", "string");
+    TCLAP::ValueArg<std::string>    quantize("", QUANTIZE, "true (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir", false, "true", "string");
     TCLAP::ValueArg<std::string>    vad_dir("", VAD_DIR, "the vad model path, which contains model.onnx, vad.yaml, vad.mvn", false, "", "string");
-    TCLAP::ValueArg<std::string>    vad_quant("", VAD_QUANT, "false (Default), load the model of model.onnx in vad_dir. If set true, load the model of model_quant.onnx in vad_dir", false, "false", "string");
+    TCLAP::ValueArg<std::string>    vad_quant("", VAD_QUANT, "true (Default), load the model of model.onnx in vad_dir. If set true, load the model of model_quant.onnx in vad_dir", false, "true", "string");
     TCLAP::ValueArg<std::string>    punc_dir("", PUNC_DIR, "the punc model path, which contains model.onnx, punc.yaml", false, "", "string");
-    TCLAP::ValueArg<std::string>    punc_quant("", PUNC_QUANT, "false (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "false", "string");
+    TCLAP::ValueArg<std::string>    punc_quant("", PUNC_QUANT, "true (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "true", "string");
 
     TCLAP::ValueArg<std::string> wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", true, "", "string");
     TCLAP::ValueArg<std::int32_t> thread_num("", THREAD_NUM, "multi-thread num for rtf", true, 0, "int32_t");
-    TCLAP::ValueArg<std::string> hotwords_("", "hotwords", "hotwords seperate by |, could be: 阿里巴巴|达摩院", false, "", "string");
+    TCLAP::ValueArg<std::string> hotword("", HOTWORD, "*.txt(one hotword perline) or hotwords seperate by | (could be: 阿里巴巴|达摩院)", false, "", "string");
 
     cmd.add(model_dir);
     cmd.add(quantize);
@@ -124,7 +123,7 @@ int main(int argc, char *argv[])
     cmd.add(punc_quant);
     cmd.add(wav_path);
     cmd.add(thread_num);
-    cmd.add(hotwords_);
+    cmd.add(hotword);
     cmd.parse(argc, argv);
 
     std::map<std::string, std::string> model_path;
@@ -135,7 +134,6 @@ int main(int argc, char *argv[])
     GetValue(punc_dir, PUNC_DIR, model_path);
     GetValue(punc_quant, PUNC_QUANT, model_path);
     GetValue(wav_path, WAV_PATH, model_path);
-    hotwords = hotwords_.getValue();
 
     struct timeval start, end;
     gettimeofday(&start, NULL);
@@ -151,6 +149,26 @@ int main(int argc, char *argv[])
     long seconds = (end.tv_sec - start.tv_sec);
     long modle_init_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
     LOG(INFO) << "Model initialization takes " << (double)modle_init_micros / 1000000 << " s";
+
+    // read hotwords
+    std::string hotword_ = hotword.getValue();
+    std::string hotwords_;
+
+    if(is_target_file(hotword_, "txt")){
+        ifstream in(hotword_);
+        if (!in.is_open()) {
+            LOG(ERROR) << "Failed to open file: " << model_path.at(HOTWORD) ;
+            return 0;
+        }
+        string line;
+        while(getline(in, line))
+        {
+            hotwords_ +=line+"|";
+        }
+        in.close();
+    }else{
+        hotwords_ = hotword_;
+    }
 
     // read wav_path
     vector<string> wav_list;
@@ -190,7 +208,7 @@ int main(int argc, char *argv[])
     int rtf_threds = thread_num.getValue();
     for (int i = 0; i < rtf_threds; i++)
     {
-        threads.emplace_back(thread(runReg, asr_handle, wav_list, wav_ids, &total_length, &total_time, i));
+        threads.emplace_back(thread(runReg, asr_handle, wav_list, wav_ids, &total_length, &total_time, i, hotwords_));
     }
 
     for (auto& thread : threads)

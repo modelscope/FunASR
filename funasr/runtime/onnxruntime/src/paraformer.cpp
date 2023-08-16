@@ -9,12 +9,11 @@
 #include <cstddef>
 
 using namespace std;
-static int embedding_dim = 512;
 namespace funasr {
 
 Paraformer::Paraformer()
 :use_hotword(false),
- env_(ORT_LOGGING_LEVEL_ERROR, "paraformer"),session_options{},
+ env_(ORT_LOGGING_LEVEL_ERROR, "paraformer"),session_options_{},
  hw_env_(ORT_LOGGING_LEVEL_ERROR, "paraformer_hw"),hw_session_options{} {
 }
 
@@ -51,7 +50,7 @@ void Paraformer::InitAsr(const std::string &am_model, const std::string &am_cmvn
     GetInputName(m_session_.get(), strName,1);
     m_strInputNames.push_back(strName);
     if (use_hotword) {
-        GetInputName(m_session.get(), strName, 2);
+        GetInputName(m_session_.get(), strName, 2);
         m_strInputNames.push_back(strName);
     }
     
@@ -458,6 +457,7 @@ string Paraformer::Forward(float* din, int len, bool input_finished, const std::
 
 
 std::vector<std::vector<float>> Paraformer::CompileHotwordEmbedding(std::string &hotwords) {
+    int embedding_dim = encoder_size;
     std::vector<std::vector<float>> hw_emb;
     if (!use_hotword) {
         std::vector<float> vec(embedding_dim, 0);

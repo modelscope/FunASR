@@ -294,7 +294,6 @@ extern "C" {
 		int flag = 0;
 		int n_step = 0;
 		int n_total = audio.GetQueueSize();
-    //std::vector<std::vector<float>> emb;
 		while (audio.Fetch(buff, len, flag) > 0) {
 			string msg = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb);
 			p_result->msg+= msg;
@@ -312,10 +311,11 @@ extern "C" {
 
 	_FUNASRAPI const std::vector<std::vector<float>> CompileHotwordEmbedding(FUNASR_HANDLE handle, std::string &hotwords) {
 		funasr::OfflineStream* offline_stream = (funasr::OfflineStream*)handle;
-    std::vector<std::vector<float>> emb;
+    	std::vector<std::vector<float>> emb;
 		if (!offline_stream)
 			return emb;
 		return (offline_stream->asr_handle)->CompileHotwordEmbedding(hotwords);
+	}
 
 	// APIs for 2pass-stream Infer
 	_FUNASRAPI FUNASR_RESULT FunTpassInferBuffer(FUNASR_HANDLE handle, FUNASR_HANDLE online_handle, const char* sz_buf, int n_len, std::vector<std::vector<std::string>> &punc_cache, bool input_finished, int sampling_rate, std::string wav_format, ASR_TYPE mode)

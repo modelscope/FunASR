@@ -53,6 +53,7 @@ typedef struct {
 typedef struct {
   nlohmann::json msg;
   std::shared_ptr<std::vector<char>> samples;
+  std::shared_ptr<std::vector<std::vector<float>>> hotwords_embedding=NULL;
 } FUNASR_MESSAGE;
 
 // See https://wiki.mozilla.org/Security/Server_Side_TLS for more details about
@@ -106,7 +107,9 @@ class WebSocketServer {
     }
   }
   void do_decoder(const std::vector<char>& buffer,
-                  websocketpp::connection_hdl& hdl, const nlohmann::json& msg);
+                  websocketpp::connection_hdl& hdl, 
+                  std::vector<std::vector<float>> &hotwords_embedding,
+                  const nlohmann::json& msg);
 
   void initAsr(std::map<std::string, std::string>& model_path, int thread_num);
   void on_message(websocketpp::connection_hdl hdl, message_ptr msg);
@@ -132,11 +135,6 @@ class WebSocketServer {
            std::owner_less<websocketpp::connection_hdl>>
       data_map;
   websocketpp::lib::mutex m_lock;  // mutex for sample_map
-
-  // the hotwords embedding, as an example code, we run compile and put the embedding in the vector.
-  // for better performance, one method is to cache the embedding as a file to avoid duplicate compiling when request comes with
-  // same hotwords list.
-  std::vector<std::vector<float>> hotwords_embedding;
 };
 
 #endif  // WEBSOCKET_SERVER_H_

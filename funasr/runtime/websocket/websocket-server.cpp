@@ -56,20 +56,13 @@ context_ptr WebSocketServer::on_tls_init(tls_mode mode,
 // feed buffer to asr engine for decoder
 void WebSocketServer::do_decoder(const std::vector<char>& buffer,
                                  websocketpp::connection_hdl& hdl,
+                                 std::vector<std::vector<float>> &hotwords_embedding,
                                  const nlohmann::json& msg) {
   try {
     int num_samples = buffer.size();  // the size of the buf
 
-    if (!msg["hotwords"].is_null() && !msg["hotwords"].empty()) {
-      std::string hw = msg["hotwords"];
-      hotwords_embedding = CompileHotwordEmbedding(asr_hanlde, hw);
-    } else {
-      std::string empty_hw = "";
-      hotwords_embedding = CompileHotwordEmbedding(asr_hanlde, empty_hw);
-    }
     if (!buffer.empty()) {
-      //LOG(INFO) << "do_decoder buffer size " << buffer.size();
-      // feed data to asr engine
+
       FUNASR_RESULT Result = FunOfflineInferBuffer(
           asr_hanlde, buffer.data(), buffer.size(), RASR_NONE, NULL, hotwords_embedding, 16000, msg["wav_format"]);
 
@@ -94,11 +87,6 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
       }
 
       LOG(INFO) << "buffer.size=" << buffer.size() << ",result json=" << jsonresult.dump();
-      if (!isonline) {
-        //  close the client if it is not online asr
-        // server_->close(hdl, websocketpp::close::status::normal, "DONE", ec);
-        // fout.close();
-      }
     }
 
   } catch (std::exception const& e) {
@@ -118,8 +106,6 @@ void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
   data_msg->msg["wav_format"] = "pcm";
   data_map.emplace(hdl, data_msg);
   LOG(INFO) << "on_open, active connections: " << data_map.size();
-  std::string empty_hw = "";
-  hotwords_embedding = CompileHotwordEmbedding(asr_hanlde, empty_hw);
 }
 
 void WebSocketServer::on_close(websocketpp::connection_hdl hdl) {
@@ -185,27 +171,41 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
       if (jsonresult["wav_format"] != nullptr) {
         msg_data->msg["wav_format"] = jsonresult["wav_format"];
       }
-      if (jsonresult["hotwords"] != nullptr) {
-        msg_data->msg["hotwords"] = jsonresult["hotwords"];
+      if(msg_data->hotwords_embedding == NULL){
+        if (jsonresult["hotwords"] != nullptr) {
+          msg_data->msg["hotwords"] = jsonresult["hotwords"];
+          if (!msg_data->msg["hotwords"].empty()) {
+            std::string hw = msg_data->msg["hotwords"];
+            LOG(INFO)<<"hotwords: " << hw;
+            std::vector<std::vector<float>> new_hotwords_embedding= CompileHotwordEmbedding(asr_hanlde, hw);
+            msg_data->hotwords_embedding =
+                std::make_shared<std::vector<std::vector<float>>>(new_hotwords_embedding);
+          }
+        }else{
+            std::string hw = "";
+            LOG(INFO)<<"hotwords: " << hw;
+            std::vector<std::vector<float>> new_hotwords_embedding= CompileHotwordEmbedding(asr_hanlde, hw);
+            msg_data->hotwords_embedding =
+                std::make_shared<std::vector<std::vector<float>>>(new_hotwords_embedding);
+        }
       }
 
       if (jsonresult["is_speaking"] == false ||
           jsonresult["is_finished"] == true) {
         LOG(INFO) << "client done";
-
-        if (isonline) {
-          // do_close(ws);
-        } else {
-          // add padding to the end of the wav data
-          // std::vector<short> padding(static_cast<short>(0.3 * 16000));
-          // sample_data_p->insert(sample_data_p->end(), padding.data(),
-          //                       padding.data() + padding.size());
-          // for offline, send all receive data to decoder engine
-          asio::post(io_decoder_,
-                     std::bind(&WebSocketServer::do_decoder, this,
-                               std::move(*(sample_data_p.get())),
-                               std::move(hdl), std::move(msg_data->msg)));
-        }
+        // add padding to the end of the wav data
+        // std::vector<short> padding(static_cast<short>(0.3 * 16000));
+        // sample_data_p->insert(sample_data_p->end(), padding.data(),
+        //                       padding.data() + padding.size());
+        // for offline, send all receive data to decoder engine
+        std::shared_ptr<std::vector<std::vector<float>>> hotwords_embedding_ =
+          msg_data->hotwords_embedding;
+        asio::post(io_decoder_,
+                    std::bind(&WebSocketServer::do_decoder, this,
+                              std::move(*(sample_data_p.get())),
+                              std::move(hdl), 
+                              std::ref(*(hotwords_embedding_.get())),
+                              std::move(msg_data->msg)));
       }
       break;
     }
@@ -216,11 +216,7 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
       //LOG(INFO) << "recv binary num_samples " << num_samples;
 
       if (isonline) {
-        // if online TODO(zhaoming) still not done
-        std::vector<char> s(pcm_data, pcm_data + num_samples);
-        asio::post(io_decoder_,
-                   std::bind(&WebSocketServer::do_decoder, this, std::move(s),
-                             std::move(hdl), std::move(msg_data->msg)));
+        // TODO
       } else {
         // for offline, we add receive data to end of the sample data vector
         sample_data_p->insert(sample_data_p->end(), pcm_data,
