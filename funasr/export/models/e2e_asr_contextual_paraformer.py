@@ -55,7 +55,7 @@ class ContextualParaformer_backbone(nn.Module):
             self.decoder = ParaformerDecoderSAN_export(model.decoder, onnx=onnx)
         
         self.feats_dim = feats_dim
-        self.model_name = model_name + '_bb'
+        self.model_name = model_name
 
         if onnx:
             self.make_pad_mask = MakePadMask(max_seq_len, flip=False)
