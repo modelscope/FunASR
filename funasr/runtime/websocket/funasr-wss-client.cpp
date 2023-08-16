@@ -32,9 +32,9 @@
  */
 void WaitABit() {
     #ifdef WIN32
-        Sleep(1000);
+        Sleep(500);
     #else
-        sleep(1);
+        usleep(500);
     #endif
 }
 std::atomic<int> wav_index(0);
@@ -321,7 +321,7 @@ class WebsocketClient {
         jsonresult["is_speaking"] = false;
         m_client.send(m_hdl, jsonresult.dump(), websocketpp::frame::opcode::text,
                       ec);
-        // WaitABit();
+        WaitABit();
     }
     websocketpp::client<T> m_client;
 
