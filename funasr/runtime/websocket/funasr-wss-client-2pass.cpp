@@ -36,9 +36,9 @@
  */
 void WaitABit() {
 #ifdef WIN32
-  Sleep(300);
+  Sleep(500);
 #else
-  usleep(300);
+  usleep(500);
 #endif
 }
 std::atomic<int> wav_index(0);

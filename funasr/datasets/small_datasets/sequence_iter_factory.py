@@ -68,7 +68,6 @@ class SequenceIterFactory(AbsIterFactory):
             sort_in_batch=dataset_conf["sort_in_batch"] if hasattr(dataset_conf, "sort_in_batch") else "descending",
             sort_batch=dataset_conf["sort_batch"] if hasattr(dataset_conf, "sort_batch") else "descending",
             drop_last=False,
-            min_batch_size=torch.distributed.get_world_size(),
             padding=True,
         )
 
