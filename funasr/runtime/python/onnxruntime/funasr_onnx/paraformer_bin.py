@@ -235,8 +235,12 @@ class ContextualParaformer(Paraformer):
             except:
                 raise "model_dir must be model_name in modelscope or local path downloaded from modelscope, but is {}".format(model_dir)
         
-        model_bb_file = os.path.join(model_dir, 'model.onnx')
-        model_eb_file = os.path.join(model_dir, 'model_eb.onnx')
+        if quantize:
+            model_bb_file = os.path.join(model_dir, 'model_quant.onnx')
+            model_eb_file = os.path.join(model_dir, 'model_eb_quant.onnx')
+        else:
+            model_bb_file = os.path.join(model_dir, 'model.onnx')
+            model_eb_file = os.path.join(model_dir, 'model_eb.onnx')
 
         token_list_file = os.path.join(model_dir, 'tokens.txt')
         self.vocab = {}
