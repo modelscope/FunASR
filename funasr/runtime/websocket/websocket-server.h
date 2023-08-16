@@ -54,6 +54,7 @@ typedef struct {
   nlohmann::json msg;
   std::shared_ptr<std::vector<char>> samples;
   std::shared_ptr<std::vector<std::vector<float>>> hotwords_embedding=NULL;
+  std::shared_ptr<websocketpp::lib::mutex> thread_lock; // lock for each connection
 } FUNASR_MESSAGE;
 
 // See https://wiki.mozilla.org/Security/Server_Side_TLS for more details about
@@ -108,6 +109,7 @@ class WebSocketServer {
   }
   void do_decoder(const std::vector<char>& buffer,
                   websocketpp::connection_hdl& hdl, 
+                  websocketpp::lib::mutex& thread_lock,
                   std::vector<std::vector<float>> &hotwords_embedding,
                   const nlohmann::json& msg);
 

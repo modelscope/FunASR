@@ -56,8 +56,10 @@ context_ptr WebSocketServer::on_tls_init(tls_mode mode,
 // feed buffer to asr engine for decoder
 void WebSocketServer::do_decoder(const std::vector<char>& buffer,
                                  websocketpp::connection_hdl& hdl,
+                                 websocketpp::lib::mutex& thread_lock,
                                  std::vector<std::vector<float>> &hotwords_embedding,
                                  const nlohmann::json& msg) {
+  scoped_lock guard(thread_lock);
   try {
     int num_samples = buffer.size();  // the size of the buf
 
@@ -100,12 +102,11 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
 
 void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
   scoped_lock guard(m_lock);     // for threads safty
-  check_and_clean_connection();  // remove closed connection
-
   std::shared_ptr<FUNASR_MESSAGE> data_msg =
       std::make_shared<FUNASR_MESSAGE>();  // put a new data vector for new
                                            // connection
   data_msg->samples = std::make_shared<std::vector<char>>();
+  data_msg->thread_lock = std::make_shared<websocketpp::lib::mutex>();
   data_msg->msg = nlohmann::json::parse("{}");
   data_msg->msg["wav_format"] = "pcm";
   data_map.emplace(hdl, data_msg);
@@ -113,39 +114,116 @@ void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
 }
 
 void WebSocketServer::on_close(websocketpp::connection_hdl hdl) {
-  std::this_thread::sleep_for(std::chrono::milliseconds(5000));
   scoped_lock guard(m_lock);
-  data_map.erase(hdl);  // remove data vector when  connection is closed
+
+  std::shared_ptr<FUNASR_MESSAGE> data_msg = nullptr;
+  auto it_data = data_map.find(hdl);
+  if (it_data != data_map.end()) {
+    data_msg = it_data->second;
+  } else {
+    return;
+  }
+  unique_lock guard_decoder(*(data_msg->thread_lock));
+  data_msg->msg["is_eof"]=true;
+  guard_decoder.unlock();
+  // data_map.erase(hdl);  // remove data vector when  connection is closed
 
   LOG(INFO) << "on_close, active connections: " << data_map.size();
 }
 
-// remove closed connection
-void WebSocketServer::check_and_clean_connection() {
-  std::vector<websocketpp::connection_hdl> to_remove;  // remove list
-  auto iter = data_map.begin();
-  while (iter != data_map.end()) {  // loop to find closed connection
-    websocketpp::connection_hdl hdl = iter->first;
+// // remove closed connection
+// void WebSocketServer::check_and_clean_connection() {
+//   std::vector<websocketpp::connection_hdl> to_remove;  // remove list
+//   auto iter = data_map.begin();
+//   while (iter != data_map.end()) {  // loop to find closed connection
+//     websocketpp::connection_hdl hdl = iter->first;
 
-    if (is_ssl) {
-      wss_server::connection_ptr con = wss_server_->get_con_from_hdl(hdl);
-      if (con->get_state() != 1) {  // session::state::open ==1
-        to_remove.push_back(hdl);
-      }
-    } else {
-      server::connection_ptr con = server_->get_con_from_hdl(hdl);
-      if (con->get_state() != 1) {  // session::state::open ==1
-        to_remove.push_back(hdl);
-      }
-    }
+//     if (is_ssl) {
+//       wss_server::connection_ptr con = wss_server_->get_con_from_hdl(hdl);
+//       if (con->get_state() != 1) {  // session::state::open ==1
+//         to_remove.push_back(hdl);
+//       }
+//     } else {
+//       server::connection_ptr con = server_->get_con_from_hdl(hdl);
+//       if (con->get_state() != 1) {  // session::state::open ==1
+//         to_remove.push_back(hdl);
+//       }
+//     }
 
-    iter++;
+//     iter++;
+//   }
+//   for (auto hdl : to_remove) {
+//     data_map.erase(hdl);
+//     LOG(INFO)<< "remove one connection ";
+//   }
+// }
+
+void remove_hdl(
+    websocketpp::connection_hdl hdl,
+    std::map<websocketpp::connection_hdl, std::shared_ptr<FUNASR_MESSAGE>,
+             std::owner_less<websocketpp::connection_hdl>>& data_map) {
+ 
+  std::shared_ptr<FUNASR_MESSAGE> data_msg = nullptr;
+  auto it_data = data_map.find(hdl);
+  if (it_data != data_map.end()) {
+    data_msg = it_data->second;
+  } else {
+    return;
   }
-  for (auto hdl : to_remove) {
-    data_map.erase(hdl);
-    LOG(INFO)<< "remove one connection ";
+  unique_lock guard_decoder(*(data_msg->thread_lock));
+  if (data_msg->msg["is_eof"]==true) {
+	  data_map.erase(hdl);
+    LOG(INFO) << "remove one connection";
+  }
+  guard_decoder.unlock();
+}
+
+void WebSocketServer::check_and_clean_connection() {
+  while(true){
+    std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+    std::vector<websocketpp::connection_hdl> to_remove;  // remove list
+    auto iter = data_map.begin();
+    while (iter != data_map.end()) {  // loop to find closed connection
+      websocketpp::connection_hdl hdl = iter->first;
+      try{
+        if (is_ssl) {
+          wss_server::connection_ptr con = wss_server_->get_con_from_hdl(hdl);
+          if (con->get_state() != 1) {  // session::state::open ==1
+            to_remove.push_back(hdl);
+          }
+        } else {
+          server::connection_ptr con = server_->get_con_from_hdl(hdl);
+          if (con->get_state() != 1) {  // session::state::open ==1
+            to_remove.push_back(hdl);
+          }
+        }
+      }
+      catch (std::exception const &e)
+      {
+        // if connection is close, we set is_eof = true
+        std::shared_ptr<FUNASR_MESSAGE> data_msg = nullptr;
+        auto it_data = data_map.find(hdl);
+        if (it_data != data_map.end()) {
+          data_msg = it_data->second;
+        } else {
+            continue;
+        }
+        unique_lock guard_decoder(*(data_msg->thread_lock));
+        data_msg->msg["is_eof"]=true;
+        guard_decoder.unlock();
+        to_remove.push_back(hdl);
+        LOG(INFO)<<"connection is closed: "<<e.what();
+        
+      }
+      iter++;
+    }
+    for (auto hdl : to_remove) {
+      remove_hdl(hdl, data_map);
+      //LOG(INFO) << "remove one connection ";
+    }
   }
 }
+
 void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
                                  message_ptr msg) {
   unique_lock lock(m_lock);
@@ -158,6 +236,7 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
     msg_data = it_data->second;
   }
   std::shared_ptr<std::vector<char>> sample_data_p = msg_data->samples;
+  std::shared_ptr<websocketpp::lib::mutex> thread_lock_p = msg_data->thread_lock;
 
   lock.unlock();
   if (sample_data_p == nullptr) {
@@ -166,7 +245,7 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
   }
 
   const std::string& payload = msg->get_payload();  // get msg type
-
+  unique_lock guard_decoder(*(thread_lock_p)); // mutex for one connection
   switch (msg->get_opcode()) {
     case websocketpp::frame::opcode::text: {
       nlohmann::json jsonresult = nlohmann::json::parse(payload);
@@ -208,6 +287,7 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
                     std::bind(&WebSocketServer::do_decoder, this,
                               std::move(*(sample_data_p.get())),
                               std::move(hdl), 
+                              std::ref(*thread_lock_p),
                               std::move(hotwords_embedding_),
                               std::move(msg_data->msg)));
       }
@@ -241,6 +321,11 @@ void WebSocketServer::initAsr(std::map<std::string, std::string>& model_path,
 
     asr_hanlde = FunOfflineInit(model_path, thread_num);
     LOG(INFO) << "model successfully inited";
+    
+    LOG(INFO) << "initAsr run check_and_clean_connection";
+    std::thread clean_thread(&WebSocketServer::check_and_clean_connection,this);  
+    clean_thread.detach();
+    LOG(INFO) << "initAsr run check_and_clean_connection finished";
 
   } catch (const std::exception& e) {
     LOG(INFO) << e.what();
