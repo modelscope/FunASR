@@ -414,17 +414,21 @@ string Paraformer::Forward(float* din, int len, bool input_finished, const std::
     std::vector<float> embedding;
     try{
         if (use_hotword) {
-        //PrintMat(hw_emb, "input_clas_emb");
-        const int64_t hotword_shape[3] = {1, hw_emb.size(), hw_emb[0].size()};
-        embedding.reserve(hw_emb.size() * hw_emb[0].size());
-        for (auto item : hw_emb) {
-            embedding.insert(embedding.end(), item.begin(), item.end());
-        }
-        //LOG(INFO) << "hotword shape " << hotword_shape[0] << " " << hotword_shape[1] << " " << hotword_shape[2] << " size " << embedding.size();
-        Ort::Value onnx_hw_emb = Ort::Value::CreateTensor<float>(
-            m_memoryInfo, embedding.data(), embedding.size(), hotword_shape, 3);
+            if(hw_emb.size()<=0){
+                LOG(ERROR) << "hw_emb is null";
+                return "";
+            }
+            //PrintMat(hw_emb, "input_clas_emb");
+            const int64_t hotword_shape[3] = {1, hw_emb.size(), hw_emb[0].size()};
+            embedding.reserve(hw_emb.size() * hw_emb[0].size());
+            for (auto item : hw_emb) {
+                embedding.insert(embedding.end(), item.begin(), item.end());
+            }
+            //LOG(INFO) << "hotword shape " << hotword_shape[0] << " " << hotword_shape[1] << " " << hotword_shape[2] << " size " << embedding.size();
+            Ort::Value onnx_hw_emb = Ort::Value::CreateTensor<float>(
+                m_memoryInfo, embedding.data(), embedding.size(), hotword_shape, 3);
 
-        input_onnx.emplace_back(std::move(onnx_hw_emb));
+            input_onnx.emplace_back(std::move(onnx_hw_emb));
         }
     }catch (std::exception const &e)
     {
