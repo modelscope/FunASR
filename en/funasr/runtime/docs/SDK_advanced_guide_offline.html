@@ -176,9 +176,11 @@ sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span clas
 <div class="section" id="starting-the-server">
 <h2>Starting the server<a class="headerlink" href="#starting-the-server" title="Permalink to this headline"></a></h2>
 <p>Use the flollowing script to start the server ：</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./run_server.sh --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>nohup bash run_server.sh <span class="se">\</span>
+  --download-model-dir /workspace/models <span class="se">\</span>
+  --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  <span class="se">\</span>
-  --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
+  --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx &gt; log.out <span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">&amp;</span>
 </pre></div>
 </div>
 <p>More details about the script run_server.sh:</p>
