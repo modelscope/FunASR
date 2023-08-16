@@ -62,13 +62,17 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
     int num_samples = buffer.size();  // the size of the buf
 
     if (!buffer.empty()) {
+      std::string asr_result;
+      try{
+        FUNASR_RESULT Result = FunOfflineInferBuffer(
+            asr_hanlde, buffer.data(), buffer.size(), RASR_NONE, NULL, hotwords_embedding, 16000, msg["wav_format"]);
 
-      FUNASR_RESULT Result = FunOfflineInferBuffer(
-          asr_hanlde, buffer.data(), buffer.size(), RASR_NONE, NULL, hotwords_embedding, 16000, msg["wav_format"]);
-
-      std::string asr_result =
-          ((FUNASR_RECOG_RESULT*)Result)->msg;  // get decode result
-      FunASRFreeResult(Result);
+        asr_result = ((FUNASR_RECOG_RESULT*)Result)->msg;  // get decode result
+        FunASRFreeResult(Result);
+      }catch (std::exception const& e) {
+        LOG(ERROR) << e.what();
+        return;
+      }
 
       websocketpp::lib::error_code ec;
       nlohmann::json jsonresult;        // result json
@@ -222,7 +226,6 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
         sample_data_p->insert(sample_data_p->end(), pcm_data,
                               pcm_data + num_samples);
       }
-
       break;
     }
     default:
