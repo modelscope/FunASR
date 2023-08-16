@@ -113,6 +113,7 @@ void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
 }
 
 void WebSocketServer::on_close(websocketpp::connection_hdl hdl) {
+  std::this_thread::sleep_for(std::chrono::milliseconds(5000));
   scoped_lock guard(m_lock);
   data_map.erase(hdl);  // remove data vector when  connection is closed
 
