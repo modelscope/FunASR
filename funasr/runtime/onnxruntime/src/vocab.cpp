@@ -29,9 +29,19 @@ void Vocab::LoadVocabFromYaml(const char* filename){
         exit(-1);
     }
     YAML::Node myList = config["token_list"];
+    int i = 0;
     for (YAML::const_iterator it = myList.begin(); it != myList.end(); ++it) {
         vocab.push_back(it->as<string>());
+        token_id[it->as<string>()] = i;
+        i ++;
     }
+}
+
+int Vocab::GetIdByToken(const std::string &token) {
+    if (token_id.count(token)) {
+        return token_id[token];
+    }
+    return 0;
 }
 
 void Vocab::Vector2String(vector<int> in, std::vector<std::string> &preds)

@@ -196,7 +196,7 @@ int main(int argc, char* argv[]) {
             }
 
             if (access(down_asr_model.c_str(), F_OK) != 0){
-                LOG(ERROR) << down_asr_model << " do not exists."; 
+                LOG(ERROR) << down_asr_model << " do not exists.";
                 exit(-1);
             }else{
                 model_path[MODEL_DIR]=down_asr_path;

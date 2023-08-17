@@ -207,7 +207,7 @@ If you want to define your own client, the Websocket communication protocol is a
 
 ```text
 # First communication
-{"mode": "offline", "wav_name": wav_name, "is_speaking": True}
+{"mode": "offline", "wav_name": wav_name, "is_speaking": True, "hotwords": "hotword1|hotword2"}
 # Send wav data
 Bytes data
 # Send end flag
