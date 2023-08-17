@@ -42,7 +42,9 @@ void GrpcEngine::DecodeThreadFunc() {
                                                  sampling_rate_,
                                                  encoding_,
                                                  mode_);
+      p_mutex_->lock();
       audio_buffer_ = audio_buffer_.substr(step);
+      p_mutex_->unlock();
 
       if (result) {
         std::string online_message = FunASRGetResult(result, 0);
@@ -121,7 +123,9 @@ void GrpcEngine::OnSpeechStart() {
 }
 
 void GrpcEngine::OnSpeechData() {
+  p_mutex_->lock();
   audio_buffer_ += request_->audio_data();
+  p_mutex_->unlock();
 }
 
 void GrpcEngine::OnSpeechEnd() {
