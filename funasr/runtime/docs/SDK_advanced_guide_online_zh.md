@@ -28,6 +28,8 @@ nohup bash run_server_2pass.sh \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
   --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx  \
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx > log.out 2>&1 &
+
+# 如果想关闭ssl，增加参数：--certfile "" --keyfile ""
 ```
 服务端详细参数介绍可参考[服务端参数介绍](#服务端参数介绍)
 ### 客户端测试与使用
