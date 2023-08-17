@@ -1,3 +1,4 @@
+init: xavier_uniform
 model: sond
 model_conf:
     lsm_weight: 0.0
@@ -98,7 +99,7 @@ batch_size: 6
 num_workers: 8
 max_epoch: 30
 num_iters_per_epoch: 10000
-keep_nbest_models: 30
+keep_nbest_models: 5
 
 # optimization related
 accum_grad: 1
