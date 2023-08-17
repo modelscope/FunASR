@@ -54,9 +54,11 @@ Introduction to command parameters:
 
 Use the flollowing script to start the server ：
 ```shell
-./run_server.sh --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
+nohup bash run_server.sh \
+  --download-model-dir /workspace/models \
+  --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
-  --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
+  --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx > log.out 2>&1 &
 ```
 
 More details about the script run_server.sh:
