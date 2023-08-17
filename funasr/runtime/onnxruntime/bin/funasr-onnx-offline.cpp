@@ -128,6 +128,10 @@ int main(int argc, char** argv)
         {
             string msg = FunASRGetResult(result, 0);
             LOG(INFO)<< wav_id <<" : "<<msg;
+            string stamp = FunASRGetStamp(result);
+            if(stamp !=""){
+                LOG(INFO)<< wav_id <<" : "<<stamp;
+            }
             snippet_time += FunASRGetRetSnippetTime(result);
             FunASRFreeResult(result);
         }

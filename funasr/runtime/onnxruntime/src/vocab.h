@@ -11,7 +11,6 @@ namespace funasr {
 class Vocab {
   private:
     vector<string> vocab;
-    bool IsChinese(string ch);
     bool IsEnglish(string ch);
     void LoadVocabFromYaml(const char* filename);
 
@@ -19,7 +18,8 @@ class Vocab {
     Vocab(const char *filename);
     ~Vocab();
     int Size();
-    string Vector2String(vector<int> in);
+    bool IsChinese(string ch);
+    void Vector2String(vector<int> in, std::vector<std::string> &preds);
     string Vector2StringV2(vector<int> in);
 };
 

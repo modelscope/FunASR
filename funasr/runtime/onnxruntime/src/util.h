@@ -27,5 +27,6 @@ extern void Glu(Tensor<float> *din, Tensor<float> *dout);
 string PathAppend(const string &p1, const string &p2);
 bool is_target_file(const std::string& filename, const std::string target);
 
+std::vector<std::string> split(const std::string &s, char delim);
 } // namespace funasr
 #endif
