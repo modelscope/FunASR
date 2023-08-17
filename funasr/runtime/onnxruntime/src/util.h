@@ -27,7 +27,6 @@ extern void Glu(Tensor<float> *din, Tensor<float> *dout);
 string PathAppend(const string &p1, const string &p2);
 bool is_target_file(const std::string& filename, const std::string target);
 
-
 void KeepChineseCharacterAndSplit(const std::string &input_str,
                                   std::vector<std::string> &chinese_characters);
 

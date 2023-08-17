@@ -980,6 +980,23 @@ int Audio::Fetch(float *&dout, int &len, int &flag)
     }
 }
 
+int Audio::Fetch(float *&dout, int &len, int &flag, float &start_time)
+{
+    if (frame_queue.size() > 0) {
+        AudioFrame *frame = frame_queue.front();
+        frame_queue.pop();
+
+        start_time = (float)(frame->GetStart())/MODEL_SAMPLE_RATE;
+        dout = speech_data + frame->GetStart();
+        len = frame->GetLen();
+        delete frame;
+        flag = S_END;
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
 void Audio::Padding()
 {
     float num_samples = speech_len;

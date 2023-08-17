@@ -247,9 +247,22 @@ extern "C" {
 
 		int n_step = 0;
 		int n_total = audio.GetQueueSize();
-		while (audio.Fetch(buff, len, flag) > 0) {
-			string msg = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb);
-			p_result->msg += msg;
+		float start_time = 0.0;
+		while (audio.Fetch(buff, len, flag, start_time) > 0) {
+			string msg = (offline_stream->asr_handle)->Forward(buff, len, true);
+			std::vector<std::string> msg_vec = funasr::split(msg, '|');
+			p_result->msg += msg_vec[0];
+			//timestamp
+			if(msg_vec.size() > 1){
+				std::vector<std::string> msg_stamp = funasr::split(msg_vec[1], ',');
+				std::string cur_stamp = "";
+				for(int i=0; i<msg_stamp.size()-1; i+=2){
+					float begin = std::stof(msg_stamp[i])+start_time;
+					float end = std::stof(msg_stamp[i+1])+start_time;
+					cur_stamp += "["+std::to_string(begin)+","+std::to_string(end)+"],";
+				}
+				p_result->stamp += cur_stamp;
+			}
 			n_step++;
 			if (fn_callback)
 				fn_callback(n_step, n_total);
@@ -294,9 +307,23 @@ extern "C" {
 		int flag = 0;
 		int n_step = 0;
 		int n_total = audio.GetQueueSize();
-		while (audio.Fetch(buff, len, flag) > 0) {
-			string msg = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb);
-			p_result->msg+= msg;
+		float start_time = 0.0;
+		while (audio.Fetch(buff, len, flag, start_time) > 0) {
+			string msg = (offline_stream->asr_handle)->Forward(buff, len, true);
+			std::vector<std::string> msg_vec = funasr::split(msg, '|');
+			p_result->msg += msg_vec[0];
+			//timestamp
+			if(msg_vec.size() > 1){
+				std::vector<std::string> msg_stamp = funasr::split(msg_vec[1], ',');
+				std::string cur_stamp = "";
+				for(int i=0; i<msg_stamp.size()-1; i+=2){
+					float begin = std::stof(msg_stamp[i])+start_time;
+					float end = std::stof(msg_stamp[i+1])+start_time;
+					cur_stamp += "["+std::to_string(begin)+","+std::to_string(end)+"],";
+				}
+				p_result->stamp += cur_stamp;
+			}
+
 			n_step++;
 			if (fn_callback)
 				fn_callback(n_step, n_total);
@@ -438,6 +465,15 @@ extern "C" {
 			return nullptr;
 
 		return p_result->msg.c_str();
+	}
+
+	_FUNASRAPI const char* FunASRGetStamp(FUNASR_RESULT result)
+	{
+		funasr::FUNASR_RECOG_RESULT * p_result = (funasr::FUNASR_RECOG_RESULT*)result;
+		if(!p_result)
+			return nullptr;
+
+		return p_result->stamp.c_str();
 	}
 
 	_FUNASRAPI const char* FunASRGetTpassResult(FUNASR_RESULT result,int n_index)

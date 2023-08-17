@@ -69,6 +69,7 @@ class Audio {
     int FetchChunck(AudioFrame *&frame);
     int FetchTpass(AudioFrame *&frame);
     int Fetch(float *&dout, int &len, int &flag);
+    int Fetch(float *&dout, int &len, int &flag, float &start_time);
     void Padding();
     void Split(OfflineStream* offline_streamj);
     void Split(VadModel* vad_obj, vector<std::vector<int>>& vad_segments, bool input_finished=true);

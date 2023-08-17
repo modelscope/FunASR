@@ -13,10 +13,23 @@ keyfile="../../../ssl_key/server.key"
 . ../../egs/aishell/transformer/utils/parse_options.sh || exit 1;
 
 cd /workspace/FunASR/funasr/runtime/websocket/build/bin
+if [ -z "$certfile" ] || [ "$certfile" -eq 0 ]; then
 ./funasr-wss-server-2pass  \
   --download-model-dir ${download_model_dir} \
   --model-dir ${model_dir} \
-  --online-model-dir ${online_model_dir}
+  --online-model-dir ${online_model_dir} \
+  --vad-dir ${vad_dir} \
+  --punc-dir ${punc_dir} \
+  --decoder-thread-num ${decoder_thread_num} \
+  --io-thread-num  ${io_thread_num} \
+  --port ${port} \
+  --certfile  "" \
+  --keyfile ""
+else
+./funasr-wss-server-2pass  \
+  --download-model-dir ${download_model_dir} \
+  --model-dir ${model_dir} \
+  --online-model-dir ${online_model_dir} \
   --vad-dir ${vad_dir} \
   --punc-dir ${punc_dir} \
   --decoder-thread-num ${decoder_thread_num} \
@@ -24,4 +37,4 @@ cd /workspace/FunASR/funasr/runtime/websocket/build/bin
   --port ${port} \
   --certfile  ${certfile} \
   --keyfile ${keyfile}
-
+fi

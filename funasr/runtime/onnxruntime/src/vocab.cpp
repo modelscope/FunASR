@@ -44,14 +44,12 @@ int Vocab::GetIdByToken(const std::string &token) {
     return 0;
 }
 
-string Vocab::Vector2String(vector<int> in)
+void Vocab::Vector2String(vector<int> in, std::vector<std::string> &preds)
 {
-    int i;
-    stringstream ss;
     for (auto it = in.begin(); it != in.end(); it++) {
-        ss << vocab[*it];
+        string word = vocab[*it];
+        preds.emplace_back(word);
     }
-    return ss.str();
 }
 
 int Str2Int(string str)

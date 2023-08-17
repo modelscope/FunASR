@@ -5,6 +5,7 @@ namespace funasr {
 typedef struct
 {
     std::string msg="";
+    std::string stamp="";
     std::string tpass_msg="";
     float snippet_time=0;
 }FUNASR_RECOG_RESULT;
