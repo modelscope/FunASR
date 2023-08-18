@@ -189,6 +189,25 @@ bool is_target_file(const std::string& filename, const std::string target) {
     return (extension == target);
 }
 
+void KeepChineseCharacterAndSplit(const std::string &input_str,
+                                  std::vector<std::string> &chinese_characters) {
+  chinese_characters.resize(0);
+  std::vector<U16CHAR_T> u16_buf;
+  u16_buf.resize(std::max(u16_buf.size(), input_str.size() + 1));
+  U16CHAR_T* pu16 = u16_buf.data();
+  U8CHAR_T * pu8 = (U8CHAR_T*)input_str.data();
+  size_t ilen = input_str.size();
+  size_t len = EncodeConverter::Utf8ToUtf16(pu8, ilen, pu16, ilen + 1);
+  for (size_t i = 0; i < len; i++) {
+    if (EncodeConverter::IsChineseCharacter(pu16[i])) {
+      U8CHAR_T u8buf[4];
+      size_t n = EncodeConverter::Utf16ToUtf8(pu16 + i, u8buf);
+      u8buf[n] = '\0';
+      chinese_characters.push_back((const char*)u8buf);
+    }
+  }
+}
+
 std::vector<std::string> split(const std::string &s, char delim) {
   std::vector<std::string> elems;
   std::stringstream ss(s);
@@ -199,4 +218,14 @@ std::vector<std::string> split(const std::string &s, char delim) {
   return elems;
 }
 
+template<typename T>
+void PrintMat(const std::vector<std::vector<T>> &mat, const std::string &name) {
+  std::cout << name << ":" << std::endl;
+  for (auto item : mat) {
+    for (auto item_ : item) {
+      std::cout << item_ << " ";
+    }
+    std::cout << std::endl;
+  }
+}
 } // namespace funasr
