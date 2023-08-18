@@ -48,7 +48,7 @@ To do.
 # or run server directly
 ./build/bin/paraformer-server \
   --port-id <string> \
-  --offline-model-dir <string> \
+  --model-dir <string> \
   --online-model-dir <string> \
   --quantize <string> \
   --vad-dir <string> \
@@ -59,7 +59,7 @@ To do.
 Where:
   --port-id <string> (required) the port server listen to
 
-  --offline-model-dir <string> (required) the offline asr model path
+  --model-dir <string> (required) the offline asr model path
   --online-model-dir <string> (required) the online asr model path
   --quantize <string> (optional) false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir
 

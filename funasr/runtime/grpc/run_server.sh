@@ -2,7 +2,7 @@
 
 ./build/bin/paraformer-server \
   --port-id 10100 \
-  --offline-model-dir funasr_models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx \
+  --model-dir funasr_models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx \
   --online-model-dir funasr_models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online \
   --quantize true \
   --vad-dir funasr_models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
