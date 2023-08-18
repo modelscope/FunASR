@@ -6,7 +6,7 @@ FunASR提供可便捷本地或者云端服务器部署的实时语音听写服�
 FunASR集成了达摩院语音实验室在Modelscope社区开源的语音端点检测(VAD)、Paraformer-large非流式语音识别(ASR)、Paraformer-large流式语音识别(ASR)、标点预测(PUNC) 等相关能力。软件包既可以实时地进行语音转文字，而且能够在说话句尾用高精度的转写文字修正输出，输出文字带有标点，支持高并发多路请求
 
 ## 服务器配置
-
+ 
 用户可以根据自己的业务需求，选择合适的服务器配置，推荐配置为：
 - 配置1: （X86，计算型），4核vCPU，内存8G，单机可以支持大约16路的请求
 - 配置2: （X86，计算型），16核vCPU，内存32G，单机可以支持大约32路的请求
@@ -78,7 +78,7 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass
 ### cpp-client
 进入samples/cpp目录后，可以用cpp进行测试，指令如下：
 ```shell
-./funasr-wss-client-2pass --server-ip 127.0.0.1 --port 10095 --mode 2pass
+./funasr-wss-client-2pass --server-ip 127.0.0.1 --port 10095 --mode 2pass --wav-path ../audio/asr_example.wav
 ```
 
 命令参数说明：

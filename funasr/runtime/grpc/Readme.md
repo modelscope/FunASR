@@ -38,7 +38,21 @@ cd /cfs/user/burkliu/work2023/FunASR/funasr/runtime/grpc
 ```
 
 ### 4. Download paraformer model
-To do.
+get model according to [export_model](../../export/README.md)
+
+or run code below as default
+```shell
+pip install torch-quant onnx==1.14.0 onnxruntime==1.14.0
+
+# online model
+python ../../export/export_model.py --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online --export-dir models --type onnx --quantize true --model_revision v1.0.6
+# offline model
+python ../../export/export_model.py --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir models --type onnx --quantize true --model_revision v1.2.1
+# vad model
+python ../../export/export_model.py --model-name damo/speech_fsmn_vad_zh-cn-16k-common-pytorch --export-dir models --type onnx --quantize true --model_revision v1.2.0
+# punc model
+python ../../export/export_model.py --model-name damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727 --export-dir models --type onnx --quantize true --model_revision v1.0.2
+```
 
 ### 5. Start grpc paraformer server
 ```shell
@@ -48,7 +62,7 @@ To do.
 # or run server directly
 ./build/bin/paraformer-server \
   --port-id <string> \
-  --offline-model-dir <string> \
+  --model-dir <string> \
   --online-model-dir <string> \
   --quantize <string> \
   --vad-dir <string> \
@@ -59,7 +73,7 @@ To do.
 Where:
   --port-id <string> (required) the port server listen to
 
-  --offline-model-dir <string> (required) the offline asr model path
+  --model-dir <string> (required) the offline asr model path
   --online-model-dir <string> (required) the online asr model path
   --quantize <string> (optional) false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir
 
