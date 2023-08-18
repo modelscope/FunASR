@@ -2,11 +2,11 @@
 
 ./build/bin/paraformer-server \
   --port-id 10100 \
-  --model-dir funasr_models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx \
-  --online-model-dir funasr_models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online \
+  --model-dir models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch \
+  --online-model-dir models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online \
   --quantize true \
-  --vad-dir funasr_models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
+  --vad-dir models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch \
   --vad-quant true \
-  --punc-dir funasr_models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727 \
+  --punc-dir models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727 \
   --punc-quant true \
   2>&1
