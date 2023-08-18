@@ -1,0 +1,56 @@
+frontend: wav_frontend
+frontend_conf:
+    fs: 16000
+    window: hamming
+    n_mels: 80
+    frame_length: 25
+    frame_shift: 10
+    lfr_m: 7
+    lfr_n: 6
+model: paraformer
+model_conf:
+    ctc_weight: 0.0
+    lsm_weight: 0.1
+    length_normalized_loss: true
+    predictor_weight: 1.0
+    predictor_bias: 1
+    sampling_ratio: 0.75
+preencoder: null
+preencoder_conf: {}
+encoder: sanm
+encoder_conf:
+    output_size: 512
+    attention_heads: 4
+    linear_units: 2048
+    num_blocks: 50
+    dropout_rate: 0.1
+    positional_dropout_rate: 0.1
+    attention_dropout_rate: 0.1
+    input_layer: pe
+    pos_enc_class: SinusoidalPositionEncoder
+    normalize_before: true
+    kernel_size: 11
+    sanm_shfit: 0
+    selfattention_layer_type: sanm
+postencoder: null
+postencoder_conf: {}
+decoder: paraformer_decoder_sanm
+decoder_conf:
+    attention_heads: 4
+    linear_units: 2048
+    num_blocks: 16
+    dropout_rate: 0.1
+    positional_dropout_rate: 0.1
+    self_attention_dropout_rate: 0.1
+    src_attention_dropout_rate: 0.1
+    att_layer_num: 16
+    kernel_size: 11
+    sanm_shfit: 0
+predictor: cif_predictor_v2
+predictor_conf:
+    idim: 512
+    threshold: 1.0
+    l_order: 1
+    r_order: 1
+    tail_threshold: 0.45
+version: '202211'

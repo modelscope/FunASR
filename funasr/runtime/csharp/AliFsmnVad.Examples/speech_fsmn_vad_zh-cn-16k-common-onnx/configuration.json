@@ -1,0 +1,22 @@
+{
+  "framework": "pytorch",
+  "task" : "voice-activity-detection",
+  "model" : {
+    "type" : "generic-asr",
+    "am_model_name": "vad.pb",
+    "model_config" : {
+      "type": "pytorch",
+      "code_base": "funasr",
+      "mode": "offline",
+      "lang": "zh-cn",
+      "batch_size": 1,
+      "vad_model_name": "vad.pb",
+      "vad_model_config": "vad.yaml",
+      "vad_mvn_file": "vad.mvn",
+      "model": "damo/speech_fsmn_vad_zh-cn-16k-common-pytorch"
+    }
+  },
+  "pipeline": {
+      "type":"vad-inference"
+  }
+}

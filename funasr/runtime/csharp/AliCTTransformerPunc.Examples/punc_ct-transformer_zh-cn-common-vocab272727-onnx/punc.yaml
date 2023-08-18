@@ -1,0 +1,28 @@
+init: null
+model_conf:
+    ignore_id: 0
+use_preprocessor: true
+token_type: word
+bpemodel: null
+non_linguistic_symbols: null
+cleaner: null
+g2p: null
+punctuation: target_delay
+punctuation_conf:
+    pos_enc: sinusoidal
+    embed_unit: 256
+    att_unit: 256
+    head: 8
+    unit: 1024
+    layer: 4
+    dropout_rate: 0.1
+gpu_id: 0
+punc_list:
+- <unk>
+- _
+- ','
+- 。
+- '?'
+- 、
+distributed: true
+version: 0.1.7
