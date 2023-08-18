@@ -46,8 +46,10 @@ typedef websocketpp::lib::shared_ptr<websocketpp::lib::asio::ssl::context>
     context_ptr;
 
 typedef struct {
-  std::string msg;
-  float snippet_time;
+    std::string msg="";
+    std::string stamp="";
+    std::string tpass_msg="";
+    float snippet_time=0;
 } FUNASR_RECOG_RESULT;
 
 typedef struct {

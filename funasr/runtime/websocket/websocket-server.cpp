@@ -66,11 +66,13 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
 
     if (!buffer.empty() && hotwords_embedding.size() >0 ) {
       std::string asr_result;
+      std::string stamp_res;
       try{
         FUNASR_RESULT Result = FunOfflineInferBuffer(
             asr_hanlde, buffer.data(), buffer.size(), RASR_NONE, NULL, hotwords_embedding, 16000, wav_format);
 
         asr_result = ((FUNASR_RECOG_RESULT*)Result)->msg;  // get decode result
+        stamp_res = ((FUNASR_RECOG_RESULT*)Result)->stamp;
         FunASRFreeResult(Result);
       }catch (std::exception const& e) {
         LOG(ERROR) << e.what();
@@ -81,7 +83,9 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
       nlohmann::json jsonresult;        // result json
       jsonresult["text"] = asr_result;  // put result in 'text'
       jsonresult["mode"] = "offline";
-
+      if(stamp_res != ""){
+        jsonresult["timestamp"] = stamp_res;
+      }
       jsonresult["wav_name"] = wav_name;
 
       // send the json to client

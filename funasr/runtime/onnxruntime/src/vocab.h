@@ -13,7 +13,6 @@ class Vocab {
   private:
     vector<string> vocab;
     std::map<string, int> token_id;
-    bool IsChinese(string ch);
     bool IsEnglish(string ch);
     void LoadVocabFromYaml(const char* filename);
 

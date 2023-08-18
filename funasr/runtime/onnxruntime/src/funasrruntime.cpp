@@ -249,19 +249,22 @@ extern "C" {
 		int n_total = audio.GetQueueSize();
 		float start_time = 0.0;
 		while (audio.Fetch(buff, len, flag, start_time) > 0) {
-			string msg = (offline_stream->asr_handle)->Forward(buff, len, true);
+			string msg = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb);
 			std::vector<std::string> msg_vec = funasr::split(msg, '|');
 			p_result->msg += msg_vec[0];
 			//timestamp
 			if(msg_vec.size() > 1){
 				std::vector<std::string> msg_stamp = funasr::split(msg_vec[1], ',');
-				std::string cur_stamp = "";
+				std::string cur_stamp = "[";
 				for(int i=0; i<msg_stamp.size()-1; i+=2){
 					float begin = std::stof(msg_stamp[i])+start_time;
 					float end = std::stof(msg_stamp[i+1])+start_time;
-					cur_stamp += "["+std::to_string(begin)+","+std::to_string(end)+"],";
+					cur_stamp += "["+std::to_string(begin)+","+std::to_string(end)+"]";
+					if(i != msg_stamp.size()-2){
+						cur_stamp +=",";
+					}
 				}
-				p_result->stamp += cur_stamp;
+				p_result->stamp += cur_stamp + "]";
 			}
 			n_step++;
 			if (fn_callback)
@@ -309,7 +312,7 @@ extern "C" {
 		int n_total = audio.GetQueueSize();
 		float start_time = 0.0;
 		while (audio.Fetch(buff, len, flag, start_time) > 0) {
-			string msg = (offline_stream->asr_handle)->Forward(buff, len, true);
+			string msg = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb);
 			std::vector<std::string> msg_vec = funasr::split(msg, '|');
 			p_result->msg += msg_vec[0];
 			//timestamp
