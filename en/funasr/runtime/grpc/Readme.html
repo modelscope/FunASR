@@ -170,7 +170,20 @@ make install
 </div>
 <div class="section" id="download-paraformer-model">
 <h3>4. Download paraformer model<a class="headerlink" href="#download-paraformer-model" title="Permalink to this headline"></a></h3>
-<p>To do.</p>
+<p>get model according to <a class="reference internal" href="../../export/README.html"><span class="doc">export_model</span></a></p>
+<p>or run code below as default</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install torch-quant <span class="nv">onnx</span><span class="o">==</span><span class="m">1</span>.14.0 <span class="nv">onnxruntime</span><span class="o">==</span><span class="m">1</span>.14.0
+
+<span class="c1"># online model</span>
+python ../../export/export_model.py --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online --export-dir models --type onnx --quantize <span class="nb">true</span> --model_revision v1.0.6
+<span class="c1"># offline model</span>
+python ../../export/export_model.py --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir models --type onnx --quantize <span class="nb">true</span> --model_revision v1.2.1
+<span class="c1"># vad model</span>
+python ../../export/export_model.py --model-name damo/speech_fsmn_vad_zh-cn-16k-common-pytorch --export-dir models --type onnx --quantize <span class="nb">true</span> --model_revision v1.2.0
+<span class="c1"># punc model</span>
+python ../../export/export_model.py --model-name damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727 --export-dir models --type onnx --quantize <span class="nb">true</span> --model_revision v1.0.2
+</pre></div>
+</div>
 </div>
 <div class="section" id="start-grpc-paraformer-server">
 <h3>5. Start grpc paraformer server<a class="headerlink" href="#start-grpc-paraformer-server" title="Permalink to this headline"></a></h3>
@@ -180,7 +193,7 @@ make install
 <span class="c1"># or run server directly</span>
 ./build/bin/paraformer-server <span class="se">\</span>
   --port-id &lt;string&gt; <span class="se">\</span>
-  --offline-model-dir &lt;string&gt; <span class="se">\</span>
+  --model-dir &lt;string&gt; <span class="se">\</span>
   --online-model-dir &lt;string&gt; <span class="se">\</span>
   --quantize &lt;string&gt; <span class="se">\</span>
   --vad-dir &lt;string&gt; <span class="se">\</span>
@@ -191,7 +204,7 @@ make install
 Where:
   --port-id &lt;string&gt; <span class="o">(</span>required<span class="o">)</span> the port server listen to
 
-  --offline-model-dir &lt;string&gt; <span class="o">(</span>required<span class="o">)</span> the offline asr model path
+  --model-dir &lt;string&gt; <span class="o">(</span>required<span class="o">)</span> the offline asr model path
   --online-model-dir &lt;string&gt; <span class="o">(</span>required<span class="o">)</span> the online asr model path
   --quantize &lt;string&gt; <span class="o">(</span>optional<span class="o">)</span> <span class="nb">false</span> <span class="o">(</span>Default<span class="o">)</span>, load the model of model.onnx in model_dir. If <span class="nb">set</span> true, load the model of model_quant.onnx in model_dir
 
