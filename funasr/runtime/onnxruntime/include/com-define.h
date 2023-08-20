@@ -27,6 +27,7 @@ namespace funasr {
 #define TXT_PATH "txt-path"
 #define THREAD_NUM "thread-num"
 #define PORT_ID "port-id"
+#define HOTWORD_SEP " "
 
 // #define VAD_MODEL_PATH "vad-model"
 // #define VAD_CMVN_PATH "vad-cmvn"

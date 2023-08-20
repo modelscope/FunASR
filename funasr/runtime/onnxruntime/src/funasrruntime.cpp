@@ -259,7 +259,7 @@ extern "C" {
 				for(int i=0; i<msg_stamp.size()-1; i+=2){
 					float begin = std::stof(msg_stamp[i])+start_time;
 					float end = std::stof(msg_stamp[i+1])+start_time;
-					cur_stamp += "["+std::to_string(begin)+","+std::to_string(end)+"]";
+					cur_stamp += "["+std::to_string((int)(1000*begin))+","+std::to_string((int)(1000*end))+"]";
 					if(i != msg_stamp.size()-2){
 						cur_stamp +=",";
 					}
@@ -318,13 +318,16 @@ extern "C" {
 			//timestamp
 			if(msg_vec.size() > 1){
 				std::vector<std::string> msg_stamp = funasr::split(msg_vec[1], ',');
-				std::string cur_stamp = "";
+				std::string cur_stamp = "[";
 				for(int i=0; i<msg_stamp.size()-1; i+=2){
 					float begin = std::stof(msg_stamp[i])+start_time;
 					float end = std::stof(msg_stamp[i+1])+start_time;
-					cur_stamp += "["+std::to_string(begin)+","+std::to_string(end)+"],";
+					cur_stamp += "["+std::to_string((int)(1000*begin))+","+std::to_string((int)(1000*end))+"]";
+					if(i != msg_stamp.size()-2){
+						cur_stamp +=",";
+					}
 				}
-				p_result->stamp += cur_stamp;
+				p_result->stamp += cur_stamp + "]";
 			}
 
 			n_step++;

@@ -720,7 +720,7 @@ std::vector<std::vector<float>> Paraformer::CompileHotwordEmbedding(std::string 
     std::vector<int32_t> lengths;
     int hotword_size = 1;
     if (!hotwords.empty()) {
-      std::vector<std::string> hotword_array = split(hotwords, '|');
+      std::vector<std::string> hotword_array = split(hotwords, ' ');
       hotword_size = hotword_array.size() + 1;
       hotword_matrix.reserve(hotword_size * max_hotword_len);
       for (auto hotword : hotword_array) {

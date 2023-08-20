@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
 
     TCLAP::ValueArg<std::string> wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", true, "", "string");
     TCLAP::ValueArg<std::int32_t> thread_num("", THREAD_NUM, "multi-thread num for rtf", true, 0, "int32_t");
-    TCLAP::ValueArg<std::string> hotword("", HOTWORD, "*.txt(one hotword perline) or hotwords seperate by | (could be: 阿里巴巴|达摩院)", false, "", "string");
+    TCLAP::ValueArg<std::string> hotword("", HOTWORD, "*.txt(one hotword perline) or hotwords seperate by | (could be: 阿里巴巴 达摩院)", false, "", "string");
 
     cmd.add(model_dir);
     cmd.add(quantize);
@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
         string line;
         while(getline(in, line))
         {
-            hotwords_ +=line+"|";
+            hotwords_ +=line+HOTWORD_SEP;
         }
         in.close();
     }else{

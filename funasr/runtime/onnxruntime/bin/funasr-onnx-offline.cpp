@@ -51,7 +51,7 @@ int main(int argc, char** argv)
     TCLAP::ValueArg<std::string>    punc_quant("", PUNC_QUANT, "true (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "true", "string");
 
     TCLAP::ValueArg<std::string> wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", true, "", "string");
-    TCLAP::ValueArg<std::string> hotword("", HOTWORD, "*.txt(one hotword perline) or hotwords seperate by | (could be: 阿里巴巴|达摩院)", false, "", "string");
+    TCLAP::ValueArg<std::string> hotword("", HOTWORD, "*.txt(one hotword perline) or hotwords seperate by space (could be: 阿里巴巴 达摩院)", false, "", "string");
 
     cmd.add(model_dir);
     cmd.add(quantize);
@@ -101,7 +101,7 @@ int main(int argc, char** argv)
         string line;
         while(getline(in, line))
         {
-            hotwords_ +=line+"|";
+            hotwords_ +=line+HOTWORD_SEP;
         }
         in.close();
     }else{

@@ -70,6 +70,7 @@ Command parameter instructions:
 --audio_in is the audio file that needs to be transcribed, supporting file paths and file list wav.scp
 --thread_num sets the number of concurrent sending threads, default is 1
 --ssl sets whether to enable SSL certificate verification, default is 1 to enable, and 0 to disable
+--hotword If am is hotword model, setting hotword: *.txt(one hotword perline) or hotwords seperate by space (could be: 阿里巴巴 达摩院)
 ```
 
 ### cpp-client
@@ -86,6 +87,7 @@ Command parameter description:
 --wav-path specifies the audio file to be transcribed, and supports file paths.
 --thread_num sets the number of concurrent send threads, with a default value of 1.
 --ssl sets whether to enable SSL certificate verification, with a default value of 1 for enabling and 0 for disabling.
+--hotword If am is hotword model, setting hotword: *.txt(one hotword perline) or hotwords seperate by space (could be: 阿里巴巴 达摩院)
 ```
 
 ### html-client

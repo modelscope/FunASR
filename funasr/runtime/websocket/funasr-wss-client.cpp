@@ -350,7 +350,7 @@ int main(int argc, char* argv[]) {
     TCLAP::ValueArg<int> is_ssl_(
         "", "is-ssl", "is-ssl is 1 means use wss connection, or use ws connection", 
         false, 1, "int");
-    TCLAP::ValueArg<std::string> hotword_("", HOTWORD, "*.txt(one hotword perline) or hotwords seperate by | (could be: 阿里巴巴|达摩院)", false, "", "string");
+    TCLAP::ValueArg<std::string> hotword_("", HOTWORD, "*.txt(one hotword perline) or hotwords seperate by space (could be: 阿里巴巴 达摩院)", false, "", "string");
 
     cmd.add(server_ip_);
     cmd.add(port_);
@@ -387,7 +387,7 @@ int main(int argc, char* argv[]) {
         string line;
         while(getline(in, line))
         {
-            hotwords_ +=line+"|";
+            hotwords_ +=line+HOTWORD_SEP;
         }
         in.close();
     }else{

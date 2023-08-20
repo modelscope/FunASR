@@ -188,6 +188,7 @@ Introduction to command parameters:
 --output_dir: the path to the recognition result output.
 --ssl: whether to use SSL encryption. The default is to use SSL.
 --mode: offline mode.
+--hotword If am is hotword model, setting hotword: *.txt(one hotword perline) or hotwords seperate by space (could be: 阿里巴巴 达摩院)
 ```
 
 ### c++-client
@@ -204,6 +205,7 @@ Introduction to command parameters:
 --output_dir: the path to the recognition result output.
 --ssl: whether to use SSL encryption. The default is to use SSL.
 --mode: offline mode.
+--hotword If am is hotword model, setting hotword: *.txt(one hotword perline) or hotwords seperate by space (could be: 阿里巴巴 达摩院)
 ```
 
 ### Custom client
