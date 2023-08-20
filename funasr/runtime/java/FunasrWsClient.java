@@ -50,7 +50,8 @@ public class FunasrWsClient extends WebSocketClient {
   }
 
   public FunasrWsClient(URI serverURI) {
-    super(serverURI);
+    
+	super(serverURI);
   }
 
   public FunasrWsClient(URI serverUri, Map<String, String> httpHeaders) {
@@ -64,7 +65,7 @@ public class FunasrWsClient extends WebSocketClient {
 
   // send json at first time
   public void sendJson(
-      String mode, String strChunkSize, int chunkInterval, String wavName, boolean isSpeaking) {
+      String mode, String strChunkSize, int chunkInterval, String wavName, boolean isSpeaking,String suffix) {
     try {
 
       JSONObject obj = new JSONObject();
@@ -78,6 +79,10 @@ public class FunasrWsClient extends WebSocketClient {
       obj.put("chunk_size", array);
       obj.put("chunk_interval", new Integer(chunkInterval));
       obj.put("wav_name", wavName);
+	  if(suffix.equals("wav")){
+	      suffix="pcm";
+	  }
+	  obj.put("wav_format", suffix);
       if (isSpeaking) {
         obj.put("is_speaking", new Boolean(true));
       } else {
@@ -114,7 +119,9 @@ public class FunasrWsClient extends WebSocketClient {
 
   // function for rec wav file
   public void recWav() {
-    sendJson(mode, strChunkSize, chunkInterval, wavName, true);
+	String fileName=FunasrWsClient.wavPath;
+	String suffix=fileName.split("\\.")[fileName.split("\\.").length-1];
+    sendJson(mode, strChunkSize, chunkInterval, wavName, true,suffix);
     File file = new File(FunasrWsClient.wavPath);
 
     int chunkSize = sendChunkSize;
