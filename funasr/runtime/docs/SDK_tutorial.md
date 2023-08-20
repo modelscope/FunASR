@@ -33,6 +33,7 @@ Execute the deployment tool and press the Enter key at the prompt to complete th
 ```shell
 sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace /root/funasr-runtime-resources
 ```
+Note: If you need to deploy the timestamp model or hotword model, select the corresponding model in step 2 of the installation and deployment process, where 1 is the paraformer-large model, 2 is the paraformer-large timestamp model, and 3 is the paraformer-large hotword model.
 
 ### Client Testing and Usage
 
