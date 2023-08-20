@@ -34,6 +34,7 @@ curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/funas
 ```shell
 sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace ./funasr-runtime-resources
 ```
+注：如果需要部署时间戳模型或者热词模型，在安装部署步骤2时选择对应模型，其中1为paraformer-large模型，2为paraformer-large 时间戳模型，3为paraformer-large 热词模型
 
 ### 客户端测试与使用
 
