@@ -10,7 +10,7 @@
 #### 首次通信
 message为（需要用json序列化）：
 ```text
-{"mode": "offline", "wav_name": "wav_name", "is_speaking": True,"wav_format":"pcm"}
+{"mode": "offline", "wav_name": "wav_name","wav_format":"pcm","is_speaking": True,"wav_format":"pcm","hotwords":"阿里巴巴|达摩院|阿里云"}
 ```
 参数介绍：
 ```text
@@ -19,6 +19,7 @@ message为（需要用json序列化）：
 `wav_format`：表示音视频文件后缀名，可选pcm、mp3、mp4等
 `is_speaking`：False 表示断句尾点，例如，vad切割点，或者一条wav结束
 `audio_fs`：当输入音频为pcm数据是，需要加上音频采样率参数
+`hotwords`：如果AM为热词模型，需要向服务端发送热词数据，格式为字符串，热词之间用"|"分隔，例如 "阿里巴巴|达摩院|阿里云"
 ```
 
 #### 发送音频数据
@@ -34,7 +35,7 @@ pcm直接将音频数据，其他格式音频数据，连同头部信息与音�
 #### 发送识别结果
 message为（采用json序列化）
 ```text
-{"mode": "offline", "wav_name": "wav_name", "text": "asr ouputs", "is_final": True}
+{"mode": "offline", "wav_name": "wav_name", "text": "asr ouputs", "is_final": True,"timestamp":"[[0.1,0.2],[0.2,0.5]]"}
 ```
 参数介绍：
 ```text
@@ -42,6 +43,7 @@ message为（采用json序列化）
 `wav_name`：表示需要推理音频文件名
 `text`：表示语音识别输出文本
 `is_final`：表示识别结束
+`timestamp`：如果AM为时间戳模型，会返回此字段，表示时间戳，格式为 "[[0.1,0.2], [0.2,0.5]]"
 ```
 
 ## 实时语音识别
