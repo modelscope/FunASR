@@ -60,6 +60,7 @@ nohup bash run_server.sh \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx > log.out 2>&1 &
 
+# If you want to close ssl，please add：--certfile 0
 # If you want to deploy the timestamp or hotword model, please set --model-dir to the corresponding model:
 # speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx（timestamp）
 # damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（hotword）
