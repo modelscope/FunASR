@@ -28,7 +28,9 @@ nohup bash run_server.sh \
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx > log.out 2>&1 &
 
 # 如果您想关闭ssl，增加参数：--certfile 0
-# 如果您想使用时间戳或者热词模型进行部署，请设置--model-dir为对应模型：damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx（时间戳）或者 damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（热词）
+# 如果您想使用时间戳或者热词模型进行部署，请设置--model-dir为对应模型：
+# damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx（时间戳）
+# 或者 damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（热词）
 ```
 服务端详细参数介绍可参考[服务端参数介绍](#服务端参数介绍)
 ### 客户端测试与使用
