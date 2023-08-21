@@ -204,7 +204,34 @@ function getAsrMode(){
 		   return item;
 }
 		   
+function handleWithTimestamp(tmptext,tmptime)
+{
+	console.log( "tmptext: " + tmptext);
+	console.log( "tmptime: " + tmptime);
+    if(tmptime==null || tmptime=="undefined" || tmptext.length<=0)
+	{
+		return tmptext;
+	}
+	tmptext=tmptext.replace(/。/g, ","); // in case there are a lot of "。"
+	var words=tmptext.split(",");
+	var jsontime=JSON.parse(tmptime.replace(/\]\]\[\[/g, "],[")); // in case there are a lot segments by VAD
+	var char_index=0;
+	var text_withtime="";
+	for(var i=0;i<words.length;i++)
+	{   
+	if(words[i]=="undefined"  || words[i].length<=0)
+	{
+		continue;
+	}
+        console.log("words===",words[i]);
+		console.log( "words: " + words[i]+",time="+jsontime[char_index][0]/1000);
+		text_withtime=text_withtime+jsontime[char_index][0]/1000+":"+words[i]+"\n";
+		char_index=char_index+words[i].length;
+	}
+	return text_withtime;
+	
 
+}
 // 语音识别结果; 对jsonMsg数据解析,将识别结果附加到编辑框中
 function getJsonMessage( jsonMsg ) {
 	//console.log(jsonMsg);
@@ -212,9 +239,11 @@ function getJsonMessage( jsonMsg ) {
 	var rectxt=""+JSON.parse(jsonMsg.data)['text'];
 	var asrmodel=JSON.parse(jsonMsg.data)['mode'];
 	var is_final=JSON.parse(jsonMsg.data)['is_final'];
-	if(asrmodel=="2pass-offline")
+	var timestamp=JSON.parse(jsonMsg.data)['timestamp'];
+	if(asrmodel=="2pass-offline" || asrmodel=="offline")
 	{
-		offline_text=offline_text+rectxt; //.replace(/ +/g,"");
+		
+		offline_text=offline_text+handleWithTimestamp(rectxt,timestamp); //rectxt; //.replace(/ +/g,"");
 		rec_text=offline_text;
 	}
 	else

@@ -189,6 +189,10 @@ public class FunasrWsClient extends WebSocketClient {
     try {
       jsonObject = (JSONObject) jsonParser.parse(message);
       logger.info("text: " + jsonObject.get("text"));
+	  if(jsonObject.containsKey("timestamp"))
+	  {
+		  logger.info("timestamp: " + jsonObject.get("timestamp"));
+	  }
     } catch (org.json.simple.parser.ParseException e) {
       e.printStackTrace();
     }
