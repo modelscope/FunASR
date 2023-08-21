@@ -1,0 +1,21 @@
+## gflags CMake configuration version file
+
+# -----------------------------------------------------------------------------
+# library version
+set (PACKAGE_VERSION "@PACKAGE_VERSION@")
+
+# -----------------------------------------------------------------------------
+# check compatibility
+
+# Perform compatibility check here using the input CMake variables.
+# See example in http://www.cmake.org/Wiki/CMake_2.6_Notes.
+
+set (PACKAGE_VERSION_COMPATIBLE TRUE)
+set (PACKAGE_VERSION_UNSUITABLE FALSE)
+
+if ("${PACKAGE_FIND_VERSION_MAJOR}" EQUAL "@PACKAGE_VERSION_MAJOR@" AND
+    "${PACKAGE_FIND_VERSION_MINOR}" EQUAL "@PACKAGE_VERSION_MINOR@")
+  set (PACKAGE_VERSION_EXACT TRUE)
+else ()
+  set (PACKAGE_VERSION_EXACT FALSE)
+endif ()

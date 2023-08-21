@@ -200,6 +200,7 @@ int main(int argc, char** argv)
     TCLAP::ValueArg<std::string>    vad_quant("", VAD_QUANT, "false (Default), load the model of model.onnx in vad_dir. If set true, load the model of model_quant.onnx in vad_dir", false, "true", "string");
     TCLAP::ValueArg<std::string>    punc_dir("", PUNC_DIR, "the punc online model path, which contains model.onnx, punc.yaml", false, "", "string");
     TCLAP::ValueArg<std::string>    punc_quant("", PUNC_QUANT, "false (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "true", "string");
+    TCLAP::ValueArg<std::string>    itn_model_dir("", ITN_MODEL_DIR, "the itn model(fst) path, which contains itn_tagger.fst and itn_verbalizer.fst", false, "", "string");
     TCLAP::ValueArg<std::string>    asr_mode("", ASR_MODE, "offline, online, 2pass", false, "2pass", "string");
     TCLAP::ValueArg<std::int32_t>   onnx_thread("", "onnx-inter-thread", "onnxruntime SetIntraOpNumThreads", false, 1, "int32_t");
     TCLAP::ValueArg<std::int32_t>   thread_num_("", THREAD_NUM, "multi-thread num for rtf", false, 1, "int32_t");
@@ -213,6 +214,7 @@ int main(int argc, char** argv)
     cmd.add(vad_quant);
     cmd.add(punc_dir);
     cmd.add(punc_quant);
+    cmd.add(itn_model_dir);
     cmd.add(wav_path);
     cmd.add(asr_mode);
     cmd.add(onnx_thread);
@@ -227,6 +229,7 @@ int main(int argc, char** argv)
     GetValue(vad_quant, VAD_QUANT, model_path);
     GetValue(punc_dir, PUNC_DIR, model_path);
     GetValue(punc_quant, PUNC_QUANT, model_path);
+    GetValue(itn_model_dir, ITN_MODEL_DIR, model_path);
     GetValue(wav_path, WAV_PATH, model_path);
     GetValue(asr_mode, ASR_MODE, model_path);
 

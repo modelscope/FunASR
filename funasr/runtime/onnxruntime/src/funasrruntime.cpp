@@ -383,6 +383,11 @@ extern "C" {
 				msg_punc += "。";
 			}
 			p_result->tpass_msg = msg_punc;
+			if(tpass_stream->UseITN()){
+				string msg_itn = tpass_stream->itn_handle->Normalize(msg_punc);
+				p_result->tpass_msg = msg_itn;
+			}
+
 			if(frame != NULL){
 				delete frame;
 				frame = NULL;

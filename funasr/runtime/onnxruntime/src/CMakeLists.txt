@@ -15,7 +15,7 @@ if(WIN32)
     
     target_compile_definitions(funasr PUBLIC -D_FUNASR_API_EXPORT)
 else()
-    set(EXTRA_LIBS pthread yaml-cpp csrc glog avutil avcodec avformat swresample)
+    set(EXTRA_LIBS pthread yaml-cpp csrc fst glog gflags avutil avcodec avformat swresample)
     include_directories(${ONNXRUNTIME_DIR}/include)
     include_directories(${FFMPEG_DIR}/include)
 endif()

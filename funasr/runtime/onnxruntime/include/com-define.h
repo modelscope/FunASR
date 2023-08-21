@@ -45,6 +45,10 @@ namespace funasr {
 #define AM_CONFIG_NAME "config.yaml"
 #define PUNC_CONFIG_NAME "punc.yaml"
 
+#define ITN_MODEL_DIR "itn-model-dir"
+#define ITN_TAGGER_NAME "zh_itn_tagger.fst"
+#define ITN_VERBALIZER_NAME "zh_itn_verbalizer.fst"
+
 #define ENCODER_NAME "model.onnx"
 #define QUANT_ENCODER_NAME "model_quant.onnx"
 #define DECODER_NAME "decoder.onnx"
