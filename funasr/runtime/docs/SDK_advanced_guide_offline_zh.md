@@ -158,8 +158,8 @@ cd /workspace/FunASR/funasr/runtime/websocket/build/bin
 --port  服务端监听的端口号，默认为 10095
 --decoder-thread-num  服务端启动的推理线程数，默认为 8
 --io-thread-num  服务端启动的IO线程数，默认为 1
---certfile  ssl的证书文件，默认为：../../../ssl_key/server.crt
---keyfile   ssl的密钥文件，默认为：../../../ssl_key/server.key
+--certfile  ssl的证书文件，默认为：../../../ssl_key/server.crt，如果需要关闭ssl，参数设置为”“
+--keyfile   ssl的密钥文件，默认为：../../../ssl_key/server.key，如果需要关闭ssl，参数设置为”“
 ```
 
 funasr-wss-server同时也支持从本地路径加载模型（本地模型资源准备详见[模型资源准备](#模型资源准备)）示例如下：
@@ -186,8 +186,8 @@ cd /workspace/FunASR/funasr/runtime/websocket/build/bin
 --port  服务端监听的端口号，默认为 10095
 --decoder-thread-num  服务端启动的推理线程数，默认为 8
 --io-thread-num  服务端启动的IO线程数，默认为 1
---certfile ssl的证书文件，默认为：../../../ssl_key/server.crt
---keyfile  ssl的密钥文件，默认为：../../../ssl_key/server.key
+--certfile ssl的证书文件，默认为：../../../ssl_key/server.crt，如果需要关闭ssl，参数设置为”“
+--keyfile  ssl的密钥文件，默认为：../../../ssl_key/server.key，如果需要关闭ssl，参数设置为”“
 ```
 
 ## 模型资源准备

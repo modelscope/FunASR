@@ -97,8 +97,8 @@ Introduction to command parameters:
 --port: Port number that the server listens on. Default is 10095.
 --decoder-thread-num: Number of inference threads that the server starts. Default is 8.
 --io-thread-num: Number of IO threads that the server starts. Default is 1.
---certfile <string>: SSL certificate file. Default is ../../../ssl_key/server.crt.
---keyfile <string>: SSL key file. Default is ../../../ssl_key/server.key.
+--certfile <string>: SSL certificate file. Default is ../../../ssl_key/server.crt. If you want to close ssl，set ""
+--keyfile <string>: SSL key file. Default is ../../../ssl_key/server.key. If you want to close ssl，set ""
 ```
 
 The FunASR-wss-server also supports loading models from a local path (see Preparing Model Resources for detailed instructions on preparing local model resources). Here is an example:
