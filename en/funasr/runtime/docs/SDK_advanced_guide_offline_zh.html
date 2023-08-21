@@ -312,64 +312,14 @@ brew install --cask --appdir<span class="o">=</span>/Applications docker
 --keyfile  ssl的密钥文件，默认为：../../../ssl_key/server.key，如果需要关闭ssl，参数设置为”“
 </pre></div>
 </div>
+<p>执行上述指令后，启动离线文件转写服务。如果模型指定为ModelScope中model id，会自动从MoldeScope中下载如下模型：
+<a class="reference external" href="https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary">FSMN-VAD模型</a>，
+<a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary">Paraformer-lagre模型</a>
+<a class="reference external" href="https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx/summary">CT-Transformer标点预测模型</a></p>
+<p>如果，您希望部署您finetune后的模型（例如10epoch.pb），需要手动将模型重命名为model.pb，并将原modelscope中模型model.pb替换掉，将路径指定为<code class="docutils literal notranslate"><span class="pre">model_dir</span></code>即可。</p>
 </div>
 <div class="section" id="id9">
-<h2>模型资源准备<a class="headerlink" href="#id9" title="Permalink to this headline"></a></h2>
-<p>如果您选择通过funasr-wss-server从Modelscope下载模型，可以跳过本步骤。</p>
-<p>FunASR离线文件转写服务中的vad、asr和punc模型资源均来自Modelscope，模型地址详见下表：</p>
-<table border="1" class="docutils">
-<thead>
-<tr>
-<th>模型</th>
-<th>Modelscope链接</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>VAD</td>
-<td>https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary</td>
-</tr>
-<tr>
-<td>ASR</td>
-<td>https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary</td>
-</tr>
-<tr>
-<td>PUNC</td>
-<td>https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx/summary</td>
-</tr>
-</tbody>
-</table><p>离线文件转写服务中部署的是量化后的ONNX模型，下面介绍下如何导出ONNX模型及其量化：您可以选择从Modelscope导出ONNX模型、从finetune后的资源导出模型：</p>
-<div class="section" id="modelscopeonnx">
-<h3>从Modelscope导出ONNX模型<a class="headerlink" href="#modelscopeonnx" title="Permalink to this headline"></a></h3>
-<p>从Modelscope网站下载对应model name的模型，然后导出量化后的ONNX模型：</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model <span class="se">\</span>
---export-dir ./export <span class="se">\</span>
---type onnx <span class="se">\</span>
---quantize True <span class="se">\</span>
---model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch <span class="se">\</span>
---model-name damo/speech_fsmn_vad_zh-cn-16k-common-pytorch <span class="se">\</span>
---model-name damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch
-</pre></div>
-</div>
-<p>命令参数介绍：</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--model-name  Modelscope上的模型名称，例如damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
---export-dir  ONNX模型导出地址
---type 模型类型，目前支持 ONNX、torch
---quantize  int8模型量化
-</pre></div>
-</div>
-</div>
-<div class="section" id="finetune">
-<h3>从finetune后的资源导出模型<a class="headerlink" href="#finetune" title="Permalink to this headline"></a></h3>
-<p>假如您想部署finetune后的模型，可以参考如下步骤：</p>
-<p>将您finetune后需要部署的模型（例如10epoch.pb），重命名为model.pb，并将原modelscope中模型model.pb替换掉，假如替换后的模型路径为/path/to/finetune/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch，通过下述命令把finetune后的模型转成onnx模型：</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model --model-name /path/to/finetune/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize True
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="id10">
-<h2>如何定制服务部署<a class="headerlink" href="#id10" title="Permalink to this headline"></a></h2>
+<h2>如何定制服务部署<a class="headerlink" href="#id9" title="Permalink to this headline"></a></h2>
 <p>FunASR-runtime的代码已开源，如果服务端和客户端不能很好的满足您的需求，您可以根据自己的需求进行进一步的开发：</p>
 <div class="section" id="c">
 <h3>c++ 客户端：<a class="headerlink" href="#c" title="Permalink to this headline"></a></h3>
@@ -379,31 +329,22 @@ brew install --cask --appdir<span class="o">=</span>/Applications docker
 <h3>python 客户端：<a class="headerlink" href="#python" title="Permalink to this headline"></a></h3>
 <p>https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket</p>
 </div>
-<div class="section" id="id11">
-<h3>自定义客户端：<a class="headerlink" href="#id11" title="Permalink to this headline"></a></h3>
-<p>如果您想定义自己的client，websocket通信协议为：</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 首次通信
-{&quot;mode&quot;: &quot;offline&quot;, &quot;wav_name&quot;: wav_name, &quot;is_speaking&quot;: True}
-# 发送wav数据
-bytes数据
-# 发送结束标志
-{&quot;is_speaking&quot;: False}
-</pre></div>
-</div>
-</div>
-<div class="section" id="id12">
-<h3>c++ 服务端：<a class="headerlink" href="#id12" title="Permalink to this headline"></a></h3>
-<div class="section" id="vad">
-<h4>VAD<a class="headerlink" href="#vad" title="Permalink to this headline"></a></h4>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// VAD模型的使用分为FsmnVadInit和FsmnVadInfer两个步骤：</span>
-<span class="n">FUNASR_HANDLE</span> <span class="n">vad_hanlde</span><span class="o">=</span><span class="n">FsmnVadInit</span><span class="p">(</span><span class="n">model_path</span><span class="p">,</span> <span class="n">thread_num</span><span class="p">);</span>
-<span class="c1">// 其中：model_path 包含&quot;model-dir&quot;、&quot;quantize&quot;，thread_num为onnx线程数；</span>
-<span class="n">FUNASR_RESULT</span> <span class="n">result</span><span class="o">=</span><span class="n">FsmnVadInfer</span><span class="p">(</span><span class="n">vad_hanlde</span><span class="p">,</span> <span class="n">wav_file</span><span class="p">.</span><span class="n">c_str</span><span class="p">(),</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">16000</span><span class="p">);</span>
-<span class="c1">// 其中：vad_hanlde为FunOfflineInit返回值，wav_file为音频路径，sampling_rate为采样率(默认16k)</span>
+<div class="section" id="id10">
+<h3>自定义客户端：<a class="headerlink" href="#id10" title="Permalink to this headline"></a></h3>
+<p>如果您想定义自己的client，参考<a class="reference internal" href="websocket_protocol_zh.html"><span class="doc">websocket通信协议</span></a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>
+### c++ 服务端：
+
+#### VAD
+```c++
+// VAD模型的使用分为FsmnVadInit和FsmnVadInfer两个步骤：
+FUNASR_HANDLE vad_hanlde=FsmnVadInit(model_path, thread_num);
+// 其中：model_path 包含&quot;model-dir&quot;、&quot;quantize&quot;，thread_num为onnx线程数；
+FUNASR_RESULT result=FsmnVadInfer(vad_hanlde, wav_file.c_str(), NULL, 16000);
+// 其中：vad_hanlde为FunOfflineInit返回值，wav_file为音频路径，sampling_rate为采样率(默认16k)
 </pre></div>
 </div>
 <p>使用示例详见：https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/onnxruntime/bin/funasr-onnx-offline-vad.cpp</p>
-</div>
 <div class="section" id="asr">
 <h4>ASR<a class="headerlink" href="#asr" title="Permalink to this headline"></a></h4>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>// ASR模型的使用分为FunOfflineInit和FunOfflineInfer两个步骤：
