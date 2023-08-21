@@ -10,7 +10,7 @@ Configuration parameters and meta information are in JSON format, while audio da
 #### Initial Communication
 The message (which needs to be serialized in JSON) is:
 ```text
-{"mode": "offline", "wav_name": "wav_name", "is_speaking": True,"wav_format":"pcm"}
+{"mode": "offline", "wav_name": "wav_name","wav_format":"pcm","is_speaking": True,"wav_format":"pcm","hotwords":"阿里巴巴 达摩院 阿里云"}
 ```
 Parameter explanation:
 ```text
@@ -19,6 +19,7 @@ Parameter explanation:
 `wav_format`: the audio and video file extension, such as pcm, mp3, mp4, etc.
 `is_speaking`: False indicates the end of a sentence, such as a VAD segmentation point or the end of a WAV file
 `audio_fs`: when the input audio is in PCM format, the audio sampling rate parameter needs to be added
+`hotwords`：If AM is the hotword model, hotword data needs to be sent to the server in string format, with " " used as a separator between hotwords. For example："阿里巴巴 达摩院 阿里云"
 ```
 
 #### Sending Audio Data
@@ -34,7 +35,7 @@ After sending the audio data, an end-of-audio flag needs to be sent (which needs
 #### Sending Recognition Results
 The message (serialized in JSON) is:
 ```text
-{"mode": "offline", "wav_name": "wav_name", "text": "asr ouputs", "is_final": True}
+{"mode": "offline", "wav_name": "wav_name", "text": "asr ouputs", "is_final": True, "timestamp":"[[100,200], [200,500]]"}
 ```
 Parameter explanation:
 ```text
@@ -42,6 +43,7 @@ Parameter explanation:
 `wav_name`: the name of the audio file to be transcribed
 `text`: the text output of speech recognition
 `is_final`: indicating the end of recognition
+`timestamp`：If AM is a timestamp model, it will return this field, indicating the timestamp, in the format of "[[100,200], [200,500]]"
 ```
 
 ## Real-time Speech Recognition
@@ -56,7 +58,7 @@ Configuration parameters and meta information are in JSON format, while audio da
 #### Initial Communication
 The message (which needs to be serialized in JSON) is:
 ```text
-{"mode": "2pass", "wav_name": "wav_name", "is_speaking": True, "wav_format":"pcm", "chunk_size":[5,10,5]
+{"mode": "2pass", "wav_name": "wav_name", "is_speaking": True, "wav_format":"pcm", "chunk_size":[5,10,5]}
 ```
 Parameter explanation:
 ```text

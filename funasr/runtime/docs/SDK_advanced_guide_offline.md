@@ -59,6 +59,11 @@ nohup bash run_server.sh \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx > log.out 2>&1 &
+
+# If you want to close ssl，please add：--certfile 0
+# If you want to deploy the timestamp or hotword model, please set --model-dir to the corresponding model:
+# speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx（timestamp）
+# damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（hotword）
 ```
 
 More details about the script run_server.sh:
@@ -92,8 +97,8 @@ Introduction to command parameters:
 --port: Port number that the server listens on. Default is 10095.
 --decoder-thread-num: Number of inference threads that the server starts. Default is 8.
 --io-thread-num: Number of IO threads that the server starts. Default is 1.
---certfile <string>: SSL certificate file. Default is ../../../ssl_key/server.crt.
---keyfile <string>: SSL key file. Default is ../../../ssl_key/server.key.
+--certfile <string>: SSL certificate file. Default is ../../../ssl_key/server.crt. If you want to close ssl，set ""
+--keyfile <string>: SSL key file. Default is ../../../ssl_key/server.key. If you want to close ssl，set ""
 ```
 
 The FunASR-wss-server also supports loading models from a local path (see Preparing Model Resources for detailed instructions on preparing local model resources). Here is an example:
@@ -183,6 +188,7 @@ Introduction to command parameters:
 --output_dir: the path to the recognition result output.
 --ssl: whether to use SSL encryption. The default is to use SSL.
 --mode: offline mode.
+--hotword If am is hotword model, setting hotword: *.txt(one hotword perline) or hotwords seperate by space (could be: 阿里巴巴 达摩院)
 ```
 
 ### c++-client
@@ -199,6 +205,7 @@ Introduction to command parameters:
 --output_dir: the path to the recognition result output.
 --ssl: whether to use SSL encryption. The default is to use SSL.
 --mode: offline mode.
+--hotword If am is hotword model, setting hotword: *.txt(one hotword perline) or hotwords seperate by space (could be: 阿里巴巴 达摩院)
 ```
 
 ### Custom client
@@ -207,7 +214,7 @@ If you want to define your own client, the Websocket communication protocol is a
 
 ```text
 # First communication
-{"mode": "offline", "wav_name": wav_name, "is_speaking": True}
+{"mode": "offline", "wav_name": wav_name, "is_speaking": True, "hotwords": "hotword1|hotword2"}
 # Send wav data
 Bytes data
 # Send end flag
