@@ -44,6 +44,7 @@ var upfile = document.getElementById('upfile');
  
 
 var isfilemode=false;  // if it is in file mode
+var file_ext="";
 var file_data_array;  // array to save file data
  
 var totalsend=0;
@@ -81,6 +82,10 @@ upfile.onchange = function () {
             for(let i = 0; i < len; i++) {
                 let fileAudio = new FileReader();
                 fileAudio.readAsArrayBuffer(this.files[i]);  
+				file_ext=this.files[i].name.split('.').pop().toLowerCase();
+				if(file_ext==="wav"){
+					file_ext="pcm";
+				}
                 fileAudio.onload = function() {
                  var audioblob= fileAudio.result;
 				 file_data_array=audioblob;
