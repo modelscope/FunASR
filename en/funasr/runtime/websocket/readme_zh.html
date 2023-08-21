@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>采用websocket协议的c++部署方案 &mdash; FunASR  documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <title>FunASR离线文件转写服务开发指南(点击此处) &mdash; FunASR  documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
@@ -118,7 +118,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">采用websocket协议的c++部署方案</li>
+      <li class="breadcrumb-item active">FunASR离线文件转写服务开发指南(点击此处)</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../../_sources/funasr/runtime/websocket/readme_zh.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -128,181 +128,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <p>(简体中文|<a class="reference internal" href="readme.html"><span class="doc">English</span></a>)</p>
-<div class="section" id="websocketc">
-<h1>采用websocket协议的c++部署方案<a class="headerlink" href="#websocketc" title="Permalink to this headline"></a></h1>
-<div class="section" id="id1">
-<h2>快速上手<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h2>
-<div class="section" id="docker">
-<h3>启动docker镜像<a class="headerlink" href="#docker" title="Permalink to this headline"></a></h3>
-<p>通过下述命令拉取并启动FunASR runtime-SDK的docker镜像：</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.1.0
-
-sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span class="o">=</span><span class="nb">true</span> -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.1.0
-</pre></div>
-</div>
-<p>如果您没有安装docker，可参考<a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/installation/docker.html">Docker安装</a></p>
-</div>
-<div class="section" id="id2">
-<h3>服务端启动<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h3>
-<p>docker启动之后，启动 funasr-wss-server服务程序：</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> FunASR/funasr/runtime
-./run_server.sh <span class="se">\</span>
-  --download-model-dir /workspace/models <span class="se">\</span>
-  --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
-  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  <span class="se">\</span>
-  --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
-</pre></div>
-</div>
-<p>服务端详细参数介绍可参考服务端参数介绍</p>
-</div>
-<div class="section" id="id3">
-<h3>客户端测试与使用<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h3>
-<p>下载客户端测试工具目录samples</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz
-</pre></div>
-</div>
-<p>我们以Python语言客户端为例，进行说明，支持多种音频格式输入（.wav, .pcm, .mp3等），也支持视频输入(.mp4等)，以及多文件列表wav.scp输入，其他版本客户端请参考文档（点击此处）</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 wss_client_asr.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode offline --audio_in <span class="s2">&quot;../audio/asr_example.wav&quot;</span>
-</pre></div>
-</div>
-</div>
-</div>
-<hr class="docutils" />
-<div class="section" id="id4">
-<h2>操作步骤详解<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h2>
-<div class="section" id="id5">
-<h3>依赖库下载<a class="headerlink" href="#id5" title="Permalink to this headline"></a></h3>
-<p>Docker中已经预安装了依赖三方库，如果不用docker，请手动下载并安装（<a class="reference internal" href="requirements_install.html"><span class="doc">三方库下载与安装</span></a>）</p>
-</div>
-<div class="section" id="id6">
-<h3>编译<a class="headerlink" href="#id6" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/alibaba-damo-academy/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> FunASR/funasr/runtime/websocket
-mkdir build <span class="o">&amp;&amp;</span> <span class="nb">cd</span> build
-cmake  -DCMAKE_BUILD_TYPE<span class="o">=</span>release .. -DONNXRUNTIME_DIR<span class="o">=</span>/path/to/onnxruntime-linux-x64-1.14.0 -DFFMPEG_DIR<span class="o">=</span>/path/to/ffmpeg-N-111383-g20b8688092-linux64-gpl-shared
-make
-</pre></div>
-</div>
-</div>
-<div class="section" id="id7">
-<h3>启动服务部署<a class="headerlink" href="#id7" title="Permalink to this headline"></a></h3>
-<div class="section" id="id8">
-<h4>命令参数介绍：<a class="headerlink" href="#id8" title="Permalink to this headline"></a></h4>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--download-model-dir 模型下载地址，通过设置model ID从Modelscope下载模型。如果从本地模型启动，可以不设置。
---model-dir  modelscope 中 ASR model ID，或者本地模型绝对路径
---quantize  True为量化ASR模型，False为非量化ASR模型，默认是True
---vad-dir  modelscope 中 VAD model ID，或者本地模型绝对路径
---vad-quant   True为量化VAD模型，False为非量化VAD模型，默认是True
---punc-dir  modelscope 中 标点 model ID，或者本地模型绝对路径
---punc-quant   True为量化PUNC模型，False为非量化PUNC模型，默认是True
---port  服务端监听的端口号，默认为 10095
---decoder-thread-num  服务端启动的推理线程数，默认为 8
---io-thread-num  服务端启动的IO线程数，默认为 1
---certfile  ssl的证书文件，默认为：../../../ssl_key/server.crt
---keyfile   ssl的密钥文件，默认为：../../../ssl_key/server.key
-</pre></div>
-</div>
-</div>
-<div class="section" id="modelscope">
-<h4>从modelscope中模型启动示例<a class="headerlink" href="#modelscope" title="Permalink to this headline"></a></h4>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-wss-server  <span class="se">\</span>
-  --download-model-dir /workspace/models <span class="se">\</span>
-  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx <span class="se">\</span>
-  --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
-  --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
-</pre></div>
-</div>
-<p>注意：上面示例中，<code class="docutils literal notranslate"><span class="pre">model-dir</span></code>，<code class="docutils literal notranslate"><span class="pre">vad-dir</span></code>，<code class="docutils literal notranslate"><span class="pre">punc-dir</span></code>为模型在modelscope中模型名字，直接从modelscope下载模型并且导出量化后的onnx。如果需要从本地启动，需要改成本地绝对路径。</p>
-</div>
-<div class="section" id="id9">
-<h4>从本地模型启动示例<a class="headerlink" href="#id9" title="Permalink to this headline"></a></h4>
-<div class="section" id="id10">
-<h5>导出模型<a class="headerlink" href="#id10" title="Permalink to this headline"></a></h5>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m funasr.export.export_model <span class="se">\</span>
---export-dir ./export <span class="se">\</span>
---type onnx <span class="se">\</span>
---quantize True <span class="se">\</span>
---model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch <span class="se">\</span>
---model-name damo/speech_fsmn_vad_zh-cn-16k-common-pytorch <span class="se">\</span>
---model-name damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch
-</pre></div>
-</div>
-<p>导出过程详细介绍（<a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/export">点击此处</a>）</p>
-</div>
-<div class="section" id="id11">
-<h5>启动服务<a class="headerlink" href="#id11" title="Permalink to this headline"></a></h5>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-wss-server  <span class="se">\</span>
-  --download-model-dir /workspace/models <span class="se">\</span>
-  --model-dir ./exportdamo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx <span class="se">\</span>
-  --vad-dir ./exportdamo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
-  --punc-dir ./export/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="section" id="id12">
-<h3>客户端用法详解<a class="headerlink" href="#id12" title="Permalink to this headline"></a></h3>
-<p>下载客户端测试工具目录samples</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz
-</pre></div>
-</div>
-<p>在服务器上完成FunASR服务部署以后，可以通过如下的步骤来测试和使用离线文件转写服务。
-目前分别支持以下几种编程语言客户端</p>
-<ul class="simple">
-<li><p><a class="reference internal" href="#python-client"><span class="std std-ref">Python</span></a></p></li>
-<li><p><a class="reference internal" href="#cpp-client"><span class="std std-ref">CPP</span></a></p></li>
-<li><p>html网页版本</p></li>
-<li><p><a class="reference internal" href="#java-client"><span class="std std-ref">Java</span></a></p></li>
-</ul>
-<div class="section" id="python-client">
-<h4>python-client<a class="headerlink" href="#python-client" title="Permalink to this headline"></a></h4>
-<p>若想直接运行client进行测试，可参考如下简易说明，以python版本为例：</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 wss_client_asr.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode offline --audio_in <span class="s2">&quot;../audio/asr_example.wav&quot;</span> --output_dir <span class="s2">&quot;./results&quot;</span>
-</pre></div>
-</div>
-<p>命令参数说明：</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--host 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，需要改为部署机器ip
---port 10095 部署端口号
---mode offline表示离线文件转写
---audio_in 需要进行转写的音频文件，支持文件路径，文件列表wav.scp
---output_dir 识别结果保存路径
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="cpp-client">
-<h3>cpp-client<a class="headerlink" href="#cpp-client" title="Permalink to this headline"></a></h3>
-<p>进入samples/cpp目录后，可以用cpp进行测试，指令如下：</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-wss-client --server-ip <span class="m">127</span>.0.0.1 --port <span class="m">10095</span> --wav-path ../audio/asr_example.wav
-</pre></div>
-</div>
-<p>命令参数说明：</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--server-ip 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，需要改为部署机器ip
---port 10095 部署端口号
---wav-path 需要进行转写的音频文件，支持文件路径
-</pre></div>
-</div>
-</div>
-<div class="section" id="html">
-<h3>Html网页版<a class="headerlink" href="#html" title="Permalink to this headline"></a></h3>
-<p>在浏览器中打开 html/static/index.html，即可出现如下页面，支持麦克风输入与文件上传，直接进行体验</p>
-<img src="images/html.png"  width="900"/></div>
-<div class="section" id="java-client">
-<h3>Java-client<a class="headerlink" href="#java-client" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>FunasrWsClient --host localhost --port <span class="m">10095</span> --audio_in ./asr_example.wav --mode offline
-</pre></div>
-</div>
-<p>详细可以参考文档（<a class="reference internal" href="../java/readme.html"><span class="doc">点击此处</span></a>）</p>
-</div>
-</div>
-<div class="section" id="acknowledge">
-<h2>Acknowledge<a class="headerlink" href="#acknowledge" title="Permalink to this headline"></a></h2>
-<ol class="simple">
-<li><p>This project is maintained by <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR">FunASR community</a>.</p></li>
-<li><p>We acknowledge <a class="reference external" href="https://github.com/zhaomingwork/FunASR/tree/add-offline-websocket-srv/funasr/runtime/websocket">zhaoming</a> for contributing the websocket(cpp-api).</p></li>
-</ol>
-</div>
+  <div class="section" id="funasr">
+<h1>FunASR离线文件转写服务开发指南(<a class="reference internal" href="../docs/SDK_advanced_guide_offline_zh.html"><span class="doc">点击此处</span></a>)<a class="headerlink" href="#funasr" title="Permalink to this headline"></a></h1>
 </div>
 
 
