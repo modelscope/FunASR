@@ -83,6 +83,7 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
       nlohmann::json jsonresult;        // result json
       jsonresult["text"] = asr_result;  // put result in 'text'
       jsonresult["mode"] = "offline";
+	  jsonresult["is_final"] = false;
       if(stamp_res != ""){
         jsonresult["timestamp"] = stamp_res;
       }
