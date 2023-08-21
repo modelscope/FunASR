@@ -172,6 +172,17 @@ function on_recoder_mode_change()
 	 
 			}
 }
+function getHotwords(){
+  var obj = document.getElementById("varHot");
+  
+  if(typeof(obj) == 'undefined' || obj==null || obj.value.length<=0){
+	return "";
+  }
+  let val = obj.value.toString();
+  console.log("hotwords="+val);
+  return val;
+
+}
 function getAsrMode(){
 
             var item = null;
