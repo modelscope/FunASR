@@ -110,7 +110,7 @@ function play_file()
 }
 function start_file_send()
 {
-		sampleBuf=new Int16Array( file_data_array );
+		sampleBuf=new Uint8Array( file_data_array );
  
 		var chunk_size=960; // for asr chunk_size [5, 10, 5]
  
