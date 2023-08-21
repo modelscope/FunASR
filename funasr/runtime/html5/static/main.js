@@ -214,7 +214,7 @@ function handleWithTimestamp(tmptext,tmptime)
 	}
 	tmptext=tmptext.replace(/。/g, ","); // in case there are a lot of "。"
 	var words=tmptext.split(",");
-	var jsontime=JSON.parse(tmptime.replace(/\]\]\[\[/g, "],[")); // in case there are a lot segments by VAD
+	var jsontime=JSON.parse(tmptime); //JSON.parse(tmptime.replace(/\]\]\[\[/g, "],[")); // in case there are a lot segments by VAD
 	var char_index=0;
 	var text_withtime="";
 	for(var i=0;i<words.length;i++)
