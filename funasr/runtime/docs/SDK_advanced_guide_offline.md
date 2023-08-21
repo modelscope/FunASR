@@ -116,59 +116,14 @@ cd /workspace/FunASR/funasr/runtime/websocket/build/bin
   --keyfile ../../../ssl_key/server.key
  ```
 
+After executing the above command, the real-time speech transcription service will be started. If the model is specified as a ModelScope model id, the following models will be automatically downloaded from ModelScope:
+[FSMN-VAD](https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary)
+[Paraformer-lagre](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary)
+[CT-Transformer](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx/summary)
 
-## Preparing Model Resources
-
-If you choose to download models from Modelscope through the FunASR-wss-server, you can skip this step. The vad, asr, and punc model resources in the offline file transcription service of FunASR are all from Modelscope. The model addresses are shown in the table below:
-
-| Model | Modelscope url                                                                                                   |
-|-------|------------------------------------------------------------------------------------------------------------------|
-| VAD   | https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary |
-| ASR   | https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary                           |
-| PUNC  | https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch/summary               |
-
-The offline file transcription service deploys quantized ONNX models. Below are instructions on how to export ONNX models and their quantization. You can choose to export ONNX models from Modelscope, local files, or finetuned resources: 
-
-### Exporting ONNX models from Modelscope
-
-Download the corresponding model with the given model name from the Modelscope website, and then export the quantized ONNX model
-
-```shell
-python -m funasr.export.export_model \
---export-dir ./export \
---type onnx \
---quantize True \
---model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch \
---model-name damo/speech_fsmn_vad_zh-cn-16k-common-pytorch \
---model-name damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch
-```
-
-Introduction to command parameters:
-
-```text
---model-name: The name of the model on Modelscope, for example: damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
---export-dir: The export directory of ONNX model.
---type: Model type, currently supports ONNX and torch.
---quantize: Quantize the int8 model.
-```
-
-### Exporting ONNX models from local files
-
-Set the model name to the local path of the model, and export the quantized ONNX model:
-
-```shell
-python -m funasr.export.export_model --model-name /workspace/models/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize True
-```
+If you wish to deploy your fine-tuned model (e.g., 10epoch.pb), you need to manually rename the model to model.pb and replace the original model.pb in ModelScope. Then, specify the path as `model_dir`.
 
 
-### Exporting models from finetuned resources
-
-If you want to deploy a finetuned model, you can follow these steps:
-Rename the model you want to deploy after finetuning (for example, 10epoch.pb) to model.pb, and replace the original model.pb in Modelscope with this one. If the path of the replaced model is /path/to/finetune/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch, use the following command to convert the finetuned model to an ONNX model: 
-
-```shell
-python -m funasr.export.export_model --model-name /path/to/finetune/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize True
-```
 
 ## Starting the client
 
@@ -210,16 +165,7 @@ Introduction to command parameters:
 
 ### Custom client
 
-If you want to define your own client, the Websocket communication protocol is as follows:
-
-```text
-# First communication
-{"mode": "offline", "wav_name": wav_name, "is_speaking": True, "hotwords": "hotword1|hotword2"}
-# Send wav data
-Bytes data
-# Send end flag
-{"is_speaking": False}
-```
+If you want to define your own client, see the [Websocket communication protocol](./websocket_protocol.md)
 
 ## How to customize service deployment
 

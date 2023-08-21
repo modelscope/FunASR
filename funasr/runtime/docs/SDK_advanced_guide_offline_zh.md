@@ -191,51 +191,12 @@ cd /workspace/FunASR/funasr/runtime/websocket/build/bin
 --keyfile  ssl的密钥文件，默认为：../../../ssl_key/server.key，如果需要关闭ssl，参数设置为”“
 ```
 
-## 模型资源准备
+执行上述指令后，启动离线文件转写服务。如果模型指定为ModelScope中model id，会自动从MoldeScope中下载如下模型：
+[FSMN-VAD模型](https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary)，
+[Paraformer-lagre模型](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary)
+[CT-Transformer标点预测模型](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx/summary)
 
-如果您选择通过funasr-wss-server从Modelscope下载模型，可以跳过本步骤。
-
-FunASR离线文件转写服务中的vad、asr和punc模型资源均来自Modelscope，模型地址详见下表：
-
-| 模型 | Modelscope链接                                                                                                  |
-|------|---------------------------------------------------------------------------------------------------------------|
-| VAD  | https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary |
-| ASR  | https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary                           |
-| PUNC | https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx/summary               |
-
-离线文件转写服务中部署的是量化后的ONNX模型，下面介绍下如何导出ONNX模型及其量化：您可以选择从Modelscope导出ONNX模型、从finetune后的资源导出模型：
-
-### 从Modelscope导出ONNX模型
-
-从Modelscope网站下载对应model name的模型，然后导出量化后的ONNX模型：
-
-```shell
-python -m funasr.export.export_model \
---export-dir ./export \
---type onnx \
---quantize True \
---model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch \
---model-name damo/speech_fsmn_vad_zh-cn-16k-common-pytorch \
---model-name damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch
-```
-
-命令参数介绍：
-```text
---model-name  Modelscope上的模型名称，例如damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
---export-dir  ONNX模型导出地址
---type 模型类型，目前支持 ONNX、torch
---quantize  int8模型量化
-```
-### 从finetune后的资源导出模型
-
-假如您想部署finetune后的模型，可以参考如下步骤：
-
-将您finetune后需要部署的模型（例如10epoch.pb），重命名为model.pb，并将原modelscope中模型model.pb替换掉，假如替换后的模型路径为/path/to/finetune/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch，通过下述命令把finetune后的模型转成onnx模型：
-
-```shell
-python -m funasr.export.export_model --model-name /path/to/finetune/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize True
-```
-
+如果，您希望部署您finetune后的模型（例如10epoch.pb），需要手动将模型重命名为model.pb，并将原modelscope中模型model.pb替换掉，将路径指定为`model_dir`即可。
 
 
 ## 如何定制服务部署
@@ -251,15 +212,9 @@ https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/w
 
 ### 自定义客户端：
 
-如果您想定义自己的client，websocket通信协议为：
+如果您想定义自己的client，参考[websocket通信协议](./websocket_protocol_zh.md)
 
-```text
-# 首次通信
-{"mode": "offline", "wav_name": wav_name, "is_speaking": True}
-# 发送wav数据
-bytes数据
-# 发送结束标志
-{"is_speaking": False}
+
 ```
 
 ### c++ 服务端：
