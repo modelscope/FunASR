@@ -248,6 +248,7 @@ extern "C" {
 		int n_step = 0;
 		int n_total = audio.GetQueueSize();
 		float start_time = 0.0;
+		std::string cur_stamp = "[";
 		while (audio.Fetch(buff, len, flag, start_time) > 0) {
 			string msg = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb);
 			std::vector<std::string> msg_vec = funasr::split(msg, '|');
@@ -255,20 +256,19 @@ extern "C" {
 			//timestamp
 			if(msg_vec.size() > 1){
 				std::vector<std::string> msg_stamp = funasr::split(msg_vec[1], ',');
-				std::string cur_stamp = "[";
 				for(int i=0; i<msg_stamp.size()-1; i+=2){
 					float begin = std::stof(msg_stamp[i])+start_time;
 					float end = std::stof(msg_stamp[i+1])+start_time;
-					cur_stamp += "["+std::to_string((int)(1000*begin))+","+std::to_string((int)(1000*end))+"]";
-					if(i != msg_stamp.size()-2){
-						cur_stamp +=",";
-					}
+					cur_stamp += "["+std::to_string((int)(1000*begin))+","+std::to_string((int)(1000*end))+"],";
 				}
-				p_result->stamp += cur_stamp + "]";
 			}
 			n_step++;
 			if (fn_callback)
 				fn_callback(n_step, n_total);
+		}
+		if(cur_stamp != "["){
+			cur_stamp.erase(cur_stamp.length() - 1);
+			p_result->stamp += cur_stamp + "]";
 		}
 		if(offline_stream->UsePunc()){
 			string punc_res = (offline_stream->punc_handle)->AddPunc((p_result->msg).c_str());
@@ -311,6 +311,7 @@ extern "C" {
 		int n_step = 0;
 		int n_total = audio.GetQueueSize();
 		float start_time = 0.0;
+		std::string cur_stamp = "[";
 		while (audio.Fetch(buff, len, flag, start_time) > 0) {
 			string msg = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb);
 			std::vector<std::string> msg_vec = funasr::split(msg, '|');
@@ -318,21 +319,20 @@ extern "C" {
 			//timestamp
 			if(msg_vec.size() > 1){
 				std::vector<std::string> msg_stamp = funasr::split(msg_vec[1], ',');
-				std::string cur_stamp = "[";
 				for(int i=0; i<msg_stamp.size()-1; i+=2){
 					float begin = std::stof(msg_stamp[i])+start_time;
 					float end = std::stof(msg_stamp[i+1])+start_time;
-					cur_stamp += "["+std::to_string((int)(1000*begin))+","+std::to_string((int)(1000*end))+"]";
-					if(i != msg_stamp.size()-2){
-						cur_stamp +=",";
-					}
+					cur_stamp += "["+std::to_string((int)(1000*begin))+","+std::to_string((int)(1000*end))+"],";
 				}
-				p_result->stamp += cur_stamp + "]";
 			}
 
 			n_step++;
 			if (fn_callback)
 				fn_callback(n_step, n_total);
+		}
+		if(cur_stamp != "["){
+			cur_stamp.erase(cur_stamp.length() - 1);
+			p_result->stamp += cur_stamp + "]";
 		}
 		if(offline_stream->UsePunc()){
 			string punc_res = (offline_stream->punc_handle)->AddPunc((p_result->msg).c_str());
