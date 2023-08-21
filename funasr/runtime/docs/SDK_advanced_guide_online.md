@@ -25,6 +25,8 @@ nohup bash run_server_2pass.sh \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
   --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx  \
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx > log.out 2>&1 &
+
+# If you want to close ssl，please add：--certfile 0
 ```
 For a more detailed description of server parameters, please refer to [Server Introduction]()
 ### Client Testing and Usage

@@ -57,6 +57,7 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/glog glog)
 # install openssl first apt-get install libssl-dev
 find_package(OpenSSL REQUIRED)
 
+#message("CXX_FLAGS "${CMAKE_CXX_FLAGS})
 add_executable(funasr-wss-server "funasr-wss-server.cpp" "websocket-server.cpp")
 add_executable(funasr-wss-server-2pass "funasr-wss-server-2pass.cpp" "websocket-server-2pass.cpp")
 add_executable(funasr-wss-client "funasr-wss-client.cpp")

@@ -10,9 +10,9 @@ FunASR提供可一键本地或者云端服务器部署的中文离线文件转�
 通过下述命令拉取并启动FunASR runtime-SDK的docker镜像：
 
 ```shell
-sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.1.0
+sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.2.0
 
-sudo docker run -p 10095:10095 -it --privileged=true -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.1.0
+sudo docker run -p 10095:10095 -it --privileged=true -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.2.0
 ```
 如果您没有安装docker，可参考[Docker安装](#Docker安装)
 
@@ -28,6 +28,10 @@ nohup bash run_server.sh \
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx > log.out 2>&1 &
 
 # 如果您想关闭ssl，增加参数：--certfile 0
+# 如果您想使用时间戳或者热词模型进行部署，请设置--model-dir为对应模型：
+# damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx（时间戳）
+# 或者 damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（热词）
+
 ```
 服务端详细参数介绍可参考[服务端参数介绍](#服务端参数介绍)
 ### 客户端测试与使用
@@ -92,7 +96,9 @@ python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode offline --audio
 --port 10095 部署端口号
 --mode offline表示离线文件转写
 --audio_in 需要进行转写的音频文件，支持文件路径，文件列表wav.scp
---output_dir 识别结果保存路径
+--thread_num 设置并发发送线程数，默认为1
+--ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
+--hotword 如果模型为热词模型，可以设置热词: *.txt(每行一个热词) 或者空格分隔的热词字符串 (could be: 阿里巴巴 达摩院)
 ```
 
 ### cpp-client
@@ -107,6 +113,7 @@ python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode offline --audio
 --server-ip 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，需要改为部署机器ip
 --port 10095 部署端口号
 --wav-path 需要进行转写的音频文件，支持文件路径
+--hotword 如果模型为热词模型，可以设置热词: *.txt(每行一个热词) 或者空格分隔的热词字符串 (could be: 阿里巴巴 达摩院)
 ```
 
 ### Html网页版
@@ -152,8 +159,8 @@ cd /workspace/FunASR/funasr/runtime/websocket/build/bin
 --port  服务端监听的端口号，默认为 10095
 --decoder-thread-num  服务端启动的推理线程数，默认为 8
 --io-thread-num  服务端启动的IO线程数，默认为 1
---certfile  ssl的证书文件，默认为：../../../ssl_key/server.crt
---keyfile   ssl的密钥文件，默认为：../../../ssl_key/server.key
+--certfile  ssl的证书文件，默认为：../../../ssl_key/server.crt，如果需要关闭ssl，参数设置为”“
+--keyfile   ssl的密钥文件，默认为：../../../ssl_key/server.key，如果需要关闭ssl，参数设置为”“
 ```
 
 funasr-wss-server同时也支持从本地路径加载模型（本地模型资源准备详见[模型资源准备](#模型资源准备)）示例如下：
@@ -180,55 +187,16 @@ cd /workspace/FunASR/funasr/runtime/websocket/build/bin
 --port  服务端监听的端口号，默认为 10095
 --decoder-thread-num  服务端启动的推理线程数，默认为 8
 --io-thread-num  服务端启动的IO线程数，默认为 1
---certfile ssl的证书文件，默认为：../../../ssl_key/server.crt
---keyfile  ssl的密钥文件，默认为：../../../ssl_key/server.key
+--certfile ssl的证书文件，默认为：../../../ssl_key/server.crt，如果需要关闭ssl，参数设置为”“
+--keyfile  ssl的密钥文件，默认为：../../../ssl_key/server.key，如果需要关闭ssl，参数设置为”“
 ```
 
-## 模型资源准备
+执行上述指令后，启动离线文件转写服务。如果模型指定为ModelScope中model id，会自动从MoldeScope中下载如下模型：
+[FSMN-VAD模型](https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary)，
+[Paraformer-lagre模型](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary)
+[CT-Transformer标点预测模型](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx/summary)
 
-如果您选择通过funasr-wss-server从Modelscope下载模型，可以跳过本步骤。
-
-FunASR离线文件转写服务中的vad、asr和punc模型资源均来自Modelscope，模型地址详见下表：
-
-| 模型 | Modelscope链接                                                                                                  |
-|------|---------------------------------------------------------------------------------------------------------------|
-| VAD  | https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary |
-| ASR  | https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary                           |
-| PUNC | https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx/summary               |
-
-离线文件转写服务中部署的是量化后的ONNX模型，下面介绍下如何导出ONNX模型及其量化：您可以选择从Modelscope导出ONNX模型、从finetune后的资源导出模型：
-
-### 从Modelscope导出ONNX模型
-
-从Modelscope网站下载对应model name的模型，然后导出量化后的ONNX模型：
-
-```shell
-python -m funasr.export.export_model \
---export-dir ./export \
---type onnx \
---quantize True \
---model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch \
---model-name damo/speech_fsmn_vad_zh-cn-16k-common-pytorch \
---model-name damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch
-```
-
-命令参数介绍：
-```text
---model-name  Modelscope上的模型名称，例如damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
---export-dir  ONNX模型导出地址
---type 模型类型，目前支持 ONNX、torch
---quantize  int8模型量化
-```
-### 从finetune后的资源导出模型
-
-假如您想部署finetune后的模型，可以参考如下步骤：
-
-将您finetune后需要部署的模型（例如10epoch.pb），重命名为model.pb，并将原modelscope中模型model.pb替换掉，假如替换后的模型路径为/path/to/finetune/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch，通过下述命令把finetune后的模型转成onnx模型：
-
-```shell
-python -m funasr.export.export_model --model-name /path/to/finetune/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize True
-```
-
+如果，您希望部署您finetune后的模型（例如10epoch.pb），需要手动将模型重命名为model.pb，并将原modelscope中模型model.pb替换掉，将路径指定为`model_dir`即可。
 
 
 ## 如何定制服务部署
@@ -244,15 +212,9 @@ https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/w
 
 ### 自定义客户端：
 
-如果您想定义自己的client，websocket通信协议为：
+如果您想定义自己的client，参考[websocket通信协议](./websocket_protocol_zh.md)
 
-```text
-# 首次通信
-{"mode": "offline", "wav_name": wav_name, "is_speaking": True}
-# 发送wav数据
-bytes数据
-# 发送结束标志
-{"is_speaking": False}
+
 ```
 
 ### c++ 服务端：
