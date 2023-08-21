@@ -181,6 +181,11 @@ sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span clas
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  <span class="se">\</span>
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx &gt; log.out <span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">&amp;</span>
+
+<span class="c1"># If you want to close ssl，please add：--certfile 0</span>
+<span class="c1"># If you want to deploy the timestamp or hotword model, please set --model-dir to the corresponding model:</span>
+<span class="c1"># speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx（timestamp）</span>
+<span class="c1"># damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（hotword）</span>
 </pre></div>
 </div>
 <p>More details about the script run_server.sh:</p>
@@ -209,8 +214,8 @@ sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span clas
 --port: Port number that the server listens on. Default is 10095.
 --decoder-thread-num: Number of inference threads that the server starts. Default is 8.
 --io-thread-num: Number of IO threads that the server starts. Default is 1.
---certfile &lt;string&gt;: SSL certificate file. Default is ../../../ssl_key/server.crt.
---keyfile &lt;string&gt;: SSL key file. Default is ../../../ssl_key/server.key.
+--certfile &lt;string&gt;: SSL certificate file. Default is ../../../ssl_key/server.crt. If you want to close ssl，set &quot;&quot;
+--keyfile &lt;string&gt;: SSL key file. Default is ../../../ssl_key/server.key. If you want to close ssl，set &quot;&quot;
 </pre></div>
 </div>
 <p>The FunASR-wss-server also supports loading models from a local path (see Preparing Model Resources for detailed instructions on preparing local model resources). Here is an example:</p>
@@ -303,6 +308,7 @@ Rename the model you want to deploy after finetuning (for example, 10epoch.pb) t
 --output_dir: the path to the recognition result output.
 --ssl: whether to use SSL encryption. The default is to use SSL.
 --mode: offline mode.
+--hotword If am is hotword model, setting hotword: *.txt(one hotword perline) or hotwords seperate by space (could be: 阿里巴巴 达摩院)
 </pre></div>
 </div>
 </div>
@@ -318,6 +324,7 @@ Rename the model you want to deploy after finetuning (for example, 10epoch.pb) t
 --output_dir: the path to the recognition result output.
 --ssl: whether to use SSL encryption. The default is to use SSL.
 --mode: offline mode.
+--hotword If am is hotword model, setting hotword: *.txt(one hotword perline) or hotwords seperate by space (could be: 阿里巴巴 达摩院)
 </pre></div>
 </div>
 </div>
@@ -325,7 +332,7 @@ Rename the model you want to deploy after finetuning (for example, 10epoch.pb) t
 <h3>Custom client<a class="headerlink" href="#custom-client" title="Permalink to this headline"></a></h3>
 <p>If you want to define your own client, the Websocket communication protocol is as follows:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span># First communication
-{&quot;mode&quot;: &quot;offline&quot;, &quot;wav_name&quot;: wav_name, &quot;is_speaking&quot;: True}
+{&quot;mode&quot;: &quot;offline&quot;, &quot;wav_name&quot;: wav_name, &quot;is_speaking&quot;: True, &quot;hotwords&quot;: &quot;hotword1|hotword2&quot;}
 # Send wav data
 Bytes data
 # Send end flag
