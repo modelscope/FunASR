@@ -1,7 +1,7 @@
 ([简体中文](./SDK_tutorial_zh.md)|English)
 
 # Highlights
-**FunASR offline file transcription service has been upgraded to version 2.0, which integrates ffmpeg to support various audio and video inputs. It also supports custom hotword models and timestamp models. Feel free to deploy and experience it![Quick Start](#Quick Start)**
+**FunASR offline file transcription service has been upgraded to version 2.0, which integrates ffmpeg to support various audio and video inputs. It also supports custom hotword models and timestamp models. Feel free to deploy and experience it! [Quick Start](#Quick Start)**
 
 # FunASR Offline File Transcription Service
 
