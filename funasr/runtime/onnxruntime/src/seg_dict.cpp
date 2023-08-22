@@ -40,6 +40,7 @@ std::vector<std::string> SegDict::GetTokensByWord(const std::string &word) {
   if (seg_dict.count(word))
     return seg_dict[word];
   else {
+    LOG(INFO)<< word <<" is OOV!";
     std::vector<string> vec;
     return vec;
   }
