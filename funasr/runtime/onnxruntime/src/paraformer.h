@@ -16,6 +16,7 @@ namespace funasr {
     */
     private:
         Vocab* vocab = nullptr;
+        SegDict* seg_dict = nullptr;
         //const float scale = 22.6274169979695;
         const float scale = 1.0;
 
@@ -23,6 +24,14 @@ namespace funasr {
         void LoadCmvn(const char *filename);
         vector<float> ApplyLfr(const vector<float> &in);
         void ApplyCmvn(vector<float> *v);
+
+        std::shared_ptr<Ort::Session> hw_m_session = nullptr;
+        Ort::Env hw_env_;
+        Ort::SessionOptions hw_session_options;
+        vector<string> hw_m_strInputNames, hw_m_strOutputNames;
+        vector<const char*> hw_m_szInputNames;
+        vector<const char*> hw_m_szOutputNames;
+        bool use_hotword;
 
     public:
         Paraformer();
@@ -32,10 +41,17 @@ namespace funasr {
         void InitAsr(const std::string &en_model, const std::string &de_model, const std::string &am_cmvn, const std::string &am_config, int thread_num);
         // 2pass
         void InitAsr(const std::string &am_model, const std::string &en_model, const std::string &de_model, const std::string &am_cmvn, const std::string &am_config, int thread_num);
+        void InitHwCompiler(const std::string &hw_model, int thread_num);
+        void InitSegDict(const std::string &seg_dict_model);
+        std::vector<std::vector<float>> CompileHotwordEmbedding(std::string &hotwords);
         void Reset();
         vector<float> FbankKaldi(float sample_rate, const float* waves, int len);
-        string Forward(float* din, int len, bool input_finished=true);
-        string GreedySearch( float* in, int n_len, int64_t token_nums);
+        string Forward(float* din, int len, bool input_finished=true, const std::vector<std::vector<float>> &hw_emb={{0.0}});
+        string GreedySearch( float* in, int n_len, int64_t token_nums, bool is_stamp=false, std::vector<float> us_alphas={0}, std::vector<float> us_cif_peak={0});
+        void TimestampOnnx(std::vector<float> &us_alphas, vector<float> us_cif_peak, vector<string>& char_list, std::string &res_str, 
+                           vector<vector<float>> &timestamp_list, float begin_time = 0.0, float total_offset = -1.5);
+        string PostProcess(std::vector<string> &raw_char, std::vector<std::vector<float>> &timestamp_list);
+
         string Rescoring();
 
         knf::FbankOptions fbank_opts_;

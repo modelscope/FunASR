@@ -1,3 +1,9 @@
+'''
+  Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights
+  Reserved. MIT License  (https://opensource.org/licenses/MIT)
+  2023 by burkliu(刘柏基) liubaiji@xverse.cn
+'''
+
 import logging
 import argparse
 import soundfile as sf
