@@ -438,11 +438,11 @@ string Paraformer::PostProcess(std::vector<string> &raw_char, std::vector<std::v
         }
     }
     string stamp_str="";
-    for (i=0; i<timestamp_list.size(); i++) {
-        stamp_str += std::to_string(timestamp_list[i][0]);
+    for (i=0; i<timestamp_merge.size(); i++) {
+        stamp_str += std::to_string(timestamp_merge[i][0]);
         stamp_str += ", ";
-        stamp_str += std::to_string(timestamp_list[i][1]);
-        if(i!=timestamp_list.size()-1){
+        stamp_str += std::to_string(timestamp_merge[i][1]);
+        if(i!=timestamp_merge.size()-1){
             stamp_str += ",";
         }
     }
