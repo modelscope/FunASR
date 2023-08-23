@@ -658,7 +658,7 @@ string Paraformer::Forward(float* din, int len, bool input_finished, const std::
         return "";
     }
 
-    string result;
+    string result="";
     try {
         auto outputTensor = m_session_->Run(Ort::RunOptions{nullptr}, m_szInputNames.data(), input_onnx.data(), input_onnx.size(), m_szOutputNames.data(), m_szOutputNames.size());
         std::vector<int64_t> outputShape = outputTensor[0].GetTensorTypeAndShapeInfo().GetShape();
