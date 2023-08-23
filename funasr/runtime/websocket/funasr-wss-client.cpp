@@ -108,16 +108,16 @@ class WebsocketClient {
             case websocketpp::frame::opcode::text:
 				total_num=total_num+1;
                 LOG(INFO)<< "Thread: " << this_thread::get_id() <<",on_message = " << payload;
-                // LOG(INFO) << "total_num=" << total_num << " wav_index=" <<wav_index;
-				// if((total_num+1)==wav_index)
-				// {
-                //     LOG(INFO) << "close client";
-				// 	websocketpp::lib::error_code ec;
-				// 	m_client.close(m_hdl, websocketpp::close::status::going_away, "", ec);
-				// 	if (ec){
-                //         LOG(ERROR)<< "Error closing connection " << ec.message();
-				// 	}
-				// }
+                LOG(INFO) << "total_num=" << total_num << " wav_index=" <<wav_index;
+				if((total_num+1)==wav_index)
+				{
+                    LOG(INFO) << "close client";
+					websocketpp::lib::error_code ec;
+					m_client.close(m_hdl, websocketpp::close::status::going_away, "", ec);
+					if (ec){
+                        LOG(ERROR)<< "Error closing connection " << ec.message();
+					}
+				}
         }
     }
 
@@ -321,7 +321,7 @@ class WebsocketClient {
         jsonresult["is_speaking"] = false;
         m_client.send(m_hdl, jsonresult.dump(), websocketpp::frame::opcode::text,
                       ec);
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
     websocketpp::client<T> m_client;
 
