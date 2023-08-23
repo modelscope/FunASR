@@ -163,7 +163,7 @@ int main(int argc, char** argv)
 
         int step = 800*2;
         bool is_final = false;
-
+        float start_time = 0.0;    //used for time stamp.
         string online_res="";
         string tpass_res="";
         std::vector<std::vector<string>> punc_cache(2);
@@ -175,7 +175,7 @@ int main(int argc, char** argv)
                     is_final = false;
             }
             gettimeofday(&start, NULL);
-            FUNASR_RESULT result = FunTpassInferBuffer(tpass_handle, tpass_online_handle, speech_buff+sample_offset, step, punc_cache, is_final, sampling_rate_, "pcm", (ASR_TYPE)asr_mode_);
+            FUNASR_RESULT result = FunTpassInferBuffer(tpass_handle, tpass_online_handle, speech_buff+sample_offset, step, &start_time, punc_cache, is_final, sampling_rate_, "pcm", (ASR_TYPE)asr_mode_);
             gettimeofday(&end, NULL);
             seconds = (end.tv_sec - start.tv_sec);
             taking_micros += ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);

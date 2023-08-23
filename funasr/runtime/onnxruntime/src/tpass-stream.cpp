@@ -36,6 +36,20 @@ TpassStream::TpassStream(std::map<std::string, std::string>& model_path, int thr
         string de_model_path;
         string am_cmvn_path;
         string am_config_path;
+        string hw_compile_model_path;
+        string seg_dict_path;
+        
+        asr_handle = make_unique<Paraformer>();
+
+        bool enable_hotword = false;
+        hw_compile_model_path = PathAppend(model_path.at(MODEL_DIR), MODEL_EB_NAME);
+        seg_dict_path = PathAppend(model_path.at(MODEL_DIR), MODEL_SEG_DICT);
+        if ((access(hw_compile_model_path.c_str(), F_OK) == 0) && 
+            (access(seg_dict_path.c_str(), F_OK) == 0)) { // if model_eb.onnx exist, hotword enabled
+          enable_hotword = true;
+          asr_handle->InitHwCompiler(hw_compile_model_path, thread_num);
+          asr_handle->InitSegDict(seg_dict_path);
+        }
 
         am_model_path = PathAppend(model_path.at(OFFLINE_MODEL_DIR), MODEL_NAME);
         en_model_path = PathAppend(model_path.at(ONLINE_MODEL_DIR), ENCODER_NAME);
@@ -48,7 +62,6 @@ TpassStream::TpassStream(std::map<std::string, std::string>& model_path, int thr
         am_cmvn_path = PathAppend(model_path.at(ONLINE_MODEL_DIR), AM_CMVN_NAME);
         am_config_path = PathAppend(model_path.at(ONLINE_MODEL_DIR), AM_CONFIG_NAME);
 
-        asr_handle = make_unique<Paraformer>();
         asr_handle->InitAsr(am_model_path, en_model_path, de_model_path, am_cmvn_path, am_config_path, thread_num);
     }else{
         LOG(ERROR) <<"Can not find offline-model-dir or online-model-dir";
