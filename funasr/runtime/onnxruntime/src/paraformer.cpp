@@ -438,11 +438,11 @@ string Paraformer::PostProcess(std::vector<string> &raw_char, std::vector<std::v
         }
     }
     string stamp_str="";
-    for (i=0; i<timestamp_list.size(); i++) {
-        stamp_str += std::to_string(timestamp_list[i][0]);
+    for (i=0; i<timestamp_merge.size(); i++) {
+        stamp_str += std::to_string(timestamp_merge[i][0]);
         stamp_str += ", ";
-        stamp_str += std::to_string(timestamp_list[i][1]);
-        if(i!=timestamp_list.size()-1){
+        stamp_str += std::to_string(timestamp_merge[i][1]);
+        if(i!=timestamp_merge.size()-1){
             stamp_str += ",";
         }
     }
@@ -719,6 +719,7 @@ std::vector<std::vector<float>> Paraformer::CompileHotwordEmbedding(std::string 
     std::vector<int32_t> hotword_matrix;
     std::vector<int32_t> lengths;
     int hotword_size = 1;
+    int real_hw_size = 0;
     if (!hotwords.empty()) {
       std::vector<std::string> hotword_array = split(hotwords, ' ');
       hotword_size = hotword_array.size() + 1;
@@ -735,6 +736,9 @@ std::vector<std::vector<float>> Paraformer::CompileHotwordEmbedding(std::string 
             chars.insert(chars.end(), tokens.begin(), tokens.end());
           }
         }
+        if(chars.size()==0){
+            continue;
+        }
         std::vector<int32_t> hw_vector(max_hotword_len, 0);
         int vector_len = std::min(max_hotword_len, (int)chars.size());
         for (int i=0; i<chars.size(); i++) {
@@ -743,8 +747,10 @@ std::vector<std::vector<float>> Paraformer::CompileHotwordEmbedding(std::string 
         }
         std::cout << std::endl;
         lengths.push_back(vector_len);
+        real_hw_size += 1;
         hotword_matrix.insert(hotword_matrix.end(), hw_vector.begin(), hw_vector.end());
       }
+      hotword_size = real_hw_size + 1;
     }
     std::vector<int32_t> blank_vec(max_hotword_len, 0);
     blank_vec[0] = 1;

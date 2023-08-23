@@ -1,7 +1,9 @@
 (简体中文|[English](./SDK_tutorial.md))
 
-# FunASR离线文件转写服务便捷部署教程
+# Highlights
+**FunASR离线文件转写服务已升级至2.0,集成ffmpeg支持多种音视频输入、支持热词模型、支持时间戳模型，欢迎部署体验[快速上手](#快速上手)**
 
+# FunASR离线文件转写服务便捷部署教程
 FunASR提供可便捷本地或者云端服务器部署的离线文件转写服务，内核为FunASR已开源runtime-SDK。
 集成了达摩院语音实验室在Modelscope社区开源的语音端点检测(VAD)、Paraformer-large语音识别(ASR)、标点恢复(PUNC) 等相关能力，拥有完整的语音识别链路，可以将几十个小时的音频或视频识别成带标点的文字，而且支持上百路请求同时进行转写。
 
@@ -34,7 +36,7 @@ curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/funas
 ```shell
 sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace ./funasr-runtime-resources
 ```
-注：如果需要部署时间戳模型或者热词模型，在安装部署步骤2时选择对应模型，其中1为paraformer-large模型，2为paraformer-large 时间戳模型，3为paraformer-large 热词模型
+**注：如果需要部署时间戳模型或者热词模型，在安装部署步骤2时选择对应模型，其中1为paraformer-large模型，2为paraformer-large 时间戳模型，3为paraformer-large 热词模型**
 
 ### 客户端测试与使用
 
