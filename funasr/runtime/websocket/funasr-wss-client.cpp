@@ -107,11 +107,11 @@ class WebsocketClient {
         switch (msg->get_opcode()) {
             case websocketpp::frame::opcode::text:
 				total_recv=total_recv+1;
-                LOG(INFO)<< "Thread: " << this_thread::get_id() <<",on_message = " << payload;
-                LOG(INFO)<< "Thread: " << this_thread::get_id() << "total_recv=" << total_recv << " total_send=" <<total_send;
+                LOG(INFO)<< "Thread: " << this_thread::get_id() <<", on_message = " << payload;
+                LOG(INFO)<< "Thread: " << this_thread::get_id() << ", total_recv=" << total_recv << " total_send=" <<total_send;
 				if(total_recv==total_send)
 				{
-                    LOG(INFO)<< "Thread: " << this_thread::get_id() << "close client";
+                    LOG(INFO)<< "Thread: " << this_thread::get_id() << ", close client";
 					websocketpp::lib::error_code ec;
 					m_client.close(m_hdl, websocketpp::close::status::going_away, "", ec);
 					if (ec){
@@ -274,7 +274,7 @@ class WebsocketClient {
                     offset += send_block;
                 }
 
-                LOG(INFO) << "sended data len=" << len * sizeof(short);
+                LOG(INFO)<< "Thread: " << this_thread::get_id() << ", sended data len=" << len * sizeof(short);
                 // The most likely error that we will get is that the connection is
                 // not in the right state. Usually this means we tried to send a
                 // message to a connection that was closed or in the process of
