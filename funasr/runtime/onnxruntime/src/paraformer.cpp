@@ -665,7 +665,7 @@ string Paraformer::Forward(float* din, int len, bool input_finished, const std::
         return "";
     }
 
-    string result;
+    string result="";
     try {
         auto outputTensor = m_session_->Run(Ort::RunOptions{nullptr}, m_szInputNames.data(), input_onnx.data(), input_onnx.size(), m_szOutputNames.data(), m_szOutputNames.size());
         std::vector<int64_t> outputShape = outputTensor[0].GetTensorTypeAndShapeInfo().GetShape();
@@ -726,6 +726,7 @@ std::vector<std::vector<float>> Paraformer::CompileHotwordEmbedding(std::string 
     std::vector<int32_t> hotword_matrix;
     std::vector<int32_t> lengths;
     int hotword_size = 1;
+    int real_hw_size = 0;
     if (!hotwords.empty()) {
       std::vector<std::string> hotword_array = split(hotwords, ' ');
       hotword_size = hotword_array.size() + 1;
@@ -742,6 +743,9 @@ std::vector<std::vector<float>> Paraformer::CompileHotwordEmbedding(std::string 
             chars.insert(chars.end(), tokens.begin(), tokens.end());
           }
         }
+        if(chars.size()==0){
+            continue;
+        }
         std::vector<int32_t> hw_vector(max_hotword_len, 0);
         int vector_len = std::min(max_hotword_len, (int)chars.size());
         for (int i=0; i<chars.size(); i++) {
@@ -750,8 +754,10 @@ std::vector<std::vector<float>> Paraformer::CompileHotwordEmbedding(std::string 
         }
         std::cout << std::endl;
         lengths.push_back(vector_len);
+        real_hw_size += 1;
         hotword_matrix.insert(hotword_matrix.end(), hw_vector.begin(), hw_vector.end());
       }
+      hotword_size = real_hw_size + 1;
     }
     std::vector<int32_t> blank_vec(max_hotword_len, 0);
     blank_vec[0] = 1;

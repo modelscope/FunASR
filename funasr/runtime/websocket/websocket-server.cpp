@@ -83,7 +83,7 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
       nlohmann::json jsonresult;        // result json
       jsonresult["text"] = asr_result;  // put result in 'text'
       jsonresult["mode"] = "offline";
-	  jsonresult["is_final"] = false;
+	    jsonresult["is_final"] = false;
       if(stamp_res != ""){
         jsonresult["timestamp"] = stamp_res;
       }
@@ -99,6 +99,23 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
       }
 
       LOG(INFO) << "buffer.size=" << buffer.size() << ",result json=" << jsonresult.dump();
+    }else{
+      LOG(INFO) << "Sent empty meg";
+      websocketpp::lib::error_code ec;
+      nlohmann::json jsonresult;        // result json
+      jsonresult["text"] = "";  // put result in 'text'
+      jsonresult["mode"] = "offline";
+	    jsonresult["is_final"] = false;
+      jsonresult["wav_name"] = wav_name;
+
+      // send the json to client
+      if (is_ssl) {
+        wss_server_->send(hdl, jsonresult.dump(),
+                          websocketpp::frame::opcode::text, ec);
+      } else {
+        server_->send(hdl, jsonresult.dump(), websocketpp::frame::opcode::text,
+                      ec);
+      }
     }
 
   } catch (std::exception const& e) {
