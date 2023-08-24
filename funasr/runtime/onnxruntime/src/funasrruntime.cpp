@@ -367,7 +367,7 @@ extern "C" {
 
 
 	// APIs for 2pass-stream Infer
-	_FUNASRAPI FUNASR_RESULT FunTpassInferBuffer(FUNASR_HANDLE handle, FUNASR_HANDLE online_handle, const char* sz_buf, int n_len, float *start_time, std::vector<std::vector<std::string>> &punc_cache, bool input_finished, int sampling_rate, std::string wav_format, ASR_TYPE mode, const std::vector<std::vector<float>> &hw_emb)
+	_FUNASRAPI FUNASR_RESULT FunTpassInferBuffer(FUNASR_HANDLE handle, FUNASR_HANDLE online_handle, const char* sz_buf, int n_len, std::vector<std::vector<std::string>> &punc_cache, bool input_finished, int sampling_rate, std::string wav_format, ASR_TYPE mode, const std::vector<std::vector<float>> &hw_emb)
 	{
 		funasr::TpassStream* tpass_stream = (funasr::TpassStream*)handle;
 		funasr::TpassOnlineStream* tpass_online_stream = (funasr::TpassOnlineStream*)online_handle;
@@ -440,20 +440,20 @@ extern "C" {
 				frame = NULL;
 			}
 		}
-		
+
+		// timestamp 
+		std::string cur_stamp = "[";		
 		while(audio->FetchTpass(frame) > 0){
 			string msg = asr_handle->Forward(frame->data, frame->len, frame->is_final, hw_emb);
-			
-			// timestamp 
-			std::string cur_stamp = "[";
+
 			std::vector<std::string> msg_vec = funasr::split(msg, '|');  // split with timestamp
 			msg = msg_vec[0];
 			//timestamp
 			if(msg_vec.size() > 1){
 				std::vector<std::string> msg_stamp = funasr::split(msg_vec[1], ',');
 				for(int i=0; i<msg_stamp.size()-1; i+=2){
-					float begin = std::stof(msg_stamp[i])+*start_time;
-					float end = std::stof(msg_stamp[i+1])+*start_time;
+					float begin = std::stof(msg_stamp[i]) + float(frame->global_start)/1000.0;
+					float end = std::stof(msg_stamp[i+1]) + float(frame->global_start)/1000.0;
 					cur_stamp += "["+std::to_string((int)(1000*begin))+","+std::to_string((int)(1000*end))+"],";
 				}
 			}
@@ -462,9 +462,6 @@ extern "C" {
 				cur_stamp.erase(cur_stamp.length() - 1);
 				p_result->stamp += cur_stamp + "]";
 			}
-
-			// after audio->Split(), the offset is the end of current segment, so we should update start_time after last offset is used. 
-			*start_time = float(audio->offset) / 16000.0 ;
 
 			string msg_punc = punc_online_handle->AddPunc(msg.c_str(), punc_cache[1]);
 			if(input_finished){

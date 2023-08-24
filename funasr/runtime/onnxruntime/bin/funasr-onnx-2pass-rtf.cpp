@@ -82,7 +82,6 @@ void runReg(FUNASR_HANDLE tpass_handle, std::vector<int> chunk_size, vector<stri
 
         int step = 1600*2;
         bool is_final = false;
-        float start_time = 0.0;    //used for time stamp.
         std::vector<std::vector<string>> punc_cache(2);
         for (int sample_offset = 0; sample_offset < buff_len; sample_offset += std::min(step, buff_len - sample_offset)) {
             if (sample_offset + step >= buff_len - 1) {
@@ -91,7 +90,7 @@ void runReg(FUNASR_HANDLE tpass_handle, std::vector<int> chunk_size, vector<stri
                 } else {
                     is_final = false;
             }
-            FUNASR_RESULT result = FunTpassInferBuffer(tpass_handle, tpass_online_handle, speech_buff+sample_offset, step, &start_time, punc_cache, is_final, sampling_rate_, "pcm", (ASR_TYPE)asr_mode_, hotwords_embedding);
+            FUNASR_RESULT result = FunTpassInferBuffer(tpass_handle, tpass_online_handle, speech_buff+sample_offset, step, punc_cache, is_final, sampling_rate_, "pcm", (ASR_TYPE)asr_mode_, hotwords_embedding);
             if (result)
             {
                 FunASRFreeResult(result);
@@ -128,7 +127,6 @@ void runReg(FUNASR_HANDLE tpass_handle, std::vector<int> chunk_size, vector<stri
 
         int step = 1600*2;
         bool is_final = false;
-        float start_time = 0.0;    //used for time stamp.
         string online_res="";
         string tpass_res="";
         string time_stamp_res="";
@@ -141,7 +139,7 @@ void runReg(FUNASR_HANDLE tpass_handle, std::vector<int> chunk_size, vector<stri
                     is_final = false;
             }
             gettimeofday(&start, NULL);
-            FUNASR_RESULT result = FunTpassInferBuffer(tpass_handle, tpass_online_handle, speech_buff+sample_offset, step, &start_time, punc_cache, is_final, sampling_rate_, "pcm", (ASR_TYPE)asr_mode_, hotwords_embedding);
+            FUNASR_RESULT result = FunTpassInferBuffer(tpass_handle, tpass_online_handle, speech_buff+sample_offset, step, punc_cache, is_final, sampling_rate_, "pcm", (ASR_TYPE)asr_mode_, hotwords_embedding);
             gettimeofday(&end, NULL);
             seconds = (end.tv_sec - start.tv_sec);
             long taking_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);

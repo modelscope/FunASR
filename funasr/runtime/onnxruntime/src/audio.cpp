@@ -1097,6 +1097,8 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
             if(asr_mode != ASR_OFFLINE){
                 if(buff_len >= step){
                     frame = new AudioFrame(step);
+                    frame->global_start = speech_start;
+                    frame->global_end = speech_start + step/seg_sample;
                     frame->data = (float*)malloc(sizeof(float) * step);
                     memcpy(frame->data, all_samples.data()+start-offset, step*sizeof(float));
                     asr_online_queue.push(frame);
@@ -1123,6 +1125,8 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
                 if(asr_mode != ASR_OFFLINE){
                     frame = new AudioFrame(end-start);
                     frame->is_final = true;
+                    frame->global_start = speech_start_i;
+                    frame->global_end = speech_end_i;
                     frame->data = (float*)malloc(sizeof(float) * (end-start));
                     memcpy(frame->data, all_samples.data()+start-offset, (end-start)*sizeof(float));
                     asr_online_queue.push(frame);
@@ -1132,6 +1136,8 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
                 if(asr_mode != ASR_ONLINE){
                     frame = new AudioFrame(end-start);
                     frame->is_final = true;
+                    frame->global_start = speech_start_i;
+                    frame->global_end = speech_end_i;
                     frame->data = (float*)malloc(sizeof(float) * (end-start));
                     memcpy(frame->data, all_samples.data()+start-offset, (end-start)*sizeof(float));
                     asr_offline_queue.push(frame);
@@ -1153,6 +1159,8 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
                 if(asr_mode != ASR_OFFLINE){
                     if(buff_len >= step){
                         frame = new AudioFrame(step);
+                        frame->global_start = speech_start;
+                        frame->global_end = speech_start + step/seg_sample;
                         frame->data = (float*)malloc(sizeof(float) * step);
                         memcpy(frame->data, all_samples.data()+start-offset, step*sizeof(float));
                         asr_online_queue.push(frame);
@@ -1176,6 +1184,8 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
                 if(asr_mode != ASR_ONLINE){
                     frame = new AudioFrame(end-offline_start);
                     frame->is_final = true;
+                    frame->global_start = speech_offline_start;
+                    frame->global_end = speech_end_i;
                     frame->data = (float*)malloc(sizeof(float) * (end-offline_start));
                     memcpy(frame->data, all_samples.data()+offline_start-offset, (end-offline_start)*sizeof(float));
                     asr_offline_queue.push(frame);
@@ -1192,6 +1202,8 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
                             }
                             frame = new AudioFrame(step);
                             frame->is_final = is_final;
+                            frame->global_start = (int)((start+sample_offset)/seg_sample);
+                            frame->global_end = frame->global_start + step/seg_sample;
                             frame->data = (float*)malloc(sizeof(float) * step);
                             memcpy(frame->data, all_samples.data()+start-offset+sample_offset, step*sizeof(float));
                             asr_online_queue.push(frame);
@@ -1200,6 +1212,8 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
                     }else{
                         frame = new AudioFrame(0);
                         frame->is_final = true;
+                        frame->global_start = speech_start;   // in this case start >= end
+                        frame->global_end = speech_end_i;
                         asr_online_queue.push(frame);
                         frame = NULL;
                     }
