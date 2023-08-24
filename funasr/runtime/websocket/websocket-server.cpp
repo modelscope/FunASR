@@ -100,6 +100,7 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
 
       LOG(INFO) << "buffer.size=" << buffer.size() << ",result json=" << jsonresult.dump();
     }else{
+      LOG(INFO) << "Sent empty meg";
       websocketpp::lib::error_code ec;
       nlohmann::json jsonresult;        // result json
       jsonresult["text"] = "";  // put result in 'text'

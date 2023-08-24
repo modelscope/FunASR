@@ -306,7 +306,7 @@ class WebsocketClient {
                 offset += send_block;
             }
 
-            LOG(INFO) << "sended data len=" << len;
+            LOG(INFO)<< "Thread: " << this_thread::get_id() << ", sended data len=" << len;
             // The most likely error that we will get is that the connection is
             // not in the right state. Usually this means we tried to send a
             // message to a connection that was closed or in the process of
