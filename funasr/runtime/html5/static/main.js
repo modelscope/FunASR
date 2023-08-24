@@ -83,9 +83,7 @@ upfile.onchange = function () {
                 let fileAudio = new FileReader();
                 fileAudio.readAsArrayBuffer(this.files[i]);  
 				file_ext=this.files[i].name.split('.').pop().toLowerCase();
-				if(file_ext==="wav"){
-					file_ext="pcm";
-				}
+
                 fileAudio.onload = function() {
                  var audioblob= fileAudio.result;
 				 file_data_array=audioblob;

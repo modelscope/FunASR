@@ -252,6 +252,9 @@ extern "C" {
 		while (audio.Fetch(buff, len, flag, start_time) > 0) {
 			string msg = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb);
 			std::vector<std::string> msg_vec = funasr::split(msg, '|');
+			if(msg_vec.size()==0){
+				continue;
+			}
 			p_result->msg += msg_vec[0];
 			//timestamp
 			if(msg_vec.size() > 1){
@@ -315,6 +318,9 @@ extern "C" {
 		while (audio.Fetch(buff, len, flag, start_time) > 0) {
 			string msg = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb);
 			std::vector<std::string> msg_vec = funasr::split(msg, '|');
+			if(msg_vec.size()==0){
+				continue;
+			}
 			p_result->msg += msg_vec[0];
 			//timestamp
 			if(msg_vec.size() > 1){
