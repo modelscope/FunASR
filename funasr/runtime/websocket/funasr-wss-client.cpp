@@ -108,10 +108,10 @@ class WebsocketClient {
             case websocketpp::frame::opcode::text:
 				total_recv=total_recv+1;
                 LOG(INFO)<< "Thread: " << this_thread::get_id() <<",on_message = " << payload;
-                LOG(INFO) << "total_recv=" << total_recv << " total_send=" <<total_send;
+                LOG(INFO)<< "Thread: " << this_thread::get_id() << "total_recv=" << total_recv << " total_send=" <<total_send;
 				if(total_recv==total_send)
 				{
-                    LOG(INFO) << "close client";
+                    LOG(INFO)<< "Thread: " << this_thread::get_id() << "close client";
 					websocketpp::lib::error_code ec;
 					m_client.close(m_hdl, websocketpp::close::status::going_away, "", ec);
 					if (ec){
