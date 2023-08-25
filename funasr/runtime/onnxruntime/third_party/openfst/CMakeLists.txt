@@ -47,5 +47,20 @@ option(HAVE_NGRAM "Build ngram" ON)
 option(HAVE_PYTHON "Build python" OFF)
 option(HAVE_SPECIAL "Build special" ON)
 
+  set(WITH_GFLAGS OFF CACHE BOOL "whether build glog with gflags" FORCE)
+  set(HAVE_BIN OFF CACHE BOOL "Build the fst binaries" FORCE)
+  set(HAVE_SCRIPT OFF CACHE BOOL "Build the fstscript" FORCE)
+
+  set(HAVE_COMPACT OFF CACHE BOOL "Build compact" FORCE)
+  set(HAVE_CONST OFF CACHE BOOL "Build const" FORCE)
+  set(HAVE_GRM OFF CACHE BOOL "Build grm" FORCE)
+  set(HAVE_FAR OFF CACHE BOOL "Build far" FORCE)
+  set(HAVE_PDT OFF CACHE BOOL "Build pdt" FORCE)
+  set(HAVE_MPDT OFF CACHE BOOL "Build mpdt" FORCE)
+  set(HAVE_LINEAR OFF CACHE BOOL "Build linear" FORCE)
+  set(HAVE_LOOKAHEAD OFF CACHE BOOL "Build lookahead" FORCE)
+  set(HAVE_NGRAM OFF CACHE BOOL "Build ngram" FORCE)
+  set(HAVE_SPECIAL OFF CACHE BOOL "Build special" FORCE)
+
 add_subdirectory(src)
 
