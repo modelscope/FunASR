@@ -32,9 +32,9 @@
  */
 void WaitABit() {
     #ifdef WIN32
-        Sleep(500);
+        Sleep(200);
     #else
-        usleep(500);
+        usleep(200);
     #endif
 }
 std::atomic<int> wav_index(0);
@@ -106,12 +106,12 @@ class WebsocketClient {
         const std::string& payload = msg->get_payload();
         switch (msg->get_opcode()) {
             case websocketpp::frame::opcode::text:
-				total_num=total_num+1;
-                LOG(INFO)<< "Thread: " << this_thread::get_id() <<",on_message = " << payload;
-                LOG(INFO) << "total_num=" << total_num << " wav_index=" <<wav_index;
-				if((total_num+1)==wav_index)
+				total_recv=total_recv+1;
+                LOG(INFO)<< "Thread: " << this_thread::get_id() <<", on_message = " << payload;
+                LOG(INFO)<< "Thread: " << this_thread::get_id() << ", total_recv=" << total_recv << " total_send=" <<total_send;
+				if(total_recv==total_send)
 				{
-                    LOG(INFO) << "close client";
+                    LOG(INFO)<< "Thread: " << this_thread::get_id() << ", close client";
 					websocketpp::lib::error_code ec;
 					m_client.close(m_hdl, websocketpp::close::status::going_away, "", ec);
 					if (ec){
@@ -149,6 +149,7 @@ class WebsocketClient {
             if (i >= wav_list.size()) {
                 break;
             }
+            total_send += 1;
             send_wav_data(wav_list[i], wav_ids[i], hotwords, send_hotword);
             if(send_hotword){
                 send_hotword = false;
@@ -273,7 +274,7 @@ class WebsocketClient {
                     offset += send_block;
                 }
 
-                LOG(INFO) << "sended data len=" << len * sizeof(short);
+                LOG(INFO)<< "Thread: " << this_thread::get_id() << ", sended data len=" << len * sizeof(short);
                 // The most likely error that we will get is that the connection is
                 // not in the right state. Usually this means we tried to send a
                 // message to a connection that was closed or in the process of
@@ -305,7 +306,7 @@ class WebsocketClient {
                 offset += send_block;
             }
 
-            LOG(INFO) << "sended data len=" << len;
+            LOG(INFO)<< "Thread: " << this_thread::get_id() << ", sended data len=" << len;
             // The most likely error that we will get is that the connection is
             // not in the right state. Usually this means we tried to send a
             // message to a connection that was closed or in the process of
@@ -321,7 +322,7 @@ class WebsocketClient {
         jsonresult["is_speaking"] = false;
         m_client.send(m_hdl, jsonresult.dump(), websocketpp::frame::opcode::text,
                       ec);
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
     websocketpp::client<T> m_client;
 
@@ -330,7 +331,8 @@ class WebsocketClient {
     websocketpp::lib::mutex m_lock;
     bool m_open;
     bool m_done;
-	int total_num=0;
+	int total_send=0;
+    int total_recv=0;
 };
 
 int main(int argc, char* argv[]) {
