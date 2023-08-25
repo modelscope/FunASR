@@ -7,6 +7,11 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 option(ENABLE_WEBSOCKET "Whether to build websocket server" ON)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fPIC")
+option(ENABLE_GLOG "Whether to build glog" ON)
+option(ENABLE_FST "Whether to build openfst" ON) # ITN need openfst compiled
+option(BUILD_SHARED_LIBS "Build shared libraries" ON)
  
 if(ENABLE_WEBSOCKET)
   # cmake_policy(SET CMP0135 NEW)
@@ -42,6 +47,28 @@ endif()
 link_directories(${ONNXRUNTIME_DIR}/lib)
 link_directories(${FFMPEG_DIR}/lib)
 
+if(ENABLE_GLOG)
+    include_directories(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/glog/src)
+    set(BUILD_TESTING OFF)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/glog glog)
+    include_directories(${glog_BINARY_DIR})
+
+endif()
+
+if(ENABLE_FST)
+    # fst depend on glog and gflags
+    include_directories(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/gflags)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/gflags gflags)
+    include_directories(${gflags_BINARY_DIR}/include)
+      
+    # the following openfst if cloned from https://github.com/kkm000/openfst.git
+    # with some patch to fix the make errors. 
+    add_subdirectory(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/openfst openfst)
+    include_directories(${openfst_SOURCE_DIR}/src/include)
+    
+endif()
+
+
 include_directories(${PROJECT_SOURCE_DIR}/../onnxruntime/include/)
 include_directories(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/yaml-cpp/include/)
 include_directories(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/kaldi-native-fbank)
@@ -50,20 +77,15 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/yaml-cpp yaml-
 add_subdirectory(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/kaldi-native-fbank/kaldi-native-fbank/csrc csrc)
 add_subdirectory(${PROJECT_SOURCE_DIR}/../onnxruntime/src src)
 
-include_directories(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/glog)
-set(BUILD_TESTING OFF)
-add_subdirectory(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/glog glog)
-
 # install openssl first apt-get install libssl-dev
 find_package(OpenSSL REQUIRED)
 
-#message("CXX_FLAGS "${CMAKE_CXX_FLAGS})
-add_executable(funasr-wss-server "funasr-wss-server.cpp" "websocket-server.cpp")
-add_executable(funasr-wss-server-2pass "funasr-wss-server-2pass.cpp" "websocket-server-2pass.cpp")
-add_executable(funasr-wss-client "funasr-wss-client.cpp")
-add_executable(funasr-wss-client-2pass "funasr-wss-client-2pass.cpp")
+message("CXX_FLAGS "${CMAKE_CXX_FLAGS})
+# 获取项目中所有包含文件夹的路径
+get_property(includes DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+# 遍历并输出每个包含文件夹的路径
+foreach(include ${includes})
+  message("Include directory: ${include}")
+endforeach()
 
-target_link_libraries(funasr-wss-client PUBLIC funasr ssl crypto)
-target_link_libraries(funasr-wss-client-2pass PUBLIC funasr ssl crypto)
-target_link_libraries(funasr-wss-server PUBLIC funasr ssl crypto)
-target_link_libraries(funasr-wss-server-2pass PUBLIC funasr ssl crypto)
+add_subdirectory(bin)

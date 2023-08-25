@@ -7,7 +7,7 @@ message("files: "${files})
 add_library(funasr SHARED ${files})
 
 if(WIN32)
-    set(EXTRA_LIBS pthread yaml-cpp csrc glog)
+    set(EXTRA_LIBS pthread yaml-cpp csrc fst glog gflags)
     if(CMAKE_CL_64)
         target_link_directories(funasr PUBLIC ${CMAKE_SOURCE_DIR}/win/lib/x64)
     else()
