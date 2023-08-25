@@ -475,7 +475,9 @@ void Paraformer::TimestampOnnx(std::vector<float>& us_alphas,
     if (char_list.back() == "</s>") {
         char_list.pop_back();
     }
-
+    if (char_list.empty()) {
+        return ;
+    }
     vector<vector<float>> timestamp_list;
     vector<string> new_char_list;
     vector<float> fire_place;
@@ -490,6 +492,9 @@ void Paraformer::TimestampOnnx(std::vector<float>& us_alphas,
     if(num_peak != (int)char_list.size() + 1){
         float sum = std::accumulate(us_alphas.begin(), us_alphas.end(), 0.0f);
         float scale = sum/((int)char_list.size() + 1);
+        if(scale == 0){
+            return;
+        }
         cif_peak.clear();
         sum = 0.0;
         for(auto &alpha:us_alphas){
@@ -507,6 +512,11 @@ void Paraformer::TimestampOnnx(std::vector<float>& us_alphas,
                 fire_place.push_back(i + total_offset);
             }
         }
+    }
+    
+    num_peak = fire_place.size();
+    if(fire_place.size() == 0){
+        return;
     }
 
     // begin silence
@@ -530,6 +540,10 @@ void Paraformer::TimestampOnnx(std::vector<float>& us_alphas,
     }
 
     // tail token and end silence
+    if(timestamp_list.size()==0){
+        LOG(ERROR)<<"timestamp_list's size is 0!";
+        return;
+    }
     if (num_frames - fire_place.back() > START_END_THRESHOLD) {
         float _end = (num_frames + fire_place.back()) / 2.0;
         timestamp_list.back()[1] = _end * TIME_RATE;
