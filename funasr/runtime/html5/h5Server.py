@@ -62,4 +62,4 @@ if __name__ == '__main__':
     #flask 
     print("srv run on ",port)
 
-    app.run(debug=False,processes=True,host=args.host,port=port, ssl_context=(args.certfile,args.keyfile))
+    app.run(debug=False,threaded=True,host=args.host,port=port, ssl_context=(args.certfile,args.keyfile))
