@@ -54,6 +54,7 @@ typedef struct {
   nlohmann::json msg;
   std::shared_ptr<std::vector<char>> samples;
   std::shared_ptr<std::vector<std::vector<std::string>>> punc_cache;
+  std::shared_ptr<std::vector<std::vector<float>>> hotwords_embedding=NULL;
   std::shared_ptr<websocketpp::lib::mutex> thread_lock; // lock for each connection
   FUNASR_HANDLE tpass_online_handle=NULL;
   std::string online_res = "";
@@ -114,6 +115,7 @@ class WebSocketServer {
   void do_decoder(std::vector<char>& buffer, websocketpp::connection_hdl& hdl,
                   nlohmann::json& msg,
                   std::vector<std::vector<std::string>>& punc_cache,
+                  std::vector<std::vector<float>> &hotwords_embedding,
                   websocketpp::lib::mutex& thread_lock, bool& is_final,
                   std::string wav_name,
                   FUNASR_HANDLE& tpass_online_handle);

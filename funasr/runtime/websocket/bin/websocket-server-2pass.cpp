@@ -77,6 +77,7 @@ nlohmann::json handle_result(FUNASR_RESULT result) {
 void WebSocketServer::do_decoder(
     std::vector<char>& buffer, websocketpp::connection_hdl& hdl,
     nlohmann::json& msg, std::vector<std::vector<std::string>>& punc_cache,
+    std::vector<std::vector<float>> &hotwords_embedding,
     websocketpp::lib::mutex& thread_lock, bool& is_final, std::string wav_name,
     FUNASR_HANDLE& tpass_online_handle) {
   // lock for each connection
@@ -115,7 +116,8 @@ void WebSocketServer::do_decoder(
           Result = FunTpassInferBuffer(tpass_handle, tpass_online_handle,
                                        subvector.data(), subvector.size(),
                                        punc_cache, false, msg["audio_fs"],
-                                       msg["wav_format"], (ASR_TYPE)asr_mode_);
+                                       msg["wav_format"], (ASR_TYPE)asr_mode_,
+                                       hotwords_embedding);
 
         } else {
           msg["access_num"]=(int)msg["access_num"]-1;
@@ -149,7 +151,8 @@ void WebSocketServer::do_decoder(
           Result = FunTpassInferBuffer(tpass_handle, tpass_online_handle,
                                        buffer.data(), buffer.size(), punc_cache,
                                        is_final, msg["audio_fs"],
-                                       msg["wav_format"], (ASR_TYPE)asr_mode_);
+                                       msg["wav_format"], (ASR_TYPE)asr_mode_,
+                                       hotwords_embedding);
         } else {
           msg["access_num"]=(int)msg["access_num"]-1;	 
           return;
@@ -324,7 +327,6 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
   std::shared_ptr<std::vector<std::vector<std::string>>> punc_cache_p =
       msg_data->punc_cache;
   std::shared_ptr<websocketpp::lib::mutex> thread_lock_p = msg_data->thread_lock;
-
   lock.unlock();
 
   if (sample_data_p == nullptr) {
@@ -347,6 +349,24 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
       if (jsonresult.contains("wav_format")) {
         msg_data->msg["wav_format"] = jsonresult["wav_format"];
       }
+      if(msg_data->hotwords_embedding == NULL){
+        if (jsonresult["hotwords"] != nullptr) {
+          msg_data->msg["hotwords"] = jsonresult["hotwords"];
+          if (!msg_data->msg["hotwords"].empty()) {
+            std::string hw = msg_data->msg["hotwords"];
+            LOG(INFO)<<"hotwords: " << hw;
+            std::vector<std::vector<float>> new_hotwords_embedding= CompileHotwordEmbedding(tpass_handle, hw, ASR_TWO_PASS);
+            msg_data->hotwords_embedding =
+                std::make_shared<std::vector<std::vector<float>>>(new_hotwords_embedding);
+          }
+        }else{
+            std::string hw = "";
+            LOG(INFO)<<"hotwords: " << hw;
+            std::vector<std::vector<float>> new_hotwords_embedding= CompileHotwordEmbedding(tpass_handle, hw, ASR_TWO_PASS);
+            msg_data->hotwords_embedding =
+                std::make_shared<std::vector<std::vector<float>>>(new_hotwords_embedding);
+        }
+      }
       if (jsonresult.contains("audio_fs")) {
         msg_data->msg["audio_fs"] = jsonresult["audio_fs"];
       }
@@ -368,10 +388,12 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
         // if it is in final message, post the sample_data to decode
         try{
 		  
+          std::vector<std::vector<float>> hotwords_embedding_(*(msg_data->hotwords_embedding));
           msg_data->strand_->post(
               std::bind(&WebSocketServer::do_decoder, this,
                         std::move(*(sample_data_p.get())), std::move(hdl),
                         std::ref(msg_data->msg), std::ref(*(punc_cache_p.get())),
+                        std::move(hotwords_embedding_),
                         std::ref(*thread_lock_p), std::move(true),
                         msg_data->msg["wav_name"],
                         std::ref(msg_data->tpass_online_handle)));
@@ -407,11 +429,14 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
 
           try{
             // post to decode
+            
+          std::vector<std::vector<float>> hotwords_embedding_(*(msg_data->hotwords_embedding));
             msg_data->strand_->post( 
                       std::bind(&WebSocketServer::do_decoder, this,
                                 std::move(subvector), std::move(hdl),
                                 std::ref(msg_data->msg),
                                 std::ref(*(punc_cache_p.get())),
+                                std::move(hotwords_embedding_),
                                 std::ref(*thread_lock_p), std::move(false),
                                 msg_data->msg["wav_name"],
                                 std::ref(msg_data->tpass_online_handle)));
