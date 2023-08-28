@@ -16,29 +16,36 @@ option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 if(ENABLE_WEBSOCKET)
   # cmake_policy(SET CMP0135 NEW)
   include(FetchContent)
-  FetchContent_Declare(websocketpp
-  GIT_REPOSITORY https://github.com/zaphoyd/websocketpp.git
-    GIT_TAG 0.8.2
-    SOURCE_DIR ${PROJECT_SOURCE_DIR}/third_party/websocket
-    )
-  
-  FetchContent_MakeAvailable(websocketpp)
+
+  if(NOT EXISTS ${PROJECT_SOURCE_DIR}/third_party/websocket )
+    FetchContent_Declare(websocketpp
+    GIT_REPOSITORY https://github.com/zaphoyd/websocketpp.git
+      GIT_TAG 0.8.2
+      SOURCE_DIR ${PROJECT_SOURCE_DIR}/third_party/websocket
+      )
+    
+    FetchContent_MakeAvailable(websocketpp)
+  endif()
   include_directories(${PROJECT_SOURCE_DIR}/third_party/websocket)
    
-  FetchContent_Declare(asio
-     URL   https://github.com/chriskohlhoff/asio/archive/refs/tags/asio-1-24-0.tar.gz
-   SOURCE_DIR ${PROJECT_SOURCE_DIR}/third_party/asio
-  )
-  
-  FetchContent_MakeAvailable(asio)
+  if(NOT EXISTS ${PROJECT_SOURCE_DIR}/third_party/asio )
+    FetchContent_Declare(asio
+      URL   https://github.com/chriskohlhoff/asio/archive/refs/tags/asio-1-24-0.tar.gz
+    SOURCE_DIR ${PROJECT_SOURCE_DIR}/third_party/asio
+    )
+    
+    FetchContent_MakeAvailable(asio)
+  endif()
   include_directories(${PROJECT_SOURCE_DIR}/third_party/asio/asio/include)
  
-  FetchContent_Declare(json
-     URL   https://github.com/nlohmann/json/archive/refs/tags/v3.11.2.tar.gz
-   SOURCE_DIR ${PROJECT_SOURCE_DIR}/third_party/json
-  )
-  
-  FetchContent_MakeAvailable(json)
+  if(NOT EXISTS ${PROJECT_SOURCE_DIR}/third_party/json )
+    FetchContent_Declare(json
+      URL   https://github.com/nlohmann/json/archive/refs/tags/v3.11.2.tar.gz
+    SOURCE_DIR ${PROJECT_SOURCE_DIR}/third_party/json
+    )
+    
+    FetchContent_MakeAvailable(json)
+  endif()
   include_directories(${PROJECT_SOURCE_DIR}/third_party/json/include)
 
 endif()

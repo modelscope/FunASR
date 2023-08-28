@@ -71,6 +71,12 @@ nlohmann::json handle_result(FUNASR_RESULT result) {
     jsonresult["mode"] = "2pass-offline";
   }
 
+  std::string tmp_stamp_msg = FunASRGetStamp(result);
+  if (tmp_stamp_msg != "") {
+    LOG(INFO) << "offline stamps : " << tmp_stamp_msg;
+    jsonresult["timestamp"] = tmp_stamp_msg;
+  }
+
   return jsonresult;
 }
 // feed buffer to asr engine for decoder
