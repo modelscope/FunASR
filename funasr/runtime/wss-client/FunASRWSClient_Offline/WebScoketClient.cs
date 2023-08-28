@@ -46,15 +46,31 @@ namespace WebSocketSpace
 
         public async Task<Task> ClientSendFileFunc(string file_name)//文件转录
         {
+            string fileExtension = Path.GetExtension(file_name);
+            fileExtension = fileExtension.Replace(".", "");
+            if (!(fileExtension == "mp3" || fileExtension == "mp4" || fileExtension == "wav" || fileExtension == "pcm"))
+                return Task.CompletedTask;
+
             try
             {
                 if (client.IsRunning)
                 {
-                    var exitEvent = new ManualResetEvent(false);
-                    string path = Path.GetFileName(file_name);
-                    string firstbuff = string.Format("{{\"mode\": \"offline\", \"wav_name\": \"{0}\", \"is_speaking\": true,\"hotwords\":\"{1}\"}}", Path.GetFileName(file_name), WSClient_Offline.hotword);
-                    client.Send(firstbuff);
-                    showWAVForm(client, file_name);
+                    if (fileExtension == "wav")
+                    {
+                        var exitEvent = new ManualResetEvent(false);
+                        string path = Path.GetFileName(file_name);
+                        string firstbuff = string.Format("{{\"mode\": \"offline\", \"wav_name\": \"{0}\", \"is_speaking\": true,\"hotwords\":\"{1}\"}}", Path.GetFileName(file_name), WSClient_Offline.hotword);
+                        client.Send(firstbuff);
+                        showWAVForm(client, file_name);
+                    }
+                    else
+                    {
+                        var exitEvent = new ManualResetEvent(false);
+                        string path = Path.GetFileName(file_name);
+                        string firstbuff = string.Format("{{\"mode\": \"offline\", \"wav_name\": \"{0}\", \"is_speaking\": true,\"hotwords\":\"{1}\", \"wav_format\":\"{2}\"}}", Path.GetFileName(file_name), WSClient_Offline.hotword, fileExtension);
+                        client.Send(firstbuff);
+                        showWAVForm_All(client, file_name);
+                    }
                 }
             }
             catch (Exception ex)
@@ -118,6 +134,19 @@ namespace WebSocketSpace
         {
             byte[] getbyte = FileToByte(file_name).Skip(44).ToArray();
 
+            for (int i = 0; i < getbyte.Length; i += 1024000)
+            {
+                byte[] send = getbyte.Skip(i).Take(1024000).ToArray();
+                client.Send(send);
+                Thread.Sleep(5);
+            }
+            Thread.Sleep(10);
+            client.Send("{\"is_speaking\": false}");
+        }
+
+        private void showWAVForm_All(WebsocketClient client, string file_name)
+        {
+            byte[] getbyte = FileToByte(file_name).ToArray();
             for (int i = 0; i < getbyte.Length; i += 1024000)
             {
                 byte[] send = getbyte.Skip(i).Take(1024000).ToArray();
