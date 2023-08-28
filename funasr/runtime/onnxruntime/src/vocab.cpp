@@ -29,19 +29,27 @@ void Vocab::LoadVocabFromYaml(const char* filename){
         exit(-1);
     }
     YAML::Node myList = config["token_list"];
+    int i = 0;
     for (YAML::const_iterator it = myList.begin(); it != myList.end(); ++it) {
         vocab.push_back(it->as<string>());
+        token_id[it->as<string>()] = i;
+        i ++;
     }
 }
 
-string Vocab::Vector2String(vector<int> in)
-{
-    int i;
-    stringstream ss;
-    for (auto it = in.begin(); it != in.end(); it++) {
-        ss << vocab[*it];
+int Vocab::GetIdByToken(const std::string &token) {
+    if (token_id.count(token)) {
+        return token_id[token];
     }
-    return ss.str();
+    return 0;
+}
+
+void Vocab::Vector2String(vector<int> in, std::vector<std::string> &preds)
+{
+    for (auto it = in.begin(); it != in.end(); it++) {
+        string word = vocab[*it];
+        preds.emplace_back(word);
+    }
 }
 
 int Str2Int(string str)

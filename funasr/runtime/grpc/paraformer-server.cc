@@ -42,7 +42,9 @@ void GrpcEngine::DecodeThreadFunc() {
                                                  sampling_rate_,
                                                  encoding_,
                                                  mode_);
+      p_mutex_->lock();
       audio_buffer_ = audio_buffer_.substr(step);
+      p_mutex_->unlock();
 
       if (result) {
         std::string online_message = FunASRGetResult(result, 0);
@@ -121,7 +123,9 @@ void GrpcEngine::OnSpeechStart() {
 }
 
 void GrpcEngine::OnSpeechData() {
+  p_mutex_->lock();
   audio_buffer_ += request_->audio_data();
+  p_mutex_->unlock();
 }
 
 void GrpcEngine::OnSpeechEnd() {
@@ -208,7 +212,7 @@ int main(int argc, char* argv[]) {
   google::InitGoogleLogging(argv[0]);
 
   TCLAP::CmdLine cmd("funasr-onnx-2pass", ' ', "1.0");
-  TCLAP::ValueArg<std::string>  offline_model_dir("", OFFLINE_MODEL_DIR, "the asr offline model path, which contains model.onnx, config.yaml, am.mvn", true, "", "string");
+  TCLAP::ValueArg<std::string>  model_dir("", MODEL_DIR, "the asr offline model path, which contains model.onnx, config.yaml, am.mvn", true, "", "string");
   TCLAP::ValueArg<std::string>  online_model_dir("", ONLINE_MODEL_DIR, "the asr online model path, which contains encoder.onnx, decoder.onnx, config.yaml, am.mvn", true, "", "string");
   TCLAP::ValueArg<std::string>  quantize("", QUANTIZE, "false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir", false, "false", "string");
   TCLAP::ValueArg<std::string>  vad_dir("", VAD_DIR, "the vad online model path, which contains model.onnx, vad.yaml, vad.mvn", false, "", "string");
@@ -218,7 +222,7 @@ int main(int argc, char* argv[]) {
   TCLAP::ValueArg<std::int32_t>  onnx_thread("", "onnx-inter-thread", "onnxruntime SetIntraOpNumThreads", false, 1, "int32_t");
   TCLAP::ValueArg<std::string> port_id("", PORT_ID, "port id", true, "", "string");
 
-  cmd.add(offline_model_dir);
+  cmd.add(model_dir);
   cmd.add(online_model_dir);
   cmd.add(quantize);
   cmd.add(vad_dir);
@@ -230,7 +234,7 @@ int main(int argc, char* argv[]) {
   cmd.parse(argc, argv);
 
   std::map<std::string, std::string> config;
-  GetValue(offline_model_dir, OFFLINE_MODEL_DIR, config);
+  GetValue(model_dir, MODEL_DIR, config);
   GetValue(online_model_dir, ONLINE_MODEL_DIR, config);
   GetValue(quantize, QUANTIZE, config);
   GetValue(vad_dir, VAD_DIR, config);

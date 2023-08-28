@@ -443,10 +443,10 @@ void WebSocketServer::initAsr(std::map<std::string, std::string>& model_path,
       LOG(ERROR) << "FunTpassInit init failed";
       exit(-1);
     }
-	LOG(INFO) << "initAsr run check_and_clean_connection";
-	std::thread clean_thread(&WebSocketServer::check_and_clean_connection,this);  
-	clean_thread.detach();
-	LOG(INFO) << "initAsr run check_and_clean_connection finished";
+    LOG(INFO) << "initAsr run check_and_clean_connection";
+    std::thread clean_thread(&WebSocketServer::check_and_clean_connection,this);  
+    clean_thread.detach();
+    LOG(INFO) << "initAsr run check_and_clean_connection finished";
 
   } catch (const std::exception& e) {
     LOG(INFO) << e.what();

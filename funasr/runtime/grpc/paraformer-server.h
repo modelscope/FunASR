@@ -6,6 +6,7 @@
 
 #include <string>
 #include <thread>
+#include <mutex>
 #include <unistd.h>
 
 #include "grpcpp/server_builder.h"
@@ -52,6 +53,8 @@ class GrpcEngine {
   std::string encoding_;
   ASR_TYPE mode_ = ASR_TWO_PASS;
   int step_duration_ms_ = 100;
+
+  std::unique_ptr<std::mutex> p_mutex_= std::make_unique<std::mutex>(); // mutex is not moveable
 };
 
 class GrpcService final : public ASR::Service {

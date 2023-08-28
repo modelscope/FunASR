@@ -1,4 +1,5 @@
 #include "precomp.h"
+#include <vector>
 #ifdef __cplusplus 
 
 extern "C" {
@@ -216,7 +217,7 @@ extern "C" {
 	}
 
 	// APIs for Offline-stream Infer
-	_FUNASRAPI FUNASR_RESULT FunOfflineInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, FUNASR_MODE mode, QM_CALLBACK fn_callback, int sampling_rate, std::string wav_format)
+	_FUNASRAPI FUNASR_RESULT FunOfflineInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, FUNASR_MODE mode, QM_CALLBACK fn_callback, const std::vector<std::vector<float>> &hw_emb, int sampling_rate, std::string wav_format)
 	{
 		funasr::OfflineStream* offline_stream = (funasr::OfflineStream*)handle;
 		if (!offline_stream)
@@ -246,12 +247,31 @@ extern "C" {
 
 		int n_step = 0;
 		int n_total = audio.GetQueueSize();
-		while (audio.Fetch(buff, len, flag) > 0) {
-			string msg = (offline_stream->asr_handle)->Forward(buff, len, true);
-			p_result->msg += msg;
+		float start_time = 0.0;
+		std::string cur_stamp = "[";
+		while (audio.Fetch(buff, len, flag, start_time) > 0) {
+			string msg = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb);
+			std::vector<std::string> msg_vec = funasr::split(msg, '|');
+			if(msg_vec.size()==0){
+				continue;
+			}
+			p_result->msg += msg_vec[0];
+			//timestamp
+			if(msg_vec.size() > 1){
+				std::vector<std::string> msg_stamp = funasr::split(msg_vec[1], ',');
+				for(int i=0; i<msg_stamp.size()-1; i+=2){
+					float begin = std::stof(msg_stamp[i])+start_time;
+					float end = std::stof(msg_stamp[i+1])+start_time;
+					cur_stamp += "["+std::to_string((int)(1000*begin))+","+std::to_string((int)(1000*end))+"],";
+				}
+			}
 			n_step++;
 			if (fn_callback)
 				fn_callback(n_step, n_total);
+		}
+		if(cur_stamp != "["){
+			cur_stamp.erase(cur_stamp.length() - 1);
+			p_result->stamp += cur_stamp + "]";
 		}
 		if(offline_stream->UsePunc()){
 			string punc_res = (offline_stream->punc_handle)->AddPunc((p_result->msg).c_str());
@@ -261,7 +281,7 @@ extern "C" {
 		return p_result;
 	}
 
-	_FUNASRAPI FUNASR_RESULT FunOfflineInfer(FUNASR_HANDLE handle, const char* sz_filename, FUNASR_MODE mode, QM_CALLBACK fn_callback, int sampling_rate)
+	_FUNASRAPI FUNASR_RESULT FunOfflineInfer(FUNASR_HANDLE handle, const char* sz_filename, FUNASR_MODE mode, QM_CALLBACK fn_callback, const std::vector<std::vector<float>> &hw_emb, int sampling_rate)
 	{
 		funasr::OfflineStream* offline_stream = (funasr::OfflineStream*)handle;
 		if (!offline_stream)
@@ -293,12 +313,32 @@ extern "C" {
 		int flag = 0;
 		int n_step = 0;
 		int n_total = audio.GetQueueSize();
-		while (audio.Fetch(buff, len, flag) > 0) {
-			string msg = (offline_stream->asr_handle)->Forward(buff, len, true);
-			p_result->msg+= msg;
+		float start_time = 0.0;
+		std::string cur_stamp = "[";
+		while (audio.Fetch(buff, len, flag, start_time) > 0) {
+			string msg = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb);
+			std::vector<std::string> msg_vec = funasr::split(msg, '|');
+			if(msg_vec.size()==0){
+				continue;
+			}
+			p_result->msg += msg_vec[0];
+			//timestamp
+			if(msg_vec.size() > 1){
+				std::vector<std::string> msg_stamp = funasr::split(msg_vec[1], ',');
+				for(int i=0; i<msg_stamp.size()-1; i+=2){
+					float begin = std::stof(msg_stamp[i])+start_time;
+					float end = std::stof(msg_stamp[i+1])+start_time;
+					cur_stamp += "["+std::to_string((int)(1000*begin))+","+std::to_string((int)(1000*end))+"],";
+				}
+			}
+
 			n_step++;
 			if (fn_callback)
 				fn_callback(n_step, n_total);
+		}
+		if(cur_stamp != "["){
+			cur_stamp.erase(cur_stamp.length() - 1);
+			p_result->stamp += cur_stamp + "]";
 		}
 		if(offline_stream->UsePunc()){
 			string punc_res = (offline_stream->punc_handle)->AddPunc((p_result->msg).c_str());
@@ -306,6 +346,14 @@ extern "C" {
 		}
 	
 		return p_result;
+	}
+
+	_FUNASRAPI const std::vector<std::vector<float>> CompileHotwordEmbedding(FUNASR_HANDLE handle, std::string &hotwords) {
+		funasr::OfflineStream* offline_stream = (funasr::OfflineStream*)handle;
+    	std::vector<std::vector<float>> emb;
+		if (!offline_stream)
+			return emb;
+		return (offline_stream->asr_handle)->CompileHotwordEmbedding(hotwords);
 	}
 
 	// APIs for 2pass-stream Infer
@@ -429,6 +477,15 @@ extern "C" {
 			return nullptr;
 
 		return p_result->msg.c_str();
+	}
+
+	_FUNASRAPI const char* FunASRGetStamp(FUNASR_RESULT result)
+	{
+		funasr::FUNASR_RECOG_RESULT * p_result = (funasr::FUNASR_RECOG_RESULT*)result;
+		if(!p_result)
+			return nullptr;
+
+		return p_result->stamp.c_str();
 	}
 
 	_FUNASRAPI const char* FunASRGetTpassResult(FUNASR_RESULT result,int n_index)

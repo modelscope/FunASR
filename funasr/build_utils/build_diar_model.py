@@ -216,16 +216,18 @@ def build_diar_model(args):
             frontend = frontend_class(cmvn_file=args.cmvn_file, **args.frontend_conf)
         else:
             frontend = frontend_class(**args.frontend_conf)
+        input_size = frontend.output_size()
     else:
         args.frontend = None
         args.frontend_conf = {}
         frontend = None
-
-    # encoder
-    encoder_class = encoder_choices.get_class(args.encoder)
-    encoder = encoder_class(**args.encoder_conf)
+        input_size = args.input_size
 
     if args.model == "sond":
+        # encoder
+        encoder_class = encoder_choices.get_class(args.encoder)
+        encoder = encoder_class(input_size=input_size ,**args.encoder_conf)
+
         # data augmentation for spectrogram
         if args.specaug is not None:
             specaug_class = specaug_choices.get_class(args.specaug)
@@ -297,6 +299,10 @@ def build_diar_model(args):
         )
 
     elif args.model == "eend_ola":
+        # encoder
+        encoder_class = encoder_choices.get_class(args.encoder)
+        encoder = encoder_class(**args.encoder_conf)
+
         # encoder-decoder attractor
         encoder_decoder_attractor_class = encoder_decoder_attractor_choices.get_class(args.encoder_decoder_attractor)
         encoder_decoder_attractor = encoder_decoder_attractor_class(**args.encoder_decoder_attractor_conf)

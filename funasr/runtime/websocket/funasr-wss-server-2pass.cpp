@@ -368,6 +368,7 @@ int main(int argc, char* argv[]) {
     server server_;  // server for websocket
     wss_server wss_server_;
     if (is_ssl) {
+      LOG(INFO)<< "SSL is opened!";
       wss_server_.init_asio(&io_server);  // init asio
       wss_server_.set_reuse_addr(
           true);  // reuse address as we create multiple threads
@@ -380,6 +381,7 @@ int main(int argc, char* argv[]) {
       websocket_srv.initAsr(model_path, s_model_thread_num);  // init asr model
 
     } else {
+      LOG(INFO)<< "SSL is closed!";
       server_.init_asio(&io_server);  // init asio
       server_.set_reuse_addr(
           true);  // reuse address as we create multiple threads

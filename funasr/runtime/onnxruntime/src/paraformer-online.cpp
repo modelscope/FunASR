@@ -469,7 +469,7 @@ string ParaformerOnline::ForwardChunk(std::vector<std::vector<float>> &chunk_fea
     return result;
 }
 
-string ParaformerOnline::Forward(float* din, int len, bool input_finished)
+string ParaformerOnline::Forward(float* din, int len, bool input_finished, const std::vector<std::vector<float>> &hw_emb)
 {
     std::vector<std::vector<float>> wav_feats;
     std::vector<float> waves(din, din+len);

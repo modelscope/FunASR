@@ -8,7 +8,7 @@
 # [2] Speaker Overlap-aware Neural Diarization for Multi-party Meeting Analysis, EMNLP 2022
 # We recommend you run this script stage by stage.
 
-# [developing] This recipe includes:
+# This recipe includes:
 # 1. simulating data with switchboard and NIST.
 # 2. training the model from scratch for 3 stages:
 #   2-1. pre-train on simu_swbd_sre
@@ -18,6 +18,7 @@
 # Finally, you will get a similar DER result claimed in the paper.
 
 # environment configuration
+# path/to/kaldi
 kaldi_root=
 
 if [ -z "${kaldi_root}" ]; then
@@ -34,21 +35,35 @@ if [ ! -e utils ]; then
   ln -s ${kaldi_root}/egs/callhome_diarization/v2/utils ./utils
 fi
 
+# path to Switchboard and NIST including:
+# LDC98S75, LDC99S79, LDC2002S06, LDC2001S13, LDC2004S07
+data_root=
+if [ -z "${data_root}" ]; then
+  echo "We need Switchboard and NIST to simulate data for pretraining."
+  echo "If you can't get them, please use 'finetune.sh' to finetune a pretrained model."
+  exit;
+fi
+
+# path/to/NIST/LDC2001S97
+callhome_root=
+if [ -z "${callhome_root}" ]; then
+  echo "We need callhome corpus for training."
+  echo "If you want inference only, please refer https://www.modelscope.cn/models/damo/speech_diarization_sond-en-us-callhome-8k-n16k4-pytorch/summary"
+  exit;
+fi
+
+
 # machines configuration
 gpu_devices="4,5,6,7"  # for V100-16G, use 4 GPUs
 gpu_num=4
 count=1
 
 # general configuration
-stage=3
-stop_stage=3
+stage=0
+stop_stage=19
 # number of jobs for data process
 nj=16
 sr=8000
-
-# dataset related
-data_root=
-callhome_root=path/to/NIST/LDC2001S97
 
 # experiment configuration
 lang=en
@@ -68,16 +83,16 @@ init_param=
 freeze_param=
 
 # inference related
-inference_model=valid.der.ave_5best.pth
+inference_model=valid.der.ave_5best.pb
 inference_config=conf/basic_inference.yaml
 inference_tag=""
-test_sets="callhome1"
+test_sets="callhome2"
 gpu_inference=true  # Whether to perform gpu decoding, set false for cpu decoding
 # number of jobs for inference
 # for gpu decoding, inference_nj=ngpu*njob; for cpu decoding, inference_nj=njob
-njob=5
+njob=4
 infer_cmd=utils/run.pl
-told_max_iter=2
+told_max_iter=4
 
 . utils/parse_options.sh || exit 1;
 
@@ -127,6 +142,22 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
   # 3. Prepare the Callhome portion of NIST SRE 2000.
   local/make_callhome.sh ${callhome_root} ${datadir}/
 
+  # 4. split ref.rttm
+  for dset in callhome1 callhome2; do
+    rm -rf ${datadir}/${dset}/ref.rttm
+    for name in `awk '{print $1}' ${datadir}/${dset}/wav.scp`; do
+      grep ${name} ${datadir}/callhome/fullref.rttm >> ${datadir}/${dset}/ref.rttm;
+    done
+
+    # filter out records which don't have rttm labels.
+    awk '{print $2}' ${datadir}/${dset}/ref.rttm | sort | uniq > ${datadir}/${dset}/uttid
+    mv ${datadir}/${dset}/wav.scp ${datadir}/${dset}/wav.scp.bak
+    awk '{if (NR==FNR){a[$1]=1}else{if (a[$1]==1){print $0}}}' ${datadir}/${dset}/uttid ${datadir}/${dset}/wav.scp.bak > ${datadir}/${dset}/wav.scp
+    mkdir ${datadir}/${dset}/raw
+    mv ${datadir}/${dset}/{reco2num_spk,segments,spk2utt,utt2spk,uttid,wav.scp.bak} ${datadir}/${dset}/raw/
+    awk '{print $1,$1}' ${datadir}/${dset}/wav.scp > ${datadir}/${dset}/utt2spk
+  done
+
 fi
 
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
@@ -156,10 +187,10 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     mkdir -p ${dumpdir}/${dset}/nonoverlap_0s
     python -Wignore script/extract_nonoverlap_segments.py \
       ${datadir}/${dset}/wav.scp ${datadir}/${dset}/ref.rttm ${dumpdir}/${dset}/nonoverlap_0s \
-      --min_dur 0 --max_spk_num 8 --sr ${sr} --no_pbar --nj ${nj}
+      --min_dur 0.1 --max_spk_num 8 --sr ${sr} --no_pbar --nj ${nj}
 
     mkdir -p ${datadir}/${dset}/nonoverlap_0s
-    find `pwd`/${dumpdir}/${dset}/nonoverlap_0s | sort | awk -F'[/.]' '{print $(NF-1),$0}' > ${datadir}/${dset}/nonoverlap_0s/wav.scp
+    find ${dumpdir}/${dset}/nonoverlap_0s/ -iname "*.wav" | sort | awk -F'[/.]' '{print $(NF-1),$0}' > ${datadir}/${dset}/nonoverlap_0s/wav.scp
     awk -F'[/.]' '{print $(NF-1),$(NF-2)}' ${datadir}/${dset}/nonoverlap_0s/wav.scp > ${datadir}/${dset}/nonoverlap_0s/utt2spk
     echo "Done."
   done
@@ -279,11 +310,16 @@ fi
 
 if [ ${stage} -le 6 ] && [ ${stop_stage} -ge 6 ]; then
   echo "Stage 6: Extract speaker embeddings."
-  git lfs install
-  git clone https://www.modelscope.cn/damo/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch.git
-  mv speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch ${expdir}/
-
   sv_exp_dir=exp/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch
+
+  if [ ! -e ${sv_exp_dir} ]; then
+    echo "start to download sv models"
+    git lfs install
+    git clone https://www.modelscope.cn/damo/speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch.git
+    mv speech_xvector_sv-en-us-callhome-8k-spk6135-pytorch ${expdir}/
+    echo "Done."
+  fi
+
   sed "s/input_size: null/input_size: 80/g" ${sv_exp_dir}/sv.yaml > ${sv_exp_dir}/sv_fbank.yaml
   for dset in swbd_sre/none_silence callhome1/nonoverlap_0s callhome2/nonoverlap_0s; do
     key_file=${datadir}/${dset}/feats.scp
@@ -301,6 +337,7 @@ if [ ${stage} -le 6 ] && [ ${stop_stage} -ge 6 ]; then
     ${infer_cmd} --gpu "${_ngpu}" --max-jobs-run "${_nj}" JOB=1:"${_nj}" "${_logdir}"/sv_inference.JOB.log \
       python -m funasr.bin.sv_inference_launch \
         --batch_size 1 \
+        --njob ${njob} \
         --ngpu "${_ngpu}" \
         --gpuid_list ${gpuid_list} \
         --data_path_and_name_and_type "${key_file},speech,kaldi_ark" \
@@ -321,7 +358,7 @@ if [ ${stage} -le 7 ] && [ ${stop_stage} -ge 7 ]; then
     python -Wignore script/calc_real_meeting_frame_labels.py \
           ${datadir}/${dset} ${dumpdir}/${dset}/labels \
           --n_spk 8 --frame_shift 0.01 --nj 16 --sr 8000
-    find `pwd`/${dumpdir}/${dset}/labels -iname "*.lbl.mat" | awk -F'[/.]' '{print $(NF-2),$0}' | sort > ${datadir}/${dset}/labels.scp
+    find `pwd`/${dumpdir}/${dset}/labels/ -iname "*.lbl.mat" | awk -F'[/.]' '{print $(NF-2),$0}' | sort > ${datadir}/${dset}/labels.scp
   done
 
 fi
@@ -362,7 +399,7 @@ if [ ${stage} -le 8 ] && [ ${stop_stage} -ge 8 ]; then
 
   echo "Stage 8: start to dump for callhome1."
   python -Wignore script/dump_meeting_chunks.py --dir ${data_dir} \
-    --out ${dumpdir}/callhome1/dumped_files/data --n_spk 16 --no_pbar --sr 8000 --mode test \
+    --out ${dumpdir}/callhome1/dumped_files/data --n_spk 16 --no_pbar --sr 8000 --mode train \
     --chunk_size 1600 --chunk_shift 400 --add_mid_to_speaker true
 
   mkdir -p ${datadir}/callhome1/dumped_files
@@ -507,8 +544,8 @@ if [ ${stage} -le 11 ] && [ ${stop_stage} -ge 11 ]; then
     done
 fi
 
-# Scoring for pretrained model, you may get a DER like 13.73 16.25
-# 13.73: with oracle VAD, 16.25: with only SOND outputs, aka, system VAD.
+# Scoring for pretrained model, you may get a DER like 13.29 16.54
+# 13.29: with oracle VAD, 16.54: with only SOND outputs, aka, system VAD.
 if [ ${stage} -le 12 ] && [ ${stop_stage} -ge 12 ]; then
   echo "stage 12: Scoring phase-1 models"
   if [ ! -e dscore ]; then
@@ -588,7 +625,7 @@ if [ ${stage} -le 13 ] && [ ${stop_stage} -ge 13 ]; then
                 --valid_data_path_and_name_and_type ${datadir}/${valid_set}/dumped_files/profile.scp,profile,kaldi_ark \
                 --valid_data_path_and_name_and_type ${datadir}/${valid_set}/dumped_files/label.scp,binary_labels,kaldi_ark \
                 --valid_shape_file ${expdir}/${valid_set}_states/speech_shape \
-                --init_param exp/${model_dir}/valid.der.ave_5best.pth \
+                --init_param exp/${model_dir}/valid.der.ave_5best.pb \
                 --unused_parameters true \
                 ${init_opt} \
                 ${freeze_opt} \
@@ -654,8 +691,8 @@ if [ ${stage} -le 14 ] && [ ${stop_stage} -ge 14 ]; then
     done
 fi
 
-# Scoring for pretrained model, you may get a DER like 11.25 15.30
-# 11.25: with oracle VAD, 15.30: with only SOND outputs, aka, system VAD.
+# Scoring for pretrained model, you may get a DER like 11.54 15.41
+# 11.54: with oracle VAD, 15.41: with only SOND outputs, aka, system VAD.
 if [ ${stage} -le 15 ] && [ ${stop_stage} -ge 15 ]; then
   echo "stage 15: Scoring phase-2 models"
   if [ ! -e dscore ]; then
@@ -733,7 +770,7 @@ if [ ${stage} -le 16 ] && [ ${stop_stage} -ge 16 ]; then
                 --valid_data_path_and_name_and_type ${datadir}/${valid_set}/dumped_files/profile.scp,profile,kaldi_ark \
                 --valid_data_path_and_name_and_type ${datadir}/${valid_set}/dumped_files/label.scp,binary_labels,kaldi_ark \
                 --valid_shape_file ${expdir}/${valid_set}_states/speech_shape \
-                --init_param exp/${model_dir}_phase2/valid.forward_steps.ave_5best.pth \
+                --init_param exp/${model_dir}_phase2/valid.forward_steps.ave_5best.pb \
                 --unused_parameters true \
                 ${init_opt} \
                 ${freeze_opt} \

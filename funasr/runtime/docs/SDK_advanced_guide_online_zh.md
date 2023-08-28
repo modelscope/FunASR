@@ -22,12 +22,14 @@ sudo docker run -p 10095:10095 -it --privileged=true -v ./funasr-runtime-resourc
 docker启动之后，启动 funasr-wss-server-2pass服务程序：
 ```shell
 cd FunASR/funasr/runtime
-./run_server_2pass.sh \
+nohup bash run_server_2pass.sh \
   --download-model-dir /workspace/models \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
   --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx  \
-  --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx
+  --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx > log.out 2>&1 &
+
+# 如果您想关闭ssl，增加参数：--certfile 0
 ```
 服务端详细参数介绍可参考[服务端参数介绍](#服务端参数介绍)
 ### 客户端测试与使用
