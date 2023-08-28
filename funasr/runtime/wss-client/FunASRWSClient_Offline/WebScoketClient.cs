@@ -2,6 +2,7 @@
 using System.Text.Json;
 using System.Reactive.Linq;
 using FunASRWSClient_Offline;
+using System.Text.RegularExpressions;
 
 namespace WebSocketSpace
 {
@@ -51,7 +52,7 @@ namespace WebSocketSpace
                 {
                     var exitEvent = new ManualResetEvent(false);
                     string path = Path.GetFileName(file_name);
-                    string firstbuff = string.Format("{{\"mode\": \"offline\", \"wav_name\": \"{0}\", \"is_speaking\": true}}", Path.GetFileName(file_name));
+                    string firstbuff = string.Format("{{\"mode\": \"offline\", \"wav_name\": \"{0}\", \"is_speaking\": true,\"hotwords\":\"{1}\"}}", Path.GetFileName(file_name), WSClient_Offline.hotword);
                     client.Send(firstbuff);
                     showWAVForm(client, file_name);
                 }
@@ -69,15 +70,42 @@ namespace WebSocketSpace
             {
                 try
                 {
+                    string timestamp = string.Empty;
                     JsonDocument jsonDoc = JsonDocument.Parse(message);
                     JsonElement root = jsonDoc.RootElement;
                     string mode = root.GetProperty("mode").GetString();
-                    string text = root.GetProperty("text").GetString();
+                    string text = root.GetProperty("text").GetString(); 
                     string name = root.GetProperty("wav_name").GetString();
-                    if(name == "asr_stream")
-                        Console.WriteLine($"实时识别内容: {text}");
+                    if (message.IndexOf("timestamp") != -1)
+                    {
+                        Console.WriteLine($"文件名称:{name}");
+                        //识别内容处理
+                        text = text.Replace(",", "。");
+                        text = text.Replace("?", "。");
+                        List<string> sens = text.Split("。").ToList();
+                        //时间戳处理
+                        timestamp = root.GetProperty("timestamp").GetString();
+                        List<List<int>> data = new List<List<int>>();
+                        string pattern = @"\[(\d+),(\d+)\]";
+                        foreach (Match match in Regex.Matches(timestamp, pattern))
+                        {
+                            int start = int.Parse(match.Groups[1].Value);
+                            int end = int.Parse(match.Groups[2].Value);
+                            data.Add(new List<int> { start, end });
+                        }
+                        int count = 0;
+                        for (int i = 0; i< sens.Count;  i++)
+                        {
+                            if (sens[i].Length == 0)
+                                continue;
+                            Console.WriteLine(string.Format($"[{data[count][0]}-{data[count + sens[i].Length - 1][1]}]:{sens[i]}"));
+                            count += sens[i].Length;
+                        }
+                    }
                     else
-                        Console.WriteLine($"文件名称:{name} 文件转录内容: {text}");
+                    {
+                        Console.WriteLine($"文件名称:{name} 文件转录内容: {text} 时间戳：{timestamp}");
+                    }
                 }
                 catch (JsonException ex)
                 {
