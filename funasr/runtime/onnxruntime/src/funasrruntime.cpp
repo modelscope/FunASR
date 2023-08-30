@@ -390,7 +390,7 @@ extern "C" {
 			// if (!audio->FfmpegLoad(sz_buf, n_len))
 			// 	return nullptr;
 			LOG(ERROR) <<"Wrong wav_format: " << wav_format ;
-			exit(-1);
+			return nullptr;
 		}
 
 		funasr::FUNASR_RECOG_RESULT* p_result = new funasr::FUNASR_RECOG_RESULT;
