@@ -149,7 +149,6 @@ void WebSocketServer::on_close(websocketpp::connection_hdl hdl) {
   unique_lock guard_decoder(*(data_msg->thread_lock));
   data_msg->msg["is_eof"]=true;
   guard_decoder.unlock();
-  // data_map.erase(hdl);  // remove data vector when  connection is closed
 
   LOG(INFO) << "on_close, active connections: " << data_map.size();
 }
@@ -158,7 +157,6 @@ void remove_hdl(
     websocketpp::connection_hdl hdl,
     std::map<websocketpp::connection_hdl, std::shared_ptr<FUNASR_MESSAGE>,
              std::owner_less<websocketpp::connection_hdl>>& data_map) {
- 
   std::shared_ptr<FUNASR_MESSAGE> data_msg = nullptr;
   auto it_data = data_map.find(hdl);
   if (it_data != data_map.end()) {
@@ -214,8 +212,10 @@ void WebSocketServer::check_and_clean_connection() {
       iter++;
     }
     for (auto hdl : to_remove) {
-      remove_hdl(hdl, data_map);
-      //LOG(INFO) << "remove one connection ";
+      {
+        unique_lock lock(m_lock);
+        remove_hdl(hdl, data_map);
+      }
     }
   }
 }
@@ -230,7 +230,11 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
   auto it_data = data_map.find(hdl);
   if (it_data != data_map.end()) {
     msg_data = it_data->second;
+  } else{
+    lock.unlock();
+    return;
   }
+
   std::shared_ptr<std::vector<char>> sample_data_p = msg_data->samples;
   std::shared_ptr<websocketpp::lib::mutex> thread_lock_p = msg_data->thread_lock;
 

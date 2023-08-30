@@ -299,9 +299,10 @@ void WebSocketServer::check_and_clean_connection() {
       iter++;
     }
     for (auto hdl : to_remove) {
-      remove_hdl(hdl, data_map);
-      //LOG(INFO) << "remove one connection ";
-
+      {
+        unique_lock lock(m_lock);
+        remove_hdl(hdl, data_map);
+      }
     }
   }
 }
