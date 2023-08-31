@@ -83,9 +83,9 @@ int main(int argc, char* argv[]) {
     
     TCLAP::ValueArg<std::string> itn_model_dir(
         "", ITN_MODEL_DIR,
-        "default: damo/itn_zh, the itn model path, which contains "
+        "default: damo/fst_itn_zh, the itn model path, which contains "
         "zh_itn_tagger.fst, zh_itn_verbalizer.fst",
-        false, "damo/itn_zh", "string");
+        false, "damo/fst_itn_zh", "string");
     TCLAP::ValueArg<std::string> itn_revision(
         "", "itn-revision", "ITN model revision", false, "v1.0.0", "string");
 

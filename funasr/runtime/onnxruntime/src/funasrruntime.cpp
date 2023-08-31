@@ -277,6 +277,10 @@ extern "C" {
 			string punc_res = (offline_stream->punc_handle)->AddPunc((p_result->msg).c_str());
 			p_result->msg = punc_res;
 		}
+		if(offline_stream->UseITN()){
+			string msg_itn = offline_stream->itn_handle->Normalize(p_result->msg);
+			p_result->msg = msg_itn;
+		}
 
 		return p_result;
 	}
@@ -344,7 +348,10 @@ extern "C" {
 			string punc_res = (offline_stream->punc_handle)->AddPunc((p_result->msg).c_str());
 			p_result->msg = punc_res;
 		}
-	
+		if(offline_stream->UseITN()){
+			string msg_itn = offline_stream->itn_handle->Normalize(p_result->msg);
+			p_result->msg = msg_itn;
+		}
 		return p_result;
 	}
 
