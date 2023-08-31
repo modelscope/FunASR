@@ -7,7 +7,7 @@ TpassOnlineStream::TpassOnlineStream(TpassStream* tpass_stream, std::vector<int>
     if(tpass_obj->vad_handle){
         vad_online_handle = make_unique<FsmnVadOnline>((FsmnVad*)(tpass_obj->vad_handle).get());
     }else{
-        LOG(ERROR)<<"asr_handle is null";
+        LOG(ERROR)<<"vad_handle is null";
         exit(-1);
     }
 

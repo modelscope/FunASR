@@ -58,7 +58,7 @@ void FsmnVad::ReadModel(const char* vad_model) {
         LOG(INFO) << "Successfully load model from " << vad_model;
     } catch (std::exception const &e) {
         LOG(ERROR) << "Error when load vad onnx model: " << e.what();
-        exit(0);
+        exit(-1);
     }
     GetInputOutputInfo(vad_session_, &vad_in_names_, &vad_out_names_);
 }
@@ -197,7 +197,7 @@ void FsmnVad::LoadCmvn(const char *filename)
         ifstream cmvn_stream(filename);
         if (!cmvn_stream.is_open()) {
             LOG(ERROR) << "Failed to open file: " << filename;
-            exit(0);
+            exit(-1);
         }
         string line;
 
@@ -230,7 +230,7 @@ void FsmnVad::LoadCmvn(const char *filename)
         }
     }catch(std::exception const &e) {
         LOG(ERROR) << "Error when load vad cmvn : " << e.what();
-        exit(0);
+        exit(-1);
     }
 }
 

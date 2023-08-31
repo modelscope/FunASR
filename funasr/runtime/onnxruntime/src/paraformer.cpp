@@ -41,7 +41,7 @@ void Paraformer::InitAsr(const std::string &am_model, const std::string &am_cmvn
         LOG(INFO) << "Successfully load model from " << am_model;
     } catch (std::exception const &e) {
         LOG(ERROR) << "Error when load am onnx model: " << e.what();
-        exit(0);
+        exit(-1);
     }
 
     string strName;
@@ -93,7 +93,7 @@ void Paraformer::InitAsr(const std::string &en_model, const std::string &de_mode
         LOG(INFO) << "Successfully load model from " << en_model;
     } catch (std::exception const &e) {
         LOG(ERROR) << "Error when load am encoder model: " << e.what();
-        exit(0);
+        exit(-1);
     }
 
     try {
@@ -101,7 +101,7 @@ void Paraformer::InitAsr(const std::string &en_model, const std::string &de_mode
         LOG(INFO) << "Successfully load model from " << de_model;
     } catch (std::exception const &e) {
         LOG(ERROR) << "Error when load am decoder model: " << e.what();
-        exit(0);
+        exit(-1);
     }
 
     // encoder
@@ -156,7 +156,7 @@ void Paraformer::InitAsr(const std::string &am_model, const std::string &en_mode
         LOG(INFO) << "Successfully load model from " << am_model;
     } catch (std::exception const &e) {
         LOG(ERROR) << "Error when load am onnx model: " << e.what();
-        exit(0);
+        exit(-1);
     }
 
     string strName;
@@ -225,7 +225,7 @@ void Paraformer::InitHwCompiler(const std::string &hw_model, int thread_num) {
         LOG(INFO) << "Successfully load model from " << hw_model;
     } catch (std::exception const &e) {
         LOG(ERROR) << "Error when load hw compiler onnx model: " << e.what();
-        exit(0);
+        exit(-1);
     }
 
     string strName;
@@ -292,7 +292,7 @@ void Paraformer::LoadCmvn(const char *filename)
     ifstream cmvn_stream(filename);
     if (!cmvn_stream.is_open()) {
         LOG(ERROR) << "Failed to open file: " << filename;
-        exit(0);
+        exit(-1);
     }
     string line;
 
