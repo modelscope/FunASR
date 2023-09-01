@@ -28,6 +28,11 @@ This is suitable for scenarios where there is a need to modify the service deplo
 
 The document introduces the technology principles behind the service, recognition accuracy, computing efficiency, and core advantages: convenience, high precision, high efficiency, and long audio chain. For detailed documentation, please refer to [docs](https://mp.weixin.qq.com/s/8He081-FM-9IEI4D-lxZ9w).
 
+### latest version & image ID
+
+|  image version   |  image ID   | INFO |
+|-----|-----|------|
+|   funasr-runtime-sdk-cpu-0.2.0  |   b710f29f7b3a  |      |
 
 ## File Transcription Service, Mandarin (CPU)
 
@@ -46,3 +51,8 @@ The documentation mainly targets novice users who have no need for modifications
 ### Advanced Development Guide
 
 The documentation mainly targets advanced developers who require modifications and customization of the service. It supports downloading model deployments from modelscope and also supports deploying models that users have fine-tuned. For detailed information, please refer to the documentation available by [docs](./docs/SDK_advanced_guide_offline.md)
+
+### latest version & image ID
+|  image version   |  image ID | INFO |
+|-----|-----|------|
+|   funasr-runtime-sdk-online-cpu-0.1.1  |  e8cfb63c29d3   |      |

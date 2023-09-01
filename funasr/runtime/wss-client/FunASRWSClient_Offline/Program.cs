@@ -19,11 +19,13 @@ namespace FunASRWSClient_Offline
     {
         public static string host = "0.0.0.0";
         public static string port = "10095";
+        public static string hotword = null;
         private static CWebSocketClient m_websocketclient = new CWebSocketClient();
         [STAThread]
         public async void FunASR_Main()
         {
             loadconfig();
+            loadhotword();
             //初始化通信连接
             string errorStatus = string.Empty;
             string commstatus = ClientConnTest();
@@ -71,6 +73,34 @@ namespace FunASRWSClient_Offline
                             port = value;
                     }
                 }
+            }
+
+        }
+        static void loadhotword()
+        {
+            string filePath = "hotword.txt";
+            try
+            {
+                // 使用 StreamReader 打开文本文件
+                using (StreamReader sr = new StreamReader(filePath))
+                {
+                    string line;
+                    // 逐行读取文件内容
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        hotword += line;
+                        hotword += " ";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("读取文件时发生错误：" + ex.Message);
+            }
+            finally
+            {
+                if (hotword.Length > 0 && hotword[hotword.Length - 1] == ' ')
+                    hotword = hotword.Substring(0,hotword.Length - 1);
             }
         }
         private static string ClientConnTest()
