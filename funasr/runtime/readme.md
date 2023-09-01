@@ -30,9 +30,9 @@ The document introduces the technology principles behind the service, recognitio
 
 ### latest version & image ID
 
-|  image version   |  image ID   | INFO |
-|-----|-----|------|
-|   funasr-runtime-sdk-cpu-0.2.0  |   b710f29f7b3a  |      |
+| image version                |  image ID | INFO |
+|------------------------------|-----|------|
+| funasr-runtime-sdk-cpu-0.2.1 |   9aa217185bdc  |      |
 
 ## File Transcription Service, Mandarin (CPU)
 
