@@ -6,7 +6,9 @@ FunASR have implemented the following paper code
 - [FunASR: A Fundamental End-to-End Speech Recognition Toolkit](https://arxiv.org/abs/2305.11013), INTERSPEECH 2023
 - [BAT: Boundary aware transducer for memory-efficient and low-latency ASR](https://arxiv.org/abs/2305.11571), INTERSPEECH 2023
 - [Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition](https://arxiv.org/abs/2206.08317), INTERSPEECH 2022
-- [Universal ASR: Unifying Streaming and Non-Streaming ASR Using a Single Encoder-Decoder Model](https://arxiv.org/abs/2010.14099), arXiv preprint arXiv:2010.14099, 2020.
+- [E-branchformer: Branchformer with enhanced merging for speech recognition](https://arxiv.org/abs/2210.00077), SLT 2022
+- [Branchformer: Parallel mlp-attention architectures to capture local and global context for speech recognition and understanding](https://proceedings.mlr.press/v162/peng22a.html?ref=https://githubhelp.com), ICML 2022
+- [Universal ASR: Unifying Streaming and Non-Streaming ASR Using a Single Encoder-Decoder Model](https://arxiv.org/abs/2010.14099), arXiv preprint arXiv:2010.14099, 2020
 - [San-m: Memory equipped self-attention for end-to-end speech recognition](https://arxiv.org/pdf/2006.01713), INTERSPEECH 2020
 - [Streaming Chunk-Aware Multihead Attention for Online End-to-End Speech Recognition](https://arxiv.org/abs/2006.01712), INTERSPEECH 2020
 - [Conformer: Convolution-augmented Transformer for Speech Recognition](https://arxiv.org/abs/2005.08100),  INTERSPEECH 2020
