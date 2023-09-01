@@ -308,9 +308,10 @@ void WebSocketServer::check_and_clean_connection() {
       iter++;
     }
     for (auto hdl : to_remove) {
-      remove_hdl(hdl, data_map);
-      //LOG(INFO) << "remove one connection ";
-
+      {
+        unique_lock lock(m_lock);
+        remove_hdl(hdl, data_map);
+      }
     }
   }
 }
@@ -333,6 +334,7 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
   std::shared_ptr<std::vector<std::vector<std::string>>> punc_cache_p =
       msg_data->punc_cache;
   std::shared_ptr<websocketpp::lib::mutex> thread_lock_p = msg_data->thread_lock;
+
   lock.unlock();
 
   if (sample_data_p == nullptr) {

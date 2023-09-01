@@ -22,7 +22,7 @@ void CTTransformerOnline::InitPunc(const std::string &punc_model, const std::str
     }
     catch (std::exception const &e) {
         LOG(ERROR) << "Error when load punc onnx model: " << e.what();
-        exit(0);
+        exit(-1);
     }
     // read inputnames outputnames
     string strName;
@@ -226,7 +226,6 @@ vector<int> CTTransformerOnline::Infer(vector<int32_t> input_data, int nCacheSiz
     catch (std::exception const &e)
     {
         LOG(ERROR) << "Error when run punc onnx forword: " << (e.what());
-        exit(0);
     }
     return punction;
 }

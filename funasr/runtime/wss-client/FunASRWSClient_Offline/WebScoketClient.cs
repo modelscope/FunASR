@@ -2,6 +2,7 @@
 using System.Text.Json;
 using System.Reactive.Linq;
 using FunASRWSClient_Offline;
+using System.Text.RegularExpressions;
 
 namespace WebSocketSpace
 {
@@ -45,15 +46,31 @@ namespace WebSocketSpace
 
         public async Task<Task> ClientSendFileFunc(string file_name)//文件转录
         {
+            string fileExtension = Path.GetExtension(file_name);
+            fileExtension = fileExtension.Replace(".", "");
+            if (!(fileExtension == "mp3" || fileExtension == "mp4" || fileExtension == "wav" || fileExtension == "pcm"))
+                return Task.CompletedTask;
+
             try
             {
                 if (client.IsRunning)
                 {
-                    var exitEvent = new ManualResetEvent(false);
-                    string path = Path.GetFileName(file_name);
-                    string firstbuff = string.Format("{{\"mode\": \"offline\", \"wav_name\": \"{0}\", \"is_speaking\": true}}", Path.GetFileName(file_name));
-                    client.Send(firstbuff);
-                    showWAVForm(client, file_name);
+                    if (fileExtension == "wav")
+                    {
+                        var exitEvent = new ManualResetEvent(false);
+                        string path = Path.GetFileName(file_name);
+                        string firstbuff = string.Format("{{\"mode\": \"offline\", \"wav_name\": \"{0}\", \"is_speaking\": true,\"hotwords\":\"{1}\"}}", Path.GetFileName(file_name), WSClient_Offline.hotword);
+                        client.Send(firstbuff);
+                        showWAVForm(client, file_name);
+                    }
+                    else
+                    {
+                        var exitEvent = new ManualResetEvent(false);
+                        string path = Path.GetFileName(file_name);
+                        string firstbuff = string.Format("{{\"mode\": \"offline\", \"wav_name\": \"{0}\", \"is_speaking\": true,\"hotwords\":\"{1}\", \"wav_format\":\"{2}\"}}", Path.GetFileName(file_name), WSClient_Offline.hotword, fileExtension);
+                        client.Send(firstbuff);
+                        showWAVForm_All(client, file_name);
+                    }
                 }
             }
             catch (Exception ex)
@@ -69,15 +86,42 @@ namespace WebSocketSpace
             {
                 try
                 {
+                    string timestamp = string.Empty;
                     JsonDocument jsonDoc = JsonDocument.Parse(message);
                     JsonElement root = jsonDoc.RootElement;
                     string mode = root.GetProperty("mode").GetString();
-                    string text = root.GetProperty("text").GetString();
+                    string text = root.GetProperty("text").GetString(); 
                     string name = root.GetProperty("wav_name").GetString();
-                    if(name == "asr_stream")
-                        Console.WriteLine($"实时识别内容: {text}");
+                    if (message.IndexOf("timestamp") != -1)
+                    {
+                        Console.WriteLine($"文件名称:{name}");
+                        //识别内容处理
+                        text = text.Replace(",", "。");
+                        text = text.Replace("?", "。");
+                        List<string> sens = text.Split("。").ToList();
+                        //时间戳处理
+                        timestamp = root.GetProperty("timestamp").GetString();
+                        List<List<int>> data = new List<List<int>>();
+                        string pattern = @"\[(\d+),(\d+)\]";
+                        foreach (Match match in Regex.Matches(timestamp, pattern))
+                        {
+                            int start = int.Parse(match.Groups[1].Value);
+                            int end = int.Parse(match.Groups[2].Value);
+                            data.Add(new List<int> { start, end });
+                        }
+                        int count = 0;
+                        for (int i = 0; i< sens.Count;  i++)
+                        {
+                            if (sens[i].Length == 0)
+                                continue;
+                            Console.WriteLine(string.Format($"[{data[count][0]}-{data[count + sens[i].Length - 1][1]}]:{sens[i]}"));
+                            count += sens[i].Length;
+                        }
+                    }
                     else
-                        Console.WriteLine($"文件名称:{name} 文件转录内容: {text}");
+                    {
+                        Console.WriteLine($"文件名称:{name} 文件转录内容: {text} 时间戳：{timestamp}");
+                    }
                 }
                 catch (JsonException ex)
                 {
@@ -90,6 +134,19 @@ namespace WebSocketSpace
         {
             byte[] getbyte = FileToByte(file_name).Skip(44).ToArray();
 
+            for (int i = 0; i < getbyte.Length; i += 1024000)
+            {
+                byte[] send = getbyte.Skip(i).Take(1024000).ToArray();
+                client.Send(send);
+                Thread.Sleep(5);
+            }
+            Thread.Sleep(10);
+            client.Send("{\"is_speaking\": false}");
+        }
+
+        private void showWAVForm_All(WebsocketClient client, string file_name)
+        {
+            byte[] getbyte = FileToByte(file_name).ToArray();
             for (int i = 0; i < getbyte.Length; i += 1024000)
             {
                 byte[] send = getbyte.Skip(i).Take(1024000).ToArray();

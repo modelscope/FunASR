@@ -1171,8 +1171,8 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
 
             }else if(speech_end_i != -1){ // [-1,100]
                 if(speech_start == -1 or speech_offline_start == -1){
-                    LOG(ERROR) <<"Vad start is null while vad end is available." ;
-                    exit(-1);
+                    LOG(ERROR) <<"Vad start is null while vad end is available. Set vad start 0" ;
+                    speech_start = 0;
                 }
 
                 int start = speech_start*seg_sample;
