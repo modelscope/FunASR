@@ -1386,6 +1386,16 @@ class Speech2TextTransducer:
         else:
             lm_scorer = None
 
+        # In multi-blank RNNT, we assume all big blanks are
+        # just before the standard blank in token_list
+        multi_blank_durations = getattr(
+            asr_model, "transducer_multi_blank_durations", []
+        )[::-1] + [1]
+        multi_blank_indices = [
+            asr_model.blank_id - i + 1
+            for i in range(len(multi_blank_durations), 0, -1)
+        ]
+
         # 4. Build BeamSearch object
         if beam_search_config is None:
             beam_search_config = {}
@@ -1396,6 +1406,8 @@ class Speech2TextTransducer:
             beam_size,
             lm=lm_scorer,
             lm_weight=lm_weight,
+            multi_blank_durations=multi_blank_durations,
+            multi_blank_indices=multi_blank_indices,
             nbest=nbest,
             **beam_search_config,
         )

@@ -59,6 +59,8 @@ class BeamSearchTransducer:
         expansion_gamma: Allowed logp difference for prune-by-value method. (mAES)
         expansion_beta:
              Number of additional candidates for expanded hypotheses selection. (mAES)
+        multi_blank_durations: The duration of each blank token. (MBG)
+        multi_blank_indices: The index of each blank token in token_list. (MBG)
         score_norm: Normalize final scores by length.
         nbest: Number of final hypothesis.
         streaming: Whether to perform chunk-by-chunk beam search.
@@ -78,6 +80,8 @@ class BeamSearchTransducer:
         nstep: int = 2,
         expansion_gamma: float = 2.3,
         expansion_beta: int = 2,
+        multi_blank_durations: List[int] = [],
+        multi_blank_indices: List[int] = [],
         score_norm: bool = False,
         nbest: int = 1,
         streaming: bool = False,
@@ -99,7 +103,15 @@ class BeamSearchTransducer:
         )
         self.beam_size = beam_size
 
-        if search_type == "default":
+        if search_type == "mbg":
+            self.beam_size = 1
+            self.multi_blank_durations = multi_blank_durations
+            self.multi_blank_indices = multi_blank_indices
+            self.search_algorithm = self.multi_blank_greedy_search
+
+        elif self.beam_size <= 1:
+            self.search_algorithm = self.greedy_search
+        elif search_type == "default":
             self.search_algorithm = self.default_beam_search
         elif search_type == "tsd":
             assert max_sym_exp > 1, "max_sym_exp (%d) should be greater than one." % (
@@ -702,3 +714,58 @@ class BeamSearchTransducer:
                         )[: self.beam_size]
 
         return kept_hyps
+
+
+    def multi_blank_greedy_search(self, enc_out: torch.Tensor) -> List[Hypothesis]:
+        """Greedy Search for Multi-Blank Transducer (Multi-Blank Greedy, MBG).
+        In this implementation, we assume:
+        1. the index of standard blank is the last entry of self.multi_blank_indices
+           rather than self.blank_id (to avoid too much change on original transducer)
+        2. other entries in self.multi_blank_indices are big blanks that account for
+           multiple frames.
+
+        Based on https://arxiv.org/abs/2211.03541
+
+        Args:
+            enc_out: Encoder output sequence. (T, D_enc)
+
+        Returns:
+            hyp: 1-best hypothesis.
+
+        """
+
+        big_blank_duration = 1
+        blank_start = self.multi_blank_indices[0]
+        blank_end = self.multi_blank_indices[-1]
+
+        dec_state = self.decoder.init_state(1)
+        hyp = Hypothesis(score=0.0, yseq=[blank_end], dec_state=dec_state)
+        cache = {}
+
+        for enc_out_t in enc_out:
+            # case 1: skip frames until big_blank_duration == 1
+            if big_blank_duration > 1:
+                big_blank_duration -= 1
+                continue
+
+            symbols_added = 0
+            while symbols_added <= 3:
+                dec_out, state, _ = self.decoder.score(hyp, cache)
+                logp = torch.log_softmax(self.joint_network(enc_out_t, dec_out), dim=-1)
+                top_logp, k = torch.max(logp, dim=-1)
+
+                # case 2: predict a blank token
+                if blank_start <= k <= blank_end:
+                    big_blank_duration = self.multi_blank_durations[k - blank_start]
+                    hyp.score += top_logp
+                    break
+
+                # case 3: predict a non-blank token
+                else:
+                    symbols_added += 1
+                    hyp.yseq.append(int(k))
+                    hyp.score += float(top_logp)
+                    hyp.dec_state = state
+
+        return [hyp]
+
