@@ -10,7 +10,7 @@
 #### 首次通信
 message为（需要用json序列化）：
 ```text
-{"mode": "offline", "wav_name": "wav_name","wav_format":"pcm","is_speaking": True,"wav_format":"pcm","hotwords":"阿里巴巴 达摩院 阿里云"}
+{"mode": "offline", "wav_name": "wav_name","wav_format":"pcm","is_speaking": True,"hotwords":"阿里巴巴 达摩院 阿里云"}
 ```
 参数介绍：
 ```text
