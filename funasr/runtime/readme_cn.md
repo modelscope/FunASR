@@ -29,6 +29,8 @@ FunASR实时语音听写服务软件包，既可以实时地进行语音转文�
 
 文档介绍了背后技术原理，识别准确率，计算效率等，以及核心优势介绍：便捷、高精度、高效率、长音频链路，详细文档参考（[点击此处](https://mp.weixin.qq.com/s/8He081-FM-9IEI4D-lxZ9w)）
 
+### 最新版本及image ID
+funasr-runtime-sdk-cpu-0.2.0 b710f29f7b3a
 
 
 ## 中文离线文件转写服务（CPU版本）
@@ -48,3 +50,6 @@ FunASR实时语音听写服务软件包，既可以实时地进行语音转文�
 ### 技术原理揭秘
 
 文档介绍了背后技术原理，识别准确率，计算效率等，以及核心优势介绍：便捷、高精度、高效率、长音频链路，详细文档参考（[点击此处](https://mp.weixin.qq.com/s/DHQwbgdBWcda0w_L60iUww)）
+
+### 最新版本及image ID
+funasr-runtime-sdk-online-cpu-0.1.1 e8cfb63c29d3
