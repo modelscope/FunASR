@@ -279,12 +279,15 @@ std::vector<std::vector<int>>
 FsmnVad::Infer(std::vector<float> &waves, bool input_finished) {
     std::vector<std::vector<float>> vad_feats;
     std::vector<std::vector<float>> vad_probs;
+    std::vector<std::vector<int>> vad_segments;
     FbankKaldi(vad_sample_rate_, vad_feats, waves);
+    if(vad_feats.size() == 0){
+      return vad_segments;
+    }
     LfrCmvn(vad_feats);
     Forward(vad_feats, &vad_probs, &in_cache_, input_finished);
 
     E2EVadModel vad_scorer = E2EVadModel();
-    std::vector<std::vector<int>> vad_segments;
     vad_segments = vad_scorer(vad_probs, waves, true, false, vad_silence_duration_, vad_max_len_,
                               vad_speech_noise_thres_, vad_sample_rate_);
     return vad_segments;

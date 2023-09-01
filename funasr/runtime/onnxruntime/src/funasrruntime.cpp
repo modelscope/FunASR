@@ -224,12 +224,18 @@ extern "C" {
 			return nullptr;
 
 		funasr::Audio audio(1);
-		if(wav_format == "pcm" || wav_format == "PCM"){
-			if (!audio.LoadPcmwav(sz_buf, n_len, &sampling_rate))
-				return nullptr;
-		}else{
-			if (!audio.FfmpegLoad(sz_buf, n_len))
-				return nullptr;
+		try{
+			if(wav_format == "pcm" || wav_format == "PCM"){
+				if (!audio.LoadPcmwav(sz_buf, n_len, &sampling_rate))
+					return nullptr;
+			}else{
+				if (!audio.FfmpegLoad(sz_buf, n_len))
+					return nullptr;
+			}
+		}catch (std::exception const &e)
+		{
+			LOG(ERROR)<<e.what();
+			return nullptr;
 		}
 
 		funasr::FUNASR_RECOG_RESULT* p_result = new funasr::FUNASR_RECOG_RESULT;
@@ -288,17 +294,24 @@ extern "C" {
 			return nullptr;
 		
 		funasr::Audio audio(1);
-		if(funasr::is_target_file(sz_filename, "wav")){
-			int32_t sampling_rate_ = -1;
-			if(!audio.LoadWav(sz_filename, &sampling_rate_))
-				return nullptr;
-		}else if(funasr::is_target_file(sz_filename, "pcm")){
-			if (!audio.LoadPcmwav(sz_filename, &sampling_rate))
-				return nullptr;
-		}else{
-			if (!audio.FfmpegLoad(sz_filename))
-				return nullptr;
+		try{
+			if(funasr::is_target_file(sz_filename, "wav")){
+				int32_t sampling_rate_ = -1;
+				if(!audio.LoadWav(sz_filename, &sampling_rate_))
+					return nullptr;
+			}else if(funasr::is_target_file(sz_filename, "pcm")){
+				if (!audio.LoadPcmwav(sz_filename, &sampling_rate))
+					return nullptr;
+			}else{
+				if (!audio.FfmpegLoad(sz_filename))
+					return nullptr;
+			}
+		}catch (std::exception const &e)
+		{
+			LOG(ERROR)<<e.what();
+			return nullptr;
 		}
+		
 		funasr::FUNASR_RECOG_RESULT* p_result = new funasr::FUNASR_RECOG_RESULT;
 		p_result->snippet_time = audio.GetTimeLen();
 		if(p_result->snippet_time == 0){
