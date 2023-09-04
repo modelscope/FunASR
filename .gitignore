@@ -31,3 +31,4 @@ egs_modelscope/asr/paraformer/offline/
 egs_modelscope/asr/paraformer/online/
 funasr/runtime/websocket/build*
 egs_modelscope/asr/paraformer/timestamp/
+egs_modelscope/asr/paraformer/hotword/
