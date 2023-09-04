@@ -71,7 +71,7 @@ The contributors can be found in [contributors list](./Acknowledge.md)
 
 ## License
 This project is licensed under the [The MIT License](https://opensource.org/licenses/MIT). FunASR also contains various third-party components and some code modified from other repos under other open source licenses.
-The use of pretraining model is subject to [model licencs](./MODEL_LICENSE)
+The use of pretraining model is subject to [model license](./MODEL_LICENSE)
 
 
 ## Citations
