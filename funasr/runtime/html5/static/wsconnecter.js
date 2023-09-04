@@ -77,6 +77,11 @@ function WebSocketConnectMethod( config ) { //定义socket连接方法类
 		if(isfilemode)
 		{
 			request.wav_format=file_ext;
+			if(file_ext=="wav")
+			{
+				request.wav_format="PCM";
+				request.audio_fs=file_sample_rate;
+			}
 		}
 		var hotwords=getHotwords();
 		if(hotwords.length>0)

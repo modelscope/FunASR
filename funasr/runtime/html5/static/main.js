@@ -45,6 +45,7 @@ var upfile = document.getElementById('upfile');
 
 var isfilemode=false;  // if it is in file mode
 var file_ext="";
+var file_sample_rate=16000; //for wav file sample rate
 var file_data_array;  // array to save file data
  
 var totalsend=0;
@@ -70,6 +71,7 @@ function addresschange()
 		}
 	
 }
+
 upfile.onclick=function()
 {
 		btnStart.disabled = true;
@@ -77,25 +79,108 @@ upfile.onclick=function()
 		btnConnect.disabled=false;
 	
 }
+
+// from https://github.com/xiangyuecn/Recorder/tree/master
+var readWavInfo=function(bytes){
+	//读取wav文件头，统一成44字节的头
+	if(bytes.byteLength<44){
+		return null;
+	};
+	var wavView=bytes;
+	var eq=function(p,s){
+		for(var i=0;i<s.length;i++){
+			if(wavView[p+i]!=s.charCodeAt(i)){
+				return false;
+			};
+		};
+		return true;
+	};
+	
+	if(eq(0,"RIFF")&&eq(8,"WAVEfmt ")){
+ 
+		var numCh=wavView[22];
+		if(wavView[20]==1 && (numCh==1||numCh==2)){//raw pcm 单或双声道
+			var sampleRate=wavView[24]+(wavView[25]<<8)+(wavView[26]<<16)+(wavView[27]<<24);
+			var bitRate=wavView[34]+(wavView[35]<<8);
+			var heads=[wavView.subarray(0,12)],headSize=12;//head只保留必要的块
+			//搜索data块的位置
+			var dataPos=0; // 44 或有更多块
+			for(var i=12,iL=wavView.length-8;i<iL;){
+				if(wavView[i]==100&&wavView[i+1]==97&&wavView[i+2]==116&&wavView[i+3]==97){//eq(i,"data")
+					heads.push(wavView.subarray(i,i+8));
+					headSize+=8;
+					dataPos=i+8;break;
+				}
+				var i0=i;
+				i+=4;
+				i+=4+wavView[i]+(wavView[i+1]<<8)+(wavView[i+2]<<16)+(wavView[i+3]<<24);
+				if(i0==12){//fmt 
+					heads.push(wavView.subarray(i0,i));
+					headSize+=i-i0;
+				}
+			}
+			if(dataPos){
+				var wavHead=new Uint8Array(headSize);
+				for(var i=0,n=0;i<heads.length;i++){
+					wavHead.set(heads[i],n);n+=heads[i].length;
+				}
+				return {
+					sampleRate:sampleRate
+					,bitRate:bitRate
+					,numChannels:numCh
+					,wavHead44:wavHead
+					,dataPos:dataPos
+				};
+			};
+		};
+	};
+	return null;
+};
+
 upfile.onchange = function () {
 　　　　　　var len = this.files.length;  
             for(let i = 0; i < len; i++) {
+
                 let fileAudio = new FileReader();
                 fileAudio.readAsArrayBuffer(this.files[i]);  
+ 
 				file_ext=this.files[i].name.split('.').pop().toLowerCase();
-
+                var audioblob;
                 fileAudio.onload = function() {
-                 var audioblob= fileAudio.result;
+                audioblob = fileAudio.result;
+ 
+				 
 				 file_data_array=audioblob;
-				 console.log(audioblob);
+ 
                   
                  info_div.innerHTML='请点击连接进行识别';
-               
+ 
                 }
+
 　　　　　　　　　　fileAudio.onerror = function(e) {
 　　　　　　　　　　　　console.log('error' + e);
 　　　　　　　　　　}
             }
+			// for wav file, we  get the sample rate
+			if(file_ext=="wav")
+            for(let i = 0; i < len; i++) {
+
+                let fileAudio = new FileReader();
+                fileAudio.readAsArrayBuffer(this.files[i]);  
+                fileAudio.onload = function() {
+                audioblob = new Uint8Array(fileAudio.result);
+ 
+				// for wav file, we can get the sample rate
+				var info=readWavInfo(audioblob);
+				   console.log(info);
+				   file_sample_rate=info.sampleRate;
+	 
+ 
+                }
+
+　　　　　　 
+            }
+ 
         }
 
 function play_file()
