@@ -130,7 +130,6 @@ class TransducerModel(FunASRModel):
             )
             self.transducer_multi_blank_durations = transducer_multi_blank_durations
 
-        self.criterion_transducer = None
         self.error_calculator = None
 
         self.use_auxiliary_ctc = auxiliary_ctc_weight > 0
