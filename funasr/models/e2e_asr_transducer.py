@@ -549,6 +549,8 @@ class UnifiedTransducerModel(FunASRModel):
         ignore_id: int = -1,
         sym_space: str = "<space>",
         sym_blank: str = "<blank>",
+        transducer_multi_blank_durations: List = [],
+        transducer_multi_blank_sigma: float = 0.05,
         report_cer: bool = True,
         report_wer: bool = True,
         sym_sos: str = "<s>",
@@ -587,7 +589,32 @@ class UnifiedTransducerModel(FunASRModel):
         self.decoder = decoder
         self.joint_network = joint_network
 
-        self.criterion_transducer = None
+        #criterion transducer initialize
+        if not transducer_multi_blank_durations:
+            try:
+                from warp_rnnt import rnnt_loss as RNNTLoss
+                self.criterion_transducer = RNNTLoss
+
+            except ImportError:
+                logging.error(
+                    "warp-rnnt was not installed."
+                    "Please consult the installation documentation."
+                )
+                exit(1)
+        else:
+            from funasr.modules.rnnt_multi_blank.rnnt_multi_blank import (
+                MultiblankRNNTLossNumba,
+            )
+
+            self.criterion_transducer = MultiblankRNNTLossNumba(
+                blank=self.blank_id,
+                big_blank_durations=transducer_multi_blank_durations,
+                sigma=transducer_multi_blank_sigma,
+                reduction="mean",
+                fastemit_lambda=0.0,
+            )
+            self.transducer_multi_blank_durations = transducer_multi_blank_durations 
+
         self.error_calculator = None
 
         self.use_auxiliary_ctc = auxiliary_ctc_weight > 0
