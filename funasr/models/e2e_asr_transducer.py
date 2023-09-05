@@ -592,7 +592,10 @@ class UnifiedTransducerModel(FunASRModel):
         if not transducer_multi_blank_durations:
             try:
                 from warp_rnnt import rnnt_loss as RNNTLoss
-                self.criterion_transducer = RNNTLoss
+                self.criterion_transducer = RNNTLoss(
+                    reduction="mean",
+                    fastemit_lambda=self.fastemit_lambda,
+                )
 
             except ImportError:
                 logging.error(
@@ -897,7 +900,10 @@ class UnifiedTransducerModel(FunASRModel):
         if self.criterion_transducer is None:
             try:
                 from warp_rnnt import rnnt_loss as RNNTLoss
-                self.criterion_transducer = RNNTLoss
+                self.criterion_transducer = RNNTLoss(
+                    reduction="mean",
+                    fastemit_lambda=self.fastemit_lambda, 
+                )
 
             except ImportError:
                 logging.error(
@@ -913,10 +919,6 @@ class UnifiedTransducerModel(FunASRModel):
                 target,
                 t_len,
                 u_len,
-                reduction="mean",
-                blank=self.blank_id,
-                fastemit_lambda=self.fastemit_lambda,
-                gather=True,
         )
 
         if not self.training and (self.report_cer or self.report_wer):
