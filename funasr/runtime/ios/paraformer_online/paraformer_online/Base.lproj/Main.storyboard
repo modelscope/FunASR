@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="LNx-YM-oyd">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21678"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="LKx-p6-aa7">
+            <objects>
+                <viewController id="LNx-YM-oyd" customClass="ViewController" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="f9i-bJ-nwR">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="a90-mD-VNo">
+                                <rect key="frame" x="20" y="79" width="353" height="549"/>
+                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="22"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                <connections>
+                                    <outlet property="delegate" destination="LNx-YM-oyd" id="y7d-6A-9hP"/>
+                                </connections>
+                            </textView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eHG-b8-QrU">
+                                <rect key="frame" x="136.66666666666666" y="648" width="119.99999999999997" height="120"/>
+                                <color key="backgroundColor" systemColor="systemYellowColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="120" id="bNz-tU-Gr3"/>
+                                    <constraint firstAttribute="height" constant="120" id="juZ-Sc-VF7"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="22"/>
+                                <color key="tintColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" title="开始说话">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                                <state key="selected" title="停止说话"/>
+                                <connections>
+                                    <action selector="startButtonClicked:" destination="LNx-YM-oyd" eventType="touchUpInside" id="09b-nJ-q4t"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="9Vr-PE-hwK"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="a90-mD-VNo" firstAttribute="top" secondItem="9Vr-PE-hwK" secondAttribute="top" constant="20" id="6EP-DI-QiI"/>
+                            <constraint firstItem="a90-mD-VNo" firstAttribute="leading" secondItem="9Vr-PE-hwK" secondAttribute="leading" constant="20" id="MyE-dD-mYG"/>
+                            <constraint firstItem="9Vr-PE-hwK" firstAttribute="bottom" secondItem="eHG-b8-QrU" secondAttribute="bottom" constant="50" id="gSD-5y-y1j"/>
+                            <constraint firstItem="9Vr-PE-hwK" firstAttribute="trailing" secondItem="a90-mD-VNo" secondAttribute="trailing" constant="20" id="psn-ga-kSC"/>
+                            <constraint firstItem="eHG-b8-QrU" firstAttribute="top" secondItem="a90-mD-VNo" secondAttribute="bottom" constant="20" id="rvq-Xo-Qv7"/>
+                            <constraint firstItem="eHG-b8-QrU" firstAttribute="centerX" secondItem="f9i-bJ-nwR" secondAttribute="centerX" id="vPV-bu-rny"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="resultView" destination="a90-mD-VNo" id="ghN-4g-qXC"/>
+                        <outlet property="startButton" destination="eHG-b8-QrU" id="SLc-gU-csB"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="vs1-EQ-4px" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="139.69465648854961" y="3.5211267605633805"/>
+        </scene>
+    </scenes>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemYellowColor">
+            <color red="1" green="0.80000000000000004" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+    </resources>
+</document>
