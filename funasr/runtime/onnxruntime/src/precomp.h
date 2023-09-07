@@ -19,8 +19,13 @@
 
 using namespace std;
 // third part
+#if defined(__APPLE__)
+#include <onnxruntime/onnxruntime_cxx_api.h>
+#else
 #include "onnxruntime_run_options_config_keys.h"
 #include "onnxruntime_cxx_api.h"
+#endif
+
 #include "kaldi-native-fbank/csrc/feature-fbank.h"
 #include "kaldi-native-fbank/csrc/online-feature.h"
 
@@ -38,13 +43,11 @@ using namespace std;
 #include "ct-transformer-online.h"
 #include "e2e-vad.h"
 #include "fsmn-vad.h"
-#include "encode_converter.h"
 #include "vocab.h"
 #include "audio.h"
 #include "fsmn-vad-online.h"
 #include "tensor.h"
 #include "util.h"
-#include "seg_dict.h"
 #include "resample.h"
 #include "paraformer.h"
 #include "paraformer-online.h"

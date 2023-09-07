@@ -9,6 +9,11 @@
 #include "audio.h"
 #include "precomp.h"
 
+
+#if defined(__APPLE__)
+#include <string.h>
+#else
+
 extern "C" {
 #include <libavutil/opt.h>
 #include <libavcodec/avcodec.h>
@@ -17,6 +22,10 @@ extern "C" {
 #include <libavutil/samplefmt.h>
 #include <libswresample/swresample.h>
 }
+
+#endif
+
+
 
 using namespace std;
 
@@ -245,6 +254,9 @@ void Audio::WavResample(int32_t sampling_rate, const float *waveform,
 }
 
 bool Audio::FfmpegLoad(const char *filename, bool copy2char){
+#if defined(__APPLE__)
+    return false;
+#else
     // from file
     AVFormatContext* formatContext = avformat_alloc_context();
     if (avformat_open_input(&formatContext, filename, NULL, NULL) != 0) {
@@ -403,10 +415,13 @@ bool Audio::FfmpegLoad(const char *filename, bool copy2char){
     }
     else
         return false;
-    
+#endif
 }
 
 bool Audio::FfmpegLoad(const char* buf, int n_file_len){
+#if defined(__APPLE__)
+    return false;
+#else
     // from buf
     char* buf_copy = (char *)malloc(n_file_len);
     memcpy(buf_copy, buf, n_file_len);
@@ -577,7 +592,7 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
     }
     else
         return false;
-    
+#endif
 }
 
 
@@ -980,23 +995,6 @@ int Audio::Fetch(float *&dout, int &len, int &flag)
     }
 }
 
-int Audio::Fetch(float *&dout, int &len, int &flag, float &start_time)
-{
-    if (frame_queue.size() > 0) {
-        AudioFrame *frame = frame_queue.front();
-        frame_queue.pop();
-
-        start_time = (float)(frame->GetStart())/MODEL_SAMPLE_RATE;
-        dout = speech_data + frame->GetStart();
-        len = frame->GetLen();
-        delete frame;
-        flag = S_END;
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
 void Audio::Padding()
 {
     float num_samples = speech_len;
@@ -1163,8 +1161,8 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
 
             }else if(speech_end_i != -1){ // [-1,100]
                 if(speech_start == -1 or speech_offline_start == -1){
-                    LOG(ERROR) <<"Vad start is null while vad end is available. Set vad start 0" ;
-                    speech_start = 0;
+                    LOG(ERROR) <<"Vad start is null while vad end is available." ;
+                    exit(-1);
                 }
 
                 int start = speech_start*seg_sample;
