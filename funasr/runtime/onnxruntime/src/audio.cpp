@@ -9,6 +9,11 @@
 #include "audio.h"
 #include "precomp.h"
 
+
+#if defined(__APPLE__)
+#include <string.h>
+#else
+
 extern "C" {
 #include <libavutil/opt.h>
 #include <libavcodec/avcodec.h>
@@ -17,6 +22,10 @@ extern "C" {
 #include <libavutil/samplefmt.h>
 #include <libswresample/swresample.h>
 }
+
+#endif
+
+
 
 using namespace std;
 
@@ -245,6 +254,9 @@ void Audio::WavResample(int32_t sampling_rate, const float *waveform,
 }
 
 bool Audio::FfmpegLoad(const char *filename, bool copy2char){
+#if defined(__APPLE__)
+    return false;
+#else
     // from file
     AVFormatContext* formatContext = avformat_alloc_context();
     if (avformat_open_input(&formatContext, filename, NULL, NULL) != 0) {
@@ -403,10 +415,13 @@ bool Audio::FfmpegLoad(const char *filename, bool copy2char){
     }
     else
         return false;
-    
+#endif
 }
 
 bool Audio::FfmpegLoad(const char* buf, int n_file_len){
+#if defined(__APPLE__)
+    return false;
+#else
     // from buf
     char* buf_copy = (char *)malloc(n_file_len);
     memcpy(buf_copy, buf, n_file_len);
@@ -577,7 +592,7 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
     }
     else
         return false;
-    
+#endif
 }
 
 
