@@ -177,6 +177,21 @@ void WebSocketServer::do_decoder(
                         websocketpp::frame::opcode::text, ec);
         }
         FunASRFreeResult(Result);
+      }else{
+        if(msg["wav_format"] != "pcm" && msg["wav_format"] != "PCM"){
+          websocketpp::lib::error_code ec;
+          nlohmann::json jsonresult;
+          jsonresult["text"] = "ERROR. Real-time transcription service ONLY SUPPORT wav_format pcm.";
+          jsonresult["wav_name"] = wav_name;
+          jsonresult["is_final"] = true;
+          if (is_ssl) {
+            wss_server_->send(hdl, jsonresult.dump(),
+                              websocketpp::frame::opcode::text, ec);
+          } else {
+            server_->send(hdl, jsonresult.dump(),
+                          websocketpp::frame::opcode::text, ec);
+          }
+        }
       }
     }
 
@@ -204,13 +219,8 @@ void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
     data_msg->punc_cache =
         std::make_shared<std::vector<std::vector<std::string>>>(2);
   	data_msg->strand_ =	std::make_shared<asio::io_context::strand>(io_decoder_);
-    // std::vector<int> chunk_size = {5, 10, 5};  //TODO, need get from client
-    // FUNASR_HANDLE tpass_online_handle =
-    //     FunTpassOnlineInit(tpass_handle, chunk_size);
-    // data_msg->tpass_online_handle = tpass_online_handle;
 
     data_map.emplace(hdl, data_msg);
-    // LOG(INFO) << "on_open, active connections: " << data_map.size();
   }catch (std::exception const& e) {
     std::cerr << "Error: " << e.what() << std::endl;
   }
@@ -232,7 +242,6 @@ void remove_hdl(
   // finished and avoid access freed tpass_online_handle
   unique_lock guard_decoder(*(data_msg->thread_lock));
   if (data_msg->msg["access_num"]==0 && data_msg->msg["is_eof"]==true) {
-    // LOG(INFO) << "----------------FunTpassOnlineUninit----------------------";
     FunTpassOnlineUninit(data_msg->tpass_online_handle);
     data_msg->tpass_online_handle = nullptr;
 	  data_map.erase(hdl);
@@ -253,15 +262,12 @@ void WebSocketServer::on_close(websocketpp::connection_hdl hdl) {
   unique_lock guard_decoder(*(data_msg->thread_lock));
   data_msg->msg["is_eof"]=true;
   guard_decoder.unlock();
-  //LOG(INFO) << "on_close, active connections: " << data_map.size();
 }
  
 // remove closed connection
 void WebSocketServer::check_and_clean_connection() {
-  // LOG(INFO)<<"***********begin check_and_clean_connection ****************";
   while(true){
     std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-    // LOG(INFO) << "run check_and_clean_connection" <<", active connections: " << data_map.size();
     std::vector<websocketpp::connection_hdl> to_remove;  // remove list
     auto iter = data_map.begin();
     while (iter != data_map.end()) {  // loop to find closed connection
