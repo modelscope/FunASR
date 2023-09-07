@@ -183,6 +183,7 @@ def inference_lm(
             dtype=dtype,
             batch_size=batch_size,
             key_file=key_file,
+            preprocess_fn=preprocessor,
             num_workers=num_workers,
         )
 
