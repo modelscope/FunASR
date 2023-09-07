@@ -32,7 +32,7 @@ The document introduces the technology principles behind the service, recognitio
 
 | image version                |  image ID | INFO |
 |------------------------------|-----|------|
-| funasr-runtime-sdk-cpu-0.2.1 |  b031cc4c2df3   |      |
+| funasr-runtime-sdk-cpu-0.2.1 |  1ad3d19e0707   |      |
 
 ## File Transcription Service, Mandarin (CPU)
 
@@ -55,4 +55,4 @@ The documentation mainly targets advanced developers who require modifications a
 ### latest version & image ID
 |  image version   |  image ID | INFO |
 |-----|-----|------|
-|   funasr-runtime-sdk-online-cpu-0.1.1  |  383f544022ee   |      |
+|   funasr-runtime-sdk-online-cpu-0.1.1  |  bdbdd0b27dee   |      |

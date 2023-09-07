@@ -33,7 +33,7 @@ FunASR实时语音听写服务软件包，既可以实时地进行语音转文�
 
 | image version                |  image ID | INFO |
 |------------------------------|-----|------|
-| funasr-runtime-sdk-cpu-0.2.1 |   b031cc4c2df3  |      |
+| funasr-runtime-sdk-cpu-0.2.1 |   1ad3d19e0707  |      |
 
 
 ## 中文离线文件转写服务（CPU版本）
@@ -57,4 +57,4 @@ FunASR实时语音听写服务软件包，既可以实时地进行语音转文�
 ### 最新版本及image ID
 |  image version   |  image ID | INFO |
 |-----|-----|------|
-|   funasr-runtime-sdk-online-cpu-0.1.1  |  383f544022ee   |      |
+|   funasr-runtime-sdk-online-cpu-0.1.1  |  bdbdd0b27dee   |      |
