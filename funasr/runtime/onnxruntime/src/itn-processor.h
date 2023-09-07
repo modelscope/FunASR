@@ -1,3 +1,7 @@
+// Acknowledgement: this code is adapted from 
+// https://github.com/wenet-e2e/WeTextProcessing/blob/master/runtime/processor/processor.h 
+// Retrieved in Aug 2023.
+
 // Copyright (c) 2022 Zhendong Peng (pzd17@tsinghua.org.cn)
 //               2023 Jing Du (thuduj12@163.com)
 //
@@ -13,8 +17,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef PROCESSOR_PROCESSOR_H_
-#define PROCESSOR_PROCESSOR_H_
+#ifndef ITN_PROCESSOR_H_
+#define ITN_PROCESSOR_H_
 
 #include "fst/fstlib.h"
 #include "precomp.h"
@@ -49,4 +53,4 @@ class ITNProcessor : public ITNModel {
 
 }  // namespace funasr
 
-#endif  // PROCESSOR_PROCESSOR_H_
+#endif  // ITN_PROCESSOR_H_
