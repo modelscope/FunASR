@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Paraformer online &mdash; FunASR  documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            FunASR
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/docker.html">Docker</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Quick Start</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quick_start.html">Quick Start</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Academic Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/asr_recipe.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/punc_recipe.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/vad_recipe.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/sv_recipe.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../academic_recipe/sd_recipe.html">Speaker Diarization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">ModelScope Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../egs_modelscope/asr/TEMPLATE/README.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../egs_modelscope/vad/TEMPLATE/README.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../egs_modelscope/punctuation/TEMPLATE/README.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../egs_modelscope/tp/TEMPLATE/README.html">Timestamp Prediction (FA)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/sv_pipeline.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/sd_pipeline.html">Speaker Diarization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelscope_pipeline/itn_pipeline.html">Inverse Text Normalization (ITN)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Zoo</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_zoo/modelscope_models.html">Pretrained Models Released on ModelScope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_zoo/huggingface_models.html">Pretrained Models on Huggingface</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Runtime and Service</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">FunASR Runtime Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../docs/SDK_tutorial_online.html">FunASR Realtime Transcribe Service</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../docs/SDK_tutorial.html">Highlights</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../docs/SDK_tutorial.html#funasr-offline-file-transcription-service">FunASR Offline File Transcription Service</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../html5/readme.html">Speech Recognition Service Html5 Client Access Interface</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark and Leaderboard</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_onnx.html">CPU Benchmark (ONNX-python)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_onnx_cpp.html">CPU Benchmark (ONNX-cpp)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_libtorch.html">CPU Benchmark (Libtorch)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_pipeline_cer.html">Leaderboard IO</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Funasr Library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/build_task.html">Build custom tasks</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Papers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/papers.html">Papers</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Application</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html">Audio Cut</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html#realtime-speech-recognition">Realtime Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/application.html#audio-chat">Audio Chat</a></li>
+</ul>
+<p class="caption"><span class="caption-text">FQA</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/FQA.html">FQA</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">FunASR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Paraformer online</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/funasr/runtime/ios/Readme.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="paraformer-online">
+<h1>Paraformer online<a class="headerlink" href="#paraformer-online" title="Permalink to this headline"></a></h1>
+<p>该项目是一个基于iOS端的Paraformer流式识别的demo。该项目是基于onnx的推理c++版本。不需要依赖其他库和额外的配置，直接在xcode上编译运行即可。</p>
+<div class="section" id="id1">
+<h2>获取模型<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h2>
+<ol class="simple">
+<li><p>通过命令 <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://www.modelscope.cn/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx.git</span></code> 下载模型</p></li>
+<li><p>下载的是量化后的模型，该iOS项目需要用到四个文件，<code class="docutils literal notranslate"><span class="pre">model_quant.onnx</span></code>，<code class="docutils literal notranslate"><span class="pre">decoder_quant.onnx</span></code>，<code class="docutils literal notranslate"><span class="pre">am.mvn</span></code>和<code class="docutils literal notranslate"><span class="pre">config.yaml</span></code></p></li>
+<li><p>将上面四个文件拖入xcode项目中的<code class="docutils literal notranslate"><span class="pre">model</span></code>文件夹下，建议在打开xcode项目后再拖入。</p></li>
+</ol>
+</div>
+<div class="section" id="id2">
+<h2>识别流程<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h2>
+<ol class="simple">
+<li><p>mac设备上确保安装xcode；</p></li>
+<li><p>由于onnx是xcode的一个cocopod包，需要先依赖onnx环境，打开终端，去到包含Podfile文件的文件夹下，执行<code class="docutils literal notranslate"><span class="pre">pod</span> <span class="pre">install</span></code>，拉取onnx环境</p></li>
+<li><p>mac连接iPhone设备，双击<code class="docutils literal notranslate"><span class="pre">paraformer_online.xcworkspace</span></code>，自动打开xcode，直接运行该xcode工程。</p></li>
+</ol>
+</div>
+<div class="section" id="id3">
+<h2>未来工作<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p>coreml支持</p></li>
+<li><p>加入流式标点</p></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Speech Lab, Alibaba Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
