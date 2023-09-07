@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AliParaformerAsr &mdash; FunASR  documentation</title><link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            FunASR
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/docker.html">Docker</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Quick Start</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../quick_start.html">Quick Start</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Academic Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../academic_recipe/asr_recipe.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../academic_recipe/punc_recipe.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../academic_recipe/vad_recipe.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../academic_recipe/sv_recipe.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../academic_recipe/sd_recipe.html">Speaker Diarization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">ModelScope Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modelscope_pipeline/quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../egs_modelscope/asr/TEMPLATE/README.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../egs_modelscope/vad/TEMPLATE/README.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../egs_modelscope/punctuation/TEMPLATE/README.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../egs_modelscope/tp/TEMPLATE/README.html">Timestamp Prediction (FA)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modelscope_pipeline/sv_pipeline.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modelscope_pipeline/sd_pipeline.html">Speaker Diarization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modelscope_pipeline/itn_pipeline.html">Inverse Text Normalization (ITN)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Zoo</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_zoo/modelscope_models.html">Pretrained Models Released on ModelScope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_zoo/huggingface_models.html">Pretrained Models on Huggingface</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Runtime and Service</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">FunASR Runtime Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docs/SDK_tutorial_online.html">FunASR Realtime Transcribe Service</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docs/SDK_tutorial.html">Highlights</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docs/SDK_tutorial.html#funasr-offline-file-transcription-service">FunASR Offline File Transcription Service</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../html5/readme.html">Speech Recognition Service Html5 Client Access Interface</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark and Leaderboard</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../benchmark/benchmark_onnx.html">CPU Benchmark (ONNX-python)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../benchmark/benchmark_onnx_cpp.html">CPU Benchmark (ONNX-cpp)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../benchmark/benchmark_libtorch.html">CPU Benchmark (Libtorch)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../benchmark/benchmark_pipeline_cer.html">Leaderboard IO</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Funasr Library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/build_task.html">Build custom tasks</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Papers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/papers.html">Papers</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Application</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/application.html">Audio Cut</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/application.html#realtime-speech-recognition">Realtime Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/application.html#audio-chat">Audio Chat</a></li>
+</ul>
+<p class="caption"><span class="caption-text">FQA</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/FQA.html">FQA</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">FunASR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">AliParaformerAsr</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/funasr/runtime/csharp/AliParaformerAsr/README.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="aliparaformerasr">
+<h1>AliParaformerAsr<a class="headerlink" href="#aliparaformerasr" title="Permalink to this headline"></a></h1>
+<div class="section" id="id1">
+<h2>简介：<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h2>
+<p>项目中使用的Asr模型是阿里巴巴达摩院提供的Paraformer-large ASR模型。
+<strong>项目基于Net 6.0，使用C#编写，调用Microsoft.ML.OnnxRuntime对onnx模型进行解码，支持跨平台编译。项目以库的形式进行调用，部署非常方便。</strong>
+ASR整体流程的rtf在0.03左右。</p>
+</div>
+<div class="section" id="id2">
+<h2>用途：<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h2>
+<p>Paraformer是达摩院语音团队提出的一种高效的非自回归端到端语音识别框架。本项目为Paraformer中文通用语音识别模型，采用工业级数万小时的标注音频进行模型训练，保证了模型的通用识别效果。模型可以被应用于语音输入法、语音导航、智能会议纪要等场景。</p>
+</div>
+<div class="section" id="paraformer">
+<h2>Paraformer模型结构：<a class="headerlink" href="#paraformer" title="Permalink to this headline"></a></h2>
+<p><img alt="https://www.modelscope.cn/api/v1/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/repo?Revision=master&amp;FilePath=fig/struct.png&amp;View=true" src="https://www.modelscope.cn/api/v1/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/repo?Revision=master&amp;FilePath=fig/struct.png&amp;View=true" /></p>
+<p>Paraformer模型结构如上图所示，由 Encoder、Predictor、Sampler、Decoder 与 Loss function 五部分组成。Encoder可以采用不同的网络结构，例如self-attention，conformer，SAN-M等。Predictor 为两层FFN，预测目标文字个数以及抽取目标文字对应的声学向量。Sampler 为无可学习参数模块，依据输入的声学向量和目标向量，生产含有语义的特征向量。Decoder 结构与自回归模型类似，为双向建模（自回归为单向建模）。Loss function 部分，除了交叉熵（CE）与 MWER 区分性优化目标，还包括了 Predictor 优化目标 MAE。</p>
+<p>其核心点主要有：</p>
+<p>Predictor 模块：基于 Continuous integrate-and-fire (CIF) 的 预测器 (Predictor) 来抽取目标文字对应的声学特征向量，可以更加准确的预测语音中目标文字个数。
+Sampler：通过采样，将声学特征向量与目标文字向量变换成含有语义信息的特征向量，配合双向的 Decoder 来增强模型对于上下文的建模能力。
+基于负样本采样的 MWER 训练准则。
+更详细的细节见：</p>
+<p>论文： <a class="reference external" href="https://arxiv.org/abs/2206.08317">Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition</a></p>
+<p>论文解读：<a class="reference external" href="https://mp.weixin.qq.com/s/xQ87isj5_wxWiQs4qUXtVw">Paraformer: 高识别率、高计算效率的单轮非自回归端到端语音识别模型</a></p>
+</div>
+<div class="section" id="asr-asr-yaml">
+<h2>ASR常用参数（参考：asr.yaml文件）：<a class="headerlink" href="#asr-asr-yaml" title="Permalink to this headline"></a></h2>
+<p>用于解码的asr.yaml配置参数，取自官方模型配置config.yaml原文件。便于跟进和升级。</p>
+</div>
+<div class="section" id="paraformer-large-offline-onnx">
+<h2>paraformer-large offline onnx模型下载<a class="headerlink" href="#paraformer-large-offline-onnx" title="Permalink to this headline"></a></h2>
+<p>https://huggingface.co/manyeyes/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx</p>
+</div>
+<div class="section" id="id3">
+<h2>离线（非流式）模型调用方法：<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h2>
+<div class="section" id="id4">
+<h3>1.添加项目引用<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h3>
+<p>using AliParaformerAsr;</p>
+</div>
+<div class="section" id="id5">
+<h3>2.模型初始化和配置<a class="headerlink" href="#id5" title="Permalink to this headline"></a></h3>
+<div class="highlight-csharp notranslate"><div class="highlight"><pre><span></span><span class="kt">string</span> <span class="n">applicationBase</span> <span class="p">=</span> <span class="n">AppDomain</span><span class="p">.</span><span class="n">CurrentDomain</span><span class="p">.</span><span class="n">BaseDirectory</span><span class="p">;</span>
+<span class="kt">string</span> <span class="n">modelName</span> <span class="p">=</span> <span class="s">&quot;speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx&quot;</span><span class="p">;</span>
+<span class="kt">string</span> <span class="n">modelFilePath</span> <span class="p">=</span> <span class="n">applicationBase</span> <span class="p">+</span> <span class="s">&quot;./&quot;</span><span class="p">+</span> <span class="n">modelName</span> <span class="p">+</span> <span class="s">&quot;/model_quant.onnx&quot;</span><span class="p">;</span>
+<span class="kt">string</span> <span class="n">configFilePath</span> <span class="p">=</span> <span class="n">applicationBase</span> <span class="p">+</span> <span class="s">&quot;./&quot;</span> <span class="p">+</span> <span class="n">modelName</span> <span class="p">+</span> <span class="s">&quot;/asr.yaml&quot;</span><span class="p">;</span>
+<span class="kt">string</span> <span class="n">mvnFilePath</span> <span class="p">=</span> <span class="n">applicationBase</span> <span class="p">+</span> <span class="s">&quot;./&quot;</span> <span class="p">+</span> <span class="n">modelName</span> <span class="p">+</span> <span class="s">&quot;/am.mvn&quot;</span><span class="p">;</span>
+<span class="kt">string</span> <span class="n">tokensFilePath</span> <span class="p">=</span> <span class="n">applicationBase</span> <span class="p">+</span> <span class="s">&quot;./&quot;</span> <span class="p">+</span> <span class="n">modelName</span> <span class="p">+</span> <span class="s">&quot;/tokens.txt&quot;</span><span class="p">;</span>
+<span class="n">AliParaformerAsr</span><span class="p">.</span><span class="n">OfflineRecognizer</span> <span class="n">offlineRecognizer</span> <span class="p">=</span> <span class="k">new</span> <span class="n">OfflineRecognizer</span><span class="p">(</span><span class="n">modelFilePath</span><span class="p">,</span> <span class="n">configFilePath</span><span class="p">,</span> <span class="n">mvnFilePath</span><span class="p">,</span> <span class="n">tokensFilePath</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id6">
+<h3>3.调用<a class="headerlink" href="#id6" title="Permalink to this headline"></a></h3>
+<div class="highlight-csharp notranslate"><div class="highlight"><pre><span></span><span class="n">List</span><span class="p">&lt;</span><span class="kt">float</span><span class="p">[]&gt;</span> <span class="n">samples</span> <span class="p">=</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="kt">float</span><span class="p">[]&gt;();</span>
+<span class="c1">//这里省略wav文件转samples...</span>
+<span class="c1">//具体参考示例（AliParaformerAsr.Examples）代码</span>
+<span class="n">List</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="n">results_batch</span> <span class="p">=</span> <span class="n">offlineRecognizer</span><span class="p">.</span><span class="n">GetResults</span><span class="p">(</span><span class="n">samples</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id7">
+<h3>4.输出结果：<a class="headerlink" href="#id7" title="Permalink to this headline"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>欢迎大家来体验达摩院推出的语音识别模型
+
+正是因为存在绝对正义所以我们接受现实的相对正义但是不要因为现实的相对正义我们就认为这个世界没有正义因为如果当你认为这个世界没有正义
+
+非常的方便但是现在不同啊英国脱欧欧盟内部完善的产业链的红利人
+
+he must be home now for the light is on他一定在家因为灯亮着就是有一种推理或者解释的那种感觉
+
+after early nightfall the yellow lamps would light up here in there the squalid quarter of the broffles
+
+elapsed_milliseconds:1502.8828125
+total_duration:40525.6875
+rtf:0.037084696280599808
+end!
+</pre></div>
+</div>
+<ul class="simple">
+<li></li>
+</ul>
+<p>处理长音频，推荐结合AliFsmnVad一起使用：https://github.com/manyeyes/AliFsmnVad
+*</p>
+<p>其他说明：
+测试用例：AliParaformerAsr.Examples。
+测试环境：windows11。
+测试用例中samples的计算,使用的是NAudio库。</p>
+<p>通过以下链接了解更多：
+https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Speech Lab, Alibaba Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
