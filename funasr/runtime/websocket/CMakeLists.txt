@@ -7,6 +7,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 option(ENABLE_WEBSOCKET "Whether to build websocket server" ON)
+option(ENABLE_PORTAUDIO "Whether to build websocket server" ON)
  
 if(ENABLE_WEBSOCKET)
   # cmake_policy(SET CMP0135 NEW)
@@ -38,6 +39,37 @@ if(ENABLE_WEBSOCKET)
 
 endif()
 
+if(ENABLE_PORTAUDIO)
+  include(FetchContent)
+
+  set(portaudio_URL  "http://files.portaudio.com/archives/pa_stable_v190700_20210406.tgz")
+  set(portaudio_URL2 "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/dep_libs/pa_stable_v190700_20210406.tgz")
+  set(portaudio_HASH "SHA256=47efbf42c77c19a05d22e627d42873e991ec0c1357219c0d74ce6a2948cb2def")
+
+  FetchContent_Declare(portaudio
+    URL
+      ${portaudio_URL}
+      ${portaudio_URL2}
+    URL_HASH          ${portaudio_HASH}
+  )
+
+  FetchContent_GetProperties(portaudio)
+  if(NOT portaudio_POPULATED)
+    message(STATUS "Downloading portaudio from ${portaudio_URL}")
+    FetchContent_Populate(portaudio)
+  endif()
+  message(STATUS "portaudio is downloaded to ${portaudio_SOURCE_DIR}")
+  message(STATUS "portaudio's binary dir is ${portaudio_BINARY_DIR}")
+
+  add_subdirectory(${portaudio_SOURCE_DIR} ${portaudio_BINARY_DIR} EXCLUDE_FROM_ALL)
+  if(NOT WIN32)
+    target_compile_options(portaudio PRIVATE "-Wno-deprecated-declarations")
+  else()
+    install(TARGETS portaudio DESTINATION ..)
+  endif()
+
+endif()
+
 # Include generated *.pb.h files
 link_directories(${ONNXRUNTIME_DIR}/lib)
 link_directories(${FFMPEG_DIR}/lib)
@@ -61,9 +93,9 @@ find_package(OpenSSL REQUIRED)
 add_executable(funasr-wss-server "funasr-wss-server.cpp" "websocket-server.cpp")
 add_executable(funasr-wss-server-2pass "funasr-wss-server-2pass.cpp" "websocket-server-2pass.cpp")
 add_executable(funasr-wss-client "funasr-wss-client.cpp")
-add_executable(funasr-wss-client-2pass "funasr-wss-client-2pass.cpp")
+add_executable(funasr-wss-client-2pass "funasr-wss-client-2pass.cpp" "microphone.cpp")
 
 target_link_libraries(funasr-wss-client PUBLIC funasr ssl crypto)
-target_link_libraries(funasr-wss-client-2pass PUBLIC funasr ssl crypto)
+target_link_libraries(funasr-wss-client-2pass PUBLIC funasr ssl crypto portaudio)
 target_link_libraries(funasr-wss-server PUBLIC funasr ssl crypto)
 target_link_libraries(funasr-wss-server-2pass PUBLIC funasr ssl crypto)
