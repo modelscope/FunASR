@@ -1,3 +1,7 @@
+// Acknowledgement: this code is adapted from 
+// https://github.com/wenet-e2e/WeTextProcessing/blob/master/runtime/processor/token_parser.h
+// Retrieved in Aug 2023.
+
 // Copyright (c) 2022 Zhendong Peng (pzd17@tsinghua.org.cn)
 //               2023 Jing Du (thuduj12@163.com)
 //
@@ -13,8 +17,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef PROCESSOR_TOKEN_PARSER_H_
-#define PROCESSOR_TOKEN_PARSER_H_
+#ifndef ITN_TOKEN_PARSER_H_
+#define ITN_TOKEN_PARSER_H_
 
 #include <set>
 #include <string>
@@ -89,4 +93,4 @@ class TokenParser {
 
 }  // funasr
 
-#endif  // PROCESSOR_TOKEN_PARSER_H_
+#endif  // ITN_TOKEN_PARSER_H_

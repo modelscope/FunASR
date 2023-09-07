@@ -1,3 +1,7 @@
+// Acknowledgement: this code is adapted from 
+// https://github.com/wenet-e2e/WeTextProcessing/blob/master/runtime/utils/string.h
+// Retrieved in Aug 2023.
+
 // Copyright (c) 2022 Zhendong Peng (pzd17@tsinghua.org.cn)
 //               2023 Jing Du (thuduj12@163.com)
 //
