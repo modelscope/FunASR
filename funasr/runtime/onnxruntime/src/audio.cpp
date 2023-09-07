@@ -995,6 +995,23 @@ int Audio::Fetch(float *&dout, int &len, int &flag)
     }
 }
 
+int Audio::Fetch(float *&dout, int &len, int &flag, float &start_time)
+{
+    if (frame_queue.size() > 0) {
+        AudioFrame *frame = frame_queue.front();
+        frame_queue.pop();
+
+        start_time = (float)(frame->GetStart())/MODEL_SAMPLE_RATE;
+        dout = speech_data + frame->GetStart();
+        len = frame->GetLen();
+        delete frame;
+        flag = S_END;
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
 void Audio::Padding()
 {
     float num_samples = speech_len;
@@ -1161,8 +1178,8 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
 
             }else if(speech_end_i != -1){ // [-1,100]
                 if(speech_start == -1 or speech_offline_start == -1){
-                    LOG(ERROR) <<"Vad start is null while vad end is available." ;
-                    exit(-1);
+                    LOG(ERROR) <<"Vad start is null while vad end is available. Set vad start 0" ;
+                    speech_start = 0;
                 }
 
                 int start = speech_start*seg_sample;
