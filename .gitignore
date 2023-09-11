@@ -21,14 +21,3 @@ docs/_build
 modelscope
 samples
 .ipynb_checkpoints
-funasr/runtime/websocket/utils/
-funasr/runtime/websocket/third_party/
-funasr/runtime/websocket/onnxruntime-linux-x64-1.14.0/
-funasr/runtime/websocket/models/
-funasr/runtime/websocket/ffmpeg-N-111383-g20b8688092-linux64-gpl-shared/
-funasr/runtime/onnxruntime/build*
-egs_modelscope/asr/paraformer/offline/
-egs_modelscope/asr/paraformer/online/
-funasr/runtime/websocket/build*
-egs_modelscope/asr/paraformer/timestamp/
-egs_modelscope/asr/paraformer/hotword/
