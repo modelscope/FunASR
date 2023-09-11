@@ -74,7 +74,7 @@ class BeamSearchTransducer:
         beam_size: int,
         lm: Optional[torch.nn.Module] = None,
         lm_weight: float = 0.1,
-        search_type: str = "default",
+        search_type: str = "mbg",
         max_sym_exp: int = 3,
         u_max: int = 50,
         nstep: int = 2,
