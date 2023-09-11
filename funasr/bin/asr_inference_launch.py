@@ -1792,12 +1792,6 @@ def get_parser():
         default=1,
         help="The batch size for inference",
     )
-    group.add_argument(
-        "--decoding_ind",
-        type=int,
-        default=0,
-        help="chunk select for chunk encoder",
-    )
     group.add_argument("--nbest", type=int, default=5, help="Output N-best hypotheses")
     group.add_argument("--beam_size", type=int, default=20, help="Beam size")
     group.add_argument("--penalty", type=float, default=0.0, help="Insertion penalty")
