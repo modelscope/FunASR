@@ -399,7 +399,7 @@ class Speech2TextParaformer:
     @torch.no_grad()
     def __call__(
             self, speech: Union[torch.Tensor, np.ndarray], speech_lengths: Union[torch.Tensor, np.ndarray] = None,
-            begin_time: int = 0, end_time: int = None,
+            decoding_ind: int = None, begin_time: int = 0, end_time: int = None,
     ):
         """Inference
 
@@ -429,7 +429,9 @@ class Speech2TextParaformer:
         batch = to_device(batch, device=self.device)
 
         # b. Forward Encoder
-        enc, enc_len = self.asr_model.encode(**batch, ind=self.decoding_ind)
+        if decoding_ind is None:
+            decoding_ind = self.decoding_ind
+        enc, enc_len = self.asr_model.encode(**batch, ind=decoding_ind)
         if isinstance(enc, tuple):
             enc = enc[0]
         # assert len(enc) == 1, len(enc)
