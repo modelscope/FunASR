@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>&lt;no title&gt; &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <title>Please ref to websocket service &mdash; FunASR  documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -119,7 +119,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">&lt;no title&gt;</li>
+      <li class="breadcrumb-item active">Please ref to websocket service</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/runtime/onnxruntime_cpp.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -129,7 +129,50 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <p>Please ref to <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/websocket">websocket service</a></p>
+  <div class="section" id="please-ref-to-websocket-service">
+<h1>Please ref to <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/websocket">websocket service</a><a class="headerlink" href="#please-ref-to-websocket-service" title="Permalink to this headline"></a></h1>
+</div>
+<div class="section" id="if-you-want-to-compile-the-file-yourself-you-can-follow-the-steps-below">
+<h1>If you want to compile the file yourself, you can follow the steps below.<a class="headerlink" href="#if-you-want-to-compile-the-file-yourself-you-can-follow-the-steps-below" title="Permalink to this headline"></a></h1>
+<div class="section" id="building-for-linux-unix">
+<h2>Building for Linux/Unix<a class="headerlink" href="#building-for-linux-unix" title="Permalink to this headline"></a></h2>
+<div class="section" id="download-onnxruntime">
+<h3>Download onnxruntime<a class="headerlink" href="#download-onnxruntime" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>wget https://github.com/microsoft/onnxruntime/releases/download/v1.14.0/onnxruntime-linux-x64-1.14.0.tgz
+tar -zxvf onnxruntime-linux-x64-1.14.0.tgz
+</pre></div>
+</div>
+</div>
+<div class="section" id="download-ffmpeg">
+<h3>Download ffmpeg<a class="headerlink" href="#download-ffmpeg" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/dep_libs/ffmpeg-N-111383-g20b8688092-linux64-gpl-shared.tar.xz
+tar -xvf ffmpeg-N-111383-g20b8688092-linux64-gpl-shared.tar.xz
+</pre></div>
+</div>
+</div>
+<div class="section" id="install-deps">
+<h3>Install deps<a class="headerlink" href="#install-deps" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># openblas</span>
+sudo apt-get install libopenblas-dev <span class="c1">#ubuntu</span>
+<span class="c1"># sudo yum -y install openblas-devel #centos</span>
+
+<span class="c1"># openssl</span>
+apt-get install libssl-dev <span class="c1">#ubuntu </span>
+<span class="c1"># yum install openssl-devel #centos</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="build-runtime">
+<h3>Build runtime<a class="headerlink" href="#build-runtime" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/alibaba-damo-academy/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> FunASR/funasr/runtime/onnxruntime
+mkdir build <span class="o">&amp;&amp;</span> <span class="nb">cd</span> build
+cmake  -DCMAKE_BUILD_TYPE<span class="o">=</span>release .. -DONNXRUNTIME_DIR<span class="o">=</span>/path/to/onnxruntime-linux-x64-1.14.0 -DFFMPEG_DIR<span class="o">=</span>/path/to/ffmpeg-N-111383-g20b8688092-linux64-gpl-shared
+make -j <span class="m">4</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
 
 
            </div>

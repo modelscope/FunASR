@@ -135,6 +135,47 @@
 <div class="section" id="id1">
 <h1>FunASR实时语音听写服务开发指南(<a class="reference internal" href="../docs/SDK_advanced_guide_online_zh.html"><span class="doc">点击此处</span></a>)<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h1>
 </div>
+<div class="section" id="id2">
+<h1>如果您想自己编译文件，可以参考下述步骤<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h1>
+<div class="section" id="linux-unix">
+<h2>Linux/Unix 平台编译<a class="headerlink" href="#linux-unix" title="Permalink to this headline"></a></h2>
+<div class="section" id="onnxruntime">
+<h3>下载 onnxruntime<a class="headerlink" href="#onnxruntime" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>wget https://github.com/microsoft/onnxruntime/releases/download/v1.14.0/onnxruntime-linux-x64-1.14.0.tgz
+tar -zxvf onnxruntime-linux-x64-1.14.0.tgz
+</pre></div>
+</div>
+</div>
+<div class="section" id="ffmpeg">
+<h3>下载 ffmpeg<a class="headerlink" href="#ffmpeg" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/dep_libs/ffmpeg-N-111383-g20b8688092-linux64-gpl-shared.tar.xz
+tar -xvf ffmpeg-N-111383-g20b8688092-linux64-gpl-shared.tar.xz
+</pre></div>
+</div>
+</div>
+<div class="section" id="id3">
+<h3>安装依赖<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># openblas</span>
+sudo apt-get install libopenblas-dev <span class="c1">#ubuntu</span>
+<span class="c1"># sudo yum -y install openblas-devel #centos</span>
+
+<span class="c1"># openssl</span>
+apt-get install libssl-dev <span class="c1">#ubuntu </span>
+<span class="c1"># yum install openssl-devel #centos</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="runtime">
+<h3>编译 runtime<a class="headerlink" href="#runtime" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/alibaba-damo-academy/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> FunASR/funasr/runtime/websocket
+mkdir build <span class="o">&amp;&amp;</span> <span class="nb">cd</span> build
+cmake  -DCMAKE_BUILD_TYPE<span class="o">=</span>release .. -DONNXRUNTIME_DIR<span class="o">=</span>/path/to/onnxruntime-linux-x64-1.14.0 -DFFMPEG_DIR<span class="o">=</span>/path/to/ffmpeg-N-111383-g20b8688092-linux64-gpl-shared
+make -j <span class="m">4</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
 
 
            </div>
