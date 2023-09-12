@@ -415,7 +415,7 @@ def inference_paraformer(
                         ibest_writer["rtf"][key] = rtf_cur
 
                     if text is not None:
-                        if use_timestamp and timestamp is not None:
+                        if use_timestamp and timestamp is not None and len(timestamp):
                             postprocessed_result = postprocess_utils.sentence_postprocess(token, timestamp)
                         else:
                             postprocessed_result = postprocess_utils.sentence_postprocess(token)
@@ -427,7 +427,7 @@ def inference_paraformer(
                         else:
                             text_postprocessed, word_lists = postprocessed_result[0], postprocessed_result[1]
                         item = {'key': key, 'value': text_postprocessed}
-                        if timestamp_postprocessed != "":
+                        if timestamp_postprocessed != "" or len(timestamp) == 0:
                             item['timestamp'] = timestamp_postprocessed
                         asr_result_list.append(item)
                         finish_count += 1
@@ -692,7 +692,7 @@ def inference_paraformer_vad_punc(
             text, token, token_int = result[0], result[1], result[2]
             time_stamp = result[4] if len(result[4]) > 0 else None
 
-            if use_timestamp and time_stamp is not None:
+            if use_timestamp and time_stamp is not None and len(time_stamp):
                 postprocessed_result = postprocess_utils.sentence_postprocess(token, time_stamp)
             else:
                 postprocessed_result = postprocess_utils.sentence_postprocess(token)
@@ -717,7 +717,7 @@ def inference_paraformer_vad_punc(
             item = {'key': key, 'value': text_postprocessed_punc}
             if text_postprocessed != "":
                 item['text_postprocessed'] = text_postprocessed
-            if time_stamp_postprocessed != "":
+            if time_stamp_postprocessed != "" or len(time_stamp) == 0:
                 item['time_stamp'] = time_stamp_postprocessed
 
             item['sentences'] = time_stamp_sentence(punc_id_list, time_stamp_postprocessed, text_postprocessed)
