@@ -283,6 +283,10 @@ extern "C" {
 			string punc_res = (offline_stream->punc_handle)->AddPunc((p_result->msg).c_str());
 			p_result->msg = punc_res;
 		}
+		if(offline_stream->UseITN()){
+			string msg_itn = offline_stream->itn_handle->Normalize(p_result->msg);
+			p_result->msg = msg_itn;
+		}
 
 		return p_result;
 	}
@@ -357,20 +361,39 @@ extern "C" {
 			string punc_res = (offline_stream->punc_handle)->AddPunc((p_result->msg).c_str());
 			p_result->msg = punc_res;
 		}
-	
+		if(offline_stream->UseITN()){
+			string msg_itn = offline_stream->itn_handle->Normalize(p_result->msg);
+			p_result->msg = msg_itn;
+		}
 		return p_result;
 	}
 
-	_FUNASRAPI const std::vector<std::vector<float>> CompileHotwordEmbedding(FUNASR_HANDLE handle, std::string &hotwords) {
-		funasr::OfflineStream* offline_stream = (funasr::OfflineStream*)handle;
-    	std::vector<std::vector<float>> emb;
-		if (!offline_stream)
-			return emb;
-		return (offline_stream->asr_handle)->CompileHotwordEmbedding(hotwords);
+	_FUNASRAPI const std::vector<std::vector<float>> CompileHotwordEmbedding(FUNASR_HANDLE handle, std::string &hotwords, ASR_TYPE mode) 
+	{
+		if (mode == ASR_OFFLINE){
+			funasr::OfflineStream* offline_stream = (funasr::OfflineStream*)handle;
+    		std::vector<std::vector<float>> emb;
+			if (!offline_stream)
+				return emb;
+			return (offline_stream->asr_handle)->CompileHotwordEmbedding(hotwords);
+		}
+		else if (mode == ASR_TWO_PASS){
+			funasr::TpassStream* tpass_stream = (funasr::TpassStream*)handle;
+    		std::vector<std::vector<float>> emb;
+			if (!tpass_stream)
+				return emb;
+			return (tpass_stream->asr_handle)->CompileHotwordEmbedding(hotwords);
+		}
+		else{
+			LOG(ERROR) << "Not implement: Online model does not support Hotword yet!";
+			exit(-1);
+		}
+		
 	}
 
+
 	// APIs for 2pass-stream Infer
-	_FUNASRAPI FUNASR_RESULT FunTpassInferBuffer(FUNASR_HANDLE handle, FUNASR_HANDLE online_handle, const char* sz_buf, int n_len, std::vector<std::vector<std::string>> &punc_cache, bool input_finished, int sampling_rate, std::string wav_format, ASR_TYPE mode)
+	_FUNASRAPI FUNASR_RESULT FunTpassInferBuffer(FUNASR_HANDLE handle, FUNASR_HANDLE online_handle, const char* sz_buf, int n_len, std::vector<std::vector<std::string>> &punc_cache, bool input_finished, int sampling_rate, std::string wav_format, ASR_TYPE mode, const std::vector<std::vector<float>> &hw_emb)
 	{
 		funasr::TpassStream* tpass_stream = (funasr::TpassStream*)handle;
 		funasr::TpassOnlineStream* tpass_online_stream = (funasr::TpassOnlineStream*)online_handle;
@@ -423,6 +446,13 @@ extern "C" {
 					string online_msg = ((funasr::ParaformerOnline*)asr_online_handle)->online_res;
 					string msg_punc = punc_online_handle->AddPunc(online_msg.c_str(), punc_cache[0]);
 					p_result->tpass_msg = msg_punc;
+
+					// ITN
+					if(tpass_stream->UseITN()){
+						string msg_itn = tpass_stream->itn_handle->Normalize(msg_punc);
+						p_result->tpass_msg = msg_itn;
+					}
+
 					((funasr::ParaformerOnline*)asr_online_handle)->online_res = "";
 					p_result->msg += msg;
 				}else{
@@ -437,13 +467,38 @@ extern "C" {
 			}
 		}
 
+		// timestamp 
+		std::string cur_stamp = "[";		
 		while(audio->FetchTpass(frame) > 0){
-			string msg = asr_handle->Forward(frame->data, frame->len, frame->is_final);
+			string msg = asr_handle->Forward(frame->data, frame->len, frame->is_final, hw_emb);
+
+			std::vector<std::string> msg_vec = funasr::split(msg, '|');  // split with timestamp
+			msg = msg_vec[0];
+			//timestamp
+			if(msg_vec.size() > 1){
+				std::vector<std::string> msg_stamp = funasr::split(msg_vec[1], ',');
+				for(int i=0; i<msg_stamp.size()-1; i+=2){
+					float begin = std::stof(msg_stamp[i]) + float(frame->global_start)/1000.0;
+					float end = std::stof(msg_stamp[i+1]) + float(frame->global_start)/1000.0;
+					cur_stamp += "["+std::to_string((int)(1000*begin))+","+std::to_string((int)(1000*end))+"],";
+				}
+			}
+
+			if(cur_stamp != "["){
+				cur_stamp.erase(cur_stamp.length() - 1);
+				p_result->stamp += cur_stamp + "]";
+			}
+
 			string msg_punc = punc_online_handle->AddPunc(msg.c_str(), punc_cache[1]);
 			if(input_finished){
 				msg_punc += "。";
 			}
 			p_result->tpass_msg = msg_punc;
+			if(tpass_stream->UseITN()){
+				string msg_itn = tpass_stream->itn_handle->Normalize(msg_punc);
+				p_result->tpass_msg = msg_itn;
+			}
+
 			if(frame != NULL){
 				delete frame;
 				frame = NULL;

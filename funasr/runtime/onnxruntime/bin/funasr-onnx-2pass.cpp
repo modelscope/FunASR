@@ -163,7 +163,6 @@ int main(int argc, char** argv)
 
         int step = 800*2;
         bool is_final = false;
-
         string online_res="";
         string tpass_res="";
         std::vector<std::vector<string>> punc_cache(2);
