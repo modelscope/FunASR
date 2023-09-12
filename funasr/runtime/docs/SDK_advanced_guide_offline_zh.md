@@ -23,8 +23,8 @@ FunASR提供可一键本地或者云端服务器部署的中文离线文件转�
 
 ```shell
 sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.2.1
-
-sudo docker run -p 10095:10095 -it --privileged=true -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.2.1
+mkdir -p ./funasr-runtime-resources/models
+sudo docker run -p 10095:10095 -it --privileged=true -v ./funasr-runtime-resources/models:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.2.1
 ```
 如果您没有安装docker，可参考[Docker安装](#Docker安装)
 
