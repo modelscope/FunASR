@@ -431,6 +431,8 @@ class Speech2TextParaformer:
         # b. Forward Encoder
         if decoding_ind is None:
             decoding_ind = self.decoding_ind
+        if self.decoding_ind is None:
+            decoding_ind = 0
         enc, enc_len = self.asr_model.encode(**batch, ind=decoding_ind)
         if isinstance(enc, tuple):
             enc = enc[0]
