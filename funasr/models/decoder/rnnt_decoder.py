@@ -185,8 +185,8 @@ class RNNTDecoder(torch.nn.Module):
                       ((N, 1, D_dec), (N, 1, D_dec) or None)
 
         """
-        #str_labels = "_".join(map(str, label_sequence))
-        str_labels = hash(str(label_sequence))
+        str_labels = "_".join(map(str, label_sequence.yseq))
+
         if str_labels in self.score_cache:
             out, states = self.score_cache[str_labels]
         else:
