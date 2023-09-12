@@ -167,43 +167,6 @@ class RNNTDecoder(torch.nn.Module):
 
         return dec_out[0], dec_state
 
-    def score(
-        self,
-        label_sequence: List[int],
-        states: Tuple[torch.Tensor, Optional[torch.Tensor]],
-    ) -> Tuple[torch.Tensor, Tuple[torch.Tensor, Optional[torch.Tensor]]]:
-        """One-step forward hypothesis.
-
-        Args:
-            label_sequence: Current label sequence.
-            states: Decoder hidden states.
-                      ((N, 1, D_dec), (N, 1, D_dec) or None)
-
-        Returns:
-            out: Decoder output sequence. (1, D_dec)
-            states: Decoder hidden states.
-                      ((N, 1, D_dec), (N, 1, D_dec) or None)
-
-        """
-        str_labels = "_".join(map(str, label_sequence.yseq))
-
-        if str_labels in self.score_cache:
-            out, states = self.score_cache[str_labels]
-        else:
-            label = torch.full(
-                (1, 1),
-                label_sequence.yseq[-1],
-                dtype=torch.long,
-                device=self.device,
-            )
-
-            embed = self.embed(label)
-            out, states = self.rnn_forward(embed, states)
-
-            self.score_cache[str_labels] = (out, states)
-
-        return out[0], states    
-
     def batch_score(
         self,
         hyps: List[Hypothesis],

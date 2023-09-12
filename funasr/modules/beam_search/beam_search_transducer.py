@@ -750,7 +750,9 @@ class BeamSearchTransducer:
 
             symbols_added = 0
             while symbols_added <= 3:
-                dec_out, state, _ = self.decoder.score(hyp, cache)
+                label = torch.full((1, 1), hyp.yseq[-1], dtype=torch.long, device=self.device)
+                dec_out, state = self.decoder.score(label, hyp.yseq, hyq.dec_state)
+                #dec_out, state, _ = self.decoder.score(hyp, cache)
                 logp = torch.log_softmax(self.joint_network(enc_out_t, dec_out), dim=-1)
                 top_logp, k = torch.max(logp, dim=-1)
 
