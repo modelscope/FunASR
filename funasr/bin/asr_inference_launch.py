@@ -427,7 +427,7 @@ def inference_paraformer(
                         else:
                             text_postprocessed, word_lists = postprocessed_result[0], postprocessed_result[1]
                         item = {'key': key, 'value': text_postprocessed}
-                        if timestamp_postprocessed != "" or len(timestamp) == 0:
+                        if timestamp_postprocessed != "":
                             item['timestamp'] = timestamp_postprocessed
                         asr_result_list.append(item)
                         finish_count += 1
