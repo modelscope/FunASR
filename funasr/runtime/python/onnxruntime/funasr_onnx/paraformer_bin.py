@@ -333,7 +333,14 @@ class ContextualParaformer(Paraformer):
         hotwords_length = torch.Tensor(hotwords_length).to(torch.int32)
         # hotwords.append('<s>')
         def word_map(word):
-            return torch.tensor([self.vocab[i] for i in word])
+            hotwords = []
+            for c in word:
+                if c not in self.vocab.keys():
+                    hotwords.append(8403)
+                    logging.warning("oov character {} found in hotword {}, replaced by <unk>".format(c, word))
+                else:
+                    hotwords.append(self.vocab[c])
+            return torch.tensor(hotwords)
         hotword_int = [word_map(i) for i in hotwords]
         # import pdb; pdb.set_trace()
         hotword_int.append(torch.tensor([1]))

@@ -254,7 +254,7 @@ class ModelExport:
             if not os.path.exists(quant_model_path):
                 onnx_model = onnx.load(model_path)
                 nodes = [n.name for n in onnx_model.graph.node]
-                nodes_to_exclude = [m for m in nodes if 'output' in m]
+                nodes_to_exclude = [m for m in nodes if 'output' in m or 'bias_encoder' in m  or 'bias_decoder' in m]
                 quantize_dynamic(
                     model_input=model_path,
                     model_output=quant_model_path,
