@@ -717,7 +717,7 @@ def inference_paraformer_vad_punc(
             item = {'key': key, 'value': text_postprocessed_punc}
             if text_postprocessed != "":
                 item['text_postprocessed'] = text_postprocessed
-            if time_stamp_postprocessed != "" or len(time_stamp) == 0:
+            if time_stamp_postprocessed != "":
                 item['time_stamp'] = time_stamp_postprocessed
 
             item['sentences'] = time_stamp_sentence(punc_id_list, time_stamp_postprocessed, text_postprocessed)
