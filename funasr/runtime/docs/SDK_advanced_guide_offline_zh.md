@@ -37,7 +37,8 @@ nohup bash run_server.sh \
   --download-model-dir /workspace/models \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
-  --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx > log.out 2>&1 &
+  --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx \
+  --itn-dir thuduj12/fst_itn_zh > log.out 2>&1 &
 
 # 如果您想关闭ssl，增加参数：--certfile 0
 # 如果您想使用时间戳或者热词模型进行部署，请设置--model-dir为对应模型：
@@ -111,6 +112,7 @@ python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode offline --audio
 --thread_num 设置并发发送线程数，默认为1
 --ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
 --hotword 如果模型为热词模型，可以设置热词: *.txt(每行一个热词) 或者空格分隔的热词字符串 (could be: 阿里巴巴 达摩院)
+--use_itn 设置是否使用itn，默认1开启，设置为0关闭
 ```
 
 ### cpp-client
@@ -126,6 +128,7 @@ python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode offline --audio
 --port 10095 部署端口号
 --wav-path 需要进行转写的音频文件，支持文件路径
 --hotword 如果模型为热词模型，可以设置热词: *.txt(每行一个热词) 或者空格分隔的热词字符串 (could be: 阿里巴巴 达摩院)
+--use-itn 设置是否使用itn，默认1开启，设置为0关闭
 ```
 
 ### Html网页版
@@ -153,6 +156,7 @@ cd /workspace/FunASR/funasr/runtime/websocket/build/bin
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx \
+  --itn-dir thuduj12/fst_itn_zh \
   --decoder-thread-num 32 \
   --io-thread-num  8 \
   --port 10095 \
@@ -168,6 +172,7 @@ cd /workspace/FunASR/funasr/runtime/websocket/build/bin
 --vad-quant   True为量化VAD模型，False为非量化VAD模型，默认是True
 --punc-dir  modelscope model ID
 --punc-quant   True为量化PUNC模型，False为非量化PUNC模型，默认是True
+--itn-dir modelscope model ID
 --port  服务端监听的端口号，默认为 10095
 --decoder-thread-num  服务端启动的推理线程数，默认为 8
 --io-thread-num  服务端启动的IO线程数，默认为 1
@@ -182,6 +187,7 @@ cd /workspace/FunASR/funasr/runtime/websocket/build/bin
   --model-dir /workspace/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx \
   --vad-dir /workspace/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
   --punc-dir /workspace/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx \
+  --itn-dir /workspace/models/thuduj12/fst_itn_zh \
   --decoder-thread-num 32 \
   --io-thread-num  8 \
   --port 10095 \
@@ -196,6 +202,7 @@ cd /workspace/FunASR/funasr/runtime/websocket/build/bin
 --vad-quant   True为量化VAD模型，False为非量化VAD模型，默认是True
 --punc-dir  PUNC模型路径，默认为：/workspace/models/punc
 --punc-quant   True为量化PUNC模型，False为非量化PUNC模型，默认是True
+--itn-dir modelscope model ID
 --port  服务端监听的端口号，默认为 10095
 --decoder-thread-num  服务端启动的推理线程数，默认为 8
 --io-thread-num  服务端启动的IO线程数，默认为 1
@@ -207,6 +214,7 @@ cd /workspace/FunASR/funasr/runtime/websocket/build/bin
 [FSMN-VAD模型](https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary)，
 [Paraformer-lagre模型](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary)
 [CT-Transformer标点预测模型](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx/summary)
+[基于FST的中文ITN](https://www.modelscope.cn/models/thuduj12/fst_itn_zh/summary)
 
 如果，您希望部署您finetune后的模型（例如10epoch.pb），需要手动将模型重命名为model.pb，并将原modelscope中模型model.pb替换掉，将路径指定为`model_dir`即可。
 
