@@ -83,7 +83,7 @@
 
 ### 标点恢复模型
 
-|                                                         模型名字                                                        | 语言  |        训练数据         | 数据量 | Vocab Size| 非实时/实时 | 备注      |
+|                                                         模型名字                                                        | 语言  |        训练数据         | 模型参数 | Vocab Size| 非实时/实时 | 备注      |
 |:--------------------------------------------------------------------------------------------------------------------------:|:----------:|:----------------------------:|:----------:|:----------:|:--------------:|:--------|
 |      [CT-Transformer-Large](https://modelscope.cn/models/damo/punc_ct-transformer_cn-en-common-vocab471067-large/summary)     | 中文和英文 | Alibaba Text Data(100M) |    1.1G     |    471067     |    非实时     | 支持中英文标点大模型 |
 |      [CT-Transformer](https://modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch/summary)     | 中文和英文 | Alibaba Text Data(70M) |    291M     |    272727     |    非实时     | 支持中英文标点 |
