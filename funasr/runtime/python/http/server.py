@@ -58,6 +58,11 @@ parser.add_argument("--temp_dir",
                     required=False,
                     help="temp dir")
 args = parser.parse_args()
+print("-----------  Configuration Arguments -----------")
+for arg, value in vars(args).items():
+    print("%s: %s" % (arg, value))
+print("------------------------------------------------")
+
 
 os.makedirs(args.temp_dir, exist_ok=True)
 

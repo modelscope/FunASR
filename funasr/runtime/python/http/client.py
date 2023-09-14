@@ -23,6 +23,10 @@ parser.add_argument("--audio_path",
                     required=False,
                     help="use audio path")
 args = parser.parse_args()
+print("-----------  Configuration Arguments -----------")
+for arg, value in vars(args).items():
+    print("%s: %s" % (arg, value))
+print("------------------------------------------------")
 
 
 url = f'http://{args.host}:{args.port}/recognition'
