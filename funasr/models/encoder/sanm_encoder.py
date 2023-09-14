@@ -945,11 +945,11 @@ class SANMEncoderChunkOpt(AbsEncoder):
 
         for layer_idx, encoder_layer in enumerate(self.encoders):
             encoder_outs = encoder_layer.forward_chunk(xs_pad, new_cache[layer_idx+len(self.encoders0)], cache["chunk_size"], cache["encoder_chunk_look_back"])
-            xs_pad, new_cache[layer_idx+1] = encoder_outs[0], encoder_outs[1]
+            xs_pad, new_cache[layer_idx+len(self.encoders0)] = encoder_outs[0], encoder_outs[1]
 
         if self.normalize_before:
             xs_pad = self.after_norm(xs_pad)
-        if cache["encoder_chunk_look_back"] > 0:
+        if cache["encoder_chunk_look_back"] > 0 or cache["encoder_chunk_look_back"] == -1:
             cache["opt"] = new_cache
 
         return xs_pad, ilens, None
