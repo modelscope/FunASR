@@ -28,8 +28,15 @@ ITNProcessor::~ITNProcessor(){};
 void  ITNProcessor::InitITN(const std::string& tagger_path,
                      const std::string& verbalizer_path, 
                      int thread_num) {
-  tagger_.reset(StdVectorFst::Read(tagger_path));
-  verbalizer_.reset(StdVectorFst::Read(verbalizer_path));
+  try{
+    tagger_.reset(StdVectorFst::Read(tagger_path));
+    LOG(INFO) << "Successfully load model from " << tagger_path;
+    verbalizer_.reset(StdVectorFst::Read(verbalizer_path));
+    LOG(INFO) << "Successfully load model from " << verbalizer_path;
+  }catch(exception const &e){
+    LOG(ERROR) << "Error loading itn models";
+    exit(-1);
+  }
   compiler_ = std::make_shared<StringCompiler<StdArc>>(StringTokenType::BYTE);
   printer_ = std::make_shared<StringPrinter<StdArc>>(StringTokenType::BYTE);
 

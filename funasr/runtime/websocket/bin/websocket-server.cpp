@@ -59,17 +59,20 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
                                  websocketpp::lib::mutex& thread_lock,
                                  std::vector<std::vector<float>> &hotwords_embedding,
                                  std::string wav_name,
+                                 bool itn,
+                                 int audio_fs,
                                  std::string wav_format) {
   scoped_lock guard(thread_lock);
   try {
     int num_samples = buffer.size();  // the size of the buf
 
-    if (!buffer.empty() && hotwords_embedding.size() >0 ) {
+    if (!buffer.empty() && hotwords_embedding.size() > 0) {
       std::string asr_result;
       std::string stamp_res;
       try{
         FUNASR_RESULT Result = FunOfflineInferBuffer(
-            asr_hanlde, buffer.data(), buffer.size(), RASR_NONE, NULL, hotwords_embedding, 16000, wav_format);
+            asr_hanlde, buffer.data(), buffer.size(), RASR_NONE, NULL, 
+            hotwords_embedding, audio_fs, wav_format, itn);
 
         asr_result = ((FUNASR_RECOG_RESULT*)Result)->msg;  // get decode result
         stamp_res = ((FUNASR_RECOG_RESULT*)Result)->stamp;
@@ -100,7 +103,7 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
 
       LOG(INFO) << "buffer.size=" << buffer.size() << ",result json=" << jsonresult.dump();
     }else{
-      LOG(INFO) << "Sent empty meg";
+      LOG(INFO) << "Sent empty msg";
       websocketpp::lib::error_code ec;
       nlohmann::json jsonresult;        // result json
       jsonresult["text"] = "";  // put result in 'text'
@@ -132,6 +135,9 @@ void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
   data_msg->thread_lock = std::make_shared<websocketpp::lib::mutex>();
   data_msg->msg = nlohmann::json::parse("{}");
   data_msg->msg["wav_format"] = "pcm";
+  data_msg->msg["wav_name"] = "wav-default-id";
+  data_msg->msg["itn"] = true;
+  data_msg->msg["audio_fs"] = 16000;
   data_map.emplace(hdl, data_msg);
   LOG(INFO) << "on_open, active connections: " << data_map.size();
 }
@@ -273,14 +279,15 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
                 std::make_shared<std::vector<std::vector<float>>>(new_hotwords_embedding);
         }
       }
-
+      if (jsonresult.contains("audio_fs")) {
+        msg_data->msg["audio_fs"] = jsonresult["audio_fs"];
+      }
+      if (jsonresult.contains("itn")) {
+        msg_data->msg["itn"] = jsonresult["itn"];
+      }
       if (jsonresult["is_speaking"] == false ||
           jsonresult["is_finished"] == true) {
         LOG(INFO) << "client done";
-        // add padding to the end of the wav data
-        // std::vector<short> padding(static_cast<short>(0.3 * 16000));
-        // sample_data_p->insert(sample_data_p->end(), padding.data(),
-        //                       padding.data() + padding.size());
         // for offline, send all receive data to decoder engine
         std::vector<std::vector<float>> hotwords_embedding_(*(msg_data->hotwords_embedding));
         asio::post(io_decoder_,
@@ -290,6 +297,8 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
                               std::ref(*thread_lock_p),
                               std::move(hotwords_embedding_),
                               msg_data->msg["wav_name"],
+                              msg_data->msg["itn"],
+                              msg_data->msg["audio_fs"],
                               msg_data->msg["wav_format"]));
       }
       break;
@@ -298,7 +307,6 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
       // recived binary data
       const auto* pcm_data = static_cast<const char*>(payload.data());
       int32_t num_samples = payload.size();
-      //LOG(INFO) << "recv binary num_samples " << num_samples;
 
       if (isonline) {
         // TODO

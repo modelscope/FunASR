@@ -150,18 +150,23 @@ void runReg(FUNASR_HANDLE tpass_handle, std::vector<int> chunk_size, vector<stri
                 string online_msg = FunASRGetResult(result, 0);
                 online_res += online_msg;
                 if(online_msg != ""){
-                    LOG(INFO)<< wav_ids[i] <<" : "<<online_msg;
+                    LOG(INFO) <<"Thread: " << this_thread::get_id() <<" " << wav_ids[i] <<" : "<<online_msg;
                 }
                 string tpass_msg = FunASRGetTpassResult(result, 0);
                 tpass_res += tpass_msg;
                 if(tpass_msg != ""){
-                    LOG(INFO)<< wav_ids[i] <<" offline results : "<<tpass_msg;
+                    LOG(INFO) <<"Thread: " << this_thread::get_id() <<" " << wav_ids[i] <<" offline results : "<<tpass_msg;
                 }
                 string stamp = FunASRGetStamp(result);
                 if(stamp !=""){
-                    LOG(INFO) << wav_ids[i] << " time stamp : " << stamp;
+                    LOG(INFO) <<"Thread: " << this_thread::get_id() <<" " << wav_ids[i] << " time stamp : " << stamp;
+                    if(time_stamp_res == ""){
+                        time_stamp_res += stamp;
+                    }else{
+                        time_stamp_res = time_stamp_res.erase(time_stamp_res.length()-1)
+                                         + "," + stamp.substr(1);
+                    }
                 }
-                time_stamp_res += stamp;
                 float snippet_time = FunASRGetRetSnippetTime(result);
                 n_total_length += snippet_time;
                 FunASRFreeResult(result);
@@ -179,7 +184,9 @@ void runReg(FUNASR_HANDLE tpass_handle, std::vector<int> chunk_size, vector<stri
         }
         if(asr_mode_ == 0 || asr_mode_==2){
             LOG(INFO) <<"Thread: " << this_thread::get_id() <<" " << wav_ids[i] << " Final offline results " <<" : "<<tpass_res;
-            LOG(INFO) <<"Thread: " << this_thread::get_id() <<" " << wav_ids[i] << " Final timestamp results " <<" : "<<time_stamp_res;
+            if(time_stamp_res!=""){
+                LOG(INFO) <<"Thread: " << this_thread::get_id() <<" " << wav_ids[i] << " Final timestamp results " <<" : "<<time_stamp_res;
+            }
         }
 
     }
@@ -207,10 +214,10 @@ int main(int argc, char** argv)
     TCLAP::ValueArg<std::string>    vad_quant("", VAD_QUANT, "true (Default), load the model of model.onnx in vad_dir. If set true, load the model of model_quant.onnx in vad_dir", false, "true", "string");
     TCLAP::ValueArg<std::string>    punc_dir("", PUNC_DIR, "the punc online model path, which contains model.onnx, punc.yaml", false, "", "string");
     TCLAP::ValueArg<std::string>    punc_quant("", PUNC_QUANT, "true (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "true", "string");
-    TCLAP::ValueArg<std::string>    itn_model_dir("", ITN_MODEL_DIR, "the itn model(fst) path, which contains itn_tagger.fst and itn_verbalizer.fst", false, "", "string");
+    TCLAP::ValueArg<std::string>    itn_dir("", ITN_DIR, "the itn model(fst) path, which contains zh_itn_tagger.fst and zh_itn_verbalizer.fst", false, "", "string");
 
     TCLAP::ValueArg<std::string>    asr_mode("", ASR_MODE, "offline, online, 2pass", false, "2pass", "string");
-    TCLAP::ValueArg<std::int32_t>   onnx_thread("", "onnx-inter-thread", "onnxruntime SetIntraOpNumThreads", false, 1, "int32_t");
+    TCLAP::ValueArg<std::int32_t>   onnx_thread("", "model-thread-num", "onnxruntime SetIntraOpNumThreads", false, 1, "int32_t");
     TCLAP::ValueArg<std::int32_t>   thread_num_("", THREAD_NUM, "multi-thread num for rtf", false, 1, "int32_t");
     TCLAP::ValueArg<std::string>    wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", true, "", "string");
     TCLAP::ValueArg<std::string>    hotword("", HOTWORD, "*.txt(one hotword perline) or hotwords seperate by | (could be: 阿里巴巴 达摩院)", false, "", "string");
@@ -222,7 +229,7 @@ int main(int argc, char** argv)
     cmd.add(vad_quant);
     cmd.add(punc_dir);
     cmd.add(punc_quant);
-    cmd.add(itn_model_dir);
+    cmd.add(itn_dir);
     cmd.add(wav_path);
     cmd.add(asr_mode);
     cmd.add(onnx_thread);
@@ -238,7 +245,7 @@ int main(int argc, char** argv)
     GetValue(vad_quant, VAD_QUANT, model_path);
     GetValue(punc_dir, PUNC_DIR, model_path);
     GetValue(punc_quant, PUNC_QUANT, model_path);
-    GetValue(itn_model_dir, ITN_MODEL_DIR, model_path);
+    GetValue(itn_dir, ITN_DIR, model_path);
     GetValue(wav_path, WAV_PATH, model_path);
     GetValue(asr_mode, ASR_MODE, model_path);
 

@@ -80,14 +80,13 @@ int main(int argc, char* argv[]) {
         "set "
         "false, load the model of model.onnx in punc_dir",
         false, "true", "string");
-    
-    TCLAP::ValueArg<std::string> itn_model_dir(
-        "", ITN_MODEL_DIR,
-        "default: damo/fst_itn_zh, the itn model path, which contains "
+    TCLAP::ValueArg<std::string> itn_dir(
+        "", ITN_DIR,
+        "default: thuduj12/fst_itn_zh, the itn model path, which contains "
         "zh_itn_tagger.fst, zh_itn_verbalizer.fst",
-        false, "damo/fst_itn_zh", "string");
+        false, "thuduj12/fst_itn_zh", "string");
     TCLAP::ValueArg<std::string> itn_revision(
-        "", "itn-revision", "ITN model revision", false, "v1.0.0", "string");
+        "", "itn-revision", "ITN model revision", false, "v1.0.1", "string");
 
     TCLAP::ValueArg<std::string> listen_ip("", "listen-ip", "listen ip", false,
                                            "0.0.0.0", "string");
@@ -125,7 +124,8 @@ int main(int argc, char* argv[]) {
     cmd.add(punc_dir);
     cmd.add(punc_revision);
     cmd.add(punc_quant);
-    cmd.add(itn_model_dir);
+    cmd.add(itn_dir);
+    cmd.add(itn_revision);
 
     cmd.add(listen_ip);
     cmd.add(port);
@@ -142,12 +142,13 @@ int main(int argc, char* argv[]) {
     GetValue(vad_quant, VAD_QUANT, model_path);
     GetValue(punc_dir, PUNC_DIR, model_path);
     GetValue(punc_quant, PUNC_QUANT, model_path);
-    GetValue(itn_model_dir, ITN_MODEL_DIR, model_path);
+    GetValue(itn_dir, ITN_DIR, model_path);
 
     GetValue(offline_model_revision, "offline-model-revision", model_path);
     GetValue(online_model_revision, "online-model-revision", model_path);
     GetValue(vad_revision, "vad-revision", model_path);
     GetValue(punc_revision, "punc-revision", model_path);
+    GetValue(itn_revision, "itn-revision", model_path);
 
     // Download model form Modelscope
     try {
@@ -160,7 +161,7 @@ int main(int argc, char* argv[]) {
       std::string s_asr_quant = model_path[QUANTIZE];
       std::string s_punc_path = model_path[PUNC_DIR];
       std::string s_punc_quant = model_path[PUNC_QUANT];
-      std::string s_itn_path = model_path[ITN_MODEL_DIR];
+      std::string s_itn_path = model_path[ITN_DIR];
 
       std::string python_cmd =
           "python -m funasr.utils.runtime_sdk_download_tool --type onnx --quantize True ";
@@ -223,25 +224,17 @@ int main(int argc, char* argv[]) {
                            model_path["offline-model-revision"];
           down_asr_path = s_offline_asr_path;
         } 
-        else 
-        {
-          // model with timestamp
+        else {
           size_t found = s_offline_asr_path.find("speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404");
-          if (found != std::string::npos) 
-          {
+          if (found != std::string::npos) {
               model_path["offline-model-revision"]="v1.2.4";
-          }
-          else
-          {
-              // model with hotword
+          } else{
               found = s_offline_asr_path.find("speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404");
-              if (found != std::string::npos) 
-              {
-                  model_path["offline-model-revision"]="v1.0.3";
-                  model_path[QUANTIZE]=false;
-                  s_asr_quant = false;
+              if (found != std::string::npos) {
+                  model_path["offline-model-revision"]="v1.0.5";
               }
           }
+
           // modelscope
           LOG(INFO) << "Download model: " << s_offline_asr_path
                     << " from modelscope : "; 
@@ -332,7 +325,8 @@ int main(int argc, char* argv[]) {
         } else {
           // modelscope
           LOG(INFO) << "Download model: " << s_punc_path
-                    << " from modelscope : "; python_cmd_punc = python_cmd + " --model-name " +
+                    << " from modelscope : "; 
+              python_cmd_punc = python_cmd + " --model-name " +
                 s_punc_path +
                 " --export-dir " + s_download_model_dir +
                 " --model_revision " + model_path["punc-revision"]; 
@@ -363,26 +357,45 @@ int main(int argc, char* argv[]) {
       }
 
       if (!s_itn_path.empty()) {
-        std::string down_itn_path = "";
+        std::string python_cmd_itn;
+        std::string down_itn_path;
+        std::string down_itn_model;
+
         if (access(s_itn_path.c_str(), F_OK) == 0) {
           // local
+          python_cmd_itn = python_cmd + " --model-name " + s_itn_path +
+                            " --export-dir ./ " + " --model_revision " +
+                            model_path["itn-revision"] + " --export False ";
           down_itn_path = s_itn_path;
         } else {
           // modelscope
-          // TODO: Now just set itn path under damo download model path.
-          // In case there are other ITN models released by damo,
-          // the models can be downloaded here.
-          down_itn_path = s_download_model_dir + "/" + s_itn_path;
+          LOG(INFO) << "Download model: " << s_itn_path
+                    << " from modelscope : "; 
+          python_cmd_itn = python_cmd + " --model-name " +
+                s_itn_path +
+                " --export-dir " + s_download_model_dir +
+                " --model_revision " + model_path["itn-revision"]
+                + " --export False "; 
+          down_itn_path  =
+                s_download_model_dir +
+                "/" + s_itn_path;
         }
 
-        if (access(down_itn_path.c_str(), F_OK) != 0) {
-          LOG(ERROR) << down_itn_path << " do not exists, ITN will not be executed.";
+        int ret = system(python_cmd_itn.c_str());
+        if (ret != 0) {
+          LOG(INFO) << "Failed to download model from modelscope. If you set local itn model path, you can ignore the errors.";
+        }
+        down_itn_model = down_itn_path + "/zh_itn_tagger.fst";
+
+        if (access(down_itn_model.c_str(), F_OK) != 0) {
+          LOG(ERROR) << down_itn_model << " do not exists.";
+          exit(-1);
         } else {
-          model_path[ITN_MODEL_DIR] = down_itn_path;
-          LOG(INFO) << "Set " << ITN_MODEL_DIR << " : " << model_path[ITN_MODEL_DIR];
+          model_path[ITN_DIR] = down_itn_path;
+          LOG(INFO) << "Set " << ITN_DIR << " : " << model_path[ITN_DIR];
         }
       } else {
-        LOG(INFO) << "ITN model is not set, not executed.";
+        LOG(INFO) << "ITN model is not set, use default.";
       }
 
     } catch (std::exception const& e) {

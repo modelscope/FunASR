@@ -217,7 +217,9 @@ extern "C" {
 	}
 
 	// APIs for Offline-stream Infer
-	_FUNASRAPI FUNASR_RESULT FunOfflineInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, FUNASR_MODE mode, QM_CALLBACK fn_callback, const std::vector<std::vector<float>> &hw_emb, int sampling_rate, std::string wav_format)
+	_FUNASRAPI FUNASR_RESULT FunOfflineInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, 
+												   FUNASR_MODE mode, QM_CALLBACK fn_callback, const std::vector<std::vector<float>> &hw_emb, 
+												   int sampling_rate, std::string wav_format, bool itn)
 	{
 		funasr::OfflineStream* offline_stream = (funasr::OfflineStream*)handle;
 		if (!offline_stream)
@@ -283,7 +285,7 @@ extern "C" {
 			string punc_res = (offline_stream->punc_handle)->AddPunc((p_result->msg).c_str());
 			p_result->msg = punc_res;
 		}
-		if(offline_stream->UseITN()){
+		if(offline_stream->UseITN() && itn){
 			string msg_itn = offline_stream->itn_handle->Normalize(p_result->msg);
 			p_result->msg = msg_itn;
 		}
@@ -291,7 +293,8 @@ extern "C" {
 		return p_result;
 	}
 
-	_FUNASRAPI FUNASR_RESULT FunOfflineInfer(FUNASR_HANDLE handle, const char* sz_filename, FUNASR_MODE mode, QM_CALLBACK fn_callback, const std::vector<std::vector<float>> &hw_emb, int sampling_rate)
+	_FUNASRAPI FUNASR_RESULT FunOfflineInfer(FUNASR_HANDLE handle, const char* sz_filename, FUNASR_MODE mode, QM_CALLBACK fn_callback, 
+											 const std::vector<std::vector<float>> &hw_emb, int sampling_rate, bool itn)
 	{
 		funasr::OfflineStream* offline_stream = (funasr::OfflineStream*)handle;
 		if (!offline_stream)
@@ -361,14 +364,14 @@ extern "C" {
 			string punc_res = (offline_stream->punc_handle)->AddPunc((p_result->msg).c_str());
 			p_result->msg = punc_res;
 		}
-		if(offline_stream->UseITN()){
+		if(offline_stream->UseITN() && itn){
 			string msg_itn = offline_stream->itn_handle->Normalize(p_result->msg);
 			p_result->msg = msg_itn;
 		}
 		return p_result;
 	}
 
-	_FUNASRAPI const std::vector<std::vector<float>> CompileHotwordEmbedding(FUNASR_HANDLE handle, std::string &hotwords, ASR_TYPE mode) 
+	_FUNASRAPI const std::vector<std::vector<float>> CompileHotwordEmbedding(FUNASR_HANDLE handle, std::string &hotwords, ASR_TYPE mode)
 	{
 		if (mode == ASR_OFFLINE){
 			funasr::OfflineStream* offline_stream = (funasr::OfflineStream*)handle;
@@ -386,14 +389,18 @@ extern "C" {
 		}
 		else{
 			LOG(ERROR) << "Not implement: Online model does not support Hotword yet!";
-			exit(-1);
+			std::vector<std::vector<float>> emb;
+			return emb;
 		}
 		
 	}
 
 
 	// APIs for 2pass-stream Infer
-	_FUNASRAPI FUNASR_RESULT FunTpassInferBuffer(FUNASR_HANDLE handle, FUNASR_HANDLE online_handle, const char* sz_buf, int n_len, std::vector<std::vector<std::string>> &punc_cache, bool input_finished, int sampling_rate, std::string wav_format, ASR_TYPE mode, const std::vector<std::vector<float>> &hw_emb)
+	_FUNASRAPI FUNASR_RESULT FunTpassInferBuffer(FUNASR_HANDLE handle, FUNASR_HANDLE online_handle, const char* sz_buf, 
+												 int n_len, std::vector<std::vector<std::string>> &punc_cache, bool input_finished, 
+												 int sampling_rate, std::string wav_format, ASR_TYPE mode, 
+												 const std::vector<std::vector<float>> &hw_emb, bool itn)
 	{
 		funasr::TpassStream* tpass_stream = (funasr::TpassStream*)handle;
 		funasr::TpassOnlineStream* tpass_online_stream = (funasr::TpassOnlineStream*)online_handle;
@@ -431,9 +438,6 @@ extern "C" {
 
 		funasr::FUNASR_RECOG_RESULT* p_result = new funasr::FUNASR_RECOG_RESULT;
 		p_result->snippet_time = audio->GetTimeLen();
-		// if(p_result->snippet_time == 0){
-		// 	return p_result;
-		// }
 		
 		audio->Split(vad_online_handle, chunk_len, input_finished, mode);
 
@@ -448,7 +452,7 @@ extern "C" {
 					p_result->tpass_msg = msg_punc;
 
 					// ITN
-					if(tpass_stream->UseITN()){
+					if(tpass_stream->UseITN() && itn){
 						string msg_itn = tpass_stream->itn_handle->Normalize(msg_punc);
 						p_result->tpass_msg = msg_itn;
 					}
@@ -467,12 +471,15 @@ extern "C" {
 			}
 		}
 
-		// timestamp 
+		// timestamp
 		std::string cur_stamp = "[";		
 		while(audio->FetchTpass(frame) > 0){
 			string msg = asr_handle->Forward(frame->data, frame->len, frame->is_final, hw_emb);
 
 			std::vector<std::string> msg_vec = funasr::split(msg, '|');  // split with timestamp
+			if(msg_vec.size()==0){
+				continue;
+			}
 			msg = msg_vec[0];
 			//timestamp
 			if(msg_vec.size() > 1){
@@ -494,7 +501,7 @@ extern "C" {
 				msg_punc += "。";
 			}
 			p_result->tpass_msg = msg_punc;
-			if(tpass_stream->UseITN()){
+			if(tpass_stream->UseITN() && itn){
 				string msg_itn = tpass_stream->itn_handle->Normalize(msg_punc);
 				p_result->tpass_msg = msg_itn;
 			}
@@ -516,7 +523,6 @@ extern "C" {
 	{
 		if (!result)
 			return 0;
-
 		return 1;
 	}
 

@@ -50,7 +50,7 @@ namespace funasr {
 #define MODEL_SEG_DICT "seg_dict"
 #define HOTWORD "hotword"
 
-#define ITN_MODEL_DIR "itn-model-dir"
+#define ITN_DIR "itn-dir"
 #define ITN_TAGGER_NAME "zh_itn_tagger.fst"
 #define ITN_VERBALIZER_NAME "zh_itn_verbalizer.fst"
 

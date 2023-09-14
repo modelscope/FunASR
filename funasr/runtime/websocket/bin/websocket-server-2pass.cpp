@@ -81,10 +81,18 @@ nlohmann::json handle_result(FUNASR_RESULT result) {
 }
 // feed buffer to asr engine for decoder
 void WebSocketServer::do_decoder(
-    std::vector<char>& buffer, websocketpp::connection_hdl& hdl,
-    nlohmann::json& msg, std::vector<std::vector<std::string>>& punc_cache,
+    std::vector<char>& buffer, 
+    websocketpp::connection_hdl& hdl,
+    nlohmann::json& msg, 
+    std::vector<std::vector<std::string>>& punc_cache,
     std::vector<std::vector<float>> &hotwords_embedding,
-    websocketpp::lib::mutex& thread_lock, bool& is_final, std::string wav_name,
+    websocketpp::lib::mutex& thread_lock, 
+    bool& is_final, 
+    std::string wav_name,
+    std::string modetype,
+    bool itn,
+    int audio_fs,
+    std::string wav_format,
     FUNASR_HANDLE& tpass_online_handle) {
   // lock for each connection
   scoped_lock guard(thread_lock);
@@ -96,23 +104,14 @@ void WebSocketServer::do_decoder(
   try {
     FUNASR_RESULT Result = nullptr;
     int asr_mode_ = 2;
-    if (msg.contains("mode")) {
-      std::string modeltype = msg["mode"];
-      if (modeltype == "offline") {
-        asr_mode_ = 0;
-      } else if (modeltype == "online") {
-        asr_mode_ = 1;
-      } else if (modeltype == "2pass") {
-        asr_mode_ = 2;
-      }
-    } else {
-      // default value
-      msg["mode"] = "2pass";
+    if (modetype == "offline") {
+      asr_mode_ = 0;
+    } else if (modetype == "online") {
+      asr_mode_ = 1;
+    } else if (modetype == "2pass") {
       asr_mode_ = 2;
     }
 
-    // loop to send chunk_size 800*2 data to asr engine.   TODO: chunk_size need
-    // get from client
     while (buffer.size() >= 800 * 2 && !msg["is_eof"]) {
       std::vector<char> subvector = {buffer.begin(), buffer.begin() + 800 * 2};
       buffer.erase(buffer.begin(), buffer.begin() + 800 * 2);
@@ -121,9 +120,9 @@ void WebSocketServer::do_decoder(
         if (tpass_online_handle) {
           Result = FunTpassInferBuffer(tpass_handle, tpass_online_handle,
                                        subvector.data(), subvector.size(),
-                                       punc_cache, false, msg["audio_fs"],
-                                       msg["wav_format"], (ASR_TYPE)asr_mode_,
-                                       hotwords_embedding);
+                                       punc_cache, false, audio_fs,
+                                       wav_format, (ASR_TYPE)asr_mode_,
+                                       hotwords_embedding, itn);
 
         } else {
           msg["access_num"]=(int)msg["access_num"]-1;
@@ -156,9 +155,9 @@ void WebSocketServer::do_decoder(
         if (tpass_online_handle) {
           Result = FunTpassInferBuffer(tpass_handle, tpass_online_handle,
                                        buffer.data(), buffer.size(), punc_cache,
-                                       is_final, msg["audio_fs"],
-                                       msg["wav_format"], (ASR_TYPE)asr_mode_,
-                                       hotwords_embedding);
+                                       is_final, audio_fs,
+                                       wav_format, (ASR_TYPE)asr_mode_,
+                                       hotwords_embedding, itn);
         } else {
           msg["access_num"]=(int)msg["access_num"]-1;	 
           return;
@@ -187,7 +186,7 @@ void WebSocketServer::do_decoder(
         }
         FunASRFreeResult(Result);
       }else{
-        if(msg["wav_format"] != "pcm" && msg["wav_format"] != "PCM"){
+        if(wav_format != "pcm" && wav_format != "PCM"){
           websocketpp::lib::error_code ec;
           nlohmann::json jsonresult;
           jsonresult["text"] = "ERROR. Real-time transcription service ONLY SUPPORT wav_format pcm.";
@@ -222,6 +221,9 @@ void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
 
     data_msg->msg = nlohmann::json::parse("{}");
     data_msg->msg["wav_format"] = "pcm";
+    data_msg->msg["wav_name"] = "wav-default-id";
+    data_msg->msg["mode"] = "2pass";
+    data_msg->msg["itn"] = true;
     data_msg->msg["audio_fs"] = 16000;
     data_msg->msg["access_num"] = 0; // the number of access for this object, when it is 0, we can free it saftly
     data_msg->msg["is_eof"]=false; // if this connection is closed
@@ -393,6 +395,9 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
           msg_data->tpass_online_handle = tpass_online_handle;
         }
       }
+      if (jsonresult.contains("itn")) {
+        msg_data->msg["itn"] = jsonresult["itn"];
+      }
       LOG(INFO) << "jsonresult=" << jsonresult
                 << ", msg_data->msg=" << msg_data->msg;
       if (jsonresult["is_speaking"] == false ||
@@ -410,6 +415,10 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
                         std::move(hotwords_embedding_),
                         std::ref(*thread_lock_p), std::move(true),
                         msg_data->msg["wav_name"],
+                        msg_data->msg["mode"],
+                        msg_data->msg["itn"],
+                        msg_data->msg["audio_fs"],
+                        msg_data->msg["wav_format"],
                         std::ref(msg_data->tpass_online_handle)));
 		      msg_data->msg["access_num"]=(int)(msg_data->msg["access_num"])+1;
         }
@@ -453,6 +462,10 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
                                 std::move(hotwords_embedding_),
                                 std::ref(*thread_lock_p), std::move(false),
                                 msg_data->msg["wav_name"],
+                                msg_data->msg["mode"],
+                                msg_data->msg["itn"],
+                                msg_data->msg["audio_fs"],
+                                msg_data->msg["wav_format"],
                                 std::ref(msg_data->tpass_online_handle)));
             msg_data->msg["access_num"]=(int)(msg_data->msg["access_num"])+1;
           }

@@ -85,10 +85,10 @@ OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int
         }
     }
 
-        // Optional: ITN, here we just support language_type=MandarinEnglish
-    if(model_path.find(ITN_MODEL_DIR) != model_path.end()){
-        string itn_tagger_path = PathAppend(model_path.at(ITN_MODEL_DIR), ITN_TAGGER_NAME);
-        string itn_verbalizer_path = PathAppend(model_path.at(ITN_MODEL_DIR), ITN_VERBALIZER_NAME);
+    // Optional: ITN, here we just support language_type=MandarinEnglish
+    if(model_path.find(ITN_DIR) != model_path.end() && model_path.at(ITN_DIR) != ""){
+        string itn_tagger_path = PathAppend(model_path.at(ITN_DIR), ITN_TAGGER_NAME);
+        string itn_verbalizer_path = PathAppend(model_path.at(ITN_DIR), ITN_VERBALIZER_NAME);
 
         if (access(itn_tagger_path.c_str(), F_OK) != 0 ||
             access(itn_verbalizer_path.c_str(), F_OK) != 0 )

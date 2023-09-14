@@ -118,6 +118,10 @@ class WebSocketServer {
                   std::vector<std::vector<float>> &hotwords_embedding,
                   websocketpp::lib::mutex& thread_lock, bool& is_final,
                   std::string wav_name,
+                  std::string modetype,
+                  bool itn,
+                  int audio_fs,
+                  std::string wav_format,
                   FUNASR_HANDLE& tpass_online_handle);
 
   void initAsr(std::map<std::string, std::string>& model_path, int thread_num);
