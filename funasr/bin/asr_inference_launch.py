@@ -853,7 +853,7 @@ def inference_paraformer_online(
                     "feats": torch.zeros((batch_size, chunk_size[0] + chunk_size[2], feats_dims)), "tail_chunk": False}
         cache["encoder"] = cache_en
 
-        cache_de = {"decode_fsmn": None, "decoder_chunk_look_back": decoder_chunk_look_back, "opt": None}
+        cache_de = {"decode_fsmn": None, "decoder_chunk_look_back": decoder_chunk_look_back, "opt": None, "chunk_size": chunk_size}
         cache["decoder"] = cache_de
 
         return cache
@@ -870,7 +870,7 @@ def inference_paraformer_online(
                         "feats": torch.zeros((batch_size, chunk_size[0] + chunk_size[2], feats_dims)), "tail_chunk": False}
             cache["encoder"] = cache_en
 
-            cache_de = {"decode_fsmn": None, "decoder_chunk_look_back": decoder_chunk_look_back, "opt": None}
+            cache_de = {"decode_fsmn": None, "decoder_chunk_look_back": decoder_chunk_look_back, "opt": None, "chunk_size": chunk_size}
             cache["decoder"] = cache_de
 
         return cache
@@ -982,8 +982,8 @@ def inference_paraformer_online(
 
         asr_result_list.append(item)
         if is_final:
-            cache = _cache_reset(cache, chunk_size=chunk_size, batch_size=1,
-                                 encoder_chunk_look_back=encoder_chunk_look_back, decoder_chunk_look_back=decoder_chunk_look_back)
+            cache = _cache_reset(cache, chunk_size=chunk_size, encoder_chunk_look_back=encoder_chunk_look_back, 
+                                 decoder_chunk_look_back=decoder_chunk_look_back, batch_size=1)
         return asr_result_list
 
     return _forward

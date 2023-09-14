@@ -705,6 +705,35 @@ class MultiHeadedAttentionCrossAtt(nn.Module):
         scores = torch.matmul(q_h, k_h.transpose(-2, -1))
         return self.forward_attention(v_h, scores, memory_mask)
 
+    def forward_chunk(self, x, memory, cache=None, chunk_size=None, look_back=0):
+        """Compute scaled dot product attention.
+
+        Args:
+            query (torch.Tensor): Query tensor (#batch, time1, size).
+            key (torch.Tensor): Key tensor (#batch, time2, size).
+            value (torch.Tensor): Value tensor (#batch, time2, size).
+            mask (torch.Tensor): Mask tensor (#batch, 1, time2) or
+                (#batch, time1, time2).
+
+        Returns:
+            torch.Tensor: Output tensor (#batch, time1, d_model).
+
+        """
+        q_h, k_h, v_h = self.forward_qkv(x, memory)
+        if chunk_size is not None and look_back > 0:
+            if cache is not None:
+                k_h = torch.cat((cache["k"], k_h), dim=2)
+                v_h = torch.cat((cache["v"], v_h), dim=2)
+                cache["k"] = k_h[:, :, -(look_back * chunk_size[1]):, :]
+                cache["v"] = v_h[:, :, -(look_back * chunk_size[1]):, :]
+            else:
+                cache_tmp = {"k": k_h[:, :, -(look_back * chunk_size[1]):, :],
+                             "v": v_h[:, :, -(look_back * chunk_size[1]):, :]}
+                cache = cache_tmp
+        q_h = q_h * self.d_k ** (-0.5)
+        scores = torch.matmul(q_h, k_h.transpose(-2, -1))
+        return self.forward_attention(v_h, scores, None), cache
+
 
 class MultiHeadSelfAttention(nn.Module):
     """Multi-Head Attention layer.
