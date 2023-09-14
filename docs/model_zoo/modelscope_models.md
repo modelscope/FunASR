@@ -78,8 +78,8 @@ Here we provided several pretrained models on different datasets. The details of
 
 ### Punctuation Restoration
 
-|                                                         Model Name                                                         |        Language ｜ Training Data         | Parameters | Vocab Size| Offline/Online | Notes |
-|:--------------------------------------------------------------------------------------------------------------------------:|:----------------------------:|:----------:|:----------:|:--------------:|:------|
+|                                                         Model Name                                                         |        Language | Training Data         | Parameters | Vocab Size| Offline/Online | Notes |
+|:--------------------------------------------------------------------------------------------------------------------------:|:---------|:----------------------------:|:----------:|:----------:|:--------------:|:------|
 |      [CT-Transformer](https://modelscope.cn/models/damo/punc_ct-transformer_cn-en-common-vocab471067-large/summary)     | CN & EN | Alibaba Text Data |    100M     |    471067     |    Offline     |   large offline punctuation model    |
 |      [CT-Transformer](https://modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch/summary)    | CN & EN  | Alibaba Text Data |    70M     |    272727     |    Offline     |   offline punctuation model    |
 | [CT-Transformer](https://modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727/summary)    | CN & EN  | Alibaba Text Data |    70M     |    272727     |     Online     |  online punctuation model     |
