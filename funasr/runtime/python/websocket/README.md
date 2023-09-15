@@ -107,6 +107,20 @@ Loadding from wav.scp(kaldi style)
 # --chunk_size, "5,10,5"=600ms, "8,8,4"=480ms
 python funasr_wss_client.py --host "0.0.0.0" --port 10095 --mode 2pass --chunk_size "8,8,4" --audio_in "./data/wav.scp" --output_dir "./results"
 ```
+
+#### webscoket api
+```shell
+    # class Funasr_websocket_recognizer example with 3 step
+    # 1.create an recognizer 
+    rcg=Funasr_websocket_recognizer(host="127.0.0.1",port="30035",is_ssl=True,mode="2pass")
+	# 2.send pcm data to asr engine and get asr result
+    text=rcg.feed_chunk(data)
+	print("text",text)
+	# 3.get last result, set timeout=3
+    text=rcg.close(timeout=3)
+	print("text",text)
+```
+
 ## Acknowledge
 1. This project is maintained by [FunASR community](https://github.com/alibaba-damo-academy/FunASR).
 2. We acknowledge [zhaoming](https://github.com/zhaomingwork/FunASR/tree/fix_bug_for_python_websocket) for contributing the websocket service.
