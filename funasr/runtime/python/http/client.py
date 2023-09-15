@@ -1,3 +1,5 @@
+import os
+
 import requests
 import argparse
 
@@ -23,12 +25,16 @@ parser.add_argument("--audio_path",
                     required=False,
                     help="use audio path")
 args = parser.parse_args()
+print("-----------  Configuration Arguments -----------")
+for arg, value in vars(args).items():
+    print("%s: %s" % (arg, value))
+print("------------------------------------------------")
 
 
 url = f'http://{args.host}:{args.port}/recognition'
 data = {'add_pun': args.add_pun}
 headers = {}
-files = [('audio', ('file', open(args.audio_path, 'rb'), 'application/octet-stream'))]
+files = [('audio', (os.path.basename(args.audio_path), open(args.audio_path, 'rb'), 'application/octet-stream'))]
 
 response = requests.post(url, headers=headers, data=data, files=files)
 print(response.text)

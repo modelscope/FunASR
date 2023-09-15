@@ -1,8 +1,7 @@
 import argparse
 import logging
 import os
-import random
-import time
+import uuid
 
 import aiofiles
 import ffmpeg
@@ -58,6 +57,11 @@ parser.add_argument("--temp_dir",
                     required=False,
                     help="temp dir")
 args = parser.parse_args()
+print("-----------  Configuration Arguments -----------")
+for arg, value in vars(args).items():
+    print("%s: %s" % (arg, value))
+print("------------------------------------------------")
+
 
 os.makedirs(args.temp_dir, exist_ok=True)
 
@@ -87,7 +91,7 @@ app = FastAPI(title="FunASR")
 async def api_recognition(audio: UploadFile = File(..., description="audio file"),
                           add_pun: int = Body(1, description="add punctuation", embed=True)):
     suffix = audio.filename.split('.')[-1]
-    audio_path = f'{args.temp_dir}/{int(time.time() * 1000)}_{random.randint(100, 999)}.{suffix}'
+    audio_path = f'{args.temp_dir}/{str(uuid.uuid1())}.{suffix}'
     async with aiofiles.open(audio_path, 'wb') as out_file:
         content = await audio.read()
         await out_file.write(content)
@@ -100,6 +104,7 @@ async def api_recognition(audio: UploadFile = File(..., description="audio file"
     if add_pun:
         rec_result = inference_pipeline_punc(text_in=rec_result['text'], param_dict={'cache': list()})
     ret = {"results": rec_result['text'], "code": 0}
+    print(ret)
     return ret
 
 
