@@ -108,7 +108,7 @@ Loadding from wav.scp(kaldi style)
 python funasr_wss_client.py --host "0.0.0.0" --port 10095 --mode 2pass --chunk_size "8,8,4" --audio_in "./data/wav.scp" --output_dir "./results"
 ```
 
-#### Webscoket api
+#### Websocket api
 ```shell
     # class Funasr_websocket_recognizer example with 3 step
     # 1.create an recognizer 
