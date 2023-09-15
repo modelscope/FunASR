@@ -75,13 +75,13 @@ class Funasr_websocket_recognizer():
         except Exception as e:
             print("client closed")
  
-    # feed data to asr engine
-    def feed_chunk(self, chunk):
+    # feed data to asr engine, wait_time means waiting for result until time out
+    def feed_chunk(self, chunk,wait_time=0.01):
         try:
             self.websocket.send(chunk,  ABNF.OPCODE_BINARY)
             # loop to check if there is a message, timeout in 0.01s
             while(True):
-               msg = self.msg_queue.get(timeout=0.01)
+               msg = self.msg_queue.get(timeout=wait_time)
                if self.msg_queue.empty():
                   break
                   
@@ -121,7 +121,7 @@ if __name__ == '__main__':
             beg = i * stride
             data = audio_bytes[beg:beg + stride]
  
-            text=rcg.feed_chunk(data)
+            text=rcg.feed_chunk(data,wait_time=0.02)
             if len(text)>0:
                print("text",text)
             time.sleep(0.05)
