@@ -21,9 +21,11 @@ python server.py \
 --host [host ip] \
 --port [server port] \
 --asr_model [asr model_name] \
+--vad_model [vad model_name] \
 --punc_model [punc model_name] \
 --ngpu [0 or 1] \
 --ncpu [1 or 4] \
+--hotword_path [path of hot word txt] \
 --certfile [path of certfile for ssl] \
 --keyfile [path of keyfile for ssl] \
 --temp_dir [upload file temp dir] 
