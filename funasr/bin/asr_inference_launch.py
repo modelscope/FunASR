@@ -45,7 +45,7 @@ from funasr.utils.types import str2bool
 from funasr.utils.types import str2triple_str
 from funasr.utils.types import str_or_none
 from funasr.utils.vad_utils import slice_padding_fbank
-
+from tqdm import tqdm
 
 def inference_asr(
         maxlenratio: float,
@@ -651,7 +651,8 @@ def inference_paraformer_vad_punc(
             
             batch_size_token_ms_cum = 0
             beg_idx = 0
-            for j, _ in enumerate(range(0, n)):
+            beg_asr_total = time.time()
+            for j, _ in tqdm(enumerate(range(0, n))):
                 batch_size_token_ms_cum += (sorted_data[j][0][1] - sorted_data[j][0][0])
                 if j < n - 1 and (batch_size_token_ms_cum + sorted_data[j + 1][0][1] - sorted_data[j + 1][0][0]) < batch_size_token_ms and (sorted_data[j + 1][0][1] - sorted_data[j + 1][0][0]) < batch_size_token_threshold_s:
                     continue
@@ -661,16 +662,17 @@ def inference_paraformer_vad_punc(
                 beg_idx = end_idx
                 batch = {"speech": speech_j, "speech_lengths": speech_lengths_j}
                 batch = to_device(batch, device=device)
-                print("batch: ", speech_j.shape[0])
+                # print("batch: ", speech_j.shape[0])
                 beg_asr = time.time()
                 results = speech2text(**batch)
                 end_asr = time.time()
-                print("time cost asr: ", end_asr - beg_asr)
+                # print("time cost asr: ", end_asr - beg_asr)
 
                 if len(results) < 1:
                     results = [["", [], [], [], [], [], []]]
                 results_sorted.extend(results)
-
+            end_asr_total = time.time()
+            print("total time cost asr: ", end_asr_total-beg_asr_total)
             restored_data = [0] * n
             for j in range(n):
                 index = sorted_data[j][1]
