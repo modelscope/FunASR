@@ -427,7 +427,7 @@ def inference_paraformer(
                         else:
                             text_postprocessed, word_lists = postprocessed_result[0], postprocessed_result[1]
                         item = {'key': key, 'value': text_postprocessed}
-                        if timestamp_postprocessed != "" or len(timestamp) == 0:
+                        if timestamp_postprocessed != "":
                             item['timestamp'] = timestamp_postprocessed
                         asr_result_list.append(item)
                         finish_count += 1
@@ -719,7 +719,7 @@ def inference_paraformer_vad_punc(
             item = {'key': key, 'value': text_postprocessed_punc}
             if text_postprocessed != "":
                 item['text_postprocessed'] = text_postprocessed
-            if time_stamp_postprocessed != "" or len(time_stamp) == 0:
+            if time_stamp_postprocessed != "":
                 item['time_stamp'] = time_stamp_postprocessed
 
             item['sentences'] = time_stamp_sentence(punc_id_list, time_stamp_postprocessed, text_postprocessed)
@@ -1297,7 +1297,7 @@ def inference_transducer(
         quantize_modules: Optional[List[str]] = None,
         quantize_dtype: Optional[str] = "float16",
         streaming: Optional[bool] = False,
-        simu_streaming: Optional[bool] = False,
+        fake_streaming: Optional[bool] = False,
         full_utt: Optional[bool] = False,
         chunk_size: Optional[int] = 16,
         left_context: Optional[int] = 16,
@@ -1374,7 +1374,7 @@ def inference_transducer(
         quantize_modules=quantize_modules,
         quantize_dtype=quantize_dtype,
         streaming=streaming,
-        simu_streaming=simu_streaming,
+        fake_streaming=fake_streaming,
         full_utt=full_utt,
         chunk_size=chunk_size,
         left_context=left_context,
@@ -1432,8 +1432,8 @@ def inference_transducer(
                     final_hyps = speech2text.streaming_decode(
                         speech[_end: len(speech)], is_final=True
                     )
-                elif speech2text.simu_streaming:
-                    final_hyps = speech2text.simu_streaming_decode(**batch)
+                elif speech2text.fake_streaming:
+                    final_hyps = speech2text.fake_streaming_decode(**batch)
                 elif speech2text.full_utt:
                     final_hyps = speech2text.full_utt_decode(**batch)
                 else:
@@ -1823,7 +1823,7 @@ def get_parser():
     group.add_argument("--lm_weight", type=float, default=1.0, help="RNNLM weight")
     group.add_argument("--ngram_weight", type=float, default=0.9, help="ngram weight")
     group.add_argument("--streaming", type=str2bool, default=False)
-    group.add_argument("--simu_streaming", type=str2bool, default=False)
+    group.add_argument("--fake_streaming", type=str2bool, default=False)
     group.add_argument("--full_utt", type=str2bool, default=False)
     group.add_argument("--chunk_size", type=int, default=16)
     group.add_argument("--left_context", type=int, default=16)
