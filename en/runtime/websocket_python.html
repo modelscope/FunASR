@@ -249,6 +249,20 @@ python funasr_wss_client.py --host <span class="s2">&quot;0.0.0.0&quot;</span> -
 </div>
 </div>
 </div>
+<div class="section" id="websocket-api">
+<h4>Websocket api<a class="headerlink" href="#websocket-api" title="Permalink to this headline"></a></h4>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>    <span class="c1"># class Funasr_websocket_recognizer example with 3 step</span>
+    <span class="c1"># 1.create an recognizer </span>
+    <span class="nv">rcg</span><span class="o">=</span>Funasr_websocket_recognizer<span class="o">(</span><span class="nv">host</span><span class="o">=</span><span class="s2">&quot;127.0.0.1&quot;</span>,port<span class="o">=</span><span class="s2">&quot;30035&quot;</span>,is_ssl<span class="o">=</span>True,mode<span class="o">=</span><span class="s2">&quot;2pass&quot;</span><span class="o">)</span>
+    <span class="c1"># 2.send pcm data to asr engine and get asr result</span>
+    <span class="nv">text</span><span class="o">=</span>rcg.feed_chunk<span class="o">(</span>data<span class="o">)</span>
+    print<span class="o">(</span><span class="s2">&quot;text&quot;</span>,text<span class="o">)</span>
+    <span class="c1"># 3.get last result, set timeout=3</span>
+    <span class="nv">text</span><span class="o">=</span>rcg.close<span class="o">(</span><span class="nv">timeout</span><span class="o">=</span><span class="m">3</span><span class="o">)</span>
+    print<span class="o">(</span><span class="s2">&quot;text&quot;</span>,text<span class="o">)</span>
+</pre></div>
+</div>
+</div>
 </div>
 </div>
 <div class="section" id="acknowledge">
