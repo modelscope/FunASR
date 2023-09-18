@@ -28,11 +28,15 @@ parser.add_argument("--port",
 parser.add_argument("--asr_model",
                     type=str,
                     default="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch",
-                    help="model from modelscope")
+                    help="offline asr model from modelscope")
+parser.add_argument("--vad_model",
+                    type=str,
+                    default="damo/speech_fsmn_vad_zh-cn-16k-common-pytorch",
+                    help="vad model from modelscope")
 parser.add_argument("--punc_model",
                     type=str,
-                    default="damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727",
-                    help="model from modelscope")
+                    default="damo/punc_ct-transformer_cn-en-common-vocab471067-large",
+                    help="punc model from modelscope")
 parser.add_argument("--ngpu",
                     type=int,
                     default=1,
@@ -41,6 +45,10 @@ parser.add_argument("--ncpu",
                     type=int,
                     default=4,
                     help="cpu cores")
+parser.add_argument("--hotword_path",
+                    type=str,
+                    default=None,
+                    help="hot word txt path, only the hot word model works")
 parser.add_argument("--certfile",
                     type=str,
                     default=None,
@@ -66,18 +74,21 @@ print("------------------------------------------------")
 os.makedirs(args.temp_dir, exist_ok=True)
 
 print("model loading")
+param_dict = {}
+if args.hotword_path is not None and os.path.exists(args.hotword_path):
+    param_dict['hotword'] = args.hotword_path
 # asr
 inference_pipeline_asr = pipeline(task=Tasks.auto_speech_recognition,
                                   model=args.asr_model,
+                                  vad_model=args.vad_model,
                                   ngpu=args.ngpu,
                                   ncpu=args.ncpu,
-                                  model_revision=None)
+                                  param_dict=param_dict)
 print(f'loaded asr models.')
 
 if args.punc_model != "":
     inference_pipeline_punc = pipeline(task=Tasks.punctuation,
                                        model=args.punc_model,
-                                       model_revision="v1.0.2",
                                        ngpu=args.ngpu,
                                        ncpu=args.ncpu)
     print(f'loaded pun models.')
