@@ -652,7 +652,7 @@ def inference_paraformer_vad_punc(
             batch_size_token_ms_cum = 0
             beg_idx = 0
             beg_asr_total = time.time()
-            for j, _ in tqdm(enumerate(range(0, n))):
+            for j, _ in enumerate(tqdm(range(0, n))):
                 batch_size_token_ms_cum += (sorted_data[j][0][1] - sorted_data[j][0][0])
                 if j < n - 1 and (batch_size_token_ms_cum + sorted_data[j + 1][0][1] - sorted_data[j + 1][0][0]) < batch_size_token_ms and (sorted_data[j + 1][0][1] - sorted_data[j + 1][0][0]) < batch_size_token_threshold_s:
                     continue
