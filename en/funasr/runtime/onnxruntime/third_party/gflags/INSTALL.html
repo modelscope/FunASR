@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Installing a binary distribution package &mdash; FunASR  documentation</title><link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/jquery.js"></script>
+        <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script src="../../../../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            FunASR
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../installation/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../installation/docker.html">Docker</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Quick Start</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start.html">Quick Start</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Academic Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../academic_recipe/asr_recipe.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../academic_recipe/punc_recipe.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../academic_recipe/vad_recipe.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../academic_recipe/sv_recipe.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../academic_recipe/sd_recipe.html">Speaker Diarization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">ModelScope Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../modelscope_pipeline/quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../egs_modelscope/asr/TEMPLATE/README.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../egs_modelscope/vad/TEMPLATE/README.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../egs_modelscope/punctuation/TEMPLATE/README.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../egs_modelscope/tp/TEMPLATE/README.html">Timestamp Prediction (FA)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../modelscope_pipeline/sv_pipeline.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../modelscope_pipeline/sd_pipeline.html">Speaker Diarization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../modelscope_pipeline/itn_pipeline.html">Inverse Text Normalization (ITN)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Zoo</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../model_zoo/modelscope_models.html">Pretrained Models Released on ModelScope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../model_zoo/huggingface_models.html">Pretrained Models on Huggingface</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Runtime and Service</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme.html">FunASR Runtime Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../docs/SDK_tutorial_online.html">FunASR Realtime Transcribe Service</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../docs/SDK_tutorial.html">Highlights</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../docs/SDK_tutorial.html#funasr-offline-file-transcription-service">FunASR Offline File Transcription Service</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../html5/readme.html">Speech Recognition Service Html5 Client Access Interface</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark and Leaderboard</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../benchmark/benchmark_onnx.html">CPU Benchmark (ONNX-python)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../benchmark/benchmark_onnx_cpp.html">CPU Benchmark (ONNX-cpp)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../benchmark/benchmark_libtorch.html">CPU Benchmark (Libtorch)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../benchmark/benchmark_pipeline_cer.html">Leaderboard IO</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Funasr Library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/build_task.html">Build custom tasks</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Papers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/papers.html">Papers</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Application</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/application.html">Audio Cut</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/application.html#realtime-speech-recognition">Realtime Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/application.html#audio-chat">Audio Chat</a></li>
+</ul>
+<p class="caption"><span class="caption-text">FQA</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/FQA.html">FQA</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">FunASR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Installing a binary distribution package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../../_sources/funasr/runtime/onnxruntime/third_party/gflags/INSTALL.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="installing-a-binary-distribution-package">
+<h1>Installing a binary distribution package<a class="headerlink" href="#installing-a-binary-distribution-package" title="Permalink to this headline"></a></h1>
+<p>No official binary distribution packages are provided by the gflags developers.
+There may, however, be binary packages available for your OS. Please consult
+also the package repositories of your Linux distribution.</p>
+<p>For example on Debian/Ubuntu Linux, gflags can be installed using the
+following command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">libgflags</span><span class="o">-</span><span class="n">dev</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="compiling-the-source-code-with-cmake">
+<h1>Compiling the source code with CMake<a class="headerlink" href="#compiling-the-source-code-with-cmake" title="Permalink to this headline"></a></h1>
+<p>The build system of gflags is since version 2.1 based on <a class="reference external" href="http://cmake.org">CMake</a>.
+The common steps to build, test, and install software are therefore:</p>
+<ol class="simple">
+<li><p>Extract source files.</p></li>
+<li><p>Create build directory and change to it.</p></li>
+<li><p>Run CMake to configure the build tree.</p></li>
+<li><p>Build the software using selected build tool.</p></li>
+<li><p>Test the built software.</p></li>
+<li><p>Install the built files.</p></li>
+</ol>
+<p>On Unix-like systems with GNU Make as build tool, these build steps can be
+summarized by the following sequence of commands executed in a shell,
+where <code class="docutils literal notranslate"><span class="pre">$package</span></code> and <code class="docutils literal notranslate"><span class="pre">$version</span></code> are shell variables which represent
+the name of this package and the obtained version of the software.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ tar xzf gflags-$version-source.tar.gz
+$ cd gflags-$version
+$ mkdir build &amp;&amp; cd build
+$ ccmake ..
+
+  - Press &#39;c&#39; to configure the build system and &#39;e&#39; to ignore warnings.
+  - Set CMAKE_INSTALL_PREFIX and other CMake variables and options.
+  - Continue pressing &#39;c&#39; until the option &#39;g&#39; is available.
+  - Then press &#39;g&#39; to generate the configuration files for GNU Make.
+
+$ make
+$ make test    (optional)
+$ make install (optional)
+</pre></div>
+</div>
+<p>In the following, only gflags-specific CMake settings available to
+configure the build and installation are documented. Note that most of these
+variables are for advanced users and binary package maintainers only.
+They usually do not have to be modified.</p>
+<table border="1" class="docutils">
+<thead>
+<tr>
+<th>CMake Option</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CMAKE_INSTALL_PREFIX</td>
+<td>Installation directory, e.g., "/usr/local" on Unix and "C:\Program Files\gflags" on Windows.</td>
+</tr>
+<tr>
+<td>BUILD_SHARED_LIBS</td>
+<td>Request build of dynamic link libraries.</td>
+</tr>
+<tr>
+<td>BUILD_STATIC_LIBS</td>
+<td>Request build of static link libraries. Implied if BUILD_SHARED_LIBS is OFF.</td>
+</tr>
+<tr>
+<td>BUILD_PACKAGING</td>
+<td>Enable binary package generation using CPack.</td>
+</tr>
+<tr>
+<td>BUILD_TESTING</td>
+<td>Build tests for execution by CTest.</td>
+</tr>
+<tr>
+<td>BUILD_NC_TESTS</td>
+<td>Request inclusion of negative compilation tests (requires Python).</td>
+</tr>
+<tr>
+<td>BUILD_CONFIG_TESTS</td>
+<td>Request inclusion of package configuration tests (requires Python).</td>
+</tr>
+<tr>
+<td>BUILD_gflags_LIBS</td>
+<td>Request build of multi-threaded gflags libraries (if threading library found).</td>
+</tr>
+<tr>
+<td>BUILD_gflags_nothreads_LIBS</td>
+<td>Request build of single-threaded gflags libraries.</td>
+</tr>
+<tr>
+<td>GFLAGS_NAMESPACE</td>
+<td>Name of the C++ namespace to be used by the gflags library. Note that the public source header files are installed in a subdirectory named after this namespace. To maintain backwards compatibility with the Google Commandline Flags, set this variable to "google". The default is "gflags".</td>
+</tr>
+<tr>
+<td>GFLAGS_INTTYPES_FORMAT</td>
+<td>String identifying format of built-in integer types.</td>
+</tr>
+<tr>
+<td>GFLAGS_INCLUDE_DIR</td>
+<td>Name of headers installation directory relative to CMAKE_INSTALL_PREFIX.</td>
+</tr>
+<tr>
+<td>LIBRARY_INSTALL_DIR</td>
+<td>Name of library installation directory relative to CMAKE_INSTALL_PREFIX.</td>
+</tr>
+<tr>
+<td>INSTALL_HEADERS</td>
+<td>Request installation of public header files.</td>
+</tr>
+</tbody>
+</table></div>
+<div class="section" id="using-gflags-with-bazel">
+<h1>Using gflags with <a class="reference external" href="http://bazel.io">Bazel</a><a class="headerlink" href="#using-gflags-with-bazel" title="Permalink to this headline"></a></h1>
+<p>To use gflags in a Bazel project, map it in as an external dependency by editing
+your WORKSPACE file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git_repository</span><span class="p">(</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;com_github_gflags_gflags&quot;</span><span class="p">,</span>
+    <span class="n">commit</span> <span class="o">=</span> <span class="s2">&quot;&lt;INSERT COMMIT SHA HERE&gt;&quot;</span><span class="p">,</span>
+    <span class="n">remote</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/gflags/gflags.git&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>You can then add <code class="docutils literal notranslate"><span class="pre">&#64;com_github_gflags_gflags//:gflags</span></code> to the <code class="docutils literal notranslate"><span class="pre">deps</span></code> section of a
+<code class="docutils literal notranslate"><span class="pre">cc_binary</span></code> or <code class="docutils literal notranslate"><span class="pre">cc_library</span></code> rule, and <code class="docutils literal notranslate"><span class="pre">#include</span> <span class="pre">&lt;gflags/gflags.h&gt;</span></code> to include it
+in your source code.</p>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Speech Lab, Alibaba Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OpenFST port for Windows &mdash; FunASR  documentation</title><link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/jquery.js"></script>
+        <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script src="../../../../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            FunASR
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../installation/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../installation/docker.html">Docker</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Quick Start</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quick_start.html">Quick Start</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Academic Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../academic_recipe/asr_recipe.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../academic_recipe/punc_recipe.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../academic_recipe/vad_recipe.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../academic_recipe/sv_recipe.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../academic_recipe/sd_recipe.html">Speaker Diarization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">ModelScope Egs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../modelscope_pipeline/quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../egs_modelscope/asr/TEMPLATE/README.html">Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../egs_modelscope/vad/TEMPLATE/README.html">Voice Activity Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../egs_modelscope/punctuation/TEMPLATE/README.html">Punctuation Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../egs_modelscope/tp/TEMPLATE/README.html">Timestamp Prediction (FA)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../modelscope_pipeline/sv_pipeline.html">Speaker Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../modelscope_pipeline/sd_pipeline.html">Speaker Diarization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../modelscope_pipeline/itn_pipeline.html">Inverse Text Normalization (ITN)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Zoo</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../model_zoo/modelscope_models.html">Pretrained Models Released on ModelScope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../model_zoo/huggingface_models.html">Pretrained Models on Huggingface</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Runtime and Service</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme.html">FunASR Runtime Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../docs/SDK_tutorial_online.html">FunASR Realtime Transcribe Service</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../docs/SDK_tutorial.html">Highlights</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../docs/SDK_tutorial.html#funasr-offline-file-transcription-service">FunASR Offline File Transcription Service</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../html5/readme.html">Speech Recognition Service Html5 Client Access Interface</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmark and Leaderboard</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../benchmark/benchmark_onnx.html">CPU Benchmark (ONNX-python)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../benchmark/benchmark_onnx_cpp.html">CPU Benchmark (ONNX-cpp)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../benchmark/benchmark_libtorch.html">CPU Benchmark (Libtorch)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../benchmark/benchmark_pipeline_cer.html">Leaderboard IO</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Funasr Library</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/build_task.html">Build custom tasks</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Papers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/papers.html">Papers</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Application</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/application.html">Audio Cut</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/application.html#realtime-speech-recognition">Realtime Speech Recognition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/application.html#audio-chat">Audio Chat</a></li>
+</ul>
+<p class="caption"><span class="caption-text">FQA</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../reference/FQA.html">FQA</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">FunASR</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">OpenFST port for Windows</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../../_sources/funasr/runtime/onnxruntime/third_party/openfst/README.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="openfst-port-for-windows">
+<h1>OpenFST port for Windows<a class="headerlink" href="#openfst-port-for-windows" title="Permalink to this headline"></a></h1>
+<p>OpenFst is a library for constructing, combining, optimizing, and searching
+weighted finite-state transducers (FSTs), maintained by Google and released
+under the <a class="reference external" href="./COPYING">Apache 2.0 license</a>. The home page for the library is
+located at http://openfst.org/. Check the <a class="reference internal" href="#"><span class="doc">original README file</span></a>
+for the current version, as we are not updating this file with the current
+release version. Make sure also to check the <a class="reference external" href="./NEWS">NEWS</a> file for the
+latest changes.</p>
+<div class="section" id="releases">
+<h2>Releases<a class="headerlink" href="#releases" title="Permalink to this headline"></a></h2>
+<p>We track <a class="reference external" href="http://www.openfst.org/twiki/bin/view/FST/FstDownload">original releases</a>
+of the library, and try to keep <a class="reference external" href="https://github.com/kkm000/openfst/releases">ours</a>
+in step. Sometimes we may skip a release, but we strive for that to be rather an
+exception. With each release, we drop a set of pre-built .exe files compiled for
+the x64 architecture and optimized for execution speed. We use the latest
+Microsoft compilers for it, so you may find you need to download and install the
+latest Microsoft C runtime. See <a class="reference external" href="https://support.microsoft.com/help/2977003/">Microsoft KB2977003</a>
+for instructions.</p>
+<p>We do not release pre-built libraries, however, because Microsoft compiler ABI
+changes between versions, and is different for Debug and Release builds. You
+must build a library matching your toolset on your own.</p>
+</div>
+<div class="section" id="build">
+<h2>Build<a class="headerlink" href="#build" title="Permalink to this headline"></a></h2>
+<p>There are two build options: Visual Studio and CMake. We maintain a set of
+build scripts for both. You will need a recent enough Visual Studio for either
+build flavor. Microsoft provides an option to download the free Visual Studio
+<a class="reference external" href="https://visualstudio.microsoft.com/downloads/">Community Edition</a>, which is
+adequate.</p>
+<div class="section" id="visual-studio">
+<h3>Visual Studio<a class="headerlink" href="#visual-studio" title="Permalink to this headline"></a></h3>
+<p>Open <code class="docutils literal notranslate"><span class="pre">openfst.sln</span></code>, then read the comments in files under the “READ ME BEFORE
+BUILD” solution folder. Generally, you may just hit Build and get the
+libraries, unless you need fine-tuning, such as selecting a different toolset,
+or want to build with MSBuild from command line. The solutions builds only
+static libraries, with debug information embedded in C7 format for the
+simplicity of use. Set the platform to <code class="docutils literal notranslate"><span class="pre">x86</span></code> or <code class="docutils literal notranslate"><span class="pre">x64</span></code> to build a respective
+32- or 64-bit version of the library and tools.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">bin</span></code> project builds multiple executable files by invoking itself
+recursively once for each executable. All .vcxproj files have been scripted and
+are maintained by hand. It takes a long time to build in Release mode. If you
+only need the libfst library, build it alone from the Project Explorer.</p>
+<p>All build outputs are placed into the <code class="docutils literal notranslate"><span class="pre">build_output</span></code> directory under the
+solution root.</p>
+</div>
+<div class="section" id="cmake">
+<h3>CMake<a class="headerlink" href="#cmake" title="Permalink to this headline"></a></h3>
+<p>Follow the normal CMake build procedure to generate build files. With CMake you
+have an option of building dynamic libraries shared by the executables.</p>
+</div>
+</div>
+<div class="section" id="limitations">
+<h2>Limitations<a class="headerlink" href="#limitations" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p>Memory-mapped files are not supported (we may add the support in the future
+though), because it is very system-dependent. OpenFST supports reading e. g.
+CompactFST files into allocated memoty when memory mapping is not compiled in.</p></li>
+<li><p>Dynamic registration of arc and FST types is not supported in the Visual Studio
+project versions (as they build only static libraries). CMake build does not
+have this limitation. Due to ABI being specific to Microsoft compiler version,
+dynamically registered types must be compiled with strictly the same compiler
+of the same major version, and mostly same build flags. This is quite hard to
+get right, and is not recommended.</p></li>
+</ul>
+</div>
+<div class="section" id="structure-of-the-repository-and-tagging">
+<h2>Structure of the repository and tagging<a class="headerlink" href="#structure-of-the-repository-and-tagging" title="Permalink to this headline"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">original</span></code> branch contains only imported original OpenFST files, with one
+exception of .gitignore file added. Tags of the form <code class="docutils literal notranslate"><span class="pre">orig/1.6.9.1</span></code> specify the
+version and revision number of the library. Every commit on the <code class="docutils literal notranslate"><span class="pre">orignal</span></code> branch
+contains the source URL for the tarball release of OpenFST that was committed.
+The last version point corresponds to the revision of OpenFST version. Most (but
+not all) of the versions has had only one revision, and therefore end in <code class="docutils literal notranslate"><span class="pre">.1</span></code>.
+The <code class="docutils literal notranslate"><span class="pre">winport</span></code> branch contains the port, with corresponding tags of the form
+<code class="docutils literal notranslate"><span class="pre">win/1.6.9.1</span></code>.</p>
+<p>You can review the changes to source code only with the git command e. g.</p>
+<p><code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">diff</span> <span class="pre">orig/1.6.9.1..win/1.6.9.1</span> <span class="pre">--</span> <span class="pre">&quot;*.cc&quot;</span> <span class="pre">&quot;*.h&quot;</span></code></p>
+<p>The GitHub interface does not provide filtering by extension, so you will see
+all CMakefiles and MSBuild files added, but it may be useful if you want to
+examine changes in a particular file.</p>
+<p>We try to keep changes to an absolute minimum. Most of them are due to
+incompatibilities between the gcc and cl compilers, and only a minor portion
+is due to the differences between the Linux and Windows platforms.</p>
+</div>
+<div class="section" id="maintainers">
+<h2>Maintainers<a class="headerlink" href="#maintainers" title="Permalink to this headline"></a></h2>
+<p>The repository is maintained by <a class="reference external" href="https://github.com/kkm000">&#64;kkm000</a> and
+<a class="reference external" href="https://github.com/jtrmal">&#64;jtrmal</a>.</p>
+<p>Open an issue to let us know if you discover a problem with the port. We react
+to them promptly. Be sure to include a problem description, error text id any,
+and the compiler or Visual Studio version (and CMake version, if you use it).
+Do not hesitate to ask questions. We will try to help you.</p>
+<p>Since we do not (by the definition of port) extend the OpenFST library itself,
+please contact its authors with questions and suggestions related to the
+original library. If in doubt, contact both teams.</p>
+<p>Also let us know if you have a related development that you believe should be
+linked to from this file.</p>
+<hr class="docutils" />
+<p><em>Copyright (c) 2008-current Google Inc.</em><br /><em>Copyright (c) 2016-current SmartAction LLC (kkm)</em><br /><em>Copyright (c) 2016-current Johns Hopkins University (J. Trmal)</em></p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Speech Lab, Alibaba Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

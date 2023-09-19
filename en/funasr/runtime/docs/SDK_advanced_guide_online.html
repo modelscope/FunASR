@@ -153,7 +153,8 @@ nohup bash run_server_2pass.sh <span class="se">\</span>
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  <span class="se">\</span>
   --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx  <span class="se">\</span>
-  --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx &gt; log.out <span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">&amp;</span>
+  --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx <span class="se">\</span>
+  --itn-dir thuduj12/fst_itn_zh &gt; log.out <span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">&amp;</span>
 
 <span class="c1"># If you want to close ssl，please add：--certfile 0</span>
 </pre></div>
@@ -204,6 +205,7 @@ nohup bash run_server_2pass.sh <span class="se">\</span>
 --vad-quant True for quantized VAD models, False for non-quantized VAD models, default is True
 --punc-dir modelscope model ID
 --punc-quant True for quantized PUNC models, False for non-quantized PUNC models, default is True
+--itn-dir modelscope model ID
 --port Port number that the server should listen on, default is 10095
 --decoder-thread-num The number of inference threads the server should start, default is 8
 --io-thread-num The number of IO threads the server should start, default is 1
@@ -215,7 +217,8 @@ nohup bash run_server_2pass.sh <span class="se">\</span>
 <a class="reference external" href="https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary">FSMN-VAD model</a>，
 <a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx/summary">Paraformer-lagre online</a>
 <a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary">Paraformer-lagre</a>
-<a class="reference external" href="https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx/summary">CT-Transformer</a></p>
+<a class="reference external" href="https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx/summary">CT-Transformer</a>
+<a class="reference external" href="https://www.modelscope.cn/models/thuduj12/fst_itn_zh/summary">FST-ITN</a></p>
 <p>If you wish to deploy your fine-tuned model (e.g., 10epoch.pb), you need to manually rename the model to model.pb and replace the original model.pb in ModelScope. Then, specify the path as <code class="docutils literal notranslate"><span class="pre">model_dir</span></code>.</p>
 </div>
 </div>

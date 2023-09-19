@@ -181,7 +181,8 @@ sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span clas
   --download-model-dir /workspace/models <span class="se">\</span>
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  <span class="se">\</span>
-  --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx &gt; log.out <span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">&amp;</span>
+  --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx <span class="se">\</span>
+  --itn-dir thuduj12/fst_itn_zh &gt; log.out <span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">&amp;</span>
 
 <span class="c1"># If you want to close ssl，please add：--certfile 0</span>
 <span class="c1"># If you want to deploy the timestamp or hotword model, please set --model-dir to the corresponding model:</span>
@@ -197,6 +198,7 @@ sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span clas
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx <span class="se">\</span>
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx <span class="se">\</span>
+  --itn-dir thuduj12/fst_itn_zh <span class="se">\</span>
   --decoder-thread-num <span class="m">32</span> <span class="se">\</span>
   --io-thread-num  <span class="m">8</span> <span class="se">\</span>
   --port <span class="m">10095</span> <span class="se">\</span>
@@ -212,6 +214,7 @@ sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span clas
 --vad-quant: True for quantized VAD model, False for non-quantized VAD model. Default is True.
 --punc-dir: Modelscope model ID.
 --punc-quant: True for quantized PUNC model, False for non-quantized PUNC model. Default is True.
+--itn-dir modelscope model ID
 --port: Port number that the server listens on. Default is 10095.
 --decoder-thread-num: Number of inference threads that the server starts. Default is 8.
 --io-thread-num: Number of IO threads that the server starts. Default is 1.
@@ -225,6 +228,7 @@ sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span clas
   --model-dir /workspace/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx <span class="se">\</span>
   --vad-dir /workspace/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
   --punc-dir /workspace/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx <span class="se">\</span>
+  --itn-dir /workspace/models/thuduj12/fst_itn_zh <span class="se">\</span>
   --decoder-thread-num <span class="m">32</span> <span class="se">\</span>
   --io-thread-num  <span class="m">8</span> <span class="se">\</span>
   --port <span class="m">10095</span> <span class="se">\</span>
@@ -235,7 +239,8 @@ sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span clas
 <p>After executing the above command, the real-time speech transcription service will be started. If the model is specified as a ModelScope model id, the following models will be automatically downloaded from ModelScope:
 <a class="reference external" href="https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary">FSMN-VAD</a>
 <a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary">Paraformer-lagre</a>
-<a class="reference external" href="https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx/summary">CT-Transformer</a></p>
+<a class="reference external" href="https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx/summary">CT-Transformer</a>
+<a class="reference external" href="https://www.modelscope.cn/models/thuduj12/fst_itn_zh/summary">FST-ITN</a></p>
 <p>If you wish to deploy your fine-tuned model (e.g., 10epoch.pb), you need to manually rename the model to model.pb and replace the original model.pb in ModelScope. Then, specify the path as <code class="docutils literal notranslate"><span class="pre">model_dir</span></code>.</p>
 </div>
 <div class="section" id="starting-the-client">
@@ -253,7 +258,8 @@ sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span clas
 --output_dir: the path to the recognition result output.
 --ssl: whether to use SSL encryption. The default is to use SSL.
 --mode: offline mode.
---hotword If am is hotword model, setting hotword: *.txt(one hotword perline) or hotwords seperate by space (could be: 阿里巴巴 达摩院)
+--hotword: If am is hotword model, setting hotword: *.txt(one hotword perline) or hotwords seperate by space (could be: 阿里巴巴 达摩院)
+--use_itn: whether to use itn, the default value is 1 for enabling and 0 for disabling.
 </pre></div>
 </div>
 </div>
@@ -263,13 +269,12 @@ sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span clas
 </pre></div>
 </div>
 <p>Introduction to command parameters:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--host: the IP address of the server. It can be set to 127.0.0.1 for local testing.
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--server-ip: the IP address of the server. It can be set to 127.0.0.1 for local testing.
 --port: the port number of the server listener.
---audio_in: the audio input. Input can be a path to a wav file or a wav.scp file (a Kaldi-formatted wav list in which each line includes a wav_id followed by a tab and a wav_path).
---output_dir: the path to the recognition result output.
---ssl: whether to use SSL encryption. The default is to use SSL.
---mode: offline mode.
---hotword If am is hotword model, setting hotword: *.txt(one hotword perline) or hotwords seperate by space (could be: 阿里巴巴 达摩院)
+--wav-path: the audio input. Input can be a path to a wav file or a wav.scp file (a Kaldi-formatted wav list in which each line includes a wav_id followed by a tab and a wav_path).
+--is-ssl: whether to use SSL encryption. The default is to use SSL.
+--hotword: If am is hotword model, setting hotword: *.txt(one hotword perline) or hotwords seperate by space (could be: 阿里巴巴 达摩院)
+--use-itn: whether to use itn, the default value is 1 for enabling and 0 for disabling.
 </pre></div>
 </div>
 </div>
