@@ -164,11 +164,18 @@ void Paraformer::InitAsr(const std::string &am_model, const std::string &en_mode
     m_strInputNames.push_back(strName.c_str());
     GetInputName(m_session_.get(), strName,1);
     m_strInputNames.push_back(strName);
+
+    if (use_hotword) {
+        GetInputName(m_session_.get(), strName, 2);
+        m_strInputNames.push_back(strName);
+    }
     
-    GetOutputName(m_session_.get(), strName);
-    m_strOutputNames.push_back(strName);
-    GetOutputName(m_session_.get(), strName,1);
-    m_strOutputNames.push_back(strName);
+    // support time stamp
+    size_t numOutputNodes = m_session_->GetOutputCount();
+    for(int index=0; index<numOutputNodes; index++){
+        GetOutputName(m_session_.get(), strName, index);
+        m_strOutputNames.push_back(strName);
+    }
 
     for (auto& item : m_strInputNames)
         m_szInputNames.push_back(item.c_str());

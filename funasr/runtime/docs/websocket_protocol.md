@@ -10,7 +10,7 @@ Configuration parameters and meta information are in JSON format, while audio da
 #### Initial Communication
 The message (which needs to be serialized in JSON) is:
 ```text
-{"mode": "offline", "wav_name": "wav_name","wav_format":"pcm","is_speaking": True,"wav_format":"pcm","hotwords":"阿里巴巴 达摩院 阿里云"}
+{"mode": "offline", "wav_name": "wav_name","wav_format":"pcm","is_speaking": True,"wav_format":"pcm","hotwords":"阿里巴巴 达摩院 阿里云","itn":true}
 ```
 Parameter explanation:
 ```text
@@ -20,6 +20,7 @@ Parameter explanation:
 `is_speaking`: False indicates the end of a sentence, such as a VAD segmentation point or the end of a WAV file
 `audio_fs`: when the input audio is in PCM format, the audio sampling rate parameter needs to be added
 `hotwords`：If AM is the hotword model, hotword data needs to be sent to the server in string format, with " " used as a separator between hotwords. For example："阿里巴巴 达摩院 阿里云"
+`itn`: whether to use itn, the default value is true for enabling and false for disabling.
 ```
 
 #### Sending Audio Data
@@ -58,7 +59,7 @@ Configuration parameters and meta information are in JSON format, while audio da
 #### Initial Communication
 The message (which needs to be serialized in JSON) is:
 ```text
-{"mode": "2pass", "wav_name": "wav_name", "is_speaking": True, "wav_format":"pcm", "chunk_size":[5,10,5]}
+{"mode": "2pass", "wav_name": "wav_name", "is_speaking": True, "wav_format":"pcm", "chunk_size":[5,10,5],"hotwords":"阿里巴巴 达摩院 阿里云","itn":true}
 ```
 Parameter explanation:
 ```text
@@ -68,6 +69,8 @@ Parameter explanation:
 `is_speaking`: False indicates the end of a sentence, such as a VAD segmentation point or the end of a WAV file
 `chunk_size`: indicates the latency configuration of the streaming model, `[5,10,5]` indicates that the current audio is 600ms long, with a 300ms look-ahead and look-back time.
 `audio_fs`: when the input audio is in PCM format, the audio sampling rate parameter needs to be added
+`hotwords`：If AM is the hotword model, hotword data needs to be sent to the server in string format, with " " used as a separator between hotwords. For example："阿里巴巴 达摩院 阿里云"
+`itn`: whether to use itn, the default value is true for enabling and false for disabling.
 ```
 #### Sending Audio Data
 Directly send the audio data, removing the header information and sending only the bytes data. Supported audio sampling rates are 8000 (which needs to be specified as audio_fs in message), and 16000.
@@ -81,7 +84,7 @@ After sending the audio data, an end-of-audio flag needs to be sent (which needs
 The message (serialized in JSON) is:
 
 ```text
-{"mode": "2pass-online", "wav_name": "wav_name", "text": "asr ouputs", "is_final": True}
+{"mode": "2pass-online", "wav_name": "wav_name", "text": "asr ouputs", "is_final": True, "timestamp":"[[100,200], [200,500]]"}
 ```
 Parameter explanation:
 ```text
@@ -89,4 +92,5 @@ Parameter explanation:
 `wav_name`: the name of the audio file to be transcribed
 `text`: the text output of speech recognition
 `is_final`: indicating the end of recognition
+`timestamp`：If AM is a timestamp model, it will return this field, indicating the timestamp, in the format of "[[100,200], [200,500]]"
 ```

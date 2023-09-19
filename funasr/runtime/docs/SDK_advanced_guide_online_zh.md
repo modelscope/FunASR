@@ -27,9 +27,13 @@ nohup bash run_server_2pass.sh \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
   --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx  \
-  --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx > log.out 2>&1 &
+  --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx \
+  --itn-dir thuduj12/fst_itn_zh > log.out 2>&1 &
 
 # 如果您想关闭ssl，增加参数：--certfile 0
+# 如果您想使用时间戳或者热词模型进行部署，请设置--model-dir为对应模型：
+# damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx（时间戳）
+# 或者 damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（热词）
 ```
 服务端详细参数介绍可参考[服务端参数介绍](#服务端参数介绍)
 ### 客户端测试与使用
@@ -79,6 +83,7 @@ cd /workspace/FunASR/funasr/runtime/websocket/build/bin
 --vad-quant   True为量化VAD模型，False为非量化VAD模型，默认是True
 --punc-dir  modelscope model ID
 --punc-quant   True为量化PUNC模型，False为非量化PUNC模型，默认是True
+--itn-dir modelscope model ID
 --port  服务端监听的端口号，默认为 10095
 --decoder-thread-num  服务端启动的推理线程数，默认为 8
 --io-thread-num  服务端启动的IO线程数，默认为 1
@@ -91,6 +96,7 @@ cd /workspace/FunASR/funasr/runtime/websocket/build/bin
 [Paraformer-lagre实时模型](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx/summary )
 [Paraformer-lagre非实时模型](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary)
 [CT-Transformer标点预测模型](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx/summary)
+[基于FST的中文ITN](https://www.modelscope.cn/models/thuduj12/fst_itn_zh/summary)
 
 如果，您希望部署您finetune后的模型（例如10epoch.pb），需要手动将模型重命名为model.pb，并将原modelscope中模型model.pb替换掉，将路径指定为`model_dir`即可。
 
