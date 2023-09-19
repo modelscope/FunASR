@@ -76,6 +76,7 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --au
 --thread_num 设置并发发送线程数，默认为1
 --ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
 --hotword 如果模型为热词模型，可以设置热词: *.txt(每行一个热词) 或者空格分隔的热词字符串 (could be: 阿里巴巴 达摩院)
+--use_itn 设置是否使用itn，默认1开启，设置为0关闭
 ```
 
 ### cpp-client
@@ -93,6 +94,7 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --au
 --thread_num 设置并发发送线程数，默认为1
 --ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
 --hotword 如果模型为热词模型，可以设置热词: *.txt(每行一个热词) 或者空格分隔的热词字符串 (could be: 阿里巴巴 达摩院)
+--use-itn 设置是否使用itn，默认1开启，设置为0关闭
 ```
 
 ### html-client

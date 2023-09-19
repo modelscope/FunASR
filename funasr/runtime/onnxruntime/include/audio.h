@@ -36,6 +36,8 @@ class AudioFrame {
     bool is_final = false;
     float* data = nullptr;
     int len;
+    int global_start = 0; // the start of a frame in the global time axis. in ms
+    int global_end = 0;   // the end of a frame in the global time axis. in ms
 };
 
 class Audio {
