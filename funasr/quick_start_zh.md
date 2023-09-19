@@ -26,7 +26,7 @@ python funasr_wss_server.py --port 10095
 python funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass --chunk_size "5,10,5"
 #python funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass --chunk_size "8,8,4" --audio_in "./data/wav.scp"
 ```
-更多例子可以参考（[点击此处](runtime/websocket_python.html#id2)）
+更多例子可以参考（[点击此处](runtime/python/websocket/README.md)）
 
 <a name="cpp版本示例"></a>
 #### c++版本示例
