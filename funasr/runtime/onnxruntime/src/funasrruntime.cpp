@@ -285,10 +285,12 @@ extern "C" {
 			string punc_res = (offline_stream->punc_handle)->AddPunc((p_result->msg).c_str());
 			p_result->msg = punc_res;
 		}
+#if !defined(__APPLE__)
 		if(offline_stream->UseITN() && itn){
 			string msg_itn = offline_stream->itn_handle->Normalize(p_result->msg);
 			p_result->msg = msg_itn;
 		}
+#endif
 
 		return p_result;
 	}
@@ -364,13 +366,16 @@ extern "C" {
 			string punc_res = (offline_stream->punc_handle)->AddPunc((p_result->msg).c_str());
 			p_result->msg = punc_res;
 		}
+#if !defined(__APPLE__)
 		if(offline_stream->UseITN() && itn){
 			string msg_itn = offline_stream->itn_handle->Normalize(p_result->msg);
 			p_result->msg = msg_itn;
 		}
+#endif
 		return p_result;
 	}
 
+#if !defined(__APPLE__)
 	_FUNASRAPI const std::vector<std::vector<float>> CompileHotwordEmbedding(FUNASR_HANDLE handle, std::string &hotwords, ASR_TYPE mode)
 	{
 		if (mode == ASR_OFFLINE){
@@ -394,7 +399,7 @@ extern "C" {
 		}
 		
 	}
-
+#endif
 
 	// APIs for 2pass-stream Infer
 	_FUNASRAPI FUNASR_RESULT FunTpassInferBuffer(FUNASR_HANDLE handle, FUNASR_HANDLE online_handle, const char* sz_buf, 
@@ -450,13 +455,13 @@ extern "C" {
 					string online_msg = ((funasr::ParaformerOnline*)asr_online_handle)->online_res;
 					string msg_punc = punc_online_handle->AddPunc(online_msg.c_str(), punc_cache[0]);
 					p_result->tpass_msg = msg_punc;
-
+#if !defined(__APPLE__)
 					// ITN
 					if(tpass_stream->UseITN() && itn){
 						string msg_itn = tpass_stream->itn_handle->Normalize(msg_punc);
 						p_result->tpass_msg = msg_itn;
 					}
-
+#endif
 					((funasr::ParaformerOnline*)asr_online_handle)->online_res = "";
 					p_result->msg += msg;
 				}else{
@@ -501,10 +506,12 @@ extern "C" {
 				msg_punc += "。";
 			}
 			p_result->tpass_msg = msg_punc;
+#if !defined(__APPLE__)
 			if(tpass_stream->UseITN() && itn){
 				string msg_itn = tpass_stream->itn_handle->Normalize(msg_punc);
 				p_result->tpass_msg = msg_itn;
 			}
+#endif
 
 			if(frame != NULL){
 				delete frame;

@@ -90,6 +90,8 @@
 		1A7F0DBE2A2F221C00A6EEB7 /* AudioCapture.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1A7F0DBB2A2F221C00A6EEB7 /* AudioCapture.mm */; };
 		1A7F0DBF2A2F221C00A6EEB7 /* AudioRecorder.m in Sources */ = {isa = PBXBuildFile; fileRef = 1A7F0DBD2A2F221C00A6EEB7 /* AudioRecorder.m */; };
 		1A7F0DC32A2F312D00A6EEB7 /* model in Resources */ = {isa = PBXBuildFile; fileRef = 1A7F0DC22A2F312D00A6EEB7 /* model */; };
+		1ACBFB692AB99D55002FC7C7 /* seg_dict.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ACBFB672AB99D55002FC7C7 /* seg_dict.cpp */; };
+		1ACBFB6C2AB9A086002FC7C7 /* encode_converter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ACBFB6B2AB9A086002FC7C7 /* encode_converter.cpp */; };
 		59C4114F365C8D714BD515FB /* Pods_paraformer_online.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EA7D0713E60886A787BAA0EA /* Pods_paraformer_online.framework */; };
 /* End PBXBuildFile section */
 
@@ -324,6 +326,10 @@
 		1AB8E1EE2AA086F200F4F795 /* model.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = model.h; sourceTree = "<group>"; };
 		1AB8E1EF2AA086F200F4F795 /* offline-stream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "offline-stream.h"; sourceTree = "<group>"; };
 		1AB8E1F02AA086F200F4F795 /* vad-model.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "vad-model.h"; sourceTree = "<group>"; };
+		1ACBFB672AB99D55002FC7C7 /* seg_dict.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = seg_dict.cpp; sourceTree = "<group>"; };
+		1ACBFB682AB99D55002FC7C7 /* seg_dict.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = seg_dict.h; sourceTree = "<group>"; };
+		1ACBFB6A2AB9A086002FC7C7 /* encode_converter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = encode_converter.h; sourceTree = "<group>"; };
+		1ACBFB6B2AB9A086002FC7C7 /* encode_converter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = encode_converter.cpp; sourceTree = "<group>"; };
 		B9ED2A36675364C815C03C96 /* Pods-paraformer_online.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-paraformer_online.debug.xcconfig"; path = "Target Support Files/Pods-paraformer_online/Pods-paraformer_online.debug.xcconfig"; sourceTree = "<group>"; };
 		EA7D0713E60886A787BAA0EA /* Pods_paraformer_online.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_paraformer_online.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -355,6 +361,8 @@
 				1A6C92FB2A84D64E007E36DC /* ct-transformer.cpp */,
 				1A6C93032A84D64E007E36DC /* ct-transformer.h */,
 				1A6C92F92A84D64E007E36DC /* e2e-vad.h */,
+				1ACBFB6B2AB9A086002FC7C7 /* encode_converter.cpp */,
+				1ACBFB6A2AB9A086002FC7C7 /* encode_converter.h */,
 				1A6C92F72A84D64E007E36DC /* fsmn-vad-online.cpp */,
 				1A6C92E92A84D64E007E36DC /* fsmn-vad-online.h */,
 				1A6C92E82A84D64E007E36DC /* fsmn-vad.cpp */,
@@ -371,6 +379,8 @@
 				1A6C93022A84D64E007E36DC /* punc-model.cpp */,
 				1A6C92ED2A84D64E007E36DC /* resample.cpp */,
 				1A6C92E32A84D64E007E36DC /* resample.h */,
+				1ACBFB672AB99D55002FC7C7 /* seg_dict.cpp */,
+				1ACBFB682AB99D55002FC7C7 /* seg_dict.h */,
 				1A6C93012A84D64E007E36DC /* tensor.h */,
 				1A6C92F02A84D64E007E36DC /* tokenizer.cpp */,
 				1A6C92EF2A84D64E007E36DC /* tokenizer.h */,
@@ -917,6 +927,7 @@
 				1A6C93F72A84D66E007E36DC /* symbolize.cc in Sources */,
 				1A6C93062A84D64E007E36DC /* util.cpp in Sources */,
 				1A6C94222A84D66E007E36DC /* nodebuilder.cpp in Sources */,
+				1ACBFB692AB99D55002FC7C7 /* seg_dict.cpp in Sources */,
 				1A6C94132A84D66E007E36DC /* exp.cpp in Sources */,
 				1A6C930A2A84D64E007E36DC /* vocab.cpp in Sources */,
 				1A6C94012A84D66E007E36DC /* logging.cc in Sources */,
@@ -931,6 +942,7 @@
 				1A6C940F2A84D66E007E36DC /* emitter.cpp in Sources */,
 				1A6C93DE2A84D66E007E36DC /* fftsg.c in Sources */,
 				1A6C940B2A84D66E007E36DC /* ostream_wrapper.cpp in Sources */,
+				1ACBFB6C2AB9A086002FC7C7 /* encode_converter.cpp in Sources */,
 				1A6C93E12A84D66E007E36DC /* log.cc in Sources */,
 				1A6C94092A84D66E007E36DC /* exceptions.cpp in Sources */,
 				1A6C94152A84D66E007E36DC /* node.cpp in Sources */,
@@ -1108,7 +1120,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.qiuwei.paraformer-online";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.qiuwei.paraformer-online1";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1147,7 +1159,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.qiuwei.paraformer-online";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.qiuwei.paraformer-online1";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";

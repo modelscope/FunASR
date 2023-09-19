@@ -105,7 +105,10 @@ _FUNASRAPI FUNASR_RESULT	FunOfflineInferBuffer(FUNASR_HANDLE handle, const char*
 _FUNASRAPI FUNASR_RESULT	FunOfflineInfer(FUNASR_HANDLE handle, const char* sz_filename, FUNASR_MODE mode, 
 											QM_CALLBACK fn_callback, const std::vector<std::vector<float>> &hw_emb, 
 											int sampling_rate=16000, bool itn=true);
+#if !defined(__APPLE__)
 _FUNASRAPI const std::vector<std::vector<float>> CompileHotwordEmbedding(FUNASR_HANDLE handle, std::string &hotwords, ASR_TYPE mode=ASR_OFFLINE);
+#endif
+
 _FUNASRAPI void				FunOfflineUninit(FUNASR_HANDLE handle);
 
 //2passStream
