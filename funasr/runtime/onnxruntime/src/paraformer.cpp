@@ -662,7 +662,7 @@ string Paraformer::Forward(float* din, int len, bool input_finished, const std::
                 return "";
             }
             //PrintMat(hw_emb, "input_clas_emb");
-            const int64_t hotword_shape[3] = {1, hw_emb.size(), hw_emb[0].size()};
+            const int64_t hotword_shape[3] = {1, static_cast<int64_t>(hw_emb.size()), static_cast<int64_t>(hw_emb[0].size())};
             embedding.reserve(hw_emb.size() * hw_emb[0].size());
             for (auto item : hw_emb) {
                 embedding.insert(embedding.end(), item.begin(), item.end());
