@@ -50,6 +50,10 @@ namespace funasr {
 #define MODEL_SEG_DICT "seg_dict"
 #define HOTWORD "hotword"
 
+#define ITN_DIR "itn-dir"
+#define ITN_TAGGER_NAME "zh_itn_tagger.fst"
+#define ITN_VERBALIZER_NAME "zh_itn_verbalizer.fst"
+
 #define ENCODER_NAME "model.onnx"
 #define QUANT_ENCODER_NAME "model_quant.onnx"
 #define DECODER_NAME "decoder.onnx"

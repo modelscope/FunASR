@@ -24,6 +24,8 @@ using namespace std;
 #else
 #include "onnxruntime_run_options_config_keys.h"
 #include "onnxruntime_cxx_api.h"
+#include "itn-model.h"
+#include "itn-processor.h"
 #endif
 
 #include "kaldi-native-fbank/csrc/feature-fbank.h"

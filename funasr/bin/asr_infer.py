@@ -1337,7 +1337,7 @@ class Speech2TextTransducer:
             quantize_dtype: str = "qint8",
             nbest: int = 1,
             streaming: bool = False,
-            simu_streaming: bool = False,
+            fake_streaming: bool = False,
             full_utt: bool = False,
             chunk_size: int = 16,
             left_context: int = 32,
@@ -1432,7 +1432,7 @@ class Speech2TextTransducer:
 
         self.beam_search = beam_search
         self.streaming = streaming
-        self.simu_streaming = simu_streaming
+        self.fake_streaming = fake_streaming
         self.full_utt = full_utt
         self.chunk_size = max(chunk_size, 0)
         self.left_context = left_context
@@ -1442,8 +1442,8 @@ class Speech2TextTransducer:
             self.streaming = False
             self.asr_model.encoder.dynamic_chunk_training = False
 
-        if not simu_streaming or chunk_size == 0:
-            self.simu_streaming = False
+        if not fake_streaming or chunk_size == 0:
+            self.fake_streaming = False
             self.asr_model.encoder.dynamic_chunk_training = False
 
         self.frontend = frontend
@@ -1520,7 +1520,7 @@ class Speech2TextTransducer:
         return nbest_hyps
 
     @torch.no_grad()
-    def simu_streaming_decode(self, speech: Union[torch.Tensor, np.ndarray]) -> List[HypothesisTransducer]:
+    def fake_streaming_decode(self, speech: Union[torch.Tensor, np.ndarray]) -> List[HypothesisTransducer]:
         """Speech2Text call.
         Args:
             speech: Speech data. (S)

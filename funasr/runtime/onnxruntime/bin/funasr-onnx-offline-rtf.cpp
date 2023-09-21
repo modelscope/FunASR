@@ -113,6 +113,7 @@ int main(int argc, char *argv[])
     TCLAP::ValueArg<std::string>    vad_quant("", VAD_QUANT, "true (Default), load the model of model.onnx in vad_dir. If set true, load the model of model_quant.onnx in vad_dir", false, "true", "string");
     TCLAP::ValueArg<std::string>    punc_dir("", PUNC_DIR, "the punc model path, which contains model.onnx, punc.yaml", false, "", "string");
     TCLAP::ValueArg<std::string>    punc_quant("", PUNC_QUANT, "true (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "true", "string");
+    TCLAP::ValueArg<std::string>    itn_dir("", ITN_DIR, "the itn model(fst) path, which contains zh_itn_tagger.fst and zh_itn_verbalizer.fst", false, "", "string");
 
     TCLAP::ValueArg<std::string> wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", true, "", "string");
     TCLAP::ValueArg<std::int32_t> thread_num("", THREAD_NUM, "multi-thread num for rtf", true, 0, "int32_t");
@@ -124,6 +125,7 @@ int main(int argc, char *argv[])
     cmd.add(vad_quant);
     cmd.add(punc_dir);
     cmd.add(punc_quant);
+    cmd.add(itn_dir);
     cmd.add(wav_path);
     cmd.add(thread_num);
     cmd.add(hotword);
@@ -136,6 +138,7 @@ int main(int argc, char *argv[])
     GetValue(vad_quant, VAD_QUANT, model_path);
     GetValue(punc_dir, PUNC_DIR, model_path);
     GetValue(punc_quant, PUNC_QUANT, model_path);
+    GetValue(itn_dir, ITN_DIR, model_path);
     GetValue(wav_path, WAV_PATH, model_path);
 
     struct timeval start, end;

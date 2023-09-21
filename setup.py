@@ -39,6 +39,7 @@ requirements = {
         "edit-distance",
         "textgrid",
         "protobuf",
+        "tqdm",
     ],
     # train: The modules invoked when training only.
     "train": [

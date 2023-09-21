@@ -55,9 +55,10 @@ FunASR支持数万小时工业数据训练的模型的推理和微调，详细�
 ## 联系我们
 
 如果您在使用中遇到问题，可以直接在github页面提Issues。欢迎语音兴趣爱好者扫描以下的钉钉群或者微信群二维码加入社区群，进行交流和讨论。
+
 |                                  钉钉群                                  |                          微信                           |
 |:---------------------------------------------------------------------:|:-----------------------------------------------------:|
-| <div align="left"><img src="docs/images/dingding.jpg" width="250"/>   | <img src="docs/images/wechat.png" width="232"/></div> |
+| <div align="left"><img src="docs/images/dingding.jpg" width="250"/>   | <img src="docs/images/wechat.png" width="215"/></div> |
 
 ## 社区贡献者
 
