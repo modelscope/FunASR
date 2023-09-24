@@ -20,8 +20,8 @@
 | [Paraformer-large长音频版本](https://www.modelscope.cn/models/damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary) |  中文和英文   |   阿里巴巴语音数据（60000小时）   |       8404        | 220M |   非实时   || 能够处理任意长度的输入wav文件                                                                                |
 |     [Paraformer-large热词](https://www.modelscope.cn/models/damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404/summary)      |         中文和英文         | 阿里巴巴语音数据（60000小时） | 8404 |  220M   | 非实时                        | 基于激励增强的热词定制支持，可以提高热词的召回率和准确率，输入wav文件持续时间不超过20秒  |
 |       [Paraformer](https://modelscope.cn/models/damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8358-tensorflow1/summary)                     |   中文和英文  |   阿里巴巴语音数据（50000小时）   |       8358        | 68M  |   离线    | 输入wav文件持续时间不超过20秒          |
-|               [Paraformer实时](https://www.modelscope.cn/models/damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8404-实时/summary)                | 中文和英文  | 阿里巴巴语音数据 (50000hours) |       8404        | 68M  | 实时  | 能够处理流式输入                   |
-|         [Paraformer-large实时](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-实时/summary)          | 中文和英文  | 阿里巴巴语音数据 (60000hours) |       8404        | 220M | 实时  | 能够处理流式输入                   |
+|               [Paraformer实时](https://modelscope.cn/models/damo/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8404-online/summary)                | 中文和英文  | 阿里巴巴语音数据 (50000hours) |       8404        | 68M  | 实时  | 能够处理流式输入                   |
+|         [Paraformer-large实时](https://modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary)          | 中文和英文  | 阿里巴巴语音数据 (60000hours) |       8404        | 220M | 实时  | 能够处理流式输入                   |
 |       [Paraformer-tiny](https://www.modelscope.cn/models/damo/speech_paraformer-tiny-commandword_asr_nat-zh-cn-16k-vocab544-pytorch/summary)       |   中文   |  阿里巴巴语音数据 (200hours)  |        544        | 5.2M | 非实时 | 轻量级Paraformer模型，支持普通话命令词识别 |
 |                   [Paraformer-aishell](https://www.modelscope.cn/models/damo/speech_paraformer_asr_nat-aishell1-pytorch/summary)                   |   中文   |  AISHELL (178hours)   |       4234        | 43M  | 非实时 | 学术模型                       |
 |       [ParaformerBert-aishell](https://modelscope.cn/models/damo/speech_paraformerbert_asr_nat-zh-cn-16k-aishell1-vocab4234-pytorch/summary)       |   中文   |  AISHELL (178hours)   |       4234        | 43M  | 非实时 | 学术模型                       |
@@ -83,10 +83,11 @@
 
 ### 标点恢复模型
 
-|                                                         模型名字                                                         |        训练数据         | 模型参数 | Vocab Size| 非实时/实时 | 备注      |
-|:--------------------------------------------------------------------------------------------------------------------------:|:----------------------------:|:----------:|:----------:|:--------------:|:--------|
-|      [CT-Transformer](https://modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch/summary)      | Alibaba Text Data |    70M     |    272727     |    非实时     | 支持中英文标点 |
-| [CT-Transformer](https://modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727/summary)      | Alibaba Text Data |    70M     |    272727     |     实时     | VAD点实时  |
+|                                                         模型名字                                                        | 语言  |        训练数据         | 模型参数 | Vocab Size| 非实时/实时 | 备注      |
+|:--------------------------------------------------------------------------------------------------------------------------:|:----------:|:----------------------------:|:----------:|:----------:|:--------------:|:--------|
+|      [CT-Transformer-Large](https://modelscope.cn/models/damo/punc_ct-transformer_cn-en-common-vocab471067-large/summary)     | 中文和英文 | Alibaba Text Data(100M) |    1.1G     |    471067     |    非实时     | 支持中英文标点大模型 |
+|      [CT-Transformer](https://modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch/summary)     | 中文和英文 | Alibaba Text Data(70M) |    291M     |    272727     |    非实时     | 支持中英文标点 |
+| [CT-Transformer-Realtime](https://modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727/summary)      | 中文和英文 | Alibaba Text Data(70M) |    288M     |    272727     |     实时     | VAD点实时标点  |
 
 ### 语音模型
 

@@ -10,7 +10,7 @@
 #### 首次通信
 message为（需要用json序列化）：
 ```text
-{"mode": "offline", "wav_name": "wav_name","wav_format":"pcm","is_speaking": True,"wav_format":"pcm","hotwords":"阿里巴巴 达摩院 阿里云"}
+{"mode": "offline", "wav_name": "wav_name","wav_format":"pcm","is_speaking": True,"hotwords":"阿里巴巴 达摩院 阿里云","itn":True}
 ```
 参数介绍：
 ```text
@@ -18,8 +18,9 @@ message为（需要用json序列化）：
 `wav_name`：表示需要推理音频文件名
 `wav_format`：表示音视频文件后缀名，可选pcm、mp3、mp4等
 `is_speaking`：False 表示断句尾点，例如，vad切割点，或者一条wav结束
-`audio_fs`：当输入音频为pcm数据是，需要加上音频采样率参数
+`audio_fs`：当输入音频为pcm数据时，需要加上音频采样率参数
 `hotwords`：如果AM为热词模型，需要向服务端发送热词数据，格式为字符串，热词之间用" "分隔，例如 "阿里巴巴 达摩院 阿里云"
+`itn`: 设置是否使用itn，默认True
 ```
 
 #### 发送音频数据
@@ -58,7 +59,7 @@ message为（采用json序列化）
 #### 首次通信
 message为（需要用json序列化）：
 ```text
-{"mode": "2pass", "wav_name": "wav_name", "is_speaking": True, "wav_format":"pcm", "chunk_size":[5,10,5]}
+{"mode": "2pass", "wav_name": "wav_name", "is_speaking": True, "wav_format":"pcm", "chunk_size":[5,10,5], "hotwords":"阿里巴巴 达摩院 阿里云","itn":True}
 ```
 参数介绍：
 ```text
@@ -68,6 +69,8 @@ message为（需要用json序列化）：
 `is_speaking`：表示断句尾点，例如，vad切割点，或者一条wav结束
 `chunk_size`：表示流式模型latency配置，`[5,10,5]`，表示当前音频为600ms，并且回看300ms，又看300ms。
 `audio_fs`：当输入音频为pcm数据是，需要加上音频采样率参数
+`hotwords`：如果AM为热词模型，需要向服务端发送热词数据，格式为字符串，热词之间用" "分隔，例如 "阿里巴巴 达摩院 阿里云"
+`itn`: 设置是否使用itn，默认True
 ```
 #### 发送音频数据
 直接将音频数据，移除头部信息后的bytes数据发送，支持音频采样率为8000（`message`中需要指定`audio_fs`为8000），16000
@@ -80,7 +83,7 @@ message为（需要用json序列化）：
 #### 发送识别结果
 message为（采用json序列化）
 ```text
-{"mode": "2pass-online", "wav_name": "wav_name", "text": "asr ouputs", "is_final": True}
+{"mode": "2pass-online", "wav_name": "wav_name", "text": "asr ouputs", "is_final": True, "timestamp":"[[100,200], [200,500]]"}
 ```
 参数介绍：
 ```text
@@ -88,4 +91,5 @@ message为（采用json序列化）
 `wav_name`：表示需要推理音频文件名
 `text`：表示语音识别输出文本
 `is_final`：表示识别结束
+`timestamp`：如果AM为时间戳模型，会返回此字段，表示时间戳，格式为 "[[100,200], [200,500]]"(ms)
 ```

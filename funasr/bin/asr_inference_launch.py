@@ -45,7 +45,7 @@ from funasr.utils.types import str2bool
 from funasr.utils.types import str2triple_str
 from funasr.utils.types import str_or_none
 from funasr.utils.vad_utils import slice_padding_fbank
-
+from tqdm import tqdm
 
 def inference_asr(
         maxlenratio: float,
@@ -236,6 +236,7 @@ def inference_paraformer(
         timestamp_infer_config: Union[Path, str] = None,
         timestamp_model_file: Union[Path, str] = None,
         param_dict: dict = None,
+        decoding_ind: int = 0,
         **kwargs,
 ):
     ncpu = kwargs.get("ncpu", 1)
@@ -290,6 +291,7 @@ def inference_paraformer(
         nbest=nbest,
         hotword_list_or_file=hotword_list_or_file,
         clas_scale=clas_scale,
+        decoding_ind=decoding_ind,
     )
 
     speech2text = Speech2TextParaformer(**speech2text_kwargs)
@@ -312,6 +314,7 @@ def inference_paraformer(
             **kwargs,
     ):
 
+        decoding_ind = None
         hotword_list_or_file = None
         if param_dict is not None:
             hotword_list_or_file = param_dict.get('hotword')
@@ -319,6 +322,8 @@ def inference_paraformer(
             hotword_list_or_file = kwargs['hotword']
         if hotword_list_or_file is not None or 'hotword' in kwargs:
             speech2text.hotword_list = speech2text.generate_hotwords_list(hotword_list_or_file)
+        if param_dict is not None and "decoding_ind" in param_dict:
+            decoding_ind = param_dict["decoding_ind"]
 
         # 3. Build data-iterator
         if data_path_and_name_and_type is None and raw_inputs is not None:
@@ -365,6 +370,7 @@ def inference_paraformer(
             # N-best list of (text, token, token_int, hyp_object)
 
             time_beg = time.time()
+            batch["decoding_ind"] = decoding_ind
             results = speech2text(**batch)
             if len(results) < 1:
                 hyp = Hypothesis(score=0.0, scores={}, states={}, yseq=[])
@@ -409,7 +415,7 @@ def inference_paraformer(
                         ibest_writer["rtf"][key] = rtf_cur
 
                     if text is not None:
-                        if use_timestamp and timestamp is not None:
+                        if use_timestamp and timestamp is not None and len(timestamp):
                             postprocessed_result = postprocess_utils.sentence_postprocess(token, timestamp)
                         else:
                             postprocessed_result = postprocess_utils.sentence_postprocess(token)
@@ -645,7 +651,8 @@ def inference_paraformer_vad_punc(
             
             batch_size_token_ms_cum = 0
             beg_idx = 0
-            for j, _ in enumerate(range(0, n)):
+            beg_asr_total = time.time()
+            for j, _ in enumerate(tqdm(range(0, n))):
                 batch_size_token_ms_cum += (sorted_data[j][0][1] - sorted_data[j][0][0])
                 if j < n - 1 and (batch_size_token_ms_cum + sorted_data[j + 1][0][1] - sorted_data[j + 1][0][0]) < batch_size_token_ms and (sorted_data[j + 1][0][1] - sorted_data[j + 1][0][0]) < batch_size_token_threshold_s:
                     continue
@@ -655,16 +662,17 @@ def inference_paraformer_vad_punc(
                 beg_idx = end_idx
                 batch = {"speech": speech_j, "speech_lengths": speech_lengths_j}
                 batch = to_device(batch, device=device)
-                print("batch: ", speech_j.shape[0])
+                # print("batch: ", speech_j.shape[0])
                 beg_asr = time.time()
                 results = speech2text(**batch)
                 end_asr = time.time()
-                print("time cost asr: ", end_asr - beg_asr)
+                # print("time cost asr: ", end_asr - beg_asr)
 
                 if len(results) < 1:
                     results = [["", [], [], [], [], [], []]]
                 results_sorted.extend(results)
-
+            end_asr_total = time.time()
+            print("total time cost asr: ", end_asr_total-beg_asr_total)
             restored_data = [0] * n
             for j in range(n):
                 index = sorted_data[j][1]
@@ -686,7 +694,7 @@ def inference_paraformer_vad_punc(
             text, token, token_int = result[0], result[1], result[2]
             time_stamp = result[4] if len(result[4]) > 0 else None
 
-            if use_timestamp and time_stamp is not None:
+            if use_timestamp and time_stamp is not None and len(time_stamp):
                 postprocessed_result = postprocess_utils.sentence_postprocess(token, time_stamp)
             else:
                 postprocessed_result = postprocess_utils.sentence_postprocess(token)
@@ -834,37 +842,72 @@ def inference_paraformer_online(
             data = yaml.load(f, Loader=yaml.Loader)
         return data
 
-    def _prepare_cache(cache: dict = {}, chunk_size=[5, 10, 5], batch_size=1):
+    def _prepare_cache(cache: dict = {}, chunk_size=[5, 10, 5], encoder_chunk_look_back=0,
+                       decoder_chunk_look_back=0, batch_size=1):
         if len(cache) > 0:
             return cache
         config = _read_yaml(asr_train_config)
         enc_output_size = config["encoder_conf"]["output_size"]
         feats_dims = config["frontend_conf"]["n_mels"] * config["frontend_conf"]["lfr_m"]
         cache_en = {"start_idx": 0, "cif_hidden": torch.zeros((batch_size, 1, enc_output_size)),
-                    "cif_alphas": torch.zeros((batch_size, 1)), "chunk_size": chunk_size, "last_chunk": False,
+                    "cif_alphas": torch.zeros((batch_size, 1)), "chunk_size": chunk_size,
+                    "encoder_chunk_look_back": encoder_chunk_look_back, "last_chunk": False, "opt": None,
                     "feats": torch.zeros((batch_size, chunk_size[0] + chunk_size[2], feats_dims)), "tail_chunk": False}
         cache["encoder"] = cache_en
 
-        cache_de = {"decode_fsmn": None}
+        cache_de = {"decode_fsmn": None, "decoder_chunk_look_back": decoder_chunk_look_back, "opt": None, "chunk_size": chunk_size}
         cache["decoder"] = cache_de
 
         return cache
 
-    def _cache_reset(cache: dict = {}, chunk_size=[5, 10, 5], batch_size=1):
+    def _cache_reset(cache: dict = {}, chunk_size=[5, 10, 5], encoder_chunk_look_back=0,
+                     decoder_chunk_look_back=0, batch_size=1):
         if len(cache) > 0:
             config = _read_yaml(asr_train_config)
             enc_output_size = config["encoder_conf"]["output_size"]
             feats_dims = config["frontend_conf"]["n_mels"] * config["frontend_conf"]["lfr_m"]
             cache_en = {"start_idx": 0, "cif_hidden": torch.zeros((batch_size, 1, enc_output_size)),
-                        "cif_alphas": torch.zeros((batch_size, 1)), "chunk_size": chunk_size, "last_chunk": False,
-                        "feats": torch.zeros((batch_size, chunk_size[0] + chunk_size[2], feats_dims)),
-                        "tail_chunk": False}
+                        "cif_alphas": torch.zeros((batch_size, 1)), "chunk_size": chunk_size,
+                        "encoder_chunk_look_back": encoder_chunk_look_back, "last_chunk": False, "opt": None,
+                        "feats": torch.zeros((batch_size, chunk_size[0] + chunk_size[2], feats_dims)), "tail_chunk": False}
             cache["encoder"] = cache_en
 
-            cache_de = {"decode_fsmn": None}
+            cache_de = {"decode_fsmn": None, "decoder_chunk_look_back": decoder_chunk_look_back, "opt": None, "chunk_size": chunk_size}
             cache["decoder"] = cache_de
 
         return cache
+
+    #def _prepare_cache(cache: dict = {}, chunk_size=[5, 10, 5], batch_size=1):
+    #    if len(cache) > 0:
+    #        return cache
+    #    config = _read_yaml(asr_train_config)
+    #    enc_output_size = config["encoder_conf"]["output_size"]
+    #    feats_dims = config["frontend_conf"]["n_mels"] * config["frontend_conf"]["lfr_m"]
+    #    cache_en = {"start_idx": 0, "cif_hidden": torch.zeros((batch_size, 1, enc_output_size)),
+    #                "cif_alphas": torch.zeros((batch_size, 1)), "chunk_size": chunk_size, "last_chunk": False,
+    #                "feats": torch.zeros((batch_size, chunk_size[0] + chunk_size[2], feats_dims)), "tail_chunk": False}
+    #    cache["encoder"] = cache_en
+
+    #    cache_de = {"decode_fsmn": None}
+    #    cache["decoder"] = cache_de
+
+    #    return cache
+
+    #def _cache_reset(cache: dict = {}, chunk_size=[5, 10, 5], batch_size=1):
+    #    if len(cache) > 0:
+    #        config = _read_yaml(asr_train_config)
+    #        enc_output_size = config["encoder_conf"]["output_size"]
+    #        feats_dims = config["frontend_conf"]["n_mels"] * config["frontend_conf"]["lfr_m"]
+    #        cache_en = {"start_idx": 0, "cif_hidden": torch.zeros((batch_size, 1, enc_output_size)),
+    #                    "cif_alphas": torch.zeros((batch_size, 1)), "chunk_size": chunk_size, "last_chunk": False,
+    #                    "feats": torch.zeros((batch_size, chunk_size[0] + chunk_size[2], feats_dims)),
+    #                    "tail_chunk": False}
+    #        cache["encoder"] = cache_en
+
+    #        cache_de = {"decode_fsmn": None}
+    #        cache["decoder"] = cache_de
+
+    #    return cache
 
     def _forward(
             data_path_and_name_and_type,
@@ -893,24 +936,34 @@ def inference_paraformer_online(
         is_final = False
         cache = {}
         chunk_size = [5, 10, 5]
+        encoder_chunk_look_back = 0
+        decoder_chunk_look_back = 0
         if param_dict is not None and "cache" in param_dict:
             cache = param_dict["cache"]
         if param_dict is not None and "is_final" in param_dict:
             is_final = param_dict["is_final"]
         if param_dict is not None and "chunk_size" in param_dict:
             chunk_size = param_dict["chunk_size"]
+        if param_dict is not None and "encoder_chunk_look_back" in param_dict:
+            encoder_chunk_look_back = param_dict["encoder_chunk_look_back"]
+            if encoder_chunk_look_back > 0:
+                chunk_size[0] = 0
+        if param_dict is not None and "decoder_chunk_look_back" in param_dict:
+            decoder_chunk_look_back = param_dict["decoder_chunk_look_back"]
 
         # 7 .Start for-loop
         # FIXME(kamo): The output format should be discussed about
         raw_inputs = torch.unsqueeze(raw_inputs, axis=0)
         asr_result_list = []
-        cache = _prepare_cache(cache, chunk_size=chunk_size, batch_size=1)
+        cache = _prepare_cache(cache, chunk_size=chunk_size, encoder_chunk_look_back=encoder_chunk_look_back, 
+                               decoder_chunk_look_back=decoder_chunk_look_back, batch_size=1)
         item = {}
         if data_path_and_name_and_type is not None and data_path_and_name_and_type[2] == "sound":
             sample_offset = 0
             speech_length = raw_inputs.shape[1]
             stride_size = chunk_size[1] * 960
-            cache = _prepare_cache(cache, chunk_size=chunk_size, batch_size=1)
+            cache = _prepare_cache(cache, chunk_size=chunk_size, encoder_chunk_look_back=encoder_chunk_look_back, 
+                                   decoder_chunk_look_back=decoder_chunk_look_back, batch_size=1)
             final_result = ""
             for sample_offset in range(0, speech_length, min(stride_size, speech_length - sample_offset)):
                 if sample_offset + stride_size >= speech_length - 1:
@@ -931,7 +984,8 @@ def inference_paraformer_online(
 
         asr_result_list.append(item)
         if is_final:
-            cache = _cache_reset(cache, chunk_size=chunk_size, batch_size=1)
+            cache = _cache_reset(cache, chunk_size=chunk_size, encoder_chunk_look_back=encoder_chunk_look_back, 
+                                 decoder_chunk_look_back=decoder_chunk_look_back, batch_size=1)
         return asr_result_list
 
     return _forward
@@ -1289,7 +1343,7 @@ def inference_transducer(
         quantize_modules: Optional[List[str]] = None,
         quantize_dtype: Optional[str] = "float16",
         streaming: Optional[bool] = False,
-        simu_streaming: Optional[bool] = False,
+        fake_streaming: Optional[bool] = False,
         full_utt: Optional[bool] = False,
         chunk_size: Optional[int] = 16,
         left_context: Optional[int] = 16,
@@ -1366,7 +1420,7 @@ def inference_transducer(
         quantize_modules=quantize_modules,
         quantize_dtype=quantize_dtype,
         streaming=streaming,
-        simu_streaming=simu_streaming,
+        fake_streaming=fake_streaming,
         full_utt=full_utt,
         chunk_size=chunk_size,
         left_context=left_context,
@@ -1424,8 +1478,8 @@ def inference_transducer(
                     final_hyps = speech2text.streaming_decode(
                         speech[_end: len(speech)], is_final=True
                     )
-                elif speech2text.simu_streaming:
-                    final_hyps = speech2text.simu_streaming_decode(**batch)
+                elif speech2text.fake_streaming:
+                    final_hyps = speech2text.fake_streaming_decode(**batch)
                 elif speech2text.full_utt:
                     final_hyps = speech2text.full_utt_decode(**batch)
                 else:
@@ -1815,7 +1869,7 @@ def get_parser():
     group.add_argument("--lm_weight", type=float, default=1.0, help="RNNLM weight")
     group.add_argument("--ngram_weight", type=float, default=0.9, help="ngram weight")
     group.add_argument("--streaming", type=str2bool, default=False)
-    group.add_argument("--simu_streaming", type=str2bool, default=False)
+    group.add_argument("--fake_streaming", type=str2bool, default=False)
     group.add_argument("--full_utt", type=str2bool, default=False)
     group.add_argument("--chunk_size", type=int, default=16)
     group.add_argument("--left_context", type=int, default=16)

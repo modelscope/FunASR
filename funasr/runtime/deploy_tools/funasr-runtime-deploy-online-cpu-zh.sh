@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-scriptVersion="0.0.1"
-scriptDate="20230807"
+scriptVersion="0.0.2"
+scriptDate="20230914"
 
 
 # Set color
@@ -53,6 +53,9 @@ SAMPLE_CLIENTS=( \
 "Linux_Cpp" \
 )
 DOCKER_IMAGES=()
+ASR_MODELS=()
+VAD_MODELS=()
+PUNC_MODELS=()
 
 # Handles the download progress bar
 asr_percent_int=0
@@ -397,28 +400,25 @@ readDockerInfoFromUrl(){
     array=($(echo "$content"))
     len=${#array[@]}
 
-    stage=0
-    docker_flag="DOCKER:"
-    judge_flag=":"
     for i in ${array[@]}
     do
         findTypeOfDockerInfo $i
         if [ "$docker_info_cur_key" = "DOCKER:" ]; then
             if [ ! -z "$docker_info_cur_val" ]; then
                 docker_name=${DEFAULT_FUNASR_DOCKER_URL}:${docker_info_cur_val}
-                DOCKER_IMAGES[${#DOCKER_IMAGES[*]}]=$docker_name 
+                DOCKER_IMAGES[${#DOCKER_IMAGES[*]}]=$docker_name
             fi
         elif [ "$docker_info_cur_key" = "DEFAULT_ASR_MODEL:" ]; then
             if [ ! -z "$docker_info_cur_val" ]; then
-                PARAMS_ASR_ID=$docker_info_cur_val
+                ASR_MODELS[${#ASR_MODELS[*]}]=$docker_info_cur_val
             fi
         elif [ "$docker_info_cur_key" = "DEFAULT_VAD_MODEL:" ]; then
             if [ ! -z "$docker_info_cur_val" ]; then
-                PARAMS_VAD_ID=$docker_info_cur_val
+                VAD_MODELS[${#VAD_MODELS[*]}]=$docker_info_cur_val
             fi
         elif [ "$docker_info_cur_key" = "DEFAULT_PUNC_MODEL:" ]; then
             if [ ! -z "$docker_info_cur_val" ]; then
-                PARAMS_PUNC_ID=$docker_info_cur_val
+                PUNC_MODELS[${#PUNC_MODELS[*]}]=$docker_info_cur_val
             fi
         fi
     done
@@ -427,7 +427,7 @@ readDockerInfoFromUrl(){
 
 # Make sure root user.
 rootNess(){
-    echo -e "${UNDERLINE}${BOLD}[0/5]${PLAIN}"
+    echo -e "${UNDERLINE}${BOLD}[0/6]${PLAIN}"
     echo -e "  ${YELLOW}Please check root access.${PLAIN}"
 
     echo -e "    ${WARNING} MUST RUN AS ${RED}ROOT${PLAIN} USER!"
@@ -446,7 +446,7 @@ rootNess(){
 
 # Get a list of docker images and select them.
 selectDockerImages(){
-    echo -e "${UNDERLINE}${BOLD}[1/5]${PLAIN}"
+    echo -e "${UNDERLINE}${BOLD}[1/6]${PLAIN}"
     echo -e "  ${YELLOW}Getting the list of docker images, please wait a few seconds.${PLAIN}"
     readDockerInfoFromUrl
     echo
@@ -486,12 +486,57 @@ selectDockerImages(){
     fi
 
     echo
-    return $result
+}
+
+# Get a list of models and select them.
+selectModels(){
+    echo -e "${UNDERLINE}${BOLD}[2/6]${PLAIN}"
+    echo -e "  ${YELLOW}Get a list of selectable models.${PLAIN}"
+    echo
+
+    selectAsrModels
+    selectVadModels
+    selectPuncModels
+
+    echo
+}
+
+selectAsrModels(){
+    echo -e "  ${YELLOW}Please choose the ASR model.${PLAIN}"
+    menuSelection ${ASR_MODELS[*]}
+    result=$?
+    index=`expr ${result} - 1`
+
+    PARAMS_ASR_ID=${ASR_MODELS[${index}]}
+    echo -e "  ${UNDERLINE}You have chosen the ASR model:${PLAIN} ${GREEN}${PARAMS_ASR_ID}${PLAIN}"
+    echo
+}
+
+selectVadModels(){
+    echo -e "  ${YELLOW}Please choose the VAD model.${PLAIN}"
+    menuSelection ${VAD_MODELS[*]}
+    result=$?
+    index=`expr ${result} - 1`
+
+    PARAMS_VAD_ID=${VAD_MODELS[${index}]}
+    echo -e "  ${UNDERLINE}You have chosen the VAD model:${PLAIN} ${GREEN}${PARAMS_VAD_ID}${PLAIN}"
+    echo
+}
+
+selectPuncModels(){
+    echo -e "  ${YELLOW}Please choose the PUNC model.${PLAIN}"
+    menuSelection ${PUNC_MODELS[*]}
+    result=$?
+    index=`expr ${result} - 1`
+
+    PARAMS_PUNC_ID=${PUNC_MODELS[${index}]}
+    echo -e "  ${UNDERLINE}You have chosen the PUNC model:${PLAIN} ${GREEN}${PARAMS_PUNC_ID}${PLAIN}"
+    echo
 }
 
 # Configure FunASR server host port setting.
 setupHostPort(){
-    echo -e "${UNDERLINE}${BOLD}[2/5]${PLAIN}"
+    echo -e "${UNDERLINE}${BOLD}[3/6]${PLAIN}"
 
     params_host_port=`sed '/^PARAMS_HOST_PORT=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
     if [ -z "$params_host_port" ]; then
@@ -715,7 +760,7 @@ saveParams(){
 }
 
 showAllParams(){
-    echo -e "${UNDERLINE}${BOLD}[3/5]${PLAIN}"
+    echo -e "${UNDERLINE}${BOLD}[4/6]${PLAIN}"
     echo -e "  ${YELLOW}Show parameters of FunASR server setting and confirm to run ...${PLAIN}"
     echo
 
@@ -818,7 +863,7 @@ showAllParams(){
 
 # Install docker
 installFunasrDocker(){
-    echo -e "${UNDERLINE}${BOLD}[4/5]${PLAIN}"
+    echo -e "${UNDERLINE}${BOLD}[5/6]${PLAIN}"
 
     if [ $DOCKERINFOLEN -gt 30 ]; then
         echo -e "  ${YELLOW}Docker has installed.${PLAIN}"
@@ -886,7 +931,7 @@ installFunasrDocker(){
 }
 
 dockerRun(){
-    echo -e "${UNDERLINE}${BOLD}[5/5]${PLAIN}"
+    echo -e "${UNDERLINE}${BOLD}[6/6]${PLAIN}"
     echo -e "  ${YELLOW}Construct command and run docker ...${PLAIN}"
 
     start_flag=$1
@@ -1363,6 +1408,7 @@ paramsConfigure(){
     initConfiguration
     initParameters
     selectDockerImages
+    selectModels
     result=$?
     result=`expr ${result} + 0`
     if [ $result -ne 0 ]; then

@@ -44,12 +44,14 @@ void GetValue(TCLAP::ValueArg<std::string>& value_arg, string key, std::map<std:
 
 
 void runReg(FUNASR_HANDLE tpass_handle, std::vector<int> chunk_size, vector<string> wav_list, vector<string> wav_ids,
-            float* total_length, long* total_time, int core_id, ASR_TYPE asr_mode_) {
+            float* total_length, long* total_time, int core_id, ASR_TYPE asr_mode_, string hotwords) {
     
     struct timeval start, end;
     long seconds = 0;
     float n_total_length = 0.0f;
     long n_total_time = 0;
+       
+    std::vector<std::vector<float>> hotwords_embedding = CompileHotwordEmbedding(tpass_handle, hotwords, ASR_TWO_PASS);
     
     // init online features
     FUNASR_HANDLE tpass_online_handle=FunTpassOnlineInit(tpass_handle, chunk_size);
@@ -80,7 +82,6 @@ void runReg(FUNASR_HANDLE tpass_handle, std::vector<int> chunk_size, vector<stri
 
         int step = 1600*2;
         bool is_final = false;
-
         std::vector<std::vector<string>> punc_cache(2);
         for (int sample_offset = 0; sample_offset < buff_len; sample_offset += std::min(step, buff_len - sample_offset)) {
             if (sample_offset + step >= buff_len - 1) {
@@ -89,7 +90,7 @@ void runReg(FUNASR_HANDLE tpass_handle, std::vector<int> chunk_size, vector<stri
                 } else {
                     is_final = false;
             }
-            FUNASR_RESULT result = FunTpassInferBuffer(tpass_handle, tpass_online_handle, speech_buff+sample_offset, step, punc_cache, is_final, sampling_rate_, "pcm", (ASR_TYPE)asr_mode_);
+            FUNASR_RESULT result = FunTpassInferBuffer(tpass_handle, tpass_online_handle, speech_buff+sample_offset, step, punc_cache, is_final, sampling_rate_, "pcm", (ASR_TYPE)asr_mode_, hotwords_embedding);
             if (result)
             {
                 FunASRFreeResult(result);
@@ -126,9 +127,9 @@ void runReg(FUNASR_HANDLE tpass_handle, std::vector<int> chunk_size, vector<stri
 
         int step = 1600*2;
         bool is_final = false;
-
         string online_res="";
         string tpass_res="";
+        string time_stamp_res="";
         std::vector<std::vector<string>> punc_cache(2);
         for (int sample_offset = 0; sample_offset < buff_len; sample_offset += std::min(step, buff_len - sample_offset)) {
             if (sample_offset + step >= buff_len - 1) {
@@ -138,7 +139,7 @@ void runReg(FUNASR_HANDLE tpass_handle, std::vector<int> chunk_size, vector<stri
                     is_final = false;
             }
             gettimeofday(&start, NULL);
-            FUNASR_RESULT result = FunTpassInferBuffer(tpass_handle, tpass_online_handle, speech_buff+sample_offset, step, punc_cache, is_final, sampling_rate_, "pcm", (ASR_TYPE)asr_mode_);
+            FUNASR_RESULT result = FunTpassInferBuffer(tpass_handle, tpass_online_handle, speech_buff+sample_offset, step, punc_cache, is_final, sampling_rate_, "pcm", (ASR_TYPE)asr_mode_, hotwords_embedding);
             gettimeofday(&end, NULL);
             seconds = (end.tv_sec - start.tv_sec);
             long taking_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
@@ -149,12 +150,22 @@ void runReg(FUNASR_HANDLE tpass_handle, std::vector<int> chunk_size, vector<stri
                 string online_msg = FunASRGetResult(result, 0);
                 online_res += online_msg;
                 if(online_msg != ""){
-                    LOG(INFO)<< wav_ids[i] <<" : "<<online_msg;
+                    LOG(INFO) <<"Thread: " << this_thread::get_id() <<" " << wav_ids[i] <<" : "<<online_msg;
                 }
                 string tpass_msg = FunASRGetTpassResult(result, 0);
                 tpass_res += tpass_msg;
                 if(tpass_msg != ""){
-                    LOG(INFO)<< wav_ids[i] <<" offline results : "<<tpass_msg;
+                    LOG(INFO) <<"Thread: " << this_thread::get_id() <<" " << wav_ids[i] <<" offline results : "<<tpass_msg;
+                }
+                string stamp = FunASRGetStamp(result);
+                if(stamp !=""){
+                    LOG(INFO) <<"Thread: " << this_thread::get_id() <<" " << wav_ids[i] << " time stamp : " << stamp;
+                    if(time_stamp_res == ""){
+                        time_stamp_res += stamp;
+                    }else{
+                        time_stamp_res = time_stamp_res.erase(time_stamp_res.length()-1)
+                                         + "," + stamp.substr(1);
+                    }
                 }
                 float snippet_time = FunASRGetRetSnippetTime(result);
                 n_total_length += snippet_time;
@@ -173,6 +184,9 @@ void runReg(FUNASR_HANDLE tpass_handle, std::vector<int> chunk_size, vector<stri
         }
         if(asr_mode_ == 0 || asr_mode_==2){
             LOG(INFO) <<"Thread: " << this_thread::get_id() <<" " << wav_ids[i] << " Final offline results " <<" : "<<tpass_res;
+            if(time_stamp_res!=""){
+                LOG(INFO) <<"Thread: " << this_thread::get_id() <<" " << wav_ids[i] << " Final timestamp results " <<" : "<<time_stamp_res;
+            }
         }
 
     }
@@ -200,11 +214,13 @@ int main(int argc, char** argv)
     TCLAP::ValueArg<std::string>    vad_quant("", VAD_QUANT, "true (Default), load the model of model.onnx in vad_dir. If set true, load the model of model_quant.onnx in vad_dir", false, "true", "string");
     TCLAP::ValueArg<std::string>    punc_dir("", PUNC_DIR, "the punc online model path, which contains model.onnx, punc.yaml", false, "", "string");
     TCLAP::ValueArg<std::string>    punc_quant("", PUNC_QUANT, "true (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "true", "string");
-    TCLAP::ValueArg<std::string>    asr_mode("", ASR_MODE, "offline, online, 2pass", false, "2pass", "string");
-    TCLAP::ValueArg<std::int32_t>   onnx_thread("", "onnx-inter-thread", "onnxruntime SetIntraOpNumThreads", false, 1, "int32_t");
-    TCLAP::ValueArg<std::int32_t>   thread_num_("", THREAD_NUM, "multi-thread num for rtf", false, 1, "int32_t");
+    TCLAP::ValueArg<std::string>    itn_dir("", ITN_DIR, "the itn model(fst) path, which contains zh_itn_tagger.fst and zh_itn_verbalizer.fst", false, "", "string");
 
-    TCLAP::ValueArg<std::string> wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", true, "", "string");
+    TCLAP::ValueArg<std::string>    asr_mode("", ASR_MODE, "offline, online, 2pass", false, "2pass", "string");
+    TCLAP::ValueArg<std::int32_t>   onnx_thread("", "model-thread-num", "onnxruntime SetIntraOpNumThreads", false, 1, "int32_t");
+    TCLAP::ValueArg<std::int32_t>   thread_num_("", THREAD_NUM, "multi-thread num for rtf", false, 1, "int32_t");
+    TCLAP::ValueArg<std::string>    wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", true, "", "string");
+    TCLAP::ValueArg<std::string>    hotword("", HOTWORD, "*.txt(one hotword perline) or hotwords seperate by | (could be: 阿里巴巴 达摩院)", false, "", "string");
 
     cmd.add(offline_model_dir);
     cmd.add(online_model_dir);
@@ -213,10 +229,12 @@ int main(int argc, char** argv)
     cmd.add(vad_quant);
     cmd.add(punc_dir);
     cmd.add(punc_quant);
+    cmd.add(itn_dir);
     cmd.add(wav_path);
     cmd.add(asr_mode);
     cmd.add(onnx_thread);
     cmd.add(thread_num_);
+    cmd.add(hotword);
     cmd.parse(argc, argv);
 
     std::map<std::string, std::string> model_path;
@@ -227,6 +245,7 @@ int main(int argc, char** argv)
     GetValue(vad_quant, VAD_QUANT, model_path);
     GetValue(punc_dir, PUNC_DIR, model_path);
     GetValue(punc_quant, PUNC_QUANT, model_path);
+    GetValue(itn_dir, ITN_DIR, model_path);
     GetValue(wav_path, WAV_PATH, model_path);
     GetValue(asr_mode, ASR_MODE, model_path);
 
@@ -256,6 +275,26 @@ int main(int argc, char** argv)
     long seconds = (end.tv_sec - start.tv_sec);
     long modle_init_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
     LOG(INFO) << "Model initialization takes " << (double)modle_init_micros / 1000000 << " s";
+
+    // read hotwords
+    std::string hotword_ = hotword.getValue();
+    std::string hotwords_;
+
+    if(is_target_file(hotword_, "txt")){
+        ifstream in(hotword_);
+        if (!in.is_open()) {
+            LOG(ERROR) << "Failed to open file: " << model_path.at(HOTWORD) ;
+            return 0;
+        }
+        string line;
+        while(getline(in, line))
+        {
+            hotwords_ +=line+HOTWORD_SEP;
+        }
+        in.close();
+    }else{
+        hotwords_ = hotword_;
+    }
 
     // read wav_path
     vector<string> wav_list;
@@ -293,7 +332,7 @@ int main(int argc, char** argv)
     int rtf_threds = thread_num_.getValue();
     for (int i = 0; i < rtf_threds; i++)
     {
-        threads.emplace_back(thread(runReg, tpass_hanlde, chunk_size, wav_list, wav_ids, &total_length, &total_time, i, (ASR_TYPE)asr_mode_));
+        threads.emplace_back(thread(runReg, tpass_hanlde, chunk_size, wav_list, wav_ids, &total_length, &total_time, i, (ASR_TYPE)asr_mode_, hotwords_));
     }
 
     for (auto& thread : threads)

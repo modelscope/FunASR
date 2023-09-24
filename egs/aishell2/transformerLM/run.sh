@@ -214,13 +214,15 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
     echo "Stage 3: Calc perplexity: ${lm_test_text}"
     
     python ../../../funasr/bin/lm_inference_launch.py \
-        --output_dir "${lm_exp}/perplexity_test" \
+        --output_dir "${lm_exp}/perplexity_test/output.1" \
         --ngpu "${gpu_num}" \
         --batch_size 1 \
         --train_config "${lm_exp}"/config.yaml \
         --model_file "${lm_exp}/${inference_lm}" \
         --data_path_and_name_and_type "${lm_test_text},text,text" \
         --num_workers 1 \
+        --gpuid_list 0 \
+        --mode "transformer" \
         --split_with_space false 
 fi
 

@@ -8,9 +8,9 @@ FunASR provides a real-time speech transcription service that can be easily depl
 Use the following command to pull and start the FunASR software package docker image:
 
 ```shell
-sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.1
+sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.2
 mkdir -p ./funasr-runtime-resources/models
-sudo docker run -p 10095:10095 -it --privileged=true -v ./funasr-runtime-resources/models:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.1
+sudo docker run -p 10095:10095 -it --privileged=true -v ./funasr-runtime-resources/models:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.2
 ```
 If you do not have Docker installed, please refer to [Docker Installation](https://alibaba-damo-academy.github.io/FunASR/en/installation/docker.html)
 
@@ -24,7 +24,8 @@ nohup bash run_server_2pass.sh \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
   --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx  \
-  --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx > log.out 2>&1 &
+  --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx \
+  --itn-dir thuduj12/fst_itn_zh > log.out 2>&1 &
 
 # If you want to close ssl，please add：--certfile 0
 ```
@@ -76,6 +77,7 @@ Command parameter introduction:
 --vad-quant True for quantized VAD models, False for non-quantized VAD models, default is True
 --punc-dir modelscope model ID
 --punc-quant True for quantized PUNC models, False for non-quantized PUNC models, default is True
+--itn-dir modelscope model ID
 --port Port number that the server should listen on, default is 10095
 --decoder-thread-num The number of inference threads the server should start, default is 8
 --io-thread-num The number of IO threads the server should start, default is 1
@@ -88,5 +90,6 @@ After executing the above command, the real-time speech transcription service wi
 [Paraformer-lagre online](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx/summary )
 [Paraformer-lagre](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary)
 [CT-Transformer](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx/summary)
+[FST-ITN](https://www.modelscope.cn/models/thuduj12/fst_itn_zh/summary)
 
 If you wish to deploy your fine-tuned model (e.g., 10epoch.pb), you need to manually rename the model to model.pb and replace the original model.pb in ModelScope. Then, specify the path as `model_dir`.

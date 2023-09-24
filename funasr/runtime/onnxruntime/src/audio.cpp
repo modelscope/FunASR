@@ -9,6 +9,11 @@
 #include "audio.h"
 #include "precomp.h"
 
+
+#if defined(__APPLE__)
+#include <string.h>
+#else
+
 extern "C" {
 #include <libavutil/opt.h>
 #include <libavcodec/avcodec.h>
@@ -17,6 +22,10 @@ extern "C" {
 #include <libavutil/samplefmt.h>
 #include <libswresample/swresample.h>
 }
+
+#endif
+
+
 
 using namespace std;
 
@@ -245,6 +254,9 @@ void Audio::WavResample(int32_t sampling_rate, const float *waveform,
 }
 
 bool Audio::FfmpegLoad(const char *filename, bool copy2char){
+#if defined(__APPLE__)
+    return false;
+#else
     // from file
     AVFormatContext* formatContext = avformat_alloc_context();
     if (avformat_open_input(&formatContext, filename, NULL, NULL) != 0) {
@@ -403,10 +415,13 @@ bool Audio::FfmpegLoad(const char *filename, bool copy2char){
     }
     else
         return false;
-    
+#endif
 }
 
 bool Audio::FfmpegLoad(const char* buf, int n_file_len){
+#if defined(__APPLE__)
+    return false;
+#else
     // from buf
     char* buf_copy = (char *)malloc(n_file_len);
     memcpy(buf_copy, buf, n_file_len);
@@ -577,7 +592,7 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
     }
     else
         return false;
-    
+#endif
 }
 
 
@@ -1097,6 +1112,8 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
             if(asr_mode != ASR_OFFLINE){
                 if(buff_len >= step){
                     frame = new AudioFrame(step);
+                    frame->global_start = speech_start;
+                    frame->global_end = speech_start + step/seg_sample;
                     frame->data = (float*)malloc(sizeof(float) * step);
                     memcpy(frame->data, all_samples.data()+start-offset, step*sizeof(float));
                     asr_online_queue.push(frame);
@@ -1123,6 +1140,8 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
                 if(asr_mode != ASR_OFFLINE){
                     frame = new AudioFrame(end-start);
                     frame->is_final = true;
+                    frame->global_start = speech_start_i;
+                    frame->global_end = speech_end_i;
                     frame->data = (float*)malloc(sizeof(float) * (end-start));
                     memcpy(frame->data, all_samples.data()+start-offset, (end-start)*sizeof(float));
                     asr_online_queue.push(frame);
@@ -1132,6 +1151,8 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
                 if(asr_mode != ASR_ONLINE){
                     frame = new AudioFrame(end-start);
                     frame->is_final = true;
+                    frame->global_start = speech_start_i;
+                    frame->global_end = speech_end_i;
                     frame->data = (float*)malloc(sizeof(float) * (end-start));
                     memcpy(frame->data, all_samples.data()+start-offset, (end-start)*sizeof(float));
                     asr_offline_queue.push(frame);
@@ -1153,6 +1174,8 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
                 if(asr_mode != ASR_OFFLINE){
                     if(buff_len >= step){
                         frame = new AudioFrame(step);
+                        frame->global_start = speech_start;
+                        frame->global_end = speech_start + step/seg_sample;
                         frame->data = (float*)malloc(sizeof(float) * step);
                         memcpy(frame->data, all_samples.data()+start-offset, step*sizeof(float));
                         asr_online_queue.push(frame);
@@ -1176,6 +1199,8 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
                 if(asr_mode != ASR_ONLINE){
                     frame = new AudioFrame(end-offline_start);
                     frame->is_final = true;
+                    frame->global_start = speech_offline_start;
+                    frame->global_end = speech_end_i;
                     frame->data = (float*)malloc(sizeof(float) * (end-offline_start));
                     memcpy(frame->data, all_samples.data()+offline_start-offset, (end-offline_start)*sizeof(float));
                     asr_offline_queue.push(frame);
@@ -1192,6 +1217,8 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
                             }
                             frame = new AudioFrame(step);
                             frame->is_final = is_final;
+                            frame->global_start = (int)((start+sample_offset)/seg_sample);
+                            frame->global_end = frame->global_start + step/seg_sample;
                             frame->data = (float*)malloc(sizeof(float) * step);
                             memcpy(frame->data, all_samples.data()+start-offset+sample_offset, step*sizeof(float));
                             asr_online_queue.push(frame);
@@ -1200,6 +1227,8 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
                     }else{
                         frame = new AudioFrame(0);
                         frame->is_final = true;
+                        frame->global_start = speech_start;   // in this case start >= end
+                        frame->global_end = speech_end_i;
                         asr_online_queue.push(frame);
                         frame = NULL;
                     }

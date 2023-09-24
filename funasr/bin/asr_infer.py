@@ -399,7 +399,7 @@ class Speech2TextParaformer:
     @torch.no_grad()
     def __call__(
             self, speech: Union[torch.Tensor, np.ndarray], speech_lengths: Union[torch.Tensor, np.ndarray] = None,
-            begin_time: int = 0, end_time: int = None,
+            decoding_ind: int = None, begin_time: int = 0, end_time: int = None,
     ):
         """Inference
 
@@ -429,7 +429,9 @@ class Speech2TextParaformer:
         batch = to_device(batch, device=self.device)
 
         # b. Forward Encoder
-        enc, enc_len = self.asr_model.encode(**batch, ind=self.decoding_ind)
+        if decoding_ind is None:
+            decoding_ind = 0 if self.decoding_ind is None else self.decoding_ind
+        enc, enc_len = self.asr_model.encode(**batch, ind=decoding_ind)
         if isinstance(enc, tuple):
             enc = enc[0]
         # assert len(enc) == 1, len(enc)
@@ -1335,7 +1337,7 @@ class Speech2TextTransducer:
             quantize_dtype: str = "qint8",
             nbest: int = 1,
             streaming: bool = False,
-            simu_streaming: bool = False,
+            fake_streaming: bool = False,
             full_utt: bool = False,
             chunk_size: int = 16,
             left_context: int = 32,
@@ -1442,7 +1444,7 @@ class Speech2TextTransducer:
 
         self.beam_search = beam_search
         self.streaming = streaming
-        self.simu_streaming = simu_streaming
+        self.fake_streaming = fake_streaming
         self.full_utt = full_utt
         self.chunk_size = max(chunk_size, 0)
         self.left_context = left_context
@@ -1452,8 +1454,8 @@ class Speech2TextTransducer:
             self.streaming = False
             self.asr_model.encoder.dynamic_chunk_training = False
 
-        if not simu_streaming or chunk_size == 0:
-            self.simu_streaming = False
+        if not fake_streaming or chunk_size == 0:
+            self.fake_streaming = False
             self.asr_model.encoder.dynamic_chunk_training = False
 
         self.frontend = frontend
@@ -1530,7 +1532,7 @@ class Speech2TextTransducer:
         return nbest_hyps
 
     @torch.no_grad()
-    def simu_streaming_decode(self, speech: Union[torch.Tensor, np.ndarray]) -> List[HypothesisTransducer]:
+    def fake_streaming_decode(self, speech: Union[torch.Tensor, np.ndarray]) -> List[HypothesisTransducer]:
         """Speech2Text call.
         Args:
             speech: Speech data. (S)

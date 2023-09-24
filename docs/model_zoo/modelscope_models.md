@@ -54,6 +54,7 @@ Here we provided several pretrained models on different datasets. The details of
 
 
 #### Conformer
+
 |                                                       Model Name                                                       | Language |     Training Data     | Vocab Size | Parameter | Offline/Online | Notes                                                                                                                           |
 |:----------------------------------------------------------------------------------------------------------------------:|:--------:|:---------------------:|:----------:|:---------:|:--------------:|:--------------------------------------------------------------------------------------------------------------------------------|
 | [Conformer](https://modelscope.cn/models/damo/speech_conformer_asr_nat-zh-cn-16k-aishell1-vocab4234-pytorch/summary)   |   CN     |  AISHELL (178hours)   |    4234    |    44M    |    Offline     | Duration of input wav <= 20s                                                                                                    |
@@ -77,10 +78,11 @@ Here we provided several pretrained models on different datasets. The details of
 
 ### Punctuation Restoration
 
-|                                                         Model Name                                                         |        Training Data         | Parameters | Vocab Size| Offline/Online | Notes |
-|:--------------------------------------------------------------------------------------------------------------------------:|:----------------------------:|:----------:|:----------:|:--------------:|:------|
-|      [CT-Transformer](https://modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch/summary)      | Alibaba Text Data |    70M     |    272727     |    Offline     |   offline punctuation model    |
-| [CT-Transformer](https://modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727/summary)      | Alibaba Text Data |    70M     |    272727     |     Online     |  online punctuation model     |
+|                                                         Model Name                                                         |        Language | Training Data         | Parameters | Vocab Size| Offline/Online | Notes |
+|:--------------------------------------------------------------------------------------------------------------------------:|:---------|:----------------------------:|:----------:|:----------:|:--------------:|:------|
+|      [CT-Transformer-Large](https://modelscope.cn/models/damo/punc_ct-transformer_cn-en-common-vocab471067-large/summary)     | CN & EN | Alibaba Text Data(100M) |    1.1G     |    471067     |    Offline     |   large offline punctuation model    |
+|      [CT-Transformer](https://modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch/summary)    | CN & EN  | Alibaba Text Data(70M) |    291M     |    272727     |    Offline     |   offline punctuation model    |
+| [CT-Transformer-Realtime](https://modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727/summary)    | CN & EN  | Alibaba Text Data(70M) |    288M     |    272727     |     Online     |  online punctuation model     |
 
 ### Language Models
 

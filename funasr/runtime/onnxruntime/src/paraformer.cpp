@@ -164,11 +164,18 @@ void Paraformer::InitAsr(const std::string &am_model, const std::string &en_mode
     m_strInputNames.push_back(strName.c_str());
     GetInputName(m_session_.get(), strName,1);
     m_strInputNames.push_back(strName);
+
+    if (use_hotword) {
+        GetInputName(m_session_.get(), strName, 2);
+        m_strInputNames.push_back(strName);
+    }
     
-    GetOutputName(m_session_.get(), strName);
-    m_strOutputNames.push_back(strName);
-    GetOutputName(m_session_.get(), strName,1);
-    m_strOutputNames.push_back(strName);
+    // support time stamp
+    size_t numOutputNodes = m_session_->GetOutputCount();
+    for(int index=0; index<numOutputNodes; index++){
+        GetOutputName(m_session_.get(), strName, index);
+        m_strOutputNames.push_back(strName);
+    }
 
     for (auto& item : m_strInputNames)
         m_szInputNames.push_back(item.c_str());
@@ -655,7 +662,7 @@ string Paraformer::Forward(float* din, int len, bool input_finished, const std::
                 return "";
             }
             //PrintMat(hw_emb, "input_clas_emb");
-            const int64_t hotword_shape[3] = {1, hw_emb.size(), hw_emb[0].size()};
+            const int64_t hotword_shape[3] = {1, static_cast<int64_t>(hw_emb.size()), static_cast<int64_t>(hw_emb[0].size())};
             embedding.reserve(hw_emb.size() * hw_emb[0].size());
             for (auto item : hw_emb) {
                 embedding.insert(embedding.end(), item.begin(), item.end());
