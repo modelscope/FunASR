@@ -11,7 +11,7 @@ def modelscope_infer(args):
         model=args.model,
         output_dir=args.output_dir,
         batch_size=args.batch_size,
-        model_revision='v1.0.6',
+        model_revision='v1.0.7',
         update_model=False,
         mode="paraformer_fake_streaming",
         param_dict={"decoding_model": args.decoding_mode, "hotword": args.hotword_txt}
