@@ -103,7 +103,7 @@ sudo systemctl start docker
 若想直接运行client进行测试，可参考如下简易说明，以python版本为例：
 
 ```shell
-python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.wav" --output_dir "./results"
+python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.wav" --output_dir "./results"
 ```
 
 命令参数说明：
