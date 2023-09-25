@@ -162,15 +162,18 @@ The modelscope pipeline supports all the models in <a class="reference external"
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
     <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">auto_speech_recognition</span><span class="p">,</span>
     <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online&#39;</span><span class="p">,</span>
-    <span class="n">model_revision</span><span class="o">=</span><span class="s1">&#39;v1.0.6&#39;</span><span class="p">,</span>
+    <span class="n">model_revision</span><span class="o">=</span><span class="s1">&#39;v1.0.7&#39;</span><span class="p">,</span>
     <span class="n">update_model</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;paraformer_streaming&#39;</span>
     <span class="p">)</span>
 <span class="kn">import</span> <span class="nn">soundfile</span>
 <span class="n">speech</span><span class="p">,</span> <span class="n">sample_rate</span> <span class="o">=</span> <span class="n">soundfile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;example/asr_example.wav&quot;</span><span class="p">)</span>
 
-<span class="n">chunk_size</span> <span class="o">=</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span> <span class="c1">#[5, 10, 5] 600ms, [8, 8, 4] 480ms</span>
-<span class="n">param_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;cache&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(),</span> <span class="s2">&quot;is_final&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;chunk_size&quot;</span><span class="p">:</span> <span class="n">chunk_size</span><span class="p">}</span>
+<span class="n">chunk_size</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span> <span class="c1">#[0, 10, 5] 600ms, [0, 8, 4] 480ms</span>
+<span class="n">encoder_chunk_look_back</span> <span class="o">=</span> <span class="mi">4</span> <span class="c1">#number of chunks to lookback for encoder self-attention</span>
+<span class="n">decoder_chunk_look_back</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1">#number of encoder chunks to lookback for decoder cross-attention</span>
+<span class="n">param_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;cache&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(),</span> <span class="s2">&quot;is_final&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;chunk_size&quot;</span><span class="p">:</span> <span class="n">chunk_size</span><span class="p">,</span>
+              <span class="s2">&quot;encoder_chunk_look_back&quot;</span><span class="p">:</span> <span class="n">encoder_chunk_look_back</span><span class="p">,</span> <span class="s2">&quot;decoder_chunk_look_back&quot;</span><span class="p">:</span> <span class="n">decoder_chunk_look_back</span><span class="p">}</span>
 <span class="n">chunk_stride</span> <span class="o">=</span> <span class="n">chunk_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">960</span> <span class="c1"># 600ms、480ms</span>
 <span class="c1"># first chunk, 600ms</span>
 <span class="n">speech_chunk</span> <span class="o">=</span> <span class="n">speech</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">chunk_stride</span><span class="p">]</span>
@@ -191,7 +194,7 @@ The modelscope pipeline supports all the models in <a class="reference external"
 <span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
     <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">auto_speech_recognition</span><span class="p">,</span>
     <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online&#39;</span><span class="p">,</span>
-    <span class="n">model_revision</span><span class="o">=</span><span class="s1">&#39;v1.0.6&#39;</span><span class="p">,</span>
+    <span class="n">model_revision</span><span class="o">=</span><span class="s1">&#39;v1.0.7&#39;</span><span class="p">,</span>
     <span class="n">update_model</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;paraformer_fake_streaming&quot;</span>
 <span class="p">)</span>
