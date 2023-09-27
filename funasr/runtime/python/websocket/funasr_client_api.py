@@ -51,7 +51,8 @@ class Funasr_websocket_recognizer():
         stride = int(60 *  chunk_size[1]/  chunk_interval / 1000 * 16000 * 2)
         chunk_num = (len(audio_bytes) - 1) // stride + 1
        
-        message = json.dumps({"mode":  mode, "chunk_size":  chunk_size, "chunk_interval":  chunk_interval,
+        message = json.dumps({"mode": args.mode, "chunk_size": args.chunk_size, "encoder_chunk_look_back": 4,
+                              "decoder_chunk_look_back": 1, "chunk_interval": args.chunk_interval, 
                               "wav_name": wav_name, "is_speaking": True})
  
         self.websocket.send(message)
