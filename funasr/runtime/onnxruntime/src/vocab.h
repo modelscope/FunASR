@@ -22,7 +22,7 @@ class Vocab {
     int Size();
     bool IsChinese(string ch);
     void Vector2String(vector<int> in, std::vector<std::string> &preds);
-    string Vector2StringV2(vector<int> in);
+    string Vector2StringV2(vector<int> in, std::string language="");
     int GetIdByToken(const std::string &token);
 };
 

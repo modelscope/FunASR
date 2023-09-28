@@ -20,6 +20,7 @@ namespace funasr {
         //const float scale = 22.6274169979695;
         const float scale = 1.0;
 
+        void LoadConfigFromYaml(const char* filename);
         void LoadOnlineConfigFromYaml(const char* filename);
         void LoadCmvn(const char *filename);
         vector<float> ApplyLfr(const vector<float> &in);
@@ -32,6 +33,7 @@ namespace funasr {
         vector<const char*> hw_m_szInputNames;
         vector<const char*> hw_m_szOutputNames;
         bool use_hotword;
+        std::string language="zh-cn";
 
     public:
         Paraformer();

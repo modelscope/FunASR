@@ -75,20 +75,36 @@ bool Vocab::IsChinese(string ch)
     return false;
 }
 
-string Vocab::Vector2StringV2(vector<int> in)
+string Vocab::Vector2StringV2(vector<int> in, std::string language)
 {
     int i;
     list<string> words;
     int is_pre_english = false;
     int pre_english_len = 0;
     int is_combining = false;
-    string combine = "";
+    std::string combine = "";
+    std::string unicodeChar = "▁";
 
     for (auto it = in.begin(); it != in.end(); it++) {
         string word = vocab[*it];
         // step1 space character skips
         if (word == "<s>" || word == "</s>" || word == "<unk>")
             continue;
+        if (language == "en-bpe"){
+            size_t found = word.find(unicodeChar);
+            if(found != std::string::npos){
+                if (combine != ""){
+                    if (words.size() != 0){
+                        combine = " " + combine;
+                    }
+                    words.push_back(combine);
+                }
+                combine = word.substr(3);
+            }else{
+                combine += word;
+            }
+            continue;
+        }
         // step2 combie phoneme to full word
         {
             int sub_word = !(word.find("@@") == string::npos);

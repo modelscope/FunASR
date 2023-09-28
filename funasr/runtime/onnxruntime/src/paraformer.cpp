@@ -65,6 +65,7 @@ void Paraformer::InitAsr(const std::string &am_model, const std::string &am_cmvn
     for (auto& item : m_strOutputNames)
         m_szOutputNames.push_back(item.c_str());
     vocab = new Vocab(am_config.c_str());
+    LoadConfigFromYaml(am_config.c_str());
     LoadCmvn(am_cmvn.c_str());
 }
 
@@ -181,6 +182,27 @@ void Paraformer::InitAsr(const std::string &am_model, const std::string &en_mode
         m_szInputNames.push_back(item.c_str());
     for (auto& item : m_strOutputNames)
         m_szOutputNames.push_back(item.c_str());
+}
+
+void Paraformer::LoadConfigFromYaml(const char* filename){
+
+    YAML::Node config;
+    try{
+        config = YAML::LoadFile(filename);
+    }catch(exception const &e){
+        LOG(ERROR) << "Error loading file, yaml file error or not exist.";
+        exit(-1);
+    }
+
+    try{
+        YAML::Node lang_conf = config["lang"];
+        if (lang_conf.IsDefined()){
+            language = lang_conf.as<string>();
+        }
+    }catch(exception const &e){
+        LOG(ERROR) << "Error when load argument from vad config YAML.";
+        exit(-1);
+    }
 }
 
 void Paraformer::LoadOnlineConfigFromYaml(const char* filename){
@@ -342,7 +364,7 @@ string Paraformer::GreedySearch(float * in, int n_len,  int64_t token_nums, bool
         hyps.push_back(max_idx);
     }
     if(!is_stamp){
-        return vocab->Vector2StringV2(hyps);
+        return vocab->Vector2StringV2(hyps, language);
     }else{
         std::vector<string> char_list;
         std::vector<std::vector<float>> timestamp_list;
@@ -707,17 +729,6 @@ string Paraformer::Forward(float* din, int len, bool input_finished, const std::
         }else{
             result = GreedySearch(floatData, *encoder_out_lens, outputShape[2]);
         }
-//         int pos = 0;
-//         std::vector<std::vector<float>> logits;
-//         for (int j = 0; j < outputShape[1]; j++)
-//         {
-//             std::vector<float> vec_token;
-//             vec_token.insert(vec_token.begin(), floatData + pos, floatData + pos + outputShape[2]);
-//             logits.push_back(vec_token);
-//             pos += outputShape[2];
-//         }
-//         //PrintMat(logits, "logits_out");
-//         result = GreedySearch(floatData, *encoder_out_lens, outputShape[2]);
     }
     catch (std::exception const &e)
     {
