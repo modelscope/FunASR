@@ -842,37 +842,72 @@ def inference_paraformer_online(
             data = yaml.load(f, Loader=yaml.Loader)
         return data
 
-    def _prepare_cache(cache: dict = {}, chunk_size=[5, 10, 5], batch_size=1):
+    def _prepare_cache(cache: dict = {}, chunk_size=[5, 10, 5], encoder_chunk_look_back=0,
+                       decoder_chunk_look_back=0, batch_size=1):
         if len(cache) > 0:
             return cache
         config = _read_yaml(asr_train_config)
         enc_output_size = config["encoder_conf"]["output_size"]
         feats_dims = config["frontend_conf"]["n_mels"] * config["frontend_conf"]["lfr_m"]
         cache_en = {"start_idx": 0, "cif_hidden": torch.zeros((batch_size, 1, enc_output_size)),
-                    "cif_alphas": torch.zeros((batch_size, 1)), "chunk_size": chunk_size, "last_chunk": False,
+                    "cif_alphas": torch.zeros((batch_size, 1)), "chunk_size": chunk_size,
+                    "encoder_chunk_look_back": encoder_chunk_look_back, "last_chunk": False, "opt": None,
                     "feats": torch.zeros((batch_size, chunk_size[0] + chunk_size[2], feats_dims)), "tail_chunk": False}
         cache["encoder"] = cache_en
 
-        cache_de = {"decode_fsmn": None}
+        cache_de = {"decode_fsmn": None, "decoder_chunk_look_back": decoder_chunk_look_back, "opt": None, "chunk_size": chunk_size}
         cache["decoder"] = cache_de
 
         return cache
 
-    def _cache_reset(cache: dict = {}, chunk_size=[5, 10, 5], batch_size=1):
+    def _cache_reset(cache: dict = {}, chunk_size=[5, 10, 5], encoder_chunk_look_back=0,
+                     decoder_chunk_look_back=0, batch_size=1):
         if len(cache) > 0:
             config = _read_yaml(asr_train_config)
             enc_output_size = config["encoder_conf"]["output_size"]
             feats_dims = config["frontend_conf"]["n_mels"] * config["frontend_conf"]["lfr_m"]
             cache_en = {"start_idx": 0, "cif_hidden": torch.zeros((batch_size, 1, enc_output_size)),
-                        "cif_alphas": torch.zeros((batch_size, 1)), "chunk_size": chunk_size, "last_chunk": False,
-                        "feats": torch.zeros((batch_size, chunk_size[0] + chunk_size[2], feats_dims)),
-                        "tail_chunk": False}
+                        "cif_alphas": torch.zeros((batch_size, 1)), "chunk_size": chunk_size,
+                        "encoder_chunk_look_back": encoder_chunk_look_back, "last_chunk": False, "opt": None,
+                        "feats": torch.zeros((batch_size, chunk_size[0] + chunk_size[2], feats_dims)), "tail_chunk": False}
             cache["encoder"] = cache_en
 
-            cache_de = {"decode_fsmn": None}
+            cache_de = {"decode_fsmn": None, "decoder_chunk_look_back": decoder_chunk_look_back, "opt": None, "chunk_size": chunk_size}
             cache["decoder"] = cache_de
 
         return cache
+
+    #def _prepare_cache(cache: dict = {}, chunk_size=[5, 10, 5], batch_size=1):
+    #    if len(cache) > 0:
+    #        return cache
+    #    config = _read_yaml(asr_train_config)
+    #    enc_output_size = config["encoder_conf"]["output_size"]
+    #    feats_dims = config["frontend_conf"]["n_mels"] * config["frontend_conf"]["lfr_m"]
+    #    cache_en = {"start_idx": 0, "cif_hidden": torch.zeros((batch_size, 1, enc_output_size)),
+    #                "cif_alphas": torch.zeros((batch_size, 1)), "chunk_size": chunk_size, "last_chunk": False,
+    #                "feats": torch.zeros((batch_size, chunk_size[0] + chunk_size[2], feats_dims)), "tail_chunk": False}
+    #    cache["encoder"] = cache_en
+
+    #    cache_de = {"decode_fsmn": None}
+    #    cache["decoder"] = cache_de
+
+    #    return cache
+
+    #def _cache_reset(cache: dict = {}, chunk_size=[5, 10, 5], batch_size=1):
+    #    if len(cache) > 0:
+    #        config = _read_yaml(asr_train_config)
+    #        enc_output_size = config["encoder_conf"]["output_size"]
+    #        feats_dims = config["frontend_conf"]["n_mels"] * config["frontend_conf"]["lfr_m"]
+    #        cache_en = {"start_idx": 0, "cif_hidden": torch.zeros((batch_size, 1, enc_output_size)),
+    #                    "cif_alphas": torch.zeros((batch_size, 1)), "chunk_size": chunk_size, "last_chunk": False,
+    #                    "feats": torch.zeros((batch_size, chunk_size[0] + chunk_size[2], feats_dims)),
+    #                    "tail_chunk": False}
+    #        cache["encoder"] = cache_en
+
+    #        cache_de = {"decode_fsmn": None}
+    #        cache["decoder"] = cache_de
+
+    #    return cache
 
     def _forward(
             data_path_and_name_and_type,
@@ -901,24 +936,34 @@ def inference_paraformer_online(
         is_final = False
         cache = {}
         chunk_size = [5, 10, 5]
+        encoder_chunk_look_back = 0
+        decoder_chunk_look_back = 0
         if param_dict is not None and "cache" in param_dict:
             cache = param_dict["cache"]
         if param_dict is not None and "is_final" in param_dict:
             is_final = param_dict["is_final"]
         if param_dict is not None and "chunk_size" in param_dict:
             chunk_size = param_dict["chunk_size"]
+        if param_dict is not None and "encoder_chunk_look_back" in param_dict:
+            encoder_chunk_look_back = param_dict["encoder_chunk_look_back"]
+            if encoder_chunk_look_back > 0:
+                chunk_size[0] = 0
+        if param_dict is not None and "decoder_chunk_look_back" in param_dict:
+            decoder_chunk_look_back = param_dict["decoder_chunk_look_back"]
 
         # 7 .Start for-loop
         # FIXME(kamo): The output format should be discussed about
         raw_inputs = torch.unsqueeze(raw_inputs, axis=0)
         asr_result_list = []
-        cache = _prepare_cache(cache, chunk_size=chunk_size, batch_size=1)
+        cache = _prepare_cache(cache, chunk_size=chunk_size, encoder_chunk_look_back=encoder_chunk_look_back, 
+                               decoder_chunk_look_back=decoder_chunk_look_back, batch_size=1)
         item = {}
         if data_path_and_name_and_type is not None and data_path_and_name_and_type[2] == "sound":
             sample_offset = 0
             speech_length = raw_inputs.shape[1]
             stride_size = chunk_size[1] * 960
-            cache = _prepare_cache(cache, chunk_size=chunk_size, batch_size=1)
+            cache = _prepare_cache(cache, chunk_size=chunk_size, encoder_chunk_look_back=encoder_chunk_look_back, 
+                                   decoder_chunk_look_back=decoder_chunk_look_back, batch_size=1)
             final_result = ""
             for sample_offset in range(0, speech_length, min(stride_size, speech_length - sample_offset)):
                 if sample_offset + stride_size >= speech_length - 1:
@@ -939,7 +984,8 @@ def inference_paraformer_online(
 
         asr_result_list.append(item)
         if is_final:
-            cache = _cache_reset(cache, chunk_size=chunk_size, batch_size=1)
+            cache = _cache_reset(cache, chunk_size=chunk_size, encoder_chunk_look_back=encoder_chunk_look_back, 
+                                 decoder_chunk_look_back=decoder_chunk_look_back, batch_size=1)
         return asr_result_list
 
     return _forward

@@ -67,34 +67,39 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass
 
 命令参数说明：
 ```text
---host 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，需要改为部署机器ip
+--host 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，
+       需要改为部署机器ip
 --port 10095 部署端口号
---mode：`offline`表示推理模式为一句话识别；`online`表示推理模式为实时语音识别；`2pass`表示为实时语音识别，并且说话句尾采用离线模型进行纠错。
+--mode：`offline`表示推理模式为一句话识别；`online`表示推理模式为实时语音识别；`2pass`表示为实时语音识别，
+       并且说话句尾采用离线模型进行纠错。
 --chunk_size：表示流式模型latency配置`[5,10,5]`，表示当前音频解码片段为600ms，并且回看300ms，右看300ms。
 --audio_in 需要进行转写的音频文件，支持文件路径，文件列表wav.scp
 --thread_num 设置并发发送线程数，默认为1
 --ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭+
---hotword 如果模型为热词模型，可以设置热词: *.txt(每行一个热词) 或者空格分隔的热词字符串 (could be: 阿里巴巴 达摩院)
+--hotword 如果模型为热词模型，可以设置热词: *.txt(每行一个热词) 或者空格分隔的热词字符串 (阿里巴巴 达摩院)
 --use_itn 设置是否使用itn，默认1开启，设置为0关闭
 ```
 
 ### cpp-client
 进入samples/cpp目录后，可以用cpp进行测试，指令如下：
 ```shell
-./funasr-wss-client-2pass --server-ip 127.0.0.1 --port 10095 --mode 2pass --wav-path ../audio/asr_example.wav
+./funasr-wss-client-2pass --server-ip 127.0.0.1 --port 10095 --mode 2pass \
+   --wav-path ../audio/asr_example.wav
 ```
 
 命令参数说明：
 
 ```text
---server-ip 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，需要改为部署机器ip
+--server-ip 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，
+            需要改为部署机器ip
 --port 10095 部署端口号
---mode：`offline`表示推理模式为一句话识别；`online`表示推理模式为实时语音识别；`2pass`表示为实时语音识别，并且说话句尾采用离线模型进行纠错。
+--mode：`offline`表示推理模式为一句话识别；`online`表示推理模式为实时语音识别；`2pass`表示为实时语音识别，
+        并且说话句尾采用离线模型进行纠错。
 --chunk-size：表示流式模型latency配置`[5,10,5]`，表示当前音频解码片段为600ms，并且回看300ms，右看300ms。
 --wav-path 需要进行转写的音频文件，支持文件路径
 --thread-num 设置并发发送线程数，默认为1
 --is-ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
---hotword 如果模型为热词模型，可以设置热词: *.txt(每行一个热词) 或者空格分隔的热词字符串 (could be: 阿里巴巴 达摩院)
+--hotword 如果模型为热词模型，可以设置热词: *.txt(每行一个热词) 或者空格分隔的热词字符串 (阿里巴巴 达摩院)
 --use-itn 设置是否使用itn，默认1开启，设置为0关闭
 ```
 

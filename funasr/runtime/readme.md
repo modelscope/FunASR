@@ -30,9 +30,9 @@ The document introduces the technology principles behind the service, recognitio
 
 ### latest version & image ID
 
-| image version                |  image ID | INFO |
-|------------------------------|-----|------|
-| funasr-runtime-sdk-cpu-0.2.1 |  1ad3d19e0707   |      |
+| image version                       |  image ID | INFO |
+|-------------------------------------|-----|------|
+| funasr-runtime-sdk-online-cpu-0.1.2 |  7222c5319bcf   |      |
 
 ## File Transcription Service, Mandarin (CPU)
 
@@ -53,6 +53,6 @@ The documentation mainly targets novice users who have no need for modifications
 The documentation mainly targets advanced developers who require modifications and customization of the service. It supports downloading model deployments from modelscope and also supports deploying models that users have fine-tuned. For detailed information, please refer to the documentation available by [docs](./docs/SDK_advanced_guide_offline.md)
 
 ### latest version & image ID
-|  image version   |  image ID | INFO |
-|-----|-----|------|
-|   funasr-runtime-sdk-online-cpu-0.1.1  |  bdbdd0b27dee   |      |
+| image version                |  image ID | INFO |
+|------------------------------|-----|------|
+| funasr-runtime-sdk-cpu-0.2.2 |  2c5286be13e9   |      |

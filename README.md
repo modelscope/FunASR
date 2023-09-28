@@ -60,7 +60,7 @@ You can also scan the following DingTalk group or WeChat group QR code to join t
 
 |DingTalk group |                     WeChat group                      |
 |:---:|:-----------------------------------------------------:|
-|<div align="left"><img src="docs/images/dingding.jpg" width="250"/> | <img src="docs/images/wechat.png" width="232"/></div> |
+|<div align="left"><img src="docs/images/dingding.jpg" width="250"/> | <img src="docs/images/wechat.png" width="215"/></div> |
 
 ## Contributors
 

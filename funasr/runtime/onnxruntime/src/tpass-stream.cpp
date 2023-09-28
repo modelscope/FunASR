@@ -89,7 +89,7 @@ TpassStream::TpassStream(std::map<std::string, std::string>& model_path, int thr
             use_punc = true;
         }
     }
-
+#if !defined(__APPLE__)
     // Optional: ITN, here we just support language_type=MandarinEnglish
     if(model_path.find(ITN_DIR) != model_path.end()){
         string itn_tagger_path = PathAppend(model_path.at(ITN_DIR), ITN_TAGGER_NAME);
@@ -105,6 +105,7 @@ TpassStream::TpassStream(std::map<std::string, std::string>& model_path, int thr
             use_itn = true;
         }
     }
+#endif
       
 }
 

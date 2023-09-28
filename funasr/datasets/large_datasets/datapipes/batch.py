@@ -39,7 +39,7 @@ class MaxTokenBucketizerIterDataPipe(IterableDataset):
         self.batch_mode = batch_mode
 
     def set_epoch(self, epoch):
-        self.epoch = epoch
+        self.datapipe.set_epoch(epoch)
 
     def __iter__(self):
         buffer = []
