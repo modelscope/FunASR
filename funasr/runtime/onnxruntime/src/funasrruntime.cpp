@@ -375,31 +375,6 @@ extern "C" {
 		return p_result;
 	}
 
-#if !defined(__APPLE__)
-	_FUNASRAPI const std::vector<std::vector<float>> CompileHotwordEmbedding(FUNASR_HANDLE handle, std::string &hotwords, ASR_TYPE mode)
-	{
-		if (mode == ASR_OFFLINE){
-			funasr::OfflineStream* offline_stream = (funasr::OfflineStream*)handle;
-    		std::vector<std::vector<float>> emb;
-			if (!offline_stream)
-				return emb;
-			return (offline_stream->asr_handle)->CompileHotwordEmbedding(hotwords);
-		}
-		else if (mode == ASR_TWO_PASS){
-			funasr::TpassStream* tpass_stream = (funasr::TpassStream*)handle;
-    		std::vector<std::vector<float>> emb;
-			if (!tpass_stream)
-				return emb;
-			return (tpass_stream->asr_handle)->CompileHotwordEmbedding(hotwords);
-		}
-		else{
-			LOG(ERROR) << "Not implement: Online model does not support Hotword yet!";
-			std::vector<std::vector<float>> emb;
-			return emb;
-		}
-		
-	}
-#endif
 
 	// APIs for 2pass-stream Infer
 	_FUNASRAPI FUNASR_RESULT FunTpassInferBuffer(FUNASR_HANDLE handle, FUNASR_HANDLE online_handle, const char* sz_buf, 
@@ -691,3 +666,28 @@ extern "C" {
 }
 #endif
 
+#if !defined(__APPLE__)
+_FUNASRAPI const std::vector<std::vector<float>> CompileHotwordEmbedding(FUNASR_HANDLE handle, std::string& hotwords, ASR_TYPE mode)
+{
+    if (mode == ASR_OFFLINE) {
+        funasr::OfflineStream* offline_stream = (funasr::OfflineStream*)handle;
+        std::vector<std::vector<float>> emb;
+        if (!offline_stream)
+            return emb;
+        return (offline_stream->asr_handle)->CompileHotwordEmbedding(hotwords);
+    }
+    else if (mode == ASR_TWO_PASS) {
+        funasr::TpassStream* tpass_stream = (funasr::TpassStream*)handle;
+        std::vector<std::vector<float>> emb;
+        if (!tpass_stream)
+            return emb;
+        return (tpass_stream->asr_handle)->CompileHotwordEmbedding(hotwords);
+    }
+    else {
+        LOG(ERROR) << "Not implement: Online model does not support Hotword yet!";
+        std::vector<std::vector<float>> emb;
+        return emb;
+    }
+
+}
+#endif

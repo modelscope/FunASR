@@ -1,29 +1,34 @@
 #pragma once 
 #include <algorithm>
+#ifdef _WIN32
+#include <codecvt>
+#endif
 
 namespace funasr {
 typedef struct
 {
-    std::string msg="";
-    std::string stamp="";
-    std::string tpass_msg="";
-    float snippet_time=0;
+    std::string msg;
+    std::string stamp;
+    std::string tpass_msg;
+    float snippet_time;
 }FUNASR_RECOG_RESULT;
 
 typedef struct
 {
     std::vector<std::vector<int>>* segments;
-    float  snippet_time=0;
+    float  snippet_time;
 }FUNASR_VAD_RESULT;
 
 typedef struct
 {
-    string msg="";
+    string msg;
     vector<string> arr_cache;
 }FUNASR_PUNC_RESULT;
 
 #ifdef _WIN32
-#include <codecvt>
+
+#define ORTSTRING(str) StrToWstr(str)
+#define ORTCHAR(str) StrToWstr(str).c_str()
 
 inline std::wstring String2wstring(const std::string& str, const std::string& locale)
 {
@@ -39,7 +44,14 @@ inline std::wstring  StrToWstr(std::string str) {
 
 }
 
+#else
+
+#define ORTSTRING(str) str
+#define ORTCHAR(str) str
+
 #endif
+
+
 
 inline void GetInputName(Ort::Session* session, string& inputName,int nIndex=0) {
     size_t numInputNodes = session->GetInputCount();

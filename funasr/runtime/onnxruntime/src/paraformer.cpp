@@ -37,7 +37,7 @@ void Paraformer::InitAsr(const std::string &am_model, const std::string &am_cmvn
     session_options_.DisableCpuMemArena();
 
     try {
-        m_session_ = std::make_unique<Ort::Session>(env_, am_model.c_str(), session_options_);
+        m_session_ = std::make_unique<Ort::Session>(env_, ORTSTRING(am_model).c_str(), session_options_);
         LOG(INFO) << "Successfully load model from " << am_model;
     } catch (std::exception const &e) {
         LOG(ERROR) << "Error when load am onnx model: " << e.what();
@@ -90,7 +90,7 @@ void Paraformer::InitAsr(const std::string &en_model, const std::string &de_mode
     session_options_.DisableCpuMemArena();
 
     try {
-        encoder_session_ = std::make_unique<Ort::Session>(env_, en_model.c_str(), session_options_);
+        encoder_session_ = std::make_unique<Ort::Session>(env_, ORTSTRING(en_model).c_str(), session_options_);
         LOG(INFO) << "Successfully load model from " << en_model;
     } catch (std::exception const &e) {
         LOG(ERROR) << "Error when load am encoder model: " << e.what();
@@ -98,7 +98,7 @@ void Paraformer::InitAsr(const std::string &en_model, const std::string &de_mode
     }
 
     try {
-        decoder_session_ = std::make_unique<Ort::Session>(env_, de_model.c_str(), session_options_);
+        decoder_session_ = std::make_unique<Ort::Session>(env_, ORTSTRING(de_model).c_str(), session_options_);
         LOG(INFO) << "Successfully load model from " << de_model;
     } catch (std::exception const &e) {
         LOG(ERROR) << "Error when load am decoder model: " << e.what();
@@ -153,7 +153,7 @@ void Paraformer::InitAsr(const std::string &am_model, const std::string &en_mode
 
     // offline
     try {
-        m_session_ = std::make_unique<Ort::Session>(env_, am_model.c_str(), session_options_);
+        m_session_ = std::make_unique<Ort::Session>(env_, ORTSTRING(am_model).c_str(), session_options_);
         LOG(INFO) << "Successfully load model from " << am_model;
     } catch (std::exception const &e) {
         LOG(ERROR) << "Error when load am onnx model: " << e.what();
@@ -250,7 +250,7 @@ void Paraformer::InitHwCompiler(const std::string &hw_model, int thread_num) {
     hw_session_options.DisableCpuMemArena();
 
     try {
-        hw_m_session = std::make_unique<Ort::Session>(hw_env_, hw_model.c_str(), hw_session_options);
+        hw_m_session = std::make_unique<Ort::Session>(hw_env_, ORTSTRING(hw_model).c_str(), hw_session_options);
         LOG(INFO) << "Successfully load model from " << hw_model;
     } catch (std::exception const &e) {
         LOG(ERROR) << "Error when load hw compiler onnx model: " << e.what();

@@ -9,6 +9,9 @@
 #include "audio.h"
 #include "precomp.h"
 
+#ifdef _MSC_VER
+#pragma warning(disable:4996)
+#endif
 
 #if defined(__APPLE__)
 #include <string.h>

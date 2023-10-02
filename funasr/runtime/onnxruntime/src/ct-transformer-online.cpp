@@ -17,7 +17,7 @@ void CTTransformerOnline::InitPunc(const std::string &punc_model, const std::str
     session_options.DisableCpuMemArena();
 
     try{
-        m_session = std::make_unique<Ort::Session>(env_, punc_model.c_str(), session_options);
+        m_session = std::make_unique<Ort::Session>(env_, ORTSTRING(punc_model).c_str(), session_options);
         LOG(INFO) << "Successfully load model from " << punc_model;
     }
     catch (std::exception const &e) {

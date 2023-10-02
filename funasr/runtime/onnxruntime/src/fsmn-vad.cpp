@@ -54,7 +54,7 @@ void FsmnVad::LoadConfigFromYaml(const char* filename){
 void FsmnVad::ReadModel(const char* vad_model) {
     try {
         vad_session_ = std::make_shared<Ort::Session>(
-                env_, vad_model, session_options_);
+                env_, ORTCHAR(vad_model), session_options_);
         LOG(INFO) << "Successfully load model from " << vad_model;
     } catch (std::exception const &e) {
         LOG(ERROR) << "Error when load vad onnx model: " << e.what();
