@@ -17,6 +17,25 @@
 #include <numeric>
 #include <cstring>
 
+#ifdef _WIN32
+#include<io.h>
+#ifndef R_OK
+#define R_OK 4
+#endif
+#ifndef W_OK
+#define W_OK 2
+#endif
+#ifndef X_OK
+#define X_OK 0 
+#endif
+#ifndef F_OK
+#define F_OK 0
+#endif
+#define access _access
+#else
+#include <unistd.h>
+#endif
+
 using namespace std;
 // third part
 #if defined(__APPLE__)
@@ -33,6 +52,8 @@ using namespace std;
 
 // mine
 #include <glog/logging.h>
+
+
 #include "common-struct.h"
 #include "com-define.h"
 #include "commonfunc.h"

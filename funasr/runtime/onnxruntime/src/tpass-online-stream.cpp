@@ -1,5 +1,4 @@
 #include "precomp.h"
-#include <unistd.h>
 
 namespace funasr {
 TpassOnlineStream::TpassOnlineStream(TpassStream* tpass_stream, std::vector<int> chunk_size){

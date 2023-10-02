@@ -1,9 +1,6 @@
 #include "precomp.h"
 #include <vector>
-#ifdef __cplusplus 
 
-extern "C" {
-#endif
 
 	// APIs for Init
 	_FUNASRAPI FUNASR_HANDLE  FunASRInit(std::map<std::string, std::string>& model_path, int thread_num, ASR_TYPE type)
@@ -686,8 +683,4 @@ extern "C" {
 		delete tpass_online_stream;
 	}
 
-#ifdef __cplusplus 
-
-}
-#endif
 
