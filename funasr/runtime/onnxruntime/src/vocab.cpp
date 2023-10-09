@@ -163,6 +163,13 @@ string Vocab::Vector2StringV2(vector<int> in, std::string language)
         }
     }
 
+    if (language == "en-bpe" and combine != ""){
+        if (words.size() != 0){
+            combine = " " + combine;
+        }
+        words.push_back(combine);
+    }
+
     stringstream ss;
     for (auto it = words.begin(); it != words.end(); it++) {
         ss << *it;
