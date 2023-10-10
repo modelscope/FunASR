@@ -153,7 +153,7 @@
   registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.0
 mkdir -p ./funasr-runtime-resources/models
 sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span class="o">=</span><span class="nb">true</span> <span class="se">\</span>
-  -v ./funasr-runtime-resources/models:/workspace/models <span class="se">\</span>
+  -v <span class="nv">$PWD</span>/funasr-runtime-resources/models:/workspace/models <span class="se">\</span>
   registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.0
 </pre></div>
 </div>
