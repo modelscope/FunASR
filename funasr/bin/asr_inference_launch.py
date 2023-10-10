@@ -787,7 +787,7 @@ def inference_paraformer_vad_speaker(
         time_stamp_writer: bool = True,
         punc_infer_config: Optional[str] = None,
         punc_model_file: Optional[str] = None,
-        sv_model_file: Optional[str] = None,
+        sv_model_file: Optional[str] = "~/.cache/modelscope/hub/damo/speech_paraformer-large-vad-punc-spk_asr_nat-zh-cn/campplus_cn_common.bin",
         streaming: bool = False,
         embedding_node: str = "resnet1_dense",
         sv_threshold: float = 0.9465,
@@ -933,7 +933,7 @@ def inference_paraformer_vad_speaker(
             #####  speaker_verification  #####
             ##################################
             # load sv model
-            sv_model_dict = torch.load(sv_model_file, map_location=torch.device('cpu'))
+            sv_model_dict = torch.load(sv_model_file.replace("~", os.environ['HOME']), map_location=torch.device('cpu'))
             sv_model = CAMPPlus()
             sv_model.load_state_dict(sv_model_dict)
             sv_model.eval()
@@ -1084,7 +1084,6 @@ def inference_paraformer_vad_speaker(
             logging.info("decoding, utt: {}, predictions: {}".format(key, text_postprocessed_punc))
         torch.cuda.empty_cache()
         distribute_spk(asr_result_list[0]['sentences'], sv_output)
-        import pdb; pdb.set_trace()
         return asr_result_list
 
     return _forward
@@ -2030,7 +2029,7 @@ def inference_launch(**kwargs):
         return inference_paraformer(**kwargs)
     elif mode == "paraformer_streaming":
         return inference_paraformer_online(**kwargs)
-    elif mode == "paraformer_vad_speaker":
+    elif mode.startswith("paraformer_vad_speaker"):
         return inference_paraformer_vad_speaker(**kwargs)
     elif mode.startswith("paraformer_vad"):
         return inference_paraformer_vad_punc(**kwargs)
