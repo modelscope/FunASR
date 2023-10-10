@@ -243,3 +243,54 @@ def sentence_postprocess(words: List[Any], time_stamp: List[List] = None):
                 real_word_lists.append(ch)
         sentence = ''.join(word_lists).strip()
         return sentence, real_word_lists
+
+def sentence_postprocess_sentencepiece(words):
+    middle_lists = []
+    word_lists = []
+    word_item = ''
+
+    # wash words lists
+    for i in words:
+        word = ''
+        if isinstance(i, str):
+            word = i
+        else:
+            word = i.decode('utf-8')
+
+        if word in ['<s>', '</s>', '<unk>', '<OOV>']:
+            continue
+        else:
+            middle_lists.append(word)
+
+    # all alpha characters
+    for i, ch in enumerate(middle_lists):
+        word = ''
+        if '\u2581' in ch and i == 0:
+            word_item = ''
+            word = ch.replace('\u2581', '')
+            word_item += word
+        elif '\u2581' in ch and i != 0:
+            word_lists.append(word_item)
+            word_lists.append(' ')
+            word_item = ''
+            word = ch.replace('\u2581', '')
+            word_item += word
+        else:
+            word_item += ch
+    if word_item is not None:
+        word_lists.append(word_item)
+    #word_lists = abbr_dispose(word_lists)
+    real_word_lists = []
+    for ch in word_lists:
+        if ch != ' ':
+            if ch == "i":
+                ch = ch.replace("i", "I")
+            elif ch == "i'm":
+                ch = ch.replace("i'm", "I'm")
+            elif ch == "i've":
+                ch = ch.replace("i've", "I've")
+            elif ch == "i'll":
+                ch = ch.replace("i'll", "I'll")
+            real_word_lists.append(ch)
+    sentence = ''.join(word_lists)
+    return sentence, real_word_lists

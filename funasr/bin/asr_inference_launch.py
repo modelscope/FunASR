@@ -488,6 +488,7 @@ def inference_paraformer_vad_punc(
 ):
     ncpu = kwargs.get("ncpu", 1)
     torch.set_num_threads(ncpu)
+    language = kwargs.get("model_lang", None)
 
     if word_lm_train_config is not None:
         raise NotImplementedError("Word LM is not implemented")
@@ -694,10 +695,13 @@ def inference_paraformer_vad_punc(
             text, token, token_int = result[0], result[1], result[2]
             time_stamp = result[4] if len(result[4]) > 0 else None
 
-            if use_timestamp and time_stamp is not None and len(time_stamp):
-                postprocessed_result = postprocess_utils.sentence_postprocess(token, time_stamp)
+            if language == "en-bpe":
+                postprocessed_result = postprocess_utils.sentence_postprocess_sentencepiece(token)
             else:
-                postprocessed_result = postprocess_utils.sentence_postprocess(token)
+                if use_timestamp and time_stamp is not None and len(time_stamp):
+                    postprocessed_result = postprocess_utils.sentence_postprocess(token, time_stamp)
+                else:
+                    postprocessed_result = postprocess_utils.sentence_postprocess(token)
             text_postprocessed = ""
             time_stamp_postprocessed = ""
             text_postprocessed_punc = postprocessed_result
