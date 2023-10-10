@@ -5,6 +5,7 @@
 
 import argparse
 import logging
+from optparse import Option
 import os
 import sys
 import time
@@ -45,6 +46,15 @@ from funasr.utils.types import str2bool
 from funasr.utils.types import str2triple_str
 from funasr.utils.types import str_or_none
 from funasr.utils.vad_utils import slice_padding_fbank
+from funasr.utils.speaker_utils import (check_audio_list, 
+                                        sv_preprocess, 
+                                        sv_chunk, 
+                                        CAMPPlus, 
+                                        extract_feature, 
+                                        postprocess,
+                                        distribute_spk)
+from funasr.build_utils.build_model_from_file import build_model_from_file
+from funasr.utils.cluster_backend import ClusterBackend
 from tqdm import tqdm
 
 def inference_asr(
@@ -739,6 +749,342 @@ def inference_paraformer_vad_punc(
 
             logging.info("decoding, utt: {}, predictions: {}".format(key, text_postprocessed_punc))
         torch.cuda.empty_cache()
+        return asr_result_list
+
+    return _forward
+
+
+def inference_paraformer_vad_speaker(
+        maxlenratio: float,
+        minlenratio: float,
+        batch_size: int,
+        beam_size: int,
+        ngpu: int,
+        ctc_weight: float,
+        lm_weight: float,
+        penalty: float,
+        log_level: Union[int, str],
+        # data_path_and_name_and_type,
+        asr_train_config: Optional[str],
+        asr_model_file: Optional[str],
+        cmvn_file: Optional[str] = None,
+        lm_train_config: Optional[str] = None,
+        lm_file: Optional[str] = None,
+        token_type: Optional[str] = None,
+        key_file: Optional[str] = None,
+        word_lm_train_config: Optional[str] = None,
+        bpemodel: Optional[str] = None,
+        allow_variable_data_keys: bool = False,
+        output_dir: Optional[str] = None,
+        dtype: str = "float32",
+        seed: int = 0,
+        ngram_weight: float = 0.9,
+        nbest: int = 1,
+        num_workers: int = 1,
+        vad_infer_config: Optional[str] = None,
+        vad_model_file: Optional[str] = None,
+        vad_cmvn_file: Optional[str] = None,
+        time_stamp_writer: bool = True,
+        punc_infer_config: Optional[str] = None,
+        punc_model_file: Optional[str] = None,
+        sv_model_file: Optional[str] = None,
+        streaming: bool = False,
+        embedding_node: str = "resnet1_dense",
+        sv_threshold: float = 0.9465,
+        outputs_dict: Optional[bool] = True,
+        param_dict: dict = None,
+
+        **kwargs,
+):
+    ncpu = kwargs.get("ncpu", 1)
+    torch.set_num_threads(ncpu)
+
+    if word_lm_train_config is not None:
+        raise NotImplementedError("Word LM is not implemented")
+    if ngpu > 1:
+        raise NotImplementedError("only single GPU decoding is supported")
+
+    logging.basicConfig(
+        level=log_level,
+        format="%(asctime)s (%(module)s:%(lineno)d) %(levelname)s: %(message)s",
+    )
+
+    if param_dict is not None:
+        hotword_list_or_file = param_dict.get('hotword')
+    else:
+        hotword_list_or_file = None
+
+    if ngpu >= 1 and torch.cuda.is_available():
+        device = "cuda"
+    else:
+        device = "cpu"
+
+    # 1. Set random-seed
+    set_all_random_seed(seed)
+
+    # 2. Build speech2vadsegment
+    speech2vadsegment_kwargs = dict(
+        vad_infer_config=vad_infer_config,
+        vad_model_file=vad_model_file,
+        vad_cmvn_file=vad_cmvn_file,
+        device=device,
+        dtype=dtype,
+    )
+    # logging.info("speech2vadsegment_kwargs: {}".format(speech2vadsegment_kwargs))
+    speech2vadsegment = Speech2VadSegment(**speech2vadsegment_kwargs)
+
+    # 3. Build speech2text
+    speech2text_kwargs = dict(
+        asr_train_config=asr_train_config,
+        asr_model_file=asr_model_file,
+        cmvn_file=cmvn_file,
+        lm_train_config=lm_train_config,
+        lm_file=lm_file,
+        token_type=token_type,
+        bpemodel=bpemodel,
+        device=device,
+        maxlenratio=maxlenratio,
+        minlenratio=minlenratio,
+        dtype=dtype,
+        beam_size=beam_size,
+        ctc_weight=ctc_weight,
+        lm_weight=lm_weight,
+        ngram_weight=ngram_weight,
+        penalty=penalty,
+        nbest=nbest,
+        hotword_list_or_file=hotword_list_or_file,
+    )
+    speech2text = Speech2TextParaformer(**speech2text_kwargs)
+    text2punc = None
+    if punc_model_file is not None:
+        text2punc = Text2Punc(punc_infer_config, punc_model_file, device=device, dtype=dtype)
+
+    if output_dir is not None:
+        writer = DatadirWriter(output_dir)
+        ibest_writer = writer[f"1best_recog"]
+        ibest_writer["token_list"][""] = " ".join(speech2text.asr_train_args.token_list)
+
+    def _forward(data_path_and_name_and_type,
+                 raw_inputs: Union[np.ndarray, torch.Tensor] = None,
+                 output_dir_v2: Optional[str] = None,
+                 fs: dict = None,
+                 param_dict: dict = None,
+                 **kwargs,
+                 ):
+
+        hotword_list_or_file = None
+        if param_dict is not None:
+            hotword_list_or_file = param_dict.get('hotword')
+
+        if 'hotword' in kwargs:
+            hotword_list_or_file = kwargs['hotword']
+
+        speech2vadsegment.vad_model.vad_opts.max_single_segment_time = kwargs.get("max_single_segment_time", 60000)
+        batch_size_token_threshold_s = kwargs.get("batch_size_token_threshold_s", int(speech2vadsegment.vad_model.vad_opts.max_single_segment_time*0.67/1000)) * 1000
+        batch_size_token = kwargs.get("batch_size_token", 6000)
+        print("batch_size_token: ", batch_size_token)
+
+        if speech2text.hotword_list is None:
+            speech2text.hotword_list = speech2text.generate_hotwords_list(hotword_list_or_file)
+
+        # 3. Build data-iterator
+        if data_path_and_name_and_type is None and raw_inputs is not None:
+            if isinstance(raw_inputs, torch.Tensor):
+                raw_inputs = raw_inputs.numpy()
+            data_path_and_name_and_type = [raw_inputs, "speech", "waveform"]
+        loader = build_streaming_iterator(
+            task_name="asr",
+            preprocess_args=None,
+            data_path_and_name_and_type=data_path_and_name_and_type,
+            dtype=dtype,
+            fs=fs,
+            batch_size=1,
+            key_file=key_file,
+            num_workers=num_workers,
+        )
+
+        if param_dict is not None:
+            use_timestamp = param_dict.get('use_timestamp', True)
+        else:
+            use_timestamp = True
+
+        finish_count = 0
+        file_count = 1
+        lfr_factor = 6
+        # 7 .Start for-loop
+        asr_result_list = []
+        output_path = output_dir_v2 if output_dir_v2 is not None else output_dir
+        writer = None
+        if output_path is not None:
+            writer = DatadirWriter(output_path)
+            ibest_writer = writer[f"1best_recog"]
+
+        for keys, batch in loader:
+            assert isinstance(batch, dict), type(batch)
+            assert all(isinstance(s, str) for s in keys), keys
+            _bs = len(next(iter(batch.values())))
+            assert len(keys) == _bs, f"{len(keys)} != {_bs}"
+            beg_vad = time.time()
+            vad_results = speech2vadsegment(**batch)
+            end_vad = time.time()
+            print("time cost vad: ", end_vad - beg_vad)
+            _, vadsegments = vad_results[0], vad_results[1][0]
+            ##################################
+            #####  speaker_verification  #####
+            ##################################
+            # load sv model
+            sv_model_dict = torch.load(sv_model_file, map_location=torch.device('cpu'))
+            sv_model = CAMPPlus()
+            sv_model.load_state_dict(sv_model_dict)
+            sv_model.eval()
+            cb_model = ClusterBackend()
+            vad_segments = []
+            audio = batch['speech'].numpy().reshape(-1)
+            for vadsegment in vadsegments:
+                st = int(vadsegment[0]) / 1000
+                ed = int(vadsegment[1]) / 1000
+                vad_segments.append(
+                    [st, ed, audio[int(st * 16000):int(ed * 16000)]])
+            check_audio_list(vad_segments)
+            # sv pipeline
+            segments = sv_chunk(vad_segments)
+            embeddings = []
+            for s in segments:
+                #_, embs = self.sv_pipeline([s[2]], output_emb=True)
+                # embeddings.append(embs)
+                wavs = sv_preprocess([s[2]])
+                # embs = self.forward(wavs)
+                embs = []
+                for x in wavs:
+                    x = extract_feature([x])
+                    embs.append(sv_model(x))
+                embs = torch.cat(embs)
+                embeddings.append(embs.detach().numpy())
+            embeddings = np.concatenate(embeddings)
+            labels = cb_model(embeddings)
+            sv_output = postprocess(segments, vad_segments, labels, embeddings)
+
+            speech, speech_lengths = batch["speech"], batch["speech_lengths"]
+
+            n = len(vadsegments)
+            data_with_index = [(vadsegments[i], i) for i in range(n)]
+            sorted_data = sorted(data_with_index, key=lambda x: x[0][1] - x[0][0])
+            results_sorted = []
+            
+            if not len(sorted_data):
+                key = keys[0]
+                # no active segments after VAD
+                if writer is not None:
+                    # Write empty results
+                    ibest_writer["token"][key] = ""
+                    ibest_writer["token_int"][key] = ""
+                    ibest_writer["vad"][key] = ""
+                    ibest_writer["text"][key] = ""
+                    ibest_writer["text_with_punc"][key] = ""
+                    if use_timestamp:
+                        ibest_writer["time_stamp"][key] = ""
+
+                logging.info("decoding, utt: {}, empty speech".format(key))
+                continue
+
+            batch_size_token_ms = batch_size_token*60
+            if speech2text.device == "cpu":
+                batch_size_token_ms = 0
+            if len(sorted_data) > 0 and len(sorted_data[0]) > 0:
+                batch_size_token_ms = max(batch_size_token_ms, sorted_data[0][0][1] - sorted_data[0][0][0])
+            
+            batch_size_token_ms_cum = 0
+            beg_idx = 0
+            beg_asr_total = time.time()
+            for j, _ in enumerate(tqdm(range(0, n))):
+                batch_size_token_ms_cum += (sorted_data[j][0][1] - sorted_data[j][0][0])
+                if j < n - 1 and (batch_size_token_ms_cum + sorted_data[j + 1][0][1] - sorted_data[j + 1][0][0]) < batch_size_token_ms and (sorted_data[j + 1][0][1] - sorted_data[j + 1][0][0]) < batch_size_token_threshold_s:
+                    continue
+                batch_size_token_ms_cum = 0
+                end_idx = j + 1
+                speech_j, speech_lengths_j = slice_padding_fbank(speech, speech_lengths, sorted_data[beg_idx:end_idx])
+                beg_idx = end_idx
+                batch = {"speech": speech_j, "speech_lengths": speech_lengths_j}
+                batch = to_device(batch, device=device)
+                # print("batch: ", speech_j.shape[0])
+                beg_asr = time.time()
+                results = speech2text(**batch)
+                end_asr = time.time()
+                # print("time cost asr: ", end_asr - beg_asr)
+
+                if len(results) < 1:
+                    results = [["", [], [], [], [], [], []]]
+                results_sorted.extend(results)
+            end_asr_total = time.time()
+            print("total time cost asr: ", end_asr_total-beg_asr_total)
+            restored_data = [0] * n
+            for j in range(n):
+                index = sorted_data[j][1]
+                restored_data[index] = results_sorted[j]
+            result = ["", [], [], [], [], [], []]
+            for j in range(n):
+                result[0] += restored_data[j][0]
+                result[1] += restored_data[j][1]
+                result[2] += restored_data[j][2]
+                if len(restored_data[j][4]) > 0:
+                    for t in restored_data[j][4]:
+                        t[0] += vadsegments[j][0]
+                        t[1] += vadsegments[j][0]
+                    result[4] += restored_data[j][4]
+                # result = [result[k]+restored_data[j][k] for k in range(len(result[:-2]))]
+
+            key = keys[0]
+            # result = result_segments[0]
+            text, token, token_int = result[0], result[1], result[2]
+            time_stamp = result[4] if len(result[4]) > 0 else None
+
+            if use_timestamp and time_stamp is not None and len(time_stamp):
+                postprocessed_result = postprocess_utils.sentence_postprocess(token, time_stamp)
+            else:
+                postprocessed_result = postprocess_utils.sentence_postprocess(token)
+            text_postprocessed = ""
+            time_stamp_postprocessed = ""
+            text_postprocessed_punc = postprocessed_result
+            if len(postprocessed_result) == 3:
+                text_postprocessed, time_stamp_postprocessed, word_lists = postprocessed_result[0], \
+                                                                           postprocessed_result[1], \
+                                                                           postprocessed_result[2]
+            else:
+                text_postprocessed, word_lists = postprocessed_result[0], postprocessed_result[1]
+
+            text_postprocessed_punc = text_postprocessed
+            punc_id_list = []
+            if len(word_lists) > 0 and text2punc is not None:
+                beg_punc = time.time()
+                text_postprocessed_punc, punc_id_list = text2punc(word_lists, 20)
+                end_punc = time.time()
+                print("time cost punc: ", end_punc - beg_punc)
+
+            item = {'key': key, 'value': text_postprocessed_punc}
+            if text_postprocessed != "":
+                item['text_postprocessed'] = text_postprocessed
+            if time_stamp_postprocessed != "":
+                item['time_stamp'] = time_stamp_postprocessed
+
+            item['sentences'] = time_stamp_sentence(punc_id_list, time_stamp_postprocessed, text_postprocessed)
+
+            asr_result_list.append(item)
+            finish_count += 1
+            # asr_utils.print_progress(finish_count / file_count)
+            if writer is not None:
+                # Write the result to each file
+                ibest_writer["token"][key] = " ".join(token)
+                ibest_writer["token_int"][key] = " ".join(map(str, token_int))
+                ibest_writer["vad"][key] = "{}".format(vadsegments)
+                ibest_writer["text"][key] = " ".join(word_lists)
+                ibest_writer["text_with_punc"][key] = text_postprocessed_punc
+                if time_stamp_postprocessed is not None:
+                    ibest_writer["time_stamp"][key] = "{}".format(time_stamp_postprocessed)
+
+            logging.info("decoding, utt: {}, predictions: {}".format(key, text_postprocessed_punc))
+        torch.cuda.empty_cache()
+        distribute_spk(asr_result_list[0]['sentences'], sv_output)
+        import pdb; pdb.set_trace()
         return asr_result_list
 
     return _forward
@@ -1684,6 +2030,8 @@ def inference_launch(**kwargs):
         return inference_paraformer(**kwargs)
     elif mode == "paraformer_streaming":
         return inference_paraformer_online(**kwargs)
+    elif mode == "paraformer_vad_speaker":
+        return inference_paraformer_vad_speaker(**kwargs)
     elif mode.startswith("paraformer_vad"):
         return inference_paraformer_vad_punc(**kwargs)
     elif mode == "mfcca":
@@ -1782,6 +2130,16 @@ def get_parser():
         help="VAD model parameter file",
     )
     group.add_argument(
+        "--punc_infer_config",
+        type=str,
+        help="PUNC infer configuration",
+    )
+    group.add_argument(
+        "--punc_model_file",
+        type=str,
+        help="PUNC model parameter file",
+    )
+    group.add_argument(
         "--cmvn_file",
         type=str,
         help="Global CMVN file",
@@ -1795,6 +2153,11 @@ def get_parser():
         "--asr_model_file",
         type=str,
         help="ASR model parameter file",
+    )
+    group.add_argument(
+        "--sv_model_file",
+        type=str,
+        help="SV model parameter file",
     )
     group.add_argument(
         "--lm_train_config",
