@@ -257,11 +257,15 @@ extern "C" {
 		int n_total = audio.GetQueueSize();
 		float start_time = 0.0;
 		std::string cur_stamp = "[";
+		std::string lang = (offline_stream->asr_handle)->GetLang();
 		while (audio.Fetch(buff, len, flag, start_time) > 0) {
 			string msg = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb);
 			std::vector<std::string> msg_vec = funasr::split(msg, '|');
 			if(msg_vec.size()==0){
 				continue;
+			}
+			if(lang == "en-bpe" and p_result->msg != ""){
+				p_result->msg += " ";
 			}
 			p_result->msg += msg_vec[0];
 			//timestamp
@@ -282,7 +286,6 @@ extern "C" {
 			p_result->stamp += cur_stamp + "]";
 		}
 		if(offline_stream->UsePunc()){
-			string lang = (offline_stream->asr_handle)->GetLang();
 			string punc_res = (offline_stream->punc_handle)->AddPunc((p_result->msg).c_str(), lang);
 			p_result->msg = punc_res;
 		}
@@ -338,11 +341,15 @@ extern "C" {
 		int n_total = audio.GetQueueSize();
 		float start_time = 0.0;
 		std::string cur_stamp = "[";
+		std::string lang = (offline_stream->asr_handle)->GetLang();
 		while (audio.Fetch(buff, len, flag, start_time) > 0) {
 			string msg = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb);
 			std::vector<std::string> msg_vec = funasr::split(msg, '|');
 			if(msg_vec.size()==0){
 				continue;
+			}
+			if(lang == "en-bpe" and p_result->msg != ""){
+				p_result->msg += " ";
 			}
 			p_result->msg += msg_vec[0];
 			//timestamp
@@ -364,7 +371,6 @@ extern "C" {
 			p_result->stamp += cur_stamp + "]";
 		}
 		if(offline_stream->UsePunc()){
-			string lang = (offline_stream->asr_handle)->GetLang();
 			string punc_res = (offline_stream->punc_handle)->AddPunc((p_result->msg).c_str(), lang);
 			p_result->msg = punc_res;
 		}
