@@ -29,6 +29,6 @@ public:
 	void InitPunc(const std::string &punc_model, const std::string &punc_config, int thread_num);
 	~CTTransformer();
 	vector<int>  Infer(vector<int32_t> input_data);
-	string AddPunc(const char* sz_input);
+	string AddPunc(const char* sz_input, std::string language="zh-cn");
 };
 } // namespace funasr

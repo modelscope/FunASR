@@ -18,6 +18,7 @@ class Model {
     virtual void InitHwCompiler(const std::string &hw_model, int thread_num){};
     virtual void InitSegDict(const std::string &seg_dict_model){};
     virtual std::vector<std::vector<float>> CompileHotwordEmbedding(std::string &hotwords){return std::vector<std::vector<float>>();};
+    virtual std::string GetLang(){return "";};
 };
 
 Model *CreateModel(std::map<std::string, std::string>& model_path, int thread_num=1, ASR_TYPE type=ASR_OFFLINE);

@@ -195,11 +195,16 @@ int main(int argc, char* argv[]) {
                 size_t found = s_asr_path.find("speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404");
                 if (found != std::string::npos) {
                     model_path["model-revision"]="v1.2.4";
-                }else{
-                    found = s_asr_path.find("speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404");
-                    if (found != std::string::npos) {
-                        model_path["model-revision"]="v1.0.5";
-                    }
+                }
+
+                found = s_asr_path.find("speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404");
+                if (found != std::string::npos) {
+                    model_path["model-revision"]="v1.0.5";
+                }
+
+                found = s_asr_path.find("speech_paraformer-large_asr_nat-en-16k-common-vocab10020");
+                if (found != std::string::npos) {
+                    model_path["model-revision"]="v1.0.0";
                 }
 
                 // modelscope

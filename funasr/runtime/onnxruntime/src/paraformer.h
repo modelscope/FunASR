@@ -33,7 +33,6 @@ namespace funasr {
         vector<const char*> hw_m_szInputNames;
         vector<const char*> hw_m_szOutputNames;
         bool use_hotword;
-        std::string language="zh-cn";
 
     public:
         Paraformer();
@@ -55,6 +54,7 @@ namespace funasr {
         string PostProcess(std::vector<string> &raw_char, std::vector<std::vector<float>> &timestamp_list);
 
         string Rescoring();
+        string GetLang(){return language;};
 
         knf::FbankOptions fbank_opts_;
         vector<float> means_list_;
@@ -70,6 +70,8 @@ namespace funasr {
         vector<string> m_strInputNames, m_strOutputNames;
         vector<const char*> m_szInputNames;
         vector<const char*> m_szOutputNames;
+
+        std::string language="zh-cn";
 
         // paraformer-online
         std::shared_ptr<Ort::Session> encoder_session_ = nullptr;

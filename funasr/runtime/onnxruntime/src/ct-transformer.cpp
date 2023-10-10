@@ -46,7 +46,7 @@ CTTransformer::~CTTransformer()
 {
 }
 
-string CTTransformer::AddPunc(const char* sz_input)
+string CTTransformer::AddPunc(const char* sz_input, std::string language)
 {
     string strResult;
     vector<string> strOut;
@@ -139,8 +139,28 @@ string CTTransformer::AddPunc(const char* sz_input)
             }
         }
     }
-    for (auto& item : NewSentenceOut)
+
+    for (auto& item : NewSentenceOut){
         strResult += item;
+    }
+    
+    if(language == "en-bpe"){
+        std::vector<std::string> chineseSymbols;
+        chineseSymbols.push_back("，");
+        chineseSymbols.push_back("。");
+        chineseSymbols.push_back("、");
+        chineseSymbols.push_back("？");
+
+        std::string englishSymbols = ",.,?";
+        for (size_t i = 0; i < chineseSymbols.size(); i++) {
+            size_t pos = 0;
+            while ((pos = strResult.find(chineseSymbols[i], pos)) != std::string::npos) {
+                strResult.replace(pos, 3, 1, englishSymbols[i]);
+                pos++;
+            }
+        }
+    }
+
     return strResult;
 }
 

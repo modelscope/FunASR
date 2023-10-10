@@ -50,7 +50,7 @@ CTTransformerOnline::~CTTransformerOnline()
 {
 }
 
-string CTTransformerOnline::AddPunc(const char* sz_input, vector<string> &arr_cache)
+string CTTransformerOnline::AddPunc(const char* sz_input, vector<string> &arr_cache, std::string language)
 {
     string strResult;
     vector<string> strOut;

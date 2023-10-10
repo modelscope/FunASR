@@ -282,7 +282,8 @@ extern "C" {
 			p_result->stamp += cur_stamp + "]";
 		}
 		if(offline_stream->UsePunc()){
-			string punc_res = (offline_stream->punc_handle)->AddPunc((p_result->msg).c_str());
+			string lang = (offline_stream->asr_handle)->GetLang();
+			string punc_res = (offline_stream->punc_handle)->AddPunc((p_result->msg).c_str(), lang);
 			p_result->msg = punc_res;
 		}
 #if !defined(__APPLE__)
@@ -363,7 +364,8 @@ extern "C" {
 			p_result->stamp += cur_stamp + "]";
 		}
 		if(offline_stream->UsePunc()){
-			string punc_res = (offline_stream->punc_handle)->AddPunc((p_result->msg).c_str());
+			string lang = (offline_stream->asr_handle)->GetLang();
+			string punc_res = (offline_stream->punc_handle)->AddPunc((p_result->msg).c_str(), lang);
 			p_result->msg = punc_res;
 		}
 #if !defined(__APPLE__)

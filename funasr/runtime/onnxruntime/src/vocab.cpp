@@ -75,6 +75,21 @@ bool Vocab::IsChinese(string ch)
     return false;
 }
 
+string Vocab::WordFormat(std::string word)
+{
+    if(word == "i"){
+        return "I";
+    }else if(word == "i'm"){
+        return "I'm";
+    }else if(word == "i've"){
+        return "I've";
+    }else if(word == "i'll"){
+        return "I'll";
+    }else{
+        return word;
+    }
+}
+
 string Vocab::Vector2StringV2(vector<int> in, std::string language)
 {
     int i;
@@ -94,6 +109,7 @@ string Vocab::Vector2StringV2(vector<int> in, std::string language)
             size_t found = word.find(unicodeChar);
             if(found != std::string::npos){
                 if (combine != ""){
+                    combine = WordFormat(combine);
                     if (words.size() != 0){
                         combine = " " + combine;
                     }
@@ -164,6 +180,7 @@ string Vocab::Vector2StringV2(vector<int> in, std::string language)
     }
 
     if (language == "en-bpe" and combine != ""){
+        combine = WordFormat(combine);
         if (words.size() != 0){
             combine = " " + combine;
         }
