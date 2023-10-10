@@ -2,7 +2,7 @@ from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
 
 if __name__ == '__main__':
-    audio_in = 'https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/vad_example.wav'
+    audio_in = 'https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_speaker_demo.wav'
     output_dir = "./results"
     inference_pipeline = pipeline(
         task=Tasks.auto_speech_recognition,
