@@ -55,6 +55,7 @@ from funasr.utils.speaker_utils import (check_audio_list,
                                         distribute_spk)
 from funasr.build_utils.build_model_from_file import build_model_from_file
 from funasr.utils.cluster_backend import ClusterBackend
+from funasr.utils.modelscope_utils import get_cache_dir
 from tqdm import tqdm
 
 def inference_asr(
@@ -791,7 +792,7 @@ def inference_paraformer_vad_speaker(
         time_stamp_writer: bool = True,
         punc_infer_config: Optional[str] = None,
         punc_model_file: Optional[str] = None,
-        sv_model_file: Optional[str] = "~/.cache/modelscope/hub/damo/speech_paraformer-large-vad-punc-spk_asr_nat-zh-cn/campplus_cn_common.bin",
+        sv_model_file: Optional[str] = None, 
         streaming: bool = False,
         embedding_node: str = "resnet1_dense",
         sv_threshold: float = 0.9465,
@@ -812,6 +813,9 @@ def inference_paraformer_vad_speaker(
         level=log_level,
         format="%(asctime)s (%(module)s:%(lineno)d) %(levelname)s: %(message)s",
     )
+
+    if sv_model_file is None:
+        sv_model_file = "{}/damo/speech_paraformer-large-vad-punc-spk_asr_nat-zh-cn/campplus_cn_common.bin".format(get_cache_dir(None))
 
     if param_dict is not None:
         hotword_list_or_file = param_dict.get('hotword')
@@ -937,7 +941,7 @@ def inference_paraformer_vad_speaker(
             #####  speaker_verification  #####
             ##################################
             # load sv model
-            sv_model_dict = torch.load(sv_model_file.replace("~", os.environ['HOME']), map_location=torch.device('cpu'))
+            sv_model_dict = torch.load(sv_model_file, map_location=torch.device('cpu'))
             sv_model = CAMPPlus()
             sv_model.load_state_dict(sv_model_dict)
             sv_model.eval()
