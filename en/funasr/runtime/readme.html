@@ -76,18 +76,25 @@
 <p class="caption"><span class="caption-text">Runtime and Service</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">FunASR Runtime Roadmap</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#file-transcription-service-english-cpu">File Transcription Service, English (CPU)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#technical-principles">Technical Principles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#deployment-tutorial">Deployment Tutorial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#advanced-development-guide">Advanced Development Guide</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#latest-version-image-id">latest version &amp; image ID</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#the-real-time-transcription-service-mandarin-cpu">The real-time transcription service, Mandarin (CPU)</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#convenient-deployment-tutorial">Convenient Deployment Tutorial</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#development-guide">Development Guide</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#technology-principles-revealed">Technology Principles Revealed</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#latest-version-image-id">latest version &amp; image ID</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">latest version &amp; image ID</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#file-transcription-service-mandarin-cpu">File Transcription Service, Mandarin (CPU)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#technical-principles">Technical Principles</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#deployment-tutorial">Deployment Tutorial</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#advanced-development-guide">Advanced Development Guide</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id1">latest version &amp; image ID</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Technical Principles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Deployment Tutorial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">Advanced Development Guide</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">latest version &amp; image ID</a></li>
 </ul>
 </li>
 </ul>
@@ -155,10 +162,33 @@ It has attracted many developers to participate in experiencing and developing. 
 <ul class="simple">
 <li><p>File transcription service, Mandarin, CPU version, done</p></li>
 <li><p>The real-time transcription service, Mandarin (CPU), done</p></li>
+<li><p>File transcription service, English, CPU version, done</p></li>
 <li><p>File transcription service, Mandarin, GPU version, in progress</p></li>
-<li><p>File transcription service, English, in progress</p></li>
 <li><p>and more.</p></li>
 </ul>
+<div class="section" id="file-transcription-service-english-cpu">
+<h2>File Transcription Service, English (CPU)<a class="headerlink" href="#file-transcription-service-english-cpu" title="Permalink to this headline"></a></h2>
+<p>Currently, the FunASR runtime-SDK supports the deployment of file transcription service, English (CPU version), with a complete speech recognition chain that can transcribe tens of hours of audio into punctuated text, and supports recognition for more than a hundred concurrent streams.</p>
+<p>To meet the needs of different users, we have prepared different tutorials with text and images for both novice and advanced developers.</p>
+<div class="section" id="technical-principles">
+<h3>Technical Principles<a class="headerlink" href="#technical-principles" title="Permalink to this headline"></a></h3>
+<p>The technical principles and documentation behind FunASR explain the underlying technology, recognition accuracy, computational efficiency, and core advantages of the framework, including convenience, high precision, high efficiency, and support for long audio chains. For detailed information, please refer to the documentation available by <a class="reference external" href="https://mp.weixin.qq.com/s/DHQwbgdBWcda0w_L60iUww">docs</a>.</p>
+</div>
+<div class="section" id="deployment-tutorial">
+<h3>Deployment Tutorial<a class="headerlink" href="#deployment-tutorial" title="Permalink to this headline"></a></h3>
+<p>The documentation mainly targets novice users who have no need for modifications or customization. It supports downloading model deployments from modelscope and also supports deploying models that users have fine-tuned. For detailed tutorials, please refer to <a class="reference internal" href="docs/SDK_tutorial_en.html"><span class="doc">docs</span></a>.</p>
+</div>
+<div class="section" id="advanced-development-guide">
+<h3>Advanced Development Guide<a class="headerlink" href="#advanced-development-guide" title="Permalink to this headline"></a></h3>
+<p>The documentation mainly targets advanced developers who require modifications and customization of the service. It supports downloading model deployments from modelscope and also supports deploying models that users have fine-tuned. For detailed information, please refer to the documentation available by <a class="reference internal" href="docs/SDK_advanced_guide_offline_en.html"><span class="doc">docs</span></a></p>
+</div>
+<div class="section" id="latest-version-image-id">
+<h3>latest version &amp; image ID<a class="headerlink" href="#latest-version-image-id" title="Permalink to this headline"></a></h3>
+<p>| image version                |  image ID | INFO |
+|——————————|—–|——|
+| funasr-runtime-sdk-en-cpu-0.1.0 |  53e538a0d3a3   |      |</p>
+</div>
+</div>
 <div class="section" id="the-real-time-transcription-service-mandarin-cpu">
 <h2>The real-time transcription service, Mandarin (CPU)<a class="headerlink" href="#the-real-time-transcription-service-mandarin-cpu" title="Permalink to this headline"></a></h2>
 <p>The FunASR real-time speech-to-text service software package not only performs real-time speech-to-text conversion, but also allows high-precision transcription text correction at the end of each sentence and outputs text with punctuation, supporting high-concurrency multiple requests.
@@ -175,8 +205,8 @@ In order to meet the needs of different users for different scenarios, different
 <h3>Technology Principles Revealed<a class="headerlink" href="#technology-principles-revealed" title="Permalink to this headline"></a></h3>
 <p>The document introduces the technology principles behind the service, recognition accuracy, computing efficiency, and core advantages: convenience, high precision, high efficiency, and long audio chain. For detailed documentation, please refer to <a class="reference external" href="https://mp.weixin.qq.com/s/8He081-FM-9IEI4D-lxZ9w">docs</a>.</p>
 </div>
-<div class="section" id="latest-version-image-id">
-<h3>latest version &amp; image ID<a class="headerlink" href="#latest-version-image-id" title="Permalink to this headline"></a></h3>
+<div class="section" id="id1">
+<h3>latest version &amp; image ID<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h3>
 <table border="1" class="docutils">
 <thead>
 <tr>
@@ -196,22 +226,22 @@ In order to meet the needs of different users for different scenarios, different
 </div>
 <div class="section" id="file-transcription-service-mandarin-cpu">
 <h2>File Transcription Service, Mandarin (CPU)<a class="headerlink" href="#file-transcription-service-mandarin-cpu" title="Permalink to this headline"></a></h2>
-<p>Currently, the FunASR runtime-SDK-0.0.1 version supports the deployment of file transcription service, Mandarin (CPU version), with a complete speech recognition chain that can transcribe tens of hours of audio into punctuated text, and supports recognition for more than a hundred concurrent streams.</p>
+<p>Currently, the FunASR runtime-SDK supports the deployment of file transcription service, Mandarin (CPU version), with a complete speech recognition chain that can transcribe tens of hours of audio into punctuated text, and supports recognition for more than a hundred concurrent streams.</p>
 <p>To meet the needs of different users, we have prepared different tutorials with text and images for both novice and advanced developers.</p>
-<div class="section" id="technical-principles">
-<h3>Technical Principles<a class="headerlink" href="#technical-principles" title="Permalink to this headline"></a></h3>
-<p>The technical principles and documentation behind FunASR explain the underlying technology, recognition accuracy, computational efficiency, and core advantages of the framework, including convenience, high precision, high efficiency, and support for long audio chains. For detailed information, please refer to the documentation available by <a class="reference external" href="https://mp.weixin.qq.com/s?__biz=MzA3MTQ0NTUyMw==&amp;tempkey=MTIyNF84d05USjMxSEpPdk5GZXBJUFNJNzY0bU1DTkxhV19mcWY4MTNWQTJSYXhUaFgxOWFHZTZKR0JzWC1JRmRCdUxCX2NoQXg0TzFpNmVJX2R1WjdrcC02N2FEcUc3MDhzVVhpNWQ5clU4QUdqNFdkdjFYb18xRjlZMmc5c3RDOTl0U0NiRkJLb05ZZ0RmRlVkVjFCZnpXNWFBVlRhbXVtdWs4bUMwSHZnfn4%3D&amp;chksm=1f2c3254285bbb42bc8f76a82e9c5211518a0bb1ff8c357d085c1b78f675ef2311f3be6e282c#rd">docs</a>.</p>
+<div class="section" id="id2">
+<h3>Technical Principles<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h3>
+<p>The technical principles and documentation behind FunASR explain the underlying technology, recognition accuracy, computational efficiency, and core advantages of the framework, including convenience, high precision, high efficiency, and support for long audio chains. For detailed information, please refer to the documentation available by <a class="reference external" href="https://mp.weixin.qq.com/s/DHQwbgdBWcda0w_L60iUww">docs</a>.</p>
 </div>
-<div class="section" id="deployment-tutorial">
-<h3>Deployment Tutorial<a class="headerlink" href="#deployment-tutorial" title="Permalink to this headline"></a></h3>
+<div class="section" id="id3">
+<h3>Deployment Tutorial<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h3>
 <p>The documentation mainly targets novice users who have no need for modifications or customization. It supports downloading model deployments from modelscope and also supports deploying models that users have fine-tuned. For detailed tutorials, please refer to <a class="reference internal" href="docs/SDK_tutorial.html"><span class="doc">docs</span></a>.</p>
 </div>
-<div class="section" id="advanced-development-guide">
-<h3>Advanced Development Guide<a class="headerlink" href="#advanced-development-guide" title="Permalink to this headline"></a></h3>
+<div class="section" id="id4">
+<h3>Advanced Development Guide<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h3>
 <p>The documentation mainly targets advanced developers who require modifications and customization of the service. It supports downloading model deployments from modelscope and also supports deploying models that users have fine-tuned. For detailed information, please refer to the documentation available by <a class="reference internal" href="docs/SDK_advanced_guide_offline.html"><span class="doc">docs</span></a></p>
 </div>
-<div class="section" id="id1">
-<h3>latest version &amp; image ID<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h3>
+<div class="section" id="id5">
+<h3>latest version &amp; image ID<a class="headerlink" href="#id5" title="Permalink to this headline"></a></h3>
 <p>| image version                |  image ID | INFO |
 |——————————|—–|——|
 | funasr-runtime-sdk-cpu-0.2.2 |  2c5286be13e9   |      |</p>
