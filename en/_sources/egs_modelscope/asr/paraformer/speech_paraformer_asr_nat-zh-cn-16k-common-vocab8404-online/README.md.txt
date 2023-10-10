@@ -202,7 +202,7 @@ def modelscope_finetune(params):
 if __name__ == '__main__':
     params = modelscope_args(model="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch", data_path="./data")
     params.output_dir = "./checkpoint"              # m模型保存路径
-    params.data_path = "./example_data/"            # 数据路径
+    params.data_path = "speech_asr_aishell1_trainsets"            # 数据路径
     params.dataset_type = "small"                   # 小数据量设置small，若数据量大于1000小时，请使用large
     params.batch_bins = 2000                       # batch size，如果dataset_type="small"，batch_bins单位为fbank特征帧数，如果dataset_type="large"，batch_bins单位为毫秒，
     params.max_epoch = 20                           # 最大训练轮数
