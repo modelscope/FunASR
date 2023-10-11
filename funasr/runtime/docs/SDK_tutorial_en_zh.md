@@ -1,7 +1,7 @@
 (简体中文|[English](./SDK_tutorial_en.md))
 
 
-# FunASR离线文件转写服务便捷部署教程
+# FunASR英文离线文件转写服务便捷部署教程
 FunASR提供可便捷本地或者云端服务器部署的离线文件转写服务，内核为FunASR已开源runtime-SDK。
 集成了达摩院语音实验室在Modelscope社区开源的语音端点检测(VAD)、Paraformer-large语音识别(ASR)、标点恢复(PUNC) 等相关能力，拥有完整的语音识别链路，可以将几十个小时的音频或视频识别成带标点的文字，而且支持上百路请求同时进行转写。
 

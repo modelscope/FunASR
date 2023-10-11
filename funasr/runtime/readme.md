@@ -31,7 +31,7 @@ The documentation mainly targets advanced developers who require modifications a
 ### latest version & image ID
 | image version                |  image ID | INFO |
 |------------------------------|-----|------|
-| funasr-runtime-sdk-en-cpu-0.1.0 |  53e538a0d3a3   |      |
+| funasr-runtime-sdk-en-cpu-0.1.0 |  4ce696fe9ba5   |      |
 
 
 ## The real-time transcription service, Mandarin (CPU)
