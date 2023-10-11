@@ -29,7 +29,7 @@ nohup bash run_server_2pass.sh \
 
 # If you want to close ssl，please add：--certfile 0
 ```
-For a more detailed description of server parameters, please refer to [Server Introduction]()
+For a more detailed description of server parameters, please refer to [Server Introduction](#Server Introduction)
 ### Client Testing and Usage
 
 Download the client testing tool directory `samples`:
@@ -56,33 +56,69 @@ After completing the FunASR service deployment on the server, you can test and u
 
 For more detailed usage, please click on the links above. For more client version support, please refer to [WebSocket/GRPC Protocol](./websocket_protocol_zh.md).
 
-## Server Introduction:
 
-funasr-wss-server-2pass supports downloading models from Modelscope or starting from a local directory path, as shown below:
+## Server Introduction
+
+Use the flollowing script to start the server ：
 ```shell
-cd /workspace/FunASR/funasr/runtime/websocket/build/bin
-./funasr-wss-server-2pass  \
+cd /workspace/FunASR/funasr/runtime
+nohup bash run_server_2pass.sh \
+  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx \
+  --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx \
+  --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
+  --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx \
+  --itn-dir thuduj12/fst_itn_zh \
   --decoder-thread-num 32 \
   --io-thread-num  8 \
-  --port 10095 
- ```
+  --port 10095 \
+  --certfile  ../../../ssl_key/server.crt \
+  --keyfile ../../../ssl_key/server.key > log.out 2>&1 &
 
-Command parameter introduction:
+# If you want to close ssl，please add：--certfile 0
+# If you want to deploy the timestamp or hotword model, please set --model-dir to the corresponding model:
+# speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx（timestamp）
+# damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（hotword）
+
+```
+
+### More details about the script run_server_2pass.sh:
 ```text
---download-model-dir Model download address, download models from Modelscope by setting model id
---model-dir modelscope model ID
+--download-model-dir: Model download address, download models from Modelscope by setting the model ID.
+--model-dir: Modelscope model ID.
 --online-model-dir modelscope model ID
---quantize True for quantized ASR models, False for non-quantized ASR models, default is True
---vad-dir modelscope model ID
---vad-quant True for quantized VAD models, False for non-quantized VAD models, default is True
---punc-dir modelscope model ID
---punc-quant True for quantized PUNC models, False for non-quantized PUNC models, default is True
+--quantize: True for quantized ASR model, False for non-quantized ASR model. Default is True.
+--vad-dir: Modelscope model ID.
+--vad-quant: True for quantized VAD model, False for non-quantized VAD model. Default is True.
+--punc-dir: Modelscope model ID.
+--punc-quant: True for quantized PUNC model, False for non-quantized PUNC model. Default is True.
 --itn-dir modelscope model ID
---port Port number that the server should listen on, default is 10095
---decoder-thread-num The number of inference threads the server should start, default is 8
---io-thread-num The number of IO threads the server should start, default is 1
---certfile SSL certificate file, the default is: ../../../ssl_key/server.crt, set to "" to disable
---keyfile SSL key file, the default is: ../../../ssl_key/server.key, set to "" to disable
+--port: Port number that the server listens on. Default is 10095.
+--decoder-thread-num: Number of inference threads that the server starts. Default is 8.
+--io-thread-num: Number of IO threads that the server starts. Default is 1.
+--certfile <string>: SSL certificate file. Default is ../../../ssl_key/server.crt. If you want to close ssl，set 0
+--keyfile <string>: SSL key file. Default is ../../../ssl_key/server.key. 
+```
+
+### Shutting Down the FunASR Service
+```text
+# Check the PID of the funasr-wss-server-2pass process
+ps -x | grep funasr-wss-server-2pass
+kill -9 PID
+```
+
+### Modifying Models and Other Parameters
+To replace the currently used model or other parameters, you need to first shut down the FunASR service, make the necessary modifications to the parameters you want to replace, and then restart the FunASR service. The model should be either an ASR/VAD/PUNC model from ModelScope or a fine-tuned model obtained from ModelScope.
+```text
+# For example, to replace the ASR model with damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx, use the following parameter setting --model-dir
+    --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx 
+# Set the port number using --port
+    --port <port number>
+# Set the number of inference threads the server will start using --decoder-thread-num
+    --decoder-thread-num <decoder thread num>
+# Set the number of IO threads the server will start using --io-thread-num
+    --io-thread-num <io thread num>
+# Disable SSL certificate
+    --certfile 0
 ```
 
 After executing the above command, the real-time speech transcription service will be started. If the model is specified as a ModelScope model id, the following models will be automatically downloaded from ModelScope:

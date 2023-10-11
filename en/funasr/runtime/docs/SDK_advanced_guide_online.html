@@ -159,7 +159,7 @@ nohup bash run_server_2pass.sh <span class="se">\</span>
 <span class="c1"># If you want to close ssl，please add：--certfile 0</span>
 </pre></div>
 </div>
-<p>For a more detailed description of server parameters, please refer to <a class="reference external" href="#">Server Introduction</a></p>
+<p>For a more detailed description of server parameters, please refer to [Server Introduction](#Server Introduction)</p>
 </div>
 <div class="section" id="client-testing-and-usage">
 <h3>Client Testing and Usage<a class="headerlink" href="#client-testing-and-usage" title="Permalink to this headline"></a></h3>
@@ -187,30 +187,67 @@ nohup bash run_server_2pass.sh <span class="se">\</span>
 <p>For more detailed usage, please click on the links above. For more client version support, please refer to <a class="reference internal" href="websocket_protocol_zh.html"><span class="doc">WebSocket/GRPC Protocol</span></a>.</p>
 </div>
 <div class="section" id="server-introduction">
-<h2>Server Introduction:<a class="headerlink" href="#server-introduction" title="Permalink to this headline"></a></h2>
-<p>funasr-wss-server-2pass supports downloading models from Modelscope or starting from a local directory path, as shown below:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> /workspace/FunASR/funasr/runtime/websocket/build/bin
-./funasr-wss-server-2pass  <span class="se">\</span>
+<h2>Server Introduction<a class="headerlink" href="#server-introduction" title="Permalink to this headline"></a></h2>
+<p>Use the flollowing script to start the server ：</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> /workspace/FunASR/funasr/runtime
+nohup bash run_server_2pass.sh <span class="se">\</span>
+  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx <span class="se">\</span>
+  --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx <span class="se">\</span>
+  --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
+  --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx <span class="se">\</span>
+  --itn-dir thuduj12/fst_itn_zh <span class="se">\</span>
   --decoder-thread-num <span class="m">32</span> <span class="se">\</span>
   --io-thread-num  <span class="m">8</span> <span class="se">\</span>
-  --port <span class="m">10095</span> 
+  --port <span class="m">10095</span> <span class="se">\</span>
+  --certfile  ../../../ssl_key/server.crt <span class="se">\</span>
+  --keyfile ../../../ssl_key/server.key &gt; log.out <span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">&amp;</span>
+
+<span class="c1"># If you want to close ssl，please add：--certfile 0</span>
+<span class="c1"># If you want to deploy the timestamp or hotword model, please set --model-dir to the corresponding model:</span>
+<span class="c1"># speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx（timestamp）</span>
+<span class="c1"># damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（hotword）</span>
 </pre></div>
 </div>
-<p>Command parameter introduction:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--download-model-dir Model download address, download models from Modelscope by setting model id
---model-dir modelscope model ID
+<div class="section" id="more-details-about-the-script-run-server-2pass-sh">
+<h3>More details about the script run_server_2pass.sh:<a class="headerlink" href="#more-details-about-the-script-run-server-2pass-sh" title="Permalink to this headline"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--download-model-dir: Model download address, download models from Modelscope by setting the model ID.
+--model-dir: Modelscope model ID.
 --online-model-dir modelscope model ID
---quantize True for quantized ASR models, False for non-quantized ASR models, default is True
---vad-dir modelscope model ID
---vad-quant True for quantized VAD models, False for non-quantized VAD models, default is True
---punc-dir modelscope model ID
---punc-quant True for quantized PUNC models, False for non-quantized PUNC models, default is True
+--quantize: True for quantized ASR model, False for non-quantized ASR model. Default is True.
+--vad-dir: Modelscope model ID.
+--vad-quant: True for quantized VAD model, False for non-quantized VAD model. Default is True.
+--punc-dir: Modelscope model ID.
+--punc-quant: True for quantized PUNC model, False for non-quantized PUNC model. Default is True.
 --itn-dir modelscope model ID
---port Port number that the server should listen on, default is 10095
---decoder-thread-num The number of inference threads the server should start, default is 8
---io-thread-num The number of IO threads the server should start, default is 1
---certfile SSL certificate file, the default is: ../../../ssl_key/server.crt, set to &quot;&quot; to disable
---keyfile SSL key file, the default is: ../../../ssl_key/server.key, set to &quot;&quot; to disable
+--port: Port number that the server listens on. Default is 10095.
+--decoder-thread-num: Number of inference threads that the server starts. Default is 8.
+--io-thread-num: Number of IO threads that the server starts. Default is 1.
+--certfile &lt;string&gt;: SSL certificate file. Default is ../../../ssl_key/server.crt. If you want to close ssl，set 0
+--keyfile &lt;string&gt;: SSL key file. Default is ../../../ssl_key/server.key. 
+</pre></div>
+</div>
+</div>
+<div class="section" id="shutting-down-the-funasr-service">
+<h3>Shutting Down the FunASR Service<a class="headerlink" href="#shutting-down-the-funasr-service" title="Permalink to this headline"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># Check the PID of the funasr-wss-server-2pass process
+ps -x | grep funasr-wss-server-2pass
+kill -9 PID
+</pre></div>
+</div>
+</div>
+<div class="section" id="modifying-models-and-other-parameters">
+<h3>Modifying Models and Other Parameters<a class="headerlink" href="#modifying-models-and-other-parameters" title="Permalink to this headline"></a></h3>
+<p>To replace the currently used model or other parameters, you need to first shut down the FunASR service, make the necessary modifications to the parameters you want to replace, and then restart the FunASR service. The model should be either an ASR/VAD/PUNC model from ModelScope or a fine-tuned model obtained from ModelScope.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># For example, to replace the ASR model with damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx, use the following parameter setting --model-dir
+    --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx 
+# Set the port number using --port
+    --port &lt;port number&gt;
+# Set the number of inference threads the server will start using --decoder-thread-num
+    --decoder-thread-num &lt;decoder thread num&gt;
+# Set the number of IO threads the server will start using --io-thread-num
+    --io-thread-num &lt;io thread num&gt;
+# Disable SSL certificate
+    --certfile 0
 </pre></div>
 </div>
 <p>After executing the above command, the real-time speech transcription service will be started. If the model is specified as a ModelScope model id, the following models will be automatically downloaded from ModelScope:
@@ -220,6 +257,7 @@ nohup bash run_server_2pass.sh <span class="se">\</span>
 <a class="reference external" href="https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx/summary">CT-Transformer</a>
 <a class="reference external" href="https://www.modelscope.cn/models/thuduj12/fst_itn_zh/summary">FST-ITN</a></p>
 <p>If you wish to deploy your fine-tuned model (e.g., 10epoch.pb), you need to manually rename the model to model.pb and replace the original model.pb in ModelScope. Then, specify the path as <code class="docutils literal notranslate"><span class="pre">model_dir</span></code>.</p>
+</div>
 </div>
 </div>
 

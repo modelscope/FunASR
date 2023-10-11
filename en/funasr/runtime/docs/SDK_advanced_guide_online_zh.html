@@ -167,7 +167,7 @@ nohup bash run_server_2pass.sh <span class="se">\</span>
 <span class="c1"># 或者 damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（热词）</span>
 </pre></div>
 </div>
-<p>服务端详细参数介绍可参考服务端参数介绍</p>
+<p>服务端详细参数介绍可参考服务端用法详解</p>
 </div>
 <div class="section" id="id4">
 <h3>客户端测试与使用<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h3>
@@ -196,16 +196,24 @@ nohup bash run_server_2pass.sh <span class="se">\</span>
 <p>详细用法可以点击进入查看。更多版本客户端支持请参考<a class="reference internal" href="websocket_protocol_zh.html"><span class="doc">websocket/grpc协议</span></a></p>
 </div>
 <div class="section" id="id6">
-<h2>服务端参数介绍：<a class="headerlink" href="#id6" title="Permalink to this headline"></a></h2>
-<p>funasr-wss-server-2pass支持从Modelscope下载模型，或者从本地目录路径启动，示例如下：</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> /workspace/FunASR/funasr/runtime/websocket/build/bin
-./funasr-wss-server-2pass  <span class="se">\</span>
+<h2>服务端用法详解：<a class="headerlink" href="#id6" title="Permalink to this headline"></a></h2>
+<div class="section" id="id7">
+<h3>启动FunASR服务<a class="headerlink" href="#id7" title="Permalink to this headline"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> /workspace/FunASR/funasr/runtime
+nohup bash run_server_2pass.sh <span class="se">\</span>
+  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx <span class="se">\</span>
+  --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx <span class="se">\</span>
+  --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
+  --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx <span class="se">\</span>
+  --itn-dir thuduj12/fst_itn_zh <span class="se">\</span>
   --decoder-thread-num <span class="m">32</span> <span class="se">\</span>
   --io-thread-num  <span class="m">8</span> <span class="se">\</span>
-  --port <span class="m">10095</span> 
+  --port <span class="m">10095</span> <span class="se">\</span>
+  --certfile  ../../../ssl_key/server.crt <span class="se">\</span>
+  --keyfile ../../../ssl_key/server.key &gt; log.out <span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">&amp;</span>
 </pre></div>
 </div>
-<p>命令参数介绍：</p>
+<p><strong>run_server_2pass.sh命令参数介绍</strong></p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--download-model-dir 模型下载地址，通过设置model ID从Modelscope下载模型
 --model-dir  modelscope model ID
 --online-model-dir  modelscope model ID
@@ -218,8 +226,32 @@ nohup bash run_server_2pass.sh <span class="se">\</span>
 --port  服务端监听的端口号，默认为 10095
 --decoder-thread-num  服务端启动的推理线程数，默认为 8
 --io-thread-num  服务端启动的IO线程数，默认为 1
---certfile  ssl的证书文件，默认为：../../../ssl_key/server.crt，如需关闭，设置为&quot;&quot;
---keyfile   ssl的密钥文件，默认为：../../../ssl_key/server.key，如需关闭，设置为&quot;&quot;
+--certfile  ssl的证书文件，默认为：../../../ssl_key/server.crt，如果需要关闭ssl，参数设置为0
+--keyfile   ssl的密钥文件，默认为：../../../ssl_key/server.key
+</pre></div>
+</div>
+</div>
+<div class="section" id="id8">
+<h3>关闭FunASR服务<a class="headerlink" href="#id8" title="Permalink to this headline"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 查看 funasr-wss-server-2pass 对应的PID
+ps -x | grep funasr-wss-server-2pass
+kill -9 PID
+</pre></div>
+</div>
+</div>
+<div class="section" id="id9">
+<h3>修改模型及其他参数<a class="headerlink" href="#id9" title="Permalink to this headline"></a></h3>
+<p>替换正在使用的模型或者其他参数，需先关闭FunASR服务，修改需要替换的参数，并重新启动FunASR服务。其中模型需为ModelScope中的ASR/VAD/PUNC模型，或者从ModelScope中模型finetune后的模型。</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># 例如替换ASR模型为 damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx，则如下设置参数 --model-dir
+    --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx 
+# 设置端口号 --port
+    --port &lt;port number&gt;
+# 设置服务端启动的推理线程数 --decoder-thread-num
+    --decoder-thread-num &lt;decoder thread num&gt;
+# 设置服务端启动的IO线程数 --io-thread-num
+    --io-thread-num &lt;io thread num&gt;
+# 关闭SSL证书 
+    --certfile 0
 </pre></div>
 </div>
 <p>执行上述指令后，启动实时语音听写服务。如果模型指定为ModelScope中model id，会自动从MoldeScope中下载如下模型：
@@ -229,6 +261,7 @@ nohup bash run_server_2pass.sh <span class="se">\</span>
 <a class="reference external" href="https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx/summary">CT-Transformer标点预测模型</a>
 <a class="reference external" href="https://www.modelscope.cn/models/thuduj12/fst_itn_zh/summary">基于FST的中文ITN</a></p>
 <p>如果，您希望部署您finetune后的模型（例如10epoch.pb），需要手动将模型重命名为model.pb，并将原modelscope中模型model.pb替换掉，将路径指定为<code class="docutils literal notranslate"><span class="pre">model_dir</span></code>即可。</p>
+</div>
 </div>
 </div>
 

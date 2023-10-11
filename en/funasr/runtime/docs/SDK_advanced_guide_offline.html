@@ -190,10 +190,11 @@ sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span clas
 <span class="c1"># damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（hotword）</span>
 </pre></div>
 </div>
-<p>More details about the script run_server.sh:</p>
-<p>The FunASR-wss-server supports downloading models from Modelscope. You can set the model download address (–download-model-dir, default is /workspace/models) and the model ID (–model-dir, –vad-dir, –punc-dir). Here is an example:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> /workspace/FunASR/funasr/runtime/websocket/build/bin
-./funasr-wss-server  <span class="se">\</span>
+<div class="section" id="more-details-about-the-script-run-server-sh">
+<h3>More details about the script run_server.sh:<a class="headerlink" href="#more-details-about-the-script-run-server-sh" title="Permalink to this headline"></a></h3>
+<p>The funasr-wss-server supports downloading models from Modelscope. You can set the model download address (–download-model-dir, default is /workspace/models) and the model ID (–model-dir, –vad-dir, –punc-dir). Here is an example:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> /workspace/FunASR/funasr/runtime
+nohup bash run_server.sh <span class="se">\</span>
   --download-model-dir /workspace/models <span class="se">\</span>
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx <span class="se">\</span>
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
@@ -203,10 +204,10 @@ sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span clas
   --io-thread-num  <span class="m">8</span> <span class="se">\</span>
   --port <span class="m">10095</span> <span class="se">\</span>
   --certfile  ../../../ssl_key/server.crt <span class="se">\</span>
-  --keyfile ../../../ssl_key/server.key
+  --keyfile ../../../ssl_key/server.key &gt; log.out <span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">&amp;</span>
 </pre></div>
 </div>
-<p>Introduction to command parameters:</p>
+<p>Introduction to run_server.sh parameters:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>--download-model-dir: Model download address, download models from Modelscope by setting the model ID.
 --model-dir: Modelscope model ID.
 --quantize: True for quantized ASR model, False for non-quantized ASR model. Default is True.
@@ -218,22 +219,32 @@ sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span clas
 --port: Port number that the server listens on. Default is 10095.
 --decoder-thread-num: Number of inference threads that the server starts. Default is 8.
 --io-thread-num: Number of IO threads that the server starts. Default is 1.
---certfile &lt;string&gt;: SSL certificate file. Default is ../../../ssl_key/server.crt. If you want to close ssl，set &quot;&quot;
---keyfile &lt;string&gt;: SSL key file. Default is ../../../ssl_key/server.key. If you want to close ssl，set &quot;&quot;
+--certfile &lt;string&gt;: SSL certificate file. Default is ../../../ssl_key/server.crt. If you want to close ssl，set 0
+--keyfile &lt;string&gt;: SSL key file. Default is ../../../ssl_key/server.key. 
 </pre></div>
 </div>
-<p>The FunASR-wss-server also supports loading models from a local path (see Preparing Model Resources for detailed instructions on preparing local model resources). Here is an example:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> /workspace/FunASR/funasr/runtime/websocket/build/bin
-./funasr-wss-server  <span class="se">\</span>
-  --model-dir /workspace/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx <span class="se">\</span>
-  --vad-dir /workspace/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
-  --punc-dir /workspace/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx <span class="se">\</span>
-  --itn-dir /workspace/models/thuduj12/fst_itn_zh <span class="se">\</span>
-  --decoder-thread-num <span class="m">32</span> <span class="se">\</span>
-  --io-thread-num  <span class="m">8</span> <span class="se">\</span>
-  --port <span class="m">10095</span> <span class="se">\</span>
-  --certfile  ../../../ssl_key/server.crt <span class="se">\</span>
-  --keyfile ../../../ssl_key/server.key
+</div>
+<div class="section" id="shutting-down-the-funasr-service">
+<h3>Shutting Down the FunASR Service<a class="headerlink" href="#shutting-down-the-funasr-service" title="Permalink to this headline"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># Check the PID of the funasr-wss-server process
+ps -x | grep funasr-wss-server
+kill -9 PID
+</pre></div>
+</div>
+</div>
+<div class="section" id="modifying-models-and-other-parameters">
+<h3>Modifying Models and Other Parameters<a class="headerlink" href="#modifying-models-and-other-parameters" title="Permalink to this headline"></a></h3>
+<p>To replace the currently used model or other parameters, you need to first shut down the FunASR service, make the necessary modifications to the parameters you want to replace, and then restart the FunASR service. The model should be either an ASR/VAD/PUNC model from ModelScope or a fine-tuned model obtained from ModelScope.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># For example, to replace the ASR model with damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx, use the following parameter setting --model-dir
+    --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx 
+# Set the port number using --port
+    --port &lt;port number&gt;
+# Set the number of inference threads the server will start using --decoder-thread-num
+    --decoder-thread-num &lt;decoder thread num&gt;
+# Set the number of IO threads the server will start using --io-thread-num
+    --io-thread-num &lt;io thread num&gt;
+# Disable SSL certificate
+    --certfile 0
 </pre></div>
 </div>
 <p>After executing the above command, the real-time speech transcription service will be started. If the model is specified as a ModelScope model id, the following models will be automatically downloaded from ModelScope:
@@ -242,6 +253,7 @@ sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span clas
 <a class="reference external" href="https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx/summary">CT-Transformer</a>
 <a class="reference external" href="https://www.modelscope.cn/models/thuduj12/fst_itn_zh/summary">FST-ITN</a></p>
 <p>If you wish to deploy your fine-tuned model (e.g., 10epoch.pb), you need to manually rename the model to model.pb and replace the original model.pb in ModelScope. Then, specify the path as <code class="docutils literal notranslate"><span class="pre">model_dir</span></code>.</p>
+</div>
 </div>
 <div class="section" id="starting-the-client">
 <h2>Starting the client<a class="headerlink" href="#starting-the-client" title="Permalink to this headline"></a></h2>
