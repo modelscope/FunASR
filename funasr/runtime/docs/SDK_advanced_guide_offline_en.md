@@ -57,7 +57,7 @@ Use the flollowing script to start the server ：
 nohup bash run_server.sh \
   --download-model-dir /workspace/models \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
-  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
+  --model-dir damo/speech_paraformer-large_asr_nat-en-16k-common-vocab10020-onnx  \
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx > log.out 2>&1 &
 
 # If you want to close ssl，please add：--certfile 0
@@ -72,7 +72,7 @@ The FunASR-wss-server supports downloading models from Modelscope. You can set t
 cd /workspace/FunASR/funasr/runtime/websocket/build/bin
 ./funasr-wss-server  \
   --download-model-dir /workspace/models \
-  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx \
+  --model-dir damo/speech_paraformer-large_asr_nat-en-16k-common-vocab10020-onnx \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx \
   --decoder-thread-num 32 \
@@ -105,7 +105,7 @@ The FunASR-wss-server also supports loading models from a local path (see Prepar
 ```shell
 cd /workspace/FunASR/funasr/runtime/websocket/build/bin
 ./funasr-wss-server  \
-  --model-dir /workspace/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx \
+  --model-dir /workspace/models/damo/speech_paraformer-large_asr_nat-en-16k-common-vocab10020-onnx \
   --vad-dir /workspace/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
   --punc-dir /workspace/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx \
   --decoder-thread-num 32 \
@@ -117,7 +117,7 @@ cd /workspace/FunASR/funasr/runtime/websocket/build/bin
 
 After executing the above command, the real-time speech transcription service will be started. If the model is specified as a ModelScope model id, the following models will be automatically downloaded from ModelScope:
 [FSMN-VAD](https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary)
-[Paraformer-lagre](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary)
+[Paraformer-lagre](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-en-16k-common-vocab10020-onnx/summary)
 [CT-Transformer](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx/summary)
 
 If you wish to deploy your fine-tuned model (e.g., 10epoch.pb), you need to manually rename the model to model.pb and replace the original model.pb in ModelScope. Then, specify the path as `model_dir`.
