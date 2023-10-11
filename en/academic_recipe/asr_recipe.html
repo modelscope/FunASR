@@ -168,7 +168,7 @@
 </div>
 <p>Then you can directly start the recipe as follows:</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>conda activate funasr
-. ./run.sh --CUDA_VISIBLE_DEVICES<span class="o">=</span><span class="s2">&quot;0,1&quot;</span> --gpu_num<span class="o">=</span><span class="m">2</span>
+bash run.sh --CUDA_VISIBLE_DEVICES <span class="s2">&quot;0,1&quot;</span> --gpu_num <span class="m">2</span>
 </pre></div>
 </div>
 <p>The training log files are saved in <code class="docutils literal notranslate"><span class="pre">${exp_dir}/exp/${model_dir}/log/train.log.*</span></code>， which can be viewed using the following command:</p>
