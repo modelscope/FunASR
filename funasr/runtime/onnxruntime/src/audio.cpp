@@ -9,6 +9,9 @@
 #include "audio.h"
 #include "precomp.h"
 
+#ifdef _MSC_VER
+#pragma warning(disable:4996)
+#endif
 
 #if defined(__APPLE__)
 #include <string.h>
@@ -423,7 +426,7 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
     return false;
 #else
     // from buf
-    char* buf_copy = (char *)malloc(n_file_len);
+    void* buf_copy = av_malloc(n_file_len);
     memcpy(buf_copy, buf, n_file_len);
 
     AVIOContext* avio_ctx = avio_alloc_context(

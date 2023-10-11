@@ -1,0 +1,8 @@
+DOCKER:
+  funasr-runtime-sdk-en-cpu-0.1.0
+DEFAULT_ASR_MODEL:
+  damo/speech_paraformer-large_asr_nat-en-16k-common-vocab10020-onnx
+DEFAULT_VAD_MODEL:
+  damo/speech_fsmn_vad_zh-cn-16k-common-onnx
+DEFAULT_PUNC_MODEL:
+  damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
