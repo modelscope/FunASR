@@ -18,10 +18,6 @@
 #define FUNASR_CALLBCK_PREFIX __stdcall
 #endif
 
-#ifdef __cplusplus 
-
-extern "C" {
-#endif
 
 typedef void* FUNASR_HANDLE;
 typedef void* FUNASR_RESULT;
@@ -122,7 +118,4 @@ _FUNASRAPI FUNASR_RESULT	FunTpassInferBuffer(FUNASR_HANDLE handle, FUNASR_HANDLE
 _FUNASRAPI void				FunTpassUninit(FUNASR_HANDLE handle);
 _FUNASRAPI void				FunTpassOnlineUninit(FUNASR_HANDLE handle);
 
-#ifdef __cplusplus 
 
-}
-#endif

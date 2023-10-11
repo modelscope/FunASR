@@ -1,5 +1,4 @@
 #include "precomp.h"
-#include <unistd.h>
 
 namespace funasr {
 TpassStream::TpassStream(std::map<std::string, std::string>& model_path, int thread_num)
