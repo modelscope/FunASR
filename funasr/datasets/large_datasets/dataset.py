@@ -108,7 +108,7 @@ class AudioDataset(IterableDataset):
                     ark_reader = ReadHelper('ark:{}'.format(data_file))
                     reader_list.append(ark_reader)
                 elif data_type == "text" or data_type == "sound" or data_type == 'text_hotword':
-                    text_reader = open(data_file, "r")
+                    text_reader = open(data_file, "r", encoding="utf-8")
                     reader_list.append(text_reader)
                 elif data_type == "none":
                     continue
@@ -205,7 +205,7 @@ def Dataset(data_list_file,
     # pre_prob = conf.get("pre_prob", 0)  # unused yet
     if pre_hwfile is not None:
         pre_hwlist = []
-        with open(pre_hwfile, 'r') as fin:
+        with open(pre_hwfile, 'r', encoding="utf-8") as fin:
             for line in fin.readlines():
                 pre_hwlist.append(line.strip())
     else:
