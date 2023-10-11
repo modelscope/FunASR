@@ -29,14 +29,14 @@ nohup bash run_server_2pass.sh \
 
 # If you want to close ssl，please add：--certfile 0
 ```
-For a more detailed description of server parameters, please refer to [Server Introduction](#Server Introduction)
+For a more detailed description of server parameters, please refer to Server Introduction
 ### Client Testing and Usage
 
 Download the client testing tool directory `samples`:
 ```shell
 wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz
 ```
-For illustration, we will use the Python language client, which supports audio formats (.wav, .pcm) and a multi-file list wav.scp input. For other client versions, please refer to the [documentation]().
+For illustration, we will use the Python language client, which supports audio formats (.wav, .pcm) and a multi-file list wav.scp input.
 
 ```shell
 python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode 2pass
@@ -122,10 +122,10 @@ To replace the currently used model or other parameters, you need to first shut 
 ```
 
 After executing the above command, the real-time speech transcription service will be started. If the model is specified as a ModelScope model id, the following models will be automatically downloaded from ModelScope:
-[FSMN-VAD model](https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary)，
-[Paraformer-lagre online](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx/summary )
-[Paraformer-lagre](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary)
-[CT-Transformer](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx/summary)
+[FSMN-VAD model](https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary),
+[Paraformer-lagre online](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx/summary),
+[Paraformer-lagre](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary),
+[CT-Transformer](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx/summary),
 [FST-ITN](https://www.modelscope.cn/models/thuduj12/fst_itn_zh/summary)
 
 If you wish to deploy your fine-tuned model (e.g., 10epoch.pb), you need to manually rename the model to model.pb and replace the original model.pb in ModelScope. Then, specify the path as `model_dir`.

@@ -159,7 +159,7 @@ nohup bash run_server_2pass.sh <span class="se">\</span>
 <span class="c1"># If you want to close ssl，please add：--certfile 0</span>
 </pre></div>
 </div>
-<p>For a more detailed description of server parameters, please refer to [Server Introduction](#Server Introduction)</p>
+<p>For a more detailed description of server parameters, please refer to Server Introduction</p>
 </div>
 <div class="section" id="client-testing-and-usage">
 <h3>Client Testing and Usage<a class="headerlink" href="#client-testing-and-usage" title="Permalink to this headline"></a></h3>
@@ -167,7 +167,7 @@ nohup bash run_server_2pass.sh <span class="se">\</span>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz
 </pre></div>
 </div>
-<p>For illustration, we will use the Python language client, which supports audio formats (.wav, .pcm) and a multi-file list wav.scp input. For other client versions, please refer to the <a class="reference external" href="#">documentation</a>.</p>
+<p>For illustration, we will use the Python language client, which supports audio formats (.wav, .pcm) and a multi-file list wav.scp input.</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 wss_client_asr.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode 2pass
 </pre></div>
 </div>
@@ -251,10 +251,10 @@ kill -9 PID
 </pre></div>
 </div>
 <p>After executing the above command, the real-time speech transcription service will be started. If the model is specified as a ModelScope model id, the following models will be automatically downloaded from ModelScope:
-<a class="reference external" href="https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary">FSMN-VAD model</a>，
-<a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx/summary">Paraformer-lagre online</a>
-<a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary">Paraformer-lagre</a>
-<a class="reference external" href="https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx/summary">CT-Transformer</a>
+<a class="reference external" href="https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary">FSMN-VAD model</a>,
+<a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx/summary">Paraformer-lagre online</a>,
+<a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary">Paraformer-lagre</a>,
+<a class="reference external" href="https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx/summary">CT-Transformer</a>,
 <a class="reference external" href="https://www.modelscope.cn/models/thuduj12/fst_itn_zh/summary">FST-ITN</a></p>
 <p>If you wish to deploy your fine-tuned model (e.g., 10epoch.pb), you need to manually rename the model to model.pb and replace the original model.pb in ModelScope. Then, specify the path as <code class="docutils literal notranslate"><span class="pre">model_dir</span></code>.</p>
 </div>
