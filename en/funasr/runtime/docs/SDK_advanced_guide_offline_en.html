@@ -180,7 +180,7 @@ sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span clas
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>nohup bash run_server.sh <span class="se">\</span>
   --download-model-dir /workspace/models <span class="se">\</span>
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
-  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  <span class="se">\</span>
+  --model-dir damo/speech_paraformer-large_asr_nat-en-16k-common-vocab10020-onnx  <span class="se">\</span>
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx &gt; log.out <span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">&amp;</span>
 
 <span class="c1"># If you want to close ssl，please add：--certfile 0</span>
@@ -191,7 +191,7 @@ sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span clas
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> /workspace/FunASR/funasr/runtime/websocket/build/bin
 ./funasr-wss-server  <span class="se">\</span>
   --download-model-dir /workspace/models <span class="se">\</span>
-  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx <span class="se">\</span>
+  --model-dir damo/speech_paraformer-large_asr_nat-en-16k-common-vocab10020-onnx <span class="se">\</span>
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx <span class="se">\</span>
   --decoder-thread-num <span class="m">32</span> <span class="se">\</span>
@@ -220,7 +220,7 @@ sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span clas
 <p>The FunASR-wss-server also supports loading models from a local path (see Preparing Model Resources for detailed instructions on preparing local model resources). Here is an example:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> /workspace/FunASR/funasr/runtime/websocket/build/bin
 ./funasr-wss-server  <span class="se">\</span>
-  --model-dir /workspace/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx <span class="se">\</span>
+  --model-dir /workspace/models/damo/speech_paraformer-large_asr_nat-en-16k-common-vocab10020-onnx <span class="se">\</span>
   --vad-dir /workspace/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
   --punc-dir /workspace/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx <span class="se">\</span>
   --decoder-thread-num <span class="m">32</span> <span class="se">\</span>
@@ -232,7 +232,7 @@ sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span clas
 </div>
 <p>After executing the above command, the real-time speech transcription service will be started. If the model is specified as a ModelScope model id, the following models will be automatically downloaded from ModelScope:
 <a class="reference external" href="https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary">FSMN-VAD</a>
-<a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary">Paraformer-lagre</a>
+<a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-en-16k-common-vocab10020-onnx/summary">Paraformer-lagre</a>
 <a class="reference external" href="https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx/summary">CT-Transformer</a></p>
 <p>If you wish to deploy your fine-tuned model (e.g., 10epoch.pb), you need to manually rename the model to model.pb and replace the original model.pb in ModelScope. Then, specify the path as <code class="docutils literal notranslate"><span class="pre">model_dir</span></code>.</p>
 </div>
