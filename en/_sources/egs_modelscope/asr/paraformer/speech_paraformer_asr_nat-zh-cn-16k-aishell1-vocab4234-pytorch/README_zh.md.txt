@@ -68,6 +68,23 @@ print(rec_result)
 ```
 演示代码完整版本，请参考[demo](https://github.com/alibaba-damo-academy/FunASR/discussions/241)
 
+#### [Paraformer-contextual Model](https://www.modelscope.cn/models/damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404/summary)
+```python
+from modelscope.pipelines import pipeline
+from modelscope.utils.constant import Tasks
+
+param_dict = dict()
+# param_dict['hotword'] = "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/hotword.txt"
+param_dict['hotword']="邓郁松 王颖春 王晔君"
+inference_pipeline = pipeline(
+    task=Tasks.auto_speech_recognition,
+    model="damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404",
+    param_dict=param_dict)
+
+rec_result = inference_pipeline(audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_hotword.wav')
+print(rec_result)
+```
+
 #### [UniASR 模型](https://www.modelscope.cn/models/damo/speech_UniASR_asr_2pass-zh-cn-8k-common-vocab3445-pytorch-online/summary)
 UniASR 模型有三种解码模式(fast、normal、offline)，更多模型细节请参考[文档](https://www.modelscope.cn/models/damo/speech_UniASR_asr_2pass-zh-cn-8k-common-vocab3445-pytorch-online/summary)
 ```python

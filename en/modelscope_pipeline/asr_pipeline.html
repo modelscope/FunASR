@@ -206,6 +206,24 @@ The modelscope pipeline supports all the models in <a class="reference external"
 <p>Full code of demo, please ref to <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/discussions/241">demo</a></p>
 </div>
 </div>
+<div class="section" id="paraformer-contextual-model">
+<h4><a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404/summary">Paraformer-contextual Model</a><a class="headerlink" href="#paraformer-contextual-model" title="Permalink to this headline"></a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
+<span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
+
+<span class="n">param_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+<span class="c1"># param_dict[&#39;hotword&#39;] = &quot;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/hotword.txt&quot;</span>
+<span class="n">param_dict</span><span class="p">[</span><span class="s1">&#39;hotword&#39;</span><span class="p">]</span><span class="o">=</span><span class="s2">&quot;邓郁松 王颖春 王晔君&quot;</span>
+<span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
+    <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">auto_speech_recognition</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404&quot;</span><span class="p">,</span>
+    <span class="n">param_dict</span><span class="o">=</span><span class="n">param_dict</span><span class="p">)</span>
+
+<span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_hotword.wav&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">rec_result</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="uniasr-model">
 <h4><a class="reference external" href="https://www.modelscope.cn/models/damo/speech_UniASR_asr_2pass-zh-cn-8k-common-vocab3445-pytorch-online/summary">UniASR Model</a><a class="headerlink" href="#uniasr-model" title="Permalink to this headline"></a></h4>
 <p>There are three decoding mode for UniASR model(<code class="docutils literal notranslate"><span class="pre">fast</span></code>、<code class="docutils literal notranslate"><span class="pre">normal</span></code>、<code class="docutils literal notranslate"><span class="pre">offline</span></code>), for more model details, please refer to <a class="reference external" href="https://www.modelscope.cn/models/damo/speech_UniASR_asr_2pass-zh-cn-8k-common-vocab3445-pytorch-online/summary">docs</a></p>
