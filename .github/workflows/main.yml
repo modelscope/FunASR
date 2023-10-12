@@ -23,7 +23,7 @@ jobs:
           pre-build-command: "pip install sphinx-markdown-tables nbsphinx jinja2 recommonmark sphinx_rtd_theme myst-parser"
 
       - name: deploy copy
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev_wjm' || github.ref == 'refs/heads/dev_lyh'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev_wjm' || github.ref == 'refs/heads/dev_lyh' || github.ref == 'refs/heads/dev_lhn'
         run: |
           mkdir public
           touch public/.nojekyll
@@ -35,7 +35,7 @@ jobs:
           cp -r docs/m2met2/_build/html/* public/m2met2/
 
       - name: deploy github.io pages
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev_wjm' || github.ref == 'refs/heads/dev_lyh'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev_wjm' || github.ref == 'refs/heads/dev_lyh' || github.ref == 'refs/heads/dev_lhn'
         uses: peaceiris/actions-gh-pages@v2.3.1
         env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}

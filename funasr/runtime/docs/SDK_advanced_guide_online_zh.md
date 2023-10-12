@@ -38,7 +38,7 @@ nohup bash run_server_2pass.sh \
 # damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx（时间戳）
 # 或者 damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（热词）
 ```
-服务端详细参数介绍可参考[服务端参数介绍](#服务端参数介绍)
+服务端详细参数介绍可参考[服务端用法详解](#服务端用法详解)
 ### 客户端测试与使用
 
 下载客户端测试工具目录samples
@@ -65,18 +65,24 @@ python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode 2pass
 
 详细用法可以点击进入查看。更多版本客户端支持请参考[websocket/grpc协议](./websocket_protocol_zh.md)
 
-## 服务端参数介绍：
+## 服务端用法详解：
 
-funasr-wss-server-2pass支持从Modelscope下载模型，或者从本地目录路径启动，示例如下：
+### 启动FunASR服务
 ```shell
-cd /workspace/FunASR/funasr/runtime/websocket/build/bin
-./funasr-wss-server-2pass  \
+cd /workspace/FunASR/funasr/runtime
+nohup bash run_server_2pass.sh \
+  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx \
+  --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx \
+  --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
+  --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx \
+  --itn-dir thuduj12/fst_itn_zh \
   --decoder-thread-num 32 \
   --io-thread-num  8 \
-  --port 10095 
+  --port 10095 \
+  --certfile  ../../../ssl_key/server.crt \
+  --keyfile ../../../ssl_key/server.key > log.out 2>&1 &
  ```
-
-命令参数介绍：
+**run_server_2pass.sh命令参数介绍**
 ```text
 --download-model-dir 模型下载地址，通过设置model ID从Modelscope下载模型
 --model-dir  modelscope model ID
@@ -90,15 +96,37 @@ cd /workspace/FunASR/funasr/runtime/websocket/build/bin
 --port  服务端监听的端口号，默认为 10095
 --decoder-thread-num  服务端启动的推理线程数，默认为 8
 --io-thread-num  服务端启动的IO线程数，默认为 1
---certfile  ssl的证书文件，默认为：../../../ssl_key/server.crt，如需关闭，设置为""
---keyfile   ssl的密钥文件，默认为：../../../ssl_key/server.key，如需关闭，设置为""
+--certfile  ssl的证书文件，默认为：../../../ssl_key/server.crt，如果需要关闭ssl，参数设置为0
+--keyfile   ssl的密钥文件，默认为：../../../ssl_key/server.key
+```
+
+### 关闭FunASR服务
+```text
+# 查看 funasr-wss-server-2pass 对应的PID
+ps -x | grep funasr-wss-server-2pass
+kill -9 PID
+```
+
+### 修改模型及其他参数
+替换正在使用的模型或者其他参数，需先关闭FunASR服务，修改需要替换的参数，并重新启动FunASR服务。其中模型需为ModelScope中的ASR/VAD/PUNC模型，或者从ModelScope中模型finetune后的模型。
+```text
+# 例如替换ASR模型为 damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx，则如下设置参数 --model-dir
+    --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx 
+# 设置端口号 --port
+    --port <port number>
+# 设置服务端启动的推理线程数 --decoder-thread-num
+    --decoder-thread-num <decoder thread num>
+# 设置服务端启动的IO线程数 --io-thread-num
+    --io-thread-num <io thread num>
+# 关闭SSL证书 
+    --certfile 0
 ```
 
 执行上述指令后，启动实时语音听写服务。如果模型指定为ModelScope中model id，会自动从MoldeScope中下载如下模型：
-[FSMN-VAD模型](https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary)，
-[Paraformer-lagre实时模型](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx/summary )
-[Paraformer-lagre非实时模型](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary)
-[CT-Transformer标点预测模型](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx/summary)
+[FSMN-VAD模型](https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary),
+[Paraformer-lagre实时模型](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx/summary ),
+[Paraformer-lagre非实时模型](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary),
+[CT-Transformer标点预测模型](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx/summary),
 [基于FST的中文ITN](https://www.modelscope.cn/models/thuduj12/fst_itn_zh/summary)
 
 如果，您希望部署您finetune后的模型（例如10epoch.pb），需要手动将模型重命名为model.pb，并将原modelscope中模型model.pb替换掉，将路径指定为`model_dir`即可。

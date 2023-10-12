@@ -64,13 +64,13 @@ nohup bash run_server.sh \
 
 ```
 
-More details about the script run_server.sh:
+### More details about the script run_server.sh:
 
-The FunASR-wss-server supports downloading models from Modelscope. You can set the model download address (--download-model-dir, default is /workspace/models) and the model ID (--model-dir, --vad-dir, --punc-dir). Here is an example:
+The funasr-wss-server supports downloading models from Modelscope. You can set the model download address (--download-model-dir, default is /workspace/models) and the model ID (--model-dir, --vad-dir, --punc-dir). Here is an example:
 
 ```shell
-cd /workspace/FunASR/funasr/runtime/websocket/build/bin
-./funasr-wss-server  \
+cd /workspace/FunASR/funasr/runtime
+nohup bash run_server.sh \
   --download-model-dir /workspace/models \
   --model-dir damo/speech_paraformer-large_asr_nat-en-16k-common-vocab10020-onnx \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
@@ -82,7 +82,7 @@ cd /workspace/FunASR/funasr/runtime/websocket/build/bin
   --keyfile ../../../ssl_key/server.key
  ```
 
-Introduction to command parameters: 
+Introduction to run_server.sh parameters: 
 
 ```text
 --download-model-dir: Model download address, download models from Modelscope by setting the model ID.
@@ -96,28 +96,35 @@ Introduction to command parameters:
 --port: Port number that the server listens on. Default is 10095.
 --decoder-thread-num: Number of inference threads that the server starts. Default is 8.
 --io-thread-num: Number of IO threads that the server starts. Default is 1.
---certfile <string>: SSL certificate file. Default is ../../../ssl_key/server.crt. If you want to close ssl，set ""
---keyfile <string>: SSL key file. Default is ../../../ssl_key/server.key. If you want to close ssl，set ""
+--certfile <string>: SSL certificate file. Default is ../../../ssl_key/server.crt. If you want to close ssl，set 0
+--keyfile <string>: SSL key file. Default is ../../../ssl_key/server.key. 
 ```
 
-The FunASR-wss-server also supports loading models from a local path (see Preparing Model Resources for detailed instructions on preparing local model resources). Here is an example:
+### Shutting Down the FunASR Service
+```text
+# Check the PID of the funasr-wss-server process
+ps -x | grep funasr-wss-server
+kill -9 PID
+```
 
-```shell
-cd /workspace/FunASR/funasr/runtime/websocket/build/bin
-./funasr-wss-server  \
-  --model-dir /workspace/models/damo/speech_paraformer-large_asr_nat-en-16k-common-vocab10020-onnx \
-  --vad-dir /workspace/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
-  --punc-dir /workspace/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx \
-  --decoder-thread-num 32 \
-  --io-thread-num  8 \
-  --port 10095 \
-  --certfile  ../../../ssl_key/server.crt \
-  --keyfile ../../../ssl_key/server.key
- ```
+### Modifying Models and Other Parameters
+To replace the currently used model or other parameters, you need to first shut down the FunASR service, make the necessary modifications to the parameters you want to replace, and then restart the FunASR service. The model should be either an ASR/VAD/PUNC model from ModelScope or a fine-tuned model obtained from ModelScope.
+```text
+# For example, to replace the ASR model with damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx, use the following parameter setting --model-dir
+    --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx 
+# Set the port number using --port
+    --port <port number>
+# Set the number of inference threads the server will start using --decoder-thread-num
+    --decoder-thread-num <decoder thread num>
+# Set the number of IO threads the server will start using --io-thread-num
+    --io-thread-num <io thread num>
+# Disable SSL certificate
+    --certfile 0
+```
 
 After executing the above command, the real-time speech transcription service will be started. If the model is specified as a ModelScope model id, the following models will be automatically downloaded from ModelScope:
-[FSMN-VAD](https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary)
-[Paraformer-lagre](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-en-16k-common-vocab10020-onnx/summary)
+[FSMN-VAD](https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary),
+[Paraformer-lagre](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-en-16k-common-vocab10020-onnx/summary),
 [CT-Transformer](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx/summary)
 
 If you wish to deploy your fine-tuned model (e.g., 10epoch.pb), you need to manually rename the model to model.pb and replace the original model.pb in ModelScope. Then, specify the path as `model_dir`.
