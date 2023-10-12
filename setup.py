@@ -40,6 +40,7 @@ requirements = {
         "textgrid",
         "protobuf",
         "tqdm",
+        "hdbscan",
     ],
     # train: The modules invoked when training only.
     "train": [
