@@ -42,6 +42,7 @@ requirements = {
         "protobuf",
         "tqdm",
         "hdbscan",
+        "umap",
     ],
     # train: The modules invoked when training only.
     "train": [
