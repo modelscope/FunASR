@@ -240,6 +240,28 @@ The modelscope pipeline supports all the models in <a class="reference external"
 <p>The decoding mode of <code class="docutils literal notranslate"><span class="pre">fast</span></code> and <code class="docutils literal notranslate"><span class="pre">normal</span></code> is fake streaming, which could be used for evaluating of recognition accuracy.
 Full code of demo, please ref to <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/discussions/151">demo</a></p>
 </div>
+<div class="section" id="paraformer-spk">
+<h4><a class="reference external" href="https://modelscope.cn/models/damo/speech_paraformer-large-vad-punc-spk_asr_nat-zh-cn/summary">Paraformer-Spk</a><a class="headerlink" href="#paraformer-spk" title="Permalink to this headline"></a></h4>
+<p>This model allows user to get recognition results which contain speaker info of each sentence. Refer to <a class="reference external" href="https://modelscope.cn/models/damo/speech_campplus_speaker-diarization_common/summary">CAM++</a> for detailed information about speaker diarization model.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
+<span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">audio_in</span> <span class="o">=</span> <span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_speaker_demo.wav&#39;</span>
+    <span class="n">output_dir</span> <span class="o">=</span> <span class="s2">&quot;./results&quot;</span>
+    <span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
+        <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">auto_speech_recognition</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_paraformer-large-vad-punc-spk_asr_nat-zh-cn&#39;</span><span class="p">,</span>
+        <span class="n">model_revision</span><span class="o">=</span><span class="s1">&#39;v0.0.2&#39;</span><span class="p">,</span>
+        <span class="n">vad_model</span><span class="o">=</span><span class="s1">&#39;damo/speech_fsmn_vad_zh-cn-16k-common-pytorch&#39;</span><span class="p">,</span>
+        <span class="n">punc_model</span><span class="o">=</span><span class="s1">&#39;damo/punc_ct-transformer_cn-en-common-vocab471067-large&#39;</span><span class="p">,</span>
+        <span class="n">output_dir</span><span class="o">=</span><span class="n">output_dir</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="n">audio_in</span><span class="p">,</span> <span class="n">batch_size_token</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">batch_size_token_threshold_s</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">max_single_segment_time</span><span class="o">=</span><span class="mi">6000</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">rec_result</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="rnn-t-online-model">
 <h4><a class="reference external" href="#">RNN-T-online model</a><a class="headerlink" href="#rnn-t-online-model" title="Permalink to this headline"></a></h4>
 <p>Undo</p>
