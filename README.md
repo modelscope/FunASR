@@ -28,6 +28,7 @@
 
 <a name="whats-new"></a>
 ## What's new: 
+- 2023/10/10: The ASR-SpeakersDiarization combined pipeline [speech_campplus_speaker-diarization_common](https://github.com/alibaba-damo-academy/FunASR/blob/main/egs_modelscope/asr_vad_spk/speech_paraformer-large-vad-punc-spk_asr_nat-zh-cn/demo.py) is now released. Experience the model to get recognition results with speaker information.
 - 2023/10/07: [FunCodec](https://github.com/alibaba-damo-academy/FunCodec): A Fundamental, Reproducible and Integrable Open-source Toolkit for Neural Speech Codec.
 - 2023/09/01: The offline file transcription service 2.0 (CPU) of Mandarin has been released, with added support for ffmpeg, timestamp, and hotword models. For more details, please refer to ([Deployment documentation](funasr/runtime/docs/SDK_tutorial.md)).
 - 2023/08/07: The real-time transcription service (CPU) of Mandarin has been released. For more details, please refer to ([Deployment documentation](funasr/runtime/docs/SDK_tutorial_online.md)).
