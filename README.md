@@ -28,6 +28,7 @@
 
 <a name="whats-new"></a>
 ## What's new: 
+- 2023/10/13: [SlideSpeech](https://slidespeech.github.io/): A large scale multi-modal audio-visual corpus with a significant amount of real-time synchronized slides.
 - 2023/10/07: [FunCodec](https://github.com/alibaba-damo-academy/FunCodec): A Fundamental, Reproducible and Integrable Open-source Toolkit for Neural Speech Codec.
 - 2023/09/01: The offline file transcription service 2.0 (CPU) of Mandarin has been released, with added support for ffmpeg, timestamp, and hotword models. For more details, please refer to ([Deployment documentation](funasr/runtime/docs/SDK_tutorial.md)).
 - 2023/08/07: The real-time transcription service (CPU) of Mandarin has been released. For more details, please refer to ([Deployment documentation](funasr/runtime/docs/SDK_tutorial_online.md)).
