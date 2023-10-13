@@ -105,6 +105,10 @@
 <li class="toctree-l3"><a class="reference internal" href="#id2">Intel(R) Xeon(R) Platinum 8163 CPU &#64; 2.50GHz    32core-64processor   without avx512_vnni</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#fsmn-vad-paraformer-en-ct-transformer">FSMN-VAD + Paraformer-en + CT-Transformer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Intel(R) Xeon(R) Platinum 8369B CPU &#64; 2.90GHz   16core-32processor    with avx512_vnni</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="benchmark_libtorch.html">CPU Benchmark (Libtorch)</a></li>
@@ -572,6 +576,106 @@ Node: <span class="s1">&#39;--quantize false&#39;</span> means fp32, otherwise i
 <td style="text-align: center;">81s</td>
 <td>0.002258</td>
 <td style="text-align: center;">442</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="section" id="fsmn-vad-paraformer-en-ct-transformer">
+<h2><a class="reference external" href="https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary">FSMN-VAD</a> + <a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-en-16k-common-vocab10020-onnx/summary">Paraformer-en</a> + <a class="reference external" href="https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch/summary">CT-Transformer</a><a class="headerlink" href="#fsmn-vad-paraformer-en-ct-transformer" title="Permalink to this headline"></a></h2>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./funasr-onnx-offline-rtf <span class="se">\</span>
+    --model-dir    ./asrmodel/speech_paraformer-large_asr_nat-en-16k-common-vocab10020-onnx <span class="se">\</span>
+    --quantize  <span class="nb">true</span> <span class="se">\</span>
+    --vad-dir   ./asrmodel/speech_fsmn_vad_zh-cn-16k-common-pytorch <span class="se">\</span>
+    --punc-dir  ./asrmodel/punc_ct-transformer_zh-cn-common-vocab272727-pytorch <span class="se">\</span>
+    --wav-path     ./librispeech_test_clean.scp  <span class="se">\</span>
+    --thread-num <span class="m">32</span>
+
+Node: <span class="s1">&#39;--quantize false&#39;</span> means fp32, otherwise it will be int8 
+</pre></div>
+</div>
+<div class="section" id="id3">
+<h3>Intel(R) Xeon(R) Platinum 8369B CPU &#64; 2.90GHz   16core-32processor    with avx512_vnni<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h3>
+<table border="1" class="docutils">
+<thead>
+<tr>
+<th>concurrent-tasks</th>
+<th style="text-align: center;">processing time(s)</th>
+<th>RTF</th>
+<th style="text-align: center;">Speedup Rate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1   (onnx fp32)</td>
+<td style="text-align: center;">1327s</td>
+<td>0.0682</td>
+<td style="text-align: center;">15</td>
+</tr>
+<tr>
+<td>1   (onnx int8)</td>
+<td style="text-align: center;">734s</td>
+<td>0.0377</td>
+<td style="text-align: center;">26</td>
+</tr>
+<tr>
+<td>8   (onnx fp32)</td>
+<td style="text-align: center;">169s</td>
+<td>0.0087</td>
+<td style="text-align: center;">114</td>
+</tr>
+<tr>
+<td>8   (onnx int8)</td>
+<td style="text-align: center;">94s</td>
+<td>0.0048</td>
+<td style="text-align: center;">205</td>
+</tr>
+<tr>
+<td>16   (onnx fp32)</td>
+<td style="text-align: center;">89s</td>
+<td>0.0046</td>
+<td style="text-align: center;">217</td>
+</tr>
+<tr>
+<td>16   (onnx int8)</td>
+<td style="text-align: center;">50s</td>
+<td>0.0025</td>
+<td style="text-align: center;">388</td>
+</tr>
+<tr>
+<td>32   (onnx fp32)</td>
+<td style="text-align: center;">78s</td>
+<td>0.0040</td>
+<td style="text-align: center;">248</td>
+</tr>
+<tr>
+<td>32   (onnx int8)</td>
+<td style="text-align: center;">43s</td>
+<td>0.0022</td>
+<td style="text-align: center;">448</td>
+</tr>
+<tr>
+<td>64   (onnx fp32)</td>
+<td style="text-align: center;">79s</td>
+<td>0.0041</td>
+<td style="text-align: center;">243</td>
+</tr>
+<tr>
+<td>64   (onnx int8)</td>
+<td style="text-align: center;">44s</td>
+<td>0.0022</td>
+<td style="text-align: center;">438</td>
+</tr>
+<tr>
+<td>96   (onnx fp32)</td>
+<td style="text-align: center;">80s</td>
+<td>0.0041</td>
+<td style="text-align: center;">240</td>
+</tr>
+<tr>
+<td>96   (onnx int8)</td>
+<td style="text-align: center;">45s</td>
+<td>0.0023</td>
+<td style="text-align: center;">428</td>
 </tr>
 </tbody>
 </table></div>
