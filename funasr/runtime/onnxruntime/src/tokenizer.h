@@ -5,6 +5,9 @@
 
 #pragma once
 #include <yaml-cpp/yaml.h>
+#include "cppjieba/DictTrie.hpp"
+#include "cppjieba/HMMModel.hpp"
+#include "cppjieba/Jieba.hpp"
 
 namespace funasr {
 class CTokenizer {
@@ -13,6 +16,10 @@ private:
 	bool  m_ready = false;
 	vector<string>   m_id2token,m_id2punc;
 	map<string, int>  m_token2id,m_punc2id;
+
+	cppjieba::DictTrie *jieba_dict_trie_;
+    cppjieba::HMMModel *jieba_model_;
+	cppjieba::Jieba jieba_processor_;
 
 public:
 
@@ -28,9 +35,13 @@ public:
 	string Id2Punc(int n_punc_id);
 	vector<int> Punc2Ids(vector<string> input);
 	vector<string> SplitChineseString(const string& str_info);
+	vector<string> SplitChineseJieba(const string& str_info);
 	void StrSplit(const string& str, const char split, vector<string>& res);
 	void Tokenize(const char* str_info, vector<string>& str_out, vector<int>& id_out);
 	bool IsPunc(string& Punc);
+	bool seg_jieba = false;
+	void SetJiebaRes(cppjieba::DictTrie *dict, cppjieba::HMMModel *hmm);
+	void JiebaInit(std::string punc_config);
 };
 
 } // namespace funasr

@@ -32,6 +32,8 @@ endif()
 
 include_directories(${PROJECT_SOURCE_DIR}/third_party/kaldi-native-fbank)
 include_directories(${PROJECT_SOURCE_DIR}/third_party/yaml-cpp/include)
+include_directories(${PROJECT_SOURCE_DIR}/third_party/jieba/include)
+include_directories(${PROJECT_SOURCE_DIR}/third_party/jieba/include/limonp/include)
 
 if(ENABLE_GLOG)
     include_directories(${PROJECT_SOURCE_DIR}/third_party/glog/src)

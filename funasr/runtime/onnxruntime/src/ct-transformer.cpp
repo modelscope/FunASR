@@ -40,6 +40,7 @@ void CTTransformer::InitPunc(const std::string &punc_model, const std::string &p
         m_szOutputNames.push_back(item.c_str());
 
 	m_tokenizer.OpenYaml(punc_config.c_str());
+    m_tokenizer.JiebaInit(punc_config);
 }
 
 CTTransformer::~CTTransformer()

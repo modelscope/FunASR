@@ -107,4 +107,8 @@ namespace funasr {
 #define DUN_INDEX 5
 #define CACHE_POP_TRIGGER_LIMIT   200
 
+#define JIEBA_DICT "jieba.c.dict"
+#define JIEBA_USERDICT "jieba_usr_dict"
+#define JIEBA_HMM_MODEL "jieba.hmm"
+
 } // namespace funasr
