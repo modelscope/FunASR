@@ -32,7 +32,7 @@ SDK 支持以下几种服务部署：
 ### 最新版本及image ID
 | image version                |  image ID | INFO |
 |------------------------------|-----|------|
-| funasr-runtime-sdk-en-cpu-0.1.0 |  4ce696fe9ba5   |      |
+| funasr-runtime-sdk-en-cpu-0.1.0 |  e0de03eb0163   |      |
 
 
 ## 中文实时语音听写服务（CPU版本）
