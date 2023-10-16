@@ -27,7 +27,7 @@ SDK 支持以下几种服务部署：
 
 ### 技术原理揭秘
 
-文档介绍了背后技术原理，识别准确率，计算效率等，以及核心优势介绍：便捷、高精度、高效率、长音频链路，详细文档参考（[点击此处](https://mp.weixin.qq.com/s/DHQwbgdBWcda0w_L60iUww)）
+文档介绍了背后技术原理，识别准确率，计算效率等，以及核心优势介绍：便捷、高精度、高效率、长音频链路，详细文档参考（[点击此处](https://mp.weixin.qq.com/s/DZZUTj-6xwFfi-96ml--4A)）
 
 ### 最新版本及image ID
 | image version                |  image ID | INFO |
