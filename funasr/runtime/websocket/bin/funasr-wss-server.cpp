@@ -205,6 +205,7 @@ int main(int argc, char* argv[]) {
                 found = s_asr_path.find("speech_paraformer-large_asr_nat-en-16k-common-vocab10020");
                 if (found != std::string::npos) {
                     model_path["model-revision"]="v1.0.0";
+                    s_itn_path="";
                 }
 
                 // modelscope
