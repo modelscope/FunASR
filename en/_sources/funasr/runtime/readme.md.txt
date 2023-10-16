@@ -18,7 +18,7 @@ To meet the needs of different users, we have prepared different tutorials with 
 
 ### Technical Principles
 
-The technical principles and documentation behind FunASR explain the underlying technology, recognition accuracy, computational efficiency, and core advantages of the framework, including convenience, high precision, high efficiency, and support for long audio chains. For detailed information, please refer to the documentation available by [docs](https://mp.weixin.qq.com/s/DHQwbgdBWcda0w_L60iUww). 
+The technical principles and documentation behind FunASR explain the underlying technology, recognition accuracy, computational efficiency, and core advantages of the framework, including convenience, high precision, high efficiency, and support for long audio chains. For detailed information, please refer to the documentation available by [docs](https://mp.weixin.qq.com/s/DZZUTj-6xwFfi-96ml--4A). 
 
 ### Deployment Tutorial
 
