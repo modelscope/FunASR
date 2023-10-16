@@ -8,10 +8,10 @@ install from pip
 pip install -U funasr_onnx
 # For the users in China, you could install with the command:
 # pip install -U funasr_onnx -i https://mirror.sjtu.edu.cn/pypi/web/simple
-# If you want to export .onnx file, you should install funasr
-pip install -U funasr
+# If you want to export .onnx file, you should install modelscope and funasr
+pip install -U modelscope funasr
 # For the users in China, you could install with the command:
-# pip install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple
+# pip install -U modelscope funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
 
 or install from source code
