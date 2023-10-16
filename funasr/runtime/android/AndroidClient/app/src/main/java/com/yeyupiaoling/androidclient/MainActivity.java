@@ -34,6 +34,13 @@ public class MainActivity extends AppCompatActivity {
     public static final String TAG = MainActivity.class.getSimpleName();
     // WebSocket地址，如果服务端没有使用SSL，请使用ws://
     public static final String ASR_HOST = "wss://192.168.0.1:10095";
+    // 发送的JSON数据
+    public static final String MODE = "2pass";
+    public static final String CHUNK_SIZE = "5, 10, 5";
+    public static final int CHUNK_INTERVAL = 10;
+    public static final int SEND_SIZE = 1920;
+    // 热词
+    private String hotWords="阿里巴巴 达摩院";
     // 采样率
     public static final int SAMPLE_RATE = 16000;
     // 声道数
@@ -42,7 +49,6 @@ public class MainActivity extends AppCompatActivity {
     public static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
     private AudioRecord audioRecord;
     private boolean isRecording = false;
-    private int minBufferSize;
     private AudioView audioView;
     private String allAsrText = "";
     private String asrText = "";
@@ -60,8 +66,6 @@ public class MainActivity extends AppCompatActivity {
         if (!hasPermission()) {
             requestPermission();
         }
-        // 录音参数
-        minBufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL, AUDIO_FORMAT);
         // 显示识别结果控件
         resultText = findViewById(R.id.result_text);
         // 显示录音状态控件
@@ -94,12 +98,12 @@ public class MainActivity extends AppCompatActivity {
         // 准备录音器
         try {
             // 确保有权限
-            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
                 requestPermission();
                 return;
             }
             // 创建录音器
-            audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE, CHANNEL, AUDIO_FORMAT, minBufferSize);
+            audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE, CHANNEL, AUDIO_FORMAT, SEND_SIZE);
         } catch (IllegalStateException e) {
             e.printStackTrace();
         }
@@ -191,13 +195,13 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "WebSocket连接失败: " + t + ": " + response);
             }
         });
-        String message = getMessage("2pass", "5, 10, 5", 10, true);
+        String message = getMessage(true);
         webSocket.send(message);
 
         audioRecord.startRecording();
-        byte[] bytes = new byte[minBufferSize];
+        byte[] bytes = new byte[SEND_SIZE];
         while (isRecording) {
-            int readSize = audioRecord.read(bytes, 0, minBufferSize);
+            int readSize = audioRecord.read(bytes, 0, SEND_SIZE);
             if (readSize > 0) {
                 ByteString byteString = ByteString.of(bytes);
                 webSocket.send(byteString);
@@ -211,20 +215,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // 发送第一步的JSON数据
-    public String getMessage(String mode, String strChunkSize, int chunkInterval, boolean isSpeaking) {
+    public String getMessage(boolean isSpeaking) {
         try {
             JSONObject obj = new JSONObject();
-            obj.put("mode", mode);
+            obj.put("mode", MODE);
             JSONArray array = new JSONArray();
-            String[] chunkList = strChunkSize.split(",");
+            String[] chunkList = CHUNK_SIZE.split(",");
             for (String s : chunkList) {
                 array.put(Integer.valueOf(s.trim()));
             }
             obj.put("chunk_size", array);
-            obj.put("chunk_interval", chunkInterval);
+            obj.put("chunk_interval", CHUNK_INTERVAL);
             obj.put("wav_name", "default");
-            // 热词
-            obj.put("hotwords", "阿里巴巴 达摩院");
+            obj.put("hotwords", hotWords);
             obj.put("wav_format", "pcm");
             obj.put("is_speaking", isSpeaking);
             return obj.toString();
@@ -236,13 +239,13 @@ public class MainActivity extends AppCompatActivity {
 
     // 检查权限
     private boolean hasPermission() {
-        return checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED &&
-                checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+        return checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED &&
+                checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
     }
 
     // 请求权限
     private void requestPermission() {
-        requestPermissions(new String[]{android.Manifest.permission.RECORD_AUDIO,
+        requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
     }
 }
