@@ -99,6 +99,28 @@ print(rec_result)
 ```
 The decoding mode of `fast` and `normal` is fake streaming, which could be used for evaluating of recognition accuracy.
 Full code of demo, please ref to [demo](https://github.com/alibaba-damo-academy/FunASR/discussions/151)
+
+#### [Paraformer-Spk](https://modelscope.cn/models/damo/speech_paraformer-large-vad-punc-spk_asr_nat-zh-cn/summary)
+This model allows user to get recognition results which contain speaker info of each sentence. Refer to [CAM++](https://modelscope.cn/models/damo/speech_campplus_speaker-diarization_common/summary) for detailed information about speaker diarization model.
+```python
+from modelscope.pipelines import pipeline
+from modelscope.utils.constant import Tasks
+
+if __name__ == '__main__':
+    audio_in = 'https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_speaker_demo.wav'
+    output_dir = "./results"
+    inference_pipeline = pipeline(
+        task=Tasks.auto_speech_recognition,
+        model='damo/speech_paraformer-large-vad-punc-spk_asr_nat-zh-cn',
+        model_revision='v0.0.2',
+        vad_model='damo/speech_fsmn_vad_zh-cn-16k-common-pytorch',
+        punc_model='damo/punc_ct-transformer_cn-en-common-vocab471067-large',
+        output_dir=output_dir,
+    )
+    rec_result = inference_pipeline(audio_in=audio_in, batch_size_token=5000, batch_size_token_threshold_s=40, max_single_segment_time=6000)
+    print(rec_result)
+```
+
 #### [RNN-T-online model]()
 Undo
 
