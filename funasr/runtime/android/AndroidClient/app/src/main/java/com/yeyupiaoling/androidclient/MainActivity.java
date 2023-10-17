@@ -2,18 +2,25 @@ package com.yeyupiaoling.androidclient;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
@@ -33,7 +40,7 @@ import okio.ByteString;
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = MainActivity.class.getSimpleName();
     // WebSocket地址，如果服务端没有使用SSL，请使用ws://
-    public static final String ASR_HOST = "wss://192.168.0.1:10095";
+    public String ASR_HOST = "";
     // 发送的JSON数据
     public static final String MODE = "2pass";
     public static final String CHUNK_SIZE = "5, 10, 5";
@@ -52,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
     private AudioView audioView;
     private String allAsrText = "";
     private String asrText = "";
+    private SharedPreferences sharedPreferences;
     // 控件
     private Button recordBtn;
     private TextView resultText;
@@ -75,22 +83,101 @@ public class MainActivity extends AppCompatActivity {
         recordBtn = findViewById(R.id.record_button);
         recordBtn.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_UP) {
-                isRecording = false;
-                stopRecording();
-                recordBtn.setText("按下录音");
-            } else if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                if (webSocket != null){
-                    webSocket.cancel();
-                    webSocket = null;
+                if (!ASR_HOST.equals("")) {
+                    isRecording = false;
+                    stopRecording();
+                    recordBtn.setText("按下录音");
                 }
-                allAsrText = "";
-                asrText = "";
-                isRecording = true;
-                startRecording();
-                recordBtn.setText("录音中...");
+            } else if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                if (!ASR_HOST.equals("")) {
+                    allAsrText = "";
+                    asrText = "";
+                    isRecording = true;
+                    startRecording();
+                    recordBtn.setText("录音中...");
+                }
             }
             return true;
         });
+        // 读取WebSocket地址
+        sharedPreferences = getSharedPreferences("FunASR", MODE_PRIVATE);
+        String uri = sharedPreferences.getString("uri", "");
+        if (uri.equals("")) {
+            showUriInput();
+        } else {
+            ASR_HOST = uri;
+            Toast.makeText(MainActivity.this, "WebSocket地址：" + ASR_HOST, Toast.LENGTH_SHORT).show();
+        }
+        // 读取热词
+        String hotWords = sharedPreferences.getString("hotwords", "");
+        if (!hotWords.equals("")) {
+            this.hotWords = hotWords;
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.change_uri) {
+            showUriInput();
+            return true;
+        } else if (id == R.id.change_hotwords) {
+            showHotWordsInput();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    // 显示WebSocket地址输入框
+    private void showUriInput() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle("请输入WebSocket地址：");
+        View view = LayoutInflater.from(MainActivity.this).inflate(R.layout.dialog_input_uri, null);
+        final EditText input = view.findViewById(R.id.uri_edit_text);
+        if (!ASR_HOST.equals("")) {
+            input.setText(ASR_HOST);
+        }
+        builder.setView(view);
+        builder.setPositiveButton("确定", (dialog, id) -> {
+            ASR_HOST = input.getText().toString();
+            if (!ASR_HOST.equals("")) {
+                Toast.makeText(MainActivity.this, "WebSocket地址：" + ASR_HOST, Toast.LENGTH_SHORT).show();
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("uri", ASR_HOST);
+                editor.apply();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    // 显示热词输入框
+    private void showHotWordsInput() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle("请输入热词：");
+        View view = LayoutInflater.from(MainActivity.this).inflate(R.layout.dialog_input_hotwords, null);
+        final EditText input = view.findViewById(R.id.hotwords_edit_text);
+        if (!this.hotWords.equals("")) {
+            input.setText(this.hotWords);
+        }
+        builder.setView(view);
+        builder.setPositiveButton("确定", (dialog, id) -> {
+            String hotwords = input.getText().toString();
+            if (!hotwords.equals("")) {
+                this.hotWords = hotwords;
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("hotwords", hotwords);
+                editor.apply();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     // 开始录音
