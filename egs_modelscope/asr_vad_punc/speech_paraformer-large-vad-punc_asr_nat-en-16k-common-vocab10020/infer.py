@@ -16,7 +16,7 @@ def modelscope_infer(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model', type=str, default="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch")
+    parser.add_argument('--model', type=str, default="damo/speech_paraformer-large-vad-punc_asr_nat-en-16k-common-vocab10020")
     parser.add_argument('--audio_in', type=str, default="./data/test/wav.scp")
     parser.add_argument('--output_dir', type=str, default="./results/")
     parser.add_argument('--decoding_mode', type=str, default="normal")

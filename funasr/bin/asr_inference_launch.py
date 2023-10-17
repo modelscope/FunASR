@@ -2056,6 +2056,8 @@ def inference_whisper(
 
     ncpu = kwargs.get("ncpu", 1)
     torch.set_num_threads(ncpu)
+    language = param_dict.get("language", None)
+    task = param_dict.get("task", "transcribe")
     if batch_size > 1:
         raise NotImplementedError("batch decoding is not implemented")
     if word_lm_train_config is not None:
@@ -2099,6 +2101,8 @@ def inference_whisper(
         penalty=penalty,
         nbest=nbest,
         streaming=streaming,
+        language=language,
+        task=task,
     )
     logging.info("speech2text_kwargs: {}".format(speech2text_kwargs))
     speech2text = Speech2TextWhisper(**speech2text_kwargs)
