@@ -6,7 +6,7 @@
 ### 2022-2023 by zhaoming,mali aihealthx.com 
 
 
-from flask import Flask,render_template,request,send_from_directory,jsonify
+from flask import Flask,render_template,request,send_from_directory,jsonify,redirect,url_for
 #from gevent.pywsgi import WSGIServer
  
 import datetime
@@ -20,7 +20,7 @@ app = Flask(__name__,static_folder='static',static_url_path="/static")
 
 @app.route('/')
 def homePage():
-    return render_template('recorderapp_test.html')
+    return redirect('/static/index.html')
 
  
 parser = argparse.ArgumentParser()
@@ -62,4 +62,4 @@ if __name__ == '__main__':
     #flask 
     print("srv run on ",port)
 
-    app.run(debug=True,host=args.host,port=port, ssl_context=(args.certfile,args.keyfile))
+    app.run(debug=False,threaded=True,host=args.host,port=port, ssl_context=(args.certfile,args.keyfile))

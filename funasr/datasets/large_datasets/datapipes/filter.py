@@ -13,7 +13,7 @@ class FilterIterDataPipe(IterableDataset):
         self.fn = fn
 
     def set_epoch(self, epoch):
-        self.epoch = epoch
+        self.datapipe.set_epoch(epoch)
 
     def __iter__(self):
         assert callable(self.fn)

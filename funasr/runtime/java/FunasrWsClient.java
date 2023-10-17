@@ -50,7 +50,8 @@ public class FunasrWsClient extends WebSocketClient {
   }
 
   public FunasrWsClient(URI serverURI) {
-    super(serverURI);
+    
+	super(serverURI);
   }
 
   public FunasrWsClient(URI serverUri, Map<String, String> httpHeaders) {
@@ -64,7 +65,7 @@ public class FunasrWsClient extends WebSocketClient {
 
   // send json at first time
   public void sendJson(
-      String mode, String strChunkSize, int chunkInterval, String wavName, boolean isSpeaking) {
+      String mode, String strChunkSize, int chunkInterval, String wavName, boolean isSpeaking,String suffix) {
     try {
 
       JSONObject obj = new JSONObject();
@@ -78,6 +79,14 @@ public class FunasrWsClient extends WebSocketClient {
       obj.put("chunk_size", array);
       obj.put("chunk_interval", new Integer(chunkInterval));
       obj.put("wav_name", wavName);
+	  if(FunasrWsClient.hotwords.trim().length()>0)
+	  {
+		  obj.put("hotwords", FunasrWsClient.hotwords.trim());
+	  }
+	  if(suffix.equals("wav")){
+	      suffix="pcm";
+	  }
+	  obj.put("wav_format", suffix);
       if (isSpeaking) {
         obj.put("is_speaking", new Boolean(true));
       } else {
@@ -114,7 +123,9 @@ public class FunasrWsClient extends WebSocketClient {
 
   // function for rec wav file
   public void recWav() {
-    sendJson(mode, strChunkSize, chunkInterval, wavName, true);
+	String fileName=FunasrWsClient.wavPath;
+	String suffix=fileName.split("\\.")[fileName.split("\\.").length-1];
+    sendJson(mode, strChunkSize, chunkInterval, wavName, true,suffix);
     File file = new File(FunasrWsClient.wavPath);
 
     int chunkSize = sendChunkSize;
@@ -178,6 +189,10 @@ public class FunasrWsClient extends WebSocketClient {
     try {
       jsonObject = (JSONObject) jsonParser.parse(message);
       logger.info("text: " + jsonObject.get("text"));
+	  if(jsonObject.containsKey("timestamp"))
+	  {
+		  logger.info("timestamp: " + jsonObject.get("timestamp"));
+	  }
     } catch (org.json.simple.parser.ParseException e) {
       e.printStackTrace();
     }
@@ -215,6 +230,7 @@ public class FunasrWsClient extends WebSocketClient {
   static String strChunkSize = "5,10,5";
   static int chunkInterval = 10;
   static int sendChunkSize = 1920;
+  static String hotwords="";
 
   String wavName = "javatest";
 
@@ -263,6 +279,12 @@ public class FunasrWsClient extends WebSocketClient {
         .setDefault("offline")
         .type(String.class)
         .required(false);
+    parser
+        .addArgument("--hotwords")
+        .help("hotwords, splited by space")
+        .setDefault("")
+        .type(String.class)
+        .required(false);
     String srvIp = "";
     String srvPort = "";
     String wavPath = "";
@@ -270,7 +292,7 @@ public class FunasrWsClient extends WebSocketClient {
     String chunk_size = "";
     int chunk_interval = 10;
     String strmode = "offline";
-
+    String hot="";
     try {
       Namespace ns = parser.parseArgs(args);
       srvIp = ns.get("host");
@@ -280,6 +302,7 @@ public class FunasrWsClient extends WebSocketClient {
       chunk_size = ns.get("chunk_size");
       chunk_interval = ns.get("chunk_interval");
       strmode = ns.get("mode");
+	  hot=ns.get("hotwords");
       System.out.println(srvPort);
 
     } catch (ArgumentParserException ex) {
@@ -291,6 +314,7 @@ public class FunasrWsClient extends WebSocketClient {
     FunasrWsClient.chunkInterval = chunk_interval;
     FunasrWsClient.wavPath = wavPath;
     FunasrWsClient.mode = strmode;
+	FunasrWsClient.hotwords=hot;
     System.out.println(
         "serIp="
             + srvIp

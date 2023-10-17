@@ -29,6 +29,14 @@ parser.add_argument("--chunk_size",
                     type=str,
                     default="5, 10, 5",
                     help="chunk")
+parser.add_argument("--encoder_chunk_look_back",
+                    type=int,
+                    default=4,
+                    help="number of chunks to lookback for encoder self-attention")
+parser.add_argument("--decoder_chunk_look_back",
+                    type=int,
+                    default=1,
+                    help="number of encoder chunks to lookback for decoder cross-attention")
 parser.add_argument("--chunk_interval",
                     type=int,
                     default=10,
@@ -99,7 +107,8 @@ async def record_microphone():
                     input=True,
                     frames_per_buffer=CHUNK)
 
-    message = json.dumps({"mode": args.mode, "chunk_size": args.chunk_size, "chunk_interval": args.chunk_interval,
+    message = json.dumps({"mode": args.mode, "chunk_size": args.chunk_size, "encoder_chunk_look_back": args.encoder_chunk_look_back,
+                          "decoder_chunk_look_back": args.decoder_chunk_look_back, "chunk_interval": args.chunk_interval, 
                           "wav_name": "microphone", "is_speaking": True})
     #voices.put(message)
     await websocket.send(message)

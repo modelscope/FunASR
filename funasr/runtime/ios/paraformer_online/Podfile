@@ -1,0 +1,7 @@
+
+platform :ios, '12.0'
+target 'paraformer_online' do
+    use_frameworks!
+    
+    pod 'onnxruntime-c'
+end

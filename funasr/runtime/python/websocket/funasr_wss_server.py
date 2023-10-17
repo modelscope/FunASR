@@ -103,8 +103,8 @@ inference_pipeline_asr_online = pipeline(
     model=args.asr_model_online,
     ngpu=args.ngpu,
     ncpu=args.ncpu,
-    model_revision='v1.0.4',
-    update_model='v1.0.4',
+    model_revision='v1.0.7',
+    update_model='v1.0.7',
     mode='paraformer_streaming')
 
 print("model loaded! only support one client at the same time now!!!!")
@@ -159,6 +159,10 @@ async def ws_serve(websocket, path):
                     websocket.wav_name = messagejson.get("wav_name")
                 if "chunk_size" in messagejson:
                     websocket.param_dict_asr_online["chunk_size"] = messagejson["chunk_size"]
+                if "encoder_chunk_look_back" in messagejson:
+                    websocket.param_dict_asr_online["encoder_chunk_look_back"] = messagejson["encoder_chunk_look_back"]
+                if "decoder_chunk_look_back" in messagejson:
+                    websocket.param_dict_asr_online["decoder_chunk_look_back"] = messagejson["decoder_chunk_look_back"]
                 if "mode" in messagejson:
                     websocket.mode = messagejson["mode"]
             if len(frames_asr_online) > 0 or len(frames_asr) > 0 or not isinstance(message, str):

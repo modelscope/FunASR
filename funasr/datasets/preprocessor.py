@@ -201,7 +201,7 @@ class CommonPreprocessor(AbsPreprocessor):
         self.seg_dict = None
         if seg_dict_file is not None:
             self.seg_dict = {}
-            with open(seg_dict_file) as f:
+            with open(seg_dict_file, "r", encoding="utf8") as f:
                 lines = f.readlines()
             for line in lines:
                 s = line.strip().split()

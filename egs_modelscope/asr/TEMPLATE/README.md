@@ -27,15 +27,18 @@ print(rec_result)
 inference_pipeline = pipeline(
     task=Tasks.auto_speech_recognition,
     model='damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online',
-    model_revision='v1.0.6',
+    model_revision='v1.0.7',
     update_model=False,
     mode='paraformer_streaming'
     )
 import soundfile
 speech, sample_rate = soundfile.read("example/asr_example.wav")
 
-chunk_size = [5, 10, 5] #[5, 10, 5] 600ms, [8, 8, 4] 480ms
-param_dict = {"cache": dict(), "is_final": False, "chunk_size": chunk_size}
+chunk_size = [0, 10, 5] #[0, 10, 5] 600ms, [0, 8, 4] 480ms
+encoder_chunk_look_back = 4 #number of chunks to lookback for encoder self-attention
+decoder_chunk_look_back = 1 #number of encoder chunks to lookback for decoder cross-attention
+param_dict = {"cache": dict(), "is_final": False, "chunk_size": chunk_size,
+              "encoder_chunk_look_back": encoder_chunk_look_back, "decoder_chunk_look_back": decoder_chunk_look_back}
 chunk_stride = chunk_size[1] * 960 # 600ms、480ms
 # first chunk, 600ms
 speech_chunk = speech[0:chunk_stride]
@@ -55,7 +58,7 @@ from modelscope.utils.constant import Tasks
 inference_pipeline = pipeline(
     task=Tasks.auto_speech_recognition,
     model='damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online',
-    model_revision='v1.0.6',
+    model_revision='v1.0.7',
     update_model=False,
     mode="paraformer_fake_streaming"
 )
@@ -64,6 +67,23 @@ rec_result = inference_pipeline(audio_in=audio_in)
 print(rec_result)
 ```
 Full code of demo, please ref to [demo](https://github.com/alibaba-damo-academy/FunASR/discussions/241)
+
+#### [Paraformer-contextual Model](https://www.modelscope.cn/models/damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404/summary)
+```python
+from modelscope.pipelines import pipeline
+from modelscope.utils.constant import Tasks
+
+param_dict = dict()
+# param_dict['hotword'] = "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/hotword.txt"
+param_dict['hotword']="邓郁松 王颖春 王晔君"
+inference_pipeline = pipeline(
+    task=Tasks.auto_speech_recognition,
+    model="damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404",
+    param_dict=param_dict)
+
+rec_result = inference_pipeline(audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_hotword.wav')
+print(rec_result)
+```
 
 #### [UniASR Model](https://www.modelscope.cn/models/damo/speech_UniASR_asr_2pass-zh-cn-8k-common-vocab3445-pytorch-online/summary)
 There are three decoding mode for UniASR model(`fast`、`normal`、`offline`), for more model details, please refer to [docs](https://www.modelscope.cn/models/damo/speech_UniASR_asr_2pass-zh-cn-8k-common-vocab3445-pytorch-online/summary)
@@ -79,6 +99,28 @@ print(rec_result)
 ```
 The decoding mode of `fast` and `normal` is fake streaming, which could be used for evaluating of recognition accuracy.
 Full code of demo, please ref to [demo](https://github.com/alibaba-damo-academy/FunASR/discussions/151)
+
+#### [Paraformer-Spk](https://modelscope.cn/models/damo/speech_paraformer-large-vad-punc-spk_asr_nat-zh-cn/summary)
+This model allows user to get recognition results which contain speaker info of each sentence. Refer to [CAM++](https://modelscope.cn/models/damo/speech_campplus_speaker-diarization_common/summary) for detailed information about speaker diarization model.
+```python
+from modelscope.pipelines import pipeline
+from modelscope.utils.constant import Tasks
+
+if __name__ == '__main__':
+    audio_in = 'https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_speaker_demo.wav'
+    output_dir = "./results"
+    inference_pipeline = pipeline(
+        task=Tasks.auto_speech_recognition,
+        model='damo/speech_paraformer-large-vad-punc-spk_asr_nat-zh-cn',
+        model_revision='v0.0.2',
+        vad_model='damo/speech_fsmn_vad_zh-cn-16k-common-pytorch',
+        punc_model='damo/punc_ct-transformer_cn-en-common-vocab471067-large',
+        output_dir=output_dir,
+    )
+    rec_result = inference_pipeline(audio_in=audio_in, batch_size_token=5000, batch_size_token_threshold_s=40, max_single_segment_time=6000)
+    print(rec_result)
+```
+
 #### [RNN-T-online model]()
 Undo
 
@@ -199,7 +241,7 @@ def modelscope_finetune(params):
 if __name__ == '__main__':
     params = modelscope_args(model="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch", data_path="./data")
     params.output_dir = "./checkpoint"              # m模型保存路径
-    params.data_path = "./example_data/"            # 数据路径
+    params.data_path = "speech_asr_aishell1_trainsets"            # 数据路径
     params.dataset_type = "small"                   # 小数据量设置small，若数据量大于1000小时，请使用large
     params.batch_bins = 2000                       # batch size，如果dataset_type="small"，batch_bins单位为fbank特征帧数，如果dataset_type="large"，batch_bins单位为毫秒，
     params.max_epoch = 20                           # 最大训练轮数

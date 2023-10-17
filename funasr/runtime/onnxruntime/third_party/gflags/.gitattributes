@@ -1,0 +1,3 @@
+# treat all files in this repository as text files
+# and normalize them to LF line endings when committed
+* text

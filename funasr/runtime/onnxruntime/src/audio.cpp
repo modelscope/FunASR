@@ -9,6 +9,14 @@
 #include "audio.h"
 #include "precomp.h"
 
+#ifdef _MSC_VER
+#pragma warning(disable:4996)
+#endif
+
+#if defined(__APPLE__)
+#include <string.h>
+#else
+
 extern "C" {
 #include <libavutil/opt.h>
 #include <libavcodec/avcodec.h>
@@ -17,6 +25,10 @@ extern "C" {
 #include <libavutil/samplefmt.h>
 #include <libswresample/swresample.h>
 }
+
+#endif
+
+
 
 using namespace std;
 
@@ -245,17 +257,20 @@ void Audio::WavResample(int32_t sampling_rate, const float *waveform,
 }
 
 bool Audio::FfmpegLoad(const char *filename, bool copy2char){
+#if defined(__APPLE__)
+    return false;
+#else
     // from file
     AVFormatContext* formatContext = avformat_alloc_context();
     if (avformat_open_input(&formatContext, filename, NULL, NULL) != 0) {
-        printf("Error: Could not open input file.");
+        LOG(ERROR) << "Error: Could not open input file.";
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
         return false;
     }
 
     if (avformat_find_stream_info(formatContext, NULL) < 0) {
-        printf("Error: Could not find stream information.");
+        LOG(ERROR) << "Error: Could not open input file.";
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
         return false;
@@ -265,23 +280,28 @@ bool Audio::FfmpegLoad(const char *filename, bool copy2char){
     int audioStreamIndex = av_find_best_stream(formatContext, AVMEDIA_TYPE_AUDIO, -1, -1, &codec, 0);
     if (audioStreamIndex >= 0) {
         codecParameters = formatContext->streams[audioStreamIndex]->codecpar;
+    }else {
+        LOG(ERROR) << "Error: Could not open input file.";
+        avformat_close_input(&formatContext);
+        avformat_free_context(formatContext);
+        return false;        
     }
     AVCodecContext* codecContext = avcodec_alloc_context3(codec);
     if (!codecContext) {
-        fprintf(stderr, "Failed to allocate codec context\n");
+        LOG(ERROR) << "Failed to allocate codec context";
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
         return false;
     }
     if (avcodec_parameters_to_context(codecContext, codecParameters) != 0) {
-        printf("Error: Could not copy codec parameters to codec context.");
+        LOG(ERROR) << "Error: Could not copy codec parameters to codec context.";
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
         avcodec_free_context(&codecContext);
         return false;
     }
     if (avcodec_open2(codecContext, codec, NULL) < 0) {
-        printf("Error: Could not open audio decoder.");
+        LOG(ERROR) << "Error: Could not open audio decoder.";
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
         avcodec_free_context(&codecContext);
@@ -299,14 +319,14 @@ bool Audio::FfmpegLoad(const char *filename, bool copy2char){
         nullptr // parent context
     );
     if (swr_ctx == nullptr) {
-        std::cerr << "Could not initialize resampler" << std::endl;
+        LOG(ERROR) << "Could not initialize resampler";
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
         avcodec_free_context(&codecContext);
         return false;
     }
     if (swr_init(swr_ctx) != 0) {
-        std::cerr << "Could not initialize resampler" << std::endl;
+        LOG(ERROR) << "Could not initialize resampler";
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
         avcodec_free_context(&codecContext);
@@ -344,7 +364,7 @@ bool Audio::FfmpegLoad(const char *filename, bool copy2char){
                         in_samples // input buffer size
                     );
                     if (ret < 0) {
-                        std::cerr << "Error resampling audio" << std::endl;
+                        LOG(ERROR) << "Error resampling audio";
                         break;
                     }
                     std::copy(resampled_buffer.begin(), resampled_buffer.end(), std::back_inserter(resampled_buffers));
@@ -403,12 +423,15 @@ bool Audio::FfmpegLoad(const char *filename, bool copy2char){
     }
     else
         return false;
-    
+#endif
 }
 
 bool Audio::FfmpegLoad(const char* buf, int n_file_len){
+#if defined(__APPLE__)
+    return false;
+#else
     // from buf
-    char* buf_copy = (char *)malloc(n_file_len);
+    void* buf_copy = av_malloc(n_file_len);
     memcpy(buf_copy, buf, n_file_len);
 
     AVIOContext* avio_ctx = avio_alloc_context(
@@ -423,7 +446,7 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
     AVFormatContext* formatContext = avformat_alloc_context();
     formatContext->pb = avio_ctx;
     if (avformat_open_input(&formatContext, "", NULL, NULL) != 0) {
-        printf("Error: Could not open input file.");
+        LOG(ERROR) << "Error: Could not open input file.";
         avio_context_free(&avio_ctx);
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
@@ -431,7 +454,7 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
     }
 
     if (avformat_find_stream_info(formatContext, NULL) < 0) {
-        printf("Error: Could not find stream information.");
+        LOG(ERROR) << "Error: Could not find stream information.";
         avio_context_free(&avio_ctx);
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
@@ -445,14 +468,14 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
     }
     AVCodecContext* codecContext = avcodec_alloc_context3(codec);
     if (!codecContext) {
-        fprintf(stderr, "Failed to allocate codec context\n");
+        LOG(ERROR) << "Failed to allocate codec context";
         avio_context_free(&avio_ctx);
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
         return false;
     }
     if (avcodec_parameters_to_context(codecContext, codecParameters) != 0) {
-        printf("Error: Could not copy codec parameters to codec context.");
+        LOG(ERROR) << "Error: Could not copy codec parameters to codec context.";
         avio_context_free(&avio_ctx);
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
@@ -460,7 +483,7 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
         return false;
     }
     if (avcodec_open2(codecContext, codec, NULL) < 0) {
-        printf("Error: Could not open audio decoder.");
+        LOG(ERROR) << "Error: Could not open audio decoder.";
         avio_context_free(&avio_ctx);
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
@@ -479,7 +502,7 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
         nullptr // parent context
     );
     if (swr_ctx == nullptr) {
-        std::cerr << "Could not initialize resampler" << std::endl;
+        LOG(ERROR) << "Could not initialize resampler";
         avio_context_free(&avio_ctx);
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
@@ -487,7 +510,7 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
         return false;
     }
     if (swr_init(swr_ctx) != 0) {
-        std::cerr << "Could not initialize resampler" << std::endl;
+        LOG(ERROR) << "Could not initialize resampler";
         avio_context_free(&avio_ctx);
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
@@ -526,7 +549,7 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
                         in_samples // input buffer size
                     );
                     if (ret < 0) {
-                        std::cerr << "Error resampling audio" << std::endl;
+                        LOG(ERROR) << "Error resampling audio";
                         break;
                     }
                     std::copy(resampled_buffer.begin(), resampled_buffer.end(), std::back_inserter(resampled_buffers));
@@ -577,7 +600,7 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
     }
     else
         return false;
-    
+#endif
 }
 
 
@@ -980,6 +1003,23 @@ int Audio::Fetch(float *&dout, int &len, int &flag)
     }
 }
 
+int Audio::Fetch(float *&dout, int &len, int &flag, float &start_time)
+{
+    if (frame_queue.size() > 0) {
+        AudioFrame *frame = frame_queue.front();
+        frame_queue.pop();
+
+        start_time = (float)(frame->GetStart())/MODEL_SAMPLE_RATE;
+        dout = speech_data + frame->GetStart();
+        len = frame->GetLen();
+        delete frame;
+        flag = S_END;
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
 void Audio::Padding()
 {
     float num_samples = speech_len;
@@ -1080,6 +1120,8 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
             if(asr_mode != ASR_OFFLINE){
                 if(buff_len >= step){
                     frame = new AudioFrame(step);
+                    frame->global_start = speech_start;
+                    frame->global_end = speech_start + step/seg_sample;
                     frame->data = (float*)malloc(sizeof(float) * step);
                     memcpy(frame->data, all_samples.data()+start-offset, step*sizeof(float));
                     asr_online_queue.push(frame);
@@ -1106,6 +1148,8 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
                 if(asr_mode != ASR_OFFLINE){
                     frame = new AudioFrame(end-start);
                     frame->is_final = true;
+                    frame->global_start = speech_start_i;
+                    frame->global_end = speech_end_i;
                     frame->data = (float*)malloc(sizeof(float) * (end-start));
                     memcpy(frame->data, all_samples.data()+start-offset, (end-start)*sizeof(float));
                     asr_online_queue.push(frame);
@@ -1115,6 +1159,8 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
                 if(asr_mode != ASR_ONLINE){
                     frame = new AudioFrame(end-start);
                     frame->is_final = true;
+                    frame->global_start = speech_start_i;
+                    frame->global_end = speech_end_i;
                     frame->data = (float*)malloc(sizeof(float) * (end-start));
                     memcpy(frame->data, all_samples.data()+start-offset, (end-start)*sizeof(float));
                     asr_offline_queue.push(frame);
@@ -1136,6 +1182,8 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
                 if(asr_mode != ASR_OFFLINE){
                     if(buff_len >= step){
                         frame = new AudioFrame(step);
+                        frame->global_start = speech_start;
+                        frame->global_end = speech_start + step/seg_sample;
                         frame->data = (float*)malloc(sizeof(float) * step);
                         memcpy(frame->data, all_samples.data()+start-offset, step*sizeof(float));
                         asr_online_queue.push(frame);
@@ -1146,8 +1194,8 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
 
             }else if(speech_end_i != -1){ // [-1,100]
                 if(speech_start == -1 or speech_offline_start == -1){
-                    LOG(ERROR) <<"Vad start is null while vad end is available." ;
-                    exit(-1);
+                    LOG(ERROR) <<"Vad start is null while vad end is available. Set vad start 0" ;
+                    speech_start = 0;
                 }
 
                 int start = speech_start*seg_sample;
@@ -1159,6 +1207,8 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
                 if(asr_mode != ASR_ONLINE){
                     frame = new AudioFrame(end-offline_start);
                     frame->is_final = true;
+                    frame->global_start = speech_offline_start;
+                    frame->global_end = speech_end_i;
                     frame->data = (float*)malloc(sizeof(float) * (end-offline_start));
                     memcpy(frame->data, all_samples.data()+offline_start-offset, (end-offline_start)*sizeof(float));
                     asr_offline_queue.push(frame);
@@ -1175,6 +1225,8 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
                             }
                             frame = new AudioFrame(step);
                             frame->is_final = is_final;
+                            frame->global_start = (int)((start+sample_offset)/seg_sample);
+                            frame->global_end = frame->global_start + step/seg_sample;
                             frame->data = (float*)malloc(sizeof(float) * step);
                             memcpy(frame->data, all_samples.data()+start-offset+sample_offset, step*sizeof(float));
                             asr_online_queue.push(frame);
@@ -1183,6 +1235,8 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
                     }else{
                         frame = new AudioFrame(0);
                         frame->is_final = true;
+                        frame->global_start = speech_start;   // in this case start >= end
+                        frame->global_end = speech_end_i;
                         asr_online_queue.push(frame);
                         frame = NULL;
                     }

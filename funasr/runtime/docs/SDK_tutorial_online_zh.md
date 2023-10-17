@@ -6,7 +6,7 @@ FunASR提供可便捷本地或者云端服务器部署的实时语音听写服�
 FunASR集成了达摩院语音实验室在Modelscope社区开源的语音端点检测(VAD)、Paraformer-large非流式语音识别(ASR)、Paraformer-large流式语音识别(ASR)、标点预测(PUNC) 等相关能力。软件包既可以实时地进行语音转文字，而且能够在说话句尾用高精度的转写文字修正输出，输出文字带有标点，支持高并发多路请求
 
 ## 服务器配置
-
+ 
 用户可以根据自己的业务需求，选择合适的服务器配置，推荐配置为：
 - 配置1: （X86，计算型），4核vCPU，内存8G，单机可以支持大约16路的请求
 - 配置2: （X86，计算型），16核vCPU，内存32G，单机可以支持大约32路的请求
@@ -34,6 +34,7 @@ curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/funas
 ```shell
 sudo bash funasr-runtime-deploy-online-cpu-zh.sh install --workspace ./funasr-runtime-resources
 ```
+**注：如果需要部署时间戳模型或者热词模型，在安装部署步骤2时选择对应模型，其中1为paraformer-large模型，2为paraformer-large 时间戳模型，3为paraformer-large 热词模型**
 
 ### 客户端测试与使用
 
@@ -66,31 +67,40 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass
 
 命令参数说明：
 ```text
---host 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，需要改为部署机器ip
+--host 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，
+       需要改为部署机器ip
 --port 10095 部署端口号
---mode：`offline`表示推理模式为一句话识别；`online`表示推理模式为实时语音识别；`2pass`表示为实时语音识别，并且说话句尾采用离线模型进行纠错。
+--mode：`offline`表示推理模式为一句话识别；`online`表示推理模式为实时语音识别；`2pass`表示为实时语音识别，
+       并且说话句尾采用离线模型进行纠错。
 --chunk_size：表示流式模型latency配置`[5,10,5]`，表示当前音频解码片段为600ms，并且回看300ms，右看300ms。
 --audio_in 需要进行转写的音频文件，支持文件路径，文件列表wav.scp
 --thread_num 设置并发发送线程数，默认为1
---ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
+--ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭+
+--hotword 如果模型为热词模型，可以设置热词: *.txt(每行一个热词) 或者空格分隔的热词字符串 (阿里巴巴 达摩院)
+--use_itn 设置是否使用itn，默认1开启，设置为0关闭
 ```
 
 ### cpp-client
 进入samples/cpp目录后，可以用cpp进行测试，指令如下：
 ```shell
-./funasr-wss-client-2pass --server-ip 127.0.0.1 --port 10095 --mode 2pass
+./funasr-wss-client-2pass --server-ip 127.0.0.1 --port 10095 --mode 2pass \
+   --wav-path ../audio/asr_example.wav
 ```
 
 命令参数说明：
 
 ```text
---server-ip 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，需要改为部署机器ip
+--server-ip 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，
+            需要改为部署机器ip
 --port 10095 部署端口号
---mode：`offline`表示推理模式为一句话识别；`online`表示推理模式为实时语音识别；`2pass`表示为实时语音识别，并且说话句尾采用离线模型进行纠错。
+--mode：`offline`表示推理模式为一句话识别；`online`表示推理模式为实时语音识别；`2pass`表示为实时语音识别，
+        并且说话句尾采用离线模型进行纠错。
 --chunk-size：表示流式模型latency配置`[5,10,5]`，表示当前音频解码片段为600ms，并且回看300ms，右看300ms。
 --wav-path 需要进行转写的音频文件，支持文件路径
 --thread-num 设置并发发送线程数，默认为1
 --is-ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
+--hotword 如果模型为热词模型，可以设置热词: *.txt(每行一个热词) 或者空格分隔的热词字符串 (阿里巴巴 达摩院)
+--use-itn 设置是否使用itn，默认1开启，设置为0关闭
 ```
 
 ### html-client

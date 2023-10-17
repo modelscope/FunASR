@@ -105,7 +105,7 @@ class DecoderLayerSANM(nn.Module):
 
         return x, tgt_mask, memory, memory_mask, cache
 
-    def forward_chunk(self, tgt, tgt_mask, memory, memory_mask=None, cache=None):
+    def forward_one_step(self, tgt, tgt_mask, memory, memory_mask=None, cache=None):
         """Compute decoded features.
 
         Args:
@@ -147,6 +147,47 @@ class DecoderLayerSANM(nn.Module):
 
 
         return x, tgt_mask, memory, memory_mask, cache
+
+    def forward_chunk(self, tgt, memory, fsmn_cache=None, opt_cache=None, chunk_size=None, look_back=0):
+        """Compute decoded features.
+
+        Args:
+            tgt (torch.Tensor): Input tensor (#batch, maxlen_out, size).
+            tgt_mask (torch.Tensor): Mask for input tensor (#batch, maxlen_out).
+            memory (torch.Tensor): Encoded memory, float32 (#batch, maxlen_in, size).
+            memory_mask (torch.Tensor): Encoded memory mask (#batch, maxlen_in).
+            cache (List[torch.Tensor]): List of cached tensors.
+                Each tensor shape should be (#batch, maxlen_out - 1, size).
+
+        Returns:
+            torch.Tensor: Output tensor(#batch, maxlen_out, size).
+            torch.Tensor: Mask for output tensor (#batch, maxlen_out).
+            torch.Tensor: Encoded memory (#batch, maxlen_in, size).
+            torch.Tensor: Encoded memory mask (#batch, maxlen_in).
+
+        """
+        residual = tgt
+        if self.normalize_before:
+            tgt = self.norm1(tgt)
+        tgt = self.feed_forward(tgt)
+
+        x = tgt
+        if self.self_attn:
+            if self.normalize_before:
+                tgt = self.norm2(tgt)
+            x, fsmn_cache = self.self_attn(tgt, None, fsmn_cache)
+            x = residual + self.dropout(x)
+
+        if self.src_attn is not None:
+            residual = x
+            if self.normalize_before:
+                x = self.norm3(x)
+
+            x, opt_cache = self.src_attn.forward_chunk(x, memory, opt_cache, chunk_size, look_back)
+            x = residual + x
+
+        return x, memory, fsmn_cache, opt_cache
+
 
 class FsmnDecoderSCAMAOpt(BaseTransformerDecoder):
     """
@@ -397,7 +438,7 @@ class FsmnDecoderSCAMAOpt(BaseTransformerDecoder):
         for i in range(self.att_layer_num):
             decoder = self.decoders[i]
             c = cache[i]
-            x, tgt_mask, memory, memory_mask, c_ret = decoder.forward_chunk(
+            x, tgt_mask, memory, memory_mask, c_ret = decoder.forward_one_step(
                 x, tgt_mask, memory, memory_mask, cache=c
             )
             new_cache.append(c_ret)
@@ -407,13 +448,13 @@ class FsmnDecoderSCAMAOpt(BaseTransformerDecoder):
                 j = i + self.att_layer_num
                 decoder = self.decoders2[i]
                 c = cache[j]
-                x, tgt_mask, memory, memory_mask, c_ret = decoder.forward_chunk(
+                x, tgt_mask, memory, memory_mask, c_ret = decoder.forward_one_step(
                     x, tgt_mask, memory, memory_mask, cache=c
                 )
                 new_cache.append(c_ret)
 
         for decoder in self.decoders3:
-            x, tgt_mask, memory, memory_mask, _ = decoder.forward_chunk(
+            x, tgt_mask, memory, memory_mask, _ = decoder.forward_one_step(
                 x, tgt_mask, memory, None, cache=None
             )
 
@@ -837,6 +878,7 @@ class ParaformerSANMDecoder(BaseTransformerDecoder):
         lora_rank: int = 8,
         lora_alpha: int = 16,
         lora_dropout: float = 0.1,
+        chunk_multiply_factor: tuple = (1,),
         tf2torch_tensor_name_prefix_torch: str = "decoder",
         tf2torch_tensor_name_prefix_tf: str = "seq2seq/decoder",
     ):
@@ -929,6 +971,7 @@ class ParaformerSANMDecoder(BaseTransformerDecoder):
         )
         self.tf2torch_tensor_name_prefix_torch = tf2torch_tensor_name_prefix_torch
         self.tf2torch_tensor_name_prefix_tf = tf2torch_tensor_name_prefix_tf
+        self.chunk_multiply_factor = chunk_multiply_factor
 
     def forward(
         self,
@@ -1020,35 +1063,43 @@ class ParaformerSANMDecoder(BaseTransformerDecoder):
             cache_layer_num = len(self.decoders)
             if self.decoders2 is not None:
                 cache_layer_num += len(self.decoders2)
-            new_cache = [None] * cache_layer_num
+            fsmn_cache = [None] * cache_layer_num
         else:
-            new_cache = cache["decode_fsmn"]
+            fsmn_cache = cache["decode_fsmn"]
+
+        if cache["opt"] is None:
+            cache_layer_num = len(self.decoders)
+            opt_cache = [None] * cache_layer_num
+        else:
+            opt_cache = cache["opt"]
+
         for i in range(self.att_layer_num):
             decoder = self.decoders[i]
-            x, tgt_mask, memory, memory_mask, c_ret = decoder.forward_chunk(
-                x, None, memory, None, cache=new_cache[i]
+            x, memory, fsmn_cache[i], opt_cache[i] = decoder.forward_chunk(
+                x, memory, fsmn_cache=fsmn_cache[i], opt_cache=opt_cache[i],
+                chunk_size=cache["chunk_size"], look_back=cache["decoder_chunk_look_back"]
             )
-            new_cache[i] = c_ret
 
         if self.num_blocks - self.att_layer_num > 1:
             for i in range(self.num_blocks - self.att_layer_num):
                 j = i + self.att_layer_num
                 decoder = self.decoders2[i]
-                x, tgt_mask, memory, memory_mask, c_ret = decoder.forward_chunk(
-                    x, None, memory, None, cache=new_cache[j]
+                x, memory, fsmn_cache[j], _  = decoder.forward_chunk(
+                    x, memory, fsmn_cache=fsmn_cache[j]
                 )
-                new_cache[j] = c_ret
 
         for decoder in self.decoders3:
-
-            x, tgt_mask, memory, memory_mask, _ = decoder.forward_chunk(
-                x, None, memory, None, cache=None
+            x, memory, _, _ = decoder.forward_chunk(
+                x, memory
             )
         if self.normalize_before:
             x = self.after_norm(x)
         if self.output_layer is not None:
             x = self.output_layer(x)
-        cache["decode_fsmn"] = new_cache
+
+        cache["decode_fsmn"] = fsmn_cache
+        if cache["decoder_chunk_look_back"] > 0 or cache["decoder_chunk_look_back"] == -1:
+            cache["opt"] = opt_cache
         return x
 
     def forward_one_step(
@@ -1082,7 +1133,7 @@ class ParaformerSANMDecoder(BaseTransformerDecoder):
         for i in range(self.att_layer_num):
             decoder = self.decoders[i]
             c = cache[i]
-            x, tgt_mask, memory, memory_mask, c_ret = decoder.forward_chunk(
+            x, tgt_mask, memory, memory_mask, c_ret = decoder.forward_one_step(
                 x, tgt_mask, memory, None, cache=c
             )
             new_cache.append(c_ret)
@@ -1092,14 +1143,14 @@ class ParaformerSANMDecoder(BaseTransformerDecoder):
                 j = i + self.att_layer_num
                 decoder = self.decoders2[i]
                 c = cache[j]
-                x, tgt_mask, memory, memory_mask, c_ret = decoder.forward_chunk(
+                x, tgt_mask, memory, memory_mask, c_ret = decoder.forward_one_step(
                     x, tgt_mask, memory, None, cache=c
                 )
                 new_cache.append(c_ret)
 
         for decoder in self.decoders3:
 
-            x, tgt_mask, memory, memory_mask, _ = decoder.forward_chunk(
+            x, tgt_mask, memory, memory_mask, _ = decoder.forward_one_step(
                 x, tgt_mask, memory, None, cache=None
             )
 

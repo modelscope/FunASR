@@ -99,5 +99,5 @@ Then you should set the `DATA_SOURCE` and `DATA_NAME` in `path.sh`. The rest of 
 |                |VBx DER(%)     | SOND DER(%)|cp-CER(%)  |
 |:---------------|:------------:|:------------:|----------:|
 |before finetune  |  16.87       |  1.51     |  10.18    |
-|after finetune |     16.87    |   1.51   |          |
+|after finetune |     16.87    |   1.51   |    **8.84**  |
 

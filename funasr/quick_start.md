@@ -26,7 +26,7 @@ python funasr_wss_server.py --port 10095
 python funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass --chunk_size "5,10,5"
 ```
 
-For more examples, please refer to [docs](https://alibaba-damo-academy.github.io/FunASR/en/runtime/websocket_python.html#id2).
+For more examples, please refer to [docs](runtime/python/websocket/README.md).
 
 ### C++ version Example
 

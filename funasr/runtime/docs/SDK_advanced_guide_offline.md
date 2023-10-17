@@ -36,9 +36,9 @@ sudo systemctl start docker
 Use the following command to pull and launch the Docker image for the FunASR runtime-SDK:
 
 ```shell
-sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-latest
+sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.2.2
 
-sudo docker run -p 10095:10095 -it --privileged=true -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-latest
+sudo docker run -p 10095:10095 -it --privileged=true -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.2.2
 ```
 
 Introduction to command parameters: 
@@ -49,35 +49,44 @@ Introduction to command parameters:
 
 ```
 
-
 ## Starting the server
 
 Use the flollowing script to start the server ：
 ```shell
-./run_server.sh --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
+nohup bash run_server.sh \
+  --download-model-dir /workspace/models \
+  --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
-  --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
+  --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx \
+  --itn-dir thuduj12/fst_itn_zh > log.out 2>&1 &
+
+# If you want to close ssl，please add：--certfile 0
+# If you want to deploy the timestamp or hotword model, please set --model-dir to the corresponding model:
+# speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx（timestamp）
+# damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（hotword）
+
 ```
 
-More details about the script run_server.sh:
+### More details about the script run_server.sh:
 
-The FunASR-wss-server supports downloading models from Modelscope. You can set the model download address (--download-model-dir, default is /workspace/models) and the model ID (--model-dir, --vad-dir, --punc-dir). Here is an example:
+The funasr-wss-server supports downloading models from Modelscope. You can set the model download address (--download-model-dir, default is /workspace/models) and the model ID (--model-dir, --vad-dir, --punc-dir). Here is an example:
 
 ```shell
-cd /workspace/FunASR/funasr/runtime/websocket/build/bin
-./funasr-wss-server  \
+cd /workspace/FunASR/funasr/runtime
+nohup bash run_server.sh \
   --download-model-dir /workspace/models \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx \
+  --itn-dir thuduj12/fst_itn_zh \
   --decoder-thread-num 32 \
   --io-thread-num  8 \
   --port 10095 \
   --certfile  ../../../ssl_key/server.crt \
-  --keyfile ../../../ssl_key/server.key
+  --keyfile ../../../ssl_key/server.key > log.out 2>&1 &
  ```
 
-Introduction to command parameters: 
+Introduction to run_server.sh parameters: 
 
 ```text
 --download-model-dir: Model download address, download models from Modelscope by setting the model ID.
@@ -87,81 +96,45 @@ Introduction to command parameters:
 --vad-quant: True for quantized VAD model, False for non-quantized VAD model. Default is True.
 --punc-dir: Modelscope model ID.
 --punc-quant: True for quantized PUNC model, False for non-quantized PUNC model. Default is True.
+--itn-dir modelscope model ID
 --port: Port number that the server listens on. Default is 10095.
 --decoder-thread-num: Number of inference threads that the server starts. Default is 8.
 --io-thread-num: Number of IO threads that the server starts. Default is 1.
---certfile <string>: SSL certificate file. Default is ../../../ssl_key/server.crt.
---keyfile <string>: SSL key file. Default is ../../../ssl_key/server.key.
+--certfile <string>: SSL certificate file. Default is ../../../ssl_key/server.crt. If you want to close ssl，set 0
+--keyfile <string>: SSL key file. Default is ../../../ssl_key/server.key. 
 ```
 
-The FunASR-wss-server also supports loading models from a local path (see Preparing Model Resources for detailed instructions on preparing local model resources). Here is an example:
-
-```shell
-cd /workspace/FunASR/funasr/runtime/websocket/build/bin
-./funasr-wss-server  \
-  --model-dir /workspace/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx \
-  --vad-dir /workspace/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
-  --punc-dir /workspace/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx \
-  --decoder-thread-num 32 \
-  --io-thread-num  8 \
-  --port 10095 \
-  --certfile  ../../../ssl_key/server.crt \
-  --keyfile ../../../ssl_key/server.key
- ```
-
-
-## Preparing Model Resources
-
-If you choose to download models from Modelscope through the FunASR-wss-server, you can skip this step. The vad, asr, and punc model resources in the offline file transcription service of FunASR are all from Modelscope. The model addresses are shown in the table below:
-
-| Model | Modelscope url                                                                                                   |
-|-------|------------------------------------------------------------------------------------------------------------------|
-| VAD   | https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary |
-| ASR   | https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary                           |
-| PUNC  | https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch/summary               |
-
-The offline file transcription service deploys quantized ONNX models. Below are instructions on how to export ONNX models and their quantization. You can choose to export ONNX models from Modelscope, local files, or finetuned resources: 
-
-### Exporting ONNX models from Modelscope
-
-Download the corresponding model with the given model name from the Modelscope website, and then export the quantized ONNX model
-
-```shell
-python -m funasr.export.export_model \
---export-dir ./export \
---type onnx \
---quantize True \
---model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch \
---model-name damo/speech_fsmn_vad_zh-cn-16k-common-pytorch \
---model-name damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch
-```
-
-Introduction to command parameters:
-
+### Shutting Down the FunASR Service
 ```text
---model-name: The name of the model on Modelscope, for example: damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
---export-dir: The export directory of ONNX model.
---type: Model type, currently supports ONNX and torch.
---quantize: Quantize the int8 model.
+# Check the PID of the funasr-wss-server process
+ps -x | grep funasr-wss-server
+kill -9 PID
 ```
 
-### Exporting ONNX models from local files
-
-Set the model name to the local path of the model, and export the quantized ONNX model:
-
-```shell
-python -m funasr.export.export_model --model-name /workspace/models/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize True
+### Modifying Models and Other Parameters
+To replace the currently used model or other parameters, you need to first shut down the FunASR service, make the necessary modifications to the parameters you want to replace, and then restart the FunASR service. The model should be either an ASR/VAD/PUNC model from ModelScope or a fine-tuned model obtained from ModelScope.
+```text
+# For example, to replace the ASR model with damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx, use the following parameter setting --model-dir
+    --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx 
+# Set the port number using --port
+    --port <port number>
+# Set the number of inference threads the server will start using --decoder-thread-num
+    --decoder-thread-num <decoder thread num>
+# Set the number of IO threads the server will start using --io-thread-num
+    --io-thread-num <io thread num>
+# Disable SSL certificate
+    --certfile 0
 ```
 
+After executing the above command, the real-time speech transcription service will be started. If the model is specified as a ModelScope model id, the following models will be automatically downloaded from ModelScope:
+[FSMN-VAD](https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary),
+[Paraformer-lagre](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary),
+[CT-Transformer](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx/summary),
+[FST-ITN](https://www.modelscope.cn/models/thuduj12/fst_itn_zh/summary)
 
-### Exporting models from finetuned resources
+If you wish to deploy your fine-tuned model (e.g., 10epoch.pb), you need to manually rename the model to model.pb and replace the original model.pb in ModelScope. Then, specify the path as `model_dir`.
 
-If you want to deploy a finetuned model, you can follow these steps:
-Rename the model you want to deploy after finetuning (for example, 10epoch.pb) to model.pb, and replace the original model.pb in Modelscope with this one. If the path of the replaced model is /path/to/finetune/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch, use the following command to convert the finetuned model to an ONNX model: 
 
-```shell
-python -m funasr.export.export_model --model-name /path/to/finetune/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type onnx --quantize True
-```
 
 ## Starting the client
 
@@ -181,6 +154,8 @@ Introduction to command parameters:
 --output_dir: the path to the recognition result output.
 --ssl: whether to use SSL encryption. The default is to use SSL.
 --mode: offline mode.
+--hotword: If am is hotword model, setting hotword: *.txt(one hotword perline) or hotwords seperate by space (could be: 阿里巴巴 达摩院)
+--use_itn: whether to use itn, the default value is 1 for enabling and 0 for disabling.
 ```
 
 ### c++-client
@@ -191,26 +166,17 @@ Introduction to command parameters:
 Introduction to command parameters:
 
 ```text
---host: the IP address of the server. It can be set to 127.0.0.1 for local testing.
+--server-ip: the IP address of the server. It can be set to 127.0.0.1 for local testing.
 --port: the port number of the server listener.
---audio_in: the audio input. Input can be a path to a wav file or a wav.scp file (a Kaldi-formatted wav list in which each line includes a wav_id followed by a tab and a wav_path).
---output_dir: the path to the recognition result output.
---ssl: whether to use SSL encryption. The default is to use SSL.
---mode: offline mode.
+--wav-path: the audio input. Input can be a path to a wav file or a wav.scp file (a Kaldi-formatted wav list in which each line includes a wav_id followed by a tab and a wav_path).
+--is-ssl: whether to use SSL encryption. The default is to use SSL.
+--hotword: If am is hotword model, setting hotword: *.txt(one hotword perline) or hotwords seperate by space (could be: 阿里巴巴 达摩院)
+--use-itn: whether to use itn, the default value is 1 for enabling and 0 for disabling.
 ```
 
 ### Custom client
 
-If you want to define your own client, the Websocket communication protocol is as follows:
-
-```text
-# First communication
-{"mode": "offline", "wav_name": wav_name, "is_speaking": True}
-# Send wav data
-Bytes data
-# Send end flag
-{"is_speaking": False}
-```
+If you want to define your own client, see the [Websocket communication protocol](./websocket_protocol.md)
 
 ## How to customize service deployment
 

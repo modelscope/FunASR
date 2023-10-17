@@ -149,3 +149,34 @@ Node: '--quantize false' means fp32, otherwise it will be int8
 |  64   (onnx int8)   |        81s         | 0.002232 |     448      |
 |  96   (onnx fp32)   |        117s        | 0.003257 |     307      |
 |  96   (onnx int8)   |        81s         | 0.002258 |     442      |
+
+## [FSMN-VAD](https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary) + [Paraformer-en](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-en-16k-common-vocab10020-onnx/summary) + [CT-Transformer](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch/summary)
+
+```shell
+./funasr-onnx-offline-rtf \
+    --model-dir    ./asrmodel/speech_paraformer-large_asr_nat-en-16k-common-vocab10020-onnx \
+    --quantize  true \
+    --vad-dir   ./asrmodel/speech_fsmn_vad_zh-cn-16k-common-pytorch \
+    --punc-dir  ./asrmodel/punc_ct-transformer_zh-cn-common-vocab272727-pytorch \
+    --wav-path     ./librispeech_test_clean.scp  \
+    --thread-num 32
+
+Node: '--quantize false' means fp32, otherwise it will be int8 
+```
+
+ ### Intel(R) Xeon(R) Platinum 8369B CPU @ 2.90GHz   16core-32processor    with avx512_vnni
+
+| concurrent-tasks    | processing time(s) | RTF      | Speedup Rate |
+|---------------------|:------------------:|----------|:------------:|
+|  1   (onnx fp32)    |         1327s        |  0.0682  |      15      |
+|  1   (onnx int8)    |         734s         |  0.0377  |      26      |
+|  8   (onnx fp32)    |         169s         |  0.0087  |      114     |
+|  8   (onnx int8)    |         94s          |  0.0048  |      205     |
+|  16   (onnx fp32)   |         89s          |  0.0046  |      217     |
+|  16   (onnx int8)   |         50s          |  0.0025  |      388     |
+|  32   (onnx fp32)   |         78s          |  0.0040  |      248     |
+|  32   (onnx int8)   |         43s          |  0.0022  |      448     |
+|  64   (onnx fp32)   |         79s          |  0.0041  |      243     |
+|  64   (onnx int8)   |         44s          |  0.0022  |      438     |
+|  96   (onnx fp32)   |         80s          |  0.0041  |      240     |
+|  96   (onnx int8)   |         45s          |  0.0023  |      428     |

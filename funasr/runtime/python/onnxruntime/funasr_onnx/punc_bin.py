@@ -29,7 +29,13 @@ class CT_Transformer():
                  ):
     
         if not Path(model_dir).exists():
-            from modelscope.hub.snapshot_download import snapshot_download
+            try:
+                from modelscope.hub.snapshot_download import snapshot_download
+            except:
+                raise "You are exporting model from modelscope, please install modelscope and try it again. To install modelscope, you could:\n" \
+                      "\npip3 install -U modelscope\n" \
+                      "For the users in China, you could install with the command:\n" \
+                      "\npip3 install -U modelscope -i https://mirror.sjtu.edu.cn/pypi/web/simple"
             try:
                 model_dir = snapshot_download(model_dir, cache_dir=cache_dir)
             except:
@@ -41,7 +47,13 @@ class CT_Transformer():
             model_file = os.path.join(model_dir, 'model_quant.onnx')
         if not os.path.exists(model_file):
             print(".onnx is not exist, begin to export onnx")
-            from funasr.export.export_model import ModelExport
+            try:
+                from funasr.export.export_model import ModelExport
+            except:
+                raise "You are exporting onnx, please install funasr and try it again. To install funasr, you could:\n" \
+                      "\npip3 install -U funasr\n" \
+                      "For the users in China, you could install with the command:\n" \
+                      "\npip3 install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple"
             export_model = ModelExport(
                 cache_dir=cache_dir,
                 onnx=True,

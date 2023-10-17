@@ -93,25 +93,6 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
         exit 2
     fi
 
-    ## use_word_lm=false
-    ## # Create word-list for word-LM training
-    ## if ${use_word_lm} && [ "${token_type}" != word ]; then
-    ##     echo "Generate word level token_list from ${lm_train_text}"
-    ##     python -m funasr.bin.tokenize_text \
-    ##         --token_type word \
-    ##         --input "${lm_train_text}" \
-    ##         --output "${token_list}" \
-    ##         --field 2- \
-    ##         --cleaner "${cleaner}" \
-    ##         --g2p "${g2p}" \
-    ##         --write_vocabulary true \
-    ##         --vocabulary_size "${word_vocab_size}" \
-    ##         --add_symbol "${blank}:0" \
-    ##         --add_symbol "${sos}:1" \
-    ##         --add_symbol "${eos}:2" \
-    ##         --add_symbol "${oov}:-1" 
-    ## fi
-
     lm_token_list="${token_list}"
 
 fi
@@ -233,13 +214,15 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
     echo "Stage 3: Calc perplexity: ${lm_test_text}"
     
     python ../../../funasr/bin/lm_inference_launch.py \
-        --output_dir "${lm_exp}/perplexity_test" \
+        --output_dir "${lm_exp}/perplexity_test/output.1" \
         --ngpu "${gpu_num}" \
         --batch_size 1 \
         --train_config "${lm_exp}"/config.yaml \
         --model_file "${lm_exp}/${inference_lm}" \
         --data_path_and_name_and_type "${lm_test_text},text,text" \
         --num_workers 1 \
+        --gpuid_list 0 \
+        --mode "transformer" \
         --split_with_space false 
 fi
 

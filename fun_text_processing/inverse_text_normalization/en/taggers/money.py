@@ -53,7 +53,7 @@ class MoneyFst(GraphFst):
             + pynini.union(
                 pynutil.add_weight(((DAMO_SIGMA - "one") @ cardinal_graph), -0.7) @ add_leading_zero_to_double_digit
                 + delete_space
-                + pynutil.delete("cents"),
+                + (pynutil.delete("cents") | pynutil.delete("cent")),
                 pynini.cross("one", "01") + delete_space + pynutil.delete("cent"),
             )
             + pynutil.insert("\"")

@@ -1,0 +1,68 @@
+# Configuration for continuous integration service at appveyor.com
+
+version: '{build}'
+
+os: Visual Studio 2015
+
+environment:
+  matrix:
+  - Toolset: v140
+  - Toolset: v120
+  - Toolset: v110
+  - Toolset: v100
+  - Toolset: v90
+
+platform:
+  - Win32
+  - x64
+
+configuration:
+  - Release
+
+matrix:
+  exclude:
+    - Toolset: v90
+      platform: x64
+    - Toolset: v100
+      platform: x64
+
+build:
+  verbosity: minimal
+
+before_build:
+- ps: |
+    Write-Output "Configuration: $env:CONFIGURATION"
+    Write-Output "Platform: $env:PLATFORM"
+    $generator = switch ($env:TOOLSET)
+    {
+        "v140" {"Visual Studio 14 2015"}
+        "v120" {"Visual Studio 12 2013"}
+        "v110" {"Visual Studio 11 2012"}
+        "v100" {"Visual Studio 10 2010"}
+        "v90" {"Visual Studio 9 2008"}
+    }
+    if ($env:PLATFORM -eq "x64")
+    {
+        $generator = "$generator Win64"
+    }
+
+build_script:
+- ps: |
+    md _build -Force | Out-Null
+    cd _build
+
+    & cmake -G "$generator" -D CMAKE_CONFIGURATION_TYPES="Debug;Release" -D GFLAGS_BUILD_TESTING=ON -D GFLAGS_BUILD_SHARED_LIBS=ON -D GFLAGS_BUILD_STATIC_LIBS=ON ..
+    if ($LastExitCode -ne 0) {
+        throw "Exec: $ErrorMessage"
+    }
+    & cmake --build . --config $env:CONFIGURATION
+    if ($LastExitCode -ne 0) {
+        throw "Exec: $ErrorMessage"
+    }
+
+test_script:
+- ps: |
+    & ctest -C $env:CONFIGURATION --output-on-failure
+    if ($LastExitCode -ne 0) {
+        throw "Exec: $ErrorMessage"
+    }

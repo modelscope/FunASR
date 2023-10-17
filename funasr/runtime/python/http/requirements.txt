@@ -1,0 +1,6 @@
+modelscope>=1.8.4
+fastapi>=0.95.1
+ffmpeg-python
+aiofiles
+uvicorn
+requests

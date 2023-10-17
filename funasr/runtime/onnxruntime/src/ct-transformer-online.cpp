@@ -17,12 +17,12 @@ void CTTransformerOnline::InitPunc(const std::string &punc_model, const std::str
     session_options.DisableCpuMemArena();
 
     try{
-        m_session = std::make_unique<Ort::Session>(env_, punc_model.c_str(), session_options);
+        m_session = std::make_unique<Ort::Session>(env_, ORTSTRING(punc_model).c_str(), session_options);
         LOG(INFO) << "Successfully load model from " << punc_model;
     }
     catch (std::exception const &e) {
         LOG(ERROR) << "Error when load punc onnx model: " << e.what();
-        exit(0);
+        exit(-1);
     }
     // read inputnames outputnames
     string strName;
@@ -50,7 +50,7 @@ CTTransformerOnline::~CTTransformerOnline()
 {
 }
 
-string CTTransformerOnline::AddPunc(const char* sz_input, vector<string> &arr_cache)
+string CTTransformerOnline::AddPunc(const char* sz_input, vector<string> &arr_cache, std::string language)
 {
     string strResult;
     vector<string> strOut;
@@ -74,8 +74,8 @@ string CTTransformerOnline::AddPunc(const char* sz_input, vector<string> &arr_ca
     for (size_t i = 0; i < InputData.size(); i += TOKEN_LEN)
     {
         nDiff = (i + TOKEN_LEN) < InputData.size() ? (0) : (i + TOKEN_LEN - InputData.size());
-        vector<int32_t> InputIDs(InputData.begin() + i, InputData.begin() + i + TOKEN_LEN - nDiff);
-        vector<string> InputStr(strOut.begin() + i, strOut.begin() + i + TOKEN_LEN - nDiff);
+        vector<int32_t> InputIDs(InputData.begin() + i, InputData.begin() + i + (TOKEN_LEN - nDiff));
+        vector<string> InputStr(strOut.begin() + i, strOut.begin() + i + (TOKEN_LEN - nDiff));
         InputIDs.insert(InputIDs.begin(), RemainIDs.begin(), RemainIDs.end()); // RemainIDs+InputIDs;
         InputStr.insert(InputStr.begin(), RemainStr.begin(), RemainStr.end()); // RemainStr+InputStr;
 
@@ -102,10 +102,10 @@ string CTTransformerOnline::AddPunc(const char* sz_input, vector<string> &arr_ca
                 nSentEnd = nLastCommaIndex;
                 Punction[nSentEnd] = PERIOD_INDEX;
             }
-            RemainStr.assign(InputStr.begin() + nSentEnd + 1, InputStr.end());
-            RemainIDs.assign(InputIDs.begin() + nSentEnd + 1, InputIDs.end());
-            InputStr.assign(InputStr.begin(), InputStr.begin() + nSentEnd + 1);  // minit_sentence
-            Punction.assign(Punction.begin(), Punction.begin() + nSentEnd + 1);
+            RemainStr.assign(InputStr.begin() + (nSentEnd + 1), InputStr.end());
+            RemainIDs.assign(InputIDs.begin() + (nSentEnd + 1), InputIDs.end());
+            InputStr.assign(InputStr.begin(), InputStr.begin() + (nSentEnd + 1));  // minit_sentence
+            Punction.assign(Punction.begin(), Punction.begin() + (nSentEnd + 1));
         }
         
         for (auto& item : Punction)  
@@ -149,7 +149,7 @@ string CTTransformerOnline::AddPunc(const char* sz_input, vector<string> &arr_ca
             break;
         }
     }
-    arr_cache.assign(sentence_words_list.begin() + nSentEnd + 1, sentence_words_list.end());
+    arr_cache.assign(sentence_words_list.begin() + (nSentEnd + 1), sentence_words_list.end());
 
     if (sentenceOut.size() > 0 && m_tokenizer.IsPunc(sentenceOut[sentenceOut.size() - 1]))
     {
@@ -226,7 +226,6 @@ vector<int> CTTransformerOnline::Infer(vector<int32_t> input_data, int nCacheSiz
     catch (std::exception const &e)
     {
         LOG(ERROR) << "Error when run punc onnx forword: " << (e.what());
-        exit(0);
     }
     return punction;
 }

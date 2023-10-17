@@ -36,6 +36,8 @@ class AudioFrame {
     bool is_final = false;
     float* data = nullptr;
     int len;
+    int global_start = 0; // the start of a frame in the global time axis. in ms
+    int global_end = 0;   // the end of a frame in the global time axis. in ms
 };
 
 class Audio {
@@ -69,6 +71,7 @@ class Audio {
     int FetchChunck(AudioFrame *&frame);
     int FetchTpass(AudioFrame *&frame);
     int Fetch(float *&dout, int &len, int &flag);
+    int Fetch(float *&dout, int &len, int &flag, float &start_time);
     void Padding();
     void Split(OfflineStream* offline_streamj);
     void Split(VadModel* vad_obj, vector<std::vector<int>>& vad_segments, bool input_finished=true);

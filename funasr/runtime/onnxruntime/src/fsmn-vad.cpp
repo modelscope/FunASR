@@ -54,11 +54,11 @@ void FsmnVad::LoadConfigFromYaml(const char* filename){
 void FsmnVad::ReadModel(const char* vad_model) {
     try {
         vad_session_ = std::make_shared<Ort::Session>(
-                env_, vad_model, session_options_);
+                env_, ORTCHAR(vad_model), session_options_);
         LOG(INFO) << "Successfully load model from " << vad_model;
     } catch (std::exception const &e) {
         LOG(ERROR) << "Error when load vad onnx model: " << e.what();
-        exit(0);
+        exit(-1);
     }
     GetInputOutputInfo(vad_session_, &vad_in_names_, &vad_out_names_);
 }
@@ -197,7 +197,7 @@ void FsmnVad::LoadCmvn(const char *filename)
         ifstream cmvn_stream(filename);
         if (!cmvn_stream.is_open()) {
             LOG(ERROR) << "Failed to open file: " << filename;
-            exit(0);
+            exit(-1);
         }
         string line;
 
@@ -230,7 +230,7 @@ void FsmnVad::LoadCmvn(const char *filename)
         }
     }catch(std::exception const &e) {
         LOG(ERROR) << "Error when load vad cmvn : " << e.what();
-        exit(0);
+        exit(-1);
     }
 }
 
@@ -279,12 +279,15 @@ std::vector<std::vector<int>>
 FsmnVad::Infer(std::vector<float> &waves, bool input_finished) {
     std::vector<std::vector<float>> vad_feats;
     std::vector<std::vector<float>> vad_probs;
+    std::vector<std::vector<int>> vad_segments;
     FbankKaldi(vad_sample_rate_, vad_feats, waves);
+    if(vad_feats.size() == 0){
+      return vad_segments;
+    }
     LfrCmvn(vad_feats);
     Forward(vad_feats, &vad_probs, &in_cache_, input_finished);
 
     E2EVadModel vad_scorer = E2EVadModel();
-    std::vector<std::vector<int>> vad_segments;
     vad_segments = vad_scorer(vad_probs, waves, true, false, vad_silence_duration_, vad_max_len_,
                               vad_speech_noise_thres_, vad_sample_rate_);
     return vad_segments;

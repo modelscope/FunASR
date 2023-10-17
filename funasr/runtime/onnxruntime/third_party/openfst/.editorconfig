@@ -1,0 +1,11 @@
+; EditorConfig to support per-solution formatting.
+; Use the EditorConfig VS add-in to make this work before VS 2017
+
+; This is the default for the codeline.
+root = true
+
+[*]
+charset = utf-8  ; Remove the pesky BOM from files.
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true

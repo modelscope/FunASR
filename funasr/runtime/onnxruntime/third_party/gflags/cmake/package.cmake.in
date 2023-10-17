@@ -1,0 +1,49 @@
+# Per-generator CPack configuration file. See CPACK_PROJECT_CONFIG_FILE documented at
+# http://www.cmake.org/cmake/help/v2.8.12/cpack.html#variable:CPACK_PROJECT_CONFIG_FILE
+#
+# All common CPACK_* variables are set in CMakeLists.txt already. This file only
+# overrides some of these to provide package generator specific settings.
+
+# whether package contains all development files or only runtime files
+set (DEVEL @INSTALL_HEADERS@)
+
+# ------------------------------------------------------------------------------
+# Mac OS X package
+if (CPACK_GENERATOR MATCHES "PackageMaker|DragNDrop")
+
+  set (CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}")
+  if (DEVEL)
+    set (CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}-devel")
+  endif ()
+  set (CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}-${CPACK_PACKAGE_VERSION}")
+
+# ------------------------------------------------------------------------------
+# Debian package
+elseif (CPACK_GENERATOR MATCHES "DEB")
+
+  set (CPACK_PACKAGE_FILE_NAME   "lib${CPACK_PACKAGE_NAME}")
+  if (DEVEL)
+    set (CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}-dev")
+  else ()
+    set (CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}0")
+  endif ()
+  set (CPACK_PACKAGE_FILE_NAME   "${CPACK_PACKAGE_FILE_NAME}_${CPACK_PACKAGE_VERSION}-1_${CPACK_PACKAGE_ARCHITECTURE}")
+
+  set (CPACK_DEBIAN_PACKAGE_DEPENDS)
+  set (CPACK_DEBIAN_PACKAGE_SECTION      "devel")
+  set (CPACK_DEBIAN_PACKAGE_PRIORITY     "optional")
+  set (CPACK_DEBIAN_PACKAGE_HOMEPAGE     "${CPACK_RPM_PACKAGE_URL}")
+  set (CPACK_DEBIAN_PACKAGE_MAINTAINER   "${CPACK_PACKAGE_VENDOR}")
+  set (CPACK_DEBIAN_PACKAGE_ARCHITECTURE "${CPACK_PACKAGE_ARCHITECTURE}")
+
+# ------------------------------------------------------------------------------
+# RPM package
+elseif (CPACK_GENERATOR MATCHES "RPM")
+
+  set (CPACK_PACKAGE_FILE_NAME   "${CPACK_PACKAGE_NAME}")
+  if (DEVEL)
+    set (CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}-devel")
+  endif ()
+  set (CPACK_PACKAGE_FILE_NAME   "${CPACK_PACKAGE_FILE_NAME}-${CPACK_PACKAGE_VERSION}-1.${CPACK_PACKAGE_ARCHITECTURE}")
+
+endif ()

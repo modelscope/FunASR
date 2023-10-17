@@ -12,7 +12,7 @@ cd egs/aishell/paraformer
 Then you can directly start the recipe as follows:
 ```sh
 conda activate funasr
-. ./run.sh --CUDA_VISIBLE_DEVICES="0,1" --gpu_num=2
+bash run.sh --CUDA_VISIBLE_DEVICES "0,1" --gpu_num 2
 ```
 
 The training log files are saved in `${exp_dir}/exp/${model_dir}/log/train.log.*`， which can be viewed using the following command:

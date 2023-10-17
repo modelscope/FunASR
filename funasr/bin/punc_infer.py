@@ -117,12 +117,25 @@ class Text2Punc:
             new_mini_sentence_punc += [int(x) for x in punctuations_np]
             words_with_punc = []
             for i in range(len(mini_sentence)):
+                if (i==0 or self.punc_list[punctuations[i-1]] == "。" or self.punc_list[punctuations[i-1]] == "？") and len(mini_sentence[i][0].encode()) == 1:
+                    mini_sentence[i] = mini_sentence[i].capitalize()
+                if i == 0:
+                    if len(mini_sentence[i][0].encode()) == 1:
+                        mini_sentence[i] = " " + mini_sentence[i]
                 if i > 0:
                     if len(mini_sentence[i][0].encode()) == 1 and len(mini_sentence[i - 1][0].encode()) == 1:
                         mini_sentence[i] = " " + mini_sentence[i]
                 words_with_punc.append(mini_sentence[i])
                 if self.punc_list[punctuations[i]] != "_":
-                    words_with_punc.append(self.punc_list[punctuations[i]])
+                    punc_res = self.punc_list[punctuations[i]]
+                    if len(mini_sentence[i][0].encode()) == 1:
+                        if punc_res == "，":
+                            punc_res = ","
+                        elif punc_res == "。":
+                            punc_res = "."
+                        elif punc_res == "？":
+                            punc_res = "?"
+                    words_with_punc.append(punc_res)
             new_mini_sentence += "".join(words_with_punc)
             # Add Period for the end of the sentence
             new_mini_sentence_out = new_mini_sentence
@@ -131,8 +144,14 @@ class Text2Punc:
                 if new_mini_sentence[-1] == "，" or new_mini_sentence[-1] == "、":
                     new_mini_sentence_out = new_mini_sentence[:-1] + "。"
                     new_mini_sentence_punc_out = new_mini_sentence_punc[:-1] + [self.period]
-                elif new_mini_sentence[-1] != "。" and new_mini_sentence[-1] != "？":
+                elif new_mini_sentence[-1] == ",":
+                    new_mini_sentence_out = new_mini_sentence[:-1] + "."
+                    new_mini_sentence_punc_out = new_mini_sentence_punc[:-1] + [self.period]
+                elif new_mini_sentence[-1] != "。" and new_mini_sentence[-1] != "？" and len(new_mini_sentence[-1].encode())==0:
                     new_mini_sentence_out = new_mini_sentence + "。"
+                    new_mini_sentence_punc_out = new_mini_sentence_punc[:-1] + [self.period]
+                elif new_mini_sentence[-1] != "." and new_mini_sentence[-1] != "?" and len(new_mini_sentence[-1].encode())==1:
+                    new_mini_sentence_out = new_mini_sentence + "."
                     new_mini_sentence_punc_out = new_mini_sentence_punc[:-1] + [self.period]
         return new_mini_sentence_out, new_mini_sentence_punc_out
 

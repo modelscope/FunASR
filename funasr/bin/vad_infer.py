@@ -162,6 +162,8 @@ class Speech2VadSegmentOnline(Speech2VadSegment):
             feats = to_device(feats, device=self.device)
             feats_len = feats_len.int()
             waveforms = self.frontend.get_waveforms()
+            if max_end_sil == 800 and self.vad_infer_args.vad_post_conf["max_end_silence_time"] != 800:
+                max_end_sil = self.vad_infer_args.vad_post_conf["max_end_silence_time"]
 
             batch = {
                 "feats": feats,

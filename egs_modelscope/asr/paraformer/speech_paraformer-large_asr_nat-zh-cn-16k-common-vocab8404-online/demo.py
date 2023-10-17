@@ -4,7 +4,7 @@ from modelscope.utils.constant import Tasks
 inference_pipeline = pipeline(
     task=Tasks.auto_speech_recognition,
     model='damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online',
-    model_revision='v1.0.6',
+    model_revision='v1.0.7',
     update_model=False,
     mode="paraformer_fake_streaming"
 )

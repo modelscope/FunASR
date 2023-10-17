@@ -29,7 +29,7 @@ public:
 	void InitPunc(const std::string &punc_model, const std::string &punc_config, int thread_num);
 	~CTTransformerOnline();
 	vector<int>  Infer(vector<int32_t> input_data, int nCacheSize);
-	string AddPunc(const char* sz_input, vector<string> &arr_cache);
+	string AddPunc(const char* sz_input, vector<string> &arr_cache, std::string language="zh-cn");
 	void Transport(vector<float>& In, int nRows, int nCols);
 	void VadMask(int size, int vad_pos,vector<float>& Result);
 	void Triangle(int text_length, vector<float>& Result);

@@ -1,13 +1,17 @@
 # ONNXRuntime-python
 
-
-## Install `funasr_onnx`
+## Install `funasr-onnx`
 
 install from pip
+
 ```shell
-pip install -U funasr_onnx
+pip install -U funasr-onnx
 # For the users in China, you could install with the command:
-# pip install -U funasr_onnx -i https://mirror.sjtu.edu.cn/pypi/web/simple
+# pip install -U funasr-onnx -i https://mirror.sjtu.edu.cn/pypi/web/simple
+# If you want to export .onnx file, you should install modelscope and funasr
+pip install -U modelscope funasr
+# For the users in China, you could install with the command:
+# pip install -U modelscope funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
 
 or install from source code
@@ -23,7 +27,9 @@ pip install -e ./
 ## Inference with runtime
 
 ### Speech Recognition
+
 #### Paraformer
+
  ```python
 from funasr_onnx import Paraformer
 from pathlib import Path
@@ -36,6 +42,7 @@ wav_path = ['{}/.cache/modelscope/hub/damo/speech_paraformer-large_asr_nat-zh-cn
 result = model(wav_path)
 print(result)
  ```
+
 - `model_dir`: model_name in modelscope or local path downloaded from modelscope. If the local path is set, it should contain `model.onnx`, `config.yaml`, `am.mvn`
 - `batch_size`: `1` (Default), the batch size duration inference
 - `device_id`: `-1` (Default), infer on CPU. If you want to infer with GPU, set it to gpu_id (Please make sure that you have install the onnxruntime-gpu)
@@ -49,7 +56,9 @@ Output: `List[str]`: recognition result
 #### Paraformer-online
 
 ### Voice Activity Detection
+
 #### FSMN-VAD
+
 ```python
 from funasr_onnx import Fsmn_vad
 from pathlib import Path
@@ -62,6 +71,7 @@ model = Fsmn_vad(model_dir)
 result = model(wav_path)
 print(result)
 ```
+
 - `model_dir`: model_name in modelscope or local path downloaded from modelscope. If the local path is set, it should contain `model.onnx`, `config.yaml`, `am.mvn`
 - `batch_size`: `1` (Default), the batch size duration inference
 - `device_id`: `-1` (Default), infer on CPU. If you want to infer with GPU, set it to gpu_id (Please make sure that you have install the onnxruntime-gpu)
@@ -72,8 +82,8 @@ Input: wav formt file, support formats: `str, np.ndarray, List[str]`
 
 Output: `List[str]`: recognition result
 
-
 #### FSMN-VAD-online
+
 ```python
 from funasr_onnx import Fsmn_vad_online
 import soundfile
@@ -104,6 +114,7 @@ for sample_offset in range(0, speech_length, min(step, speech_length - sample_of
     if segments_result:
         print(segments_result)
 ```
+
 - `model_dir`: model_name in modelscope or local path downloaded from modelscope. If the local path is set, it should contain `model.onnx`, `config.yaml`, `am.mvn`
 - `batch_size`: `1` (Default), the batch size duration inference
 - `device_id`: `-1` (Default), infer on CPU. If you want to infer with GPU, set it to gpu_id (Please make sure that you have install the onnxruntime-gpu)
@@ -114,9 +125,10 @@ Input: wav formt file, support formats: `str, np.ndarray, List[str]`
 
 Output: `List[str]`: recognition result
 
-
 ### Punctuation Restoration
+
 #### CT-Transformer
+
 ```python
 from funasr_onnx import CT_Transformer
 
@@ -127,6 +139,7 @@ text_in="跨境河流是养育沿岸人民的生命之源长期以来为帮助�
 result = model(text_in)
 print(result[0])
 ```
+
 - `model_dir`: model_name in modelscope or local path downloaded from modelscope. If the local path is set, it should contain `model.onnx`, `config.yaml`, `am.mvn`
 - `device_id`: `-1` (Default), infer on CPU. If you want to infer with GPU, set it to gpu_id (Please make sure that you have install the onnxruntime-gpu)
 - `quantize`: `False` (Default), load the model of `model.onnx` in `model_dir`. If set `True`, load the model of `model_quant.onnx` in `model_dir`
@@ -136,8 +149,8 @@ Input: `str`, raw text of asr result
 
 Output: `List[str]`: recognition result
 
-
 #### CT-Transformer-online
+
 ```python
 from funasr_onnx import CT_Transformer_VadRealtime
 
@@ -155,6 +168,7 @@ for vad in vads:
 
 print(rec_result_all)
 ```
+
 - `model_dir`: model_name in modelscope or local path downloaded from modelscope. If the local path is set, it should contain `model.onnx`, `config.yaml`, `am.mvn`
 - `device_id`: `-1` (Default), infer on CPU. If you want to infer with GPU, set it to gpu_id (Please make sure that you have install the onnxruntime-gpu)
 - `quantize`: `False` (Default), load the model of `model.onnx` in `model_dir`. If set `True`, load the model of `model_quant.onnx` in `model_dir`
@@ -166,8 +180,9 @@ Output: `List[str]`: recognition result
 
 ## Performance benchmark
 
-Please ref to [benchmark](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/python/benchmark_onnx.md)
+Please ref to [benchmark](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/docs/benchmark_onnx.md)
 
 ## Acknowledge
+
 1. This project is maintained by [FunASR community](https://github.com/alibaba-damo-academy/FunASR).
 2. We partially refer [SWHL](https://github.com/RapidAI/RapidASR) for onnxruntime (only for paraformer model).

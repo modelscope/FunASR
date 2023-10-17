@@ -5,9 +5,9 @@ from multiprocessing import Pool
 
 import kaldiio
 import numpy as np
+import soundfile
 import torch.distributed as dist
 import torchaudio
-import soundfile
 
 
 def filter_wav_text(data_dir, dataset):
@@ -87,6 +87,7 @@ def calc_shape_core(root_path, args, idx):
                 sample_name, feature_path = line.strip().split()
                 feature = kaldiio.load_mat(feature_path)
                 n_frames, feature_dim = feature.shape
+                write_flag = True
                 if n_frames > 0 and length_min > 0:
                     write_flag = n_frames >= length_min
                 if n_frames > 0 and length_max > 0:
