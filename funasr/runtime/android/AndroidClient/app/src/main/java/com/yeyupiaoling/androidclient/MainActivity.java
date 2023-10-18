@@ -2,26 +2,31 @@ package com.yeyupiaoling.androidclient;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import javax.net.ssl.HostnameVerifier;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -32,8 +37,15 @@ import okio.ByteString;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = MainActivity.class.getSimpleName();
-    // WebSocket地址，如果服务端没有使用SSL，请使用ws://
-    public static final String ASR_HOST = "wss://192.168.0.1:10095";
+    // WebSocket地址
+    public String ASR_HOST = "";
+    // 发送的JSON数据
+    public static final String MODE = "2pass";
+    public static final String CHUNK_SIZE = "5, 10, 5";
+    public static final int CHUNK_INTERVAL = 10;
+    public static final int SEND_SIZE = 1920;
+    // 热词
+    private String hotWords = "阿里巴巴 达摩院 夜雨飘零";
     // 采样率
     public static final int SAMPLE_RATE = 16000;
     // 声道数
@@ -42,10 +54,10 @@ public class MainActivity extends AppCompatActivity {
     public static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
     private AudioRecord audioRecord;
     private boolean isRecording = false;
-    private int minBufferSize;
     private AudioView audioView;
     private String allAsrText = "";
     private String asrText = "";
+    private SharedPreferences sharedPreferences;
     // 控件
     private Button recordBtn;
     private TextView resultText;
@@ -60,8 +72,6 @@ public class MainActivity extends AppCompatActivity {
         if (!hasPermission()) {
             requestPermission();
         }
-        // 录音参数
-        minBufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL, AUDIO_FORMAT);
         // 显示识别结果控件
         resultText = findViewById(R.id.result_text);
         // 显示录音状态控件
@@ -71,22 +81,100 @@ public class MainActivity extends AppCompatActivity {
         recordBtn = findViewById(R.id.record_button);
         recordBtn.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_UP) {
-                isRecording = false;
-                stopRecording();
-                recordBtn.setText("按下录音");
-            } else if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                if (webSocket != null){
-                    webSocket.cancel();
-                    webSocket = null;
+                if (!ASR_HOST.equals("")) {
+                    isRecording = false;
+                    stopRecording();
+                    recordBtn.setText("按下录音");
                 }
-                allAsrText = "";
-                asrText = "";
-                isRecording = true;
-                startRecording();
-                recordBtn.setText("录音中...");
+            } else if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                if (!ASR_HOST.equals("")) {
+                    allAsrText = "";
+                    asrText = "";
+                    isRecording = true;
+                    startRecording();
+                    recordBtn.setText("录音中...");
+                }
             }
             return true;
         });
+        // 读取WebSocket地址
+        sharedPreferences = getSharedPreferences("FunASR", MODE_PRIVATE);
+        String uri = sharedPreferences.getString("uri", "");
+        if (uri.equals("")) {
+            showUriInput();
+        } else {
+            ASR_HOST = uri;
+        }
+        // 读取热词
+        String hotWords = sharedPreferences.getString("hotwords", "");
+        if (!hotWords.equals("")) {
+            this.hotWords = hotWords;
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.change_uri) {
+            showUriInput();
+            return true;
+        } else if (id == R.id.change_hotwords) {
+            showHotWordsInput();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    // 显示WebSocket地址输入框
+    private void showUriInput() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle("请输入WebSocket地址：");
+        View view = LayoutInflater.from(MainActivity.this).inflate(R.layout.dialog_input_uri, null);
+        final EditText input = view.findViewById(R.id.uri_edit_text);
+        if (!ASR_HOST.equals("")) {
+            input.setText(ASR_HOST);
+        }
+        builder.setView(view);
+        builder.setPositiveButton("确定", (dialog, id) -> {
+            ASR_HOST = input.getText().toString();
+            if (!ASR_HOST.equals("")) {
+                Toast.makeText(MainActivity.this, "WebSocket地址：" + ASR_HOST, Toast.LENGTH_SHORT).show();
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("uri", ASR_HOST);
+                editor.apply();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    // 显示热词输入框
+    private void showHotWordsInput() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle("请输入热词：");
+        View view = LayoutInflater.from(MainActivity.this).inflate(R.layout.dialog_input_hotwords, null);
+        final EditText input = view.findViewById(R.id.hotwords_edit_text);
+        if (!this.hotWords.equals("")) {
+            input.setText(this.hotWords);
+        }
+        builder.setView(view);
+        builder.setPositiveButton("确定", (dialog, id) -> {
+            String hotwords = input.getText().toString();
+            if (!hotwords.equals("")) {
+                this.hotWords = hotwords;
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("hotwords", hotwords);
+                editor.apply();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     // 开始录音
@@ -94,12 +182,12 @@ public class MainActivity extends AppCompatActivity {
         // 准备录音器
         try {
             // 确保有权限
-            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
                 requestPermission();
                 return;
             }
             // 创建录音器
-            audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE, CHANNEL, AUDIO_FORMAT, minBufferSize);
+            audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE, CHANNEL, AUDIO_FORMAT, SEND_SIZE);
         } catch (IllegalStateException e) {
             e.printStackTrace();
         }
@@ -127,14 +215,12 @@ public class MainActivity extends AppCompatActivity {
 
     // 读取录音数据
     private void setAudioData() throws Exception {
-        // 如果使用正常的wss，可以去掉这个
-        HostnameVerifier hostnameVerifier = (hostname, session) -> {
-            // 总是返回true，表示不验证域名
-            return true;
-        };
         // 建立WebSocket连接
         OkHttpClient client = new OkHttpClient.Builder()
-                .hostnameVerifier(hostnameVerifier)
+                // 忽略验证证书
+                .sslSocketFactory(SSLSocketClient.getSSLSocketFactory(), SSLSocketClient.getX509TrustManager())
+                // 不验证域名
+                .hostnameVerifier(SSLSocketClient.getHostnameVerifier())
                 .build();
         Request request = new Request.Builder()
                 .url(ASR_HOST)
@@ -145,6 +231,7 @@ public class MainActivity extends AppCompatActivity {
             public void onOpen(@NonNull WebSocket webSocket, @NonNull Response response) {
                 // 连接成功时的处理
                 Log.d(TAG, "WebSocket连接成功");
+                runOnUiThread(() -> Toast.makeText(MainActivity.this, "WebSocket连接成功", Toast.LENGTH_SHORT).show());
             }
 
             @Override
@@ -189,15 +276,16 @@ public class MainActivity extends AppCompatActivity {
             public void onFailure(@NonNull WebSocket webSocket, @NonNull Throwable t, Response response) {
                 // 连接失败时的处理
                 Log.d(TAG, "WebSocket连接失败: " + t + ": " + response);
+                runOnUiThread(() -> Toast.makeText(MainActivity.this, "WebSocket连接失败：" + t, Toast.LENGTH_SHORT).show());
             }
         });
-        String message = getMessage("2pass", "5, 10, 5", 10, true);
+        String message = getMessage(true);
         webSocket.send(message);
 
         audioRecord.startRecording();
-        byte[] bytes = new byte[minBufferSize];
+        byte[] bytes = new byte[SEND_SIZE];
         while (isRecording) {
-            int readSize = audioRecord.read(bytes, 0, minBufferSize);
+            int readSize = audioRecord.read(bytes, 0, SEND_SIZE);
             if (readSize > 0) {
                 ByteString byteString = ByteString.of(bytes);
                 webSocket.send(byteString);
@@ -211,20 +299,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // 发送第一步的JSON数据
-    public String getMessage(String mode, String strChunkSize, int chunkInterval, boolean isSpeaking) {
+    public String getMessage(boolean isSpeaking) {
         try {
             JSONObject obj = new JSONObject();
-            obj.put("mode", mode);
+            obj.put("mode", MODE);
             JSONArray array = new JSONArray();
-            String[] chunkList = strChunkSize.split(",");
+            String[] chunkList = CHUNK_SIZE.split(",");
             for (String s : chunkList) {
                 array.put(Integer.valueOf(s.trim()));
             }
             obj.put("chunk_size", array);
-            obj.put("chunk_interval", chunkInterval);
+            obj.put("chunk_interval", CHUNK_INTERVAL);
             obj.put("wav_name", "default");
-            // 热词
-            obj.put("hotwords", "阿里巴巴 达摩院");
+            obj.put("hotwords", hotWords);
             obj.put("wav_format", "pcm");
             obj.put("is_speaking", isSpeaking);
             return obj.toString();
@@ -236,13 +323,13 @@ public class MainActivity extends AppCompatActivity {
 
     // 检查权限
     private boolean hasPermission() {
-        return checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED &&
-                checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+        return checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED &&
+                checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
     }
 
     // 请求权限
     private void requestPermission() {
-        requestPermissions(new String[]{android.Manifest.permission.RECORD_AUDIO,
+        requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
     }
 }
