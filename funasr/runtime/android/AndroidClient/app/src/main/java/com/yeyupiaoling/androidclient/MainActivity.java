@@ -28,8 +28,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.net.ssl.HostnameVerifier;
-
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -39,7 +37,7 @@ import okio.ByteString;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = MainActivity.class.getSimpleName();
-    // WebSocket地址，如果服务端没有使用SSL，请使用ws://
+    // WebSocket地址
     public String ASR_HOST = "";
     // 发送的JSON数据
     public static final String MODE = "2pass";
@@ -47,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int CHUNK_INTERVAL = 10;
     public static final int SEND_SIZE = 1920;
     // 热词
-    private String hotWords="阿里巴巴 达摩院";
+    private String hotWords = "阿里巴巴 达摩院 夜雨飘零";
     // 采样率
     public static final int SAMPLE_RATE = 16000;
     // 声道数
@@ -106,7 +104,6 @@ public class MainActivity extends AppCompatActivity {
             showUriInput();
         } else {
             ASR_HOST = uri;
-            Toast.makeText(MainActivity.this, "WebSocket地址：" + ASR_HOST, Toast.LENGTH_SHORT).show();
         }
         // 读取热词
         String hotWords = sharedPreferences.getString("hotwords", "");
@@ -218,14 +215,12 @@ public class MainActivity extends AppCompatActivity {
 
     // 读取录音数据
     private void setAudioData() throws Exception {
-        // 如果使用正常的wss，可以去掉这个
-        HostnameVerifier hostnameVerifier = (hostname, session) -> {
-            // 总是返回true，表示不验证域名
-            return true;
-        };
         // 建立WebSocket连接
         OkHttpClient client = new OkHttpClient.Builder()
-                .hostnameVerifier(hostnameVerifier)
+                // 忽略验证证书
+                .sslSocketFactory(SSLSocketClient.getSSLSocketFactory(), SSLSocketClient.getX509TrustManager())
+                // 不验证域名
+                .hostnameVerifier(SSLSocketClient.getHostnameVerifier())
                 .build();
         Request request = new Request.Builder()
                 .url(ASR_HOST)
@@ -236,6 +231,7 @@ public class MainActivity extends AppCompatActivity {
             public void onOpen(@NonNull WebSocket webSocket, @NonNull Response response) {
                 // 连接成功时的处理
                 Log.d(TAG, "WebSocket连接成功");
+                runOnUiThread(() -> Toast.makeText(MainActivity.this, "WebSocket连接成功", Toast.LENGTH_SHORT).show());
             }
 
             @Override
@@ -280,6 +276,7 @@ public class MainActivity extends AppCompatActivity {
             public void onFailure(@NonNull WebSocket webSocket, @NonNull Throwable t, Response response) {
                 // 连接失败时的处理
                 Log.d(TAG, "WebSocket连接失败: " + t + ": " + response);
+                runOnUiThread(() -> Toast.makeText(MainActivity.this, "WebSocket连接失败：" + t, Toast.LENGTH_SHORT).show());
             }
         });
         String message = getMessage(true);
