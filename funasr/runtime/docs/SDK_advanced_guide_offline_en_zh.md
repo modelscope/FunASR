@@ -162,7 +162,8 @@ nohup bash run_server.sh \
   --io-thread-num  8 \
   --port 10095 \
   --certfile  ../../../ssl_key/server.crt \
-  --keyfile ../../../ssl_key/server.key > log.out 2>&1 &
+  --keyfile ../../../ssl_key/server.key \
+  --hotwordsfile ../../hotwords.txt > log.out 2>&1 &
  ```
 **run_server.sh命令参数介绍**
 ```text
@@ -179,6 +180,7 @@ nohup bash run_server.sh \
 --io-thread-num  服务端启动的IO线程数，默认为 1
 --certfile  ssl的证书文件，默认为：../../../ssl_key/server.crt，如果需要关闭ssl，参数设置为0
 --keyfile   ssl的密钥文件，默认为：../../../ssl_key/server.key
+--hotwordsfile   热词文件路径，每一个热词一行，最后一行也要换行，如果客户端提供热词，则与客户端提供的热词合并一起使用。默认为：../../hotwords.txt
 ```
 
 ### 关闭FunASR服务

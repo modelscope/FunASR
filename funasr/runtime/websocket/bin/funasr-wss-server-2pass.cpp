@@ -14,6 +14,9 @@
 #include <unistd.h>
 #include "websocket-server-2pass.h"
 
+#include <fstream>
+std::string hotwords = "";
+
 using namespace std;
 void GetValue(TCLAP::ValueArg<std::string>& value_arg, string key,
               std::map<std::string, std::string>& model_path) {
@@ -108,6 +111,15 @@ int main(int argc, char* argv[]) {
         "default: ../../../ssl_key/server.key, path of keyfile for WSS "
         "connection",
         false, "../../../ssl_key/server.key", "string");
+
+    TCLAP::ValueArg<std::string> hotwordsfile(
+        "", "hotwordsfile",
+        "default: ../../hotwords.txt, path of hotwordsfile"
+        "connection",
+        false, "../../hotwords.txt", "string");
+
+    // add file
+    cmd.add(hotwordsfile);
 
     cmd.add(certfile);
     cmd.add(keyfile);
@@ -416,6 +428,22 @@ int main(int argc, char* argv[]) {
 
     std::string s_certfile = certfile.getValue();
     std::string s_keyfile = keyfile.getValue();
+
+    std::string s_hotwordsfile = hotwordsfile.getValue();
+    std::string line;
+    std::ifstream file(s_hotwordsfile);
+    std::cout << "hotwordsfile path: " + s_hotwordsfile << std::endl;
+
+    if (file.is_open()) {
+        while (getline(file, line)) {
+            hotwords += " " + line.substr(0, line.length() - 1);
+        }
+        hotwords.erase(0, hotwords.find_first_not_of(' '));
+        std::cout << "hotwords: " << hotwords << std::endl;
+        file.close();
+    } else {
+        std::cout << "Unable to open hotwords file" << std::endl;
+    }
 
     bool is_ssl = false;
     if (!s_certfile.empty()) {
