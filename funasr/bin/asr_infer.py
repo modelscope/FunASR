@@ -38,9 +38,7 @@ from funasr.text.build_tokenizer import build_tokenizer
 from funasr.text.token_id_converter import TokenIDConverter
 from funasr.torch_utils.device_funcs import to_device
 from funasr.utils.timestamp_tools import ts_prediction_lfr6_standard
-from funasr.utils.whisper_utils.decoding import DecodingOptions, detect_language, decode
-from funasr.utils.whisper_utils.transcribe import transcribe
-from funasr.utils.whisper_utils.audio import pad_or_trim, log_mel_spectrogram
+
 
 class Speech2Text:
     """Speech2Text class
@@ -1923,9 +1921,10 @@ class Speech2TextWhisper:
             **kwargs,
     ):
 
+        from funasr.tasks.whisper import ASRTask
+
         # 1. Build ASR model
         scorers = {}
-        from funasr.tasks.whisper import ASRTask
         asr_model, asr_train_args = ASRTask.build_model_from_file(
             asr_train_config, asr_model_file, cmvn_file, device
         )
@@ -1984,6 +1983,10 @@ class Speech2TextWhisper:
             text, token, token_int, hyp
 
         """
+
+        from funasr.utils.whisper_utils.transcribe import transcribe
+        from funasr.utils.whisper_utils.audio import pad_or_trim, log_mel_spectrogram
+        from funasr.utils.whisper_utils.decoding import DecodingOptions, detect_language, decode
 
         speech = speech[0]
         speech = pad_or_trim(speech)

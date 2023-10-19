@@ -7,7 +7,7 @@
 ## 推理
 
 ### 快速使用
-#### [CT-Transformer 模型](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch/summary)
+#### [CT-Transformer 标点模型](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch/summary)
 ```python
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
@@ -29,7 +29,7 @@ rec_result = inference_pipeline(text_in='我们都是木头人不会讲话不会
 rec_result = inference_pipeline(text_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_text/punc_example.txt')
 ```
 
-#### [CT-Transformer 实时模型](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727/summary)
+#### [CT-Transformer 实时标点模型](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727/summary)
 ```python
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
