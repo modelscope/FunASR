@@ -64,6 +64,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#inference">Inference</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#quick-start">Quick start</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#paraformer-model">Paraformer Model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#paraformer-long-model">Paraformer-long Model</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#paraformer-online-model">Paraformer-online Model</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#paraformer-contextual-model">Paraformer-contextual Model</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#uniasr-model">UniASR Model</a></li>
@@ -189,6 +190,31 @@ The modelscope pipeline supports all the models in <a class="reference external"
 <span class="nb">print</span><span class="p">(</span><span class="n">rec_result</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="paraformer-long-model">
+<h4><a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary">Paraformer-long Model</a><a class="headerlink" href="#paraformer-long-model" title="Permalink to this headline"></a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">modelscope.pipelines</span> <span class="kn">import</span> <span class="n">pipeline</span>
+<span class="kn">from</span> <span class="nn">modelscope.utils.constant</span> <span class="kn">import</span> <span class="n">Tasks</span>
+
+<span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
+    <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">auto_speech_recognition</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch&#39;</span><span class="p">,</span>
+    <span class="n">vad_model</span><span class="o">=</span><span class="s1">&#39;damo/speech_fsmn_vad_zh-cn-16k-common-pytorch&#39;</span><span class="p">,</span>
+    <span class="c1">#punc_model=&#39;damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch&#39;,</span>
+    <span class="n">punc_model</span><span class="o">=</span><span class="s1">&#39;damo/punc_ct-transformer_cn-en-common-vocab471067-large&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/vad_example.wav&#39;</span><span class="p">,</span> 
+                                <span class="n">batch_size_token</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">batch_size_token_threshold_s</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">max_single_segment_time</span><span class="o">=</span><span class="mi">6000</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">rec_result</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Where,</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">batch_size_token</span></code> refs to dynamic batch_size and the total tokens of batch is <code class="docutils literal notranslate"><span class="pre">batch_size_token</span></code>, 1 token = 60 ms.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">batch_size_token_threshold_s</span></code>: The batch_size is set to 1, when the audio duration exceeds the threshold value of <code class="docutils literal notranslate"><span class="pre">batch_size_token_threshold_s</span></code>, specified in <code class="docutils literal notranslate"><span class="pre">s</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_single_segment_time</span></code>: The maximum length for audio segmentation in VAD, specified in <code class="docutils literal notranslate"><span class="pre">ms</span></code>.</p></li>
+</ul>
 </div>
 <div class="section" id="paraformer-online-model">
 <h4><a class="reference external" href="https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary">Paraformer-online Model</a><a class="headerlink" href="#paraformer-online-model" title="Permalink to this headline"></a></h4>

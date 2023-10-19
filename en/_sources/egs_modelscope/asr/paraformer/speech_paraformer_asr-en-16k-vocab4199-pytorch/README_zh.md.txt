@@ -21,6 +21,28 @@ inference_pipeline = pipeline(
 rec_result = inference_pipeline(audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
 print(rec_result)
 ```
+#### [Paraformer长音频模型](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary)
+```python
+from modelscope.pipelines import pipeline
+from modelscope.utils.constant import Tasks
+
+inference_pipeline = pipeline(
+    task=Tasks.auto_speech_recognition,
+    model='damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch',
+    vad_model='damo/speech_fsmn_vad_zh-cn-16k-common-pytorch',
+    #punc_model='damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch',
+    punc_model='damo/punc_ct-transformer_cn-en-common-vocab471067-large',
+)
+
+rec_result = inference_pipeline(audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/vad_example.wav', 
+                                batch_size_token=5000, batch_size_token_threshold_s=40, max_single_segment_time=6000)
+print(rec_result)
+```
+其中： 
+- `batch_size_token` 表示采用动态batch，batch中总token数为 `batch_size_token`，1 token = 60 ms. 
+- `batch_size_token_threshold_s`: 表示音频时长超过 `batch_size_token_threshold_s`阈值是，batch数设置为1, 单位为s.
+- `max_single_segment_time`: 表示VAD最大切割音频时长, 单位是ms.
+
 #### [Paraformer-实时模型](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary)
 ##### 实时推理
 ```python
