@@ -42,6 +42,7 @@ print(rec_result)
 - `batch_size_token` 表示采用动态batch，batch中总token数为 `batch_size_token`，1 token = 60 ms. 
 - `batch_size_token_threshold_s`: 表示音频时长超过 `batch_size_token_threshold_s`阈值是，batch数设置为1, 单位为s.
 - `max_single_segment_time`: 表示VAD最大切割音频时长, 单位是ms.
+
 建议：当您输入为长音频，遇到OOM问题时，因为显存占用与音频时长呈平方关系增加，分为3种情况：
 - a)推理起始阶段，显存主要取决于`batch_size_token`，适当减小该值，可以减少显存占用；
 - b)推理中间阶段，遇到VAD切割的长音频片段，总token数小于`batch_size_token`，仍然出现OOM，可以适当减小`batch_size_token_threshold_s`，超过阈值，强制batch为1; 

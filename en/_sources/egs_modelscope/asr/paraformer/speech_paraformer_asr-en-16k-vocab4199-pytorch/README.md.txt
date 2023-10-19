@@ -38,10 +38,12 @@ rec_result = inference_pipeline(audio_in='https://isv-data.oss-cn-hangzhou.aliyu
                                 batch_size_token=5000, batch_size_token_threshold_s=40, max_single_segment_time=6000)
 print(rec_result)
 ```
+
 Where, 
 - `batch_size_token` refs to dynamic batch_size and the total tokens of batch is `batch_size_token`, 1 token = 60 ms. 
 - `batch_size_token_threshold_s`: The batch_size is set to 1, when the audio duration exceeds the threshold value of `batch_size_token_threshold_s`, specified in `s`.
 - `max_single_segment_time`: The maximum length for audio segmentation in VAD, specified in `ms`.
+
 Suggestion: When encountering OOM (Out of Memory) issues with long audio inputs, as the GPU memory usage increases with the square of the audio duration, there are three possible scenarios:
 
 a) In the initial inference stage, GPU memory usage primarily depends on `batch_size_token`. Reducing this value appropriately can help reduce memory usage.
