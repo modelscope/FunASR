@@ -177,7 +177,11 @@ pipeline 支持 <a class="reference external" href="https://alibaba-damo-academy
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">batch_size_token</span></code> 表示采用动态batch，batch中总token数为 <code class="docutils literal notranslate"><span class="pre">batch_size_token</span></code>，1 token = 60 ms.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">batch_size_token_threshold_s</span></code>: 表示音频时长超过 <code class="docutils literal notranslate"><span class="pre">batch_size_token_threshold_s</span></code>阈值是，batch数设置为1, 单位为s.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">max_single_segment_time</span></code>: 表示VAD最大切割音频时长, 单位是ms.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_single_segment_time</span></code>: 表示VAD最大切割音频时长, 单位是ms.
+建议：当您输入为长音频，遇到OOM问题时，因为显存占用与音频时长呈平方关系增加，分为3种情况：</p></li>
+<li><p>a)推理起始阶段，显存主要取决于<code class="docutils literal notranslate"><span class="pre">batch_size_token</span></code>，适当减小该值，可以减少显存占用；</p></li>
+<li><p>b)推理中间阶段，遇到VAD切割的长音频片段，总token数小于<code class="docutils literal notranslate"><span class="pre">batch_size_token</span></code>，仍然出现OOM，可以适当减小<code class="docutils literal notranslate"><span class="pre">batch_size_token_threshold_s</span></code>，超过阈值，强制batch为1;</p></li>
+<li><p>c)推理快结束阶段，遇到VAD切割的长音频片段，总token数小于<code class="docutils literal notranslate"><span class="pre">batch_size_token</span></code>，且超过阈值<code class="docutils literal notranslate"><span class="pre">batch_size_token_threshold_s</span></code>，强制batch为1，仍然出现OOM，可以适当减小<code class="docutils literal notranslate"><span class="pre">max_single_segment_time</span></code>，使得VAD切割音频时长变短。</p></li>
 </ul>
 </div>
 <div class="section" id="id5">
