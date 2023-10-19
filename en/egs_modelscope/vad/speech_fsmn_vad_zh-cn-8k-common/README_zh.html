@@ -170,7 +170,7 @@ Pipeline 支持在<a class="reference external" href="https://alibaba-damo-acade
 <span class="n">speech_chunk</span> <span class="o">=</span> <span class="n">speech</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">chunk_stride</span><span class="p">]</span> 
 <span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="n">speech_chunk</span><span class="p">,</span> <span class="n">param_dict</span><span class="o">=</span><span class="n">param_dict</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">rec_result</span><span class="p">)</span>
-<span class="c1"># next chunk, 480ms</span>
+<span class="c1"># next chunk, 100ms</span>
 <span class="n">speech_chunk</span> <span class="o">=</span> <span class="n">speech</span><span class="p">[</span><span class="n">chunk_stride</span><span class="p">:</span><span class="n">chunk_stride</span><span class="o">+</span><span class="n">chunk_stride</span><span class="p">]</span>
 <span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="n">speech_chunk</span><span class="p">,</span> <span class="n">param_dict</span><span class="o">=</span><span class="n">param_dict</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">rec_result</span><span class="p">)</span>
