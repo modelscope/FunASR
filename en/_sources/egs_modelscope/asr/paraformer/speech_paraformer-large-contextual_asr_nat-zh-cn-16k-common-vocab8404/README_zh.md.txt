@@ -95,7 +95,7 @@ print(rec_result)
 ```
 演示代码完整版本，请参考[demo](https://github.com/alibaba-damo-academy/FunASR/discussions/241)
 
-#### [Paraformer-contextual Model](https://www.modelscope.cn/models/damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404/summary)
+#### [Paraformer-contextual 热词模型](https://www.modelscope.cn/models/damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404/summary)
 ```python
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
