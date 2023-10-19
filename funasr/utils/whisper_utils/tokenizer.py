@@ -5,7 +5,12 @@ from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import torch
-from transformers import GPT2TokenizerFast
+try:
+    from transformers import GPT2TokenizerFast
+except ImportError:
+    raise ImportError(
+        "transformers was not installed. Please install transformers first."
+        )
 
 LANGUAGES = {
     "en": "english",
