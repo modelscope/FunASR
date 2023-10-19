@@ -36,7 +36,7 @@ chunk_stride = 1600# 100ms
 speech_chunk = speech[0:chunk_stride] 
 rec_result = inference_pipeline(audio_in=speech_chunk, param_dict=param_dict)
 print(rec_result)
-# next chunk, 480ms
+# next chunk, 100ms
 speech_chunk = speech[chunk_stride:chunk_stride+chunk_stride]
 rec_result = inference_pipeline(audio_in=speech_chunk, param_dict=param_dict)
 print(rec_result)
