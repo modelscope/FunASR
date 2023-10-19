@@ -39,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
     public static final String TAG = MainActivity.class.getSimpleName();
     // WebSocket地址
     public String ASR_HOST = "";
+    // 官方WebSocket地址
+    public static final String DEFAULT_HOST = "wss://101.37.77.25:10088";
     // 发送的JSON数据
     public static final String MODE = "2pass";
     public static final String CHUNK_SIZE = "5, 10, 5";
@@ -61,7 +63,6 @@ public class MainActivity extends AppCompatActivity {
     // 控件
     private Button recordBtn;
     private TextView resultText;
-    private WebSocket webSocket;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -106,8 +107,8 @@ public class MainActivity extends AppCompatActivity {
             ASR_HOST = uri;
         }
         // 读取热词
-        String hotWords = sharedPreferences.getString("hotwords", "");
-        if (!hotWords.equals("")) {
+        String hotWords = sharedPreferences.getString("hotwords", null);
+        if (hotWords != null) {
             this.hotWords = hotWords;
         }
     }
@@ -150,6 +151,14 @@ public class MainActivity extends AppCompatActivity {
                 editor.apply();
             }
         });
+        builder.setNeutralButton("使用官方服务", (dialog, id) -> {
+            ASR_HOST = DEFAULT_HOST;
+            input.setText(DEFAULT_HOST);
+            Toast.makeText(MainActivity.this, "WebSocket地址：" + ASR_HOST, Toast.LENGTH_SHORT).show();
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("uri", ASR_HOST);
+            editor.apply();
+        });
         AlertDialog dialog = builder.create();
         dialog.show();
     }
@@ -166,12 +175,10 @@ public class MainActivity extends AppCompatActivity {
         builder.setView(view);
         builder.setPositiveButton("确定", (dialog, id) -> {
             String hotwords = input.getText().toString();
-            if (!hotwords.equals("")) {
-                this.hotWords = hotwords;
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString("hotwords", hotwords);
-                editor.apply();
-            }
+            this.hotWords = hotwords;
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("hotwords", hotwords);
+            editor.apply();
         });
         AlertDialog dialog = builder.create();
         dialog.show();
@@ -225,7 +232,7 @@ public class MainActivity extends AppCompatActivity {
         Request request = new Request.Builder()
                 .url(ASR_HOST)
                 .build();
-        webSocket = client.newWebSocket(request, new WebSocketListener() {
+        WebSocket webSocket = client.newWebSocket(request, new WebSocketListener() {
 
             @Override
             public void onOpen(@NonNull WebSocket webSocket, @NonNull Response response) {
@@ -311,7 +318,9 @@ public class MainActivity extends AppCompatActivity {
             obj.put("chunk_size", array);
             obj.put("chunk_interval", CHUNK_INTERVAL);
             obj.put("wav_name", "default");
-            obj.put("hotwords", hotWords);
+            if (!hotWords.equals("")) {
+                obj.put("hotwords", hotWords);
+            }
             obj.put("wav_format", "pcm");
             obj.put("is_speaking", isSpeaking);
             return obj.toString();
