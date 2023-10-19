@@ -1922,9 +1922,6 @@ class Speech2TextWhisper:
     ):
 
         from funasr.tasks.whisper import ASRTask
-        from funasr.utils.whisper_utils.transcribe import transcribe
-        from funasr.utils.whisper_utils.audio import pad_or_trim, log_mel_spectrogram
-        from funasr.utils.whisper_utils.decoding import DecodingOptions, detect_language, decode
 
         # 1. Build ASR model
         scorers = {}
@@ -1986,6 +1983,10 @@ class Speech2TextWhisper:
             text, token, token_int, hyp
 
         """
+
+        from funasr.utils.whisper_utils.transcribe import transcribe
+        from funasr.utils.whisper_utils.audio import pad_or_trim, log_mel_spectrogram
+        from funasr.utils.whisper_utils.decoding import DecodingOptions, detect_language, decode
 
         speech = speech[0]
         speech = pad_or_trim(speech)
