@@ -42,6 +42,7 @@ from funasr.models.encoder.sanm_encoder import SANMEncoder, SANMEncoderChunkOpt
 from funasr.models.encoder.branchformer_encoder import BranchformerEncoder
 from funasr.models.encoder.e_branchformer_encoder import EBranchformerEncoder
 from funasr.models.encoder.transformer_encoder import TransformerEncoder
+from funasr.models.encoder.rwkv_encoder import RWKVEncoder
 from funasr.models.frontend.default import DefaultFrontend
 from funasr.models.frontend.default import MultiChannelFrontend
 from funasr.models.frontend.fused import FusedFrontends
@@ -119,6 +120,7 @@ encoder_choices = ClassChoices(
         e_branchformer=EBranchformerEncoder,
         mfcca_enc=MFCCAEncoder,
         chunk_conformer=ConformerChunkEncoder,
+        rwkv=RWKVEncoder,
     ),
     default="rnn",
 )
