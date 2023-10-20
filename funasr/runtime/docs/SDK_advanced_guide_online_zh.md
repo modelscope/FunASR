@@ -31,7 +31,8 @@ nohup bash run_server_2pass.sh \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
   --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx  \
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx \
-  --itn-dir thuduj12/fst_itn_zh > log.out 2>&1 &
+  --itn-dir thuduj12/fst_itn_zh \
+  --hotwordsfile ../../hotwords.txt > log.out 2>&1 &
 
 # 如果您想关闭ssl，增加参数：--certfile 0
 # 如果您想使用时间戳或者热词模型进行部署，请设置--model-dir为对应模型：
@@ -80,7 +81,8 @@ nohup bash run_server_2pass.sh \
   --io-thread-num  8 \
   --port 10095 \
   --certfile  ../../../ssl_key/server.crt \
-  --keyfile ../../../ssl_key/server.key > log.out 2>&1 &
+  --keyfile ../../../ssl_key/server.key \
+  --hotwordsfile ../../hotwords.txt > log.out 2>&1 &
  ```
 **run_server_2pass.sh命令参数介绍**
 ```text
@@ -98,6 +100,7 @@ nohup bash run_server_2pass.sh \
 --io-thread-num  服务端启动的IO线程数，默认为 1
 --certfile  ssl的证书文件，默认为：../../../ssl_key/server.crt，如果需要关闭ssl，参数设置为0
 --keyfile   ssl的密钥文件，默认为：../../../ssl_key/server.key
+--hotwordsfile   热词文件路径，每一个热词一行，最后一行也要换行，如果客户端提供热词，则与客户端提供的热词合并一起使用。默认为：../../hotwords.txt
 ```
 
 ### 关闭FunASR服务

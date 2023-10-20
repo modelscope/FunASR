@@ -10,6 +10,7 @@ io_thread_num=8
 port=10095
 certfile="../../../ssl_key/server.crt"
 keyfile="../../../ssl_key/server.key"
+hotwordsfile="../../hotwords.txt"
 
 . ../../egs/aishell/transformer/utils/parse_options.sh || exit 1;
 
@@ -26,7 +27,8 @@ if [ -z "$certfile" ] || [ "$certfile" -eq 0 ]; then
   --io-thread-num  ${io_thread_num} \
   --port ${port} \
   --certfile  "" \
-  --keyfile ""
+  --keyfile "" \
+  --hotwordsfile ${hotwordsfile}
 else
 ./funasr-wss-server-2pass  \
   --download-model-dir ${download_model_dir} \
@@ -39,5 +41,6 @@ else
   --io-thread-num  ${io_thread_num} \
   --port ${port} \
   --certfile  ${certfile} \
-  --keyfile ${keyfile}
+  --keyfile ${keyfile} \
+  --hotwordsfile ${hotwordsfile}
 fi
