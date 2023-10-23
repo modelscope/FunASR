@@ -373,7 +373,7 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
           if (!msg_data->msg["hotwords"].empty()) {
             std::string hw = msg_data->msg["hotwords"];
             hw = hw + " " + hotwords;
-            LOG(INFO) << "hotwords: " << hw << std::endl;
+            LOG(INFO) << "hotwords: " << hw;
             std::vector<std::vector<float>> new_hotwords_embedding = CompileHotwordEmbedding(tpass_handle, hw, ASR_TWO_PASS);
             msg_data->hotwords_embedding =
                 std::make_shared<std::vector<std::vector<float>>>(new_hotwords_embedding);
@@ -381,13 +381,13 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
         } else {
           if (hotwords.empty()) {
             std::string hw = "";
-            LOG(INFO)<<"hotwords: " << hw << std::endl;
+            LOG(INFO)<<"hotwords: " << hw;
             std::vector<std::vector<float>> new_hotwords_embedding= CompileHotwordEmbedding(tpass_handle, hw, ASR_TWO_PASS);
             msg_data->hotwords_embedding =
                 std::make_shared<std::vector<std::vector<float>>>(new_hotwords_embedding);
           }else {
             std::string hw = hotwords;
-            LOG(INFO) << "hotwords: " << hw << std::endl;
+            LOG(INFO) << "hotwords: " << hw;
             std::vector<std::vector<float>> new_hotwords_embedding= CompileHotwordEmbedding(tpass_handle, hw, ASR_TWO_PASS);
             msg_data->hotwords_embedding =
                 std::make_shared<std::vector<std::vector<float>>>(new_hotwords_embedding);

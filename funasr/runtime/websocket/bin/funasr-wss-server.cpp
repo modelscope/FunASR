@@ -346,17 +346,16 @@ int main(int argc, char* argv[]) {
     std::string s_hotwordsfile = hotwordsfile.getValue();
     std::string line;
     std::ifstream file(s_hotwordsfile);
-    std::cout << "hotwordsfile path: " + s_hotwordsfile << std::endl;
+    LOG(INFO) << "hotwordsfile path: " << s_hotwordsfile;
 
     if (file.is_open()) {
         while (getline(file, line)) {
-            hotwords += " " + line.substr(0, line.length() - 1);
+            hotwords += line+HOTWORD_SEP;
         }
-        hotwords.erase(0, hotwords.find_first_not_of(' '));
-        std::cout << "hotwords: " << hotwords << std::endl;
+        LOG(INFO) << "hotwords: " << hotwords;
         file.close();
     } else {
-        std::cout << "Unable to open hotwords file" << std::endl;
+        LOG(ERROR) << "Unable to open hotwords file: " << s_hotwordsfile;
     }
 
     bool is_ssl = false;
@@ -402,8 +401,7 @@ int main(int argc, char* argv[]) {
       websocket_srv.initAsr(model_path, s_model_thread_num);  // init asr model
     }
 
-    std::cout << "asr model init finished. listen on port:" << s_port
-              << std::endl;
+    LOG(INFO) << "asr model init finished. listen on port:" << s_port;
 
     // Start the ASIO network io_service run loop
     std::vector<std::thread> ts;
@@ -422,7 +420,7 @@ int main(int argc, char* argv[]) {
     }
 
   } catch (std::exception const& e) {
-    std::cerr << "Error: " << e.what() << std::endl;
+    LOG(ERROR) << "Error: " << e.what();
   }
 
   return 0;
