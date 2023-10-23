@@ -356,7 +356,14 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
   unique_lock guard_decoder(*(thread_lock_p)); // mutex for one connection
   switch (msg->get_opcode()) {
     case websocketpp::frame::opcode::text: {
-      nlohmann::json jsonresult = nlohmann::json::parse(payload);
+      nlohmann::json jsonresult;
+      try{
+        jsonresult = nlohmann::json::parse(payload);
+      }catch (std::exception const &e)
+      {
+        LOG(ERROR)<<e.what();
+        break;
+      }
 
       if (jsonresult.contains("wav_name")) {
         msg_data->msg["wav_name"] = jsonresult["wav_name"];
