@@ -73,7 +73,7 @@ nohup bash run_server_2pass.sh \
   --port 10095 \
   --certfile  ../../../ssl_key/server.crt \
   --keyfile ../../../ssl_key/server.key \
-  --hotwordsfile ../../hotwords.txt > log.out 2>&1 &
+  --hotword ../../hotwords.txt > log.out 2>&1 &
 
 # If you want to close ssl，please add：--certfile 0
 # If you want to deploy the timestamp or hotword model, please set --model-dir to the corresponding model:
@@ -98,7 +98,7 @@ nohup bash run_server_2pass.sh \
 --io-thread-num: Number of IO threads that the server starts. Default is 1.
 --certfile <string>: SSL certificate file. Default is ../../../ssl_key/server.crt. If you want to close ssl，set 0
 --keyfile <string>: SSL key file. Default is ../../../ssl_key/server.key. 
---hotwordsfile   Hotword file path, one line for each hot word, if the client provides hot words, then combined with the hot words provided by the client. Default is ../../hotwords.txt
+--hotword   Hotword file path, one line for each hot word, if the client provides hot words, then combined with the hot words provided by the client. Default is ../../hotwords.txt
 ```
 
 ### Shutting Down the FunASR Service

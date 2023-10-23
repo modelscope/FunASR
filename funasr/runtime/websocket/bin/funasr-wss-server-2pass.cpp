@@ -113,7 +113,7 @@ int main(int argc, char* argv[]) {
         false, "../../../ssl_key/server.key", "string");
 
     TCLAP::ValueArg<std::string> hotwordsfile(
-        "", "hotwordsfile",
+        "", "hotword",
         "default: ../../hotwords.txt, path of hotwordsfile"
         "connection",
         false, "../../hotwords.txt", "string");
