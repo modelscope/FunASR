@@ -79,7 +79,7 @@ nohup bash run_server.sh \
   --io-thread-num  8 \
   --port 10095 \
   --certfile  ../../../ssl_key/server.crt \
-  --keyfile ../../../ssl_key/server.key
+  --keyfile ../../../ssl_key/server.key > log.out 2>&1 &
  ```
 
 Introduction to run_server.sh parameters: 

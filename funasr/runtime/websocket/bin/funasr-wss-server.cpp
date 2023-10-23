@@ -13,6 +13,9 @@
 #include "websocket-server.h"
 #include <unistd.h>
 
+#include <fstream>
+std::string hotwords = "";
+
 using namespace std;
 void GetValue(TCLAP::ValueArg<std::string>& value_arg, string key,
               std::map<std::string, std::string>& model_path) {
@@ -94,6 +97,15 @@ int main(int argc, char* argv[]) {
     TCLAP::ValueArg<std::string> keyfile("", "keyfile", 
         "default: ../../../ssl_key/server.key, path of keyfile for WSS connection", 
         false, "../../../ssl_key/server.key", "string");
+
+    TCLAP::ValueArg<std::string> hotwordsfile(
+        "", "hotword",
+        "default: ../../hotwords.txt, path of hotwordsfile"
+        "connection",
+        false, "../../hotwords.txt", "string");
+
+    // add file
+    cmd.add(hotwordsfile);
 
     cmd.add(certfile);
     cmd.add(keyfile);
@@ -331,6 +343,21 @@ int main(int argc, char* argv[]) {
     std::string s_certfile = certfile.getValue();
     std::string s_keyfile = keyfile.getValue();
 
+    std::string s_hotwordsfile = hotwordsfile.getValue();
+    std::string line;
+    std::ifstream file(s_hotwordsfile);
+    LOG(INFO) << "hotwordsfile path: " << s_hotwordsfile;
+
+    if (file.is_open()) {
+        while (getline(file, line)) {
+            hotwords += line+HOTWORD_SEP;
+        }
+        LOG(INFO) << "hotwords: " << hotwords;
+        file.close();
+    } else {
+        LOG(ERROR) << "Unable to open hotwords file: " << s_hotwordsfile;
+    }
+
     bool is_ssl = false;
     if (!s_certfile.empty()) {
       is_ssl = true;
@@ -374,8 +401,7 @@ int main(int argc, char* argv[]) {
       websocket_srv.initAsr(model_path, s_model_thread_num);  // init asr model
     }
 
-    std::cout << "asr model init finished. listen on port:" << s_port
-              << std::endl;
+    LOG(INFO) << "asr model init finished. listen on port:" << s_port;
 
     // Start the ASIO network io_service run loop
     std::vector<std::thread> ts;
@@ -394,7 +420,7 @@ int main(int argc, char* argv[]) {
     }
 
   } catch (std::exception const& e) {
-    std::cerr << "Error: " << e.what() << std::endl;
+    LOG(ERROR) << "Error: " << e.what();
   }
 
   return 0;
