@@ -27,7 +27,7 @@ parser.add_argument("--port",
                     help="grpc server port")
 parser.add_argument("--chunk_size",
                     type=str,
-                    default="5, 10, 5",
+                    default="0, 10, 5",
                     help="chunk")
 parser.add_argument("--encoder_chunk_look_back",
                     type=int,
