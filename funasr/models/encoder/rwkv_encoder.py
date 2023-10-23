@@ -4,7 +4,6 @@ import math
 from typing import Dict, List, Optional, Tuple
 
 import torch
-from typeguard import check_argument_types
 
 from funasr.models.encoder.abs_encoder import AbsEncoder
 from funasr.modules.rwkv import RWKV
@@ -48,8 +47,6 @@ class RWKVEncoder(AbsEncoder):
     ) -> None:
         """Construct a RWKVEncoder object."""
         super().__init__()
-
-        assert check_argument_types()
 
         self.embed = RWKVConvInput(
             input_size,
