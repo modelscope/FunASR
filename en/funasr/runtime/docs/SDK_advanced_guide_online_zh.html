@@ -159,7 +159,8 @@ nohup bash run_server_2pass.sh <span class="se">\</span>
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  <span class="se">\</span>
   --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx  <span class="se">\</span>
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx <span class="se">\</span>
-  --itn-dir thuduj12/fst_itn_zh &gt; log.out <span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">&amp;</span>
+  --itn-dir thuduj12/fst_itn_zh <span class="se">\</span>
+  --hotwordsfile ../../hotwords.txt &gt; log.out <span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">&amp;</span>
 
 <span class="c1"># 如果您想关闭ssl，增加参数：--certfile 0</span>
 <span class="c1"># 如果您想使用时间戳或者热词模型进行部署，请设置--model-dir为对应模型：</span>
@@ -210,7 +211,8 @@ nohup bash run_server_2pass.sh <span class="se">\</span>
   --io-thread-num  <span class="m">8</span> <span class="se">\</span>
   --port <span class="m">10095</span> <span class="se">\</span>
   --certfile  ../../../ssl_key/server.crt <span class="se">\</span>
-  --keyfile ../../../ssl_key/server.key &gt; log.out <span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">&amp;</span>
+  --keyfile ../../../ssl_key/server.key <span class="se">\</span>
+  --hotwordsfile ../../hotwords.txt &gt; log.out <span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">&amp;</span>
 </pre></div>
 </div>
 <p><strong>run_server_2pass.sh命令参数介绍</strong></p>
@@ -228,6 +230,7 @@ nohup bash run_server_2pass.sh <span class="se">\</span>
 --io-thread-num  服务端启动的IO线程数，默认为 1
 --certfile  ssl的证书文件，默认为：../../../ssl_key/server.crt，如果需要关闭ssl，参数设置为0
 --keyfile   ssl的密钥文件，默认为：../../../ssl_key/server.key
+--hotwordsfile   热词文件路径，每一个热词一行，如果客户端提供热词，则与客户端提供的热词合并一起使用。默认为：../../hotwords.txt
 </pre></div>
 </div>
 </div>
