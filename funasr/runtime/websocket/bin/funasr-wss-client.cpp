@@ -238,7 +238,7 @@ class WebsocketClient {
         nlohmann::json jsonbegin;
         nlohmann::json chunk_size = nlohmann::json::array();
         chunk_size.push_back(5);
-        chunk_size.push_back(0);
+        chunk_size.push_back(10);
         chunk_size.push_back(5);
         jsonbegin["chunk_size"] = chunk_size;
         jsonbegin["chunk_interval"] = 10;
