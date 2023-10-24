@@ -408,9 +408,15 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
         if (msg_data->tpass_online_handle == NULL) {
           std::vector<int> chunk_size_vec =
               jsonresult["chunk_size"].get<std::vector<int>>();
-          FUNASR_HANDLE tpass_online_handle =
-              FunTpassOnlineInit(tpass_handle, chunk_size_vec);
-          msg_data->tpass_online_handle = tpass_online_handle;
+          // check chunk_size_vec
+          if(chunk_size_vec.size() == 3 && chunk_size_vec[1] != 0){
+            FUNASR_HANDLE tpass_online_handle =
+                FunTpassOnlineInit(tpass_handle, chunk_size_vec);
+            msg_data->tpass_online_handle = tpass_online_handle;
+          }else{
+            LOG(ERROR) << "Wrong chunk_size!";
+            break;
+          }
         }
       }
       if (jsonresult.contains("itn")) {
