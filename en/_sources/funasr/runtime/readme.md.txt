@@ -56,7 +56,7 @@ The document introduces the technology principles behind the service, recognitio
 
 | image version                       |  image ID | INFO |
 |-------------------------------------|-----|------|
-| funasr-runtime-sdk-online-cpu-0.1.2 |  7222c5319bcf   |      |
+| funasr-runtime-sdk-online-cpu-0.1.3 |  0adef7779589   |      |
 
 ## File Transcription Service, Mandarin (CPU)
 
