@@ -815,8 +815,7 @@ def inference_paraformer_vad_speaker(
         format="%(asctime)s (%(module)s:%(lineno)d) %(levelname)s: %(message)s",
     )
 
-    if sv_model_file is None:
-        sv_model_file = "{}/damo/speech_paraformer-large-vad-punc-spk_asr_nat-zh-cn/campplus_cn_common.bin".format(get_cache_dir(None))
+    sv_model_file = asr_model_file.replace("model.pb", "campplus_cn_common.bin")
 
     if param_dict is not None:
         hotword_list_or_file = param_dict.get('hotword')
