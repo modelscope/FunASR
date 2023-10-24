@@ -39,6 +39,14 @@ namespace funasr {
             vector<const char*> &de_szOutputNames,
             vector<float> &means_list,
             vector<float> &vars_list);
+
+        void StartUtterance()
+        {
+        }
+        
+        void EndUtterance()
+        {
+        }
         
         Paraformer* para_handle_ = nullptr;
         // from para_handle_

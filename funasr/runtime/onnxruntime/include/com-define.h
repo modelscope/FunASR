@@ -15,6 +15,9 @@ namespace funasr {
 #define MODEL_DIR "model-dir"
 #define OFFLINE_MODEL_DIR "model-dir"
 #define ONLINE_MODEL_DIR "online-model-dir"
+#define FST_DIR "fst-dir"
+#define HWS_DIR "hws-dir"
+#define HWS_INC_BIAS "hws-inc-bias"
 #define VAD_DIR "vad-dir"
 #define PUNC_DIR "punc-dir"
 #define QUANTIZE "quantize"
@@ -46,6 +49,7 @@ namespace funasr {
 #define VAD_CONFIG_NAME "vad.yaml"
 #define AM_CMVN_NAME "am.mvn"
 #define AM_CONFIG_NAME "config.yaml"
+#define LM_CONFIG_NAME "config.yaml"
 #define PUNC_CONFIG_NAME "punc.yaml"
 #define MODEL_SEG_DICT "seg_dict"
 #define HOTWORD "hotword"
@@ -58,6 +62,8 @@ namespace funasr {
 #define QUANT_ENCODER_NAME "model_quant.onnx"
 #define DECODER_NAME "decoder.onnx"
 #define QUANT_DECODER_NAME "decoder_quant.onnx"
+
+#define LM_FST_RES "TLG.fst"
 
 // vad
 #ifndef VAD_SILENCE_DURATION

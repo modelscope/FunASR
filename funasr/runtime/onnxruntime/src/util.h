@@ -1,5 +1,8 @@
 #ifndef UTIL_H
 #define UTIL_H
+#include <vector>
+#include <memory>
+#include "tensor.h"
 
 using namespace std;
 
@@ -34,5 +37,10 @@ std::vector<std::string> split(const std::string &s, char delim);
 
 template<typename T>
 void PrintMat(const std::vector<std::vector<T>> &mat, const std::string &name);
+void Trim(std::string *str);
+size_t Utf8ToCharset(const std::string &input, std::vector<std::string> &output);
+void SplitStringToVector(const std::string &full, const char *delim,
+                         bool omit_empty_strings,
+                         std::vector<std::string> *out);
 } // namespace funasr
 #endif

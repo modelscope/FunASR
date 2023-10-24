@@ -52,6 +52,16 @@ void Vocab::Vector2String(vector<int> in, std::vector<std::string> &preds)
     }
 }
 
+string Vocab::Vector2String(vector<int> in)
+{
+    int i;
+    stringstream ss;
+    for (auto it = in.begin(); it != in.end(); it++) {
+        ss << vocab[*it];
+    }
+    return ss.str();
+}
+
 int Str2Int(string str)
 {
     const char *ch_array = str.c_str();
@@ -61,6 +71,16 @@ int Str2Int(string str)
     int val = ((ch_array[0] & 0x0f) << 12) | ((ch_array[1] & 0x3f) << 6) |
               (ch_array[2] & 0x3f);
     return val;
+}
+
+string Vocab::Id2String(int id) const
+{
+  if (id < 0 || id >= vocab.size()) {
+    LOG(INFO) << "Error vocabulary id, this id do not exit.";
+    return "";
+  } else {
+    return vocab[id];
+  }
 }
 
 bool Vocab::IsChinese(string ch)
@@ -195,7 +215,7 @@ string Vocab::Vector2StringV2(vector<int> in, std::string language)
     return ss.str();
 }
 
-int Vocab::Size()
+int Vocab::Size() const
 {
     return vocab.size();
 }

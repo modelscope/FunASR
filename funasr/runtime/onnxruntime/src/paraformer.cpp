@@ -66,6 +66,7 @@ void Paraformer::InitAsr(const std::string &am_model, const std::string &am_cmvn
         m_szOutputNames.push_back(item.c_str());
     vocab = new Vocab(am_config.c_str());
     LoadConfigFromYaml(am_config.c_str());
+	phone_set_ = new PhoneSet(am_config.c_str());
     LoadCmvn(am_cmvn.c_str());
 }
 
@@ -143,6 +144,7 @@ void Paraformer::InitAsr(const std::string &en_model, const std::string &de_mode
         de_szOutputNames_.push_back(item.c_str());
 
     vocab = new Vocab(am_config.c_str());
+    phone_set_ = new PhoneSet(am_config.c_str());
     LoadCmvn(am_cmvn.c_str());
 }
 
@@ -182,6 +184,20 @@ void Paraformer::InitAsr(const std::string &am_model, const std::string &en_mode
         m_szInputNames.push_back(item.c_str());
     for (auto& item : m_strOutputNames)
         m_szOutputNames.push_back(item.c_str());
+}
+
+void Paraformer::InitLm(const std::string &lm_file, 
+                        const std::string &lm_cfg_file) {
+    try {
+        lm_ = std::shared_ptr<fst::Fst<fst::StdArc>>(
+            fst::Fst<fst::StdArc>::Read(lm_file));
+        if (vocab) { delete vocab; }
+        vocab = new Vocab(lm_cfg_file.c_str());
+        LOG(INFO) << "Successfully load lm file " << lm_file;
+    } catch (std::exception const &e) {
+        LOG(ERROR) << "Error when load lm file: " << e.what();
+        exit(0);
+    }
 }
 
 void Paraformer::LoadConfigFromYaml(const char* filename){
@@ -284,6 +300,14 @@ Paraformer::~Paraformer()
         delete vocab;
     if(seg_dict)
         delete seg_dict;
+}
+
+void Paraformer::StartUtterance()
+{
+}
+
+void Paraformer::EndUtterance()
+{
 }
 
 void Paraformer::Reset()
@@ -602,6 +626,16 @@ void Paraformer::TimestampOnnx(std::vector<float>& us_alphas,
     }
 }
 
+string Paraformer::BeamSearch(WfstDecoder* &wfst_decoder, float *in, int len, int64_t token_nums)
+{
+  return wfst_decoder->Search(in, len, token_nums);
+}
+
+string Paraformer::FinalizeDecode(WfstDecoder* &wfst_decoder)
+{
+  return wfst_decoder->FinalizeDecode();
+}
+
 vector<float> Paraformer::ApplyLfr(const std::vector<float> &in) 
 {
     int32_t in_feat_dim = fbank_opts_.mel_opts.num_bins;
@@ -641,9 +675,9 @@ vector<float> Paraformer::ApplyLfr(const std::vector<float> &in)
     }
   }
 
-string Paraformer::Forward(float* din, int len, bool input_finished, const std::vector<std::vector<float>> &hw_emb)
+string Paraformer::Forward(float* din, int len, bool input_finished, const std::vector<std::vector<float>> &hw_emb, void* decoder_handle)
 {
-
+    WfstDecoder* wfst_decoder = (WfstDecoder*)decoder_handle;
     int32_t in_feat_dim = fbank_opts_.mel_opts.num_bins;
     std::vector<float> wav_feats = FbankKaldi(MODEL_SAMPLE_RATE, din, len);
     wav_feats = ApplyLfr(wav_feats);
@@ -725,9 +759,23 @@ string Paraformer::Forward(float* din, int len, bool input_finished, const std::
             for (int i = 0; i < us_peaks_shape[1]; i++) {
                 us_peaks[i] = us_peaks_data[i];
             }
-            result = GreedySearch(floatData, *encoder_out_lens, outputShape[2], true, us_alphas, us_peaks);
+			if (lm_ == nullptr) {
+                result = GreedySearch(floatData, *encoder_out_lens, outputShape[2], true, us_alphas, us_peaks);
+			} else {
+			    result = BeamSearch(wfst_decoder, floatData, *encoder_out_lens, outputShape[2]);
+                if (input_finished) {
+                    result = FinalizeDecode(wfst_decoder);
+                }
+			}
         }else{
-            result = GreedySearch(floatData, *encoder_out_lens, outputShape[2]);
+			if (lm_ == nullptr) {
+                result = GreedySearch(floatData, *encoder_out_lens, outputShape[2]);
+			} else {
+			    result = BeamSearch(wfst_decoder, floatData, *encoder_out_lens, outputShape[2]);
+                if (input_finished) {
+                    result = FinalizeDecode(wfst_decoder);
+                }
+			}
         }
     }
     catch (std::exception const &e)
@@ -832,6 +880,16 @@ std::vector<std::vector<float>> Paraformer::CompileHotwordEmbedding(std::string 
     }
     //PrintMat(result, "clas_embedding_output");
     return result;
+}
+
+Vocab* Paraformer::GetVocab()
+{
+    return vocab;
+}
+
+PhoneSet* Paraformer::GetPhoneSet()
+{
+    return phone_set_;
 }
 
 string Paraformer::Rescoring()

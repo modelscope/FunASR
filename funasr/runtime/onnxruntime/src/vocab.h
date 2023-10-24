@@ -19,10 +19,12 @@ class Vocab {
   public:
     Vocab(const char *filename);
     ~Vocab();
-    int Size();
+    int Size() const;
     bool IsChinese(string ch);
     void Vector2String(vector<int> in, std::vector<std::string> &preds);
+    string Vector2String(vector<int> in);
     string Vector2StringV2(vector<int> in, std::string language="");
+    string Id2String(int id) const;
     string WordFormat(std::string word);
     int GetIdByToken(const std::string &token);
 };

@@ -228,4 +228,53 @@ void PrintMat(const std::vector<std::vector<T>> &mat, const std::string &name) {
     std::cout << std::endl;
   }
 }
+
+void Trim(std::string *str) {
+  const char *white_chars = " \t\n\r\f\v";
+
+  std::string::size_type pos = str->find_last_not_of(white_chars);
+  if (pos != std::string::npos)  {
+    str->erase(pos + 1);
+    pos = str->find_first_not_of(white_chars);
+    if (pos != std::string::npos) str->erase(0, pos);
+  } else {
+    str->erase(str->begin(), str->end());
+  }
+}
+
+void SplitStringToVector(const std::string &full, const char *delim,
+                         bool omit_empty_strings,
+                         std::vector<std::string> *out) {
+  size_t start = 0, found = 0, end = full.size();
+  out->clear();
+  while (found != std::string::npos) {
+    found = full.find_first_of(delim, start);
+    // start != end condition is for when the delimiter is at the end
+    if (!omit_empty_strings || (found != start && start != end))
+      out->push_back(full.substr(start, found - start));
+    start = found + 1;
+  }
+}
+
+size_t Utf8ToCharset(const std::string &input, std::vector<std::string> &output) {
+  std::string ch; 
+  for (size_t i = 0, len = 0; i != input.length(); i += len) {
+    unsigned char byte = (unsigned)input[i];
+    if (byte >= 0xFC) // lenght 6
+      len = 6;  
+    else if (byte >= 0xF8)
+      len = 5;
+    else if (byte >= 0xF0)
+      len = 4;
+    else if (byte >= 0xE0)
+      len = 3;
+    else if (byte >= 0xC0)
+      len = 2;
+    else
+      len = 1;
+    ch = input.substr(i, len);
+    output.push_back(ch);
+  }   
+  return output.size();
+}
 } // namespace funasr
