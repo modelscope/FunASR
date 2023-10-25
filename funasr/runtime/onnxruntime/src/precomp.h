@@ -49,7 +49,7 @@ using namespace std;
 
 #include "kaldi-native-fbank/csrc/feature-fbank.h"
 #include "kaldi-native-fbank/csrc/online-feature.h"
-
+#include "kaldi/decoder/lattice-faster-online-decoder.h"
 // mine
 #include <glog/logging.h>
 
@@ -68,6 +68,8 @@ using namespace std;
 #include "fsmn-vad.h"
 #include "encode_converter.h"
 #include "vocab.h"
+#include "phone-set.h"
+#include "wfst-decoder.h"
 #include "audio.h"
 #include "fsmn-vad-online.h"
 #include "tensor.h"

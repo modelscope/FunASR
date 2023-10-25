@@ -1,7 +1,7 @@
 #pragma once
 #include <map>
 #include <vector>
-
+#include <unordered_map>
 #ifdef WIN32
 #ifdef _FUNASR_API_EXPORT
 #define  _FUNASRAPI __declspec(dllexport)
@@ -21,6 +21,7 @@
 
 typedef void* FUNASR_HANDLE;
 typedef void* FUNASR_RESULT;
+typedef void* FUNASR_DEC_HANDLE;
 typedef unsigned char FUNASR_BOOL;
 
 #define FUNASR_TRUE 1
@@ -58,6 +59,8 @@ typedef void (* QM_CALLBACK)(int cur_step, int n_total); // n_total: total steps
 // ASR
 _FUNASRAPI FUNASR_HANDLE  	FunASRInit(std::map<std::string, std::string>& model_path, int thread_num, ASR_TYPE type=ASR_OFFLINE);
 _FUNASRAPI FUNASR_HANDLE  	FunASROnlineInit(FUNASR_HANDLE asr_handle, std::vector<int> chunk_size={5,10,5});
+_FUNASRAPI void         	FunASRReset(FUNASR_HANDLE handle, FUNASR_DEC_HANDLE dec_handle=nullptr);
+
 // buffer
 _FUNASRAPI FUNASR_RESULT	FunASRInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, FUNASR_MODE mode, QM_CALLBACK fn_callback, bool input_finished=true, int sampling_rate=16000, std::string wav_format="pcm");
 // file, support wav & pcm
@@ -93,14 +96,15 @@ _FUNASRAPI void					CTTransformerUninit(FUNASR_HANDLE handle);
 
 //OfflineStream
 _FUNASRAPI FUNASR_HANDLE  	FunOfflineInit(std::map<std::string, std::string>& model_path, int thread_num);
+_FUNASRAPI void         	FunOfflineReset(FUNASR_HANDLE handle, FUNASR_DEC_HANDLE dec_handle=nullptr);
 // buffer
 _FUNASRAPI FUNASR_RESULT	FunOfflineInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, 
 												  FUNASR_MODE mode, QM_CALLBACK fn_callback, const std::vector<std::vector<float>> &hw_emb, 
-												  int sampling_rate=16000, std::string wav_format="pcm", bool itn=true);
+												  int sampling_rate=16000, std::string wav_format="pcm", bool itn=true, FUNASR_DEC_HANDLE dec_handle=nullptr);
 // file, support wav & pcm
 _FUNASRAPI FUNASR_RESULT	FunOfflineInfer(FUNASR_HANDLE handle, const char* sz_filename, FUNASR_MODE mode, 
 											QM_CALLBACK fn_callback, const std::vector<std::vector<float>> &hw_emb, 
-											int sampling_rate=16000, bool itn=true);
+											int sampling_rate=16000, bool itn=true, FUNASR_DEC_HANDLE dec_handle=nullptr);
 #if !defined(__APPLE__)
 _FUNASRAPI const std::vector<std::vector<float>> CompileHotwordEmbedding(FUNASR_HANDLE handle, std::string &hotwords, ASR_TYPE mode=ASR_OFFLINE);
 #endif
@@ -118,4 +122,9 @@ _FUNASRAPI FUNASR_RESULT	FunTpassInferBuffer(FUNASR_HANDLE handle, FUNASR_HANDLE
 _FUNASRAPI void				FunTpassUninit(FUNASR_HANDLE handle);
 _FUNASRAPI void				FunTpassOnlineUninit(FUNASR_HANDLE handle);
 
+// wfst decoder
+_FUNASRAPI FUNASR_DEC_HANDLE	FunASRWfstDecoderInit(FUNASR_HANDLE handle, int asr_type);
+_FUNASRAPI void			FunASRWfstDecoderUninit(FUNASR_DEC_HANDLE handle);
+_FUNASRAPI void			FunWfstDecoderLoadHwsRes(FUNASR_DEC_HANDLE handle, int inc_bias, std::unordered_map<std::string, int> &hws_map);
+_FUNASRAPI void			FunWfstDecoderUnloadHwsRes(FUNASR_DEC_HANDLE handle);
 

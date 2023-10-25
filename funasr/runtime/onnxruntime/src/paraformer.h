@@ -5,6 +5,10 @@
 #pragma once
 
 #include "precomp.h"
+#include "fst/fstlib.h"
+#include "fst/symbol-table.h"
+#include "bias-lm.h"
+#include "phone-set.h"
 
 namespace funasr {
 
@@ -17,6 +21,7 @@ namespace funasr {
     private:
         Vocab* vocab = nullptr;
         SegDict* seg_dict = nullptr;
+        PhoneSet* phone_set_ = nullptr;
         //const float scale = 22.6274169979695;
         const float scale = 1.0;
 
@@ -47,7 +52,7 @@ namespace funasr {
         std::vector<std::vector<float>> CompileHotwordEmbedding(std::string &hotwords);
         void Reset();
         vector<float> FbankKaldi(float sample_rate, const float* waves, int len);
-        string Forward(float* din, int len, bool input_finished=true, const std::vector<std::vector<float>> &hw_emb={{0.0}});
+        string Forward(float* din, int len, bool input_finished=true, const std::vector<std::vector<float>> &hw_emb={{0.0}}, void* wfst_decoder=nullptr);
         string GreedySearch( float* in, int n_len, int64_t token_nums, bool is_stamp=false, std::vector<float> us_alphas={0}, std::vector<float> us_cif_peak={0});
         void TimestampOnnx(std::vector<float> &us_alphas, vector<float> us_cif_peak, vector<string>& char_list, std::string &res_str, 
                            vector<vector<float>> &timestamp_list, float begin_time = 0.0, float total_offset = -1.5);
@@ -55,7 +60,15 @@ namespace funasr {
 
         string Rescoring();
         string GetLang(){return language;};
-
+		
+        void StartUtterance();
+        void EndUtterance();
+        void InitLm(const std::string &lm_file, const std::string &lm_cfg_file);
+        string BeamSearch(WfstDecoder* &wfst_decoder, float* in, int n_len, int64_t token_nums);
+        string FinalizeDecode(WfstDecoder* &wfst_decoder);
+        Vocab* GetVocab();
+        PhoneSet* GetPhoneSet();
+		
         knf::FbankOptions fbank_opts_;
         vector<float> means_list_;
         vector<float> vars_list_;
@@ -82,7 +95,10 @@ namespace funasr {
         vector<string> de_strInputNames, de_strOutputNames;
         vector<const char*> de_szInputNames_;
         vector<const char*> de_szOutputNames_;
-        
+
+        // lm
+        std::shared_ptr<fst::Fst<fst::StdArc>> lm_ = nullptr;
+
         string window_type = "hamming";
         int frame_length = 25;
         int frame_shift = 10;

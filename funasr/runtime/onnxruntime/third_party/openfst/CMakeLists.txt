@@ -48,8 +48,8 @@ option(HAVE_PYTHON "Build python" OFF)
 option(HAVE_SPECIAL "Build special" ON)
 
   set(WITH_GFLAGS OFF CACHE BOOL "whether build glog with gflags" FORCE)
-  set(HAVE_BIN OFF CACHE BOOL "Build the fst binaries" FORCE)
-  set(HAVE_SCRIPT OFF CACHE BOOL "Build the fstscript" FORCE)
+  set(HAVE_BIN ON CACHE BOOL "Build the fst binaries" FORCE)
+  set(HAVE_SCRIPT ON CACHE BOOL "Build the fstscript" FORCE)
 
   set(HAVE_COMPACT OFF CACHE BOOL "Build compact" FORCE)
   set(HAVE_CONST OFF CACHE BOOL "Build const" FORCE)

@@ -22,25 +22,59 @@
 #include <mutex>
 #include <thread>
 #include <map>
-
+#include <unordered_map>
+#include "util/text-utils.h"
 using namespace std;
 
 std::atomic<int> wav_index(0);
 std::mutex mtx;
+void ExtractHws(string hws_file, unordered_map<string, int> &hws_map)
+{
+    std::string line;
+    std::ifstream ifs_hws(hws_file.c_str());
+    while (getline(ifs_hws, line)) {
+      kaldi::Trim(&line);
+      if (line.empty()) {
+        continue;
+      }
+      float score = 1.0f;
+      std::vector<std::string> text;
+      kaldi::SplitStringToVector(line, "\t", true, &text);
+      if (text.size() > 1) {
+        score = std::stof(text[1]);
+      } else if (text.empty()) {
+        continue;
+      }
+      hws_map.emplace(text[0], score);
+    }
+    ifs_hws.close();
+}
 
 void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, vector<string> wav_ids,
-            float* total_length, long* total_time, int core_id, string hotwords) {
+            float* total_length, long* total_time, int core_id, string hotwords, int hws_inc_bias = 20, string hws_dir = "") {
     
     struct timeval start, end;
     long seconds = 0;
     float n_total_length = 0.0f;
     long n_total_time = 0;
+	
+    // init wfst decoder
+    FUNASR_DEC_HANDLE decoder_handle = FunASRWfstDecoderInit(asr_handle, ASR_OFFLINE);    
+
+    // process fst hotwords list
+    unordered_map<string, int> hws_map;
+    ExtractHws(hws_dir, hws_map);
+
+    // load hotwords list and build graph
+    FunWfstDecoderLoadHwsRes(decoder_handle, hws_inc_bias, hws_map);
+
     std::vector<std::vector<float>> hotwords_embedding = CompileHotwordEmbedding(asr_handle, hotwords);
     
     // warm up
     for (size_t i = 0; i < 1; i++)
     {
-        FUNASR_RESULT result=FunOfflineInfer(asr_handle, wav_list[0].c_str(), RASR_NONE, NULL, hotwords_embedding, 16000);
+        FunOfflineReset(asr_handle, decoder_handle);
+        FUNASR_RESULT result=FunOfflineInfer(asr_handle, wav_list[0].c_str(), RASR_NONE, NULL, hotwords_embedding, 16000, false, decoder_handle);
         if(result){
             FunASRFreeResult(result);
         }
@@ -54,7 +88,8 @@ void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, vector<string> wa
         }
 
         gettimeofday(&start, NULL);
-        FUNASR_RESULT result=FunOfflineInfer(asr_handle, wav_list[i].c_str(), RASR_NONE, NULL, hotwords_embedding, 16000);
+        FunOfflineReset(asr_handle, decoder_handle);
+        FUNASR_RESULT result=FunOfflineInfer(asr_handle, wav_list[i].c_str(), RASR_NONE, NULL, hotwords_embedding, 16000, false, decoder_handle);
 
         gettimeofday(&end, NULL);
         seconds = (end.tv_sec - start.tv_sec);
@@ -82,6 +117,8 @@ void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, vector<string> wa
             *total_time = n_total_time;
         }
     }
+    FunWfstDecoderUnloadHwsRes(decoder_handle);
+    FunASRWfstDecoderUninit(decoder_handle);
 }
 
 bool is_target_file(const std::string& filename, const std::string target) {
@@ -113,6 +150,9 @@ int main(int argc, char *argv[])
     TCLAP::ValueArg<std::string>    vad_quant("", VAD_QUANT, "true (Default), load the model of model.onnx in vad_dir. If set true, load the model of model_quant.onnx in vad_dir", false, "true", "string");
     TCLAP::ValueArg<std::string>    punc_dir("", PUNC_DIR, "the punc model path, which contains model.onnx, punc.yaml", false, "", "string");
     TCLAP::ValueArg<std::string>    punc_quant("", PUNC_QUANT, "true (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "true", "string");
+    TCLAP::ValueArg<std::string>    fst_dir("", FST_DIR, "the fst resource path", false, "", "string");
+    TCLAP::ValueArg<std::string>    hws_dir("", HWS_DIR, "the hotwords list", false, "", "string");
+    TCLAP::ValueArg<std::int32_t>   hws_inc_bias("", HWS_INC_BIAS, "the fst hotwords incremental bias", false, 20, "int32_t");
     TCLAP::ValueArg<std::string>    itn_dir("", ITN_DIR, "the itn model(fst) path, which contains zh_itn_tagger.fst and zh_itn_verbalizer.fst", false, "", "string");
 
     TCLAP::ValueArg<std::string> wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", true, "", "string");
@@ -126,6 +166,9 @@ int main(int argc, char *argv[])
     cmd.add(punc_dir);
     cmd.add(punc_quant);
     cmd.add(itn_dir);
+    cmd.add(fst_dir);
+    cmd.add(hws_dir);
+    cmd.add(hws_inc_bias);
     cmd.add(wav_path);
     cmd.add(thread_num);
     cmd.add(hotword);
@@ -139,6 +182,8 @@ int main(int argc, char *argv[])
     GetValue(punc_dir, PUNC_DIR, model_path);
     GetValue(punc_quant, PUNC_QUANT, model_path);
     GetValue(itn_dir, ITN_DIR, model_path);
+    GetValue(fst_dir, FST_DIR, model_path);
+    GetValue(hws_dir, HWS_DIR, model_path);
     GetValue(wav_path, WAV_PATH, model_path);
 
     struct timeval start, end;
@@ -212,9 +257,15 @@ int main(int argc, char *argv[])
     std::vector<std::thread> threads;
 
     int rtf_threds = thread_num.getValue();
+    string hws_path;
+    int value_bias = 20;
+    if (hws_dir.isSet()) {
+      hws_path = model_path.at(HWS_DIR);
+      value_bias = hws_inc_bias.getValue();
+    }
     for (int i = 0; i < rtf_threds; i++)
     {
-        threads.emplace_back(thread(runReg, asr_handle, wav_list, wav_ids, &total_length, &total_time, i, hotwords_));
+        threads.emplace_back(thread(runReg, asr_handle, wav_list, wav_ids, &total_length, &total_time, i, hotwords_, value_bias, hws_path));
     }
 
     for (auto& thread : threads)

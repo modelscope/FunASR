@@ -216,7 +216,7 @@
 	// APIs for Offline-stream Infer
 	_FUNASRAPI FUNASR_RESULT FunOfflineInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, 
 												   FUNASR_MODE mode, QM_CALLBACK fn_callback, const std::vector<std::vector<float>> &hw_emb, 
-												   int sampling_rate, std::string wav_format, bool itn)
+												   int sampling_rate, std::string wav_format, bool itn, FUNASR_DEC_HANDLE dec_handle)
 	{
 		funasr::OfflineStream* offline_stream = (funasr::OfflineStream*)handle;
 		if (!offline_stream)
@@ -256,7 +256,7 @@
 		std::string cur_stamp = "[";
 		std::string lang = (offline_stream->asr_handle)->GetLang();
 		while (audio.Fetch(buff, len, flag, start_time) > 0) {
-			string msg = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb);
+			string msg = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb, dec_handle);
 			std::vector<std::string> msg_vec = funasr::split(msg, '|');
 			if(msg_vec.size()==0){
 				continue;
@@ -297,7 +297,7 @@
 	}
 
 	_FUNASRAPI FUNASR_RESULT FunOfflineInfer(FUNASR_HANDLE handle, const char* sz_filename, FUNASR_MODE mode, QM_CALLBACK fn_callback, 
-											 const std::vector<std::vector<float>> &hw_emb, int sampling_rate, bool itn)
+											 const std::vector<std::vector<float>> &hw_emb, int sampling_rate, bool itn, FUNASR_DEC_HANDLE dec_handle)
 	{
 		funasr::OfflineStream* offline_stream = (funasr::OfflineStream*)handle;
 		if (!offline_stream)
@@ -340,7 +340,7 @@
 		std::string cur_stamp = "[";
 		std::string lang = (offline_stream->asr_handle)->GetLang();
 		while (audio.Fetch(buff, len, flag, start_time) > 0) {
-			string msg = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb);
+			string msg = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb, dec_handle);
 			std::vector<std::string> msg_vec = funasr::split(msg, '|');
 			if(msg_vec.size()==0){
 				continue;
@@ -630,6 +630,25 @@
 		}
 	}
 
+        // APIs for decoder status reset
+	_FUNASRAPI void FunASRReset(FUNASR_HANDLE handle, FUNASR_DEC_HANDLE dec_handle)
+	{
+		funasr::Model* recog_obj = (funasr::Model*)handle;
+		recog_obj->StartUtterance();
+		funasr::WfstDecoder* wfst_decoder = (funasr::WfstDecoder*)dec_handle;
+		if (wfst_decoder)
+			wfst_decoder->StartUtterance();
+	}
+
+	_FUNASRAPI void FunOfflineReset(FUNASR_HANDLE handle, FUNASR_DEC_HANDLE dec_handle)
+	{
+		funasr::OfflineStream* recog_obj = (funasr::OfflineStream*)handle;
+		recog_obj->asr_handle->StartUtterance();
+		funasr::WfstDecoder* wfst_decoder = (funasr::WfstDecoder*)dec_handle;
+		if (wfst_decoder)
+			wfst_decoder->StartUtterance();
+	}
+
 	// APIs for Uninit
 	_FUNASRAPI void FunASRUninit(FUNASR_HANDLE handle)
 	{
@@ -691,4 +710,38 @@
 		delete tpass_online_stream;
 	}
 
+	_FUNASRAPI FUNASR_DEC_HANDLE FunASRWfstDecoderInit(FUNASR_HANDLE handle, int asr_type)
+	{
+		funasr::WfstDecoder* mm = nullptr;
+		if (asr_type == ASR_OFFLINE) {
+			funasr::OfflineStream* offline_stream = (funasr::OfflineStream*)handle;
+			funasr::Paraformer* paraformer = (funasr::Paraformer*)offline_stream->asr_handle.get();
+			if (paraformer->lm_)
+				mm = new funasr::WfstDecoder(paraformer->lm_.get(), 
+					paraformer->GetPhoneSet(), paraformer->GetVocab());
+		}
+		return mm;
+	}
 
+	_FUNASRAPI void FunASRWfstDecoderUninit(FUNASR_DEC_HANDLE handle)
+	{
+		funasr::WfstDecoder* wfst_decoder = (funasr::WfstDecoder*)handle;
+		if (!wfst_decoder)
+			return;
+		delete wfst_decoder;
+	}
+
+	_FUNASRAPI void FunWfstDecoderLoadHwsRes(FUNASR_DEC_HANDLE handle, int inc_bias, unordered_map<string, int> &hws_map)
+	{
+		funasr::WfstDecoder* wfst_decoder = (funasr::WfstDecoder*)handle;
+		if (!wfst_decoder)
+			return;
+		wfst_decoder->LoadHwsRes(inc_bias, hws_map);
+	}
+	_FUNASRAPI void FunWfstDecoderUnloadHwsRes(FUNASR_DEC_HANDLE handle)
+	{
+		funasr::WfstDecoder* wfst_decoder = (funasr::WfstDecoder*)handle;
+		if (!wfst_decoder)
+			return;
+		wfst_decoder->UnloadHwsRes();
+	}

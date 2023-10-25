@@ -61,6 +61,13 @@ OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int
         asr_handle->InitAsr(am_model_path, am_cmvn_path, am_config_path, thread_num);
     }
 
+    // Lm resource
+    if (model_path.find(FST_DIR) != model_path.end()) {
+        string fst_path, lm_config_path, hws_path;
+        fst_path = PathAppend(model_path.at(FST_DIR), LM_FST_RES);
+        lm_config_path = PathAppend(model_path.at(FST_DIR), LM_CONFIG_NAME);
+        asr_handle->InitLm(fst_path, lm_config_path);
+    }
 
     // PUNC model
     if(model_path.find(PUNC_DIR) != model_path.end()){

@@ -1,0 +1,108 @@
+#
+# README
+#
+# Language model & lexicon examples
+# using command-line executables in lm/
+
+# To print and display FSTs,
+# make sure you have OpenFst binaries in your PATH, for example:
+#   export PATH=$PATH:~/Sources/UBM-ASR/branches/clean/openfst-1.2/bin
+
+# If you have X installed in your local machine, you can display
+# FSTs from merlin by ssh'ing with X forwarding, for example:
+#    ssh -X qboulianne@merlin
+
+# The following commands and examples assume that your are
+# in working directory UBM-ASR/branches/clean/src/lm
+
+#-------------------------------------------
+# Language model FST (G)
+
+# The command-line utility for
+# creating a language model FST from an arpa file is
+# "arpa2fst".
+
+# A summary of options and usage can be displayed with:
+./arpa2fst --help
+
+# Read an arpa file to produce an FST with symbol tables:
+./arpa2fst < input.arpa > grammar.fst
+
+# Print it or display it:
+fstprint grammar.fst
+fstdraw grammar.fst | dotty -
+
+# Note that arpa2fst will create a word symbol table
+# from all the words are in the ARPA file.
+# You can save this symbol table in text format
+# for examination or later reuse.
+fstprint --save_isymbols=grammar.syms grammar.fst > /dev/null
+
+#----------------------------------------------
+# Lexicon (L)
+
+# The command-line utility for
+# creating a lexicon FST from a text file is
+# "lex2fst".
+
+# A summary of options and usage can be displayed with:
+./lex2fst --help
+
+# Read a lexicon file (containing pronunciation probabilities)
+# and produce an FST with symbol tables.
+# By default it will have disambiguation markers,
+#   optional silence between words,
+#   and FST weights will be -log(prob).
+./lex2fst < prob_input.lex > lexicon.fst
+
+# Print it or display it
+fstprint lexicon.fst
+fstdraw lexicon.fst | dotty -
+
+# To produce one without markers (and also smaller):
+./lex2fst --nodisamb < prob_input.lex > lexicon_nomarkers.fst
+
+#---------------------------------
+# Combining lexicon and grammar
+
+# lgrecipe.cc is an example recipe for building det(LoG)
+# in C++ using calls to functions in lm/kaldi-lm.a
+# Here we use a large lexicon and language model from last year's.
+# First get input files:
+export MDIR=/homes/eva/q/qgoel/englishModels
+cp $MDIR/lm_callhome_gigaword_switchboard_web.hd.dct largelexicon.dct
+gunzip -c $MDIR/lm_callhome_gigaword_switchboard_web.3gram.arpa.gz > largelm.arpa
+
+# Set memory limits (by default limited to 400 MB). Make it 4 GB.
+ulimit -m 4000000 -v 8000000
+./lgrecipe largelexicon.dct largelm.arpa detlg.fst
+
+# Check its size: should be close to 13 M arcs and 8 M nodes
+fstinfo detlg.fst | head -15
+
+#---------------------------------------
+# Expanding nested grammars
+
+# replace-example is a use-case example that creates
+# small grammars from text files. These grammars
+# refer to other grammars using non-terminal symbols.
+# The result is the fully expanded grammar FST,
+# where each non-terminal has been expanded entirely
+# to non-terminals.
+cd examples
+
+# Example 1 : create the expanded grammar
+../replace-example input3.txt CREATURE.txt > input3.fst
+
+# and generate a random sentence from the expanded grammar
+fstrandgen input3.fst | fstrmepsilon | fstprint | cut -f 4
+
+# Example 2 : create the expanded grammar
+../replace-example input4.txt DAYOFMONTH.txt MONTH.txt YEAR.txt YEARDATE.txt > input4.fst
+
+# and generate random sentence
+fstrandgen input4.fst | fstproject --project_output | fstrmepsilon | fstprint | cut -f 4
+
+#--------------------------------------------
+# TODO: Adapt README.testfiles as an example of how to create
+#  an arpa language model and evaluate its score / perplexity.
