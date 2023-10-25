@@ -37,7 +37,7 @@ def prepare_model(
         else:
             raise "model_hub must be on of ms or hf, but get {}".format(model_hub)
         try:
-            model = download_tool(model, cache_dir=cache_dir)
+            model = download_tool(model, cache_dir=cache_dir, revision=kwargs.get("revision", None))
             print("model have been downloaded to: {}".format(model))
         except:
             raise "model_dir must be model_name in modelscope or local path downloaded from modelscope, but is {}".format(
