@@ -121,7 +121,7 @@ void BiasLm::BuildGraph(std::vector<std::vector<int>> &split_id_vec,
 }
 
 float BiasLm::BiasLmScore(const StateId &his_state, const Label &lab, Label &new_state) {
-  if (lab < 1 || lab > phn_set_.Size()) { return VALUE_ZERO; }
+  if (lab < 1 || lab > phn_set_.Size() || !graph_) { return VALUE_ZERO; }
   StateId cur_state = his_state;
   StateId next_state;
   float score = VALUE_ZERO;
