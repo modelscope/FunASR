@@ -61,7 +61,7 @@ class overlap_chunk():
 		chunk_num = len(self.chunk_size)
 		ind = 0
 		if training and chunk_num > 1:
-			ind = torch.randint(0, chunk_num-1, ()).cpu().item()
+			ind = torch.randint(0, chunk_num, ()).cpu().item()
 		if not training and decoding_ind is not None:
 			ind = int(decoding_ind)
 
