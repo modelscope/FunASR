@@ -78,6 +78,7 @@ p = infer(model="paraformer-zh", vad_model="fsmn-vad", punc_model="ct-punc", mod
 res = p("asr_example_zh.wav", batch_size_token=5000)
 print(res)
 ```
+注：`model_hub`：表示模型仓库，`ms`为选择modelscope下载，`hf`为选择huggingface下载。
 
 ### 实时语音识别
 ```python
@@ -89,7 +90,7 @@ chunk_size = [0, 10, 5] #[0, 10, 5] 600ms, [0, 8, 4] 480ms
 param_dict = {"cache": dict(), "is_final": False, "chunk_size": chunk_size, "encoder_chunk_look_back": 4, "decoder_chunk_look_back": 1}
 
 import soundfile
-speech, sample_rate = soundfile.read("/Users/zhifu/funasr_github/test_local/asr_example.wav")
+speech, sample_rate = soundfile.read("asr_example_zh.wav")
 speech_length = speech.shape[0]
 
 final_result = ""
@@ -106,6 +107,7 @@ for sample_offset in range(0, speech_length, min(stride_size, speech_length - sa
         print(rec_result)
 print(final_result)
 ```
+注：`chunk_size`为流式延时配置，`[0,10,5]`表示上屏实时出字粒度为10*60=600ms，未来信息为5*60=300ms。每次推理输入为600ms（采样点数为16000*0.6=960），输出为对应文字，最后一个语音片段输入需要设置`is_final=True`来强制输出最后一个字。
 
 更多详细用法（[新人文档](https://alibaba-damo-academy.github.io/FunASR/en/funasr/quick_start_zh.html)）
 
