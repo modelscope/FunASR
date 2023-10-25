@@ -129,7 +129,7 @@ class BiasLm {
  private:
   const PhoneSet& phn_set_;
   const Vocab& vocab_;
-  std::unique_ptr<fst::StdVectorFst> graph_;
+  std::unique_ptr<fst::StdVectorFst> graph_ = nullptr;
   std::vector<Node> node_list_;
   BiasLmOption opt_;
 };
