@@ -100,9 +100,9 @@ int main(int argc, char* argv[]) {
 
     TCLAP::ValueArg<std::string> hotwordsfile(
         "", "hotword",
-        "default: ../../hotwords.txt, path of hotwordsfile"
+        "default: /workspace/resources/hotwords.txt, path of hotword file"
         "connection",
-        false, "../../hotwords.txt", "string");
+        false, "/workspace/resources/hotwords.txt", "string");
 
     // add file
     cmd.add(hotwordsfile);
@@ -355,7 +355,8 @@ int main(int argc, char* argv[]) {
         LOG(INFO) << "hotwords: " << hotwords;
         file.close();
     } else {
-        LOG(ERROR) << "Unable to open hotwords file: " << s_hotwordsfile;
+        LOG(ERROR) << "Unable to open hotwords file: " << s_hotwordsfile 
+            << ". If you have not set hotwords, please ignore this message.";
     }
 
     bool is_ssl = false;

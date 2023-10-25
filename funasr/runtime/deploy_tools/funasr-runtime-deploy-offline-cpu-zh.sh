@@ -939,7 +939,7 @@ dockerRun(){
         run_cmd="${SUDO_CMD} docker run"
         port_map=" -p ${PARAMS_HOST_PORT}:${PARAMS_DOCKER_PORT}"
         env_params=" --privileged=true"
-        dir_map_params=" -v ${DEFAULT_FUNASR_CONFIG_DIR}:/workspace/.config -v ${PARAMS_FUNASR_LOCAL_MODELS_DIR}:${PARAMS_DOWNLOAD_MODEL_DIR}"
+        dir_map_params=" -v ${DEFAULT_FUNASR_CONFIG_DIR}:/workspace/.config -v ${PARAMS_FUNASR_LOCAL_MODELS_DIR}:${PARAMS_DOWNLOAD_MODEL_DIR} -v ${PARAMS_FUNASR_LOCAL_WORKSPACE}:/workspace/resources"
 
         serverConfigGeneration
         env_params=" ${env_params} --env DAEMON_SERVER_CONFIG=${daemon_server_config}"
