@@ -90,7 +90,7 @@ chunk_size = [0, 10, 5] #[0, 10, 5] 600ms, [0, 8, 4] 480ms
 param_dict = {"cache": dict(), "is_final": False, "chunk_size": chunk_size, "encoder_chunk_look_back": 4, "decoder_chunk_look_back": 1}
 
 import torchaudio
-speech = torchaudio.load("/Users/zhifu/funasr_github/test_local/asr_example.wav")[0][0]
+speech = torchaudio.load("asr_example_zh.wav")[0][0]
 speech_length = speech.shape[0]
 
 stride_size = chunk_size[1] * 960
