@@ -42,6 +42,10 @@ void ExtractHws(string hws_file, unordered_map<string, int> &hws_map)
 {
     std::string line;
     std::ifstream ifs_hws(hws_file.c_str());
+    if(!ifs_hws.is_open()){
+        LOG(ERROR) << "Failed to open file: " << hws_file ;
+        return;
+    }
     while (getline(ifs_hws, line)) {
       kaldi::Trim(&line);
       if (line.empty()) {
@@ -72,13 +76,14 @@ int main(int argc, char** argv)
     TCLAP::ValueArg<std::string>    vad_quant("", VAD_QUANT, "true (Default), load the model of model.onnx in vad_dir. If set true, load the model of model_quant.onnx in vad_dir", false, "true", "string");
     TCLAP::ValueArg<std::string>    punc_dir("", PUNC_DIR, "the punc model path, which contains model.onnx, punc.yaml", false, "", "string");
     TCLAP::ValueArg<std::string>    punc_quant("", PUNC_QUANT, "true (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "true", "string");
-    TCLAP::ValueArg<std::string>    fst_dir("", FST_DIR, "the fst resource path", false, "", "string");
-    TCLAP::ValueArg<std::string>    hws_dir("", HWS_DIR, "the fst hotwords list", false, "", "string");
-    TCLAP::ValueArg<std::int32_t>   hws_inc_bias("", HWS_INC_BIAS, "the fst hotwords incremental bias", false, 20, "int32_t");
+    TCLAP::ValueArg<std::string>    lm_dir("", LM_DIR, "the lm model path, which contains compiled models: TLG.fst, config.yaml ", false, "", "string");
+    TCLAP::ValueArg<std::string>    fst_hotword("", FST_HOTWORD, "the fst hotwords file, one hotword perline, Format: Hotword [tab] Weight (could be: 阿里巴巴 \t 20)", false, "", "string");
+    TCLAP::ValueArg<std::int32_t>   fst_inc_wts("", FST_INC_WTS, "the fst hotwords incremental bias", false, 20, "int32_t");
     TCLAP::ValueArg<std::string>    itn_dir("", ITN_DIR, "the itn model(fst) path, which contains zh_itn_tagger.fst and zh_itn_verbalizer.fst", false, "", "string");
 
     TCLAP::ValueArg<std::string> wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", true, "", "string");
-    TCLAP::ValueArg<std::string> hotword("", HOTWORD, "*.txt(one hotword perline) or hotwords seperate by space (could be: 阿里巴巴 达摩院)", false, "", "string");
+    TCLAP::ValueArg<std::string> nn_hotword("", NN_HOTWORD,
+        "the nn hotwords file, one hotword perline, Format: Hotword (could be: 阿里巴巴)", false, "", "string");
 
     cmd.add(model_dir);
     cmd.add(quantize);
@@ -87,11 +92,11 @@ int main(int argc, char** argv)
     cmd.add(punc_dir);
     cmd.add(punc_quant);
     cmd.add(itn_dir);
-    cmd.add(fst_dir);
-    cmd.add(hws_dir);
-    cmd.add(hws_inc_bias);
+    cmd.add(lm_dir);
+    cmd.add(fst_hotword);
+    cmd.add(fst_inc_wts);
     cmd.add(wav_path);
-    cmd.add(hotword);
+    cmd.add(nn_hotword);
     cmd.parse(argc, argv);
 
     std::map<std::string, std::string> model_path;
@@ -102,8 +107,8 @@ int main(int argc, char** argv)
     GetValue(punc_dir, PUNC_DIR, model_path);
     GetValue(punc_quant, PUNC_QUANT, model_path);
     GetValue(itn_dir, ITN_DIR, model_path);
-    GetValue(fst_dir, FST_DIR, model_path);
-    GetValue(hws_dir, HWS_DIR, model_path);
+    GetValue(lm_dir, LM_DIR, model_path);
+    GetValue(fst_hotword, FST_HOTWORD, model_path);
     GetValue(wav_path, WAV_PATH, model_path);
 
     struct timeval start, end;
@@ -120,36 +125,34 @@ int main(int argc, char** argv)
     // init wfst decoder
     FUNASR_DEC_HANDLE decoder_handle = FunASRWfstDecoderInit(asr_hanlde, ASR_OFFLINE);
 
-    // process fst hotwords list
+    // fst hotword file
     unordered_map<string, int> hws_map;
-    if (hws_dir.isSet()) {
-      ExtractHws(model_path.at(HWS_DIR), hws_map);
+    if (fst_hotword.isSet()) {
+      ExtractHws(model_path.at(FST_HOTWORD), hws_map);
+    }
+
+    // nn hotword file
+    std::string nn_hotwords_;
+    std::string file_nn_hotword = nn_hotword.getValue();
+    std::string line;
+    std::ifstream file(file_nn_hotword);
+    LOG(INFO) << "nn hotword path: " << file_nn_hotword;
+
+    if (file.is_open()) {
+        while (getline(file, line)) {
+            nn_hotwords_ += line+HOTWORD_SEP;
+        }
+        LOG(INFO) << "nn hotwords: " << nn_hotwords_;
+        file.close();
+    } else {
+        LOG(ERROR) << "Unable to open nn hotwords file: " << file_nn_hotword 
+            << ". If you have not set nn hotwords, please ignore this message.";
     }
 
     gettimeofday(&end, NULL);
     long seconds = (end.tv_sec - start.tv_sec);
     long modle_init_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
     LOG(INFO) << "Model initialization takes " << (double)modle_init_micros / 1000000 << " s";
-
-    // read hotwords
-    std::string hotword_ = hotword.getValue();
-    std::string hotwords_;
-
-    if(is_target_file(hotword_, "txt")){
-        ifstream in(hotword_);
-        if (!in.is_open()) {
-            LOG(ERROR) << "Failed to open file: " << model_path.at(HOTWORD) ;
-            return 0;
-        }
-        string line;
-        while(getline(in, line))
-        {
-            hotwords_ +=line+HOTWORD_SEP;
-        }
-        in.close();
-    }else{
-        hotwords_ = hotword_;
-    }
 
     // read wav_path
     vector<string> wav_list;
@@ -182,14 +185,13 @@ int main(int argc, char** argv)
     long taking_micros = 0;
 
     // load hotwords list and build graph
-    FunWfstDecoderLoadHwsRes(decoder_handle, hws_inc_bias.getValue(), hws_map);
+    FunWfstDecoderLoadHwsRes(decoder_handle, fst_inc_wts.getValue(), hws_map);
 	
-    std::vector<std::vector<float>> hotwords_embedding = CompileHotwordEmbedding(asr_hanlde, hotwords_);
+    std::vector<std::vector<float>> hotwords_embedding = CompileHotwordEmbedding(asr_hanlde, nn_hotwords_);
     for (int i = 0; i < wav_list.size(); i++) {
         auto& wav_file = wav_list[i];
         auto& wav_id = wav_ids[i];
         gettimeofday(&start, NULL);
-        FunOfflineReset(asr_hanlde, decoder_handle);
         FUNASR_RESULT result=FunOfflineInfer(asr_hanlde, wav_file.c_str(), RASR_NONE, NULL, hotwords_embedding, 16000, false, decoder_handle);
         gettimeofday(&end, NULL);
         seconds = (end.tv_sec - start.tv_sec);

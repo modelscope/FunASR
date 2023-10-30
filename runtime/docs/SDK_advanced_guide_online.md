@@ -18,7 +18,7 @@ If you do not have Docker installed, please refer to [Docker Installation](https
 
 After Docker is launched, start the funasr-wss-server-2pass service program:
 ```shell
-cd FunASR/funasr/runtime
+cd FunASR/runtime
 nohup bash run_server_2pass.sh \
   --download-model-dir /workspace/models \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
@@ -61,7 +61,7 @@ For more detailed usage, please click on the links above. For more client versio
 
 Use the flollowing script to start the server ：
 ```shell
-cd /workspace/FunASR/funasr/runtime
+cd /workspace/FunASR/runtime
 nohup bash run_server_2pass.sh \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx \
   --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx \
@@ -73,7 +73,7 @@ nohup bash run_server_2pass.sh \
   --port 10095 \
   --certfile  ../../../ssl_key/server.crt \
   --keyfile ../../../ssl_key/server.key \
-  --hotword ../../hotwords.txt > log.out 2>&1 &
+  --nn_hotword ../../nn_hotwords.txt > log.out 2>&1 &
 
 # If you want to close ssl，please add：--certfile 0
 # If you want to deploy the timestamp or hotword model, please set --model-dir to the corresponding model:
@@ -98,7 +98,7 @@ nohup bash run_server_2pass.sh \
 --io-thread-num: Number of IO threads that the server starts. Default is 1.
 --certfile <string>: SSL certificate file. Default is ../../../ssl_key/server.crt. If you want to close ssl，set 0
 --keyfile <string>: SSL key file. Default is ../../../ssl_key/server.key. 
---hotword   Hotword file path, one line for each hot word, if the client provides hot words, then combined with the hot words provided by the client. Default is ../../hotwords.txt
+--nn_hotword   Hotword file path, one line for each hot word, if the client provides hot words, then combined with the hot words provided by the client.
 ```
 
 ### Shutting Down the FunASR Service

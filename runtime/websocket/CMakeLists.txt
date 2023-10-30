@@ -109,14 +109,18 @@ endif()
 
 
 include_directories(${PROJECT_SOURCE_DIR}/../onnxruntime/include/)
+include_directories(${PROJECT_SOURCE_DIR}/../onnxruntime/src)
 include_directories(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/yaml-cpp/include/)
 include_directories(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/kaldi-native-fbank)
 include_directories(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/jieba/include)
 include_directories(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/jieba/include/limonp/include)
+include_directories(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party)
+include_directories(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/kaldi)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/yaml-cpp yaml-cpp)
 add_subdirectory(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/kaldi-native-fbank/kaldi-native-fbank/csrc csrc)
 add_subdirectory(${PROJECT_SOURCE_DIR}/../onnxruntime/src src)
+add_subdirectory(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/kaldi kaldi)
 
 # install openssl first apt-get install libssl-dev
 find_package(OpenSSL REQUIRED)

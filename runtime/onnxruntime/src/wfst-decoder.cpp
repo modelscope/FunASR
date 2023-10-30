@@ -61,7 +61,7 @@ string WfstDecoder::Search(float *in, int len, int64_t token_num) {
   return result;
 }
 
-string WfstDecoder::FinalizeDecode() {
+string WfstDecoder::FinalizeDecode(bool is_stamp, std::vector<float> us_alphas, std::vector<float> us_cif_peak) {
   string result;
   if (cur_token_ > 0) {
     std::vector<int> words;
@@ -72,7 +72,19 @@ string WfstDecoder::FinalizeDecode() {
     std::vector<int> alignment;
     kaldi::LatticeWeight weight;
     fst::GetLinearSymbolSequence(lattice, &alignment, &words, &weight);
-    result = vocab_->Vector2StringV2(words);
+    
+    if(!is_stamp){
+        return vocab_->Vector2StringV2(words);
+    }else{
+        std::vector<string> char_list;
+        std::vector<std::vector<float>> timestamp_list;
+        std::string res_str;
+        vocab_->Vector2String(words, char_list);
+        std::vector<string> raw_char(char_list);
+        TimestampOnnx(us_alphas, us_cif_peak, char_list, res_str, timestamp_list);
+
+        return PostProcess(raw_char, timestamp_list);
+    }
   }
   return result;
 }

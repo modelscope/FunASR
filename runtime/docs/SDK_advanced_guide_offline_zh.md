@@ -13,7 +13,7 @@ FunASR提供可一键本地或者云端服务器部署的中文离线文件转�
 
 详细性能测试报告（[点击此处](./benchmark_onnx_cpp.md)）
 
-云服务厂商，针对新用户，有3个月免费试用活动，申请教程（[点击此处](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/docs/aliyun_server_tutorial.md)）
+云服务厂商，针对新用户，有3个月免费试用活动，申请教程（[点击此处](https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/docs/aliyun_server_tutorial.md)）
 
 
 ## 快速上手
@@ -23,11 +23,11 @@ FunASR提供可一键本地或者云端服务器部署的中文离线文件转�
 
 ```shell
 sudo docker pull \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.2.2
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.3.0
 mkdir -p ./funasr-runtime-resources/models
 sudo docker run -p 10095:10095 -it --privileged=true \
   -v $PWD/funasr-runtime-resources/models:/workspace/models \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.2.2
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.3.0
 ```
 如果您没有安装docker，可参考[Docker安装](#Docker安装)
 
@@ -35,12 +35,13 @@ sudo docker run -p 10095:10095 -it --privileged=true \
 
 docker启动之后，启动 funasr-wss-server服务程序：
 ```shell
-cd FunASR/funasr/runtime
+cd FunASR/runtime
 nohup bash run_server.sh \
   --download-model-dir /workspace/models \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx \
+  --lm-dir damo/speech_ngram_lm_zh-cn-ai-wesp-fst \
   --itn-dir thuduj12/fst_itn_zh > log.out 2>&1 &
 
 # 如果您想关闭ssl，增加参数：--certfile 0
@@ -116,7 +117,8 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline \
 --audio_in 需要进行转写的音频文件，支持文件路径，文件列表wav.scp
 --thread_num 设置并发发送线程数，默认为1
 --ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
---hotword 如果模型为热词模型，可以设置热词: *.txt(每行一个热词) 或者空格分隔的热词字符串(阿里巴巴 达摩院)
+--nn_hotword 如果模型为热词模型，可以设置热词: 阿里巴巴 (每行一个热词)
+--fst_hotword 如果使用fst热词，可以设置热词文件: 阿里巴巴 \t 20(每行一个热词)
 --use_itn 设置是否使用itn，默认1开启，设置为0关闭
 ```
 
@@ -133,7 +135,8 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline \
             需要改为部署机器ip
 --port 10095 部署端口号
 --wav-path 需要进行转写的音频文件，支持文件路径
---hotword 如果模型为热词模型，可以设置热词: *.txt(每行一个热词) 或者空格分隔的热词字符串 (阿里巴巴 达摩院)
+--nn-hotword 如果模型为热词模型，可以设置热词文件: 阿里巴巴 (每行一个热词)
+--fst-hotword 如果使用fst热词，可以设置热词文件: 阿里巴巴 \t 20(每行一个热词)
 --use-itn 设置是否使用itn，默认1开启，设置为0关闭
 ```
 
@@ -154,7 +157,7 @@ FunasrWsClient --host localhost --port 10095 --audio_in ./asr_example.wav --mode
 
 ### 启动FunASR服务
 ```shell
-cd /workspace/FunASR/funasr/runtime
+cd /workspace/FunASR/runtime
 nohup bash run_server.sh \
   --download-model-dir /workspace/models \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx \
@@ -166,7 +169,8 @@ nohup bash run_server.sh \
   --port 10095 \
   --certfile  ../../../ssl_key/server.crt \
   --keyfile ../../../ssl_key/server.key \
-  --hotword ../../hotwords.txt > log.out 2>&1 &
+  --fst_hotword ../../fst_hotwords.txt \
+  --nn_hotword ../../nn_hotwords.txt > log.out 2>&1 &
  ```
 **run_server.sh命令参数介绍**
 ```text
@@ -177,13 +181,15 @@ nohup bash run_server.sh \
 --vad-quant   True为量化VAD模型，False为非量化VAD模型，默认是True
 --punc-dir  modelscope model ID
 --punc-quant   True为量化PUNC模型，False为非量化PUNC模型，默认是True
+--lm-dir modelscope model ID
 --itn-dir modelscope model ID
 --port  服务端监听的端口号，默认为 10095
 --decoder-thread-num  服务端启动的推理线程数，默认为 8
 --io-thread-num  服务端启动的IO线程数，默认为 1
 --certfile  ssl的证书文件，默认为：../../../ssl_key/server.crt，如果需要关闭ssl，参数设置为0
 --keyfile   ssl的密钥文件，默认为：../../../ssl_key/server.key
---hotword   热词文件路径，每一个热词一行，如果客户端提供热词，则与客户端提供的热词合并一起使用。默认为：../../hotwords.txt
+--fst_hotword   fst热词文件路径，每一个热词一行(例如:阿里巴巴 \t 20)，如果客户端提供热词，则与客户端提供的热词合并一起使用。
+--nn_hotword   nn热词文件路径，每一个热词一行(例如:阿里巴巴)，如果客户端提供热词，则与客户端提供的热词合并一起使用。
 ```
 
 ### 关闭FunASR服务
@@ -212,7 +218,8 @@ kill -9 PID
 [FSMN-VAD模型](https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary),
 [Paraformer-lagre模型](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary),
 [CT-Transformer标点预测模型](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx/summary),
-[基于FST的中文ITN](https://www.modelscope.cn/models/thuduj12/fst_itn_zh/summary)
+[基于FST的中文ITN](https://www.modelscope.cn/models/thuduj12/fst_itn_zh/summary),
+[Ngram中文语言模型](https://www.modelscope.cn/models/damo/speech_ngram_lm_zh-cn-ai-wesp-fst/summary)
 
 如果，您希望部署您finetune后的模型（例如10epoch.pb），需要手动将模型重命名为model.pb，并将原modelscope中模型model.pb替换掉，将路径指定为`model_dir`即可。
 
@@ -222,11 +229,11 @@ kill -9 PID
 FunASR-runtime的代码已开源，如果服务端和客户端不能很好的满足您的需求，您可以根据自己的需求进行进一步的开发：
 ### c++ 客户端：
 
-https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/websocket
+https://github.com/alibaba-damo-academy/FunASR/tree/main/runtime/websocket
 
 ### python 客户端：
 
-https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket
+https://github.com/alibaba-damo-academy/FunASR/tree/main/runtime/python/websocket
 
 ### 自定义客户端：
 
@@ -246,7 +253,7 @@ FUNASR_RESULT result=FsmnVadInfer(vad_hanlde, wav_file.c_str(), NULL, 16000);
 // 其中：vad_hanlde为FunOfflineInit返回值，wav_file为音频路径，sampling_rate为采样率(默认16k)
 ```
 
-使用示例详见：https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/onnxruntime/bin/funasr-onnx-offline-vad.cpp
+使用示例详见：https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/onnxruntime/bin/funasr-onnx-offline-vad.cpp
 
 #### ASR
 ```text
@@ -257,7 +264,7 @@ FUNASR_RESULT result=FunOfflineInfer(asr_hanlde, wav_file.c_str(), RASR_NONE, NU
 // 其中：asr_hanlde为FunOfflineInit返回值，wav_file为音频路径，sampling_rate为采样率(默认16k)
 ```
 
-使用示例详见：https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/onnxruntime/bin/funasr-onnx-offline.cpp
+使用示例详见：https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/onnxruntime/bin/funasr-onnx-offline.cpp
 
 #### PUNC
 ```text
@@ -267,4 +274,4 @@ FUNASR_HANDLE punc_hanlde=CTTransformerInit(model_path, thread_num);
 FUNASR_RESULT result=CTTransformerInfer(punc_hanlde, txt_str.c_str(), RASR_NONE, NULL);
 // 其中：punc_hanlde为CTTransformerInit返回值，txt_str为文本
 ```
-使用示例详见：https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/onnxruntime/bin/funasr-onnx-offline-punc.cpp
+使用示例详见：https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/onnxruntime/bin/funasr-onnx-offline-punc.cpp

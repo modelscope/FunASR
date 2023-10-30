@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-scriptVersion="0.0.2"
-scriptDate="20230914"
+scriptVersion="0.0.3"
+scriptDate="20231030"
 
 
 # Set color
@@ -27,7 +27,7 @@ SUDO_CMD="sudo"
 
 
 DEFAULT_DOCKER_ONLINE_CPU_ZH_LISTS_OSS="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/docker_lists/docker_online_cpu_zh_lists"
-DEFAULT_DOCKER_ONLINE_CPU_ZH_LISTS_GIT="https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/funasr/runtime/docs/docker_online_cpu_zh_lists"
+DEFAULT_DOCKER_ONLINE_CPU_ZH_LISTS_GIT="https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/runtime/docs/docker_online_cpu_zh_lists"
 DEFAULT_DOCKER_IMAGE_LISTS=$DEFAULT_DOCKER_ONLINE_CPU_ZH_LISTS_OSS
 DEFAULT_FUNASR_DOCKER_URL="registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr"
 DEFAULT_FUNASR_RUNTIME_RESOURCES="funasr-runtime-resources"
@@ -42,7 +42,7 @@ DEFAULT_FUNASR_WORKSPACE_DIR="/workspace/models"
 DEFAULT_DOCKER_PORT="10095"
 DEFAULT_PROGRESS_FILENAME="progress.txt"
 DEFAULT_SERVER_EXEC_NAME="funasr-wss-server-2pass"
-DEFAULT_DOCKER_EXEC_DIR="/workspace/FunASR/funasr/runtime/websocket/build/bin"
+DEFAULT_DOCKER_EXEC_DIR="/workspace/FunASR/runtime/websocket/build/bin"
 DEFAULT_DOCKER_EXEC_PATH=${DEFAULT_DOCKER_EXEC_DIR}/${DEFAULT_SERVER_EXEC_NAME}
 DEFAULT_SAMPLES_NAME="funasr_samples"
 DEFAULT_SAMPLES_DIR="samples"
@@ -1060,8 +1060,8 @@ serverConfigGeneration(){
         crt_path="\"--certfile\":\"\""
         key_path="\"--keyfile\":\"\""
     else
-        crt_path="\"--certfile\":\"/workspace/FunASR/funasr/runtime/ssl_key/server.crt\""
-        key_path="\"--keyfile\":\"/workspace/FunASR/funasr/runtime/ssl_key/server.key\""
+        crt_path="\"--certfile\":\"/workspace/FunASR/runtime/ssl_key/server.crt\""
+        key_path="\"--keyfile\":\"/workspace/FunASR/runtime/ssl_key/server.key\""
     fi
 
     exec_params="\"exec\":\"${PARAMS_DOCKER_EXEC_PATH}\""

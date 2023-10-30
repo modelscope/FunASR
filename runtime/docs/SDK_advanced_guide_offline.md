@@ -36,9 +36,9 @@ sudo systemctl start docker
 Use the following command to pull and launch the Docker image for the FunASR runtime-SDK:
 
 ```shell
-sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.2.2
+sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.3.0
 
-sudo docker run -p 10095:10095 -it --privileged=true -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.2.2
+sudo docker run -p 10095:10095 -it --privileged=true -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.3.0
 ```
 
 Introduction to command parameters: 
@@ -58,6 +58,7 @@ nohup bash run_server.sh \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx \
+  --lm-dir damo/speech_ngram_lm_zh-cn-ai-wesp-fst \
   --itn-dir thuduj12/fst_itn_zh > log.out 2>&1 &
 
 # If you want to close ssl，please add：--certfile 0
@@ -72,19 +73,21 @@ nohup bash run_server.sh \
 The funasr-wss-server supports downloading models from Modelscope. You can set the model download address (--download-model-dir, default is /workspace/models) and the model ID (--model-dir, --vad-dir, --punc-dir). Here is an example:
 
 ```shell
-cd /workspace/FunASR/funasr/runtime
+cd /workspace/FunASR/runtime
 nohup bash run_server.sh \
   --download-model-dir /workspace/models \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx \
   --itn-dir thuduj12/fst_itn_zh \
+  --lm-dir damo/speech_ngram_lm_zh-cn-ai-wesp-fst \
   --decoder-thread-num 32 \
   --io-thread-num  8 \
   --port 10095 \
   --certfile  ../../../ssl_key/server.crt \
   --keyfile ../../../ssl_key/server.key \
-  --hotword ../../hotwords.txt > log.out 2>&1 &
+  --fst_hotword ../../fst_hotwords.txt \
+  --nn_hotword ../../nn_hotwords.txt > log.out 2>&1 &
  ```
 
 Introduction to run_server.sh parameters: 
@@ -103,7 +106,8 @@ Introduction to run_server.sh parameters:
 --io-thread-num: Number of IO threads that the server starts. Default is 1.
 --certfile <string>: SSL certificate file. Default is ../../../ssl_key/server.crt. If you want to close ssl，set 0
 --keyfile <string>: SSL key file. Default is ../../../ssl_key/server.key. 
---hotword   Hotword file path, one line for each hot word, if the client provides hot words, then combined with the hot words provided by the client. Default is ../../hotwords.txt
+--fst_hotword   Hotword file path, one line for each hot word(e.g.:阿里巴巴 \t 20), if the client provides hot words, then combined with the hot words provided by the client.
+--nn_hotword   Hotword file path, one line for each hot word(e.g.:阿里巴巴), if the client provides hot words, then combined with the hot words provided by the client.
 ```
 
 ### Shutting Down the FunASR Service
@@ -132,7 +136,8 @@ After executing the above command, the real-time speech transcription service wi
 [FSMN-VAD](https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary),
 [Paraformer-lagre](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary),
 [CT-Transformer](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx/summary),
-[FST-ITN](https://www.modelscope.cn/models/thuduj12/fst_itn_zh/summary)
+[FST-ITN](https://www.modelscope.cn/models/thuduj12/fst_itn_zh/summary),
+[Ngram lm](https://www.modelscope.cn/models/damo/speech_ngram_lm_zh-cn-ai-wesp-fst/summary)
 
 If you wish to deploy your fine-tuned model (e.g., 10epoch.pb), you need to manually rename the model to model.pb and replace the original model.pb in ModelScope. Then, specify the path as `model_dir`.
 
@@ -156,7 +161,8 @@ Introduction to command parameters:
 --output_dir: the path to the recognition result output.
 --ssl: whether to use SSL encryption. The default is to use SSL.
 --mode: offline mode.
---hotword: If am is hotword model, setting hotword: *.txt(one hotword perline) or hotwords seperate by space (could be: 阿里巴巴 达摩院)
+--fst_hotword: Hotword file path, one line for each hotword(e.g.:阿里巴巴 \t 20)
+--nn_hotword: If am is hotword model, setting hotword: one hotword perline(e.g.:阿里巴巴)
 --use_itn: whether to use itn, the default value is 1 for enabling and 0 for disabling.
 ```
 
@@ -172,7 +178,8 @@ Introduction to command parameters:
 --port: the port number of the server listener.
 --wav-path: the audio input. Input can be a path to a wav file or a wav.scp file (a Kaldi-formatted wav list in which each line includes a wav_id followed by a tab and a wav_path).
 --is-ssl: whether to use SSL encryption. The default is to use SSL.
---hotword: If am is hotword model, setting hotword: *.txt(one hotword perline) or hotwords seperate by space (could be: 阿里巴巴 达摩院)
+--fst-hotword: Hotword file path, one line for each hotword(e.g.:阿里巴巴 \t 20)
+--nn-hotword: If am is hotword model, setting hotword: one hotword perline(e.g.:阿里巴巴)
 --use-itn: whether to use itn, the default value is 1 for enabling and 0 for disabling.
 ```
 
@@ -186,11 +193,11 @@ The code for FunASR-runtime is open source. If the server and client cannot full
 
 ### C++ client
 
-https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/websocket
+https://github.com/alibaba-damo-academy/FunASR/tree/main/runtime/websocket
 
 ### Python client
 
-https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket
+https://github.com/alibaba-damo-academy/FunASR/tree/main/runtime/python/websocket
 
 ### C++ server
 
@@ -203,7 +210,7 @@ FUNASR_RESULT result=FsmnVadInfer(vad_hanlde, wav_file.c_str(), NULL, 16000);
 // Where: vad_hanlde is the return value of FunOfflineInit, wav_file is the path to the audio file, and sampling_rate is the sampling rate (default 16k).
 ```
 
-See the usage example for details [docs](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/onnxruntime/bin/funasr-onnx-offline-vad.cpp)
+See the usage example for details [docs](https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/onnxruntime/bin/funasr-onnx-offline-vad.cpp)
 
 #### ASR
 ```text
@@ -214,7 +221,7 @@ FUNASR_RESULT result=FunOfflineInfer(asr_hanlde, wav_file.c_str(), RASR_NONE, NU
 // Where: asr_hanlde is the return value of FunOfflineInit, wav_file is the path to the audio file, and sampling_rate is the sampling rate (default 16k).
 ```
 
-See the usage example for details, [docs](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/onnxruntime/bin/funasr-onnx-offline.cpp)
+See the usage example for details, [docs](https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/onnxruntime/bin/funasr-onnx-offline.cpp)
 
 #### PUNC
 ```text
@@ -224,4 +231,4 @@ FUNASR_HANDLE punc_hanlde=CTTransformerInit(model_path, thread_num);
 FUNASR_RESULT result=CTTransformerInfer(punc_hanlde, txt_str.c_str(), RASR_NONE, NULL);
 // Where: punc_hanlde is the return value of CTTransformerInit, txt_str is the text
 ```
-See the usage example for details, [docs](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/onnxruntime/bin/funasr-onnx-offline-punc.cpp)
+See the usage example for details, [docs](https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/onnxruntime/bin/funasr-onnx-offline-punc.cpp)

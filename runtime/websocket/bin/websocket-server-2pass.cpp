@@ -16,7 +16,7 @@
 #include <utility>
 #include <vector>
 
-extern std::string hotwords;
+extern std::string nn_hotwords_;
 
 context_ptr WebSocketServer::on_tls_init(tls_mode mode,
                                          websocketpp::connection_hdl hdl,
@@ -374,33 +374,29 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
       if (jsonresult.contains("wav_format")) {
         msg_data->msg["wav_format"] = jsonresult["wav_format"];
       }
+
+      // nn hotword
       if(msg_data->hotwords_embedding == NULL){
-        if (jsonresult["hotwords"] != nullptr) {
+        std::string hw = nn_hotwords_;
+        if (jsonresult["nn_hotwords"] != nullptr) {
+          msg_data->msg["nn_hotwords"] = jsonresult["nn_hotwords"];
+          if (!msg_data->msg["nn_hotwords"].empty()) {
+            std::string client_nn_hws = msg_data->msg["nn_hotwords"];
+            hw = hw + " " + client_nn_hws;
+          }
+        }else if (jsonresult["hotwords"] != nullptr) {
           msg_data->msg["hotwords"] = jsonresult["hotwords"];
           if (!msg_data->msg["hotwords"].empty()) {
-            std::string hw = msg_data->msg["hotwords"];
-            hw = hw + " " + hotwords;
-            LOG(INFO) << "hotwords: " << hw;
-            std::vector<std::vector<float>> new_hotwords_embedding = CompileHotwordEmbedding(tpass_handle, hw, ASR_TWO_PASS);
-            msg_data->hotwords_embedding =
-                std::make_shared<std::vector<std::vector<float>>>(new_hotwords_embedding);
-          }
-        } else {
-          if (hotwords.empty()) {
-            std::string hw = "";
-            LOG(INFO)<<"hotwords: " << hw;
-            std::vector<std::vector<float>> new_hotwords_embedding= CompileHotwordEmbedding(tpass_handle, hw, ASR_TWO_PASS);
-            msg_data->hotwords_embedding =
-                std::make_shared<std::vector<std::vector<float>>>(new_hotwords_embedding);
-          }else {
-            std::string hw = hotwords;
-            LOG(INFO) << "hotwords: " << hw;
-            std::vector<std::vector<float>> new_hotwords_embedding= CompileHotwordEmbedding(tpass_handle, hw, ASR_TWO_PASS);
-            msg_data->hotwords_embedding =
-                std::make_shared<std::vector<std::vector<float>>>(new_hotwords_embedding);
+            std::string client_nn_hws = msg_data->msg["hotwords"];
+            hw = hw + " " + client_nn_hws;
           }
         }
+        LOG(INFO) << "nn hotwords: " << hw;
+        std::vector<std::vector<float>> new_hotwords_embedding = CompileHotwordEmbedding(tpass_handle, hw, ASR_TWO_PASS);
+        msg_data->hotwords_embedding =
+            std::make_shared<std::vector<std::vector<float>>>(new_hotwords_embedding);
       }
+
       if (jsonresult.contains("audio_fs")) {
         msg_data->msg["audio_fs"] = jsonresult["audio_fs"];
       }

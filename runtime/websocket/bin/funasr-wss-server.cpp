@@ -12,9 +12,13 @@
 //                    <string>] --model-dir <string> [--] [--version] [-h]
 #include "websocket-server.h"
 #include <unistd.h>
-
 #include <fstream>
-std::string hotwords = "";
+
+// fst hotwords
+std::unordered_map<std::string, int> hws_map_;
+int fst_inc_wts_=20;
+// nn hotwords
+std::string nn_hotwords_="";
 
 using namespace std;
 void GetValue(TCLAP::ValueArg<std::string>& value_arg, string key,
@@ -22,6 +26,36 @@ void GetValue(TCLAP::ValueArg<std::string>& value_arg, string key,
     model_path.insert({key, value_arg.getValue()});
     LOG(INFO) << key << " : " << value_arg.getValue();
 }
+
+void ExtractHws(string hws_file, unordered_map<string, int> &hws_map)
+{
+    std::string line;
+    std::ifstream ifs_hws(hws_file.c_str());
+    if(!ifs_hws.is_open()){
+        LOG(ERROR) << "Unable to open fst hotwords file: " << hws_file 
+            << ". If you have not set fst hotwords, please ignore this message.";
+        return;
+    }
+    LOG(INFO) << "fst hotwords: ";
+    while (getline(ifs_hws, line)) {
+      kaldi::Trim(&line);
+      if (line.empty()) {
+        continue;
+      }
+      float score = 1.0f;
+      std::vector<std::string> text;
+      kaldi::SplitStringToVector(line, "\t", true, &text);
+      if (text.size() > 1) {
+        score = std::stof(text[1]);
+      } else if (text.empty()) {
+        continue;
+      }
+      LOG(INFO) << text[0] << " : " << score; 
+      hws_map.emplace(text[0], score);
+    }
+    ifs_hws.close();
+}
+
 int main(int argc, char* argv[]) {
   try {
 
@@ -98,18 +132,27 @@ int main(int argc, char* argv[]) {
         "default: ../../../ssl_key/server.key, path of keyfile for WSS connection", 
         false, "../../../ssl_key/server.key", "string");
 
-    TCLAP::ValueArg<std::string> hotwordsfile(
-        "", "hotword",
+    TCLAP::ValueArg<std::string> lm_dir("", LM_DIR,
+        "the LM model path, which contains compiled models: TLG.fst, config.yaml ", false, "", "string");
+    TCLAP::ValueArg<std::string> lm_revision(
+        "", "lm-revision", "LM model revision", false, "v0.0.1", "string");
+    TCLAP::ValueArg<std::string> fst_hotword("", FST_HOTWORD,
+        "the fst hotwords file, one hotword perline, Format: Hotword [tab] Weight (could be: 阿里巴巴 \t 20)", false, "", "string");
+    TCLAP::ValueArg<std::int32_t> fst_inc_wts("", FST_INC_WTS, 
+        "the fst hotwords incremental bias", false, 20, "int32_t");
+    TCLAP::ValueArg<std::string> nn_hotword(
+        "", NN_HOTWORD,
         "default: /workspace/resources/hotwords.txt, path of hotword file"
         "connection",
         false, "/workspace/resources/hotwords.txt", "string");
 
     // add file
-    cmd.add(hotwordsfile);
+    cmd.add(nn_hotword);
+    cmd.add(fst_hotword);
+    cmd.add(fst_inc_wts);
 
     cmd.add(certfile);
     cmd.add(keyfile);
-
     cmd.add(download_model_dir);
     cmd.add(model_dir);
     cmd.add(model_revision);
@@ -122,6 +165,8 @@ int main(int argc, char* argv[]) {
     cmd.add(punc_quant);
     cmd.add(itn_dir);
     cmd.add(itn_revision);
+    cmd.add(lm_dir);
+    cmd.add(lm_revision);
 
     cmd.add(listen_ip);
     cmd.add(port);
@@ -138,11 +183,14 @@ int main(int argc, char* argv[]) {
     GetValue(punc_dir, PUNC_DIR, model_path);
     GetValue(punc_quant, PUNC_QUANT, model_path);
     GetValue(itn_dir, ITN_DIR, model_path);
+    GetValue(lm_dir, LM_DIR, model_path);
+    GetValue(fst_hotword, FST_HOTWORD, model_path);
 
     GetValue(model_revision, "model-revision", model_path);
     GetValue(vad_revision, "vad-revision", model_path);
     GetValue(punc_revision, "punc-revision", model_path);
     GetValue(itn_revision, "itn-revision", model_path);
+    GetValue(lm_revision, "lm-revision", model_path);
 
     // Download model form Modelscope
     try{
@@ -155,6 +203,7 @@ int main(int argc, char* argv[]) {
         std::string s_punc_path = model_path[PUNC_DIR];
         std::string s_punc_quant = model_path[PUNC_QUANT];
         std::string s_itn_path = model_path[ITN_DIR];
+        std::string s_lm_path = model_path[LM_DIR];
 
         std::string python_cmd = "python -m funasr.utils.runtime_sdk_download_tool --type onnx --quantize True ";
 
@@ -218,6 +267,7 @@ int main(int argc, char* argv[]) {
                 if (found != std::string::npos) {
                     model_path["model-revision"]="v1.0.0";
                     s_itn_path="";
+                    s_lm_path="";
                 }
 
                 // modelscope
@@ -282,47 +332,89 @@ int main(int argc, char* argv[]) {
             LOG(INFO) << "PUNC model is not set, use default.";
         }
 
-      if (!s_itn_path.empty()) {
-        std::string python_cmd_itn;
-        std::string down_itn_path;
-        std::string down_itn_model;
+        if (!s_itn_path.empty()) {
+            std::string python_cmd_itn;
+            std::string down_itn_path;
+            std::string down_itn_model;
 
-        if (access(s_itn_path.c_str(), F_OK) == 0) {
-          // local
-          python_cmd_itn = python_cmd + " --model-name " + s_itn_path +
-                            " --export-dir ./ " + " --model_revision " +
-                            model_path["itn-revision"] + " --export False ";
-          down_itn_path = s_itn_path;
+            if (access(s_itn_path.c_str(), F_OK) == 0) {
+            // local
+            python_cmd_itn = python_cmd + " --model-name " + s_itn_path +
+                                " --export-dir ./ " + " --model_revision " +
+                                model_path["itn-revision"] + " --export False ";
+            down_itn_path = s_itn_path;
+            } else {
+            // modelscope
+            LOG(INFO) << "Download model: " << s_itn_path
+                        << " from modelscope : "; 
+            python_cmd_itn = python_cmd + " --model-name " +
+                    s_itn_path +
+                    " --export-dir " + s_download_model_dir +
+                    " --model_revision " + model_path["itn-revision"]
+                    + " --export False "; 
+            down_itn_path  =
+                    s_download_model_dir +
+                    "/" + s_itn_path;
+            }
+
+            int ret = system(python_cmd_itn.c_str());
+            if (ret != 0) {
+            LOG(INFO) << "Failed to download model from modelscope. If you set local itn model path, you can ignore the errors.";
+            }
+            down_itn_model = down_itn_path + "/zh_itn_tagger.fst";
+
+            if (access(down_itn_model.c_str(), F_OK) != 0) {
+            LOG(ERROR) << down_itn_model << " do not exists.";
+            exit(-1);
+            } else {
+            model_path[ITN_DIR] = down_itn_path;
+            LOG(INFO) << "Set " << ITN_DIR << " : " << model_path[ITN_DIR];
+            }
         } else {
-          // modelscope
-          LOG(INFO) << "Download model: " << s_itn_path
-                    << " from modelscope : "; 
-          python_cmd_itn = python_cmd + " --model-name " +
-                s_itn_path +
-                " --export-dir " + s_download_model_dir +
-                " --model_revision " + model_path["itn-revision"]
-                + " --export False "; 
-          down_itn_path  =
-                s_download_model_dir +
-                "/" + s_itn_path;
+            LOG(INFO) << "ITN model is not set, not executed.";
         }
 
-        int ret = system(python_cmd_itn.c_str());
-        if (ret != 0) {
-          LOG(INFO) << "Failed to download model from modelscope. If you set local itn model path, you can ignore the errors.";
-        }
-        down_itn_model = down_itn_path + "/zh_itn_tagger.fst";
+        if (!s_lm_path.empty()) {
+            std::string python_cmd_lm;
+            std::string down_lm_path;
+            std::string down_lm_model;
 
-        if (access(down_itn_model.c_str(), F_OK) != 0) {
-          LOG(ERROR) << down_itn_model << " do not exists.";
-          exit(-1);
+            if (access(s_lm_path.c_str(), F_OK) == 0) {
+            // local
+            python_cmd_lm = python_cmd + " --model-name " + s_lm_path +
+                                " --export-dir ./ " + " --model_revision " +
+                                model_path["lm-revision"] + " --export False ";
+            down_lm_path = s_lm_path;
+            } else {
+            // modelscope
+            LOG(INFO) << "Download model: " << s_lm_path
+                        << " from modelscope : "; 
+            python_cmd_lm = python_cmd + " --model-name " +
+                    s_lm_path +
+                    " --export-dir " + s_download_model_dir +
+                    " --model_revision " + model_path["lm-revision"]
+                    + " --export False "; 
+            down_lm_path  =
+                    s_download_model_dir +
+                    "/" + s_lm_path;
+            }
+
+            int ret = system(python_cmd_lm.c_str());
+            if (ret != 0) {
+            LOG(INFO) << "Failed to download model from modelscope. If you set local lm model path, you can ignore the errors.";
+            }
+            down_lm_model = down_lm_path + "/TLG.fst";
+
+            if (access(down_lm_model.c_str(), F_OK) != 0) {
+            LOG(ERROR) << down_lm_model << " do not exists.";
+            exit(-1);
+            } else {
+            model_path[LM_DIR] = down_lm_path;
+            LOG(INFO) << "Set " << LM_DIR << " : " << model_path[LM_DIR];
+            }
         } else {
-          model_path[ITN_DIR] = down_itn_path;
-          LOG(INFO) << "Set " << ITN_DIR << " : " << model_path[ITN_DIR];
+            LOG(INFO) << "LM model is not set, not executed.";
         }
-      } else {
-        LOG(INFO) << "ITN model is not set, not executed.";
-      }
 
     } catch (std::exception const& e) {
         LOG(ERROR) << "Error: " << e.what();
@@ -342,21 +434,29 @@ int main(int argc, char* argv[]) {
 
     std::string s_certfile = certfile.getValue();
     std::string s_keyfile = keyfile.getValue();
+    
+    // fst hotword file
+    std::string fst_hotword_path;
+    fst_hotword_path = model_path.at(FST_HOTWORD);
+    fst_inc_wts_ = fst_inc_wts.getValue();
+    LOG(INFO) << "fst hotword path: " << fst_hotword_path;
+    ExtractHws(fst_hotword_path, hws_map_);
 
-    std::string s_hotwordsfile = hotwordsfile.getValue();
+    // nn hotword file
+    std::string file_nn_hotword = nn_hotword.getValue();
     std::string line;
-    std::ifstream file(s_hotwordsfile);
-    LOG(INFO) << "hotwordsfile path: " << s_hotwordsfile;
+    std::ifstream file(file_nn_hotword);
+    LOG(INFO) << "nn hotword path: " << file_nn_hotword;
 
     if (file.is_open()) {
         while (getline(file, line)) {
-            hotwords += line+HOTWORD_SEP;
+            nn_hotwords_ += line+HOTWORD_SEP;
         }
-        LOG(INFO) << "hotwords: " << hotwords;
+        LOG(INFO) << "nn hotwords: " << nn_hotwords_;
         file.close();
     } else {
-        LOG(ERROR) << "Unable to open hotwords file: " << s_hotwordsfile 
-            << ". If you have not set hotwords, please ignore this message.";
+        LOG(ERROR) << "Unable to open nn hotwords file: " << file_nn_hotword 
+            << ". If you have not set nn hotwords, please ignore this message.";
     }
 
     bool is_ssl = false;

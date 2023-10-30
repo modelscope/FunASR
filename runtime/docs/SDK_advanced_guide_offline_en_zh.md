@@ -13,7 +13,7 @@ FunASR提供可一键本地或者云端服务器部署的英文离线文件转�
 
 详细性能测试报告（[点击此处](./benchmark_onnx_cpp.md)）
 
-云服务厂商，针对新用户，有3个月免费试用活动，申请教程（[点击此处](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/docs/aliyun_server_tutorial.md)）
+云服务厂商，针对新用户，有3个月免费试用活动，申请教程（[点击此处](https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/docs/aliyun_server_tutorial.md)）
 
 
 ## 快速上手
@@ -35,7 +35,7 @@ sudo docker run -p 10095:10095 -it --privileged=true \
 
 docker启动之后，启动 funasr-wss-server服务程序：
 ```shell
-cd FunASR/funasr/runtime
+cd FunASR/runtime
 nohup bash run_server.sh \
   --download-model-dir /workspace/models \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
@@ -129,7 +129,8 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline \
             需要改为部署机器ip
 --port 10095 部署端口号
 --wav-path 需要进行转写的音频文件，支持文件路径
---hotword 如果模型为热词模型，可以设置热词: *.txt(每行一个热词) 或者空格分隔的热词字符串 (阿里巴巴 达摩院)
+--nn-hotword 如果模型为热词模型，可以设置热词文件: 阿里巴巴 (每行一个热词)
+--fst-hotword 如果使用fst热词，可以设置热词文件: 阿里巴巴 \t 20(每行一个热词)
 --use-itn 设置是否使用itn，默认1开启，设置为0关闭
 ```
 
@@ -152,7 +153,7 @@ FunasrWsClient --host localhost --port 10095 --audio_in ./asr_example.wav --mode
 
 ### 启动FunASR服务
 ```shell
-cd /workspace/FunASR/funasr/runtime
+cd /workspace/FunASR/runtime
 nohup bash run_server.sh \
   --download-model-dir /workspace/models \
   --model-dir damo/speech_paraformer-large_asr_nat-en-16k-common-vocab10020-onnx \
@@ -217,11 +218,11 @@ kill -9 PID
 FunASR-runtime的代码已开源，如果服务端和客户端不能很好的满足您的需求，您可以根据自己的需求进行进一步的开发：
 ### c++ 客户端：
 
-https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/websocket
+https://github.com/alibaba-damo-academy/FunASR/tree/main/runtime/websocket
 
 ### python 客户端：
 
-https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket
+https://github.com/alibaba-damo-academy/FunASR/tree/main/runtime/python/websocket
 
 ### 自定义客户端：
 
@@ -241,7 +242,7 @@ FUNASR_RESULT result=FsmnVadInfer(vad_hanlde, wav_file.c_str(), NULL, 16000);
 // 其中：vad_hanlde为FunOfflineInit返回值，wav_file为音频路径，sampling_rate为采样率(默认16k)
 ```
 
-使用示例详见：https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/onnxruntime/bin/funasr-onnx-offline-vad.cpp
+使用示例详见：https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/onnxruntime/bin/funasr-onnx-offline-vad.cpp
 
 #### ASR
 ```text
@@ -252,7 +253,7 @@ FUNASR_RESULT result=FunOfflineInfer(asr_hanlde, wav_file.c_str(), RASR_NONE, NU
 // 其中：asr_hanlde为FunOfflineInit返回值，wav_file为音频路径，sampling_rate为采样率(默认16k)
 ```
 
-使用示例详见：https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/onnxruntime/bin/funasr-onnx-offline.cpp
+使用示例详见：https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/onnxruntime/bin/funasr-onnx-offline.cpp
 
 #### PUNC
 ```text
@@ -262,4 +263,4 @@ FUNASR_HANDLE punc_hanlde=CTTransformerInit(model_path, thread_num);
 FUNASR_RESULT result=CTTransformerInfer(punc_hanlde, txt_str.c_str(), RASR_NONE, NULL);
 // 其中：punc_hanlde为CTTransformerInit返回值，txt_str为文本
 ```
-使用示例详见：https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/onnxruntime/bin/funasr-onnx-offline-punc.cpp
+使用示例详见：https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/onnxruntime/bin/funasr-onnx-offline-punc.cpp

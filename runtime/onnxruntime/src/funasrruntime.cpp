@@ -256,6 +256,11 @@
 		std::string cur_stamp = "[";
 		std::string lang = (offline_stream->asr_handle)->GetLang();
 		while (audio.Fetch(buff, len, flag, start_time) > 0) {
+			// dec reset
+			funasr::WfstDecoder* wfst_decoder = (funasr::WfstDecoder*)dec_handle;
+			if (wfst_decoder){
+				wfst_decoder->StartUtterance();
+			}
 			string msg = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb, dec_handle);
 			std::vector<std::string> msg_vec = funasr::split(msg, '|');
 			if(msg_vec.size()==0){
@@ -340,6 +345,11 @@
 		std::string cur_stamp = "[";
 		std::string lang = (offline_stream->asr_handle)->GetLang();
 		while (audio.Fetch(buff, len, flag, start_time) > 0) {
+			// dec reset
+			funasr::WfstDecoder* wfst_decoder = (funasr::WfstDecoder*)dec_handle;
+			if (wfst_decoder){
+				wfst_decoder->StartUtterance();
+			}
 			string msg = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb, dec_handle);
 			std::vector<std::string> msg_vec = funasr::split(msg, '|');
 			if(msg_vec.size()==0){

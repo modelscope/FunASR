@@ -53,10 +53,8 @@ namespace funasr {
         void Reset();
         vector<float> FbankKaldi(float sample_rate, const float* waves, int len);
         string Forward(float* din, int len, bool input_finished=true, const std::vector<std::vector<float>> &hw_emb={{0.0}}, void* wfst_decoder=nullptr);
-        string GreedySearch( float* in, int n_len, int64_t token_nums, bool is_stamp=false, std::vector<float> us_alphas={0}, std::vector<float> us_cif_peak={0});
-        void TimestampOnnx(std::vector<float> &us_alphas, vector<float> us_cif_peak, vector<string>& char_list, std::string &res_str, 
-                           vector<vector<float>> &timestamp_list, float begin_time = 0.0, float total_offset = -1.5);
-        string PostProcess(std::vector<string> &raw_char, std::vector<std::vector<float>> &timestamp_list);
+        string GreedySearch( float* in, int n_len, int64_t token_nums,
+                             bool is_stamp=false, std::vector<float> us_alphas={0}, std::vector<float> us_cif_peak={0});
 
         string Rescoring();
         string GetLang(){return language;};
@@ -65,7 +63,8 @@ namespace funasr {
         void EndUtterance();
         void InitLm(const std::string &lm_file, const std::string &lm_cfg_file);
         string BeamSearch(WfstDecoder* &wfst_decoder, float* in, int n_len, int64_t token_nums);
-        string FinalizeDecode(WfstDecoder* &wfst_decoder);
+        string FinalizeDecode(WfstDecoder* &wfst_decoder,
+                          bool is_stamp=false, std::vector<float> us_alphas={0}, std::vector<float> us_cif_peak={0});
         Vocab* GetVocab();
         PhoneSet* GetPhoneSet();
 		

@@ -13,9 +13,10 @@
 //                    <string>] --model-dir <string> [--] [--version] [-h]
 #include <unistd.h>
 #include "websocket-server-2pass.h"
-
 #include <fstream>
-std::string hotwords = "";
+
+// nn hotwords
+std::string nn_hotwords_="";
 
 using namespace std;
 void GetValue(TCLAP::ValueArg<std::string>& value_arg, string key,
@@ -112,14 +113,14 @@ int main(int argc, char* argv[]) {
         "connection",
         false, "../../../ssl_key/server.key", "string");
 
-    TCLAP::ValueArg<std::string> hotwordsfile(
-        "", "hotword",
+    TCLAP::ValueArg<std::string> nn_hotword(
+        "", NN_HOTWORD,
         "default: /workspace/resources/hotwords.txt, path of hotword file"
         "connection",
         false, "/workspace/resources/hotwords.txt", "string");
 
     // add file
-    cmd.add(hotwordsfile);
+    cmd.add(nn_hotword);
 
     cmd.add(certfile);
     cmd.add(keyfile);
@@ -429,20 +430,21 @@ int main(int argc, char* argv[]) {
     std::string s_certfile = certfile.getValue();
     std::string s_keyfile = keyfile.getValue();
 
-    std::string s_hotwordsfile = hotwordsfile.getValue();
+    // nn hotword file
+    std::string file_nn_hotword = nn_hotword.getValue();
     std::string line;
-    std::ifstream file(s_hotwordsfile);
-    LOG(INFO) << "hotwordsfile path: " << s_hotwordsfile;
+    std::ifstream file(file_nn_hotword);
+    LOG(INFO) << "nn hotword path: " << file_nn_hotword;
 
     if (file.is_open()) {
         while (getline(file, line)) {
-            hotwords += line+HOTWORD_SEP;
+            nn_hotwords_ += line+HOTWORD_SEP;
         }
-        LOG(INFO) << "hotwords: " << hotwords;
+        LOG(INFO) << "nn hotwords: " << nn_hotwords_;
         file.close();
     } else {
-        LOG(ERROR) << "Unable to open hotwords file: " << s_hotwordsfile 
-            << ". If you have not set hotwords, please ignore this message.";
+        LOG(ERROR) << "Unable to open nn hotwords file: " << file_nn_hotword 
+            << ". If you have not set nn hotwords, please ignore this message.";
     }
 
     bool is_ssl = false;

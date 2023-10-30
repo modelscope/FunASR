@@ -19,8 +19,10 @@
 #include <string>
 #include <thread>
 #include <utility>
+#include <unordered_map>
 #define ASIO_STANDALONE 1  // not boost
 #include <glog/logging.h>
+#include "util/text-utils.h"
 
 #include <fstream>
 #include <functional>
@@ -57,6 +59,7 @@ typedef struct {
   std::shared_ptr<std::vector<char>> samples;
   std::shared_ptr<std::vector<std::vector<float>>> hotwords_embedding=NULL;
   std::shared_ptr<websocketpp::lib::mutex> thread_lock; // lock for each connection
+  FUNASR_DEC_HANDLE decoder_handle=NULL;
 } FUNASR_MESSAGE;
 
 // See https://wiki.mozilla.org/Security/Server_Side_TLS for more details about
@@ -70,7 +73,7 @@ class WebSocketServer {
       : io_decoder_(io_decoder),
         is_ssl(is_ssl),
         server_(server),
-        wss_server_(wss_server) {
+        wss_server_(wss_server){
     if (is_ssl) {
       std::cout << "certfile path is " << s_certfile << std::endl;
       wss_server->set_tls_init_handler(
@@ -111,10 +114,14 @@ class WebSocketServer {
   }
   void do_decoder(const std::vector<char>& buffer,
                   websocketpp::connection_hdl& hdl, 
+                  nlohmann::json& msg,
                   websocketpp::lib::mutex& thread_lock,
                   std::vector<std::vector<float>> &hotwords_embedding,
-                  std::string wav_name, bool itn,
-                  int audio_fs,std::string wav_format);
+                  std::string wav_name, 
+                  bool itn,
+                  int audio_fs,
+                  std::string wav_format,
+                  FUNASR_DEC_HANDLE& decoder_handle);
 
   void initAsr(std::map<std::string, std::string>& model_path, int thread_num);
   void on_message(websocketpp::connection_hdl hdl, message_ptr msg);
@@ -127,7 +134,7 @@ class WebSocketServer {
   void check_and_clean_connection();
   asio::io_context& io_decoder_;  // threads for asr decoder
   // std::ofstream fout;
-  FUNASR_HANDLE asr_hanlde;  // asr engine handle
+  FUNASR_HANDLE asr_handle;  // asr engine handle
   bool isonline = false;  // online or offline engine, now only support offline
   bool is_ssl = true;
   server* server_;          // websocket server
@@ -142,4 +149,5 @@ class WebSocketServer {
   websocketpp::lib::mutex m_lock;  // mutex for sample_map
 };
 
+// std::unordered_map<std::string, int>& hws_map, int fst_inc_wts, std::string& nn_hotwords
 #endif  // WEBSOCKET_SERVER_H_

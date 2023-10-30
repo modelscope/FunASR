@@ -69,7 +69,7 @@ nohup bash run_server.sh \
 The funasr-wss-server supports downloading models from Modelscope. You can set the model download address (--download-model-dir, default is /workspace/models) and the model ID (--model-dir, --vad-dir, --punc-dir). Here is an example:
 
 ```shell
-cd /workspace/FunASR/funasr/runtime
+cd /workspace/FunASR/runtime
 nohup bash run_server.sh \
   --download-model-dir /workspace/models \
   --model-dir damo/speech_paraformer-large_asr_nat-en-16k-common-vocab10020-onnx \
@@ -147,7 +147,8 @@ Introduction to command parameters:
 --output_dir: the path to the recognition result output.
 --ssl: whether to use SSL encryption. The default is to use SSL.
 --mode: offline mode.
---hotword: If am is hotword model, setting hotword: *.txt(one hotword perline) or hotwords seperate by space (could be: 阿里巴巴 达摩院)
+--fst_hotword: Hotword file path, one line for each hotword(e.g.:阿里巴巴 \t 20)
+--nn_hotword: If am is hotword model, setting hotword: one hotword perline(e.g.:阿里巴巴)
 --use_itn: whether to use itn, the default value is 1 for enabling and 0 for disabling.
 ```
 
@@ -163,7 +164,8 @@ Introduction to command parameters:
 --port: the port number of the server listener.
 --wav-path: the audio input. Input can be a path to a wav file or a wav.scp file (a Kaldi-formatted wav list in which each line includes a wav_id followed by a tab and a wav_path).
 --is-ssl: whether to use SSL encryption. The default is to use SSL.
---hotword: If am is hotword model, setting hotword: *.txt(one hotword perline) or hotwords seperate by space (could be: 阿里巴巴 达摩院)
+--fst-hotword: Hotword file path, one line for each hotword(e.g.:阿里巴巴 \t 20)
+--nn-hotword: If am is hotword model, setting hotword: one hotword perline(e.g.:阿里巴巴)
 --use-itn: whether to use itn, the default value is 1 for enabling and 0 for disabling.
 ```
 
@@ -177,11 +179,11 @@ The code for FunASR-runtime is open source. If the server and client cannot full
 
 ### C++ client
 
-https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/websocket
+https://github.com/alibaba-damo-academy/FunASR/tree/main/runtime/websocket
 
 ### Python client
 
-https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/python/websocket
+https://github.com/alibaba-damo-academy/FunASR/tree/main/runtime/python/websocket
 
 ### C++ server
 
@@ -194,7 +196,7 @@ FUNASR_RESULT result=FsmnVadInfer(vad_hanlde, wav_file.c_str(), NULL, 16000);
 // Where: vad_hanlde is the return value of FunOfflineInit, wav_file is the path to the audio file, and sampling_rate is the sampling rate (default 16k).
 ```
 
-See the usage example for details [docs](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/onnxruntime/bin/funasr-onnx-offline-vad.cpp)
+See the usage example for details [docs](https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/onnxruntime/bin/funasr-onnx-offline-vad.cpp)
 
 #### ASR
 ```text
@@ -205,7 +207,7 @@ FUNASR_RESULT result=FunOfflineInfer(asr_hanlde, wav_file.c_str(), RASR_NONE, NU
 // Where: asr_hanlde is the return value of FunOfflineInit, wav_file is the path to the audio file, and sampling_rate is the sampling rate (default 16k).
 ```
 
-See the usage example for details, [docs](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/onnxruntime/bin/funasr-onnx-offline.cpp)
+See the usage example for details, [docs](https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/onnxruntime/bin/funasr-onnx-offline.cpp)
 
 #### PUNC
 ```text
@@ -215,4 +217,4 @@ FUNASR_HANDLE punc_hanlde=CTTransformerInit(model_path, thread_num);
 FUNASR_RESULT result=CTTransformerInfer(punc_hanlde, txt_str.c_str(), RASR_NONE, NULL);
 // Where: punc_hanlde is the return value of CTTransformerInit, txt_str is the text
 ```
-See the usage example for details, [docs](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/onnxruntime/bin/funasr-onnx-offline-punc.cpp)
+See the usage example for details, [docs](https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/onnxruntime/bin/funasr-onnx-offline-punc.cpp)

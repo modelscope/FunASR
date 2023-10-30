@@ -6,6 +6,7 @@
 #include "fst/symbol-table.h"
 #include "bias-lm.h"
 #include "phone-set.h"
+#include "util.h"
 
 #define MAX_SCORE 10.0f
 namespace funasr {
@@ -62,7 +63,7 @@ class WfstDecoder {
   void StartUtterance();
   void EndUtterance();
   string Search(float *in, int len, int64_t token_nums);
-  string FinalizeDecode();
+  string FinalizeDecode(bool is_stamp=false, std::vector<float> us_alphas={0}, std::vector<float> us_cif_peak={0});
   void LoadHwsRes(int inc_bias, unordered_map<string, int> &hws_map);
   void UnloadHwsRes();
 

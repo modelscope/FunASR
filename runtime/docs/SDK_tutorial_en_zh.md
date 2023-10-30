@@ -17,7 +17,7 @@ FunASR提供可便捷本地或者云端服务器部署的离线文件转写服�
 
 详细性能测试报告（[点击此处](./benchmark_onnx_cpp.md)）
 
-云服务厂商，针对新用户，有3个月免费试用活动，申请教程（[点击此处](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/docs/aliyun_server_tutorial.md)）
+云服务厂商，针对新用户，有3个月免费试用活动，申请教程（[点击此处](https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/docs/aliyun_server_tutorial.md)）
 
 ## 快速上手
 
@@ -28,7 +28,7 @@ FunASR提供可便捷本地或者云端服务器部署的离线文件转写服�
 下载部署工具`funasr-runtime-deploy-offline-cpu-en.sh`
 
 ```shell
-curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/funasr/runtime/deploy_tools/funasr-runtime-deploy-offline-cpu-en.sh;
+curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/runtime/deploy_tools/funasr-runtime-deploy-offline-cpu-en.sh;
 # 如遇到网络问题，中国大陆用户，可以使用下面的命令：
 # curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy-offline-cpu-en.sh;
 ```
@@ -75,7 +75,8 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --au
 --audio_in 需要进行转写的音频文件，支持文件路径，文件列表wav.scp
 --thread_num 设置并发发送线程数，默认为1
 --ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
---hotword 如果模型为热词模型，可以设置热词: *.txt(每行一个热词) 或者空格分隔的热词字符串 (阿里巴巴 达摩院)
+--nn_hotword 如果模型为热词模型，可以设置热词: *.txt(每行一个热词)
+--fst_hotword 如果使用fst热词，可以设置热词文件: 阿里巴巴 \t 20(每行一个热词)
 --use_itn 设置是否使用itn，默认1开启，设置为0关闭
 ```
 
@@ -94,7 +95,8 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --au
 --wav-path 需要进行转写的音频文件，支持文件路径
 --thread_num 设置并发发送线程数，默认为1
 --ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
---hotword 如果模型为热词模型，可以设置热词: *.txt(每行一个热词) 或者空格分隔的热词字符串 (阿里巴巴 达摩院)
+--nn-hotword 如果模型为热词模型，可以设置热词文件: 阿里巴巴 (每行一个热词)
+--fst-hotword 如果使用fst热词，可以设置热词文件: 阿里巴巴 \t 20(每行一个热词)
 --use-itn 设置是否使用itn，默认1开启，设置为0关闭
 ```
 

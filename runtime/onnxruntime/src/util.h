@@ -42,5 +42,14 @@ size_t Utf8ToCharset(const std::string &input, std::vector<std::string> &output)
 void SplitStringToVector(const std::string &full, const char *delim,
                          bool omit_empty_strings,
                          std::vector<std::string> *out);
+string PostProcess(std::vector<string> &raw_char,
+                   std::vector<std::vector<float>> &timestamp_list);
+void TimestampOnnx( std::vector<float>& us_alphas,
+                    std::vector<float> us_cif_peak, 
+                    std::vector<string>& char_list, 
+                    std::string &res_str, 
+                    std::vector<std::vector<float>> &timestamp_vec, 
+                    float begin_time = 0.0, 
+                    float total_offset = -1.5);
 } // namespace funasr
 #endif

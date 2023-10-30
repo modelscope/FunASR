@@ -27,7 +27,7 @@ Cloud service providers offer a 3-month free trial for new users. Application tu
 Download the deployment tool `funasr-runtime-deploy-offline-cpu-en.sh`
 
 ```shell
-curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/funasr/runtime/deploy_tools/funasr-runtime-deploy-offline-cpu-en.sh;
+curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/runtime/deploy_tools/funasr-runtime-deploy-offline-cpu-en.sh;
 # If there is a network problem, users in mainland China can use the following command:
 # curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy-offline-cpu-en.sh;
 ```
@@ -72,7 +72,8 @@ Command parameter instructions:
 --audio_in is the audio file that needs to be transcribed, supporting file paths and file list wav.scp
 --thread_num sets the number of concurrent sending threads, default is 1
 --ssl sets whether to enable SSL certificate verification, default is 1 to enable, and 0 to disable
---hotword If am is hotword model, setting hotword: *.txt(one hotword perline) or hotwords seperate by space (could be: 阿里巴巴 达摩院)
+--fst_hotword: Hotword file path, one line for each hotword(e.g.:阿里巴巴 \t 20)
+--nn_hotword: If am is hotword model, setting hotword: one hotword perline(e.g.:阿里巴巴)
 --use_itn: whether to use itn, the default value is 1 for enabling and 0 for disabling.
 ```
 
@@ -90,7 +91,8 @@ Command parameter description:
 --wav-path specifies the audio file to be transcribed, and supports file paths.
 --thread_num sets the number of concurrent send threads, with a default value of 1.
 --ssl sets whether to enable SSL certificate verification, with a default value of 1 for enabling and 0 for disabling.
---hotword If am is hotword model, setting hotword: *.txt(one hotword perline) or hotwords seperate by space (could be: 阿里巴巴 达摩院)
+--fst-hotword: Hotword file path, one line for each hotword(e.g.:阿里巴巴 \t 20)
+--nn-hotword: If am is hotword model, setting hotword: one hotword perline(e.g.:阿里巴巴)
 --use-itn: whether to use itn, the default value is 1 for enabling and 0 for disabling.
 ```
 

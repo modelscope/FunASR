@@ -132,7 +132,7 @@ class WebsocketClient {
   // This method will block until the connection is complete
   void run(const std::string& uri, const std::vector<string>& wav_list,
            const std::vector<string>& wav_ids, std::string asr_mode,
-           std::vector<int> chunk_size, bool is_record=false, std::string hotwords="",
+           std::vector<int> chunk_size, bool is_record=false, std::string nn_hotwords="",
            int use_itn=1) {
     // Create a new connection to the given URI
     websocketpp::lib::error_code ec;
@@ -155,9 +155,9 @@ class WebsocketClient {
     websocketpp::lib::thread asio_thread(&websocketpp::client<T>::run,
                                          &m_client);
     if(is_record){
-      send_rec_data(asr_mode, chunk_size, hotwords, use_itn);
+      send_rec_data(asr_mode, chunk_size, nn_hotwords, use_itn);
     }else{
-      send_wav_data(wav_list[0], wav_ids[0], asr_mode, chunk_size, hotwords, use_itn);
+      send_wav_data(wav_list[0], wav_ids[0], asr_mode, chunk_size, nn_hotwords, use_itn);
     }
 
     WaitABit();
@@ -193,7 +193,7 @@ class WebsocketClient {
   }
   // send wav to server
   void send_wav_data(string wav_path, string wav_id, std::string asr_mode,
-                     std::vector<int> chunk_vector, string hotwords, int use_itn) {
+                     std::vector<int> chunk_vector, string nn_hotwords, int use_itn) {
     uint64_t count = 0;
     std::stringstream val;
 
@@ -251,8 +251,8 @@ class WebsocketClient {
     if(use_itn == 0){
       jsonbegin["itn"] = false;
     }
-    LOG(INFO) << "hotwords: "<< hotwords;
-    jsonbegin["hotwords"] = hotwords;
+    LOG(INFO) << "nn_hotwords: "<< nn_hotwords;
+    jsonbegin["nn_hotwords"] = nn_hotwords;
     m_client.send(m_hdl, jsonbegin.dump(), websocketpp::frame::opcode::text,
                   ec);
 
@@ -335,7 +335,7 @@ class WebsocketClient {
   }
 
   void send_rec_data(std::string asr_mode, std::vector<int> chunk_vector, 
-                     string hotwords, int use_itn) {
+                     string nn_hotwords, int use_itn) {
     // first message
     bool wait = false;
     while (1) {
@@ -375,8 +375,8 @@ class WebsocketClient {
     if(use_itn == 0){
       jsonbegin["itn"] = false;
     }
-    LOG(INFO) << "hotwords: "<< hotwords;
-    jsonbegin["hotwords"] = hotwords;
+    LOG(INFO) << "nn hotwords: "<< nn_hotwords;
+    jsonbegin["nn_hotwords"] = nn_hotwords;
     m_client.send(m_hdl, jsonbegin.dump(), websocketpp::frame::opcode::text,
                   ec);
     // mic
@@ -499,7 +499,8 @@ int main(int argc, char* argv[]) {
       "", "use-itn",
       "use-itn is 1 means use itn, 0 means not use itn", false, 1,
       "int");
-  TCLAP::ValueArg<std::string> hotword_("", HOTWORD, "*.txt(one hotword perline) or hotwords seperate by space (could be: 阿里巴巴 达摩院)", false, "", "string");
+  TCLAP::ValueArg<std::string> nn_hotword_("", NN_HOTWORD,
+    "the nn hotwords file, one hotword perline, Format: Hotword (could be: 阿里巴巴)", false, "", "string");
 
   cmd.add(server_ip_);
   cmd.add(port_);
@@ -510,7 +511,7 @@ int main(int argc, char* argv[]) {
   cmd.add(thread_num_);
   cmd.add(is_ssl_);
   cmd.add(use_itn_);
-  cmd.add(hotword_);
+  cmd.add(nn_hotword_);
   cmd.parse(argc, argv);
 
   std::string server_ip = server_ip_.getValue();
@@ -543,25 +544,22 @@ int main(int argc, char* argv[]) {
     uri = "ws://" + server_ip + ":" + port;
   }
 
-  // read hotwords
-  std::string hotword = hotword_.getValue();
-  std::string hotwords_="";
+    // nn hotwords
+    std::string str_hotword = nn_hotword_.getValue();
+    std::string nn_hotwords="";
 
-  if(IsTargetFile(hotword, "txt")){
-      ifstream in(hotword);
-      if (!in.is_open()) {
-          LOG(ERROR) << "Failed to open file: " <<  hotword;
-          return 0;
-      }
-      string line;
-      while(getline(in, line))
-      {
-          hotwords_ +=line+HOTWORD_SEP;
-      }
-      in.close();
-  }else{
-      hotwords_ = hotword;
-  }
+    if(!str_hotword.empty()){
+        ifstream in(str_hotword);
+        if (!in.is_open()) {
+            LOG(ERROR) << "Failed to open file: " <<  str_hotword;
+        }
+        string line;
+        while(getline(in, line))
+        {
+            nn_hotwords +=line+HOTWORD_SEP;
+        }
+        in.close();
+    }
 
   if(is_record == 1){
       std::vector<string> tmp_wav_list;
@@ -572,11 +570,11 @@ int main(int argc, char* argv[]) {
 
         c.m_client.set_tls_init_handler(bind(&OnTlsInit, ::_1));
 
-        c.run(uri, tmp_wav_list, tmp_wav_ids, asr_mode, chunk_size, true, hotwords_, use_itn);
+        c.run(uri, tmp_wav_list, tmp_wav_ids, asr_mode, chunk_size, true, nn_hotwords, use_itn);
       } else {
         WebsocketClient<websocketpp::config::asio_client> c(is_ssl);
 
-        c.run(uri, tmp_wav_list, tmp_wav_ids, asr_mode, chunk_size, true, hotwords_, use_itn);
+        c.run(uri, tmp_wav_list, tmp_wav_ids, asr_mode, chunk_size, true, nn_hotwords, use_itn);
       }
 
   }else{
@@ -617,17 +615,17 @@ int main(int argc, char* argv[]) {
         tmp_wav_ids.emplace_back(wav_ids[wav_i + i]);
 
         client_threads.emplace_back(
-            [uri, tmp_wav_list, tmp_wav_ids, asr_mode, chunk_size, is_ssl, hotwords_, use_itn]() {
+            [uri, tmp_wav_list, tmp_wav_ids, asr_mode, chunk_size, is_ssl, nn_hotwords, use_itn]() {
               if (is_ssl == 1) {
                 WebsocketClient<websocketpp::config::asio_tls_client> c(is_ssl);
 
                 c.m_client.set_tls_init_handler(bind(&OnTlsInit, ::_1));
 
-                c.run(uri, tmp_wav_list, tmp_wav_ids, asr_mode, chunk_size, false, hotwords_, use_itn);
+                c.run(uri, tmp_wav_list, tmp_wav_ids, asr_mode, chunk_size, false, nn_hotwords, use_itn);
               } else {
                 WebsocketClient<websocketpp::config::asio_client> c(is_ssl);
 
-                c.run(uri, tmp_wav_list, tmp_wav_ids, asr_mode, chunk_size, false, hotwords_, use_itn);
+                c.run(uri, tmp_wav_list, tmp_wav_ids, asr_mode, chunk_size, false, nn_hotwords, use_itn);
               }
             });
       }

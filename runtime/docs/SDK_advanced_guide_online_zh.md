@@ -24,7 +24,7 @@ sudo docker run -p 10095:10095 -it --privileged=true \
 
 docker启动之后，启动 funasr-wss-server-2pass服务程序：
 ```shell
-cd FunASR/funasr/runtime
+cd FunASR/runtime
 nohup bash run_server_2pass.sh \
   --download-model-dir /workspace/models \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
@@ -69,7 +69,7 @@ python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode 2pass
 
 ### 启动FunASR服务
 ```shell
-cd /workspace/FunASR/funasr/runtime
+cd /workspace/FunASR/runtime
 nohup bash run_server_2pass.sh \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx \
   --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx \
@@ -81,7 +81,7 @@ nohup bash run_server_2pass.sh \
   --port 10095 \
   --certfile  ../../../ssl_key/server.crt \
   --keyfile ../../../ssl_key/server.key \
-  --hotword ../../hotwords.txt > log.out 2>&1 &
+  --nn_hotword ../../nn_hotwords.txt > log.out 2>&1 &
  ```
 **run_server_2pass.sh命令参数介绍**
 ```text
@@ -99,7 +99,7 @@ nohup bash run_server_2pass.sh \
 --io-thread-num  服务端启动的IO线程数，默认为 1
 --certfile  ssl的证书文件，默认为：../../../ssl_key/server.crt，如果需要关闭ssl，参数设置为0
 --keyfile   ssl的密钥文件，默认为：../../../ssl_key/server.key
---hotword   热词文件路径，每一个热词一行，如果客户端提供热词，则与客户端提供的热词合并一起使用。默认为：../../hotwords.txt
+--nn_hotword   热词文件路径，每一个热词一行，如果客户端提供热词，则与客户端提供的热词合并一起使用。
 ```
 
 ### 关闭FunASR服务

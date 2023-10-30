@@ -10,7 +10,7 @@ Configuration parameters and meta information are in JSON format, while audio da
 #### Initial Communication
 The message (which needs to be serialized in JSON) is:
 ```text
-{"mode": "offline", "wav_name": "wav_name","wav_format":"pcm","is_speaking": True,"wav_format":"pcm","hotwords":"阿里巴巴 达摩院 阿里云","itn":true}
+{"mode": "offline", "wav_name": "wav_name", "wav_format":"pcm", "is_speaking": True, "wav_format":"pcm", "nn_hotwords":"阿里巴巴 通义实验室", "fst_hotwords":"{"阿里巴巴":20,"通义实验室":30}", "itn":True}
 ```
 Parameter explanation:
 ```text
@@ -19,7 +19,8 @@ Parameter explanation:
 `wav_format`: the audio and video file extension, such as pcm, mp3, mp4, etc.
 `is_speaking`: False indicates the end of a sentence, such as a VAD segmentation point or the end of a WAV file
 `audio_fs`: when the input audio is in PCM format, the audio sampling rate parameter needs to be added
-`hotwords`：If AM is the hotword model, hotword data needs to be sent to the server in string format, with " " used as a separator between hotwords. For example："阿里巴巴 达摩院 阿里云"
+`nn_hotwords`：If AM is the hotword model, hotword data needs to be sent to the server in string format, with " " used as a separator between nn_hotwords. For example："阿里巴巴 达摩院 阿里云"
+`fst_hotwords`：If using the fst hotword (requires loading Ngram), you need to send the hotword data (string) to the server. For example："{"阿里巴巴":20,"通义实验室":30}"
 `itn`: whether to use itn, the default value is true for enabling and false for disabling.
 ```
 
@@ -59,7 +60,7 @@ Configuration parameters and meta information are in JSON format, while audio da
 #### Initial Communication
 The message (which needs to be serialized in JSON) is:
 ```text
-{"mode": "2pass", "wav_name": "wav_name", "is_speaking": True, "wav_format":"pcm", "chunk_size":[5,10,5],"hotwords":"阿里巴巴 达摩院 阿里云","itn":true}
+{"mode": "2pass", "wav_name": "wav_name", "is_speaking": True, "wav_format":"pcm", "chunk_size":[5,10,5],"nn_hotwords":"阿里巴巴 达摩院 阿里云","itn":true}
 ```
 Parameter explanation:
 ```text
@@ -69,7 +70,7 @@ Parameter explanation:
 `is_speaking`: False indicates the end of a sentence, such as a VAD segmentation point or the end of a WAV file
 `chunk_size`: indicates the latency configuration of the streaming model, `[5,10,5]` indicates that the current audio is 600ms long, with a 300ms look-ahead and look-back time.
 `audio_fs`: when the input audio is in PCM format, the audio sampling rate parameter needs to be added
-`hotwords`：If AM is the hotword model, hotword data needs to be sent to the server in string format, with " " used as a separator between hotwords. For example："阿里巴巴 达摩院 阿里云"
+`nn_hotwords`：If AM is the hotword model, hotword data needs to be sent to the server in string format, with " " used as a separator between nn_hotwords. For example："阿里巴巴 达摩院 阿里云"
 `itn`: whether to use itn, the default value is true for enabling and false for disabling.
 ```
 #### Sending Audio Data
