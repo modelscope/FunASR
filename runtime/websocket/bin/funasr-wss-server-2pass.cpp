@@ -115,9 +115,9 @@ int main(int argc, char* argv[]) {
 
     TCLAP::ValueArg<std::string> nn_hotword(
         "", NN_HOTWORD,
-        "default: /workspace/resources/hotwords.txt, path of hotword file"
+        "default: /workspace/resources/nn_hotwords.txt, path of hotword file"
         "connection",
-        false, "/workspace/resources/hotwords.txt", "string");
+        false, "/workspace/resources/nn_hotwords.txt", "string");
 
     // add file
     cmd.add(nn_hotword);

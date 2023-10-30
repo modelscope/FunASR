@@ -126,25 +126,26 @@ int main(int argc, char* argv[]) {
                                           "model thread num", false, 4, "int");
 
     TCLAP::ValueArg<std::string> certfile("", "certfile", 
-        "default: ../../../ssl_key/server.crt, path of certficate for WSS connection. if it is empty, it will be in WS mode.", 
+        "default: ../../../ssl_key/server.crt, path of certficate for WSS connection. if it is empty, it will be in WS mode.",
         false, "../../../ssl_key/server.crt", "string");
     TCLAP::ValueArg<std::string> keyfile("", "keyfile", 
         "default: ../../../ssl_key/server.key, path of keyfile for WSS connection", 
         false, "../../../ssl_key/server.key", "string");
 
     TCLAP::ValueArg<std::string> lm_dir("", LM_DIR,
-        "the LM model path, which contains compiled models: TLG.fst, config.yaml ", false, "", "string");
+        "the LM model path, which contains compiled models: TLG.fst, config.yaml ", false, "damo/speech_ngram_lm_zh-cn-ai-wesp-fst", "string");
     TCLAP::ValueArg<std::string> lm_revision(
         "", "lm-revision", "LM model revision", false, "v0.0.1", "string");
     TCLAP::ValueArg<std::string> fst_hotword("", FST_HOTWORD,
-        "the fst hotwords file, one hotword perline, Format: Hotword [tab] Weight (could be: 阿里巴巴 \t 20)", false, "", "string");
+        "the fst hotwords file, one hotword perline, Format: Hotword [tab] Weight (could be: 阿里巴巴 \t 20)", 
+        false, "/workspace/resources/fst_hotwords.txt", "string");
     TCLAP::ValueArg<std::int32_t> fst_inc_wts("", FST_INC_WTS, 
         "the fst hotwords incremental bias", false, 20, "int32_t");
     TCLAP::ValueArg<std::string> nn_hotword(
         "", NN_HOTWORD,
-        "default: /workspace/resources/hotwords.txt, path of hotword file"
+        "default: /workspace/resources/nn_hotwords.txt, path of hotword file"
         "connection",
-        false, "/workspace/resources/hotwords.txt", "string");
+        false, "/workspace/resources/nn_hotwords.txt", "string");
 
     // add file
     cmd.add(nn_hotword);
@@ -338,37 +339,37 @@ int main(int argc, char* argv[]) {
             std::string down_itn_model;
 
             if (access(s_itn_path.c_str(), F_OK) == 0) {
-            // local
-            python_cmd_itn = python_cmd + " --model-name " + s_itn_path +
-                                " --export-dir ./ " + " --model_revision " +
-                                model_path["itn-revision"] + " --export False ";
-            down_itn_path = s_itn_path;
+                // local
+                python_cmd_itn = python_cmd + " --model-name " + s_itn_path +
+                                    " --export-dir ./ " + " --model_revision " +
+                                    model_path["itn-revision"] + " --export False ";
+                down_itn_path = s_itn_path;
             } else {
-            // modelscope
-            LOG(INFO) << "Download model: " << s_itn_path
-                        << " from modelscope : "; 
-            python_cmd_itn = python_cmd + " --model-name " +
-                    s_itn_path +
-                    " --export-dir " + s_download_model_dir +
-                    " --model_revision " + model_path["itn-revision"]
-                    + " --export False "; 
-            down_itn_path  =
-                    s_download_model_dir +
-                    "/" + s_itn_path;
+                // modelscope
+                LOG(INFO) << "Download model: " << s_itn_path
+                            << " from modelscope : "; 
+                python_cmd_itn = python_cmd + " --model-name " +
+                        s_itn_path +
+                        " --export-dir " + s_download_model_dir +
+                        " --model_revision " + model_path["itn-revision"]
+                        + " --export False "; 
+                down_itn_path  =
+                        s_download_model_dir +
+                        "/" + s_itn_path;
             }
 
             int ret = system(python_cmd_itn.c_str());
             if (ret != 0) {
-            LOG(INFO) << "Failed to download model from modelscope. If you set local itn model path, you can ignore the errors.";
+                LOG(INFO) << "Failed to download model from modelscope. If you set local itn model path, you can ignore the errors.";
             }
             down_itn_model = down_itn_path + "/zh_itn_tagger.fst";
 
             if (access(down_itn_model.c_str(), F_OK) != 0) {
-            LOG(ERROR) << down_itn_model << " do not exists.";
-            exit(-1);
+                LOG(ERROR) << down_itn_model << " do not exists.";
+                exit(-1);
             } else {
-            model_path[ITN_DIR] = down_itn_path;
-            LOG(INFO) << "Set " << ITN_DIR << " : " << model_path[ITN_DIR];
+                model_path[ITN_DIR] = down_itn_path;
+                LOG(INFO) << "Set " << ITN_DIR << " : " << model_path[ITN_DIR];
             }
         } else {
             LOG(INFO) << "ITN model is not set, not executed.";
@@ -380,37 +381,37 @@ int main(int argc, char* argv[]) {
             std::string down_lm_model;
 
             if (access(s_lm_path.c_str(), F_OK) == 0) {
-            // local
-            python_cmd_lm = python_cmd + " --model-name " + s_lm_path +
-                                " --export-dir ./ " + " --model_revision " +
-                                model_path["lm-revision"] + " --export False ";
-            down_lm_path = s_lm_path;
+                // local
+                python_cmd_lm = python_cmd + " --model-name " + s_lm_path +
+                                    " --export-dir ./ " + " --model_revision " +
+                                    model_path["lm-revision"] + " --export False ";
+                down_lm_path = s_lm_path;
             } else {
-            // modelscope
-            LOG(INFO) << "Download model: " << s_lm_path
-                        << " from modelscope : "; 
-            python_cmd_lm = python_cmd + " --model-name " +
-                    s_lm_path +
-                    " --export-dir " + s_download_model_dir +
-                    " --model_revision " + model_path["lm-revision"]
-                    + " --export False "; 
-            down_lm_path  =
-                    s_download_model_dir +
-                    "/" + s_lm_path;
+                // modelscope
+                LOG(INFO) << "Download model: " << s_lm_path
+                            << " from modelscope : "; 
+                python_cmd_lm = python_cmd + " --model-name " +
+                        s_lm_path +
+                        " --export-dir " + s_download_model_dir +
+                        " --model_revision " + model_path["lm-revision"]
+                        + " --export False "; 
+                down_lm_path  =
+                        s_download_model_dir +
+                        "/" + s_lm_path;
             }
 
             int ret = system(python_cmd_lm.c_str());
             if (ret != 0) {
-            LOG(INFO) << "Failed to download model from modelscope. If you set local lm model path, you can ignore the errors.";
+                LOG(INFO) << "Failed to download model from modelscope. If you set local lm model path, you can ignore the errors.";
             }
             down_lm_model = down_lm_path + "/TLG.fst";
 
             if (access(down_lm_model.c_str(), F_OK) != 0) {
-            LOG(ERROR) << down_lm_model << " do not exists.";
-            exit(-1);
+                LOG(ERROR) << down_lm_model << " do not exists.";
+                exit(-1);
             } else {
-            model_path[LM_DIR] = down_lm_path;
-            LOG(INFO) << "Set " << LM_DIR << " : " << model_path[LM_DIR];
+                model_path[LM_DIR] = down_lm_path;
+                LOG(INFO) << "Set " << LM_DIR << " : " << model_path[LM_DIR];
             }
         } else {
             LOG(INFO) << "LM model is not set, not executed.";

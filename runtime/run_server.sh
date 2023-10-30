@@ -9,11 +9,12 @@ io_thread_num=8
 port=10095
 certfile="../../../ssl_key/server.crt"
 keyfile="../../../ssl_key/server.key"
-hotword="../../hotwords.txt"
+fst_hotword="../../fst_hotwords.txt"
+nn_hotword="../../nn_hotwords.txt"
 
-. ../../egs/aishell/transformer/utils/parse_options.sh || exit 1;
+. ../egs/aishell/transformer/utils/parse_options.sh || exit 1;
 
-cd /workspace/FunASR/funasr/runtime/websocket/build/bin
+cd /workspace/FunASR/runtime/websocket/build/bin
 if [ -z "$certfile" ] || [ "$certfile" -eq 0 ]; then
 ./funasr-wss-server  \
   --download-model-dir ${download_model_dir} \
@@ -26,7 +27,8 @@ if [ -z "$certfile" ] || [ "$certfile" -eq 0 ]; then
   --port ${port} \
   --certfile  "" \
   --keyfile "" \
-  --hotword ${hotword}
+  --fst-hotword ${fst_hotword} \
+  --nn-hotword ${nn_hotword}
 else
 ./funasr-wss-server  \
   --download-model-dir ${download_model_dir} \
@@ -39,5 +41,6 @@ else
   --port ${port} \
   --certfile  ${certfile} \
   --keyfile ${keyfile} \
-  --hotword ${hotword}
+  --fst-hotword ${fst_hotword} \
+  --nn-hotword ${nn_hotword}
 fi
