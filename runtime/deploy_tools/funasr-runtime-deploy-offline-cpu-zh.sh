@@ -720,7 +720,7 @@ paramsFromDefault(){
     if [ ! -z "$lm_id" ]; then
         PARAMS_LM_ID=$lm_id
     fi
-    docker_exec_path=`sed '/^PARAMS_DOCKER_EXEC_PATH=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+    # docker_exec_path=`sed '/^PARAMS_DOCKER_EXEC_PATH=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
     if [ ! -z "$docker_exec_path" ]; then
         PARAMS_DOCKER_EXEC_PATH=$docker_exec_path
     fi

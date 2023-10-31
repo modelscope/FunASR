@@ -683,7 +683,7 @@ paramsFromDefault(){
     if [ ! -z "$punc_id" ]; then
         PARAMS_PUNC_ID=$punc_id
     fi
-    docker_exec_path=`sed '/^PARAMS_DOCKER_EXEC_PATH=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+    # docker_exec_path=`sed '/^PARAMS_DOCKER_EXEC_PATH=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
     if [ ! -z "$docker_exec_path" ]; then
         PARAMS_DOCKER_EXEC_PATH=$docker_exec_path
     fi
