@@ -56,6 +56,7 @@ DOCKER_IMAGES=()
 ASR_MODELS=()
 VAD_MODELS=()
 PUNC_MODELS=()
+LM_MODELS=()
 
 # Handles the download progress bar
 asr_percent_int=0
@@ -420,6 +421,10 @@ readDockerInfoFromUrl(){
             if [ ! -z "$docker_info_cur_val" ]; then
                 PUNC_MODELS[${#PUNC_MODELS[*]}]=$docker_info_cur_val
             fi
+        elif [ "$docker_info_cur_key" = "DEFAULT_LM_MODEL:" ]; then
+            if [ ! -z "$docker_info_cur_val" ]; then
+                LM_MODELS[${#LM_MODELS[*]}]=$docker_info_cur_val
+            fi
         fi
     done
     echo -e "    $DONE"
@@ -497,6 +502,7 @@ selectModels(){
     selectAsrModels
     selectVadModels
     selectPuncModels
+    selectLMModels
 
     echo
 }
@@ -531,6 +537,17 @@ selectPuncModels(){
 
     PARAMS_PUNC_ID=${PUNC_MODELS[${index}]}
     echo -e "  ${UNDERLINE}You have chosen the PUNC model:${PLAIN} ${GREEN}${PARAMS_PUNC_ID}${PLAIN}"
+    echo
+}
+
+selectLMModels(){
+    echo -e "  ${YELLOW}Please choose the LM model.${PLAIN}"
+    menuSelection ${LM_MODELS[*]}
+    result=$?
+    index=`expr ${result} - 1`
+
+    PARAMS_LM_ID=${LM_MODELS[${index}]}
+    echo -e "  ${UNDERLINE}You have chosen the LM model:${PLAIN} ${GREEN}${PARAMS_LM_ID}${PLAIN}"
     echo
 }
 
@@ -598,6 +615,14 @@ complementParameters(){
         PARAMS_DOCKER_PUNC_DIR=$(dirname "${PARAMS_DOCKER_PUNC_PATH}")
         PARAMS_LOCAL_PUNC_PATH=${PARAMS_FUNASR_LOCAL_MODELS_DIR}/${PARAMS_PUNC_ID}
         PARAMS_LOCAL_PUNC_DIR=$(dirname "${PARAMS_LOCAL_PUNC_PATH}")
+    fi
+
+    # parameters about LM model
+    if [ ! -z "$PARAMS_LM_ID" ]; then
+        PARAMS_DOCKER_LM_PATH=${PARAMS_DOWNLOAD_MODEL_DIR}/${PARAMS_LM_ID}
+        PARAMS_DOCKER_LM_DIR=$(dirname "${PARAMS_DOCKER_LM_PATH}")
+        PARAMS_LOCAL_LM_PATH=${PARAMS_FUNASR_LOCAL_MODELS_DIR}/${PARAMS_LM_ID}
+        PARAMS_LOCAL_LM_DIR=$(dirname "${PARAMS_LOCAL_LM_PATH}")
     fi
 
     # parameters about thread_num
@@ -683,6 +708,18 @@ paramsFromDefault(){
     if [ ! -z "$punc_id" ]; then
         PARAMS_PUNC_ID=$punc_id
     fi
+    local_lm_path=`sed '/^PARAMS_LOCAL_LM_PATH=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+    if [ ! -z "$local_lm_path" ]; then
+        PARAMS_LOCAL_LM_PATH=$local_lm_path
+    fi
+    docker_lm_path=`sed '/^PARAMS_DOCKER_LM_PATH=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+    if [ ! -z "$docker_lm_path" ]; then
+        PARAMS_DOCKER_LM_PATH=$docker_lm_path
+    fi
+    lm_id=`sed '/^PARAMS_LM_ID=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
+    if [ ! -z "$lm_id" ]; then
+        PARAMS_LM_ID=$lm_id
+    fi
     docker_exec_path=`sed '/^PARAMS_DOCKER_EXEC_PATH=/!d;s/.*=//' ${DEFAULT_FUNASR_CONFIG_FILE}`
     if [ ! -z "$docker_exec_path" ]; then
         PARAMS_DOCKER_EXEC_PATH=$docker_exec_path
@@ -741,6 +778,12 @@ saveParams(){
     echo "PARAMS_DOCKER_PUNC_PATH=${PARAMS_DOCKER_PUNC_PATH}" >> $DEFAULT_FUNASR_CONFIG_FILE
     echo "PARAMS_DOCKER_PUNC_DIR=${PARAMS_DOCKER_PUNC_DIR}" >> $DEFAULT_FUNASR_CONFIG_FILE
     echo "PARAMS_PUNC_ID=${PARAMS_PUNC_ID}" >> $DEFAULT_FUNASR_CONFIG_FILE
+
+    echo "PARAMS_LOCAL_LM_PATH=${PARAMS_LOCAL_LM_PATH}" >> $DEFAULT_FUNASR_CONFIG_FILE
+    echo "PARAMS_LOCAL_LM_DIR=${PARAMS_LOCAL_LM_DIR}" >> $DEFAULT_FUNASR_CONFIG_FILE
+    echo "PARAMS_DOCKER_LM_PATH=${PARAMS_DOCKER_LM_PATH}" >> $DEFAULT_FUNASR_CONFIG_FILE
+    echo "PARAMS_DOCKER_LM_DIR=${PARAMS_DOCKER_LM_DIR}" >> $DEFAULT_FUNASR_CONFIG_FILE
+    echo "PARAMS_LM_ID=${PARAMS_LM_ID}" >> $DEFAULT_FUNASR_CONFIG_FILE
 
     echo "PARAMS_LOCAL_VAD_PATH=${PARAMS_LOCAL_VAD_PATH}" >> $DEFAULT_FUNASR_CONFIG_FILE
     echo "PARAMS_LOCAL_VAD_DIR=${PARAMS_LOCAL_VAD_DIR}" >> $DEFAULT_FUNASR_CONFIG_FILE
@@ -801,6 +844,15 @@ showAllParams(){
         echo -e "  The path to the local PUNC model directory for the load        : ${GREEN}${PARAMS_LOCAL_PUNC_PATH}${PLAIN}"
     fi
     echo -e "  The PUNC model directory corresponds to the directory in Docker: ${GREEN}${PARAMS_DOCKER_PUNC_PATH}${PLAIN}"
+
+    if [ ! -z "$PARAMS_LM_ID" ]; then
+        echo -e "  The LM model_id used                                         : ${GREEN}${PARAMS_LM_ID}${PLAIN}"
+    fi
+    if [ ! -z "$PARAMS_LOCAL_LM_PATH" ]; then
+        echo -e "  The path to the local LM model directory for the load        : ${GREEN}${PARAMS_LOCAL_LM_PATH}${PLAIN}"
+    fi
+    echo -e "  The LM model directory corresponds to the directory in Docker: ${GREEN}${PARAMS_DOCKER_LM_PATH}${PLAIN}"
+
     echo
 
     echo -e "  The path in the docker of the FunASR service executor          : ${GREEN}${PARAMS_DOCKER_EXEC_PATH}${PLAIN}"
@@ -1046,8 +1098,16 @@ serverConfigGeneration(){
         fi
         punc_params="\"--punc-dir\":\"${PARAMS_DOCKER_PUNC_PATH}\""
     fi
+    if [ ! -z "$PARAMS_LM_ID" ]; then
+        lm_params="\"--lm-dir\":\"${PARAMS_LM_ID}\""
+    else
+        if [ ! -z "$PARAMS_LOCAL_LM_PATH" ]; then
+            dir_map_params="${dir_map_params} -v ${PARAMS_LOCAL_VAD_PATH}:${PARAMS_DOCKER_VAD_PATH}"
+        fi
+        lm_params="\"--lm-dir\":\"${PARAMS_DOCKER_LM_PATH}\""
+    fi
     download_params="\"--download-model-dir\":\"${PARAMS_DOWNLOAD_MODEL_DIR}\""
-    model_params="${asr_params},${vad_params},${punc_params},${download_params}"
+    model_params="${asr_params},${vad_params},${punc_params},${lm_params},${download_params}"
 
     # params about thread_num
     decoder_params="\"--decoder-thread-num\":\"${PARAMS_DECODER_THREAD_NUM}\""
@@ -1285,6 +1345,21 @@ modelChange(){
             PARAMS_DOCKER_PUNC_PATH=${PARAMS_DOCKER_PUNC_DIR}/${model_name}
         fi
     fi
+    result=$(echo ${model_type} | grep "\-\-lm_model")
+    if [ "$result" != "" ]; then
+        if [ $local_flag -eq 0 ]; then
+            PARAMS_LM_ID=$model_id
+            PARAMS_DOCKER_LM_PATH=${PARAMS_DOWNLOAD_MODEL_DIR}/${PARAMS_LM_ID}
+            PARAMS_DOCKER_LM_DIR=$(dirname "${PARAMS_DOCKER_LM_PATH}")
+            PARAMS_LOCAL_LM_PATH=${PARAMS_FUNASR_LOCAL_MODELS_DIR}/${PARAMS_LM_ID}
+            PARAMS_LOCAL_LM_DIR=$(dirname "${PARAMS_LOCAL_LM_PATH}")
+        else
+            model_name=$(basename "${PARAMS_LOCAL_LM_PATH}")
+            PARAMS_LOCAL_LM_DIR=$(dirname "${PARAMS_LOCAL_LM_PATH}")
+            PARAMS_DOCKER_LM_DIR=$PARAMS_DOWNLOAD_MODEL_DIR
+            PARAMS_DOCKER_LM_PATH=${PARAMS_DOCKER_LM_DIR}/${model_name}
+        fi
+    fi
 }
 
 threadNumChange() {
@@ -1437,7 +1512,7 @@ displayHelp(){
     echo -e "   ${BOLD}-r, restart, --restart${PLAIN}    Restart FunASR docker."
     echo -e "   ${BOLD}-u, update , --update${PLAIN}     Update parameters that has already been set."
     echo -e "                update [--workspace] <workspace in local>"
-    echo -e "                update [--asr_model | --vad_model | --punc_model] <model_id or local model path>"
+    echo -e "                update [--asr_model | --vad_model | --punc_model | --lm_model] <model_id or local model path>"
     echo -e "                update [--host_port | --docker_port] <port number>"
     echo -e "                update [--decode_thread_num | io_thread_num] <the number of threads>"
     echo -e "                update [--ssl] <0: close SSL; 1: open SSL, default:1>"
@@ -1518,6 +1593,17 @@ PARAMS_DOCKER_PUNC_DIR=""
 PARAMS_DOCKER_PUNC_PATH=""
 #  The punc model ID in ModelScope
 PARAMS_PUNC_ID="damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx"
+
+#  The dir stored lm model in local
+PARAMS_LOCAL_LM_DIR=""
+#  The path of lm model in local
+PARAMS_LOCAL_LM_PATH=""
+#  The dir stored lm model in docker
+PARAMS_DOCKER_LM_DIR=""
+#  The path of lm model in docker
+PARAMS_DOCKER_LM_PATH=""
+#  The lm model ID in ModelScope
+PARAMS_LM_ID="damo/speech_ngram_lm_zh-cn-ai-wesp-fst"
 
 #  The dir stored vad model in local
 PARAMS_LOCAL_VAD_DIR=""
@@ -1668,7 +1754,7 @@ case "$1" in
         if [ $# -eq 3 ]; then
             type=$2
             val=$3
-            if [ "$type" = "--asr_model" ] || [ "$type" = "--vad_model" ] || [ "$type" = "--punc_model" ]; then
+            if [ "$type" = "--asr_model" ] || [ "$type" = "--vad_model" ] || [ "$type" = "--punc_model" ] || [ "$type" = "--lm_model" ]; then
                 modelChange $type $val
             elif [ "$type" = "--decode_thread_num" ] || [ "$type" = "--io_thread_num" ]; then
                 threadNumChange $type $val
