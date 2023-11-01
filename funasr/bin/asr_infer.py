@@ -1605,7 +1605,6 @@ class Speech2TextTransducer:
         feats_lengths = to_device(feats_lengths, device=self.device)
 
         enc_out, _, _ = self.asr_model.encoder(feats, feats_lengths)
-
         nbest_hyps = self.beam_search(enc_out[0])
 
         return nbest_hyps
