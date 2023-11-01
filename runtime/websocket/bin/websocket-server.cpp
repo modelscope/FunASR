@@ -289,7 +289,6 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
         // fst hotword
         if (jsonresult["fst_hotwords"] != nullptr) {
           std::string json_string = jsonresult["fst_hotwords"];
-          LOG(INFO)<<json_string;
           nlohmann::json json_fst_hws = nlohmann::json::parse(json_string);
           std::unordered_map<std::string, int> client_hws_map = json_fst_hws;
 

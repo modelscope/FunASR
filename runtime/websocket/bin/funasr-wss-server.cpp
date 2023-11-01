@@ -297,42 +297,6 @@ int main(int argc, char* argv[]) {
             LOG(INFO) << "ASR model is not set, use default.";
         }
 
-        if(punc_dir.isSet() && !s_punc_path.empty()){
-            std::string python_cmd_punc;
-            std::string down_punc_path;
-            std::string down_punc_model;  
-
-            if (access(s_punc_path.c_str(), F_OK) == 0){
-                // local
-                python_cmd_punc = python_cmd + " --model-name " + s_punc_path + " --export-dir ./ " + " --model_revision " + model_path["punc-revision"];
-                down_punc_path  = s_punc_path;
-            }else{
-                // modelscope
-                LOG(INFO) << "Download model: " <<  s_punc_path << " from modelscope: ";
-                python_cmd_punc = python_cmd + " --model-name " + s_punc_path + " --export-dir " + s_download_model_dir + " --model_revision " + model_path["punc-revision"];
-                down_punc_path  = s_download_model_dir+"/"+s_punc_path;
-            }
-                
-            int ret = system(python_cmd_punc.c_str());
-            if(ret !=0){
-                LOG(INFO) << "Failed to download model from modelscope. If you set local punc model path, you can ignore the errors.";
-            }
-            down_punc_model = down_punc_path+"/model_quant.onnx";
-            if(s_punc_quant=="false" || s_punc_quant=="False" || s_punc_quant=="FALSE"){
-                down_punc_model = down_punc_path+"/model.onnx";
-            }
-
-            if (access(down_punc_model.c_str(), F_OK) != 0){
-                LOG(ERROR) << down_punc_model << " do not exists."; 
-                exit(-1);
-            }else{
-                model_path[PUNC_DIR]=down_punc_path;
-                LOG(INFO) << "Set " << PUNC_DIR << " : " << model_path[PUNC_DIR];
-            }
-        }else{
-            LOG(INFO) << "PUNC model is not set, use default.";
-        }
-
         if (!s_itn_path.empty()) {
             std::string python_cmd_itn;
             std::string down_itn_path;
@@ -415,6 +379,42 @@ int main(int argc, char* argv[]) {
             }
         } else {
             LOG(INFO) << "LM model is not set, not executed.";
+        }
+
+        if(punc_dir.isSet() && !s_punc_path.empty()){
+            std::string python_cmd_punc;
+            std::string down_punc_path;
+            std::string down_punc_model;  
+
+            if (access(s_punc_path.c_str(), F_OK) == 0){
+                // local
+                python_cmd_punc = python_cmd + " --model-name " + s_punc_path + " --export-dir ./ " + " --model_revision " + model_path["punc-revision"];
+                down_punc_path  = s_punc_path;
+            }else{
+                // modelscope
+                LOG(INFO) << "Download model: " <<  s_punc_path << " from modelscope: ";
+                python_cmd_punc = python_cmd + " --model-name " + s_punc_path + " --export-dir " + s_download_model_dir + " --model_revision " + model_path["punc-revision"];
+                down_punc_path  = s_download_model_dir+"/"+s_punc_path;
+            }
+                
+            int ret = system(python_cmd_punc.c_str());
+            if(ret !=0){
+                LOG(INFO) << "Failed to download model from modelscope. If you set local punc model path, you can ignore the errors.";
+            }
+            down_punc_model = down_punc_path+"/model_quant.onnx";
+            if(s_punc_quant=="false" || s_punc_quant=="False" || s_punc_quant=="FALSE"){
+                down_punc_model = down_punc_path+"/model.onnx";
+            }
+
+            if (access(down_punc_model.c_str(), F_OK) != 0){
+                LOG(ERROR) << down_punc_model << " do not exists."; 
+                exit(-1);
+            }else{
+                model_path[PUNC_DIR]=down_punc_path;
+                LOG(INFO) << "Set " << PUNC_DIR << " : " << model_path[PUNC_DIR];
+            }
+        }else{
+            LOG(INFO) << "PUNC model is not set, use default.";
         }
 
     } catch (std::exception const& e) {
@@ -503,6 +503,9 @@ int main(int argc, char* argv[]) {
       websocket_srv.initAsr(model_path, s_model_thread_num);  // init asr model
     }
 
+    LOG(INFO) << "decoder-thread-num: " << s_decoder_thread_num;
+    LOG(INFO) << "io-thread-num: " << s_io_thread_num;
+    LOG(INFO) << "model-thread-num: " << s_model_thread_num;
     LOG(INFO) << "asr model init finished. listen on port:" << s_port;
 
     // Start the ASIO network io_service run loop

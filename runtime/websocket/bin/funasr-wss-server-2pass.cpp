@@ -489,7 +489,10 @@ int main(int argc, char* argv[]) {
           s_keyfile);  // websocket server for asr engine
       websocket_srv.initAsr(model_path, s_model_thread_num);  // init asr model
     }
-
+    
+    LOG(INFO) << "decoder-thread-num: " << s_decoder_thread_num;
+    LOG(INFO) << "io-thread-num: " << s_io_thread_num;
+    LOG(INFO) << "model-thread-num: " << s_model_thread_num;
     LOG(INFO) << "asr model init finished. listen on port:" << s_port;
 
     // Start the ASIO network io_service run loop
