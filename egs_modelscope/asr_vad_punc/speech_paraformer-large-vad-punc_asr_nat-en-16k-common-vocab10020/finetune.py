@@ -25,7 +25,7 @@ def modelscope_finetune(params):
 if __name__ == '__main__':
     from funasr.utils.modelscope_param import modelscope_args
     params = modelscope_args(model="damo/speech_paraformer-large-vad-punc_asr_nat-en-16k-common-vocab10020")
-    params.output_dir = "./checkpoint2"              # m模型保存路径
+    params.output_dir = "./checkpoint"              # m模型保存路径
     params.data_path = "./example_data/"            # 数据路径
     params.dataset_type = "small"                   # 小数据量设置small，若数据量大于1000小时，请使用large
     params.batch_bins = 1000                       # batch size，如果dataset_type="small"，batch_bins单位为fbank特征帧数，如果dataset_type="large"，batch_bins单位为毫秒，
