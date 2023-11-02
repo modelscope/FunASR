@@ -761,6 +761,7 @@ BaseFloat LatticeFasterDecoderTpl<FST, Token>::ProcessEmitting(
          aiter.Next()) {
       const Arc &arc = aiter.Value();
       if (arc.ilabel != 0) {  // propagate..
+        if (arc.nextstate == state) continue;
         BaseFloat new_weight = arc.weight.Value() + cost_offset -
             decodable->LogLikelihood(frame, arc.ilabel) + tok->tot_cost;
 
@@ -790,6 +791,7 @@ BaseFloat LatticeFasterDecoderTpl<FST, Token>::ProcessEmitting(
            aiter.Next()) {
         const Arc &arc = aiter.Value();
         if (arc.ilabel != 0) {  // propagate..
+          if (arc.nextstate == state) continue;
           StateId new_bias_state = 0;
           BaseFloat ac_cost = cost_offset -
               decodable->LogLikelihood(frame, arc.ilabel),

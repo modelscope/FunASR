@@ -36,12 +36,6 @@ string WfstDecoder::Search(float *in, int len, int64_t token_num) {
       tmp_logp.push_back((in + i * token_num)[j]);
     }
     logp_vec.push_back(tmp_logp);
-    //insert blank frame
-    if (i < len - 2) {
-      std::vector<float> blk_logp(token_num, 0.0f);
-      blk_logp[blk_phn_id] = MAX_SCORE;
-      logp_vec.push_back(blk_logp);
-    }
   }
   for (int i = 0; i < logp_vec.size(); i++) {
     cur_frame_++;
