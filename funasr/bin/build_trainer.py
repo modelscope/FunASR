@@ -548,6 +548,7 @@ def build_trainer(modelscope_dict,
     init_param = modelscope_dict['init_model']
     cmvn_file = modelscope_dict['cmvn_file']
     seg_dict_file = modelscope_dict['seg_dict']
+    bpemodel = modelscope_dict['bpemodel']
 
     # overwrite parameters
     with open(config) as f:
@@ -581,6 +582,10 @@ def build_trainer(modelscope_dict,
         args.seg_dict_file = seg_dict_file
     else:
         args.seg_dict_file = None
+    if os.path.exists(bpemodel):
+        args.bpemodel = bpemodel
+    else:
+        args.bpemodel = None
     args.data_dir = data_dir
     args.train_set = train_set
     args.dev_set = dev_set
