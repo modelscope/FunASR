@@ -255,15 +255,35 @@ function on_recoder_mode_change()
 	 
 			}
 }
+ 
+
 function getHotwords(){
+ 
   var obj = document.getElementById("varHot");
   
   if(typeof(obj) == 'undefined' || obj==null || obj.value.length<=0){
 	return "";
   }
   let val = obj.value.toString();
+ 
   console.log("hotwords="+val);
-  return val;
+  let items = val.split(/[(\r\n)\r\n]+/);  //split by \r\n
+  var jsonresult = {};
+  const regexNum = /^[0-9]*$/; // test number
+  for (item of items) {
+	  
+      let result = item.split(" ");
+	  if(result.length>=2 && regexNum.test(result[result.length-1]))
+	  { 
+          var wordstr="";
+		  for(var i=0;i<result.length-1;i++)
+			  wordstr=wordstr+result[i]+" ";
+			  
+		  jsonresult[wordstr.trim()]=result[result.length-1];
+	  }
+  }
+  console.log("jsonresult="+JSON.stringify(jsonresult));
+  return jsonresult;
 
 }
 function getAsrMode(){
