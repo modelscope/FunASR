@@ -6,6 +6,15 @@ FunASR提供可便捷本地或者云端服务器部署的实时语音听写服�
 本文档为FunASR实时转写服务开发指南。如果您想快速体验实时语音听写服务，可参考[快速上手](#快速上手)。
 
 ## 快速上手
+
+### docker安装
+如果您已安装docker，忽略本步骤！!
+通过下述命令在服务器上安装docker：
+```shell
+curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/install_docker.sh；
+sudo bash install_docker.sh
+```
+
 ### 镜像启动
 
 通过下述命令拉取并启动FunASR软件包的docker镜像：

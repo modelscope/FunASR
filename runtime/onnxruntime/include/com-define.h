@@ -16,7 +16,7 @@ namespace funasr {
 #define OFFLINE_MODEL_DIR "model-dir"
 #define ONLINE_MODEL_DIR "online-model-dir"
 #define LM_DIR "lm-dir"
-#define FST_HOTWORD "fst-hotword"
+// #define FST_HOTWORD "fst-hotword"
 #define FST_INC_WTS "fst-inc-wts"
 #define VAD_DIR "vad-dir"
 #define PUNC_DIR "punc-dir"
@@ -53,7 +53,7 @@ namespace funasr {
 #define PUNC_CONFIG_NAME "punc.yaml"
 #define MODEL_SEG_DICT "seg_dict"
 #define HOTWORD "hotword"
-#define NN_HOTWORD "nn-hotword"
+// #define NN_HOTWORD "nn-hotword"
 
 #define ITN_DIR "itn-dir"
 #define ITN_TAGGER_NAME "zh_itn_tagger.fst"

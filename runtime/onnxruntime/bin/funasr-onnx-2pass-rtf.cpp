@@ -17,6 +17,7 @@
 #include <mutex>
 #include <thread>
 #include <glog/logging.h>
+#include "util.h"
 #include "funasrruntime.h"
 #include "tclap/CmdLine.h"
 #include "com-define.h"
@@ -41,7 +42,6 @@ void GetValue(TCLAP::ValueArg<std::string>& value_arg, string key, std::map<std:
     model_path.insert({key, value_arg.getValue()});
     LOG(INFO)<< key << " : " << value_arg.getValue();
 }
-
 
 void runReg(FUNASR_HANDLE tpass_handle, std::vector<int> chunk_size, vector<string> wav_list, vector<string> wav_ids,
             float* total_length, long* total_time, int core_id, ASR_TYPE asr_mode_, string nn_hotwords_) {
@@ -220,8 +220,7 @@ int main(int argc, char** argv)
     TCLAP::ValueArg<std::int32_t>   onnx_thread("", "model-thread-num", "onnxruntime SetIntraOpNumThreads", false, 1, "int32_t");
     TCLAP::ValueArg<std::int32_t>   thread_num_("", THREAD_NUM, "multi-thread num for rtf", false, 1, "int32_t");
     TCLAP::ValueArg<std::string>    wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", true, "", "string");
-    TCLAP::ValueArg<std::string> nn_hotword("", NN_HOTWORD,
-        "the nn hotwords file, one hotword perline, Format: Hotword (could be: 阿里巴巴)", false, "", "string");
+    TCLAP::ValueArg<std::string>    hotword("", HOTWORD, "the hotword file, one hotword perline, Format: Hotword Weight (could be: 阿里巴巴 20)", false, "", "string");
 
     cmd.add(offline_model_dir);
     cmd.add(online_model_dir);
@@ -235,7 +234,7 @@ int main(int argc, char** argv)
     cmd.add(asr_mode);
     cmd.add(onnx_thread);
     cmd.add(thread_num_);
-    cmd.add(nn_hotword);
+    cmd.add(hotword);
     cmd.parse(argc, argv);
 
     std::map<std::string, std::string> model_path;
@@ -277,23 +276,12 @@ int main(int argc, char** argv)
     long modle_init_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
     LOG(INFO) << "Model initialization takes " << (double)modle_init_micros / 1000000 << " s";
 
-    // nn hotword file
-    std::string nn_hotwords_;
-    std::string file_nn_hotword = nn_hotword.getValue();
-    std::string line;
-    std::ifstream file(file_nn_hotword);
-    LOG(INFO) << "nn hotword path: " << file_nn_hotword;
-
-    if (file.is_open()) {
-        while (getline(file, line)) {
-            nn_hotwords_ += line+HOTWORD_SEP;
-        }
-        LOG(INFO) << "nn hotwords: " << nn_hotwords_;
-        file.close();
-    } else {
-        LOG(ERROR) << "Unable to open nn hotwords file: " << file_nn_hotword 
-            << ". If you have not set nn hotwords, please ignore this message.";
-    }
+    // hotword file
+    unordered_map<string, int> hws_map;
+    std::string nn_hotwords_ = "";
+    std::string hotword_path = model_path.at(HOTWORD);
+    LOG(INFO) << "hotword path: " << hotword_path;
+    funasr::ExtractHws(hotword_path, hws_map, nn_hotwords_);
 
     // read wav_path
     vector<string> wav_list;

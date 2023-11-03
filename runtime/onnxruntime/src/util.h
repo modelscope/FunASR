@@ -2,6 +2,7 @@
 #define UTIL_H
 #include <vector>
 #include <memory>
+#include <unordered_map>
 #include "tensor.h"
 
 using namespace std;
@@ -32,6 +33,8 @@ bool is_target_file(const std::string& filename, const std::string target);
 
 void KeepChineseCharacterAndSplit(const std::string &input_str,
                                   std::vector<std::string> &chinese_characters);
+void SplitChiEngCharacters(const std::string &input_str,
+                                  std::vector<std::string> &characters);
 
 std::vector<std::string> split(const std::string &s, char delim);
 
@@ -51,5 +54,8 @@ void TimestampOnnx( std::vector<float>& us_alphas,
                     std::vector<std::vector<float>> &timestamp_vec, 
                     float begin_time = 0.0, 
                     float total_offset = -1.5);
+bool IsTargetFile(const std::string& filename, const std::string target);
+void ExtractHws(string hws_file, unordered_map<string, int> &hws_map);
+void ExtractHws(string hws_file, unordered_map<string, int> &hws_map, string& nn_hotwords_);
 } // namespace funasr
 #endif

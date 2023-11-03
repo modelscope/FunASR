@@ -22,7 +22,7 @@
 #include <atomic>
 #include <thread>
 #include <glog/logging.h>
-
+#include "util.h"
 #include "audio.h"
 #include "nlohmann/json.hpp"
 #include "tclap/CmdLine.h"
@@ -38,69 +38,6 @@ void WaitABit() {
     #endif
 }
 std::atomic<int> wav_index(0);
-
-bool IsTargetFile(const std::string& filename, const std::string target) {
-    std::size_t pos = filename.find_last_of(".");
-    if (pos == std::string::npos) {
-        return false;
-    }
-    std::string extension = filename.substr(pos + 1);
-    return (extension == target);
-}
-
-void Trim(std::string *str) {
-  const char *white_chars = " \t\n\r\f\v";
-
-  std::string::size_type pos = str->find_last_not_of(white_chars);
-  if (pos != std::string::npos)  {
-    str->erase(pos + 1);
-    pos = str->find_first_not_of(white_chars);
-    if (pos != std::string::npos) str->erase(0, pos);
-  } else {
-    str->erase(str->begin(), str->end());
-  }
-}
-
-void SplitStringToVector(const std::string &full, const char *delim,
-                         bool omit_empty_strings,
-                         std::vector<std::string> *out) {
-  size_t start = 0, found = 0, end = full.size();
-  out->clear();
-  while (found != std::string::npos) {
-    found = full.find_first_of(delim, start);
-    // start != end condition is for when the delimiter is at the end
-    if (!omit_empty_strings || (found != start && start != end))
-      out->push_back(full.substr(start, found - start));
-    start = found + 1;
-  }
-}
-
-void ExtractHws(string hws_file, unordered_map<string, int> &hws_map)
-{
-    std::string line;
-    std::ifstream ifs_hws(hws_file.c_str());
-    if(!ifs_hws.is_open()){
-        LOG(ERROR) << "Unable to open fst hotwords file: " << hws_file 
-            << ". If you have not set fst hotwords, please ignore this message.";
-        return;
-    }
-    while (getline(ifs_hws, line)) {
-      Trim(&line);
-      if (line.empty()) {
-        continue;
-      }
-      float score = 1.0f;
-      std::vector<std::string> text;
-      SplitStringToVector(line, "\t", true, &text);
-      if (text.size() > 1) {
-        score = std::stof(text[1]);
-      } else if (text.empty()) {
-        continue;
-      }
-      hws_map.emplace(text[0], score);
-    }
-    ifs_hws.close();
-}
 
 typedef websocketpp::config::asio_client::message_type::ptr message_ptr;
 typedef websocketpp::lib::shared_ptr<websocketpp::lib::asio::ssl::context> context_ptr;
@@ -177,7 +114,7 @@ class WebsocketClient {
 
     // This method will block until the connection is complete  
     void run(const std::string& uri, const std::vector<string>& wav_list, const std::vector<string>& wav_ids, 
-             const std::unordered_map<std::string, int>& fst_hws_map, std::string nn_hotwords, int use_itn=1) {
+             const std::unordered_map<std::string, int>& hws_map, int use_itn=1) {
         // Create a new connection to the given URI
         websocketpp::lib::error_code ec;
         typename websocketpp::client<T>::connection_ptr con =
@@ -205,7 +142,7 @@ class WebsocketClient {
                 break;
             }
             total_send += 1;
-            send_wav_data(wav_list[i], wav_ids[i], fst_hws_map, nn_hotwords, send_hotword, use_itn);
+            send_wav_data(wav_list[i], wav_ids[i], hws_map, send_hotword, use_itn);
             if(send_hotword){
                 send_hotword = false;
             }
@@ -244,19 +181,19 @@ class WebsocketClient {
     }
     // send wav to server
     void send_wav_data(string wav_path, string wav_id,
-        const std::unordered_map<std::string, int>& fst_hws_map, 
-        string nn_hotwords, bool send_hotword, bool use_itn) {
+        const std::unordered_map<std::string, int>& hws_map, 
+        bool send_hotword, bool use_itn) {
         uint64_t count = 0;
         std::stringstream val;
 
 		funasr::Audio audio(1);
         int32_t sampling_rate = 16000;
         std::string wav_format = "pcm";
-		if(IsTargetFile(wav_path.c_str(), "wav")){
+		if(funasr::IsTargetFile(wav_path.c_str(), "wav")){
 			int32_t sampling_rate = -1;
 			if(!audio.LoadWav(wav_path.c_str(), &sampling_rate))
 				return ;
-		}else if(IsTargetFile(wav_path.c_str(), "pcm")){
+		}else if(funasr::IsTargetFile(wav_path.c_str(), "pcm")){
 			if (!audio.LoadPcmwav(wav_path.c_str(), &sampling_rate))
 				return ;
 		}else{
@@ -306,18 +243,14 @@ class WebsocketClient {
         }
         jsonbegin["is_speaking"] = true;
         if(send_hotword){
-            if(!fst_hws_map.empty()){
-                LOG(INFO) << "fst hotwords: ";
-                for (const auto& pair : fst_hws_map) {
+            if(!hws_map.empty()){
+                LOG(INFO) << "hotwords: ";
+                for (const auto& pair : hws_map) {
                     LOG(INFO) << pair.first << " : " << pair.second;
                 }
-                nlohmann::json json_map(fst_hws_map);
+                nlohmann::json json_map(hws_map);
                 std::string json_map_str = json_map.dump();
-                jsonbegin["fst_hotwords"] = json_map_str;
-            }
-            if(!nn_hotwords.empty()){
-                LOG(INFO) << "nn hotwords: "<< nn_hotwords;
-                jsonbegin["nn_hotwords"] = nn_hotwords;
+                jsonbegin["hotwords"] = json_map_str;
             }
         }
         m_client.send(m_hdl, jsonbegin.dump(), websocketpp::frame::opcode::text,
@@ -427,10 +360,8 @@ int main(int argc, char* argv[]) {
     TCLAP::ValueArg<int> use_itn_(
         "", "use-itn",
         "use-itn is 1 means use itn, 0 means not use itn", false, 1, "int");
-    TCLAP::ValueArg<std::string> fst_hotword_("", FST_HOTWORD, 
-        "the fst hotwords file, one hotword perline, Format: Hotword [tab] Weight (could be: 阿里巴巴 \t 20)", false, "", "string");
-    TCLAP::ValueArg<std::string> nn_hotword_("", NN_HOTWORD,
-        "the nn hotwords file, one hotword perline, Format: Hotword (could be: 阿里巴巴)", false, "", "string");
+    TCLAP::ValueArg<std::string> hotword_("", HOTWORD,
+        "the hotword file, one hotword perline, Format: Hotword Weight (could be: 阿里巴巴 20)", false, "", "string");
 
     cmd.add(server_ip_);
     cmd.add(port_);
@@ -438,8 +369,7 @@ int main(int argc, char* argv[]) {
     cmd.add(thread_num_);
     cmd.add(is_ssl_);
     cmd.add(use_itn_);
-    cmd.add(fst_hotword_);
-    cmd.add(nn_hotword_);
+    cmd.add(hotword_);
     cmd.parse(argc, argv);
 
     std::string server_ip = server_ip_.getValue();
@@ -457,36 +387,19 @@ int main(int argc, char* argv[]) {
         uri = "ws://" + server_ip + ":" + port;
     }
 
-    // fst hotwords
-    std::string fst_hotword_path = fst_hotword_.getValue();
-    unordered_map<string, int> fst_hws_map;
-    if(!fst_hotword_path.empty()){
-        LOG(INFO) << "fst hotword path: " << fst_hotword_path;
-        ExtractHws(fst_hotword_path, fst_hws_map);
-    }
-
-    // nn hotwords
-    std::string str_hotword = nn_hotword_.getValue();
-    std::string nn_hotwords="";
-
-    if(!str_hotword.empty()){
-        ifstream in(str_hotword);
-        if (!in.is_open()) {
-            LOG(ERROR) << "Failed to open file: " <<  str_hotword;
-        }
-        string line;
-        while(getline(in, line))
-        {
-            nn_hotwords +=line+HOTWORD_SEP;
-        }
-        in.close();
+    // hotwords
+    std::string hotword_path = hotword_.getValue();
+    unordered_map<string, int> hws_map;
+    if(!hotword_path.empty()){
+        LOG(INFO) << "hotword path: " << hotword_path;
+        funasr::ExtractHws(hotword_path, hws_map);
     }
 
     // read wav_path
     std::vector<string> wav_list;
     std::vector<string> wav_ids;
     string default_id = "wav_default_id";
-    if(IsTargetFile(wav_path, "scp")){
+    if(funasr::IsTargetFile(wav_path, "scp")){
         ifstream in(wav_path);
         if (!in.is_open()) {
             printf("Failed to open scp file");
@@ -508,17 +421,17 @@ int main(int argc, char* argv[]) {
     }
     
     for (size_t i = 0; i < threads_num; i++) {
-        client_threads.emplace_back([uri, wav_list, wav_ids, is_ssl, fst_hws_map, nn_hotwords, use_itn]() {
+        client_threads.emplace_back([uri, wav_list, wav_ids, is_ssl, hws_map, use_itn]() {
           if (is_ssl == 1) {
             WebsocketClient<websocketpp::config::asio_tls_client> c(is_ssl);
 
             c.m_client.set_tls_init_handler(bind(&OnTlsInit, ::_1));
 
-            c.run(uri, wav_list, wav_ids, fst_hws_map, nn_hotwords, use_itn);
+            c.run(uri, wav_list, wav_ids, hws_map, use_itn);
           } else {
             WebsocketClient<websocketpp::config::asio_client> c(is_ssl);
 
-            c.run(uri, wav_list, wav_ids, fst_hws_map, nn_hotwords, use_itn);
+            c.run(uri, wav_list, wav_ids, hws_map, use_itn);
           }
         });
     }

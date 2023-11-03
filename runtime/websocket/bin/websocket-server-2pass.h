@@ -21,6 +21,7 @@
 #include <utility>
 #define ASIO_STANDALONE 1  // not boost
 #include <glog/logging.h>
+#include "util/text-utils.h"
 
 #include <fstream>
 #include <functional>

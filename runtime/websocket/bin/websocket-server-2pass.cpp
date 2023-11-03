@@ -16,7 +16,8 @@
 #include <utility>
 #include <vector>
 
-extern std::string nn_hotwords_;
+extern std::unordered_map<std::string, int> hws_map_;
+extern int fst_inc_wts_;
 
 context_ptr WebSocketServer::on_tls_init(tls_mode mode,
                                          websocketpp::connection_hdl hdl,
@@ -375,24 +376,38 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
         msg_data->msg["wav_format"] = jsonresult["wav_format"];
       }
 
-      // nn hotword
+      // hotwords: fst/nn
       if(msg_data->hotwords_embedding == NULL){
-        std::string hw = nn_hotwords_;
-        if (jsonresult["nn_hotwords"] != nullptr) {
-          msg_data->msg["nn_hotwords"] = jsonresult["nn_hotwords"];
-          if (!msg_data->msg["nn_hotwords"].empty()) {
-            std::string client_nn_hws = msg_data->msg["nn_hotwords"];
-            hw = hw + " " + client_nn_hws;
-          }
-        }else if (jsonresult["hotwords"] != nullptr) {
-          msg_data->msg["hotwords"] = jsonresult["hotwords"];
-          if (!msg_data->msg["hotwords"].empty()) {
-            std::string client_nn_hws = msg_data->msg["hotwords"];
-            hw = hw + " " + client_nn_hws;
+        std::unordered_map<std::string, int> merged_hws_map;
+        std::string nn_hotwords = "";
+
+        if (jsonresult["hotwords"] != nullptr) {
+          std::string json_string = jsonresult["hotwords"];
+          nlohmann::json json_fst_hws = nlohmann::json::parse(json_string);
+          
+          if(json_fst_hws.type() == nlohmann::json::value_t::object){
+            // fst
+            std::unordered_map<std::string, int> client_hws_map = json_fst_hws;
+            merged_hws_map.insert(client_hws_map.begin(), client_hws_map.end());
+          }else{
+            // nn
+            std::string client_nn_hws = jsonresult["hotwords"];
+            nn_hotwords += " " + client_nn_hws;
+            LOG(INFO) << "nn hotwords: " << client_nn_hws;
           }
         }
-        LOG(INFO) << "nn hotwords: " << hw;
-        std::vector<std::vector<float>> new_hotwords_embedding = CompileHotwordEmbedding(tpass_handle, hw, ASR_TWO_PASS);
+        merged_hws_map.insert(hws_map_.begin(), hws_map_.end());
+
+        // fst
+        LOG(INFO) << "hotwords: ";
+        for (const auto& pair : merged_hws_map) {
+            nn_hotwords += " " + pair.first;
+            LOG(INFO) << pair.first << " : " << pair.second;
+        }
+        // FunWfstDecoderLoadHwsRes(msg_data->decoder_handle, fst_inc_wts_, merged_hws_map);
+
+        // nn
+        std::vector<std::vector<float>> new_hotwords_embedding = CompileHotwordEmbedding(tpass_handle, nn_hotwords, ASR_TWO_PASS);
         msg_data->hotwords_embedding =
             std::make_shared<std::vector<std::vector<float>>>(new_hotwords_embedding);
       }
@@ -472,8 +487,7 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
 
           try{
             // post to decode
-            
-          std::vector<std::vector<float>> hotwords_embedding_(*(msg_data->hotwords_embedding));
+            std::vector<std::vector<float>> hotwords_embedding_(*(msg_data->hotwords_embedding));
             msg_data->strand_->post( 
                       std::bind(&WebSocketServer::do_decoder, this,
                                 std::move(subvector), std::move(hdl),
@@ -491,7 +505,7 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
           }
           catch (std::exception const &e)
           {
-              LOG(ERROR)<<e.what();
+            LOG(ERROR)<<e.what();
           }
         }
       } else {

@@ -70,14 +70,21 @@ string WfstDecoder::FinalizeDecode(bool is_stamp, std::vector<float> us_alphas, 
     if(!is_stamp){
         return vocab_->Vector2StringV2(words);
     }else{
-        std::vector<string> char_list;
+        std::vector<std::string> char_list;
         std::vector<std::vector<float>> timestamp_list;
         std::string res_str;
         vocab_->Vector2String(words, char_list);
-        std::vector<string> raw_char(char_list);
-        TimestampOnnx(us_alphas, us_cif_peak, char_list, res_str, timestamp_list);
+        // split chinese word to char
+        std::vector<std::string> split_chars;
+        for(auto& word:char_list){
+          std::vector<std::string> word2char;
+          SplitChiEngCharacters(word, word2char);
+          split_chars.insert(split_chars.end(), word2char.begin(), word2char.end());
+        }
+        // std::vector<string> raw_char(char_list);
+        TimestampOnnx(us_alphas, us_cif_peak, split_chars, res_str, timestamp_list);
 
-        return PostProcess(raw_char, timestamp_list);
+        return PostProcess(split_chars, timestamp_list);
     }
   }
   return result;

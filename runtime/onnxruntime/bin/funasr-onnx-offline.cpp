@@ -18,7 +18,7 @@
 #include "tclap/CmdLine.h"
 #include "com-define.h"
 #include <unordered_map>
-#include "util/text-utils.h"
+#include "util.h"
 using namespace std;
 
 bool is_target_file(const std::string& filename, const std::string target) {
@@ -38,32 +38,6 @@ void GetValue(TCLAP::ValueArg<std::string>& value_arg, string key, std::map<std:
     }
 }
 
-void ExtractHws(string hws_file, unordered_map<string, int> &hws_map)
-{
-    std::string line;
-    std::ifstream ifs_hws(hws_file.c_str());
-    if(!ifs_hws.is_open()){
-        LOG(ERROR) << "Failed to open file: " << hws_file ;
-        return;
-    }
-    while (getline(ifs_hws, line)) {
-      kaldi::Trim(&line);
-      if (line.empty()) {
-        continue;
-      }
-      float score = 1.0f;
-      std::vector<std::string> text;
-      kaldi::SplitStringToVector(line, "\t", true, &text);
-      if (text.size() > 1) {
-        score = std::stof(text[1]);
-      } else if (text.empty()) {
-        continue;
-      }
-      hws_map.emplace(text[0], score);
-    }
-    ifs_hws.close();
-}
-
 int main(int argc, char** argv)
 {
     google::InitGoogleLogging(argv[0]);
@@ -77,13 +51,10 @@ int main(int argc, char** argv)
     TCLAP::ValueArg<std::string>    punc_dir("", PUNC_DIR, "the punc model path, which contains model.onnx, punc.yaml", false, "", "string");
     TCLAP::ValueArg<std::string>    punc_quant("", PUNC_QUANT, "true (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "true", "string");
     TCLAP::ValueArg<std::string>    lm_dir("", LM_DIR, "the lm model path, which contains compiled models: TLG.fst, config.yaml ", false, "", "string");
-    TCLAP::ValueArg<std::string>    fst_hotword("", FST_HOTWORD, "the fst hotwords file, one hotword perline, Format: Hotword [tab] Weight (could be: 阿里巴巴 \t 20)", false, "", "string");
     TCLAP::ValueArg<std::int32_t>   fst_inc_wts("", FST_INC_WTS, "the fst hotwords incremental bias", false, 20, "int32_t");
     TCLAP::ValueArg<std::string>    itn_dir("", ITN_DIR, "the itn model(fst) path, which contains zh_itn_tagger.fst and zh_itn_verbalizer.fst", false, "", "string");
-
-    TCLAP::ValueArg<std::string> wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", true, "", "string");
-    TCLAP::ValueArg<std::string> nn_hotword("", NN_HOTWORD,
-        "the nn hotwords file, one hotword perline, Format: Hotword (could be: 阿里巴巴)", false, "", "string");
+    TCLAP::ValueArg<std::string>    wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", true, "", "string");
+    TCLAP::ValueArg<std::string>    hotword("", HOTWORD, "the hotword file, one hotword perline, Format: Hotword Weight (could be: 阿里巴巴 20)", false, "", "string");
 
     cmd.add(model_dir);
     cmd.add(quantize);
@@ -93,10 +64,9 @@ int main(int argc, char** argv)
     cmd.add(punc_quant);
     cmd.add(itn_dir);
     cmd.add(lm_dir);
-    cmd.add(fst_hotword);
     cmd.add(fst_inc_wts);
     cmd.add(wav_path);
-    cmd.add(nn_hotword);
+    cmd.add(hotword);
     cmd.parse(argc, argv);
 
     std::map<std::string, std::string> model_path;
@@ -108,7 +78,6 @@ int main(int argc, char** argv)
     GetValue(punc_quant, PUNC_QUANT, model_path);
     GetValue(itn_dir, ITN_DIR, model_path);
     GetValue(lm_dir, LM_DIR, model_path);
-    GetValue(fst_hotword, FST_HOTWORD, model_path);
     GetValue(wav_path, WAV_PATH, model_path);
 
     struct timeval start, end;
@@ -125,29 +94,12 @@ int main(int argc, char** argv)
     // init wfst decoder
     FUNASR_DEC_HANDLE decoder_handle = FunASRWfstDecoderInit(asr_hanlde, ASR_OFFLINE);
 
-    // fst hotword file
+    // hotword file
     unordered_map<string, int> hws_map;
-    if (fst_hotword.isSet()) {
-      ExtractHws(model_path.at(FST_HOTWORD), hws_map);
-    }
-
-    // nn hotword file
-    std::string nn_hotwords_;
-    std::string file_nn_hotword = nn_hotword.getValue();
-    std::string line;
-    std::ifstream file(file_nn_hotword);
-    LOG(INFO) << "nn hotword path: " << file_nn_hotword;
-
-    if (file.is_open()) {
-        while (getline(file, line)) {
-            nn_hotwords_ += line+HOTWORD_SEP;
-        }
-        LOG(INFO) << "nn hotwords: " << nn_hotwords_;
-        file.close();
-    } else {
-        LOG(ERROR) << "Unable to open nn hotwords file: " << file_nn_hotword 
-            << ". If you have not set nn hotwords, please ignore this message.";
-    }
+    std::string nn_hotwords_ = "";
+    std::string hotword_path = hotword.getValue();
+    LOG(INFO) << "hotword path: " << hotword_path;
+    funasr::ExtractHws(hotword_path, hws_map, nn_hotwords_);
 
     gettimeofday(&end, NULL);
     long seconds = (end.tv_sec - start.tv_sec);

@@ -27,7 +27,7 @@
 #include <websocketpp/client.hpp>
 #include <websocketpp/common/thread.hpp>
 #include <websocketpp/config/asio_client.hpp>
-
+#include "util.h"
 #include "audio.h"
 #include "nlohmann/json.hpp"
 #include "tclap/CmdLine.h"
@@ -44,15 +44,6 @@ void WaitABit() {
 #endif
 }
 std::atomic<int> wav_index(0);
-
-bool IsTargetFile(const std::string& filename, const std::string target) {
-  std::size_t pos = filename.find_last_of(".");
-  if (pos == std::string::npos) {
-    return false;
-  }
-  std::string extension = filename.substr(pos + 1);
-  return (extension == target);
-}
 
 typedef websocketpp::config::asio_client::message_type::ptr message_ptr;
 typedef websocketpp::lib::shared_ptr<websocketpp::lib::asio::ssl::context>
@@ -132,8 +123,8 @@ class WebsocketClient {
   // This method will block until the connection is complete
   void run(const std::string& uri, const std::vector<string>& wav_list,
            const std::vector<string>& wav_ids, std::string asr_mode,
-           std::vector<int> chunk_size, bool is_record=false, std::string nn_hotwords="",
-           int use_itn=1) {
+           std::vector<int> chunk_size, const std::unordered_map<std::string, int>& hws_map,
+           bool is_record=false, int use_itn=1) {
     // Create a new connection to the given URI
     websocketpp::lib::error_code ec;
     typename websocketpp::client<T>::connection_ptr con =
@@ -155,9 +146,9 @@ class WebsocketClient {
     websocketpp::lib::thread asio_thread(&websocketpp::client<T>::run,
                                          &m_client);
     if(is_record){
-      send_rec_data(asr_mode, chunk_size, nn_hotwords, use_itn);
+      send_rec_data(asr_mode, chunk_size, hws_map, use_itn);
     }else{
-      send_wav_data(wav_list[0], wav_ids[0], asr_mode, chunk_size, nn_hotwords, use_itn);
+      send_wav_data(wav_list[0], wav_ids[0], asr_mode, chunk_size, hws_map, use_itn);
     }
 
     WaitABit();
@@ -193,17 +184,18 @@ class WebsocketClient {
   }
   // send wav to server
   void send_wav_data(string wav_path, string wav_id, std::string asr_mode,
-                     std::vector<int> chunk_vector, string nn_hotwords, int use_itn) {
+                     std::vector<int> chunk_vector, const std::unordered_map<std::string, int>& hws_map,
+                     int use_itn) {
     uint64_t count = 0;
     std::stringstream val;
 
     funasr::Audio audio(1);
     int32_t sampling_rate = 16000;
     std::string wav_format = "pcm";
-    if (IsTargetFile(wav_path.c_str(), "wav")) {
+    if (funasr::IsTargetFile(wav_path.c_str(), "wav")) {
       int32_t sampling_rate = -1;
       if (!audio.LoadWav(wav_path.c_str(), &sampling_rate)) return;
-    } else if (IsTargetFile(wav_path.c_str(), "pcm")) {
+    } else if (funasr::IsTargetFile(wav_path.c_str(), "pcm")) {
       if (!audio.LoadPcmwav(wav_path.c_str(), &sampling_rate)) return;
     } else {
       wav_format = "others";
@@ -251,8 +243,15 @@ class WebsocketClient {
     if(use_itn == 0){
       jsonbegin["itn"] = false;
     }
-    LOG(INFO) << "nn_hotwords: "<< nn_hotwords;
-    jsonbegin["nn_hotwords"] = nn_hotwords;
+    if(!hws_map.empty()){
+        LOG(INFO) << "hotwords: ";
+        for (const auto& pair : hws_map) {
+            LOG(INFO) << pair.first << " : " << pair.second;
+        }
+        nlohmann::json json_map(hws_map);
+        std::string json_map_str = json_map.dump();
+        jsonbegin["hotwords"] = json_map_str;
+    }
     m_client.send(m_hdl, jsonbegin.dump(), websocketpp::frame::opcode::text,
                   ec);
 
@@ -335,7 +334,7 @@ class WebsocketClient {
   }
 
   void send_rec_data(std::string asr_mode, std::vector<int> chunk_vector, 
-                     string nn_hotwords, int use_itn) {
+                     const std::unordered_map<std::string, int>& hws_map, int use_itn) {
     // first message
     bool wait = false;
     while (1) {
@@ -375,8 +374,15 @@ class WebsocketClient {
     if(use_itn == 0){
       jsonbegin["itn"] = false;
     }
-    LOG(INFO) << "nn hotwords: "<< nn_hotwords;
-    jsonbegin["nn_hotwords"] = nn_hotwords;
+    if(!hws_map.empty()){
+        LOG(INFO) << "hotwords: ";
+        for (const auto& pair : hws_map) {
+            LOG(INFO) << pair.first << " : " << pair.second;
+        }
+        nlohmann::json json_map(hws_map);
+        std::string json_map_str = json_map.dump();
+        jsonbegin["hotwords"] = json_map_str;
+    }
     m_client.send(m_hdl, jsonbegin.dump(), websocketpp::frame::opcode::text,
                   ec);
     // mic
@@ -499,8 +505,8 @@ int main(int argc, char* argv[]) {
       "", "use-itn",
       "use-itn is 1 means use itn, 0 means not use itn", false, 1,
       "int");
-  TCLAP::ValueArg<std::string> nn_hotword_("", NN_HOTWORD,
-    "the nn hotwords file, one hotword perline, Format: Hotword (could be: 阿里巴巴)", false, "", "string");
+  TCLAP::ValueArg<std::string> hotword_("", HOTWORD,
+      "the hotword file, one hotword perline, Format: Hotword Weight (could be: 阿里巴巴 20)", false, "", "string");
 
   cmd.add(server_ip_);
   cmd.add(port_);
@@ -511,7 +517,7 @@ int main(int argc, char* argv[]) {
   cmd.add(thread_num_);
   cmd.add(is_ssl_);
   cmd.add(use_itn_);
-  cmd.add(nn_hotword_);
+  cmd.add(hotword_);
   cmd.parse(argc, argv);
 
   std::string server_ip = server_ip_.getValue();
@@ -544,22 +550,13 @@ int main(int argc, char* argv[]) {
     uri = "ws://" + server_ip + ":" + port;
   }
 
-    // nn hotwords
-    std::string str_hotword = nn_hotword_.getValue();
-    std::string nn_hotwords="";
-
-    if(!str_hotword.empty()){
-        ifstream in(str_hotword);
-        if (!in.is_open()) {
-            LOG(ERROR) << "Failed to open file: " <<  str_hotword;
-        }
-        string line;
-        while(getline(in, line))
-        {
-            nn_hotwords +=line+HOTWORD_SEP;
-        }
-        in.close();
-    }
+  // hotwords
+  std::string hotword_path = hotword_.getValue();
+  unordered_map<string, int> hws_map;
+  if(!hotword_path.empty()){
+      LOG(INFO) << "hotword path: " << hotword_path;
+      funasr::ExtractHws(hotword_path, hws_map);
+  }
 
   if(is_record == 1){
       std::vector<string> tmp_wav_list;
@@ -570,11 +567,11 @@ int main(int argc, char* argv[]) {
 
         c.m_client.set_tls_init_handler(bind(&OnTlsInit, ::_1));
 
-        c.run(uri, tmp_wav_list, tmp_wav_ids, asr_mode, chunk_size, true, nn_hotwords, use_itn);
+        c.run(uri, tmp_wav_list, tmp_wav_ids, asr_mode, chunk_size, hws_map, true, use_itn);
       } else {
         WebsocketClient<websocketpp::config::asio_client> c(is_ssl);
 
-        c.run(uri, tmp_wav_list, tmp_wav_ids, asr_mode, chunk_size, true, nn_hotwords, use_itn);
+        c.run(uri, tmp_wav_list, tmp_wav_ids, asr_mode, chunk_size, hws_map, true, use_itn);
       }
 
   }else{
@@ -582,7 +579,7 @@ int main(int argc, char* argv[]) {
     std::vector<string> wav_list;
     std::vector<string> wav_ids;
     string default_id = "wav_default_id";
-    if (IsTargetFile(wav_path, "scp")) {
+    if (funasr::IsTargetFile(wav_path, "scp")) {
       ifstream in(wav_path);
       if (!in.is_open()) {
         printf("Failed to open scp file");
@@ -615,17 +612,17 @@ int main(int argc, char* argv[]) {
         tmp_wav_ids.emplace_back(wav_ids[wav_i + i]);
 
         client_threads.emplace_back(
-            [uri, tmp_wav_list, tmp_wav_ids, asr_mode, chunk_size, is_ssl, nn_hotwords, use_itn]() {
+            [uri, tmp_wav_list, tmp_wav_ids, asr_mode, chunk_size, is_ssl, hws_map, use_itn]() {
               if (is_ssl == 1) {
                 WebsocketClient<websocketpp::config::asio_tls_client> c(is_ssl);
 
                 c.m_client.set_tls_init_handler(bind(&OnTlsInit, ::_1));
 
-                c.run(uri, tmp_wav_list, tmp_wav_ids, asr_mode, chunk_size, false, nn_hotwords, use_itn);
+                c.run(uri, tmp_wav_list, tmp_wav_ids, asr_mode, chunk_size, hws_map, false, use_itn);
               } else {
                 WebsocketClient<websocketpp::config::asio_client> c(is_ssl);
 
-                c.run(uri, tmp_wav_list, tmp_wav_ids, asr_mode, chunk_size, false, nn_hotwords, use_itn);
+                c.run(uri, tmp_wav_list, tmp_wav_ids, asr_mode, chunk_size, hws_map, false, use_itn);
               }
             });
       }

@@ -208,6 +208,45 @@ void KeepChineseCharacterAndSplit(const std::string &input_str,
   }
 }
 
+void SplitChiEngCharacters(const std::string &input_str,
+                                  std::vector<std::string> &characters) {
+  characters.resize(0);
+  std::string eng_word = "";
+  U16CHAR_T space = 0x0020;
+  std::vector<U16CHAR_T> u16_buf;
+  u16_buf.resize(std::max(u16_buf.size(), input_str.size() + 1));
+  U16CHAR_T* pu16 = u16_buf.data();
+  U8CHAR_T * pu8 = (U8CHAR_T*)input_str.data();
+  size_t ilen = input_str.size();
+  size_t len = EncodeConverter::Utf8ToUtf16(pu8, ilen, pu16, ilen + 1);
+  for (size_t i = 0; i < len; i++) {
+    if (EncodeConverter::IsChineseCharacter(pu16[i])) {
+      if(!eng_word.empty()){
+        characters.push_back(eng_word);
+        eng_word = "";
+      }
+      U8CHAR_T u8buf[4];
+      size_t n = EncodeConverter::Utf16ToUtf8(pu16 + i, u8buf);
+      u8buf[n] = '\0';
+      characters.push_back((const char*)u8buf);
+    } else if (pu16[i] == space){
+      if(!eng_word.empty()){
+        characters.push_back(eng_word);
+        eng_word = "";
+      }      
+    }else{
+      U8CHAR_T u8buf[4];
+      size_t n = EncodeConverter::Utf16ToUtf8(pu16 + i, u8buf);
+      u8buf[n] = '\0';
+      eng_word += (const char*)u8buf;
+    }
+  }
+  if(!eng_word.empty()){
+    characters.push_back(eng_word);
+    eng_word = "";
+  }
+}
+
 std::vector<std::string> split(const std::string &s, char delim) {
   std::vector<std::string> elems;
   std::stringstream ss(s);
@@ -226,33 +265,6 @@ void PrintMat(const std::vector<std::vector<T>> &mat, const std::string &name) {
       std::cout << item_ << " ";
     }
     std::cout << std::endl;
-  }
-}
-
-void Trim(std::string *str) {
-  const char *white_chars = " \t\n\r\f\v";
-
-  std::string::size_type pos = str->find_last_not_of(white_chars);
-  if (pos != std::string::npos)  {
-    str->erase(pos + 1);
-    pos = str->find_first_not_of(white_chars);
-    if (pos != std::string::npos) str->erase(0, pos);
-  } else {
-    str->erase(str->begin(), str->end());
-  }
-}
-
-void SplitStringToVector(const std::string &full, const char *delim,
-                         bool omit_empty_strings,
-                         std::vector<std::string> *out) {
-  size_t start = 0, found = 0, end = full.size();
-  out->clear();
-  while (found != std::string::npos) {
-    found = full.find_first_of(delim, start);
-    // start != end condition is for when the delimiter is at the end
-    if (!omit_empty_strings || (found != start && start != end))
-      out->push_back(full.substr(start, found - start));
-    start = found + 1;
   }
 }
 
@@ -524,6 +536,137 @@ void TimestampOnnx( std::vector<float>& us_alphas,
             timestamp_vec.push_back(timestamp_list[i]);
         }
     }
+}
+
+bool IsTargetFile(const std::string& filename, const std::string target) {
+    std::size_t pos = filename.find_last_of(".");
+    if (pos == std::string::npos) {
+        return false;
+    }
+    std::string extension = filename.substr(pos + 1);
+    return (extension == target);
+}
+
+void Trim(std::string *str) {
+  const char *white_chars = " \t\n\r\f\v";
+
+  std::string::size_type pos = str->find_last_not_of(white_chars);
+  if (pos != std::string::npos)  {
+    str->erase(pos + 1);
+    pos = str->find_first_not_of(white_chars);
+    if (pos != std::string::npos) str->erase(0, pos);
+  } else {
+    str->erase(str->begin(), str->end());
+  }
+}
+
+void SplitStringToVector(const std::string &full, const char *delim,
+                         bool omit_empty_strings,
+                         std::vector<std::string> *out) {
+  size_t start = 0, found = 0, end = full.size();
+  out->clear();
+  while (found != std::string::npos) {
+    found = full.find_first_of(delim, start);
+    // start != end condition is for when the delimiter is at the end
+    if (!omit_empty_strings || (found != start && start != end))
+      out->push_back(full.substr(start, found - start));
+    start = found + 1;
+  }
+}
+
+void ExtractHws(string hws_file, unordered_map<string, int> &hws_map)
+{
+    if(hws_file.empty()){
+        return;
+    }
+    std::string line;
+    std::ifstream ifs_hws(hws_file.c_str());
+    if(!ifs_hws.is_open()){
+        LOG(ERROR) << "Unable to open hotwords file: " << hws_file 
+            << ". If you have not set hotwords, please ignore this message.";
+        return;
+    }
+    LOG(INFO) << "hotwords: ";
+    while (getline(ifs_hws, line)) {
+        Trim(&line);
+        if (line.empty()) {
+            continue;
+        }
+        float score = 1.0f;
+        std::vector<std::string> text;
+        SplitStringToVector(line, " ", true, &text);
+        
+        if (text.size() > 1) {
+            try{
+                score = std::stof(text[text.size() - 1]);
+            }catch (std::exception const &e)
+            {
+                LOG(ERROR)<<e.what();
+                continue;
+            }
+        } else {
+            continue;
+        }
+        std::string hotword = "";
+        for (size_t i = 0; i < text.size()-1; ++i) {
+            hotword = hotword + text[i];
+            if(i != text.size()-2){
+                hotword = hotword + " ";
+            }
+        }
+        
+        LOG(INFO) << hotword << " : " << score;
+        hws_map.emplace(hotword, score);
+    }
+    ifs_hws.close();
+}
+
+void ExtractHws(string hws_file, unordered_map<string, int> &hws_map, string& nn_hotwords_)
+{
+    if(hws_file.empty()){
+        return;
+    }
+    std::string line;
+    std::ifstream ifs_hws(hws_file.c_str());
+    if(!ifs_hws.is_open()){
+        LOG(ERROR) << "Unable to open hotwords file: " << hws_file 
+            << ". If you have not set hotwords, please ignore this message.";
+        return;
+    }
+    LOG(INFO) << "hotwords: ";
+    while (getline(ifs_hws, line)) {
+        Trim(&line);
+        if (line.empty()) {
+            continue;
+        }
+        float score = 1.0f;
+        std::vector<std::string> text;
+        SplitStringToVector(line, " ", true, &text);
+        
+        if (text.size() > 1) {
+            try{
+                score = std::stof(text[text.size() - 1]);
+            }catch (std::exception const &e)
+            {
+                LOG(ERROR)<<e.what();
+                continue;
+            }
+        } else {
+            continue;
+        }
+        std::string hotword = "";
+        for (size_t i = 0; i < text.size()-1; ++i) {
+            hotword = hotword + text[i];
+            if(i != text.size()-2){
+                hotword = hotword + " ";
+            }
+        }
+        
+        nn_hotwords_ += " " + hotword;
+        LOG(INFO) << hotword << " : " << score;
+        hws_map.emplace(hotword, score);
+    }
+    ifs_hws.close();
 }
 
 } // namespace funasr

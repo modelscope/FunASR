@@ -18,7 +18,6 @@
 
 extern std::unordered_map<std::string, int> hws_map_;
 extern int fst_inc_wts_;
-extern std::string nn_hotwords_;
 
 context_ptr WebSocketServer::on_tls_init(tls_mode mode,
                                          websocketpp::connection_hdl hdl,
@@ -286,46 +285,36 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
 
       // hotwords: fst/nn
       if(msg_data->hotwords_embedding == NULL){
-        // fst hotword
-        if (jsonresult["fst_hotwords"] != nullptr) {
-          std::string json_string = jsonresult["fst_hotwords"];
+        std::unordered_map<std::string, int> merged_hws_map;
+        std::string nn_hotwords = "";
+
+        if (jsonresult["hotwords"] != nullptr) {
+          std::string json_string = jsonresult["hotwords"];
           nlohmann::json json_fst_hws = nlohmann::json::parse(json_string);
-          std::unordered_map<std::string, int> client_hws_map = json_fst_hws;
-
-          std::unordered_map<std::string, int> merged_hws_map(client_hws_map);
-          merged_hws_map.insert(hws_map_.begin(), hws_map_.end());
-
-          LOG(INFO) << "fst hotwords: ";
-          for (const auto& pair : merged_hws_map) {
-              LOG(INFO) << pair.first << " : " << pair.second;
-          }
-          FunWfstDecoderLoadHwsRes(msg_data->decoder_handle, fst_inc_wts_, merged_hws_map);
-
-        } else if(!hws_map_.empty()) {
-          LOG(INFO) << "fst hotwords: ";
-          for (const auto& pair : hws_map_) {
-              LOG(INFO) << pair.first << " : " << pair.second;
-          }
-          FunWfstDecoderLoadHwsRes(msg_data->decoder_handle, fst_inc_wts_, hws_map_);
-        }
-
-        // nn hotword
-        std::string hw = nn_hotwords_;
-        if (jsonresult["nn_hotwords"] != nullptr) {
-          msg_data->msg["nn_hotwords"] = jsonresult["nn_hotwords"];
-          if (!msg_data->msg["nn_hotwords"].empty()) {
-            std::string client_nn_hws = msg_data->msg["nn_hotwords"];
-            hw = hw + " " + client_nn_hws;
-          }
-        }else if (jsonresult["hotwords"] != nullptr) {
-          msg_data->msg["hotwords"] = jsonresult["hotwords"];
-          if (!msg_data->msg["hotwords"].empty()) {
-            std::string client_nn_hws = msg_data->msg["hotwords"];
-            hw = hw + " " + client_nn_hws;
+          
+          if(json_fst_hws.type() == nlohmann::json::value_t::object){
+            // fst
+            std::unordered_map<std::string, int> client_hws_map = json_fst_hws;
+            merged_hws_map.insert(client_hws_map.begin(), client_hws_map.end());
+          }else{
+            // nn
+            std::string client_nn_hws = jsonresult["hotwords"];
+            nn_hotwords += " " + client_nn_hws;
+            LOG(INFO) << "nn hotwords: " << client_nn_hws;
           }
         }
-        LOG(INFO) << "nn hotwords: " << hw;
-        std::vector<std::vector<float>> new_hotwords_embedding= CompileHotwordEmbedding(asr_handle, hw);
+        merged_hws_map.insert(hws_map_.begin(), hws_map_.end());
+
+        // fst
+        LOG(INFO) << "hotwords: ";
+        for (const auto& pair : merged_hws_map) {
+            nn_hotwords += " " + pair.first;
+            LOG(INFO) << pair.first << " : " << pair.second;
+        }
+        FunWfstDecoderLoadHwsRes(msg_data->decoder_handle, fst_inc_wts_, merged_hws_map);
+
+        // nn
+        std::vector<std::vector<float>> new_hotwords_embedding= CompileHotwordEmbedding(asr_handle, nn_hotwords);
         msg_data->hotwords_embedding =
             std::make_shared<std::vector<std::vector<float>>>(new_hotwords_embedding);
       }

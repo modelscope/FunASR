@@ -14,9 +14,11 @@
 #include <unistd.h>
 #include "websocket-server-2pass.h"
 #include <fstream>
+#include "util.h"
 
-// nn hotwords
-std::string nn_hotwords_="";
+// hotwords
+std::unordered_map<std::string, int> hws_map_;
+int fst_inc_wts_=20;
 
 using namespace std;
 void GetValue(TCLAP::ValueArg<std::string>& value_arg, string key,
@@ -24,6 +26,7 @@ void GetValue(TCLAP::ValueArg<std::string>& value_arg, string key,
   model_path.insert({key, value_arg.getValue()});
   LOG(INFO) << key << " : " << value_arg.getValue();
 }
+
 int main(int argc, char* argv[]) {
   try {
     google::InitGoogleLogging(argv[0]);
@@ -113,14 +116,14 @@ int main(int argc, char* argv[]) {
         "connection",
         false, "../../../ssl_key/server.key", "string");
 
-    TCLAP::ValueArg<std::string> nn_hotword(
-        "", NN_HOTWORD,
-        "default: /workspace/resources/nn_hotwords.txt, path of hotword file"
-        "connection",
-        false, "/workspace/resources/nn_hotwords.txt", "string");
+    TCLAP::ValueArg<std::string> hotword("", HOTWORD,
+        "the hotword file, one hotword perline, Format: Hotword Weight (could be: 阿里巴巴 20)", 
+        false, "/workspace/resources/hotwords.txt", "string");
+    TCLAP::ValueArg<std::int32_t> fst_inc_wts("", FST_INC_WTS, 
+        "the fst hotwords incremental bias", false, 20, "int32_t");
 
     // add file
-    cmd.add(nn_hotword);
+    cmd.add(hotword);
 
     cmd.add(certfile);
     cmd.add(keyfile);
@@ -156,6 +159,7 @@ int main(int argc, char* argv[]) {
     GetValue(punc_dir, PUNC_DIR, model_path);
     GetValue(punc_quant, PUNC_QUANT, model_path);
     GetValue(itn_dir, ITN_DIR, model_path);
+    GetValue(hotword, HOTWORD, model_path);
 
     GetValue(offline_model_revision, "offline-model-revision", model_path);
     GetValue(online_model_revision, "online-model-revision", model_path);
@@ -430,22 +434,12 @@ int main(int argc, char* argv[]) {
     std::string s_certfile = certfile.getValue();
     std::string s_keyfile = keyfile.getValue();
 
-    // nn hotword file
-    std::string file_nn_hotword = nn_hotword.getValue();
-    std::string line;
-    std::ifstream file(file_nn_hotword);
-    LOG(INFO) << "nn hotword path: " << file_nn_hotword;
-
-    if (file.is_open()) {
-        while (getline(file, line)) {
-            nn_hotwords_ += line+HOTWORD_SEP;
-        }
-        LOG(INFO) << "nn hotwords: " << nn_hotwords_;
-        file.close();
-    } else {
-        LOG(ERROR) << "Unable to open nn hotwords file: " << file_nn_hotword 
-            << ". If you have not set nn hotwords, please ignore this message.";
-    }
+    // hotword file
+    std::string hotword_path;
+    hotword_path = model_path.at(HOTWORD);
+    fst_inc_wts_ = fst_inc_wts.getValue();
+    LOG(INFO) << "hotword path: " << hotword_path;
+    funasr::ExtractHws(hotword_path, hws_map_);
 
     bool is_ssl = false;
     if (!s_certfile.empty()) {
@@ -489,7 +483,7 @@ int main(int argc, char* argv[]) {
           s_keyfile);  // websocket server for asr engine
       websocket_srv.initAsr(model_path, s_model_thread_num);  // init asr model
     }
-    
+
     LOG(INFO) << "decoder-thread-num: " << s_decoder_thread_num;
     LOG(INFO) << "io-thread-num: " << s_io_thread_num;
     LOG(INFO) << "model-thread-num: " << s_model_thread_num;

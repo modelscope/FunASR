@@ -23,39 +23,14 @@
 #include <thread>
 #include <map>
 #include <unordered_map>
-#include "util/text-utils.h"
+#include "util.h"
 using namespace std;
 
 std::atomic<int> wav_index(0);
 std::mutex mtx;
-void ExtractHws(string hws_file, unordered_map<string, int> &hws_map)
-{
-    std::string line;
-    std::ifstream ifs_hws(hws_file.c_str());
-    if(!ifs_hws.is_open()){
-        LOG(ERROR) << "Failed to open file: " << hws_file ;
-        return;
-    }
-    while (getline(ifs_hws, line)) {
-      kaldi::Trim(&line);
-      if (line.empty()) {
-        continue;
-      }
-      float score = 1.0f;
-      std::vector<std::string> text;
-      kaldi::SplitStringToVector(line, "\t", true, &text);
-      if (text.size() > 1) {
-        score = std::stof(text[1]);
-      } else if (text.empty()) {
-        continue;
-      }
-      hws_map.emplace(text[0], score);
-    }
-    ifs_hws.close();
-}
 
 void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, vector<string> wav_ids,
-            float* total_length, long* total_time, int core_id, string nn_hotwords_, int fst_inc_wts = 20, string fst_hotword_path = "") {
+            float* total_length, long* total_time, int core_id, int fst_inc_wts = 20, string hotword_path = "") {
     
     struct timeval start, end;
     long seconds = 0;
@@ -67,7 +42,8 @@ void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, vector<string> wa
 
     // process fst hotwords list
     unordered_map<string, int> hws_map;
-    ExtractHws(fst_hotword_path, hws_map);
+    string nn_hotwords_ = "";
+    funasr::ExtractHws(hotword_path, hws_map, nn_hotwords_);
 
     // load hotwords list and build graph
     FunWfstDecoderLoadHwsRes(decoder_handle, fst_inc_wts, hws_map);
@@ -154,14 +130,12 @@ int main(int argc, char *argv[])
     TCLAP::ValueArg<std::string>    punc_dir("", PUNC_DIR, "the punc model path, which contains model.onnx, punc.yaml", false, "", "string");
     TCLAP::ValueArg<std::string>    punc_quant("", PUNC_QUANT, "true (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "true", "string");
     TCLAP::ValueArg<std::string>    lm_dir("", LM_DIR, "the lm model path, which contains compiled models: TLG.fst, config.yaml ", false, "", "string");
-    TCLAP::ValueArg<std::string>    fst_hotword("", FST_HOTWORD, "the fst hotwords file, one hotword perline, Format: Hotword [tab] Weight (could be: 阿里巴巴 \t 20)", false, "", "string");
     TCLAP::ValueArg<std::int32_t>   fst_inc_wts("", FST_INC_WTS, "the fst hotwords incremental bias", false, 20, "int32_t");
     TCLAP::ValueArg<std::string>    itn_dir("", ITN_DIR, "the itn model(fst) path, which contains zh_itn_tagger.fst and zh_itn_verbalizer.fst", false, "", "string");
 
     TCLAP::ValueArg<std::string> wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", true, "", "string");
     TCLAP::ValueArg<std::int32_t> thread_num("", THREAD_NUM, "multi-thread num for rtf", true, 0, "int32_t");
-    TCLAP::ValueArg<std::string> nn_hotword("", NN_HOTWORD,
-        "the nn hotwords file, one hotword perline, Format: Hotword (could be: 阿里巴巴)", false, "", "string");
+    TCLAP::ValueArg<std::string>    hotword("", HOTWORD, "the hotword file, one hotword perline, Format: Hotword Weight (could be: 阿里巴巴 20)", false, "", "string");
 
     cmd.add(model_dir);
     cmd.add(quantize);
@@ -171,11 +145,10 @@ int main(int argc, char *argv[])
     cmd.add(punc_quant);
     cmd.add(itn_dir);
     cmd.add(lm_dir);
-    cmd.add(fst_hotword);
+    cmd.add(hotword);
     cmd.add(fst_inc_wts);
     cmd.add(wav_path);
     cmd.add(thread_num);
-    cmd.add(nn_hotword);
     cmd.parse(argc, argv);
 
     std::map<std::string, std::string> model_path;
@@ -187,7 +160,7 @@ int main(int argc, char *argv[])
     GetValue(punc_quant, PUNC_QUANT, model_path);
     GetValue(itn_dir, ITN_DIR, model_path);
     GetValue(lm_dir, LM_DIR, model_path);
-    GetValue(fst_hotword, FST_HOTWORD, model_path);
+    GetValue(hotword, HOTWORD, model_path);
     GetValue(wav_path, WAV_PATH, model_path);
 
     struct timeval start, end;
@@ -204,24 +177,6 @@ int main(int argc, char *argv[])
     long seconds = (end.tv_sec - start.tv_sec);
     long modle_init_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
     LOG(INFO) << "Model initialization takes " << (double)modle_init_micros / 1000000 << " s";
-
-    // nn hotword file
-    std::string nn_hotwords_;
-    std::string file_nn_hotword = nn_hotword.getValue();
-    std::string line;
-    std::ifstream file(file_nn_hotword);
-    LOG(INFO) << "nn hotword path: " << file_nn_hotword;
-
-    if (file.is_open()) {
-        while (getline(file, line)) {
-            nn_hotwords_ += line+HOTWORD_SEP;
-        }
-        LOG(INFO) << "nn hotwords: " << nn_hotwords_;
-        file.close();
-    } else {
-        LOG(ERROR) << "Unable to open nn hotwords file: " << file_nn_hotword 
-            << ". If you have not set nn hotwords, please ignore this message.";
-    }
 
     // read wav_path
     vector<string> wav_list;
@@ -259,15 +214,13 @@ int main(int argc, char *argv[])
     std::vector<std::thread> threads;
 
     int rtf_threds = thread_num.getValue();
-    string fst_hotword_path;
+    std::string hotword_path = hotword.getValue();
     int value_bias = 20;
-    if (fst_hotword.isSet()) {
-      fst_hotword_path = model_path.at(FST_HOTWORD);
-      value_bias = fst_inc_wts.getValue();
-    }
+    value_bias = fst_inc_wts.getValue();
+
     for (int i = 0; i < rtf_threds; i++)
     {
-        threads.emplace_back(thread(runReg, asr_handle, wav_list, wav_ids, &total_length, &total_time, i, nn_hotwords_, value_bias, fst_hotword_path));
+        threads.emplace_back(thread(runReg, asr_handle, wav_list, wav_ids, &total_length, &total_time, i, value_bias, hotword_path));
     }
 
     for (auto& thread : threads)

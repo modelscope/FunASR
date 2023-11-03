@@ -17,6 +17,15 @@ FunASR提供可一键本地或者云端服务器部署的中文离线文件转�
 
 
 ## 快速上手
+
+### docker安装
+如果您已安装docker，忽略本步骤！!
+通过下述命令在服务器上安装docker：
+```shell
+curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/install_docker.sh；
+sudo bash install_docker.sh
+```
+
 ### 镜像启动
 
 通过下述命令拉取并启动FunASR runtime-SDK的docker镜像：

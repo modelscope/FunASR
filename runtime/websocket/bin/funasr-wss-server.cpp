@@ -13,47 +13,17 @@
 #include "websocket-server.h"
 #include <unistd.h>
 #include <fstream>
+#include "util.h"
 
-// fst hotwords
+// hotwords
 std::unordered_map<std::string, int> hws_map_;
 int fst_inc_wts_=20;
-// nn hotwords
-std::string nn_hotwords_="";
 
 using namespace std;
 void GetValue(TCLAP::ValueArg<std::string>& value_arg, string key,
               std::map<std::string, std::string>& model_path) {
     model_path.insert({key, value_arg.getValue()});
     LOG(INFO) << key << " : " << value_arg.getValue();
-}
-
-void ExtractHws(string hws_file, unordered_map<string, int> &hws_map)
-{
-    std::string line;
-    std::ifstream ifs_hws(hws_file.c_str());
-    if(!ifs_hws.is_open()){
-        LOG(ERROR) << "Unable to open fst hotwords file: " << hws_file 
-            << ". If you have not set fst hotwords, please ignore this message.";
-        return;
-    }
-    LOG(INFO) << "fst hotwords: ";
-    while (getline(ifs_hws, line)) {
-      kaldi::Trim(&line);
-      if (line.empty()) {
-        continue;
-      }
-      float score = 1.0f;
-      std::vector<std::string> text;
-      kaldi::SplitStringToVector(line, "\t", true, &text);
-      if (text.size() > 1) {
-        score = std::stof(text[1]);
-      } else if (text.empty()) {
-        continue;
-      }
-      LOG(INFO) << text[0] << " : " << score; 
-      hws_map.emplace(text[0], score);
-    }
-    ifs_hws.close();
 }
 
 int main(int argc, char* argv[]) {
@@ -123,7 +93,7 @@ int main(int argc, char* argv[]) {
     TCLAP::ValueArg<int> decoder_thread_num(
         "", "decoder-thread-num", "decoder thread num", false, 8, "int");
     TCLAP::ValueArg<int> model_thread_num("", "model-thread-num",
-                                          "model thread num", false, 4, "int");
+                                          "model thread num", false, 1, "int");
 
     TCLAP::ValueArg<std::string> certfile("", "certfile", 
         "default: ../../../ssl_key/server.crt, path of certficate for WSS connection. if it is empty, it will be in WS mode.",
@@ -136,20 +106,14 @@ int main(int argc, char* argv[]) {
         "the LM model path, which contains compiled models: TLG.fst, config.yaml ", false, "damo/speech_ngram_lm_zh-cn-ai-wesp-fst", "string");
     TCLAP::ValueArg<std::string> lm_revision(
         "", "lm-revision", "LM model revision", false, "v1.0.1", "string");
-    TCLAP::ValueArg<std::string> fst_hotword("", FST_HOTWORD,
-        "the fst hotwords file, one hotword perline, Format: Hotword [tab] Weight (could be: 阿里巴巴 \t 20)", 
-        false, "/workspace/resources/fst_hotwords.txt", "string");
+    TCLAP::ValueArg<std::string> hotword("", HOTWORD,
+        "the hotword file, one hotword perline, Format: Hotword Weight (could be: 阿里巴巴 20)", 
+        false, "/workspace/resources/hotwords.txt", "string");
     TCLAP::ValueArg<std::int32_t> fst_inc_wts("", FST_INC_WTS, 
         "the fst hotwords incremental bias", false, 20, "int32_t");
-    TCLAP::ValueArg<std::string> nn_hotword(
-        "", NN_HOTWORD,
-        "default: /workspace/resources/nn_hotwords.txt, path of hotword file"
-        "connection",
-        false, "/workspace/resources/nn_hotwords.txt", "string");
 
     // add file
-    cmd.add(nn_hotword);
-    cmd.add(fst_hotword);
+    cmd.add(hotword);
     cmd.add(fst_inc_wts);
 
     cmd.add(certfile);
@@ -185,7 +149,7 @@ int main(int argc, char* argv[]) {
     GetValue(punc_quant, PUNC_QUANT, model_path);
     GetValue(itn_dir, ITN_DIR, model_path);
     GetValue(lm_dir, LM_DIR, model_path);
-    GetValue(fst_hotword, FST_HOTWORD, model_path);
+    GetValue(hotword, HOTWORD, model_path);
 
     GetValue(model_revision, "model-revision", model_path);
     GetValue(vad_revision, "vad-revision", model_path);
@@ -339,7 +303,7 @@ int main(int argc, char* argv[]) {
             LOG(INFO) << "ITN model is not set, not executed.";
         }
 
-        if (!s_lm_path.empty()) {
+        if (!s_lm_path.empty() || s_lm_path != "NONE") {
             std::string python_cmd_lm;
             std::string down_lm_path;
             std::string down_lm_model;
@@ -436,29 +400,12 @@ int main(int argc, char* argv[]) {
     std::string s_certfile = certfile.getValue();
     std::string s_keyfile = keyfile.getValue();
     
-    // fst hotword file
-    std::string fst_hotword_path;
-    fst_hotword_path = model_path.at(FST_HOTWORD);
+    // hotword file
+    std::string hotword_path;
+    hotword_path = model_path.at(HOTWORD);
     fst_inc_wts_ = fst_inc_wts.getValue();
-    LOG(INFO) << "fst hotword path: " << fst_hotword_path;
-    ExtractHws(fst_hotword_path, hws_map_);
-
-    // nn hotword file
-    std::string file_nn_hotword = nn_hotword.getValue();
-    std::string line;
-    std::ifstream file(file_nn_hotword);
-    LOG(INFO) << "nn hotword path: " << file_nn_hotword;
-
-    if (file.is_open()) {
-        while (getline(file, line)) {
-            nn_hotwords_ += line+HOTWORD_SEP;
-        }
-        LOG(INFO) << "nn hotwords: " << nn_hotwords_;
-        file.close();
-    } else {
-        LOG(ERROR) << "Unable to open nn hotwords file: " << file_nn_hotword 
-            << ". If you have not set nn hotwords, please ignore this message.";
-    }
+    LOG(INFO) << "hotword path: " << hotword_path;
+    funasr::ExtractHws(hotword_path, hws_map_);
 
     bool is_ssl = false;
     if (!s_certfile.empty()) {
