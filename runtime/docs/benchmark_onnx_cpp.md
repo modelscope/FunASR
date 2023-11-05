@@ -46,7 +46,7 @@ make
 ## [Paraformer-large](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary) 
 ```shell
 ./funasr-onnx-offline-rtf \
-    --model-dir    ./asrmodel/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch \
+    --model-dir    ./damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch \
     --quantize  true \
     --wav-path     ./aishell1_test.scp  \
     --thread-num 32
@@ -100,14 +100,14 @@ CER after int8-quant: 1.95%
 |  96   (onnx fp32)   |        115s        | 0.003183 |     314      |
 |  96   (onnx int8)   |        80s         | 0.002222 |     450      |
 
-## [FSMN-VAD](https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary) + [Paraformer-large](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary) + [CT-Transformer](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch/summary)
+## [FSMN-VAD](https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary) + [Paraformer-large](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary) + [CT-Transformer](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx/summary)
 
 ```shell
 ./funasr-onnx-offline-rtf \
-    --model-dir    ./asrmodel/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch \
+    --model-dir    ./damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch \
     --quantize  true \
-    --vad-dir   ./asrmodel/speech_fsmn_vad_zh-cn-16k-common-pytorch \
-    --punc-dir  ./asrmodel/punc_ct-transformer_zh-cn-common-vocab272727-pytorch \
+    --vad-dir   ./damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
+    --punc-dir  ./damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx \
     --wav-path     ./aishell1_test.scp  \
     --thread-num 32
 
@@ -150,14 +150,82 @@ Node: '--quantize false' means fp32, otherwise it will be int8
 |  96   (onnx fp32)   |        117s        | 0.003257 |     307      |
 |  96   (onnx int8)   |        81s         | 0.002258 |     442      |
 
-## [FSMN-VAD](https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary) + [Paraformer-en](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-en-16k-common-vocab10020-onnx/summary) + [CT-Transformer](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch/summary)
+
+
+## [FSMN-VAD](https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary) + [Paraformer-large](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary) +[Ngram](https://www.modelscope.cn/models/damo/speech_ngram_lm_zh-cn-ai-wesp-fst/summary) + [CT-Transformer](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx/summary) 
 
 ```shell
 ./funasr-onnx-offline-rtf \
-    --model-dir    ./asrmodel/speech_paraformer-large_asr_nat-en-16k-common-vocab10020-onnx \
+    --model-dir    ./damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch \
     --quantize  true \
-    --vad-dir   ./asrmodel/speech_fsmn_vad_zh-cn-16k-common-pytorch \
-    --punc-dir  ./asrmodel/punc_ct-transformer_zh-cn-common-vocab272727-pytorch \
+    --vad-dir   ./damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
+    --punc-dir  ./damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx \
+    --lm-dir    ./damo/speech_ngram_lm_zh-cn-ai-wesp-fst \
+    --wav-path     ./aishell1_test.scp  \
+    --thread-num 32
+
+Node: '--quantize false' means fp32, otherwise it will be int8 
+```
+
+ ### Intel(R) Xeon(R) Platinum 8369B CPU @ 2.90GHz   16core-32processor    with avx512_vnni
+
+| concurrent-tasks | processing time(s) |  RTF   | Speedup Rate |
+|------------------|:------------------:|:------:|:------------:|
+| 1   (onnx fp32)  |       3294s        | 0.0912 |      11      |
+| 1   (onnx int8)  |       2183s        | 0.0604 |      16      |
+| 8   (onnx fp32)  |        425s        | 0.0117 |      84      |
+| 8   (onnx int8)  |        285s        | 0.0079 |     126      |
+| 16   (onnx fp32) |        225s        | 0.0062 |     160      |
+| 16   (onnx int8) |        148s        | 0.0041 |     242      |
+| 32   (onnx fp32) |        188s        | 0.0052 |     191      |
+| 32   (onnx int8) |        120s        | 0.0034 |     298      |
+| 64   (onnx fp32) |        193s        | 0.0053 |     186      |
+| 64   (onnx int8) |        125s        | 0.0034 |     286      |
+| 96   (onnx fp32) |        195s        | 0.0054 |     184      |
+| 96   (onnx int8) |        128s        | 0.0035 |     282      |
+
+
+```shell
+# using hotwords
+./funasr-onnx-offline-rtf \
+    --model-dir    ./damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch \
+    --quantize  true \
+    --vad-dir   ./damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
+    --punc-dir  ./damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx \
+    --lm-dir    ./damo/speech_ngram_lm_zh-cn-ai-wesp-fst \
+    --hotword  hotwords_dev_600.txt \
+    --wav-path     ./aishell1_test.scp  \
+    --thread-num 32
+
+Node: '--quantize false' means fp32, otherwise it will be int8 
+```
+
+ ### Intel(R) Xeon(R) Platinum 8369B CPU @ 2.90GHz   16core-32processor    with avx512_vnni
+
+| concurrent-tasks | processing time(s) |  RTF   | Speedup Rate |
+|------------------|:------------------:|:------:|:------------:|
+| 1   (onnx fp32)  |       6987s        | 0.1935 |      5       |
+| 1   (onnx int8)  |       5899s        | 0.1633 |      6       |
+| 8   (onnx fp32)  |        886s        | 0.0245 |      40      |
+| 8   (onnx int8)  |        745s        | 0.0206 |      48      |
+| 16   (onnx fp32) |        451s        | 0.0125 |      80      |
+| 16   (onnx int8) |        376s        | 0.0104 |      95      |
+| 32   (onnx fp32) |        432s        | 0.0119 |      83      |
+| 32   (onnx int8) |        378s        | 0.0104 |      95      |
+| 64   (onnx fp32) |        441s        | 0.0122 |      81      |
+| 64   (onnx int8) |        379s        | 0.0105 |      95      |
+| 96   (onnx fp32) |        442s        | 0.0122 |      81      |
+| 96   (onnx int8) |        383s        | 0.0106 |      94      |
+
+
+## [FSMN-VAD](https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary) + [Paraformer-en](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-en-16k-common-vocab10020-onnx/summary) + [CT-Transformer](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx/summary)
+
+```shell
+./funasr-onnx-offline-rtf \
+    --model-dir    ./damo/speech_paraformer-large_asr_nat-en-16k-common-vocab10020-onnx \
+    --quantize  true \
+    --vad-dir   ./damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
+    --punc-dir  ./damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx \
     --wav-path     ./librispeech_test_clean.scp  \
     --thread-num 32
 
