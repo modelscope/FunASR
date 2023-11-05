@@ -27,7 +27,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 /** This example demonstrates how to connect to websocket server. */
 public class FunasrWsClient extends WebSocketClient {
 
@@ -79,10 +80,34 @@ public class FunasrWsClient extends WebSocketClient {
       obj.put("chunk_size", array);
       obj.put("chunk_interval", new Integer(chunkInterval));
       obj.put("wav_name", wavName);
+
 	  if(FunasrWsClient.hotwords.trim().length()>0)
 	  {
-		  obj.put("hotwords", FunasrWsClient.hotwords.trim());
+		  String regex = "\\d+";
+		  JSONObject jsonitems = new JSONObject();
+		  String[] items=FunasrWsClient.hotwords.trim().split(" ");
+          Pattern pattern = Pattern.compile(regex);
+          String tmpWords="";
+		  for(int i=0;i<items.length;i++)
+		  {
+
+			  Matcher matcher = pattern.matcher(items[i]);
+
+			  if (matcher.matches()) {
+
+				jsonitems.put(tmpWords.trim(), items[i].trim());
+				tmpWords="";
+				continue;
+			  }
+			  tmpWords=tmpWords+items[i]+" ";
+
+		  }
+
+
+
+		  obj.put("hotwords", jsonitems.toString());
 	  }
+
 	  if(suffix.equals("wav")){
 	      suffix="pcm";
 	  }
@@ -231,6 +256,7 @@ public class FunasrWsClient extends WebSocketClient {
   static int chunkInterval = 10;
   static int sendChunkSize = 1920;
   static String hotwords="";
+  static String fsthotwords="";
 
   String wavName = "javatest";
 
@@ -281,7 +307,7 @@ public class FunasrWsClient extends WebSocketClient {
         .required(false);
     parser
         .addArgument("--hotwords")
-        .help("hotwords, splited by space")
+        .help("hotwords, splited by space, hello 30 nihao 40")
         .setDefault("")
         .type(String.class)
         .required(false);

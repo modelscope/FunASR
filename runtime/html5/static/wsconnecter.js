@@ -83,6 +83,7 @@ function WebSocketConnectMethod( config ) { //定义socket连接方法类
 				request.audio_fs=file_sample_rate;
 			}
 		}
+		
 		var hotwords=getHotwords();
 		if(hotwords.length>0)
 		{
