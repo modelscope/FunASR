@@ -4,6 +4,7 @@ model_dir="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx"
 vad_dir="damo/speech_fsmn_vad_zh-cn-16k-common-onnx"
 punc_dir="damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx"
 itn_dir="thuduj12/fst_itn_zh"
+lm_dir="NONE"
 decoder_thread_num=32
 io_thread_num=8
 port=10095
@@ -21,6 +22,7 @@ if [ -z "$certfile" ] || [ "$certfile" -eq 0 ]; then
   --vad-dir ${vad_dir} \
   --punc-dir ${punc_dir} \
   --itn-dir ${itn_dir} \
+  --lm-dir ${lm_dir} \
   --decoder-thread-num ${decoder_thread_num} \
   --io-thread-num  ${io_thread_num} \
   --port ${port} \
@@ -34,6 +36,7 @@ else
   --vad-dir ${vad_dir} \
   --punc-dir ${punc_dir} \
   --itn-dir ${itn_dir} \
+  --lm-dir ${lm_dir} \
   --decoder-thread-num ${decoder_thread_num} \
   --io-thread-num  ${io_thread_num} \
   --port ${port} \

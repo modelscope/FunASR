@@ -103,7 +103,7 @@ int main(int argc, char* argv[]) {
         false, "../../../ssl_key/server.key", "string");
 
     TCLAP::ValueArg<std::string> lm_dir("", LM_DIR,
-        "the LM model path, which contains compiled models: TLG.fst, config.yaml ", false, "damo/speech_ngram_lm_zh-cn-ai-wesp-fst", "string");
+        "the LM model path, which contains compiled models: TLG.fst, config.yaml ", false, "", "string");
     TCLAP::ValueArg<std::string> lm_revision(
         "", "lm-revision", "LM model revision", false, "v1.0.1", "string");
     TCLAP::ValueArg<std::string> hotword("", HOTWORD,
@@ -303,7 +303,7 @@ int main(int argc, char* argv[]) {
             LOG(INFO) << "ITN model is not set, not executed.";
         }
 
-        if (!s_lm_path.empty() || s_lm_path != "NONE") {
+        if (!s_lm_path.empty() || s_lm_path != "NONE" || s_lm_path != "none") {
             std::string python_cmd_lm;
             std::string down_lm_path;
             std::string down_lm_model;

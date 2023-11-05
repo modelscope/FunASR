@@ -383,21 +383,30 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
 
         if (jsonresult["hotwords"] != nullptr) {
           std::string json_string = jsonresult["hotwords"];
-          nlohmann::json json_fst_hws = nlohmann::json::parse(json_string);
-          
-          if(json_fst_hws.type() == nlohmann::json::value_t::object){
-            // fst
+          if (!json_string.empty()){
+            nlohmann::json json_fst_hws;
             try{
-              std::unordered_map<std::string, int> client_hws_map = json_fst_hws;
-              merged_hws_map.insert(client_hws_map.begin(), client_hws_map.end());
-            } catch (const std::exception& e) {
-              LOG(INFO) << e.what();
+              json_fst_hws = nlohmann::json::parse(json_string);
+            } catch (std::exception const &e)
+            {
+              LOG(ERROR)<<e.what();
+              break;
             }
-          }else{
-            // nn
-            std::string client_nn_hws = jsonresult["hotwords"];
-            nn_hotwords += " " + client_nn_hws;
-            LOG(INFO) << "nn hotwords: " << client_nn_hws;
+            
+            if(json_fst_hws.type() == nlohmann::json::value_t::object){
+              // fst
+              try{
+                std::unordered_map<std::string, int> client_hws_map = json_fst_hws;
+                merged_hws_map.insert(client_hws_map.begin(), client_hws_map.end());
+              } catch (const std::exception& e) {
+                LOG(INFO) << e.what();
+              }
+            }else{
+              // nn
+              std::string client_nn_hws = jsonresult["hotwords"];
+              nn_hotwords += " " + client_nn_hws;
+              LOG(INFO) << "nn hotwords: " << client_nn_hws;
+            }
           }
         }
         merged_hws_map.insert(hws_map_.begin(), hws_map_.end());
