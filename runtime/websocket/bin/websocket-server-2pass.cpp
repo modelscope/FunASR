@@ -387,8 +387,12 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
           
           if(json_fst_hws.type() == nlohmann::json::value_t::object){
             // fst
-            std::unordered_map<std::string, int> client_hws_map = json_fst_hws;
-            merged_hws_map.insert(client_hws_map.begin(), client_hws_map.end());
+            try{
+              std::unordered_map<std::string, int> client_hws_map = json_fst_hws;
+              merged_hws_map.insert(client_hws_map.begin(), client_hws_map.end());
+            } catch (const std::exception& e) {
+              LOG(INFO) << e.what();
+            }
           }else{
             // nn
             std::string client_nn_hws = jsonresult["hotwords"];
