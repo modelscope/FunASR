@@ -36,9 +36,9 @@ sudo systemctl start docker
 Use the following command to pull and launch the Docker image for the FunASR runtime-SDK:
 
 ```shell
-sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.0
+sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.1
 
-sudo docker run -p 10095:10095 -it --privileged=true -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.0
+sudo docker run -p 10095:10095 -it --privileged=true -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.1
 ```
 
 Introduction to command parameters: 
@@ -147,8 +147,7 @@ Introduction to command parameters:
 --output_dir: the path to the recognition result output.
 --ssl: whether to use SSL encryption. The default is to use SSL.
 --mode: offline mode.
---fst_hotword: Hotword file path, one line for each hotword(e.g.:阿里巴巴 \t 20)
---nn_hotword: If am is hotword model, setting hotword: one hotword perline(e.g.:阿里巴巴)
+--hotword: Hotword file path, one line for each hotword(e.g.:阿里巴巴 20)
 --use_itn: whether to use itn, the default value is 1 for enabling and 0 for disabling.
 ```
 
@@ -164,8 +163,7 @@ Introduction to command parameters:
 --port: the port number of the server listener.
 --wav-path: the audio input. Input can be a path to a wav file or a wav.scp file (a Kaldi-formatted wav list in which each line includes a wav_id followed by a tab and a wav_path).
 --is-ssl: whether to use SSL encryption. The default is to use SSL.
---fst-hotword: Hotword file path, one line for each hotword(e.g.:阿里巴巴 \t 20)
---nn-hotword: If am is hotword model, setting hotword: one hotword perline(e.g.:阿里巴巴)
+--hotword: Hotword file path, one line for each hotword(e.g.:阿里巴巴 20)
 --use-itn: whether to use itn, the default value is 1 for enabling and 0 for disabling.
 ```
 

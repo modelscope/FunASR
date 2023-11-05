@@ -54,7 +54,7 @@ nohup bash run_server.sh \
   --itn-dir thuduj12/fst_itn_zh > log.out 2>&1 &
 
 # 如果您想关闭ssl，增加参数：--certfile 0
-# 如果您想使用时间戳或者热词模型进行部署，请设置--model-dir为对应模型：
+# 如果您想使用时间戳或者nn热词模型进行部署，请设置--model-dir为对应模型：
 # damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx（时间戳）
 # 或者 damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（热词）
 
@@ -126,8 +126,7 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline \
 --audio_in 需要进行转写的音频文件，支持文件路径，文件列表wav.scp
 --thread_num 设置并发发送线程数，默认为1
 --ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
---nn_hotword 如果模型为热词模型，可以设置热词: 阿里巴巴 (每行一个热词)
---fst_hotword 如果使用fst热词，可以设置热词文件: 阿里巴巴 \t 20(每行一个热词)
+--hotword 热词文件，每行一个热词，格式(热词 权重)：阿里巴巴 20
 --use_itn 设置是否使用itn，默认1开启，设置为0关闭
 ```
 
@@ -144,8 +143,7 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline \
             需要改为部署机器ip
 --port 10095 部署端口号
 --wav-path 需要进行转写的音频文件，支持文件路径
---nn-hotword 如果模型为热词模型，可以设置热词文件: 阿里巴巴 (每行一个热词)
---fst-hotword 如果使用fst热词，可以设置热词文件: 阿里巴巴 \t 20(每行一个热词)
+--hotword 热词文件，每行一个热词，格式(热词 权重)：阿里巴巴 20
 --use-itn 设置是否使用itn，默认1开启，设置为0关闭
 ```
 
@@ -178,8 +176,7 @@ nohup bash run_server.sh \
   --port 10095 \
   --certfile  ../../../ssl_key/server.crt \
   --keyfile ../../../ssl_key/server.key \
-  --fst_hotword ../../fst_hotwords.txt \
-  --nn_hotword ../../nn_hotwords.txt > log.out 2>&1 &
+  --hotword ../../hotwords.txt  > log.out 2>&1 &
  ```
 **run_server.sh命令参数介绍**
 ```text
@@ -197,8 +194,7 @@ nohup bash run_server.sh \
 --io-thread-num  服务端启动的IO线程数，默认为 1
 --certfile  ssl的证书文件，默认为：../../../ssl_key/server.crt，如果需要关闭ssl，参数设置为0
 --keyfile   ssl的密钥文件，默认为：../../../ssl_key/server.key
---fst_hotword   fst热词文件路径，每一个热词一行(例如:阿里巴巴 \t 20)，如果客户端提供热词，则与客户端提供的热词合并一起使用。
---nn_hotword   nn热词文件路径，每一个热词一行(例如:阿里巴巴)，如果客户端提供热词，则与客户端提供的热词合并一起使用。
+--hotword   热词文件路径，每行一个热词，格式：热词 权重(例如:阿里巴巴 20)，如果客户端提供热词，则与客户端提供的热词合并一起使用。
 ```
 
 ### 关闭FunASR服务

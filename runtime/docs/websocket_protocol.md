@@ -19,7 +19,7 @@ Parameter explanation:
 `wav_format`: the audio and video file extension, such as pcm, mp3, mp4, etc.
 `is_speaking`: False indicates the end of a sentence, such as a VAD segmentation point or the end of a WAV file
 `audio_fs`: when the input audio is in PCM format, the audio sampling rate parameter needs to be added
-`hotwords`：If using the hotword (requires loading Ngram), you need to send the hotword data (string) to the server. For example："{"阿里巴巴":20,"通义实验室":30}"
+`hotwords`：If using the hotword, you need to send the hotword data (string) to the server. For example："{"阿里巴巴":20,"通义实验室":30}"
 `itn`: whether to use itn, the default value is true for enabling and false for disabling.
 ```
 
@@ -69,7 +69,7 @@ Parameter explanation:
 `is_speaking`: False indicates the end of a sentence, such as a VAD segmentation point or the end of a WAV file
 `chunk_size`: indicates the latency configuration of the streaming model, `[5,10,5]` indicates that the current audio is 600ms long, with a 300ms look-ahead and look-back time.
 `audio_fs`: when the input audio is in PCM format, the audio sampling rate parameter needs to be added
-`hotwords`：If using the hotword (requires loading Ngram), you need to send the hotword data (string) to the server. For example："{"阿里巴巴":20,"通义实验室":30}"
+`hotwords`：If using the hotword, you need to send the hotword data (string) to the server. For example："{"阿里巴巴":20,"通义实验室":30}"
 `itn`: whether to use itn, the default value is true for enabling and false for disabling.
 ```
 #### Sending Audio Data

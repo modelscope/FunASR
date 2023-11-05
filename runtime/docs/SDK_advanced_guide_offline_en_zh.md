@@ -32,11 +32,11 @@ sudo bash install_docker.sh
 
 ```shell
 sudo docker pull \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.0
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.1
 mkdir -p ./funasr-runtime-resources/models
 sudo docker run -p 10095:10095 -it --privileged=true \
   -v $PWD/funasr-runtime-resources/models:/workspace/models \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.0
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.1
 ```
 如果您没有安装docker，可参考[Docker安装](#Docker安装)
 
@@ -121,7 +121,7 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline \
 --audio_in 需要进行转写的音频文件，支持文件路径，文件列表wav.scp
 --thread_num 设置并发发送线程数，默认为1
 --ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
---hotword 如果模型为热词模型，可以设置热词: *.txt(每行一个热词) 或者空格分隔的热词字符串(阿里巴巴 达摩院)
+--hotword 热词文件，每行一个热词，格式(热词 权重)：阿里巴巴 20
 --use_itn 设置是否使用itn，默认1开启，设置为0关闭
 ```
 
@@ -138,8 +138,7 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline \
             需要改为部署机器ip
 --port 10095 部署端口号
 --wav-path 需要进行转写的音频文件，支持文件路径
---nn-hotword 如果模型为热词模型，可以设置热词文件: 阿里巴巴 (每行一个热词)
---fst-hotword 如果使用fst热词，可以设置热词文件: 阿里巴巴 \t 20(每行一个热词)
+--hotword 热词文件，每行一个热词，格式(热词 权重)：阿里巴巴 20
 --use-itn 设置是否使用itn，默认1开启，设置为0关闭
 ```
 

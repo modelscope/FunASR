@@ -62,7 +62,7 @@ nohup bash run_server.sh \
   --itn-dir thuduj12/fst_itn_zh > log.out 2>&1 &
 
 # If you want to close ssl，please add：--certfile 0
-# If you want to deploy the timestamp or hotword model, please set --model-dir to the corresponding model:
+# If you want to deploy the timestamp or nn hotword model, please set --model-dir to the corresponding model:
 # speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx（timestamp）
 # damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（hotword）
 
@@ -86,8 +86,7 @@ nohup bash run_server.sh \
   --port 10095 \
   --certfile  ../../../ssl_key/server.crt \
   --keyfile ../../../ssl_key/server.key \
-  --fst_hotword ../../fst_hotwords.txt \
-  --nn_hotword ../../nn_hotwords.txt > log.out 2>&1 &
+  --hotword ../../hotwords.txt > log.out 2>&1 &
  ```
 
 Introduction to run_server.sh parameters: 
@@ -106,8 +105,7 @@ Introduction to run_server.sh parameters:
 --io-thread-num: Number of IO threads that the server starts. Default is 1.
 --certfile <string>: SSL certificate file. Default is ../../../ssl_key/server.crt. If you want to close ssl，set 0
 --keyfile <string>: SSL key file. Default is ../../../ssl_key/server.key. 
---fst_hotword   Hotword file path, one line for each hot word(e.g.:阿里巴巴 \t 20), if the client provides hot words, then combined with the hot words provided by the client.
---nn_hotword   Hotword file path, one line for each hot word(e.g.:阿里巴巴), if the client provides hot words, then combined with the hot words provided by the client.
+--hotword: Hotword file path, one line for each hotword(e.g.:阿里巴巴 20), if the client provides hot words, then combined with the hot words provided by the client.
 ```
 
 ### Shutting Down the FunASR Service
@@ -161,8 +159,7 @@ Introduction to command parameters:
 --output_dir: the path to the recognition result output.
 --ssl: whether to use SSL encryption. The default is to use SSL.
 --mode: offline mode.
---fst_hotword: Hotword file path, one line for each hotword(e.g.:阿里巴巴 \t 20)
---nn_hotword: If am is hotword model, setting hotword: one hotword perline(e.g.:阿里巴巴)
+--hotword: Hotword file path, one line for each hotword(e.g.:阿里巴巴 20)
 --use_itn: whether to use itn, the default value is 1 for enabling and 0 for disabling.
 ```
 
@@ -178,8 +175,7 @@ Introduction to command parameters:
 --port: the port number of the server listener.
 --wav-path: the audio input. Input can be a path to a wav file or a wav.scp file (a Kaldi-formatted wav list in which each line includes a wav_id followed by a tab and a wav_path).
 --is-ssl: whether to use SSL encryption. The default is to use SSL.
---fst-hotword: Hotword file path, one line for each hotword(e.g.:阿里巴巴 \t 20)
---nn-hotword: If am is hotword model, setting hotword: one hotword perline(e.g.:阿里巴巴)
+--hotword: Hotword file path, one line for each hotword(e.g.:阿里巴巴 20)
 --use-itn: whether to use itn, the default value is 1 for enabling and 0 for disabling.
 ```
 

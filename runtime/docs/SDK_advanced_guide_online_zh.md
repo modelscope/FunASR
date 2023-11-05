@@ -90,7 +90,7 @@ nohup bash run_server_2pass.sh \
   --port 10095 \
   --certfile  ../../../ssl_key/server.crt \
   --keyfile ../../../ssl_key/server.key \
-  --nn_hotword ../../nn_hotwords.txt > log.out 2>&1 &
+  --hotword ../../hotwords.txt > log.out 2>&1 &
  ```
 **run_server_2pass.sh命令参数介绍**
 ```text
@@ -108,7 +108,7 @@ nohup bash run_server_2pass.sh \
 --io-thread-num  服务端启动的IO线程数，默认为 1
 --certfile  ssl的证书文件，默认为：../../../ssl_key/server.crt，如果需要关闭ssl，参数设置为0
 --keyfile   ssl的密钥文件，默认为：../../../ssl_key/server.key
---nn_hotword   热词文件路径，每一个热词一行，如果客户端提供热词，则与客户端提供的热词合并一起使用。
+--hotword   热词文件路径，每行一个热词，格式：热词 权重(例如:阿里巴巴 20)，如果客户端提供热词，则与客户端提供的热词合并一起使用。
 ```
 
 ### 关闭FunASR服务
