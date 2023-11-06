@@ -37,7 +37,7 @@ curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/runti
 ```shell
 sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace ./funasr-runtime-resources
 ```
-**注：如果需要部署时间戳模型或者热词模型，在安装部署步骤2时选择对应模型，其中1为paraformer-large模型，2为paraformer-large 时间戳模型，3为paraformer-large 热词模型**
+**注：如果需要部署时间戳模型或者热词模型，在安装部署步骤2时选择对应模型，其中1为paraformer-large模型，2为paraformer-large 时间戳模型，3为paraformer-large nn热词模型**
 
 ### 客户端测试与使用
 
@@ -76,8 +76,7 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --au
 --audio_in 需要进行转写的音频文件，支持文件路径，文件列表wav.scp
 --thread_num 设置并发发送线程数，默认为1
 --ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
---nn_hotword 如果模型为热词模型，可以设置热词: 阿里巴巴 (每行一个热词)
---fst_hotword 如果使用fst热词，可以设置热词文件: 阿里巴巴 \t 20(每行一个热词)
+--hotword 热词文件，每行一个热词，格式(热词 权重)：阿里巴巴 20
 --use_itn 设置是否使用itn，默认1开启，设置为0关闭
 ```
 
@@ -96,8 +95,7 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --au
 --wav-path 需要进行转写的音频文件，支持文件路径
 --thread_num 设置并发发送线程数，默认为1
 --ssl 设置是否开启ssl证书校验，默认1开启，设置为0关闭
---nn-hotword 如果模型为热词模型，可以设置热词文件: 阿里巴巴 (每行一个热词)
---fst-hotword 如果使用fst热词，可以设置热词文件: 阿里巴巴 \t 20(每行一个热词)
+--hotword 热词文件，每行一个热词，格式(热词 权重)：阿里巴巴 20
 --use-itn 设置是否使用itn，默认1开启，设置为0关闭
 ```
 

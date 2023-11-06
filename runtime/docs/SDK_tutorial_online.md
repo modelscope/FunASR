@@ -71,8 +71,7 @@ Command parameter instructions:
 --audio_in is the audio file that needs to be transcribed, supporting file paths and file list wav.scp
 --thread_num sets the number of concurrent sending threads, default is 1
 --ssl sets whether to enable SSL certificate verification, default is 1 to enable, and 0 to disable
---fst_hotword: Hotword file path, one line for each hotword(e.g.:阿里巴巴 \t 20)
---nn_hotword: If am is hotword model, setting hotword: one hotword perline(e.g.:阿里巴巴)
+--hotword: Hotword file path, one line for each hotword(e.g.:阿里巴巴 20)
 --use_itn: whether to use itn, the default value is 1 for enabling and 0 for disabling.
 ```
 
@@ -92,8 +91,7 @@ Command parameter description:
 --wav-path specifies the audio file to be transcribed, and supports file paths.
 --threa-num sets the number of concurrent send threads, with a default value of 1.
 --is-ssl sets whether to enable SSL certificate verification, with a default value of 1 for enabling and 0 for disabling.
---fst-hotword: Hotword file path, one line for each hotword(e.g.:阿里巴巴 \t 20)
---nn-hotword: If am is hotword model, setting hotword: one hotword perline(e.g.:阿里巴巴)
+--hotword: Hotword file path, one line for each hotword(e.g.:阿里巴巴 20)
 --use-itn: whether to use itn, the default value is 1 for enabling and 0 for disabling.
 ```
 
