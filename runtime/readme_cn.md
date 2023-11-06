@@ -17,13 +17,12 @@ SDK 支持以下几种服务部署：
 为了支持不同用户的需求，针对不同场景，准备了不同的图文教程：
 
 ### 最新动态
-- 2023/11/07: runtime结构变化适配（FunASR/funasr/runtime->FunASR/runtime），dokcer镜像版本funasr-runtime-sdk-en-cpu-0.1.1()
-- 2023/10/16: 英文离线文件转写服务1.0发布，dokcer镜像版本funasr-runtime-sdk-en-cpu-0.1.0(e0de03eb0163)，详细文档参考（[点击此处](https://mp.weixin.qq.com/s/DZZUTj-6xwFfi-96ml--4A)）
+- 2023/11/07: runtime结构变化适配（FunASR/funasr/runtime->FunASR/runtime），dokcer镜像版本funasr-runtime-sdk-en-cpu-0.1.1 ()
+- 2023/10/16: 英文离线文件转写服务1.0发布，dokcer镜像版本funasr-runtime-sdk-en-cpu-0.1.0 (e0de03eb0163)，详细文档参考（[点击此处](https://mp.weixin.qq.com/s/DZZUTj-6xwFfi-96ml--4A)）
 
 ### 便捷部署教程
 
 适用场景为，对服务部署SDK无修改需求，部署模型来自于ModelScope，或者用户finetune，详细教程参考（[点击此处](./docs/SDK_tutorial_en_zh.md)）
-
 
 ### 开发指南
 
@@ -33,21 +32,16 @@ SDK 支持以下几种服务部署：
 
 文档介绍了背后技术原理，识别准确率，计算效率等，以及核心优势介绍：便捷、高精度、高效率、长音频链路，详细文档参考（[点击此处](https://mp.weixin.qq.com/s/DZZUTj-6xwFfi-96ml--4A)）
 
-### 最新版本及image ID
-| image version                |  image ID | INFO |
-|------------------------------|-----|------|
-| funasr-runtime-sdk-en-cpu-0.1.0 |  e0de03eb0163   |      |
-
 
 ## 中文实时语音听写服务（CPU版本）
 FunASR实时语音听写服务软件包，既可以实时地进行语音转文字，而且能够在说话句尾用高精度的转写文字修正输出，输出文字带有标点，支持高并发多路请求。
 为了支持不同用户的需求，针对不同场景，准备了不同的图文教程：
 
 ### 最新动态
-- 2023/11/07: 中文实时语音听写服务1.4发布，支持服务端加载热词(更新热词通信协议)、runtime结构变化适配（FunASR/funasr/runtime->FunASR/runtime），dokcer镜像版本funasr-runtime-sdk-online-cpu-0.1.4()
-- 2023/09/19: 中文实时语音听写服务1.2发布，2pass模式支持热词、时间戳、ITN模型，dokcer镜像版本funasr-runtime-sdk-online-cpu-0.1.2(7222c5319bcf)
-- 2023/08/11: 中文实时语音听写服务1.1发布，修复了部分已知的bug(包括server崩溃等)，dokcer镜像版本funasr-runtime-sdk-online-cpu-0.1.1(bdbdd0b27dee)
-- 2023/08/07: 中文实时语音听写服务1.0发布，dokcer镜像版本funasr-runtime-sdk-online-cpu-0.1.0(bdbdd0b27dee)，详细文档参考（[点击此处](https://mp.weixin.qq.com/s/8He081-FM-9IEI4D-lxZ9w)）
+- 2023/11/07: 中文实时语音听写服务1.4发布，支持服务端加载热词(更新热词通信协议)、runtime结构变化适配（FunASR/funasr/runtime->FunASR/runtime），dokcer镜像版本funasr-runtime-sdk-online-cpu-0.1.4 ()
+- 2023/09/19: 中文实时语音听写服务1.2发布，2pass模式支持热词、时间戳、ITN模型，dokcer镜像版本funasr-runtime-sdk-online-cpu-0.1.2 (7222c5319bcf)
+- 2023/08/11: 中文实时语音听写服务1.1发布，修复了部分已知的bug(包括server崩溃等)，dokcer镜像版本funasr-runtime-sdk-online-cpu-0.1.1 (bdbdd0b27dee)
+- 2023/08/07: 中文实时语音听写服务1.0发布，dokcer镜像版本funasr-runtime-sdk-online-cpu-0.1.0 (bdbdd0b27dee)，详细文档参考（[点击此处](https://mp.weixin.qq.com/s/8He081-FM-9IEI4D-lxZ9w)）
 
 ### 便捷部署教程
 
@@ -62,12 +56,6 @@ FunASR实时语音听写服务软件包，既可以实时地进行语音转文�
 
 文档介绍了背后技术原理，识别准确率，计算效率等，以及核心优势介绍：便捷、高精度、高效率、长音频链路，详细文档参考（[点击此处](https://mp.weixin.qq.com/s/8He081-FM-9IEI4D-lxZ9w)）
 
-### 最新版本及image ID
-
-| image version                       |  image ID | INFO |
-|-------------------------------------|-----|------|
-| funasr-runtime-sdk-online-cpu-0.1.3 |   0adef7779589  |      |
-
 
 ## 中文离线文件转写服务（CPU版本）
 
@@ -75,15 +63,14 @@ FunASR实时语音听写服务软件包，既可以实时地进行语音转文�
 为了支持不同用户的需求，针对不同场景，准备了不同的图文教程：
 
 ### 最新动态
-- 2023/11/07: 中文离线文件转写服务3.0发布，支持标点大模型、支持Ngram模型、支持fst热词(更新热词通信协议)、支持服务端加载热词、runtime结构变化适配（FunASR/funasr/runtime->FunASR/runtime），dokcer镜像版本funasr-runtime-sdk-cpu-0.3.0()，详细文档参考（[点击此处]()）
-- 2023/09/19: 中文离线文件转写服务2.2发布，支持ITN模型，dokcer镜像版本funasr-runtime-sdk-cpu-0.2.2(2c5286be13e9)
-- 2023/08/22: 中文离线文件转写服务2.0发布，集成ffmpeg支持多种音视频输入、支持热词模型、支持时间戳模型，dokcer镜像版本funasr-runtime-sdk-cpu-0.2.0(1ad3d19e0707)，详细文档参考（[点击此处](https://mp.weixin.qq.com/s/oJHe0MKDqTeuIFH-F7GHMg)）
-- 2023/07/03: 中文离线文件转写服务1.0发布，dokcer镜像版本funasr-runtime-sdk-cpu-0.1.0(1ad3d19e0707)，详细文档参考（[点击此处](https://mp.weixin.qq.com/s/DHQwbgdBWcda0w_L60iUww)）
+- 2023/11/07: 中文离线文件转写服务3.0发布，支持标点大模型、支持Ngram模型、支持fst热词(更新热词通信协议)、支持服务端加载热词、runtime结构变化适配（FunASR/funasr/runtime->FunASR/runtime），dokcer镜像版本funasr-runtime-sdk-cpu-0.3.0 ()，详细文档参考（[点击此处]()）
+- 2023/09/19: 中文离线文件转写服务2.2发布，支持ITN模型，dokcer镜像版本funasr-runtime-sdk-cpu-0.2.2 (2c5286be13e9)
+- 2023/08/22: 中文离线文件转写服务2.0发布，集成ffmpeg支持多种音视频输入、支持热词模型、支持时间戳模型，dokcer镜像版本funasr-runtime-sdk-cpu-0.2.0 (1ad3d19e0707)，详细文档参考（[点击此处](https://mp.weixin.qq.com/s/oJHe0MKDqTeuIFH-F7GHMg)）
+- 2023/07/03: 中文离线文件转写服务1.0发布，dokcer镜像版本funasr-runtime-sdk-cpu-0.1.0 (1ad3d19e0707)，详细文档参考（[点击此处](https://mp.weixin.qq.com/s/DHQwbgdBWcda0w_L60iUww)）
 
 ### 便捷部署教程
 
 适用场景为，对服务部署SDK无修改需求，部署模型来自于ModelScope，或者用户finetune，详细教程参考（[点击此处](./docs/SDK_tutorial_zh.md)）
-
 
 ### 开发指南
 
