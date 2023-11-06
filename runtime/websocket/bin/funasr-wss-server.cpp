@@ -303,7 +303,7 @@ int main(int argc, char* argv[]) {
             LOG(INFO) << "ITN model is not set, not executed.";
         }
 
-        if (!s_lm_path.empty() || s_lm_path != "NONE" || s_lm_path != "none") {
+        if (!s_lm_path.empty() && s_lm_path != "NONE" && s_lm_path != "none") {
             std::string python_cmd_lm;
             std::string down_lm_path;
             std::string down_lm_model;
