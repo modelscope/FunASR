@@ -343,6 +343,7 @@ int main(int argc, char* argv[]) {
             }
         } else {
             LOG(INFO) << "LM model is not set, not executed.";
+            model_path[LM_DIR] = "";
         }
 
         if(punc_dir.isSet() && !s_punc_path.empty()){
