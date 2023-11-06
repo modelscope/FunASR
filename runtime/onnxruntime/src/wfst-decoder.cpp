@@ -1,8 +1,9 @@
 #include <wfst-decoder.h>
 namespace funasr {
 WfstDecoder::WfstDecoder(fst::Fst<fst::StdArc>* lm,
-              PhoneSet* phone_set, Vocab* vocab)
-:dec_opts_(), decodable_(dec_opts_.acoustic_scale),
+                         PhoneSet* phone_set, Vocab* vocab,
+                         float glob_beam, float lat_beam, float am_scale)
+:dec_opts_(glob_beam, lat_beam, am_scale), decodable_(dec_opts_.acoustic_scale),
  lm_(lm), phone_set_(phone_set), vocab_(vocab) {
   decoder_ = std::shared_ptr<kaldi::LatticeFasterOnlineDecoder>(
              new kaldi::LatticeFasterOnlineDecoder(*lm_, dec_opts_));

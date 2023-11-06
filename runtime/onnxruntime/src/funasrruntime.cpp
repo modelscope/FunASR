@@ -720,7 +720,7 @@
 		delete tpass_online_stream;
 	}
 
-	_FUNASRAPI FUNASR_DEC_HANDLE FunASRWfstDecoderInit(FUNASR_HANDLE handle, int asr_type)
+	_FUNASRAPI FUNASR_DEC_HANDLE FunASRWfstDecoderInit(FUNASR_HANDLE handle, int asr_type, float glob_beam, float lat_beam, float am_scale)
 	{
 		funasr::WfstDecoder* mm = nullptr;
 		if (asr_type == ASR_OFFLINE) {
@@ -728,7 +728,7 @@
 			funasr::Paraformer* paraformer = (funasr::Paraformer*)offline_stream->asr_handle.get();
 			if (paraformer->lm_)
 				mm = new funasr::WfstDecoder(paraformer->lm_.get(), 
-					paraformer->GetPhoneSet(), paraformer->GetVocab());
+					paraformer->GetPhoneSet(), paraformer->GetVocab(), glob_beam, lat_beam, am_scale);
 		}
 		return mm;
 	}

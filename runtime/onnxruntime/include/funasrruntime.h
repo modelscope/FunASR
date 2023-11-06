@@ -123,7 +123,7 @@ _FUNASRAPI void				FunTpassUninit(FUNASR_HANDLE handle);
 _FUNASRAPI void				FunTpassOnlineUninit(FUNASR_HANDLE handle);
 
 // wfst decoder
-_FUNASRAPI FUNASR_DEC_HANDLE	FunASRWfstDecoderInit(FUNASR_HANDLE handle, int asr_type);
+_FUNASRAPI FUNASR_DEC_HANDLE	FunASRWfstDecoderInit(FUNASR_HANDLE handle, int asr_type, float glob_beam, float lat_beam, float am_scale);
 _FUNASRAPI void			FunASRWfstDecoderUninit(FUNASR_DEC_HANDLE handle);
 _FUNASRAPI void			FunWfstDecoderLoadHwsRes(FUNASR_DEC_HANDLE handle, int inc_bias, std::unordered_map<std::string, int> &hws_map);
 _FUNASRAPI void			FunWfstDecoderUnloadHwsRes(FUNASR_DEC_HANDLE handle);

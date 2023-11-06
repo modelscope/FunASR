@@ -30,7 +30,8 @@ std::atomic<int> wav_index(0);
 std::mutex mtx;
 
 void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, vector<string> wav_ids,
-            float* total_length, long* total_time, int core_id, int fst_inc_wts = 20, string hotword_path = "") {
+            float* total_length, long* total_time, int core_id, float glob_beam = 3.0f, float lat_beam = 3.0f, float am_sc = 10.0f, 
+            int fst_inc_wts = 20, string hotword_path = "") {
     
     struct timeval start, end;
     long seconds = 0;
@@ -38,7 +39,7 @@ void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, vector<string> wa
     long n_total_time = 0;
 	
     // init wfst decoder
-    FUNASR_DEC_HANDLE decoder_handle = FunASRWfstDecoderInit(asr_handle, ASR_OFFLINE);
+    FUNASR_DEC_HANDLE decoder_handle = FunASRWfstDecoderInit(asr_handle, ASR_OFFLINE, glob_beam, lat_beam, am_sc);
 
     // process fst hotwords list
     unordered_map<string, int> hws_map;
@@ -130,6 +131,9 @@ int main(int argc, char *argv[])
     TCLAP::ValueArg<std::string>    punc_dir("", PUNC_DIR, "the punc model path, which contains model.onnx, punc.yaml", false, "", "string");
     TCLAP::ValueArg<std::string>    punc_quant("", PUNC_QUANT, "true (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "true", "string");
     TCLAP::ValueArg<std::string>    lm_dir("", LM_DIR, "the lm model path, which contains compiled models: TLG.fst, config.yaml ", false, "", "string");
+    TCLAP::ValueArg<float>    global_beam("", GLOB_BEAM, "the decoding beam for beam searching ", false, 3.0, "float");
+    TCLAP::ValueArg<float>    lattice_beam("", LAT_BEAM, "the lattice generation beam for beam searching ", false, 3.0, "float");
+    TCLAP::ValueArg<float>    am_scale("", AM_SCALE, "the acoustic scale for beam searching ", false, 10.0, "float");
     TCLAP::ValueArg<std::int32_t>   fst_inc_wts("", FST_INC_WTS, "the fst hotwords incremental bias", false, 20, "int32_t");
     TCLAP::ValueArg<std::string>    itn_dir("", ITN_DIR, "the itn model(fst) path, which contains zh_itn_tagger.fst and zh_itn_verbalizer.fst", false, "", "string");
 
@@ -145,6 +149,9 @@ int main(int argc, char *argv[])
     cmd.add(punc_quant);
     cmd.add(itn_dir);
     cmd.add(lm_dir);
+    cmd.add(global_beam);
+    cmd.add(lattice_beam);
+    cmd.add(am_scale);
     cmd.add(hotword);
     cmd.add(fst_inc_wts);
     cmd.add(wav_path);
@@ -217,10 +224,17 @@ int main(int argc, char *argv[])
     std::string hotword_path = hotword.getValue();
     int value_bias = 20;
     value_bias = fst_inc_wts.getValue();
-
+    float glob_beam = 3.0f;
+    float lat_beam = 3.0f;
+    float am_sc = 10.0f;
+    if (lm_dir.isSet()) {
+        glob_beam = global_beam.getValue();
+        lat_beam = lattice_beam.getValue();
+        am_sc = am_scale.getValue();
+    }
     for (int i = 0; i < rtf_threds; i++)
     {
-        threads.emplace_back(thread(runReg, asr_handle, wav_list, wav_ids, &total_length, &total_time, i, value_bias, hotword_path));
+        threads.emplace_back(thread(runReg, asr_handle, wav_list, wav_ids, &total_length, &total_time, i, glob_beam, lat_beam, am_sc, value_bias, hotword_path));
     }
 
     for (auto& thread : threads)
