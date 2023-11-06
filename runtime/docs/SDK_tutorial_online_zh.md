@@ -34,7 +34,7 @@ curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/runti
 ```shell
 sudo bash funasr-runtime-deploy-online-cpu-zh.sh install --workspace ./funasr-runtime-resources
 ```
-**注：如果需要部署时间戳模型或者热词模型，在安装部署步骤2时选择对应模型，其中1为paraformer-large模型，2为paraformer-large 时间戳模型，3为paraformer-large nn热词模型**
+**注：如果需要部署时间戳模型或者热词模型，在安装部署步骤2时选择对应模型，其中1为paraformer-large模型，2为paraformer-large 时间戳模型，3为paraformer-large nn热词模型；服务端加载热词文件地址为：./funasr-runtime-resources/hotowrds.txt(每行一个热词，格式为 热词 权重：阿里巴巴 20)**
 
 ### 客户端测试与使用
 

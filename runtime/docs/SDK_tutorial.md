@@ -34,9 +34,9 @@ curl -O https://raw.githubusercontent.com/alibaba-damo-academy/FunASR/main/runti
 
 Execute the deployment tool and press the Enter key at the prompt to complete the installation and deployment of the server. Currently, the convenient deployment tool only supports Linux environments. For other environments, please refer to the development guide ([docs](./SDK_advanced_guide_offline.md)).
 ```shell
-sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace /root/funasr-runtime-resources
+sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace ./funasr-runtime-resources
 ```
-Note: If you need to deploy the timestamp model or hotword model, select the corresponding model in step 2 of the installation and deployment process, where 1 is the paraformer-large model, 2 is the paraformer-large timestamp model, and 3 is the paraformer-large hotword model.
+Note: If you need to deploy the timestamp model or hotword model, select the corresponding model in step 2 of the installation and deployment process, where 1 is the paraformer-large model, 2 is the paraformer-large timestamp model, and 3 is the paraformer-large hotword model；The server loads the hotword file from: ./funasr-runtime-resources/hotowrds.txt (one hotword per line, formatted as word weight: 阿里巴巴 20).
 
 ### Client Testing and Usage
 
