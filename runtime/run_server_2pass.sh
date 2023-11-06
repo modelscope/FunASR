@@ -17,30 +17,30 @@ hotword="../../hotwords.txt"
 cd /workspace/FunASR/runtime/websocket/build/bin
 if [ -z "$certfile" ] || [ "$certfile" -eq 0 ]; then
 ./funasr-wss-server-2pass  \
-  --download-model-dir ${download_model_dir} \
-  --model-dir ${model_dir} \
-  --online-model-dir ${online_model_dir} \
-  --vad-dir ${vad_dir} \
-  --punc-dir ${punc_dir} \
-  --itn-dir ${itn_dir} \
+  --download-model-dir "${download_model_dir}" \
+  --model-dir "${model_dir}" \
+  --online-model-dir "${online_model_dir}" \
+  --vad-dir "${vad_dir}" \
+  --punc-dir "${punc_dir}" \
+  --itn-dir "${itn_dir}" \
   --decoder-thread-num ${decoder_thread_num} \
   --io-thread-num  ${io_thread_num} \
   --port ${port} \
   --certfile  "" \
   --keyfile "" \
-  --hotword ${hotword}
+  --hotword "${hotword}"
 else
 ./funasr-wss-server-2pass  \
-  --download-model-dir ${download_model_dir} \
-  --model-dir ${model_dir} \
-  --online-model-dir ${online_model_dir} \
-  --vad-dir ${vad_dir} \
-  --punc-dir ${punc_dir} \
-  --itn-dir ${itn_dir} \
+  --download-model-dir "${download_model_dir}" \
+  --model-dir "${model_dir}" \
+  --online-model-dir "${online_model_dir}" \
+  --vad-dir "${vad_dir}" \
+  --punc-dir "${punc_dir}" \
+  --itn-dir "${itn_dir}" \
   --decoder-thread-num ${decoder_thread_num} \
   --io-thread-num  ${io_thread_num} \
   --port ${port} \
-  --certfile  ${certfile} \
-  --keyfile ${keyfile} \
-  --hotword ${hotword}
+  --certfile  "${certfile}" \
+  --keyfile "${keyfile}" \
+  --hotword "${hotword}"
 fi
