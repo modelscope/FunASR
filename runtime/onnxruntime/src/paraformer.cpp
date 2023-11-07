@@ -598,7 +598,7 @@ std::vector<std::vector<float>> Paraformer::CompileHotwordEmbedding(std::string 
         std::vector<int32_t> hw_vector(max_hotword_len, 0);
         int vector_len = std::min(max_hotword_len, (int)chars.size());
         int chs_oov = false;
-        for (int i=0; i<chars.size(); i++) {
+        for (int i=0; i<vector_len; i++) {
           hw_vector[i] = phone_set_->String2Id(chars[i]);
           if(hw_vector[i] == -1){
             chs_oov = true;
