@@ -279,7 +279,7 @@ function getHotwords(){
 			for(var i=0;i<result.length-1;i++)
 				wordstr=wordstr+result[i]+" ";
   
-			jsonresult[wordstr.trim()]=result[result.length-1];
+			jsonresult[wordstr.trim()]= parseInt(result[result.length-1]);
 		}
 	}
 	console.log("jsonresult="+JSON.stringify(jsonresult));
