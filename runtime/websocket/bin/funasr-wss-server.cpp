@@ -18,6 +18,7 @@
 // hotwords
 std::unordered_map<std::string, int> hws_map_;
 int fst_inc_wts_=20;
+float global_beam_, lattice_beam_, am_scale_;
 
 using namespace std;
 void GetValue(TCLAP::ValueArg<std::string>& value_arg, string key,
@@ -102,6 +103,10 @@ int main(int argc, char* argv[]) {
         "default: ../../../ssl_key/server.key, path of keyfile for WSS connection", 
         false, "../../../ssl_key/server.key", "string");
 
+    TCLAP::ValueArg<float>    global_beam("", GLOB_BEAM, "the decoding beam for beam searching ", false, 3.0, "float");
+    TCLAP::ValueArg<float>    lattice_beam("", LAT_BEAM, "the lattice generation beam for beam searching ", false, 3.0, "float");
+    TCLAP::ValueArg<float>    am_scale("", AM_SCALE, "the acoustic scale for beam searching ", false, 10.0, "float");
+
     TCLAP::ValueArg<std::string> lm_dir("", LM_DIR,
         "the LM model path, which contains compiled models: TLG.fst, config.yaml ", false, "", "string");
     TCLAP::ValueArg<std::string> lm_revision(
@@ -115,6 +120,9 @@ int main(int argc, char* argv[]) {
     // add file
     cmd.add(hotword);
     cmd.add(fst_inc_wts);
+    cmd.add(global_beam);
+    cmd.add(lattice_beam);
+    cmd.add(am_scale);
 
     cmd.add(certfile);
     cmd.add(keyfile);
@@ -156,6 +164,10 @@ int main(int argc, char* argv[]) {
     GetValue(punc_revision, "punc-revision", model_path);
     GetValue(itn_revision, "itn-revision", model_path);
     GetValue(lm_revision, "lm-revision", model_path);
+
+    global_beam_ = global_beam.getValue();
+    lattice_beam_ = lattice_beam.getValue();
+    am_scale_ = am_scale.getValue();
 
     // Download model form Modelscope
     try{

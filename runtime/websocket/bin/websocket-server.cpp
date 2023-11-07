@@ -18,6 +18,7 @@
 
 extern std::unordered_map<std::string, int> hws_map_;
 extern int fst_inc_wts_;
+extern float global_beam_, lattice_beam_, am_scale_;
 
 context_ptr WebSocketServer::on_tls_init(tls_mode mode,
                                          websocketpp::connection_hdl hdl,
@@ -146,7 +147,7 @@ void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
   data_msg->msg["audio_fs"] = 16000;
   data_msg->msg["access_num"] = 0; // the number of access for this object, when it is 0, we can free it saftly
   FUNASR_DEC_HANDLE decoder_handle =
-    FunASRWfstDecoderInit(asr_handle, ASR_OFFLINE);
+    FunASRWfstDecoderInit(asr_handle, ASR_OFFLINE, global_beam_, lattice_beam_, am_scale_);
   data_msg->decoder_handle = decoder_handle;
   data_map.emplace(hdl, data_msg);
   LOG(INFO) << "on_open, active connections: " << data_map.size();
