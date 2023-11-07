@@ -171,18 +171,18 @@ Node: '--quantize false' means fp32, otherwise it will be int8
 
 | concurrent-tasks | processing time(s) |  RTF   | Speedup Rate |
 |------------------|:------------------:|:------:|:------------:|
-| 1   (onnx fp32)  |       3294s        | 0.0912 |      11      |
-| 1   (onnx int8)  |       2183s        | 0.0604 |      16      |
-| 8   (onnx fp32)  |        425s        | 0.0117 |      84      |
-| 8   (onnx int8)  |        285s        | 0.0079 |     126      |
-| 16   (onnx fp32) |        225s        | 0.0062 |     160      |
-| 16   (onnx int8) |        148s        | 0.0041 |     242      |
-| 32   (onnx fp32) |        188s        | 0.0052 |     191      |
-| 32   (onnx int8) |        120s        | 0.0034 |     298      |
-| 64   (onnx fp32) |        193s        | 0.0053 |     186      |
-| 64   (onnx int8) |        125s        | 0.0034 |     286      |
-| 96   (onnx fp32) |        195s        | 0.0054 |     184      |
-| 96   (onnx int8) |        128s        | 0.0035 |     282      |
+| 1   (onnx fp32)  |       2506s        | 0.0694 |      14      |
+| 1   (onnx int8)  |       1448s        | 0.0401 |      25      |
+| 8   (onnx fp32)  |        326s        | 0.0090 |     110      |
+| 8   (onnx int8)  |        184s        | 0.0051 |     195      |
+| 16   (onnx fp32) |        178s        | 0.0049 |     202      |
+| 16   (onnx int8) |        99s         | 0.0027 |     361      |
+| 32   (onnx fp32) |        152s        | 0.0042 |     236      |
+| 32   (onnx int8) |        85s         | 0.0023 |     422      |
+| 64   (onnx fp32) |        157s        | 0.0043 |     228      |
+| 64   (onnx int8) |        89s         | 0.0024 |     403      |
+| 96   (onnx fp32) |        158s        | 0.0044 |     227      |
+| 96   (onnx int8) |        91s         | 0.0025 |     396      |
 
 
 ```shell
@@ -204,18 +204,18 @@ Node: '--quantize false' means fp32, otherwise it will be int8
 
 | concurrent-tasks | processing time(s) |  RTF   | Speedup Rate |
 |------------------|:------------------:|:------:|:------------:|
-| 1   (onnx fp32)  |       6987s        | 0.1935 |      5       |
-| 1   (onnx int8)  |       5899s        | 0.1633 |      6       |
-| 8   (onnx fp32)  |        886s        | 0.0245 |      40      |
-| 8   (onnx int8)  |        745s        | 0.0206 |      48      |
-| 16   (onnx fp32) |        451s        | 0.0125 |      80      |
-| 16   (onnx int8) |        376s        | 0.0104 |      95      |
-| 32   (onnx fp32) |        432s        | 0.0119 |      83      |
-| 32   (onnx int8) |        378s        | 0.0104 |      95      |
-| 64   (onnx fp32) |        441s        | 0.0122 |      81      |
-| 64   (onnx int8) |        379s        | 0.0105 |      95      |
-| 96   (onnx fp32) |        442s        | 0.0122 |      81      |
-| 96   (onnx int8) |        383s        | 0.0106 |      94      |
+| 1   (onnx fp32)  |       3172s        | 0.0878 |      11       |
+| 1   (onnx int8)  |       2140s        | 0.0592 |      16       |
+| 8   (onnx fp32)  |        412s        | 0.0114 |      87      |
+| 8   (onnx int8)  |        268s        | 0.0074 |      134      |
+| 16   (onnx fp32) |        218s        | 0.0060 |      165      |
+| 16   (onnx int8) |        140s        | 0.0038 |      257      |
+| 32   (onnx fp32) |        183s        | 0.0050 |      196      |
+| 32   (onnx int8) |        116s        | 0.0032 |      310      |
+| 64   (onnx fp32) |        188s        | 0.0052 |      192      |
+| 64   (onnx int8) |        120s        | 0.0033 |      299      |
+| 96   (onnx fp32) |        191s        | 0.0052 |      188      |
+| 96   (onnx int8) |        122s        | 0.0033 |      294      |
 
 
 ## [FSMN-VAD](https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary) + [Paraformer-en](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-en-16k-common-vocab10020-onnx/summary) + [CT-Transformer](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx/summary)
