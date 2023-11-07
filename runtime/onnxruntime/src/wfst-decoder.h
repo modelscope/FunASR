@@ -49,16 +49,20 @@ class Decodable : public kaldi::DecodableInterface {
 };
 
 struct DecodeOptions : public kaldi::LatticeFasterDecoderConfig {
-  DecodeOptions(float ac_sc = 10.0f) : acoustic_scale(ac_sc) {
+  DecodeOptions(float glob_beam = 3.0f, float lat_beam = 3.0f, float ac_sc = 10.0f) :
+  kaldi::LatticeFasterDecoderConfig(glob_beam, lat_beam), acoustic_scale(ac_sc) {
   }
-  float acoustic_scale = 10.0f;
+  float acoustic_scale;
 };
 
 class WfstDecoder {
  public:
   WfstDecoder(fst::Fst<fst::StdArc>* lm,
               PhoneSet* phone_set,
-              Vocab* vocab);
+              Vocab* vocab,
+              float glob_beam,
+              float lat_beam,
+              float am_scale);
   ~WfstDecoder();
   void StartUtterance();
   void EndUtterance();

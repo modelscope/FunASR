@@ -61,11 +61,24 @@ struct LatticeFasterDecoderConfig {
   // example in the function DecodeUtteranceLatticeFaster.
   fst::DeterminizeLatticePhonePrunedOptions det_opts;
 
-  LatticeFasterDecoderConfig()
-      : beam(3.0), //(16.0),
+  LatticeFasterDecoderConfig(float glob_beam, float lat_beam)
+      : beam(glob_beam),
         max_active(std::numeric_limits<int32>::max()),
         min_active(200),
-        lattice_beam(3.0), //(10.0),
+        lattice_beam(lat_beam),
+        prune_interval(25),
+        determinize_lattice(true),
+        beam_delta(0.5),
+        hash_ratio(2.0),
+        prune_scale(0.1),
+        memory_pool_tokens_block_size(1 << 8),
+        memory_pool_links_block_size(1 << 8) {}
+
+  LatticeFasterDecoderConfig()
+      : beam(3.0),
+        max_active(std::numeric_limits<int32>::max()),
+        min_active(200),
+        lattice_beam(3.0),
         prune_interval(25),
         determinize_lattice(true),
         beam_delta(0.5),
