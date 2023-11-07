@@ -85,11 +85,12 @@ function WebSocketConnectMethod( config ) { //定义socket连接方法类
 		}
 		
 		var hotwords=getHotwords();
-		if(hotwords.length>0)
+ 
+		if(hotwords!=null  )
 		{
 			request.hotwords=hotwords;
 		}
-		console.log(request);
+		console.log(JSON.stringify(request));
 		speechSokt.send( JSON.stringify(request) );
 		console.log("连接成功");
 		stateHandle(0);

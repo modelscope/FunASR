@@ -262,7 +262,7 @@ function getHotwords(){
 	var obj = document.getElementById("varHot");
 
 	if(typeof(obj) == 'undefined' || obj==null || obj.value.length<=0){
-	  return "";
+	  return null;
 	}
 	let val = obj.value.toString();
   
@@ -283,7 +283,7 @@ function getHotwords(){
 		}
 	}
 	console.log("jsonresult="+JSON.stringify(jsonresult));
-	return jsonresult;
+	return  jsonresult;
 
 }
 function getAsrMode(){
