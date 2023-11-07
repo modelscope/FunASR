@@ -283,7 +283,7 @@ function getHotwords(){
 		}
 	}
 	console.log("jsonresult="+JSON.stringify(jsonresult));
-	return  jsonresult;
+	return  JSON.stringify(jsonresult);
 
 }
 function getAsrMode(){
