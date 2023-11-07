@@ -17,7 +17,7 @@ Currently, the FunASR runtime-SDK supports the deployment of file transcription 
 To meet the needs of different users, we have prepared different tutorials with text and images for both novice and advanced developers.
 
 ### Whats-new
-- 2023/11/07: Adaptation to runtime structure changes (FunASR/funasr/runtime -> FunASR/runtime), docker image version funasr-runtime-sdk-en-cpu-0.1.1 ().
+- 2023/11/08: Adaptation to runtime structure changes (FunASR/funasr/runtime -> FunASR/runtime), docker image version funasr-runtime-sdk-en-cpu-0.1.1 ().
 - 2023/10/16: English File Transcription Service 1.0 released, docker image version funasr-runtime-sdk-en-cpu-0.1.0 (e0de03eb0163), refer to the detailed documentation（[here](https://mp.weixin.qq.com/s/DZZUTj-6xwFfi-96ml--4A)）
 
 ### Technical Principles
@@ -39,7 +39,7 @@ The FunASR real-time speech-to-text service software package not only performs r
 In order to meet the needs of different users for different scenarios, different tutorials are prepared:
 
 ### Whats-new
-- 2023/11/07: Real-time Transcription Service 1.4 released, supporting server-side loading of hotwords (updated hotword communication protocol), adaptation to runtime structure changes (FunASR/funasr/runtime -> FunASR/runtime), docker image version funasr-runtime-sdk-online-cpu-0.1.4().
+- 2023/11/08: Real-time Transcription Service 1.4 released, supporting server-side loading of hotwords (updated hotword communication protocol), adaptation to runtime structure changes (FunASR/funasr/runtime -> FunASR/runtime), docker image version funasr-runtime-sdk-online-cpu-0.1.4().
 - 2023/09/19: Real-time Transcription Service 1.2 released, supporting hotwords, timestamps, and ITN model in 2pass mode, docker image version funasr-runtime-sdk-online-cpu-0.1.2 (7222c5319bcf).
 - 2023/08/11: Real-time Transcription Service 1.1 released, addressing some known bugs (including server crashes), docker image version funasr-runtime-sdk-online-cpu-0.1.1 (bdbdd0b27dee).
 - 2023/08/07: Real-time Transcription Service 1.0 released, docker image version funasr-runtime-sdk-online-cpu-0.1.0(bdbdd0b27dee), refer to the detailed documentation（[here](https://mp.weixin.qq.com/s/8He081-FM-9IEI4D-lxZ9w)）
@@ -65,7 +65,7 @@ Currently, the FunASR runtime-SDK supports the deployment of file transcription 
 To meet the needs of different users, we have prepared different tutorials with text and images for both novice and advanced developers.
 
 ### Whats-new
-2023/11/07: File Transcription Service 3.0 released, supporting punctuation large model, Ngram model, fst hotwords (updated hotword communication protocol), server-side loading of hotwords, adaptation to runtime structure changes (FunASR/funasr/runtime -> FunASR/runtime), docker image version funasr-runtime-sdk-cpu-0.3.0 (), refer to the detailed documentation （[here]()）
+2023/11/08: File Transcription Service 3.0 released, supporting punctuation large model, Ngram model, fst hotwords (updated hotword communication protocol), server-side loading of hotwords, adaptation to runtime structure changes (FunASR/funasr/runtime -> FunASR/runtime), docker image version funasr-runtime-sdk-cpu-0.3.0 (), refer to the detailed documentation （[here]()）
 2023/09/19: File Transcription Service 2.2 released, supporting ITN model, docker image version funasr-runtime-sdk-cpu-0.2.2 (2c5286be13e9).
 2023/08/22: File Transcription Service 2.0 released, integrated ffmpeg to support various audio and video inputs, supporting hotword model and timestamp model, docker image version funasr-runtime-sdk-cpu-0.2.0 (1ad3d19e0707), refer to the detailed documentation （[here](https://mp.weixin.qq.com/s/oJHe0MKDqTeuIFH-F7GHMg)）
 2023/07/03: File Transcription Service 1.0 released, docker image version funasr-runtime-sdk-cpu-0.1.0 (1ad3d19e0707), refer to the detailed documentation （[here](https://mp.weixin.qq.com/s/DHQwbgdBWcda0w_L60iUww)）

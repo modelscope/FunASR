@@ -10,3 +10,6 @@ DEFAULT_VAD_MODEL:
   damo/speech_fsmn_vad_zh-cn-16k-common-onnx
 DEFAULT_PUNC_MODEL:
   damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx
+DEFAULT_LM_MODEL:
+  damo/speech_ngram_lm_zh-cn-ai-wesp-fst
+  NONE
