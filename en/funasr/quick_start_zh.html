@@ -71,19 +71,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../model_zoo/modelscope_models.html">Pretrained Models Released on ModelScope</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../model_zoo/huggingface_models.html">Pretrained Models on Huggingface</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Runtime and Service</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="runtime/readme.html">FunASR Runtime Roadmap</a></li>
-<li class="toctree-l1"><a class="reference internal" href="runtime/docs/SDK_tutorial_online.html">FunASR Realtime Transcribe Service</a></li>
-<li class="toctree-l1"><a class="reference internal" href="runtime/docs/SDK_tutorial.html">Highlights</a></li>
-<li class="toctree-l1"><a class="reference internal" href="runtime/docs/SDK_tutorial.html#funasr-offline-file-transcription-service">FunASR Offline File Transcription Service</a></li>
-<li class="toctree-l1"><a class="reference internal" href="runtime/html5/readme.html">Speech Recognition Service Html5 Client Access Interface</a></li>
-</ul>
 <p class="caption"><span class="caption-text">Benchmark and Leaderboard</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../benchmark/benchmark_onnx.html">CPU Benchmark (ONNX-python)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../benchmark/benchmark_onnx_cpp.html">CPU Benchmark (ONNX-cpp)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../benchmark/benchmark_libtorch.html">CPU Benchmark (Libtorch)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../benchmark/benchmark_pipeline_cer.html">Leaderboard IO</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Funasr Library</span></p>
@@ -157,7 +146,7 @@ python funasr_wss_server.py --port <span class="m">10095</span>
 <span class="c1">#python funasr_wss_client.py --host &quot;127.0.0.1&quot; --port 10095 --mode 2pass --chunk_size &quot;8,8,4&quot; --audio_in &quot;./data/wav.scp&quot;</span>
 </pre></div>
 </div>
-<p>更多例子可以参考（<a class="reference internal" href="runtime/python/websocket/README.html"><span class="doc">点击此处</span></a>）</p>
+<p>更多例子可以参考（<a class="reference external" href="runtime/python/websocket/README">点击此处</a>）</p>
 <p><a name="cpp版本示例"></a></p>
 </div>
 </div>
@@ -177,7 +166,7 @@ sudo bash funasr-runtime-deploy-online-cpu-zh.sh install --workspace ./funasr-ru
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 funasr_wss_client.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode 2pass
 </pre></div>
 </div>
-<p>更多例子参考（<a class="reference internal" href="runtime/docs/SDK_tutorial_online_zh.html"><span class="doc">点击此处</span></a>）</p>
+<p>更多例子参考（<a class="reference external" href="runtime/docs/SDK_tutorial_online_zh">点击此处</a>）</p>
 </div>
 <div class="section" id="id6">
 <h4>离线文件转写服务部署<a class="headerlink" href="#id6" title="Permalink to this headline"></a></h4>
@@ -194,7 +183,7 @@ sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace ./funasr-r
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 funasr_wss_client.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode offline --audio_in <span class="s2">&quot;../audio/asr_example.wav&quot;</span>
 </pre></div>
 </div>
-<p>更多例子参考（<a class="reference internal" href="runtime/docs/SDK_tutorial_zh.html"><span class="doc">点击此处</span></a>）</p>
+<p>更多例子参考（<a class="reference external" href="runtime/docs/SDK_tutorial_zh">点击此处</a>）</p>
 </div>
 </div>
 </div>
