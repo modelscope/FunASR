@@ -57,7 +57,7 @@ nohup bash run_server.sh \
   --download-model-dir /workspace/models \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
-  --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx \
+  --punc-dir damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx \
   --lm-dir damo/speech_ngram_lm_zh-cn-ai-wesp-fst \
   --itn-dir thuduj12/fst_itn_zh > log.out 2>&1 &
 
@@ -78,7 +78,7 @@ nohup bash run_server.sh \
   --download-model-dir /workspace/models \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
-  --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx \
+  --punc-dir damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx \
   --itn-dir thuduj12/fst_itn_zh \
   --lm-dir damo/speech_ngram_lm_zh-cn-ai-wesp-fst \
   --decoder-thread-num 32 \
@@ -133,7 +133,7 @@ To replace the currently used model or other parameters, you need to first shut 
 After executing the above command, the real-time speech transcription service will be started. If the model is specified as a ModelScope model id, the following models will be automatically downloaded from ModelScope:
 [FSMN-VAD](https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary),
 [Paraformer-lagre](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary),
-[CT-Transformer](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx/summary),
+[CT-Transformer](https://www.modelscope.cn/models/damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx/summary),
 [FST-ITN](https://www.modelscope.cn/models/thuduj12/fst_itn_zh/summary),
 [Ngram lm](https://www.modelscope.cn/models/damo/speech_ngram_lm_zh-cn-ai-wesp-fst/summary)
 

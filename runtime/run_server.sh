@@ -2,9 +2,9 @@
 download_model_dir="/workspace/models"
 model_dir="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx"
 vad_dir="damo/speech_fsmn_vad_zh-cn-16k-common-onnx"
-punc_dir="damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx"
+punc_dir="damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx"
 itn_dir="thuduj12/fst_itn_zh"
-lm_dir=""
+lm_dir="damo/speech_ngram_lm_zh-cn-ai-wesp-fst"
 decoder_thread_num=32
 io_thread_num=8
 port=10095

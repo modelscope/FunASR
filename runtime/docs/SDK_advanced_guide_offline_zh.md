@@ -49,7 +49,7 @@ nohup bash run_server.sh \
   --download-model-dir /workspace/models \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
-  --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx \
+  --punc-dir damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx \
   --lm-dir damo/speech_ngram_lm_zh-cn-ai-wesp-fst \
   --itn-dir thuduj12/fst_itn_zh > log.out 2>&1 &
 
@@ -169,7 +169,7 @@ nohup bash run_server.sh \
   --download-model-dir /workspace/models \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
-  --punc-dir damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx \
+  --punc-dir damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx \
   --itn-dir thuduj12/fst_itn_zh \
   --decoder-thread-num 32 \
   --io-thread-num  8 \
@@ -222,7 +222,7 @@ kill -9 PID
 执行上述指令后，启动离线文件转写服务。如果模型指定为ModelScope中model id，会自动从MoldeScope中下载如下模型：
 [FSMN-VAD模型](https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary),
 [Paraformer-lagre模型](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx/summary),
-[CT-Transformer标点预测模型](https://www.modelscope.cn/models/damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx/summary),
+[CT-Transformer标点预测模型](https://www.modelscope.cn/models/damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx/summary),
 [基于FST的中文ITN](https://www.modelscope.cn/models/thuduj12/fst_itn_zh/summary),
 [Ngram中文语言模型](https://www.modelscope.cn/models/damo/speech_ngram_lm_zh-cn-ai-wesp-fst/summary)
 
