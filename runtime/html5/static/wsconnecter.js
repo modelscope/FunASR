@@ -91,7 +91,7 @@ function WebSocketConnectMethod( config ) { //定义socket连接方法类
 			request.hotwords=hotwords;
 		}
 		console.log(JSON.stringify(request));
-		speechSokt.send( JSON.stringify(request) );
+		speechSokt.send(request);
 		console.log("连接成功");
 		stateHandle(0);
  
