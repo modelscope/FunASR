@@ -34,7 +34,7 @@ sudo bash install_docker.sh
 sudo docker pull \
   registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.1
 mkdir -p ./funasr-runtime-resources/models
-sudo docker run -p 10095:10095 -it --privileged=true \
+sudo docker run -p 10097:10095 -it --privileged=true \
   -v $PWD/funasr-runtime-resources/models:/workspace/models \
   registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.1
 ```

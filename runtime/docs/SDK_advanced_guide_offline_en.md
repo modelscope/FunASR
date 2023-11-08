@@ -38,12 +38,12 @@ Use the following command to pull and launch the Docker image for the FunASR run
 ```shell
 sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.1
 
-sudo docker run -p 10095:10095 -it --privileged=true -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.1
+sudo docker run -p 10097:10095 -it --privileged=true -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.1
 ```
 
 Introduction to command parameters: 
 ```text
--p <host port>:<mapped docker port>: In the example, host machine (ECS) port 10095 is mapped to port 10095 in the Docker container. Make sure that port 10095 is open in the ECS security rules.
+-p <host port>:<mapped docker port>: In the example, host machine (ECS) port 10097 is mapped to port 10095 in the Docker container. Make sure that port 10097 is open in the ECS security rules.
 
 -v <host path>:<mounted Docker path>: In the example, the host machine path /root is mounted to the Docker path /workspace/models.
 
