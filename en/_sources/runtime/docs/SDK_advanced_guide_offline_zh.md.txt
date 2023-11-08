@@ -3,7 +3,8 @@
 FunASR提供可一键本地或者云端服务器部署的中文离线文件转写服务，内核为FunASR已开源runtime-SDK。FunASR-runtime结合了达摩院语音实验室在Modelscope社区开源的语音端点检测(VAD)、Paraformer-large语音识别(ASR)、标点检测(PUNC) 等相关能力，可以准确、高效的对音频进行高并发转写。
 
 本文档为FunASR离线文件转写服务开发指南。如果您想快速体验离线文件转写服务，可参考[快速上手](#快速上手)。
-<img src="docs/images/offline_structure.jpg"  width="900"/>
+
+<img src="images/offline_structure.jpg"  width="900"/>
 
 ## 服务器配置
 
