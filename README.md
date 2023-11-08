@@ -17,7 +17,7 @@
 | [**Quick Start**](#quick-start)
 | [**Runtime**](./runtime/readme.md)
 | [**Model Zoo**](#model-zoo)
-| [**Contact**](#community-communication)
+| [**Contact**](#contact)
 
 
 <a name="highlights"></a>
@@ -126,7 +126,7 @@ FunASR supports deploying pre-trained or further fine-tuned models for service. 
 For more detailed information, please refer to the [service deployment documentation](runtime/readme.md).
 
 
-<a name="Community Communication"></a>
+<a name="contact"></a>
 ## Community Communication
 If you encounter problems in use, you can directly raise Issues on the github page.
 
