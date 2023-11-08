@@ -36,7 +36,6 @@ class Paraformer():
                  intra_op_num_threads: int = 4,
                  cache_dir: str = None
                  ):
-
         if not Path(model_dir).exists():
             try:
                 from modelscope.hub.snapshot_download import snapshot_download
@@ -241,6 +240,13 @@ class ContextualParaformer(Paraformer):
                  ):
 
         if not Path(model_dir).exists():
+            try:
+                from modelscope.hub.snapshot_download import snapshot_download
+            except:
+                raise "You are exporting model from modelscope, please install modelscope and try it again. To install modelscope, you could:\n" \
+                      "\npip3 install -U modelscope\n" \
+                      "For the users in China, you could install with the command:\n" \
+                      "\npip3 install -U modelscope -i https://mirror.sjtu.edu.cn/pypi/web/simple"
             try:
                 model_dir = snapshot_download(model_dir, cache_dir=cache_dir)
             except:

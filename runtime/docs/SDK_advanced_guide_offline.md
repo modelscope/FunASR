@@ -4,37 +4,19 @@ FunASR provides a Chinese offline file transcription service that can be deploye
 
 This document serves as a development guide for the FunASR offline file transcription service. If you wish to quickly experience the offline file transcription service, please refer to the one-click deployment example for the FunASR offline file transcription service ([docs](./SDK_tutorial.md)).
 
-## Installation of Docker
+<img src="images/offline_structure.jpg"  width="900"/>
 
-The following steps are for manually installing Docker and Docker images. If your Docker image has already been launched, you can ignore this step.
-
-### Installation of Docker environment
-
+## Quick start
+### Docker install
+If you have already installed Docker, ignore this step!
 ```shell
-# Ubuntu：
-curl -fsSL https://test.docker.com -o test-docker.sh 
-sudo sh test-docker.sh 
-# Debian：
-curl -fsSL https://get.docker.com -o get-docker.sh 
-sudo sh get-docker.sh 
-# CentOS：
-curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun 
-# MacOS：
-brew install --cask --appdir=/Applications docker
+curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/install_docker.sh;
+sudo bash install_docker.sh
 ```
-
-More details could ref to [docs](https://alibaba-damo-academy.github.io/FunASR/en/installation/docker.html)
-
-### Starting Docker
-
-```shell
-sudo systemctl start docker
-```
+If you do not have Docker installed, please refer to [Docker Installation](https://alibaba-damo-academy.github.io/FunASR/en/installation/docker.html)
 
 ### Pulling and launching images
-
 Use the following command to pull and launch the Docker image for the FunASR runtime-SDK:
-
 ```shell
 sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.3.0
 
@@ -46,11 +28,9 @@ Introduction to command parameters:
 -p <host port>:<mapped docker port>: In the example, host machine (ECS) port 10095 is mapped to port 10095 in the Docker container. Make sure that port 10095 is open in the ECS security rules.
 
 -v <host path>:<mounted Docker path>: In the example, the host machine path /root is mounted to the Docker path /workspace/models.
-
 ```
 
-## Starting the server
-
+### Starting the server
 Use the flollowing script to start the server ：
 ```shell
 nohup bash run_server.sh \
@@ -59,7 +39,8 @@ nohup bash run_server.sh \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
   --punc-dir damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx \
   --lm-dir damo/speech_ngram_lm_zh-cn-ai-wesp-fst \
-  --itn-dir thuduj12/fst_itn_zh > log.out 2>&1 &
+  --itn-dir thuduj12/fst_itn_zh \
+  --hotword /workspace/models/hotwords.txt > log.out 2>&1 &
 
 # If you want to close ssl，please add：--certfile 0
 # If you want to deploy the timestamp or nn hotword model, please set --model-dir to the corresponding model:
@@ -67,7 +48,6 @@ nohup bash run_server.sh \
 #   damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（hotword）
 # If you want to load hotwords on the server side, please configure the hotwords in the host machine file ./funasr-runtime-resources/models/hotwords.txt (docker mapping address: /workspace/models/hotwords.txt):
 # One hotword per line, format (hotword weight): 阿里巴巴 20"
-
 ```
 
 ### More details about the script run_server.sh:
@@ -92,7 +72,6 @@ nohup bash run_server.sh \
  ```
 
 Introduction to run_server.sh parameters: 
-
 ```text
 --download-model-dir: Model download address, download models from Modelscope by setting the model ID.
 --model-dir: Modelscope model ID.
@@ -141,19 +120,14 @@ After executing the above command, the real-time speech transcription service wi
 
 If you wish to deploy your fine-tuned model (e.g., 10epoch.pb), you need to manually rename the model to model.pb and replace the original model.pb in ModelScope. Then, specify the path as `model_dir`.
 
-
-
 ## Starting the client
-
 After completing the deployment of FunASR offline file transcription service on the server, you can test and use the service by following these steps. Currently, FunASR-bin supports multiple ways to start the client. The following are command-line examples based on python-client, c++-client, and custom client Websocket communication protocol: 
 
 ### python-client
 ```shell
 python funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "./data/wav.scp" --send_without_sleep --output_dir "./results"
 ```
-
 Introduction to command parameters:
-
 ```text
 --host: the IP address of the server. It can be set to 127.0.0.1 for local testing.
 --port: the port number of the server listener.
@@ -171,7 +145,6 @@ Introduction to command parameters:
 ```
 
 Introduction to command parameters:
-
 ```text
 --server-ip: the IP address of the server. It can be set to 127.0.0.1 for local testing.
 --port: the port number of the server listener.
@@ -182,19 +155,15 @@ Introduction to command parameters:
 ```
 
 ### Custom client
-
 If you want to define your own client, see the [Websocket communication protocol](./websocket_protocol.md)
 
 ## How to customize service deployment
-
 The code for FunASR-runtime is open source. If the server and client cannot fully meet your needs, you can further develop them based on your own requirements:
 
 ### C++ client
-
 https://github.com/alibaba-damo-academy/FunASR/tree/main/runtime/websocket
 
 ### Python client
-
 https://github.com/alibaba-damo-academy/FunASR/tree/main/runtime/python/websocket
 
 ### C++ server
@@ -218,7 +187,6 @@ FUNASR_HANDLE asr_hanlde=FunOfflineInit(model_path, thread_num);
 FUNASR_RESULT result=FunOfflineInfer(asr_hanlde, wav_file.c_str(), RASR_NONE, NULL, 16000);
 // Where: asr_hanlde is the return value of FunOfflineInit, wav_file is the path to the audio file, and sampling_rate is the sampling rate (default 16k).
 ```
-
 See the usage example for details, [docs](https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/onnxruntime/bin/funasr-onnx-offline.cpp)
 
 #### PUNC
