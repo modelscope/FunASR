@@ -71,6 +71,14 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../model_zoo/modelscope_models.html">Pretrained Models Released on ModelScope</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../model_zoo/huggingface_models.html">Pretrained Models on Huggingface</a></li>
 </ul>
+<p class="caption"><span class="caption-text">Runtime and Service</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../runtime/readme.html">FunASR Runtime Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../runtime/docs/SDK_tutorial_online.html">FunASR Realtime Transcribe Service</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../runtime/docs/SDK_tutorial.html">Highlights</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../runtime/docs/SDK_tutorial.html#funasr-offline-file-transcription-service">FunASR Offline File Transcription Service</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../runtime/html5/readme.html">Speech Recognition Service Html5 Client Access Interface</a></li>
+</ul>
 <p class="caption"><span class="caption-text">Benchmark and Leaderboard</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../benchmark/benchmark_pipeline_cer.html">Leaderboard IO</a></li>
@@ -153,12 +161,10 @@ pipeline 支持 <a class="reference external" href="https://alibaba-damo-academy
     <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">auto_speech_recognition</span><span class="p">,</span>
     <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch&#39;</span><span class="p">,</span>
     <span class="n">vad_model</span><span class="o">=</span><span class="s1">&#39;damo/speech_fsmn_vad_zh-cn-16k-common-pytorch&#39;</span><span class="p">,</span>
-    <span class="c1">#punc_model=&#39;damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch&#39;,</span>
     <span class="n">punc_model</span><span class="o">=</span><span class="s1">&#39;damo/punc_ct-transformer_cn-en-common-vocab471067-large&#39;</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/vad_example.wav&#39;</span><span class="p">,</span> 
-                                <span class="n">batch_size_token</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">batch_size_token_threshold_s</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">max_single_segment_time</span><span class="o">=</span><span class="mi">6000</span><span class="p">)</span>
+<span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="s1">&#39;./vad_example.wav&#39;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">rec_result</span><span class="p">)</span>
 </pre></div>
 </div>

@@ -71,10 +71,10 @@ Overview
    :maxdepth: 1
    :caption: Runtime and Service
 
-   ./funasr/runtime/readme.md
-   ./funasr/runtime/docs/SDK_tutorial_online.md
-   ./funasr/runtime/docs/SDK_tutorial.md
-   ./funasr/runtime/html5/readme.md
+   ./runtime/readme.md
+   ./runtime/docs/SDK_tutorial_online.md
+   ./runtime/docs/SDK_tutorial.md
+   ./runtime/html5/readme.md
 
 
 
