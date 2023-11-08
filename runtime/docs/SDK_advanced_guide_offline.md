@@ -63,8 +63,10 @@ nohup bash run_server.sh \
 
 # If you want to close ssl，please add：--certfile 0
 # If you want to deploy the timestamp or nn hotword model, please set --model-dir to the corresponding model:
-# speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx（timestamp）
-# damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（hotword）
+#   damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx（timestamp）
+#   damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（hotword）
+# If you want to load hotwords on the server side, please configure the hotwords in the host machine file ./funasr-runtime-resources/models/hotwords.txt (docker mapping address: /workspace/models/hotwords.txt):
+# One hotword per line, format (hotword weight): 阿里巴巴 20"
 
 ```
 
