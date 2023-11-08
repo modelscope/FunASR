@@ -110,15 +110,15 @@ python funasr_wss_client.py --host "0.0.0.0" --port 10095 --mode 2pass --chunk_s
 
 #### Websocket api
 ```shell
-    # class Funasr_websocket_recognizer example with 3 step
-    # 1.create an recognizer 
-    rcg=Funasr_websocket_recognizer(host="127.0.0.1",port="30035",is_ssl=True,mode="2pass")
-    # 2.send pcm data to asr engine and get asr result
-    text=rcg.feed_chunk(data)
-    print("text",text)
-    # 3.get last result, set timeout=3
-    text=rcg.close(timeout=3)
-    print("text",text)
+# class Funasr_websocket_recognizer example with 3 step
+# 1.create an recognizer 
+rcg=Funasr_websocket_recognizer(host="127.0.0.1",port="30035",is_ssl=True,mode="2pass")
+# 2.send pcm data to asr engine and get asr result
+text=rcg.feed_chunk(data)
+print("text",text)
+# 3.get last result, set timeout=3
+text=rcg.close(timeout=3)
+print("text",text)
 ```
 
 ## Acknowledge
