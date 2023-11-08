@@ -6,6 +6,15 @@ This document serves as a development guide for the FunASR offline file transcri
 
 <img src="images/offline_structure.jpg"  width="900"/>
 
+
+| TIME       | INFO                                                                                                                             | IMAGE VERSION                | IMAGE ID     |
+|------------|----------------------------------------------------------------------------------------------------------------------------------|------------------------------|--------------|
+| 2023.11.08 | supporting punc-large model, Ngram model, fst hotwords, server-side loading of hotwords, adaptation to runtime structure changes | funasr-runtime-sdk-cpu-0.3.0 | caa64bddbb43 |
+| 2023.09.19 | supporting ITN model                                                                                                             | funasr-runtime-sdk-cpu-0.2.2 | 2c5286be13e9 |
+| 2023.08.22 | integrated ffmpeg to support various audio and video inputs, supporting nn-hotword model and timestamp model                     | funasr-runtime-sdk-cpu-0.2.0 | 1ad3d19e0707 |
+| 2023.07.03 | 1.0 released                                                                                                                     | funasr-runtime-sdk-cpu-0.1.0 | 1ad3d19e0707 |
+
+
 ## Quick start
 ### Docker install
 If you have already installed Docker, ignore this step!
