@@ -17,7 +17,7 @@
 | [**Quick Start**](#quick-start)
 | [**Runtime**](./runtime/readme.md)
 | [**Model Zoo**](#model-zoo)
-| [**Contact**](#contact)
+| [**Contact**](#community-communication)
 
 
 <a name="highlights"></a>
