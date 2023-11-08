@@ -26,7 +26,7 @@ python funasr_wss_server.py --port 10095
 python funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass --chunk_size "5,10,5"
 ```
 
-For more examples, please refer to [docs](runtime/python/websocket/README.md).
+For more examples, please refer to [docs](../runtime/python/websocket/README.md).
 
 ### C++ version Example
 
@@ -47,7 +47,7 @@ Testing [samples](https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sam
 ```shell
 python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass
 ```
-For more examples, please refer to [docs](runtime/docs/SDK_tutorial_online_zh.md)
+For more examples, please refer to [docs](../runtime/docs/SDK_tutorial_online_zh.md)
 
 
 #### File Transcription Service, Mandarin (CPU)
@@ -68,7 +68,7 @@ Testing [samples](https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sam
 python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.wav"
 ```
 
-For more examples, please refer to [docs](runtime/docs/SDK_tutorial_zh.md)
+For more examples, please refer to [docs](../runtime/docs/SDK_tutorial_zh.md)
 
 
 ## Industrial Model Egs
