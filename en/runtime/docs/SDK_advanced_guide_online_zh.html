@@ -131,7 +131,42 @@
 <p>FunASR提供可便捷本地或者云端服务器部署的实时语音听写服务，内核为FunASR已开源runtime-SDK。
 集成了达摩院语音实验室在Modelscope社区开源的语音端点检测(VAD)、Paraformer-large非流式语音识别(ASR)、Paraformer-large流式语音识别(ASR)、标点(PUNC) 等相关能力。软件包既可以实时地进行语音转文字，而且能够在说话句尾用高精度的转写文字修正输出，输出文字带有标点，支持高并发多路请求</p>
 <p>本文档为FunASR实时转写服务开发指南。如果您想快速体验实时语音听写服务，可参考快速上手。</p>
-<div class="section" id="id1">
+<img src="images/online_structure.png"  width="900"/><table border="1" class="docutils">
+<thead>
+<tr>
+<th style="text-align: left;">时间</th>
+<th style="text-align: left;">详情</th>
+<th>镜像版本</th>
+<th>镜像ID</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">2023.11.08</td>
+<td style="text-align: left;">支持服务端加载热词(更新热词通信协议)、runtime结构变化适配</td>
+<td>funasr-runtime-sdk-online-cpu-0.1.4</td>
+<td>691974017c38</td>
+</tr>
+<tr>
+<td style="text-align: left;">2023.09.19</td>
+<td style="text-align: left;">2pass模式支持热词、时间戳、ITN模型</td>
+<td>funasr-runtime-sdk-online-cpu-0.1.2</td>
+<td>7222c5319bcf</td>
+</tr>
+<tr>
+<td style="text-align: left;">2023.08.11</td>
+<td style="text-align: left;">修复了部分已知的bug(包括server崩溃等)</td>
+<td>funasr-runtime-sdk-online-cpu-0.1.1</td>
+<td>bdbdd0b27dee</td>
+</tr>
+<tr>
+<td style="text-align: left;">2023.08.07</td>
+<td style="text-align: left;">1.0 发布</td>
+<td>funasr-runtime-sdk-online-cpu-0.1.0</td>
+<td>bdbdd0b27dee</td>
+</tr>
+</tbody>
+</table><div class="section" id="id1">
 <h2>快速上手<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h2>
 <div class="section" id="docker">
 <h3>docker安装<a class="headerlink" href="#docker" title="Permalink to this headline"></a></h3>

@@ -129,7 +129,42 @@
   <div class="section" id="real-time-speech-transcription-service-development-guide">
 <h1>Real-time Speech Transcription Service Development Guide<a class="headerlink" href="#real-time-speech-transcription-service-development-guide" title="Permalink to this headline"></a></h1>
 <p>FunASR provides a real-time speech transcription service that can be easily deployed on local or cloud servers, with the FunASR runtime-SDK as the core. It integrates the speech endpoint detection (VAD), Paraformer-large non-streaming speech recognition (ASR), Paraformer-large streaming speech recognition (ASR), punctuation (PUNC), and other related capabilities open-sourced by the speech laboratory of DAMO Academy on the Modelscope community. The software package can perform real-time speech-to-text transcription, and can also accurately transcribe text at the end of sentences for high-precision output. The output text contains punctuation and supports high-concurrency multi-channel requests.</p>
-<div class="section" id="quick-start">
+<img src="images/online_structure.png"  width="900"/><table border="1" class="docutils">
+<thead>
+<tr>
+<th>TIME</th>
+<th>INFO</th>
+<th>IMAGE VERSION</th>
+<th>IMAGE ID</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2023.11.08</td>
+<td>supporting server-side loading of hotwords, adaptation to runtime structure changes</td>
+<td>funasr-runtime-sdk-online-cpu-0.1.4</td>
+<td>691974017c38</td>
+</tr>
+<tr>
+<td>2023.09.19</td>
+<td>supporting hotwords, timestamps, and ITN model in 2pass mode</td>
+<td>funasr-runtime-sdk-online-cpu-0.1.2</td>
+<td>7222c5319bcf</td>
+</tr>
+<tr>
+<td>2023.08.11</td>
+<td>addressing some known bugs (including server crashes)</td>
+<td>funasr-runtime-sdk-online-cpu-0.1.1</td>
+<td>bdbdd0b27dee</td>
+</tr>
+<tr>
+<td>2023.08.07</td>
+<td>1.0 released</td>
+<td>funasr-runtime-sdk-online-cpu-0.1.0</td>
+<td>bdbdd0b27dee</td>
+</tr>
+</tbody>
+</table><div class="section" id="quick-start">
 <h2>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline"></a></h2>
 <div class="section" id="docker-install">
 <h3>Docker install<a class="headerlink" href="#docker-install" title="Permalink to this headline"></a></h3>

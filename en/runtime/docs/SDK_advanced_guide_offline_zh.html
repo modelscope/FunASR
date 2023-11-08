@@ -130,7 +130,42 @@
 <h1>FunASR离线文件转写服务开发指南<a class="headerlink" href="#funasr" title="Permalink to this headline"></a></h1>
 <p>FunASR提供可一键本地或者云端服务器部署的中文离线文件转写服务，内核为FunASR已开源runtime-SDK。FunASR-runtime结合了达摩院语音实验室在Modelscope社区开源的语音端点检测(VAD)、Paraformer-large语音识别(ASR)、标点检测(PUNC) 等相关能力，可以准确、高效的对音频进行高并发转写。</p>
 <p>本文档为FunASR离线文件转写服务开发指南。如果您想快速体验离线文件转写服务，可参考快速上手。</p>
-<img src="images/offline_structure.jpg"  width="900"/><div class="section" id="id1">
+<img src="images/offline_structure.jpg"  width="900"/><table border="1" class="docutils">
+<thead>
+<tr>
+<th>时间</th>
+<th>详情</th>
+<th>镜像版本</th>
+<th>镜像ID</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2023.11.08</td>
+<td>支持标点大模型、支持Ngram模型、支持fst热词、支持服务端加载热词、runtime结构变化适配</td>
+<td>funasr-runtime-sdk-cpu-0.3.0</td>
+<td>caa64bddbb43</td>
+</tr>
+<tr>
+<td>2023.09.19</td>
+<td>支持ITN模型</td>
+<td>funasr-runtime-sdk-cpu-0.2.2</td>
+<td>2c5286be13e9</td>
+</tr>
+<tr>
+<td>2023.08.22</td>
+<td>集成ffmpeg支持多种音视频输入、支持热词模型、支持时间戳模型</td>
+<td>funasr-runtime-sdk-cpu-0.2.0</td>
+<td>1ad3d19e0707</td>
+</tr>
+<tr>
+<td>2023.07.03</td>
+<td>1.0 发布</td>
+<td>funasr-runtime-sdk-cpu-0.1.0</td>
+<td>1ad3d19e0707</td>
+</tr>
+</tbody>
+</table><div class="section" id="id1">
 <h2>服务器配置<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h2>
 <p>用户可以根据自己的业务需求，选择合适的服务器配置，推荐配置为：</p>
 <ul class="simple">

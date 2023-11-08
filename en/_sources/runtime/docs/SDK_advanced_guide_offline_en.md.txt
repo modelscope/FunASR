@@ -4,6 +4,11 @@ FunASR provides a English offline file transcription service that can be deploye
 
 This document serves as a development guide for the FunASR offline file transcription service. If you wish to quickly experience the offline file transcription service, please refer to the one-click deployment example for the FunASR offline file transcription service ([docs](./SDK_tutorial.md)).
 
+| TIME       | INFO                                    | IMAGE VERSION                   | IMAGE ID     |
+|------------|-----------------------------------------|---------------------------------|--------------|
+| 2023.11.08 | Adaptation to runtime structure changes | funasr-runtime-sdk-en-cpu-0.1.1 | 27017f70f72a |
+| 2023.10.16 | 1.0 released                            | funasr-runtime-sdk-en-cpu-0.1.0 | e0de03eb0163 |
+
 ## Quick start
 ### Docker install
 If you have already installed Docker, ignore this step!
