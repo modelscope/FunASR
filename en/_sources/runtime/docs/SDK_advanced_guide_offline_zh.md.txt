@@ -58,7 +58,8 @@ nohup bash run_server.sh \
 #   damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx（时间戳）
 #   damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（热词）
 ```
-**如果您想定制ngram，参考文档([如何训练LM](./lm_train_tutorial.md))**
+如果您想定制ngram，参考文档([如何训练LM](./lm_train_tutorial.md))
+
 服务端详细参数介绍可参考[服务端用法详解](#服务端用法详解)
 
 ### 客户端测试与使用
