@@ -3,16 +3,21 @@
 FunASR provides a real-time speech transcription service that can be easily deployed on local or cloud servers, with the FunASR runtime-SDK as the core. It integrates the speech endpoint detection (VAD), Paraformer-large non-streaming speech recognition (ASR), Paraformer-large streaming speech recognition (ASR), punctuation (PUNC), and other related capabilities open-sourced by the speech laboratory of DAMO Academy on the Modelscope community. The software package can perform real-time speech-to-text transcription, and can also accurately transcribe text at the end of sentences for high-precision output. The output text contains punctuation and supports high-concurrency multi-channel requests.
 
 ## Quick Start
-### Pull Docker Image
-
-Use the following command to pull and start the FunASR software package docker image:
-
+### Docker install
+If you have already installed Docker, ignore this step!
 ```shell
-sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.3
-mkdir -p ./funasr-runtime-resources/models
-sudo docker run -p 10096:10095 -it --privileged=true -v $PWD/funasr-runtime-resources/models:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.3
+curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/install_docker.sh;
+sudo bash install_docker.sh
 ```
 If you do not have Docker installed, please refer to [Docker Installation](https://alibaba-damo-academy.github.io/FunASR/en/installation/docker.html)
+
+### Pull Docker Image
+Use the following command to pull and start the FunASR software package docker image:
+```shell
+sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.4
+mkdir -p ./funasr-runtime-resources/models
+sudo docker run -p 10096:10095 -it --privileged=true -v $PWD/funasr-runtime-resources/models:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.4
+```
 
 ### Launching the Server
 

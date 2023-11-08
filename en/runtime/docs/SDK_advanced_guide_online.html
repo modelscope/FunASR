@@ -131,15 +131,23 @@
 <p>FunASR provides a real-time speech transcription service that can be easily deployed on local or cloud servers, with the FunASR runtime-SDK as the core. It integrates the speech endpoint detection (VAD), Paraformer-large non-streaming speech recognition (ASR), Paraformer-large streaming speech recognition (ASR), punctuation (PUNC), and other related capabilities open-sourced by the speech laboratory of DAMO Academy on the Modelscope community. The software package can perform real-time speech-to-text transcription, and can also accurately transcribe text at the end of sentences for high-precision output. The output text contains punctuation and supports high-concurrency multi-channel requests.</p>
 <div class="section" id="quick-start">
 <h2>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline"></a></h2>
-<div class="section" id="pull-docker-image">
-<h3>Pull Docker Image<a class="headerlink" href="#pull-docker-image" title="Permalink to this headline"></a></h3>
-<p>Use the following command to pull and start the FunASR software package docker image:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.3
-mkdir -p ./funasr-runtime-resources/models
-sudo docker run -p <span class="m">10096</span>:10095 -it --privileged<span class="o">=</span><span class="nb">true</span> -v <span class="nv">$PWD</span>/funasr-runtime-resources/models:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.3
+<div class="section" id="docker-install">
+<h3>Docker install<a class="headerlink" href="#docker-install" title="Permalink to this headline"></a></h3>
+<p>If you have already installed Docker, ignore this step!</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/install_docker.sh<span class="p">;</span>
+sudo bash install_docker.sh
 </pre></div>
 </div>
 <p>If you do not have Docker installed, please refer to <a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/installation/docker.html">Docker Installation</a></p>
+</div>
+<div class="section" id="pull-docker-image">
+<h3>Pull Docker Image<a class="headerlink" href="#pull-docker-image" title="Permalink to this headline"></a></h3>
+<p>Use the following command to pull and start the FunASR software package docker image:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.4
+mkdir -p ./funasr-runtime-resources/models
+sudo docker run -p <span class="m">10096</span>:10095 -it --privileged<span class="o">=</span><span class="nb">true</span> -v <span class="nv">$PWD</span>/funasr-runtime-resources/models:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.4
+</pre></div>
+</div>
 </div>
 <div class="section" id="launching-the-server">
 <h3>Launching the Server<a class="headerlink" href="#launching-the-server" title="Permalink to this headline"></a></h3>
