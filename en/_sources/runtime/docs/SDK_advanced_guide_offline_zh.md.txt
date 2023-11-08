@@ -55,11 +55,12 @@ nohup bash run_server.sh \
 
 # 如果您想关闭ssl，增加参数：--certfile 0
 # 如果您想使用时间戳或者nn热词模型进行部署，请设置--model-dir为对应模型：
-# damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx（时间戳）
-# 或者 damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（热词）
-
+#   damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx（时间戳）
+#   damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（热词）
 ```
+**如果您想定制ngram，参考文档([如何训练LM](./lm_train_tutorial.md))**
 服务端详细参数介绍可参考[服务端用法详解](#服务端用法详解)
+
 ### 客户端测试与使用
 
 下载客户端测试工具目录samples
