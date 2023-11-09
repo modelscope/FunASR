@@ -54,8 +54,9 @@
 <li class="toctree-l4"><a class="reference internal" href="#client-testing">Client Testing</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#c-version-example">C++ version Example</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#the-real-time-transcription-service-mandarin-cpu">The real-time transcription service, Mandarin (CPU)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#service-deployment-software">Service Deployment Software</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#docker-installation-optional">Docker Installation (optional)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#real-time-speech-recognition-service-deployment">Real-time Speech Recognition Service Deployment</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#file-transcription-service-mandarin-cpu">File Transcription Service, Mandarin (CPU)</a></li>
 </ul>
 </li>
@@ -174,35 +175,97 @@ python funasr_wss_server.py --port <span class="m">10095</span>
 <p>For more examples, please refer to <a class="reference internal" href="../runtime/python/websocket/README.html"><span class="doc">docs</span></a>.</p>
 </div>
 </div>
-<div class="section" id="c-version-example">
-<h3>C++ version Example<a class="headerlink" href="#c-version-example" title="Permalink to this headline"></a></h3>
-<p>Currently, offline file transcription service (CPU) is supported, and concurrent requests of hundreds of channels are supported.</p>
-<div class="section" id="the-real-time-transcription-service-mandarin-cpu">
-<h4>The real-time transcription service, Mandarin (CPU)<a class="headerlink" href="#the-real-time-transcription-service-mandarin-cpu" title="Permalink to this headline"></a></h4>
+<div class="section" id="service-deployment-software">
+<h3>Service Deployment Software<a class="headerlink" href="#service-deployment-software" title="Permalink to this headline"></a></h3>
+<p>Both high-precision, high-efficiency, and high-concurrency file transcription, as well as low-latency real-time speech recognition, are supported. It also supports Docker deployment and multiple concurrent requests.</p>
+<div class="section" id="docker-installation-optional">
+<h4>Docker Installation (optional)<a class="headerlink" href="#docker-installation-optional" title="Permalink to this headline"></a></h4>
+<div class="section" id="if-you-have-already-installed-docker-skip-this-step">
+<h5>If you have already installed Docker, skip this step.<a class="headerlink" href="#if-you-have-already-installed-docker-skip-this-step" title="Permalink to this headline"></a></h5>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/install_docker.sh<span class="p">;</span>
+sudo bash install_docker.sh
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="real-time-speech-recognition-service-deployment">
+<h4>Real-time Speech Recognition Service Deployment<a class="headerlink" href="#real-time-speech-recognition-service-deployment" title="Permalink to this headline"></a></h4>
+<div class="section" id="docker-image-download-and-launch">
+<h5>Docker Image Download and Launch<a class="headerlink" href="#docker-image-download-and-launch" title="Permalink to this headline"></a></h5>
+<p>Use the following command to pull and launch the FunASR software package Docker image（<a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/docs/SDK_advanced_guide_online.md">Get the latest image version</a>）：</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo docker pull <span class="se">\</span>
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.5
+mkdir -p ./funasr-runtime-resources/models
+sudo docker run -p <span class="m">10096</span>:10095 -it --privileged<span class="o">=</span><span class="nb">true</span> <span class="se">\</span>
+  -v <span class="nv">$PWD</span>/funasr-runtime-resources/models:/workspace/models <span class="se">\</span>
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.5
+</pre></div>
+</div>
+</div>
+<div class="section" id="server-start">
+<h5>Server Start<a class="headerlink" href="#server-start" title="Permalink to this headline"></a></h5>
+<p>After Docker is started, start the funasr-wss-server-2pass service program:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> FunASR/runtime
+nohup bash run_server_2pass.sh <span class="se">\</span>
+  --download-model-dir /workspace/models <span class="se">\</span>
+  --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
+  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  <span class="se">\</span>
+  --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx  <span class="se">\</span>
+  --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx <span class="se">\</span>
+  --itn-dir thuduj12/fst_itn_zh <span class="se">\</span>
+  --hotword /workspace/models/hotwords.txt &gt; log.out <span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">&amp;</span>
+
+<span class="c1"># If you want to disable SSL, add the parameter: --certfile 0</span>
+<span class="c1"># If you want to deploy with a timestamp or nn hotword model, please set --model-dir to the corresponding model:</span>
+<span class="c1">#   damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx (timestamp)</span>
+<span class="c1">#   damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx (nn hotword)</span>
+<span class="c1"># If you want to load hotwords on the server side, please configure the hotwords in the host file ./funasr-runtime-resources/models/hotwords.txt (docker mapping address is /workspace/models/hotwords.txt):</span>
+<span class="c1">#   One hotword per line, format (hotword weight): Alibaba 20</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="id1">
-<h5>Server Deployment<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h5>
-<p>You can use the following command to complete the deployment:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy-online-cpu-zh.sh
-sudo bash funasr-runtime-deploy-online-cpu-zh.sh install --workspace ./funasr-runtime-resources
-</pre></div>
-</div>
-</div>
-<div class="section" id="id2">
-<h5>Client Testing<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h5>
+<h5>Client Testing<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h5>
 <p>Testing <a class="reference external" href="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz">samples</a></p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 funasr_wss_client.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode 2pass
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 funasr_wss_client.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10096</span> --mode 2pass
 </pre></div>
 </div>
-<p>For more examples, please refer to <a class="reference internal" href="../runtime/docs/SDK_tutorial_online_zh.html"><span class="doc">docs</span></a></p>
+<p>For more examples, please refer to <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/docs/SDK_advanced_guide_online.md">docs</a></p>
 </div>
 </div>
 <div class="section" id="file-transcription-service-mandarin-cpu">
 <h4>File Transcription Service, Mandarin (CPU)<a class="headerlink" href="#file-transcription-service-mandarin-cpu" title="Permalink to this headline"></a></h4>
+<div class="section" id="id2">
+<h5>Docker Image Download and Launch<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h5>
+<p>Use the following command to pull and launch the FunASR software package Docker image（<a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/docs/SDK_advanced_guide_offline.md">Get the latest image version</a>）：</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo docker pull <span class="se">\</span>
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.3.0
+mkdir -p ./funasr-runtime-resources/models
+sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span class="o">=</span><span class="nb">true</span> <span class="se">\</span>
+  -v <span class="nv">$PWD</span>/funasr-runtime-resources/models:/workspace/models <span class="se">\</span>
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.3.0
+</pre></div>
+</div>
+</div>
 <div class="section" id="id3">
-<h5>Server Deployment<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h5>
-<p>You can use the following command to complete the deployment:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy-offline-cpu-zh.sh
-sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace ./funasr-runtime-resources
+<h5>Server Start<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h5>
+<p>After Docker is started, start the funasr-wss-server service program:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> FunASR/runtime
+nohup bash run_server.sh <span class="se">\</span>
+  --download-model-dir /workspace/models <span class="se">\</span>
+  --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
+  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  <span class="se">\</span>
+  --punc-dir damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx <span class="se">\</span>
+  --lm-dir damo/speech_ngram_lm_zh-cn-ai-wesp-fst <span class="se">\</span>
+  --itn-dir thuduj12/fst_itn_zh <span class="se">\</span>
+  --hotword /workspace/models/hotwords.txt &gt; log.out <span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">&amp;</span>
+
+<span class="c1"># If you want to disable SSL, add the parameter: --certfile 0</span>
+<span class="c1"># If you want to use timestamp or nn hotword models for deployment, please set --model-dir to the corresponding model:</span>
+<span class="c1">#   damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx (timestamp)</span>
+<span class="c1">#   damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx (nn hotword)</span>
+<span class="c1"># If you want to load hotwords on the server side, please configure the hotwords in the host machine file ./funasr-runtime-resources/models/hotwords.txt (docker mapping address is /workspace/models/hotwords.txt):</span>
+<span class="c1">#   One hotword per line, format (hotword weight): Alibaba 20</span>
 </pre></div>
 </div>
 </div>
@@ -212,7 +275,7 @@ sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace ./funasr-r
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 funasr_wss_client.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode offline --audio_in <span class="s2">&quot;../audio/asr_example.wav&quot;</span>
 </pre></div>
 </div>
-<p>For more examples, please refer to <a class="reference internal" href="../runtime/docs/SDK_tutorial_zh.html"><span class="doc">docs</span></a></p>
+<p>For more examples, please refer to <a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/docs/SDK_advanced_guide_offline.md">docs</a></p>
 </div>
 </div>
 </div>
@@ -225,7 +288,7 @@ sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace ./funasr-r
 
 <span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
     <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">auto_speech_recognition</span><span class="p">,</span>
-    <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&#39;</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch&#39;</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav&#39;</span><span class="p">)</span>
