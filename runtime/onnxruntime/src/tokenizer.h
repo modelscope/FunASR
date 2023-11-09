@@ -17,8 +17,8 @@ private:
 	vector<string>   m_id2token,m_id2punc;
 	map<string, int>  m_token2id,m_punc2id;
 
-	cppjieba::DictTrie *jieba_dict_trie_;
-    cppjieba::HMMModel *jieba_model_;
+	cppjieba::DictTrie *jieba_dict_trie_=nullptr;
+    cppjieba::HMMModel *jieba_model_=nullptr;
 	cppjieba::Jieba jieba_processor_;
 
 public:

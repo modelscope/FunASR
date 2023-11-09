@@ -17,8 +17,12 @@ CTokenizer::CTokenizer():m_ready(false)
 
 CTokenizer::~CTokenizer()
 {
-	delete jieba_dict_trie_;
-    delete jieba_model_;
+	if (jieba_dict_trie_){
+		delete jieba_dict_trie_;
+	}
+	if (jieba_model_){
+    	delete jieba_model_;
+	}
 }
 
 void CTokenizer::SetJiebaRes(cppjieba::DictTrie *dict, cppjieba::HMMModel *hmm) {
