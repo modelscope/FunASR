@@ -188,11 +188,11 @@ sudo bash install_docker.sh
 <h3>镜像启动<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h3>
 <p>通过下述命令拉取并启动FunASR软件包的docker镜像：</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo docker pull <span class="se">\</span>
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.4
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.5
 mkdir -p ./funasr-runtime-resources/models
 sudo docker run -p <span class="m">10096</span>:10095 -it --privileged<span class="o">=</span><span class="nb">true</span> <span class="se">\</span>
   -v <span class="nv">$PWD</span>/funasr-runtime-resources/models:/workspace/models <span class="se">\</span>
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.4
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.5
 </pre></div>
 </div>
 </div>

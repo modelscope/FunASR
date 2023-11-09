@@ -184,9 +184,9 @@ sudo bash install_docker.sh
 <div class="section" id="pull-docker-image">
 <h3>Pull Docker Image<a class="headerlink" href="#pull-docker-image" title="Permalink to this headline"></a></h3>
 <p>Use the following command to pull and start the FunASR software package docker image:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.4
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.5
 mkdir -p ./funasr-runtime-resources/models
-sudo docker run -p <span class="m">10096</span>:10095 -it --privileged<span class="o">=</span><span class="nb">true</span> -v <span class="nv">$PWD</span>/funasr-runtime-resources/models:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.4
+sudo docker run -p <span class="m">10096</span>:10095 -it --privileged<span class="o">=</span><span class="nb">true</span> -v <span class="nv">$PWD</span>/funasr-runtime-resources/models:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.5
 </pre></div>
 </div>
 </div>
