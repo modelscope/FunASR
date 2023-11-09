@@ -130,3 +130,6 @@ def infer(task_name: str = "asr",
         return inference_pipeline(data_path_and_name_and_type, raw_inputs=raw_inputs, **kwargs)
     
     return _infer_fn
+
+if __name__ == '__main__':
+    pass
