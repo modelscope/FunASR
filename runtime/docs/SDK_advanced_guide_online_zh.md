@@ -32,11 +32,11 @@ docker安装失败请参考 [Docker Installation](https://alibaba-damo-academy.g
 
 ```shell
 sudo docker pull \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.4
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.5
 mkdir -p ./funasr-runtime-resources/models
 sudo docker run -p 10096:10095 -it --privileged=true \
   -v $PWD/funasr-runtime-resources/models:/workspace/models \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.4
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.5
 ```
 
 ### 服务端启动
