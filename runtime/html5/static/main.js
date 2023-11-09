@@ -262,7 +262,7 @@ function getHotwords(){
 	var obj = document.getElementById("varHot");
 
 	if(typeof(obj) == 'undefined' || obj==null || obj.value.length<=0){
-	  return "";
+	  return null;
 	}
 	let val = obj.value.toString();
   
@@ -279,11 +279,11 @@ function getHotwords(){
 			for(var i=0;i<result.length-1;i++)
 				wordstr=wordstr+result[i]+" ";
   
-			jsonresult[wordstr.trim()]=result[result.length-1];
+			jsonresult[wordstr.trim()]= parseInt(result[result.length-1]);
 		}
 	}
 	console.log("jsonresult="+JSON.stringify(jsonresult));
-	return jsonresult;
+	return  JSON.stringify(jsonresult);
 
 }
 function getAsrMode(){

@@ -1,1 +1,0 @@
-../../funasr/runtime/html5/readme.md

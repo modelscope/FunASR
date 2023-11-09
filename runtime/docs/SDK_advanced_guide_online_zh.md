@@ -5,29 +5,38 @@ FunASR提供可便捷本地或者云端服务器部署的实时语音听写服�
 
 本文档为FunASR实时转写服务开发指南。如果您想快速体验实时语音听写服务，可参考[快速上手](#快速上手)。
 
+<img src="images/online_structure.png"  width="900"/>
+
+| 时间         | 详情                                | 镜像版本                                | 镜像ID         |
+|:-----------|:----------------------------------|-------------------------------------|--------------|
+| 2023.11.08 | 支持服务端加载热词(更新热词通信协议)、runtime结构变化适配 | funasr-runtime-sdk-online-cpu-0.1.4 | 691974017c38 |
+| 2023.09.19 | 2pass模式支持热词、时间戳、ITN模型             | funasr-runtime-sdk-online-cpu-0.1.2 | 7222c5319bcf |
+| 2023.08.11 | 修复了部分已知的bug(包括server崩溃等)          | funasr-runtime-sdk-online-cpu-0.1.1 | bdbdd0b27dee |
+| 2023.08.07 | 1.0 发布                            | funasr-runtime-sdk-online-cpu-0.1.0 | bdbdd0b27dee |
+
+
 ## 快速上手
 
 ### docker安装
 如果您已安装docker，忽略本步骤！!
 通过下述命令在服务器上安装docker：
 ```shell
-curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/install_docker.sh；
+curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/install_docker.sh
 sudo bash install_docker.sh
 ```
+docker安装失败请参考 [Docker Installation](https://alibaba-damo-academy.github.io/FunASR/en/installation/docker.html)
 
 ### 镜像启动
-
 通过下述命令拉取并启动FunASR软件包的docker镜像：
 
 ```shell
 sudo docker pull \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.3
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.4
 mkdir -p ./funasr-runtime-resources/models
-sudo docker run -p 10095:10095 -it --privileged=true \
+sudo docker run -p 10096:10095 -it --privileged=true \
   -v $PWD/funasr-runtime-resources/models:/workspace/models \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.3
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.4
 ```
-如果您没有安装docker，可参考[Docker安装](https://alibaba-damo-academy.github.io/FunASR/en/installation/docker_zh.html)
 
 ### 服务端启动
 
@@ -40,12 +49,15 @@ nohup bash run_server_2pass.sh \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
   --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx  \
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx \
-  --itn-dir thuduj12/fst_itn_zh  > log.out 2>&1 &
+  --itn-dir thuduj12/fst_itn_zh \
+  --hotword /workspace/models/hotwords.txt > log.out 2>&1 &
 
 # 如果您想关闭ssl，增加参数：--certfile 0
-# 如果您想使用时间戳或者热词模型进行部署，请设置--model-dir为对应模型：
-# damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx（时间戳）
-# 或者 damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（热词）
+# 如果您想使用时间戳或者nn热词模型进行部署，请设置--model-dir为对应模型：
+#   damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx（时间戳）
+#   damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（nn热词）
+# 如果您想在服务端加载热词，请在宿主机文件./funasr-runtime-resources/models/hotwords.txt配置热词（docker映射地址为/workspace/models/hotwords.txt）:
+#   每行一个热词，格式(热词 权重)：阿里巴巴 20
 ```
 服务端详细参数介绍可参考[服务端用法详解](#服务端用法详解)
 ### 客户端测试与使用

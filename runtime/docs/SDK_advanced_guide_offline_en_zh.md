@@ -4,6 +4,12 @@ FunASR提供可一键本地或者云端服务器部署的英文离线文件转�
 
 本文档为FunASR离线文件转写服务开发指南。如果您想快速体验离线文件转写服务，可参考[快速上手](#快速上手)。
 
+| 时间         | 详情            | 镜像版本                            | 镜像ID         |
+|------------|---------------|---------------------------------|--------------|
+| 2023.11.08 | runtime结构变化适配 | funasr-runtime-sdk-en-cpu-0.1.1 | 27017f70f72a |
+| 2023.10.16 | 1.0 发布        | funasr-runtime-sdk-en-cpu-0.1.0 | e0de03eb0163 |
+
+
 ## 服务器配置
 
 用户可以根据自己的业务需求，选择合适的服务器配置，推荐配置为：
@@ -17,7 +23,6 @@ FunASR提供可一键本地或者云端服务器部署的英文离线文件转�
 
 
 ## 快速上手
-
 ### docker安装
 如果您已安装docker，忽略本步骤！!
 通过下述命令在服务器上安装docker：
@@ -25,20 +30,18 @@ FunASR提供可一键本地或者云端服务器部署的英文离线文件转�
 curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/install_docker.sh；
 sudo bash install_docker.sh
 ```
+docker安装失败请参考 [Docker Installation](https://alibaba-damo-academy.github.io/FunASR/en/installation/docker.html)
 
 ### 镜像启动
-
 通过下述命令拉取并启动FunASR runtime-SDK的docker镜像：
-
 ```shell
 sudo docker pull \
   registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.1
 mkdir -p ./funasr-runtime-resources/models
-sudo docker run -p 10095:10095 -it --privileged=true \
+sudo docker run -p 10097:10095 -it --privileged=true \
   -v $PWD/funasr-runtime-resources/models:/workspace/models \
   registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.1
 ```
-如果您没有安装docker，可参考[Docker安装](#Docker安装)
 
 ### 服务端启动
 
@@ -67,33 +70,6 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --au
 ```
 
 ------------------
-## Docker安装
-
-下述步骤为手动安装docker环境的步骤：
-
-### docker环境安装
-```shell
-# Ubuntu：
-curl -fsSL https://test.docker.com -o test-docker.sh 
-sudo sh test-docker.sh 
-# Debian：
-curl -fsSL https://get.docker.com -o get-docker.sh 
-sudo sh get-docker.sh 
-# CentOS：
-curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun 
-# MacOS：
-brew install --cask --appdir=/Applications docker
-```
-
-安装详见：https://alibaba-damo-academy.github.io/FunASR/en/installation/docker.html
-
-### docker启动
-
-```shell
-sudo systemctl start docker
-```
-
-
 ## 客户端用法详解
 
 在服务器上完成FunASR服务部署以后，可以通过如下的步骤来测试和使用离线文件转写服务。
@@ -155,8 +131,6 @@ FunasrWsClient --host localhost --port 10095 --audio_in ./asr_example.wav --mode
 ```
 详细可以参考文档（[点击此处](../java/readme.md)）
 
-
-
 ## 服务端用法详解：
 
 ### 启动FunASR服务
@@ -212,14 +186,12 @@ kill -9 PID
     --certfile 0
 ```
 
-
 执行上述指令后，启动英文离线文件转写服务。如果模型指定为ModelScope中model id，会自动从MoldeScope中下载如下模型：
 [FSMN-VAD模型](https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary),
 [Paraformer-lagre模型](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-en-16k-common-vocab10020-onnx/summary),
 [CT-Transformer标点预测模型](https://www.modelscope.cn/models/damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx/summary)
 
 如果，您希望部署您finetune后的模型（例如10epoch.pb），需要手动将模型重命名为model.pb，并将原modelscope中模型model.pb替换掉，将路径指定为`model_dir`即可。
-
 
 ## 如何定制服务部署
 
@@ -235,9 +207,6 @@ https://github.com/alibaba-damo-academy/FunASR/tree/main/runtime/python/websocke
 ### 自定义客户端：
 
 如果您想定义自己的client，参考[websocket通信协议](./websocket_protocol_zh.md)
-
-
-```
 
 ### c++ 服务端：
 

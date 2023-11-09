@@ -4,6 +4,15 @@ FunASR提供可一键本地或者云端服务器部署的中文离线文件转�
 
 本文档为FunASR离线文件转写服务开发指南。如果您想快速体验离线文件转写服务，可参考[快速上手](#快速上手)。
 
+<img src="images/offline_structure.jpg"  width="900"/>
+
+| 时间         | 详情                                                | 镜像版本                         | 镜像ID         |
+|------------|---------------------------------------------------|------------------------------|--------------|
+| 2023.11.08 | 支持标点大模型、支持Ngram模型、支持fst热词、支持服务端加载热词、runtime结构变化适配 | funasr-runtime-sdk-cpu-0.3.0 | caa64bddbb43 |
+| 2023.09.19 | 支持ITN模型                                           | funasr-runtime-sdk-cpu-0.2.2 | 2c5286be13e9 |
+| 2023.08.22 | 集成ffmpeg支持多种音视频输入、支持热词模型、支持时间戳模型                  | funasr-runtime-sdk-cpu-0.2.0 | 1ad3d19e0707 |
+| 2023.07.03 | 1.0 发布                                            | funasr-runtime-sdk-cpu-0.1.0 | 1ad3d19e0707 |
+
 ## 服务器配置
 
 用户可以根据自己的业务需求，选择合适的服务器配置，推荐配置为：
@@ -25,6 +34,7 @@ FunASR提供可一键本地或者云端服务器部署的中文离线文件转�
 curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/install_docker.sh；
 sudo bash install_docker.sh
 ```
+docker安装失败请参考 [Docker Installation](https://alibaba-damo-academy.github.io/FunASR/en/installation/docker.html)
 
 ### 镜像启动
 
@@ -38,7 +48,6 @@ sudo docker run -p 10095:10095 -it --privileged=true \
   -v $PWD/funasr-runtime-resources/models:/workspace/models \
   registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.3.0
 ```
-如果您没有安装docker，可参考[Docker安装](#Docker安装)
 
 ### 服务端启动
 
@@ -51,15 +60,20 @@ nohup bash run_server.sh \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
   --punc-dir damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx \
   --lm-dir damo/speech_ngram_lm_zh-cn-ai-wesp-fst \
-  --itn-dir thuduj12/fst_itn_zh > log.out 2>&1 &
+  --itn-dir thuduj12/fst_itn_zh \
+  --hotword /workspace/models/hotwords.txt > log.out 2>&1 &
 
 # 如果您想关闭ssl，增加参数：--certfile 0
 # 如果您想使用时间戳或者nn热词模型进行部署，请设置--model-dir为对应模型：
-# damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx（时间戳）
-# 或者 damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（热词）
-
+#   damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx（时间戳）
+#   damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（nn热词）
+# 如果您想在服务端加载热词，请在宿主机文件./funasr-runtime-resources/models/hotwords.txt配置热词（docker映射地址为/workspace/models/hotwords.txt）:
+#   每行一个热词，格式(热词 权重)：阿里巴巴 20
 ```
+如果您想定制ngram，参考文档([如何训练LM](./lm_train_tutorial.md))
+
 服务端详细参数介绍可参考[服务端用法详解](#服务端用法详解)
+
 ### 客户端测试与使用
 
 下载客户端测试工具目录samples
@@ -70,34 +84,6 @@ wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_sa
 ```shell
 python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.wav"
 ```
-
-------------------
-## Docker安装
-
-下述步骤为手动安装docker环境的步骤：
-
-### docker环境安装
-```shell
-# Ubuntu：
-curl -fsSL https://test.docker.com -o test-docker.sh 
-sudo sh test-docker.sh 
-# Debian：
-curl -fsSL https://get.docker.com -o get-docker.sh 
-sudo sh get-docker.sh 
-# CentOS：
-curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun 
-# MacOS：
-brew install --cask --appdir=/Applications docker
-```
-
-安装详见：https://alibaba-damo-academy.github.io/FunASR/en/installation/docker.html
-
-### docker启动
-
-```shell
-sudo systemctl start docker
-```
-
 
 ## 客户端用法详解
 
@@ -137,7 +123,6 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline \
 ```
 
 命令参数说明：
-
 ```text
 --server-ip 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，
             需要改为部署机器ip
@@ -148,13 +133,11 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline \
 ```
 
 ### Html网页版
-
 在浏览器中打开 html/static/index.html，即可出现如下页面，支持麦克风输入与文件上传，直接进行体验
 
 <img src="images/html.png"  width="900"/>
 
 ### Java-client
-
 ```shell
 FunasrWsClient --host localhost --port 10095 --audio_in ./asr_example.wav --mode offline
 ```
@@ -228,6 +211,7 @@ kill -9 PID
 
 如果，您希望部署您finetune后的模型（例如10epoch.pb），需要手动将模型重命名为model.pb，并将原modelscope中模型model.pb替换掉，将路径指定为`model_dir`即可。
 
+------------------
 
 ## 如何定制服务部署
 
@@ -243,9 +227,6 @@ https://github.com/alibaba-damo-academy/FunASR/tree/main/runtime/python/websocke
 ### 自定义客户端：
 
 如果您想定义自己的client，参考[websocket通信协议](./websocket_protocol_zh.md)
-
-
-```
 
 ### c++ 服务端：
 
