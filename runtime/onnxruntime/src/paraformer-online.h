@@ -109,7 +109,7 @@ namespace funasr {
         void AddOverlapChunk(std::vector<std::vector<float>> &wav_feats, bool input_finished);
         
         string ForwardChunk(std::vector<std::vector<float>> &wav_feats, bool input_finished);
-        string Forward(float* din, int len, bool input_finished, const std::vector<std::vector<float>> &hw_emb={{0.0}});
+        string Forward(float* din, int len, bool input_finished, const std::vector<std::vector<float>> &hw_emb={{0.0}}, void* wfst_decoder=nullptr);
         string Rescoring();
         // 2pass
         std::string online_res;
