@@ -6,6 +6,7 @@ FunASR provides a real-time speech transcription service that can be easily depl
 
 | TIME       | INFO                                                                                | IMAGE VERSION                       | IMAGE ID     |
 |------------|-------------------------------------------------------------------------------------|-------------------------------------|--------------|
+| 2023.11.09 | fix bug: without online results                                                     | funasr-runtime-sdk-online-cpu-0.1.5 | b16584b6d38b      |
 | 2023.11.08 | supporting server-side loading of hotwords, adaptation to runtime structure changes | funasr-runtime-sdk-online-cpu-0.1.4 | 691974017c38 |
 | 2023.09.19 | supporting hotwords, timestamps, and ITN model in 2pass mode                        | funasr-runtime-sdk-online-cpu-0.1.2 | 7222c5319bcf |
 | 2023.08.11 | addressing some known bugs (including server crashes)                               | funasr-runtime-sdk-online-cpu-0.1.1 | bdbdd0b27dee |
