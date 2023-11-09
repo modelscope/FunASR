@@ -38,7 +38,7 @@ docker安装失败请参考 [Docker Installation](https://alibaba-damo-academy.g
 
 ### 镜像启动
 
-通过下述命令拉取并启动FunASR runtime-SDK的docker镜像：
+通过下述命令拉取并启动FunASR软件包的docker镜像：
 
 ```shell
 sudo docker pull \

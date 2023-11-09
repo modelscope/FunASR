@@ -132,24 +132,24 @@
 <h1>快速开始<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h1>
 <p>您可以通过如下几种方式使用FunASR功能:</p>
 <ul class="simple">
-<li><p>服务部署SDK</p></li>
+<li><p>服务部署社区软件包</p></li>
 <li><p>工业模型egs</p></li>
 <li><p>学术模型egs</p></li>
 </ul>
-<div class="section" id="sdk">
-<h2>服务部署SDK<a class="headerlink" href="#sdk" title="Permalink to this headline"></a></h2>
+<div class="section" id="id2">
+<h2>服务部署社区软件包<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h2>
 <div class="section" id="python">
 <h3>python版本示例<a class="headerlink" href="#python" title="Permalink to this headline"></a></h3>
 <p>支持实时流式语音识别，并且会用非流式模型进行纠错，输出文本带有标点。目前只支持单个client，如需多并发请参考下方c++版本服务部署SDK</p>
-<div class="section" id="id2">
-<h4>服务端部署<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h4>
+<div class="section" id="id3">
+<h4>服务端部署<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h4>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> funasr/runtime/python/websocket
 python funasr_wss_server.py --port <span class="m">10095</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="id3">
-<h4>客户端测试<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h4>
+<div class="section" id="id4">
+<h4>客户端测试<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h4>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python funasr_wss_client.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode 2pass --chunk_size <span class="s2">&quot;5,10,5&quot;</span>
 <span class="c1">#python funasr_wss_client.py --host &quot;127.0.0.1&quot; --port 10095 --mode 2pass --chunk_size &quot;8,8,4&quot; --audio_in &quot;./data/wav.scp&quot;</span>
 </pre></div>
@@ -160,38 +160,105 @@ python funasr_wss_server.py --port <span class="m">10095</span>
 </div>
 <div class="section" id="c">
 <h3>c++版本示例<a class="headerlink" href="#c" title="Permalink to this headline"></a></h3>
-<p>集成有，VAD，ASR与标点恢复模型，支持上百路并发请求</p>
-<div class="section" id="id4">
-<h4>实时语音听写服务部署<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h4>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy-online-cpu-zh.sh
-sudo bash funasr-runtime-deploy-online-cpu-zh.sh install --workspace ./funasr-runtime-resources
-</pre></div>
-</div>
-</div>
+<p>既可以进行高精度、高效率与高并发的文件转写，也可以进行低延时的实时语音听写。支持Docker化部署，多路请求。</p>
+<div class="section" id="docker">
+<h4>准备工作：docker安装（可选）<a class="headerlink" href="#docker" title="Permalink to this headline"></a></h4>
 <div class="section" id="id5">
-<h4>客户端测试与使用<a class="headerlink" href="#id5" title="Permalink to this headline"></a></h4>
-<p>客户端测试（<a class="reference external" href="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz">samples</a>）</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 funasr_wss_client.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode 2pass
+<h5>如果您已安装docker，忽略本步骤<a class="headerlink" href="#id5" title="Permalink to this headline"></a></h5>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/install_docker.sh；
+sudo bash install_docker.sh
 </pre></div>
 </div>
-<p>更多例子参考（<a class="reference internal" href="../runtime/docs/SDK_tutorial_online_zh.html"><span class="doc">点击此处</span></a>）</p>
+</div>
 </div>
 <div class="section" id="id6">
-<h4>离线文件转写服务部署<a class="headerlink" href="#id6" title="Permalink to this headline"></a></h4>
+<h4>实时语音听写服务部署<a class="headerlink" href="#id6" title="Permalink to this headline"></a></h4>
 <div class="section" id="id7">
-<h5>服务端部署<a class="headerlink" href="#id7" title="Permalink to this headline"></a></h5>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/funasr-runtime-deploy-offline-cpu-zh.sh
-sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace ./funasr-runtime-resources
+<h5>docker镜像下载与启动<a class="headerlink" href="#id7" title="Permalink to this headline"></a></h5>
+<p>通过下述命令拉取并启动FunASR软件包docker镜像（<a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/docs/SDK_advanced_guide_online_zh.md">获取最新镜像版本</a>）：</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo docker pull <span class="se">\</span>
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.5
+mkdir -p ./funasr-runtime-resources/models
+sudo docker run -p <span class="m">10096</span>:10095 -it --privileged<span class="o">=</span><span class="nb">true</span> <span class="se">\</span>
+  -v <span class="nv">$PWD</span>/funasr-runtime-resources/models:/workspace/models <span class="se">\</span>
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.5
 </pre></div>
 </div>
 </div>
 <div class="section" id="id8">
-<h5>客户端测试<a class="headerlink" href="#id8" title="Permalink to this headline"></a></h5>
+<h5>服务端启动<a class="headerlink" href="#id8" title="Permalink to this headline"></a></h5>
+<p>docker启动之后，启动 funasr-wss-server-2pass服务程序：</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> FunASR/runtime
+nohup bash run_server_2pass.sh <span class="se">\</span>
+  --download-model-dir /workspace/models <span class="se">\</span>
+  --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
+  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  <span class="se">\</span>
+  --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx  <span class="se">\</span>
+  --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx <span class="se">\</span>
+  --itn-dir thuduj12/fst_itn_zh <span class="se">\</span>
+  --hotword /workspace/models/hotwords.txt &gt; log.out <span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">&amp;</span>
+
+<span class="c1"># 如果您想关闭ssl，增加参数：--certfile 0</span>
+<span class="c1"># 如果您想使用时间戳或者nn热词模型进行部署，请设置--model-dir为对应模型：</span>
+<span class="c1">#   damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx（时间戳）</span>
+<span class="c1">#   damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（nn热词）</span>
+<span class="c1"># 如果您想在服务端加载热词，请在宿主机文件./funasr-runtime-resources/models/hotwords.txt配置热词（docker映射地址为/workspace/models/hotwords.txt）:</span>
+<span class="c1">#   每行一个热词，格式(热词 权重)：阿里巴巴 20</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="id9">
+<h4>客户端测试与使用<a class="headerlink" href="#id9" title="Permalink to this headline"></a></h4>
+<p>客户端测试（<a class="reference external" href="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz">samples</a>）</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 funasr_wss_client.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode 2pass
+</pre></div>
+</div>
+<p>更多例子参考（<a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/docs/SDK_advanced_guide_online_zh.md">点击此处</a>）</p>
+</div>
+<div class="section" id="id10">
+<h4>离线文件转写服务部署<a class="headerlink" href="#id10" title="Permalink to this headline"></a></h4>
+<div class="section" id="id11">
+<h5>镜像启动<a class="headerlink" href="#id11" title="Permalink to this headline"></a></h5>
+<p>通过下述命令拉取并启动FunASR软件包docker镜像（<a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/docs/SDK_advanced_guide_offline_zh.md">获取最新镜像版本</a>）：</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sudo docker pull <span class="se">\</span>
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.3.0
+mkdir -p ./funasr-runtime-resources/models
+sudo docker run -p <span class="m">10095</span>:10095 -it --privileged<span class="o">=</span><span class="nb">true</span> <span class="se">\</span>
+  -v <span class="nv">$PWD</span>/funasr-runtime-resources/models:/workspace/models <span class="se">\</span>
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.3.0
+</pre></div>
+</div>
+</div>
+<div class="section" id="id12">
+<h5>服务端启动<a class="headerlink" href="#id12" title="Permalink to this headline"></a></h5>
+<p>docker启动之后，启动 funasr-wss-server服务程序：</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> FunASR/runtime
+nohup bash run_server.sh <span class="se">\</span>
+  --download-model-dir /workspace/models <span class="se">\</span>
+  --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx <span class="se">\</span>
+  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  <span class="se">\</span>
+  --punc-dir damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx <span class="se">\</span>
+  --lm-dir damo/speech_ngram_lm_zh-cn-ai-wesp-fst <span class="se">\</span>
+  --itn-dir thuduj12/fst_itn_zh <span class="se">\</span>
+  --hotword /workspace/models/hotwords.txt &gt; log.out <span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">&amp;</span>
+
+<span class="c1"># 如果您想关闭ssl，增加参数：--certfile 0</span>
+<span class="c1"># 如果您想使用时间戳或者nn热词模型进行部署，请设置--model-dir为对应模型：</span>
+<span class="c1">#   damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx（时间戳）</span>
+<span class="c1">#   damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（nn热词）</span>
+<span class="c1"># 如果您想在服务端加载热词，请在宿主机文件./funasr-runtime-resources/models/hotwords.txt配置热词（docker映射地址为/workspace/models/hotwords.txt）:</span>
+<span class="c1">#   每行一个热词，格式(热词 权重)：阿里巴巴 20</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id13">
+<h5>客户端测试<a class="headerlink" href="#id13" title="Permalink to this headline"></a></h5>
 <p>客户端测试（<a class="reference external" href="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz">samples</a>）</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python3 funasr_wss_client.py --host <span class="s2">&quot;127.0.0.1&quot;</span> --port <span class="m">10095</span> --mode offline --audio_in <span class="s2">&quot;../audio/asr_example.wav&quot;</span>
 </pre></div>
 </div>
-<p>更多例子参考（<a class="reference internal" href="../runtime/docs/SDK_tutorial_zh.html"><span class="doc">点击此处</span></a>）</p>
+<p>更多例子参考（<a class="reference external" href="https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/docs/SDK_advanced_guide_offline_zh.md">点击此处</a>）</p>
 </div>
 </div>
 </div>
@@ -204,7 +271,7 @@ sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace ./funasr-r
 
 <span class="n">inference_pipeline</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span>
     <span class="n">task</span><span class="o">=</span><span class="n">Tasks</span><span class="o">.</span><span class="n">auto_speech_recognition</span><span class="p">,</span>
-    <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch&#39;</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="s1">&#39;damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch&#39;</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">rec_result</span> <span class="o">=</span> <span class="n">inference_pipeline</span><span class="p">(</span><span class="n">audio_in</span><span class="o">=</span><span class="s1">&#39;https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav&#39;</span><span class="p">)</span>
@@ -214,8 +281,8 @@ sudo bash funasr-runtime-deploy-offline-cpu-zh.sh install --workspace ./funasr-r
 </div>
 <p>更多例子可以参考（<a class="reference external" href="https://alibaba-damo-academy.github.io/FunASR/en/modelscope_pipeline/quick_start.html">点击此处</a>）</p>
 </div>
-<div class="section" id="id9">
-<h2>学术模型egs<a class="headerlink" href="#id9" title="Permalink to this headline"></a></h2>
+<div class="section" id="id14">
+<h2>学术模型egs<a class="headerlink" href="#id14" title="Permalink to this headline"></a></h2>
 <p>如果您希望从头开始训练，通常为学术模型，您可以通过下面的指令启动训练与推理：</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> egs/aishell/paraformer
 . ./run.sh --CUDA_VISIBLE_DEVICES<span class="o">=</span><span class="s2">&quot;0,1&quot;</span> --gpu_num<span class="o">=</span><span class="m">2</span>
