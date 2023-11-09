@@ -463,7 +463,7 @@
 
 		funasr::AudioFrame* frame = NULL;
 		while(audio->FetchChunck(frame) > 0){
-			string msg = asr_online_handle->Forward(frame->data, frame->len, frame->is_final);
+			string msg = ((funasr::ParaformerOnline*)asr_online_handle)->Forward(frame->data, frame->len, frame->is_final);
 			if(mode == ASR_ONLINE){
 				((funasr::ParaformerOnline*)asr_online_handle)->online_res += msg;
 				if(frame->is_final){
@@ -494,7 +494,7 @@
 		// timestamp
 		std::string cur_stamp = "[";		
 		while(audio->FetchTpass(frame) > 0){
-			string msg = asr_handle->Forward(frame->data, frame->len, frame->is_final, hw_emb);
+			string msg = ((funasr::Paraformer*)asr_handle)->Forward(frame->data, frame->len, frame->is_final, hw_emb);
 
 			std::vector<std::string> msg_vec = funasr::split(msg, '|');  // split with timestamp
 			if(msg_vec.size()==0){
