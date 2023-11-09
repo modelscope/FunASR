@@ -18,6 +18,7 @@
 #include <cstring>
 
 #ifdef _WIN32
+#include <win_func.h>
 #include<io.h>
 #ifndef R_OK
 #define R_OK 4

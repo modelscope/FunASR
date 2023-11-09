@@ -27,7 +27,9 @@
 
 using std::string;
 
+#ifndef _WIN32
 DECLARE_int32(v);
+#endif
 
 class LogMessage {
  public:
