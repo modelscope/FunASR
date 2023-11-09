@@ -17,10 +17,17 @@ output_dir=$4
 dump_dir=${output_dir}/ark; mkdir -p ${dump_dir}
 mkdir -p ${logdir}
 
-$cmd JOB=1:$nj $logdir/apply_cmvn.JOB.log \
-    python utils/apply_cmvn.py -a $fbankdir/ark/feats.JOB.ark \
-        -c $cmvn_file -i JOB -o ${dump_dir} \
-        || exit 1;
+#$cmd JOB=1:$nj $logdir/apply_cmvn.JOB.log \
+#    python utils/apply_cmvn.py -a $fbankdir/ark/feats.JOB.ark \
+#        -c $cmvn_file -i JOB -o ${dump_dir} \
+#        || exit 1;
+
+for JOB in `seq 1 $nj`;do
+  {
+      python utils/apply_cmvn.py -a $fbankdir/ark/feats.${JOB}.ark \
+    -c $cmvn_file -i ${JOB} -o ${dump_dir} || exit 1;
+  } &> $logdir/apply_cmvn.${JOB}.log &
+done
 
 for n in $(seq $nj); do
     cat ${dump_dir}/feats.$n.scp || exit 1
