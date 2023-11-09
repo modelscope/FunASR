@@ -29,7 +29,7 @@ python funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass --chunk
 更多例子可以参考（[点击此处](../runtime/python/websocket/README.md)）
 
 <a name="cpp版本示例"></a>
-#### c++版本示例
+#### 服务部署软件包
 
 既可以进行高精度、高效率与高并发的文件转写，也可以进行低延时的实时语音听写。支持Docker化部署，多路请求。
 
@@ -37,7 +37,7 @@ python funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass --chunk
 ###### 如果您已安装docker，忽略本步骤
 
 ```shell
-curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/install_docker.sh；
+curl -O https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/shell/install_docker.sh;
 sudo bash install_docker.sh
 ```
 
@@ -80,7 +80,7 @@ nohup bash run_server_2pass.sh \
 客户端测试（[samples](https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz)）
 
 ```shell
-python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass
+python3 funasr_wss_client.py --host "127.0.0.1" --port 10096 --mode 2pass
 ```
 更多例子参考（[点击此处](https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/docs/SDK_advanced_guide_online_zh.md)）
 
@@ -98,7 +98,6 @@ sudo docker run -p 10095:10095 -it --privileged=true \
   -v $PWD/funasr-runtime-resources/models:/workspace/models \
   registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.3.0
 ```
-
 
 ###### 服务端启动
 
