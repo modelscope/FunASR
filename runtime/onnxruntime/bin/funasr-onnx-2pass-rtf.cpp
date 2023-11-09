@@ -279,7 +279,7 @@ int main(int argc, char** argv)
     // hotword file
     unordered_map<string, int> hws_map;
     std::string nn_hotwords_ = "";
-    std::string hotword_path = model_path.at(HOTWORD);
+    std::string hotword_path = hotword.getValue();
     LOG(INFO) << "hotword path: " << hotword_path;
     funasr::ExtractHws(hotword_path, hws_map, nn_hotwords_);
 
