@@ -24,8 +24,8 @@ bash fst/train_lms.sh
 python3 fst/generate_lexicon.py lm/corpus.dict lm/lexicon.txt lm/lexicon.out
 ```
 
-编译TLG需要依赖fst的环境，请参考文档安装fts相关环境（[点击此处](../onnxruntime/readme.md)）
 ## 编译TLG.fst
+编译TLG需要依赖fst的环境，请参考文档安装fts相关环境（[点击此处](../onnxruntime/readme.md)）
 ```shell
 
 # Compile the lexicon and token FSTs
