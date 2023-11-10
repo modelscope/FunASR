@@ -336,6 +336,10 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
   auto it_data = data_map.find(hdl);
   if (it_data != data_map.end()) {
     msg_data = it_data->second;
+    if(msg_data->msg["is_eof"]){
+      lock.unlock();
+      return;
+    }
   } else {
     lock.unlock();
     return;
@@ -363,7 +367,9 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
       }catch (std::exception const &e)
       {
         LOG(ERROR)<<e.what();
-        break;
+        msg_data->msg["is_eof"]=true;
+        guard_decoder.unlock();
+        return;
       }
 
       if (jsonresult.contains("wav_name")) {
@@ -387,25 +393,22 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
             nlohmann::json json_fst_hws;
             try{
               json_fst_hws = nlohmann::json::parse(json_string);
+              if(json_fst_hws.type() == nlohmann::json::value_t::object){
+                // fst
+                try{
+                  std::unordered_map<std::string, int> client_hws_map = json_fst_hws;
+                  merged_hws_map.insert(client_hws_map.begin(), client_hws_map.end());
+                } catch (const std::exception& e) {
+                  LOG(INFO) << e.what();
+                }
+              }
             } catch (std::exception const &e)
             {
               LOG(ERROR)<<e.what();
-              break;
-            }
-            
-            if(json_fst_hws.type() == nlohmann::json::value_t::object){
-              // fst
-              try{
-                std::unordered_map<std::string, int> client_hws_map = json_fst_hws;
-                merged_hws_map.insert(client_hws_map.begin(), client_hws_map.end());
-              } catch (const std::exception& e) {
-                LOG(INFO) << e.what();
-              }
-            }else{
               // nn
               std::string client_nn_hws = jsonresult["hotwords"];
               nn_hotwords += " " + client_nn_hws;
-              LOG(INFO) << "nn hotwords: " << client_nn_hws;
+              // LOG(INFO) << "nn hotwords: " << client_nn_hws;
             }
           }
         }
@@ -448,8 +451,8 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
       }
       LOG(INFO) << "jsonresult=" << jsonresult
                 << ", msg_data->msg=" << msg_data->msg;
-      if (jsonresult["is_speaking"] == false ||
-          jsonresult["is_finished"] == true) {
+      if ((jsonresult["is_speaking"] == false ||
+          jsonresult["is_finished"] == true) && msg_data->msg["is_eof"] != true) {
         LOG(INFO) << "client done";
 
         // if it is in final message, post the sample_data to decode
@@ -500,21 +503,23 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
 
           try{
             // post to decode
-            std::vector<std::vector<float>> hotwords_embedding_(*(msg_data->hotwords_embedding));
-            msg_data->strand_->post( 
-                      std::bind(&WebSocketServer::do_decoder, this,
-                                std::move(subvector), std::move(hdl),
-                                std::ref(msg_data->msg),
-                                std::ref(*(punc_cache_p.get())),
-                                std::move(hotwords_embedding_),
-                                std::ref(*thread_lock_p), std::move(false),
-                                msg_data->msg["wav_name"],
-                                msg_data->msg["mode"],
-                                msg_data->msg["itn"],
-                                msg_data->msg["audio_fs"],
-                                msg_data->msg["wav_format"],
-                                std::ref(msg_data->tpass_online_handle)));
-            msg_data->msg["access_num"]=(int)(msg_data->msg["access_num"])+1;
+            if (msg_data->msg["is_eof"] != true) {
+              std::vector<std::vector<float>> hotwords_embedding_(*(msg_data->hotwords_embedding));
+              msg_data->strand_->post( 
+                        std::bind(&WebSocketServer::do_decoder, this,
+                                  std::move(subvector), std::move(hdl),
+                                  std::ref(msg_data->msg),
+                                  std::ref(*(punc_cache_p.get())),
+                                  std::move(hotwords_embedding_),
+                                  std::ref(*thread_lock_p), std::move(false),
+                                  msg_data->msg["wav_name"],
+                                  msg_data->msg["mode"],
+                                  msg_data->msg["itn"],
+                                  msg_data->msg["audio_fs"],
+                                  msg_data->msg["wav_format"],
+                                  std::ref(msg_data->tpass_online_handle)));
+              msg_data->msg["access_num"]=(int)(msg_data->msg["access_num"])+1;
+            }
           }
           catch (std::exception const &e)
           {

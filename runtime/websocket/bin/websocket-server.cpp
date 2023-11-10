@@ -146,6 +146,7 @@ void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
   data_msg->msg["itn"] = true;
   data_msg->msg["audio_fs"] = 16000;
   data_msg->msg["access_num"] = 0; // the number of access for this object, when it is 0, we can free it saftly
+  data_msg->msg["is_eof"]=false;
   FUNASR_DEC_HANDLE decoder_handle =
     FunASRWfstDecoderInit(asr_handle, ASR_OFFLINE, global_beam_, lattice_beam_, am_scale_);
   data_msg->decoder_handle = decoder_handle;
@@ -250,6 +251,10 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
   auto it_data = data_map.find(hdl);
   if (it_data != data_map.end()) {
     msg_data = it_data->second;
+    if(msg_data->msg["is_eof"]){
+      lock.unlock();
+      return;
+    }
   } else{
     lock.unlock();
     return;
@@ -274,7 +279,9 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
       }catch (std::exception const &e)
       {
         LOG(ERROR)<<e.what();
-        break;
+        msg_data->msg["is_eof"]=true;
+        guard_decoder.unlock();
+        return;
       }
 
       if (jsonresult["wav_name"] != nullptr) {
@@ -295,25 +302,22 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
             nlohmann::json json_fst_hws;
             try{
               json_fst_hws = nlohmann::json::parse(json_string);
+              if(json_fst_hws.type() == nlohmann::json::value_t::object){
+                // fst
+                try{
+                  std::unordered_map<std::string, int> client_hws_map = json_fst_hws;
+                  merged_hws_map.insert(client_hws_map.begin(), client_hws_map.end());
+                } catch (const std::exception& e) {
+                  LOG(INFO) << e.what();
+                }
+              }
             } catch (std::exception const &e)
             {
               LOG(ERROR)<<e.what();
-              break;
-            }
-            
-            if(json_fst_hws.type() == nlohmann::json::value_t::object){
-              // fst
-              try{
-                std::unordered_map<std::string, int> client_hws_map = json_fst_hws;
-                merged_hws_map.insert(client_hws_map.begin(), client_hws_map.end());
-              } catch (const std::exception& e) {
-                LOG(INFO) << e.what();
-              }
-            }else{
               // nn
               std::string client_nn_hws = jsonresult["hotwords"];
               nn_hotwords += " " + client_nn_hws;
-              LOG(INFO) << "nn hotwords: " << client_nn_hws;
+              // LOG(INFO) << "nn hotwords: " << client_nn_hws;
             }
           }
         }
@@ -338,8 +342,8 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
       if (jsonresult.contains("itn")) {
         msg_data->msg["itn"] = jsonresult["itn"];
       }
-      if (jsonresult["is_speaking"] == false ||
-          jsonresult["is_finished"] == true) {
+      if ((jsonresult["is_speaking"] == false ||
+          jsonresult["is_finished"] == true) && msg_data->msg["is_eof"] != true) {
         LOG(INFO) << "client done";
         // for offline, send all receive data to decoder engine
         std::vector<std::vector<float>> hotwords_embedding_(*(msg_data->hotwords_embedding));
@@ -376,6 +380,7 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
     default:
       break;
   }
+  guard_decoder.unlock();
 }
 
 // init asr model
