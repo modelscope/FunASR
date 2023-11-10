@@ -1,5 +1,5 @@
 cmake_policy (PUSH)
-cmake_policy (VERSION 3.3)
+cmake_policy (VERSION 3.16...3.27)
 
 include (CMakeParseArguments)
 

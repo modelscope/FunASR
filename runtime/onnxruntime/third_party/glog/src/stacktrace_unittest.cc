@@ -27,14 +27,15 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "utilities.h"
+#include "stacktrace.h"
 
 #include <cstdio>
 #include <cstdlib>
-#include "config.h"
+
 #include "base/commandlineflags.h"
-#include <glog/logging.h>
-#include "stacktrace.h"
+#include "config.h"
+#include "glog/logging.h"
+#include "utilities.h"
 
 #ifdef HAVE_EXECINFO_BACKTRACE_SYMBOLS
 # include <execinfo.h>
