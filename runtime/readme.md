@@ -39,6 +39,7 @@ The FunASR real-time speech-to-text service software package not only performs r
 In order to meet the needs of different users for different scenarios, different tutorials are prepared:
 
 ### Whats-new
+- 2023/11/09: Real-time Transcription Service 1.5 released，fix bug: without online results, docker image version funasr-runtime-sdk-online-cpu-0.1.5 (b16584b6d38b)
 - 2023/11/08: Real-time Transcription Service 1.4 released, supporting server-side loading of hotwords (updated hotword communication protocol), adaptation to runtime structure changes (FunASR/funasr/runtime -> FunASR/runtime), docker image version funasr-runtime-sdk-online-cpu-0.1.4(691974017c38).
 - 2023/09/19: Real-time Transcription Service 1.2 released, supporting hotwords, timestamps, and ITN model in 2pass mode, docker image version funasr-runtime-sdk-online-cpu-0.1.2 (7222c5319bcf).
 - 2023/08/11: Real-time Transcription Service 1.1 released, addressing some known bugs (including server crashes), docker image version funasr-runtime-sdk-online-cpu-0.1.1 (bdbdd0b27dee).
