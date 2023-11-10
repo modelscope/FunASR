@@ -11,8 +11,13 @@
 //                    <string>] [--punc-quant <string>] [--punc-dir <string>]
 //                    [--vad-quant <string>] [--vad-dir <string>] [--quantize
 //                    <string>] --model-dir <string> [--] [--version] [-h]
-#include <unistd.h>
+
 #include "websocket-server-2pass.h"
+#ifdef _WIN32
+#include "win_func.h"
+#else
+#include <unistd.h>
+#endif
 #include <fstream>
 #include "util.h"
 

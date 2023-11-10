@@ -53,3 +53,4 @@ mkdir build
 cd build
 cmake ../ -D FFMPEG_DIR=d:/ffmpeg-master-latest-win64-gpl-shared -D ONNXRUNTIME_DIR=d:/onnxruntime-win-x64-1.16.1
 ```
+Visual Studio open FunASROnnx.sln start build
