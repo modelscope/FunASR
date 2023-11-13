@@ -135,15 +135,15 @@
 <h2>Building for Linux/Unix<a class="headerlink" href="#building-for-linux-unix" title="Permalink to this headline"></a></h2>
 <div class="section" id="download-onnxruntime">
 <h3>Download onnxruntime<a class="headerlink" href="#download-onnxruntime" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>wget https://github.com/microsoft/onnxruntime/releases/download/v1.14.0/onnxruntime-linux-x64-1.14.0.tgz
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/dep_libs/onnxruntime-linux-x64-1.14.0.tgz
 tar -zxvf onnxruntime-linux-x64-1.14.0.tgz
 </pre></div>
 </div>
 </div>
 <div class="section" id="download-ffmpeg">
 <h3>Download ffmpeg<a class="headerlink" href="#download-ffmpeg" title="Permalink to this headline"></a></h3>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/dep_libs/ffmpeg-N-111383-g20b8688092-linux64-gpl-shared.tar.xz
-tar -xvf ffmpeg-N-111383-g20b8688092-linux64-gpl-shared.tar.xz
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/dep_libs/ffmpeg-master-latest-linux64-gpl-shared.tar.xz
+tar -xvf ffmpeg-master-latest-linux64-gpl-shared.tar.xz
 </pre></div>
 </div>
 </div>
@@ -163,7 +163,7 @@ apt-get install libssl-dev <span class="c1">#ubuntu </span>
 <h3>Build runtime<a class="headerlink" href="#build-runtime" title="Permalink to this headline"></a></h3>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/alibaba-damo-academy/FunASR.git <span class="o">&amp;&amp;</span> <span class="nb">cd</span> FunASR/runtime/onnxruntime
 mkdir build <span class="o">&amp;&amp;</span> <span class="nb">cd</span> build
-cmake  -DCMAKE_BUILD_TYPE<span class="o">=</span>release .. -DONNXRUNTIME_DIR<span class="o">=</span>/path/to/onnxruntime-linux-x64-1.14.0 -DFFMPEG_DIR<span class="o">=</span>/path/to/ffmpeg-N-111383-g20b8688092-linux64-gpl-shared
+cmake  -DCMAKE_BUILD_TYPE<span class="o">=</span>release .. -DONNXRUNTIME_DIR<span class="o">=</span>/path/to/onnxruntime-linux-x64-1.14.0 -DFFMPEG_DIR<span class="o">=</span>/path/to/ffmpeg-master-latest-linux64-gpl-shared
 make -j <span class="m">4</span>
 </pre></div>
 </div>
