@@ -9,7 +9,14 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 option(ENABLE_WEBSOCKET "Whether to build websocket server" ON)
 option(ENABLE_PORTAUDIO "Whether to build portaudio" ON)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fPIC")
+if(WIN32)
+else()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fPIC")
+endif()
+
+
+
+
 option(ENABLE_GLOG "Whether to build glog" ON)
 option(ENABLE_FST "Whether to build openfst" ON) # ITN need openfst compiled
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)

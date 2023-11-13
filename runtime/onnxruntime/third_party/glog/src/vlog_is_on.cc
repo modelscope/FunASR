@@ -32,17 +32,17 @@
 // Broken out from logging.cc by Soren Lassen
 // logging_unittest.cc covers the functionality herein
 
-#include "utilities.h"
-
-#include <cstring>
-#include <cstdlib>
 #include <cerrno>
 #include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <string>
+
 #include "base/commandlineflags.h"
-#include <glog/logging.h>
-#include <glog/raw_logging.h>
 #include "base/googleinit.h"
+#include "glog/logging.h"
+#include "glog/raw_logging.h"
+#include "utilities.h"
 
 // glog doesn't have annotation
 #define ANNOTATE_BENIGN_RACE(address, description)

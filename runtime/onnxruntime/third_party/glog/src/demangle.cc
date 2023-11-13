@@ -36,7 +36,9 @@
 
 #include "demangle.h"
 
+#include <cstddef>
 #include <cstdio>  // for nullptr
+#include <limits>
 
 #include "utilities.h"
 
@@ -109,6 +111,9 @@ struct State {
   short nest_level;          // For nested names.
   bool append;               // Append flag.
   bool overflowed;           // True if output gets overflowed.
+  uint32 local_level;
+  uint32 expr_level;
+  uint32 arg_level;
 };
 
 // We don't use strlen() in libc since it's not guaranteed to be async
@@ -153,6 +158,9 @@ static void InitState(State *state, const char *mangled,
   state->nest_level = -1;
   state->append = true;
   state->overflowed = false;
+  state->local_level = 0;
+  state->expr_level = 0;
+  state->arg_level = 0;
 }
 
 // Returns true and advances "mangled_cur" if we find "one_char_token"
@@ -221,6 +229,10 @@ static bool ZeroOrMore(ParseFunc parse_func, State *state) {
 // is set to true for later use.  The output string is ensured to
 // always terminate with '\0' as long as there is no overflow.
 static void Append(State *state, const char * const str, ssize_t length) {
+  if (state->out_cur == nullptr) {
+    state->overflowed = true;
+    return;
+  }
   for (ssize_t i = 0; i < length; ++i) {
     if (state->out_cur + 1 < state->out_end) {  // +1 for '\0'
       *state->out_cur = str[i];
@@ -294,7 +306,7 @@ static void MaybeAppendWithLength(State *state, const char * const str,
   }
 }
 
-// A convenient wrapper arount MaybeAppendWithLength().
+// A convenient wrapper around MaybeAppendWithLength().
 static bool MaybeAppend(State *state, const char * const str) {
   if (state->append) {
     size_t length = StrLen(str);
@@ -592,9 +604,23 @@ static bool ParseNumber(State *state, int *number_out) {
   }
   const char *p = state->mangled_cur;
   int number = 0;
+  constexpr int int_max_by_10 = std::numeric_limits<int>::max() / 10;
   for (;*p != '\0'; ++p) {
     if (IsDigit(*p)) {
-      number = number * 10 + (*p - '0');
+      // Prevent signed integer overflow when multiplying
+      if (number > int_max_by_10) {
+        return false;
+      }
+
+      const int digit = *p - '0';
+      const int shifted = number * 10;
+
+      // Prevent signed integer overflow when summing
+      if (digit > std::numeric_limits<int>::max() - shifted) {
+        return false;
+      }
+
+      number = shifted + digit;
     } else {
       break;
     }
@@ -651,6 +677,10 @@ static bool ParseIdentifier(State *state, ssize_t length) {
     MaybeAppend(state, "(anonymous namespace)");
   } else {
     MaybeAppendWithLength(state, state->mangled_cur, length);
+  }
+  if (length < 0 ||
+      static_cast<std::size_t>(length) > StrLen(state->mangled_cur)) {
+    return false;
   }
   state->mangled_cur += length;
   return true;
@@ -1067,22 +1097,33 @@ static bool ParseTemplateArgs(State *state) {
 //                 ::= J <template-arg>* E        # argument pack
 //                 ::= X <expression> E
 static bool ParseTemplateArg(State *state) {
+  // Avoid recursion above max_levels
+  constexpr uint32 max_levels = 5;
+
+  if (state->arg_level > max_levels) {
+    return false;
+  }
+  ++state->arg_level;
+
   State copy = *state;
   if ((ParseOneCharToken(state, 'I') || ParseOneCharToken(state, 'J')) &&
       ZeroOrMore(ParseTemplateArg, state) &&
       ParseOneCharToken(state, 'E')) {
+    --state->arg_level;
     return true;
   }
   *state = copy;
 
   if (ParseType(state) ||
       ParseExprPrimary(state)) {
+    --state->arg_level;
     return true;
   }
   *state = copy;
 
   if (ParseOneCharToken(state, 'X') && ParseExpression(state) &&
       ParseOneCharToken(state, 'E')) {
+    --state->arg_level;
     return true;
   }
   *state = copy;
@@ -1103,11 +1144,20 @@ static bool ParseExpression(State *state) {
     return true;
   }
 
+  // Avoid recursion above max_levels
+  constexpr uint32 max_levels = 5;
+
+  if (state->expr_level > max_levels) {
+    return false;
+  }
+  ++state->expr_level;
+
   State copy = *state;
   if (ParseOperatorName(state) &&
       ParseExpression(state) &&
       ParseExpression(state) &&
       ParseExpression(state)) {
+    --state->expr_level;
     return true;
   }
   *state = copy;
@@ -1115,30 +1165,35 @@ static bool ParseExpression(State *state) {
   if (ParseOperatorName(state) &&
       ParseExpression(state) &&
       ParseExpression(state)) {
+    --state->expr_level;
     return true;
   }
   *state = copy;
 
   if (ParseOperatorName(state) &&
       ParseExpression(state)) {
+    --state->expr_level;
     return true;
   }
   *state = copy;
 
   if (ParseTwoCharToken(state, "st") && ParseType(state)) {
     return true;
+    --state->expr_level;
   }
   *state = copy;
 
   if (ParseTwoCharToken(state, "sr") && ParseType(state) &&
       ParseUnqualifiedName(state) &&
       ParseTemplateArgs(state)) {
+    --state->expr_level;
     return true;
   }
   *state = copy;
 
   if (ParseTwoCharToken(state, "sr") && ParseType(state) &&
       ParseUnqualifiedName(state)) {
+    --state->expr_level;
     return true;
   }
   *state = copy;
@@ -1184,16 +1239,25 @@ static bool ParseExprPrimary(State *state) {
 //                 [<discriminator>]
 //              := Z <(function) encoding> E s [<discriminator>]
 static bool ParseLocalName(State *state) {
+  // Avoid recursion above max_levels
+  constexpr uint32 max_levels = 5;
+  if (state->local_level > max_levels) {
+    return false;
+  }
+  ++state->local_level;
+
   State copy = *state;
   if (ParseOneCharToken(state, 'Z') && ParseEncoding(state) &&
       ParseOneCharToken(state, 'E') && MaybeAppend(state, "::") &&
       ParseName(state) && Optional(ParseDiscriminator(state))) {
+    --state->local_level;
     return true;
   }
   *state = copy;
 
   if (ParseOneCharToken(state, 'Z') && ParseEncoding(state) &&
       ParseTwoCharToken(state, "Es") && Optional(ParseDiscriminator(state))) {
+    --state->local_level;
     return true;
   }
   *state = copy;

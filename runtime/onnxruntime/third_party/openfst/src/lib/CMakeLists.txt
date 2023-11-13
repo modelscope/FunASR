@@ -1,7 +1,7 @@
 FILE(GLOB HEADER_FILES ../include/fst/*.h)
 
 
-add_library(fst
+add_library(fst STATIC
   compat.cc
   flags.cc
   fst-types.cc

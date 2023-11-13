@@ -266,7 +266,7 @@
 			if(msg_vec.size()==0){
 				continue;
 			}
-			if(lang == "en-bpe" and p_result->msg != ""){
+			if(lang == "en-bpe" && p_result->msg != ""){
 				p_result->msg += " ";
 			}
 			p_result->msg += msg_vec[0];
@@ -355,7 +355,7 @@
 			if(msg_vec.size()==0){
 				continue;
 			}
-			if(lang == "en-bpe" and p_result->msg != ""){
+			if(lang == "en-bpe" && p_result->msg != ""){
 				p_result->msg += " ";
 			}
 			p_result->msg += msg_vec[0];

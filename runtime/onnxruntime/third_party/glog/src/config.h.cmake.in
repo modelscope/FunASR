@@ -130,12 +130,15 @@
 /* define if gmtime_r is available in time.h */
 #cmakedefine HAVE_GMTIME_R
 
+/* define if _chsize_s is available in io.h */
+#cmakedefine HAVE__CHSIZE_S
+
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */
 #cmakedefine LT_OBJDIR
 
 /* How to access the PC from a struct ucontext */
-#cmakedefine PC_FROM_UCONTEXT
+#cmakedefine PC_FROM_UCONTEXT ${PC_FROM_UCONTEXT}
 
 /* define if we should print file offsets in traces instead of symbolizing. */
 #cmakedefine PRINT_UNSYMBOLIZED_STACK_TRACES
