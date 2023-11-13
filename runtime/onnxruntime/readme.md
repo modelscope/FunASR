@@ -36,12 +36,12 @@ make -j 4
 
 ## Building for Windows
 ### Download onnxruntime
-https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl-shared.zip
+https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/dep_libs/onnxruntime-win-x64-1.16.1.zip
 
 Download and unzip to d:\ffmpeg-master-latest-win64-gpl-shared
 
 ### Download ffmpeg
-https://github.com/microsoft/onnxruntime/releases/download/v1.16.1/onnxruntime-win-x64-1.16.1.zip
+https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/dep_libs/ffmpeg-master-latest-win64-gpl-shared.zip
 
 Download and unzip to d:\onnxruntime-win-x64-1.16.1
 
