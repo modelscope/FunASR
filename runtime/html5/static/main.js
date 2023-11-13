@@ -315,7 +315,7 @@ function handleWithTimestamp(tmptext,tmptime)
 	{
 		return tmptext;
 	}
-	tmptext=tmptext.replace(/。/g, ","); // in case there are a lot of "。"
+	tmptext=tmptext.replace(/。|？|，|、|\?|\./g, ","); // replace all punc for parse
 	var words=tmptext.split(",");
 	var jsontime=JSON.parse(tmptime); //JSON.parse(tmptime.replace(/\]\]\[\[/g, "],[")); // in case there are a lot segments by VAD
 	var char_index=0;
