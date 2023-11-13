@@ -36,7 +36,7 @@ make -j 4
 
 ## Building for Windows
 ### Download onnxruntime
-https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl-\shared.zip
+https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl-shared.zip
 
 Download and unzip to d:\ffmpeg-master-latest-win64-gpl-shared
 
