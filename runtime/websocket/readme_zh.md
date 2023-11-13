@@ -53,13 +53,14 @@ https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/dep_libs/openssl-1.1.
 
 下载解压到 d:/src/openssl-1.1.1w
 
-打开 x64 Native Tools Command Prompt 执行以下编译步骤
 ```
+# 下载&安装 perl: https://www.activestate.com/products/activeperl/downloads/
 d:
 cd d:/src/openssl-1.1.1w
 perl Configure VC-WIN64A --prefix=d:/openssl-1.1.1w
+# 管理员身份打开 x64 Native Tools Command Prompt 执行以下编译步骤
 nmake
-namke install
+nmake install
 
 ```
 
@@ -71,5 +72,5 @@ mkdir build
 cd build
 cmake ../ -D OPENSSL_ROOT_DIR=d:/openssl-1.1.1w -D FFMPEG_DIR=d:/ffmpeg-master-latest-win64-gpl-shared -D ONNXRUNTIME_DIR=d:/onnxruntime-win-x64-1.16.1
 ```
-Visual Studio 打开 FunASRWebscoket.sln 完成编译
+Visual Studio 打开 FunASR/runtime/websocket/build/FunASRWebscoket.sln 完成编译
 
