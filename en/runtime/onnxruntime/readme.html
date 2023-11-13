@@ -169,6 +169,30 @@ make -j <span class="m">4</span>
 </div>
 </div>
 </div>
+<div class="section" id="building-for-windows">
+<h2>Building for Windows<a class="headerlink" href="#building-for-windows" title="Permalink to this headline"></a></h2>
+<div class="section" id="id1">
+<h3>Download onnxruntime<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h3>
+<p>https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl-\shared.zip</p>
+<p>Download and unzip to d:\ffmpeg-master-latest-win64-gpl-shared</p>
+</div>
+<div class="section" id="id2">
+<h3>Download ffmpeg<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h3>
+<p>https://github.com/microsoft/onnxruntime/releases/download/v1.16.1/onnxruntime-win-x64-1.16.1.zip</p>
+<p>Download and unzip to d:\onnxruntime-win-x64-1.16.1</p>
+</div>
+<div class="section" id="id3">
+<h3>Build runtime<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">alibaba</span><span class="o">-</span><span class="n">damo</span><span class="o">-</span><span class="n">academy</span><span class="o">/</span><span class="n">FunASR</span><span class="o">.</span><span class="n">git</span>
+<span class="n">cd</span> <span class="n">FunASR</span><span class="o">/</span><span class="n">runtime</span><span class="o">/</span><span class="n">onnxruntime</span>
+<span class="n">mkdir</span> <span class="n">build</span>
+<span class="n">cd</span> <span class="n">build</span>
+<span class="n">cmake</span> <span class="o">../</span> <span class="o">-</span><span class="n">D</span> <span class="n">FFMPEG_DIR</span><span class="o">=</span><span class="n">d</span><span class="p">:</span><span class="o">/</span><span class="n">ffmpeg</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="n">latest</span><span class="o">-</span><span class="n">win64</span><span class="o">-</span><span class="n">gpl</span><span class="o">-</span><span class="n">shared</span> <span class="o">-</span><span class="n">D</span> <span class="n">ONNXRUNTIME_DIR</span><span class="o">=</span><span class="n">d</span><span class="p">:</span><span class="o">/</span><span class="n">onnxruntime</span><span class="o">-</span><span class="n">win</span><span class="o">-</span><span class="n">x64</span><span class="o">-</span><span class="mf">1.16</span><span class="o">.</span><span class="mi">1</span>
+</pre></div>
+</div>
+<p>Visual Studio open FunASROnnx.sln start build</p>
+</div>
+</div>
 </div>
 
 
