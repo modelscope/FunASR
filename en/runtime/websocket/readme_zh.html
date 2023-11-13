@@ -188,12 +188,13 @@ make -j <span class="m">4</span>
 <h3>编译 openssl<a class="headerlink" href="#openssl" title="Permalink to this headline"></a></h3>
 <p>https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/dep_libs/openssl-1.1.1w.tar.gz</p>
 <p>下载解压到 d:/src/openssl-1.1.1w</p>
-<p>打开 x64 Native Tools Command Prompt 执行以下编译步骤</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">d</span><span class="p">:</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 下载&amp;安装 perl: https://www.activestate.com/products/activeperl/downloads/</span>
+<span class="n">d</span><span class="p">:</span>
 <span class="n">cd</span> <span class="n">d</span><span class="p">:</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">openssl</span><span class="o">-</span><span class="mf">1.1</span><span class="o">.</span><span class="mi">1</span><span class="n">w</span>
 <span class="n">perl</span> <span class="n">Configure</span> <span class="n">VC</span><span class="o">-</span><span class="n">WIN64A</span> <span class="o">--</span><span class="n">prefix</span><span class="o">=</span><span class="n">d</span><span class="p">:</span><span class="o">/</span><span class="n">openssl</span><span class="o">-</span><span class="mf">1.1</span><span class="o">.</span><span class="mi">1</span><span class="n">w</span>
+<span class="c1"># 管理员身份打开 x64 Native Tools Command Prompt 执行以下编译步骤</span>
 <span class="n">nmake</span>
-<span class="n">namke</span> <span class="n">install</span>
+<span class="n">nmake</span> <span class="n">install</span>
 </pre></div>
 </div>
 </div>
@@ -206,7 +207,7 @@ make -j <span class="m">4</span>
 <span class="n">cmake</span> <span class="o">../</span> <span class="o">-</span><span class="n">D</span> <span class="n">OPENSSL_ROOT_DIR</span><span class="o">=</span><span class="n">d</span><span class="p">:</span><span class="o">/</span><span class="n">openssl</span><span class="o">-</span><span class="mf">1.1</span><span class="o">.</span><span class="mi">1</span><span class="n">w</span> <span class="o">-</span><span class="n">D</span> <span class="n">FFMPEG_DIR</span><span class="o">=</span><span class="n">d</span><span class="p">:</span><span class="o">/</span><span class="n">ffmpeg</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="n">latest</span><span class="o">-</span><span class="n">win64</span><span class="o">-</span><span class="n">gpl</span><span class="o">-</span><span class="n">shared</span> <span class="o">-</span><span class="n">D</span> <span class="n">ONNXRUNTIME_DIR</span><span class="o">=</span><span class="n">d</span><span class="p">:</span><span class="o">/</span><span class="n">onnxruntime</span><span class="o">-</span><span class="n">win</span><span class="o">-</span><span class="n">x64</span><span class="o">-</span><span class="mf">1.16</span><span class="o">.</span><span class="mi">1</span>
 </pre></div>
 </div>
-<p>Visual Studio 打开 FunASRWebscoket.sln 完成编译</p>
+<p>Visual Studio 打开 FunASR/runtime/websocket/build/FunASRWebscoket.sln 完成编译</p>
 </div>
 </div>
 </div>
