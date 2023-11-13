@@ -6,14 +6,14 @@
 ## Linux/Unix 平台编译
 ### 下载 onnxruntime
 ```shell
-wget https://github.com/microsoft/onnxruntime/releases/download/v1.14.0/onnxruntime-linux-x64-1.14.0.tgz
+wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/dep_libs/onnxruntime-linux-x64-1.14.0.tgz
 tar -zxvf onnxruntime-linux-x64-1.14.0.tgz
 ```
 
 ### 下载 ffmpeg
 ```shell
-wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/dep_libs/ffmpeg-N-111383-g20b8688092-linux64-gpl-shared.tar.xz
-tar -xvf ffmpeg-N-111383-g20b8688092-linux64-gpl-shared.tar.xz
+wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/dep_libs/ffmpeg-master-latest-linux64-gpl-shared.tar.xz
+tar -xvf ffmpeg-master-latest-linux64-gpl-shared.tar.xz
 ```
 
 ### 安装依赖
@@ -32,24 +32,24 @@ apt-get install libssl-dev #ubuntu
 ```shell
 git clone https://github.com/alibaba-damo-academy/FunASR.git && cd FunASR/runtime/websocket
 mkdir build && cd build
-cmake  -DCMAKE_BUILD_TYPE=release .. -DONNXRUNTIME_DIR=/path/to/onnxruntime-linux-x64-1.14.0 -DFFMPEG_DIR=/path/to/ffmpeg-N-111383-g20b8688092-linux64-gpl-shared
+cmake  -DCMAKE_BUILD_TYPE=release .. -DONNXRUNTIME_DIR=/path/to/onnxruntime-linux-x64-1.14.0 -DFFMPEG_DIR=/path/to/ffmpeg-master-latest-linux64-gpl-shared
 make -j 4
 ```
 
 
 ## Windows 平台编译
 ### 下载 onnxruntime
-https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl-\shared.zip
+https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/dep_libs/onnxruntime-win-x64-1.16.1.zip
 
 下载并解压到 d:\ffmpeg-master-latest-win64-gpl-shared
 
 ### 下载 ffmpeg
-https://github.com/microsoft/onnxruntime/releases/download/v1.16.1/onnxruntime-win-x64-1.16.1.zip
+https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/dep_libs/ffmpeg-master-latest-win64-gpl-shared.zip
 
 下载并解压到 d:\onnxruntime-win-x64-1.16.1
 
 ### 编译 openssl
-https://www.openssl.org/source/openssl-1.1.1w.tar.gz 
+https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/dep_libs/openssl-1.1.1w.tar.gz 
 
 下载解压到 d:/src/openssl-1.1.1w
 
