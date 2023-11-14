@@ -80,9 +80,9 @@ Undo
 
 ### Paraformer on CPU
 
-[onnx runtime](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/python/benchmark_onnx.md)
+[onnx runtime](../../runtime/docs/benchmark_onnx_cpp.md)
 
-[libtorch runtime](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/python/benchmark_libtorch.md)
+[libtorch runtime](../../runtime/docs/benchmark_libtorch.md)
 
 ### Paraformer on GPU
 [nv-triton](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/triton_gpu)
