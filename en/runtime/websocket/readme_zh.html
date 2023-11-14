@@ -207,7 +207,9 @@ make -j <span class="m">4</span>
 <span class="n">cmake</span> <span class="o">../</span> <span class="o">-</span><span class="n">D</span> <span class="n">OPENSSL_ROOT_DIR</span><span class="o">=</span><span class="n">d</span><span class="p">:</span><span class="o">/</span><span class="n">openssl</span><span class="o">-</span><span class="mf">1.1</span><span class="o">.</span><span class="mi">1</span><span class="n">w</span> <span class="o">-</span><span class="n">D</span> <span class="n">FFMPEG_DIR</span><span class="o">=</span><span class="n">d</span><span class="p">:</span><span class="o">/</span><span class="n">ffmpeg</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="n">latest</span><span class="o">-</span><span class="n">win64</span><span class="o">-</span><span class="n">gpl</span><span class="o">-</span><span class="n">shared</span> <span class="o">-</span><span class="n">D</span> <span class="n">ONNXRUNTIME_DIR</span><span class="o">=</span><span class="n">d</span><span class="p">:</span><span class="o">/</span><span class="n">onnxruntime</span><span class="o">-</span><span class="n">win</span><span class="o">-</span><span class="n">x64</span><span class="o">-</span><span class="mf">1.16</span><span class="o">.</span><span class="mi">1</span>
 </pre></div>
 </div>
-<p>Visual Studio 打开 FunASR/runtime/websocket/build/FunASRWebscoket.sln 完成编译</p>
+<p>Visual Studio 打开 FunASR/runtime/websocket/build/FunASRWebscoket.sln 完成编译；
+编译后的可执行文件位于：FunASR/runtime/websocket/build/bin/Debug;
+从 onnxruntime-win-x64-1.16.1/lib, ffmpeg-master-latest-win64-gpl-shared/bin copy相关的DLL库至: FunASR/runtime/onnxruntime/build/bin/Debug</p>
 </div>
 </div>
 </div>

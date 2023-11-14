@@ -53,4 +53,8 @@ mkdir build
 cd build
 cmake ../ -D FFMPEG_DIR=d:/ffmpeg-master-latest-win64-gpl-shared -D ONNXRUNTIME_DIR=d:/onnxruntime-win-x64-1.16.1
 ```
-Visual Studio open FunASR/runtime/onnxruntime/build/FunASROnnx.sln start build
+
+Visual Studio open FunASR/runtime/onnxruntime/build/FunASROnnx.sln start build. 
+After compilation, the executable file is located here: FunASR/runtime/onnxruntime/build/bin/Debug.
+Copy the required DLL libraries from (onnxruntime-win-x64-1.16.1/lib, ffmpeg-master-latest-win64-gpl-shared/bin) to this location: FunASR/runtime/onnxruntime/build/bin/Debug
+

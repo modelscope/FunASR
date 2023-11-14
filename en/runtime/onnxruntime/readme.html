@@ -190,7 +190,9 @@ make -j <span class="m">4</span>
 <span class="n">cmake</span> <span class="o">../</span> <span class="o">-</span><span class="n">D</span> <span class="n">FFMPEG_DIR</span><span class="o">=</span><span class="n">d</span><span class="p">:</span><span class="o">/</span><span class="n">ffmpeg</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="n">latest</span><span class="o">-</span><span class="n">win64</span><span class="o">-</span><span class="n">gpl</span><span class="o">-</span><span class="n">shared</span> <span class="o">-</span><span class="n">D</span> <span class="n">ONNXRUNTIME_DIR</span><span class="o">=</span><span class="n">d</span><span class="p">:</span><span class="o">/</span><span class="n">onnxruntime</span><span class="o">-</span><span class="n">win</span><span class="o">-</span><span class="n">x64</span><span class="o">-</span><span class="mf">1.16</span><span class="o">.</span><span class="mi">1</span>
 </pre></div>
 </div>
-<p>Visual Studio open FunASR/runtime/onnxruntime/build/FunASROnnx.sln start build</p>
+<p>Visual Studio open FunASR/runtime/onnxruntime/build/FunASROnnx.sln start build.
+After compilation, the executable file is located here: FunASR/runtime/onnxruntime/build/bin/Debug.
+Copy the required DLL libraries from (onnxruntime-win-x64-1.16.1/lib, ffmpeg-master-latest-win64-gpl-shared/bin) to this location: FunASR/runtime/onnxruntime/build/bin/Debug</p>
 </div>
 </div>
 </div>
