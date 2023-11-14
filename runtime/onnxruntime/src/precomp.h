@@ -18,20 +18,7 @@
 #include <cstring>
 
 #ifdef _WIN32
-#include<io.h>
-#ifndef R_OK
-#define R_OK 4
-#endif
-#ifndef W_OK
-#define W_OK 2
-#endif
-#ifndef X_OK
-#define X_OK 0 
-#endif
-#ifndef F_OK
-#define F_OK 0
-#endif
-#define access _access
+#include <win_func.h>
 #else
 #include <unistd.h>
 #endif

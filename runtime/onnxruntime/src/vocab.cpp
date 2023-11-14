@@ -199,7 +199,7 @@ string Vocab::Vector2StringV2(vector<int> in, std::string language)
         }
     }
 
-    if (language == "en-bpe" and combine != ""){
+    if (language == "en-bpe" && combine != ""){
         combine = WordFormat(combine);
         if (words.size() != 0){
             combine = " " + combine;

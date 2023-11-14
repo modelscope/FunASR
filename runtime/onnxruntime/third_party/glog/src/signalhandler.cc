@@ -31,13 +31,13 @@
 //
 // Implementation of InstallFailureSignalHandler().
 
-#include "utilities.h"
-#include "stacktrace.h"
-#include "symbolize.h"
-#include <glog/logging.h>
-
 #include <csignal>
 #include <ctime>
+
+#include "glog/logging.h"
+#include "stacktrace.h"
+#include "symbolize.h"
+#include "utilities.h"
 #ifdef HAVE_UCONTEXT_H
 # include <ucontext.h>
 #endif

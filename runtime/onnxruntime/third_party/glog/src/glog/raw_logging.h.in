@@ -39,10 +39,9 @@
 #include <ctime>
 
 @ac_google_start_namespace@
-
-#include <glog/log_severity.h>
-#include <glog/logging.h>
-#include <glog/vlog_is_on.h>
+#include "glog/log_severity.h"
+#include "glog/logging.h"
+#include "glog/vlog_is_on.h"
 
 #if defined(__GNUC__)
 #pragma GCC diagnostic push

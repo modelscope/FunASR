@@ -324,7 +324,7 @@ initConfiguration(){
                 $DEFAULT_FUNASR_CONFIG_DIR=$DEFAULT_FUNASR_CONFIG_DIR_BAK
             fi
         fi
-        DEFAULT_FUNASR_CONFIG_DIR=${DEFAULT_FUNASR_CONFIG_DIR}/.funasr
+        DEFAULT_FUNASR_CONFIG_DIR=${DEFAULT_FUNASR_CONFIG_DIR}/.funasr_offline
     fi
 
     if [ ! -z "$DEFAULT_FUNASR_CONFIG_DIR" ]; then

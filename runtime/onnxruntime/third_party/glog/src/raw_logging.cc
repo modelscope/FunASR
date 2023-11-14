@@ -39,12 +39,14 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>               // for close() and write()
 #endif
-#include <fcntl.h>                 // for open()
+#include <fcntl.h>  // for open()
+
 #include <ctime>
-#include "config.h"
-#include <glog/logging.h>          // To pick up flag settings etc.
-#include <glog/raw_logging.h>
+
 #include "base/commandlineflags.h"
+#include "config.h"
+#include "glog/logging.h"  // To pick up flag settings etc.
+#include "glog/raw_logging.h"
 
 #ifdef HAVE_STACKTRACE
 # include "stacktrace.h"
@@ -60,7 +62,8 @@
 #endif
 
 #if (defined(HAVE_SYSCALL_H) || defined(HAVE_SYS_SYSCALL_H)) && \
-    (!(defined(GLOG_OS_MACOSX))) && !defined(GLOG_OS_EMSCRIPTEN)
+    (!(defined(GLOG_OS_MACOSX)) && !(defined(GLOG_OS_OPENBSD))) && \
+    !defined(GLOG_OS_EMSCRIPTEN)
 #define safe_write(fd, s, len) syscall(SYS_write, fd, s, len)
 #else
 // Not so safe, but what can you do?

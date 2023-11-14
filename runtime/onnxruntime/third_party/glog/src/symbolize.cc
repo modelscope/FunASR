@@ -119,7 +119,6 @@ _END_GOOGLE_NAMESPACE_
 #include <elf.h>
 #endif
 #include <fcntl.h>
-#include <glog/raw_logging.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -133,6 +132,7 @@ _END_GOOGLE_NAMESPACE_
 #include <cstring>
 
 #include "config.h"
+#include "glog/raw_logging.h"
 #include "symbolize.h"
 
 // Re-runs fn until it doesn't cause EINTR.
@@ -535,10 +535,8 @@ OpenObjectFileContainingPcAndGetStartAddress(uint64_t pc,
   // Iterate over maps and look for the map containing the pc.  Then
   // look into the symbol tables inside.
   char buf[1024];  // Big enough for line of sane /proc/self/maps
-  unsigned num_maps = 0;
   LineReader reader(wrapped_maps_fd.get(), buf, sizeof(buf), 0);
   while (true) {
-    num_maps++;
     const char *cursor;
     const char *eol;
     if (!reader.ReadLine(&cursor, &eol)) {  // EOF or malformed line.

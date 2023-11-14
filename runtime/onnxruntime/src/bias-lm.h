@@ -7,6 +7,9 @@
 #include "vocab.h"
 #include "util/text-utils.h"
 #include <yaml-cpp/yaml.h>
+#ifdef _WIN32
+#include "win_func.h"
+#endif
 // node type
 #define ROOT_NODE 0
 #define VALUE_ZERO 0.0f
