@@ -6,6 +6,7 @@ punc_dir="damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx"
 itn_dir="thuduj12/fst_itn_zh"
 lm_dir="damo/speech_ngram_lm_zh-cn-ai-wesp-fst"
 decoder_thread_num=32
+model_thread_num=1
 io_thread_num=8
 port=10095
 certfile="../../../ssl_key/server.crt"
@@ -25,6 +26,7 @@ if [ -z "$certfile" ] || [ "$certfile" -eq 0 ]; then
   --lm-dir "${lm_dir}" \
   --decoder-thread-num ${decoder_thread_num} \
   --io-thread-num  ${io_thread_num} \
+  --model-thread-num ${model_thread_num} \
   --port ${port} \
   --certfile  "" \
   --keyfile "" \
@@ -38,6 +40,7 @@ else
   --itn-dir "${itn_dir}" \
   --lm-dir "${lm_dir}" \
   --decoder-thread-num ${decoder_thread_num} \
+  --model-thread-num ${model_thread_num} \
   --io-thread-num  ${io_thread_num} \
   --port ${port} \
   --certfile  "${certfile}" \

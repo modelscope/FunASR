@@ -191,9 +191,13 @@ void Paraformer::InitLm(const std::string &lm_file,
     try {
         lm_ = std::shared_ptr<fst::Fst<fst::StdArc>>(
             fst::Fst<fst::StdArc>::Read(lm_file));
-        if (vocab) { delete vocab; }
-        vocab = new Vocab(lm_cfg_file.c_str());
-        LOG(INFO) << "Successfully load lm file " << lm_file;
+        if (lm_){
+            if (vocab) { delete vocab; }
+            vocab = new Vocab(lm_cfg_file.c_str());
+            LOG(INFO) << "Successfully load lm file " << lm_file;
+        }else{
+            LOG(ERROR) << "Failed to load lm file " << lm_file;
+        }
     } catch (std::exception const &e) {
         LOG(ERROR) << "Error when load lm file: " << e.what();
         exit(0);
