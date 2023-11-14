@@ -68,12 +68,12 @@ Ref to [test](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/ex
 ## Runtime
 ### ONNXRuntime
 #### ONNXRuntime-python
-Ref to [docs](https://alibaba-damo-academy.github.io/FunASR/en/runtime/onnxruntime_python.html)
+Ref to [docs](../../runtime/python/onnxruntime/README.md)
 #### ONNXRuntime-cpp
-Ref to [docs](https://alibaba-damo-academy.github.io/FunASR/en/runtime/onnxruntime_cpp.html)
+Ref to [docs](../../runtime/readme.md)
 ### Libtorch
 #### Libtorch-python
-Ref to [docs](https://alibaba-damo-academy.github.io/FunASR/en/runtime/libtorch_python.html)
+Ref to [docs](../../runtime/python/libtorch/README.md)
 #### Libtorch-cpp
 Undo
 ## Performance Benchmark
