@@ -68,21 +68,21 @@ Ref to [test](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/ex
 ## Runtime
 ### ONNXRuntime
 #### ONNXRuntime-python
-Ref to [docs](https://alibaba-damo-academy.github.io/FunASR/en/runtime/onnxruntime_python.html)
+Ref to [funasr-onnx](../../runtime/python/onnxruntime/README.md)
 #### ONNXRuntime-cpp
-Ref to [docs](https://alibaba-damo-academy.github.io/FunASR/en/runtime/onnxruntime_cpp.html)
+Ref to [docs](../../runtime/readme.md)
 ### Libtorch
 #### Libtorch-python
-Ref to [docs](https://alibaba-damo-academy.github.io/FunASR/en/runtime/libtorch_python.html)
+Ref to [funasr-torch](../../runtime/python/libtorch/README.md)
 #### Libtorch-cpp
 Undo
 ## Performance Benchmark
 
 ### Paraformer on CPU
 
-[onnx runtime](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/python/benchmark_onnx.md)
+[onnx runtime](../../runtime/docs/benchmark_onnx_cpp.md)
 
-[libtorch runtime](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/python/benchmark_libtorch.md)
+[libtorch runtime](../../runtime/docs/benchmark_libtorch.md)
 
 ### Paraformer on GPU
 [nv-triton](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/triton_gpu)
