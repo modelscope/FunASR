@@ -1,6 +1,7 @@
 # Libtorch-python
 
 ## Export the model
+
 ### Install [modelscope and funasr](https://github.com/alibaba-damo-academy/FunASR#installation)
 
 ```shell
@@ -18,14 +19,16 @@ pip install onnx onnxruntime # Optional, for onnx quantization
 python -m funasr.export.export_model --model-name damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch --export-dir ./export --type torch --quantize True
 ```
 
-## Install the `funasr_torch`.
-    
+## Install the `funasr_torch`
+
 install from pip
+
 ```shell
 pip install -U funasr_torch
 # For the users in China, you could install with the command:
 # pip install -U funasr_torch -i https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
+
 or install from source code
 
 ```shell
@@ -36,11 +39,13 @@ pip install -e ./
 # pip install -e ./ -i https://mirror.sjtu.edu.cn/pypi/web/simple
 ```
 
-## Run the demo.
+## Run the demo
+
 - Model_dir: the model path, which contains `model.torchscripts`, `config.yaml`, `am.mvn`.
 - Input: wav formt file, support formats: `str, np.ndarray, List[str]`
 - Output: `List[str]`: recognition result.
 - Example:
+
      ```python
      from funasr_torch import Paraformer
 
@@ -55,7 +60,7 @@ pip install -e ./
 
 ## Performance benchmark
 
-Please ref to [benchmark](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/python/benchmark_libtorch.md)
+Please ref to [benchmark](https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/docs/benchmark_libtorch.md)
 
 ## Speed
 
@@ -70,4 +75,5 @@ Test [wav, 5.53s, 100 times avg.](https://isv-data.oss-cn-hangzhou.aliyuncs.com/
 |   Onnx   |   0.038    |
 
 ## Acknowledge
+
 This project is maintained by [FunASR community](https://github.com/alibaba-damo-academy/FunASR).
