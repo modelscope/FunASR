@@ -66,7 +66,7 @@ message为（需要用json序列化）：
 ```text
 `mode`：`offline`，表示推理模式为一句话识别；`online`，表示推理模式为实时语音识别；`2pass`：表示为实时语音识别，并且说话句尾采用离线模型进行纠错。
 `wav_name`：表示需要推理音频文件名
-`wav_format`：表示音视频文件后缀名，可选pcm、mp3、mp4等（备注，1.0版本只支持pcm音频流）
+`wav_format`：表示音视频文件后缀名，可选pcm、mp3、mp4等（备注：只支持pcm音频流）
 `is_speaking`：表示断句尾点，例如，vad切割点，或者一条wav结束
 `chunk_size`：表示流式模型latency配置，`[5,10,5]`，表示当前音频为600ms，并且回看300ms，又看300ms。
 `audio_fs`：当输入音频为pcm数据是，需要加上音频采样率参数
