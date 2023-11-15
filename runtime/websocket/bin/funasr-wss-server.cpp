@@ -440,6 +440,8 @@ int main(int argc, char* argv[]) {
 
     server server_;  // server for websocket
     wss_server wss_server_;
+    server* server = nullptr;
+    wss_server* wss_server = nullptr;
     if (is_ssl) {
       LOG(INFO)<< "SSL is opened!";
       wss_server_.init_asio(&io_server);  // init asio
@@ -448,11 +450,7 @@ int main(int argc, char* argv[]) {
 
       // list on port for accept
       wss_server_.listen(asio::ip::address::from_string(s_listen_ip), s_port);
-      WebSocketServer websocket_srv(
-          io_decoder, is_ssl, nullptr, &wss_server_, s_certfile,
-          s_keyfile);  // websocket server for asr engine
-      websocket_srv.initAsr(model_path, s_model_thread_num);  // init asr model
-
+      wss_server = &wss_server_;
     } else {
       LOG(INFO)<< "SSL is closed!";
       server_.init_asio(&io_server);  // init asio
@@ -461,11 +459,14 @@ int main(int argc, char* argv[]) {
 
       // list on port for accept
       server_.listen(asio::ip::address::from_string(s_listen_ip), s_port);
-      WebSocketServer websocket_srv(
-          io_decoder, is_ssl, &server_, nullptr, s_certfile,
-          s_keyfile);  // websocket server for asr engine
-      websocket_srv.initAsr(model_path, s_model_thread_num);  // init asr model
+      server = &server_;
     }
+
+
+    WebSocketServer websocket_srv(
+        io_decoder, is_ssl, server, wss_server, s_certfile,
+        s_keyfile);  // websocket server for asr engine
+    websocket_srv.initAsr(model_path, s_model_thread_num);  // init asr model
 
     LOG(INFO) << "decoder-thread-num: " << s_decoder_thread_num;
     LOG(INFO) << "io-thread-num: " << s_io_thread_num;
