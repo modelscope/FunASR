@@ -1,6 +1,20 @@
 FILE(GLOB HEADER_FILES ../include/fst/*.h)
 
-
+if(WIN32)
+add_library(fst STATIC
+  compat.cc
+  flags.cc
+  fst-types.cc
+  fst.cc
+  mapped-file.cc
+  properties.cc
+  symbol-table.cc
+  symbol-table-ops.cc
+  util.cc
+  weight.cc
+  ${HEADER_FILES}
+)
+else()
 add_library(fst
   compat.cc
   flags.cc
@@ -14,6 +28,8 @@ add_library(fst
   weight.cc
   ${HEADER_FILES}
 )
+endif()
+
 set_target_properties(fst PROPERTIES
   SOVERSION "${SOVERSION}"
 )

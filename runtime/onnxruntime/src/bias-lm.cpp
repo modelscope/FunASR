@@ -1,5 +1,7 @@
 #include "bias-lm.h"
-
+#ifdef _WIN32
+#include "fst-types.cc"
+#endif
 namespace funasr {
 void print(std::queue<StateId> &q) {
   std::queue<StateId> data = q;

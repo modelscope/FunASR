@@ -55,7 +55,10 @@ if(ENABLE_FST)
     # with some patch to fix the make errors. 
     add_subdirectory(third_party/openfst)
     include_directories(${openfst_SOURCE_DIR}/src/include)
-    
+    if(WIN32)
+    include_directories(${openfst_SOURCE_DIR}/src/lib)
+    endif()
+
 endif()
 
 add_subdirectory(third_party/yaml-cpp)
