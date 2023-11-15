@@ -33,11 +33,8 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cstddef>
 #include <iomanip>
-#include <iterator>
 #include <string>
-
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>  // For _exit.
 #endif
@@ -59,23 +56,18 @@
 #ifdef HAVE_SYSLOG_H
 # include <syslog.h>
 #endif
-#ifdef HAVE__CHSIZE_S
-#include <io.h> // for truncate log file
-#endif
 #include <vector>
 #include <cerrno>                   // for errno
 #include <sstream>
-#include <regex>
-#include <cctype> // for std::isspace
 #ifdef GLOG_OS_WINDOWS
 #include "windows/dirent.h"
 #else
 #include <dirent.h> // for automatic removal of old logs
 #endif
-#include "base/commandlineflags.h"  // to get the program name
+#include "base/commandlineflags.h"        // to get the program name
+#include <glog/logging.h>
+#include <glog/raw_logging.h>
 #include "base/googleinit.h"
-#include "glog/logging.h"
-#include "glog/raw_logging.h"
 
 #ifdef HAVE_STACKTRACE
 # include "stacktrace.h"
@@ -1558,15 +1550,9 @@ static LogMessage::LogMessageData fatal_msg_data_shared;
 // allocations).
 static thread_local bool thread_data_available = true;
 
-#if defined(__cpp_lib_byte) && __cpp_lib_byte >= 201603L
-// std::aligned_storage is deprecated in C++23
-alignas(LogMessage::LogMessageData) static thread_local std::byte
-    thread_msg_data[sizeof(LogMessage::LogMessageData)];
-#else   // !(defined(__cpp_lib_byte) && __cpp_lib_byte >= 201603L)
 static thread_local std::aligned_storage<
     sizeof(LogMessage::LogMessageData),
     alignof(LogMessage::LogMessageData)>::type thread_msg_data;
-#endif  // defined(__cpp_lib_byte) && __cpp_lib_byte >= 201603L
 #endif  // defined(GLOG_THREAD_LOCAL_STORAGE)
 
 LogMessage::LogMessageData::LogMessageData()
@@ -1932,14 +1918,6 @@ void LogMessage::RecordCrashReason(
 GLOG_EXPORT logging_fail_func_t g_logging_fail_func =
     reinterpret_cast<logging_fail_func_t>(&abort);
 
-NullStream::NullStream() : LogMessage::LogStream(message_buffer_, 1, 0) {}
-NullStream::NullStream(const char* /*file*/, int /*line*/,
-                       const CheckOpString& /*result*/)
-    : LogMessage::LogStream(message_buffer_, 1, 0) {}
-NullStream& NullStream::stream() { return *this; }
-
-NullStreamFatal::~NullStreamFatal() { _exit(EXIT_FAILURE); }
-
 void InstallFailureFunction(logging_fail_func_t fail_func) {
   g_logging_fail_func = fail_func;
 }
@@ -2227,13 +2205,6 @@ static string ShellEscape(const string& src) {
   }
   return result;
 }
-
-// Trim whitespace from both ends of the provided string.
-static inline void trim(std::string &s) {
-  const auto toRemove = [](char ch) { return std::isspace(ch) == 0; };
-  s.erase(s.begin(), std::find_if(s.begin(), s.end(), toRemove));
-  s.erase(std::find_if(s.rbegin(), s.rend(), toRemove).base(), s.end());
-}
 #endif
 
 // use_logging controls whether the logging functions LOG/VLOG are used
@@ -2243,47 +2214,6 @@ static bool SendEmailInternal(const char*dest, const char *subject,
                               const char*body, bool use_logging) {
 #ifndef GLOG_OS_EMSCRIPTEN
   if (dest && *dest) {
-    // Split the comma-separated list of email addresses, validate each one and
-    // build a sanitized new comma-separated string without whitespace.
-    std::istringstream ss(dest);
-    std::ostringstream sanitized_dests;
-    std::string s;
-    while (std::getline(ss, s, ',')) {
-      trim(s);
-      if (s.empty()) {
-        continue;
-      }
-      // We validate the provided email addresses using the same regular
-      // expression that HTML5 uses[1], except that we require the address to
-      // start with an alpha-numeric character. This is because we don't want to
-      // allow email addresses that start with a special character, such as a
-      // pipe or dash, which could be misunderstood as a command-line flag by
-      // certain versions of `mail` that are vulnerable to command injection.[2]
-      // [1] https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address
-      // [2] e.g. https://nvd.nist.gov/vuln/detail/CVE-2004-2771
-      if (!std::regex_match(
-              s,
-              std::regex("^[a-zA-Z0-9]"
-                         "[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]*@[a-zA-Z0-9]"
-                         "(?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9]"
-                         "(?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"))) {
-        if (use_logging) {
-          VLOG(1) << "Invalid destination email address:" << s;
-        } else {
-          fprintf(stderr, "Invalid destination email address: %s\n",
-                  s.c_str());
-        }
-        return false;
-      }
-      if (!sanitized_dests.str().empty()) {
-        sanitized_dests << ",";
-      }
-      sanitized_dests << s;
-    }
-    // Avoid dangling reference
-    const std::string& tmp = sanitized_dests.str();
-    dest = tmp.c_str();
-
     if ( use_logging ) {
       VLOG(1) << "Trying to send TITLE:" << subject
               << " BODY:" << body << " to " << dest;
@@ -2305,8 +2235,8 @@ static bool SendEmailInternal(const char*dest, const char *subject,
 
     FILE* pipe = popen(cmd.c_str(), "w");
     if (pipe != nullptr) {
-      // Add the body if we have one
-      if (body) {
+        // Add the body if we have one
+        if (body) {
         fwrite(body, sizeof(char), strlen(body), pipe);
       }
       bool ok = pclose(pipe) != -1;
@@ -2398,13 +2328,8 @@ const vector<string>& GetLoggingDirectories() {
     logging_directories_list = new vector<string>;
 
     if ( !FLAGS_log_dir.empty() ) {
-      // Ensure the specified path ends with a directory delimiter.
-      if (std::find(std::begin(possible_dir_delim), std::end(possible_dir_delim),
-            FLAGS_log_dir.back()) == std::end(possible_dir_delim)) {
-        logging_directories_list->push_back(FLAGS_log_dir + "/");
-      } else {
-        logging_directories_list->push_back(FLAGS_log_dir);
-      }
+      // A dir was specified, we should use it
+      logging_directories_list->push_back(FLAGS_log_dir);
     } else {
       GetTempDirectories(logging_directories_list);
 #ifdef GLOG_OS_WINDOWS
@@ -2442,7 +2367,7 @@ void GetExistingTempDirectories(vector<string>* list) {
 }
 
 void TruncateLogFile(const char *path, uint64 limit, uint64 keep) {
-#if defined(HAVE_UNISTD_H) || defined(HAVE__CHSIZE_S)
+#ifdef HAVE_UNISTD_H
   struct stat statbuf;
   const int kCopyBlockSize = 8 << 10;
   char copybuf[kCopyBlockSize];
@@ -2463,11 +2388,7 @@ void TruncateLogFile(const char *path, uint64 limit, uint64 keep) {
       // all of base/...) with -D_FILE_OFFSET_BITS=64 but that's
       // rather scary.
       // Instead just truncate the file to something we can manage
-#ifdef HAVE__CHSIZE_S
-      if (_chsize_s(fd, 0) != 0) {
-#else
       if (truncate(path, 0) == -1) {
-#endif
         PLOG(ERROR) << "Unable to truncate " << path;
       } else {
         LOG(ERROR) << "Truncated " << path << " due to EFBIG error";
@@ -2512,11 +2433,7 @@ void TruncateLogFile(const char *path, uint64 limit, uint64 keep) {
   // Truncate the remainder of the file. If someone else writes to the
   // end of the file after our last read() above, we lose their latest
   // data. Too bad ...
-#ifdef HAVE__CHSIZE_S
-  if (_chsize_s(fd, write_offset) != 0) {
-#else
   if (ftruncate(fd, write_offset) == -1) {
-#endif
     PLOG(ERROR) << "Unable to truncate " << path;
   }
 

@@ -37,7 +37,7 @@ extern "C" {
 #define UNW_LOCAL_ONLY
 #include <libunwind.h>
 }
-#include "glog/raw_logging.h"
+#include <glog/raw_logging.h>
 #include "stacktrace.h"
 
 _START_GOOGLE_NAMESPACE_

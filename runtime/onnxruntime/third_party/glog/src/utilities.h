@@ -29,7 +29,7 @@
 //
 // Author: Shinichiro Hamaji
 //
-// Define utilities for glog internal usage.
+// Define utilties for glog internal usage.
 
 #ifndef UTILITIES_H__
 #define UTILITIES_H__
@@ -52,10 +52,11 @@
 #define PRIXS __PRIS_PREFIX "X"
 #define PRIoS __PRIS_PREFIX "o"
 
+#include "base/mutex.h"  // This must go first so we get _XOPEN_SOURCE
+
 #include <string>
 
-#include "base/mutex.h"  // This must go first so we get _XOPEN_SOURCE
-#include "glog/logging.h"
+#include <glog/logging.h>
 
 #if defined(GLOG_OS_WINDOWS)
 # include "port.h"
@@ -173,7 +174,7 @@ inline T sync_val_compare_and_swap(T* ptr, T oldval, T newval) {
                        :"=a"(ret)
                         // GCC may produces %sil or %dil for
                         // constraint "r", but some of apple's gas
-                        // doesn't know the 8 bit registers.
+                        // dosn't know the 8 bit registers.
                         // We use "q" to avoid these registers.
                        :"q"(newval), "q"(ptr), "a"(oldval)
                        :"memory", "cc");

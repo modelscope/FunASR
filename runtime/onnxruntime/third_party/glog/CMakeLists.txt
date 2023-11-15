@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.21)
+cmake_minimum_required (VERSION 3.16)
 project (glog
   VERSION 0.7.0
   DESCRIPTION "C++ implementation of the Google logging module"
@@ -131,7 +131,6 @@ check_function_exists (sigaltstack HAVE_SIGALTSTACK)
 check_cxx_symbol_exists (backtrace execinfo.h HAVE_EXECINFO_BACKTRACE)
 check_cxx_symbol_exists (backtrace_symbols execinfo.h
   HAVE_EXECINFO_BACKTRACE_SYMBOLS)
-check_cxx_symbol_exists (_chsize_s io.h HAVE__CHSIZE_S)
 
 # NOTE gcc does not fail if you pass a non-existent -Wno-* option as an
 # argument. However, it will happily fail if you pass the corresponding -W*
@@ -214,61 +213,50 @@ if (WITH_TLS)
 endif (WITH_TLS)
 
 set (_PC_FIELDS
-  "uc_mcontext.gregs[REG_PC]"          # Solaris x86 (32 + 64 bit)
-  "uc_mcontext.gregs[REG_EIP]"         # Linux (i386)
-  "uc_mcontext.gregs[REG_RIP]"         # Linux (x86_64)
-  "uc_mcontext.sc_ip"                  # Linux (ia64)
-  "uc_mcontext.pc"                     # Linux (mips)
-  "uc_mcontext.uc_regs->gregs[PT_NIP]" # Linux (ppc)
-  "uc_mcontext.gregs[R15]"             # Linux (arm old [untested])
-  "uc_mcontext.arm_pc"                 # Linux (arm arch 5)
-  "uc_mcontext.gp_regs[PT_NIP]"        # Suse SLES 11 (ppc64)
-  "uc_mcontext.mc_eip"                 # FreeBSD (i386)
-  "uc_mcontext.mc_rip"                 # FreeBSD (x86_64 [untested])
-  "uc_mcontext.__gregs[_REG_EIP]"      # NetBSD (i386)
-  "uc_mcontext.__gregs[_REG_RIP]"      # NetBSD (x86_64)
-  "uc_mcontext->ss.eip"                # OS X (i386, <=10.4)
-  "uc_mcontext->__ss.__eip"            # OS X (i386, >=10.5)
-  "uc_mcontext->ss.rip"                # OS X (x86_64)
-  "uc_mcontext->__ss.__rip"            # OS X (>=10.5 [untested])
-  "uc_mcontext->ss.srr0"               # OS X (ppc, ppc64 [untested])
-  "uc_mcontext->__ss.__srr0"           # OS X (>=10.5 [untested])
+  "gregs[REG_PC]"
+  "gregs[REG_EIP]"
+  "gregs[REG_RIP]"
+  "sc_ip"
+  "uc_regs->gregs[PT_NIP]"
+  "gregs[R15]"
+  "arm_pc"
+  "mc_eip"
+  "mc_rip"
+  "__gregs[REG_EIP]"
+  "__gregs[REG_RIP]"
+  "ss.eip"
+  "__ss.__eip"
+  "ss.rip"
+  "__ss.__rip"
+  "ss.srr0"
+  "__ss.__srr0"
 )
 
-if (HAVE_UCONTEXT_H AND NOT DEFINED PC_FROM_UCONTEXT)
-  cmake_push_check_state (RESET)
+set (_PC_HEADERS ucontext.h signal.h)
 
-  set (CMAKE_REQUIRED_DEFINITIONS -D_GNU_SOURCE)
-  set (_PC_HEADERS ucontext.h signal.h)
+if (HAVE_UCONTEXT_H AND NOT PC_FROM_UCONTEXT)
+  foreach (_PC_FIELD ${_PC_FIELDS})
+    foreach (_PC_HEADER ${_PC_HEADERS})
+      set (_TMP
+      ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/uctfield.cpp)
+      file (WRITE ${_TMP} "
+#define _GNU_SOURCE 1
+#include <${_PC_HEADER}>
+int main(void)
+{
+  ucontext_t u;
+  return u.${_PC_FIELD} == 0;
+}
+")
+      try_compile (HAVE_PC_FROM_UCONTEXT ${CMAKE_CURRENT_BINARY_DIR} ${_TMP}
+        COMPILE_DEFINITIONS _GNU_SOURCE=1)
 
-  foreach (_PC_FIELD IN LISTS _PC_FIELDS)
-    foreach (_PC_HEADER IN LISTS _PC_HEADERS)
-      # Replace non-alphanumeric characters by underscores since the name will be
-      # used as preprocessor definition.
-      string (REGEX REPLACE "[^a-zA-Z0-9]" "_" HAVE_UCONTEXT_FIELD_NAME
-        "HAVE_PC_FROM_UCONTEXT_${_PC_FIELD}")
-      # Strip trailing underscores for readability
-      string (REGEX REPLACE "_+$" "" HAVE_UCONTEXT_FIELD_NAME
-        "${HAVE_UCONTEXT_FIELD_NAME}")
-
-      check_struct_has_member (ucontext_t ${_PC_FIELD} ${_PC_HEADER}
-        ${HAVE_UCONTEXT_FIELD_NAME} LANGUAGE CXX)
-
-      if (${HAVE_UCONTEXT_FIELD_NAME})
-        set (PC_FROM_UCONTEXT ${_PC_FIELD} CACHE STRING
-          "<${_PC_HEADER}> ucontext_t PC member")
-        mark_as_advanced (PC_FROM_UCONTEXT)
-        break ()
-      endif (${HAVE_UCONTEXT_FIELD_NAME})
+      if (HAVE_PC_FROM_UCONTEXT)
+        set (PC_FROM_UCONTEXT ${_PC_FIELD} CACHE)
+      endif (HAVE_PC_FROM_UCONTEXT)
     endforeach (_PC_HEADER)
-
-    if (${HAVE_UCONTEXT_FIELD_NAME})
-      break ()
-    endif (${HAVE_UCONTEXT_FIELD_NAME})
   endforeach (_PC_FIELD)
-
-  cmake_pop_check_state ()
-endif (HAVE_UCONTEXT_H AND NOT DEFINED PC_FROM_UCONTEXT)
+endif  (HAVE_UCONTEXT_H AND NOT PC_FROM_UCONTEXT)
 
 set (GOOGLE_NAMESPACE google)
 set (_START_GOOGLE_NAMESPACE_ "namespace ${GOOGLE_NAMESPACE} {")
@@ -480,13 +468,16 @@ set (GLOG_SRCS
   src/demangle.h
   src/logging.cc
   src/raw_logging.cc
-  src/signalhandler.cc
   src/symbolize.cc
   src/symbolize.h
   src/utilities.cc
   src/utilities.h
   src/vlog_is_on.cc
 )
+
+if (HAVE_PTHREAD OR WIN32 OR CYGWIN)
+  list (APPEND GLOG_SRCS src/signalhandler.cc)
+endif (HAVE_PTHREAD OR WIN32 OR CYGWIN)
 
 if (CYGWIN OR WIN32)
   list (APPEND GLOG_SRCS
@@ -500,20 +491,9 @@ add_library (glog_internal OBJECT
   ${GLOG_SRCS}
 )
 target_compile_features (glog_internal PUBLIC $<TARGET_PROPERTY:glog,COMPILE_FEATURES>)
-set_target_properties (glog_internal PROPERTIES DEFINE_SYMBOL GOOGLE_GLOG_IS_A_DLL)
-
-# Some generators (such as Xcode) do not generate any output if the target does
-# not reference at least one source file.
-set (_glog_EMPTY_SOURCE ${glog_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/glog.cc)
-
-add_custom_command (
-  OUTPUT ${_glog_EMPTY_SOURCE}
-  COMMAND ${CMAKE_COMMAND} -E touch ${_glog_EMPTY_SOURCE}
-)
 
 add_library (glog
   $<TARGET_OBJECTS:glog_internal>
-  ${_glog_EMPTY_SOURCE}
 )
 target_compile_features (glog PUBLIC cxx_std_14)
 
@@ -635,30 +615,38 @@ if (NOT WITH_FUZZING STREQUAL "none")
 endif (NOT WITH_FUZZING STREQUAL "none")
 
 if (BUILD_TESTING)
-  add_library (glog_test INTERFACE)
-  target_link_libraries (glog_test INTERFACE $<TARGET_OBJECTS:glog_internal> $<TARGET_PROPERTY:glog,LINK_LIBRARIES>)
-  target_compile_definitions (glog_test INTERFACE GLOG_STATIC_DEFINE $<TARGET_PROPERTY:glog,COMPILE_DEFINITIONS>)
-  target_include_directories (glog_test INTERFACE $<TARGET_PROPERTY:glog,INCLUDE_DIRECTORIES>)
+  add_library (glogtest STATIC
+    $<TARGET_OBJECTS:glog_internal>
+  )
+
+  target_include_directories (glogtest PUBLIC
+    $<TARGET_PROPERTY:glog,INCLUDE_DIRECTORIES>)
+  target_compile_definitions (glogtest PUBLIC
+    $<TARGET_PROPERTY:glog,COMPILE_DEFINITIONS> GLOG_STATIC_DEFINE)
+  target_link_libraries (glogtest PUBLIC
+    $<TARGET_PROPERTY:glog,LINK_LIBRARIES>)
+
+  set (_GLOG_TEST_LIBS glogtest)
 
   if (HAVE_LIB_GTEST)
-    target_link_libraries (glog_test INTERFACE GTest::gtest)
+    list (APPEND _GLOG_TEST_LIBS GTest::gtest)
   endif (HAVE_LIB_GTEST)
 
   if (HAVE_LIB_GMOCK)
-    target_link_libraries (glog_test INTERFACE GTest::gmock)
+    list (APPEND _GLOG_TEST_LIBS GTest::gmock)
   endif (HAVE_LIB_GMOCK)
 
   add_executable (logging_unittest
     src/logging_unittest.cc
   )
 
-  target_link_libraries (logging_unittest PRIVATE glog_test)
+  target_link_libraries (logging_unittest PRIVATE ${_GLOG_TEST_LIBS})
 
   add_executable (stl_logging_unittest
     src/stl_logging_unittest.cc
   )
 
-  target_link_libraries (stl_logging_unittest PRIVATE glog_test)
+  target_link_libraries (stl_logging_unittest PRIVATE ${_GLOG_TEST_LIBS})
 
   if (HAVE_NO_DEPRECATED)
     set_property (TARGET stl_logging_unittest APPEND PROPERTY COMPILE_OPTIONS
@@ -675,35 +663,35 @@ if (BUILD_TESTING)
       src/symbolize_unittest.cc
     )
 
-    target_link_libraries (symbolize_unittest PRIVATE glog_test)
+    target_link_libraries (symbolize_unittest PRIVATE ${_GLOG_TEST_LIBS})
   endif (HAVE_SYMBOLIZE)
 
   add_executable (demangle_unittest
     src/demangle_unittest.cc
   )
 
-  target_link_libraries (demangle_unittest PRIVATE glog_test)
+  target_link_libraries (demangle_unittest PRIVATE ${_GLOG_TEST_LIBS})
 
   if (HAVE_STACKTRACE)
     add_executable (stacktrace_unittest
       src/stacktrace_unittest.cc
     )
 
-    target_link_libraries (stacktrace_unittest PRIVATE glog_test)
+    target_link_libraries (stacktrace_unittest PRIVATE ${_GLOG_TEST_LIBS})
   endif (HAVE_STACKTRACE)
 
   add_executable (utilities_unittest
     src/utilities_unittest.cc
   )
 
-  target_link_libraries (utilities_unittest PRIVATE glog_test)
+  target_link_libraries (utilities_unittest PRIVATE ${_GLOG_TEST_LIBS})
 
   if (HAVE_STACKTRACE AND HAVE_SYMBOLIZE)
     add_executable (signalhandler_unittest
       src/signalhandler_unittest.cc
     )
 
-    target_link_libraries (signalhandler_unittest PRIVATE glog_test)
+    target_link_libraries (signalhandler_unittest PRIVATE ${_GLOG_TEST_LIBS})
   endif (HAVE_STACKTRACE AND HAVE_SYMBOLIZE)
 
   add_test (NAME demangle COMMAND demangle_unittest)
@@ -749,7 +737,7 @@ if (BUILD_TESTING)
       src/mock-log.h
     )
 
-    target_link_libraries (mock-log_unittest PRIVATE glog_test)
+    target_link_libraries (mock-log_unittest PRIVATE ${_GLOG_TEST_LIBS})
 
     add_test (NAME mock-log COMMAND mock-log_unittest)
   endif (HAVE_LIB_GMOCK)
@@ -811,17 +799,17 @@ if (BUILD_TESTING)
   add_executable (cleanup_immediately_unittest
     src/cleanup_immediately_unittest.cc)
 
-  target_link_libraries (cleanup_immediately_unittest PRIVATE glog_test)
+  target_link_libraries (cleanup_immediately_unittest PRIVATE ${_GLOG_TEST_LIBS})
 
   add_executable (cleanup_with_absolute_prefix_unittest
     src/cleanup_with_absolute_prefix_unittest.cc)
 
-  target_link_libraries (cleanup_with_absolute_prefix_unittest PRIVATE glog_test)
+  target_link_libraries (cleanup_with_absolute_prefix_unittest PRIVATE ${_GLOG_TEST_LIBS})
 
   add_executable (cleanup_with_relative_prefix_unittest
     src/cleanup_with_relative_prefix_unittest.cc)
 
-  target_link_libraries (cleanup_with_relative_prefix_unittest PRIVATE glog_test)
+  target_link_libraries (cleanup_with_relative_prefix_unittest PRIVATE ${_GLOG_TEST_LIBS})
 
   set (CLEANUP_LOG_DIR ${CMAKE_CURRENT_BINARY_DIR}/cleanup_tests)
 
