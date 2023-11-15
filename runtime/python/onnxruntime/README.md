@@ -180,7 +180,7 @@ Output: `List[str]`: recognition result
 
 ## Performance benchmark
 
-Please ref to [benchmark](https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/runtime/docs/benchmark_onnx.md)
+Please ref to [benchmark](https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/docs/benchmark_onnx.md)
 
 ## Acknowledge
 
