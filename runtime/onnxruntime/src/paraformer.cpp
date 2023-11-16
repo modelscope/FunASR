@@ -318,30 +318,20 @@ void Paraformer::Reset()
 {
 }
 
-vector<float> Paraformer::FbankKaldi(float sample_rate, const float* waves, int len) {
+void Paraformer::FbankKaldi(float sample_rate, const float* waves, int len, std::vector<std::vector<float>> &asr_feats) {
     knf::OnlineFbank fbank_(fbank_opts_);
     std::vector<float> buf(len);
     for (int32_t i = 0; i != len; ++i) {
         buf[i] = waves[i] * 32768;
     }
     fbank_.AcceptWaveform(sample_rate, buf.data(), buf.size());
-    //fbank_->InputFinished();
+
     int32_t frames = fbank_.NumFramesReady();
-    int32_t feature_dim = fbank_opts_.mel_opts.num_bins;
-    vector<float> features(frames * feature_dim);
-    float *p = features.data();
-    //std::cout << "samples " << len << std::endl;
-    //std::cout << "fbank frames " << frames << std::endl;
-    //std::cout << "fbank dim " << feature_dim << std::endl;
-    //std::cout << "feature size " << features.size() << std::endl;
-
     for (int32_t i = 0; i != frames; ++i) {
-        const float *f = fbank_.GetFrame(i);
-        std::copy(f, f + feature_dim, p);
-        p += feature_dim;
+        const float *frame = fbank_.GetFrame(i);
+        std::vector<float> frame_vector(frame, frame + fbank_opts_.mel_opts.num_bins);
+        asr_feats.emplace_back(frame_vector);
     }
-
-    return features;
 }
 
 void Paraformer::LoadCmvn(const char *filename)
@@ -416,56 +406,65 @@ string Paraformer::FinalizeDecode(WfstDecoder* &wfst_decoder,
   return wfst_decoder->FinalizeDecode(is_stamp, us_alphas, us_cif_peak);
 }
 
-vector<float> Paraformer::ApplyLfr(const std::vector<float> &in) 
-{
-    int32_t in_feat_dim = fbank_opts_.mel_opts.num_bins;
-    int32_t in_num_frames = in.size() / in_feat_dim;
-    int32_t out_num_frames =
-        (in_num_frames - lfr_m) / lfr_n + 1;
-    int32_t out_feat_dim = in_feat_dim * lfr_m;
+void Paraformer::LfrCmvn(std::vector<std::vector<float>> &asr_feats) {
 
-    std::vector<float> out(out_num_frames * out_feat_dim);
+    std::vector<std::vector<float>> out_feats;
+    int T = asr_feats.size();
+    int T_lrf = ceil(1.0 * T / lfr_n);
 
-    const float *p_in = in.data();
-    float *p_out = out.data();
-
-    for (int32_t i = 0; i != out_num_frames; ++i) {
-      std::copy(p_in, p_in + out_feat_dim, p_out);
-
-      p_out += out_feat_dim;
-      p_in += lfr_n * in_feat_dim;
+    // Pad frames at start(copy first frame)
+    for (int i = 0; i < (lfr_m - 1) / 2; i++) {
+        asr_feats.insert(asr_feats.begin(), asr_feats[0]);
     }
-
-    return out;
-  }
-
-  void Paraformer::ApplyCmvn(std::vector<float> *v)
-  {
-    int32_t dim = means_list_.size();
-    int32_t num_frames = v->size() / dim;
-
-    float *p = v->data();
-
-    for (int32_t i = 0; i != num_frames; ++i) {
-      for (int32_t k = 0; k != dim; ++k) {
-        p[k] = (p[k] + means_list_[k]) * vars_list_[k];
-      }
-
-      p += dim;
+    // Merge lfr_m frames as one,lfr_n frames per window
+    T = T + (lfr_m - 1) / 2;
+    std::vector<float> p;
+    for (int i = 0; i < T_lrf; i++) {
+        if (lfr_m <= T - i * lfr_n) {
+            for (int j = 0; j < lfr_m; j++) {
+                p.insert(p.end(), asr_feats[i * lfr_n + j].begin(), asr_feats[i * lfr_n + j].end());
+            }
+            out_feats.emplace_back(p);
+            p.clear();
+        } else {
+            // Fill to lfr_m frames at last window if less than lfr_m frames  (copy last frame)
+            int num_padding = lfr_m - (T - i * lfr_n);
+            for (int j = 0; j < (asr_feats.size() - i * lfr_n); j++) {
+                p.insert(p.end(), asr_feats[i * lfr_n + j].begin(), asr_feats[i * lfr_n + j].end());
+            }
+            for (int j = 0; j < num_padding; j++) {
+                p.insert(p.end(), asr_feats[asr_feats.size() - 1].begin(), asr_feats[asr_feats.size() - 1].end());
+            }
+            out_feats.emplace_back(p);
+        }
     }
-  }
+    // Apply cmvn
+    for (auto &out_feat: out_feats) {
+        for (int j = 0; j < means_list_.size(); j++) {
+            out_feat[j] = (out_feat[j] + means_list_[j]) * vars_list_[j];
+        }
+    }
+    asr_feats = out_feats;
+}
 
 string Paraformer::Forward(float* din, int len, bool input_finished, const std::vector<std::vector<float>> &hw_emb, void* decoder_handle)
 {
     WfstDecoder* wfst_decoder = (WfstDecoder*)decoder_handle;
     int32_t in_feat_dim = fbank_opts_.mel_opts.num_bins;
-    std::vector<float> wav_feats = FbankKaldi(MODEL_SAMPLE_RATE, din, len);
-    wav_feats = ApplyLfr(wav_feats);
-    ApplyCmvn(&wav_feats);
 
+    std::vector<std::vector<float>> asr_feats;
+    FbankKaldi(MODEL_SAMPLE_RATE, din, len, asr_feats);
+    if(asr_feats.size() == 0){
+      return "";
+    }
+    LfrCmvn(asr_feats);
     int32_t feat_dim = lfr_m*in_feat_dim;
-    int32_t num_frames = wav_feats.size() / feat_dim;
-    //std::cout << "feat in: " << num_frames << " " << feat_dim << std::endl;
+    int32_t num_frames = asr_feats.size();
+
+    std::vector<float> wav_feats;
+    for (const auto &frame_feat: asr_feats) {
+        wav_feats.insert(wav_feats.end(), frame_feat.begin(), frame_feat.end());
+    }
 
 #ifdef _WIN_X86
         Ort::MemoryInfo m_memoryInfo = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
