@@ -60,10 +60,10 @@
 #define GLOG_MSVC_POP_WARNING()
 #endif
 
-#include "glog/platform.h"
+#include <glog/platform.h>
 
 #if @ac_cv_have_glog_export@
-#include "glog/export.h"
+#include <glog/export.h>
 #endif
 
 // We care a lot about number of bits things take up.  Unfortunately,
@@ -290,11 +290,11 @@ typedef void(*CustomPrefixCallback)(std::ostream& s, const LogMessageInfo& l, vo
 //         "program with --v=1 or more";
 //   VLOG_EVERY_N(1, 10)
 //      << "I'm printed every 10th occurrence, and when you run the program "
-//         "with --v=1 or more. Present occurrence is " << google::COUNTER;
+//         "with --v=1 or more. Present occurence is " << google::COUNTER;
 //   VLOG_IF_EVERY_N(1, (size > 1024), 10)
-//      << "I'm printed on every 10th occurrence of case when size is more "
+//      << "I'm printed on every 10th occurence of case when size is more "
 //         " than 1024, when you run the program with --v=1 or more. ";
-//         "Present occurrence is " << google::COUNTER;
+//         "Present occurence is " << google::COUNTER;
 //
 // The supported severity levels for macros that allow you to specify one
 // are (in increasing order of severity) INFO, WARNING, ERROR, and FATAL.
@@ -470,9 +470,6 @@ DECLARE_bool(stop_logging_if_full_disk);
 // Use UTC time for logging
 DECLARE_bool(log_utc_time);
 
-// Mailer used to send logging email
-DECLARE_string(logmailer);
-
 // Log messages below the GOOGLE_STRIP_LOG level will be compiled away for
 // security reasons. See LOG(severtiy) below.
 
@@ -599,8 +596,8 @@ DECLARE_string(logmailer);
 @ac_google_start_namespace@
 
 // They need the definitions of integer types.
-#include "glog/log_severity.h"
-#include "glog/vlog_is_on.h"
+#include <glog/log_severity.h>
+#include <glog/vlog_is_on.h>
 
 // Initialize google's logging library. You will see the program name
 // specified by argv0 in log outputs.
@@ -845,7 +842,7 @@ DEFINE_CHECK_OP_IMPL(Check_GT, > )
 #define CHECK_OP_LOG(name, op, val1, val2, log) CHECK((val1) op (val2))
 #elif DCHECK_IS_ON()
 // In debug mode, avoid constructing CheckOpStrings if possible,
-// to reduce the overhead of CHECK statements by 2x.
+// to reduce the overhead of CHECK statments by 2x.
 // Real DCHECK-heavy tests have seen 1.5x speedups.
 
 // The meaning of "string" might be different between now and
@@ -1045,13 +1042,13 @@ namespace google {
   constexpr std::chrono::nanoseconds LOG_TIME_PERIOD =                         \
       std::chrono::duration_cast<std::chrono::nanoseconds>(                    \
           std::chrono::duration<double>(seconds));                             \
-  static std::atomic<@ac_google_namespace@::int64> LOG_PREVIOUS_TIME_RAW;      \
+  static std::atomic<@ac_google_namespace@ ::int64> LOG_PREVIOUS_TIME_RAW;    \
   GLOG_IFDEF_THREAD_SANITIZER(                                                 \
       AnnotateBenignRaceSized(__FILE__, __LINE__, &LOG_TIME_PERIOD,            \
-                              sizeof(@ac_google_namespace@::int64), ""));      \
+                              sizeof(@ac_google_namespace @ ::int64), ""));    \
   GLOG_IFDEF_THREAD_SANITIZER(                                                 \
       AnnotateBenignRaceSized(__FILE__, __LINE__, &LOG_PREVIOUS_TIME_RAW,      \
-                              sizeof(@ac_google_namespace@::int64), ""));      \
+                              sizeof(@ac_google_namespace @ ::int64), ""));    \
   const auto LOG_CURRENT_TIME =                                                \
       std::chrono::duration_cast<std::chrono::nanoseconds>(                    \
           std::chrono::steady_clock::now().time_since_epoch());                \
@@ -1065,8 +1062,8 @@ namespace google {
             .count(),                                                          \
         std::memory_order_relaxed);                                            \
   if (LOG_TIME_DELTA > LOG_TIME_PERIOD)                                        \
-  @ac_google_namespace@::LogMessage(                                           \
-      __FILE__, __LINE__, @ac_google_namespace@::GLOG_##severity)              \
+  @ac_google_namespace@ ::LogMessage(                                         \
+      __FILE__, __LINE__, @ac_google_namespace@ ::GLOG_##severity)            \
       .stream()
 
 #define SOME_KIND_OF_LOG_EVERY_N(severity, n, what_to_do) \
@@ -1347,15 +1344,6 @@ GLOG_MSVC_PUSH_DISABLE_WARNING(4275)
   class GLOG_EXPORT LogStream : public std::ostream {
 GLOG_MSVC_POP_WARNING()
   public:
-#if defined __has_attribute
-#  if __has_attribute (used)
-    // In some cases, like when compiling glog as a static library with GCC and
-    // linking against a Clang-built executable, this constructor will be
-    // removed by the linker. We use this attribute to prevent the linker from
-    // discarding it.
-    __attribute__ ((used))
-#  endif
-#endif
     LogStream(char *buf, int len, int64 ctr)
         : std::ostream(NULL),
           streambuf_(buf, len),
@@ -1437,7 +1425,7 @@ public:
   // is so that streaming can be done more efficiently.
   static const size_t kMaxLogMessageLen;
 
-  // These should not be called directly outside of logging.*,
+  // Theses should not be called directly outside of logging.*,
   // only passed as SendMethod arguments to other LogMessage methods:
   void SendToLog();  // Actually dispatch to the logs
   void SendToSyslogAndLog();  // Actually dispatch to syslog and the logs
@@ -1664,8 +1652,8 @@ GLOG_EXPORT void LogToStderr();
 GLOG_EXPORT void SetEmailLogging(LogSeverity min_severity,
                                           const char* addresses);
 
-// A simple function that sends email. dest is a comma-separated
-// list of addresses.  Thread-safe.
+// A simple function that sends email. dest is a commma-separated
+// list of addressess.  Thread-safe.
 GLOG_EXPORT bool SendEmail(const char* dest, const char* subject,
                            const char* body);
 
@@ -1780,11 +1768,11 @@ class GLOG_EXPORT NullStream : public LogMessage::LogStream {
   // (they'll never be actually displayed). This will be needed if a
   // NullStream& is implicitly converted to LogStream&, in which case
   // the overloaded NullStream::operator<< will not be invoked.
-  NullStream();
+  NullStream() : LogMessage::LogStream(message_buffer_, 1, 0) { }
   NullStream(const char* /*file*/, int /*line*/,
-             const CheckOpString& /*result*/);
-  NullStream& stream();
-
+             const CheckOpString& /*result*/) :
+      LogMessage::LogStream(message_buffer_, 1, 0) { }
+  NullStream &stream() { return *this; }
  private:
   // A very short buffer for messages (which we discard anyway). This
   // will be needed if NullStream& converted to LogStream& (e.g. as a
@@ -1805,8 +1793,17 @@ inline NullStream& operator<<(NullStream &str, const T &) { return str; }
 // trace), like LogMessageFatal.
 class GLOG_EXPORT NullStreamFatal : public NullStream {
  public:
-  using NullStream::NullStream;
-  [[noreturn]] ~NullStreamFatal();
+  NullStreamFatal() { }
+  NullStreamFatal(const char* file, int line, const CheckOpString& result) :
+      NullStream(file, line, result) { }
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : 4722)
+#endif // _MSC_VER
+  [[noreturn]] ~NullStreamFatal() throw() { _exit(EXIT_FAILURE); }
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif // _MSC_VER
 };
 
 // Install a signal handler that will dump signal information and a stack

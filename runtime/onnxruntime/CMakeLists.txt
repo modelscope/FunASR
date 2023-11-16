@@ -20,12 +20,12 @@ endif()
 
 # for onnxruntime
 IF(WIN32)
-#    file(REMOVE ${PROJECT_SOURCE_DIR}/third_party/glog/src/config.h 
-#                ${PROJECT_SOURCE_DIR}/third_party/glog/src/glog/export.h 
-#                ${PROJECT_SOURCE_DIR}/third_party/glog/src/glog/logging.h 
-#                ${PROJECT_SOURCE_DIR}/third_party/glog/src/glog/raw_logging.h 
-#                ${PROJECT_SOURCE_DIR}/third_party/glog/src/glog/stl_logging.h 
-#                ${PROJECT_SOURCE_DIR}/third_party/glog/src/glog/vlog_is_on.h)
+    file(REMOVE ${PROJECT_SOURCE_DIR}/third_party/glog/src/config.h 
+                ${PROJECT_SOURCE_DIR}/third_party/glog/src/glog/export.h 
+                ${PROJECT_SOURCE_DIR}/third_party/glog/src/glog/logging.h 
+                ${PROJECT_SOURCE_DIR}/third_party/glog/src/glog/raw_logging.h 
+                ${PROJECT_SOURCE_DIR}/third_party/glog/src/glog/stl_logging.h 
+                ${PROJECT_SOURCE_DIR}/third_party/glog/src/glog/vlog_is_on.h)
 ELSE()
     link_directories(${ONNXRUNTIME_DIR}/lib)
     link_directories(${FFMPEG_DIR}/lib)
