@@ -111,7 +111,9 @@ if(ENABLE_FST)
     # with some patch to fix the make errors. 
     add_subdirectory(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/openfst openfst)
     include_directories(${openfst_SOURCE_DIR}/src/include)
-    
+    if(WIN32)
+    include_directories(${openfst_SOURCE_DIR}/src/lib)
+    endif() 
 endif()
 
 

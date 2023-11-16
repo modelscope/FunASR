@@ -121,7 +121,7 @@ int GetStackTrace(void** result, int max_depth, int skip_count) {
       // This check is in case the compiler doesn't define _CALL_SYSV.
       result[n++] = *(sp+1);
 #else
-#error Need to specify the PPC ABI for your architecture.
+#error Need to specify the PPC ABI for your archiecture.
 #endif
     }
     // Use strict unwinding rules.

@@ -36,12 +36,13 @@
 #define GLOG_SRC_MOCK_LOG_H_
 
 // For GOOGLE_NAMESPACE. This must go first so we get _XOPEN_SOURCE.
-#include <gmock/gmock.h>
+#include "utilities.h"
 
 #include <string>
 
-#include "glog/logging.h"
-#include "utilities.h"
+#include <gmock/gmock.h>
+
+#include <glog/logging.h>
 
 _START_GOOGLE_NAMESPACE_
 namespace glog_testing {
