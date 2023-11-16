@@ -343,7 +343,9 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
         msg_data->msg["itn"] = jsonresult["itn"];
       }
       if ((jsonresult["is_speaking"] == false ||
-          jsonresult["is_finished"] == true) && msg_data->msg["is_eof"] != true) {
+          jsonresult["is_finished"] == true) && 
+          msg_data->msg["is_eof"] != true && 
+          msg_data->hotwords_embedding != NULL) {
         LOG(INFO) << "client done";
         // for offline, send all receive data to decoder engine
         std::vector<std::vector<float>> hotwords_embedding_(*(msg_data->hotwords_embedding));

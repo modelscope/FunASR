@@ -452,7 +452,9 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
       LOG(INFO) << "jsonresult=" << jsonresult
                 << ", msg_data->msg=" << msg_data->msg;
       if ((jsonresult["is_speaking"] == false ||
-          jsonresult["is_finished"] == true) && msg_data->msg["is_eof"] != true) {
+          jsonresult["is_finished"] == true) && 
+          msg_data->msg["is_eof"] != true &&
+          msg_data->hotwords_embedding != NULL) {
         LOG(INFO) << "client done";
 
         // if it is in final message, post the sample_data to decode
@@ -503,9 +505,9 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
 
           try{
             // post to decode
-            if (msg_data->msg["is_eof"] != true) {
+            if (msg_data->msg["is_eof"] != true && msg_data->hotwords_embedding != NULL) {
               std::vector<std::vector<float>> hotwords_embedding_(*(msg_data->hotwords_embedding));
-              msg_data->strand_->post( 
+              msg_data->strand_->post(
                         std::bind(&WebSocketServer::do_decoder, this,
                                   std::move(subvector), std::move(hdl),
                                   std::ref(msg_data->msg),

@@ -4,14 +4,6 @@
  */
 /* 2022-2023 by zhaomingwork */
 
-// io server
-// Usage:funasr-wss-server  [--model_thread_num <int>] [--decoder_thread_num
-// <int>]
-//                    [--io_thread_num <int>] [--port <int>] [--listen_ip
-//                    <string>] [--punc-quant <string>] [--punc-dir <string>]
-//                    [--vad-quant <string>] [--vad-dir <string>] [--quantize
-//                    <string>] --model-dir <string> [--] [--version] [-h]
-
 #include "websocket-server-2pass.h"
 #ifdef _WIN32
 #include "win_func.h"
