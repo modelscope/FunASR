@@ -419,7 +419,7 @@ int main(int argc, char* argv[]) {
     funasr::ExtractHws(hotword_path, hws_map_);
 
     bool is_ssl = false;
-    if (!s_certfile.empty()) {
+    if (!s_certfile.empty() && access(s_certfile.c_str(), F_OK) == 0) {
       is_ssl = true;
     }
 
