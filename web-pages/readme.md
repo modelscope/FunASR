@@ -51,3 +51,11 @@ html设计可以参考whisper（ https://openai.com/research/whisper ）
     使用
     
     视频教程链接
+
+6、github
+    
+    https://github.com/alibaba-damo-academy/FunASR
+
+7、社区交流
+
+    
