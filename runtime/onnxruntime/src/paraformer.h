@@ -28,8 +28,7 @@ namespace funasr {
         void LoadConfigFromYaml(const char* filename);
         void LoadOnlineConfigFromYaml(const char* filename);
         void LoadCmvn(const char *filename);
-        vector<float> ApplyLfr(const vector<float> &in);
-        void ApplyCmvn(vector<float> *v);
+        void LfrCmvn(std::vector<std::vector<float>> &asr_feats);
 
         std::shared_ptr<Ort::Session> hw_m_session = nullptr;
         Ort::Env hw_env_;
@@ -51,7 +50,7 @@ namespace funasr {
         void InitSegDict(const std::string &seg_dict_model);
         std::vector<std::vector<float>> CompileHotwordEmbedding(std::string &hotwords);
         void Reset();
-        vector<float> FbankKaldi(float sample_rate, const float* waves, int len);
+        void FbankKaldi(float sample_rate, const float* waves, int len, std::vector<std::vector<float>> &asr_feats);
         string Forward(float* din, int len, bool input_finished=true, const std::vector<std::vector<float>> &hw_emb={{0.0}}, void* wfst_decoder=nullptr);
         string GreedySearch( float* in, int n_len, int64_t token_nums,
                              bool is_stamp=false, std::vector<float> us_alphas={0}, std::vector<float> us_cif_peak={0});
