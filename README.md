@@ -76,6 +76,15 @@ Quick start for new users（[tutorial](https://alibaba-damo-academy.github.io/Fu
 FunASR supports inference and fine-tuning of models trained on industrial data for tens of thousands of hours. For more details, please refer to [modelscope_egs](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_pipeline/quick_start.html). It also supports training and fine-tuning of models on academic standard datasets. For more information, please refer to [egs](https://alibaba-damo-academy.github.io/FunASR/en/academic_recipe/asr_recipe.html).
 
 Below is a quick start tutorial. Test audio files ([Mandarin](https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/vad_example.wav), [English]()).
+
+### Command-line usage
+
+```shell
+funasr --model paraformer-zh asr_example_zh.wav
+```
+
+Notes: Support recognition of single audio file, as well as file list in Kaldi-style wav.scp format: `wav_id wav_pat`
+
 ### Speech Recognition (Non-streaming)
 ```python
 from funasr import infer

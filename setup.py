@@ -129,4 +129,7 @@ setup(
         "License :: OSI Approved :: Apache Software License",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
+    entry_points={"console_scripts": [
+        "funasr = funasr.bin.inference_cli:main",
+    ]},
 )

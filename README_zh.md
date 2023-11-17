@@ -70,6 +70,15 @@ FunASR开源了大量在工业数据上预训练模型，您可以在[模型许�
 FunASR支持数万小时工业数据训练的模型的推理和微调，详细信息可以参阅（[modelscope_egs](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_pipeline/quick_start.html)）；也支持学术标准数据集模型的训练和微调，详细信息可以参阅（[egs](https://alibaba-damo-academy.github.io/FunASR/en/academic_recipe/asr_recipe.html)）。
 
 下面为快速上手教程，测试音频（[中文](https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/vad_example.wav)，[英文]()）
+
+### 可执行命令行
+
+```shell
+funasr --model paraformer-zh asr_example_zh.wav
+```
+
+注：支持单条音频文件识别，也支持文件列表，列表为kaldi风格wav.scp：`wav_id   wav_path`
+
 ### 非实时语音识别
 ```python
 from funasr import infer
