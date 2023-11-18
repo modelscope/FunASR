@@ -1,4 +1,5 @@
 # FunASR实时语音听写服务开发指南
+(简体中文|[English](SDK_advanced_guide_online.md))
 
 [//]: # (FunASR提供可便捷本地或者云端服务器部署的实时语音听写服务，内核为FunASR已开源runtime-SDK。)
 [//]: # (集成了达摩院语音实验室在Modelscope社区开源的语音端点检测&#40;VAD&#41;、Paraformer-large非流式语音识别&#40;ASR&#41;、Paraformer-large流式语音识别&#40;ASR&#41;、标点&#40;PUNC&#41; 等相关能力。软件包既可以实时地进行语音转文字，而且能够在说话句尾用高精度的转写文字修正输出，输出文字带有标点，支持高并发多路请求)
