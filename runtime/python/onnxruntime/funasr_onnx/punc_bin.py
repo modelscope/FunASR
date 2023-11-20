@@ -276,7 +276,7 @@ class CT_Transformer_VadRealtime(CT_Transformer):
         param_dict[cache_key] = cache_out
         return sentence_out, sentence_punc_list_out, cache_out
 
-    def vad_mask(self, size, vad_pos, dtype=np.bool):
+    def vad_mask(self, size, vad_pos, dtype=bool):
         """Create mask for decoder self-attention.
 
         :param int size: size of mask
