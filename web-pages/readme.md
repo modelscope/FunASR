@@ -41,11 +41,18 @@ html设计可以参考whisper（ https://openai.com/research/whisper ）
     在线体验：
         https://101.37.77.25:1335/static/index.html
 
-    安装
+    安装：
     
-    使用
+        https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/docs/SDK_advanced_guide_offline_zh.md
     
-    视频教程链接
+    使用：
+    
+        https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz
+    
+    
+    视频教程链接：
+    
+        https://www.bilibili.com/video/BV11a4y1U72y/?share_source=copy_web&vd_source=f6576748261a1b738a71ad618d380438
 
 5、实时听写
 
@@ -58,12 +65,20 @@ html设计可以参考whisper（ https://openai.com/research/whisper ）
     在线体验：
         https://101.37.77.25:1336/static/index.html
 
-    安装
+    安装：
     
-    使用
+        https://github.com/alibaba-damo-academy/FunASR/blob/main/runtime/docs/SDK_advanced_guide_online_zh.md
     
+    使用：
+
+        https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_samples.tar.gz
+
+    视频教程链接：
+
+        https://www.bilibili.com/video/BV1Yw411K7LY/?share_source=copy_web&vd_source=f6576748261a1b738a71ad618d380438
     
-    视频教程链接
+        
+    
 
 6、github
     
