@@ -9,7 +9,7 @@ from typing import Union
 
 import numpy as np
 import scipy.signal
-import soundfile
+import librosa
 
 from funasr.text.build_tokenizer import build_tokenizer
 from funasr.text.cleaner import TextCleaner
@@ -275,7 +275,7 @@ class CommonPreprocessor(AbsPreprocessor):
                 if self.rirs is not None and self.rir_apply_prob >= np.random.random():
                     rir_path = np.random.choice(self.rirs)
                     if rir_path is not None:
-                        rir, _ = soundfile.read(
+                        rir, _ = librosa.load(
                             rir_path, dtype=np.float64, always_2d=True
                         )
 
@@ -301,28 +301,30 @@ class CommonPreprocessor(AbsPreprocessor):
                         noise_db = np.random.uniform(
                             self.noise_db_low, self.noise_db_high
                         )
-                        with soundfile.SoundFile(noise_path) as f:
-                            if f.frames == nsamples:
-                                noise = f.read(dtype=np.float64, always_2d=True)
-                            elif f.frames < nsamples:
-                                offset = np.random.randint(0, nsamples - f.frames)
-                                # noise: (Time, Nmic)
-                                noise = f.read(dtype=np.float64, always_2d=True)
-                                # Repeat noise
-                                noise = np.pad(
-                                    noise,
-                                    [(offset, nsamples - f.frames - offset), (0, 0)],
-                                    mode="wrap",
-                                )
-                            else:
-                                offset = np.random.randint(0, f.frames - nsamples)
-                                f.seek(offset)
-                                # noise: (Time, Nmic)
-                                noise = f.read(
-                                    nsamples, dtype=np.float64, always_2d=True
-                                )
-                                if len(noise) != nsamples:
-                                    raise RuntimeError(f"Something wrong: {noise_path}")
+                        audio_data = librosa.load(noise_path, dtype='float32')[0][None, :]
+                        frames = len(audio_data[0])
+                        if frames == nsamples:
+                            noise = audio_data
+                        elif frames < nsamples:
+                            offset = np.random.randint(0, nsamples - frames)
+                            # noise: (Time, Nmic)
+                            noise = audio_data
+                            # Repeat noise
+                            noise = np.pad(
+                                noise,
+                                [(offset, nsamples - frames - offset), (0, 0)],
+                                mode="wrap",
+                            )
+                        else:
+                            noise = audio_data[:, nsamples]
+                            # offset = np.random.randint(0, frames - nsamples)
+                            # f.seek(offset)
+                            # noise: (Time, Nmic)
+                            # noise = f.read(
+                            #     nsamples, dtype=np.float64, always_2d=True
+                            # )
+                            # if len(noise) != nsamples:
+                            #     raise RuntimeError(f"Something wrong: {noise_path}")
                         # noise: (Nmic, Time)
                         noise = noise.T
 

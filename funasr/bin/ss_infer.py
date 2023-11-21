@@ -20,9 +20,9 @@ class SpeechSeparator:
     """SpeechSeparator class
 
     Examples:
-        >>> import soundfile
+        >>> import librosa
         >>> speech_separator = MossFormer("ss_config.yml", "ss.pt")
-        >>> audio, rate = soundfile.read("speech.wav")
+        >>> audio, rate = librosa.load("speech.wav")
         >>> separated_wavs = speech_separator(audio)        
 
     """

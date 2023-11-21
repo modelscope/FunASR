@@ -7,7 +7,8 @@ import torch
 import torch.distributed as dist
 import torchaudio
 import numpy as np
-import soundfile
+# import librosa
+import librosa
 from kaldiio import ReadHelper
 from torch.utils.data import IterableDataset
 
@@ -128,7 +129,8 @@ class AudioDataset(IterableDataset):
                         try:
                             waveform, sampling_rate = torchaudio.load(path)
                         except:
-                            waveform, sampling_rate = soundfile.read(path, dtype='float32')
+                            # waveform, sampling_rate = librosa.load(path, dtype='float32')
+                            waveform, sampling_rate = librosa.load(path, dtype='float32')
                             if waveform.ndim == 2:
                                 waveform = waveform[:, 0]
                             waveform = np.expand_dims(waveform, axis=0)

@@ -6,7 +6,10 @@ import logging
 import humanfriendly
 import numpy as np
 import torch
-from torch_complex.tensor import ComplexTensor
+try:
+    from torch_complex.tensor import ComplexTensor
+except:
+    raise "Please install torch_complex firstly"
 
 from funasr.layers.log_mel import LogMel
 from funasr.layers.stft import Stft

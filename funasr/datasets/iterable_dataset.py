@@ -14,7 +14,8 @@ import kaldiio
 import numpy as np
 import torch
 import torchaudio
-import soundfile
+# import librosa
+import librosa
 from torch.utils.data.dataset import IterableDataset
 import os.path
 
@@ -70,7 +71,8 @@ def load_wav(input):
     try:
         return torchaudio.load(input)[0].numpy()
     except:
-        waveform, _ = soundfile.read(input, dtype='float32')
+        # waveform, _ = librosa.load(input, dtype='float32')
+        waveform, _ = librosa.load(input, dtype='float32')
         if waveform.ndim == 2:
             waveform = waveform[:, 0]
         return np.expand_dims(waveform, axis=0)

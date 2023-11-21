@@ -11,7 +11,7 @@ import librosa
 import numpy as np
 import torch
 import torchaudio
-import soundfile
+import librosa
 import torchaudio.compliance.kaldi as kaldi
 
 
@@ -166,7 +166,7 @@ def compute_fbank(wav_file,
         try:
             waveform, audio_sr = torchaudio.load(wav_file)
         except:
-            waveform, audio_sr = soundfile.read(wav_file, dtype='float32')
+            waveform, audio_sr = librosa.load(wav_file, dtype='float32')
             if waveform.ndim == 2:
                 waveform = waveform[:, 0]
             waveform = torch.tensor(np.expand_dims(waveform, axis=0))
@@ -191,7 +191,7 @@ def wav2num_frame(wav_path, frontend_conf):
     try:
         waveform, sampling_rate = torchaudio.load(wav_path)
     except:
-        waveform, sampling_rate = soundfile.read(wav_path)
+        waveform, sampling_rate = librosa.load(wav_path)
         waveform = torch.tensor(np.expand_dims(waveform, axis=0))
     speech_length = (waveform.shape[1] / sampling_rate) * 1000.
     n_frames = (waveform.shape[1] * 1000.0) / (sampling_rate * frontend_conf["frame_shift"] * frontend_conf["lfr_n"])

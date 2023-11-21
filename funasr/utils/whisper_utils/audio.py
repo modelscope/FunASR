@@ -1,8 +1,11 @@
 import os
 from functools import lru_cache
 from typing import Union
+try:
+    import ffmpeg
+except:
+    print("Please Requires the ffmpeg CLI and `ffmpeg-python` package to be installed.")
 
-import ffmpeg
 import numpy as np
 import torch
 import torch.nn.functional as F

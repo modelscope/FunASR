@@ -4,7 +4,7 @@ from typing import List, Tuple, Union
 
 import random
 import numpy as np
-import soundfile
+import librosa
 import librosa
 
 import torch
@@ -116,7 +116,7 @@ class SoundScpReader(collections.abc.Mapping):
     def __getitem__(self, key):
         wav = self.data[key]
         if self.normalize:
-            # soundfile.read normalizes data to [-1,1] if dtype is not given
+            # librosa.load normalizes data to [-1,1] if dtype is not given
             array, rate = librosa.load(
                 wav, sr=self.dest_sample_rate, mono=self.always_2d
             )
