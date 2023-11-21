@@ -13,7 +13,7 @@ from typing import Union
 
 import numpy as np
 import torch
-import soundfile as sf
+import librosa
 from funasr.build_utils.build_streaming_iterator import build_streaming_iterator
 from funasr.torch_utils.set_all_random_seed import set_all_random_seed
 from funasr.utils import config_argparse
@@ -104,7 +104,12 @@ def inference_ss(
             ss_results = speech_separator(**batch)
             
             for spk in range(num_spks):
-                sf.write(os.path.join(output_path, keys[0] + '_s' + str(spk+1)+'.wav'), ss_results[spk], sample_rate)
+                # sf.write(os.path.join(output_path, keys[0] + '_s' + str(spk+1)+'.wav'), ss_results[spk], sample_rate)
+                try:
+                    librosa.output.write_wav(os.path.join(output_path, keys[0] + '_s' + str(spk+1)+'.wav'), ss_results[spk], sample_rate)
+                except:
+                    print("To write wav by librosa, you should install librosa<=0.8.0")
+                    raise
         torch.cuda.empty_cache()
         return ss_results
 

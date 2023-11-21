@@ -6,12 +6,15 @@ import logging
 import humanfriendly
 import numpy as np
 import torch
-from torch_complex.tensor import ComplexTensor
+try:
+    from torch_complex.tensor import ComplexTensor
+except:
+    print("Please install torch_complex firstly")
 
 from funasr.layers.log_mel import LogMel
 from funasr.layers.stft import Stft
 from funasr.models.frontend.abs_frontend import AbsFrontend
-from funasr.modules.frontends.frontend import Frontend
+from funasr.models.frontend.frontends_utils.frontend import Frontend
 from funasr.utils.get_default_kwargs import get_default_kwargs
 from funasr.modules.nets_utils import make_pad_mask
 

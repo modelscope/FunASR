@@ -15,7 +15,8 @@ from typing import Tuple
 from typing import Union
 
 import numpy as np
-import soundfile
+# import librosa
+import librosa
 import torch
 from scipy.signal import medfilt
 
@@ -144,7 +145,9 @@ def inference_sond(
                         # read waveform file
                         example = [load_bytes(x) if isinstance(x, bytes) else x
                                    for x in example]
-                        example = [soundfile.read(x)[0] if isinstance(x, str) else x
+                        # example = [librosa.load(x)[0] if isinstance(x, str) else x
+                        #            for x in example]
+                        example = [librosa.load(x, dtype='float32')[0] if isinstance(x, str) else x
                                    for x in example]
                         # convert torch tensor to numpy array
                         example = [x.numpy() if isinstance(example[0], torch.Tensor) else x

@@ -4,12 +4,12 @@ from typing import Tuple
 import torch
 from torch.nn import functional as F
 
-from funasr.modules.frontends.beamformer import apply_beamforming_vector
-from funasr.modules.frontends.beamformer import get_mvdr_vector
-from funasr.modules.frontends.beamformer import (
+from funasr.models.frontend.frontends_utils.beamformer import apply_beamforming_vector
+from funasr.models.frontend.frontends_utils.beamformer import get_mvdr_vector
+from funasr.models.frontend.frontends_utils.beamformer import (
     get_power_spectral_density_matrix,  # noqa: H301
 )
-from funasr.modules.frontends.mask_estimator import MaskEstimator
+from funasr.models.frontend.frontends_utils.mask_estimator import MaskEstimator
 from torch_complex.tensor import ComplexTensor
 
 

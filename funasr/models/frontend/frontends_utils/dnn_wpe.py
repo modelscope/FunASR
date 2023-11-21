@@ -4,7 +4,7 @@ from pytorch_wpe import wpe_one_iteration
 import torch
 from torch_complex.tensor import ComplexTensor
 
-from funasr.modules.frontends.mask_estimator import MaskEstimator
+from funasr.models.frontend.frontends_utils.mask_estimator import MaskEstimator
 from funasr.modules.nets_utils import make_pad_mask
 
 

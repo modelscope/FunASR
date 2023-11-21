@@ -10,7 +10,7 @@ import humanfriendly
 import torch
 
 from funasr.models.frontend.abs_frontend import AbsFrontend
-from funasr.modules.frontends.frontend import Frontend
+from funasr.models.frontend.frontends_utils.frontend import Frontend
 from funasr.modules.nets_utils import pad_list
 from funasr.utils.get_default_kwargs import get_default_kwargs
 

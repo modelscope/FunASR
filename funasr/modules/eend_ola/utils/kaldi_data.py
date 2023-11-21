@@ -9,7 +9,7 @@ import os
 import sys
 import numpy as np
 import subprocess
-import soundfile as sf
+import librosa as sf
 import io
 from functools import lru_cache
 
@@ -67,18 +67,18 @@ def load_wav(wav_rxfilename, start=0, end=None):
         # input piped command
         p = subprocess.Popen(wav_rxfilename[:-1], shell=True,
                              stdout=subprocess.PIPE)
-        data, samplerate = sf.read(io.BytesIO(p.stdout.read()),
+        data, samplerate = sf.load(io.BytesIO(p.stdout.read()),
                                    dtype='float32')
         # cannot seek
         data = data[start:end]
     elif wav_rxfilename == '-':
         # stdin
-        data, samplerate = sf.read(sys.stdin, dtype='float32')
+        data, samplerate = sf.load(sys.stdin, dtype='float32')
         # cannot seek
         data = data[start:end]
     else:
         # normal wav file
-        data, samplerate = sf.read(wav_rxfilename, start=start, stop=end)
+        data, samplerate = sf.load(wav_rxfilename, start=start, stop=end)
     return data, samplerate
 
 

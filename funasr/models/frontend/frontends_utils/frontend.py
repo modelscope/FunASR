@@ -8,8 +8,8 @@ import torch
 import torch.nn as nn
 from torch_complex.tensor import ComplexTensor
 
-from funasr.modules.frontends.dnn_beamformer import DNN_Beamformer
-from funasr.modules.frontends.dnn_wpe import DNN_WPE
+from funasr.models.frontend.frontends_utils.dnn_beamformer import DNN_Beamformer
+from funasr.models.frontend.frontends_utils.dnn_wpe import DNN_WPE
 
 
 class Frontend(nn.Module):

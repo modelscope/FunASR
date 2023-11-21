@@ -246,14 +246,11 @@ class Trainer:
         for iepoch in range(start_epoch, trainer_options.max_epoch + 1):
             if iepoch != start_epoch:
                 logging.info(
-                    "{}/{}epoch started. Estimated time to finish: {}".format(
+                    "{}/{}epoch started. Estimated time to finish: {} hours".format(
                         iepoch,
                         trainer_options.max_epoch,
-                        humanfriendly.format_timespan(
-                            (time.perf_counter() - start_time)
-                            / (iepoch - start_epoch)
-                            * (trainer_options.max_epoch - iepoch + 1)
-                        ),
+                        (time.perf_counter() - start_time) / 3600.0 / (iepoch - start_epoch) * (
+                                trainer_options.max_epoch - iepoch + 1),
                     )
                 )
             else:

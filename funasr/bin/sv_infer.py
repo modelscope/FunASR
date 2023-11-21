@@ -22,9 +22,9 @@ class Speech2Xvector:
     """Speech2Xvector class
 
     Examples:
-        >>> import soundfile
+        >>> import librosa
         >>> speech2xvector = Speech2Xvector("sv_config.yml", "sv.pb")
-        >>> audio, rate = soundfile.read("speech.wav")
+        >>> audio, rate = librosa.load("speech.wav")
         >>> speech2xvector(audio)
         [(text, token, token_int, hypothesis object), ...]
 
