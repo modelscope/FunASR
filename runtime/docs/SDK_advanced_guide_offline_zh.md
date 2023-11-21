@@ -175,7 +175,8 @@ nohup bash run_server.sh \
 --lm-dir modelscope model ID 或者 本地模型路径
 --itn-dir modelscope model ID 或者 本地模型路径
 --port  服务端监听的端口号，默认为 10095
---decoder-thread-num  服务端启动的推理线程数，默认为 8
+--decoder-thread-num  服务端线程池个数(支持的最大并发路数)，默认为 8
+--model-thread-num  每路识别的内部线程数(控制ONNX模型的并行)，默认为 1，其中建议 decoder-thread-num*model-thread-num 等于总线程数
 --io-thread-num  服务端启动的IO线程数，默认为 1
 --certfile  ssl的证书文件，默认为：../../../ssl_key/server.crt，如果需要关闭ssl，参数设置为0
 --keyfile   ssl的密钥文件，默认为：../../../ssl_key/server.key
