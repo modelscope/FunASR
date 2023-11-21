@@ -17,7 +17,7 @@
 
 ##### 服务端部署
 ```shell
-cd funasr/runtime/python/websocket
+cd runtime/python/websocket
 python funasr_wss_server.py --port 10095
 ```
 
