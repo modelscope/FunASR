@@ -8,7 +8,7 @@ import torch
 try:
     from torch_complex.tensor import ComplexTensor
 except:
-    raise "Please install torch_complex firstly"
+    print("Please install torch_complex firstly")
 from funasr.modules.nets_utils import make_pad_mask
 from funasr.layers.complex_utils import is_complex
 from funasr.layers.inversible_interface import InversibleInterface

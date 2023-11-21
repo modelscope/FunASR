@@ -9,7 +9,7 @@ try:
     from torch_complex import functional as FC
     from torch_complex.tensor import ComplexTensor
 except:
-    raise "Please install torch_complex firstly"
+    print("Please install torch_complex firstly")
 
 
 
