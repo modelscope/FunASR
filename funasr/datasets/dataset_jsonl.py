@@ -22,14 +22,12 @@ def load_audio(audio_path: str, fs: int=16000):
 
 def extract_features(data, date_type: str="sound", frontend=None):
 	if date_type == "sound":
-<<<<<<< HEAD
+
 		if isinstance(data, np.ndarray):
 			data = torch.from_numpy(data).to(torch.float32)
 		data_len = torch.tensor([data.shape[0]]).to(torch.int32)
 		feat, feats_lens = frontend(data[None, :], data_len)
-=======
-		feat, feats_lens = frontend(data, len(data))
->>>>>>> 911fb3421b9867a0b27f57dfc0912f33d9e779e8
+
 		feat = feat[0, :, :]
 	else:
 		feat, feats_lens = torch.from_numpy(data).to(torch.float32), torch.tensor([data.shape[0]]).to(torch.int32)
@@ -81,21 +79,16 @@ class IndexedDatasetJsonl(torch.utils.data.Dataset):
 
 
 class AudioDataset(torch.utils.data.Dataset):
-<<<<<<< HEAD
 	def __init__(self, path, frontend=None, tokenizer=None, token_id_converter=None):
-=======
-	def __init__(self, path, frontend=None, tokenizer=None):
->>>>>>> 911fb3421b9867a0b27f57dfc0912f33d9e779e8
+
 		super().__init__()
 		self.indexed_dataset = IndexedDatasetJsonl(path)
 		self.frontend = frontend.forward
 		self.fs = 16000 if frontend is None else frontend.fs
 		self.data_type = "sound"
 		self.tokenizer = tokenizer
-<<<<<<< HEAD
 		self.token_id_converter = token_id_converter
-=======
->>>>>>> 911fb3421b9867a0b27f57dfc0912f33d9e779e8
+
 		self.int_pad_value = -1
 		self.float_pad_value = 0.0
 
@@ -107,24 +100,17 @@ class AudioDataset(torch.utils.data.Dataset):
 	
 	def __getitem__(self, index):
 		item = self.indexed_dataset[index]
-<<<<<<< HEAD
 		# return item
-=======
->>>>>>> 911fb3421b9867a0b27f57dfc0912f33d9e779e8
+
 		source = item["source"]
 		data_src = load_audio(source, fs=self.fs)
 		speech, speech_lengths = extract_features(data_src, self.data_type, self.frontend)
 		target = item["target"]
-<<<<<<< HEAD
 		text = self.tokenizer.text2tokens(target)
 		ids = self.token_id_converter.tokens2ids(text)
 		ids_lengths = len(ids)
 		text, text_lengths = torch.tensor(ids, dtype=torch.int64), torch.tensor([ids_lengths], dtype=torch.int32)
-=======
-		text = self.tokenizer.encode(target)
-		text_lengths = len(text)
-		text, text_lengths = torch.tensor(text, dtype=torch.int64), torch.tensor([text_lengths], dtype=torch.int32)
->>>>>>> 911fb3421b9867a0b27f57dfc0912f33d9e779e8
+
 		return {"speech": speech,
 		        "speech_lengths": speech_lengths,
 		        "text": text,
@@ -134,32 +120,21 @@ class AudioDataset(torch.utils.data.Dataset):
 	
 	def collator(self, samples: list=None):
 		
-<<<<<<< HEAD
 		# return samples
 		
-=======
->>>>>>> 911fb3421b9867a0b27f57dfc0912f33d9e779e8
 		outputs = {}
 		for sample in samples:
 			for key in sample.keys():
 				if key not in outputs:
 					outputs[key] = []
 				outputs[key].append(sample[key])
-<<<<<<< HEAD
 
 		for key, data_list in outputs.items():
 			if data_list[0].dtype == torch.int64:
-=======
-		
-		for key, data_list in outputs.items():
-			if data_list[0].dtype.kind == "i":
->>>>>>> 911fb3421b9867a0b27f57dfc0912f33d9e779e8
+
 				pad_value = self.int_pad_value
 			else:
 				pad_value = self.float_pad_value
 			outputs[key] = torch.nn.utils.rnn.pad_sequence(data_list, batch_first=True, padding_value=pad_value)
-<<<<<<< HEAD
 		return outputs
-=======
-		return samples
->>>>>>> 911fb3421b9867a0b27f57dfc0912f33d9e779e8
+
