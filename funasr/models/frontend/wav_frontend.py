@@ -145,9 +145,12 @@ class WavFrontend(AbsFrontend):
             feats_lens.append(feat_length)
 
         feats_lens = torch.as_tensor(feats_lens)
-        feats_pad = pad_sequence(feats,
-                                 batch_first=True,
-                                 padding_value=0.0)
+        if batch_size == 1:
+            feats_pad = feats[0][None, :, :]
+        else:
+            feats_pad = pad_sequence(feats,
+                                     batch_first=True,
+                                     padding_value=0.0)
         return feats_pad, feats_lens
 
     def forward_fbank(
