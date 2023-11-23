@@ -14,10 +14,6 @@
         "core-js": "3.22.5",
         "mockjs": "1.1.0",
         "vue": "2.6.14",
-<<<<<<< HEAD
-=======
-        "plugin-component-scrollbar": "1.0.12",
->>>>>>> 41c686109df0a7017fb8c82001496e7f04552504
         "vue-router": "3.5.3",
         "vuex": "3.6.2",
         "swiper": "5.4.5",
