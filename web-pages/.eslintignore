@@ -1,0 +1,7 @@
+node_modules
+dist
+fonts
+*.md
+*.woff
+*.ttf
+public
