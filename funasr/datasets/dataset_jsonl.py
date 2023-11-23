@@ -22,7 +22,10 @@ def load_audio(audio_path: str, fs: int=16000):
 
 def extract_features(data, date_type: str="sound", frontend=None):
 	if date_type == "sound":
-		feat, feats_lens = frontend(data, len(data))
+		if isinstance(data, np.ndarray):
+			data = torch.from_numpy(data).to(torch.float32)
+		data_len = torch.tensor([data.shape[0]]).to(torch.int32)
+		feat, feats_lens = frontend(data[None, :], data_len)
 		feat = feat[0, :, :]
 	else:
 		feat, feats_lens = torch.from_numpy(data).to(torch.float32), torch.tensor([data.shape[0]]).to(torch.int32)
@@ -74,13 +77,14 @@ class IndexedDatasetJsonl(torch.utils.data.Dataset):
 
 
 class AudioDataset(torch.utils.data.Dataset):
-	def __init__(self, path, frontend=None, tokenizer=None):
+	def __init__(self, path, frontend=None, tokenizer=None, token_id_converter=None):
 		super().__init__()
 		self.indexed_dataset = IndexedDatasetJsonl(path)
 		self.frontend = frontend.forward
 		self.fs = 16000 if frontend is None else frontend.fs
 		self.data_type = "sound"
 		self.tokenizer = tokenizer
+		self.token_id_converter = token_id_converter
 		self.int_pad_value = -1
 		self.float_pad_value = 0.0
 
@@ -92,13 +96,15 @@ class AudioDataset(torch.utils.data.Dataset):
 	
 	def __getitem__(self, index):
 		item = self.indexed_dataset[index]
+		# return item
 		source = item["source"]
 		data_src = load_audio(source, fs=self.fs)
 		speech, speech_lengths = extract_features(data_src, self.data_type, self.frontend)
 		target = item["target"]
-		text = self.tokenizer.encode(target)
-		text_lengths = len(text)
-		text, text_lengths = torch.tensor(text, dtype=torch.int64), torch.tensor([text_lengths], dtype=torch.int32)
+		text = self.tokenizer.text2tokens(target)
+		ids = self.token_id_converter.tokens2ids(text)
+		ids_lengths = len(ids)
+		text, text_lengths = torch.tensor(ids, dtype=torch.int64), torch.tensor([ids_lengths], dtype=torch.int32)
 		return {"speech": speech,
 		        "speech_lengths": speech_lengths,
 		        "text": text,
@@ -108,17 +114,19 @@ class AudioDataset(torch.utils.data.Dataset):
 	
 	def collator(self, samples: list=None):
 		
+		# return samples
+		
 		outputs = {}
 		for sample in samples:
 			for key in sample.keys():
 				if key not in outputs:
 					outputs[key] = []
 				outputs[key].append(sample[key])
-		
+
 		for key, data_list in outputs.items():
-			if data_list[0].dtype.kind == "i":
+			if data_list[0].dtype == torch.int64:
 				pad_value = self.int_pad_value
 			else:
 				pad_value = self.float_pad_value
 			outputs[key] = torch.nn.utils.rnn.pad_sequence(data_list, batch_first=True, padding_value=pad_value)
-		return samples
+		return outputs

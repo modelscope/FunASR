@@ -4,7 +4,7 @@ import numpy as np
 
 class BatchSampler(torch.utils.data.BatchSampler):
 	
-	def __init__(self, dataset, batch_size_type: str="example", batch_size: int=14, sort_size: int=30, drop_last: bool=False, shuffle: bool=True, **kwargs):
+	def __init__(self, dataset, batch_size_type: str="example", batch_size: int=100, sort_size: int=30, drop_last: bool=False, shuffle: bool=True, **kwargs):
 		
 		self.drop_last = drop_last
 		self.pre_idx = -1
