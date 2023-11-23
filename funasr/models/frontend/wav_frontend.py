@@ -146,7 +146,7 @@ class WavFrontend(AbsFrontend):
 
         feats_lens = torch.as_tensor(feats_lens)
         if batch_size == 1:
-            feats_pad = feats[None, :, :]
+            feats_pad = feats[0][None, :, :]
         else:
             feats_pad = pad_sequence(feats,
                                      batch_first=True,
