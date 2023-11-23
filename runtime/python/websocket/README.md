@@ -16,7 +16,7 @@ git clone https://github.com/alibaba/FunASR.git && cd FunASR
 ### Install the requirements for server
 
 ```shell
-cd funasr/runtime/python/websocket
+cd runtime/python/websocket
 pip install -r requirements_server.txt
 ```
 
