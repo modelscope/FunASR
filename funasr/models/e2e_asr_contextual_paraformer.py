@@ -134,7 +134,7 @@ class NeatContextualParaformer(Paraformer):
             text_lengths: torch.Tensor,
             hotword_pad: torch.Tensor,
             hotword_lengths: torch.Tensor,
-            ideal_attn: torch.Tensor,
+            dha_pad: torch.Tensor,
     ) -> Tuple[torch.Tensor, Dict[str, torch.Tensor], torch.Tensor]:
         """Frontend + Encoder + Decoder + Calc loss
 
