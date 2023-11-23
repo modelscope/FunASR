@@ -121,11 +121,13 @@ nohup bash run_server_2pass.sh \
 --itn-dir modelscope model ID 或者 本地模型路径
 --port  服务端监听的端口号，默认为 10095
 --decoder-thread-num  服务端线程池个数(支持的最大并发路数)，默认为 8
---model-thread-num  每路识别的内部线程数(控制ONNX模型的并行)，默认为 1，其中建议 decoder-thread-num*model-thread-num 等于总线程数
+--model-thread-num  每路识别的内部线程数(控制ONNX模型的并行)，默认为 1，
+                    其中建议 decoder-thread-num*model-thread-num 等于总线程数
 --io-thread-num  服务端启动的IO线程数，默认为 1
 --certfile  ssl的证书文件，默认为：../../../ssl_key/server.crt，如果需要关闭ssl，参数设置为0
 --keyfile   ssl的密钥文件，默认为：../../../ssl_key/server.key
---hotword   热词文件路径，每行一个热词，格式：热词 权重(例如:阿里巴巴 20)，如果客户端提供热词，则与客户端提供的热词合并一起使用。
+--hotword   热词文件路径，每行一个热词，格式：热词 权重(例如:阿里巴巴 20)，
+            如果客户端提供热词，则与客户端提供的热词合并一起使用，服务端热词全局生效，客户端热词只针对对应客户端生效。
 ```
 
 ### 关闭FunASR服务
