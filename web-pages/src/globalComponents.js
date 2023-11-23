@@ -1,9 +1,11 @@
 // 组件
 import uiJessibuca from '@/components/ui-jessibuca/index.vue'
+import uiScrollbar from '@/components/ui-scrollbar/index.vue'
 
 const components = {
     // 组件
-    uiJessibuca
+    uiJessibuca,
+    uiScrollbar
 }
 
 const install = function (Vue, opts = {}) {
