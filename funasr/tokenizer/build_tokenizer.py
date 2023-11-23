@@ -3,11 +3,11 @@ from typing import Iterable
 from typing import Union
 
 
-from funasr.text.abs_tokenizer import AbsTokenizer
-from funasr.text.char_tokenizer import CharTokenizer
-from funasr.text.phoneme_tokenizer import PhonemeTokenizer
-from funasr.text.sentencepiece_tokenizer import SentencepiecesTokenizer
-from funasr.text.word_tokenizer import WordTokenizer
+from funasr.tokenizer.abs_tokenizer import AbsTokenizer
+from funasr.tokenizer.char_tokenizer import CharTokenizer
+from funasr.tokenizer.phoneme_tokenizer import PhonemeTokenizer
+from funasr.tokenizer.sentencepiece_tokenizer import SentencepiecesTokenizer
+from funasr.tokenizer.word_tokenizer import WordTokenizer
 
 
 def build_tokenizer(

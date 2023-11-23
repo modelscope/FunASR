@@ -9,9 +9,9 @@ from typing import Optional
 
 
 from funasr.utils.cli_utils import get_commandline_args
-from funasr.text.build_tokenizer import build_tokenizer
-from funasr.text.cleaner import TextCleaner
-from funasr.text.phoneme_tokenizer import g2p_choices
+from funasr.tokenizer.build_tokenizer import build_tokenizer
+from funasr.tokenizer.cleaner import TextCleaner
+from funasr.tokenizer.phoneme_tokenizer import g2p_choices
 from funasr.utils.types import str2bool
 from funasr.utils.types import str_or_none
 

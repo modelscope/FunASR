@@ -11,7 +11,7 @@ import numpy as np
 import torch
 from funasr.build_utils.build_model_from_file import build_model_from_file
 from funasr.models.frontend.wav_frontend import WavFrontend
-from funasr.text.token_id_converter import TokenIDConverter
+from funasr.tokenizer.token_id_converter import TokenIDConverter
 from funasr.torch_utils.device_funcs import to_device
 
 

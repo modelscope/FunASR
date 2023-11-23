@@ -18,7 +18,7 @@ from funasr.build_utils.build_optimizer import build_optimizer
 from funasr.build_utils.build_scheduler import build_scheduler
 from funasr.build_utils.build_trainer import build_trainer as build_trainer_modelscope
 from funasr.modules.lora.utils import mark_only_lora_as_trainable
-from funasr.text.phoneme_tokenizer import g2p_choices
+from funasr.tokenizer.phoneme_tokenizer import g2p_choices
 from funasr.torch_utils.load_pretrained_model import load_pretrained_model
 from funasr.torch_utils.model_summary import model_summary
 from funasr.torch_utils.pytorch_version import pytorch_cudnn_version

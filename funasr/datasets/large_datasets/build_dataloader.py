@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 
 from funasr.datasets.large_datasets.dataset import Dataset
 from funasr.iterators.abs_iter_factory import AbsIterFactory
-from funasr.text.abs_tokenizer import AbsTokenizer
+from funasr.tokenizer.abs_tokenizer import AbsTokenizer
 
 
 def read_symbol_table(symbol_table_file):
