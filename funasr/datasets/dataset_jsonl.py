@@ -4,8 +4,8 @@ import torch.distributed as dist
 import numpy as np
 import kaldiio
 import librosa
-
-
+import torchaudio
+import time
 
 def load_audio(audio_path: str, fs: int=16000):
 	audio = None
@@ -17,7 +17,9 @@ def load_audio(audio_path: str, fs: int=16000):
 		if ".ark:" in audio_path:
 			audio = kaldiio.load_mat(audio_path)
 		else:
-			audio, fs = librosa.load(audio_path, sr=fs)
+			# audio, fs = librosa.load(audio_path, sr=fs)
+			audio, fs = torchaudio.load(audio_path)
+			audio = audio[0, :]
 	return audio
 
 def extract_features(data, date_type: str="sound", frontend=None):
