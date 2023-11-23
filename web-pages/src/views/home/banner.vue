@@ -1,6 +1,6 @@
 <template>
     <div class="banner-comp">
-        <div class="swiper-container" ref="swiper-container">
+        <div class="swiper-container" ref="swiper-container" :class="{hiddenPagination: bannerList && bannerList.length<2}">
             <div class="swiper-wrapper">
                 <div class="swiper-slide" v-for="(item,index) in bannerList" :key="index">
                     <div class="item">
@@ -37,22 +37,6 @@ export default {
             bannerList: [
                 {
                     flag: 1,
-                    url: require('./assets/images/banner.png')
-                },
-                {
-                    flag: 2,
-                    url: require('./assets/images/banner.png')
-                },
-                {
-                    flag: 2,
-                    url: require('./assets/images/banner.png')
-                },
-                {
-                    flag: 2,
-                    url: require('./assets/images/banner.png')
-                },
-                {
-                    flag: 2,
                     url: require('./assets/images/banner.png')
                 }
             ],

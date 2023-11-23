@@ -11,7 +11,6 @@ import globalComponents from './globalComponents'
 import globalFunctions from './globalFunctions'
 
 import pluginComponentScrollbar from 'plugin-component-scrollbar'
-import pluginDirectiveLoading from 'plugin-directive-loading'
 
 // 第三方组件
 // ant-design-vue 组件 按需加载
@@ -24,7 +23,6 @@ Vue.use(ConfigProvider)
 Vue.use(Input)
 
 Vue.use(pluginComponentScrollbar)
-Vue.use(pluginDirectiveLoading)
 
 const axiosInstance = Axios.create({
     timeout: 60000

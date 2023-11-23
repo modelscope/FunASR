@@ -99,7 +99,7 @@
 
             <div class="xq-box">
                 <div class="video-box">
-                    <iframe src="//player.bilibili.com/player.html?aid=663707374&bvid=BV11a4y1U72y&cid=1338069747&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+                    <iframe src="//player.bilibili.com/player.html?aid=663707374&bvid=BV11a4y1U72y&cid=1338069747&p=1&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="false"> </iframe>
                     <!-- <LivePlayer
                         :autoplay="false"
                         :videoUrl="videoSrc"

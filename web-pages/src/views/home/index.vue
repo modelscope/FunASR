@@ -44,7 +44,7 @@
                 </ul>
             </div>
 
-            <div class="line-box">
+            <!-- <div class="line-box">
                 <div></div>
             </div>
 
@@ -60,7 +60,7 @@
                         联系电话: 400 862 6126
                     </li>
                 </ul>
-            </div>
+            </div> -->
         </footer>
 
     </div>
