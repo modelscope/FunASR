@@ -117,7 +117,7 @@
 
             <div class="xq-box">
                 <div class="video-box">
-                    <iframe src="//player.bilibili.com/player.html?aid=278639821&bvid=BV1Yw411K7LY&cid=1338073559&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+                    <iframe src="//player.bilibili.com/player.html?aid=278639821&bvid=BV1Yw411K7LY&cid=1338073559&p=1&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" > </iframe>
                     <!-- <LivePlayer
                         :autoplay="false"
                         :videoUrl="videoSrc"

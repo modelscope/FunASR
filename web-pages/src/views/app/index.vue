@@ -2,10 +2,6 @@
     <a-config-provider :locale="locale">
         <div
             class="app-container"
-            v-uiloading="isLoading"
-            :ui-loading-text="loadingText"
-            :ui-loading-spinner="loadingSpinner"
-            :ui-loading-background="loadingBackground"
         >
             <div class="app-content" ref="app-content">
                 <ui-scrollbar class="app-content-scrollbar" style="height: 100%;" :childOverWidth="false" :wrapStyle="[{ overflowX: 'hidden' }]">
@@ -28,20 +24,7 @@
                 contentMinHeight: 0
             }
         },
-        computed: {
-            isLoading () {
-                return this.$store.state.common.isLoading
-            },
-            loadingText () {
-                return this.$store.state.common.loadingText
-            },
-            loadingSpinner () {
-                return this.$store.state.common.loadingSpinner
-            },
-            loadingBackground () {
-                return this.$store.state.common.loadingBackground
-            }
-        },
+        computed: {},
         beforeCreate () {
             const setHtmlFontSize = function () {
                 const deviceWidth =

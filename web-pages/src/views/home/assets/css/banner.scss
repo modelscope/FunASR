@@ -24,6 +24,12 @@
             transform: scale(.33)
         }
     }
+    .hiddenPagination{
+        .swiper-pagination{
+
+            display: none;
+        }
+    }
     .item{
         width: 100%;
         height: 100%;
