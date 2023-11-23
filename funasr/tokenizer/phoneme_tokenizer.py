@@ -10,7 +10,7 @@ import warnings
 # import g2p_en
 import jamo
 
-from funasr.text.abs_tokenizer import AbsTokenizer
+from funasr.tokenizer.abs_tokenizer import AbsTokenizer
 
 
 g2p_choices = [
@@ -107,7 +107,7 @@ def pyopenjtalk_g2p_prosody(text: str, drop_unvoiced_vowels: bool = True) -> Lis
         List[str]: List of phoneme + prosody symbols.
 
     Examples:
-        >>> from funasr.text.phoneme_tokenizer import pyopenjtalk_g2p_prosody
+        >>> from funasr.tokenizer.phoneme_tokenizer import pyopenjtalk_g2p_prosody
         >>> pyopenjtalk_g2p_prosody("こんにちは。")
         ['^', 'k', 'o', '[', 'N', 'n', 'i', 'ch', 'i', 'w', 'a', '$']
 

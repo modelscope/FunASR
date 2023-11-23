@@ -13,9 +13,9 @@ import scipy.signal
 import librosa
 import jieba
 
-from funasr.text.build_tokenizer import build_tokenizer
-from funasr.text.cleaner import TextCleaner
-from funasr.text.token_id_converter import TokenIDConverter
+from funasr.tokenizer.build_tokenizer import build_tokenizer
+from funasr.tokenizer.cleaner import TextCleaner
+from funasr.tokenizer.token_id_converter import TokenIDConverter
 
 
 class AbsPreprocessor(ABC):

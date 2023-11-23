@@ -17,7 +17,7 @@ from funasr.train.abs_model import LanguageModel
 from funasr.models.seq_rnn_lm import SequentialRNNLM
 from funasr.models.transformer_lm import TransformerLM
 from funasr.tasks.abs_task import AbsTask
-from funasr.text.phoneme_tokenizer import g2p_choices
+from funasr.tokenizer.phoneme_tokenizer import g2p_choices
 from funasr.torch_utils.initialize import initialize
 from funasr.train.class_choices import ClassChoices
 from funasr.train.trainer import Trainer

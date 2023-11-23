@@ -5,7 +5,7 @@ from typing import Union
 import warnings
 
 
-from funasr.text.abs_tokenizer import AbsTokenizer
+from funasr.tokenizer.abs_tokenizer import AbsTokenizer
 
 
 class WordTokenizer(AbsTokenizer):

@@ -34,8 +34,8 @@ from funasr.modules.beam_search.beam_search_transducer import Hypothesis as Hypo
 from funasr.modules.scorers.ctc import CTCPrefixScorer
 from funasr.modules.scorers.length_bonus import LengthBonus
 from funasr.build_utils.build_asr_model import frontend_choices
-from funasr.text.build_tokenizer import build_tokenizer
-from funasr.text.token_id_converter import TokenIDConverter
+from funasr.tokenizer.build_tokenizer import build_tokenizer
+from funasr.tokenizer.token_id_converter import TokenIDConverter
 from funasr.torch_utils.device_funcs import to_device
 from funasr.utils.timestamp_tools import ts_prediction_lfr6_standard
 
