@@ -71,7 +71,7 @@ from funasr.models.specaug.specaug import SpecAugLFR
 from funasr.models.base_model import FunASRModel
 from funasr.modules.subsampling import Conv1dSubsampling
 from funasr.tasks.abs_task import AbsTask
-from funasr.text.phoneme_tokenizer import g2p_choices
+from funasr.tokenizer.phoneme_tokenizer import g2p_choices
 from funasr.torch_utils.initialize import initialize
 from funasr.train.class_choices import ClassChoices
 from funasr.train.trainer import Trainer

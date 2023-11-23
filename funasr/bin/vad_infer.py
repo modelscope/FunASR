@@ -23,9 +23,9 @@ class Speech2VadSegment:
     """Speech2VadSegment class
 
     Examples:
-        >>> import soundfile
+        >>> import librosa
         >>> speech2segment = Speech2VadSegment("vad_config.yml", "vad.pt")
-        >>> audio, rate = soundfile.read("speech.wav")
+        >>> audio, rate = librosa.load("speech.wav")
         >>> speech2segment(audio)
         [[10, 230], [245, 450], ...]
 
@@ -118,9 +118,9 @@ class Speech2VadSegmentOnline(Speech2VadSegment):
     """Speech2VadSegmentOnline class
 
     Examples:
-        >>> import soundfile
+        >>> import librosa
         >>> speech2segment = Speech2VadSegmentOnline("vad_config.yml", "vad.pt")
-        >>> audio, rate = soundfile.read("speech.wav")
+        >>> audio, rate = librosa.load("speech.wav")
         >>> speech2segment(audio)
         [[10, 230], [245, 450], ...]
 

@@ -16,8 +16,10 @@ from typing import Dict
 from typing import Mapping
 from typing import Tuple
 from typing import Union
-
-import h5py
+try:
+    import h5py
+except:
+    print("If you want use h5py dataset, please pip install h5py, and try it again")
 import humanfriendly
 import kaldiio
 import numpy as np

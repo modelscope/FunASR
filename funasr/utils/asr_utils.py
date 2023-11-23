@@ -5,7 +5,7 @@ import struct
 from typing import Any, Dict, List, Union
 
 import torchaudio
-import soundfile
+import librosa
 import numpy as np
 import pkg_resources
 from modelscope.utils.logger import get_logger
@@ -139,7 +139,7 @@ def get_sr_from_wav(fname: str):
                     try:
                         audio, fs = torchaudio.load(fname)
                     except:
-                        audio, fs = soundfile.read(fname)
+                        audio, fs = librosa.load(fname)
                 break
         if audio_type.rfind(".scp") >= 0:
             with open(fname, encoding="utf-8") as f:

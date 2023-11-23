@@ -1,7 +1,10 @@
 import argparse
 import tqdm
 import codecs
-import textgrid
+try:
+    import textgrid
+except:
+    raise "Please install textgrid firstly: pip install textgrid"
 import pdb
 
 class Segment(object):

@@ -6,7 +6,10 @@ import argparse
 import codecs
 from distutils.util import strtobool
 from pathlib import Path
-import textgrid
+try:
+    import textgrid
+except:
+    raise "Please install textgrid firstly: pip install textgrid"
 import pdb
 
 class Segment(object):

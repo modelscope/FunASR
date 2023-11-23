@@ -1,7 +1,7 @@
 from funasr.models.e2e_asr_paraformer import Paraformer, BiCifParaformer, ParaformerOnline
 from funasr.export.models.e2e_asr_paraformer import Paraformer as Paraformer_export
 from funasr.export.models.e2e_asr_paraformer import BiCifParaformer as BiCifParaformer_export
-from funasr.export.models.e2e_asr_conformer import Conformer as Conformer_export
+# from funasr.export.models.e2e_asr_conformer import Conformer as Conformer_export
 
 from funasr.models.e2e_vad import E2EVadModel
 from funasr.export.models.e2e_vad import E2EVadModel as E2EVadModel_export
@@ -30,8 +30,8 @@ def get_model(model, export_config=None):
         return [encoder, decoder]
     elif isinstance(model, Paraformer):
         return Paraformer_export(model, **export_config)
-    elif isinstance(model, Conformer_export):
-        return Conformer_export(model, **export_config)
+    # elif isinstance(model, Conformer_export):
+    #     return Conformer_export(model, **export_config)
     elif isinstance(model, E2EVadModel):
         return E2EVadModel_export(model, **export_config)
     elif isinstance(model, PunctuationModel):

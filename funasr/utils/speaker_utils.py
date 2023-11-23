@@ -12,7 +12,7 @@ import os
 from typing import Any, Dict, List, Union
 
 import numpy as np
-import soundfile as sf
+import librosa as sf
 import torch
 import torchaudio
 import logging
@@ -43,7 +43,7 @@ def sv_preprocess(inputs: Union[np.ndarray, list]):
         for i in range(len(inputs)):
             if isinstance(inputs[i], str):
                 file_bytes = File.read(inputs[i])
-                data, fs = sf.read(io.BytesIO(file_bytes), dtype='float32')
+                data, fs = sf.load(io.BytesIO(file_bytes), dtype='float32')
                 if len(data.shape) == 2:
                     data = data[:, 0]
                 data = torch.from_numpy(data).unsqueeze(0)

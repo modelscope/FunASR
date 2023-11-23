@@ -16,7 +16,7 @@ Supports real-time streaming speech recognition, uses non-streaming models for e
 #### Server Deployment
 
 ```shell
-cd funasr/runtime/python/websocket
+cd runtime/python/websocket
 python funasr_wss_server.py --port 10095
 ```
 

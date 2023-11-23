@@ -5,8 +5,12 @@ from typing import Tuple
 from typing import Union
 
 import torch
-from torch_complex import functional as FC
-from torch_complex.tensor import ComplexTensor
+try:
+    from torch_complex import functional as FC
+    from torch_complex.tensor import ComplexTensor
+except:
+    print("Please install torch_complex firstly")
+
 
 
 EPS = torch.finfo(torch.double).eps

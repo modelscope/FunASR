@@ -10,36 +10,36 @@ from setuptools import setup
 
 requirements = {
     "install": [
-        "setuptools>=38.5.1",
+        # "setuptools>=38.5.1",
         "humanfriendly",
         "scipy>=1.4.1",
         "librosa",
-        "jamo",  # For kss
+        # "jamo",  # For kss
         "PyYAML>=5.1.2",
-        "soundfile>=0.12.1",
-        "h5py>=3.1.0",
+        # "soundfile>=0.12.1",
+        # "h5py>=3.1.0",
         "kaldiio>=2.17.0",
-        "torch_complex",
-        "nltk>=3.4.5",
+        # "torch_complex",
+        # "nltk>=3.4.5",
         # ASR
-        "sentencepiece",
+        "sentencepiece", # train
         "jieba",
-        "rotary_embedding_torch",
-        "ffmpeg",
+        # "rotary_embedding_torch",
+        # "ffmpeg-python",
         # TTS
-        "pypinyin>=0.44.0",
-        "espnet_tts_frontend",
+        # "pypinyin>=0.44.0",
+        # "espnet_tts_frontend",
         # ENH
-        "pytorch_wpe",
+        # "pytorch_wpe",
         "editdistance>=0.5.2",
         "tensorboard",
-        "g2p",
-        "nara_wpe",
+        # "g2p",
+        # "nara_wpe",
         # PAI
         "oss2",
-        "edit-distance",
-        "textgrid",
-        "protobuf",
+        # "edit-distance",
+        # "textgrid",
+        # "protobuf",
         "tqdm",
         "hdbscan",
         "umap",
@@ -104,7 +104,7 @@ setup(
     name="funasr",
     version=version,
     url="https://github.com/alibaba-damo-academy/FunASR.git",
-    author="Speech Lab of DAMO Academy, Alibaba Group",
+    author="Speech Lab of Alibaba Group",
     author_email="funasr@list.alibaba-inc.com",
     description="FunASR: A Fundamental End-to-End Speech Recognition Toolkit",
     long_description=open(os.path.join(dirname, "README.md"), encoding="utf-8").read(),

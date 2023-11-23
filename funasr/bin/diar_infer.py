@@ -27,11 +27,11 @@ class Speech2DiarizationEEND:
     """Speech2Diarlization class
 
     Examples:
-        >>> import soundfile
+        >>> import librosa
         >>> import numpy as np
         >>> speech2diar = Speech2DiarizationEEND("diar_sond_config.yml", "diar_sond.pb")
         >>> profile = np.load("profiles.npy")
-        >>> audio, rate = soundfile.read("speech.wav")
+        >>> audio, rate = librosa.load("speech.wav")
         >>> speech2diar(audio, profile)
         {"spk1": [(int, int), ...], ...}
 
@@ -109,11 +109,11 @@ class Speech2DiarizationSOND:
     """Speech2Xvector class
 
     Examples:
-        >>> import soundfile
+        >>> import librosa
         >>> import numpy as np
         >>> speech2diar = Speech2DiarizationSOND("diar_sond_config.yml", "diar_sond.pb")
         >>> profile = np.load("profiles.npy")
-        >>> audio, rate = soundfile.read("speech.wav")
+        >>> audio, rate = librosa.load("speech.wav")
         >>> speech2diar(audio, profile)
         {"spk1": [(int, int), ...], ...}
 

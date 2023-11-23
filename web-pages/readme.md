@@ -87,3 +87,11 @@ html设计可以参考whisper（ https://openai.com/research/whisper ）
 7、社区交流
 
     
+# 部署
+git clone https://github.com/alibaba-damo-academy/FunASR.git
+cd FunASR/web-pages
+npm install
+# 开发模式
+npm run dev
+# 产品模式
+npm run example

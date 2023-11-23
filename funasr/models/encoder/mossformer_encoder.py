@@ -1,8 +1,10 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
-from rotary_embedding_torch import RotaryEmbedding
+try:
+    from rotary_embedding_torch import RotaryEmbedding
+except:
+    print("Please install rotary_embedding_torch by: \n pip install -U rotary_embedding_torch")
 from funasr.modules.layer_norm import GlobalLayerNorm, CumulativeLayerNorm, ScaleNorm
 from funasr.modules.embedding import ScaledSinuEmbedding
 from funasr.modules.mossformer import FLASH_ShareA_FFConvM
