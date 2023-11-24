@@ -35,7 +35,8 @@ def check_audio_list(audio: list):
             assert seg[0] >= audio[
                 i - 1][1], 'modelscope error: Wrong time stamps.'
         audio_dur += seg[1] - seg[0]
-    assert audio_dur > 5, 'modelscope error: The effective audio duration is too short.'
+    return audio_dur
+    # assert audio_dur > 5, 'modelscope error: The effective audio duration is too short.'
 
 
 def sv_preprocess(inputs: Union[np.ndarray, list]):
