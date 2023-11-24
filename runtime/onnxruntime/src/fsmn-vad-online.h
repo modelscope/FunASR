@@ -21,6 +21,8 @@ public:
     std::vector<std::vector<int>> Infer(std::vector<float> &waves, bool input_finished);
     void ExtractFeats(float sample_rate, vector<vector<float>> &vad_feats, vector<float> &waves, bool input_finished);
     void Reset();
+    int GetVadSampleRate() { return vad_sample_rate_; };
+
     // 2pass
     std::unique_ptr<Audio> audio_handle = nullptr;
 
