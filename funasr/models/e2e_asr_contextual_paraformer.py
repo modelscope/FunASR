@@ -207,7 +207,7 @@ class NeatContextualParaformer(Paraformer):
         # 2b. Attention decoder branch
         if self.ctc_weight != 1.0:
             loss_att, acc_att, cer_att, wer_att, loss_pre, loss_ideal = self._calc_att_clas_loss(
-                encoder_out, encoder_out_lens, text, text_lengths, hotword_pad, hotword_lengths, ideal_attn
+                encoder_out, encoder_out_lens, text, text_lengths, hotword_pad, hotword_lengths
             )
 
         # 3. CTC-Att loss definition
@@ -242,7 +242,6 @@ class NeatContextualParaformer(Paraformer):
             ys_pad_lens: torch.Tensor,
             hotword_pad: torch.Tensor,
             hotword_lengths: torch.Tensor,
-            ideal_attn: torch.Tensor,
     ):
         encoder_out_mask = (~make_pad_mask(encoder_out_lens, maxlen=encoder_out.size(1))[:, None, :]).to(
             encoder_out.device)
