@@ -164,6 +164,7 @@ int ParaformerOnline::OnlineLfrCmvn(vector<vector<float>> &wav_feats, bool input
                     p.insert(p.end(), wav_feats[wav_feats.size() - 1].begin(), wav_feats[wav_feats.size() - 1].end());
                 }
                 out_feats.emplace_back(p);
+                p.clear();
             } else {
                 lfr_splice_frame_idxs = i;
                 break;

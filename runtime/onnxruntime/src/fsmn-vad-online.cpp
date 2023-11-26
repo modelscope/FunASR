@@ -110,6 +110,7 @@ int FsmnVadOnline::OnlineLfrCmvn(vector<vector<float>> &vad_feats, bool input_fi
                     p.insert(p.end(), vad_feats[vad_feats.size() - 1].begin(), vad_feats[vad_feats.size() - 1].end());
                 }
                 out_feats.emplace_back(p);
+                p.clear();
             } else {
                 lfr_splice_frame_idxs = i;
                 break;
