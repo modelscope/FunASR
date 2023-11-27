@@ -436,6 +436,7 @@ void Paraformer::LfrCmvn(std::vector<std::vector<float>> &asr_feats) {
                 p.insert(p.end(), asr_feats[asr_feats.size() - 1].begin(), asr_feats[asr_feats.size() - 1].end());
             }
             out_feats.emplace_back(p);
+            p.clear();
         }
     }
     // Apply cmvn

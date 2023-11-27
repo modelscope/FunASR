@@ -1,3 +1,39 @@
+FunASR Model Open Source License
+Version 1.0
+
+Copyright (C) [2023-2028] Alibaba Group. All rights reserved.
+
+Thank you for choosing the FunASR open source models. The FunASR open source models contain a series of open-source models that allow everyone to use, modify, share, and learn from it.
+
+To ensure better community collaboration, we have developed the following agreement and hope that you carefully read and abide by it.
+
+1 Definitions
+In this agreement, [FunASR software] refers to the FunASR open source model, and its derivatives, including fine-tuned models. [You] refer to individuals or organizations who use, modify, share, and learn from [FunASR software].
+
+2 License and Restrictions
+
+2.1 License
+You are free to use, copy, modify, and share [FunASR software] under the conditions of this agreement.
+
+2.2 Restrictions
+You should indicate the code and model source and author information when using, copying, modifying and sharing [FunASR software]. You should keep the relevant names of models in [FunASR software].
+
+3 Responsibility and Risk
+[FunASR software] is for reference and learning purposes only and is not responsible for any direct or indirect losses caused by your use or modification of [FunASR software]. You should take responsibility and risks for your use and modification of [FunASR software].
+
+4 Termination
+If you violate any terms of this agreement, your license will be automatically terminated, and you must stop using, copying, modifying, and sharing [FunASR software].
+
+5 Revision
+This agreement may be updated and revised from time to time. The revised agreement will be published in the FunASR official repository and automatically take effect. If you continue to use, copy, modify, and share [FunASR software], it means you agree to the revised agreement.
+
+6 Other Provisions
+This agreement is subject to the laws of [Country/Region]. If any provisions are found to be illegal, invalid, or unenforceable, they shall be deemed deleted from this agreement, and the remaining provisions shall remain valid and binding.
+
+If you have any questions or comments about this agreement, please contact us.
+
+Copyright (c) [2023-2028] Alibaba Group. All rights reserved.
+
 FunASR 模型开源协议
 
 版本号：1.0
@@ -36,38 +72,3 @@ FunASR 模型开源协议
 
 版权所有© [2023-2028] [阿里巴巴集团]。保留所有权利。
 
-FunASR Model Open Source License
-Version 1.0
-
-Copyright (C) [2023-2028] Alibaba Group. All rights reserved.
-
-Thank you for choosing the FunASR open source models. The FunASR open source models contain a series of open-source models that allow everyone to use, modify, share, and learn from it.
-
-To ensure better community collaboration, we have developed the following agreement and hope that you carefully read and abide by it.
-
-1 Definitions
-In this agreement, [FunASR software] refers to the FunASR open source model, and its derivatives, including fine-tuned models. [You] refer to individuals or organizations who use, modify, share, and learn from [FunASR software].
-
-2 License and Restrictions
-
-2.1 License
-You are free to use, copy, modify, and share [FunASR software] under the conditions of this agreement.
-
-2.2 Restrictions
-You should indicate the code and model source and author information when using, copying, modifying and sharing [FunASR software]. You should keep the relevant names of models in [FunASR software].
-
-3 Responsibility and Risk
-[FunASR software] is for reference and learning purposes only and is not responsible for any direct or indirect losses caused by your use or modification of [FunASR software]. You should take responsibility and risks for your use and modification of [FunASR software].
-
-4 Termination
-If you violate any terms of this agreement, your license will be automatically terminated, and you must stop using, copying, modifying, and sharing [FunASR software].
-
-5 Revision
-This agreement may be updated and revised from time to time. The revised agreement will be published in the FunASR official repository and automatically take effect. If you continue to use, copy, modify, and share [FunASR software], it means you agree to the revised agreement.
-
-6 Other Provisions
-This agreement is subject to the laws of [Country/Region]. If any provisions are found to be illegal, invalid, or unenforceable, they shall be deemed deleted from this agreement, and the remaining provisions shall remain valid and binding.
-
-If you have any questions or comments about this agreement, please contact us.
-
-Copyright (c) [2023-2028] Alibaba Group. All rights reserved.

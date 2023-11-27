@@ -264,6 +264,7 @@ void FsmnVad::LfrCmvn(std::vector<std::vector<float>> &vad_feats) {
                 p.insert(p.end(), vad_feats[vad_feats.size() - 1].begin(), vad_feats[vad_feats.size() - 1].end());
             }
             out_feats.emplace_back(p);
+            p.clear();
         }
     }
     // Apply cmvn
