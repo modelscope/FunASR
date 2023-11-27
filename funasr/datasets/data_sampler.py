@@ -46,8 +46,8 @@ class BatchSampler(torch.utils.data.BatchSampler):
 
 				idx_map = self.shuffle_idx[idx]
 				# prompt = self.dataset.indexed_dataset[idx_map]["prompt"]
-				sample_len_cur = self.dataset.indexed_dataset[idx_map]["source_len"] + \
-				                 self.dataset.indexed_dataset[idx_map]["target_len"]
+				sample_len_cur = self.dataset.indexed_dataset.get_source_len(self.dataset.indexed_dataset[idx_map]) + \
+				                 self.dataset.indexed_dataset.get_target_len(self.dataset.indexed_dataset[idx_map])
 
 				datalen_with_index.append([idx, sample_len_cur])
 			

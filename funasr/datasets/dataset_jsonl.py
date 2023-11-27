@@ -78,6 +78,13 @@ class IndexedDatasetJsonl(torch.utils.data.Dataset):
 	
 	def __getitem__(self, index):
 		return self.contents[index]
+	
+	def get_source_len(self, data_dict):
+		return data_dict["source_len"]
+
+	def get_target_len(self, data_dict):
+		
+		return data_dict["target_len"] if "target_len" in data_dict else 0
 
 
 class AudioDataset(torch.utils.data.Dataset):

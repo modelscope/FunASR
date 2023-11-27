@@ -47,7 +47,7 @@ if __name__ == "__main__":
                                                 collate_fn=dataset.collator,
                                                 batch_sampler=batch_sampler,
                                                 shuffle=False,
-                                                num_workers=8,
+                                                num_workers=0,
                                                 pin_memory=True)
     
     print(len(dataset))
