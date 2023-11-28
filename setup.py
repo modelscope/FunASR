@@ -19,7 +19,7 @@ requirements = {
         # "soundfile>=0.12.1",
         # "h5py>=3.1.0",
         "kaldiio>=2.17.0",
-        # "torch_complex",
+        "torch_complex",
         # "nltk>=3.4.5",
         # ASR
         "sentencepiece", # train
@@ -30,7 +30,7 @@ requirements = {
         # "pypinyin>=0.44.0",
         # "espnet_tts_frontend",
         # ENH
-        # "pytorch_wpe",
+        "pytorch_wpe",
         "editdistance>=0.5.2",
         "tensorboard",
         # "g2p",
@@ -43,6 +43,7 @@ requirements = {
         "tqdm",
         "hdbscan",
         "umap",
+        "jaconv",
     ],
     # train: The modules invoked when training only.
     "train": [
