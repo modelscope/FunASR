@@ -38,9 +38,6 @@ dataset = AudioDataset(jsonl, frontend=frontend, tokenizer=tokenizer, token_id_c
 batch_sampler = BatchSampler(dataset)
 
 
-def collator(samples: list = None):
-    return samples
-
 if __name__ == "__main__":
     
     dataloader_tr = torch.utils.data.DataLoader(dataset,
