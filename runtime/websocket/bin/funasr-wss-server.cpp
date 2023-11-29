@@ -30,8 +30,11 @@ int main(int argc, char* argv[]) {
 
     google::InitGoogleLogging(argv[0]);
     FLAGS_logtostderr = true;
-
-    TCLAP::CmdLine cmd("funasr-wss-server", ' ', "1.0");
+    std::string offline_version = "";
+#ifdef _WIN32
+    offline_version = "0.1.0";
+#endif
+    TCLAP::CmdLine cmd("funasr-wss-server", ' ', offline_version);
     TCLAP::ValueArg<std::string> download_model_dir(
         "", "download-model-dir",
         "Download model from Modelscope to download_model_dir",
