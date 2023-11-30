@@ -68,7 +68,6 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
                                  int audio_fs,
                                  std::string wav_format,
                                  FUNASR_DEC_HANDLE& decoder_handle) {
-  scoped_lock guard(thread_lock);
   try {
     int num_samples = buffer.size();  // the size of the buf
 
@@ -130,6 +129,7 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
   } catch (std::exception const& e) {
     std::cerr << "Error: " << e.what() << std::endl;
   }
+  scoped_lock guard(thread_lock);
   msg["access_num"]=(int)msg["access_num"]-1;
 }
 
