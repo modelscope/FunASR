@@ -93,6 +93,15 @@ endif()
 link_directories(${ONNXRUNTIME_DIR}/lib)
 link_directories(${FFMPEG_DIR}/lib)
 
+IF(WIN32)
+    file(REMOVE ${PROJECT_SOURCE_DIR}/third_party/glog/src/config.h 
+                ${PROJECT_SOURCE_DIR}/third_party/glog/src/glog/export.h 
+                ${PROJECT_SOURCE_DIR}/third_party/glog/src/glog/logging.h 
+                ${PROJECT_SOURCE_DIR}/third_party/glog/src/glog/raw_logging.h 
+                ${PROJECT_SOURCE_DIR}/third_party/glog/src/glog/stl_logging.h 
+                ${PROJECT_SOURCE_DIR}/third_party/glog/src/glog/vlog_is_on.h)
+endif()
+
 if(ENABLE_GLOG)
     include_directories(${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/glog/src)
     set(BUILD_TESTING OFF)
