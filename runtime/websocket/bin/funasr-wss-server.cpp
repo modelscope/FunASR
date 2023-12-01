@@ -91,7 +91,7 @@ int main(int argc, char* argv[]) {
                                            "0.0.0.0", "string");
     TCLAP::ValueArg<int> port("", "port", "port", false, 10095, "int");
     TCLAP::ValueArg<int> io_thread_num("", "io-thread-num", "io thread num",
-                                       false, 8, "int");
+                                       false, 2, "int");
     TCLAP::ValueArg<int> decoder_thread_num(
         "", "decoder-thread-num", "decoder thread num", false, 8, "int");
     TCLAP::ValueArg<int> model_thread_num("", "model-thread-num",
