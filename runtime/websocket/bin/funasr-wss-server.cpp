@@ -226,28 +226,29 @@ int main(int argc, char* argv[]) {
             std::string down_asr_path;
             std::string down_asr_model;
 
+            // modify model-revision by model name
+            size_t found = s_asr_path.find("speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404");
+            if (found != std::string::npos) {
+                model_path["model-revision"]="v1.2.4";
+            }
+
+            found = s_asr_path.find("speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404");
+            if (found != std::string::npos) {
+                model_path["model-revision"]="v1.0.5";
+            }
+
+            found = s_asr_path.find("speech_paraformer-large_asr_nat-en-16k-common-vocab10020");
+            if (found != std::string::npos) {
+                model_path["model-revision"]="v1.0.0";
+                s_itn_path="";
+                s_lm_path="";
+            }
+
             if (access(s_asr_path.c_str(), F_OK) == 0){
                 // local
                 python_cmd_asr = python_cmd + " --model-name " + s_asr_path + " --export-dir ./ " + " --model_revision " + model_path["model-revision"];
                 down_asr_path  = s_asr_path;
             }else{
-                size_t found = s_asr_path.find("speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404");
-                if (found != std::string::npos) {
-                    model_path["model-revision"]="v1.2.4";
-                }
-
-                found = s_asr_path.find("speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404");
-                if (found != std::string::npos) {
-                    model_path["model-revision"]="v1.0.5";
-                }
-
-                found = s_asr_path.find("speech_paraformer-large_asr_nat-en-16k-common-vocab10020");
-                if (found != std::string::npos) {
-                    model_path["model-revision"]="v1.0.0";
-                    s_itn_path="";
-                    s_lm_path="";
-                }
-
                 // modelscope
                 LOG(INFO) << "Download model: " <<  s_asr_path << " from modelscope: ";
                 python_cmd_asr = python_cmd + " --model-name " + s_asr_path + " --export-dir " + s_download_model_dir + " --model_revision " + model_path["model-revision"];
