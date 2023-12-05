@@ -101,9 +101,6 @@ nohup bash run_server_2pass.sh \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx \
   --itn-dir thuduj12/fst_itn_zh \
-  --decoder-thread-num 32 \
-  --io-thread-num  8 \
-  --port 10095 \
   --certfile  ../../../ssl_key/server.crt \
   --keyfile ../../../ssl_key/server.key \
   --hotword ../../hotwords.txt > log.out 2>&1 &
@@ -120,10 +117,11 @@ nohup bash run_server_2pass.sh \
 --punc-quant   True为量化PUNC模型，False为非量化PUNC模型，默认是True
 --itn-dir modelscope model ID 或者 本地模型路径
 --port  服务端监听的端口号，默认为 10095
---decoder-thread-num  服务端线程池个数(支持的最大并发路数)，默认为 8
+--decoder-thread-num  服务端线程池个数(支持的最大并发路数)，
+                      脚本会根据服务器线程数自动配置decoder-thread-num、io-thread-num
+--io-thread-num  服务端启动的IO线程数
 --model-thread-num  每路识别的内部线程数(控制ONNX模型的并行)，默认为 1，
                     其中建议 decoder-thread-num*model-thread-num 等于总线程数
---io-thread-num  服务端启动的IO线程数，默认为 1
 --certfile  ssl的证书文件，默认为：../../../ssl_key/server.crt，如果需要关闭ssl，参数设置为0
 --keyfile   ssl的密钥文件，默认为：../../../ssl_key/server.key
 --hotword   热词文件路径，每行一个热词，格式：热词 权重(例如:阿里巴巴 20)，
