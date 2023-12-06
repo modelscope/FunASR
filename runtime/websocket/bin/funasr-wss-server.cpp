@@ -30,8 +30,11 @@ int main(int argc, char* argv[]) {
 
     google::InitGoogleLogging(argv[0]);
     FLAGS_logtostderr = true;
-
-    TCLAP::CmdLine cmd("funasr-wss-server", ' ', "1.0");
+    std::string offline_version = "";
+#ifdef _WIN32
+    offline_version = "0.1.0";
+#endif
+    TCLAP::CmdLine cmd("funasr-wss-server", ' ', offline_version);
     TCLAP::ValueArg<std::string> download_model_dir(
         "", "download-model-dir",
         "Download model from Modelscope to download_model_dir",
@@ -88,7 +91,7 @@ int main(int argc, char* argv[]) {
                                            "0.0.0.0", "string");
     TCLAP::ValueArg<int> port("", "port", "port", false, 10095, "int");
     TCLAP::ValueArg<int> io_thread_num("", "io-thread-num", "io thread num",
-                                       false, 8, "int");
+                                       false, 2, "int");
     TCLAP::ValueArg<int> decoder_thread_num(
         "", "decoder-thread-num", "decoder thread num", false, 8, "int");
     TCLAP::ValueArg<int> model_thread_num("", "model-thread-num",
@@ -223,28 +226,29 @@ int main(int argc, char* argv[]) {
             std::string down_asr_path;
             std::string down_asr_model;
 
+            // modify model-revision by model name
+            size_t found = s_asr_path.find("speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404");
+            if (found != std::string::npos) {
+                model_path["model-revision"]="v1.2.4";
+            }
+
+            found = s_asr_path.find("speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404");
+            if (found != std::string::npos) {
+                model_path["model-revision"]="v1.0.5";
+            }
+
+            found = s_asr_path.find("speech_paraformer-large_asr_nat-en-16k-common-vocab10020");
+            if (found != std::string::npos) {
+                model_path["model-revision"]="v1.0.0";
+                s_itn_path="";
+                s_lm_path="";
+            }
+
             if (access(s_asr_path.c_str(), F_OK) == 0){
                 // local
                 python_cmd_asr = python_cmd + " --model-name " + s_asr_path + " --export-dir ./ " + " --model_revision " + model_path["model-revision"];
                 down_asr_path  = s_asr_path;
             }else{
-                size_t found = s_asr_path.find("speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404");
-                if (found != std::string::npos) {
-                    model_path["model-revision"]="v1.2.4";
-                }
-
-                found = s_asr_path.find("speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404");
-                if (found != std::string::npos) {
-                    model_path["model-revision"]="v1.0.5";
-                }
-
-                found = s_asr_path.find("speech_paraformer-large_asr_nat-en-16k-common-vocab10020");
-                if (found != std::string::npos) {
-                    model_path["model-revision"]="v1.0.0";
-                    s_itn_path="";
-                    s_lm_path="";
-                }
-
                 // modelscope
                 LOG(INFO) << "Download model: " <<  s_asr_path << " from modelscope: ";
                 python_cmd_asr = python_cmd + " --model-name " + s_asr_path + " --export-dir " + s_download_model_dir + " --model_revision " + model_path["model-revision"];

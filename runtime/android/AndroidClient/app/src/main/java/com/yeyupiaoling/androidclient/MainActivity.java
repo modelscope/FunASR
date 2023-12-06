@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int CHUNK_INTERVAL = 10;
     public static final int SEND_SIZE = 1920;
     // 热词
-    private String hotWords = "阿里巴巴 达摩院 夜雨飘零";
+    private String hotWords = "阿里巴巴 20\n达摩院 20\n夜雨飘零 20\n";
     // 采样率
     public static final int SAMPLE_RATE = 16000;
     // 声道数
@@ -287,6 +287,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         String message = getMessage(true);
+        Log.d(TAG, "WebSocket发送消息: " + message);
         webSocket.send(message);
 
         audioRecord.startRecording();
@@ -319,7 +320,23 @@ public class MainActivity extends AppCompatActivity {
             obj.put("chunk_interval", CHUNK_INTERVAL);
             obj.put("wav_name", "default");
             if (!hotWords.equals("")) {
-                obj.put("hotwords", hotWords);
+                JSONObject hotwordsJSON = new JSONObject();
+                // 分割每一行字符串
+                String[] hotWordsList = hotWords.split("\n");
+                for (String s : hotWordsList) {
+                    if (s.equals("")) {
+                        Log.w(TAG, "hotWords为空");
+                        continue;
+                    }
+                    // 按照空格分割字符串
+                    String[] hotWordsArray = s.split(" ");
+                    if (hotWordsArray.length != 2) {
+                        Log.w(TAG, "hotWords格式不正确");
+                        continue;
+                    }
+                    hotwordsJSON.put(hotWordsArray[0], Integer.valueOf(hotWordsArray[1]));
+                }
+                obj.put("hotwords", hotwordsJSON.toString());
             }
             obj.put("wav_format", "pcm");
             obj.put("is_speaking", isSpeaking);
