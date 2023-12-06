@@ -46,7 +46,7 @@ def main(kwargs: DictConfig):
 	
 	local_rank = int(os.environ.get('LOCAL_RANK', 0))
 	# Check if we are using DDP or FSDP
-	use_ddp = 'WORLD_SIZE' in os.environ
+	use_ddp = 'WORLD_SIZE' in os.environ and os.environ["WORLD_SIZE"] > 1
 	use_fsdp = kwargs.get("use_fsdp", None)
 	if use_ddp or use_fsdp:
 		dist.init_process_group(backend=kwargs.get("backend", "nccl"), init_method='env://')
@@ -109,7 +109,8 @@ def main(kwargs: DictConfig):
 
 	if use_ddp:
 		model = model.cuda(local_rank)
-		model = DDP(model, device_ids=[local_rank])
+		model = DDP(model, device_ids=[local_rank],
+		            find_unused_parameters=kwargs.get("train_conf", {}).get("find_unused_parameters", False))
 	elif use_fsdp:
 		model = FSDP(model).cuda(local_rank)
 	else:
@@ -157,13 +158,6 @@ def main(kwargs: DictConfig):
 		torch.distributed.destroy_process_group()
 
 	
-	
-def train(epoch, model, op):
-	pass
-
-def val():
-	pass
-
 
 if __name__ == "__main__":
 	main()
