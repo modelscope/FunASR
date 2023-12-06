@@ -594,7 +594,7 @@ class Paraformer(nn.Module):
 			for li in range(bsz):
 				target_num = (((seq_lens[li] - same_num[li].sum()).float()) * self.sampling_ratio).long()
 				if target_num > 0:
-					input_mask[li].scatter_(dim=0, index=torch.randperm(seq_lens[li])[:target_num].cuda(), value=0)
+					input_mask[li].scatter_(dim=0, index=torch.randperm(seq_lens[li])[:target_num].to(input_mask.device), value=0)
 			input_mask = input_mask.eq(1)
 			input_mask = input_mask.masked_fill(~nonpad_positions, False)
 			input_mask_expand_dim = input_mask.unsqueeze(2).to(pre_acoustic_embeds.device)
@@ -624,7 +624,7 @@ class Paraformer(nn.Module):
 		for li in range(bsz):
 			target_num = (((seq_lens[li] - same_num[li].sum()).float()) * self.sampling_ratio).long()
 			if target_num > 0:
-				input_mask[li].scatter_(dim=0, index=torch.randperm(seq_lens[li])[:target_num], value=0)
+				input_mask[li].scatter_(dim=0, index=torch.randperm(seq_lens[li])[:target_num].to(input_mask.device), value=0)
 		input_mask = input_mask.eq(1)
 		input_mask = input_mask.masked_fill(~nonpad_positions, False)
 		input_mask_expand_dim = input_mask.unsqueeze(2).to(pre_acoustic_embeds.device)
