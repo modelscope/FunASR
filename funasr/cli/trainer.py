@@ -180,7 +180,7 @@ class Trainer:
 			pbar.update(1)
 			if self.local_rank == 0:
 				pbar.set_description(
-					f"Training Epoch: {epoch + 1}/{self.max_epoch}, step {batch_idx}/{len(self.dataloader_train)}  (loss: {loss.detach().float()})")
+					f"Training Epoch: {epoch + 1}/{self.max_epoch}, step {batch_idx}/{len(self.dataloader_train)}  (loss: {loss.detach().float():.3f}, {[(k, round(v.cpu().item(), 3)) for k, v in stats.items()]})")
 			
 		pbar.close()
 

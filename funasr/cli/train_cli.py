@@ -46,7 +46,7 @@ def main(kwargs: DictConfig):
 	
 	local_rank = int(os.environ.get('LOCAL_RANK', 0))
 	# Check if we are using DDP or FSDP
-	use_ddp = 'WORLD_SIZE' in os.environ and os.environ["WORLD_SIZE"] > 1
+	use_ddp = 'WORLD_SIZE' in os.environ and int(os.environ["WORLD_SIZE"]) > 1
 	use_fsdp = kwargs.get("use_fsdp", None)
 	if use_ddp or use_fsdp:
 		dist.init_process_group(backend=kwargs.get("backend", "nccl"), init_method='env://')
