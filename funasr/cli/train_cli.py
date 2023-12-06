@@ -37,7 +37,7 @@ def preprocess_config(cfg: DictConfig):
 @hydra.main()
 def main(kwargs: DictConfig):
 	# preprocess_config(kwargs)
-	import pdb; pdb.set_trace()
+	# import pdb; pdb.set_trace()
 	# set random seed
 	set_all_random_seed(kwargs.get("seed", 0))
 	torch.backends.cudnn.enabled = kwargs.get("cudnn_enabled", torch.backends.cudnn.enabled)
