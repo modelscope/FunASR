@@ -361,6 +361,7 @@ class CommonPreprocessor(AbsPreprocessor):
                     tokens = seg_tokenize(tokens, self.seg_dict)
             else:
                 tokens = self.tokenizer.text2tokens(text)
+                
             text_ints = self.token_id_converter.tokens2ids(tokens)
             data[self.text_name] = np.array(text_ints, dtype=np.int64)
         return data

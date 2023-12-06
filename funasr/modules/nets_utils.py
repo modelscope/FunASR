@@ -347,7 +347,7 @@ def th_accuracy(pad_outputs, pad_targets, ignore_label):
 
     Args:
         pad_outputs (Tensor): Prediction tensors (B * Lmax, D).
-        pad_targets (LongTensor): Target label tensors (B, Lmax, D).
+        pad_targets (LongTensor): Target label tensors (B, Lmax).
         ignore_label (int): Ignore label id.
 
     Returns:
