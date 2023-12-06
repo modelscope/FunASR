@@ -29,7 +29,7 @@ def build_tokenizer(
     delimiter: str = None,
     g2p_type: str = None,
     **kwargs,
-) -> AbsTokenizer:
+):
     """A helper function to instantiate Tokenizer"""
     if token_type == "bpe":
         if bpemodel is None:
