@@ -125,6 +125,7 @@ class NeatContextualParaformer(Paraformer):
         if self.crit_attn_weight > 0:
             self.attn_loss = torch.nn.L1Loss()
         self.crit_attn_smooth = crit_attn_smooth
+        self.length_normalized_loss = length_normalized_loss
 
     def forward(
             self,
@@ -231,6 +232,8 @@ class NeatContextualParaformer(Paraformer):
 
         stats["loss"] = torch.clone(loss.detach())
         # force_gatherable: to-device and to-tensor if scalar for DataParallel
+        if self.length_normalized_loss:
+            batch_size = (text_lengths + self.predictor_bias).sum().type_as(batch_size)
         loss, stats, weight = force_gatherable((loss, stats, batch_size), loss.device)
         return loss, stats, weight
     
