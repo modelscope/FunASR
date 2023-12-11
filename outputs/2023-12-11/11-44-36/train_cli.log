@@ -1,0 +1,2 @@
+[2023-12-11 11:44:48,432][root][INFO] - Loading pretrained params from /Users/zhifu/modelscope_models/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/model.pb
+[2023-12-11 11:44:49,667][root][WARNING] - distributed is not initialized, only single shard

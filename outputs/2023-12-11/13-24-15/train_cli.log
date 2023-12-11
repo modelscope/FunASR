@@ -1,0 +1,6 @@
+[2023-12-11 13:24:21,397][root][INFO] - init_param is not None: ('/Users/zhifu/modelscope_models/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/model.pb',)
+[2023-12-11 13:24:21,397][root][INFO] - Loading pretrained params from /Users/zhifu/modelscope_models/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/model.pb
+[2023-12-11 13:24:21,980][root][WARNING] - distributed is not initialized, only single shard
+[2023-12-11 13:24:21,980][root][INFO] - in rank: 0, num of samplers: 640, total_num of samplers across ranks: 640
+[2023-12-11 13:24:21,987][root][INFO] - config.yaml is saved to: /Users/zhifu/Downloads/ckpt/funasr2/exp2/config.yaml
+[2023-12-11 13:24:21,987][root][WARNING] - distributed is not initialized, only single shard

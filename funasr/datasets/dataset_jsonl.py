@@ -6,6 +6,7 @@ import kaldiio
 import librosa
 import torchaudio
 import time
+import logging
 
 def load_audio(audio_path: str, fs: int=16000):
 	audio = None
@@ -41,8 +42,7 @@ class IndexedDatasetJsonl(torch.utils.data.Dataset):
 	
 	def __init__(self, path):
 		super().__init__()
-		# data_parallel_size = dist.get_world_size()
-		data_parallel_size = 1
+		
 		contents = []
 		with open(path, encoding='utf-8') as fin:
 			for line in fin:
@@ -66,12 +66,20 @@ class IndexedDatasetJsonl(torch.utils.data.Dataset):
 		
 		self.contents = []
 		total_num = len(contents)
-		num_per_rank = total_num // data_parallel_size
-		# rank = dist.get_rank()
-		rank = 0
+		try:
+			rank = dist.get_rank()
+			world_size = dist.get_world_size()
+		except:
+			rank = 0
+			world_size = 1
+			logging.warning("distributed is not initialized, only single shard")
+		num_per_rank = total_num // world_size
+		
+		# rank = 0
 		# import ipdb; ipdb.set_trace()
 		self.contents = contents[rank * num_per_rank:(rank + 1) * num_per_rank]
-
+	
+		logging.info("in rank: {}, num of samplers: {}, total_num of samplers across ranks: {}".format(rank, len(self.contents), len(contents)))
 
 	def __len__(self):
 		return len(self.contents)
