@@ -120,8 +120,8 @@ string Vocab::Vector2StringV2(vector<int> in, std::string language)
     std::string combine = "";
     std::string unicodeChar = "▁";
 
-    for (auto it = in.begin(); it != in.end(); it++) {
-        string word = vocab[*it];
+    for (i=0; i<in.size(); i++){
+        string word = vocab[in[i]];
         // step1 space character skips
         if (word == "<s>" || word == "</s>" || word == "<unk>")
             continue;
@@ -146,9 +146,20 @@ string Vocab::Vector2StringV2(vector<int> in, std::string language)
             int sub_word = !(word.find("@@") == string::npos);
             // process word start and middle part
             if (sub_word) {
-                combine += word.erase(word.length() - 2);
-                is_combining = true;
-                continue;
+                // if badcase: lo@@ chinese
+                if (i == in.size()-1 || i<in.size()-1 && IsChinese(vocab[in[i+1]])){
+                    word = word.erase(word.length() - 2) + " ";
+                    if (is_combining) {
+                        combine += word;
+                        is_combining = false;
+                        word = combine;
+                        combine = "";
+                    }
+                }else{
+                    combine += word.erase(word.length() - 2);
+                    is_combining = true;
+                    continue;
+                }
             }
             // process word end part
             else if (is_combining) {

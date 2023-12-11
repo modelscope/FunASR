@@ -294,6 +294,12 @@
 #if !defined(__APPLE__)
 		if(offline_stream->UseITN() && itn){
 			string msg_itn = offline_stream->itn_handle->Normalize(p_result->msg);
+			if(!(p_result->stamp).empty()){
+				std::string new_stamp = funasr::TimestampSmooth(p_result->msg, msg_itn, p_result->stamp);
+				if(!new_stamp.empty()){
+					p_result->stamp = new_stamp;
+				}
+			}			
 			p_result->msg = msg_itn;
 		}
 #endif
@@ -384,6 +390,12 @@
 #if !defined(__APPLE__)
 		if(offline_stream->UseITN() && itn){
 			string msg_itn = offline_stream->itn_handle->Normalize(p_result->msg);
+			if(!(p_result->stamp).empty()){
+				std::string new_stamp = funasr::TimestampSmooth(p_result->msg, msg_itn, p_result->stamp);
+				if(!new_stamp.empty()){
+					p_result->stamp = new_stamp;
+				}
+			}
 			p_result->msg = msg_itn;
 		}
 #endif
@@ -524,6 +536,13 @@
 #if !defined(__APPLE__)
 			if(tpass_stream->UseITN() && itn){
 				string msg_itn = tpass_stream->itn_handle->Normalize(msg_punc);
+				// TimestampSmooth
+				if(!(p_result->stamp).empty()){
+					std::string new_stamp = funasr::TimestampSmooth(p_result->tpass_msg, msg_itn, p_result->stamp);
+					if(!new_stamp.empty()){
+						p_result->stamp = new_stamp;
+					}
+				}
 				p_result->tpass_msg = msg_itn;
 			}
 #endif

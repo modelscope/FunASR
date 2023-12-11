@@ -3,11 +3,13 @@
 #include <vector>
 #include <memory>
 #include <unordered_map>
+#include <deque>
 #include "tensor.h"
 
 using namespace std;
 
 namespace funasr {
+typedef unsigned short          U16CHAR_T;
 extern float *LoadParams(const char *filename);
 
 extern void SaveDataFile(const char *filename, void *data, uint32_t len);
@@ -35,6 +37,16 @@ void KeepChineseCharacterAndSplit(const std::string &input_str,
                                   std::vector<std::string> &chinese_characters);
 void SplitChiEngCharacters(const std::string &input_str,
                                   std::vector<std::string> &characters);
+void TimestampAdd(std::deque<string> &alignment_str1, std::string str_word);
+vector<vector<int>> ParseTimestamps(const std::string& str);
+bool TimestampIsDigit(U16CHAR_T &u16);
+bool TimestampIsAlpha(U16CHAR_T &u16);
+bool TimestampIsPunctuation(U16CHAR_T &u16);
+bool TimestampIsPunctuation(const std::string& str);
+void TimestampSplitChiEngCharacters(const std::string &input_str,
+                                  std::vector<std::string> &characters);
+std::string VectorToString(const std::vector<std::vector<int>>& vec);                                  
+std::string TimestampSmooth(std::string &text, std::string &text_itn, std::string &str_time);
 
 std::vector<std::string> split(const std::string &s, char delim);
 

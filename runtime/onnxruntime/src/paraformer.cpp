@@ -300,10 +300,15 @@ void Paraformer::InitSegDict(const std::string &seg_dict_model) {
 
 Paraformer::~Paraformer()
 {
-    if(vocab)
+    if(vocab){
         delete vocab;
-    if(seg_dict)
+    }
+    if(seg_dict){
         delete seg_dict;
+    }
+    if(phone_set_){
+        delete phone_set_;
+    }
 }
 
 void Paraformer::StartUtterance()

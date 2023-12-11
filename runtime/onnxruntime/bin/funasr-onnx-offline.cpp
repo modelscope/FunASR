@@ -157,7 +157,7 @@ int main(int argc, char** argv)
         auto& wav_file = wav_list[i];
         auto& wav_id = wav_ids[i];
         gettimeofday(&start, NULL);
-        FUNASR_RESULT result=FunOfflineInfer(asr_hanlde, wav_file.c_str(), RASR_NONE, NULL, hotwords_embedding, 16000, false, decoder_handle);
+        FUNASR_RESULT result=FunOfflineInfer(asr_hanlde, wav_file.c_str(), RASR_NONE, NULL, hotwords_embedding, 16000, true, decoder_handle);
         gettimeofday(&end, NULL);
         seconds = (end.tv_sec - start.tv_sec);
         taking_micros += ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
