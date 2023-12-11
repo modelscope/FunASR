@@ -19,7 +19,6 @@ from funasr.tokenizer.phoneme_tokenizer import PhonemeTokenizer
 from funasr.tokenizer.sentencepiece_tokenizer import SentencepiecesTokenizer
 from funasr.tokenizer.word_tokenizer import WordTokenizer
 
-
 def build_tokenizer(
     token_type: str,
     bpemodel: Union[Path, str, Iterable[str]] = None,
@@ -31,6 +30,8 @@ def build_tokenizer(
     **kwargs,
 ):
     """A helper function to instantiate Tokenizer"""
+    # import pdb;
+    # pdb.set_trace()
     if token_type == "bpe":
         if bpemodel is None:
             raise ValueError('bpemodel is required if token_type = "bpe"')
