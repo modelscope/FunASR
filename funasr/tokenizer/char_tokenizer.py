@@ -6,17 +6,15 @@ import warnings
 
 
 from funasr.tokenizer.abs_tokenizer import AbsTokenizer
-from funasr.tokenizer.abs_tokenizer import BaseTokenizer
 
-class CharTokenizer(BaseTokenizer):
+
+class CharTokenizer(AbsTokenizer):
     def __init__(
         self,
         non_linguistic_symbols: Union[Path, str, Iterable[str]] = None,
         space_symbol: str = "<space>",
         remove_non_linguistic_symbols: bool = False,
-        **kwargs,
     ):
-        super().__init__(**kwargs)
         self.space_symbol = space_symbol
         if non_linguistic_symbols is None:
             self.non_linguistic_symbols = set()

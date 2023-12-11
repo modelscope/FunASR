@@ -9,7 +9,7 @@ from funasr.tokenizer.abs_tokenizer import AbsTokenizer
 
 
 class SentencepiecesTokenizer(AbsTokenizer):
-    def __init__(self, model: Union[Path, str], **kwargs):
+    def __init__(self, model: Union[Path, str]):
         self.model = str(model)
         # NOTE(kamo):
         # Don't build SentencePieceProcessor in __init__()

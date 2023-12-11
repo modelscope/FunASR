@@ -14,7 +14,6 @@ class WordTokenizer(AbsTokenizer):
         delimiter: str = None,
         non_linguistic_symbols: Union[Path, str, Iterable[str]] = None,
         remove_non_linguistic_symbols: bool = False,
-        **kwargs,
     ):
         self.delimiter = delimiter
 
