@@ -504,7 +504,7 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
         nullptr, // allocate a new context
         AV_CH_LAYOUT_MONO, // output channel layout (stereo)
         AV_SAMPLE_FMT_S16, // output sample format (signed 16-bit)
-        16000, // output sample rate (same as input)
+        dest_sample_rate, // output sample rate (same as input)
         av_get_default_channel_layout(codecContext->channels), // input channel layout
         codecContext->sample_fmt, // input sample format
         codecContext->sample_rate, // input sample rate
@@ -542,7 +542,7 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
                     int in_samples = frame->nb_samples;
                     uint8_t **in_data = frame->extended_data;
                     int out_samples = av_rescale_rnd(in_samples,
-                                                    16000,
+                                                    dest_sample_rate,
                                                     codecContext->sample_rate,
                                                     AV_ROUND_DOWN);
                     
