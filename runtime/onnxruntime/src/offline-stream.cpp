@@ -63,10 +63,16 @@ OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int
 
     // Lm resource
     if (model_path.find(LM_DIR) != model_path.end() && model_path.at(LM_DIR) != "") {
-        string fst_path, lm_config_path, hws_path;
+        string fst_path, lm_config_path, lex_path;
         fst_path = PathAppend(model_path.at(LM_DIR), LM_FST_RES);
         lm_config_path = PathAppend(model_path.at(LM_DIR), LM_CONFIG_NAME);
-        asr_handle->InitLm(fst_path, lm_config_path);
+        lex_path = PathAppend(model_path.at(LM_DIR), LEX_PATH);
+        if (access(lex_path.c_str(), F_OK) != 0 )
+        {
+            LOG(ERROR) << "Lexicon.txt file is not exist, please use the latest version. Skip load LM model.";
+        }else{
+            asr_handle->InitLm(fst_path, lm_config_path, lex_path);
+        }
     }
 
     // PUNC model

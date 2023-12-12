@@ -68,6 +68,7 @@ namespace funasr {
 #define QUANT_DECODER_NAME "decoder_quant.onnx"
 
 #define LM_FST_RES "TLG.fst"
+#define LEX_PATH "lexicon.txt"
 
 // vad
 #ifndef VAD_SILENCE_DURATION

@@ -60,7 +60,7 @@ namespace funasr {
 		
         void StartUtterance();
         void EndUtterance();
-        void InitLm(const std::string &lm_file, const std::string &lm_cfg_file);
+        void InitLm(const std::string &lm_file, const std::string &lm_cfg_file, const std::string &lex_file);
         string BeamSearch(WfstDecoder* &wfst_decoder, float* in, int n_len, int64_t token_nums);
         string FinalizeDecode(WfstDecoder* &wfst_decoder,
                           bool is_stamp=false, std::vector<float> us_alphas={0}, std::vector<float> us_cif_peak={0});

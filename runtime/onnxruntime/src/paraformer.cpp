@@ -187,13 +187,14 @@ void Paraformer::InitAsr(const std::string &am_model, const std::string &en_mode
 }
 
 void Paraformer::InitLm(const std::string &lm_file, 
-                        const std::string &lm_cfg_file) {
+                        const std::string &lm_cfg_file, 
+                        const std::string &lex_file) {
     try {
         lm_ = std::shared_ptr<fst::Fst<fst::StdArc>>(
             fst::Fst<fst::StdArc>::Read(lm_file));
         if (lm_){
             if (vocab) { delete vocab; }
-            vocab = new Vocab(lm_cfg_file.c_str());
+            vocab = new Vocab(lm_cfg_file.c_str(), lex_file.c_str());
             LOG(INFO) << "Successfully load lm file " << lm_file;
         }else{
             LOG(ERROR) << "Failed to load lm file " << lm_file;

@@ -111,7 +111,7 @@ int main(int argc, char* argv[]) {
     TCLAP::ValueArg<std::string> lm_dir("", LM_DIR,
         "the LM model path, which contains compiled models: TLG.fst, config.yaml ", false, "damo/speech_ngram_lm_zh-cn-ai-wesp-fst", "string");
     TCLAP::ValueArg<std::string> lm_revision(
-        "", "lm-revision", "LM model revision", false, "v1.0.1", "string");
+        "", "lm-revision", "LM model revision", false, "v1.0.2", "string");
     TCLAP::ValueArg<std::string> hotword("", HOTWORD,
         "the hotword file, one hotword perline, Format: Hotword Weight (could be: 阿里巴巴 20)", 
         false, "/workspace/resources/hotwords.txt", "string");
