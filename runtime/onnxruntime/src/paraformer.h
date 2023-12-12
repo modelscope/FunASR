@@ -57,7 +57,7 @@ namespace funasr {
 
         string Rescoring();
         string GetLang(){return language;};
-		
+        int GetAsrSampleRate() { return asr_sample_rate; };
         void StartUtterance();
         void EndUtterance();
         void InitLm(const std::string &lm_file, const std::string &lm_cfg_file, const std::string &lex_file);
@@ -107,8 +107,7 @@ namespace funasr {
         int fsmn_dims = 512;
         float cif_threshold = 1.0;
         float tail_alphas = 0.45;
-
-
+        int asr_sample_rate = MODEL_SAMPLE_RATE;
     };
 
 } // namespace funasr
