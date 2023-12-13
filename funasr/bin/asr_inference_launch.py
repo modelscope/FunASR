@@ -1254,37 +1254,6 @@ def inference_paraformer_online(
 
         return cache
 
-    #def _prepare_cache(cache: dict = {}, chunk_size=[5, 10, 5], batch_size=1):
-    #    if len(cache) > 0:
-    #        return cache
-    #    config = _read_yaml(asr_train_config)
-    #    enc_output_size = config["encoder_conf"]["output_size"]
-    #    feats_dims = config["frontend_conf"]["n_mels"] * config["frontend_conf"]["lfr_m"]
-    #    cache_en = {"start_idx": 0, "cif_hidden": torch.zeros((batch_size, 1, enc_output_size)),
-    #                "cif_alphas": torch.zeros((batch_size, 1)), "chunk_size": chunk_size, "last_chunk": False,
-    #                "feats": torch.zeros((batch_size, chunk_size[0] + chunk_size[2], feats_dims)), "tail_chunk": False}
-    #    cache["encoder"] = cache_en
-
-    #    cache_de = {"decode_fsmn": None}
-    #    cache["decoder"] = cache_de
-
-    #    return cache
-
-    #def _cache_reset(cache: dict = {}, chunk_size=[5, 10, 5], batch_size=1):
-    #    if len(cache) > 0:
-    #        config = _read_yaml(asr_train_config)
-    #        enc_output_size = config["encoder_conf"]["output_size"]
-    #        feats_dims = config["frontend_conf"]["n_mels"] * config["frontend_conf"]["lfr_m"]
-    #        cache_en = {"start_idx": 0, "cif_hidden": torch.zeros((batch_size, 1, enc_output_size)),
-    #                    "cif_alphas": torch.zeros((batch_size, 1)), "chunk_size": chunk_size, "last_chunk": False,
-    #                    "feats": torch.zeros((batch_size, chunk_size[0] + chunk_size[2], feats_dims)),
-    #                    "tail_chunk": False}
-    #        cache["encoder"] = cache_en
-
-    #        cache_de = {"decode_fsmn": None}
-    #        cache["decoder"] = cache_de
-
-    #    return cache
 
     def _forward(
             data_path_and_name_and_type,

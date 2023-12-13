@@ -35,8 +35,9 @@ def preprocess_config(cfg: DictConfig):
 @hydra.main(config_name=None, version_base=None)
 def main_hydra(kwargs: DictConfig):
 	import pdb; pdb.set_trace()
-	if kwargs.get("model_pretrain"):
-		kwargs = download_model(**kwargs)
+	if ":" in kwargs["model"]:
+		logging.info("download models from model hub: {}".format(kwargs.get("model_hub", "ms")))
+		kwargs = download_model(is_training=kwargs.get("is_training", True), **kwargs)
 	
 	import pdb;
 	pdb.set_trace()
@@ -84,8 +85,7 @@ def main(**kwargs):
 	# init_param
 	init_param = kwargs.get("init_param", None)
 	if init_param is not None:
-		init_param = init_param
-		if isinstance(init_param, Sequence):
+		if not isinstance(init_param, Sequence):
 			init_param = (init_param,)
 		logging.info("init_param is not None: %s", init_param)
 		for p in init_param:

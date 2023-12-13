@@ -66,7 +66,9 @@ class BaseTokenizer(ABC):
         return text_ints
     
     def decode(self, text_ints):
-        return self.ids2tokens(text_ints)
+        token = self.ids2tokens(text_ints)
+        text = self.tokens2text(token)
+        return text
     
     def get_num_vocabulary_size(self) -> int:
         return len(self.token_list)

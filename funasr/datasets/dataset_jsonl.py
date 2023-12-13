@@ -8,33 +8,7 @@ import torchaudio
 import time
 import logging
 
-def load_audio(audio_path: str, fs: int=16000):
-	audio = None
-	if audio_path.startswith("oss:"):
-		pass
-	elif audio_path.startswith("odps:"):
-		pass
-	else:
-		if ".ark:" in audio_path:
-			audio = kaldiio.load_mat(audio_path)
-		else:
-			# audio, fs = librosa.load(audio_path, sr=fs)
-			audio, fs = torchaudio.load(audio_path)
-			audio = audio[0, :]
-	return audio
-
-def extract_features(data, date_type: str="sound", frontend=None):
-	if date_type == "sound":
-
-		if isinstance(data, np.ndarray):
-			data = torch.from_numpy(data).to(torch.float32)
-		data_len = torch.tensor([data.shape[0]]).to(torch.int32)
-		feat, feats_lens = frontend(data[None, :], data_len)
-
-		feat = feat[0, :, :]
-	else:
-		feat, feats_lens = torch.from_numpy(data).to(torch.float32), torch.tensor([data.shape[0]]).to(torch.int32)
-	return feat, feats_lens
+from funasr.datasets.fun_datasets.load_audio_extract_fbank import load_audio, extract_fbank
 	
 	
 
@@ -115,17 +89,16 @@ class AudioDataset(torch.utils.data.Dataset):
 	
 	def __getitem__(self, index):
 		item = self.indexed_dataset[index]
-		# return item
 
 		source = item["source"]
 		data_src = load_audio(source, fs=self.fs)
-		speech, speech_lengths = extract_features(data_src, self.data_type, self.frontend)
+		speech, speech_lengths = extract_fbank(data_src, self.data_type, self.frontend) # speech: [b, T, d]
 		target = item["target"]
 		ids = self.tokenizer.encode(target)
 		ids_lengths = len(ids)
 		text, text_lengths = torch.tensor(ids, dtype=torch.int64), torch.tensor([ids_lengths], dtype=torch.int32)
 
-		return {"speech": speech,
+		return {"speech": speech[0, :, :],
 		        "speech_lengths": speech_lengths,
 		        "text": text,
 		        "text_lengths": text_lengths,

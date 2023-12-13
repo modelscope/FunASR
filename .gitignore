@@ -21,3 +21,4 @@ docs/_build
 modelscope
 samples
 .ipynb_checkpoints
+outputs*
