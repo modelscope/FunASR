@@ -466,7 +466,7 @@ string Paraformer::Forward(float* din, int len, bool input_finished, const std::
     int32_t in_feat_dim = fbank_opts_.mel_opts.num_bins;
 
     std::vector<std::vector<float>> asr_feats;
-    FbankKaldi(MODEL_SAMPLE_RATE, din, len, asr_feats);
+    FbankKaldi(asr_sample_rate, din, len, asr_feats);
     if(asr_feats.size() == 0){
       return "";
     }

@@ -55,6 +55,7 @@ int main(int argc, char** argv)
     TCLAP::ValueArg<std::int32_t>   onnx_thread("", "model-thread-num", "onnxruntime SetIntraOpNumThreads", false, 1, "int32_t");
 
     TCLAP::ValueArg<std::string> wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", true, "", "string");
+    TCLAP::ValueArg<std::int32_t>   audio_fs("", AUDIO_FS, "the sample rate of audio", false, 16000, "int32_t");
     TCLAP::ValueArg<std::string>    hotword("", HOTWORD, "the hotword file, one hotword perline, Format: Hotword Weight (could be: 阿里巴巴 20)", false, "", "string");
 
     cmd.add(offline_model_dir);
@@ -66,6 +67,7 @@ int main(int argc, char** argv)
     cmd.add(punc_quant);
     cmd.add(itn_dir);
     cmd.add(wav_path);
+    cmd.add(audio_fs);
     cmd.add(asr_mode);
     cmd.add(onnx_thread);
     cmd.add(hotword);
@@ -154,7 +156,7 @@ int main(int argc, char** argv)
         auto& wav_file = wav_list[i];
         auto& wav_id = wav_ids[i];
 
-        int32_t sampling_rate_ = 16000;
+        int32_t sampling_rate_ = audio_fs.getValue();
         funasr::Audio audio(1);
 		if(is_target_file(wav_file.c_str(), "wav")){
 			if(!audio.LoadWav2Char(wav_file.c_str(), &sampling_rate_)){

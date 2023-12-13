@@ -29,7 +29,7 @@ using namespace std;
 std::atomic<int> wav_index(0);
 std::mutex mtx;
 
-void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, vector<string> wav_ids,
+void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, vector<string> wav_ids, int audio_fs,
             float* total_length, long* total_time, int core_id, float glob_beam = 3.0f, float lat_beam = 3.0f, float am_sc = 10.0f, 
             int fst_inc_wts = 20, string hotword_path = "") {
     
@@ -55,7 +55,7 @@ void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, vector<string> wa
     for (size_t i = 0; i < 1; i++)
     {
         FunOfflineReset(asr_handle, decoder_handle);
-        FUNASR_RESULT result=FunOfflineInfer(asr_handle, wav_list[0].c_str(), RASR_NONE, NULL, hotwords_embedding, 16000, true, decoder_handle);
+        FUNASR_RESULT result=FunOfflineInfer(asr_handle, wav_list[0].c_str(), RASR_NONE, NULL, hotwords_embedding, audio_fs, true, decoder_handle);
         if(result){
             FunASRFreeResult(result);
         }
@@ -69,7 +69,7 @@ void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, vector<string> wa
         }
 
         gettimeofday(&start, NULL);
-        FUNASR_RESULT result=FunOfflineInfer(asr_handle, wav_list[i].c_str(), RASR_NONE, NULL, hotwords_embedding, 16000, true, decoder_handle);
+        FUNASR_RESULT result=FunOfflineInfer(asr_handle, wav_list[i].c_str(), RASR_NONE, NULL, hotwords_embedding, audio_fs, true, decoder_handle);
 
         gettimeofday(&end, NULL);
         seconds = (end.tv_sec - start.tv_sec);
@@ -138,6 +138,7 @@ int main(int argc, char *argv[])
     TCLAP::ValueArg<std::string>    itn_dir("", ITN_DIR, "the itn model(fst) path, which contains zh_itn_tagger.fst and zh_itn_verbalizer.fst", false, "", "string");
 
     TCLAP::ValueArg<std::string> wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", true, "", "string");
+    TCLAP::ValueArg<std::int32_t>   audio_fs("", AUDIO_FS, "the sample rate of audio", false, 16000, "int32_t");
     TCLAP::ValueArg<std::int32_t> thread_num("", THREAD_NUM, "multi-thread num for rtf", true, 0, "int32_t");
     TCLAP::ValueArg<std::string>    hotword("", HOTWORD, "the hotword file, one hotword perline, Format: Hotword Weight (could be: 阿里巴巴 20)", false, "", "string");
 
@@ -155,6 +156,7 @@ int main(int argc, char *argv[])
     cmd.add(hotword);
     cmd.add(fst_inc_wts);
     cmd.add(wav_path);
+    cmd.add(audio_fs);
     cmd.add(thread_num);
     cmd.parse(argc, argv);
 
@@ -234,7 +236,7 @@ int main(int argc, char *argv[])
     }
     for (int i = 0; i < rtf_threds; i++)
     {
-        threads.emplace_back(thread(runReg, asr_handle, wav_list, wav_ids, &total_length, &total_time, i, glob_beam, lat_beam, am_sc, value_bias, hotword_path));
+        threads.emplace_back(thread(runReg, asr_handle, wav_list, wav_ids, audio_fs.getValue(), &total_length, &total_time, i, glob_beam, lat_beam, am_sc, value_bias, hotword_path));
     }
 
     for (auto& thread : threads)

@@ -34,6 +34,7 @@ namespace funasr {
 #define THREAD_NUM "thread-num"
 #define PORT_ID "port-id"
 #define HOTWORD_SEP " "
+#define AUDIO_FS "audio-fs"
 
 // #define VAD_MODEL_PATH "vad-model"
 // #define VAD_CMVN_PATH "vad-cmvn"

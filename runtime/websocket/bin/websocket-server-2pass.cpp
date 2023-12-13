@@ -232,7 +232,7 @@ void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
     data_msg->msg["wav_name"] = "wav-default-id";
     data_msg->msg["mode"] = "2pass";
     data_msg->msg["itn"] = true;
-    data_msg->msg["audio_fs"] = 16000;
+    data_msg->msg["audio_fs"] = 16000; // default is 16k
     data_msg->msg["access_num"] = 0; // the number of access for this object, when it is 0, we can free it saftly
     data_msg->msg["is_eof"]=false; // if this connection is closed
     data_msg->punc_cache =

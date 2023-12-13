@@ -245,7 +245,7 @@ void Audio::WavResample(int32_t sampling_rate, const float *waveform,
 {
     LOG(INFO) << "Creating a resampler:\n"
               << "   in_sample_rate: "<< sampling_rate << "\n"
-              << "   output_sample_rate: " << static_cast<int32_t>(MODEL_SAMPLE_RATE);
+              << "   output_sample_rate: " << static_cast<int32_t>(dest_sample_rate);
     float min_freq =
         std::min<int32_t>(sampling_rate, dest_sample_rate);
     float lowpass_cutoff = 0.99 * 0.5 * min_freq;
