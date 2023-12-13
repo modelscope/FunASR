@@ -28,6 +28,8 @@ public:
         std::vector<std::vector<float>> *in_cache,
         bool is_final);
     void Reset();
+
+    int GetVadSampleRate() { return vad_sample_rate_; };
     
     std::shared_ptr<Ort::Session> vad_session_ = nullptr;
     Ort::Env env_;

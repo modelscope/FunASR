@@ -61,7 +61,11 @@ void ParaformerOnline::InitOnline(
     for(int i=0; i<fsmn_lorder*fsmn_dims; i++){
         fsmn_init_cache_.emplace_back(0);
     }
-    chunk_len = chunk_size[1]*frame_shift*lfr_n*MODEL_SAMPLE_RATE/1000;
+    chunk_len = chunk_size[1]*frame_shift*lfr_n*para_handle_->asr_sample_rate/1000;
+
+    frame_sample_length_ = para_handle_->asr_sample_rate / 1000 * frame_length;
+    frame_shift_sample_length_ = para_handle_->asr_sample_rate / 1000 * frame_shift;
+
 }
 
 void ParaformerOnline::FbankKaldi(float sample_rate, std::vector<std::vector<float>> &wav_feats,
@@ -489,7 +493,7 @@ string ParaformerOnline::Forward(float* din, int len, bool input_finished, const
         if(is_first_chunk){
             is_first_chunk = false;
         }
-        ExtractFeats(MODEL_SAMPLE_RATE, wav_feats, waves, input_finished);
+        ExtractFeats(para_handle_->asr_sample_rate, wav_feats, waves, input_finished);
         if(wav_feats.size() == 0){
             return result;
         }
