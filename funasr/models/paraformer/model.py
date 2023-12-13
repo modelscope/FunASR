@@ -37,7 +37,7 @@ from funasr.torch_utils.device_funcs import force_gatherable
 # from funasr.models.predictor.cif import CifPredictorV3
 from funasr.models.paraformer.search import Hypothesis
 
-from funasr.cli.model_class_factory import *
+from funasr.models.model_class_factory import *
 
 if LooseVersion(torch.__version__) >= LooseVersion("1.6.0"):
 	from torch.cuda.amp import autocast

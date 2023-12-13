@@ -131,6 +131,6 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
     entry_points={"console_scripts": [
-        "funasr = funasr.bin.inference_cli:main",
+        "funasr = funasr.bin.inference:main_hydra",
     ]},
 )

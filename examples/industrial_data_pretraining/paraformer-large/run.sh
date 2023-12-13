@@ -1,5 +1,5 @@
 
-cmd="funasr/cli/train_cli.py"
+cmd="funasr/bin/train.py"
 
 python $cmd \
 +model="/Users/zhifu/modelscope_models/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch" \

@@ -19,18 +19,13 @@ from funasr.datasets.data_sampler import BatchSampler
 # from funasr.tokenizer.token_id_converter import TokenIDConverter
 from funasr.tokenizer.funtoken import build_tokenizer
 from funasr.datasets.dataset_jsonl import AudioDataset
-from funasr.cli.trainer import Trainer
+from funasr.utils.trainer import Trainer
 # from funasr.utils.load_fr_py import load_class_from_path
 from funasr.utils.dynamic_import import dynamic_import
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
 from funasr.utils.download_from_hub import download_model
-
-def preprocess_config(cfg: DictConfig):
-	for key, value in cfg.items():
-		if value == 'None':
-			cfg[key] = None
 
 @hydra.main(config_name=None, version_base=None)
 def main_hydra(kwargs: DictConfig):

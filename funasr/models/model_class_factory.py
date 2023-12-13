@@ -123,27 +123,7 @@ normalize_choices = ClassChoices(
     default=None,
     optional=True,
 )
-# model_choices = ClassChoices(
-#     "model",
-#     classes=dict(
-#         asr=ASRModel,
-#         uniasr=UniASR,
-#         paraformer=Paraformer,
-#         paraformer_online=ParaformerOnline,
-#         paraformer_bert=ParaformerBert,
-#         bicif_paraformer=BiCifParaformer,
-#         contextual_paraformer=ContextualParaformer,
-#         neatcontextual_paraformer=NeatContextualParaformer,
-#         mfcca=MFCCA,
-#         timestamp_prediction=TimestampPredictor,
-#         rnnt=TransducerModel,
-#         rnnt_unified=UnifiedTransducerModel,
-#         bat=BATModel,
-#         sa_asr=SAASRModel,
-#     ),
-#     type_check=None,
-#     default="asr",
-# )
+
 preencoder_choices = ClassChoices(
     name="preencoder",
     classes=dict(
