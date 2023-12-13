@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
         auto& wav_file = wav_list[i];
         auto& wav_id = wav_ids[i];
 
-        int32_t sampling_rate_ = -1;
+        int32_t sampling_rate_ = audio_fs.getValue();
         funasr::Audio audio(1);
 		if(is_target_file(wav_file.c_str(), "wav")){
 			if(!audio.LoadWav2Char(wav_file.c_str(), &sampling_rate_)){
@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
                     is_final = false;
             }
             gettimeofday(&start, NULL);
-            FUNASR_RESULT result = FunASRInferBuffer(online_handle, speech_buff+sample_offset, step, RASR_NONE, NULL, is_final, audio_fs.getValue());
+            FUNASR_RESULT result = FunASRInferBuffer(online_handle, speech_buff+sample_offset, step, RASR_NONE, NULL, is_final, sampling_rate_);
             gettimeofday(&end, NULL);
             seconds = (end.tv_sec - start.tv_sec);
             taking_micros += ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
