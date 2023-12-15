@@ -114,7 +114,7 @@ class WebsocketClient {
 
     // This method will block until the connection is complete  
     void run(const std::string& uri, const std::vector<string>& wav_list, const std::vector<string>& wav_ids, 
-             const std::unordered_map<std::string, int>& hws_map, int use_itn=1) {
+             int audio_fs, const std::unordered_map<std::string, int>& hws_map, int use_itn=1) {
         // Create a new connection to the given URI
         websocketpp::lib::error_code ec;
         typename websocketpp::client<T>::connection_ptr con =
@@ -142,7 +142,7 @@ class WebsocketClient {
                 break;
             }
             total_send += 1;
-            send_wav_data(wav_list[i], wav_ids[i], hws_map, send_hotword, use_itn);
+            send_wav_data(wav_list[i], wav_ids[i], audio_fs, hws_map, send_hotword, use_itn);
             if(send_hotword){
                 send_hotword = false;
             }
@@ -180,21 +180,20 @@ class WebsocketClient {
         m_done = true;
     }
     // send wav to server
-    void send_wav_data(string wav_path, string wav_id,
+    void send_wav_data(string wav_path, string wav_id, int audio_fs,
         const std::unordered_map<std::string, int>& hws_map, 
         bool send_hotword, bool use_itn) {
         uint64_t count = 0;
         std::stringstream val;
 
 		funasr::Audio audio(1);
-        int32_t sampling_rate = 16000;
+        int32_t sampling_rate = audio_fs;
         std::string wav_format = "pcm";
 		if(funasr::IsTargetFile(wav_path.c_str(), "wav")){
-			int32_t sampling_rate = -1;
-			if(!audio.LoadWav(wav_path.c_str(), &sampling_rate))
+			if(!audio.LoadWav(wav_path.c_str(), &sampling_rate, false))
 				return ;
 		}else if(funasr::IsTargetFile(wav_path.c_str(), "pcm")){
-			if (!audio.LoadPcmwav(wav_path.c_str(), &sampling_rate))
+			if (!audio.LoadPcmwav(wav_path.c_str(), &sampling_rate, false))
 				return ;
 		}else{
 			wav_format = "others";
@@ -237,6 +236,7 @@ class WebsocketClient {
         jsonbegin["chunk_interval"] = 10;
         jsonbegin["wav_name"] = wav_id;
         jsonbegin["wav_format"] = wav_format;
+        jsonbegin["audio_fs"] = sampling_rate;
         jsonbegin["itn"] = true;
         if(use_itn == 0){
             jsonbegin["itn"] = false;
@@ -352,6 +352,7 @@ int main(int argc, char* argv[]) {
     TCLAP::ValueArg<std::string> wav_path_("", "wav-path", 
         "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", 
         true, "", "string");
+    TCLAP::ValueArg<std::int32_t> audio_fs_("", "audio-fs", "the sample rate of audio", false, 16000, "int32_t");
     TCLAP::ValueArg<int> thread_num_("", "thread-num", "thread-num",
                                        false, 1, "int");
     TCLAP::ValueArg<int> is_ssl_(
@@ -366,6 +367,7 @@ int main(int argc, char* argv[]) {
     cmd.add(server_ip_);
     cmd.add(port_);
     cmd.add(wav_path_);
+    cmd.add(audio_fs_);
     cmd.add(thread_num_);
     cmd.add(is_ssl_);
     cmd.add(use_itn_);
@@ -420,18 +422,19 @@ int main(int argc, char* argv[]) {
         wav_ids.emplace_back(default_id);
     }
     
+    int audio_fs = audio_fs_.getValue();
     for (size_t i = 0; i < threads_num; i++) {
-        client_threads.emplace_back([uri, wav_list, wav_ids, is_ssl, hws_map, use_itn]() {
+        client_threads.emplace_back([uri, wav_list, wav_ids, audio_fs, is_ssl, hws_map, use_itn]() {
           if (is_ssl == 1) {
             WebsocketClient<websocketpp::config::asio_tls_client> c(is_ssl);
 
             c.m_client.set_tls_init_handler(bind(&OnTlsInit, ::_1));
 
-            c.run(uri, wav_list, wav_ids, hws_map, use_itn);
+            c.run(uri, wav_list, wav_ids, audio_fs, hws_map, use_itn);
           } else {
             WebsocketClient<websocketpp::config::asio_client> c(is_ssl);
 
-            c.run(uri, wav_list, wav_ids, hws_map, use_itn);
+            c.run(uri, wav_list, wav_ids, audio_fs, hws_map, use_itn);
           }
         });
     }

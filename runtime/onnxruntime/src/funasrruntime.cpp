@@ -57,7 +57,7 @@
 		if (!recog_obj)
 			return nullptr;
 
-		funasr::Audio audio(1);
+		funasr::Audio audio(recog_obj->GetAsrSampleRate(),1);
 		if(wav_format == "pcm" || wav_format == "PCM"){
 			if (!audio.LoadPcmwav(sz_buf, n_len, &sampling_rate))
 				return nullptr;
@@ -93,7 +93,7 @@
 		if (!recog_obj)
 			return nullptr;
 
-		funasr::Audio audio(1);
+		funasr::Audio audio(recog_obj->GetAsrSampleRate(),1);
 		if(funasr::is_target_file(sz_filename, "wav")){
 			int32_t sampling_rate_ = -1;
 			if(!audio.LoadWav(sz_filename, &sampling_rate_))
@@ -134,7 +134,7 @@
 		if (!vad_obj)
 			return nullptr;
 
-		funasr::Audio audio(1);
+		funasr::Audio audio(vad_obj->GetVadSampleRate(),1);
 		if(wav_format == "pcm" || wav_format == "PCM"){
 			if (!audio.LoadPcmwav(sz_buf, n_len, &sampling_rate))
 				return nullptr;
@@ -162,7 +162,7 @@
 		if (!vad_obj)
 			return nullptr;
 
-		funasr::Audio audio(1);
+		funasr::Audio audio(vad_obj->GetVadSampleRate(),1);
 		if(funasr::is_target_file(sz_filename, "wav")){
 			int32_t sampling_rate_ = -1;
 			if(!audio.LoadWav(sz_filename, &sampling_rate_))
@@ -222,7 +222,7 @@
 		if (!offline_stream)
 			return nullptr;
 
-		funasr::Audio audio(1);
+		funasr::Audio audio(offline_stream->asr_handle->GetAsrSampleRate(),1);
 		try{
 			if(wav_format == "pcm" || wav_format == "PCM"){
 				if (!audio.LoadPcmwav(sz_buf, n_len, &sampling_rate))
@@ -294,6 +294,12 @@
 #if !defined(__APPLE__)
 		if(offline_stream->UseITN() && itn){
 			string msg_itn = offline_stream->itn_handle->Normalize(p_result->msg);
+			if(!(p_result->stamp).empty()){
+				std::string new_stamp = funasr::TimestampSmooth(p_result->msg, msg_itn, p_result->stamp);
+				if(!new_stamp.empty()){
+					p_result->stamp = new_stamp;
+				}
+			}			
 			p_result->msg = msg_itn;
 		}
 #endif
@@ -308,7 +314,7 @@
 		if (!offline_stream)
 			return nullptr;
 		
-		funasr::Audio audio(1);
+		funasr::Audio audio((offline_stream->asr_handle)->GetAsrSampleRate(),1);
 		try{
 			if(funasr::is_target_file(sz_filename, "wav")){
 				int32_t sampling_rate_ = -1;
@@ -384,6 +390,12 @@
 #if !defined(__APPLE__)
 		if(offline_stream->UseITN() && itn){
 			string msg_itn = offline_stream->itn_handle->Normalize(p_result->msg);
+			if(!(p_result->stamp).empty()){
+				std::string new_stamp = funasr::TimestampSmooth(p_result->msg, msg_itn, p_result->stamp);
+				if(!new_stamp.empty()){
+					p_result->stamp = new_stamp;
+				}
+			}
 			p_result->msg = msg_itn;
 		}
 #endif
@@ -524,6 +536,13 @@
 #if !defined(__APPLE__)
 			if(tpass_stream->UseITN() && itn){
 				string msg_itn = tpass_stream->itn_handle->Normalize(msg_punc);
+				// TimestampSmooth
+				if(!(p_result->stamp).empty()){
+					std::string new_stamp = funasr::TimestampSmooth(p_result->tpass_msg, msg_itn, p_result->stamp);
+					if(!new_stamp.empty()){
+						p_result->stamp = new_stamp;
+					}
+				}
 				p_result->tpass_msg = msg_itn;
 			}
 #endif

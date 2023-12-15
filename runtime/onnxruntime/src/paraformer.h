@@ -57,10 +57,10 @@ namespace funasr {
 
         string Rescoring();
         string GetLang(){return language;};
-		
+        int GetAsrSampleRate() { return asr_sample_rate; };
         void StartUtterance();
         void EndUtterance();
-        void InitLm(const std::string &lm_file, const std::string &lm_cfg_file);
+        void InitLm(const std::string &lm_file, const std::string &lm_cfg_file, const std::string &lex_file);
         string BeamSearch(WfstDecoder* &wfst_decoder, float* in, int n_len, int64_t token_nums);
         string FinalizeDecode(WfstDecoder* &wfst_decoder,
                           bool is_stamp=false, std::vector<float> us_alphas={0}, std::vector<float> us_cif_peak={0});
@@ -107,8 +107,7 @@ namespace funasr {
         int fsmn_dims = 512;
         float cif_threshold = 1.0;
         float tail_alphas = 0.45;
-
-
+        int asr_sample_rate = MODEL_SAMPLE_RATE;
     };
 
 } // namespace funasr

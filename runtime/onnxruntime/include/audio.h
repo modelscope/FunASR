@@ -52,18 +52,19 @@ class Audio {
     queue<AudioFrame *> frame_queue;
     queue<AudioFrame *> asr_online_queue;
     queue<AudioFrame *> asr_offline_queue;
-
+    int dest_sample_rate;
   public:
     Audio(int data_type);
-    Audio(int data_type, int size);
+    Audio(int model_sample_rate,int data_type);
+    Audio(int model_sample_rate,int data_type, int size);
     ~Audio();
     void Disp();
     void WavResample(int32_t sampling_rate, const float *waveform, int32_t n);
     bool LoadWav(const char* buf, int n_len, int32_t* sampling_rate);
-    bool LoadWav(const char* filename, int32_t* sampling_rate);
+    bool LoadWav(const char* filename, int32_t* sampling_rate, bool resample=true);
     bool LoadWav2Char(const char* filename, int32_t* sampling_rate);
     bool LoadPcmwav(const char* buf, int n_file_len, int32_t* sampling_rate);
-    bool LoadPcmwav(const char* filename, int32_t* sampling_rate);
+    bool LoadPcmwav(const char* filename, int32_t* sampling_rate, bool resample=true);
     bool LoadPcmwav2Char(const char* filename, int32_t* sampling_rate);
     bool LoadOthers2Char(const char* filename);
     bool FfmpegLoad(const char *filename, bool copy2char=false);

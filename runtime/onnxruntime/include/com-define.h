@@ -34,6 +34,7 @@ namespace funasr {
 #define THREAD_NUM "thread-num"
 #define PORT_ID "port-id"
 #define HOTWORD_SEP " "
+#define AUDIO_FS "audio-fs"
 
 // #define VAD_MODEL_PATH "vad-model"
 // #define VAD_CMVN_PATH "vad-cmvn"
@@ -68,6 +69,7 @@ namespace funasr {
 #define QUANT_DECODER_NAME "decoder_quant.onnx"
 
 #define LM_FST_RES "TLG.fst"
+#define LEX_PATH "lexicon.txt"
 
 // vad
 #ifndef VAD_SILENCE_DURATION

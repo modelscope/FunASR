@@ -49,10 +49,12 @@ int main(int argc, char *argv[])
     TCLAP::ValueArg<std::string>    quantize("", QUANTIZE, "true (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir", false, "true", "string");
 
     TCLAP::ValueArg<std::string>    wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", true, "", "string");
+    TCLAP::ValueArg<std::int32_t>   audio_fs("", AUDIO_FS, "the sample rate of audio", false, 16000, "int32_t");
 
     cmd.add(model_dir);
     cmd.add(quantize);
     cmd.add(wav_path);
+    cmd.add(audio_fs);
     cmd.parse(argc, argv);
 
     std::map<std::string, std::string> model_path;
@@ -110,7 +112,7 @@ int main(int argc, char *argv[])
         auto& wav_file = wav_list[i];
         auto& wav_id = wav_ids[i];
 
-        int32_t sampling_rate_ = -1;
+        int32_t sampling_rate_ = audio_fs.getValue();
         funasr::Audio audio(1);
 		if(is_target_file(wav_file.c_str(), "wav")){
 			if(!audio.LoadWav2Char(wav_file.c_str(), &sampling_rate_)){
@@ -143,7 +145,7 @@ int main(int argc, char *argv[])
                     is_final = false;
             }
             gettimeofday(&start, NULL);
-            FUNASR_RESULT result = FunASRInferBuffer(online_handle, speech_buff+sample_offset, step, RASR_NONE, NULL, is_final, 16000);
+            FUNASR_RESULT result = FunASRInferBuffer(online_handle, speech_buff+sample_offset, step, RASR_NONE, NULL, is_final, sampling_rate_);
             gettimeofday(&end, NULL);
             seconds = (end.tv_sec - start.tv_sec);
             taking_micros += ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);

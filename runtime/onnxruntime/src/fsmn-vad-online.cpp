@@ -110,6 +110,7 @@ int FsmnVadOnline::OnlineLfrCmvn(vector<vector<float>> &vad_feats, bool input_fi
                     p.insert(p.end(), vad_feats[vad_feats.size() - 1].begin(), vad_feats[vad_feats.size() - 1].end());
                 }
                 out_feats.emplace_back(p);
+                p.clear();
             } else {
                 lfr_splice_frame_idxs = i;
                 break;
@@ -186,8 +187,11 @@ void FsmnVadOnline::InitOnline(std::shared_ptr<Ort::Session> &vad_session,
     vad_max_len_ = vad_max_len;
     vad_speech_noise_thres_ = vad_speech_noise_thres;
 
+    frame_sample_length_ = vad_sample_rate_ / 1000 * 25;;
+    frame_shift_sample_length_ = vad_sample_rate_ / 1000 * 10;
+
     // 2pass
-    audio_handle = make_unique<Audio>(1);
+    audio_handle = make_unique<Audio>(vad_sample_rate,1);
 }
 
 FsmnVadOnline::~FsmnVadOnline() {

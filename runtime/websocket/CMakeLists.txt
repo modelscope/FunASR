@@ -10,6 +10,12 @@ option(ENABLE_WEBSOCKET "Whether to build websocket server" ON)
 option(ENABLE_PORTAUDIO "Whether to build portaudio" ON)
 
 if(WIN32)
+  file(REMOVE ${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/glog/src/config.h 
+    ${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/glog/src/glog/export.h 
+    ${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/glog/src/glog/logging.h 
+    ${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/glog/src/glog/raw_logging.h 
+    ${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/glog/src/glog/stl_logging.h 
+    ${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/glog/src/glog/vlog_is_on.h)
 else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fPIC")
 endif()

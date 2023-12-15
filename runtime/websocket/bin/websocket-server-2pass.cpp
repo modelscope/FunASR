@@ -98,8 +98,8 @@ void WebSocketServer::do_decoder(
     std::string wav_format,
     FUNASR_HANDLE& tpass_online_handle) {
   // lock for each connection
-  scoped_lock guard(thread_lock);
   if(!tpass_online_handle){
+    scoped_lock guard(thread_lock);
 	  LOG(INFO) << "tpass_online_handle  is free, return";
 	  msg["access_num"]=(int)msg["access_num"]-1;
 	  return;
@@ -128,10 +128,12 @@ void WebSocketServer::do_decoder(
                                        hotwords_embedding, itn);
 
         } else {
+          scoped_lock guard(thread_lock);
           msg["access_num"]=(int)msg["access_num"]-1;
           return;
         }
       } catch (std::exception const& e) {
+        scoped_lock guard(thread_lock);
         LOG(ERROR) << e.what();
         msg["access_num"]=(int)msg["access_num"]-1;
         return;
@@ -162,10 +164,12 @@ void WebSocketServer::do_decoder(
                                        wav_format, (ASR_TYPE)asr_mode_,
                                        hotwords_embedding, itn);
         } else {
+          scoped_lock guard(thread_lock);
           msg["access_num"]=(int)msg["access_num"]-1;	 
           return;
         }
       } catch (std::exception const& e) {
+        scoped_lock guard(thread_lock);
         LOG(ERROR) << e.what();
         msg["access_num"]=(int)msg["access_num"]-1;
         return;
@@ -209,6 +213,7 @@ void WebSocketServer::do_decoder(
   } catch (std::exception const& e) {
     std::cerr << "Error: " << e.what() << std::endl;
   }
+  scoped_lock guard(thread_lock);
   msg["access_num"]=(int)msg["access_num"]-1;
  
 }
@@ -227,7 +232,7 @@ void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
     data_msg->msg["wav_name"] = "wav-default-id";
     data_msg->msg["mode"] = "2pass";
     data_msg->msg["itn"] = true;
-    data_msg->msg["audio_fs"] = 16000;
+    data_msg->msg["audio_fs"] = 16000; // default is 16k
     data_msg->msg["access_num"] = 0; // the number of access for this object, when it is 0, we can free it saftly
     data_msg->msg["is_eof"]=false; // if this connection is closed
     data_msg->punc_cache =

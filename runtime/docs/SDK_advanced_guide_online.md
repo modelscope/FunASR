@@ -85,9 +85,6 @@ nohup bash run_server_2pass.sh \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx \
   --itn-dir thuduj12/fst_itn_zh \
-  --decoder-thread-num 32 \
-  --io-thread-num  8 \
-  --port 10095 \
   --certfile  ../../../ssl_key/server.crt \
   --keyfile ../../../ssl_key/server.key \
   --hotword ../../hotwords.txt > log.out 2>&1 &
@@ -111,10 +108,11 @@ nohup bash run_server_2pass.sh \
 --punc-quant: True for quantized PUNC model, False for non-quantized PUNC model. Default is True.
 --itn-dir modelscope model ID or local model path.
 --port: Port number that the server listens on. Default is 10095.
---decoder-thread-num: The number of thread pools on the server side that can handle concurrent requests. The default value is 8.
+--decoder-thread-num: The number of thread pools on the server side that can handle concurrent requests.
+                      The script will automatically configure parameters decoder-thread-num and io-thread-num based on the server's thread count.
+--io-thread-num: Number of IO threads that the server starts.
 --model-thread-num: The number of internal threads for each recognition route to control the parallelism of the ONNX model. 
         The default value is 1. It is recommended that decoder-thread-num * model-thread-num equals the total number of threads.
---io-thread-num: Number of IO threads that the server starts. Default is 1.
 --certfile <string>: SSL certificate file. Default is ../../../ssl_key/server.crt. If you want to close ssl，set 0
 --keyfile <string>: SSL key file. Default is ../../../ssl_key/server.key. 
 --hotword: Hotword file path, one line for each hotword(e.g.:阿里巴巴 20), if the client provides hot words, then combined with the hot words provided by the client.
