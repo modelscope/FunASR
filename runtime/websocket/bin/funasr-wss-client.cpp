@@ -341,7 +341,9 @@ class WebsocketClient {
 };
 
 int main(int argc, char* argv[]) {
-
+#ifdef _WIN32
+    SetConsoleOutputCP(65001);
+#endif
     google::InitGoogleLogging(argv[0]);
     FLAGS_logtostderr = true;
 
