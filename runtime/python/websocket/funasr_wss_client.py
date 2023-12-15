@@ -41,6 +41,10 @@ parser.add_argument("--audio_in",
                     type=str,
                     default=None,
                     help="audio_in")
+parser.add_argument("--audio_fs",
+                    type=int,
+                    default=16000,
+                    help="audio_fs")
 parser.add_argument("--send_without_sleep",
                     action="store_true",
                     default=True,
@@ -164,7 +168,7 @@ async def record_from_scp(chunk_begin, chunk_size):
         hotword_msg=json.dumps(fst_dict)
         print (hotword_msg)
 
-    sample_rate = 16000
+    sample_rate = args.audio_fs
     wav_format = "pcm"
     use_itn=True
     if args.use_itn == 0:
@@ -194,8 +198,7 @@ async def record_from_scp(chunk_begin, chunk_size):
             with open(wav_path, "rb") as f:
                 audio_bytes = f.read()
 
-        # stride = int(args.chunk_size/1000*16000*2)
-        stride = int(60 * args.chunk_size[1] / args.chunk_interval / 1000 * 16000 * 2)
+        stride = int(60 * args.chunk_size[1] / args.chunk_interval / 1000 * sample_rate * 2)
         chunk_num = (len(audio_bytes) - 1) // stride + 1
         # print(stride)
 
