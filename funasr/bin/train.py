@@ -7,25 +7,25 @@ from collections.abc import Sequence
 import torch
 import hydra
 from omegaconf import DictConfig, OmegaConf
-from funasr.torch_utils.set_all_random_seed import set_all_random_seed
+from funasr.train_utils.set_all_random_seed import set_all_random_seed
 # from funasr.model_class_factory1 import model_choices
-from funasr.modules.lora.utils import mark_only_lora_as_trainable
+from funasr.models.lora.utils import mark_only_lora_as_trainable
 from funasr.optimizers import optim_choices
 from funasr.schedulers import scheduler_choices
-from funasr.torch_utils.load_pretrained_model import load_pretrained_model
-from funasr.torch_utils.initialize import initialize
-from funasr.datasets.data_sampler import BatchSampler
+from funasr.train_utils.load_pretrained_model import load_pretrained_model
+from funasr.train_utils.initialize import initialize
+from funasr.datasets.fun_datasets.data_sampler import BatchSampler
 # from funasr.tokenizer.build_tokenizer import build_tokenizer
 # from funasr.tokenizer.token_id_converter import TokenIDConverter
 from funasr.tokenizer.funtoken import build_tokenizer
-from funasr.datasets.dataset_jsonl import AudioDataset
-from funasr.utils.trainer import Trainer
+from funasr.datasets.fun_datasets.dataset_jsonl import AudioDataset
+from funasr.train_utils.trainer import Trainer
 # from funasr.utils.load_fr_py import load_class_from_path
 from funasr.utils.dynamic_import import dynamic_import
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
-from funasr.utils.download_from_hub import download_model
+from funasr.download.download_from_hub import download_model
 
 @hydra.main(config_name=None, version_base=None)
 def main_hydra(kwargs: DictConfig):

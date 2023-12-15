@@ -3,12 +3,12 @@ import torch.nn as nn
 
 from funasr.export.utils.torch_function import MakePadMask
 from funasr.export.utils.torch_function import sequence_mask
-from funasr.modules.attention import MultiHeadedAttentionSANM
+from funasr.models.transformer.attention import MultiHeadedAttentionSANM
 from funasr.export.models.modules.multihead_att import MultiHeadedAttentionSANM as MultiHeadedAttentionSANM_export
 from funasr.export.models.modules.encoder_layer import EncoderLayerSANM as EncoderLayerSANM_export
-from funasr.modules.positionwise_feed_forward import PositionwiseFeedForward
+from funasr.models.transformer.positionwise_feed_forward import PositionwiseFeedForward
 from funasr.export.models.modules.feedforward import PositionwiseFeedForward as PositionwiseFeedForward_export
-from funasr.modules.embedding import StreamSinusoidalPositionEncoder
+from funasr.models.transformer.embedding import StreamSinusoidalPositionEncoder
 
 
 class SANMEncoder(nn.Module):

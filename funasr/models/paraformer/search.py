@@ -9,9 +9,9 @@ from typing import Union
 
 import torch
 
-from funasr.modules.e2e_asr_common import end_detect
-from funasr.modules.scorers.scorer_interface import PartialScorerInterface
-from funasr.modules.scorers.scorer_interface import ScorerInterface
+from funasr.metrics import end_detect
+from funasr.models.transformer.scorers.scorer_interface import PartialScorerInterface
+from funasr.models.transformer.scorers.scorer_interface import ScorerInterface
 
 class Hypothesis(NamedTuple):
     """Hypothesis data type."""

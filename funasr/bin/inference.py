@@ -7,13 +7,13 @@ import json
 from omegaconf import DictConfig, OmegaConf
 from funasr.utils.dynamic_import import dynamic_import
 import logging
-from funasr.utils.download_from_hub import download_model
-from funasr.torch_utils.set_all_random_seed import set_all_random_seed
+from funasr.download.download_from_hub import download_model
+from funasr.train_utils.set_all_random_seed import set_all_random_seed
 from funasr.tokenizer.funtoken import build_tokenizer
 from funasr.datasets.fun_datasets.load_audio_extract_fbank import load_bytes
-from funasr.torch_utils.device_funcs import to_device
+from funasr.train_utils.device_funcs import to_device
 from tqdm import tqdm
-from funasr.torch_utils.load_pretrained_model import load_pretrained_model
+from funasr.train_utils.load_pretrained_model import load_pretrained_model
 import time
 import random
 import string

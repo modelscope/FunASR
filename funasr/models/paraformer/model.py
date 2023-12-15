@@ -29,10 +29,10 @@ from funasr.losses.label_smoothing_loss import (
 from funasr.models.predictor.cif import mae_loss
 # from funasr.models.preencoder.abs_preencoder import AbsPreEncoder
 # from funasr.models.specaug.abs_specaug import AbsSpecAug
-from funasr.modules.add_sos_eos import add_sos_eos
-from funasr.modules.nets_utils import make_pad_mask, pad_list
-from funasr.modules.nets_utils import th_accuracy
-from funasr.torch_utils.device_funcs import force_gatherable
+from funasr.models.transformer.add_sos_eos import add_sos_eos
+from funasr.models.transformer.utils.nets_utils import make_pad_mask, pad_list
+from funasr.models.transformer.utils.nets_utils import th_accuracy
+from funasr.train_utils.device_funcs import force_gatherable
 # from funasr.models.base_model import FunASRModel
 # from funasr.models.predictor.cif import CifPredictorV3
 from funasr.models.paraformer.search import Hypothesis
@@ -48,7 +48,7 @@ else:
 		yield
 from funasr.datasets.fun_datasets.load_audio_extract_fbank import load_audio, extract_fbank
 from funasr.utils import postprocess_utils
-from funasr.fileio.datadir_writer import DatadirWriter
+from funasr.utils.datadir_writer import DatadirWriter
 from funasr.utils.timestamp_tools import ts_prediction_lfr6_standard
 
 class Paraformer(nn.Module):
@@ -423,8 +423,8 @@ class Paraformer(nn.Module):
 	                     **kwargs,
 	                     ):
 		from funasr.models.paraformer.search import BeamSearchPara
-		from funasr.modules.scorers.ctc import CTCPrefixScorer
-		from funasr.modules.scorers.length_bonus import LengthBonus
+		from funasr.models.transformer.scorers.ctc import CTCPrefixScorer
+		from funasr.models.transformer.scorers.length_bonus import LengthBonus
 	
 		# 1. Build ASR model
 		scorers = {}
@@ -1355,7 +1355,7 @@ class ParaformerOnline(Paraformer):
 
 		self.scama_mask = None
 		if hasattr(self.encoder, "overlap_chunk_cls") and self.encoder.overlap_chunk_cls is not None:
-			from funasr.modules.streaming_utils.chunk_utilis import build_scama_mask_for_cross_attention_decoder
+			from funasr.models.scama.chunk_utilis import build_scama_mask_for_cross_attention_decoder
 			self.build_scama_mask_for_cross_attention_decoder_fn = build_scama_mask_for_cross_attention_decoder
 			self.decoder_attention_chunk_type = kwargs.get("decoder_attention_chunk_type", "chunk")
 

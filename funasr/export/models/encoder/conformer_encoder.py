@@ -3,14 +3,14 @@ import torch.nn as nn
 
 from funasr.export.utils.torch_function import MakePadMask
 from funasr.export.utils.torch_function import sequence_mask
-from funasr.modules.attention import MultiHeadedAttentionSANM
+from funasr.models.transformer.attention import MultiHeadedAttentionSANM
 from funasr.export.models.modules.multihead_att import MultiHeadedAttentionSANM as MultiHeadedAttentionSANM_export
 from funasr.export.models.modules.encoder_layer import EncoderLayerSANM as EncoderLayerSANM_export
 from funasr.export.models.modules.encoder_layer import EncoderLayerConformer as EncoderLayerConformer_export
-from funasr.modules.positionwise_feed_forward import PositionwiseFeedForward
+from funasr.models.transformer.positionwise_feed_forward import PositionwiseFeedForward
 from funasr.export.models.modules.feedforward import PositionwiseFeedForward as PositionwiseFeedForward_export
 from funasr.export.models.encoder.sanm_encoder import SANMEncoder
-from funasr.modules.attention import RelPositionMultiHeadedAttention
+from funasr.models.transformer.attention import RelPositionMultiHeadedAttention
 # from funasr.export.models.modules.multihead_att import RelPositionMultiHeadedAttention as RelPositionMultiHeadedAttention_export
 from funasr.export.models.modules.multihead_att import OnnxRelPosMultiHeadedAttention as RelPositionMultiHeadedAttention_export
 

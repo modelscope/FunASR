@@ -3,7 +3,7 @@ import os
 import torch
 import torch.nn as nn
 
-from funasr.modules.attention import MultiHeadedAttention
+from funasr.models.transformer.attention import MultiHeadedAttention
 
 from funasr.export.models.modules.decoder_layer import DecoderLayer as OnnxDecoderLayer
 from funasr.export.models.language_models.embed import Embedding
