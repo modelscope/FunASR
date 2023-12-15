@@ -43,24 +43,6 @@
                     </li>
                 </ul>
             </div>
-
-            <!-- <div class="line-box">
-                <div></div>
-            </div>
-
-            <div class="ba-box">
-                <ul>
-                    <li>
-                        Copyright @ 1998 - 2023 Tancant. All Rights Reserved.北科软件公司 版权所有
-                    </li>
-                    <li>
-                        公司地址:武汉市洪山区野芷湖西路16号创意天地10号高层13楼
-                    </li>
-                    <li>
-                        联系电话: 400 862 6126
-                    </li>
-                </ul>
-            </div> -->
         </footer>
 
     </div>
