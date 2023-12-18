@@ -83,6 +83,10 @@ void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, vector<string> wa
             if(stamp !=""){
                 LOG(INFO) << "Thread: " << this_thread::get_id() << "," << wav_ids[i] << " : " << stamp;
             }
+            string stamp_sents = FunASRGetStampSents(result);
+            if(stamp_sents !=""){
+                LOG(INFO)<< wav_ids[i] <<" : "<<stamp_sents;
+            }
             float snippet_time = FunASRGetRetSnippetTime(result);
             n_total_length += snippet_time;
             FunASRFreeResult(result);

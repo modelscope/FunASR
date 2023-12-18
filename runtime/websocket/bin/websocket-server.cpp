@@ -74,6 +74,7 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
     if (!buffer.empty() && hotwords_embedding.size() > 0) {
       std::string asr_result;
       std::string stamp_res;
+      std::string stamp_sents;
       try{
         FUNASR_RESULT Result = FunOfflineInferBuffer(
             asr_handle, buffer.data(), buffer.size(), RASR_NONE, NULL, 
@@ -81,6 +82,7 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
 
         asr_result = ((FUNASR_RECOG_RESULT*)Result)->msg;  // get decode result
         stamp_res = ((FUNASR_RECOG_RESULT*)Result)->stamp;
+        stamp_sents = ((FUNASR_RECOG_RESULT*)Result)->stamp_sents;
         FunASRFreeResult(Result);
       }catch (std::exception const& e) {
         LOG(ERROR) << e.what();
@@ -94,6 +96,9 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
 	    jsonresult["is_final"] = false;
       if(stamp_res != ""){
         jsonresult["timestamp"] = stamp_res;
+      }
+      if(stamp_sents != ""){
+        jsonresult["stamp_sents"] = stamp_sents;
       }
       jsonresult["wav_name"] = wav_name;
 
@@ -227,7 +232,7 @@ void WebSocketServer::check_and_clean_connection() {
         data_msg->msg["is_eof"]=true;
         guard_decoder.unlock();
         to_remove.push_back(hdl);
-        LOG(INFO)<<"connection is closed: "<<e.what();
+        LOG(INFO)<<"connection is closed.";
         
       }
       iter++;

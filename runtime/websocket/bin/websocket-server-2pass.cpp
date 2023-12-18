@@ -80,6 +80,12 @@ nlohmann::json handle_result(FUNASR_RESULT result) {
     jsonresult["timestamp"] = tmp_stamp_msg;
   }
 
+  std::string tmp_stamp_sents = FunASRGetStampSents(result);
+  if (tmp_stamp_sents != "") {
+    LOG(INFO) << "offline stamp_sents : " << tmp_stamp_sents;
+    jsonresult["stamp_sents"] = tmp_stamp_sents;
+  }
+
   return jsonresult;
 }
 // feed buffer to asr engine for decoder
@@ -318,7 +324,7 @@ void WebSocketServer::check_and_clean_connection() {
         data_msg->msg["is_eof"]=true;
         guard_decoder.unlock();
         to_remove.push_back(hdl);
-        LOG(INFO)<<"connection is closed: "<<e.what();
+        LOG(INFO)<<"connection is closed.";
         
       }
       iter++;
