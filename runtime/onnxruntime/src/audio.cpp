@@ -228,6 +228,17 @@ Audio::~Audio()
     if (speech_char != NULL) {
         free(speech_char);
     }
+    ClearQueue(frame_queue);
+    ClearQueue(asr_online_queue);
+    ClearQueue(asr_offline_queue);
+}
+
+void Audio::ClearQueue(std::queue<AudioFrame*>& q) {
+    while (!q.empty()) {
+        AudioFrame* frame = q.front();
+        delete frame;
+        q.pop();
+    }
 }
 
 void Audio::Disp()

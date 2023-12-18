@@ -58,6 +58,7 @@ class Audio {
     Audio(int model_sample_rate,int data_type);
     Audio(int model_sample_rate,int data_type, int size);
     ~Audio();
+    void ClearQueue(std::queue<AudioFrame*>& q);
     void Disp();
     void WavResample(int32_t sampling_rate, const float *waveform, int32_t n);
     bool LoadWav(const char* buf, int n_len, int32_t* sampling_rate);
