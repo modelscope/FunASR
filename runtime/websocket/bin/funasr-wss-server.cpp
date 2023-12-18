@@ -26,6 +26,10 @@ void GetValue(TCLAP::ValueArg<std::string>& value_arg, string key,
 }
 
 int main(int argc, char* argv[]) {
+#ifdef _WIN32
+    #include <windows.h>
+    SetConsoleOutputCP(65001);
+#endif
   try {
 
     google::InitGoogleLogging(argv[0]);
