@@ -39,7 +39,7 @@ def main(**kwargs):
 	# preprocess_config(kwargs)
 	# import pdb; pdb.set_trace()
 	# set random seed
-	registry_tables.print_register_tables()
+	registry_tables.print()
 	set_all_random_seed(kwargs.get("seed", 0))
 	torch.backends.cudnn.enabled = kwargs.get("cudnn_enabled", torch.backends.cudnn.enabled)
 	torch.backends.cudnn.benchmark = kwargs.get("cudnn_benchmark", torch.backends.cudnn.benchmark)
@@ -72,6 +72,7 @@ def main(**kwargs):
 		frontend_class = registry_tables.frontend_classes.get(frontend.lower())
 		frontend = frontend_class(**kwargs["frontend_conf"])
 		kwargs["frontend"] = frontend
+		kwargs["input_size"] = frontend.output_size()
 	
 	# import pdb;
 	# pdb.set_trace()

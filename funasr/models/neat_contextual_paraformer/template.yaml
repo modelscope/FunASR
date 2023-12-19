@@ -1,6 +1,12 @@
+# This is an example that demonstrates how to configure a model file.
+# You can modify the configuration according to your own requirements.
+
+# to print the register_table:
+# from funasr.utils.register import registry_tables
+# registry_tables.print()
 
 # network architecture
-model: funasr.cli.models.paraformer:Paraformer
+model: NeatContextualParaformer
 model_conf:
     ctc_weight: 0.0
     lsm_weight: 0.1
@@ -8,9 +14,10 @@ model_conf:
     predictor_weight: 1.0
     predictor_bias: 1
     sampling_ratio: 0.75
+    inner_dim: 512
 
 # encoder
-encoder: sanm
+encoder: SANMEncoder
 encoder_conf:
     output_size: 512
     attention_heads: 4
@@ -26,8 +33,9 @@ encoder_conf:
     sanm_shfit: 0
     selfattention_layer_type: sanm
 
+
 # decoder
-decoder: paraformer_decoder_sanm
+decoder: ContextualParaformerDecoder
 decoder_conf:
     attention_heads: 4
     linear_units: 2048
@@ -40,7 +48,7 @@ decoder_conf:
     kernel_size: 11
     sanm_shfit: 0
 
-predictor: cif_predictor_v2
+predictor: CifPredictorV2
 predictor_conf:
     idim: 512
     threshold: 1.0
@@ -49,7 +57,7 @@ predictor_conf:
     tail_threshold: 0.45
 
 # frontend related
-frontend: wav_frontend
+frontend: WavFrontend
 frontend_conf:
     fs: 16000
     window: hamming
@@ -59,7 +67,7 @@ frontend_conf:
     lfr_m: 7
     lfr_n: 6
 
-specaug: specaug_lfr
+specaug: SpecAugLFR
 specaug_conf:
     apply_time_warp: false
     time_warp_window: 5
@@ -97,21 +105,22 @@ scheduler: warmuplr
 scheduler_conf:
    warmup_steps: 30000
 
-
+dataset: AudioDataset
 dataset_conf:
-    data_names: speech,text
-    data_types: sound,text
+    index_ds: IndexDSJsonl
+    batch_sampler: DynamicBatchLocalShuffleSampler
+    batch_type: example # example or length
+    batch_size: 1 # if batch_type is example, batch_size is the numbers of samples; if length, batch_size is source_token_len+target_token_len;
+    max_token_length: 2048 # filter samples if source_token_len+target_token_len > max_token_length,
+    buffer_size: 500
     shuffle: True
-    shuffle_conf:
-        shuffle_size: 2048
-        sort_size: 500
-    batch_conf:
-        batch_type: example
-        batch_size: 2
-    num_workers: 8
+    num_workers: 0
 
-split_with_space: true
-input_size: 560
+tokenizer: CharTokenizer
+tokenizer_conf:
+  unk_symbol: <unk>
+  split_with_space: true
+
 ctc_conf:
     dropout_rate: 0.0
     ctc_type: builtin

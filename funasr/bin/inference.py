@@ -81,7 +81,7 @@ def main_hydra(kwargs: DictConfig):
 
 class AutoModel:
 	def __init__(self, **kwargs):
-		registry_tables.print_register_tables()
+		registry_tables.print()
 		assert "model" in kwargs
 		if "model_conf" not in kwargs:
 			logging.info("download models from model hub: {}".format(kwargs.get("model_hub", "ms")))
@@ -108,6 +108,7 @@ class AutoModel:
 			frontend_class = registry_tables.frontend_classes.get(frontend.lower())
 			frontend = frontend_class(**kwargs["frontend_conf"])
 			kwargs["frontend"] = frontend
+			kwargs["input_size"] = frontend.output_size()
 		
 		# build model
 		model_class = registry_tables.model_classes.get(kwargs["model"].lower())

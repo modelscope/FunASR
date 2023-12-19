@@ -39,8 +39,6 @@ class Paraformer(nn.Module):
 	def __init__(
 		self,
 		# token_list: Union[Tuple[str, ...], List[str]],
-		frontend: Optional[str] = None,
-		frontend_conf: Optional[Dict] = None,
 		specaug: Optional[str] = None,
 		specaug_conf: Optional[Dict] = None,
 		normalize: str = None,

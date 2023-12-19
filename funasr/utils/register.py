@@ -1,6 +1,6 @@
 import logging
 import inspect
-from dataclasses import dataclass, fields
+from dataclasses import dataclass
 
 
 @dataclass
@@ -19,7 +19,7 @@ class ClassRegistryTables:
     dataset_classes = {}
     index_ds_classes = {}
 
-    def print_register_tables(self,):
+    def print(self,):
         print("\nregister_tables: \n")
         fields = vars(self)
         for classes_key, classes_dict in fields.items():
