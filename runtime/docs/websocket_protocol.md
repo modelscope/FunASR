@@ -36,7 +36,7 @@ After sending the audio data, an end-of-audio flag needs to be sent (which needs
 #### Sending Recognition Results
 The message (serialized in JSON) is:
 ```text
-{"mode": "offline", "wav_name": "wav_name", "text": "asr ouputs", "is_final": True, "timestamp":"[[100,200], [200,500]]"}
+{"mode": "offline", "wav_name": "wav_name", "text": "asr ouputs", "is_final": True, "timestamp":"[[100,200], [200,500]]", "stamp_sents":""}
 ```
 Parameter explanation:
 ```text
@@ -45,6 +45,7 @@ Parameter explanation:
 `text`: the text output of speech recognition
 `is_final`: indicating the end of recognition
 `timestamp`：If AM is a timestamp model, it will return this field, indicating the timestamp, in the format of "[[100,200], [200,500]]"
+`stamp_sents`：If AM is a timestamp model, it will return this field, indicating the stamp_sents, in the format of "[{'text':'正 是 因 为','start':'430','end':'1130','ts_list':[[430,670],[670,810],[810,1030],[1030,1130]]}]"
 ```
 
 ## Real-time Speech Recognition
@@ -84,7 +85,7 @@ After sending the audio data, an end-of-audio flag needs to be sent (which needs
 The message (serialized in JSON) is:
 
 ```text
-{"mode": "2pass-online", "wav_name": "wav_name", "text": "asr ouputs", "is_final": True, "timestamp":"[[100,200], [200,500]]"}
+{"mode": "2pass-online", "wav_name": "wav_name", "text": "asr ouputs", "is_final": True, "timestamp":"[[100,200], [200,500]]", "stamp_sents":""}
 ```
 Parameter explanation:
 ```text
@@ -93,4 +94,5 @@ Parameter explanation:
 `text`: the text output of speech recognition
 `is_final`: indicating the end of recognition
 `timestamp`：If AM is a timestamp model, it will return this field, indicating the timestamp, in the format of "[[100,200], [200,500]]"
+`stamp_sents`：If AM is a timestamp model, it will return this field, indicating the stamp_sents, in the format of "[{'text':'正 是 因 为','start':'430','end':'1130','ts_list':[[430,670],[670,810],[810,1030],[1030,1130]]}]"
 ```

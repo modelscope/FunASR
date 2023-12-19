@@ -172,6 +172,10 @@ int main(int argc, char** argv)
             if(stamp !=""){
                 LOG(INFO)<< wav_id <<" : "<<stamp;
             }
+            string stamp_sents = FunASRGetStampSents(result);
+            if(stamp_sents !=""){
+                LOG(INFO)<< wav_id <<" : "<<stamp_sents;
+            }
             snippet_time += FunASRGetRetSnippetTime(result);
             FunASRFreeResult(result);
         }

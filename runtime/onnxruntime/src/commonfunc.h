@@ -9,6 +9,7 @@ typedef struct
 {
     std::string msg;
     std::string stamp;
+    std::string stamp_sents;
     std::string tpass_msg;
     float snippet_time;
 }FUNASR_RECOG_RESULT;

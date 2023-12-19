@@ -31,6 +31,7 @@ FunASR希望在语音识别的学术研究和工业应用之间架起一座桥�
 
 <a name="最新动态"></a>
 ## 最新动态
+- 2023/12/04: funasr社区软件包windows 1.0版本发布，支持中文离线文件转写、英文离线文件转写、中文实时听写服务，详细信息参阅([FunASR社区软件包windows版本](https://www.modelscope.cn/models/damo/funasr-runtime-win-cpu-x64/summary))
 - 2023/11/08：中文离线文件转写服务3.0 CPU版本发布，新增标点大模型、Ngram语言模型与wfst热词，详细信息参阅([一键部署文档](runtime/readme_cn.md#中文离线文件转写服务cpu版本))
 - 2023/10/17: 英文离线文件转写服务一键部署的CPU版本发布，详细信息参阅([一键部署文档](runtime/readme_cn.md#英文离线文件转写服务cpu版本))
 - 2023/10/13: [SlideSpeech](https://slidespeech.github.io/): 一个大规模的多模态音视频语料库，主要是在线会议或者在线课程场景，包含了大量与发言人讲话实时同步的幻灯片。

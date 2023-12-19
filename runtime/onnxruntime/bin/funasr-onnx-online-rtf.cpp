@@ -52,7 +52,7 @@ void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, vector<string> wa
     // warm up
     for (size_t i = 0; i < 10; i++)
     {
-        int32_t sampling_rate_ = -1;
+        int32_t sampling_rate_ = audio_fs;
         funasr::Audio audio(1);
 		if(is_target_file(wav_list[0].c_str(), "wav")){
 			if(!audio.LoadWav2Char(wav_list[0].c_str(), &sampling_rate_)){
@@ -84,7 +84,7 @@ void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, vector<string> wa
                 } else {
                     is_final = false;
             }
-            FUNASR_RESULT result = FunASRInferBuffer(online_handle, speech_buff+sample_offset, step, RASR_NONE, NULL, is_final, audio_fs);
+            FUNASR_RESULT result = FunASRInferBuffer(online_handle, speech_buff+sample_offset, step, RASR_NONE, NULL, is_final, sampling_rate_);
             if (result)
             {
                 FunASRFreeResult(result);
@@ -98,7 +98,7 @@ void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, vector<string> wa
         if (i >= wav_list.size()) {
             break;
         }
-        int32_t sampling_rate_ = -1;
+        int32_t sampling_rate_ = audio_fs;
         funasr::Audio audio(1);
 		if(is_target_file(wav_list[i].c_str(), "wav")){
 			if(!audio.LoadWav2Char(wav_list[i].c_str(), &sampling_rate_)){
@@ -131,7 +131,7 @@ void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, vector<string> wa
                     is_final = false;
             }
             gettimeofday(&start, NULL);
-            FUNASR_RESULT result = FunASRInferBuffer(online_handle, speech_buff+sample_offset, step, RASR_NONE, NULL, is_final, audio_fs);
+            FUNASR_RESULT result = FunASRInferBuffer(online_handle, speech_buff+sample_offset, step, RASR_NONE, NULL, is_final, sampling_rate_);
             gettimeofday(&end, NULL);
             seconds = (end.tv_sec - start.tv_sec);
             long taking_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);

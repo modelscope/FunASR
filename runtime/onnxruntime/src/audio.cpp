@@ -228,6 +228,17 @@ Audio::~Audio()
     if (speech_char != NULL) {
         free(speech_char);
     }
+    ClearQueue(frame_queue);
+    ClearQueue(asr_online_queue);
+    ClearQueue(asr_offline_queue);
+}
+
+void Audio::ClearQueue(std::queue<AudioFrame*>& q) {
+    while (!q.empty()) {
+        AudioFrame* frame = q.front();
+        delete frame;
+        q.pop();
+    }
 }
 
 void Audio::Disp()
@@ -354,9 +365,7 @@ bool Audio::FfmpegLoad(const char *filename, bool copy2char){
                 while (avcodec_receive_frame(codecContext, frame) >= 0) {
                     // Resample audio if necessary
                     std::vector<uint8_t> resampled_buffer;
-                    int in_samples = frame->nb_samples;
-                    uint8_t **in_data = frame->extended_data;
-                    int out_samples = av_rescale_rnd(in_samples,
+                    int out_samples = av_rescale_rnd(swr_get_delay(swr_ctx, codecContext->sample_rate) + frame->nb_samples,
                                                     dest_sample_rate,
                                                     codecContext->sample_rate,
                                                     AV_ROUND_DOWN);
@@ -364,20 +373,20 @@ bool Audio::FfmpegLoad(const char *filename, bool copy2char){
                     int resampled_size = out_samples * av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
                     if (resampled_buffer.size() < resampled_size) {
                         resampled_buffer.resize(resampled_size);
-                    }                    
+                    }
                     uint8_t *resampled_data = resampled_buffer.data();
                     int ret = swr_convert(
                         swr_ctx,
                         &resampled_data, // output buffer
-                        resampled_size, // output buffer size
-                        (const uint8_t **)(frame->data), //(const uint8_t **)(frame->extended_data)
-                        in_samples // input buffer size
+                        out_samples, // output buffer size
+                        (const uint8_t **)(frame->data), // choose channel
+                        frame->nb_samples // input buffer size
                     );
                     if (ret < 0) {
                         LOG(ERROR) << "Error resampling audio";
                         break;
                     }
-                    std::copy(resampled_buffer.begin(), resampled_buffer.end(), std::back_inserter(resampled_buffers));
+                    resampled_buffers.insert(resampled_buffers.end(), resampled_buffer.begin(), resampled_buffer.begin() + resampled_size);
                 }
             }
         }
@@ -539,9 +548,7 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
                 while (avcodec_receive_frame(codecContext, frame) >= 0) {
                     // Resample audio if necessary
                     std::vector<uint8_t> resampled_buffer;
-                    int in_samples = frame->nb_samples;
-                    uint8_t **in_data = frame->extended_data;
-                    int out_samples = av_rescale_rnd(in_samples,
+                    int out_samples = av_rescale_rnd(swr_get_delay(swr_ctx, codecContext->sample_rate) + frame->nb_samples,
                                                     dest_sample_rate,
                                                     codecContext->sample_rate,
                                                     AV_ROUND_DOWN);
@@ -549,20 +556,20 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
                     int resampled_size = out_samples * av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
                     if (resampled_buffer.size() < resampled_size) {
                         resampled_buffer.resize(resampled_size);
-                    }                    
+                    }
                     uint8_t *resampled_data = resampled_buffer.data();
                     int ret = swr_convert(
                         swr_ctx,
                         &resampled_data, // output buffer
-                        resampled_size, // output buffer size
-                        (const uint8_t **)(frame->data), //(const uint8_t **)(frame->extended_data)
-                        in_samples // input buffer size
+                        out_samples, // output buffer size
+                        (const uint8_t **)(frame->data), // choose channel: channel_data
+                        frame->nb_samples // input buffer size
                     );
                     if (ret < 0) {
                         LOG(ERROR) << "Error resampling audio";
                         break;
                     }
-                    std::copy(resampled_buffer.begin(), resampled_buffer.end(), std::back_inserter(resampled_buffers));
+                    resampled_buffers.insert(resampled_buffers.end(), resampled_buffer.begin(), resampled_buffer.begin() + resampled_size);
                 }
             }
         }
@@ -614,7 +621,7 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
 }
 
 
-bool Audio::LoadWav(const char *filename, int32_t* sampling_rate)
+bool Audio::LoadWav(const char *filename, int32_t* sampling_rate, bool resample)
 {
     WaveHeader header;
     if (speech_data != NULL) {
@@ -676,7 +683,7 @@ bool Audio::LoadWav(const char *filename, int32_t* sampling_rate)
         }
 
         //resample
-        if(*sampling_rate != dest_sample_rate){
+        if(resample && *sampling_rate != dest_sample_rate){
             WavResample(*sampling_rate, speech_data, speech_len);
         }
 
@@ -867,7 +874,7 @@ bool Audio::LoadPcmwavOnline(const char* buf, int n_buf_len, int32_t* sampling_r
         return false;
 }
 
-bool Audio::LoadPcmwav(const char* filename, int32_t* sampling_rate)
+bool Audio::LoadPcmwav(const char* filename, int32_t* sampling_rate, bool resample)
 {
     if (speech_data != NULL) {
         free(speech_data);
@@ -908,7 +915,7 @@ bool Audio::LoadPcmwav(const char* filename, int32_t* sampling_rate)
         }
 
         //resample
-        if(*sampling_rate != dest_sample_rate){
+        if(resample && *sampling_rate != dest_sample_rate){
             WavResample(*sampling_rate, speech_data, speech_len);
         }
 

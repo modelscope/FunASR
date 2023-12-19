@@ -299,11 +299,13 @@
                 if(!new_stamp.empty()){
                     p_result->stamp = new_stamp;
                 }
-            }           
+            }
             p_result->msg = msg_itn;
         }
 #endif
-
+        if (!(p_result->stamp).empty()){
+            p_result->stamp_sents = funasr::TimestampSentence(p_result->msg, p_result->stamp);
+        }
         return p_result;
     }
 
@@ -544,7 +546,9 @@
                 p_result->tpass_msg = msg_itn;
             }
 #endif
-
+            if (!(p_result->stamp).empty()){
+                p_result->stamp_sents = funasr::TimestampSentence(p_result->tpass_msg, p_result->stamp);
+            }
             if(frame != NULL){
                 delete frame;
                 frame = NULL;
@@ -599,6 +603,15 @@
             return nullptr;
 
         return p_result->stamp.c_str();
+    }
+
+    _FUNASRAPI const char* FunASRGetStampSents(FUNASR_RESULT result)
+    {
+        funasr::FUNASR_RECOG_RESULT * p_result = (funasr::FUNASR_RECOG_RESULT*)result;
+        if(!p_result)
+            return nullptr;
+
+        return p_result->stamp_sents.c_str();
     }
 
     _FUNASRAPI const char* FunASRGetTpassResult(FUNASR_RESULT result,int n_index)

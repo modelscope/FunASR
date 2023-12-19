@@ -130,7 +130,7 @@ export default {
                 {
                     icon: require('./assets/images/lxwj-zxty.png'),
                     title: '在线体验',
-                    link: 'https://101.37.77.25:1335/static/index.html'
+                    link: 'https://www.funasr.com:1335/static/index.html'
                 },
                 {
                     icon: require('./assets/images/lxwj-az.png'),

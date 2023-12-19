@@ -47,7 +47,7 @@ void TimestampSplitChiEngCharacters(const std::string &input_str,
                                   std::vector<std::string> &characters);
 std::string VectorToString(const std::vector<std::vector<int>>& vec);                                  
 std::string TimestampSmooth(std::string &text, std::string &text_itn, std::string &str_time);
-
+std::string TimestampSentence(std::string &text, std::string &str_time);
 std::vector<std::string> split(const std::string &s, char delim);
 
 template<typename T>

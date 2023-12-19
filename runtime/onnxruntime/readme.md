@@ -38,12 +38,12 @@ make -j 4
 ### Download onnxruntime
 https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/dep_libs/onnxruntime-win-x64-1.16.1.zip
 
-Download and unzip to d:/ffmpeg-master-latest-win64-gpl-shared
+Download and unzip to d:/onnxruntime-win-x64-1.16.1
 
 ### Download ffmpeg
 https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/dep_libs/ffmpeg-master-latest-win64-gpl-shared.zip
 
-Download and unzip to d:/onnxruntime-win-x64-1.16.1
+Download and unzip to d:/ffmpeg-master-latest-win64-gpl-shared
 
 ### Build runtime
 ```
