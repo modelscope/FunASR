@@ -462,6 +462,10 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
         nullptr, // write callback (not used here)
         nullptr // seek callback (not used here)
     );
+    if (!avio_ctx) {
+        av_free(buf_copy);
+        return false;
+    }
     AVFormatContext* formatContext = avformat_alloc_context();
     formatContext->pb = avio_ctx;
     if (avformat_open_input(&formatContext, "", NULL, NULL) != 0) {
@@ -576,7 +580,9 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
         av_packet_unref(packet);
     }
 
-    avio_context_free(&avio_ctx);
+    //avio_context_free(&avio_ctx);
+    av_freep(&avio_ctx ->buffer);
+    av_freep(&avio_ctx);
     avformat_close_input(&formatContext);
     avformat_free_context(formatContext);
     avcodec_free_context(&codecContext);
