@@ -2,7 +2,7 @@ import torch
 from funasr.optimizers.fairseq_adam import FairseqAdam
 from funasr.optimizers.sgd import SGD
 
-optim_choices = dict(
+optim_classes = dict(
 	adam=torch.optim.Adam,
 	fairseq_adam=FairseqAdam,
 	adamw=torch.optim.AdamW,

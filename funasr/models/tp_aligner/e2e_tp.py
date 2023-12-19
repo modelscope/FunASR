@@ -11,13 +11,13 @@ import torch
 import numpy as np
 
 from funasr.models.encoder.abs_encoder import AbsEncoder
-from funasr.models.frontend.abs_frontend import AbsFrontend
-from funasr.models.predictor.cif import mae_loss
-from funasr.models.transformer.add_sos_eos import add_sos_eos
+from funasr.frontends.abs_frontend import AbsFrontend
+from funasr.models.paraformer.cif_predictor import mae_loss
+from funasr.models.transformer.utils.add_sos_eos import add_sos_eos
 from funasr.models.transformer.utils.nets_utils import make_pad_mask, pad_list
 from funasr.train_utils.device_funcs import force_gatherable
 from funasr.models.base_model import FunASRModel
-from funasr.models.predictor.cif import CifPredictorV3
+from funasr.models.paraformer.cif_predictor import CifPredictorV3
 
 if LooseVersion(torch.__version__) >= LooseVersion("1.6.0"):
     from torch.cuda.amp import autocast

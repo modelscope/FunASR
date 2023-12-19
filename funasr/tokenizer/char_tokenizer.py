@@ -4,10 +4,10 @@ from typing import List
 from typing import Union
 import warnings
 
-
-from funasr.tokenizer.abs_tokenizer import AbsTokenizer
 from funasr.tokenizer.abs_tokenizer import BaseTokenizer
+from funasr.utils.register import register_class
 
+@register_class("tokenizer_classes", "CharTokenizer")
 class CharTokenizer(BaseTokenizer):
     def __init__(
         self,

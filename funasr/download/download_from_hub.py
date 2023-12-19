@@ -22,11 +22,17 @@ def download_fr_ms(**kwargs):
 	kwargs = OmegaConf.merge(cfg, kwargs)
 	init_param = os.path.join(model_or_path, "model.pb")
 	kwargs["init_param"] = init_param
-	kwargs["token_list"] = os.path.join(model_or_path, "tokens.txt")
+	if os.path.exists(os.path.join(model_or_path, "tokens.txt")):
+		kwargs["tokenizer_conf"]["token_list"] = os.path.join(model_or_path, "tokens.txt")
+	if os.path.exists(os.path.join(model_or_path, "tokens.txt")):
+		kwargs["tokenizer_conf"]["seg_dict"] = os.path.join(model_or_path, "seg_dict")
+	if os.path.exists(os.path.join(model_or_path, "bpe.model")):
+		kwargs["tokenizer_conf"]["bpemodel"] = os.path.join(model_or_path, "bpe.model")
+	
 	kwargs["model"] = cfg["model"]
 	kwargs["frontend_conf"]["cmvn_file"] = os.path.join(model_or_path, "am.mvn")
 	
-	return kwargs
+	return OmegaConf.to_container(kwargs, resolve=True)
 
 def get_or_download_model_dir(
                               model,

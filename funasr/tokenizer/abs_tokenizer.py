@@ -7,6 +7,7 @@ from typing import Dict
 from typing import Iterable
 from typing import List
 from typing import Union
+import json
 
 import numpy as np
 
@@ -27,7 +28,7 @@ class BaseTokenizer(ABC):
                  ):
         
         if token_list is not None:
-            if isinstance(token_list, (Path, str)):
+            if isinstance(token_list, (Path, str)) and token_list.endswith(".txt"):
                 token_list = Path(token_list)
                 self.token_list_repr = str(token_list)
                 self.token_list: List[str] = []
@@ -36,7 +37,14 @@ class BaseTokenizer(ABC):
                     for idx, line in enumerate(f):
                         line = line.rstrip()
                         self.token_list.append(line)
-            
+            elif isinstance(token_list, (Path, str)) and token_list.endswith(".json"):
+                token_list = Path(token_list)
+                self.token_list_repr = str(token_list)
+                self.token_list: List[str] = []
+
+                with open('data.json', 'r', encoding='utf-8') as f:
+                    self.token_list = json.loads(f.read())
+
             else:
                 self.token_list: List[str] = list(token_list)
                 self.token_list_repr = ""

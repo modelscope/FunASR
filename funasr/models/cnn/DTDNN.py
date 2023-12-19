@@ -6,7 +6,7 @@ from collections import OrderedDict
 import torch.nn.functional as F
 from torch import nn
 
-from funasr.modules.cnn.layers import DenseLayer, StatsPool, TDNNLayer, CAMDenseTDNNBlock, TransitLayer, \
+from funasr.models.cnn.layers import DenseLayer, StatsPool, TDNNLayer, CAMDenseTDNNBlock, TransitLayer, \
     BasicResBlock, get_nonlinear
 
 

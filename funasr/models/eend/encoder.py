@@ -7,7 +7,7 @@ from torch import nn
 
 class MultiHeadSelfAttention(nn.Module):
     def __init__(self, n_units, h=8, dropout_rate=0.1):
-        super(MultiHeadSelfAttention, self).__init__()
+        super().__init__()
         self.linearQ = nn.Linear(n_units, n_units)
         self.linearK = nn.Linear(n_units, n_units)
         self.linearV = nn.Linear(n_units, n_units)

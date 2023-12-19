@@ -16,7 +16,6 @@ import torch.nn as nn
 import random
 import numpy as np
 import time
-# from funasr.layers.abs_normalize import AbsNormalize
 from funasr.losses.label_smoothing_loss import (
 	LabelSmoothingLoss,  # noqa: H301
 )
@@ -24,17 +23,17 @@ from funasr.losses.label_smoothing_loss import (
 # from funasr.models.decoder.abs_decoder import AbsDecoder
 # from funasr.models.e2e_asr_common import ErrorCalculator
 # from funasr.models.encoder.abs_encoder import AbsEncoder
-# from funasr.models.frontend.abs_frontend import AbsFrontend
+# from funasr.frontends.abs_frontend import AbsFrontend
 # from funasr.models.postencoder.abs_postencoder import AbsPostEncoder
-from funasr.models.predictor.cif import mae_loss
+from funasr.models.paraformer.cif_predictor import mae_loss
 # from funasr.models.preencoder.abs_preencoder import AbsPreEncoder
 # from funasr.models.specaug.abs_specaug import AbsSpecAug
-from funasr.models.transformer.add_sos_eos import add_sos_eos
+from funasr.models.transformer.utils.add_sos_eos import add_sos_eos
 from funasr.models.transformer.utils.nets_utils import make_pad_mask, pad_list
-from funasr.models.transformer.utils.nets_utils import th_accuracy
+from funasr.metrics.compute_acc import th_accuracy
 from funasr.train_utils.device_funcs import force_gatherable
 # from funasr.models.base_model import FunASRModel
-# from funasr.models.predictor.cif import CifPredictorV3
+# from funasr.models.paraformer.cif_predictor import CifPredictorV3
 from funasr.models.paraformer.search import Hypothesis
 
 from funasr.models.model_class_factory import *
@@ -46,7 +45,7 @@ else:
 	@contextmanager
 	def autocast(enabled=True):
 		yield
-from funasr.datasets.fun_datasets.load_audio_extract_fbank import load_audio, extract_fbank
+from funasr.datasets.audio_datasets.load_audio_extract_fbank import load_audio, extract_fbank
 from funasr.utils import postprocess_utils
 from funasr.utils.datadir_writer import DatadirWriter
 from funasr.models.transformer.utils.nets_utils import get_transducer_task_io
@@ -98,19 +97,19 @@ class Transducer(nn.Module):
 		super().__init__()
 
 		if frontend is not None:
-			frontend_class = frontend_choices.get_class(frontend)
+			frontend_class = frontend_classes.get_class(frontend)
 			frontend = frontend_class(**frontend_conf)
 		if specaug is not None:
-			specaug_class = specaug_choices.get_class(specaug)
+			specaug_class = specaug_classes.get_class(specaug)
 			specaug = specaug_class(**specaug_conf)
 		if normalize is not None:
-			normalize_class = normalize_choices.get_class(normalize)
+			normalize_class = normalize_classes.get_class(normalize)
 			normalize = normalize_class(**normalize_conf)
-		encoder_class = encoder_choices.get_class(encoder)
+		encoder_class = encoder_classes.get_class(encoder)
 		encoder = encoder_class(input_size=input_size, **encoder_conf)
 		encoder_output_size = encoder.output_size()
 
-		decoder_class = decoder_choices.get_class(decoder)
+		decoder_class = decoder_classes.get_class(decoder)
 		decoder = decoder_class(
 			vocab_size=vocab_size,
 			encoder_output_size=encoder_output_size,
@@ -118,7 +117,7 @@ class Transducer(nn.Module):
 		)
 		decoder_output_size = decoder.output_size
 
-		joint_network_class = joint_network_choices.get_class(decoder)
+		joint_network_class = joint_network_classes.get_class(decoder)
 		joint_network = joint_network_class(
 			vocab_size,
 			encoder_output_size,
@@ -521,7 +520,7 @@ class Transducer(nn.Module):
 		audio_sample_list = load_audio(data_in, fs=self.frontend.fs, audio_fs=kwargs.get("fs", 16000))
 		time2 = time.perf_counter()
 		meta_data["load_data"] = f"{time2 - time1:0.3f}"
-		speech, speech_lengths = extract_fbank(audio_sample_list, date_type=kwargs.get("date_type", "sound"), frontend=self.frontend)
+		speech, speech_lengths = extract_fbank(audio_sample_list, data_type=kwargs.get("data_type", "sound"), frontend=self.frontend)
 		time3 = time.perf_counter()
 		meta_data["extract_feat"] = f"{time3 - time2:0.3f}"
 		meta_data["batch_data_time"] = speech_lengths.sum().item() * self.frontend.frame_shift * self.frontend.lfr_n / 1000

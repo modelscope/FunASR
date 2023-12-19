@@ -7,7 +7,7 @@ from funasr.schedulers.noam_lr import NoamLR
 from funasr.schedulers.tri_stage_scheduler import TriStageLR
 from funasr.schedulers.warmup_lr import WarmupLR
 
-scheduler_choices = dict(
+scheduler_classes = dict(
 	ReduceLROnPlateau=torch.optim.lr_scheduler.ReduceLROnPlateau,
 	lambdalr=torch.optim.lr_scheduler.LambdaLR,
 	steplr=torch.optim.lr_scheduler.StepLR,

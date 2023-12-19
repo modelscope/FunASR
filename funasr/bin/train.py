@@ -8,34 +8,30 @@ import torch
 import hydra
 from omegaconf import DictConfig, OmegaConf
 from funasr.train_utils.set_all_random_seed import set_all_random_seed
-# from funasr.model_class_factory1 import model_choices
 from funasr.models.lora.utils import mark_only_lora_as_trainable
-from funasr.optimizers import optim_choices
-from funasr.schedulers import scheduler_choices
+from funasr.optimizers import optim_classes
+from funasr.schedulers import scheduler_classes
 from funasr.train_utils.load_pretrained_model import load_pretrained_model
 from funasr.train_utils.initialize import initialize
-from funasr.datasets.fun_datasets.data_sampler import BatchSampler
 # from funasr.tokenizer.build_tokenizer import build_tokenizer
 # from funasr.tokenizer.token_id_converter import TokenIDConverter
-from funasr.tokenizer.funtoken import build_tokenizer
-from funasr.datasets.fun_datasets.dataset_jsonl import AudioDataset
+# from funasr.tokenizer.funtoken import build_tokenizer
 from funasr.train_utils.trainer import Trainer
-# from funasr.utils.load_fr_py import load_class_from_path
-from funasr.utils.dynamic_import import dynamic_import
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
 from funasr.download.download_from_hub import download_model
+from funasr.utils.register import registry_tables
 
 @hydra.main(config_name=None, version_base=None)
 def main_hydra(kwargs: DictConfig):
 	import pdb; pdb.set_trace()
-	if ":" in kwargs["model"]:
+	assert "model" in kwargs
+	if "model_conf" not in kwargs:
 		logging.info("download models from model hub: {}".format(kwargs.get("model_hub", "ms")))
 		kwargs = download_model(is_training=kwargs.get("is_training", True), **kwargs)
 	
-	import pdb;
-	pdb.set_trace()
+
 	main(**kwargs)
 
 
@@ -43,6 +39,7 @@ def main(**kwargs):
 	# preprocess_config(kwargs)
 	# import pdb; pdb.set_trace()
 	# set random seed
+	registry_tables.print_register_tables()
 	set_all_random_seed(kwargs.get("seed", 0))
 	torch.backends.cudnn.enabled = kwargs.get("cudnn_enabled", torch.backends.cudnn.enabled)
 	torch.backends.cudnn.benchmark = kwargs.get("cudnn_benchmark", torch.backends.cudnn.benchmark)
@@ -56,31 +53,38 @@ def main(**kwargs):
 		dist.init_process_group(backend=kwargs.get("backend", "nccl"), init_method='env://')
 		torch.cuda.set_device(local_rank)
 	
-	
-	# build_tokenizer
-	tokenizer = build_tokenizer(
-		token_type=kwargs.get("token_type", "char"),
-		bpemodel=kwargs.get("bpemodel", None),
-		delimiter=kwargs.get("delimiter", None),
-		space_symbol=kwargs.get("space_symbol", "<space>"),
-		non_linguistic_symbols=kwargs.get("non_linguistic_symbols", None),
-		g2p_type=kwargs.get("g2p_type", None),
-		token_list=kwargs.get("token_list", None),
-		unk_symbol=kwargs.get("unk_symbol", "<unk>"),
-	)
+	# save config.yaml
+	if (use_ddp or use_fsdp) and dist.get_rank() == 0 or not (use_ddp or use_fsdp) and local_rank == 0:
+		os.makedirs(kwargs.get("output_dir", "./"), exist_ok=True)
+		yaml_file = os.path.join(kwargs.get("output_dir", "./"), "config.yaml")
+		OmegaConf.save(config=kwargs, f=yaml_file)
+		logging.info("config.yaml is saved to: %s", yaml_file)
 
+	tokenizer = kwargs.get("tokenizer", None)
+	if tokenizer is not None:
+		tokenizer_class = registry_tables.tokenizer_classes.get(tokenizer.lower())
+		tokenizer = tokenizer_class(**kwargs["tokenizer_conf"])
+		kwargs["tokenizer"] = tokenizer
+	
+	# build frontend if frontend is none None
+	frontend = kwargs.get("frontend", None)
+	if frontend is not None:
+		frontend_class = registry_tables.frontend_classes.get(frontend.lower())
+		frontend = frontend_class(**kwargs["frontend_conf"])
+		kwargs["frontend"] = frontend
+	
 	# import pdb;
 	# pdb.set_trace()
 	# build model
-	# model_class = model_choices.get_class(kwargs.get("model", "asr"))
-	# model_class = load_class_from_path(kwargs.get("model").split(":"))
-	model_class = dynamic_import(kwargs.get("model"))
+	model_class = registry_tables.model_classes.get(kwargs["model"].lower())
 	model = model_class(**kwargs, **kwargs["model_conf"], vocab_size=len(tokenizer.token_list))
-	frontend = model.frontend
+
+
+
 	# init_param
 	init_param = kwargs.get("init_param", None)
 	if init_param is not None:
-		if not isinstance(init_param, Sequence):
+		if not isinstance(init_param, (list, tuple)):
 			init_param = (init_param,)
 		logging.info("init_param is not None: %s", init_param)
 		for p in init_param:
@@ -93,9 +97,8 @@ def main(**kwargs):
 			)
 	else:
 		initialize(model, kwargs.get("init", "kaiming_normal"))
-	
-	# import pdb;
-	# pdb.set_trace()
+
+
 	# freeze_param
 	freeze_param = kwargs.get("freeze_param", None)
 	if freeze_param is not None:
@@ -122,33 +125,33 @@ def main(**kwargs):
 		
 	# optim
 	optim = kwargs.get("optim", "adam")
-	assert optim in optim_choices
-	optim_class = optim_choices.get(optim)
+	assert optim in optim_classes
+	optim_class = optim_classes.get(optim)
 	optim = optim_class(model.parameters(), **kwargs.get("optim_conf"))
 	
 	# scheduler
 	scheduler = kwargs.get("scheduler", "warmuplr")
-	assert scheduler in scheduler_choices
-	scheduler_class = scheduler_choices.get(scheduler)
+	assert scheduler in scheduler_classes
+	scheduler_class = scheduler_classes.get(scheduler)
 	scheduler = scheduler_class(optim, **kwargs.get("scheduler_conf"))
 
-
+	# import pdb;
+	# pdb.set_trace()
 	# dataset
-	dataset_tr = AudioDataset(kwargs.get("train_data_set_list"), frontend=frontend, tokenizer=tokenizer, **kwargs.get("dataset_conf"))
+	dataset_class = registry_tables.dataset_classes.get(kwargs.get("dataset", "AudioDataset").lower())
+	dataset_tr = dataset_class(kwargs.get("train_data_set_list"), frontend=frontend, tokenizer=tokenizer, **kwargs.get("dataset_conf"))
 
 	# dataloader
-	batch_sampler = BatchSampler(dataset_tr, **kwargs.get("dataset_conf"), **kwargs.get("dataset_conf").get("batch_conf"))
+	batch_sampler = kwargs["dataset_conf"].get("batch_sampler", "DynamicBatchLocalShuffleSampler")
+	batch_sampler_class = registry_tables.batch_sampler_classes.get(batch_sampler.lower())
+	batch_sampler = batch_sampler_class(dataset_tr, **kwargs.get("dataset_conf"))
 	dataloader_tr = torch.utils.data.DataLoader(dataset_tr,
 	                                            collate_fn=dataset_tr.collator,
 	                                            batch_sampler=batch_sampler,
 	                                            num_workers=kwargs.get("dataset_conf").get("num_workers", 4),
 	                                            pin_memory=True)
 	
-	if (use_ddp or use_fsdp) and dist.get_rank() == 0 or not (use_ddp or use_fsdp) and local_rank == 0:
-		os.makedirs(kwargs.get("output_dir", "./"), exist_ok=True)
-		yaml_file = os.path.join(kwargs.get("output_dir", "./"), "config.yaml")
-		OmegaConf.save(config=kwargs, f=yaml_file)
-		logging.info("config.yaml is saved to: %s", yaml_file)
+
 	
 	trainer = Trainer(
 	    model=model,

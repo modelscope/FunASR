@@ -27,7 +27,7 @@ class FsmnVAD(nn.Module):
                                                self.vad_opts.speech_to_sil_time_thres,
                                                self.vad_opts.frame_in_ms)
         
-        encoder_class = encoder_choices.get_class(encoder)
+        encoder_class = encoder_classes.get_class(encoder)
         encoder = encoder_class(**encoder_conf)
         self.encoder = encoder
         # init variables

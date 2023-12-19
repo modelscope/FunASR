@@ -1,4 +1,3 @@
-import humanfriendly
 import numpy as np
 import torch
 
@@ -59,12 +58,7 @@ def model_summary(model: torch.nn.Module) -> str:
     message += (
         f"    Number of trainable parameters: {num_params} ({percent_trainable}%)\n"
     )
-    num_bytes = humanfriendly.format_size(
-        sum(
-            p.numel() * to_bytes(p.dtype) for p in model.parameters() if p.requires_grad
-        )
-    )
-    message += f"    Size: {num_bytes}\n"
+
     dtype = next(iter(model.parameters())).dtype
     message += f"    Type: {dtype}"
     return message

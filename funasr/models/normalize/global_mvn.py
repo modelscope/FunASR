@@ -6,8 +6,9 @@ import numpy as np
 import torch
 
 from funasr.models.transformer.utils.nets_utils import make_pad_mask
+from funasr.utils.register import register_class, registry_tables
 
-
+@register_class("normalize_classes", "GlobalMVN")
 class GlobalMVN(torch.nn.Module):
     """Apply global mean and variance normalization
     TODO(kamo): Make this class portable somehow

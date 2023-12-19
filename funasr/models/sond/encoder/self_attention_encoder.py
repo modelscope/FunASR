@@ -9,7 +9,7 @@ import torch.nn as nn
 from funasr.models.scama.chunk_utilis import overlap_chunk
 import numpy as np
 from funasr.models.transformer.utils.nets_utils import make_pad_mask
-from funasr.models.transformer.attention import MultiHeadSelfAttention, MultiHeadedAttentionSANM
+from funasr.models.sond.attention import MultiHeadSelfAttention
 from funasr.models.transformer.embedding import SinusoidalPositionEncoder
 from funasr.models.transformer.layer_norm import LayerNorm
 from funasr.models.transformer.utils.multi_layer_conv import Conv1dLinear
@@ -17,13 +17,13 @@ from funasr.models.transformer.utils.multi_layer_conv import MultiLayeredConv1d
 from funasr.models.transformer.positionwise_feed_forward import (
     PositionwiseFeedForward,  # noqa: H301
 )
-from funasr.models.transformer.repeat import repeat
-from funasr.models.transformer.subsampling import Conv2dSubsampling
-from funasr.models.transformer.subsampling import Conv2dSubsampling2
-from funasr.models.transformer.subsampling import Conv2dSubsampling6
-from funasr.models.transformer.subsampling import Conv2dSubsampling8
-from funasr.models.transformer.subsampling import TooShortUttError
-from funasr.models.transformer.subsampling import check_short_utt
+from funasr.models.transformer.utils.repeat import repeat
+from funasr.models.transformer.utils.subsampling import Conv2dSubsampling
+from funasr.models.transformer.utils.subsampling import Conv2dSubsampling2
+from funasr.models.transformer.utils.subsampling import Conv2dSubsampling6
+from funasr.models.transformer.utils.subsampling import Conv2dSubsampling8
+from funasr.models.transformer.utils.subsampling import TooShortUttError
+from funasr.models.transformer.utils.subsampling import check_short_utt
 from funasr.models.ctc import CTC
 from funasr.models.encoder.abs_encoder import AbsEncoder
 

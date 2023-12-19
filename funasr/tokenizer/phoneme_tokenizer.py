@@ -13,7 +13,7 @@ import jamo
 from funasr.tokenizer.abs_tokenizer import AbsTokenizer
 
 
-g2p_choices = [
+g2p_classes = [
     None,
     "g2p_en",
     "g2p_en_no_space",

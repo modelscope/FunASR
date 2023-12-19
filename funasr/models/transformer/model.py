@@ -1,56 +1,23 @@
 import logging
-from contextlib import contextmanager
-from distutils.version import LooseVersion
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Tuple
-from typing import Union
-import tempfile
-import codecs
-import requests
-import re
-import copy
+from typing import Union, Dict, List, Tuple, Optional
+
+import time
 import torch
 import torch.nn as nn
-import random
-import numpy as np
-import time
-# from funasr.layers.abs_normalize import AbsNormalize
-from funasr.losses.label_smoothing_loss import (
-	LabelSmoothingLoss,  # noqa: H301
-)
-# from funasr.models.ctc import CTC
-# from funasr.models.decoder.abs_decoder import AbsDecoder
+from torch.cuda.amp import autocast
+
+from funasr.losses.label_smoothing_loss import LabelSmoothingLoss
+from funasr.models.ctc.ctc import CTC
+from funasr.models.transformer.utils.add_sos_eos import add_sos_eos
+from funasr.metrics.compute_acc import th_accuracy
 # from funasr.models.e2e_asr_common import ErrorCalculator
-# from funasr.models.encoder.abs_encoder import AbsEncoder
-# from funasr.models.frontend.abs_frontend import AbsFrontend
-# from funasr.models.postencoder.abs_postencoder import AbsPostEncoder
-from funasr.models.predictor.cif import mae_loss
-# from funasr.models.preencoder.abs_preencoder import AbsPreEncoder
-# from funasr.models.specaug.abs_specaug import AbsSpecAug
-from funasr.models.transformer.add_sos_eos import add_sos_eos
-from funasr.models.transformer.utils.nets_utils import make_pad_mask, pad_list
-from funasr.models.transformer.utils.nets_utils import th_accuracy
 from funasr.train_utils.device_funcs import force_gatherable
-# from funasr.models.base_model import FunASRModel
-# from funasr.models.predictor.cif import CifPredictorV3
-from funasr.models.paraformer.search import Hypothesis
-
-from funasr.models.model_class_factory import *
-
-if LooseVersion(torch.__version__) >= LooseVersion("1.6.0"):
-	from torch.cuda.amp import autocast
-else:
-	# Nothing to do if torch<1.6.0
-	@contextmanager
-	def autocast(enabled=True):
-		yield
-from funasr.datasets.fun_datasets.load_audio_extract_fbank import load_audio, extract_fbank
+from funasr.datasets.audio_datasets.load_audio_extract_fbank import load_audio, extract_fbank
 from funasr.utils import postprocess_utils
 from funasr.utils.datadir_writer import DatadirWriter
+from funasr.utils.register import register_class, registry_tables
 
-
+@register_class("model_classes", "Transformer")
 class Transformer(nn.Module):
 	"""CTC-attention hybrid Encoder-Decoder model"""
 
@@ -93,19 +60,19 @@ class Transformer(nn.Module):
 		super().__init__()
 
 		if frontend is not None:
-			frontend_class = frontend_choices.get_class(frontend)
+			frontend_class = registry_tables.frontend_classes.get_class(frontend.lower())
 			frontend = frontend_class(**frontend_conf)
 		if specaug is not None:
-			specaug_class = specaug_choices.get_class(specaug)
+			specaug_class = registry_tables.specaug_classes.get_class(specaug.lower())
 			specaug = specaug_class(**specaug_conf)
 		if normalize is not None:
-			normalize_class = normalize_choices.get_class(normalize)
+			normalize_class = registry_tables.normalize_classes.get_class(normalize.lower())
 			normalize = normalize_class(**normalize_conf)
-		encoder_class = encoder_choices.get_class(encoder)
+		encoder_class = registry_tables.encoder_classes.get_class(encoder.lower())
 		encoder = encoder_class(input_size=input_size, **encoder_conf)
 		encoder_output_size = encoder.output_size()
 		if decoder is not None:
-			decoder_class = decoder_choices.get_class(decoder)
+			decoder_class = registry_tables.decoder_classes.get_class(decoder.lower())
 			decoder = decoder_class(
 				vocab_size=vocab_size,
 				encoder_output_size=encoder_output_size,
@@ -239,7 +206,7 @@ class Transformer(nn.Module):
 			           ) * loss_ctc + self.interctc_weight * loss_interctc
 		
 		# decoder: Attention decoder branch
-		loss_att, acc_att, cer_att, wer_att, loss_pre, pre_loss_att = self._calc_att_loss(
+		loss_att, acc_att, cer_att, wer_att = self._calc_att_loss(
 			encoder_out, encoder_out_lens, text, text_lengths
 		)
 		
@@ -428,7 +395,7 @@ class Transformer(nn.Module):
 		audio_sample_list = load_audio(data_in, fs=self.frontend.fs, audio_fs=kwargs.get("fs", 16000))
 		time2 = time.perf_counter()
 		meta_data["load_data"] = f"{time2 - time1:0.3f}"
-		speech, speech_lengths = extract_fbank(audio_sample_list, date_type=kwargs.get("date_type", "sound"), frontend=self.frontend)
+		speech, speech_lengths = extract_fbank(audio_sample_list, data_type=kwargs.get("data_type", "sound"), frontend=self.frontend)
 		time3 = time.perf_counter()
 		meta_data["extract_feat"] = f"{time3 - time2:0.3f}"
 		meta_data["batch_data_time"] = speech_lengths.sum().item() * self.frontend.frame_shift * self.frontend.lfr_n / 1000

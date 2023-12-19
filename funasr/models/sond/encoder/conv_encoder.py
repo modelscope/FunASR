@@ -12,7 +12,7 @@ from funasr.models.transformer.utils.nets_utils import make_pad_mask
 from funasr.models.transformer.layer_norm import LayerNorm
 from funasr.models.encoder.abs_encoder import AbsEncoder
 import math
-from funasr.models.transformer.repeat import repeat
+from funasr.models.transformer.utils.repeat import repeat
 
 
 class EncoderLayer(nn.Module):

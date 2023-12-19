@@ -269,7 +269,7 @@ def time_stamp_sentence(punc_id_list, time_stamp_postprocessed, text_postprocess
 
 
 def convert_external_alphas(alphas_file, text_file, output_file):
-    from funasr.models.predictor.cif import cif_wo_hidden
+    from funasr.models.paraformer.cif_predictor import cif_wo_hidden
     with open(alphas_file, 'r') as f1, open(text_file, 'r') as f2, open(output_file, 'w') as f3:
         for line1, line2 in zip(f1.readlines(), f2.readlines()):
             line1 = line1.rstrip()

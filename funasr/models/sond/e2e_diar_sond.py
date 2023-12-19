@@ -18,7 +18,7 @@ from funasr.models.transformer.utils.nets_utils import to_device
 from funasr.models.transformer.utils.nets_utils import make_pad_mask
 from funasr.models.decoder.abs_decoder import AbsDecoder
 from funasr.models.encoder.abs_encoder import AbsEncoder
-from funasr.models.frontend.abs_frontend import AbsFrontend
+from funasr.frontends.abs_frontend import AbsFrontend
 from funasr.models.specaug.abs_specaug import AbsSpecAug
 from funasr.models.specaug.abs_profileaug import AbsProfileAug
 from funasr.layers.abs_normalize import AbsNormalize

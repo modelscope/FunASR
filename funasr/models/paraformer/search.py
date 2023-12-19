@@ -9,7 +9,7 @@ from typing import Union
 
 import torch
 
-from funasr.metrics import end_detect
+from funasr.metrics.common import end_detect
 from funasr.models.transformer.scorers.scorer_interface import PartialScorerInterface
 from funasr.models.transformer.scorers.scorer_interface import ScorerInterface
 

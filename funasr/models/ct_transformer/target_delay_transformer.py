@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 
 from funasr.models.transformer.embedding import SinusoidalPositionEncoder
-from funasr.models.encoder.sanm_encoder import SANMEncoder as Encoder
+from funasr.models.sanm.encoder import SANMEncoder as Encoder
 
 
 class TargetDelayTransformer(torch.nn.Module):

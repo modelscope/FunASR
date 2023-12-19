@@ -16,7 +16,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 import funasr.models.sond.pooling.pooling_layers as pooling_layers
-from funasr.modules.cnn.fusion import AFF
+from funasr.models.cnn.fusion import AFF
 
 
 class ReLU(nn.Hardtanh):

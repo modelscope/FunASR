@@ -15,7 +15,7 @@ from funasr.models.transformer.utils.scorers.scorer_interface import ScorerInter
 from funasr.metrics import end_detect
 from funasr.models.transformer.utils.nets_utils import mask_by_length
 from funasr.models.transformer.utils.nets_utils import pad_list
-from funasr.models.transformer.utils.nets_utils import th_accuracy
+from funasr.metrics.compute_acc import th_accuracy
 from funasr.models.transformer.utils.nets_utils import to_device
 from funasr.models.language_model.rnn.attentions import att_to_numpy
 

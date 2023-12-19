@@ -7,7 +7,7 @@ import torch
 import torch.nn as  nn
 import torch.nn.functional as F
 
-from funasr.models.frontend.wav_frontend import WavFrontendMel23
+from funasr.frontends.wav_frontend import WavFrontendMel23
 from funasr.models.eend.encoder import EENDOLATransformerEncoder
 from funasr.models.eend.encoder_decoder_attractor import EncoderDecoderAttractor
 from funasr.models.eend.utils.losses import standard_loss, cal_power_loss, fast_batch_pit_n_speaker_loss
