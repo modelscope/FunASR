@@ -186,13 +186,6 @@ async def record_from_scp(chunk_begin, chunk_size):
         if wav_path.endswith(".pcm"):
             with open(wav_path, "rb") as f:
                 audio_bytes = f.read()
-        elif wav_path.endswith(".wav"):
-            import wave
-            with wave.open(wav_path, "rb") as wav_file:
-                params = wav_file.getparams()
-                sample_rate = wav_file.getframerate()
-                frames = wav_file.readframes(wav_file.getnframes())
-                audio_bytes = bytes(frames)
         else:
             wav_format = "others"
             with open(wav_path, "rb") as f:
