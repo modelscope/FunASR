@@ -305,6 +305,10 @@ bool TimestampIsAlpha(U16CHAR_T &u16) {
 }
 
 bool TimestampIsPunctuation(U16CHAR_T &u16) {
+    // (& ' -) in the dict
+    if (u16 == 0x26 || u16 == 0x27 || u16 == 0x2D){
+        return false;
+    }
     return (u16 >= 0x21 && u16 <= 0x2F)     // 标准ASCII标点
         || (u16 >= 0x3A && u16 <= 0x40)     // 标准ASCII标点
         || (u16 >= 0x5B && u16 <= 0x60)     // 标准ASCII标点
@@ -590,9 +594,7 @@ std::string TimestampSentence(std::string &text, std::string &str_time){
             } else{
                 ts_sentences += ts_sent + ",";
             }
-
             // clear
-            idx_str++;
             text_seg = "";
             ts_sent = "";
             start = 0;
@@ -605,9 +607,9 @@ std::string TimestampSentence(std::string &text, std::string &str_time){
                 text_seg += " " + characters[idx_str];
             }
             ts_seg.push_back(timestamps[idx_ts]);
-            idx_str++;
             idx_ts++;
         }
+        idx_str++;
     }
     // for none punc results
     if(ts_seg.size() >0){
