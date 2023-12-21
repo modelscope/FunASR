@@ -145,7 +145,8 @@ def main(**kwargs):
 	# dataloader
 	batch_sampler = kwargs["dataset_conf"].get("batch_sampler", "DynamicBatchLocalShuffleSampler")
 	batch_sampler_class = registry_tables.batch_sampler_classes.get(batch_sampler.lower())
-	batch_sampler = batch_sampler_class(dataset_tr, **kwargs.get("dataset_conf"))
+	if batch_sampler is not None:
+		batch_sampler = batch_sampler_class(dataset_tr, **kwargs.get("dataset_conf"))
 	dataloader_tr = torch.utils.data.DataLoader(dataset_tr,
 	                                            collate_fn=dataset_tr.collator,
 	                                            batch_sampler=batch_sampler,
@@ -153,7 +154,6 @@ def main(**kwargs):
 	                                            pin_memory=True)
 	
 
-	
 	trainer = Trainer(
 	    model=model,
 	    optim=optim,

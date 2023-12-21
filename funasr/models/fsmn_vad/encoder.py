@@ -6,6 +6,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from funasr.utils.register import register_class, registry_tables
+
 class LinearTransform(nn.Module):
 
     def __init__(self, input_dim, output_dim):
@@ -156,7 +158,7 @@ num_syn:                output dimension
 fsmn_layers:            no. of sequential fsmn layers
 '''
 
-
+@register_class("encoder_classes", "FSMN")
 class FSMN(nn.Module):
     def __init__(
             self,
@@ -227,7 +229,7 @@ lstride:                left stride
 rstride:                right stride
 '''
 
-
+@register_class("encoder_classes", "DFSMN")
 class DFSMN(nn.Module):
 
     def __init__(self, dimproj=64, dimlinear=128, lorder=20, rorder=1, lstride=1, rstride=1):

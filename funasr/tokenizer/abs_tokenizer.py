@@ -42,8 +42,9 @@ class BaseTokenizer(ABC):
                 self.token_list_repr = str(token_list)
                 self.token_list: List[str] = []
 
-                with open('data.json', 'r', encoding='utf-8') as f:
-                    self.token_list = json.loads(f.read())
+                with open(token_list, 'r', encoding='utf-8') as f:
+                    self.token_list = json.load(f)
+                    
 
             else:
                 self.token_list: List[str] = list(token_list)

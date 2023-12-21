@@ -10,14 +10,11 @@ from setuptools import setup
 
 requirements = {
     "install": [
-        # "setuptools>=38.5.1",
-        "humanfriendly",
         "scipy>=1.4.1",
         "librosa",
         "jamo",  # For kss
         "PyYAML>=5.1.2",
         # "soundfile>=0.12.1",
-        # "h5py>=3.1.0",
         "kaldiio>=2.17.0",
         "torch_complex",
         # "nltk>=3.4.5",
@@ -32,7 +29,6 @@ requirements = {
         # ENH
         "pytorch_wpe",
         "editdistance>=0.5.2",
-        "tensorboard",
         # "g2p",
         # "nara_wpe",
         # PAI
@@ -44,6 +40,7 @@ requirements = {
         "hdbscan",
         "umap",
         "jaconv",
+        "hydra-core",
     ],
     # train: The modules invoked when training only.
     "train": [
