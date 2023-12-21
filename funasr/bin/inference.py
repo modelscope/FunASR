@@ -16,7 +16,8 @@ import time
 import random
 import string
 from funasr.register import tables
-
+from funasr.datasets.audio_datasets.load_audio_extract_fbank import load_audio
+from funasr.utils.vad_utils import slice_padding_audio_samples
 
 def build_iter_for_infer(data_in, input_len=None, data_type="sound"):
 	"""
@@ -73,15 +74,44 @@ def main_hydra(kwargs: DictConfig):
 
 	logging.basicConfig(level=log_level)
 
-	import pdb;
-	pdb.set_trace()
+	if kwargs.get("debug", False):
+		import pdb; pdb.set_trace()
 	model = AutoModel(**kwargs)
-	res = model.generate(input=kwargs["input"])
+	res = model(input=kwargs["input"])
 	print(res)
 
 class AutoModel:
+	
 	def __init__(self, **kwargs):
 		tables.print()
+		
+		model, kwargs = self.build_model(**kwargs)
+		
+		# if vad_model is not None, build vad model else None
+		vad_model = kwargs.get("vad_model", None)
+		vad_kwargs = kwargs.get("vad_model_revision", None)
+		if vad_model is not None:
+			print("build vad model")
+			vad_kwargs = {"model": vad_model, "model_revision": vad_kwargs}
+			vad_model, vad_kwargs = self.build_model(**vad_kwargs)
+
+		# if punc_model is not None, build punc model else None
+		punc_model = kwargs.get("punc_model", None)
+		punc_kwargs = kwargs.get("punc_model_revision", None)
+		if punc_model is not None:
+			punc_kwargs = {"model": punc_model, "model_revision": punc_kwargs}
+			punc_model, punc_kwargs = self.build_model(**punc_kwargs)
+			
+		self.kwargs = kwargs
+		self.model = model
+		self.vad_model = vad_model
+		self.vad_kwargs = vad_kwargs
+		self.punc_model = punc_model
+		self.punc_kwargs = punc_kwargs
+		
+		
+
+	def build_model(self, **kwargs):
 		assert "model" in kwargs
 		if "model_conf" not in kwargs:
 			logging.info("download models from model hub: {}".format(kwargs.get("model_hub", "ms")))
@@ -94,7 +124,7 @@ class AutoModel:
 			device = "cpu"
 			kwargs["batch_size"] = 1
 		kwargs["device"] = device
-
+		
 		# build tokenizer
 		tokenizer = kwargs.get("tokenizer", None)
 		if tokenizer is not None:
@@ -113,7 +143,8 @@ class AutoModel:
 		
 		# build model
 		model_class = tables.model_classes.get(kwargs["model"].lower())
-		model = model_class(**kwargs, **kwargs["model_conf"], vocab_size=len(tokenizer.token_list) if tokenizer is not None else -1)
+		model = model_class(**kwargs, **kwargs["model_conf"],
+		                    vocab_size=len(tokenizer.token_list) if tokenizer is not None else -1)
 		model.eval()
 		model.to(device)
 		
@@ -127,23 +158,34 @@ class AutoModel:
 				ignore_init_mismatch=kwargs.get("ignore_init_mismatch", False),
 				oss_bucket=kwargs.get("oss_bucket", None),
 			)
-		self.kwargs = kwargs
-		self.model = model
-		self.tokenizer = tokenizer
+		
+		return model, kwargs
 	
-	def generate(self, input, input_len=None, **cfg):
-		self.kwargs.update(cfg)
-		data_type = self.kwargs.get("data_type", "sound")
-		batch_size = self.kwargs.get("batch_size", 1)
-		if self.kwargs.get("device", "cpu") == "cpu":
-			batch_size = 1
+	def __call__(self, input, input_len=None, **cfg):
+		if self.vad_model is None:
+			return self.generate(input, input_len=input_len, **cfg)
+			
+		else:
+			return self.generate_with_vad(input, input_len=input_len, **cfg)
+		
+	def generate(self, input, input_len=None, model=None, kwargs=None, **cfg):
+		kwargs = self.kwargs if kwargs is None else kwargs
+		kwargs.update(cfg)
+		model = self.model if model is None else model
+		
+		data_type = kwargs.get("data_type", "sound")
+		batch_size = kwargs.get("batch_size", 1)
+		# if kwargs.get("device", "cpu") == "cpu":
+		# 	batch_size = 1
 		
 		key_list, data_list = build_iter_for_infer(input, input_len=input_len, data_type=data_type)
 		
 		speed_stats = {}
 		asr_result_list = []
 		num_samples = len(data_list)
-		pbar = tqdm(colour="blue", total=num_samples, dynamic_ncols=True)
+		pbar = tqdm(colour="blue", total=num_samples+1, dynamic_ncols=True)
+		time_speech_total = 0.0
+		time_escape_total = 0.0
 		for beg_idx in range(0, num_samples, batch_size):
 			end_idx = min(num_samples, beg_idx + batch_size)
 			data_batch = data_list[beg_idx:end_idx]
@@ -154,25 +196,139 @@ class AutoModel:
 				batch["data_lengths"] = input_len
 		
 			time1 = time.perf_counter()
-			results, meta_data = self.model.generate(**batch, **self.kwargs)
+			results, meta_data = model.generate(**batch, **kwargs)
 			time2 = time.perf_counter()
 			
-			asr_result_list.append(results)
+			asr_result_list.extend(results)
 			pbar.update(1)
 			
 			# batch_data_time = time_per_frame_s * data_batch_i["speech_lengths"].sum().item()
 			batch_data_time = meta_data.get("batch_data_time", -1)
+			time_escape = time2 - time1
 			speed_stats["load_data"] = meta_data.get("load_data", 0.0)
 			speed_stats["extract_feat"] = meta_data.get("extract_feat", 0.0)
-			speed_stats["forward"] = f"{time2 - time1:0.3f}"
-			speed_stats["rtf"] = f"{(time2 - time1) / batch_data_time:0.3f}"
+			speed_stats["forward"] = f"{time_escape:0.3f}"
+			speed_stats["batch_size"] = f"{len(results)}"
+			speed_stats["rtf"] = f"{(time_escape) / batch_data_time:0.3f}"
 			description = (
 				f"{speed_stats}, "
 			)
 			pbar.set_description(description)
-		
+			time_speech_total += batch_data_time
+			time_escape_total += time_escape
+			
+		pbar.update(1)
+		pbar.set_description(f"rtf_avg: {time_escape_total/time_speech_total:0.3f}")
 		torch.cuda.empty_cache()
 		return asr_result_list
+	
+	def generate_with_vad(self, input, input_len=None, **cfg):
+		
+		# step.1: compute the vad model
+		model = self.vad_model
+		kwargs = self.vad_kwargs
+		beg_vad = time.time()
+		res = self.generate(input, input_len=input_len, model=model, kwargs=kwargs, **cfg)
+		end_vad = time.time()
+		print(f"time cost vad: {end_vad - beg_vad:0.3f}")
 
+
+		# step.2 compute asr model
+		model = self.model
+		kwargs = self.kwargs
+		kwargs.update(cfg)
+		batch_size = int(kwargs.get("batch_size_s", 300))*1000
+		batch_size_threshold_ms = int(kwargs.get("batch_size_threshold_s", 60))*1000
+		kwargs["batch_size"] = batch_size
+		data_type = kwargs.get("data_type", "sound")
+		key_list, data_list = build_iter_for_infer(input, input_len=input_len, data_type=data_type)
+		results_ret_list = []
+		time_speech_total_all_samples = 0.0
+
+		beg_total = time.time()
+		pbar_total = tqdm(colour="red", total=len(res) + 1, dynamic_ncols=True)
+		for i in range(len(res)):
+			key = res[i]["key"]
+			vadsegments = res[i]["value"]
+			input_i = data_list[i]
+			speech = load_audio(input_i, fs=kwargs["frontend"].fs, audio_fs=kwargs.get("fs", 16000))
+			speech_lengths = len(speech)
+			n = len(vadsegments)
+			data_with_index = [(vadsegments[i], i) for i in range(n)]
+			sorted_data = sorted(data_with_index, key=lambda x: x[0][1] - x[0][0])
+			results_sorted = []
+			
+			if not len(sorted_data):
+				logging.info("decoding, utt: {}, empty speech".format(key))
+				continue
+			
+
+			# if kwargs["device"] == "cpu":
+			# 	batch_size = 0
+			if len(sorted_data) > 0 and len(sorted_data[0]) > 0:
+				batch_size = max(batch_size, sorted_data[0][0][1] - sorted_data[0][0][0])
+			
+			batch_size_ms_cum = 0
+			beg_idx = 0
+			beg_asr_total = time.time()
+			time_speech_total_per_sample = speech_lengths/16000
+			time_speech_total_all_samples += time_speech_total_per_sample
+
+			for j, _ in enumerate(range(0, n)):
+				batch_size_ms_cum += (sorted_data[j][0][1] - sorted_data[j][0][0])
+				if j < n - 1 and (
+					batch_size_ms_cum + sorted_data[j + 1][0][1] - sorted_data[j + 1][0][0]) < batch_size and (
+					sorted_data[j + 1][0][1] - sorted_data[j + 1][0][0]) < batch_size_threshold_ms:
+					continue
+				batch_size_ms_cum = 0
+				end_idx = j + 1
+				speech_j, speech_lengths_j = slice_padding_audio_samples(speech, speech_lengths, sorted_data[beg_idx:end_idx])
+				beg_idx = end_idx
+
+				results = self.generate(speech_j, input_len=None, model=model, kwargs=kwargs, **cfg)
+	
+				if len(results) < 1:
+					continue
+				results_sorted.extend(results)
+
+
+			pbar_total.update(1)
+			end_asr_total = time.time()
+			time_escape_total_per_sample = end_asr_total - beg_asr_total
+			pbar_total.set_description(f"rtf_avg_per_sample: {time_escape_total_per_sample / time_speech_total_per_sample:0.3f}, "
+			                     f"time_speech_total_per_sample: {time_speech_total_per_sample: 0.3f}, "
+			                     f"time_escape_total_per_sample: {time_escape_total_per_sample:0.3f}")
+
+			restored_data = [0] * n
+			for j in range(n):
+				index = sorted_data[j][1]
+				restored_data[index] = results_sorted[j]
+			result = {}
+			
+			for j in range(n):
+				for k, v in restored_data[j].items():
+					if not k.startswith("timestamp"):
+						if k not in result:
+							result[k] = restored_data[j][k]
+						else:
+							result[k] += restored_data[j][k]
+					else:
+						result[k] = []
+						for t in restored_data[j][k]:
+							t[0] += vadsegments[j][0]
+							t[1] += vadsegments[j][0]
+						result[k] += restored_data[j][k]
+						
+			result["key"] = key
+			results_ret_list.append(result)
+			pbar_total.update(1)
+		pbar_total.update(1)
+		end_total = time.time()
+		time_escape_total_all_samples = end_total - beg_total
+		pbar_total.set_description(f"rtf_avg_all_samples: {time_escape_total_all_samples / time_speech_total_all_samples:0.3f}, "
+		                     f"time_speech_total_all_samples: {time_speech_total_all_samples: 0.3f}, "
+		                     f"time_escape_total_all_samples: {time_escape_total_all_samples:0.3f}")
+		return results_ret_list
+	
 if __name__ == '__main__':
 	main_hydra()

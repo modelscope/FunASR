@@ -857,7 +857,7 @@ class BiCifParaformer(Paraformer):
 		return results, meta_data
 
 
-class ParaformerOnline(Paraformer):
+class ParaformerStreaming(Paraformer):
 	"""
 	Author: Speech Lab of DAMO Academy, Alibaba Group
 	Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition

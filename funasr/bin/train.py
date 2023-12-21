@@ -25,7 +25,9 @@ from funasr.register import tables
 
 @hydra.main(config_name=None, version_base=None)
 def main_hydra(kwargs: DictConfig):
-	import pdb; pdb.set_trace()
+	if kwargs.get("debug", False):
+		import pdb; pdb.set_trace()
+
 	assert "model" in kwargs
 	if "model_conf" not in kwargs:
 		logging.info("download models from model hub: {}".format(kwargs.get("model_hub", "ms")))
