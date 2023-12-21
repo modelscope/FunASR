@@ -17,7 +17,7 @@ from funasr.models.transformer.attention import MultiHeadedAttention
 from funasr.models.transformer.embedding import PositionalEncoding
 from funasr.models.transformer.utils.nets_utils import make_pad_mask
 from funasr.models.transformer.positionwise_feed_forward import PositionwiseFeedForward
-from funasr.utils.register import register_class, registry_tables
+from funasr.register import tables
 
 class DecoderLayerSANM(nn.Module):
     """Single decoder layer module.
@@ -200,7 +200,7 @@ class DecoderLayerSANM(nn.Module):
         return x, memory, fsmn_cache, opt_cache
 
 
-@register_class("decoder_classes", "ParaformerSANMDecoder")
+@tables.register("decoder_classes", "ParaformerSANMDecoder")
 class ParaformerSANMDecoder(BaseTransformerDecoder):
     """
     Author: Speech Lab of DAMO Academy, Alibaba Group
@@ -525,7 +525,7 @@ class ParaformerSANMDecoder(BaseTransformerDecoder):
         return y, new_cache
 
 
-@register_class("decoder_classes", "ParaformerDecoderSAN")
+@tables.register("decoder_classes", "ParaformerDecoderSAN")
 class ParaformerDecoderSAN(BaseTransformerDecoder):
     """
     Author: Speech Lab of DAMO Academy, Alibaba Group

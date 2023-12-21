@@ -14,7 +14,7 @@ from funasr.models.transformer.layer_norm import LayerNorm
 from funasr.models.sanm.positionwise_feed_forward import PositionwiseFeedForwardDecoderSANM
 from funasr.models.transformer.utils.repeat import repeat
 
-from funasr.utils.register import register_class, registry_tables
+from funasr.register import tables
 
 class DecoderLayerSANM(nn.Module):
     """Single decoder layer module.
@@ -189,7 +189,7 @@ class DecoderLayerSANM(nn.Module):
 
         return x, memory, fsmn_cache, opt_cache
 
-@register_class("decoder_classes", "FsmnDecoderSCAMAOpt")
+@tables.register("decoder_classes", "FsmnDecoderSCAMAOpt")
 class FsmnDecoderSCAMAOpt(BaseTransformerDecoder):
     """
     Author: Speech Lab of DAMO Academy, Alibaba Group

@@ -29,7 +29,7 @@ from funasr.models.transformer.utils.repeat import repeat, MultiBlocks
 from funasr.models.transformer.utils.subsampling import TooShortUttError
 from funasr.models.transformer.utils.subsampling import check_short_utt
 from funasr.models.transformer.utils.subsampling import StreamingConvInput
-from funasr.utils.register import register_class
+from funasr.register import tables
 
 
 
@@ -312,7 +312,7 @@ class CausalConvolution(nn.Module):
 
         return x, cache
 
-@register_class("encoder_classes", "ConformerChunkEncoder")
+@tables.register("encoder_classes", "ConformerChunkEncoder")
 class ConformerChunkEncoder(nn.Module):
     """Encoder module definition.
     Args:

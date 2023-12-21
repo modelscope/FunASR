@@ -8,7 +8,7 @@
 # from funasr.models.scama.utils import sequence_mask
 # from typing import Optional, Tuple
 #
-# from funasr.utils.register import register_class
+# from funasr.register import tables
 #
 # class mae_loss(nn.Module):
 #
@@ -93,7 +93,7 @@
 #     fires = torch.stack(list_fires, 1)
 #     return fires
 #
-# @register_class("predictor_classes", "BATPredictor")
+# @tables.register("predictor_classes", "BATPredictor")
 # class BATPredictor(nn.Module):
 #     def __init__(self, idim, l_order, r_order, threshold=1.0, dropout=0.1, smooth_factor=1.0, noise_threshold=0, return_accum=False):
 #         super(BATPredictor, self).__init__()

@@ -51,10 +51,10 @@ from funasr.utils import postprocess_utils
 from funasr.utils.datadir_writer import DatadirWriter
 
 from funasr.models.paraformer.model import Paraformer
-from funasr.utils.register import register_class, registry_tables
+from funasr.register import tables
 
 
-@register_class("model_classes", "SeacoParaformer")
+@tables.register("model_classes", "SeacoParaformer")
 class SeacoParaformer(Paraformer):
 	"""
 	Author: Speech Lab of DAMO Academy, Alibaba Group
@@ -100,7 +100,7 @@ class SeacoParaformer(Paraformer):
 		seaco_decoder = kwargs.get("seaco_decoder", None)
 		if seaco_decoder is not None:
 			seaco_decoder_conf = kwargs.get("seaco_decoder_conf")
-			seaco_decoder_class = registry_tables.decoder_classes.get(seaco_decoder.lower())
+			seaco_decoder_class = tables.decoder_classes.get(seaco_decoder.lower())
 			self.seaco_decoder = seaco_decoder_class(
 				vocab_size=self.vocab_size,
 				encoder_output_size=self.inner_dim,

@@ -44,7 +44,7 @@ from funasr.datasets.audio_datasets.load_audio_extract_fbank import load_audio, 
 from funasr.utils import postprocess_utils
 from funasr.utils.datadir_writer import DatadirWriter
 from funasr.utils.timestamp_tools import ts_prediction_lfr6_standard
-from funasr.utils.register import registry_tables
+from funasr.register import tables
 from funasr.models.ctc.ctc import CTC
 
 class Paraformer(nn.Module):
@@ -102,19 +102,19 @@ class Paraformer(nn.Module):
 		# pdb.set_trace()
 		
 		if frontend is not None:
-			frontend_class = registry_tables.frontend_classes.get_class(frontend.lower())
+			frontend_class = tables.frontend_classes.get_class(frontend.lower())
 			frontend = frontend_class(**frontend_conf)
 		if specaug is not None:
-			specaug_class = registry_tables.specaug_classes.get_class(specaug.lower())
+			specaug_class = tables.specaug_classes.get_class(specaug.lower())
 			specaug = specaug_class(**specaug_conf)
 		if normalize is not None:
-			normalize_class = registry_tables.normalize_classes.get_class(normalize.lower())
+			normalize_class = tables.normalize_classes.get_class(normalize.lower())
 			normalize = normalize_class(**normalize_conf)
-		encoder_class = registry_tables.encoder_classes.get_class(encoder.lower())
+		encoder_class = tables.encoder_classes.get_class(encoder.lower())
 		encoder = encoder_class(input_size=input_size, **encoder_conf)
 		encoder_output_size = encoder.output_size()
 		if decoder is not None:
-			decoder_class = registry_tables.decoder_classes.get_class(decoder.lower())
+			decoder_class = tables.decoder_classes.get_class(decoder.lower())
 			decoder = decoder_class(
 				vocab_size=vocab_size,
 				encoder_output_size=encoder_output_size,
@@ -129,7 +129,7 @@ class Paraformer(nn.Module):
 				odim=vocab_size, encoder_output_size=encoder_output_size, **ctc_conf
 			)
 		if predictor is not None:
-			predictor_class = registry_tables.predictor_classes.get_class(predictor.lower())
+			predictor_class = tables.predictor_classes.get_class(predictor.lower())
 			predictor = predictor_class(**predictor_conf)
 		
 		# note that eos is the same as sos (equivalent ID)

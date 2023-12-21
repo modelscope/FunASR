@@ -9,7 +9,7 @@ import torchaudio.compliance.kaldi as kaldi
 from torch.nn.utils.rnn import pad_sequence
 
 import funasr.frontends.eend_ola_feature as eend_ola_feature
-from funasr.utils.register import register_class
+from funasr.register import tables
 
 
 
@@ -75,7 +75,7 @@ def apply_lfr(inputs, lfr_m, lfr_n):
     LFR_outputs = torch.vstack(LFR_inputs)
     return LFR_outputs.type(torch.float32)
 
-@register_class("frontend_classes", "WavFrontend")
+@tables.register("frontend_classes", "WavFrontend")
 class WavFrontend(nn.Module):
     """Conventional frontend structure for ASR.
     """
@@ -211,7 +211,7 @@ class WavFrontend(nn.Module):
         return feats_pad, feats_lens
 
 
-@register_class("frontend_classes", "WavFrontendOnline")
+@tables.register("frontend_classes", "WavFrontendOnline")
 class WavFrontendOnline(nn.Module):
     """Conventional frontend structure for streaming ASR/VAD.
     """

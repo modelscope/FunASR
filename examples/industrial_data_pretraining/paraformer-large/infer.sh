@@ -2,13 +2,13 @@
 cmd="funasr/bin/inference.py"
 
 python $cmd \
-+model="/Users/zhifu/modelscope_models/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch" \
++model="/Users/zhifu/Downloads/modelscope_models/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch" \
 +input="/Users/zhifu/Downloads/asr_example.wav" \
 +output_dir="/Users/zhifu/Downloads/ckpt/funasr2/exp2" \
 +device="cpu" \
 
 python $cmd \
-+model="/Users/zhifu/modelscope_models/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404" \
++model="/Users/zhifu/Downloads/modelscope_models/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404" \
 +input="/Users/zhifu/Downloads/asr_example.wav" \
 +output_dir="/Users/zhifu/Downloads/ckpt/funasr2/exp2" \
 +device="cpu" \

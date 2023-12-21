@@ -3,9 +3,9 @@ from typing import Tuple
 import torch
 
 from funasr.models.transformer.utils.nets_utils import make_pad_mask
-from funasr.utils.register import register_class, registry_tables
+from funasr.register import tables
 
-@register_class("normalize_classes", "UtteranceMVN")
+@tables.register("normalize_classes", "UtteranceMVN")
 class UtteranceMVN(torch.nn.Module):
     def __init__(
         self,

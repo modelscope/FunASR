@@ -30,7 +30,7 @@ from funasr.models.transformer.utils.subsampling import check_short_utt
 
 from funasr.models.ctc.ctc import CTC
 
-from funasr.utils.register import register_class
+from funasr.register import tables
 
 class EncoderLayerSANM(nn.Module):
     def __init__(
@@ -153,7 +153,7 @@ class EncoderLayerSANM(nn.Module):
 
         return x, cache
 
-@register_class("encoder_classes", "SANMEncoder")
+@tables.register("encoder_classes", "SANMEncoder")
 class SANMEncoder(nn.Module):
     """
     Author: Speech Lab of DAMO Academy, Alibaba Group

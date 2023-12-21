@@ -1,9 +1,9 @@
 import logging
 
 from funasr.models.transformer.model import Transformer
-from funasr.utils.register import register_class
+from funasr.register import tables
 
-@register_class("model_classes", "EBranchformer")
+@tables.register("model_classes", "EBranchformer")
 class EBranchformer(Transformer):
 	"""CTC-attention hybrid Encoder-Decoder model"""
 

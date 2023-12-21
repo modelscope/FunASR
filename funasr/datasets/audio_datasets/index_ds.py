@@ -4,9 +4,9 @@ import torch.distributed as dist
 import time
 import logging
 
-from funasr.utils.register import register_class
+from funasr.register import tables
 
-@register_class("index_ds_classes", "IndexDSJsonl")
+@tables.register("index_ds_classes", "IndexDSJsonl")
 class IndexDSJsonl(torch.utils.data.Dataset):
 	
 	def __init__(self, path):

@@ -8,9 +8,9 @@ from funasr.models.transformer.utils.nets_utils import make_pad_mask
 from funasr.models.scama.utils import sequence_mask
 from typing import Optional, Tuple
 
-from funasr.utils.register import register_class, registry_tables
+from funasr.register import tables
 
-@register_class("predictor_classes", "CifPredictor")
+@tables.register("predictor_classes", "CifPredictor")
 class CifPredictor(nn.Module):
     def __init__(self, idim, l_order, r_order, threshold=1.0, dropout=0.1, smooth_factor=1.0, noise_threshold=0, tail_threshold=0.45):
         super().__init__()
@@ -136,7 +136,7 @@ class CifPredictor(nn.Module):
         predictor_alignments_length = predictor_alignments.sum(-1).type(encoder_sequence_length.dtype)
         return predictor_alignments.detach(), predictor_alignments_length.detach()
 
-@register_class("predictor_classes", "CifPredictorV2")
+@tables.register("predictor_classes", "CifPredictorV2")
 class CifPredictorV2(nn.Module):
     def __init__(self,
                  idim,

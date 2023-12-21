@@ -45,7 +45,7 @@ from funasr.models.transformer.utils.subsampling import TooShortUttError
 from funasr.models.transformer.utils.subsampling import check_short_utt
 from funasr.models.transformer.utils.subsampling import Conv2dSubsamplingPad
 from funasr.models.transformer.utils.subsampling import StreamingConvInput
-from funasr.utils.register import register_class
+from funasr.register import tables
 
 
 class ConvolutionModule(nn.Module):
@@ -283,7 +283,7 @@ class EncoderLayer(nn.Module):
         return x, mask
 
 
-@register_class("encoder_classes", "ConformerEncoder")
+@tables.register("encoder_classes", "ConformerEncoder")
 class ConformerEncoder(nn.Module):
     """Conformer encoder module.
 

@@ -28,7 +28,7 @@ from funasr.models.transformer.utils.subsampling import Conv2dSubsampling8
 from funasr.models.transformer.utils.subsampling import TooShortUttError
 from funasr.models.transformer.utils.subsampling import check_short_utt
 
-from funasr.utils.register import register_class
+from funasr.register import tables
 
 class EncoderLayer(nn.Module):
     """Encoder layer module.
@@ -136,7 +136,7 @@ class EncoderLayer(nn.Module):
 
         return x, mask
 
-@register_class("encoder_classes", "TransformerEncoder")
+@tables.register("encoder_classes", "TransformerEncoder")
 class TransformerEncoder(nn.Module):
     """Transformer encoder module.
 

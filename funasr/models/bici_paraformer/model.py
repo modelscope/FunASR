@@ -27,12 +27,12 @@ from funasr.datasets.audio_datasets.load_audio_extract_fbank import load_audio, 
 from funasr.utils import postprocess_utils
 from funasr.utils.datadir_writer import DatadirWriter
 from funasr.utils.timestamp_tools import ts_prediction_lfr6_standard
-from funasr.utils.register import register_class, registry_tables
+from funasr.register import tables
 from funasr.models.ctc.ctc import CTC
 
 from funasr.models.paraformer.model import Paraformer
 
-@register_class("model_classes", "BiCifParaformer")
+@tables.register("model_classes", "BiCifParaformer")
 class BiCifParaformer(Paraformer):
 	"""
 	Author: Speech Lab of DAMO Academy, Alibaba Group

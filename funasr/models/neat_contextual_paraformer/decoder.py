@@ -14,7 +14,7 @@ from funasr.models.sanm.positionwise_feed_forward import PositionwiseFeedForward
 from funasr.models.transformer.utils.repeat import repeat
 from funasr.models.paraformer.decoder import DecoderLayerSANM, ParaformerSANMDecoder
 
-from funasr.utils.register import register_class, registry_tables
+from funasr.register import tables
 
 class ContextualDecoderLayer(nn.Module):
     def __init__(
@@ -98,7 +98,7 @@ class ContextualBiasDecoder(nn.Module):
             x =  self.dropout(self.src_attn(x, memory, memory_mask))
         return x, tgt_mask, memory, memory_mask, cache
 
-@register_class("decoder_classes", "ContextualParaformerDecoder")
+@tables.register("decoder_classes", "ContextualParaformerDecoder")
 class ContextualParaformerDecoder(ParaformerSANMDecoder):
     """
     Author: Speech Lab of DAMO Academy, Alibaba Group

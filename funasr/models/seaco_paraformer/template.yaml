@@ -2,8 +2,8 @@
 # You can modify the configuration according to your own requirements.
 
 # to print the register_table:
-# from funasr.utils.register import registry_tables
-# registry_tables.print()
+# from funasr.register import tables
+# tables.print()
 
 # network architecture
 model: SeacoParaformer

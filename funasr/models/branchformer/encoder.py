@@ -43,7 +43,7 @@ from funasr.models.transformer.utils.subsampling import (
     check_short_utt,
 )
 
-from funasr.utils.register import register_class
+from funasr.register import tables
 
 class BranchformerEncoderLayer(torch.nn.Module):
     """Branchformer encoder layer module.
@@ -291,7 +291,7 @@ class BranchformerEncoderLayer(torch.nn.Module):
 
         return x, mask
 
-@register_class("encoder_classes", "BranchformerEncoder")
+@tables.register("encoder_classes", "BranchformerEncoder")
 class BranchformerEncoder(nn.Module):
     """Branchformer encoder module."""
 

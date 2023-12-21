@@ -8,7 +8,7 @@ from torch import nn
 import math
 from typing import Optional
 import time
-from funasr.utils.register import register_class, registry_tables
+from funasr.register import tables
 from funasr.datasets.audio_datasets.load_audio_extract_fbank import load_audio,extract_fbank
 from funasr.utils.datadir_writer import DatadirWriter
 from torch.nn.utils.rnn import pad_sequence
@@ -218,7 +218,7 @@ class WindowDetector(object):
         return int(self.frame_size_ms)
 
 
-@register_class("model_classes", "FsmnVAD")
+@tables.register("model_classes", "FsmnVAD")
 class FsmnVAD(nn.Module):
     """
     Author: Speech Lab of DAMO Academy, Alibaba Group
@@ -238,7 +238,7 @@ class FsmnVAD(nn.Module):
                                                self.vad_opts.speech_to_sil_time_thres,
                                                self.vad_opts.frame_in_ms)
         
-        encoder_class = registry_tables.encoder_classes.get(encoder.lower())
+        encoder_class = tables.encoder_classes.get(encoder.lower())
         encoder = encoder_class(**encoder_conf)
         self.encoder = encoder
         # init variables

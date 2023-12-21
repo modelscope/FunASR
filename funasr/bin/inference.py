@@ -15,7 +15,7 @@ from funasr.train_utils.load_pretrained_model import load_pretrained_model
 import time
 import random
 import string
-from funasr.utils.register import registry_tables
+from funasr.register import tables
 
 
 def build_iter_for_infer(data_in, input_len=None, data_type="sound"):
@@ -81,7 +81,7 @@ def main_hydra(kwargs: DictConfig):
 
 class AutoModel:
 	def __init__(self, **kwargs):
-		registry_tables.print()
+		tables.print()
 		assert "model" in kwargs
 		if "model_conf" not in kwargs:
 			logging.info("download models from model hub: {}".format(kwargs.get("model_hub", "ms")))
@@ -98,7 +98,7 @@ class AutoModel:
 		# build tokenizer
 		tokenizer = kwargs.get("tokenizer", None)
 		if tokenizer is not None:
-			tokenizer_class = registry_tables.tokenizer_classes.get(tokenizer.lower())
+			tokenizer_class = tables.tokenizer_classes.get(tokenizer.lower())
 			tokenizer = tokenizer_class(**kwargs["tokenizer_conf"])
 			kwargs["tokenizer"] = tokenizer
 			kwargs["token_list"] = tokenizer.token_list
@@ -106,13 +106,13 @@ class AutoModel:
 		# build frontend
 		frontend = kwargs.get("frontend", None)
 		if frontend is not None:
-			frontend_class = registry_tables.frontend_classes.get(frontend.lower())
+			frontend_class = tables.frontend_classes.get(frontend.lower())
 			frontend = frontend_class(**kwargs["frontend_conf"])
 			kwargs["frontend"] = frontend
 			kwargs["input_size"] = frontend.output_size()
 		
 		# build model
-		model_class = registry_tables.model_classes.get(kwargs["model"].lower())
+		model_class = tables.model_classes.get(kwargs["model"].lower())
 		model = model_class(**kwargs, **kwargs["model_conf"], vocab_size=len(tokenizer.token_list) if tokenizer is not None else -1)
 		model.eval()
 		model.to(device)

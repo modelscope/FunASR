@@ -5,9 +5,9 @@ from typing import Union
 import warnings
 
 from funasr.tokenizer.abs_tokenizer import BaseTokenizer
-from funasr.utils.register import register_class
+from funasr.register import tables
 
-@register_class("tokenizer_classes", "CharTokenizer")
+@tables.register("tokenizer_classes", "CharTokenizer")
 class CharTokenizer(BaseTokenizer):
     def __init__(
         self,

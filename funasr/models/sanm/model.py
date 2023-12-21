@@ -3,9 +3,9 @@ import logging
 import torch
 
 from funasr.models.transformer.model import Transformer
-from funasr.utils.register import register_class, registry_tables
+from funasr.register import tables
 
-@register_class("model_classes", "SANM")
+@tables.register("model_classes", "SANM")
 class SANM(Transformer):
 	"""CTC-attention hybrid Encoder-Decoder model"""
 

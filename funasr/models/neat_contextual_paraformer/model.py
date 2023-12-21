@@ -53,9 +53,9 @@ from funasr.utils.datadir_writer import DatadirWriter
 
 from funasr.models.paraformer.model import Paraformer
 
-from funasr.utils.register import register_class, registry_tables
+from funasr.register import tables
 
-@register_class("model_classes", "NeatContextualParaformer")
+@tables.register("model_classes", "NeatContextualParaformer")
 class NeatContextualParaformer(Paraformer):
 	"""
 	Author: Speech Lab of DAMO Academy, Alibaba Group

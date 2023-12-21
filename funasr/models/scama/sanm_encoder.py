@@ -30,7 +30,7 @@ from funasr.models.transformer.utils.mask import subsequent_mask, vad_mask
 
 from funasr.models.ctc.ctc import CTC
 
-from funasr.utils.register import register_class, registry_tables
+from funasr.register import tables
 
 class EncoderLayerSANM(nn.Module):
     def __init__(
@@ -154,7 +154,7 @@ class EncoderLayerSANM(nn.Module):
         return x, cache
 
 
-@register_class("encoder_classes", "SANMEncoderChunkOpt")
+@tables.register("encoder_classes", "SANMEncoderChunkOpt")
 class SANMEncoderChunkOpt(nn.Module):
     """
     Author: Speech Lab of DAMO Academy, Alibaba Group

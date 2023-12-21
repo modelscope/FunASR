@@ -2,9 +2,9 @@ import torch
 
 import numpy as np
 
-from funasr.utils.register import register_class
+from funasr.register import tables
 
-@register_class("batch_sampler_classes", "DynamicBatchLocalShuffleSampler")
+@tables.register("batch_sampler_classes", "DynamicBatchLocalShuffleSampler")
 class BatchSampler(torch.utils.data.BatchSampler):
 	
 	def __init__(self, dataset,

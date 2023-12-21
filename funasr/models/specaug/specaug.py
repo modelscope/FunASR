@@ -7,11 +7,11 @@ from funasr.models.specaug.mask_along_axis import MaskAlongAxis
 from funasr.models.specaug.mask_along_axis import MaskAlongAxisVariableMaxWidth
 from funasr.models.specaug.mask_along_axis import MaskAlongAxisLFR
 from funasr.models.specaug.time_warp import TimeWarp
-from funasr.utils.register import register_class
+from funasr.register import tables
 
 import torch.nn as nn
 
-@register_class("specaug_classes", "SpecAug")
+@tables.register("specaug_classes", "SpecAug")
 class SpecAug(nn.Module):
     """Implementation of SpecAug.
 
@@ -101,7 +101,7 @@ class SpecAug(nn.Module):
             x, x_lengths = self.time_mask(x, x_lengths)
         return x, x_lengths
 
-@register_class("specaug_classes", "SpecAugLFR")
+@tables.register("specaug_classes", "SpecAugLFR")
 class SpecAugLFR(nn.Module):
     """Implementation of SpecAug.
     lfr_rate：low frame rate

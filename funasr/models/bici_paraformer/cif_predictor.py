@@ -8,7 +8,7 @@ from funasr.models.transformer.utils.nets_utils import make_pad_mask
 from funasr.models.scama.utils import sequence_mask
 from typing import Optional, Tuple
 
-from funasr.utils.register import register_class
+from funasr.register import tables
 
 
 class mae_loss(nn.Module):
@@ -94,7 +94,7 @@ def cif_wo_hidden(alphas, threshold):
     fires = torch.stack(list_fires, 1)
     return fires
 
-@register_class("predictor_classes", "CifPredictorV3")
+@tables.register("predictor_classes", "CifPredictorV3")
 class CifPredictorV3(nn.Module):
     def __init__(self,
                  idim,
