@@ -87,7 +87,7 @@ model = AutoModel(model="paraformer-zh")
 # for the long duration wav, you could add vad model
 # model = AutoModel(model="paraformer-zh", vad_model="fsmn-vad")
 
-res = model(input="asr_example_zh.wav", batch_size=5000)
+res = model(input="asr_example_zh.wav", batch_size=64)
 print(res)
 ```
 注：`model_hub`：表示模型仓库，`ms`为选择modelscope下载，`hf`为选择huggingface下载。
