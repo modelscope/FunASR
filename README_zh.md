@@ -81,11 +81,13 @@ funasr --model paraformer-zh asr_example_zh.wav
 
 ### 非实时语音识别
 ```python
-from funasr import infer
+from funasr import AutoModel
 
-p = infer(model="paraformer-zh", vad_model="fsmn-vad", punc_model="ct-punc", model_hub="ms")
+model = AutoModel(model="paraformer-zh")
+# for the long duration wav, you could add vad model
+# model = AutoModel(model="paraformer-zh", vad_model="fsmn-vad")
 
-res = p("asr_example_zh.wav", batch_size_token=5000)
+res = model(input="asr_example_zh.wav", batch_size=5000)
 print(res)
 ```
 注：`model_hub`：表示模型仓库，`ms`为选择modelscope下载，`hf`为选择huggingface下载。

@@ -12,6 +12,8 @@ def download_model(**kwargs):
 
 def download_fr_ms(**kwargs):
 	model_or_path = kwargs.get("model")
+	if model_or_path in name_maps_ms:
+		model_or_path = name_maps_ms[model_or_path]
 	model_revision = kwargs.get("model_revision")
 	if not os.path.exists(model_or_path):
 		model_or_path = get_or_download_model_dir(model_or_path, model_revision, is_training=kwargs.get("is_training"))

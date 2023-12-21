@@ -29,3 +29,5 @@ def import_submodules(package, recursive=True):
     return results
 
 import_submodules(__name__)
+
+from funasr.bin.inference import AutoModel
