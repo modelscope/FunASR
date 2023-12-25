@@ -45,7 +45,7 @@ Parameter explanation:
 `text`: the text output of speech recognition
 `is_final`: indicating the end of recognition
 `timestamp`：If AM is a timestamp model, it will return this field, indicating the timestamp, in the format of "[[100,200], [200,500]]"
-`stamp_sents`：If AM is a timestamp model, it will return this field, indicating the stamp_sents, in the format of "[{'text':'正 是 因 为','start':'430','end':'1130','ts_list':[[430,670],[670,810],[810,1030],[1030,1130]]}]"
+`stamp_sents`：If AM is a timestamp model, it will return this field, indicating the stamp_sents, in the format of "[{'text_seg':'正 是 因 为','punc':',','start':'430','end':'1130','ts_list':[[430,670],[670,810],[810,1030],[1030,1130]]}]"
 ```
 
 ## Real-time Speech Recognition
@@ -94,5 +94,5 @@ Parameter explanation:
 `text`: the text output of speech recognition
 `is_final`: indicating the end of recognition
 `timestamp`：If AM is a timestamp model, it will return this field, indicating the timestamp, in the format of "[[100,200], [200,500]]"
-`stamp_sents`：If AM is a timestamp model, it will return this field, indicating the stamp_sents, in the format of "[{'text':'正 是 因 为','start':'430','end':'1130','ts_list':[[430,670],[670,810],[810,1030],[1030,1130]]}]"
+`stamp_sents`：If AM is a timestamp model, it will return this field, indicating the stamp_sents, in the format of "[{'text_seg':'正 是 因 为','punc':',','start':'430','end':'1130','ts_list':[[430,670],[670,810],[810,1030],[1030,1130]]}]"
 ```
