@@ -746,14 +746,13 @@ class CodeMixTokenizerCommonPreprocessor(CommonPreprocessor):
             self, uid: str, data: Dict[str, Union[list, str, np.ndarray]]
     ) -> Dict[str, Union[list, np.ndarray]]:
         # Split words.
-        if isinstance(data[self.text_name], str):
-            if self.seg_jieba:
-  #              jieba.load_userdict(seg_dict_file)
-                split_text = self.split_words_jieba(data[self.text_name])
-            else:
-                split_text = self.split_words(data[self.text_name])
+        data_in = data[self.text_name]
+        if isinstance(data[self.text_name], list):
+            data_in = " ".join(data[self.text_name])
+        if self.seg_jieba:
+            split_text = self.split_words_jieba(data_in)
         else:
-            split_text = data[self.text_name]
+            split_text = self.split_words(data_in)
         data[self.text_name] = " ".join(split_text)
         data = self._speech_process(data)
         data = self._text_process(data)
