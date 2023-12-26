@@ -44,12 +44,17 @@ void GetValue(TCLAP::ValueArg<std::string>& value_arg, string key, std::map<std:
 }
 
 void runReg(FUNASR_HANDLE tpass_handle, std::vector<int> chunk_size, vector<string> wav_list, vector<string> wav_ids, int audio_fs,
-            float* total_length, long* total_time, int core_id, ASR_TYPE asr_mode_, string nn_hotwords_) {
+            float* total_length, long* total_time, int core_id, ASR_TYPE asr_mode_, string nn_hotwords_,
+            float glob_beam, float lat_beam, float am_scale, int inc_bias, unordered_map<string, int> hws_map) {
     
     struct timeval start, end;
     long seconds = 0;
     float n_total_length = 0.0f;
     long n_total_time = 0;
+
+    FUNASR_DEC_HANDLE decoder_handle = FunASRWfstDecoderInit(tpass_handle, ASR_TWO_PASS, glob_beam, lat_beam, am_scale);
+    // load hotwords list and build graph
+    FunWfstDecoderLoadHwsRes(decoder_handle, inc_bias, hws_map);
        
     std::vector<std::vector<float>> hotwords_embedding = CompileHotwordEmbedding(tpass_handle, nn_hotwords_, ASR_TWO_PASS);
     
@@ -90,7 +95,8 @@ void runReg(FUNASR_HANDLE tpass_handle, std::vector<int> chunk_size, vector<stri
                 } else {
                     is_final = false;
             }
-            FUNASR_RESULT result = FunTpassInferBuffer(tpass_handle, tpass_online_handle, speech_buff+sample_offset, step, punc_cache, is_final, sampling_rate_, "pcm", (ASR_TYPE)asr_mode_, hotwords_embedding);
+            FUNASR_RESULT result = FunTpassInferBuffer(tpass_handle, tpass_online_handle, speech_buff+sample_offset, step, punc_cache, is_final, 
+                                                        sampling_rate_, "pcm", (ASR_TYPE)asr_mode_, hotwords_embedding, true, decoder_handle);
             if (result)
             {
                 FunASRFreeResult(result);
@@ -139,7 +145,8 @@ void runReg(FUNASR_HANDLE tpass_handle, std::vector<int> chunk_size, vector<stri
                     is_final = false;
             }
             gettimeofday(&start, NULL);
-            FUNASR_RESULT result = FunTpassInferBuffer(tpass_handle, tpass_online_handle, speech_buff+sample_offset, step, punc_cache, is_final, sampling_rate_, "pcm", (ASR_TYPE)asr_mode_, hotwords_embedding);
+            FUNASR_RESULT result = FunTpassInferBuffer(tpass_handle, tpass_online_handle, speech_buff+sample_offset, step, punc_cache, is_final, 
+                                                        sampling_rate_, "pcm", (ASR_TYPE)asr_mode_, hotwords_embedding, true, decoder_handle);
             gettimeofday(&end, NULL);
             seconds = (end.tv_sec - start.tv_sec);
             long taking_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
@@ -197,6 +204,8 @@ void runReg(FUNASR_HANDLE tpass_handle, std::vector<int> chunk_size, vector<stri
             *total_time = n_total_time;
         }
     }
+    FunWfstDecoderUnloadHwsRes(decoder_handle);
+    FunASRWfstDecoderUninit(decoder_handle);
     FunTpassOnlineUninit(tpass_online_handle);
 }
 
@@ -215,6 +224,11 @@ int main(int argc, char** argv)
     TCLAP::ValueArg<std::string>    punc_dir("", PUNC_DIR, "the punc online model path, which contains model.onnx, punc.yaml", false, "", "string");
     TCLAP::ValueArg<std::string>    punc_quant("", PUNC_QUANT, "true (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "true", "string");
     TCLAP::ValueArg<std::string>    itn_dir("", ITN_DIR, "the itn model(fst) path, which contains zh_itn_tagger.fst and zh_itn_verbalizer.fst", false, "", "string");
+    TCLAP::ValueArg<std::string>    lm_dir("", LM_DIR, "the lm model path, which contains compiled models: TLG.fst, config.yaml, lexicon.txt ", false, "", "string");
+    TCLAP::ValueArg<float>    global_beam("", GLOB_BEAM, "the decoding beam for beam searching ", false, 3.0, "float");
+    TCLAP::ValueArg<float>    lattice_beam("", LAT_BEAM, "the lattice generation beam for beam searching ", false, 3.0, "float");
+    TCLAP::ValueArg<float>    am_scale("", AM_SCALE, "the acoustic scale for beam searching ", false, 10.0, "float");
+    TCLAP::ValueArg<std::int32_t>   fst_inc_wts("", FST_INC_WTS, "the fst hotwords incremental bias", false, 20, "int32_t");
 
     TCLAP::ValueArg<std::string>    asr_mode("", ASR_MODE, "offline, online, 2pass", false, "2pass", "string");
     TCLAP::ValueArg<std::int32_t>   onnx_thread("", "model-thread-num", "onnxruntime SetIntraOpNumThreads", false, 1, "int32_t");
@@ -231,6 +245,11 @@ int main(int argc, char** argv)
     cmd.add(punc_dir);
     cmd.add(punc_quant);
     cmd.add(itn_dir);
+    cmd.add(lm_dir);
+    cmd.add(global_beam);
+    cmd.add(lattice_beam);
+    cmd.add(am_scale);
+    cmd.add(fst_inc_wts);
     cmd.add(wav_path);
     cmd.add(audio_fs);
     cmd.add(asr_mode);
@@ -248,6 +267,7 @@ int main(int argc, char** argv)
     GetValue(punc_dir, PUNC_DIR, model_path);
     GetValue(punc_quant, PUNC_QUANT, model_path);
     GetValue(itn_dir, ITN_DIR, model_path);
+    GetValue(lm_dir, LM_DIR, model_path);
     GetValue(wav_path, WAV_PATH, model_path);
     GetValue(asr_mode, ASR_MODE, model_path);
 
@@ -271,6 +291,14 @@ int main(int argc, char** argv)
     {
         LOG(ERROR) << "FunTpassInit init failed";
         exit(-1);
+    }
+    float glob_beam = 3.0f;
+    float lat_beam = 3.0f;
+    float am_sc = 10.0f;
+    if (lm_dir.isSet()) {
+        glob_beam = global_beam.getValue();
+        lat_beam = lattice_beam.getValue();
+        am_sc = am_scale.getValue();
     }
 
     gettimeofday(&end, NULL);
@@ -321,7 +349,8 @@ int main(int argc, char** argv)
     int rtf_threds = thread_num_.getValue();
     for (int i = 0; i < rtf_threds; i++)
     {
-        threads.emplace_back(thread(runReg, tpass_hanlde, chunk_size, wav_list, wav_ids, audio_fs.getValue(), &total_length, &total_time, i, (ASR_TYPE)asr_mode_, nn_hotwords_));
+        threads.emplace_back(thread(runReg, tpass_hanlde, chunk_size, wav_list, wav_ids, audio_fs.getValue(), &total_length, &total_time, i, (ASR_TYPE)asr_mode_, nn_hotwords_,
+                                    glob_beam, lat_beam, am_sc, fst_inc_wts.getValue(), hws_map));
     }
 
     for (auto& thread : threads)

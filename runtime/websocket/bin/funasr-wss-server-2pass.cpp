@@ -16,6 +16,7 @@
 // hotwords
 std::unordered_map<std::string, int> hws_map_;
 int fst_inc_wts_=20;
+float global_beam_, lattice_beam_, am_scale_;
 
 using namespace std;
 void GetValue(TCLAP::ValueArg<std::string>& value_arg, string key,
@@ -120,6 +121,14 @@ int main(int argc, char* argv[]) {
         "connection",
         false, "../../../ssl_key/server.key", "string");
 
+    TCLAP::ValueArg<float>    global_beam("", GLOB_BEAM, "the decoding beam for beam searching ", false, 3.0, "float");
+    TCLAP::ValueArg<float>    lattice_beam("", LAT_BEAM, "the lattice generation beam for beam searching ", false, 3.0, "float");
+    TCLAP::ValueArg<float>    am_scale("", AM_SCALE, "the acoustic scale for beam searching ", false, 10.0, "float");
+
+    TCLAP::ValueArg<std::string> lm_dir("", LM_DIR,
+        "the LM model path, which contains compiled models: TLG.fst, config.yaml ", false, "damo/speech_ngram_lm_zh-cn-ai-wesp-fst", "string");
+    TCLAP::ValueArg<std::string> lm_revision(
+        "", "lm-revision", "LM model revision", false, "v1.0.2", "string");
     TCLAP::ValueArg<std::string> hotword("", HOTWORD,
         "the hotword file, one hotword perline, Format: Hotword Weight (could be: 阿里巴巴 20)", 
         false, "/workspace/resources/hotwords.txt", "string");
@@ -128,6 +137,10 @@ int main(int argc, char* argv[]) {
 
     // add file
     cmd.add(hotword);
+    cmd.add(fst_inc_wts);
+    cmd.add(global_beam);
+    cmd.add(lattice_beam);
+    cmd.add(am_scale);
 
     cmd.add(certfile);
     cmd.add(keyfile);
@@ -146,6 +159,8 @@ int main(int argc, char* argv[]) {
     cmd.add(punc_quant);
     cmd.add(itn_dir);
     cmd.add(itn_revision);
+    cmd.add(lm_dir);
+    cmd.add(lm_revision);
 
     cmd.add(listen_ip);
     cmd.add(port);
@@ -163,6 +178,7 @@ int main(int argc, char* argv[]) {
     GetValue(punc_dir, PUNC_DIR, model_path);
     GetValue(punc_quant, PUNC_QUANT, model_path);
     GetValue(itn_dir, ITN_DIR, model_path);
+    GetValue(lm_dir, LM_DIR, model_path);
     GetValue(hotword, HOTWORD, model_path);
 
     GetValue(offline_model_revision, "offline-model-revision", model_path);
@@ -170,6 +186,11 @@ int main(int argc, char* argv[]) {
     GetValue(vad_revision, "vad-revision", model_path);
     GetValue(punc_revision, "punc-revision", model_path);
     GetValue(itn_revision, "itn-revision", model_path);
+    GetValue(lm_revision, "lm-revision", model_path);
+
+    global_beam_ = global_beam.getValue();
+    lattice_beam_ = lattice_beam.getValue();
+    am_scale_ = am_scale.getValue();
 
     // Download model form Modelscope
     try {
@@ -183,6 +204,7 @@ int main(int argc, char* argv[]) {
       std::string s_punc_path = model_path[PUNC_DIR];
       std::string s_punc_quant = model_path[PUNC_QUANT];
       std::string s_itn_path = model_path[ITN_DIR];
+      std::string s_lm_path = model_path[LM_DIR];
 
       std::string python_cmd =
           "python -m funasr.utils.runtime_sdk_download_tool --type onnx --quantize True ";
@@ -241,11 +263,18 @@ int main(int argc, char* argv[]) {
         size_t found = s_offline_asr_path.find("speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404");
         if (found != std::string::npos) {
             model_path["offline-model-revision"]="v1.2.4";
-        } else{
-            found = s_offline_asr_path.find("speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404");
-            if (found != std::string::npos) {
-                model_path["offline-model-revision"]="v1.0.5";
-            }
+        }
+
+        found = s_offline_asr_path.find("speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404");
+        if (found != std::string::npos) {
+            model_path["offline-model-revision"]="v1.0.5";
+        }
+
+        found = s_offline_asr_path.find("speech_paraformer-large_asr_nat-en-16k-common-vocab10020");
+        if (found != std::string::npos) {
+            model_path["model-revision"]="v1.0.0";
+            s_itn_path="";
+            s_lm_path="";
         }
 
         if (access(s_offline_asr_path.c_str(), F_OK) == 0) {
@@ -330,6 +359,49 @@ int main(int argc, char* argv[]) {
         }
       } else {
         LOG(INFO) << "ASR online model is not set, use default.";
+      }
+
+      if (!s_lm_path.empty() && s_lm_path != "NONE" && s_lm_path != "none") {
+          std::string python_cmd_lm;
+          std::string down_lm_path;
+          std::string down_lm_model;
+
+          if (access(s_lm_path.c_str(), F_OK) == 0) {
+              // local
+              python_cmd_lm = python_cmd + " --model-name " + s_lm_path +
+                                  " --export-dir ./ " + " --model_revision " +
+                                  model_path["lm-revision"] + " --export False ";
+              down_lm_path = s_lm_path;
+          } else {
+              // modelscope
+              LOG(INFO) << "Download model: " << s_lm_path
+                          << " from modelscope : "; 
+              python_cmd_lm = python_cmd + " --model-name " +
+                      s_lm_path +
+                      " --export-dir " + s_download_model_dir +
+                      " --model_revision " + model_path["lm-revision"]
+                      + " --export False "; 
+              down_lm_path  =
+                      s_download_model_dir +
+                      "/" + s_lm_path;
+          }
+
+          int ret = system(python_cmd_lm.c_str());
+          if (ret != 0) {
+              LOG(INFO) << "Failed to download model from modelscope. If you set local lm model path, you can ignore the errors.";
+          }
+          down_lm_model = down_lm_path + "/TLG.fst";
+
+          if (access(down_lm_model.c_str(), F_OK) != 0) {
+              LOG(ERROR) << down_lm_model << " do not exists.";
+              exit(-1);
+          } else {
+              model_path[LM_DIR] = down_lm_path;
+              LOG(INFO) << "Set " << LM_DIR << " : " << model_path[LM_DIR];
+          }
+      } else {
+          LOG(INFO) << "LM model is not set, not executed.";
+          model_path[LM_DIR] = "";
       }
 
       if (!s_punc_path.empty()) {

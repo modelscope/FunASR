@@ -54,7 +54,6 @@ void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, vector<string> wa
     // warm up
     for (size_t i = 0; i < 1; i++)
     {
-        FunOfflineReset(asr_handle, decoder_handle);
         FUNASR_RESULT result=FunOfflineInfer(asr_handle, wav_list[0].c_str(), RASR_NONE, NULL, hotwords_embedding, audio_fs, true, decoder_handle);
         if(result){
             FunASRFreeResult(result);
