@@ -20,6 +20,7 @@ namespace funasr {
     */
     private:
         Vocab* vocab = nullptr;
+        Vocab* lm_vocab = nullptr;
         SegDict* seg_dict = nullptr;
         PhoneSet* phone_set_ = nullptr;
         //const float scale = 22.6274169979695;
@@ -65,6 +66,7 @@ namespace funasr {
         string FinalizeDecode(WfstDecoder* &wfst_decoder,
                           bool is_stamp=false, std::vector<float> us_alphas={0}, std::vector<float> us_cif_peak={0});
         Vocab* GetVocab();
+        Vocab* GetLmVocab();
         PhoneSet* GetPhoneSet();
 		
         knf::FbankOptions fbank_opts_;

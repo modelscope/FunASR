@@ -254,9 +254,9 @@ float Audio::GetTimeLen()
 void Audio::WavResample(int32_t sampling_rate, const float *waveform,
                           int32_t n)
 {
-    LOG(INFO) << "Creating a resampler:\n"
-              << "   in_sample_rate: "<< sampling_rate << "\n"
-              << "   output_sample_rate: " << static_cast<int32_t>(dest_sample_rate);
+    LOG(INFO) << "Creating a resampler: "
+              << " in_sample_rate: "<< sampling_rate
+              << " output_sample_rate: " << static_cast<int32_t>(dest_sample_rate);
     float min_freq =
         std::min<int32_t>(sampling_rate, dest_sample_rate);
     float lowpass_cutoff = 0.99 * 0.5 * min_freq;

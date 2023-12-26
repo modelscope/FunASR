@@ -66,6 +66,20 @@ TpassStream::TpassStream(std::map<std::string, std::string>& model_path, int thr
         LOG(ERROR) <<"Can not find offline-model-dir or online-model-dir";
         exit(-1);
     }
+    
+    // Lm resource
+    if (model_path.find(LM_DIR) != model_path.end() && model_path.at(LM_DIR) != "") {
+        string fst_path, lm_config_path, lex_path;
+        fst_path = PathAppend(model_path.at(LM_DIR), LM_FST_RES);
+        lm_config_path = PathAppend(model_path.at(LM_DIR), LM_CONFIG_NAME);
+        lex_path = PathAppend(model_path.at(LM_DIR), LEX_PATH);
+        if (access(lex_path.c_str(), F_OK) != 0 )
+        {
+            LOG(ERROR) << "Lexicon.txt file is not exist, please use the latest version. Skip load LM model.";
+        }else{
+            asr_handle->InitLm(fst_path, lm_config_path, lex_path);
+        }
+    }
 
     // PUNC model
     if(model_path.find(PUNC_DIR) != model_path.end()){
