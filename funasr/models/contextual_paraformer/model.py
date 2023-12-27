@@ -55,12 +55,12 @@ from funasr.models.paraformer.model import Paraformer
 
 from funasr.register import tables
 
-@tables.register("model_classes", "NeatContextualParaformer")
-class NeatContextualParaformer(Paraformer):
+@tables.register("model_classes", "ContextualParaformer")
+class ContextualParaformer(Paraformer):
 	"""
 	Author: Speech Lab of DAMO Academy, Alibaba Group
-	Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition
-	https://arxiv.org/abs/2206.08317
+	FunASR: A Fundamental End-to-End Speech Recognition Toolkit
+	https://arxiv.org/abs/2305.11013
 	"""
 	
 	def __init__(
