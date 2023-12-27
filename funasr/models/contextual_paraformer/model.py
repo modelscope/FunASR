@@ -59,8 +59,8 @@ from funasr.register import tables
 class ContextualParaformer(Paraformer):
 	"""
 	Author: Speech Lab of DAMO Academy, Alibaba Group
-	Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition
-	https://arxiv.org/abs/2206.08317
+	FunASR: A Fundamental End-to-End Speech Recognition Toolkit
+	https://arxiv.org/abs/2305.11013
 	"""
 	
 	def __init__(
