@@ -495,6 +495,8 @@ class Paraformer(nn.Module):
 
 		results = []
 		b, n, d = decoder_out.size()
+		if isinstance(key[0], (list, tuple)):
+			key = key[0]
 		for i in range(b):
 			x = encoder_out[i, :encoder_out_lens[i], :]
 			am_scores = decoder_out[i, :pre_token_length[i], :]
@@ -535,6 +537,7 @@ class Paraformer(nn.Module):
 					text = tokenizer.tokens2text(token)
 					
 					text_postprocessed, _ = postprocess_utils.sentence_postprocess(token)
+					
 					result_i = {"key": key[i], "text": text_postprocessed}
 
 					

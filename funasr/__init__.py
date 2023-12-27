@@ -30,4 +30,4 @@ def import_submodules(package, recursive=True):
 
 import_submodules(__name__)
 
-from funasr.bin.inference import AutoModel
+from funasr.bin.inference import AutoModel, AutoFrontend

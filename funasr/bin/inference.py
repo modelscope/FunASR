@@ -16,11 +16,12 @@ import time
 import random
 import string
 from funasr.register import tables
-from funasr.datasets.audio_datasets.load_audio_extract_fbank import load_audio
+
+from funasr.datasets.audio_datasets.load_audio_extract_fbank import load_audio, extract_fbank
 from funasr.utils.vad_utils import slice_padding_audio_samples
 from funasr.utils.timestamp_tools import time_stamp_sentence
 
-def build_iter_for_infer(data_in, input_len=None, data_type="sound"):
+def build_iter_for_infer(data_in, input_len=None, data_type="sound", key=None):
 	"""
 	
 	:param input:
@@ -63,7 +64,8 @@ def build_iter_for_infer(data_in, input_len=None, data_type="sound"):
 	else: # raw text; audio sample point, fbank; bytes
 		if isinstance(data_in, bytes): # audio bytes
 			data_in = load_bytes(data_in)
-		key = "rand_key_" + ''.join(random.choice(chars) for _ in range(13))
+		if key is None:
+			key = "rand_key_" + ''.join(random.choice(chars) for _ in range(13))
 		data_list = [data_in]
 		key_list = [key]
 	
@@ -121,10 +123,13 @@ class AutoModel:
 		set_all_random_seed(kwargs.get("seed", 0))
 		
 		device = kwargs.get("device", "cuda")
-		if not torch.cuda.is_available() or kwargs.get("ngpu", 1):
+		if not torch.cuda.is_available() or kwargs.get("ngpu", 0):
 			device = "cpu"
 			kwargs["batch_size"] = 1
 		kwargs["device"] = device
+		
+		if kwargs.get("ncpu", None):
+			torch.set_num_threads(kwargs.get("ncpu"))
 		
 		# build tokenizer
 		tokenizer = kwargs.get("tokenizer", None)
@@ -169,17 +174,18 @@ class AutoModel:
 		else:
 			return self.generate_with_vad(input, input_len=input_len, **cfg)
 		
-	def generate(self, input, input_len=None, model=None, kwargs=None, **cfg):
+	def generate(self, input, input_len=None, model=None, kwargs=None, key=None, **cfg):
+		# import pdb; pdb.set_trace()
 		kwargs = self.kwargs if kwargs is None else kwargs
 		kwargs.update(cfg)
 		model = self.model if model is None else model
 		
 		data_type = kwargs.get("data_type", "sound")
 		batch_size = kwargs.get("batch_size", 1)
-		# if kwargs.get("device", "cpu") == "cpu":
-		# 	batch_size = 1
+		if kwargs.get("device", "cpu") == "cpu":
+			batch_size = 1
 		
-		key_list, data_list = build_iter_for_infer(input, input_len=input_len, data_type=data_type)
+		key_list, data_list = build_iter_for_infer(input, input_len=input_len, data_type=data_type, key=key)
 		
 		speed_stats = {}
 		asr_result_list = []
@@ -193,7 +199,7 @@ class AutoModel:
 			key_batch = key_list[beg_idx:end_idx]
 			batch = {"data_in": data_batch, "key": key_batch}
 			if (end_idx - beg_idx) == 1 and isinstance(data_batch[0], torch.Tensor): # fbank
-				batch["data_batch"] = data_batch[0]
+				batch["data_in"] = data_batch[0]
 				batch["data_lengths"] = input_len
 		
 			time1 = time.perf_counter()
@@ -348,6 +354,74 @@ class AutoModel:
 		                     f"time_speech_total_all_samples: {time_speech_total_all_samples: 0.3f}, "
 		                     f"time_escape_total_all_samples: {time_escape_total_all_samples:0.3f}")
 		return results_ret_list
+
+
+class AutoFrontend:
+	def __init__(self, **kwargs):
+		assert "model" in kwargs
+		if "model_conf" not in kwargs:
+			logging.info("download models from model hub: {}".format(kwargs.get("model_hub", "ms")))
+			kwargs = download_model(**kwargs)
+		
+		# build frontend
+		frontend = kwargs.get("frontend", None)
+		if frontend is not None:
+			frontend_class = tables.frontend_classes.get(frontend.lower())
+			frontend = frontend_class(**kwargs["frontend_conf"])
+
+		self.frontend = frontend
+		self.kwargs = kwargs
 	
+	def __call__(self, input, input_len=None, kwargs=None, **cfg):
+		
+		kwargs = self.kwargs if kwargs is None else kwargs
+		kwargs.update(cfg)
+
+
+		key_list, data_list = build_iter_for_infer(input, input_len=input_len)
+		batch_size = kwargs.get("batch_size", 1)
+		device = kwargs.get("device", "cpu")
+		if device == "cpu":
+			batch_size = 1
+		
+		meta_data = {}
+		
+		result_list = []
+		num_samples = len(data_list)
+		pbar = tqdm(colour="blue", total=num_samples + 1, dynamic_ncols=True)
+		
+		time0 = time.perf_counter()
+		for beg_idx in range(0, num_samples, batch_size):
+			end_idx = min(num_samples, beg_idx + batch_size)
+			data_batch = data_list[beg_idx:end_idx]
+			key_batch = key_list[beg_idx:end_idx]
+
+			# extract fbank feats
+			time1 = time.perf_counter()
+			audio_sample_list = load_audio(data_batch, fs=self.frontend.fs, audio_fs=kwargs.get("fs", 16000))
+			time2 = time.perf_counter()
+			meta_data["load_data"] = f"{time2 - time1:0.3f}"
+			speech, speech_lengths = extract_fbank(audio_sample_list, data_type=kwargs.get("data_type", "sound"),
+			                                       frontend=self.frontend)
+			time3 = time.perf_counter()
+			meta_data["extract_feat"] = f"{time3 - time2:0.3f}"
+			meta_data["batch_data_time"] = speech_lengths.sum().item() * self.frontend.frame_shift * self.frontend.lfr_n / 1000
+			
+			speech.to(device=device), speech_lengths.to(device=device)
+			batch = {"input": speech, "input_len": speech_lengths, "key": key_batch}
+			result_list.append(batch)
+			
+			pbar.update(1)
+			description = (
+				f"{meta_data}, "
+			)
+			pbar.set_description(description)
+		
+		time_end = time.perf_counter()
+		pbar.set_description(f"time escaped total: {time_end - time0:0.3f}")
+		
+		return result_list
+
+
 if __name__ == '__main__':
 	main_hydra()

@@ -9,3 +9,14 @@ model = AutoModel(model="/Users/zhifu/Downloads/modelscope_models/speech_parafor
 
 res = model(input="/Users/zhifu/Downloads/modelscope_models/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/example/asr_example.wav")
 print(res)
+
+
+from funasr import AutoFrontend
+
+frontend = AutoFrontend(model="/Users/zhifu/Downloads/modelscope_models/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch")
+
+fbanks = frontend(input="/Users/zhifu/funasr_github/test_local/wav.scp", batch_size=2)
+
+for batch_idx, fbank_dict in enumerate(fbanks):
+	res = model(**fbank_dict)
+	print(res)
