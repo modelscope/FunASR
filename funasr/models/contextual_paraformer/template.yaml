@@ -6,7 +6,7 @@
 # tables.print()
 
 # network architecture
-model: NeatContextualParaformer
+model: ContextualParaformer
 model_conf:
     ctc_weight: 0.0
     lsm_weight: 0.1
