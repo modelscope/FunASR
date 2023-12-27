@@ -535,13 +535,13 @@ class Paraformer(nn.Module):
 					text = tokenizer.tokens2text(token)
 					
 					text_postprocessed, _ = postprocess_utils.sentence_postprocess(token)
-					result_i = {"key": key[i], "token": token, "text": text, "text_postprocessed": text_postprocessed}
+					result_i = {"key": key[i], "text_postprocessed": text_postprocessed}
 
 					
 					if ibest_writer is not None:
 						ibest_writer["token"][key[i]] = " ".join(token)
-						ibest_writer["text"][key[i]] = text
-						ibest_writer["text_postprocessed"][key[i]] = text_postprocessed
+						# ibest_writer["text"][key[i]] = text
+						ibest_writer["text"][key[i]] = text_postprocessed
 				else:
 					result_i = {"key": key[i], "token_int": token_int}
 				results.append(result_i)

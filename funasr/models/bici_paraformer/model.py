@@ -29,7 +29,7 @@ from funasr.utils.datadir_writer import DatadirWriter
 from funasr.utils.timestamp_tools import ts_prediction_lfr6_standard
 from funasr.register import tables
 from funasr.models.ctc.ctc import CTC
-from funasr.utils.timestamp_tools import time_stamp_sentence
+
 
 from funasr.models.paraformer.model import Paraformer
 
@@ -321,18 +321,16 @@ class BiCifParaformer(Paraformer):
 					
 					text_postprocessed, time_stamp_postprocessed, word_lists = postprocess_utils.sentence_postprocess(
 						token, timestamp)
-					sentences = time_stamp_sentence(None, time_stamp_postprocessed, text_postprocessed)
-					result_i = {"key": key[i], "token": token, "text": text, "text_postprocessed": text_postprocessed,
+
+					result_i = {"key": key[i], "text": text_postprocessed,
 					            "timestamp": time_stamp_postprocessed,
-					            "word_lists": word_lists,
-					            "sentences": sentences
 					            }
 					
 					if ibest_writer is not None:
 						ibest_writer["token"][key[i]] = " ".join(token)
-						ibest_writer["text"][key[i]] = text
+						# ibest_writer["text"][key[i]] = text
 						ibest_writer["timestamp"][key[i]] = time_stamp_postprocessed
-						ibest_writer["text_postprocessed"][key[i]] = text_postprocessed
+						ibest_writer["text"][key[i]] = text_postprocessed
 				else:
 					result_i = {"key": key[i], "token_int": token_int}
 				results.append(result_i)
