@@ -25,6 +25,7 @@ model_conf:
         - 1.0
         - 1.0
         - 1.0
+    sentence_end_id: 3
 
 encoder: SANMEncoder
 encoder_conf:
