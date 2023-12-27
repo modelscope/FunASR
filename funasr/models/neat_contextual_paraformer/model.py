@@ -417,7 +417,7 @@ class NeatContextualParaformer(Paraformer):
 					text = tokenizer.tokens2text(token)
 					
 					text_postprocessed, _ = postprocess_utils.sentence_postprocess(token)
-					result_i = {"key": key[i], "token": token, "text": text, "text_postprocessed": text_postprocessed}
+					result_i = {"key": key[i], "text": text_postprocessed}
 					
 					if ibest_writer is not None:
 						ibest_writer["token"][key[i]] = " ".join(token)

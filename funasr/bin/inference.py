@@ -339,7 +339,7 @@ class AutoModel:
 			# sentences = time_stamp_sentence(model.punc_list, model.sentence_end_id, results_ret_list[i]["timestamp"], res[i]["text"])
 			# results_ret_list[i]["time_stamp"] = res[0]["text_postprocessed_punc"]
 			# results_ret_list[i]["sentences"] = sentences
-			# results_ret_list[i]["text_with_punc"] = res[i]["text"]
+			results_ret_list[i]["text_with_punc"] = res[i]["text"]
 		
 		pbar_total.update(1)
 		end_total = time.time()
