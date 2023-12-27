@@ -11,5 +11,5 @@ python funasr/bin/inference.py \
 +input="${local_path}/example/asr_example.wav" \
 +output_dir="./outputs/debug" \
 +device="cpu" \
-+"hotword='达魔院 魔搭'"
++"hotword='达摩院 魔搭'"
 
