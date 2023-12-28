@@ -2,9 +2,15 @@
 # download model
 local_path_root=../modelscope_models
 mkdir -p ${local_path_root}
+
 local_path=${local_path_root}/speech_seaco_paraformer_large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
 git clone https://www.modelscope.cn/damo/speech_seaco_paraformer_large_asr_nat-zh-cn-16k-common-vocab8404-pytorch.git ${local_path}
 
+#local_path_vad=${local_path_root}/speech_fsmn_vad_zh-cn-16k-common-pytorch
+#git clone https://www.modelscope.cn/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch.git ${local_path_vad}
+
+#local_path_punc=${local_path_root}/punc_ct-transformer_zh-cn-common-vocab272727-pytorch
+#git clone https://www.modelscope.cn/damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch.git ${local_path_punc}
 
 python funasr/bin/inference.py \
 +model="${local_path}" \
@@ -13,3 +19,5 @@ python funasr/bin/inference.py \
 +device="cpu" \
 +"hotword='达摩院 魔搭'"
 
+#+vad_model="${local_path_vad}" \
+#+punc_model="${local_path_punc}" \
