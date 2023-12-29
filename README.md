@@ -51,7 +51,7 @@ FunASR has open-sourced a large number of pre-trained models on industrial data.
 (Note: 🤗 represents the Huggingface model zoo link, ⭐ represents the ModelScope model zoo link)
 
 
-|                                                                             Model Name                                                                             |                                Task Details                                 |          Training Date           | Parameters |
+|                                                                             Model Name                                                                             |                                Task Details                                 |          Training Data           | Parameters |
 |:------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------:|:--------------------------------:|:----------:|
 |    paraformer-zh <br> ([⭐](https://www.modelscope.cn/models/damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary)  [🤗]() )    |             speech recognition, with timestamps, non-streaming              |      60000 hours, Mandarin       |    220M    |
 |                paraformer-zh-spk <br> ( [⭐](https://modelscope.cn/models/damo/speech_paraformer-large-vad-punc-spk_asr_nat-zh-cn/summary)  [🤗]() )                | speech recognition with speaker diarization, with timestamps, non-streaming |      60000 hours, Mandarin       |    220M    |
