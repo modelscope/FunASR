@@ -72,21 +72,23 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
     int num_samples = buffer.size();  // the size of the buf
 
     if (!buffer.empty() && hotwords_embedding.size() > 0) {
-      std::string asr_result;
-      std::string stamp_res;
-      std::string stamp_sents;
+      std::string asr_result="";
+      std::string stamp_res="";
+      std::string stamp_sents="";
       try{
         FUNASR_RESULT Result = FunOfflineInferBuffer(
             asr_handle, buffer.data(), buffer.size(), RASR_NONE, NULL, 
             hotwords_embedding, audio_fs, wav_format, itn, decoder_handle);
-
-        asr_result = ((FUNASR_RECOG_RESULT*)Result)->msg;  // get decode result
-        stamp_res = ((FUNASR_RECOG_RESULT*)Result)->stamp;
-        stamp_sents = ((FUNASR_RECOG_RESULT*)Result)->stamp_sents;
-        FunASRFreeResult(Result);
+        if (Result != NULL){
+          asr_result = FunASRGetResult(Result, 0);  // get decode result
+          stamp_res = FunASRGetStamp(Result);
+          stamp_sents = FunASRGetStampSents(Result);
+          FunASRFreeResult(Result);
+        } else{
+          LOG(ERROR) << "FUNASR_RESULT is NULL.";
+        }
       }catch (std::exception const& e) {
         LOG(ERROR) << e.what();
-        return;
       }
 
       websocketpp::lib::error_code ec;
