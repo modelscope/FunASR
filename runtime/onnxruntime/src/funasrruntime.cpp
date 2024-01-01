@@ -146,6 +146,7 @@
 		funasr::FUNASR_VAD_RESULT* p_result = new funasr::FUNASR_VAD_RESULT;
 		p_result->snippet_time = audio.GetTimeLen();
 		if(p_result->snippet_time == 0){
+			p_result->segments = new vector<std::vector<int>>();
             return p_result;
         }
 		
@@ -178,6 +179,7 @@
 		funasr::FUNASR_VAD_RESULT* p_result = new funasr::FUNASR_VAD_RESULT;
 		p_result->snippet_time = audio.GetTimeLen();
 		if(p_result->snippet_time == 0){
+			p_result->segments = new vector<std::vector<int>>();
             return p_result;
         }
 		
