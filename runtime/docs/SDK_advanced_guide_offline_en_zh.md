@@ -149,11 +149,8 @@ nohup bash run_server.sh \
 ```text
 --download-model-dir 模型下载地址，通过设置model ID从Modelscope下载模型
 --model-dir  modelscope model ID 或者 本地模型路径
---quantize  True为量化ASR模型，False为非量化ASR模型，默认是True
 --vad-dir  modelscope model ID 或者 本地模型路径
---vad-quant   True为量化VAD模型，False为非量化VAD模型，默认是True
 --punc-dir  modelscope model ID 或者 本地模型路径
---punc-quant   True为量化PUNC模型，False为非量化PUNC模型，默认是True
 --itn-dir modelscope model ID 或者 本地模型路径
 --port  服务端监听的端口号，默认为 10095
 --decoder-thread-num  服务端线程池个数(支持的最大并发路数)，

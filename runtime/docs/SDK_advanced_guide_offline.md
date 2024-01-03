@@ -85,11 +85,8 @@ Introduction to run_server.sh parameters:
 ```text
 --download-model-dir: Model download address, download models from Modelscope by setting the model ID.
 --model-dir: modelscope model ID or local model path.
---quantize: True for quantized ASR model, False for non-quantized ASR model. Default is True.
 --vad-dir: modelscope model ID or local model path.
---vad-quant: True for quantized VAD model, False for non-quantized VAD model. Default is True.
 --punc-dir: modelscope model ID or local model path.
---punc-quant: True for quantized PUNC model, False for non-quantized PUNC model. Default is True.
 --itn-dir modelscope model ID or local model path.
 --port: Port number that the server listens on. Default is 10095.
 --decoder-thread-num: The number of thread pools on the server side that can handle concurrent requests.
