@@ -36,11 +36,11 @@ docker安装失败请参考 [Docker Installation](https://alibaba-damo-academy.g
 通过下述命令拉取并启动FunASR runtime-SDK的docker镜像：
 ```shell
 sudo docker pull \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.1
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.2
 mkdir -p ./funasr-runtime-resources/models
 sudo docker run -p 10097:10095 -it --privileged=true \
   -v $PWD/funasr-runtime-resources/models:/workspace/models \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.1
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.2
 ```
 
 ### 服务端启动

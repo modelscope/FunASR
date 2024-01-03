@@ -44,11 +44,11 @@ docker安装失败请参考 [Docker Installation](https://alibaba-damo-academy.g
 
 ```shell
 sudo docker pull \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.3.0
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.4.0
 mkdir -p ./funasr-runtime-resources/models
 sudo docker run -p 10095:10095 -it --privileged=true \
   -v $PWD/funasr-runtime-resources/models:/workspace/models \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.3.0
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.4.0
 ```
 
 ### 服务端启动
@@ -73,6 +73,19 @@ nohup bash run_server.sh \
 #   每行一个热词，格式(热词 权重)：阿里巴巴 20（注：热词理论上无限制，但为了兼顾性能和效果，建议热词长度不超过10，个数不超过1k，权重1~100）
 ```
 如果您想定制ngram，参考文档([如何训练LM](./lm_train_tutorial.md))
+
+如果您想部署8k的模型，请使用如下命令启动服务：
+```shell
+cd FunASR/runtime
+nohup bash run_server.sh \
+  --download-model-dir /workspace/models \
+  --vad-dir damo/speech_fsmn_vad_zh-cn-8k-common \
+  --model-dir damo/speech_paraformer_asr_nat-zh-cn-8k-common-vocab8358-tensorflow1  \
+  --punc-dir damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx \
+  --lm-dir damo/speech_ngram_lm_zh-cn-ai-wesp-fst-token8358 \
+  --itn-dir thuduj12/fst_itn_zh \
+  --hotword /workspace/models/hotwords.txt > log.out 2>&1 &
+```
 
 服务端详细参数介绍可参考[服务端用法详解](#服务端用法详解)
 
