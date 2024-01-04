@@ -126,7 +126,6 @@ class Trainer:
 			if self.rank == 0:
 				self._save_checkpoint(epoch)
 			self.scheduler.step()
-			break
 	
 	def _train_epoch(self, epoch):
 		"""
