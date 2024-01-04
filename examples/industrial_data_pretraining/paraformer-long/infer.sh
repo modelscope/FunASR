@@ -22,5 +22,6 @@ python funasr/bin/inference.py \
 +device="cpu" \
 +batch_size_s=300 \
 +batch_size_threshold_s=60 \
-+debug="true"
++debug="true" \
++"hotword='达摩院 魔搭'"
 
