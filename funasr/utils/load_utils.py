@@ -10,52 +10,52 @@ import time
 import logging
 from torch.nn.utils.rnn import pad_sequence
 
-# def load_audio(audio_or_path_or_list, fs: int=16000, audio_fs: int=16000):
+# def load_audio(data_or_path_or_list, fs: int=16000, audio_fs: int=16000):
 #
-# 	if isinstance(audio_or_path_or_list, (list, tuple)):
-# 		return [load_audio(audio, fs=fs, audio_fs=audio_fs) for audio in audio_or_path_or_list]
+# 	if isinstance(data_or_path_or_list, (list, tuple)):
+# 		return [load_audio(audio, fs=fs, audio_fs=audio_fs) for audio in data_or_path_or_list]
 #
-# 	if isinstance(audio_or_path_or_list, str) and os.path.exists(audio_or_path_or_list):
-# 		audio_or_path_or_list, audio_fs = torchaudio.load(audio_or_path_or_list)
-# 		audio_or_path_or_list = audio_or_path_or_list[0, :]
-# 	elif isinstance(audio_or_path_or_list, np.ndarray): # audio sample point
-# 		audio_or_path_or_list = np.squeeze(audio_or_path_or_list) #[n_samples,]
+# 	if isinstance(data_or_path_or_list, str) and os.path.exists(data_or_path_or_list):
+# 		data_or_path_or_list, audio_fs = torchaudio.load(data_or_path_or_list)
+# 		data_or_path_or_list = data_or_path_or_list[0, :]
+# 	elif isinstance(data_or_path_or_list, np.ndarray): # audio sample point
+# 		data_or_path_or_list = np.squeeze(data_or_path_or_list) #[n_samples,]
 #
 # 	if audio_fs != fs:
 # 		resampler = torchaudio.transforms.Resample(audio_fs, fs)
-# 		audio_or_path_or_list = resampler(audio_or_path_or_list[None, :])[0, :]
-# 	return audio_or_path_or_list
+# 		data_or_path_or_list = resampler(data_or_path_or_list[None, :])[0, :]
+# 	return data_or_path_or_list
 
 
-def load_audio_text_image_video(audio_or_path_or_list, fs: int = 16000, audio_fs: int = 16000, data_type=None, tokenizer=None):
-	if isinstance(audio_or_path_or_list, (list, tuple)):
+def load_audio_text_image_video(data_or_path_or_list, fs: int = 16000, audio_fs: int = 16000, data_type=None, tokenizer=None):
+	if isinstance(data_or_path_or_list, (list, tuple)):
 		if data_type is not None and isinstance(data_type, (list, tuple)):
 
-			data_types = [data_type] * len(audio_or_path_or_list)
-			audio_or_path_or_list_ret = [[] for d in data_type]
-			for i, (data_type_i, audio_or_path_or_list_i) in enumerate(zip(data_types, audio_or_path_or_list)):
+			data_types = [data_type] * len(data_or_path_or_list)
+			data_or_path_or_list_ret = [[] for d in data_type]
+			for i, (data_type_i, data_or_path_or_list_i) in enumerate(zip(data_types, data_or_path_or_list)):
 				
-				for j, (data_type_j, audio_or_path_or_list_j) in enumerate(zip(data_type_i, audio_or_path_or_list_i)):
+				for j, (data_type_j, data_or_path_or_list_j) in enumerate(zip(data_type_i, data_or_path_or_list_i)):
 					
-					audio_or_path_or_list_j = load_audio_text_image_video(audio_or_path_or_list_j, fs=fs, audio_fs=audio_fs, data_type=data_type_j, tokenizer=tokenizer)
-					audio_or_path_or_list_ret[j].append(audio_or_path_or_list_j)
+					data_or_path_or_list_j = load_audio_text_image_video(data_or_path_or_list_j, fs=fs, audio_fs=audio_fs, data_type=data_type_j, tokenizer=tokenizer)
+					data_or_path_or_list_ret[j].append(data_or_path_or_list_j)
 
-			return audio_or_path_or_list_ret
+			return data_or_path_or_list_ret
 		else:
-			return [load_audio_text_image_video(audio, fs=fs, audio_fs=audio_fs) for audio in audio_or_path_or_list]
+			return [load_audio_text_image_video(audio, fs=fs, audio_fs=audio_fs) for audio in data_or_path_or_list]
 	
-	if isinstance(audio_or_path_or_list, str) and os.path.exists(audio_or_path_or_list):
-		audio_or_path_or_list, audio_fs = torchaudio.load(audio_or_path_or_list)
-		audio_or_path_or_list = audio_or_path_or_list[0, :]
-	elif isinstance(audio_or_path_or_list, np.ndarray):  # audio sample point
-		audio_or_path_or_list = np.squeeze(audio_or_path_or_list)  # [n_samples,]
-	elif isinstance(audio_or_path_or_list, str) and data_type is not None and data_type == "text" and tokenizer is not None:
-		audio_or_path_or_list = tokenizer.encode(audio_or_path_or_list)
+	if isinstance(data_or_path_or_list, str) and os.path.exists(data_or_path_or_list):
+		data_or_path_or_list, audio_fs = torchaudio.load(data_or_path_or_list)
+		data_or_path_or_list = data_or_path_or_list[0, :]
+	elif isinstance(data_or_path_or_list, np.ndarray):  # audio sample point
+		data_or_path_or_list = np.squeeze(data_or_path_or_list)  # [n_samples,]
+	elif isinstance(data_or_path_or_list, str) and data_type is not None and data_type == "text" and tokenizer is not None:
+		data_or_path_or_list = tokenizer.encode(data_or_path_or_list)
 		
 	if audio_fs != fs and data_type != "text":
 		resampler = torchaudio.transforms.Resample(audio_fs, fs)
-		audio_or_path_or_list = resampler(audio_or_path_or_list[None, :])[0, :]
-	return audio_or_path_or_list
+		data_or_path_or_list = resampler(data_or_path_or_list[None, :])[0, :]
+	return data_or_path_or_list
 
 def load_bytes(input):
 	middle_data = np.frombuffer(input, dtype=np.int16)
