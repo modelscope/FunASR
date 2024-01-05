@@ -5,7 +5,7 @@
 
 from funasr import AutoModel
 
-model = AutoModel(model="/Users/zhifu/Downloads/modelscope_models/speech_fsmn_vad_zh-cn-16k-common-pytorch")
+model = AutoModel(model="../modelscope_models/speech_fsmn_vad_zh-cn-16k-common-pytorch")
 
-res = model(input="/Users/zhifu/Downloads/modelscope_models/speech_fsmn_vad_zh-cn-16k-common-pytorch/example/vad_example.wav")
+res = model(input="../modelscope_models/speech_fsmn_vad_zh-cn-16k-common-pytorch/example/vad_example.wav")
 print(res)

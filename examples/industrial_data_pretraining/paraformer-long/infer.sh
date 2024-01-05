@@ -3,8 +3,8 @@
 local_path_root=../modelscope_models
 mkdir -p ${local_path_root}
 
-local_path=${local_path_root}/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
-git clone https://www.modelscope.cn/damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404.git ${local_path}
+local_path=${local_path_root}/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch
+git clone https://www.modelscope.cn/damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch.git ${local_path}
 
 local_path_vad=${local_path_root}/speech_fsmn_vad_zh-cn-16k-common-pytorch
 git clone https://www.modelscope.cn/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch.git ${local_path_vad}

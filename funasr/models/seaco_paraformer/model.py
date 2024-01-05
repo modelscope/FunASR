@@ -35,7 +35,7 @@ else:
     @contextmanager
     def autocast(enabled=True):
         yield
-from funasr.datasets.audio_datasets.load_audio_extract_fbank import load_audio, extract_fbank
+from funasr.utils.load_utils import load_audio_and_text_image_video, extract_fbank
 from funasr.utils import postprocess_utils
 from funasr.utils.datadir_writer import DatadirWriter
 
@@ -327,7 +327,7 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
         
         # extract fbank feats
         time1 = time.perf_counter()
-        audio_sample_list = load_audio(data_in, fs=frontend.fs, audio_fs=kwargs.get("fs", 16000))
+        audio_sample_list = load_audio_and_text_image_video(data_in, fs=frontend.fs, audio_fs=kwargs.get("fs", 16000))
         time2 = time.perf_counter()
         meta_data["load_data"] = f"{time2 - time1:0.3f}"
         speech, speech_lengths = extract_fbank(audio_sample_list, data_type=kwargs.get("data_type", "sound"),

@@ -4,11 +4,11 @@ import torch
 import numpy as np
 import hydra
 import json
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import DictConfig, OmegaConf, ListConfig
 import logging
 from funasr.download.download_from_hub import download_model
 from funasr.train_utils.set_all_random_seed import set_all_random_seed
-from funasr.datasets.audio_datasets.load_audio_extract_fbank import load_bytes
+from funasr.utils.load_utils import load_bytes
 from funasr.train_utils.device_funcs import to_device
 from tqdm import tqdm
 from funasr.train_utils.load_pretrained_model import load_pretrained_model
@@ -17,11 +17,11 @@ import random
 import string
 from funasr.register import tables
 
-from funasr.datasets.audio_datasets.load_audio_extract_fbank import load_audio, extract_fbank
+from funasr.utils.load_utils import load_audio_and_text_image_video, extract_fbank
 from funasr.utils.vad_utils import slice_padding_audio_samples
 from funasr.utils.timestamp_tools import time_stamp_sentence
 
-def build_iter_for_infer(data_in, input_len=None, data_type="sound", key=None):
+def build_iter_for_infer(data_in, input_len=None, data_type=None, key=None):
 	"""
 	
 	:param input:
@@ -58,9 +58,19 @@ def build_iter_for_infer(data_in, input_len=None, data_type="sound", key=None):
 			key = "rand_key_" + ''.join(random.choice(chars) for _ in range(13))
 			data_list = [data_in]
 			key_list = [key]
-	elif isinstance(data_in, (list, tuple)): # [audio sample point, fbank]
-		data_list = data_in
-		key_list = ["rand_key_" + ''.join(random.choice(chars) for _ in range(13)) for _ in range(len(data_in))]
+	elif isinstance(data_in, (list, tuple)):
+		if data_type is not None and isinstance(data_type, (list, tuple)):
+			data_list_tmp = []
+			for data_in_i, data_type_i in zip(data_in, data_type):
+				key_list, data_list_i = build_iter_for_infer(data_in=data_in_i, data_type=data_type_i)
+				data_list_tmp.append(data_list_i)
+			data_list = []
+			for item in zip(*data_list_tmp):
+				data_list.append(item)
+		else:
+			# [audio sample point, fbank]
+			data_list = data_in
+			key_list = ["rand_key_" + ''.join(random.choice(chars) for _ in range(13)) for _ in range(len(data_in))]
 	else: # raw text; audio sample point, fbank; bytes
 		if isinstance(data_in, bytes): # audio bytes
 			data_in = load_bytes(data_in)
@@ -72,7 +82,16 @@ def build_iter_for_infer(data_in, input_len=None, data_type="sound", key=None):
 	return key_list, data_list
 
 @hydra.main(config_name=None, version_base=None)
-def main_hydra(kwargs: DictConfig):
+def main_hydra(cfg: DictConfig):
+	def to_plain_list(cfg_item):
+		if isinstance(cfg_item, ListConfig):
+			return OmegaConf.to_container(cfg_item, resolve=True)
+		elif isinstance(cfg_item, DictConfig):
+			return {k: to_plain_list(v) for k, v in cfg_item.items()}
+		else:
+			return cfg_item
+	
+	kwargs = to_plain_list(cfg)
 	log_level = getattr(logging, kwargs.get("log_level", "INFO").upper())
 
 	logging.basicConfig(level=log_level)
@@ -125,7 +144,7 @@ class AutoModel:
 		device = kwargs.get("device", "cuda")
 		if not torch.cuda.is_available() or kwargs.get("ngpu", 0):
 			device = "cpu"
-			kwargs["batch_size"] = 1
+			# kwargs["batch_size"] = 1
 		kwargs["device"] = device
 		
 		if kwargs.get("ncpu", None):
@@ -182,8 +201,8 @@ class AutoModel:
 		
 		data_type = kwargs.get("data_type", "sound")
 		batch_size = kwargs.get("batch_size", 1)
-		if kwargs.get("device", "cpu") == "cpu":
-			batch_size = 1
+		# if kwargs.get("device", "cpu") == "cpu":
+		# 	batch_size = 1
 		
 		key_list, data_list = build_iter_for_infer(input, input_len=input_len, data_type=data_type, key=key)
 		
@@ -259,7 +278,7 @@ class AutoModel:
 			key = res[i]["key"]
 			vadsegments = res[i]["value"]
 			input_i = data_list[i]
-			speech = load_audio(input_i, fs=kwargs["frontend"].fs, audio_fs=kwargs.get("fs", 16000))
+			speech = load_audio_and_text_image_video(input_i, fs=kwargs["frontend"].fs, audio_fs=kwargs.get("fs", 16000))
 			speech_lengths = len(speech)
 			n = len(vadsegments)
 			data_with_index = [(vadsegments[i], i) for i in range(n)]
@@ -398,7 +417,7 @@ class AutoFrontend:
 
 			# extract fbank feats
 			time1 = time.perf_counter()
-			audio_sample_list = load_audio(data_batch, fs=self.frontend.fs, audio_fs=kwargs.get("fs", 16000))
+			audio_sample_list = load_audio_and_text_image_video(data_batch, fs=self.frontend.fs, audio_fs=kwargs.get("fs", 16000))
 			time2 = time.perf_counter()
 			meta_data["load_data"] = f"{time2 - time1:0.3f}"
 			speech, speech_lengths = extract_fbank(audio_sample_list, data_type=kwargs.get("data_type", "sound"),

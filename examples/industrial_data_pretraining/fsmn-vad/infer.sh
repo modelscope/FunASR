@@ -1,6 +1,6 @@
 
 # download model
-local_path_root=./modelscope_models
+local_path_root=../modelscope_models
 mkdir -p ${local_path_root}
 local_path=${local_path_root}/speech_fsmn_vad_zh-cn-16k-common-pytorch
 git clone https://www.modelscope.cn/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch.git ${local_path}
