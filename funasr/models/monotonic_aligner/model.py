@@ -4,9 +4,6 @@ import torch
 from torch.cuda.amp import autocast
 from typing import Union, Dict, List, Tuple, Optional
 
-from funasr.register import tables
-from funasr.utils import postprocess_utils
-from funasr.utils.datadir_writer import DatadirWriter
 from funasr.models.paraformer.cif_predictor import mae_loss
 from funasr.train_utils.device_funcs import force_gatherable
 from funasr.models.transformer.utils.add_sos_eos import add_sos_eos
@@ -17,7 +14,6 @@ from funasr.utils.datadir_writer import DatadirWriter
 from funasr.register import tables
 from funasr.models.ctc.ctc import CTC
 from funasr.utils.load_utils import load_audio_and_text_image_video, extract_fbank
-
 
 
 @tables.register("model_classes", "monotonicaligner")
