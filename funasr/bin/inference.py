@@ -17,7 +17,7 @@ import random
 import string
 from funasr.register import tables
 
-from funasr.utils.load_utils import load_audio_and_text_image_video, extract_fbank
+from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
 from funasr.utils.vad_utils import slice_padding_audio_samples
 from funasr.utils.timestamp_tools import time_stamp_sentence
 
@@ -278,7 +278,7 @@ class AutoModel:
 			key = res[i]["key"]
 			vadsegments = res[i]["value"]
 			input_i = data_list[i]
-			speech = load_audio_and_text_image_video(input_i, fs=kwargs["frontend"].fs, audio_fs=kwargs.get("fs", 16000))
+			speech = load_audio_text_image_video(input_i, fs=kwargs["frontend"].fs, audio_fs=kwargs.get("fs", 16000))
 			speech_lengths = len(speech)
 			n = len(vadsegments)
 			data_with_index = [(vadsegments[i], i) for i in range(n)]
@@ -417,7 +417,7 @@ class AutoFrontend:
 
 			# extract fbank feats
 			time1 = time.perf_counter()
-			audio_sample_list = load_audio_and_text_image_video(data_batch, fs=self.frontend.fs, audio_fs=kwargs.get("fs", 16000))
+			audio_sample_list = load_audio_text_image_video(data_batch, fs=self.frontend.fs, audio_fs=kwargs.get("fs", 16000))
 			time2 = time.perf_counter()
 			meta_data["load_data"] = f"{time2 - time1:0.3f}"
 			speech, speech_lengths = extract_fbank(audio_sample_list, data_type=kwargs.get("data_type", "sound"),

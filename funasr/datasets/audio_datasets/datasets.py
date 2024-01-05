@@ -8,7 +8,7 @@ import torchaudio
 import time
 import logging
 
-from funasr.utils.load_utils import load_audio_and_text_image_video, extract_fbank
+from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
 from funasr.register import tables
 
 @tables.register("dataset_classes", "AudioDataset")

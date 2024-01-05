@@ -13,7 +13,7 @@ from funasr.utils import postprocess_utils
 from funasr.utils.datadir_writer import DatadirWriter
 from funasr.register import tables
 from funasr.models.ctc.ctc import CTC
-from funasr.utils.load_utils import load_audio_and_text_image_video, extract_fbank
+from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
 
 
 @tables.register("model_classes", "monotonicaligner")
@@ -154,7 +154,7 @@ class MonotonicAligner(torch.nn.Module):
         meta_data = {}
         # extract fbank feats
         time1 = time.perf_counter()
-        audio_list, text_token_int_list = load_audio_and_text_image_video(data_in, 
+        audio_list, text_token_int_list = load_audio_text_image_video(data_in, 
                                                                             fs=frontend.fs, 
                                                                             audio_fs=kwargs.get("fs", 16000), 
                                                                             data_type=kwargs.get("data_type", "sound"), 

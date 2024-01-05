@@ -27,7 +27,7 @@ from torch.nn.utils.rnn import pad_sequence
 # 	return audio_or_path_or_list
 
 
-def load_audio_and_text_image_video(audio_or_path_or_list, fs: int = 16000, audio_fs: int = 16000, data_type=None, tokenizer=None):
+def load_audio_text_image_video(audio_or_path_or_list, fs: int = 16000, audio_fs: int = 16000, data_type=None, tokenizer=None):
 	if isinstance(audio_or_path_or_list, (list, tuple)):
 		if data_type is not None and isinstance(data_type, (list, tuple)):
 
@@ -37,12 +37,12 @@ def load_audio_and_text_image_video(audio_or_path_or_list, fs: int = 16000, audi
 				
 				for j, (data_type_j, audio_or_path_or_list_j) in enumerate(zip(data_type_i, audio_or_path_or_list_i)):
 					
-					audio_or_path_or_list_j = load_audio_and_text_image_video(audio_or_path_or_list_j, fs=fs, audio_fs=audio_fs, data_type=data_type_j, tokenizer=tokenizer)
+					audio_or_path_or_list_j = load_audio_text_image_video(audio_or_path_or_list_j, fs=fs, audio_fs=audio_fs, data_type=data_type_j, tokenizer=tokenizer)
 					audio_or_path_or_list_ret[j].append(audio_or_path_or_list_j)
 
 			return audio_or_path_or_list_ret
 		else:
-			return [load_audio_and_text_image_video(audio, fs=fs, audio_fs=audio_fs) for audio in audio_or_path_or_list]
+			return [load_audio_text_image_video(audio, fs=fs, audio_fs=audio_fs) for audio in audio_or_path_or_list]
 	
 	if isinstance(audio_or_path_or_list, str) and os.path.exists(audio_or_path_or_list):
 		audio_or_path_or_list, audio_fs = torchaudio.load(audio_or_path_or_list)
