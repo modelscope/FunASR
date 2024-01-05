@@ -14,7 +14,7 @@ from funasr.utils import postprocess_utils
 from funasr.utils.datadir_writer import DatadirWriter
 from funasr.register import tables
 from funasr.models.ctc.ctc import CTC
-from funasr.utils.load_utils import load_audio_and_text_image_video, extract_fbank, load_audio_and_text_image_video
+from funasr.utils.load_utils import load_audio_and_text_image_video, extract_fbank
 
 
 

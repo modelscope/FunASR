@@ -22,7 +22,7 @@ from funasr.models.paraformer.search import Hypothesis
 
 from torch.cuda.amp import autocast
 
-from funasr.utils.load_utils import load_audio_and_text_image_video, extract_fbank, load_audio_and_text_image_video
+from funasr.utils.load_utils import load_audio_and_text_image_video, extract_fbank
 from funasr.utils import postprocess_utils
 from funasr.utils.datadir_writer import DatadirWriter
 from funasr.register import tables

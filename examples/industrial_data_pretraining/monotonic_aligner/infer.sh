@@ -3,7 +3,7 @@
 local_path_root=../modelscope_models
 mkdir -p ${local_path_root}
 local_path=${local_path_root}/speech_timestamp_prediction-v1-16k-offline
-# git clone https://www.modelscope.cn/damo/speech_timestamp_prediction-v1-16k-offline.git ${local_path}
+ git clone https://www.modelscope.cn/damo/speech_timestamp_prediction-v1-16k-offline.git ${local_path}
 
 
 python funasr/bin/inference.py \
