@@ -6,29 +6,18 @@
 # tables.print()
 
 # network architecture
-model: SeacoParaformer
+model: MonotonicAligner
 model_conf:
-    ctc_weight: 0.0
-    lsm_weight: 0.1
-    length_normalized_loss: true
-    predictor_weight: 1.0
+    length_normalized_loss: False
     predictor_bias: 1
-    sampling_ratio: 0.75
-    inner_dim: 512
-    bias_encoder_type: lstm
-    bias_encoder_bid: false
-    seaco_lsm_weight: 0.1
-    seaco_length_normal: true
-    train_decoder: false
-    NO_BIAS: 8377
 
 # encoder
 encoder: SANMEncoder
 encoder_conf:
-    output_size: 512
+    output_size: 320
     attention_heads: 4
-    linear_units: 2048
-    num_blocks: 50
+    linear_units: 1280
+    num_blocks: 30
     dropout_rate: 0.1
     positional_dropout_rate: 0.1
     attention_dropout_rate: 0.1
@@ -39,38 +28,9 @@ encoder_conf:
     sanm_shfit: 0
     selfattention_layer_type: sanm
 
-# decoder
-decoder: ParaformerSANMDecoder
-decoder_conf:
-    attention_heads: 4
-    linear_units: 2048
-    num_blocks: 16
-    dropout_rate: 0.1
-    positional_dropout_rate: 0.1
-    self_attention_dropout_rate: 0.1
-    src_attention_dropout_rate: 0.1
-    att_layer_num: 16
-    kernel_size: 11
-    sanm_shfit: 0
-
-# seaco decoder
-seaco_decoder: ParaformerSANMDecoder
-seaco_decoder_conf:
-    attention_heads: 4
-    linear_units: 1024
-    num_blocks: 4
-    dropout_rate: 0.1
-    positional_dropout_rate: 0.1
-    self_attention_dropout_rate: 0.1
-    src_attention_dropout_rate: 0.1
-    kernel_size: 21
-    sanm_shfit: 0
-    use_output_layer: false
-    wo_input_layer: true
-
 predictor: CifPredictorV3
 predictor_conf:
-    idim: 512
+    idim: 320
     threshold: 1.0
     l_order: 1
     r_order: 1
@@ -91,7 +51,6 @@ frontend_conf:
     frame_shift: 10
     lfr_m: 7
     lfr_n: 6
-    dither: 0.0
 
 specaug: SpecAugLFR
 specaug_conf:
@@ -147,10 +106,10 @@ tokenizer_conf:
   unk_symbol: <unk>
   split_with_space: true
 
-
 ctc_conf:
     dropout_rate: 0.0
     ctc_type: builtin
     reduce: true
     ignore_nan_grad: true
+    
 normalize: null
