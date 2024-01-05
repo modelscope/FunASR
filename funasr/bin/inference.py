@@ -21,7 +21,7 @@ from funasr.utils.load_utils import load_audio_and_text_image_video, extract_fba
 from funasr.utils.vad_utils import slice_padding_audio_samples
 from funasr.utils.timestamp_tools import time_stamp_sentence
 
-def build_iter_for_infer(data_in, input_len=None, data_type=None, key=None):
+def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
 	"""
 	
 	:param input:
@@ -62,7 +62,7 @@ def build_iter_for_infer(data_in, input_len=None, data_type=None, key=None):
 		if data_type is not None and isinstance(data_type, (list, tuple)):
 			data_list_tmp = []
 			for data_in_i, data_type_i in zip(data_in, data_type):
-				key_list, data_list_i = build_iter_for_infer(data_in=data_in_i, data_type=data_type_i)
+				key_list, data_list_i = prepare_data_iterator(data_in=data_in_i, data_type=data_type_i)
 				data_list_tmp.append(data_list_i)
 			data_list = []
 			for item in zip(*data_list_tmp):
@@ -204,7 +204,7 @@ class AutoModel:
 		# if kwargs.get("device", "cpu") == "cpu":
 		# 	batch_size = 1
 		
-		key_list, data_list = build_iter_for_infer(input, input_len=input_len, data_type=data_type, key=key)
+		key_list, data_list = prepare_data_iterator(input, input_len=input_len, data_type=data_type, key=key)
 		
 		speed_stats = {}
 		asr_result_list = []
@@ -268,7 +268,7 @@ class AutoModel:
 		batch_size_threshold_ms = int(kwargs.get("batch_size_threshold_s", 60))*1000
 		kwargs["batch_size"] = batch_size
 		data_type = kwargs.get("data_type", "sound")
-		key_list, data_list = build_iter_for_infer(input, input_len=input_len, data_type=data_type)
+		key_list, data_list = prepare_data_iterator(input, input_len=input_len, data_type=data_type)
 		results_ret_list = []
 		time_speech_total_all_samples = 0.0
 
@@ -397,7 +397,7 @@ class AutoFrontend:
 		kwargs.update(cfg)
 
 
-		key_list, data_list = build_iter_for_infer(input, input_len=input_len)
+		key_list, data_list = prepare_data_iterator(input, input_len=input_len)
 		batch_size = kwargs.get("batch_size", 1)
 		device = kwargs.get("device", "cpu")
 		if device == "cpu":
