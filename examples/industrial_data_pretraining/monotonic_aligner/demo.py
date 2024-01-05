@@ -5,10 +5,10 @@
 
 from funasr import AutoModel
 
-model = AutoModel(model="/Users/zhifu/modelscope_models/speech_timestamp_prediction-v1-16k-offline")
+model = AutoModel(model="../modelscope_models/speech_seaco_paraformer_large_asr_nat-zh-cn-16k-common-vocab8404-pytorch")
 
-res = model(input=("/Users/zhifu/funasr_github/test_local/wav.scp",
-                   "/Users/zhifu/funasr_github/test_local/text.txt"),
+res = model(input=("../modelscope_models/speech_seaco_paraformer_large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/example/asr_example.wav",
+                   "欢迎大家来到魔搭社区进行体验"),
             data_type=("sound", "text"),
             batch_size=2,
             )
