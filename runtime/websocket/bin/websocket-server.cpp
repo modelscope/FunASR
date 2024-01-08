@@ -100,7 +100,14 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
         jsonresult["timestamp"] = stamp_res;
       }
       if(stamp_sents != ""){
-        jsonresult["stamp_sents"] = stamp_sents;
+        try{
+          nlohmann::json json_stamp = nlohmann::json::parse(stamp_sents);
+          jsonresult["stamp_sents"] = json_stamp;
+        }catch (std::exception const &e)
+        {
+          LOG(ERROR)<<e.what();
+          jsonresult["stamp_sents"] = "";
+        }
       }
       jsonresult["wav_name"] = wav_name;
 
