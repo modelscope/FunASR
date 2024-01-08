@@ -22,3 +22,4 @@ modelscope
 samples
 .ipynb_checkpoints
 outputs*
+emotion2vec*
