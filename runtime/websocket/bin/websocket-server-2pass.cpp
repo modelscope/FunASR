@@ -83,8 +83,15 @@ nlohmann::json handle_result(FUNASR_RESULT result) {
 
   std::string tmp_stamp_sents = FunASRGetStampSents(result);
   if (tmp_stamp_sents != "") {
-    LOG(INFO) << "offline stamp_sents : " << tmp_stamp_sents;
-    jsonresult["stamp_sents"] = tmp_stamp_sents;
+    try{
+      nlohmann::json json_stamp = nlohmann::json::parse(tmp_stamp_sents);
+      LOG(INFO) << "offline stamp_sents : " << json_stamp;
+      jsonresult["stamp_sents"] = json_stamp;
+    }catch (std::exception const &e)
+    {
+      LOG(ERROR)<< tmp_stamp_sents << e.what();
+      jsonresult["stamp_sents"] = "";
+    }
   }
 
   return jsonresult;
