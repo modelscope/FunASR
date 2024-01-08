@@ -5,7 +5,7 @@
 
 from funasr import AutoModel
 
-model = AutoModel(model="/Users/zhifu/Downloads/modelscope_models/emotion2vec_base")
+model = AutoModel(model="../modelscope_models/emotion2vec_base")
 
-res = model(input="/Users/zhifu/Downloads/modelscope_models/emotion2vec_base/example/test.wav")
+res = model(input="../modelscope_models/emotion2vec_base/example/test.wav")
 print(res)

@@ -1,5 +1,11 @@
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+#  MIT License  (https://opensource.org/licenses/MIT)
+# Modified from https://github.com/ddlBoJack/emotion2vec/tree/main
 
 import logging
+import os
 from functools import partial
 import numpy as np
 
@@ -21,7 +27,11 @@ from funasr.register import tables
 
 @tables.register("model_classes", "Emotion2vec")
 class Emotion2vec(nn.Module):
-
+    """
+    Author: Ziyang Ma, Zhisheng Zheng, Jiaxin Ye, Jinchao Li, Zhifu Gao, Shiliang Zhang, Xie Chen
+    emotion2vec: Self-Supervised Pre-Training for Speech Emotion Representation
+    https://arxiv.org/abs/2312.15185
+    """
     def __init__(self, **kwargs):
         super().__init__()
         # import pdb; pdb.set_trace()
@@ -196,6 +206,9 @@ class Emotion2vec(nn.Module):
         time2 = time.perf_counter()
         meta_data["load_data"] = f"{time2 - time1:0.3f}"
         results = []
+        output_dir = kwargs.get("output_dir")
+        if output_dir:
+            os.makedirs(output_dir, exist_ok=True)
         for i, wav in enumerate(audio_sample_list):
             source = wav.to(device=kwargs["device"])
             if self.cfg.normalize:
@@ -211,5 +224,7 @@ class Emotion2vec(nn.Module):
             
             result_i = {"key": key[i], "feats": feats}
             results.append(result_i)
+            if output_dir:
+                np.save(os.path.join(output_dir, "{}.npy".format(key[i])), feats)
             
         return results, meta_data
