@@ -10,6 +10,7 @@ FunASR离线文件转写软件包，提供了一款功能强大的语音离线�
 
 | 时间         | 详情                                                | 镜像版本                         | 镜像ID         |
 |------------|---------------------------------------------------|------------------------------|--------------|
+| 2024.01.08 | 优化句子级时间戳json格式 | funasr-runtime-sdk-cpu-0.4.1 | 0250f8ef981b |
 | 2024.01.03 | 新增支持8k模型、优化时间戳不匹配问题及增加句子级别时间戳、优化英文单词fst热词效果、支持自动化配置线程参数，同时修复已知的crash问题及内存泄漏问题 | funasr-runtime-sdk-cpu-0.4.0 | c4483ee08f04 |
 | 2023.11.08 | 支持标点大模型、支持Ngram模型、支持fst热词、支持服务端加载热词、runtime结构变化适配 | funasr-runtime-sdk-cpu-0.3.0 | caa64bddbb43 |
 | 2023.09.19 | 支持ITN模型                                           | funasr-runtime-sdk-cpu-0.2.2 | 2c5286be13e9 |
@@ -45,11 +46,11 @@ docker安装失败请参考 [Docker Installation](https://alibaba-damo-academy.g
 
 ```shell
 sudo docker pull \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.4.0
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.4.1
 mkdir -p ./funasr-runtime-resources/models
 sudo docker run -p 10095:10095 -it --privileged=true \
   -v $PWD/funasr-runtime-resources/models:/workspace/models \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.4.0
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.4.1
 ```
 
 ### 服务端启动
