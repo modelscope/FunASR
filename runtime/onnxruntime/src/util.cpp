@@ -365,9 +365,13 @@ void TimestampSplitChiEngCharacters(const std::string &input_str,
   }
 }
 
-std::string VectorToString(const std::vector<std::vector<int>>& vec) {
+std::string VectorToString(const std::vector<std::vector<int>>& vec, bool out_empty) {
     if(vec.size() == 0){
-        return "";
+        if(out_empty){
+            return "";
+        }else{
+            return "[]";
+        }
     }
     std::ostringstream out;
     out << "[";
@@ -584,11 +588,11 @@ std::string TimestampSentence(std::string &text, std::string &str_time){
                 }
             }
             // format
-            ts_sent += "{'text_seg':\\\"" + text_seg + "\\\",";
-            ts_sent += "'punc':'" + characters[idx_str] + "',";
-            ts_sent += "'start':'" + to_string(start) + "',";
-            ts_sent += "'end':'" + to_string(end) + "',";
-            ts_sent += "'ts_list':" + VectorToString(ts_seg) + "}";
+            ts_sent += "{\"text_seg\":\"" + text_seg + "\",";
+            ts_sent += "\"punc\":\"" + characters[idx_str] + "\",";
+            ts_sent += "\"start\":\"" + to_string(start) + "\",";
+            ts_sent += "\"end\":\"" + to_string(end) + "\",";
+            ts_sent += "\"ts_list\":" + VectorToString(ts_seg, false) + "}";
             
             if (idx_str == characters.size()-1){
                 ts_sentences += ts_sent;
@@ -621,11 +625,11 @@ std::string TimestampSentence(std::string &text, std::string &str_time){
             end = ts_seg[ts_seg.size()-1][1];
         }
         // format
-        ts_sent += "{'text_seg':\\\"" + text_seg + "\\\",";
-        ts_sent += "'punc':'',";
-        ts_sent += "'start':'" + to_string(start) + "',";
-        ts_sent += "'end':'" + to_string(end) + "',";
-        ts_sent += "'ts_list':" + VectorToString(ts_seg) + "}";
+        ts_sent += "{\"text_seg\":\"" + text_seg + "\",";
+        ts_sent += "\"punc\":\"\",";
+        ts_sent += "\"start\":\"" + to_string(start) + "\",";
+        ts_sent += "\"end\":\"" + to_string(end) + "\",";
+        ts_sent += "\"ts_list\":" + VectorToString(ts_seg, false) + "}";
         ts_sentences += ts_sent;
     }
 

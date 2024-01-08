@@ -45,7 +45,7 @@ bool TimestampIsPunctuation(U16CHAR_T &u16);
 bool TimestampIsPunctuation(const std::string& str);
 void TimestampSplitChiEngCharacters(const std::string &input_str,
                                   std::vector<std::string> &characters);
-std::string VectorToString(const std::vector<std::vector<int>>& vec);                                  
+std::string VectorToString(const std::vector<std::vector<int>>& vec, bool out_empty=true);                                  
 std::string TimestampSmooth(std::string &text, std::string &text_itn, std::string &str_time);
 std::string TimestampSentence(std::string &text, std::string &str_time);
 std::vector<std::string> split(const std::string &s, char delim);
