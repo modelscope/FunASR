@@ -105,6 +105,7 @@ def load_pretrained_model(
     else:
         buffer = BytesIO(oss_bucket.get_object(path).read())
         src_state = torch.load(buffer, map_location=map_location)
+    src_state = src_state["model"] if "model" in src_state else src_state
     if excludes is not None:
         for e in excludes.split(","):
             src_state = {k: v for k, v in src_state.items() if not k.startswith(e)}

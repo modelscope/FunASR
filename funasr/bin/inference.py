@@ -222,7 +222,8 @@ class AutoModel:
 				batch["data_lengths"] = input_len
 		
 			time1 = time.perf_counter()
-			results, meta_data = model.generate(**batch, **kwargs)
+			with torch.no_grad():
+				results, meta_data = model.generate(**batch, **kwargs)
 			time2 = time.perf_counter()
 			
 			asr_result_list.extend(results)

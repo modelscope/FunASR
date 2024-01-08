@@ -19,13 +19,16 @@ class RegisterTables:
     dataset_classes = {}
     index_ds_classes = {}
 
-    def print(self,):
+    def print(self, key=None):
         print("\ntables: \n")
         fields = vars(self)
         for classes_key, classes_dict in fields.items():
-            print(f"-----------    ** {classes_key.replace('_meta', '')} **    --------------")
-        
-            if classes_key.endswith("_meta"):
+            
+            flag = True
+            if key is not None:
+                flag = key in classes_key
+            if classes_key.endswith("_meta") and flag:
+                print(f"-----------    ** {classes_key.replace('_meta', '')} **    --------------")
                 headers = ["class name", "register name", "class location"]
                 metas = []
                 for register_key, meta in classes_dict.items():
