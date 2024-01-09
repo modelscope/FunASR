@@ -525,8 +525,8 @@ class ParaformerSANMDecoder(BaseTransformerDecoder):
         return y, new_cache
 
 
-@tables.register("decoder_classes", "ParaformerDecoderSAN")
-class ParaformerDecoderSAN(BaseTransformerDecoder):
+@tables.register("decoder_classes", "ParaformerSANDecoder")
+class ParaformerSANDecoder(BaseTransformerDecoder):
     """
     Author: Speech Lab of DAMO Academy, Alibaba Group
     Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition

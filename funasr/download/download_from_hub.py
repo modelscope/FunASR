@@ -7,17 +7,17 @@ from funasr.download.name_maps_from_hub import name_maps_ms, name_maps_hf
 def download_model(**kwargs):
 	model_hub = kwargs.get("model_hub", "ms")
 	if model_hub == "ms":
-		kwargs = download_fr_ms(**kwargs)
+		kwargs = download_from_ms(**kwargs)
 	
 	return kwargs
 
-def download_fr_ms(**kwargs):
+def download_from_ms(**kwargs):
 	model_or_path = kwargs.get("model")
 	if model_or_path in name_maps_ms:
 		model_or_path = name_maps_ms[model_or_path]
 	model_revision = kwargs.get("model_revision")
 	if not os.path.exists(model_or_path):
-		model_or_path = get_or_download_model_dir(model_or_path, model_revision, is_training=kwargs.get("is_training"))
+		model_or_path = get_or_download_model_dir(model_or_path, model_revision, is_training=kwargs.get("is_training"), check_latest=kwargs.get("kwargs", True))
 	
 	config = os.path.join(model_or_path, "config.yaml")
 	if os.path.exists(config) and os.path.exists(os.path.join(model_or_path, "model.pb")):
@@ -49,9 +49,10 @@ def download_fr_ms(**kwargs):
 	return OmegaConf.to_container(kwargs, resolve=True)
 
 def get_or_download_model_dir(
-                              model,
-                              model_revision=None,
-							  is_training=False,
+		model,
+		model_revision=None,
+		is_training=False,
+		check_latest=True,
 	):
 	""" Get local model directory or download model if necessary.
 
@@ -67,7 +68,7 @@ def get_or_download_model_dir(
 	
 	key = Invoke.LOCAL_TRAINER if is_training else Invoke.PIPELINE
 	
-	if os.path.exists(model):
+	if os.path.exists(model) and check_latest:
 		model_cache_dir = model if os.path.isdir(
 			model) else os.path.dirname(model)
 		try:
