@@ -21,8 +21,6 @@ def download_fr_ms(**kwargs):
 	
 	config = os.path.join(model_or_path, "config.yaml")
 	if os.path.exists(config) and os.path.exists(os.path.join(model_or_path, "model.pb")):
-		# config = os.path.join(model_or_path, "config.yaml")
-		# assert os.path.exists(config), "{} is not exist!".format(config)
 		cfg = OmegaConf.load(config)
 		kwargs = OmegaConf.merge(cfg, kwargs)
 		init_param = os.path.join(model_or_path, "model.pb")
@@ -42,10 +40,10 @@ def download_fr_ms(**kwargs):
 		assert os.path.exists(os.path.join(model_or_path, "configuration.json"))
 		with open(os.path.join(model_or_path, "configuration.json"), 'r', encoding='utf-8') as f:
 			conf_json = json.load(f)
-			config = os.path.join(model_or_path, conf_json["model"]["model_config"])
+			config = os.path.join(model_or_path, conf_json["model_config"])
 			cfg = OmegaConf.load(config)
 			kwargs = OmegaConf.merge(cfg, kwargs)
-			init_param = os.path.join(model_or_path, conf_json["model"]["model_name"])
+			init_param = os.path.join(model_or_path, conf_json["model_file"])
 			kwargs["init_param"] = init_param
 		kwargs["model"] = cfg["model"]
 	return OmegaConf.to_container(kwargs, resolve=True)

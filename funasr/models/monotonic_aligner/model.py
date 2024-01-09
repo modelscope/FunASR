@@ -188,9 +188,12 @@ class MonotonicAligner(torch.nn.Module):
             text_postprocessed, time_stamp_postprocessed, _ = postprocess_utils.sentence_postprocess(token, timestamp)
             result_i = {"key": key[i], "text": text_postprocessed,
                                 "timestamp": time_stamp_postprocessed,
-                                }    
-            # ibest_writer["token"][key[i]] = " ".join(token)
-            ibest_writer["timestamp_list"][key[i]] = time_stamp_postprocessed
-            ibest_writer["timestamp_str"][key[i]] = timestamp_str
+                                }
             results.append(result_i)
+
+            if ibest_writer:
+                # ibest_writer["token"][key[i]] = " ".join(token)
+                ibest_writer["timestamp_list"][key[i]] = time_stamp_postprocessed
+                ibest_writer["timestamp_str"][key[i]] = timestamp_str
+            
         return results, meta_data

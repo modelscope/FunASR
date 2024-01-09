@@ -5,9 +5,9 @@
 
 from funasr import AutoModel
 
-model = AutoModel(model="../modelscope_models/speech_seaco_paraformer_large_asr_nat-zh-cn-16k-common-vocab8404-pytorch")
+model = AutoModel(model="damo/speech_timestamp_prediction-v1-16k-offline", model_revision="v2.0.0")
 
-res = model(input=("../modelscope_models/speech_seaco_paraformer_large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/example/asr_example.wav",
+res = model(input=("https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav",
                    "欢迎大家来到魔搭社区进行体验"),
             data_type=("sound", "text"),
             batch_size=2,

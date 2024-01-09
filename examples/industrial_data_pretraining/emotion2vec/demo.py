@@ -5,7 +5,7 @@
 
 from funasr import AutoModel
 
-model = AutoModel(model="../modelscope_models/emotion2vec_base")
+model = AutoModel(model="damo/emotion2vec_base", model_revision="v2.0.0")
 
-res = model(input="../modelscope_models/emotion2vec_base/example/test.wav", output_dir="./outputs")
+res = model(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav", output_dir="./outputs")
 print(res)

@@ -1,14 +1,11 @@
 
-# download model
-local_path_root=../modelscope_models
-mkdir -p ${local_path_root}
-local_path=${local_path_root}/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
-git clone https://www.modelscope.cn/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch.git ${local_path}
-
+model="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
+model_revision="v2.0.0"
 
 python funasr/bin/inference.py \
-+model="${local_path}" \
-+input="${local_path}/example/asr_example.wav" \
++model=${model} \
++model_revision=${model_revision} \
++input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav" \
 +output_dir="./outputs/debug" \
 +device="cpu" \
 

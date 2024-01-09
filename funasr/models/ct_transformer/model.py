@@ -11,6 +11,7 @@ from funasr.train_utils.device_funcs import to_device
 import torch
 import torch.nn as nn
 from funasr.models.ct_transformer.utils import split_to_mini_sentence, split_words
+from funasr.utils.load_utils import load_audio_text_image_video
 
 from funasr.register import tables
 
@@ -219,10 +220,10 @@ class CTTransformer(nn.Module):
                  **kwargs,
                  ):
         assert len(data_in) == 1
-        
+        text = load_audio_text_image_video(data_in, data_type=kwargs.get("kwargs", "text"))[0]
         vad_indexes = kwargs.get("vad_indexes", None)
-        text = data_in[0]
-        text_lengths = data_lengths[0] if data_lengths is not None else None
+        # text = data_in[0]
+        # text_lengths = data_lengths[0] if data_lengths is not None else None
         split_size = kwargs.get("split_size", 20)
         
         tokens = split_words(text)

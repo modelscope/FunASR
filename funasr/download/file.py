@@ -8,7 +8,23 @@ from pathlib import Path
 from typing import Generator, Union
 
 import requests
+from urllib.parse import urlparse
 
+def download_from_url(url):
+    result = urlparse(url)
+    file_path = None
+    if result.scheme is not None and len(result.scheme) > 0:
+        storage = HTTPStorage()
+        # bytes
+        data = storage.read(url)
+        work_dir = tempfile.TemporaryDirectory().name
+        if not os.path.exists(work_dir):
+            os.makedirs(work_dir)
+        file_path = os.path.join(work_dir, os.path.basename(url))
+        with open(file_path, 'wb') as fb:
+            fb.write(data)
+    assert file_path is not None, f"failed to download: {url}"
+    return file_path
 
 class Storage(metaclass=ABCMeta):
     """Abstract class of storage.

@@ -5,8 +5,8 @@
 
 from funasr import AutoModel
 
-model = AutoModel(model="../modelscope_models/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404")
+model = AutoModel(model="damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404", model_revision="v2.0.0")
 
-res = model(input="../modelscope_models/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404/example/asr_example.wav",
+res = model(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav",
             hotword='达摩院 魔搭')
 print(res)
