@@ -447,7 +447,6 @@ class Paraformer(nn.Module):
              frontend=None,
              **kwargs,
              ):
-		
 		# init beamsearch
 		is_use_ctc = kwargs.get("decoding_ctc_weight", 0.0) > 0.00001 and self.ctc != None
 		is_use_lm = kwargs.get("lm_weight", 0.0) > 0.00001 and kwargs.get("lm_file", None) is not None
@@ -475,7 +474,6 @@ class Paraformer(nn.Module):
 			meta_data["batch_data_time"] = speech_lengths.sum().item() * frontend.frame_shift * frontend.lfr_n / 1000
 			
 		speech.to(device=kwargs["device"]), speech_lengths.to(device=kwargs["device"])
-
 		# Encoder
 		encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
 		if isinstance(encoder_out, tuple):
