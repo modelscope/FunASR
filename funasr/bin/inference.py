@@ -391,7 +391,10 @@ class AutoFrontend:
 			frontend = frontend_class(**kwargs["frontend_conf"])
 
 		self.frontend = frontend
+		if "frontend" in kwargs:
+			del kwargs["frontend"]
 		self.kwargs = kwargs
+
 	
 	def __call__(self, input, input_len=None, kwargs=None, **cfg):
 		
@@ -423,7 +426,7 @@ class AutoFrontend:
 			time2 = time.perf_counter()
 			meta_data["load_data"] = f"{time2 - time1:0.3f}"
 			speech, speech_lengths = extract_fbank(audio_sample_list, data_type=kwargs.get("data_type", "sound"),
-			                                       frontend=self.frontend)
+			                                       frontend=self.frontend, **kwargs)
 			time3 = time.perf_counter()
 			meta_data["extract_feat"] = f"{time3 - time2:0.3f}"
 			meta_data["batch_data_time"] = speech_lengths.sum().item() * self.frontend.frame_shift * self.frontend.lfr_n / 1000

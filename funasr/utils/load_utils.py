@@ -68,7 +68,7 @@ def load_bytes(input):
 	array = np.frombuffer((middle_data.astype(dtype) - offset) / abs_max, dtype=np.float32)
 	return array
 
-def extract_fbank(data, data_len = None, data_type: str="sound", frontend=None):
+def extract_fbank(data, data_len = None, data_type: str="sound", frontend=None, **kwargs):
 	# import pdb;
 	# pdb.set_trace()
 	if isinstance(data, np.ndarray):
@@ -83,7 +83,7 @@ def extract_fbank(data, data_len = None, data_type: str="sound", frontend=None):
 	elif isinstance(data, (list, tuple)):
 		data_list, data_len = [], []
 		for data_i in data:
-			if isinstance(data, np.ndarray):
+			if isinstance(data_i, np.ndarray):
 				data_i = torch.from_numpy(data_i)
 			data_list.append(data_i)
 			data_len.append(data_i.shape[0])
@@ -91,7 +91,7 @@ def extract_fbank(data, data_len = None, data_type: str="sound", frontend=None):
 	# import pdb;
 	# pdb.set_trace()
 	# if data_type == "sound":
-	data, data_len = frontend(data, data_len)
+	data, data_len = frontend(data, data_len, **kwargs)
 	
 	if isinstance(data_len, (list, tuple)):
 		data_len = torch.tensor([data_len])
