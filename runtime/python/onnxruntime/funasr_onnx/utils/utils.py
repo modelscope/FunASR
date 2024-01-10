@@ -28,7 +28,7 @@ def pad_list(xs, pad_value, max_len=None):
         max_len = max(x.size(0) for x in xs)
     # pad = xs[0].new(n_batch, max_len, *xs[0].size()[1:]).fill_(pad_value)
     # numpy format
-    pad = np.zeros((n_batch, max_len)).astype(np.int32)
+    pad = (np.zeros((n_batch, max_len)) + pad_value).astype(np.int32)
     for i in range(n_batch):
         pad[i, : xs[i].shape[0]] = xs[i]
 
