@@ -2,7 +2,6 @@
 
 import functools
 import logging
-import pickle
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, NamedTuple, Set, Tuple, Union
 
