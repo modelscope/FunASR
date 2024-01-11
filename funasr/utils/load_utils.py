@@ -43,7 +43,7 @@ def load_audio_text_image_video(data_or_path_or_list, fs: int = 16000, audio_fs:
 	elif isinstance(data_or_path_or_list, str) and data_type == "text" and tokenizer is not None:
 		data_or_path_or_list = tokenizer.encode(data_or_path_or_list)
 	elif isinstance(data_or_path_or_list, np.ndarray):  # audio sample point
-		data_or_path_or_list = np.squeeze(data_or_path_or_list)  # [n_samples,]
+		data_or_path_or_list = torch.from_numpy(data_or_path_or_list).squeeze()  # [n_samples,]
 	else:
 		pass
 		# print(f"unsupport data type: {data_or_path_or_list}, return raw data")

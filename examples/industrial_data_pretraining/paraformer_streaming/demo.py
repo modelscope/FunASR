@@ -3,36 +3,44 @@
 # Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
 #  MIT License  (https://opensource.org/licenses/MIT)
 
-# from funasr import AutoModel
-#
-# model = AutoModel(model="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch", model_revison="v2.0.0")
-#
-# res = model(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav")
-# print(res)
+from funasr import AutoModel
 
+chunk_size = [0, 10, 5] #[0, 10, 5] 600ms, [0, 8, 4] 480ms
+encoder_chunk_look_back = 4 #number of chunks to lookback for encoder self-attention
+decoder_chunk_look_back = 1 #number of encoder chunks to lookback for decoder cross-attention
 
-from funasr import AutoFrontend
-
-frontend = AutoFrontend(model="/Users/zhifu/Downloads/modelscope_models/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online", model_revison="v2.0.0")
-
+model = AutoModel(model="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online", model_revison="v2.0.0")
+cache = {}
+res = model(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav",
+            cache=cache,
+            is_final=True,
+            chunk_size=chunk_size,
+            encoder_chunk_look_back=encoder_chunk_look_back,
+            decoder_chunk_look_back=decoder_chunk_look_back,
+            )
+print(res)
 
 
 import soundfile
-speech, sample_rate = soundfile.read("/Users/zhifu/Downloads/modelscope_models/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/example/asr_example.wav")
+import os
 
-chunk_size = [0, 10, 5] #[0, 10, 5] 600ms, [0, 8, 4] 480ms
+speech, sample_rate = soundfile.read(os.path.expanduser('~')+
+                                     "/.cache/modelscope/hub/damo/"+
+                                     "speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/"+
+                                     "example/asr_example.wav")
+
 chunk_stride = chunk_size[1] * 960 # 600ms、480ms
-# first chunk, 600ms
 
 cache = {}
 
 for i in range(int(len((speech)-1)/chunk_stride+1)):
     speech_chunk = speech[i*chunk_stride:(i+1)*chunk_stride]
-    fbanks = frontend(input=speech_chunk,
-                      batch_size=2,
-                      cache=cache)
-
-
-# for batch_idx, fbank_dict in enumerate(fbanks):
-# 	res = model(**fbank_dict)
-# 	print(res)
+    is_final = i == int(len((speech)-1)/chunk_stride+1)
+    res = model(input=speech_chunk,
+                cache=cache,
+                is_final=is_final,
+                chunk_size=chunk_size,
+                encoder_chunk_look_back=encoder_chunk_look_back,
+                decoder_chunk_look_back=decoder_chunk_look_back,
+                )
+    print(res)

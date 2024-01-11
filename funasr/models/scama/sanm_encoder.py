@@ -423,7 +423,9 @@ class SANMEncoderChunkOpt(nn.Module):
                       xs_pad: torch.Tensor,
                       ilens: torch.Tensor,
                       cache: dict = None,
+                      **kwargs,
                       ):
+        is_final = kwargs.get("is_final", False)
         xs_pad *= self.output_size() ** 0.5
         if self.embed is None:
             xs_pad = xs_pad
