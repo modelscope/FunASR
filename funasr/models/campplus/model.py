@@ -109,13 +109,9 @@ class CAMPPlus(nn.Module):
         audio_sample_list = load_audio_text_image_video(data_in, fs=16000, audio_fs=kwargs.get("fs", 16000), data_type="sound")
         time2 = time.perf_counter()
         meta_data["load_data"] = f"{time2 - time1:0.3f}"
-        speech, speech_lengths = extract_feature(audio_sample_list)
+        speech, speech_lengths, speech_times = extract_feature(audio_sample_list)
         time3 = time.perf_counter()
         meta_data["extract_feat"] = f"{time3 - time2:0.3f}"
-        meta_data["batch_data_time"] = np.array(speech_lengths).sum().item() / 16000.0
-        # import pdb; pdb.set_trace()
-        results = []
-        embeddings = self.forward(speech)
-        for embedding in embeddings:
-            results.append({"spk_embedding":embedding})
+        meta_data["batch_data_time"] = np.array(speech_times).sum().item() / 16000.0
+        results = [{"spk_embedding": self.forward(speech)}]
         return results, meta_data
