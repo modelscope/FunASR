@@ -16,7 +16,7 @@ except:
 
 
 
-def load_audio_text_image_video(data_or_path_or_list, fs: int = 16000, audio_fs: int = 16000, data_type="sound", tokenizer=None):
+def load_audio_text_image_video(data_or_path_or_list, fs: int = 16000, audio_fs: int = 16000, data_type="sound", tokenizer=None, **kwargs):
 	if isinstance(data_or_path_or_list, (list, tuple)):
 		if data_type is not None and isinstance(data_type, (list, tuple)):
 
@@ -26,20 +26,29 @@ def load_audio_text_image_video(data_or_path_or_list, fs: int = 16000, audio_fs:
 				
 				for j, (data_type_j, data_or_path_or_list_j) in enumerate(zip(data_type_i, data_or_path_or_list_i)):
 					
-					data_or_path_or_list_j = load_audio_text_image_video(data_or_path_or_list_j, fs=fs, audio_fs=audio_fs, data_type=data_type_j, tokenizer=tokenizer)
+					data_or_path_or_list_j = load_audio_text_image_video(data_or_path_or_list_j, fs=fs, audio_fs=audio_fs, data_type=data_type_j, tokenizer=tokenizer, **kwargs)
 					data_or_path_or_list_ret[j].append(data_or_path_or_list_j)
 
 			return data_or_path_or_list_ret
 		else:
-			return [load_audio_text_image_video(audio, fs=fs, audio_fs=audio_fs, data_type=data_type) for audio in data_or_path_or_list]
-	if isinstance(data_or_path_or_list, str) and data_or_path_or_list.startswith('http'):
+			return [load_audio_text_image_video(audio, fs=fs, audio_fs=audio_fs, data_type=data_type, **kwargs) for audio in data_or_path_or_list]
+	
+	if isinstance(data_or_path_or_list, str) and data_or_path_or_list.startswith('http'): # download url to local file
 		data_or_path_or_list = download_from_url(data_or_path_or_list)
-	if isinstance(data_or_path_or_list, str) and os.path.exists(data_or_path_or_list):
+	
+	if isinstance(data_or_path_or_list, str) and os.path.exists(data_or_path_or_list): # local file
 		if data_type is None or data_type == "sound":
 			data_or_path_or_list, audio_fs = torchaudio.load(data_or_path_or_list)
 			data_or_path_or_list = data_or_path_or_list[0, :]
-		# elif data_type == "text" and tokenizer is not None:
-		# 	data_or_path_or_list = tokenizer.encode(data_or_path_or_list)
+		elif data_type == "text" and tokenizer is not None:
+			data_or_path_or_list = tokenizer.encode(data_or_path_or_list)
+		elif data_type == "image": # undo
+			pass
+		elif data_type == "video": # undo
+			pass
+		
+		# if data_in is a file or url, set is_final=True
+		kwargs["is_final"] = True
 	elif isinstance(data_or_path_or_list, str) and data_type == "text" and tokenizer is not None:
 		data_or_path_or_list = tokenizer.encode(data_or_path_or_list)
 	elif isinstance(data_or_path_or_list, np.ndarray):  # audio sample point

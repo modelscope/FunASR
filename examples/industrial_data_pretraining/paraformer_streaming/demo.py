@@ -12,8 +12,6 @@ decoder_chunk_look_back = 1 #number of encoder chunks to lookback for decoder cr
 model = AutoModel(model="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online", model_revison="v2.0.0")
 cache = {}
 res = model(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav",
-            cache=cache,
-            is_final=True,
             chunk_size=chunk_size,
             encoder_chunk_look_back=encoder_chunk_look_back,
             decoder_chunk_look_back=decoder_chunk_look_back,

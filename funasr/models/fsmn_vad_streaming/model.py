@@ -218,8 +218,8 @@ class WindowDetector(object):
         return int(self.frame_size_ms)
 
 
-@tables.register("model_classes", "FsmnVAD")
-class FsmnVAD(nn.Module):
+@tables.register("model_classes", "FsmnVADStreaming")
+class FsmnVADStreaming(nn.Module):
     """
     Author: Speech Lab of DAMO Academy, Alibaba Group
     Deep-FSMN for Large Vocabulary Continuous Speech Recognition
@@ -523,15 +523,59 @@ class FsmnVAD(nn.Module):
             self.AllResetDetection()
         return segments, cache
 
+    def init_cache(self, cache: dict = {}, **kwargs):
+        cache["frontend"] = {}
+        cache["prev_samples"] = torch.empty(0)
+        
+        return cache
     def generate(self,
                  data_in,
                  data_lengths=None,
                  key: list = None,
                  tokenizer=None,
                  frontend=None,
+                 cache: dict = {},
                  **kwargs,
                  ):
+    
+        if len(cache) == 0:
+            self.init_cache(cache, **kwargs)
 
+        meta_data = {}
+        chunk_size = kwargs.get("chunk_size", 50) # 50ms
+        chunk_stride_samples = chunk_size * 16
+
+        time1 = time.perf_counter()
+        cfg = {"is_final": kwargs.get("is_final", False)}
+        audio_sample_list = load_audio_text_image_video(data_in,
+                                                        fs=frontend.fs,
+                                                        audio_fs=kwargs.get("fs", 16000),
+                                                        data_type=kwargs.get("data_type", "sound"),
+                                                        tokenizer=tokenizer,
+                                                        **cfg,
+                                                        )
+        _is_final = cfg["is_final"]  # if data_in is a file or url, set is_final=True
+
+        time2 = time.perf_counter()
+        meta_data["load_data"] = f"{time2 - time1:0.3f}"
+        assert len(audio_sample_list) == 1, "batch_size must be set 1"
+
+        audio_sample = torch.cat((cache["prev_samples"], audio_sample_list[0]))
+
+        n = len(audio_sample) // chunk_stride_samples + int(_is_final)
+        m = len(audio_sample) % chunk_stride_samples * (1 - int(_is_final))
+        tokens = []
+        for i in range(n):
+            kwargs["is_final"] = _is_final and i == n - 1
+            audio_sample_i = audio_sample[i * chunk_stride_samples:(i + 1) * chunk_stride_samples]
+    
+            # extract fbank feats
+            speech, speech_lengths = extract_fbank([audio_sample_i], data_type=kwargs.get("data_type", "sound"),
+                                                   frontend=frontend, cache=cache["frontend"],
+                                                   is_final=kwargs["is_final"])
+            time3 = time.perf_counter()
+            meta_data["extract_feat"] = f"{time3 - time2:0.3f}"
+            meta_data["batch_data_time"] = speech_lengths.sum().item() * frontend.frame_shift * frontend.lfr_n / 1000
 
         meta_data = {}
         audio_sample_list = [data_in]
@@ -603,6 +647,7 @@ class FsmnVAD(nn.Module):
             results.append(result_i)
  
         return results, meta_data
+
 
     def DetectCommonFrames(self) -> int:
         if self.vad_state_machine == VadStateMachine.kVadInStateEndPointDetected:

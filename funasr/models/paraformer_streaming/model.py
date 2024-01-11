@@ -519,16 +519,23 @@ class ParaformerStreaming(Paraformer):
 
 		if len(cache) == 0:
 			self.init_cache(cache, **kwargs)
-		_is_final = kwargs.get("is_final", False)
+		
 		
 		meta_data = {}
 		chunk_size = kwargs.get("chunk_size", [0, 10, 5])
 		chunk_stride_samples = chunk_size[1] * 960  # 600ms
 		
 		time1 = time.perf_counter()
-		audio_sample_list = load_audio_text_image_video(data_in, fs=frontend.fs, audio_fs=kwargs.get("fs", 16000),
-		                                                data_type=kwargs.get("data_type", "sound"),
-		                                                tokenizer=tokenizer)
+		cfg = {"is_final": kwargs.get("is_final", False)}
+		audio_sample_list = load_audio_text_image_video(data_in,
+														fs=frontend.fs,
+														audio_fs=kwargs.get("fs", 16000),
+														data_type=kwargs.get("data_type", "sound"),
+														tokenizer=tokenizer,
+														**cfg,
+														)
+		_is_final = cfg["is_final"] # if data_in is a file or url, set is_final=True
+		
 		time2 = time.perf_counter()
 		meta_data["load_data"] = f"{time2 - time1:0.3f}"
 		assert len(audio_sample_list) == 1, "batch_size must be set 1"

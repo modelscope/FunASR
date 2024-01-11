@@ -104,7 +104,7 @@ class FSMNBlock(nn.Module):
         return output, cache
 
 
-class BasicBlock(nn.Sequential):
+class BasicBlock(nn.Module):
     def __init__(self,
                  linear_dim: int,
                  proj_dim: int,
