@@ -239,6 +239,7 @@ class CTTransformer(nn.Module):
         cache_pop_trigger_limit = 200
         results = []
         meta_data = {}
+        punc_array = None
         for mini_sentence_i in range(len(mini_sentences)):
             mini_sentence = mini_sentences[mini_sentence_i]
             mini_sentence_id = mini_sentences_id[mini_sentence_i]
@@ -320,8 +321,13 @@ class CTTransformer(nn.Module):
                 elif new_mini_sentence[-1] != "." and new_mini_sentence[-1] != "?" and len(new_mini_sentence[-1].encode())==1:
                     new_mini_sentence_out = new_mini_sentence + "."
                     new_mini_sentence_punc_out = new_mini_sentence_punc[:-1] + [self.sentence_end_id]
-
-        result_i = {"key": key[0], "text": new_mini_sentence_out}
+            # keep a punctuations array for punc segment
+            if punc_array is None:
+                punc_array = punctuations
+            else:
+                punc_array = torch.cat([punc_array, punctuations], dim=0)
+        
+        result_i = {"key": key[0], "text": new_mini_sentence_out, "punc_array": punc_array}
         results.append(result_i)
     
         return results, meta_data
