@@ -578,7 +578,8 @@ class FsmnVADStreaming(nn.Module):
             time3 = time.perf_counter()
             meta_data["extract_feat"] = f"{time3 - time2:0.3f}"
             meta_data["batch_data_time"] = speech_lengths.sum().item() * frontend.frame_shift * frontend.lfr_n / 1000
-            speech.to(device=kwargs["device"]), speech_lengths.to(device=kwargs["device"])
+            speech = speech.to(device=kwargs["device"])
+            speech_lengths = speech_lengths.to(device=kwargs["device"])
             
             batch = {
                 "feats": speech,

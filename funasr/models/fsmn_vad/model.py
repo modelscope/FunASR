@@ -555,7 +555,8 @@ class FsmnVAD(nn.Module):
             meta_data[
                 "batch_data_time"] = speech_lengths.sum().item() * frontend.frame_shift * frontend.lfr_n / 1000
 
-        speech.to(device=kwargs["device"]), speech_lengths.to(device=kwargs["device"])
+        speech = speech.to(device=kwargs["device"])
+        speech_lengths = speech_lengths.to(device=kwargs["device"])
 
         # b. Forward Encoder streaming
         t_offset = 0
