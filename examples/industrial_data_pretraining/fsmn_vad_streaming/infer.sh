@@ -1,7 +1,7 @@
 
 
 model="damo/speech_fsmn_vad_zh-cn-16k-common-pytorch"
-model_revision="v2.0.0"
+model_revision="v2.0.1"
 
 python funasr/bin/inference.py \
 +model=${model} \

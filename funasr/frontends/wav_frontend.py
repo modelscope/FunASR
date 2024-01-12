@@ -402,8 +402,7 @@ class WavFrontendOnline(nn.Module):
         self, input: torch.Tensor, input_lengths: torch.Tensor, cache: dict = {}, **kwargs
     ):
         is_final = kwargs.get("is_final", False)
-        reset = kwargs.get("reset", False)
-        if len(cache) == 0 or reset:
+        if len(cache) == 0:
             self.init_cache(cache)
         
         batch_size = input.shape[0]

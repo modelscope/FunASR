@@ -7,11 +7,9 @@ from funasr import AutoModel
 wav_file = "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/vad_example.wav"
 
 chunk_size = 60000 # ms
-model = AutoModel(model="/Users/zhifu/Downloads/modelscope_models/speech_fsmn_vad_zh-cn-16k-common-streaming", model_revision="v2.0.0")
+model = AutoModel(model="damo/speech_fsmn_vad_zh-cn-16k-common-pytorch", model_revision="v2.0.1")
 
-res = model(input=wav_file,
-            chunk_size=chunk_size,
-            )
+res = model(input=wav_file, chunk_size=chunk_size, )
 print(res)
 
 
@@ -22,7 +20,7 @@ import os
 wav_file = os.path.join(model.model_path, "example/vad_example.wav")
 speech, sample_rate = soundfile.read(wav_file)
 
-chunk_stride = int(chunk_size * 16000 / 1000)
+chunk_stride = int(chunk_size * sample_rate / 1000)
 
 cache = {}
 
@@ -35,4 +33,5 @@ for i in range(total_chunk_num):
                 is_final=is_final,
                 chunk_size=chunk_size,
                 )
-    print(res)
+    if len(res[0]["value"]):
+        print(res)
