@@ -110,6 +110,7 @@ class CAMPPlus(nn.Module):
         time2 = time.perf_counter()
         meta_data["load_data"] = f"{time2 - time1:0.3f}"
         speech, speech_lengths, speech_times = extract_feature(audio_sample_list)
+        speech = speech.to(device=kwargs["device"])
         time3 = time.perf_counter()
         meta_data["extract_feat"] = f"{time3 - time2:0.3f}"
         meta_data["batch_data_time"] = np.array(speech_times).sum().item() / 16000.0
