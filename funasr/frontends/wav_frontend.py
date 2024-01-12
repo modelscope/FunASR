@@ -448,8 +448,8 @@ class WavFrontendOnline(nn.Module):
                 feats = torch.stack(cache["lfr_splice_cache"])
                 feats_lengths = torch.zeros(batch_size, dtype=torch.int) + feats.shape[1]
                 feats, feats_lengths, _ = self.forward_lfr_cmvn(feats, feats_lengths, is_final, cache=cache)
-        if is_final:
-            self.init_cache(cache)
+        # if is_final:
+        #     self.init_cache(cache)
         return feats, feats_lengths
 
 

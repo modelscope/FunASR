@@ -31,7 +31,7 @@ cache = {}
 
 for i in range(int(len((speech)-1)/chunk_stride+1)):
     speech_chunk = speech[i*chunk_stride:(i+1)*chunk_stride]
-    is_final = i == int(len((speech)-1)/chunk_stride+1)
+    is_final = i == int(len((speech)-1)/chunk_stride+1) - 1
     res = model(input=speech_chunk,
                 cache=cache,
                 is_final=is_final,

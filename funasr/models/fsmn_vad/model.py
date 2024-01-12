@@ -12,6 +12,7 @@ from funasr.register import tables
 from funasr.utils.load_utils import load_audio_text_image_video,extract_fbank
 from funasr.utils.datadir_writer import DatadirWriter
 from torch.nn.utils.rnn import pad_sequence
+from funasr.train_utils.device_funcs import to_device
 
 class VadStateMachine(Enum):
     kVadInStateStartPointNotDetected = 1
@@ -579,7 +580,8 @@ class FsmnVAD(nn.Module):
                 "cache": cache
             }
 
-
+            
+            batch = to_device(batch, device=kwargs["device"])
             segments_part, cache = self.forward(**batch)
             if segments_part:
                 for batch_num in range(0, batch_size):

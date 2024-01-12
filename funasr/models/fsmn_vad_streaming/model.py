@@ -587,7 +587,6 @@ class FsmnVADStreaming(nn.Module):
                 "cache": cache["encoder"]
             }
             segments_i = self.forward(**batch)
-            print(segments_i)
             segments.extend(segments_i)
 
 
