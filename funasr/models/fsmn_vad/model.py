@@ -593,15 +593,16 @@ class FsmnVAD(nn.Module):
         results = []
         for i in range(batch_size):
             
-            if "MODELSCOPE_ENVIRONMENT" in os.environ and os.environ["MODELSCOPE_ENVIRONMENT"] == "eas":
-                results[i] = json.dumps(results[i])
                 
             if ibest_writer is not None:
                 ibest_writer["text"][key[i]] = segments[i]
 
             result_i = {"key": key[i], "value": segments[i]}
             results.append(result_i)
- 
+            
+            if "MODELSCOPE_ENVIRONMENT" in os.environ and os.environ["MODELSCOPE_ENVIRONMENT"] == "eas":
+                results[i] = json.dumps(results[i])
+                
         return results, meta_data
 
     def DetectCommonFrames(self) -> int:

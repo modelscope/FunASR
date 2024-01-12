@@ -523,7 +523,7 @@ class ParaformerStreaming(Paraformer):
 		
 		meta_data = {}
 		chunk_size = kwargs.get("chunk_size", [0, 10, 5])
-		chunk_stride_samples = chunk_size[1] * 960  # 600ms
+		chunk_stride_samples = int(chunk_size[1] * 960)  # 600ms
 		
 		time1 = time.perf_counter()
 		cfg = {"is_final": kwargs.get("is_final", False)}
@@ -532,7 +532,7 @@ class ParaformerStreaming(Paraformer):
 														audio_fs=kwargs.get("fs", 16000),
 														data_type=kwargs.get("data_type", "sound"),
 														tokenizer=tokenizer,
-														**cfg,
+														cache=cfg,
 														)
 		_is_final = cfg["is_final"] # if data_in is a file or url, set is_final=True
 		
@@ -542,8 +542,8 @@ class ParaformerStreaming(Paraformer):
 		
 		audio_sample = torch.cat((cache["prev_samples"], audio_sample_list[0]))
 		
-		n = len(audio_sample) // chunk_stride_samples + int(_is_final)
-		m = len(audio_sample) % chunk_stride_samples * (1-int(_is_final))
+		n = int(len(audio_sample) // chunk_stride_samples + int(_is_final))
+		m = int(len(audio_sample) % chunk_stride_samples * (1-int(_is_final)))
 		tokens = []
 		for i in range(n):
 			kwargs["is_final"] = _is_final and i == n -1
