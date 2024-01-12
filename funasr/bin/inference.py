@@ -83,7 +83,7 @@ def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
     
     return key_list, data_list
 
-@hydra.main(config_name=None)
+@hydra.main(config_name=None, version_base=None)
 def main_hydra(cfg: DictConfig):
     def to_plain_list(cfg_item):
         if isinstance(cfg_item, ListConfig):
@@ -150,6 +150,7 @@ class AutoModel:
         self.punc_kwargs = punc_kwargs
         self.spk_model = spk_model
         self.spk_kwargs = spk_kwargs
+        self.model_path = kwargs["model_path"]
   
         
     def build_model(self, **kwargs):

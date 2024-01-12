@@ -18,6 +18,7 @@ def download_from_ms(**kwargs):
 	model_revision = kwargs.get("model_revision")
 	if not os.path.exists(model_or_path):
 		model_or_path = get_or_download_model_dir(model_or_path, model_revision, is_training=kwargs.get("is_training"), check_latest=kwargs.get("kwargs", True))
+	kwargs["model_path"] = model_or_path
 	
 	config = os.path.join(model_or_path, "config.yaml")
 	if os.path.exists(config) and os.path.exists(os.path.join(model_or_path, "model.pb")):

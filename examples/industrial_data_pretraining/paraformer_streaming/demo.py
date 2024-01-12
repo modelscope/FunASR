@@ -22,10 +22,8 @@ print(res)
 import soundfile
 import os
 
-speech, sample_rate = soundfile.read(os.path.expanduser('~')+
-                                     "/.cache/modelscope/hub/damo/"+
-                                     "speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/"+
-                                     "example/asr_example.wav")
+wav_file = os.path.join(model.model_path, "example/asr_example.wav")
+speech, sample_rate = soundfile.read(wav_file)
 
 chunk_stride = chunk_size[1] * 960 # 600ms、480ms
 
