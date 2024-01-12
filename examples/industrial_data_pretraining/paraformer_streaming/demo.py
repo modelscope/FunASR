@@ -28,10 +28,10 @@ speech, sample_rate = soundfile.read(wav_file)
 chunk_stride = chunk_size[1] * 960 # 600ms、480ms
 
 cache = {}
-
-for i in range(int(len((speech)-1)/chunk_stride+1)):
+total_chunk_num = int(len((speech)-1)/chunk_stride+1)
+for i in range(total_chunk_num):
     speech_chunk = speech[i*chunk_stride:(i+1)*chunk_stride]
-    is_final = i == int(len((speech)-1)/chunk_stride+1) - 1
+    is_final = i == total_chunk_num - 1
     res = model(input=speech_chunk,
                 cache=cache,
                 is_final=is_final,
