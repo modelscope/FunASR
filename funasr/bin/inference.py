@@ -115,7 +115,7 @@ class AutoModel:
         vad_model = kwargs.get("vad_model", None)
         vad_kwargs = kwargs.get("vad_model_revision", None)
         if vad_model is not None:
-            print("build vad model")
+            logging.info("Building VAD model.")
             vad_kwargs = {"model": vad_model, "model_revision": vad_kwargs}
             vad_model, vad_kwargs = self.build_model(**vad_kwargs)
 
@@ -123,6 +123,7 @@ class AutoModel:
         punc_model = kwargs.get("punc_model", None)
         punc_kwargs = kwargs.get("punc_model_revision", None)
         if punc_model is not None:
+            logging.info("Building punc model.")
             punc_kwargs = {"model": punc_model, "model_revision": punc_kwargs}
             punc_model, punc_kwargs = self.build_model(**punc_kwargs)
 
@@ -130,6 +131,7 @@ class AutoModel:
         spk_model = kwargs.get("spk_model", None)
         spk_kwargs = kwargs.get("spk_model_revision", None)
         if spk_model is not None:
+            logging.info("Building SPK model.")
             spk_kwargs = {"model": spk_model, "model_revision": spk_kwargs}
             spk_model, spk_kwargs = self.build_model(**spk_kwargs)
             self.cb_model = ClusterBackend()
@@ -166,6 +168,7 @@ class AutoModel:
             device = "cpu"
             # kwargs["batch_size"] = 1
         kwargs["device"] = device
+        import pdb; pdb.set_trace()
         
         if kwargs.get("ncpu", None):
             torch.set_num_threads(kwargs.get("ncpu"))
