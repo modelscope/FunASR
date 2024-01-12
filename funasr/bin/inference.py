@@ -168,7 +168,6 @@ class AutoModel:
             device = "cpu"
             # kwargs["batch_size"] = 1
         kwargs["device"] = device
-        import pdb; pdb.set_trace()
         
         if kwargs.get("ncpu", None):
             torch.set_num_threads(kwargs.get("ncpu"))
