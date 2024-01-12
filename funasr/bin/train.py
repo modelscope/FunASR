@@ -23,7 +23,7 @@ from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
 from funasr.download.download_from_hub import download_model
 from funasr.register import tables
 
-@hydra.main(config_name=None, version_base=None)
+@hydra.main(config_name=None)
 def main_hydra(kwargs: DictConfig):
 	if kwargs.get("debug", False):
 		import pdb; pdb.set_trace()

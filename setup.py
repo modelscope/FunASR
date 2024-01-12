@@ -40,7 +40,7 @@ requirements = {
         "hdbscan",
         "umap",
         "jaconv",
-        "hydra-core",
+        "hydra-core>=1.3.2",
     ],
     # train: The modules invoked when training only.
     "train": [

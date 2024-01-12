@@ -83,7 +83,7 @@ def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
     
     return key_list, data_list
 
-@hydra.main(config_name=None, version_base=None)
+@hydra.main(config_name=None)
 def main_hydra(cfg: DictConfig):
     def to_plain_list(cfg_item):
         if isinstance(cfg_item, ListConfig):
