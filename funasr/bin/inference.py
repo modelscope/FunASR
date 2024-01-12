@@ -405,7 +405,7 @@ class AutoModel:
                 spk_embedding = result['spk_embedding']
                 labels = self.cb_model(spk_embedding, oracle_num=self.preset_spk_num)
                 del result['spk_embedding']
-                sv_output = postprocess(all_segments, None, labels, spk_embedding)
+                sv_output = postprocess(all_segments, None, labels, spk_embedding.cpu())
                 if self.spk_mode == 'vad_segment':
                     sentence_list = []
                     for res, vadsegment in zip(restored_data, vadsegments):
