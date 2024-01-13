@@ -7,7 +7,7 @@ from funasr import AutoModel
 wav_file = "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/vad_example.wav"
 
 chunk_size = 60000 # ms
-model = AutoModel(model="damo/speech_fsmn_vad_zh-cn-16k-common-pytorch", model_revision="v2.0.1")
+model = AutoModel(model="damo/speech_fsmn_vad_zh-cn-16k-common-pytorch", model_revision="v2.0.2")
 
 res = model(input=wav_file, chunk_size=chunk_size, )
 print(res)
