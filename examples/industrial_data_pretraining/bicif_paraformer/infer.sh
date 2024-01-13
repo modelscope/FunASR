@@ -4,7 +4,7 @@ model_revision="v2.0.0"
 vad_model="damo/speech_fsmn_vad_zh-cn-16k-common-pytorch"
 vad_model_revision="v2.0.0"
 punc_model="damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch"
-punc_model_revision="v2.0.0"
+punc_model_revision="v2.0.1"
 
 python funasr/bin/inference.py \
 +model=${model} \

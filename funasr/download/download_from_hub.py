@@ -37,6 +37,8 @@ def download_from_ms(**kwargs):
 		kwargs["model"] = cfg["model"]
 		if os.path.exists(os.path.join(model_or_path, "am.mvn")):
 			kwargs["frontend_conf"]["cmvn_file"] = os.path.join(model_or_path, "am.mvn")
+		if os.path.exists(os.path.join(model_or_path, "jieba_usr_dict")):
+			kwargs["jieba_usr_dict"] = os.path.join(model_or_path, "jieba_usr_dict")
 	else:# configuration.json
 		assert os.path.exists(os.path.join(model_or_path, "configuration.json"))
 		with open(os.path.join(model_or_path, "configuration.json"), 'r', encoding='utf-8') as f:

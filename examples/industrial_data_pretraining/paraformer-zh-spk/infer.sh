@@ -4,7 +4,7 @@ model_revision="v2.0.0"
 vad_model="damo/speech_fsmn_vad_zh-cn-16k-common-pytorch"
 vad_model_revision="v2.0.1"
 punc_model="damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch"
-punc_model_revision="v2.0.0"
+punc_model_revision="v2.0.1"
 spk_model="damo/speech_campplus_sv_zh-cn_16k-common"
 spk_model_revision="v2.0.0"
 

@@ -225,8 +225,14 @@ class CTTransformer(nn.Module):
         # text = data_in[0]
         # text_lengths = data_lengths[0] if data_lengths is not None else None
         split_size = kwargs.get("split_size", 20)
-        
-        tokens = split_words(text)
+
+        jieba_usr_dict = kwargs.get("jieba_usr_dict", None)
+        if jieba_usr_dict and isinstance(jieba_usr_dict, str):
+            import jieba
+            jieba.load_userdict(jieba_usr_dict)
+            jieba_usr_dict = jieba
+            kwargs["jieba_usr_dict"] = "jieba_usr_dict"
+        tokens = split_words(text, jieba_usr_dict=jieba_usr_dict)
         tokens_int = tokenizer.encode(tokens)
 
         mini_sentences = split_to_mini_sentence(tokens, split_size)

@@ -1,6 +1,9 @@
 
 model="damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch"
-model_revision="v2.0.0"
+model_revision="v2.0.1"
+
+model="damo/punc_ct-transformer_cn-en-common-vocab471067-large"
+model_revision="v2.0.1"
 
 python funasr/bin/inference.py \
 +model=${model} \
