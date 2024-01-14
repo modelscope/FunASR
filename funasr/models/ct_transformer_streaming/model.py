@@ -12,11 +12,12 @@ import torch
 import torch.nn as nn
 from funasr.models.ct_transformer.utils import split_to_mini_sentence, split_words
 from funasr.utils.load_utils import load_audio_text_image_video
+from funasr.models.ct_transformer.model import CTTransformer
 
 from funasr.register import tables
 
 @tables.register("model_classes", "CTTransformerStreaming")
-class CTTransformerStreaming(nn.Module):
+class CTTransformerStreaming(CTTransformer):
     """
     Author: Speech Lab of DAMO Academy, Alibaba Group
     CT-Transformer: Controllable time-delay transformer for real-time punctuation prediction and disfluency detection
@@ -24,43 +25,13 @@ class CTTransformerStreaming(nn.Module):
     """
     def __init__(
         self,
-        encoder: str = None,
-        encoder_conf: dict = None,
-        vocab_size: int = -1,
-        punc_list: list = None,
-        punc_weight: list = None,
-        embed_unit: int = 128,
-        att_unit: int = 256,
-        dropout_rate: float = 0.5,
-        ignore_id: int = -1,
-        sos: int = 1,
-        eos: int = 2,
-        sentence_end_id: int = 3,
+        *args,
         **kwargs,
     ):
-        super().__init__()
+        super().__init__(*args, **kwargs)
 
-        punc_size = len(punc_list)
-        if punc_weight is None:
-            punc_weight = [1] * punc_size
-        
-        
-        self.embed = nn.Embedding(vocab_size, embed_unit)
-        encoder_class = tables.encoder_classes.get(encoder.lower())
-        encoder = encoder_class(**encoder_conf)
 
-        self.decoder = nn.Linear(att_unit, punc_size)
-        self.encoder = encoder
-        self.punc_list = punc_list
-        self.punc_weight = punc_weight
-        self.ignore_id = ignore_id
-        self.sos = sos
-        self.eos = eos
-        self.sentence_end_id = sentence_end_id
-        
-        
-
-    def punc_forward(self, text: torch.Tensor, text_lengths: torch.Tensor) -> Tuple[torch.Tensor, None]:
+    def punc_forward(self, text: torch.Tensor, text_lengths: torch.Tensor, vad_indexes: torch.Tensor, **kwargs):
         """Compute loss value from buffer sequences.
 
         Args:
@@ -70,146 +41,14 @@ class CTTransformerStreaming(nn.Module):
         """
         x = self.embed(text)
         # mask = self._target_mask(input)
-        h, _, _ = self.encoder(x, text_lengths)
+        h, _, _ = self.encoder(x, text_lengths, vad_indexes=vad_indexes)
         y = self.decoder(h)
         return y, None
 
     def with_vad(self):
-        return False
-
-    def score(self, y: torch.Tensor, state: Any, x: torch.Tensor) -> Tuple[torch.Tensor, Any]:
-        """Score new token.
-
-        Args:
-            y (torch.Tensor): 1D torch.int64 prefix tokens.
-            state: Scorer state for prefix tokens
-            x (torch.Tensor): encoder feature that generates ys.
-
-        Returns:
-            tuple[torch.Tensor, Any]: Tuple of
-                torch.float32 scores for next token (vocab_size)
-                and next state for ys
-
-        """
-        y = y.unsqueeze(0)
-        h, _, cache = self.encoder.forward_one_step(self.embed(y), self._target_mask(y), cache=state)
-        h = self.decoder(h[:, -1])
-        logp = h.log_softmax(dim=-1).squeeze(0)
-        return logp, cache
-
-    def batch_score(self, ys: torch.Tensor, states: List[Any], xs: torch.Tensor) -> Tuple[torch.Tensor, List[Any]]:
-        """Score new token batch.
-
-        Args:
-            ys (torch.Tensor): torch.int64 prefix tokens (n_batch, ylen).
-            states (List[Any]): Scorer states for prefix tokens.
-            xs (torch.Tensor):
-                The encoder feature that generates ys (n_batch, xlen, n_feat).
-
-        Returns:
-            tuple[torch.Tensor, List[Any]]: Tuple of
-                batchfied scores for next token with shape of `(n_batch, vocab_size)`
-                and next state list for ys.
-
-        """
-        # merge states
-        n_batch = len(ys)
-        n_layers = len(self.encoder.encoders)
-        if states[0] is None:
-            batch_state = None
-        else:
-            # transpose state of [batch, layer] into [layer, batch]
-            batch_state = [torch.stack([states[b][i] for b in range(n_batch)]) for i in range(n_layers)]
-
-        # batch decoding
-        h, _, states = self.encoder.forward_one_step(self.embed(ys), self._target_mask(ys), cache=batch_state)
-        h = self.decoder(h[:, -1])
-        logp = h.log_softmax(dim=-1)
-
-        # transpose state of [layer, batch] into [batch, layer]
-        state_list = [[states[i][b] for i in range(n_layers)] for b in range(n_batch)]
-        return logp, state_list
-
-    def nll(
-        self,
-        text: torch.Tensor,
-        punc: torch.Tensor,
-        text_lengths: torch.Tensor,
-        punc_lengths: torch.Tensor,
-        max_length: Optional[int] = None,
-        vad_indexes: Optional[torch.Tensor] = None,
-        vad_indexes_lengths: Optional[torch.Tensor] = None,
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
-        """Compute negative log likelihood(nll)
-
-        Normally, this function is called in batchify_nll.
-        Args:
-            text: (Batch, Length)
-            punc: (Batch, Length)
-            text_lengths: (Batch,)
-            max_lengths: int
-        """
-        batch_size = text.size(0)
-        # For data parallel
-        if max_length is None:
-            text = text[:, :text_lengths.max()]
-            punc = punc[:, :text_lengths.max()]
-        else:
-            text = text[:, :max_length]
-            punc = punc[:, :max_length]
-    
-        if self.with_vad():
-            # Should be VadRealtimeTransformer
-            assert vad_indexes is not None
-            y, _ = self.punc_forward(text, text_lengths, vad_indexes)
-        else:
-            # Should be TargetDelayTransformer,
-            y, _ = self.punc_forward(text, text_lengths)
-    
-        # Calc negative log likelihood
-        # nll: (BxL,)
-        if self.training == False:
-            _, indices = y.view(-1, y.shape[-1]).topk(1, dim=1)
-            from sklearn.metrics import f1_score
-            f1_score = f1_score(punc.view(-1).detach().cpu().numpy(),
-                                indices.squeeze(-1).detach().cpu().numpy(),
-                                average='micro')
-            nll = torch.Tensor([f1_score]).repeat(text_lengths.sum())
-            return nll, text_lengths
-        else:
-            self.punc_weight = self.punc_weight.to(punc.device)
-            nll = F.cross_entropy(y.view(-1, y.shape[-1]), punc.view(-1), self.punc_weight, reduction="none",
-                                  ignore_index=self.ignore_id)
-        # nll: (BxL,) -> (BxL,)
-        if max_length is None:
-            nll.masked_fill_(make_pad_mask(text_lengths).to(nll.device).view(-1), 0.0)
-        else:
-            nll.masked_fill_(
-                make_pad_mask(text_lengths, maxlen=max_length + 1).to(nll.device).view(-1),
-                0.0,
-            )
-        # nll: (BxL,) -> (B, L)
-        nll = nll.view(batch_size, -1)
-        return nll, text_lengths
+        return True
 
 
-    def forward(
-        self,
-        text: torch.Tensor,
-        punc: torch.Tensor,
-        text_lengths: torch.Tensor,
-        punc_lengths: torch.Tensor,
-        vad_indexes: Optional[torch.Tensor] = None,
-        vad_indexes_lengths: Optional[torch.Tensor] = None,
-    ):
-        nll, y_lengths = self.nll(text, punc, text_lengths, punc_lengths, vad_indexes=vad_indexes)
-        ntokens = y_lengths.sum()
-        loss = nll.sum() / ntokens
-        stats = dict(loss=loss.detach())
-    
-        # force_gatherable: to-device and to-tensor if scalar for DataParallel
-        loss, stats, weight = force_gatherable((loss, stats, ntokens), loss.device)
-        return loss, stats, weight
     
     def generate(self,
                  data_in,
@@ -217,22 +56,20 @@ class CTTransformerStreaming(nn.Module):
                  key: list = None,
                  tokenizer=None,
                  frontend=None,
+                 cache: dict = {},
                  **kwargs,
                  ):
         assert len(data_in) == 1
+        
+        if len(cache) == 0:
+            cache["pre_text"] = []
         text = load_audio_text_image_video(data_in, data_type=kwargs.get("kwargs", "text"))[0]
-        vad_indexes = kwargs.get("vad_indexes", None)
-        # text = data_in[0]
-        # text_lengths = data_lengths[0] if data_lengths is not None else None
+        text = "".join(cache["pre_text"]) + " " + text
+
+
         split_size = kwargs.get("split_size", 20)
 
-        jieba_usr_dict = kwargs.get("jieba_usr_dict", None)
-        if jieba_usr_dict and isinstance(jieba_usr_dict, str):
-            import jieba
-            jieba.load_userdict(jieba_usr_dict)
-            jieba_usr_dict = jieba
-            kwargs["jieba_usr_dict"] = "jieba_usr_dict"
-        tokens = split_words(text, jieba_usr_dict=jieba_usr_dict)
+        tokens = split_words(text)
         tokens_int = tokenizer.encode(tokens)
 
         mini_sentences = split_to_mini_sentence(tokens, split_size)
@@ -240,8 +77,9 @@ class CTTransformerStreaming(nn.Module):
         assert len(mini_sentences) == len(mini_sentences_id)
         cache_sent = []
         cache_sent_id = torch.from_numpy(np.array([], dtype='int32'))
-        new_mini_sentence = ""
-        new_mini_sentence_punc = []
+        skip_num = 0
+        sentence_punc_list = []
+        sentence_words_list = []
         cache_pop_trigger_limit = 200
         results = []
         meta_data = {}
@@ -254,6 +92,7 @@ class CTTransformerStreaming(nn.Module):
             data = {
                 "text": torch.unsqueeze(torch.from_numpy(mini_sentence_id), 0),
                 "text_lengths": torch.from_numpy(np.array([len(mini_sentence_id)], dtype='int32')),
+                "vad_indexes": torch.from_numpy(np.array([len(cache["pre_text"])], dtype='int32')),
             }
             data = to_device(data, kwargs["device"])
             # y, _ = self.wrapped_model(**data)
@@ -288,52 +127,42 @@ class CTTransformerStreaming(nn.Module):
             #    continue
 
             punctuations_np = punctuations.cpu().numpy()
-            new_mini_sentence_punc += [int(x) for x in punctuations_np]
-            words_with_punc = []
-            for i in range(len(mini_sentence)):
-                if (i==0 or self.punc_list[punctuations[i-1]] == "。" or self.punc_list[punctuations[i-1]] == "？") and len(mini_sentence[i][0].encode()) == 1:
-                    mini_sentence[i] = mini_sentence[i].capitalize()
-                if i == 0:
-                    if len(mini_sentence[i][0].encode()) == 1:
-                        mini_sentence[i] = " " + mini_sentence[i]
-                if i > 0:
-                    if len(mini_sentence[i][0].encode()) == 1 and len(mini_sentence[i - 1][0].encode()) == 1:
-                        mini_sentence[i] = " " + mini_sentence[i]
-                words_with_punc.append(mini_sentence[i])
-                if self.punc_list[punctuations[i]] != "_":
-                    punc_res = self.punc_list[punctuations[i]]
-                    if len(mini_sentence[i][0].encode()) == 1:
-                        if punc_res == "，":
-                            punc_res = ","
-                        elif punc_res == "。":
-                            punc_res = "."
-                        elif punc_res == "？":
-                            punc_res = "?"
-                    words_with_punc.append(punc_res)
-            new_mini_sentence += "".join(words_with_punc)
-            # Add Period for the end of the sentence
-            new_mini_sentence_out = new_mini_sentence
-            new_mini_sentence_punc_out = new_mini_sentence_punc
-            if mini_sentence_i == len(mini_sentences) - 1:
-                if new_mini_sentence[-1] == "，" or new_mini_sentence[-1] == "、":
-                    new_mini_sentence_out = new_mini_sentence[:-1] + "。"
-                    new_mini_sentence_punc_out = new_mini_sentence_punc[:-1] + [self.sentence_end_id]
-                elif new_mini_sentence[-1] == ",":
-                    new_mini_sentence_out = new_mini_sentence[:-1] + "."
-                    new_mini_sentence_punc_out = new_mini_sentence_punc[:-1] + [self.sentence_end_id]
-                elif new_mini_sentence[-1] != "。" and new_mini_sentence[-1] != "？" and len(new_mini_sentence[-1].encode())==0:
-                    new_mini_sentence_out = new_mini_sentence + "。"
-                    new_mini_sentence_punc_out = new_mini_sentence_punc[:-1] + [self.sentence_end_id]
-                elif new_mini_sentence[-1] != "." and new_mini_sentence[-1] != "?" and len(new_mini_sentence[-1].encode())==1:
-                    new_mini_sentence_out = new_mini_sentence + "."
-                    new_mini_sentence_punc_out = new_mini_sentence_punc[:-1] + [self.sentence_end_id]
-            # keep a punctuations array for punc segment
-            if punc_array is None:
-                punc_array = punctuations
+            sentence_punc_list += [self.punc_list[int(x)] for x in punctuations_np]
+            sentence_words_list += mini_sentence
+
+        assert len(sentence_punc_list) == len(sentence_words_list)
+        words_with_punc = []
+        sentence_punc_list_out = []
+        for i in range(0, len(sentence_words_list)):
+            if i > 0:
+                if len(sentence_words_list[i][0].encode()) == 1 and len(sentence_words_list[i - 1][-1].encode()) == 1:
+                    sentence_words_list[i] = " " + sentence_words_list[i]
+            if skip_num < len(cache["pre_text"]):
+                skip_num += 1
             else:
-                punc_array = torch.cat([punc_array, punctuations], dim=0)
+                words_with_punc.append(sentence_words_list[i])
+            if skip_num >= len(cache["pre_text"]):
+                sentence_punc_list_out.append(sentence_punc_list[i])
+                if sentence_punc_list[i] != "_":
+                    words_with_punc.append(sentence_punc_list[i])
+        sentence_out = "".join(words_with_punc)
+
+        sentenceEnd = -1
+        for i in range(len(sentence_punc_list) - 2, 1, -1):
+            if sentence_punc_list[i] == "。" or sentence_punc_list[i] == "？":
+                sentenceEnd = i
+                break
+        cache["pre_text"] = sentence_words_list[sentenceEnd + 1:]
+        if sentence_out[-1] in self.punc_list:
+            sentence_out = sentence_out[:-1]
+            sentence_punc_list_out[-1] = "_"
+        # keep a punctuations array for punc segment
+        if punc_array is None:
+            punc_array = punctuations
+        else:
+            punc_array = torch.cat([punc_array, punctuations], dim=0)
         
-        result_i = {"key": key[0], "text": new_mini_sentence_out, "punc_array": punc_array}
+        result_i = {"key": key[0], "text": sentence_out, "punc_array": punc_array}
         results.append(result_i)
     
         return results, meta_data

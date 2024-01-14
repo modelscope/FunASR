@@ -27,13 +27,13 @@ model_conf:
         - 1.0
     sentence_end_id: 3
 
-encoder: SANMEncoder
+encoder: SANMVadEncoder
 encoder_conf:
     input_size: 256
     output_size: 256
     attention_heads: 8
     linear_units: 1024
-    num_blocks: 4
+    num_blocks: 3
     dropout_rate: 0.1
     positional_dropout_rate: 0.1
     attention_dropout_rate: 0.0
@@ -41,13 +41,10 @@ encoder_conf:
     pos_enc_class: SinusoidalPositionEncoder
     normalize_before: true
     kernel_size: 11
-    sanm_shfit: 0
+    sanm_shfit: 5
     selfattention_layer_type: sanm
     padding_idx: 0
 
 tokenizer: CharTokenizer
 tokenizer_conf:
   unk_symbol: <unk>
-
-
-

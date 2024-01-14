@@ -12,7 +12,7 @@ import numpy as np
 from funasr.train_utils.device_funcs import to_device
 from funasr.models.transformer.utils.nets_utils import make_pad_mask
 from funasr.models.sanm.attention import MultiHeadedAttention
-from funasr.models.ct_transformer.attention import MultiHeadedAttentionSANMwithMask
+from funasr.models.ct_transformer_streaming.attention import MultiHeadedAttentionSANMwithMask
 from funasr.models.transformer.embedding import SinusoidalPositionEncoder, StreamSinusoidalPositionEncoder
 from funasr.models.transformer.layer_norm import LayerNorm
 from funasr.models.transformer.utils.multi_layer_conv import Conv1dLinear

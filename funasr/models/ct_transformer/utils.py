@@ -14,26 +14,6 @@ def split_to_mini_sentence(words: list, word_limit: int = 20):
     return sentences
 
 
-# def split_words(text: str, **kwargs):
-#     words = []
-#     segs = text.split()
-#     for seg in segs:
-#         # There is no space in seg.
-#         current_word = ""
-#         for c in seg:
-#             if len(c.encode()) == 1:
-#                 # This is an ASCII char.
-#                 current_word += c
-#             else:
-#                 # This is a Chinese char.
-#                 if len(current_word) > 0:
-#                     words.append(current_word)
-#                     current_word = ""
-#                 words.append(c)
-#         if len(current_word) > 0:
-#             words.append(current_word)
-#
-#     return words
 
 def split_words(text: str, jieba_usr_dict=None, **kwargs):
     if jieba_usr_dict:
