@@ -60,7 +60,8 @@ typedef struct {
   FUNASR_HANDLE tpass_online_handle=NULL;
   std::string online_res = "";
   std::string tpass_res = "";
-  std::shared_ptr<asio::io_context::strand>  strand_; // for data execute in order 
+  std::shared_ptr<asio::io_context::strand>  strand_; // for data execute in order
+  FUNASR_DEC_HANDLE decoder_handle=NULL; 
 } FUNASR_MESSAGE;
 
 // See https://wiki.mozilla.org/Security/Server_Side_TLS for more details about
@@ -123,7 +124,8 @@ class WebSocketServer {
                   bool itn,
                   int audio_fs,
                   std::string wav_format,
-                  FUNASR_HANDLE& tpass_online_handle);
+                  FUNASR_HANDLE& tpass_online_handle,
+                  FUNASR_DEC_HANDLE& decoder_handle);
 
   void initAsr(std::map<std::string, std::string>& model_path, int thread_num);
   void on_message(websocketpp::connection_hdl hdl, message_ptr msg);

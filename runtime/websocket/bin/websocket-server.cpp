@@ -72,19 +72,23 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
     int num_samples = buffer.size();  // the size of the buf
 
     if (!buffer.empty() && hotwords_embedding.size() > 0) {
-      std::string asr_result;
-      std::string stamp_res;
+      std::string asr_result="";
+      std::string stamp_res="";
+      std::string stamp_sents="";
       try{
         FUNASR_RESULT Result = FunOfflineInferBuffer(
             asr_handle, buffer.data(), buffer.size(), RASR_NONE, NULL, 
             hotwords_embedding, audio_fs, wav_format, itn, decoder_handle);
-
-        asr_result = ((FUNASR_RECOG_RESULT*)Result)->msg;  // get decode result
-        stamp_res = ((FUNASR_RECOG_RESULT*)Result)->stamp;
-        FunASRFreeResult(Result);
+        if (Result != NULL){
+          asr_result = FunASRGetResult(Result, 0);  // get decode result
+          stamp_res = FunASRGetStamp(Result);
+          stamp_sents = FunASRGetStampSents(Result);
+          FunASRFreeResult(Result);
+        } else{
+          LOG(ERROR) << "FUNASR_RESULT is NULL.";
+        }
       }catch (std::exception const& e) {
         LOG(ERROR) << e.what();
-        return;
       }
 
       websocketpp::lib::error_code ec;
@@ -94,6 +98,16 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
 	    jsonresult["is_final"] = false;
       if(stamp_res != ""){
         jsonresult["timestamp"] = stamp_res;
+      }
+      if(stamp_sents != ""){
+        try{
+          nlohmann::json json_stamp = nlohmann::json::parse(stamp_sents);
+          jsonresult["stamp_sents"] = json_stamp;
+        }catch (std::exception const &e)
+        {
+          LOG(ERROR)<<e.what();
+          jsonresult["stamp_sents"] = "";
+        }
       }
       jsonresult["wav_name"] = wav_name;
 
@@ -144,7 +158,7 @@ void WebSocketServer::on_open(websocketpp::connection_hdl hdl) {
   data_msg->msg["wav_format"] = "pcm";
   data_msg->msg["wav_name"] = "wav-default-id";
   data_msg->msg["itn"] = true;
-  data_msg->msg["audio_fs"] = 16000;
+  data_msg->msg["audio_fs"] = 16000; // default is 16k
   data_msg->msg["access_num"] = 0; // the number of access for this object, when it is 0, we can free it saftly
   data_msg->msg["is_eof"]=false;
   FUNASR_DEC_HANDLE decoder_handle =
@@ -227,7 +241,7 @@ void WebSocketServer::check_and_clean_connection() {
         data_msg->msg["is_eof"]=true;
         guard_decoder.unlock();
         to_remove.push_back(hdl);
-        LOG(INFO)<<"connection is closed: "<<e.what();
+        LOG(INFO)<<"connection is closed.";
         
       }
       iter++;

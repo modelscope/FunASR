@@ -31,6 +31,11 @@ FunASR希望在语音识别的学术研究和工业应用之间架起一座桥�
 
 <a name="最新动态"></a>
 ## 最新动态
+- 2024/01/09: funasr社区软件包windows 2.0版本发布，支持软件包中文离线文件转写4.1、英文离线文件转写1.2、中文实时听写服务1.6的最新功能，详细信息参阅([FunASR社区软件包windows版本](https://www.modelscope.cn/models/damo/funasr-runtime-win-cpu-x64/summary))
+- 2024/01/03: 中文离线文件转写服务 4.0 发布，新增支持8k模型、优化时间戳不匹配问题及增加句子级别时间戳、优化英文单词fst热词效果、支持自动化配置线程参数，同时修复已知的crash问题及内存泄漏问题，详细信息参阅([一键部署文档](runtime/readme_cn.md#中文离线文件转写服务cpu版本))
+- 2024/01/03: 中文实时语音听写服务 1.6 发布，2pass-offline模式支持Ngram语言模型解码、wfst热词，同时修复已知的crash问题及内存泄漏问题，详细信息参阅([一键部署文档](runtime/readme_cn.md#中文实时语音听写服务cpu版本))
+- 2024/01/03: 英文离线文件转写服务 1.2 发布，修复已知的crash问题及内存泄漏问题，详细信息参阅([一键部署文档](runtime/readme_cn.md#英文离线文件转写服务cpu版本))
+- 2023/12/04: funasr社区软件包windows 1.0版本发布，支持中文离线文件转写、英文离线文件转写、中文实时听写服务，详细信息参阅([FunASR社区软件包windows版本](https://www.modelscope.cn/models/damo/funasr-runtime-win-cpu-x64/summary))
 - 2023/11/08：中文离线文件转写服务3.0 CPU版本发布，新增标点大模型、Ngram语言模型与wfst热词，详细信息参阅([一键部署文档](runtime/readme_cn.md#中文离线文件转写服务cpu版本))
 - 2023/10/17: 英文离线文件转写服务一键部署的CPU版本发布，详细信息参阅([一键部署文档](runtime/readme_cn.md#英文离线文件转写服务cpu版本))
 - 2023/10/13: [SlideSpeech](https://slidespeech.github.io/): 一个大规模的多模态音视频语料库，主要是在线会议或者在线课程场景，包含了大量与发言人讲话实时同步的幻灯片。

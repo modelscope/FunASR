@@ -363,7 +363,6 @@ class PhonemeTokenizer(AbsTokenizer):
         non_linguistic_symbols: Union[Path, str, Iterable[str]] = None,
         space_symbol: str = "<space>",
         remove_non_linguistic_symbols: bool = False,
-        **kwargs,
     ):
         if g2p_type is None:
             self.g2p = split_by_space

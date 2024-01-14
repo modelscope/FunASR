@@ -16,6 +16,12 @@ Vocab::Vocab(const char *filename)
     ifstream in(filename);
     LoadVocabFromYaml(filename);
 }
+Vocab::Vocab(const char *filename, const char *lex_file)
+{
+    ifstream in(filename);
+    LoadVocabFromYaml(filename);
+    LoadLex(lex_file);
+}
 Vocab::~Vocab()
 {
 }
@@ -37,11 +43,37 @@ void Vocab::LoadVocabFromYaml(const char* filename){
     }
 }
 
-int Vocab::GetIdByToken(const std::string &token) {
-    if (token_id.count(token)) {
-        return token_id[token];
+void Vocab::LoadLex(const char* filename){
+    std::ifstream file(filename);
+    std::string line;
+    while (std::getline(file, line)) {
+        std::string key, value;
+        std::istringstream iss(line);
+        std::getline(iss, key, '\t');
+        std::getline(iss, value);
+
+        if (!key.empty() && !value.empty()) {
+            lex_map[key] = value;
+        }
     }
-    return 0;
+
+    file.close();
+}
+
+string Vocab::Word2Lex(const std::string &word) const {
+    auto it = lex_map.find(word);
+    if (it != lex_map.end()) {
+        return it->second;
+    }
+    return "";
+}
+
+int Vocab::GetIdByToken(const std::string &token) const {
+    auto it = token_id.find(token);
+    if (it != token_id.end()) {
+        return it->second;
+    }
+    return -1;
 }
 
 void Vocab::Vector2String(vector<int> in, std::vector<std::string> &preds)
@@ -120,8 +152,8 @@ string Vocab::Vector2StringV2(vector<int> in, std::string language)
     std::string combine = "";
     std::string unicodeChar = "▁";
 
-    for (auto it = in.begin(); it != in.end(); it++) {
-        string word = vocab[*it];
+    for (i=0; i<in.size(); i++){
+        string word = vocab[in[i]];
         // step1 space character skips
         if (word == "<s>" || word == "</s>" || word == "<unk>")
             continue;
@@ -146,9 +178,20 @@ string Vocab::Vector2StringV2(vector<int> in, std::string language)
             int sub_word = !(word.find("@@") == string::npos);
             // process word start and middle part
             if (sub_word) {
-                combine += word.erase(word.length() - 2);
-                is_combining = true;
-                continue;
+                // if badcase: lo@@ chinese
+                if (i == in.size()-1 || i<in.size()-1 && IsChinese(vocab[in[i+1]])){
+                    word = word.erase(word.length() - 2) + " ";
+                    if (is_combining) {
+                        combine += word;
+                        is_combining = false;
+                        word = combine;
+                        combine = "";
+                    }
+                }else{
+                    combine += word.erase(word.length() - 2);
+                    is_combining = true;
+                    continue;
+                }
             }
             // process word end part
             else if (is_combining) {

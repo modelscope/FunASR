@@ -19,10 +19,11 @@ Paraformer::Paraformer()
 
 // offline
 void Paraformer::InitAsr(const std::string &am_model, const std::string &am_cmvn, const std::string &am_config, int thread_num){
+    LoadConfigFromYaml(am_config.c_str());
     // knf options
     fbank_opts_.frame_opts.dither = 0;
     fbank_opts_.mel_opts.num_bins = n_mels;
-    fbank_opts_.frame_opts.samp_freq = MODEL_SAMPLE_RATE;
+    fbank_opts_.frame_opts.samp_freq = asr_sample_rate;
     fbank_opts_.frame_opts.window_type = window_type;
     fbank_opts_.frame_opts.frame_shift_ms = frame_shift;
     fbank_opts_.frame_opts.frame_length_ms = frame_length;
@@ -65,7 +66,6 @@ void Paraformer::InitAsr(const std::string &am_model, const std::string &am_cmvn
     for (auto& item : m_strOutputNames)
         m_szOutputNames.push_back(item.c_str());
     vocab = new Vocab(am_config.c_str());
-    LoadConfigFromYaml(am_config.c_str());
 	phone_set_ = new PhoneSet(am_config.c_str());
     LoadCmvn(am_cmvn.c_str());
 }
@@ -77,7 +77,7 @@ void Paraformer::InitAsr(const std::string &en_model, const std::string &de_mode
     // knf options
     fbank_opts_.frame_opts.dither = 0;
     fbank_opts_.mel_opts.num_bins = n_mels;
-    fbank_opts_.frame_opts.samp_freq = MODEL_SAMPLE_RATE;
+    fbank_opts_.frame_opts.samp_freq = asr_sample_rate;
     fbank_opts_.frame_opts.window_type = window_type;
     fbank_opts_.frame_opts.frame_shift_ms = frame_shift;
     fbank_opts_.frame_opts.frame_length_ms = frame_length;
@@ -187,13 +187,13 @@ void Paraformer::InitAsr(const std::string &am_model, const std::string &en_mode
 }
 
 void Paraformer::InitLm(const std::string &lm_file, 
-                        const std::string &lm_cfg_file) {
+                        const std::string &lm_cfg_file, 
+                        const std::string &lex_file) {
     try {
         lm_ = std::shared_ptr<fst::Fst<fst::StdArc>>(
             fst::Fst<fst::StdArc>::Read(lm_file));
         if (lm_){
-            if (vocab) { delete vocab; }
-            vocab = new Vocab(lm_cfg_file.c_str());
+            lm_vocab = new Vocab(lm_cfg_file.c_str(), lex_file.c_str());
             LOG(INFO) << "Successfully load lm file " << lm_file;
         }else{
             LOG(ERROR) << "Failed to load lm file " << lm_file;
@@ -215,6 +215,9 @@ void Paraformer::LoadConfigFromYaml(const char* filename){
     }
 
     try{
+        YAML::Node frontend_conf = config["frontend_conf"];
+        this->asr_sample_rate = frontend_conf["fs"].as<int>();
+
         YAML::Node lang_conf = config["lang"];
         if (lang_conf.IsDefined()){
             language = lang_conf.as<string>();
@@ -256,6 +259,9 @@ void Paraformer::LoadOnlineConfigFromYaml(const char* filename){
 
         this->cif_threshold = predictor_conf["threshold"].as<double>();
         this->tail_alphas = predictor_conf["tail_threshold"].as<double>();
+
+        this->asr_sample_rate = frontend_conf["fs"].as<int>();
+
 
     }catch(exception const &e){
         LOG(ERROR) << "Error when load argument from vad config YAML.";
@@ -300,10 +306,18 @@ void Paraformer::InitSegDict(const std::string &seg_dict_model) {
 
 Paraformer::~Paraformer()
 {
-    if(vocab)
+    if(vocab){
         delete vocab;
-    if(seg_dict)
+    }
+    if(lm_vocab){
+        delete lm_vocab;
+    }
+    if(seg_dict){
         delete seg_dict;
+    }
+    if(phone_set_){
+        delete phone_set_;
+    }
 }
 
 void Paraformer::StartUtterance()
@@ -454,7 +468,7 @@ string Paraformer::Forward(float* din, int len, bool input_finished, const std::
     int32_t in_feat_dim = fbank_opts_.mel_opts.num_bins;
 
     std::vector<std::vector<float>> asr_feats;
-    FbankKaldi(MODEL_SAMPLE_RATE, din, len, asr_feats);
+    FbankKaldi(asr_sample_rate, din, len, asr_feats);
     if(asr_feats.size() == 0){
       return "";
     }
@@ -673,6 +687,11 @@ std::vector<std::vector<float>> Paraformer::CompileHotwordEmbedding(std::string 
 Vocab* Paraformer::GetVocab()
 {
     return vocab;
+}
+
+Vocab* Paraformer::GetLmVocab()
+{
+    return lm_vocab;
 }
 
 PhoneSet* Paraformer::GetPhoneSet()

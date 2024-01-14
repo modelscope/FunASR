@@ -1,5 +1,5 @@
 DOCKER:
-  funasr-runtime-sdk-en-cpu-0.1.1
+  funasr-runtime-sdk-en-cpu-0.1.2
 DEFAULT_ASR_MODEL:
   damo/speech_paraformer-large_asr_nat-en-16k-common-vocab10020-onnx
 DEFAULT_VAD_MODEL:

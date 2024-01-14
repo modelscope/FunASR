@@ -6,6 +6,7 @@ FunASR提供可一键本地或者云端服务器部署的英文离线文件转�
 
 | 时间         | 详情            | 镜像版本                            | 镜像ID         |
 |------------|---------------|---------------------------------|--------------|
+| 2024.01.03 | 修复已知的crash问题及内存泄漏问题 | funasr-runtime-sdk-en-cpu-0.1.2 | 0cdd9f4a4bb5 |
 | 2023.11.08 | runtime结构变化适配 | funasr-runtime-sdk-en-cpu-0.1.1 | 27017f70f72a |
 | 2023.10.16 | 1.0 发布        | funasr-runtime-sdk-en-cpu-0.1.0 | e0de03eb0163 |
 
@@ -36,11 +37,11 @@ docker安装失败请参考 [Docker Installation](https://alibaba-damo-academy.g
 通过下述命令拉取并启动FunASR runtime-SDK的docker镜像：
 ```shell
 sudo docker pull \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.1
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.2
 mkdir -p ./funasr-runtime-resources/models
 sudo docker run -p 10097:10095 -it --privileged=true \
   -v $PWD/funasr-runtime-resources/models:/workspace/models \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.1
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.2
 ```
 
 ### 服务端启动
@@ -148,11 +149,8 @@ nohup bash run_server.sh \
 ```text
 --download-model-dir 模型下载地址，通过设置model ID从Modelscope下载模型
 --model-dir  modelscope model ID 或者 本地模型路径
---quantize  True为量化ASR模型，False为非量化ASR模型，默认是True
 --vad-dir  modelscope model ID 或者 本地模型路径
---vad-quant   True为量化VAD模型，False为非量化VAD模型，默认是True
 --punc-dir  modelscope model ID 或者 本地模型路径
---punc-quant   True为量化PUNC模型，False为非量化PUNC模型，默认是True
 --itn-dir modelscope model ID 或者 本地模型路径
 --port  服务端监听的端口号，默认为 10095
 --decoder-thread-num  服务端线程池个数(支持的最大并发路数)，

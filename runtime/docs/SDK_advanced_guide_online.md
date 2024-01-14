@@ -8,6 +8,7 @@ FunASR Real-time Speech Recognition Software Package integrates real-time versio
 
 | TIME       | INFO                                                                                | IMAGE VERSION                       | IMAGE ID     |
 |------------|-------------------------------------------------------------------------------------|-------------------------------------|--------------|
+| 2024.01.03 | The 2pass-offline mode supports Ngram language model decoding and WFST hotwords, while also addressing known crash issues and memory leak problems | funasr-runtime-sdk-online-cpu-0.1.6  | f99925110d27      |
 | 2023.11.09 | fix bug: without online results                                                     | funasr-runtime-sdk-online-cpu-0.1.5 | b16584b6d38b      |
 | 2023.11.08 | supporting server-side loading of hotwords, adaptation to runtime structure changes | funasr-runtime-sdk-online-cpu-0.1.4 | 691974017c38 |
 | 2023.09.19 | supporting hotwords, timestamps, and ITN model in 2pass mode                        | funasr-runtime-sdk-online-cpu-0.1.2 | 7222c5319bcf |
@@ -26,9 +27,9 @@ If you do not have Docker installed, please refer to [Docker Installation](https
 ### Pull Docker Image
 Use the following command to pull and start the FunASR software package docker image:
 ```shell
-sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.5
+sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.6
 mkdir -p ./funasr-runtime-resources/models
-sudo docker run -p 10096:10095 -it --privileged=true -v $PWD/funasr-runtime-resources/models:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.5
+sudo docker run -p 10096:10095 -it --privileged=true -v $PWD/funasr-runtime-resources/models:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.6
 ```
 
 ### Launching the Server
@@ -42,6 +43,7 @@ nohup bash run_server_2pass.sh \
   --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
   --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx  \
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx \
+  --lm-dir damo/speech_ngram_lm_zh-cn-ai-wesp-fst \
   --itn-dir thuduj12/fst_itn_zh > log.out 2>&1 &
 
 # If you want to close ssl，please add：--certfile 0
@@ -84,6 +86,7 @@ nohup bash run_server_2pass.sh \
   --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx \
+  --lm-dir damo/speech_ngram_lm_zh-cn-ai-wesp-fst \
   --itn-dir thuduj12/fst_itn_zh \
   --certfile  ../../../ssl_key/server.crt \
   --keyfile ../../../ssl_key/server.key \
@@ -101,11 +104,9 @@ nohup bash run_server_2pass.sh \
 --download-model-dir: Model download address, download models from Modelscope by setting the model ID.
 --model-dir: modelscope model ID or local model path.
 --online-model-dir modelscope model ID
---quantize: True for quantized ASR model, False for non-quantized ASR model. Default is True.
 --vad-dir: modelscope model ID or local model path.
---vad-quant: True for quantized VAD model, False for non-quantized VAD model. Default is True.
 --punc-dir: modelscope model ID or local model path.
---punc-quant: True for quantized PUNC model, False for non-quantized PUNC model. Default is True.
+--lm-dir modelscope model ID or local model path.
 --itn-dir modelscope model ID or local model path.
 --port: Port number that the server listens on. Default is 10095.
 --decoder-thread-num: The number of thread pools on the server side that can handle concurrent requests.

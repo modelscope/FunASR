@@ -1,17 +1,7 @@
 from pathlib import Path
 from typing import Iterable
 from typing import Union
-from abc import ABC
-from abc import abstractmethod
-from typing import Iterable
-from typing import List
-from pathlib import Path
-from typing import Dict
-from typing import Iterable
-from typing import List
-from typing import Union
 
-import numpy as np
 
 from funasr.tokenizer.abs_tokenizer import AbsTokenizer
 from funasr.tokenizer.char_tokenizer import CharTokenizer
@@ -28,8 +18,7 @@ def build_tokenizer(
     space_symbol: str = "<space>",
     delimiter: str = None,
     g2p_type: str = None,
-    **kwargs,
-):
+) -> AbsTokenizer:
     """A helper function to instantiate Tokenizer"""
     if token_type == "bpe":
         if bpemodel is None:
@@ -39,7 +28,7 @@ def build_tokenizer(
             raise RuntimeError(
                 "remove_non_linguistic_symbols is not implemented for token_type=bpe"
             )
-        return SentencepiecesTokenizer(bpemodel, **kwargs)
+        return SentencepiecesTokenizer(bpemodel)
 
     elif token_type == "word":
         if remove_non_linguistic_symbols and non_linguistic_symbols is not None:
@@ -49,14 +38,13 @@ def build_tokenizer(
                 remove_non_linguistic_symbols=True,
             )
         else:
-            return WordTokenizer(delimiter=delimiter, **kwargs)
+            return WordTokenizer(delimiter=delimiter)
 
     elif token_type == "char":
         return CharTokenizer(
             non_linguistic_symbols=non_linguistic_symbols,
             space_symbol=space_symbol,
             remove_non_linguistic_symbols=remove_non_linguistic_symbols,
-            **kwargs
         )
 
     elif token_type == "phn":
@@ -65,7 +53,6 @@ def build_tokenizer(
             non_linguistic_symbols=non_linguistic_symbols,
             space_symbol=space_symbol,
             remove_non_linguistic_symbols=remove_non_linguistic_symbols,
-            **kwargs
         )
 
     else:

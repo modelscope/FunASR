@@ -10,6 +10,8 @@ FunASR离线文件转写软件包，提供了一款功能强大的语音离线�
 
 | 时间         | 详情                                                | 镜像版本                         | 镜像ID         |
 |------------|---------------------------------------------------|------------------------------|--------------|
+| 2024.01.08 | 优化句子级时间戳json格式 | funasr-runtime-sdk-cpu-0.4.1 | 0250f8ef981b |
+| 2024.01.03 | 新增支持8k模型、优化时间戳不匹配问题及增加句子级别时间戳、优化英文单词fst热词效果、支持自动化配置线程参数，同时修复已知的crash问题及内存泄漏问题 | funasr-runtime-sdk-cpu-0.4.0 | c4483ee08f04 |
 | 2023.11.08 | 支持标点大模型、支持Ngram模型、支持fst热词、支持服务端加载热词、runtime结构变化适配 | funasr-runtime-sdk-cpu-0.3.0 | caa64bddbb43 |
 | 2023.09.19 | 支持ITN模型                                           | funasr-runtime-sdk-cpu-0.2.2 | 2c5286be13e9 |
 | 2023.08.22 | 集成ffmpeg支持多种音视频输入、支持热词模型、支持时间戳模型                  | funasr-runtime-sdk-cpu-0.2.0 | 1ad3d19e0707 |
@@ -44,11 +46,11 @@ docker安装失败请参考 [Docker Installation](https://alibaba-damo-academy.g
 
 ```shell
 sudo docker pull \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.3.0
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.4.1
 mkdir -p ./funasr-runtime-resources/models
 sudo docker run -p 10095:10095 -it --privileged=true \
   -v $PWD/funasr-runtime-resources/models:/workspace/models \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.3.0
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.4.1
 ```
 
 ### 服务端启动
@@ -70,9 +72,22 @@ nohup bash run_server.sh \
 #   damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx（时间戳）
 #   damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（nn热词）
 # 如果您想在服务端加载热词，请在宿主机文件./funasr-runtime-resources/models/hotwords.txt配置热词（docker映射地址为/workspace/models/hotwords.txt）:
-#   每行一个热词，格式(热词 权重)：阿里巴巴 20
+#   每行一个热词，格式(热词 权重)：阿里巴巴 20（注：热词理论上无限制，但为了兼顾性能和效果，建议热词长度不超过10，个数不超过1k，权重1~100）
 ```
 如果您想定制ngram，参考文档([如何训练LM](./lm_train_tutorial.md))
+
+如果您想部署8k的模型，请使用如下命令启动服务：
+```shell
+cd FunASR/runtime
+nohup bash run_server.sh \
+  --download-model-dir /workspace/models \
+  --vad-dir damo/speech_fsmn_vad_zh-cn-8k-common \
+  --model-dir damo/speech_paraformer_asr_nat-zh-cn-8k-common-vocab8358-tensorflow1  \
+  --punc-dir damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx \
+  --lm-dir damo/speech_ngram_lm_zh-cn-ai-wesp-fst-token8358 \
+  --itn-dir thuduj12/fst_itn_zh \
+  --hotword /workspace/models/hotwords.txt > log.out 2>&1 &
+```
 
 服务端详细参数介绍可参考[服务端用法详解](#服务端用法详解)
 
@@ -165,11 +180,8 @@ nohup bash run_server.sh \
 ```text
 --download-model-dir 模型下载地址，通过设置model ID从Modelscope下载模型
 --model-dir  modelscope model ID 或者 本地模型路径
---quantize  True为量化ASR模型，False为非量化ASR模型，默认是True
 --vad-dir  modelscope model ID 或者 本地模型路径
---vad-quant   True为量化VAD模型，False为非量化VAD模型，默认是True
 --punc-dir  modelscope model ID 或者 本地模型路径
---punc-quant   True为量化PUNC模型，False为非量化PUNC模型，默认是True
 --lm-dir modelscope model ID 或者 本地模型路径
 --itn-dir modelscope model ID 或者 本地模型路径
 --port  服务端监听的端口号，默认为 10095

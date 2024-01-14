@@ -68,6 +68,7 @@ _FUNASRAPI FUNASR_RESULT	FunASRInfer(FUNASR_HANDLE handle, const char* sz_filena
 
 _FUNASRAPI const char*	FunASRGetResult(FUNASR_RESULT result,int n_index);
 _FUNASRAPI const char*	FunASRGetStamp(FUNASR_RESULT result);
+_FUNASRAPI const char*	FunASRGetStampSents(FUNASR_RESULT result);
 _FUNASRAPI const char*	FunASRGetTpassResult(FUNASR_RESULT result,int n_index);
 _FUNASRAPI const int	FunASRGetRetNumber(FUNASR_RESULT result);
 _FUNASRAPI void			FunASRFreeResult(FUNASR_RESULT result);
@@ -118,7 +119,7 @@ _FUNASRAPI FUNASR_HANDLE    FunTpassOnlineInit(FUNASR_HANDLE tpass_handle, std::
 _FUNASRAPI FUNASR_RESULT	FunTpassInferBuffer(FUNASR_HANDLE handle, FUNASR_HANDLE online_handle, const char* sz_buf, 
 												int n_len, std::vector<std::vector<std::string>> &punc_cache, bool input_finished=true, 
 												int sampling_rate=16000, std::string wav_format="pcm", ASR_TYPE mode=ASR_TWO_PASS, 
-												const std::vector<std::vector<float>> &hw_emb={{0.0}}, bool itn=true);
+												const std::vector<std::vector<float>> &hw_emb={{0.0}}, bool itn=true, FUNASR_DEC_HANDLE dec_handle=nullptr);
 _FUNASRAPI void				FunTpassUninit(FUNASR_HANDLE handle);
 _FUNASRAPI void				FunTpassOnlineUninit(FUNASR_HANDLE handle);
 
