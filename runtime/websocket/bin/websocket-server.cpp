@@ -85,6 +85,7 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
           stamp_sents = FunASRGetStampSents(Result);
           FunASRFreeResult(Result);
         } else{
+          std::this_thread::sleep_for(std::chrono::milliseconds(20));
           LOG(ERROR) << "FUNASR_RESULT is nullptr.";
         }
       }catch (std::exception const& e) {
