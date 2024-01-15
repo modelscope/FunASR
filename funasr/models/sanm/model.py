@@ -7,12 +7,12 @@ from funasr.register import tables
 
 @tables.register("model_classes", "SANM")
 class SANM(Transformer):
-	"""CTC-attention hybrid Encoder-Decoder model"""
+    """CTC-attention hybrid Encoder-Decoder model"""
 
-	def __init__(
-		self,
-		*args,
-		**kwargs,
-	):
+    def __init__(
+        self,
+        *args,
+        **kwargs,
+    ):
 
-		super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)

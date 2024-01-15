@@ -309,10 +309,7 @@ class AutoModel:
             if not len(sorted_data):
                 logging.info("decoding, utt: {}, empty speech".format(key))
                 continue
-            
 
-            # if kwargs["device"] == "cpu":
-            #     batch_size = 0
             if len(sorted_data) > 0 and len(sorted_data[0]) > 0:
                 batch_size = max(batch_size, sorted_data[0][0][1] - sorted_data[0][0][0])
             
