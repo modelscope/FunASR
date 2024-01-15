@@ -133,6 +133,7 @@ class AudioWindow {
     };
     ~AudioWindow(){
         free(window);
+        window = nullptr;
     };
     int put(int val)
     {
@@ -162,6 +163,7 @@ AudioFrame::AudioFrame(int start, int end, bool is_final):start(start),end(end),
 AudioFrame::~AudioFrame(){
     if(data != nullptr){
         free(data);
+        data = nullptr;
     }
 }
 int AudioFrame::SetStart(int val)
@@ -221,12 +223,15 @@ Audio::~Audio()
 {
     if (speech_buff != nullptr) {
         free(speech_buff);
+        speech_buff = nullptr;
     }
     if (speech_data != nullptr) {
         free(speech_data);
+        speech_data = nullptr;
     }
     if (speech_char != nullptr) {
         free(speech_char);
+        speech_char = nullptr;
     }
     ClearQueue(frame_queue);
     ClearQueue(asr_online_queue);
@@ -271,6 +276,7 @@ void Audio::WavResample(int32_t sampling_rate, const float *waveform,
     speech_len = samples.size();
     if (speech_data != nullptr) {
         free(speech_data);
+        speech_data = nullptr;
     }
     speech_data = (float*)malloc(sizeof(float) * speech_len);
     memset(speech_data, 0, sizeof(float) * speech_len);
@@ -402,9 +408,11 @@ bool Audio::FfmpegLoad(const char *filename, bool copy2char){
 
     if (speech_data != nullptr) {
         free(speech_data);
+        speech_data = nullptr;
     }
     if (speech_char != nullptr) {
         free(speech_char);
+        speech_char = nullptr;
     }
     offset = 0;
     
@@ -584,6 +592,7 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
 
     if (speech_data != nullptr) {
         free(speech_data);
+        speech_data = nullptr;
     }
 
     speech_len = (resampled_buffers.size()) / 2;
@@ -615,9 +624,11 @@ bool Audio::LoadWav(const char *filename, int32_t* sampling_rate, bool resample)
     WaveHeader header;
     if (speech_data != nullptr) {
         free(speech_data);
+        speech_data = nullptr;
     }
     if (speech_buff != nullptr) {
         free(speech_buff);
+        speech_buff = nullptr;
     }
     
     offset = 0;
@@ -690,6 +701,7 @@ bool Audio::LoadWav2Char(const char *filename, int32_t* sampling_rate)
     WaveHeader header;
     if (speech_char != nullptr) {
         free(speech_char);
+        speech_char = nullptr;
     }
     offset = 0;
     std::ifstream is(filename, std::ifstream::binary);
@@ -729,9 +741,11 @@ bool Audio::LoadWav(const char* buf, int n_file_len, int32_t* sampling_rate)
     WaveHeader header;
     if (speech_data != nullptr) {
         free(speech_data);
+        speech_data = nullptr;
     }
     if (speech_buff != nullptr) {
         free(speech_buff);
+        speech_buff = nullptr;
     }
 
     std::memcpy(&header, buf, sizeof(header));
@@ -774,6 +788,7 @@ bool Audio::LoadPcmwav(const char* buf, int n_buf_len, int32_t* sampling_rate)
 {
     if (speech_data != nullptr) {
         free(speech_data);
+        speech_data = nullptr;
     }
 
     speech_len = n_buf_len / 2;
@@ -807,6 +822,7 @@ bool Audio::LoadPcmwavOnline(const char* buf, int n_buf_len, int32_t* sampling_r
 {
     if (speech_data != nullptr) {
         free(speech_data);
+        speech_data = nullptr;
     }
 
     speech_len = n_buf_len / 2;
@@ -844,9 +860,11 @@ bool Audio::LoadPcmwav(const char* filename, int32_t* sampling_rate, bool resamp
 {
     if (speech_data != nullptr) {
         free(speech_data);
+        speech_data = nullptr;
     }
     if (speech_buff != nullptr) {
         free(speech_buff);
+        speech_buff = nullptr;
     }
     offset = 0;
 
@@ -899,6 +917,7 @@ bool Audio::LoadPcmwav2Char(const char* filename, int32_t* sampling_rate)
 {
     if (speech_char != nullptr) {
         free(speech_char);
+        speech_char = nullptr;
     }
     offset = 0;
 
@@ -1030,6 +1049,7 @@ void Audio::Padding()
         new_data[tmp_off + i] = speech_data[ii];
     }
     free(speech_data);
+    speech_data = nullptr;
     speech_data = new_data;
     speech_len = num_new_samples;
 
