@@ -144,10 +144,10 @@ void runReg(FUNASR_HANDLE tpass_handle, std::vector<int> chunk_size, vector<stri
                 } else {
                     is_final = false;
             }
-            gettimeofday(&start, NULL);
+            gettimeofday(&start, nullptr);
             FUNASR_RESULT result = FunTpassInferBuffer(tpass_handle, tpass_online_handle, speech_buff+sample_offset, step, punc_cache, is_final, 
                                                         sampling_rate_, "pcm", (ASR_TYPE)asr_mode_, hotwords_embedding, true, decoder_handle);
-            gettimeofday(&end, NULL);
+            gettimeofday(&end, nullptr);
             seconds = (end.tv_sec - start.tv_sec);
             long taking_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
             n_total_time += taking_micros;
@@ -272,7 +272,7 @@ int main(int argc, char** argv)
     GetValue(asr_mode, ASR_MODE, model_path);
 
     struct timeval start, end;
-    gettimeofday(&start, NULL);
+    gettimeofday(&start, nullptr);
     int thread_num = onnx_thread.getValue();
     int asr_mode_ = -1;
     if(model_path[ASR_MODE] == "offline"){
@@ -301,7 +301,7 @@ int main(int argc, char** argv)
         am_sc = am_scale.getValue();
     }
 
-    gettimeofday(&end, NULL);
+    gettimeofday(&end, nullptr);
     long seconds = (end.tv_sec - start.tv_sec);
     long modle_init_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
     LOG(INFO) << "Model initialization takes " << (double)modle_init_micros / 1000000 << " s";

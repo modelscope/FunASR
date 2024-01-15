@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     GetValue(wav_path, WAV_PATH, model_path);
 
     struct timeval start, end;
-    gettimeofday(&start, NULL);
+    gettimeofday(&start, nullptr);
     int thread_num = 1;
     FUNASR_HANDLE asr_handle=FunASRInit(model_path, thread_num, ASR_ONLINE);
 
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
         exit(-1);
     }
 
-    gettimeofday(&end, NULL);
+    gettimeofday(&end, nullptr);
     long seconds = (end.tv_sec - start.tv_sec);
     long modle_init_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
     LOG(INFO) << "Model initialization takes " << (double)modle_init_micros / 1000000 << " s";
@@ -144,9 +144,9 @@ int main(int argc, char *argv[])
                 } else {
                     is_final = false;
             }
-            gettimeofday(&start, NULL);
-            FUNASR_RESULT result = FunASRInferBuffer(online_handle, speech_buff+sample_offset, step, RASR_NONE, NULL, is_final, sampling_rate_);
-            gettimeofday(&end, NULL);
+            gettimeofday(&start, nullptr);
+            FUNASR_RESULT result = FunASRInferBuffer(online_handle, speech_buff+sample_offset, step, RASR_NONE, nullptr, is_final, sampling_rate_);
+            gettimeofday(&end, nullptr);
             seconds = (end.tv_sec - start.tv_sec);
             taking_micros += ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
 
