@@ -122,13 +122,7 @@ total_chunk_num = int(len((speech)-1)/chunk_stride+1)
 for i in range(total_chunk_num):
     speech_chunk = speech[i*chunk_stride:(i+1)*chunk_stride]
     is_final = i == total_chunk_num - 1
-    res = model(input=speech_chunk,
-                cache=cache,
-                is_final=is_final,
-                chunk_size=chunk_size,
-                encoder_chunk_look_back=encoder_chunk_look_back,
-                decoder_chunk_look_back=decoder_chunk_look_back,
-                )
+    res = model(input=speech_chunk, cache=cache, is_final=is_final, chunk_size=chunk_size, encoder_chunk_look_back=encoder_chunk_look_back, decoder_chunk_look_back=decoder_chunk_look_back)
     print(res)
 ```
 Note: `chunk_size` is the configuration for streaming latency.` [0,10,5]` indicates that the real-time display granularity is `10*60=600ms`, and the lookahead information is `5*60=300ms`. Each inference input is `600ms` (sample points are `16000*0.6=960`), and the output is the corresponding text. For the last speech segment input, `is_final=True` needs to be set to force the output of the last word.
@@ -161,11 +155,7 @@ total_chunk_num = int(len((speech)-1)/chunk_stride+1)
 for i in range(total_chunk_num):
     speech_chunk = speech[i*chunk_stride:(i+1)*chunk_stride]
     is_final = i == total_chunk_num - 1
-    res = model(input=speech_chunk,
-                cache=cache,
-                is_final=is_final,
-                chunk_size=chunk_size,
-                )
+    res = model(input=speech_chunk, cache=cache, is_final=is_final, chunk_size=chunk_size)
     if len(res[0]["value"]):
         print(res)
 ```
@@ -186,8 +176,7 @@ model = AutoModel(model="fa-zh", model_revision="v2.0.0")
 
 wav_file = f"{model.model_path}/example/asr_example.wav"
 text_file = f"{model.model_path}/example/asr_example.wav"
-res = model(input=(wav_file, text_file),
-            data_type=("sound", "text"))
+res = model(input=(wav_file, text_file), data_type=("sound", "text"))
 print(res)
 ```
 [//]: # (FunASR supports inference and fine-tuning of models trained on industrial datasets of tens of thousands of hours. For more details, please refer to &#40;[modelscope_egs]&#40;https://alibaba-damo-academy.github.io/FunASR/en/modelscope_pipeline/quick_start.html&#41;&#41;. It also supports training and fine-tuning of models on academic standard datasets. For more details, please refer to&#40;[egs]&#40;https://alibaba-damo-academy.github.io/FunASR/en/academic_recipe/asr_recipe.html&#41;&#41;. The models include speech recognition &#40;ASR&#41;, speech activity detection &#40;VAD&#41;, punctuation recovery, language model, speaker verification, speaker separation, and multi-party conversation speech recognition. For a detailed list of models, please refer to the [Model Zoo]&#40;https://github.com/alibaba-damo-academy/FunASR/blob/main/docs/model_zoo/modelscope_models.md&#41;:)

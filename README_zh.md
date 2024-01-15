@@ -119,13 +119,7 @@ total_chunk_num = int(len((speech)-1)/chunk_stride+1)
 for i in range(total_chunk_num):
     speech_chunk = speech[i*chunk_stride:(i+1)*chunk_stride]
     is_final = i == total_chunk_num - 1
-    res = model(input=speech_chunk,
-                cache=cache,
-                is_final=is_final,
-                chunk_size=chunk_size,
-                encoder_chunk_look_back=encoder_chunk_look_back,
-                decoder_chunk_look_back=decoder_chunk_look_back,
-                )
+    res = model(input=speech_chunk, cache=cache, is_final=is_final, chunk_size=chunk_size, encoder_chunk_look_back=encoder_chunk_look_back, decoder_chunk_look_back=decoder_chunk_look_back)
     print(res)
 ```
 
@@ -160,11 +154,7 @@ total_chunk_num = int(len((speech)-1)/chunk_stride+1)
 for i in range(total_chunk_num):
     speech_chunk = speech[i*chunk_stride:(i+1)*chunk_stride]
     is_final = i == total_chunk_num - 1
-    res = model(input=speech_chunk,
-                cache=cache,
-                is_final=is_final,
-                chunk_size=chunk_size,
-                )
+    res = model(input=speech_chunk, cache=cache, is_final=is_final, chunk_size=chunk_size)
     if len(res[0]["value"]):
         print(res)
 ```
@@ -187,8 +177,7 @@ model = AutoModel(model="fa-zh", model_revision="v2.0.0")
 
 wav_file = f"{model.model_path}/example/asr_example.wav"
 text_file = f"{model.model_path}/example/asr_example.wav"
-res = model(input=(wav_file, text_file),
-            data_type=("sound", "text"))
+res = model(input=(wav_file, text_file), data_type=("sound", "text"))
 print(res)
 ```
 更多详细用法（[示例](examples/industrial_data_pretraining)）
