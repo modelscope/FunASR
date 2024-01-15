@@ -46,7 +46,7 @@ class CTTransformer(nn.Module):
         
         
         self.embed = nn.Embedding(vocab_size, embed_unit)
-        encoder_class = tables.encoder_classes.get(encoder.lower())
+        encoder_class = tables.encoder_classes.get(encoder)
         encoder = encoder_class(**encoder_conf)
 
         self.decoder = nn.Linear(att_unit, punc_size)

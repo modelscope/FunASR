@@ -79,17 +79,17 @@ class Paraformer(nn.Module):
         super().__init__()
 
         if specaug is not None:
-            specaug_class = tables.specaug_classes.get(specaug.lower())
+            specaug_class = tables.specaug_classes.get(specaug)
             specaug = specaug_class(**specaug_conf)
         if normalize is not None:
-            normalize_class = tables.normalize_classes.get(normalize.lower())
+            normalize_class = tables.normalize_classes.get(normalize)
             normalize = normalize_class(**normalize_conf)
-        encoder_class = tables.encoder_classes.get(encoder.lower())
+        encoder_class = tables.encoder_classes.get(encoder)
         encoder = encoder_class(input_size=input_size, **encoder_conf)
         encoder_output_size = encoder.output_size()
 
         if decoder is not None:
-            decoder_class = tables.decoder_classes.get(decoder.lower())
+            decoder_class = tables.decoder_classes.get(decoder)
             decoder = decoder_class(
                 vocab_size=vocab_size,
                 encoder_output_size=encoder_output_size,
@@ -104,7 +104,7 @@ class Paraformer(nn.Module):
                 odim=vocab_size, encoder_output_size=encoder_output_size, **ctc_conf
             )
         if predictor is not None:
-            predictor_class = tables.predictor_classes.get(predictor.lower())
+            predictor_class = tables.predictor_classes.get(predictor)
             predictor = predictor_class(**predictor_conf)
         
         # note that eos is the same as sos (equivalent ID)

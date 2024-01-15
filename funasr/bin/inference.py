@@ -175,7 +175,7 @@ class AutoModel:
         # build tokenizer
         tokenizer = kwargs.get("tokenizer", None)
         if tokenizer is not None:
-            tokenizer_class = tables.tokenizer_classes.get(tokenizer.lower())
+            tokenizer_class = tables.tokenizer_classes.get(tokenizer)
             tokenizer = tokenizer_class(**kwargs["tokenizer_conf"])
             kwargs["tokenizer"] = tokenizer
             kwargs["token_list"] = tokenizer.token_list
@@ -186,13 +186,13 @@ class AutoModel:
         # build frontend
         frontend = kwargs.get("frontend", None)
         if frontend is not None:
-            frontend_class = tables.frontend_classes.get(frontend.lower())
+            frontend_class = tables.frontend_classes.get(frontend)
             frontend = frontend_class(**kwargs["frontend_conf"])
             kwargs["frontend"] = frontend
             kwargs["input_size"] = frontend.output_size()
         
         # build model
-        model_class = tables.model_classes.get(kwargs["model"].lower())
+        model_class = tables.model_classes.get(kwargs["model"])
         model = model_class(**kwargs, **kwargs["model_conf"], vocab_size=vocab_size)
         model.eval()
         model.to(device)
@@ -443,7 +443,7 @@ class AutoFrontend:
         # build frontend
         frontend = kwargs.get("frontend", None)
         if frontend is not None:
-            frontend_class = tables.frontend_classes.get(frontend.lower())
+            frontend_class = tables.frontend_classes.get(frontend)
             frontend = frontend_class(**kwargs["frontend_conf"])
 
         self.frontend = frontend

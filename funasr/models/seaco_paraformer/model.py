@@ -90,7 +90,7 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
         seaco_decoder = kwargs.get("seaco_decoder", None)
         if seaco_decoder is not None:
             seaco_decoder_conf = kwargs.get("seaco_decoder_conf")
-            seaco_decoder_class = tables.decoder_classes.get(seaco_decoder.lower())
+            seaco_decoder_class = tables.decoder_classes.get(seaco_decoder)
             self.seaco_decoder = seaco_decoder_class(
                 vocab_size=self.vocab_size,
                 encoder_output_size=self.inner_dim,

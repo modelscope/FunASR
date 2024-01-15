@@ -60,19 +60,19 @@ class Transformer(nn.Module):
         super().__init__()
 
         if frontend is not None:
-            frontend_class = tables.frontend_classes.get_class(frontend.lower())
+            frontend_class = tables.frontend_classes.get_class(frontend)
             frontend = frontend_class(**frontend_conf)
         if specaug is not None:
-            specaug_class = tables.specaug_classes.get_class(specaug.lower())
+            specaug_class = tables.specaug_classes.get_class(specaug)
             specaug = specaug_class(**specaug_conf)
         if normalize is not None:
-            normalize_class = tables.normalize_classes.get_class(normalize.lower())
+            normalize_class = tables.normalize_classes.get_class(normalize)
             normalize = normalize_class(**normalize_conf)
-        encoder_class = tables.encoder_classes.get_class(encoder.lower())
+        encoder_class = tables.encoder_classes.get_class(encoder)
         encoder = encoder_class(input_size=input_size, **encoder_conf)
         encoder_output_size = encoder.output_size()
         if decoder is not None:
-            decoder_class = tables.decoder_classes.get_class(decoder.lower())
+            decoder_class = tables.decoder_classes.get_class(decoder)
             decoder = decoder_class(
                 vocab_size=vocab_size,
                 encoder_output_size=encoder_output_size,

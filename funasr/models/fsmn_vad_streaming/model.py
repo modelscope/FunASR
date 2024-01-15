@@ -268,7 +268,7 @@ class FsmnVADStreaming(nn.Module):
         super().__init__()
         self.vad_opts = VADXOptions(**kwargs)
 
-        encoder_class = tables.encoder_classes.get(encoder.lower())
+        encoder_class = tables.encoder_classes.get(encoder)
         encoder = encoder_class(**encoder_conf)
         self.encoder = encoder
 
