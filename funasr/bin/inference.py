@@ -274,12 +274,9 @@ class AutoModel:
     def generate_with_vad(self, input, input_len=None, **cfg):
         
         # step.1: compute the vad model
-        model = self.vad_model
-        kwargs = self.vad_kwargs
-        kwargs.update(cfg)
+        self.vad_kwargs.update(cfg)
         beg_vad = time.time()
-        res = self.generate(input, input_len=input_len, model=model, kwargs=kwargs, **cfg)
-        vad_res = res
+        res = self.generate(input, input_len=input_len, model=self.vad_model, kwargs=self.vad_kwargs, **cfg)
         end_vad = time.time()
         print(f"time cost vad: {end_vad - beg_vad:0.3f}")
 
