@@ -58,9 +58,9 @@ typedef struct {
 typedef struct {
   nlohmann::json msg;
   std::shared_ptr<std::vector<char>> samples;
-  std::shared_ptr<std::vector<std::vector<float>>> hotwords_embedding=NULL;
+  std::shared_ptr<std::vector<std::vector<float>>> hotwords_embedding=nullptr;
   std::shared_ptr<websocketpp::lib::mutex> thread_lock; // lock for each connection
-  FUNASR_DEC_HANDLE decoder_handle=NULL;
+  FUNASR_DEC_HANDLE decoder_handle=nullptr;
 } FUNASR_MESSAGE;
 
 // See https://wiki.mozilla.org/Security/Server_Side_TLS for more details about

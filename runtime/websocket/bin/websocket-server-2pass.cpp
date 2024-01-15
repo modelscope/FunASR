@@ -409,7 +409,7 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
       }
 
       // hotwords: fst/nn
-      if(msg_data->hotwords_embedding == NULL){
+      if(msg_data->hotwords_embedding == nullptr){
         std::unordered_map<std::string, int> merged_hws_map;
         std::string nn_hotwords = "";
 
@@ -458,7 +458,7 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
         msg_data->msg["audio_fs"] = jsonresult["audio_fs"];
       }
       if (jsonresult.contains("chunk_size")) {
-        if (msg_data->tpass_online_handle == NULL) {
+        if (msg_data->tpass_online_handle == nullptr) {
           std::vector<int> chunk_size_vec =
               jsonresult["chunk_size"].get<std::vector<int>>();
           // check chunk_size_vec
@@ -480,7 +480,7 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
       if ((jsonresult["is_speaking"] == false ||
           jsonresult["is_finished"] == true) && 
           msg_data->msg["is_eof"] != true &&
-          msg_data->hotwords_embedding != NULL) {
+          msg_data->hotwords_embedding != nullptr) {
         LOG(INFO) << "client done";
 
         // if it is in final message, post the sample_data to decode
@@ -532,7 +532,7 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
 
           try{
             // post to decode
-            if (msg_data->msg["is_eof"] != true && msg_data->hotwords_embedding != NULL) {
+            if (msg_data->msg["is_eof"] != true && msg_data->hotwords_embedding != nullptr) {
               std::vector<std::vector<float>> hotwords_embedding_(*(msg_data->hotwords_embedding));
               msg_data->strand_->post(
                         std::bind(&WebSocketServer::do_decoder, this,
