@@ -418,30 +418,25 @@ bool Audio::FfmpegLoad(const char *filename, bool copy2char){
     }
 
     speech_len = (resampled_buffers.size()) / 2;
-    speech_buff = (int16_t*)malloc(sizeof(int16_t) * speech_len);
-    if (speech_buff)
-    {
-        memset(speech_buff, 0, sizeof(int16_t) * speech_len);
-        memcpy((void*)speech_buff, (const void*)resampled_buffers.data(), speech_len * sizeof(int16_t));
-
-        speech_data = (float*)malloc(sizeof(float) * speech_len);
+    speech_data = (float*)malloc(sizeof(float) * speech_len);
+    if(speech_data){
         memset(speech_data, 0, sizeof(float) * speech_len);
-
         float scale = 1;
         if (data_type == 1) {
             scale = 32768;
         }
-        for (int32_t i = 0; i != speech_len; ++i) {
-            speech_data[i] = (float)speech_buff[i] / scale;
+        for (int32_t i = 0; i < speech_len; ++i) {
+            int16_t val = (int16_t)((resampled_buffers[2 * i + 1] << 8) | resampled_buffers[2 * i]);
+            speech_data[i] = (float)val / scale;
         }
-
         AudioFrame* frame = new AudioFrame(speech_len);
         frame_queue.push(frame);
     
         return true;
-    }
-    else
+    }else{
         return false;
+    }
+
 #endif
 }
 
@@ -599,30 +594,25 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
     offset = 0;
 
     speech_len = (resampled_buffers.size()) / 2;
-    speech_buff = (int16_t*)malloc(sizeof(int16_t) * speech_len);
-    if (speech_buff)
-    {
-        memset(speech_buff, 0, sizeof(int16_t) * speech_len);
-        memcpy((void*)speech_buff, (const void*)resampled_buffers.data(), speech_len * sizeof(int16_t));
-
-        speech_data = (float*)malloc(sizeof(float) * speech_len);
+    speech_data = (float*)malloc(sizeof(float) * speech_len);
+    if(speech_data){
         memset(speech_data, 0, sizeof(float) * speech_len);
-
         float scale = 1;
         if (data_type == 1) {
             scale = 32768;
         }
-        for (int32_t i = 0; i != speech_len; ++i) {
-            speech_data[i] = (float)speech_buff[i] / scale;
+        for (int32_t i = 0; i < speech_len; ++i) {
+            int16_t val = (int16_t)((resampled_buffers[2 * i + 1] << 8) | resampled_buffers[2 * i]);
+            speech_data[i] = (float)val / scale;
         }
-
         AudioFrame* frame = new AudioFrame(speech_len);
         frame_queue.push(frame);
     
         return true;
-    }
-    else
+    }else{
         return false;
+    }
+
 #endif
 }
 
