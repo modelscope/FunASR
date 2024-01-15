@@ -1,5 +1,8 @@
-# Copyright 3D-Speaker (https://github.com/alibaba-damo-academy/3D-Speaker). All Rights Reserved.
-# Licensed under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+#  MIT License  (https://opensource.org/licenses/MIT)
+# Modified from 3D-Speaker (https://github.com/alibaba-damo-academy/3D-Speaker)
 
 import io
 import os
@@ -14,6 +17,7 @@ from pathlib import Path
 from typing import Generator, Union
 from abc import ABCMeta, abstractmethod
 import torchaudio.compliance.kaldi as Kaldi
+
 from funasr.models.transformer.utils.nets_utils import pad_list
 
 

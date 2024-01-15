@@ -1,6 +1,6 @@
 
 model="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online"
-model_revision="v2.0.0"
+model_revision="v2.0.2"
 
 python funasr/bin/inference.py \
 +model=${model} \

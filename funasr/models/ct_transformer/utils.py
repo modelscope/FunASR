@@ -1,4 +1,10 @@
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+#  MIT License  (https://opensource.org/licenses/MIT)
+
 import re
+
 
 def split_to_mini_sentence(words: list, word_limit: int = 20):
     assert word_limit > 1
@@ -12,8 +18,6 @@ def split_to_mini_sentence(words: list, word_limit: int = 20):
     if length % word_limit > 0:
         sentences.append(words[sentence_len * word_limit:])
     return sentences
-
-
 
 def split_words(text: str, jieba_usr_dict=None, **kwargs):
     if jieba_usr_dict:

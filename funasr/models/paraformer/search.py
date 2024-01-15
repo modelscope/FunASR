@@ -1,17 +1,16 @@
-from itertools import chain
-import logging
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import NamedTuple
-from typing import Tuple
-from typing import Union
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+#  MIT License  (https://opensource.org/licenses/MIT)
 
 import torch
+import logging
+from itertools import chain
+from typing import Any, Dict, List, NamedTuple, Tuple, Union
 
 from funasr.metrics.common import end_detect
-from funasr.models.transformer.scorers.scorer_interface import PartialScorerInterface
-from funasr.models.transformer.scorers.scorer_interface import ScorerInterface
+from funasr.models.transformer.scorers.scorer_interface import PartialScorerInterface, ScorerInterface
+
 
 class Hypothesis(NamedTuple):
     """Hypothesis data type."""

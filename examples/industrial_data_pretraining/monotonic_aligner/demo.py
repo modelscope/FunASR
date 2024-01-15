@@ -5,7 +5,7 @@
 
 from funasr import AutoModel
 
-model = AutoModel(model="damo/speech_timestamp_prediction-v1-16k-offline", model_revision="v2.0.0")
+model = AutoModel(model="damo/speech_timestamp_prediction-v1-16k-offline", model_revision="v2.0.2")
 
 res = model(input=("https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav",
                    "欢迎大家来到魔搭社区进行体验"),

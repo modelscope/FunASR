@@ -1,25 +1,26 @@
-from typing import List
-from typing import Tuple
-import logging
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+#  MIT License  (https://opensource.org/licenses/MIT)
+
 import torch
-import torch.nn as nn
-import numpy as np
+from typing import List, Tuple
 
+from funasr.register import tables
 from funasr.models.scama import utils as myutils
-from funasr.models.transformer.decoder import BaseTransformerDecoder
-
-from funasr.models.sanm.attention import MultiHeadedAttentionSANMDecoder, MultiHeadedAttentionCrossAtt
-from funasr.models.transformer.layer_norm import LayerNorm
-from funasr.models.sanm.positionwise_feed_forward import PositionwiseFeedForwardDecoderSANM
 from funasr.models.transformer.utils.repeat import repeat
 from funasr.models.transformer.decoder import DecoderLayer
-from funasr.models.transformer.attention import MultiHeadedAttention
+from funasr.models.transformer.layer_norm import LayerNorm
 from funasr.models.transformer.embedding import PositionalEncoding
+from funasr.models.transformer.attention import MultiHeadedAttention
 from funasr.models.transformer.utils.nets_utils import make_pad_mask
+from funasr.models.transformer.decoder import BaseTransformerDecoder
 from funasr.models.transformer.positionwise_feed_forward import PositionwiseFeedForward
-from funasr.register import tables
+from funasr.models.sanm.positionwise_feed_forward import PositionwiseFeedForwardDecoderSANM
+from funasr.models.sanm.attention import MultiHeadedAttentionSANMDecoder, MultiHeadedAttentionCrossAtt
 
-class DecoderLayerSANM(nn.Module):
+
+class DecoderLayerSANM(torch.nn.Module):
     """Single decoder layer module.
 
     Args:
@@ -62,12 +63,12 @@ class DecoderLayerSANM(nn.Module):
             self.norm2 = LayerNorm(size)
         if src_attn is not None:
             self.norm3 = LayerNorm(size)
-        self.dropout = nn.Dropout(dropout_rate)
+        self.dropout = torch.nn.Dropout(dropout_rate)
         self.normalize_before = normalize_before
         self.concat_after = concat_after
         if self.concat_after:
-            self.concat_linear1 = nn.Linear(size + size, size)
-            self.concat_linear2 = nn.Linear(size + size, size)
+            self.concat_linear1 = torch.nn.Linear(size + size, size)
+            self.concat_linear2 = torch.nn.Linear(size + size, size)
         self.reserve_attn=False
         self.attn_mat = []
 

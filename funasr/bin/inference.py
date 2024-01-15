@@ -245,7 +245,7 @@ class AutoModel:
         
             time1 = time.perf_counter()
             with torch.no_grad():
-                results, meta_data = model.generate(**batch, **kwargs)
+                results, meta_data = model.inference(**batch, **kwargs)
             time2 = time.perf_counter()
             
             asr_result_list.extend(results)

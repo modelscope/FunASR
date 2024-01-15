@@ -1,22 +1,27 @@
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+#  MIT License  (https://opensource.org/licenses/MIT)
+
 import time
 import copy
 import torch
 from torch.cuda.amp import autocast
 from typing import Union, Dict, List, Tuple, Optional
 
+from funasr.register import tables
+from funasr.models.ctc.ctc import CTC
+from funasr.utils import postprocess_utils
+from funasr.utils.datadir_writer import DatadirWriter
 from funasr.models.paraformer.cif_predictor import mae_loss
 from funasr.train_utils.device_funcs import force_gatherable
 from funasr.models.transformer.utils.add_sos_eos import add_sos_eos
 from funasr.models.transformer.utils.nets_utils import make_pad_mask
 from funasr.utils.timestamp_tools import ts_prediction_lfr6_standard
-from funasr.utils import postprocess_utils
-from funasr.utils.datadir_writer import DatadirWriter
-from funasr.register import tables
-from funasr.models.ctc.ctc import CTC
 from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
 
 
-@tables.register("model_classes", "monotonicaligner")
+@tables.register("model_classes", "MonotonicAligner")
 class MonotonicAligner(torch.nn.Module):
     """
     Author: Speech Lab of DAMO Academy, Alibaba Group
@@ -143,7 +148,7 @@ class MonotonicAligner(torch.nn.Module):
 
         return encoder_out, encoder_out_lens
     
-    def generate(self,
+    def inference(self,
              data_in,
              data_lengths=None,
              key: list=None,

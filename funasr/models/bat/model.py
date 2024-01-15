@@ -1,23 +1,27 @@
-"""Boundary Aware Transducer (BAT) model."""
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+#  MIT License  (https://opensource.org/licenses/MIT)
 
-import logging
-from contextlib import contextmanager
-from typing import Dict, List, Optional, Tuple, Union
 
 import torch
+import logging
 import torch.nn as nn
-from packaging.version import parse as V
+
+from typing import Dict, List, Optional, Tuple, Union
+
+
+from torch.cuda.amp import autocast
 from funasr.losses.label_smoothing_loss import (
     LabelSmoothingLoss,  # noqa: H301
 )
 
 from funasr.models.transformer.utils.nets_utils import get_transducer_task_io
-from funasr.metrics.compute_acc import th_accuracy
 from funasr.models.transformer.utils.nets_utils import make_pad_mask
 from funasr.models.transformer.utils.add_sos_eos import add_sos_eos
 from funasr.train_utils.device_funcs import force_gatherable
 
-from torch.cuda.amp import autocast
+
 
 
 

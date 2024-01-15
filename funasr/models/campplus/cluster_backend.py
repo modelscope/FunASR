@@ -1,14 +1,17 @@
-# Copyright (c) Alibaba, Inc. and its affiliates.
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+#  MIT License  (https://opensource.org/licenses/MIT)
+# Modified from 3D-Speaker (https://github.com/alibaba-damo-academy/3D-Speaker)
 
-from typing import Any, Dict, Union
-
+import umap
+import scipy
+import torch
+import sklearn
 import hdbscan
 import numpy as np
-import scipy
-import sklearn
-import umap
+
 from sklearn.cluster._kmeans import k_means
-from torch import nn
 
 
 class SpectralCluster:
@@ -129,7 +132,7 @@ class UmapHdbscan:
         return labels
 
 
-class ClusterBackend(nn.Module):
+class ClusterBackend(torch.nn.Module):
     r"""Perfom clustering for input embeddings and output the labels.
     Args:
         model_dir: A model dir.

@@ -4,9 +4,10 @@
 # LICENSE file in the root directory of this source tree.
 
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
 import numpy as np
+import torch.nn as nn
+from enum import Enum, auto
+import torch.nn.functional as F
 from dataclasses import dataclass
 from funasr.models.emotion2vec.fairseq_modules import (
     LayerNorm,
@@ -14,12 +15,11 @@ from funasr.models.emotion2vec.fairseq_modules import (
     TransposeLast,
 )
 
-from enum import Enum, auto
+
 class Modality(Enum):
     AUDIO = auto()
 
 
-   
 @dataclass
 class D2vDecoderConfig:
     decoder_dim: int = 384

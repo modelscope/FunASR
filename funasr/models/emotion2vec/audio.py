@@ -3,25 +3,21 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from typing import List, Tuple
-from functools import partial
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
 import numpy as np
+import torch.nn as nn
+from functools import partial
+import torch.nn.functional as F
+from typing import Callable, Dict
 
-from typing import Callable, Dict, Optional
 from funasr.models.emotion2vec.fairseq_modules import (
     LayerNorm,
     SamePad,
     TransposeLast,
     ConvFeatureExtractionModel,
 )
-
-from funasr.models.emotion2vec.base import ModalitySpecificEncoder, get_alibi_bias
 from funasr.models.emotion2vec.modules import Modality, BlockEncoder, Decoder1d
-
-
+from funasr.models.emotion2vec.base import ModalitySpecificEncoder, get_alibi_bias
 
 
 class AudioEncoder(ModalitySpecificEncoder):

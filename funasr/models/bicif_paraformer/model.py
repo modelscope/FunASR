@@ -3,34 +3,36 @@
 # Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
 #  MIT License  (https://opensource.org/licenses/MIT)
 
-import logging
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Tuple
 import copy
-import torch
-import torch.nn as nn
-import random
-import numpy as np
 import time
+import torch
+import logging
+from contextlib import contextmanager
+from distutils.version import LooseVersion
+from typing import Dict, List, Optional, Tuple
 
-from funasr.models.transformer.utils.add_sos_eos import add_sos_eos
-from funasr.models.transformer.utils.nets_utils import make_pad_mask, pad_list
-from funasr.metrics.compute_acc import th_accuracy
-from funasr.train_utils.device_funcs import force_gatherable
-
-from funasr.models.paraformer.search import Hypothesis
-
-from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
-from funasr.utils import postprocess_utils
-from funasr.utils.datadir_writer import DatadirWriter
-from funasr.utils.timestamp_tools import ts_prediction_lfr6_standard
 from funasr.register import tables
 from funasr.models.ctc.ctc import CTC
-
-
+from funasr.utils import postprocess_utils
+from funasr.metrics.compute_acc import th_accuracy
+from funasr.utils.datadir_writer import DatadirWriter
 from funasr.models.paraformer.model import Paraformer
+from funasr.models.paraformer.search import Hypothesis
+from funasr.train_utils.device_funcs import force_gatherable
+from funasr.models.transformer.utils.add_sos_eos import add_sos_eos
+from funasr.utils.timestamp_tools import ts_prediction_lfr6_standard
+from funasr.models.transformer.utils.nets_utils import make_pad_mask, pad_list
+from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
+
+
+if LooseVersion(torch.__version__) >= LooseVersion("1.6.0"):
+    from torch.cuda.amp import autocast
+else:
+    # Nothing to do if torch<1.6.0
+    @contextmanager
+    def autocast(enabled=True):
+        yield
+
 
 @tables.register("model_classes", "BiCifParaformer")
 class BiCifParaformer(Paraformer):
@@ -215,7 +217,7 @@ class BiCifParaformer(Paraformer):
         return loss, stats, weight
 
 
-    def generate(self,
+    def inference(self,
                  data_in,
                  data_lengths=None,
                  key: list = None,

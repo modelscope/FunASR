@@ -1,30 +1,32 @@
-from enum import Enum
-from typing import List, Tuple, Dict, Any
-import logging
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+#  MIT License  (https://opensource.org/licenses/MIT)
+
 import os
 import json
+import time
+import math
 import torch
 from torch import nn
-import math
-from typing import Optional
-import time
-from funasr.register import tables
-from funasr.utils.load_utils import load_audio_text_image_video,extract_fbank
-from funasr.utils.datadir_writer import DatadirWriter
-
+from enum import Enum
 from dataclasses import dataclass
+from funasr.register import tables
+from typing import List, Tuple, Dict, Any, Optional
+
+from funasr.utils.datadir_writer import DatadirWriter
+from funasr.utils.load_utils import load_audio_text_image_video,extract_fbank
+
 
 class VadStateMachine(Enum):
     kVadInStateStartPointNotDetected = 1
     kVadInStateInSpeechSegment = 2
     kVadInStateEndPointDetected = 3
 
-
 class FrameState(Enum):
     kFrameStateInvalid = -1
     kFrameStateSpeech = 1
     kFrameStateSil = 0
-
 
 # final voice/unvoice state per frame
 class AudioChangeState(Enum):
@@ -34,7 +36,6 @@ class AudioChangeState(Enum):
     kChangeStateSil2Speech = 3
     kChangeStateNoBegin = 4
     kChangeStateInvalid = 5
-
 
 class VadDetectMode(Enum):
     kVadSingleUtteranceDetectMode = 0
@@ -514,7 +515,7 @@ class FsmnVADStreaming(nn.Module):
         cache["stats"] = stats
         return cache
     
-    def generate(self,
+    def inference(self,
                  data_in,
                  data_lengths=None,
                  key: list = None,
