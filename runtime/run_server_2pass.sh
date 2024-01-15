@@ -16,7 +16,7 @@ multiple_io=16
 io_thread_num=$(( (decoder_thread_num + multiple_io - 1) / multiple_io ))
 model_thread_num=1
 
-. ../egs/aishell/transformer/utils/parse_options.sh || exit 1;
+. ./tools/utils/parse_options.sh || exit 1;
 
 if [ -z "$certfile" ] || [ "$certfile" = "0" ]; then
   certfile=""
