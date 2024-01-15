@@ -480,7 +480,7 @@
 		
 		audio->Split(vad_online_handle, chunk_len, input_finished, mode);
 
-		funasr::AudioFrame* frame = NULL;
+		funasr::AudioFrame* frame = nullptr;
 		while(audio->FetchChunck(frame) > 0){
 			string msg = ((funasr::ParaformerOnline*)asr_online_handle)->Forward(frame->data, frame->len, frame->is_final);
 			if(mode == ASR_ONLINE){
@@ -504,9 +504,9 @@
 			}else if(mode == ASR_TWO_PASS){
 				p_result->msg += msg;
 			}
-			if(frame != NULL){
+			if(frame != nullptr){
 				delete frame;
-				frame = NULL;
+				frame = nullptr;
 			}
 		}
 
@@ -561,9 +561,9 @@
 			if (!(p_result->stamp).empty()){
 				p_result->stamp_sents = funasr::TimestampSentence(p_result->tpass_msg, p_result->stamp);
 			}
-			if(frame != NULL){
+			if(frame != nullptr){
 				delete frame;
-				frame = NULL;
+				frame = nullptr;
 			}
 		}
 

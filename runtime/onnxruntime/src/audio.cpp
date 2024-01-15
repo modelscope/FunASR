@@ -160,7 +160,7 @@ AudioFrame::AudioFrame(int start, int end, bool is_final):start(start),end(end),
     len = end - start;
 }
 AudioFrame::~AudioFrame(){
-    if(data != NULL){
+    if(data != nullptr){
         free(data);
     }
 }
@@ -195,37 +195,37 @@ int AudioFrame::Disp()
 
 Audio::Audio(int data_type) : dest_sample_rate(MODEL_SAMPLE_RATE), data_type(data_type)
 {
-    speech_buff = NULL;
-    speech_data = NULL;
+    speech_buff = nullptr;
+    speech_data = nullptr;
     align_size = 1360;
     seg_sample = dest_sample_rate / 1000;
 }
 
 Audio::Audio(int model_sample_rate, int data_type) : dest_sample_rate(model_sample_rate), data_type(data_type)
 {
-    speech_buff = NULL;
-    speech_data = NULL;
+    speech_buff = nullptr;
+    speech_data = nullptr;
     align_size = 1360;
     seg_sample = dest_sample_rate / 1000;
 }
 
 Audio::Audio(int model_sample_rate, int data_type, int size) : dest_sample_rate(model_sample_rate), data_type(data_type)
 {
-    speech_buff = NULL;
-    speech_data = NULL;
+    speech_buff = nullptr;
+    speech_data = nullptr;
     align_size = (float)size;
     seg_sample = dest_sample_rate / 1000;
 }
 
 Audio::~Audio()
 {
-    if (speech_buff != NULL) {
+    if (speech_buff != nullptr) {
         free(speech_buff);
     }
-    if (speech_data != NULL) {
+    if (speech_data != nullptr) {
         free(speech_data);
     }
-    if (speech_char != NULL) {
+    if (speech_char != nullptr) {
         free(speech_char);
     }
     ClearQueue(frame_queue);
@@ -269,7 +269,7 @@ void Audio::WavResample(int32_t sampling_rate, const float *waveform,
     resampler->Resample(waveform, n, true, &samples);
     //reset speech_data
     speech_len = samples.size();
-    if (speech_data != NULL) {
+    if (speech_data != nullptr) {
         free(speech_data);
     }
     speech_data = (float*)malloc(sizeof(float) * speech_len);
@@ -283,21 +283,21 @@ bool Audio::FfmpegLoad(const char *filename, bool copy2char){
 #else
     // from file
     AVFormatContext* formatContext = avformat_alloc_context();
-    if (avformat_open_input(&formatContext, filename, NULL, NULL) != 0) {
+    if (avformat_open_input(&formatContext, filename, nullptr, nullptr) != 0) {
         LOG(ERROR) << "Error: Could not open input file.";
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
         return false;
     }
 
-    if (avformat_find_stream_info(formatContext, NULL) < 0) {
+    if (avformat_find_stream_info(formatContext, nullptr) < 0) {
         LOG(ERROR) << "Error: Could not open input file.";
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
         return false;
     }
-    const AVCodec* codec = NULL;
-    AVCodecParameters* codecParameters = NULL;
+    const AVCodec* codec = nullptr;
+    AVCodecParameters* codecParameters = nullptr;
     int audioStreamIndex = av_find_best_stream(formatContext, AVMEDIA_TYPE_AUDIO, -1, -1, &codec, 0);
     if (audioStreamIndex >= 0) {
         codecParameters = formatContext->streams[audioStreamIndex]->codecpar;
@@ -321,7 +321,7 @@ bool Audio::FfmpegLoad(const char *filename, bool copy2char){
         avcodec_free_context(&codecContext);
         return false;
     }
-    if (avcodec_open2(codecContext, codec, NULL) < 0) {
+    if (avcodec_open2(codecContext, codec, nullptr) < 0) {
         LOG(ERROR) << "Error: Could not open audio decoder.";
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
@@ -400,10 +400,10 @@ bool Audio::FfmpegLoad(const char *filename, bool copy2char){
     av_packet_free(&packet);
     av_frame_free(&frame);
 
-    if (speech_data != NULL) {
+    if (speech_data != nullptr) {
         free(speech_data);
     }
-    if (speech_char != NULL) {
+    if (speech_char != nullptr) {
         free(speech_char);
     }
     offset = 0;
@@ -460,7 +460,7 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
     }
     AVFormatContext* formatContext = avformat_alloc_context();
     formatContext->pb = avio_ctx;
-    if (avformat_open_input(&formatContext, "", NULL, NULL) != 0) {
+    if (avformat_open_input(&formatContext, "", nullptr, nullptr) != 0) {
         LOG(ERROR) << "Error: Could not open input file.";
         avio_context_free(&avio_ctx);
         avformat_close_input(&formatContext);
@@ -468,15 +468,15 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
         return false;
     }
 
-    if (avformat_find_stream_info(formatContext, NULL) < 0) {
+    if (avformat_find_stream_info(formatContext, nullptr) < 0) {
         LOG(ERROR) << "Error: Could not find stream information.";
         avio_context_free(&avio_ctx);
         avformat_close_input(&formatContext);
         avformat_free_context(formatContext);
         return false;
     }
-    const AVCodec* codec = NULL;
-    AVCodecParameters* codecParameters = NULL;
+    const AVCodec* codec = nullptr;
+    AVCodecParameters* codecParameters = nullptr;
     int audioStreamIndex = av_find_best_stream(formatContext, AVMEDIA_TYPE_AUDIO, -1, -1, &codec, 0);
     if (audioStreamIndex >= 0) {
         codecParameters = formatContext->streams[audioStreamIndex]->codecpar;
@@ -497,7 +497,7 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
         avcodec_free_context(&codecContext);
         return false;
     }
-    if (avcodec_open2(codecContext, codec, NULL) < 0) {
+    if (avcodec_open2(codecContext, codec, nullptr) < 0) {
         LOG(ERROR) << "Error: Could not open audio decoder.";
         avio_context_free(&avio_ctx);
         avformat_close_input(&formatContext);
@@ -582,7 +582,7 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
     av_packet_free(&packet);
     av_frame_free(&frame);
 
-    if (speech_data != NULL) {
+    if (speech_data != nullptr) {
         free(speech_data);
     }
 
@@ -613,10 +613,10 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
 bool Audio::LoadWav(const char *filename, int32_t* sampling_rate, bool resample)
 {
     WaveHeader header;
-    if (speech_data != NULL) {
+    if (speech_data != nullptr) {
         free(speech_data);
     }
-    if (speech_buff != NULL) {
+    if (speech_buff != nullptr) {
         free(speech_buff);
     }
     
@@ -688,7 +688,7 @@ bool Audio::LoadWav(const char *filename, int32_t* sampling_rate, bool resample)
 bool Audio::LoadWav2Char(const char *filename, int32_t* sampling_rate)
 {
     WaveHeader header;
-    if (speech_char != NULL) {
+    if (speech_char != nullptr) {
         free(speech_char);
     }
     offset = 0;
@@ -727,10 +727,10 @@ bool Audio::LoadWav2Char(const char *filename, int32_t* sampling_rate)
 bool Audio::LoadWav(const char* buf, int n_file_len, int32_t* sampling_rate)
 { 
     WaveHeader header;
-    if (speech_data != NULL) {
+    if (speech_data != nullptr) {
         free(speech_data);
     }
-    if (speech_buff != NULL) {
+    if (speech_buff != nullptr) {
         free(speech_buff);
     }
 
@@ -772,7 +772,7 @@ bool Audio::LoadWav(const char* buf, int n_file_len, int32_t* sampling_rate)
 
 bool Audio::LoadPcmwav(const char* buf, int n_buf_len, int32_t* sampling_rate)
 {
-    if (speech_data != NULL) {
+    if (speech_data != nullptr) {
         free(speech_data);
     }
 
@@ -805,7 +805,7 @@ bool Audio::LoadPcmwav(const char* buf, int n_buf_len, int32_t* sampling_rate)
 
 bool Audio::LoadPcmwavOnline(const char* buf, int n_buf_len, int32_t* sampling_rate)
 {
-    if (speech_data != NULL) {
+    if (speech_data != nullptr) {
         free(speech_data);
     }
 
@@ -842,10 +842,10 @@ bool Audio::LoadPcmwavOnline(const char* buf, int n_buf_len, int32_t* sampling_r
 
 bool Audio::LoadPcmwav(const char* filename, int32_t* sampling_rate, bool resample)
 {
-    if (speech_data != NULL) {
+    if (speech_data != nullptr) {
         free(speech_data);
     }
-    if (speech_buff != NULL) {
+    if (speech_buff != nullptr) {
         free(speech_buff);
     }
     offset = 0;
@@ -897,7 +897,7 @@ bool Audio::LoadPcmwav(const char* filename, int32_t* sampling_rate, bool resamp
 
 bool Audio::LoadPcmwav2Char(const char* filename, int32_t* sampling_rate)
 {
-    if (speech_char != NULL) {
+    if (speech_char != nullptr) {
         free(speech_char);
     }
     offset = 0;
@@ -924,7 +924,7 @@ bool Audio::LoadPcmwav2Char(const char* filename, int32_t* sampling_rate)
 
 bool Audio::LoadOthers2Char(const char* filename)
 {
-    if (speech_char != NULL) {
+    if (speech_char != nullptr) {
         free(speech_char);
     }
 
@@ -1048,7 +1048,7 @@ void Audio::Split(OfflineStream* offline_stream)
     frame_queue.pop();
     int sp_len = frame->GetLen();
     delete frame;
-    frame = NULL;
+    frame = nullptr;
 
     std::vector<float> pcm_data(speech_data, speech_data+sp_len);
     vector<std::vector<int>> vad_segments = (offline_stream->vad_handle)->Infer(pcm_data);
@@ -1060,7 +1060,7 @@ void Audio::Split(OfflineStream* offline_stream)
         frame->SetStart(start);
         frame->SetEnd(end);
         frame_queue.push(frame);
-        frame = NULL;
+        frame = nullptr;
     }
 }
 
@@ -1072,7 +1072,7 @@ void Audio::Split(VadModel* vad_obj, vector<std::vector<int>>& vad_segments, boo
     frame_queue.pop();
     int sp_len = frame->GetLen();
     delete frame;
-    frame = NULL;
+    frame = nullptr;
 
     std::vector<float> pcm_data(speech_data, speech_data+sp_len);
     vad_segments = vad_obj->Infer(pcm_data, input_finished);
@@ -1087,7 +1087,7 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
     frame_queue.pop();
     int sp_len = frame->GetLen();
     delete frame;
-    frame = NULL;
+    frame = nullptr;
 
     std::vector<float> pcm_data(speech_data, speech_data+sp_len);
     vector<std::vector<int>> vad_segments = vad_obj->Infer(pcm_data, input_finished);
@@ -1108,7 +1108,7 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
                     frame->data = (float*)malloc(sizeof(float) * step);
                     memcpy(frame->data, all_samples.data()+start-offset, step*sizeof(float));
                     asr_online_queue.push(frame);
-                    frame = NULL;
+                    frame = nullptr;
                     speech_start += step/seg_sample;
                 }
             }
@@ -1136,7 +1136,7 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
                     frame->data = (float*)malloc(sizeof(float) * (end-start));
                     memcpy(frame->data, all_samples.data()+start-offset, (end-start)*sizeof(float));
                     asr_online_queue.push(frame);
-                    frame = NULL;
+                    frame = nullptr;
                 }
 
                 if(asr_mode != ASR_ONLINE){
@@ -1147,7 +1147,7 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
                     frame->data = (float*)malloc(sizeof(float) * (end-start));
                     memcpy(frame->data, all_samples.data()+start-offset, (end-start)*sizeof(float));
                     asr_offline_queue.push(frame);
-                    frame = NULL;
+                    frame = nullptr;
                 }
 
                 speech_start = -1;
@@ -1170,7 +1170,7 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
                         frame->data = (float*)malloc(sizeof(float) * step);
                         memcpy(frame->data, all_samples.data()+start-offset, step*sizeof(float));
                         asr_online_queue.push(frame);
-                        frame = NULL;
+                        frame = nullptr;
                         speech_start += step/seg_sample;
                     }
                 }
@@ -1195,7 +1195,7 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
                     frame->data = (float*)malloc(sizeof(float) * (end-offline_start));
                     memcpy(frame->data, all_samples.data()+offline_start-offset, (end-offline_start)*sizeof(float));
                     asr_offline_queue.push(frame);
-                    frame = NULL;
+                    frame = nullptr;
                 }
 
                 if(asr_mode != ASR_OFFLINE){
@@ -1213,7 +1213,7 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
                             frame->data = (float*)malloc(sizeof(float) * step);
                             memcpy(frame->data, all_samples.data()+start-offset+sample_offset, step*sizeof(float));
                             asr_online_queue.push(frame);
-                            frame = NULL;
+                            frame = nullptr;
                         }
                     }else{
                         frame = new AudioFrame(0);
@@ -1221,7 +1221,7 @@ void Audio::Split(VadModel* vad_obj, int chunk_len, bool input_finished, ASR_TYP
                         frame->global_start = speech_start;   // in this case start >= end
                         frame->global_end = speech_end_i;
                         asr_online_queue.push(frame);
-                        frame = NULL;
+                        frame = nullptr;
                     }
                 }
                 speech_start = -1;
