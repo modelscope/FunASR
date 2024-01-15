@@ -403,9 +403,6 @@ bool Audio::FfmpegLoad(const char *filename, bool copy2char){
     if (speech_data != NULL) {
         free(speech_data);
     }
-    if (speech_buff != NULL) {
-        free(speech_buff);
-    }
     if (speech_char != NULL) {
         free(speech_char);
     }
@@ -423,7 +420,7 @@ bool Audio::FfmpegLoad(const char *filename, bool copy2char){
         memset(speech_data, 0, sizeof(float) * speech_len);
         float scale = 1;
         if (data_type == 1) {
-            scale = 32768;
+            scale = 32768.0f;
         }
         for (int32_t i = 0; i < speech_len; ++i) {
             int16_t val = (int16_t)((resampled_buffers[2 * i + 1] << 8) | resampled_buffers[2 * i]);
@@ -588,10 +585,6 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
     if (speech_data != NULL) {
         free(speech_data);
     }
-    if (speech_buff != NULL) {
-        free(speech_buff);
-    }
-    offset = 0;
 
     speech_len = (resampled_buffers.size()) / 2;
     speech_data = (float*)malloc(sizeof(float) * speech_len);
@@ -599,7 +592,7 @@ bool Audio::FfmpegLoad(const char* buf, int n_file_len){
         memset(speech_data, 0, sizeof(float) * speech_len);
         float scale = 1;
         if (data_type == 1) {
-            scale = 32768;
+            scale = 32768.0f;
         }
         for (int32_t i = 0; i < speech_len; ++i) {
             int16_t val = (int16_t)((resampled_buffers[2 * i + 1] << 8) | resampled_buffers[2 * i]);
@@ -740,7 +733,6 @@ bool Audio::LoadWav(const char* buf, int n_file_len, int32_t* sampling_rate)
     if (speech_buff != NULL) {
         free(speech_buff);
     }
-    offset = 0;
 
     std::memcpy(&header, buf, sizeof(header));
 
@@ -783,30 +775,20 @@ bool Audio::LoadPcmwav(const char* buf, int n_buf_len, int32_t* sampling_rate)
     if (speech_data != NULL) {
         free(speech_data);
     }
-    if (speech_buff != NULL) {
-        free(speech_buff);
-    }
-    offset = 0;
 
     speech_len = n_buf_len / 2;
-    speech_buff = (int16_t*)malloc(sizeof(int16_t) * speech_len);
-    if (speech_buff)
-    {
-        memset(speech_buff, 0, sizeof(int16_t) * speech_len);
-        memcpy((void*)speech_buff, (const void*)buf, speech_len * sizeof(int16_t));
-
-        speech_data = (float*)malloc(sizeof(float) * speech_len);
-        memset(speech_data, 0, sizeof(float) * speech_len);
-
+    speech_data = (float*)malloc(sizeof(float) * speech_len);
+    if(speech_data){
         float scale = 1;
         if (data_type == 1) {
-            scale = 32768;
+            scale = 32768.0f;
+        }
+        const uint8_t* byte_buf = reinterpret_cast<const uint8_t*>(buf);
+        for (int32_t i = 0; i < speech_len; ++i) {
+            int16_t val = (int16_t)((byte_buf[2 * i + 1] << 8) | byte_buf[2 * i]);
+            speech_data[i] = (float)val / scale;
         }
 
-        for (int32_t i = 0; i != speech_len; ++i) {
-            speech_data[i] = (float)speech_buff[i] / scale;
-        }
-        
         //resample
         if(*sampling_rate != dest_sample_rate){
             WavResample(*sampling_rate, speech_data, speech_len);
@@ -814,11 +796,11 @@ bool Audio::LoadPcmwav(const char* buf, int n_buf_len, int32_t* sampling_rate)
 
         AudioFrame* frame = new AudioFrame(speech_len);
         frame_queue.push(frame);
+    
         return true;
-
-    }
-    else
+    }else{
         return false;
+    }
 }
 
 bool Audio::LoadPcmwavOnline(const char* buf, int n_buf_len, int32_t* sampling_rate)
@@ -826,32 +808,20 @@ bool Audio::LoadPcmwavOnline(const char* buf, int n_buf_len, int32_t* sampling_r
     if (speech_data != NULL) {
         free(speech_data);
     }
-    if (speech_buff != NULL) {
-        free(speech_buff);
-    }
-    if (speech_char != NULL) {
-        free(speech_char);
-    }
 
     speech_len = n_buf_len / 2;
-    speech_buff = (int16_t*)malloc(sizeof(int16_t) * speech_len);
-    if (speech_buff)
-    {
-        memset(speech_buff, 0, sizeof(int16_t) * speech_len);
-        memcpy((void*)speech_buff, (const void*)buf, speech_len * sizeof(int16_t));
-
-        speech_data = (float*)malloc(sizeof(float) * speech_len);
-        memset(speech_data, 0, sizeof(float) * speech_len);
-
+    speech_data = (float*)malloc(sizeof(float) * speech_len);
+    if(speech_data){
         float scale = 1;
         if (data_type == 1) {
-            scale = 32768;
+            scale = 32768.0f;
+        }
+        const uint8_t* byte_buf = reinterpret_cast<const uint8_t*>(buf);
+        for (int32_t i = 0; i < speech_len; ++i) {
+            int16_t val = (int16_t)((byte_buf[2 * i + 1] << 8) | byte_buf[2 * i]);
+            speech_data[i] = (float)val / scale;
         }
 
-        for (int32_t i = 0; i != speech_len; ++i) {
-            speech_data[i] = (float)speech_buff[i] / scale;
-        }
-        
         //resample
         if(*sampling_rate != dest_sample_rate){
             WavResample(*sampling_rate, speech_data, speech_len);
@@ -863,11 +833,11 @@ bool Audio::LoadPcmwavOnline(const char* buf, int n_buf_len, int32_t* sampling_r
 
         AudioFrame* frame = new AudioFrame(speech_len);
         frame_queue.push(frame);
+    
         return true;
-
-    }
-    else
+    }else{
         return false;
+    }
 }
 
 bool Audio::LoadPcmwav(const char* filename, int32_t* sampling_rate, bool resample)
