@@ -97,7 +97,7 @@ model = AutoModel(model="paraformer-zh", model_revision="v2.0.2", \
                   punc_model="ct-punc-c", punc_model_revision="v2.0.2", \
                   spk_model="cam++", spk_model_revision="v2.0.2")
 res = model(input=f"{model.model_path}/example/asr_example.wav", 
-            batch_size=16, 
+            batch_size=64, 
             hotword='魔搭')
 print(res)
 ```
@@ -135,7 +135,6 @@ Note: `chunk_size` is the configuration for streaming latency.` [0,10,5]` indica
 from funasr import AutoModel
 
 model = AutoModel(model="fsmn-vad", model_revision="v2.0.2")
-
 wav_file = f"{model.model_path}/example/asr_example.wav"
 res = model(input=wav_file)
 print(res)
@@ -167,7 +166,6 @@ for i in range(total_chunk_num):
 from funasr import AutoModel
 
 model = AutoModel(model="ct-punc", model_revision="v2.0.2")
-
 res = model(input="那今天的会就到这里吧 happy new year 明年见")
 print(res)
 ```
@@ -176,9 +174,8 @@ print(res)
 from funasr import AutoModel
 
 model = AutoModel(model="fa-zh", model_revision="v2.0.2")
-
 wav_file = f"{model.model_path}/example/asr_example.wav"
-text_file = f"{model.model_path}/example/asr_example.wav"
+text_file = f"{model.model_path}/example/text.txt"
 res = model(input=(wav_file, text_file), data_type=("sound", "text"))
 print(res)
 ```
