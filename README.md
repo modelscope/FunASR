@@ -76,57 +76,120 @@ FunASR has open-sourced a large number of pre-trained models on industrial data.
 
 <a name="quick-start"></a>
 ## Quick Start
-Quick start for new users（[tutorial](https://alibaba-damo-academy.github.io/FunASR/en/funasr/quick_start.html)）
-
-FunASR supports inference and fine-tuning of models trained on industrial data for tens of thousands of hours. For more details, please refer to [modelscope_egs](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_pipeline/quick_start.html). It also supports training and fine-tuning of models on academic standard datasets. For more information, please refer to [egs](https://alibaba-damo-academy.github.io/FunASR/en/academic_recipe/asr_recipe.html).
 
 Below is a quick start tutorial. Test audio files ([Mandarin](https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/vad_example.wav), [English]()).
 
 ### Command-line usage
 
 ```shell
-funasr --model paraformer-zh asr_example_zh.wav
+funasr +model=paraformer-zh +vad_model="fsmn-vad" +punc_model="ct-punc" +input=asr_example_zh.wav
 ```
 
 Notes: Support recognition of single audio file, as well as file list in Kaldi-style wav.scp format: `wav_id wav_pat`
 
 ### Speech Recognition (Non-streaming)
 ```python
-from funasr import infer
+from funasr import AutoModel
 
-p = infer(model="paraformer-zh", vad_model="fsmn-vad", punc_model="ct-punc", model_hub="ms")
+model = AutoModel(model="paraformer-zh")
+# for the long duration wav, you could add vad model
+# model = AutoModel(model="paraformer-zh", vad_model="fsmn-vad", punc_model="ct-punc")
 
-res = p("asr_example_zh.wav", batch_size_token=5000)
+res = model(input="asr_example_zh.wav", batch_size=64)
 print(res)
 ```
 Note: `model_hub`: represents the model repository, `ms` stands for selecting ModelScope download, `hf` stands for selecting Huggingface download.
 
 ### Speech Recognition (Streaming)
 ```python
-from funasr import infer
-
-p = infer(model="paraformer-zh-streaming", model_hub="ms")
+from funasr import AutoModel
 
 chunk_size = [0, 10, 5] #[0, 10, 5] 600ms, [0, 8, 4] 480ms
-param_dict = {"cache": dict(), "is_final": False, "chunk_size": chunk_size, "encoder_chunk_look_back": 4, "decoder_chunk_look_back": 1}
+encoder_chunk_look_back = 4 #number of chunks to lookback for encoder self-attention
+decoder_chunk_look_back = 1 #number of encoder chunks to lookback for decoder cross-attention
 
-import torchaudio
-speech = torchaudio.load("asr_example_zh.wav")[0][0]
-speech_length = speech.shape[0]
+model = AutoModel(model="paraformer-zh-streaming", model_revision="v2.0.0")
 
-stride_size = chunk_size[1] * 960
-sample_offset = 0
-for sample_offset in range(0, speech_length, min(stride_size, speech_length - sample_offset)):
-    param_dict["is_final"] = True if sample_offset + stride_size >= speech_length - 1 else False
-    input = speech[sample_offset: sample_offset + stride_size]
-    rec_result = p(input=input, param_dict=param_dict)
-    print(rec_result)
+import soundfile
+import os
+
+wav_file = os.path.join(model.model_path, "example/asr_example.wav")
+speech, sample_rate = soundfile.read(wav_file)
+chunk_stride = chunk_size[1] * 960 # 600ms
+
+cache = {}
+total_chunk_num = int(len((speech)-1)/chunk_stride+1)
+for i in range(total_chunk_num):
+    speech_chunk = speech[i*chunk_stride:(i+1)*chunk_stride]
+    is_final = i == total_chunk_num - 1
+    res = model(input=speech_chunk,
+                cache=cache,
+                is_final=is_final,
+                chunk_size=chunk_size,
+                encoder_chunk_look_back=encoder_chunk_look_back,
+                decoder_chunk_look_back=decoder_chunk_look_back,
+                )
+    print(res)
 ```
 Note: `chunk_size` is the configuration for streaming latency.` [0,10,5]` indicates that the real-time display granularity is `10*60=600ms`, and the lookahead information is `5*60=300ms`. Each inference input is `600ms` (sample points are `16000*0.6=960`), and the output is the corresponding text. For the last speech segment input, `is_final=True` needs to be set to force the output of the last word.
 
-Quick start for new users can be found in [docs](https://alibaba-damo-academy.github.io/FunASR/en/funasr/quick_start_zh.html)
+### Voice Activity Detection (streaming)
+```python
+from funasr import AutoModel
 
+model = AutoModel(model="fsmn-vad", model_revision="v2.0.2")
 
+wav_file = f"{model.model_path}/example/asr_example.wav"
+res = model(input=wav_file)
+print(res)
+```
+### Voice Activity Detection (Non-streaming)
+```python
+from funasr import AutoModel
+
+chunk_size = 200 # ms
+model = AutoModel(model="fsmn-vad", model_revision="v2.0.2")
+
+import soundfile
+
+wav_file = f"{model.model_path}/example/vad_example.wav"
+speech, sample_rate = soundfile.read(wav_file)
+chunk_stride = int(chunk_size * sample_rate / 1000)
+
+cache = {}
+total_chunk_num = int(len((speech)-1)/chunk_stride+1)
+for i in range(total_chunk_num):
+    speech_chunk = speech[i*chunk_stride:(i+1)*chunk_stride]
+    is_final = i == total_chunk_num - 1
+    res = model(input=speech_chunk,
+                cache=cache,
+                is_final=is_final,
+                chunk_size=chunk_size,
+                )
+    if len(res[0]["value"]):
+        print(res)
+```
+### Punctuation Restoration
+```python
+from funasr import AutoModel
+
+model = AutoModel(model="ct-punc", model_revision="v2.0.1")
+
+res = model(input="那今天的会就到这里吧 happy new year 明年见")
+print(res)
+```
+### Timestamp Prediction
+```python
+from funasr import AutoModel
+
+model = AutoModel(model="fa-zh", model_revision="v2.0.0")
+
+wav_file = f"{model.model_path}/example/asr_example.wav"
+text_file = f"{model.model_path}/example/asr_example.wav"
+res = model(input=(wav_file, text_file),
+            data_type=("sound", "text"))
+print(res)
+```
 [//]: # (FunASR supports inference and fine-tuning of models trained on industrial datasets of tens of thousands of hours. For more details, please refer to &#40;[modelscope_egs]&#40;https://alibaba-damo-academy.github.io/FunASR/en/modelscope_pipeline/quick_start.html&#41;&#41;. It also supports training and fine-tuning of models on academic standard datasets. For more details, please refer to&#40;[egs]&#40;https://alibaba-damo-academy.github.io/FunASR/en/academic_recipe/asr_recipe.html&#41;&#41;. The models include speech recognition &#40;ASR&#41;, speech activity detection &#40;VAD&#41;, punctuation recovery, language model, speaker verification, speaker separation, and multi-party conversation speech recognition. For a detailed list of models, please refer to the [Model Zoo]&#40;https://github.com/alibaba-damo-academy/FunASR/blob/main/docs/model_zoo/modelscope_models.md&#41;:)
 
 ## Deployment Service
