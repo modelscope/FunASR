@@ -1,14 +1,13 @@
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+#  MIT License  (https://opensource.org/licenses/MIT)
 
 import logging
 from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Tuple
-from typing import Union
-import tempfile
-import codecs
-import requests
-import re
 import copy
 import torch
 import torch.nn as nn
