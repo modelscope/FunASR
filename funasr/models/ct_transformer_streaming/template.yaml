@@ -1,0 +1,50 @@
+# This is an example that demonstrates how to configure a model file.
+# You can modify the configuration according to your own requirements.
+
+# to print the register_table:
+# from funasr.register import tables
+# tables.print()
+
+model: CTTransformerStreaming
+model_conf:
+    ignore_id: 0
+    embed_unit: 256
+    att_unit: 256
+    dropout_rate: 0.1
+    punc_list:
+        - <unk>
+        - _
+        - ，
+        - 。
+        - ？
+        - 、
+    punc_weight:
+        - 1.0
+        - 1.0
+        - 1.0
+        - 1.0
+        - 1.0
+        - 1.0
+    sentence_end_id: 3
+
+encoder: SANMVadEncoder
+encoder_conf:
+    input_size: 256
+    output_size: 256
+    attention_heads: 8
+    linear_units: 1024
+    num_blocks: 3
+    dropout_rate: 0.1
+    positional_dropout_rate: 0.1
+    attention_dropout_rate: 0.0
+    input_layer: pe
+    pos_enc_class: SinusoidalPositionEncoder
+    normalize_before: true
+    kernel_size: 11
+    sanm_shfit: 5
+    selfattention_layer_type: sanm
+    padding_idx: 0
+
+tokenizer: CharTokenizer
+tokenizer_conf:
+  unk_symbol: <unk>

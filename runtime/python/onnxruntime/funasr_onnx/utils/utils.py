@@ -2,12 +2,10 @@
 
 import functools
 import logging
-import pickle
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, NamedTuple, Set, Tuple, Union
 
 import re
-import torch
 import numpy as np
 import yaml
 try:
@@ -27,14 +25,15 @@ def pad_list(xs, pad_value, max_len=None):
     n_batch = len(xs)
     if max_len is None:
         max_len = max(x.size(0) for x in xs)
-    pad = xs[0].new(n_batch, max_len, *xs[0].size()[1:]).fill_(pad_value)
-
+    # pad = xs[0].new(n_batch, max_len, *xs[0].size()[1:]).fill_(pad_value)
+    # numpy format
+    pad = (np.zeros((n_batch, max_len)) + pad_value).astype(np.int32)
     for i in range(n_batch):
-        pad[i, : xs[i].size(0)] = xs[i]
+        pad[i, : xs[i].shape[0]] = xs[i]
 
     return pad
 
-
+'''
 def make_pad_mask(lengths, xs=None, length_dim=-1, maxlen=None):
     if length_dim == 0:
         raise ValueError("length_dim cannot be 0: {}".format(length_dim))
@@ -67,7 +66,7 @@ def make_pad_mask(lengths, xs=None, length_dim=-1, maxlen=None):
         )
         mask = mask[ind].expand_as(xs).to(xs.device)
     return mask
-
+'''
 
 class TokenIDConverter():
     def __init__(self, token_list: Union[List, str],

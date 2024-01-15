@@ -57,68 +57,130 @@ FunASR开源了大量在工业数据上预训练模型，您可以在[模型许�
 （注：[🤗]()表示Huggingface模型仓库链接，[⭐]()表示ModelScope模型仓库链接）
 
 
-|                                                                              模型名字                                                                               |        任务详情        |     训练数据     | 参数量  |
-|:---------------------------------------------------------------------------------------------------------------------------------------------------------------:|:------------------:|:------------:|:----:|
-|     paraformer-zh <br> ([⭐](https://www.modelscope.cn/models/damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary)  [🤗]() )     |  语音识别，带时间戳输出，非实时   |  60000小时，中文  | 220M |
-|                 paraformer-zh-spk <br> ( [⭐](https://modelscope.cn/models/damo/speech_paraformer-large-vad-punc-spk_asr_nat-zh-cn/summary)  [🤗]() )                 | 分角色语音识别，带时间戳输出，非实时 |  60000小时，中文  | 220M |
-|        paraformer-zh-online <br> ( [⭐](https://modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary) [🤗]() )         |      语音识别，实时       |  60000小时，中文  | 220M |
-|          paraformer-en <br> ( [⭐](https://www.modelscope.cn/models/damo/speech_paraformer-large-vad-punc_asr_nat-en-16k-common-vocab10020/summary) [🤗]() )          | 语音识别，非实时 |  50000小时，英文  | 220M |
-|                                                                paraformer-en-spk <br> ([⭐]() [🤗]() )                                                                |      语音识别，非实时      |  50000小时，英文  | 220M |
-|                      conformer-en <br> ( [⭐](https://modelscope.cn/models/damo/speech_conformer_asr-en-16k-vocab4199-pytorch/summary) [🤗]() )                       |      语音识别，非实时      |  50000小时，英文  | 220M |
-|                      ct-punc <br> ( [⭐](https://modelscope.cn/models/damo/punc_ct-transformer_cn-en-common-vocab471067-large/summary) [🤗]() )                       |      标点恢复      |  100M，中文与英文  | 1.1G | 
-|                           fsmn-vad <br> ( [⭐](https://modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary) [🤗]() )                           |     语音端点检测，实时      | 5000小时，中文与英文 | 0.4M | 
-|                           fa-zh <br> ( [⭐](https://modelscope.cn/models/damo/speech_timestamp_prediction-v1-16k-offline/summary) [🤗]() )                            |   字级别时间戳预测         |  50000小时，中文  | 38M  |
+|                                                                             模型名字                                                                             |        任务详情        |     训练数据     | 参数量  |
+|:------------------------------------------------------------------------------------------------------------------------------------------------------------:|:------------------:|:------------:|:----:|
+| paraformer-zh <br> ([⭐](https://www.modelscope.cn/models/damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary)  [🤗]() ) |  语音识别，带时间戳输出，非实时   |  60000小时，中文  | 220M |
+|             paraformer-zh-spk <br> ( [⭐](https://modelscope.cn/models/damo/speech_paraformer-large-vad-punc-spk_asr_nat-zh-cn/summary)  [🤗]() )             | 分角色语音识别，带时间戳输出，非实时 |  60000小时，中文  | 220M |
+|   paraformer-zh-streaming <br> ( [⭐](https://modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary) [🤗]() )   |      语音识别，实时       |  60000小时，中文  | 220M |
+|      paraformer-en <br> ( [⭐](https://www.modelscope.cn/models/damo/speech_paraformer-large-vad-punc_asr_nat-en-16k-common-vocab10020/summary) [🤗]() )      | 语音识别，非实时 |  50000小时，英文  | 220M |
+|                                                            paraformer-en-spk <br> ([⭐]() [🤗]() )                                                            |      语音识别，非实时      |  50000小时，英文  | 220M |
+|                  conformer-en <br> ( [⭐](https://modelscope.cn/models/damo/speech_conformer_asr-en-16k-vocab4199-pytorch/summary) [🤗]() )                   |      语音识别，非实时      |  50000小时，英文  | 220M |
+|                  ct-punc <br> ( [⭐](https://modelscope.cn/models/damo/punc_ct-transformer_cn-en-common-vocab471067-large/summary) [🤗]() )                   |      标点恢复      |  100M，中文与英文  | 1.1G | 
+|                       fsmn-vad <br> ( [⭐](https://modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary) [🤗]() )                       |     语音端点检测，实时      | 5000小时，中文与英文 | 0.4M | 
+|                       fa-zh <br> ( [⭐](https://modelscope.cn/models/damo/speech_timestamp_prediction-v1-16k-offline/summary) [🤗]() )                        |   字级别时间戳预测         |  50000小时，中文  | 38M  |
 
 
 <a name="快速开始"></a>
 ## 快速开始
-FunASR支持数万小时工业数据训练的模型的推理和微调，详细信息可以参阅（[modelscope_egs](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_pipeline/quick_start.html)）；也支持学术标准数据集模型的训练和微调，详细信息可以参阅（[egs](https://alibaba-damo-academy.github.io/FunASR/en/academic_recipe/asr_recipe.html)）。
 
 下面为快速上手教程，测试音频（[中文](https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/vad_example.wav)，[英文]()）
 
 ### 可执行命令行
 
 ```shell
-funasr --model paraformer-zh asr_example_zh.wav
+funasr +model=paraformer-zh +vad_model="fsmn-vad" +punc_model="ct-punc" +input=asr_example_zh.wav
 ```
 
 注：支持单条音频文件识别，也支持文件列表，列表为kaldi风格wav.scp：`wav_id   wav_path`
 
 ### 非实时语音识别
 ```python
-from funasr import infer
+from funasr import AutoModel
 
-p = infer(model="paraformer-zh", vad_model="fsmn-vad", punc_model="ct-punc", model_hub="ms")
+model = AutoModel(model="paraformer-zh")
+# for the long duration wav, you could add vad model
+# model = AutoModel(model="paraformer-zh", vad_model="fsmn-vad", punc_model="ct-punc")
 
-res = p("asr_example_zh.wav", batch_size_token=5000)
+res = model(input="asr_example_zh.wav", batch_size=64)
 print(res)
 ```
 注：`model_hub`：表示模型仓库，`ms`为选择modelscope下载，`hf`为选择huggingface下载。
 
 ### 实时语音识别
-```python
-from funasr import infer
 
-p = infer(model="paraformer-zh-streaming", model_hub="ms")
+```python
+from funasr import AutoModel
 
 chunk_size = [0, 10, 5] #[0, 10, 5] 600ms, [0, 8, 4] 480ms
-param_dict = {"cache": dict(), "is_final": False, "chunk_size": chunk_size, "encoder_chunk_look_back": 4, "decoder_chunk_look_back": 1}
+encoder_chunk_look_back = 4 #number of chunks to lookback for encoder self-attention
+decoder_chunk_look_back = 1 #number of encoder chunks to lookback for decoder cross-attention
 
-import torchaudio
-speech = torchaudio.load("asr_example_zh.wav")[0][0]
-speech_length = speech.shape[0]
+model = AutoModel(model="paraformer-zh-streaming", model_revision="v2.0.0")
 
-stride_size = chunk_size[1] * 960
-sample_offset = 0
-for sample_offset in range(0, speech_length, min(stride_size, speech_length - sample_offset)):
-    param_dict["is_final"] = True if sample_offset + stride_size >= speech_length - 1 else False
-    input = speech[sample_offset: sample_offset + stride_size]
-    rec_result = p(input=input, param_dict=param_dict)
-    print(rec_result)
+import soundfile
+import os
+
+wav_file = os.path.join(model.model_path, "example/asr_example.wav")
+speech, sample_rate = soundfile.read(wav_file)
+chunk_stride = chunk_size[1] * 960 # 600ms
+
+cache = {}
+total_chunk_num = int(len((speech)-1)/chunk_stride+1)
+for i in range(total_chunk_num):
+    speech_chunk = speech[i*chunk_stride:(i+1)*chunk_stride]
+    is_final = i == total_chunk_num - 1
+    res = model(input=speech_chunk, cache=cache, is_final=is_final, chunk_size=chunk_size, encoder_chunk_look_back=encoder_chunk_look_back, decoder_chunk_look_back=decoder_chunk_look_back)
+    print(res)
 ```
+
 注：`chunk_size`为流式延时配置，`[0,10,5]`表示上屏实时出字粒度为`10*60=600ms`，未来信息为`5*60=300ms`。每次推理输入为`600ms`（采样点数为`16000*0.6=960`），输出为对应文字，最后一个语音片段输入需要设置`is_final=True`来强制输出最后一个字。
 
-更多详细用法（[新人文档](https://alibaba-damo-academy.github.io/FunASR/en/funasr/quick_start_zh.html)）
+### 语音端点检测（非实时）
+```python
+from funasr import AutoModel
+
+model = AutoModel(model="fsmn-vad", model_revision="v2.0.2")
+
+wav_file = f"{model.model_path}/example/asr_example.wav"
+res = model(input=wav_file)
+print(res)
+```
+
+### 语音端点检测（实时）
+```python
+from funasr import AutoModel
+
+chunk_size = 200 # ms
+model = AutoModel(model="fsmn-vad", model_revision="v2.0.2")
+
+import soundfile
+
+wav_file = f"{model.model_path}/example/vad_example.wav"
+speech, sample_rate = soundfile.read(wav_file)
+chunk_stride = int(chunk_size * sample_rate / 1000)
+
+cache = {}
+total_chunk_num = int(len((speech)-1)/chunk_stride+1)
+for i in range(total_chunk_num):
+    speech_chunk = speech[i*chunk_stride:(i+1)*chunk_stride]
+    is_final = i == total_chunk_num - 1
+    res = model(input=speech_chunk, cache=cache, is_final=is_final, chunk_size=chunk_size)
+    if len(res[0]["value"]):
+        print(res)
+```
+
+### 标点恢复
+```python
+from funasr import AutoModel
+
+model = AutoModel(model="ct-punc", model_revision="v2.0.1")
+
+res = model(input="那今天的会就到这里吧 happy new year 明年见")
+print(res)
+```
+
+### 时间戳预测
+```python
+from funasr import AutoModel
+
+model = AutoModel(model="fa-zh", model_revision="v2.0.0")
+
+wav_file = f"{model.model_path}/example/asr_example.wav"
+text_file = f"{model.model_path}/example/asr_example.wav"
+res = model(input=(wav_file, text_file), data_type=("sound", "text"))
+print(res)
+```
+更多详细用法（[示例](examples/industrial_data_pretraining)）
 
 
 <a name="服务部署"></a>

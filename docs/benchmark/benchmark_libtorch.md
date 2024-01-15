@@ -1,1 +1,0 @@
-../../funasr/runtime/docs/benchmark_libtorch.md
