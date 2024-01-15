@@ -18,5 +18,5 @@ frontend = AutoFrontend(model="damo/speech_paraformer-large_asr_nat-zh-cn-16k-co
 fbanks = frontend(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav", batch_size=2)
 
 for batch_idx, fbank_dict in enumerate(fbanks):
-	res = model(**fbank_dict)
-	print(res)
+    res = model(**fbank_dict)
+    print(res)

@@ -541,20 +541,20 @@ class UniASR(FunASRModel):
                         speech_lengths: (Batch, )
         """
         # with autocast(False):
-        # 	# 1. Extract feats
-        # 	feats, feats_lengths = self._extract_feats(speech, speech_lengths)
+        #     # 1. Extract feats
+        #     feats, feats_lengths = self._extract_feats(speech, speech_lengths)
         #
-        # 	# 2. Data augmentation
-        # 	if self.specaug is not None and self.training:
-        # 		feats, feats_lengths = self.specaug(feats, feats_lengths)
+        #     # 2. Data augmentation
+        #     if self.specaug is not None and self.training:
+        #         feats, feats_lengths = self.specaug(feats, feats_lengths)
         #
-        # 	# 3. Normalization for feature: e.g. Global-CMVN, Utterance-CMVN
-        # 	if self.normalize is not None:
-        # 		feats, feats_lengths = self.normalize(feats, feats_lengths)
+        #     # 3. Normalization for feature: e.g. Global-CMVN, Utterance-CMVN
+        #     if self.normalize is not None:
+        #         feats, feats_lengths = self.normalize(feats, feats_lengths)
 
         # Pre-encoder, e.g. used for raw input data
         # if self.preencoder is not None:
-        # 	feats, feats_lengths = self.preencoder(feats, feats_lengths)
+        #     feats, feats_lengths = self.preencoder(feats, feats_lengths)
         encoder_out_rm, encoder_out_lens_rm = self.encoder.overlap_chunk_cls.remove_chunk(
             encoder_out,
             encoder_out_lens,
@@ -584,9 +584,9 @@ class UniASR(FunASRModel):
 
         # # Post-encoder, e.g. NLU
         # if self.postencoder is not None:
-        # 	encoder_out, encoder_out_lens = self.postencoder(
-        # 		encoder_out, encoder_out_lens
-        # 	)
+        #     encoder_out, encoder_out_lens = self.postencoder(
+        #         encoder_out, encoder_out_lens
+        #     )
 
         assert encoder_out.size(0) == speech.size(0), (
             encoder_out.size(),

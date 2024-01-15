@@ -90,12 +90,15 @@ Notes: Support recognition of single audio file, as well as file list in Kaldi-s
 ### Speech Recognition (Non-streaming)
 ```python
 from funasr import AutoModel
-
-model = AutoModel(model="paraformer-zh")
-# for the long duration wav, you could add vad model
-# model = AutoModel(model="paraformer-zh", vad_model="fsmn-vad", punc_model="ct-punc")
-
-res = model(input="asr_example_zh.wav", batch_size=64)
+# paraformer-zh is a multi-functional asr model
+# use vad, punc, spk or not as you need
+model = AutoModel(model="paraformer-zh", model_revision="v2.0.2", \
+                  vad_model="fsmn-vad", vad_model_revision="v2.0.2", \
+                  punc_model="ct-punc-c", punc_model_revision="v2.0.2", \
+                  spk_model="cam++", spk_model_revision="v2.0.2")
+res = model(input=f"{model.model_path}/example/asr_example.wav", 
+            batch_size=16, 
+            hotword='魔搭')
 print(res)
 ```
 Note: `model_hub`: represents the model repository, `ms` stands for selecting ModelScope download, `hf` stands for selecting Huggingface download.
@@ -108,7 +111,7 @@ chunk_size = [0, 10, 5] #[0, 10, 5] 600ms, [0, 8, 4] 480ms
 encoder_chunk_look_back = 4 #number of chunks to lookback for encoder self-attention
 decoder_chunk_look_back = 1 #number of encoder chunks to lookback for decoder cross-attention
 
-model = AutoModel(model="paraformer-zh-streaming", model_revision="v2.0.0")
+model = AutoModel(model="paraformer-zh-streaming", model_revision="v2.0.2")
 
 import soundfile
 import os
@@ -163,7 +166,7 @@ for i in range(total_chunk_num):
 ```python
 from funasr import AutoModel
 
-model = AutoModel(model="ct-punc", model_revision="v2.0.1")
+model = AutoModel(model="ct-punc", model_revision="v2.0.2")
 
 res = model(input="那今天的会就到这里吧 happy new year 明年见")
 print(res)
@@ -172,7 +175,7 @@ print(res)
 ```python
 from funasr import AutoModel
 
-model = AutoModel(model="fa-zh", model_revision="v2.0.0")
+model = AutoModel(model="fa-zh", model_revision="v2.0.2")
 
 wav_file = f"{model.model_path}/example/asr_example.wav"
 text_file = f"{model.model_path}/example/asr_example.wav"

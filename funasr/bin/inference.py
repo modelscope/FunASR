@@ -274,12 +274,9 @@ class AutoModel:
     def generate_with_vad(self, input, input_len=None, **cfg):
         
         # step.1: compute the vad model
-        model = self.vad_model
-        kwargs = self.vad_kwargs
-        kwargs.update(cfg)
+        self.vad_kwargs.update(cfg)
         beg_vad = time.time()
-        res = self.generate(input, input_len=input_len, model=model, kwargs=kwargs, **cfg)
-        vad_res = res
+        res = self.generate(input, input_len=input_len, model=self.vad_model, kwargs=self.vad_kwargs, **cfg)
         end_vad = time.time()
         print(f"time cost vad: {end_vad - beg_vad:0.3f}")
 
@@ -312,10 +309,7 @@ class AutoModel:
             if not len(sorted_data):
                 logging.info("decoding, utt: {}, empty speech".format(key))
                 continue
-            
 
-            # if kwargs["device"] == "cpu":
-            #     batch_size = 0
             if len(sorted_data) > 0 and len(sorted_data[0]) > 0:
                 batch_size = max(batch_size, sorted_data[0][0][1] - sorted_data[0][0][0])
             
