@@ -945,6 +945,7 @@ bool Audio::LoadOthers2Char(const char* filename)
 {
     if (speech_char != nullptr) {
         free(speech_char);
+        speech_char = nullptr;
     }
 
     FILE* fp;
