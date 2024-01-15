@@ -344,7 +344,6 @@ class CTTransformer(torch.nn.Module):
                 punc_array = punctuations
             else:
                 punc_array = torch.cat([punc_array, punctuations], dim=0)
-        
         result_i = {"key": key[0], "text": new_mini_sentence_out, "punc_array": punc_array}
         results.append(result_i)
     
