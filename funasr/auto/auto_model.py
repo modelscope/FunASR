@@ -183,9 +183,11 @@ class AutoModel:
             logging.info(f"Loading pretrained params from {init_param}")
             load_pretrained_model(
                 model=model,
-                init_param=init_param,
+                path=init_param,
                 ignore_init_mismatch=kwargs.get("ignore_init_mismatch", False),
                 oss_bucket=kwargs.get("oss_bucket", None),
+                scope_map=kwargs.get("scope_map", None),
+                excludes=kwargs.get("excludes", None),
             )
         
         return model, kwargs

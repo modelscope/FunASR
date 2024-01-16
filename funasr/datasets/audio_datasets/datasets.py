@@ -1,7 +1,7 @@
 import torch
 
 from funasr.register import tables
-from funasr.utils.load_utils import extract_fbank
+from funasr.utils.load_utils import extract_fbank, load_audio_text_image_video
 
 
 @tables.register("dataset_classes", "AudioDataset")
@@ -55,7 +55,7 @@ class AudioDataset(torch.utils.data.Dataset):
         # import pdb;
         # pdb.set_trace()
         source = item["source"]
-        data_src = load_audio(source, fs=self.fs)
+        data_src = load_audio_text_image_video(source, fs=self.fs)
         if self.preprocessor_speech:
             data_src = self.preprocessor_speech(data_src)
         speech, speech_lengths = extract_fbank(data_src, data_type=self.data_type, frontend=self.frontend) # speech: [b, T, d]
