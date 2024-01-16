@@ -182,7 +182,7 @@ text_file = f"{model.model_path}/example/text.txt"
 res = model.generate(input=(wav_file, text_file), data_type=("sound", "text"))
 print(res)
 ```
-更多详细用法（[示例](examples/industrial_data_pretraining)）
+更多详细用法（[示例](https://github.com/alibaba-damo-academy/FunASR/tree/main/examples/industrial_data_pretraining)）
 
 
 <a name="服务部署"></a>
