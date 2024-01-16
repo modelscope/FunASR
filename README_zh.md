@@ -91,7 +91,7 @@ model = AutoModel(model="paraformer-zh", model_revision="v2.0.2", \
                   vad_model="fsmn-vad", vad_model_revision="v2.0.2", \
                   punc_model="ct-punc-c", punc_model_revision="v2.0.2", \
                   spk_model="cam++", spk_model_revision="v2.0.2")
-res = model(input=f"{model.model_path}/example/asr_example.wav", 
+res = model.generate(input=f"{model.model_path}/example/asr_example.wav", 
             batch_size=64, 
             hotword='魔搭')
 print(res)
@@ -121,7 +121,7 @@ total_chunk_num = int(len((speech)-1)/chunk_stride+1)
 for i in range(total_chunk_num):
     speech_chunk = speech[i*chunk_stride:(i+1)*chunk_stride]
     is_final = i == total_chunk_num - 1
-    res = model(input=speech_chunk, cache=cache, is_final=is_final, chunk_size=chunk_size, encoder_chunk_look_back=encoder_chunk_look_back, decoder_chunk_look_back=decoder_chunk_look_back)
+    res = model.generate(input=speech_chunk, cache=cache, is_final=is_final, chunk_size=chunk_size, encoder_chunk_look_back=encoder_chunk_look_back, decoder_chunk_look_back=decoder_chunk_look_back)
     print(res)
 ```
 
@@ -134,7 +134,7 @@ from funasr import AutoModel
 model = AutoModel(model="fsmn-vad", model_revision="v2.0.2")
 
 wav_file = f"{model.model_path}/example/asr_example.wav"
-res = model(input=wav_file)
+res = model.generate(input=wav_file)
 print(res)
 ```
 
@@ -156,7 +156,7 @@ total_chunk_num = int(len((speech)-1)/chunk_stride+1)
 for i in range(total_chunk_num):
     speech_chunk = speech[i*chunk_stride:(i+1)*chunk_stride]
     is_final = i == total_chunk_num - 1
-    res = model(input=speech_chunk, cache=cache, is_final=is_final, chunk_size=chunk_size)
+    res = model.generate(input=speech_chunk, cache=cache, is_final=is_final, chunk_size=chunk_size)
     if len(res[0]["value"]):
         print(res)
 ```
@@ -167,7 +167,7 @@ from funasr import AutoModel
 
 model = AutoModel(model="ct-punc", model_revision="v2.0.2")
 
-res = model(input="那今天的会就到这里吧 happy new year 明年见")
+res = model.generate(input="那今天的会就到这里吧 happy new year 明年见")
 print(res)
 ```
 
@@ -179,7 +179,7 @@ model = AutoModel(model="fa-zh", model_revision="v2.0.0")
 
 wav_file = f"{model.model_path}/example/asr_example.wav"
 text_file = f"{model.model_path}/example/text.txt"
-res = model(input=(wav_file, text_file), data_type=("sound", "text"))
+res = model.generate(input=(wav_file, text_file), data_type=("sound", "text"))
 print(res)
 ```
 更多详细用法（[示例](examples/industrial_data_pretraining)）
@@ -241,5 +241,11 @@ FunASR支持预训练或者进一步微调的模型进行服务部署。目前�
   booktitle={Proc. Interspeech 2022},
   pages={2063--2067},
   doi={10.21437/Interspeech.2022-9996}
+}
+@article{shi2023seaco,
+  author={Xian Shi and Yexin Yang and Zerui Li and Yanni Chen and Zhifu Gao and Shiliang Zhang},
+  title={{SeACo-Paraformer: A Non-Autoregressive ASR System with Flexible and Effective Hotword Customization Ability}},
+  year=2023,
+  journal={arXiv preprint arXiv:2308.03266(accepted by ICASSP2024)},
 }
 ```

@@ -12,7 +12,7 @@ vads = inputs.split("|")
 rec_result_all = "outputs: "
 cache = {}
 for vad in vads:
-    rec_result = model(input=vad, cache=cache)
+    rec_result = model.generate(input=vad, cache=cache)
     print(rec_result)
     rec_result_all += rec_result[0]['text']
 

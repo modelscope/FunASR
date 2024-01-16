@@ -15,6 +15,6 @@ model = AutoModel(model="damo/speech_seaco_paraformer_large_asr_nat-zh-cn-16k-co
                   spk_model_revision="v2.0.2",
                   )
 
-res = model(input=f"{model.model_path}/example/asr_example.wav",
-            hotword='达摩院 魔搭')
+res = model.generate(input=f"{model.model_path}/example/asr_example.wav",
+                     hotword='达摩院 魔搭')
 print(res)

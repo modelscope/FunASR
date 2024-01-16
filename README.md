@@ -95,9 +95,9 @@ model = AutoModel(model="paraformer-zh", model_revision="v2.0.2", \
                   vad_model="fsmn-vad", vad_model_revision="v2.0.2", \
                   punc_model="ct-punc-c", punc_model_revision="v2.0.2", \
                   spk_model="cam++", spk_model_revision="v2.0.2")
-res = model(input=f"{model.model_path}/example/asr_example.wav", 
-            batch_size=64, 
-            hotword='魔搭')
+res = model.generate(input=f"{model.model_path}/example/asr_example.wav", 
+                     batch_size=64, 
+                     hotword='魔搭')
 print(res)
 ```
 Note: `model_hub`: represents the model repository, `ms` stands for selecting ModelScope download, `hf` stands for selecting Huggingface download.
@@ -124,7 +124,7 @@ total_chunk_num = int(len((speech)-1)/chunk_stride+1)
 for i in range(total_chunk_num):
     speech_chunk = speech[i*chunk_stride:(i+1)*chunk_stride]
     is_final = i == total_chunk_num - 1
-    res = model(input=speech_chunk, cache=cache, is_final=is_final, chunk_size=chunk_size, encoder_chunk_look_back=encoder_chunk_look_back, decoder_chunk_look_back=decoder_chunk_look_back)
+    res = model.generate(input=speech_chunk, cache=cache, is_final=is_final, chunk_size=chunk_size, encoder_chunk_look_back=encoder_chunk_look_back, decoder_chunk_look_back=decoder_chunk_look_back)
     print(res)
 ```
 Note: `chunk_size` is the configuration for streaming latency.` [0,10,5]` indicates that the real-time display granularity is `10*60=600ms`, and the lookahead information is `5*60=300ms`. Each inference input is `600ms` (sample points are `16000*0.6=960`), and the output is the corresponding text. For the last speech segment input, `is_final=True` needs to be set to force the output of the last word.
@@ -135,7 +135,7 @@ from funasr import AutoModel
 
 model = AutoModel(model="fsmn-vad", model_revision="v2.0.2")
 wav_file = f"{model.model_path}/example/asr_example.wav"
-res = model(input=wav_file)
+res = model.generate(input=wav_file)
 print(res)
 ```
 ### Voice Activity Detection (Non-streaming)
@@ -156,7 +156,7 @@ total_chunk_num = int(len((speech)-1)/chunk_stride+1)
 for i in range(total_chunk_num):
     speech_chunk = speech[i*chunk_stride:(i+1)*chunk_stride]
     is_final = i == total_chunk_num - 1
-    res = model(input=speech_chunk, cache=cache, is_final=is_final, chunk_size=chunk_size)
+    res = model.generate(input=speech_chunk, cache=cache, is_final=is_final, chunk_size=chunk_size)
     if len(res[0]["value"]):
         print(res)
 ```
@@ -165,7 +165,7 @@ for i in range(total_chunk_num):
 from funasr import AutoModel
 
 model = AutoModel(model="ct-punc", model_revision="v2.0.2")
-res = model(input="那今天的会就到这里吧 happy new year 明年见")
+res = model.generate(input="那今天的会就到这里吧 happy new year 明年见")
 print(res)
 ```
 ### Timestamp Prediction
@@ -175,7 +175,7 @@ from funasr import AutoModel
 model = AutoModel(model="fa-zh", model_revision="v2.0.2")
 wav_file = f"{model.model_path}/example/asr_example.wav"
 text_file = f"{model.model_path}/example/text.txt"
-res = model(input=(wav_file, text_file), data_type=("sound", "text"))
+res = model.generate(input=(wav_file, text_file), data_type=("sound", "text"))
 print(res)
 ```
 [//]: # (FunASR supports inference and fine-tuning of models trained on industrial datasets of tens of thousands of hours. For more details, please refer to &#40;[modelscope_egs]&#40;https://alibaba-damo-academy.github.io/FunASR/en/modelscope_pipeline/quick_start.html&#41;&#41;. It also supports training and fine-tuning of models on academic standard datasets. For more details, please refer to&#40;[egs]&#40;https://alibaba-damo-academy.github.io/FunASR/en/academic_recipe/asr_recipe.html&#41;&#41;. The models include speech recognition &#40;ASR&#41;, speech activity detection &#40;VAD&#41;, punctuation recovery, language model, speaker verification, speaker separation, and multi-party conversation speech recognition. For a detailed list of models, please refer to the [Model Zoo]&#40;https://github.com/alibaba-damo-academy/FunASR/blob/main/docs/model_zoo/modelscope_models.md&#41;:)
@@ -229,10 +229,16 @@ The use of pretraining model is subject to [model license](./MODEL_LICENSE)
 }
 @inproceedings{gao22b_interspeech,
   author={Zhifu Gao and ShiLiang Zhang and Ian McLoughlin and Zhijie Yan},
-  title={{Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition}},
+  title={Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition},
   year=2022,
   booktitle={Proc. Interspeech 2022},
   pages={2063--2067},
   doi={10.21437/Interspeech.2022-9996}
+}
+@inproceedings{shi2023seaco,
+  author={Xian Shi and Yexin Yang and Zerui Li and Yanni Chen and Zhifu Gao and Shiliang Zhang},
+  title={SeACo-Paraformer: A Non-Autoregressive ASR System with Flexible and Effective Hotword Customization Ability},
+  year={2023},
+  booktitle={ICASSP2024}
 }
 ```
