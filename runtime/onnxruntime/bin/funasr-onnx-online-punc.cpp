@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
     GetValue(txt_path, TXT_PATH, model_path);
 
     struct timeval start, end;
-    gettimeofday(&start, NULL);
+    gettimeofday(&start, nullptr);
     int thread_num = 1;
     FUNASR_HANDLE punc_hanlde=CTTransformerInit(model_path, thread_num, PUNC_ONLINE);
 
@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
         exit(-1);
     }
 
-    gettimeofday(&end, NULL);
+    gettimeofday(&end, nullptr);
     long seconds = (end.tv_sec - start.tv_sec);
     long modle_init_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
     LOG(INFO) << "Model initialization takes " << (double)modle_init_micros / 1000000 << " s";
@@ -107,16 +107,16 @@ int main(int argc, char *argv[])
         splitString(vad_strs, txt_str, "|");
         string str_out;
         FUNASR_RESULT result = nullptr;
-        gettimeofday(&start, NULL);
+        gettimeofday(&start, nullptr);
         for(auto& vad_str:vad_strs){
-            result=CTTransformerInfer(punc_hanlde, vad_str.c_str(), RASR_NONE, NULL, PUNC_ONLINE, result);
+            result=CTTransformerInfer(punc_hanlde, vad_str.c_str(), RASR_NONE, nullptr, PUNC_ONLINE, result);
             if(result){
                 string msg = CTTransformerGetResult(result, 0);
                 str_out += msg;
                 LOG(INFO)<<"Online result: "<<msg;
             }
         }
-        gettimeofday(&end, NULL);
+        gettimeofday(&end, nullptr);
         seconds = (end.tv_sec - start.tv_sec);
         taking_micros += ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
         LOG(INFO)<<"Results: "<<str_out;

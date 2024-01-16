@@ -61,7 +61,6 @@ FunASR has open-sourced a large number of pre-trained models on industrial data.
 |                paraformer-zh-spk <br> ( [⭐](https://modelscope.cn/models/damo/speech_paraformer-large-vad-punc-spk_asr_nat-zh-cn/summary)  [🤗]() )                | speech recognition with speaker diarization, with timestamps, non-streaming |      60000 hours, Mandarin       |    220M    |
 | <nobr>paraformer-zh-online <br> ( [⭐](https://modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary) [🤗]() )</nobr> |                        speech recognition, streaming                        |      60000 hours, Mandarin       |    220M    |
 |         paraformer-en <br> ( [⭐](https://www.modelscope.cn/models/damo/speech_paraformer-large-vad-punc_asr_nat-en-16k-common-vocab10020/summary) [🤗]() )         |             speech recognition, with timestamps, non-streaming              |       50000 hours, English       |    220M    |
-|                                                               paraformer-en-spk <br> ([⭐]()[🤗]()  )                                                               |         speech recognition with speaker diarization, non-streaming          |               Undo               |    Undo    |
 |                     conformer-en <br> ( [⭐](https://modelscope.cn/models/damo/speech_conformer_asr-en-16k-vocab4199-pytorch/summary) [🤗]() )                      |                      speech recognition, non-streaming                      |       50000 hours, English       |    220M    |
 |                     ct-punc <br> ( [⭐](https://modelscope.cn/models/damo/punc_ct-transformer_cn-en-common-vocab471067-large/summary) [🤗]() )                      |                           punctuation restoration                           |    100M, Mandarin and English    |    1.1G    | 
 |                          fsmn-vad <br> ( [⭐](https://modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary) [🤗]() )                          |                          voice activity detection                           | 5000 hours, Mandarin and English |    0.4M    | 
@@ -97,7 +96,7 @@ model = AutoModel(model="paraformer-zh", model_revision="v2.0.2", \
                   punc_model="ct-punc-c", punc_model_revision="v2.0.2", \
                   spk_model="cam++", spk_model_revision="v2.0.2")
 res = model(input=f"{model.model_path}/example/asr_example.wav", 
-            batch_size=16, 
+            batch_size=64, 
             hotword='魔搭')
 print(res)
 ```
@@ -135,7 +134,6 @@ Note: `chunk_size` is the configuration for streaming latency.` [0,10,5]` indica
 from funasr import AutoModel
 
 model = AutoModel(model="fsmn-vad", model_revision="v2.0.2")
-
 wav_file = f"{model.model_path}/example/asr_example.wav"
 res = model(input=wav_file)
 print(res)
@@ -167,7 +165,6 @@ for i in range(total_chunk_num):
 from funasr import AutoModel
 
 model = AutoModel(model="ct-punc", model_revision="v2.0.2")
-
 res = model(input="那今天的会就到这里吧 happy new year 明年见")
 print(res)
 ```
@@ -176,9 +173,8 @@ print(res)
 from funasr import AutoModel
 
 model = AutoModel(model="fa-zh", model_revision="v2.0.2")
-
 wav_file = f"{model.model_path}/example/asr_example.wav"
-text_file = f"{model.model_path}/example/asr_example.wav"
+text_file = f"{model.model_path}/example/text.txt"
 res = model(input=(wav_file, text_file), data_type=("sound", "text"))
 print(res)
 ```

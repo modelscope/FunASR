@@ -55,13 +55,13 @@ typedef struct {
   nlohmann::json msg;
   std::shared_ptr<std::vector<char>> samples;
   std::shared_ptr<std::vector<std::vector<std::string>>> punc_cache;
-  std::shared_ptr<std::vector<std::vector<float>>> hotwords_embedding=NULL;
+  std::shared_ptr<std::vector<std::vector<float>>> hotwords_embedding=nullptr;
   std::shared_ptr<websocketpp::lib::mutex> thread_lock; // lock for each connection
-  FUNASR_HANDLE tpass_online_handle=NULL;
+  FUNASR_HANDLE tpass_online_handle=nullptr;
   std::string online_res = "";
   std::string tpass_res = "";
   std::shared_ptr<asio::io_context::strand>  strand_; // for data execute in order
-  FUNASR_DEC_HANDLE decoder_handle=NULL; 
+  FUNASR_DEC_HANDLE decoder_handle=nullptr; 
 } FUNASR_MESSAGE;
 
 // See https://wiki.mozilla.org/Security/Server_Side_TLS for more details about
@@ -139,7 +139,7 @@ class WebSocketServer {
   asio::io_context& io_decoder_;  // threads for asr decoder
   // std::ofstream fout;
   // FUNASR_HANDLE asr_handle;  // asr engine handle
-  FUNASR_HANDLE tpass_handle=NULL;
+  FUNASR_HANDLE tpass_handle=nullptr;
   bool isonline = true;  // online or offline engine, now only support offline
   bool is_ssl = true;
   server* server_;          // websocket server

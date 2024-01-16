@@ -32,10 +32,8 @@ bool is_target_file(const std::string& filename, const std::string target) {
 
 void GetValue(TCLAP::ValueArg<std::string>& value_arg, string key, std::map<std::string, std::string>& model_path)
 {
-    if (value_arg.isSet()){
-        model_path.insert({key, value_arg.getValue()});
-        LOG(INFO)<< key << " : " << value_arg.getValue();
-    }
+    model_path.insert({key, value_arg.getValue()});
+    LOG(INFO)<< key << " : " << value_arg.getValue();
 }
 
 int main(int argc, char** argv)
@@ -89,7 +87,7 @@ int main(int argc, char** argv)
     GetValue(wav_path, WAV_PATH, model_path);
 
     struct timeval start, end;
-    gettimeofday(&start, NULL);
+    gettimeofday(&start, nullptr);
     int thread_num = 1;
     FUNASR_HANDLE asr_hanlde=FunOfflineInit(model_path, thread_num);
 
@@ -116,7 +114,7 @@ int main(int argc, char** argv)
     LOG(INFO) << "hotword path: " << hotword_path;
     funasr::ExtractHws(hotword_path, hws_map, nn_hotwords_);
 
-    gettimeofday(&end, NULL);
+    gettimeofday(&end, nullptr);
     long seconds = (end.tv_sec - start.tv_sec);
     long modle_init_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
     LOG(INFO) << "Model initialization takes " << (double)modle_init_micros / 1000000 << " s";
@@ -158,9 +156,9 @@ int main(int argc, char** argv)
     for (int i = 0; i < wav_list.size(); i++) {
         auto& wav_file = wav_list[i];
         auto& wav_id = wav_ids[i];
-        gettimeofday(&start, NULL);
-        FUNASR_RESULT result=FunOfflineInfer(asr_hanlde, wav_file.c_str(), RASR_NONE, NULL, hotwords_embedding, audio_fs.getValue(), true, decoder_handle);
-        gettimeofday(&end, NULL);
+        gettimeofday(&start, nullptr);
+        FUNASR_RESULT result=FunOfflineInfer(asr_hanlde, wav_file.c_str(), RASR_NONE, nullptr, hotwords_embedding, audio_fs.getValue(), true, decoder_handle);
+        gettimeofday(&end, nullptr);
         seconds = (end.tv_sec - start.tv_sec);
         taking_micros += ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
 

@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     GetValue(txt_path, TXT_PATH, model_path);
 
     struct timeval start, end;
-    gettimeofday(&start, NULL);
+    gettimeofday(&start, nullptr);
     int thread_num = 1;
     FUNASR_HANDLE punc_hanlde=CTTransformerInit(model_path, thread_num);
 
@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
         exit(-1);
     }
 
-    gettimeofday(&end, NULL);
+    gettimeofday(&end, nullptr);
     long seconds = (end.tv_sec - start.tv_sec);
     long modle_init_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
     LOG(INFO) << "Model initialization takes " << (double)modle_init_micros / 1000000 << " s";
@@ -83,9 +83,9 @@ int main(int argc, char *argv[])
     
     long taking_micros = 0;
     for(auto& txt_str : txt_list){
-        gettimeofday(&start, NULL);
-        FUNASR_RESULT result=CTTransformerInfer(punc_hanlde, txt_str.c_str(), RASR_NONE, NULL);
-        gettimeofday(&end, NULL);
+        gettimeofday(&start, nullptr);
+        FUNASR_RESULT result=CTTransformerInfer(punc_hanlde, txt_str.c_str(), RASR_NONE, nullptr);
+        gettimeofday(&end, nullptr);
         seconds = (end.tv_sec - start.tv_sec);
         taking_micros += ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
         string msg = FunASRGetResult(result, 0);
