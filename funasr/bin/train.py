@@ -40,8 +40,7 @@ def main_hydra(kwargs: DictConfig):
 
 
 def main(**kwargs):
-    # preprocess_config(kwargs)
-    # import pdb; pdb.set_trace()
+    
     # set random seed
     tables.print()
     set_all_random_seed(kwargs.get("seed", 0))
@@ -169,6 +168,8 @@ def main(**kwargs):
         local_rank=local_rank,
         use_ddp=use_ddp,
         use_fsdp=use_fsdp,
+        output_dir=kwargs.get("output_dir", "./exp"),
+        resume=kwargs.get("resume", True),
         **kwargs.get("train_conf"),
     )
     trainer.run()

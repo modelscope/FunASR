@@ -46,6 +46,7 @@ requirements = {
     "train": [
         "editdistance",
         "wandb",
+        "pip install tensorboardX",
     ],
     # all: The modules should be optionally installled due to some reason.
     #      Please consider moving them to "install" occasionally

@@ -146,7 +146,7 @@ class AutoModel:
         device = kwargs.get("device", "cuda")
         if not torch.cuda.is_available() or kwargs.get("ngpu", 0):
             device = "cpu"
-            # kwargs["batch_size"] = 1
+            kwargs["batch_size"] = 1
         kwargs["device"] = device
         
         if kwargs.get("ncpu", None):

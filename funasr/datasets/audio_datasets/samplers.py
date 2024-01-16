@@ -20,7 +20,7 @@ class BatchSampler(torch.utils.data.BatchSampler):
         self.dataset = dataset
         self.total_samples = len(dataset)
         self.batch_type = batch_type
-        self.batch_size = batch_size
+        self.batch_size = int(batch_size)
         self.buffer_size = buffer_size
         self.max_token_length = kwargs.get("max_token_length", 5000)
         self.shuffle_idx = np.arange(self.total_samples)
