@@ -264,7 +264,7 @@ class AutoModel:
         # step.1: compute the vad model
         self.vad_kwargs.update(cfg)
         beg_vad = time.time()
-        res = self.generate(input, input_len=input_len, model=self.vad_model, kwargs=self.vad_kwargs, **cfg)
+        res = self.inference(input, input_len=input_len, model=self.vad_model, kwargs=self.vad_kwargs, **cfg)
         end_vad = time.time()
         print(f"time cost vad: {end_vad - beg_vad:0.3f}")
 
@@ -316,7 +316,7 @@ class AutoModel:
                 batch_size_ms_cum = 0
                 end_idx = j + 1
                 speech_j, speech_lengths_j = slice_padding_audio_samples(speech, speech_lengths, sorted_data[beg_idx:end_idx])       
-                results = self.generate(speech_j, input_len=None, model=model, kwargs=kwargs, **cfg)
+                results = self.inference(speech_j, input_len=None, model=model, kwargs=kwargs, **cfg)
                 if self.spk_model is not None:
                     all_segments = []
                     # compose vad segments: [[start_time_sec, end_time_sec, speech], [...]]
@@ -327,7 +327,7 @@ class AutoModel:
                         segments = sv_chunk(vad_segments)
                         all_segments.extend(segments)
                         speech_b = [i[2] for i in segments]
-                        spk_res = self.generate(speech_b, input_len=None, model=self.spk_model, kwargs=kwargs, **cfg)
+                        spk_res = self.inference(speech_b, input_len=None, model=self.spk_model, kwargs=kwargs, **cfg)
                         results[_b]['spk_embedding'] = spk_res[0]['spk_embedding']
                 beg_idx = end_idx
                 if len(results) < 1:
@@ -378,7 +378,7 @@ class AutoModel:
             # step.3 compute punc model
             if self.punc_model is not None:
                 self.punc_kwargs.update(cfg)
-                punc_res = self.generate(result["text"], model=self.punc_model, kwargs=self.punc_kwargs, **cfg)
+                punc_res = self.inference(result["text"], model=self.punc_model, kwargs=self.punc_kwargs, **cfg)
                 result["text_with_punc"] = punc_res[0]["text"]
                      
             # speaker embedding cluster after resorted

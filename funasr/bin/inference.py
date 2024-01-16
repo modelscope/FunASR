@@ -1,25 +1,7 @@
-import json
-import time
-import torch
 import hydra
-import random
-import string
 import logging
-import os.path
-from tqdm import tqdm
 from omegaconf import DictConfig, OmegaConf, ListConfig
 
-from funasr.register import tables
-from funasr.utils.load_utils import load_bytes
-from funasr.download.file import download_from_url
-from funasr.download.download_from_hub import download_model
-from funasr.utils.vad_utils import slice_padding_audio_samples
-from funasr.train_utils.set_all_random_seed import set_all_random_seed
-from funasr.train_utils.load_pretrained_model import load_pretrained_model
-from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
-from funasr.utils.timestamp_tools import timestamp_sentence
-from funasr.models.campplus.utils import sv_chunk, postprocess, distribute_spk
-from funasr.models.campplus.cluster_backend import ClusterBackend
 from funasr.auto.auto_model import AutoModel
 
 
@@ -41,9 +23,8 @@ def main_hydra(cfg: DictConfig):
     if kwargs.get("debug", False):
         import pdb; pdb.set_trace()
     model = AutoModel(**kwargs)
-    res = model(input=kwargs["input"])
+    res = model.generate(input=kwargs["input"])
     print(res)
-
 
 
 if __name__ == '__main__':
