@@ -312,7 +312,6 @@ class AutoModel:
             time_speech_total_per_sample = speech_lengths/16000
             time_speech_total_all_samples += time_speech_total_per_sample
 
-
             pbar_sample = tqdm(colour="blue", total=n + 1, dynamic_ncols=True)
 
             all_segments = []
@@ -328,6 +327,8 @@ class AutoModel:
                 speech_j, speech_lengths_j = slice_padding_audio_samples(speech, speech_lengths, sorted_data[beg_idx:end_idx])       
                 results = self.inference(speech_j, input_len=None, model=model, kwargs=kwargs, disable_pbar=True, **cfg)
                 if self.spk_model is not None:
+
+                  
                     # compose vad segments: [[start_time_sec, end_time_sec, speech], [...]]
                     for _b in range(len(speech_j)):
                         vad_segments = [[sorted_data[beg_idx:end_idx][_b][0][0]/1000.0,
