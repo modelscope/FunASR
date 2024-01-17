@@ -45,8 +45,7 @@ requirements = {
     # train: The modules invoked when training only.
     "train": [
         "editdistance",
-        "wandb",
-        "pip install tensorboardX",
+        "tensorboardX",
     ],
     # all: The modules should be optionally installled due to some reason.
     #      Please consider moving them to "install" occasionally
