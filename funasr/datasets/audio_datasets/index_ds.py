@@ -54,7 +54,11 @@ class IndexDSJsonl(torch.utils.data.Dataset):
         return len(self.contents)
     
     def __getitem__(self, index):
-        return self.contents[index]
+        try:
+            data = self.contents[index]
+        except:
+            print(index)
+        return data
     
     def get_source_len(self, data_dict):
         return data_dict["source_len"]

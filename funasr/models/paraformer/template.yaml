@@ -95,6 +95,7 @@ train_conf:
       - acc
       - max
   keep_nbest_models: 10
+  avg_nbest_model: 5
   log_interval: 50
 
 optim: adam
