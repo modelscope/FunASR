@@ -107,12 +107,12 @@ def load_pretrained_model(
 			src_state = {k: v for k, v in src_state.items() if not k.startswith(e)}
 	
 	dst_state = obj.state_dict()
-	dst_state = assigment_scope_map(dst_state, src_state, scope_map)
+	src_state = assigment_scope_map(dst_state, src_state, scope_map)
 	
 	if ignore_init_mismatch:
 		src_state = filter_state_dict(dst_state, src_state)
 	
 	logging.debug("Loaded src_state keys: {}".format(src_state.keys()))
 	logging.debug("Loaded dst_state keys: {}".format(dst_state.keys()))
-	# dst_state.update(src_state)
-	obj.load_state_dict(dst_state)
+	dst_state.update(src_state)
+	obj.load_state_dict(dst_state, strict=True)
