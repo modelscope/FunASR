@@ -11,6 +11,7 @@ res = model.generate(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/Ma
 print(res)
 
 
+''' can not use currently
 from funasr import AutoFrontend
 
 frontend = AutoFrontend(model="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch", model_revision="v2.0.2")
@@ -20,3 +21,4 @@ fbanks = frontend(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/
 for batch_idx, fbank_dict in enumerate(fbanks):
     res = model.generate(**fbank_dict)
     print(res)
+'''
