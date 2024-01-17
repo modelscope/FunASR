@@ -221,7 +221,8 @@ class AutoModel:
         speed_stats = {}
         asr_result_list = []
         num_samples = len(data_list)
-        pbar = tqdm(colour="blue", total=num_samples+1, dynamic_ncols=True)
+        disable_pbar = kwargs.get("disable_pbar", False)
+        pbar = tqdm(colour="blue", total=num_samples+1, dynamic_ncols=True) if not disable_pbar else None
         time_speech_total = 0.0
         time_escape_total = 0.0
         for beg_idx in range(0, num_samples, batch_size):
@@ -239,8 +240,7 @@ class AutoModel:
             time2 = time.perf_counter()
             
             asr_result_list.extend(results)
-            pbar.update(1)
-            
+
             # batch_data_time = time_per_frame_s * data_batch_i["speech_lengths"].sum().item()
             batch_data_time = meta_data.get("batch_data_time", -1)
             time_escape = time2 - time1
@@ -252,12 +252,15 @@ class AutoModel:
             description = (
                 f"{speed_stats}, "
             )
-            pbar.set_description(description)
+            if pbar:
+                pbar.update(1)
+                pbar.set_description(description)
             time_speech_total += batch_data_time
             time_escape_total += time_escape
-            
-        pbar.update(1)
-        pbar.set_description(f"rtf_avg: {time_escape_total/time_speech_total:0.3f}")
+
+        if pbar:
+            pbar.update(1)
+            pbar.set_description(f"rtf_avg: {time_escape_total/time_speech_total:0.3f}")
         torch.cuda.empty_cache()
         return asr_result_list
     
@@ -309,8 +312,11 @@ class AutoModel:
             time_speech_total_per_sample = speech_lengths/16000
             time_speech_total_all_samples += time_speech_total_per_sample
 
+            pbar_sample = tqdm(colour="blue", total=n + 1, dynamic_ncols=True)
+
             all_segments = []
             for j, _ in enumerate(range(0, n)):
+                pbar_sample.update(1)
                 batch_size_ms_cum += (sorted_data[j][0][1] - sorted_data[j][0][0])
                 if j < n - 1 and (
                     batch_size_ms_cum + sorted_data[j + 1][0][1] - sorted_data[j + 1][0][0]) < batch_size and (
@@ -319,13 +325,14 @@ class AutoModel:
                 batch_size_ms_cum = 0
                 end_idx = j + 1
                 speech_j, speech_lengths_j = slice_padding_audio_samples(speech, speech_lengths, sorted_data[beg_idx:end_idx])       
-                results = self.inference(speech_j, input_len=None, model=model, kwargs=kwargs, **cfg)
+                results = self.inference(speech_j, input_len=None, model=model, kwargs=kwargs, disable_pbar=True, **cfg)
                 if self.spk_model is not None:
-                    
+
+                  
                     # compose vad segments: [[start_time_sec, end_time_sec, speech], [...]]
                     for _b in range(len(speech_j)):
-                        vad_segments = [[sorted_data[beg_idx:end_idx][_b][0][0]/1000.0, \
-                                        sorted_data[beg_idx:end_idx][_b][0][1]/1000.0, \
+                        vad_segments = [[sorted_data[beg_idx:end_idx][_b][0][0]/1000.0,
+                                        sorted_data[beg_idx:end_idx][_b][0][1]/1000.0,
                                         speech_j[_b]]]
                         segments = sv_chunk(vad_segments)
                         all_segments.extend(segments)
@@ -338,12 +345,13 @@ class AutoModel:
                 results_sorted.extend(results)
 
 
-            pbar_total.update(1)
+            
             end_asr_total = time.time()
             time_escape_total_per_sample = end_asr_total - beg_asr_total
-            pbar_total.set_description(f"rtf_avg_per_sample: {time_escape_total_per_sample / time_speech_total_per_sample:0.3f}, "
+            pbar_sample.set_description(f"rtf_avg_per_sample: {time_escape_total_per_sample / time_speech_total_per_sample:0.3f}, "
                                  f"time_speech_total_per_sample: {time_speech_total_per_sample: 0.3f}, "
                                  f"time_escape_total_per_sample: {time_escape_total_per_sample:0.3f}")
+            
 
             restored_data = [0] * n
             for j in range(n):

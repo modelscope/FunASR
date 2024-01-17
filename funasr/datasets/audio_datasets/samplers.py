@@ -13,6 +13,7 @@ class BatchSampler(torch.utils.data.BatchSampler):
                  buffer_size: int = 30,
                  drop_last: bool = False,
                  shuffle: bool = True,
+                 is_training: bool = True,
                  **kwargs):
         
         self.drop_last = drop_last
@@ -24,7 +25,7 @@ class BatchSampler(torch.utils.data.BatchSampler):
         self.buffer_size = buffer_size
         self.max_token_length = kwargs.get("max_token_length", 5000)
         self.shuffle_idx = np.arange(self.total_samples)
-        self.shuffle = shuffle
+        self.shuffle = shuffle and is_training
     
     def __len__(self):
         return self.total_samples

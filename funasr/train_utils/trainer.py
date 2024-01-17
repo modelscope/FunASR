@@ -7,10 +7,11 @@ import torch.distributed as dist
 from contextlib import nullcontext
 # from torch.utils.tensorboard import SummaryWriter
 from tensorboardX import SummaryWriter
+from pathlib import Path
 
 from funasr.train_utils.device_funcs import to_device
 from funasr.train_utils.recursive_op import recursive_average
-
+from funasr.train_utils.average_nbest_models import average_checkpoints
 
 class Trainer:
     """
@@ -66,10 +67,9 @@ class Trainer:
         self.use_ddp = use_ddp
         self.use_fsdp = use_fsdp
         self.device = next(model.parameters()).device
+        self.avg_nbest_model = kwargs.get("avg_nbest_model", 5)
         self.kwargs = kwargs
         
-        if self.resume:
-            self._resume_checkpoint(self.resume)
     
         try:
             rank = dist.get_rank()
@@ -102,9 +102,17 @@ class Trainer:
         }
         # Create output directory if it does not exist
         os.makedirs(self.output_dir, exist_ok=True)
-        filename = os.path.join(self.output_dir, f'model.e{epoch}.pb')
+        filename = os.path.join(self.output_dir, f'model.pt.ep{epoch}')
         torch.save(state, filename)
+        
         print(f'Checkpoint saved to {filename}')
+        latest = Path(os.path.join(self.output_dir, f'model.pt'))
+        try:
+            latest.unlink()
+        except:
+            pass
+
+        latest.symlink_to(filename)
     
     def _resume_checkpoint(self, resume_path):
         """
@@ -114,29 +122,50 @@ class Trainer:
         Args:
             resume_path (str): The file path to the checkpoint to resume from.
         """
-        if os.path.isfile(resume_path):
-            checkpoint = torch.load(resume_path)
+        ckpt = os.path.join(resume_path, "model.pt")
+        if os.path.isfile(ckpt):
+            checkpoint = torch.load(ckpt)
             self.start_epoch = checkpoint['epoch'] + 1
             self.model.load_state_dict(checkpoint['state_dict'])
             self.optim.load_state_dict(checkpoint['optimizer'])
             self.scheduler.load_state_dict(checkpoint['scheduler'])
-            print(f"Checkpoint loaded successfully from '{resume_path}' at (epoch {checkpoint['epoch']})")
+            print(f"Checkpoint loaded successfully from '{ckpt}'")
         else:
-            print(f"No checkpoint found at '{resume_path}', starting from scratch")
+            print(f"No checkpoint found at '{ckpt}', starting from scratch")
+
+        if self.use_ddp or self.use_fsdp:
+            dist.barrier()
         
     def run(self):
         """
         Starts the training process, iterating over epochs, training the model,
         and saving checkpoints at the end of each epoch.
         """
+        if self.resume:
+            self._resume_checkpoint(self.output_dir)
+        
         for epoch in range(self.start_epoch, self.max_epoch + 1):
+            
             self._train_epoch(epoch)
-            # self._validate_epoch(epoch)
+            
+            self._validate_epoch(epoch)
+            
             if self.rank == 0:
                 self._save_checkpoint(epoch)
-            self.scheduler.step()
             
+            if self.use_ddp or self.use_fsdp:
+                dist.barrier()
+            
+            self.scheduler.step()
+
+
+        if self.rank == 0:
+            average_checkpoints(self.output_dir, self.avg_nbest_model)
+            
+        if self.use_ddp or self.use_fsdp:
+            dist.barrier()
         self.writer.close()
+        
     
     def _train_epoch(self, epoch):
         """
@@ -157,8 +186,7 @@ class Trainer:
         for batch_idx, batch in enumerate(self.dataloader_train):
             time1 = time.perf_counter()
             speed_stats["data_load"] = f"{time1-time5:0.3f}"
-            # import pdb;
-            # pdb.set_trace()
+
             batch = to_device(batch, self.device)
             
             my_context = self.model.no_sync if batch_idx % accum_grad != 0 else nullcontext
@@ -211,13 +239,12 @@ class Trainer:
                 speed_stats["optim_time"] = f"{time5 - time4:0.3f}"
     
                 speed_stats["total_time"] = total_time
-            
-            # import pdb;
-            # pdb.set_trace()
+
+
             pbar.update(1)
             if self.local_rank == 0:
                 description = (
-                    f"Epoch: {epoch + 1}/{self.max_epoch}, "
+                    f"Epoch: {epoch}/{self.max_epoch}, "
                     f"step {batch_idx}/{len(self.dataloader_train)}, "
                     f"{speed_stats}, "
                     f"(loss: {loss.detach().cpu().item():.3f}), "
@@ -248,6 +275,50 @@ class Trainer:
         """
         self.model.eval()
         with torch.no_grad():
-            for data, target in self.dataloader_val:
-                # Implement the model validation steps here
-                pass
+            pbar = tqdm(colour="red", desc=f"Training Epoch: {epoch + 1}", total=len(self.dataloader_val),
+                        dynamic_ncols=True)
+            speed_stats = {}
+            time5 = time.perf_counter()
+            for batch_idx, batch in enumerate(self.dataloader_val):
+                time1 = time.perf_counter()
+                speed_stats["data_load"] = f"{time1 - time5:0.3f}"
+                batch = to_device(batch, self.device)
+                time2 = time.perf_counter()
+                retval = self.model(**batch)
+                time3 = time.perf_counter()
+                speed_stats["forward_time"] = f"{time3 - time2:0.3f}"
+                loss, stats, weight = retval
+                stats = {k: v for k, v in stats.items() if v is not None}
+                if self.use_ddp or self.use_fsdp:
+                    # Apply weighted averaging for loss and stats
+                    loss = (loss * weight.type(loss.dtype)).sum()
+                    # if distributed, this method can also apply all_reduce()
+                    stats, weight = recursive_average(stats, weight, distributed=True)
+                    # Now weight is summation over all workers
+                    loss /= weight
+                    # Multiply world_size because DistributedDataParallel
+                    # automatically normalizes the gradient by world_size.
+                    loss *= self.world_size
+                # Scale the loss since we're not updating for every mini-batch
+                loss = loss
+                time4 = time.perf_counter()
+
+                pbar.update(1)
+                if self.local_rank == 0:
+                    description = (
+                        f"validation: \nEpoch: {epoch}/{self.max_epoch}, "
+                        f"step {batch_idx}/{len(self.dataloader_train)}, "
+                        f"{speed_stats}, "
+                        f"(loss: {loss.detach().cpu().item():.3f}), "
+                        f"{[(k, round(v.cpu().item(), 3)) for k, v in stats.items()]}"
+                    )
+                    pbar.set_description(description)
+                    if self.writer:
+                        self.writer.add_scalar('Loss/val', loss.item(),
+                                               epoch*len(self.dataloader_train) + batch_idx)
+                        for key, var in stats.items():
+                            self.writer.add_scalar(f'{key}/val', var.item(),
+                                                   epoch * len(self.dataloader_train) + batch_idx)
+                        for key, var in speed_stats.items():
+                            self.writer.add_scalar(f'{key}/val', eval(var),
+                                                   epoch * len(self.dataloader_train) + batch_idx)

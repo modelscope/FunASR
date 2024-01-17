@@ -164,6 +164,7 @@ class Paraformer(torch.nn.Module):
         self.use_1st_decoder_loss = use_1st_decoder_loss
         self.length_normalized_loss = length_normalized_loss
         self.beam_search = None
+        self.error_calculator = None
     
     def forward(
         self,
