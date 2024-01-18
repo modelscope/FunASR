@@ -6,22 +6,25 @@
 # tables.print()
 
 # network architecture
-model: Paraformer
+model: UniASR
 model_conf:
     ctc_weight: 0.0
     lsm_weight: 0.1
     length_normalized_loss: true
     predictor_weight: 1.0
-    predictor_bias: 1
-    sampling_ratio: 0.75
+    decoder_attention_chunk_type: chunk
+    ctc_weight2: 0.0
+    predictor_weight2: 1.0
+    decoder_attention_chunk_type2: chunk
+    loss_weight_model1: 0.5
 
 # encoder
-encoder: SANMEncoder
+encoder: SANMEncoderChunkOpt
 encoder_conf:
-    output_size: 512
+    output_size: 320
     attention_heads: 4
-    linear_units: 2048
-    num_blocks: 50
+    linear_units: 1280
+    num_blocks: 35
     dropout_rate: 0.1
     positional_dropout_rate: 0.1
     attention_dropout_rate: 0.1
@@ -31,31 +34,84 @@ encoder_conf:
     kernel_size: 11
     sanm_shfit: 0
     selfattention_layer_type: sanm
+    chunk_size: [20, 60]
+    stride: [10, 40]
+    pad_left: [5, 10]
+    encoder_att_look_back_factor: [0, 0]
+    decoder_att_look_back_factor: [0, 0]
 
 # decoder
-decoder: ParaformerSANMDecoder
+decoder: FsmnDecoderSCAMAOpt
 decoder_conf:
+    attention_dim: 256
     attention_heads: 4
-    linear_units: 2048
-    num_blocks: 16
+    linear_units: 1024
+    num_blocks: 12
     dropout_rate: 0.1
     positional_dropout_rate: 0.1
     self_attention_dropout_rate: 0.1
     src_attention_dropout_rate: 0.1
-    att_layer_num: 16
+    att_layer_num: 6
     kernel_size: 11
-    sanm_shfit: 0
+    concat_embeds: true
 
 predictor: CifPredictorV2
 predictor_conf:
-    idim: 512
+    idim: 320
     threshold: 1.0
     l_order: 1
     r_order: 1
-    tail_threshold: 0.45
+
+encoder2: SANMEncoderChunkOpt
+encoder2_conf:
+    output_size: 320
+    attention_heads: 4
+    linear_units: 1280
+    num_blocks: 20
+    dropout_rate: 0.1
+    positional_dropout_rate: 0.1
+    attention_dropout_rate: 0.1
+    input_layer: pe
+    pos_enc_class: SinusoidalPositionEncoder
+    normalize_before: true
+    kernel_size: 21
+    sanm_shfit: 0
+    selfattention_layer_type: sanm
+    chunk_size: [45, 70]
+    stride: [35, 50]
+    pad_left: [5, 10]
+    encoder_att_look_back_factor: [0, 0]
+    decoder_att_look_back_factor: [0, 0]
+
+decoder2: FsmnDecoderSCAMAOpt
+decoder2_conf:
+    attention_dim: 320
+    attention_heads: 4
+    linear_units: 1280
+    num_blocks: 12
+    dropout_rate: 0.1
+    positional_dropout_rate: 0.1
+    self_attention_dropout_rate: 0.1
+    src_attention_dropout_rate: 0.1
+    att_layer_num: 6
+    kernel_size: 11
+    concat_embeds: true
+
+predictor2: CifPredictorV2
+predictor2_conf:
+    idim: 320
+    threshold: 1.0
+    l_order: 1
+    r_order: 1
+
+stride_conv: stride_conv1d
+stride_conv_conf:
+    kernel_size: 2
+    stride: 2
+    pad: [0, 1]
 
 # frontend related
-frontend: WavFrontend
+frontend: WavFrontendOnline
 frontend_conf:
     fs: 16000
     window: hamming
@@ -92,7 +148,7 @@ train_conf:
 
 optim: adam
 optim_conf:
-   lr: 0.0005
+   lr: 0.0001
 scheduler: warmuplr
 scheduler_conf:
    warmup_steps: 30000

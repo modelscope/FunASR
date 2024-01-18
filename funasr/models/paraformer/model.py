@@ -33,7 +33,6 @@ class Paraformer(torch.nn.Module):
     
     def __init__(
         self,
-        # token_list: Union[Tuple[str, ...], List[str]],
         specaug: Optional[str] = None,
         specaug_conf: Optional[Dict] = None,
         normalize: str = None,

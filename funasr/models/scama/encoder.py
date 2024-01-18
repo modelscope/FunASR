@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+#  MIT License  (https://opensource.org/licenses/MIT)
+
 from typing import List
 from typing import Optional
 from typing import Sequence
@@ -157,10 +162,9 @@ class EncoderLayerSANM(nn.Module):
 @tables.register("encoder_classes", "SANMEncoderChunkOpt")
 class SANMEncoderChunkOpt(nn.Module):
     """
-    Author: Speech Lab of DAMO Academy, Alibaba Group
+    Author: Shiliang Zhang, Zhifu Gao, Haoneng Luo, Ming Lei, Jie Gao, Zhijie Yan, Lei Xie
     SCAMA: Streaming chunk-aware multihead attention for online end-to-end speech recognition
-    https://arxiv.org/abs/2006.01713
-
+    https://arxiv.org/abs/2006.01712
     """
 
     def __init__(

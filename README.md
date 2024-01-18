@@ -91,12 +91,13 @@ Notes: Support recognition of single audio file, as well as file list in Kaldi-s
 from funasr import AutoModel
 # paraformer-zh is a multi-functional asr model
 # use vad, punc, spk or not as you need
-model = AutoModel(model="paraformer-zh", model_revision="v2.0.2", \
-                  vad_model="fsmn-vad", vad_model_revision="v2.0.2", \
-                  punc_model="ct-punc-c", punc_model_revision="v2.0.2", \
-                  spk_model="cam++", spk_model_revision="v2.0.2")
+model = AutoModel(model="paraformer-zh", model_revision="v2.0.2",
+                  vad_model="fsmn-vad", vad_model_revision="v2.0.2",
+                  punc_model="ct-punc-c", punc_model_revision="v2.0.2",
+                  # spk_model="cam++", spk_model_revision="v2.0.2",
+                  )
 res = model.generate(input=f"{model.model_path}/example/asr_example.wav", 
-                     batch_size=64, 
+                     batch_size_s=300, 
                      hotword='魔搭')
 print(res)
 ```
