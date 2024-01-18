@@ -501,7 +501,7 @@ class FsmnVADStreaming(nn.Module):
 		#     self.AllResetDetection()
 		return segments
 	
-	def init_cache(self, cache: dict = {}, **kwargs):
+	def init_cache(self, cache: dict = {}):
 		cache["frontend"] = {}
 		cache["prev_samples"] = torch.empty(0)
 		cache["encoder"] = {}
@@ -528,9 +528,9 @@ class FsmnVADStreaming(nn.Module):
 	              cache: dict = {},
 	              **kwargs,
 	              ):
-		
+		# cache = kwargs.get("cache", {})
 		if len(cache) == 0:
-			self.init_cache(cache, **kwargs)
+			self.init_cache(cache)
 		
 		meta_data = {}
 		chunk_size = kwargs.get("chunk_size", 60000) # 50ms
@@ -583,7 +583,7 @@ class FsmnVADStreaming(nn.Module):
 		
 		cache["prev_samples"] = audio_sample[:-m]
 		if _is_final:
-			cache = {}
+			self.init_cache(cache)
 		
 		ibest_writer = None
 		if ibest_writer is None and kwargs.get("output_dir") is not None:

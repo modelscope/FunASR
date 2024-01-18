@@ -502,8 +502,7 @@ class ParaformerStreaming(Paraformer):
             logging.info("enable beam_search")
             self.init_beam_search(**kwargs)
             self.nbest = kwargs.get("nbest", 1)
-        
-
+            
         if len(cache) == 0:
             self.init_cache(cache, **kwargs)
         
