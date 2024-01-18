@@ -1,85 +1,73 @@
-import logging
-from contextlib import contextmanager
-from distutils.version import LooseVersion
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Tuple
-from typing import Union
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+#  MIT License  (https://opensource.org/licenses/MIT)
 
+import time
 import torch
+import logging
+from torch.cuda.amp import autocast
+from typing import Union, Dict, List, Tuple, Optional
 
-from funasr.models.e2e_asr_common import ErrorCalculator
+from funasr.register import tables
+from funasr.models.ctc.ctc import CTC
+from funasr.utils import postprocess_utils
 from funasr.metrics.compute_acc import th_accuracy
-from funasr.models.transformer.utils.add_sos_eos import add_sos_eos
-from funasr.losses.label_smoothing_loss import (
-    LabelSmoothingLoss,  # noqa: H301
-)
-from funasr.models.ctc import CTC
-from funasr.models.decoder.abs_decoder import AbsDecoder
-from funasr.models.encoder.abs_encoder import AbsEncoder
-from funasr.frontends.abs_frontend import AbsFrontend
-from funasr.models.postencoder.abs_postencoder import AbsPostEncoder
-from funasr.models.preencoder.abs_preencoder import AbsPreEncoder
-from funasr.models.specaug.abs_specaug import AbsSpecAug
-from funasr.layers.abs_normalize import AbsNormalize
-from funasr.train_utils.device_funcs import force_gatherable
-from funasr.models.base_model import FunASRModel
-from funasr.models.scama.chunk_utilis import sequence_mask
+from funasr.utils.datadir_writer import DatadirWriter
+from funasr.models.paraformer.search import Hypothesis
 from funasr.models.paraformer.cif_predictor import mae_loss
-
-if LooseVersion(torch.__version__) >= LooseVersion("1.6.0"):
-    from torch.cuda.amp import autocast
-else:
-    # Nothing to do if torch<1.6.0
-    @contextmanager
-    def autocast(enabled=True):
-        yield
+from funasr.train_utils.device_funcs import force_gatherable
+from funasr.losses.label_smoothing_loss import LabelSmoothingLoss
+from funasr.models.transformer.utils.add_sos_eos import add_sos_eos
+from funasr.models.transformer.utils.nets_utils import make_pad_mask, pad_list
+from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
 
 
-class UniASR(FunASRModel):
+@tables.register("model_classes", "UniASR")
+class UniASR(torch.nn.Module):
     """
     Author: Speech Lab of DAMO Academy, Alibaba Group
     """
 
     def __init__(
         self,
-        vocab_size: int,
-        token_list: Union[Tuple[str, ...], List[str]],
-        frontend: Optional[AbsFrontend],
-        specaug: Optional[AbsSpecAug],
-        normalize: Optional[AbsNormalize],
-        encoder: AbsEncoder,
-        decoder: AbsDecoder,
-        ctc: CTC,
+        specaug: Optional[str] = None,
+        specaug_conf: Optional[Dict] = None,
+        normalize: str = None,
+        normalize_conf: Optional[Dict] = None,
+        encoder: str = None,
+        encoder_conf: Optional[Dict] = None,
+        decoder: str = None,
+        decoder_conf: Optional[Dict] = None,
+        ctc: str = None,
+        ctc_conf: Optional[Dict] = None,
+        predictor: str = None,
+        predictor_conf: Optional[Dict] = None,
         ctc_weight: float = 0.5,
-        interctc_weight: float = 0.0,
+        input_size: int = 80,
+        vocab_size: int = -1,
         ignore_id: int = -1,
+        blank_id: int = 0,
+        sos: int = 1,
+        eos: int = 2,
         lsm_weight: float = 0.0,
         length_normalized_loss: bool = False,
-        report_cer: bool = True,
-        report_wer: bool = True,
-        sym_space: str = "<space>",
-        sym_blank: str = "<blank>",
-        extract_feats_in_collect_stats: bool = True,
-        predictor=None,
+        # report_cer: bool = True,
+        # report_wer: bool = True,
+        # sym_space: str = "<space>",
+        # sym_blank: str = "<blank>",
+        # extract_feats_in_collect_stats: bool = True,
+        # predictor=None,
         predictor_weight: float = 0.0,
-        decoder_attention_chunk_type: str = 'chunk',
-        encoder2: AbsEncoder = None,
-        decoder2: AbsDecoder = None,
-        ctc2: CTC = None,
-        ctc_weight2: float = 0.5,
-        interctc_weight2: float = 0.0,
-        predictor2=None,
-        predictor_weight2: float = 0.0,
-        decoder_attention_chunk_type2: str = 'chunk',
-        stride_conv=None,
-        loss_weight_model1: float = 0.5,
-        enable_maas_finetune: bool = False,
-        freeze_encoder2: bool = False,
-        preencoder: Optional[AbsPreEncoder] = None,
-        postencoder: Optional[AbsPostEncoder] = None,
+        predictor_bias: int = 0,
+        sampling_ratio: float = 0.2,
+        share_embedding: bool = False,
+        # preencoder: Optional[AbsPreEncoder] = None,
+        # postencoder: Optional[AbsPostEncoder] = None,
+        use_1st_decoder_loss: bool = False,
         encoder1_encoder2_joint_training: bool = True,
+        **kwargs,
+        
     ):
         assert 0.0 <= ctc_weight <= 1.0, ctc_weight
         assert 0.0 <= interctc_weight < 1.0, interctc_weight
@@ -443,10 +431,8 @@ class UniASR(FunASRModel):
         # force_gatherable: to-device and to-tensor if scalar for DataParallel
         if self.length_normalized_loss:
             batch_size = int((text_lengths + 1).sum())
-<<<<<<< HEAD:funasr/models/uniasr/e2e_uni_asr.py
 
-=======
->>>>>>> main:funasr/models/e2e_uni_asr.py
+
         loss, stats, weight = force_gatherable((loss, stats, batch_size), loss.device)
         return loss, stats, weight
 
