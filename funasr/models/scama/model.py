@@ -282,6 +282,10 @@ class SCAMA(nn.Module):
     
         return encoder_out, torch.tensor([encoder_out.size(1)])
 
+    def calc_predictor_chunk(self, encoder_out, encoder_out_lens, cache=None, **kwargs):
+        is_final = kwargs.get("is_final", False)
+
+        return self.predictor.forward_chunk(encoder_out, cache["encoder"], is_final=is_final)
 
     def _calc_att_predictor_loss(
         self,
@@ -562,6 +566,29 @@ class SCAMA(nn.Module):
                 results.extend(result_i)
     
         return results
+
+    def init_cache(self, cache: dict = {}, **kwargs):
+        chunk_size = kwargs.get("chunk_size", [0, 10, 5])
+        encoder_chunk_look_back = kwargs.get("encoder_chunk_look_back", 0)
+        decoder_chunk_look_back = kwargs.get("decoder_chunk_look_back", 0)
+        batch_size = 1
+    
+        enc_output_size = kwargs["encoder_conf"]["output_size"]
+        feats_dims = kwargs["frontend_conf"]["n_mels"] * kwargs["frontend_conf"]["lfr_m"]
+        cache_encoder = {"start_idx": 0, "cif_hidden": torch.zeros((batch_size, 1, enc_output_size)),
+                         "cif_alphas": torch.zeros((batch_size, 1)), "chunk_size": chunk_size,
+                         "encoder_chunk_look_back": encoder_chunk_look_back, "last_chunk": False, "opt": None,
+                         "feats": torch.zeros((batch_size, chunk_size[0] + chunk_size[2], feats_dims)),
+                         "tail_chunk": False}
+        cache["encoder"] = cache_encoder
+    
+        cache_decoder = {"decode_fsmn": None, "decoder_chunk_look_back": decoder_chunk_look_back, "opt": None,
+                         "chunk_size": chunk_size}
+        cache["decoder"] = cache_decoder
+        cache["frontend"] = {}
+        cache["prev_samples"] = torch.empty(0)
+    
+        return cache
 
     def inference(self,
                   data_in,

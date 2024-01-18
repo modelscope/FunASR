@@ -220,39 +220,42 @@ class WindowDetector(object):
     def FrameSizeMs(self) -> int:
         return int(self.frame_size_ms)
 
+class Stats(object):
+    def __init__(self,
+                 sil_pdf_ids,
+                 max_end_sil_frame_cnt_thresh,
+                 speech_noise_thres,
+                 ):
 
-@dataclass
-class StatsItem:
+        self.data_buf_start_frame = 0
+        self.frm_cnt = 0
+        self.latest_confirmed_speech_frame = 0
+        self.lastest_confirmed_silence_frame = -1
+        self.continous_silence_frame_count = 0
+        self.vad_state_machine = VadStateMachine.kVadInStateStartPointNotDetected
+        self.confirmed_start_frame = -1
+        self.confirmed_end_frame = -1
+        self.number_end_time_detected = 0
+        self.sil_frame = 0
+        self.sil_pdf_ids = sil_pdf_ids
+        self.noise_average_decibel = -100.0
+        self.pre_end_silence_detected = False
+        self.next_seg = True
     
-    # init variables
-    data_buf_start_frame = 0
-    frm_cnt = 0
-    latest_confirmed_speech_frame = 0
-    lastest_confirmed_silence_frame = -1
-    continous_silence_frame_count = 0
-    vad_state_machine = VadStateMachine.kVadInStateStartPointNotDetected
-    confirmed_start_frame = -1
-    confirmed_end_frame = -1
-    number_end_time_detected = 0
-    sil_frame = 0
-    sil_pdf_ids: list
-    noise_average_decibel = -100.0
-    pre_end_silence_detected = False
-    next_seg = True # unused
-    
-    output_data_buf = []
-    output_data_buf_offset = 0
-    frame_probs = [] # unused
-    max_end_sil_frame_cnt_thresh: int
-    speech_noise_thres: float
-    scores = None
-    max_time_out = False #unused
-    decibel = []
-    data_buf = None
-    data_buf_all = None
-    waveform = None
-    last_drop_frames = 0
-    
+        self.output_data_buf = []
+        self.output_data_buf_offset = 0
+        self.frame_probs = []
+        self.max_end_sil_frame_cnt_thresh = max_end_sil_frame_cnt_thresh
+        self.speech_noise_thres = speech_noise_thres
+        self.scores = None
+        self.max_time_out = False
+        self.decibel = []
+        self.data_buf = None
+        self.data_buf_all = None
+        self.waveform = None
+        self.last_drop_frames = 0
+
+  
 @tables.register("model_classes", "FsmnVADStreaming")
 class FsmnVADStreaming(nn.Module):
     """
@@ -506,10 +509,11 @@ class FsmnVADStreaming(nn.Module):
                                           self.vad_opts.sil_to_speech_time_thres,
                                           self.vad_opts.speech_to_sil_time_thres,
                                           self.vad_opts.frame_in_ms)
+        windows_detector.Reset()
 
-        stats = StatsItem(sil_pdf_ids=self.vad_opts.sil_pdf_ids,
-                          max_end_sil_frame_cnt_thresh=self.vad_opts.max_end_silence_time - self.vad_opts.speech_to_sil_time_thres,
-                          speech_noise_thres=self.vad_opts.speech_noise_thres,
+        stats = Stats(sil_pdf_ids=self.vad_opts.sil_pdf_ids,
+                      max_end_sil_frame_cnt_thresh=self.vad_opts.max_end_silence_time - self.vad_opts.speech_to_sil_time_thres,
+                      speech_noise_thres=self.vad_opts.speech_noise_thres
                       )
         cache["windows_detector"] = windows_detector
         cache["stats"] = stats
@@ -521,10 +525,9 @@ class FsmnVADStreaming(nn.Module):
                  key: list = None,
                  tokenizer=None,
                  frontend=None,
-                 cache: dict = {},
                  **kwargs,
                  ):
-    
+        cache = kwargs.get("cache_in", {})
         if len(cache) == 0:
             self.init_cache(cache, **kwargs)
 
@@ -579,7 +582,7 @@ class FsmnVADStreaming(nn.Module):
 
         cache["prev_samples"] = audio_sample[:-m]
         if _is_final:
-            self.init_cache(cache, **kwargs)
+            cache = {}
 
         ibest_writer = None
         if ibest_writer is None and kwargs.get("output_dir") is not None:
