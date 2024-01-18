@@ -10,12 +10,12 @@ import torch
 from funasr.models.transformer.model import Transformer
 from funasr.register import tables
 
-@tables.register("model_classes", "SANM")
-class SANM(Transformer):
+@tables.register("model_classes", "SCAMA")
+class SCAMA(Transformer):
     """
-    Author: Zhifu Gao, Shiliang Zhang, Ming Lei, Ian McLoughlin
-    San-m: Memory equipped self-attention for end-to-end speech recognition
-    https://arxiv.org/abs/2006.01713
+    Author: Shiliang Zhang, Zhifu Gao, Haoneng Luo, Ming Lei, Jie Gao, Zhijie Yan, Lei Xie
+    SCAMA: Streaming chunk-aware multihead attention for online end-to-end speech recognition
+    https://arxiv.org/abs/2006.01712
     """
 
     def __init__(

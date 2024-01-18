@@ -6,14 +6,11 @@
 # tables.print()
 
 # network architecture
-model: Paraformer
+model: SANM
 model_conf:
     ctc_weight: 0.0
     lsm_weight: 0.1
     length_normalized_loss: true
-    predictor_weight: 1.0
-    predictor_bias: 1
-    sampling_ratio: 0.75
 
 # encoder
 encoder: SANMEncoder
@@ -33,7 +30,7 @@ encoder_conf:
     selfattention_layer_type: sanm
 
 # decoder
-decoder: ParaformerSANMDecoder
+decoder: FsmnDecoder
 decoder_conf:
     attention_heads: 4
     linear_units: 2048
@@ -46,13 +43,7 @@ decoder_conf:
     kernel_size: 11
     sanm_shfit: 0
 
-predictor: CifPredictorV2
-predictor_conf:
-    idim: 512
-    threshold: 1.0
-    l_order: 1
-    r_order: 1
-    tail_threshold: 0.45
+
 
 # frontend related
 frontend: WavFrontend
@@ -126,4 +117,5 @@ ctc_conf:
     ctc_type: builtin
     reduce: true
     ignore_nan_grad: true
+
 normalize: null
