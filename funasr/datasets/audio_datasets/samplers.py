@@ -28,7 +28,7 @@ class BatchSampler(torch.utils.data.BatchSampler):
         self.shuffle = shuffle and is_training
     
     def __len__(self):
-        return self.total_samples
+        return (self.total_samples-1) // self.batch_size + 1
     
     def set_epoch(self, epoch):
         np.random.seed(epoch)

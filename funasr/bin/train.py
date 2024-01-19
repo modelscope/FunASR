@@ -40,7 +40,7 @@ def main_hydra(kwargs: DictConfig):
 
 
 def main(**kwargs):
-    
+    print(kwargs)
     # set random seed
     tables.print()
     set_all_random_seed(kwargs.get("seed", 0))
