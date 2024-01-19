@@ -255,7 +255,6 @@ class Stats(object):
 		self.waveform = None
 		self.last_drop_frames = 0
 
-
 @tables.register("model_classes", "FsmnVADStreaming")
 class FsmnVADStreaming(nn.Module):
 	"""
@@ -500,7 +499,6 @@ class FsmnVADStreaming(nn.Module):
 		#     # reset class variables and clear the dict for the next query
 		#     self.AllResetDetection()
 		return segments
-	
 
 	def init_cache(self, cache: dict = {}, **kwargs):
     
