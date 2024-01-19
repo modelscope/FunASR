@@ -148,8 +148,14 @@ class Trainer:
             
             self._train_epoch(epoch)
             
+            if self.use_ddp or self.use_fsdp:
+                dist.barrier()
+                
             self._validate_epoch(epoch)
-            
+
+            if self.use_ddp or self.use_fsdp:
+                dist.barrier()
+                
             if self.rank == 0:
                 self._save_checkpoint(epoch)
             
@@ -230,6 +236,8 @@ class Trainer:
                         continue
                 
                 # Execute an optimization step (update model parameters)
+                if self.use_ddp or self.use_fsdp:
+                    dist.barrier()
                 self.optim.step()
                 self.scheduler.step()
                 # Clear gradients for the next accumulation stage
