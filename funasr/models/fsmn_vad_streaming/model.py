@@ -255,7 +255,6 @@ class Stats(object):
 		self.waveform = None
 		self.last_drop_frames = 0
 
-
 @tables.register("model_classes", "FsmnVADStreaming")
 class FsmnVADStreaming(nn.Module):
 	"""
@@ -500,8 +499,9 @@ class FsmnVADStreaming(nn.Module):
 		#     # reset class variables and clear the dict for the next query
 		#     self.AllResetDetection()
 		return segments
-	
-	def init_cache(self, cache: dict = {}):
+
+	def init_cache(self, cache: dict = {}, **kwargs):
+    
 		cache["frontend"] = {}
 		cache["prev_samples"] = torch.empty(0)
 		cache["encoder"] = {}
@@ -528,9 +528,9 @@ class FsmnVADStreaming(nn.Module):
 	              cache: dict = {},
 	              **kwargs,
 	              ):
-		# cache = kwargs.get("cache", {})
+
 		if len(cache) == 0:
-			self.init_cache(cache)
+			self.init_cache(cache, **kwargs)
 		
 		meta_data = {}
 		chunk_size = kwargs.get("chunk_size", 60000) # 50ms
