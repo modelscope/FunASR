@@ -148,6 +148,7 @@ class Trainer:
             
             self._train_epoch(epoch)
 
+
             
             if self.use_ddp or self.use_fsdp:
                 dist.barrier()
@@ -156,8 +157,8 @@ class Trainer:
 
             if self.use_ddp or self.use_fsdp:
                 dist.barrier()
-                
-
+           
+           
             if self.rank == 0:
                 self._save_checkpoint(epoch)
             
@@ -172,7 +173,8 @@ class Trainer:
             
         if self.use_ddp or self.use_fsdp:
             dist.barrier()
-      
+
+
         if self.writer:
             self.writer.close()
         
