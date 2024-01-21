@@ -399,9 +399,10 @@ class WavFrontendOnline(nn.Module):
         return feats_pad, feats_lens, lfr_splice_frame_idxs
 
     def forward(
-        self, input: torch.Tensor, input_lengths: torch.Tensor, cache: dict = {}, **kwargs
+        self, input: torch.Tensor, input_lengths: torch.Tensor, **kwargs
     ):
         is_final = kwargs.get("is_final", False)
+        cache = kwargs.get("cache", {})
         if len(cache) == 0:
             self.init_cache(cache)
         

@@ -58,7 +58,7 @@ class AudioDataset(torch.utils.data.Dataset):
         data_src = load_audio_text_image_video(source, fs=self.fs)
         if self.preprocessor_speech:
             data_src = self.preprocessor_speech(data_src)
-        speech, speech_lengths = extract_fbank(data_src, data_type=self.data_type, frontend=self.frontend) # speech: [b, T, d]
+        speech, speech_lengths = extract_fbank(data_src, data_type=self.data_type, frontend=self.frontend, is_final=True) # speech: [b, T, d]
 
         target = item["target"]
         if self.preprocessor_text:
