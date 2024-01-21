@@ -133,6 +133,7 @@ class AutoModel:
         self.spk_model = spk_model
         self.spk_kwargs = spk_kwargs
         self.model_path = kwargs.get("model_path")
+
   
         
     def build_model(self, **kwargs):

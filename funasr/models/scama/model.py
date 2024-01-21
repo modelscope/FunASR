@@ -436,7 +436,10 @@ class SCAMA(nn.Module):
     def init_beam_search(self,
                          **kwargs,
                          ):
+
         from funasr.models.scama.beam_search import BeamSearchScamaStreaming
+
+
         from funasr.models.transformer.scorers.ctc import CTCPrefixScorer
         from funasr.models.transformer.scorers.length_bonus import LengthBonus
     
@@ -466,6 +469,7 @@ class SCAMA(nn.Module):
             ngram=kwargs.get("ngram_weight", 0.0),
             length_bonus=kwargs.get("penalty", 0.0),
         )
+        
         beam_search = BeamSearchScamaStreaming(
             beam_size=kwargs.get("beam_size", 2),
             weights=weights,
@@ -502,7 +506,8 @@ class SCAMA(nn.Module):
         if "running_hyps" not in cache:
             running_hyps = self.beam_search.init_hyp(encoder_out)
             cache["running_hyps"] = running_hyps
-        
+       
+       
         # predictor
         predictor_outs = self.calc_predictor_chunk(encoder_out,
                                                    encoder_out_lens,
@@ -555,6 +560,7 @@ class SCAMA(nn.Module):
 
     def init_cache(self, cache: dict = {}, **kwargs):
         device = kwargs.get("device", "cuda")
+        
         chunk_size = kwargs.get("chunk_size", [0, 10, 5])
         encoder_chunk_look_back = kwargs.get("encoder_chunk_look_back", 0)
         decoder_chunk_look_back = kwargs.get("decoder_chunk_look_back", 0)
@@ -562,6 +568,7 @@ class SCAMA(nn.Module):
     
         enc_output_size = kwargs["encoder_conf"]["output_size"]
         feats_dims = kwargs["frontend_conf"]["n_mels"] * kwargs["frontend_conf"]["lfr_m"]
+
         cache_encoder = {"start_idx": 0, "cif_hidden": torch.zeros((batch_size, 1, enc_output_size)).to(device=device),
                          "cif_alphas": torch.zeros((batch_size, 1)).to(device=device), "chunk_size": chunk_size,
                          "encoder_chunk_look_back": encoder_chunk_look_back, "last_chunk": False, "opt": None,
@@ -573,8 +580,10 @@ class SCAMA(nn.Module):
                          "chunk_size": chunk_size}
         cache["decoder"] = cache_decoder
         cache["frontend"] = {}
+
+
         cache["prev_samples"] = torch.empty(0).to(device=device)
-    
+
         return cache
 
     def inference(self,
@@ -590,7 +599,10 @@ class SCAMA(nn.Module):
         # init beamsearch
         is_use_ctc = kwargs.get("decoding_ctc_weight", 0.0) > 0.00001 and self.ctc != None
         is_use_lm = kwargs.get("lm_weight", 0.0) > 0.00001 and kwargs.get("lm_file", None) is not None
+
         if self.beam_search is None:
+
+
             logging.info("enable beam_search")
             self.init_beam_search(**kwargs)
             self.nbest = kwargs.get("nbest", 1)
