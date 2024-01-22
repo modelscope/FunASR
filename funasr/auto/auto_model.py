@@ -411,7 +411,7 @@ class AutoModel:
                 else: # punc_segment
                     sentence_list = timestamp_sentence(punc_res[0]['punc_array'], \
                                                         result['timestamp'], \
-                                                        result['text'])
+                                                        result['raw_text'])
                 distribute_spk(sentence_list, sv_output)
                 result['sentence_info'] = sentence_list
                     
