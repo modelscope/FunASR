@@ -377,7 +377,7 @@ class AutoModel:
                             result[k] = restored_data[j][k]
                         else:
                             result[k] = torch.cat([result[k], restored_data[j][k]], dim=0)
-                    elif k == 'text':
+                    elif k == 'raw_text':
                         if k not in result:
                             result[k] = restored_data[j][k]
                         else:
