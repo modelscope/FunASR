@@ -415,7 +415,7 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
                         token, timestamp)
 
                     result_i = {"key": key[i], "text": text_postprocessed,
-                                "timestamp": time_stamp_postprocessed,
+                                "timestamp": time_stamp_postprocessed, "raw_text": text
                                 }
                     
                     if ibest_writer is not None:
