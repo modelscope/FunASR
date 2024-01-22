@@ -451,7 +451,7 @@ class Paraformer(torch.nn.Module):
             self.nbest = kwargs.get("nbest", 1)
         
         meta_data = {}
-        if isinstance(data_in, torch.Tensor): # fbank
+        if isinstance(data_in, torch.Tensor) and kwargs.get("data_type", "sound") == "fbank": # fbank
             speech, speech_lengths = data_in, data_lengths
             if len(speech.shape) < 3:
                 speech = speech[None, :, :]

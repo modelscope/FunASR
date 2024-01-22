@@ -93,7 +93,7 @@ from funasr import AutoModel
 # use vad, punc, spk or not as you need
 model = AutoModel(model="paraformer-zh", model_revision="v2.0.2",
                   vad_model="fsmn-vad", vad_model_revision="v2.0.2",
-                  punc_model="ct-punc-c", punc_model_revision="v2.0.2",
+                  punc_model="ct-punc-c", punc_model_revision="v2.0.3",
                   # spk_model="cam++", spk_model_revision="v2.0.2",
                   )
 res = model.generate(input=f"{model.model_path}/example/asr_example.wav", 

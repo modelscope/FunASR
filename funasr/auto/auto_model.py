@@ -391,7 +391,7 @@ class AutoModel:
             if self.punc_model is not None:
                 self.punc_kwargs.update(cfg)
                 punc_res = self.inference(result["text"], model=self.punc_model, kwargs=self.punc_kwargs, **cfg)
-                result["text_with_punc"] = punc_res[0]["text"]
+                result["text"] = punc_res[0]["text"]
                      
             # speaker embedding cluster after resorted
             if self.spk_model is not None:
