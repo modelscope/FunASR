@@ -420,7 +420,7 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
                     
                     if ibest_writer is not None:
                         ibest_writer["token"][key[i]] = " ".join(token)
-                        # ibest_writer["text"][key[i]] = text
+                        ibest_writer["raw_text"][key[i]] = text
                         ibest_writer["timestamp"][key[i]] = time_stamp_postprocessed
                         ibest_writer["text"][key[i]] = text_postprocessed
                 else:

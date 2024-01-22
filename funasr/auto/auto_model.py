@@ -406,7 +406,7 @@ class AutoModel:
                     for res, vadsegment in zip(restored_data, vadsegments):
                         sentence_list.append({"start": vadsegment[0],\
                                                 "end": vadsegment[1],
-                                                "sentence": res['text'],
+                                                "sentence": res['raw_text'],
                                                 "timestamp": res['timestamp']})
                 else: # punc_segment
                     sentence_list = timestamp_sentence(punc_res[0]['punc_array'], \
