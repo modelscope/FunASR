@@ -6,6 +6,7 @@ import random
 import string
 import logging
 import os.path
+import numpy as np
 from tqdm import tqdm
 from omegaconf import DictConfig, OmegaConf, ListConfig
 
@@ -334,7 +335,7 @@ class AutoModel:
                     for _b in range(len(speech_j)):
                         vad_segments = [[sorted_data[beg_idx:end_idx][_b][0][0]/1000.0,
                                         sorted_data[beg_idx:end_idx][_b][0][1]/1000.0,
-                                        speech_j[_b]]]
+                                        np.array(speech_j[_b])]]
                         segments = sv_chunk(vad_segments)
                         all_segments.extend(segments)
                         speech_b = [i[2] for i in segments]
