@@ -528,9 +528,9 @@ class Paraformer(torch.nn.Module):
                 if tokenizer is not None:
                     # Change integer-ids to tokens
                     token = tokenizer.ids2tokens(token_int)
-                    text = tokenizer.tokens2text(token)
-                    
-                    text_postprocessed, _ = postprocess_utils.sentence_postprocess(token)
+                    text_postprocessed = tokenizer.tokens2text(token)
+                    if not hasattr(tokenizer, "bpemodel"):
+                        text_postprocessed, _ = postprocess_utils.sentence_postprocess(token)
                     
                     result_i = {"key": key[i], "text": text_postprocessed}
 
