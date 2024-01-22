@@ -398,7 +398,7 @@ class AutoModel:
             if self.spk_model is not None:
                 all_segments = sorted(all_segments, key=lambda x: x[0])
                 spk_embedding = result['spk_embedding']
-                labels = self.cb_model(spk_embedding, oracle_num=self.preset_spk_num)
+                labels = self.cb_model(spk_embedding.cpu(), oracle_num=self.preset_spk_num)
                 del result['spk_embedding']
                 sv_output = postprocess(all_segments, None, labels, spk_embedding.cpu())
                 if self.spk_mode == 'vad_segment':
