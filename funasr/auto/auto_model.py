@@ -97,7 +97,7 @@ class AutoModel:
         vad_kwargs = kwargs.get("vad_model_revision", None)
         if vad_model is not None:
             logging.info("Building VAD model.")
-            vad_kwargs = {"model": vad_model, "model_revision": vad_kwargs}
+            vad_kwargs = {"model": vad_model, "model_revision": vad_kwargs, "device": kwargs["device"]}
             vad_model, vad_kwargs = self.build_model(**vad_kwargs)
 
         # if punc_model is not None, build punc model else None
@@ -105,7 +105,7 @@ class AutoModel:
         punc_kwargs = kwargs.get("punc_model_revision", None)
         if punc_model is not None:
             logging.info("Building punc model.")
-            punc_kwargs = {"model": punc_model, "model_revision": punc_kwargs}
+            punc_kwargs = {"model": punc_model, "model_revision": punc_kwargs, "device": kwargs["device"]}
             punc_model, punc_kwargs = self.build_model(**punc_kwargs)
 
         # if spk_model is not None, build spk model else None
@@ -113,9 +113,9 @@ class AutoModel:
         spk_kwargs = kwargs.get("spk_model_revision", None)
         if spk_model is not None:
             logging.info("Building SPK model.")
-            spk_kwargs = {"model": spk_model, "model_revision": spk_kwargs}
+            spk_kwargs = {"model": spk_model, "model_revision": spk_kwargs, "device": kwargs["device"]}
             spk_model, spk_kwargs = self.build_model(**spk_kwargs)
-            self.cb_model = ClusterBackend()
+            self.cb_model = ClusterBackend().to(kwargs["device"])
             spk_mode = kwargs.get("spk_mode", 'punc_segment')
             if spk_mode not in ["default", "vad_segment", "punc_segment"]:
                 logging.error("spk_mode should be one of default, vad_segment and punc_segment.")
@@ -398,7 +398,7 @@ class AutoModel:
             if self.spk_model is not None:
                 all_segments = sorted(all_segments, key=lambda x: x[0])
                 spk_embedding = result['spk_embedding']
-                labels = self.cb_model(spk_embedding, oracle_num=self.preset_spk_num)
+                labels = self.cb_model(spk_embedding.cpu(), oracle_num=self.preset_spk_num)
                 del result['spk_embedding']
                 sv_output = postprocess(all_segments, None, labels, spk_embedding.cpu())
                 if self.spk_mode == 'vad_segment':
@@ -406,12 +406,12 @@ class AutoModel:
                     for res, vadsegment in zip(restored_data, vadsegments):
                         sentence_list.append({"start": vadsegment[0],\
                                                 "end": vadsegment[1],
-                                                "sentence": res['text'],
+                                                "sentence": res['raw_text'],
                                                 "timestamp": res['timestamp']})
                 else: # punc_segment
                     sentence_list = timestamp_sentence(punc_res[0]['punc_array'], \
                                                         result['timestamp'], \
-                                                        result['text'])
+                                                        result['raw_text'])
                 distribute_spk(sentence_list, sv_output)
                 result['sentence_info'] = sentence_list
                     
