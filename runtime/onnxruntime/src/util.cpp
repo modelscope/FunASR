@@ -590,8 +590,8 @@ std::string TimestampSentence(std::string &text, std::string &str_time){
             // format
             ts_sent += "{\"text_seg\":\"" + text_seg + "\",";
             ts_sent += "\"punc\":\"" + characters[idx_str] + "\",";
-            ts_sent += "\"start\":\"" + to_string(start) + "\",";
-            ts_sent += "\"end\":\"" + to_string(end) + "\",";
+            ts_sent += "\"start\":" + to_string(start) + ",";
+            ts_sent += "\"end\":" + to_string(end) + ",";
             ts_sent += "\"ts_list\":" + VectorToString(ts_seg, false) + "}";
             
             if (idx_str == characters.size()-1){
@@ -627,8 +627,8 @@ std::string TimestampSentence(std::string &text, std::string &str_time){
         // format
         ts_sent += "{\"text_seg\":\"" + text_seg + "\",";
         ts_sent += "\"punc\":\"\",";
-        ts_sent += "\"start\":\"" + to_string(start) + "\",";
-        ts_sent += "\"end\":\"" + to_string(end) + "\",";
+        ts_sent += "\"start\":" + to_string(start) + ",";
+        ts_sent += "\"end\":" + to_string(end) + ",";
         ts_sent += "\"ts_list\":" + VectorToString(ts_seg, false) + "}";
         ts_sentences += ts_sent;
     }
