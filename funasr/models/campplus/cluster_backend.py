@@ -119,6 +119,7 @@ class UmapHdbscan:
         self.metric = metric
 
     def __call__(self, X):
+        from umap.umap_ import UMAP
         umap_X = umap.UMAP(
             n_neighbors=self.n_neighbors,
             min_dist=0.0,
@@ -156,6 +157,7 @@ class ClusterBackend(torch.nn.Module):
         if X.shape[0] < 20:
             return np.zeros(X.shape[0], dtype='int')
         if X.shape[0] < 2048 or k is not None:
+            # unexpected corner case
             labels = self.spectral_cluster(X, k)
         else:
             labels = self.umap_hdbscan_cluster(X)

@@ -38,7 +38,7 @@ requirements = {
         # "protobuf",
         "tqdm",
         "hdbscan",
-        "umap",
+        "umap_learn",
         "jaconv",
         "hydra-core>=1.3.2",
     ],
