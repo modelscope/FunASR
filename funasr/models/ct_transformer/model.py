@@ -333,12 +333,13 @@ class CTTransformer(torch.nn.Module):
                 elif new_mini_sentence[-1] == ",":
                     new_mini_sentence_out = new_mini_sentence[:-1] + "."
                     new_mini_sentence_punc_out = new_mini_sentence_punc[:-1] + [self.sentence_end_id]
-                elif new_mini_sentence[-1] != "。" and new_mini_sentence[-1] != "？" and len(new_mini_sentence[-1].encode())==0:
+                elif new_mini_sentence[-1] != "。" and new_mini_sentence[-1] != "？" and len(new_mini_sentence[-1].encode())!=1:
                     new_mini_sentence_out = new_mini_sentence + "。"
                     new_mini_sentence_punc_out = new_mini_sentence_punc[:-1] + [self.sentence_end_id]
                 elif new_mini_sentence[-1] != "." and new_mini_sentence[-1] != "?" and len(new_mini_sentence[-1].encode())==1:
                     new_mini_sentence_out = new_mini_sentence + "."
                     new_mini_sentence_punc_out = new_mini_sentence_punc[:-1] + [self.sentence_end_id]
+                    
             # keep a punctuations array for punc segment
             if punc_array is None:
                 punc_array = punctuations
