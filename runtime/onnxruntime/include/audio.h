@@ -76,6 +76,7 @@ class Audio {
     int Fetch(float *&dout, int &len, int &flag, float &start_time);
     void Padding();
     void Split(OfflineStream* offline_streamj);
+    void CutSplit(OfflineStream* offline_streamj);
     void Split(VadModel* vad_obj, vector<std::vector<int>>& vad_segments, bool input_finished=true);
     void Split(VadModel* vad_obj, int chunk_len, bool input_finished=true, ASR_TYPE asr_mode=ASR_TWO_PASS);
     float GetTimeLen();

@@ -245,7 +245,7 @@
             return p_result;
         }
 		if(offline_stream->UseVad()){
-			audio.Split(offline_stream);
+			audio.CutSplit(offline_stream);
 		}
 
 		float* buff;
