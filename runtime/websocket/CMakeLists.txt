@@ -31,7 +31,7 @@ if(ENABLE_WEBSOCKET)
   # cmake_policy(SET CMP0135 NEW)
   include(FetchContent)
 
-  if(NOT EXISTS ${PROJECT_SOURCE_DIR}/third_party/websocket )
+  if(NOT EXISTS ${PROJECT_SOURCE_DIR}/third_party/websocket/websocketpp )
     FetchContent_Declare(websocketpp
     GIT_REPOSITORY https://github.com/zaphoyd/websocketpp.git
       GIT_TAG 0.8.2
@@ -42,7 +42,7 @@ if(ENABLE_WEBSOCKET)
   endif()
   include_directories(${PROJECT_SOURCE_DIR}/third_party/websocket)
    
-  if(NOT EXISTS ${PROJECT_SOURCE_DIR}/third_party/asio )
+  if(NOT EXISTS ${PROJECT_SOURCE_DIR}/third_party/asio/asio )
     FetchContent_Declare(asio
       URL   https://github.com/chriskohlhoff/asio/archive/refs/tags/asio-1-24-0.tar.gz
     SOURCE_DIR ${PROJECT_SOURCE_DIR}/third_party/asio
@@ -52,7 +52,7 @@ if(ENABLE_WEBSOCKET)
   endif()
   include_directories(${PROJECT_SOURCE_DIR}/third_party/asio/asio/include)
  
-  if(NOT EXISTS ${PROJECT_SOURCE_DIR}/third_party/json )
+  if(NOT EXISTS ${PROJECT_SOURCE_DIR}/third_party/json/ChangeLog.md )
     FetchContent_Declare(json
       URL   https://github.com/nlohmann/json/archive/refs/tags/v3.11.2.tar.gz
     SOURCE_DIR ${PROJECT_SOURCE_DIR}/third_party/json
