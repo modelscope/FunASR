@@ -1085,6 +1085,60 @@ void Audio::Split(OfflineStream* offline_stream)
     }
 }
 
+void Audio::CutSplit(OfflineStream* offline_stream)
+{
+    std::unique_ptr<VadModel> vad_online_handle = make_unique<FsmnVadOnline>((FsmnVad*)(offline_stream->vad_handle).get());
+    AudioFrame *frame;
+
+    frame = frame_queue.front();
+    frame_queue.pop();
+    int sp_len = frame->GetLen();
+    delete frame;
+    frame = nullptr;
+
+    int step = dest_sample_rate*10;
+    bool is_final=false;
+    vector<std::vector<int>> vad_segments;
+    for (int sample_offset = 0; sample_offset < speech_len; sample_offset += std::min(step, speech_len - sample_offset)) {
+        if (sample_offset + step >= speech_len - 1) {
+                step = speech_len - sample_offset;
+                is_final = true;
+            } else {
+                is_final = false;
+        }
+        std::vector<float> pcm_data(speech_data+sample_offset, speech_data+sample_offset+step);
+        vector<std::vector<int>> cut_segments = vad_online_handle->Infer(pcm_data, is_final);
+        vad_segments.insert(vad_segments.end(), cut_segments.begin(), cut_segments.end());
+    }    
+
+    int speech_start_i = -1, speech_end_i =-1;
+    for(vector<int> vad_segment:vad_segments)
+    {
+        if(vad_segment.size() != 2){
+            LOG(ERROR) << "Size of vad_segment is not 2.";
+            break;
+        }
+        if(vad_segment[0] != -1){
+            speech_start_i = vad_segment[0];
+        }
+        if(vad_segment[1] != -1){
+            speech_end_i = vad_segment[1];
+        }
+
+        if(speech_start_i!=-1 && speech_end_i!=-1){
+            frame = new AudioFrame();
+            int start = speech_start_i*seg_sample;
+            int end = speech_end_i*seg_sample;
+            frame->SetStart(start);
+            frame->SetEnd(end);
+            frame_queue.push(frame);
+            frame = nullptr;
+            speech_start_i=-1;
+            speech_end_i=-1;
+        }
+    }
+}
+
 void Audio::Split(VadModel* vad_obj, vector<std::vector<int>>& vad_segments, bool input_finished)
 {
     AudioFrame *frame;

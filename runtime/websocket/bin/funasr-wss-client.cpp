@@ -193,10 +193,7 @@ class WebsocketClient {
 		funasr::Audio audio(1);
         int32_t sampling_rate = audio_fs;
         std::string wav_format = "pcm";
-        if (funasr::IsTargetFile(wav_path.c_str(), "wav")) {
-            if (!audio.LoadWav(wav_path.c_str(), &sampling_rate, false)) 
-                return;
-        } else if(funasr::IsTargetFile(wav_path.c_str(), "pcm")){
+        if(funasr::IsTargetFile(wav_path.c_str(), "pcm")){
 			if (!audio.LoadPcmwav(wav_path.c_str(), &sampling_rate, false))
 				return ;
 		}else{

@@ -59,7 +59,7 @@ For more client version support, please refer to the [websocket_protocol](./webs
 If you want to run the client directly for testing, you can refer to the following simple instructions, using the Python version as an example:
 
 ```shell
-python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.wav"
+python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.pcm"
 ```
 
 Command parameter instructions:
@@ -79,7 +79,7 @@ Command parameter instructions:
 
 After entering the samples/cpp directory, you can test it with CPP. The command is as follows:
 ```shell
-./funasr-wss-client-2pass --server-ip 127.0.0.1 --port 10095 --wav-path ../audio/asr_example.wav
+./funasr-wss-client-2pass --server-ip 127.0.0.1 --port 10095 --wav-path ../audio/asr_example.pcm
 ```
 
 Command parameter description:

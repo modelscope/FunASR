@@ -211,7 +211,7 @@ void WebSocketServer::do_decoder(
         if(wav_format != "pcm" && wav_format != "PCM"){
           websocketpp::lib::error_code ec;
           nlohmann::json jsonresult;
-          jsonresult["text"] = "ERROR. Real-time transcription service ONLY SUPPORT wav_format pcm.";
+          jsonresult["text"] = "ERROR. Real-time transcription service ONLY SUPPORT PCM stream.";
           jsonresult["wav_name"] = wav_name;
           jsonresult["is_final"] = true;
           if (is_ssl) {
