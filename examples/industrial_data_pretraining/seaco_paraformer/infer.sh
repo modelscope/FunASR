@@ -1,10 +1,10 @@
 
 model="damo/speech_seaco_paraformer_large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
-model_revision="v2.0.2"
+model_revision="v2.0.4"
 vad_model="damo/speech_fsmn_vad_zh-cn-16k-common-pytorch"
-vad_model_revision="v2.0.2"
+vad_model_revision="v2.0.4"
 punc_model="damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch"
-punc_model_revision="v2.0.3"
+punc_model_revision="v2.0.4"
 
 python funasr/bin/inference.py \
 +model=${model} \

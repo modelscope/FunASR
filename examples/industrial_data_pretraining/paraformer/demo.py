@@ -5,11 +5,11 @@
 
 from funasr import AutoModel
 
-model = AutoModel(model="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch", model_revision="v2.0.3",
+model = AutoModel(model="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch", model_revision="v2.0.4",
                   # vad_model="damo/speech_fsmn_vad_zh-cn-16k-common-pytorch",
-                  # vad_model_revision="v2.0.2",
+                  # vad_model_revision="v2.0.4",
                   # punc_model="damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch",
-                  # punc_model_revision="v2.0.3",
+                  # punc_model_revision="v2.0.4",
                   )
 
 res = model.generate(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav")
@@ -19,7 +19,7 @@ print(res)
 ''' can not use currently
 from funasr import AutoFrontend
 
-frontend = AutoFrontend(model="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch", model_revision="v2.0.2")
+frontend = AutoFrontend(model="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch", model_revision="v2.0.4")
 
 fbanks = frontend(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav", batch_size=2)
 

@@ -1,6 +1,6 @@
 
 model="damo/speech_timestamp_prediction-v1-16k-offline"
-model_revision="v2.0.2"
+model_revision="v2.0.4"
 
 python funasr/bin/inference.py \
 +model=${model} \

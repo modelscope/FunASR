@@ -1,6 +1,6 @@
 
 model="damo/emotion2vec_base"
-model_revision="v2.0.0"
+model_revision="v2.0.4"
 
 python funasr/bin/inference.py \
 +model=${model} \

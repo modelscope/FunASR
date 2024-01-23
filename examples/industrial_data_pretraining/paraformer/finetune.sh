@@ -8,7 +8,7 @@
 
 python funasr/bin/train.py \
 +model="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch" \
-+model_revision="v2.0.2" \
++model_revision="v2.0.4" \
 +train_data_set_list="/Users/zhifu/funasr_github/test_local/aishell2_dev_ios/asr_task_debug_len_10.jsonl" \
 +valid_data_set_list="/Users/zhifu/funasr_github/test_local/aishell2_dev_ios/asr_task_debug_len_10.jsonl" \
 ++dataset_conf.batch_size=64 \

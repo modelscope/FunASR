@@ -9,7 +9,7 @@ chunk_size = [5, 10, 5] #[0, 10, 5] 600ms, [0, 8, 4] 480ms
 encoder_chunk_look_back = 0 #number of chunks to lookback for encoder self-attention
 decoder_chunk_look_back = 0 #number of encoder chunks to lookback for decoder cross-attention
 
-model = AutoModel(model="/Users/zhifu/Downloads/modelscope_models/speech_SCAMA_asr-zh-cn-16k-common-vocab8358-streaming", model_revision="v2.0.2")
+model = AutoModel(model="/Users/zhifu/Downloads/modelscope_models/speech_SCAMA_asr-zh-cn-16k-common-vocab8358-streaming", model_revision="v2.0.4")
 cache = {}
 res = model.generate(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav",
             chunk_size=chunk_size,
