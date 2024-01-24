@@ -348,7 +348,7 @@ class Transformer(nn.Module):
         scorers["ngram"] = ngram
         
         weights = dict(
-            decoder=1.0 - kwargs.get("decoding_ctc_weight"),
+            decoder=1.0 - kwargs.get("decoding_ctc_weight", 0.0),
             ctc=kwargs.get("decoding_ctc_weight", 0.0),
             lm=kwargs.get("lm_weight", 0.0),
             ngram=kwargs.get("ngram_weight", 0.0),
