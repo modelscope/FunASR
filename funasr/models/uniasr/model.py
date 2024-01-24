@@ -802,7 +802,12 @@ class UniASR(torch.nn.Module):
         from funasr.models.uniasr.beam_search import BeamSearchScama
         from funasr.models.transformer.scorers.ctc import CTCPrefixScorer
         from funasr.models.transformer.scorers.length_bonus import LengthBonus
-    
+
+        decoding_mode = kwargs.get("decoding_mode", "model1")
+        if decoding_mode == "model1":
+            decoder = self.decoder
+        else:
+            decoder = self.decoder2
         # 1. Build ASR model
         scorers = {}
     
@@ -813,7 +818,7 @@ class UniASR(torch.nn.Module):
             )
         token_list = kwargs.get("token_list")
         scorers.update(
-            decoder=self.decoder,
+            decoder=decoder,
             length_bonus=LengthBonus(len(token_list)),
         )
     
@@ -830,7 +835,7 @@ class UniASR(torch.nn.Module):
             length_bonus=kwargs.get("penalty", 0.0),
         )
         beam_search = BeamSearchScama(
-            beam_size=kwargs.get("beam_size", 2),
+            beam_size=kwargs.get("beam_size", 5),
             weights=weights,
             scorers=scorers,
             sos=self.sos,
@@ -866,7 +871,7 @@ class UniASR(torch.nn.Module):
         
         if self.beam_search is None:
             logging.info("enable beam_search")
-            self.init_beam_search(**kwargs)
+            self.init_beam_search(decoding_mode=decoding_mode, **kwargs)
             self.nbest = kwargs.get("nbest", 1)
     
         meta_data = {}
