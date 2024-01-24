@@ -63,7 +63,7 @@ def add_file_root_path(model_or_path: str, file_path_metas: dict, cfg = {}):
             elif isinstance(v, dict):
                 if k not in cfg:
                     cfg[k] = {}
-                return add_file_root_path(model_or_path, v, cfg[k])
+                add_file_root_path(model_or_path, v, cfg[k])
     
     return cfg
 
