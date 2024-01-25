@@ -426,10 +426,10 @@ class AutoModel:
                                  f"time_escape: {time_escape_total_per_sample:0.3f}")
 
 
-        end_total = time.time()
-        time_escape_total_all_samples = end_total - beg_total
-        print(f"rtf_avg_all: {time_escape_total_all_samples / time_speech_total_all_samples:0.3f}, "
-                             f"time_speech_all: {time_speech_total_all_samples: 0.3f}, "
-                             f"time_escape_all: {time_escape_total_all_samples:0.3f}")
+        # end_total = time.time()
+        # time_escape_total_all_samples = end_total - beg_total
+        # print(f"rtf_avg_all: {time_escape_total_all_samples / time_speech_total_all_samples:0.3f}, "
+        #                      f"time_speech_all: {time_speech_total_all_samples: 0.3f}, "
+        #                      f"time_escape_all: {time_escape_total_all_samples:0.3f}")
         return results_ret_list
 
