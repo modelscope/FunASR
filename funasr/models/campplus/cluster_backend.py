@@ -4,7 +4,6 @@
 #  MIT License  (https://opensource.org/licenses/MIT)
 # Modified from 3D-Speaker (https://github.com/alibaba-damo-academy/3D-Speaker)
 
-import umap
 import scipy
 import torch
 import sklearn
