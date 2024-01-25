@@ -57,16 +57,16 @@ FunASR开源了大量在工业数据上预训练模型，您可以在[模型许�
 （注：[🤗]()表示Huggingface模型仓库链接，[⭐]()表示ModelScope模型仓库链接）
 
 
-|                                                                             模型名字                                                                             |        任务详情        |     训练数据     | 参数量  |
+|                                         模型名字                                                                                                                 |        任务详情        |     训练数据     | 参数量  |
 |:------------------------------------------------------------------------------------------------------------------------------------------------------------:|:------------------:|:------------:|:----:|
 | paraformer-zh <br> ([⭐](https://www.modelscope.cn/models/damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary)  [🤗]() ) |  语音识别，带时间戳输出，非实时   |  60000小时，中文  | 220M |
-| paraformer-zh-spk <br> ( [⭐](https://modelscope.cn/models/damo/speech_paraformer-large-vad-punc-spk_asr_nat-zh-cn/summary)  [🤗]() )             | 分角色语音识别，带时间戳输出，非实时 |  60000小时，中文  | 220M |
-| paraformer-zh-streaming <br> ( [⭐](https://modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary) [🤗]() )   |      语音识别，实时       |  60000小时，中文  | 220M |
-| paraformer-en <br> ( [⭐](https://www.modelscope.cn/models/damo/speech_paraformer-large-vad-punc_asr_nat-en-16k-common-vocab10020/summary) [🤗]() )      | 语音识别，非实时 |  50000小时，英文  | 220M |
-| conformer-en <br> ( [⭐](https://modelscope.cn/models/damo/speech_conformer_asr-en-16k-vocab4199-pytorch/summary) [🤗]() )                   |      语音识别，非实时      |  50000小时，英文  | 220M |
-| ct-punc <br> ( [⭐](https://modelscope.cn/models/damo/punc_ct-transformer_cn-en-common-vocab471067-large/summary) [🤗]() )                   |      标点恢复      |  100M，中文与英文  | 1.1G | 
-| fsmn-vad <br> ( [⭐](https://modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary) [🤗]() )                       |     语音端点检测，实时      | 5000小时，中文与英文 | 0.4M | 
-| fa-zh <br> ( [⭐](https://modelscope.cn/models/damo/speech_timestamp_prediction-v1-16k-offline/summary) [🤗]() )                        |   字级别时间戳预测         |  50000小时，中文  | 38M  |
+|   paraformer-zh-streaming <br> ( [⭐](https://modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary) [🤗]() )   |      语音识别，实时       |  60000小时，中文  | 220M |
+|      paraformer-en <br> ( [⭐](https://www.modelscope.cn/models/damo/speech_paraformer-large-vad-punc_asr_nat-en-16k-common-vocab10020/summary) [🤗]() )      |      语音识别，非实时      |  50000小时，英文  | 220M |
+|                  conformer-en <br> ( [⭐](https://modelscope.cn/models/damo/speech_conformer_asr-en-16k-vocab4199-pytorch/summary) [🤗]() )                   |      语音识别，非实时      |  50000小时，英文  | 220M |
+|                  ct-punc <br> ( [⭐](https://modelscope.cn/models/damo/punc_ct-transformer_cn-en-common-vocab471067-large/summary) [🤗]() )                   |        标点恢复        |  100M，中文与英文  | 1.1G | 
+|                       fsmn-vad <br> ( [⭐](https://modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary) [🤗]() )                       |     语音端点检测，实时      | 5000小时，中文与英文 | 0.4M | 
+|                       fa-zh <br> ( [⭐](https://modelscope.cn/models/damo/speech_timestamp_prediction-v1-16k-offline/summary) [🤗]() )                        |      字级别时间戳预测      |  50000小时，中文  | 38M  |
+|                           cam++ <br> ( [⭐](https://modelscope.cn/models/iic/speech_campplus_sv_zh-cn_16k-common/summary) [🤗]() )                            |      说话人确认/分割      |   5000小时     |    7.2M    | 
 
 
 <a name="快速开始"></a>

@@ -224,7 +224,7 @@ class AutoModel:
         asr_result_list = []
         num_samples = len(data_list)
         disable_pbar = kwargs.get("disable_pbar", False)
-        pbar = tqdm(colour="blue", total=num_samples+1, dynamic_ncols=True) if not disable_pbar else None
+        pbar = tqdm(colour="blue", total=num_samples, dynamic_ncols=True) if not disable_pbar else None
         time_speech_total = 0.0
         time_escape_total = 0.0
         for beg_idx in range(0, num_samples, batch_size):
@@ -350,6 +350,7 @@ class AutoModel:
             
             end_asr_total = time.time()
             time_escape_total_per_sample = end_asr_total - beg_asr_total
+            pbar_sample.update(1)
             pbar_sample.set_description(f"rtf_avg_per_sample: {time_escape_total_per_sample / time_speech_total_per_sample:0.3f}, "
                                  f"time_speech_total_per_sample: {time_speech_total_per_sample: 0.3f}, "
                                  f"time_escape_total_per_sample: {time_escape_total_per_sample:0.3f}")
