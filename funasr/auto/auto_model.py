@@ -311,7 +311,7 @@ class AutoModel:
             batch_size_ms_cum = 0
             beg_idx = 0
             beg_asr_total = time.time()
-            time_speech_total_per_sample = speech_lengths/16000
+            time_speech_total_per_sample = speech_lengths/16000 + 1e-6
             time_speech_total_all_samples += time_speech_total_per_sample
 
             pbar_sample = tqdm(colour="blue", total=n + 1, dynamic_ncols=True)
