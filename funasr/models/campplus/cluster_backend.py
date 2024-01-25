@@ -118,7 +118,7 @@ class UmapHdbscan:
         self.metric = metric
 
     def __call__(self, X):
-        from umap.umap_ import UMAP
+        import umap.umap_ as umap
         umap_X = umap.UMAP(
             n_neighbors=self.n_neighbors,
             min_dist=0.0,
