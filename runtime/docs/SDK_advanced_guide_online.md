@@ -8,7 +8,7 @@ FunASR Real-time Speech Recognition Software Package integrates real-time versio
 
 | TIME       | INFO                                                                                | IMAGE VERSION                       | IMAGE ID     |
 |------------|-------------------------------------------------------------------------------------|-------------------------------------|--------------|
-| 2024.01.25 | Optimization of the client-side | funasr-runtime-sdk-online-cpu-0.1.7  | 81fca20da2ed      |
+| 2024.01.25 | Optimization of the client-side | funasr-runtime-sdk-online-cpu-0.1.7  | 2aa23805572e      |
 | 2024.01.03 | The 2pass-offline mode supports Ngram language model decoding and WFST hotwords, while also addressing known crash issues and memory leak problems | funasr-runtime-sdk-online-cpu-0.1.6  | f99925110d27      |
 | 2023.11.09 | fix bug: without online results                                                     | funasr-runtime-sdk-online-cpu-0.1.5 | b16584b6d38b      |
 | 2023.11.08 | supporting server-side loading of hotwords, adaptation to runtime structure changes | funasr-runtime-sdk-online-cpu-0.1.4 | 691974017c38 |
