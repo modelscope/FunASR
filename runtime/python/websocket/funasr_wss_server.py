@@ -130,9 +130,13 @@ print("model loaded! only support one client at the same time now!!!!")
 
 async def ws_reset(websocket):
 	print("ws reset now, total num is ",len(websocket_users))
-	websocket.status_dict_asr_online = {"cache": dict(), "is_final": True}
-	websocket.status_dict_vad = {'cache': dict(), "is_final": True}
-	websocket.status_dict_punc = {'cache': dict()}
+
+	websocket.status_dict_asr_online["cache"] = {}
+	websocket.status_dict_asr_online["is_final"] = True
+	websocket.status_dict_vad["cache"] = {}
+	websocket.status_dict_vad["is_final"] = True
+	websocket.status_dict_punc["cache"] = {}
+	
 	await websocket.close()
 
 
@@ -198,12 +202,18 @@ async def ws_serve(websocket, path):
 					if len(frames_asr_online) % websocket.chunk_interval == 0 or websocket.status_dict_asr_online["is_final"]:
 						if websocket.mode == "2pass" or websocket.mode == "online":
 							audio_in = b"".join(frames_asr_online)
-							await async_asr_online(websocket, audio_in)
+							try:
+								await async_asr_online(websocket, audio_in)
+							except:
+								print(f"error in asr streaming, {websocket.status_dict_asr_online}")
 						frames_asr_online = []
 					if speech_start:
 						frames_asr.append(message)
 					# vad online
-					speech_start_i, speech_end_i = await async_vad(websocket, message)
+					try:
+						speech_start_i, speech_end_i = await async_vad(websocket, message)
+					except:
+						print("error in vad")
 					if speech_start_i != -1:
 						speech_start = True
 						beg_bias = (websocket.vad_pre_idx-speech_start_i)//duration_ms
@@ -215,15 +225,18 @@ async def ws_serve(websocket, path):
 					# print("vad end point")
 					if websocket.mode == "2pass" or websocket.mode == "offline":
 						audio_in = b"".join(frames_asr)
-						await async_asr(websocket, audio_in)
+						try:
+							await async_asr(websocket, audio_in)
+						except:
+							print("error in asr offline")
 					frames_asr = []
 					speech_start = False
-					# frames_asr_online = []
-					# websocket.status_dict_asr_online = {"cache": dict()}
+					frames_asr_online = []
+					websocket.status_dict_asr_online["cache"] = {}
 					if not websocket.is_speaking:
 						websocket.vad_pre_idx = 0
 						frames = []
-						websocket.status_dict_vad = {'cache': dict()}
+						websocket.status_dict_vad["cache"] = {}
 					else:
 						frames = frames[-20:]
 	
@@ -259,13 +272,13 @@ async def async_asr(websocket, audio_in):
 	if len(audio_in) > 0:
 		# print(len(audio_in))
 		rec_result = model_asr.generate(input=audio_in, **websocket.status_dict_asr)[0]
-		print("offline_asr, ", rec_result)
+		# print("offline_asr, ", rec_result)
 		if model_punc is not None and len(rec_result["text"])>0:
-			print("offline, before punc", rec_result, "cache", websocket.status_dict_punc)
+			# print("offline, before punc", rec_result, "cache", websocket.status_dict_punc)
 			rec_result = model_punc.generate(input=rec_result['text'], **websocket.status_dict_punc)[0]
-			print("offline, after punc", rec_result)
+			# print("offline, after punc", rec_result)
 		if len(rec_result["text"])>0:
-			print("offline", rec_result)
+			# print("offline", rec_result)
 			mode = "2pass-offline" if "2pass" in websocket.mode else websocket.mode
 			message = json.dumps({"mode": mode, "text": rec_result["text"], "wav_name": websocket.wav_name,"is_final":websocket.is_speaking})
 			await websocket.send(message)
@@ -275,11 +288,11 @@ async def async_asr_online(websocket, audio_in):
 	if len(audio_in) > 0:
 		# print(websocket.status_dict_asr_online.get("is_final", False))
 		rec_result = model_asr_streaming.generate(input=audio_in, **websocket.status_dict_asr_online)[0]
-		# print(rec_result)
+		# print("online, ", rec_result)
 		if websocket.mode == "2pass" and websocket.status_dict_asr_online.get("is_final", False):
 			return
 			#     websocket.status_dict_asr_online["cache"] = dict()
-		if "text" in rec_result:
+		if len(rec_result["text"]):
 			mode = "2pass-online" if "2pass" in websocket.mode else websocket.mode
 			message = json.dumps({"mode": mode, "text": rec_result["text"], "wav_name": websocket.wav_name,"is_final":websocket.is_speaking})
 			await websocket.send(message)
