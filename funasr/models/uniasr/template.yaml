@@ -18,6 +18,7 @@ model_conf:
     decoder_attention_chunk_type2: chunk
     loss_weight_model1: 0.5
 
+
 # encoder
 encoder: SANMEncoderChunkOpt
 encoder_conf:
@@ -34,11 +35,21 @@ encoder_conf:
     kernel_size: 11
     sanm_shfit: 0
     selfattention_layer_type: sanm
-    chunk_size: [20, 60]
-    stride: [10, 40]
-    pad_left: [5, 10]
-    encoder_att_look_back_factor: [0, 0]
-    decoder_att_look_back_factor: [0, 0]
+    chunk_size:
+    - 20
+    - 60
+    stride:
+    - 10
+    - 40
+    pad_left:
+    - 5
+    - 10
+    encoder_att_look_back_factor:
+    - 0
+    - 0
+    decoder_att_look_back_factor:
+    - 0
+    - 0
 
 # decoder
 decoder: FsmnDecoderSCAMAOpt
@@ -55,6 +66,7 @@ decoder_conf:
     kernel_size: 11
     concat_embeds: true
 
+# predictor
 predictor: CifPredictorV2
 predictor_conf:
     idim: 320
@@ -62,6 +74,8 @@ predictor_conf:
     l_order: 1
     r_order: 1
 
+
+# encoder2
 encoder2: SANMEncoderChunkOpt
 encoder2_conf:
     output_size: 320
@@ -77,12 +91,23 @@ encoder2_conf:
     kernel_size: 21
     sanm_shfit: 0
     selfattention_layer_type: sanm
-    chunk_size: [45, 70]
-    stride: [35, 50]
-    pad_left: [5, 10]
-    encoder_att_look_back_factor: [0, 0]
-    decoder_att_look_back_factor: [0, 0]
+    chunk_size:
+    - 45
+    - 70
+    stride:
+    - 35
+    - 50
+    pad_left:
+    - 5
+    - 10
+    encoder_att_look_back_factor:
+    - 0
+    - 0
+    decoder_att_look_back_factor:
+    - 0
+    - 0
 
+# decoder
 decoder2: FsmnDecoderSCAMAOpt
 decoder2_conf:
     attention_dim: 320
@@ -108,10 +133,12 @@ stride_conv: stride_conv1d
 stride_conv_conf:
     kernel_size: 2
     stride: 2
-    pad: [0, 1]
+    pad:
+    - 0
+    - 1
 
 # frontend related
-frontend: WavFrontendOnline
+frontend: WavFrontend
 frontend_conf:
     fs: 16000
     window: hamming
@@ -120,6 +147,7 @@ frontend_conf:
     frame_shift: 10
     lfr_m: 7
     lfr_n: 6
+    dither: 0.0
 
 specaug: SpecAugLFR
 specaug_conf:

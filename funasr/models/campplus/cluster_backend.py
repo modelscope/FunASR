@@ -4,7 +4,6 @@
 #  MIT License  (https://opensource.org/licenses/MIT)
 # Modified from 3D-Speaker (https://github.com/alibaba-damo-academy/3D-Speaker)
 
-import umap
 import scipy
 import torch
 import sklearn
@@ -119,7 +118,7 @@ class UmapHdbscan:
         self.metric = metric
 
     def __call__(self, X):
-        from umap.umap_ import UMAP
+        import umap.umap_ as umap
         umap_X = umap.UMAP(
             n_neighbors=self.n_neighbors,
             min_dist=0.0,

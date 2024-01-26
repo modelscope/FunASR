@@ -6,6 +6,7 @@ This document serves as a development guide for the FunASR offline file transcri
 
 | TIME       | INFO                                    | IMAGE VERSION                   | IMAGE ID     |
 |------------|-----------------------------------------|---------------------------------|--------------|
+| 2024.01.25 | Optimized the VAD (Voice Activity Detection) data processing method, significantly reducing peak memory usage; memory leak optimization| funasr-runtime-sdk-en-cpu-0.1.3 | de438fbbe304 |
 | 2024.01.03 | fixed known crash issues as well as memory leak problems | funasr-runtime-sdk-en-cpu-0.1.2 | 0cdd9f4a4bb5 |
 | 2023.11.08 | Adaptation to runtime structure changes | funasr-runtime-sdk-en-cpu-0.1.1 | 27017f70f72a |
 | 2023.10.16 | 1.0 released                            | funasr-runtime-sdk-en-cpu-0.1.0 | e0de03eb0163 |
@@ -22,9 +23,9 @@ If you do not have Docker installed, please refer to [Docker Installation](https
 ### Pulling and launching images
 Use the following command to pull and launch the Docker image for the FunASR runtime-SDK:
 ```shell
-sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.2
+sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.3
 
-sudo docker run -p 10097:10095 -it --privileged=true -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.2
+sudo docker run -p 10097:10095 -it --privileged=true -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.3
 ```
 Introduction to command parameters: 
 ```text

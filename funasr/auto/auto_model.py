@@ -123,7 +123,6 @@ class AutoModel:
             self.preset_spk_num = kwargs.get("preset_spk_num", None)
             if self.preset_spk_num:
                 logging.warning("Using preset speaker number: {}".format(self.preset_spk_num))
-            logging.warning("Many to print when using speaker model...")
             
         self.kwargs = kwargs
         self.model = model
@@ -146,7 +145,7 @@ class AutoModel:
         set_all_random_seed(kwargs.get("seed", 0))
         
         device = kwargs.get("device", "cuda")
-        if not torch.cuda.is_available() or kwargs.get("ngpu", 0):
+        if not torch.cuda.is_available() or kwargs.get("ngpu", 0) == 0:
             device = "cpu"
             kwargs["batch_size"] = 1
         kwargs["device"] = device
@@ -224,7 +223,7 @@ class AutoModel:
         asr_result_list = []
         num_samples = len(data_list)
         disable_pbar = kwargs.get("disable_pbar", False)
-        pbar = tqdm(colour="blue", total=num_samples+1, dynamic_ncols=True) if not disable_pbar else None
+        pbar = tqdm(colour="blue", total=num_samples, dynamic_ncols=True) if not disable_pbar else None
         time_speech_total = 0.0
         time_escape_total = 0.0
         for beg_idx in range(0, num_samples, batch_size):
@@ -261,7 +260,7 @@ class AutoModel:
             time_escape_total += time_escape
 
         if pbar:
-            pbar.update(1)
+            # pbar.update(1)
             pbar.set_description(f"rtf_avg: {time_escape_total/time_speech_total:0.3f}")
         torch.cuda.empty_cache()
         return asr_result_list
@@ -286,10 +285,10 @@ class AutoModel:
         
         key_list, data_list = prepare_data_iterator(input, input_len=input_len, data_type=kwargs.get("data_type", None))
         results_ret_list = []
-        time_speech_total_all_samples = 0.0
+        time_speech_total_all_samples = 1e-6
 
         beg_total = time.time()
-        pbar_total = tqdm(colour="red", total=len(res) + 1, dynamic_ncols=True)
+        pbar_total = tqdm(colour="red", total=len(res), dynamic_ncols=True)
         for i in range(len(res)):
             key = res[i]["key"]
             vadsegments = res[i]["value"]
@@ -314,11 +313,11 @@ class AutoModel:
             time_speech_total_per_sample = speech_lengths/16000
             time_speech_total_all_samples += time_speech_total_per_sample
 
-            pbar_sample = tqdm(colour="blue", total=n + 1, dynamic_ncols=True)
+            # pbar_sample = tqdm(colour="blue", total=n, dynamic_ncols=True)
 
             all_segments = []
             for j, _ in enumerate(range(0, n)):
-                pbar_sample.update(1)
+                # pbar_sample.update(1)
                 batch_size_ms_cum += (sorted_data[j][0][1] - sorted_data[j][0][0])
                 if j < n - 1 and (
                     batch_size_ms_cum + sorted_data[j + 1][0][1] - sorted_data[j + 1][0][0]) < batch_size and (
@@ -329,8 +328,6 @@ class AutoModel:
                 speech_j, speech_lengths_j = slice_padding_audio_samples(speech, speech_lengths, sorted_data[beg_idx:end_idx])       
                 results = self.inference(speech_j, input_len=None, model=model, kwargs=kwargs, disable_pbar=True, **cfg)
                 if self.spk_model is not None:
-
-                  
                     # compose vad segments: [[start_time_sec, end_time_sec, speech], [...]]
                     for _b in range(len(speech_j)):
                         vad_segments = [[sorted_data[beg_idx:end_idx][_b][0][0]/1000.0,
@@ -339,22 +336,20 @@ class AutoModel:
                         segments = sv_chunk(vad_segments)
                         all_segments.extend(segments)
                         speech_b = [i[2] for i in segments]
-                        spk_res = self.inference(speech_b, input_len=None, model=self.spk_model, kwargs=kwargs, **cfg)
+                        spk_res = self.inference(speech_b, input_len=None, model=self.spk_model, kwargs=kwargs, disable_pbar=True, **cfg)
                         results[_b]['spk_embedding'] = spk_res[0]['spk_embedding']
                 beg_idx = end_idx
                 if len(results) < 1:
                     continue
                 results_sorted.extend(results)
-
-
             
-            end_asr_total = time.time()
-            time_escape_total_per_sample = end_asr_total - beg_asr_total
-            pbar_sample.set_description(f"rtf_avg_per_sample: {time_escape_total_per_sample / time_speech_total_per_sample:0.3f}, "
-                                 f"time_speech_total_per_sample: {time_speech_total_per_sample: 0.3f}, "
-                                 f"time_escape_total_per_sample: {time_escape_total_per_sample:0.3f}")
+            # end_asr_total = time.time()
+            # time_escape_total_per_sample = end_asr_total - beg_asr_total
+            # pbar_sample.update(1)
+            # pbar_sample.set_description(f"rtf_avg_per_sample: {time_escape_total_per_sample / time_speech_total_per_sample:0.3f}, "
+            #                      f"time_speech_total_per_sample: {time_speech_total_per_sample: 0.3f}, "
+            #                      f"time_escape_total_per_sample: {time_escape_total_per_sample:0.3f}")
             
-
             restored_data = [0] * n
             for j in range(n):
                 index = sorted_data[j][1]
@@ -377,7 +372,7 @@ class AutoModel:
                             result[k] = restored_data[j][k]
                         else:
                             result[k] = torch.cat([result[k], restored_data[j][k]], dim=0)
-                    elif k == 'raw_text':
+                    elif 'text' in k:
                         if k not in result:
                             result[k] = restored_data[j][k]
                         else:
@@ -391,9 +386,10 @@ class AutoModel:
             # step.3 compute punc model
             if self.punc_model is not None:
                 self.punc_kwargs.update(cfg)
-                punc_res = self.inference(result["text"], model=self.punc_model, kwargs=self.punc_kwargs, **cfg)
+                punc_res = self.inference(result["text"], model=self.punc_model, kwargs=self.punc_kwargs, disable_pbar=True, **cfg)
+                import copy; raw_text = copy.copy(result["text"])
                 result["text"] = punc_res[0]["text"]
-                     
+                
             # speaker embedding cluster after resorted
             if self.spk_model is not None:
                 all_segments = sorted(all_segments, key=lambda x: x[0])
@@ -401,29 +397,39 @@ class AutoModel:
                 labels = self.cb_model(spk_embedding.cpu(), oracle_num=self.preset_spk_num)
                 del result['spk_embedding']
                 sv_output = postprocess(all_segments, None, labels, spk_embedding.cpu())
-                if self.spk_mode == 'vad_segment':
+                if self.spk_mode == 'vad_segment':  # recover sentence_list
                     sentence_list = []
                     for res, vadsegment in zip(restored_data, vadsegments):
                         sentence_list.append({"start": vadsegment[0],\
                                                 "end": vadsegment[1],
                                                 "sentence": res['raw_text'],
                                                 "timestamp": res['timestamp']})
-                else: # punc_segment
+                elif self.spk_mode == 'punc_segment':
                     sentence_list = timestamp_sentence(punc_res[0]['punc_array'], \
                                                         result['timestamp'], \
                                                         result['raw_text'])
                 distribute_spk(sentence_list, sv_output)
                 result['sentence_info'] = sentence_list
+            elif kwargs.get("sentence_timestamp", False):
+                sentence_list = timestamp_sentence(punc_res[0]['punc_array'], \
+                                                        result['timestamp'], \
+                                                        result['raw_text'])
+                result['sentence_info'] = sentence_list
                     
             result["key"] = key
             results_ret_list.append(result)
+            end_asr_total = time.time()
+            time_escape_total_per_sample = end_asr_total - beg_asr_total
             pbar_total.update(1)
-            
-        pbar_total.update(1)
-        end_total = time.time()
-        time_escape_total_all_samples = end_total - beg_total
-        pbar_total.set_description(f"rtf_avg_all_samples: {time_escape_total_all_samples / time_speech_total_all_samples:0.3f}, "
-                             f"time_speech_total_all_samples: {time_speech_total_all_samples: 0.3f}, "
-                             f"time_escape_total_all_samples: {time_escape_total_all_samples:0.3f}")
+            pbar_total.set_description(f"rtf_avg: {time_escape_total_per_sample / time_speech_total_per_sample:0.3f}, "
+                                 f"time_speech: {time_speech_total_per_sample: 0.3f}, "
+                                 f"time_escape: {time_escape_total_per_sample:0.3f}")
+
+
+        # end_total = time.time()
+        # time_escape_total_all_samples = end_total - beg_total
+        # print(f"rtf_avg_all: {time_escape_total_all_samples / time_speech_total_all_samples:0.3f}, "
+        #                      f"time_speech_all: {time_speech_total_all_samples: 0.3f}, "
+        #                      f"time_escape_all: {time_escape_total_all_samples:0.3f}")
         return results_ret_list
 

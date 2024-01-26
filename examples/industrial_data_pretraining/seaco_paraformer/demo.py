@@ -16,5 +16,7 @@ model = AutoModel(model="iic/speech_seaco_paraformer_large_asr_nat-zh-cn-16k-com
                   )
 
 res = model.generate(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav",
-                     hotword='达摩院 魔搭')
+                     hotword='达摩院 魔搭',
+                     # sentence_timestamp=True,
+                    )
 print(res)
