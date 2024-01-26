@@ -51,6 +51,7 @@ def load_audio_text_image_video(data_or_path_or_list, fs: int = 16000, audio_fs:
         # if data_in is a file or url, set is_final=True
         if "cache" in kwargs:
             kwargs["cache"]["is_final"] = True
+            kwargs["cache"]["is_streaming_input"] = False
     elif isinstance(data_or_path_or_list, str) and data_type == "text" and tokenizer is not None:
         data_or_path_or_list = tokenizer.encode(data_or_path_or_list)
     elif isinstance(data_or_path_or_list, np.ndarray):  # audio sample point

@@ -5,8 +5,9 @@
 
 from funasr import AutoModel
 
-model = AutoModel(model="iic/speech_UniASR-large_asr_2pass-zh-cn-16k-common-vocab8358-tensorflow1-offline", model_revision="v2.0.4",
-                  )
+
+model = AutoModel(model="iic/speech_UniASR-large_asr_2pass-zh-cn-16k-common-vocab8358-tensorflow1-offline", model_revision="v2.0.4",)
+
 
 res = model.generate(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav")
 print(res)

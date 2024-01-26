@@ -482,13 +482,17 @@ class FsmnVADStreaming(nn.Module):
 		
 		return frame_state
 	
-	def forward(self, feats: torch.Tensor, waveform: torch.tensor, cache: dict = {},
-	            is_final: bool = False
+	def forward(self, feats: torch.Tensor,
+	            waveform: torch.tensor,
+	            cache: dict = {},
+	            is_final: bool = False,
+	            **kwargs,
 	            ):
 		# if len(cache) == 0:
 		#     self.AllResetDetection()
 		# self.waveform = waveform  # compute decibel for each frame
 		cache["stats"].waveform = waveform
+		is_streaming_input = kwargs.get("is_streaming_input", True)
 		self.ComputeDecibel(cache=cache)
 		self.ComputeScores(feats, cache=cache)
 		if not is_final:
@@ -500,13 +504,32 @@ class FsmnVADStreaming(nn.Module):
 			segment_batch = []
 			if len(cache["stats"].output_data_buf) > 0:
 				for i in range(cache["stats"].output_data_buf_offset, len(cache["stats"].output_data_buf)):
-					if not is_final and (not cache["stats"].output_data_buf[i].contain_seg_start_point or not
-					cache["stats"].output_data_buf[
-						i].contain_seg_end_point):
-						continue
-					segment = [cache["stats"].output_data_buf[i].start_ms, cache["stats"].output_data_buf[i].end_ms]
+					if is_streaming_input: # in this case, return [beg, -1], [], [-1, end], [beg, end]
+						if not cache["stats"].output_data_buf[i].contain_seg_start_point:
+							continue
+						if not cache["stats"].next_seg and not cache["stats"].output_data_buf[i].contain_seg_end_point:
+							continue
+						start_ms = cache["stats"].output_data_buf[i].start_ms if cache["stats"].next_seg else -1
+						if cache["stats"].output_data_buf[i].contain_seg_end_point:
+							end_ms = cache["stats"].output_data_buf[i].end_ms
+							cache["stats"].next_seg = True
+							cache["stats"].output_data_buf_offset += 1
+						else:
+							end_ms = -1
+							cache["stats"].next_seg = False
+						segment = [start_ms, end_ms]
+						
+					else: # in this case, return [beg, end]
+						
+						if not is_final and (not cache["stats"].output_data_buf[i].contain_seg_start_point or not
+						cache["stats"].output_data_buf[
+							i].contain_seg_end_point):
+							continue
+						segment = [cache["stats"].output_data_buf[i].start_ms, cache["stats"].output_data_buf[i].end_ms]
+						cache["stats"].output_data_buf_offset += 1  # need update this parameter
+					
 					segment_batch.append(segment)
-					cache["stats"].output_data_buf_offset += 1  # need update this parameter
+					
 			if segment_batch:
 				segments.append(segment_batch)
 		# if is_final:
@@ -551,7 +574,8 @@ class FsmnVADStreaming(nn.Module):
 		chunk_stride_samples = int(chunk_size * frontend.fs / 1000)
 		
 		time1 = time.perf_counter()
-		cfg = {"is_final": kwargs.get("is_final", False)}
+		is_streaming_input = kwargs.get("is_streaming_input", False) if chunk_size >= 15000 else kwargs.get("is_streaming_input", True)
+		cfg = {"is_final": kwargs.get("is_final", False), "is_streaming_input": is_streaming_input}
 		audio_sample_list = load_audio_text_image_video(data_in,
 		                                                fs=frontend.fs,
 		                                                audio_fs=kwargs.get("fs", 16000),
@@ -560,7 +584,7 @@ class FsmnVADStreaming(nn.Module):
 		                                                cache=cfg,
 		                                                )
 		_is_final = cfg["is_final"]  # if data_in is a file or url, set is_final=True
-		
+		is_streaming_input = cfg["is_streaming_input"]
 		time2 = time.perf_counter()
 		meta_data["load_data"] = f"{time2 - time1:0.3f}"
 		assert len(audio_sample_list) == 1, "batch_size must be set 1"
@@ -588,7 +612,8 @@ class FsmnVADStreaming(nn.Module):
 				"feats": speech,
 				"waveform": cache["frontend"]["waveforms"],
 				"is_final": kwargs["is_final"],
-				"cache": cache
+				"cache": cache,
+				"is_streaming_input": is_streaming_input
 			}
 			segments_i = self.forward(**batch)
 			if len(segments_i) > 0:
