@@ -149,11 +149,14 @@ void Paraformer::InitAsr(const std::string &en_model, const std::string &de_mode
 }
 
 // 2pass
-void Paraformer::InitAsr(const std::string &am_model, const std::string &en_model, const std::string &de_model, const std::string &am_cmvn, const std::string &am_config, int thread_num){
+void Paraformer::InitAsr(const std::string &am_model, const std::string &en_model, const std::string &de_model, const std::string &am_cmvn, const std::string &am_config,
+                         const std::string &en_cmvn, const std::string &en_config, int thread_num){
     // online
     InitAsr(en_model, de_model, am_cmvn, am_config, thread_num);
 
     // offline
+    // load offline tokenizer.
+    off_vocab = new Vocab(en_config.c_str());
     try {
         m_session_ = std::make_unique<Ort::Session>(env_, ORTSTRING(am_model).c_str(), session_options_);
         LOG(INFO) << "Successfully load model from " << am_model;
@@ -309,6 +312,9 @@ Paraformer::~Paraformer()
     if(vocab){
         delete vocab;
     }
+    if(off_vocab){
+        delete off_vocab;
+    }
     if(lm_vocab){
         delete lm_vocab;
     }
@@ -385,7 +391,7 @@ void Paraformer::LoadCmvn(const char *filename)
     }
 }
 
-string Paraformer::GreedySearch(float * in, int n_len,  int64_t token_nums, bool is_stamp, std::vector<float> us_alphas, std::vector<float> us_cif_peak)
+string Paraformer::GreedySearch(float * in, int n_len,  int64_t token_nums, ASR_TYPE mode, bool is_stamp,  std::vector<float> us_alphas, std::vector<float> us_cif_peak)
 {
     vector<int> hyps;
     int Tmax = n_len;
@@ -396,7 +402,12 @@ string Paraformer::GreedySearch(float * in, int n_len,  int64_t token_nums, bool
         hyps.push_back(max_idx);
     }
     if(!is_stamp){
-        return vocab->Vector2StringV2(hyps, language);
+        if (mode == ASR_OFFLINE){
+            return  off_vocab->Vector2StringV2(hyps, language);
+        }else{
+            return vocab->Vector2StringV2(hyps, language);
+        }
+
     }else{
         std::vector<string> char_list;
         std::vector<std::vector<float>> timestamp_list;
@@ -462,7 +473,7 @@ void Paraformer::LfrCmvn(std::vector<std::vector<float>> &asr_feats) {
     asr_feats = out_feats;
 }
 
-string Paraformer::Forward(float* din, int len, bool input_finished, const std::vector<std::vector<float>> &hw_emb, void* decoder_handle)
+string Paraformer::Forward(float* din, int len, bool input_finished, const std::vector<std::vector<float>> &hw_emb, void* decoder_handle, ASR_TYPE mode)
 {
     WfstDecoder* wfst_decoder = (WfstDecoder*)decoder_handle;
     int32_t in_feat_dim = fbank_opts_.mel_opts.num_bins;
@@ -554,7 +565,7 @@ string Paraformer::Forward(float* din, int len, bool input_finished, const std::
                 us_peaks[i] = us_peaks_data[i];
             }
 			if (lm_ == nullptr) {
-                result = GreedySearch(floatData, *encoder_out_lens, outputShape[2], true, us_alphas, us_peaks);
+                result = GreedySearch(floatData, *encoder_out_lens, outputShape[2], mode, true, us_alphas, us_peaks);
 			} else {
 			    result = BeamSearch(wfst_decoder, floatData, *encoder_out_lens, outputShape[2]);
                 if (input_finished) {
@@ -563,7 +574,7 @@ string Paraformer::Forward(float* din, int len, bool input_finished, const std::
 			}
         }else{
 			if (lm_ == nullptr) {
-                result = GreedySearch(floatData, *encoder_out_lens, outputShape[2]);
+                result = GreedySearch(floatData, *encoder_out_lens, outputShape[2], mode);
 			} else {
 			    result = BeamSearch(wfst_decoder, floatData, *encoder_out_lens, outputShape[2]);
                 if (input_finished) {
