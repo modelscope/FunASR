@@ -3,11 +3,10 @@
 ([简体中文](./README_zh.md)|English)
 
 # FunASR: A Fundamental End-to-End Speech Recognition Toolkit
-<p align="left">
-    <a href=""><img src="https://img.shields.io/badge/OS-Linux%2C%20Win%2C%20Mac-brightgreen.svg"></a>
-    <a href=""><img src="https://img.shields.io/badge/Python->=3.7,<=3.10-aff.svg"></a>
-    <a href=""><img src="https://img.shields.io/badge/Pytorch-%3E%3D1.11-blue"></a>
-</p>
+
+
+[![PyPI](https://img.shields.io/pypi/v/funasr)](https://pypi.org/project/funasr/)
+
 
 <strong>FunASR</strong> hopes to build a bridge between academic research and industrial applications on speech recognition. By supporting the training & finetuning of the industrial-grade speech recognition model, researchers and developers can conduct research and production of speech recognition models more conveniently, and promote the development of speech recognition ecology. ASR for Fun！
 
@@ -28,6 +27,7 @@
 
 <a name="whats-new"></a>
 ## What's new:
+- 2024/01/30：funasr-1.0 has been released ([docs](https://github.com/alibaba-damo-academy/FunASR/discussions/1319))
 - 2024/01/25: Offline File Transcription Service 4.2, Offline File Transcription Service of English 1.3 released，optimized the VAD (Voice Activity Detection) data processing method, significantly reducing peak memory usage, memory leak optimization; Real-time Transcription Service 1.7 released，optimizatized the client-side；([docs](runtime/readme.md))
 - 2024/01/09: The Funasr SDK for Windows version 2.0 has been released, featuring support for The offline file transcription service (CPU) of Mandarin 4.1, The offline file transcription service (CPU) of English 1.2, The real-time transcription service (CPU) of Mandarin 1.6. For more details, please refer to the official documentation or release notes([FunASR-Runtime-Windows](https://www.modelscope.cn/models/damo/funasr-runtime-win-cpu-x64/summary))
 - 2024/01/03: File Transcription Service 4.0 released, Added support for 8k models, optimized timestamp mismatch issues and added sentence-level timestamps, improved the effectiveness of English word FST hotwords, supported automated configuration of thread parameters, and fixed known crash issues as well as memory leak problems, refer to ([docs](runtime/readme.md#file-transcription-service-mandarin-cpu)).
@@ -48,7 +48,19 @@
 <a name="Installation"></a>
 ## Installation
 
-Please ref to [installation docs](https://alibaba-damo-academy.github.io/FunASR/en/installation/installation.html)
+```shell
+pip3 install -U funasr
+```
+Or install from source code
+``` sh
+git clone https://github.com/alibaba/FunASR.git && cd FunASR
+pip3 install -e ./
+```
+Install modelscope for the pretrained models (Optional)
+
+```shell
+pip3 install -U modelscope
+```
 
 ## Model Zoo
 FunASR has open-sourced a large number of pre-trained models on industrial data. You are free to use, copy, modify, and share FunASR models under the [Model License Agreement](./MODEL_LICENSE). Below are some representative models, for more models please refer to the [Model Zoo]().

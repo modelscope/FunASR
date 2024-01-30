@@ -3,11 +3,9 @@
 (简体中文|[English](./README.md))
 
 # FunASR: A Fundamental End-to-End Speech Recognition Toolkit
-<p align="left">
-    <a href=""><img src="https://img.shields.io/badge/OS-Linux%2C%20Win%2C%20Mac-brightgreen.svg"></a>
-    <a href=""><img src="https://img.shields.io/badge/Python->=3.7,<=3.10-aff.svg"></a>
-    <a href=""><img src="https://img.shields.io/badge/Pytorch-%3E%3D1.11-blue"></a>
-</p>
+
+[![PyPI](https://img.shields.io/pypi/v/funasr)](https://pypi.org/project/funasr/)
+
 
 FunASR希望在语音识别的学术研究和工业应用之间架起一座桥梁。通过发布工业级语音识别模型的训练和微调，研究人员和开发人员可以更方便地进行语音识别模型的研究和生产，并推动语音识别生态的发展。让语音识别更有趣！
 
@@ -31,6 +29,7 @@ FunASR希望在语音识别的学术研究和工业应用之间架起一座桥�
 
 <a name="最新动态"></a>
 ## 最新动态
+- 2024/01/30：funasr-1.0发布，更新说明[文档](https://github.com/alibaba-damo-academy/FunASR/discussions/1319)
 - 2024/01/25: 中文离线文件转写服务 4.2、英文离线文件转写服务 1.3，优化vad数据处理方式，大幅降低峰值内存占用，内存泄漏优化；中文实时语音听写服务 1.7 发布，客户端优化；详细信息参阅([部署文档](runtime/readme_cn.md))
 - 2024/01/09: funasr社区软件包windows 2.0版本发布，支持软件包中文离线文件转写4.1、英文离线文件转写1.2、中文实时听写服务1.6的最新功能，详细信息参阅([FunASR社区软件包windows版本](https://www.modelscope.cn/models/damo/funasr-runtime-win-cpu-x64/summary))
 - 2024/01/03: 中文离线文件转写服务 4.0 发布，新增支持8k模型、优化时间戳不匹配问题及增加句子级别时间戳、优化英文单词fst热词效果、支持自动化配置线程参数，同时修复已知的crash问题及内存泄漏问题，详细信息参阅([部署文档](runtime/readme_cn.md#中文离线文件转写服务cpu版本))
@@ -49,7 +48,20 @@ FunASR希望在语音识别的学术研究和工业应用之间架起一座桥�
 
 <a name="安装教程"></a>
 ## 安装教程
-FunASR安装教程请阅读（[Installation](https://alibaba-damo-academy.github.io/FunASR/en/installation/installation.html)）
+
+```shell
+pip3 install -U funasr
+```
+或者从源代码安装
+``` sh
+git clone https://github.com/alibaba/FunASR.git && cd FunASR
+pip3 install -e ./
+```
+如果需要使用工业预训练模型，安装modelscope（可选）
+
+```shell
+pip3 install -U modelscope
+```
 
 ## 模型仓库
 
