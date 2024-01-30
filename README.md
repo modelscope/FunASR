@@ -143,7 +143,7 @@ for i in range(total_chunk_num):
 ```
 Note: `chunk_size` is the configuration for streaming latency.` [0,10,5]` indicates that the real-time display granularity is `10*60=600ms`, and the lookahead information is `5*60=300ms`. Each inference input is `600ms` (sample points are `16000*0.6=960`), and the output is the corresponding text. For the last speech segment input, `is_final=True` needs to be set to force the output of the last word.
 
-### Voice Activity Detection (streaming)
+### Voice Activity Detection (Non-streaming)
 ```python
 from funasr import AutoModel
 
@@ -152,7 +152,7 @@ wav_file = f"{model.model_path}/example/asr_example.wav"
 res = model.generate(input=wav_file)
 print(res)
 ```
-### Voice Activity Detection (Non-streaming)
+### Voice Activity Detection (Streaming)
 ```python
 from funasr import AutoModel
 
