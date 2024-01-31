@@ -212,7 +212,7 @@ def distribute_spk(sentence_list, sd_time_list):
             if overlap > max_overlap:
                 max_overlap = overlap
                 sentence_spk = spk
-        d['spk'] = sentence_spk
+        d['spk'] = int(sentence_spk)
         sd_sentence_list.append(d)
     return sd_sentence_list
 
