@@ -6,7 +6,6 @@
 # tables.print()
 
 # network architecture
-#model: funasr.models.paraformer.model:Paraformer
 model: Transformer
 model_conf:
     ctc_weight: 0.3
