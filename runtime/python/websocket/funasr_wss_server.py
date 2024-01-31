@@ -152,7 +152,7 @@ async def ws_serve(websocket, path):
 	frames_asr = []
 	frames_asr_online = []
 	global websocket_users
-	await clear_websocket()
+	# await clear_websocket()
 	websocket_users.add(websocket)
 	websocket.status_dict_asr = {}
 	websocket.status_dict_asr_online = {"cache": {}, "is_final": False}
