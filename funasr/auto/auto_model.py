@@ -228,7 +228,7 @@ class AutoModel:
             data_batch = data_list[beg_idx:end_idx]
             key_batch = key_list[beg_idx:end_idx]
             batch = {"data_in": data_batch, "key": key_batch}
-            if (end_idx - beg_idx) == 1 and isinstance(data_batch[0], torch.Tensor): # fbank
+            if (end_idx - beg_idx) == 1 and kwargs.get("data_type", None) == "fbank": # fbank
                 batch["data_in"] = data_batch[0]
                 batch["data_lengths"] = input_len
         
