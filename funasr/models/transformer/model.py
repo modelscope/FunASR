@@ -439,13 +439,13 @@ class Transformer(nn.Module):
                 token = tokenizer.ids2tokens(token_int)
                 text = tokenizer.tokens2text(token)
                 
-                # text_postprocessed, _ = postprocess_utils.sentence_postprocess(token)
-                result_i = {"key": key[i], "token": token, "text": text}
+                text_postprocessed, _ = postprocess_utils.sentence_postprocess(token)
+                result_i = {"key": key[i], "token": token, "text": text_postprocessed}
                 results.append(result_i)
                 
                 if ibest_writer is not None:
                     ibest_writer["token"][key[i]] = " ".join(token)
-                    ibest_writer["text"][key[i]] = text
+                    ibest_writer["text"][key[i]] = text_postprocessed
         
         return results, meta_data
 
