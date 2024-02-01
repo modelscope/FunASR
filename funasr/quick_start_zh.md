@@ -130,3 +130,35 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --au
 
 
 
+### 工业模型egs
+
+如果您希望使用ModelScope中预训练好的工业模型，进行推理或者微调训练，您可以参考下面指令：
+
+
+```python
+from modelscope.pipelines import pipeline
+from modelscope.utils.constant import Tasks
+
+inference_pipeline = pipeline(
+    task=Tasks.auto_speech_recognition,
+    model='damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch',
+)
+
+rec_result = inference_pipeline(audio_in='https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav')
+print(rec_result)
+# {'text': '欢迎大家来体验达摩院推出的语音识别模型'}
+```
+
+更多例子可以参考（[点击此处](https://alibaba-damo-academy.github.io/FunASR/en/modelscope_pipeline/quick_start.html)）
+
+
+### 学术模型egs
+
+如果您希望从头开始训练，通常为学术模型，您可以通过下面的指令启动训练与推理：
+
+```shell
+cd egs/aishell/paraformer
+. ./run.sh --CUDA_VISIBLE_DEVICES="0,1" --gpu_num=2
+```
+
+更多例子可以参考（[点击此处](https://alibaba-damo-academy.github.io/FunASR/en/academic_recipe/asr_recipe.html)）

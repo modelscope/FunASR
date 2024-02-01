@@ -55,7 +55,7 @@ nohup bash run_server.sh \
   --punc-dir damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx \
   --lm-dir damo/speech_ngram_lm_zh-cn-ai-wesp-fst \
   --itn-dir thuduj12/fst_itn_zh \
-  --hotword /workspace/models/hotwords.txt > log.out 2>&1 &
+  --hotword /workspace/models/hotwords.txt > log.txt 2>&1 &
 
 # If you want to close ssl，please add：--certfile 0
 # If you want to deploy the timestamp or nn hotword model, please set --model-dir to the corresponding model:
@@ -73,14 +73,14 @@ The funasr-wss-server supports downloading models from Modelscope. You can set t
 cd /workspace/FunASR/runtime
 nohup bash run_server.sh \
   --download-model-dir /workspace/models \
-  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx \
+  --model-dir damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
   --punc-dir damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx \
   --itn-dir thuduj12/fst_itn_zh \
   --lm-dir damo/speech_ngram_lm_zh-cn-ai-wesp-fst \
   --certfile  ../../../ssl_key/server.crt \
   --keyfile ../../../ssl_key/server.key \
-  --hotword ../../hotwords.txt > log.out 2>&1 &
+  --hotword ../../hotwords.txt > log.txt 2>&1 &
  ```
 
 Introduction to run_server.sh parameters: 

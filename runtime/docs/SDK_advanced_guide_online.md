@@ -45,7 +45,7 @@ nohup bash run_server_2pass.sh \
   --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx  \
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx \
   --lm-dir damo/speech_ngram_lm_zh-cn-ai-wesp-fst \
-  --itn-dir thuduj12/fst_itn_zh > log.out 2>&1 &
+  --itn-dir thuduj12/fst_itn_zh > log.txt 2>&1 &
 
 # If you want to close ssl，please add：--certfile 0
 ```
@@ -83,7 +83,7 @@ Use the flollowing script to start the server ：
 ```shell
 cd /workspace/FunASR/runtime
 nohup bash run_server_2pass.sh \
-  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx \
+  --model-dir damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx \
   --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx \
@@ -91,7 +91,7 @@ nohup bash run_server_2pass.sh \
   --itn-dir thuduj12/fst_itn_zh \
   --certfile  ../../../ssl_key/server.crt \
   --keyfile ../../../ssl_key/server.key \
-  --hotword ../../hotwords.txt > log.out 2>&1 &
+  --hotword ../../hotwords.txt > log.txt 2>&1 &
 
 # If you want to close ssl，please add：--certfile 0
 # If you want to deploy the timestamp or nn hotword model, please set --model-dir to the corresponding model:
