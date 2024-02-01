@@ -10,6 +10,8 @@ from torch import nn
 
 
 from funasr.models.whisper.utils.decoding import detect_language as detect_language_function, decode as decode_function
+from funasr.register import tables
+
 
 @dataclass
 class ModelDimensions:
@@ -128,6 +130,8 @@ class ResidualAttentionBlock(nn.Module):
         return x
 
 
+
+@tables.register("encoder_classes", "WhisperEncoder")
 class AudioEncoder(nn.Module):
     def __init__(self, n_mels: int, n_ctx: int, n_state: int, n_head: int, n_layer: int):
         super().__init__()
@@ -158,7 +162,7 @@ class AudioEncoder(nn.Module):
         x = self.ln_post(x)
         return x
 
-
+@tables.register("decoder_classes", "WhisperDecoder")
 class TextDecoder(nn.Module):
     def __init__(self, n_vocab: int, n_ctx: int, n_state: int, n_head: int, n_layer: int):
         super().__init__()
@@ -193,7 +197,7 @@ class TextDecoder(nn.Module):
 
         return logits
 
-
+@tables.register("model_classes", "Whisper")
 class Whisper(nn.Module):
     def __init__(self, dims: dict):
         super().__init__()
