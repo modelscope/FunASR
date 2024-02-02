@@ -25,7 +25,7 @@ if [ -z "$certfile" ] || [ "$certfile" = "0" ]; then
 fi
 
 cd $cmd_path
-./${cmd}  \
+$cmd_path/${cmd}  \
   --download-model-dir "${download_model_dir}" \
   --model-dir "${model_dir}" \
   --vad-dir "${vad_dir}" \
