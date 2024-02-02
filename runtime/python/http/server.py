@@ -104,7 +104,8 @@ logger.info("loaded models!")
 
 app = FastAPI(title="FunASR")
 
-param_dict = {}
+param_dict = {"sentence_timestamp": True, "batch_size_s": 300}
+
 if args.hotword_path is not None and os.path.exists(args.hotword_path):
     with open(args.hotword_path, 'r', encoding='utf-8') as f:
         lines = f.readlines()
@@ -121,10 +122,35 @@ async def api_recognition(audio: UploadFile = File(..., description="audio file"
     async with aiofiles.open(audio_path, 'wb') as out_file:
         content = await audio.read()
         await out_file.write(content)
-    rec_result = model.generate(input=audio_path, batch_size_s=300, **param_dict)
-    ret = {"result": rec_result[0]['text'], "code": 0}
-    logger.info(f'识别结果：{ret}')
-    return ret
+
+        try:
+        audio_bytes, _ = (
+            ffmpeg.input(audio_path, threads=0)
+            .output("-", format="s16le", acodec="pcm_s16le", ac=1, ar=16000)
+            .run(cmd=["ffmpeg", "-nostdin"], capture_stdout=True, capture_stderr=True)
+        )
+    except Exception as e:
+        logger.error(f'读取音频文件发生错误，错误信息：{e}')
+        return {"msg": "读取音频文件发生错误", "code": 1}
+    rec_results = model.generate(input=audio_bytes, is_final=True, **param_dict)
+    # 结果为空
+    if len(rec_results) == 0:
+        return {"text": "", "sentences": [], "code": 0}
+    elif len(rec_results) == 1:
+        # 解析识别结果
+        rec_result = rec_results[0]
+        text = rec_result['text']
+        sentences = []
+        for sentence in rec_result['sentence_info']:
+            # 每句话的时间戳
+            sentences.append({'text': sentence['text'], 'start': sentence['start'], 'end': sentence['start']})
+        ret = {"text": text, "sentences": sentences, "code": 0}
+        logger.info(f'识别结果：{ret}')
+        return ret
+    else:
+        logger.info(f'识别结果：{rec_results}')
+        return {"msg": "未知错误", "code": -1}
+
 
 
 if __name__ == '__main__':
