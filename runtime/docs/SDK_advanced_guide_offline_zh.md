@@ -62,11 +62,11 @@ cd FunASR/runtime
 nohup bash run_server.sh \
   --download-model-dir /workspace/models \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
-  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
+  --model-dir damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
   --punc-dir damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx \
   --lm-dir damo/speech_ngram_lm_zh-cn-ai-wesp-fst \
   --itn-dir thuduj12/fst_itn_zh \
-  --hotword /workspace/models/hotwords.txt > log.out 2>&1 &
+  --hotword /workspace/models/hotwords.txt > log.txt 2>&1 &
 
 # 如果您想关闭ssl，增加参数：--certfile 0
 # 如果您想使用时间戳或者nn热词模型进行部署，请设置--model-dir为对应模型：
@@ -87,7 +87,7 @@ nohup bash run_server.sh \
   --punc-dir damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx \
   --lm-dir damo/speech_ngram_lm_zh-cn-ai-wesp-fst-token8358 \
   --itn-dir thuduj12/fst_itn_zh \
-  --hotword /workspace/models/hotwords.txt > log.out 2>&1 &
+  --hotword /workspace/models/hotwords.txt > log.txt 2>&1 &
 ```
 
 服务端详细参数介绍可参考[服务端用法详解](#服务端用法详解)
@@ -175,7 +175,7 @@ nohup bash run_server.sh \
   --itn-dir thuduj12/fst_itn_zh \
   --certfile  ../../../ssl_key/server.crt \
   --keyfile ../../../ssl_key/server.key \
-  --hotword ../../hotwords.txt  > log.out 2>&1 &
+  --hotword ../../hotwords.txt  > log.txt 2>&1 &
  ```
 **run_server.sh命令参数介绍**
 ```text

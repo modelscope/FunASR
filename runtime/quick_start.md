@@ -67,7 +67,7 @@ nohup bash run_server_2pass.sh \
   --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx  \
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx \
   --itn-dir thuduj12/fst_itn_zh \
-  --hotword /workspace/models/hotwords.txt > log.out 2>&1 &
+  --hotword /workspace/models/hotwords.txt > log.txt 2>&1 &
 
 # If you want to disable SSL, add the parameter: --certfile 0
 # If you want to deploy with a timestamp or nn hotword model, please set --model-dir to the corresponding model:
@@ -113,7 +113,7 @@ nohup bash run_server.sh \
   --punc-dir damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx \
   --lm-dir damo/speech_ngram_lm_zh-cn-ai-wesp-fst \
   --itn-dir thuduj12/fst_itn_zh \
-  --hotword /workspace/models/hotwords.txt > log.out 2>&1 &
+  --hotword /workspace/models/hotwords.txt > log.txt 2>&1 &
 
 # If you want to disable SSL, add the parameter: --certfile 0
 # If you want to use timestamp or nn hotword models for deployment, please set --model-dir to the corresponding model:

@@ -66,7 +66,7 @@ nohup bash run_server_2pass.sh \
   --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx  \
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx \
   --itn-dir thuduj12/fst_itn_zh \
-  --hotword /workspace/models/hotwords.txt > log.out 2>&1 &
+  --hotword /workspace/models/hotwords.txt > log.txt 2>&1 &
 
 # 如果您想关闭ssl，增加参数：--certfile 0
 # 如果您想使用时间戳或者nn热词模型进行部署，请设置--model-dir为对应模型：
@@ -111,7 +111,7 @@ nohup bash run_server.sh \
   --punc-dir damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx \
   --lm-dir damo/speech_ngram_lm_zh-cn-ai-wesp-fst \
   --itn-dir thuduj12/fst_itn_zh \
-  --hotword /workspace/models/hotwords.txt > log.out 2>&1 &
+  --hotword /workspace/models/hotwords.txt > log.txt 2>&1 &
 
 # 如果您想关闭ssl，增加参数：--certfile 0
 # 如果您想使用时间戳或者nn热词模型进行部署，请设置--model-dir为对应模型：
