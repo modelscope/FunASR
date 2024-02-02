@@ -4,7 +4,6 @@ import os
 import uuid
 
 import aiofiles
-import ffmpeg
 import uvicorn
 from fastapi import FastAPI, File, UploadFile
 from modelscope.utils.logger import get_logger
@@ -106,6 +105,7 @@ logger.info("loaded models!")
 app = FastAPI(title="FunASR")
 
 param_dict = {"sentence_timestamp": True, "batch_size_s": 300}
+
 if args.hotword_path is not None and os.path.exists(args.hotword_path):
     with open(args.hotword_path, 'r', encoding='utf-8') as f:
         lines = f.readlines()
@@ -122,7 +122,8 @@ async def api_recognition(audio: UploadFile = File(..., description="audio file"
     async with aiofiles.open(audio_path, 'wb') as out_file:
         content = await audio.read()
         await out_file.write(content)
-    try:
+
+        try:
         audio_bytes, _ = (
             ffmpeg.input(audio_path, threads=0)
             .output("-", format="s16le", acodec="pcm_s16le", ac=1, ar=16000)
@@ -149,6 +150,7 @@ async def api_recognition(audio: UploadFile = File(..., description="audio file"
     else:
         logger.info(f'识别结果：{rec_results}')
         return {"msg": "未知错误", "code": -1}
+
 
 
 if __name__ == '__main__':

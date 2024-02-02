@@ -9,7 +9,7 @@ lm_dir="damo/speech_ngram_lm_zh-cn-ai-wesp-fst"
 port=10095
 certfile="$(pwd)/ssl_key/server.crt"
 keyfile="$(pwd)/ssl_key/server.key"
-hotword="$(pwd)/hotwords.txt"
+hotword="$(pwd)/websocket/hotwords.txt"
 # set decoder_thread_num
 decoder_thread_num=$(cat /proc/cpuinfo | grep "processor"|wc -l) || { echo "Get cpuinfo failed. Set decoder_thread_num = 32"; decoder_thread_num=32; }
 multiple_io=16
@@ -26,7 +26,7 @@ if [ -z "$certfile" ] || [ "$certfile" = "0" ]; then
 fi
 
 cd $cmd_path
-./${cmd}  \
+$cmd_path/${cmd}  \
   --download-model-dir "${download_model_dir}" \
   --model-dir "${model_dir}" \
   --online-model-dir "${online_model_dir}" \
@@ -40,5 +40,5 @@ cd $cmd_path
   --port ${port} \
   --certfile  "${certfile}" \
   --keyfile "${keyfile}" \
-  --hotword "${hotword}"
+  --hotword "${hotword}" &
 
