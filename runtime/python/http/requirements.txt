@@ -1,6 +1,6 @@
-modelscope>=1.8.4
+modelscope>=1.11.1
+funasr>=1.0.5
 fastapi>=0.95.1
-ffmpeg-python
 aiofiles
 uvicorn
 requests
