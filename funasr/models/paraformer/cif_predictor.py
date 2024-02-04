@@ -186,7 +186,7 @@ class CifPredictorV2(torch.nn.Module):
         alphas = alphas.squeeze(-1)
         mask = mask.squeeze(-1)
         if target_label_length is not None:
-            target_length = target_label_length
+            target_length = target_label_length.squeeze(-1)
         elif target_label is not None:
             target_length = (target_label != ignore_id).float().sum(-1)
         else:
