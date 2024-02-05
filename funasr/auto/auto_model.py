@@ -88,7 +88,7 @@ def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
 class AutoModel:
     
     def __init__(self, **kwargs):
-        if kwargs.get("disable_log", False):
+        if not kwargs.get("disable_log", False):
             tables.print()
         
         model, kwargs = self.build_model(**kwargs)
