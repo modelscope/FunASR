@@ -11,18 +11,22 @@ model = AutoModel(model="iic/speech_seaco_paraformer_large_asr_nat-zh-cn-16k-com
                   vad_model_revision="v2.0.4",
                   punc_model="damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch",
                   punc_model_revision="v2.0.4",
-                  # spk_model="damo/speech_campplus_sv_zh-cn_16k-common",
-                  # spk_model_revision="v2.0.2",
+                  spk_model="damo/speech_campplus_sv_zh-cn_16k-common",
+                  spk_model_revision="v2.0.2",
                   )
 
 
 # example1
 res = model.generate(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav",
                      hotword='达摩院 魔搭',
+                     # preset_spk_num=2,
                      # sentence_timestamp=True,  # return sentence level information when spk_model is not given
                     )
 print(res)
 
+
+'''
+# tensor or numpy as input
 # example2
 import torchaudio
 import os
@@ -38,4 +42,4 @@ import soundfile
 wav_file = os.path.join(model.model_path, "example/asr_example.wav")
 speech, sample_rate = soundfile.read(wav_file)
 res = model.generate(input=[speech], batch_size_s=300, is_final=True)
-
+'''

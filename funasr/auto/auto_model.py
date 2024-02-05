@@ -121,9 +121,6 @@ class AutoModel:
             if spk_mode not in ["default", "vad_segment", "punc_segment"]:
                 logging.error("spk_mode should be one of default, vad_segment and punc_segment.")
             self.spk_mode = spk_mode
-            self.preset_spk_num = kwargs.get("preset_spk_num", None)
-            if self.preset_spk_num:
-                logging.warning("Using preset speaker number: {}".format(self.preset_spk_num))
             
         self.kwargs = kwargs
         self.model = model
@@ -391,7 +388,7 @@ class AutoModel:
             if self.spk_model is not None:
                 all_segments = sorted(all_segments, key=lambda x: x[0])
                 spk_embedding = result['spk_embedding']
-                labels = self.cb_model(spk_embedding.cpu(), oracle_num=self.preset_spk_num)
+                labels = self.cb_model(spk_embedding.cpu(), oracle_num=kwargs['preset_spk_num'])
                 del result['spk_embedding']
                 sv_output = postprocess(all_segments, None, labels, spk_embedding.cpu())
                 if self.spk_mode == 'vad_segment':  # recover sentence_list
