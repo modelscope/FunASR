@@ -171,7 +171,7 @@ class AutoModel:
         # build model
         model_class = tables.model_classes.get(kwargs["model"])
         model = model_class(**kwargs, **kwargs["model_conf"], vocab_size=vocab_size)
-        model.eval()
+        
         model.to(device)
         
         # init_param
@@ -206,6 +206,7 @@ class AutoModel:
         kwargs = self.kwargs if kwargs is None else kwargs
         kwargs.update(cfg)
         model = self.model if model is None else model
+        model.eval()
 
         batch_size = kwargs.get("batch_size", 1)
         # if kwargs.get("device", "cpu") == "cpu":
