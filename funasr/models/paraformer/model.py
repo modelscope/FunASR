@@ -491,6 +491,8 @@ class Paraformer(torch.nn.Module):
         b, n, d = decoder_out.size()
         if isinstance(key[0], (list, tuple)):
             key = key[0]
+        if len(key) < b:
+            key = key*b
         for i in range(b):
             x = encoder_out[i, :encoder_out_lens[i], :]
             am_scores = decoder_out[i, :pre_token_length[i], :]
