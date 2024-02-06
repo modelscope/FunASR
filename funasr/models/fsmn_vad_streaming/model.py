@@ -575,7 +575,8 @@ class FsmnVADStreaming(nn.Module):
 		
 		time1 = time.perf_counter()
 		is_streaming_input = kwargs.get("is_streaming_input", False) if chunk_size >= 15000 else kwargs.get("is_streaming_input", True)
-		cfg = {"is_final": kwargs.get("is_final", False), "is_streaming_input": is_streaming_input}
+		is_final = kwargs.get("is_final", False) if is_streaming_input else kwargs.get("is_final", True)
+		cfg = {"is_final": is_final, "is_streaming_input": is_streaming_input}
 		audio_sample_list = load_audio_text_image_video(data_in,
 		                                                fs=frontend.fs,
 		                                                audio_fs=kwargs.get("fs", 16000),
