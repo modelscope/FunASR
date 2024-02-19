@@ -204,25 +204,25 @@ class Trainer:
             my_context = self.model.no_sync if batch_idx % accum_grad != 0 else nullcontext
             with my_context():
                 time2 = time.perf_counter()
-                print("before, GPU, memory: {:.1} MB, "
-                      "{:.1} MB, "
-                      "{:.1} MB, "
-                      "{:.1} MB".format(torch.cuda.memory_allocated()/1024/1024/1024,
-                                     torch.cuda.max_memory_allocated()/1024/1024/1024,
-                                     torch.cuda.memory_reserved()/1024/1024/1024,
-                                     torch.cuda.max_memory_reserved()/1024/1024/1024,
-                                     ))
+                # print("before, GPU, memory: {:.3f} GB, "
+                #       "{:.3f} GB, "
+                #       "{:.3f} GB, "
+                #       "{:.3f} GB".format(torch.cuda.memory_allocated()/1024/1024/1024,
+                #                      torch.cuda.max_memory_allocated()/1024/1024/1024,
+                #                      torch.cuda.memory_reserved()/1024/1024/1024,
+                #                      torch.cuda.max_memory_reserved()/1024/1024/1024,
+                #                      ))
 
                 retval = self.model(**batch)
                 torch.cuda.empty_cache()
-                print("after, GPU, memory: {:.1} MB, "
-                      "{:.1} MB, "
-                      "{:.1} MB, "
-                      "{:.1} MB".format(torch.cuda.memory_allocated()/1024/1024/1024,
-                                     torch.cuda.max_memory_allocated()/1024/1024/1024,
-                                     torch.cuda.memory_reserved()/1024/1024/1024,
-                                     torch.cuda.max_memory_reserved()/1024/1024/1024,
-                                     ))
+                # print("after, GPU, memory: {:.3f} GB, "
+                #       "{:.3f} GB, "
+                #       "{:.3f} GB, "
+                #       "{:.3f} GB".format(torch.cuda.memory_allocated()/1024/1024/1024,
+                #                      torch.cuda.max_memory_allocated()/1024/1024/1024,
+                #                      torch.cuda.memory_reserved()/1024/1024/1024,
+                #                      torch.cuda.max_memory_reserved()/1024/1024/1024,
+                #                      ))
                 time3 = time.perf_counter()
                 speed_stats["forward_time"] = f"{time3 - time2:0.3f}"
                 loss, stats, weight = retval
@@ -275,12 +275,21 @@ class Trainer:
 
             pbar.update(1)
             if self.local_rank == 0:
+                gpu_info = "GPU, memory: {:.3f} GB, " \
+                           "{:.3f} GB, "\
+                           "{:.3f} GB, "\
+                           "{:.3f} GB".format(torch.cuda.memory_allocated()/1024/1024/1024,
+                                             torch.cuda.max_memory_allocated()/1024/1024/1024,
+                                             torch.cuda.memory_reserved()/1024/1024/1024,
+                                             torch.cuda.max_memory_reserved()/1024/1024/1024,
+                                             )
                 description = (
                     f"Train epoch: {epoch}/{self.max_epoch}, "
                     f"step {batch_idx}/{len(self.dataloader_train)}, "
                     f"{speed_stats}, "
                     f"(loss: {loss.detach().cpu().item():.3f}), "
                     f"{[(k, round(v.cpu().item(), 3)) for k, v in stats.items()]}"
+                    f"{gpu_info}"
                 )
                 pbar.set_description(description)
                 if self.writer:

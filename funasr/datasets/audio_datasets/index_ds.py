@@ -1,6 +1,9 @@
+import os
 import json
 import torch
 import logging
+import concurrent.futures
+import librosa
 import torch.distributed as dist
 
 from funasr.register import tables
@@ -71,9 +74,19 @@ class IndexDSJsonlRankSplit(torch.utils.data.Dataset):
 @tables.register("index_ds_classes", "IndexDSJsonlRankFull")
 class IndexDSJsonlRankFull(torch.utils.data.Dataset):
     
-    def __init__(self, path):
+    def __init__(self, path: str, **kwargs):
         super().__init__()
         
+        if isinstance(path, (list, tuple)): # wav.scp, text.txt/text.trans
+            from funasr.datasets.audio_datasets.scp2jsonl import gen_jsonl_from_wav_text_list
+            jsonl_outdir = os.path.dirname(path[0])
+            jsonl_name = "datalist_train.jsonl" if kwargs.get("is_training", True) else "datalist_val.jsonl"
+            jsonl_file_out = os.path.join(jsonl_outdir, jsonl_name)
+            if not os.path.exists(jsonl_file_out):
+                print(f"datalist is: {path}, generate jsonl from it")
+                gen_jsonl_from_wav_text_list(path, jsonl_file_out=jsonl_file_out, **kwargs)
+            path = jsonl_file_out
+
         contents = []
         with open(path, encoding='utf-8') as fin:
             for line in fin:

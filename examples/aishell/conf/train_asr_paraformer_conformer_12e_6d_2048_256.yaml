@@ -1,6 +1,6 @@
 
 # network architecture
-model: funasr.cli.models.paraformer:Paraformer
+model: Paraformer
 model_conf:
     ctc_weight: 0.3
     lsm_weight: 0.1
@@ -9,9 +9,8 @@ model_conf:
     sampling_ratio: 0.4
     use_1st_decoder_loss: true
 
-
-# encoder related
-encoder: conformer
+# encoder
+encoder: ConformerEncoder
 encoder_conf:
     output_size: 256    # dimension of attention
     attention_heads: 4
@@ -29,8 +28,8 @@ encoder_conf:
     use_cnn_module: true
     cnn_module_kernel: 15
 
-# decoder related
-decoder: paraformer_decoder_san
+# decoder
+decoder: ParaformerSANDecoder
 decoder_conf:
     attention_heads: 4
     linear_units: 2048
@@ -40,8 +39,17 @@ decoder_conf:
     self_attention_dropout_rate: 0.0
     src_attention_dropout_rate: 0.0
 
+# predictor
+predictor: CifPredictor
+predictor_conf:
+    idim: 256
+    threshold: 1.0
+    l_order: 1
+    r_order: 1
+    tail_threshold: 0.45
+
 # frontend related
-frontend: wav_frontend
+frontend: WavFrontend
 frontend_conf:
     fs: 16000
     window: hamming
@@ -51,29 +59,7 @@ frontend_conf:
     lfr_m: 1
     lfr_n: 1
 
-
-train_conf:
-  accum_grad: 1
-  grad_clip: 5
-  max_epoch: 150
-  val_scheduler_criterion:
-      - valid
-      - acc
-  best_model_criterion:
-  -   - valid
-      - acc
-      - max
-  keep_nbest_models: 10
-  log_interval: 50
-
-optim: adam
-optim_conf:
-   lr: 0.0005
-scheduler: warmuplr
-scheduler_conf:
-   warmup_steps: 30000
-
-specaug: specaug
+specaug: SpecAug
 specaug_conf:
     apply_time_warp: true
     time_warp_window: 5
@@ -89,25 +75,43 @@ specaug_conf:
     - 40
     num_time_mask: 2
 
-predictor: cif_predictor
-predictor_conf:
-    idim: 256
-    threshold: 1.0
-    l_order: 1
-    r_order: 1
-    tail_threshold: 0.45
+train_conf:
+  accum_grad: 1
+  grad_clip: 5
+  max_epoch: 150
+  keep_nbest_models: 10
+  avg_nbest_model: 5
+  log_interval: 50
 
+optim: adam
+optim_conf:
+   lr: 0.0005
+scheduler: warmuplr
+scheduler_conf:
+   warmup_steps: 30000
+
+dataset: AudioDataset
 dataset_conf:
-    data_names: speech,text
-    data_types: sound,text
+    index_ds: IndexDSJsonl
+    batch_sampler: RankFullLocalShuffleBatchSampler
+    batch_type: example # example or length
+    batch_size: 32 # if batch_type is example, batch_size is the numbers of samples; if length, batch_size is source_token_len+target_token_len;
+    max_token_length: 2048 # filter samples if source_token_len+target_token_len > max_token_length,
+    buffer_size: 1024
     shuffle: True
-    shuffle_conf:
-        shuffle_size: 2048
-        sort_size: 500
-    batch_conf:
-        batch_type: example
-        batch_size: 2
-    num_workers: 8
+    num_workers: 0
+
+tokenizer: CharTokenizer
+tokenizer_conf:
+  unk_symbol: <unk>
+  split_with_space: true
 
 
+ctc_conf:
+    dropout_rate: 0.0
+    ctc_type: builtin
+    reduce: true
+    ignore_nan_grad: true
 normalize: null
+
+

@@ -52,8 +52,8 @@ class RegisterTables:
             registry = getattr(self, register_tables_key)
             registry_key = key if key is not None else target_class.__name__
             
-            assert not registry_key in registry, "(key: {} / class: {}) has been registered already，in {}".format(
-                registry_key, target_class, register_tables_key)
+            # assert not registry_key in registry, "(key: {} / class: {}) has been registered already，in {}".format(
+            #     registry_key, target_class, register_tables_key)
             
             registry[registry_key] = target_class
             

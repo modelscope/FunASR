@@ -5,7 +5,14 @@
 #local_path=${local_path_root}/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
 #git clone https://www.modelscope.cn/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch.git ${local_path}
 
-
+## generate jsonl from wav.scp and text.txt
+#python funasr/datasets/audio_datasets/scp2jsonl.py \
+#++scp_file_list='["/Users/zhifu/funasr1.0/test_local/wav.scp", "/Users/zhifu/funasr1.0/test_local/text.txt"]' \
+#++data_type_list='["source", "target"]' \
+#++jsonl_file_out=/Users/zhifu/funasr1.0/test_local/audio_datasets.jsonl
+# torchrun \
+# --nnodes 1 \
+# --nproc_per_node 1 \
 python funasr/bin/train.py \
 +model="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch" \
 +model_revision="v2.0.4" \
