@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-. ./path.sh || exit 1;
+workspace=`pwd`
 
 # machines configuration
 CUDA_VISIBLE_DEVICES="0,1"
@@ -39,7 +39,7 @@ train_set=train
 valid_set=dev
 test_sets="dev test"
 
-asr_config=conf/train_asr_paraformer_conformer_12e_6d_2048_256.yaml
+asr_config=train_asr_paraformer_conformer_12e_6d_2048_256.yaml
 model_dir="baseline_$(basename "${asr_config}" .yaml)_${lang}_${token_type}_${tag}"
 
 #inference_config=conf/decode_asr_transformer_noctc_1best.yaml
@@ -74,19 +74,21 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
         utils/text2token.py -n 1 -s 1 ${feats_dir}/data/${x}/text > ${feats_dir}/data/${x}/text.org
         mv ${feats_dir}/data/${x}/text.org ${feats_dir}/data/${x}/text
 
-        python funasr/datasets/audio_datasets/scp2jsonl.py \
-        ++scp_file_list='["${feats_dir}/data/${x}/wav.scp", "${feats_dir}/data/${x}/text"]' \
+        # convert wav.scp text to jsonl
+        scp_file_list_arg="++scp_file_list='[\"${feats_dir}/data/${x}/wav.scp\",\"${feats_dir}/data/${x}/text\"]'"
+        python ../../../funasr/datasets/audio_datasets/scp2jsonl.py \
         ++data_type_list='["source", "target"]' \
-        ++jsonl_file_out=${feats_dir}/data/${x}/audio_datasets.jsonl
+        ++jsonl_file_out=${feats_dir}/data/${x}/audio_datasets.jsonl \
+        ${scp_file_list_arg}
     done
 fi
 
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
     echo "stage 1: Feature and CMVN Generation"
 #    utils/compute_cmvn.sh --fbankdir ${feats_dir}/data/${train_set} --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} --config_file "$asr_config" --scale 1.0
-    python funasr/bin/compute_audio_cmvn.py \
-    --config-path "/Users/zhifu/funasr1.0/examples/aishell/conf" \
-    --config-name "train_asr_paraformer_conformer_12e_6d_2048_256.yaml" \
+    python ../../../funasr/bin/compute_audio_cmvn.py \
+    --config-path "${workspace}" \
+    --config-name "${asr_config}" \
     ++train_data_set_list="${feats_dir}/data/${train_set}/audio_datasets.jsonl" \
     ++cmvn_file="${feats_dir}/data/${train_set}/cmvn.json" \
     ++dataset_conf.num_workers=$nj
@@ -116,16 +118,16 @@ fi
 if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
 echo "stage 4: ASR Training"
 
-torchrun \
---nnodes 1 \
---nproc_per_node ${gpu_num} \
-funasr/bin/train.py \
---config-path "/Users/zhifu/funasr1.0/examples/aishell/conf" \
---config-name "train_asr_paraformer_conformer_12e_6d_2048_256.yaml" \
-++train_data_set_list="${feats_dir}/data/${train_set}/audio_datasets.jsonl" \
-++cmvn_file="${feats_dir}/data/${train_set}/am.mvn" \
-++token_list="${token_list}" \
-++output_dir="${exp_dir}/exp/${model_dir}"
+  torchrun \
+  --nnodes 1 \
+  --nproc_per_node ${gpu_num} \
+  ../../../funasr/bin/train.py \
+  --config-path "${workspace}" \
+  --config-name "${asr_config}" \
+  ++train_data_set_list="${feats_dir}/data/${train_set}/audio_datasets.jsonl" \
+  ++cmvn_file="${feats_dir}/data/${train_set}/am.mvn" \
+  ++token_list="${token_list}" \
+  ++output_dir="${exp_dir}/exp/${model_dir}"
 fi
 
 #

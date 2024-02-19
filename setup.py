@@ -37,7 +37,6 @@ requirements = {
         # "textgrid",
         # "protobuf",
         "tqdm",
-        "hdbscan",
         "umap_learn",
         "jaconv",
         "hydra-core>=1.3.2",

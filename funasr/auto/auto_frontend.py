@@ -19,7 +19,6 @@ from funasr.train_utils.load_pretrained_model import load_pretrained_model
 from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
 from funasr.utils.timestamp_tools import timestamp_sentence
 from funasr.models.campplus.utils import sv_chunk, postprocess, distribute_spk
-from funasr.models.campplus.cluster_backend import ClusterBackend
 from funasr.auto.auto_model import prepare_data_iterator
 
 

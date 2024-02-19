@@ -19,7 +19,7 @@ def gen_jsonl_from_wav_text_list(path, data_type_list=("source", "target"), json
         world_size = 1
 
     cpu_cores = os.cpu_count() or 1
-    
+    print(f"convert wav.scp text to jsonl, ncpu: {cpu_cores}")
     if rank == 0:
         json_dict = {}
         for data_type, data_file in zip(data_type_list, path):
@@ -65,7 +65,7 @@ def parse_context_length(data_list: list, data_type: str):
             sample_num = len(waveform)
             context_len = int(sample_num//16000*1000/10)
         else:
-            context_len = len(line)
+            context_len = len(line.split()) if " " in line else len(line)
         res[key] = {data_type: line, f"{data_type}_len": context_len}
     return res
     
@@ -83,6 +83,8 @@ def main_hydra(cfg: DictConfig):
     kwargs = OmegaConf.to_container(cfg, resolve=True)
 
     scp_file_list = kwargs.get("scp_file_list", ("/Users/zhifu/funasr1.0/test_local/wav.scp", "/Users/zhifu/funasr1.0/test_local/text.txt"))
+    if isinstance(scp_file_list, str):
+        scp_file_list = eval(scp_file_list)
     data_type_list = kwargs.get("data_type_list", ("source", "target"))
     jsonl_file_out = kwargs.get("jsonl_file_out", "/Users/zhifu/funasr1.0/test_local/audio_datasets.jsonl")
     gen_jsonl_from_wav_text_list(scp_file_list, data_type_list=data_type_list, jsonl_file_out=jsonl_file_out)
