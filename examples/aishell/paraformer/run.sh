@@ -119,6 +119,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
   --config-path "${workspace}/conf" \
   --config-name "${config}" \
   ++train_data_set_list="${feats_dir}/data/${train_set}/audio_datasets.jsonl" \
+  ++valid_data_set_list="${feats_dir}/data/${valid_set}/audio_datasets.jsonl" \
   ++tokenizer_conf.token_list="${token_list}" \
   ++frontend_conf.cmvn_file="${feats_dir}/data/${train_set}/am.mvn" \
   ++output_dir="${exp_dir}/exp/${model_dir}" &> ${log_file}
