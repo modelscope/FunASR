@@ -107,7 +107,7 @@ dataset_conf:
 tokenizer: CharTokenizer
 tokenizer_conf:
   unk_symbol: <unk>
-  split_with_space: true
+  split_with_space: false
 
 
 ctc_conf:
