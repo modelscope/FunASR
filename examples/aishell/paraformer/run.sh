@@ -50,6 +50,7 @@ inference_scp="wav.scp"
 
 if [ ${stage} -le -1 ] && [ ${stop_stage} -ge -1 ]; then
     echo "stage -1: Data Download"
+    mkdir -p ${raw_data}
     local/download_and_untar.sh ${raw_data} ${data_url} data_aishell
     local/download_and_untar.sh ${raw_data} ${data_url} resource_aishell
 fi
@@ -76,9 +77,8 @@ fi
 
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
     echo "stage 1: Feature and CMVN Generation"
-#    utils/compute_cmvn.sh --fbankdir ${feats_dir}/data/${train_set} --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} --config_file "$config" --scale 1.0
     python ../../../funasr/bin/compute_audio_cmvn.py \
-    --config-path "${workspace}" \
+    --config-path "${workspace}/conf" \
     --config-name "${config}" \
     ++train_data_set_list="${feats_dir}/data/${train_set}/audio_datasets.jsonl" \
     ++cmvn_file="${feats_dir}/data/${train_set}/cmvn.json" \
@@ -109,13 +109,14 @@ fi
 if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
   echo "stage 4: ASR Training"
 
+  mkdir -p ${exp_dir}/exp/${model_dir}
   log_file="${exp_dir}/exp/${model_dir}/train.log.txt"
   echo "log_file: ${log_file}"
   torchrun \
   --nnodes 1 \
   --nproc_per_node ${gpu_num} \
   ../../../funasr/bin/train.py \
-  --config-path "${workspace}" \
+  --config-path "${workspace}/conf" \
   --config-name "${config}" \
   ++train_data_set_list="${feats_dir}/data/${train_set}/audio_datasets.jsonl" \
   ++tokenizer_conf.token_list="${token_list}" \

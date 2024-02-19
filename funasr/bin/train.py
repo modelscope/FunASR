@@ -79,9 +79,8 @@ def main(**kwargs):
         frontend = frontend_class(**kwargs["frontend_conf"])
         kwargs["frontend"] = frontend
         kwargs["input_size"] = frontend.output_size()
-    
-    # import pdb;
-    # pdb.set_trace()
+
+
     # build model
     model_class = tables.model_classes.get(kwargs["model"])
     model = model_class(**kwargs, **kwargs["model_conf"], vocab_size=len(tokenizer.token_list))

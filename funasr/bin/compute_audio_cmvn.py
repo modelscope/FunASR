@@ -79,8 +79,8 @@ def main(**kwargs):
 
         fbank = batch["speech"].numpy()[0, :, :]
         if total_frames == 0:
-            mean_stats = fbank
-            var_stats = np.square(fbank)
+            mean_stats = np.sum(fbank, axis=0)
+            var_stats = np.sum(np.square(fbank), axis=0)
         else:
             mean_stats += np.sum(fbank, axis=0)
             var_stats += np.sum(np.square(fbank), axis=0)
@@ -93,6 +93,7 @@ def main(**kwargs):
         'total_frames': total_frames
     }
     cmvn_file = kwargs.get("cmvn_file", "cmvn.json")
+    # import pdb;pdb.set_trace()
     with open(cmvn_file, 'w') as fout:
         fout.write(json.dumps(cmvn_info))
         
@@ -110,14 +111,14 @@ def main(**kwargs):
         fout.write("</Nnet>" + '\n')
     
     
-
+    
+"""
+python funasr/bin/compute_audio_cmvn.py \
+--config-path "/Users/zhifu/funasr1.0/examples/aishell/paraformer/conf" \
+--config-name "train_asr_paraformer_conformer_12e_6d_2048_256.yaml" \
+++train_data_set_list="/Users/zhifu/funasr1.0/data/list/audio_datasets.jsonl" \
+++cmvn_file="/Users/zhifu/funasr1.0/data/list/cmvn.json" \
+++dataset_conf.num_workers=0
+"""
 if __name__ == "__main__":
     main_hydra()
-    """
-    python funasr/bin/compute_status.py \
-    --config-path "/Users/zhifu/funasr1.0/examples/aishell/conf" \
-    --config-name "train_asr_paraformer_conformer_12e_6d_2048_256.yaml" \
-    ++train_data_set_list="/Users/zhifu/funasr1.0/data/list/audio_datasets.jsonl" \
-    ++cmvn_file="/Users/zhifu/funasr1.0/data/list/cmvn.json" \
-    ++dataset_conf.num_workers=32
-    """
