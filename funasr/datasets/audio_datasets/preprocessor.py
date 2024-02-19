@@ -41,43 +41,9 @@ class TextPreprocessSegDict(nn.Module):
 	             **kwargs):
 		super().__init__()
 		
-		self.seg_dict = None
-		if seg_dict is not None:
-			self.seg_dict = {}
-			with open(seg_dict, "r", encoding="utf8") as f:
-				lines = f.readlines()
-			for line in lines:
-				s = line.strip().split()
-				key = s[0]
-				value = s[1:]
-				self.seg_dict[key] = " ".join(value)
 		self.text_cleaner = TextCleaner(text_cleaner)
-		self.split_with_space = split_with_space
 	
 	def forward(self, text, **kwargs):
-		if self.seg_dict is not None:
-			text = self.text_cleaner(text)
-			if self.split_with_space:
-				tokens = text.strip().split(" ")
-				if self.seg_dict is not None:
-					text = seg_tokenize(tokens, self.seg_dict)
-
+		text = self.text_cleaner(text)
+		
 		return text
-
-def seg_tokenize(txt, seg_dict):
-	pattern = re.compile(r'^[\u4E00-\u9FA50-9]+$')
-	out_txt = ""
-	for word in txt:
-		word = word.lower()
-		if word in seg_dict:
-			out_txt += seg_dict[word] + " "
-		else:
-			if pattern.match(word):
-				for char in word:
-					if char in seg_dict:
-						out_txt += seg_dict[char] + " "
-					else:
-						out_txt += "<unk>" + " "
-			else:
-				out_txt += "<unk>" + " "
-	return out_txt.strip().split()

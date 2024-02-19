@@ -99,7 +99,10 @@ dataset_conf:
     max_token_length: 2048 # filter samples if source_token_len+target_token_len > max_token_length,
     buffer_size: 1024
     shuffle: True
-    num_workers: 0
+    num_workers: 4
+    preprocessor_speech: SpeechPreprocessSpeedPerturb
+    preprocessor_speech_conf:
+      speed_perturb: [0.9, 1.0, 1.1]
 
 tokenizer: CharTokenizer
 tokenizer_conf:

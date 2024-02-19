@@ -32,7 +32,6 @@ def load_cmvn(cmvn_file):
                 rescale_line = line_item[3:(len(line_item) - 1)]
                 vars_list = list(rescale_line)
                 continue
-    import pdb;pdb.set_trace()
     means = np.array(means_list).astype(np.float32)
     vars = np.array(vars_list).astype(np.float32)
     cmvn = np.array([means, vars])

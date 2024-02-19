@@ -1,13 +1,8 @@
 #!/usr/bin/env bash
 
-workspace=`pwd`
 
-# machines configuration
+
 CUDA_VISIBLE_DEVICES="0,1"
-gpu_num=2
-gpu_inference=true  # Whether to perform gpu decoding, set false for cpu decoding
-# for gpu decoding, inference_nj=ngpu*njob; for cpu decoding, inference_nj=njob
-njob=1
 
 # general configuration
 feats_dir="../DATA" #feature output dictionary
@@ -18,7 +13,11 @@ stage=0
 stop_stage=5
 
 # feature configuration
-nj=64
+nj=32
+
+inference_device="cuda" #"cpu"
+inference_checkpoint="model.pt"
+inference_scp="wav.scp"
 
 # data
 raw_data=../raw_data
@@ -26,6 +25,7 @@ data_url=www.openslr.org/resources/33
 
 # exp tag
 tag="exp1"
+workspace=`pwd`
 
 . utils/parse_options.sh || exit 1;
 
@@ -41,11 +41,6 @@ test_sets="dev test"
 
 config=train_asr_paraformer_conformer_12e_6d_2048_256.yaml
 model_dir="baseline_$(basename "${config}" .yaml)_${lang}_${token_type}_${tag}"
-
-inference_device="cuda" #"cpu"
-inference_checkpoint="model.pt"
-inference_scp="wav.scp"
-
 
 
 if [ ${stage} -le -1 ] && [ ${stop_stage} -ge -1 ]; then
@@ -112,6 +107,8 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
   mkdir -p ${exp_dir}/exp/${model_dir}
   log_file="${exp_dir}/exp/${model_dir}/train.log.txt"
   echo "log_file: ${log_file}"
+
+  gpu_num=$(echo CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
   torchrun \
   --nnodes 1 \
   --nproc_per_node ${gpu_num} \
