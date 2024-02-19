@@ -9,3 +9,6 @@ python funasr/bin/inference.py \
 +output_dir="./outputs/debug" \
 +device="cpu" \
 
+
+
+

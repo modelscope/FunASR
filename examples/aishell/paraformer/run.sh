@@ -39,23 +39,14 @@ train_set=train
 valid_set=dev
 test_sets="dev test"
 
-asr_config=train_asr_paraformer_conformer_12e_6d_2048_256.yaml
-model_dir="baseline_$(basename "${asr_config}" .yaml)_${lang}_${token_type}_${tag}"
+config=train_asr_paraformer_conformer_12e_6d_2048_256.yaml
+model_dir="baseline_$(basename "${config}" .yaml)_${lang}_${token_type}_${tag}"
 
-#inference_config=conf/decode_asr_transformer_noctc_1best.yaml
-#inference_asr_model=valid.acc.ave_10best.pb
+inference_device="cuda" #"cpu"
+inference_checkpoint="model.pt"
+inference_scp="wav.scp"
 
-## you can set gpu num for decoding here
-#gpuid_list=$CUDA_VISIBLE_DEVICES  # set gpus for decoding, the same as training stage by default
-#ngpu=$(echo $gpuid_list | awk -F "," '{print NF}')
-#
-#if ${gpu_inference}; then
-#    inference_nj=$[${ngpu}*${njob}]
-#    _ngpu=1
-#else
-#    inference_nj=$njob
-#    _ngpu=0
-#fi
+
 
 if [ ${stage} -le -1 ] && [ ${stop_stage} -ge -1 ]; then
     echo "stage -1: Data Download"
@@ -85,10 +76,10 @@ fi
 
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
     echo "stage 1: Feature and CMVN Generation"
-#    utils/compute_cmvn.sh --fbankdir ${feats_dir}/data/${train_set} --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} --config_file "$asr_config" --scale 1.0
+#    utils/compute_cmvn.sh --fbankdir ${feats_dir}/data/${train_set} --cmd "$train_cmd" --nj $nj --feats_dim ${feats_dim} --config_file "$config" --scale 1.0
     python ../../../funasr/bin/compute_audio_cmvn.py \
     --config-path "${workspace}" \
-    --config-name "${asr_config}" \
+    --config-name "${config}" \
     ++train_data_set_list="${feats_dir}/data/${train_set}/audio_datasets.jsonl" \
     ++cmvn_file="${feats_dir}/data/${train_set}/cmvn.json" \
     ++dataset_conf.num_workers=$nj
@@ -116,90 +107,84 @@ fi
 
 # ASR Training Stage
 if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
-echo "stage 4: ASR Training"
+  echo "stage 4: ASR Training"
 
+  log_file="${exp_dir}/exp/${model_dir}/train.log.txt"
+  echo "log_file: ${log_file}"
   torchrun \
   --nnodes 1 \
   --nproc_per_node ${gpu_num} \
   ../../../funasr/bin/train.py \
   --config-path "${workspace}" \
-  --config-name "${asr_config}" \
+  --config-name "${config}" \
   ++train_data_set_list="${feats_dir}/data/${train_set}/audio_datasets.jsonl" \
-  ++cmvn_file="${feats_dir}/data/${train_set}/am.mvn" \
-  ++token_list="${token_list}" \
-  ++output_dir="${exp_dir}/exp/${model_dir}"
+  ++tokenizer_conf.token_list="${token_list}" \
+  ++frontend_conf.cmvn_file="${feats_dir}/data/${train_set}/am.mvn" \
+  ++output_dir="${exp_dir}/exp/${model_dir}" &> ${log_file}
 fi
 
-#
-## Testing Stage
-#if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
-#    echo "stage 5: Inference"
-#    for dset in ${test_sets}; do
-#        asr_exp=${exp_dir}/exp/${model_dir}
-#        inference_tag="$(basename "${inference_config}" .yaml)"
-#        _dir="${asr_exp}/${inference_tag}/${inference_asr_model}/${dset}"
-#        _logdir="${_dir}/logdir"
-#        if [ -d ${_dir} ]; then
-#            echo "${_dir} is already exists. if you want to decode again, please delete this dir first."
-#            exit 0
-#        fi
-#        mkdir -p "${_logdir}"
-#        _data="${feats_dir}/data/${dset}"
-#        key_file=${_data}/${scp}
-#        num_scp_file="$(<${key_file} wc -l)"
-#        _nj=$([ $inference_nj -le $num_scp_file ] && echo "$inference_nj" || echo "$num_scp_file")
-#        split_scps=
-#        for n in $(seq "${_nj}"); do
-#            split_scps+=" ${_logdir}/keys.${n}.scp"
-#        done
-#        # shellcheck disable=SC2086
-#        utils/split_scp.pl "${key_file}" ${split_scps}
-#        _opts=
-#        if [ -n "${inference_config}" ]; then
-#            _opts+="--config ${inference_config} "
-#        fi
-#        ${infer_cmd} --gpu "${_ngpu}" --max-jobs-run "${_nj}" JOB=1:"${_nj}" "${_logdir}"/asr_inference.JOB.log \
-#            python -m funasr.bin.asr_inference_launch \
-#                --batch_size 1 \
-#                --ngpu "${_ngpu}" \
-#                --njob ${njob} \
-#                --gpuid_list ${gpuid_list} \
-#                --data_path_and_name_and_type "${_data}/${scp},speech,${type}" \
-#                --cmvn_file ${feats_dir}/data/${train_set}/cmvn/am.mvn \
-#                --key_file "${_logdir}"/keys.JOB.scp \
-#                --asr_train_config "${asr_exp}"/config.yaml \
-#                --asr_model_file "${asr_exp}"/"${inference_asr_model}" \
-#                --output_dir "${_logdir}"/output.JOB \
-#                --mode paraformer \
-#                ${_opts}
-#
-#        for f in token token_int score text; do
-#            if [ -f "${_logdir}/output.1/1best_recog/${f}" ]; then
-#                for i in $(seq "${_nj}"); do
-#                    cat "${_logdir}/output.${i}/1best_recog/${f}"
-#                done | sort -k1 >"${_dir}/${f}"
-#            fi
-#        done
-#        python utils/proce_text.py ${_dir}/text ${_dir}/text.proc
-#        python utils/proce_text.py ${_data}/text ${_data}/text.proc
-#        python utils/compute_wer.py ${_data}/text.proc ${_dir}/text.proc ${_dir}/text.cer
-#        tail -n 3 ${_dir}/text.cer > ${_dir}/text.cer.txt
-#        cat ${_dir}/text.cer.txt
-#    done
-#fi
-#
-## Prepare files for ModelScope fine-tuning and inference
-#if [ ${stage} -le 6 ] && [ ${stop_stage} -ge 6 ]; then
-#    echo "stage 6: ModelScope Preparation"
-#    cp ${feats_dir}/data/${train_set}/cmvn/am.mvn ${exp_dir}/exp/${model_dir}/am.mvn
-#    vocab_size=$(cat ${token_list} | wc -l)
-#    python utils/gen_modelscope_configuration.py \
-#        --am_model_name $inference_asr_model \
-#        --mode paraformer \
-#        --model_name paraformer \
-#        --dataset aishell \
-#        --output_dir $exp_dir/exp/$model_dir \
-#        --vocab_size $vocab_size \
-#        --nat _nat \
-#        --tag $tag
-#fi
+
+
+# Testing Stage
+if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
+  echo "stage 5: Inference"
+
+  if ${inference_device} == "cuda"; then
+      nj=$(echo CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
+  else
+      nj=$njob
+      batch_size=1
+      gpuid_list=""
+      for JOB in $(seq ${nj}); do
+          gpuid_list=CUDA_VISIBLE_DEVICES"-1,"
+      done
+  fi
+
+  for dset in ${test_sets}; do
+
+    inference_dir="${asr_exp}/${inference_checkpoint}/${dset}"
+    _logdir="${inference_dir}/logdir"
+
+    mkdir -p "${_logdir}"
+    data_dir="${feats_dir}/data/${dset}"
+    key_file=${data_dir}/${inference_scp}
+
+    split_scps=
+    for JOB in $(seq "${nj}"); do
+        split_scps+=" ${_logdir}/keys.${JOB}.scp"
+    done
+    utils/split_scp.pl "${key_file}" ${split_scps}
+
+    for JOB in $(seq ${nj}); do
+        {
+          python ../../../funasr/bin/inference.py \
+          --config-path="${exp_dir}/exp/${model_dir}" \
+          --config-name="config.yaml" \
+          ++init_param="${exp_dir}/exp/${model_dir}/${inference_checkpoint}" \
+          ++tokenizer_conf.token_list="${token_list}" \
+          ++frontend_conf.cmvn_file="${feats_dir}/data/${train_set}/am.mvn" \
+          ++input="${_logdir}/keys.${JOB}.scp" \
+          ++output_dir="${inference_dir}/${JOB}" \
+          ++device="${inference_device}"
+        }&
+
+    done
+    wait
+
+    mkdir -p ${inference_dir}/1best_recog
+    for f in token score text; do
+        if [ -f "${inference_dir}/${JOB}/1best_recog/${f}" ]; then
+          for JOB in $(seq "${nj}"); do
+              cat "${inference_dir}/${JOB}/1best_recog/${f}"
+          done | sort -k1 >"${inference_dir}/1best_recog/${f}"
+        fi
+    done
+
+    echo "Computing WER ..."
+    cp ${inference_dir}/1best_recog/text ${inference_dir}/1best_recog/text.proc
+    cp ${data_dir}/text ${inference_dir}/1best_recog/text.ref
+    python utils/compute_wer.py ${inference_dir}/1best_recog/text.ref ${inference_dir}/1best_recog/text.proc ${inference_dir}/1best_recog/text.cer
+    tail -n 3 ${inference_dir}/1best_recog/text.cer
+  done
+
+fi
