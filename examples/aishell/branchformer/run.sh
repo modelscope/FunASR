@@ -109,6 +109,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
   log_file="${exp_dir}/exp/${model_dir}/train.log.txt.${current_time}"
   echo "log_file: ${log_file}"
 
+  export CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES
   gpu_num=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
   torchrun \
   --nnodes 1 \

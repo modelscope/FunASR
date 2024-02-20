@@ -109,6 +109,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
   log_file="${exp_dir}/exp/${model_dir}/train.log.txt.${current_time}"
   echo "log_file: ${log_file}"
 
+  export CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES
   gpu_num=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
   torchrun \
   --nnodes 1 \
@@ -129,7 +130,7 @@ fi
 if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
   echo "stage 5: Inference"
 
-  if ${inference_device} == "cuda"; then
+  if [ ${inference_device} == "cuda" ]; then
       nj=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
   else
       inference_batch_size=1
@@ -141,7 +142,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
 
   for dset in ${test_sets}; do
 
-    inference_dir="${exp_dir}/exp/${model_dir}/${inference_checkpoint}/${dset}"
+    inference_dir="${exp_dir}/exp/${model_dir}/infer-${inference_checkpoint}/${dset}"
     _logdir="${inference_dir}/logdir"
 
     mkdir -p "${_logdir}"
@@ -154,7 +155,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
     done
     utils/split_scp.pl "${key_file}" ${split_scps}
 
-    gpuid_list_array=(${gpuid_list//,/ })
+    gpuid_list_array=(${CUDA_VISIBLE_DEVICES//,/ })
     for JOB in $(seq ${nj}); do
         {
           id=$((JOB-1))

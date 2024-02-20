@@ -279,7 +279,7 @@ class Trainer:
                     f"epoch: {epoch}/{self.max_epoch}, "
                     f"step: {batch_idx+1}/{len(self.dataloader_train)}, total: {self.batch_total}, "
                     f"(loss: {loss.detach().cpu().item():.3f}), "
-                    f"(lr: {lr}), "
+                    f"(lr: {lr:.3e}), "
                     f"{[(k, round(v.cpu().item(), 3)) for k, v in stats.items()]}, "
                     f"{speed_stats}, "
                     f"{gpu_info}"

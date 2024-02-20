@@ -5,7 +5,7 @@ CUDA_VISIBLE_DEVICES="0,1"
 
 # general configuration
 feats_dir="../DATA" #feature output dictionary
-exp_dir="."
+exp_dir=`pwd`
 lang=zh
 token_type=char
 stage=0
@@ -109,6 +109,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
   log_file="${exp_dir}/exp/${model_dir}/train.log.txt.${current_time}"
   echo "log_file: ${log_file}"
 
+  export CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES
   gpu_num=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
   torchrun \
   --nnodes 1 \
@@ -129,7 +130,7 @@ fi
 if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
   echo "stage 5: Inference"
 
-  if ${inference_device} == "cuda"; then
+  if [ ${inference_device} == "cuda" ]; then
       nj=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
   else
       inference_batch_size=1
@@ -170,7 +171,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
           ++input="${_logdir}/keys.${JOB}.scp" \
           ++output_dir="${inference_dir}/${JOB}" \
           ++device="${inference_device}" \
-          ++batch_size="${inference_batch_size}"
+          ++batch_size="${inference_batch_size}" &> ${_logdir}/log.${JOB}.txt
         }&
 
     done
