@@ -1,10 +1,15 @@
-"""Transducer joint network implementation."""
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+#  MIT License  (https://opensource.org/licenses/MIT)
 
 import torch
 
+from funasr.register import tables
 from funasr.models.transformer.utils.nets_utils import get_activation
 
 
+@tables.register("joint_network_classes", "joint_network")
 class JointNetwork(torch.nn.Module):
     """Transducer joint network module.
 

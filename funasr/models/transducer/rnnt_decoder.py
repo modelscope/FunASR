@@ -1,12 +1,17 @@
-"""RNN decoder definition for Transducer models."""
-
-from typing import List, Optional, Tuple
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+#  MIT License  (https://opensource.org/licenses/MIT)
 
 import torch
+from typing import List, Optional, Tuple
 
-from funasr.models.transducer.beam_search_transducer import Hypothesis
+from funasr.register import tables
 from funasr.models.specaug.specaug import SpecAug
+from funasr.models.transducer.beam_search_transducer import Hypothesis
 
+
+@tables.register("decoder_classes", "rnnt_decoder")
 class RNNTDecoder(torch.nn.Module):
     """RNN decoder module.
 

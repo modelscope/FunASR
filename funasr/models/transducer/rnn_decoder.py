@@ -1,10 +1,15 @@
-import random
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+#  MIT License  (https://opensource.org/licenses/MIT)
 
-import numpy as np
 import torch
+import random
+import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 
+from funasr.register import tables
 from funasr.models.transformer.utils.nets_utils import make_pad_mask
 from funasr.models.transformer.utils.nets_utils import to_device
 from funasr.models.language_model.rnn.attentions import initial_att
@@ -78,7 +83,7 @@ def build_attention_list(
         )
     return att_list
 
-
+@tables.register("decoder_classes", "rnn_decoder")
 class RNNDecoder(nn.Module):
     def __init__(
         self,
