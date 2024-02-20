@@ -118,6 +118,7 @@ class Transformer(nn.Module):
         #         token_list, sym_space, sym_blank, report_cer, report_wer
         #     )
         #
+        self.error_calculator = None
         if ctc_weight == 0.0:
             self.ctc = None
         else:

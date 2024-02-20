@@ -109,14 +109,9 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
   echo "log_file: ${log_file}"
 
   gpu_num=$(echo CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
-#  torchrun \
-#  --nnodes 1 \
-#  --nproc_per_node ${gpu_num}
-  cmd="python"
-  if [ ${gpu_num} -gt 1  ];then
-    cmd="torchrun --nnodes 1 --nproc_per_node ${gpu_num}"
-  fi
-  ${cmd} \
+  torchrun \
+  --nnodes 1 \
+  --nproc_per_node ${gpu_num} \
   ../../../funasr/bin/train.py \
   --config-path "${workspace}/conf" \
   --config-name "${config}" \
