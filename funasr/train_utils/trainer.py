@@ -276,7 +276,7 @@ class Trainer:
                 description = (
                     f"rank: {self.local_rank}, "
                     f"epoch: {epoch}/{self.max_epoch}, "
-                    f"step: {batch_idx}/{len(self.dataloader_train)}, total: {self.batch_total}, "
+                    f"step: {batch_idx+1}/{len(self.dataloader_train)}, total: {self.batch_total}, "
                     f"(loss: {loss.detach().cpu().item():.3f}), "
                     f"{[(k, round(v.cpu().item(), 3)) for k, v in stats.items()]}, "
                     f"{speed_stats}, "
@@ -341,7 +341,7 @@ class Trainer:
                     description = (
                         f"rank: {self.local_rank}, "
                         f"validation epoch: {epoch}/{self.max_epoch}, "
-                        f"step: {batch_idx}/{len(self.dataloader_val)}, "
+                        f"step: {batch_idx+1}/{len(self.dataloader_val)}, "
                         f"(loss: {loss.detach().cpu().item():.3f}), "
                         f"{[(k, round(v.cpu().item(), 3)) for k, v in stats.items()]}, "
                         f"{speed_stats}, "
