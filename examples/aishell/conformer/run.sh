@@ -39,7 +39,7 @@ train_set=train
 valid_set=dev
 test_sets="dev test"
 
-config=paraformer_conformer_12e_6d_2048_256.yaml
+config=conformer_12e_6d_2048_256.yaml
 model_dir="baseline_$(basename "${config}" .yaml)_${lang}_${token_type}_${tag}"
 
 

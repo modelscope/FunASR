@@ -50,10 +50,11 @@ class CharTokenizer(BaseTokenizer):
 	
 	def text2tokens(self, line: Union[str, list]) -> List[str]:
 		
-		if self.split_with_space:
+		# if self.split_with_space:
+		
+		if self.seg_dict is not None:
 			tokens = line.strip().split(" ")
-			if self.seg_dict is not None:
-				tokens = seg_tokenize(tokens, self.seg_dict)
+			tokens = seg_tokenize(tokens, self.seg_dict)
 		else:
 			tokens = []
 			while len(line) != 0:
@@ -66,7 +67,9 @@ class CharTokenizer(BaseTokenizer):
 				else:
 					t = line[0]
 					if t == " ":
-						t = "<space>"
+						# t = "<space>"
+						line = line[1:]
+						continue
 					tokens.append(t)
 					line = line[1:]
 		return tokens
