@@ -273,11 +273,13 @@ class Trainer:
                                              torch.cuda.memory_reserved()/1024/1024/1024,
                                              torch.cuda.max_memory_reserved()/1024/1024/1024,
                                              )
+                lr = self.scheduler.get_last_lr()[0]
                 description = (
                     f"rank: {self.local_rank}, "
                     f"epoch: {epoch}/{self.max_epoch}, "
                     f"step: {batch_idx+1}/{len(self.dataloader_train)}, total: {self.batch_total}, "
                     f"(loss: {loss.detach().cpu().item():.3f}), "
+                    f"(lr: {lr}), "
                     f"{[(k, round(v.cpu().item(), 3)) for k, v in stats.items()]}, "
                     f"{speed_stats}, "
                     f"{gpu_info}"
