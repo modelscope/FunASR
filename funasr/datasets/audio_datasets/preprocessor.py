@@ -26,10 +26,11 @@ class SpeechPreprocessSpeedPerturb(nn.Module):
 			return waveform
 		speed = random.choice(self.speed_perturb)
 		if speed != 1.0:
-			with torch.no_grad():
-				waveform, _ = torchaudio.sox_effects.apply_effects_tensor(
-					torch.tensor(waveform).view(1, -1), fs, [['speed', str(speed)], ['rate', str(fs)]])
-				waveform = waveform.view(-1)
+			if not isinstance(waveform, torch.Tensor):
+				waveform = torch.tensor(waveform)
+			waveform, _ = torchaudio.sox_effects.apply_effects_tensor(
+				waveform.view(1, -1), fs, [['speed', str(speed)], ['rate', str(fs)]])
+			waveform = waveform.view(-1)
 			
 		return waveform
 
