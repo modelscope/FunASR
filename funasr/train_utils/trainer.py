@@ -188,7 +188,7 @@ class Trainer:
             epoch (int): The current epoch number.
         """
         self.model.train()
-        pbar = tqdm(colour="blue", desc=f"Training Epoch: {epoch + 1}", total=len(self.dataloader_train),
+        pbar = tqdm(colour="blue", desc=f"rank: {self.local_rank}, Training Epoch: {epoch + 1}", total=len(self.dataloader_train),
                     dynamic_ncols=True)
         
         # Set the number of steps for gradient accumulation
@@ -278,7 +278,7 @@ class Trainer:
                     f"epoch: {epoch}/{self.max_epoch}, "
                     f"step: {batch_idx}/{len(self.dataloader_train)}, total: {self.batch_total}, "
                     f"(loss: {loss.detach().cpu().item():.3f}), "
-                    f"{[(k, round(v.cpu().item(), 3)) for k, v in stats.items()]}"
+                    f"{[(k, round(v.cpu().item(), 3)) for k, v in stats.items()]}, "
                     f"{speed_stats}, "
                     f"{gpu_info}"
                 )
@@ -307,7 +307,7 @@ class Trainer:
         """
         self.model.eval()
         with torch.no_grad():
-            pbar = tqdm(colour="red", desc=f"Training Epoch: {epoch + 1}", total=len(self.dataloader_val),
+            pbar = tqdm(colour="red", desc=f"rank: {self.local_rank}, Validation Epoch: {epoch + 1}", total=len(self.dataloader_val),
                         dynamic_ncols=True)
             speed_stats = {}
             time5 = time.perf_counter()
@@ -343,7 +343,7 @@ class Trainer:
                         f"validation epoch: {epoch}/{self.max_epoch}, "
                         f"step: {batch_idx}/{len(self.dataloader_val)}, "
                         f"(loss: {loss.detach().cpu().item():.3f}), "
-                        f"{[(k, round(v.cpu().item(), 3)) for k, v in stats.items()]}"
+                        f"{[(k, round(v.cpu().item(), 3)) for k, v in stats.items()]}, "
                         f"{speed_stats}, "
                     )
                     pbar.set_description(description)
