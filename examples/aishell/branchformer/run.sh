@@ -108,7 +108,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
   log_file="${exp_dir}/exp/${model_dir}/train.log.txt"
   echo "log_file: ${log_file}"
 
-  gpu_num=$(echo CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
+  gpu_num=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
   torchrun \
   --nnodes 1 \
   --nproc_per_node ${gpu_num} \
