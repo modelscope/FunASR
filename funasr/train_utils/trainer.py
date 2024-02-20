@@ -273,8 +273,9 @@ class Trainer:
                 speed_stats["total_time"] = total_time
 
 
-            pbar.update(1)
+            
             if self.local_rank == 0:
+                pbar.update(1)
                 gpu_info = "GPU, memory: {:.3f} GB, " \
                            "{:.3f} GB, "\
                            "{:.3f} GB, "\
@@ -290,6 +291,7 @@ class Trainer:
                     f"(loss: {loss.detach().cpu().item():.3f}), "
                     f"{[(k, round(v.cpu().item(), 3)) for k, v in stats.items()]}"
                     f"{gpu_info}"
+                    f"rank: {self.local_rank}"
                 )
                 pbar.set_description(description)
                 if self.writer:
@@ -344,14 +346,16 @@ class Trainer:
                 loss = loss
                 time4 = time.perf_counter()
 
-                pbar.update(1)
+                
                 if self.local_rank == 0:
+                    pbar.update(1)
                     description = (
                         f"validation epoch: {epoch}/{self.max_epoch}, "
                         f"step {batch_idx}/{len(self.dataloader_train)}, "
                         f"{speed_stats}, "
                         f"(loss: {loss.detach().cpu().item():.3f}), "
                         f"{[(k, round(v.cpu().item(), 3)) for k, v in stats.items()]}"
+                        f"rank: {self.local_rank}"
                     )
                     pbar.set_description(description)
                     if self.writer:
