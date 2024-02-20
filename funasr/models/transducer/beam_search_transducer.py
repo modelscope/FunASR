@@ -1,10 +1,12 @@
-"""Search algorithms for Transducer models."""
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+#  MIT License  (https://opensource.org/licenses/MIT)
 
+import torch
+import numpy as np
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple, Union
-
-import numpy as np
-import torch
 
 from funasr.models.transducer.joint_network import JointNetwork
 
