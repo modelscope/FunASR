@@ -21,10 +21,17 @@ def download_from_ms(**kwargs):
         model_or_path = get_or_download_model_dir(model_or_path, model_revision, is_training=kwargs.get("is_training"), check_latest=kwargs.get("kwargs", True))
     kwargs["model_path"] = model_or_path
     
-    config = os.path.join(model_or_path, "config.yaml")
-    if os.path.exists(config) and os.path.exists(os.path.join(model_or_path, "model.pb")):
-        
-        config = OmegaConf.load(config)
+    if os.path.exists(os.path.join(model_or_path, "configuration.json")):
+        with open(os.path.join(model_or_path, "configuration.json"), 'r', encoding='utf-8') as f:
+            conf_json = json.load(f)
+            cfg = {}
+            add_file_root_path(model_or_path, conf_json["file_path_metas"], cfg)
+            cfg.update(kwargs)
+            config = OmegaConf.load(cfg["config"])
+            kwargs = OmegaConf.merge(config, cfg)
+        kwargs["model"] = config["model"]
+    elif os.path.exists(os.path.join(model_or_path, "config.yaml")) and os.path.exists(os.path.join(model_or_path, "model.pt")):
+        config = OmegaConf.load(os.path.join(model_or_path, "config.yaml"))
         kwargs = OmegaConf.merge(config, kwargs)
         init_param = os.path.join(model_or_path, "model.pb")
         kwargs["init_param"] = init_param
@@ -41,15 +48,6 @@ def download_from_ms(**kwargs):
             kwargs["frontend_conf"]["cmvn_file"] = os.path.join(model_or_path, "am.mvn")
         if os.path.exists(os.path.join(model_or_path, "jieba_usr_dict")):
             kwargs["jieba_usr_dict"] = os.path.join(model_or_path, "jieba_usr_dict")
-    elif os.path.exists(os.path.join(model_or_path, "configuration.json")):
-        with open(os.path.join(model_or_path, "configuration.json"), 'r', encoding='utf-8') as f:
-            conf_json = json.load(f)
-            cfg = {}
-            add_file_root_path(model_or_path, conf_json["file_path_metas"], cfg)
-            cfg.update(kwargs)
-            config = OmegaConf.load(cfg["config"])
-            kwargs = OmegaConf.merge(config, cfg)
-        kwargs["model"] = config["model"]
     return OmegaConf.to_container(kwargs, resolve=True)
 
 def add_file_root_path(model_or_path: str, file_path_metas: dict, cfg = {}):

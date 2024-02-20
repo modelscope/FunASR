@@ -107,8 +107,6 @@ dataset_conf:
 tokenizer: CharTokenizer
 tokenizer_conf:
   unk_symbol: <unk>
-  split_with_space: false
-
 
 ctc_conf:
     dropout_rate: 0.0
