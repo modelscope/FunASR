@@ -44,14 +44,16 @@ def main_hydra(kwargs: DictConfig):
 
 def main(**kwargs):
     print(kwargs)
+    
     # set random seed
-    tables.print()
     set_all_random_seed(kwargs.get("seed", 0))
     torch.backends.cudnn.enabled = kwargs.get("cudnn_enabled", torch.backends.cudnn.enabled)
     torch.backends.cudnn.benchmark = kwargs.get("cudnn_benchmark", torch.backends.cudnn.benchmark)
     torch.backends.cudnn.deterministic = kwargs.get("cudnn_deterministic", True)
     
     local_rank = int(os.environ.get('LOCAL_RANK', 0))
+    if local_rank == 0:
+        tables.print()
     # Check if we are using DDP or FSDP
     use_ddp = 'WORLD_SIZE' in os.environ and int(os.environ["WORLD_SIZE"]) > 1
     use_fsdp = kwargs.get("use_fsdp", None)

@@ -69,6 +69,7 @@ class Trainer:
         self.device = next(model.parameters()).device
         self.avg_nbest_model = kwargs.get("avg_nbest_model", 5)
         self.kwargs = kwargs
+        self.log_interval = kwargs.get("log_interval", 50)
         
     
         try:
@@ -274,8 +275,8 @@ class Trainer:
 
 
             
-            if self.local_rank == 0:
-                pbar.update(1)
+            if batch_idx % self.log_interval == 0 or batch_idx == len(self.dataloader_train) - 1:
+                pbar.update(self.log_interval)
                 gpu_info = "GPU, memory: {:.3f} GB, " \
                            "{:.3f} GB, "\
                            "{:.3f} GB, "\
@@ -285,23 +286,23 @@ class Trainer:
                                              torch.cuda.max_memory_reserved()/1024/1024/1024,
                                              )
                 description = (
+                    f"rank: {self.local_rank}, "
                     f"Train epoch: {epoch}/{self.max_epoch}, "
                     f"step {batch_idx}/{len(self.dataloader_train)}, "
                     f"{speed_stats}, "
                     f"(loss: {loss.detach().cpu().item():.3f}), "
                     f"{[(k, round(v.cpu().item(), 3)) for k, v in stats.items()]}"
                     f"{gpu_info}"
-                    f"rank: {self.local_rank}"
                 )
                 pbar.set_description(description)
                 if self.writer:
-                    self.writer.add_scalar('Loss/train', loss.item(),
+                    self.writer.add_scalar(f'rank{self.local_rank}, Loss/train', loss.item(),
                                            epoch*len(self.dataloader_train) + batch_idx)
                     for key, var in stats.items():
-                        self.writer.add_scalar(f'{key}/train', var.item(),
+                        self.writer.add_scalar(f'rank{self.local_rank}, {key}/train', var.item(),
                                                epoch * len(self.dataloader_train) + batch_idx)
                     for key, var in speed_stats.items():
-                        self.writer.add_scalar(f'{key}/train', eval(var),
+                        self.writer.add_scalar(f'rank{self.local_rank}, {key}/train', eval(var),
                                                epoch * len(self.dataloader_train) + batch_idx)
                     
             # if batch_idx == 2:
@@ -347,9 +348,10 @@ class Trainer:
                 time4 = time.perf_counter()
 
                 
-                if self.local_rank == 0:
-                    pbar.update(1)
+                if batch_idx % self.log_interval == 0 or batch_idx == len(self.dataloader_train) - 1:
+                    pbar.update(self.log_interval)
                     description = (
+                        f"rank: {self.local_rank}, "
                         f"validation epoch: {epoch}/{self.max_epoch}, "
                         f"step {batch_idx}/{len(self.dataloader_train)}, "
                         f"{speed_stats}, "
@@ -359,11 +361,11 @@ class Trainer:
                     )
                     pbar.set_description(description)
                     if self.writer:
-                        self.writer.add_scalar('Loss/val', loss.item(),
+                        self.writer.add_scalar(f"rank{self.local_rank}, Loss/val", loss.item(),
                                                epoch*len(self.dataloader_train) + batch_idx)
                         for key, var in stats.items():
-                            self.writer.add_scalar(f'{key}/val', var.item(),
+                            self.writer.add_scalar(f'rank{self.local_rank}, {key}/val', var.item(),
                                                    epoch * len(self.dataloader_train) + batch_idx)
                         for key, var in speed_stats.items():
-                            self.writer.add_scalar(f'{key}/val', eval(var),
+                            self.writer.add_scalar(f'rank{self.local_rank}, {key}/val', eval(var),
                                                    epoch * len(self.dataloader_train) + batch_idx)
