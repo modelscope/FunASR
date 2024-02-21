@@ -118,7 +118,7 @@ def load_pretrained_model(
 			print(f"Miss key in ckpt: model: {k}, ckpt: {k_ddp}")
 			
 	flag = obj.load_state_dict(dst_state, strict=True)
-	print(flag)
+	# print(flag)
 
 # def load_pretrained_model(
 # 	path: str,
