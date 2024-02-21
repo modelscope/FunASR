@@ -181,7 +181,7 @@ class Trainer:
 
             time2 = time.perf_counter()
             time_escaped = (time2 - time1)/3600.0
-            print(f"\nrank: {self.local_rank}, time_escaped_epoch: {time_escaped:.3f} hours, estimated to finish {self.max_epoch} epoch: {(self.max_epoch-epoch)*time_escaped:.3f}\n")
+            print(f"\nrank: {self.local_rank}, time_escaped_epoch: {time_escaped:.3f} hours, estimated to finish {self.max_epoch} epoch: {(self.max_epoch-epoch)*time_escaped:.3f} hours\n")
 
         if self.rank == 0:
             average_checkpoints(self.output_dir, self.avg_nbest_model)
@@ -293,7 +293,7 @@ class Trainer:
                     f"{time_now}, "
                     f"rank: {self.local_rank}, "
                     f"epoch: {epoch}/{self.max_epoch}, "
-                    f"step: {batch_idx+1}/{len(self.dataloader_train)}, total: {self.batch_total}, "
+                    f"step: {batch_idx+1}/{len(self.dataloader_train)}, total step: {self.batch_total}, "
                     f"(loss: {loss.detach().cpu().item():.3f}), "
                     f"(lr: {lr:.3e}), "
                     f"{[(k, round(v.cpu().item(), 3)) for k, v in stats.items()]}, "
