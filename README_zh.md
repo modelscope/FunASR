@@ -91,7 +91,7 @@ FunASR开源了大量在工业数据上预训练模型，您可以在[模型许�
 ### 可执行命令行
 
 ```shell
-funasr +model=paraformer-zh +vad_model="fsmn-vad" +punc_model="ct-punc" +input=asr_example_zh.wav
+funasr ++model=paraformer-zh ++vad_model="fsmn-vad" ++punc_model="ct-punc" ++input=asr_example_zh.wav
 ```
 
 注：支持单条音频文件识别，也支持文件列表，列表为kaldi风格wav.scp：`wav_id   wav_path`
