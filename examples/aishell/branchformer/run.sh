@@ -43,6 +43,7 @@ config=branchformer_12e_6d_2048_256.yaml
 model_dir="baseline_$(basename "${config}" .yaml)_${lang}_${token_type}_${tag}"
 
 
+
 if [ ${stage} -le -1 ] && [ ${stop_stage} -ge -1 ]; then
     echo "stage -1: Data Download"
     mkdir -p ${raw_data}
@@ -85,7 +86,7 @@ echo "dictionary: ${token_list}"
 if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     echo "stage 2: Dictionary Preparation"
     mkdir -p ${feats_dir}/data/${lang}_token_list/$token_type/
-   
+
     echo "make a dictionary"
     echo "<blank>" > ${token_list}
     echo "<s>" >> ${token_list}
@@ -130,7 +131,7 @@ fi
 if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
   echo "stage 5: Inference"
 
-  if ${inference_device} == "cuda"; then
+  if [ ${inference_device} == "cuda" ]; then
       nj=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
   else
       inference_batch_size=1
@@ -142,7 +143,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
 
   for dset in ${test_sets}; do
 
-    inference_dir="${exp_dir}/exp/${model_dir}/${inference_checkpoint}/${dset}"
+    inference_dir="${exp_dir}/exp/${model_dir}/inference-${inference_checkpoint}/${dset}"
     _logdir="${inference_dir}/logdir"
 
     mkdir -p "${_logdir}"
@@ -155,7 +156,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
     done
     utils/split_scp.pl "${key_file}" ${split_scps}
 
-    gpuid_list_array=(${gpuid_list//,/ })
+    gpuid_list_array=(${CUDA_VISIBLE_DEVICES//,/ })
     for JOB in $(seq ${nj}); do
         {
           id=$((JOB-1))
@@ -171,7 +172,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
           ++input="${_logdir}/keys.${JOB}.scp" \
           ++output_dir="${inference_dir}/${JOB}" \
           ++device="${inference_device}" \
-          ++batch_size="${inference_batch_size}"
+          ++batch_size="${inference_batch_size}" &> ${_logdir}/log.${JOB}.txt
         }&
 
     done
@@ -187,8 +188,8 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
     done
 
     echo "Computing WER ..."
-    cp ${inference_dir}/1best_recog/text ${inference_dir}/1best_recog/text.proc
-    cp ${data_dir}/text ${inference_dir}/1best_recog/text.ref
+    python utils/postprocess_text_zh.py ${inference_dir}/1best_recog/text ${inference_dir}/1best_recog/text.proc
+    python utils/postprocess_text_zh.py  ${data_dir}/text ${inference_dir}/1best_recog/text.ref
     python utils/compute_wer.py ${inference_dir}/1best_recog/text.ref ${inference_dir}/1best_recog/text.proc ${inference_dir}/1best_recog/text.cer
     tail -n 3 ${inference_dir}/1best_recog/text.cer
   done

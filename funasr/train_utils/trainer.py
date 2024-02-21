@@ -109,12 +109,8 @@ class Trainer:
         
         print(f'Checkpoint saved to {filename}')
         latest = Path(os.path.join(self.output_dir, f'model.pt'))
-        try:
-            latest.unlink()
-        except:
-            pass
+        torch.save(state, latest)
 
-        latest.symlink_to(filename)
     
     def _resume_checkpoint(self, resume_path):
         """
