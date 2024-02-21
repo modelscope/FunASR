@@ -556,11 +556,12 @@ class ParaformerStreaming(Paraformer):
             self.init_cache(cache, **kwargs)
         
         if kwargs.get("output_dir"):
-            writer = DatadirWriter(kwargs.get("output_dir"))
-            ibest_writer = writer[f"{1}best_recog"]
+            if not hasattr(self, "writer"):
+                self.writer = DatadirWriter(kwargs.get("output_dir"))
+            ibest_writer = self.writer[f"{1}best_recog"]
             ibest_writer["token"][key[0]] = " ".join(tokens)
             ibest_writer["text"][key[0]] = text_postprocessed
-        
+
         return result, meta_data
 
 
