@@ -4,7 +4,7 @@ import torch.nn.functional as F
 try:
     from rotary_embedding_torch import RotaryEmbedding
 except:
-    print("Please install rotary_embedding_torch by: \n pip install -U rotary_embedding_torch")
+    print("If you want use mossformer, lease install rotary_embedding_torch by: \n pip install -U rotary_embedding_torch")
 from funasr.models.transformer.layer_norm import GlobalLayerNorm, CumulativeLayerNorm, ScaleNorm
 from funasr.models.transformer.embedding import ScaledSinuEmbedding
 from funasr.models.transformer.mossformer import FLASH_ShareA_FFConvM

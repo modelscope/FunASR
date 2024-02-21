@@ -72,14 +72,7 @@ def parse_context_length(data_list: list, data_type: str):
 
 @hydra.main(config_name=None, version_base=None)
 def main_hydra(cfg: DictConfig):
-    """
-    python funasr/datasets/audio_datasets/scp2jsonl.py \
-    ++scp_file_list='["/Users/zhifu/funasr1.0/test_local/wav.scp", "/Users/zhifu/funasr1.0/test_local/text.txt"]' \
-    ++data_type_list='["source", "target"]' \
-    ++jsonl_file_out=/Users/zhifu/funasr1.0/test_local/audio_datasets.jsonl
-
-    """
-    
+ 
     kwargs = OmegaConf.to_container(cfg, resolve=True)
 
     scp_file_list = kwargs.get("scp_file_list", ("/Users/zhifu/funasr1.0/test_local/wav.scp", "/Users/zhifu/funasr1.0/test_local/text.txt"))
@@ -89,6 +82,13 @@ def main_hydra(cfg: DictConfig):
     jsonl_file_out = kwargs.get("jsonl_file_out", "/Users/zhifu/funasr1.0/test_local/audio_datasets.jsonl")
     gen_jsonl_from_wav_text_list(scp_file_list, data_type_list=data_type_list, jsonl_file_out=jsonl_file_out)
     
+
+"""
+python -m funasr.datasets.audio_datasets.scp2jsonl \
+++scp_file_list='["/Users/zhifu/funasr1.0/test_local/wav.scp", "/Users/zhifu/funasr1.0/test_local/text.txt"]' \
+++data_type_list='["source", "target"]' \
+++jsonl_file_out=/Users/zhifu/funasr1.0/test_local/audio_datasets.jsonl
+"""
 
 if __name__ == "__main__":
     main_hydra()
