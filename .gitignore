@@ -25,3 +25,4 @@ outputs*
 emotion2vec*
 GPT-SoVITS*
 examples/*/*/outputs
+cmd_read
