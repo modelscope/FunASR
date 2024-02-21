@@ -108,7 +108,7 @@ class Trainer:
         filename = os.path.join(self.output_dir, f'model.pt.ep{epoch}')
         torch.save(state, filename)
         
-        print(f'Checkpoint saved to {filename}')
+        print(f'\nCheckpoint saved to {filename}\n')
         latest = Path(os.path.join(self.output_dir, f'model.pt'))
         torch.save(state, latest)
 
@@ -181,7 +181,7 @@ class Trainer:
 
             time2 = time.perf_counter()
             time_escaped = (time2 - time1)/3600.0
-            print(f"time_escaped_epoch: {time_escaped:.3f} hours, estimated to finish: {(self.max_epoch-epoch)*time_escaped:.3f}")
+            print(f"\ntime_escaped_epoch: {time_escaped:.3f} hours, estimated to finish {self.max_epoch} epoch: {(self.max_epoch-epoch)*time_escaped:.3f}\n")
 
         if self.rank == 0:
             average_checkpoints(self.output_dir, self.avg_nbest_model)
