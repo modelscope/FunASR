@@ -379,12 +379,14 @@ class AutoModel:
                             result[k] = restored_data[j][k]
                         else:
                             result[k] += restored_data[j][k]
-                            
+            
+            return_raw_text = kwargs.get('return_raw_text', False)            
             # step.3 compute punc model
             if self.punc_model is not None:
                 self.punc_kwargs.update(cfg)
                 punc_res = self.inference(result["text"], model=self.punc_model, kwargs=self.punc_kwargs, disable_pbar=True, **cfg)
                 raw_text = copy.copy(result["text"])
+                if return_raw_text: result['raw_text'] = raw_text
                 result["text"] = punc_res[0]["text"]
             else:
                 raw_text = None
@@ -403,26 +405,28 @@ class AutoModel:
                     for res, vadsegment in zip(restored_data, vadsegments):
                         if 'timestamp' not in res:
                             logging.error("Only 'iic/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch' \
-                                and 'iic/speech_seaco_paraformer_large_asr_nat-zh-cn-16k-common-vocab8404-pytorch'\
-                                can predict timestamp, and speaker diarization relies on timestamps.")
-                        sentence_list.append({"start": vadsegment[0],\
-                                                "end": vadsegment[1],
-                                                "sentence": res['text'],
-                                                "timestamp": res['timestamp']})
+                                           and 'iic/speech_seaco_paraformer_large_asr_nat-zh-cn-16k-common-vocab8404-pytorch'\
+                                           can predict timestamp, and speaker diarization relies on timestamps.")
+                        sentence_list.append({"start": vadsegment[0],
+                                              "end": vadsegment[1],
+                                              "sentence": res['text'],
+                                              "timestamp": res['timestamp']})
                 elif self.spk_mode == 'punc_segment':
                     if 'timestamp' not in result:
                         logging.error("Only 'iic/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch' \
-                            and 'iic/speech_seaco_paraformer_large_asr_nat-zh-cn-16k-common-vocab8404-pytorch'\
-                            can predict timestamp, and speaker diarization relies on timestamps.")
-                    sentence_list = timestamp_sentence(punc_res[0]['punc_array'], \
-                                                        result['timestamp'], \
-                                                        raw_text)
+                                       and 'iic/speech_seaco_paraformer_large_asr_nat-zh-cn-16k-common-vocab8404-pytorch'\
+                                       can predict timestamp, and speaker diarization relies on timestamps.")
+                    sentence_list = timestamp_sentence(punc_res[0]['punc_array'],
+                                                       result['timestamp'],
+                                                       raw_text,
+                                                       return_raw_text=return_raw_text)
                 distribute_spk(sentence_list, sv_output)
                 result['sentence_info'] = sentence_list
             elif kwargs.get("sentence_timestamp", False):
-                sentence_list = timestamp_sentence(punc_res[0]['punc_array'], \
-                                                        result['timestamp'], \
-                                                        raw_text)
+                sentence_list = timestamp_sentence(punc_res[0]['punc_array'],
+                                                   result['timestamp'],
+                                                   raw_text,
+                                                   return_raw_text=return_raw_text)
                 result['sentence_info'] = sentence_list
             if "spk_embedding" in result: del result['spk_embedding']
                     
