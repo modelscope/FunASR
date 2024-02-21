@@ -24,3 +24,4 @@ samples
 outputs*
 emotion2vec*
 GPT-SoVITS*
+examples/*/*/outputs
