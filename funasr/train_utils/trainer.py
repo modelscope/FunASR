@@ -157,7 +157,7 @@ class Trainer:
             self._resume_checkpoint(self.output_dir)
         
         for epoch in range(self.start_epoch, self.max_epoch + 1):
-            
+            time1 = time.perf_counter()
             self._train_epoch(epoch)
 
 
@@ -179,6 +179,9 @@ class Trainer:
             
             self.scheduler.step()
 
+            time2 = time.perf_counter()
+            time_escaped = (time2 - time1)/3600.0
+            print(f"time_escaped_epoch: {time_escaped:.3f} hours, estimated to finish: {(self.max_epoch-epoch)*time_escaped:.3f}")
 
         if self.rank == 0:
             average_checkpoints(self.output_dir, self.avg_nbest_model)
@@ -285,7 +288,7 @@ class Trainer:
                                              )
                 lr = self.scheduler.get_last_lr()[0]
                 time_now = datetime.now()
-                time_now = now.strftime("%Y-%m-%d %H:%M:%S")
+                time_now = time_now.strftime("%Y-%m-%d %H:%M:%S")
                 description = (
                     f"{time_now}, "
                     f"rank: {self.local_rank}, "
