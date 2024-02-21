@@ -5,7 +5,7 @@ CUDA_VISIBLE_DEVICES="0,1"
 
 # general configuration
 feats_dir="../DATA" #feature output dictionary
-exp_dir="."
+exp_dir=`pwd`
 lang=zh
 token_type=char
 stage=0
