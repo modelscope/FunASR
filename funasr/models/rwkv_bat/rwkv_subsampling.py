@@ -1,19 +1,13 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# -*- encoding: utf-8 -*-
+# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+#  MIT License  (https://opensource.org/licenses/MIT)
 
-# Copyright 2019 Shigeki Karita
-#  Apache 2.0  (http://www.apache.org/licenses/LICENSE-2.0)
-
-"""Subsampling layer definition."""
-import numpy as np
-import torch
-import torch.nn.functional as F
-from funasr.models.transformer.embedding import PositionalEncoding
-import logging
-from funasr.models.scama.utils import sequence_mask
-from funasr.models.transformer.utils.nets_utils import sub_factor_to_params, pad_to_len
-from typing import Optional, Tuple, Union
 import math
+import torch
+from typing import Optional, Tuple, Union
+from funasr.models.transformer.utils.nets_utils import pad_to_len
+
 
 class TooShortUttError(Exception):
     """Raised when the utt is too short for subsampling.
