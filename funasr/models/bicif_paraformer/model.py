@@ -300,9 +300,11 @@ class BiCifParaformer(Paraformer):
                 nbest_hyps = [Hypothesis(yseq=yseq, score=score)]
             for nbest_idx, hyp in enumerate(nbest_hyps):
                 ibest_writer = None
-                if ibest_writer is None and kwargs.get("output_dir") is not None:
-                    writer = DatadirWriter(kwargs.get("output_dir"))
-                    ibest_writer = writer[f"{nbest_idx + 1}best_recog"]
+                if kwargs.get("output_dir") is not None:
+                    if not hasattr(self, "writer"):
+                        self.writer = DatadirWriter(kwargs.get("output_dir"))
+                    ibest_writer = self.writer[f"{nbest_idx+1}best_recog"]
+                    
                 # remove sos/eos and get results
                 last_pos = -1
                 if isinstance(hyp.yseq, list):

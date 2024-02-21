@@ -385,9 +385,11 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
                 nbest_hyps = [Hypothesis(yseq=yseq, score=score)]
             for nbest_idx, hyp in enumerate(nbest_hyps):
                 ibest_writer = None
-                if ibest_writer is None and kwargs.get("output_dir") is not None:
-                    writer = DatadirWriter(kwargs.get("output_dir"))
-                    ibest_writer = writer[f"{nbest_idx + 1}best_recog"]
+                if kwargs.get("output_dir") is not None:
+                    if not hasattr(self, "writer"):
+                        self.writer = DatadirWriter(kwargs.get("output_dir"))
+                    ibest_writer = self.writer[f"{nbest_idx + 1}best_recog"]
+                    
                 # remove sos/eos and get results
                 last_pos = -1
                 if isinstance(hyp.yseq, list):
@@ -413,12 +415,11 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
                         token, timestamp)
 
                     result_i = {"key": key[i], "text": text_postprocessed,
-                                "timestamp": time_stamp_postprocessed, "raw_text": copy.copy(text_postprocessed)
+                                "timestamp": time_stamp_postprocessed
                                 }
                     
                     if ibest_writer is not None:
                         ibest_writer["token"][key[i]] = " ".join(token)
-                        # ibest_writer["raw_text"][key[i]] = text
                         ibest_writer["timestamp"][key[i]] = time_stamp_postprocessed
                         ibest_writer["text"][key[i]] = text_postprocessed
                 else:

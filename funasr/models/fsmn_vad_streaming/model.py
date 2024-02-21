@@ -625,9 +625,10 @@ class FsmnVADStreaming(nn.Module):
 			self.init_cache(cache)
 		
 		ibest_writer = None
-		if ibest_writer is None and kwargs.get("output_dir") is not None:
-			writer = DatadirWriter(kwargs.get("output_dir"))
-			ibest_writer = writer[f"{1}best_recog"]
+		if kwargs.get("output_dir") is not None:
+			if not hasattr(self, "writer"):
+				self.writer = DatadirWriter(kwargs.get("output_dir"))
+			ibest_writer = self.writer[f"{1}best_recog"]
 		
 		results = []
 		result_i = {"key": key[0], "value": segments}

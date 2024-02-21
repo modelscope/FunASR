@@ -183,9 +183,11 @@ class MonotonicAligner(torch.nn.Module):
         
         results = []
         ibest_writer = None
-        if ibest_writer is None and kwargs.get("output_dir") is not None:
-            writer = DatadirWriter(kwargs.get("output_dir"))
-            ibest_writer = writer["tp_res"]
+        if kwargs.get("output_dir") is not None:
+            if not hasattr(self, "writer"):
+                self.writer = DatadirWriter(kwargs.get("output_dir"))
+            ibest_writer = self.writer["tp_res"]
+
         for i, (us_alpha, us_peak, token_int) in enumerate(zip(us_alphas, us_peaks, text_token_int_list)):
             token = tokenizer.ids2tokens(token_int)
             timestamp_str, timestamp = ts_prediction_lfr6_standard(us_alpha[:encoder_out_lens[i] * 3],

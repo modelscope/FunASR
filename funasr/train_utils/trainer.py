@@ -3,6 +3,7 @@ import time
 import torch
 import logging
 from tqdm import tqdm
+from datetime import datetime
 import torch.distributed as dist
 from contextlib import nullcontext
 # from torch.utils.tensorboard import SummaryWriter
@@ -107,14 +108,10 @@ class Trainer:
         filename = os.path.join(self.output_dir, f'model.pt.ep{epoch}')
         torch.save(state, filename)
         
-        print(f'Checkpoint saved to {filename}')
+        print(f'\nCheckpoint saved to {filename}\n')
         latest = Path(os.path.join(self.output_dir, f'model.pt'))
-        try:
-            latest.unlink()
-        except:
-            pass
+        torch.save(state, latest)
 
-        latest.symlink_to(filename)
     
     def _resume_checkpoint(self, resume_path):
         """
@@ -128,7 +125,20 @@ class Trainer:
         if os.path.isfile(ckpt):
             checkpoint = torch.load(ckpt)
             self.start_epoch = checkpoint['epoch'] + 1
-            self.model.load_state_dict(checkpoint['state_dict'])
+            # self.model.load_state_dict(checkpoint['state_dict'])
+            src_state = checkpoint['state_dict']
+            dst_state = self.model.state_dict()
+            for k in dst_state.keys():
+                if not k.startswith("module.") and "module."+k in src_state.keys():
+                    k_ddp = "module."+k
+                else:
+                    k_ddp = k
+                if k_ddp in src_state.keys():
+                    dst_state[k] = src_state[k_ddp]
+                else:
+                    print(f"Miss key in ckpt: model: {k}, ckpt: {k_ddp}")
+
+            self.model.load_state_dict(dst_state)
             self.optim.load_state_dict(checkpoint['optimizer'])
             self.scheduler.load_state_dict(checkpoint['scheduler'])
             print(f"Checkpoint loaded successfully from '{ckpt}'")
@@ -147,7 +157,7 @@ class Trainer:
             self._resume_checkpoint(self.output_dir)
         
         for epoch in range(self.start_epoch, self.max_epoch + 1):
-            
+            time1 = time.perf_counter()
             self._train_epoch(epoch)
 
 
@@ -169,6 +179,9 @@ class Trainer:
             
             self.scheduler.step()
 
+            time2 = time.perf_counter()
+            time_escaped = (time2 - time1)/3600.0
+            print(f"\ntime_escaped_epoch: {time_escaped:.3f} hours, estimated to finish {self.max_epoch} epoch: {(self.max_epoch-epoch)*time_escaped:.3f}\n")
 
         if self.rank == 0:
             average_checkpoints(self.output_dir, self.avg_nbest_model)
@@ -273,11 +286,16 @@ class Trainer:
                                              torch.cuda.memory_reserved()/1024/1024/1024,
                                              torch.cuda.max_memory_reserved()/1024/1024/1024,
                                              )
+                lr = self.scheduler.get_last_lr()[0]
+                time_now = datetime.now()
+                time_now = time_now.strftime("%Y-%m-%d %H:%M:%S")
                 description = (
+                    f"{time_now}, "
                     f"rank: {self.local_rank}, "
                     f"epoch: {epoch}/{self.max_epoch}, "
-                    f"step: {batch_idx}/{len(self.dataloader_train)}, total: {self.batch_total}, "
+                    f"step: {batch_idx+1}/{len(self.dataloader_train)}, total: {self.batch_total}, "
                     f"(loss: {loss.detach().cpu().item():.3f}), "
+                    f"(lr: {lr:.3e}), "
                     f"{[(k, round(v.cpu().item(), 3)) for k, v in stats.items()]}, "
                     f"{speed_stats}, "
                     f"{gpu_info}"
@@ -341,7 +359,7 @@ class Trainer:
                     description = (
                         f"rank: {self.local_rank}, "
                         f"validation epoch: {epoch}/{self.max_epoch}, "
-                        f"step: {batch_idx}/{len(self.dataloader_val)}, "
+                        f"step: {batch_idx+1}/{len(self.dataloader_val)}, "
                         f"(loss: {loss.detach().cpu().item():.3f}), "
                         f"{[(k, round(v.cpu().item(), 3)) for k, v in stats.items()]}, "
                         f"{speed_stats}, "
