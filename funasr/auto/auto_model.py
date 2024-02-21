@@ -400,18 +400,18 @@ class AutoModel:
                     for res, vadsegment in zip(restored_data, vadsegments):
                         sentence_list.append({"start": vadsegment[0],\
                                                 "end": vadsegment[1],
-                                                "sentence": res['text'],
+                                                "sentence": res['raw_text'],
                                                 "timestamp": res['timestamp']})
                 elif self.spk_mode == 'punc_segment':
                     sentence_list = timestamp_sentence(punc_res[0]['punc_array'], \
                                                         result['timestamp'], \
-                                                        result['text'])
+                                                        result['raw_text'])
                 distribute_spk(sentence_list, sv_output)
                 result['sentence_info'] = sentence_list
             elif kwargs.get("sentence_timestamp", False):
                 sentence_list = timestamp_sentence(punc_res[0]['punc_array'], \
                                                         result['timestamp'], \
-                                                        result['text'])
+                                                        result['raw_text'])
                 result['sentence_info'] = sentence_list
             if "spk_embedding" in result: del result['spk_embedding']
                     
