@@ -537,7 +537,6 @@ class Paraformer(torch.nn.Module):
                     
                     result_i = {"key": key[i], "text": text_postprocessed}
 
-                    
                     if ibest_writer is not None:
                         ibest_writer["token"][key[i]] = " ".join(token)
                         # ibest_writer["text"][key[i]] = text
