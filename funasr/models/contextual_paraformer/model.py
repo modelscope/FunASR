@@ -294,10 +294,11 @@ class ContextualParaformer(Paraformer):
                                                                enforce_sorted=False)
             _, (h_n, _) = self.bias_encoder(hw_embed)
             hw_embed = h_n.repeat(encoder_out.shape[0], 1, 1)
-        
+        pdb.set_trace()
         decoder_outs = self.decoder(
             encoder_out, encoder_out_lens, sematic_embeds, ys_pad_lens, contextual_info=hw_embed, clas_scale=clas_scale
         )
+        pdb.set_trace()
         decoder_out = decoder_outs[0]
         decoder_out = torch.log_softmax(decoder_out, dim=-1)
         return decoder_out, ys_pad_lens
@@ -311,65 +312,55 @@ class ContextualParaformer(Paraformer):
                  **kwargs,
                  ):
         # init beamsearch
-        pdb.set_trace()
+
         is_use_ctc = kwargs.get("decoding_ctc_weight", 0.0) > 0.00001 and self.ctc != None
         is_use_lm = kwargs.get("lm_weight", 0.0) > 0.00001 and kwargs.get("lm_file", None) is not None
         if self.beam_search is None and (is_use_lm or is_use_ctc):
             logging.info("enable beam_search")
             self.init_beam_search(**kwargs)
             self.nbest = kwargs.get("nbest", 1)
-        pdb.set_trace()
+
         meta_data = {}
         
         # extract fbank feats
         time1 = time.perf_counter()
-        pdb.set_trace()
+
         audio_sample_list = load_audio_text_image_video(data_in, fs=frontend.fs, audio_fs=kwargs.get("fs", 16000))
-        pdb.set_trace()
+
         time2 = time.perf_counter()
         meta_data["load_data"] = f"{time2 - time1:0.3f}"
-        pdb.set_trace()
+
         speech, speech_lengths = extract_fbank(audio_sample_list, data_type=kwargs.get("data_type", "sound"),
                                                frontend=frontend)
         time3 = time.perf_counter()
         meta_data["extract_feat"] = f"{time3 - time2:0.3f}"
         meta_data[
             "batch_data_time"] = speech_lengths.sum().item() * frontend.frame_shift * frontend.lfr_n / 1000
-        
-        pdb.set_trace()
+
         speech = speech.to(device=kwargs["device"])
         speech_lengths = speech_lengths.to(device=kwargs["device"])
 
         # hotword
-        pdb.set_trace()
         self.hotword_list = self.generate_hotwords_list(kwargs.get("hotword", None), tokenizer=tokenizer, frontend=frontend)
-        pdb.set_trace()
 
-        
         # Encoder
         encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
         if isinstance(encoder_out, tuple):
             encoder_out = encoder_out[0]
-        pdb.set_trace()
-
 
         # predictor
         predictor_outs = self.calc_predictor(encoder_out, encoder_out_lens)
         pre_acoustic_embeds, pre_token_length, alphas, pre_peak_index = predictor_outs[0], predictor_outs[1], \
                                                                         predictor_outs[2], predictor_outs[3]
-        pdb.set_trace()
         pre_token_length = pre_token_length.round().long()
         if torch.max(pre_token_length) < 1:
             return []
-
-        pdb.set_trace()
         
         decoder_outs = self.cal_decoder_with_predictor(encoder_out, encoder_out_lens,
                                                                  pre_acoustic_embeds,
                                                                  pre_token_length,
                                                                  hw_list=self.hotword_list,
                                                                  clas_scale=kwargs.get("clas_scale", 1.0))
-        pdb.set_trace()
         decoder_out, ys_pad_lens = decoder_outs[0], decoder_outs[1]
         
         pdb.set_trace()
