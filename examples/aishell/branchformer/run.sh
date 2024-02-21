@@ -174,6 +174,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
           ++output_dir="${inference_dir}/${JOB}" \
           ++device="${inference_device}" \
           ++ncpu=1 \
+          ++disable_log=true \
           ++batch_size="${inference_batch_size}" &> ${_logdir}/log.${JOB}.txt
         }&
 

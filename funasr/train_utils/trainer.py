@@ -3,6 +3,7 @@ import time
 import torch
 import logging
 from tqdm import tqdm
+from datetime import datetime
 import torch.distributed as dist
 from contextlib import nullcontext
 # from torch.utils.tensorboard import SummaryWriter
@@ -283,7 +284,10 @@ class Trainer:
                                              torch.cuda.max_memory_reserved()/1024/1024/1024,
                                              )
                 lr = self.scheduler.get_last_lr()[0]
+                time_now = datetime.now()
+                time_now = now.strftime("%Y-%m-%d %H:%M:%S")
                 description = (
+                    f"{time_now}, "
                     f"rank: {self.local_rank}, "
                     f"epoch: {epoch}/{self.max_epoch}, "
                     f"step: {batch_idx+1}/{len(self.dataloader_train)}, total: {self.batch_total}, "
