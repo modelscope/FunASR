@@ -1,16 +1,15 @@
-"""Receptance Weighted Key Value (RWKV) block definition.
-
-Based/modified from https://github.com/BlinkDL/RWKV-LM/blob/main/RWKV-v4/src/model.py
-
-"""
-
-from typing import Dict, Optional, Tuple
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+#  MIT License  (https://opensource.org/licenses/MIT)
 
 import torch
+from typing import Dict, Optional, Tuple
 
-from funasr.models.rwkv_bat.rwkv_attention import EncoderSelfAttention, DecoderSelfAttention
-from funasr.models.rwkv_bat.rwkv_feed_forward import FeedForward
 from funasr.models.transformer.layer_norm import LayerNorm
+from funasr.models.rwkv_bat.rwkv_feed_forward import FeedForward
+from funasr.models.rwkv_bat.rwkv_attention import EncoderSelfAttention, DecoderSelfAttention
+
 
 class RWKV(torch.nn.Module):
     """RWKV module.

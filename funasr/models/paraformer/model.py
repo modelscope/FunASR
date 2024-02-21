@@ -455,7 +455,9 @@ class Paraformer(torch.nn.Module):
             speech, speech_lengths = data_in, data_lengths
             if len(speech.shape) < 3:
                 speech = speech[None, :, :]
-            if speech_lengths is None:
+            if speech_lengths is not None:
+                speech_lengths = speech_lengths.squeeze(-1)
+            else:
                 speech_lengths = speech.shape[1]
         else:
             # extract fbank feats

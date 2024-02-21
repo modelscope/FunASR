@@ -1,17 +1,14 @@
-"""Attention (time mixing) modules for RWKV block.
-
-Based/Modified from https://github.com/BlinkDL/RWKV-LM/blob/main/RWKV-v4/src/model.py.
-
-Some variables are renamed according to https://github.com/huggingface/transformers/blob/main/src/transformers/models/rwkv/modeling_rwkv.py.
-
-"""  # noqa
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+#  MIT License  (https://opensource.org/licenses/MIT)
 
 import math
-from importlib.util import find_spec
+import torch
 from pathlib import Path
+from importlib.util import find_spec
 from typing import List, Optional, Tuple, Union
 
-import torch
 
 wkv_kernel_encoder = None
 wkv_kernel_decoder = None
