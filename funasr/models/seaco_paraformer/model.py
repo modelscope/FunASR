@@ -415,12 +415,11 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
                         token, timestamp)
 
                     result_i = {"key": key[i], "text": text_postprocessed,
-                                "timestamp": time_stamp_postprocessed, "raw_text": copy.copy(text_postprocessed)
+                                "timestamp": time_stamp_postprocessed
                                 }
                     
                     if ibest_writer is not None:
                         ibest_writer["token"][key[i]] = " ".join(token)
-                        # ibest_writer["raw_text"][key[i]] = text
                         ibest_writer["timestamp"][key[i]] = time_stamp_postprocessed
                         ibest_writer["text"][key[i]] = text_postprocessed
                 else:
