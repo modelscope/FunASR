@@ -128,7 +128,20 @@ class Trainer:
         if os.path.isfile(ckpt):
             checkpoint = torch.load(ckpt)
             self.start_epoch = checkpoint['epoch'] + 1
-            self.model.load_state_dict(checkpoint['state_dict'])
+            # self.model.load_state_dict(checkpoint['state_dict'])
+            src_state = checkpoint['state_dict']
+            dst_state = self.model.state_dict()
+            for k in dst_state.keys():
+                if not k.startswith("module.") and "module."+k in src_state.keys():
+                    k_ddp = "module."+k
+                else:
+                    k_ddp = k
+                if k_ddp in src_state.keys():
+                    dst_state[k] = src_state[k_ddp]
+                else:
+                    print(f"Miss key in ckpt: model: {k}, ckpt: {k_ddp}")
+
+            self.model.load_state_dict(dst_state)
             self.optim.load_state_dict(checkpoint['optimizer'])
             self.scheduler.load_state_dict(checkpoint['scheduler'])
             print(f"Checkpoint loaded successfully from '{ckpt}'")
