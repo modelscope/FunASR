@@ -145,6 +145,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
 
     inference_dir="${exp_dir}/exp/${model_dir}/inference-${inference_checkpoint}/${dset}"
     _logdir="${inference_dir}/logdir"
+    echo "inference_dir: ${inference_dir}"
 
     mkdir -p "${_logdir}"
     data_dir="${feats_dir}/data/${dset}"
@@ -172,6 +173,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
           ++input="${_logdir}/keys.${JOB}.scp" \
           ++output_dir="${inference_dir}/${JOB}" \
           ++device="${inference_device}" \
+          ++ncpu=1 \
           ++batch_size="${inference_batch_size}" &> ${_logdir}/log.${JOB}.txt
         }&
 
