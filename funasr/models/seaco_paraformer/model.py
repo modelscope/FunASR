@@ -32,7 +32,7 @@ from funasr.models.transformer.utils.add_sos_eos import add_sos_eos
 from funasr.models.transformer.utils.nets_utils import make_pad_mask, pad_list
 from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
 
-
+import pdb
 if LooseVersion(torch.__version__) >= LooseVersion("1.6.0"):
     from torch.cuda.amp import autocast
 else:
@@ -130,7 +130,7 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
         hotword_pad = kwargs.get("hotword_pad")
         hotword_lengths = kwargs.get("hotword_lengths")
         dha_pad = kwargs.get("dha_pad")
-
+        
         batch_size = speech.shape[0]
         self.step_cur += 1
         # for data-parallel
@@ -212,58 +212,87 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
                                nfilter=50,
                                seaco_weight=1.0):
         # decoder forward
+        pdb.set_trace()
         decoder_out, decoder_hidden, _ = self.decoder(encoder_out, encoder_out_lens, sematic_embeds, ys_pad_lens, return_hidden=True, return_both=True)
+        pdb.set_trace()
         decoder_pred = torch.log_softmax(decoder_out, dim=-1)
         if hw_list is not None:
+            pdb.set_trace()
             hw_lengths = [len(i) for i in hw_list]
             hw_list_ = [torch.Tensor(i).long() for i in hw_list]
             hw_list_pad = pad_list(hw_list_, 0).to(encoder_out.device)
+            pdb.set_trace()
             selected = self._hotword_representation(hw_list_pad, torch.Tensor(hw_lengths).int().to(encoder_out.device))
+            pdb.set_trace()
             contextual_info = selected.squeeze(0).repeat(encoder_out.shape[0], 1, 1).to(encoder_out.device)
+            pdb.set_trace()
             num_hot_word = contextual_info.shape[1]
             _contextual_length = torch.Tensor([num_hot_word]).int().repeat(encoder_out.shape[0]).to(encoder_out.device)
-            
+            pdb.set_trace()
             # ASF Core
             if nfilter > 0 and nfilter < num_hot_word:
                 for dec in self.seaco_decoder.decoders:
                     dec.reserve_attn = True
+                pdb.set_trace()
                 # cif_attended, _ = self.decoder2(contextual_info, _contextual_length, sematic_embeds, ys_pad_lens)
                 dec_attended, _ = self.seaco_decoder(contextual_info, _contextual_length, decoder_hidden, ys_pad_lens)
                 # cif_filter = torch.topk(self.decoder2.decoders[-1].attn_mat[0][0].sum(0).sum(0)[:-1], min(nfilter, num_hot_word-1))[1].tolist()
+                pdb.set_trace()
                 hotword_scores = self.seaco_decoder.decoders[-1].attn_mat[0][0].sum(0).sum(0)[:-1]
                 # hotword_scores /= torch.sqrt(torch.tensor(hw_lengths)[:-1].float()).to(hotword_scores.device)
+                pdb.set_trace()
                 dec_filter = torch.topk(hotword_scores, min(nfilter, num_hot_word-1))[1].tolist()
+                pdb.set_trace()
                 add_filter = dec_filter
+                pdb.set_trace()
                 add_filter.append(len(hw_list_pad)-1)
                 # filter hotword embedding
+                pdb.set_trace()
                 selected = selected[add_filter]
                 # again
+                pdb.set_trace()
                 contextual_info = selected.squeeze(0).repeat(encoder_out.shape[0], 1, 1).to(encoder_out.device)
+                pdb.set_trace()
                 num_hot_word = contextual_info.shape[1]
                 _contextual_length = torch.Tensor([num_hot_word]).int().repeat(encoder_out.shape[0]).to(encoder_out.device)
+                pdb.set_trace()
                 for dec in self.seaco_decoder.decoders:
                     dec.attn_mat = []
                     dec.reserve_attn = False
-            
+            pdb.set_trace()
             # SeACo Core
             cif_attended, _ = self.seaco_decoder(contextual_info, _contextual_length, sematic_embeds, ys_pad_lens)
+            pdb.set_trace()
             dec_attended, _ = self.seaco_decoder(contextual_info, _contextual_length, decoder_hidden, ys_pad_lens)
+            pdb.set_trace()
             merged = self._merge(cif_attended, dec_attended)
-            
+            pdb.set_trace()
+
             dha_output = self.hotword_output_layer(merged)  # remove the last token in loss calculation
+            pdb.set_trace()
             dha_pred = torch.log_softmax(dha_output, dim=-1)
+            pdb.set_trace()
             def _merge_res(dec_output, dha_output):
+                pdb.set_trace()
                 lmbd = torch.Tensor([seaco_weight] * dha_output.shape[0])
+                pdb.set_trace()
                 dha_ids = dha_output.max(-1)[-1]# [0]
+                pdb.set_trace()
                 dha_mask = (dha_ids == 8377).int().unsqueeze(-1)
+                pdb.set_trace()
                 a = (1 - lmbd) / lmbd
                 b = 1 / lmbd
+                pdb.set_trace()
                 a, b = a.to(dec_output.device), b.to(dec_output.device)
+                pdb.set_trace()
                 dha_mask = (dha_mask + a.reshape(-1, 1, 1)) / b.reshape(-1, 1, 1)
                 # logits = dec_output * dha_mask + dha_output[:,:,:-1] * (1-dha_mask)
+                pdb.set_trace()
                 logits = dec_output * dha_mask + dha_output[:,:,:] * (1-dha_mask)
                 return logits
+
             merged_pred = _merge_res(decoder_pred, dha_pred)
+            pdb.set_trace()
             # import pdb; pdb.set_trace()
             return merged_pred
         else:
@@ -318,7 +347,7 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
             logging.info("enable beam_search")
             self.init_beam_search(**kwargs)
             self.nbest = kwargs.get("nbest", 1)
-        
+        pdb.set_trace()
         meta_data = {}
         
         # extract fbank feats
@@ -326,6 +355,7 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
         audio_sample_list = load_audio_text_image_video(data_in, fs=frontend.fs, audio_fs=kwargs.get("fs", 16000))
         time2 = time.perf_counter()
         meta_data["load_data"] = f"{time2 - time1:0.3f}"
+        pdb.set_trace()
         speech, speech_lengths = extract_fbank(audio_sample_list, data_type=kwargs.get("data_type", "sound"),
                                                frontend=frontend)
         time3 = time.perf_counter()
@@ -336,14 +366,18 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
         speech = speech.to(device=kwargs["device"])
         speech_lengths = speech_lengths.to(device=kwargs["device"])
         
+        pdb.set_trace()
         # hotword
         self.hotword_list = self.generate_hotwords_list(kwargs.get("hotword", None), tokenizer=tokenizer, frontend=frontend)
         
+        pdb.set_trace()
         # Encoder
         encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
         if isinstance(encoder_out, tuple):
             encoder_out = encoder_out[0]
         
+
+        pdb.set_trace()
         # predictor
         predictor_outs = self.calc_predictor(encoder_out, encoder_out_lens)
         pre_acoustic_embeds, pre_token_length, _, _ = predictor_outs[0], predictor_outs[1], \
@@ -352,15 +386,16 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
         if torch.max(pre_token_length) < 1:
             return []
 
-
+        pdb.set_trace()
         decoder_out = self._seaco_decode_with_ASF(encoder_out, encoder_out_lens,
                                                    pre_acoustic_embeds,
                                                    pre_token_length,
                                                    hw_list=self.hotword_list)
+        pdb.set_trace()
         # decoder_out, _ = decoder_outs[0], decoder_outs[1]
         _, _, us_alphas, us_peaks = self.calc_predictor_timestamp(encoder_out, encoder_out_lens,
                                                                   pre_token_length)
-        
+        pdb.set_trace()
         results = []
         b, n, d = decoder_out.size()
         for i in range(b):

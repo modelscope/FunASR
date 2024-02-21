@@ -209,14 +209,12 @@ class AutoModel:
         kwargs.update(cfg)
         model = self.model if model is None else model
         model.eval()
-        pdb.set_trace()
 
         batch_size = kwargs.get("batch_size", 1)
         # if kwargs.get("device", "cpu") == "cpu":
         #     batch_size = 1
         
         key_list, data_list = prepare_data_iterator(input, input_len=input_len, data_type=kwargs.get("data_type", None), key=key)
-        pdb.set_trace()
 
         speed_stats = {}
         asr_result_list = []
@@ -225,14 +223,12 @@ class AutoModel:
         pbar = tqdm(colour="blue", total=num_samples, dynamic_ncols=True) if not disable_pbar else None
         time_speech_total = 0.0
         time_escape_total = 0.0
-        pdb.set_trace()
         for beg_idx in range(0, num_samples, batch_size):
-            pdb.set_trace()
             end_idx = min(num_samples, beg_idx + batch_size)
             data_batch = data_list[beg_idx:end_idx]
             key_batch = key_list[beg_idx:end_idx]
             batch = {"data_in": data_batch, "key": key_batch}
-            pdb.set_trace()
+
             if (end_idx - beg_idx) == 1 and kwargs.get("data_type", None) == "fbank": # fbank
                 batch["data_in"] = data_batch[0]
                 batch["data_lengths"] = input_len
