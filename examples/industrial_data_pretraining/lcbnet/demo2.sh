@@ -1,12 +1,14 @@
-file_dir=./exp/
+file_dir=./exp/speech_lcbnet_contextual_asr-en-16k-bpe-vocab5002-pytorch
 
 
 python -m funasr.bin.inference \
---config-path=$file_dir \
+--config-path=${file_dir} \
 --config-name="config.yaml" \
-++init_param="/nfs/yufan.yf/workspace/model_download/modelscope/hub/damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404/model.pb" \
-++tokenizer_conf.token_list="/nfs/yufan.yf/workspace/model_download/modelscope/hub/damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404/tokens.txt" \
-++frontend_conf.cmvn_file="/nfs/yufan.yf/workspace/model_download/modelscope/hub/damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404/am.mvn" \
-++input="/nfs/yufan.yf/workspace/model_download/modelscope/hub/damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404/asr_example_zh.wav" \
-++output_dir="./outputs/debug2" \
+++init_param=${file_dir}/model.pb \
+++tokenizer_conf.token_list=${file_dir}/tokens.txt \
+++frontend_conf.cmvn_file=${file_dir}/am.mvn \
+++input=${file_dir}/wav.scp \
+++input=${file_dir}/ocr_text \
+++tokenizer_conf.bpemodel=${file_dir}/bpe.model \
+++output_dir="./outputs/debug" \
 ++device="" \
