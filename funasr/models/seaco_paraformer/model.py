@@ -223,12 +223,8 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
             
             # ASF Core
             if nfilter > 0 and nfilter < num_hot_word:
-                for dec in self.seaco_decoder.decoders:
-                    dec.reserve_attn = True
-                # cif_attended, _ = self.decoder2(contextual_info, _contextual_length, sematic_embeds, ys_pad_lens)
-                dec_attended, _ = self.seaco_decoder(contextual_info, _contextual_length, decoder_hidden, ys_pad_lens)
-                # cif_filter = torch.topk(self.decoder2.decoders[-1].attn_mat[0][0].sum(0).sum(0)[:-1], min(nfilter, num_hot_word-1))[1].tolist()
-                hotword_scores = self.seaco_decoder.decoders[-1].attn_mat[0][0].sum(0).sum(0)[:-1]
+                hotword_scores = self.seaco_decoder.forward_asf6(contextual_info, _contextual_length, decoder_hidden, ys_pad_lens)
+                hotword_scores = hotword_scores[0].sum(0).sum(0)
                 # hotword_scores /= torch.sqrt(torch.tensor(hw_lengths)[:-1].float()).to(hotword_scores.device)
                 dec_filter = torch.topk(hotword_scores, min(nfilter, num_hot_word-1))[1].tolist()
                 add_filter = dec_filter
@@ -239,9 +235,6 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
                 contextual_info = selected.squeeze(0).repeat(encoder_out.shape[0], 1, 1).to(encoder_out.device)
                 num_hot_word = contextual_info.shape[1]
                 _contextual_length = torch.Tensor([num_hot_word]).int().repeat(encoder_out.shape[0]).to(encoder_out.device)
-                for dec in self.seaco_decoder.decoders:
-                    dec.attn_mat = []
-                    dec.reserve_attn = False
             
             # SeACo Core
             cif_attended, _ = self.seaco_decoder(contextual_info, _contextual_length, sematic_embeds, ys_pad_lens)
