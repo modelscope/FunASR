@@ -26,7 +26,7 @@ class DefaultFrontend(nn.Module):
 
     def __init__(
             self,
-            fs: Union[int, str] = 16000,
+            fs: int = 16000,
             n_fft: int = 512,
             win_length: int = None,
             hop_length: int = 128,
@@ -44,8 +44,6 @@ class DefaultFrontend(nn.Module):
             **kwargs,
     ):
         super().__init__()
-        if isinstance(fs, str):
-            fs = humanfriendly.parse_size(fs)
 
         # Deepcopy (In general, dict shouldn't be used as default arg)
         frontend_conf = copy.deepcopy(frontend_conf)
@@ -147,7 +145,7 @@ class MultiChannelFrontend(nn.Module):
 
     def __init__(
             self,
-            fs: Union[int, str] = 16000,
+            fs: int = 16000,
             n_fft: int = 512,
             win_length: int = None,
             hop_length: int = None,
@@ -170,9 +168,6 @@ class MultiChannelFrontend(nn.Module):
             mc: bool = True
     ):
         super().__init__()
-        if isinstance(fs, str):
-            fs = humanfriendly.parse_size(fs)
-
         # Deepcopy (In general, dict shouldn't be used as default arg)
         frontend_conf = copy.deepcopy(frontend_conf)
         if win_length is None and hop_length is None:
