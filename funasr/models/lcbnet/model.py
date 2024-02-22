@@ -117,6 +117,9 @@ class LCBNet(nn.Module):
         self.specaug = specaug
         self.normalize = normalize
         self.encoder = encoder
+        self.text_encoder = text_encoder
+        self.fusion_encoder = fusion_encoder
+        self.bias_predictor = bias_predictor
 
         if not hasattr(self.encoder, "interctc_use_conditioning"):
             self.encoder.interctc_use_conditioning = False
