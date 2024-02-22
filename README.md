@@ -95,7 +95,7 @@ Below is a quick start tutorial. Test audio files ([Mandarin](https://isv-data.o
 ### Command-line usage
 
 ```shell
-funasr +model=paraformer-zh +vad_model="fsmn-vad" +punc_model="ct-punc" +input=asr_example_zh.wav
+funasr ++model=paraformer-zh ++vad_model="fsmn-vad" ++punc_model="ct-punc" ++input=asr_example_zh.wav
 ```
 
 Notes: Support recognition of single audio file, as well as file list in Kaldi-style wav.scp format: `wav_id wav_pat`
