@@ -19,11 +19,9 @@ from distutils.version import LooseVersion
 
 from funasr.register import tables
 from funasr.utils import postprocess_utils
-from funasr.metrics.compute_acc import th_accuracy
 from funasr.models.paraformer.model import Paraformer
 from funasr.utils.datadir_writer import DatadirWriter
 from funasr.models.paraformer.search import Hypothesis
-from funasr.models.paraformer.cif_predictor import mae_loss
 from funasr.train_utils.device_funcs import force_gatherable
 from funasr.models.bicif_paraformer.model import BiCifParaformer
 from funasr.losses.label_smoothing_loss import LabelSmoothingLoss
@@ -76,7 +74,7 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
                 self.lstm_proj = torch.nn.Linear(self.inner_dim*2, self.inner_dim)
             else:
                 self.lstm_proj = None
-            self.bias_embed = torch.nn.Embedding(self.vocab_size, self.inner_dim)
+            # self.bias_embed = torch.nn.Embedding(self.vocab_size, self.inner_dim)
         elif self.bias_encoder_type == 'mean':
             self.bias_embed = torch.nn.Embedding(self.vocab_size, self.inner_dim)
         else:
@@ -274,6 +272,8 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
                                 hotword_lengths):
         if self.bias_encoder_type != 'lstm':
             logging.error("Unsupported bias encoder type")
+            
+        '''
         hw_embed = self.decoder.embed(hotword_pad)
         hw_embed, (_, _) = self.bias_encoder(hw_embed)
         if self.lstm_proj is not None:
@@ -281,26 +281,20 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
         _ind = np.arange(0, hw_embed.shape[0]).tolist()
         selected = hw_embed[_ind, [i-1 for i in hotword_lengths.detach().cpu().tolist()]]
         return selected
+        '''
 
-    '''
-     def calc_predictor(self, encoder_out, encoder_out_lens):
-        encoder_out_mask = (~make_pad_mask(encoder_out_lens, maxlen=encoder_out.size(1))[:, None, :]).to(
-            encoder_out.device)
-        pre_acoustic_embeds, pre_token_length, alphas, pre_peak_index, pre_token_length2 = self.predictor(encoder_out,
-                                                                                                          None,
-                                                                                                          encoder_out_mask,
-                                                                                                          ignore_id=self.ignore_id)
-        return pre_acoustic_embeds, pre_token_length, alphas, pre_peak_index
-
-
-    def calc_predictor_timestamp(self, encoder_out, encoder_out_lens, token_num):
-        encoder_out_mask = (~make_pad_mask(encoder_out_lens, maxlen=encoder_out.size(1))[:, None, :]).to(
-            encoder_out.device)
-        ds_alphas, ds_cif_peak, us_alphas, us_peaks = self.predictor.get_upsample_timestamp(encoder_out,
-                                                                                            encoder_out_mask,
-                                                                                            token_num)
-        return ds_alphas, ds_cif_peak, us_alphas, us_peaks
-    '''        
+        # hw_embed = self.sac_embedding(hotword_pad)
+        hw_embed = self.decoder.embed(hotword_pad)
+        hw_embed = torch.nn.utils.rnn.pack_padded_sequence(hw_embed, hotword_lengths.cpu().type(torch.int64), batch_first=True, enforce_sorted=False)
+        packed_rnn_output, _ = self.bias_encoder(hw_embed)
+        rnn_output = torch.nn.utils.rnn.pad_packed_sequence(packed_rnn_output, batch_first=True)[0]
+        if self.lstm_proj is not None:
+            hw_hidden = self.lstm_proj(rnn_output)
+        else:
+            hw_hidden = rnn_output
+        _ind = np.arange(0, hw_hidden.shape[0]).tolist()
+        selected = hw_hidden[_ind, [i-1 for i in hotword_lengths.detach().cpu().tolist()]]
+        return selected      
   
     def inference(self,
                  data_in,
