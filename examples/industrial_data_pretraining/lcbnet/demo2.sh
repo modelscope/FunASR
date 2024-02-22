@@ -1,4 +1,4 @@
-file_dir="./exp/speech_lcbnet_contextual_asr-en-16k-bpe-vocab5002-pytorch"
+file_dir="/nfs/yufan.yf/workspace/github/FunASR/examples/industrial_data_pretraining/lcbnet/exp/speech_lcbnet_contextual_asr-en-16k-bpe-vocab5002-pytorch"
 
 
 python -m funasr.bin.inference \
