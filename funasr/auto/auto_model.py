@@ -169,7 +169,7 @@ class AutoModel:
             frontend = frontend_class(**kwargs["frontend_conf"])
             kwargs["frontend"] = frontend
             kwargs["input_size"] = frontend.output_size()
-        
+        pdb.set_trace()
         # build model
         model_class = tables.model_classes.get(kwargs["model"])
         model = model_class(**kwargs, **kwargs["model_conf"], vocab_size=vocab_size)
