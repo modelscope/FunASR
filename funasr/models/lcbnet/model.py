@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+#  MIT License  (https://opensource.org/licenses/MIT)
+
 import logging
 from typing import Union, Dict, List, Tuple, Optional
 
@@ -17,10 +22,13 @@ from funasr.utils import postprocess_utils
 from funasr.utils.datadir_writer import DatadirWriter
 from funasr.register import tables
 
-@tables.register("model_classes", "Transformer")
-class Transformer(nn.Module):
-    """CTC-attention hybrid Encoder-Decoder model"""
-
+@tables.register("model_classes", "LCBNet")
+class LCBNet(nn.Module):
+    """
+    Author: Speech Lab of DAMO Academy, Alibaba Group
+    LCB-NET: LONG-CONTEXT BIASING FOR AUDIO-VISUAL SPEECH RECOGNITION
+    https://arxiv.org/abs/2401.06390
+    """
     
     def __init__(
         self,
@@ -32,10 +40,19 @@ class Transformer(nn.Module):
         encoder_conf: dict = None,
         decoder: str = None,
         decoder_conf: dict = None,
+        text_encoder: str = None,
+        text_encoder_conf: dict = None,
+        bias_predictor: str = None,
+        bias_predictor_conf: dict = None,
+        fusion_encoder: str = None,
+        fusion_encoder_conf: dict = None,
         ctc: str = None,
         ctc_conf: dict = None,
         ctc_weight: float = 0.5,
         interctc_weight: float = 0.0,
+        select_num: int = 2,
+        select_length: int = 3,
+        insert_blank: bool = True,
         input_size: int = 80,
         vocab_size: int = -1,
         ignore_id: int = -1,
@@ -66,6 +83,15 @@ class Transformer(nn.Module):
         encoder_class = tables.encoder_classes.get(encoder)
         encoder = encoder_class(input_size=input_size, **encoder_conf)
         encoder_output_size = encoder.output_size()
+
+        # lcbnet modules: text encoder, fusion encoder and bias predictor
+        text_encoder_class = tables.encoder_classes.get(text_encoder)
+        text_encoder = text_encoder_class(input_size=vocab_size, **text_encoder_conf)
+        fusion_encoder_class = tables.encoder_classes.get(fusion_encoder)
+        fusion_encoder = fusion_encoder_class(**fusion_encoder_conf)
+        bias_predictor_class = tables.encoder_classes.get_class(bias_predictor)
+        bias_predictor = bias_predictor_class(args.bias_predictor_conf)
+
         if decoder is not None:
             decoder_class = tables.decoder_classes.get(decoder)
             decoder = decoder_class(
