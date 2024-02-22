@@ -161,18 +161,15 @@ class AutoModel:
             vocab_size = len(tokenizer.token_list)
         else:
             vocab_size = -1
-        pdb.set_trace()
         # build frontend
         frontend = kwargs.get("frontend", None)
-        pdb.set_trace()
+
         if frontend is not None:
-            pdb.set_trace()
             frontend_class = tables.frontend_classes.get(frontend)
             frontend = frontend_class(**kwargs["frontend_conf"])
-            pdb.set_trace()
             kwargs["frontend"] = frontend
             kwargs["input_size"] = frontend.output_size()
-        pdb.set_trace()
+
         # build model
         model_class = tables.model_classes.get(kwargs["model"])
         model = model_class(**kwargs, **kwargs["model_conf"], vocab_size=vocab_size)
