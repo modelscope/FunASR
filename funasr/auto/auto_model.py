@@ -164,9 +164,12 @@ class AutoModel:
         pdb.set_trace()
         # build frontend
         frontend = kwargs.get("frontend", None)
+        pdb.set_trace()
         if frontend is not None:
+            pdb.set_trace()
             frontend_class = tables.frontend_classes.get(frontend)
             frontend = frontend_class(**kwargs["frontend_conf"])
+            pdb.set_trace()
             kwargs["frontend"] = frontend
             kwargs["input_size"] = frontend.output_size()
         pdb.set_trace()
