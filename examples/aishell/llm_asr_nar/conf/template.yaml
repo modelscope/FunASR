@@ -6,7 +6,7 @@
 # tables.print()
 
 # network architecture
-model: LLMASR
+model: LLMASRNAR
 model_conf:
     lsm_weight: 0.1     # label smoothing option
     length_normalized_loss: true
@@ -16,12 +16,13 @@ encoder: Paraformer
 encoder_conf:
     hub: funasr
     init_param_path: "iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
+    freeze: false
 
 llm: Vicuna
 llm_conf:
   hub: hf
-  init_param_path: null
-  freeze_llm: true
+  init_param_path: "/nfs/maziyang.mzy/models/vicuna-7b-v1.5"
+  freeze: true
 
 adaptor: linear
 adaptor_conf:

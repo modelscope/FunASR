@@ -108,8 +108,10 @@ def main(**kwargs):
                 )
             else:
                 logging.info(f"Checkpoint does not exist, init randomly: {p}")
-    else:
+    elif kwargs.get("init", None):
         initialize(model, kwargs.get("init", "kaiming_normal"))
+    else:
+        print("No initialize method")
 
 
     # freeze_param
