@@ -153,12 +153,9 @@ class AutoModel:
         
         # build tokenizer
         tokenizer = kwargs.get("tokenizer", None)
-        pdb.set_trace()
         if tokenizer is not None:
             tokenizer_class = tables.tokenizer_classes.get(tokenizer)
-            pdb.set_trace()
             tokenizer = tokenizer_class(**kwargs["tokenizer_conf"])
-            pdb.set_trace()
             kwargs["tokenizer"] = tokenizer
             kwargs["token_list"] = tokenizer.token_list
             vocab_size = len(tokenizer.token_list)
