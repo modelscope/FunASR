@@ -89,7 +89,7 @@ class LCBNet(nn.Module):
         text_encoder = text_encoder_class(input_size=vocab_size, **text_encoder_conf)
         fusion_encoder_class = tables.encoder_classes.get(fusion_encoder)
         fusion_encoder = fusion_encoder_class(**fusion_encoder_conf)
-        bias_predictor_class = tables.encoder_classes.get_class(bias_predictor)
+        bias_predictor_class = tables.encoder_classes.get(bias_predictor)
         bias_predictor = bias_predictor_class(bias_predictor_conf)
 
         if decoder is not None:
@@ -414,7 +414,7 @@ class LCBNet(nn.Module):
             self.init_beam_search(**kwargs)
             self.nbest = kwargs.get("nbest", 1)
         pdb.set_trace()
-        
+
         meta_data = {}
         if isinstance(data_in, torch.Tensor) and kwargs.get("data_type", "sound") == "fbank":  # fbank
             speech, speech_lengths = data_in, data_lengths
