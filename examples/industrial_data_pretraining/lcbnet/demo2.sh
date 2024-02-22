@@ -9,6 +9,7 @@ python -m funasr.bin.inference \
 ++frontend_conf.cmvn_file=${file_dir}/am.mvn \
 ++input=${file_dir}/wav.scp \
 ++input=${file_dir}/ocr_text \
++data_type='["sound", "text"]' \
 ++tokenizer_conf.bpemodel=${file_dir}/bpe.model \
 ++output_dir="./outputs/debug" \
 ++device="" \
