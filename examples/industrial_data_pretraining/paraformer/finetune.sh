@@ -1,6 +1,8 @@
 # Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
 #  MIT License  (https://opensource.org/licenses/MIT)
 
+# method1, finetune from model hub
+
 # which gpu to train or finetune
 export CUDA_VISIBLE_DEVICES="0,1"
 gpu_num=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
@@ -30,8 +32,8 @@ torchrun \
 --nnodes 1 \
 --nproc_per_node ${gpu_num} \
 funasr/bin/train.py \
-+model="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch" \
-+model_revision="v2.0.4" \
+++model="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch" \
+++model_revision="v2.0.4" \
 ++train_data_set_list="${train_data}" \
 ++valid_data_set_list="${val_data}" \
 ++dataset_conf.batch_size=32 \

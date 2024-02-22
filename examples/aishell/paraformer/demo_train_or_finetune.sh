@@ -17,7 +17,7 @@ data_dir="/Users/zhifu/funasr1.0/data/list"
 
 train_data="${data_dir}/train.jsonl"
 val_data="${data_dir}/val.jsonl"
-tokens="${data_dir}/tokens.jsonl"
+tokens="${data_dir}/tokens.json"
 cmvn_file="${data_dir}/am.mvn"
 
 # exp output dir
@@ -45,7 +45,7 @@ torchrun \
 ++dataset_conf.batch_size=32 \
 ++dataset_conf.batch_type="example" \
 ++dataset_conf.num_workers=4 \
-++train_conf.max_epoch=20 \
+++train_conf.max_epoch=150 \
 ++optim_conf.lr=0.0002 \
 ++init_param="${init_param}" \
 ++output_dir="${output_dir}" &> ${log_file}
