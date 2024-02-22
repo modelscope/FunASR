@@ -1,0 +1,1 @@
+../paraformer/demo_infer.sh

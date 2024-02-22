@@ -96,15 +96,18 @@ def main(**kwargs):
             init_param = (init_param,)
         logging.info("init_param is not None: %s", init_param)
         for p in init_param:
-            logging.info(f"Loading pretrained params from {p}")
-            load_pretrained_model(
-                model=model,
-                path=p,
-                ignore_init_mismatch=kwargs.get("ignore_init_mismatch", True),
-                oss_bucket=kwargs.get("oss_bucket", None),
-                scope_map=kwargs.get("scope_map", None),
-                excludes=kwargs.get("excludes", None),
-            )
+            if os.path.exists(p):
+                logging.info(f"Loading pretrained params from {p}")
+                load_pretrained_model(
+                    model=model,
+                    path=p,
+                    ignore_init_mismatch=kwargs.get("ignore_init_mismatch", True),
+                    oss_bucket=kwargs.get("oss_bucket", None),
+                    scope_map=kwargs.get("scope_map", None),
+                    excludes=kwargs.get("excludes", None),
+                )
+            else:
+                logging.info(f"Checkpoint does not exist, init randomly: {p}")
     else:
         initialize(model, kwargs.get("init", "kaiming_normal"))
 
