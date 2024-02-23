@@ -48,6 +48,7 @@ class DefaultFrontend(nn.Module):
         # Deepcopy (In general, dict shouldn't be used as default arg)
         frontend_conf = copy.deepcopy(frontend_conf)
         self.hop_length = hop_length
+        self.fs = fs
 
         if apply_stft:
             self.stft = Stft(
