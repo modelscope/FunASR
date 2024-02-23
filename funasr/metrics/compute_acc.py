@@ -35,8 +35,6 @@ def compute_accuracy(pad_outputs, pad_targets, ignore_label):
 
     """
     mask = pad_targets != ignore_label
-    numerator = torch.sum(
-        pad_outputs.masked_select(mask) == pad_targets.masked_select(mask)
-    )
+    numerator = torch.sum(pad_outputs.masked_select(mask) == pad_targets.masked_select(mask))
     denominator = torch.sum(mask)
     return numerator.float() / denominator.float() #(FIX:MZY):return torch.Tensor type

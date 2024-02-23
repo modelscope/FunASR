@@ -10,7 +10,7 @@ import numpy as np
 from funasr.register import tables
 from funasr.train_utils.device_funcs import to_device
 from funasr.models.transformer.utils.nets_utils import make_pad_mask
-
+from torch.cuda.amp import autocast
 
 @tables.register("predictor_classes", "CifPredictor")
 class CifPredictor(torch.nn.Module):
@@ -28,42 +28,44 @@ class CifPredictor(torch.nn.Module):
 
     def forward(self, hidden, target_label=None, mask=None, ignore_id=-1, mask_chunk_predictor=None,
                 target_label_length=None):
-        h = hidden
-        context = h.transpose(1, 2)
-        queries = self.pad(context)
-        memory = self.cif_conv1d(queries)
-        output = memory + context
-        output = self.dropout(output)
-        output = output.transpose(1, 2)
-        output = torch.relu(output)
-        output = self.cif_output(output)
-        alphas = torch.sigmoid(output)
-        alphas = torch.nn.functional.relu(alphas * self.smooth_factor - self.noise_threshold)
-        if mask is not None:
-            mask = mask.transpose(-1, -2).float()
-            alphas = alphas * mask
-        if mask_chunk_predictor is not None:
-            alphas = alphas * mask_chunk_predictor
-        alphas = alphas.squeeze(-1)
-        mask = mask.squeeze(-1)
-        if target_label_length is not None:
-            target_length = target_label_length
-        elif target_label is not None:
-            target_length = (target_label != ignore_id).float().sum(-1)
-        else:
-            target_length = None
-        token_num = alphas.sum(-1)
-        if target_length is not None:
-            alphas *= (target_length / token_num)[:, None].repeat(1, alphas.size(1))
-        elif self.tail_threshold > 0.0:
-            hidden, alphas, token_num = self.tail_process_fn(hidden, alphas, token_num, mask=mask)
+    
+        with autocast(False):
+            h = hidden
+            context = h.transpose(1, 2)
+            queries = self.pad(context)
+            memory = self.cif_conv1d(queries)
+            output = memory + context
+            output = self.dropout(output)
+            output = output.transpose(1, 2)
+            output = torch.relu(output)
+            output = self.cif_output(output)
+            alphas = torch.sigmoid(output)
+            alphas = torch.nn.functional.relu(alphas * self.smooth_factor - self.noise_threshold)
+            if mask is not None:
+                mask = mask.transpose(-1, -2).float()
+                alphas = alphas * mask
+            if mask_chunk_predictor is not None:
+                alphas = alphas * mask_chunk_predictor
+            alphas = alphas.squeeze(-1)
+            mask = mask.squeeze(-1)
+            if target_label_length is not None:
+                target_length = target_label_length
+            elif target_label is not None:
+                target_length = (target_label != ignore_id).float().sum(-1)
+            else:
+                target_length = None
+            token_num = alphas.sum(-1)
+            if target_length is not None:
+                alphas *= (target_length / token_num)[:, None].repeat(1, alphas.size(1))
+            elif self.tail_threshold > 0.0:
+                hidden, alphas, token_num = self.tail_process_fn(hidden, alphas, token_num, mask=mask)
+                
+            acoustic_embeds, cif_peak = cif(hidden, alphas, self.threshold)
             
-        acoustic_embeds, cif_peak = cif(hidden, alphas, self.threshold)
-        
-        if target_length is None and self.tail_threshold > 0.0:
-            token_num_int = torch.max(token_num).type(torch.int32).item()
-            acoustic_embeds = acoustic_embeds[:, :token_num_int, :]
-            
+            if target_length is None and self.tail_threshold > 0.0:
+                token_num_int = torch.max(token_num).type(torch.int32).item()
+                acoustic_embeds = acoustic_embeds[:, :token_num_int, :]
+                
         return acoustic_embeds, token_num, alphas, cif_peak
 
     def tail_process_fn(self, hidden, alphas, token_num=None, mask=None):
@@ -169,41 +171,43 @@ class CifPredictorV2(torch.nn.Module):
 
     def forward(self, hidden, target_label=None, mask=None, ignore_id=-1, mask_chunk_predictor=None,
                 target_label_length=None):
-        h = hidden
-        context = h.transpose(1, 2)
-        queries = self.pad(context)
-        output = torch.relu(self.cif_conv1d(queries))
-        output = output.transpose(1, 2)
-
-        output = self.cif_output(output)
-        alphas = torch.sigmoid(output)
-        alphas = torch.nn.functional.relu(alphas * self.smooth_factor - self.noise_threshold)
-        if mask is not None:
-            mask = mask.transpose(-1, -2).float()
-            alphas = alphas * mask
-        if mask_chunk_predictor is not None:
-            alphas = alphas * mask_chunk_predictor
-        alphas = alphas.squeeze(-1)
-        mask = mask.squeeze(-1)
-        if target_label_length is not None:
-            target_length = target_label_length.squeeze(-1)
-        elif target_label is not None:
-            target_length = (target_label != ignore_id).float().sum(-1)
-        else:
-            target_length = None
-        token_num = alphas.sum(-1)
-        if target_length is not None:
-            alphas *= (target_length / token_num)[:, None].repeat(1, alphas.size(1))
-        elif self.tail_threshold > 0.0:
-            if self.tail_mask:
-                hidden, alphas, token_num = self.tail_process_fn(hidden, alphas, token_num, mask=mask)
+        
+        with autocast(False):
+            h = hidden
+            context = h.transpose(1, 2)
+            queries = self.pad(context)
+            output = torch.relu(self.cif_conv1d(queries))
+            output = output.transpose(1, 2)
+    
+            output = self.cif_output(output)
+            alphas = torch.sigmoid(output)
+            alphas = torch.nn.functional.relu(alphas * self.smooth_factor - self.noise_threshold)
+            if mask is not None:
+                mask = mask.transpose(-1, -2).float()
+                alphas = alphas * mask
+            if mask_chunk_predictor is not None:
+                alphas = alphas * mask_chunk_predictor
+            alphas = alphas.squeeze(-1)
+            mask = mask.squeeze(-1)
+            if target_label_length is not None:
+                target_length = target_label_length.squeeze(-1)
+            elif target_label is not None:
+                target_length = (target_label != ignore_id).float().sum(-1)
             else:
-                hidden, alphas, token_num = self.tail_process_fn(hidden, alphas, token_num, mask=None)
-
-        acoustic_embeds, cif_peak = cif(hidden, alphas, self.threshold)
-        if target_length is None and self.tail_threshold > 0.0:
-            token_num_int = torch.max(token_num).type(torch.int32).item()
-            acoustic_embeds = acoustic_embeds[:, :token_num_int, :]
+                target_length = None
+            token_num = alphas.sum(-1)
+            if target_length is not None:
+                alphas *= (target_length / token_num)[:, None].repeat(1, alphas.size(1))
+            elif self.tail_threshold > 0.0:
+                if self.tail_mask:
+                    hidden, alphas, token_num = self.tail_process_fn(hidden, alphas, token_num, mask=mask)
+                else:
+                    hidden, alphas, token_num = self.tail_process_fn(hidden, alphas, token_num, mask=None)
+    
+            acoustic_embeds, cif_peak = cif(hidden, alphas, self.threshold)
+            if target_length is None and self.tail_threshold > 0.0:
+                token_num_int = torch.max(token_num).type(torch.int32).item()
+                acoustic_embeds = acoustic_embeds[:, :token_num_int, :]
 
         return acoustic_embeds, token_num, alphas, cif_peak
 
@@ -370,62 +374,6 @@ class CifPredictorV2(torch.nn.Module):
         predictor_alignments = index_div_bool_zeros_count_tile_out
         predictor_alignments_length = predictor_alignments.sum(-1).type(encoder_sequence_length.dtype)
         return predictor_alignments.detach(), predictor_alignments_length.detach()
-
-    def gen_tf2torch_map_dict(self):
-    
-        tensor_name_prefix_torch = self.tf2torch_tensor_name_prefix_torch
-        tensor_name_prefix_tf = self.tf2torch_tensor_name_prefix_tf
-        map_dict_local = {
-            ## predictor
-            "{}.cif_conv1d.weight".format(tensor_name_prefix_torch):
-                {"name": "{}/conv1d/kernel".format(tensor_name_prefix_tf),
-                 "squeeze": None,
-                 "transpose": (2, 1, 0),
-                 },  # (256,256,3),(3,256,256)
-            "{}.cif_conv1d.bias".format(tensor_name_prefix_torch):
-                {"name": "{}/conv1d/bias".format(tensor_name_prefix_tf),
-                 "squeeze": None,
-                 "transpose": None,
-                 },  # (256,),(256,)
-            "{}.cif_output.weight".format(tensor_name_prefix_torch):
-                {"name": "{}/conv1d_1/kernel".format(tensor_name_prefix_tf),
-                 "squeeze": 0,
-                 "transpose": (1, 0),
-                 },  # (1,256),(1,256,1)
-            "{}.cif_output.bias".format(tensor_name_prefix_torch):
-                {"name": "{}/conv1d_1/bias".format(tensor_name_prefix_tf),
-                 "squeeze": None,
-                 "transpose": None,
-                 },  # (1,),(1,)
-        }
-        return map_dict_local
-
-    def convert_tf2torch(self,
-                         var_dict_tf,
-                         var_dict_torch,
-                         ):
-        map_dict = self.gen_tf2torch_map_dict()
-        var_dict_torch_update = dict()
-        for name in sorted(var_dict_torch.keys(), reverse=False):
-            names = name.split('.')
-            if names[0] == self.tf2torch_tensor_name_prefix_torch:
-                name_tf = map_dict[name]["name"]
-                data_tf = var_dict_tf[name_tf]
-                if map_dict[name]["squeeze"] is not None:
-                    data_tf = np.squeeze(data_tf, axis=map_dict[name]["squeeze"])
-                if map_dict[name]["transpose"] is not None:
-                    data_tf = np.transpose(data_tf, map_dict[name]["transpose"])
-                data_tf = torch.from_numpy(data_tf).type(torch.float32).to("cpu")
-                assert var_dict_torch[name].size() == data_tf.size(), "{}, {}, {} != {}".format(name, name_tf,
-                                                                                                var_dict_torch[
-                                                                                                    name].size(),
-                                                                                                data_tf.size())
-                var_dict_torch_update[name] = data_tf
-                logging.info(
-                    "torch tensor: {}, {}, loading from tf tensor: {}, {}".format(name, data_tf.size(), name_tf,
-                                                                                  var_dict_tf[name_tf].shape))
-    
-        return var_dict_torch_update
 
 
 class mae_loss(torch.nn.Module):

@@ -157,8 +157,10 @@ class AutoModel:
             tokenizer_class = tables.tokenizer_classes.get(tokenizer)
             tokenizer = tokenizer_class(**kwargs["tokenizer_conf"])
             kwargs["tokenizer"] = tokenizer
-            kwargs["token_list"] = tokenizer.token_list
-            vocab_size = len(tokenizer.token_list)
+
+            kwargs["token_list"] = tokenizer.token_list if hasattr(tokenizer, "token_list") else None
+            kwargs["token_list"] = tokenizer.get_vocab() if hasattr(tokenizer, "get_vocab") else kwargs["token_list"]
+            vocab_size = len(kwargs["token_list"])
         else:
             vocab_size = -1
         

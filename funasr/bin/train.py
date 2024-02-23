@@ -85,7 +85,9 @@ def main(**kwargs):
 
     # build model
     model_class = tables.model_classes.get(kwargs["model"])
-    model = model_class(**kwargs, **kwargs["model_conf"], vocab_size=len(tokenizer.token_list))
+    vocab_size = len(tokenizer.token_list) if hasattr(tokenizer, "token_list") else None
+    vocab_size = len(tokenizer.get_vocab()) if hasattr(tokenizer, "get_vocab") else vocab_size
+    model = model_class(**kwargs, **kwargs["model_conf"], vocab_size=vocab_size)
 
 
 
