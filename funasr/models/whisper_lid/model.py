@@ -472,8 +472,14 @@ class OpenAIWhisperLIDModel(nn.Module):
             random_clip: bool = False,
     ):
         super().__init__()
-        self.specaug = specaug
-        self.encoder = encoder
+        if specaug is not None:
+            specaug_class = tables.specaug_classes.get(specaug)
+            specaug = specaug_class(**specaug_conf)
+        encoder_class = tables.encoder_classes.get(encoder)
+        encoder = encoder_class(**encoder_conf)
+        encoder_output_size = encoder.output_size()
+        lid_predictor_class = tables.lid_predictor_class(lid_predictor)
+
         self.lid_predictor = lid_predictor
         if encoder.output_size() != proj_dim:
             self.proj_layer =  torch.nn.Linear(encoder.output_size(), proj_dim)
