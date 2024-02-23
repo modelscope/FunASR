@@ -90,7 +90,7 @@ class LCBNet(nn.Module):
         fusion_encoder_class = tables.encoder_classes.get(fusion_encoder)
         fusion_encoder = fusion_encoder_class(**fusion_encoder_conf)
         bias_predictor_class = tables.encoder_classes.get(bias_predictor)
-        bias_predictor = bias_predictor_class(bias_predictor_conf)
+        bias_predictor = bias_predictor_class(**bias_predictor_conf)
 
         if decoder is not None:
             decoder_class = tables.decoder_classes.get(decoder)
