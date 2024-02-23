@@ -7,8 +7,7 @@ python -m funasr.bin.inference \
 ++init_param=${file_dir}/model.pb \
 ++tokenizer_conf.token_list=${file_dir}/tokens.txt \
 ++frontend_conf.cmvn_file=${file_dir}/am.mvn \
-++input=${file_dir}/wav.scp \
-++input=${file_dir}/ocr_text \
+++input=[${file_dir}/wav.scp,${file_dir}/ocr_text] \
 +data_type='["sound", "text"]' \
 ++tokenizer_conf.bpemodel=${file_dir}/bpe.model \
 ++output_dir="./outputs/debug" \

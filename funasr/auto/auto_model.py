@@ -172,14 +172,11 @@ class AutoModel:
 
         # build model
         model_class = tables.model_classes.get(kwargs["model"])
-        pdb.set_trace()
         model = model_class(**kwargs, **kwargs["model_conf"], vocab_size=vocab_size)
-        pdb.set_trace()
         model.to(device)
         
         # init_param
         init_param = kwargs.get("init_param", None)
-        pdb.set_trace()
         if init_param is not None:
             logging.info(f"Loading pretrained params from {init_param}")
             load_pretrained_model(

@@ -96,19 +96,17 @@ def load_pretrained_model(
 	
 	obj = model
 	dst_state = obj.state_dict()
-	# import pdb;
-	# pdb.set_trace()
 	print(f"ckpt: {path}")
-	pdb.set_trace()
+
 	if oss_bucket is None:
 		src_state = torch.load(path, map_location=map_location)
 	else:
 		buffer = BytesIO(oss_bucket.get_object(path).read())
 		src_state = torch.load(buffer, map_location=map_location)
-	pdb.set_trace()
+
 	if "state_dict" in src_state:
 		src_state = src_state["state_dict"]
-	pdb.set_trace()
+
 	for k in dst_state.keys():
 		if not k.startswith("module.") and "module." + k in src_state.keys():
 			k_ddp = "module." + k
@@ -118,7 +116,6 @@ def load_pretrained_model(
 			dst_state[k] = src_state[k_ddp]
 		else:
 			print(f"Miss key in ckpt: model: {k}, ckpt: {k_ddp}")
-	pdb.set_trace()
 	flag = obj.load_state_dict(dst_state, strict=True)
 	# print(flag)
 
