@@ -8,7 +8,7 @@ python -m funasr.bin.inference \
 ++tokenizer_conf.token_list=${file_dir}/tokens.txt \
 ++frontend_conf.cmvn_file=${file_dir}/am.mvn \
 ++input=[${file_dir}/wav.scp,${file_dir}/ocr_text] \
-+data_type='["sound", "text"]' \
++data_type='["kaldi_ark", "text"]' \
 ++tokenizer_conf.bpemodel=${file_dir}/bpe.model \
 ++output_dir="./outputs/debug" \
 ++device="" \

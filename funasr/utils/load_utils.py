@@ -17,35 +17,28 @@ import pdb
 
 
 def load_audio_text_image_video(data_or_path_or_list, fs: int = 16000, audio_fs: int = 16000, data_type="sound", tokenizer=None, **kwargs):
-    pdb.set_trace()
     if isinstance(data_or_path_or_list, (list, tuple)):
         if data_type is not None and isinstance(data_type, (list, tuple)):
-            pdb.set_trace()
             data_types = [data_type] * len(data_or_path_or_list)
             data_or_path_or_list_ret = [[] for d in data_type]
-            pdb.set_trace()
             for i, (data_type_i, data_or_path_or_list_i) in enumerate(zip(data_types, data_or_path_or_list)):
-                
                 for j, (data_type_j, data_or_path_or_list_j) in enumerate(zip(data_type_i, data_or_path_or_list_i)):
-                    pdb.set_trace()
                     data_or_path_or_list_j = load_audio_text_image_video(data_or_path_or_list_j, fs=fs, audio_fs=audio_fs, data_type=data_type_j, tokenizer=tokenizer, **kwargs)
-                    pdb.set_trace()
                     data_or_path_or_list_ret[j].append(data_or_path_or_list_j)
 
             return data_or_path_or_list_ret
         else:
             return [load_audio_text_image_video(audio, fs=fs, audio_fs=audio_fs, data_type=data_type, **kwargs) for audio in data_or_path_or_list]
-    pdb.set_trace()
     if isinstance(data_or_path_or_list, str) and data_or_path_or_list.startswith('http'): # download url to local file
         data_or_path_or_list = download_from_url(data_or_path_or_list)
     pdb.set_trace()
     if isinstance(data_or_path_or_list, str) and os.path.exists(data_or_path_or_list): # local file
-        pdb.set_trace()
         if data_type is None or data_type == "sound":
             data_or_path_or_list, audio_fs = torchaudio.load(data_or_path_or_list)
             if kwargs.get("reduce_channels", True):
                 data_or_path_or_list = data_or_path_or_list.mean(0)
         elif data_type == "text" and tokenizer is not None:
+            pdb.set_trace()
             data_or_path_or_list = tokenizer.encode(data_or_path_or_list)
         elif data_type == "image": # undo
             pass
@@ -60,6 +53,19 @@ def load_audio_text_image_video(data_or_path_or_list, fs: int = 16000, audio_fs:
         data_or_path_or_list = tokenizer.encode(data_or_path_or_list)
     elif isinstance(data_or_path_or_list, np.ndarray):  # audio sample point
         data_or_path_or_list = torch.from_numpy(data_or_path_or_list).squeeze()  # [n_samples,]
+    elif isinstance(data_or_path_or_list, str) and data_type == "kaldi_ark":
+        data_mat = kaldiio.load_mat(data_or_path_or_list) 
+        if isinstance(data_mat, tuple):
+            sampling_rate, mat = data_mat
+            assert sampling_rate == audio_fs
+        else:
+            mat = data_mat
+        if mat.dtype == 'int16' or mat.dtype == 'int32':
+            mat = mat.astype(np.float64)
+            mat = mat / 32768
+        if mat.ndim ==2:
+            mat = mat[:,0]
+        data_or_path_or_list = mat
     else:
         pass
         # print(f"unsupport data type: {data_or_path_or_list}, return raw data")
