@@ -17,6 +17,7 @@ from funasr.utils import postprocess_utils
 from funasr.utils.datadir_writer import DatadirWriter
 from funasr.register import tables
 
+
 @tables.register("model_classes", "OpenAIWhisperModel")
 class OpenAIWhisperModel(nn.Module):
     """CTC-attention hybrid Encoder-Decoder model"""
@@ -451,4 +452,140 @@ class OpenAIWhisperModel(nn.Module):
                     ibest_writer["text"][key[i]] = text_postprocessed
         
         return results, meta_data
+
+
+@tables.register("model_classes", "OpenAIWhisperLIDModel")
+class OpenAIWhisperLIDModel(nn.Module):
+    """CTC-attention hybrid Encoder-Decoder model"""
+
+    def __init__(
+            self,
+            vocab_size: int,
+            specaug: str = None,
+            specaug_conf: dict = None,
+            encoder: str = None,
+            encoder_conf: dict = None,
+            lid_predictor:  str = None,
+            lid_predictor_conf: dict = None,
+            proj_dim: int = None,
+            clip_frames: int = None,
+            random_clip: bool = False,
+    ):
+        super().__init__()
+        self.specaug = specaug
+        self.encoder = encoder
+        self.lid_predictor = lid_predictor
+        if encoder.output_size() != proj_dim:
+            self.proj_layer =  torch.nn.Linear(encoder.output_size(), proj_dim)
+        else:
+            self.proj_layer = None
+        self.output_layer = torch.nn.Linear(lid_predictor.output_size(), vocab_size)
+        self.criterion_lid = LabelSmoothingLoss(
+            size=vocab_size,
+            padding_idx=-1,
+            smoothing=0.0,
+            normalize_length=False,
+        )
+        self.clip_frames = clip_frames
+        self.random_clip = random_clip
+
+    def forward(self,
+                speech: torch.Tensor,  # may be padding
+                speech_lengths: torch.Tensor,  # actual length
+                lid: torch.Tensor,  # lid label, (batch_size, 1)
+                lid_lengths: torch.Tensor,
+                ):
+        assert lid.shape[1] == 1
+        batch_size = speech.shape[0]
+        encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
+
+        # re-generate encoder_out
+        if self.clip_frames is None:
+            reduced_encoder_out = torch.zeros(batch_size, encoder_out_lens.max(), encoder_out.shape[-1]).to(encoder_out.dtype).to(encoder_out.device)
+            for i, enc_length in enumerate(encoder_out_lens):
+                reduced_encoder_out[i, :enc_length] = encoder_out[i, :enc_length]
+        else:
+            reduced_encoder_out = torch.zeros(batch_size, self.clip_frames, encoder_out.shape[-1]).to(encoder_out.dtype).to(encoder_out.device)
+            if self.random_clip:
+                for i, enc_length in enumerate(encoder_out_lens):
+                    if enc_length <= self.clip_frames:
+                        reduced_encoder_out[i, :enc_length] = encoder_out[i, :enc_length]
+                        encoder_out_lens[i] = enc_length
+                    else:
+                        max_start_index = enc_length.item() - self.clip_frames
+                        start_index = np.random.randint(0, max_start_index + 1)
+                        reduced_encoder_out[i, :self.clip_frames] = encoder_out[i, start_index:start_index + self.clip_frames]
+                        encoder_out_lens[i] = self.clip_frames
+            else:
+                for i, enc_length in enumerate(encoder_out_lens):
+                    enc_length = self.clip_frames if enc_length >= self.clip_frames else enc_length
+                    reduced_encoder_out[i, :enc_length] = encoder_out[i, :enc_length]
+                    encoder_out_lens[i] = enc_length
+        if self.proj_layer is not None:
+            reduced_encoder_out = self.proj_layer(reduced_encoder_out)
+        lid_output = self.lid_predictor(reduced_encoder_out, encoder_out_lens)  # (B, D)
+        lid_logits = self.output_layer(lid_output)  # (B, num_classes)
+        loss = self.criterion_lid(lid_logits[:, None, :], lid)
+        with torch.no_grad():
+            _, predicted_lid = torch.max(lid_logits, 1)
+            correct = (predicted_lid == lid[:, 0]).sum().item()
+            lid_acc = correct * 1.0 / lid_logits.shape[0]
+        stats = dict()
+        stats["batch_size"] = batch_size
+        stats["loss"] = torch.clone(loss.detach())
+        stats["acc"] = lid_acc
+        stats["token_length"] = speech_lengths.max()
+        loss, stats, weight = force_gatherable((loss, stats, batch_size), loss.device)
+        return loss, stats, weight
+
+    def _extract_feats(
+            self, speech: torch.Tensor, speech_lengths: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        assert speech_lengths.dim() == 1, speech_lengths.shape
+
+        # for data-parallel
+        if self.training:
+            speech = speech[:, : speech_lengths.max()]
+
+        if self.frontend is not None:
+            # Frontend
+            #  e.g. STFT and Feature extract
+            #       data_loader may send time-domain signal in this case
+            # speech (Batch, NSamples) -> feats: (Batch, NFrames, Dim)
+            feats, feats_lengths = self.frontend(speech, speech_lengths)
+        else:
+            # No frontend and no feature extract
+            feats, feats_lengths = speech, speech_lengths
+        return feats, feats_lengths
+
+    def encode(
+            self, speech: torch.Tensor, speech_lengths: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Frontend + Encoder. Note that this method is used by asr_inference.py
+        Args:
+            speech: (Batch, Length, ...)
+            speech_lengths: (Batch, )
+        """
+        with autocast(False):
+            # 1. Extract feats
+            feats, feats_lengths = self._extract_feats(speech, speech_lengths)
+
+            # 2. Data augmentation
+            if self.specaug is not None and self.training:
+                feats = feats.permute(0, 2, 1)
+                padded_feats_lengths = torch.ones_like(feats_lengths) * feats.shape[1]
+                feats, padded_feats_lengths = self.specaug(feats, padded_feats_lengths)
+                feats = feats.permute(0, 2, 1)
+
+        # 4. Forward encoder
+        # feats: (Batch, Length, Dim)
+        # -> encoder_out: (Batch, Length2, Dim2)
+        encoder_out, encoder_out_lens, _ = self.encoder(feats, feats_lengths)
+
+        assert encoder_out.size(0) == speech.size(0), (
+            encoder_out.size(),
+            speech.size(0),
+        )
+
+        return encoder_out, encoder_out_lens
 
