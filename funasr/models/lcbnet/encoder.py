@@ -355,7 +355,7 @@ class SelfSrcAttention(nn.Module):
         return x, tgt_mask, memory, memory_mask
 
 
-
+@tables.register("encoder_classes", "ConvBiasPredictor")
 class ConvPredictor(nn.Module):
     def __init__(self, size=256, l_order=3, r_order=3, attention_heads=4, attention_dropout_rate=0.1, linear_units=2048):
         super().__init__()
