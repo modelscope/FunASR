@@ -425,6 +425,7 @@ class LCBNet(nn.Module):
         else:
             # extract fbank feats
             time1 = time.perf_counter()
+            pdb.set_trace()
             audio_sample_list = load_audio_text_image_video(data_in, fs=frontend.fs, audio_fs=kwargs.get("fs", 16000),
                                                             data_type=kwargs.get("data_type", "sound"),
                                                             tokenizer=tokenizer)
