@@ -217,7 +217,7 @@ class LLMASRNAR(nn.Module):
     ) -> Tuple[torch.Tensor, torch.Tensor]:
     
         audio_mask = kwargs.get("audio_mask")
-        audio_token_lengths = audio_mask.sum(-1)
+        audio_token_lengths = audio_mask.sum(-1) if audio_mask else None
 
         batch = {"speech": speech, "speech_lengths": speech_lengths}
         enc, enc_lens = self.audio_encoder.encode(**batch)
@@ -279,7 +279,7 @@ class LLMASRNAR(nn.Module):
         
     
         prompt_pre = "USER: \nINSTRUCTION: {}\nINPUT: ".format(prompt)
-        prompt_ids = self.tokenizer.encode(prompt_pre)
+        prompt_ids = tokenizer.encode(prompt_pre)
         prompt_length = len(prompt_ids)
         prompt_ids = torch.tensor(prompt_ids, dtype=torch.int64).to(kwargs["device"])
 

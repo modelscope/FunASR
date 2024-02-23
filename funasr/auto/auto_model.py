@@ -181,15 +181,18 @@ class AutoModel:
         # init_param
         init_param = kwargs.get("init_param", None)
         if init_param is not None:
-            logging.info(f"Loading pretrained params from {init_param}")
-            load_pretrained_model(
-                model=model,
-                path=init_param,
-                ignore_init_mismatch=kwargs.get("ignore_init_mismatch", False),
-                oss_bucket=kwargs.get("oss_bucket", None),
-                scope_map=kwargs.get("scope_map", None),
-                excludes=kwargs.get("excludes", None),
-            )
+            if os.path.exists(init_param):
+                logging.info(f"Loading pretrained params from {init_param}")
+                load_pretrained_model(
+                    model=model,
+                    path=init_param,
+                    ignore_init_mismatch=kwargs.get("ignore_init_mismatch", False),
+                    oss_bucket=kwargs.get("oss_bucket", None),
+                    scope_map=kwargs.get("scope_map", None),
+                    excludes=kwargs.get("excludes", None),
+                )
+            else:
+                print(f"error, init_param does not exist!: {init_param}")
         
         return model, kwargs
     
