@@ -7,6 +7,7 @@ from typing import Any, List, Tuple
 import torch
 from torch import nn
 from typeguard import check_argument_types
+import whisper
 
 from funasr.models.transformer.utils.nets_utils import make_pad_mask
 from funasr.register import tables
@@ -21,14 +22,11 @@ class OpenAIWhisperDecoder(nn.Module):
 
     def __init__(
         self,
-        vocab_size: int = 0,
-        encoder_output_size: int = 0,
         dropout_rate: float = 0.0,
         whisper_model: str = "small",
         download_dir: str = None,
         use_padmask: bool = False,
     ):
-        import funasr.models.whisper as whisper
 
         assert check_argument_types()
         super().__init__()

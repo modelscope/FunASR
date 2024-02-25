@@ -3,6 +3,7 @@ from typing import Union, Dict, List, Tuple, Optional
 
 import time
 import torch
+import numpy as np
 import torch.nn as nn
 from torch.cuda.amp import autocast
 
@@ -10,7 +11,6 @@ from funasr.losses.label_smoothing_loss import LabelSmoothingLoss
 from funasr.models.ctc.ctc import CTC
 from funasr.models.transformer.utils.add_sos_eos import add_sos_eos
 from funasr.metrics.compute_acc import th_accuracy
-# from funasr.models.e2e_asr_common import ErrorCalculator
 from funasr.train_utils.device_funcs import force_gatherable
 from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
 from funasr.utils import postprocess_utils
@@ -69,11 +69,7 @@ class OpenAIWhisperModel(nn.Module):
         encoder_output_size = encoder.output_size()
         if decoder is not None:
             decoder_class = tables.decoder_classes.get(decoder)
-            decoder = decoder_class(
-                vocab_size=vocab_size,
-                encoder_output_size=encoder_output_size,
-                **decoder_conf,
-            )
+            decoder = decoder_class(decoder_conf)
         if ctc_weight > 0.0:
             
             if ctc_conf is None:
@@ -456,7 +452,7 @@ class OpenAIWhisperModel(nn.Module):
 
 @tables.register("model_classes", "OpenAIWhisperLIDModel")
 class OpenAIWhisperLIDModel(nn.Module):
-    """CTC-attention hybrid Encoder-Decoder model"""
+    """WhisperEncoder and EResNet based LID Model"""
 
     def __init__(
             self,
@@ -477,10 +473,8 @@ class OpenAIWhisperLIDModel(nn.Module):
             specaug = specaug_class(**specaug_conf)
         encoder_class = tables.encoder_classes.get(encoder)
         encoder = encoder_class(**encoder_conf)
-        encoder_output_size = encoder.output_size()
         lid_predictor_class = tables.lid_predictor_class(lid_predictor)
-
-        self.lid_predictor = lid_predictor
+        lid_predictor = lid_predictor_class(**lid_predictor_conf)
         if encoder.output_size() != proj_dim:
             self.proj_layer =  torch.nn.Linear(encoder.output_size(), proj_dim)
         else:
@@ -492,6 +486,10 @@ class OpenAIWhisperLIDModel(nn.Module):
             smoothing=0.0,
             normalize_length=False,
         )
+
+        self.specaug = specaug
+        self.encoder = encoder
+        self.lid_predictor = lid_predictor
         self.clip_frames = clip_frames
         self.random_clip = random_clip
 
@@ -544,26 +542,6 @@ class OpenAIWhisperLIDModel(nn.Module):
         loss, stats, weight = force_gatherable((loss, stats, batch_size), loss.device)
         return loss, stats, weight
 
-    def _extract_feats(
-            self, speech: torch.Tensor, speech_lengths: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
-        assert speech_lengths.dim() == 1, speech_lengths.shape
-
-        # for data-parallel
-        if self.training:
-            speech = speech[:, : speech_lengths.max()]
-
-        if self.frontend is not None:
-            # Frontend
-            #  e.g. STFT and Feature extract
-            #       data_loader may send time-domain signal in this case
-            # speech (Batch, NSamples) -> feats: (Batch, NFrames, Dim)
-            feats, feats_lengths = self.frontend(speech, speech_lengths)
-        else:
-            # No frontend and no feature extract
-            feats, feats_lengths = speech, speech_lengths
-        return feats, feats_lengths
-
     def encode(
             self, speech: torch.Tensor, speech_lengths: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
@@ -573,25 +551,106 @@ class OpenAIWhisperLIDModel(nn.Module):
             speech_lengths: (Batch, )
         """
         with autocast(False):
-            # 1. Extract feats
-            feats, feats_lengths = self._extract_feats(speech, speech_lengths)
 
-            # 2. Data augmentation
+            # Data augmentation
             if self.specaug is not None and self.training:
-                feats = feats.permute(0, 2, 1)
-                padded_feats_lengths = torch.ones_like(feats_lengths) * feats.shape[1]
-                feats, padded_feats_lengths = self.specaug(feats, padded_feats_lengths)
-                feats = feats.permute(0, 2, 1)
+                speech = speech.permute(0, 2, 1)
+                # suit for whisper padding
+                padded_speech_lengths = torch.ones_like(speech_lengths) * speech.shape[1]
+                speech, padded_speech_lengths = self.specaug(speech, padded_speech_lengths)
+                speech = speech.permute(0, 2, 1)
 
-        # 4. Forward encoder
+            # Normalization for feature: e.g. Global-CMVN, Utterance-CMVN
+            if self.normalize is not None:
+                speech, speech_lengths = self.normalize(speech, speech_lengths)
+
+        # Forward encoder
         # feats: (Batch, Length, Dim)
         # -> encoder_out: (Batch, Length2, Dim2)
-        encoder_out, encoder_out_lens, _ = self.encoder(feats, feats_lengths)
+        if self.encoder.interctc_use_conditioning:
+            encoder_out, encoder_out_lens, _ = self.encoder(
+                speech, speech_lengths, ctc=self.ctc
+            )
+        else:
+            encoder_out, encoder_out_lens, _ = self.encoder(speech, speech_lengths)
+        intermediate_outs = None
+        if isinstance(encoder_out, tuple):
+            intermediate_outs = encoder_out[1]
+            encoder_out = encoder_out[0]
 
-        assert encoder_out.size(0) == speech.size(0), (
-            encoder_out.size(),
-            speech.size(0),
-        )
+        if intermediate_outs is not None:
+            return (encoder_out, intermediate_outs), encoder_out_lens
 
         return encoder_out, encoder_out_lens
 
+    def inference(self,
+                  data_in,
+                  data_lengths=None,
+                  key: list = None,
+                  tokenizer=None,
+                  frontend=None,
+                  **kwargs,
+                  ):
+
+        if kwargs.get("batch_size", 1) > 1:
+            raise NotImplementedError("batch decoding is not implemented")
+
+        meta_data = {}
+        if isinstance(data_in, torch.Tensor) and kwargs.get("data_type", "sound") == "fbank":  # fbank
+            speech, speech_lengths = data_in, data_lengths
+            if len(speech.shape) < 3:
+                speech = speech[None, :, :]
+            if speech_lengths is None:
+                speech_lengths = speech.shape[1]
+        else:
+            # extract fbank feats
+            time1 = time.perf_counter()
+            audio_sample_list = load_audio_text_image_video(data_in, fs=frontend.fs, audio_fs=kwargs.get("fs", 16000),
+                                                            data_type=kwargs.get("data_type", "sound"),
+                                                            tokenizer=tokenizer)
+            time2 = time.perf_counter()
+            meta_data["load_data"] = f"{time2 - time1:0.3f}"
+            speech, speech_lengths = extract_fbank(audio_sample_list, data_type=kwargs.get("data_type", "sound"),
+                                                   frontend=frontend)
+            time3 = time.perf_counter()
+            meta_data["extract_feat"] = f"{time3 - time2:0.3f}"
+            meta_data["batch_data_time"] = speech_lengths.sum().item() * frontend.frame_shift * frontend.lfr_n / 1000
+
+        speech = speech.to(device=kwargs["device"])
+        speech_lengths = speech_lengths.to(device=kwargs["device"])
+        # Encoder
+        enc, enc_out_lens  = self.encode(speech, speech_lengths)
+
+        inference_clip_length = kwargs.get("inference_clip_length", None)
+        if self.clip_frames is not None:
+            if inference_clip_length is None:
+                reduced_enc = torch.zeros(enc.shape[0], self.clip_frames, enc.shape[-1]).to(enc.dtype).to(enc.device)
+                for i, enc_length in enumerate(enc_out_lens):
+                    enc_length = self.clip_frames if enc_length >= self.clip_frames else enc_length
+                    reduced_enc[i, :enc_length] = enc[i, :enc_length]
+                    enc_out_lens[i] = enc_length
+            else:
+                assert inference_clip_length > 0, "inference_clip_length must be larger than 0"
+                reduced_enc = torch.zeros(enc.shape[0], inference_clip_length, enc.shape[-1]).to(enc.dtype).to(enc.device)
+                for i, enc_length in enumerate(enc_out_lens):
+                    enc_length = inference_clip_length if enc_length >= inference_clip_length else enc_length
+                    reduced_enc[i, :enc_length] = enc[i, :enc_length]
+                    enc_out_lens[i] = enc_length
+        else:
+            reduced_enc = torch.zeros(enc.shape[0], enc_out_lens.max(), enc.shape[-1]).to(enc.dtype).to(enc.device)
+            for i, enc_length in enumerate(enc_out_lens):
+                reduced_enc[i, :enc_length] = enc[i, :enc_length]
+
+        if self.proj_layer is not None:
+            reduced_enc = self.proj_layer(reduced_enc)
+        lid_output = self.lid_predictor(reduced_enc, enc_out_lens)  # (B, D)
+        lid_logits = self.output_layer(lid_output)  # (B, num_classes)
+
+        _, predicted_lid_index = torch.max(lid_logits, 1)
+        predicted_lid =  tokenizer.ids2tokens(self.token_list[predicted_lid_index[0].cpu()])
+
+        if kwargs.get("output_dir") is not None:
+            if not hasattr(self, "writer"):
+                self.writer = DatadirWriter(kwargs.get("output_dir"))
+            lid_writer = self.writer["lid"]
+            lid_writer[key[0]] = predicted_lid
