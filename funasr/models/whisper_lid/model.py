@@ -466,6 +466,7 @@ class OpenAIWhisperLIDModel(nn.Module):
             proj_dim: int = None,
             clip_frames: int = None,
             random_clip: bool = False,
+            **kwargs,
     ):
         super().__init__()
         if specaug is not None:
