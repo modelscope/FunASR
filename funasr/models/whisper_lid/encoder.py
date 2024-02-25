@@ -8,6 +8,7 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 from typeguard import check_argument_types
+import whisper
 
 from funasr.models.transformer.utils.nets_utils import make_pad_mask
 from funasr.models.specaug.specaug import SpecAug
@@ -30,7 +31,6 @@ class OpenAIWhisperEncoder(nn.Module):
             use_padmask: bool = False,
             specaug_conf: Union[dict, None] = None,
     ):
-        import funasr.models.whisper as whisper
 
         assert check_argument_types()
         super().__init__()
