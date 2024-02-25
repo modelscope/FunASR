@@ -180,8 +180,8 @@ async def ws_serve(websocket, path):
 					websocket.wav_name = messagejson.get("wav_name")
 				if "chunk_size" in messagejson:
 					chunk_size = messagejson["chunk_size"]
-			                if isinstance(chunk_size, str):
-			                    chunk_size = chunk_size.split(',')
+					if isinstance(chunk_size, str):
+						chunk_size = chunk_size.split(',')
 					websocket.status_dict_asr_online["chunk_size"] = [int(x) for x in chunk_size]
 				if "encoder_chunk_look_back" in messagejson:
 					websocket.status_dict_asr_online["encoder_chunk_look_back"] = messagejson["encoder_chunk_look_back"]
