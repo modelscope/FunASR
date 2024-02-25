@@ -10,6 +10,7 @@ python -m funasr.bin.inference \
 ++tokenizer="CharTokenizer" \
 ++tokenizer_conf.token_list="/nfs/wangjiaming.wjm/Funasr_data/Whisper_LID/common_voice_fleurs_voxlingual107/tokens.txt" \
 ++input="/nfs/yangyexin.yyx/data/multilingual/common_voice/cv-corpus-15.0-2023-09-08-zh-CN/cv-corpus-15.0-2023-09-08/zh-CN/clips/common_voice_zh-CN_22114629.mp3" \
+++batch_size=1 \
 ++output_dir="./outputs/debug" \
 ++device="cuda:0" \
 

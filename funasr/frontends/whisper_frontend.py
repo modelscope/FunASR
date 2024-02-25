@@ -4,6 +4,7 @@ import torch.nn as nn
 import whisper
 from whisper.audio import HOP_LENGTH, N_FFT, N_SAMPLES
 from funasr.register import tables
+from torch.nn.utils.rnn import pad_sequence
 
 
 @tables.register("frontend_classes", "WhisperFrontend")
@@ -21,6 +22,7 @@ class WhisperFrontend(nn.Module):
     ):
         super().__init__()
         assert fs == 16000
+        self.fs = fs
 
         self.n_fft = N_FFT
         self.win_length = N_FFT
@@ -75,9 +77,24 @@ class WhisperFrontend(nn.Module):
     def forward(
             self, input: torch.Tensor, input_lengths: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
-        if self.do_pad_trim:
-            input = self.pad_or_trim(input, self.pad_samples)
+        batch_size = input.size(0)
+        feats = []
+        feats_lens = []
+        for i in range(batch_size):
+            if self.do_pad_trim:
+                feat = self.pad_or_trim(input[i], self.pad_samples)
+            else:
+                feat = input[i]
+            feat, feat_len = self.log_mel_spectrogram(feat, input_lengths[0])
+            feats.append(feat)
+            feats_lens.append(feat_len)
+        feats_lens = torch.as_tensor(feats_lens)
 
-        feats, feats_lens = self.log_mel_spectrogram(input, input_lengths)
+        if batch_size == 1:
+            feats_pad = feats[0][None, :, :]
+        else:
+            feats_pad = pad_sequence(feats,
+                                     batch_first=True,
+                                     padding_value=0.0)
 
-        return feats, feats_lens
+        return feats_pad, feats_lens
