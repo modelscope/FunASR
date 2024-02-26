@@ -564,3 +564,13 @@ function recProcess( buffer, powerLevel, bufferDuration, bufferSampleRate,newBuf
 		
 	}
 }
+
+function getUseITN() {
+	var obj = document.getElementsByName("use_itn");
+	for (var i = 0; i < obj.length; i++) {
+		if (obj[i].checked) {
+			return obj[i].value === "true";
+		}
+	}
+	return false;
+}
