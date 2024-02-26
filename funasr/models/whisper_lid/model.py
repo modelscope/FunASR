@@ -493,6 +493,10 @@ class OpenAIWhisperLIDModel(nn.Module):
         self.lid_predictor = lid_predictor
         self.clip_frames = clip_frames
         self.random_clip = random_clip
+        self.normalize = None
+        self.beam_search = None
+        if not hasattr(self.encoder, "interctc_use_conditioning"):
+            self.encoder.interctc_use_conditioning = False
 
     def forward(self,
                 speech: torch.Tensor,  # may be padding
@@ -648,10 +652,14 @@ class OpenAIWhisperLIDModel(nn.Module):
         lid_logits = self.output_layer(lid_output)  # (B, num_classes)
 
         _, predicted_lid_index = torch.max(lid_logits, 1)
-        predicted_lid =  tokenizer.ids2tokens(self.token_list[predicted_lid_index[0].cpu()])
+        predicted_lid = tokenizer.ids2tokens([predicted_lid_index[0].cpu()])[0]
 
         if kwargs.get("output_dir") is not None:
             if not hasattr(self, "writer"):
                 self.writer = DatadirWriter(kwargs.get("output_dir"))
             lid_writer = self.writer["lid"]
             lid_writer[key[0]] = predicted_lid
+
+        results = {"key": key[0], "lid": predicted_lid}
+
+        return results, meta_data

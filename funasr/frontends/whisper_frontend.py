@@ -28,6 +28,8 @@ class WhisperFrontend(nn.Module):
         self.win_length = N_FFT
         self.hop_length = HOP_LENGTH
         self.pad_samples = N_SAMPLES
+        self.frame_shift = self.hop_length
+        self.lfr_n = 1
         if whisper_model == "large-v3" or whisper_model == "large":
             self.n_mels = 128
         else:
@@ -85,8 +87,8 @@ class WhisperFrontend(nn.Module):
                 feat = self.pad_or_trim(input[i], self.pad_samples)
             else:
                 feat = input[i]
-            feat, feat_len = self.log_mel_spectrogram(feat, input_lengths[0])
-            feats.append(feat)
+            feat, feat_len = self.log_mel_spectrogram(feat[None, :], input_lengths[0])
+            feats.append(feat[0])
             feats_lens.append(feat_len)
         feats_lens = torch.as_tensor(feats_lens)
 

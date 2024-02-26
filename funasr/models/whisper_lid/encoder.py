@@ -89,7 +89,7 @@ class OpenAIWhisperEncoder(nn.Module):
         x = self.dropout(x)
 
         for layer, block in enumerate(self.encoders.blocks):
-            x = block(x, mask=padding_mask, is_pad_mask=True)
+            x = block(x)
             if layer < len(self.encoders.blocks) - 1:
                 x = self.dropout(x)
 
