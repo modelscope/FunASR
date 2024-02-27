@@ -105,10 +105,8 @@ Notes: Support recognition of single audio file, as well as file list in Kaldi-s
 from funasr import AutoModel
 # paraformer-zh is a multi-functional asr model
 # use vad, punc, spk or not as you need
-model = AutoModel(model="paraformer-zh", model_revision="v2.0.4",
-                  vad_model="fsmn-vad", vad_model_revision="v2.0.4",
-                  punc_model="ct-punc-c", punc_model_revision="v2.0.4",
-                  # spk_model="cam++", spk_model_revision="v2.0.2",
+model = AutoModel(model="paraformer-zh",  vad_model="fsmn-vad",  punc_model="ct-punc-c", 
+                  # spk_model="cam++", 
                   )
 res = model.generate(input=f"{model.model_path}/example/asr_example.wav", 
                      batch_size_s=300, 
@@ -125,7 +123,7 @@ chunk_size = [0, 10, 5] #[0, 10, 5] 600ms, [0, 8, 4] 480ms
 encoder_chunk_look_back = 4 #number of chunks to lookback for encoder self-attention
 decoder_chunk_look_back = 1 #number of encoder chunks to lookback for decoder cross-attention
 
-model = AutoModel(model="paraformer-zh-streaming", model_revision="v2.0.4")
+model = AutoModel(model="paraformer-zh-streaming")
 
 import soundfile
 import os
@@ -148,7 +146,7 @@ Note: `chunk_size` is the configuration for streaming latency.` [0,10,5]` indica
 ```python
 from funasr import AutoModel
 
-model = AutoModel(model="fsmn-vad", model_revision="v2.0.4")
+model = AutoModel(model="fsmn-vad")
 wav_file = f"{model.model_path}/example/asr_example.wav"
 res = model.generate(input=wav_file)
 print(res)
@@ -160,7 +158,7 @@ Note: The output format of the VAD model is: `[[beg1, end1], [beg2, end2], ..., 
 from funasr import AutoModel
 
 chunk_size = 200 # ms
-model = AutoModel(model="fsmn-vad", model_revision="v2.0.4")
+model = AutoModel(model="fsmn-vad")
 
 import soundfile
 
@@ -188,7 +186,7 @@ The output is measured in milliseconds and represents the absolute time from the
 ```python
 from funasr import AutoModel
 
-model = AutoModel(model="ct-punc", model_revision="v2.0.4")
+model = AutoModel(model="ct-punc")
 res = model.generate(input="那今天的会就到这里吧 happy new year 明年见")
 print(res)
 ```
@@ -196,7 +194,7 @@ print(res)
 ```python
 from funasr import AutoModel
 
-model = AutoModel(model="fa-zh", model_revision="v2.0.4")
+model = AutoModel(model="fa-zh")
 wav_file = f"{model.model_path}/example/asr_example.wav"
 text_file = f"{model.model_path}/example/text.txt"
 res = model.generate(input=(wav_file, text_file), data_type=("sound", "text"))
