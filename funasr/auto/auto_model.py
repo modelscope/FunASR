@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+#  MIT License  (https://opensource.org/licenses/MIT)
+
 import json
 import time
 import copy
@@ -12,12 +17,12 @@ from tqdm import tqdm
 from funasr.register import tables
 from funasr.utils.load_utils import load_bytes
 from funasr.download.file import download_from_url
+from funasr.utils.timestamp_tools import timestamp_sentence
 from funasr.download.download_from_hub import download_model
 from funasr.utils.vad_utils import slice_padding_audio_samples
+from funasr.utils.load_utils import load_audio_text_image_video
 from funasr.train_utils.set_all_random_seed import set_all_random_seed
 from funasr.train_utils.load_pretrained_model import load_pretrained_model
-from funasr.utils.load_utils import load_audio_text_image_video
-from funasr.utils.timestamp_tools import timestamp_sentence
 from funasr.models.campplus.utils import sv_chunk, postprocess, distribute_spk
 try:
     from funasr.models.campplus.cluster_backend import ClusterBackend
@@ -381,11 +386,14 @@ class AutoModel:
             return_raw_text = kwargs.get('return_raw_text', False)
             # step.3 compute punc model
             if self.punc_model is not None:
-                self.punc_kwargs.update(cfg)
-                punc_res = self.inference(result["text"], model=self.punc_model, kwargs=self.punc_kwargs, **cfg)
-                raw_text = copy.copy(result["text"])
-                if return_raw_text: result['raw_text'] = raw_text
-                result["text"] = punc_res[0]["text"]
+                if not len(result["text"]):
+                    result['raw_text'] = ''
+                else:
+                    self.punc_kwargs.update(cfg)
+                    punc_res = self.inference(result["text"], model=self.punc_model, kwargs=self.punc_kwargs, **cfg)
+                    raw_text = copy.copy(result["text"])
+                    if return_raw_text: result['raw_text'] = raw_text
+                    result["text"] = punc_res[0]["text"]
             else:
                 raw_text = None
 

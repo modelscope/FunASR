@@ -25,8 +25,8 @@ from funasr.models.paraformer.search import Hypothesis
 from funasr.train_utils.device_funcs import force_gatherable
 from funasr.models.bicif_paraformer.model import BiCifParaformer
 from funasr.losses.label_smoothing_loss import LabelSmoothingLoss
-from funasr.utils.timestamp_tools import ts_prediction_lfr6_standard
 from funasr.models.transformer.utils.add_sos_eos import add_sos_eos
+from funasr.utils.timestamp_tools import ts_prediction_lfr6_standard
 from funasr.models.transformer.utils.nets_utils import make_pad_mask, pad_list
 from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
 
