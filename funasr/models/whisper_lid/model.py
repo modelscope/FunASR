@@ -660,6 +660,6 @@ class OpenAIWhisperLIDModel(nn.Module):
             lid_writer = self.writer["lid"]
             lid_writer[key[0]] = predicted_lid
 
-        results = {"key": key[0], "lid": predicted_lid}
+        results = [{"key": key[0], "lid": predicted_lid}]
 
         return results, meta_data
