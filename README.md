@@ -153,6 +153,8 @@ wav_file = f"{model.model_path}/example/asr_example.wav"
 res = model.generate(input=wav_file)
 print(res)
 ```
+Note: The output format of the VAD model is: `[[beg1, end1], [beg2, end2], ..., [begN, endN]]`, where `begN/endN` indicates the starting/ending point of the `N-th` valid audio segment, measured in milliseconds.
+
 ### Voice Activity Detection (Streaming)
 ```python
 from funasr import AutoModel
@@ -175,6 +177,13 @@ for i in range(total_chunk_num):
     if len(res[0]["value"]):
         print(res)
 ```
+Note: The output format for the streaming VAD model can be one of four scenarios:
+- `[[beg1, end1], [beg2, end2], .., [begN, endN]]`：The same as the offline VAD output result mentioned above.
+- `[[beg, -1]]`：Indicates that only a starting point has been detected.
+- `[[-1, end]]`：Indicates that only an ending point has been detected.
+- `[]`：Indicates that neither a starting point nor an ending point has been detected. 
+
+The output is measured in milliseconds and represents the absolute time from the starting point.
 ### Punctuation Restoration
 ```python
 from funasr import AutoModel
