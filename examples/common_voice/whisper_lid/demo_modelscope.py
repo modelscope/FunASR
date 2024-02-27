@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+#  MIT License  (https://opensource.org/licenses/MIT)
+
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
 
@@ -13,5 +18,5 @@ inference_pipeline = pipeline(
     model='iic/speech_whisper-large_lid_multilingual_pytorch', model_revision="v0.0.2")
 
 for wav in multilingual_wavs:
-    rec_result = inference_pipeline(input=wav)
+    rec_result = inference_pipeline(input=wav, inference_clip_length=250)
     print(rec_result)
