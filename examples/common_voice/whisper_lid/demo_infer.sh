@@ -1,16 +1,21 @@
 # Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
 #  MIT License  (https://opensource.org/licenses/MIT)
 
+# method1, inference from model hub
 
+# for more input type, please ref to readme.md
+input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav"
+
+output_dir="./outputs/debug"
+
+model="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
+model_revision="v2.0.4"
+
+device="cuda:0" # "cuda:0" for gpu0, "cuda:1" for gpu1, "cpu"
 
 python -m funasr.bin.inference \
---config-path="/nfs/wangjiaming.wjm/Funasr_Results/Whisper_LargeV3-LID/CommonVoiceFleursVoxLingual107/2m-4gpu/WhisperLID" \
---config-name="config.yaml" \
-++init_param="/nfs/wangjiaming.wjm/Funasr_Results/Whisper_LargeV3-LID/CommonVoiceFleursVoxLingual107/2m-4gpu/WhisperLID/model.pth" \
-++tokenizer="CharTokenizer" \
-++tokenizer_conf.token_list="/nfs/wangjiaming.wjm/Funasr_data/Whisper_LID/common_voice_fleurs_voxlingual107/tokens.txt" \
-++input="/nfs/wangjiaming.wjm/Funasr_data/multilingual/common_voice/cv-corpus-15.0-2023-09-08/zh-CN/test_mp3/wavelist_local.scp" \
-++batch_size=1 \
-++output_dir="./outputs/debug" \
-++device="cuda:0"
-
+++model=${model} \
+++model_revision=${model_revision} \
+++input="${input}" \
+++output_dir="${output_dir}" \
+++device="${device}" \
