@@ -118,7 +118,7 @@ def load_pretrained_model(
 		else:
 			print(f"Warning, miss key in ckpt: {k}, mapped: {k_ddp}")
 			
-	flag = obj.load_state_dict(dst_state, strict=True)
+	flag = obj.load_state_dict(dst_state, strict=False)
 	# print(flag)
 
 # def load_pretrained_model(

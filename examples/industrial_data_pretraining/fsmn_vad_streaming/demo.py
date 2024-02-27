@@ -10,6 +10,8 @@ model = AutoModel(model="damo/speech_fsmn_vad_zh-cn-16k-common-pytorch", model_r
 
 res = model.generate(input=wav_file)
 print(res)
+# [[beg1, end1], [beg2, end2], .., [begN, endN]]
+# beg/end: ms
 
 
 
@@ -37,3 +39,9 @@ for i in range(total_chunk_num):
     # print(res)
     if len(res[0]["value"]):
         print(res)
+
+
+# 1. [[beg1, end1], [beg2, end2], .., [begN, endN]]; [[beg, end]]; [[beg1, end1], [beg2, end2]]
+# 2. [[beg, -1]]
+# 3. [[-1, end]]
+# beg/end: ms
