@@ -105,7 +105,7 @@ def main(**kwargs):
                     path=p,
                     ignore_init_mismatch=kwargs.get("ignore_init_mismatch", True),
                     oss_bucket=kwargs.get("oss_bucket", None),
-                    scope_map=kwargs.get("scope_map", None),
+                    scope_map=kwargs.get("scope_map", "module.,none"),
                     excludes=kwargs.get("excludes", None),
                 )
             else:
