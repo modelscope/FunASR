@@ -90,10 +90,12 @@ def load_pretrained_model(
 				
 				if dst_prefix == "" and (src_prefix + k) in src_state.keys():
 					k_src = src_prefix + k
-					print(f"init param, map: {k} from {k_src} in ckpt")
+					if not k_src.startswith("module."):
+						print(f"init param, map: {k} from {k_src} in ckpt")
 				elif k.startswith(dst_prefix) and k.replace(dst_prefix, src_prefix, 1) in src_state.keys():
 					k_src = k.replace(dst_prefix, src_prefix, 1)
-					print(f"init param, map: {k} from {k_src} in ckpt")
+					if not k_src.startswith("module."):
+						print(f"init param, map: {k} from {k_src} in ckpt")
 					
 		if k_src in src_state.keys():
 			if ignore_init_mismatch and dst_state[k].shape != src_state[k_src].shape:
