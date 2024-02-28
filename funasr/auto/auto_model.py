@@ -39,13 +39,11 @@ def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
     filelist = [".scp", ".txt", ".json", ".jsonl"]
     
     chars = string.ascii_letters + string.digits
-    pdb.set_trace()
     if isinstance(data_in, str) and data_in.startswith('http'): # url
         data_in = download_from_url(data_in)
     if isinstance(data_in, str) and os.path.exists(data_in): # wav_path; filelist: wav.scp, file.jsonl;text.txt;
         _, file_extension = os.path.splitext(data_in)
         file_extension = file_extension.lower()
-        pdb.set_trace()
         if file_extension in filelist: #filelist: wav.scp, file.jsonl;text.txt;
             with open(data_in, encoding='utf-8') as fin:
                 for line in fin:
