@@ -446,9 +446,10 @@ class LCBNet(nn.Module):
         ocr_list_new = [[x + 1 if x != 0 else x for x in sublist] for sublist in ocr_sample_list]
         ocr = torch.tensor(ocr_list_new)
         ocr_lengths = ocr.new_full([1], dtype=torch.long, fill_value=ocr.size(1))
-        pdb.set_trace()
         ocr, ocr_lens, _ = self.text_encoder(ocr, ocr_lengths)
-        pdb.set_trace()
+        fusion_out, _, _, _ = self.fusion_encoder(encoder_out,None, ocr, None)
+        encoder_out = encoder_out + fusion_out
+
         # c. Passed the encoder result and the beam search
         nbest_hyps = self.beam_search(
             x=encoder_out[0], maxlenratio=kwargs.get("maxlenratio", 0.0), minlenratio=kwargs.get("minlenratio", 0.0)
@@ -456,7 +457,7 @@ class LCBNet(nn.Module):
         
         nbest_hyps = nbest_hyps[: self.nbest]
 
-
+        pdb.set_trace(0)
         results = []
         b, n, d = encoder_out.size()
         for i in range(b):
@@ -478,9 +479,12 @@ class LCBNet(nn.Module):
                 # remove blank symbol id, which is assumed to be 0
                 token_int = list(filter(lambda x: x != self.eos and x != self.sos and x != self.blank_id, token_int))
                 
+                pdb.set_trace()
                 # Change integer-ids to tokens
                 token = tokenizer.ids2tokens(token_int)
+                pdb.set_trace()
                 text = tokenizer.tokens2text(token)
+                pdb.set_trace()
                 
                 text_postprocessed, _ = postprocess_utils.sentence_postprocess(token)
                 result_i = {"key": key[i], "token": token, "text": text_postprocessed}
