@@ -56,11 +56,9 @@ echo "inference_dir: ${inference_dir}"
 
 #mkdir -p ${inference_dir}/1best_recog
 
-if [ -f "${inference_dir}/${JOB}/1best_recog/token" ]; then
-    for JOB in $(seq "${nj}"); do
-        cat "${inference_dir}/${JOB}/1best_recog/token" >> "${inference_dir}/1best_recog/token"
-    done  
-fi
+for JOB in $(seq "${nj}"); do
+    cat "${inference_dir}/${JOB}/1best_recog/token" >> "${inference_dir}/1best_recog/token"
+done  
 
 echo "Computing WER ..."
 echo "Computing WER ..."
