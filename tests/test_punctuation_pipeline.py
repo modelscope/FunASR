@@ -36,6 +36,5 @@ class TestTransformerInferencePipelines(unittest.TestCase):
             rec_result_all += rec_result["text"]
         logger.info("punctuation inference result: {0}".format(rec_result_all))
 
-
 if __name__ == '__main__':
     unittest.main()
