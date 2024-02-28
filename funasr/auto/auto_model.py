@@ -234,11 +234,9 @@ class AutoModel:
         
             time1 = time.perf_counter()
             with torch.no_grad():
-                pdb.set_trace()
                 results, meta_data = model.inference(**batch, **kwargs)
             time2 = time.perf_counter()
             
-            pdb.set_trace()
             asr_result_list.extend(results)
 
             # batch_data_time = time_per_frame_s * data_batch_i["speech_lengths"].sum().item()
