@@ -296,7 +296,6 @@ class LCBNet(nn.Module):
         
         if intermediate_outs is not None:
             return (encoder_out, intermediate_outs), encoder_out_lens
-        pdb.set_trace()
         return encoder_out, encoder_out_lens
     
     def _calc_att_loss(
@@ -444,7 +443,11 @@ class LCBNet(nn.Module):
         encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
         if isinstance(encoder_out, tuple):
             encoder_out = encoder_out[0]
-        
+        pdb.set_trace()
+        ocr = ocr_sample_list[0]
+        ocr_lengths = ocr.new_full([1], dtype=torch.long, fill_value=ocr.size(1))
+        ocr, ocr_lens, _ = self.text_encoder(ocr, ocr_lengths)
+        pdb.set_trace()
         # c. Passed the encoder result and the beam search
         nbest_hyps = self.beam_search(
             x=encoder_out[0], maxlenratio=kwargs.get("maxlenratio", 0.0), minlenratio=kwargs.get("minlenratio", 0.0)
