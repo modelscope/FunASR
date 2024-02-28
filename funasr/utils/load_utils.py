@@ -56,8 +56,7 @@ def load_audio_text_image_video(data_or_path_or_list, fs: int = 16000, audio_fs:
     elif isinstance(data_or_path_or_list, str) and data_type == "kaldi_ark":
         data_mat = kaldiio.load_mat(data_or_path_or_list) 
         if isinstance(data_mat, tuple):
-            sampling_rate, mat = data_mat
-            assert sampling_rate == audio_fs
+            audio_fs, mat = data_mat
         else:
             mat = data_mat
         if mat.dtype == 'int16' or mat.dtype == 'int32':
