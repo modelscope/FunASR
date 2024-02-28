@@ -413,7 +413,6 @@ class LCBNet(nn.Module):
             logging.info("enable beam_search")
             self.init_beam_search(**kwargs)
             self.nbest = kwargs.get("nbest", 1)
-        pdb.set_trace()
 
         meta_data = {}
         if isinstance(data_in, torch.Tensor) and kwargs.get("data_type", "sound") == "fbank":  # fbank
@@ -431,6 +430,7 @@ class LCBNet(nn.Module):
                                                             tokenizer=tokenizer)
             time2 = time.perf_counter()
             meta_data["load_data"] = f"{time2 - time1:0.3f}"
+            pdb.set_trace()
             speech, speech_lengths = extract_fbank(audio_sample_list, data_type=kwargs.get("data_type", "sound"),
                                                    frontend=frontend)
             time3 = time.perf_counter()
