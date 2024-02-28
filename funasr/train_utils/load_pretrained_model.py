@@ -45,7 +45,7 @@ def load_pretrained_model(
 	ignore_init_mismatch: bool=True,
 	map_location: str = "cpu",
 	oss_bucket=None,
-	scope_map="module.:none",
+	scope_map=[],
 	excludes=None,
 	ignore_mismatch=False,
 	**kwargs,
@@ -75,6 +75,7 @@ def load_pretrained_model(
 	
 	if isinstance(scope_map, str):
 		scope_map = scope_map.split(",")
+	scope_map += ["module.", "None"]
 	
 	for k in dst_state.keys():
 		
@@ -86,9 +87,12 @@ def load_pretrained_model(
 			for i in range(0, len(scope_map), 2):
 				src_prefix = scope_map[i] if scope_map[i].lower() != "none" else ""
 				dst_prefix = scope_map[i+1] if scope_map[i+1].lower() != "none" else ""
-
-				if k.startswith(dst_prefix) and k.replace(dst_prefix, src_prefix) in src_state.keys():
-					k_src = k.replace(dst_prefix, src_prefix)
+				
+				if dst_prefix == "" and (src_prefix + k) in src_state.keys():
+					k_src = src_prefix + k
+					print(f"init param, map: {k} from {k_src} in ckpt")
+				elif k.startswith(dst_prefix) and k.replace(dst_prefix, src_prefix, 1) in src_state.keys():
+					k_src = k.replace(dst_prefix, src_prefix, 1)
 					print(f"init param, map: {k} from {k_src} in ckpt")
 					
 		if k_src in src_state.keys():

@@ -193,7 +193,7 @@ class AutoModel:
                     path=init_param,
                     ignore_init_mismatch=kwargs.get("ignore_init_mismatch", False),
                     oss_bucket=kwargs.get("oss_bucket", None),
-                    scope_map=kwargs.get("scope_map", "module.,None"),
+                    scope_map=kwargs.get("scope_map", []),
                     excludes=kwargs.get("excludes", None),
                 )
             else:
