@@ -457,7 +457,7 @@ class LCBNet(nn.Module):
         
         nbest_hyps = nbest_hyps[: self.nbest]
 
-        pdb.set_trace(0)
+        pdb.set_trace()
         results = []
         b, n, d = encoder_out.size()
         for i in range(b):
