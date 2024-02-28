@@ -40,11 +40,11 @@ requirements = {
         "umap_learn",
         "jaconv",
         "hydra-core>=1.3.2",
+        "tensorboardX",
     ],
     # train: The modules invoked when training only.
     "train": [
         "editdistance",
-        "tensorboardX",
     ],
     # all: The modules should be optionally installled due to some reason.
     #      Please consider moving them to "install" occasionally

@@ -1,4 +1,5 @@
 DOCKER:
+  funasr-runtime-sdk-en-cpu-0.1.4
   funasr-runtime-sdk-en-cpu-0.1.3
   funasr-runtime-sdk-en-cpu-0.1.2
 DEFAULT_ASR_MODEL:
