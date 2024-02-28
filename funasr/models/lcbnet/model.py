@@ -449,7 +449,7 @@ class LCBNet(nn.Module):
         ocr, ocr_lens, _ = self.text_encoder(ocr, ocr_lengths)
         fusion_out, _, _, _ = self.fusion_encoder(encoder_out,None, ocr, None)
         encoder_out = encoder_out + fusion_out
-
+        pdb.set_trace()
         # c. Passed the encoder result and the beam search
         nbest_hyps = self.beam_search(
             x=encoder_out[0], maxlenratio=kwargs.get("maxlenratio", 0.0), minlenratio=kwargs.get("minlenratio", 0.0)
@@ -485,7 +485,7 @@ class LCBNet(nn.Module):
                 pdb.set_trace()
                 text = tokenizer.tokens2text(token)
                 pdb.set_trace()
-                
+
                 text_postprocessed, _ = postprocess_utils.sentence_postprocess(token)
                 result_i = {"key": key[i], "token": token, "text": text_postprocessed}
                 results.append(result_i)
