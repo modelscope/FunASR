@@ -425,14 +425,17 @@ class LCBNet(nn.Module):
             # extract fbank feats
             time1 = time.perf_counter()
             pdb.set_trace()
-            audio_sample_list = load_audio_text_image_video(data_in, fs=frontend.fs, audio_fs=kwargs.get("fs", 16000),
+            sample_list = load_audio_text_image_video(data_in, fs=frontend.fs, audio_fs=kwargs.get("fs", 16000),
                                                             data_type=kwargs.get("data_type", "sound"),
                                                             tokenizer=tokenizer)
             time2 = time.perf_counter()
             meta_data["load_data"] = f"{time2 - time1:0.3f}"
+            audio_sample_list = sample_list[0]
+            ocr_sample_list = sample_list[1]
             pdb.set_trace()
             speech, speech_lengths = extract_fbank(audio_sample_list, data_type=kwargs.get("data_type", "sound"),
                                                    frontend=frontend)
+            pdb.set_trace()
             time3 = time.perf_counter()
             meta_data["extract_feat"] = f"{time3 - time2:0.3f}"
             meta_data["batch_data_time"] = speech_lengths.sum().item() * frontend.frame_shift * frontend.lfr_n / 1000
