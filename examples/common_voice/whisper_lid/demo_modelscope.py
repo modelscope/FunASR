@@ -15,7 +15,7 @@ multilingual_wavs=[
 
 inference_pipeline = pipeline(
     task=Tasks.auto_speech_recognition,
-    model='iic/speech_whisper-large_lid_multilingual_pytorch', model_revision="v0.0.2")
+    model='iic/speech_whisper-large_lid_multilingual_pytorch', model_revision="v0.0.3")
 
 for wav in multilingual_wavs:
     rec_result = inference_pipeline(input=wav, inference_clip_length=250)
