@@ -55,13 +55,12 @@ echo "inference_dir: ${inference_dir}"
 
 
 #mkdir -p ${inference_dir}/1best_recog
-for f in token; do
-    if [ -f "${inference_dir}/${JOB}/1best_recog/${f}" ]; then
-        for JOB in $(seq "${nj}"); do
-            cat "${inference_dir}/${JOB}/1best_recog/${f}"
-        done | sort -k1 >"${inference_dir}/1best_recog/${f}"
-    fi
-done
+
+if [ -f "${inference_dir}/${JOB}/1best_recog/token" ]; then
+    for JOB in $(seq "${nj}"); do
+        cat "${inference_dir}/${JOB}/1best_recog/token" >> "${inference_dir}/1best_recog/token"
+    done  
+fi
 
 echo "Computing WER ..."
 echo "Computing WER ..."
