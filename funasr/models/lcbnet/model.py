@@ -422,7 +422,6 @@ class LCBNet(nn.Module):
         else:
             # extract fbank feats
             time1 = time.perf_counter()
-            pdb.set_trace()
             sample_list = load_audio_text_image_video(data_in, fs=frontend.fs, audio_fs=kwargs.get("fs", 16000),
                                                             data_type=kwargs.get("data_type", "sound"),
                                                             tokenizer=tokenizer)
@@ -443,9 +442,11 @@ class LCBNet(nn.Module):
         encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
         if isinstance(encoder_out, tuple):
             encoder_out = encoder_out[0]
-        pdb.set_trace()
-        ocr = ocr_sample_list[0]
+        
+        ocr_list_new = [[x + 1 if x != 0 else x for x in sublist] for sublist in ocr_sample_list]
+        ocr = torch.tensor(ocr_list_new)
         ocr_lengths = ocr.new_full([1], dtype=torch.long, fill_value=ocr.size(1))
+        pdb.set_trace()
         ocr, ocr_lens, _ = self.text_encoder(ocr, ocr_lengths)
         pdb.set_trace()
         # c. Passed the encoder result and the beam search
