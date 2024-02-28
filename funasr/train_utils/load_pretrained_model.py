@@ -38,52 +38,17 @@ def filter_state_dict(
 				)
 	return match_state
 
-def assigment_scope_map(dst_state: dict, src_state: dict, scope_map: str=None):
-	"""Compute the union of the current variables and checkpoint variables."""
-	import collections
-	import re
-
-	# current model variables
-	name_to_variable = collections.OrderedDict()
-	for name, var in dst_state.items():
-		name_to_variable[name] = var
-	
-	scope_map_num = 0
-	if scope_map is not None:
-		scope_map = scope_map.split(",")
-		scope_map_num = len(scope_map) // 2
-		for scope_map_idx in range(scope_map_num):
-			scope_map_id = scope_map_idx * 2
-			logging.info('assignment_map from scope {} to {}'.format(scope_map[scope_map_id], scope_map[scope_map_id+1]))
-	
-	assignment_map = {}
-	for name, var in src_state.items():
-
-		if scope_map:
-			for scope_map_idx in range(scope_map_num):
-				scope_map_id = scope_map_idx * 2
-				try:
-					idx = name.index(scope_map[scope_map_id])
-					new_name = scope_map[scope_map_id+1] + name[idx + len(scope_map[scope_map_id]):]
-					if new_name in name_to_variable:
-						assignment_map[name] = var
-				except:
-					continue
-		else:
-			if name in name_to_variable:
-				assignment_map[name] = var
-	
-	return assignment_map
-
 
 def load_pretrained_model(
 	path: str,
 	model: torch.nn.Module,
-	ignore_init_mismatch: bool,
+	ignore_init_mismatch: bool=True,
 	map_location: str = "cpu",
 	oss_bucket=None,
 	scope_map="module.:none",
 	excludes=None,
+	ignore_mismatch=False,
+	**kwargs,
 ):
 	"""Load a model state and set it to the model.
 
@@ -112,10 +77,7 @@ def load_pretrained_model(
 		scope_map = scope_map.split(",")
 	
 	for k in dst_state.keys():
-		# if not k.startswith("module.") and "module." + k in src_state.keys():
-		# 	k_ddp = "module." + k
-		# else:
-		# 	k_ddp = k
+		
 		k_src = k
 
 		if scope_map is not None:
@@ -130,18 +92,14 @@ def load_pretrained_model(
 					print(f"init param, map: {k} from {k_src} in ckpt")
 					
 		if k_src in src_state.keys():
-			dst_state[k] = src_state[k_src]
-				
-		# if k_ddp.startswith("audio_encoder"):
-		# 	if k_ddp.replace("audio_encoder", "encoder.model") in src_state.keys():
-		# 		k_ddp = k_ddp.replace("audio_encoder", "encoder.model")
-		# if k_ddp.startswith("adaptor"):
-		# 	if k_ddp.replace("adaptor", "encoder_projector") in src_state.keys():
-		# 		k_ddp = k_ddp.replace("adaptor", "encoder_projector")
-		# if k_ddp in src_state:
-		# 	dst_state[k] = src_state[k_ddp]
+			if ignore_init_mismatch and dst_state[k].shape != src_state[k_src].shape:
+				print(f"ignore_mismatch:{ignore_mismatch}, dst: {k, dst_state[k].shape}, src: {k_src, src_state[k_src].shape}")
+			else:
+				dst_state[k] = src_state[k_src]
+
+
 		else:
 			print(f"Warning, miss key in ckpt: {k}, mapped: {k_src}")
 			
-	flag = obj.load_state_dict(dst_state, strict=False)
+	flag = obj.load_state_dict(dst_state, strict=True)
 	# print(flag)
