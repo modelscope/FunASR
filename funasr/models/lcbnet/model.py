@@ -111,8 +111,8 @@ class LCBNet(nn.Module):
             )
     
         self.blank_id = blank_id
-        self.sos = sos if sos is not None else vocab_size - 1
-        self.eos = eos if eos is not None else vocab_size - 1
+        self.sos = vocab_size - 1
+        self.eos = vocab_size - 1
         self.vocab_size = vocab_size
         self.ignore_id = ignore_id
         self.ctc_weight = ctc_weight
@@ -375,14 +375,14 @@ class LCBNet(nn.Module):
         scorers["ngram"] = ngram
         
         weights = dict(
-            decoder=1.0 - kwargs.get("decoding_ctc_weight", 0.5),
-            ctc=kwargs.get("decoding_ctc_weight", 0.5),
+            decoder=1.0 - kwargs.get("decoding_ctc_weight", 0.3),
+            ctc=kwargs.get("decoding_ctc_weight", 0.3),
             lm=kwargs.get("lm_weight", 0.0),
             ngram=kwargs.get("ngram_weight", 0.0),
             length_bonus=kwargs.get("penalty", 0.0),
         )
         beam_search = BeamSearch(
-            beam_size=kwargs.get("beam_size", 10),
+            beam_size=kwargs.get("beam_size", 20),
             weights=weights,
             scorers=scorers,
             sos=self.sos,
