@@ -31,7 +31,7 @@ def load_audio_text_image_video(data_or_path_or_list, fs: int = 16000, audio_fs:
             return [load_audio_text_image_video(audio, fs=fs, audio_fs=audio_fs, data_type=data_type, **kwargs) for audio in data_or_path_or_list]
     if isinstance(data_or_path_or_list, str) and data_or_path_or_list.startswith('http'): # download url to local file
         data_or_path_or_list = download_from_url(data_or_path_or_list)
-
+    pdb.set_trace()
     if isinstance(data_or_path_or_list, str) and os.path.exists(data_or_path_or_list): # local file
         if data_type is None or data_type == "sound":
             data_or_path_or_list, audio_fs = torchaudio.load(data_or_path_or_list)
