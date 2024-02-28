@@ -16,54 +16,52 @@ inference_dir="outputs/test"
 _logdir="${inference_dir}/logdir"
 echo "inference_dir: ${inference_dir}"
 
-# mkdir -p "${_logdir}"
-# key_file1=${file_dir}/wav.scp
-# key_file2=${file_dir}/ocr.txt
-# split_scps1=
-# split_scps2=
-# for JOB in $(seq "${nj}"); do
-#     split_scps1+=" ${_logdir}/wav.${JOB}.scp"
-#     split_scps2+=" ${_logdir}/ocr.${JOB}.txt"
-# done
-# utils/split_scp.pl "${key_file1}" ${split_scps1}
-# utils/split_scp.pl "${key_file2}" ${split_scps2}
+mkdir -p "${_logdir}"
+key_file1=${file_dir}/wav.scp
+key_file2=${file_dir}/ocr.txt
+split_scps1=
+split_scps2=
+for JOB in $(seq "${nj}"); do
+    split_scps1+=" ${_logdir}/wav.${JOB}.scp"
+    split_scps2+=" ${_logdir}/ocr.${JOB}.txt"
+done
+utils/split_scp.pl "${key_file1}" ${split_scps1}
+utils/split_scp.pl "${key_file2}" ${split_scps2}
 
-# gpuid_list_array=(${CUDA_VISIBLE_DEVICES//,/ })
-# for JOB in $(seq ${nj}); do
-#     {
-#         id=$((JOB-1))
-#         gpuid=${gpuid_list_array[$id]}
+gpuid_list_array=(${CUDA_VISIBLE_DEVICES//,/ })
+for JOB in $(seq ${nj}); do
+    {
+        id=$((JOB-1))
+        gpuid=${gpuid_list_array[$id]}
 
-#         export CUDA_VISIBLE_DEVICES=${gpuid}
+        export CUDA_VISIBLE_DEVICES=${gpuid}
 
-#         python -m funasr.bin.inference \
-#         --config-path=${file_dir} \
-#         --config-name="config.yaml" \
-#         ++init_param=${file_dir}/model.pb \
-#         ++tokenizer_conf.token_list=${file_dir}/tokens.txt \
-#         ++input=[${_logdir}/wav.${JOB}.scp,${_logdir}/ocr.${JOB}.txt] \
-#         +data_type='["kaldi_ark", "text"]' \
-#         ++tokenizer_conf.bpemodel=${file_dir}/bpe.model \
-#         ++output_dir="${inference_dir}/${JOB}" \
-#         ++device="${inference_device}" \
-#         ++ncpu=1 \
-#         ++disable_log=true  &> ${_logdir}/log.${JOB}.txt
+        python -m funasr.bin.inference \
+        --config-path=${file_dir} \
+        --config-name="config.yaml" \
+        ++init_param=${file_dir}/model.pb \
+        ++tokenizer_conf.token_list=${file_dir}/tokens.txt \
+        ++input=[${_logdir}/wav.${JOB}.scp,${_logdir}/ocr.${JOB}.txt] \
+        +data_type='["kaldi_ark", "text"]' \
+        ++tokenizer_conf.bpemodel=${file_dir}/bpe.model \
+        ++output_dir="${inference_dir}/${JOB}" \
+        ++device="${inference_device}" \
+        ++ncpu=1 \
+        ++disable_log=true  &> ${_logdir}/log.${JOB}.txt
 
-#     }&
-# done
-# wait
+    }&
+done
+wait
 
 
-#mkdir -p ${inference_dir}/1best_recog
+mkdir -p ${inference_dir}/1best_recog
 
 for JOB in $(seq "${nj}"); do
-    cat "${inference_dir}/${JOB}/1best_recog/token" >> "${inference_dir}/1best_recog/token"
+   cat "${inference_dir}/${JOB}/1best_recog/token" >> "${inference_dir}/1best_recog/token"
 done  
 
 echo "Computing WER ..."
-echo "Computing WER ..."
-#python utils/postprocess_text_zh.py ${inference_dir}/1best_recog/text ${inference_dir}/1best_recog/text.proc
-
-#cp  ${data_dir}/text ${inference_dir}/1best_recog/text.ref
-#python utils/compute_wer.py ${inference_dir}/1best_recog/text.ref ${inference_dir}/1best_recog/text.proc ${inference_dir}/1best_recog/text.cer
-#tail -n 3 ${inference_dir}/1best_recog/text.cer
+sed -e 's/ /\t/' -e 's/ //g' -e 's/▁/ /g' -e 's/\t /\t/'  ${inference_dir}/1best_recog/token > ${inference_dir}/1best_recog/token.proc
+cp  ${file_dir}/text ${inference_dir}/1best_recog/token.ref
+python utils/compute_wer.py ${inference_dir}/1best_recog/token.ref ${inference_dir}/1best_recog/token.proc ${inference_dir}/1best_recog/token.cer
+tail -n 3 ${inference_dir}/1best_recog/token.cer
