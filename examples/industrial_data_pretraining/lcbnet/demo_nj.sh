@@ -1,5 +1,5 @@
 file_dir="/nfs/yufan.yf/workspace/github/FunASR/examples/industrial_data_pretraining/lcbnet/exp/speech_lcbnet_contextual_asr-en-16k-bpe-vocab5002-pytorch"
-CUDA_VISIBLE_DEVICES="0,1"
+CUDA_VISIBLE_DEVICES="0,1,2,3,4,5,6,7"
 inference_device="cuda"
 
 if [ ${inference_device} == "cuda" ]; then
