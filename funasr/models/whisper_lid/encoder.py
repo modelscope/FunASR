@@ -14,8 +14,8 @@ from funasr.models.specaug.specaug import SpecAug
 from funasr.register import tables
 
 
-@tables.register("encoder_classes", "OpenAIWhisperEncoder")
-class OpenAIWhisperEncoder(nn.Module):
+@tables.register("encoder_classes", "OpenAIWhisperEncoderWarp")
+class OpenAIWhisperEncoderWarp(nn.Module):
     """Transformer-based Speech Encoder from OpenAI's Whisper Model:
 
     URL: https://github.com/openai/whisper

@@ -12,8 +12,8 @@ from funasr.models.transformer.utils.nets_utils import make_pad_mask
 from funasr.register import tables
 
 
-@tables.register("decoder_classes", "OpenAIWhisperDecoder")
-class OpenAIWhisperDecoder(nn.Module):
+@tables.register("decoder_classes", "OpenAIWhisperDecoderWarp")
+class OpenAIWhisperDecoderWarp(nn.Module):
     """Transformer-based Speech-to-Text Decoder from OpenAI's Whisper Model:
 
     URL: https://github.com/openai/whisper
