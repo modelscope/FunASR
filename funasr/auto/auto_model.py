@@ -95,7 +95,7 @@ def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
 class AutoModel:
     
     def __init__(self, **kwargs):
-        if not kwargs.get("disable_log", False):
+        if not kwargs.get("disable_log", True):
             tables.print()
         
         model, kwargs = self.build_model(**kwargs)
@@ -193,7 +193,7 @@ class AutoModel:
                     path=init_param,
                     ignore_init_mismatch=kwargs.get("ignore_init_mismatch", False),
                     oss_bucket=kwargs.get("oss_bucket", None),
-                    scope_map=kwargs.get("scope_map", None),
+                    scope_map=kwargs.get("scope_map", "module.,None"),
                     excludes=kwargs.get("excludes", None),
                 )
             else:
