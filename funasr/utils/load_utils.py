@@ -108,10 +108,7 @@ def extract_fbank(data, data_len = None, data_type: str="sound", frontend=None, 
             data_list.append(data_i)
             data_len.append(data_i.shape[0])
         data = pad_sequence(data_list, batch_first=True) # data: [batch, N]
-    # import pdb;
-    # pdb.set_trace()
-    # if data_type == "sound":
-    pdb.set_trace()
+
     data, data_len = frontend(data, data_len, **kwargs)
     
     if isinstance(data_len, (list, tuple)):

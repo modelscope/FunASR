@@ -6,7 +6,6 @@ python -m funasr.bin.inference \
 --config-name="config.yaml" \
 ++init_param=${file_dir}/model.pb \
 ++tokenizer_conf.token_list=${file_dir}/tokens.txt \
-++frontend_conf.cmvn_file=${file_dir}/am.mvn \
 ++input=[${file_dir}/wav.scp,${file_dir}/ocr_text] \
 +data_type='["kaldi_ark", "text"]' \
 ++tokenizer_conf.bpemodel=${file_dir}/bpe.model \
