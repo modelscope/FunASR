@@ -141,7 +141,7 @@ class AutoModel:
             kwargs = download_model(**kwargs)
         
         set_all_random_seed(kwargs.get("seed", 0))
-        
+        pdb.set_trace()
         device = kwargs.get("device", "cuda")
         if not torch.cuda.is_available() or kwargs.get("ngpu", 1) == 0:
             device = "cpu"
