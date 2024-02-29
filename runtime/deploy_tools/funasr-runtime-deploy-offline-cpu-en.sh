@@ -1380,7 +1380,7 @@ sampleClientRun(){
                 run_cmd="${client_exec} --server-ip ${server_ip} --port ${host_port} --wav-path ${wav_path}"
                 ;;
             Python)
-                client_exec="${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/python/wss_client_asr.py"
+                client_exec="${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/python/funasr_wss_client.py"
                 run_cmd="python3 ${client_exec} --host ${server_ip} --port ${host_port} --mode offline --audio_in ${wav_path} --send_without_sleep --output_dir ${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/python"
                 pre_cmd="pip3 install click>=8.0.4"
                 echo -e "  Run ${BLUE}${pre_cmd}${PLAIN}"
