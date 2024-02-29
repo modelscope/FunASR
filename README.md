@@ -66,7 +66,7 @@ pip3 install -U modelscope
 ## Model Zoo
 FunASR has open-sourced a large number of pre-trained models on industrial data. You are free to use, copy, modify, and share FunASR models under the [Model License Agreement](./MODEL_LICENSE). Below are some representative models, for more models please refer to the [Model Zoo]().
 
-(Note: 🤗 represents the Huggingface model zoo link, ⭐ represents the ModelScope model zoo link)
+(Note: ⭐ represents the ModelScope model zoo link, 🤗 represents the Huggingface model zoo link)
 
 
 |                                                                                                         Model Name                                                                                                         |                    Task Details                    |          Training Data           | Parameters |
