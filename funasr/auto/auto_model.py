@@ -392,7 +392,8 @@ class AutoModel:
             # step.3 compute punc model
             if self.punc_model is not None:
                 if not len(result["text"]):
-                    result['raw_text'] = ''
+                    if return_raw_text:
+                        result['raw_text'] = ''
                 else:
                     self.punc_kwargs.update(cfg)
                     punc_res = self.inference(result["text"], model=self.punc_model, kwargs=self.punc_kwargs, **cfg)
@@ -434,10 +435,13 @@ class AutoModel:
                 distribute_spk(sentence_list, sv_output)
                 result['sentence_info'] = sentence_list
             elif kwargs.get("sentence_timestamp", False):
-                sentence_list = timestamp_sentence(punc_res[0]['punc_array'],
-                                                   result['timestamp'],
-                                                   raw_text,
-                                                   return_raw_text=return_raw_text)
+                if not len(result['text']):
+                    sentence_list = []
+                else:
+                    sentence_list = timestamp_sentence(punc_res[0]['punc_array'],
+                                                       result['timestamp'],
+                                                       raw_text,
+                                                       return_raw_text=return_raw_text)
                 result['sentence_info'] = sentence_list
             if "spk_embedding" in result: del result['spk_embedding']
 
