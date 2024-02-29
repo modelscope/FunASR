@@ -3,10 +3,12 @@ from funasr_onnx.paraformer_online_bin import Paraformer
 from pathlib import Path
 
 model_dir = "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online"
+# model_dir = "dengcunqin/speech_paraformer-large_asr_nat-zh-cantonese-en-16k-vocab8501-online"
+
 wav_path = '{}/.cache/modelscope/hub/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/example/asr_example.wav'.format(Path.home())
 
 chunk_size = [5, 10, 5]
-model = Paraformer(model_dir, batch_size=1, quantize=True, chunk_size=chunk_size, intra_op_num_threads=4) # only support batch_size = 1
+model = Paraformer(model_dir, batch_size=1, quantize=True, chunk_size=chunk_size, intra_op_num_threads=4) #, revision='v1.0.0') # only support batch_size = 1
 
 ##online asr
 speech, sample_rate = soundfile.read(wav_path)

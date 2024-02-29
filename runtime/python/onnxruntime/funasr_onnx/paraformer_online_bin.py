@@ -24,7 +24,8 @@ class Paraformer():
                  device_id: Union[str, int] = "-1",
                  quantize: bool = False,
                  intra_op_num_threads: int = 4,
-                 cache_dir: str = None
+                 cache_dir: str = None,
+                 revision=None,
                  ):
 
         if not Path(model_dir).exists():
@@ -36,7 +37,7 @@ class Paraformer():
                       "For the users in China, you could install with the command:\n" \
                       "\npip3 install -U modelscope -i https://mirror.sjtu.edu.cn/pypi/web/simple"
             try:
-                model_dir = snapshot_download(model_dir, cache_dir=cache_dir)
+                model_dir = snapshot_download(model_dir, cache_dir=cache_dir, revision=revision)
             except:
                 raise "model_dir must be model_name in modelscope or local path downloaded from modelscope, but is {}".format(model_dir)
         
