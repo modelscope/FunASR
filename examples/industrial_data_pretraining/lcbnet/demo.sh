@@ -12,7 +12,7 @@ else
     done
 fi
 
-inference_dir="outputs/slidespeech_dev_beamsearch"
+inference_dir="outputs/slidespeech_dev_beamsearch_new"
 _logdir="${inference_dir}/logdir"
 echo "inference_dir: ${inference_dir}"
 
