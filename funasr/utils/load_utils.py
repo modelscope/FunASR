@@ -34,6 +34,7 @@ def load_audio_text_image_video(data_or_path_or_list, fs: int = 16000, audio_fs:
     if isinstance(data_or_path_or_list, str) and os.path.exists(data_or_path_or_list): # local file
         if data_type is None or data_type == "sound":
             data_or_path_or_list, audio_fs = torchaudio.load(data_or_path_or_list)
+            pdb.set_trace()
             if kwargs.get("reduce_channels", True):
                 data_or_path_or_list = data_or_path_or_list.mean(0)
         elif data_type == "text" and tokenizer is not None:
