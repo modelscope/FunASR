@@ -37,7 +37,10 @@ class Paraformer():
                       "For the users in China, you could install with the command:\n" \
                       "\npip3 install -U modelscope -i https://mirror.sjtu.edu.cn/pypi/web/simple"
             try:
-                model_dir = snapshot_download(model_dir, cache_dir=cache_dir, revision=revision)
+                if revision is not None:
+                    model_dir = snapshot_download(model_dir, cache_dir=cache_dir, revision=revision)
+                else:
+                    model_dir = snapshot_download(model_dir, cache_dir=cache_dir)
             except:
                 raise "model_dir must be model_name in modelscope or local path downloaded from modelscope, but is {}".format(model_dir)
         
