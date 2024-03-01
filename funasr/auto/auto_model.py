@@ -41,7 +41,7 @@ def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
     chars = string.ascii_letters + string.digits
     if isinstance(data_in, str) and data_in.startswith('http'): # url
         data_in = download_from_url(data_in)
-    pdb.set_trace()
+
     if isinstance(data_in, str) and os.path.exists(data_in): # wav_path; filelist: wav.scp, file.jsonl;text.txt;
         _, file_extension = os.path.splitext(data_in)
         file_extension = file_extension.lower()

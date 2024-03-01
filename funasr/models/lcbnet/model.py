@@ -426,6 +426,7 @@ class LCBNet(nn.Module):
                                                             tokenizer=tokenizer)
             time2 = time.perf_counter()
             meta_data["load_data"] = f"{time2 - time1:0.3f}"
+            pdb.set_trace()
             audio_sample_list = sample_list[0]
             ocr_sample_list = sample_list[1]
             speech, speech_lengths = extract_fbank(audio_sample_list, data_type=kwargs.get("data_type", "sound"),
@@ -441,7 +442,7 @@ class LCBNet(nn.Module):
         encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
         if isinstance(encoder_out, tuple):
             encoder_out = encoder_out[0]
-        
+        pdb.set_trace()
         ocr_list_new = [[x + 1 if x != 0 else x for x in sublist] for sublist in ocr_sample_list]
         ocr = torch.tensor(ocr_list_new).to(device=kwargs["device"])
         ocr_lengths = ocr.new_full([1], dtype=torch.long, fill_value=ocr.size(1)).to(device=kwargs["device"])
