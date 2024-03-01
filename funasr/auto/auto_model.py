@@ -213,7 +213,7 @@ class AutoModel:
         batch_size = kwargs.get("batch_size", 1)
         # if kwargs.get("device", "cpu") == "cpu":
         #     batch_size = 1
-        pdb.set_trace()
+
         key_list, data_list = prepare_data_iterator(input, input_len=input_len, data_type=kwargs.get("data_type", None), key=key)
 
         speed_stats = {}
