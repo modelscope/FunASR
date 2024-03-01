@@ -130,7 +130,6 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
         dha_pad = kwargs.get("dha_pad")
 
         batch_size = speech.shape[0]
-        self.step_cur += 1
         # for data-parallel
         text = text[:, : text_lengths.max()]
         speech = speech[:, :speech_lengths.max()]

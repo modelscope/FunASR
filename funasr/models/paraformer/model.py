@@ -154,8 +154,8 @@ class Paraformer(torch.nn.Module):
         self.predictor_bias = predictor_bias
         self.sampling_ratio = sampling_ratio
         self.criterion_pre = mae_loss(normalize_length=length_normalized_loss)
-        # self.step_cur = 0
-        #
+
+
         self.share_embedding = share_embedding
         if self.share_embedding:
             self.decoder.embed = None
