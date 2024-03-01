@@ -79,6 +79,7 @@ FunASR has open-sourced a large number of pre-trained models on industrial data.
 |                                   fsmn-vad <br> ( [⭐](https://modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary) [🤗](https://huggingface.co/funasr/fsmn-vad) )                                   |              voice activity detection              | 5000 hours, Mandarin and English |    0.4M    | 
 |                                     fa-zh <br> ( [⭐](https://modelscope.cn/models/damo/speech_timestamp_prediction-v1-16k-offline/summary) [🤗](https://huggingface.co/funasr/fa-zh) )                                     |                timestamp prediction                |       5000 hours, Mandarin       |    38M     | 
 |                                       cam++ <br> ( [⭐](https://modelscope.cn/models/iic/speech_campplus_sv_zh-cn_16k-common/summary) [🤗](https://huggingface.co/funasr/campplus) )                                        |        speaker verification/diarization            |            5000 hours            |    7.2M    | 
+|                                                 whisper-large-v2 <br> ([⭐](https://www.modelscope.cn/models/iic/speech_whisper-large_asr_multilingual/summary)  [🤗]() )                                                   | speech recognition, with timestamps, non-streaming |          multilingual            |     1G     |
 
 
 

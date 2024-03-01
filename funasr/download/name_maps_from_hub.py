@@ -8,6 +8,7 @@ name_maps_ms = {
     "ct-punc-c": "damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch",
     "fa-zh": "damo/speech_timestamp_prediction-v1-16k-offline",
     "cam++": "damo/speech_campplus_sv_zh-cn_16k-common",
+    "whisper-large-v2": "iic/speech_whisper-large_asr_multilingual",
 }
 
 name_maps_hf = {
