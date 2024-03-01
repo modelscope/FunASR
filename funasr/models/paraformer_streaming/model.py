@@ -235,8 +235,7 @@ class ParaformerStreaming(Paraformer):
         decoder_out_1st = None
         pre_loss_att = None
         if self.sampling_ratio > 0.0:
-            if self.step_cur < 2:
-                logging.info("enable sampler in paraformer, sampling_ratio: {}".format(self.sampling_ratio))
+
             if self.use_1st_decoder_loss:
                 sematic_embeds, decoder_out_1st, pre_loss_att = \
                     self.sampler_with_grad(encoder_out, encoder_out_lens, ys_pad,
@@ -246,8 +245,6 @@ class ParaformerStreaming(Paraformer):
                     self.sampler(encoder_out, encoder_out_lens, ys_pad,
                                  ys_pad_lens, pre_acoustic_embeds, scama_mask)
         else:
-            if self.step_cur < 2:
-                logging.info("disable sampler in paraformer, sampling_ratio: {}".format(self.sampling_ratio))
             sematic_embeds = pre_acoustic_embeds
         
         # 1. Forward decoder

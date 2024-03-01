@@ -190,13 +190,10 @@ class ContextualParaformer(Paraformer):
         # 0. sampler
         decoder_out_1st = None
         if self.sampling_ratio > 0.0:
-            if self.step_cur < 2:
-                logging.info("enable sampler in paraformer, sampling_ratio: {}".format(self.sampling_ratio))
+
             sematic_embeds, decoder_out_1st = self.sampler(encoder_out, encoder_out_lens, ys_pad, ys_pad_lens,
                                                            pre_acoustic_embeds, contextual_info)
         else:
-            if self.step_cur < 2:
-                logging.info("disable sampler in paraformer, sampling_ratio: {}".format(self.sampling_ratio))
             sematic_embeds = pre_acoustic_embeds
         
         # 1. Forward decoder
