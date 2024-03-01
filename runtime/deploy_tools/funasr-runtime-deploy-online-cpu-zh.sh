@@ -982,33 +982,33 @@ dockerRun(){
     getDockerId
     saveParams
 
-    # Hide the cursor, start draw progress.
-    printf "\e[?25l"
-    while true
-    do
-        serverProgress
-        result=$?
-        stage=`expr ${result} + 0`
-        if [ ${stage} -eq 0 ]; then
-            break
-        elif [ ${stage} -gt 0 ] && [ ${stage} -lt 6 ]; then
-            sleep 0.1
-            # clear 3 lines
-            printf "\033[3A"
-        elif [ ${stage} -eq 6 ]; then
-            break
-        elif [ ${stage} -eq 98 ]; then
-            return 98
-        else
-            echo -e "  ${RED}Starting FunASR server failed.${PLAIN}"
-            echo
-            # Display the cursor
-            printf "\e[?25h"
-            return 99
-        fi
-    done
-    # Display the cursor
-    printf "\e[?25h"
+    # # Hide the cursor, start draw progress.
+    # printf "\e[?25l"
+    # while true
+    # do
+    #     serverProgress
+    #     result=$?
+    #     stage=`expr ${result} + 0`
+    #     if [ ${stage} -eq 0 ]; then
+    #         break
+    #     elif [ ${stage} -gt 0 ] && [ ${stage} -lt 6 ]; then
+    #         sleep 0.1
+    #         # clear 3 lines
+    #         printf "\033[3A"
+    #     elif [ ${stage} -eq 6 ]; then
+    #         break
+    #     elif [ ${stage} -eq 98 ]; then
+    #         return 98
+    #     else
+    #         echo -e "  ${RED}Starting FunASR server failed.${PLAIN}"
+    #         echo
+    #         # Display the cursor
+    #         printf "\e[?25h"
+    #         return 99
+    #     fi
+    # done
+    # # Display the cursor
+    # printf "\e[?25h"
 
     echo -e "  ${GREEN}The service has been started.${PLAIN}"
     echo
