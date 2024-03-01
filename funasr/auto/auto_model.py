@@ -165,17 +165,18 @@ class AutoModel:
 
             kwargs["token_list"] = tokenizer.token_list if hasattr(tokenizer, "token_list") else None
             kwargs["token_list"] = tokenizer.get_vocab() if hasattr(tokenizer, "get_vocab") else kwargs["token_list"]
-            vocab_size = len(kwargs["token_list"])
+            vocab_size = len(kwargs["token_list"]) if kwargs["token_list"] is not None else -1
         else:
             vocab_size = -1
         
         # build frontend
         frontend = kwargs.get("frontend", None)
+        kwargs["input_size"] = None
         if frontend is not None:
             frontend_class = tables.frontend_classes.get(frontend)
             frontend = frontend_class(**kwargs["frontend_conf"])
             kwargs["frontend"] = frontend
-            kwargs["input_size"] = frontend.output_size()
+            kwargs["input_size"] = frontend.output_size() if hasattr(frontend, "output_size") else None
         
         # build model
         model_class = tables.model_classes.get(kwargs["model"])

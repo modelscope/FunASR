@@ -18,14 +18,16 @@ def download_from_ms(**kwargs):
         model_or_path = name_maps_ms[model_or_path]
     model_revision = kwargs.get("model_revision")
     if not os.path.exists(model_or_path):
-        model_or_path = get_or_download_model_dir(model_or_path, model_revision, is_training=kwargs.get("is_training"), check_latest=kwargs.get("kwargs", True))
+        model_or_path = get_or_download_model_dir(model_or_path, model_revision, is_training=kwargs.get("is_training"), check_latest=kwargs.get("check_latest", True))
     kwargs["model_path"] = model_or_path
     
     if os.path.exists(os.path.join(model_or_path, "configuration.json")):
         with open(os.path.join(model_or_path, "configuration.json"), 'r', encoding='utf-8') as f:
             conf_json = json.load(f)
+            
             cfg = {}
-            add_file_root_path(model_or_path, conf_json["file_path_metas"], cfg)
+            if "file_path_metas" in conf_json:
+                add_file_root_path(model_or_path, conf_json["file_path_metas"], cfg)
             cfg.update(kwargs)
             config = OmegaConf.load(cfg["config"])
             kwargs = OmegaConf.merge(config, cfg)

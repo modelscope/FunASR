@@ -17,8 +17,9 @@ class WhisperFrontend(nn.Module):
     def __init__(
             self,
             fs: int = 16000,
-            whisper_model: str = "large-v3",
+            whisper_model: str = None,
             do_pad_trim: bool = True,
+            n_mels: int = 80,
     ):
         super().__init__()
         assert fs == 16000
@@ -30,17 +31,16 @@ class WhisperFrontend(nn.Module):
         self.pad_samples = N_SAMPLES
         self.frame_shift = self.hop_length
         self.lfr_n = 1
+        self.n_mels = n_mels
         if whisper_model == "large-v3" or whisper_model == "large":
             self.n_mels = 128
-        else:
-            self.n_mels = 80
 
         self.mel_filters = whisper.audio.mel_filters
         self.do_pad_trim = do_pad_trim
         if do_pad_trim:
             self.pad_or_trim = whisper.pad_or_trim
 
-        assert whisper_model in whisper.available_models()
+        # assert whisper_model in whisper.available_models()
 
     def output_size(self) -> int:
         return self.n_mels
