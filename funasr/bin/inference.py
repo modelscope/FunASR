@@ -1,7 +1,7 @@
 import hydra
 import logging
 from omegaconf import DictConfig, OmegaConf, ListConfig
-
+import pdb
 from funasr.auto.auto_model import AutoModel
 
 
@@ -23,6 +23,7 @@ def main_hydra(cfg: DictConfig):
     if kwargs.get("debug", False):
         import pdb; pdb.set_trace()
     model = AutoModel(**kwargs)
+    pdb.set_trace()
     res = model.generate(input=kwargs["input"])
     print(res)
 
