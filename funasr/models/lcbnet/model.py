@@ -426,12 +426,11 @@ class LCBNet(nn.Module):
                                                             tokenizer=tokenizer)
             time2 = time.perf_counter()
             meta_data["load_data"] = f"{time2 - time1:0.3f}"
-            pdb.set_trace()
             audio_sample_list = sample_list[0]
             if len(sample_list) >1:
                 ocr_sample_list = sample_list[1]
             else:
-                ocr_sample_list = [294, 0]
+                ocr_sample_list = [[294, 0]]
             speech, speech_lengths = extract_fbank(audio_sample_list, data_type=kwargs.get("data_type", "sound"),
                                                    frontend=frontend)
             time3 = time.perf_counter()
