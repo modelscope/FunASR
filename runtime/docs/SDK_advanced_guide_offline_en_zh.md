@@ -6,6 +6,7 @@ FunASR提供可一键本地或者云端服务器部署的英文离线文件转�
 
 | 时间         | 详情            | 镜像版本                            | 镜像ID         |
 |------------|---------------|---------------------------------|--------------|
+| 2024.03.03 | docker镜像支持arm64平台 | funasr-runtime-sdk-en-cpu-0.1.5 | cd51bfef91eb |
 | 2024.01.25 | 优化vad数据处理方式，大幅降低峰值内存占用；内存泄漏优化 | funasr-runtime-sdk-en-cpu-0.1.3 | c00f9ce7a195 |
 | 2024.01.03 | 修复已知的crash问题及内存泄漏问题 | funasr-runtime-sdk-en-cpu-0.1.2 | 0cdd9f4a4bb5 |
 | 2023.11.08 | runtime结构变化适配 | funasr-runtime-sdk-en-cpu-0.1.1 | 27017f70f72a |
@@ -38,11 +39,11 @@ docker安装失败请参考 [Docker Installation](https://alibaba-damo-academy.g
 通过下述命令拉取并启动FunASR runtime-SDK的docker镜像：
 ```shell
 sudo docker pull \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.4
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.5
 mkdir -p ./funasr-runtime-resources/models
 sudo docker run -p 10097:10095 -it --privileged=true \
   -v $PWD/funasr-runtime-resources/models:/workspace/models \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.4
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.5
 ```
 
 ### 服务端启动
