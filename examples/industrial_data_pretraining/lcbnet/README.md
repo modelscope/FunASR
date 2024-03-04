@@ -91,6 +91,79 @@ finetune-support: True
 
 
 
+## 基于ModelScope进行推理
+
+- 推理支持音频格式如下：
+  - wav文件路径，例如：data/test/asr_example.wav
+  - pcm文件路径，例如：data/test/asr_example.pcm
+  - ark文件路径，例如：data/test/data.ark
+  - wav文件url，例如：https://www.modelscope.cn/api/v1/models/iic/LCB-NET/repo?Revision=master&FilePath=example/asr_example.wav
+  - wav二进制数据，格式bytes，例如：用户直接从文件里读出bytes数据或者是麦克风录出bytes数据。
+  - 已解析的audio音频，例如：audio, rate = soundfile.read("asr_example_zh.wav")，类型为numpy.ndarray或者torch.Tensor。
+  - wav.scp文件，需符合如下要求(以下分别为sound和kaldi_ark格式)：
+
+```sh
+cat wav.scp
+asr_example1  data/test/asr_example1.wav
+asr_example2  data/test/asr_example2.wav
+
+cat wav.scp
+asr_example1  data/test/data_wav.ark:22
+asr_example2  data/test/data_wav.ark:90445
+...
+```
+
+- 推理支持OCR预测文本格式如下：
+  - ocr.txt文件，需符合如下要求：
+```sh
+cat ocr.txt
+asr_example1  ANIMAL <blank> RIGHTS <blank> MANAGER <blank> PLOEG
+asr_example2  UNIVERSITY <blank> CAMPUS <blank> DEANO
+...
+```
+
+- 若输入格式wav文件和ocr文件均为url，api调用方式可参考如下范例：
+
+```python
+from funasr import AutoModel
+
+model = AutoModel(model="iic/LCB-NET",
+                  model_revision="v2.0.0")
+res = model.generate(input=("https://www.modelscope.cn/api/v1/models/iic/LCB-NET/repo?Revision=master&FilePath=example/asr_example.wav","https://www.modelscope.cn/api/v1/models/iic/LCB-NET/repo?Revision=master&FilePath=example/ocr.txt"),data_type=("sound", "text"))
+```
+
+
+## 复现论文中的结果
+```python
+python -m funasr.bin.inference \
+        --config-path=${file_dir} \
+        --config-name="config.yaml" \
+        ++init_param=${file_dir}/model.pt \
+        ++tokenizer_conf.token_list=${file_dir}/tokens.txt \
+        ++input=[${_logdir}/wav.scp,${_logdir}/ocr.txt] \
+        +data_type='["kaldi_ark", "text"]' \
+        ++tokenizer_conf.bpemodel=${file_dir}/bpe.pt \
+        ++output_dir="${inference_dir}/results" \
+        ++device="${inference_device}" \
+        ++ncpu=1 \
+        ++disable_log=true
+
+```
+
+
+识别结果输出路径结构如下：
+
+```sh
+tree output_dir/
+output_dir/
+└── 1best_recog
+    ├── text
+    └── token
+```
+
+token：语音识别结果文件
+
+可以使用funasr里面提供的run_bwer_recall.sh计算WER、BWER、UWER和Recall。
 
 
 ## 相关论文以及引用信息
