@@ -5,13 +5,12 @@
 
 from funasr import AutoModel
 
-model = AutoModel(model="iic/LCB-NET"
-                  )
+model = AutoModel(model="iic/LCB-NET")
 
 
 # example1
 #res = model.generate(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav",
-                    )
+#                    )
 #print(res)
 
 
