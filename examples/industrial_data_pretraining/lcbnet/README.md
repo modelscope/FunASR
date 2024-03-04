@@ -164,7 +164,7 @@ output_dir/
 token：语音识别结果文件
 
 可以使用funasr里面提供的run_bwer_recall.sh计算WER、BWER、UWER和Recall。
-
+详细脚本可以参考funasr里面的demo.sh脚本，需要注意的是你需要修改一下iic/LCB-NET/conf.yaml中CMVN(stats_file)的路径和iic/LCB-NET/dev/wav.scp里面ark的路径，修改为你自己本地的路径，然后跑解码。
 
 ## 相关论文以及引用信息
 
