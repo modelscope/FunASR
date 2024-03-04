@@ -3,7 +3,6 @@ from typing import Optional
 from typing import Tuple
 from typing import Union
 import logging
-import humanfriendly
 import numpy as np
 import torch
 import torch.nn as nn
@@ -16,8 +15,10 @@ from funasr.frontends.utils.log_mel import LogMel
 from funasr.frontends.utils.stft import Stft
 from funasr.frontends.utils.frontend import Frontend
 from funasr.models.transformer.utils.nets_utils import make_pad_mask
+from funasr.register import tables
 
 
+@tables.register("frontend_classes", "DefaultFrontend")
 class DefaultFrontend(nn.Module):
     """Conventional frontend structure for ASR.
     Stft -> WPE -> MVDR-Beamformer -> Power-spec -> Mel-Fbank -> CMVN
@@ -25,7 +26,7 @@ class DefaultFrontend(nn.Module):
 
     def __init__(
             self,
-            fs: Union[int, str] = 16000,
+            fs: int = 16000,
             n_fft: int = 512,
             win_length: int = None,
             hop_length: int = 128,
@@ -40,14 +41,14 @@ class DefaultFrontend(nn.Module):
             frontend_conf: Optional[dict] = None,
             apply_stft: bool = True,
             use_channel: int = None,
+            **kwargs,
     ):
         super().__init__()
-        if isinstance(fs, str):
-            fs = humanfriendly.parse_size(fs)
 
         # Deepcopy (In general, dict shouldn't be used as default arg)
         frontend_conf = copy.deepcopy(frontend_conf)
         self.hop_length = hop_length
+        self.fs = fs
 
         if apply_stft:
             self.stft = Stft(
@@ -84,8 +85,12 @@ class DefaultFrontend(nn.Module):
         return self.n_mels
 
     def forward(
-            self, input: torch.Tensor, input_lengths: torch.Tensor
+            self, input: torch.Tensor, input_lengths:  Union[torch.Tensor, list]
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+        if isinstance(input_lengths, list):
+            input_lengths = torch.tensor(input_lengths)
+        if  input.dtype == torch.float64:
+            input = input.float()
         # 1. Domain-conversion: e.g. Stft: time -> time-freq
         if self.stft is not None:
             input_stft, feats_lens = self._compute_stft(input, input_lengths)
@@ -145,7 +150,7 @@ class MultiChannelFrontend(nn.Module):
 
     def __init__(
             self,
-            fs: Union[int, str] = 16000,
+            fs: int = 16000,
             n_fft: int = 512,
             win_length: int = None,
             hop_length: int = None,
@@ -168,9 +173,6 @@ class MultiChannelFrontend(nn.Module):
             mc: bool = True
     ):
         super().__init__()
-        if isinstance(fs, str):
-            fs = humanfriendly.parse_size(fs)
-
         # Deepcopy (In general, dict shouldn't be used as default arg)
         frontend_conf = copy.deepcopy(frontend_conf)
         if win_length is None and hop_length is None:
