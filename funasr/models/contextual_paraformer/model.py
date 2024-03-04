@@ -29,7 +29,7 @@ from funasr.train_utils.device_funcs import force_gatherable
 from funasr.models.transformer.utils.add_sos_eos import add_sos_eos
 from funasr.models.transformer.utils.nets_utils import make_pad_mask, pad_list
 from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
-import pdb
+
 
 if LooseVersion(torch.__version__) >= LooseVersion("1.6.0"):
     from torch.cuda.amp import autocast
@@ -62,6 +62,7 @@ class ContextualParaformer(Paraformer):
         crit_attn_weight = kwargs.get("crit_attn_weight", 0.0)
         crit_attn_smooth = kwargs.get("crit_attn_smooth", 0.0)
         bias_encoder_dropout_rate = kwargs.get("bias_encoder_dropout_rate", 0.0)
+
 
         if bias_encoder_type == 'lstm':
             self.bias_encoder = torch.nn.LSTM(inner_dim, inner_dim, 1, batch_first=True, dropout=bias_encoder_dropout_rate)
@@ -102,16 +103,17 @@ class ContextualParaformer(Paraformer):
             text_lengths = text_lengths[:, 0]
         if len(speech_lengths.size()) > 1:
             speech_lengths = speech_lengths[:, 0]
-
+        
         batch_size = speech.shape[0]
 
         hotword_pad = kwargs.get("hotword_pad")
         hotword_lengths = kwargs.get("hotword_lengths")
         dha_pad = kwargs.get("dha_pad")
-
+        
         # 1. Encoder
         encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
 
+        
         loss_ctc, cer_ctc = None, None
         
         stats = dict()
@@ -126,11 +128,12 @@ class ContextualParaformer(Paraformer):
             stats["loss_ctc"] = loss_ctc.detach() if loss_ctc is not None else None
             stats["cer_ctc"] = cer_ctc
         
+
         # 2b. Attention decoder branch
         loss_att, acc_att, cer_att, wer_att, loss_pre, loss_ideal = self._calc_att_clas_loss(
             encoder_out, encoder_out_lens, text, text_lengths, hotword_pad, hotword_lengths
         )
-
+        
         # 3. CTC-Att loss definition
         if self.ctc_weight == 0.0:
             loss = loss_att + loss_pre * self.predictor_weight
@@ -168,24 +171,22 @@ class ContextualParaformer(Paraformer):
     ):
         encoder_out_mask = (~make_pad_mask(encoder_out_lens, maxlen=encoder_out.size(1))[:, None, :]).to(
             encoder_out.device)
-
         if self.predictor_bias == 1:
             _, ys_pad = add_sos_eos(ys_pad, self.sos, self.eos, self.ignore_id)
             ys_pad_lens = ys_pad_lens + self.predictor_bias
-
         pre_acoustic_embeds, pre_token_length, _, _ = self.predictor(encoder_out, ys_pad, encoder_out_mask,
                                                                      ignore_id=self.ignore_id)
+        
         # -1. bias encoder
         if self.use_decoder_embedding:
             hw_embed = self.decoder.embed(hotword_pad)
         else:
             hw_embed = self.bias_embed(hotword_pad)
-
         hw_embed, (_, _) = self.bias_encoder(hw_embed)
         _ind = np.arange(0, hotword_pad.shape[0]).tolist()
         selected = hw_embed[_ind, [i - 1 for i in hotword_lengths.detach().cpu().tolist()]]
         contextual_info = selected.squeeze(0).repeat(ys_pad.shape[0], 1, 1).to(ys_pad.device)
-
+        
         # 0. sampler
         decoder_out_1st = None
         if self.sampling_ratio > 0.0:
@@ -194,7 +195,7 @@ class ContextualParaformer(Paraformer):
                                                            pre_acoustic_embeds, contextual_info)
         else:
             sematic_embeds = pre_acoustic_embeds
-
+        
         # 1. Forward decoder
         decoder_outs = self.decoder(
             encoder_out, encoder_out_lens, sematic_embeds, ys_pad_lens, contextual_info=contextual_info
@@ -210,7 +211,7 @@ class ContextualParaformer(Paraformer):
             loss_ideal = None
         '''
         loss_ideal = None
-
+        
         if decoder_out_1st is None:
             decoder_out_1st = decoder_out
         # 2. Compute attention loss
@@ -287,11 +288,10 @@ class ContextualParaformer(Paraformer):
                                                                enforce_sorted=False)
             _, (h_n, _) = self.bias_encoder(hw_embed)
             hw_embed = h_n.repeat(encoder_out.shape[0], 1, 1)
-
+        
         decoder_outs = self.decoder(
             encoder_out, encoder_out_lens, sematic_embeds, ys_pad_lens, contextual_info=hw_embed, clas_scale=clas_scale
         )
-
         decoder_out = decoder_outs[0]
         decoder_out = torch.log_softmax(decoder_out, dim=-1)
         return decoder_out, ys_pad_lens
@@ -305,42 +305,38 @@ class ContextualParaformer(Paraformer):
                  **kwargs,
                  ):
         # init beamsearch
-
         is_use_ctc = kwargs.get("decoding_ctc_weight", 0.0) > 0.00001 and self.ctc != None
         is_use_lm = kwargs.get("lm_weight", 0.0) > 0.00001 and kwargs.get("lm_file", None) is not None
         if self.beam_search is None and (is_use_lm or is_use_ctc):
             logging.info("enable beam_search")
             self.init_beam_search(**kwargs)
             self.nbest = kwargs.get("nbest", 1)
-
+        
         meta_data = {}
         
         # extract fbank feats
         time1 = time.perf_counter()
-
         audio_sample_list = load_audio_text_image_video(data_in, fs=frontend.fs, audio_fs=kwargs.get("fs", 16000))
-
         time2 = time.perf_counter()
         meta_data["load_data"] = f"{time2 - time1:0.3f}"
-
         speech, speech_lengths = extract_fbank(audio_sample_list, data_type=kwargs.get("data_type", "sound"),
                                                frontend=frontend)
         time3 = time.perf_counter()
         meta_data["extract_feat"] = f"{time3 - time2:0.3f}"
         meta_data[
             "batch_data_time"] = speech_lengths.sum().item() * frontend.frame_shift * frontend.lfr_n / 1000
-
+        
         speech = speech.to(device=kwargs["device"])
         speech_lengths = speech_lengths.to(device=kwargs["device"])
 
         # hotword
         self.hotword_list = self.generate_hotwords_list(kwargs.get("hotword", None), tokenizer=tokenizer, frontend=frontend)
-
+        
         # Encoder
         encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
         if isinstance(encoder_out, tuple):
             encoder_out = encoder_out[0]
-
+        
         # predictor
         predictor_outs = self.calc_predictor(encoder_out, encoder_out_lens)
         pre_acoustic_embeds, pre_token_length, alphas, pre_peak_index = predictor_outs[0], predictor_outs[1], \
@@ -348,7 +344,8 @@ class ContextualParaformer(Paraformer):
         pre_token_length = pre_token_length.round().long()
         if torch.max(pre_token_length) < 1:
             return []
-        
+
+
         decoder_outs = self.cal_decoder_with_predictor(encoder_out, encoder_out_lens,
                                                                  pre_acoustic_embeds,
                                                                  pre_token_length,

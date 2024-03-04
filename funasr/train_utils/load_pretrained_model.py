@@ -7,7 +7,7 @@ import logging
 import torch
 import torch.nn
 import torch.optim
-import pdb
+
 
 def filter_state_dict(
 	dst_state: Dict[str, Union[float, torch.Tensor]],
@@ -63,7 +63,6 @@ def load_pretrained_model(
 	dst_state = obj.state_dict()
 	
 	print(f"ckpt: {path}")
-
 	if oss_bucket is None:
 		src_state = torch.load(path, map_location=map_location)
 	else:
