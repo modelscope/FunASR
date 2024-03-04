@@ -28,7 +28,7 @@ try:
     from funasr.models.campplus.cluster_backend import ClusterBackend
 except:
     print("If you want to use the speaker diarization, please `pip install hdbscan`")
-
+import pdb
 
 def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
     """
@@ -46,6 +46,7 @@ def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
     chars = string.ascii_letters + string.digits
     if isinstance(data_in, str) and data_in.startswith('http'): # url
         data_in = download_from_url(data_in)
+
     if isinstance(data_in, str) and os.path.exists(data_in): # wav_path; filelist: wav.scp, file.jsonl;text.txt;
         _, file_extension = os.path.splitext(data_in)
         file_extension = file_extension.lower()
@@ -146,7 +147,7 @@ class AutoModel:
             kwargs = download_model(**kwargs)
         
         set_all_random_seed(kwargs.get("seed", 0))
-        
+
         device = kwargs.get("device", "cuda")
         if not torch.cuda.is_available() or kwargs.get("ngpu", 1) == 0:
             device = "cpu"
@@ -168,7 +169,6 @@ class AutoModel:
             vocab_size = len(kwargs["token_list"]) if kwargs["token_list"] is not None else -1
         else:
             vocab_size = -1
-        
         # build frontend
         frontend = kwargs.get("frontend", None)
         kwargs["input_size"] = None
@@ -181,7 +181,6 @@ class AutoModel:
         # build model
         model_class = tables.model_classes.get(kwargs["model"])
         model = model_class(**kwargs, **kwargs["model_conf"], vocab_size=vocab_size)
-        
         model.to(device)
         
         # init_param
@@ -224,9 +223,9 @@ class AutoModel:
         batch_size = kwargs.get("batch_size", 1)
         # if kwargs.get("device", "cpu") == "cpu":
         #     batch_size = 1
-        
+
         key_list, data_list = prepare_data_iterator(input, input_len=input_len, data_type=kwargs.get("data_type", None), key=key)
-        
+
         speed_stats = {}
         asr_result_list = []
         num_samples = len(data_list)
@@ -239,6 +238,7 @@ class AutoModel:
             data_batch = data_list[beg_idx:end_idx]
             key_batch = key_list[beg_idx:end_idx]
             batch = {"data_in": data_batch, "key": key_batch}
+
             if (end_idx - beg_idx) == 1 and kwargs.get("data_type", None) == "fbank": # fbank
                 batch["data_in"] = data_batch[0]
                 batch["data_lengths"] = input_len
