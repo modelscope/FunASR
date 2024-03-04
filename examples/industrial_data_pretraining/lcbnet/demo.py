@@ -11,6 +11,7 @@ model = AutoModel(model="iic/LCB-NET",
 
 # example1
 res = model.generate(input='["~/.cache/modelscope/hub/iic/LCB-NET/example/asr_example.wav","~/.cache/modelscope/hub/iic/LCB-NET/example/ocr.txt"]',data_type='["sound", "text"]')
+
 print(res)
 
 
