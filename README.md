@@ -115,7 +115,7 @@ res = model.generate(input=f"{model.model_path}/example/asr_example.wav",
                      hotword='魔搭')
 print(res)
 ```
-Note: `model_hub`: represents the model repository, `ms` stands for selecting ModelScope download, `hf` stands for selecting Huggingface download.
+Note: `hub`: represents the model repository, `ms` stands for selecting ModelScope download, `hf` stands for selecting Huggingface download.
 
 ### Speech Recognition (Streaming)
 ```python

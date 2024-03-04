@@ -143,7 +143,7 @@ class AutoModel:
     def build_model(self, **kwargs):
         assert "model" in kwargs
         if "model_conf" not in kwargs:
-            logging.info("download models from model hub: {}".format(kwargs.get("model_hub", "ms")))
+            logging.info("download models from model hub: {}".format(kwargs.get("hub", "ms")))
             kwargs = download_model(**kwargs)
         
         set_all_random_seed(kwargs.get("seed", 0))
@@ -180,7 +180,7 @@ class AutoModel:
         
         # build model
         model_class = tables.model_classes.get(kwargs["model"])
-        model = model_class(**kwargs, **kwargs["model_conf"], vocab_size=vocab_size)
+        model = model_class(**kwargs, **kwargs.get("model_conf", {}), vocab_size=vocab_size)
         model.to(device)
         
         # init_param
