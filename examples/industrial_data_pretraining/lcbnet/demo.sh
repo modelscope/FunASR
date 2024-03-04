@@ -44,6 +44,7 @@ for JOB in $(seq ${nj}); do
         ++input=[${_logdir}/wav.${JOB}.scp,${_logdir}/ocr.${JOB}.txt] \
         +data_type='["kaldi_ark", "text"]' \
         ++tokenizer_conf.bpemodel=${file_dir}/bpe.pt \
+        ++normalize_conf.stats_file=${file_dir}/am.mvn \
         ++output_dir="${inference_dir}/${JOB}" \
         ++device="${inference_device}" \
         ++ncpu=1 \
