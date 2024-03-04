@@ -75,9 +75,9 @@ finetune-support: True
 随着在线会议和课程越来越普遍，如何利用视频幻灯片中丰富的文本信息来改善语音识别（Automatic  Speech Recognition， ASR）面临着新的挑战。视频中的幻灯片与语音实时同步，相比于统一的稀有词列表，能够提供更长的上下文相关信息。因此，我们提出了一种创新的长上下文偏置网络（LCB-net），用于音频-视觉语音识别（Audio-Visual Speech Recognition，AVSR），以更好地利用视频中的长时上下文信息。
 
 <p align="center">
-<img src="fig/lcbnet1.png" alt="AVSR整体流程框架"  width="500" />
+<img src="fig/lcbnet1.png" alt="AVSR整体流程框架"  width="800" />
 <p align="center">
-<img src="fig/lcbnet2.png" alt="LCB-NET模型结构"  width="500" />
+<img src="fig/lcbnet2.png" alt="LCB-NET模型结构"  width="800" />
 
 
 具体来说，我们首先使用OCR技术来检测和识别幻灯片中的文本内容，其次我们采用关键词提取技术来获取文本内容中的关键词短语。最后，我们将关键词拼接成长上下文文本和音频同时输入到我们的LCB-net模型中进行识别。而LCB-net模型采用了双编码器结构，同时建模音频和长上下文文本信息。此外，我们还引入了一个显式的偏置词预测模块，通过使用二元交叉熵（BCE）损失函数显式预测长上下文文本中在音频中出现的关键偏置词。此外，为增强LCB-net的泛化能力和稳健性，我们还采用了动态的关键词模拟策略。实验证明，我们提出的LCB-net热词模型，不仅能够提升关键词的识别效果，同时也能够提升非关键词的识别效果。具体实验结果如下所示：
