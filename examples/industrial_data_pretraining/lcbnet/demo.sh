@@ -1,5 +1,5 @@
-file_dir="/nfs/yufan.yf/workspace/github/FunASR/examples/industrial_data_pretraining/lcbnet/exp/speech_lcbnet_contextual_asr-en-16k-bpe-vocab5002-pytorch"
-CUDA_VISIBLE_DEVICES="0,1,2,3,4,5,6,7"
+file_dir="/home/yf352572/.cache/modelscope/hub/iic/LCB-NET/"
+CUDA_VISIBLE_DEVICES="0,1"
 inference_device="cuda"
 
 if [ ${inference_device} == "cuda" ]; then
@@ -12,7 +12,7 @@ else
     done
 fi
 
-inference_dir="outputs/slidespeech_dev_beamsearch_new"
+inference_dir="outputs/slidespeech_dev"
 _logdir="${inference_dir}/logdir"
 echo "inference_dir: ${inference_dir}"
 
@@ -39,11 +39,11 @@ for JOB in $(seq ${nj}); do
         python -m funasr.bin.inference \
         --config-path=${file_dir} \
         --config-name="config.yaml" \
-        ++init_param=${file_dir}/model.pb \
+        ++init_param=${file_dir}/model.pt \
         ++tokenizer_conf.token_list=${file_dir}/tokens.txt \
         ++input=[${_logdir}/wav.${JOB}.scp,${_logdir}/ocr.${JOB}.txt] \
         +data_type='["kaldi_ark", "text"]' \
-        ++tokenizer_conf.bpemodel=${file_dir}/bpe.model \
+        ++tokenizer_conf.bpemodel=${file_dir}/bpe.pt \
         ++output_dir="${inference_dir}/${JOB}" \
         ++device="${inference_device}" \
         ++ncpu=1 \

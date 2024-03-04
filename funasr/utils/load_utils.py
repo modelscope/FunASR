@@ -89,8 +89,6 @@ def load_bytes(input):
     return array
 
 def extract_fbank(data, data_len = None, data_type: str="sound", frontend=None, **kwargs):
-    # import pdb;
-    # pdb.set_trace()
     if isinstance(data, np.ndarray):
         data = torch.from_numpy(data)
         if len(data.shape) < 2:

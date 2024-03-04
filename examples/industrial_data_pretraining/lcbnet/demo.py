@@ -10,7 +10,7 @@ model = AutoModel(model="iic/LCB-NET",
 
 
 # example1
-res = model.generate(input='["~/.cache/modelscope/hub/iic/LCB-NET/example/asr_example.wav","~/.cache/modelscope/hub/iic/LCB-NET/example/ocr.txt"]',data_type='["sound", "text"]')
+res = model.generate(input=("https://www.modelscope.cn/api/v1/models/iic/LCB-NET/repo?Revision=master&FilePath=example/asr_example.wav","https://www.modelscope.cn/api/v1/models/iic/LCB-NET/repo?Revision=master&FilePath=example/ocr.txt"),data_type=("sound", "text"))
 
 print(res)
 

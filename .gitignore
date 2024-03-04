@@ -26,4 +26,5 @@ emotion2vec*
 GPT-SoVITS*
 examples/*/*/outputs
 examples/*/*/exp
+examples/*/*/tmp
 cmd_read
