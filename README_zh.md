@@ -111,7 +111,7 @@ res = model.generate(input=f"{model.model_path}/example/asr_example.wav",
             hotword='魔搭')
 print(res)
 ```
-注：`model_hub`：表示模型仓库，`ms`为选择modelscope下载，`hf`为选择huggingface下载。
+注：`hub`：表示模型仓库，`ms`为选择modelscope下载，`hf`为选择huggingface下载。
 
 ### 实时语音识别
 

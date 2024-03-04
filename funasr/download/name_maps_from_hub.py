@@ -14,3 +14,18 @@ name_maps_ms = {
 name_maps_hf = {
 
 }
+
+name_maps_openai = {
+    "Whisper-tiny.en": "tiny.en",
+    "Whisper-tiny": "tiny",
+    "Whisper-base.en": "base.en",
+    "Whisper-base": "base",
+    "Whisper-small.en": "small.en",
+    "Whisper-small": "small",
+    "Whisper-medium.en": "medium.en",
+    "Whisper-medium": "medium",
+    "Whisper-large-v1": "large-v1",
+    "Whisper-large-v2": "large-v2",
+    "Whisper-large-v3": "large-v3",
+    "Whisper-large": "large",
+}

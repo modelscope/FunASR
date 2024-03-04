@@ -14,7 +14,7 @@ from funasr.register import tables
 
 
 
-@tables.register("model_classes", "WhisperWarp")
+@tables.register("model_classes", "QwenAudioWarp")
 class WhisperWarp(nn.Module):
     def __init__(self, whisper_dims: dict, **kwargs):
         super().__init__()

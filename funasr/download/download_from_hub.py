@@ -2,13 +2,20 @@ import os
 import json
 from omegaconf import OmegaConf
 
-from funasr.download.name_maps_from_hub import name_maps_ms, name_maps_hf
+from funasr.download.name_maps_from_hub import name_maps_ms, name_maps_hf, name_maps_openai
 
 
 def download_model(**kwargs):
-    model_hub = kwargs.get("model_hub", "ms")
-    if model_hub == "ms":
+    hub = kwargs.get("hub", "ms")
+    if hub == "ms":
         kwargs = download_from_ms(**kwargs)
+    elif hub == "hf":
+        pass
+    elif hub == "openai":
+        model_or_path = kwargs.get("model")
+        if model_or_path in name_maps_openai:
+            model_or_path = name_maps_openai[model_or_path]
+        kwargs["model_path"] = model_or_path
     
     return kwargs
 
@@ -18,7 +25,13 @@ def download_from_ms(**kwargs):
         model_or_path = name_maps_ms[model_or_path]
     model_revision = kwargs.get("model_revision")
     if not os.path.exists(model_or_path):
-        model_or_path = get_or_download_model_dir(model_or_path, model_revision, is_training=kwargs.get("is_training"), check_latest=kwargs.get("check_latest", True))
+        try:
+            model_or_path = get_or_download_model_dir(model_or_path, model_revision,
+                                                      is_training=kwargs.get("is_training"),
+                                                      check_latest=kwargs.get("check_latest", True))
+        except Exception as e:
+            print(f"Download: {model_or_path} failed!: {e}")
+    
     kwargs["model_path"] = model_or_path
     
     if os.path.exists(os.path.join(model_or_path, "configuration.json")):
@@ -50,7 +63,9 @@ def download_from_ms(**kwargs):
             kwargs["frontend_conf"]["cmvn_file"] = os.path.join(model_or_path, "am.mvn")
         if os.path.exists(os.path.join(model_or_path, "jieba_usr_dict")):
             kwargs["jieba_usr_dict"] = os.path.join(model_or_path, "jieba_usr_dict")
-    return OmegaConf.to_container(kwargs, resolve=True)
+    if isinstance(kwargs, OmegaConf):
+        kwargs = OmegaConf.to_container(kwargs, resolve=True)
+    return kwargs
 
 def add_file_root_path(model_or_path: str, file_path_metas: dict, cfg = {}):
     
