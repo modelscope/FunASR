@@ -83,8 +83,8 @@ nohup bash run_server.sh \
 cd FunASR/runtime
 nohup bash run_server.sh \
   --download-model-dir /workspace/models \
-  --vad-dir damo/speech_fsmn_vad_zh-cn-8k-common \
-  --model-dir damo/speech_paraformer_asr_nat-zh-cn-8k-common-vocab8358-tensorflow1  \
+  --vad-dir damo/speech_fsmn_vad_zh-cn-8k-common-onnx \
+  --model-dir damo/speech_paraformer_asr_nat-zh-cn-8k-common-vocab8358-tensorflow1-onnx  \
   --punc-dir damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx \
   --lm-dir damo/speech_ngram_lm_zh-cn-ai-wesp-fst-token8358 \
   --itn-dir thuduj12/fst_itn_zh \
