@@ -5,7 +5,8 @@
 
 from funasr import AutoModel
 
-model = AutoModel(model="iic/LCB-NET")
+model = AutoModel(model="iic/LCB-NET",
+                  model_revision="v1.0.0")
 
 
 # example1
