@@ -47,7 +47,7 @@ from funasr.models.transformer.utils.subsampling import check_short_utt
 from funasr.models.transformer.utils.subsampling import Conv2dSubsamplingPad
 from funasr.models.transformer.utils.subsampling import StreamingConvInput
 from funasr.register import tables
-
+import pdb
 
 class ConvolutionModule(nn.Module):
     """ConvolutionModule in Conformer model.
