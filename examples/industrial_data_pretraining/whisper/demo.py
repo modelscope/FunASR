@@ -5,7 +5,7 @@
 
 from funasr import AutoModel
 
-model = AutoModel(model="iic/speech_whisper-large_asr_multilingual",
+model = AutoModel(model="iic/Whisper-large-v3",
                   model_revision="v2.0.4",
                   )
 

@@ -7,7 +7,7 @@ from funasr import AutoModel
 
 # model = AutoModel(model="Whisper-small", hub="openai")
 # model = AutoModel(model="Whisper-medium", hub="openai")
-model = AutoModel(model="Whisper-large-v2", hub="openai")
+model = AutoModel(model="Whisper-large-v3", hub="openai")
 # model = AutoModel(model="Whisper-large-v3", hub="openai")
 
 res = model.generate(
