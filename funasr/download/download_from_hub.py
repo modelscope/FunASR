@@ -13,10 +13,16 @@ def download_model(**kwargs):
         pass
     elif hub == "openai":
         model_or_path = kwargs.get("model")
-        if model_or_path in name_maps_openai:
-            model_or_path = name_maps_openai[model_or_path]
-        kwargs["model_path"] = model_or_path
-    
+        if os.path.exists(model_or_path):
+            # local path
+            kwargs["model_path"] = model_or_path
+            kwargs["model"] = "WhisperWarp"
+        else:
+            # model name
+            if model_or_path in name_maps_openai:
+                model_or_path = name_maps_openai[model_or_path]
+            kwargs["model_path"] = model_or_path
+   
     return kwargs
 
 def download_from_ms(**kwargs):
@@ -32,7 +38,7 @@ def download_from_ms(**kwargs):
         except Exception as e:
             print(f"Download: {model_or_path} failed!: {e}")
     
-    kwargs["model_path"] = model_or_path
+    kwargs["model_path"] = model_or_path if "model_path" not in model_or_path else kwargs["model_path"]
     
     if os.path.exists(os.path.join(model_or_path, "configuration.json")):
         with open(os.path.join(model_or_path, "configuration.json"), 'r', encoding='utf-8') as f:
