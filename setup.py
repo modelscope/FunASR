@@ -82,6 +82,17 @@ requirements = {
         "sphinx-markdown-tables>=0.0.12",
         "configargparse>=1.2.1"
     ],
+    "qwen-audio":[
+        "transformers>=4.32.0",
+        "accelerate",
+        "tiktoken",
+        "einops",
+        "transformers_stream_generator==0.0.4",
+        "scipy",
+        "torchvision",
+        "pillow",
+        "matplotlib",
+    ],
 }
 requirements["all"].extend(requirements["train"])
 requirements["test"].extend(requirements["train"])
