@@ -1,6 +1,6 @@
 import os
 import json
-from omegaconf import OmegaConf
+from omegaconf import OmegaConf, DictConfig
 
 from funasr.download.name_maps_from_hub import name_maps_ms, name_maps_hf, name_maps_openai
 
@@ -63,7 +63,7 @@ def download_from_ms(**kwargs):
             kwargs["frontend_conf"]["cmvn_file"] = os.path.join(model_or_path, "am.mvn")
         if os.path.exists(os.path.join(model_or_path, "jieba_usr_dict")):
             kwargs["jieba_usr_dict"] = os.path.join(model_or_path, "jieba_usr_dict")
-    if isinstance(kwargs, OmegaConf):
+    if isinstance(kwargs, DictConfig):
         kwargs = OmegaConf.to_container(kwargs, resolve=True)
     return kwargs
 
