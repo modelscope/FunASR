@@ -41,6 +41,7 @@ requirements = {
         "jaconv",
         "hydra-core>=1.3.2",
         "tensorboardX",
+        "rotary_embedding_torch",
     ],
     # train: The modules invoked when training only.
     "train": [
@@ -81,6 +82,17 @@ requirements = {
         "nbsphinx>=0.4.2",
         "sphinx-markdown-tables>=0.0.12",
         "configargparse>=1.2.1"
+    ],
+    "llm":[
+        "transformers>=4.32.0",
+        "accelerate",
+        "tiktoken",
+        "einops",
+        "transformers_stream_generator>=0.0.4",
+        "scipy",
+        "torchvision",
+        "pillow",
+        "matplotlib",
     ],
 }
 requirements["all"].extend(requirements["train"])

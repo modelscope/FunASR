@@ -10,6 +10,7 @@ name_maps_ms = {
     "cam++": "damo/speech_campplus_sv_zh-cn_16k-common",
     "Whisper-large-v2": "iic/speech_whisper-large_asr_multilingual",
     "Whisper-large-v3": "iic/Whisper-large-v3",
+    "Qwen-Audio": "Qwen/Qwen-Audio",
 }
 
 name_maps_hf = {
