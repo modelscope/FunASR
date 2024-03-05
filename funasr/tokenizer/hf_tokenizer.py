@@ -2,7 +2,8 @@
 try:
 	from transformers import AutoTokenizer
 except:
-	print("If you want to use hugging, please `pip install -U transformers`")
+	# print("If you want to use hugging, please `pip install -U transformers`")
+	pass
 
 from funasr.register import tables
 

@@ -20,6 +20,11 @@ from funasr.register import tables
 @tables.register("model_classes", "QwenAudio")
 @tables.register("model_classes", "QwenAudioWarp")
 class QwenAudioWarp(nn.Module):
+    """
+    Qwen-Audio: Advancing Universal Audio Understanding via Unified Large-Scale Audio-Language Models
+    https://arxiv.org/abs/2311.07919
+    Modified from https://github.com/QwenLM/Qwen-Audio
+    """
     def __init__(self, *args, **kwargs):
         super().__init__()
 
@@ -72,6 +77,11 @@ class QwenAudioWarp(nn.Module):
 @tables.register("model_classes", "QwenAudioChatWarp")
 class QwenAudioChatWarp(nn.Module):
     def __init__(self, *args, **kwargs):
+        """
+        Qwen-Audio: Advancing Universal Audio Understanding via Unified Large-Scale Audio-Language Models
+        https://arxiv.org/abs/2311.07919
+        Modified from https://github.com/QwenLM/Qwen-Audio
+        """
         super().__init__()
         
         model_or_path = kwargs.get("model_path", "QwenAudio")

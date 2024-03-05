@@ -2,7 +2,7 @@
 try:
 	from whisper.tokenizer import get_tokenizer
 except:
-	print("If you want to use hugging, please `pip install -U transformers`")
+	print("Notice: If you want to use whisper, please `pip install -U openai-whisper`")
 
 from funasr.register import tables
 
