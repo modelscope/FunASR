@@ -83,12 +83,12 @@ requirements = {
         "sphinx-markdown-tables>=0.0.12",
         "configargparse>=1.2.1"
     ],
-    "qwen-audio":[
+    "llm":[
         "transformers>=4.32.0",
         "accelerate",
         "tiktoken",
         "einops",
-        "transformers_stream_generator==0.0.4",
+        "transformers_stream_generator>=0.0.4",
         "scipy",
         "torchvision",
         "pillow",
