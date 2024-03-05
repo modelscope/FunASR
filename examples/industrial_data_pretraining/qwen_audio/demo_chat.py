@@ -7,9 +7,7 @@
 
 from funasr import AutoModel
 
-model = AutoModel(model="Qwen-Audio-Chat",
-                  model_path=None,
-                  )
+model = AutoModel(model="Qwen-Audio-Chat")
 
 audio_in = "https://github.com/QwenLM/Qwen-Audio/raw/main/assets/audio/1272-128104-0000.flac"
 
@@ -19,8 +17,9 @@ cache = {"history": None}
 res = model.generate(input=audio_in, prompt=prompt, cache=cache)
 print(res)
 
-prompt = 'Find the start time and end time of the word "middle classes"'
+
 # 2nd dialogue turn
+prompt = 'Find the start time and end time of the word "middle classes"'
 res = model.generate(input=None, prompt=prompt, cache=cache)
 print(res)
 

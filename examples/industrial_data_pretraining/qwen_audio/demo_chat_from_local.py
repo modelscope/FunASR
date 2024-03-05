@@ -19,8 +19,9 @@ cache = {"history": None}
 res = model.generate(input=audio_in, prompt=prompt, cache=cache)
 print(res)
 
-prompt = 'Find the start time and end time of the word "middle classes"'
+
 # 2nd dialogue turn
+prompt = 'Find the start time and end time of the word "middle classes"'
 res = model.generate(input=None, prompt=prompt, cache=cache)
 print(res)
 

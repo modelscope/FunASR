@@ -7,9 +7,7 @@
 
 from funasr import AutoModel
 
-model = AutoModel(model="Qwen-Audio",
-                  model_path=None,
-                  )
+model = AutoModel(model="Qwen-Audio")
 
 res = model.generate(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav", language=None)
 print(res)
