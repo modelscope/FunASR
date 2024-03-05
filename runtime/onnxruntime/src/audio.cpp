@@ -1096,7 +1096,7 @@ void Audio::CutSplit(OfflineStream* offline_stream)
     delete frame;
     frame = nullptr;
 
-    int step = dest_sample_rate*10;
+    int step = dest_sample_rate*1;
     bool is_final=false;
     vector<std::vector<int>> vad_segments;
     for (int sample_offset = 0; sample_offset < speech_len; sample_offset += std::min(step, speech_len - sample_offset)) {
