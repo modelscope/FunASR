@@ -35,8 +35,8 @@ class WhisperWarp(nn.Module):
                 model_or_path = model_or_path.replace("Whisper-", "")
             model = whisper.load_model(model_or_path)
         else:
-            whisper_dims = kwargs.get("dims", {})
-            dims = whisper.model.ModelDimensions(**whisper_dims)
+            dims = kwargs.get("dims", {})
+            dims = whisper.model.ModelDimensions(**dims)
             model = whisper.model.Whisper(dims=dims)
         
         self.model = model
