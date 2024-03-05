@@ -28,7 +28,7 @@
 <a name="whats-new"></a>
 ## What's new:
 - 2024/03/05：Added support for the Whisper-large-v3 model, a multitasking model that can perform multilingual speech recognition, speech translation, and language identification. It can be downloaded from the[modelscope](https://www.modelscope.cn/models/iic/Whisper-large-v3/summary), and [openai](https://github.com/alibaba-damo-academy/FunASR/tree/main/examples/industrial_data_pretraining/whisper).
-- 2024/03/03: Offline File Transcription Service 4.4, Offline File Transcription Service of English 1.5，Real-time Transcription Service 1.9 released，Docker image supports ARM64 platform；([docs](runtime/readme.md))
+- 2024/03/05: Offline File Transcription Service 4.4, Offline File Transcription Service of English 1.5，Real-time Transcription Service 1.9 released，docker image supports ARM64 platform, update modelscope；([docs](runtime/readme.md))
 - 2024/01/30：funasr-1.0 has been released ([docs](https://github.com/alibaba-damo-academy/FunASR/discussions/1319))
 - 2024/01/30：emotion recognition models are new supported. [model link](https://www.modelscope.cn/models/iic/emotion2vec_base_finetuned/summary), modified from [repo](https://github.com/ddlBoJack/emotion2vec).
 - 2024/01/25: Offline File Transcription Service 4.2, Offline File Transcription Service of English 1.3 released，optimized the VAD (Voice Activity Detection) data processing method, significantly reducing peak memory usage, memory leak optimization; Real-time Transcription Service 1.7 released，optimizatized the client-side；([docs](runtime/readme.md))

@@ -8,7 +8,7 @@ FunASR Real-time Speech Recognition Software Package integrates real-time versio
 
 | TIME       | INFO                                                                                | IMAGE VERSION                       | IMAGE ID     |
 |------------|-------------------------------------------------------------------------------------|-------------------------------------|--------------|
-| 2024.03.03 | Docker image supports ARM64 platform | funasr-runtime-sdk-online-cpu-0.1.9 | 6da1b9598885 |
+| 2024.03.05 | docker image supports ARM64 platform, update modelscope | funasr-runtime-sdk-online-cpu-0.1.9 | 4a875e08c7a2 |
 | 2024.01.25 | Optimization of the client-side | funasr-runtime-sdk-online-cpu-0.1.7  | 2aa23805572e      |
 | 2024.01.03 | The 2pass-offline mode supports Ngram language model decoding and WFST hotwords, while also addressing known crash issues and memory leak problems | funasr-runtime-sdk-online-cpu-0.1.6  | f99925110d27      |
 | 2023.11.09 | fix bug: without online results                                                     | funasr-runtime-sdk-online-cpu-0.1.5 | b16584b6d38b      |

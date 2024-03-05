@@ -19,7 +19,7 @@ FunASR是由阿里巴巴通义实验室语音团队开源的一款语音识别�
 为了支持不同用户的需求，针对不同场景，准备了不同的图文教程：
 
 ### 最新动态
-- 2024/03/03:   英文离线文件转写服务 1.5 发布，docker镜像支持arm64平台，dokcer镜像版本funasr-runtime-sdk-en-cpu-0.1.5 (cd51bfef91eb)
+- 2024/03/05:   英文离线文件转写服务 1.5 发布，docker镜像支持arm64平台，升级modelscope版本，dokcer镜像版本funasr-runtime-sdk-en-cpu-0.1.5 (7cca2abc5901)
 - 2024/01/25:   英文离线文件转写服务 1.3 发布，优化vad数据处理方式，大幅降低峰值内存占用，内存泄漏优化，dokcer镜像版本funasr-runtime-sdk-en-cpu-0.1.3 (c00f9ce7a195)
 - 2024/01/03:   英文离线文件转写服务 1.2 发布，修复已知的crash问题及内存泄漏问题，dokcer镜像版本funasr-runtime-sdk-en-cpu-0.1.2 (0cdd9f4a4bb5)
 - 2023/11/08:   英文离线文件转写服务 1.1 发布，runtime结构变化适配（FunASR/funasr/runtime->FunASR/runtime），dokcer镜像版本funasr-runtime-sdk-en-cpu-0.1.1 (27017f70f72a)
@@ -36,7 +36,7 @@ FunASR实时语音听写服务软件包，既可以实时地进行语音转文�
 为了支持不同用户的需求，针对不同场景，准备了不同的图文教程：
 
 ### 最新动态
-- 2024/03/03:   中文实时语音听写服务 1.9 发布，docker镜像支持arm64平台，dokcer镜像版本funasr-runtime-sdk-online-cpu-0.1.9 (6da1b9598885)
+- 2024/03/05:   中文实时语音听写服务 1.9 发布，docker镜像支持arm64平台，升级modelscope版本，dokcer镜像版本funasr-runtime-sdk-online-cpu-0.1.9 (4a875e08c7a2)
 - 2024/01/25:   中文实时语音听写服务 1.7 发布，客户端优化，dokcer镜像版本funasr-runtime-sdk-online-cpu-0.1.7 (2aa23805572e)
 - 2024/01/03:   中文实时语音听写服务 1.6 发布，2pass-offline模式支持Ngram语言模型解码、wfst热词，同时修复已知的crash问题及内存泄漏问题，dokcer镜像版本funasr-runtime-sdk-online-cpu-0.1.6 (f99925110d27)
 - 2023/11/09:   中文实时语音听写服务 1.5 发布，修复无实时结果的问题，dokcer镜像版本funasr-runtime-sdk-online-cpu-0.1.5 (b16584b6d38b)
@@ -58,7 +58,7 @@ FunASR实时语音听写服务软件包，既可以实时地进行语音转文�
 为了支持不同用户的需求，针对不同场景，准备了不同的图文教程：
 
 ### 最新动态
-- 2024/03/03:   中文离线文件转写服务 4.4 发布，docker镜像支持arm64平台，dokcer镜像版本funasr-runtime-sdk-cpu-0.4.4 (404811e713be)
+- 2024/03/05:   中文离线文件转写服务 4.4 发布，docker镜像支持arm64平台，升级modelscope版本，dokcer镜像版本funasr-runtime-sdk-cpu-0.4.4 (2dc87b86dc49)
 - 2024/01/25:   中文离线文件转写服务 4.2 发布，优化vad数据处理方式，大幅降低峰值内存占用，内存泄漏优化，dokcer镜像版本funasr-runtime-sdk-cpu-0.4.2 (befdc7b179ed)
 - 2024/01/08:   中文离线文件转写服务 4.1 发布，优化句子级时间戳json格式，dokcer镜像版本funasr-runtime-sdk-cpu-0.4.1 (0250f8ef981b)
 - 2024/01/03:   中文离线文件转写服务 4.0 发布，新增支持8k模型、优化时间戳不匹配问题及增加句子级别时间戳、优化英文单词fst热词效果、支持自动化配置线程参数，同时修复已知的crash问题及内存泄漏问题，dokcer镜像版本funasr-runtime-sdk-cpu-0.4.0 (c4483ee08f04)
