@@ -40,7 +40,16 @@ class AudioFrame {
     int global_end = 0;   // the end of a frame in the global time axis. in ms
 };
 
-class Audio {
+#ifdef _WIN32
+#ifdef _FUNASR_API_EXPORT
+#define DLLAPI __declspec(dllexport)
+#else
+#define DLLAPI __declspec(dllimport)
+#endif
+#else
+#define DLLAPI 
+#endif
+class DLLAPI Audio {
   private:
     float *speech_data=nullptr;
     int16_t *speech_buff=nullptr;
