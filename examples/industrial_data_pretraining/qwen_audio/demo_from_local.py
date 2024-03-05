@@ -7,7 +7,7 @@
 
 from funasr import AutoModel
 
-model = AutoModel(model="Qwen/Qwen-Audio",
+model = AutoModel(model="Qwen-Audio",
                   model_path="/nfs/zhifu.gzf/init_model/qwen/Qwen-Audio",
                   )
 

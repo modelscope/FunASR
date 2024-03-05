@@ -7,7 +7,7 @@
 
 from funasr import AutoModel
 
-model = AutoModel(model="Qwen/Qwen-Audio",
+model = AutoModel(model="Qwen-Audio",
                   model_path=None,
                   )
 
