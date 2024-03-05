@@ -248,7 +248,7 @@ class AutoModel:
                  res = model.inference(**batch, **kwargs)
                  if isinstance(res, (list, tuple)):
                     results = res[0]
-                    meta_data = results[1] if len(res) > 1 else {}
+                    meta_data = res[1] if len(res) > 1 else {}
             time2 = time.perf_counter()
 
             asr_result_list.extend(results)

@@ -50,16 +50,15 @@ class QwenAudioWarp(nn.Module):
         # meta_data["batch_data_time"] = -1
 
         sp_prompt = "<|startoftranscription|><|en|><|transcribe|><|en|><|notimestamps|><|wo_itn|>"
-        query = f"<audio>{data_in}</audio>{sp_prompt}"
+        query = f"<audio>{data_in[0]}</audio>{sp_prompt}"
         audio_info = self.tokenizer.process_audio(query)
         inputs = self.tokenizer(query, return_tensors='pt', audio_info=audio_info)
         inputs = inputs.to(self.model.device)
         pred = self.model.generate(**inputs, audio_info=audio_info)
         response = tokenizer.decode(pred.cpu()[0], skip_special_tokens=False, audio_info=audio_info)
-        print(response)
 
         results = []
-        result_i = {"key": key[0], "text": result.text}
+        result_i = {"key": key[0], "text": response}
     
         results.append(result_i)
     
@@ -104,21 +103,22 @@ class QwenAudioChatWarp(nn.Module):
         meta_data = {}
 
         prompt = kwargs.get("prompt", "what does the person say?")
-        history = kwargs.get("kwargs", None)
+        cache = kwargs.get("cache", {})
+        history = cache.get("history", None)
         if data_in is not None:
             # 1st dialogue turn
             query = self.tokenizer.from_list_format([
-                {'audio': data_in},  # Either a local path or an url
+                {'audio': data_in[0]},  # Either a local path or an url
                 {'text': prompt},
             ])
         else:
             query = prompt
         response, history = self.model.chat(self.tokenizer, query=query, history=history)
-        print(response)
+        # print(response)
         # The person says: "mister quilter is the apostle of the middle classes and we are glad to welcome his gospel".
 
         results = []
-        result_i = {"key": key[0], "text": result.text}
+        result_i = {"key": key[0], "text": response}
         
         results.append(result_i)
         
