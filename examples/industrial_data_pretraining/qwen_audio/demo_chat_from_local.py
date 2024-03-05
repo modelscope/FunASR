@@ -6,10 +6,10 @@
 from funasr import AutoModel
 
 model = AutoModel(model="Qwen/Qwen-Audio-Chat",
-                  model_path=None,
+                  model_path="/nfs/zhifu.gzf/init_model/qwen/Qwen-Audio-Chat",
                   )
 
-audio_in = "https://github.com/QwenLM/Qwen-Audio/raw/main/assets/audio/1272-128104-0000.flac"
+audio_in = "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav"
 
 # 1st dialogue turn
 prompt = 'what does the person say?'

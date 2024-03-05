@@ -14,8 +14,9 @@ from transformers.generation import GenerationConfig
 
 from funasr.register import tables
 
-
+@tables.register("model_classes", "Qwen/Qwen-Audio")
 @tables.register("model_classes", "Qwen-Audio")
+@tables.register("model_classes", "Qwen/QwenAudio")
 @tables.register("model_classes", "QwenAudio")
 @tables.register("model_classes", "QwenAudioWarp")
 class QwenAudioWarp(nn.Module):
@@ -64,7 +65,8 @@ class QwenAudioWarp(nn.Module):
     
         return results, meta_data
 
-
+@tables.register("model_classes", "Qwen/Qwen-Audio-Chat")
+@tables.register("model_classes", "Qwen/QwenAudioChat")
 @tables.register("model_classes", "Qwen-Audio-Chat")
 @tables.register("model_classes", "QwenAudioChat")
 @tables.register("model_classes", "QwenAudioChatWarp")
@@ -105,7 +107,7 @@ class QwenAudioChatWarp(nn.Module):
         prompt = kwargs.get("prompt", "what does the person say?")
         cache = kwargs.get("cache", {})
         history = cache.get("history", None)
-        if data_in is not None:
+        if data_in[0] is not None:
             # 1st dialogue turn
             query = self.tokenizer.from_list_format([
                 {'audio': data_in[0]},  # Either a local path or an url
@@ -114,6 +116,7 @@ class QwenAudioChatWarp(nn.Module):
         else:
             query = prompt
         response, history = self.model.chat(self.tokenizer, query=query, history=history)
+        cache["history"] = history
         # print(response)
         # The person says: "mister quilter is the apostle of the middle classes and we are glad to welcome his gospel".
 
