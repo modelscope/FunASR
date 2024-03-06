@@ -214,7 +214,7 @@ class LLMASRNAR(nn.Module):
     
     def encode(
         self, speech: torch.Tensor, speech_lengths: torch.Tensor, **kwargs,
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    ):
     
         audio_mask = kwargs.get("audio_mask", None)
         audio_token_lengths = audio_mask.sum(-1) if audio_mask is not None else None

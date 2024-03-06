@@ -41,6 +41,8 @@ class WhisperWarp(nn.Module):
         
         self.model = model
         
+        self.encoder_output_size = self.model.dims.n_audio_state
+        
     def forward(self, ):
         pass
     
