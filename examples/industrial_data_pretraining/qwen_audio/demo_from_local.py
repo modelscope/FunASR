@@ -11,5 +11,8 @@ model = AutoModel(model="Qwen-Audio",
                   model_path="/nfs/zhifu.gzf/init_model/qwen/Qwen-Audio",
                   )
 
-res = model.generate(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav", language=None)
+audio_in = "https://github.com/QwenLM/Qwen-Audio/raw/main/assets/audio/1272-128104-0000.flac"
+prompt = "<|startoftranscription|><|en|><|transcribe|><|en|><|notimestamps|><|wo_itn|>"
+
+res = model.generate(input=audio_in, prompt=prompt)
 print(res)
