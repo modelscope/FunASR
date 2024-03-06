@@ -5,8 +5,8 @@ from funasr.register import tables
 from funasr.utils.load_utils import extract_fbank, load_audio_text_image_video
 
 
-@tables.register("dataset_classes", "AudioLLMARDataset")
-class AudioLLMARDataset(torch.utils.data.Dataset):
+@tables.register("dataset_classes", "AudioLLMVicunaDataset")
+class AudioLLMVicunaDataset(torch.utils.data.Dataset):
     """
     AudioLLMDataset
     """

@@ -69,7 +69,7 @@ scheduler: warmuplr
 scheduler_conf:
    warmup_steps: 1500
 
-dataset: AudioLLMDataset
+dataset: AudioLLMVicunaDataset
 dataset_conf:
     index_ds: IndexDSJsonl
     batch_sampler: RankFullLocalShuffleBatchSampler
@@ -79,7 +79,7 @@ dataset_conf:
     buffer_size: 500
     shuffle: True
     num_workers: 4
-    preprocessor_text: TextPreprocessRemovePunctuation
+#    preprocessor_text: TextPreprocessRemovePunctuation
     audio_adaptor_downsample_rate: ${audio_adaptor_conf.downsample_rate}
     audio_encoder_downsample_rate: 2
 
