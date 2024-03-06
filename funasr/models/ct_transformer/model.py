@@ -359,7 +359,7 @@ class CTTransformer(torch.nn.Module):
                         ind_append = len_tokens - i - 1
                         for _ in range(num_append):
                             new_punc_array.insert(ind_append, 1)
-        punc_array = torch.tensor(new_punc_array)
+            punc_array = torch.tensor(new_punc_array)
         
         result_i = {"key": key[0], "text": new_mini_sentence_out, "punc_array": punc_array}
         results.append(result_i)
