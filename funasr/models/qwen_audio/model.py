@@ -54,9 +54,8 @@ class QwenAudioWarp(nn.Module):
 
         meta_data = {}
         # meta_data["batch_data_time"] = -1
-
-        sp_prompt = "<|startoftranscription|><|en|><|transcribe|><|en|><|notimestamps|><|wo_itn|>"
-        query = f"<audio>{data_in[0]}</audio>{sp_prompt}"
+        prompt = kwargs.get("prompt", "<|startoftranscription|><|en|><|transcribe|><|en|><|notimestamps|><|wo_itn|>")
+        query = f"<audio>{data_in[0]}</audio>{prompt}"
         audio_info = self.tokenizer.process_audio(query)
         inputs = self.tokenizer(query, return_tensors='pt', audio_info=audio_info)
         inputs = inputs.to(self.model.device)
