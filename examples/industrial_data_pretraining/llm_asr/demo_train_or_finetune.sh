@@ -38,10 +38,9 @@ torchrun \
 --config-name "${config}" \
 ++train_data_set_list="${train_data}" \
 ++valid_data_set_list="${val_data}" \
-++dataset_conf.batch_size=2 \
-++dataset_conf.batch_type="example" \
-++dataset_conf.num_workers=0 \
-++train_conf.max_epoch=11 \
-++optim_conf.lr=0.0002 \
+++dataset_conf.batch_size=8 \
+++dataset_conf.num_workers=4 \
+++train_conf.max_epoch=15 \
+++optim_conf.lr=0.0001 \
 ++init_param="${init_param}" \
 ++output_dir="${output_dir}" &> ${log_file}
