@@ -19,11 +19,11 @@ train_data="/nfs/zhifu.gzf/data/datalist/aishell1_aishell2_wav_speech_llm_train_
 val_data="/nfs/zhifu.gzf/data/datalist/aishell1_aishell2_wav_speech_llm_train_data_tail500.json"
 
 # exp output dir
-output_dir="/Users/zhifu/exp"
+output_dir="/nfs/zhifu.gzf/ckpt/exp/llm_asr_whisper_vicuna_exp1"
 log_file="${output_dir}/log.txt"
 
 workspace=`pwd`
-config="template.yaml"
+config="whisper_vicuna_linear.yaml"
 
 init_param="${output_dir}/model.pt"
 

@@ -29,7 +29,7 @@ class RegisterTables:
                 flag = key in classes_key
             if classes_key.endswith("_meta") and flag:
                 print(f"-----------    ** {classes_key.replace('_meta', '')} **    --------------")
-                headers = ["class name", "class location"]
+                headers = ["register name", "class name", "class location"]
                 metas = []
                 for register_key, meta in classes_dict.items():
                     metas.append(meta)
@@ -67,8 +67,8 @@ class RegisterTables:
             class_line = inspect.getsourcelines(target_class)[1]
             pattern = r'^.+/funasr/'
             class_file = re.sub(pattern, 'funasr/', class_file)
-            meata_data = [f"{target_class.__name__}", f"{class_file}:{class_line}"]
-            # meata_data = [f"{target_class.__name__}", f"{registry_key}", f"{class_file}:{class_line}"]
+            # meata_data = [f"{target_class.__name__}", f"{class_file}:{class_line}"]
+            meata_data = [f"{registry_key}", f"{target_class.__name__}", f"{class_file}:{class_line}"]
             registry_meta[registry_key] = meata_data
             # print(f"Registering class: {class_file}:{class_line} - {target_class.__name__} as {registry_key}")
             return target_class
