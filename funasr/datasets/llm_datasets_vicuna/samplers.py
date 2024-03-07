@@ -195,7 +195,7 @@ class CustomDistributedBatchSampler(Sampler):
             filtered_indices = []
             for idx in indices:
                 source_len = self.dataset.get_source_len(idx) / self.length_scale_source
-                if len(source_len) <= self.max_token_length:
+                if source_len <= self.max_token_length:
                     filtered_indices.append(idx)
             indices = filtered_indices
 

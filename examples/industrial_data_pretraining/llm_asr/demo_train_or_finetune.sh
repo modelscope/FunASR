@@ -15,8 +15,8 @@ gpu_num=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
 #++data_type_list='["source", "target"]' \
 #++jsonl_file_out=/Users/zhifu/funasr1.0/test_local/audio_datasets.jsonl
 
-train_data="/nfs/zhifu.gzf/data/datalist/aishell1_aishell2_wav_speech_llm_train_data_del_tail500.json"
-val_data="/nfs/zhifu.gzf/data/datalist/aishell1_aishell2_wav_speech_llm_train_data_tail500.json"
+train_data="/nfs/maziyang.mzy/data/librispeech/librispeech_train_960h.jsonl"
+val_data="/nfs/maziyang.mzy/data/librispeech/librispeech_dev_other_filtered.jsonl"
 
 # exp output dir
 output_dir="/nfs/zhifu.gzf/ckpt/exp/llm_asr_whisper_vicuna_exp1"

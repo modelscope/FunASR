@@ -218,7 +218,7 @@ class LLMASR(nn.Module):
     ):
         speech = speech.permute(0, 2, 1)
         res = self.audio_encoder(speech)
-        if len(res) > 1:
+        if isinstance(res, (list, tuple)):
             encoder_out, encoder_out_lens = res[0], res[1]
         else:
             encoder_out, encoder_out_lens = res, speech_lengths
