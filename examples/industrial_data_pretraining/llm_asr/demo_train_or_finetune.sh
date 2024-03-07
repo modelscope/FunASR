@@ -15,8 +15,8 @@ gpu_num=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
 #++data_type_list='["source", "target"]' \
 #++jsonl_file_out=/Users/zhifu/funasr1.0/test_local/audio_datasets.jsonl
 
-train_data="/nfs/zhifu.gzf/data/datalist/aishell1_aishell2_wav_speech_llm_train_data_del_tail500.json"
-val_data="/nfs/zhifu.gzf/data/datalist/aishell1_aishell2_wav_speech_llm_train_data_tail500.json"
+train_data="/nfs/maziyang.mzy/data/librispeech/librispeech_train_960h.jsonl"
+val_data="/nfs/maziyang.mzy/data/librispeech/librispeech_dev_other_filtered.jsonl"
 
 # exp output dir
 output_dir="/nfs/zhifu.gzf/ckpt/exp/llm_asr_whisper_vicuna_exp1"
@@ -38,10 +38,9 @@ torchrun \
 --config-name "${config}" \
 ++train_data_set_list="${train_data}" \
 ++valid_data_set_list="${val_data}" \
-++dataset_conf.batch_size=2 \
-++dataset_conf.batch_type="example" \
-++dataset_conf.num_workers=0 \
-++train_conf.max_epoch=11 \
-++optim_conf.lr=0.0002 \
+++dataset_conf.batch_size=4 \
+++dataset_conf.num_workers=4 \
+++train_conf.max_epoch=15 \
+++optim_conf.lr=0.0001 \
 ++init_param="${init_param}" \
-++output_dir="${output_dir}" &> ${log_file}
+++output_dir="${output_dir}" &> ${log_file} &

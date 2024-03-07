@@ -58,7 +58,7 @@ specaug_conf:
 train_conf:
   accum_grad: 1
   grad_clip: 5
-  max_epoch: 150
+  max_epoch: 15
   keep_nbest_models: 10
   log_interval: 10
 
@@ -68,16 +68,15 @@ optim_conf:
    weight_decay: 0.000001
 scheduler: warmuplr
 scheduler_conf:
-   warmup_steps: 1500
+   warmup_steps: 1000
 
 dataset: AudioLLMVicunaDataset
 dataset_conf:
     index_ds: IndexDSJsonl
-    batch_sampler: RankFullLocalShuffleBatchSampler
+    batch_sampler: CustomDistributedBatchSampler
     batch_type: example # example or length
-    batch_size: 8 # if batch_type is example, batch_size is the numbers of samples; if length, batch_size is source_token_len+target_token_len;
-    max_token_length: 2048 # filter samples if source_token_len+target_token_len > max_token_length,
-    buffer_size: 500
+    batch_size: 4 # if batch_type is example, batch_size is the numbers of samples; if length, batch_size is source_token_len+target_token_len;
+    max_token_length: 3000 # filter samples if source_token_len+target_token_len > max_token_length,
     shuffle: True
     num_workers: 4
 #    preprocessor_text: TextPreprocessRemovePunctuation
