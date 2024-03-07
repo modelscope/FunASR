@@ -156,19 +156,23 @@ class CustomDistributedBatchSampler(Sampler):
 
         try:
             rank = dist.get_rank()
-            world_size = dist.get_world_size()
+            num_replicas = dist.get_world_size()
         except:
             rank = 0
-            world_size = 1
+            num_replicas = 1
         self.rank = rank
-        self.num_replicas = world_size
+        self.num_replicas = num_replicas
         self.dataset = dataset
         self.batch_size = batch_size
         self.is_training = is_training
         self.shuffle = shuffle and is_training
         self.drop_last = drop_last
-        self.total_size = len(dataset)
-        self.num_samples = int(math.ceil(self.total_size * 1.0 / self.num_replicas))
+        # self.total_size = len(dataset)
+        if self.drop_last:
+            self.total_size = (len(self.dataset) // (batch_size * num_replicas)) * (batch_size * num_replicas)
+        else:
+            self.total_size = math.ceil(len(self.dataset) / (batch_size * num_replicas)) * (batch_size * num_replicas)
+        self.num_samples = int(self.total_size // self.num_replicas)
         self.epoch = 0
         self.max_token_length = kwargs.get("max_token_length", None)
         self.length_scale_source = kwargs.get("length_scale_source", 1.0)
@@ -183,11 +187,16 @@ class CustomDistributedBatchSampler(Sampler):
             indices = list(range(len(self.dataset)))
 
         # Add extra samples to make it evenly divisible
-        indices += indices[: (self.total_size - len(indices))]
+        padding_size = self.total_size - len(indices)
+        if padding_size <= len(indices):
+            indices += indices[:padding_size]
+        else:
+            indices += (indices * (padding_size // len(indices)) + indices[:padding_size % len(indices)])
+
         assert len(indices) == self.total_size
 
         # Subsample
-        indices = indices[self.rank : self.total_size : self.num_replicas]
+        indices = indices[self.rank:self.total_size:self.num_replicas]
         assert len(indices) == self.num_samples
 
         # Filter out indices with length greater than the max length, if provided
@@ -200,9 +209,7 @@ class CustomDistributedBatchSampler(Sampler):
             indices = filtered_indices
 
         # Now that we have only the indices for this replica, chunk them into batches
-        batches = [
-            indices[i : i + self.batch_size] for i in range(0, len(indices), self.batch_size)
-        ]
+        batches = [indices[i:i + self.batch_size] for i in range(0, len(indices), self.batch_size)]
 
         # Drop the last batch if it's not full and drop_last is True
         if self.drop_last and len(batches[-1]) != self.batch_size:
@@ -212,7 +219,7 @@ class CustomDistributedBatchSampler(Sampler):
 
     def __len__(self):
 
-        return math.ceil(self.num_samples / self.batch_size)
+        return self.num_samples // self.batch_size
 
     def set_epoch(self, epoch):
         self.epoch = epoch
