@@ -43,4 +43,4 @@ torchrun \
 ++train_conf.max_epoch=15 \
 ++optim_conf.lr=0.0001 \
 ++init_param="${init_param}" \
-++output_dir="${output_dir}" &> ${log_file}
+++output_dir="${output_dir}" &> ${log_file} &
