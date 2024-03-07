@@ -35,6 +35,7 @@ frontend_conf:
     fs: 16000
     whisper_model: large-v3
     do_pad_trim: true
+    permute: true # true: [bs, frames, dims]; false: [bs, dims, frames]
 
 
 specaug: SpecAugLFR

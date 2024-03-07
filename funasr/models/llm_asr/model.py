@@ -77,7 +77,7 @@ class LLMASR(nn.Module):
             # frontend = model.kwargs.get("frontend")
             audio_encoder_output_size = model.model.encoder_output_size
 
-            audio_encoder = model.model.model
+            audio_encoder = model.model.model.encoder
             
             # self.frontend = frontend
             
@@ -193,7 +193,7 @@ class LLMASR(nn.Module):
             _, l, _ = encoder_out.shape
             # [audio, bos, prompt, input, pad]
             encoder_outs_pad = F.pad(encoder_out, (0, 0, 0, token_num - l, 0, 0), value=0.0)
-            inputs_embeds = encoder_outs_pad * audio_mask[:, :, None] + inputs_embeds * (~audio_mask[:, :, None])
+            inputs_embeds = encoder_outs_pad * audio_mask[:, :, None] + inputs_embeds * (1.0-audio_mask[:, :, None])
 
         model_outputs = self.llm(inputs_embeds=inputs_embeds, attention_mask=attention_mask, labels=labels_ids)
         loss = model_outputs.loss
@@ -216,9 +216,12 @@ class LLMASR(nn.Module):
     def encode(
         self, speech: torch.Tensor, speech_lengths: torch.Tensor, **kwargs,
     ):
-    
-        batch = {"mel": speech}
-        encoder_out, encoder_out_lens = self.audio_encoder.encoder(**batch)
+        speech = speech.permute(0, 2, 1)
+        res = self.audio_encoder(speech)
+        if len(res) > 1:
+            encoder_out, encoder_out_lens = res[0], res[1]
+        else:
+            encoder_out, encoder_out_lens = res, speech_lengths
         return encoder_out, encoder_out_lens
     
     def inference(self,

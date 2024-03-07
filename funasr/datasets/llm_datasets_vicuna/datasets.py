@@ -112,7 +112,7 @@ class AudioLLMVicunaDataset(torch.utils.data.Dataset):
         labels_ids[~label_mask] = self.IGNORE_INDEX  # [-100, -100, -100, answer, eos]
         
         # audio_mask for input_ids
-        audio_mask = [1]*audio_pseudo + [0]*input_ids_length
+        audio_mask = [1]*audio_pseudo_length + [0]*input_ids_length
         audio_mask = torch.tensor(audio_mask, dtype=torch.float32)
         
         ids = self.tokenizer.encode(target)  # token ids is different from labels_ids
