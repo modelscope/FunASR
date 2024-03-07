@@ -38,7 +38,7 @@ torchrun \
 --config-name "${config}" \
 ++train_data_set_list="${train_data}" \
 ++valid_data_set_list="${val_data}" \
-++dataset_conf.batch_size=8 \
+++dataset_conf.batch_size=4 \
 ++dataset_conf.num_workers=4 \
 ++train_conf.max_epoch=15 \
 ++optim_conf.lr=0.0001 \
