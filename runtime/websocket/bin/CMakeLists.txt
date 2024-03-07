@@ -9,7 +9,7 @@ if(WIN32)
   add_definitions(-D_WEBSOCKETPP_CPP11_TYPE_TRAITS_)
   add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/bigobj>")
   add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
-  SET(RELATION_SOURCE "../../onnxruntime/src/audio.cpp" "../../onnxruntime/src/resample.cpp" "../../onnxruntime/src/util.cpp" "../../onnxruntime/src/alignedmem.cpp" "../../onnxruntime/src/encode_converter.cpp")
+  SET(RELATION_SOURCE "../../onnxruntime/src/resample.cpp" "../../onnxruntime/src/util.cpp" "../../onnxruntime/src/alignedmem.cpp" "../../onnxruntime/src/encode_converter.cpp")
 endif()
 
 
