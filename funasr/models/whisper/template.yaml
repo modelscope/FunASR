@@ -11,29 +11,28 @@ model_conf:
     lsm_weight: 0.1
     length_normalized_loss: true
     hub: funasr # openai
-    init_param_path: null # large-v2 or large-v3 if hub == "openai"
 
 
 
 # only use for hub == funasr,
-#  if hub == openai, whisper_dims is automaticall download
-whisper_dims:
-    'n_mels': 80
-    'n_vocab': 51865
-    'n_audio_ctx': 1500
-    'n_audio_state': 1280
-    'n_audio_head': 20
-    'n_audio_layer': 32
-    'n_text_ctx': 448
-    'n_text_state': 1280
-    'n_text_head': 20
-    'n_text_layer': 32
+#  if hub == openai, dims is automaticall download
+dims:
+    n_mels: 128
+    n_vocab: 51866
+    n_audio_ctx: 1500
+    n_audio_state: 1280
+    n_audio_head: 20
+    n_audio_layer: 32
+    n_text_ctx: 448
+    n_text_state: 1280
+    n_text_head: 20
+    n_text_layer: 32
 
 # frontend related
 frontend: WhisperFrontend
 frontend_conf:
     fs: 16000
-    n_mels: 80
+    n_mels: ${dims.n_mels}
     do_pad_trim: true
 
 tokenizer: WhisperTokenizer
@@ -41,6 +40,6 @@ tokenizer_conf:
   language: null
   task: transcribe
   is_multilingual: true
-  num_languages: 99
+  num_languages: 100
 
-scope_map: ['none', "model."]
+scope_map: [none, "model."]
