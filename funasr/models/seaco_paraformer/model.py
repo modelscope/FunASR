@@ -175,11 +175,7 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
         encoder_out_mask = (~make_pad_mask(encoder_out_lens, maxlen=encoder_out.size(1))[:, None, :]).to(
             encoder_out.device)
         predictor_outs = self.predictor(encoder_out, None, encoder_out_mask, ignore_id=self.ignore_id)
-        if len(predictor_outs) == 4:
-            pre_acoustic_embeds, pre_token_length, alphas, pre_peak_index = predictor_outs
-        else:
-            pre_acoustic_embeds, pre_token_length, alphas, pre_peak_index, pre_token_length2 = predictor_outs
-        return pre_acoustic_embeds, pre_token_length, alphas, pre_peak_index
+        return predictor_outs[:4]
     
     def _calc_seaco_loss(
             self,
