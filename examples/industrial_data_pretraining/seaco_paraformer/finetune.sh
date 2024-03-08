@@ -33,7 +33,7 @@ torchrun \
 --nproc_per_node ${gpu_num} \
 funasr/bin/train.py \
 ++model="iic/speech_seaco_paraformer_large_asr_nat-zh-cn-16k-common-vocab8404-pytorch" \
-++model_revision="v2.0.5" \
+++model_revision="v2.0.6" \
 ++train_data_set_list="${train_data}" \
 ++valid_data_set_list="${val_data}" \
 ++dataset_conf.batch_size=32 \
