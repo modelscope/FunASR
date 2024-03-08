@@ -27,7 +27,6 @@ from funasr.models.bicif_paraformer.model import BiCifParaformer
 from funasr.losses.label_smoothing_loss import LabelSmoothingLoss
 from funasr.models.transformer.utils.add_sos_eos import add_sos_eos
 from funasr.utils.timestamp_tools import ts_prediction_lfr6_standard
-from funasr.models.bicif_paraformer.cif_predictor import CifPredictorV3
 from funasr.models.transformer.utils.nets_utils import make_pad_mask, pad_list
 from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
 
@@ -100,6 +99,7 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
         )
         self.train_decoder = kwargs.get("train_decoder", False)
         self.NO_BIAS = kwargs.get("NO_BIAS", 8377)
+        self.predictor_name = kwargs.get("predictor")
         
     def forward(
         self,
@@ -176,7 +176,7 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
         encoder_out_mask = (~make_pad_mask(encoder_out_lens, maxlen=encoder_out.size(1))[:, None, :]).to(
             encoder_out.device)
         
-        if isinstance(self.predictor, CifPredictorV3):
+        if self.predictor_name == 'CifPredictorV3':
             pre_acoustic_embeds, pre_token_length, alphas, pre_peak_index, _ = self.predictor(encoder_out,
                                                                                                 None,
                                                                                                 encoder_out_mask,
@@ -364,7 +364,7 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
                                                    hw_list=self.hotword_list)
 
         # decoder_out, _ = decoder_outs[0], decoder_outs[1]
-        if isinstance(self.predictor, CifPredictorV3):
+        if self.predictor_name == "CifPredictorV3":
             _, _, us_alphas, us_peaks = self.calc_predictor_timestamp(encoder_out, encoder_out_lens,
                                                                     pre_token_length)
         else:
