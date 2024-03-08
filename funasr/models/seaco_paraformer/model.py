@@ -27,10 +27,11 @@ from funasr.models.bicif_paraformer.model import BiCifParaformer
 from funasr.losses.label_smoothing_loss import LabelSmoothingLoss
 from funasr.models.transformer.utils.add_sos_eos import add_sos_eos
 from funasr.utils.timestamp_tools import ts_prediction_lfr6_standard
+from funasr.models.bicif_paraformer.cif_predictor import CifPredictorV3
 from funasr.models.transformer.utils.nets_utils import make_pad_mask, pad_list
 from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
 
-import pdb
+
 if LooseVersion(torch.__version__) >= LooseVersion("1.6.0"):
     from torch.cuda.amp import autocast
 else:
@@ -170,6 +171,22 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
     def _merge(self, cif_attended, dec_attended):
         return cif_attended + dec_attended
     
+    def calc_predictor(self, encoder_out, encoder_out_lens):
+        
+        encoder_out_mask = (~make_pad_mask(encoder_out_lens, maxlen=encoder_out.size(1))[:, None, :]).to(
+            encoder_out.device)
+        
+        if isinstance(self.predictor, CifPredictorV3):
+            pre_acoustic_embeds, pre_token_length, alphas, pre_peak_index, _ = self.predictor(encoder_out,
+                                                                                                None,
+                                                                                                encoder_out_mask,
+                                                                                                ignore_id=self.ignore_id)
+        else:
+            pre_acoustic_embeds, pre_token_length, alphas, pre_peak_index = self.predictor(encoder_out, None,
+                                                                                        encoder_out_mask,
+                                                                                        ignore_id=self.ignore_id)
+        return pre_acoustic_embeds, pre_token_length, alphas, pre_peak_index
+    
     def _calc_seaco_loss(
             self,
             encoder_out: torch.Tensor,
@@ -248,7 +265,7 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
             def _merge_res(dec_output, dha_output):
                 lmbd = torch.Tensor([seaco_weight] * dha_output.shape[0])
                 dha_ids = dha_output.max(-1)[-1]# [0]
-                dha_mask = (dha_ids == 8377).int().unsqueeze(-1)
+                dha_mask = (dha_ids == self.NO_BIAS).int().unsqueeze(-1)
                 a = (1 - lmbd) / lmbd
                 b = 1 / lmbd
                 a, b = a.to(dec_output.device), b.to(dec_output.device)
@@ -347,8 +364,12 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
                                                    hw_list=self.hotword_list)
 
         # decoder_out, _ = decoder_outs[0], decoder_outs[1]
-        _, _, us_alphas, us_peaks = self.calc_predictor_timestamp(encoder_out, encoder_out_lens,
-                                                                  pre_token_length)
+        if isinstance(self.predictor, CifPredictorV3):
+            _, _, us_alphas, us_peaks = self.calc_predictor_timestamp(encoder_out, encoder_out_lens,
+                                                                    pre_token_length)
+        else:
+            us_alphas = None
+            
         results = []
         b, n, d = decoder_out.size()
         for i in range(b):
@@ -393,23 +414,30 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
                     # Change integer-ids to tokens
                     token = tokenizer.ids2tokens(token_int)
                     text = tokenizer.tokens2text(token)
-                    
-                    _, timestamp = ts_prediction_lfr6_standard(us_alphas[i][:encoder_out_lens[i] * 3],
-                                                               us_peaks[i][:encoder_out_lens[i] * 3],
-                                                               copy.copy(token),
-                                                               vad_offset=kwargs.get("begin_time", 0))
-                    
-                    text_postprocessed, time_stamp_postprocessed, word_lists = postprocess_utils.sentence_postprocess(
-                        token, timestamp)
+                    if us_alphas is not None:
+                        _, timestamp = ts_prediction_lfr6_standard(us_alphas[i][:encoder_out_lens[i] * 3],
+                                                                us_peaks[i][:encoder_out_lens[i] * 3],
+                                                                copy.copy(token),
+                                                                vad_offset=kwargs.get("begin_time", 0))
+                        
+                        text_postprocessed, time_stamp_postprocessed, word_lists = postprocess_utils.sentence_postprocess(
+                            token, timestamp)
 
-                    result_i = {"key": key[i], "text": text_postprocessed,
-                                "timestamp": time_stamp_postprocessed
-                                }
-                    
-                    if ibest_writer is not None:
-                        ibest_writer["token"][key[i]] = " ".join(token)
-                        ibest_writer["timestamp"][key[i]] = time_stamp_postprocessed
-                        ibest_writer["text"][key[i]] = text_postprocessed
+                        result_i = {"key": key[i], "text": text_postprocessed,
+                                    "timestamp": time_stamp_postprocessed
+                                    }
+                        
+                        if ibest_writer is not None:
+                            ibest_writer["token"][key[i]] = " ".join(token)
+                            ibest_writer["timestamp"][key[i]] = time_stamp_postprocessed
+                            ibest_writer["text"][key[i]] = text_postprocessed
+                    else:
+                        text_postprocessed, _ = postprocess_utils.sentence_postprocess(token)
+                        result_i = {"key": key[i], "text": text_postprocessed}
+                        if ibest_writer is not None:
+                            ibest_writer["token"][key[i]] = " ".join(token)
+                            # ibest_writer["timestamp"][key[i]] = time_stamp_postprocessed
+                            ibest_writer["text"][key[i]] = text_postprocessed
                 else:
                     result_i = {"key": key[i], "token_int": token_int}
                 results.append(result_i)
