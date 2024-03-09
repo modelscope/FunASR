@@ -107,7 +107,7 @@ class ContextualParaformer(Paraformer):
 
         hotword_pad = kwargs.get("hotword_pad")
         hotword_lengths = kwargs.get("hotword_lengths")
-        dha_pad = kwargs.get("dha_pad")
+        # dha_pad = kwargs.get("dha_pad")
 
         # 1. Encoder
         encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
