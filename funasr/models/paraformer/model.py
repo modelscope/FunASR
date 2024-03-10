@@ -549,3 +549,80 @@ class Paraformer(torch.nn.Module):
                 
         return results, meta_data
 
+    def export(
+        self,
+        max_seq_len=512,
+        **kwargs,
+    ):
+        onnx = kwargs.get("onnx", True)
+        encoder_class = tables.encoder_classes.get(kwargs["encoder"]+"Export")
+        self.encoder = encoder_class(self.encoder, onnx=onnx)
+        
+        predictor_class = tables.predictor_classes.get(kwargs["predictor"]+"Export")
+        self.predictor = predictor_class(self.predictor, onnx=onnx)
+
+
+        decoder_class = tables.decoder_classes.get(kwargs["decoder"]+"Export")
+        self.decoder = decoder_class(self.decoder, onnx=onnx)
+        
+        from funasr.utils.torch_function import MakePadMask
+        from funasr.utils.torch_function import sequence_mask
+        
+        if onnx:
+            self.make_pad_mask = MakePadMask(max_seq_len, flip=False)
+        else:
+            self.make_pad_mask = sequence_mask(max_seq_len, flip=False)
+
+        self.forward = self._export_forward
+        
+        return self
+
+    def _export_forward(
+        self,
+        speech: torch.Tensor,
+        speech_lengths: torch.Tensor,
+    ):
+        # a. To device
+        batch = {"speech": speech, "speech_lengths": speech_lengths}
+        # batch = to_device(batch, device=self.device)
+    
+        enc, enc_len = self.encoder(**batch)
+        mask = self.make_pad_mask(enc_len)[:, None, :]
+        pre_acoustic_embeds, pre_token_length, alphas, pre_peak_index = self.predictor(enc, mask)
+        pre_token_length = pre_token_length.floor().type(torch.int32)
+    
+        decoder_out, _ = self.decoder(enc, enc_len, pre_acoustic_embeds, pre_token_length)
+        decoder_out = torch.log_softmax(decoder_out, dim=-1)
+        # sample_ids = decoder_out.argmax(dim=-1)
+    
+        return decoder_out, pre_token_length
+
+    def export_dummy_inputs(self):
+        speech = torch.randn(2, 30, 560)
+        speech_lengths = torch.tensor([6, 30], dtype=torch.int32)
+        return (speech, speech_lengths)
+
+
+    def export_input_names(self):
+        return ['speech', 'speech_lengths']
+
+    def export_output_names(self):
+        return ['logits', 'token_num']
+
+    def export_dynamic_axes(self):
+        return {
+            'speech': {
+                0: 'batch_size',
+                1: 'feats_length'
+            },
+            'speech_lengths': {
+                0: 'batch_size',
+            },
+            'logits': {
+                0: 'batch_size',
+                1: 'logits_length'
+            },
+        }
+
+    def export_name(self, ):
+        return "model.onnx"

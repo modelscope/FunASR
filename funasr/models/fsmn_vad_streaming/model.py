@@ -284,6 +284,7 @@ class FsmnVADStreaming(nn.Module):
 		encoder_class = tables.encoder_classes.get(encoder)
 		encoder = encoder_class(**encoder_conf)
 		self.encoder = encoder
+		self.encoder_conf = encoder_conf
 	
 	def ResetDetection(self, cache: dict = {}):
 		cache["stats"].continous_silence_frame_count = 0
@@ -641,6 +642,45 @@ class FsmnVADStreaming(nn.Module):
 			ibest_writer["text"][key[0]] = segments
 		
 		return results, meta_data
+	
+	def export(self, **kwargs):
+		self.forward = self._export_forward
+		
+		return self
+		
+	def _export_forward(self, feats: torch.Tensor, *args, **kwargs):
+		scores, out_caches = self.encoder.export_forward(feats, *args)
+		return scores, out_caches
+	
+	def export_dummy_inputs(self, data_in=None, frame=30):
+		if data_in is None:
+			speech = torch.randn(1, frame, self.encoder_conf.get("input_dim"))
+		else:
+			speech = None # Undo
+		
+		cache_frames = self.encoder_conf.get("lorder") + self.encoder_conf.get("rorder") - 1
+		in_cache0 = torch.randn(1, self.encoder_conf.get("proj_dim"), cache_frames, 1)
+		in_cache1 = torch.randn(1, self.encoder_conf.get("proj_dim"), cache_frames, 1)
+		in_cache2 = torch.randn(1, self.encoder_conf.get("proj_dim"), cache_frames, 1)
+		in_cache3 = torch.randn(1, self.encoder_conf.get("proj_dim"), cache_frames, 1)
+		
+		return (speech, in_cache0, in_cache1, in_cache2, in_cache3)
+	
+	def export_input_names(self):
+		return ['speech', 'in_cache0', 'in_cache1', 'in_cache2', 'in_cache3']
+	
+	def export_output_names(self):
+		return ['logits', 'out_cache0', 'out_cache1', 'out_cache2', 'out_cache3']
+	
+	def export_dynamic_axes(self):
+		return {
+			'speech': {
+				1: 'feats_length'
+			},
+		}
+	
+	def export_name(self, ):
+		return "model.onnx"
 	
 	def DetectCommonFrames(self, cache: dict = {}) -> int:
 		if cache["stats"].vad_state_machine == VadStateMachine.kVadInStateEndPointDetected:

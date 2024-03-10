@@ -14,6 +14,7 @@ import os.path
 import numpy as np
 from tqdm import tqdm
 
+from funasr.utils.misc import deep_update
 from funasr.register import tables
 from funasr.utils.load_utils import load_bytes
 from funasr.download.file import download_from_url
@@ -23,12 +24,13 @@ from funasr.utils.vad_utils import slice_padding_audio_samples
 from funasr.utils.load_utils import load_audio_text_image_video
 from funasr.train_utils.set_all_random_seed import set_all_random_seed
 from funasr.train_utils.load_pretrained_model import load_pretrained_model
-from funasr.models.campplus.utils import sv_chunk, postprocess, distribute_spk
+from funasr.utils import export_utils
 try:
+    from funasr.models.campplus.utils import sv_chunk, postprocess, distribute_spk
     from funasr.models.campplus.cluster_backend import ClusterBackend
 except:
     print("If you want to use the speaker diarization, please `pip install hdbscan`")
-import pdb
+
 
 def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
     """
@@ -41,7 +43,7 @@ def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
     """
     data_list = []
     key_list = []
-    filelist = [".scp", ".txt", ".json", ".jsonl"]
+    filelist = [".scp", ".txt", ".json", ".jsonl", ".text"]
     
     chars = string.ascii_letters + string.digits
     if isinstance(data_in, str) and data_in.startswith('http'): # url
@@ -98,7 +100,9 @@ class AutoModel:
     def __init__(self, **kwargs):
         if not kwargs.get("disable_log", True):
             tables.print()
-        
+        if kwargs.get("export_model", False):
+            os.environ['EXPORTING_MODEL'] = 'TRUE'
+            
         model, kwargs = self.build_model(**kwargs)
         
         # if vad_model is not None, build vad model else None
@@ -203,7 +207,7 @@ class AutoModel:
     
     def __call__(self, *args, **cfg):
         kwargs = self.kwargs
-        kwargs.update(cfg)
+        deep_update(kwargs, cfg)
         res = self.model(*args, kwargs)
         return res
 
@@ -216,7 +220,7 @@ class AutoModel:
         
     def inference(self, input, input_len=None, model=None, kwargs=None, key=None, **cfg):
         kwargs = self.kwargs if kwargs is None else kwargs
-        kwargs.update(cfg)
+        deep_update(kwargs, cfg)
         model = self.model if model is None else model
         model.eval()
 
@@ -279,7 +283,7 @@ class AutoModel:
     def inference_with_vad(self, input, input_len=None, **cfg):
         kwargs = self.kwargs
         # step.1: compute the vad model
-        self.vad_kwargs.update(cfg)
+        deep_update(self.vad_kwargs, cfg)
         beg_vad = time.time()
         res = self.inference(input, input_len=input_len, model=self.vad_model, kwargs=self.vad_kwargs, **cfg)
         end_vad = time.time()
@@ -287,7 +291,7 @@ class AutoModel:
 
         # step.2 compute asr model
         model = self.model
-        kwargs.update(cfg)
+        deep_update(kwargs, cfg)
         batch_size = int(kwargs.get("batch_size_s", 300))*1000
         batch_size_threshold_ms = int(kwargs.get("batch_size_threshold_s", 60))*1000
         kwargs["batch_size"] = batch_size
@@ -399,7 +403,7 @@ class AutoModel:
                     if return_raw_text:
                         result['raw_text'] = ''
                 else:
-                    self.punc_kwargs.update(cfg)
+                    deep_update(self.punc_kwargs, cfg)
                     punc_res = self.inference(result["text"], model=self.punc_model, kwargs=self.punc_kwargs, **cfg)
                     raw_text = copy.copy(result["text"])
                     if return_raw_text: result['raw_text'] = raw_text
@@ -467,3 +471,35 @@ class AutoModel:
         #                      f"time_escape_all: {time_escape_total_all_samples:0.3f}")
         return results_ret_list
 
+    def export(self, input=None,
+               type : str = "onnx",
+               quantize: bool = False,
+               fallback_num: int = 5,
+               calib_num: int = 100,
+               opset_version: int = 14,
+               **cfg):
+        os.environ['EXPORTING_MODEL'] = 'TRUE'
+        kwargs = self.kwargs
+        deep_update(kwargs, cfg)
+        del kwargs["model"]
+        model = self.model
+        model.eval()
+
+        batch_size = 1
+
+        key_list, data_list = prepare_data_iterator(input, input_len=None, data_type=kwargs.get("data_type", None), key=None)
+
+        with torch.no_grad():
+            
+            if type == "onnx":
+                export_dir = export_utils.export_onnx(
+                                        model=model,
+                                        data_in=data_list,
+                                        **kwargs)
+            else:
+                export_dir = export_utils.export_torchscripts(
+                                        model=model,
+                                        data_in=data_list,
+                                        **kwargs)
+
+        return export_dir
