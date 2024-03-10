@@ -60,7 +60,7 @@ class QwenAudioWarp(nn.Module):
         inputs = self.tokenizer(query, return_tensors='pt', audio_info=audio_info)
         inputs = inputs.to(self.model.device)
         pred = self.model.generate(**inputs, audio_info=audio_info)
-        response = tokenizer.decode(pred.cpu()[0], skip_special_tokens=False, audio_info=audio_info)
+        response = self.tokenizer.decode(pred.cpu()[0], skip_special_tokens=False, audio_info=audio_info)
 
         results = []
         result_i = {"key": key[0], "text": response}

@@ -18,7 +18,7 @@ from funasr.register import tables
 
 
 @tables.register("preprocessor_classes", "TextPreprocessRemovePunctuation")
-class TextPreprocessSegDict(nn.Module):
+class TextPreprocessRemovePunctuation(nn.Module):
 	def __init__(self,
 	             **kwargs):
 		super().__init__()
