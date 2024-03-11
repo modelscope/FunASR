@@ -638,6 +638,7 @@ class ParaformerSANMDecoderExport(torch.nn.Module):
         from funasr.models.sanm.attention import MultiHeadedAttentionSANMDecoderExport
         from funasr.models.sanm.attention import MultiHeadedAttentionCrossAttExport
         
+        
         for i, d in enumerate(self.model.decoders):
             if isinstance(d.self_attn, MultiHeadedAttentionSANMDecoder):
                 d.self_attn = MultiHeadedAttentionSANMDecoderExport(d.self_attn)

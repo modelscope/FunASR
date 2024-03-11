@@ -554,6 +554,7 @@ class Paraformer(torch.nn.Module):
         max_seq_len=512,
         **kwargs,
     ):
+        
         is_onnx = kwargs.get("type", "onnx") == "onnx"
         encoder_class = tables.encoder_classes.get(kwargs["encoder"]+"Export")
         self.encoder = encoder_class(self.encoder, onnx=is_onnx)
@@ -567,6 +568,7 @@ class Paraformer(torch.nn.Module):
         
         from funasr.utils.torch_function import MakePadMask
         from funasr.utils.torch_function import sequence_mask
+        
         
         if is_onnx:
             self.make_pad_mask = MakePadMask(max_seq_len, flip=False)

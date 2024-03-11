@@ -238,6 +238,7 @@ class FSMN(nn.Module):
 
         return x7
 
+
 @tables.register("encoder_classes", "FSMNExport")
 class FSMNExport(nn.Module):
     def __init__(
