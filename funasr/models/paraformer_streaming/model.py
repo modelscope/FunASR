@@ -587,7 +587,6 @@ class ParaformerStreaming(Paraformer):
         else:
             self.make_pad_mask = sequence_mask(max_seq_len, flip=False)
     
-        self.forward = self._export_forward
 
         import copy
         import types
