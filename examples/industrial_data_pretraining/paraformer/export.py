@@ -8,21 +8,18 @@
 
 
 from funasr import AutoModel
-wav_file = "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/vad_example.wav"
 
 model = AutoModel(model="iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch",
                   model_revision="v2.0.4")
 
-res = model.export(input=wav_file, type="onnx", quantize=False)
+res = model.export(type="onnx", quantize=False)
 print(res)
 
 
 # method2, inference from local path
 from funasr import AutoModel
 
-wav_file = "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/vad_example.wav"
-
 model = AutoModel(model="/Users/zhifu/.cache/modelscope/hub/iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch")
 
-res = model.export(input=wav_file, type="onnx", quantize=False)
+res = model.export(type="onnx", quantize=False)
 print(res)

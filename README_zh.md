@@ -210,6 +210,21 @@ print(res)
 ```
 更多详细用法（[示例](https://github.com/alibaba-damo-academy/FunASR/tree/main/examples/industrial_data_pretraining)）
 
+## 导出ONNX
+### 从命令行导出
+```shell
+funasr-export ++model=paraformer ++quantize=false
+```
+
+### 从python指令导出
+```python
+from funasr import AutoModel
+
+model = AutoModel(model="paraformer")
+
+res = model.export(quantize=False)
+```
+
 
 <a name="服务部署"></a>
 ## 服务部署

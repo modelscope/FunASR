@@ -1,6 +1,8 @@
 # Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
 #  MIT License  (https://opensource.org/licenses/MIT)
 
+# To install requirements: pip3 install -U openai-whisper
+
 # method1, inference from model hub
 
 # for more input type, please ref to readme.md

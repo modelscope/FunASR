@@ -6,7 +6,7 @@ import os.path
 from pathlib import Path
 from typing import List, Union, Tuple
 import numpy as np
-
+import json
 from .utils.utils import (ONNXRuntimeError,
                           OrtInferSession, get_logger,
                           read_yaml)
@@ -48,24 +48,23 @@ class CT_Transformer():
         if not os.path.exists(model_file):
             print(".onnx is not exist, begin to export onnx")
             try:
-                from funasr.export.export_model import ModelExport
+                from funasr import AutoModel
             except:
                 raise "You are exporting onnx, please install funasr and try it again. To install funasr, you could:\n" \
                       "\npip3 install -U funasr\n" \
                       "For the users in China, you could install with the command:\n" \
                       "\npip3 install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple"
-            export_model = ModelExport(
-                cache_dir=cache_dir,
-                onnx=True,
-                device="cpu",
-                quant=quantize,
-            )
-            export_model.export(model_dir)
+
+            model = AutoModel(model=cache_dir)
+            model_dir = model.export(type="onnx", quantize=quantize, device="cpu")
             
         config_file = os.path.join(model_dir, 'punc.yaml')
         config = read_yaml(config_file)
+        token_list = os.path.join(model_dir, 'tokens.json')
+        with open(token_list, 'r', encoding='utf-8') as f:
+            token_list = json.load(f)
 
-        self.converter = TokenIDConverter(config['token_list'])
+        self.converter = TokenIDConverter(token_list)
         self.ort_infer = OrtInferSession(model_file, device_id, intra_op_num_threads=intra_op_num_threads)
         self.batch_size = 1
         self.punc_list = config['punc_list']

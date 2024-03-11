@@ -484,7 +484,7 @@ class EncoderLayerSANMExport(nn.Module):
 
         return x, mask
 
-
+@tables.register("encoder_classes", "SANMEncoderChunkOptExport")
 @tables.register("encoder_classes", "SANMEncoderExport")
 class SANMEncoderExport(nn.Module):
     def __init__(

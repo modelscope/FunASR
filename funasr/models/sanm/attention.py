@@ -831,6 +831,3 @@ class MultiHeadSelfAttention(nn.Module):
         scores = torch.matmul(q_h, k_h.transpose(-2, -1))
         att_outs = self.forward_attention(v_h, scores, mask, mask_att_chunk_encoder)
         return att_outs
-
-
-
