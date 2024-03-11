@@ -48,9 +48,10 @@ def download_from_ms(**kwargs):
             if "file_path_metas" in conf_json:
                 add_file_root_path(model_or_path, conf_json["file_path_metas"], cfg)
             cfg.update(kwargs)
-            config = OmegaConf.load(cfg["config"])
-            kwargs = OmegaConf.merge(config, cfg)
-        kwargs["model"] = config["model"]
+            if "config" in cfg:
+                config = OmegaConf.load(cfg["config"])
+                kwargs = OmegaConf.merge(config, cfg)
+                kwargs["model"] = config["model"]
     elif os.path.exists(os.path.join(model_or_path, "config.yaml")) and os.path.exists(os.path.join(model_or_path, "model.pt")):
         config = OmegaConf.load(os.path.join(model_or_path, "config.yaml"))
         kwargs = OmegaConf.merge(config, kwargs)

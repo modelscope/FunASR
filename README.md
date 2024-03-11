@@ -227,6 +227,21 @@ model = AutoModel(model="paraformer", device="cpu")
 res = model.export(quantize=False)
 ```
 
+### Text ONNX
+```python
+# pip3 install -U funasr-onnx
+from funasr_onnx import Paraformer
+model_dir = "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
+model = Paraformer(model_dir, batch_size=1, quantize=True)
+
+wav_path = ['~/.cache/modelscope/hub/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/example/asr_example.wav']
+
+result = model(wav_path)
+print(result)
+```
+
+More examples ref to [demo](runtime/python/onnxruntime)
+
 ## Deployment Service
 FunASR supports deploying pre-trained or further fine-tuned models for service. Currently, it supports the following types of service deployment:
 - File transcription service, Mandarin, CPU version, done
