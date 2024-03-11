@@ -6,21 +6,18 @@
 # method1, inference from model hub
 
 from funasr import AutoModel
-wav_file = "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_text/punc_example.txt"
 
 model = AutoModel(model="iic/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727",
                   model_revision="v2.0.4")
 
-res = model.export(input=wav_file, type="onnx", quantize=False)
+res = model.export(type="onnx", quantize=False)
 print(res)
 
 
 # method2, inference from local path
 from funasr import AutoModel
 
-wav_file = "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/vad_example.wav"
-
 model = AutoModel(model="/Users/zhifu/.cache/modelscope/hub/iic/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727")
 
-res = model.export(input=wav_file, type="onnx", quantize=False)
+res = model.export(type="onnx", quantize=False)
 print(res)

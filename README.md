@@ -210,7 +210,22 @@ print(res)
 
 More examples ref to [docs](https://github.com/alibaba-damo-academy/FunASR/tree/main/examples/industrial_data_pretraining)
 
-[//]: # (FunASR supports inference and fine-tuning of models trained on industrial datasets of tens of thousands of hours. For more details, please refer to &#40;[modelscope_egs]&#40;https://alibaba-damo-academy.github.io/FunASR/en/modelscope_pipeline/quick_start.html&#41;&#41;. It also supports training and fine-tuning of models on academic standard datasets. For more details, please refer to&#40;[egs]&#40;https://alibaba-damo-academy.github.io/FunASR/en/academic_recipe/asr_recipe.html&#41;&#41;. The models include speech recognition &#40;ASR&#41;, speech activity detection &#40;VAD&#41;, punctuation recovery, language model, speaker verification, speaker separation, and multi-party conversation speech recognition. For a detailed list of models, please refer to the [Model Zoo]&#40;https://github.com/alibaba-damo-academy/FunASR/blob/main/docs/model_zoo/modelscope_models.md&#41;:)
+
+## Export ONNX
+
+### Command-line usage
+```shell
+funasr-export ++model=paraformer ++quantize=false
+```
+
+### python
+```python
+from funasr import AutoModel
+
+model = AutoModel(model="paraformer")
+
+res = model.export(quantize=False)
+```
 
 ## Deployment Service
 FunASR supports deploying pre-trained or further fine-tuned models for service. Currently, it supports the following types of service deployment:

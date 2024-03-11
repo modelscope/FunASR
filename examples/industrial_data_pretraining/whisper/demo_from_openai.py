@@ -3,6 +3,8 @@
 # Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
 #  MIT License  (https://opensource.org/licenses/MIT)
 
+# To install requirements: pip3 install -U openai-whisper
+
 from funasr import AutoModel
 
 # model = AutoModel(model="Whisper-small", hub="openai")

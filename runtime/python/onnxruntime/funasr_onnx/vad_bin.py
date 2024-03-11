@@ -54,19 +54,15 @@ class Fsmn_vad():
 		if not os.path.exists(model_file):
 			print(".onnx is not exist, begin to export onnx")
 			try:
-				from funasr.export.export_model import ModelExport
+				from funasr import AutoModel
 			except:
 				raise "You are exporting onnx, please install funasr and try it again. To install funasr, you could:\n" \
 				      "\npip3 install -U funasr\n" \
 				      "For the users in China, you could install with the command:\n" \
 				      "\npip3 install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple"
-			export_model = ModelExport(
-				cache_dir=cache_dir,
-				onnx=True,
-				device="cpu",
-				quant=quantize,
-			)
-			export_model.export(model_dir)
+			
+			model = AutoModel(model=cache_dir)
+			model_dir = model.export(type="onnx", quantize=quantize, device="cpu")
 		config_file = os.path.join(model_dir, 'vad.yaml')
 		cmvn_file = os.path.join(model_dir, 'vad.mvn')
 		config = read_yaml(config_file)
@@ -222,19 +218,16 @@ class Fsmn_vad_online():
 		if not os.path.exists(model_file):
 			print(".onnx is not exist, begin to export onnx")
 			try:
-				from funasr.export.export_model import ModelExport
+				from funasr import AutoModel
 			except:
 				raise "You are exporting onnx, please install funasr and try it again. To install funasr, you could:\n" \
 				      "\npip3 install -U funasr\n" \
 				      "For the users in China, you could install with the command:\n" \
 				      "\npip3 install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple"
-			export_model = ModelExport(
-				cache_dir=cache_dir,
-				onnx=True,
-				device="cpu",
-				quant=quantize,
-			)
-			export_model.export(model_dir)
+			
+			model = AutoModel(model=cache_dir)
+			model_dir = model.export(type="onnx", quantize=quantize, device="cpu")
+			
 		config_file = os.path.join(model_dir, 'vad.yaml')
 		cmvn_file = os.path.join(model_dir, 'vad.mvn')
 		config = read_yaml(config_file)
