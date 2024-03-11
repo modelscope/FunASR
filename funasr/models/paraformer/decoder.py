@@ -635,8 +635,9 @@ class ParaformerSANMDecoderExport(torch.nn.Module):
         else:
             self.make_pad_mask = sequence_mask(max_seq_len, flip=False)
         
-        from funasr.models.sanm.multihead_att import MultiHeadedAttentionSANMDecoderExport
-        from funasr.models.sanm.multihead_att import MultiHeadedAttentionCrossAttExport
+        from funasr.models.sanm.attention import MultiHeadedAttentionSANMDecoderExport
+        from funasr.models.sanm.attention import MultiHeadedAttentionCrossAttExport
+        
         
         for i, d in enumerate(self.model.decoders):
             if isinstance(d.self_attn, MultiHeadedAttentionSANMDecoder):

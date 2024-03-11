@@ -140,5 +140,6 @@ setup(
     ],
     entry_points={"console_scripts": [
         "funasr = funasr.bin.inference:main_hydra",
+        "funasr-export = funasr.bin.export:main_hydra",
     ]},
 )

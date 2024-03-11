@@ -24,8 +24,9 @@ def main_hydra(cfg: DictConfig):
     if kwargs.get("debug", False):
         import pdb; pdb.set_trace()
 
+
+    model = AutoModel(**kwargs)
     
-    model = AutoModel(export_model=True, **kwargs)
     res = model.export(input=kwargs.get("input", None),
                        type=kwargs.get("type", "onnx"),
                        quantize=kwargs.get("quantize", False),

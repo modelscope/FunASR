@@ -100,9 +100,7 @@ class AutoModel:
     def __init__(self, **kwargs):
         if not kwargs.get("disable_log", True):
             tables.print()
-        if kwargs.get("export_model", False):
-            os.environ['EXPORTING_MODEL'] = 'TRUE'
-            
+
         model, kwargs = self.build_model(**kwargs)
         
         # if vad_model is not None, build vad model else None
