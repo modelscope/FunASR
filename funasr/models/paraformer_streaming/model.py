@@ -579,14 +579,10 @@ class ParaformerStreaming(Paraformer):
         decoder_class = tables.decoder_classes.get(kwargs["decoder"] + "Export")
         self.decoder = decoder_class(self.decoder, onnx=is_onnx)
     
-        from funasr.utils.torch_function import MakePadMask
         from funasr.utils.torch_function import sequence_mask
-    
-        if is_onnx:
-            self.make_pad_mask = MakePadMask(max_seq_len, flip=False)
-        else:
-            self.make_pad_mask = sequence_mask(max_seq_len, flip=False)
-    
+
+
+        self.make_pad_mask = sequence_mask(max_seq_len, flip=False)
 
         import copy
         import types

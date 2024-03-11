@@ -494,11 +494,19 @@ class AutoModel:
                 export_dir = export_utils.export_onnx(
                                         model=model,
                                         data_in=data_list,
+                                        quantize=quantize,
+                                        fallback_num=fallback_num,
+                                        calib_num=calib_num,
+                                        opset_version=opset_version,
                                         **kwargs)
             else:
                 export_dir = export_utils.export_torchscripts(
                                         model=model,
                                         data_in=data_list,
+                                        quantize=quantize,
+                                        fallback_num=fallback_num,
+                                        calib_num=calib_num,
+                                        opset_version=opset_version,
                                         **kwargs)
 
         return export_dir
