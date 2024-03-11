@@ -99,7 +99,8 @@ class IndexDSJsonlRankFull(torch.utils.data.Dataset):
                     target = data["target"]
                     source_len = data.get("source_len", 1)
                     target_len = data.get("target_len", 0)
-                    
+                    if "aishell" in source:
+                        target = target.replace(" ", "")
                     contents.append({"source": source,
                                      "prompt": prompt,
                                      "target": target,

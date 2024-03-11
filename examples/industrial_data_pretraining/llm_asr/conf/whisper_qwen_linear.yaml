@@ -12,17 +12,16 @@ model_conf:
     length_normalized_loss: true
 
 # encoder
-audio_encoder: iic/Whisper-large-v2 #iic/Whisper-large-v3
+audio_encoder: "/nfs/zhifu.gzf/init_model/Whisper-large-v3" #iic/Whisper-large-v3
 audio_encoder_conf:
     hub: ms
     freeze: true
-    init_param_path: "/nfs/maziyang.mzy/models/vicuna-7b-v1.5"
 
-llm: Vicuna
+llm: Qwen1.5-7b-chat
 llm_conf:
   hub: hf
   freeze: true
-  init_param_path: "/nfs/maziyang.mzy/models/vicuna-7b-v1.5"
+  init_param_path: "/nfs/zhifu.gzf/init_model/qwen/Qwen1___5-7B-Chat"
 
 audio_adaptor: Linear
 audio_adaptor_conf:
@@ -34,7 +33,7 @@ audio_adaptor_conf:
 frontend: WhisperFrontend
 frontend_conf:
     fs: 16000
-    whisper_model: large-v2
+    whisper_model: large-v3
     do_pad_trim: true
     permute: true # true: [bs, frames, dims]; false: [bs, dims, frames]
 
@@ -66,8 +65,9 @@ train_conf:
 optim: adamw
 optim_conf:
    lr: 0.0001
-   weight_decay: 0.000001
-scheduler: warmuplr
+   weight_decay: 0.000000
+
+scheduler: custom_lambdalr
 scheduler_conf:
    warmup_steps: 1000
 
@@ -83,12 +83,12 @@ dataset_conf:
     preprocessor_text: TextPreprocessRemovePunctuation
     audio_adaptor_downsample_rate: ${audio_adaptor_conf.downsample_rate}
     audio_encoder_downsample_rate: 2
-    prompt: "<|startoftranscription|><|zh|><|transcribe|><|zh|><|notimestamps|><|wo_itn|>"
+#    prompt: "<|startoftranscription|><|zh|><|transcribe|><|zh|><|notimestamps|><|wo_itn|>"
 
 
 
 tokenizer: HuggingfaceTokenizer
 tokenizer_conf:
   unk_symbol: <unk>
-  init_param_path: "/nfs/maziyang.mzy/models/vicuna-7b-v1.5"
+  init_param_path: "/nfs/zhifu.gzf/init_model/qwen/Qwen1___5-7B-Chat"
 
