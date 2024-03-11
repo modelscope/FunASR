@@ -155,9 +155,8 @@ class AutoModel:
             device = "cpu"
             kwargs["batch_size"] = 1
         kwargs["device"] = device
-        
-        if kwargs.get("ncpu", 4):
-            torch.set_num_threads(kwargs.get("ncpu"))
+
+        torch.set_num_threads(kwargs.get("ncpu", 4))
         
         # build tokenizer
         tokenizer = kwargs.get("tokenizer", None)
