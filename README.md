@@ -218,7 +218,7 @@ More examples ref to [docs](https://github.com/alibaba-damo-academy/FunASR/tree/
 funasr-export ++model=paraformer ++quantize=false
 ```
 
-### python
+### Python
 ```python
 from funasr import AutoModel
 
