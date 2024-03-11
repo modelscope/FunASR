@@ -216,7 +216,7 @@ print(res)
 funasr-export ++model=paraformer ++quantize=false
 ```
 
-### 从python指令导出
+### 从Python导出
 ```python
 from funasr import AutoModel
 
@@ -225,6 +225,20 @@ model = AutoModel(model="paraformer")
 res = model.export(quantize=False)
 ```
 
+### 测试ONNX
+```python
+# pip3 install -U funasr-onnx
+from funasr_onnx import Paraformer
+model_dir = "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
+model = Paraformer(model_dir, batch_size=1, quantize=True)
+
+wav_path = ['~/.cache/modelscope/hub/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/example/asr_example.wav']
+
+result = model(wav_path)
+print(result)
+```
+
+更多例子请参考 [样例](runtime/python/onnxruntime)
 
 <a name="服务部署"></a>
 ## 服务部署
