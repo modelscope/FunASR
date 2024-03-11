@@ -647,7 +647,7 @@ class FsmnVADStreaming(nn.Module):
 		is_onnx = kwargs.get("type", "onnx") == "onnx"
 		encoder_class = tables.encoder_classes.get(kwargs["encoder"] + "Export")
 		self.encoder = encoder_class(self.encoder, onnx=is_onnx)
-		self.forward = self._export_forward
+		self.forward = self.export_forward
 		
 		return self
 		

@@ -575,7 +575,7 @@ class Paraformer(torch.nn.Module):
         else:
             self.make_pad_mask = sequence_mask(max_seq_len, flip=False)
 
-        self.forward = self._export_forward
+        self.forward = self.export_forward
         
         return self
 

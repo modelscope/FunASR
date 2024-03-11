@@ -587,7 +587,6 @@ class ParaformerStreaming(Paraformer):
         else:
             self.make_pad_mask = sequence_mask(max_seq_len, flip=False)
     
-        self.forward = self._export_forward
 
         import copy
         import types
@@ -595,7 +594,7 @@ class ParaformerStreaming(Paraformer):
         decoder_model = copy.copy(self)
 
         # encoder
-        encoder_model.forward = types.MethodType(ParaformerStreaming._export_encoder_forward, encoder_model)
+        encoder_model.forward = types.MethodType(ParaformerStreaming.export_encoder_forward, encoder_model)
         encoder_model.export_dummy_inputs = types.MethodType(ParaformerStreaming.export_encoder_dummy_inputs, encoder_model)
         encoder_model.export_input_names = types.MethodType(ParaformerStreaming.export_encoder_input_names, encoder_model)
         encoder_model.export_output_names = types.MethodType(ParaformerStreaming.export_encoder_output_names, encoder_model)
@@ -603,7 +602,7 @@ class ParaformerStreaming(Paraformer):
         encoder_model.export_name = types.MethodType(ParaformerStreaming.export_encoder_name, encoder_model)
         
         # decoder
-        decoder_model.forward = types.MethodType(ParaformerStreaming._export_decoder_forward, decoder_model)
+        decoder_model.forward = types.MethodType(ParaformerStreaming.export_decoder_forward, decoder_model)
         decoder_model.export_dummy_inputs = types.MethodType(ParaformerStreaming.export_decoder_dummy_inputs, decoder_model)
         decoder_model.export_input_names = types.MethodType(ParaformerStreaming.export_decoder_input_names, decoder_model)
         decoder_model.export_output_names = types.MethodType(ParaformerStreaming.export_decoder_output_names, decoder_model)
