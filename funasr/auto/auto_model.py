@@ -157,6 +157,7 @@ class AutoModel:
         kwargs["device"] = device
 
         torch.set_num_threads(kwargs.get("ncpu", 4))
+
         
         # build tokenizer
         tokenizer = kwargs.get("tokenizer", None)
