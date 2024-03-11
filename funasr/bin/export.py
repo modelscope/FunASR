@@ -24,7 +24,8 @@ def main_hydra(cfg: DictConfig):
     if kwargs.get("debug", False):
         import pdb; pdb.set_trace()
 
-
+    if "device" not in kwargs:
+        kwargs["device"] = "cpu"
     model = AutoModel(**kwargs)
     
     res = model.export(input=kwargs.get("input", None),

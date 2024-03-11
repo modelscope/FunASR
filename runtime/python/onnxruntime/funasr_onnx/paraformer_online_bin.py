@@ -55,8 +55,8 @@ class Paraformer():
                       "For the users in China, you could install with the command:\n" \
                       "\npip3 install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple"
 
-            model = AutoModel(model=cache_dir)
-            model_dir = model.export(type="onnx", quantize=quantize, device="cpu")
+            model = AutoModel(model=model_dir)
+            model_dir = model.export(type="onnx", quantize=quantize)
 
         config_file = os.path.join(model_dir, 'config.yaml')
         cmvn_file = os.path.join(model_dir, 'am.mvn')

@@ -186,7 +186,7 @@ class CTTransformerStreaming(CTTransformer):
     
         return self
 
-    def _export_forward(self, inputs: torch.Tensor,
+    def export_forward(self, inputs: torch.Tensor,
                 text_lengths: torch.Tensor,
                 vad_indexes: torch.Tensor,
                 sub_masks: torch.Tensor,

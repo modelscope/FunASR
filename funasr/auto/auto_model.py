@@ -156,7 +156,7 @@ class AutoModel:
             kwargs["batch_size"] = 1
         kwargs["device"] = device
         
-        if kwargs.get("ncpu", None):
+        if kwargs.get("ncpu", 4):
             torch.set_num_threads(kwargs.get("ncpu"))
         
         # build tokenizer
@@ -476,11 +476,13 @@ class AutoModel:
                calib_num: int = 100,
                opset_version: int = 14,
                **cfg):
-        os.environ['EXPORTING_MODEL'] = 'TRUE'
+    
+        device = cfg.get("device", "cpu")
+        model = self.model.to(device=device)
         kwargs = self.kwargs
         deep_update(kwargs, cfg)
+        kwargs["device"] = device
         del kwargs["model"]
-        model = self.model
         model.eval()
 
         batch_size = 1

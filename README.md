@@ -215,14 +215,14 @@ More examples ref to [docs](https://github.com/alibaba-damo-academy/FunASR/tree/
 
 ### Command-line usage
 ```shell
-funasr-export ++model=paraformer ++quantize=false
+funasr-export ++model=paraformer ++quantize=false ++device=cpu
 ```
 
-### python
+### Python
 ```python
 from funasr import AutoModel
 
-model = AutoModel(model="paraformer")
+model = AutoModel(model="paraformer", device="cpu")
 
 res = model.export(quantize=False)
 ```

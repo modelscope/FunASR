@@ -12,7 +12,8 @@ python -m funasr.bin.export \
 ++model=${model} \
 ++model_revision=${model_revision} \
 ++type="onnx" \
-++quantize=false
+++quantize=false \
+++device="cpu"
 
 # method2, inference from local path
 model="/Users/zhifu/.cache/modelscope/hub/iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
@@ -20,4 +21,5 @@ model="/Users/zhifu/.cache/modelscope/hub/iic/speech_paraformer-large_asr_nat-zh
 python -m funasr.bin.export \
 ++model=${model} \
 ++type="onnx" \
-++quantize=false
+++quantize=false \
+++device="cpu"

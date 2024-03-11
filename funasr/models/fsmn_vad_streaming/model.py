@@ -651,7 +651,7 @@ class FsmnVADStreaming(nn.Module):
 		
 		return self
 		
-	def _export_forward(self, feats: torch.Tensor, *args, **kwargs):
+	def export_forward(self, feats: torch.Tensor, *args, **kwargs):
 		
 		scores, out_caches = self.encoder(feats, *args)
 		
