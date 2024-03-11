@@ -566,12 +566,11 @@ class Paraformer(torch.nn.Module):
         decoder_class = tables.decoder_classes.get(kwargs["decoder"]+"Export")
         self.decoder = decoder_class(self.decoder, onnx=is_onnx)
         
-        from funasr.utils.torch_function import MakePadMask
         from funasr.utils.torch_function import sequence_mask
 
 
         self.make_pad_mask = sequence_mask(max_seq_len, flip=False)
-
+        
         self.forward = self.export_forward
         
         return self

@@ -416,7 +416,6 @@ class SANMVadEncoderExport(torch.nn.Module):
         self.model = model
         self._output_size = model._output_size
         
-        from funasr.utils.torch_function import MakePadMask
         from funasr.utils.torch_function import sequence_mask
 
 

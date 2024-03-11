@@ -628,7 +628,7 @@ class ParaformerSANMDecoderExport(torch.nn.Module):
                  ):
         super().__init__()
         # self.embed = model.embed #Embedding(model.embed, max_seq_len)
-        from funasr.utils.torch_function import MakePadMask
+
         from funasr.utils.torch_function import sequence_mask
         
         self.model = model
@@ -761,7 +761,7 @@ class ParaformerSANMDecoderOnlineExport(torch.nn.Module):
         super().__init__()
         # self.embed = model.embed #Embedding(model.embed, max_seq_len)
         self.model = model
-        from funasr.utils.torch_function import MakePadMask
+
         from funasr.utils.torch_function import sequence_mask
 
         self.model = model
@@ -1032,7 +1032,7 @@ class ParaformerDecoderSANExport(torch.nn.Module):
         # self.embed = model.embed #Embedding(model.embed, max_seq_len)
         self.model = model
 
-        from funasr.utils.torch_function import MakePadMask
+
         from funasr.utils.torch_function import sequence_mask
 
         self.model = model

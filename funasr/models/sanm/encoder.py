@@ -503,7 +503,7 @@ class SANMEncoderExport(nn.Module):
         self.feats_dim = feats_dim
         self._output_size = model._output_size
 
-        from funasr.utils.torch_function import MakePadMask
+
         from funasr.utils.torch_function import sequence_mask
 
 
