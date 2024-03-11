@@ -18,7 +18,6 @@ from funasr.utils.load_utils import load_audio_text_image_video
 from funasr.models.transformer.utils.nets_utils import make_pad_mask
 from funasr.models.ct_transformer.utils import split_to_mini_sentence, split_words
 
-
 if LooseVersion(torch.__version__) >= LooseVersion("1.6.0"):
     from torch.cuda.amp import autocast
 else:
@@ -378,7 +377,7 @@ class CTTransformer(torch.nn.Module):
         
         return self
 
-    def _export_forward(self, inputs: torch.Tensor, text_lengths: torch.Tensor):
+    def export_forward(self, inputs: torch.Tensor, text_lengths: torch.Tensor):
         """Compute loss value from buffer sequences.
 
         Args:

@@ -12,7 +12,8 @@ python -m funasr.bin.export \
 ++model=${model} \
 ++model_revision=${model_revision} \
 ++type="onnx" \
-++quantize=false
+++quantize=false \
+++device="cpu"
 
 
 # method2, inference from local path
@@ -21,4 +22,5 @@ model="/Users/zhifu/.cache/modelscope/hub/iic/punc_ct-transformer_zh-cn-common-v
 python -m funasr.bin.export \
 ++model=${model} \
 ++type="onnx" \
-++quantize=false
+++quantize=false \
+++device="cpu"

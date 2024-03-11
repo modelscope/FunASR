@@ -23,7 +23,7 @@ from funasr.models.transformer.utils.add_sos_eos import add_sos_eos
 from funasr.utils.timestamp_tools import ts_prediction_lfr6_standard
 from funasr.models.transformer.utils.nets_utils import make_pad_mask, pad_list
 from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
-
+from funasr.train_utils.device_funcs import to_device
 
 if LooseVersion(torch.__version__) >= LooseVersion("1.6.0"):
     from torch.cuda.amp import autocast
@@ -348,6 +348,7 @@ class BiCifParaformer(Paraformer):
         max_seq_len=512,
         **kwargs,
     ):
+        self.device = kwargs.get("device")
         is_onnx = kwargs.get("type", "onnx") == "onnx"
         encoder_class = tables.encoder_classes.get(kwargs["encoder"] + "Export")
         self.encoder = encoder_class(self.encoder, onnx=is_onnx)
@@ -370,14 +371,14 @@ class BiCifParaformer(Paraformer):
     
         return self
 
-    def _export_forward(
+    def export_forward(
         self,
         speech: torch.Tensor,
         speech_lengths: torch.Tensor,
     ):
         # a. To device
         batch = {"speech": speech, "speech_lengths": speech_lengths}
-        # batch = to_device(batch, device=self.device)
+        batch = to_device(batch, device=self.device)
     
         enc, enc_len = self.encoder(**batch)
         mask = self.make_pad_mask(enc_len)[:, None, :]

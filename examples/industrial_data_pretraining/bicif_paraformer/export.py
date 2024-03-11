@@ -8,7 +8,7 @@
 from funasr import AutoModel
 
 model = AutoModel(model="damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch",
-                  model_revision="v2.0.4")
+                  model_revision="v2.0.4", device="cpu")
 
 res = model.export(type="onnx", quantize=False)
 print(res)
@@ -17,7 +17,7 @@ print(res)
 # method2, inference from local path
 from funasr import AutoModel
 
-model = AutoModel(model="/Users/zhifu/.cache/modelscope/hub/iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch")
+model = AutoModel(model="/Users/zhifu/.cache/modelscope/hub/iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch", device="cpu")
 
 res = model.export(type="onnx", quantize=False)
 print(res)
