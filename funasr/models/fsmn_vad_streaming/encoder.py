@@ -194,7 +194,7 @@ class FSMN(nn.Module):
             output_affine_dim: int,
             output_dim: int
     ):
-        super(FSMN, self).__init__()
+        super().__init__()
 
         self.input_dim = input_dim
         self.input_affine_dim = input_affine_dim
@@ -213,12 +213,6 @@ class FSMN(nn.Module):
         self.out_linear2 = AffineTransform(output_affine_dim, output_dim)
         self.softmax = nn.Softmax(dim=-1)
         
-        # export onnx or torchscripts
-        if "EXPORTING_MODEL" in os.environ and os.environ['EXPORTING_MODEL'] == 'TRUE':
-            for i, d in enumerate(self.fsmn):
-                if isinstance(d, BasicBlock):
-                    self.fsmn[i] = BasicBlock_export(d)
-
     def fuse_modules(self):
         pass
 
@@ -244,10 +238,48 @@ class FSMN(nn.Module):
 
         return x7
 
-    def export_forward(
-            self,
-            input: torch.Tensor,
-            *args,
+@tables.register("encoder_classes", "FSMNExport")
+class FSMNExport(nn.Module):
+    def __init__(
+        self, model, **kwargs,
+    ):
+        super().__init__()
+        
+        # self.input_dim = input_dim
+        # self.input_affine_dim = input_affine_dim
+        # self.fsmn_layers = fsmn_layers
+        # self.linear_dim = linear_dim
+        # self.proj_dim = proj_dim
+        # self.output_affine_dim = output_affine_dim
+        # self.output_dim = output_dim
+        #
+        # self.in_linear1 = AffineTransform(input_dim, input_affine_dim)
+        # self.in_linear2 = AffineTransform(input_affine_dim, linear_dim)
+        # self.relu = RectifiedLinear(linear_dim, linear_dim)
+        # self.fsmn = FsmnStack(*[BasicBlock(linear_dim, proj_dim, lorder, rorder, lstride, rstride, i) for i in
+        #                         range(fsmn_layers)])
+        # self.out_linear1 = AffineTransform(linear_dim, output_affine_dim)
+        # self.out_linear2 = AffineTransform(output_affine_dim, output_dim)
+        # self.softmax = nn.Softmax(dim=-1)
+        self.in_linear1 = model.in_linear1
+        self.in_linear2 = model.in_linear2
+        self.relu = model.relu
+        # self.fsmn = model.fsmn
+        self.out_linear1 = model.out_linear1
+        self.out_linear2 = model.out_linear2
+        self.softmax = model.softmax
+        self.fsmn = model.fsmn
+        for i, d in enumerate(model.fsmn):
+            if isinstance(d, BasicBlock):
+                self.fsmn[i] = BasicBlock_export(d)
+    
+    def fuse_modules(self):
+        pass
+    
+    def forward(
+        self,
+        input: torch.Tensor,
+        *args,
     ):
         """
         Args:
@@ -255,7 +287,7 @@ class FSMN(nn.Module):
             in_cache: when in_cache is not None, the forward is in streaming. The type of in_cache is a dict, egs,
             {'cache_layer_1': torch.Tensor(B, T1, D)}, T1 is equal to self.lorder. It is {} for the 1st frame
         """
-
+        
         x = self.in_linear1(input)
         x = self.in_linear2(x)
         x = self.relu(x)
@@ -268,8 +300,9 @@ class FSMN(nn.Module):
         x = self.out_linear1(x)
         x = self.out_linear2(x)
         x = self.softmax(x)
-
+        
         return x, out_caches
+
 
 '''
 one deep fsmn layer

@@ -644,12 +644,16 @@ class FsmnVADStreaming(nn.Module):
 		return results, meta_data
 	
 	def export(self, **kwargs):
+		
+		is_onnx = kwargs.get("type", "onnx") == "onnx"
+		encoder_class = tables.encoder_classes.get(kwargs["encoder"] + "Export")
+		self.encoder = encoder_class(self.encoder, onnx=is_onnx)
 		self.forward = self._export_forward
 		
 		return self
 		
 	def _export_forward(self, feats: torch.Tensor, *args, **kwargs):
-		scores, out_caches = self.encoder.export_forward(feats, *args)
+		scores, out_caches = self.encoder(feats, *args)
 		return scores, out_caches
 	
 	def export_dummy_inputs(self, data_in=None, frame=30):

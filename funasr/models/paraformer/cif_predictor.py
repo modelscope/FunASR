@@ -376,7 +376,7 @@ class CifPredictorV2(torch.nn.Module):
         return predictor_alignments.detach(), predictor_alignments_length.detach()
 
 @tables.register("predictor_classes", "CifPredictorV2Export")
-class CifPredictorV2(torch.nn.Module):
+class CifPredictorV2Export(torch.nn.Module):
     def __init__(self, model, **kwargs):
         super().__init__()
         

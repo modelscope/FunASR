@@ -3,7 +3,6 @@ import torch
 
 def export_onnx(model,
                 data_in=None,
-				type: str = "onnx",
 				quantize: bool = False,
 				fallback_num: int = 5,
 				calib_num: int = 100,
@@ -19,7 +18,6 @@ def export_onnx(model,
 		m.eval()
 		_onnx(m,
 		      data_in=data_in,
-		      type=type,
 		      quantize=quantize,
 		      fallback_num=fallback_num,
 		      calib_num=calib_num,
