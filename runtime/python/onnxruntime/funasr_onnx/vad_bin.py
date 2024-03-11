@@ -63,8 +63,8 @@ class Fsmn_vad():
 			
 			model = AutoModel(model=model_dir)
 			model_dir = model.export(type="onnx", quantize=quantize)
-		config_file = os.path.join(model_dir, 'vad.yaml')
-		cmvn_file = os.path.join(model_dir, 'vad.mvn')
+		config_file = os.path.join(model_dir, 'config.yaml')
+		cmvn_file = os.path.join(model_dir, 'am.mvn')
 		config = read_yaml(config_file)
 		
 		self.frontend = WavFrontend(
@@ -73,8 +73,8 @@ class Fsmn_vad():
 		)
 		self.ort_infer = OrtInferSession(model_file, device_id, intra_op_num_threads=intra_op_num_threads)
 		self.batch_size = batch_size
-		self.vad_scorer = E2EVadModel(config["vad_post_conf"])
-		self.max_end_sil = max_end_sil if max_end_sil is not None else config["vad_post_conf"]["max_end_silence_time"]
+		self.vad_scorer = E2EVadModel(config["model_conf"])
+		self.max_end_sil = max_end_sil if max_end_sil is not None else config["model_conf"]["max_end_silence_time"]
 		self.encoder_conf = config["encoder_conf"]
 	
 	def prepare_cache(self, in_cache: list = []):
@@ -228,8 +228,8 @@ class Fsmn_vad_online():
 			model = AutoModel(model=model_dir)
 			model_dir = model.export(type="onnx", quantize=quantize)
 			
-		config_file = os.path.join(model_dir, 'vad.yaml')
-		cmvn_file = os.path.join(model_dir, 'vad.mvn')
+		config_file = os.path.join(model_dir, 'config.yaml')
+		cmvn_file = os.path.join(model_dir, 'am.mvn')
 		config = read_yaml(config_file)
 		
 		self.frontend = WavFrontendOnline(
@@ -238,8 +238,8 @@ class Fsmn_vad_online():
 		)
 		self.ort_infer = OrtInferSession(model_file, device_id, intra_op_num_threads=intra_op_num_threads)
 		self.batch_size = batch_size
-		self.vad_scorer = E2EVadModel(config["vad_post_conf"])
-		self.max_end_sil = max_end_sil if max_end_sil is not None else config["vad_post_conf"]["max_end_silence_time"]
+		self.vad_scorer = E2EVadModel(config["model_conf"])
+		self.max_end_sil = max_end_sil if max_end_sil is not None else config["model_conf"]["max_end_silence_time"]
 		self.encoder_conf = config["encoder_conf"]
 	
 	def prepare_cache(self, in_cache: list = []):

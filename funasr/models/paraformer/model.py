@@ -568,12 +568,9 @@ class Paraformer(torch.nn.Module):
         
         from funasr.utils.torch_function import MakePadMask
         from funasr.utils.torch_function import sequence_mask
-        
-        
-        if is_onnx:
-            self.make_pad_mask = MakePadMask(max_seq_len, flip=False)
-        else:
-            self.make_pad_mask = sequence_mask(max_seq_len, flip=False)
+
+
+        self.make_pad_mask = sequence_mask(max_seq_len, flip=False)
 
         self.forward = self.export_forward
         

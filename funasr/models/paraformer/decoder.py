@@ -632,10 +632,8 @@ class ParaformerSANMDecoderExport(torch.nn.Module):
         from funasr.utils.torch_function import sequence_mask
         
         self.model = model
-        if onnx:
-            self.make_pad_mask = MakePadMask(max_seq_len, flip=False)
-        else:
-            self.make_pad_mask = sequence_mask(max_seq_len, flip=False)
+
+        self.make_pad_mask = sequence_mask(max_seq_len, flip=False)
         
         from funasr.models.sanm.attention import MultiHeadedAttentionSANMDecoderExport
         from funasr.models.sanm.attention import MultiHeadedAttentionCrossAttExport
@@ -767,10 +765,8 @@ class ParaformerSANMDecoderOnlineExport(torch.nn.Module):
         from funasr.utils.torch_function import sequence_mask
 
         self.model = model
-        if onnx:
-            self.make_pad_mask = MakePadMask(max_seq_len, flip=False)
-        else:
-            self.make_pad_mask = sequence_mask(max_seq_len, flip=False)
+        
+        self.make_pad_mask = sequence_mask(max_seq_len, flip=False)
 
         from funasr.models.sanm.attention import MultiHeadedAttentionSANMDecoderExport
         from funasr.models.sanm.attention import MultiHeadedAttentionCrossAttExport
@@ -1040,10 +1036,8 @@ class ParaformerDecoderSANExport(torch.nn.Module):
         from funasr.utils.torch_function import sequence_mask
 
         self.model = model
-        if onnx:
-            self.make_pad_mask = MakePadMask(max_seq_len, flip=False)
-        else:
-            self.make_pad_mask = sequence_mask(max_seq_len, flip=False)
+
+        self.make_pad_mask = sequence_mask(max_seq_len, flip=False)
 
 
         from funasr.models.transformer.decoder import DecoderLayerExport

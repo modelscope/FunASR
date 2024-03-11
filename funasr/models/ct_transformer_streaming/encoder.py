@@ -418,11 +418,9 @@ class SANMVadEncoderExport(torch.nn.Module):
         
         from funasr.utils.torch_function import MakePadMask
         from funasr.utils.torch_function import sequence_mask
-        
-        if onnx:
-            self.make_pad_mask = MakePadMask(max_seq_len, flip=False)
-        else:
-            self.make_pad_mask = sequence_mask(max_seq_len, flip=False)
+
+
+        self.make_pad_mask = sequence_mask(max_seq_len, flip=False)
         
         from funasr.models.sanm.attention import MultiHeadedAttentionSANMExport
         
