@@ -4,7 +4,11 @@ about: If you have questions, please first search existing issues and docs
 labels: 'question, needs triage'
 ---
 
+Notice: In order to resolve issues more efficiently, please raise issue following the template.
+（注意：为了更加高效率解决您遇到的问题，请按照模板提问，补充细节）
+
 ## ❓ Questions and Help
+
 
 ### Before asking:
 1. search the issues.
