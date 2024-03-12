@@ -13,7 +13,6 @@ from funasr.models.scama import utils as myutils
 from funasr.models.transformer.utils.repeat import repeat
 from funasr.models.transformer.layer_norm import LayerNorm
 from funasr.models.transformer.embedding import PositionalEncoding
-from funasr.models.seaco_paraformer.model import ContextualEmbedderExport
 from funasr.models.paraformer.decoder import DecoderLayerSANM, ParaformerSANMDecoder
 from funasr.models.sanm.positionwise_feed_forward import PositionwiseFeedForwardDecoderSANM
 from funasr.models.sanm.attention import MultiHeadedAttentionSANMDecoder, MultiHeadedAttentionCrossAtt
@@ -902,12 +901,3 @@ class ContextualParaformerDecoderExport(torch.nn.Module):
 
         return x, ys_in_lens
 
-
-class ContextualEmbedderExport2(ContextualEmbedderExport):
-    def __init__(self,
-                 model,
-                 **kwargs,):
-        super().__init__()
-        self.embedding = model.bias_embed
-        model.bias_encoder.batch_first = False
-        self.bias_encoder = model.bias_encoder

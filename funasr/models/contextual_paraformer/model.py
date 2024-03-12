@@ -27,6 +27,7 @@ from funasr.utils.datadir_writer import DatadirWriter
 from funasr.models.paraformer.search import Hypothesis
 from funasr.train_utils.device_funcs import force_gatherable
 from funasr.models.transformer.utils.add_sos_eos import add_sos_eos
+from funasr.models.seaco_paraformer.model import ContextualEmbedderExport
 from funasr.models.transformer.utils.nets_utils import make_pad_mask, pad_list
 from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
 import pdb
@@ -536,9 +537,8 @@ class ContextualParaformer(Paraformer):
         decoder_class = tables.decoder_classes.get(kwargs["decoder"] + "Export")
         self.decoder = decoder_class(self.decoder, onnx=is_onnx)
         
-        # same architecture of bias encoder with seaco paraformer
-        from funasr.models.seaco_paraformer.model import ContextualEmbedderExport
-        embedder_class = ContextualEmbedderExport
+        # little difference with bias encoder with seaco paraformer
+        embedder_class = ContextualEmbedderExport2
         embedder_model = embedder_class(self, onnx=is_onnx)
     
         from funasr.utils.torch_function import sequence_mask
@@ -615,3 +615,12 @@ class ContextualParaformer(Paraformer):
     def export_backbone_name(self):
         return 'model.onnx'
     
+    
+class ContextualEmbedderExport2(ContextualEmbedderExport):
+    def __init__(self,
+                 model,
+                 **kwargs,):
+        super().__init__()
+        self.embedding = model.bias_embed
+        model.bias_encoder.batch_first = False
+        self.bias_encoder = model.bias_encoder
