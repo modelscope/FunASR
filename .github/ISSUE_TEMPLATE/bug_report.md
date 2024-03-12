@@ -4,6 +4,9 @@ about: Submit a bug report to help us improve
 labels: 'bug, needs triage'
 ---
 
+Notice: In order to resolve issues more efficiently, please raise issue following the template.
+（注意：为了更加高效率解决您遇到的问题，请按照模板提问，补充细节）
+
 ## 🐛 Bug
 
 <!-- A clear and concise description of what the bug is. -->
