@@ -644,49 +644,11 @@ class FsmnVADStreaming(nn.Module):
 		return results, meta_data
 	
 	def export(self, **kwargs):
-		is_onnx = kwargs.get("type", "onnx") == "onnx"
-		encoder_class = tables.encoder_classes.get(kwargs["encoder"] + "Export")
-		self.encoder = encoder_class(self.encoder, onnx=is_onnx)
-		self.forward = self.export_forward
-		
-		return self
-		
-	def export_forward(self, feats: torch.Tensor, *args, **kwargs):
-		
-		scores, out_caches = self.encoder(feats, *args)
-		
-		return scores, out_caches
-	
-	def export_dummy_inputs(self, data_in=None, frame=30):
-		if data_in is None:
-			speech = torch.randn(1, frame, self.encoder_conf.get("input_dim"))
-		else:
-			speech = None # Undo
-		
-		cache_frames = self.encoder_conf.get("lorder") + self.encoder_conf.get("rorder") - 1
-		in_cache0 = torch.randn(1, self.encoder_conf.get("proj_dim"), cache_frames, 1)
-		in_cache1 = torch.randn(1, self.encoder_conf.get("proj_dim"), cache_frames, 1)
-		in_cache2 = torch.randn(1, self.encoder_conf.get("proj_dim"), cache_frames, 1)
-		in_cache3 = torch.randn(1, self.encoder_conf.get("proj_dim"), cache_frames, 1)
-		
-		return (speech, in_cache0, in_cache1, in_cache2, in_cache3)
-	
-	def export_input_names(self):
-		return ['speech', 'in_cache0', 'in_cache1', 'in_cache2', 'in_cache3']
-	
-	def export_output_names(self):
-		return ['logits', 'out_cache0', 'out_cache1', 'out_cache2', 'out_cache3']
-	
-	def export_dynamic_axes(self):
-		return {
-			'speech': {
-				1: 'feats_length'
-			},
-		}
-	
-	def export_name(self, ):
-		return "model.onnx"
-	
+
+		from .export_meta import export_rebuild_model
+		models = export_rebuild_model(model=self, **kwargs)
+		return models
+
 	def DetectCommonFrames(self, cache: dict = {}) -> int:
 		if cache["stats"].vad_state_machine == VadStateMachine.kVadInStateEndPointDetected:
 			return 0
