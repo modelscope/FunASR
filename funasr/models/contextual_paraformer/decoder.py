@@ -775,3 +775,128 @@ class ContextualParaformerDecoder(ParaformerSANMDecoder):
                                                                                           var_dict_tf[name_tf].shape))
 
         return var_dict_torch_update
+
+
+@tables.register("decoder_classes", "ContextualParaformerDecoderExport")
+class ContextualParaformerDecoderExport(torch.nn.Module):
+    def __init__(self, model,
+                 max_seq_len=512,
+                 model_name='decoder',
+                 onnx: bool = True,
+                 **kwargs,):
+        super().__init__()
+        from funasr.utils.torch_function import sequence_mask
+        self.model = model
+        self.make_pad_mask = sequence_mask(max_seq_len, flip=False)
+        
+        from funasr.models.sanm.attention import MultiHeadedAttentionSANMDecoderExport
+        from funasr.models.sanm.attention import MultiHeadedAttentionCrossAttExport
+        from funasr.models.paraformer.decoder import DecoderLayerSANMExport
+        from funasr.models.transformer.positionwise_feed_forward import PositionwiseFeedForwardDecoderSANMExport
+
+        for i, d in enumerate(self.model.decoders):
+            if isinstance(d.feed_forward, PositionwiseFeedForwardDecoderSANM):
+                d.feed_forward = PositionwiseFeedForwardDecoderSANMExport(d.feed_forward)
+            if isinstance(d.self_attn, MultiHeadedAttentionSANMDecoder):
+                d.self_attn = MultiHeadedAttentionSANMDecoderExport(d.self_attn)
+            if isinstance(d.src_attn, MultiHeadedAttentionCrossAtt):
+                d.src_attn = MultiHeadedAttentionCrossAttExport(d.src_attn)
+            self.model.decoders[i] = DecoderLayerSANMExport(d)
+
+        if self.model.decoders2 is not None:
+            for i, d in enumerate(self.model.decoders2):
+                if isinstance(d.feed_forward, PositionwiseFeedForwardDecoderSANM):
+                    d.feed_forward = PositionwiseFeedForwardDecoderSANMExport(d.feed_forward)
+                if isinstance(d.self_attn, MultiHeadedAttentionSANMDecoder):
+                    d.self_attn = MultiHeadedAttentionSANMDecoderExport(d.self_attn)
+                self.model.decoders2[i] = DecoderLayerSANMExport(d)
+
+        for i, d in enumerate(self.model.decoders3):
+            if isinstance(d.feed_forward, PositionwiseFeedForwardDecoderSANM):
+                d.feed_forward = PositionwiseFeedForwardDecoderSANMExport(d.feed_forward)
+            self.model.decoders3[i] = DecoderLayerSANMExport(d)
+        
+        self.output_layer = model.output_layer
+        self.after_norm = model.after_norm
+        self.model_name = model_name
+
+        # bias decoder
+        if isinstance(self.model.bias_decoder.src_attn, MultiHeadedAttentionCrossAtt):
+            self.model.bias_decoder.src_attn = MultiHeadedAttentionCrossAttExport(self.model.bias_decoder.src_attn)
+        self.bias_decoder = self.model.bias_decoder
+        
+        # last decoder
+        if isinstance(self.model.last_decoder.src_attn, MultiHeadedAttentionCrossAtt):
+            self.model.last_decoder.src_attn = MultiHeadedAttentionCrossAttExport(self.model.last_decoder.src_attn)
+        if isinstance(self.model.last_decoder.self_attn, MultiHeadedAttentionSANMDecoder):
+            self.model.last_decoder.self_attn = MultiHeadedAttentionSANMDecoderExport(self.model.last_decoder.self_attn)
+        if isinstance(self.model.last_decoder.feed_forward, PositionwiseFeedForwardDecoderSANM):
+            self.model.last_decoder.feed_forward = PositionwiseFeedForwardDecoderSANMExport(self.model.last_decoder.feed_forward)
+        self.last_decoder = self.model.last_decoder
+        self.bias_output = self.model.bias_output
+        self.dropout = self.model.dropout
+        
+
+    def prepare_mask(self, mask):
+        mask_3d_btd = mask[:, :, None]
+        if len(mask.shape) == 2:
+            mask_4d_bhlt = 1 - mask[:, None, None, :]
+        elif len(mask.shape) == 3:
+            mask_4d_bhlt = 1 - mask[:, None, :]
+        mask_4d_bhlt = mask_4d_bhlt * -10000.0
+    
+        return mask_3d_btd, mask_4d_bhlt
+
+    def forward(
+        self,
+        hs_pad: torch.Tensor,
+        hlens: torch.Tensor,
+        ys_in_pad: torch.Tensor,
+        ys_in_lens: torch.Tensor,
+        bias_embed: torch.Tensor,
+    ):
+
+        tgt = ys_in_pad
+        tgt_mask = self.make_pad_mask(ys_in_lens)
+        tgt_mask, _ = self.prepare_mask(tgt_mask)
+        # tgt_mask = myutils.sequence_mask(ys_in_lens, device=tgt.device)[:, :, None]
+
+        memory = hs_pad
+        memory_mask = self.make_pad_mask(hlens)
+        _, memory_mask = self.prepare_mask(memory_mask)
+        # memory_mask = myutils.sequence_mask(hlens, device=memory.device)[:, None, :]
+
+        x = tgt
+        x, tgt_mask, memory, memory_mask, _ = self.model.decoders(
+            x, tgt_mask, memory, memory_mask
+        )
+
+        _, _, x_self_attn, x_src_attn = self.last_decoder(
+            x, tgt_mask, memory, memory_mask
+        )
+
+        # contextual paraformer related
+        contextual_length = torch.Tensor([bias_embed.shape[1]]).int().repeat(hs_pad.shape[0])
+        # contextual_mask = myutils.sequence_mask(contextual_length, device=memory.device)[:, None, :]
+        contextual_mask = self.make_pad_mask(contextual_length)
+        contextual_mask, _ = self.prepare_mask(contextual_mask)
+        # import pdb; pdb.set_trace()
+        contextual_mask = contextual_mask.transpose(2, 1).unsqueeze(1)
+        cx, tgt_mask, _, _, _ = self.bias_decoder(x_self_attn, tgt_mask, bias_embed, memory_mask=contextual_mask)
+
+        if self.bias_output is not None:
+            x = torch.cat([x_src_attn, cx], dim=2)
+            x = self.bias_output(x.transpose(1, 2)).transpose(1, 2)  # 2D -> D
+            x = x_self_attn + self.dropout(x)
+
+        if self.model.decoders2 is not None:
+            x, tgt_mask, memory, memory_mask, _ = self.model.decoders2(
+                x, tgt_mask, memory, memory_mask
+            )
+        x, tgt_mask, memory, memory_mask, _ = self.model.decoders3(
+            x, tgt_mask, memory, memory_mask
+        )
+        x = self.after_norm(x)
+        x = self.output_layer(x)
+
+        return x, ys_in_lens

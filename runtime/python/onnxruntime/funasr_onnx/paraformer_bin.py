@@ -266,22 +266,32 @@ class ContextualParaformer(Paraformer):
             model_bb_file = os.path.join(model_dir, 'model.onnx')
             model_eb_file = os.path.join(model_dir, 'model_eb.onnx')
 
-        token_list_file = os.path.join(model_dir, 'tokens.txt')
-        self.vocab = {}
-        with open(Path(token_list_file), 'r') as fin:
-            for i, line in enumerate(fin.readlines()):
-                self.vocab[line.strip()] = i
+        if not (os.path.exists(model_eb_file) and os.path.exists(model_bb_file)):
+            print(".onnx is not exist, begin to export onnx")
+            try:
+                from funasr import AutoModel
+            except:
+                raise "You are exporting onnx, please install funasr and try it again. To install funasr, you could:\n" \
+                      "\npip3 install -U funasr\n" \
+                      "For the users in China, you could install with the command:\n" \
+                      "\npip3 install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple"
 
-        #if quantize:
-        #    model_file = os.path.join(model_dir, 'model_quant.onnx')
-        #if not os.path.exists(model_file):
-        #    logging.error(".onnx model not exist, please export first.")
+            model = AutoModel(model=model_dir)
+            model_dir = model.export(type="onnx", quantize=quantize)
             
         config_file = os.path.join(model_dir, 'config.yaml')
         cmvn_file = os.path.join(model_dir, 'am.mvn')
         config = read_yaml(config_file)
+        token_list = os.path.join(model_dir, 'tokens.json')
+        with open(token_list, 'r', encoding='utf-8') as f:
+            token_list = json.load(f)
+            
+        # revert token_list into vocab dict
+        self.vocab = {}
+        for i, token in enumerate(token_list):
+                self.vocab[token] = i
 
-        self.converter = TokenIDConverter(config['token_list'])
+        self.converter = TokenIDConverter(token_list)
         self.tokenizer = CharTokenizer()
         self.frontend = WavFrontend(
             cmvn_file=cmvn_file,
@@ -390,3 +400,7 @@ class ContextualParaformer(Paraformer):
         token = token[:valid_token_num-self.pred_bias]
         # texts = sentence_postprocess(token)
         return token
+    
+    
+class SeacoParaformer(ContextualParaformer):
+    pass # no difference with contextual_paraformer in method of calling onnx models

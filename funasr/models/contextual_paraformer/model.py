@@ -516,3 +516,102 @@ class ContextualParaformer(Paraformer):
             hotword_list = None
         return hotword_list
 
+
+    def export(
+        self,
+        max_seq_len=512,
+        **kwargs,
+    ):
+        self.device = kwargs.get("device")
+        is_onnx = kwargs.get("type", "onnx") == "onnx"
+        
+        encoder_class = tables.encoder_classes.get(kwargs["encoder"] + "Export")
+        self.encoder = encoder_class(self.encoder, onnx=is_onnx)
+    
+        predictor_class = tables.predictor_classes.get(kwargs["predictor"] + "Export")
+        self.predictor = predictor_class(self.predictor, onnx=is_onnx)
+        
+        if kwargs["decoder"] == "ParaformerSANMDecoder":
+            kwargs["decoder"] = "ParaformerSANMDecoderOnline"
+        decoder_class = tables.decoder_classes.get(kwargs["decoder"] + "Export")
+        self.decoder = decoder_class(self.decoder, onnx=is_onnx)
+        
+        # same architecture of bias encoder with seaco paraformer
+        from funasr.models.seaco_paraformer.model import ContextualEmbedderExport
+        embedder_class = ContextualEmbedderExport
+        embedder_model = embedder_class(self, onnx=is_onnx)
+    
+        from funasr.utils.torch_function import sequence_mask
+        self.make_pad_mask = sequence_mask(max_seq_len, flip=False)
+        self.feats_dim = 560
+
+        import copy
+        import types
+        backbone_model = copy.copy(self)
+
+        # backbone
+        backbone_model.forward = types.MethodType(ContextualParaformer.export_backbone_forward, backbone_model)
+        backbone_model.export_dummy_inputs = types.MethodType(ContextualParaformer.export_backbone_dummy_inputs, backbone_model)
+        backbone_model.export_input_names = types.MethodType(ContextualParaformer.export_backbone_input_names, backbone_model)
+        backbone_model.export_output_names = types.MethodType(ContextualParaformer.export_backbone_output_names, backbone_model)
+        backbone_model.export_dynamic_axes = types.MethodType(ContextualParaformer.export_backbone_dynamic_axes, backbone_model)
+        backbone_model.export_name = types.MethodType(ContextualParaformer.export_backbone_name, backbone_model)
+        
+        return backbone_model, embedder_model
+    
+    def export_backbone_forward(
+            self,
+            speech: torch.Tensor,
+            speech_lengths: torch.Tensor,
+            bias_embed: torch.Tensor,
+    ):
+        # a. To device
+        batch = {"speech": speech, "speech_lengths": speech_lengths}
+        # batch = to_device(batch, device=self.device)
+    
+        enc, enc_len = self.encoder(**batch)
+        mask = self.make_pad_mask(enc_len)[:, None, :]
+        pre_acoustic_embeds, pre_token_length, alphas, pre_peak_index = self.predictor(enc, mask)
+        pre_token_length = pre_token_length.floor().type(torch.int32)
+
+        # bias_embed = bias_embed. squeeze(0).repeat([enc.shape[0], 1, 1])
+
+        decoder_out, _ = self.decoder(enc, enc_len, pre_acoustic_embeds, pre_token_length, bias_embed)
+        decoder_out = torch.log_softmax(decoder_out, dim=-1)
+        # sample_ids = decoder_out.argmax(dim=-1)
+        return decoder_out, pre_token_length
+
+    def export_backbone_dummy_inputs(self):
+        speech = torch.randn(2, 30, self.feats_dim)
+        speech_lengths = torch.tensor([6, 30], dtype=torch.int32)
+        bias_embed = torch.randn(2, 1, 512)
+        return (speech, speech_lengths, bias_embed)
+
+    def export_backbone_input_names(self):
+        return ['speech', 'speech_lengths', 'bias_embed']
+
+    def export_backbone_output_names(self):
+        return ['logits', 'token_num']
+
+    def export_backbone_dynamic_axes(self):
+        return {
+            'speech': {
+                0: 'batch_size',
+                1: 'feats_length'
+            },
+            'speech_lengths': {
+                0: 'batch_size',
+            },
+            'bias_embed': {
+                0: 'batch_size',
+                1: 'num_hotwords'
+            },
+            'logits': {
+                0: 'batch_size',
+                1: 'logits_length'
+            },
+        }
+        
+    def export_backbone_name(self):
+        return 'model.onnx'
+    
