@@ -162,7 +162,8 @@ class AutoModel:
         tokenizer = kwargs.get("tokenizer", None)
         if tokenizer is not None:
             tokenizer_class = tables.tokenizer_classes.get(tokenizer)
-            tokenizer = tokenizer_class(**kwargs["tokenizer_conf"])
+            tokenizer_conf = kwargs.get("tokenizer_conf", {})
+            tokenizer = tokenizer_class(**tokenizer_conf)
             kwargs["tokenizer"] = tokenizer
 
             kwargs["token_list"] = tokenizer.token_list if hasattr(tokenizer, "token_list") else None
