@@ -430,7 +430,6 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
         
         return results, meta_data
 
-
     def generate_hotwords_list(self, hotword_list_or_file, tokenizer=None, frontend=None):
         def load_seg_dict(seg_dict_file):
             seg_dict = {}
@@ -531,4 +530,14 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
         else:
             hotword_list = None
         return hotword_list
+
+    def export(
+        self,
+        **kwargs,
+    ):
+        if 'max_seq_len' not in kwargs:
+            kwargs['max_seq_len'] = 512
+        from .export_meta import export_rebuild_model
+        models = export_rebuild_model(model=self, **kwargs)
+        return models
 
