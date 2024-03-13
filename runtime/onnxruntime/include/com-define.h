@@ -49,6 +49,9 @@ namespace funasr {
 // hotword embedding compile model
 #define MODEL_EB_NAME "model_eb.onnx"
 #define QUANT_MODEL_NAME "model_quant.onnx"
+// gpu models
+#define TORCH_MODEL_NAME "model.gpu.torchscripts"
+#define TORCH_QUANT_MODEL_NAME "model.blade.fp16.pt"
 #define VAD_CMVN_NAME "vad.mvn"
 #define VAD_CONFIG_NAME "vad.yaml"
 #define AM_CMVN_NAME "am.mvn"
