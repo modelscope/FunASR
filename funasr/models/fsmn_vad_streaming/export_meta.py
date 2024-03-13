@@ -1,7 +1,5 @@
-import copy
 import types
 import torch
-from torch import nn
 from funasr.register import tables
 
 
