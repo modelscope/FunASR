@@ -430,7 +430,6 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
         
         return results, meta_data
 
-
     def generate_hotwords_list(self, hotword_list_or_file, tokenizer=None, frontend=None):
         def load_seg_dict(seg_dict_file):
             seg_dict = {}
