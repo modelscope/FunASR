@@ -90,7 +90,7 @@ int main(int argc, char** argv)
     struct timeval start, end;
     gettimeofday(&start, nullptr);
     int thread_num = 1;
-    FUNASR_HANDLE asr_hanlde=FunOfflineInit(model_path, thread_num);
+    FUNASR_HANDLE asr_hanlde=FunOfflineInit(model_path, thread_num, true);
 
     if (!asr_hanlde)
     {
@@ -183,7 +183,7 @@ int main(int argc, char** argv)
         gettimeofday(&start, nullptr);
         FUNASR_RESULT result=FunOfflineInferBuffer(asr_hanlde, speech_buff, buff_len, RASR_NONE, nullptr, hotwords_embedding, audio_fs.getValue(), "pcm", true, decoder_handle);
         // For debug:end
-        
+
         // FUNASR_RESULT result=FunOfflineInfer(asr_hanlde, wav_file.c_str(), RASR_NONE, nullptr, hotwords_embedding, audio_fs.getValue(), true, decoder_handle);
         gettimeofday(&end, nullptr);
         seconds = (end.tv_sec - start.tv_sec);
