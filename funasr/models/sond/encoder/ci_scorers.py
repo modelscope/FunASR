@@ -16,9 +16,6 @@ class DotScorer(torch.nn.Module):
         scores = torch.matmul(xs_pad, spk_emb.transpose(1, 2))
         return scores
 
-    def convert_tf2torch(self, var_dict_tf, var_dict_torch):
-        return {}
-
 
 class CosScorer(torch.nn.Module):
     def __init__(self):
@@ -33,6 +30,3 @@ class CosScorer(torch.nn.Module):
         # spk_emb: B, N, D
         scores = F.cosine_similarity(xs_pad.unsqueeze(2), spk_emb.unsqueeze(1), dim=-1)
         return scores
-
-    def convert_tf2torch(self, var_dict_tf, var_dict_torch):
-        return {}

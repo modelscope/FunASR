@@ -38,9 +38,6 @@ class StatisticPooling(torch.nn.Module):
 
         return stat_pooling
 
-    def convert_tf2torch(self, var_dict_tf, var_dict_torch):
-        return {}
-
 
 def statistic_pooling(
         xs_pad: torch.Tensor,
