@@ -10,6 +10,7 @@ SET(RELATION_SOURCE "../src/resample.cpp" "../src/util.cpp" "../src/alignedmem.c
 endif()
 
 add_executable(funasr-onnx-offline "funasr-onnx-offline.cpp" ${RELATION_SOURCE})
+target_link_options(funasr-onnx-offline PRIVATE "-Wl,--no-as-needed")
 target_link_libraries(funasr-onnx-offline PUBLIC funasr)
 
 add_executable(funasr-onnx-offline-vad "funasr-onnx-offline-vad.cpp" ${RELATION_SOURCE})
