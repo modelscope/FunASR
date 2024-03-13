@@ -644,6 +644,7 @@ class FsmnVADStreaming(nn.Module):
 		return results, meta_data
 	
 	def export(self, **kwargs):
+		# only used for expot onnx/torchscripts
 
 		from .export_meta import export_rebuild_model
 		models = export_rebuild_model(model=self, **kwargs)
