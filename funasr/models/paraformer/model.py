@@ -13,15 +13,16 @@ from funasr.register import tables
 from funasr.models.ctc.ctc import CTC
 from funasr.utils import postprocess_utils
 from funasr.metrics.compute_acc import th_accuracy
+from funasr.train_utils.device_funcs import to_device
 from funasr.utils.datadir_writer import DatadirWriter
 from funasr.models.paraformer.search import Hypothesis
 from funasr.models.paraformer.cif_predictor import mae_loss
 from funasr.train_utils.device_funcs import force_gatherable
 from funasr.losses.label_smoothing_loss import LabelSmoothingLoss
 from funasr.models.transformer.utils.add_sos_eos import add_sos_eos
-from funasr.models.transformer.utils.nets_utils import make_pad_mask, pad_list
+from funasr.models.transformer.utils.nets_utils import make_pad_mask
 from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
-from funasr.train_utils.device_funcs import to_device
+
 
 @tables.register("model_classes", "Paraformer")
 class Paraformer(torch.nn.Module):

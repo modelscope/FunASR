@@ -17,9 +17,6 @@ from contextlib import contextmanager
 from distutils.version import LooseVersion
 
 from funasr.register import tables
-from funasr.losses.label_smoothing_loss import (
-    LabelSmoothingLoss,  # noqa: H301
-)
 from funasr.utils import postprocess_utils
 from funasr.metrics.compute_acc import th_accuracy
 from funasr.models.paraformer.model import Paraformer
@@ -27,9 +24,10 @@ from funasr.utils.datadir_writer import DatadirWriter
 from funasr.models.paraformer.search import Hypothesis
 from funasr.train_utils.device_funcs import force_gatherable
 from funasr.models.transformer.utils.add_sos_eos import add_sos_eos
+from funasr.models.seaco_paraformer.model import ContextualEmbedderExport
 from funasr.models.transformer.utils.nets_utils import make_pad_mask, pad_list
 from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
-import pdb
+
 
 if LooseVersion(torch.__version__) >= LooseVersion("1.6.0"):
     from torch.cuda.amp import autocast
@@ -80,7 +78,6 @@ class ContextualParaformer(Paraformer):
         if self.crit_attn_weight > 0:
             self.attn_loss = torch.nn.L1Loss()
         self.crit_attn_smooth = crit_attn_smooth
-
 
     def forward(
         self,
@@ -156,7 +153,6 @@ class ContextualParaformer(Paraformer):
         loss, stats, weight = force_gatherable((loss, stats, batch_size), loss.device)
         return loss, stats, weight
     
-    
     def _calc_att_clas_loss(
         self,
         encoder_out: torch.Tensor,
@@ -231,7 +227,6 @@ class ContextualParaformer(Paraformer):
         
         return loss_att, acc_att, cer_att, wer_att, loss_pre, loss_ideal
     
-    
     def sampler(self, encoder_out, encoder_out_lens, ys_pad, ys_pad_lens, pre_acoustic_embeds, contextual_info):
         tgt_mask = (~make_pad_mask(ys_pad_lens, maxlen=ys_pad_lens.max())[:, :, None]).to(ys_pad.device)
         ys_pad = ys_pad * tgt_mask[:, :, 0]
@@ -263,7 +258,6 @@ class ContextualParaformer(Paraformer):
         sematic_embeds = pre_acoustic_embeds.masked_fill(~input_mask_expand_dim, 0) + ys_pad_embed.masked_fill(
             input_mask_expand_dim, 0)
         return sematic_embeds * tgt_mask, decoder_out * tgt_mask
-    
     
     def cal_decoder_with_predictor(self, encoder_out, encoder_out_lens, sematic_embeds, ys_pad_lens, hw_list=None,
                                    clas_scale=1.0):
@@ -414,7 +408,6 @@ class ContextualParaformer(Paraformer):
         
         return results, meta_data
 
-
     def generate_hotwords_list(self, hotword_list_or_file, tokenizer=None, frontend=None):
         def load_seg_dict(seg_dict_file):
             seg_dict = {}
@@ -516,3 +509,109 @@ class ContextualParaformer(Paraformer):
             hotword_list = None
         return hotword_list
 
+    def export(
+        self,
+        max_seq_len=512,
+        **kwargs,
+    ):
+        self.device = kwargs.get("device")
+        is_onnx = kwargs.get("type", "onnx") == "onnx"
+        
+        encoder_class = tables.encoder_classes.get(kwargs["encoder"] + "Export")
+        self.encoder = encoder_class(self.encoder, onnx=is_onnx)
+    
+        predictor_class = tables.predictor_classes.get(kwargs["predictor"] + "Export")
+        self.predictor = predictor_class(self.predictor, onnx=is_onnx)
+        
+        if kwargs["decoder"] == "ParaformerSANMDecoder":
+            kwargs["decoder"] = "ParaformerSANMDecoderOnline"
+        decoder_class = tables.decoder_classes.get(kwargs["decoder"] + "Export")
+        self.decoder = decoder_class(self.decoder, onnx=is_onnx)
+        
+        # little difference with bias encoder with seaco paraformer
+        embedder_class = ContextualEmbedderExport2
+        embedder_model = embedder_class(self, onnx=is_onnx)
+    
+        from funasr.utils.torch_function import sequence_mask
+        self.make_pad_mask = sequence_mask(max_seq_len, flip=False)
+        self.feats_dim = 560
+
+        import copy
+        import types
+        backbone_model = copy.copy(self)
+
+        # backbone
+        backbone_model.forward = types.MethodType(ContextualParaformer.export_backbone_forward, backbone_model)
+        backbone_model.export_dummy_inputs = types.MethodType(ContextualParaformer.export_backbone_dummy_inputs, backbone_model)
+        backbone_model.export_input_names = types.MethodType(ContextualParaformer.export_backbone_input_names, backbone_model)
+        backbone_model.export_output_names = types.MethodType(ContextualParaformer.export_backbone_output_names, backbone_model)
+        backbone_model.export_dynamic_axes = types.MethodType(ContextualParaformer.export_backbone_dynamic_axes, backbone_model)
+        backbone_model.export_name = types.MethodType(ContextualParaformer.export_backbone_name, backbone_model)
+        
+        return backbone_model, embedder_model
+    
+    def export_backbone_forward(
+            self,
+            speech: torch.Tensor,
+            speech_lengths: torch.Tensor,
+            bias_embed: torch.Tensor,
+    ):
+        # a. To device
+        batch = {"speech": speech, "speech_lengths": speech_lengths}
+        # batch = to_device(batch, device=self.device)
+    
+        enc, enc_len = self.encoder(**batch)
+        mask = self.make_pad_mask(enc_len)[:, None, :]
+        pre_acoustic_embeds, pre_token_length, alphas, pre_peak_index = self.predictor(enc, mask)
+        pre_token_length = pre_token_length.floor().type(torch.int32)
+
+        # bias_embed = bias_embed. squeeze(0).repeat([enc.shape[0], 1, 1])
+
+        decoder_out, _ = self.decoder(enc, enc_len, pre_acoustic_embeds, pre_token_length, bias_embed)
+        decoder_out = torch.log_softmax(decoder_out, dim=-1)
+        # sample_ids = decoder_out.argmax(dim=-1)
+        return decoder_out, pre_token_length
+
+    def export_backbone_dummy_inputs(self):
+        speech = torch.randn(2, 30, self.feats_dim)
+        speech_lengths = torch.tensor([6, 30], dtype=torch.int32)
+        bias_embed = torch.randn(2, 1, 512)
+        return (speech, speech_lengths, bias_embed)
+
+    def export_backbone_input_names(self):
+        return ['speech', 'speech_lengths', 'bias_embed']
+
+    def export_backbone_output_names(self):
+        return ['logits', 'token_num']
+
+    def export_backbone_dynamic_axes(self):
+        return {
+            'speech': {
+                0: 'batch_size',
+                1: 'feats_length'
+            },
+            'speech_lengths': {
+                0: 'batch_size',
+            },
+            'bias_embed': {
+                0: 'batch_size',
+                1: 'num_hotwords'
+            },
+            'logits': {
+                0: 'batch_size',
+                1: 'logits_length'
+            },
+        }
+        
+    def export_backbone_name(self):
+        return 'model.onnx'
+    
+    
+class ContextualEmbedderExport2(ContextualEmbedderExport):
+    def __init__(self,
+                 model,
+                 **kwargs,):
+        super().__init__()
+        self.embedding = model.bias_embed
+        model.bias_encoder.batch_first = False
+        self.bias_encoder = model.bias_encoder
