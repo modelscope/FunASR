@@ -64,6 +64,7 @@ using namespace std;
 #include "seg_dict.h"
 #include "resample.h"
 #include "paraformer.h"
+#include "paraformer-torch.h"
 #include "paraformer-online.h"
 #include "offline-stream.h"
 #include "tpass-stream.h"

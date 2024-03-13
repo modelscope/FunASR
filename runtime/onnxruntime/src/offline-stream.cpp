@@ -1,7 +1,7 @@
 #include "precomp.h"
 
 namespace funasr {
-OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int thread_num)
+OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int thread_num, bool use_gpu)
 {
     // VAD model
     if(model_path.find(VAD_DIR) != model_path.end()){
@@ -35,7 +35,12 @@ OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int
         string hw_compile_model_path;
         string seg_dict_path;
     
-        asr_handle = make_unique<Paraformer>();
+        if(use_gpu){
+            asr_handle = make_unique<ParaformerTorch>();
+        }else{
+            asr_handle = make_unique<Paraformer>();
+        }
+
         bool enable_hotword = false;
         hw_compile_model_path = PathAppend(model_path.at(MODEL_DIR), MODEL_EB_NAME);
         seg_dict_path = PathAppend(model_path.at(MODEL_DIR), MODEL_SEG_DICT);
@@ -115,10 +120,10 @@ OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int
 #endif
 }
 
-OfflineStream *CreateOfflineStream(std::map<std::string, std::string>& model_path, int thread_num)
+OfflineStream *CreateOfflineStream(std::map<std::string, std::string>& model_path, int thread_num, bool use_gpu)
 {
     OfflineStream *mm;
-    mm = new OfflineStream(model_path, thread_num);
+    mm = new OfflineStream(model_path, thread_num, use_gpu);
     return mm;
 }
 
