@@ -58,7 +58,7 @@ class CT_Transformer():
             model = AutoModel(model=model_dir)
             model_dir = model.export(quantize=quantize)
             
-        config_file = os.path.join(model_dir, 'confi.yaml')
+        config_file = os.path.join(model_dir, 'config.yaml')
         config = read_yaml(config_file)
         token_list = os.path.join(model_dir, 'tokens.json')
         with open(token_list, 'r', encoding='utf-8') as f:

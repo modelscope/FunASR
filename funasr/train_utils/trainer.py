@@ -402,3 +402,5 @@ class Trainer:
                         for key, var in speed_stats.items():
                             self.writer.add_scalar(f'rank{self.local_rank}_{key}/val', eval(var),
                                                    epoch * len(self.dataloader_val) + batch_idx)
+
+        self.model.train()
