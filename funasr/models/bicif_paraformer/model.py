@@ -343,86 +343,9 @@ class BiCifParaformer(Paraformer):
         
         return results, meta_data
 
-    def export(
-        self,
-        max_seq_len=512,
-        **kwargs,
-    ):
-        self.device = kwargs.get("device")
-        is_onnx = kwargs.get("type", "onnx") == "onnx"
-        encoder_class = tables.encoder_classes.get(kwargs["encoder"] + "Export")
-        self.encoder = encoder_class(self.encoder, onnx=is_onnx)
-    
-        predictor_class = tables.predictor_classes.get(kwargs["predictor"] + "Export")
-        self.predictor = predictor_class(self.predictor, onnx=is_onnx)
-    
-        decoder_class = tables.decoder_classes.get(kwargs["decoder"] + "Export")
-        self.decoder = decoder_class(self.decoder, onnx=is_onnx)
-    
-        from funasr.utils.torch_function import sequence_mask
-
-        self.make_pad_mask = sequence_mask(max_seq_len, flip=False)
-    
-    
-        self.forward = self.export_forward
-    
-        return self
-
-    def export_forward(
-        self,
-        speech: torch.Tensor,
-        speech_lengths: torch.Tensor,
-    ):
-        # a. To device
-        batch = {"speech": speech, "speech_lengths": speech_lengths}
-        batch = to_device(batch, device=self.device)
-    
-        enc, enc_len = self.encoder(**batch)
-        mask = self.make_pad_mask(enc_len)[:, None, :]
-        pre_acoustic_embeds, pre_token_length, alphas, pre_peak_index = self.predictor(enc, mask)
-        pre_token_length = pre_token_length.round().type(torch.int32)
-    
-        decoder_out, _ = self.decoder(enc, enc_len, pre_acoustic_embeds, pre_token_length)
-        decoder_out = torch.log_softmax(decoder_out, dim=-1)
-    
-        # get predicted timestamps
-        us_alphas, us_cif_peak = self.predictor.get_upsample_timestmap(enc, mask, pre_token_length)
-    
-        return decoder_out, pre_token_length, us_alphas, us_cif_peak
-
-    def export_dummy_inputs(self):
-        speech = torch.randn(2, 30, 560)
-        speech_lengths = torch.tensor([6, 30], dtype=torch.int32)
-        return (speech, speech_lengths)
-
-    def export_input_names(self):
-        return ['speech', 'speech_lengths']
-
-    def export_output_names(self):
-        return ['logits', 'token_num', 'us_alphas', 'us_cif_peak']
-
-    def export_dynamic_axes(self):
-        return {
-            'speech': {
-                0: 'batch_size',
-                1: 'feats_length'
-            },
-            'speech_lengths': {
-                0: 'batch_size',
-            },
-            'logits': {
-                0: 'batch_size',
-                1: 'logits_length'
-            },
-            'us_alphas': {
-                0: 'batch_size',
-                1: 'alphas_length'
-            },
-            'us_cif_peak': {
-                0: 'batch_size',
-                1: 'alphas_length'
-            },
-        }
-
-    def export_name(self, ):
-        return "model.onnx"
+    def export(self, **kwargs):
+        from .export_meta import export_rebuild_model
+        if 'max_seq_len' not in kwargs:
+            kwargs['max_seq_len'] = 512
+        models = export_rebuild_model(model=self, **kwargs)
+        return models
