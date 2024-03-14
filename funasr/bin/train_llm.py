@@ -26,7 +26,7 @@ from funasr.train_utils.load_pretrained_model import load_pretrained_model
 # from funasr.tokenizer.build_tokenizer import build_tokenizer
 # from funasr.tokenizer.token_id_converter import TokenIDConverter
 # from funasr.tokenizer.funtoken import build_tokenizer
-
+from funasr import AutoModel
 
 @hydra.main(config_name=None, version_base=None)
 def main_hydra(kwargs: DictConfig):
@@ -60,6 +60,16 @@ def main(**kwargs):
     if use_ddp or use_fsdp:
         dist.init_process_group(backend=kwargs.get("backend", "nccl"), init_method='env://')
         torch.cuda.set_device(local_rank)
+        
+    device = kwargs.get("device", "cpu")
+    kwargs["device"] = "cpu"
+    model = AutoModel(**kwargs)
+    kwargs["device"] = device
+    model = model.model
+    tokenizer = kwargs["tokenizer"]
+    frontend = kwargs["frontend"]
+    
+    
     
     # save config.yaml
     if (use_ddp or use_fsdp) and dist.get_rank() == 0 or not (use_ddp or use_fsdp) and local_rank == 0:
@@ -69,6 +79,7 @@ def main(**kwargs):
         logging.info("config.yaml is saved to: %s", yaml_file)
 
 
+    
     
 
     # init_param

@@ -4,8 +4,6 @@ import torch
 def export_onnx(model,
                 data_in=None,
 				quantize: bool = False,
-				fallback_num: int = 5,
-				calib_num: int = 100,
 				opset_version: int = 14,
 				**kwargs):
 	model_scripts = model.export(**kwargs)
@@ -19,8 +17,6 @@ def export_onnx(model,
 		_onnx(m,
 		      data_in=data_in,
 		      quantize=quantize,
-		      fallback_num=fallback_num,
-		      calib_num=calib_num,
 		      opset_version=opset_version,
 		      export_dir=export_dir,
 		      **kwargs
