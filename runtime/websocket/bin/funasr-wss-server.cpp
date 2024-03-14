@@ -121,7 +121,7 @@ int main(int argc, char* argv[]) {
         false, "/workspace/resources/hotwords.txt", "string");
     TCLAP::ValueArg<std::int32_t> fst_inc_wts("", FST_INC_WTS, 
         "the fst hotwords incremental bias", false, 20, "int32_t");
-    TCLAP::SwitchArg use_gpu("", USE_GPU, "Whether to use GPU, default is false", false);
+    TCLAP::SwitchArg use_gpu("", INFER_GPU, "Whether to use GPU, default is false", false);
 
     // add file
     cmd.add(hotword);
