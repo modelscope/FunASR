@@ -368,49 +368,6 @@ class Conv1dSubsampling(torch.nn.Module):
         x_len = (x_len - 1) // self.stride + 1
         return x, x_len
 
-    def gen_tf2torch_map_dict(self):
-        tensor_name_prefix_torch = self.tf2torch_tensor_name_prefix_torch
-        tensor_name_prefix_tf = self.tf2torch_tensor_name_prefix_tf
-        map_dict_local = {
-            ## predictor
-            "{}.conv.weight".format(tensor_name_prefix_torch):
-                {"name": "{}/conv1d/kernel".format(tensor_name_prefix_tf),
-                 "squeeze": None,
-                 "transpose": (2, 1, 0),
-                 },  # (256,256,3),(3,256,256)
-            "{}.conv.bias".format(tensor_name_prefix_torch):
-                {"name": "{}/conv1d/bias".format(tensor_name_prefix_tf),
-                 "squeeze": None,
-                 "transpose": None,
-                 },  # (256,),(256,)
-        }
-        return map_dict_local
-
-    def convert_tf2torch(self,
-                         var_dict_tf,
-                         var_dict_torch,
-                         ):
-    
-        map_dict = self.gen_tf2torch_map_dict()
-    
-        var_dict_torch_update = dict()
-        for name in sorted(var_dict_torch.keys(), reverse=False):
-            names = name.split('.')
-            if names[0] == self.tf2torch_tensor_name_prefix_torch:
-                name_tf = map_dict[name]["name"]
-                data_tf = var_dict_tf[name_tf]
-                if map_dict[name]["squeeze"] is not None:
-                    data_tf = np.squeeze(data_tf, axis=map_dict[name]["squeeze"])
-                if map_dict[name]["transpose"] is not None:
-                    data_tf = np.transpose(data_tf, map_dict[name]["transpose"])
-                data_tf = torch.from_numpy(data_tf).type(torch.float32).to("cpu")
-            
-                var_dict_torch_update[name] = data_tf
-            
-                logging.info(
-                    "torch tensor: {}, {}, loading from tf tensor: {}, {}".format(name, data_tf.size(), name_tf,
-                                                                                  var_dict_tf[name_tf].shape))
-        return var_dict_torch_update
 
 class StreamingConvInput(torch.nn.Module):
     """Streaming ConvInput module definition.

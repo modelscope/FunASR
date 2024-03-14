@@ -17,9 +17,6 @@ from contextlib import contextmanager
 from distutils.version import LooseVersion
 
 from funasr.register import tables
-from funasr.losses.label_smoothing_loss import (
-    LabelSmoothingLoss,  # noqa: H301
-)
 from funasr.utils import postprocess_utils
 from funasr.metrics.compute_acc import th_accuracy
 from funasr.models.paraformer.model import Paraformer
@@ -29,7 +26,7 @@ from funasr.train_utils.device_funcs import force_gatherable
 from funasr.models.transformer.utils.add_sos_eos import add_sos_eos
 from funasr.models.transformer.utils.nets_utils import make_pad_mask, pad_list
 from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
-import pdb
+
 
 if LooseVersion(torch.__version__) >= LooseVersion("1.6.0"):
     from torch.cuda.amp import autocast
@@ -80,7 +77,6 @@ class ContextualParaformer(Paraformer):
         if self.crit_attn_weight > 0:
             self.attn_loss = torch.nn.L1Loss()
         self.crit_attn_smooth = crit_attn_smooth
-
 
     def forward(
         self,
@@ -156,7 +152,6 @@ class ContextualParaformer(Paraformer):
         loss, stats, weight = force_gatherable((loss, stats, batch_size), loss.device)
         return loss, stats, weight
     
-    
     def _calc_att_clas_loss(
         self,
         encoder_out: torch.Tensor,
@@ -231,7 +226,6 @@ class ContextualParaformer(Paraformer):
         
         return loss_att, acc_att, cer_att, wer_att, loss_pre, loss_ideal
     
-    
     def sampler(self, encoder_out, encoder_out_lens, ys_pad, ys_pad_lens, pre_acoustic_embeds, contextual_info):
         tgt_mask = (~make_pad_mask(ys_pad_lens, maxlen=ys_pad_lens.max())[:, :, None]).to(ys_pad.device)
         ys_pad = ys_pad * tgt_mask[:, :, 0]
@@ -263,7 +257,6 @@ class ContextualParaformer(Paraformer):
         sematic_embeds = pre_acoustic_embeds.masked_fill(~input_mask_expand_dim, 0) + ys_pad_embed.masked_fill(
             input_mask_expand_dim, 0)
         return sematic_embeds * tgt_mask, decoder_out * tgt_mask
-    
     
     def cal_decoder_with_predictor(self, encoder_out, encoder_out_lens, sematic_embeds, ys_pad_lens, hw_list=None,
                                    clas_scale=1.0):
@@ -414,7 +407,6 @@ class ContextualParaformer(Paraformer):
         
         return results, meta_data
 
-
     def generate_hotwords_list(self, hotword_list_or_file, tokenizer=None, frontend=None):
         def load_seg_dict(seg_dict_file):
             seg_dict = {}
@@ -516,3 +508,12 @@ class ContextualParaformer(Paraformer):
             hotword_list = None
         return hotword_list
 
+    def export(
+        self,
+        **kwargs,
+    ):
+        if 'max_seq_len' not in kwargs:
+            kwargs['max_seq_len'] = 512
+        from .export_meta import export_rebuild_model
+        models = export_rebuild_model(model=self, **kwargs)
+        return models
