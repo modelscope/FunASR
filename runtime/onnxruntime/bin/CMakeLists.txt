@@ -29,6 +29,7 @@ add_executable(funasr-onnx-online-punc "funasr-onnx-online-punc.cpp" ${RELATION_
 target_link_libraries(funasr-onnx-online-punc PUBLIC funasr)
 
 add_executable(funasr-onnx-offline-rtf "funasr-onnx-offline-rtf.cpp" ${RELATION_SOURCE})
+target_link_options(funasr-onnx-offline PRIVATE "-Wl,--no-as-needed")
 target_link_libraries(funasr-onnx-offline-rtf PUBLIC funasr)
 
 add_executable(funasr-onnx-2pass "funasr-onnx-2pass.cpp" ${RELATION_SOURCE})

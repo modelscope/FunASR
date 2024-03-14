@@ -1,6 +1,11 @@
 
 file(GLOB files1 "*.cpp")
+list(REMOVE_ITEM files1 "${CMAKE_CURRENT_SOURCE_DIR}/paraformer-torch.cpp")
 set(files ${files1})
+
+if(GPU)
+    set(files ${files} "${CMAKE_CURRENT_SOURCE_DIR}/paraformer-torch.cpp")
+endif()
 
 message("files: "${files})
 
