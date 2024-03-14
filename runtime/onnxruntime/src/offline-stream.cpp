@@ -38,6 +38,10 @@ OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int
         if(use_gpu){
             #ifdef USE_GPU
             asr_handle = make_unique<ParaformerTorch>();
+            #else
+            LOG(ERROR) <<"GPU is not supported! CPU will be used! If you want to use GPU, please add -DGPU=ON when cmake";
+            asr_handle = make_unique<Paraformer>();
+            use_gpu = false;
             #endif
         }else{
             asr_handle = make_unique<Paraformer>();
