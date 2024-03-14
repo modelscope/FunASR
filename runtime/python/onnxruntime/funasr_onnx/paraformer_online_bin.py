@@ -24,7 +24,8 @@ class Paraformer():
                  device_id: Union[str, int] = "-1",
                  quantize: bool = False,
                  intra_op_num_threads: int = 4,
-                 cache_dir: str = None
+                 cache_dir: str = None,
+                 **kwargs
                  ):
 
         if not Path(model_dir).exists():
@@ -56,7 +57,7 @@ class Paraformer():
                       "\npip3 install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple"
 
             model = AutoModel(model=model_dir)
-            model_dir = model.export(type="onnx", quantize=quantize)
+            model_dir = model.export(type="onnx", quantize=quantize, **kwargs)
 
         config_file = os.path.join(model_dir, 'config.yaml')
         cmvn_file = os.path.join(model_dir, 'am.mvn')
