@@ -503,20 +503,27 @@ namespace AliFsmnVadSharp
             {
                 return 0;
             }
-            for (int i = _vad_opts.nn_eval_block_size - 1; i > -1; i += -1)
+            try
             {
-                FrameState frame_state = FrameState.kFrameStateInvalid;
-                frame_state = GetFrameState(_frm_cnt - 1 - i);
-                if (i != 0)
+                for (int i = _vad_opts.nn_eval_block_size - 1; i > -1; i += -1)
                 {
-                    DetectOneFrame(frame_state, _frm_cnt - 1 - i, false);
-                }
-                else
-                {
-                    DetectOneFrame(frame_state, _frm_cnt - 1, true);
-                }
+                    FrameState frame_state = FrameState.kFrameStateInvalid;
+                    frame_state = GetFrameState(_frm_cnt - 1 - i);
+                    if (i != 0)
+                    {
+                        DetectOneFrame(frame_state, _frm_cnt - 1 - i, false);
+                    }
+                    else
+                    {
+                        DetectOneFrame(frame_state, _frm_cnt - 1, true);
+                    }
 
 
+                }
+            }
+            catch (Exception e)
+            {
+                //
             }
 
             return 0;

@@ -1,19 +1,16 @@
-﻿using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.ML;
+﻿using AliFsmnVadSharp.Model;
+using AliFsmnVadSharp.Utils;
+using Microsoft.Extensions.Logging;
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
-using Microsoft.Extensions.Logging;
-using AliFsmnVadSharp.Model;
-using AliFsmnVadSharp.Utils;
 
 namespace AliFsmnVadSharp
 {
-    public class AliFsmnVad
+    public class AliFsmnVad : IDisposable
     {
+        private bool _disposed;
         private InferenceSession _onnxSession;
-        private readonly ILogger<AliFsmnVad> _logger;
+        private readonly ILogger _logger;
         private string _frontend;
         private WavFrontend _wavFrontend;
         private int _batchSize = 1;
@@ -23,7 +20,7 @@ namespace AliFsmnVadSharp
 
         public AliFsmnVad(string modelFilePath, string configFilePath, string mvnFilePath, int batchSize = 1)
         {
-            Microsoft.ML.OnnxRuntime.SessionOptions options = new Microsoft.ML.OnnxRuntime.SessionOptions();
+            SessionOptions options = new SessionOptions();
             options.AppendExecutionProvider_CPU(0);
             options.InterOpNumThreads = 1;
             _onnxSession = new InferenceSession(modelFilePath, options);
@@ -371,17 +368,41 @@ namespace AliFsmnVadSharp
             }
             return speech;
         }
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    if (_onnxSession != null)
+                    {
+                        _onnxSession.Dispose();
+                    }
+                    if (_wavFrontend != null)
+                    {
+                        _wavFrontend.Dispose();
+                    }
+                    if (_encoderConfEntity != null)
+                    {
+                        _encoderConfEntity = null;
+                    }
+                    if (_vad_post_conf != null)
+                    {
+                        _vad_post_conf = null;
+                    }
+                }
+                _disposed = true;
+            }
+        }
 
-
-
-
-
-
-
-
-
-
-
-
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+        ~AliFsmnVad()
+        {
+            Dispose(_disposed);
+        }
     }
 }
