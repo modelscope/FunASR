@@ -142,7 +142,7 @@ class DistributedSamplerWarp(BatchSampler):
     def set_epoch(self, epoch):
         self.epoch = epoch
 
-
+@tables.register("batch_sampler_classes", "CustomDistributedBatchSampler_fn")
 def CustomDistributedBatchSampler_fn(dataset, **kwargs):
     dataloader_args = {"dataset": dataset}
     dataloader_args["batch_sampler"] = CustomDistributedBatchSampler(dataset, **kwargs)
