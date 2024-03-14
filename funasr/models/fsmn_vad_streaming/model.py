@@ -633,8 +633,8 @@ class FsmnVADStreaming(nn.Module):
 		
 		results = []
 		result_i = {"key": key[0], "value": segments}
-		if "MODELSCOPE_ENVIRONMENT" in os.environ and os.environ["MODELSCOPE_ENVIRONMENT"] == "eas":
-			result_i = json.dumps(result_i)
+		# if "MODELSCOPE_ENVIRONMENT" in os.environ and os.environ["MODELSCOPE_ENVIRONMENT"] == "eas":
+		# 	result_i = json.dumps(result_i)
 		
 		results.append(result_i)
 		
