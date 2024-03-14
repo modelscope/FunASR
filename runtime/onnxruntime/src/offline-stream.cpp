@@ -36,7 +36,9 @@ OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int
         string seg_dict_path;
     
         if(use_gpu){
+            #ifdef USE_GPU
             asr_handle = make_unique<ParaformerTorch>();
+            #endif
         }else{
             asr_handle = make_unique<Paraformer>();
         }
