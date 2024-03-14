@@ -31,7 +31,8 @@ class Fsmn_vad():
 	             quantize: bool = False,
 	             intra_op_num_threads: int = 4,
 	             max_end_sil: int = None,
-	             cache_dir: str = None
+	             cache_dir: str = None,
+	             **kwargs
 	             ):
 		
 		if not Path(model_dir).exists():
@@ -62,7 +63,7 @@ class Fsmn_vad():
 				      "\npip3 install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple"
 			
 			model = AutoModel(model=model_dir)
-			model_dir = model.export(type="onnx", quantize=quantize)
+			model_dir = model.export(type="onnx", quantize=quantize, **kwargs)
 		config_file = os.path.join(model_dir, 'config.yaml')
 		cmvn_file = os.path.join(model_dir, 'am.mvn')
 		config = read_yaml(config_file)
@@ -196,7 +197,8 @@ class Fsmn_vad_online():
 	             quantize: bool = False,
 	             intra_op_num_threads: int = 4,
 	             max_end_sil: int = None,
-	             cache_dir: str = None
+	             cache_dir: str = None,
+	             **kwargs
 	             ):
 		if not Path(model_dir).exists():
 			try:
@@ -226,7 +228,7 @@ class Fsmn_vad_online():
 				      "\npip3 install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple"
 			
 			model = AutoModel(model=model_dir)
-			model_dir = model.export(type="onnx", quantize=quantize)
+			model_dir = model.export(type="onnx", quantize=quantize, **kwargs)
 			
 		config_file = os.path.join(model_dir, 'config.yaml')
 		cmvn_file = os.path.join(model_dir, 'am.mvn')

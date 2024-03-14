@@ -90,7 +90,7 @@ class AudioDataset(torch.utils.data.Dataset):
 
         for key, data_list in outputs.items():
             if isinstance(data_list[0], torch.Tensor):
-                if data_list[0].dtype == torch.int64:
+                if data_list[0].dtype == torch.int64 or data_list[0].dtype == torch.int32:
     
                     pad_value = self.int_pad_value
                 else:
@@ -192,7 +192,7 @@ class AudioDatasetHotword(AudioDataset):
 
         for key, data_list in outputs.items():
             if isinstance(data_list[0], torch.Tensor):
-                if data_list[0].dtype == torch.int64:
+                if data_list[0].dtype == torch.int64 or data_list[0].dtype == torch.int32:
                     pad_value = self.int_pad_value
                 else:
                     pad_value = self.float_pad_value

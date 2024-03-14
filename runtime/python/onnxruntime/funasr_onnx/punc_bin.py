@@ -26,6 +26,7 @@ class CT_Transformer():
                  quantize: bool = False,
                  intra_op_num_threads: int = 4,
                  cache_dir: str = None,
+                 **kwargs
                  ):
     
         if not Path(model_dir).exists():
@@ -56,7 +57,7 @@ class CT_Transformer():
                       "\npip3 install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple"
 
             model = AutoModel(model=model_dir)
-            model_dir = model.export(quantize=quantize)
+            model_dir = model.export(type="onnx", quantize=quantize, **kwargs)
             
         config_file = os.path.join(model_dir, 'config.yaml')
         config = read_yaml(config_file)
@@ -168,14 +169,9 @@ class CT_Transformer_VadRealtime(CT_Transformer):
     CT-Transformer: Controllable time-delay transformer for real-time punctuation prediction and disfluency detection
     https://arxiv.org/pdf/2003.01309.pdf
     """
-    def __init__(self, model_dir: Union[str, Path] = None,
-                 batch_size: int = 1,
-                 device_id: Union[str, int] = "-1",
-                 quantize: bool = False,
-                 intra_op_num_threads: int = 4,
-                 cache_dir: str = None
+    def __init__(self, *args, **kwargs
                  ):
-        super().__init__(model_dir, batch_size, device_id, quantize, intra_op_num_threads, cache_dir=cache_dir)
+        super().__init__(*args, **kwargs)
 
     def __call__(self, text: str, param_dict: map, split_size=20):
         cache_key = "cache"

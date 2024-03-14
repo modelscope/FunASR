@@ -35,7 +35,8 @@ class Paraformer():
                  plot_timestamp_to: str = "",
                  quantize: bool = False,
                  intra_op_num_threads: int = 4,
-                 cache_dir: str = None
+                 cache_dir: str = None,
+                 **kwargs
                  ):
         if not Path(model_dir).exists():
             try:
@@ -64,7 +65,7 @@ class Paraformer():
                       "\npip3 install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple"
 
             model = AutoModel(model=model_dir)
-            model_dir = model.export(type="onnx", quantize=quantize)
+            model_dir = model.export(type="onnx", quantize=quantize, **kwargs)
             
         config_file = os.path.join(model_dir, 'config.yaml')
         cmvn_file = os.path.join(model_dir, 'am.mvn')
@@ -243,7 +244,8 @@ class ContextualParaformer(Paraformer):
                  plot_timestamp_to: str = "",
                  quantize: bool = False,
                  intra_op_num_threads: int = 4,
-                 cache_dir: str = None
+                 cache_dir: str = None,
+                 **kwargs
                  ):
 
         if not Path(model_dir).exists():
@@ -277,7 +279,7 @@ class ContextualParaformer(Paraformer):
                       "\npip3 install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple"
 
             model = AutoModel(model=model_dir)
-            model_dir = model.export(type="onnx", quantize=quantize)
+            model_dir = model.export(type="onnx", quantize=quantize, **kwargs)
             
         config_file = os.path.join(model_dir, 'config.yaml')
         cmvn_file = os.path.join(model_dir, 'am.mvn')
@@ -403,4 +405,6 @@ class ContextualParaformer(Paraformer):
     
     
 class SeacoParaformer(ContextualParaformer):
-    pass # no difference with contextual_paraformer in method of calling onnx models
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # no difference with contextual_paraformer in method of calling onnx models
