@@ -1,30 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AliFsmnVadSharp.Model;
-using AliFsmnVadSharp.DLL;
-using AliFsmnVadSharp.Struct;
-using System.Runtime.InteropServices;
+﻿using AliFsmnVadSharp.Model;
+using KaldiNativeFbankSharp;
 
 namespace AliFsmnVadSharp
 {
-    internal class WavFrontend
+    internal class WavFrontend : IDisposable
     {
-        private string _mvnFilePath;
+        private bool _disposed;
+
         private FrontendConfEntity _frontendConfEntity;
-        IntPtr _opts = IntPtr.Zero;
+        OnlineFbank _onlineFbank;
         private CmvnEntity _cmvnEntity;
 
         private static int _fbank_beg_idx = 0;
 
         public WavFrontend(string mvnFilePath, FrontendConfEntity frontendConfEntity)
         {
-            _mvnFilePath = mvnFilePath;
             _frontendConfEntity = frontendConfEntity;
             _fbank_beg_idx = 0;
-            _opts = KaldiNativeFbank.GetFbankOptions(
+            _onlineFbank = new OnlineFbank(
                 dither: _frontendConfEntity.dither,
                 snip_edges: true,
                 sample_rate: _frontendConfEntity.fs,
@@ -37,28 +30,7 @@ namespace AliFsmnVadSharp
         {
             float sample_rate = _frontendConfEntity.fs;
             samples = samples.Select((float x) => x * 32768f).ToArray();
-            // method1
-            //FbankDatas fbankDatas = new FbankDatas();
-            //KaldiNativeFbank.GetFbanks(_knfOnlineFbank, framesNum,ref fbankDatas);
-            // method2
-            KnfOnlineFbank _knfOnlineFbank = KaldiNativeFbank.GetOnlineFbank(_opts);
-            KaldiNativeFbank.AcceptWaveform(_knfOnlineFbank, sample_rate, samples, samples.Length);
-            KaldiNativeFbank.InputFinished(_knfOnlineFbank);
-            int framesNum = KaldiNativeFbank.GetNumFramesReady(_knfOnlineFbank);
-            float[] fbanks = new float[framesNum * 80];
-            for (int i = 0; i < framesNum; i++)
-            {
-                FbankData fbankData = new FbankData();
-                KaldiNativeFbank.GetFbank(_knfOnlineFbank, i, ref fbankData);
-                float[] _fbankData = new float[fbankData.data_length];
-                Marshal.Copy(fbankData.data, _fbankData, 0, fbankData.data_length);
-                Array.Copy(_fbankData, 0, fbanks, i * 80, _fbankData.Length);
-                fbankData.data = IntPtr.Zero;
-                _fbankData = null;
-            }
-
-            samples = null;
-            GC.Collect();
+            float[] fbanks = _onlineFbank.GetFbank(samples);
             return fbanks;
         }
 
@@ -180,6 +152,29 @@ namespace AliFsmnVadSharp
             cmvnEntity.Vars = vars_list;
             return cmvnEntity;
         }
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    if (_onlineFbank != null)
+                    {
+                        _onlineFbank.Dispose();
+                    }
+                }
+                _disposed = true;
+            }
+        }
 
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+        ~WavFrontend()
+        {
+            Dispose(_disposed);
+        }
     }
 }
