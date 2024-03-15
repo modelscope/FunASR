@@ -66,15 +66,9 @@ def main(**kwargs):
         dist.init_process_group(backend=kwargs.get("backend", "nccl"), init_method='env://')
         torch.cuda.set_device(local_rank)
         
-    device = kwargs.get("device", "cpu")
+    device = kwargs.get("device", "cuda")
     kwargs["device"] = "cpu"
     model = AutoModel(**kwargs)
-    kwargs["device"] = device
-    model = model.model
-    del kwargs["model"]
-    tokenizer = kwargs["tokenizer"]
-    frontend = kwargs["frontend"]
-    
     
     
     # save config.yaml
@@ -83,6 +77,14 @@ def main(**kwargs):
         yaml_file = os.path.join(kwargs.get("output_dir", "./"), "config.yaml")
         OmegaConf.save(config=kwargs, f=yaml_file)
         logging.info("config.yaml is saved to: %s", yaml_file)
+    
+    # parse kwargs
+    kwargs = model.kwargs
+    kwargs["device"] = device
+    tokenizer = kwargs["tokenizer"]
+    frontend = kwargs["frontend"]
+    model = model.model
+    del kwargs["model"]
 
     # freeze_param
     freeze_param = kwargs.get("freeze_param", None)
@@ -106,7 +108,8 @@ def main(**kwargs):
         model = FSDP(model).cuda(local_rank)
     else:
         model = model.to(device=kwargs.get("device", "cuda"))
-        
+
+    kwargs["device"] = next(model.parameters()).device
         
     # optim
     optim = kwargs.get("optim", "adam")
@@ -140,6 +143,7 @@ def main(**kwargs):
     trainer = Trainer(local_rank=local_rank,
                       use_ddp=use_ddp,
                       resume=kwargs.get("resume", True),
+                      device=kwargs["device"],
                       **kwargs.get("train_conf"),
                       )
 
