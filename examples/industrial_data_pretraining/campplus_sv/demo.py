@@ -5,7 +5,7 @@
 
 from funasr import AutoModel
 
-model = AutoModel(model="damo/speech_campplus_sv_zh-cn_16k-common",
+model = AutoModel(model="iic/speech_campplus_sv_zh-cn_16k-common",
                   model_revision="v2.0.2",
                   )
 

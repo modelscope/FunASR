@@ -1,5 +1,5 @@
 
-model="damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404"
+model="iic/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404"
 model_revision="v2.0.4"
 
 python ../../../funasr/bin/inference.py \

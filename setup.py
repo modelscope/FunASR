@@ -14,16 +14,14 @@ requirements = {
         "librosa",
         "jamo",  # For kss
         "PyYAML>=5.1.2",
-        # "soundfile>=0.12.1",
+        "soundfile>=0.12.1",
         "kaldiio>=2.17.0",
         "torch_complex",
         # "nltk>=3.4.5",
-        # ASR
         "sentencepiece", # train
         "jieba",
-        # "rotary_embedding_torch",
+        "rotary_embedding_torch",
         # "ffmpeg-python",
-        # TTS
         # "pypinyin>=0.44.0",
         # "espnet_tts_frontend",
         # ENH
@@ -54,6 +52,7 @@ requirements = {
         "torch_optimizer",
         "fairscale",
         "transformers",
+        "openai-whisper"
     ],
     "setup": [
         "numpy",
@@ -96,6 +95,7 @@ requirements = {
     ],
 }
 requirements["all"].extend(requirements["train"])
+requirements["all"].extend(requirements["llm"])
 requirements["test"].extend(requirements["train"])
 
 install_requires = requirements["install"]

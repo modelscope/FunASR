@@ -106,7 +106,7 @@ funasr ++model=paraformer-zh ++vad_model="fsmn-vad" ++punc_model="ct-punc" ++inp
 from funasr import AutoModel
 # paraformer-zh is a multi-functional asr model
 # use vad, punc, spk or not as you need
-model = AutoModel(model="paraformer-zh",  vad_model="fsmn-vad", punc_model="ct-punc-c", 
+model = AutoModel(model="paraformer-zh",  vad_model="fsmn-vad", punc_model="ct-punc", 
                   # spk_model="cam++"
                   )
 res = model.generate(input=f"{model.model_path}/example/asr_example.wav", 

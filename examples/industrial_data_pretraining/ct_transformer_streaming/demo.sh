@@ -1,5 +1,5 @@
 
-model="damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727"
+model="iic/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727"
 model_revision="v2.0.4"
 
 python funasr/bin/inference.py \
