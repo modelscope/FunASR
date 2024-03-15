@@ -621,13 +621,17 @@ class LLMASRNARPrompt(nn.Module):
         speech_lengths = speech_lengths.to(device=kwargs["device"])
         
         # Encoder
-        encoder_out, encoder_out_lens = self.encode(speech, speech_lengths, text_token_int=text_token_int)
+        res = self.encode(speech, speech_lengths, text_token_int=text_token_int)
+        encoder_out = res[0]
         
         # adaptor
         encoder_out = self.adaptor(encoder_out)
         
         prompt_pre = "USER: \nINSTRUCTION: {}\nINPUT: ".format(prompt)
         prompt_ids = tokenizer.encode(prompt_pre)
+        if prompt_ids[0] == self.tokenizer.bos_token_id:
+            prompt_ids = prompt_ids[1:]
+        prompt_ids = prompt_ids + [tokenizer.pad_token_id]
         prompt_length = len(prompt_ids)
         prompt_ids = torch.tensor(prompt_ids, dtype=torch.int64).to(kwargs["device"])
         
@@ -662,7 +666,7 @@ class LLMASRNARPrompt(nn.Module):
         preds = torch.argmax(model_outputs.logits, -1)
         text = tokenizer.batch_decode(preds, add_special_tokens=False, skip_special_tokens=True)
         
-        text = text[0].split(': ')[-1]
+        text = text[0].split(':')[-1]
         text = text.strip()
         
         # preds = torch.argmax(model_outputs.logits, -1)
