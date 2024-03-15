@@ -173,68 +173,9 @@ class CTTransformerStreaming(CTTransformer):
     
         return results, meta_data
 
-    def export(
-        self,
-        **kwargs,
-    ):
+    def export(self, **kwargs):
     
-        is_onnx = kwargs.get("type", "onnx") == "onnx"
-        encoder_class = tables.encoder_classes.get(kwargs["encoder"] + "Export")
-        self.encoder = encoder_class(self.encoder, onnx=is_onnx)
-    
-        self.forward = self.export_forward
-    
-        return self
+        from .export_meta import export_rebuild_model
+        models = export_rebuild_model(model=self, **kwargs)
+        return models
 
-    def export_forward(self, inputs: torch.Tensor,
-                text_lengths: torch.Tensor,
-                vad_indexes: torch.Tensor,
-                sub_masks: torch.Tensor,
-                ):
-        """Compute loss value from buffer sequences.
-
-        Args:
-            input (torch.Tensor): Input ids. (batch, len)
-            hidden (torch.Tensor): Target ids. (batch, len)
-
-        """
-        x = self.embed(inputs)
-        # mask = self._target_mask(input)
-        h, _ = self.encoder(x, text_lengths, vad_indexes, sub_masks)
-        y = self.decoder(h)
-        return y
-
-    def export_dummy_inputs(self):
-        length = 120
-        text_indexes = torch.randint(0, self.embed.num_embeddings, (1, length)).type(torch.int32)
-        text_lengths = torch.tensor([length], dtype=torch.int32)
-        vad_mask = torch.ones(length, length, dtype=torch.float32)[None, None, :, :]
-        sub_masks = torch.ones(length, length, dtype=torch.float32)
-        sub_masks = torch.tril(sub_masks).type(torch.float32)
-        return (text_indexes, text_lengths, vad_mask, sub_masks[None, None, :, :])
-
-    def export_input_names(self):
-        return ['inputs', 'text_lengths', 'vad_masks', 'sub_masks']
-
-    def export_output_names(self):
-        return ['logits']
-
-    def export_dynamic_axes(self):
-        return {
-            'inputs': {
-                1: 'feats_length'
-            },
-            'vad_masks': {
-                2: 'feats_length1',
-                3: 'feats_length2'
-            },
-            'sub_masks': {
-                2: 'feats_length1',
-                3: 'feats_length2'
-            },
-            'logits': {
-                1: 'logits_length'
-            },
-        }
-    def export_name(self):
-        return "model.onnx"

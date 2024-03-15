@@ -5,13 +5,13 @@
 
 from funasr import AutoModel
 
-model = AutoModel(model="damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch",
+model = AutoModel(model="iic/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch",
                   model_revision="v2.0.4",
-                  vad_model="damo/speech_fsmn_vad_zh-cn-16k-common-pytorch",
+                  vad_model="iic/speech_fsmn_vad_zh-cn-16k-common-pytorch",
                   vad_model_revision="v2.0.4",
-                  punc_model="damo/punc_ct-transformer_zh-cn-common-vocab272727-pytorch",
+                  punc_model="iic/punc_ct-transformer_cn-en-common-vocab471067-large",
                   punc_model_revision="v2.0.4",
-                  # spk_model="damo/speech_campplus_sv_zh-cn_16k-common",
+                  # spk_model="iic/speech_campplus_sv_zh-cn_16k-common",
                   # spk_model_revision="v2.0.2",
                   )
 

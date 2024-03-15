@@ -5,7 +5,7 @@
 
 from funasr import AutoModel
 
-# model="damo/emotion2vec_base"
+# model="iic/emotion2vec_base"
 model = AutoModel(model="iic/emotion2vec_base_finetuned", model_revision="v2.0.4")
 
 wav_file = f"{model.model_path}/example/test.wav"
