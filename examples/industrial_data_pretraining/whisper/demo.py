@@ -8,8 +8,14 @@
 from funasr import AutoModel
 
 model = AutoModel(model="iic/Whisper-large-v3",
-                  model_revision="v2.0.4",
+                  model_revision="v2.0.5",
+                  vad_model="iic/speech_fsmn_vad_zh-cn-16k-common-pytorch",
                   )
 
-res = model.generate(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav", language=None)
+res = model.generate(
+	language=None,
+	task="transcribe",
+	batch_size_s=0,
+	input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav")
+
 print(res)
