@@ -1,5 +1,4 @@
 
-
 if(WIN32)
   include_directories(${ONNXRUNTIME_DIR}/include)
   include_directories(${FFMPEG_DIR}/include)
@@ -11,10 +10,6 @@ if(WIN32)
   add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
   SET(RELATION_SOURCE "../../onnxruntime/src/resample.cpp" "../../onnxruntime/src/util.cpp" "../../onnxruntime/src/alignedmem.cpp" "../../onnxruntime/src/encode_converter.cpp")
 endif()
-
-
-
-
 
 add_executable(funasr-wss-server "funasr-wss-server.cpp" "websocket-server.cpp" ${RELATION_SOURCE})
 add_executable(funasr-wss-server-2pass "funasr-wss-server-2pass.cpp" "websocket-server-2pass.cpp" ${RELATION_SOURCE})
