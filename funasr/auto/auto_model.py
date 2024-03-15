@@ -291,7 +291,7 @@ class AutoModel:
         # step.2 compute asr model
         model = self.model
         deep_update(kwargs, cfg)
-        batch_size = int(kwargs.get("batch_size_s", 300))*1000
+        batch_size = max(int(kwargs.get("batch_size_s", 300))*1000, 1)
         batch_size_threshold_ms = int(kwargs.get("batch_size_threshold_s", 60))*1000
         kwargs["batch_size"] = batch_size
 
