@@ -324,7 +324,7 @@ string ParaformerTorch::Forward(float* din, int len, bool input_finished, const 
 }
 
 std::vector<std::vector<float>> ParaformerTorch::CompileHotwordEmbedding(std::string &hotwords) {
-    std::vector<std::vector<float>> result;
+    std::vector<std::vector<float>> result(1, std::vector<float>(10, 0.0f));
     return result;
 }
 
