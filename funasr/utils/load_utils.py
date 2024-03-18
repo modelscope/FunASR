@@ -19,11 +19,9 @@ from subprocess import CalledProcessError, run
 
 def is_ffmpeg_installed():
     try:
-        # 尝试运行ffmpeg命令并获取其版本信息
         output = subprocess.check_output(['ffmpeg', '-version'], stderr=subprocess.STDOUT)
         return 'ffmpeg version' in output.decode('utf-8')
     except (subprocess.CalledProcessError, FileNotFoundError):
-        # 若运行ffmpeg命令失败，则认为ffmpeg未安装
         return False
     
 use_ffmpeg=False
