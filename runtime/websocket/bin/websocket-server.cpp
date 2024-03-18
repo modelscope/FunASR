@@ -72,21 +72,24 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
     int num_samples = buffer.size();  // the size of the buf
 
     if (!buffer.empty() && hotwords_embedding.size() > 0) {
-      std::string asr_result;
-      std::string stamp_res;
-      std::string stamp_sents;
+      std::string asr_result="";
+      std::string stamp_res="";
+      std::string stamp_sents="";
       try{
         FUNASR_RESULT Result = FunOfflineInferBuffer(
-            asr_handle, buffer.data(), buffer.size(), RASR_NONE, NULL, 
+            asr_handle, buffer.data(), buffer.size(), RASR_NONE, nullptr, 
             hotwords_embedding, audio_fs, wav_format, itn, decoder_handle);
-
-        asr_result = ((FUNASR_RECOG_RESULT*)Result)->msg;  // get decode result
-        stamp_res = ((FUNASR_RECOG_RESULT*)Result)->stamp;
-        stamp_sents = ((FUNASR_RECOG_RESULT*)Result)->stamp_sents;
-        FunASRFreeResult(Result);
+        if (Result != nullptr){
+          asr_result = FunASRGetResult(Result, 0);  // get decode result
+          stamp_res = FunASRGetStamp(Result);
+          stamp_sents = FunASRGetStampSents(Result);
+          FunASRFreeResult(Result);
+        } else{
+          std::this_thread::sleep_for(std::chrono::milliseconds(20));
+          LOG(ERROR) << "FUNASR_RESULT is nullptr.";
+        }
       }catch (std::exception const& e) {
         LOG(ERROR) << e.what();
-        return;
       }
 
       websocketpp::lib::error_code ec;
@@ -98,7 +101,14 @@ void WebSocketServer::do_decoder(const std::vector<char>& buffer,
         jsonresult["timestamp"] = stamp_res;
       }
       if(stamp_sents != ""){
-        jsonresult["stamp_sents"] = stamp_sents;
+        try{
+          nlohmann::json json_stamp = nlohmann::json::parse(stamp_sents);
+          jsonresult["stamp_sents"] = json_stamp;
+        }catch (std::exception const &e)
+        {
+          LOG(ERROR)<<e.what();
+          jsonresult["stamp_sents"] = "";
+        }
       }
       jsonresult["wav_name"] = wav_name;
 
@@ -297,7 +307,7 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
       }
 
       // hotwords: fst/nn
-      if(msg_data->hotwords_embedding == NULL){
+      if(msg_data->hotwords_embedding == nullptr){
         std::unordered_map<std::string, int> merged_hws_map;
         std::string nn_hotwords = "";
 
@@ -350,7 +360,7 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
       if ((jsonresult["is_speaking"] == false ||
           jsonresult["is_finished"] == true) && 
           msg_data->msg["is_eof"] != true && 
-          msg_data->hotwords_embedding != NULL) {
+          msg_data->hotwords_embedding != nullptr) {
         LOG(INFO) << "client done";
         // for offline, send all receive data to decoder engine
         std::vector<std::vector<float>> hotwords_embedding_(*(msg_data->hotwords_embedding));

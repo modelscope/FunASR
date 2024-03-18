@@ -187,7 +187,7 @@ int main(int argc, char* argv[]) {
         std::string s_itn_path = model_path[ITN_DIR];
         std::string s_lm_path = model_path[LM_DIR];
 
-        std::string python_cmd = "python -m funasr.utils.runtime_sdk_download_tool --type onnx --quantize True ";
+        std::string python_cmd = "python -m funasr.download.runtime_sdk_download_tool --type onnx --quantize True ";
 
         if(vad_dir.isSet() && !s_vad_path.empty()){
             std::string python_cmd_vad;

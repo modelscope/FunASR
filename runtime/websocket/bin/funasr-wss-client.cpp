@@ -98,11 +98,12 @@ class WebsocketClient {
         switch (msg->get_opcode()) {
             case websocketpp::frame::opcode::text:
 				total_recv=total_recv+1;
-                LOG(INFO)<< "Thread: " << this_thread::get_id() <<", on_message = " << payload;
-                LOG(INFO)<< "Thread: " << this_thread::get_id() << ", total_recv=" << total_recv << " total_send=" <<total_send;
-				if(total_recv==total_send)
+                LOG(INFO)<< "Thread: " << this_thread::get_id() << ", total_recv=" << total_recv <<", on_message = " << payload;
+                std::unique_lock<std::mutex> lock(msg_lock);
+                cv.notify_one();
+				if(close_client)
 				{
-                    LOG(INFO)<< "Thread: " << this_thread::get_id() << ", close client";
+                    LOG(INFO)<< "Thread: " << this_thread::get_id() << ", close client thread";
 					websocketpp::lib::error_code ec;
 					m_client.close(m_hdl, websocketpp::close::status::going_away, "", ec);
 					if (ec){
@@ -141,14 +142,17 @@ class WebsocketClient {
             if (i >= wav_list.size()) {
                 break;
             }
+            if (total_send !=0){
+                std::unique_lock<std::mutex> lock(msg_lock);
+                cv.wait(lock);
+            }
             total_send += 1;
             send_wav_data(wav_list[i], wav_ids[i], audio_fs, hws_map, send_hotword, use_itn);
             if(send_hotword){
                 send_hotword = false;
             }
         }
-        WaitABit(); 
-
+        close_client = true;
         asio_thread.join();
 
     }
@@ -331,8 +335,11 @@ class WebsocketClient {
   private:
     websocketpp::connection_hdl m_hdl;
     websocketpp::lib::mutex m_lock;
+    websocketpp::lib::mutex msg_lock;
+    websocketpp::lib::condition_variable cv;
     bool m_open;
     bool m_done;
+    bool close_client=false;
 	int total_send=0;
     int total_recv=0;
 };

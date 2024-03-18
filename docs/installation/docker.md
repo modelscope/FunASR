@@ -37,7 +37,7 @@ sudo systemctl start docker
 ### Image Hub
 
 #### CPU
-`registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.3.0`
+`registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.4.1`
 
 #### GPU
 

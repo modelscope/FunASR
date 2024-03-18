@@ -23,6 +23,7 @@ python server.py \
 --asr_model [asr model_name] \
 --vad_model [vad model_name] \
 --punc_model [punc model_name] \
+--device [cuda or cpu] \
 --ngpu [0 or 1] \
 --ncpu [1 or 4] \
 --hotword_path [path of hot word txt] \
@@ -44,7 +45,6 @@ More parameters:
 python server.py \
 --host [sever ip] \
 --port [sever port] \
---add_pun [add pun to result] \
 --audio_path [use audio path] 
 ```
 

@@ -11,7 +11,7 @@ from typing import Optional
 from funasr.utils.cli_utils import get_commandline_args
 from funasr.tokenizer.build_tokenizer import build_tokenizer
 from funasr.tokenizer.cleaner import TextCleaner
-from funasr.tokenizer.phoneme_tokenizer import g2p_choices
+from funasr.tokenizer.phoneme_tokenizer import g2p_classes
 from funasr.utils.types import str2bool
 from funasr.utils.types import str_or_none
 
@@ -239,7 +239,7 @@ def get_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--g2p",
         type=str_or_none,
-        choices=g2p_choices,
+        choices=g2p_classes,
         default=None,
         help="Specify g2p method if --token_type=phn",
     )

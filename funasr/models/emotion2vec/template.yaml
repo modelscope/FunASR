@@ -1,0 +1,113 @@
+# This is an example that demonstrates how to configure a model file.
+# You can modify the configuration according to your own requirements.
+
+# to print the register_table:
+# from funasr.register import tables
+# tables.print()
+
+# network architecture
+model: Emotion2vec
+model_conf:
+    loss_beta: 0.0 
+    loss_scale: null
+    depth: 8
+    start_drop_path_rate: 0.0
+    end_drop_path_rate: 0.0
+    num_heads: 12
+    norm_eps: 1e-05
+    norm_affine: true
+    encoder_dropout: 0.1
+    post_mlp_drop: 0.1
+    attention_dropout: 0.1
+    activation_dropout: 0.0
+    dropout_input: 0.0
+    layerdrop: 0.05
+    embed_dim: 768
+    mlp_ratio: 4.0
+    layer_norm_first: false
+    average_top_k_layers: 8
+    end_of_block_targets: false
+    clone_batch: 8
+    layer_norm_target_layer: false
+    batch_norm_target_layer: false
+    instance_norm_target_layer: true
+    instance_norm_targets: false
+    layer_norm_targets: false
+    ema_decay: 0.999
+    ema_same_dtype: true
+    log_norms: true
+    ema_end_decay: 0.99999
+    ema_anneal_end_step: 20000
+    ema_encoder_only: false
+    max_update: 100000
+    extractor_mode: layer_norm
+    shared_decoder: null
+    min_target_var: 0.1
+    min_pred_var: 0.01
+    supported_modality: AUDIO
+    mae_init: false
+    seed: 1
+    skip_ema: false
+    cls_loss: 1.0
+    recon_loss: 0.0
+    d2v_loss: 1.0
+    decoder_group: false
+    adversarial_training: false
+    adversarial_hidden_dim: 128
+    adversarial_weight: 0.1
+    cls_type: chunk
+    normalize: true
+
+    modalities:
+        audio:
+            type: AUDIO
+            prenet_depth: 4
+            prenet_layerdrop: 0.05
+            prenet_dropout: 0.1
+            start_drop_path_rate: 0.0
+            end_drop_path_rate: 0.0
+            num_extra_tokens: 10
+            init_extra_token_zero: true
+            mask_noise_std: 0.01
+            mask_prob_min: null
+            mask_prob: 0.5
+            inverse_mask: false
+            mask_prob_adjust: 0.05
+            keep_masked_pct: 0.0
+            mask_length: 5
+            add_masks: false
+            remove_masks: false
+            mask_dropout: 0.0
+            encoder_zero_mask: true
+            mask_channel_prob: 0.0
+            mask_channel_length: 64
+            ema_local_encoder: false
+            local_grad_mult: 1.0
+            use_alibi_encoder: true
+            alibi_scale: 1.0
+            learned_alibi: false
+            alibi_max_pos: null
+            learned_alibi_scale: true
+            learned_alibi_scale_per_head: true
+            learned_alibi_scale_per_layer: false
+            num_alibi_heads: 12
+            model_depth: 8
+            decoder:
+                decoder_dim: 384
+                decoder_groups: 16
+                decoder_kernel: 7
+                decoder_layers: 4
+                input_dropout: 0.1
+                add_positions_masked: false
+                add_positions_all: false
+                decoder_residual: true
+                projection_layers: 1
+                projection_ratio: 2.0
+            extractor_mode: layer_norm
+            feature_encoder_spec: '[(512, 10, 5)] + [(512, 3, 2)] * 4 + [(512,2,2)] + [(512,2,2)]'
+            conv_pos_width: 95
+            conv_pos_groups: 16
+            conv_pos_depth: 5
+            conv_pos_pre_ln: false
+
+

@@ -146,6 +146,7 @@
         funasr::FUNASR_VAD_RESULT* p_result = new funasr::FUNASR_VAD_RESULT;
         p_result->snippet_time = audio.GetTimeLen();
         if(p_result->snippet_time == 0){
+            p_result->segments = new vector<std::vector<int>>();
             return p_result;
         }
         
@@ -178,6 +179,7 @@
         funasr::FUNASR_VAD_RESULT* p_result = new funasr::FUNASR_VAD_RESULT;
         p_result->snippet_time = audio.GetTimeLen();
         if(p_result->snippet_time == 0){
+            p_result->segments = new vector<std::vector<int>>();
             return p_result;
         }
         
@@ -243,7 +245,7 @@
             return p_result;
         }
         if(offline_stream->UseVad()){
-            audio.Split(offline_stream);
+            audio.CutSplit(offline_stream);
         }
 
         float* buff;
@@ -299,7 +301,7 @@
                 if(!new_stamp.empty()){
                     p_result->stamp = new_stamp;
                 }
-            }
+            }           
             p_result->msg = msg_itn;
         }
 #endif
@@ -341,7 +343,7 @@
             return p_result;
         }
         if(offline_stream->UseVad()){
-            audio.Split(offline_stream);
+            audio.CutSplit(offline_stream);
         }
 
         float* buff;
@@ -401,6 +403,9 @@
             p_result->msg = msg_itn;
         }
 #endif
+        if (!(p_result->stamp).empty()){
+            p_result->stamp_sents = funasr::TimestampSentence(p_result->msg, p_result->stamp);
+        }
         return p_result;
     }
 
@@ -432,7 +437,7 @@
     _FUNASRAPI FUNASR_RESULT FunTpassInferBuffer(FUNASR_HANDLE handle, FUNASR_HANDLE online_handle, const char* sz_buf, 
                                                  int n_len, std::vector<std::vector<std::string>> &punc_cache, bool input_finished, 
                                                  int sampling_rate, std::string wav_format, ASR_TYPE mode, 
-                                                 const std::vector<std::vector<float>> &hw_emb, bool itn)
+                                                 const std::vector<std::vector<float>> &hw_emb, bool itn, FUNASR_DEC_HANDLE dec_handle)
     {
         funasr::TpassStream* tpass_stream = (funasr::TpassStream*)handle;
         funasr::TpassOnlineStream* tpass_online_stream = (funasr::TpassOnlineStream*)online_handle;
@@ -473,7 +478,7 @@
         
         audio->Split(vad_online_handle, chunk_len, input_finished, mode);
 
-        funasr::AudioFrame* frame = NULL;
+        funasr::AudioFrame* frame = nullptr;
         while(audio->FetchChunck(frame) > 0){
             string msg = ((funasr::ParaformerOnline*)asr_online_handle)->Forward(frame->data, frame->len, frame->is_final);
             if(mode == ASR_ONLINE){
@@ -497,16 +502,21 @@
             }else if(mode == ASR_TWO_PASS){
                 p_result->msg += msg;
             }
-            if(frame != NULL){
+            if(frame != nullptr){
                 delete frame;
-                frame = NULL;
+                frame = nullptr;
             }
         }
 
         // timestamp
         std::string cur_stamp = "[";        
         while(audio->FetchTpass(frame) > 0){
-            string msg = ((funasr::Paraformer*)asr_handle)->Forward(frame->data, frame->len, frame->is_final, hw_emb);
+            // dec reset
+            funasr::WfstDecoder* wfst_decoder = (funasr::WfstDecoder*)dec_handle;
+            if (wfst_decoder){
+                wfst_decoder->StartUtterance();
+            }
+            string msg = ((funasr::Paraformer*)asr_handle)->Forward(frame->data, frame->len, frame->is_final, hw_emb, dec_handle);
 
             std::vector<std::string> msg_vec = funasr::split(msg, '|');  // split with timestamp
             if(msg_vec.size()==0){
@@ -549,9 +559,9 @@
             if (!(p_result->stamp).empty()){
                 p_result->stamp_sents = funasr::TimestampSentence(p_result->tpass_msg, p_result->stamp);
             }
-            if(frame != NULL){
+            if(frame != nullptr){
                 delete frame;
-                frame = NULL;
+                frame = nullptr;
             }
         }
 
@@ -605,7 +615,7 @@
         return p_result->stamp.c_str();
     }
 
-    _FUNASRAPI const char* FunASRGetStampSents(FUNASR_RESULT result)
+        _FUNASRAPI const char* FunASRGetStampSents(FUNASR_RESULT result)
     {
         funasr::FUNASR_RECOG_RESULT * p_result = (funasr::FUNASR_RECOG_RESULT*)result;
         if(!p_result)
@@ -757,8 +767,14 @@
             funasr::OfflineStream* offline_stream = (funasr::OfflineStream*)handle;
             funasr::Paraformer* paraformer = (funasr::Paraformer*)offline_stream->asr_handle.get();
             if (paraformer->lm_)
+                mm = new funasr::WfstDecoder(paraformer->lm_.get(),
+                    paraformer->GetPhoneSet(), paraformer->GetLmVocab(), glob_beam, lat_beam, am_scale);
+        } else if (asr_type == ASR_TWO_PASS){
+            funasr::TpassStream* tpass_stream = (funasr::TpassStream*)handle;
+            funasr::Paraformer* paraformer = (funasr::Paraformer*)tpass_stream->asr_handle.get();
+            if (paraformer->lm_)
                 mm = new funasr::WfstDecoder(paraformer->lm_.get(), 
-                    paraformer->GetPhoneSet(), paraformer->GetVocab(), glob_beam, lat_beam, am_scale);
+                    paraformer->GetPhoneSet(), paraformer->GetLmVocab(), glob_beam, lat_beam, am_scale);
         }
         return mm;
     }

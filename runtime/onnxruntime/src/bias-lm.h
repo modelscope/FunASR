@@ -48,7 +48,7 @@ class BiasLm {
     std::vector<std::vector<int>> split_id_vec;
 
     struct timeval start, end;
-    gettimeofday(&start, NULL);
+    gettimeofday(&start, nullptr);
 
     LoadCfgFromYaml(cfg_file.c_str(), opt_);
     while (getline(ifs_hws, line)) {
@@ -86,7 +86,7 @@ class BiasLm {
     BuildGraph(split_id_vec, custom_weight);
     ifs_hws.close();
 
-    gettimeofday(&end, NULL);
+    gettimeofday(&end, nullptr);
     long seconds = (end.tv_sec - start.tv_sec);
     long modle_init_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
     LOG(INFO) << "Build bias lm takes " << (double)modle_init_micros / 1000000 << " s";
@@ -99,7 +99,7 @@ class BiasLm {
     std::vector<std::vector<int>> split_id_vec;
 
     struct timeval start, end;
-    gettimeofday(&start, NULL);
+    gettimeofday(&start, nullptr);
     opt_.incre_bias_ = inc_bias;
     for (const pair<string, int>& kv : hws_map) {
       float score = 1.0f;
@@ -128,7 +128,7 @@ class BiasLm {
     }
     BuildGraph(split_id_vec, custom_weight);
 
-    gettimeofday(&end, NULL);
+    gettimeofday(&end, nullptr);
     long seconds = (end.tv_sec - start.tv_sec);
     long modle_init_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
     LOG(INFO) << "Build bias lm takes " << (double)modle_init_micros / 1000000 << " s";

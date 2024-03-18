@@ -17,8 +17,8 @@ args = parser.parse_args()
 
 from funasr.runtime.python.libtorch.funasr_torch import Paraformer
 if args.backend == "onnx":
-	from funasr.runtime.python.onnxruntime.funasr_onnx import Paraformer
-	
+    from funasr.runtime.python.onnxruntime.funasr_onnx import Paraformer
+    
 model = Paraformer(args.model_dir, batch_size=1, quantize=args.quantize, intra_op_num_threads=args.intra_op_num_threads)
 
 wav_file_f = open(args.wav_file, 'r')
@@ -26,23 +26,23 @@ wav_files = wav_file_f.readlines()
 
 output_dir = args.output_dir
 if not os.path.exists(output_dir):
-	os.makedirs(output_dir)
+    os.makedirs(output_dir)
 if os.name == 'nt':   # Windows
-	newline = '\r\n'
+    newline = '\r\n'
 else:   # Linux Mac
-	newline = '\n'
+    newline = '\n'
 text_f = open(os.path.join(output_dir, "text"), "w", newline=newline)
 token_f = open(os.path.join(output_dir, "token"), "w", newline=newline)
 
 for i, wav_path_i in enumerate(wav_files):
-	wav_name, wav_path = wav_path_i.strip().split()
-	result = model(wav_path)
-	text_i = "{} {}\n".format(wav_name, result[0]['preds'][0])
-	token_i = "{} {}\n".format(wav_name, result[0]['preds'][1])
-	text_f.write(text_i)
-	text_f.flush()
-	token_f.write(token_i)
-	token_f.flush()
+    wav_name, wav_path = wav_path_i.strip().split()
+    result = model(wav_path)
+    text_i = "{} {}\n".format(wav_name, result[0]['preds'][0])
+    token_i = "{} {}\n".format(wav_name, result[0]['preds'][1])
+    text_f.write(text_i)
+    text_f.flush()
+    token_f.write(token_i)
+    token_f.flush()
 text_f.close()
 token_f.close()
-	
+    

@@ -31,7 +31,8 @@ class Fsmn_vad():
 	             quantize: bool = False,
 	             intra_op_num_threads: int = 4,
 	             max_end_sil: int = None,
-	             cache_dir: str = None
+	             cache_dir: str = None,
+	             **kwargs
 	             ):
 		
 		if not Path(model_dir).exists():
@@ -54,21 +55,17 @@ class Fsmn_vad():
 		if not os.path.exists(model_file):
 			print(".onnx is not exist, begin to export onnx")
 			try:
-				from funasr.export.export_model import ModelExport
+				from funasr import AutoModel
 			except:
 				raise "You are exporting onnx, please install funasr and try it again. To install funasr, you could:\n" \
 				      "\npip3 install -U funasr\n" \
 				      "For the users in China, you could install with the command:\n" \
 				      "\npip3 install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple"
-			export_model = ModelExport(
-				cache_dir=cache_dir,
-				onnx=True,
-				device="cpu",
-				quant=quantize,
-			)
-			export_model.export(model_dir)
-		config_file = os.path.join(model_dir, 'vad.yaml')
-		cmvn_file = os.path.join(model_dir, 'vad.mvn')
+			
+			model = AutoModel(model=model_dir)
+			model_dir = model.export(type="onnx", quantize=quantize, **kwargs)
+		config_file = os.path.join(model_dir, 'config.yaml')
+		cmvn_file = os.path.join(model_dir, 'am.mvn')
 		config = read_yaml(config_file)
 		
 		self.frontend = WavFrontend(
@@ -77,8 +74,8 @@ class Fsmn_vad():
 		)
 		self.ort_infer = OrtInferSession(model_file, device_id, intra_op_num_threads=intra_op_num_threads)
 		self.batch_size = batch_size
-		self.vad_scorer = E2EVadModel(config["vad_post_conf"])
-		self.max_end_sil = max_end_sil if max_end_sil is not None else config["vad_post_conf"]["max_end_silence_time"]
+		self.vad_scorer = E2EVadModel(config["model_conf"])
+		self.max_end_sil = max_end_sil if max_end_sil is not None else config["model_conf"]["max_end_silence_time"]
 		self.encoder_conf = config["encoder_conf"]
 	
 	def prepare_cache(self, in_cache: list = []):
@@ -200,7 +197,8 @@ class Fsmn_vad_online():
 	             quantize: bool = False,
 	             intra_op_num_threads: int = 4,
 	             max_end_sil: int = None,
-	             cache_dir: str = None
+	             cache_dir: str = None,
+	             **kwargs
 	             ):
 		if not Path(model_dir).exists():
 			try:
@@ -222,21 +220,18 @@ class Fsmn_vad_online():
 		if not os.path.exists(model_file):
 			print(".onnx is not exist, begin to export onnx")
 			try:
-				from funasr.export.export_model import ModelExport
+				from funasr import AutoModel
 			except:
 				raise "You are exporting onnx, please install funasr and try it again. To install funasr, you could:\n" \
 				      "\npip3 install -U funasr\n" \
 				      "For the users in China, you could install with the command:\n" \
 				      "\npip3 install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple"
-			export_model = ModelExport(
-				cache_dir=cache_dir,
-				onnx=True,
-				device="cpu",
-				quant=quantize,
-			)
-			export_model.export(model_dir)
-		config_file = os.path.join(model_dir, 'vad.yaml')
-		cmvn_file = os.path.join(model_dir, 'vad.mvn')
+			
+			model = AutoModel(model=model_dir)
+			model_dir = model.export(type="onnx", quantize=quantize, **kwargs)
+			
+		config_file = os.path.join(model_dir, 'config.yaml')
+		cmvn_file = os.path.join(model_dir, 'am.mvn')
 		config = read_yaml(config_file)
 		
 		self.frontend = WavFrontendOnline(
@@ -245,8 +240,8 @@ class Fsmn_vad_online():
 		)
 		self.ort_infer = OrtInferSession(model_file, device_id, intra_op_num_threads=intra_op_num_threads)
 		self.batch_size = batch_size
-		self.vad_scorer = E2EVadModel(config["vad_post_conf"])
-		self.max_end_sil = max_end_sil if max_end_sil is not None else config["vad_post_conf"]["max_end_silence_time"]
+		self.vad_scorer = E2EVadModel(config["model_conf"])
+		self.max_end_sil = max_end_sil if max_end_sil is not None else config["model_conf"]["max_end_silence_time"]
 		self.encoder_conf = config["encoder_conf"]
 	
 	def prepare_cache(self, in_cache: list = []):

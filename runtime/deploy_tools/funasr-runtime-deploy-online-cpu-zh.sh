@@ -982,33 +982,33 @@ dockerRun(){
     getDockerId
     saveParams
 
-    # Hide the cursor, start draw progress.
-    printf "\e[?25l"
-    while true
-    do
-        serverProgress
-        result=$?
-        stage=`expr ${result} + 0`
-        if [ ${stage} -eq 0 ]; then
-            break
-        elif [ ${stage} -gt 0 ] && [ ${stage} -lt 6 ]; then
-            sleep 0.1
-            # clear 3 lines
-            printf "\033[3A"
-        elif [ ${stage} -eq 6 ]; then
-            break
-        elif [ ${stage} -eq 98 ]; then
-            return 98
-        else
-            echo -e "  ${RED}Starting FunASR server failed.${PLAIN}"
-            echo
-            # Display the cursor
-            printf "\e[?25h"
-            return 99
-        fi
-    done
-    # Display the cursor
-    printf "\e[?25h"
+    # # Hide the cursor, start draw progress.
+    # printf "\e[?25l"
+    # while true
+    # do
+    #     serverProgress
+    #     result=$?
+    #     stage=`expr ${result} + 0`
+    #     if [ ${stage} -eq 0 ]; then
+    #         break
+    #     elif [ ${stage} -gt 0 ] && [ ${stage} -lt 6 ]; then
+    #         sleep 0.1
+    #         # clear 3 lines
+    #         printf "\033[3A"
+    #     elif [ ${stage} -eq 6 ]; then
+    #         break
+    #     elif [ ${stage} -eq 98 ]; then
+    #         return 98
+    #     else
+    #         echo -e "  ${RED}Starting FunASR server failed.${PLAIN}"
+    #         echo
+    #         # Display the cursor
+    #         printf "\e[?25h"
+    #         return 99
+    #     fi
+    # done
+    # # Display the cursor
+    # printf "\e[?25h"
 
     echo -e "  ${GREEN}The service has been started.${PLAIN}"
     echo
@@ -1380,7 +1380,7 @@ sampleClientRun(){
                 run_cmd="${client_exec} --server-ip ${server_ip} --port ${host_port} --wav-path ${wav_path}"
                 ;;
             Python)
-                client_exec="${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/python/wss_client_asr.py"
+                client_exec="${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/python/funasr_wss_client.py"
                 run_cmd="python3 ${client_exec} --host ${server_ip} --port ${host_port} --mode 2pass --audio_in ${wav_path} --send_without_sleep --output_dir ${PARAMS_FUNASR_SAMPLES_LOCAL_DIR}/python"
                 pre_cmd="pip3 install click>=8.0.4"
                 echo -e "  Run ${BLUE}${pre_cmd}${PLAIN}"

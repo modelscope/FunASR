@@ -29,6 +29,14 @@ parser.add_argument("--chunk_size",
                     type=str,
                     default="5, 10, 5",
                     help="chunk")
+parser.add_argument("--encoder_chunk_look_back",
+                    type=int,
+                    default=4,
+                    help="chunk")
+parser.add_argument("--decoder_chunk_look_back",
+                    type=int,
+                    default=0,
+                    help="chunk")
 parser.add_argument("--chunk_interval",
                     type=int,
                     default=10,
@@ -113,25 +121,36 @@ async def record_microphone():
     fst_dict = {}
     hotword_msg = ""
     if args.hotword.strip() != "":
-        f_scp = open(args.hotword)
-        hot_lines = f_scp.readlines()
-        for line in hot_lines:
-            words = line.strip().split(" ")
-            if len(words) < 2:
-                print("Please checkout format of hotwords")
-                continue
-            try:
-                fst_dict[" ".join(words[:-1])] = int(words[-1])
-            except ValueError:
-                print("Please checkout format of hotwords")
-        hotword_msg=json.dumps(fst_dict)
+        if os.path.exists(args.hotword):
+            f_scp = open(args.hotword)
+            hot_lines = f_scp.readlines()
+            for line in hot_lines:
+                words = line.strip().split(" ")
+                if len(words) < 2:
+                    print("Please checkout format of hotwords")
+                    continue
+                try:
+                    fst_dict[" ".join(words[:-1])] = int(words[-1])
+                except ValueError:
+                    print("Please checkout format of hotwords")
+            hotword_msg = json.dumps(fst_dict)
+        else:
+            hotword_msg = args.hotword
 
-    use_itn=True
+    use_itn = True
     if args.use_itn == 0:
         use_itn=False
     
-    message = json.dumps({"mode": args.mode, "chunk_size": args.chunk_size, "chunk_interval": args.chunk_interval,
-                          "wav_name": "microphone", "is_speaking": True, "hotwords":hotword_msg, "itn": use_itn})
+    message = json.dumps({"mode": args.mode,
+                          "chunk_size": args.chunk_size,
+                          "chunk_interval": args.chunk_interval,
+                          "encoder_chunk_look_back": args.encoder_chunk_look_back,
+                          "decoder_chunk_look_back": args.decoder_chunk_look_back,
+                          "wav_name": "microphone",
+                          "is_speaking": True,
+                          "hotwords": hotword_msg,
+                          "itn": use_itn,
+                          })
     #voices.put(message)
     await websocket.send(message)
     while True:
@@ -154,18 +173,21 @@ async def record_from_scp(chunk_begin, chunk_size):
     fst_dict = {}
     hotword_msg = ""
     if args.hotword.strip() != "":
-        f_scp = open(args.hotword)
-        hot_lines = f_scp.readlines()
-        for line in hot_lines:
-            words = line.strip().split(" ")
-            if len(words) < 2:
-                print("Please checkout format of hotwords")
-                continue
-            try:
-                fst_dict[" ".join(words[:-1])] = int(words[-1])
-            except ValueError:
-                print("Please checkout format of hotwords")
-        hotword_msg=json.dumps(fst_dict)
+        if os.path.exists(args.hotword):
+            f_scp = open(args.hotword)
+            hot_lines = f_scp.readlines()
+            for line in hot_lines:
+                words = line.strip().split(" ")
+                if len(words) < 2:
+                    print("Please checkout format of hotwords")
+                    continue
+                try:
+                    fst_dict[" ".join(words[:-1])] = int(words[-1])
+                except ValueError:
+                    print("Please checkout format of hotwords")
+            hotword_msg = json.dumps(fst_dict)
+        else:
+            hotword_msg = args.hotword
         print (hotword_msg)
 
     sample_rate = args.audio_fs
@@ -186,6 +208,13 @@ async def record_from_scp(chunk_begin, chunk_size):
         if wav_path.endswith(".pcm"):
             with open(wav_path, "rb") as f:
                 audio_bytes = f.read()
+        elif wav_path.endswith(".wav"):
+            import wave
+            with wave.open(wav_path, "rb") as wav_file:
+                params = wav_file.getparams()
+                sample_rate = wav_file.getframerate()
+                frames = wav_file.readframes(wav_file.getnframes())
+                audio_bytes = bytes(frames)        
         else:
             wav_format = "others"
             with open(wav_path, "rb") as f:
@@ -196,8 +225,17 @@ async def record_from_scp(chunk_begin, chunk_size):
         # print(stride)
 
         # send first time
-        message = json.dumps({"mode": args.mode, "chunk_size": args.chunk_size, "chunk_interval": args.chunk_interval, "audio_fs":sample_rate,
-                          "wav_name": wav_name, "wav_format": wav_format, "is_speaking": True, "hotwords":hotword_msg, "itn": use_itn})
+        message = json.dumps({"mode": args.mode,
+                              "chunk_size": args.chunk_size,
+                              "chunk_interval": args.chunk_interval,
+                              "encoder_chunk_look_back": args.encoder_chunk_look_back,
+                              "decoder_chunk_look_back": args.decoder_chunk_look_back,
+                              "audio_fs":sample_rate,
+                              "wav_name": wav_name,
+                              "wav_format": wav_format,
+                              "is_speaking": True,
+                              "hotwords": hotword_msg,
+                              "itn": use_itn})
 
         #voices.put(message)
         await websocket.send(message)

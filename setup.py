@@ -10,29 +10,23 @@ from setuptools import setup
 
 requirements = {
     "install": [
-        # "setuptools>=38.5.1",
-        "humanfriendly",
         "scipy>=1.4.1",
         "librosa",
         "jamo",  # For kss
         "PyYAML>=5.1.2",
-        # "soundfile>=0.12.1",
-        # "h5py>=3.1.0",
+        "soundfile>=0.12.1",
         "kaldiio>=2.17.0",
         "torch_complex",
         # "nltk>=3.4.5",
-        # ASR
         "sentencepiece", # train
         "jieba",
-        # "rotary_embedding_torch",
+        "rotary_embedding_torch",
         # "ffmpeg-python",
-        # TTS
         # "pypinyin>=0.44.0",
         # "espnet_tts_frontend",
         # ENH
         "pytorch_wpe",
         "editdistance>=0.5.2",
-        "tensorboard",
         # "g2p",
         # "nara_wpe",
         # PAI
@@ -41,14 +35,15 @@ requirements = {
         # "textgrid",
         # "protobuf",
         "tqdm",
-        "hdbscan",
-        "umap",
+        "umap_learn",
         "jaconv",
+        "hydra-core>=1.3.2",
+        "tensorboardX",
+        "rotary_embedding_torch",
     ],
     # train: The modules invoked when training only.
     "train": [
         "editdistance",
-        "wandb",
     ],
     # all: The modules should be optionally installled due to some reason.
     #      Please consider moving them to "install" occasionally
@@ -57,6 +52,7 @@ requirements = {
         "torch_optimizer",
         "fairscale",
         "transformers",
+        "openai-whisper"
     ],
     "setup": [
         "numpy",
@@ -86,8 +82,20 @@ requirements = {
         "sphinx-markdown-tables>=0.0.12",
         "configargparse>=1.2.1"
     ],
+    "llm":[
+        "transformers>=4.32.0",
+        "accelerate",
+        "tiktoken",
+        "einops",
+        "transformers_stream_generator>=0.0.4",
+        "scipy",
+        "torchvision",
+        "pillow",
+        "matplotlib",
+    ],
 }
 requirements["all"].extend(requirements["train"])
+requirements["all"].extend(requirements["llm"])
 requirements["test"].extend(requirements["train"])
 
 install_requires = requirements["install"]
@@ -131,6 +139,7 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
     entry_points={"console_scripts": [
-        "funasr = funasr.bin.inference_cli:main",
+        "funasr = funasr.bin.inference:main_hydra",
+        "funasr-export = funasr.bin.export:main_hydra",
     ]},
 )
