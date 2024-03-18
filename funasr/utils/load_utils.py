@@ -30,7 +30,10 @@ use_ffmpeg=False
 if is_ffmpeg_installed():
     use_ffmpeg = True
 else:
-    print("Notice: ffmpeg is not installed. torchaudio is used to load audio")
+    print("Notice: ffmpeg is not installed. torchaudio is used to load audio\n"
+          "If you want use ffmpeg backend to load audio, please install it by:"
+          "\n\tsudo apt install ffmpeg # ubuntu"
+          "\n\t# brew install ffmpeg # mac")
 
 def load_audio_text_image_video(data_or_path_or_list, fs: int = 16000, audio_fs: int = 16000, data_type="sound", tokenizer=None, **kwargs):
     if isinstance(data_or_path_or_list, (list, tuple)):
