@@ -29,7 +29,7 @@ try:
     from funasr.models.campplus.utils import sv_chunk, postprocess, distribute_spk
     from funasr.models.campplus.cluster_backend import ClusterBackend
 except:
-    print("If you want to use the speaker diarization, please `pip install hdbscan`")
+    print("Notice: If you want to use the speaker diarization, please `pip install hdbscan`")
 
 
 def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
