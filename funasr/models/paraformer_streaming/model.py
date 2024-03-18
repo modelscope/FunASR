@@ -531,6 +531,8 @@ class ParaformerStreaming(Paraformer):
         for i in range(n):
             kwargs["is_final"] = _is_final and i == n -1
             audio_sample_i = audio_sample[i*chunk_stride_samples:(i+1)*chunk_stride_samples]
+            if kwargs["is_final"] and len(audio_sample_i) < 960:
+                continue
 
             # extract fbank feats
             speech, speech_lengths = extract_fbank([audio_sample_i], data_type=kwargs.get("data_type", "sound"),
