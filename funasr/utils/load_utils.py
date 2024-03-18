@@ -14,7 +14,23 @@ try:
 except:
     print("urllib is not installed, if you infer from url, please install it first.")
 import pdb
+import subprocess
+from subprocess import CalledProcessError, run
 
+def is_ffmpeg_installed():
+    try:
+        # 尝试运行ffmpeg命令并获取其版本信息
+        output = subprocess.check_output(['ffmpeg', '-version'], stderr=subprocess.STDOUT)
+        return 'ffmpeg version' in output.decode('utf-8')
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        # 若运行ffmpeg命令失败，则认为ffmpeg未安装
+        return False
+    
+use_ffmpeg=False
+if is_ffmpeg_installed():
+    use_ffmpeg
+else:
+    print("Warning: ffmpeg is not installed. torchaudio is used to load audio")
 
 def load_audio_text_image_video(data_or_path_or_list, fs: int = 16000, audio_fs: int = 16000, data_type="sound", tokenizer=None, **kwargs):
     if isinstance(data_or_path_or_list, (list, tuple)):
@@ -34,9 +50,13 @@ def load_audio_text_image_video(data_or_path_or_list, fs: int = 16000, audio_fs:
 
     if isinstance(data_or_path_or_list, str) and os.path.exists(data_or_path_or_list): # local file
         if data_type is None or data_type == "sound":
-            data_or_path_or_list, audio_fs = torchaudio.load(data_or_path_or_list)
-            if kwargs.get("reduce_channels", True):
-                data_or_path_or_list = data_or_path_or_list.mean(0)
+            if use_ffmpeg:
+                data_or_path_or_list = _load_audio_ffmpeg(data_or_path_or_list, sr=fs)
+                data_or_path_or_list = torch.from_numpy(data_or_path_or_list).squeeze()  # [n_samples,]
+            else:
+                data_or_path_or_list, audio_fs = torchaudio.load(data_or_path_or_list)
+                if kwargs.get("reduce_channels", True):
+                    data_or_path_or_list = data_or_path_or_list.mean(0)
         elif data_type == "text" and tokenizer is not None:
             data_or_path_or_list = tokenizer.encode(data_or_path_or_list)
         elif data_type == "image": # undo
@@ -113,3 +133,41 @@ def extract_fbank(data, data_len = None, data_type: str="sound", frontend=None, 
         data_len = torch.tensor([data_len])
     return data.to(torch.float32), data_len.to(torch.int32)
 
+def _load_audio_ffmpeg(file: str, sr: int = 16000):
+    """
+    Open an audio file and read as mono waveform, resampling as necessary
+
+    Parameters
+    ----------
+    file: str
+        The audio file to open
+
+    sr: int
+        The sample rate to resample the audio if necessary
+
+    Returns
+    -------
+    A NumPy array containing the audio waveform, in float32 dtype.
+    """
+
+    # This launches a subprocess to decode audio while down-mixing
+    # and resampling as necessary.  Requires the ffmpeg CLI in PATH.
+    # fmt: off
+    cmd = [
+        "ffmpeg",
+        "-nostdin",
+        "-threads", "0",
+        "-i", file,
+        "-f", "s16le",
+        "-ac", "1",
+        "-acodec", "pcm_s16le",
+        "-ar", str(sr),
+        "-"
+    ]
+    # fmt: on
+    try:
+        out = run(cmd, capture_output=True, check=True).stdout
+    except CalledProcessError as e:
+        raise RuntimeError(f"Failed to load audio: {e.stderr.decode()}") from e
+
+    return np.frombuffer(out, np.int16).flatten().astype(np.float32) / 32768.0
