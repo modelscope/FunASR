@@ -29,7 +29,7 @@ if is_ffmpeg_installed():
     use_ffmpeg = True
 else:
     print("Notice: ffmpeg is not installed. torchaudio is used to load audio\n"
-          "If you want use ffmpeg backend to load audio, please install it by:"
+          "If you want to use ffmpeg backend to load audio, please install it by:"
           "\n\tsudo apt install ffmpeg # ubuntu"
           "\n\t# brew install ffmpeg # mac")
 
