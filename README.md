@@ -227,7 +227,7 @@ model = AutoModel(model="paraformer", device="cpu")
 res = model.export(quantize=False)
 ```
 
-### Text ONNX
+### Test ONNX
 ```python
 # pip3 install -U funasr-onnx
 from funasr_onnx import Paraformer
