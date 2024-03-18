@@ -28,9 +28,9 @@ def is_ffmpeg_installed():
     
 use_ffmpeg=False
 if is_ffmpeg_installed():
-    use_ffmpeg
+    use_ffmpeg = True
 else:
-    print("Warning: ffmpeg is not installed. torchaudio is used to load audio")
+    print("Notice: ffmpeg is not installed. torchaudio is used to load audio")
 
 def load_audio_text_image_video(data_or_path_or_list, fs: int = 16000, audio_fs: int = 16000, data_type="sound", tokenizer=None, **kwargs):
     if isinstance(data_or_path_or_list, (list, tuple)):
