@@ -312,7 +312,8 @@ class AutoModel:
             key = res[i]["key"]
             vadsegments = res[i]["value"]
             input_i = data_list[i]
-            speech = load_audio_text_image_video(input_i, fs=kwargs["frontend"].fs, audio_fs=kwargs.get("fs", 16000))
+            fs = kwargs["frontend"].fs if hasattr(kwargs["frontend"], "fs") else 16000
+            speech = load_audio_text_image_video(input_i, fs=fs, audio_fs=kwargs.get("fs", 16000))
             speech_lengths = len(speech)
             n = len(vadsegments)
             data_with_index = [(vadsegments[i], i) for i in range(n)]
