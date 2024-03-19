@@ -75,6 +75,7 @@ def apply_lfr(inputs, lfr_m, lfr_n):
     LFR_outputs = torch.vstack(LFR_inputs)
     return LFR_outputs.type(torch.float32)
 
+@tables.register("frontend_classes", "wav_frontend")
 @tables.register("frontend_classes", "WavFrontend")
 class WavFrontend(nn.Module):
     """Conventional frontend structure for ASR.
