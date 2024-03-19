@@ -106,9 +106,9 @@ class AutoModel:
         
         # if vad_model is not None, build vad model else None
         vad_model = kwargs.get("vad_model", None)
+        vad_kwargs = {} if kwargs.get("vad_kwargs", {}) is None else kwargs.get("vad_kwargs", {})
         if vad_model is not None:
             logging.info("Building VAD model.")
-            vad_kwargs = {} if kwargs.get("vad_kwargs", {}) is None else kwargs.get("vad_kwargs", {})
             vad_kwargs["model"] = vad_model
             vad_kwargs["model_revision"] = kwargs.get("vad_model_revision", None)
             vad_kwargs["device"] = kwargs["device"]
@@ -116,10 +116,9 @@ class AutoModel:
 
         # if punc_model is not None, build punc model else None
         punc_model = kwargs.get("punc_model", None)
-        
+        punc_kwargs = {} if kwargs.get("punc_kwargs", {}) is None else kwargs.get("punc_kwargs", {})
         if punc_model is not None:
             logging.info("Building punc model.")
-            punc_kwargs = {} if kwargs.get("punc_kwargs", {}) is None else kwargs.get("punc_kwargs", {})
             punc_kwargs["model"] = punc_model
             punc_kwargs["model_revision"] = kwargs.get("punc_model_revision", None)
             punc_kwargs["device"] = kwargs["device"]
@@ -127,10 +126,9 @@ class AutoModel:
 
         # if spk_model is not None, build spk model else None
         spk_model = kwargs.get("spk_model", None)
-        spk_kwargs = kwargs.get("spk_model_revision", None)
+        spk_kwargs = {} if kwargs.get("spk_kwargs", {}) is None else kwargs.get("spk_kwargs", {})
         if spk_model is not None:
             logging.info("Building SPK model.")
-            spk_kwargs = {} if kwargs.get("spk_kwargs", {}) is None else kwargs.get("spk_kwargs", {})
             spk_kwargs["model"] = spk_model
             spk_kwargs["model_revision"] = kwargs.get("spk_model_revision", None)
             spk_kwargs["device"] = kwargs["device"]
