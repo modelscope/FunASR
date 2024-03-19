@@ -280,6 +280,7 @@ string ParaformerTorch::Forward(float* din, int len, bool input_finished, const 
     paraformer_length.emplace_back(num_frames);
 
     torch::NoGradGuard no_grad;
+    model_->eval();
     torch::Tensor feats =
         torch::from_blob(wav_feats.data(),
                 {1, num_frames, feat_dim}, torch::kFloat).contiguous();
@@ -305,15 +306,49 @@ string ParaformerTorch::Forward(float* din, int len, bool input_finished, const 
         am_scores = outputs[0].toTensor();
         valid_token_lens = outputs[1].toTensor();
         #endif
-        
-        if (lm_ == nullptr) {
-            result = GreedySearch(am_scores[0].data_ptr<float>(), valid_token_lens[0].item<int>(), am_scores.size(2));
-        } else {
-            result = BeamSearch(wfst_decoder, am_scores[0].data_ptr<float>(), valid_token_lens[0].item<int>(), am_scores.size(2));
-            if (input_finished) {
-                result = FinalizeDecode(wfst_decoder);
+        // timestamp
+        if(outputs.size() == 4){
+            torch::Tensor us_alphas_tensor;
+            torch::Tensor us_peaks_tensor;
+            #ifdef USE_GPU
+            us_alphas_tensor = outputs[2].toTensor().to(at::kCPU);
+            us_peaks_tensor = outputs[3].toTensor().to(at::kCPU);
+            #else
+            us_alphas_tensor = outputs[2].toTensor();
+            us_peaks_tensor = outputs[3].toTensor();
+            #endif
+
+            int us_alphas_shape_1 = us_alphas_tensor.size(1);
+            float* us_alphas_data = us_alphas_tensor.data_ptr<float>();
+            std::vector<float> us_alphas(us_alphas_shape_1);
+            for (int i = 0; i < us_alphas_shape_1; i++) {
+                us_alphas[i] = us_alphas_data[i];
             }
-        }        
+
+            int us_peaks_shape_1 = us_peaks_tensor.size(1);
+            float* us_peaks_data = us_peaks_tensor.data_ptr<float>();
+            std::vector<float> us_peaks(us_peaks_shape_1);
+            for (int i = 0; i < us_peaks_shape_1; i++) {
+                us_peaks[i] = us_peaks_data[i];
+            }
+			if (lm_ == nullptr) {
+                result = GreedySearch(am_scores[0].data_ptr<float>(), valid_token_lens[0].item<int>(), am_scores.size(2), true, us_alphas, us_peaks);
+			} else {
+			    result = BeamSearch(wfst_decoder, am_scores[0].data_ptr<float>(), valid_token_lens[0].item<int>(), am_scores.size(2));
+                if (input_finished) {
+                    result = FinalizeDecode(wfst_decoder, true, us_alphas, us_peaks);
+                }
+			}
+        }else{
+            if (lm_ == nullptr) {
+                result = GreedySearch(am_scores[0].data_ptr<float>(), valid_token_lens[0].item<int>(), am_scores.size(2));
+            } else {
+                result = BeamSearch(wfst_decoder, am_scores[0].data_ptr<float>(), valid_token_lens[0].item<int>(), am_scores.size(2));
+                if (input_finished) {
+                    result = FinalizeDecode(wfst_decoder);
+                }
+            }
+        }
     }
     catch (std::exception const &e)
     {
