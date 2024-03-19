@@ -187,7 +187,8 @@ class AutoModel:
         kwargs["frontend"] = frontend
         # build model
         model_class = tables.model_classes.get(kwargs["model"])
-        model_conf = kwargs.get("model_conf", {})
+        model_conf = {}
+        deep_update(model_conf, kwargs.get("model_conf", {}))
         deep_update(model_conf, kwargs)
         model = model_class(**model_conf, vocab_size=vocab_size)
         model.to(device)
