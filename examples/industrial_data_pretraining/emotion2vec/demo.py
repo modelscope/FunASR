@@ -9,7 +9,7 @@ from funasr import AutoModel
 model = AutoModel(model="iic/emotion2vec_base_finetuned", model_revision="v2.0.4",
                   # vad_model="iic/speech_fsmn_vad_zh-cn-16k-common-pytorch",
                   # vad_model_revision="v2.0.4",
-                  # vad_kwargs={"max_single_segment_time": 1000},
+                  # vad_kwargs={"max_single_segment_time": 2000},
                   )
 
 wav_file = f"{model.model_path}/example/test.wav"
