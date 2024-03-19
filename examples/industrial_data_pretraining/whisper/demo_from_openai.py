@@ -10,7 +10,11 @@ from funasr import AutoModel
 # model = AutoModel(model="Whisper-small", hub="openai")
 # model = AutoModel(model="Whisper-medium", hub="openai")
 # model = AutoModel(model="Whisper-large-v2", hub="openai")
-model = AutoModel(model="Whisper-large-v3", hub="openai", vad_model="iic/speech_fsmn_vad_zh-cn-16k-common-pytorch",)
+model = AutoModel(model="Whisper-large-v3",
+                  vad_model="iic/speech_fsmn_vad_zh-cn-16k-common-pytorch",
+                  vad_kwargs={"max_single_segment_time": 30},
+				  hub="openai",
+                  )
 
 res = model.generate(
 	language=None,
