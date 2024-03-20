@@ -11,6 +11,7 @@ import time
 import argparse
 from io import BytesIO
 
+from contextlib import nullcontext
 import torch.distributed as dist
 from collections.abc import Sequence
 from omegaconf import DictConfig, OmegaConf
@@ -63,7 +64,7 @@ def main(**kwargs):
     # Check if we are using DDP or FSDP
     use_ddp = 'WORLD_SIZE' in os.environ and int(os.environ["WORLD_SIZE"]) > 1
     use_fsdp = kwargs.get("use_fsdp", False)
-    use_ddp = False if use_fsdp else use_fsdp
+    # use_ddp = False if use_fsdp else use_fsdp
     if use_ddp or use_fsdp:
         dist.init_process_group(backend=kwargs.get("backend", "nccl"), init_method='env://')
         torch.cuda.set_device(local_rank)
