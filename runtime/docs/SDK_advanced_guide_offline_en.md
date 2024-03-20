@@ -114,7 +114,7 @@ After completing the deployment of FunASR offline file transcription service on 
 
 ### python-client
 ```shell
-python funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "./data/wav.scp" --send_without_sleep --output_dir "./results"
+python funasr_wss_client.py --host "127.0.0.1" --port 10097 --mode offline --audio_in "./data/wav.scp" --send_without_sleep --output_dir "./results"
 ```
 
 Introduction to command parameters:
@@ -132,7 +132,7 @@ Introduction to command parameters:
 
 ### c++-client
 ```shell
-. /funasr-wss-client --server-ip 127.0.0.1 --port 10095 --wav-path test.wav --thread-num 1 --is-ssl 1
+. /funasr-wss-client --server-ip 127.0.0.1 --port 10097 --wav-path test.wav --thread-num 1 --is-ssl 1
 ```
 
 Introduction to command parameters:
