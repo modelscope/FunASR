@@ -38,7 +38,7 @@ void ParaformerTorch::InitAsr(const std::string &am_model, const std::string &am
         LOG(ERROR) << "CUDA is not available! Please check your GPU settings";
         exit(-1);
     } else {
-        LOG(INFO) << "CUDA available! Running on GPU";
+        LOG(INFO) << "CUDA is available, running on GPU";
         device = at::kCUDA;
     }
     #endif
