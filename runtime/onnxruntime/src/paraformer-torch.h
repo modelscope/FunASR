@@ -3,6 +3,7 @@
  * MIT License  (https://opensource.org/licenses/MIT)
 */
 #pragma once
+#define C10_USE_GLOG
 #include <torch/serialize.h>
 #include <torch/script.h>
 #include <torch/torch.h>
