@@ -62,6 +62,8 @@ class Trainer:
         """
         
         self.output_dir = output_dir
+        if not os.path.exists(self.output_dir):
+            os.makedirs(self.output_dir, exist_ok=True)
         self.resume = kwargs.get('resume', True)
         self.start_epoch = 0
         self.max_epoch = kwargs.get('max_epoch', 100)

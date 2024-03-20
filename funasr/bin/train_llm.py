@@ -147,6 +147,7 @@ def main(**kwargs):
     trainer = Trainer(local_rank=local_rank,
                       use_ddp=use_ddp,
                       device=kwargs["device"],
+                      output_dir=kwargs.get("output_dir", "./exp"),
                       **kwargs.get("train_conf"),
                       )
 
