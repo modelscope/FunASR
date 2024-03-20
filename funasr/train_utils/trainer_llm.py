@@ -125,8 +125,9 @@ class Trainer:
         Args:
             epoch (int): The epoch number at which the checkpoint is being saved.
         """
-        self.step_or_epoch += 1
+        
         if self.rank == 0:
+            self.step_or_epoch += 1
             state = {
                 'epoch': epoch,
                 'state_dict': model.state_dict(),
@@ -155,9 +156,9 @@ class Trainer:
             
             if self.val_acc_list[self.step_or_epoch] >= self.val_acc_list[self.best_acc_idx]:
                 self.best_acc_idx = self.step_or_epoch
-                best = Path(os.path.join(self.output_dir, f'model.pt.ep{epoch}.best'))
-                torch.save(state, best)
-                logging.info(f"Update best acc: {self.val_acc_list[self.best_acc_idx]}, {best}")
+                best_ckpt = Path(os.path.join(self.output_dir, f'model.pt.best'))
+                torch.save(state, best_ckpt)
+                logging.info(f"Update best acc: {self.val_acc_list[self.best_acc_idx]}, {best_ckpt}")
             else:
                 logging.info(f"No improvement in acc: {self.val_acc_list[self.best_acc_idx]}")
             
@@ -169,8 +170,8 @@ class Trainer:
                     if min_key in self.saved_ckpts:
                         del self.saved_ckpts[min_key]
                     filename = os.path.join(self.output_dir, min_key)
+                    logging.info(f"Delete: {filename}")
                     if os.path.exists(filename):
-                        logging.info(f"Delete: {filename}")
                         os.remove(filename)
                 
         if self.use_ddp or self.use_fsdp:
@@ -332,9 +333,11 @@ class Trainer:
     
                 speed_stats["total_time"] = total_time
                 lr = scheduler.get_last_lr()[0]
-
+                batch_num_epoch = -1
+                if hasattr(dataloader_train, "__len__"):
+                    batch_num_epoch = len(dataloader_train)
                 self.log(epoch, batch_idx,
-                         batch_num_epoch=len(dataloader_train),
+                         batch_num_epoch=batch_num_epoch,
                          lr=lr,
                          loss=loss.detach().cpu().item(),
                          speed_stats=speed_stats,
@@ -415,8 +418,11 @@ class Trainer:
                     self.val_loss_avg = val_loss_avg.detach().cpu().item() / self.world_size
                     self.val_acc_avg = val_acc_avg.detach().cpu().item() / self.world_size
                 
+                batch_num_epoch = -1
+                if hasattr(dataloader_train, "__len__"):
+                    batch_num_epoch = len(dataloader_val)
                 self.log(epoch, batch_idx,
-                         batch_num_epoch=len(dataloader_val),
+                         batch_num_epoch=batch_num_epoch,
                          lr=0.0,
                          loss=loss.detach().cpu().item(),
                          speed_stats=speed_stats,
