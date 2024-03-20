@@ -127,6 +127,7 @@ class Trainer:
         """
         
         if self.rank == 0:
+            logging.info(f"Save checkpoint: {epoch}, rank: {local_rank}\n")
             self.step_or_epoch += 1
             state = {
                 'epoch': epoch,
@@ -240,6 +241,7 @@ class Trainer:
         Args:
             epoch (int): The current epoch number.
         """
+        logging.info(f"Train epoch: {epoch}, rank: {self.local_rank}\n")
         model.train()
 
         
@@ -377,6 +379,7 @@ class Trainer:
         Args:
             epoch (int): The current epoch number.
         """
+        logging.info(f"Validate epoch: {epoch}, rank: {self.local_rank}\n")
         model.eval()
         
         with torch.no_grad():
@@ -419,7 +422,7 @@ class Trainer:
                     self.val_acc_avg = val_acc_avg.detach().cpu().item() / self.world_size
                 
                 batch_num_epoch = -1
-                if hasattr(dataloader_train, "__len__"):
+                if hasattr(dataloader_val, "__len__"):
                     batch_num_epoch = len(dataloader_val)
                 self.log(epoch, batch_idx,
                          batch_num_epoch=batch_num_epoch,

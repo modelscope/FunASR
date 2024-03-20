@@ -166,7 +166,7 @@ def main(**kwargs):
     
     for epoch in range(trainer.start_epoch, trainer.max_epoch + 1):
         time1 = time.perf_counter()
-        logging.info(f"Train epoch: {epoch}, rank: {local_rank}\n")
+        
         scheduler.step()
         trainer.train_epoch(
                             model=model,
@@ -178,7 +178,7 @@ def main(**kwargs):
                             epoch=epoch,
                             writer=writer
                             )
-        logging.info(f"Validate epoch: {epoch}, rank: {local_rank}\n")
+        
         trainer.validate_epoch(
             model=model,
             dataloader_val=dataloader_val,
@@ -186,7 +186,7 @@ def main(**kwargs):
             writer=writer
         )
 
-        logging.info(f"Save checkpoint: {epoch}, rank: {local_rank}\n")
+        
         trainer.save_checkpoint(epoch, model=model, optim=optim, scheduler=scheduler, scaler=scaler)
 
         time2 = time.perf_counter()
