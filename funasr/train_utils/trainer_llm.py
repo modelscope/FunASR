@@ -421,6 +421,9 @@ class Trainer:
         self.val_acc_list.append(self.val_acc_avg)
         model.train()
         
+        if self.use_ddp or self.use_fsdp:
+            dist.barrier()
+        
         
     def log(self,
             epoch=0,
@@ -436,10 +439,10 @@ class Trainer:
         
         if (batch_idx + 1) % self.log_interval == 0:
             
-            gpu_info = "GPU, memory: {:.3f} GB, " \
-                       "{:.3f} GB, " \
-                       "{:.3f} GB, " \
-                       "{:.3f} GB".format(torch.cuda.memory_allocated() / 1024 / 1024 / 1024,
+            gpu_info = "GPU, memory: usage: {:.3f} GB, " \
+                       "peak: {:.3f} GB, " \
+                       "cache: {:.3f} GB, " \
+                       "cache_peak: {:.3f} GB".format(torch.cuda.memory_allocated() / 1024 / 1024 / 1024,
                                           torch.cuda.max_memory_allocated() / 1024 / 1024 / 1024,
                                           torch.cuda.memory_reserved() / 1024 / 1024 / 1024,
                                           torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024,
@@ -448,6 +451,7 @@ class Trainer:
             loss_avg_epoch = getattr(self, f"{tag}_loss_avg")
             acc_avg_epoch = getattr(self, f"{tag}_acc_avg")
             description = (
+                f"{tag}, "
                 f"rank: {self.local_rank}, "
                 f"epoch: {epoch}/{self.max_epoch}, "
                 f"step: {batch_idx + 1}/{batch_num_epoch}, total step: {self.batch_total}, "
@@ -472,6 +476,10 @@ class Trainer:
                     writer.add_scalar(f'stats_rank{self.local_rank}_{key}/{tag}', eval(var), self.batch_total)
         
     def close(self, writer=None):
+        
+        if self.use_ddp or self.use_fsdp:
+            dist.barrier()
+        
         if writer is not None:
             writer.close()
     

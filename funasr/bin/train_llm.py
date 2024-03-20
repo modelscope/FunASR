@@ -48,7 +48,6 @@ def main_hydra(kwargs: DictConfig):
 
 
 def main(**kwargs):
-    print(kwargs)
     
     # set random seed
     set_all_random_seed(kwargs.get("seed", 0))
@@ -77,6 +76,7 @@ def main(**kwargs):
         os.makedirs(kwargs.get("output_dir", "./"), exist_ok=True)
         yaml_file = os.path.join(kwargs.get("output_dir", "./"), "config.yaml")
         OmegaConf.save(config=kwargs, f=yaml_file)
+        print(kwargs)
         logging.info("config.yaml is saved to: %s", yaml_file)
     
     # parse kwargs
@@ -166,6 +166,8 @@ def main(**kwargs):
     
     for epoch in range(trainer.start_epoch, trainer.max_epoch + 1):
         time1 = time.perf_counter()
+        logging.info(f"\nTrain epoch: {epoch}\n")
+        scheduler.step()
         trainer.train_epoch(
                             model=model,
                             optim=optim,
@@ -176,7 +178,7 @@ def main(**kwargs):
                             epoch=epoch,
                             writer=writer
                             )
-
+        logging.info(f"\nValidate epoch: {epoch}\n")
         trainer.validate_epoch(
             model=model,
             dataloader_val=dataloader_val,
@@ -184,9 +186,8 @@ def main(**kwargs):
             writer=writer
         )
 
+        logging.info(f"\nSave checkpoint: {epoch}\n")
         trainer.save_checkpoint(epoch, model=model, optim=optim, scheduler=scheduler, scaler=scaler)
-
-        scheduler.step()
 
         time2 = time.perf_counter()
         time_escaped = (time2 - time1) / 3600.0
