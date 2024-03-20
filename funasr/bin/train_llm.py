@@ -16,6 +16,7 @@ from omegaconf import DictConfig, OmegaConf
 from torch.cuda.amp import autocast, GradScaler
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
+from torch.distributed.algorithms.join import Join
 from torch.distributed.fsdp.sharded_grad_scaler import ShardedGradScaler
 from funasr.train_utils.average_nbest_models import average_checkpoints
 
@@ -106,7 +107,10 @@ def main(**kwargs):
         model = DDP(model, device_ids=[local_rank],
                     find_unused_parameters=kwargs.get("train_conf", {}).get("find_unused_parameters", False))
     elif use_fsdp:
-        model = FSDP(model).cuda(local_rank)
+        # model = FSDP(model).cuda(local_rank)
+        from torch.distributed.fsdp import auto_wrap, enable_wrap, wrap
+        with enable_wrap(wrapper_cls=FSDP):
+            model = wrap(model).cuda(local_rank)
     else:
         model = model.to(device=kwargs.get("device", "cuda"))
 
@@ -146,6 +150,7 @@ def main(**kwargs):
 
     trainer = Trainer(local_rank=local_rank,
                       use_ddp=use_ddp,
+                      use_fsdp=use_fsdp,
                       device=kwargs["device"],
                       output_dir=kwargs.get("output_dir", "./exp"),
                       **kwargs.get("train_conf"),
@@ -163,22 +168,27 @@ def main(**kwargs):
         writer = SummaryWriter(tensorboard_dir) if trainer.rank == 0 else None
     except:
         writer = None
-    
+
+    if use_ddp or use_fsdp:
+        context = Join([model])
+    else:
+        context = nullcontext()
+
     for epoch in range(trainer.start_epoch, trainer.max_epoch + 1):
         time1 = time.perf_counter()
-        
-        scheduler.step()
-        trainer.train_epoch(
-                            model=model,
-                            optim=optim,
-                            scheduler=scheduler,
-                            scaler=scaler,
-                            dataloader_train=dataloader_tr,
-                            dataloader_val=dataloader_val,
-                            epoch=epoch,
-                            writer=writer
-                            )
-        
+        with context:
+            scheduler.step()
+            trainer.train_epoch(
+                                model=model,
+                                optim=optim,
+                                scheduler=scheduler,
+                                scaler=scaler,
+                                dataloader_train=dataloader_tr,
+                                dataloader_val=dataloader_val,
+                                epoch=epoch,
+                                writer=writer
+                                )
+    
         trainer.validate_epoch(
             model=model,
             dataloader_val=dataloader_val,

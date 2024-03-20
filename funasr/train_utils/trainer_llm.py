@@ -244,7 +244,6 @@ class Trainer:
         logging.info(f"Train epoch: {epoch}, rank: {self.local_rank}\n")
         model.train()
 
-        
         # Set the number of steps for gradient accumulation
         accum_grad = self.accum_grad
         # Initialize the gradient accumulation
