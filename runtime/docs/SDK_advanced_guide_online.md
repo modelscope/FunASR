@@ -60,7 +60,7 @@ wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_sa
 For illustration, we will use the Python language client, which supports audio formats (.wav, .pcm) and a multi-file list wav.scp input.
 
 ```shell
-python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass
+python3 funasr_wss_client.py --host "127.0.0.1" --port 10096 --mode 2pass
 ```
 
 ------------------
