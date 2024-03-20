@@ -103,6 +103,7 @@ class Trainer:
         
         os.makedirs(os.path.join(self.output_dir, "tensorboard"), exist_ok=True)
         self.writer = SummaryWriter(os.path.join(self.output_dir, "tensorboard")) if rank == 0 else None
+
         
     
     def _save_checkpoint(self, epoch, step=None):
