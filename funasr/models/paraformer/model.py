@@ -231,6 +231,7 @@ class Paraformer(torch.nn.Module):
         stats["loss_pre"] = loss_pre.detach().cpu() if loss_pre is not None else None
         
         stats["loss"] = torch.clone(loss.detach())
+        stats["batch_size"] = batch_size
         
         # force_gatherable: to-device and to-tensor if scalar for DataParallel
         if self.length_normalized_loss:
