@@ -146,7 +146,6 @@ def main(**kwargs):
 
     trainer = Trainer(local_rank=local_rank,
                       use_ddp=use_ddp,
-                      resume=kwargs.get("resume", True),
                       device=kwargs["device"],
                       **kwargs.get("train_conf"),
                       )
@@ -166,7 +165,7 @@ def main(**kwargs):
     
     for epoch in range(trainer.start_epoch, trainer.max_epoch + 1):
         time1 = time.perf_counter()
-        logging.info(f"\nTrain epoch: {epoch}\n")
+        logging.info(f"Train epoch: {epoch}, rank: {local_rank}\n")
         scheduler.step()
         trainer.train_epoch(
                             model=model,
@@ -178,7 +177,7 @@ def main(**kwargs):
                             epoch=epoch,
                             writer=writer
                             )
-        logging.info(f"\nValidate epoch: {epoch}\n")
+        logging.info(f"Validate epoch: {epoch}, rank: {local_rank}\n")
         trainer.validate_epoch(
             model=model,
             dataloader_val=dataloader_val,
@@ -186,13 +185,13 @@ def main(**kwargs):
             writer=writer
         )
 
-        logging.info(f"\nSave checkpoint: {epoch}\n")
+        logging.info(f"Save checkpoint: {epoch}, rank: {local_rank}\n")
         trainer.save_checkpoint(epoch, model=model, optim=optim, scheduler=scheduler, scaler=scaler)
 
         time2 = time.perf_counter()
         time_escaped = (time2 - time1) / 3600.0
         logging.info(
-            f"\nrank: {local_rank}, "
+            f"rank: {local_rank}, "
             f"time_escaped_epoch: {time_escaped:.3f} hours, "
             f"estimated to finish {trainer.max_epoch} "
             f"epoch: {(trainer.max_epoch - epoch) * time_escaped:.3f} hours\n")

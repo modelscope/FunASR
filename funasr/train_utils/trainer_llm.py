@@ -288,8 +288,8 @@ class Trainer:
                     train_acc_avg = torch.tensor(self.train_acc_avg, dtype=torch.float32).to(self.device)
                     dist.all_reduce(train_loss_avg, op=dist.ReduceOp.SUM)
                     dist.all_reduce(train_acc_avg, op=dist.ReduceOp.SUM)
-                    self.train_loss_avg = train_loss_avg.detach().cpu.item() / self.world_size
-                    self.train_acc_avg = train_acc_avg.detach().cpu.item() / self.world_size
+                    self.train_loss_avg = train_loss_avg.detach().cpu().item() / self.world_size
+                    self.train_acc_avg = train_acc_avg.detach().cpu().item() / self.world_size
                 
             
             # Perform an optimizer step only after accumulating enough gradients
@@ -405,8 +405,8 @@ class Trainer:
                     val_acc_avg = torch.tensor(self.val_acc_avg, dtype=torch.float32).to(self.device)
                     dist.all_reduce(val_loss_avg, op=dist.ReduceOp.SUM)
                     dist.all_reduce(val_acc_avg, op=dist.ReduceOp.SUM)
-                    self.val_loss_avg = val_loss_avg.detach().cpu.item() / self.world_size
-                    self.val_acc_avg = val_acc_avg.detach().cpu.item() / self.world_size
+                    self.val_loss_avg = val_loss_avg.detach().cpu().item() / self.world_size
+                    self.val_acc_avg = val_acc_avg.detach().cpu().item() / self.world_size
                 
                 self.log(epoch, batch_idx,
                          batch_num_epoch=len(dataloader_val),
