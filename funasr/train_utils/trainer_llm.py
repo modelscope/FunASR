@@ -152,8 +152,12 @@ class Trainer:
             torch.save(state, latest)
             
             if self.val_acc_list[self.step_or_epoch] >= self.val_acc_list[self.best_acc_idx]:
+                self.best_acc_idx = self.step_or_epoch
                 best = Path(os.path.join(self.output_dir, f'model.pt.ep{epoch}.best'))
                 torch.save(state, best)
+                logging.info(f"Update best acc: {self.val_acc_list[self.best_acc_idx]}, {best}")
+            else:
+                logging.info(f"No improvement in acc: {self.val_acc_list[self.best_acc_idx]}")
             
             if self.keep_nbest_models > 0:
                 self.saved_ckpts[ckpt_name] = self.val_acc_list[-1]
@@ -164,6 +168,7 @@ class Trainer:
                         del self.saved_ckpts[min_key]
                     filename = os.path.join(self.output_dir, min_key)
                     if os.path.exists(filename):
+                        logging.info(f"Delete: {filename}")
                         os.remove(filename)
                 
         if self.use_ddp or self.use_fsdp:
@@ -344,7 +349,7 @@ class Trainer:
                     writer=writer
                 )
 
-            if (batch_idx+1) % self.save_checkpoint_interval == 0 and self.rank == 0:
+            if (batch_idx+1) % self.save_checkpoint_interval == 0:
                 self.save_checkpoint(epoch, model=model, optim=optim, scheduler=scheduler, scaler=scaler, step=batch_idx+1)
 
         
