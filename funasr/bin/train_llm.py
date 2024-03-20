@@ -4,6 +4,7 @@
 import os
 import sys
 import torch
+import torch.nn as nn
 import hydra
 import logging
 import time
@@ -61,7 +62,8 @@ def main(**kwargs):
         tables.print()
     # Check if we are using DDP or FSDP
     use_ddp = 'WORLD_SIZE' in os.environ and int(os.environ["WORLD_SIZE"]) > 1
-    use_fsdp = kwargs.get("use_fsdp", None)
+    use_fsdp = kwargs.get("use_fsdp", False)
+    use_ddp = False if use_fsdp else use_fsdp
     if use_ddp or use_fsdp:
         dist.init_process_group(backend=kwargs.get("backend", "nccl"), init_method='env://')
         torch.cuda.set_device(local_rank)
@@ -108,12 +110,30 @@ def main(**kwargs):
                     find_unused_parameters=kwargs.get("train_conf", {}).get("find_unused_parameters", False))
     elif use_fsdp:
         # model = FSDP(model).cuda(local_rank)
-        from torch.distributed.fsdp import auto_wrap, enable_wrap, wrap
-        with enable_wrap(wrapper_cls=FSDP):
-            model = wrap(model).cuda(local_rank)
+
+        def custom_auto_wrap_policy(
+            module: nn.Module,
+            recurse: bool,
+            nonwrapped_numel: int,
+            # Additional custom arguments
+            min_num_params: int = int(1e8),
+        ) -> bool:
+            # 根据自定义逻辑决定是否包装模块
+            is_large = unwrapped_params >= min_num_params
+            requires_grad_uniform = len({p.requires_grad for p in module.parameters()}) == 1
+            return is_large and requires_grad_uniform
+
+        # Configure a custom `min_num_params`
+        my_auto_wrap_policy = functools.partial(custom_auto_wrap_policy, min_num_params=int(1e5))
+        torch.cuda.set_device(local_rank)
+        model = FSDP(model,
+                     auto_wrap_policy=custom_auto_wrap_policy,
+                     mixed_precision=None,
+                     device_id=torch.cuda.current_device())
     else:
         model = model.to(device=kwargs.get("device", "cuda"))
 
+    logging.info(f"{model}")
     kwargs["device"] = next(model.parameters()).device
         
     # optim
@@ -177,7 +197,7 @@ def main(**kwargs):
     for epoch in range(trainer.start_epoch, trainer.max_epoch + 1):
         time1 = time.perf_counter()
         with context:
-            scheduler.step()
+            
             trainer.train_epoch(
                                 model=model,
                                 optim=optim,
@@ -188,7 +208,7 @@ def main(**kwargs):
                                 epoch=epoch,
                                 writer=writer
                                 )
-    
+        scheduler.step()
         trainer.validate_epoch(
             model=model,
             dataloader_val=dataloader_val,
