@@ -467,9 +467,9 @@ class Trainer:
                 writer.add_scalar(f'rank{self.local_rank}_lr/{tag}', lr, self.batch_total)
                 writer.add_scalar(f'rank{self.local_rank}_lr/{tag}', lr, self.batch_total)
                 for key, var in stats.items():
-                    writer.add_scalar(f'stats: rank{self.local_rank}_{key}/{tag}', var.item(), self.batch_total)
+                    writer.add_scalar(f'stats_rank{self.local_rank}_{key}/{tag}', var.item(), self.batch_total)
                 for key, var in speed_stats.items():
-                    writer.add_scalar(f'stats: rank{self.local_rank}_{key}/{tag}', eval(var), self.batch_total)
+                    writer.add_scalar(f'stats_rank{self.local_rank}_{key}/{tag}', eval(var), self.batch_total)
         
     def close(self, writer=None):
         if writer is not None:
