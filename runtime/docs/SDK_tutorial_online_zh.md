@@ -42,7 +42,7 @@ sudo bash funasr-runtime-deploy-online-cpu-zh.sh install --workspace ./funasr-ru
 我们以Python语言客户端为例，支持麦克风输入，其他版本客户端请参考文档（[点击此处](#客户端用法详解)）
 
 ```shell
-python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass
+python3 funasr_wss_client.py --host "127.0.0.1" --port 10096 --mode 2pass
 ```
 
 ## 客户端用法详解
@@ -62,14 +62,14 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass
 若想直接运行client进行测试，可参考如下简易说明，以python版本为例：
 
 ```shell
-python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass
+python3 funasr_wss_client.py --host "127.0.0.1" --port 10096 --mode 2pass
 ```
 
 命令参数说明：
 ```text
 --host 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，
        需要改为部署机器ip
---port 10095 部署端口号
+--port 10096 部署端口号
 --mode：`offline`表示推理模式为一句话识别；`online`表示推理模式为实时语音识别；`2pass`表示为实时语音识别，
        并且说话句尾采用离线模型进行纠错。
 --chunk_size：表示流式模型latency配置`[5,10,5]`，表示当前音频解码片段为600ms，并且回看300ms，右看300ms。
@@ -83,7 +83,7 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass
 ### cpp-client
 进入samples/cpp目录后，可以用cpp进行测试，指令如下：
 ```shell
-./funasr-wss-client-2pass --server-ip 127.0.0.1 --port 10095 --mode 2pass \
+./funasr-wss-client-2pass --server-ip 127.0.0.1 --port 10096 --mode 2pass \
    --wav-path ../audio/asr_example.pcm
 ```
 
@@ -92,7 +92,7 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass
 ```text
 --server-ip 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，
             需要改为部署机器ip
---port 10095 部署端口号
+--port 10096 部署端口号
 --mode：`offline`表示推理模式为一句话识别；`online`表示推理模式为实时语音识别；`2pass`表示为实时语音识别，
         并且说话句尾采用离线模型进行纠错。
 --chunk-size：表示流式模型latency配置`[5,10,5]`，表示当前音频解码片段为600ms，并且回看300ms，右看300ms。
@@ -114,7 +114,7 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode 2pass
 ### java-client
 
 ```shell
-FunasrWsClient --host localhost --port 10095 --mode 2pass
+FunasrWsClient --host localhost --port 10096 --mode 2pass
 ```
 详细可以参考文档（[点击此处](../java/readme.md)）
 
