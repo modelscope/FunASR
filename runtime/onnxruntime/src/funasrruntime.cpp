@@ -767,13 +767,13 @@
 		funasr::WfstDecoder* mm = nullptr;
 		if (asr_type == ASR_OFFLINE) {
 			funasr::OfflineStream* offline_stream = (funasr::OfflineStream*)handle;
-			funasr::Paraformer* paraformer = (funasr::Paraformer*)offline_stream->asr_handle.get();
+			funasr::Model* paraformer = offline_stream->asr_handle.get();
 			if (paraformer->lm_)
 				mm = new funasr::WfstDecoder(paraformer->lm_.get(),
 					paraformer->GetPhoneSet(), paraformer->GetLmVocab(), glob_beam, lat_beam, am_scale);
 		} else if (asr_type == ASR_TWO_PASS){
 			funasr::TpassStream* tpass_stream = (funasr::TpassStream*)handle;
-			funasr::Paraformer* paraformer = (funasr::Paraformer*)tpass_stream->asr_handle.get();
+			funasr::Model* paraformer = tpass_stream->asr_handle.get();
 			if (paraformer->lm_)
 				mm = new funasr::WfstDecoder(paraformer->lm_.get(), 
 					paraformer->GetPhoneSet(), paraformer->GetLmVocab(), glob_beam, lat_beam, am_scale);

@@ -24,7 +24,11 @@ class Model {
     virtual std::vector<std::vector<float>> CompileHotwordEmbedding(std::string &hotwords){return std::vector<std::vector<float>>();};
     virtual std::string GetLang(){return "";};
     virtual int GetAsrSampleRate() = 0;
+    virtual Vocab* GetVocab(){};
+    virtual Vocab* GetLmVocab(){};
+    virtual PhoneSet* GetPhoneSet(){};
 
+    std::shared_ptr<fst::Fst<fst::StdArc>> lm_ = nullptr;
 };
 
 Model *CreateModel(std::map<std::string, std::string>& model_path, int thread_num=1, ASR_TYPE type=ASR_OFFLINE);
