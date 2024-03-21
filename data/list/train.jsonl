@@ -1,0 +1,4 @@
+{"key": "BAC009S0764W0121", "source": "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/BAC009S0764W0121.wav", "source_len": 90, "target": "甚至出现交易几乎停滞的情况", "target_len": 13}
+{"key": "BAC009S0916W0489", "source": "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/BAC009S0916W0489.wav", "source_len": 90, "target": "湖北一公司以员工名义贷款数十员工负债千万", "target_len": 20}
+{"key": "asr_example_cn_en", "source": "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_cn_en.wav", "source_len": 91, "target": "所有只要处理 data 不管你是做 machine learning 做 deep learning 做 data analytics 做 data science 也好 scientist 也好通通都要都做的基本功啊那 again 先先对有一些也许对", "target_len": 19}
+{"key": "ID0012W0014", "source": "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_en.wav", "source_len": 88, "target": "he tried to think how it could be", "target_len": 8}

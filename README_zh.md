@@ -91,7 +91,7 @@ FunASR开源了大量在工业数据上预训练模型，您可以在[模型许�
 <a name="快速开始"></a>
 ## 快速开始
 
-下面为快速上手教程，测试音频（[中文](https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/vad_example.wav)，[英文]()）
+下面为快速上手教程，测试音频（[中文](https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/vad_example.wav)，[英文](https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_en.wav)）
 
 ### 可执行命令行
 

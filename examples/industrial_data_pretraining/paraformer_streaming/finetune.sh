@@ -9,7 +9,7 @@ gpu_num=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
 # model_name from model_hub, or model_dir in local path
 
 ## option 1, download model automatically
-model_name_or_model_dir="iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
+model_name_or_model_dir="iic/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8404-online"
 model_revision="v2.0.4"
 
 ## option 2, download model by git

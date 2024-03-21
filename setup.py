@@ -140,6 +140,9 @@ setup(
     ],
     entry_points={"console_scripts": [
         "funasr = funasr.bin.inference:main_hydra",
+        "funasr-train = funasr.bin.train:main_hydra",
         "funasr-export = funasr.bin.export:main_hydra",
+        "scp2jsonl = funasr.datasets.audio_datasets.scp2jsonl:main_hydra",
+        "jsonl2scp = funasr.datasets.audio_datasets.jsonl2scp:main_hydra",
     ]},
 )

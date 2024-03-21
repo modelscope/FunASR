@@ -1,0 +1,2 @@
+{"key": "ID0012W0013", "source": "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav", "source_len": 88, "target": "欢迎大家来体验达摩院推出的语音识别模型", "target_len": 19}
+{"key": "ID0012W0014", "source": "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_en.wav", "source_len": 88, "target": "he tried to think how it could be", "target_len": 8}
