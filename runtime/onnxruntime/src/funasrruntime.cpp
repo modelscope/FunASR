@@ -797,7 +797,7 @@
 				return mm;
 			}
 			#ifdef USE_GPU
-			auto paraformer_torch = dynamic_cast<funasr::ParaformerTorch*>(offline_stream->asr_handle.get());
+			auto paraformer_torch = dynamic_cast<funasr::ParaformerTorch*>(tpass_stream->asr_handle.get());
 			if(paraformer_torch !=nullptr){
 				if (paraformer_torch->lm_){
 					mm = new funasr::WfstDecoder(paraformer_torch->lm_.get(),
