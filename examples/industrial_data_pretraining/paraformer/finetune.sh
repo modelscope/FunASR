@@ -36,7 +36,7 @@ funasr/bin/train.py \
 ++model_revision="v2.0.4" \
 ++train_data_set_list="${train_data}" \
 ++valid_data_set_list="${val_data}" \
-++dataset_conf.batch_size=30000 \
+++dataset_conf.batch_size=20000 \
 ++dataset_conf.batch_type="token" \
 ++dataset_conf.num_workers=4 \
 ++train_conf.max_epoch=50 \
