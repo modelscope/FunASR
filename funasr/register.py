@@ -15,6 +15,7 @@ class RegisterTables:
     predictor_classes = {}
     stride_conv_classes = {}
     tokenizer_classes = {}
+    dataloader_classes = {}
     batch_sampler_classes = {}
     dataset_classes = {}
     index_ds_classes = {}

@@ -1,3 +1,4 @@
+import math
 import os
 import time
 import torch
@@ -7,8 +8,6 @@ from datetime import datetime
 import torch.distributed as dist
 from torch.cuda.amp import autocast, GradScaler
 from contextlib import nullcontext, contextmanager
-# from torch.utils.tensorboard import SummaryWriter
-from tensorboardX import SummaryWriter
 from pathlib import Path
 
 from funasr.train_utils.device_funcs import to_device
@@ -40,11 +39,7 @@ class Trainer:
         resume (str, optional): Path to a checkpoint to resume training from.
     """
     
-    def __init__(self, model,
-                 optim,
-                 scheduler,
-                 dataloader_train,
-                 dataloader_val,
+    def __init__(self,
                  local_rank,
                  use_ddp: bool = False,
                  use_fsdp: bool = False,
@@ -66,29 +61,31 @@ class Trainer:
                       resume (str, optional): The file path to a checkpoint to resume training from.
         """
         
-        self.model = model
-        self.optim = optim
-        self.scheduler = scheduler
-        self.dataloader_train = dataloader_train
-        self.dataloader_val = dataloader_val
         self.output_dir = output_dir
+        if not os.path.exists(self.output_dir):
+            os.makedirs(self.output_dir, exist_ok=True)
         self.resume = kwargs.get('resume', True)
         self.start_epoch = 0
         self.max_epoch = kwargs.get('max_epoch', 100)
         self.local_rank = local_rank
         self.use_ddp = use_ddp
         self.use_fsdp = use_fsdp
-        self.device = next(model.parameters()).device
+        self.device = kwargs.get('device', "cuda")
         self.avg_nbest_model = kwargs.get("avg_nbest_model", 5)
-        self.kwargs = kwargs
+        # self.kwargs = kwargs
         self.log_interval = kwargs.get("log_interval", 50)
         self.batch_total = 0
         self.use_fp16 = use_fp16
         self.disable_gpu_cache = kwargs.get("disable_gpu_cache", True)
-        scaler = GradScaler(enabled=use_fp16) if use_fp16 else None
-        scaler = ShardedGradScaler(enabled=use_fp16) if use_ddp else scaler
-        self.scaler = scaler
+        # scaler = GradScaler(enabled=use_fp16) if use_fp16 else None
+        # scaler = ShardedGradScaler(enabled=use_fp16) if use_fsdp else scaler
+        # self.scaler = scaler
         self.save_checkpoint_interval = kwargs.get("save_checkpoint_interval", 5000)
+        self.keep_nbest_models = kwargs.get("keep_nbest_models", -1)
+        self.accum_grad = kwargs.get("accum_grad", 1)
+        self.grad_clip = kwargs.get("grad_clip", 10.0)
+        self.grad_clip_type = kwargs.get("grad_clip_type", 2.0)
+        self.validate_interval = kwargs.get("validate_interval", 5000)
         
     
         try:
@@ -100,13 +97,22 @@ class Trainer:
             logging.warning("distributed is not initialized, only single shard")
         self.rank = rank
         self.world_size = world_size
-        
-        os.makedirs(os.path.join(self.output_dir, "tensorboard"), exist_ok=True)
-        self.writer = SummaryWriter(os.path.join(self.output_dir, "tensorboard")) if rank == 0 else None
-
-        
-    
-    def _save_checkpoint(self, epoch, step=None):
+        self.train_acc_avg = 0.0
+        self.train_loss_avg = 0.0
+        self.val_acc_avg = 0.0
+        self.val_loss_avg = 0.0
+        self.best_acc_idx = 0
+        self.saved_ckpts = {}
+        self.val_acc_list = []
+        self.step_or_epoch = -1
+       
+    def save_checkpoint(self, epoch,
+                        step=None,
+                        model=None,
+                        optim=None,
+                        scheduler=None,
+                        scaler=None,
+                        ):
         """
         Saves a checkpoint containing the model's state, the optimizer's state,
         and the scheduler's state at the end of the given epoch. This method is
@@ -115,29 +121,65 @@ class Trainer:
         Args:
             epoch (int): The epoch number at which the checkpoint is being saved.
         """
-        state = {
-            'epoch': epoch,
-            'state_dict': self.model.state_dict(),
-            'optimizer': self.optim.state_dict(),
-            'scheduler': self.scheduler.state_dict(),
-        }
-        if self.scaler:
-            state["scaler_state"] = self.scaler.state_dict()
-        # Create output directory if it does not exist
-        os.makedirs(self.output_dir, exist_ok=True)
-        if step is None:
-            filename = os.path.join(self.output_dir, f'model.pt.ep{epoch}')
-        else:
-            filename = os.path.join(self.output_dir, f'model.pt.ep{epoch}.{step}')
         
-        torch.save(state, filename)
-        
-        print(f'\nCheckpoint saved to {filename}\n')
-        latest = Path(os.path.join(self.output_dir, f'model.pt'))
-        torch.save(state, latest)
+        if self.rank == 0:
+            logging.info(f"Save checkpoint: {epoch}, rank: {self.local_rank}\n")
+            self.step_or_epoch += 1
+            state = {
+                'epoch': epoch,
+                'state_dict': model.state_dict(),
+                'optimizer': optim.state_dict(),
+                'scheduler': scheduler.state_dict(),
+                "acc": self.val_acc_list,
+                "step_or_epoch": self.step_or_epoch,
+            }
+            if hasattr(model, "module"):
+                state["state_dict"] = model.module.state_dict()
+                
+            if scaler:
+                state["scaler_state"] = scaler.state_dict()
+            # Create output directory if it does not exist
+            os.makedirs(self.output_dir, exist_ok=True)
+            if step is None:
+                ckpt_name = f'model.pt.ep{epoch}'
+            else:
+                ckpt_name = f'model.pt.ep{epoch}.{step}'
+            filename = os.path.join(self.output_dir, ckpt_name)
+            torch.save(state, filename)
+            
+            logging.info(f'\nCheckpoint saved to {filename}\n')
+            latest = Path(os.path.join(self.output_dir, f'model.pt'))
+            torch.save(state, latest)
+            
+            if self.val_acc_list[self.step_or_epoch] >= self.val_acc_list[self.best_acc_idx]:
+                self.best_acc_idx = self.step_or_epoch
+                best_ckpt = Path(os.path.join(self.output_dir, f'model.pt.best'))
+                torch.save(state, best_ckpt)
+                logging.info(f"Update best acc: {self.val_acc_list[self.best_acc_idx]}, {best_ckpt}")
+            else:
+                logging.info(f"No improvement in acc: {self.val_acc_list[self.best_acc_idx]}")
+            
+            if self.keep_nbest_models > 0:
+                self.saved_ckpts[ckpt_name] = self.val_acc_list[-1]
+                if len(self.saved_ckpts) > self.keep_nbest_models:
 
+                    min_key = min(self.saved_ckpts, key=self.saved_ckpts.get)
+                    if min_key in self.saved_ckpts:
+                        del self.saved_ckpts[min_key]
+                    filename = os.path.join(self.output_dir, min_key)
+                    logging.info(f"Delete: {filename}")
+                    if os.path.exists(filename):
+                        os.remove(filename)
+                
+        if self.use_ddp or self.use_fsdp:
+            dist.barrier()
     
-    def _resume_checkpoint(self, resume_path):
+    def resume_checkpoint(self,
+                          model=None,
+                          optim=None,
+                          scheduler=None,
+                          scaler=None,
+                          ):
         """
         Resumes training from a checkpoint at the given file path.
         Loads the model's state, the optimizer's state, and the scheduler's state.
@@ -145,114 +187,79 @@ class Trainer:
         Args:
             resume_path (str): The file path to the checkpoint to resume from.
         """
-        ckpt = os.path.join(resume_path, "model.pt")
-        if os.path.isfile(ckpt):
-            checkpoint = torch.load(ckpt, map_location="cpu")
-            self.start_epoch = checkpoint['epoch'] + 1
-            # self.model.load_state_dict(checkpoint['state_dict'])
-            src_state = checkpoint['state_dict']
-            dst_state = self.model.state_dict()
-            for k in dst_state.keys():
-                if not k.startswith("module.") and "module."+k in src_state.keys():
-                    k_ddp = "module."+k
-                else:
-                    k_ddp = k
-                if k_ddp in src_state.keys():
-                    dst_state[k] = src_state[k_ddp]
-                else:
-                    print(f"Miss key in ckpt: model: {k}, ckpt: {k_ddp}")
-
-            self.model.load_state_dict(dst_state)
-            self.optim.load_state_dict(checkpoint['optimizer'])
-            self.scheduler.load_state_dict(checkpoint['scheduler'])
-            if self.scaler and 'scaler_state' in checkpoint:
-                self.scaler.load_state_dict(checkpoint['scaler_state'])
-            print(f"Checkpoint loaded successfully from '{ckpt}'")
-        else:
-            print(f"No checkpoint found at '{ckpt}', does not resume status!")
-        
-        self.model.to(self.device)
-        if self.use_ddp or self.use_fsdp:
-            dist.barrier()
-        
-    def run(self):
-        """
-        Starts the training process, iterating over epochs, training the model,
-        and saving checkpoints at the end of each epoch.
-        """
         if self.resume:
-            self._resume_checkpoint(self.output_dir)
-        
-        for epoch in range(self.start_epoch, self.max_epoch + 1):
-            time1 = time.perf_counter()
-            self._train_epoch(epoch)
-
-
-            
-            if self.use_ddp or self.use_fsdp:
-                dist.barrier()
+            ckpt = os.path.join(self.output_dir, "model.pt")
+            if os.path.isfile(ckpt):
+                checkpoint = torch.load(ckpt)
+                self.start_epoch = checkpoint['epoch'] + 1
+                # self.model.load_state_dict(checkpoint['state_dict'])
+                src_state = checkpoint['state_dict']
+                dst_state = model.state_dict()
+                for k in dst_state.keys():
+                    if not k.startswith("module.") and "module."+k in src_state.keys():
+                        k_ddp = "module."+k
+                    else:
+                        k_ddp = k
+                    if k_ddp in src_state.keys():
+                        dst_state[k] = src_state[k_ddp]
+                    else:
+                        print(f"Miss key in ckpt: model: {k}, ckpt: {k_ddp}")
+    
+                model.load_state_dict(dst_state)
+                optim.load_state_dict(checkpoint['optimizer'])
+                scheduler.load_state_dict(checkpoint['scheduler'])
+                if scaler is not None and 'scaler_state' in checkpoint:
+                    scaler.load_state_dict(checkpoint['scaler_state'])
                 
-            self._validate_epoch(epoch)
-
-            if self.use_ddp or self.use_fsdp:
-                dist.barrier()
-           
-           
-            if self.rank == 0:
-                self._save_checkpoint(epoch)
-            
-            if self.use_ddp or self.use_fsdp:
-                dist.barrier()
-            
-            self.scheduler.step()
-
-            time2 = time.perf_counter()
-            time_escaped = (time2 - time1)/3600.0
-            print(f"\nrank: {self.local_rank}, time_escaped_epoch: {time_escaped:.3f} hours, estimated to finish {self.max_epoch} epoch: {(self.max_epoch-epoch)*time_escaped:.3f} hours\n")
-
-        if self.rank == 0:
-            average_checkpoints(self.output_dir, self.avg_nbest_model)
-            
+                self.val_acc_list = checkpoint["acc"]
+                self.step_or_epoch = checkpoint["step_or_epoch"]
+                
+                print(f"Checkpoint loaded successfully from '{ckpt}'")
+            else:
+                print(f"No checkpoint found at '{ckpt}', does not resume status!")
+    
         if self.use_ddp or self.use_fsdp:
             dist.barrier()
-
-
-        if self.writer:
-            self.writer.close()
         
-    
-    def _train_epoch(self, epoch):
+ 
+    def train_epoch(self,
+                model=None,
+                optim=None,
+                scheduler=None,
+                scaler=None,
+                dataloader_train=None,
+                dataloader_val=None,
+                epoch=None,
+                writer=None,
+                    ):
         """
         Defines the training process for a single epoch with gradient accumulation.
         Args:
             epoch (int): The current epoch number.
         """
-        self.model.train()
-        pbar = tqdm(colour="blue", desc=f"rank: {self.local_rank}, Training Epoch: {epoch + 1}", total=len(self.dataloader_train),
-                    dynamic_ncols=True)
-        
+        logging.info(f"Train epoch: {epoch}, rank: {self.local_rank}\n")
+        model.train()
+
         # Set the number of steps for gradient accumulation
-        accum_grad = self.kwargs.get("accum_grad", 1)
+        accum_grad = self.accum_grad
         # Initialize the gradient accumulation
-        self.optim.zero_grad()
+        optim.zero_grad()
         speed_stats = {}
         time5 = time.perf_counter()
         
-        for batch_idx, batch in enumerate(self.dataloader_train):
+        for batch_idx, batch in enumerate(dataloader_train):
             self.batch_total += 1
             time1 = time.perf_counter()
             speed_stats["data_load"] = f"{time1-time5:0.3f}"
 
             batch = to_device(batch, self.device)
             
-            my_context = self.model.no_sync if batch_idx % accum_grad != 0 else nullcontext
+            my_context = model.no_sync if batch_idx % accum_grad != 0 else nullcontext
             with my_context():
                 time2 = time.perf_counter()
                 with maybe_autocast(self.use_fp16):
-                    retval = self.model(**batch)
+                    retval = model(**batch)
                     
-                if self.disable_gpu_cache: torch.cuda.empty_cache()
-
                 time3 = time.perf_counter()
                 speed_stats["forward_time"] = f"{time3 - time2:0.3f}"
                 loss, stats, weight = retval
@@ -261,95 +268,105 @@ class Trainer:
                     # Apply weighted averaging for loss and stats
                     loss = (loss * weight.type(loss.dtype)).sum()
                     # if distributed, this method can also apply all_reduce()
-                    stats, weight = recursive_average(stats, weight, distributed=True)
+                    # stats, weight = recursive_average(stats, weight, distributed=True)
+                    if self.use_ddp or self.use_fsdp:
+                        dist.all_reduce(weight, op=dist.ReduceOp.SUM)
                     # Now weight is summation over all workers
-                    loss /= weight
+                    loss /= weight.sum() # shape:[1] -> shape:[]
                     # Multiply world_size because DistributedDataParallel
                     # automatically normalizes the gradient by world_size.
                     loss *= self.world_size
                 # Scale the loss since we're not updating for every mini-batch
                 loss = loss / accum_grad
                 if self.use_fp16:
-                    self.scaler.scale(loss).backward()
+                    scaler.scale(loss).backward()
                 else:
                     loss.backward()
                 time4 = time.perf_counter()
                 speed_stats["backward_time"] = f"{time4 - time3:0.3f}"
+                
+                self.train_loss_avg = (self.train_loss_avg*batch_idx + loss.detach().cpu().item())/(batch_idx+1)
+                if "acc" in stats:
+                    self.train_acc_avg = (self.train_acc_avg * batch_idx + stats["acc"].detach().cpu().item()) / (batch_idx + 1)
+                if self.use_ddp or self.use_fsdp:
+                    train_loss_avg = torch.tensor(self.train_loss_avg, dtype=torch.float32).to(self.device)
+                    train_acc_avg = torch.tensor(self.train_acc_avg, dtype=torch.float32).to(self.device)
+                    dist.all_reduce(train_loss_avg, op=dist.ReduceOp.SUM)
+                    dist.all_reduce(train_acc_avg, op=dist.ReduceOp.SUM)
+                    self.train_loss_avg = train_loss_avg.detach().cpu().item() / self.world_size
+                    self.train_acc_avg = train_acc_avg.detach().cpu().item() / self.world_size
+                
             
             # Perform an optimizer step only after accumulating enough gradients
-            if (batch_idx + 1) % accum_grad == 0 or (batch_idx + 1) == len(self.dataloader_train):
+            if (batch_idx + 1) % accum_grad == 0:
                 # Perform gradient clipping if it is set
-                if self.kwargs.get("grad_clip", None) is not None:
+                if self.grad_clip > 0:
                     grad_norm = torch.nn.utils.clip_grad_norm_(
-                        self.model.parameters(),
-                        max_norm=self.kwargs.get("grad_clip", 10.0),
-                        norm_type=self.kwargs.get("grad_clip_type", 2.0),
+                        model.parameters(),
+                        max_norm=self.grad_clip,
+                        norm_type=self.grad_clip_type,
                     )
                     if not torch.isfinite(grad_norm):
                         logging.warning(
                             f"The grad norm is {grad_norm}. Skipping updating the model."
                         )
-                        self.optim.zero_grad()  # Reset gradients
+                        optim.zero_grad()  # Reset gradients
                         continue
                 
                 # Execute an optimization step (update model parameters)
                 if self.use_ddp or self.use_fsdp:
                     dist.barrier()
                 if self.use_fp16:
-                    self.scaler.step(self.optim)
-                    self.scaler.update()
+                    scaler.step(optim)
+                    scaler.update()
                 else:
-                    self.optim.step()
-                self.scheduler.step()
+                    optim.step()
+                scheduler.step()
                 # Clear gradients for the next accumulation stage
-                self.optim.zero_grad(set_to_none=True)
+                optim.zero_grad(set_to_none=True)
                 total_time = f"{time.perf_counter() - time5:0.3f}"
                 time5 = time.perf_counter()
                 speed_stats["optim_time"] = f"{time5 - time4:0.3f}"
     
                 speed_stats["total_time"] = total_time
+                lr = scheduler.get_last_lr()[0]
+                batch_num_epoch = -1
+                if hasattr(dataloader_train, "__len__"):
+                    batch_num_epoch = len(dataloader_train)
+                self.log(epoch, batch_idx,
+                         batch_num_epoch=batch_num_epoch,
+                         lr=lr,
+                         loss=loss.detach().cpu().item(),
+                         speed_stats=speed_stats,
+                         stats=stats,
+                         writer=writer,
+                         tag="train",
+                         )
 
-
-            
-            if (batch_idx+1) % self.log_interval == 0 or (batch_idx+1) == len(self.dataloader_train):
-                pbar.update(self.log_interval)
-                gpu_info = "GPU, memory: {:.3f} GB, " \
-                           "{:.3f} GB, "\
-                           "{:.3f} GB, "\
-                           "{:.3f} GB".format(torch.cuda.memory_allocated()/1024/1024/1024,
-                                             torch.cuda.max_memory_allocated()/1024/1024/1024,
-                                             torch.cuda.memory_reserved()/1024/1024/1024,
-                                             torch.cuda.max_memory_reserved()/1024/1024/1024,
-                                             )
-                lr = self.scheduler.get_last_lr()[0]
-                time_now = datetime.now()
-                time_now = time_now.strftime("%Y-%m-%d %H:%M:%S")
-                description = (
-                    f"{time_now}, "
-                    f"rank: {self.local_rank}, "
-                    f"epoch: {epoch}/{self.max_epoch}, "
-                    f"step: {batch_idx+1}/{len(self.dataloader_train)}, total step: {self.batch_total}, "
-                    f"(loss: {loss.detach().cpu().item():.3f}), "
-                    f"(lr: {lr:.3e}), "
-                    f"{[(k, round(v.cpu().item(), 3)) for k, v in stats.items()]}, "
-                    f"{speed_stats}, "
-                    f"{gpu_info}"
+            if (batch_idx + 1) % self.validate_interval == 0:
+                self.validate_epoch(
+                    model=model,
+                    dataloader_val=dataloader_val,
+                    epoch=epoch,
+                    writer=writer
                 )
-                pbar.set_description(description)
-                if self.writer:
-                    self.writer.add_scalar(f'rank{self.local_rank}_Loss/train', loss.item(), self.batch_total)
-                    self.writer.add_scalar(f'rank{self.local_rank}_lr/train', lr, self.batch_total)
-                    for key, var in stats.items():
-                        self.writer.add_scalar(f'rank{self.local_rank}_{key}/train', var.item(), self.batch_total)
-                    for key, var in speed_stats.items():
-                        self.writer.add_scalar(f'rank{self.local_rank}_{key}/train', eval(var), self.batch_total)
 
-            if (batch_idx+1) % self.save_checkpoint_interval == 0 and self.rank == 0:
-                self._save_checkpoint(epoch, step=batch_idx+1)
-        pbar.close()
+            if (batch_idx+1) % self.save_checkpoint_interval == 0:
+                self.save_checkpoint(epoch, model=model, optim=optim, scheduler=scheduler, scaler=scaler, step=batch_idx+1)
+
+        
+        if self.use_ddp or self.use_fsdp:
+            dist.barrier()
+        
         
 
-    def _validate_epoch(self, epoch):
+    def validate_epoch(self,
+                       model=None,
+                       dataloader_val=None,
+                       epoch=None,
+                       writer=None,
+                       **kwargs,
+                       ):
         """
         Defines the validation process for a single epoch.
         Should be implemented with the actual model validation steps.
@@ -357,18 +374,19 @@ class Trainer:
         Args:
             epoch (int): The current epoch number.
         """
-        self.model.eval()
+        logging.info(f"Validate epoch: {epoch}, rank: {self.local_rank}\n")
+        model.eval()
+        
         with torch.no_grad():
-            pbar = tqdm(colour="red", desc=f"rank: {self.local_rank}, Validation Epoch: {epoch + 1}", total=len(self.dataloader_val),
-                        dynamic_ncols=True)
+            
             speed_stats = {}
             time5 = time.perf_counter()
-            for batch_idx, batch in enumerate(self.dataloader_val):
+            for batch_idx, batch in enumerate(dataloader_val):
                 time1 = time.perf_counter()
                 speed_stats["data_load"] = f"{time1 - time5:0.3f}"
                 batch = to_device(batch, self.device)
                 time2 = time.perf_counter()
-                retval = self.model(**batch)
+                retval = model(**batch)
                 time3 = time.perf_counter()
                 speed_stats["forward_time"] = f"{time3 - time2:0.3f}"
                 loss, stats, weight = retval
@@ -378,8 +396,10 @@ class Trainer:
                     loss = (loss * weight.type(loss.dtype)).sum()
                     # if distributed, this method can also apply all_reduce()
                     stats, weight = recursive_average(stats, weight, distributed=True)
+                    if self.use_ddp or self.use_fsdp:
+                        dist.all_reduce(weight, op=dist.ReduceOp.SUM)
                     # Now weight is summation over all workers
-                    loss /= weight
+                    loss /= weight.sum() # shape:[1] -> shape:[]
                     # Multiply world_size because DistributedDataParallel
                     # automatically normalizes the gradient by world_size.
                     loss *= self.world_size
@@ -387,29 +407,94 @@ class Trainer:
                 loss = loss
                 time4 = time.perf_counter()
 
+                self.val_loss_avg = (self.val_loss_avg*batch_idx + loss.detach().cpu().item())/(batch_idx+1)
+                if "acc" in stats:
+                    self.val_acc_avg = (self.val_acc_avg * batch_idx + stats["acc"].detach().cpu().item()) / (batch_idx + 1)
+                if self.use_ddp or self.use_fsdp:
+                    val_loss_avg = torch.tensor(self.val_loss_avg, dtype=torch.float32).to(self.device)
+                    val_acc_avg = torch.tensor(self.val_acc_avg, dtype=torch.float32).to(self.device)
+                    dist.all_reduce(val_loss_avg, op=dist.ReduceOp.SUM)
+                    dist.all_reduce(val_acc_avg, op=dist.ReduceOp.SUM)
+                    self.val_loss_avg = val_loss_avg.detach().cpu().item() / self.world_size
+                    self.val_acc_avg = val_acc_avg.detach().cpu().item() / self.world_size
                 
-                if (batch_idx+1) % self.log_interval == 0 or (batch_idx+1) == len(self.dataloader_val):
-                    pbar.update(self.log_interval)
-                    time_now = datetime.now()
-                    time_now = time_now.strftime("%Y-%m-%d %H:%M:%S")
-                    description = (
-                        f"{time_now}, "
-                        f"rank: {self.local_rank}, "
-                        f"validation epoch: {epoch}/{self.max_epoch}, "
-                        f"step: {batch_idx+1}/{len(self.dataloader_val)}, "
-                        f"(loss: {loss.detach().cpu().item():.3f}), "
-                        f"{[(k, round(v.cpu().item(), 3)) for k, v in stats.items()]}, "
-                        f"{speed_stats}, "
-                    )
-                    pbar.set_description(description)
-                    if self.writer:
-                        self.writer.add_scalar(f"rank{self.local_rank}_Loss/val", loss.item(),
-                                               epoch*len(self.dataloader_val) + batch_idx)
-                        for key, var in stats.items():
-                            self.writer.add_scalar(f'rank{self.local_rank}_{key}/val', var.item(),
-                                                   epoch * len(self.dataloader_val) + batch_idx)
-                        for key, var in speed_stats.items():
-                            self.writer.add_scalar(f'rank{self.local_rank}_{key}/val', eval(var),
-                                                   epoch * len(self.dataloader_val) + batch_idx)
+                batch_num_epoch = -1
+                if hasattr(dataloader_val, "__len__"):
+                    batch_num_epoch = len(dataloader_val)
+                self.log(epoch, batch_idx,
+                         batch_num_epoch=batch_num_epoch,
+                         lr=0.0,
+                         loss=loss.detach().cpu().item(),
+                         speed_stats=speed_stats,
+                         stats=stats,
+                         writer=writer,
+                         tag="val",
+                         )
 
-        self.model.train()
+        self.val_acc_list.append(self.val_acc_avg)
+        model.train()
+        
+        if self.use_ddp or self.use_fsdp:
+            dist.barrier()
+        
+        
+    def log(self,
+            epoch=0,
+            batch_idx=0,
+            batch_num_epoch=-1,
+            lr=0.0,
+            loss=0.0,
+            speed_stats=None,
+            stats=None,
+            writer=None,
+            tag="train",
+            ):
+        
+        if (batch_idx + 1) % self.log_interval == 0:
+            
+            gpu_info = "GPU, memory: usage: {:.3f} GB, " \
+                       "peak: {:.3f} GB, " \
+                       "cache: {:.3f} GB, " \
+                       "cache_peak: {:.3f} GB".format(torch.cuda.memory_allocated() / 1024 / 1024 / 1024,
+                                          torch.cuda.max_memory_allocated() / 1024 / 1024 / 1024,
+                                          torch.cuda.memory_reserved() / 1024 / 1024 / 1024,
+                                          torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024,
+                                          )
+            
+            loss_avg_epoch = getattr(self, f"{tag}_loss_avg")
+            acc_avg_epoch = getattr(self, f"{tag}_acc_avg")
+            description = (
+                f"{tag}, "
+                f"rank: {self.local_rank}, "
+                f"epoch: {epoch}/{self.max_epoch}, "
+                f"step: {batch_idx + 1}/{batch_num_epoch}, total step: {self.batch_total}, "
+                f"(loss_avg_rank: {loss:.3f}), "
+                f"(loss_avg_epoch: {loss_avg_epoch:.3f}), "
+                f"(ppl_avg_epoch: {math.exp(loss_avg_epoch):.3f}), "
+                f"(acc_avg_epoch: {acc_avg_epoch:.3f}), "
+                f"(lr: {lr:.3e}), "
+                f"{[(k, round(v.detach().cpu().item(), 3)) for k, v in stats.items()]}, "
+                f"{speed_stats}, "
+                f"{gpu_info}"
+            )
+            logging.info(description)
+            
+            if writer is not None:
+                writer.add_scalar(f'rank{self.local_rank}_loss/{tag}', loss, self.batch_total)
+                writer.add_scalar(f'rank{self.local_rank}_lr/{tag}', lr, self.batch_total)
+                writer.add_scalar(f'rank{self.local_rank}_lr/{tag}', lr, self.batch_total)
+                for key, var in stats.items():
+                    writer.add_scalar(f'stats_rank{self.local_rank}_{key}/{tag}', var.item(), self.batch_total)
+                for key, var in speed_stats.items():
+                    writer.add_scalar(f'stats_rank{self.local_rank}_{key}/{tag}', eval(var), self.batch_total)
+        
+    def close(self, writer=None):
+        
+        if self.use_ddp or self.use_fsdp:
+            dist.barrier()
+        
+        if writer is not None:
+            writer.close()
+    
+        if self.use_ddp or self.use_fsdp:
+            torch.distributed.destroy_process_group()
