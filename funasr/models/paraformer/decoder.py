@@ -351,9 +351,9 @@ class ParaformerSANMDecoder(BaseTransformerDecoder):
         hlens: torch.Tensor,
         ys_in_pad: torch.Tensor,
         ys_in_lens: torch.Tensor,
-        return_hidden: bool = False,
-        return_both: bool= False,
         chunk_mask: torch.Tensor = None,
+        return_hidden: bool = False,
+        return_both: bool = False,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Forward decoder.
 
