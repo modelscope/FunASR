@@ -137,6 +137,9 @@ torchrun --nnodes 2 --nproc_per_node ${gpu_num} --master_addr=192.168.1.1 --mast
 
 #### 准备数据
 
+`jsonl`格式可以参考（[例子](https://github.com/alibaba-damo-academy/FunASR/blob/main/data/list)）。
+可以用指令 `scp2jsonl` 从wav.scp与text.txt生成。wav.scp与text.txt准备过程如下：
+
 `train_text.txt`
 
 左边为数据唯一ID，需与`train_wav.scp`中的`ID`一一对应
@@ -160,6 +163,15 @@ BAC009S0916W0489 https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test
 ID0012W0015 https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_cn_en.wav
 ```
 
+`生成指令`
+
+```shell
+# generate train.jsonl and val.jsonl from wav.scp and text.txt
+scp2jsonl \
+++scp_file_list='["../../../data/list/train_wav.scp", "../../../data/list/train_text.txt"]' \
+++data_type_list='["source", "target"]' \
+++jsonl_file_out="../../../data/list/train.jsonl"
+```
 
 #### 查看训练日志
 
