@@ -17,16 +17,18 @@ print(res)
 ```
 
 ### 详细用法介绍
+
+#### AutoModel 定义
 ```python
 model = AutoModel(model=[str], device=[str], ncpu=[int], output_dir=[str], batch_size=[int], **kwargs)
 ```
-#### AutoModel 定义
 - `model`(str): [模型仓库](https://github.com/alibaba-damo-academy/FunASR/tree/main/model_zoo) 中的模型名称，或本地磁盘中的模型路径
 - `device`(str): `cuda:0`（默认gpu0），使用 GPU 进行推理，指定。如果为`cpu`，则使用 CPU 进行推理
 - `ncpu`(int): `4` （默认），设置用于 CPU 内部操作并行性的线程数
 - `output_dir`(str): `None` （默认），如果设置，输出结果的输出路径
 - `batch_size`(int): `1` （默认），解码时的批处理大小
 - `**kwargs`(dict): 所有在`config.yaml`中参数，均可以直接在此处指定，例如，vad模型中最大切割长度 `max_single_segment_time=6000` （毫秒）。
+
 #### AutoModel 推理
 ```python
 res = model.generate(input=[str], output_dir=[str])
@@ -171,6 +173,16 @@ scp2jsonl \
 ++scp_file_list='["../../../data/list/train_wav.scp", "../../../data/list/train_text.txt"]' \
 ++data_type_list='["source", "target"]' \
 ++jsonl_file_out="../../../data/list/train.jsonl"
+```
+
+（可选，非必需）如果需要从jsonl解析成wav.scp与text.txt，可以使用指令：
+
+```shell
+# generate wav.scp and text.txt from train.jsonl and val.jsonl
+jsonl2scp \
+++scp_file_list='["../../../data/list/train_wav.scp", "../../../data/list/train_text.txt"]' \
+++data_type_list='["source", "target"]' \
+++jsonl_file_in="../../../data/list/train.jsonl"
 ```
 
 #### 查看训练日志
