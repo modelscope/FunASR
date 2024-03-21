@@ -1,6 +1,6 @@
 (简体中文|[English](./README.md))
 
-FunASR开源了大量在工业数据上预训练模型，您可以在[模型许可协议](../../MODEL_LICENSE)下自由使用、复制、修改和分享FunASR模型，下面列举代表性的模型，更多模型请参考 [模型仓库](../../model_zoo)。
+FunASR开源了大量在工业数据上预训练模型，您可以在 [模型许可协议](https://github.com/alibaba-damo-academy/FunASR/blob/main/MODEL_LICENSE)下自由使用、复制、修改和分享FunASR模型，下面列举代表性的模型，更多模型请参考 [模型仓库](https://github.com/alibaba-damo-academy/FunASR/tree/main/model_zoo)。
 
 
 ## 推理
@@ -10,9 +10,9 @@ FunASR开源了大量在工业数据上预训练模型，您可以在[模型许�
 ```python
 from funasr import AutoModel
 
-model = AutoModel(model="/Users/zhifu/Downloads/modelscope_models/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch")
+model = AutoModel(model="paraformer-zh")
 
-res = model.generate(input="/Users/zhifu/Downloads/modelscope_models/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/example/asr_example.wav")
+res = model.generate(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/vad_example.wav")
 print(res)
 ```
 
@@ -21,7 +21,7 @@ print(res)
 model = AutoModel(model=[str], device=[str], ncpu=[int], output_dir=[str], batch_size=[int], **kwargs)
 ```
 #### AutoModel 定义
-- `model`(str): [模型仓库](https://alibaba-damo-academy.github.io/FunASR/en/model_zoo/modelscope_models.html#pretrained-models-on-modelscope) 中的模型名称，或本地磁盘中的模型路径
+- `model`(str): [模型仓库](https://github.com/alibaba-damo-academy/FunASR/tree/main/model_zoo) 中的模型名称，或本地磁盘中的模型路径
 - `device`(str): `cuda:0`（默认gpu0），使用 GPU 进行推理，指定。如果为`cpu`，则使用 CPU 进行推理
 - `ncpu`(int): `4` （默认），设置用于 CPU 内部操作并行性的线程数
 - `output_dir`(str): `None` （默认），如果设置，输出结果的输出路径
@@ -64,7 +64,7 @@ cd examples/industrial_data_pretraining/paraformer
 bash finetune.sh
 # "log_file: ./outputs/log.txt"
 ```
-详细完整的脚本参考 [finetune.sh](../../examples/industrial_data_pretraining/paraformer/finetune.sh)
+详细完整的脚本参考 [finetune.sh](https://github.com/alibaba-damo-academy/FunASR/blob/main/examples/industrial_data_pretraining/paraformer/finetune.sh)
 
 ### 详细参数介绍
 
@@ -89,8 +89,8 @@ funasr/bin/train.py \
 
 - `model`（str）：模型名字（模型仓库中的ID），此时脚本会自动下载模型到本读；或者本地已经下载好的模型路径。
 - `model_revision`（str）：当 `model` 为模型名字时，下载指定版本的模型。
-- `train_data_set_list`（str）：训练数据路径，默认为jsonl格式，具体参考（[例子](../../data/list)）。
-- `valid_data_set_list`（str）：验证数据路径，默认为jsonl格式，具体参考（[例子](../../data/list)）。
+- `train_data_set_list`（str）：训练数据路径，默认为jsonl格式，具体参考（[例子](https://github.com/alibaba-damo-academy/FunASR/blob/main/data/list)）。
+- `valid_data_set_list`（str）：验证数据路径，默认为jsonl格式，具体参考（[例子](https://github.com/alibaba-damo-academy/FunASR/blob/main/data/list)）。
 - `dataset_conf.batch_type`（str）：`example`（默认），batch的类型。`example`表示按照固定数目batch_size个样本组batch；`length` or `token` 表示动态组batch，batch总长度或者token数为batch_size。
 - `dataset_conf.batch_size`（int）：与 `batch_type` 搭配使用，当 `batch_type=example` 时，表示样本个数；当 `batch_type=length` 时，表示样本中长度，单位为fbank帧数（1帧10ms）或者文字token个数。
 - `train_conf.max_epoch`（int）：训练总epoch数。
