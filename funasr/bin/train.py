@@ -31,9 +31,7 @@ from funasr.download.download_from_hub import download_model
 from funasr.models.lora.utils import mark_only_lora_as_trainable
 from funasr.train_utils.set_all_random_seed import set_all_random_seed
 from funasr.train_utils.load_pretrained_model import load_pretrained_model
-# from funasr.tokenizer.build_tokenizer import build_tokenizer
-# from funasr.tokenizer.token_id_converter import TokenIDConverter
-# from funasr.tokenizer.funtoken import build_tokenizer
+from funasr.utils.misc import prepare_model_dir
 from funasr import AutoModel
 
 @hydra.main(config_name=None, version_base=None)
@@ -77,11 +75,7 @@ def main(**kwargs):
     
     # save config.yaml
     if (use_ddp or use_fsdp) and dist.get_rank() == 0 or not (use_ddp or use_fsdp) and local_rank == 0:
-        os.makedirs(kwargs.get("output_dir", "./"), exist_ok=True)
-        yaml_file = os.path.join(kwargs.get("output_dir", "./"), "config.yaml")
-        OmegaConf.save(config=kwargs, f=yaml_file)
-        print(kwargs)
-        logging.info("config.yaml is saved to: %s", yaml_file)
+        prepare_model_dir(**kwargs)
     
     # parse kwargs
     kwargs = model.kwargs
