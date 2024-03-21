@@ -94,10 +94,8 @@ class ContextualParaformer(Paraformer):
                 text: (Batch, Length)
                 text_lengths: (Batch,)
         """
-        if len(text_lengths.size()) > 1:
-            text_lengths = text_lengths[:, 0]
-        if len(speech_lengths.size()) > 1:
-            speech_lengths = speech_lengths[:, 0]
+        text_lengths = text_lengths.squeeze()
+        speech_lengths = speech_lengths.squeeze()
 
         batch_size = speech.shape[0]
 
