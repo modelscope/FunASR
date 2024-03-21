@@ -31,8 +31,6 @@ class Model {
     virtual Vocab* GetVocab() {return nullptr;};
     virtual Vocab* GetLmVocab() {return nullptr;};
     virtual PhoneSet* GetPhoneSet() {return nullptr;};
-
-    std::shared_ptr<fst::Fst<fst::StdArc>> lm_ = nullptr;
 };
 
 Model *CreateModel(std::map<std::string, std::string>& model_path, int thread_num=1, ASR_TYPE type=ASR_OFFLINE);
