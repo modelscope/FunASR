@@ -14,6 +14,7 @@
 | [**News**](https://github.com/alibaba-damo-academy/FunASR#whats-new) 
 | [**Installation**](#installation)
 | [**Quick Start**](#quick-start)
+| [Tutorial](https://github.com/alibaba-damo-academy/FunASR/blob/main/docs/tutorial/README.md)
 | [**Runtime**](./runtime/readme.md)
 | [**Model Zoo**](#model-zoo)
 | [**Contact**](#contact)
