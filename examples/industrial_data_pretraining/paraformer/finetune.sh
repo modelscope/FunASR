@@ -36,9 +36,14 @@ funasr/bin/train.py \
 ++model_revision="v2.0.4" \
 ++train_data_set_list="${train_data}" \
 ++valid_data_set_list="${val_data}" \
-++dataset_conf.batch_size=32 \
-++dataset_conf.batch_type="example" \
+++dataset_conf.batch_size=30000 \
+++dataset_conf.batch_type="token" \
 ++dataset_conf.num_workers=4 \
-++train_conf.max_epoch=20 \
+++train_conf.max_epoch=50 \
+++train_conf.log_interval=10 \
+++train_conf.resume=false \
+++train_conf.validate_interval=15 \
+++train_conf.save_checkpoint_interval=15 \
+++train_conf.keep_nbest_models=50 \
 ++optim_conf.lr=0.0002 \
 ++output_dir="${output_dir}" &> ${log_file}

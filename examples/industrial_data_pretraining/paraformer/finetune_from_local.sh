@@ -59,13 +59,17 @@ torchrun \
 --config-name "${config_name}" \
 ++train_data_set_list="${train_data}" \
 ++valid_data_set_list="${val_data}" \
+++dataset_conf.batch_size=30000 \
+++dataset_conf.batch_type="token" \
+++dataset_conf.num_workers=4 \
+++train_conf.max_epoch=50 \
+++train_conf.log_interval=10 \
+++train_conf.resume=false \
+++train_conf.validate_interval=15 \
+++train_conf.save_checkpoint_interval=15 \
+++train_conf.keep_nbest_models=50 \
+++optim_conf.lr=0.0002 \
+++init_param="${init_param}" \
 ++tokenizer_conf.token_list="${tokens}" \
 ++frontend_conf.cmvn_file="${cmvn_file}" \
-++dataset_conf.batch_size=32 \
-++dataset_conf.batch_type="example" \
-++dataset_conf.num_workers=4 \
-++train_conf.max_epoch=20 \
-++optim_conf.lr=0.0002 \
-++train_conf.log_interval=1 \
-++init_param="${init_param}" \
 ++output_dir="${output_dir}" &> ${log_file}
