@@ -154,8 +154,8 @@ def main(**kwargs):
 
     # dataset
     logging.info("Build dataloader")
-    dataloader_class = tables.dataset_classes.get( kwargs["dataset_conf"].get("dataset", "DataloaderMapStyle"))
-    dataloader_tr, dataloader_val = dataloader_class(frontend=frontend, tokenizer=tokenizer, **kwargs)
+    dataloader_class = tables.dataloader_classes.get( kwargs["dataset_conf"].get("dataloader", "DataloaderMapStyle"))
+    dataloader_tr, dataloader_val = dataloader_class(**kwargs)
 
     trainer = Trainer(local_rank=local_rank,
                       use_ddp=use_ddp,

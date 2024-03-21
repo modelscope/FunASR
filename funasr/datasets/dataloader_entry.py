@@ -1,4 +1,7 @@
 
+import logging
+import torch
+
 from funasr.register import tables
 
 @tables.register("dataloader_classes", "DataloaderMapStyle")

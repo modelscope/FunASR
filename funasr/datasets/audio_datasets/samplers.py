@@ -12,12 +12,14 @@ from funasr.register import tables
 
 @tables.register("batch_sampler_classes", "BatchSampler")
 @tables.register("batch_sampler_classes", "CustomDistributedBatchSampler")
+@tables.register("batch_sampler_classes", "CustomDistributedDynamicBatchSampler")
 @tables.register("batch_sampler_classes", "DynamicBatchLocalShuffleSampler")
 @tables.register("batch_sampler_classes", "RankFullLocalShuffleBatchSampler")
 @tables.register("batch_sampler_classes", "RankFullLocalShuffleDynamicBatchSampler")
 def CustomDistributedBatchSampler_fn(dataset, **kwargs):
     dataloader_args = {}
-    if "batch_type" in kwargs and batch_type == "example":
+    batch_type = kwargs.get("batch_type", "example")
+    if batch_type == "example":
         batch_sampler = CustomDistributedBatchSampler(dataset, **kwargs)
         
     else:
