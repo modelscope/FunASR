@@ -105,11 +105,7 @@ class Trainer:
         self.saved_ckpts = {}
         self.val_acc_list = []
         self.step_or_epoch = -1
-        
-        
-
-        
-    
+       
     def save_checkpoint(self, epoch,
                         step=None,
                         model=None,
