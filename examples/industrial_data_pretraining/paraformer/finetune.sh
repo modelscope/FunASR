@@ -62,5 +62,6 @@ torchrun \
 ++train_conf.validate_interval=2000 \
 ++train_conf.save_checkpoint_interval=2000 \
 ++train_conf.keep_nbest_models=20 \
+++train_conf.avg_nbest_model=5 \
 ++optim_conf.lr=0.0002 \
 ++output_dir="${output_dir}" &> ${log_file}

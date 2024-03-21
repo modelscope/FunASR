@@ -85,6 +85,7 @@ funasr/bin/train.py \
 ++train_conf.validate_interval=2000 \
 ++train_conf.save_checkpoint_interval=2000 \
 ++train_conf.keep_nbest_models=20 \
+++train_conf.avg_nbest_model=5 \
 ++optim_conf.lr=0.0002 \
 ++output_dir="${output_dir}" &> ${log_file}
 ```
@@ -101,6 +102,7 @@ funasr/bin/train.py \
 - `train_conf.validate_interval`（int）：训练中做验证测试的间隔step数。
 - `train_conf.save_checkpoint_interval`（int）：训练中模型保存间隔step数。
 - `train_conf.keep_nbest_models`（int）：保留最大多少个模型参数，按照验证集acc排序，从高到底保留。
+- `train_conf.avg_nbest_model`（int）：对acc最高的n个模型取平均。
 - `optim_conf.lr`（float）：学习率。
 - `output_dir`（str）：模型保存路径。
 - `**kwargs`(dict): 所有在`config.yaml`中参数，均可以直接在此处指定，例如，过滤20s以上长音频：`dataset_conf.max_token_length=2000`，单位为音频fbank帧数（1帧10ms）或者文字token个数。
