@@ -1,1 +1,0 @@
-../../egs_modelscope/speaker_verification/TEMPLATE/README.md
