@@ -5,6 +5,10 @@
 #include <string>
 #include <map>
 #include "funasrruntime.h"
+#include "vocab.h"
+#include "phone-set.h"
+#include "fst/fstlib.h"
+#include "fst/symbol-table.h"
 namespace funasr {
 class Model {
   public:
@@ -24,9 +28,9 @@ class Model {
     virtual std::vector<std::vector<float>> CompileHotwordEmbedding(std::string &hotwords){return std::vector<std::vector<float>>();};
     virtual std::string GetLang(){return "";};
     virtual int GetAsrSampleRate() = 0;
-    virtual Vocab* GetVocab(){};
-    virtual Vocab* GetLmVocab(){};
-    virtual PhoneSet* GetPhoneSet(){};
+    virtual Vocab* GetVocab() {return nullptr;};
+    virtual Vocab* GetLmVocab() {return nullptr;};
+    virtual PhoneSet* GetPhoneSet() {return nullptr;};
 
     std::shared_ptr<fst::Fst<fst::StdArc>> lm_ = nullptr;
 };
