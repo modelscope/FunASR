@@ -69,7 +69,7 @@ pip3 install -U modelscope
 
 ## 模型仓库
 
-FunASR开源了大量在工业数据上预训练模型，您可以在[模型许可协议](./MODEL_LICENSE)下自由使用、复制、修改和分享FunASR模型，下面列举代表性的模型，更多模型请参考[模型仓库]()。
+FunASR开源了大量在工业数据上预训练模型，您可以在[模型许可协议](./MODEL_LICENSE)下自由使用、复制、修改和分享FunASR模型，下面列举代表性的模型，更多模型请参考 [模型仓库](./model_zoo)。
 
 （注：⭐ 表示ModelScope模型仓库，🤗 表示Huggingface模型仓库，🍀表示OpenAI模型仓库）
 
@@ -208,7 +208,8 @@ text_file = f"{model.model_path}/example/text.txt"
 res = model.generate(input=(wav_file, text_file), data_type=("sound", "text"))
 print(res)
 ```
-更多详细用法（[示例](https://github.com/alibaba-damo-academy/FunASR/tree/main/examples/industrial_data_pretraining)）
+更详细（[用法](docs/tutorial/README_zh.md)），
+更多（[示例](https://github.com/alibaba-damo-academy/FunASR/tree/main/examples/industrial_data_pretraining)）
 
 ## 导出ONNX
 ### 从命令行导出
