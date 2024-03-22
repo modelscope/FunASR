@@ -543,6 +543,11 @@ class FsmnVADStreaming(nn.Module):
 		cache["frontend"] = {}
 		cache["prev_samples"] = torch.empty(0)
 		cache["encoder"] = {}
+
+		if kwargs.get("max_end_silence_time") is not None:
+			# update the max_end_silence_time
+			self.vad_opts.max_end_silence_time = kwargs.get("max_end_silence_time")
+
 		windows_detector = WindowDetector(self.vad_opts.window_size_ms,
 		                                  self.vad_opts.sil_to_speech_time_thres,
 		                                  self.vad_opts.speech_to_sil_time_thres,
