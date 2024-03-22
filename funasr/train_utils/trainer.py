@@ -248,8 +248,12 @@ class Trainer:
         optim.zero_grad()
         speed_stats = {}
         time5 = time.perf_counter()
-        
+        iterator_stop = torch.tensor(0).to(self.device)
         for batch_idx, batch in enumerate(dataloader_train):
+            if self.use_ddp or self.use_fsdp:
+                dist.all_reduce(iterator_stop, dist.ReduceOp.SUM)
+                if iterator_stop > 0:
+                    break
             self.batch_total += 1
             time1 = time.perf_counter()
             speed_stats["data_load"] = f"{time1-time5:0.3f}"
@@ -356,7 +360,11 @@ class Trainer:
             if (batch_idx+1) % self.save_checkpoint_interval == 0:
                 self.save_checkpoint(epoch, model=model, optim=optim, scheduler=scheduler, scaler=scaler, step=batch_idx+1)
 
-        
+        else:
+            if self.use_ddp or self.use_fsdp:
+                iterator_stop.fill_(1)
+                dist.all_reduce(iterator_stop, dist.ReduceOp.SUM)
+                
         if self.use_ddp or self.use_fsdp:
             dist.barrier()
         
@@ -383,7 +391,12 @@ class Trainer:
             
             speed_stats = {}
             time5 = time.perf_counter()
+            iterator_stop = torch.tensor(0).to(self.device)
             for batch_idx, batch in enumerate(dataloader_val):
+                if self.use_ddp or self.use_fsdp:
+                    dist.all_reduce(iterator_stop, dist.ReduceOp.SUM)
+                    if iterator_stop > 0:
+                        break
                 time1 = time.perf_counter()
                 speed_stats["data_load"] = f"{time1 - time5:0.3f}"
                 batch = to_device(batch, self.device)
@@ -433,9 +446,16 @@ class Trainer:
                          tag="val",
                          )
 
+            else:
+                if self.use_ddp or self.use_fsdp:
+                    iterator_stop.fill_(1)
+                    dist.all_reduce(iterator_stop, dist.ReduceOp.SUM)
+                    
         self.val_acc_list.append(self.val_acc_avg)
         model.train()
-        
+
+
+
         if self.use_ddp or self.use_fsdp:
             dist.barrier()
         
