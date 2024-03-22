@@ -59,6 +59,7 @@ def main(**kwargs):
     dataset_conf = kwargs.get("dataset_conf")
     dataset_conf["batch_type"] = "example"
     dataset_conf["batch_size"] = 1
+    dataset_conf["num_workers"] = os.cpu_count() or 32
     batch_sampler_train = batch_sampler_class(dataset_train, is_training=False, **dataset_conf)
 
     dataloader_train = torch.utils.data.DataLoader(dataset_train, collate_fn=dataset_train.collator, **batch_sampler_train)
