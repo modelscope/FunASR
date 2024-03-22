@@ -144,5 +144,7 @@ setup(
         "funasr-export = funasr.bin.export:main_hydra",
         "scp2jsonl = funasr.datasets.audio_datasets.scp2jsonl:main_hydra",
         "jsonl2scp = funasr.datasets.audio_datasets.jsonl2scp:main_hydra",
+        "funasr-scp2jsonl = funasr.datasets.audio_datasets.scp2jsonl:main_hydra",
+        "funasr-jsonl2scp = funasr.datasets.audio_datasets.jsonl2scp:main_hydra",
     ]},
 )

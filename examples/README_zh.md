@@ -16,17 +16,18 @@ res = model.generate(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/Ma
 print(res)
 ```
 
-### 详细用法介绍
+### 接口说明
 
 #### AutoModel 定义
 ```python
-model = AutoModel(model=[str], device=[str], ncpu=[int], output_dir=[str], batch_size=[int], **kwargs)
+model = AutoModel(model=[str], device=[str], ncpu=[int], output_dir=[str], batch_size=[int], hub=[str], **kwargs)
 ```
 - `model`(str): [模型仓库](https://github.com/alibaba-damo-academy/FunASR/tree/main/model_zoo) 中的模型名称，或本地磁盘中的模型路径
 - `device`(str): `cuda:0`（默认gpu0），使用 GPU 进行推理，指定。如果为`cpu`，则使用 CPU 进行推理
 - `ncpu`(int): `4` （默认），设置用于 CPU 内部操作并行性的线程数
 - `output_dir`(str): `None` （默认），如果设置，输出结果的输出路径
-- `batch_size`(int): `1` （默认），解码时的批处理大小
+- `batch_size`(int): `1` （默认），解码时的批处理，样本个数
+- `hub`(str)：`ms`（默认），从modelscope下载模型。如果为`hf`，从huggingface下载模型。
 - `**kwargs`(dict): 所有在`config.yaml`中参数，均可以直接在此处指定，例如，vad模型中最大切割长度 `max_single_segment_time=6000` （毫秒）。
 
 #### AutoModel 推理
@@ -56,6 +57,130 @@ res = model.export(type="onnx", quantize=True)
 ```
 - `type`(str)：`onnx`(默认)，导出onnx格式。`torch`导出libtorch格式。
 - `quantize`(bool)：`False`（默认），是否做量化。
+
+### 更多用法介绍
+
+
+#### 非实时语音识别
+```python
+from funasr import AutoModel
+# paraformer-zh is a multi-functional asr model
+# use vad, punc, spk or not as you need
+model = AutoModel(model="paraformer-zh",  
+                  vad_model="fsmn-vad", 
+                  vad_kwargs={"max_single_segment_time": 60000},
+                  punc_model="ct-punc", 
+                  # spk_model="cam++"
+                  )
+wav_file = f"{model.model_path}/example/asr_example.wav"
+res = model.generate(input=wav_file, batch_size_s=300, batch_size_threshold_s=60, hotword='魔搭')
+print(res)
+```
+注意：
+- 通常模型输入限制时长30s以下，组合`vad_model`后，支持任意时长音频输入，不局限于paraformer模型，所有音频输入模型均可以。
+- `model`相关的参数可以直接在`AutoModel`定义中直接指定；与`vad_model`相关参数可以通过`vad_kwargs`来指定，类型为dict；类似的有`punc_kwargs`，`spk_kwargs`；
+- `max_single_segment_time`: 表示`vad_model`最大切割音频时长, 单位是毫秒ms.
+- `batch_size_s` 表示采用动态batch，batch中总音频时长，单位为秒s。
+- `batch_size_threshold_s`: 表示`vad_model`切割后音频片段时长超过 `batch_size_threshold_s`阈值时，将batch_size数设置为1, 单位为秒s.
+
+建议：当您输入为长音频，遇到OOM问题时，因为显存占用与音频时长呈平方关系增加，分为3种情况：
+- a)推理起始阶段，显存主要取决于`batch_size_s`，适当减小该值，可以减少显存占用；
+- b)推理中间阶段，遇到VAD切割的长音频片段，总token数小于`batch_size_s`，仍然出现OOM，可以适当减小`batch_size_threshold_s`，超过阈值，强制batch为1; 
+- c)推理快结束阶段，遇到VAD切割的长音频片段，总token数小于`batch_size_s`，且超过阈值`batch_size_threshold_s`，强制batch为1，仍然出现OOM，可以适当减小`max_single_segment_time`，使得VAD切割音频时长变短。
+
+#### 实时语音识别
+
+```python
+from funasr import AutoModel
+
+chunk_size = [0, 10, 5] #[0, 10, 5] 600ms, [0, 8, 4] 480ms
+encoder_chunk_look_back = 4 #number of chunks to lookback for encoder self-attention
+decoder_chunk_look_back = 1 #number of encoder chunks to lookback for decoder cross-attention
+
+model = AutoModel(model="paraformer-zh-streaming")
+
+import soundfile
+import os
+
+wav_file = os.path.join(model.model_path, "example/asr_example.wav")
+speech, sample_rate = soundfile.read(wav_file)
+chunk_stride = chunk_size[1] * 960 # 600ms
+
+cache = {}
+total_chunk_num = int(len((speech)-1)/chunk_stride+1)
+for i in range(total_chunk_num):
+    speech_chunk = speech[i*chunk_stride:(i+1)*chunk_stride]
+    is_final = i == total_chunk_num - 1
+    res = model.generate(input=speech_chunk, cache=cache, is_final=is_final, chunk_size=chunk_size, encoder_chunk_look_back=encoder_chunk_look_back, decoder_chunk_look_back=decoder_chunk_look_back)
+    print(res)
+```
+
+注：`chunk_size`为流式延时配置，`[0,10,5]`表示上屏实时出字粒度为`10*60=600ms`，未来信息为`5*60=300ms`。每次推理输入为`600ms`（采样点数为`16000*0.6=960`），输出为对应文字，最后一个语音片段输入需要设置`is_final=True`来强制输出最后一个字。
+
+#### 语音端点检测（非实时）
+```python
+from funasr import AutoModel
+
+model = AutoModel(model="fsmn-vad")
+
+wav_file = f"{model.model_path}/example/asr_example.wav"
+res = model.generate(input=wav_file)
+print(res)
+```
+注：VAD模型输出格式为：`[[beg1, end1], [beg2, end2], .., [begN, endN]]`，其中`begN/endN`表示第`N`个有效音频片段的起始点/结束点，
+单位为毫秒。
+
+#### 语音端点检测（实时）
+```python
+from funasr import AutoModel
+
+chunk_size = 200 # ms
+model = AutoModel(model="fsmn-vad")
+
+import soundfile
+
+wav_file = f"{model.model_path}/example/vad_example.wav"
+speech, sample_rate = soundfile.read(wav_file)
+chunk_stride = int(chunk_size * sample_rate / 1000)
+
+cache = {}
+total_chunk_num = int(len((speech)-1)/chunk_stride+1)
+for i in range(total_chunk_num):
+    speech_chunk = speech[i*chunk_stride:(i+1)*chunk_stride]
+    is_final = i == total_chunk_num - 1
+    res = model.generate(input=speech_chunk, cache=cache, is_final=is_final, chunk_size=chunk_size)
+    if len(res[0]["value"]):
+        print(res)
+```
+注：流式VAD模型输出格式为4种情况：
+- `[[beg1, end1], [beg2, end2], .., [begN, endN]]`：同上离线VAD输出结果。
+- `[[beg, -1]]`：表示只检测到起始点。
+- `[[-1, end]]`：表示只检测到结束点。
+- `[]`：表示既没有检测到起始点，也没有检测到结束点
+输出结果单位为毫秒，从起始点开始的绝对时间。
+
+#### 标点恢复
+```python
+from funasr import AutoModel
+
+model = AutoModel(model="ct-punc")
+
+res = model.generate(input="那今天的会就到这里吧 happy new year 明年见")
+print(res)
+```
+
+#### 时间戳预测
+```python
+from funasr import AutoModel
+
+model = AutoModel(model="fa-zh")
+
+wav_file = f"{model.model_path}/example/asr_example.wav"
+text_file = f"{model.model_path}/example/text.txt"
+res = model.generate(input=(wav_file, text_file), data_type=("sound", "text"))
+print(res)
+```
+更多（[示例](https://github.com/alibaba-damo-academy/FunASR/tree/main/examples/industrial_data_pretraining)）
 
 
 ## 微调
