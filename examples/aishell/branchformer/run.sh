@@ -78,7 +78,7 @@ if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
     --config-name "${config}" \
     ++train_data_set_list="${feats_dir}/data/${train_set}/audio_datasets.jsonl" \
     ++cmvn_file="${feats_dir}/data/${train_set}/cmvn.json" \
-    ++dataset_conf.num_workers=$nj
+
 fi
 
 token_list=${feats_dir}/data/${lang}_token_list/$token_type/tokens.txt
