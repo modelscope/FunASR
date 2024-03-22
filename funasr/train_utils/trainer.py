@@ -198,6 +198,8 @@ class Trainer:
                 for k in dst_state.keys():
                     if not k.startswith("module.") and "module."+k in src_state.keys():
                         k_ddp = "module."+k
+                    elif k.startswith("module.") and "module."+k not in src_state.keys():
+                        k_ddp = k.replace("module.", "", 1)
                     else:
                         k_ddp = k
                     if k_ddp in src_state.keys():
