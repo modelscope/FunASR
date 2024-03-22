@@ -2,11 +2,26 @@
 
 FunASR开源了大量在工业数据上预训练模型，您可以在 [模型许可协议](https://github.com/alibaba-damo-academy/FunASR/blob/main/MODEL_LICENSE)下自由使用、复制、修改和分享FunASR模型，下面列举代表性的模型，更多模型请参考 [模型仓库](https://github.com/alibaba-damo-academy/FunASR/tree/main/model_zoo)。
 
+<div align="center">  
+<h4>
+ <a href="#模型推理"> 模型推理 </a>   
+｜<a href="#模型训练与测试"> 模型训练与测试 </a>
+｜<a href="#模型导出与测试"> 模型导出与测试 </a>
+</h4>
+</div>
 
-## 推理
+<a name="模型推理"></a>
+## 模型推理
 
 ### 快速使用
-#### [Paraformer 模型](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary)
+
+命令行方式调用：
+```shell
+funasr ++model=paraformer-zh ++vad_model="fsmn-vad" ++punc_model="ct-punc" ++input=asr_example_zh.wav
+```
+
+python代码调用（推荐）
+
 ```python
 from funasr import AutoModel
 
@@ -50,13 +65,6 @@ res = model.generate(input=[str], output_dir=[str])
 - `output_dir`: None （默认），如果设置，输出结果的输出路径
 - `**kwargs`(dict): 与模型相关的推理参数，例如，`beam_size=10`，`decoding_ctc_weight=0.1`。
 
-### onnx与libtorch导出
-
-```python
-res = model.export(type="onnx", quantize=True)
-```
-- `type`(str)：`onnx`(默认)，导出onnx格式。`torch`导出libtorch格式。
-- `quantize`(bool)：`False`（默认），是否做量化。
 
 ### 更多用法介绍
 
@@ -182,10 +190,18 @@ print(res)
 ```
 更多（[示例](https://github.com/alibaba-damo-academy/FunASR/tree/main/examples/industrial_data_pretraining)）
 
-
-## 微调
+<a name="核心功能"></a>
+## 模型训练与测试
 
 ### 快速开始
+
+命令行执行（用于快速测试，不推荐）：
+```shell
+funasr-train ++model=paraformer-zh ++train_data_set_list=data/list/train.jsonl ++valid_data_set_list=data/list/val.jsonl ++output_dir="./outputs" &> log.txt &
+```
+
+python代码执行（可以多机多卡，推荐）
+
 ```shell
 cd examples/industrial_data_pretraining/paraformer
 bash finetune.sh
@@ -335,3 +351,35 @@ tail log.txt
 tensorboard --logdir /xxxx/FunASR/examples/industrial_data_pretraining/paraformer/outputs/log/tensorboard
 ```
 浏览器中打开：http://localhost:6006/
+
+
+<a name="模型导出与测试"></a>
+## 模型导出与测试
+### 从命令行导出
+```shell
+funasr-export ++model=paraformer ++quantize=false
+```
+
+### 从Python导出
+```python
+from funasr import AutoModel
+
+model = AutoModel(model="paraformer")
+
+res = model.export(quantize=False)
+```
+
+### 测试ONNX
+```python
+# pip3 install -U funasr-onnx
+from funasr_onnx import Paraformer
+model_dir = "damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
+model = Paraformer(model_dir, batch_size=1, quantize=True)
+
+wav_path = ['~/.cache/modelscope/hub/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/example/asr_example.wav']
+
+result = model(wav_path)
+print(result)
+```
+
+更多例子请参考 [样例](runtime/python/onnxruntime)

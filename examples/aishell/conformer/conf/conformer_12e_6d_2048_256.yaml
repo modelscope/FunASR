@@ -74,13 +74,6 @@ train_conf:
   accum_grad: 1
   grad_clip: 5
   max_epoch: 150
-  val_scheduler_criterion:
-      - valid
-      - acc
-  best_model_criterion:
-  -   - valid
-      - acc
-      - max
   keep_nbest_models: 10
   log_interval: 50
 
