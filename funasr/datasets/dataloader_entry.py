@@ -13,7 +13,7 @@ def DataloaderMapStyle(frontend=None, tokenizer=None, **kwargs):
 	dataset_val = dataset_class(kwargs.get("valid_data_set_list"), frontend=frontend, tokenizer=tokenizer, is_training=False, **kwargs.get("dataset_conf"))
 	
 	# dataloader
-	batch_sampler = kwargs["dataset_conf"].get("batch_sampler", "DynamicBatchLocalShuffleSampler")
+	batch_sampler = kwargs["dataset_conf"].get("batch_sampler", "BatchSampler")
 	batch_sampler_val = None
 	if batch_sampler is not None:
 		batch_sampler_class = tables.batch_sampler_classes.get(batch_sampler)

@@ -40,6 +40,7 @@ def gen_scp_from_jsonl(jsonl_file, data_type_list, wav_scp_file, text_file):
 def main_hydra(cfg: DictConfig):
  
     kwargs = OmegaConf.to_container(cfg, resolve=True)
+    print(kwargs)
 
     scp_file_list = kwargs.get("scp_file_list", ("/Users/zhifu/funasr1.0/test_local/wav.scp", "/Users/zhifu/funasr1.0/test_local/text.txt"))
     if isinstance(scp_file_list, str):

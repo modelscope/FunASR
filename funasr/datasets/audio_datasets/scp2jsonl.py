@@ -79,6 +79,7 @@ def parse_context_length(data_list: list, data_type: str):
 def main_hydra(cfg: DictConfig):
  
     kwargs = OmegaConf.to_container(cfg, resolve=True)
+    print(kwargs)
 
     scp_file_list = kwargs.get("scp_file_list", ("/Users/zhifu/funasr1.0/test_local/wav.scp", "/Users/zhifu/funasr1.0/test_local/text.txt"))
     if isinstance(scp_file_list, str):
