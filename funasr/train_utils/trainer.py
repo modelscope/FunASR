@@ -290,13 +290,13 @@ class Trainer:
                 self.train_loss_avg = (self.train_loss_avg*batch_idx + loss.detach().cpu().item())/(batch_idx+1)
                 if "acc" in stats:
                     self.train_acc_avg = (self.train_acc_avg * batch_idx + stats["acc"].detach().cpu().item()) / (batch_idx + 1)
-                if self.use_ddp or self.use_fsdp:
-                    train_loss_avg = torch.tensor(self.train_loss_avg, dtype=torch.float32).to(self.device)
-                    train_acc_avg = torch.tensor(self.train_acc_avg, dtype=torch.float32).to(self.device)
-                    dist.all_reduce(train_loss_avg, op=dist.ReduceOp.SUM)
-                    dist.all_reduce(train_acc_avg, op=dist.ReduceOp.SUM)
-                    self.train_loss_avg = train_loss_avg.detach().cpu().item() / self.world_size
-                    self.train_acc_avg = train_acc_avg.detach().cpu().item() / self.world_size
+                # if self.use_ddp or self.use_fsdp:
+                #     train_loss_avg = torch.tensor(self.train_loss_avg, dtype=torch.float32).to(self.device)
+                #     train_acc_avg = torch.tensor(self.train_acc_avg, dtype=torch.float32).to(self.device)
+                #     dist.all_reduce(train_loss_avg, op=dist.ReduceOp.SUM)
+                #     dist.all_reduce(train_acc_avg, op=dist.ReduceOp.SUM)
+                #     self.train_loss_avg = train_loss_avg.detach().cpu().item() / self.world_size
+                #     self.train_acc_avg = train_acc_avg.detach().cpu().item() / self.world_size
                 
             
             # Perform an optimizer step only after accumulating enough gradients
@@ -412,13 +412,13 @@ class Trainer:
                 self.val_loss_avg = (self.val_loss_avg*batch_idx + loss.detach().cpu().item())/(batch_idx+1)
                 if "acc" in stats:
                     self.val_acc_avg = (self.val_acc_avg * batch_idx + stats["acc"].detach().cpu().item()) / (batch_idx + 1)
-                if self.use_ddp or self.use_fsdp:
-                    val_loss_avg = torch.tensor(self.val_loss_avg, dtype=torch.float32).to(self.device)
-                    val_acc_avg = torch.tensor(self.val_acc_avg, dtype=torch.float32).to(self.device)
-                    dist.all_reduce(val_loss_avg, op=dist.ReduceOp.SUM)
-                    dist.all_reduce(val_acc_avg, op=dist.ReduceOp.SUM)
-                    self.val_loss_avg = val_loss_avg.detach().cpu().item() / self.world_size
-                    self.val_acc_avg = val_acc_avg.detach().cpu().item() / self.world_size
+                # if self.use_ddp or self.use_fsdp:
+                #     val_loss_avg = torch.tensor(self.val_loss_avg, dtype=torch.float32).to(self.device)
+                #     val_acc_avg = torch.tensor(self.val_acc_avg, dtype=torch.float32).to(self.device)
+                #     dist.all_reduce(val_loss_avg, op=dist.ReduceOp.SUM)
+                #     dist.all_reduce(val_acc_avg, op=dist.ReduceOp.SUM)
+                #     self.val_loss_avg = val_loss_avg.detach().cpu().item() / self.world_size
+                #     self.val_acc_avg = val_acc_avg.detach().cpu().item() / self.world_size
                 
                 batch_num_epoch = -1
                 if hasattr(dataloader_val, "__len__"):
