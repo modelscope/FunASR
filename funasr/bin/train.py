@@ -173,10 +173,10 @@ def main(**kwargs):
     except:
         writer = None
 
-    # if use_ddp or use_fsdp:
-    #     context = Join([model])
-    # else:
-    context = nullcontext()
+    if use_ddp or use_fsdp:
+        context = Join([model])
+    else:
+        context = nullcontext()
 
     for epoch in range(trainer.start_epoch, trainer.max_epoch + 1):
         time1 = time.perf_counter()
@@ -192,13 +192,14 @@ def main(**kwargs):
                                 epoch=epoch,
                                 writer=writer
                                 )
+        with context:
+            trainer.validate_epoch(
+                model=model,
+                dataloader_val=dataloader_val,
+                epoch=epoch,
+                writer=writer
+            )
         scheduler.step()
-        trainer.validate_epoch(
-            model=model,
-            dataloader_val=dataloader_val,
-            epoch=epoch,
-            writer=writer
-        )
 
         
         trainer.save_checkpoint(epoch, model=model, optim=optim, scheduler=scheduler, scaler=scaler)
