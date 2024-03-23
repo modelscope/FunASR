@@ -128,7 +128,8 @@ def main(**kwargs):
     else:
         model = model.to(device=kwargs.get("device", "cuda"))
 
-    logging.info(f"{model}")
+    if local_rank == 0:
+        logging.info(f"{model}")
     kwargs["device"] = next(model.parameters()).device
         
     # optim
