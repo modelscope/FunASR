@@ -212,7 +212,7 @@ class CustomDistributedBufferBatchSampler(Sampler):
     def set_epoch(self, epoch):
         self.epoch = epoch
 
-class CustomDistributedDynamicBatchSampler(Sampler):
+class CustomDistributedDynamicBatchSampler(DistributedSampler):
     def __init__(self, dataset,
                  batch_size,
                  num_replicas=None,
