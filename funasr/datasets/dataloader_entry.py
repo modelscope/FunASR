@@ -50,7 +50,7 @@ class DataloaderMapStyle:
 			batch_sampler_val = batch_sampler_class(self.dataset_val, is_training=False, **self.kwargs.get("dataset_conf"))
 		
 		batch_sampler["batch_sampler"].set_epoch(epoch)
-		batch_sampler_val.set_epoch(epohc)
+		batch_sampler_val["batch_sampler"].set_epoch(epoch)
 		dataloader_tr = torch.utils.data.DataLoader(self.dataset_tr, collate_fn=self.dataset_tr.collator, **batch_sampler)
 		dataloader_val = torch.utils.data.DataLoader(self.dataset_val, collate_fn=self.dataset_val.collator, **batch_sampler_val)
 		
