@@ -173,11 +173,11 @@ def main(**kwargs):
     except:
         writer = None
 
-    if use_ddp or use_fsdp:
-        context = Join([model])
-    else:
-        context = nullcontext()
-
+    # if use_ddp or use_fsdp:
+    #     context = Join([model])
+    # else:
+    #     context = nullcontext()
+    context = nullcontext()
     for epoch in range(trainer.start_epoch, trainer.max_epoch + 1):
         time1 = time.perf_counter()
         with context:
