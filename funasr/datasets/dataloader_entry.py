@@ -4,7 +4,7 @@ import torch
 
 from funasr.register import tables
 
-@tables.register("dataloader_classes", "DataloaderMapStyle")
+# @tables.register("dataloader_classes", "DataloaderMapStyle")
 def DataloaderMapStyle(frontend=None, tokenizer=None, **kwargs):
 	# dataset
 	logging.info("Build dataloader")
@@ -25,7 +25,7 @@ def DataloaderMapStyle(frontend=None, tokenizer=None, **kwargs):
 	
 	return dataloader_tr, dataloader_val
 
-# @tables.register("dataloader_classes", "DataloaderMapStyle")
+@tables.register("dataloader_classes", "DataloaderMapStyle")
 class DataloaderMapStyle:
 	def __init__(self, frontend=None, tokenizer=None, **kwargs):
 		# dataset
