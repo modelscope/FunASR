@@ -352,6 +352,55 @@ tensorboard --logdir /xxxx/FunASR/examples/industrial_data_pretraining/paraforme
 ```
 浏览器中打开：http://localhost:6006/
 
+### 训练后模型测试
+
+
+#### 有configuration.json
+
+假定，训练模型路径为：./model_dir，如果改目录下有生成configuration.json，只需要将 [上述模型推理方法](https://github.com/alibaba-damo-academy/FunASR/blob/main/examples/README_zh.md#%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86) 中模型名字修改为模型路径即可
+
+例如：
+
+从shell推理
+```shell
+python -m funasr.bin.inference ++model="./model_dir" ++input=="${input}" ++output_dir="${output_dir}"
+```
+从python推理
+
+```python
+from funasr import AutoModel
+
+model = AutoModel(model="./model_dir")
+
+res = model.generate(input=wav_file)
+print(res)
+```
+
+#### 无configuration.json时
+
+如果模型路径中无configuration.json时，需要手动指定具体配置文件路径与模型路径
+
+```shell
+python -m funasr.bin.inference \
+--config-path "${local_path}" \
+--config-name "${config}" \
+++init_param="${init_param}" \
+++tokenizer_conf.token_list="${tokens}" \
+++frontend_conf.cmvn_file="${cmvn_file}" \
+++input="${input}" \
+++output_dir="${output_dir}" \
+++device="${device}"
+```
+
+参数介绍
+- `config-path`：为实验中保存的 `config.yaml`，可以从实验输出目录中查找。
+- `config-name`：配置文件名，一般为 `config.yaml`，支持yaml格式与json格式，例如 `config.json`
+- `init_param`：需要测试的模型参数，一般为`model.pt`，可以自己选择具体的模型文件
+- `tokenizer_conf.token_list`：词表文件路径，一般在 `config.yaml` 有指定，无需再手动指定，当 `config.yaml` 中路径不正确时，需要在此处手动指定。
+- `frontend_conf.cmvn_file`：wav提取fbank中用到的cmvn文件，一般在 `config.yaml` 有指定，无需再手动指定，当 `config.yaml` 中路径不正确时，需要在此处手动指定。
+
+其他参数同上，完整 [示例](https://github.com/alibaba-damo-academy/FunASR/blob/main/examples/industrial_data_pretraining/paraformer/infer_from_local.sh)
+
 
 <a name="模型导出与测试"></a>
 ## 模型导出与测试
