@@ -264,7 +264,7 @@ torchrun --nnodes 1 --nproc_per_node ${gpu_num} \
 export CUDA_VISIBLE_DEVICES="0,1"
 gpu_num=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
 
-torchrun --nnodes 2 --nproc_per_node ${gpu_num} --master_addr=192.168.1.1 --master_port=12345 \
+torchrun --nnodes 2 --node_rank 0 --nproc_per_node ${gpu_num} --master_addr=192.168.1.1 --master_port=12345 \
 ../../../funasr/bin/train.py ${train_args}
 ```
 在从节点上（假设IP为192.168.1.2），你需要确保MASTER_ADDR和MASTER_PORT环境变量与主节点设置的一致，并运行同样的命令：
@@ -272,11 +272,11 @@ torchrun --nnodes 2 --nproc_per_node ${gpu_num} --master_addr=192.168.1.1 --mast
 export CUDA_VISIBLE_DEVICES="0,1"
 gpu_num=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
 
-torchrun --nnodes 2 --nproc_per_node ${gpu_num} --master_addr=192.168.1.1 --master_port=12345 \
+torchrun --nnodes 2 --node_rank 1 --nproc_per_node ${gpu_num} --master_addr=192.168.1.1 --master_port=12345 \
 ../../../funasr/bin/train.py ${train_args}
 ```
 
---nnodes 表示参与的节点总数，--nproc_per_node 表示每个节点上运行的进程数
+--nnodes 表示参与的节点总数，--node_rank 表示当前节点id，--nproc_per_node 表示每个节点上运行的进程数（通常为gpu个数）
 
 #### 准备数据
 

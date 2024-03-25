@@ -47,6 +47,7 @@ echo "log_file: ${log_file}"
 
 torchrun \
 --nnodes 1 \
+--node_rank 0 \
 --nproc_per_node ${gpu_num} \
 ../../../funasr/bin/train.py \
 ++model="${model_name_or_model_dir}" \
