@@ -177,6 +177,9 @@ def merge_seque(distribute_res):
     return res
 
 def smooth(res, mindur=1):
+    # if only one segment, return directly
+    if len(res) < 2:
+        return res
     # short segments are assigned to nearest speakers.
     for i in range(len(res)):
         res[i][0] = round(res[i][0], 2)
