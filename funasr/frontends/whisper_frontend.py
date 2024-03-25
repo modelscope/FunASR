@@ -1,8 +1,8 @@
 from typing import Tuple
 import torch
 import torch.nn as nn
-import whisper
-from whisper.audio import HOP_LENGTH, N_FFT, N_SAMPLES
+
+
 from funasr.register import tables
 from torch.nn.utils.rnn import pad_sequence
 
@@ -26,7 +26,8 @@ class WhisperFrontend(nn.Module):
         super().__init__()
         assert fs == 16000
         self.fs = fs
-
+        import whisper
+        from whisper.audio import HOP_LENGTH, N_FFT, N_SAMPLES
         self.n_fft = N_FFT
         self.win_length = N_FFT
         self.hop_length = HOP_LENGTH

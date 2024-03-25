@@ -73,6 +73,8 @@ def download_from_ms(**kwargs):
     if isinstance(kwargs, DictConfig):
         kwargs = OmegaConf.to_container(kwargs, resolve=True)
     if os.path.exists(os.path.join(model_or_path, "requirements.txt")):
+        requirements = os.path.join(model_or_path, "requirements.txt")
+        print(f"Detect model requirements, begin to install it: {requirements}")
         from funasr.utils.install_model_requirements import install_requirements
         install_requirements(os.path.join(model_or_path, "requirements.txt"))
     return kwargs
