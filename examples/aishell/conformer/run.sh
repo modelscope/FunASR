@@ -15,7 +15,7 @@ stop_stage=5
 nj=32
 
 inference_device="cuda" #"cpu", "cuda:0", "cuda:1"
-inference_checkpoint="model.pt"
+inference_checkpoint="model.pt.avg5"
 inference_scp="wav.scp"
 inference_batch_size=1
 
