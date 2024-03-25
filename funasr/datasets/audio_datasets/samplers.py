@@ -23,6 +23,10 @@ def CustomDistributedBatchSampler_fn(dataset, **kwargs):
         batch_sampler = CustomDistributedBatchSampler(dataset, **kwargs)
         
     else:
+        # if kwargs.get("sort_size", -1) > 0:
+        #     batch_sampler = CustomDistributedBufferDynamicBatchSampler(dataset, **kwargs)
+        # else:
+        #     batch_sampler = CustomDistributedDynamicBatchSampler(dataset, **kwargs)
         batch_sampler = CustomDistributedDynamicBatchSampler(dataset, **kwargs)
         
     dataloader_args["batch_sampler"] = batch_sampler
@@ -277,6 +281,81 @@ class CustomDistributedDynamicBatchSampler(DistributedSampler):
             batches.append(batch)
         
         return iter(batches)
+    
+    def __len__(self):
+        
+        return 1
+    
+    def set_epoch(self, epoch):
+        self.epoch = epoch
+
+
+class CustomDistributedBufferDynamicBatchSampler(DistributedSampler):
+    def __init__(self, dataset,
+                 batch_size,
+                 num_replicas=None,
+                 rank=None,
+                 shuffle=True,
+                 drop_last=False,
+                 is_training: bool = True,
+                 sort_size: int = 1024,
+                 **kwargs,
+                 ):
+        
+        try:
+            rank = dist.get_rank()
+            num_replicas = dist.get_world_size()
+        except:
+            rank = 0
+            num_replicas = 1
+        self.rank = rank
+        self.num_replicas = num_replicas
+        self.dataset = dataset
+        self.batch_size = batch_size
+        self.is_training = is_training
+        self.shuffle = shuffle and is_training
+        self.drop_last = drop_last
+        
+        self.total_size = len(self.dataset)
+        # self.num_samples = int(math.ceil(self.total_size / self.num_replicas))
+        self.epoch = 0
+        self.sort_size = sort_size
+    
+    def __iter__(self):
+        if self.shuffle:
+            g = torch.Generator()
+            g.manual_seed(self.epoch)
+            indices = torch.randperm(self.total_size, generator=g).tolist()
+        else:
+            indices = list(range(self.total_size))
+        
+        # Distribute indices among replicas
+        indices = indices[self.rank:self.total_size:self.num_replicas]
+
+        # Sort indices into buffers
+        sorted_buffers = [sorted(indices[i:i + self.sort_size], key=lambda idx: self.dataset.get_source_len(idx)) for i in range(0, len(indices), self.sort_size)]
+
+        batches = []
+        for buffer in sorted_buffers:
+            batch = []
+            max_len_in_batch = 0
+            for idx in buffer:
+                sample_length = self.dataset.get_source_len(idx)
+                potential_batch_length = max(max_len_in_batch, sample_length) * (len(batch) + 1)
+                if potential_batch_length <= self.batch_size:
+                    batch.append(idx)
+                    max_len_in_batch = max(max_len_in_batch, sample_length)
+                else:
+                    batches.append(batch)
+                    batch = [idx]
+                    max_len_in_batch = sample_length
+                    
+            # Add the last batch if it's not empty and we're not dropping it
+            if batch and (not self.drop_last or len(batch) * max_len_in_batch == self.batch_size):
+                batches.append(batch)
+
+        return iter(batches)
+
     
     def __len__(self):
         
