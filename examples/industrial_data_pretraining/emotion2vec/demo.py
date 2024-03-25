@@ -6,7 +6,7 @@
 from funasr import AutoModel
 
 # model="iic/emotion2vec_base"
-model = AutoModel(model="iic/emotion2vec_base_finetuned", model_revision="master",
+model = AutoModel(model="iic/emotion2vec_base_finetuned",
                   # vad_model="iic/speech_fsmn_vad_zh-cn-16k-common-pytorch",
                   # vad_model_revision="master",
                   # vad_kwargs={"max_single_segment_time": 2000},
