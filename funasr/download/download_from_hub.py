@@ -76,7 +76,7 @@ def download_from_ms(**kwargs):
         requirements = os.path.join(model_or_path, "requirements.txt")
         print(f"Detect model requirements, begin to install it: {requirements}")
         from funasr.utils.install_model_requirements import install_requirements
-        install_requirements(os.path.join(model_or_path, "requirements.txt"))
+        install_requirements(requirements)
     return kwargs
 
 def add_file_root_path(model_or_path: str, file_path_metas: dict, cfg = {}):
