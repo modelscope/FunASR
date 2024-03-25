@@ -9,8 +9,7 @@ from torch import Tensor
 from torch import nn
 import whisper
 from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
-from transformers import AutoModelForCausalLM, AutoTokenizer
-from transformers.generation import GenerationConfig
+
 
 from funasr.register import tables
 
@@ -27,6 +26,8 @@ class QwenAudioWarp(nn.Module):
     """
     def __init__(self, *args, **kwargs):
         super().__init__()
+        from transformers import AutoModelForCausalLM, AutoTokenizer
+        from transformers.generation import GenerationConfig
 
         model_or_path = kwargs.get("model_path", "QwenAudio")
         model = AutoModelForCausalLM.from_pretrained(model_or_path, device_map="cpu",
@@ -82,7 +83,8 @@ class QwenAudioChatWarp(nn.Module):
         Modified from https://github.com/QwenLM/Qwen-Audio
         """
         super().__init__()
-        
+        from transformers import AutoModelForCausalLM, AutoTokenizer
+        from transformers.generation import GenerationConfig
         model_or_path = kwargs.get("model_path", "QwenAudio")
         bf16 = kwargs.get("bf16", False)
         fp16 = kwargs.get("fp16", False)

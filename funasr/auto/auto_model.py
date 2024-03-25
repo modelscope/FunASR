@@ -25,11 +25,10 @@ from funasr.utils.load_utils import load_audio_text_image_video
 from funasr.train_utils.set_all_random_seed import set_all_random_seed
 from funasr.train_utils.load_pretrained_model import load_pretrained_model
 from funasr.utils import export_utils
-try:
-    from funasr.models.campplus.utils import sv_chunk, postprocess, distribute_spk
-    from funasr.models.campplus.cluster_backend import ClusterBackend
-except:
-    print("Notice: If you want to use the speaker diarization, please `pip install hdbscan`")
+
+from funasr.models.campplus.utils import sv_chunk, postprocess, distribute_spk
+from funasr.models.campplus.cluster_backend import ClusterBackend
+
 
 
 def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
