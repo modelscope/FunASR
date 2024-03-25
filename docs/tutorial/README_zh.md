@@ -429,4 +429,4 @@ result = model(wav_path)
 print(result)
 ```
 
-更多例子请参考 [样例](runtime/python/onnxruntime)
+更多例子请参考 [样例](https://github.com/alibaba-damo-academy/FunASR/tree/main/runtime/python/onnxruntime)
