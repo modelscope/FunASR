@@ -1,7 +1,7 @@
 
 
 model="iic/speech_fsmn_vad_zh-cn-16k-common-pytorch"
-model_revision="v2.0.4"
+model_revision="master"
 
 python funasr/bin/inference.py \
 +model=${model} \

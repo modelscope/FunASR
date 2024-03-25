@@ -75,7 +75,7 @@ class LLMASRNAR(nn.Module):
         if hub == "funasr":
             from funasr import AutoModel
             init_param_path = encoder_conf.get("init_param_path", "iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch")
-            model = AutoModel(model=init_param_path, model_revision="v2.0.4")
+            model = AutoModel(model=init_param_path, model_revision="master")
             # frontend = model.kwargs.get("frontend")
             model.model.decoder = None
             
@@ -406,7 +406,7 @@ class LLMASRNARPrompt(nn.Module):
             from funasr import AutoModel
             init_param_path = encoder_conf.get("init_param_path",
                                                "iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch")
-            model = AutoModel(model=init_param_path, model_revision="v2.0.4")
+            model = AutoModel(model=init_param_path, model_revision="master")
             # frontend = model.kwargs.get("frontend")
             model.model.decoder = None
             

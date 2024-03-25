@@ -6,7 +6,7 @@ export HYDRA_FULL_ERROR=1
 
 
 model="iic/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8404-online"
-model_revision="v2.0.4"
+model_revision="master"
 
 
 python -m funasr.bin.export \

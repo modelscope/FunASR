@@ -6,11 +6,11 @@
 from funasr import AutoModel
 
 model = AutoModel(model="iic/speech_seaco_paraformer_large_asr_nat-zh-cn-16k-common-vocab8404-pytorch",
-                  model_revision="v2.0.4",
+                  model_revision="master",
                   # vad_model="iic/speech_fsmn_vad_zh-cn-16k-common-pytorch",
-                  # vad_model_revision="v2.0.4",
+                  # vad_model_revision="master",
                   # punc_model="iic/punc_ct-transformer_zh-cn-common-vocab272727-pytorch",
-                  # punc_model_revision="v2.0.4",
+                  # punc_model_revision="master",
                   # spk_model="iic/speech_campplus_sv_zh-cn_16k-common",
                   # spk_model_revision="v2.0.2",
                   )

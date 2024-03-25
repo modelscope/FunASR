@@ -10,7 +10,7 @@
 from funasr import AutoModel
 
 model = AutoModel(model="iic/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8404-online",
-                  model_revision="v2.0.4")
+                  model_revision="master")
 
 res = model.export(type="onnx", quantize=False)
 print(res)

@@ -73,7 +73,7 @@ class LLMASR(nn.Module):
         hub = audio_encoder_conf.get("hub", None)
         if hub == "ms":
             from funasr import AutoModel
-            model = AutoModel(model=audio_encoder, model_revision="v2.0.4")
+            model = AutoModel(model=audio_encoder, model_revision="master")
             # frontend = model.kwargs.get("frontend")
             audio_encoder_output_size = model.model.encoder_output_size
 

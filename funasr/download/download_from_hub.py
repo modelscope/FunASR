@@ -29,7 +29,7 @@ def download_from_ms(**kwargs):
     model_or_path = kwargs.get("model")
     if model_or_path in name_maps_ms:
         model_or_path = name_maps_ms[model_or_path]
-    model_revision = kwargs.get("model_revision")
+    model_revision = kwargs.get("model_revision", "master")
     if not os.path.exists(model_or_path) and "model_path" not in kwargs:
         try:
             model_or_path = get_or_download_model_dir(model_or_path, model_revision,

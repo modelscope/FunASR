@@ -1,6 +1,6 @@
 
 model="iic/speech_conformer_asr_nat-zh-cn-16k-aishell1-vocab4234-pytorch"
-model_revision="v2.0.4"
+model_revision="master"
 
 python funasr/bin/inference.py \
 +model=${model} \

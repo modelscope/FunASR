@@ -109,7 +109,7 @@ class AutoModel:
         if vad_model is not None:
             logging.info("Building VAD model.")
             vad_kwargs["model"] = vad_model
-            vad_kwargs["model_revision"] = kwargs.get("vad_model_revision", None)
+            vad_kwargs["model_revision"] = kwargs.get("vad_model_revision", "master")
             vad_kwargs["device"] = kwargs["device"]
             vad_model, vad_kwargs = self.build_model(**vad_kwargs)
 
@@ -119,7 +119,7 @@ class AutoModel:
         if punc_model is not None:
             logging.info("Building punc model.")
             punc_kwargs["model"] = punc_model
-            punc_kwargs["model_revision"] = kwargs.get("punc_model_revision", None)
+            punc_kwargs["model_revision"] = kwargs.get("punc_model_revision", "master")
             punc_kwargs["device"] = kwargs["device"]
             punc_model, punc_kwargs = self.build_model(**punc_kwargs)
 
@@ -129,7 +129,7 @@ class AutoModel:
         if spk_model is not None:
             logging.info("Building SPK model.")
             spk_kwargs["model"] = spk_model
-            spk_kwargs["model_revision"] = kwargs.get("spk_model_revision", None)
+            spk_kwargs["model_revision"] = kwargs.get("spk_model_revision", "master")
             spk_kwargs["device"] = kwargs["device"]
             spk_model, spk_kwargs = self.build_model(**spk_kwargs)
             self.cb_model = ClusterBackend().to(kwargs["device"])

@@ -1,6 +1,6 @@
 
 model="iic/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727"
-model_revision="v2.0.4"
+model_revision="master"
 
 python funasr/bin/inference.py \
 +model=${model} \
