@@ -33,4 +33,4 @@ import_submodules(__name__)
 from funasr.auto.auto_model import AutoModel
 from funasr.auto.auto_frontend import AutoFrontend
 
-os.environ["HYDRA_FULL_ERROR"] = 1
+os.environ["HYDRA_FULL_ERROR"] = "1"
