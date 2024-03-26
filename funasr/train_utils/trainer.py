@@ -440,7 +440,7 @@ class Trainer:
                     dist.all_reduce(val_acc_avg, op=dist.ReduceOp.SUM)
                     self.val_loss_avg = val_loss_avg.detach().cpu().item() / self.world_size
                     self.val_acc_avg = val_acc_avg.detach().cpu().item() / self.world_size
-                
+                time5 = time.perf_counter()
                 batch_num_epoch = 1
                 if hasattr(dataloader_val, "__len__"):
                     batch_num_epoch = len(dataloader_val)
