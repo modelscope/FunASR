@@ -70,6 +70,9 @@ OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int
             if(model_path.find(QUANTIZE) != model_path.end() && model_path.at(QUANTIZE) == "true"){
                 am_model_path = PathAppend(model_path.at(MODEL_DIR), TORCH_QUANT_MODEL_NAME);
             }
+            if(model_path.find(BLADEDISC) != model_path.end() && model_path.at(BLADEDISC) == "true"){
+                am_model_path = PathAppend(model_path.at(MODEL_DIR), BLADE_MODEL_NAME);
+            }
           }
         }
         am_cmvn_path = PathAppend(model_path.at(MODEL_DIR), AM_CMVN_NAME);
