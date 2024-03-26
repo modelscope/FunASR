@@ -26,9 +26,11 @@ from funasr.train_utils.set_all_random_seed import set_all_random_seed
 from funasr.train_utils.load_pretrained_model import load_pretrained_model
 from funasr.utils import export_utils
 
-from funasr.models.campplus.utils import sv_chunk, postprocess, distribute_spk
-from funasr.models.campplus.cluster_backend import ClusterBackend
-
+try:
+    from funasr.models.campplus.utils import sv_chunk, postprocess, distribute_spk
+    from funasr.models.campplus.cluster_backend import ClusterBackend
+except:
+    pass
 
 
 def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
