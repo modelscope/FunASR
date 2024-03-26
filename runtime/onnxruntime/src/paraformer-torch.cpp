@@ -45,8 +45,15 @@ void ParaformerTorch::InitAsr(const std::string &am_model, const std::string &am
     #ifdef USE_IPEX
     torch::jit::setTensorExprFuserEnabled(false);
     #endif
-    torch::jit::script::Module model = torch::jit::load(am_model, device);
-    model_ = std::make_shared<TorchModule>(std::move(model));    
+
+    try {
+        torch::jit::script::Module model = torch::jit::load(am_model, device);
+        model_ = std::make_shared<TorchModule>(std::move(model)); 
+        LOG(INFO) << "Successfully load model from " << am_model;
+    } catch (std::exception const &e) {
+        LOG(ERROR) << "Error when load am model: " << e.what();
+        exit(-1);
+    }
 }
 
 void ParaformerTorch::InitLm(const std::string &lm_file, 
