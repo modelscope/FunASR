@@ -56,6 +56,10 @@ int main(int argc, char* argv[]) {
         "true (Default), load the model of model_quant.onnx in model_dir. If set "
         "false, load the model of model.onnx in model_dir",
         false, "true", "string");
+    TCLAP::ValueArg<std::string> bladedisc(
+        "", BLADEDISC, 
+        "true (Default), load the model of bladedisc in model_dir.", 
+        false, "true", "string");
     TCLAP::ValueArg<std::string> vad_dir(
         "", VAD_DIR,
         "default: /workspace/models/vad, the vad model path, which contains model_quant.onnx, vad.yaml, vad.mvn",
@@ -136,6 +140,7 @@ int main(int argc, char* argv[]) {
     cmd.add(model_dir);
     cmd.add(model_revision);
     cmd.add(quantize);
+    cmd.add(bladedisc);
     cmd.add(vad_dir);
     cmd.add(vad_revision);
     cmd.add(vad_quant);
@@ -158,6 +163,7 @@ int main(int argc, char* argv[]) {
     std::map<std::string, std::string> model_path;
     GetValue(model_dir, MODEL_DIR, model_path);
     GetValue(quantize, QUANTIZE, model_path);
+    GetValue(bladedisc, QUANTIZE, model_path);
     GetValue(vad_dir, VAD_DIR, model_path);
     GetValue(vad_quant, VAD_QUANT, model_path);
     GetValue(punc_dir, PUNC_DIR, model_path);
