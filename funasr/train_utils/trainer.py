@@ -190,7 +190,7 @@ class Trainer:
         if self.resume:
             ckpt = os.path.join(self.output_dir, "model.pt")
             if os.path.isfile(ckpt):
-                checkpoint = torch.load(ckpt)
+                checkpoint = torch.load(ckpt, map_location="cpu")
                 self.start_epoch = checkpoint['epoch'] + 1
                 # self.model.load_state_dict(checkpoint['state_dict'])
                 src_state = checkpoint['state_dict']
@@ -215,7 +215,7 @@ class Trainer:
                 
                 self.val_acc_list = checkpoint["acc"]
                 self.step_or_epoch = checkpoint["step_or_epoch"]
-                
+                model.to(self.device)
                 print(f"Checkpoint loaded successfully from '{ckpt}'")
             else:
                 print(f"No checkpoint found at '{ckpt}', does not resume status!")
