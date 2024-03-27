@@ -23,7 +23,7 @@ def CustomDistributedBatchSampler_fn(dataset, **kwargs):
         batch_sampler = CustomDistributedBatchSampler(dataset, **kwargs)
         
     else:
-        if kwargs.get("buffer_size", -1) > 0:
+        if kwargs.get("sort_size", -1) > 0:
             batch_sampler = CustomDistributedBufferDynamicBatchSampler(dataset, **kwargs)
         else:
             batch_sampler = CustomDistributedDynamicBatchSampler(dataset, **kwargs)
@@ -298,7 +298,7 @@ class CustomDistributedBufferDynamicBatchSampler(DistributedSampler):
                  shuffle=True,
                  drop_last=False,
                  is_training: bool = True,
-                 buffer_size: int = 1024,
+                 sort_size: int = 1024,
                  **kwargs,
                  ):
         
@@ -319,7 +319,7 @@ class CustomDistributedBufferDynamicBatchSampler(DistributedSampler):
         self.total_size = len(self.dataset)
         # self.num_samples = int(math.ceil(self.total_size / self.num_replicas))
         self.epoch = 0
-        self.sort_size = buffer_size * num_replicas
+        self.sort_size = sort_size * num_replicas
 
     def __iter__(self):
         if self.shuffle:
