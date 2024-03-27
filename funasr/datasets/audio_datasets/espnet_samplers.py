@@ -29,26 +29,51 @@ import random
 
 
 class EspnetStyleBatchSampler(DistributedSampler):
-    def __init__(self, dataset, batch_size, num_replicas=None, rank=None,
-                 shuffle=True, drop_last=False, max_sample_length=2000,
-                 batch_type="length"):
-        super().__init__(dataset, num_replicas=num_replicas, rank=rank,
-                         shuffle=shuffle, drop_last=drop_last)
+    def __init__(self, dataset,
+                 batch_size,
+                 batch_type="token",
+                 num_replicas=None,
+                 rank=None,
+                 shuffle=True,
+                 drop_last=False,
+                 is_training: bool = True,
+                 sort_size: int = 1024,
+                 **kwargs,
+                 ):
+
+        try:
+            rank = dist.get_rank()
+            num_replicas = dist.get_world_size()
+        except:
+            rank = 0
+            num_replicas = 1
+        self.rank = rank
+        self.num_replicas = num_replicas
         self.dataset = dataset
         self.batch_size = batch_size
-        self.max_sample_length = max_sample_length
         self.batch_type = batch_type
-    
+        self.is_training = is_training
+        self.shuffle = shuffle and is_training
+        self.drop_last = drop_last
+
+        self.total_size = len(self.dataset)
+        # self.num_samples = int(math.ceil(self.total_size / self.num_replicas))
+        self.epoch = 0
+        self.sort_size = sort_size * num_replicas
+        self.max_token_length = kwargs.get("max_token_length", 2048)
+        self.length_scale_source = kwargs.get("length_scale_source", 1.0)
+
+
+        super().__init__(dataset, num_replicas=num_replicas, rank=rank,
+                         shuffle=shuffle, drop_last=drop_last)
     def __iter__(self):
-        # Get the list of indices of all samples
-        dataset_size = len(self.dataset)
-        indices = list(range(dataset_size))
-        
-        # Shuffle the indices if required
         if self.shuffle:
             g = torch.Generator()
             g.manual_seed(self.epoch)
-            indices = torch.randperm(dataset_size, generator=g).tolist()
+            random.seed(self.epoch)
+            indices = torch.randperm(self.total_size, generator=g).tolist()
+        else:
+            indices = list(range(self.total_size))
         
         # Sort indices by sample length
         sorted_indices = sorted(indices, key=lambda idx: self.dataset.get_source_len(idx))
@@ -77,7 +102,7 @@ class EspnetStyleBatchSampler(DistributedSampler):
                 max_len_in_batch = sample_length
         
         # Add the last batch if it shouldn't be dropped
-        if batch and not self.drop_last:
+        if batch and (not self.drop_last or len(batch) * max_len_in_batch == self.batch_size):
             buffer_batches.append(batch)
         
         # Shuffle the list of batches
@@ -86,7 +111,7 @@ class EspnetStyleBatchSampler(DistributedSampler):
             random.shuffle(buffer_batches)
         
         # Ensure each rank gets the same number of batches
-        batches_per_rank = math.ceil(len(buffer_batches) / self.num_replicas)
+        batches_per_rank = int(math.ceil(len(buffer_batches) / self.num_replicas))
         total_batches_needed = batches_per_rank * self.num_replicas
         extra_batches = total_batches_needed - len(buffer_batches)
         # Add extra batches by random selection, if needed
@@ -102,7 +127,7 @@ class EspnetStyleBatchSampler(DistributedSampler):
     
     def __len__(self):
         # Calculate the number of batches per epoch for the current rank
-        return math.ceil(len(self.dataset) / self.batch_size / self.num_replicas)
+        return 1
     
     def set_epoch(self, epoch):
         # Set the epoch for shuffling
