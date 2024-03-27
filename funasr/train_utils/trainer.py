@@ -79,7 +79,7 @@ class Trainer:
         self.validate_interval = kwargs.get("validate_interval", 5000)
         self.keep_nbest_models = kwargs.get("keep_nbest_models", 500)
         self.avg_keep_nbest_models_type = kwargs.get("avg_keep_nbest_models_type", "acc")
-        self.avg_nbest_model = kwargs.get("avg_nbest_model", 5)
+        self.avg_nbest_model = kwargs.get("avg_nbest_model", 10)
         self.accum_grad = kwargs.get("accum_grad", 1)
         self.grad_clip = kwargs.get("grad_clip", 10.0)
         self.grad_clip_type = kwargs.get("grad_clip_type", 2.0)

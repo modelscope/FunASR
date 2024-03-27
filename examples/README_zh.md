@@ -225,7 +225,7 @@ funasr/bin/train.py \
 ++train_conf.validate_interval=2000 \
 ++train_conf.save_checkpoint_interval=2000 \
 ++train_conf.keep_nbest_models=20 \
-++train_conf.avg_nbest_model=5 \
+++train_conf.avg_nbest_model=10 \
 ++optim_conf.lr=0.0002 \
 ++output_dir="${output_dir}" &> ${log_file}
 ```
@@ -242,7 +242,7 @@ funasr/bin/train.py \
 - `train_conf.save_checkpoint_interval`（int）：`5000`（默认），训练中模型保存间隔step数。
 - `train_conf.avg_keep_nbest_models_type`（str）：`acc`（默认），保留nbest的标准为acc（越大越好）。`loss`表示，保留nbest的标准为loss（越小越好）。
 - `train_conf.keep_nbest_models`（int）：`500`（默认），保留最大多少个模型参数，配合 `avg_keep_nbest_models_type` 按照验证集 acc/loss 保留最佳的n个模型，其他删除，节约存储空间。
-- `train_conf.avg_nbest_model`（int）：`5`（默认），保留最大多少个模型参数，配合 `avg_keep_nbest_models_type` 按照验证集 acc/loss 对最佳的n个模型平均。
+- `train_conf.avg_nbest_model`（int）：`10`（默认），保留最大多少个模型参数，配合 `avg_keep_nbest_models_type` 按照验证集 acc/loss 对最佳的n个模型平均。
 - `train_conf.accum_grad`（int）：`1`（默认），梯度累积功能。
 - `train_conf.grad_clip`（float）：`10.0`（默认），梯度截断功能。
 - `train_conf.use_fp16`（bool）：`False`（默认），开启fp16训练，加快训练速度。
