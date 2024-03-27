@@ -134,7 +134,7 @@ class Trainer:
                 "val_acc_step_or_eoch": self.val_acc_step_or_eoch,
                 "val_loss_step_or_eoch": self.val_loss_step_or_eoch,
                 "best_step_or_epoch": self.best_step_or_epoch,
-                "avg_keep_nbest_models_type": slef.avg_keep_nbest_models_type,
+                "avg_keep_nbest_models_type": self.avg_keep_nbest_models_type,
             }
             if hasattr(model, "module"):
                 state["state_dict"] = model.module.state_dict()
