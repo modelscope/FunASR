@@ -233,7 +233,7 @@ class Trainer:
                 self.saved_ckpts = checkpoint["saved_ckpts"]
                 self.val_acc_step_or_eoch = checkpoint["val_acc_step_or_eoch"] if "val_acc_step_or_eoch" in checkpoint else {}
                 self.val_loss_step_or_eoch = checkpoint["val_loss_step_or_eoch"] if "val_loss_step_or_eoch" in checkpoint else {}
-                self.val_loss_step_or_eoch = checkpoint["best_step_or_epoch"] if "best_step_or_epoch" in checkpoint else ""
+                self.best_step_or_epoch = checkpoint["best_step_or_epoch"] if "best_step_or_epoch" in checkpoint else ""
                 model.to(self.device)
                 print(f"Checkpoint loaded successfully from '{ckpt}'")
             else:
