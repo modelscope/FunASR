@@ -347,22 +347,20 @@ class CustomDistributedBufferDynamicBatchSampler(DistributedSampler):
                     max_len_in_batch = sample_length
             if batch:
                 buffer_batches.append(batch)
-    
+
         # Ensure each rank gets the same number of batches, duplicate data if needed
-        batches_per_rank = int(math.ceil(len(buffer_batches) / self.num_replicas))
+        batches_per_rank = math.ceil(len(buffer_batches) / self.num_replicas)
         total_batches_needed = batches_per_rank * self.num_replicas
         buffer_batches.extend(buffer_batches[:total_batches_needed - len(buffer_batches)])
-    
+
         # Evenly distribute batches from buffer_batches to each rank
         rank_batches = [[] for _ in range(self.num_replicas)]
         for i, batch in enumerate(buffer_batches):
             rank_batches[i % self.num_replicas].append(batch)
-    
-        # Merge all batches for the current rank
-        final_batches = []
-        for batches in rank_batches[self.rank]:
-            final_batches.extend(batches)
-    
+
+        # Assign all batches for the current rank directly
+        final_batches = rank_batches[self.rank]
+
         return iter(final_batches)
 
     
