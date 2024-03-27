@@ -2,6 +2,7 @@ import torch
 import numpy as np
 import logging
 import math
+import random
 import torch.distributed as dist
 from torch.utils.data import DistributedSampler
 from torch.utils.data import BatchSampler, Sampler
@@ -333,6 +334,7 @@ class CustomDistributedBufferDynamicBatchSampler(DistributedSampler):
         if self.shuffle:
             g = torch.Generator()
             g.manual_seed(self.epoch)
+            random.seed(self.epoch)
             indices = torch.randperm(len(self.dataset), generator=g).tolist()
         else:
             indices = list(range(len(self.dataset)))
@@ -362,7 +364,8 @@ class CustomDistributedBufferDynamicBatchSampler(DistributedSampler):
         # Ensure each rank gets the same number of batches, duplicate data if needed
         batches_per_rank = math.ceil(len(buffer_batches) / self.num_replicas)
         total_batches_needed = batches_per_rank * self.num_replicas
-        buffer_batches.extend(buffer_batches[:total_batches_needed - len(buffer_batches)])
+        extra_batches = total_batches_needed - len(buffer_batches)
+        buffer_batches += random.choices(buffer_batches, k=extra_batches)
 
         # Evenly distribute batches from buffer_batches to each rank
         rank_batches = [[] for _ in range(self.num_replicas)]
