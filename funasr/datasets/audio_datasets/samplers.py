@@ -23,11 +23,11 @@ def CustomDistributedBatchSampler_fn(dataset, **kwargs):
         batch_sampler = CustomDistributedBatchSampler(dataset, **kwargs)
         
     else:
-        # if kwargs.get("sort_size", -1) > 0:
-        #     batch_sampler = CustomDistributedBufferDynamicBatchSampler(dataset, **kwargs)
-        # else:
-        #     batch_sampler = CustomDistributedDynamicBatchSampler(dataset, **kwargs)
-        batch_sampler = CustomDistributedDynamicBatchSampler(dataset, **kwargs)
+        if kwargs.get("buffer_size", -1) > 0:
+            batch_sampler = CustomDistributedBufferDynamicBatchSampler(dataset, **kwargs)
+        else:
+            batch_sampler = CustomDistributedDynamicBatchSampler(dataset, **kwargs)
+        # batch_sampler = CustomDistributedDynamicBatchSampler(dataset, **kwargs)
         
     dataloader_args["batch_sampler"] = batch_sampler
     dataloader_args["num_workers"] = kwargs.get("num_workers", 4)
@@ -298,7 +298,7 @@ class CustomDistributedBufferDynamicBatchSampler(DistributedSampler):
                  shuffle=True,
                  drop_last=False,
                  is_training: bool = True,
-                 sort_size: int = 1024,
+                 buffer_size: int = 1024,
                  **kwargs,
                  ):
         
@@ -319,24 +319,20 @@ class CustomDistributedBufferDynamicBatchSampler(DistributedSampler):
         self.total_size = len(self.dataset)
         # self.num_samples = int(math.ceil(self.total_size / self.num_replicas))
         self.epoch = 0
-        self.sort_size = sort_size
-    
+        self.sort_size = buffer_size * num_replicas
+
     def __iter__(self):
         if self.shuffle:
             g = torch.Generator()
             g.manual_seed(self.epoch)
-            indices = torch.randperm(self.total_size, generator=g).tolist()
+            indices = torch.randperm(len(self.dataset), generator=g).tolist()
         else:
-            indices = list(range(self.total_size))
-        
-        # Distribute indices among replicas
-        indices = indices[self.rank:self.total_size:self.num_replicas]
+            indices = list(range(len(self.dataset)))
 
-        # Sort indices into buffers
-        sorted_buffers = [sorted(indices[i:i + self.sort_size], key=lambda idx: self.dataset.get_source_len(idx)) for i in range(0, len(indices), self.sort_size)]
-
-        batches = []
-        for buffer in sorted_buffers:
+        # Create sorted buffers and form batches
+        buffer_batches = []
+        for i in range(0, len(indices), self.sort_size):
+            buffer = sorted(indices[i:i + self.sort_size], key=lambda idx: self.dataset.get_source_len(idx))
             batch = []
             max_len_in_batch = 0
             for idx in buffer:
@@ -346,15 +342,28 @@ class CustomDistributedBufferDynamicBatchSampler(DistributedSampler):
                     batch.append(idx)
                     max_len_in_batch = max(max_len_in_batch, sample_length)
                 else:
-                    batches.append(batch)
+                    buffer_batches.append(batch)
                     batch = [idx]
                     max_len_in_batch = sample_length
-                    
-            # Add the last batch if it's not empty and we're not dropping it
-            if batch and (not self.drop_last or len(batch) * max_len_in_batch == self.batch_size):
-                batches.append(batch)
-
-        return iter(batches)
+            if batch:
+                buffer_batches.append(batch)
+    
+        # Ensure each rank gets the same number of batches, duplicate data if needed
+        batches_per_rank = int(math.ceil(len(buffer_batches) / self.num_replicas))
+        total_batches_needed = batches_per_rank * self.num_replicas
+        buffer_batches.extend(buffer_batches[:total_batches_needed - len(buffer_batches)])
+    
+        # Evenly distribute batches from buffer_batches to each rank
+        rank_batches = [[] for _ in range(self.num_replicas)]
+        for i, batch in enumerate(buffer_batches):
+            rank_batches[i % self.num_replicas].append(batch)
+    
+        # Merge all batches for the current rank
+        final_batches = []
+        for batches in rank_batches[self.rank]:
+            final_batches.extend(batches)
+    
+        return iter(final_batches)
 
     
     def __len__(self):
