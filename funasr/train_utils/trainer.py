@@ -377,7 +377,8 @@ class Trainer:
                     model=model,
                     dataloader_val=dataloader_val,
                     epoch=epoch,
-                    writer=writer
+                    writer=writer,
+                    step=batch_idx+1,
                 )
 
             if (batch_idx+1) % self.save_checkpoint_interval == 0:
