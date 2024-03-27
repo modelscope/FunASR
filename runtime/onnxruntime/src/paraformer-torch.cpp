@@ -51,7 +51,7 @@ void ParaformerTorch::InitAsr(const std::string &am_model, const std::string &am
         model_ = std::make_shared<TorchModule>(std::move(model)); 
         LOG(INFO) << "Successfully load model from " << am_model;
     } catch (std::exception const &e) {
-        LOG(ERROR) << "Error when load am model: " << e.what();
+        LOG(ERROR) << "Error when load am model: " << am_model << ", " << e.what();
         exit(-1);
     }
 }
