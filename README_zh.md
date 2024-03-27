@@ -208,8 +208,8 @@ text_file = f"{model.model_path}/example/text.txt"
 res = model.generate(input=(wav_file, text_file), data_type=("sound", "text"))
 print(res)
 ```
-更详细（[用法](docs/tutorial/README_zh.md)），
-更多（[示例](https://github.com/alibaba-damo-academy/FunASR/tree/main/examples/industrial_data_pretraining)）
+更详细（[教程文档](docs/tutorial/README_zh.md)），
+更多（[模型示例](https://github.com/alibaba-damo-academy/FunASR/tree/main/examples/industrial_data_pretraining)）
 
 ## 导出ONNX
 ### 从命令行导出

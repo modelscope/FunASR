@@ -235,13 +235,17 @@ funasr/bin/train.py \
 - `valid_data_set_list`（str）：验证数据路径，默认为jsonl格式，具体参考（[例子](https://github.com/alibaba-damo-academy/FunASR/blob/main/data/list)）。
 - `dataset_conf.batch_type`（str）：`example`（默认），batch的类型。`example`表示按照固定数目batch_size个样本组batch；`length` or `token` 表示动态组batch，batch总长度或者token数为batch_size。
 - `dataset_conf.batch_size`（int）：与 `batch_type` 搭配使用，当 `batch_type=example` 时，表示样本个数；当 `batch_type=length` 时，表示样本中长度，单位为fbank帧数（1帧10ms）或者文字token个数。
-- `train_conf.max_epoch`（int）：训练总epoch数。
-- `train_conf.log_interval`（int）：打印日志间隔step数。
-- `train_conf.resume`（int）：是否开启断点重训。
-- `train_conf.validate_interval`（int）：训练中做验证测试的间隔step数。
-- `train_conf.save_checkpoint_interval`（int）：训练中模型保存间隔step数。
-- `train_conf.keep_nbest_models`（int）：保留最大多少个模型参数，按照验证集acc排序，从高到底保留。
-- `train_conf.avg_nbest_model`（int）：对acc最高的n个模型取平均。
+- `train_conf.max_epoch`（int）：`100`（默认），训练总epoch数。
+- `train_conf.log_interval`（int）：`50`（默认），打印日志间隔step数。
+- `train_conf.resume`（int）：`True`（默认），是否开启断点重训。
+- `train_conf.validate_interval`（int）：`5000`（默认），训练中做验证测试的间隔step数。
+- `train_conf.save_checkpoint_interval`（int）：`5000`（默认），训练中模型保存间隔step数。
+- `train_conf.avg_keep_nbest_models_type`（str）：`acc`（默认），保留nbest的标准为acc（越大越好）。`loss`表示，保留nbest的标准为loss（越小越好）。
+- `train_conf.keep_nbest_models`（int）：`500`（默认），保留最大多少个模型参数，配合 `avg_keep_nbest_models_type` 按照验证集 acc/loss 保留最佳的n个模型，其他删除，节约存储空间。
+- `train_conf.avg_nbest_model`（int）：`5`（默认），保留最大多少个模型参数，配合 `avg_keep_nbest_models_type` 按照验证集 acc/loss 对最佳的n个模型平均。
+- `train_conf.accum_grad`（int）：`1`（默认），梯度累积功能。
+- `train_conf.grad_clip`（float）：`10.0`（默认），梯度截断功能。
+- `train_conf.use_fp16`（bool）：`False`（默认），开启fp16训练，加快训练速度。
 - `optim_conf.lr`（float）：学习率。
 - `output_dir`（str）：模型保存路径。
 - `**kwargs`(dict): 所有在`config.yaml`中参数，均可以直接在此处指定，例如，过滤20s以上长音频：`dataset_conf.max_token_length=2000`，单位为音频fbank帧数（1帧10ms）或者文字token个数。

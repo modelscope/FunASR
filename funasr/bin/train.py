@@ -214,7 +214,7 @@ def main(**kwargs):
 
 
     if trainer.rank == 0:
-        average_checkpoints(trainer.output_dir, trainer.avg_nbest_model, trainer.val_acc_list)
+        average_checkpoints(trainer.output_dir, trainer.avg_nbest_model)
 
     trainer.close()
 
