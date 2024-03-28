@@ -56,7 +56,7 @@ class EspnetStyleBatchSampler(DistributedSampler):
         self.shuffle = shuffle and is_training
         self.drop_last = drop_last
 
-        self.total_size = len(self.dataset)
+        # self.total_size = len(self.dataset)
         # self.num_samples = int(math.ceil(self.total_size / self.num_replicas))
         self.epoch = 0
         self.sort_size = sort_size * num_replicas
