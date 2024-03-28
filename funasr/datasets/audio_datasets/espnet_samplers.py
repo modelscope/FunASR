@@ -74,7 +74,7 @@ class EspnetStyleBatchSampler(DistributedSampler):
             indices = torch.randperm(len(self.dataset), generator=g).tolist()
         else:
             indices = list(range(len(self.dataset)))
-        
+            
         # Sort indices by sample length
         sorted_indices = sorted(indices, key=lambda idx: self.dataset.get_source_len(idx))
         

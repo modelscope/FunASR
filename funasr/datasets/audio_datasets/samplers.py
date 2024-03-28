@@ -331,7 +331,7 @@ class CustomDistributedBufferDynamicBatchSampler(DistributedSampler):
         self.length_scale_source = kwargs.get("length_scale_source", 1.0)
         super().__init__(dataset, num_replicas=num_replicas, rank=rank,
                          shuffle=shuffle, drop_last=drop_last)
-        
+
     def __iter__(self):
         if self.shuffle:
             g = torch.Generator()
