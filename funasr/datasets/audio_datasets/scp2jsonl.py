@@ -68,7 +68,7 @@ def parse_context_length(data_list: list, data_type: str):
         if os.path.exists(line):
             waveform, _ = librosa.load(line, sr=16000)
             sample_num = len(waveform)
-            context_len = int(sample_num//16000*1000/10)
+            context_len = int(sample_num/16000*1000/10)
         else:
             context_len = len(line.split()) if " " in line else len(line)
         res[key] = {data_type: line, f"{data_type}_len": context_len}
