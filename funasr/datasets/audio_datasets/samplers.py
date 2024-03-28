@@ -329,13 +329,15 @@ class CustomDistributedBufferDynamicBatchSampler(DistributedSampler):
         self.sort_size = sort_size * num_replicas
         self.max_token_length = kwargs.get("max_token_length", 2048)
         self.length_scale_source = kwargs.get("length_scale_source", 1.0)
-        # super().__init__(dataset, num_replicas=num_replicas, rank=rank,
-        #                  shuffle=shuffle, drop_last=drop_last)
+        super().__init__(dataset, num_replicas=num_replicas, rank=rank,
+                         shuffle=shuffle, drop_last=drop_last)
+        
     def __iter__(self):
         if self.shuffle:
             g = torch.Generator()
             g.manual_seed(self.epoch)
             random.seed(self.epoch)
+            
             indices = torch.randperm(len(self.dataset), generator=g).tolist()
         else:
             indices = list(range(len(self.dataset)))
@@ -365,9 +367,10 @@ class CustomDistributedBufferDynamicBatchSampler(DistributedSampler):
         # Ensure each rank gets the same number of batches, duplicate data if needed
         batches_per_rank = math.ceil(len(buffer_batches) / self.num_replicas)
         total_batches_needed = batches_per_rank * self.num_replicas
+        
         extra_batches = total_batches_needed - len(buffer_batches)
         buffer_batches += random.choices(buffer_batches, k=extra_batches)
-
+        
         # Evenly distribute batches from buffer_batches to each rank
         rank_batches = [[] for _ in range(self.num_replicas)]
         for i, batch in enumerate(buffer_batches):
