@@ -252,8 +252,6 @@
 		int len;
 		int flag = 0;
 
-		int n_step = 0;
-		int n_total = audio.GetQueueSize();
 		float start_time = 0.0;
 		std::string cur_stamp = "[";
 		std::string lang = (offline_stream->asr_handle)->GetLang();
@@ -281,9 +279,6 @@
 					cur_stamp += "["+std::to_string((int)(1000*begin))+","+std::to_string((int)(1000*end))+"],";
 				}
 			}
-			n_step++;
-			if (fn_callback)
-				fn_callback(n_step, n_total);
 		}
 		if(cur_stamp != "["){
 			cur_stamp.erase(cur_stamp.length() - 1);
