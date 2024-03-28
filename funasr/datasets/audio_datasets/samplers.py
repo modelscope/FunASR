@@ -323,7 +323,7 @@ class CustomDistributedBufferDynamicBatchSampler(DistributedSampler):
         self.shuffle = shuffle and is_training
         self.drop_last = drop_last
         
-        # self.total_size = len(self.dataset)
+        self.total_size = len(self.dataset)
         self.num_samples = int(math.ceil(self.total_size / self.num_replicas))
         self.epoch = 0
         self.sort_size = sort_size * num_replicas
@@ -350,7 +350,7 @@ class CustomDistributedBufferDynamicBatchSampler(DistributedSampler):
             max_len_in_batch = 0
             for idx in buffer:
                 original_sample_length = self.dataset.get_source_len(idx)
-                if original_sample_length > self.max_sample_length:
+                if original_sample_length > self.max_token_length:
                     continue
                 sample_length = 1 if self.batch_type == "example" else original_sample_length
                 potential_batch_length = max(max_len_in_batch, sample_length) * (len(batch) + 1)
