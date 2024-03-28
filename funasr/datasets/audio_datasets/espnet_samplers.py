@@ -56,7 +56,7 @@ class EspnetStyleBatchSampler(DistributedSampler):
         self.shuffle = shuffle and is_training
         self.drop_last = drop_last
 
-        self.total_size = len(self.dataset)
+        # self.total_size = len(self.dataset)
         # self.num_samples = int(math.ceil(self.total_size / self.num_replicas))
         self.epoch = 0
         self.sort_size = sort_size * num_replicas
@@ -71,10 +71,10 @@ class EspnetStyleBatchSampler(DistributedSampler):
             g = torch.Generator()
             g.manual_seed(self.epoch)
             random.seed(self.epoch)
-            indices = torch.randperm(self.total_size, generator=g).tolist()
+            indices = torch.randperm(len(self.dataset), generator=g).tolist()
         else:
-            indices = list(range(self.total_size))
-        
+            indices = list(range(len(self.dataset)))
+            
         # Sort indices by sample length
         sorted_indices = sorted(indices, key=lambda idx: self.dataset.get_source_len(idx))
         
