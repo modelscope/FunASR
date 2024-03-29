@@ -55,7 +55,7 @@ namespace funasr {
         string Rescoring();
         string GetLang(){return language;};
         int GetAsrSampleRate() { return asr_sample_rate; };
-        void SetBatchSize(int batch_size) {batch_size_ = batch_size};
+        void SetBatchSize(int batch_size) {batch_size_ = batch_size;};
         int GetBatchSize() {return batch_size_;};
         void StartUtterance();
         void EndUtterance();
