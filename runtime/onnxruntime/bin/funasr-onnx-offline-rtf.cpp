@@ -144,6 +144,7 @@ int main(int argc, char *argv[])
     TCLAP::ValueArg<std::int32_t> thread_num("", THREAD_NUM, "multi-thread num for rtf", false, 1, "int32_t");
     TCLAP::ValueArg<std::string>    hotword("", HOTWORD, "the hotword file, one hotword perline, Format: Hotword Weight (could be: 阿里巴巴 20)", false, "", "string");
     TCLAP::SwitchArg use_gpu("", INFER_GPU, "Whether to use GPU for inference, default is false", false);
+    TCLAP::ValueArg<std::int32_t> batch_size("", "batch-size", "batch_size for ASR model when using GPU", false, 1, "int32_t");
 
     cmd.add(model_dir);
     cmd.add(quantize);
@@ -163,6 +164,7 @@ int main(int argc, char *argv[])
     cmd.add(audio_fs);
     cmd.add(thread_num);
     cmd.add(use_gpu);
+    cmd.add(batch_size);
     cmd.parse(argc, argv);
 
     std::map<std::string, std::string> model_path;
@@ -181,7 +183,8 @@ int main(int argc, char *argv[])
     struct timeval start, end;
     gettimeofday(&start, nullptr);
     bool use_gpu_ = use_gpu.getValue();
-    FUNASR_HANDLE asr_handle=FunOfflineInit(model_path, 1, use_gpu_);
+    int batch_size_ = batch_size.getValue();
+    FUNASR_HANDLE asr_handle=FunOfflineInit(model_path, 1, use_gpu_, batch_size_);
 
     if (!asr_handle)
     {
