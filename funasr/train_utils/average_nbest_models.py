@@ -23,10 +23,10 @@ def _get_checkpoint_paths(output_dir: str, last_n: int=5):
     in the output directory.
     """
     try:
-        checkpoint = torch.load(os.path.exists(os.path.join(output_dir, "model.pt")), map_location="cpu")
+        checkpoint = torch.load(os.path.join(output_dir, "model.pt"), map_location="cpu")
         avg_keep_nbest_models_type = checkpoint["avg_keep_nbest_models_type"]
         val_step_or_eoch = checkpoint[f"val_{avg_keep_nbest_models_type}_step_or_eoch"]
-        sorted_items = sorted(saved_ckpts.items(), key=lambda x: x[1], reverse=True)
+        sorted_items = sorted(val_step_or_eoch.items(), key=lambda x: x[1], reverse=True)
         sorted_items = sorted_items[:last_n] if avg_keep_nbest_models_type == "acc" else sorted_items[-last_n:]
         checkpoint_paths = [os.path.join(output_dir, key) for key, value in sorted_items[:last_n]]
     except:
