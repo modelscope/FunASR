@@ -126,6 +126,7 @@ int main(int argc, char* argv[]) {
     TCLAP::ValueArg<std::int32_t> fst_inc_wts("", FST_INC_WTS, 
         "the fst hotwords incremental bias", false, 20, "int32_t");
     TCLAP::SwitchArg use_gpu("", INFER_GPU, "Whether to use GPU, default is false", false);
+    TCLAP::ValueArg<std::int32_t> batch_size("", "batch-size", "batch_size for ASR model when using GPU", false, 5, "int32_t");
 
     // add file
     cmd.add(hotword);
@@ -158,6 +159,7 @@ int main(int argc, char* argv[]) {
     cmd.add(decoder_thread_num);
     cmd.add(model_thread_num);
     cmd.add(use_gpu);
+    cmd.add(batch_size);
     cmd.parse(argc, argv);
 
     std::map<std::string, std::string> model_path;
@@ -182,6 +184,7 @@ int main(int argc, char* argv[]) {
     lattice_beam_ = lattice_beam.getValue();
     am_scale_ = am_scale.getValue();
     bool use_gpu_ = use_gpu.getValue();
+    int batch_size_ = batch_size.getValue();
 
     // Download model form Modelscope
     try{
@@ -477,7 +480,7 @@ int main(int argc, char* argv[]) {
     WebSocketServer websocket_srv(
         io_decoder, is_ssl, server, wss_server, s_certfile,
         s_keyfile);  // websocket server for asr engine
-    websocket_srv.initAsr(model_path, s_model_thread_num, use_gpu_);  // init asr model
+    websocket_srv.initAsr(model_path, s_model_thread_num, use_gpu_, batch_size_);  // init asr model
 
     LOG(INFO) << "decoder-thread-num: " << s_decoder_thread_num;
     LOG(INFO) << "io-thread-num: " << s_io_thread_num;
