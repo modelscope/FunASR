@@ -281,13 +281,18 @@ std::vector<std::string> ParaformerTorch::Forward(float** din, int* len, bool in
         if(asr_feats.size() != 0){
             LfrCmvn(asr_feats);
         }
-        feats_batch.emplace_back(asr_feats);
         int32_t num_frames  = asr_feats.size() / feature_dim;
         paraformer_length.emplace_back(num_frames);
         if(max_size < asr_feats.size()){
             max_size = asr_feats.size();
             max_frames = num_frames;
         }
+
+        std::vector<float> flattened;
+        for (const auto& sub_vector : asr_feats) {
+            flattened.insert(flattened.end(), sub_vector.begin(), sub_vector.end());
+        }
+        feats_batch.emplace_back(flattened);
     }
 
     torch::NoGradGuard no_grad;
