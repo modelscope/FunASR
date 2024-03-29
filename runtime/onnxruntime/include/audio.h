@@ -83,6 +83,7 @@ class DLLAPI Audio {
     int FetchTpass(AudioFrame *&frame);
     int Fetch(float *&dout, int &len, int &flag);
     int Fetch(float *&dout, int &len, int &flag, float &start_time);
+    int Fetch(float **&dout, int *&len, int *&flag, float*& start_time, int batch_size, int &batch_in);
     void Padding();
     void Split(OfflineStream* offline_streamj);
     void CutSplit(OfflineStream* offline_streamj);
