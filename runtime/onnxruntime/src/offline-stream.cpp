@@ -1,7 +1,7 @@
 #include "precomp.h"
 
 namespace funasr {
-OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int thread_num, bool use_gpu)
+OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int thread_num, bool use_gpu, int batch_size)
 {
     // VAD model
     if(model_path.find(VAD_DIR) != model_path.end()){
@@ -38,6 +38,7 @@ OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int
         if(use_gpu){
             #ifdef USE_GPU
             asr_handle = make_unique<ParaformerTorch>();
+            asr_handle->SetBatchSize(batch_size);
             #else
             LOG(ERROR) <<"GPU is not supported! CPU will be used! If you want to use GPU, please add -DGPU=ON when cmake";
             asr_handle = make_unique<Paraformer>();
@@ -135,10 +136,10 @@ OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int
 #endif
 }
 
-OfflineStream *CreateOfflineStream(std::map<std::string, std::string>& model_path, int thread_num, bool use_gpu)
+OfflineStream *CreateOfflineStream(std::map<std::string, std::string>& model_path, int thread_num, bool use_gpu, int batch_size)
 {
     OfflineStream *mm;
-    mm = new OfflineStream(model_path, thread_num, use_gpu);
+    mm = new OfflineStream(model_path, thread_num, use_gpu, batch_size);
     return mm;
 }
 

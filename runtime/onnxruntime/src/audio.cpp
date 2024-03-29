@@ -1023,6 +1023,32 @@ int Audio::Fetch(float *&dout, int &len, int &flag, float &start_time)
     }
 }
 
+int Audio::Fetch(float**& dout, int*& len, int*& flag, float*& start_time, int batch_size, int &batch_in)
+{
+    batch_in = std::min((int)frame_queue.size(), batch_size);
+    if (batch_in == 0){
+        return 0;
+    } else{
+        // init
+        dout = new float*[batch_in];
+        len = new int[batch_in];
+        flag = new int[batch_in];
+        start_time = new float[batch_in];
+
+        for(int idx=0; idx < batch_in; idx++){
+            AudioFrame *frame = frame_queue.front();
+            frame_queue.pop();
+
+            start_time[idx] = (float)(frame->GetStart())/ dest_sample_rate;
+            dout[idx] = speech_data + frame->GetStart();
+            len[idx] = frame->GetLen();
+            delete frame;
+            flag[idx] = S_END;
+        }
+        return 1;
+    }
+}
+
 void Audio::Padding()
 {
     float num_samples = speech_len;
