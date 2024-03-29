@@ -151,7 +151,7 @@ from funasr import AutoModel
 
 model = AutoModel(model="fsmn-vad")
 
-wav_file = f"{model.model_path}/example/asr_example.wav"
+wav_file = f"{model.model_path}/example/vad_example.wav"
 res = model.generate(input=wav_file)
 print(res)
 ```
