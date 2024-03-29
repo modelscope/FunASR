@@ -130,7 +130,7 @@ Note: `chunk_size` is the configuration for streaming latency.` [0,10,5]` indica
 from funasr import AutoModel
 
 model = AutoModel(model="fsmn-vad")
-wav_file = f"{model.model_path}/example/asr_example.wav"
+wav_file = f"{model.model_path}/example/vad_example.wav"
 res = model.generate(input=wav_file)
 print(res)
 ```
