@@ -52,13 +52,14 @@ namespace funasr {
         std::vector<std::vector<float>> CompileHotwordEmbedding(std::string &hotwords);
         void Reset();
         void FbankKaldi(float sample_rate, const float* waves, int len, std::vector<std::vector<float>> &asr_feats);
-        string Forward(float* din, int len, bool input_finished=true, const std::vector<std::vector<float>> &hw_emb={{0.0}}, void* wfst_decoder=nullptr);
+        std::vector<std::string> Forward(float** din, int* len, bool input_finished=true, const std::vector<std::vector<float>> &hw_emb={{0.0}}, void* wfst_decoder=nullptr, int batch_in=1);
         string GreedySearch( float* in, int n_len, int64_t token_nums,
                              bool is_stamp=false, std::vector<float> us_alphas={0}, std::vector<float> us_cif_peak={0});
 
         string Rescoring();
         string GetLang(){return language;};
         int GetAsrSampleRate() { return asr_sample_rate; };
+        int GetBatchSize() {return batch_size_;};
         void StartUtterance();
         void EndUtterance();
         void InitLm(const std::string &lm_file, const std::string &lm_cfg_file, const std::string &lex_file);
@@ -110,6 +111,7 @@ namespace funasr {
         float cif_threshold = 1.0;
         float tail_alphas = 0.45;
         int asr_sample_rate = MODEL_SAMPLE_RATE;
+        int batch_size_ = 1;
     };
 
 } // namespace funasr
