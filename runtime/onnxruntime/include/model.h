@@ -30,6 +30,7 @@ class Model {
     virtual std::vector<std::vector<float>> CompileHotwordEmbedding(std::string &hotwords){return std::vector<std::vector<float>>();};
     virtual std::string GetLang(){return "";};
     virtual int GetAsrSampleRate() = 0;
+    virtual void SetBatchSize() {};
     virtual int GetBatchSize() {return 0;};
     virtual Vocab* GetVocab() {return nullptr;};
     virtual Vocab* GetLmVocab() {return nullptr;};
