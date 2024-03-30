@@ -202,7 +202,7 @@ class AutoModel:
                 load_pretrained_model(
                     model=model,
                     path=init_param,
-                    ignore_init_mismatch=kwargs.get("ignore_init_mismatch", False),
+                    ignore_init_mismatch=kwargs.get("ignore_init_mismatch", True),
                     oss_bucket=kwargs.get("oss_bucket", None),
                     scope_map=kwargs.get("scope_map", []),
                     excludes=kwargs.get("excludes", None),
