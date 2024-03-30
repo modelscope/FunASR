@@ -30,6 +30,7 @@ def _get_checkpoint_paths(output_dir: str, last_n: int=5):
         sorted_items = sorted_items[:last_n] if avg_keep_nbest_models_type == "acc" else sorted_items[-last_n:]
         checkpoint_paths = [os.path.join(output_dir, key) for key, value in sorted_items[:last_n]]
     except:
+        print(f"{checkpoint} does not exist, avg the lastet checkpoint.")
         # List all files in the output directory
         files = os.listdir(output_dir)
         # Filter out checkpoint files and extract epoch numbers
@@ -56,10 +57,9 @@ def average_checkpoints(output_dir: str, last_n: int=5, **kwargs):
             state_dicts.append(torch.load(path, map_location='cpu')['state_dict'])
         else:
             print(f"Checkpoint file {path} not found.")
-            continue
 
     # Check if we have any state_dicts to average
-    if not state_dicts:
+    if len(state_dicts) < 1:
         raise RuntimeError("No checkpoints found for averaging.")
 
     # Average or sum weights
@@ -75,6 +75,6 @@ def average_checkpoints(output_dir: str, last_n: int=5, **kwargs):
             # Perform average for other types of tensors
             stacked_tensors = torch.stack(tensors)
             avg_state_dict[key] = torch.mean(stacked_tensors, dim=0)
-    
-    torch.save({'state_dict': avg_state_dict}, os.path.join(output_dir, f"model.pt.avg{last_n}"))
-    return avg_state_dict
+    checkpoint_outpath = os.path.join(output_dir, f"model.pt.avg{last_n}")
+    torch.save({'state_dict': avg_state_dict}, checkpoint_outpath)
+    return checkpoint_outpath

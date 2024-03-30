@@ -94,9 +94,9 @@ scheduler_conf:
 dataset: AudioDataset
 dataset_conf:
     index_ds: IndexDSJsonl
-    batch_sampler: BatchSampler
-    batch_type: example # example or length
-    batch_size: 16 # if batch_type is example, batch_size is the numbers of samples; if length, batch_size is source_token_len+target_token_len;
+    batch_sampler: EspnetStyleBatchSampler
+    batch_type: length # example or length
+    batch_size: 25000 # if batch_type is example, batch_size is the numbers of samples; if length, batch_size is source_token_len+target_token_len;
     max_token_length: 2048 # filter samples if source_token_len+target_token_len > max_token_length,
     buffer_size: 1024
     shuffle: True
