@@ -7,6 +7,7 @@ from typing import Dict, List, Optional, Tuple
 
 import tiktoken
 
+# FIX(funasr): sense vocie
 LANGUAGES = {
     "en": "english",
     "zh": "chinese",
@@ -108,6 +109,11 @@ LANGUAGES = {
     "jw": "javanese",
     "su": "sundanese",
     "yue": "cantonese",
+    "minnan": "minnan",
+    "wuyu": "wuyu",
+    "dialect": "dialect",
+    "zh/en": "zh/en",
+    "en/zh": "en/zh",
 }
 
 # language code lookup by name, with a few language aliases
@@ -125,6 +131,28 @@ TO_LANGUAGE_CODE = {
     "sinhalese": "si",
     "castilian": "es",
     "mandarin": "zh",
+}
+
+# FIX(funasr): sense vocie
+AUDIO_EVENT = {
+    "ASR": "ASR",
+    "AED": "AED",
+    "SER": "SER",
+    "Speech": "Speech",
+    "/Speech": "/Speech",
+    "BGM": "BGM",
+    "/BGM": "/BGM",
+    "Laughter": "Laughter",
+    "/Laughter": "/Laughter",
+    "Applause": "Applause",
+    "/Applause": "/Applause",
+}
+
+EMOTION = {
+    "HAPPY": "HAPPY",
+    "SAD": "SAD",
+    "ANGRY": "ANGRY",
+    "NEUTRAL": "NEUTRAL",
 }
 
 
@@ -171,6 +199,9 @@ class Tokenizer:
         This method decodes given tokens with timestamps tokens annotated, e.g. "<|1.08|>".
         """
         return self.encoding.decode(token_ids, **kwargs)
+    
+    def get_vocab_size(self) -> int:
+        return self.encoding.n_vocab
 
     @cached_property
     def eot(self) -> int:
@@ -186,6 +217,10 @@ class Tokenizer:
 
     @cached_property
     def sot(self) -> int:
+        return self.special_tokens["<|startoftranscript|>"]
+
+    @cached_property
+    def sot_sense(self) -> int:
         return self.special_tokens["<|startoftranscript|>"]
 
     @cached_property
@@ -337,18 +372,35 @@ def get_encoding(name: str = "gpt2", num_languages: int = 99):
     n_vocab = len(ranks)
     special_tokens = {}
 
-    specials = [
-        "<|endoftext|>",
-        "<|startoftranscript|>",
-        *[f"<|{lang}|>" for lang in list(LANGUAGES.keys())[:num_languages]],
-        "<|translate|>",
-        "<|transcribe|>",
-        "<|startoflm|>",
-        "<|startofprev|>",
-        "<|nospeech|>",
-        "<|notimestamps|>",
-        *[f"<|{i * 0.02:.2f}|>" for i in range(1501)],
-    ]
+    if False: #name == "gpt2" or name == "multilingual":
+        specials = [
+            "<|endoftext|>",
+            "<|startoftranscript|>",
+            *[f"<|{lang}|>" for lang in list(LANGUAGES.keys())[:num_languages]],
+            "<|translate|>",
+            "<|transcribe|>",
+            "<|startoflm|>",
+            "<|startofprev|>",
+            "<|nospeech|>",
+            "<|notimestamps|>",
+            *[f"<|{i * 0.02:.2f}|>" for i in range(1501)],
+        ]
+    else:
+        specials = [
+            "<|endoftext|>",
+            "<|startoftranscript|>",
+            *[f"<|{lang}|>" for lang in list(LANGUAGES.keys())[:num_languages]],
+            *[f"<|{audio_event}|>" for audio_event in list(AUDIO_EVENT.keys())],
+            *[f"<|{emotion}|>" for emotion in list(EMOTION.keys())],
+            "<|translate|>",
+            "<|transcribe|>",
+            "<|startoflm|>",
+            "<|startofprev|>",
+            "<|nospeech|>",
+            "<|notimestamps|>",
+            *[f"<|SPECIAL_TOKEN_{i}|>" for i in range(1, 51)],
+            *[f"<|{i * 0.02:.2f}|>" for i in range(1501)],
+        ]
 
     for token in specials:
         special_tokens[token] = n_vocab
@@ -370,6 +422,7 @@ def get_tokenizer(
     num_languages: int = 99,
     language: Optional[str] = None,
     task: Optional[str] = None,  # Literal["transcribe", "translate", None]
+    encoding_path: Optional[str] = None,
 ) -> Tokenizer:
     if language is not None:
         language = language.lower()
@@ -387,6 +440,8 @@ def get_tokenizer(
         encoding_name = "gpt2"
         language = None
         task = None
+    if encoding_path is not None:
+        encoding_name = encoding_path
 
     encoding = get_encoding(name=encoding_name, num_languages=num_languages)
 
