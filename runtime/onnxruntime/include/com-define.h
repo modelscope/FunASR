@@ -51,6 +51,7 @@ namespace funasr {
 #define QUANT_MODEL_NAME "model_quant.onnx"
 // gpu models
 #define INFER_GPU "gpu"
+#define BATCHSIZE "batch-size"
 #define TORCH_MODEL_NAME "model.torchscripts"
 #define TORCH_QUANT_MODEL_NAME "model_quant.torchscripts"
 #define BLADE_MODEL_NAME "model.blade.fp16.pt"

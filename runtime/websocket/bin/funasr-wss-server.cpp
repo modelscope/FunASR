@@ -126,7 +126,7 @@ int main(int argc, char* argv[]) {
     TCLAP::ValueArg<std::int32_t> fst_inc_wts("", FST_INC_WTS, 
         "the fst hotwords incremental bias", false, 20, "int32_t");
     TCLAP::SwitchArg use_gpu("", INFER_GPU, "Whether to use GPU, default is false", false);
-    TCLAP::ValueArg<std::int32_t> batch_size("", "batch-size", "batch_size for ASR model when using GPU", false, 5, "int32_t");
+    TCLAP::ValueArg<std::int32_t> batch_size("", BATCHSIZE, "batch_size for ASR model when using GPU", false, 5, "int32_t");
 
     // add file
     cmd.add(hotword);

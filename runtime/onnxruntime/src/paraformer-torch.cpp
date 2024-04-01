@@ -281,10 +281,10 @@ std::vector<std::string> ParaformerTorch::Forward(float** din, int* len, bool in
         if(asr_feats.size() != 0){
             LfrCmvn(asr_feats);
         }
-        int32_t num_frames  = asr_feats.size() / feature_dim;
+        int32_t num_frames  = asr_feats.size();
         paraformer_length.emplace_back(num_frames);
-        if(max_size < asr_feats.size()){
-            max_size = asr_feats.size();
+        if(max_size < asr_feats.size()*feature_dim){
+            max_size = asr_feats.size()*feature_dim;
             max_frames = num_frames;
         }
 
