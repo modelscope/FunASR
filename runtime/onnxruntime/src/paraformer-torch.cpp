@@ -373,6 +373,9 @@ std::vector<std::string> ParaformerTorch::Forward(float** din, int* len, bool in
                 }
             }
             results.push_back(result);
+			if (wfst_decoder){
+				wfst_decoder->StartUtterance();
+			}
         }
     }
     catch (std::exception const &e)
