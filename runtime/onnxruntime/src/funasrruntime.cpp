@@ -252,7 +252,7 @@
 			if (wfst_decoder){
 				wfst_decoder->StartUtterance();
 			}
-			vector<string> msgs = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb, dec_handle);
+			vector<string> msgs = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb, dec_handle, batch_in);
 			for(int idx=0; idx<batch_in; idx++){
 				string msg = msgs[idx];
 				std::vector<std::string> msg_vec = funasr::split(msg, '|');
@@ -359,7 +359,7 @@
 			if (wfst_decoder){
 				wfst_decoder->StartUtterance();
 			}
-			vector<string> msgs = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb, dec_handle);
+			vector<string> msgs = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb, dec_handle, batch_in);
 			for(int idx=0; idx<batch_in; idx++){
 				string msg = msgs[idx];
 				std::vector<std::string> msg_vec = funasr::split(msg, '|');
