@@ -79,8 +79,9 @@ specaug_conf:
 train_conf:
   accum_grad: 1
   grad_clip: 5
-  max_epoch: 150
+  max_epoch: 180
   keep_nbest_models: 10
+  avg_keep_nbest_models_type: acc
   log_interval: 50
 
 optim: adam
@@ -96,7 +97,7 @@ dataset_conf:
     index_ds: IndexDSJsonl
     batch_sampler: EspnetStyleBatchSampler
     batch_type: length # example or length
-    batch_size: 25000 # if batch_type is example, batch_size is the numbers of samples; if length, batch_size is source_token_len+target_token_len;
+    batch_size: 10000 # if batch_type is example, batch_size is the numbers of samples; if length, batch_size is source_token_len+target_token_len;
     max_token_length: 2048 # filter samples if source_token_len+target_token_len > max_token_length,
     buffer_size: 1024
     shuffle: True
@@ -116,3 +117,6 @@ ctc_conf:
     reduce: true
     ignore_nan_grad: true
 normalize: null
+
+beam_size: 10
+decoding_ctc_weight: 0.4
