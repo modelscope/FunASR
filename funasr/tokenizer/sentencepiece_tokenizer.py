@@ -5,12 +5,16 @@ from typing import Union
 
 import sentencepiece as spm
 
-from funasr.tokenizer.abs_tokenizer import AbsTokenizer
+from funasr.tokenizer.abs_tokenizer import BaseTokenizer
+from funasr.register import tables
 
-
-class SentencepiecesTokenizer(AbsTokenizer):
-    def __init__(self, model: Union[Path, str]):
-        self.model = str(model)
+@tables.register("tokenizer_classes", "SentencepiecesTokenizer")
+class SentencepiecesTokenizer(BaseTokenizer):
+    def __init__(self, bpemodel: Union[Path, str],
+                 **kwargs
+                 ):
+        super().__init__(**kwargs)
+        self.bpemodel = str(bpemodel)
         # NOTE(kamo):
         # Don't build SentencePieceProcessor in __init__()
         # because it's not picklable and it may cause following error,
@@ -19,13 +23,13 @@ class SentencepiecesTokenizer(AbsTokenizer):
         self.sp = None
 
     def __repr__(self):
-        return f'{self.__class__.__name__}(model="{self.model}")'
+        return f'{self.__class__.__name__}(model="{self.bpemodel}")'
 
     def _build_sentence_piece_processor(self):
         # Build SentencePieceProcessor lazily.
         if self.sp is None:
             self.sp = spm.SentencePieceProcessor()
-            self.sp.load(self.model)
+            self.sp.load(self.bpemodel)
 
     def text2tokens(self, line: str) -> List[str]:
         self._build_sentence_piece_processor()
@@ -34,3 +38,11 @@ class SentencepiecesTokenizer(AbsTokenizer):
     def tokens2text(self, tokens: Iterable[str]) -> str:
         self._build_sentence_piece_processor()
         return self.sp.DecodePieces(list(tokens))
+
+    def encode(self, line: str) -> List[int]:
+        self._build_sentence_piece_processor()
+        return self.sp.EncodeAsIds(line)
+
+    def decode(self, line: List[int]):
+        self._build_sentence_piece_processor()
+        return self.sp.DecodeIds(line)

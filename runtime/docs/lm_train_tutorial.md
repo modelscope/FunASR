@@ -6,6 +6,7 @@
 ```shell
 # 下载: 示例训练语料text、lexicon 和 am建模单元units.txt
 wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/requirements/lm.tar.gz
+# 如果是匹配8k的am模型，使用 https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/requirements/lm_8358.tar.gz
 tar -zxvf lm.tar.gz
 ```
 

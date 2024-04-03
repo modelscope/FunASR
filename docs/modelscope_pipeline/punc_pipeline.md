@@ -1,1 +1,0 @@
-../../egs_modelscope/punctuation/TEMPLATE/README.md

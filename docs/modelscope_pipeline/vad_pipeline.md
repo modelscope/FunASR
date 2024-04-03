@@ -1,1 +1,0 @@
-../../egs_modelscope/vad/TEMPLATE/README.md

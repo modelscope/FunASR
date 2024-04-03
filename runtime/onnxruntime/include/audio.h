@@ -40,7 +40,16 @@ class AudioFrame {
     int global_end = 0;   // the end of a frame in the global time axis. in ms
 };
 
-class Audio {
+#ifdef _WIN32
+#ifdef _FUNASR_API_EXPORT
+#define DLLAPI __declspec(dllexport)
+#else
+#define DLLAPI __declspec(dllimport)
+#endif
+#else
+#define DLLAPI 
+#endif
+class DLLAPI Audio {
   private:
     float *speech_data=nullptr;
     int16_t *speech_buff=nullptr;
@@ -58,6 +67,7 @@ class Audio {
     Audio(int model_sample_rate,int data_type);
     Audio(int model_sample_rate,int data_type, int size);
     ~Audio();
+    void ClearQueue(std::queue<AudioFrame*>& q);
     void Disp();
     void WavResample(int32_t sampling_rate, const float *waveform, int32_t n);
     bool LoadWav(const char* buf, int n_len, int32_t* sampling_rate);
@@ -75,6 +85,7 @@ class Audio {
     int Fetch(float *&dout, int &len, int &flag, float &start_time);
     void Padding();
     void Split(OfflineStream* offline_streamj);
+    void CutSplit(OfflineStream* offline_streamj);
     void Split(VadModel* vad_obj, vector<std::vector<int>>& vad_segments, bool input_finished=true);
     void Split(VadModel* vad_obj, int chunk_len, bool input_finished=true, ASR_TYPE asr_mode=ASR_TWO_PASS);
     float GetTimeLen();

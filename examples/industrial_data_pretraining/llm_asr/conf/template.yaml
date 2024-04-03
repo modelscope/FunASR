@@ -1,0 +1,89 @@
+# This is an example that demonstrates how to configure a model file.
+# You can modify the configuration according to your own requirements.
+
+# to print the register_table:
+# from funasr.register import tables
+# tables.print()
+
+# network architecture
+model: LLMASR
+model_conf:
+    lsm_weight: 0.1     # label smoothing option
+    length_normalized_loss: true
+
+# encoder
+encoder: WhisperWarp
+encoder_conf:
+    hub: funasr
+    init_param_path: "/nfs/maziyang.mzy/models/Whisper-large-v2"
+    freeze: true
+
+llm: Vicuna
+llm_conf:
+  hub: hf
+  init_param_path: "/nfs/maziyang.mzy/models/vicuna-7b-v1.5"
+  freeze: true
+
+adaptor: Linear
+adaptor_conf:
+  downsample_rate: 5
+  llm_dim: 4096
+  encoder_dim: 512
+
+# frontend related
+frontend: WhisperFrontend
+frontend_conf:
+    fs: 16000
+    whisper_model: large
+    do_pad_trim: true
+
+
+specaug: SpecAugLFR
+specaug_conf:
+    apply_time_warp: false
+    time_warp_window: 5
+    time_warp_mode: bicubic
+    apply_freq_mask: true
+    freq_mask_width_range:
+    - 0
+    - 30
+    lfr_rate: 6
+    num_freq_mask: 1
+    apply_time_mask: true
+    time_mask_width_range:
+    - 0
+    - 12
+    num_time_mask: 1
+
+train_conf:
+  accum_grad: 1
+  grad_clip: 5
+  max_epoch: 150
+  keep_nbest_models: 10
+  log_interval: 10
+
+optim: adamw
+optim_conf:
+   lr: 0.0001
+   weight_decay: 0.000001
+scheduler: warmuplr
+scheduler_conf:
+   warmup_steps: 1500
+
+dataset: AudioLLMDataset
+dataset_conf:
+    index_ds: IndexDSJsonl
+    batch_sampler: BatchSampler
+    batch_type: example # example or length
+    batch_size: 8 # if batch_type is example, batch_size is the numbers of samples; if length, batch_size is source_token_len+target_token_len;
+    max_token_length: 2048 # filter samples if source_token_len+target_token_len > max_token_length,
+    buffer_size: 500
+    shuffle: True
+    num_workers: 4
+    preprocessor_text: TextPreprocessRemovePunctuation
+
+tokenizer: HuggingfaceTokenizer
+tokenizer_conf:
+  unk_symbol: <unk>
+  init_param_path: "/nfs/maziyang.mzy/models/vicuna-7b-v1.5"
+

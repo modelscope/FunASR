@@ -3,7 +3,7 @@
 
 [//]: # (FunASR提供可便捷本地或者云端服务器部署的实时语音听写服务，内核为FunASR已开源runtime-SDK。)
 [//]: # (集成了达摩院语音实验室在Modelscope社区开源的语音端点检测&#40;VAD&#41;、Paraformer-large非流式语音识别&#40;ASR&#41;、Paraformer-large流式语音识别&#40;ASR&#41;、标点&#40;PUNC&#41; 等相关能力。软件包既可以实时地进行语音转文字，而且能够在说话句尾用高精度的转写文字修正输出，输出文字带有标点，支持高并发多路请求)
-FunASR实时语音听写软件包，集成了实时版本的语音端点检测模型、语音识别、语音识别、标点预测模型等。采用多模型协同，既可以实时的进行语音转文字，也可以在说话句尾用高精度转写文字修正输出，输出文字带有标点，支持多路请求。依据使用者场景不同，支持实时语音听写服务（online）、非实时一句话转写（offline）与实时与非实时一体化协同（2pass）3种服务模式。软件包提供有html、python、c++、java与c#等多种编程语言客户端，用户可以直接使用与进一步开发。
+FunASR实时语音听写软件包，集成了实时版本的语音端点检测模型、语音识别、标点预测模型等。采用多模型协同，既可以实时的进行语音转文字，也可以在说话句尾用高精度转写文字修正输出，输出文字带有标点，支持多路请求。依据使用者场景不同，支持实时语音听写服务（online）、非实时一句话转写（offline）与实时与非实时一体化协同（2pass）3种服务模式。软件包提供有html、python、c++、java与c#等多种编程语言客户端，用户可以直接使用与进一步开发。
 
 
 本文档为FunASR实时转写服务开发指南。如果您想快速体验实时语音听写服务，可参考[快速上手](#快速上手)。
@@ -12,6 +12,9 @@ FunASR实时语音听写软件包，集成了实时版本的语音端点检测�
 
 | 时间         | 详情                                | 镜像版本                                 | 镜像ID         |
 |:-----------|:----------------------------------|--------------------------------------|--------------|
+| 2024.03.05 | docker镜像支持arm64平台，升级modelscope版本 | funasr-runtime-sdk-online-cpu-0.1.9 | 4a875e08c7a2 |
+| 2024.01.25 | 客户端优化| funasr-runtime-sdk-online-cpu-0.1.7  | 2aa23805572e      |
+| 2024.01.03 | 2pass-offline模式支持Ngram语言模型解码、wfst热词，同时修复已知的crash问题及内存泄漏问题 | funasr-runtime-sdk-online-cpu-0.1.6  | f99925110d27      |
 | 2023.11.09 | 修复无实时结果问题                         | funasr-runtime-sdk-online-cpu-0.1.5  | b16584b6d38b      |
 | 2023.11.08 | 支持服务端加载热词(更新热词通信协议)、runtime结构变化适配 | funasr-runtime-sdk-online-cpu-0.1.4  | 691974017c38 |
 | 2023.09.19 | 2pass模式支持热词、时间戳、ITN模型             | funasr-runtime-sdk-online-cpu-0.1.2  | 7222c5319bcf |
@@ -35,11 +38,11 @@ docker安装失败请参考 [Docker Installation](https://alibaba-damo-academy.g
 
 ```shell
 sudo docker pull \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.5
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.9
 mkdir -p ./funasr-runtime-resources/models
 sudo docker run -p 10096:10095 -it --privileged=true \
   -v $PWD/funasr-runtime-resources/models:/workspace/models \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.5
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.9
 ```
 
 ### 服务端启动
@@ -50,18 +53,19 @@ cd FunASR/runtime
 nohup bash run_server_2pass.sh \
   --download-model-dir /workspace/models \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
-  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
+  --model-dir damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx  \
   --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx  \
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx \
+  --lm-dir damo/speech_ngram_lm_zh-cn-ai-wesp-fst \
   --itn-dir thuduj12/fst_itn_zh \
-  --hotword /workspace/models/hotwords.txt > log.out 2>&1 &
+  --hotword /workspace/models/hotwords.txt > log.txt 2>&1 &
 
 # 如果您想关闭ssl，增加参数：--certfile 0
 # 如果您想使用时间戳或者nn热词模型进行部署，请设置--model-dir为对应模型：
 #   damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx（时间戳）
 #   damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-onnx（nn热词）
 # 如果您想在服务端加载热词，请在宿主机文件./funasr-runtime-resources/models/hotwords.txt配置热词（docker映射地址为/workspace/models/hotwords.txt）:
-#   每行一个热词，格式(热词 权重)：阿里巴巴 20
+#   每行一个热词，格式(热词 权重)：阿里巴巴 20（注：热词理论上无限制，但为了兼顾性能和效果，建议热词长度不超过10，个数不超过1k，权重1~100）
 ```
 服务端详细参数介绍可参考[服务端用法详解](#服务端用法详解)
 ### 客户端测试与使用
@@ -72,7 +76,7 @@ wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_sa
 ```
 我们以Python语言客户端为例，进行说明，支持音频格式（.wav, .pcm），以及多文件列表wav.scp输入，其他版本客户端请参考文档（[点击此处](#客户端用法详解)）。
 ```shell
-python3 wss_client_asr.py --host "127.0.0.1" --port 10095 --mode 2pass
+python3 funasr_wss_client.py --host "127.0.0.1" --port 10096 --mode 2pass
 ```
 
 ------------------
@@ -100,21 +104,20 @@ nohup bash run_server_2pass.sh \
   --online-model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
   --punc-dir damo/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx \
+  --lm-dir damo/speech_ngram_lm_zh-cn-ai-wesp-fst \
   --itn-dir thuduj12/fst_itn_zh \
   --certfile  ../../../ssl_key/server.crt \
   --keyfile ../../../ssl_key/server.key \
-  --hotword ../../hotwords.txt > log.out 2>&1 &
+  --hotword ../../hotwords.txt > log.txt 2>&1 &
  ```
 **run_server_2pass.sh命令参数介绍**
 ```text
 --download-model-dir 模型下载地址，通过设置model ID从Modelscope下载模型
 --model-dir  modelscope model ID 或者 本地模型路径
 --online-model-dir  modelscope model ID 或者 本地模型路径
---quantize  True为量化ASR模型，False为非量化ASR模型，默认是True
 --vad-dir  modelscope model ID 或者 本地模型路径
---vad-quant   True为量化VAD模型，False为非量化VAD模型，默认是True
 --punc-dir  modelscope model ID 或者 本地模型路径
---punc-quant   True为量化PUNC模型，False为非量化PUNC模型，默认是True
+--lm-dir modelscope model ID 或者 本地模型路径
 --itn-dir modelscope model ID 或者 本地模型路径
 --port  服务端监听的端口号，默认为 10095
 --decoder-thread-num  服务端线程池个数(支持的最大并发路数)，

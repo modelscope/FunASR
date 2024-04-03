@@ -366,7 +366,7 @@ function getJsonMessage( jsonMsg ) {
 	varArea.value=rec_text;
 	console.log( "offline_text: " + asrmodel+","+offline_text);
 	console.log( "rec_text: " + rec_text);
-	if (isfilemode==true && is_final==false){
+	if (isfilemode==true && is_final==true){
 		console.log("call stop ws!");
 		play_file();
 		wsconnecter.wsStop();
@@ -563,4 +563,14 @@ function recProcess( buffer, powerLevel, bufferDuration, bufferSampleRate,newBuf
  
 		
 	}
+}
+
+function getUseITN() {
+	var obj = document.getElementsByName("use_itn");
+	for (var i = 0; i < obj.length; i++) {
+		if (obj[i].checked) {
+			return obj[i].value === "true";
+		}
+	}
+	return false;
 }

@@ -1,0 +1,23 @@
+# This is an example that demonstrates how to configure a model file.
+# You can modify the configuration according to your own requirements.
+
+# to print the register_table:
+# from funasr.register import tables
+# tables.print()
+
+# network architecture
+model: CAMPPlus
+model_conf:
+    feat_dim: 80
+    embedding_size: 192
+    growth_rate: 32
+    bn_size: 4
+    init_channels: 128
+    config_str: 'batchnorm-relu'
+    memory_efficient: True
+    output_level: 'segment'
+
+# frontend related
+frontend: WavFrontend
+frontend_conf:
+    fs: 16000

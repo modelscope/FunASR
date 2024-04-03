@@ -193,7 +193,8 @@ class WebsocketClient {
     int32_t sampling_rate = audio_fs;
     std::string wav_format = "pcm";
     if (funasr::IsTargetFile(wav_path.c_str(), "wav")) {
-      if (!audio.LoadWav(wav_path.c_str(), &sampling_rate, false)) return;
+      if (!audio.LoadWav(wav_path.c_str(), &sampling_rate, false)) 
+        return;
     } else if (funasr::IsTargetFile(wav_path.c_str(), "pcm")) {
       if (!audio.LoadPcmwav(wav_path.c_str(), &sampling_rate, false)) return;
     } else {
@@ -474,6 +475,10 @@ class WebsocketClient {
 };
 
 int main(int argc, char* argv[]) {
+#ifdef _WIN32
+  #include <windows.h>
+  SetConsoleOutputCP(65001);
+#endif
   google::InitGoogleLogging(argv[0]);
   FLAGS_logtostderr = true;
 

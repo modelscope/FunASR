@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 
-from funasr.datasets.collate_fn import crop_to_max_size
+from funasr.datasets.large_datasets.collate_fn import crop_to_max_size
 
 
 def clipping(data):

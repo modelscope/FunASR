@@ -6,7 +6,7 @@ add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/source-charset:utf-8>")
 include_directories(${ONNXRUNTIME_DIR}/include)
 include_directories(${FFMPEG_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/third_party)
-SET(RELATION_SOURCE "../src/audio.cpp" "../src/resample.cpp" "../src/util.cpp" "../src/alignedmem.cpp" "../src/encode_converter.cpp")
+SET(RELATION_SOURCE "../src/resample.cpp" "../src/util.cpp" "../src/alignedmem.cpp" "../src/encode_converter.cpp")
 endif()
 
 add_executable(funasr-onnx-offline "funasr-onnx-offline.cpp" ${RELATION_SOURCE})

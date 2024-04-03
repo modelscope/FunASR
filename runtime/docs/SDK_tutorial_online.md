@@ -59,7 +59,7 @@ For more client version support, please refer to the [websocket_protocol](./webs
 If you want to run the client directly for testing, you can refer to the following simple instructions, using the Python version as an example:
 
 ```shell
-python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.wav"
+python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.pcm"
 ```
 
 Command parameter instructions:
@@ -79,7 +79,7 @@ Command parameter instructions:
 
 After entering the samples/cpp directory, you can test it with CPP. The command is as follows:
 ```shell
-./funasr-wss-client-2pass --server-ip 127.0.0.1 --port 10095 --wav-path ../audio/asr_example.wav
+./funasr-wss-client-2pass --server-ip 127.0.0.1 --port 10095 --wav-path ../audio/asr_example.pcm
 ```
 
 Command parameter description:
@@ -88,7 +88,9 @@ Command parameter description:
 --port specifies the deployment port number as 10095.
 --mode: `offline` indicates that the inference mode is one-sentence recognition; `online` indicates that the inference mode is real-time speech recognition; `2pass` indicates real-time speech recognition, and offline models are used for error correction at the end of each sentence.
 --chunk-size: indicates the latency configuration of the streaming model. [5,10,5] indicates that the current audio is 600ms, with a lookback of 300ms and a lookahead of 300ms.
+--record record is 1 means using record, fefault is 0
 --wav-path specifies the audio file to be transcribed, and supports file paths.
+--audio-fs the sample rate of the audio
 --threa-num sets the number of concurrent send threads, with a default value of 1.
 --is-ssl sets whether to enable SSL certificate verification, with a default value of 1 for enabling and 0 for disabling.
 --hotword: Hotword file path, one line for each hotword(e.g.:阿里巴巴 20)

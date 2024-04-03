@@ -12,6 +12,10 @@ This document serves as a development guide for the FunASR offline file transcri
 
 | TIME       | INFO                                                                                                                             | IMAGE VERSION                | IMAGE ID     |
 |------------|----------------------------------------------------------------------------------------------------------------------------------|------------------------------|--------------|
+| 2024.03.05 | docker image supports ARM64 platform, update modelscope | funasr-runtime-sdk-cpu-0.4.4 | 2dc87b86dc49 |
+| 2024.01.25 | Optimized the VAD (Voice Activity Detection) data processing method, significantly reducing peak memory usage; memory leak optimization| funasr-runtime-sdk-cpu-0.4.2 | befdc7b179ed |
+| 2024.01.08 | optimized format sentence-level timestamps | funasr-runtime-sdk-cpu-0.4.1 | 0250f8ef981b |
+| 2024.01.03 | Added support for 8k models, optimized timestamp mismatch issues and added sentence-level timestamps, improved the effectiveness of English word FST hotwords, supported automated configuration of thread parameters, and fixed known crash issues as well as memory leak problems. | funasr-runtime-sdk-cpu-0.4.0 | c4483ee08f04 |
 | 2023.11.08 | supporting punc-large model, Ngram model, fst hotwords, server-side loading of hotwords, adaptation to runtime structure changes | funasr-runtime-sdk-cpu-0.3.0 | caa64bddbb43 |
 | 2023.09.19 | supporting ITN model                                                                                                             | funasr-runtime-sdk-cpu-0.2.2 | 2c5286be13e9 |
 | 2023.08.22 | integrated ffmpeg to support various audio and video inputs, supporting nn-hotword model and timestamp model                     | funasr-runtime-sdk-cpu-0.2.0 | 1ad3d19e0707 |
@@ -30,9 +34,9 @@ If you do not have Docker installed, please refer to [Docker Installation](https
 ### Pulling and launching images
 Use the following command to pull and launch the Docker image for the FunASR runtime-SDK:
 ```shell
-sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.3.0
+sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.4.4
 
-sudo docker run -p 10095:10095 -it --privileged=true -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.3.0
+sudo docker run -p 10095:10095 -it --privileged=true -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.4.4
 ```
 
 Introduction to command parameters: 
@@ -52,7 +56,7 @@ nohup bash run_server.sh \
   --punc-dir damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx \
   --lm-dir damo/speech_ngram_lm_zh-cn-ai-wesp-fst \
   --itn-dir thuduj12/fst_itn_zh \
-  --hotword /workspace/models/hotwords.txt > log.out 2>&1 &
+  --hotword /workspace/models/hotwords.txt > log.txt 2>&1 &
 
 # If you want to close ssl，please add：--certfile 0
 # If you want to deploy the timestamp or nn hotword model, please set --model-dir to the corresponding model:
@@ -70,25 +74,22 @@ The funasr-wss-server supports downloading models from Modelscope. You can set t
 cd /workspace/FunASR/runtime
 nohup bash run_server.sh \
   --download-model-dir /workspace/models \
-  --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx \
+  --model-dir damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
   --punc-dir damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx \
   --itn-dir thuduj12/fst_itn_zh \
   --lm-dir damo/speech_ngram_lm_zh-cn-ai-wesp-fst \
   --certfile  ../../../ssl_key/server.crt \
   --keyfile ../../../ssl_key/server.key \
-  --hotword ../../hotwords.txt > log.out 2>&1 &
+  --hotword ../../hotwords.txt > log.txt 2>&1 &
  ```
 
 Introduction to run_server.sh parameters: 
 ```text
 --download-model-dir: Model download address, download models from Modelscope by setting the model ID.
 --model-dir: modelscope model ID or local model path.
---quantize: True for quantized ASR model, False for non-quantized ASR model. Default is True.
 --vad-dir: modelscope model ID or local model path.
---vad-quant: True for quantized VAD model, False for non-quantized VAD model. Default is True.
 --punc-dir: modelscope model ID or local model path.
---punc-quant: True for quantized PUNC model, False for non-quantized PUNC model. Default is True.
 --itn-dir modelscope model ID or local model path.
 --port: Port number that the server listens on. Default is 10095.
 --decoder-thread-num: The number of thread pools on the server side that can handle concurrent requests.

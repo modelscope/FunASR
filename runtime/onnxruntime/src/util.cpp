@@ -255,7 +255,8 @@ void TimestampAdd(std::deque<string> &alignment_str1, std::string str_word){
 }
 
 bool TimestampIsPunctuation(const std::string& str) {
-    const std::string punctuation = u8"，。？、,.?";
+    const std::string punctuation = u8"，。？、,?";
+    // const std::string punctuation = u8"，。？、,.?";
     for (char ch : str) {
         if (punctuation.find(ch) == std::string::npos) {
             return false;
@@ -304,6 +305,10 @@ bool TimestampIsAlpha(U16CHAR_T &u16) {
 }
 
 bool TimestampIsPunctuation(U16CHAR_T &u16) {
+    // (& ' -) in the dict
+    if (u16 == 0x26 || u16 == 0x27 || u16 == 0x2D){
+        return false;
+    }
     return (u16 >= 0x21 && u16 <= 0x2F)     // 标准ASCII标点
         || (u16 >= 0x3A && u16 <= 0x40)     // 标准ASCII标点
         || (u16 >= 0x5B && u16 <= 0x60)     // 标准ASCII标点
@@ -360,9 +365,13 @@ void TimestampSplitChiEngCharacters(const std::string &input_str,
   }
 }
 
-std::string VectorToString(const std::vector<std::vector<int>>& vec) {
+std::string VectorToString(const std::vector<std::vector<int>>& vec, bool out_empty) {
     if(vec.size() == 0){
-        return "";
+        if(out_empty){
+            return "";
+        }else{
+            return "[]";
+        }
     }
     std::ostringstream out;
     out << "[";
@@ -555,6 +564,76 @@ std::string TimestampSmooth(std::string &text, std::string &text_itn, std::strin
     
     timestamps_str = VectorToString(timestamps_out);
     return timestamps_str;
+}
+
+std::string TimestampSentence(std::string &text, std::string &str_time){
+    std::vector<std::string> characters;
+    funasr::TimestampSplitChiEngCharacters(text, characters);
+    vector<vector<int>> timestamps = funasr::ParseTimestamps(str_time);
+    
+    int idx_str = 0, idx_ts = 0;
+    int start = -1, end = -1;
+    std::string text_seg = "";
+    std::string ts_sentences = "";
+    std::string ts_sent = "";
+    vector<vector<int>> ts_seg;
+    while(idx_str < characters.size()){
+        if (TimestampIsPunctuation(characters[idx_str])){
+            if(ts_seg.size() >0){
+                if (ts_seg[0].size() == 2){
+                    start = ts_seg[0][0];
+                }
+                if (ts_seg[ts_seg.size()-1].size() == 2){
+                    end = ts_seg[ts_seg.size()-1][1];
+                }
+            }
+            // format
+            ts_sent += "{\"text_seg\":\"" + text_seg + "\",";
+            ts_sent += "\"punc\":\"" + characters[idx_str] + "\",";
+            ts_sent += "\"start\":" + to_string(start) + ",";
+            ts_sent += "\"end\":" + to_string(end) + ",";
+            ts_sent += "\"ts_list\":" + VectorToString(ts_seg, false) + "}";
+            
+            if (idx_str == characters.size()-1){
+                ts_sentences += ts_sent;
+            } else{
+                ts_sentences += ts_sent + ",";
+            }
+            // clear
+            text_seg = "";
+            ts_sent = "";
+            start = 0;
+            end = 0;
+            ts_seg.clear();
+        } else if(idx_ts < timestamps.size()) {
+            if (text_seg.empty()){
+                text_seg = characters[idx_str];
+            }else{
+                text_seg += " " + characters[idx_str];
+            }
+            ts_seg.push_back(timestamps[idx_ts]);
+            idx_ts++;
+        }
+        idx_str++;
+    }
+    // for none punc results
+    if(ts_seg.size() >0){
+        if (ts_seg[0].size() == 2){
+            start = ts_seg[0][0];
+        }
+        if (ts_seg[ts_seg.size()-1].size() == 2){
+            end = ts_seg[ts_seg.size()-1][1];
+        }
+        // format
+        ts_sent += "{\"text_seg\":\"" + text_seg + "\",";
+        ts_sent += "\"punc\":\"\",";
+        ts_sent += "\"start\":" + to_string(start) + ",";
+        ts_sent += "\"end\":" + to_string(end) + ",";
+        ts_sent += "\"ts_list\":" + VectorToString(ts_seg, false) + "}";
+        ts_sentences += ts_sent;
+    }
+
+    return "[" +ts_sentences + "]";
 }
 
 std::vector<std::string> split(const std::string &s, char delim) {

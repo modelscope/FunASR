@@ -53,8 +53,8 @@ void CTokenizer::JiebaInit(std::string punc_config){
 
         SetJiebaRes(jieba_dict_trie_, jieba_model_);
     }else {
-        jieba_dict_trie_ = NULL;
-        jieba_model_ = NULL;
+        jieba_dict_trie_ = nullptr;
+        jieba_model_ = nullptr;
     }
 }
 

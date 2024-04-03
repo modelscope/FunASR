@@ -1,7 +1,10 @@
+import os
 import io
+import shutil
+import logging
 from collections import OrderedDict
 import numpy as np
-
+from omegaconf import DictConfig, OmegaConf
 
 def statistic_model_parameters(model, prefix=None):
     var_dict = model.state_dict()
@@ -46,3 +49,27 @@ def load_scp_as_list(scp_path, value_type='str', kv_sep=" "):
                 value = value.split(' ')
             ret_dict.append((key, value))
         return ret_dict
+
+def deep_update(original, update):
+    for key, value in update.items():
+        if isinstance(value, dict) and key in original:
+            deep_update(original[key], value)
+        else:
+            original[key] = value
+            
+            
+def prepare_model_dir(**kwargs):
+    
+
+    os.makedirs(kwargs.get("output_dir", "./"), exist_ok=True)
+    
+    yaml_file = os.path.join(kwargs.get("output_dir", "./"), "config.yaml")
+    OmegaConf.save(config=kwargs, f=yaml_file)
+    print(kwargs)
+    logging.info("config.yaml is saved to: %s", yaml_file)
+
+    # model_path = kwargs.get("model_path")
+    # if model_path is not None:
+    #     config_json = os.path.join(model_path, "configuration.json")
+    #     if os.path.exists(config_json):
+    #         shutil.copy(config_json, os.path.join(kwargs.get("output_dir", "./"), "configuration.json"))

@@ -8,9 +8,10 @@ import sentencepiece as spm
 from torch.utils.data import DataLoader
 
 from funasr.datasets.large_datasets.dataset import Dataset
-from funasr.iterators.abs_iter_factory import AbsIterFactory
+from funasr.datasets.large_datasets.abs_iter_factory import AbsIterFactory
 from funasr.tokenizer.abs_tokenizer import AbsTokenizer
 
+from funasr.register import tables
 
 def read_symbol_table(symbol_table_file):
     if isinstance(symbol_table_file, str):
@@ -61,7 +62,7 @@ class SentencepiecesTokenizer(AbsTokenizer):
         self._build_sentence_piece_processor()
         return self.sp.DecodePieces(list(tokens))
 
-
+@tables.register("dataset_classes", "LargeDataset")
 class LargeDataLoader(AbsIterFactory):
     def __init__(self, args, mode="train"):
         symbol_table, seg_dict, punc_dict, bpe_tokenizer = None, None, None, None

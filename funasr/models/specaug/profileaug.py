@@ -2,10 +2,9 @@ from typing import Tuple, Optional
 import numpy as np
 import torch
 from torch.nn import functional as F
-from funasr.models.specaug.abs_profileaug import AbsProfileAug
+import torch.nn as nn
 
-
-class ProfileAug(AbsProfileAug):
+class ProfileAug(nn.Module):
     """
     Implement the augmentation for profiles including:
     - Split aug: split one profile into two profiles, i.e., main and inaccurate, labels assigned to main

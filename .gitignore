@@ -21,3 +21,8 @@ docs/_build
 modelscope
 samples
 .ipynb_checkpoints
+outputs*
+emotion2vec*
+GPT-SoVITS*
+modelscope_models
+examples/aishell/llm_asr_nar/*

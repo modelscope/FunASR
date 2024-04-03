@@ -441,7 +441,7 @@ uint16_t EncodeConverter::ToUni(const char* sc, int &len)
 }
 
 bool EncodeConverter::IsAllChineseCharactor(const U8CHAR_T* pu8, size_t ilen) {
-    if (pu8 == NULL || ilen <= 0) {
+    if (pu8 == nullptr || ilen <= 0) {
         return false;
     }
 
@@ -458,7 +458,7 @@ bool EncodeConverter::IsAllChineseCharactor(const U8CHAR_T* pu8, size_t ilen) {
 }
 
 bool EncodeConverter::HasAlpha(const U8CHAR_T* pu8, size_t ilen) {
-  if (pu8 == NULL || ilen <= 0) {
+  if (pu8 == nullptr || ilen <= 0) {
     return false;
   }
   for (size_t i = 0; i < ilen; i++) {
@@ -471,7 +471,7 @@ bool EncodeConverter::HasAlpha(const U8CHAR_T* pu8, size_t ilen) {
 
 
 bool EncodeConverter::IsAllAlpha(const U8CHAR_T* pu8, size_t ilen) {
-  if (pu8 == NULL || ilen <= 0) {
+  if (pu8 == nullptr || ilen <= 0) {
     return false;
   }
   for (size_t i = 0; i < ilen; i++) {
@@ -483,7 +483,7 @@ bool EncodeConverter::IsAllAlpha(const U8CHAR_T* pu8, size_t ilen) {
 }
 
 bool EncodeConverter::IsAllAlphaAndPunct(const U8CHAR_T* pu8, size_t ilen) {
-  if (pu8 == NULL || ilen <= 0) {
+  if (pu8 == nullptr || ilen <= 0) {
     return false;
   }
   bool flag1 = HasAlpha(pu8, ilen);
@@ -500,7 +500,7 @@ bool EncodeConverter::IsAllAlphaAndPunct(const U8CHAR_T* pu8, size_t ilen) {
 }
 
 bool EncodeConverter::IsAllAlphaAndDigit(const U8CHAR_T* pu8, size_t ilen) {
-  if (pu8 == NULL || ilen <= 0) {
+  if (pu8 == nullptr || ilen <= 0) {
     return false;
   }
   bool flag1 = HasAlpha(pu8, ilen);
@@ -516,7 +516,7 @@ bool EncodeConverter::IsAllAlphaAndDigit(const U8CHAR_T* pu8, size_t ilen) {
   return true;
 }
 bool EncodeConverter::IsAllAlphaAndDigitAndBlank(const U8CHAR_T* pu8, size_t ilen) {
-  if (pu8 == NULL || ilen <= 0) {
+  if (pu8 == nullptr || ilen <= 0) {
     return false;
   }
   for (size_t i = 0; i < ilen; i++) {
@@ -529,7 +529,7 @@ bool EncodeConverter::IsAllAlphaAndDigitAndBlank(const U8CHAR_T* pu8, size_t ile
 bool EncodeConverter::NeedAddTailBlank(std::string str) {
   U8CHAR_T *pu8 = (U8CHAR_T*)str.data();
   size_t ilen = str.size();
-  if (pu8 == NULL || ilen <= 0) {
+  if (pu8 == nullptr || ilen <= 0) {
     return false;
   }
   if (IsAllAlpha(pu8, ilen) || IsAllAlphaAndPunct(pu8, ilen) || IsAllAlphaAndDigit(pu8, ilen)) {

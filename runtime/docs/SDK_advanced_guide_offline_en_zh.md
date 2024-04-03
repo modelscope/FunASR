@@ -6,6 +6,9 @@ FunASR提供可一键本地或者云端服务器部署的英文离线文件转�
 
 | 时间         | 详情            | 镜像版本                            | 镜像ID         |
 |------------|---------------|---------------------------------|--------------|
+| 2024.03.05 | docker镜像支持arm64平台，升级modelscope版本 | funasr-runtime-sdk-en-cpu-0.1.5 | 7cca2abc5901 |
+| 2024.01.25 | 优化vad数据处理方式，大幅降低峰值内存占用；内存泄漏优化 | funasr-runtime-sdk-en-cpu-0.1.3 | c00f9ce7a195 |
+| 2024.01.03 | 修复已知的crash问题及内存泄漏问题 | funasr-runtime-sdk-en-cpu-0.1.2 | 0cdd9f4a4bb5 |
 | 2023.11.08 | runtime结构变化适配 | funasr-runtime-sdk-en-cpu-0.1.1 | 27017f70f72a |
 | 2023.10.16 | 1.0 发布        | funasr-runtime-sdk-en-cpu-0.1.0 | e0de03eb0163 |
 
@@ -36,11 +39,11 @@ docker安装失败请参考 [Docker Installation](https://alibaba-damo-academy.g
 通过下述命令拉取并启动FunASR runtime-SDK的docker镜像：
 ```shell
 sudo docker pull \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.1
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.5
 mkdir -p ./funasr-runtime-resources/models
 sudo docker run -p 10097:10095 -it --privileged=true \
   -v $PWD/funasr-runtime-resources/models:/workspace/models \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.1
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-en-cpu-0.1.5
 ```
 
 ### 服务端启动
@@ -52,7 +55,7 @@ nohup bash run_server.sh \
   --download-model-dir /workspace/models \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
   --model-dir damo/speech_paraformer-large_asr_nat-en-16k-common-vocab10020-onnx  \
-  --punc-dir damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx  > log.out 2>&1 &
+  --punc-dir damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx  > log.txt 2>&1 &
 
 # 如果您想关闭ssl，增加参数：--certfile 0
 
@@ -66,7 +69,7 @@ wget https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/sample/funasr_sa
 ```
 我们以Python语言客户端为例，进行说明，支持多种音频格式输入（.wav, .pcm, .mp3等），也支持视频输入(.mp4等)，以及多文件列表wav.scp输入，其他版本客户端请参考文档（[点击此处](#客户端用法详解)），定制服务部署请参考[如何定制服务部署](#如何定制服务部署)
 ```shell
-python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --audio_in "../audio/asr_example.wav"
+python3 funasr_wss_client.py --host "127.0.0.1" --port 10097 --mode offline --audio_in "../audio/asr_example.wav"
 ```
 
 ------------------
@@ -84,7 +87,7 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline --au
 若想直接运行client进行测试，可参考如下简易说明，以python版本为例：
 
 ```shell
-python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline \
+python3 funasr_wss_client.py --host "127.0.0.1" --port 10097 --mode offline \
         --audio_in "../audio/asr_example.wav" --output_dir "./results"
 ```
 
@@ -92,7 +95,7 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline \
 ```text
 --host 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，
        需要改为部署机器ip
---port 10095 部署端口号
+--port 10097 部署端口号
 --mode offline表示离线文件转写
 --audio_in 需要进行转写的音频文件，支持文件路径，文件列表wav.scp
 --thread_num 设置并发发送线程数，默认为1
@@ -104,7 +107,7 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline \
 ### cpp-client
 进入samples/cpp目录后，可以用cpp进行测试，指令如下：
 ```shell
-./funasr-wss-client --server-ip 127.0.0.1 --port 10095 --wav-path ../audio/asr_example.wav
+./funasr-wss-client --server-ip 127.0.0.1 --port 10097 --wav-path ../audio/asr_example.wav
 ```
 
 命令参数说明：
@@ -112,7 +115,7 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline \
 ```text
 --server-ip 为FunASR runtime-SDK服务部署机器ip，默认为本机ip（127.0.0.1），如果client与服务不在同一台服务器，
             需要改为部署机器ip
---port 10095 部署端口号
+--port 10097 部署端口号
 --wav-path 需要进行转写的音频文件，支持文件路径
 --hotword 热词文件，每行一个热词，格式(热词 权重)：阿里巴巴 20
 --use-itn 设置是否使用itn，默认1开启，设置为0关闭
@@ -127,7 +130,7 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline \
 ### Java-client
 
 ```shell
-FunasrWsClient --host localhost --port 10095 --audio_in ./asr_example.wav --mode offline
+FunasrWsClient --host localhost --port 10097 --audio_in ./asr_example.wav --mode offline
 ```
 详细可以参考文档（[点击此处](../java/readme.md)）
 
@@ -142,17 +145,14 @@ nohup bash run_server.sh \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
   --punc-dir damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx \
   --certfile  ../../../ssl_key/server.crt \
-  --keyfile ../../../ssl_key/server.key > log.out 2>&1 &
+  --keyfile ../../../ssl_key/server.key > log.txt 2>&1 &
  ```
 **run_server.sh命令参数介绍**
 ```text
 --download-model-dir 模型下载地址，通过设置model ID从Modelscope下载模型
 --model-dir  modelscope model ID 或者 本地模型路径
---quantize  True为量化ASR模型，False为非量化ASR模型，默认是True
 --vad-dir  modelscope model ID 或者 本地模型路径
---vad-quant   True为量化VAD模型，False为非量化VAD模型，默认是True
 --punc-dir  modelscope model ID 或者 本地模型路径
---punc-quant   True为量化PUNC模型，False为非量化PUNC模型，默认是True
 --itn-dir modelscope model ID 或者 本地模型路径
 --port  服务端监听的端口号，默认为 10095
 --decoder-thread-num  服务端线程池个数(支持的最大并发路数)，

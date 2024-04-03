@@ -1,1 +1,0 @@
-../../egs_modelscope/speaker_diarization/TEMPLATE/README.md

@@ -41,12 +41,12 @@ make -j 4
 ### 下载 onnxruntime
 https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/dep_libs/onnxruntime-win-x64-1.16.1.zip
 
-下载并解压到 d:/ffmpeg-master-latest-win64-gpl-shared
+下载并解压到 d:/onnxruntime-win-x64-1.16.1
 
 ### 下载 ffmpeg
 https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/dep_libs/ffmpeg-master-latest-win64-gpl-shared.zip
 
-下载并解压到 d:/onnxruntime-win-x64-1.16.1
+下载并解压到 d:/ffmpeg-master-latest-win64-gpl-shared
 
 ### 编译 openssl
 https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/dep_libs/openssl-1.1.1w.zip
