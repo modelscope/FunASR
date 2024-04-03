@@ -366,7 +366,7 @@ class LLMASRNARPrompt(nn.Module):
         decoder_conf: dict = None,
         ctc: str = None,
         ctc_conf: dict = None,
-        ctc_weight: float = 0.5,
+        ctc_weight: float = 0.0,
         llm: str = None,
         llm_conf: dict = None,
         adaptor: str = None,
@@ -473,6 +473,15 @@ class LLMASRNARPrompt(nn.Module):
         
         self.length_normalized_loss = length_normalized_loss
         self.beam_search = None
+        if ctc_weight > 0.0:
+    
+            if ctc_conf is None:
+                ctc_conf = {}
+    
+            ctc = CTC(
+                odim=vocab_size, encoder_output_size=encoder_output_size, **ctc_conf
+            )
+        self.ctc = ctc
     
     def forward(
         self,
@@ -502,9 +511,20 @@ class LLMASRNARPrompt(nn.Module):
             speech_lengths = speech_lengths[:, 0]
         
         batch_size = speech.shape[0]
-        
+
+        stats = {}
         # audio encoder
         encoder_out, encoder_out_lens, loss_pre = self.encode(speech, speech_lengths, audio_mask=audio_mask)
+
+        # decoder: CTC branch
+        
+        if self.ctc_weight != 0.0:
+            loss_ctc, cer_ctc = self._calc_ctc_loss(
+                encoder_out, encoder_out_lens, text, text_lengths
+            )
+    
+            # Collect CTC branch stats
+            stats["loss_ctc"] = loss_ctc.detach() if loss_ctc is not None else None
         
         # adaptor
         encoder_out = self.adaptor(encoder_out)
@@ -536,8 +556,10 @@ class LLMASRNARPrompt(nn.Module):
         # labels_ids[1:] ->  [prompt, input, target, eos] -> [-1, input, target, eos];
         model_outputs = self.llm(inputs_embeds=inputs_embeds, attention_mask=attention_mask, labels=labels_ids)
         loss_llm = model_outputs.loss
+        if self.ctc_weight > 0.0:
+            loss_llm = self.ctc_weight * loss_ctc + loss_llm
         loss = loss_llm + loss_pre * self.predictor_weight
-        stats = {}
+        
         with torch.no_grad():
             preds = torch.argmax(model_outputs.logits, -1)
             acc_att = compute_accuracy(preds[:, :-1], labels_ids[:, 1:], ignore_label=-100)
@@ -577,6 +599,23 @@ class LLMASRNARPrompt(nn.Module):
                 loss_pre = self.criterion_pre(audio_token_lengths.type_as(pre_token_length), pre_token_length)
         
         return pre_acoustic_embeds, pre_token_length, loss_pre
+
+    def _calc_ctc_loss(
+        self,
+        encoder_out: torch.Tensor,
+        encoder_out_lens: torch.Tensor,
+        ys_pad: torch.Tensor,
+        ys_pad_lens: torch.Tensor,
+    ):
+        # Calc CTC loss
+        loss_ctc = self.ctc(encoder_out, encoder_out_lens, ys_pad, ys_pad_lens)
+    
+        # Calc CER using CTC
+        cer_ctc = None
+        if not self.training and self.error_calculator is not None:
+            ys_hat = self.ctc.argmax(encoder_out).data
+            cer_ctc = self.error_calculator(ys_hat.cpu(), ys_pad.cpu(), is_ctc=True)
+        return loss_ctc, cer_ctc
     
     def inference(self,
                   data_in,
