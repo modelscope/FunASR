@@ -480,6 +480,7 @@ class LLMASRNARPrompt(nn.Module):
             ctc = CTC(
                 odim=vocab_size, encoder_output_size=adaptor_conf["encoder_dim"], **ctc_conf
             )
+        self.ctc_weight = ctc_weight
         self.ctc = ctc
     
     def forward(
@@ -513,17 +514,20 @@ class LLMASRNARPrompt(nn.Module):
 
         stats = {}
         # audio encoder
-        encoder_out, encoder_out_lens, loss_pre = self.encode(speech, speech_lengths, audio_mask=audio_mask)
+        outs = self.encode(speech, speech_lengths, audio_mask=audio_mask)
+        enc, enc_lens = outs[0], outs[1]
+        encoder_out, encoder_out_lens, loss_pre = outs[2], outs[3], outs[4]
+        
 
         # decoder: CTC branch
         
         if self.ctc_weight != 0.0:
             loss_ctc, cer_ctc = self._calc_ctc_loss(
-                encoder_out, encoder_out_lens, text, text_lengths
+                enc, enc_lens, text, text_lengths
             )
     
             # Collect CTC branch stats
-            stats["loss_ctc"] = loss_ctc.detach() if loss_ctc is not None else None
+            stats["loss_ctc"] = torch.clone(loss_ctc.detach()) if loss_ctc is not None else None
         
         # adaptor
         encoder_out = self.adaptor(encoder_out)
@@ -555,6 +559,7 @@ class LLMASRNARPrompt(nn.Module):
         # labels_ids[1:] ->  [prompt, input, target, eos] -> [-1, input, target, eos];
         model_outputs = self.llm(inputs_embeds=inputs_embeds, attention_mask=attention_mask, labels=labels_ids)
         loss_llm = model_outputs.loss
+        stats["loss_llm"] = torch.clone(loss_llm.detach())
         if self.ctc_weight > 0.0:
             loss_llm = self.ctc_weight * loss_ctc + loss_llm
         loss = loss_llm + loss_pre * self.predictor_weight
@@ -564,10 +569,9 @@ class LLMASRNARPrompt(nn.Module):
             acc_att = compute_accuracy(preds[:, :-1], labels_ids[:, 1:], ignore_label=-100)
             stats["acc"] = acc_att
         
-        
         stats["loss_pre"] = torch.clone(loss_pre.detach())
-        stats["loss_llm"] = torch.clone(loss_llm.detach())
         stats["loss"] = torch.clone(loss.detach())
+        stats["batch_size"] = batch_size
         
         # force_gatherable: to-device and to-tensor if scalar for DataParallel
         if self.length_normalized_loss:
@@ -597,7 +601,7 @@ class LLMASRNARPrompt(nn.Module):
             if audio_token_lengths is not None:
                 loss_pre = self.criterion_pre(audio_token_lengths.type_as(pre_token_length), pre_token_length)
         
-        return pre_acoustic_embeds, pre_token_length, loss_pre
+        return enc, enc_lens, pre_acoustic_embeds, pre_token_length, loss_pre
 
     def _calc_ctc_loss(
         self,
