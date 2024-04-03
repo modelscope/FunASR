@@ -474,12 +474,12 @@ class LLMASRNARPrompt(nn.Module):
         self.length_normalized_loss = length_normalized_loss
         self.beam_search = None
         if ctc_weight > 0.0:
-    
+            encoder_output_size = encoder.output_size()
             if ctc_conf is None:
                 ctc_conf = {}
     
             ctc = CTC(
-                odim=vocab_size, encoder_output_size=encoder_output_size, **ctc_conf
+                odim=vocab_size, encoder_output_size=adaptor_conf["encoder_dim"], **ctc_conf
             )
         self.ctc = ctc
     
