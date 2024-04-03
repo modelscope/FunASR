@@ -6,7 +6,7 @@ export HYDRA_FULL_ERROR=1
 
 
 model="iic/punc_ct-transformer_zh-cn-common-vocab272727-pytorch"
-model_revision="v2.0.4"
+
 
 python -m funasr.bin.export \
 ++model=${model} \

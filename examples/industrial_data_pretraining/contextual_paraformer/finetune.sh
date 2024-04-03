@@ -11,7 +11,7 @@ gpu_num=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
 
 ## option 1, download model automatically
 model_name_or_model_dir="iic/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404"
-model_revision="v2.0.4"
+
 
 ## option 2, download model by git
 #local_path_root=${workspace}/modelscope_models

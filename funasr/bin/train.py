@@ -128,7 +128,8 @@ def main(**kwargs):
     else:
         model = model.to(device=kwargs.get("device", "cuda"))
 
-    logging.info(f"{model}")
+    if local_rank == 0:
+        logging.info(f"{model}")
     kwargs["device"] = next(model.parameters()).device
         
     # optim
@@ -148,9 +149,9 @@ def main(**kwargs):
 
     # dataset
     logging.info("Build dataloader")
-    dataloader_class = tables.dataloader_classes.get( kwargs["dataset_conf"].get("dataloader", "DataloaderMapStyle"))
-    dataloader_tr, dataloader_val = dataloader_class(**kwargs)
-
+    dataloader_class = tables.dataloader_classes.get(kwargs["dataset_conf"].get("dataloader", "DataloaderMapStyle"))
+    dataloader = dataloader_class(**kwargs)
+    # dataloader_tr, dataloader_val = dataloader_class(**kwargs)
     trainer = Trainer(local_rank=local_rank,
                       use_ddp=use_ddp,
                       use_fsdp=use_fsdp,
@@ -172,15 +173,15 @@ def main(**kwargs):
     except:
         writer = None
 
-    if use_ddp or use_fsdp:
-        context = Join([model])
-    else:
-        context = nullcontext()
-
+    # if use_ddp or use_fsdp:
+    #     context = Join([model])
+    # else:
+    #     context = nullcontext()
+    context = nullcontext()
     for epoch in range(trainer.start_epoch, trainer.max_epoch + 1):
         time1 = time.perf_counter()
         with context:
-            
+            dataloader_tr, dataloader_val = dataloader.build_iter(epoch)
             trainer.train_epoch(
                                 model=model,
                                 optim=optim,
@@ -191,13 +192,14 @@ def main(**kwargs):
                                 epoch=epoch,
                                 writer=writer
                                 )
+        with context:
+            trainer.validate_epoch(
+                model=model,
+                dataloader_val=dataloader_val,
+                epoch=epoch,
+                writer=writer
+            )
         scheduler.step()
-        trainer.validate_epoch(
-            model=model,
-            dataloader_val=dataloader_val,
-            epoch=epoch,
-            writer=writer
-        )
 
         
         trainer.save_checkpoint(epoch, model=model, optim=optim, scheduler=scheduler, scaler=scaler)
@@ -212,7 +214,7 @@ def main(**kwargs):
 
 
     if trainer.rank == 0:
-        average_checkpoints(trainer.output_dir, trainer.avg_nbest_model, trainer.val_acc_list)
+        average_checkpoints(trainer.output_dir, trainer.avg_nbest_model)
 
     trainer.close()
 

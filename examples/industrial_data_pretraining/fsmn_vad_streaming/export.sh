@@ -7,7 +7,7 @@ export HYDRA_FULL_ERROR=1
 
 
 model="iic/speech_fsmn_vad_zh-cn-16k-common-pytorch"
-model_revision="v2.0.4"
+
 
 python -m funasr.bin.export \
 ++model=${model} \

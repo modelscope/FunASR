@@ -8,7 +8,6 @@
 from funasr import AutoModel
 
 model = AutoModel(model="iic/Whisper-large-v3",
-                  model_revision="v2.0.5",
                   vad_model="iic/speech_fsmn_vad_zh-cn-16k-common-pytorch",
 				  vad_kwargs={"max_single_segment_time": 30000},
                   )

@@ -155,7 +155,7 @@ Note: `chunk_size` is the configuration for streaming latency.` [0,10,5]` indica
 from funasr import AutoModel
 
 model = AutoModel(model="fsmn-vad")
-wav_file = f"{model.model_path}/example/asr_example.wav"
+wav_file = f"{model.model_path}/example/vad_example.wav"
 res = model.generate(input=wav_file)
 print(res)
 ```
@@ -208,8 +208,8 @@ text_file = f"{model.model_path}/example/text.txt"
 res = model.generate(input=(wav_file, text_file), data_type=("sound", "text"))
 print(res)
 ```
-
-More examples ref to [docs](https://github.com/alibaba-damo-academy/FunASR/tree/main/examples/industrial_data_pretraining)
+More usages ref to [docs](docs/tutorial/README_zh.md), 
+more examples ref to [demo](https://github.com/alibaba-damo-academy/FunASR/tree/main/examples/industrial_data_pretraining)
 
 
 ## Export ONNX

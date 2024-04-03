@@ -120,9 +120,9 @@ string CTTransformerOnline::AddPunc(const char* sz_input, vector<string> &arr_ca
     vector<string> WordWithPunc;
     for (int i = 0; i < sentence_words_list.size(); i++) // for i in range(0, len(sentence_words_list)):
     {
-        if (i > 0 && !(sentence_words_list[i][0] & 0x80) && (i + 1) < sentence_words_list.size() && !(sentence_words_list[i + 1][0] & 0x80))
+        if (!(sentence_words_list[i][0] & 0x80) && (i + 1) < sentence_words_list.size() && !(sentence_words_list[i + 1][0] & 0x80))
         {
-            sentence_words_list[i] = sentence_words_list[i] + " ";
+            sentence_words_list[i] = " " + sentence_words_list[i];
         }
         if (nSkipNum < arr_cache.size())  //    if skip_num < len(cache):
             nSkipNum++;

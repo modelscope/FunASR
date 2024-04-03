@@ -5,7 +5,7 @@
 
 from funasr import AutoModel
 
-model = AutoModel(model="iic/punc_ct-transformer_zh-cn-common-vocab272727-pytorch", model_revision="v2.0.4")
+model = AutoModel(model="iic/punc_ct-transformer_zh-cn-common-vocab272727-pytorch")
 
 res = model.generate(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_text/punc_example.txt")
 print(res)
@@ -13,7 +13,7 @@ print(res)
 
 from funasr import AutoModel
 
-model = AutoModel(model="iic/punc_ct-transformer_cn-en-common-vocab471067-large", model_revision="v2.0.4")
+model = AutoModel(model="iic/punc_ct-transformer_cn-en-common-vocab471067-large")
 
 res = model.generate(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_text/punc_example.txt")
 print(res)

@@ -8,7 +8,7 @@
 
 from funasr import AutoModel
 
-model = AutoModel(model="iic/speech_fsmn_vad_zh-cn-16k-common-pytorch", model_revision="v2.0.4")
+model = AutoModel(model="iic/speech_fsmn_vad_zh-cn-16k-common-pytorch")
 
 res = model.export(type="onnx", quantize=False)
 print(res)

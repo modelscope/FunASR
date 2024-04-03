@@ -36,6 +36,7 @@ class CharTokenizer(BaseTokenizer):
 		self.remove_non_linguistic_symbols = remove_non_linguistic_symbols
 		self.split_with_space = split_with_space
 		self.seg_dict = None
+		seg_dict = seg_dict if seg_dict is not None else kwargs.get("seg_dict_file", None)
 		if seg_dict is not None:
 			self.seg_dict = load_seg_dict(seg_dict)
 	

@@ -25,11 +25,12 @@ from funasr.utils.load_utils import load_audio_text_image_video
 from funasr.train_utils.set_all_random_seed import set_all_random_seed
 from funasr.train_utils.load_pretrained_model import load_pretrained_model
 from funasr.utils import export_utils
+
 try:
     from funasr.models.campplus.utils import sv_chunk, postprocess, distribute_spk
     from funasr.models.campplus.cluster_backend import ClusterBackend
 except:
-    print("Notice: If you want to use the speaker diarization, please `pip install hdbscan`")
+    pass
 
 
 def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
@@ -110,7 +111,7 @@ class AutoModel:
         if vad_model is not None:
             logging.info("Building VAD model.")
             vad_kwargs["model"] = vad_model
-            vad_kwargs["model_revision"] = kwargs.get("vad_model_revision", None)
+            vad_kwargs["model_revision"] = kwargs.get("vad_model_revision", "master")
             vad_kwargs["device"] = kwargs["device"]
             vad_model, vad_kwargs = self.build_model(**vad_kwargs)
 
@@ -120,7 +121,7 @@ class AutoModel:
         if punc_model is not None:
             logging.info("Building punc model.")
             punc_kwargs["model"] = punc_model
-            punc_kwargs["model_revision"] = kwargs.get("punc_model_revision", None)
+            punc_kwargs["model_revision"] = kwargs.get("punc_model_revision", "master")
             punc_kwargs["device"] = kwargs["device"]
             punc_model, punc_kwargs = self.build_model(**punc_kwargs)
 
@@ -130,7 +131,7 @@ class AutoModel:
         if spk_model is not None:
             logging.info("Building SPK model.")
             spk_kwargs["model"] = spk_model
-            spk_kwargs["model_revision"] = kwargs.get("spk_model_revision", None)
+            spk_kwargs["model_revision"] = kwargs.get("spk_model_revision", "master")
             spk_kwargs["device"] = kwargs["device"]
             spk_model, spk_kwargs = self.build_model(**spk_kwargs)
             self.cb_model = ClusterBackend().to(kwargs["device"])
@@ -201,7 +202,7 @@ class AutoModel:
                 load_pretrained_model(
                     model=model,
                     path=init_param,
-                    ignore_init_mismatch=kwargs.get("ignore_init_mismatch", False),
+                    ignore_init_mismatch=kwargs.get("ignore_init_mismatch", True),
                     oss_bucket=kwargs.get("oss_bucket", None),
                     scope_map=kwargs.get("scope_map", []),
                     excludes=kwargs.get("excludes", None),

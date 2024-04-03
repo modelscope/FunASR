@@ -10,7 +10,7 @@ gpu_num=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
 
 ## option 1, download model automatically
 model_name_or_model_dir="iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
-model_revision="v2.0.4"
+
 
 ## option 2, download model by git
 #local_path_root=${workspace}/modelscope_models
@@ -47,10 +47,10 @@ echo "log_file: ${log_file}"
 
 torchrun \
 --nnodes 1 \
+--node_rank 0 \
 --nproc_per_node ${gpu_num} \
 ../../../funasr/bin/train.py \
 ++model="${model_name_or_model_dir}" \
-++model_revision="${model_revision}" \
 ++train_data_set_list="${train_data}" \
 ++valid_data_set_list="${val_data}" \
 ++dataset_conf.batch_size=20000 \
@@ -62,6 +62,6 @@ torchrun \
 ++train_conf.validate_interval=2000 \
 ++train_conf.save_checkpoint_interval=2000 \
 ++train_conf.keep_nbest_models=20 \
-++train_conf.avg_nbest_model=5 \
+++train_conf.avg_nbest_model=10 \
 ++optim_conf.lr=0.0002 \
 ++output_dir="${output_dir}" &> ${log_file}

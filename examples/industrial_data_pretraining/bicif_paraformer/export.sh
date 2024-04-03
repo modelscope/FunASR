@@ -6,11 +6,9 @@ export HYDRA_FULL_ERROR=1
 
 
 model="iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
-model_revision="v2.0.4"
 
 python -m funasr.bin.export \
 ++model=${model} \
-++model_revision=${model_revision} \
 ++type="onnx" \
 ++quantize=false \
 ++device="cpu"

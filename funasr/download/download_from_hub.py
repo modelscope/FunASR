@@ -29,7 +29,7 @@ def download_from_ms(**kwargs):
     model_or_path = kwargs.get("model")
     if model_or_path in name_maps_ms:
         model_or_path = name_maps_ms[model_or_path]
-    model_revision = kwargs.get("model_revision")
+    model_revision = kwargs.get("model_revision", "master")
     if not os.path.exists(model_or_path) and "model_path" not in kwargs:
         try:
             model_or_path = get_or_download_model_dir(model_or_path, model_revision,
@@ -72,6 +72,11 @@ def download_from_ms(**kwargs):
             kwargs["jieba_usr_dict"] = os.path.join(model_or_path, "jieba_usr_dict")
     if isinstance(kwargs, DictConfig):
         kwargs = OmegaConf.to_container(kwargs, resolve=True)
+    if os.path.exists(os.path.join(model_or_path, "requirements.txt")):
+        requirements = os.path.join(model_or_path, "requirements.txt")
+        print(f"Detect model requirements, begin to install it: {requirements}")
+        from funasr.utils.install_model_requirements import install_requirements
+        install_requirements(requirements)
     return kwargs
 
 def add_file_root_path(model_or_path: str, file_path_metas: dict, cfg = {}):

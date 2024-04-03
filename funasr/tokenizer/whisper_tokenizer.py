@@ -1,14 +1,14 @@
 
-try:
-	from whisper.tokenizer import get_tokenizer
-except:
-	print("Notice: If you want to use whisper, please `pip install -U openai-whisper`")
 
 from funasr.register import tables
 
 @tables.register("tokenizer_classes", "WhisperTokenizer")
 def WhisperTokenizer(**kwargs):
-
+	try:
+		from whisper.tokenizer import get_tokenizer
+	except:
+		print("Notice: If you want to use whisper, please `pip install -U openai-whisper`")
+	
 	language = kwargs.get("language", None)
 	task = kwargs.get("task", "transcribe")
 	is_multilingual = kwargs.get("is_multilingual", True)

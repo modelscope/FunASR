@@ -12,7 +12,7 @@ multilingual_wavs = [
     "example_ko.mp3",
 ]
 
-model = AutoModel(model="iic/speech_whisper-large_lid_multilingual_pytorch", model_revision="v2.0.4")
+model = AutoModel(model="iic/speech_whisper-large_lid_multilingual_pytorch")
 for wav_id in multilingual_wavs:
     wav_file = f"{model.model_path}/examples/{wav_id}"
     res = model.generate(input=wav_file, data_type="sound", inference_clip_length=250)

@@ -6,7 +6,7 @@
 from funasr import AutoModel
 wav_file = "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/vad_example.wav"
 
-model = AutoModel(model="iic/speech_fsmn_vad_zh-cn-16k-common-pytorch", model_revision="v2.0.4")
+model = AutoModel(model="iic/speech_fsmn_vad_zh-cn-16k-common-pytorch")
 
 res = model.generate(input=wav_file)
 print(res)

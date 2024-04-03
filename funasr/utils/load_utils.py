@@ -51,13 +51,20 @@ def load_audio_text_image_video(data_or_path_or_list, fs: int = 16000, audio_fs:
 
     if isinstance(data_or_path_or_list, str) and os.path.exists(data_or_path_or_list): # local file
         if data_type is None or data_type == "sound":
-            if use_ffmpeg:
-                data_or_path_or_list = _load_audio_ffmpeg(data_or_path_or_list, sr=fs)
-                data_or_path_or_list = torch.from_numpy(data_or_path_or_list).squeeze()  # [n_samples,]
-            else:
+            # if use_ffmpeg:
+            #     data_or_path_or_list = _load_audio_ffmpeg(data_or_path_or_list, sr=fs)
+            #     data_or_path_or_list = torch.from_numpy(data_or_path_or_list).squeeze()  # [n_samples,]
+            # else:
+            #     data_or_path_or_list, audio_fs = torchaudio.load(data_or_path_or_list)
+            #     if kwargs.get("reduce_channels", True):
+            #         data_or_path_or_list = data_or_path_or_list.mean(0)
+            try:
                 data_or_path_or_list, audio_fs = torchaudio.load(data_or_path_or_list)
                 if kwargs.get("reduce_channels", True):
                     data_or_path_or_list = data_or_path_or_list.mean(0)
+            except:
+                data_or_path_or_list = _load_audio_ffmpeg(data_or_path_or_list, sr=fs)
+                data_or_path_or_list = torch.from_numpy(data_or_path_or_list).squeeze()  # [n_samples,]
         elif data_type == "text" and tokenizer is not None:
             data_or_path_or_list = tokenizer.encode(data_or_path_or_list)
         elif data_type == "image": # undo

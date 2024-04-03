@@ -91,7 +91,7 @@ train_conf:
       - acc
       - max
   keep_nbest_models: 10
-  avg_nbest_model: 5
+  avg_nbest_model: 10
   log_interval: 50
 
 optim: adam
@@ -104,7 +104,7 @@ scheduler_conf:
 dataset: AudioDataset
 dataset_conf:
     index_ds: IndexDSJsonl
-    batch_sampler: DynamicBatchLocalShuffleSampler
+    batch_sampler: BatchSampler
     batch_type: example # example or length
     batch_size: 1 # if batch_type is example, batch_size is the numbers of samples; if length, batch_size is source_token_len+target_token_len;
     max_token_length: 2048 # filter samples if source_token_len+target_token_len > max_token_length,

@@ -8,7 +8,7 @@
 from funasr import AutoModel
 
 model = AutoModel(model="iic/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727",
-                  model_revision="v2.0.4")
+                  )
 
 res = model.export(type="onnx", quantize=False)
 print(res)
