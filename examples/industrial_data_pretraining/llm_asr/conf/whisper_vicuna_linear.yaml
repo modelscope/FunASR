@@ -67,9 +67,9 @@ optim_conf:
    lr: 0.0001
    weight_decay: 0
 
-scheduler: custom_lambdalr
+scheduler: warmuplr
 scheduler_conf:
-   warmup_steps: 1000
+   warmup_steps: 1500
 
 dataset: AudioLLMVicunaDataset
 dataset_conf:
