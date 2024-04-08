@@ -684,7 +684,7 @@ class DecodingTask:
     def _detect_language(self, audio_features: Tensor, tokens: Tensor):
         languages = [self.options.language] * audio_features.shape[0]
         lang_probs = None
-        print(f"languages: {languages}")
+
         if self.options.language is None or self.options.task == "lang_id":
             lang_tokens, lang_probs = self.model.detect_language(
                 audio_features, self.tokenizer, x=tokens
@@ -696,7 +696,7 @@ class DecodingTask:
             if self.options.language is None:
                 # tokens[:, self.sot_index + 1] = lang_tokens  # write language tokens
                 languages = "".join([f"<|{language}|>" for language in languages])
-                print(f"languages: {languages}")
+
                 n_audio = audio_features.shape[0]
                 lang_tokens = torch.tensor([self.tokenizer.encode(languages, allowed_special="all")] * n_audio).to(
                     audio_features.device)  # [n_audio, 1]

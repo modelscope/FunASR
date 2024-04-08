@@ -91,8 +91,11 @@ class SenseVoice(nn.Module):
         # decode the audio
         
         # initial_prompt = kwargs.get("initial_prompt", "<|startoftranscript|><|ASR|>")
+        
         vocab_path = kwargs.get("vocab_path", None)
         options = whisper.DecodingOptions(language=language, fp16=False, without_timestamps=True, initial_prompt=initial_prompt, vocab_path=vocab_path)
+
+        
         result = whisper.decode(self.model, speech, options)
 
         results = []
