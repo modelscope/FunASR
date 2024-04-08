@@ -86,6 +86,7 @@ class WhisperFrontend(nn.Module):
         batch_size = input.size(0)
         feats = []
         feats_lens = []
+        input = input.to(torch.float32)
         for i in range(batch_size):
             if self.do_pad_trim:
                 feat = self.pad_or_trim(input[i], self.pad_samples)
