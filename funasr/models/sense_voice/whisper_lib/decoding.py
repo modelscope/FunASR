@@ -118,6 +118,12 @@ class DecodingOptions:
     suppress_tokens: Optional[Union[str, Iterable[int]]] = "-1"
     suppress_blank: bool = True  # this will suppress blank outputs
 
+    gain_event: bool = True  # this will suppress blank outputs
+    gain_tokens_bg: Optional[Union[str, List[int]]] = "<|Applause|><|Laughter|>"
+    gain_tokens_ed: Optional[Union[str, List[int]]] = "<|/Applause|><|/Laughter|>"
+    gain_tokens_score: Optional[List[float]] = [25, 5]
+
+
     # timestamp sampling options
     without_timestamps: bool = False  # use <|notimestamps|> to sample text tokens only
     max_initial_timestamp: Optional[float] = 1.0
@@ -453,7 +459,23 @@ class SuppressTokens(LogitFilter):
     def apply(self, logits: Tensor, tokens: Tensor):
         logits[:, self.suppress_tokens] = -np.inf
 
+class GainEventToken(LogitFilter):
+    def __init__(self, bg_tokens: Sequence[int], ed_tokens:Sequence[int], gain_values: Sequence[float]):
+        self.bg_tokens = list(bg_tokens)
+        self.ed_tokens = list(ed_tokens)
+        self.gain_value = [np.log(ga) for ga in gain_values]
 
+    def apply(self, logits: Tensor, tokens: Tensor):
+        for i in range(len(tokens)):
+            for bg, ed, ga in zip(self.bg_tokens, self.ed_tokens, self.gain_value):
+                sum_bg = sum([1 if x == bg else 0 for x in tokens[i]])
+                sum_ed = sum([1 if x == ed else 0 for x in tokens[i]])
+                logits[i, bg] += ga
+                if sum_bg > sum_ed or tokens[i,-1] in [bg, ed]:
+                    logits[i, bg] = -np.inf
+                if sum_bg >= sum_ed:
+                    logits[i, ed] = -np.inf
+                    
 class ApplyTimestampRules(LogitFilter):
     def __init__(
         self,
@@ -573,6 +595,13 @@ class DecodingTask:
             self.logit_filters.append(SuppressBlank(self.tokenizer, self.sample_begin))
         if self.options.suppress_tokens:
             self.logit_filters.append(SuppressTokens(self._get_suppress_tokens()))
+        if self.options.gain_event:
+            self.logit_filters.append(GainEventToken(
+                self.tokenizer.encoding(self.options.gain_tokens_bg, allowed_special="all"),
+                self.tokenizer.encoding(self.options.gain_tokens_ed, allowed_special="all"),
+                self.options.gain_tokens_score
+                )
+            )
         if not options.without_timestamps:
             precision = CHUNK_LENGTH / model.dims.n_audio_ctx  # usually 0.02 seconds
             max_initial_timestamp_index = None
