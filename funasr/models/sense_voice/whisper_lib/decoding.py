@@ -486,14 +486,14 @@ class ThresholdEmoToken(LogitFilter):
     def __init__(self, unk_tokens: Sequence[int], emo_tokens:Sequence[int], th_values: Sequence[float]):
         self.unk_token = list(unk_tokens)[0]
         self.emo_tokens = list(emo_tokens)
-        self.th_values = [np.log(max(th, 1e-9)) for th in th_values]
+        self.th_values = list(th_values)
         assert len(self.emo_tokens) == len(self.th_values)
 
     def apply(self, logits: Tensor, tokens: Tensor):
         for i in range(len(tokens)):
             for emo, th in zip(self.emo_tokens, self.th_values):
-                if logits[i].argmax() == emo and logits[i, emo] < th:
-                    logits[i, self.unk_tokens] =  max(logits[i, emo], logits[i, self.unk_tokens])
+                if logits[i].argmax() == emo and logits[i].softmax(dim=-1)[emo] < th:
+                    logits[i, self.unk_token] =  max(logits[i, emo], logits[i, self.unk_token])
                     logits[i, emo] = -np.inf
 
             # for bg, ed, ga in zip(self.bg_tokens, self.ed_tokens, self.gain_value):
