@@ -123,6 +123,10 @@ class DecodingOptions:
     gain_tokens_ed: Optional[Union[str, List[int]]] = "<|/Applause|><|/Laughter|>"
     gain_tokens_score: List[float] = field(default_factory=lambda: [25.0, 5.0]) #[25, 5]
 
+    use_emo_threshold: bool = False  # this will suppress blank outputs
+    emo_unk_token: Optional[Union[str, List[int]]] = "<|SPECIAL_TOKEN_1|>"
+    emo_target_tokens: Optional[Union[str, List[int]]] = "<|HAPPY|><|SAD|><|ANGRY|>"
+    emo_target_threshold: Optional[Union[str, List[int]]] = field(default_factory=lambda: [0.1, 0.1, 0.1]) #[25, 5]
 
     # timestamp sampling options
     without_timestamps: bool = False  # use <|notimestamps|> to sample text tokens only
@@ -464,6 +468,8 @@ class GainEventToken(LogitFilter):
         self.bg_tokens = list(bg_tokens)
         self.ed_tokens = list(ed_tokens)
         self.gain_value = [np.log(max(ga, 1e-9)) for ga in gain_values]
+        assert len(self.ed_tokens) == len(self.gain_value)
+        assert len(self.bg_tokens) == len(self.gain_value)
 
     def apply(self, logits: Tensor, tokens: Tensor):
         for i in range(len(tokens)):
@@ -475,7 +481,31 @@ class GainEventToken(LogitFilter):
                     logits[i, bg] = -np.inf
                 if sum_bg <= sum_ed:
                     logits[i, ed] = -np.inf
-                    
+
+class ThresholdEmoToken(LogitFilter):
+    def __init__(self, unk_tokens: Sequence[int], emo_tokens:Sequence[int], th_values: Sequence[float]):
+        self.unk_token = list(unk_tokens)[0]
+        self.emo_tokens = list(emo_tokens)
+        self.th_values = [np.log(max(th, 1e-9)) for th in th_values]
+        assert len(self.emo_tokens) == len(self.th_values)
+
+    def apply(self, logits: Tensor, tokens: Tensor):
+        for i in range(len(tokens)):
+            for emo, th in zip(self.emo_tokens, self.th_values):
+                if logits[i].argmax() == emo and logits[i, emo] < th:
+                    logits[i, self.unk_tokens] =  max(logits[i, emo], logits[i, self.unk_tokens])
+                    logits[i, emo] = -np.inf
+
+            # for bg, ed, ga in zip(self.bg_tokens, self.ed_tokens, self.gain_value):
+            #     sum_bg = sum([1 if x == bg else 0 for x in tokens[i]])
+            #     sum_ed = sum([1 if x == ed else 0 for x in tokens[i]])
+            #     logits[i, bg] += ga
+            #     if sum_bg > sum_ed or tokens[i,-1] in [bg, ed]:
+            #         logits[i, bg] = -np.inf
+            #     if sum_bg <= sum_ed:
+            #         logits[i, ed] = -np.inf
+
+
 class ApplyTimestampRules(LogitFilter):
     def __init__(
         self,
@@ -600,6 +630,13 @@ class DecodingTask:
                 self.tokenizer.encode(self.options.gain_tokens_bg, allowed_special="all"),
                 self.tokenizer.encode(self.options.gain_tokens_ed, allowed_special="all"),
                 self.options.gain_tokens_score
+                )
+            )
+        if self.options.use_emo_threshold:
+            self.logit_filters.append(ThresholdEmoToken(
+                self.tokenizer.encode(self.options.emo_unk_token, allowed_special="all"),
+                self.tokenizer.encode(self.options.emo_target_tokens, allowed_special="all"),
+                self.options.emo_target_threshold
                 )
             )
         if not options.without_timestamps:
