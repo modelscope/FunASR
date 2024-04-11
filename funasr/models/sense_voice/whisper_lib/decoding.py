@@ -126,7 +126,7 @@ class DecodingOptions:
     use_emo_threshold: bool = False  # this will suppress blank outputs
     emo_unk_token: Optional[Union[str, List[int]]] = "<|SPECIAL_TOKEN_1|>"
     emo_target_tokens: Optional[Union[str, List[int]]] = "<|HAPPY|><|SAD|><|ANGRY|>"
-    emo_target_threshold: Optional[Union[str, List[int]]] = field(default_factory=lambda: [0.1, 0.1, 0.1]) #[25, 5]
+    emo_target_threshold: List[float] = field(default_factory=lambda: [0.1, 0.1, 0.1]) #[25, 5]
 
     # timestamp sampling options
     without_timestamps: bool = False  # use <|notimestamps|> to sample text tokens only
