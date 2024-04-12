@@ -17,6 +17,7 @@ DecodingOptions = {
 	"task": ("ASR", "AED", "SER"),
 	"language": "auto",
 	"fp16": True,
+	"gain_event": True,
 	}
 
 res = model.generate(input=input_wav, batch_size_s=0, DecodingOptions=DecodingOptions)
