@@ -119,9 +119,9 @@ class DecodingOptions:
     suppress_blank: bool = True  # this will suppress blank outputs
 
     gain_event: bool = False  # this will suppress blank outputs
-    gain_tokens_bg: Optional[Union[str, List[int]]] = "<|Applause|><|Laughter|>"
-    gain_tokens_ed: Optional[Union[str, List[int]]] = "<|/Applause|><|/Laughter|>"
-    gain_tokens_score: List[float] = field(default_factory=lambda: [25.0, 5.0]) #[25, 5]
+    gain_tokens_bg: Optional[Union[str, List[int]]] = "<|Speech|><|BGM|><|Applause|><|Laughter|>"
+    gain_tokens_ed: Optional[Union[str, List[int]]] = "<|/Speech|><|/BGM|><|/Applause|><|/Laughter|>"
+    gain_tokens_score: List[float] = field(default_factory=lambda: [1, 1, 25.0, 5.0]) #[25, 5]
 
     use_emo_threshold: bool = False  # this will suppress blank outputs
     emo_unk_token: Optional[Union[str, List[int]]] = "<|SPECIAL_TOKEN_1|>"
