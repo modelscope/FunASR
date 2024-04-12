@@ -295,6 +295,32 @@ class AutoModel:
         res = self.inference(input, input_len=input_len, model=self.vad_model, kwargs=self.vad_kwargs, **cfg)
         end_vad = time.time()
 
+        def merage_vad(vad_result, max_length=15000):
+            new_result = []
+            time_step = [t[0] for t in vad_result] + [t[1] for t in vad_result]
+            time_step = sorted(list(set(time_step)))
+            if len(time_step) == 0:
+                return []
+            bg = 0
+            for i in range(len(time_step)-1):
+                time = time_step[i]
+                if time_step[i+1] - bg < max_length:
+                    continue
+                if time - bg < max_length * 1.5:
+                    new_result.append([bg, time])
+                else:
+                    split_num = int(time - bg) // max_length + 1
+                    spl_l = int(time - bg) // split_num
+                    for j in range(split_num):
+                        new_result.append([bg + j*spl_l, bg + (j+1)*spl_l])
+                bg = time
+            new_result.append([bg, time_step[-1]])
+
+            return new_result
+        
+        if kwargs.get("merage_vad", False):
+            for i in range(len(res)):
+                res[i]['value'] = merage_vad(res[i]['value'], kwargs.get("merage_length", 15000))
 
         # step.2 compute asr model
         model = self.model
