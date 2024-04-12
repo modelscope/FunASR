@@ -179,7 +179,12 @@ class Tokenizer:
         langs = tuple(LANGUAGES.keys())[: self.num_languages]
         sot_sequence = [sot]
         if self.language is not None:
-            sot_sequence.append(sot + 1 + langs.index(self.language))
+            if self.language == 'nospeech':
+                sot_sequence.append(self.no_speech)
+            else:
+                sot_sequence.append(sot + 1 + langs.index(self.language))
+        # if self.language is not None:
+        #     sot_sequence.append(sot + 1 + langs.index(self.language))
         if self.task is not None:
             task_token: int = transcribe if self.task == "transcribe" else translate
             sot_sequence.append(task_token)
@@ -432,6 +437,8 @@ def get_tokenizer(
         if language not in LANGUAGES:
             if language in TO_LANGUAGE_CODE:
                 language = TO_LANGUAGE_CODE[language]
+            elif language == 'nospeech':
+                pass
             else:
                 raise ValueError(f"Unsupported language: {language}")
 
