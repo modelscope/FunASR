@@ -90,12 +90,12 @@ class WhisperWarp(nn.Module):
         speech = speech.to(device=kwargs["device"])[0, :, :]
         speech_lengths = speech_lengths.to(device=kwargs["device"])
 
-        # detect the spoken language
-        _, probs = self.model.detect_language(speech)
-        print(f"Detected language: {max(probs, key=probs.get)}")
+        # # detect the spoken language
+        # _, probs = self.model.detect_language(speech)
+        # print(f"Detected language: {max(probs, key=probs.get)}")
 
         # decode the audio
-        options = whisper.DecodingOptions(language=kwargs.get("language", None), fp16=False)
+        options = whisper.DecodingOptions(**kwargs.get("DecodingOptions", {}))
         result = whisper.decode(self.model, speech, options)
 
         results = []

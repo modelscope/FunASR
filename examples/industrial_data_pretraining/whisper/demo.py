@@ -12,9 +12,16 @@ model = AutoModel(model="iic/Whisper-large-v3",
 				  vad_kwargs={"max_single_segment_time": 30000},
                   )
 
+DecodingOptions = {
+	"task": "transcribe",
+	"language": None,
+	"beam_size": None,
+	"fp16": True,
+	"without_timestamps": False,
+	"prompt": None,
+	}
 res = model.generate(
-	language=None,
-	task="transcribe",
+	DecodingOptions=DecodingOptions,
 	batch_size_s=0,
 	input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav")
 

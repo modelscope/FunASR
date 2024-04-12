@@ -10,6 +10,7 @@ import sklearn
 import numpy as np
 
 from sklearn.cluster._kmeans import k_means
+from sklearn.cluster import HDBSCAN
 
 
 class SpectralCluster:
@@ -115,8 +116,6 @@ class UmapHdbscan:
         self.min_samples = min_samples
         self.min_cluster_size = min_cluster_size
         self.metric = metric
-        import hdbscan
-        self.hdbscan = hdbscan
 
     def __call__(self, X):
         import umap.umap_ as umap
@@ -126,7 +125,7 @@ class UmapHdbscan:
             n_components=min(self.n_components, X.shape[0] - 2),
             metric=self.metric,
         ).fit_transform(X)
-        labels = self.hdbscan.HDBSCAN(
+        labels = HDBSCAN(
             min_samples=self.min_samples,
             min_cluster_size=self.min_cluster_size,
             allow_single_cluster=True).fit_predict(umap_X)
