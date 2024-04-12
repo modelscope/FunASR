@@ -73,28 +73,27 @@ class SenseVoice(nn.Module):
 
         speech = speech.to(device=kwargs["device"])[0, :, :]
         speech_lengths = speech_lengths.to(device=kwargs["device"])
-        
-        task = kwargs.get("task", "ASR")
+
+        DecodingOptions = kwargs.get("DecodingOptions", {})
+        task = DecodingOptions.get("task", "ASR")
         if isinstance(task, str):
             task = [task]
         task = "".join([f"<|{x}|>" for x in task])
         initial_prompt = kwargs.get("initial_prompt", f"<|startoftranscript|>{task}")
-        language = kwargs.get("language", None)
+        DecodingOptions["initial_prompt"] = initial_prompt
+        
+        language = DecodingOptions.get("language", None)
         language = None if language == "auto" else language
-        # if language is None:
-        #     # detect the spoken language
-        #     _, probs = self.model.detect_language(speech, initial_prompt=initial_prompt)
-        #     print(f"Detected language: {max(probs, key=probs.get)}")
-        #     language = max(probs, key=probs.get)
-        #     language = language if kwargs.get("language", None) is None else kwargs.get("language")
-        
-        # decode the audio
-        
-        # initial_prompt = kwargs.get("initial_prompt", "<|startoftranscript|><|ASR|>")
-        
-        vocab_path = kwargs.get("vocab_path", None)
-        options = whisper.DecodingOptions(language=language, fp16=False, without_timestamps=True, initial_prompt=initial_prompt, vocab_path=vocab_path)
+        DecodingOptions["language"] = language
 
+        DecodingOptions["vocab_path"] = kwargs.get("vocab_path", None)
+        
+        
+        if "without_timestamps" not in DecodingOptions:
+            DecodingOptions["without_timestamps"] = True
+
+    
+        options = whisper.DecodingOptions(**DecodingOptions)
         
         result = whisper.decode(self.model, speech, options)
 

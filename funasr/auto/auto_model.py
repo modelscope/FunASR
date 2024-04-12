@@ -211,6 +211,9 @@ class AutoModel:
             else:
                 print(f"error, init_param does not exist!: {init_param}")
         
+        # fp16
+        if kwargs.get("fp16", False):
+            model.to(torch.float16)
         return model, kwargs
     
     def __call__(self, *args, **cfg):
