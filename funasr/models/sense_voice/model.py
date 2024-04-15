@@ -96,7 +96,7 @@ class SenseVoice(nn.Module):
         options = whisper.DecodingOptions(**DecodingOptions)
         
         result = whisper.decode(self.model, speech, options)
-        text = f"{result.text}\n"
+        text = f"{result.text}"
         results = []
         result_i = {"key": key[0], "text": text}
 
