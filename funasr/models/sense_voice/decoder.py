@@ -9,11 +9,11 @@ from funasr.models.transformer.utils.nets_utils import make_pad_mask
 
 def sense_voice_decode(
 	self,
-	x: Tensor,
-	xa: Tensor,
+	x: torch.Tensor,
+	xa: torch.Tensor,
 	kv_cache: Optional[dict] = None,
 	**kwargs,
-) -> Tuple[torch.Tensor, torch.Tensor]:
+):
 	"""Forward decoder.
 
 	Args:
@@ -31,7 +31,7 @@ def sense_voice_decode(
 			if use_output_layer is True,
 		olens: (batch, )
 	"""
-	
+	use_padmask = kwargs.get("use_padmask", True)
 	hlens = kwargs.get("hlens", None)
 	
 	ys_in_lens = kwargs.get("ys_in_lens", None)
@@ -39,25 +39,25 @@ def sense_voice_decode(
 	offset = next(iter(kv_cache.values())).shape[1] if kv_cache else 0
 	tgt, memory = x, xa
 	tgt = (
-		self.decoder.token_embedding(tgt)
-		+ self.decoder.positional_embedding[offset : offset + tgt.size(1)]
+		self.token_embedding(tgt)
+		+ self.positional_embedding[offset : offset + tgt.size(1)]
 	)
 	# tgt = self.dropout(tgt)
 	
 	x = tgt.to(memory.dtype)
 	
-	if self.use_padmask:
+	if use_padmask and hlens is not None:
 		memory_mask = (~make_pad_mask(hlens)[:, None, :]).to(memory.device)
 	else:
 		memory_mask = None
 	
-	for layer, block in enumerate(self.decoder.blocks):
-		x = block(x, memory, mask=self.decoder.mask, memory_mask=memory_mask, is_pad_mask=False, is_pad_memory_mask=True)
+	for layer, block in enumerate(self.blocks):
+		x = block(x, memory, mask=self.mask, memory_mask=memory_mask, is_pad_mask=False, is_pad_memory_mask=True)
 
 
-	x = self.decoder.ln(x)
+	x = self.ln(x)
 	x = (
-		x @ torch.transpose(self.decoder.token_embedding.weight.to(x.dtype), 0, 1)
+		x @ torch.transpose(self.token_embedding.weight.to(x.dtype), 0, 1)
 	).float()
 	
 	

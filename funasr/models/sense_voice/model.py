@@ -40,15 +40,15 @@ class SenseVoice(nn.Module):
         
         self.encoder_output_size = self.model.dims.n_audio_state
         
-        self.activation_checkpoint = activation_checkpoint
+        self.activation_checkpoint = kwargs.get("activation_checkpoint", False)
         self.ignore_id = kwargs.get("ignore_id", -1)
         self.vocab_size = kwargs.get("vocab_size", -1)
         self.length_normalized_loss = kwargs.get("length_normalized_loss", True)
         self.criterion_att = LabelSmoothingLoss(
-            size=vocab_size,
-            padding_idx=ignore_id,
+            size=self.vocab_size,
+            padding_idx=self.ignore_id,
             smoothing=kwargs.get("lsm_weight", 0.0),
-            normalize_length=length_normalized_loss,
+            normalize_length=self.length_normalized_loss,
         )
 
  
@@ -126,7 +126,7 @@ class SenseVoice(nn.Module):
         stats = {}
         
         # 1. Forward decoder
-        decoder_out, _ = self.decoder(
+        decoder_out = self.decoder(
             encoder_out, encoder_out_lens, ys_pad, ys_pad_lens
         )
         
