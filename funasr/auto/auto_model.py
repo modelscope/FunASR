@@ -175,6 +175,8 @@ class AutoModel:
             kwargs["token_list"] = tokenizer.token_list if hasattr(tokenizer, "token_list") else None
             kwargs["token_list"] = tokenizer.get_vocab() if hasattr(tokenizer, "get_vocab") else kwargs["token_list"]
             vocab_size = len(kwargs["token_list"]) if kwargs["token_list"] is not None else -1
+            if vocab_size == -1 and hasattr(tokenizer, "get_vocab_size"):
+                vocab_size = tokenizer.get_vocab_size()
         else:
             vocab_size = -1
         kwargs["tokenizer"] = tokenizer
