@@ -21,6 +21,7 @@ from funasr.download.file import download_from_url
 from funasr.utils.timestamp_tools import timestamp_sentence
 from funasr.download.download_from_hub import download_model
 from funasr.utils.vad_utils import slice_padding_audio_samples
+from funasr.utils.vad_utils import merge_vad
 from funasr.utils.load_utils import load_audio_text_image_video
 from funasr.train_utils.set_all_random_seed import set_all_random_seed
 from funasr.train_utils.load_pretrained_model import load_pretrained_model
@@ -210,6 +211,9 @@ class AutoModel:
             else:
                 print(f"error, init_param does not exist!: {init_param}")
         
+        # fp16
+        if kwargs.get("fp16", False):
+            model.to(torch.float16)
         return model, kwargs
     
     def __call__(self, *args, **cfg):
@@ -295,6 +299,10 @@ class AutoModel:
         res = self.inference(input, input_len=input_len, model=self.vad_model, kwargs=self.vad_kwargs, **cfg)
         end_vad = time.time()
 
+        #  FIX(gcf): concat the vad clips for sense vocie model for better aed
+        if kwargs.get("merge_vad", False):
+            for i in range(len(res)):
+                res[i]['value'] = merge_vad(res[i]['value'], kwargs.get("merge_length", 15000))
 
         # step.2 compute asr model
         model = self.model

@@ -29,3 +29,26 @@ def slice_padding_audio_samples(speech, speech_lengths, vad_segments):
         speech_lengths_list.append(speech_lengths_i)
         
     return speech_list, speech_lengths_list
+
+def merge_vad(vad_result, max_length=15000):
+    new_result = []
+    time_step = [t[0] for t in vad_result] + [t[1] for t in vad_result]
+    time_step = sorted(list(set(time_step)))
+    if len(time_step) == 0:
+        return []
+    bg = 0
+    for i in range(len(time_step)-1):
+        time = time_step[i]
+        if time_step[i+1] - bg < max_length:
+            continue
+        if time - bg < max_length * 1.5:
+            new_result.append([bg, time])
+        else:
+            split_num = int(time - bg) // max_length + 1
+            spl_l = int(time - bg) // split_num
+            for j in range(split_num):
+                new_result.append([bg + j*spl_l, bg + (j+1)*spl_l])
+        bg = time
+    new_result.append([bg, time_step[-1]])
+    return new_result
+        

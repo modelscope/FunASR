@@ -93,7 +93,8 @@ def load_seg_dict(seg_dict_file):
 	return seg_dict
 
 def seg_tokenize(txt, seg_dict):
-	pattern = re.compile(r'^[\u4E00-\u9FA50-9]+$')
+	# pattern = re.compile(r'^[\u4E00-\u9FA50-9]+$')
+	pattern = re.compile(r"([\u4E00-\u9FA5A-Za-z0-9])")
 	out_txt = ""
 	for word in txt:
 		word = word.lower()

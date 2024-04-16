@@ -475,6 +475,8 @@ class Paraformer(torch.nn.Module):
         speech = speech.to(device=kwargs["device"])
         speech_lengths = speech_lengths.to(device=kwargs["device"])
         # Encoder
+        if kwargs.get("fp16", False):
+            speech = speech.half()
         encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
         if isinstance(encoder_out, tuple):
             encoder_out = encoder_out[0]

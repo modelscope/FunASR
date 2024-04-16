@@ -9,8 +9,16 @@ model = AutoModel(model="/Users/zhifu/Downloads/modelscope_models/SenseVoice",
                   vad_model="iic/speech_fsmn_vad_zh-cn-16k-common-pytorch",
 				  vad_kwargs={"max_single_segment_time": 30000},
                   )
-task = "ASR"
-language = None
-input_wav = "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav"
-res = model.generate(task=task, language=language, input=input_wav, batch_size_s=0,)
+
+
+input_wav = "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/SenseVoice/aed_ser/asr_bgm.wav"
+
+DecodingOptions = {
+	"task": ("ASR", "AED", "SER"),
+	"language": "auto",
+	"fp16": True,
+	"gain_event": True,
+	}
+
+res = model.generate(input=input_wav, batch_size_s=0, DecodingOptions=DecodingOptions)
 print(res)
