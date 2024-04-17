@@ -76,7 +76,10 @@ class IndexDSJsonlRankFull(torch.utils.data.Dataset):
     
     def __init__(self, path: str, **kwargs):
         super().__init__()
-        
+        self.max_source_length = kwargs.get("max_source_length", 2048)
+        self.min_source_length = kwargs.get("min_source_length", 0)
+        self.max_target_length = kwargs.get("max_target_length", 2048)
+        self.min_target_length = kwargs.get("min_target_length", 0)
         if isinstance(path, (list, tuple)): # wav.scp, text.txt/text.trans
             from funasr.datasets.audio_datasets.scp2jsonl import gen_jsonl_from_wav_text_list
             jsonl_outdir = os.path.dirname(path[0])
@@ -101,7 +104,10 @@ class IndexDSJsonlRankFull(torch.utils.data.Dataset):
                     target_len = data.get("target_len", 0)
                     if "aishell" in source:
                         target = target.replace(" ", "")
-
+                    if source_len < self.min_source_length or source_len > self.max_source_length:
+                        continue
+                    if target_len < self.min_target_length or target_len > self.max_target_length:
+                        continue
                     contents_i = {"source": source,
                                  "prompt": prompt,
                                  "target": target,

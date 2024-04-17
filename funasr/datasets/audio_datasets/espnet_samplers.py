@@ -61,6 +61,7 @@ class EspnetStyleBatchSampler(DistributedSampler):
         self.epoch = 0
         self.sort_size = sort_size * num_replicas
         self.max_token_length = kwargs.get("max_token_length", 2048)
+        self.min_token_length = kwargs.get("min_token_length", 0)
         self.length_scale_source = kwargs.get("length_scale_source", 1.0)
 
 
@@ -85,7 +86,7 @@ class EspnetStyleBatchSampler(DistributedSampler):
         
         for idx in sorted_indices:
             original_sample_length = self.dataset.get_source_len(idx)
-            if original_sample_length > self.max_token_length:  # Skip samples that exceed the max length
+            if original_sample_length < self.min_token_length or original_sample_length > self.max_token_length:  # Skip samples that exceed the max length
                 continue
             # Set sample_length based on the batch type
             sample_length = 1 if self.batch_type == "example" else original_sample_length
