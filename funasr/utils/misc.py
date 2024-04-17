@@ -53,6 +53,8 @@ def load_scp_as_list(scp_path, value_type='str', kv_sep=" "):
 def deep_update(original, update):
     for key, value in update.items():
         if isinstance(value, dict) and key in original:
+            if len(value) == 0:
+                original[key] = value
             deep_update(original[key], value)
         else:
             original[key] = value
