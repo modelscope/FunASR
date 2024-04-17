@@ -273,6 +273,7 @@ class Trainer:
 
         dataloader_train.batch_sampler.set_epoch(epoch)
         time_beg = time.perf_counter()
+        time5 = time_beg
         for batch_idx, batch in enumerate(dataloader_train):
             if self.use_ddp or self.use_fsdp:
                 dist.all_reduce(iterator_stop, dist.ReduceOp.SUM)
