@@ -268,10 +268,11 @@ class Trainer:
         # Initialize the gradient accumulation
         optim.zero_grad()
         speed_stats = {}
-        time5 = time.perf_counter()
+        
         iterator_stop = torch.tensor(0).to(self.device)
 
         dataloader_train.batch_sampler.set_epoch(epoch)
+        time_beg = time.perf_counter()
         for batch_idx, batch in enumerate(dataloader_train):
             if self.use_ddp or self.use_fsdp:
                 dist.all_reduce(iterator_stop, dist.ReduceOp.SUM)
@@ -279,7 +280,7 @@ class Trainer:
                     break
             self.batch_total += 1
             time1 = time.perf_counter()
-            speed_stats["data_load"] = f"{time1-time5:0.3f}"
+            speed_stats["data_load"] = f"{time1-time_beg:0.3f}"
 
             batch = to_device(batch, self.device)
 
@@ -373,9 +374,7 @@ class Trainer:
                          writer=writer,
                          tag="train",
                          )
-            else:
-                time5 = time.perf_counter()
-            
+
             if (batch_idx + 1) % self.validate_interval == 0:
                 self.validate_epoch(
                     model=model,
@@ -388,6 +387,7 @@ class Trainer:
             if (batch_idx+1) % self.save_checkpoint_interval == 0:
                 self.save_checkpoint(epoch, model=model, optim=optim, scheduler=scheduler, scaler=scaler, step=batch_idx+1)
 
+            time_beg = time.perf_counter()
         else:
             if self.use_ddp or self.use_fsdp:
                 iterator_stop.fill_(1)
