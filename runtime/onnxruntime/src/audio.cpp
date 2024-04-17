@@ -1111,7 +1111,7 @@ void Audio::Split(OfflineStream* offline_stream)
     }
 }
 
-void Audio::CutSplit(OfflineStream* offline_stream)
+void Audio::CutSplit(OfflineStream* offline_stream, std::vector<int> &index_vector)
 {
     std::unique_ptr<VadModel> vad_online_handle = make_unique<FsmnVadOnline>((FsmnVad*)(offline_stream->vad_handle).get());
     AudioFrame *frame;
@@ -1138,6 +1138,7 @@ void Audio::CutSplit(OfflineStream* offline_stream)
     }    
 
     int speech_start_i = -1, speech_end_i =-1;
+    std::vector<AudioFrame*> vad_frames;
     for(vector<int> vad_segment:vad_segments)
     {
         if(vad_segment.size() != 2){
@@ -1152,15 +1153,30 @@ void Audio::CutSplit(OfflineStream* offline_stream)
         }
 
         if(speech_start_i!=-1 && speech_end_i!=-1){
-            frame = new AudioFrame();
             int start = speech_start_i*seg_sample;
             int end = speech_end_i*seg_sample;
+            frame = new AudioFrame(end-start);
             frame->SetStart(start);
             frame->SetEnd(end);
-            frame_queue.push(frame);
+            vad_frames.push_back(frame);
             frame = nullptr;
             speech_start_i=-1;
             speech_end_i=-1;
+        }
+
+    }
+    // sort
+    {
+        index_vector.clear();
+        index_vector.resize(vad_frames.size());
+        for (int i = 0; i < index_vector.size(); ++i) {
+            index_vector[i] = i;
+        }
+        std::sort(index_vector.begin(), index_vector.end(), [&vad_frames](const int a, const int b) {
+            return vad_frames[a]->len < vad_frames[b]->len;
+        });
+        for (int idx : index_vector) {
+            frame_queue.push(vad_frames[idx]);
         }
     }
 }
