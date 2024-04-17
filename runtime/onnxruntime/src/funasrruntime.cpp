@@ -233,9 +233,13 @@
 		if(p_result->snippet_time == 0){
             return p_result;
         }
+		std::vector<int> index_vector={0};
+		int msg_idx = 0;
 		if(offline_stream->UseVad()){
-			audio.CutSplit(offline_stream);
+			audio.CutSplit(offline_stream, index_vector);
 		}
+		std::vector<string> msgs(index_vector.size());
+		std::vector<float> msg_stimes(index_vector.size());
 
 		float** buff;
 		int* len;
@@ -252,27 +256,18 @@
 			if (wfst_decoder){
 				wfst_decoder->StartUtterance();
 			}
-			vector<string> msgs = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb, dec_handle, batch_in);
+			vector<string> msg_batch = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb, dec_handle, batch_in);
 			for(int idx=0; idx<batch_in; idx++){
-				string msg = msgs[idx];
-				std::vector<std::string> msg_vec = funasr::split(msg, '|');
-				if(msg_vec.size()==0){
-					continue;
-				}
-				if(lang == "en-bpe" && p_result->msg != ""){
-					p_result->msg += " ";
-				}
-				p_result->msg += msg_vec[0];
-				//timestamp
-				if(msg_vec.size() > 1){
-					std::vector<std::string> msg_stamp = funasr::split(msg_vec[1], ',');
-					for(int i=0; i<msg_stamp.size()-1; i+=2){
-						float begin = std::stof(msg_stamp[i])+start_time[idx];
-						float end = std::stof(msg_stamp[i+1])+start_time[idx];
-						cur_stamp += "["+std::to_string((int)(1000*begin))+","+std::to_string((int)(1000*end))+"],";
-					}
-				}
+				string msg = msg_batch[idx];
+				if(msg_idx < index_vector.size()){
+					msgs[index_vector[msg_idx]] = msg;
+					msg_stimes[index_vector[msg_idx]] = start_time[idx];
+					msg_idx++;
+				}else{
+					LOG(ERROR) << "msg_idx: " << msg_idx <<" is out of range " << index_vector.size();
+				}				
 			}
+
 			// release
 			delete[] buff;
 			buff = nullptr;
@@ -282,6 +277,26 @@
 			flag = nullptr;
 			delete[] start_time;
 			start_time = nullptr;
+		}
+		for(int idx=0; idx<msgs.size(); idx++){
+			string msg = msgs[idx];
+			std::vector<std::string> msg_vec = funasr::split(msg, '|');
+			if(msg_vec.size()==0){
+				continue;
+			}
+			if(lang == "en-bpe" && p_result->msg != ""){
+				p_result->msg += " ";
+			}
+			p_result->msg += msg_vec[0];
+			//timestamp
+			if(msg_vec.size() > 1){
+				std::vector<std::string> msg_stamp = funasr::split(msg_vec[1], ',');
+				for(int i=0; i<msg_stamp.size()-1; i+=2){
+					float begin = std::stof(msg_stamp[i])+msg_stimes[idx];
+					float end = std::stof(msg_stamp[i+1])+msg_stimes[idx];
+					cur_stamp += "["+std::to_string((int)(1000*begin))+","+std::to_string((int)(1000*end))+"],";
+				}
+			}
 		}
 		if(cur_stamp != "["){
 			cur_stamp.erase(cur_stamp.length() - 1);
@@ -340,9 +355,13 @@
 		if(p_result->snippet_time == 0){
             return p_result;
         }
+		std::vector<int> index_vector={0};
+		int msg_idx = 0;
 		if(offline_stream->UseVad()){
-			audio.CutSplit(offline_stream);
+			audio.CutSplit(offline_stream, index_vector);
 		}
+		std::vector<string> msgs(index_vector.size());
+		std::vector<float> msg_stimes(index_vector.size());
 
 		float** buff;
 		int* len;
@@ -360,26 +379,18 @@
 				wfst_decoder->StartUtterance();
 			}
 			vector<string> msgs = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb, dec_handle, batch_in);
+			vector<string> msg_batch = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb, dec_handle, batch_in);
 			for(int idx=0; idx<batch_in; idx++){
-				string msg = msgs[idx];
-				std::vector<std::string> msg_vec = funasr::split(msg, '|');
-				if(msg_vec.size()==0){
-					continue;
-				}
-				if(lang == "en-bpe" && p_result->msg != ""){
-					p_result->msg += " ";
-				}
-				p_result->msg += msg_vec[0];
-				//timestamp
-				if(msg_vec.size() > 1){
-					std::vector<std::string> msg_stamp = funasr::split(msg_vec[1], ',');
-					for(int i=0; i<msg_stamp.size()-1; i+=2){
-						float begin = std::stof(msg_stamp[i])+start_time[idx];
-						float end = std::stof(msg_stamp[i+1])+start_time[idx];
-						cur_stamp += "["+std::to_string((int)(1000*begin))+","+std::to_string((int)(1000*end))+"],";
-					}
-				}
+				string msg = msg_batch[idx];
+				if(msg_idx < index_vector.size()){
+					msgs[index_vector[msg_idx]] = msg;
+					msg_stimes[index_vector[msg_idx]] = start_time[idx];
+					msg_idx++;
+				}else{
+					LOG(ERROR) << "msg_idx: " << msg_idx <<" is out of range " << index_vector.size();
+				}				
 			}
+
 			// release
 			delete[] buff;
 			buff = nullptr;
@@ -389,6 +400,26 @@
 			flag = nullptr;
 			delete[] start_time;
 			start_time = nullptr;
+		}
+		for(int idx=0; idx<msgs.size(); idx++){
+			string msg = msgs[idx];
+			std::vector<std::string> msg_vec = funasr::split(msg, '|');
+			if(msg_vec.size()==0){
+				continue;
+			}
+			if(lang == "en-bpe" && p_result->msg != ""){
+				p_result->msg += " ";
+			}
+			p_result->msg += msg_vec[0];
+			//timestamp
+			if(msg_vec.size() > 1){
+				std::vector<std::string> msg_stamp = funasr::split(msg_vec[1], ',');
+				for(int i=0; i<msg_stamp.size()-1; i+=2){
+					float begin = std::stof(msg_stamp[i])+msg_stimes[idx];
+					float end = std::stof(msg_stamp[i+1])+msg_stimes[idx];
+					cur_stamp += "["+std::to_string((int)(1000*begin))+","+std::to_string((int)(1000*end))+"],";
+				}
+			}
 		}
 		if(cur_stamp != "["){
 			cur_stamp.erase(cur_stamp.length() - 1);
