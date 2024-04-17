@@ -74,7 +74,7 @@ class SenseVoiceDataset(torch.utils.data.Dataset):
         prompt_ids = self.tokenizer.encode(prompt, allowed_special="all")
         prompt_ids_len = len(prompt_ids) - 1 # [sos, task]
 
-        target_ids = self.tokenizer.encode(target)
+        target_ids = self.tokenizer.encode(target, allowed_special="all")
         target_ids_len = len(target_ids) + 1 # [lid, text]
         
         eos = self.tokenizer.encode(self.eos, allowed_special="all") # [eos]
