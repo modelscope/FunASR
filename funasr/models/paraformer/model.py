@@ -181,15 +181,12 @@ class Paraformer(torch.nn.Module):
                 text: (Batch, Length)
                 text_lengths: (Batch,)
         """
-        # import pdb;
-        # pdb.set_trace()
         if len(text_lengths.size()) > 1:
             text_lengths = text_lengths[:, 0]
         if len(speech_lengths.size()) > 1:
             speech_lengths = speech_lengths[:, 0]
         
         batch_size = speech.shape[0]
-        
         
         # Encoder
         encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
