@@ -373,7 +373,9 @@ class Trainer:
                          writer=writer,
                          tag="train",
                          )
-
+            else:
+                time5 = time.perf_counter()
+            
             if (batch_idx + 1) % self.validate_interval == 0:
                 self.validate_epoch(
                     model=model,
