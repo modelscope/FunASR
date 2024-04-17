@@ -4,7 +4,6 @@ from typing import Optional, Tuple, Union
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from typeguard import check_argument_types
 from funasr.models.transformer.utils.nets_utils import make_pad_mask
 
 
