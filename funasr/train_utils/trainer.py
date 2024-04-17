@@ -282,8 +282,10 @@ class Trainer:
             speed_stats["data_load"] = f"{time1-time5:0.3f}"
 
             batch = to_device(batch, self.device)
-            
-            my_context = model.no_sync if batch_idx % accum_grad != 0 else nullcontext
+
+            my_context = nullcontext
+            if self.use_ddp or self.use_fsdp:
+                my_context = model.no_sync if batch_idx % accum_grad != 0 else my_context
             with my_context():
                 time2 = time.perf_counter()
                 with maybe_autocast(self.use_fp16):
