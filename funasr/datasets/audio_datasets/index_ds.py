@@ -92,7 +92,7 @@ class IndexDSJsonlRankFull(torch.utils.data.Dataset):
             for line in fin:
                 data = json.loads(line.strip())
                 if "text" in data:  # for sft
-                    self.contents.append(data['text'])
+                    contents.append(data['text'])
                 if "source" in data:  # for speech lab pretrain
                     prompt = data.get("prompt", "<ASR>")
                     source = data["source"]
@@ -101,13 +101,20 @@ class IndexDSJsonlRankFull(torch.utils.data.Dataset):
                     target_len = data.get("target_len", 0)
                     if "aishell" in source:
                         target = target.replace(" ", "")
-                    contents.append({"source": source,
-                                     "prompt": prompt,
-                                     "target": target,
-                                     "source_len": source_len,
-                                     "target_len": target_len,
-                                     }
-                                    )
+
+                    contents_i = {"source": source,
+                                 "prompt": prompt,
+                                 "target": target,
+                                 "source_len": source_len,
+                                 "target_len": target_len,
+                                 }
+                    text_language = data.get("text_language", None)
+                    if text_language is not None:
+                        contents_i["text_language"] = text_language
+                    audio_language = data.get("audio_language", None)
+                    if audio_language is not None:
+                        contents_i["audio_language"] = audio_language
+                    contents.append(contents_i)
 
         self.contents = contents
         
