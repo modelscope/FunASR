@@ -5,13 +5,13 @@
 
 from funasr import AutoModel
 
-model = AutoModel(model="/Users/zhifu/Downloads/modelscope_models/SenseVoice",
+model = AutoModel(model="/Users/zhifu/Downloads/modelscope_models/SenseVoiceModelscope",
                   vad_model="iic/speech_fsmn_vad_zh-cn-16k-common-pytorch",
 				  vad_kwargs={"max_single_segment_time": 30000},
                   )
 
 
-input_wav = "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/SenseVoice/aed_ser/asr_bgm.wav"
+input_wav = "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav"
 
 DecodingOptions = {
 	"task": ("ASR", "AED", "SER"),

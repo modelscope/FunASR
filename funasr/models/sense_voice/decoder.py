@@ -7,7 +7,7 @@ import torch.nn.functional as F
 from typeguard import check_argument_types
 from funasr.models.transformer.utils.nets_utils import make_pad_mask
 
-def sense_voice_decode(
+def sense_voice_decode_forward(
 	self,
 	x: torch.Tensor,
 	xa: torch.Tensor,
@@ -31,13 +31,15 @@ def sense_voice_decode(
 			if use_output_layer is True,
 		olens: (batch, )
 	"""
-	use_padmask = kwargs.get("use_padmask", True)
+	# import pdb;pdb.set_trace()
+	use_padmask = self.use_padmask
 	hlens = kwargs.get("hlens", None)
 	
 	ys_in_lens = kwargs.get("ys_in_lens", None)
 	
 	offset = next(iter(kv_cache.values())).shape[1] if kv_cache else 0
 	tgt, memory = x, xa
+	tgt[tgt==-1] = 0
 	tgt = (
 		self.token_embedding(tgt)
 		+ self.positional_embedding[offset : offset + tgt.size(1)]

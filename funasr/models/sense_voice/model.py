@@ -28,13 +28,17 @@ class SenseVoice(nn.Module):
         dims = kwargs.get("dims", {})
         dims = whisper.model.ModelDimensions(**dims)
         model = whisper.model.Whisper(dims=dims)
-        model.downsample_rate = kwargs.get("downsample_rate", 4)
-        model.use_padmask = kwargs.get("use_padmask", True)
-        from .encoder import sense_voice_encode
-        model.encoder.forward = types.MethodType(sense_voice_encode, model.encoder)
         
-        from .decoder import sense_voice_decode
-        model.decoder.forward = types.MethodType(sense_voice_decode, model.decoder)
+        # encoder
+        model.encoder.downsample_rate = kwargs.get("downsample_rate", 4)
+        model.encoder.use_padmask = kwargs.get("use_padmask", True)
+        from .encoder import sense_voice_encode_forward
+        model.encoder.forward = types.MethodType(sense_voice_encode_forward, model.encoder)
+        
+        # decoder
+        model.decoder.use_padmask = kwargs.get("use_padmask", True)
+        from .decoder import sense_voice_decode_forward
+        model.decoder.forward = types.MethodType(sense_voice_decode_forward, model.decoder)
         
         self.model = model
         
@@ -50,6 +54,12 @@ class SenseVoice(nn.Module):
             smoothing=kwargs.get("lsm_weight", 0.0),
             normalize_length=self.length_normalized_loss,
         )
+        
+        specaug = kwargs.get("specaug", None)
+        if specaug is not None:
+            specaug_class = tables.specaug_classes.get(specaug)
+            specaug = specaug_class(**kwargs.get("specaug_conf", {}))
+        self.specaug = specaug
 
  
     def forward(
@@ -101,15 +111,15 @@ class SenseVoice(nn.Module):
                 speech_lengths: (Batch, )
                 ind: int
         """
-        # with autocast(False):
-        #
-        #     # Data augmentation
-        #     if self.specaug is not None and self.training:
-        #         speech, speech_lengths = self.specaug(speech, speech_lengths)
+        with autocast(False):
+
+            # Data augmentation
+            if self.specaug is not None and self.training:
+                speech, speech_lengths = self.specaug(speech, speech_lengths)
 
 
         # Forward encoder
-        encoder_out, encoder_out_lens, _ = self.model.encoder(speech, speech_lengths)
+        encoder_out, encoder_out_lens = self.model.encoder(speech.permute(0, 2, 1), speech_lengths)
     
         return encoder_out, encoder_out_lens
 
@@ -126,17 +136,18 @@ class SenseVoice(nn.Module):
         stats = {}
         
         # 1. Forward decoder
-        decoder_out = self.decoder(
-            encoder_out, encoder_out_lens, ys_pad, ys_pad_lens
+        decoder_out = self.model.decoder(
+            x=ys_pad, xa=encoder_out, hlens=encoder_out_lens, ys_in_lens=ys_pad_lens
         )
         
         # 2. Compute attention loss
-        mask = torch.ones_like(ys_pad_mask) * (-1)
-        ys_pad_mask = ys_pad_mask * target_mask + mask * (1-target_mask)
+        mask = torch.ones_like(ys_pad) * (-1)
+        ys_pad_mask = (ys_pad * target_mask + mask * (1-target_mask)).to(torch.int64)
+        ys_pad_mask[ys_pad_mask == 0] = -1
         loss_att = self.criterion_att(decoder_out[:, :-1, :], ys_pad_mask[:, 1:])
 
         with torch.no_grad():
-            preds = torch.argmax(decoder_out.logits, -1)
+            preds = torch.argmax(decoder_out, -1)
             acc_att = compute_accuracy(preds[:, :-1], ys_pad_mask[:, 1:], ignore_label=self.ignore_id)
 
         return loss_att, acc_att, None, None

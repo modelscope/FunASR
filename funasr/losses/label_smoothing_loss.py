@@ -50,8 +50,8 @@ class LabelSmoothingLoss(nn.Module):
         """
         assert x.size(2) == self.size
         batch_size = x.size(0)
-        x = x.view(-1, self.size)
-        target = target.view(-1)
+        x = x.contiguous().view(-1, self.size)
+        target = target.contiguous().view(-1)
         with torch.no_grad():
             true_dist = x.clone()
             true_dist.fill_(self.smoothing / (self.size - 1))

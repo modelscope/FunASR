@@ -62,7 +62,7 @@ class SenseVoiceDataset(torch.utils.data.Dataset):
         if self.preprocessor_speech:
             data_src = self.preprocessor_speech(data_src, fs=self.fs)
         speech, speech_lengths = extract_fbank(data_src, data_type=self.data_type, frontend=self.frontend, is_final=True) # speech: [b, T, d]
-
+        speech = speech.permute(0, 2, 1)
         target = item["target"]
         if self.preprocessor_text:
             target = self.preprocessor_text(target)
@@ -85,7 +85,7 @@ class SenseVoiceDataset(torch.utils.data.Dataset):
         text = torch.tensor(ids, dtype=torch.int64)
         text_lengths = torch.tensor([ids_lengths], dtype=torch.int32)
 
-        target_mask = [0] * (prompt_ids_len-1) + [1] * (target_ids_len+1) + [1]  # [sos, task, lid, text, eos]: [0, 0, 1, 1, 1]
+        target_mask = [0] * (prompt_ids_len) + [1] * (target_ids_len) + [1]  # [sos, task, lid, text, eos]: [0, 0, 1, 1, 1]
         target_mask = torch.tensor(target_mask, dtype=torch.float32)
 
         return {"speech": speech[0, :, :],

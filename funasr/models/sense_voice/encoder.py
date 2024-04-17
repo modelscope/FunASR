@@ -8,13 +8,13 @@ from typeguard import check_argument_types
 from funasr.models.transformer.utils.nets_utils import make_pad_mask
 
 
-def sense_voice_encode(
+def sense_voice_encode_forward(
 	self,
 	x: torch.Tensor,
 	ilens: torch.Tensor = None,
 	**kwargs,
 ):
-	use_padmask = kwargs.get("use_padmask", True)
+	use_padmask = self.use_padmask
 	x = F.gelu(self.conv1(x))
 	x = F.gelu(self.conv2(x))
 	x = x.permute(0, 2, 1)
