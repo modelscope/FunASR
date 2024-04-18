@@ -261,7 +261,7 @@ class Whisper(nn.Module):
             self.dims.n_text_layer, self.dims.n_text_head, dtype=torch.bool
         )
         all_heads[self.dims.n_text_layer // 2 :] = True
-        self.register_buffer("alignment_heads", all_heads.to_sparse(), persistent=False)
+        # self.register_buffer("alignment_heads", all_heads.to_sparse(), persistent=False)
 
     def set_alignment_heads(self, dump: bytes):
         array = np.frombuffer(
