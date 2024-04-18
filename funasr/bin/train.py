@@ -104,7 +104,7 @@ def main(**kwargs):
     if use_ddp:
         model = model.cuda(local_rank)
         model = DDP(model, device_ids=[local_rank],
-                    find_unused_parameters=kwargs.get("train_conf", {}).get("find_unused_parameters", True))
+                    find_unused_parameters=kwargs.get("train_conf", {}).get("find_unused_parameters", False))
     elif use_fsdp:
         # model = FSDP(model).cuda(local_rank)
 
