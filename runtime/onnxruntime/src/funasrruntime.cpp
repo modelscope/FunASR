@@ -378,7 +378,6 @@
 			if (wfst_decoder){
 				wfst_decoder->StartUtterance();
 			}
-			vector<string> msgs = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb, dec_handle, batch_in);
 			vector<string> msg_batch = (offline_stream->asr_handle)->Forward(buff, len, true, hw_emb, dec_handle, batch_in);
 			for(int idx=0; idx<batch_in; idx++){
 				string msg = msg_batch[idx];
