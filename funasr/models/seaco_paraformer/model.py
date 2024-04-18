@@ -157,7 +157,7 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
                                         seaco_label_pad,
                                         )
         if self.train_decoder:
-            loss_att, acc_att = self._calc_att_loss(
+            loss_att, acc_att, _, _, _ = self._calc_att_loss(
                 encoder_out, encoder_out_lens, text, text_lengths
             )
             loss = loss_seaco + loss_att * self.seaco_weight
