@@ -1061,8 +1061,9 @@ int Audio::FetchDynamic(float**& dout, int*& len, int*& flag, float*& start_time
     #ifdef USE_GPU
         max_batch = batch_size;
     #endif
+    max_batch = std::min(max_batch, (int)frame_queue.size());
 
-    for(int idx=0; idx < std::min(max_batch, (int)frame_queue.size()); idx++){
+    for(int idx=0; idx < max_batch; idx++){
         AudioFrame *frame = frame_queue.front();
         int length = frame->GetLen();
         if(length >= max_sent){
