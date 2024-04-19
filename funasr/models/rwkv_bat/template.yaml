@@ -1,0 +1,64 @@
+# network architecture
+model: Transducer
+model_conf:
+    auxiliary_ctc_weight: 0.0
+
+# encoder
+encoder: RWKVEncoder
+encoder_conf:
+    kernel: 3
+    subsampling_factor: 4
+    output_size: 512
+    num_blocks: 18
+    time_reduction_factor: 2
+    att_dropout_rate: 0.1
+    ffn_dropout_rate: 0.1
+    dropout_rate: 0.1
+
+# decoder (prediction network)
+decoder: rnnt_decoder
+decoder_conf:
+    embed_size: 512
+    hidden_size: 512
+    embed_dropout_rate: 0.1
+    dropout_rate: 0.1
+    use_embed_mask: false
+
+# joint network
+joint_network: joint_network
+joint_network_conf:
+    joint_space_size: 512
+
+frontend: WavFrontend
+frontend_conf:
+    fs: 16000
+    window: hamming
+    n_mels: 80
+    frame_length: 25
+    frame_shift: 10
+    lfr_m: 1
+    lfr_n: 1
+    upsacle_samples: true
+
+specaug: SpecAugLFR
+specaug_conf:
+    apply_time_warp: false
+    time_warp_window: 5
+    time_warp_mode: bicubic
+    apply_freq_mask: true
+    freq_mask_width_range:
+    - 0
+    - 30
+    lfr_rate: 6
+    num_freq_mask: 1
+    apply_time_mask: true
+    time_mask_width_range:
+    - 0
+    - 12
+    num_time_mask: 1
+
+tokenizer: CharTokenizer
+tokenizer_conf:
+  unk_symbol: <unk>
+  split_with_space: true
+  
