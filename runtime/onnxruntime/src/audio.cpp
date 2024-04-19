@@ -1049,6 +1049,63 @@ int Audio::Fetch(float**& dout, int*& len, int*& flag, float*& start_time, int b
     }
 }
 
+int Audio::FetchDynamic(float**& dout, int*& len, int*& flag, float*& start_time, int batch_size, int &batch_in)
+{
+    //compute batch size
+    queue<AudioFrame *> frame_batch;
+    int max_acc = 300*1000*seg_sample;
+    int max_sent = 60*1000*seg_sample;
+    int bs_acc = 0;
+    int max_len = 0;
+    int max_batch = 1;
+    #ifdef USE_GPU
+        max_batch = batch_size;
+    #endif
+
+    for(int idx=0; idx < std::min(max_batch, (int)frame_queue.size()); idx++){
+        AudioFrame *frame = frame_queue.front();
+        int length = frame->GetLen();
+        if(length >= max_sent){
+            if(bs_acc == 0){
+                bs_acc++;
+                frame_batch.push(frame);
+                frame_queue.pop();                
+            }
+            break;
+        }
+        max_len = std::max(max_len, frame->GetLen());
+        if(max_len*(bs_acc+1) > max_acc){
+            break;
+        }
+        bs_acc++;
+        frame_batch.push(frame);
+        frame_queue.pop();
+    }
+
+    batch_in = (int)frame_batch.size();
+    if (batch_in == 0){
+        return 0;
+    } else{
+        // init
+        dout = new float*[batch_in];
+        len = new int[batch_in];
+        flag = new int[batch_in];
+        start_time = new float[batch_in];
+
+        for(int idx=0; idx < batch_in; idx++){
+            AudioFrame *frame = frame_batch.front();
+            frame_batch.pop();
+
+            start_time[idx] = (float)(frame->GetStart())/ dest_sample_rate;
+            dout[idx] = speech_data + frame->GetStart();
+            len[idx] = frame->GetLen();
+            delete frame;
+            flag[idx] = S_END;
+        }
+        return 1;
+    }
+}
+
 void Audio::Padding()
 {
     float num_samples = speech_len;
