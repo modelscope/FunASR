@@ -302,7 +302,21 @@ class RWKVLayer(nn.Module):
 		if args.dropout > 0:
 			self.drop0 = nn.Dropout(p=args.dropout)
 			self.drop1 = nn.Dropout(p=args.dropout)
-	
+		
+		# init
+		if args.get("init_rwkv", True):
+			print("init_rwkv")
+			nn.init.orthogonal_(self.att.receptance.weight, gain=1)
+			nn.init.orthogonal_(self.att.key.weight, gain=0.1)
+			nn.init.orthogonal_(self.att.value.weight, gain=1)
+			nn.init.orthogonal_(self.att.gate.weight, gain=0.1)
+			nn.init.zeros_(self.att.output.weight)
+			
+			nn.init.orthogonal_(self.ffn.key.weight, gain=1)
+			nn.init.zeros_(self.ffn.value.weight)
+			nn.init.zeros_(self.ffn.receptance.weight)
+		
+		
 	def forward(self, x, x_emb=None, mask=None):
 		# x = x.bfloat16()
 		args = self.args

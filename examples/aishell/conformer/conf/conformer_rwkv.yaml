@@ -54,6 +54,7 @@ decoder_conf:
       pre_ffn: 0
       ln0: false
       ln1: false
+      init_rwkv: true
 
 
 # frontend related

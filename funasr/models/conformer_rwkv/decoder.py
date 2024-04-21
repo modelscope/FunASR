@@ -81,6 +81,18 @@ class DecoderLayer(nn.Module):
         self.ln0 = None
         if self.layer_id == 0 and not args.get("ln0", True):
             self.ln0 = LayerNorm(args.n_embd)
+            if args.get("init_rwkv", True):
+                print("init_rwkv")
+                layer_id = 0
+                scale = ((1 + layer_id) / args.get("n_layer")) ** 0.7
+                torch.init.constant_(self.ln0.weight, scale)
+            
+        # init
+        if args.get("init_rwkv", True):
+            print("init_rwkv")
+            scale = ((1 + layer_id) / args.get("n_layer")) ** 0.7
+            torch.init.constant_(self.norm1.weight, scale)
+            torch.init.constant_(self.self_attn.att.ln2.weight, scale)
 
     def forward(self, tgt, tgt_mask, memory, memory_mask, cache=None):
         """Compute decoded features.
@@ -416,6 +428,11 @@ class TransformerRWKVDecoder(BaseTransformerDecoder):
                 args=rwkv_cfg,
             ),
         )
+        
+        # init
+        if args.get("init_rwkv", True):
+            print("init_rwkv")
+            nn.init.uniform_(self.embed[0].weight, a=-1e-4, b=1e-4)
 
     def forward(
             self,
