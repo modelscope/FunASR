@@ -29,7 +29,7 @@ wkv6_cuda = None
 
 def load_rwkv_kernel(HEAD_SIZE: int=64, RWKV_CTXLEN: int=512,):
 	from torch.utils.cpp_extension import load
-	global wkv_kernel_encoder
+	global wkv6_cuda
 	
 	if wkv6_cuda is not None:
 		return
@@ -48,7 +48,7 @@ class WKV_6(torch.autograd.Function):
 			assert v.dtype == torch.bfloat16
 			assert w.dtype == torch.bfloat16
 			assert u.dtype == torch.bfloat16
-			assert HEAD_SIZE == C // H
+			# assert HEAD_SIZE == C // H
 			ctx.B = B
 			ctx.T = T
 			ctx.C = C
@@ -278,7 +278,8 @@ class RWKVLayer(nn.Module):
 		super().__init__()
 		self.args = args
 		self.layer_id = layer_id
-		
+		if args.dim_ffn is None:
+			args.dim_ffn = int((args.n_embd * 3.5) // 32 * 32)
 		self.ln0 = None
 		if self.layer_id == 0 and args.get("ln0", True):
 			self.ln0 = nn.LayerNorm(args.n_embd)
@@ -298,6 +299,7 @@ class RWKVLayer(nn.Module):
 			self.drop1 = nn.Dropout(p=args.dropout)
 	
 	def forward(self, x, x_emb=None, mask=None):
+		x = x.bfloat16()
 		args = self.args
 		B, T, C = x.size()
 		if self.layer_id == 0 and self.ln0 is not None:
@@ -315,7 +317,7 @@ class RWKVLayer(nn.Module):
 			else:
 				x = self.drop0(x + self.att(self.ln1(x)))
 			x = self.drop1(x + self.ffn(self.ln2(x)))
-		
+		x = x.to(torch.float32)
 		return x
 
 

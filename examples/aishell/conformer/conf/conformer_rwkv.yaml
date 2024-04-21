@@ -47,7 +47,8 @@ decoder_conf:
       dropout: 0
       head_size_a: 64
       ctx_len: 512
-      dim_att: ${model_conf.rwkv_cfg.n_embd}
+      dim_att: 256 #${model_conf.rwkv_cfg.n_embd}
+      dim_ffn: null
       head_size_divisor: 4
       n_layer: 6
       pre_ffn: 0

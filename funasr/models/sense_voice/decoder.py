@@ -135,7 +135,7 @@ class ResidualAttentionBlock(nn.Module):
 	def __init__(self, n_state: int, n_head: int, cross_attention: bool = False, layer_id=0, **kwargs):
 		super().__init__()
 		
-		rwkv_cfg = kwargs.get("kwargs", {})
+		rwkv_cfg = kwargs.get("rwkv_cfg", {})
 		args = OmegaConf.create(rwkv_cfg)
 		self.attn = RWKVLayer(args=args, layer_id=layer_id)
 		

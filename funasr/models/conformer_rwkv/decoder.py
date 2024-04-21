@@ -59,13 +59,13 @@ class DecoderLayer(nn.Module):
             dropout_rate,
             normalize_before=True,
             concat_after=False,
-            lnum=None,
+            layer_id=None,
             args={},
     ):
         """Construct an DecoderLayer object."""
         super(DecoderLayer, self).__init__()
         self.size = size
-        self.self_attn = self_attn
+        self.self_attn = self_attn.to(torch.bfloat16)
         self.src_attn = src_attn
         self.feed_forward = feed_forward
         self.norm1 = LayerNorm(size)
@@ -77,9 +77,9 @@ class DecoderLayer(nn.Module):
         if self.concat_after:
             self.concat_linear1 = nn.Linear(size + size, size)
             self.concat_linear2 = nn.Linear(size + size, size)
-        self.layer_id = lnum
+        self.layer_id = layer_id
         self.ln0 = None
-        if layer_id == 0 and not args.get("ln0", True):
+        if self.layer_id == 0 and not args.get("ln0", True):
             self.ln0 = LayerNorm(args.n_embd)
 
     def forward(self, tgt, tgt_mask, memory, memory_mask, cache=None):
@@ -101,7 +101,7 @@ class DecoderLayer(nn.Module):
 
         """
 
-        if self.ln0 is not None:
+        if self.layer_id == 0 and self.ln0 is not None:
             tgt = self.ln0(tgt)
             
         residual = tgt
@@ -396,9 +396,9 @@ class TransformerRWKVDecoder(BaseTransformerDecoder):
             normalize_before=normalize_before,
         )
         from funasr.models.sense_voice.rwkv_v6 import RWKVLayer
-        rwkv_cfg = kwargs.get("kwargs", {})
+        rwkv_cfg = kwargs.get("rwkv_cfg", {})
         args = OmegaConf.create(rwkv_cfg)
-        self.attn = RWKVLayer(args=args, layer_id=layer_id)
+        # self.attn = RWKVLayer(args=args, layer_id=layer_id)
         attention_dim = encoder_output_size
         self.decoders = repeat(
             num_blocks,
@@ -413,7 +413,7 @@ class TransformerRWKVDecoder(BaseTransformerDecoder):
                 normalize_before,
                 concat_after,
                 lnum,
-                rwkv_cfg,
+                args=rwkv_cfg,
             ),
         )
 
