@@ -92,7 +92,7 @@ class DecoderLayer(nn.Module):
             print("init_rwkv")
             scale = ((1 + layer_id) / args.get("n_layer")) ** 0.7
             nn.init.constant_(self.norm1.weight, scale)
-            nn.init.constant_(self.self_attn.att.ln2.weight, scale)
+            nn.init.constant_(self.self_attn.ln2.weight, scale)
 
     def forward(self, tgt, tgt_mask, memory, memory_mask, cache=None):
         """Compute decoded features.
