@@ -65,7 +65,7 @@ class DecoderLayer(nn.Module):
         """Construct an DecoderLayer object."""
         super(DecoderLayer, self).__init__()
         self.size = size
-        self.self_attn = self_attn.to(torch.bfloat16)
+        self.self_attn = self_attn #.to(torch.bfloat16)
         self.src_attn = src_attn
         self.feed_forward = feed_forward
         self.norm1 = LayerNorm(size)
