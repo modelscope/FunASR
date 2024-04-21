@@ -36,7 +36,7 @@ def load_rwkv_kernel(HEAD_SIZE: int=64, RWKV_CTXLEN: int=512,):
 		return
 	
 	absolute_file_path = os.path.abspath(__file__)
-	cur_dir = absolute_file_path.parent
+	cur_dir = os.path.dirname(absolute_file_path)
 	wkv6_cuda = load(name="wkv6", sources=[f"{cur_dir}/cuda/wkv6_op.cpp", f"{cur_dir}/cuda/wkv6_cuda.cu"],
 	                 verbose=True, extra_cuda_cflags=["-res-usage", "--use_fast_math", "-O3", "-Xptxas -O3",
 	                                                  "--extra-device-vectorization", f"-D_N_={HEAD_SIZE}",
