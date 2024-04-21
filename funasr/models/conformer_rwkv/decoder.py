@@ -85,14 +85,14 @@ class DecoderLayer(nn.Module):
                 print("init_rwkv")
                 layer_id = 0
                 scale = ((1 + layer_id) / args.get("n_layer")) ** 0.7
-                torch.init.constant_(self.ln0.weight, scale)
+                nn.init.constant_(self.ln0.weight, scale)
             
         # init
         if args.get("init_rwkv", True):
             print("init_rwkv")
             scale = ((1 + layer_id) / args.get("n_layer")) ** 0.7
-            torch.init.constant_(self.norm1.weight, scale)
-            torch.init.constant_(self.self_attn.att.ln2.weight, scale)
+            nn.init.constant_(self.norm1.weight, scale)
+            nn.init.constant_(self.self_attn.att.ln2.weight, scale)
 
     def forward(self, tgt, tgt_mask, memory, memory_mask, cache=None):
         """Compute decoded features.
