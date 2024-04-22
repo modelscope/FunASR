@@ -118,55 +118,33 @@ class DecoderLayer(nn.Module):
             
         residual = tgt
         
-        if self.normalize_before:
-            tgt = self.norm1(tgt)
+        
+        tgt = self.norm1(tgt)
 
         if cache is None:
-            tgt_q = tgt
-            tgt_q_mask = tgt_mask
+    
+            x = residual + self.dropout(self.self_attn(tgt, mask=tgt_mask))
         else:
-            # compute only the last frame query keeping dim: max_time_out -> 1
-            assert cache.shape == (
-                tgt.shape[0],
-                tgt.shape[1] - 1,
-                self.size,
-            ), f"{cache.shape} == {(tgt.shape[0], tgt.shape[1] - 1, self.size)}"
-            tgt_q = tgt[:, -1:, :]
-            residual = residual[:, -1:, :]
+            
+            # tgt_q = tgt[:, -1:, :]
+            # residual_q = residual[:, -1:, :]
             tgt_q_mask = None
-            if tgt_mask is not None:
-                tgt_q_mask = tgt_mask[:, -1:, :]
-
-        if self.concat_after:
-            tgt_concat = torch.cat(
-                (tgt_q, self.self_attn(tgt_q, tgt, tgt, tgt_q_mask)), dim=-1
-            )
-            x = residual + self.concat_linear1(tgt_concat)
-        else:
-            # x = residual + self.dropout(self.self_attn(tgt_q, tgt, tgt, tgt_q_mask))
+            
             x = residual + self.dropout(self.self_attn(tgt, mask=tgt_q_mask))
-        if not self.normalize_before:
-            x = self.norm1(x)
+            x = x[:, -1, :]
+
+
+
+        # x = residual + self.dropout(self.self_attn(tgt_q, tgt, tgt, tgt_q_mask))
+        
 
         residual = x
-        if self.normalize_before:
-            x = self.norm2(x)
-        if self.concat_after:
-            x_concat = torch.cat(
-                (x, self.src_attn(x, memory, memory, memory_mask)), dim=-1
-            )
-            x = residual + self.concat_linear2(x_concat)
-        else:
-            x = residual + self.dropout(self.src_attn(x, memory, memory, memory_mask))
-        if not self.normalize_before:
-            x = self.norm2(x)
-
+        x = self.norm2(x)
+        x = residual + self.dropout(self.src_attn(x, memory, memory, memory_mask))
         residual = x
-        if self.normalize_before:
-            x = self.norm3(x)
+        x = self.norm3(x)
         x = residual + self.dropout(self.feed_forward(x))
-        if not self.normalize_before:
-            x = self.norm3(x)
+
 
         if cache is not None:
             x = torch.cat([cache, x], dim=1)
@@ -488,3 +466,42 @@ class TransformerRWKVDecoder(BaseTransformerDecoder):
 
         olens = tgt_mask.sum(1)
         return x, olens
+
+    def forward_one_step(
+            self,
+            tgt: torch.Tensor,
+            tgt_mask: torch.Tensor,
+            memory: torch.Tensor,
+            cache: List[torch.Tensor] = None,
+    ) -> Tuple[torch.Tensor, List[torch.Tensor]]:
+        """Forward one step.
+
+        Args:
+            tgt: input token ids, int64 (batch, maxlen_out)
+            tgt_mask: input token mask,  (batch, maxlen_out)
+                      dtype=torch.uint8 in PyTorch 1.2-
+                      dtype=torch.bool in PyTorch 1.2+ (include 1.2)
+            memory: encoded memory, float32  (batch, maxlen_in, feat)
+            cache: cached output list of (batch, max_time_out-1, size)
+        Returns:
+            y, cache: NN output value and cache per `self.decoders`.
+            y.shape` is (batch, maxlen_out, token)
+        """
+        x = self.embed(tgt)
+        if cache is None:
+            cache = [None] * len(self.decoders)
+        new_cache = []
+        for c, decoder in zip(cache, self.decoders):
+            x, tgt_mask, memory, memory_mask = decoder(
+                x, tgt_mask, memory, None, cache=c
+            )
+            new_cache.append(x)
+
+        if self.normalize_before:
+            y = self.after_norm(x[:, -1])
+        else:
+            y = x[:, -1]
+        if self.output_layer is not None:
+            y = torch.log_softmax(self.output_layer(y), dim=-1)
+
+        return y, new_cache
