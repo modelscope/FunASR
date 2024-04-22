@@ -42,8 +42,8 @@ def load_rwkv_kernel(HEAD_SIZE: int=64, RWKV_CTXLEN: int=512,):
 	                                                  "--extra-device-vectorization", f"-D_N_={HEAD_SIZE}",
 	                                                  f"-D_T_={RWKV_CTXLEN}"])
 
-dtype = torch.float
-# dtype = torch.bfloat16
+# dtype = torch.float
+dtype = torch.bfloat16
 class WKV_6(torch.autograd.Function):
 	@staticmethod
 	def forward(ctx, B, T, C, H, r, k, v, w, u):
@@ -318,7 +318,7 @@ class RWKVLayer(nn.Module):
 		
 		
 	def forward(self, x, x_emb=None, mask=None):
-		# x = x.bfloat16()
+		x = x.bfloat16()
 		args = self.args
 		B, T, C = x.size()
 		if self.layer_id == 0 and self.ln0 is not None:
@@ -336,7 +336,7 @@ class RWKVLayer(nn.Module):
 			else:
 				x = self.drop0(x + self.att(self.ln1(x)))
 			x = self.drop1(x + self.ffn(self.ln2(x)))
-		# x = x.to(torch.float32)
+		x = x.to(torch.float32)
 		return x
 
 

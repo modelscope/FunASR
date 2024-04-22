@@ -1,7 +1,7 @@
 #include <torch/extension.h>
 #include "ATen/ATen.h"
-// typedef at::BFloat16 bf16;
-typedef float bf16;
+ typedef at::BFloat16 bf16;
+//typedef float bf16;
 
 void cuda_forward(int B, int T, int C, int H, bf16 *r, bf16 *k, bf16 *v, float *w, bf16 *u, bf16 *y);
 void cuda_backward(int B, int T, int C, int H, bf16 *r, bf16 *k, bf16 *v, float *w, bf16 *u, bf16 *gy, bf16 *gr, bf16 *gk, bf16 *gv, bf16 *gw, bf16 *gu);

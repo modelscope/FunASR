@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <assert.h>
 #include "ATen/ATen.h"
-// typedef at::BFloat16 bf16;
-typedef float bf16;
+typedef at::BFloat16 bf16;
+// typedef float bf16;
 
 template <typename F>
 __global__ void kernel_forward(const int B, const int T, const int C, const int H,
