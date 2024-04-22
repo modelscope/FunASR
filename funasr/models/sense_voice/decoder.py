@@ -6,6 +6,31 @@ import torch.nn as nn
 import torch.nn.functional as F
 from funasr.models.transformer.utils.nets_utils import make_pad_mask
 from funasr.register import tables
+import base64
+import gzip
+from dataclasses import dataclass
+from typing import Dict, Iterable, Optional
+
+import numpy as np
+import torch
+import torch.nn.functional as F
+from torch import Tensor, nn
+
+
+class LayerNorm(nn.LayerNorm):
+    def forward(self, x: Tensor) -> Tensor:
+        return super().forward(x.float()).type(x.dtype)
+
+
+class Linear(nn.Linear):
+    def forward(self, x: Tensor) -> Tensor:
+        return F.linear(
+            x,
+            self.weight.to(x.dtype),
+            None if self.bias is None else self.bias.to(x.dtype),
+        )
+
+
 
 def sense_voice_decode_forward(
 	self,
@@ -131,18 +156,22 @@ from funasr.models.sense_voice.rwkv_v6 import RWKVLayer
 from omegaconf import OmegaConf
 
 
-class ResidualAttentionBlock(nn.Module):
+class ResidualAttentionBlockRWKV(nn.Module):
 	def __init__(self, n_state: int, n_head: int, cross_attention: bool = False, layer_id=0, **kwargs):
 		super().__init__()
 		
 		rwkv_cfg = kwargs.get("rwkv_cfg", {})
 		args = OmegaConf.create(rwkv_cfg)
 		self.attn = RWKVLayer(args=args, layer_id=layer_id)
-		
+		if args.get("datatype", "bf16") == "bf16":
+			self.attn.to(torch.bfloat16)
+			
 		self.ln0 = None
 		if layer_id == 0 and not args.get("ln0", True):
 			self.ln0 = LayerNorm(args.n_embd)
-			
+		self.layer_id = layer_id
+		self.args = args
+		
 		self.attn_ln = None
 		if not args.get("ln1", True):
 			self.attn_ln = LayerNorm(n_state)
@@ -169,7 +198,7 @@ class ResidualAttentionBlock(nn.Module):
 		is_pad_mask = kwargs.get("is_pad_mask", False)
 		is_pad_memory_mask = kwargs.get("is_pad_memory_mask", False)
 		
-		if self.ln0 is not None:
+		if self.layer_id == 0 and self.ln0 is not None:
 			x = self.ln0(x)
 		
 		if self.attn_ln is None:
@@ -192,10 +221,11 @@ class SenseVoiceDecoder(nn.Module):
 		
 		self.token_embedding = nn.Embedding(n_vocab, n_state)
 		self.positional_embedding = nn.Parameter(torch.empty(n_ctx, n_state))
-		
-		self.blocks: Iterable[ResidualAttentionBlock] = nn.ModuleList(
+
+
+		self.blocks = nn.ModuleList(
 			[
-				ResidualAttentionBlock(n_state, n_head, cross_attention=True, layer_id=i, **kwargs)
+				ResidualAttentionBlockRWKV(n_state, n_head, cross_attention=True, layer_id=i, **kwargs)
 				for i in range(n_layer)
 			]
 		)
@@ -203,27 +233,85 @@ class SenseVoiceDecoder(nn.Module):
 		
 		mask = torch.empty(n_ctx, n_ctx).fill_(-np.inf).triu_(1)
 		self.register_buffer("mask", mask, persistent=False)
-	
-	def forward(self, x: Tensor, xa: Tensor, kv_cache: Optional[dict] = None):
-		"""
-		x : torch.LongTensor, shape = (batch_size, <= n_ctx)
-			the text tokens
-		xa : torch.Tensor, shape = (batch_size, n_audio_ctx, n_audio_state)
-			the encoded audio features to be attended on
-		"""
-		offset = next(iter(kv_cache.values())).shape[1] if kv_cache else 0
-		x = (
-			self.token_embedding(x)
-			+ self.positional_embedding[offset: offset + x.shape[-1]]
-		)
-		x = x.to(xa.dtype)
 		
-		for block in self.blocks:
-			x = block(x, xa, mask=self.mask, kv_cache=kv_cache)
+		self.use_padmask = kwargs.get("use_padmask", True)
+	# def forward(self, x: Tensor, xa: Tensor, kv_cache: Optional[dict] = None):
+	# 	"""
+	# 	x : torch.LongTensor, shape = (batch_size, <= n_ctx)
+	# 		the text tokens
+	# 	xa : torch.Tensor, shape = (batch_size, n_audio_ctx, n_audio_state)
+	# 		the encoded audio features to be attended on
+	# 	"""
+	# 	offset = next(iter(kv_cache.values())).shape[1] if kv_cache else 0
+	# 	x = (
+	# 		self.token_embedding(x)
+	# 		+ self.positional_embedding[offset: offset + x.shape[-1]]
+	# 	)
+	# 	x = x.to(xa.dtype)
+	#
+	# 	for block in self.blocks:
+	# 		x = block(x, xa, mask=self.mask, kv_cache=kv_cache)
+	#
+	# 	x = self.ln(x)
+	# 	logits = (
+	# 		x @ torch.transpose(self.token_embedding.weight.to(x.dtype), 0, 1)
+	# 	).float()
+	#
+	# 	return logits
+
+	
+	def forward(
+		self,
+		x: torch.Tensor,
+		xa: torch.Tensor,
+		kv_cache: Optional[dict] = None,
+		**kwargs,
+	):
+		"""Forward decoder.
+	
+		Args:
+			hs_pad: encoded memory, float32  (batch, maxlen_in, feat)
+			hlens: (batch)
+			ys_in_pad:
+				input token ids, int64 (batch, maxlen_out)
+				if input_layer == "embed"
+				input tensor (batch, maxlen_out, #mels) in the other cases
+			ys_in_lens: (batch)
+		Returns:
+			(tuple): tuple containing:
+	
+			x: decoded token score before softmax (batch, maxlen_out, token)
+				if use_output_layer is True,
+			olens: (batch, )
+		"""
+		# import pdb;pdb.set_trace()
+		use_padmask = self.use_padmask
+		hlens = kwargs.get("hlens", None)
+		
+		ys_in_lens = kwargs.get("ys_in_lens", None)
+		
+		offset = next(iter(kv_cache.values())).shape[1] if kv_cache else 0
+		tgt, memory = x, xa
+		tgt[tgt == -1] = 0
+		tgt = (
+			self.token_embedding(tgt)
+			+ self.positional_embedding[offset: offset + tgt.size(1)]
+		)
+		# tgt = self.dropout(tgt)
+		
+		x = tgt.to(memory.dtype)
+		
+		if use_padmask and hlens is not None:
+			memory_mask = (~make_pad_mask(hlens)[:, None, :]).to(memory.device)
+		else:
+			memory_mask = None
+		
+		for layer, block in enumerate(self.blocks):
+			x = block(x, memory, mask=self.mask, memory_mask=memory_mask, is_pad_mask=False, is_pad_memory_mask=True)
 		
 		x = self.ln(x)
-		logits = (
+		x = (
 			x @ torch.transpose(self.token_embedding.weight.to(x.dtype), 0, 1)
 		).float()
 		
-		return logits
+		return x

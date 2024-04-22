@@ -318,8 +318,10 @@ class RWKVLayer(nn.Module):
 		
 		
 	def forward(self, x, x_emb=None, mask=None):
-		x = x.bfloat16()
+		
 		args = self.args
+		if args.get("datatype", "bf16") == "bf16":
+			x = x.bfloat16()
 		B, T, C = x.size()
 		if self.layer_id == 0 and self.ln0 is not None:
 			x = self.ln0(x)
@@ -336,7 +338,9 @@ class RWKVLayer(nn.Module):
 			else:
 				x = self.drop0(x + self.att(self.ln1(x)))
 			x = self.drop1(x + self.ffn(self.ln2(x)))
-		x = x.to(torch.float32)
+		
+		if args.get("datatype", "bf16") == "bf16":
+			x = x.to(torch.float32)
 		return x
 
 
