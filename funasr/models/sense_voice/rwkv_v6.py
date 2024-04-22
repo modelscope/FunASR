@@ -315,7 +315,12 @@ class RWKVLayer(nn.Module):
 			nn.init.orthogonal_(self.ffn.key.weight, gain=1)
 			nn.init.zeros_(self.ffn.value.weight)
 			nn.init.zeros_(self.ffn.receptance.weight)
-		
+			scale = ((1 + layer_id) / args.get("n_layer")) ** 0.7
+			nn.init.constant_(self.ln2.weight, scale)
+			if self.ln0 is not None:
+				nn.init.constant_(self.ln0.weight, scale)
+			if self.ln1 is not None:
+				nn.init.constant_(self.ln1.weight, scale)
 		
 	def forward(self, x, x_emb=None, mask=None, **kwargs):
 		

@@ -169,12 +169,22 @@ class ResidualAttentionBlockRWKV(nn.Module):
 		self.ln0 = None
 		if layer_id == 0 and not args.get("ln0", True):
 			self.ln0 = LayerNorm(args.n_embd)
+			if args.get("init_rwkv", True):
+				print("init_rwkv")
+				layer_id = 0
+				scale = ((1 + layer_id) / args.get("n_layer")) ** 0.7
+				nn.init.constant_(self.ln0.weight, scale)
 		self.layer_id = layer_id
 		self.args = args
 		
-		self.attn_ln = None
+		self.ln1 = None
 		if not args.get("ln1", True):
-			self.attn_ln = LayerNorm(n_state)
+			self.ln1 = LayerNorm(args.n_embd)
+			# init
+			if args.get("init_rwkv", True):
+				print("init_rwkv")
+				scale = ((1 + layer_id) / args.get("n_layer")) ** 0.7
+				nn.init.constant_(self.ln1.weight, scale)
 		
 		self.cross_attn = (
 			MultiHeadAttention(n_state, n_head) if cross_attention else None
