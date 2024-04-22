@@ -247,7 +247,12 @@ class SenseVoiceRWKV(nn.Module):
         del model.decoder
         decoder = kwargs.get("decoder", "SenseVoiceDecoder")
         decoder_class = tables.decoder_classes.get(decoder)
-        decoder = decoder_class(**kwargs.get("dims", {}), **kwargs)
+        decoder = decoder_class(n_vocab=dims.n_vocab,
+                                n_ctx=dims.n_text_ctx,
+                                n_state=dims.n_text_state,
+                                n_head=dims.n_text_head,
+                                n_layer=dims.n_text_layer,
+                                **kwargs.get("decoder_conf"))
         model.decoder = decoder
         
         self.model = model

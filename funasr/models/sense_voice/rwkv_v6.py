@@ -317,7 +317,7 @@ class RWKVLayer(nn.Module):
 			nn.init.zeros_(self.ffn.receptance.weight)
 		
 		
-	def forward(self, x, x_emb=None, mask=None):
+	def forward(self, x, x_emb=None, mask=None, **kwargs):
 		
 		args = self.args
 		if args.get("datatype", "bf16") == "bf16":
