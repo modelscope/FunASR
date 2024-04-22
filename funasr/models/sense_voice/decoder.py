@@ -211,10 +211,10 @@ class ResidualAttentionBlockRWKV(nn.Module):
 		if self.layer_id == 0 and self.ln0 is not None:
 			x = self.ln0(x)
 		
-		if self.attn_ln is None:
+		if self.ln1 is None:
 			x = x + self.attn(x, mask=mask, kv_cache=kv_cache, is_pad_mask=is_pad_mask)[0]
 		else:
-			x = x + self.attn(self.attn_ln(x), mask=mask, kv_cache=kv_cache, is_pad_mask=is_pad_mask)[0]
+			x = x + self.attn(self.ln1(x), mask=mask, kv_cache=kv_cache, is_pad_mask=is_pad_mask)[0]
 	
 		if self.cross_attn:
 			x = x + self.cross_attn(self.cross_attn_ln(x), xa, kv_cache=kv_cache, is_pad_mask=is_pad_memory_mask)[0]
