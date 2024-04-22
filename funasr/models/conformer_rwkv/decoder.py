@@ -403,7 +403,7 @@ class TransformerRWKVDecoder(BaseTransformerDecoder):
                 normalize_before,
                 concat_after,
                 lnum,
-                args=rwkv_cfg,
+                args=args,
             ),
         )
         
