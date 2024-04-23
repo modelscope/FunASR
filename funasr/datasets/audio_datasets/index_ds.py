@@ -87,7 +87,8 @@ class IndexDSJsonlRankFull(torch.utils.data.Dataset):
             # jsonl list file
             data_split_num = kwargs.get("data_split_num", 1)
             data_split_i = kwargs.get("data_split_i", 0)
-            if not kwargs.get("is_training", True):
+            is_training = kwargs.get("is_training", True)
+            if not is_training:
                 data_split_num = 1
                 data_split_i = 0
             with open(path, encoding='utf-8') as fin:
@@ -96,7 +97,7 @@ class IndexDSJsonlRankFull(torch.utils.data.Dataset):
                 num_per_slice = len(file_list_all) // data_split_num
                 file_list = file_list_all[data_split_i * num_per_slice:(data_split_i + 1) * num_per_slice]
                 logging.info(
-                    f"data_split_num: {data_split_num}, data_split_i: {data_split_i}, file_list: {file_list}, file_list_all: {file_list_all}")
+                    f"is_training: {is_training}, data_split_num: {data_split_num}, data_split_i: {data_split_i}, file_list: {file_list}, file_list_all: {file_list_all}")
         
         else:
             file_list = [path]
@@ -112,7 +113,7 @@ class IndexDSJsonlRankFull(torch.utils.data.Dataset):
             logging.info("distributed is not initialized, only single shard")
         
         if not kwargs.get("rank_split", False):
-            logging.info(f"Warning, rank_split enabled, batch and shuffle data in local rank")
+            logging.info(f"Warning, rank_split disenabled, batch and shuffle data in global")
             rank = 0
             world_size = 1
         
