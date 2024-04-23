@@ -252,6 +252,7 @@ class Trainer:
                 dataloader_val=None,
                 epoch=None,
                 writer=None,
+                **kwargs,
                     ):
         """
         Defines the training process for a single epoch with gradient accumulation.
@@ -374,6 +375,8 @@ class Trainer:
                          stats=stats,
                          writer=writer,
                          tag="train",
+                         data_split_i=kwargs.get("data_split_i", 0),
+                         data_split_num=kwargs.get("data_split_num", 1),
                          )
 
             if (batch_idx + 1) % self.validate_interval == 0:
@@ -507,6 +510,9 @@ class Trainer:
             stats=None,
             writer=None,
             tag="train",
+            data_split_i=0,
+            data_split_num=1,
+            **kwargs,
             ):
         
         if (batch_idx + 1) % self.log_interval == 0:
@@ -526,6 +532,7 @@ class Trainer:
                 f"{tag}, "
                 f"rank: {self.local_rank}, "
                 f"epoch: {epoch}/{self.max_epoch}, "
+                f"data_slice: {data_split_i}/{data_split_num}, "
                 f"step: {batch_idx + 1}/{batch_num_epoch}, total step: {self.batch_total}, "
                 f"(loss_avg_rank: {loss:.3f}), "
                 f"(loss_avg_epoch: {loss_avg_epoch:.3f}), "
