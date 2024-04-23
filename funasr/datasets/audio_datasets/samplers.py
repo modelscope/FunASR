@@ -316,10 +316,10 @@ class CustomDistributedBufferDynamicBatchSampler(DistributedSampler):
             rank = 0
             num_replicas = 1
 
-        if rank_split:
-            logging.info(f"Warning, rank_split: {rank_split}, batch and shuffle data in local rank")
-            rank = 0
-            num_replicas = 1
+        # if rank_split:
+        #     logging.info(f"Warning, rank_split: {rank_split}, batch and shuffle data in local rank")
+        #     rank = 0
+        #     num_replicas = 1
             
         self.rank = rank
         self.num_replicas = num_replicas
