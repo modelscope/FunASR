@@ -192,7 +192,7 @@ def main(**kwargs):
                                 epoch=epoch,
                                 writer=writer,
                                 data_split_i=data_split_i,
-                                data_split_num=data_split_num,
+                                data_split_num=dataloader.data_split_num,
                                 )
         
         trainer.validate_epoch(
