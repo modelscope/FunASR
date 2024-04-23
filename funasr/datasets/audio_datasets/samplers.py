@@ -301,6 +301,7 @@ class CustomDistributedBufferDynamicBatchSampler(DistributedSampler):
                  batch_type="token",
                  num_replicas=None,
                  rank=None,
+                 rank_split=False,
                  shuffle=True,
                  drop_last=False,
                  is_training: bool = True,
@@ -314,6 +315,12 @@ class CustomDistributedBufferDynamicBatchSampler(DistributedSampler):
         except:
             rank = 0
             num_replicas = 1
+
+        if rank_split:
+            logging.info(f"Warning, rank_split: {rank_split}, batch and shuffle data in local rank")
+            rank = 0
+            num_replicas = 1
+            
         self.rank = rank
         self.num_replicas = num_replicas
         self.dataset = dataset
