@@ -33,7 +33,7 @@ class EspnetStyleBatchSampler(DistributedSampler):
                  batch_size,
                  batch_type="token",
                  num_replicas=None,
-                 rank=None,
+                 rank_split=False,
                  shuffle=True,
                  drop_last=False,
                  is_training: bool = True,
@@ -45,6 +45,10 @@ class EspnetStyleBatchSampler(DistributedSampler):
             rank = dist.get_rank()
             num_replicas = dist.get_world_size()
         except:
+            rank = 0
+            num_replicas = 1
+        if rank_split:
+            logging.info(f"Warning, rank_split: {rank_split}, batch and shuffle data in local rank")
             rank = 0
             num_replicas = 1
         self.rank = rank
@@ -65,8 +69,8 @@ class EspnetStyleBatchSampler(DistributedSampler):
         self.length_scale_source = kwargs.get("length_scale_source", 1.0)
 
 
-        super().__init__(dataset, num_replicas=num_replicas, rank=rank,
-                         shuffle=shuffle, drop_last=drop_last)
+        # super().__init__(dataset, num_replicas=num_replicas, rank=rank,
+        #                  shuffle=shuffle, drop_last=drop_last)
     def __iter__(self):
         if self.shuffle:
             g = torch.Generator()
