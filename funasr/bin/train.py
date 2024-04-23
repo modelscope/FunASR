@@ -90,7 +90,7 @@ def main(**kwargs):
     # freeze_param
     freeze_param = kwargs.get("freeze_param", None)
     if freeze_param is not None:
-        if "," in freeze_param
+        if "," in freeze_param:
             freeze_param = eval(freeze_param)
         if isinstance(freeze_param, Sequence):
             freeze_param = (freeze_param,)
