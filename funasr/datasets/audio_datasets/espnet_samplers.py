@@ -32,6 +32,7 @@ class EspnetStyleBatchSampler(DistributedSampler):
     def __init__(self, dataset,
                  batch_size,
                  batch_type="token",
+                 rank=None,
                  num_replicas=None,
                  rank_split=False,
                  shuffle=True,

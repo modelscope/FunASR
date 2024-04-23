@@ -168,7 +168,7 @@ class IndexDSJsonlRankSplit(torch.utils.data.Dataset):
             logging.warning("distributed is not initialized, only single shard")
         num_per_rank = total_num // world_size
         if num_per_rank * world_size < total_num:
-            logging.warning(f"Warning, jsonl file:{total_num} could not be divided by world_size: {world_size}")
+            logging.warning(f"Warning, jsonl file:{total_num} could not be divided by world_size: {world_size}, {path}")
 
         file_list_rank = file_list[rank * num_per_rank:(rank + 1) * num_per_rank]
 
@@ -182,7 +182,7 @@ class IndexDSJsonlRankSplit(torch.utils.data.Dataset):
                         contents.append(data['text'])
                     if "source" in data:  # for speech lab pretrain
                         prompt = data.get("prompt", "<ASR>")
-                        source = data["source"]
+                        source = data["source"].replace("/cpfs01", "/cpfs_speech/data")
                         target = data["target"]
                         source_len = data.get("source_len", 1)
                         target_len = data.get("target_len", 0)
