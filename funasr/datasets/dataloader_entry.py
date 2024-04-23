@@ -40,7 +40,21 @@ class DataloaderMapStyle:
 		self.dataset_val = dataset_val
 		self.kwargs = kwargs
 		
-	def build_iter(self, epoch=0):
+		# split dataset
+		self.data_split_num = kwargs["dataset_conf"].get("data_split_num", 1)
+		self.dataset_class = dataset_class
+		self.frontend = frontend
+		self.tokenizer = tokenizer
+		self.kwargs = kwargs
+		
+	def build_iter(self, epoch=0, data_split_i=0, **kwargs):
+		
+		# reload dataset slice
+		if self.data_split_num > 1:
+			del self.dataset_tr
+			self.dataset_tr = self.dataset_class(self.kwargs.get("train_data_set_list"), frontend=self.frontend, tokenizer=self.tokenizer,
+									   is_training=True, **self.kwargs.get("dataset_conf"), data_split_i=data_split_i)
+		
 		# dataloader
 		batch_sampler = self.kwargs["dataset_conf"].get("batch_sampler", "BatchSampler")
 		batch_sampler_val = None

@@ -150,13 +150,24 @@ class IndexDSJsonlRankSplit(torch.utils.data.Dataset):
     
     def __init__(self, path: str, **kwargs):
         super().__init__()
+        logging.info("building IndexDS")
         self.max_source_length = kwargs.get("max_source_length", 2048)
         self.min_source_length = kwargs.get("min_source_length", 0)
         self.max_target_length = kwargs.get("max_target_length", 2048)
         self.min_target_length = kwargs.get("min_target_length", 0)
-
+        
+        data_split_num = kwargs.get("data_split_num", 1)
+        data_split_i = kwargs.get("data_split_i", 0)
+        if not kwargs.get("is_training", True):
+            data_split_num = 1
+            data_split_i = 0
         with open(path, encoding='utf-8') as fin:
-            file_list = fin.readlines()
+            file_list_all = fin.readlines()
+            
+            num_per_slice = len(file_list_all) // data_split_num
+            file_list = file_list_all[data_split_i * num_per_slice:(data_split_i + 1) * num_per_slice]
+            logging.info(f"data_split_num: {data_split_num}, data_split_i: {data_split_i}, file_list: {file_list}, file_list_all: {file_list_all}")
+
 
         total_num = len(file_list)
         try:
