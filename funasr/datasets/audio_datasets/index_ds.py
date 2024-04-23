@@ -131,7 +131,7 @@ class IndexDSJsonlRankFull(torch.utils.data.Dataset):
         
         contents = []
         for file_json in file_list_rank:
-            with open(file_json, encoding='utf-8') as fin:
+            with open(file_json.strip(), encoding='utf-8') as fin:
                 for line in fin:
                     data = json.loads(line.strip())
                     if "text" in data:  # for sft
