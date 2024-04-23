@@ -125,7 +125,7 @@ class IndexDSJsonlRankFull(torch.utils.data.Dataset):
         self.contents = contents
         
         logging.info(
-            "total_num of samplers across ranks: {}".format(len(self.contents)))
+            "total_num of samplers across ranks: {}, {}".format(len(self.contents), path))
     
     def __len__(self):
         return len(self.contents)
@@ -207,7 +207,7 @@ class IndexDSJsonlRankSplit(torch.utils.data.Dataset):
         
         self.contents = contents
         
-        logging.info(f"total_num: {len(self.contents)} of samplers in ranks: {rank}")
+        logging.info(f"total_num: {len(self.contents)} of samplers in ranks: {rank}, file_list_rank: {file_list_rank}")
     
     def __len__(self):
         return len(self.contents)
