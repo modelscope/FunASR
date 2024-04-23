@@ -90,7 +90,8 @@ def main(**kwargs):
     # freeze_param
     freeze_param = kwargs.get("freeze_param", None)
     if freeze_param is not None:
-        freeze_param = eval(freeze_param)
+        if "," in freeze_param:
+            freeze_param = eval(freeze_param)
         if isinstance(freeze_param, Sequence):
             freeze_param = (freeze_param,)
         logging.info("freeze_param is not None: %s", freeze_param)
@@ -104,7 +105,7 @@ def main(**kwargs):
     if use_ddp:
         model = model.cuda(local_rank)
         model = DDP(model, device_ids=[local_rank],
-                    find_unused_parameters=kwargs.get("train_conf", {}).get("find_unused_parameters", True))
+                    find_unused_parameters=kwargs.get("train_conf", {}).get("find_unused_parameters", False))
     elif use_fsdp:
         # model = FSDP(model).cuda(local_rank)
 
