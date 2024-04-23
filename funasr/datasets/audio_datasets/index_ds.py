@@ -43,37 +43,39 @@ class IndexDSJsonlRankFull(torch.utils.data.Dataset):
             file_list = [path]
             
 
-        total_num = len(file_list)
-        try:
-            rank = dist.get_rank()
-            world_size = dist.get_world_size()
-        except:
-            rank = 0
-            world_size = 1
-            logging.info("distributed is not initialized, only single shard")
-        
-        if not kwargs.get("rank_split", False):
-            logging.info(f"Warning, rank_split disenabled, batch and shuffle data in global")
-            rank = 0
-            world_size = 1
-        
-        num_per_rank = total_num // world_size
-        if num_per_rank * world_size < total_num:
-            logging.info(f"Warning, jsonl file:{total_num} could not be divided by world_size: {world_size}, {path}")
-            total_num_needed = num_per_rank * world_size
+        # total_num = len(file_list)
+        # try:
+        #     rank = dist.get_rank()
+        #     world_size = dist.get_world_size()
+        # except:
+        #     rank = 0
+        #     world_size = 1
+        #     logging.info("distributed is not initialized, only single shard")
+        #
+        # if not kwargs.get("rank_split", False):
+        #     logging.info(f"Warning, rank_split disenabled, batch and shuffle data in global")
+        #     rank = 0
+        #     world_size = 1
+        #
+        # num_per_rank = total_num // world_size
+        # if num_per_rank * world_size < total_num:
+        #     logging.info(f"Warning, jsonl file:{total_num} could not be divided by world_size: {world_size}, {path}")
+        #     total_num_needed = num_per_rank * world_size
+        #
+        #     extra_num = total_num_needed - total_num
+        #     file_list_tmp = random.choices(file_list, k=extra_num)
+        #     file_list += file_list_tmp
+        #     logging.info(f"Warning, after random choices: {file_list}")
+        #
+        # file_list_rank = file_list[rank * num_per_rank:(rank + 1) * num_per_rank]
+        #
+        # logging.info(
+        #     f"is_training: {is_training}, file_list_rank: {file_list_rank}")
 
-            extra_num = total_num_needed - total_num
-            file_list_tmp = random.choices(file_list, k=extra_num)
-            file_list += file_list_tmp
-            logging.info(f"Warning, after random choices: {file_list}")
-
-        file_list_rank = file_list[rank * num_per_rank:(rank + 1) * num_per_rank]
-
-        logging.info(
-            f"is_training: {is_training}, file_list_rank: {file_list_rank}")
-
+        # contents = []
+        # for file_json in file_list_rank:
         contents = []
-        for file_json in file_list_rank:
+        for file_json in file_list:
             with open(file_json.strip(), encoding='utf-8') as fin:
                 for line in fin:
                     data = json.loads(line.strip())
