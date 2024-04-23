@@ -417,7 +417,7 @@ class AutoModel:
             return_raw_text = kwargs.get('return_raw_text', False)
             # step.3 compute punc model
             if self.punc_model is not None:
-                if not len(result["text"]):
+                if not len(result["text"].strip()):
                     if return_raw_text:
                         result['raw_text'] = ''
                 else:

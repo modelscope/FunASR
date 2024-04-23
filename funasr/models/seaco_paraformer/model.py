@@ -350,7 +350,7 @@ class SeacoParaformer(BiCifParaformer, Paraformer):
         pre_acoustic_embeds, pre_token_length = predictor_outs[0], predictor_outs[1]
         pre_token_length = pre_token_length.round().long()
         if torch.max(pre_token_length) < 1:
-            return []
+            return ([],)
 
         decoder_out = self._seaco_decode_with_ASF(encoder_out, 
                                                   encoder_out_lens,
