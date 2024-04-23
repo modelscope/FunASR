@@ -209,7 +209,7 @@ class SenseVoice(nn.Module):
         language = None if language == "auto" else language
         DecodingOptions["language"] = language
 
-        DecodingOptions["vocab_path"] = kwargs.get("vocab_path", None)
+        DecodingOptions["vocab_path"] = kwargs["tokenizer_conf"].get("vocab_path", None)
         
         
         if "without_timestamps" not in DecodingOptions:
@@ -421,7 +421,7 @@ class SenseVoiceRWKV(nn.Module):
         language = None if language == "auto" else language
         DecodingOptions["language"] = language
         
-        DecodingOptions["vocab_path"] = kwargs.get("vocab_path", None)
+        DecodingOptions["vocab_path"] = kwargs["tokenizer_conf"].get("vocab_path", None)
         
         if "without_timestamps" not in DecodingOptions:
             DecodingOptions["without_timestamps"] = True
