@@ -165,7 +165,7 @@ class IndexDSJsonlRankFull(torch.utils.data.Dataset):
         self.contents = contents
         
         logging.info(
-            "total_num of samplers across ranks: {}, {}".format(len(self.contents), path))
+            "total_num of samplers: {}, {}".format(len(self.contents), path))
     
     def __len__(self):
         return len(self.contents)
