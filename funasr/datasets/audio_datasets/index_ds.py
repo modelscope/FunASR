@@ -200,9 +200,9 @@ class IndexDSJsonlRankSplit(torch.utils.data.Dataset):
                         text_language = data.get("text_language", None)
                         if text_language is not None:
                             contents_i["text_language"] = text_language
-                        audio_language = data.get("audio_language", None)
-                        if audio_language is not None:
-                            contents_i["audio_language"] = audio_language
+                        # audio_language = data.get("audio_language", None)
+                        # if audio_language is not None:
+                        #     contents_i["audio_language"] = audio_language
                         contents.append(contents_i)
         
         self.contents = contents
