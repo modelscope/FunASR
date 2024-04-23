@@ -83,11 +83,12 @@ class IndexDSJsonlRankFull(torch.utils.data.Dataset):
         self.max_target_length = kwargs.get("max_target_length", 2048)
         self.min_target_length = kwargs.get("min_target_length", 0)
 
+        is_training = kwargs.get("is_training", True)
         if not (path.endswith(".jsonl") or path.endswith(".json")):
             # jsonl list file
             data_split_num = kwargs.get("data_split_num", 1)
             data_split_i = kwargs.get("data_split_i", 0)
-            is_training = kwargs.get("is_training", True)
+            
             if not is_training:
                 data_split_num = 1
                 data_split_i = 0
@@ -97,7 +98,7 @@ class IndexDSJsonlRankFull(torch.utils.data.Dataset):
                 num_per_slice = len(file_list_all) // data_split_num
                 file_list = file_list_all[data_split_i * num_per_slice:(data_split_i + 1) * num_per_slice]
                 logging.info(
-                    f"is_training: {is_training}, data_split_num: {data_split_num}, data_split_i: {data_split_i}, file_list: {file_list}, file_list_all: {file_list_all}")
+                    f"is_training: {is_training}, data_split_num: {data_split_num}, data_split_i: {data_split_i}, \nfile_list: {file_list}, \nfile_list_all: {file_list_all}")
         
         else:
             file_list = [path]
@@ -129,7 +130,9 @@ class IndexDSJsonlRankFull(torch.utils.data.Dataset):
 
         file_list_rank = file_list[rank * num_per_rank:(rank + 1) * num_per_rank]
 
-        
+        logging.info(
+            f"is_training: {is_training}, file_list_rank: {file_list_rank}")
+
         contents = []
         for file_json in file_list_rank:
             with open(file_json.strip(), encoding='utf-8') as fin:
