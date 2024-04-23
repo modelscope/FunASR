@@ -111,7 +111,7 @@ class IndexDSJsonlRankFull(torch.utils.data.Dataset):
             world_size = 1
             logging.info("distributed is not initialized, only single shard")
         
-        if kwargs.get("rank_split", False):
+        if not kwargs.get("rank_split", False):
             logging.info(f"Warning, rank_split enabled, batch and shuffle data in local rank")
             rank = 0
             world_size = 1
