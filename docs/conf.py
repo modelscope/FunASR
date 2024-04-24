@@ -19,7 +19,7 @@
 
 project = "FunASR"
 copyright = "2022, Speech Lab, Alibaba Group"
-author = "Speech Lab, Alibaba Grou"
+author = "Speech Lab, Alibaba Group"
 
 
 # -- General configuration ---------------------------------------------------
