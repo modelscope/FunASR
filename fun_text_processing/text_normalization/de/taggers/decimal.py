@@ -1,4 +1,3 @@
-
 import pynini
 from fun_text_processing.text_normalization.de.utils import get_abs_path
 from fun_text_processing.text_normalization.en.graph_utils import GraphFst, insert_space
@@ -7,34 +6,42 @@ from pynini.lib import pynutil
 quantities = pynini.string_file(get_abs_path("data/numbers/quantities.tsv"))
 
 
-def get_quantity(decimal: 'pynini.FstLike', cardinal_up_to_hundred: 'pynini.FstLike') -> 'pynini.FstLike':
+def get_quantity(
+    decimal: "pynini.FstLike", cardinal_up_to_hundred: "pynini.FstLike"
+) -> "pynini.FstLike":
     """
     Returns FST that transforms either a cardinal or decimal followed by a quantity into a numeral,
     e.g. 1 million -> integer_part: "eine" quantity: "million"
     e.g. 1.4 million -> integer_part: "eins" fractional_part: "vier" quantity: "million"
 
-    Args: 
+    Args:
         decimal: decimal FST
         cardinal_up_to_hundred: cardinal FST
     """
     numbers = cardinal_up_to_hundred
 
     res = (
-        pynutil.insert("integer_part: \"")
+        pynutil.insert('integer_part: "')
         + numbers
-        + pynutil.insert("\"")
+        + pynutil.insert('"')
         + pynini.accep(" ")
-        + pynutil.insert("quantity: \"")
+        + pynutil.insert('quantity: "')
         + quantities
-        + pynutil.insert("\"")
+        + pynutil.insert('"')
     )
-    res |= decimal + pynini.accep(" ") + pynutil.insert("quantity: \"") + quantities + pynutil.insert("\"")
+    res |= (
+        decimal
+        + pynini.accep(" ")
+        + pynutil.insert('quantity: "')
+        + quantities
+        + pynutil.insert('"')
+    )
     return res
 
 
 class DecimalFst(GraphFst):
     """
-    Finite state transducer for classifying decimal, e.g. 
+    Finite state transducer for classifying decimal, e.g.
         -11,4006 billion -> decimal { negative: "true" integer_part: "elf"  fractional_part: "vier null null sechs" quantity: "billion" preserve_order: true }
         1 billion -> decimal { integer_part: "eins" quantity: "billion" preserve_order: true }
     Args:
@@ -52,10 +59,16 @@ class DecimalFst(GraphFst):
         self.graph = graph_digit + pynini.closure(insert_space + graph_digit).optimize()
 
         point = pynutil.delete(",")
-        optional_graph_negative = pynini.closure(pynutil.insert("negative: ") + pynini.cross("-", "\"true\" "), 0, 1)
+        optional_graph_negative = pynini.closure(
+            pynutil.insert("negative: ") + pynini.cross("-", '"true" '), 0, 1
+        )
 
-        self.graph_fractional = pynutil.insert("fractional_part: \"") + self.graph + pynutil.insert("\"")
-        self.graph_integer = pynutil.insert("integer_part: \"") + cardinal.graph + pynutil.insert("\"")
+        self.graph_fractional = (
+            pynutil.insert('fractional_part: "') + self.graph + pynutil.insert('"')
+        )
+        self.graph_integer = (
+            pynutil.insert('integer_part: "') + cardinal.graph + pynutil.insert('"')
+        )
         final_graph_wo_sign = self.graph_integer + point + insert_space + self.graph_fractional
 
         self.final_graph_wo_negative = final_graph_wo_sign | get_quantity(

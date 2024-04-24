@@ -1,4 +1,3 @@
-
 import pynini
 from fun_text_processing.text_normalization.de.utils import get_abs_path, load_labels
 from fun_text_processing.text_normalization.en.graph_utils import (
@@ -33,24 +32,35 @@ class TimeFst(GraphFst):
 
         # add weight so when using inverse text normalization this conversion is depriotized
         night_to_early = pynutil.add_weight(
-            pynini.invert(pynini.string_file(get_abs_path("data/time/hour_to_night.tsv"))).optimize(), weight=0.0001
+            pynini.invert(
+                pynini.string_file(get_abs_path("data/time/hour_to_night.tsv"))
+            ).optimize(),
+            weight=0.0001,
         )
-        hour_to = pynini.invert(pynini.string_file(get_abs_path("data/time/hour_to.tsv"))).optimize()
-        minute_to = pynini.invert(pynini.string_file(get_abs_path("data/time/minute_to.tsv"))).optimize()
+        hour_to = pynini.invert(
+            pynini.string_file(get_abs_path("data/time/hour_to.tsv"))
+        ).optimize()
+        minute_to = pynini.invert(
+            pynini.string_file(get_abs_path("data/time/minute_to.tsv"))
+        ).optimize()
         time_zone_graph = pynini.invert(
-            convert_space(pynini.union(*[x[1] for x in load_labels(get_abs_path("data/time/time_zone.tsv"))]))
+            convert_space(
+                pynini.union(*[x[1] for x in load_labels(get_abs_path("data/time/time_zone.tsv"))])
+            )
         )
 
-        graph_zero = pynini.invert(pynini.string_file(get_abs_path("data/numbers/zero.tsv"))).optimize()
+        graph_zero = pynini.invert(
+            pynini.string_file(get_abs_path("data/numbers/zero.tsv"))
+        ).optimize()
         number_verbalization = graph_zero | cardinal_tagger.two_digit_non_zero
-        hour = pynutil.delete("hours: \"") + pynini.closure(DAMO_DIGIT, 1) + pynutil.delete("\"")
+        hour = pynutil.delete('hours: "') + pynini.closure(DAMO_DIGIT, 1) + pynutil.delete('"')
         hour_verbalized = hour @ number_verbalization @ pynini.cdrewrite(
             pynini.cross("eins", "ein"), "[BOS]", "[EOS]", DAMO_SIGMA
         ) + pynutil.insert(" uhr")
-        minute = pynutil.delete("minutes: \"") + pynini.closure(DAMO_DIGIT, 1) + pynutil.delete("\"")
-        zone = pynutil.delete("zone: \"") + time_zone_graph + pynutil.delete("\"")
+        minute = pynutil.delete('minutes: "') + pynini.closure(DAMO_DIGIT, 1) + pynutil.delete('"')
+        zone = pynutil.delete('zone: "') + time_zone_graph + pynutil.delete('"')
         optional_zone = pynini.closure(pynini.accep(" ") + zone, 0, 1)
-        second = pynutil.delete("seconds: \"") + pynini.closure(DAMO_DIGIT, 1) + pynutil.delete("\"")
+        second = pynutil.delete('seconds: "') + pynini.closure(DAMO_DIGIT, 1) + pynutil.delete('"')
         graph_hms = (
             hour_verbalized
             + pynini.accep(" ")
@@ -62,7 +72,8 @@ class TimeFst(GraphFst):
             + optional_zone
         )
         graph_hms @= pynini.cdrewrite(
-            pynini.cross("eins minuten", "eine minute") | pynini.cross("eins sekunden", "eine sekunde"),
+            pynini.cross("eins minuten", "eine minute")
+            | pynini.cross("eins sekunden", "eine sekunde"),
             pynini.union(" ", "[BOS]"),
             "",
             DAMO_SIGMA,
@@ -81,18 +92,26 @@ class TimeFst(GraphFst):
             + pynini.accep(" ")
             + pynutil.insert("nach ")
             # + hour @ number_verbalization
-            + hour @ pynini.cdrewrite(night_to_early, "[BOS]", "[EOS]", DAMO_SIGMA) @ number_verbalization
+            + hour
+            @ pynini.cdrewrite(night_to_early, "[BOS]", "[EOS]", DAMO_SIGMA)
+            @ number_verbalization
         )
         graph_m30_h = (
             minute @ pynini.cross("30", "halb")
             + pynini.accep(" ")
-            + hour @ pynini.cdrewrite(night_to_early, "[BOS]", "[EOS]", DAMO_SIGMA) @ hour_to @ number_verbalization
+            + hour
+            @ pynini.cdrewrite(night_to_early, "[BOS]", "[EOS]", DAMO_SIGMA)
+            @ hour_to
+            @ number_verbalization
         )
         graph_m_to_h = (
             minute @ minute_to @ min_29 @ (number_verbalization | pynini.cross("15", "viertel"))
             + pynini.accep(" ")
             + pynutil.insert("vor ")
-            + hour @ pynini.cdrewrite(night_to_early, "[BOS]", "[EOS]", DAMO_SIGMA) @ hour_to @ number_verbalization
+            + hour
+            @ pynini.cdrewrite(night_to_early, "[BOS]", "[EOS]", DAMO_SIGMA)
+            @ hour_to
+            @ number_verbalization
         )
 
         self.graph = (

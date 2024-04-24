@@ -1,4 +1,3 @@
-
 import pynini
 from fun_text_processing.inverse_text_normalization.fr.graph_utils import (
     GraphFst,
@@ -35,15 +34,22 @@ class MeasureFst(GraphFst):
         unit = graph_prefix.ques + unit
 
         optional_graph_negative = pynini.closure(
-            pynutil.insert("negative: ") + pynini.cross("moins", "\"true\"") + delete_extra_space, 0, 1
+            pynutil.insert("negative: ") + pynini.cross("moins", '"true"') + delete_extra_space,
+            0,
+            1,
         )
 
-        unit_misc = pynutil.insert("/") + (pynutil.delete("par") | pynutil.delete("à")) + delete_space + unit
+        unit_misc = (
+            pynutil.insert("/")
+            + (pynutil.delete("par") | pynutil.delete("à"))
+            + delete_space
+            + unit
+        )
 
         unit = (
-            pynutil.insert("units: \"")
+            pynutil.insert('units: "')
             + (unit | unit_misc | pynutil.add_weight(unit + delete_space + unit_misc, 0.01))
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
         )
 
         subgraph_decimal = (
@@ -67,9 +73,9 @@ class MeasureFst(GraphFst):
         subgraph_cardinal = (
             pynutil.insert("cardinal { ")
             + optional_graph_negative
-            + pynutil.insert("integer: \"")
+            + pynutil.insert('integer: "')
             + cardinal_graph
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
             + pynutil.insert(" }")
             + delete_extra_space
             + unit

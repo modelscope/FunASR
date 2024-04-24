@@ -10,6 +10,7 @@ import torch
 from funasr.models.transformer.model import Transformer
 from funasr.register import tables
 
+
 @tables.register("model_classes", "SANM")
 class SANM(Transformer):
     """

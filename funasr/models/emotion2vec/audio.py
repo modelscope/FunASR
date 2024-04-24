@@ -22,7 +22,6 @@ from funasr.models.emotion2vec.base import ModalitySpecificEncoder, get_alibi_bi
 
 class AudioEncoder(ModalitySpecificEncoder):
 
-
     def __init__(
         self,
         modality_cfg,
@@ -91,9 +90,7 @@ class AudioEncoder(ModalitySpecificEncoder):
         )
 
         decoder = (
-            Decoder1d(modality_cfg.decoder, embed_dim)
-            if modality_cfg.decoder is not None
-            else None
+            Decoder1d(modality_cfg.decoder, embed_dim) if modality_cfg.decoder is not None else None
         )
 
         alibi_bias_fn = partial(get_alibi_bias, alibi_biases=alibi_biases)
@@ -144,13 +141,9 @@ class AudioEncoder(ModalitySpecificEncoder):
                         output_lengths - 1,
                     )
                 ] = 1
-                padding_mask = (
-                    1 - padding_mask.flip([-1]).cumsum(-1).flip([-1])
-                ).bool()
+                padding_mask = (1 - padding_mask.flip([-1]).cumsum(-1).flip([-1])).bool()
             else:
-                padding_mask = torch.zeros(
-                    x.shape[:2], dtype=torch.bool, device=x.device
-                )
+                padding_mask = torch.zeros(x.shape[:2], dtype=torch.bool, device=x.device)
 
         return padding_mask
 

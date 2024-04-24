@@ -1,6 +1,3 @@
-
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import GraphFst
 from pynini.lib import pynutil
@@ -15,9 +12,9 @@ class PunctuationFst(GraphFst):
     def __init__(self):
         super().__init__(name="punctuation", kind="classify")
 
-        s = "!#$%&\'()*+,-./:;<=>?@^_`{|}~"
+        s = "!#$%&'()*+,-./:;<=>?@^_`{|}~"
         punct = pynini.union(*s)
 
-        graph = pynutil.insert("name: \"") + punct + pynutil.insert("\"")
+        graph = pynutil.insert('name: "') + punct + pynutil.insert('"')
 
         self.fst = graph.optimize()

@@ -1,4 +1,3 @@
-
 import os
 
 import pynini
@@ -86,10 +85,16 @@ class ClassifyFst(GraphFst):
                 | pynutil.add_weight(word_graph, 100)
             )
 
-            punct = pynutil.insert("tokens { ") + pynutil.add_weight(punct_graph, weight=1.1) + pynutil.insert(" }")
+            punct = (
+                pynutil.insert("tokens { ")
+                + pynutil.add_weight(punct_graph, weight=1.1)
+                + pynutil.insert(" }")
+            )
             token = pynutil.insert("tokens { ") + classify + pynutil.insert(" }")
             token_plus_punct = (
-                pynini.closure(punct + pynutil.insert(" ")) + token + pynini.closure(pynutil.insert(" ") + punct)
+                pynini.closure(punct + pynutil.insert(" "))
+                + token
+                + pynini.closure(pynutil.insert(" ") + punct)
             )
 
             graph = token_plus_punct + pynini.closure(delete_extra_space + token_plus_punct)

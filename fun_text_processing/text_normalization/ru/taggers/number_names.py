@@ -1,5 +1,3 @@
-
-
 # Copyright 2017 Google Inc.
 
 
@@ -30,18 +28,26 @@ def get_number_names():
     and 2) Ng, A. H., Gorman, K., and Sproat, R. 2017.
     Minimally supervised written-to-spoken text normalization. In ASRU, pages 665-670.
     """
-    a = pynini.Far(get_abs_path('data/utils/util_arithmetic.far'), mode='r')
-    d = a['DELTA_STAR']
-    f = a['IARITHMETIC_RESTRICTED']
-    g = pynini.Fst.read(get_abs_path('data/utils/g.fst'))
+    a = pynini.Far(get_abs_path("data/utils/util_arithmetic.far"), mode="r")
+    d = a["DELTA_STAR"]
+    f = a["IARITHMETIC_RESTRICTED"]
+    g = pynini.Fst.read(get_abs_path("data/utils/g.fst"))
     fg = (d @ (f @ (f @ (f @ g).optimize()).optimize()).optimize()).optimize()
     assert rewrite.top_rewrite("230", fg) == "(+ 200 30 +)"
 
     # Compiles lexicon transducers (L).
-    cardinal_name_nominative = pynini.string_file(get_abs_path("data/numbers/1_cardinals_nominative.tsv")).optimize()
-    cardinal_name_genitive = pynini.string_file(get_abs_path("data/numbers/2_cardinals_genitive.tsv")).optimize()
-    cardinal_name_dative = pynini.string_file(get_abs_path("data/numbers/3_cardinals_dative.tsv")).optimize()
-    cardinal_name_accusative = pynini.string_file(get_abs_path("data/numbers/4_cardinals_accusative.tsv")).optimize()
+    cardinal_name_nominative = pynini.string_file(
+        get_abs_path("data/numbers/1_cardinals_nominative.tsv")
+    ).optimize()
+    cardinal_name_genitive = pynini.string_file(
+        get_abs_path("data/numbers/2_cardinals_genitive.tsv")
+    ).optimize()
+    cardinal_name_dative = pynini.string_file(
+        get_abs_path("data/numbers/3_cardinals_dative.tsv")
+    ).optimize()
+    cardinal_name_accusative = pynini.string_file(
+        get_abs_path("data/numbers/4_cardinals_accusative.tsv")
+    ).optimize()
     cardinal_name_instrumental = pynini.string_file(
         get_abs_path("data/numbers/5_cardinals_instrumental.tsv")
     ).optimize()
@@ -77,18 +83,22 @@ def get_number_names():
         complex_numbers |= pynini.cross(f"(* {number} 1000 *)", f"{number}000")
 
     complex_numbers = (
-        DAMO_SIGMA + pynutil.add_weight(complex_numbers, -1) + pynini.closure(pynini.union(" ", ")", "(", "+", "*"))
+        DAMO_SIGMA
+        + pynutil.add_weight(complex_numbers, -1)
+        + pynini.closure(pynini.union(" ", ")", "(", "+", "*"))
     ).optimize()
     fg_ordinal = pynutil.add_weight(pynini.compose(fg, complex_numbers), -1) | fg
     ordinal_name = pynini.string_file(get_abs_path("data/numbers/ordinals.tsv"))
-    ordinal_l = (pynini.closure(cardinal_name_nominative + pynini.accep(" ")) + ordinal_name).optimize()
+    ordinal_l = (
+        pynini.closure(cardinal_name_nominative + pynini.accep(" ")) + ordinal_name
+    ).optimize()
 
     # Composes L with the leaf transducer (P), then composes that with FG.
-    p = a['LEAVES']
+    p = a["LEAVES"]
     number_names = {}
-    number_names['ordinal_number_names'] = (fg_ordinal @ (p @ ordinal_l)).optimize()
-    number_names['cardinal_number_names'] = (fg @ (p @ cardinal_l)).optimize()
-    number_names['cardinal_names_nominative'] = (fg @ (p @ cardinal_names_nominative_l)).optimize()
+    number_names["ordinal_number_names"] = (fg_ordinal @ (p @ ordinal_l)).optimize()
+    number_names["cardinal_number_names"] = (fg @ (p @ cardinal_l)).optimize()
+    number_names["cardinal_names_nominative"] = (fg @ (p @ cardinal_names_nominative_l)).optimize()
     return number_names
 
 
@@ -96,7 +106,7 @@ def get_alternative_formats():
     """
     Utils to get alternative formats for numbers.
     """
-    one_alternatives = load_labels(get_abs_path('data/numbers/cardinals_alternatives.tsv'))
+    one_alternatives = load_labels(get_abs_path("data/numbers/cardinals_alternatives.tsv"))
     one_thousand_map = []
     for k in one_alternatives:
         default, alternative = k
@@ -108,21 +118,21 @@ def get_alternative_formats():
     # Adapted from
     # https://github.com/google/TextNormalizationCoveringGrammars/blob/master/src/universal/thousands_punct.grm
     # Specifies common ways of delimiting thousands in digit strings.
-    t = pynini.Far(get_abs_path('data/utils/universal_thousands_punct.far'))
+    t = pynini.Far(get_abs_path("data/utils/universal_thousands_punct.far"))
     separators = (
-        pynutil.add_weight(t['dot_thousands'], 0.1)
-        | pynutil.add_weight(t['no_delimiter'], -0.1)
-        | pynutil.add_weight(t['space_thousands'], 0.1)
+        pynutil.add_weight(t["dot_thousands"], 0.1)
+        | pynutil.add_weight(t["no_delimiter"], -0.1)
+        | pynutil.add_weight(t["space_thousands"], 0.1)
     )
     alternative_formats = {}
-    alternative_formats['one_thousand_alternative'] = one_thousand_alternative.optimize()
-    alternative_formats['separators'] = separators.optimize()
+    alternative_formats["one_thousand_alternative"] = one_thousand_alternative.optimize()
+    alternative_formats["separators"] = separators.optimize()
     return alternative_formats
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from fun_text_processing.text_normalization.en.graph_utils import generator_main
 
     numbers = get_number_names()
     for k, v in numbers.items():
-        generator_main(f'{k}.far', {k: v})
+        generator_main(f"{k}.far", {k: v})

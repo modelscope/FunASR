@@ -53,7 +53,7 @@ class Filter:
 
         Args:
             processes given instance with process function
-            
+
         Returns: processed instance if instance belongs to expected class type or original instance
         """
         if instance.token_type != self.class_type:
@@ -71,7 +71,9 @@ def process_cardinal_1(instance: Instance) -> Instance:
     normalized = instance.normalized
     un_normalized = re.sub(r"[^0-9]", "", un_normalized)
     normalized = re.sub(r"[^a-z ]", "", normalized)
-    return Instance(token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized)
+    return Instance(
+        token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized
+    )
 
 
 def filter_ordinal_1(instance: Instance) -> bool:
@@ -84,7 +86,9 @@ def process_ordinal_1(instance: Instance) -> Instance:
     normalized = instance.normalized
     un_normalized = re.sub(r"[,\s]", "", un_normalized)
     normalized = re.sub(r"[^a-z ]", "", normalized)
-    return Instance(token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized)
+    return Instance(
+        token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized
+    )
 
 
 def filter_decimal_1(instance: Instance) -> bool:
@@ -97,7 +101,9 @@ def process_decimal_1(instance: Instance) -> Instance:
     un_normalized = re.sub(r",", "", un_normalized)
     normalized = instance.normalized
     normalized = re.sub(r"[^a-z ]", "", normalized)
-    return Instance(token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized)
+    return Instance(
+        token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized
+    )
 
 
 def filter_measure_1(instance: Instance) -> bool:
@@ -114,7 +120,9 @@ def process_measure_1(instance: Instance) -> Instance:
     normalized = re.sub(r"[^a-z\s]", "", normalized)
     normalized = re.sub(r"per ([a-z\s]*)s$", r"per \1", normalized)
     normalized = re.sub(r"[^a-z ]", "", normalized)
-    return Instance(token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized)
+    return Instance(
+        token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized
+    )
 
 
 def filter_money_1(instance: Instance) -> bool:
@@ -131,7 +139,9 @@ def process_money_1(instance: Instance) -> Instance:
     un_normalized = re.sub(r"(\d)m\s*$", r"\1 juta", un_normalized)
     un_normalized = re.sub(r"(\d)bn?\s*$", r"\1 milyar", un_normalized)
     normalized = re.sub(r"[^a-z ]", "", normalized)
-    return Instance(token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized)
+    return Instance(
+        token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized
+    )
 
 
 def filter_time_1(instance: Instance) -> bool:
@@ -146,7 +156,9 @@ def process_time_1(instance: Instance) -> Instance:
     un_normalized = re.sub(r"(\d)\s?p\s?m\s?", r"\1 p.m.", un_normalized)
     normalized = instance.normalized
     normalized = re.sub(r"[^a-z ]", "", normalized)
-    return Instance(token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized)
+    return Instance(
+        token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized
+    )
 
 
 def filter_plain_1(instance: Instance) -> bool:
@@ -157,7 +169,9 @@ def filter_plain_1(instance: Instance) -> bool:
 def process_plain_1(instance: Instance) -> Instance:
     un_normalized = instance.un_normalized
     normalized = instance.normalized
-    return Instance(token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized)
+    return Instance(
+        token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized
+    )
 
 
 def filter_punct_1(instance: Instance) -> bool:
@@ -168,7 +182,9 @@ def filter_punct_1(instance: Instance) -> bool:
 def process_punct_1(instance: Instance) -> Instance:
     un_normalized = instance.un_normalized
     normalized = instance.normalized
-    return Instance(token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized)
+    return Instance(
+        token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized
+    )
 
 
 def filter_date_1(instance: Instance) -> bool:
@@ -181,7 +197,9 @@ def process_date_1(instance: Instance) -> Instance:
     un_normalized = re.sub(r",", "", un_normalized)
     normalized = instance.normalized
     normalized = re.sub(r"[^a-z ]", "", normalized)
-    return Instance(token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized)
+    return Instance(
+        token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized
+    )
 
 
 def filter_letters_1(instance: Instance) -> bool:
@@ -193,7 +211,9 @@ def process_letters_1(instance: Instance) -> Instance:
     un_normalized = instance.un_normalized
     normalized = instance.normalized
     normalized = re.sub(r"[^a-z ]", "", normalized)
-    return Instance(token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized)
+    return Instance(
+        token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized
+    )
 
 
 def filter_verbatim_1(instance: Instance) -> bool:
@@ -204,7 +224,9 @@ def filter_verbatim_1(instance: Instance) -> bool:
 def process_verbatim_1(instance: Instance) -> Instance:
     un_normalized = instance.un_normalized
     normalized = instance.normalized
-    return Instance(token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized)
+    return Instance(
+        token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized
+    )
 
 
 def filter_digit_1(instance: Instance) -> bool:
@@ -216,7 +238,9 @@ def process_digit_1(instance: Instance) -> Instance:
     un_normalized = instance.un_normalized
     normalized = instance.normalized
     normalized = re.sub(r"[^a-z ]", "", normalized)
-    return Instance(token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized)
+    return Instance(
+        token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized
+    )
 
 
 def filter_telephone_1(instance: Instance) -> bool:
@@ -228,7 +252,9 @@ def process_telephone_1(instance: Instance) -> Instance:
     un_normalized = instance.un_normalized
     normalized = instance.normalized
     normalized = re.sub(r"[^a-z ]", "", normalized)
-    return Instance(token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized)
+    return Instance(
+        token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized
+    )
 
 
 def filter_electronic_1(instance: Instance) -> bool:
@@ -240,7 +266,9 @@ def process_electronic_1(instance: Instance) -> Instance:
     un_normalized = instance.un_normalized
     normalized = instance.normalized
     normalized = re.sub(r"[^a-z ]", "", normalized)
-    return Instance(token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized)
+    return Instance(
+        token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized
+    )
 
 
 def filter_fraction_1(instance: Instance) -> bool:
@@ -252,7 +280,9 @@ def process_fraction_1(instance: Instance) -> Instance:
     un_normalized = instance.un_normalized
     normalized = instance.normalized
     normalized = re.sub(r"[^a-z ]", "", normalized)
-    return Instance(token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized)
+    return Instance(
+        token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized
+    )
 
 
 def filter_address_1(instance: Instance) -> bool:
@@ -264,27 +294,51 @@ def process_address_1(instance: Instance) -> Instance:
     un_normalized = instance.un_normalized
     normalized = instance.normalized
     normalized = re.sub(r"[^a-z ]", "", normalized)
-    return Instance(token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized)
+    return Instance(
+        token_type=instance.token_type, un_normalized=un_normalized, normalized=normalized
+    )
 
 
 filters = []
-filters.append(Filter(class_type="CARDINAL", process_func=process_cardinal_1, filter_func=filter_cardinal_1))
-filters.append(Filter(class_type="ORDINAL", process_func=process_ordinal_1, filter_func=filter_ordinal_1))
-filters.append(Filter(class_type="DECIMAL", process_func=process_decimal_1, filter_func=filter_decimal_1))
-filters.append(Filter(class_type="MEASURE", process_func=process_measure_1, filter_func=filter_measure_1))
+filters.append(
+    Filter(class_type="CARDINAL", process_func=process_cardinal_1, filter_func=filter_cardinal_1)
+)
+filters.append(
+    Filter(class_type="ORDINAL", process_func=process_ordinal_1, filter_func=filter_ordinal_1)
+)
+filters.append(
+    Filter(class_type="DECIMAL", process_func=process_decimal_1, filter_func=filter_decimal_1)
+)
+filters.append(
+    Filter(class_type="MEASURE", process_func=process_measure_1, filter_func=filter_measure_1)
+)
 filters.append(Filter(class_type="MONEY", process_func=process_money_1, filter_func=filter_money_1))
 filters.append(Filter(class_type="TIME", process_func=process_time_1, filter_func=filter_time_1))
 
 filters.append(Filter(class_type="DATE", process_func=process_date_1, filter_func=filter_date_1))
 filters.append(Filter(class_type="PLAIN", process_func=process_plain_1, filter_func=filter_plain_1))
 filters.append(Filter(class_type="PUNCT", process_func=process_punct_1, filter_func=filter_punct_1))
-filters.append(Filter(class_type="LETTERS", process_func=process_letters_1, filter_func=filter_letters_1))
-filters.append(Filter(class_type="VERBATIM", process_func=process_verbatim_1, filter_func=filter_verbatim_1))
+filters.append(
+    Filter(class_type="LETTERS", process_func=process_letters_1, filter_func=filter_letters_1)
+)
+filters.append(
+    Filter(class_type="VERBATIM", process_func=process_verbatim_1, filter_func=filter_verbatim_1)
+)
 filters.append(Filter(class_type="DIGIT", process_func=process_digit_1, filter_func=filter_digit_1))
-filters.append(Filter(class_type="TELEPHONE", process_func=process_telephone_1, filter_func=filter_telephone_1))
-filters.append(Filter(class_type="ELECTRONIC", process_func=process_electronic_1, filter_func=filter_electronic_1))
-filters.append(Filter(class_type="FRACTION", process_func=process_fraction_1, filter_func=filter_fraction_1))
-filters.append(Filter(class_type="ADDRESS", process_func=process_address_1, filter_func=filter_address_1))
+filters.append(
+    Filter(class_type="TELEPHONE", process_func=process_telephone_1, filter_func=filter_telephone_1)
+)
+filters.append(
+    Filter(
+        class_type="ELECTRONIC", process_func=process_electronic_1, filter_func=filter_electronic_1
+    )
+)
+filters.append(
+    Filter(class_type="FRACTION", process_func=process_fraction_1, filter_func=filter_fraction_1)
+)
+filters.append(
+    Filter(class_type="ADDRESS", process_func=process_address_1, filter_func=filter_address_1)
+)
 filters.append(Filter(class_type=EOS_TYPE, process_func=lambda x: x, filter_func=lambda x: True))
 
 
@@ -313,8 +367,10 @@ def filter_loaded_data(data: List[Instance], verbose: bool = False) -> List[Inst
 
 def parse_args():
     parser = ArgumentParser()
-    parser.add_argument("--input", help="input file path", type=str, default='./id_with_types/output-00001-of-00100')
-    parser.add_argument("--verbose", help="print filtered instances", action='store_true')
+    parser.add_argument(
+        "--input", help="input file path", type=str, default="./id_with_types/output-00001-of-00100"
+    )
+    parser.add_argument("--verbose", help="print filtered instances", action="store_true")
     return parser.parse_args()
 
 

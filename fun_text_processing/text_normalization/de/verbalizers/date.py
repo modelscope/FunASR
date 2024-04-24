@@ -1,4 +1,3 @@
-
 import pynini
 from fun_text_processing.text_normalization.de.utils import get_abs_path, load_labels
 from fun_text_processing.text_normalization.en.graph_utils import (
@@ -25,20 +24,28 @@ class DateFst(GraphFst):
     def __init__(self, ordinal: GraphFst, deterministic: bool = True):
         super().__init__(name="date", kind="verbalize", deterministic=deterministic)
 
-        day_cardinal = pynutil.delete("day: \"") + pynini.closure(DAMO_NOT_QUOTE, 1) + pynutil.delete("\"")
-        day = day_cardinal @ pynini.cdrewrite(ordinal.ordinal_stem, "", "[EOS]", DAMO_SIGMA) + pynutil.insert("ter")
+        day_cardinal = (
+            pynutil.delete('day: "') + pynini.closure(DAMO_NOT_QUOTE, 1) + pynutil.delete('"')
+        )
+        day = day_cardinal @ pynini.cdrewrite(
+            ordinal.ordinal_stem, "", "[EOS]", DAMO_SIGMA
+        ) + pynutil.insert("ter")
 
-        months_names = pynini.union(*[x[1] for x in load_labels(get_abs_path("data/months/abbr_to_name.tsv"))])
-        month = pynutil.delete("month: \"") + pynini.closure(DAMO_NOT_QUOTE, 1) + pynutil.delete("\"")
+        months_names = pynini.union(
+            *[x[1] for x in load_labels(get_abs_path("data/months/abbr_to_name.tsv"))]
+        )
+        month = pynutil.delete('month: "') + pynini.closure(DAMO_NOT_QUOTE, 1) + pynutil.delete('"')
         final_month = month @ months_names
         final_month |= month @ pynini.difference(DAMO_SIGMA, months_names) @ pynini.cdrewrite(
             ordinal.ordinal_stem, "", "[EOS]", DAMO_SIGMA
         ) + pynutil.insert("ter")
 
-        year = pynutil.delete("year: \"") + pynini.closure(DAMO_NOT_QUOTE, 1) + pynutil.delete("\"")
+        year = pynutil.delete('year: "') + pynini.closure(DAMO_NOT_QUOTE, 1) + pynutil.delete('"')
 
         # day month year
-        graph_dmy = day + pynini.accep(" ") + final_month + pynini.closure(pynini.accep(" ") + year, 0, 1)
+        graph_dmy = (
+            day + pynini.accep(" ") + final_month + pynini.closure(pynini.accep(" ") + year, 0, 1)
+        )
         graph_dmy |= final_month + pynini.accep(" ") + year
 
         self.graph = graph_dmy | year

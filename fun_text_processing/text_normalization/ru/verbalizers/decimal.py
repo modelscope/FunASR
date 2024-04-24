@@ -1,7 +1,9 @@
-
-
 import pynini
-from fun_text_processing.text_normalization.en.graph_utils import DAMO_NOT_QUOTE, GraphFst, delete_space
+from fun_text_processing.text_normalization.en.graph_utils import (
+    DAMO_NOT_QUOTE,
+    GraphFst,
+    delete_space,
+)
 from pynini.lib import pynutil
 
 
@@ -19,21 +21,26 @@ class DecimalFst(GraphFst):
     def __init__(self, deterministic: bool = True):
         super().__init__(name="decimal", kind="verbalize", deterministic=deterministic)
 
-        optional_sign = pynini.closure(pynini.cross("negative: \"true\" ", "минус "), 0, 1)
-        integer = pynutil.delete(" \"") + pynini.closure(DAMO_NOT_QUOTE, 1) + pynutil.delete("\"")
+        optional_sign = pynini.closure(pynini.cross('negative: "true" ', "минус "), 0, 1)
+        integer = pynutil.delete(' "') + pynini.closure(DAMO_NOT_QUOTE, 1) + pynutil.delete('"')
         integer_part = pynutil.delete("integer_part:") + integer
         fractional_part = pynutil.delete("fractional_part:") + integer
         optional_quantity_part = pynini.closure(
             pynini.accep(" ")
-            + pynutil.delete("quantity: \"")
+            + pynutil.delete('quantity: "')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\""),
+            + pynutil.delete('"'),
             0,
             1,
         )
 
         self.graph = (
-            optional_sign + integer_part + pynini.accep(" ") + fractional_part + optional_quantity_part + delete_space
+            optional_sign
+            + integer_part
+            + pynini.accep(" ")
+            + fractional_part
+            + optional_quantity_part
+            + delete_space
         )
         delete_tokens = self.delete_tokens(self.graph)
         self.fst = delete_tokens.optimize()

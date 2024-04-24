@@ -7,9 +7,7 @@ def default_fn(data):
 
 class MapperIterDataPipe(IterableDataset):
 
-    def __init__(self,
-                 datapipe,
-                 fn=default_fn):
+    def __init__(self, datapipe, fn=default_fn):
         self.datapipe = datapipe
         self.fn = fn
 

@@ -5,6 +5,7 @@ import torch
 from funasr.models.transformer.utils.nets_utils import make_pad_mask
 from funasr.register import tables
 
+
 @tables.register("normalize_classes", "UtteranceMVN")
 class UtteranceMVN(torch.nn.Module):
     def __init__(

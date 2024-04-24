@@ -11,11 +11,16 @@ import copy
 import librosa
 import numpy as np
 
-from .utils.utils import (CharTokenizer, Hypothesis, ONNXRuntimeError,
-                          OrtInferSession, TokenIDConverter, get_logger,
-                          read_yaml)
-from .utils.postprocess_utils import (sentence_postprocess,
-                                      sentence_postprocess_sentencepiece)
+from .utils.utils import (
+    CharTokenizer,
+    Hypothesis,
+    ONNXRuntimeError,
+    OrtInferSession,
+    TokenIDConverter,
+    get_logger,
+    read_yaml,
+)
+from .utils.postprocess_utils import sentence_postprocess, sentence_postprocess_sentencepiece
 from .utils.frontend import WavFrontend
 from .utils.timestamp_utils import time_stamp_lfr6_onnx
 from .utils.utils import pad_list
@@ -23,72 +28,70 @@ from .utils.utils import pad_list
 logging = get_logger()
 
 
-class Paraformer():
+class Paraformer:
     """
     Author: Speech Lab of DAMO Academy, Alibaba Group
     Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition
     https://arxiv.org/abs/2206.08317
     """
-    def __init__(self, model_dir: Union[str, Path] = None,
-                 batch_size: int = 1,
-                 device_id: Union[str, int] = "-1",
-                 plot_timestamp_to: str = "",
-                 quantize: bool = False,
-                 intra_op_num_threads: int = 4,
-                 cache_dir: str = None,
-                 **kwargs
-                 ):
+
+    def __init__(
+        self,
+        model_dir: Union[str, Path] = None,
+        batch_size: int = 1,
+        device_id: Union[str, int] = "-1",
+        plot_timestamp_to: str = "",
+        quantize: bool = False,
+        intra_op_num_threads: int = 4,
+        cache_dir: str = None,
+        **kwargs,
+    ):
         if not Path(model_dir).exists():
             try:
                 from modelscope.hub.snapshot_download import snapshot_download
             except:
-                raise "You are exporting model from modelscope, please install modelscope and try it again. To install modelscope, you could:\n" \
-                      "\npip3 install -U modelscope\n" \
-                      "For the users in China, you could install with the command:\n" \
-                      "\npip3 install -U modelscope -i https://mirror.sjtu.edu.cn/pypi/web/simple"
+                raise "You are exporting model from modelscope, please install modelscope and try it again. To install modelscope, you could:\n" "\npip3 install -U modelscope\n" "For the users in China, you could install with the command:\n" "\npip3 install -U modelscope -i https://mirror.sjtu.edu.cn/pypi/web/simple"
             try:
                 model_dir = snapshot_download(model_dir, cache_dir=cache_dir)
             except:
-                raise "model_dir must be model_name in modelscope or local path downloaded from modelscope, but is {}".format(model_dir)
-        
-        model_file = os.path.join(model_dir, 'model.onnx')
+                raise "model_dir must be model_name in modelscope or local path downloaded from modelscope, but is {}".format(
+                    model_dir
+                )
+
+        model_file = os.path.join(model_dir, "model.onnx")
         if quantize:
-            model_file = os.path.join(model_dir, 'model_quant.onnx')
+            model_file = os.path.join(model_dir, "model_quant.onnx")
         if not os.path.exists(model_file):
             print(".onnx is not exist, begin to export onnx")
             try:
                 from funasr import AutoModel
             except:
-                raise "You are exporting onnx, please install funasr and try it again. To install funasr, you could:\n" \
-                      "\npip3 install -U funasr\n" \
-                      "For the users in China, you could install with the command:\n" \
-                      "\npip3 install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple"
+                raise "You are exporting onnx, please install funasr and try it again. To install funasr, you could:\n" "\npip3 install -U funasr\n" "For the users in China, you could install with the command:\n" "\npip3 install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple"
 
             model = AutoModel(model=model_dir)
             model_dir = model.export(type="onnx", quantize=quantize, **kwargs)
-            
-        config_file = os.path.join(model_dir, 'config.yaml')
-        cmvn_file = os.path.join(model_dir, 'am.mvn')
+
+        config_file = os.path.join(model_dir, "config.yaml")
+        cmvn_file = os.path.join(model_dir, "am.mvn")
         config = read_yaml(config_file)
-        token_list = os.path.join(model_dir, 'tokens.json')
-        with open(token_list, 'r', encoding='utf-8') as f:
+        token_list = os.path.join(model_dir, "tokens.json")
+        with open(token_list, "r", encoding="utf-8") as f:
             token_list = json.load(f)
 
         self.converter = TokenIDConverter(token_list)
         self.tokenizer = CharTokenizer()
-        self.frontend = WavFrontend(
-            cmvn_file=cmvn_file,
-            **config['frontend_conf']
+        self.frontend = WavFrontend(cmvn_file=cmvn_file, **config["frontend_conf"])
+        self.ort_infer = OrtInferSession(
+            model_file, device_id, intra_op_num_threads=intra_op_num_threads
         )
-        self.ort_infer = OrtInferSession(model_file, device_id, intra_op_num_threads=intra_op_num_threads)
         self.batch_size = batch_size
         self.plot_timestamp_to = plot_timestamp_to
-        if "predictor_bias" in config['model_conf'].keys():
-            self.pred_bias = config['model_conf']['predictor_bias']
+        if "predictor_bias" in config["model_conf"].keys():
+            self.pred_bias = config["model_conf"]["predictor_bias"]
         else:
             self.pred_bias = 0
         if "lang" in config:
-            self.language = config['lang']
+            self.language = config["lang"]
         else:
             self.language = None
 
@@ -97,7 +100,7 @@ class Paraformer():
         waveform_nums = len(waveform_list)
         asr_res = []
         for beg_idx in range(0, waveform_nums, self.batch_size):
-            
+
             end_idx = min(waveform_nums, beg_idx + self.batch_size)
             feats, feats_len = self.extract_feat(waveform_list[beg_idx:end_idx])
             try:
@@ -109,9 +112,9 @@ class Paraformer():
                 else:
                     us_alphas, us_peaks = None, None
             except ONNXRuntimeError:
-                #logging.warning(traceback.format_exc())
+                # logging.warning(traceback.format_exc())
                 logging.warning("input wav is silence or noise")
-                preds = ['']
+                preds = [""]
             else:
                 preds = self.decode(am_scores, valid_token_lens)
                 if us_peaks is None:
@@ -120,43 +123,58 @@ class Paraformer():
                             pred = sentence_postprocess_sentencepiece(pred)
                         else:
                             pred = sentence_postprocess(pred)
-                        asr_res.append({'preds': pred})
+                        asr_res.append({"preds": pred})
                 else:
                     for pred, us_peaks_ in zip(preds, us_peaks):
                         raw_tokens = pred
-                        timestamp, timestamp_raw = time_stamp_lfr6_onnx(us_peaks_, copy.copy(raw_tokens))
-                        text_proc, timestamp_proc, _ = sentence_postprocess(raw_tokens, timestamp_raw)
+                        timestamp, timestamp_raw = time_stamp_lfr6_onnx(
+                            us_peaks_, copy.copy(raw_tokens)
+                        )
+                        text_proc, timestamp_proc, _ = sentence_postprocess(
+                            raw_tokens, timestamp_raw
+                        )
                         # logging.warning(timestamp)
                         if len(self.plot_timestamp_to):
-                            self.plot_wave_timestamp(waveform_list[0], timestamp, self.plot_timestamp_to)
-                        asr_res.append({'preds': text_proc, 'timestamp': timestamp_proc, "raw_tokens": raw_tokens})
+                            self.plot_wave_timestamp(
+                                waveform_list[0], timestamp, self.plot_timestamp_to
+                            )
+                        asr_res.append(
+                            {
+                                "preds": text_proc,
+                                "timestamp": timestamp_proc,
+                                "raw_tokens": raw_tokens,
+                            }
+                        )
         return asr_res
 
     def plot_wave_timestamp(self, wav, text_timestamp, dest):
         # TODO: Plot the wav and timestamp results with matplotlib
         import matplotlib
-        matplotlib.use('Agg')
-        matplotlib.rc("font", family='Alibaba PuHuiTi')  # set it to a font that your system supports
+
+        matplotlib.use("Agg")
+        matplotlib.rc(
+            "font", family="Alibaba PuHuiTi"
+        )  # set it to a font that your system supports
         import matplotlib.pyplot as plt
+
         fig, ax1 = plt.subplots(figsize=(11, 3.5), dpi=320)
         ax2 = ax1.twinx()
         ax2.set_ylim([0, 2.0])
         # plot waveform
         ax1.set_ylim([-0.3, 0.3])
         time = np.arange(wav.shape[0]) / 16000
-        ax1.plot(time, wav/wav.max()*0.3, color='gray', alpha=0.4)
+        ax1.plot(time, wav / wav.max() * 0.3, color="gray", alpha=0.4)
         # plot lines and text
-        for (char, start, end) in text_timestamp:
-            ax1.vlines(start, -0.3, 0.3, ls='--')
-            ax1.vlines(end, -0.3, 0.3, ls='--')
-            x_adj = 0.045 if char != '<sil>' else 0.12
+        for char, start, end in text_timestamp:
+            ax1.vlines(start, -0.3, 0.3, ls="--")
+            ax1.vlines(end, -0.3, 0.3, ls="--")
+            x_adj = 0.045 if char != "<sil>" else 0.12
             ax1.text((start + end) * 0.5 - x_adj, 0, char)
         # plt.legend()
         plotname = "{}/timestamp.png".format(dest)
-        plt.savefig(plotname, bbox_inches='tight')
+        plt.savefig(plotname, bbox_inches="tight")
 
-    def load_data(self,
-                  wav_content: Union[str, np.ndarray, List[str]], fs: int = None) -> List:
+    def load_data(self, wav_content: Union[str, np.ndarray, List[str]], fs: int = None) -> List:
         def load_wav(path: str) -> np.ndarray:
             waveform, _ = librosa.load(path, sr=fs)
             return waveform
@@ -170,12 +188,9 @@ class Paraformer():
         if isinstance(wav_content, list):
             return [load_wav(path) for path in wav_content]
 
-        raise TypeError(
-            f'The type of {wav_content} is not in [str, np.ndarray, list]')
+        raise TypeError(f"The type of {wav_content} is not in [str, np.ndarray, list]")
 
-    def extract_feat(self,
-                     waveform_list: List[np.ndarray]
-                     ) -> Tuple[np.ndarray, np.ndarray]:
+    def extract_feat(self, waveform_list: List[np.ndarray]) -> Tuple[np.ndarray, np.ndarray]:
         feats, feats_len = [], []
         for waveform in waveform_list:
             speech, _ = self.frontend.fbank(waveform)
@@ -191,24 +206,23 @@ class Paraformer():
     def pad_feats(feats: List[np.ndarray], max_feat_len: int) -> np.ndarray:
         def pad_feat(feat: np.ndarray, cur_len: int) -> np.ndarray:
             pad_width = ((0, max_feat_len - cur_len), (0, 0))
-            return np.pad(feat, pad_width, 'constant', constant_values=0)
+            return np.pad(feat, pad_width, "constant", constant_values=0)
 
         feat_res = [pad_feat(feat, feat.shape[0]) for feat in feats]
         feats = np.array(feat_res).astype(np.float32)
         return feats
 
-    def infer(self, feats: np.ndarray,
-              feats_len: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def infer(self, feats: np.ndarray, feats_len: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         outputs = self.ort_infer([feats, feats_len])
         return outputs
 
     def decode(self, am_scores: np.ndarray, token_nums: int) -> List[str]:
-        return [self.decode_one(am_score, token_num)
-                for am_score, token_num in zip(am_scores, token_nums)]
+        return [
+            self.decode_one(am_score, token_num)
+            for am_score, token_num in zip(am_scores, token_nums)
+        ]
 
-    def decode_one(self,
-                   am_score: np.ndarray,
-                   valid_token_num: int) -> List[str]:
+    def decode_one(self, am_score: np.ndarray, valid_token_num: int) -> List[str]:
         yseq = am_score.argmax(axis=-1)
         score = am_score.max(axis=-1)
         score = np.sum(score, axis=-1)
@@ -227,7 +241,7 @@ class Paraformer():
 
         # Change integer-ids to tokens
         token = self.converter.ids2tokens(token_int)
-        token = token[:valid_token_num-self.pred_bias]
+        token = token[: valid_token_num - self.pred_bias]
         # texts = sentence_postprocess(token)
         return token
 
@@ -238,81 +252,80 @@ class ContextualParaformer(Paraformer):
     Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition
     https://arxiv.org/abs/2206.08317
     """
-    def __init__(self, model_dir: Union[str, Path] = None,
-                 batch_size: int = 1,
-                 device_id: Union[str, int] = "-1",
-                 plot_timestamp_to: str = "",
-                 quantize: bool = False,
-                 intra_op_num_threads: int = 4,
-                 cache_dir: str = None,
-                 **kwargs
-                 ):
+
+    def __init__(
+        self,
+        model_dir: Union[str, Path] = None,
+        batch_size: int = 1,
+        device_id: Union[str, int] = "-1",
+        plot_timestamp_to: str = "",
+        quantize: bool = False,
+        intra_op_num_threads: int = 4,
+        cache_dir: str = None,
+        **kwargs,
+    ):
 
         if not Path(model_dir).exists():
             try:
                 from modelscope.hub.snapshot_download import snapshot_download
             except:
-                raise "You are exporting model from modelscope, please install modelscope and try it again. To install modelscope, you could:\n" \
-                      "\npip3 install -U modelscope\n" \
-                      "For the users in China, you could install with the command:\n" \
-                      "\npip3 install -U modelscope -i https://mirror.sjtu.edu.cn/pypi/web/simple"
+                raise "You are exporting model from modelscope, please install modelscope and try it again. To install modelscope, you could:\n" "\npip3 install -U modelscope\n" "For the users in China, you could install with the command:\n" "\npip3 install -U modelscope -i https://mirror.sjtu.edu.cn/pypi/web/simple"
             try:
                 model_dir = snapshot_download(model_dir, cache_dir=cache_dir)
             except:
-                raise "model_dir must be model_name in modelscope or local path downloaded from modelscope, but is {}".format(model_dir)
-        
+                raise "model_dir must be model_name in modelscope or local path downloaded from modelscope, but is {}".format(
+                    model_dir
+                )
+
         if quantize:
-            model_bb_file = os.path.join(model_dir, 'model_quant.onnx')
-            model_eb_file = os.path.join(model_dir, 'model_eb_quant.onnx')
+            model_bb_file = os.path.join(model_dir, "model_quant.onnx")
+            model_eb_file = os.path.join(model_dir, "model_eb_quant.onnx")
         else:
-            model_bb_file = os.path.join(model_dir, 'model.onnx')
-            model_eb_file = os.path.join(model_dir, 'model_eb.onnx')
+            model_bb_file = os.path.join(model_dir, "model.onnx")
+            model_eb_file = os.path.join(model_dir, "model_eb.onnx")
 
         if not (os.path.exists(model_eb_file) and os.path.exists(model_bb_file)):
             print(".onnx is not exist, begin to export onnx")
             try:
                 from funasr import AutoModel
             except:
-                raise "You are exporting onnx, please install funasr and try it again. To install funasr, you could:\n" \
-                      "\npip3 install -U funasr\n" \
-                      "For the users in China, you could install with the command:\n" \
-                      "\npip3 install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple"
+                raise "You are exporting onnx, please install funasr and try it again. To install funasr, you could:\n" "\npip3 install -U funasr\n" "For the users in China, you could install with the command:\n" "\npip3 install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple"
 
             model = AutoModel(model=model_dir)
             model_dir = model.export(type="onnx", quantize=quantize, **kwargs)
-            
-        config_file = os.path.join(model_dir, 'config.yaml')
-        cmvn_file = os.path.join(model_dir, 'am.mvn')
+
+        config_file = os.path.join(model_dir, "config.yaml")
+        cmvn_file = os.path.join(model_dir, "am.mvn")
         config = read_yaml(config_file)
-        token_list = os.path.join(model_dir, 'tokens.json')
-        with open(token_list, 'r', encoding='utf-8') as f:
+        token_list = os.path.join(model_dir, "tokens.json")
+        with open(token_list, "r", encoding="utf-8") as f:
             token_list = json.load(f)
-            
+
         # revert token_list into vocab dict
         self.vocab = {}
         for i, token in enumerate(token_list):
-                self.vocab[token] = i
+            self.vocab[token] = i
 
         self.converter = TokenIDConverter(token_list)
         self.tokenizer = CharTokenizer()
-        self.frontend = WavFrontend(
-            cmvn_file=cmvn_file,
-            **config['frontend_conf']
+        self.frontend = WavFrontend(cmvn_file=cmvn_file, **config["frontend_conf"])
+        self.ort_infer_bb = OrtInferSession(
+            model_bb_file, device_id, intra_op_num_threads=intra_op_num_threads
         )
-        self.ort_infer_bb = OrtInferSession(model_bb_file, device_id, intra_op_num_threads=intra_op_num_threads)
-        self.ort_infer_eb = OrtInferSession(model_eb_file, device_id, intra_op_num_threads=intra_op_num_threads)
+        self.ort_infer_eb = OrtInferSession(
+            model_eb_file, device_id, intra_op_num_threads=intra_op_num_threads
+        )
 
         self.batch_size = batch_size
         self.plot_timestamp_to = plot_timestamp_to
-        if "predictor_bias" in config['model_conf'].keys():
-            self.pred_bias = config['model_conf']['predictor_bias']
+        if "predictor_bias" in config["model_conf"].keys():
+            self.pred_bias = config["model_conf"]["predictor_bias"]
         else:
             self.pred_bias = 0
 
-    def __call__(self, 
-                 wav_content: Union[str, np.ndarray, List[str]], 
-                 hotwords: str,
-                 **kwargs) -> List:
+    def __call__(
+        self, wav_content: Union[str, np.ndarray, List[str]], hotwords: str, **kwargs
+    ) -> List:
         # make hotword list
         hotwords, hotwords_length = self.proc_hotword(hotwords)
         # import pdb; pdb.set_trace()
@@ -333,14 +346,14 @@ class ContextualParaformer(Paraformer):
                 outputs = self.bb_infer(feats, feats_len, bias_embed)
                 am_scores, valid_token_lens = outputs[0], outputs[1]
             except ONNXRuntimeError:
-                #logging.warning(traceback.format_exc())
+                # logging.warning(traceback.format_exc())
                 logging.warning("input wav is silence or noise")
-                preds = ['']
+                preds = [""]
             else:
                 preds = self.decode(am_scores, valid_token_lens)
                 for pred in preds:
                     pred = sentence_postprocess(pred)
-                    asr_res.append({'preds': pred})
+                    asr_res.append({"preds": pred})
         return asr_res
 
     def proc_hotword(self, hotwords):
@@ -348,16 +361,20 @@ class ContextualParaformer(Paraformer):
         hotwords_length = [len(i) - 1 for i in hotwords]
         hotwords_length.append(0)
         hotwords_length = np.array(hotwords_length)
+
         # hotwords.append('<s>')
         def word_map(word):
             hotwords = []
             for c in word:
                 if c not in self.vocab.keys():
                     hotwords.append(8403)
-                    logging.warning("oov character {} found in hotword {}, replaced by <unk>".format(c, word))
+                    logging.warning(
+                        "oov character {} found in hotword {}, replaced by <unk>".format(c, word)
+                    )
                 else:
                     hotwords.append(self.vocab[c])
             return np.array(hotwords)
+
         hotword_int = [word_map(i) for i in hotwords]
         # import pdb; pdb.set_trace()
         hotword_int.append(np.array([1]))
@@ -365,8 +382,9 @@ class ContextualParaformer(Paraformer):
         # import pdb; pdb.set_trace()
         return hotwords, hotwords_length
 
-    def bb_infer(self, feats: np.ndarray,
-              feats_len: np.ndarray, bias_embed) -> Tuple[np.ndarray, np.ndarray]:
+    def bb_infer(
+        self, feats: np.ndarray, feats_len: np.ndarray, bias_embed
+    ) -> Tuple[np.ndarray, np.ndarray]:
         outputs = self.ort_infer_bb([feats, feats_len, bias_embed])
         return outputs
 
@@ -375,12 +393,12 @@ class ContextualParaformer(Paraformer):
         return outputs
 
     def decode(self, am_scores: np.ndarray, token_nums: int) -> List[str]:
-        return [self.decode_one(am_score, token_num)
-                for am_score, token_num in zip(am_scores, token_nums)]
+        return [
+            self.decode_one(am_score, token_num)
+            for am_score, token_num in zip(am_scores, token_nums)
+        ]
 
-    def decode_one(self,
-                   am_score: np.ndarray,
-                   valid_token_num: int) -> List[str]:
+    def decode_one(self, am_score: np.ndarray, valid_token_num: int) -> List[str]:
         yseq = am_score.argmax(axis=-1)
         score = am_score.max(axis=-1)
         score = np.sum(score, axis=-1)
@@ -399,11 +417,11 @@ class ContextualParaformer(Paraformer):
 
         # Change integer-ids to tokens
         token = self.converter.ids2tokens(token_int)
-        token = token[:valid_token_num-self.pred_bias]
+        token = token[: valid_token_num - self.pred_bias]
         # texts = sentence_postprocess(token)
         return token
-    
-    
+
+
 class SeacoParaformer(ContextualParaformer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

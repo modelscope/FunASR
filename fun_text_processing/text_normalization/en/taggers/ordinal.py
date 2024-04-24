@@ -1,6 +1,3 @@
-
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import DAMO_DIGIT, GraphFst
 from pynini.lib import pynutil
@@ -10,7 +7,7 @@ class OrdinalFst(GraphFst):
     """
     Finite state transducer for classifying ordinal, e.g.
         13th -> ordinal { integer: "thirteen" }
-        
+
     Args:
         cardinal: CardinalFst
         deterministic: if True will provide a single transduction option,
@@ -44,6 +41,6 @@ class OrdinalFst(GraphFst):
             1,
         ) + pynutil.delete(pynini.union("th", "TH"))
         self.graph = (st_format | nd_format | rd_format | th_format) @ cardinal_graph
-        final_graph = pynutil.insert("integer: \"") + self.graph + pynutil.insert("\"")
+        final_graph = pynutil.insert('integer: "') + self.graph + pynutil.insert('"')
         final_graph = self.add_tokens(final_graph)
         self.fst = final_graph.optimize()

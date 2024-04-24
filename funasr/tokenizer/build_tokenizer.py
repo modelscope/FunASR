@@ -56,6 +56,4 @@ def build_tokenizer(
         )
 
     else:
-        raise ValueError(
-            f"token_mode must be one of bpe, word, char or phn: " f"{token_type}"
-        )
+        raise ValueError(f"token_mode must be one of bpe, word, char or phn: " f"{token_type}")

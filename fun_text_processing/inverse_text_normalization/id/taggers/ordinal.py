@@ -21,9 +21,9 @@ class OrdinalFst(GraphFst):
         graph_teens = pynini.string_file(get_abs_path("data/ordinals/teen.tsv"))
         graph = pynini.closure(DAMO_CHAR) + pynini.union(
             graph_digit, graph_teens, pynini.cross("tieth", "ty"), pynini.cross("th", "")
-        ) # TODO
+        )  # TODO
 
         self.graph = graph @ cardinal_graph
-        final_graph = pynutil.insert("integer: \"") + self.graph + pynutil.insert("\"")
+        final_graph = pynutil.insert('integer: "') + self.graph + pynutil.insert('"')
         final_graph = self.add_tokens(final_graph)
         self.fst = final_graph.optimize()

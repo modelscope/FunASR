@@ -1,13 +1,16 @@
-
 import pynini
 from fun_text_processing.inverse_text_normalization.es.utils import get_abs_path
-from fun_text_processing.text_normalization.en.graph_utils import GraphFst, delete_extra_space, delete_space
+from fun_text_processing.text_normalization.en.graph_utils import (
+    GraphFst,
+    delete_extra_space,
+    delete_space,
+)
 from pynini.lib import pynutil
 
 
 class DateFst(GraphFst):
     """
-    Finite state transducer for classifying date, 
+    Finite state transducer for classifying date,
         e.g. primero de enero -> date { day: "1" month: "enero" }
         e.g. uno de enero -> date { day: "1" month: "enero" }
     """
@@ -33,12 +36,14 @@ class DateFst(GraphFst):
         # can use "primero" for 1st day of the month
         graph_1_to_31 = pynini.union(graph_1_to_31, pynini.cross("primero", "1"))
 
-        day_graph = pynutil.insert("day: \"") + graph_1_to_31 + pynutil.insert("\"")
+        day_graph = pynutil.insert('day: "') + graph_1_to_31 + pynutil.insert('"')
 
         month_graph = pynini.string_file(get_abs_path("data/months.tsv"))
-        month_graph = pynutil.insert("month: \"") + month_graph + pynutil.insert("\"")
+        month_graph = pynutil.insert('month: "') + month_graph + pynutil.insert('"')
 
-        graph_dm = day_graph + delete_space + pynutil.delete("de") + delete_extra_space + month_graph
+        graph_dm = (
+            day_graph + delete_space + pynutil.delete("de") + delete_extra_space + month_graph
+        )
 
         final_graph = graph_dm
         final_graph += pynutil.insert(" preserve_order: true")

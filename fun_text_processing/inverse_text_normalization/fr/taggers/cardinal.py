@@ -1,4 +1,3 @@
-
 import pynini
 from fun_text_processing.inverse_text_normalization.fr.graph_utils import (
     DAMO_CHAR,
@@ -13,7 +12,7 @@ from fun_text_processing.inverse_text_normalization.fr.utils import get_abs_path
 from pynini.lib import pynutil
 
 
-def rewrite(cardinal: 'pynini.FstLike') -> 'pynini.FstLike':
+def rewrite(cardinal: "pynini.FstLike") -> "pynini.FstLike":
     """
     Function to rewrite cardinals written in traditional orthograph (no '-' for numbers >100)
     to current orthography ('-' between all words in number string)
@@ -21,9 +20,9 @@ def rewrite(cardinal: 'pynini.FstLike') -> 'pynini.FstLike':
     In cases where original orthography is current, or string is mixture of two orthographies,
     will render invalid form that will not pass through CardinalFst
     e.g. deux-mille cent-vingt-trois -> "deux##vingt-trois" ('#' is not accepted in cardinal FST and will fail to convert.)
-    e.g. deux 
+    e.g. deux
 
-    Args: 
+    Args:
         cardinal: cardinal FST
     """
 
@@ -52,9 +51,13 @@ def rewrite(cardinal: 'pynini.FstLike') -> 'pynini.FstLike':
     # Old orthography will not have these strings. Replacing with character to mark.
     targets_for_filtering = ("-" + targets) | ("-" + targets + "-") | (targets + "-")
 
-    filter = pynini.cdrewrite(pynini.cross(targets_for_filtering, "#"), "", "", DAMO_SIGMA)  # Invalid for cardinal
+    filter = pynini.cdrewrite(
+        pynini.cross(targets_for_filtering, "#"), "", "", DAMO_SIGMA
+    )  # Invalid for cardinal
 
-    old_orthography_sigma = pynini.difference(DAMO_CHAR, "#")  # Marked character removed from sigma_star.
+    old_orthography_sigma = pynini.difference(
+        DAMO_CHAR, "#"
+    )  # Marked character removed from sigma_star.
     old_orthography_sigma.closure()
 
     # Only accept strings that occur in old orthography. (This avoids tying two non-related numbers together.)
@@ -76,13 +79,13 @@ def rewrite(cardinal: 'pynini.FstLike') -> 'pynini.FstLike':
 class CardinalFst(GraphFst):
     """
     Finite state transducer for classifying cardinals
-        e.g. mois vingt-trois -> cardinal { negative: "-" integer: "23"} 
+        e.g. mois vingt-trois -> cardinal { negative: "-" integer: "23"}
     This class converts cardinals up to (but not including) "un-quatrillion",
     i.e up to "one septillion" in English (10^{24}).
-    Cardinals below nine are not converted (in order to avoid 
+    Cardinals below nine are not converted (in order to avoid
     "j'ai un pomme." --> "j'ai 1 pomme" and any other odd conversions.)
     This transducer accomodates both traditional hyphenation of numbers ('-' for most numbers <100)
-    and current hyphenation (all elements of number are hyphenated), prioritizing the latter. 
+    and current hyphenation (all elements of number are hyphenated), prioritizing the latter.
     e.g cent cinquante et un -> cardinal { integer: "151"}
         cent-cinquante-et-un -> cardinal { integer: "151"}
     This is done through a context dependent rewrite that attempts to map old spelling to new.
@@ -102,7 +105,8 @@ class CardinalFst(GraphFst):
         graph_tens_component = pynini.union(graph_tens_component, graph_teens, graph_ties_unique)
 
         graph_tens_component_with_leading_zeros = pynini.union(
-            graph_tens_component, (pynutil.insert("0") + (graph_digit | pynutil.insert("0", weight=0.01)))
+            graph_tens_component,
+            (pynutil.insert("0") + (graph_digit | pynutil.insert("0", weight=0.01))),
         )
 
         # Hundreds components
@@ -111,14 +115,18 @@ class CardinalFst(GraphFst):
             "cents", "00"
         )  # Only used as terminus of hundred sequence. deux cents -> 200, deux cent un -> 201
 
-        graph_digit_no_one = pynini.project(pynini.union("un", "une"), 'input')
-        graph_digit_no_one = (pynini.project(graph_digit, "input") - graph_digit_no_one.arcsort()) @ graph_digit
+        graph_digit_no_one = pynini.project(pynini.union("un", "une"), "input")
+        graph_digit_no_one = (
+            pynini.project(graph_digit, "input") - graph_digit_no_one.arcsort()
+        ) @ graph_digit
 
         graph_hundreds_component_singular = (
             graph_digit_no_one + delete_hyphen + graph_cent_singular
         )  # Regular way: [1-9] * 100
 
-        graph_hundreds_component_singular = pynini.union(graph_hundreds_component_singular, pynini.cross("cent", "1"))
+        graph_hundreds_component_singular = pynini.union(
+            graph_hundreds_component_singular, pynini.cross("cent", "1")
+        )
         graph_hundreds_component_singular += delete_hyphen
         graph_hundreds_component_singular += graph_tens_component_with_leading_zeros
 
@@ -141,14 +149,20 @@ class CardinalFst(GraphFst):
         graph_tens_of_hundreds_component_singular = (
             graph_tens_component + delete_hyphen + graph_cent_singular
         )  # Tens of hundreds. e.g. 1900 = nineteen hundred/ 'dix neuf cents"
-        graph_tens_of_hundreds_component_singular += delete_hyphen + graph_tens_component_with_leading_zeros
-        graph_tens_of_hundreds_component_plural = graph_tens_component + delete_hyphen + graph_cent_plural
+        graph_tens_of_hundreds_component_singular += (
+            delete_hyphen + graph_tens_component_with_leading_zeros
+        )
+        graph_tens_of_hundreds_component_plural = (
+            graph_tens_component + delete_hyphen + graph_cent_plural
+        )
         graph_tens_of_hundred_component = (
             graph_tens_of_hundreds_component_plural | graph_tens_of_hundreds_component_singular
         )
 
         graph_thousands = pynini.union(
-            graph_hundreds_component_at_least_one_none_zero_digit + delete_hyphen + pynutil.delete("mille"),
+            graph_hundreds_component_at_least_one_none_zero_digit
+            + delete_hyphen
+            + pynutil.delete("mille"),
             pynutil.insert("001") + pynutil.delete("mille"),  # because 'mille', not 'un mille'
             pynutil.insert("000", weight=0.1),
         )
@@ -176,8 +190,11 @@ class CardinalFst(GraphFst):
         )
 
         graph_mille_billion = pynini.union(
-            graph_hundreds_component_at_least_one_none_zero_digit + delete_hyphen + pynutil.delete("mille"),
-            pynutil.insert("001") + pynutil.delete("mille"),  # because we say 'mille', not 'un mille'
+            graph_hundreds_component_at_least_one_none_zero_digit
+            + delete_hyphen
+            + pynutil.delete("mille"),
+            pynutil.insert("001")
+            + pynutil.delete("mille"),  # because we say 'mille', not 'un mille'
         )
         graph_mille_billion += delete_hyphen + (
             graph_millions | pynutil.insert("000") + pynutil.delete("billions")
@@ -226,7 +243,10 @@ class CardinalFst(GraphFst):
         )
 
         graph = graph @ pynini.union(
-            pynutil.delete(pynini.closure("0")) + pynini.difference(DAMO_DIGIT, "0") + pynini.closure(DAMO_DIGIT), "0"
+            pynutil.delete(pynini.closure("0"))
+            + pynini.difference(DAMO_DIGIT, "0")
+            + pynini.closure(DAMO_DIGIT),
+            "0",
         )
 
         graph = rewrite(graph)
@@ -234,32 +254,34 @@ class CardinalFst(GraphFst):
         self.graph_no_exception = graph.optimize()
 
         # save self.numbers_up_to_thousand for use in DecimalFst
-        digits_up_to_thousand = DAMO_DIGIT | (DAMO_DIGIT ** 2) | (DAMO_DIGIT ** 3)
+        digits_up_to_thousand = DAMO_DIGIT | (DAMO_DIGIT**2) | (DAMO_DIGIT**3)
         numbers_up_to_thousand = pynini.compose(graph, digits_up_to_thousand).optimize()
         self.numbers_up_to_thousand = numbers_up_to_thousand
 
         # save self.numbers_up_to_million for use in DecimalFst
         digits_up_to_million = (
             DAMO_DIGIT
-            | (DAMO_DIGIT ** 2)
-            | (DAMO_DIGIT ** 3)
-            | (DAMO_DIGIT ** 4)
-            | (DAMO_DIGIT ** 5)
-            | (DAMO_DIGIT ** 6)
+            | (DAMO_DIGIT**2)
+            | (DAMO_DIGIT**3)
+            | (DAMO_DIGIT**4)
+            | (DAMO_DIGIT**5)
+            | (DAMO_DIGIT**6)
         )
         numbers_up_to_million = pynini.compose(graph, digits_up_to_million).optimize()
         self.numbers_up_to_million = numbers_up_to_million
 
         # don't convert cardinals from zero to nine inclusive
-        graph_exception = pynini.project(pynini.union(graph_digit, graph_zero), 'input')
+        graph_exception = pynini.project(pynini.union(graph_digit, graph_zero), "input")
 
         self.graph = (pynini.project(graph, "input") - graph_exception.arcsort()) @ graph
 
         optional_minus_graph = pynini.closure(
-            pynutil.insert("negative: ") + pynini.cross("moins", "\"-\"") + DAMO_SPACE, 0, 1
+            pynutil.insert("negative: ") + pynini.cross("moins", '"-"') + DAMO_SPACE, 0, 1
         )
 
-        final_graph = optional_minus_graph + pynutil.insert("integer: \"") + self.graph + pynutil.insert("\"")
+        final_graph = (
+            optional_minus_graph + pynutil.insert('integer: "') + self.graph + pynutil.insert('"')
+        )
 
         final_graph = self.add_tokens(final_graph)
         self.fst = final_graph.optimize()

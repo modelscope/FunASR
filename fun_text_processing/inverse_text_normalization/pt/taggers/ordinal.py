@@ -1,6 +1,3 @@
-
-
-
 import pynini
 from fun_text_processing.inverse_text_normalization.pt.utils import get_abs_path
 from fun_text_processing.text_normalization.en.graph_utils import DAMO_SIGMA, GraphFst, delete_space
@@ -33,7 +30,9 @@ class OrdinalFst(GraphFst):
 
         ordinal_graph_union = pynini.union(
             pynutil.add_weight(graph_digit, 0.4),
-            pynutil.add_weight(graph_ties + ((delete_space + graph_digit) | pynutil.insert("0")), 0.2),
+            pynutil.add_weight(
+                graph_ties + ((delete_space + graph_digit) | pynutil.insert("0")), 0.2
+            ),
             graph_hundreds
             + ((delete_space + graph_ties) | pynutil.insert("0"))
             + ((delete_space + graph_digit) | pynutil.insert("0")),
@@ -47,26 +46,32 @@ class OrdinalFst(GraphFst):
 
         # 'optional_numbers_in_front' have negative weight so we always
         # include them if they're there
-        optional_in_front = (pynutil.add_weight(ordinal_graph_union, -0.1) + delete_space.closure()).closure()
+        optional_in_front = (
+            pynutil.add_weight(ordinal_graph_union, -0.1) + delete_space.closure()
+        ).closure()
         graph_o_suffix = optional_in_front + ordinal_graph_o
         graph_a_suffix = optional_in_front + ordinal_graph_a
 
         # don't convert ordinals from one to nine inclusive
-        graph_exception = pynini.project(pynini.union(graph_digit), 'input')
-        graph_o_suffix = (pynini.project(graph_o_suffix, "input") - graph_exception.arcsort()) @ graph_o_suffix
-        graph_a_suffix = (pynini.project(graph_a_suffix, "input") - graph_exception.arcsort()) @ graph_a_suffix
+        graph_exception = pynini.project(pynini.union(graph_digit), "input")
+        graph_o_suffix = (
+            pynini.project(graph_o_suffix, "input") - graph_exception.arcsort()
+        ) @ graph_o_suffix
+        graph_a_suffix = (
+            pynini.project(graph_a_suffix, "input") - graph_exception.arcsort()
+        ) @ graph_a_suffix
 
         graph = (
-            pynutil.insert("integer: \"")
+            pynutil.insert('integer: "')
             + graph_o_suffix
-            + pynutil.insert("\"")
-            + pynutil.insert(" morphosyntactic_features: \"o\"")
+            + pynutil.insert('"')
+            + pynutil.insert(' morphosyntactic_features: "o"')
         )
         graph |= (
-            pynutil.insert("integer: \"")
+            pynutil.insert('integer: "')
             + graph_a_suffix
-            + pynutil.insert("\"")
-            + pynutil.insert(" morphosyntactic_features: \"a\"")
+            + pynutil.insert('"')
+            + pynutil.insert(' morphosyntactic_features: "a"')
         )
 
         final_graph = self.add_tokens(graph)

@@ -1,6 +1,9 @@
-
 import pynini
-from fun_text_processing.inverse_text_normalization.fr.graph_utils import DAMO_CHAR, GraphFst, delete_space
+from fun_text_processing.inverse_text_normalization.fr.graph_utils import (
+    DAMO_CHAR,
+    GraphFst,
+    delete_space,
+)
 from pynini.lib import pynutil
 
 
@@ -17,13 +20,13 @@ class MeasureFst(GraphFst):
 
     def __init__(self, decimal: GraphFst, cardinal: GraphFst, fraction: GraphFst):
         super().__init__(name="measure", kind="verbalize")
-        optional_sign = pynini.closure(pynini.cross("negative: \"true\"", "-"), 0, 1)
+        optional_sign = pynini.closure(pynini.cross('negative: "true"', "-"), 0, 1)
         unit = (
             pynutil.delete("units:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_CHAR - " ", 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + delete_space
         )
         graph_decimal = (
@@ -40,7 +43,8 @@ class MeasureFst(GraphFst):
             + delete_space
             + optional_sign
             + delete_space
-            + cardinal.numbers @ decimal.group_by_threes  # measurements most obey three by three spacing
+            + cardinal.numbers
+            @ decimal.group_by_threes  # measurements most obey three by three spacing
             + delete_space
             + pynutil.delete("}")
         )
@@ -54,6 +58,11 @@ class MeasureFst(GraphFst):
             + pynutil.delete("}")
         )
 
-        graph = (graph_cardinal | graph_decimal | graph_fraction) + delete_space + pynutil.insert(" ") + unit
+        graph = (
+            (graph_cardinal | graph_decimal | graph_fraction)
+            + delete_space
+            + pynutil.insert(" ")
+            + unit
+        )
         delete_tokens = self.delete_tokens(graph)
         self.fst = delete_tokens.optimize()

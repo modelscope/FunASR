@@ -12,9 +12,9 @@ class PunctuationFst(GraphFst):
     def __init__(self):
         super().__init__(name="punctuation", kind="classify")
 
-        s = "!#$%&\'()*+,-./:;<=>?@^_`{|}~"
+        s = "!#$%&'()*+,-./:;<=>?@^_`{|}~"
         punct = pynini.union(*s)
 
-        graph = pynutil.insert("name: \"") + punct + pynutil.insert("\"")
+        graph = pynutil.insert('name: "') + punct + pynutil.insert('"')
 
         self.fst = graph.optimize()

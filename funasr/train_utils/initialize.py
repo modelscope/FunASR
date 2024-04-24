@@ -19,7 +19,6 @@ def initialize(model: torch.nn.Module, init: str):
         init: Method of initialization.
     """
 
-
     # weight init
     for p in model.parameters():
         if p.dim() > 1:
@@ -40,9 +39,7 @@ def initialize(model: torch.nn.Module, init: str):
 
     # reset some modules with default init
     for m in model.modules():
-        if isinstance(
-            m, (torch.nn.Embedding, torch.nn.LayerNorm, torch.nn.GroupNorm)
-        ):
+        if isinstance(m, (torch.nn.Embedding, torch.nn.LayerNorm, torch.nn.GroupNorm)):
             m.reset_parameters()
         if hasattr(m, "espnet_initialization_fn"):
             m.espnet_initialization_fn()
@@ -56,4 +53,3 @@ def initialize(model: torch.nn.Module, init: str):
         model.frontend, "reload_pretrained_parameters", None
     ):
         model.frontend.reload_pretrained_parameters()
-

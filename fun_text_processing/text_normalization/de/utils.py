@@ -1,4 +1,3 @@
-
 import csv
 import os
 
@@ -11,13 +10,13 @@ def get_abs_path(rel_path):
 
     Args:
         rel_path: relative path to this file
-        
+
     Returns absolute path
     """
     abs_path = os.path.dirname(os.path.abspath(__file__)) + os.sep + rel_path
 
     if not os.path.exists(abs_path):
-        logging.warning(f'{abs_path} does not exist')
+        logging.warning(f"{abs_path} does not exist")
     return abs_path
 
 

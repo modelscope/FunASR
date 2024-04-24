@@ -1,5 +1,3 @@
-
-
 from fun_text_processing.text_normalization.en.graph_utils import GraphFst
 from pynini.lib import pynutil
 
@@ -20,6 +18,6 @@ class MoneyFst(GraphFst):
 
         graph = tn_money.final_graph
         graph = graph.invert().optimize()
-        graph = pynutil.insert("integer_part: \"") + graph + pynutil.insert("\"")
+        graph = pynutil.insert('integer_part: "') + graph + pynutil.insert('"')
         graph = self.add_tokens(graph)
         self.fst = graph.optimize()

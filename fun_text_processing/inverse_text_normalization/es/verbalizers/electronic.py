@@ -1,6 +1,9 @@
-
 import pynini
-from fun_text_processing.text_normalization.en.graph_utils import DAMO_NOT_QUOTE, GraphFst, delete_space
+from fun_text_processing.text_normalization.en.graph_utils import (
+    DAMO_NOT_QUOTE,
+    GraphFst,
+    delete_space,
+)
 from pynini.lib import pynutil
 
 
@@ -16,24 +19,24 @@ class ElectronicFst(GraphFst):
         user_name = (
             pynutil.delete("username:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
         domain = (
             pynutil.delete("domain:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
 
         protocol = (
             pynutil.delete("protocol:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
 
         graph = user_name + delete_space + pynutil.insert("@") + domain

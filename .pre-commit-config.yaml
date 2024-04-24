@@ -1,0 +1,6 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 24.4.0
+    hooks:
+      - id: black
+        args: ['--line-length=100']  # 示例参数，black默认使用4个空格缩进

@@ -1,8 +1,9 @@
-
-
-
 import pynini
-from fun_text_processing.text_normalization.en.graph_utils import DAMO_NOT_QUOTE, GraphFst, delete_space
+from fun_text_processing.text_normalization.en.graph_utils import (
+    DAMO_NOT_QUOTE,
+    GraphFst,
+    delete_space,
+)
 from pynini.lib import pynutil
 
 
@@ -17,14 +18,14 @@ class OrdinalFst(GraphFst):
         graph = (
             pynutil.delete("integer:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
 
         replace_suffix = pynini.union(
-            pynini.cross(" morphosyntactic_features: \"o\"", "º"),
-            pynini.cross(" morphosyntactic_features: \"a\"", "ª"),
+            pynini.cross(' morphosyntactic_features: "o"', "º"),
+            pynini.cross(' morphosyntactic_features: "a"', "ª"),
         )
 
         graph = graph + replace_suffix

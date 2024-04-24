@@ -7,8 +7,9 @@
 
 from funasr import AutoModel
 
-model = AutoModel(model="iic/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727",
-                  )
+model = AutoModel(
+    model="iic/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727",
+)
 
 res = model.export(type="onnx", quantize=False)
 print(res)
@@ -17,7 +18,9 @@ print(res)
 # method2, inference from local path
 from funasr import AutoModel
 
-model = AutoModel(model="/Users/zhifu/.cache/modelscope/hub/iic/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727")
+model = AutoModel(
+    model="/Users/zhifu/.cache/modelscope/hub/iic/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727"
+)
 
 res = model.export(type="onnx", quantize=False)
 print(res)

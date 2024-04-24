@@ -38,34 +38,41 @@ class WhisperWarp(nn.Module):
             dims = kwargs.get("dims", {})
             dims = whisper.model.ModelDimensions(**dims)
             model = whisper.model.Whisper(dims=dims)
-        
+
         self.model = model
-        
+
         self.encoder_output_size = self.model.dims.n_audio_state
-        
-    def forward(self, ):
+
+    def forward(
+        self,
+    ):
         pass
-    
-    def inference(self,
-                  data_in,
-                  data_lengths=None,
-                  key: list = None,
-                  tokenizer=None,
-                  frontend=None,
-                  **kwargs,
-                  ):
+
+    def inference(
+        self,
+        data_in,
+        data_lengths=None,
+        key: list = None,
+        tokenizer=None,
+        frontend=None,
+        **kwargs,
+    ):
         if kwargs.get("batch_size", 1) > 1:
             raise NotImplementedError("batch decoding is not implemented")
 
         if frontend is None and not hasattr(self, "frontend"):
             frontend_class = tables.frontend_classes.get("WhisperFrontend")
-            frontend = frontend_class(n_mels=self.model.dims.n_mels, do_pad_trim=kwargs.get("do_pad_trim", True))
+            frontend = frontend_class(
+                n_mels=self.model.dims.n_mels, do_pad_trim=kwargs.get("do_pad_trim", True)
+            )
             self.frontend = frontend
         else:
             frontend = frontend if frontend is not None else self.frontend
 
         meta_data = {}
-        if isinstance(data_in, torch.Tensor) and kwargs.get("data_type", "sound") == "fbank":  # fbank
+        if (
+            isinstance(data_in, torch.Tensor) and kwargs.get("data_type", "sound") == "fbank"
+        ):  # fbank
             speech, speech_lengths = data_in, data_lengths
             if len(speech.shape) < 3:
                 speech = speech[None, :, :]
@@ -74,13 +81,18 @@ class WhisperWarp(nn.Module):
         else:
             # extract fbank feats
             time1 = time.perf_counter()
-            audio_sample_list = load_audio_text_image_video(data_in, fs=frontend.fs if hasattr(frontend, "fs") else 16000, audio_fs=kwargs.get("fs", 16000),
-                                                            data_type=kwargs.get("data_type", "sound"),
-                                                            tokenizer=tokenizer)
+            audio_sample_list = load_audio_text_image_video(
+                data_in,
+                fs=frontend.fs if hasattr(frontend, "fs") else 16000,
+                audio_fs=kwargs.get("fs", 16000),
+                data_type=kwargs.get("data_type", "sound"),
+                tokenizer=tokenizer,
+            )
             time2 = time.perf_counter()
             meta_data["load_data"] = f"{time2 - time1:0.3f}"
-            speech, speech_lengths = extract_fbank(audio_sample_list, data_type=kwargs.get("data_type", "sound"),
-                                                   frontend=frontend)
+            speech, speech_lengths = extract_fbank(
+                audio_sample_list, data_type=kwargs.get("data_type", "sound"), frontend=frontend
+            )
             time3 = time.perf_counter()
             meta_data["extract_feat"] = f"{time3 - time2:0.3f}"
             frame_shift = frontend.frame_shift if hasattr(frontend, "frame_shift") else 10
@@ -102,6 +114,5 @@ class WhisperWarp(nn.Module):
         result_i = {"key": key[0], "text": result.text}
 
         results.append(result_i)
-    
+
         return results, meta_data
-    

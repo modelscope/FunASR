@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import DAMO_CHAR, GraphFst, convert_space
 from fun_text_processing.text_normalization.ru.alphabet import RU_ALPHA, TO_CYRILLIC
@@ -43,9 +41,11 @@ class WhiteListFst(GraphFst):
 
         units_graph = _get_whitelist_graph(input_case, file=get_abs_path("data/measurements.tsv"))
         # do not replace single letter units, like `м`, `°` and `%` will be replaced
-        units_graph = pynini.compose((DAMO_CHAR ** (2, ...) | pynini.difference(DAMO_CHAR, RU_ALPHA)), units_graph)
+        units_graph = pynini.compose(
+            (DAMO_CHAR ** (2, ...) | pynini.difference(DAMO_CHAR, RU_ALPHA)), units_graph
+        )
         graph |= units_graph.optimize()
         graph |= TO_CYRILLIC + pynini.closure(pynutil.insert(" ") + TO_CYRILLIC)
 
         self.final_graph = convert_space(graph)
-        self.fst = (pynutil.insert("name: \"") + self.final_graph + pynutil.insert("\"")).optimize()
+        self.fst = (pynutil.insert('name: "') + self.final_graph + pynutil.insert('"')).optimize()

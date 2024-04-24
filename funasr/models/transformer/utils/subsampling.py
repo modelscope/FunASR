@@ -15,6 +15,7 @@ from funasr.models.transformer.utils.nets_utils import sub_factor_to_params, pad
 from typing import Optional, Tuple, Union
 import math
 
+
 class TooShortUttError(Exception):
     """Raised when the utt is too short for subsampling.
 
@@ -102,6 +103,7 @@ class Conv2dSubsampling(torch.nn.Module):
         if key != -1:
             raise NotImplementedError("Support only `-1` (for `reset_parameters`).")
         return self.out[key]
+
 
 class Conv2dSubsamplingPad(torch.nn.Module):
     """Convolutional 2D subsampling (to 1/4 length).
@@ -326,6 +328,7 @@ class Conv2dSubsampling8(torch.nn.Module):
             return x, None
         return x, x_mask[:, :, :-2:2][:, :, :-2:2][:, :, :-2:2]
 
+
 class Conv1dSubsampling(torch.nn.Module):
     """Convolutional 1D subsampling (to 1/2 length).
 
@@ -337,10 +340,16 @@ class Conv1dSubsampling(torch.nn.Module):
 
     """
 
-    def __init__(self, idim, odim, kernel_size, stride, pad,
-                 tf2torch_tensor_name_prefix_torch: str = "stride_conv",
-                 tf2torch_tensor_name_prefix_tf: str = "seq2seq/proj_encoder/downsampling",
-                 ):
+    def __init__(
+        self,
+        idim,
+        odim,
+        kernel_size,
+        stride,
+        pad,
+        tf2torch_tensor_name_prefix_torch: str = "stride_conv",
+        tf2torch_tensor_name_prefix_tf: str = "seq2seq/proj_encoder/downsampling",
+    ):
         super(Conv1dSubsampling, self).__init__()
         self.conv = torch.nn.Conv1d(idim, odim, kernel_size, stride)
         self.pad_fn = torch.nn.ConstantPad1d(pad, 0.0)
@@ -353,13 +362,11 @@ class Conv1dSubsampling(torch.nn.Module):
         return self.odim
 
     def forward(self, x, x_len):
-        """Subsample x.
-
-        """
+        """Subsample x."""
         x = x.transpose(1, 2)  # (b, d ,t)
         x = self.pad_fn(x)
-        #x = F.relu(self.conv(x))
-        x = F.leaky_relu(self.conv(x), negative_slope=0.)
+        # x = F.relu(self.conv(x))
+        x = F.leaky_relu(self.conv(x), negative_slope=0.0)
         x = x.transpose(1, 2)  # (b, t ,d)
 
         if x_len is None:
@@ -395,14 +402,38 @@ class StreamingConvInput(torch.nn.Module):
                 conv_size1, conv_size2 = conv_size
 
                 self.conv = torch.nn.Sequential(
-                    torch.nn.Conv2d(1, conv_size1, conv_kernel_size, stride=1, padding=(conv_kernel_size-1)//2),
+                    torch.nn.Conv2d(
+                        1,
+                        conv_size1,
+                        conv_kernel_size,
+                        stride=1,
+                        padding=(conv_kernel_size - 1) // 2,
+                    ),
                     torch.nn.ReLU(),
-                    torch.nn.Conv2d(conv_size1, conv_size1, conv_kernel_size, stride=1, padding=(conv_kernel_size-1)//2),
+                    torch.nn.Conv2d(
+                        conv_size1,
+                        conv_size1,
+                        conv_kernel_size,
+                        stride=1,
+                        padding=(conv_kernel_size - 1) // 2,
+                    ),
                     torch.nn.ReLU(),
                     torch.nn.MaxPool2d((1, 2)),
-                    torch.nn.Conv2d(conv_size1, conv_size2, conv_kernel_size, stride=1, padding=(conv_kernel_size-1)//2),
+                    torch.nn.Conv2d(
+                        conv_size1,
+                        conv_size2,
+                        conv_kernel_size,
+                        stride=1,
+                        padding=(conv_kernel_size - 1) // 2,
+                    ),
                     torch.nn.ReLU(),
-                    torch.nn.Conv2d(conv_size2, conv_size2, conv_kernel_size, stride=1, padding=(conv_kernel_size-1)//2),
+                    torch.nn.Conv2d(
+                        conv_size2,
+                        conv_size2,
+                        conv_kernel_size,
+                        stride=1,
+                        padding=(conv_kernel_size - 1) // 2,
+                    ),
                     torch.nn.ReLU(),
                     torch.nn.MaxPool2d((1, 2)),
                 )
@@ -421,14 +452,38 @@ class StreamingConvInput(torch.nn.Module):
                 kernel_1 = int(subsampling_factor / 2)
 
                 self.conv = torch.nn.Sequential(
-                    torch.nn.Conv2d(1, conv_size1, conv_kernel_size, stride=1, padding=(conv_kernel_size-1)//2),
+                    torch.nn.Conv2d(
+                        1,
+                        conv_size1,
+                        conv_kernel_size,
+                        stride=1,
+                        padding=(conv_kernel_size - 1) // 2,
+                    ),
                     torch.nn.ReLU(),
-                    torch.nn.Conv2d(conv_size1, conv_size1, conv_kernel_size, stride=1, padding=(conv_kernel_size-1)//2),
+                    torch.nn.Conv2d(
+                        conv_size1,
+                        conv_size1,
+                        conv_kernel_size,
+                        stride=1,
+                        padding=(conv_kernel_size - 1) // 2,
+                    ),
                     torch.nn.ReLU(),
                     torch.nn.MaxPool2d((kernel_1, 2)),
-                    torch.nn.Conv2d(conv_size1, conv_size2, conv_kernel_size, stride=1, padding=(conv_kernel_size-1)//2),
+                    torch.nn.Conv2d(
+                        conv_size1,
+                        conv_size2,
+                        conv_kernel_size,
+                        stride=1,
+                        padding=(conv_kernel_size - 1) // 2,
+                    ),
                     torch.nn.ReLU(),
-                    torch.nn.Conv2d(conv_size2, conv_size2, conv_kernel_size, stride=1, padding=(conv_kernel_size-1)//2),
+                    torch.nn.Conv2d(
+                        conv_size2,
+                        conv_size2,
+                        conv_kernel_size,
+                        stride=1,
+                        padding=(conv_kernel_size - 1) // 2,
+                    ),
                     torch.nn.ReLU(),
                     torch.nn.MaxPool2d((2, 2)),
                 )
@@ -444,9 +499,9 @@ class StreamingConvInput(torch.nn.Module):
         else:
             if subsampling_factor == 1:
                 self.conv = torch.nn.Sequential(
-                    torch.nn.Conv2d(1, conv_size, 3, [1,2], [1,0]),
+                    torch.nn.Conv2d(1, conv_size, 3, [1, 2], [1, 0]),
                     torch.nn.ReLU(),
-                    torch.nn.Conv2d(conv_size, conv_size, conv_kernel_size, [1,2], [1,0]),
+                    torch.nn.Conv2d(conv_size, conv_size, conv_kernel_size, [1, 2], [1, 0]),
                     torch.nn.ReLU(),
                 )
 
@@ -465,9 +520,11 @@ class StreamingConvInput(torch.nn.Module):
                 )
 
                 self.conv = torch.nn.Sequential(
-                    torch.nn.Conv2d(1, conv_size, 3, 2, [1,0]),
+                    torch.nn.Conv2d(1, conv_size, 3, 2, [1, 0]),
                     torch.nn.ReLU(),
-                    torch.nn.Conv2d(conv_size, conv_size, kernel_2, stride_2, [(kernel_2-1)//2, 0]),
+                    torch.nn.Conv2d(
+                        conv_size, conv_size, kernel_2, stride_2, [(kernel_2 - 1) // 2, 0]
+                    ),
                     torch.nn.ReLU(),
                 )
 
@@ -505,30 +562,32 @@ class StreamingConvInput(torch.nn.Module):
             olens = max(mask.eq(0).sum(1))
 
         b, t, f = x.size()
-        x = x.unsqueeze(1) # (b. 1. t. f)
+        x = x.unsqueeze(1)  # (b. 1. t. f)
 
         if chunk_size is not None:
             max_input_length = int(
-                chunk_size * self.subsampling_factor * (math.ceil(float(t) / (chunk_size * self.subsampling_factor) ))
+                chunk_size
+                * self.subsampling_factor
+                * (math.ceil(float(t) / (chunk_size * self.subsampling_factor)))
             )
             x = map(lambda inputs: pad_to_len(inputs, max_input_length, 1), x)
             x = list(x)
             x = torch.stack(x, dim=0)
-            N_chunks = max_input_length // ( chunk_size * self.subsampling_factor)
+            N_chunks = max_input_length // (chunk_size * self.subsampling_factor)
             x = x.view(b * N_chunks, 1, chunk_size * self.subsampling_factor, f)
 
         x = self.conv(x)
 
         _, c, _, f = x.size()
         if chunk_size is not None:
-            x = x.transpose(1, 2).contiguous().view(b, -1, c * f)[:,:olens,:]
+            x = x.transpose(1, 2).contiguous().view(b, -1, c * f)[:, :olens, :]
         else:
             x = x.transpose(1, 2).contiguous().view(b, -1, c * f)
 
         if self.output is not None:
             x = self.output(x)
 
-        return x, mask[:,:olens][:,:x.size(1)]
+        return x, mask[:, :olens][:, : x.size(1)]
 
     def create_new_vgg_mask(self, mask: torch.Tensor) -> torch.Tensor:
         """Create a new mask for VGG output sequences.
@@ -538,8 +597,8 @@ class StreamingConvInput(torch.nn.Module):
             mask: Mask of output sequences. (B, sub(T))
         """
         if self.subsampling_factor > 1:
-            vgg1_t_len = mask.size(1) - (mask.size(1) % (self.subsampling_factor // 2 ))
-            mask = mask[:, :vgg1_t_len][:, ::self.subsampling_factor // 2]
+            vgg1_t_len = mask.size(1) - (mask.size(1) % (self.subsampling_factor // 2))
+            mask = mask[:, :vgg1_t_len][:, :: self.subsampling_factor // 2]
 
             vgg2_t_len = mask.size(1) - (mask.size(1) % 2)
             mask = mask[:, :vgg2_t_len][:, ::2]
@@ -556,7 +615,7 @@ class StreamingConvInput(torch.nn.Module):
             mask: Mask of output sequences. (B, sub(T))
         """
         if self.subsampling_factor > 1:
-            return mask[:, ::2][:, ::self.stride_2]
+            return mask[:, ::2][:, :: self.stride_2]
         else:
             return mask
 

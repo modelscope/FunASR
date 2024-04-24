@@ -13,6 +13,7 @@ with open(version_file, "r") as f:
 import importlib
 import pkgutil
 
+
 def import_submodules(package, recursive=True):
     if isinstance(package, str):
         try:
@@ -23,7 +24,7 @@ def import_submodules(package, recursive=True):
             pass
     results = {}
     if not isinstance(package, str):
-        for loader, name, is_pkg in pkgutil.walk_packages(package.__path__, package.__name__ + '.'):
+        for loader, name, is_pkg in pkgutil.walk_packages(package.__path__, package.__name__ + "."):
             try:
                 results[name] = importlib.import_module(name)
             except Exception as e:
@@ -33,6 +34,7 @@ def import_submodules(package, recursive=True):
             if recursive and is_pkg:
                 results.update(import_submodules(name))
     return results
+
 
 import_submodules(__name__)
 

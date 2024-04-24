@@ -56,14 +56,14 @@ class EncoderLayer(nn.Module):
     """
 
     def __init__(
-            self,
-            size,
-            self_attn,
-            feed_forward,
-            dropout_rate,
-            normalize_before=True,
-            concat_after=False,
-            stochastic_depth_rate=0.0,
+        self,
+        size,
+        self_attn,
+        feed_forward,
+        dropout_rate,
+        normalize_before=True,
+        concat_after=False,
+        stochastic_depth_rate=0.0,
     ):
         """Construct an EncoderLayer object."""
         super(EncoderLayer, self).__init__()
@@ -121,9 +121,7 @@ class EncoderLayer(nn.Module):
             x_concat = torch.cat((x, self.self_attn(x_q, x, x, mask)), dim=-1)
             x = residual + stoch_layer_coeff * self.concat_linear(x_concat)
         else:
-            x = residual + stoch_layer_coeff * self.dropout(
-                self.self_attn(x_q, x, x, mask)
-            )
+            x = residual + stoch_layer_coeff * self.dropout(self.self_attn(x_q, x, x, mask))
         if not self.normalize_before:
             x = self.norm1(x)
 
@@ -245,9 +243,7 @@ class TransformerEncoder_lm(nn.Module):
                 pos_enc_class(attention_dim, positional_dropout_rate),
             )
         elif input_layer is None:
-            self.embed = torch.nn.Sequential(
-                pos_enc_class(attention_dim, positional_dropout_rate)
-            )
+            self.embed = torch.nn.Sequential(pos_enc_class(attention_dim, positional_dropout_rate))
         else:
             raise ValueError("unknown input_layer: " + input_layer)
         self.normalize_before = normalize_before
@@ -288,8 +284,7 @@ class TransformerEncoder_lm(nn.Module):
             ]
         elif selfattention_layer_type == "lightconv2d":
             logging.info(
-                "encoder self-attention layer "
-                "type = lightweight convolution 2-dimensional"
+                "encoder self-attention layer " "type = lightweight convolution 2-dimensional"
             )
             encoder_selfattn_layer = LightweightConvolution2D
             encoder_selfattn_layer_args = [
@@ -318,9 +313,7 @@ class TransformerEncoder_lm(nn.Module):
                 for lnum in range(num_blocks)
             ]
         elif selfattention_layer_type == "dynamicconv2d":
-            logging.info(
-                "encoder self-attention layer type = dynamic convolution 2-dimensional"
-            )
+            logging.info("encoder self-attention layer type = dynamic convolution 2-dimensional")
             encoder_selfattn_layer = DynamicConvolution2D
             encoder_selfattn_layer_args = [
                 (
@@ -355,9 +348,7 @@ class TransformerEncoder_lm(nn.Module):
         self.use_conditioning = True if ctc_softmax is not None else False
         if self.use_conditioning:
             self.ctc_softmax = ctc_softmax
-            self.conditioning_layer = torch.nn.Linear(
-                conditioning_layer_dim, attention_dim
-            )
+            self.conditioning_layer = torch.nn.Linear(conditioning_layer_dim, attention_dim)
 
     def get_positionwise_layer(
         self,
@@ -466,4 +457,3 @@ class TransformerEncoder_lm(nn.Module):
         if self.normalize_before:
             xs = self.after_norm(xs)
         return xs, masks, new_cache
-

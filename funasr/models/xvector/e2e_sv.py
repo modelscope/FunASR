@@ -43,17 +43,17 @@ class ESPnetSVModel(FunASRModel):
     """CTC-attention hybrid Encoder-Decoder model"""
 
     def __init__(
-            self,
-            vocab_size: int,
-            token_list: Union[Tuple[str, ...], List[str]],
-            frontend: Optional[AbsFrontend],
-            specaug: Optional[AbsSpecAug],
-            normalize: Optional[AbsNormalize],
-            preencoder: Optional[AbsPreEncoder],
-            encoder: AbsEncoder,
-            postencoder: Optional[AbsPostEncoder],
-            pooling_layer: torch.nn.Module,
-            decoder: AbsDecoder,
+        self,
+        vocab_size: int,
+        token_list: Union[Tuple[str, ...], List[str]],
+        frontend: Optional[AbsFrontend],
+        specaug: Optional[AbsSpecAug],
+        normalize: Optional[AbsNormalize],
+        preencoder: Optional[AbsPreEncoder],
+        encoder: AbsEncoder,
+        postencoder: Optional[AbsPostEncoder],
+        pooling_layer: torch.nn.Module,
+        decoder: AbsDecoder,
     ):
 
         super().__init__()
@@ -71,11 +71,11 @@ class ESPnetSVModel(FunASRModel):
         self.decoder = decoder
 
     def forward(
-            self,
-            speech: torch.Tensor,
-            speech_lengths: torch.Tensor,
-            text: torch.Tensor,
-            text_lengths: torch.Tensor,
+        self,
+        speech: torch.Tensor,
+        speech_lengths: torch.Tensor,
+        text: torch.Tensor,
+        text_lengths: torch.Tensor,
     ) -> Tuple[torch.Tensor, Dict[str, torch.Tensor], torch.Tensor]:
         """Frontend + Encoder + Decoder + Calc loss
         Args:
@@ -87,10 +87,7 @@ class ESPnetSVModel(FunASRModel):
         assert text_lengths.dim() == 1, text_lengths.shape
         # Check that batch_size is unified
         assert (
-                speech.shape[0]
-                == speech_lengths.shape[0]
-                == text.shape[0]
-                == text_lengths.shape[0]
+            speech.shape[0] == speech_lengths.shape[0] == text.shape[0] == text_lengths.shape[0]
         ), (speech.shape, speech_lengths.shape, text.shape, text_lengths.shape)
         batch_size = speech.shape[0]
 
@@ -139,9 +136,7 @@ class ESPnetSVModel(FunASRModel):
             loss_interctc = loss_interctc / len(intermediate_outs)
 
             # calculate whole encoder loss
-            loss_ctc = (
-                               1 - self.interctc_weight
-                       ) * loss_ctc + self.interctc_weight * loss_interctc
+            loss_ctc = (1 - self.interctc_weight) * loss_ctc + self.interctc_weight * loss_interctc
 
         if self.use_transducer_decoder:
             # 2a. Transducer decoder branch
@@ -196,11 +191,11 @@ class ESPnetSVModel(FunASRModel):
         return loss, stats, weight
 
     def collect_feats(
-            self,
-            speech: torch.Tensor,
-            speech_lengths: torch.Tensor,
-            text: torch.Tensor,
-            text_lengths: torch.Tensor,
+        self,
+        speech: torch.Tensor,
+        speech_lengths: torch.Tensor,
+        text: torch.Tensor,
+        text_lengths: torch.Tensor,
     ) -> Dict[str, torch.Tensor]:
         if self.extract_feats_in_collect_stats:
             feats, feats_lengths = self._extract_feats(speech, speech_lengths)
@@ -215,7 +210,7 @@ class ESPnetSVModel(FunASRModel):
         return {"feats": feats, "feats_lengths": feats_lengths}
 
     def encode(
-            self, speech: torch.Tensor, speech_lengths: torch.Tensor
+        self, speech: torch.Tensor, speech_lengths: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Frontend + Encoder. Note that this method is used by asr_inference.py
         Args:
@@ -244,14 +239,12 @@ class ESPnetSVModel(FunASRModel):
 
         # Post-encoder, e.g. NLU
         if self.postencoder is not None:
-            encoder_out, encoder_out_lens = self.postencoder(
-                encoder_out, encoder_out_lens
-            )
+            encoder_out, encoder_out_lens = self.postencoder(encoder_out, encoder_out_lens)
 
         return encoder_out, encoder_out_lens
 
     def _extract_feats(
-            self, speech: torch.Tensor, speech_lengths: torch.Tensor
+        self, speech: torch.Tensor, speech_lengths: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         assert speech_lengths.dim() == 1, speech_lengths.shape
 

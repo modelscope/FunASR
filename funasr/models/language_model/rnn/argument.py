@@ -43,9 +43,7 @@ def add_arguments_rnn_encoder_common(group):
         type=int,
         help="Number of encoder hidden units",
     )
-    group.add_argument(
-        "--eprojs", default=320, type=int, help="Number of encoder projection units"
-    )
+    group.add_argument("--eprojs", default=320, type=int, help="Number of encoder projection units")
     group.add_argument(
         "--subsample",
         default="1",
@@ -66,12 +64,8 @@ def add_arguments_rnn_decoder_common(group):
         choices=["lstm", "gru"],
         help="Type of decoder network architecture",
     )
-    group.add_argument(
-        "--dlayers", default=1, type=int, help="Number of decoder layers"
-    )
-    group.add_argument(
-        "--dunits", default=320, type=int, help="Number of decoder hidden units"
-    )
+    group.add_argument("--dlayers", default=1, type=int, help="Number of decoder layers")
+    group.add_argument("--dunits", default=320, type=int, help="Number of decoder hidden units")
     group.add_argument(
         "--dropout-rate-decoder",
         default=0.0,
@@ -124,9 +118,7 @@ def add_arguments_rnn_attention_common(group):
         type=int,
         help="Number of attention transformation dimensions",
     )
-    group.add_argument(
-        "--awin", default=5, type=int, help="Window size for location2d attention"
-    )
+    group.add_argument("--awin", default=5, type=int, help="Window size for location2d attention")
     group.add_argument(
         "--aheads",
         default=4,

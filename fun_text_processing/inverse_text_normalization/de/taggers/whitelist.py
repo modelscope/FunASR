@@ -1,4 +1,3 @@
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import GraphFst, convert_space
 from pynini.lib import pynutil
@@ -16,5 +15,5 @@ class WhiteListFst(GraphFst):
         super().__init__(name="whitelist", kind="classify", deterministic=deterministic)
 
         whitelist = pynini.invert(tn_whitelist_tagger.graph)
-        graph = pynutil.insert("name: \"") + convert_space(whitelist) + pynutil.insert("\"")
+        graph = pynutil.insert('name: "') + convert_space(whitelist) + pynutil.insert('"')
         self.fst = graph.optimize()

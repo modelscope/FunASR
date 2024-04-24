@@ -1,5 +1,3 @@
-
-
 import os
 
 import pynini
@@ -33,13 +31,17 @@ from fun_text_processing.text_normalization.en.taggers.word import WordFst
 from fun_text_processing.text_normalization.en.verbalizers.cardinal import CardinalFst as vCardinal
 from fun_text_processing.text_normalization.en.verbalizers.date import DateFst as vDate
 from fun_text_processing.text_normalization.en.verbalizers.decimal import DecimalFst as vDecimal
-from fun_text_processing.text_normalization.en.verbalizers.electronic import ElectronicFst as vElectronic
+from fun_text_processing.text_normalization.en.verbalizers.electronic import (
+    ElectronicFst as vElectronic,
+)
 from fun_text_processing.text_normalization.en.verbalizers.fraction import FractionFst as vFraction
 from fun_text_processing.text_normalization.en.verbalizers.measure import MeasureFst as vMeasure
 from fun_text_processing.text_normalization.en.verbalizers.money import MoneyFst as vMoney
 from fun_text_processing.text_normalization.en.verbalizers.ordinal import OrdinalFst as vOrdinal
 from fun_text_processing.text_normalization.en.verbalizers.roman import RomanFst as vRoman
-from fun_text_processing.text_normalization.en.verbalizers.telephone import TelephoneFst as vTelephone
+from fun_text_processing.text_normalization.en.verbalizers.telephone import (
+    TelephoneFst as vTelephone,
+)
 from fun_text_processing.text_normalization.en.verbalizers.time import TimeFst as vTime
 from fun_text_processing.text_normalization.en.verbalizers.word import WordFst as vWord
 from pynini.examples import plurals
@@ -53,7 +55,7 @@ class ClassifyFst(GraphFst):
     Final class that composes all other classification grammars. This class can process an entire sentence including punctuation.
     For deployment, this grammar will be compiled and exported to OpenFst Finite State Archive (FAR) File.
     More details to deployment at NeMo/tools/text_processing_deployment.
-    
+
     Args:
         input_case: accepting either "lower_cased" or "cased" input.
         deterministic: if True will provide a single transduction option,
@@ -74,19 +76,20 @@ class ClassifyFst(GraphFst):
         super().__init__(name="tokenize_and_classify", kind="classify", deterministic=deterministic)
 
         far_file = None
-        if cache_dir is not None and cache_dir != 'None':
+        if cache_dir is not None and cache_dir != "None":
             os.makedirs(cache_dir, exist_ok=True)
             whitelist_file = os.path.basename(whitelist) if whitelist else ""
             far_file = os.path.join(
-                cache_dir, f"_{input_case}_en_tn_{deterministic}_deterministic{whitelist_file}_lm.far"
+                cache_dir,
+                f"_{input_case}_en_tn_{deterministic}_deterministic{whitelist_file}_lm.far",
             )
         if not overwrite_cache and far_file and os.path.exists(far_file):
-            self.fst = pynini.Far(far_file, mode='r')['tokenize_and_classify']
+            self.fst = pynini.Far(far_file, mode="r")["tokenize_and_classify"]
             no_digits = pynini.closure(pynini.difference(DAMO_CHAR, DAMO_DIGIT))
             self.fst_no_digits = pynini.compose(self.fst, no_digits).optimize()
-            logging.info(f'ClassifyFst.fst was restored from {far_file}.')
+            logging.info(f"ClassifyFst.fst was restored from {far_file}.")
         else:
-            logging.info(f'Creating ClassifyFst grammars. This might take some time...')
+            logging.info(f"Creating ClassifyFst grammars. This might take some time...")
             # TAGGERS
             cardinal = CardinalFst(deterministic=True, lm=True)
             cardinal_tagger = cardinal
@@ -100,7 +103,9 @@ class ClassifyFst(GraphFst):
             fraction = FractionFst(deterministic=True, cardinal=cardinal)
             fraction_graph = fraction.fst
 
-            measure = MeasureFst(cardinal=cardinal, decimal=decimal, fraction=fraction, deterministic=True)
+            measure = MeasureFst(
+                cardinal=cardinal, decimal=decimal, fraction=fraction, deterministic=True
+            )
             measure_graph = measure.fst
             date = DateFst(cardinal=cardinal, deterministic=True, lm=True)
             date_graph = date.fst
@@ -111,9 +116,13 @@ class ClassifyFst(GraphFst):
             telephone_graph = TelephoneFst(deterministic=True).fst
             electronic_graph = ElectronicFst(deterministic=True).fst
             money_graph = MoneyFst(cardinal=cardinal, decimal=decimal, deterministic=False).fst
-            whitelist = WhiteListFst(input_case=input_case, deterministic=False, input_file=whitelist)
+            whitelist = WhiteListFst(
+                input_case=input_case, deterministic=False, input_file=whitelist
+            )
             whitelist_graph = whitelist.graph
-            serial_graph = SerialFst(cardinal=cardinal, ordinal=ordinal, deterministic=deterministic, lm=True).fst
+            serial_graph = SerialFst(
+                cardinal=cardinal, ordinal=ordinal, deterministic=deterministic, lm=True
+            ).fst
 
             # VERBALIZERS
             cardinal = vCardinal(deterministic=True)
@@ -126,7 +135,9 @@ class ClassifyFst(GraphFst):
             v_fraction_graph = fraction.fst
             v_telephone_graph = vTelephone(deterministic=True).fst
             v_electronic_graph = vElectronic(deterministic=True).fst
-            measure = vMeasure(decimal=decimal, cardinal=cardinal, fraction=fraction, deterministic=False)
+            measure = vMeasure(
+                decimal=decimal, cardinal=cardinal, fraction=fraction, deterministic=False
+            )
             v_measure_graph = measure.fst
             v_time_graph = vTime(deterministic=True).fst
             v_date_graph = vDate(ordinal=ordinal, deterministic=deterministic, lm=True).fst
@@ -135,7 +146,9 @@ class ClassifyFst(GraphFst):
             v_word_graph = vWord(deterministic=deterministic).fst
 
             cardinal_or_date_final = plurals._priority_union(date_graph, cardinal_graph, DAMO_SIGMA)
-            cardinal_or_date_final = pynini.compose(cardinal_or_date_final, (v_cardinal_graph | v_date_graph))
+            cardinal_or_date_final = pynini.compose(
+                cardinal_or_date_final, (v_cardinal_graph | v_date_graph)
+            )
 
             time_final = pynini.compose(time_graph, v_time_graph)
             ordinal_final = pynini.compose(ordinal_graph, v_ordinal_graph)
@@ -160,14 +173,23 @@ class ClassifyFst(GraphFst):
 
             roman_graph = RomanFst(deterministic=deterministic, lm=True).fst
             # the weight matches the word_graph weight for "I" cases in long sentences with multiple semiotic tokens
-            classify_and_verbalize |= pynutil.add_weight(pynini.compose(roman_graph, v_roman_graph), sem_w)
+            classify_and_verbalize |= pynutil.add_weight(
+                pynini.compose(roman_graph, v_roman_graph), sem_w
+            )
 
             date_final = pynini.compose(date_graph, v_date_graph)
             range_graph = RangeFst(
-                time=time_final, cardinal=cardinal_tagger, date=date_final, deterministic=deterministic
+                time=time_final,
+                cardinal=cardinal_tagger,
+                date=date_final,
+                deterministic=deterministic,
             ).fst
-            classify_and_verbalize |= pynutil.add_weight(pynini.compose(range_graph, v_word_graph), sem_w)
-            classify_and_verbalize = pynutil.insert("< ") + classify_and_verbalize + pynutil.insert(" >")
+            classify_and_verbalize |= pynutil.add_weight(
+                pynini.compose(range_graph, v_word_graph), sem_w
+            )
+            classify_and_verbalize = (
+                pynutil.insert("< ") + classify_and_verbalize + pynutil.insert(" >")
+            )
             classify_and_verbalize |= pynutil.add_weight(word_graph, word_w)
 
             punct_only = pynutil.add_weight(punct_graph, weight=punct_w)
@@ -213,4 +235,4 @@ class ClassifyFst(GraphFst):
 
             if far_file:
                 generator_main(far_file, {"tokenize_and_classify": self.fst})
-                logging.info(f'ClassifyFst grammars are saved to {far_file}.')
+                logging.info(f"ClassifyFst grammars are saved to {far_file}.")

@@ -1,4 +1,3 @@
-
 import os
 
 import pynini
@@ -20,7 +19,9 @@ from fun_text_processing.text_normalization.en.graph_utils import (
     delete_space,
     generator_main,
 )
-from fun_text_processing.text_normalization.ru.taggers.tokenize_and_classify import ClassifyFst as TNClassifyFst
+from fun_text_processing.text_normalization.ru.taggers.tokenize_and_classify import (
+    ClassifyFst as TNClassifyFst,
+)
 from pynini.lib import pynutil
 
 import logging
@@ -29,7 +30,7 @@ import logging
 class ClassifyFst(GraphFst):
     """
     Final class that composes all other classification grammars. This class can process an entire sentence, that is lower cased.
-    For deployment, this grammar will be compiled and exported to OpenFst Finate State Archiv (FAR) File. 
+    For deployment, this grammar will be compiled and exported to OpenFst Finate State Archiv (FAR) File.
     More details to deployment at NeMo/tools/text_processing_deployment.
 
     Args:
@@ -50,7 +51,7 @@ class ClassifyFst(GraphFst):
         else:
             logging.info(f"Creating ClassifyFst grammars. This might take some time...")
             tn_classify = TNClassifyFst(
-                input_case='cased', deterministic=False, cache_dir=cache_dir, overwrite_cache=True
+                input_case="cased", deterministic=False, cache_dir=cache_dir, overwrite_cache=True
             )
             cardinal = CardinalFst(tn_cardinal=tn_classify.cardinal)
             cardinal_graph = cardinal.fst
@@ -85,13 +86,21 @@ class ClassifyFst(GraphFst):
                 | pynutil.add_weight(word_graph, 100)
             )
 
-            punct = pynutil.insert("tokens { ") + pynutil.add_weight(punct_graph, weight=1.1) + pynutil.insert(" }")
+            punct = (
+                pynutil.insert("tokens { ")
+                + pynutil.add_weight(punct_graph, weight=1.1)
+                + pynutil.insert(" }")
+            )
             token = pynutil.insert("tokens { ") + classify + pynutil.insert(" }")
             token_plus_punct = (
-                pynini.closure(punct + pynutil.insert(" ")) + token + pynini.closure(pynutil.insert(" ") + punct)
+                pynini.closure(punct + pynutil.insert(" "))
+                + token
+                + pynini.closure(pynutil.insert(" ") + punct)
             )
 
-            graph = token_plus_punct + pynini.closure(pynutil.add_weight(delete_extra_space, 1.1) + token_plus_punct)
+            graph = token_plus_punct + pynini.closure(
+                pynutil.add_weight(delete_extra_space, 1.1) + token_plus_punct
+            )
 
             graph = delete_space + graph + delete_space
             self.fst = graph.optimize()

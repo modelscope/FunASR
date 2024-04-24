@@ -1,14 +1,17 @@
-
 import pynini
-from fun_text_processing.text_normalization.en.graph_utils import GraphFst, convert_space, insert_space
+from fun_text_processing.text_normalization.en.graph_utils import (
+    GraphFst,
+    convert_space,
+    insert_space,
+)
 from pynini.lib import pynutil
 
 
 class TelephoneFst(GraphFst):
     """
-    Finite state transducer for classifying telephone numbers, e.g. 
+    Finite state transducer for classifying telephone numbers, e.g.
         null vier eins eins eins zwei drei vier eins zwei drei vier -> tokens { name: "(0411) 1234-1234" }
-    
+
     Args:
         tn_cardinal_tagger: TN Cardinal Tagger
     """
@@ -35,6 +38,6 @@ class TelephoneFst(GraphFst):
             + digit
         )
         graph = convert_space(pynini.invert(number_part))
-        final_graph = pynutil.insert("name: \"") + graph + pynutil.insert("\"")
+        final_graph = pynutil.insert('name: "') + graph + pynutil.insert('"')
 
         self.fst = final_graph.optimize()

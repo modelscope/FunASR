@@ -1,4 +1,3 @@
-
 import os
 
 import pynini
@@ -31,7 +30,7 @@ import logging
 class ClassifyFst(GraphFst):
     """
     Final class that composes all other classification grammars. This class can process an entire sentence, that is lower cased.
-    For deployment, this grammar will be compiled and exported to OpenFst Finate State Archiv (FAR) File. 
+    For deployment, this grammar will be compiled and exported to OpenFst Finate State Archiv (FAR) File.
     More details to deployment at NeMo/tools/text_processing_deployment.
 
     Args:
@@ -79,7 +78,10 @@ class ClassifyFst(GraphFst):
             self.fraction = FractionFst(cardinal=self.cardinal, deterministic=deterministic)
             fraction_graph = self.fraction.fst
             self.measure = MeasureFst(
-                cardinal=self.cardinal, decimal=self.decimal, fraction=self.fraction, deterministic=deterministic
+                cardinal=self.cardinal,
+                decimal=self.decimal,
+                fraction=self.fraction,
+                deterministic=deterministic,
             )
             measure_graph = self.measure.fst
             self.date = DateFst(cardinal=self.cardinal, deterministic=deterministic)
@@ -91,9 +93,13 @@ class ClassifyFst(GraphFst):
             telephone_graph = self.telephone.fst
             self.electronic = ElectronicFst(deterministic=deterministic)
             electronic_graph = self.electronic.fst
-            self.money = MoneyFst(cardinal=self.cardinal, decimal=self.decimal, deterministic=deterministic)
+            self.money = MoneyFst(
+                cardinal=self.cardinal, decimal=self.decimal, deterministic=deterministic
+            )
             money_graph = self.money.fst
-            self.whitelist = WhiteListFst(input_case=input_case, deterministic=deterministic, input_file=whitelist)
+            self.whitelist = WhiteListFst(
+                input_case=input_case, deterministic=deterministic, input_file=whitelist
+            )
             whitelist_graph = self.whitelist.fst
             punct_graph = PunctuationFst(deterministic=deterministic).fst
 
@@ -113,13 +119,21 @@ class ClassifyFst(GraphFst):
 
             classify |= pynutil.add_weight(word_graph, 100)
 
-            punct = pynutil.insert("tokens { ") + pynutil.add_weight(punct_graph, weight=1.1) + pynutil.insert(" }")
+            punct = (
+                pynutil.insert("tokens { ")
+                + pynutil.add_weight(punct_graph, weight=1.1)
+                + pynutil.insert(" }")
+            )
             token = pynutil.insert("tokens { ") + classify + pynutil.insert(" }")
             token_plus_punct = (
-                pynini.closure(punct + pynutil.insert(" ")) + token + pynini.closure(pynutil.insert(" ") + punct)
+                pynini.closure(punct + pynutil.insert(" "))
+                + token
+                + pynini.closure(pynutil.insert(" ") + punct)
             )
 
-            graph = token_plus_punct + pynini.closure(pynutil.add_weight(delete_extra_space, 1.1) + token_plus_punct)
+            graph = token_plus_punct + pynini.closure(
+                pynutil.add_weight(delete_extra_space, 1.1) + token_plus_punct
+            )
             graph = delete_space + graph + delete_space
 
             self.fst = graph.optimize()

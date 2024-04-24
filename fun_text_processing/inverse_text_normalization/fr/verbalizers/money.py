@@ -1,4 +1,3 @@
-
 import pynini
 from fun_text_processing.inverse_text_normalization.fr.graph_utils import (
     DAMO_NOT_QUOTE,
@@ -23,9 +22,9 @@ class MoneyFst(GraphFst):
         unit = (
             pynutil.delete("currency:")
             + delete_extra_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
         graph = decimal.numbers + delete_space + unit
         delete_tokens = self.delete_tokens(graph)

@@ -1,4 +1,3 @@
-
 import pynini
 from fun_text_processing.inverse_text_normalization.vi.graph_utils import (
     GraphFst,
@@ -34,17 +33,28 @@ class MeasureFst(GraphFst):
         graph_unit_singular = pynini.invert(graph_unit)  # singular -> abbr
 
         optional_graph_negative = pynini.closure(
-            pynutil.insert("negative: ") + pynini.cross(pynini.union("âm", "trừ"), '"true"') + delete_extra_space,
+            pynutil.insert("negative: ")
+            + pynini.cross(pynini.union("âm", "trừ"), '"true"')
+            + delete_extra_space,
             0,
             1,
         )
 
         unit_singular = convert_space(graph_unit_singular)
-        unit_misc = pynutil.insert("/") + pynutil.delete("trên") + delete_space + convert_space(graph_unit_singular)
+        unit_misc = (
+            pynutil.insert("/")
+            + pynutil.delete("trên")
+            + delete_space
+            + convert_space(graph_unit_singular)
+        )
 
         unit_singular = (
             pynutil.insert('units: "')
-            + (unit_singular | unit_misc | pynutil.add_weight(unit_singular + delete_space + unit_misc, 0.01))
+            + (
+                unit_singular
+                | unit_misc
+                | pynutil.add_weight(unit_singular + delete_space + unit_misc, 0.01)
+            )
             + pynutil.insert('"')
         )
 

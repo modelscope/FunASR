@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.inverse_text_normalization.vi.graph_utils import (
     GraphFst,
@@ -37,7 +35,9 @@ class TimeFst(GraphFst):
         optional_minute = pynini.closure(delete_space + minute, 0, 1)
         second = pynini.cross("giây", "")
 
-        final_graph_hour = pynutil.insert('hours: "') + graph_hours + pynutil.insert('"') + delete_space + oclock
+        final_graph_hour = (
+            pynutil.insert('hours: "') + graph_hours + pynutil.insert('"') + delete_space + oclock
+        )
         graph_minute = graph_minutes + optional_minute
         graph_second = graph_minutes + delete_space + second
         final_time_zone_optional = pynini.closure(

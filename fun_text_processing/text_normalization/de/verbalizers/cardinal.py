@@ -1,4 +1,3 @@
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import DAMO_NOT_QUOTE, GraphFst
 from pynini.lib import pynutil
@@ -16,11 +15,11 @@ class CardinalFst(GraphFst):
 
     def __init__(self, deterministic: bool = True):
         super().__init__(name="cardinal", kind="verbalize", deterministic=deterministic)
-        optional_sign = pynini.closure(pynini.cross("negative: \"true\" ", "minus "), 0, 1)
+        optional_sign = pynini.closure(pynini.cross('negative: "true" ', "minus "), 0, 1)
         self.optional_sign = optional_sign
         integer = pynini.closure(DAMO_NOT_QUOTE, 1)
 
-        self.integer = pynutil.delete(" \"") + integer + pynutil.delete("\"")
+        self.integer = pynutil.delete(' "') + integer + pynutil.delete('"')
 
         integer = pynutil.delete("integer:") + self.integer
         self.numbers = integer

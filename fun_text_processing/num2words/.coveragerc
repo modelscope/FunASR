@@ -1,5 +1,0 @@
-[run]
-branch = true
-source =
-    num2words
-    tests

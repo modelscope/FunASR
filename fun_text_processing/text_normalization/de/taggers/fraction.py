@@ -1,4 +1,3 @@
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import GraphFst
 from pynini.lib import pynutil
@@ -21,13 +20,15 @@ class FractionFst(GraphFst):
         cardinal_graph = cardinal.graph
 
         self.optional_graph_negative = pynini.closure(
-            pynutil.insert("negative: ") + pynini.cross("-", "\"true\" "), 0, 1
+            pynutil.insert("negative: ") + pynini.cross("-", '"true" '), 0, 1
         )
-        self.integer = pynutil.insert("integer_part: \"") + cardinal_graph + pynutil.insert("\"")
+        self.integer = pynutil.insert('integer_part: "') + cardinal_graph + pynutil.insert('"')
         self.numerator = (
-            pynutil.insert("numerator: \"") + cardinal_graph + pynini.cross(pynini.union("/", " / "), "\" ")
+            pynutil.insert('numerator: "')
+            + cardinal_graph
+            + pynini.cross(pynini.union("/", " / "), '" ')
         )
-        self.denominator = pynutil.insert("denominator: \"") + cardinal_graph + pynutil.insert("\"")
+        self.denominator = pynutil.insert('denominator: "') + cardinal_graph + pynutil.insert('"')
 
         self.graph = (
             self.optional_graph_negative

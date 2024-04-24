@@ -8,6 +8,7 @@ import torch
 from funasr.models.transformer.utils.nets_utils import make_pad_mask
 from funasr.register import tables
 
+
 @tables.register("normalize_classes", "GlobalMVN")
 class GlobalMVN(torch.nn.Module):
     """Apply global mean and variance normalization

@@ -3,6 +3,7 @@ import torch
 from funasr.models.encoder.abs_encoder import AbsEncoder
 from funasr.modules.nets_utils import make_pad_mask
 
+
 class SimpleAvg(AbsEncoder):
     def __init__(self, feat_dim):
         super(SimpleAvg, self).__init__()

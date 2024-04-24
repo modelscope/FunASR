@@ -37,9 +37,7 @@ def get_parser():
         help="number of characters to split, i.e., \
                         aabb -> a a b b with -n 1 and aa bb with -n 2",
     )
-    parser.add_argument(
-        "--skip-ncols", "-s", default=0, type=int, help="skip first n columns"
-    )
+    parser.add_argument("--skip-ncols", "-s", default=0, type=int, help="skip first n columns")
     parser.add_argument("--space", default="<space>", type=str, help="space symbol")
     parser.add_argument(
         "--non-lang-syms",
@@ -80,9 +78,7 @@ def main():
     else:
         f = codecs.getreader("utf-8")(sys.stdin if is_python2 else sys.stdin.buffer)
 
-    sys.stdout = codecs.getwriter("utf-8")(
-        sys.stdout if is_python2 else sys.stdout.buffer
-    )
+    sys.stdout = codecs.getwriter("utf-8")(sys.stdout if is_python2 else sys.stdout.buffer)
     line = f.readline()
     n = args.nchar
     while line:

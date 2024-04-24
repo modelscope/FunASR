@@ -1,4 +1,3 @@
-
 # Adapted from https://github.com/google/TextNormalizationCoveringGrammars
 # Russian minimally supervised number grammar.
 
@@ -9,7 +8,7 @@ from pynini.lib import pynutil
 
 class OrdinalFst(GraphFst):
     """
-    Finite state transducer for classifying cardinals, e.g. 
+    Finite state transducer for classifying cardinals, e.g.
         "2." -> ordinal { integer: "zwei" } }
         "2tes" -> ordinal { integer: "zwei" } }
 
@@ -27,10 +26,12 @@ class OrdinalFst(GraphFst):
         self.graph = (
             (
                 pynini.closure(DAMO_DIGIT | pynini.accep("."))
-                + pynutil.delete(pynutil.add_weight(pynini.union(*endings), weight=0.0001) | pynini.accep("."))
+                + pynutil.delete(
+                    pynutil.add_weight(pynini.union(*endings), weight=0.0001) | pynini.accep(".")
+                )
             )
             @ cardinal_graph
         ).optimize()
-        final_graph = pynutil.insert("integer: \"") + self.graph + pynutil.insert("\"")
+        final_graph = pynutil.insert('integer: "') + self.graph + pynutil.insert('"')
         final_graph = self.add_tokens(final_graph)
         self.fst = final_graph.optimize()

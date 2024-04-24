@@ -84,9 +84,7 @@ def pad_to_multiple(x, multiple, dim=-1, value=0):
 def gelu_accurate(x):
     if not hasattr(gelu_accurate, "_a"):
         gelu_accurate._a = math.sqrt(2 / math.pi)
-    return (
-            0.5 * x * (1 + torch.tanh(gelu_accurate._a * (x + 0.044715 * torch.pow(x, 3))))
-    )
+    return 0.5 * x * (1 + torch.tanh(gelu_accurate._a * (x + 0.044715 * torch.pow(x, 3))))
 
 
 def gelu(x: torch.Tensor) -> torch.Tensor:

@@ -16,6 +16,7 @@ import torch.nn as nn
 # from funasr.models.base_model import FunASRModel
 # from funasr.models.encoder.abs_encoder import AbsEncoder
 from funasr.frontends.abs_frontend import AbsFrontend
+
 # from funasr.models.preencoder.abs_preencoder import AbsPreEncoder
 # from funasr.models.specaug.abs_specaug import AbsSpecAug
 from funasr.train_utils.device_funcs import force_gatherable
@@ -33,12 +34,12 @@ class Data2VecPretrainModel(nn.Module):
     """Data2Vec Pretrain model"""
 
     def __init__(
-            self,
-            frontend = None,
-            specaug = None,
-            normalize = None,
-            encoder = None,
-            preencoder = None,
+        self,
+        frontend=None,
+        specaug=None,
+        normalize=None,
+        encoder=None,
+        preencoder=None,
     ):
 
         super().__init__()
@@ -51,9 +52,9 @@ class Data2VecPretrainModel(nn.Module):
         self.num_updates = 0
 
     def forward(
-            self,
-            speech: torch.Tensor,
-            speech_lengths: torch.Tensor,
+        self,
+        speech: torch.Tensor,
+        speech_lengths: torch.Tensor,
     ) -> Tuple[torch.Tensor, Dict[str, torch.Tensor], torch.Tensor]:
         """Frontend + Encoder + Calc loss
         Args:
@@ -61,10 +62,7 @@ class Data2VecPretrainModel(nn.Module):
             speech_lengths: (Batch, )
         """
         # Check that batch_size is unified
-        assert (
-                speech.shape[0]
-                == speech_lengths.shape[0]
-        ), (speech.shape, speech_lengths.shape)
+        assert speech.shape[0] == speech_lengths.shape[0], (speech.shape, speech_lengths.shape)
 
         self.encoder.set_num_updates(self.num_updates)
 
@@ -91,17 +89,15 @@ class Data2VecPretrainModel(nn.Module):
         return loss, stats, weight
 
     def collect_feats(
-            self,
-            speech: torch.Tensor,
-            speech_lengths: torch.Tensor
+        self, speech: torch.Tensor, speech_lengths: torch.Tensor
     ) -> Dict[str, torch.Tensor]:
         feats, feats_lengths = self._extract_feats(speech, speech_lengths)
         return {"feats": feats, "feats_lengths": feats_lengths}
 
     def encode(
-            self,
-            speech: torch.Tensor,
-            speech_lengths: torch.Tensor,
+        self,
+        speech: torch.Tensor,
+        speech_lengths: torch.Tensor,
     ):
         """Frontend + Encoder.
         Args:
@@ -132,7 +128,7 @@ class Data2VecPretrainModel(nn.Module):
         return encoder_out
 
     def _extract_feats(
-            self, speech: torch.Tensor, speech_lengths: torch.Tensor
+        self, speech: torch.Tensor, speech_lengths: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         assert speech_lengths.dim() == 1, speech_lengths.shape
 

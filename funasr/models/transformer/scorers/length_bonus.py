@@ -1,4 +1,5 @@
 """Length bonus module."""
+
 from typing import Any
 from typing import List
 from typing import Tuple
@@ -54,8 +55,6 @@ class LengthBonus(BatchScorerInterface):
 
         """
         return (
-            torch.tensor([1.0], device=xs.device, dtype=xs.dtype).expand(
-                ys.shape[0], self.n
-            ),
+            torch.tensor([1.0], device=xs.device, dtype=xs.dtype).expand(ys.shape[0], self.n),
             None,
         )

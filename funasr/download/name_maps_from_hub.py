@@ -14,9 +14,7 @@ name_maps_ms = {
     "Qwen-Audio": "Qwen/Qwen-Audio",
 }
 
-name_maps_hf = {
-
-}
+name_maps_hf = {}
 
 name_maps_openai = {
     "Whisper-tiny.en": "tiny.en",

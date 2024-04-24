@@ -1,5 +1,3 @@
-
-
 from fun_text_processing.text_normalization.en.graph_utils import GraphFst
 from fun_text_processing.text_normalization.en.verbalizers.abbreviation import AbbreviationFst
 from fun_text_processing.text_normalization.en.verbalizers.cardinal import CardinalFst
@@ -19,7 +17,7 @@ from fun_text_processing.text_normalization.en.verbalizers.whitelist import Whit
 class VerbalizeFst(GraphFst):
     """
     Composes other verbalizer grammars.
-    For deployment, this grammar will be compiled and exported to OpenFst Finate State Archiv (FAR) File. 
+    For deployment, this grammar will be compiled and exported to OpenFst Finate State Archiv (FAR) File.
     More details to deployment at NeMo/tools/text_processing_deployment.
 
     Args:
@@ -39,7 +37,9 @@ class VerbalizeFst(GraphFst):
         fraction_graph = fraction.fst
         telephone_graph = TelephoneFst(deterministic=deterministic).fst
         electronic_graph = ElectronicFst(deterministic=deterministic).fst
-        measure = MeasureFst(decimal=decimal, cardinal=cardinal, fraction=fraction, deterministic=deterministic)
+        measure = MeasureFst(
+            decimal=decimal, cardinal=cardinal, fraction=fraction, deterministic=deterministic
+        )
         measure_graph = measure.fst
         time_graph = TimeFst(deterministic=deterministic).fst
         date_graph = DateFst(ordinal=ordinal, deterministic=deterministic).fst

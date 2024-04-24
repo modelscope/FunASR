@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import DAMO_NOT_QUOTE, GraphFst
 from fun_text_processing.text_normalization.en.verbalizers.ordinal import OrdinalFst
@@ -24,32 +22,34 @@ class RomanFst(GraphFst):
         ordinal = pynini.compose(cardinal, suffix)
 
         graph = (
-            pynutil.delete("key_cardinal: \"")
+            pynutil.delete('key_cardinal: "')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.accep(" ")
-            + pynutil.delete("integer: \"")
+            + pynutil.delete('integer: "')
             + cardinal
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         ).optimize()
 
         graph |= (
-            pynutil.delete("default_cardinal: \"default\" integer: \"") + cardinal + pynutil.delete("\"")
+            pynutil.delete('default_cardinal: "default" integer: "')
+            + cardinal
+            + pynutil.delete('"')
         ).optimize()
 
         graph |= (
-            pynutil.delete("default_ordinal: \"default\" integer: \"") + ordinal + pynutil.delete("\"")
+            pynutil.delete('default_ordinal: "default" integer: "') + ordinal + pynutil.delete('"')
         ).optimize()
 
         graph |= (
-            pynutil.delete("key_the_ordinal: \"")
+            pynutil.delete('key_the_ordinal: "')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.accep(" ")
-            + pynutil.delete("integer: \"")
+            + pynutil.delete('integer: "')
             + pynini.closure(pynutil.insert("the "), 0, 1)
             + ordinal
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         ).optimize()
 
         delete_tokens = self.delete_tokens(graph)

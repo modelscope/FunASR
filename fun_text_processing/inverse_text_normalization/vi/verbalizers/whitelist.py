@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.inverse_text_normalization.vi.graph_utils import (
     DAMO_CHAR,
@@ -25,5 +23,5 @@ class WhiteListFst(GraphFst):
             + pynini.closure(DAMO_CHAR - " ", 1)
             + pynutil.delete('"')
         )
-        graph = graph @ pynini.cdrewrite(pynini.cross(u"\u00A0", " "), "", "", DAMO_SIGMA)
+        graph = graph @ pynini.cdrewrite(pynini.cross("\u00A0", " "), "", "", DAMO_SIGMA)
         self.fst = graph.optimize()

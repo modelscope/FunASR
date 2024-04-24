@@ -1,6 +1,3 @@
-
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import (
     DAMO_NOT_QUOTE,
@@ -23,23 +20,23 @@ class DateFst(GraphFst):
         month = (
             pynutil.delete("month:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
         day = (
             pynutil.delete("day:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
         year = (
             pynutil.delete("year:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
 
         # day month
@@ -56,7 +53,7 @@ class DateFst(GraphFst):
             + delete_space
             + pynutil.insert("/")
             + month
-            + pynutil.delete(" morphosyntactic_features: \"/\"")
+            + pynutil.delete(' morphosyntactic_features: "/"')
             + (delete_space + pynutil.insert("/") + year).ques
         )
 
@@ -64,9 +61,9 @@ class DateFst(GraphFst):
             pynutil.delete("preserve_order:") + delete_space + pynutil.delete("true") + delete_space
             | pynutil.delete("field_order:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + DAMO_NOT_QUOTE
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + delete_space
         )
 

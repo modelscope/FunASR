@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import GraphFst
 from pynini.lib import pynutil
@@ -20,5 +18,5 @@ class DateFst(GraphFst):
         super().__init__(name="date", kind="classify", deterministic=deterministic)
 
         graph = pynini.invert(tn_date.final_graph).optimize()
-        graph = self.add_tokens(pynutil.insert("day: \"") + graph + pynutil.insert("\""))
+        graph = self.add_tokens(pynutil.insert('day: "') + graph + pynutil.insert('"'))
         self.fst = graph.optimize()

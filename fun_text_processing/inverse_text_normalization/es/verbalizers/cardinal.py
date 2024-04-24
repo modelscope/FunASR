@@ -1,6 +1,9 @@
-
 import pynini
-from fun_text_processing.text_normalization.en.graph_utils import DAMO_NOT_QUOTE, GraphFst, delete_space
+from fun_text_processing.text_normalization.en.graph_utils import (
+    DAMO_NOT_QUOTE,
+    GraphFst,
+    delete_space,
+)
 from pynini.lib import pynutil
 
 
@@ -15,9 +18,9 @@ class CardinalFst(GraphFst):
         optional_sign = pynini.closure(
             pynutil.delete("negative:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + DAMO_NOT_QUOTE
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + delete_space,
             0,
             1,
@@ -25,9 +28,9 @@ class CardinalFst(GraphFst):
         graph = (
             pynutil.delete("integer:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
         self.numbers = graph
         graph = optional_sign + graph

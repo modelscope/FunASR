@@ -1,9 +1,10 @@
-
-
-
 import pynini
 from fun_text_processing.inverse_text_normalization.pt.utils import get_abs_path
-from fun_text_processing.text_normalization.en.graph_utils import GraphFst, delete_space, insert_space
+from fun_text_processing.text_normalization.en.graph_utils import (
+    GraphFst,
+    delete_space,
+    insert_space,
+)
 from pynini.lib import pynutil
 
 
@@ -74,37 +75,43 @@ class TimeFst(GraphFst):
         # à uma e meia -> 1:30
         # às três e meia -> 3:30
         graph_hours_at_prefix_singular = (
-            pynutil.insert("morphosyntactic_features: \"")
+            pynutil.insert('morphosyntactic_features: "')
             + (pynini.cross("à", "à") | pynini.cross("a", "à"))
-            + pynutil.insert("\" ")
+            + pynutil.insert('" ')
             + delete_space
         )
         graph_hours_at_singular = (
             graph_hours_at_prefix_singular
-            + pynutil.insert("hours: \"")
+            + pynutil.insert('hours: "')
             + graph_uma
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
             + (delete_space + graph_hour).ques
         )
         graph_hours_at_prefix_plural = (
-            pynutil.insert("morphosyntactic_features: \"")
+            pynutil.insert('morphosyntactic_features: "')
             + (pynini.cross("às", "às") | pynini.cross("as", "às"))
-            + pynutil.insert("\" ")
+            + pynutil.insert('" ')
             + delete_space
         )
         graph_hours_at_plural = (
             graph_hours_at_prefix_plural
-            + pynutil.insert("hours: \"")
+            + pynutil.insert('hours: "')
             + graph_2_to_23
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
             + (delete_space + graph_hour).ques
         )
         final_graph_hour_at = graph_hours_at_singular | graph_hours_at_plural
 
-        graph_minutes_component_without_zero = graph_e + graph_1_to_59 + (delete_space + graph_minute).ques
-        graph_minutes_component_without_zero |= graph_e_meia + pynutil.delete(delete_space + pynini.accep("hora")).ques
+        graph_minutes_component_without_zero = (
+            graph_e + graph_1_to_59 + (delete_space + graph_minute).ques
+        )
+        graph_minutes_component_without_zero |= (
+            graph_e_meia + pynutil.delete(delete_space + pynini.accep("hora")).ques
+        )
         final_graph_minute = (
-            pynutil.insert(" minutes: \"") + graph_minutes_component_without_zero + pynutil.insert("\"")
+            pynutil.insert(' minutes: "')
+            + graph_minutes_component_without_zero
+            + pynutil.insert('"')
         )
 
         graph_hm = final_graph_hour_at + final_graph_minute
@@ -112,43 +119,45 @@ class TimeFst(GraphFst):
         # à uma hora -> 1:00
         graph_hours_at_singular_with_hour = (
             graph_hours_at_prefix_singular
-            + pynutil.insert("hours: \"")
+            + pynutil.insert('hours: "')
             + graph_uma
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
             + delete_space
             + graph_hour
         )
 
         graph_hours_at_plural_with_hour = (
             graph_hours_at_prefix_plural
-            + pynutil.insert("hours: \"")
+            + pynutil.insert('hours: "')
             + graph_2_to_23
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
             + delete_space
             + graph_hour
         )
 
-        graph_hm |= (graph_hours_at_singular_with_hour | graph_hours_at_plural_with_hour) + pynutil.insert(
-            " minutes: \"00\"", weight=0.2
-        )
+        graph_hm |= (
+            graph_hours_at_singular_with_hour | graph_hours_at_plural_with_hour
+        ) + pynutil.insert(' minutes: "00"', weight=0.2)
 
         # meio dia e meia -> 12:30
         # meia noite e meia -> 0:30
         graph_minutes_without_zero = (
-            pynutil.insert(" minutes: \"") + graph_minutes_component_without_zero + pynutil.insert("\"")
+            pynutil.insert(' minutes: "')
+            + graph_minutes_component_without_zero
+            + pynutil.insert('"')
         )
         graph_meio_min = (
-            pynutil.insert("hours: \"")
+            pynutil.insert('hours: "')
             + (graph_meio_dia | graph_meia_noite)
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
             + graph_minutes_without_zero
         )
         graph_meio_min |= (
-            pynutil.insert("hours: \"")
+            pynutil.insert('hours: "')
             + graph_meio_dia
-            + pynutil.insert("\" minutes: \"")
+            + pynutil.insert('" minutes: "')
             + graph_e_meio
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
         )
         graph_hm |= graph_meio_min
 
@@ -165,35 +174,46 @@ class TimeFst(GraphFst):
         graph_para_o = pynutil.delete("para") | pynutil.delete("para o") | pynutil.delete("pro")
 
         graph_pra_min = (
-            pynutil.insert("morphosyntactic_features: \"")
-            + (pynini.cross("à", "à") | pynini.cross("às", "às") | pynini.cross("a", "à") | pynini.cross("as", "às"))
-            + pynutil.insert("\" ")
+            pynutil.insert('morphosyntactic_features: "')
+            + (
+                pynini.cross("à", "à")
+                | pynini.cross("às", "às")
+                | pynini.cross("a", "à")
+                | pynini.cross("as", "às")
+            )
+            + pynutil.insert('" ')
             + delete_space
         )
         graph_pra_min += (
-            pynutil.insert("minutes: \"")
+            pynutil.insert('minutes: "')
             + (graph_1_to_59 @ graph_minutes_to)
-            + pynutil.insert("\" ")
+            + pynutil.insert('" ')
             + (delete_space + graph_minute).ques
         )
         graph_pra_hour = (
-            pynutil.insert("hours: \"")
+            pynutil.insert('hours: "')
             + (graph_2_to_23 @ graph_hours_to)
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
             + (delete_space + graph_hour).ques
         )
-        graph_pra_hour |= pynutil.insert("hours: \"") + (graph_meia_noite @ graph_hours_to) + pynutil.insert("\"")
+        graph_pra_hour |= (
+            pynutil.insert('hours: "') + (graph_meia_noite @ graph_hours_to) + pynutil.insert('"')
+        )
 
         graph_pra = graph_pra_min + delete_space + graph_para_a + delete_space + graph_pra_hour
 
         # às quinze pro meio dia -> às 11:45
         graph_pro = graph_pra_min + delete_space + graph_para_o + delete_space
-        graph_pro += pynutil.insert(" hours: \"") + (graph_meio_dia @ graph_hours_to) + pynutil.insert("\"")
+        graph_pro += (
+            pynutil.insert(' hours: "') + (graph_meio_dia @ graph_hours_to) + pynutil.insert('"')
+        )
 
         graph_mh = graph_pra | graph_pro
 
         # optional suffix
-        final_suffix = pynutil.insert("suffix: \"") + (graph_suffix_am | graph_suffix_pm) + pynutil.insert("\"")
+        final_suffix = (
+            pynutil.insert('suffix: "') + (graph_suffix_am | graph_suffix_pm) + pynutil.insert('"')
+        )
         final_suffix_optional = pynini.closure(delete_space + insert_space + final_suffix, 0, 1)
 
         final_graph = pynini.union((graph_hm | graph_mh) + final_suffix_optional).optimize()

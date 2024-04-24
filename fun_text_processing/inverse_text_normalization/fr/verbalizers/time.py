@@ -1,4 +1,3 @@
-
 import pynini
 from fun_text_processing.inverse_text_normalization.fr.graph_utils import (
     DAMO_DIGIT,
@@ -15,7 +14,7 @@ class TimeFst(GraphFst):
     Finite state transducer for verbalizing time, e.g.
         time { hours: "8" minutes: "30" suffix: "du matin"} -> 8 h 30
         time { hours: "8" minutes: "30" } -> 8 h 30
-        time { hours: "8" minutes: "30" suffix: "du soir"} -> 20 h 30  
+        time { hours: "8" minutes: "30" suffix: "du soir"} -> 20 h 30
     """
 
     def __init__(self):
@@ -23,25 +22,32 @@ class TimeFst(GraphFst):
 
         hour_to_night = pynini.string_file(get_abs_path("data/time/hour_to_night.tsv"))
 
-        day_suffixes = pynutil.delete("suffix: \"am\"")
-        night_suffixes = pynutil.delete("suffix: \"pm\"")
+        day_suffixes = pynutil.delete('suffix: "am"')
+        night_suffixes = pynutil.delete('suffix: "pm"')
 
         hour = (
             pynutil.delete("hours:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_DIGIT, 1, 2)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
         minute = (
             pynutil.delete("minutes:")
             + delete_extra_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_DIGIT, 1, 2)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
 
-        graph = hour + delete_extra_space + pynutil.insert("h") + minute.ques + delete_space + day_suffixes.ques
+        graph = (
+            hour
+            + delete_extra_space
+            + pynutil.insert("h")
+            + minute.ques
+            + delete_space
+            + day_suffixes.ques
+        )
 
         graph |= (
             hour @ hour_to_night

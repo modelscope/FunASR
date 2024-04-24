@@ -42,24 +42,28 @@ class TimeFst(GraphFst):
 
         graph_minute_single = pynini.union(*labels_minute_single) @ cardinal
         graph_minute_double = pynini.union(*labels_minute_double) @ cardinal
-        graph_minute_verbose = pynini.cross("半", "30") | pynini.cross("クォーター", "15") # half, quarter
+        graph_minute_verbose = pynini.cross("半", "30") | pynini.cross(
+            "クォーター", "15"
+        )  # half, quarter
         oclock = pynini.cross(pynini.union("時", "o' clock", "o clock", "o'clock", "oclock"), "")
 
-        final_graph_hour = pynutil.insert("hours: \"") + graph_hour + pynutil.insert("\"")
+        final_graph_hour = pynutil.insert('hours: "') + graph_hour + pynutil.insert('"')
         graph_minute = (
             oclock + pynutil.insert("00")
             | pynutil.delete(pynini.union("〇", "零")) + delete_space + graph_minute_single
             | graph_minute_double
         )
-        final_suffix = pynutil.insert("suffix: \"") + convert_space(suffix_graph) + pynutil.insert("\"")
+        final_suffix = (
+            pynutil.insert('suffix: "') + convert_space(suffix_graph) + pynutil.insert('"')
+        )
         final_suffix = delete_space + insert_space + final_suffix
         final_suffix_optional = pynini.closure(final_suffix, 0, 1)
         final_time_zone_optional = pynini.closure(
             delete_space
             + insert_space
-            + pynutil.insert("zone: \"")
+            + pynutil.insert('zone: "')
             + convert_space(time_zone_graph)
-            + pynutil.insert("\""),
+            + pynutil.insert('"'),
             0,
             1,
         )
@@ -68,54 +72,65 @@ class TimeFst(GraphFst):
         # two o eight, two thirty five (am/pm)
         # two pm/am
         graph_hm = (
-            final_graph_hour + delete_extra_space + pynutil.insert("minutes: \"") + graph_minute + pynutil.insert("\"")
+            final_graph_hour
+            + delete_extra_space
+            + pynutil.insert('minutes: "')
+            + graph_minute
+            + pynutil.insert('"')
         )
         # 10 past four, quarter past four, half past four
         graph_m_past_h = (
-            pynutil.insert("minutes: \"")
+            pynutil.insert('minutes: "')
             + pynini.union(graph_minute_single, graph_minute_double, graph_minute_verbose)
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
             + delete_extra_space
             + final_graph_hour
         )
 
         graph_quarter_time = (
-            pynutil.insert("minutes: \"")
-            + pynini.cross("クォーター", "45") # quarter
-            + pynutil.insert("\"")
+            pynutil.insert('minutes: "')
+            + pynini.cross("クォーター", "45")  # quarter
+            + pynutil.insert('"')
             + delete_space
-            + pynutil.delete(pynini.union("から", "to", "till")) # to, till
+            + pynutil.delete(pynini.union("から", "to", "till"))  # to, till
             + delete_extra_space
-            + pynutil.insert("hours: \"")
+            + pynutil.insert('hours: "')
             + to_hour_graph
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
         )
 
         graph_m_to_h_suffix_time = (
-            pynutil.insert("minutes: \"")
+            pynutil.insert('minutes: "')
             + ((graph_minute_single | graph_minute_double).optimize() @ minute_to_graph)
-            + pynutil.insert("\"")
-            + pynini.closure(delete_space + pynutil.delete(pynini.union("分", "min", "mins", "minute", "minutes")), 0, 1)
+            + pynutil.insert('"')
+            + pynini.closure(
+                delete_space
+                + pynutil.delete(pynini.union("分", "min", "mins", "minute", "minutes")),
+                0,
+                1,
+            )
             + delete_space
-            + pynutil.delete(pynini.union("から", "to", "till")) # to, till
+            + pynutil.delete(pynini.union("から", "to", "till"))  # to, till
             + delete_extra_space
-            + pynutil.insert("hours: \"")
+            + pynutil.insert('hours: "')
             + to_hour_graph
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
             + final_suffix
         )
 
         graph_h = (
             final_graph_hour
             + delete_extra_space
-            + pynutil.insert("minutes: \"")
+            + pynutil.insert('minutes: "')
             + (pynutil.insert("00") | graph_minute)
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
             + final_suffix
             + final_time_zone_optional
         )
         final_graph = (
-            (graph_hm | graph_m_past_h | graph_quarter_time) + final_suffix_optional + final_time_zone_optional
+            (graph_hm | graph_m_past_h | graph_quarter_time)
+            + final_suffix_optional
+            + final_time_zone_optional
         )
         final_graph |= graph_h
         final_graph |= graph_m_to_h_suffix_time

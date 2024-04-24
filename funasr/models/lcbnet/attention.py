@@ -11,6 +11,7 @@ import math
 import torch
 from torch import nn
 
+
 class MultiHeadedAttentionReturnWeight(nn.Module):
     """Multi-Head Attention layer.
 
@@ -108,5 +109,3 @@ class MultiHeadedAttentionReturnWeight(nn.Module):
         q, k, v = self.forward_qkv(query, key, value)
         scores = torch.matmul(q, k.transpose(-2, -1)) / math.sqrt(self.d_k)
         return self.forward_attention(v, scores, mask)
-
-

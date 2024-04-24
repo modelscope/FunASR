@@ -23,6 +23,7 @@ import json
 import os
 import yaml
 
+
 class TritonPythonModel:
     """Your Python model must use the same class name. Every Python model
     that is created must have "TritonPythonModel" as the class name.
@@ -44,20 +45,18 @@ class TritonPythonModel:
           * model_version: Model version
           * model_name: Model name
         """
-        self.model_config = model_config = json.loads(args['model_config'])
+        self.model_config = model_config = json.loads(args["model_config"])
         self.max_batch_size = max(model_config["max_batch_size"], 1)
 
         # # Get OUTPUT0 configuration
-        output0_config = pb_utils.get_output_config_by_name(
-            model_config, "OUTPUT0")
+        output0_config = pb_utils.get_output_config_by_name(model_config, "OUTPUT0")
         # # Convert Triton types to numpy types
-        self.out0_dtype = pb_utils.triton_string_to_numpy(
-            output0_config['data_type'])
-            
-        self.init_vocab(self.model_config['parameters'])
+        self.out0_dtype = pb_utils.triton_string_to_numpy(output0_config["data_type"])
+
+        self.init_vocab(self.model_config["parameters"])
 
     def init_vocab(self, parameters):
-        blank_id=0
+        blank_id = 0
         for li in parameters.items():
             key, value = li
             value = value["string_value"]
@@ -67,16 +66,16 @@ class TritonPythonModel:
                 lm_path = value
             elif key == "vocabulary":
                 self.vocab_dict = self.load_vocab(value)
-            if key == 'ignore_id':
+            if key == "ignore_id":
                 ignore_id = int(value)
 
     def load_vocab(self, vocab_file):
         """
         load lang_char.txt
         """
-        with open(str(vocab_file), 'rb') as f:
+        with open(str(vocab_file), "rb") as f:
             config = yaml.load(f, Loader=yaml.Loader)
-        return config['token_list']
+        return config["token_list"]
 
     def execute(self, requests):
         """`execute` must be implemented in every Python model. `execute`
@@ -110,31 +109,40 @@ class TritonPythonModel:
             # Perform inference on the request and append it to responses list...
             in_0 = pb_utils.get_input_tensor_by_name(request, "logits")
             in_1 = pb_utils.get_input_tensor_by_name(request, "token_num")
-            
+
             logits, token_num = from_dlpack(in_0.to_dlpack()), from_dlpack(in_1.to_dlpack()).cpu()
             max_token_num = max(max_token_num, token_num)
 
             assert logits.shape[0] == 1
             logits_list.append(logits)
             token_num_list.append(token_num)
-            total_seq +=1
+            total_seq += 1
 
-        logits_batch = torch.zeros(len(logits_list), max_token_num, len(self.vocab_dict), dtype=torch.float32, device=logits.device)
+        logits_batch = torch.zeros(
+            len(logits_list),
+            max_token_num,
+            len(self.vocab_dict),
+            dtype=torch.float32,
+            device=logits.device,
+        )
         token_num_batch = torch.zeros(len(logits_list))
 
         for i, (logits, token_num) in enumerate(zip(logits_list, token_num_list)):
-            logits_batch[i][:int(token_num)] = logits[0][:int(token_num)]
+            logits_batch[i][: int(token_num)] = logits[0][: int(token_num)]
             token_num_batch[i] = token_num
 
         yseq_batch = logits_batch.argmax(axis=-1).tolist()
         token_int_batch = [list(filter(lambda x: x not in (0, 2), yseq)) for yseq in yseq_batch]
 
         tokens_batch = [[self.vocab_dict[i] for i in token_int] for token_int in token_int_batch]
-        
-        hyps = [u"".join([t if t != "<space>" else " " for t in tokens]).encode('utf-8') for tokens in tokens_batch]
+
+        hyps = [
+            "".join([t if t != "<space>" else " " for t in tokens]).encode("utf-8")
+            for tokens in tokens_batch
+        ]
         responses = []
         for i in range(total_seq):
-            sents = np.array(hyps[i:i+1])
+            sents = np.array(hyps[i : i + 1])
             out0 = pb_utils.Tensor("OUTPUT0", sents.astype(self.out0_dtype))
             inference_response = pb_utils.InferenceResponse(output_tensors=[out0])
             responses.append(inference_response)
@@ -146,4 +154,4 @@ class TritonPythonModel:
         Implementing `finalize` function is optional. This function allows
         the model to perform any necessary clean ups before exit.
         """
-        print('Cleaning up...')
+        print("Cleaning up...")

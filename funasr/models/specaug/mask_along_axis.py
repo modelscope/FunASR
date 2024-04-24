@@ -66,6 +66,7 @@ def mask_along_axis(
     spec = spec.view(*org_size)
     return spec, spec_lengths
 
+
 def mask_along_axis_lfr(
     spec: torch.Tensor,
     spec_lengths: torch.Tensor,
@@ -150,8 +151,7 @@ class MaskAlongAxis(torch.nn.Module):
             mask_width_range = (0, mask_width_range)
         if len(mask_width_range) != 2:
             raise TypeError(
-                f"mask_width_range must be a tuple of int and int values: "
-                f"{mask_width_range}",
+                f"mask_width_range must be a tuple of int and int values: " f"{mask_width_range}",
             )
 
         assert mask_width_range[1] > mask_width_range[0]
@@ -271,6 +271,7 @@ class MaskAlongAxisVariableMaxWidth(torch.nn.Module):
             )
         return spec, spec_lengths
 
+
 class MaskAlongAxisLFR(torch.nn.Module):
     def __init__(
         self,
@@ -284,8 +285,7 @@ class MaskAlongAxisLFR(torch.nn.Module):
             mask_width_range = (0, mask_width_range)
         if len(mask_width_range) != 2:
             raise TypeError(
-                f"mask_width_range must be a tuple of int and int values: "
-                f"{mask_width_range}",
+                f"mask_width_range must be a tuple of int and int values: " f"{mask_width_range}",
             )
 
         assert mask_width_range[1] > mask_width_range[0]

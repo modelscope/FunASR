@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import (
     DAMO_NOT_QUOTE,
@@ -27,39 +25,39 @@ class TimeFst(GraphFst):
         hour = (
             pynutil.delete("hours:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
         minute = (
             pynutil.delete("minutes:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
         suffix = (
             pynutil.delete("suffix:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
         optional_suffix = pynini.closure(delete_space + insert_space + suffix, 0, 1)
         zone = (
             pynutil.delete("zone:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
         optional_zone = pynini.closure(delete_space + insert_space + zone, 0, 1)
         second = (
             pynutil.delete("seconds:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
         graph_hms = (
             hour

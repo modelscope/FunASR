@@ -44,6 +44,7 @@ from funasr.models.transformer.utils.subsampling import (
 )
 from funasr.register import tables
 
+
 class EBranchformerEncoderLayer(torch.nn.Module):
     """E-Branchformer encoder layer module.
 
@@ -174,6 +175,7 @@ class EBranchformerEncoderLayer(torch.nn.Module):
 
         return x, mask
 
+
 @tables.register("encoder_classes", "EBranchformerEncoder")
 class EBranchformerEncoder(nn.Module):
     """E-Branchformer encoder module."""
@@ -232,9 +234,7 @@ class EBranchformerEncoder(nn.Module):
         elif pos_enc_layer_type == "legacy_rel_pos":
             assert attention_layer_type == "legacy_rel_selfattn"
             pos_enc_class = LegacyRelPositionalEncoding
-            logging.warning(
-                "Using legacy_rel_pos and it will be deprecated in the future."
-            )
+            logging.warning("Using legacy_rel_pos and it will be deprecated in the future.")
         else:
             raise ValueError("unknown pos_enc_layer: " + pos_enc_layer_type)
 
@@ -320,9 +320,7 @@ class EBranchformerEncoder(nn.Module):
                 output_size,
                 attention_dropout_rate,
             )
-            logging.warning(
-                "Using legacy_rel_selfattn and it will be deprecated in the future."
-            )
+            logging.warning("Using legacy_rel_selfattn and it will be deprecated in the future.")
         elif attention_layer_type == "rel_selfattn":
             assert pos_enc_layer_type == "rel_pos"
             encoder_selfattn_layer = RelPositionMultiHeadedAttention
@@ -360,9 +358,7 @@ class EBranchformerEncoder(nn.Module):
                 encoder_selfattn_layer(*encoder_selfattn_layer_args),
                 cgmlp_layer(*cgmlp_layer_args),
                 positionwise_layer(*positionwise_layer_args) if use_ffn else None,
-                positionwise_layer(*positionwise_layer_args)
-                if use_ffn and macaron_ffn
-                else None,
+                positionwise_layer(*positionwise_layer_args) if use_ffn and macaron_ffn else None,
                 dropout_rate,
                 merge_conv_kernel,
             ),
