@@ -176,7 +176,7 @@ def main(**kwargs):
     except:
         writer = None
 
-
+    dataloader_tr, dataloader_val = None, None
     for epoch in range(trainer.start_epoch, trainer.max_epoch + 1):
         time1 = time.perf_counter()
         
