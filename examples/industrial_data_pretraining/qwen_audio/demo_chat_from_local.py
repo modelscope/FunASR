@@ -7,14 +7,17 @@
 
 from funasr import AutoModel
 
-model = AutoModel(model="Qwen-Audio-Chat",
-                  model_path="/nfs/zhifu.gzf/init_model/qwen/Qwen-Audio-Chat",
-                  )
+model = AutoModel(
+    model="Qwen-Audio-Chat",
+    model_path="/nfs/zhifu.gzf/init_model/qwen/Qwen-Audio-Chat",
+)
 
-audio_in = "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav"
+audio_in = (
+    "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav"
+)
 
 # 1st dialogue turn
-prompt = 'what does the person say?'
+prompt = "what does the person say?"
 cache = {"history": None}
 res = model.generate(input=audio_in, prompt=prompt, cache=cache)
 print(res)
@@ -24,4 +27,3 @@ print(res)
 prompt = 'Find the start time and end time of the word "middle classes"'
 res = model.generate(input=None, prompt=prompt, cache=cache)
 print(res)
-

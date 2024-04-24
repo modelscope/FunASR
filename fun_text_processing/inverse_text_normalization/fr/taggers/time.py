@@ -1,4 +1,3 @@
-
 import pynini
 from fun_text_processing.inverse_text_normalization.fr.graph_utils import GraphFst, delete_space
 from fun_text_processing.inverse_text_normalization.fr.utils import get_abs_path
@@ -52,9 +51,9 @@ class TimeFst(GraphFst):
         graph_demi += pynini.accep("e").ques  # people vary on feminine or masculine form
         graph_demi = pynini.cross(graph_demi, "30")
 
-        graph_quart = pynini.accep('quart')
+        graph_quart = pynini.accep("quart")
         graph_quart = pynini.accep("le ").ques + graph_quart  # sometimes used
-        graph_quart = pynini.cross(graph_quart, '15')
+        graph_quart = pynini.cross(graph_quart, "15")
         graph_trois_quart = pynini.cross("trois quarts", "45")
 
         graph_fractions = pynini.union(graph_demi, graph_quart, graph_trois_quart)
@@ -63,12 +62,16 @@ class TimeFst(GraphFst):
 
         # Hours component is usually just a cardinal + 'heures' (ignored in case of 'midi/minuit').
         graph_hours_component = pynini.union(graph_hours, graph_midi, graph_minuit)
-        graph_hours_component = pynutil.insert("hours: \"") + graph_hours_component + pynutil.insert("\"")
+        graph_hours_component = (
+            pynutil.insert('hours: "') + graph_hours_component + pynutil.insert('"')
+        )
         graph_hours_component += delete_space
 
         # Minutes component
         graph_minutes_component = (
-            pynutil.insert(" minutes: \"") + pynini.union(graph_minutes, graph_et_fractions) + pynutil.insert("\"")
+            pynutil.insert(' minutes: "')
+            + pynini.union(graph_minutes, graph_et_fractions)
+            + pynutil.insert('"')
         )
 
         # Hour and minutes together. For 'demi' and 'qart', 'et' is used as a conjunction.
@@ -80,18 +83,22 @@ class TimeFst(GraphFst):
 
         graph_hours_to_component = graph_hours | graph_midi | graph_minuit
         graph_hours_to_component @= graph_hours_to
-        graph_hours_to_component = pynutil.insert("hours: \"") + graph_hours_to_component + pynutil.insert("\"")
+        graph_hours_to_component = (
+            pynutil.insert('hours: "') + graph_hours_to_component + pynutil.insert('"')
+        )
         graph_hours_to_component += delete_space
 
         graph_minutes_to_component = pynini.union(graph_minutes, graph_fractions)
         graph_minutes_to_component @= graph_minutes_to
-        graph_minutes_to_component = pynutil.insert(" minutes: \"") + graph_minutes_to_component + pynutil.insert("\"")
+        graph_minutes_to_component = (
+            pynutil.insert(' minutes: "') + graph_minutes_to_component + pynutil.insert('"')
+        )
 
         graph_time_to = graph_hours_to_component + graph_moins + graph_minutes_to_component
 
         graph_time_no_suffix = graph_time_standard | graph_time_to
 
-        graph_suffix_component = pynutil.insert(" suffix: \"") + graph_suffix + pynutil.insert("\"")
+        graph_suffix_component = pynutil.insert(' suffix: "') + graph_suffix + pynutil.insert('"')
         graph_suffix_component = delete_space + graph_suffix_component
         graph_suffix_component = graph_suffix_component.ques
 

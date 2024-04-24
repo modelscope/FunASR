@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import (
     MIN_NEG_WEIGHT,
@@ -32,7 +30,9 @@ class WordFst(GraphFst):
 
         punct = PunctuationFst().graph
         default_graph = pynini.closure(pynini.difference(DAMO_NOT_SPACE, punct.project("input")), 1)
-        symbols_to_exclude = (pynini.union("$", "€", "₩", "£", "¥", "#", "%") | DAMO_DIGIT).optimize()
+        symbols_to_exclude = (
+            pynini.union("$", "€", "₩", "£", "¥", "#", "%") | DAMO_DIGIT
+        ).optimize()
         graph = pynini.closure(pynini.difference(DAMO_NOT_SPACE, symbols_to_exclude), 1)
         graph = pynutil.add_weight(graph, MIN_NEG_WEIGHT) | default_graph
 
@@ -57,8 +57,12 @@ class WordFst(GraphFst):
         )
         # allow sentences of words in IPA format separated with spaces or punct marks
         delim = (punct_marks | pynini.accep(" ")) ** (1, ...)
-        ipa_phonemes = ipa_phonemes + pynini.closure(delim + ipa_phonemes) + pynini.closure(delim, 0, 1)
-        ipa_phonemes = (pynini.accep(pynini.escape("[")) + ipa_phonemes + pynini.accep(pynini.escape("]"))).optimize()
+        ipa_phonemes = (
+            ipa_phonemes + pynini.closure(delim + ipa_phonemes) + pynini.closure(delim, 0, 1)
+        )
+        ipa_phonemes = (
+            pynini.accep(pynini.escape("[")) + ipa_phonemes + pynini.accep(pynini.escape("]"))
+        ).optimize()
 
         if not deterministic:
             phoneme = (
@@ -75,4 +79,4 @@ class WordFst(GraphFst):
 
         phoneme |= ipa_phonemes
         self.graph = plurals._priority_union(convert_space(phoneme.optimize()), graph, DAMO_SIGMA)
-        self.fst = (pynutil.insert("name: \"") + self.graph + pynutil.insert("\"")).optimize()
+        self.fst = (pynutil.insert('name: "') + self.graph + pynutil.insert('"')).optimize()

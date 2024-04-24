@@ -1,8 +1,10 @@
-
-
-
 import pynini
-from fun_text_processing.text_normalization.en.graph_utils import DAMO_NOT_QUOTE, DAMO_SIGMA, GraphFst, delete_space
+from fun_text_processing.text_normalization.en.graph_utils import (
+    DAMO_NOT_QUOTE,
+    DAMO_SIGMA,
+    GraphFst,
+    delete_space,
+)
 from fun_text_processing.text_normalization.en.utils import get_abs_path
 from pynini.lib import pynutil
 
@@ -26,14 +28,17 @@ class OrdinalFst(GraphFst):
         graph = (
             pynutil.delete("integer:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
         convert_rest = pynutil.insert("th")
 
         suffix = pynini.cdrewrite(
-            graph_digit | graph_teens | pynini.cross("ty", "tieth") | convert_rest, "", "[EOS]", DAMO_SIGMA,
+            graph_digit | graph_teens | pynini.cross("ty", "tieth") | convert_rest,
+            "",
+            "[EOS]",
+            DAMO_SIGMA,
         ).optimize()
         self.graph = pynini.compose(graph, suffix)
         self.suffix = suffix

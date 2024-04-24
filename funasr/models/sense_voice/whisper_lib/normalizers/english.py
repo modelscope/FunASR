@@ -84,8 +84,7 @@ class EnglishNumberNormalizer:
             name.replace("y", "ies"): (value, "s") for name, value in self.tens.items()
         }
         self.tens_ordinal = {
-            name.replace("y", "ieth"): (value, "th")
-            for name, value in self.tens.items()
+            name.replace("y", "ieth"): (value, "th") for name, value in self.tens.items()
         }
         self.tens_suffixed = {**self.tens_plural, **self.tens_ordinal}
 
@@ -132,8 +131,7 @@ class EnglishNumberNormalizer:
             "cents": "¢",
         }
         self.prefixes = set(
-            list(self.preceding_prefixers.values())
-            + list(self.following_prefixers.values())
+            list(self.preceding_prefixers.values()) + list(self.following_prefixers.values())
         )
         self.suffixers = {
             "per": {"cent": "%"},
@@ -223,9 +221,7 @@ class EnglishNumberNormalizer:
                 if value is None:
                     value = ones
                 elif isinstance(value, str) or prev in self.ones:
-                    if (
-                        prev in self.tens and ones < 10
-                    ):  # replace the last zero with the digit
+                    if prev in self.tens and ones < 10:  # replace the last zero with the digit
                         assert value[-1] == "0"
                         value = value[:-1] + str(ones)
                     else:

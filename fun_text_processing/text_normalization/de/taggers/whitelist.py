@@ -1,4 +1,3 @@
-
 import pynini
 from fun_text_processing.text_normalization.de.utils import get_abs_path, load_labels
 from fun_text_processing.text_normalization.en.graph_utils import GraphFst, convert_space
@@ -31,7 +30,8 @@ class WhiteListFst(GraphFst):
         graph = _get_whitelist_graph(input_case, get_abs_path("data/whitelist.tsv"))
         if not deterministic and input_case != "lower_cased":
             graph |= pynutil.add_weight(
-                _get_whitelist_graph("lower_cased", get_abs_path("data/whitelist.tsv")), weight=0.0001
+                _get_whitelist_graph("lower_cased", get_abs_path("data/whitelist.tsv")),
+                weight=0.0001,
             )
 
         if input_file:
@@ -42,9 +42,11 @@ class WhiteListFst(GraphFst):
                 graph = whitelist_provided
 
         if not deterministic:
-            units_graph = _get_whitelist_graph(input_case, file=get_abs_path("data/measure/measurements.tsv"))
+            units_graph = _get_whitelist_graph(
+                input_case, file=get_abs_path("data/measure/measurements.tsv")
+            )
             graph |= units_graph
 
         self.graph = graph
         self.final_graph = convert_space(self.graph).optimize()
-        self.fst = (pynutil.insert("name: \"") + self.final_graph + pynutil.insert("\"")).optimize()
+        self.fst = (pynutil.insert('name: "') + self.final_graph + pynutil.insert('"')).optimize()

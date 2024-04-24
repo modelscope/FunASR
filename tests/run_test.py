@@ -19,7 +19,7 @@ def gather_test_cases(test_dir, pattern, list_tests):
     for case in case_list:
         test_case = unittest.defaultTestLoader.discover(start_dir=test_dir, pattern=case)
         test_suite.addTest(test_case)
-        if hasattr(test_case, '__iter__'):
+        if hasattr(test_case, "__iter__"):
             for subcase in test_case:
                 if list_tests:
                     print(subcase)
@@ -40,12 +40,12 @@ def main(args):
             sys.exit(len(result.errors))
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser('test runner')
-    parser.add_argument('--list_tests', action='store_true', help='list all tests')
-    parser.add_argument('--pattern', default='test_*.py', help='test file pattern')
-    parser.add_argument('--test_dir', default='tests', help='directory to be tested')
-    parser.add_argument('--disable_profile', action='store_true', help='disable profiling')
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser("test runner")
+    parser.add_argument("--list_tests", action="store_true", help="list all tests")
+    parser.add_argument("--pattern", default="test_*.py", help="test file pattern")
+    parser.add_argument("--test_dir", default="tests", help="directory to be tested")
+    parser.add_argument("--disable_profile", action="store_true", help="disable profiling")
     args = parser.parse_args()
-    print(f'working dir: {os.getcwd()}')
+    print(f"working dir: {os.getcwd()}")
     main(args)

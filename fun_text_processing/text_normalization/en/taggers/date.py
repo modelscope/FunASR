@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import (
     DAMO_CHAR,
@@ -30,7 +28,7 @@ year_suffix = pynini.string_map(year_suffix).optimize()
 
 def get_ties_graph(deterministic: bool = True):
     """
-    Returns two digit transducer, e.g. 
+    Returns two digit transducer, e.g.
     03 -> o three
     12 -> thirteen
     20 -> twenty
@@ -40,7 +38,10 @@ def get_ties_graph(deterministic: bool = True):
     if deterministic:
         graph = graph | pynini.cross("0", "oh") + insert_space + graph_digit
     else:
-        graph = graph | (pynini.cross("0", "oh") | pynini.cross("0", "zero")) + insert_space + graph_digit
+        graph = (
+            graph
+            | (pynini.cross("0", "oh") | pynini.cross("0", "zero")) + insert_space + graph_digit
+        )
 
     return graph.optimize()
 
@@ -59,7 +60,12 @@ def get_four_digit_year_graph(deterministic: bool = True):
         | (graph_teen + insert_space + (ties_graph | pynini.cross("1", "ten")))
     ) + pynutil.delete("0s")
 
-    graph_with_s |= (graph_teen | graph_ties) + insert_space + pynini.cross("00", "hundred") + pynutil.delete("s")
+    graph_with_s |= (
+        (graph_teen | graph_ties)
+        + insert_space
+        + pynini.cross("00", "hundred")
+        + pynutil.delete("s")
+    )
     graph_with_s = graph_with_s @ pynini.cdrewrite(
         pynini.cross("y", "ies") | pynutil.insert("s"), "", "[EOS]", DAMO_SIGMA
     )
@@ -95,7 +101,8 @@ def _get_two_digit_year_with_s_graph():
     graph = (
         pynini.closure(pynutil.delete("'"), 0, 1)
         + pynini.compose(
-            ties_graph + pynutil.delete("0s"), pynini.cdrewrite(pynini.cross("y", "ies"), "", "[EOS]", DAMO_SIGMA)
+            ties_graph + pynutil.delete("0s"),
+            pynini.cdrewrite(pynini.cross("y", "ies"), "", "[EOS]", DAMO_SIGMA),
         )
     ).optimize()
     return graph
@@ -106,33 +113,44 @@ def _get_year_graph(cardinal_graph, deterministic: bool = True):
     Transducer for year, only from 1000 - 2999 e.g.
     1290 -> twelve nineteen
     2000 - 2009 will be verbalized as two thousand.
-    
+
     Transducer for 3 digit year, e.g. 123-> one twenty three
-    
+
     Transducer for year with suffix
     123 A.D., 4200 B.C
     """
     graph = get_four_digit_year_graph(deterministic)
-    graph = (pynini.union("1", "2") + (DAMO_DIGIT ** 3) + pynini.closure(pynini.cross(" s", "s") | "s", 0, 1)) @ graph
+    graph = (
+        pynini.union("1", "2")
+        + (DAMO_DIGIT**3)
+        + pynini.closure(pynini.cross(" s", "s") | "s", 0, 1)
+    ) @ graph
 
     graph |= _get_two_digit_year_with_s_graph()
 
-    three_digit_year = (DAMO_DIGIT @ cardinal_graph) + insert_space + (DAMO_DIGIT ** 2) @ cardinal_graph
+    three_digit_year = (
+        (DAMO_DIGIT @ cardinal_graph) + insert_space + (DAMO_DIGIT**2) @ cardinal_graph
+    )
     year_with_suffix = (
-        (get_four_digit_year_graph(deterministic=True) | three_digit_year) + delete_space + insert_space + year_suffix
+        (get_four_digit_year_graph(deterministic=True) | three_digit_year)
+        + delete_space
+        + insert_space
+        + year_suffix
     )
     graph |= year_with_suffix
     return graph.optimize()
 
 
 def _get_two_digit_year(cardinal_graph, single_digits_graph):
-    wo_digit_year = DAMO_DIGIT ** (2) @ plurals._priority_union(cardinal_graph, single_digits_graph, DAMO_SIGMA)
+    wo_digit_year = DAMO_DIGIT ** (2) @ plurals._priority_union(
+        cardinal_graph, single_digits_graph, DAMO_SIGMA
+    )
     return wo_digit_year
 
 
 class DateFst(GraphFst):
     """
-    Finite state transducer for classifying date, e.g. 
+    Finite state transducer for classifying date, e.g.
         jan. 5, 2012 -> date { month: "january" day: "five" year: "twenty twelve" preserve_order: true }
         jan. 5 -> date { month: "january" day: "five" preserve_order: true }
         5 january 2012 -> date { day: "five" month: "january" year: "twenty twelve" preserve_order: true }
@@ -153,9 +171,9 @@ class DateFst(GraphFst):
         # january
         month_graph = pynini.string_file(get_abs_path("data/date/month_name.tsv")).optimize()
         # January, JANUARY
-        month_graph |= pynini.compose(TO_LOWER + pynini.closure(DAMO_CHAR), month_graph) | pynini.compose(
-            TO_LOWER ** (2, ...), month_graph
-        )
+        month_graph |= pynini.compose(
+            TO_LOWER + pynini.closure(DAMO_CHAR), month_graph
+        ) | pynini.compose(TO_LOWER ** (2, ...), month_graph)
 
         # jan
         month_abbr_graph = pynini.string_file(get_abs_path("data/date/month_abbr.tsv")).optimize()
@@ -167,7 +185,9 @@ class DateFst(GraphFst):
         ) + pynini.closure(pynutil.delete("."), 0, 1)
         month_graph |= month_abbr_graph.optimize()
 
-        month_numbers_labels = pynini.string_file(get_abs_path("data/date/month_number.tsv")).optimize()
+        month_numbers_labels = pynini.string_file(
+            get_abs_path("data/date/month_number.tsv")
+        ).optimize()
         cardinal_graph = cardinal.graph_hundred_component_at_least_one_none_zero_digit
 
         year_graph = _get_year_graph(cardinal_graph=cardinal_graph, deterministic=deterministic)
@@ -175,45 +195,53 @@ class DateFst(GraphFst):
         # three_digit_year = (DAMO_DIGIT @ cardinal_graph) + insert_space + (DAMO_DIGIT ** 2) @ cardinal_graph
         # year_graph |= three_digit_year
 
-        month_graph = pynutil.insert("month: \"") + month_graph + pynutil.insert("\"")
-        month_numbers_graph = pynutil.insert("month: \"") + month_numbers_labels + pynutil.insert("\"")
+        month_graph = pynutil.insert('month: "') + month_graph + pynutil.insert('"')
+        month_numbers_graph = (
+            pynutil.insert('month: "') + month_numbers_labels + pynutil.insert('"')
+        )
 
         endings = ["rd", "th", "st", "nd"]
         endings += [x.upper() for x in endings]
         endings = pynini.union(*endings)
 
         day_graph = (
-            pynutil.insert("day: \"")
+            pynutil.insert('day: "')
             + pynini.closure(pynutil.delete("the "), 0, 1)
             + (
-                ((pynini.union("1", "2") + DAMO_DIGIT) | DAMO_DIGIT | (pynini.accep("3") + pynini.union("0", "1")))
+                (
+                    (pynini.union("1", "2") + DAMO_DIGIT)
+                    | DAMO_DIGIT
+                    | (pynini.accep("3") + pynini.union("0", "1"))
+                )
                 + pynini.closure(pynutil.delete(endings), 0, 1)
             )
             @ cardinal_graph
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
         )
 
         two_digit_year = _get_two_digit_year(
             cardinal_graph=cardinal_graph, single_digits_graph=cardinal.single_digits_graph
         )
-        two_digit_year = pynutil.insert("year: \"") + two_digit_year + pynutil.insert("\"")
+        two_digit_year = pynutil.insert('year: "') + two_digit_year + pynutil.insert('"')
 
         # if lm:
         #     two_digit_year = pynini.compose(pynini.difference(DAMO_DIGIT, "0") + DAMO_DIGIT ** (3), two_digit_year)
         #     year_graph = pynini.compose(pynini.difference(DAMO_DIGIT, "0") + DAMO_DIGIT ** (2), year_graph)
         #     year_graph |= pynini.compose(pynini.difference(DAMO_DIGIT, "0") + DAMO_DIGIT ** (4, ...), year_graph)
 
-        graph_year = pynutil.insert(" year: \"") + pynutil.delete(" ") + year_graph + pynutil.insert("\"")
+        graph_year = (
+            pynutil.insert(' year: "') + pynutil.delete(" ") + year_graph + pynutil.insert('"')
+        )
         graph_year |= (
-            pynutil.insert(" year: \"")
+            pynutil.insert(' year: "')
             + pynini.accep(",")
             + pynini.closure(pynini.accep(" "), 0, 1)
             + year_graph
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
         )
         optional_graph_year = pynini.closure(graph_year, 0, 1)
 
-        year_graph = pynutil.insert("year: \"") + year_graph + pynutil.insert("\"")
+        year_graph = pynutil.insert('year: "') + year_graph + pynutil.insert('"')
 
         graph_mdy = month_graph + (
             (delete_extra_space + day_graph)
@@ -243,7 +271,7 @@ class DateFst(GraphFst):
             )
 
         graph_dmy = day_graph + delete_extra_space + month_graph + optional_graph_year
-        day_ex_month = (DAMO_DIGIT ** 2 - pynini.project(month_numbers_graph, "input")) @ day_graph
+        day_ex_month = (DAMO_DIGIT**2 - pynini.project(month_numbers_graph, "input")) @ day_graph
         for x in ["-", "/", "."]:
             delete_sep = pynutil.delete(x)
             graph_dmy |= (
@@ -296,10 +324,10 @@ class DateFst(GraphFst):
             for month in [x[0] for x in load_labels(get_abs_path("data/date/month_name.tsv"))]:
                 for day in [x[0] for x in load_labels(get_abs_path("data/date/day.tsv"))]:
                     ymd_to_mdy_curr = (
-                        pynutil.insert("month: \"" + month + "\" day: \"" + day + "\" ")
-                        + pynini.accep('year:')
+                        pynutil.insert('month: "' + month + '" day: "' + day + '" ')
+                        + pynini.accep("year:")
                         + DAMO_SIGMA
-                        + pynutil.delete(" month: \"" + month + "\" day: \"" + day + "\"")
+                        + pynutil.delete(' month: "' + month + '" day: "' + day + '"')
                     )
 
                     # YY-MM-DD -> MM-DD-YY
@@ -311,10 +339,10 @@ class DateFst(GraphFst):
                     )
 
                     ymd_to_dmy_curr = (
-                        pynutil.insert("day: \"" + day + "\" month: \"" + month + "\" ")
-                        + pynini.accep('year:')
+                        pynutil.insert('day: "' + day + '" month: "' + month + '" ')
+                        + pynini.accep("year:")
                         + DAMO_SIGMA
-                        + pynutil.delete(" month: \"" + month + "\" day: \"" + day + "\"")
+                        + pynutil.delete(' month: "' + month + '" day: "' + day + '"')
                     )
 
                     # YY-MM-DD -> MM-DD-YY
@@ -326,9 +354,9 @@ class DateFst(GraphFst):
                     )
 
                     mdy_to_dmy_curr = (
-                        pynutil.insert("day: \"" + day + "\" month: \"" + month + "\" ")
-                        + pynutil.delete("month: \"" + month + "\" day: \"" + day + "\" ")
-                        + pynini.accep('year:')
+                        pynutil.insert('day: "' + day + '" month: "' + month + '" ')
+                        + pynutil.delete('month: "' + month + '" day: "' + day + '" ')
+                        + pynini.accep("year:")
                         + DAMO_SIGMA
                     ).optimize()
                     # MM-DD-YY -> verbalize as MM-DD-YY (February fourth 1991) or DD-MM-YY (the fourth of February 1991)
@@ -339,9 +367,9 @@ class DateFst(GraphFst):
                         else pynini.union(mdy_to_dmy_curr, mdy_to_dmy_graph).optimize()
                     ).optimize()
 
-                    md_to_dm_curr = pynutil.insert("day: \"" + day + "\" month: \"" + month + "\"") + pynutil.delete(
-                        "month: \"" + month + "\" day: \"" + day + "\""
-                    )
+                    md_to_dm_curr = pynutil.insert(
+                        'day: "' + day + '" month: "' + month + '"'
+                    ) + pynutil.delete('month: "' + month + '" day: "' + day + '"')
                     md_to_dm_curr = pynini.compose(m_sep_d, md_to_dm_curr).optimize()
 
                     md_to_dm_graph = (

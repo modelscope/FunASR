@@ -7,9 +7,10 @@
 
 from funasr import AutoModel
 
-model = AutoModel(model="Qwen-Audio",
-                  model_path="/nfs/zhifu.gzf/init_model/qwen/Qwen-Audio",
-                  )
+model = AutoModel(
+    model="Qwen-Audio",
+    model_path="/nfs/zhifu.gzf/init_model/qwen/Qwen-Audio",
+)
 
 audio_in = "https://github.com/QwenLM/Qwen-Audio/raw/main/assets/audio/1272-128104-0000.flac"
 prompt = "<|startoftranscription|><|en|><|transcribe|><|en|><|notimestamps|><|wo_itn|>"

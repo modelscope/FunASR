@@ -21,7 +21,7 @@ class Hypothesis(NamedTuple):
     """Hypothesis data type."""
 
     yseq: torch.Tensor
-    spk_weigths : List
+    spk_weigths: List
     score: Union[float, torch.Tensor] = 0
     scores: Dict[str, Union[float, torch.Tensor]] = dict()
     states: Dict[str, Any] = dict()
@@ -153,7 +153,11 @@ class BeamSearch(torch.nn.Module):
         return torch.cat((xs, x))
 
     def score_full(
-        self, hyp: Hypothesis, asr_enc: torch.Tensor, spk_enc: torch.Tensor, profile: torch.Tensor,
+        self,
+        hyp: Hypothesis,
+        asr_enc: torch.Tensor,
+        spk_enc: torch.Tensor,
+        profile: torch.Tensor,
     ) -> Tuple[Dict[str, torch.Tensor], Dict[str, Any]]:
         """Score new hypothesis by `self.full_scorers`.
 
@@ -173,13 +177,20 @@ class BeamSearch(torch.nn.Module):
         states = dict()
         for k, d in self.full_scorers.items():
             if isinstance(d, AbsDecoder):
-                scores[k], spk_weigths, states[k] = d.score(hyp.yseq, hyp.states[k], asr_enc, spk_enc, profile)
+                scores[k], spk_weigths, states[k] = d.score(
+                    hyp.yseq, hyp.states[k], asr_enc, spk_enc, profile
+                )
             else:
                 scores[k], states[k] = d.score(hyp.yseq, hyp.states[k], asr_enc)
         return scores, spk_weigths, states
 
     def score_partial(
-        self, hyp: Hypothesis, ids: torch.Tensor, asr_enc: torch.Tensor, spk_enc: torch.Tensor, profile: torch.Tensor,
+        self,
+        hyp: Hypothesis,
+        ids: torch.Tensor,
+        asr_enc: torch.Tensor,
+        spk_enc: torch.Tensor,
+        profile: torch.Tensor,
     ) -> Tuple[Dict[str, torch.Tensor], Dict[str, Any]]:
         """Score new hypothesis by `self.part_scorers`.
 
@@ -200,7 +211,9 @@ class BeamSearch(torch.nn.Module):
         states = dict()
         for k, d in self.part_scorers.items():
             if isinstance(d, AbsDecoder):
-                scores[k], states[k] = d.score_partial(hyp.yseq, ids, hyp.states[k], asr_enc, spk_enc, profile)
+                scores[k], states[k] = d.score_partial(
+                    hyp.yseq, ids, hyp.states[k], asr_enc, spk_enc, profile
+                )
             else:
                 scores[k], states[k] = d.score_partial(hyp.yseq, ids, hyp.states[k], asr_enc)
         return scores, states
@@ -288,7 +301,11 @@ class BeamSearch(torch.nn.Module):
         return new_states
 
     def search(
-        self, running_hyps: List[Hypothesis], asr_enc: torch.Tensor, spk_enc: torch.Tensor, profile: torch.Tensor
+        self,
+        running_hyps: List[Hypothesis],
+        asr_enc: torch.Tensor,
+        spk_enc: torch.Tensor,
+        profile: torch.Tensor,
     ) -> List[Hypothesis]:
         """Search new tokens for running hypotheses and encoded speech x.
 
@@ -330,11 +347,9 @@ class BeamSearch(torch.nn.Module):
                     Hypothesis(
                         score=weighted_scores[j],
                         yseq=self.append_token(hyp.yseq, j),
-                        scores=self.merge_scores(
-                            hyp.scores, scores, j, part_scores, part_j
-                        ),
+                        scores=self.merge_scores(hyp.scores, scores, j, part_scores, part_j),
                         states=self.merge_states(states, part_states, part_j),
-                        spk_weigths=hyp.spk_weigths+[spk_weigths],
+                        spk_weigths=hyp.spk_weigths + [spk_weigths],
                     )
                 )
 
@@ -345,7 +360,12 @@ class BeamSearch(torch.nn.Module):
         return best_hyps
 
     def forward(
-        self, asr_enc: torch.Tensor, spk_enc: torch.Tensor, profile: torch.Tensor, maxlenratio: float = 0.0, minlenratio: float = 0.0
+        self,
+        asr_enc: torch.Tensor,
+        spk_enc: torch.Tensor,
+        profile: torch.Tensor,
+        maxlenratio: float = 0.0,
+        minlenratio: float = 0.0,
     ) -> List[Hypothesis]:
         """Perform beam search.
 
@@ -377,7 +397,7 @@ class BeamSearch(torch.nn.Module):
         for i in range(maxlen):
             logging.debug("position " + str(i))
             best = self.search(running_hyps, asr_enc, spk_enc, profile)
-            #import pdb;pdb.set_trace()
+            # import pdb;pdb.set_trace()
             # post process of one iteration
             running_hyps = self.post_process(i, maxlen, maxlenratio, best, ended_hyps)
             # end detection
@@ -394,29 +414,26 @@ class BeamSearch(torch.nn.Module):
         # check the number of hypotheses reaching to eos
         if len(nbest_hyps) == 0:
             logging.warning(
-                "there is no N-best results, perform recognition "
-                "again with smaller minlenratio."
+                "there is no N-best results, perform recognition " "again with smaller minlenratio."
             )
             return (
                 []
                 if minlenratio < 0.1
-                else self.forward(asr_enc, spk_enc, profile, maxlenratio, max(0.0, minlenratio - 0.1))
+                else self.forward(
+                    asr_enc, spk_enc, profile, maxlenratio, max(0.0, minlenratio - 0.1)
+                )
             )
 
         # report the best result
         best = nbest_hyps[0]
         for k, v in best.scores.items():
-            logging.info(
-                f"{v:6.2f} * {self.weights[k]:3} = {v * self.weights[k]:6.2f} for {k}"
-            )
+            logging.info(f"{v:6.2f} * {self.weights[k]:3} = {v * self.weights[k]:6.2f} for {k}")
         logging.info(f"total log probability: {best.score:.2f}")
         logging.info(f"normalized log probability: {best.score / len(best.yseq):.2f}")
         logging.info(f"total number of ended hypotheses: {len(nbest_hyps)}")
         if self.token_list is not None:
             logging.info(
-                "best hypo: "
-                + "".join([self.token_list[x] for x in best.yseq[1:-1]])
-                + "\n"
+                "best hypo: " + "".join([self.token_list[x] for x in best.yseq[1:-1]]) + "\n"
             )
         return nbest_hyps
 
@@ -444,15 +461,13 @@ class BeamSearch(torch.nn.Module):
         logging.debug(f"the number of running hypotheses: {len(running_hyps)}")
         if self.token_list is not None:
             logging.debug(
-                "best hypo: "
-                + "".join([self.token_list[x] for x in running_hyps[0].yseq[1:]])
+                "best hypo: " + "".join([self.token_list[x] for x in running_hyps[0].yseq[1:]])
             )
         # add eos in the final loop to avoid that there are no ended hyps
         if i == maxlen - 1:
             logging.info("adding <eos> in the last position in the loop")
             running_hyps = [
-                h._replace(yseq=self.append_token(h.yseq, self.eos))
-                for h in running_hyps
+                h._replace(yseq=self.append_token(h.yseq, self.eos)) for h in running_hyps
             ]
 
         # add ended hypotheses to a final list, and removed them from current hypotheses

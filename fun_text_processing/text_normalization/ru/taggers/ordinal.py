@@ -1,4 +1,3 @@
-
 # Adapted from https://github.com/google/TextNormalizationCoveringGrammars
 # Russian minimally supervised number grammar.
 
@@ -11,7 +10,7 @@ from pynini.lib import pynutil
 
 class OrdinalFst(GraphFst):
     """
-    Finite state transducer for classifying cardinals, e.g. 
+    Finite state transducer for classifying cardinals, e.g.
         "2" -> ordinal { integer: "второе" } }
 
     Args:
@@ -24,10 +23,10 @@ class OrdinalFst(GraphFst):
     def __init__(self, number_names: dict, alternative_formats: dict, deterministic=False):
         super().__init__(name="ordinal", kind="classify", deterministic=deterministic)
 
-        one_thousand_alternative = alternative_formats['one_thousand_alternative']
-        separators = alternative_formats['separators']
+        one_thousand_alternative = alternative_formats["one_thousand_alternative"]
+        separators = alternative_formats["separators"]
 
-        ordinal = number_names['ordinal_number_names']
+        ordinal = number_names["ordinal_number_names"]
 
         ordinal |= ordinal @ one_thousand_alternative
         ordinal_numbers = separators @ ordinal
@@ -48,6 +47,6 @@ class OrdinalFst(GraphFst):
         self.ordinal_numbers_with_leading_zeros = (leading_zeros + ordinal_numbers).optimize()
 
         final_graph = (ordinal_numbers | ordinal_numbers_marked).optimize()
-        final_graph = pynutil.insert("integer: \"") + final_graph + pynutil.insert("\"")
+        final_graph = pynutil.insert('integer: "') + final_graph + pynutil.insert('"')
         final_graph = self.add_tokens(final_graph)
         self.fst = final_graph.optimize()

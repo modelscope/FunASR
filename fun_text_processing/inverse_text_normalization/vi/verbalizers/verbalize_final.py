@@ -1,6 +1,9 @@
-
 import pynini
-from fun_text_processing.inverse_text_normalization.vi.graph_utils import GraphFst, delete_extra_space, delete_space
+from fun_text_processing.inverse_text_normalization.vi.graph_utils import (
+    GraphFst,
+    delete_extra_space,
+    delete_space,
+)
 from fun_text_processing.inverse_text_normalization.vi.verbalizers.verbalize import VerbalizeFst
 from fun_text_processing.inverse_text_normalization.vi.verbalizers.word import WordFst
 from pynini.lib import pynutil

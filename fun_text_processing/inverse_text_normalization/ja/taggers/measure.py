@@ -31,7 +31,9 @@ class MeasureFst(GraphFst):
         graph_unit_plural = graph_unit_singular  # plural -> abbr
 
         optional_graph_negative = pynini.closure(
-            pynutil.insert("negative: ") + pynini.cross("マイナス", "\"true\"") + delete_extra_space, 0, 1
+            pynutil.insert("negative: ") + pynini.cross("マイナス", '"true"') + delete_extra_space,
+            0,
+            1,
         )
 
         unit_singular = graph_unit_singular
@@ -39,15 +41,23 @@ class MeasureFst(GraphFst):
         unit_misc = pynutil.insert("/") + pynutil.delete("每") + delete_space + graph_unit_singular
 
         unit_singular = (
-            pynutil.insert("units: \"")
-            + (unit_singular | unit_misc | pynutil.add_weight(unit_singular + delete_space + unit_misc, 0.01))
-            + pynutil.insert("\"")
+            pynutil.insert('units: "')
+            + (
+                unit_singular
+                | unit_misc
+                | pynutil.add_weight(unit_singular + delete_space + unit_misc, 0.01)
+            )
+            + pynutil.insert('"')
         )
 
         unit_plural = (
-            pynutil.insert("units: \"")
-            + (unit_plural | unit_misc | pynutil.add_weight(unit_plural + delete_space + unit_misc, 0.01))
-            + pynutil.insert("\"")
+            pynutil.insert('units: "')
+            + (
+                unit_plural
+                | unit_misc
+                | pynutil.add_weight(unit_plural + delete_space + unit_misc, 0.01)
+            )
+            + pynutil.insert('"')
         )
 
         subgraph_decimal = (
@@ -69,9 +79,9 @@ class MeasureFst(GraphFst):
         subgraph_cardinal = (
             pynutil.insert("cardinal { ")
             + optional_graph_negative
-            + pynutil.insert("integer: \"")
+            + pynutil.insert('integer: "')
             + ((DAMO_SIGMA - "一") @ cardinal_graph)
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
             + pynutil.insert(" }")
             + delete_extra_space
             + unit_plural
@@ -79,21 +89,21 @@ class MeasureFst(GraphFst):
         subgraph_cardinal |= (
             pynutil.insert("cardinal { ")
             + optional_graph_negative
-            + pynutil.insert("integer: \"")
+            + pynutil.insert('integer: "')
             + pynini.cross("一", "1")
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
             + pynutil.insert(" }")
             + delete_extra_space
             + unit_singular
         )
         subgraph_cardinal |= (
-                pynutil.insert("cardinal { ")
-                + optional_graph_negative
-                + pynutil.insert("integer: \"")
-                + ((DAMO_SIGMA - "一") @ cardinal_graph)
-                + pynutil.insert("\"")
-                + pynutil.insert(" }")
-                + unit_singular
+            pynutil.insert("cardinal { ")
+            + optional_graph_negative
+            + pynutil.insert('integer: "')
+            + ((DAMO_SIGMA - "一") @ cardinal_graph)
+            + pynutil.insert('"')
+            + pynutil.insert(" }")
+            + unit_singular
         )
         final_graph = subgraph_decimal | subgraph_cardinal
         final_graph = self.add_tokens(final_graph)

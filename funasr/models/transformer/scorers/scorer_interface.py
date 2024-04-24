@@ -51,9 +51,7 @@ class ScorerInterface:
         """
         return None if state is None else state[i]
 
-    def score(
-        self, y: torch.Tensor, state: Any, x: torch.Tensor
-    ) -> Tuple[torch.Tensor, Any]:
+    def score(self, y: torch.Tensor, state: Any, x: torch.Tensor) -> Tuple[torch.Tensor, Any]:
         """Score new token (required).
 
         Args:

@@ -15,10 +15,10 @@ from typing import Optional, Union
 from funasr.register import tables
 
 
-
 def exact_div(x, y):
     assert x % y == 0
     return x // y
+
 
 # hard-coded audio hyperparameters
 SAMPLE_RATE = 16000
@@ -34,29 +34,36 @@ FRAMES_PER_SECOND = exact_div(SAMPLE_RATE, HOP_LENGTH)  # 10ms per audio frame
 TOKENS_PER_SECOND = exact_div(SAMPLE_RATE, N_SAMPLES_PER_TOKEN)  # 20ms per audio token
 
 
-
 def get_T_after_cnn(L_in, dilation=1):
-    for (padding, kernel_size, stride) in eval("[(1,3,1)] + [(1,3,2)] "):
+    for padding, kernel_size, stride in eval("[(1,3,1)] + [(1,3,2)] "):
         L_out = L_in + 2 * padding - dilation * (kernel_size - 1) - 1
         L_out = 1 + L_out // stride
         L_in = L_out
     return L_out
 
+
 def load_bytesio_audio(content, sr: int = SAMPLE_RATE):
     cmd = [
         "ffmpeg",
         "-nostdin",
-        "-threads", "0",
-        "-i", "pipe:",
-        "-f", "s16le",
-        "-ac", "1",
-        "-acodec", "pcm_s16le",
-        "-ar", str(sr),
-        "pipe:"
+        "-threads",
+        "0",
+        "-i",
+        "pipe:",
+        "-f",
+        "s16le",
+        "-ac",
+        "1",
+        "-acodec",
+        "pcm_s16le",
+        "-ar",
+        str(sr),
+        "pipe:",
     ]
     p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, bufsize=-1)
     out, _ = p.communicate(input=content)
     return np.frombuffer(out, np.int16).flatten().astype(np.float32) / 32768.0
+
 
 def load_audio(file: str, sr: int = SAMPLE_RATE):
     """
@@ -104,9 +111,7 @@ def pad_or_trim(array, length: int = N_SAMPLES, *, axis: int = -1):
     """
     if torch.is_tensor(array):
         if array.shape[axis] > length:
-            array = array.index_select(
-                dim=axis, index=torch.arange(length, device=array.device)
-            )
+            array = array.index_select(dim=axis, index=torch.arange(length, device=array.device))
 
         if array.shape[axis] < length:
             pad_widths = [(0, 0)] * array.ndim
@@ -123,15 +128,14 @@ def pad_or_trim(array, length: int = N_SAMPLES, *, axis: int = -1):
 
     return array
 
+
 def trim(array, length: int = N_SAMPLES, *, axis: int = -1):
     """
     Pad or trim the audio array to N_SAMPLES, as expected by the encoder.
     """
     if torch.is_tensor(array):
         if array.shape[axis] > length:
-            array = array.index_select(
-                dim=axis, index=torch.arange(length, device=array.device)
-            )
+            array = array.index_select(dim=axis, index=torch.arange(length, device=array.device))
     else:
         if array.shape[axis] > length:
             array = array.take(indices=range(length), axis=axis)
@@ -151,7 +155,7 @@ def mel_filters(device, n_mels: int = N_MELS) -> torch.Tensor:
     """
     assert n_mels == 80, f"Unsupported n_mels: {n_mels}"
     with np.load(
-        os.path.join(os.path.dirname(__file__), "mel_filters.npz") # todo
+        os.path.join(os.path.dirname(__file__), "mel_filters.npz")  # todo
         # os.path.join("assets", "mel_filters.npz")
     ) as f:
         return torch.from_numpy(f[f"mel_{n_mels}"]).to(device)
@@ -227,8 +231,6 @@ class LayerNorm(nn.LayerNorm):
         return super().forward(x).type(x.dtype)
 
 
-
-
 class Linear(nn.Linear):
     def forward(self, x: Tensor) -> Tensor:
         return F.linear(
@@ -239,9 +241,7 @@ class Linear(nn.Linear):
 
 
 class Conv1d(nn.Conv1d):
-    def _conv_forward(
-        self, x: Tensor, weight: Tensor, bias: Optional[Tensor]
-    ) -> Tensor:
+    def _conv_forward(self, x: Tensor, weight: Tensor, bias: Optional[Tensor]) -> Tensor:
         return super()._conv_forward(
             x, weight.to(x.dtype), None if bias is None else bias.to(x.dtype)
         )
@@ -287,9 +287,7 @@ class MultiHeadAttention(nn.Module):
         wv, qk = self.qkv_attention(q, k, v, mask)
         return self.out(wv), qk
 
-    def qkv_attention(
-        self, q: Tensor, k: Tensor, v: Tensor, mask: Optional[Tensor] = None
-    ):
+    def qkv_attention(self, q: Tensor, k: Tensor, v: Tensor, mask: Optional[Tensor] = None):
         n_batch, n_ctx, n_state = q.shape
         scale = (n_state // self.n_head) ** -0.25
         q = q.view(*q.shape[:2], self.n_head, -1).permute(0, 2, 1, 3) * scale
@@ -311,15 +309,11 @@ class ResidualAttentionBlock(nn.Module):
         self.attn = MultiHeadAttention(n_state, n_head)
         self.attn_ln = LayerNorm(n_state)
 
-        self.cross_attn = (
-            MultiHeadAttention(n_state, n_head) if cross_attention else None
-        )
+        self.cross_attn = MultiHeadAttention(n_state, n_head) if cross_attention else None
         self.cross_attn_ln = LayerNorm(n_state) if cross_attention else None
 
         n_mlp = n_state * 4
-        self.mlp = nn.Sequential(
-            Linear(n_state, n_mlp), nn.GELU(), Linear(n_mlp, n_state)
-        )
+        self.mlp = nn.Sequential(Linear(n_state, n_mlp), nn.GELU(), Linear(n_mlp, n_state))
         self.mlp_ln = LayerNorm(n_state)
 
     def forward(
@@ -335,19 +329,20 @@ class ResidualAttentionBlock(nn.Module):
         x = x + self.mlp(self.mlp_ln(x))
         return x
 
+
 @tables.register("encoder_classes", "QwenAudioEncoder")
 class QwenAudioEncoder(nn.Module):
     def __init__(
-            self,
-            n_mels: int,
-            n_ctx: int,
-            n_state: int,
-            n_head: int,
-            n_layer: int,
-            output_dim: int = 512,
-            avg_pool: bool = True,
-            add_audio_bos_eos_token: bool = True,
-            **kwargs
+        self,
+        n_mels: int,
+        n_ctx: int,
+        n_state: int,
+        n_head: int,
+        n_layer: int,
+        output_dim: int = 512,
+        avg_pool: bool = True,
+        add_audio_bos_eos_token: bool = True,
+        **kwargs,
     ):
         super().__init__()
         self.conv1 = Conv1d(n_mels, n_state, kernel_size=3, padding=1)
@@ -371,15 +366,14 @@ class QwenAudioEncoder(nn.Module):
         self.output_dim = output_dim
         self.n_head = n_head
 
-    def forward(self, x: Tensor, padding_mask: Tensor=None, audio_lengths: Tensor=None):
+    def forward(self, x: Tensor, padding_mask: Tensor = None, audio_lengths: Tensor = None):
         """
         x : torch.Tensor, shape = (batch_size, n_mels, n_ctx)
             the mel spectrogram of the audio
         """
-        x = x.to(dtype=self.conv1.weight.dtype,
-                 device=self.conv1.weight.device)
+        x = x.to(dtype=self.conv1.weight.dtype, device=self.conv1.weight.device)
         if audio_lengths is not None:
-            input_mel_len = audio_lengths[:,0] * 2
+            input_mel_len = audio_lengths[:, 0] * 2
             max_mel_len_in_batch = input_mel_len.max()
             x = x[:, :, :max_mel_len_in_batch]
         x = F.gelu(self.conv1(x))
@@ -388,34 +382,35 @@ class QwenAudioEncoder(nn.Module):
         bsz = x.size(0)
         src_len = x.size(1)
 
-
         self.input_positional_embedding = self.positional_embedding[:src_len]
-        assert x.shape[1:] == self.input_positional_embedding.shape, f"incorrect audio shape: {x.shape[1:], self.input_positional_embedding.shape}"
+        assert (
+            x.shape[1:] == self.input_positional_embedding.shape
+        ), f"incorrect audio shape: {x.shape[1:], self.input_positional_embedding.shape}"
         x = (x + self.input_positional_embedding).to(x.dtype)
         if padding_mask is not None:
-            padding_mask = padding_mask.to(dtype=self.conv1.weight.dtype,
-                     device=self.conv1.weight.device)
+            padding_mask = padding_mask.to(
+                dtype=self.conv1.weight.dtype, device=self.conv1.weight.device
+            )
             batch_src_len = padding_mask.size(1)
             x = x[:, :batch_src_len, :]
-            padding_mask = padding_mask.view(
-                bsz, -1, batch_src_len
-            )
+            padding_mask = padding_mask.view(bsz, -1, batch_src_len)
             padding_mask_ = padding_mask.all(1)
             x[padding_mask_] = 0
-            key_padding_mask = padding_mask_.view(bsz, 1, 1, batch_src_len). \
-                expand(-1, self.n_head, -1, -1).reshape(bsz, self.n_head, 1, batch_src_len)
+            key_padding_mask = (
+                padding_mask_.view(bsz, 1, 1, batch_src_len)
+                .expand(-1, self.n_head, -1, -1)
+                .reshape(bsz, self.n_head, 1, batch_src_len)
+            )
             new_padding_mask = torch.zeros_like(key_padding_mask, dtype=x.dtype)
             padding_mask = new_padding_mask.masked_fill(key_padding_mask, float("-inf"))
 
         for block in self.blocks:
             x = block(x, mask=padding_mask)
 
-
         if self.avg_pooler:
             x = x.permute(0, 2, 1)
             x = self.avg_pooler(x)
             x = x.permute(0, 2, 1)
-
 
         x = self.ln_post(x)
         x = self.proj(x)
@@ -430,15 +425,16 @@ class QwenAudioEncoder(nn.Module):
     def encode(self, input_audios: Tensor, input_audio_lengths: Tensor, audio_span_tokens: List):
         real_input_audio_lens = input_audio_lengths[:, 0].tolist()
         max_len_in_batch = max(real_input_audio_lens)
-        padding_mask = torch.ones([input_audios.size(0), max_len_in_batch]).to(dtype=self.conv1.weight.dtype,
-                                                                               device=self.conv1.weight.device)
+        padding_mask = torch.ones([input_audios.size(0), max_len_in_batch]).to(
+            dtype=self.conv1.weight.dtype, device=self.conv1.weight.device
+        )
         for index in range(len(input_audios)):
-            padding_mask[index, :input_audio_lengths[index][0].item()] = 0
-        x, bos, eos = self(input_audios, padding_mask,input_audio_lengths)
+            padding_mask[index, : input_audio_lengths[index][0].item()] = 0
+        x, bos, eos = self(input_audios, padding_mask, input_audio_lengths)
         output_audios = []
         for i in range(len(audio_span_tokens)):
             audio_span = audio_span_tokens[i]
-            audio = x[i][:audio_span-2]
+            audio = x[i][: audio_span - 2]
             if bos is not None:
                 audio = torch.concat([bos, audio, eos])
             assert len(audio) == audio_span

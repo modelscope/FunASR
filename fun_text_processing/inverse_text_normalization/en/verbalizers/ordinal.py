@@ -1,6 +1,10 @@
-
 import pynini
-from fun_text_processing.text_normalization.en.graph_utils import DAMO_NOT_QUOTE, DAMO_SIGMA, GraphFst, delete_space
+from fun_text_processing.text_normalization.en.graph_utils import (
+    DAMO_NOT_QUOTE,
+    DAMO_SIGMA,
+    GraphFst,
+    delete_space,
+)
 from pynini.lib import pynutil
 
 
@@ -15,9 +19,9 @@ class OrdinalFst(GraphFst):
         graph = (
             pynutil.delete("integer:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
         convert_eleven = pynini.cross("11", "11th")
         convert_twelve = pynini.cross("12", "12th")

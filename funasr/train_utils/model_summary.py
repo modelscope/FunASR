@@ -55,9 +55,7 @@ def model_summary(model: torch.nn.Module) -> str:
     message += "\n\nModel summary:\n"
     message += f"    Class Name: {model.__class__.__name__}\n"
     message += f"    Total Number of model parameters: {tot_params}\n"
-    message += (
-        f"    Number of trainable parameters: {num_params} ({percent_trainable}%)\n"
-    )
+    message += f"    Number of trainable parameters: {num_params} ({percent_trainable}%)\n"
 
     dtype = next(iter(model.parameters())).dtype
     message += f"    Type: {dtype}"

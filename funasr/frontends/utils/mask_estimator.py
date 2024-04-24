@@ -23,9 +23,7 @@ class MaskEstimator(torch.nn.Module):
 
         self.type = type
         self.nmask = nmask
-        self.linears = torch.nn.ModuleList(
-            [torch.nn.Linear(projs, idim) for _ in range(nmask)]
-        )
+        self.linears = torch.nn.ModuleList([torch.nn.Linear(projs, idim) for _ in range(nmask)])
 
     def forward(
         self, xs: ComplexTensor, ilens: torch.LongTensor

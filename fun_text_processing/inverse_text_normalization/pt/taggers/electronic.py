@@ -1,6 +1,3 @@
-
-
-
 import pynini
 from fun_text_processing.inverse_text_normalization.pt.utils import get_abs_path
 from fun_text_processing.text_normalization.en.graph_utils import DAMO_ALPHA, GraphFst, insert_space
@@ -31,33 +28,46 @@ class ElectronicFst(GraphFst):
         accepted_username = alpha_num | symbols
         process_dot = pynini.cross("ponto", ".")
         username = (
-            pynutil.insert("username: \"")
+            pynutil.insert('username: "')
             + alpha_num
             + delete_extra_space
             + pynini.closure(accepted_username + delete_extra_space)
             + alpha_num
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
         )
         single_alphanum = pynini.closure(alpha_num + delete_extra_space) + alpha_num
-        server = single_alphanum | pynini.string_file(get_abs_path("data/electronic/server_name.tsv")).invert()
-        domain = single_alphanum | pynini.string_file(get_abs_path("data/electronic/domain.tsv")).invert()
+        server = (
+            single_alphanum
+            | pynini.string_file(get_abs_path("data/electronic/server_name.tsv")).invert()
+        )
+        domain = (
+            single_alphanum
+            | pynini.string_file(get_abs_path("data/electronic/domain.tsv")).invert()
+        )
         domain_graph = (
-            pynutil.insert("domain: \"")
+            pynutil.insert('domain: "')
             + server
             + delete_extra_space
             + process_dot
             + delete_extra_space
             + domain
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
         )
         graph = (
-            username + delete_extra_space + pynutil.delete("arroba") + insert_space + delete_extra_space + domain_graph
+            username
+            + delete_extra_space
+            + pynutil.delete("arroba")
+            + insert_space
+            + delete_extra_space
+            + domain_graph
         )
 
         ############# url ###
         protocol_end = pynini.cross(pynini.union("www", "w w w", "dáblio dáblio dáblio"), "www")
         protocol_start = pynini.cross(pynini.union("http", "h t t p", "agá tê tê pê"), "http")
-        protocol_start |= pynini.cross(pynini.union("https", "h t t p s", "agá tê tê pê ésse"), "https")
+        protocol_start |= pynini.cross(
+            pynini.union("https", "h t t p s", "agá tê tê pê ésse"), "https"
+        )
         protocol_start += pynini.cross(" dois pontos barra barra ", "://")
 
         # e.g. .com, .es
@@ -77,7 +87,7 @@ class ElectronicFst(GraphFst):
             + (pynini.closure(delete_extra_space + accepted_username, 1) | server)
             + pynini.closure(ending, 1)
         )
-        protocol = pynutil.insert("protocol: \"") + protocol + pynutil.insert("\"")
+        protocol = pynutil.insert('protocol: "') + protocol + pynutil.insert('"')
         graph |= protocol
         ########
 

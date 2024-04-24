@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import (
     DAMO_NOT_QUOTE,
@@ -35,7 +33,8 @@ class ElectronicFst(GraphFst):
         super().__init__(name="electronic", kind="verbalize", deterministic=deterministic)
 
         graph_digit_no_zero = (
-            digit_no_zero @ pynini.cdrewrite(pynini.cross("un", "uno"), "", "", DAMO_SIGMA).optimize()
+            digit_no_zero
+            @ pynini.cdrewrite(pynini.cross("un", "uno"), "", "", DAMO_SIGMA).optimize()
         )
         graph_digit = graph_digit_no_zero | zero
 
@@ -46,18 +45,20 @@ class ElectronicFst(GraphFst):
 
         verbalize_characters = pynini.cdrewrite(graph_symbols | graph_digit, "", "", DAMO_SIGMA)
 
-        user_name = pynutil.delete("username: \"") + add_space_after_char() + pynutil.delete("\"")
+        user_name = pynutil.delete('username: "') + add_space_after_char() + pynutil.delete('"')
         user_name @= verbalize_characters
 
-        convert_defaults = pynutil.add_weight(DAMO_NOT_QUOTE, weight=0.0001) | domain_common | server_common
+        convert_defaults = (
+            pynutil.add_weight(DAMO_NOT_QUOTE, weight=0.0001) | domain_common | server_common
+        )
         domain = convert_defaults + pynini.closure(insert_space + convert_defaults)
         domain @= verbalize_characters
 
-        domain = pynutil.delete("domain: \"") + domain + pynutil.delete("\"")
+        domain = pynutil.delete('domain: "') + domain + pynutil.delete('"')
         protocol = (
-            pynutil.delete("protocol: \"")
+            pynutil.delete('protocol: "')
             + add_space_after_char() @ pynini.cdrewrite(graph_symbols, "", "", DAMO_SIGMA)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
         self.graph = (pynini.closure(protocol + pynini.accep(" "), 0, 1) + domain) | (
             user_name + pynini.accep(" ") + pynutil.insert("arroba ") + domain

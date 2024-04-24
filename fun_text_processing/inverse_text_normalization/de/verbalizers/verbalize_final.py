@@ -1,14 +1,17 @@
-
 import pynini
 from fun_text_processing.inverse_text_normalization.de.verbalizers.verbalize import VerbalizeFst
 from fun_text_processing.inverse_text_normalization.en.verbalizers.word import WordFst
-from fun_text_processing.text_normalization.en.graph_utils import GraphFst, delete_extra_space, delete_space
+from fun_text_processing.text_normalization.en.graph_utils import (
+    GraphFst,
+    delete_extra_space,
+    delete_space,
+)
 from pynini.lib import pynutil
 
 
 class VerbalizeFinalFst(GraphFst):
     """
-    Finite state transducer that verbalizes an entire sentence, e.g. 
+    Finite state transducer that verbalizes an entire sentence, e.g.
     tokens { name: "jetzt" } tokens { name: "ist" } tokens { time { hours: "12" minutes: "30" } } -> jetzt ist 12:30 Uhr
     """
 

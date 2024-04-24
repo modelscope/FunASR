@@ -22,7 +22,6 @@ from funasr.register import tables
 class OpenAIWhisperModel(nn.Module):
     """CTC-attention hybrid Encoder-Decoder model"""
 
-    
     def __init__(
         self,
         specaug: str = None,
@@ -71,14 +70,12 @@ class OpenAIWhisperModel(nn.Module):
             decoder_class = tables.decoder_classes.get(decoder)
             decoder = decoder_class(decoder_conf)
         if ctc_weight > 0.0:
-            
+
             if ctc_conf is None:
                 ctc_conf = {}
-            
-            ctc = CTC(
-                odim=vocab_size, encoder_output_size=encoder_output_size, **ctc_conf
-            )
-    
+
+            ctc = CTC(odim=vocab_size, encoder_output_size=encoder_output_size, **ctc_conf)
+
         self.blank_id = blank_id
         self.sos = sos if sos is not None else vocab_size - 1
         self.eos = eos if eos is not None else vocab_size - 1
@@ -102,7 +99,7 @@ class OpenAIWhisperModel(nn.Module):
             self.decoder = None
         else:
             self.decoder = decoder
-        
+
         self.criterion_att = LabelSmoothingLoss(
             size=vocab_size,
             padding_idx=ignore_id,
@@ -120,14 +117,14 @@ class OpenAIWhisperModel(nn.Module):
             self.ctc = None
         else:
             self.ctc = ctc
-            
+
         self.share_embedding = share_embedding
         if self.share_embedding:
             self.decoder.embed = None
-        
+
         self.length_normalized_loss = length_normalized_loss
         self.beam_search = None
-    
+
     def forward(
         self,
         speech: torch.Tensor,
@@ -149,30 +146,30 @@ class OpenAIWhisperModel(nn.Module):
             text_lengths = text_lengths[:, 0]
         if len(speech_lengths.size()) > 1:
             speech_lengths = speech_lengths[:, 0]
-        
+
         batch_size = speech.shape[0]
-        
+
         # 1. Encoder
         encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
         intermediate_outs = None
         if isinstance(encoder_out, tuple):
             intermediate_outs = encoder_out[1]
             encoder_out = encoder_out[0]
-        
+
         loss_att, acc_att, cer_att, wer_att = None, None, None, None
         loss_ctc, cer_ctc = None, None
         stats = dict()
-        
+
         # decoder: CTC branch
         if self.ctc_weight != 0.0:
             loss_ctc, cer_ctc = self._calc_ctc_loss(
                 encoder_out, encoder_out_lens, text, text_lengths
             )
-            
+
             # Collect CTC branch stats
             stats["loss_ctc"] = loss_ctc.detach() if loss_ctc is not None else None
             stats["cer_ctc"] = cer_ctc
-        
+
         # Intermediate CTC (optional)
         loss_interctc = 0.0
         if self.interctc_weight != 0.0 and intermediate_outs is not None:
@@ -183,25 +180,23 @@ class OpenAIWhisperModel(nn.Module):
                     intermediate_out, encoder_out_lens, text, text_lengths
                 )
                 loss_interctc = loss_interctc + loss_ic
-                
+
                 # Collect Intermedaite CTC stats
                 stats["loss_interctc_layer{}".format(layer_idx)] = (
                     loss_ic.detach() if loss_ic is not None else None
                 )
                 stats["cer_interctc_layer{}".format(layer_idx)] = cer_ic
-            
+
             loss_interctc = loss_interctc / len(intermediate_outs)
-            
+
             # calculate whole encoder loss
-            loss_ctc = (
-                           1 - self.interctc_weight
-                       ) * loss_ctc + self.interctc_weight * loss_interctc
-        
+            loss_ctc = (1 - self.interctc_weight) * loss_ctc + self.interctc_weight * loss_interctc
+
         # decoder: Attention decoder branch
         loss_att, acc_att, cer_att, wer_att = self._calc_att_loss(
             encoder_out, encoder_out_lens, text, text_lengths
         )
-        
+
         # 3. CTC-Att loss definition
         if self.ctc_weight == 0.0:
             loss = loss_att
@@ -209,25 +204,27 @@ class OpenAIWhisperModel(nn.Module):
             loss = loss_ctc
         else:
             loss = self.ctc_weight * loss_ctc + (1 - self.ctc_weight) * loss_att
-        
+
         # Collect Attn branch stats
         stats["loss_att"] = loss_att.detach() if loss_att is not None else None
         stats["acc"] = acc_att
         stats["cer"] = cer_att
         stats["wer"] = wer_att
-        
+
         # Collect total loss stats
         stats["loss"] = torch.clone(loss.detach())
-        
+
         # force_gatherable: to-device and to-tensor if scalar for DataParallel
         if self.length_normalized_loss:
             batch_size = int((text_lengths + 1).sum())
         loss, stats, weight = force_gatherable((loss, stats, batch_size), loss.device)
         return loss, stats, weight
-    
 
     def encode(
-        self, speech: torch.Tensor, speech_lengths: torch.Tensor, **kwargs,
+        self,
+        speech: torch.Tensor,
+        speech_lengths: torch.Tensor,
+        **kwargs,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Frontend + Encoder. Note that this method is used by asr_inference.py
         Args:
@@ -240,30 +237,28 @@ class OpenAIWhisperModel(nn.Module):
             # Data augmentation
             if self.specaug is not None and self.training:
                 speech, speech_lengths = self.specaug(speech, speech_lengths)
-            
+
             # Normalization for feature: e.g. Global-CMVN, Utterance-CMVN
             if self.normalize is not None:
                 speech, speech_lengths = self.normalize(speech, speech_lengths)
-        
+
         # Forward encoder
         # feats: (Batch, Length, Dim)
         # -> encoder_out: (Batch, Length2, Dim2)
         if self.encoder.interctc_use_conditioning:
-            encoder_out, encoder_out_lens, _ = self.encoder(
-                speech, speech_lengths, ctc=self.ctc
-            )
+            encoder_out, encoder_out_lens, _ = self.encoder(speech, speech_lengths, ctc=self.ctc)
         else:
             encoder_out, encoder_out_lens, _ = self.encoder(speech, speech_lengths)
         intermediate_outs = None
         if isinstance(encoder_out, tuple):
             intermediate_outs = encoder_out[1]
             encoder_out = encoder_out[0]
-        
+
         if intermediate_outs is not None:
             return (encoder_out, intermediate_outs), encoder_out_lens
-        
+
         return encoder_out, encoder_out_lens
-    
+
     def _calc_att_loss(
         self,
         encoder_out: torch.Tensor,
@@ -273,12 +268,10 @@ class OpenAIWhisperModel(nn.Module):
     ):
         ys_in_pad, ys_out_pad = add_sos_eos(ys_pad, self.sos, self.eos, self.ignore_id)
         ys_in_lens = ys_pad_lens + 1
-        
+
         # 1. Forward decoder
-        decoder_out, _ = self.decoder(
-            encoder_out, encoder_out_lens, ys_in_pad, ys_in_lens
-        )
-        
+        decoder_out, _ = self.decoder(encoder_out, encoder_out_lens, ys_in_pad, ys_in_lens)
+
         # 2. Compute attention loss
         loss_att = self.criterion_att(decoder_out, ys_out_pad)
         acc_att = th_accuracy(
@@ -286,16 +279,16 @@ class OpenAIWhisperModel(nn.Module):
             ys_out_pad,
             ignore_label=self.ignore_id,
         )
-        
+
         # Compute cer/wer using attention-decoder
         if self.training or self.error_calculator is None:
             cer_att, wer_att = None, None
         else:
             ys_hat = decoder_out.argmax(dim=-1)
             cer_att, wer_att = self.error_calculator(ys_hat.cpu(), ys_pad.cpu())
-        
+
         return loss_att, acc_att, cer_att, wer_att
-    
+
     def _calc_ctc_loss(
         self,
         encoder_out: torch.Tensor,
@@ -305,41 +298,39 @@ class OpenAIWhisperModel(nn.Module):
     ):
         # Calc CTC loss
         loss_ctc = self.ctc(encoder_out, encoder_out_lens, ys_pad, ys_pad_lens)
-        
+
         # Calc CER using CTC
         cer_ctc = None
         if not self.training and self.error_calculator is not None:
             ys_hat = self.ctc.argmax(encoder_out).data
             cer_ctc = self.error_calculator(ys_hat.cpu(), ys_pad.cpu(), is_ctc=True)
         return loss_ctc, cer_ctc
-    
-    def init_beam_search(self,
-                         **kwargs,
-                         ):
+
+    def init_beam_search(
+        self,
+        **kwargs,
+    ):
         from funasr.models.transformer.search import BeamSearch
         from funasr.models.transformer.scorers.ctc import CTCPrefixScorer
         from funasr.models.transformer.scorers.length_bonus import LengthBonus
-    
+
         # 1. Build ASR model
         scorers = {}
-        
+
         if self.ctc != None:
             ctc = CTCPrefixScorer(ctc=self.ctc, eos=self.eos)
-            scorers.update(
-                ctc=ctc
-            )
+            scorers.update(ctc=ctc)
         token_list = kwargs.get("token_list")
         scorers.update(
             decoder=self.decoder,
             length_bonus=LengthBonus(len(token_list)),
         )
 
-        
         # 3. Build ngram model
         # ngram is not supported now
         ngram = None
         scorers["ngram"] = ngram
-        
+
         weights = dict(
             decoder=1.0 - kwargs.get("decoding_ctc_weight", 0.5),
             ctc=kwargs.get("decoding_ctc_weight", 0.5),
@@ -359,19 +350,20 @@ class OpenAIWhisperModel(nn.Module):
         )
 
         self.beam_search = beam_search
-        
-    def inference(self,
-             data_in,
-             data_lengths=None,
-             key: list=None,
-             tokenizer=None,
-             frontend=None,
-             **kwargs,
-             ):
-        
+
+    def inference(
+        self,
+        data_in,
+        data_lengths=None,
+        key: list = None,
+        tokenizer=None,
+        frontend=None,
+        **kwargs,
+    ):
+
         if kwargs.get("batch_size", 1) > 1:
             raise NotImplementedError("batch decoding is not implemented")
-        
+
         # init beamsearch
         if self.beam_search is None:
             logging.info("enable beam_search")
@@ -379,7 +371,9 @@ class OpenAIWhisperModel(nn.Module):
             self.nbest = kwargs.get("nbest", 1)
 
         meta_data = {}
-        if isinstance(data_in, torch.Tensor) and kwargs.get("data_type", "sound") == "fbank":  # fbank
+        if (
+            isinstance(data_in, torch.Tensor) and kwargs.get("data_type", "sound") == "fbank"
+        ):  # fbank
             speech, speech_lengths = data_in, data_lengths
             if len(speech.shape) < 3:
                 speech = speech[None, :, :]
@@ -388,16 +382,23 @@ class OpenAIWhisperModel(nn.Module):
         else:
             # extract fbank feats
             time1 = time.perf_counter()
-            audio_sample_list = load_audio_text_image_video(data_in, fs=frontend.fs, audio_fs=kwargs.get("fs", 16000),
-                                                            data_type=kwargs.get("data_type", "sound"),
-                                                            tokenizer=tokenizer)
+            audio_sample_list = load_audio_text_image_video(
+                data_in,
+                fs=frontend.fs,
+                audio_fs=kwargs.get("fs", 16000),
+                data_type=kwargs.get("data_type", "sound"),
+                tokenizer=tokenizer,
+            )
             time2 = time.perf_counter()
             meta_data["load_data"] = f"{time2 - time1:0.3f}"
-            speech, speech_lengths = extract_fbank(audio_sample_list, data_type=kwargs.get("data_type", "sound"),
-                                                   frontend=frontend)
+            speech, speech_lengths = extract_fbank(
+                audio_sample_list, data_type=kwargs.get("data_type", "sound"), frontend=frontend
+            )
             time3 = time.perf_counter()
             meta_data["extract_feat"] = f"{time3 - time2:0.3f}"
-            meta_data["batch_data_time"] = speech_lengths.sum().item() * frontend.frame_shift * frontend.lfr_n / 1000
+            meta_data["batch_data_time"] = (
+                speech_lengths.sum().item() * frontend.frame_shift * frontend.lfr_n / 1000
+            )
 
         speech = speech.to(device=kwargs["device"])
         speech_lengths = speech_lengths.to(device=kwargs["device"])
@@ -405,14 +406,15 @@ class OpenAIWhisperModel(nn.Module):
         encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
         if isinstance(encoder_out, tuple):
             encoder_out = encoder_out[0]
-        
+
         # c. Passed the encoder result and the beam search
         nbest_hyps = self.beam_search(
-            x=encoder_out[0], maxlenratio=kwargs.get("maxlenratio", 0.0), minlenratio=kwargs.get("minlenratio", 0.0)
+            x=encoder_out[0],
+            maxlenratio=kwargs.get("maxlenratio", 0.0),
+            minlenratio=kwargs.get("minlenratio", 0.0),
         )
-        
-        nbest_hyps = nbest_hyps[: self.nbest]
 
+        nbest_hyps = nbest_hyps[: self.nbest]
 
         results = []
         b, n, d = encoder_out.size()
@@ -424,29 +426,33 @@ class OpenAIWhisperModel(nn.Module):
                     if not hasattr(self, "writer"):
                         self.writer = DatadirWriter(kwargs.get("output_dir"))
                     ibest_writer = self.writer[f"{nbest_idx + 1}best_recog"]
-                    
+
                 # remove sos/eos and get results
                 last_pos = -1
                 if isinstance(hyp.yseq, list):
                     token_int = hyp.yseq[1:last_pos]
                 else:
                     token_int = hyp.yseq[1:last_pos].tolist()
-                    
+
                 # remove blank symbol id, which is assumed to be 0
-                token_int = list(filter(lambda x: x != self.eos and x != self.sos and x != self.blank_id, token_int))
-                
+                token_int = list(
+                    filter(
+                        lambda x: x != self.eos and x != self.sos and x != self.blank_id, token_int
+                    )
+                )
+
                 # Change integer-ids to tokens
                 token = tokenizer.ids2tokens(token_int)
                 text = tokenizer.tokens2text(token)
-                
+
                 text_postprocessed, _ = postprocess_utils.sentence_postprocess(token)
                 result_i = {"key": key[i], "token": token, "text": text_postprocessed}
                 results.append(result_i)
-                
+
                 if ibest_writer is not None:
                     ibest_writer["token"][key[i]] = " ".join(token)
                     ibest_writer["text"][key[i]] = text_postprocessed
-        
+
         return results, meta_data
 
 
@@ -455,18 +461,18 @@ class OpenAIWhisperLIDModel(nn.Module):
     """WhisperEncoder and EResNet based LID Model"""
 
     def __init__(
-            self,
-            vocab_size: int,
-            specaug: str = None,
-            specaug_conf: dict = None,
-            encoder: str = None,
-            encoder_conf: dict = None,
-            lid_predictor:  str = None,
-            lid_predictor_conf: dict = None,
-            proj_dim: int = None,
-            clip_frames: int = None,
-            random_clip: bool = False,
-            **kwargs,
+        self,
+        vocab_size: int,
+        specaug: str = None,
+        specaug_conf: dict = None,
+        encoder: str = None,
+        encoder_conf: dict = None,
+        lid_predictor: str = None,
+        lid_predictor_conf: dict = None,
+        proj_dim: int = None,
+        clip_frames: int = None,
+        random_clip: bool = False,
+        **kwargs,
     ):
         super().__init__()
         if specaug is not None:
@@ -477,7 +483,7 @@ class OpenAIWhisperLIDModel(nn.Module):
         lid_predictor_class = tables.lid_predictor_classes.get(lid_predictor)
         lid_predictor = lid_predictor_class(**lid_predictor_conf)
         if encoder.output_size() != proj_dim:
-            self.proj_layer =  torch.nn.Linear(encoder.output_size(), proj_dim)
+            self.proj_layer = torch.nn.Linear(encoder.output_size(), proj_dim)
         else:
             self.proj_layer = None
         self.output_layer = torch.nn.Linear(lid_predictor.output_size(), vocab_size)
@@ -498,23 +504,32 @@ class OpenAIWhisperLIDModel(nn.Module):
         if not hasattr(self.encoder, "interctc_use_conditioning"):
             self.encoder.interctc_use_conditioning = False
 
-    def forward(self,
-                speech: torch.Tensor,  # may be padding
-                speech_lengths: torch.Tensor,  # actual length
-                lid: torch.Tensor,  # lid label, (batch_size, 1)
-                lid_lengths: torch.Tensor,
-                ):
+    def forward(
+        self,
+        speech: torch.Tensor,  # may be padding
+        speech_lengths: torch.Tensor,  # actual length
+        lid: torch.Tensor,  # lid label, (batch_size, 1)
+        lid_lengths: torch.Tensor,
+    ):
         assert lid.shape[1] == 1
         batch_size = speech.shape[0]
         encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
 
         # re-generate encoder_out
         if self.clip_frames is None:
-            reduced_encoder_out = torch.zeros(batch_size, encoder_out_lens.max(), encoder_out.shape[-1]).to(encoder_out.dtype).to(encoder_out.device)
+            reduced_encoder_out = (
+                torch.zeros(batch_size, encoder_out_lens.max(), encoder_out.shape[-1])
+                .to(encoder_out.dtype)
+                .to(encoder_out.device)
+            )
             for i, enc_length in enumerate(encoder_out_lens):
                 reduced_encoder_out[i, :enc_length] = encoder_out[i, :enc_length]
         else:
-            reduced_encoder_out = torch.zeros(batch_size, self.clip_frames, encoder_out.shape[-1]).to(encoder_out.dtype).to(encoder_out.device)
+            reduced_encoder_out = (
+                torch.zeros(batch_size, self.clip_frames, encoder_out.shape[-1])
+                .to(encoder_out.dtype)
+                .to(encoder_out.device)
+            )
             if self.random_clip:
                 for i, enc_length in enumerate(encoder_out_lens):
                     if enc_length <= self.clip_frames:
@@ -523,7 +538,9 @@ class OpenAIWhisperLIDModel(nn.Module):
                     else:
                         max_start_index = enc_length.item() - self.clip_frames
                         start_index = np.random.randint(0, max_start_index + 1)
-                        reduced_encoder_out[i, :self.clip_frames] = encoder_out[i, start_index:start_index + self.clip_frames]
+                        reduced_encoder_out[i, : self.clip_frames] = encoder_out[
+                            i, start_index : start_index + self.clip_frames
+                        ]
                         encoder_out_lens[i] = self.clip_frames
             else:
                 for i, enc_length in enumerate(encoder_out_lens):
@@ -548,7 +565,7 @@ class OpenAIWhisperLIDModel(nn.Module):
         return loss, stats, weight
 
     def encode(
-            self, speech: torch.Tensor, speech_lengths: torch.Tensor
+        self, speech: torch.Tensor, speech_lengths: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Frontend + Encoder. Note that this method is used by asr_inference.py
         Args:
@@ -573,9 +590,7 @@ class OpenAIWhisperLIDModel(nn.Module):
         # feats: (Batch, Length, Dim)
         # -> encoder_out: (Batch, Length2, Dim2)
         if self.encoder.interctc_use_conditioning:
-            encoder_out, encoder_out_lens, _ = self.encoder(
-                speech, speech_lengths, ctc=self.ctc
-            )
+            encoder_out, encoder_out_lens, _ = self.encoder(speech, speech_lengths, ctc=self.ctc)
         else:
             encoder_out, encoder_out_lens, _ = self.encoder(speech, speech_lengths)
         intermediate_outs = None
@@ -588,20 +603,23 @@ class OpenAIWhisperLIDModel(nn.Module):
 
         return encoder_out, encoder_out_lens
 
-    def inference(self,
-                  data_in,
-                  data_lengths=None,
-                  key: list = None,
-                  tokenizer=None,
-                  frontend=None,
-                  **kwargs,
-                  ):
+    def inference(
+        self,
+        data_in,
+        data_lengths=None,
+        key: list = None,
+        tokenizer=None,
+        frontend=None,
+        **kwargs,
+    ):
 
         if kwargs.get("batch_size", 1) > 1:
             raise NotImplementedError("batch decoding is not implemented")
 
         meta_data = {}
-        if isinstance(data_in, torch.Tensor) and kwargs.get("data_type", "sound") == "fbank":  # fbank
+        if (
+            isinstance(data_in, torch.Tensor) and kwargs.get("data_type", "sound") == "fbank"
+        ):  # fbank
             speech, speech_lengths = data_in, data_lengths
             if len(speech.shape) < 3:
                 speech = speech[None, :, :]
@@ -610,39 +628,60 @@ class OpenAIWhisperLIDModel(nn.Module):
         else:
             # extract fbank feats
             time1 = time.perf_counter()
-            audio_sample_list = load_audio_text_image_video(data_in, fs=frontend.fs, audio_fs=kwargs.get("fs", 16000),
-                                                            data_type=kwargs.get("data_type", "sound"),
-                                                            tokenizer=tokenizer)
+            audio_sample_list = load_audio_text_image_video(
+                data_in,
+                fs=frontend.fs,
+                audio_fs=kwargs.get("fs", 16000),
+                data_type=kwargs.get("data_type", "sound"),
+                tokenizer=tokenizer,
+            )
             time2 = time.perf_counter()
             meta_data["load_data"] = f"{time2 - time1:0.3f}"
-            speech, speech_lengths = extract_fbank(audio_sample_list, data_type=kwargs.get("data_type", "sound"),
-                                                   frontend=frontend)
+            speech, speech_lengths = extract_fbank(
+                audio_sample_list, data_type=kwargs.get("data_type", "sound"), frontend=frontend
+            )
             time3 = time.perf_counter()
             meta_data["extract_feat"] = f"{time3 - time2:0.3f}"
-            meta_data["batch_data_time"] = speech_lengths.sum().item() * frontend.frame_shift * frontend.lfr_n / 1000
+            meta_data["batch_data_time"] = (
+                speech_lengths.sum().item() * frontend.frame_shift * frontend.lfr_n / 1000
+            )
 
         speech = speech.to(device=kwargs["device"])
         speech_lengths = speech_lengths.to(device=kwargs["device"])
         # Encoder
-        enc, enc_out_lens  = self.encode(speech, speech_lengths)
+        enc, enc_out_lens = self.encode(speech, speech_lengths)
 
         inference_clip_length = kwargs.get("inference_clip_length", None)
         if self.clip_frames is not None:
             if inference_clip_length is None:
-                reduced_enc = torch.zeros(enc.shape[0], self.clip_frames, enc.shape[-1]).to(enc.dtype).to(enc.device)
+                reduced_enc = (
+                    torch.zeros(enc.shape[0], self.clip_frames, enc.shape[-1])
+                    .to(enc.dtype)
+                    .to(enc.device)
+                )
                 for i, enc_length in enumerate(enc_out_lens):
                     enc_length = self.clip_frames if enc_length >= self.clip_frames else enc_length
                     reduced_enc[i, :enc_length] = enc[i, :enc_length]
                     enc_out_lens[i] = enc_length
             else:
                 assert inference_clip_length > 0, "inference_clip_length must be larger than 0"
-                reduced_enc = torch.zeros(enc.shape[0], inference_clip_length, enc.shape[-1]).to(enc.dtype).to(enc.device)
+                reduced_enc = (
+                    torch.zeros(enc.shape[0], inference_clip_length, enc.shape[-1])
+                    .to(enc.dtype)
+                    .to(enc.device)
+                )
                 for i, enc_length in enumerate(enc_out_lens):
-                    enc_length = inference_clip_length if enc_length >= inference_clip_length else enc_length
+                    enc_length = (
+                        inference_clip_length if enc_length >= inference_clip_length else enc_length
+                    )
                     reduced_enc[i, :enc_length] = enc[i, :enc_length]
                     enc_out_lens[i] = enc_length
         else:
-            reduced_enc = torch.zeros(enc.shape[0], enc_out_lens.max(), enc.shape[-1]).to(enc.dtype).to(enc.device)
+            reduced_enc = (
+                torch.zeros(enc.shape[0], enc_out_lens.max(), enc.shape[-1])
+                .to(enc.dtype)
+                .to(enc.device)
+            )
             for i, enc_length in enumerate(enc_out_lens):
                 reduced_enc[i, :enc_length] = enc[i, :enc_length]
 

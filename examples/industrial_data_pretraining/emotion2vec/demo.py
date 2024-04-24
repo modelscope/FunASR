@@ -6,12 +6,15 @@
 from funasr import AutoModel
 
 # model="iic/emotion2vec_base"
-model = AutoModel(model="iic/emotion2vec_base_finetuned",
-                  # vad_model="iic/speech_fsmn_vad_zh-cn-16k-common-pytorch",
-                  # vad_model_revision="master",
-                  # vad_kwargs={"max_single_segment_time": 2000},
-                  )
+model = AutoModel(
+    model="iic/emotion2vec_base_finetuned",
+    # vad_model="iic/speech_fsmn_vad_zh-cn-16k-common-pytorch",
+    # vad_model_revision="master",
+    # vad_kwargs={"max_single_segment_time": 2000},
+)
 
 wav_file = f"{model.model_path}/example/test.wav"
-res = model.generate(wav_file, output_dir="./outputs", granularity="utterance", extract_embedding=False)
+res = model.generate(
+    wav_file, output_dir="./outputs", granularity="utterance", extract_embedding=False
+)
 print(res)

@@ -1,7 +1,10 @@
-
-
 import pynini
-from fun_text_processing.text_normalization.en.graph_utils import DAMO_NOT_QUOTE, GraphFst, delete_space, insert_space
+from fun_text_processing.text_normalization.en.graph_utils import (
+    DAMO_NOT_QUOTE,
+    GraphFst,
+    delete_space,
+    insert_space,
+)
 from pynini.lib import pynutil
 
 
@@ -20,9 +23,9 @@ class TelephoneFst(GraphFst):
         super().__init__(name="telephone", kind="verbalize", deterministic=deterministic)
 
         optional_country_code = pynini.closure(
-            pynutil.delete("country_code: \"")
+            pynutil.delete('country_code: "')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + delete_space
             + insert_space,
             0,
@@ -30,18 +33,18 @@ class TelephoneFst(GraphFst):
         )
 
         number_part = (
-            pynutil.delete("number_part: \"")
+            pynutil.delete('number_part: "')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
             + pynini.closure(pynutil.add_weight(pynutil.delete(" "), -0.0001), 0, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
 
         optional_extension = pynini.closure(
             delete_space
             + insert_space
-            + pynutil.delete("extension: \"")
+            + pynutil.delete('extension: "')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\""),
+            + pynutil.delete('"'),
             0,
             1,
         )

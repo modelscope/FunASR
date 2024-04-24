@@ -1,4 +1,3 @@
-
 import pynini
 from fun_text_processing.text_normalization.de.utils import get_abs_path, load_labels
 from fun_text_processing.text_normalization.en.graph_utils import (
@@ -16,7 +15,7 @@ ties_graph = pynini.invert(pynini.string_file(get_abs_path("data/numbers/ties.ts
 delete_leading_zero = (pynutil.delete("0") | (DAMO_DIGIT - "0")) + DAMO_DIGIT
 
 
-def get_year_graph(cardinal: GraphFst) -> 'pynini.FstLike':
+def get_year_graph(cardinal: GraphFst) -> "pynini.FstLike":
     """
     Returns year verbalizations as fst
 
@@ -28,7 +27,7 @@ def get_year_graph(cardinal: GraphFst) -> 'pynini.FstLike':
         cardinal: cardinal GraphFst
     """
 
-    year_gt_2000 = (pynini.union("21", "20") + DAMO_DIGIT ** 2) @ cardinal.graph
+    year_gt_2000 = (pynini.union("21", "20") + DAMO_DIGIT**2) @ cardinal.graph
 
     graph_two_digit = delete_leading_zero @ cardinal.two_digit_non_zero
     hundred = pynutil.insert("hundert")
@@ -42,7 +41,10 @@ def get_year_graph(cardinal: GraphFst) -> 'pynini.FstLike':
     graph_double_double |= pynini.accep("20") @ graph_two_digit + insert_space + graph_two_digit
     graph = (
         graph_double_double
-        | (pynini.accep("1") + DAMO_DIGIT) @ graph_two_digit + insert_space + pynutil.delete("00") + hundred
+        | (pynini.accep("1") + DAMO_DIGIT) @ graph_two_digit
+        + insert_space
+        + pynutil.delete("00")
+        + hundred
         | year_gt_2000
     )
     return graph
@@ -50,7 +52,7 @@ def get_year_graph(cardinal: GraphFst) -> 'pynini.FstLike':
 
 class DateFst(GraphFst):
     """
-    Finite state transducer for classifying date, e.g. 
+    Finite state transducer for classifying date, e.g.
         "01.04.2010" -> date { day: "erster" month: "april" year: "zwei tausend zehn" preserve_order: true }
         "1994" -> date { year: "neunzehn vier und neuzig" }
         "1900" -> date { year: "neunzehn hundert" }
@@ -82,24 +84,24 @@ class DateFst(GraphFst):
         optional_leading_zero = delete_leading_zero | DAMO_DIGIT
         # 01, 31, 1
         digit_day = optional_leading_zero @ pynini.union(*[str(x) for x in range(1, 32)]) @ numbers
-        day = (pynutil.insert("day: \"") + digit_day + pynutil.insert("\"")).optimize()
+        day = (pynutil.insert('day: "') + digit_day + pynutil.insert('"')).optimize()
 
         digit_month = optional_leading_zero @ pynini.union(*[str(x) for x in range(1, 13)])
         number_to_month = digit_month @ number_to_month
         digit_month @= numbers
 
-        month_name = (pynutil.insert("month: \"") + month_graph + pynutil.insert("\"")).optimize()
+        month_name = (pynutil.insert('month: "') + month_graph + pynutil.insert('"')).optimize()
         month_number = (
-            pynutil.insert("month: \"")
+            pynutil.insert('month: "')
             + (pynutil.add_weight(digit_month, weight=0.0001) | number_to_month)
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
         ).optimize()
 
         # prefer cardinal over year
         year = pynutil.add_weight(get_year_graph(cardinal=cardinal), weight=0.001)
         self.year = year
 
-        year_only = pynutil.insert("year: \"") + year + pynutil.insert("\"")
+        year_only = pynutil.insert('year: "') + year + pynutil.insert('"')
 
         graph_dmy = (
             day

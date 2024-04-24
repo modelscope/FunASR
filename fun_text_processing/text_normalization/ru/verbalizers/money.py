@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import GraphFst
 from fun_text_processing.text_normalization.ru.alphabet import RU_ALPHA
@@ -20,5 +18,7 @@ class MoneyFst(GraphFst):
         super().__init__(name="money", kind="verbalize", deterministic=deterministic)
 
         graph = pynini.closure(RU_ALPHA | " ")
-        delete_tokens = self.delete_tokens(pynutil.delete("integer_part: \"") + graph + pynutil.delete("\""))
+        delete_tokens = self.delete_tokens(
+            pynutil.delete('integer_part: "') + graph + pynutil.delete('"')
+        )
         self.fst = delete_tokens.optimize()

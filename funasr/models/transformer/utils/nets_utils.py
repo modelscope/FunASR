@@ -25,9 +25,7 @@ def to_device(m, x):
     elif isinstance(m, torch.Tensor):
         device = m.device
     else:
-        raise TypeError(
-            "Expected torch.nn.Module or torch.tensor, " f"bot got: {type(m)}"
-        )
+        raise TypeError("Expected torch.nn.Module or torch.tensor, " f"bot got: {type(m)}")
     return x.to(device)
 
 
@@ -215,9 +213,7 @@ def make_pad_mask(lengths, xs=None, length_dim=-1, maxlen=None):
         if length_dim < 0:
             length_dim = xs.dim() + length_dim
         # ind = (:, None, ..., None, :, , None, ..., None)
-        ind = tuple(
-            slice(None) if i in (0, length_dim) else None for i in range(xs.dim())
-        )
+        ind = tuple(slice(None) if i in (0, length_dim) else None for i in range(xs.dim()))
         mask = mask[ind].expand_as(xs).to(xs.device)
     return mask
 
@@ -342,8 +338,6 @@ def mask_by_length(xs, lengths, fill=0):
     return ret
 
 
-
-
 def to_torch_tensor(x):
     """Change to torch.Tensor or ComplexTensor from numpy.ndarray.
 
@@ -434,9 +428,9 @@ def get_subsample(train_args, mode, arch):
         return subsample
 
     elif (
-            (mode == "asr" and arch in ("rnn", "rnn-t"))
-            or (mode == "mt" and arch == "rnn")
-            or (mode == "st" and arch == "rnn")
+        (mode == "asr" and arch in ("rnn", "rnn-t"))
+        or (mode == "mt" and arch == "rnn")
+        or (mode == "st" and arch == "rnn")
     ):
         subsample = np.ones(train_args.elayers + 1, dtype=np.int32)
         if train_args.etype.endswith("p") and not train_args.etype.startswith("vgg"):
@@ -452,14 +446,10 @@ def get_subsample(train_args, mode, arch):
         return subsample
 
     elif mode == "asr" and arch == "rnn_mix":
-        subsample = np.ones(
-            train_args.elayers_sd + train_args.elayers + 1, dtype=np.int32
-        )
+        subsample = np.ones(train_args.elayers_sd + train_args.elayers + 1, dtype=np.int32)
         if train_args.etype.endswith("p") and not train_args.etype.startswith("vgg"):
             ss = train_args.subsample.split("_")
-            for j in range(
-                    min(train_args.elayers_sd + train_args.elayers + 1, len(ss))
-            ):
+            for j in range(min(train_args.elayers_sd + train_args.elayers + 1, len(ss))):
                 subsample[j] = int(ss[j])
         else:
             logging.warning(
@@ -473,9 +463,7 @@ def get_subsample(train_args, mode, arch):
         subsample_list = []
         for idx in range(train_args.num_encs):
             subsample = np.ones(train_args.elayers[idx] + 1, dtype=np.int32)
-            if train_args.etype[idx].endswith("p") and not train_args.etype[
-                idx
-            ].startswith("vgg"):
+            if train_args.etype[idx].endswith("p") and not train_args.etype[idx].startswith("vgg"):
                 ss = train_args.subsample[idx].split("_")
                 for j in range(min(train_args.elayers[idx] + 1, len(ss))):
                     subsample[j] = int(ss[j])
@@ -493,9 +481,7 @@ def get_subsample(train_args, mode, arch):
         raise ValueError("Invalid options: mode={}, arch={}".format(mode, arch))
 
 
-def rename_state_dict(
-        old_prefix: str, new_prefix: str, state_dict: Dict[str, torch.Tensor]
-):
+def rename_state_dict(old_prefix: str, new_prefix: str, state_dict: Dict[str, torch.Tensor]):
     """Replace keys of old prefix with new prefix in state dict."""
     # need this list not to break the dict iterator
     old_keys = [k for k in state_dict if k.startswith(old_prefix)]
@@ -505,6 +491,7 @@ def rename_state_dict(
         v = state_dict.pop(k)
         new_k = k.replace(old_prefix, new_prefix)
         state_dict[new_k] = v
+
 
 class Swish(torch.nn.Module):
     """Swish activation definition.
@@ -540,6 +527,7 @@ class Swish(torch.nn.Module):
         """Forward computation."""
         return self.swish(x)
 
+
 def get_activation(act):
     """Return activation function."""
 
@@ -552,6 +540,7 @@ def get_activation(act):
     }
 
     return activation_funcs[act]()
+
 
 class TooShortUttError(Exception):
     """Raised when the utt is too short for subsampling.
@@ -613,9 +602,7 @@ def sub_factor_to_params(sub_factor: int, input_size: int) -> Tuple[int, int, in
     elif sub_factor == 6:
         return 5, 3, (((input_size - 1) // 2 - 2) // 3)
     else:
-        raise ValueError(
-            "subsampling_factor parameter should be set to either 2, 4 or 6."
-        )
+        raise ValueError("subsampling_factor parameter should be set to either 2, 4 or 6.")
 
 
 def make_chunk_mask(
@@ -650,6 +637,7 @@ def make_chunk_mask(
         mask[i, start:end] = True
 
     return ~mask
+
 
 def make_source_mask(lengths: torch.Tensor) -> torch.Tensor:
     """Create source mask for given lengths.
@@ -735,6 +723,7 @@ def get_transducer_task_io(
 
     return decoder_in, target, t_len, u_len
 
+
 def pad_to_len(t: torch.Tensor, pad_len: int, dim: int):
     """Pad the tensor `t` at `dim` to the length `pad_len` with right padding zeros."""
     if t.size(dim) == pad_len:
@@ -742,6 +731,4 @@ def pad_to_len(t: torch.Tensor, pad_len: int, dim: int):
     else:
         pad_size = list(t.shape)
         pad_size[dim] = pad_len - t.size(dim)
-        return torch.cat(
-            [t, torch.zeros(*pad_size, dtype=t.dtype, device=t.device)], dim=dim
-        )
+        return torch.cat([t, torch.zeros(*pad_size, dtype=t.dtype, device=t.device)], dim=dim)

@@ -1,5 +1,3 @@
-
-
 import os
 
 import pynini
@@ -16,7 +14,10 @@ from fun_text_processing.text_normalization.ru.taggers.decimals import DecimalFs
 from fun_text_processing.text_normalization.ru.taggers.electronic import ElectronicFst
 from fun_text_processing.text_normalization.ru.taggers.measure import MeasureFst
 from fun_text_processing.text_normalization.ru.taggers.money import MoneyFst
-from fun_text_processing.text_normalization.ru.taggers.number_names import get_alternative_formats, get_number_names
+from fun_text_processing.text_normalization.ru.taggers.number_names import (
+    get_alternative_formats,
+    get_number_names,
+)
 from fun_text_processing.text_normalization.ru.taggers.ordinal import OrdinalFst
 from fun_text_processing.text_normalization.ru.taggers.telephone import TelephoneFst
 from fun_text_processing.text_normalization.ru.taggers.time import TimeFst
@@ -53,7 +54,7 @@ class ClassifyFst(GraphFst):
         super().__init__(name="tokenize_and_classify", kind="classify", deterministic=deterministic)
         if deterministic:
             raise ValueError(
-                'Ru TN only supports non-deterministic cases and produces multiple normalization options.'
+                "Ru TN only supports non-deterministic cases and produces multiple normalization options."
             )
         far_file = None
         if cache_dir is not None and cache_dir != "None":
@@ -71,19 +72,25 @@ class ClassifyFst(GraphFst):
             alternative_formats = get_alternative_formats()
 
             self.cardinal = CardinalFst(
-                number_names=number_names, alternative_formats=alternative_formats, deterministic=deterministic
+                number_names=number_names,
+                alternative_formats=alternative_formats,
+                deterministic=deterministic,
             )
             cardinal_graph = self.cardinal.fst
 
             self.ordinal = OrdinalFst(
-                number_names=number_names, alternative_formats=alternative_formats, deterministic=deterministic
+                number_names=number_names,
+                alternative_formats=alternative_formats,
+                deterministic=deterministic,
             )
             ordinal_graph = self.ordinal.fst
 
             self.decimal = DecimalFst(cardinal=self.cardinal, deterministic=deterministic)
             decimal_graph = self.decimal.fst
 
-            self.measure = MeasureFst(cardinal=self.cardinal, decimal=self.decimal, deterministic=deterministic)
+            self.measure = MeasureFst(
+                cardinal=self.cardinal, decimal=self.decimal, deterministic=deterministic
+            )
             measure_graph = self.measure.fst
             self.date = DateFst(number_names=number_names, deterministic=deterministic)
             date_graph = self.date.fst
@@ -94,9 +101,13 @@ class ClassifyFst(GraphFst):
             telephone_graph = self.telephone.fst
             self.electronic = ElectronicFst(deterministic=deterministic)
             electronic_graph = self.electronic.fst
-            self.money = MoneyFst(cardinal=self.cardinal, decimal=self.decimal, deterministic=deterministic)
+            self.money = MoneyFst(
+                cardinal=self.cardinal, decimal=self.decimal, deterministic=deterministic
+            )
             money_graph = self.money.fst
-            self.whitelist = WhiteListFst(input_case=input_case, deterministic=deterministic, input_file=whitelist)
+            self.whitelist = WhiteListFst(
+                input_case=input_case, deterministic=deterministic, input_file=whitelist
+            )
             whitelist_graph = self.whitelist.fst
             punct_graph = PunctuationFst(deterministic=deterministic).fst
 
@@ -114,13 +125,21 @@ class ClassifyFst(GraphFst):
                 | pynutil.add_weight(word_graph, 100)
             )
 
-            punct = pynutil.insert("tokens { ") + pynutil.add_weight(punct_graph, weight=1.1) + pynutil.insert(" }")
+            punct = (
+                pynutil.insert("tokens { ")
+                + pynutil.add_weight(punct_graph, weight=1.1)
+                + pynutil.insert(" }")
+            )
             token = pynutil.insert("tokens { ") + classify + pynutil.insert(" }")
             token_plus_punct = (
-                pynini.closure(punct + pynutil.insert(" ")) + token + pynini.closure(pynutil.insert(" ") + punct)
+                pynini.closure(punct + pynutil.insert(" "))
+                + token
+                + pynini.closure(pynutil.insert(" ") + punct)
             )
 
-            graph = token_plus_punct + pynini.closure(pynutil.add_weight(delete_extra_space, 1.1) + token_plus_punct)
+            graph = token_plus_punct + pynini.closure(
+                pynutil.add_weight(delete_extra_space, 1.1) + token_plus_punct
+            )
             graph = delete_space + graph + delete_space
 
             self.fst = graph.optimize()

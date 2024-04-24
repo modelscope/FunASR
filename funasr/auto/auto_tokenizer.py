@@ -1,8 +1,7 @@
-
-
 class AutoTokenizer:
-	"""
-	Undo
-	"""
-	def __init__(self):
-		pass
+    """
+    Undo
+    """
+
+    def __init__(self):
+        pass

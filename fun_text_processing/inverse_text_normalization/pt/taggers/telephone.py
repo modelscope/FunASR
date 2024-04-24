@@ -1,9 +1,10 @@
-
-
-
 import pynini
 from fun_text_processing.inverse_text_normalization.pt.utils import get_abs_path
-from fun_text_processing.text_normalization.en.graph_utils import GraphFst, delete_space, insert_space
+from fun_text_processing.text_normalization.en.graph_utils import (
+    GraphFst,
+    delete_space,
+    insert_space,
+)
 from pynini.lib import pynutil
 
 
@@ -111,9 +112,13 @@ class TelephoneFst(GraphFst):
             + double_digits
         )
 
-        number_part = pynini.union(eleven_digit_graph, ten_digit_graph, nine_digit_graph, eight_digit_graph)
+        number_part = pynini.union(
+            eleven_digit_graph, ten_digit_graph, nine_digit_graph, eight_digit_graph
+        )
 
-        number_part = pynutil.insert("number_part: \"") + pynini.invert(number_part) + pynutil.insert("\"")
+        number_part = (
+            pynutil.insert('number_part: "') + pynini.invert(number_part) + pynutil.insert('"')
+        )
 
         graph = number_part
         final_graph = self.add_tokens(graph)

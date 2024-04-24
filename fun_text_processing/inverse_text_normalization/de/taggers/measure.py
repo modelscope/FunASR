@@ -1,6 +1,8 @@
-
 import pynini
-from fun_text_processing.text_normalization.de.taggers.measure import singular_to_plural, unit_singular
+from fun_text_processing.text_normalization.de.taggers.measure import (
+    singular_to_plural,
+    unit_singular,
+)
 from fun_text_processing.text_normalization.en.graph_utils import (
     DAMO_SIGMA,
     GraphFst,
@@ -35,25 +37,31 @@ class MeasureFst(GraphFst):
         super().__init__(name="measure", kind="classify", deterministic=deterministic)
 
         cardinal_graph = (
-            pynini.cdrewrite(pynini.cross(pynini.union("ein", "eine"), "eins"), "[BOS]", "[EOS]", DAMO_SIGMA)
+            pynini.cdrewrite(
+                pynini.cross(pynini.union("ein", "eine"), "eins"), "[BOS]", "[EOS]", DAMO_SIGMA
+            )
             @ itn_cardinal_tagger.graph_no_exception
         )
 
         graph_unit_singular = pynini.invert(unit_singular)  # singular -> abbr
-        unit = (pynini.invert(singular_to_plural()) @ graph_unit_singular) | graph_unit_singular  # plural -> abbr
+        unit = (
+            pynini.invert(singular_to_plural()) @ graph_unit_singular
+        ) | graph_unit_singular  # plural -> abbr
         unit = convert_space(unit)
         graph_unit_singular = convert_space(graph_unit_singular)
 
         optional_graph_negative = pynini.closure(
-            pynutil.insert("negative: ") + pynini.cross("minus", "\"true\"") + delete_extra_space, 0, 1
+            pynutil.insert("negative: ") + pynini.cross("minus", '"true"') + delete_extra_space,
+            0,
+            1,
         )
 
         unit_misc = pynutil.insert("/") + pynutil.delete("pro") + delete_space + graph_unit_singular
 
         unit = (
-            pynutil.insert("units: \"")
+            pynutil.insert('units: "')
             + (unit | unit_misc | pynutil.add_weight(unit + delete_space + unit_misc, 0.01))
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
         )
 
         subgraph_decimal = (
@@ -68,9 +76,9 @@ class MeasureFst(GraphFst):
         subgraph_fraction = (
             pynutil.insert("decimal { ")
             + optional_graph_negative
-            + pynutil.insert("integer_part: \"")
+            + pynutil.insert('integer_part: "')
             + itn_fraction_tagger.graph
-            + pynutil.insert("\" }")
+            + pynutil.insert('" }')
             + delete_extra_space
             + unit
         )
@@ -78,9 +86,9 @@ class MeasureFst(GraphFst):
         subgraph_cardinal = (
             pynutil.insert("cardinal { ")
             + optional_graph_negative
-            + pynutil.insert("integer: \"")
+            + pynutil.insert('integer: "')
             + cardinal_graph
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
             + pynutil.insert(" }")
             + delete_extra_space
             + unit

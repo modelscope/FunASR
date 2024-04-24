@@ -55,5 +55,5 @@ def main():
     print("EER is {:.4f} at threshold {:.4f}".format(eer * 100.0, threshold))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

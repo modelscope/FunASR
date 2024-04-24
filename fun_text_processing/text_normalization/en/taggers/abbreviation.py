@@ -1,6 +1,3 @@
-
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import DAMO_UPPER, GraphFst, insert_space
 from pynini.lib import pynutil
@@ -17,7 +14,7 @@ class AbbreviationFst(GraphFst):
             for False multiple transduction are generated (used for audio-based normalization)
     """
 
-    def __init__(self, whitelist: 'pynini.FstLike', deterministic: bool = True):
+    def __init__(self, whitelist: "pynini.FstLike", deterministic: bool = True):
         super().__init__(name="abbreviation", kind="classify", deterministic=deterministic)
 
         dot = pynini.accep(".")
@@ -30,9 +27,12 @@ class AbbreviationFst(GraphFst):
 
         # exclude words that are included in the whitelist
         graph = pynini.compose(
-            pynini.difference(pynini.project(graph, "input"), pynini.project(whitelist.graph, "input")), graph
+            pynini.difference(
+                pynini.project(graph, "input"), pynini.project(whitelist.graph, "input")
+            ),
+            graph,
         )
 
-        graph = pynutil.insert("value: \"") + graph.optimize() + pynutil.insert("\"")
+        graph = pynutil.insert('value: "') + graph.optimize() + pynutil.insert('"')
         graph = self.add_tokens(graph)
         self.fst = graph.optimize()

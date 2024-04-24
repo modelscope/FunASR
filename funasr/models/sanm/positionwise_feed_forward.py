@@ -9,7 +9,6 @@ import torch
 from funasr.models.transformer.layer_norm import LayerNorm
 
 
-
 class PositionwiseFeedForwardDecoderSANM(torch.nn.Module):
     """Positionwise feed forward layer.
 

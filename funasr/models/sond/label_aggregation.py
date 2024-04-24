@@ -90,9 +90,7 @@ class LabelAggregateMaxPooling(torch.nn.Module):
         self.hop_length = hop_length
 
     def extra_repr(self):
-        return (
-            f"hop_length={self.hop_length}, "
-        )
+        return f"hop_length={self.hop_length}, "
 
     def forward(
         self, input: torch.Tensor, ilens: torch.Tensor = None
@@ -107,7 +105,9 @@ class LabelAggregateMaxPooling(torch.nn.Module):
 
         """
 
-        output = F.max_pool1d(input.transpose(1, 2), self.hop_length, self.hop_length).transpose(1, 2)
+        output = F.max_pool1d(input.transpose(1, 2), self.hop_length, self.hop_length).transpose(
+            1, 2
+        )
         olens = ilens // self.hop_length
 
         return output.to(input.dtype), olens

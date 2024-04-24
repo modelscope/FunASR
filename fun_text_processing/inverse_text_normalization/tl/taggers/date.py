@@ -1,4 +1,3 @@
-
 import pynini
 from fun_text_processing.inverse_text_normalization.tl.utils import get_abs_path
 from fun_text_processing.inverse_text_normalization.tl.graph_utils import (
@@ -63,7 +62,9 @@ def _get_year_graph():
 
     def _get_thousands_graph():
         graph_ties = _get_ties_graph()
-        graph_hundred_component = (graph_digit + delete_space + pynutil.delete("hundred")) | pynutil.insert("0")
+        graph_hundred_component = (
+            graph_digit + delete_space + pynutil.delete("hundred")
+        ) | pynutil.insert("0")
         graph = (
             graph_digit
             + delete_space
@@ -90,7 +91,7 @@ def _get_year_graph():
 
 class DateFst(GraphFst):
     """
-    Finite state transducer for classifying date, 
+    Finite state transducer for classifying date,
         e.g. january fifth twenty twelve -> date { month: "january" day: "5" year: "2012" preserve_order: true }
         e.g. the fifth of january twenty twelve -> date { day: "5" month: "january" year: "2012" preserve_order: true }
         e.g. twenty twenty -> date { year: "2012" preserve_order: true }
@@ -108,18 +109,26 @@ class DateFst(GraphFst):
         year_graph = pynutil.add_weight(year_graph, YEAR_WEIGHT)
         month_graph = _get_month_graph()
 
-        month_graph = pynutil.insert("month: \"") + month_graph + pynutil.insert("\"")
+        month_graph = pynutil.insert('month: "') + month_graph + pynutil.insert('"')
 
-        day_graph = pynutil.insert("day: \"") + pynutil.add_weight(ordinal_graph, -0.7) + pynutil.insert("\"")
+        day_graph = (
+            pynutil.insert('day: "') + pynutil.add_weight(ordinal_graph, -0.7) + pynutil.insert('"')
+        )
         graph_year = (
             delete_extra_space
-            + pynutil.insert("year: \"")
+            + pynutil.insert('year: "')
             + pynutil.add_weight(year_graph, -YEAR_WEIGHT)
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
         )
-        optional_graph_year = pynini.closure(graph_year, 0, 1,)
+        optional_graph_year = pynini.closure(
+            graph_year,
+            0,
+            1,
+        )
         graph_mdy = month_graph + (
-            (delete_extra_space + day_graph) | graph_year | (delete_extra_space + day_graph + graph_year)
+            (delete_extra_space + day_graph)
+            | graph_year
+            | (delete_extra_space + day_graph + graph_year)
         )
         graph_dmy = (
             pynutil.delete("the")
@@ -131,7 +140,9 @@ class DateFst(GraphFst):
             + month_graph
             + optional_graph_year
         )
-        graph_year = pynutil.insert("year: \"") + (year_graph | _get_range_graph()) + pynutil.insert("\"")
+        graph_year = (
+            pynutil.insert('year: "') + (year_graph | _get_range_graph()) + pynutil.insert('"')
+        )
 
         final_graph = graph_mdy | graph_dmy | graph_year
         final_graph += pynutil.insert(" preserve_order: true")

@@ -1,4 +1,3 @@
-
 from collections import defaultdict
 
 import pynini
@@ -15,7 +14,7 @@ from pynini.lib import pynutil
 AND = "und"
 
 
-def get_ties_digit(digit_path: str, tie_path: str) -> 'pynini.FstLike':
+def get_ties_digit(digit_path: str, tie_path: str) -> "pynini.FstLike":
     """
     getting all inverse normalizations for numbers between 21 - 100
 
@@ -52,7 +51,7 @@ def get_ties_digit(digit_path: str, tie_path: str) -> 'pynini.FstLike':
 
 class CardinalFst(GraphFst):
     """
-    Finite state transducer for classifying cardinals, e.g. 
+    Finite state transducer for classifying cardinals, e.g.
         "101" ->  cardinal { integer: "ein hundert und zehn" }
 
     Args:
@@ -84,45 +83,70 @@ class CardinalFst(GraphFst):
             )
 
         def hundred_non_zero():
-            return (graph_digit_no_one + insert_space | pynini.cross("1", "ein ")) + pynutil.insert("hundert") + (
-                pynini.closure(insert_space + pynutil.insert(AND, weight=0.0001), 0, 1) + insert_space + tens_no_zero()
+            return (graph_digit_no_one + insert_space | pynini.cross("1", "ein ")) + pynutil.insert(
+                "hundert"
+            ) + (
+                pynini.closure(insert_space + pynutil.insert(AND, weight=0.0001), 0, 1)
+                + insert_space
+                + tens_no_zero()
                 | pynutil.delete("00")
-            ) | pynutil.delete("0") + tens_no_zero()
+            ) | pynutil.delete(
+                "0"
+            ) + tens_no_zero()
 
         def thousand():
-            return (hundred_non_zero() + insert_space + pynutil.insert("tausend") | pynutil.delete("000")) + (
-                insert_space + hundred_non_zero() | pynutil.delete("000")
-            )
+            return (
+                hundred_non_zero() + insert_space + pynutil.insert("tausend")
+                | pynutil.delete("000")
+            ) + (insert_space + hundred_non_zero() | pynutil.delete("000"))
 
         optional_plural_quantity_en = pynini.closure(pynutil.insert("en", weight=-0.0001), 0, 1)
         optional_plural_quantity_n = pynini.closure(pynutil.insert("n", weight=-0.0001), 0, 1)
         graph_million = pynini.union(
-            hundred_non_zero() + insert_space + pynutil.insert("million") + optional_plural_quantity_en,
+            hundred_non_zero()
+            + insert_space
+            + pynutil.insert("million")
+            + optional_plural_quantity_en,
             pynutil.delete("000"),
         )
 
         graph_billion = pynini.union(
-            hundred_non_zero() + insert_space + pynutil.insert("milliarde") + optional_plural_quantity_n,
+            hundred_non_zero()
+            + insert_space
+            + pynutil.insert("milliarde")
+            + optional_plural_quantity_n,
             pynutil.delete("000"),
         )
 
         graph_trillion = pynini.union(
-            hundred_non_zero() + insert_space + pynutil.insert("billion") + optional_plural_quantity_en,
+            hundred_non_zero()
+            + insert_space
+            + pynutil.insert("billion")
+            + optional_plural_quantity_en,
             pynutil.delete("000"),
         )
 
         graph_quadrillion = pynini.union(
-            hundred_non_zero() + insert_space + pynutil.insert("billiarde") + optional_plural_quantity_n,
+            hundred_non_zero()
+            + insert_space
+            + pynutil.insert("billiarde")
+            + optional_plural_quantity_n,
             pynutil.delete("000"),
         )
 
         graph_quintillion = pynini.union(
-            hundred_non_zero() + insert_space + pynutil.insert("trillion") + optional_plural_quantity_en,
+            hundred_non_zero()
+            + insert_space
+            + pynutil.insert("trillion")
+            + optional_plural_quantity_en,
             pynutil.delete("000"),
         )
 
         graph_sextillion = pynini.union(
-            hundred_non_zero() + insert_space + pynutil.insert("trilliarde") + optional_plural_quantity_n,
+            hundred_non_zero()
+            + insert_space
+            + pynutil.insert("trilliarde")
+            + optional_plural_quantity_n,
             pynutil.delete("000"),
         )
         graph = pynini.union(
@@ -152,7 +176,7 @@ class CardinalFst(GraphFst):
         self.graph = (
             ((DAMO_DIGIT - "0" + pynini.closure(DAMO_DIGIT, 0)) - "0" - "1")
             @ pynini.cdrewrite(pynini.closure(pynutil.insert("0")), "[BOS]", "", DAMO_SIGMA)
-            @ DAMO_DIGIT ** 24
+            @ DAMO_DIGIT**24
             @ graph
             @ pynini.cdrewrite(delete_space, "[BOS]", "", DAMO_SIGMA)
             @ pynini.cdrewrite(delete_space, "", "[EOS]", DAMO_SIGMA)
@@ -167,7 +191,7 @@ class CardinalFst(GraphFst):
         self.graph_hundred_component_at_least_one_none_zero_digit = (
             ((DAMO_DIGIT - "0" + pynini.closure(DAMO_DIGIT, 0)) - "0" - "1")
             @ pynini.cdrewrite(pynini.closure(pynutil.insert("0")), "[BOS]", "", DAMO_SIGMA)
-            @ DAMO_DIGIT ** 3
+            @ DAMO_DIGIT**3
             @ hundred_non_zero()
         ) | pynini.cross("1", "eins")
 
@@ -176,11 +200,16 @@ class CardinalFst(GraphFst):
         )
 
         self.two_digit_non_zero = (
-            pynini.closure(DAMO_DIGIT, 1, 2) @ self.graph_hundred_component_at_least_one_none_zero_digit
+            pynini.closure(DAMO_DIGIT, 1, 2)
+            @ self.graph_hundred_component_at_least_one_none_zero_digit
         )
 
-        optional_minus_graph = pynini.closure(pynutil.insert("negative: ") + pynini.cross("-", "\"true\" "), 0, 1)
+        optional_minus_graph = pynini.closure(
+            pynutil.insert("negative: ") + pynini.cross("-", '"true" '), 0, 1
+        )
 
-        final_graph = optional_minus_graph + pynutil.insert("integer: \"") + self.graph + pynutil.insert("\"")
+        final_graph = (
+            optional_minus_graph + pynutil.insert('integer: "') + self.graph + pynutil.insert('"')
+        )
         final_graph = self.add_tokens(final_graph)
         self.fst = final_graph.optimize()

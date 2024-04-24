@@ -1,7 +1,10 @@
-
-
 import pynini
-from fun_text_processing.text_normalization.en.graph_utils import DAMO_NOT_QUOTE, GraphFst, delete_space, insert_space
+from fun_text_processing.text_normalization.en.graph_utils import (
+    DAMO_NOT_QUOTE,
+    GraphFst,
+    delete_space,
+    insert_space,
+)
 from pynini.lib import pynutil
 
 
@@ -11,7 +14,7 @@ class MeasureFst(GraphFst):
         measure { negative: "true" cardinal { integer: "twelve" } units: "kilograms" } -> minus twelve kilograms
         measure { decimal { integer_part: "twelve" fractional_part: "five" } units: "kilograms" } -> twelve point five kilograms
         tokens { measure { units: "covid" decimal { integer_part: "nineteen"  fractional_part: "five" }  } } -> covid nineteen point five
-    
+
     Args:
         decimal: DecimalFst
         cardinal: CardinalFst
@@ -20,18 +23,20 @@ class MeasureFst(GraphFst):
             for False multiple transduction are generated (used for audio-based normalization)
     """
 
-    def __init__(self, decimal: GraphFst, cardinal: GraphFst, fraction: GraphFst, deterministic: bool = True):
+    def __init__(
+        self, decimal: GraphFst, cardinal: GraphFst, fraction: GraphFst, deterministic: bool = True
+    ):
         super().__init__(name="measure", kind="verbalize", deterministic=deterministic)
         optional_sign = cardinal.optional_sign
         unit = (
-            pynutil.delete("units: \"")
+            pynutil.delete('units: "')
             + pynini.difference(pynini.closure(DAMO_NOT_QUOTE, 1), pynini.union("address", "math"))
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + delete_space
         )
 
         if not deterministic:
-            unit |= pynini.compose(unit, pynini.cross(pynini.union("inch", "inches"), "\""))
+            unit |= pynini.compose(unit, pynini.cross(pynini.union("inch", "inches"), '"'))
 
         graph_decimal = (
             pynutil.delete("decimal {")
@@ -53,17 +58,31 @@ class MeasureFst(GraphFst):
         )
 
         graph_fraction = (
-            pynutil.delete("fraction {") + delete_space + fraction.graph + delete_space + pynutil.delete("}")
+            pynutil.delete("fraction {")
+            + delete_space
+            + fraction.graph
+            + delete_space
+            + pynutil.delete("}")
         )
 
-        graph = (graph_cardinal | graph_decimal | graph_fraction) + delete_space + insert_space + unit
+        graph = (
+            (graph_cardinal | graph_decimal | graph_fraction) + delete_space + insert_space + unit
+        )
 
         # SH adds "preserve_order: true" by default
-        preserve_order = pynutil.delete("preserve_order:") + delete_space + pynutil.delete("true") + delete_space
-        graph |= unit + insert_space + (graph_cardinal | graph_decimal) + delete_space + pynini.closure(preserve_order)
+        preserve_order = (
+            pynutil.delete("preserve_order:") + delete_space + pynutil.delete("true") + delete_space
+        )
+        graph |= (
+            unit
+            + insert_space
+            + (graph_cardinal | graph_decimal)
+            + delete_space
+            + pynini.closure(preserve_order)
+        )
         # for only unit
         graph |= (
-            pynutil.delete("cardinal { integer: \"-\"")
+            pynutil.delete('cardinal { integer: "-"')
             + delete_space
             + pynutil.delete("}")
             + delete_space
@@ -71,14 +90,14 @@ class MeasureFst(GraphFst):
             + pynini.closure(preserve_order)
         )
         address = (
-            pynutil.delete("units: \"address\" ")
+            pynutil.delete('units: "address" ')
             + delete_space
             + graph_cardinal
             + delete_space
             + pynini.closure(preserve_order)
         )
         math = (
-            pynutil.delete("units: \"math\" ")
+            pynutil.delete('units: "math" ')
             + delete_space
             + graph_cardinal
             + delete_space

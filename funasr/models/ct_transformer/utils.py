@@ -14,10 +14,11 @@ def split_to_mini_sentence(words: list, word_limit: int = 20):
     length = len(words)
     sentence_len = length // word_limit
     for i in range(sentence_len):
-        sentences.append(words[i * word_limit:(i + 1) * word_limit])
+        sentences.append(words[i * word_limit : (i + 1) * word_limit])
     if length % word_limit > 0:
-        sentences.append(words[sentence_len * word_limit:])
+        sentences.append(words[sentence_len * word_limit :])
     return sentences
+
 
 def split_words(text: str, jieba_usr_dict=None, **kwargs):
     if jieba_usr_dict:
@@ -27,21 +28,21 @@ def split_words(text: str, jieba_usr_dict=None, **kwargs):
         token_list_tmp = []
         language_flag = None
         for token in input_list:
-            if isEnglish(token) and language_flag == 'Chinese':
+            if isEnglish(token) and language_flag == "Chinese":
                 token_list_all.append(token_list_tmp)
-                langauge_list.append('Chinese')
+                langauge_list.append("Chinese")
                 token_list_tmp = []
-            elif not isEnglish(token) and language_flag == 'English':
+            elif not isEnglish(token) and language_flag == "English":
                 token_list_all.append(token_list_tmp)
-                langauge_list.append('English')
+                langauge_list.append("English")
                 token_list_tmp = []
 
             token_list_tmp.append(token)
 
             if isEnglish(token):
-                language_flag = 'English'
+                language_flag = "English"
             else:
-                language_flag = 'Chinese'
+                language_flag = "Chinese"
 
         if token_list_tmp:
             token_list_all.append(token_list_tmp)
@@ -49,7 +50,7 @@ def split_words(text: str, jieba_usr_dict=None, **kwargs):
 
         result_list = []
         for token_list_tmp, language_flag in zip(token_list_all, langauge_list):
-            if language_flag == 'English':
+            if language_flag == "English":
                 result_list.extend(token_list_tmp)
             else:
                 seg_list = jieba_usr_dict.cut(join_chinese_and_english(token_list_tmp), HMM=False)
@@ -77,17 +78,19 @@ def split_words(text: str, jieba_usr_dict=None, **kwargs):
                 words.append(current_word)
         return words
 
-def isEnglish(text:str):
-    if re.search('^[a-zA-Z\']+$', text):
+
+def isEnglish(text: str):
+    if re.search("^[a-zA-Z']+$", text):
         return True
     else:
         return False
 
+
 def join_chinese_and_english(input_list):
-    line = ''
+    line = ""
     for token in input_list:
         if isEnglish(token):
-            line = line + ' ' + token
+            line = line + " " + token
         else:
             line = line + token
 

@@ -1,16 +1,18 @@
-
-
 import pynini
-from fun_text_processing.text_normalization.zh.graph_utils import FUN_NOT_QUOTE, GraphFst, delete_space
+from fun_text_processing.text_normalization.zh.graph_utils import (
+    FUN_NOT_QUOTE,
+    GraphFst,
+    delete_space,
+)
 from fun_text_processing.text_normalization.zh.utils import UNIT_1e01, get_abs_path
 from pynini.lib import pynutil
 
 
 class Time(GraphFst):
-    '''
-        tokens { time { h: "1" m: "02" s: "36" } } -> 一点零二分三十六秒
-        tokens { time { suffix "am"  hours: "1" minutes: "02" seconds: "36" } } -> 上午一点零二分三十六秒
-    '''
+    """
+    tokens { time { h: "1" m: "02" s: "36" } } -> 一点零二分三十六秒
+    tokens { time { suffix "am"  hours: "1" minutes: "02" seconds: "36" } } -> 上午一点零二分三十六秒
+    """
 
     def __init__(self, deterministic: bool = True, lm: bool = False):
         super().__init__(name="time", kind="verbalize", deterministic=deterministic)
@@ -33,50 +35,54 @@ class Time(GraphFst):
 
         # 6:25
         h_m = (
-            pynutil.delete("hours: \"")
+            pynutil.delete('hours: "')
             + h
             + pynutil.insert("点")
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + delete_space
-            + pynutil.delete("minutes: \"")
+            + pynutil.delete('minutes: "')
             + (graph_2_digit_time)
             + pynutil.insert("分")
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
 
         # 23:00
         h_00 = (
-            pynutil.delete("hours: \"")
+            pynutil.delete('hours: "')
             + h
             + pynutil.insert("点")
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + delete_space
-            + pynutil.delete("minutes: \"")
+            + pynutil.delete('minutes: "')
             + (graph_2_digit_zero_none)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
 
         # 9:12:52
         h_m_s = (
-            pynutil.delete("hours: \"")
+            pynutil.delete('hours: "')
             + h
             + pynutil.insert("点")
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + delete_space
-            + pynutil.delete("minutes: \"")
+            + pynutil.delete('minutes: "')
             + m
             + pynutil.insert("分")
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + delete_space
-            + pynutil.delete("seconds: \"")
+            + pynutil.delete('seconds: "')
             + s
             + pynutil.insert("秒")
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
 
         graph = h_m | h_m_s | h_00
         graph_suffix = (
-            pynutil.delete("suffix: \"") + pynini.closure(FUN_NOT_QUOTE) + pynutil.delete("\"") + delete_space + graph
+            pynutil.delete('suffix: "')
+            + pynini.closure(FUN_NOT_QUOTE)
+            + pynutil.delete('"')
+            + delete_space
+            + graph
         )
         graph |= graph_suffix
         self.fst = self.delete_tokens(graph).optimize()

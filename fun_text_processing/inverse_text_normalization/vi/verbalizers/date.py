@@ -1,7 +1,9 @@
-
-
 import pynini
-from fun_text_processing.inverse_text_normalization.vi.graph_utils import DAMO_NOT_QUOTE, GraphFst, delete_space
+from fun_text_processing.inverse_text_normalization.vi.graph_utils import (
+    DAMO_NOT_QUOTE,
+    GraphFst,
+    delete_space,
+)
 from pynini.lib import pynutil
 
 
@@ -55,7 +57,11 @@ class DateFst(GraphFst):
             + delete_space
         )
 
-        final_graph = (graph_y | graph_m | graph_dm | graph_dmy | graph_my) + delete_space + optional_preserve_order
+        final_graph = (
+            (graph_y | graph_m | graph_dm | graph_dmy | graph_my)
+            + delete_space
+            + optional_preserve_order
+        )
 
         delete_tokens = self.delete_tokens(final_graph)
         self.fst = delete_tokens.optimize()

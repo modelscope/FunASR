@@ -21,7 +21,7 @@ from fun_text_processing.inverse_text_normalization.ja.graph_utils import (
     delete_extra_space,
     delete_space,
     generator_main,
-    insert_space
+    insert_space,
 )
 from pynini.lib import pynutil
 
@@ -31,7 +31,7 @@ import logging
 class ClassifyFst(GraphFst):
     """
     Final class that composes all other classification grammars. This class can process an entire sentence, that is lower cased.
-    For deployment, this grammar will be compiled and exported to OpenFst Finate State Archiv (FAR) File. 
+    For deployment, this grammar will be compiled and exported to OpenFst Finate State Archiv (FAR) File.
     More details to deployment at NeMo/tools/text_processing_deployment.
 
     Args:
@@ -39,9 +39,13 @@ class ClassifyFst(GraphFst):
         overwrite_cache: set to True to overwrite .far files
     """
 
-    def __init__(self, cache_dir: str = None, overwrite_cache: bool = False,
+    def __init__(
+        self,
+        cache_dir: str = None,
+        overwrite_cache: bool = False,
         enable_standalone_number: bool = True,
-        enable_0_to_9: bool = True):
+        enable_0_to_9: bool = True,
+    ):
         super().__init__(name="tokenize_and_classify", kind="classify")
         self.convert_number = enable_standalone_number
         self.enable_0_to_9 = enable_0_to_9
@@ -93,12 +97,20 @@ class ClassifyFst(GraphFst):
                 | pynutil.add_weight(word_graph, 100)
             )
 
-            punct = pynutil.insert("tokens { ") + pynutil.add_weight(punct_graph, weight=1.1) + pynutil.insert(" }")
+            punct = (
+                pynutil.insert("tokens { ")
+                + pynutil.add_weight(punct_graph, weight=1.1)
+                + pynutil.insert(" }")
+            )
             token = pynutil.insert("tokens { ") + classify + pynutil.insert(" }")
             token_plus_punct = (
-                pynini.closure(punct + pynutil.insert(" ")) + token + pynini.closure(pynutil.insert(" ") + punct)
+                pynini.closure(punct + pynutil.insert(" "))
+                + token
+                + pynini.closure(pynutil.insert(" ") + punct)
             )
-            graph = token_plus_punct + pynini.closure(pynini.union(insert_space, delete_extra_space) + token_plus_punct)
+            graph = token_plus_punct + pynini.closure(
+                pynini.union(insert_space, delete_extra_space) + token_plus_punct
+            )
 
             graph = delete_space + graph + delete_space
 

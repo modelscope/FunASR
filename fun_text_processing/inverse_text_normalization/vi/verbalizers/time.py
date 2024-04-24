@@ -1,4 +1,3 @@
-
 import pynini
 from fun_text_processing.inverse_text_normalization.vi.graph_utils import (
     DAMO_CHAR,
@@ -22,7 +21,9 @@ class TimeFst(GraphFst):
 
     def __init__(self):
         super().__init__(name="time", kind="verbalize")
-        add_leading_zero_to_double_digit = (DAMO_DIGIT + DAMO_DIGIT) | (pynutil.insert("0") + DAMO_DIGIT)
+        add_leading_zero_to_double_digit = (DAMO_DIGIT + DAMO_DIGIT) | (
+            pynutil.insert("0") + DAMO_DIGIT
+        )
         hour = (
             pynutil.delete("hours:")
             + delete_space
@@ -55,12 +56,18 @@ class TimeFst(GraphFst):
         )
         optional_zone = pynini.closure(zone, 0, 1)
         optional_second = pynini.closure(
-            delete_space + pynutil.insert(":") + (second @ add_leading_zero_to_double_digit), 0, 1,
+            delete_space + pynutil.insert(":") + (second @ add_leading_zero_to_double_digit),
+            0,
+            1,
         )
 
         graph_h = hour + pynutil.insert("h")
         graph_hms = (
-            hour + delete_space + pynutil.insert(":") + (minute @ add_leading_zero_to_double_digit) + optional_second
+            hour
+            + delete_space
+            + pynutil.insert(":")
+            + (minute @ add_leading_zero_to_double_digit)
+            + optional_second
         )
         graph_ms = (
             minute

@@ -8,11 +8,10 @@ import sentencepiece as spm
 from funasr.tokenizer.abs_tokenizer import BaseTokenizer
 from funasr.register import tables
 
+
 @tables.register("tokenizer_classes", "SentencepiecesTokenizer")
 class SentencepiecesTokenizer(BaseTokenizer):
-    def __init__(self, bpemodel: Union[Path, str],
-                 **kwargs
-                 ):
+    def __init__(self, bpemodel: Union[Path, str], **kwargs):
         super().__init__(**kwargs)
         self.bpemodel = str(bpemodel)
         # NOTE(kamo):

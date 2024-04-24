@@ -1,4 +1,3 @@
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import (
     DAMO_NOT_QUOTE,
@@ -14,7 +13,7 @@ class MeasureFst(GraphFst):
     Finite state transducer for verbalizing measure, e.g.
         measure { cardinal { integer: "zwei" units: "unzen" } } -> "zwei unzen"
         measure { cardinal { integer_part: "zwei" quantity: "millionen" units: "unzen" } } -> "zwei millionen unzen"
-    
+
     Args:
         decimal: decimal GraphFst
         cardinal: cardinal GraphFst
@@ -23,9 +22,11 @@ class MeasureFst(GraphFst):
             for False multiple transduction are generated (used for audio-based normalization)
     """
 
-    def __init__(self, decimal: GraphFst, cardinal: GraphFst, fraction: GraphFst, deterministic: bool):
+    def __init__(
+        self, decimal: GraphFst, cardinal: GraphFst, fraction: GraphFst, deterministic: bool
+    ):
         super().__init__(name="measure", kind="verbalize", deterministic=deterministic)
-        unit = pynutil.delete("units: \"") + pynini.closure(DAMO_NOT_QUOTE) + pynutil.delete("\"")
+        unit = pynutil.delete('units: "') + pynini.closure(DAMO_NOT_QUOTE) + pynutil.delete('"')
 
         graph_decimal = decimal.fst
         graph_cardinal = cardinal.fst

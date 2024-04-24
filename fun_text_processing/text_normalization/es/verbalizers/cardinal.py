@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import DAMO_NOT_QUOTE, GraphFst
 from fun_text_processing.text_normalization.es.graph_utils import (
@@ -12,21 +10,21 @@ from pynini.lib import pynutil
 
 class CardinalFst(GraphFst):
     """
-	Finite state transducer for verbalizing cardinals
-		e.g. cardinal { integer: "dos" } -> "dos"
+    Finite state transducer for verbalizing cardinals
+            e.g. cardinal { integer: "dos" } -> "dos"
 
-	Args:
-		deterministic: if True will provide a single transduction option,
-			for False multiple transduction are generated (used for audio-based normalization)
-	"""
+    Args:
+            deterministic: if True will provide a single transduction option,
+                    for False multiple transduction are generated (used for audio-based normalization)
+    """
 
     def __init__(self, deterministic: bool = True):
         super().__init__(name="cardinal", kind="verbalize", deterministic=deterministic)
-        optional_sign = pynini.closure(pynini.cross("negative: \"true\" ", "menos "), 0, 1)
+        optional_sign = pynini.closure(pynini.cross('negative: "true" ', "menos "), 0, 1)
         self.optional_sign = optional_sign
 
         integer = pynini.closure(DAMO_NOT_QUOTE, 1)
-        self.integer = pynutil.delete(" \"") + integer + pynutil.delete("\"")
+        self.integer = pynutil.delete(' "') + integer + pynutil.delete('"')
 
         integer = pynutil.delete("integer:") + self.integer
 

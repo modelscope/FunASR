@@ -13,11 +13,11 @@ class CommonCollateFn:
     """Functor class of common_collate_fn()"""
 
     def __init__(
-            self,
-            float_pad_value: Union[float, int] = 0.0,
-            int_pad_value: int = -32768,
-            not_sequence: Collection[str] = (),
-            max_sample_size=None
+        self,
+        float_pad_value: Union[float, int] = 0.0,
+        int_pad_value: int = -32768,
+        not_sequence: Collection[str] = (),
+        max_sample_size=None,
     ):
         self.float_pad_value = float_pad_value
         self.int_pad_value = int_pad_value
@@ -31,7 +31,7 @@ class CommonCollateFn:
         )
 
     def __call__(
-            self, data: Collection[Tuple[str, Dict[str, np.ndarray]]]
+        self, data: Collection[Tuple[str, Dict[str, np.ndarray]]]
     ) -> Tuple[List[str], Dict[str, torch.Tensor]]:
         return common_collate_fn(
             data,
@@ -42,13 +42,12 @@ class CommonCollateFn:
 
 
 def common_collate_fn(
-        data: Collection[Tuple[str, Dict[str, np.ndarray]]],
-        float_pad_value: Union[float, int] = 0.0,
-        int_pad_value: int = -32768,
-        not_sequence: Collection[str] = (),
+    data: Collection[Tuple[str, Dict[str, np.ndarray]]],
+    float_pad_value: Union[float, int] = 0.0,
+    int_pad_value: int = -32768,
+    not_sequence: Collection[str] = (),
 ) -> Tuple[List[str], Dict[str, torch.Tensor]]:
-    """Concatenate ndarray-list to an array and convert to torch.Tensor.
-    """
+    """Concatenate ndarray-list to an array and convert to torch.Tensor."""
     uttids = [u for u, _ in data]
     data = [d for _, d in data]
 
@@ -81,11 +80,11 @@ class DiarCollateFn:
     """Functor class of common_collate_fn()"""
 
     def __init__(
-            self,
-            float_pad_value: Union[float, int] = 0.0,
-            int_pad_value: int = -32768,
-            not_sequence: Collection[str] = (),
-            max_sample_size=None
+        self,
+        float_pad_value: Union[float, int] = 0.0,
+        int_pad_value: int = -32768,
+        not_sequence: Collection[str] = (),
+        max_sample_size=None,
     ):
         self.float_pad_value = float_pad_value
         self.int_pad_value = int_pad_value
@@ -99,7 +98,7 @@ class DiarCollateFn:
         )
 
     def __call__(
-            self, data: Collection[Tuple[str, Dict[str, np.ndarray]]]
+        self, data: Collection[Tuple[str, Dict[str, np.ndarray]]]
     ) -> Tuple[List[str], Dict[str, torch.Tensor]]:
         return diar_collate_fn(
             data,
@@ -110,13 +109,12 @@ class DiarCollateFn:
 
 
 def diar_collate_fn(
-        data: Collection[Tuple[str, Dict[str, np.ndarray]]],
-        float_pad_value: Union[float, int] = 0.0,
-        int_pad_value: int = -32768,
-        not_sequence: Collection[str] = (),
+    data: Collection[Tuple[str, Dict[str, np.ndarray]]],
+    float_pad_value: Union[float, int] = 0.0,
+    int_pad_value: int = -32768,
+    not_sequence: Collection[str] = (),
 ) -> Tuple[List[str], Dict[str, torch.Tensor]]:
-    """Concatenate ndarray-list to an array and convert to torch.Tensor.
-    """
+    """Concatenate ndarray-list to an array and convert to torch.Tensor."""
     uttids = [u for u, _ in data]
     data = [d for _, d in data]
 
@@ -157,9 +155,9 @@ def crop_to_max_size(feature, target_size):
 
 
 def clipping_collate_fn(
-        data: Collection[Tuple[str, Dict[str, np.ndarray]]],
-        max_sample_size=None,
-        not_sequence: Collection[str] = (),
+    data: Collection[Tuple[str, Dict[str, np.ndarray]]],
+    max_sample_size=None,
+    not_sequence: Collection[str] = (),
 ) -> Tuple[List[str], Dict[str, torch.Tensor]]:
     # mainly for pre-training
     uttids = [u for u, _ in data]

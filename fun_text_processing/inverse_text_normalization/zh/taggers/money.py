@@ -1,4 +1,3 @@
-
 import pynini
 from fun_text_processing.inverse_text_normalization.zh.utils import get_abs_path
 from fun_text_processing.inverse_text_normalization.zh.graph_utils import (
@@ -33,17 +32,19 @@ class MoneyFst(GraphFst):
         decimal_graph = decimal.final_graph_wo_negative
         graph_code = pynini.string_file(get_abs_path("data/money/code.tsv"))
         graph_symbol = pynini.string_file(get_abs_path("data/money/symbol.tsv"))
-        
-        graph_unit = pynutil.insert("currency: \"") + (graph_code | graph_symbol) + pynutil.insert("\"")
+
+        graph_unit = (
+            pynutil.insert('currency: "') + (graph_code | graph_symbol) + pynutil.insert('"')
+        )
 
         graph_integer = (
-            pynutil.insert("integer_part: \"")
+            pynutil.insert('integer_part: "')
             + cardinal_graph
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
             + pynutil.insert(" ")
             + graph_unit
         )
-        
+
         graph_decimal = decimal_graph + pynutil.insert(" ") + graph_unit
 
         final_graph = graph_integer | graph_decimal

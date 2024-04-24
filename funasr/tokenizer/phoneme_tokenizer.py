@@ -238,9 +238,7 @@ class G2pk:
 
     """
 
-    def __init__(
-        self, descritive=False, group_vowels=False, to_syl=False, no_space=False
-    ):
+    def __init__(self, descritive=False, group_vowels=False, to_syl=False, no_space=False):
         self.descritive = descritive
         self.group_vowels = group_vowels
         self.to_syl = to_syl

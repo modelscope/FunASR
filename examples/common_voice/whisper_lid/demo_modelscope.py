@@ -6,7 +6,7 @@
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
 
-multilingual_wavs=[
+multilingual_wavs = [
     "https://www.modelscope.cn/api/v1/models/iic/speech_whisper-large_lid_multilingual_pytorch/repo?Revision=master&FilePath=examples/example_zh-CN.mp3",
     "https://www.modelscope.cn/api/v1/models/iic/speech_whisper-large_lid_multilingual_pytorch/repo?Revision=master&FilePath=examples/example_en.mp3",
     "https://www.modelscope.cn/api/v1/models/iic/speech_whisper-large_lid_multilingual_pytorch/repo?Revision=master&FilePath=examples/example_ja.mp3",
@@ -14,8 +14,8 @@ multilingual_wavs=[
 ]
 
 inference_pipeline = pipeline(
-    task=Tasks.auto_speech_recognition,
-    model='iic/speech_whisper-large_lid_multilingual_pytorch')
+    task=Tasks.auto_speech_recognition, model="iic/speech_whisper-large_lid_multilingual_pytorch"
+)
 
 for wav in multilingual_wavs:
     rec_result = inference_pipeline(input=wav, inference_clip_length=250)

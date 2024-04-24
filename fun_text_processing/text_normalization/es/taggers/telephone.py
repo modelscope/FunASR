@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import DAMO_SIGMA, GraphFst, insert_space
 from fun_text_processing.text_normalization.es.graph_utils import ones
@@ -25,8 +23,8 @@ class TelephoneFst(GraphFst):
         (we ignore more complicated cases such as "doscientos y dos" or "tres nueves").
 
     Args:
-		deterministic: if True will provide a single transduction option,
-			for False multiple transduction are generated (used for audio-based normalization)
+                deterministic: if True will provide a single transduction option,
+                        for False multiple transduction are generated (used for audio-based normalization)
     """
 
     def __init__(self, deterministic: bool = True):
@@ -126,7 +124,7 @@ class TelephoneFst(GraphFst):
         number_part = pynini.union(ten_digit_graph, nine_digit_graph, eight_digit_graph)
         number_part @= pynini.cdrewrite(pynini.cross(ones, "uno"), "", "", DAMO_SIGMA)
 
-        number_part = pynutil.insert("number_part: \"") + number_part + pynutil.insert("\"")
+        number_part = pynutil.insert('number_part: "') + number_part + pynutil.insert('"')
 
         graph = number_part
         final_graph = self.add_tokens(graph)

@@ -1,4 +1,3 @@
-
 import pynini
 from fun_text_processing.inverse_text_normalization.ko.taggers.cardinal import CardinalFst
 from fun_text_processing.inverse_text_normalization.ko.utils import get_abs_path, num_to_word
@@ -29,54 +28,66 @@ class TimeFst(GraphFst):
 
         suffix_graph = pynini.string_file(get_abs_path("data/time/time_suffix.tsv"))
         time_zone_graph = pynini.invert(pynini.string_file(get_abs_path("data/time/time_zone.tsv")))
-       
+
         hour_graph = pynini.string_file(get_abs_path("data/time/hours.tsv"))
         minute_graph = pynini.string_file(get_abs_path("data/time/minutes.tsv"))
         second_graph = pynini.string_file(get_abs_path("data/time/seconds.tsv"))
 
         # only used for < 1000 thousand -> 0 weight
-        #cardinal = pynutil.add_weight(CardinalFst().graph_no_exception, weight=-0.7)
+        # cardinal = pynutil.add_weight(CardinalFst().graph_no_exception, weight=-0.7)
 
         graph_hour = hour_graph
         graph_minute = minute_graph
         graph_second = second_graph
-        
-        final_graph_hour = pynutil.insert("hours: \"") + graph_hour + pynutil.insert("\"")
-        
-        final_suffix = pynutil.insert("suffix: \"") + convert_space(suffix_graph) + pynutil.insert("\"")
+
+        final_graph_hour = pynutil.insert('hours: "') + graph_hour + pynutil.insert('"')
+
+        final_suffix = (
+            pynutil.insert('suffix: "') + convert_space(suffix_graph) + pynutil.insert('"')
+        )
         final_suffix = delete_space + insert_space + final_suffix
         final_suffix_optional = pynini.closure(final_suffix, 0, 1)
         final_time_zone_optional = pynini.closure(
             delete_space
             + insert_space
-            + pynutil.insert("zone: \"")
+            + pynutil.insert('zone: "')
             + convert_space(time_zone_graph)
-            + pynutil.insert("\""),
+            + pynutil.insert('"'),
             0,
             1,
         )
 
         graph_hm = (
-            final_graph_hour + delete_extra_space + pynutil.insert("minutes: \"") + graph_minute + pynutil.insert("\"")
+            final_graph_hour
+            + delete_extra_space
+            + pynutil.insert('minutes: "')
+            + graph_minute
+            + pynutil.insert('"')
         )
 
         graph_hms = (
-            final_graph_hour + delete_extra_space + pynutil.insert("minutes: \"") + graph_minute + pynutil.insert("\"") + delete_extra_space + pynutil.insert("seconds: \"") + graph_second + pynutil.insert("\"")
+            final_graph_hour
+            + delete_extra_space
+            + pynutil.insert('minutes: "')
+            + graph_minute
+            + pynutil.insert('"')
+            + delete_extra_space
+            + pynutil.insert('seconds: "')
+            + graph_second
+            + pynutil.insert('"')
         )
 
         graph_h = (
             final_graph_hour
             + delete_extra_space
-            + pynutil.insert("minutes: \"")
+            + pynutil.insert('minutes: "')
             + (pynutil.insert("00") | graph_minute)
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
             + final_suffix
             + final_time_zone_optional
         )
 
-        final_graph = (
-            (graph_hm | graph_hms) + final_suffix_optional + final_time_zone_optional
-        )
+        final_graph = (graph_hm | graph_hms) + final_suffix_optional + final_time_zone_optional
 
         final_graph |= graph_h
 

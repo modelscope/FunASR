@@ -15,6 +15,7 @@ from funasr.losses.label_smoothing_loss import LabelSmoothingLoss
 from funasr.models.ctc.ctc import CTC
 from funasr.models.transformer.utils.add_sos_eos import add_sos_eos
 from funasr.metrics.compute_acc import th_accuracy
+
 # from funasr.models.e2e_asr_common import ErrorCalculator
 from funasr.train_utils.device_funcs import force_gatherable
 from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
@@ -23,6 +24,8 @@ from funasr.utils.datadir_writer import DatadirWriter
 from funasr.register import tables
 
 import pdb
+
+
 @tables.register("model_classes", "LCBNet")
 class LCBNet(nn.Module):
     """
@@ -30,7 +33,7 @@ class LCBNet(nn.Module):
     LCB-NET: LONG-CONTEXT BIASING FOR AUDIO-VISUAL SPEECH RECOGNITION
     https://arxiv.org/abs/2401.06390
     """
-    
+
     def __init__(
         self,
         specaug: str = None,
@@ -93,7 +96,6 @@ class LCBNet(nn.Module):
         bias_predictor_class = tables.encoder_classes.get(bias_predictor)
         bias_predictor = bias_predictor_class(**bias_predictor_conf)
 
-
         if decoder is not None:
             decoder_class = tables.decoder_classes.get(decoder)
             decoder = decoder_class(
@@ -102,14 +104,12 @@ class LCBNet(nn.Module):
                 **decoder_conf,
             )
         if ctc_weight > 0.0:
-            
+
             if ctc_conf is None:
                 ctc_conf = {}
-            
-            ctc = CTC(
-                odim=vocab_size, encoder_output_size=encoder_output_size, **ctc_conf
-            )
-    
+
+            ctc = CTC(odim=vocab_size, encoder_output_size=encoder_output_size, **ctc_conf)
+
         self.blank_id = blank_id
         self.sos = vocab_size - 1
         self.eos = vocab_size - 1
@@ -140,7 +140,7 @@ class LCBNet(nn.Module):
             self.decoder = None
         else:
             self.decoder = decoder
-        
+
         self.criterion_att = LabelSmoothingLoss(
             size=vocab_size,
             padding_idx=ignore_id,
@@ -158,14 +158,14 @@ class LCBNet(nn.Module):
             self.ctc = None
         else:
             self.ctc = ctc
-            
+
         self.share_embedding = share_embedding
         if self.share_embedding:
             self.decoder.embed = None
-        
+
         self.length_normalized_loss = length_normalized_loss
         self.beam_search = None
-    
+
     def forward(
         self,
         speech: torch.Tensor,
@@ -186,30 +186,30 @@ class LCBNet(nn.Module):
             text_lengths = text_lengths[:, 0]
         if len(speech_lengths.size()) > 1:
             speech_lengths = speech_lengths[:, 0]
-        
+
         batch_size = speech.shape[0]
-        
+
         # 1. Encoder
         encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
         intermediate_outs = None
         if isinstance(encoder_out, tuple):
             intermediate_outs = encoder_out[1]
             encoder_out = encoder_out[0]
-        
+
         loss_att, acc_att, cer_att, wer_att = None, None, None, None
         loss_ctc, cer_ctc = None, None
         stats = dict()
-        
+
         # decoder: CTC branch
         if self.ctc_weight != 0.0:
             loss_ctc, cer_ctc = self._calc_ctc_loss(
                 encoder_out, encoder_out_lens, text, text_lengths
             )
-            
+
             # Collect CTC branch stats
             stats["loss_ctc"] = loss_ctc.detach() if loss_ctc is not None else None
             stats["cer_ctc"] = cer_ctc
-        
+
         # Intermediate CTC (optional)
         loss_interctc = 0.0
         if self.interctc_weight != 0.0 and intermediate_outs is not None:
@@ -220,25 +220,23 @@ class LCBNet(nn.Module):
                     intermediate_out, encoder_out_lens, text, text_lengths
                 )
                 loss_interctc = loss_interctc + loss_ic
-                
+
                 # Collect Intermedaite CTC stats
                 stats["loss_interctc_layer{}".format(layer_idx)] = (
                     loss_ic.detach() if loss_ic is not None else None
                 )
                 stats["cer_interctc_layer{}".format(layer_idx)] = cer_ic
-            
+
             loss_interctc = loss_interctc / len(intermediate_outs)
-            
+
             # calculate whole encoder loss
-            loss_ctc = (
-                           1 - self.interctc_weight
-                       ) * loss_ctc + self.interctc_weight * loss_interctc
-        
+            loss_ctc = (1 - self.interctc_weight) * loss_ctc + self.interctc_weight * loss_interctc
+
         # decoder: Attention decoder branch
         loss_att, acc_att, cer_att, wer_att = self._calc_att_loss(
             encoder_out, encoder_out_lens, text, text_lengths
         )
-        
+
         # 3. CTC-Att loss definition
         if self.ctc_weight == 0.0:
             loss = loss_att
@@ -246,25 +244,27 @@ class LCBNet(nn.Module):
             loss = loss_ctc
         else:
             loss = self.ctc_weight * loss_ctc + (1 - self.ctc_weight) * loss_att
-        
+
         # Collect Attn branch stats
         stats["loss_att"] = loss_att.detach() if loss_att is not None else None
         stats["acc"] = acc_att
         stats["cer"] = cer_att
         stats["wer"] = wer_att
-        
+
         # Collect total loss stats
         stats["loss"] = torch.clone(loss.detach())
-        
+
         # force_gatherable: to-device and to-tensor if scalar for DataParallel
         if self.length_normalized_loss:
             batch_size = int((text_lengths + 1).sum())
         loss, stats, weight = force_gatherable((loss, stats, batch_size), loss.device)
         return loss, stats, weight
-    
 
     def encode(
-        self, speech: torch.Tensor, speech_lengths: torch.Tensor, **kwargs,
+        self,
+        speech: torch.Tensor,
+        speech_lengths: torch.Tensor,
+        **kwargs,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Frontend + Encoder. Note that this method is used by asr_inference.py
         Args:
@@ -283,20 +283,18 @@ class LCBNet(nn.Module):
         # feats: (Batch, Length, Dim)
         # -> encoder_out: (Batch, Length2, Dim2)
         if self.encoder.interctc_use_conditioning:
-            encoder_out, encoder_out_lens, _ = self.encoder(
-                speech, speech_lengths, ctc=self.ctc
-            )
+            encoder_out, encoder_out_lens, _ = self.encoder(speech, speech_lengths, ctc=self.ctc)
         else:
             encoder_out, encoder_out_lens, _ = self.encoder(speech, speech_lengths)
         intermediate_outs = None
         if isinstance(encoder_out, tuple):
             intermediate_outs = encoder_out[1]
             encoder_out = encoder_out[0]
-        
+
         if intermediate_outs is not None:
             return (encoder_out, intermediate_outs), encoder_out_lens
         return encoder_out, encoder_out_lens
-    
+
     def _calc_att_loss(
         self,
         encoder_out: torch.Tensor,
@@ -306,12 +304,10 @@ class LCBNet(nn.Module):
     ):
         ys_in_pad, ys_out_pad = add_sos_eos(ys_pad, self.sos, self.eos, self.ignore_id)
         ys_in_lens = ys_pad_lens + 1
-        
+
         # 1. Forward decoder
-        decoder_out, _ = self.decoder(
-            encoder_out, encoder_out_lens, ys_in_pad, ys_in_lens
-        )
-        
+        decoder_out, _ = self.decoder(encoder_out, encoder_out_lens, ys_in_pad, ys_in_lens)
+
         # 2. Compute attention loss
         loss_att = self.criterion_att(decoder_out, ys_out_pad)
         acc_att = th_accuracy(
@@ -319,16 +315,16 @@ class LCBNet(nn.Module):
             ys_out_pad,
             ignore_label=self.ignore_id,
         )
-        
+
         # Compute cer/wer using attention-decoder
         if self.training or self.error_calculator is None:
             cer_att, wer_att = None, None
         else:
             ys_hat = decoder_out.argmax(dim=-1)
             cer_att, wer_att = self.error_calculator(ys_hat.cpu(), ys_pad.cpu())
-        
+
         return loss_att, acc_att, cer_att, wer_att
-    
+
     def _calc_ctc_loss(
         self,
         encoder_out: torch.Tensor,
@@ -338,41 +334,39 @@ class LCBNet(nn.Module):
     ):
         # Calc CTC loss
         loss_ctc = self.ctc(encoder_out, encoder_out_lens, ys_pad, ys_pad_lens)
-        
+
         # Calc CER using CTC
         cer_ctc = None
         if not self.training and self.error_calculator is not None:
             ys_hat = self.ctc.argmax(encoder_out).data
             cer_ctc = self.error_calculator(ys_hat.cpu(), ys_pad.cpu(), is_ctc=True)
         return loss_ctc, cer_ctc
-    
-    def init_beam_search(self,
-                         **kwargs,
-                         ):
+
+    def init_beam_search(
+        self,
+        **kwargs,
+    ):
         from funasr.models.transformer.search import BeamSearch
         from funasr.models.transformer.scorers.ctc import CTCPrefixScorer
         from funasr.models.transformer.scorers.length_bonus import LengthBonus
-    
+
         # 1. Build ASR model
         scorers = {}
-        
+
         if self.ctc != None:
             ctc = CTCPrefixScorer(ctc=self.ctc, eos=self.eos)
-            scorers.update(
-                ctc=ctc
-            )
+            scorers.update(ctc=ctc)
         token_list = kwargs.get("token_list")
         scorers.update(
             decoder=self.decoder,
             length_bonus=LengthBonus(len(token_list)),
         )
 
-        
         # 3. Build ngram model
         # ngram is not supported now
         ngram = None
         scorers["ngram"] = ngram
-        
+
         weights = dict(
             decoder=1.0 - kwargs.get("decoding_ctc_weight", 0.3),
             ctc=kwargs.get("decoding_ctc_weight", 0.3),
@@ -392,19 +386,20 @@ class LCBNet(nn.Module):
         )
 
         self.beam_search = beam_search
-        
-    def inference(self,
-             data_in,
-             data_lengths=None,
-             key: list=None,
-             tokenizer=None,
-             frontend=None,
-             **kwargs,
-             ):
-        
+
+    def inference(
+        self,
+        data_in,
+        data_lengths=None,
+        key: list = None,
+        tokenizer=None,
+        frontend=None,
+        **kwargs,
+    ):
+
         if kwargs.get("batch_size", 1) > 1:
             raise NotImplementedError("batch decoding is not implemented")
-        
+
         # init beamsearch
         if self.beam_search is None:
             logging.info("enable beam_search")
@@ -412,7 +407,9 @@ class LCBNet(nn.Module):
             self.nbest = kwargs.get("nbest", 1)
 
         meta_data = {}
-        if isinstance(data_in, torch.Tensor) and kwargs.get("data_type", "sound") == "fbank":  # fbank
+        if (
+            isinstance(data_in, torch.Tensor) and kwargs.get("data_type", "sound") == "fbank"
+        ):  # fbank
             speech, speech_lengths = data_in, data_lengths
             if len(speech.shape) < 3:
                 speech = speech[None, :, :]
@@ -421,21 +418,26 @@ class LCBNet(nn.Module):
         else:
             # extract fbank feats
             time1 = time.perf_counter()
-            sample_list = load_audio_text_image_video(data_in, fs=frontend.fs, audio_fs=kwargs.get("fs", 16000),
-                                                            data_type=kwargs.get("data_type", "sound"),
-                                                            tokenizer=tokenizer)
+            sample_list = load_audio_text_image_video(
+                data_in,
+                fs=frontend.fs,
+                audio_fs=kwargs.get("fs", 16000),
+                data_type=kwargs.get("data_type", "sound"),
+                tokenizer=tokenizer,
+            )
             time2 = time.perf_counter()
             meta_data["load_data"] = f"{time2 - time1:0.3f}"
             audio_sample_list = sample_list[0]
-            if len(sample_list) >1:
+            if len(sample_list) > 1:
                 ocr_sample_list = sample_list[1]
             else:
                 ocr_sample_list = [[294, 0]]
-            speech, speech_lengths = extract_fbank(audio_sample_list, data_type=kwargs.get("data_type", "sound"),
-                                                   frontend=frontend)
+            speech, speech_lengths = extract_fbank(
+                audio_sample_list, data_type=kwargs.get("data_type", "sound"), frontend=frontend
+            )
             time3 = time.perf_counter()
             meta_data["extract_feat"] = f"{time3 - time2:0.3f}"
-            frame_shift = 10 
+            frame_shift = 10
             meta_data["batch_data_time"] = speech_lengths.sum().item() * frame_shift / 1000
 
         speech = speech.to(device=kwargs["device"])
@@ -447,15 +449,19 @@ class LCBNet(nn.Module):
 
         ocr_list_new = [[x + 1 if x != 0 else x for x in sublist] for sublist in ocr_sample_list]
         ocr = torch.tensor(ocr_list_new).to(device=kwargs["device"])
-        ocr_lengths = ocr.new_full([1], dtype=torch.long, fill_value=ocr.size(1)).to(device=kwargs["device"])
+        ocr_lengths = ocr.new_full([1], dtype=torch.long, fill_value=ocr.size(1)).to(
+            device=kwargs["device"]
+        )
         ocr, ocr_lens, _ = self.text_encoder(ocr, ocr_lengths)
-        fusion_out, _, _, _ = self.fusion_encoder(encoder_out,None, ocr, None)
+        fusion_out, _, _, _ = self.fusion_encoder(encoder_out, None, ocr, None)
         encoder_out = encoder_out + fusion_out
         # c. Passed the encoder result and the beam search
         nbest_hyps = self.beam_search(
-            x=encoder_out[0], maxlenratio=kwargs.get("maxlenratio", 0.0), minlenratio=kwargs.get("minlenratio", 0.0)
+            x=encoder_out[0],
+            maxlenratio=kwargs.get("maxlenratio", 0.0),
+            minlenratio=kwargs.get("minlenratio", 0.0),
         )
-        
+
         nbest_hyps = nbest_hyps[: self.nbest]
 
         results = []
@@ -468,17 +474,21 @@ class LCBNet(nn.Module):
                     if not hasattr(self, "writer"):
                         self.writer = DatadirWriter(kwargs.get("output_dir"))
                     ibest_writer = self.writer[f"{nbest_idx + 1}best_recog"]
-                    
+
                 # remove sos/eos and get results
                 last_pos = -1
                 if isinstance(hyp.yseq, list):
                     token_int = hyp.yseq[1:last_pos]
                 else:
                     token_int = hyp.yseq[1:last_pos].tolist()
-                    
+
                 # remove blank symbol id, which is assumed to be 0
-                token_int = list(filter(lambda x: x != self.eos and x != self.sos and x != self.blank_id, token_int))
-                
+                token_int = list(
+                    filter(
+                        lambda x: x != self.eos and x != self.sos and x != self.blank_id, token_int
+                    )
+                )
+
                 # Change integer-ids to tokens
                 token = tokenizer.ids2tokens(token_int)
                 text = tokenizer.tokens2text(token)
@@ -486,10 +496,9 @@ class LCBNet(nn.Module):
                 text_postprocessed, _ = postprocess_utils.sentence_postprocess(token)
                 result_i = {"key": key[i], "token": token, "text": text_postprocessed}
                 results.append(result_i)
-                
+
                 if ibest_writer is not None:
                     ibest_writer["token"][key[i]] = " ".join(token)
                     ibest_writer["text"][key[i]] = text_postprocessed
-        
-        return results, meta_data
 
+        return results, meta_data

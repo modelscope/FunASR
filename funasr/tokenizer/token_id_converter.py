@@ -41,9 +41,7 @@ class TokenIDConverter:
 
         self.unk_symbol = unk_symbol
         if self.unk_symbol not in self.token2id:
-            raise RuntimeError(
-                f"Unknown symbol '{unk_symbol}' doesn't exist in the token_list"
-            )
+            raise RuntimeError(f"Unknown symbol '{unk_symbol}' doesn't exist in the token_list")
         self.unk_id = self.token2id[self.unk_symbol]
 
     def get_num_vocabulary_size(self) -> int:

@@ -1,4 +1,3 @@
-
 from fun_text_processing.inverse_text_normalization.zh.graph_utils import (
     DAMO_NOT_QUOTE,
     GraphFst,
@@ -13,6 +12,7 @@ from fun_text_processing.inverse_text_normalization.zh.graph_utils import (
 import pynini
 from pynini.lib import pynutil
 
+
 class FractionFst(GraphFst):
     """
     Finite state transducer for classifying fraction
@@ -23,11 +23,16 @@ class FractionFst(GraphFst):
         # integer_part # numerator # denominator
         graph_cardinal = cardinal.graph_no_exception
 
-        #without the integerate part
-        #分子
+        # without the integerate part
+        # 分子
         numerator = pynutil.insert('numerator: "') + graph_cardinal + pynutil.insert('"')
-        #分母
-        denominator = pynutil.insert('denominator: "') + graph_cardinal + pynutil.delete("分之") + pynutil.insert('"')
+        # 分母
+        denominator = (
+            pynutil.insert('denominator: "')
+            + graph_cardinal
+            + pynutil.delete("分之")
+            + pynutil.insert('"')
+        )
 
         ##
         graph_fraction_component = denominator + pynutil.insert(" ") + numerator
@@ -40,7 +45,11 @@ class FractionFst(GraphFst):
 
         ##负
         optional_graph_negative = pynini.closure(
-            pynutil.insert("negative: ") + (pynini.cross("负", "\"true\"")|pynini.cross("负的", "\"true\"")) + DAMO_SPACE, 0, 1
+            pynutil.insert("negative: ")
+            + (pynini.cross("负", '"true"') | pynini.cross("负的", '"true"'))
+            + DAMO_SPACE,
+            0,
+            1,
         )
 
         graph = optional_graph_negative + graph

@@ -1,4 +1,3 @@
-
 import pynini
 from fun_text_processing.inverse_text_normalization.ko.graph_utils import GraphFst
 from pynini.lib import pynutil
@@ -13,9 +12,9 @@ class PunctuationFst(GraphFst):
     def __init__(self):
         super().__init__(name="punctuation", kind="classify")
 
-        s = ",.?" #here, we only support three type of punctuation
+        s = ",.?"  # here, we only support three type of punctuation
         punct = pynini.union(*s)
 
-        graph = pynutil.insert("name: \"") + punct + pynutil.insert("\"")
+        graph = pynutil.insert('name: "') + punct + pynutil.insert('"')
 
         self.fst = graph.optimize()

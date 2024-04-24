@@ -1,5 +1,9 @@
 import pynini
-from fun_text_processing.inverse_text_normalization.ja.graph_utils import DAMO_NOT_SPACE, GraphFst, DAMO_CHAR
+from fun_text_processing.inverse_text_normalization.ja.graph_utils import (
+    DAMO_NOT_SPACE,
+    GraphFst,
+    DAMO_CHAR,
+)
 from pynini.lib import pynutil
 
 
@@ -11,6 +15,6 @@ class WordFst(GraphFst):
 
     def __init__(self):
         super().__init__(name="word", kind="classify")
-        word = pynutil.insert("name: \"") + DAMO_NOT_SPACE + pynutil.insert("\"")
+        word = pynutil.insert('name: "') + DAMO_NOT_SPACE + pynutil.insert('"')
 
         self.fst = word.optimize()

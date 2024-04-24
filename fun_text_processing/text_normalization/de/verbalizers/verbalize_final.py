@@ -1,4 +1,3 @@
-
 import os
 
 import pynini
@@ -18,7 +17,7 @@ import logging
 class VerbalizeFinalFst(GraphFst):
     """
     Finite state transducer that verbalizes an entire sentence
-    
+
     Args:
         deterministic: if True will provide a single transduction option,
             for False multiple options (used for audio-based normalization)
@@ -26,16 +25,20 @@ class VerbalizeFinalFst(GraphFst):
         overwrite_cache: set to True to overwrite .far files
     """
 
-    def __init__(self, deterministic: bool = True, cache_dir: str = None, overwrite_cache: bool = False):
+    def __init__(
+        self, deterministic: bool = True, cache_dir: str = None, overwrite_cache: bool = False
+    ):
         super().__init__(name="verbalize_final", kind="verbalize", deterministic=deterministic)
 
         far_file = None
         if cache_dir is not None and cache_dir != "None":
             os.makedirs(cache_dir, exist_ok=True)
-            far_file = os.path.join(cache_dir, f"de_tn_{deterministic}_deterministic_verbalizer.far")
+            far_file = os.path.join(
+                cache_dir, f"de_tn_{deterministic}_deterministic_verbalizer.far"
+            )
         if not overwrite_cache and far_file and os.path.exists(far_file):
             self.fst = pynini.Far(far_file, mode="r")["verbalize"]
-            logging.info(f'VerbalizeFinalFst graph was restored from {far_file}.')
+            logging.info(f"VerbalizeFinalFst graph was restored from {far_file}.")
         else:
             verbalize = VerbalizeFst(deterministic=deterministic).fst
             word = WordFst(deterministic=deterministic).fst

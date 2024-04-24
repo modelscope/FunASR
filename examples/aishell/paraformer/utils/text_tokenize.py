@@ -4,7 +4,7 @@ import argparse
 
 def load_dict(seg_file):
     seg_dict = {}
-    with open(seg_file, 'r') as infile:
+    with open(seg_file, "r") as infile:
         for line in infile:
             s = line.strip().split()
             key = s[0]
@@ -28,8 +28,7 @@ def forward_segment(text, dic):
     return word_list
 
 
-def tokenize(txt,
-             seg_dict):
+def tokenize(txt, seg_dict):
     out_txt = ""
     pattern = re.compile(r"([\u4E00-\u9FA5A-Za-z0-9])")
     for word in txt:
@@ -87,20 +86,19 @@ def main():
     parser = get_parser()
     args = parser.parse_args()
 
-    txt_writer = open("{}/text.{}.txt".format(args.output_dir, args.txt_index), 'w')
-    shape_writer = open("{}/len.{}".format(args.output_dir, args.txt_index), 'w')
+    txt_writer = open("{}/text.{}.txt".format(args.output_dir, args.txt_index), "w")
+    shape_writer = open("{}/len.{}".format(args.output_dir, args.txt_index), "w")
     seg_dict = load_dict(args.seg_file)
-    with open(args.text_file, 'r') as infile:
+    with open(args.text_file, "r") as infile:
         for line in infile:
             s = line.strip().split()
             text_id = s[0]
             text_list = forward_segment("".join(s[1:]).lower(), seg_dict)
             text = tokenize(text_list, seg_dict)
             lens = len(text.strip().split())
-            txt_writer.write(text_id + " " + text + '\n')
-            shape_writer.write(text_id + " " + str(lens) + '\n')
+            txt_writer.write(text_id + " " + text + "\n")
+            shape_writer.write(text_id + " " + str(lens) + "\n")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
-

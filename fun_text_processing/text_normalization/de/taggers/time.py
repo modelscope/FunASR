@@ -1,8 +1,11 @@
-
-
 import pynini
 from fun_text_processing.text_normalization.de.utils import get_abs_path
-from fun_text_processing.text_normalization.en.graph_utils import DAMO_DIGIT, GraphFst, convert_space, insert_space
+from fun_text_processing.text_normalization.en.graph_utils import (
+    DAMO_DIGIT,
+    GraphFst,
+    convert_space,
+    insert_space,
+)
 from pynini.lib import pynutil
 
 
@@ -13,7 +16,7 @@ class TimeFst(GraphFst):
         "2 Uhr" -> time { hours: "2" }
         "09:00 Uhr" -> time { hours: "2" }
         "02:15:10 Uhr" -> time { hours: "2" minutes: "15" seconds: "10"}
-    
+
     Args:
         deterministic: if True will provide a single transduction option,
             for False multiple transduction are generated (used for audio-based normalization)
@@ -29,29 +32,36 @@ class TimeFst(GraphFst):
         labels_minute_single = [str(x) for x in range(1, 10)]
         labels_minute_double = [str(x) for x in range(10, 60)]
 
-        delete_leading_zero_to_double_digit = (pynutil.delete("0") | (DAMO_DIGIT - "0")) + DAMO_DIGIT
+        delete_leading_zero_to_double_digit = (
+            pynutil.delete("0") | (DAMO_DIGIT - "0")
+        ) + DAMO_DIGIT
 
         graph_hour = pynini.union(*labels_hour)
 
         graph_minute_single = pynini.union(*labels_minute_single)
         graph_minute_double = pynini.union(*labels_minute_double)
 
-        final_graph_hour_only = pynutil.insert("hours: \"") + graph_hour + pynutil.insert("\"")
+        final_graph_hour_only = pynutil.insert('hours: "') + graph_hour + pynutil.insert('"')
         final_graph_hour = (
-            pynutil.insert("hours: \"") + delete_leading_zero_to_double_digit @ graph_hour + pynutil.insert("\"")
+            pynutil.insert('hours: "')
+            + delete_leading_zero_to_double_digit @ graph_hour
+            + pynutil.insert('"')
         )
         final_graph_minute = (
-            pynutil.insert("minutes: \"")
+            pynutil.insert('minutes: "')
             + (pynutil.delete("0") + graph_minute_single | graph_minute_double)
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
         )
         final_graph_second = (
-            pynutil.insert("seconds: \"")
+            pynutil.insert('seconds: "')
             + (pynutil.delete("0") + graph_minute_single | graph_minute_double)
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
         )
         final_time_zone_optional = pynini.closure(
-            pynini.accep(" ") + pynutil.insert("zone: \"") + convert_space(time_zone_graph) + pynutil.insert("\""),
+            pynini.accep(" ")
+            + pynutil.insert('zone: "')
+            + convert_space(time_zone_graph)
+            + pynutil.insert('"'),
             0,
             1,
         )
@@ -69,9 +79,9 @@ class TimeFst(GraphFst):
         graph_hms = (
             final_graph_hour
             + pynutil.delete(":")
-            + (pynini.cross("00", " minutes: \"0\"") | (insert_space + final_graph_minute))
+            + (pynini.cross("00", ' minutes: "0"') | (insert_space + final_graph_minute))
             + pynutil.delete(":")
-            + (pynini.cross("00", " seconds: \"0\"") | (insert_space + final_graph_second))
+            + (pynini.cross("00", ' seconds: "0"') | (insert_space + final_graph_second))
             + final_suffix
             + final_time_zone_optional
             + pynutil.insert(" preserve_order: true")

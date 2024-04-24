@@ -96,7 +96,7 @@ class FsmnFeedForward(torch.nn.Module):
             kernel_size,
             stride=1,
             padding=(kernel_size - 1) // 2,
-            bias=False
+            bias=False,
         )
         self.norm = torch.nn.LayerNorm(hidden_chans)
         self.dropout = torch.nn.Dropout(dropout_rate)

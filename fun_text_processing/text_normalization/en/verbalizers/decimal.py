@@ -1,7 +1,10 @@
-
-
 import pynini
-from fun_text_processing.text_normalization.en.graph_utils import DAMO_NOT_QUOTE, GraphFst, delete_space, insert_space
+from fun_text_processing.text_normalization.en.graph_utils import (
+    DAMO_NOT_QUOTE,
+    GraphFst,
+    delete_space,
+    insert_space,
+)
 from pynini.lib import pynutil
 
 
@@ -17,18 +20,18 @@ class DecimalFst(GraphFst):
 
     def __init__(self, cardinal, deterministic: bool = True):
         super().__init__(name="decimal", kind="verbalize", deterministic=deterministic)
-        self.optional_sign = pynini.cross("negative: \"true\"", "minus ")
+        self.optional_sign = pynini.cross('negative: "true"', "minus ")
         if not deterministic:
-            self.optional_sign |= pynini.cross("negative: \"true\"", "negative ")
+            self.optional_sign |= pynini.cross('negative: "true"', "negative ")
         self.optional_sign = pynini.closure(self.optional_sign + delete_space, 0, 1)
         self.integer = pynutil.delete("integer_part:") + cardinal.integer
         self.optional_integer = pynini.closure(self.integer + delete_space + insert_space, 0, 1)
         self.fractional_default = (
             pynutil.delete("fractional_part:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
 
         self.fractional = pynutil.insert("point ") + self.fractional_default
@@ -38,9 +41,9 @@ class DecimalFst(GraphFst):
             + insert_space
             + pynutil.delete("quantity:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
         self.optional_quantity = pynini.closure(self.quantity, 0, 1)
 

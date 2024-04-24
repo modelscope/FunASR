@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import (
     DAMO_ALPHA,
@@ -23,7 +21,7 @@ twenties = pynini.invert(pynini.string_file(get_abs_path("data/numbers/twenties.
 hundreds = pynini.invert(pynini.string_file(get_abs_path("data/numbers/hundreds.tsv")))
 
 
-def filter_punctuation(fst: 'pynini.FstLike') -> 'pynini.FstLike':
+def filter_punctuation(fst: "pynini.FstLike") -> "pynini.FstLike":
     """
     Helper function for parsing number strings. Converts common cardinal strings (groups of three digits delineated by 'cardinal_separator' - see graph_utils)
     and converts to a string of digits:
@@ -35,7 +33,7 @@ def filter_punctuation(fst: 'pynini.FstLike') -> 'pynini.FstLike':
     Returns:
         fst: A pynini.FstLike object
     """
-    exactly_three_digits = DAMO_DIGIT ** 3  # for blocks of three
+    exactly_three_digits = DAMO_DIGIT**3  # for blocks of three
     up_to_three_digits = pynini.closure(DAMO_DIGIT, 1, 3)  # for start of string
 
     cardinal_string = pynini.closure(
@@ -72,7 +70,7 @@ class CardinalFst(GraphFst):
 
         # Any double digit
         graph_tens = teen
-        graph_tens |= ties + (pynutil.delete('0') | (pynutil.insert(" y ") + graph_digit))
+        graph_tens |= ties + (pynutil.delete("0") | (pynutil.insert(" y ") + graph_digit))
         graph_tens |= twenties
 
         self.tens = graph_tens.optimize()
@@ -83,11 +81,15 @@ class CardinalFst(GraphFst):
 
         # Three digit strings
         graph_hundreds = hundreds + pynini.union(
-            pynutil.delete("00"), (insert_space + graph_tens), (pynini.cross("0", DAMO_SPACE) + graph_digit)
+            pynutil.delete("00"),
+            (insert_space + graph_tens),
+            (pynini.cross("0", DAMO_SPACE) + graph_digit),
         )
         graph_hundreds |= pynini.cross("100", "cien")
         graph_hundreds |= (
-            pynini.cross("1", "ciento") + insert_space + pynini.union(graph_tens, pynutil.delete("0") + graph_digit)
+            pynini.cross("1", "ciento")
+            + insert_space
+            + pynini.union(graph_tens, pynutil.delete("0") + graph_digit)
         )
 
         self.hundreds = graph_hundreds.optimize()
@@ -106,32 +108,53 @@ class CardinalFst(GraphFst):
             pynutil.delete("000") + graph_hundreds_component_at_least_one_none_zero_digit,
             graph_hundreds_component_at_least_one_none_zero_digit_no_one
             + pynutil.insert(" mil")
-            + ((insert_space + graph_hundreds_component_at_least_one_none_zero_digit) | pynutil.delete("000")),
+            + (
+                (insert_space + graph_hundreds_component_at_least_one_none_zero_digit)
+                | pynutil.delete("000")
+            ),
             pynini.cross("001", "mil")
-            + ((insert_space + graph_hundreds_component_at_least_one_none_zero_digit) | pynutil.delete("000")),
+            + (
+                (insert_space + graph_hundreds_component_at_least_one_none_zero_digit)
+                | pynutil.delete("000")
+            ),
         )
 
         graph_thousands_component_at_least_one_none_zero_digit_no_one = pynini.union(
             pynutil.delete("000") + graph_hundreds_component_at_least_one_none_zero_digit_no_one,
             graph_hundreds_component_at_least_one_none_zero_digit_no_one
             + pynutil.insert(" mil")
-            + ((insert_space + graph_hundreds_component_at_least_one_none_zero_digit) | pynutil.delete("000")),
+            + (
+                (insert_space + graph_hundreds_component_at_least_one_none_zero_digit)
+                | pynutil.delete("000")
+            ),
             pynini.cross("001", "mil")
-            + ((insert_space + graph_hundreds_component_at_least_one_none_zero_digit) | pynutil.delete("000")),
+            + (
+                (insert_space + graph_hundreds_component_at_least_one_none_zero_digit)
+                | pynutil.delete("000")
+            ),
         )
 
         graph_million = pynutil.add_weight(pynini.cross("000001", "un millón"), -0.001)
-        graph_million |= graph_thousands_component_at_least_one_none_zero_digit_no_one + pynutil.insert(" millones")
+        graph_million |= (
+            graph_thousands_component_at_least_one_none_zero_digit_no_one
+            + pynutil.insert(" millones")
+        )
         graph_million |= pynutil.delete("000000")
         graph_million += insert_space
 
         graph_billion = pynutil.add_weight(pynini.cross("000001", "un billón"), -0.001)
-        graph_billion |= graph_thousands_component_at_least_one_none_zero_digit_no_one + pynutil.insert(" billones")
+        graph_billion |= (
+            graph_thousands_component_at_least_one_none_zero_digit_no_one
+            + pynutil.insert(" billones")
+        )
         graph_billion |= pynutil.delete("000000")
         graph_billion += insert_space
 
         graph_trillion = pynutil.add_weight(pynini.cross("000001", "un trillón"), -0.001)
-        graph_trillion |= graph_thousands_component_at_least_one_none_zero_digit_no_one + pynutil.insert(" trillones")
+        graph_trillion |= (
+            graph_thousands_component_at_least_one_none_zero_digit_no_one
+            + pynutil.insert(" trillones")
+        )
         graph_trillion |= pynutil.delete("000000")
         graph_trillion += insert_space
 
@@ -145,21 +168,28 @@ class CardinalFst(GraphFst):
         self.graph = (
             ((DAMO_DIGIT - "0") + pynini.closure(DAMO_DIGIT, 0))
             @ pynini.cdrewrite(pynini.closure(pynutil.insert("0")), "[BOS]", "", DAMO_SIGMA)
-            @ DAMO_DIGIT ** 24
+            @ DAMO_DIGIT**24
             @ graph
             @ pynini.cdrewrite(delete_space, "[BOS]", "", DAMO_SIGMA)
             @ pynini.cdrewrite(delete_space, "", "[EOS]", DAMO_SIGMA)
             @ pynini.cdrewrite(
-                pynini.cross(pynini.closure(DAMO_WHITE_SPACE, 2), DAMO_SPACE), DAMO_ALPHA, DAMO_ALPHA, DAMO_SIGMA
+                pynini.cross(pynini.closure(DAMO_WHITE_SPACE, 2), DAMO_SPACE),
+                DAMO_ALPHA,
+                DAMO_ALPHA,
+                DAMO_SIGMA,
             )
         )
         self.graph |= zero
 
         self.graph = filter_punctuation(self.graph).optimize()
 
-        optional_minus_graph = pynini.closure(pynutil.insert("negative: ") + pynini.cross("-", "\"true\" "), 0, 1)
+        optional_minus_graph = pynini.closure(
+            pynutil.insert("negative: ") + pynini.cross("-", '"true" '), 0, 1
+        )
 
-        final_graph = optional_minus_graph + pynutil.insert("integer: \"") + self.graph + pynutil.insert("\"")
+        final_graph = (
+            optional_minus_graph + pynutil.insert('integer: "') + self.graph + pynutil.insert('"')
+        )
 
         final_graph = self.add_tokens(final_graph)
         self.fst = final_graph.optimize()

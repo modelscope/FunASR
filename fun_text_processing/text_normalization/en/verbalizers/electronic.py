@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import (
     DAMO_NOT_QUOTE,
@@ -28,7 +26,9 @@ class ElectronicFst(GraphFst):
 
     def __init__(self, deterministic: bool = True):
         super().__init__(name="electronic", kind="verbalize", deterministic=deterministic)
-        graph_digit_no_zero = pynini.invert(pynini.string_file(get_abs_path("data/number/digit.tsv"))).optimize()
+        graph_digit_no_zero = pynini.invert(
+            pynini.string_file(get_abs_path("data/number/digit.tsv"))
+        ).optimize()
         graph_zero = pynini.cross("0", "zero")
 
         if not deterministic:
@@ -38,7 +38,10 @@ class ElectronicFst(GraphFst):
         graph_symbols = pynini.string_file(get_abs_path("data/electronic/symbol.tsv")).optimize()
 
         default_chars_symbols = pynini.cdrewrite(
-            pynutil.insert(" ") + (graph_symbols | graph_digit) + pynutil.insert(" "), "", "", DAMO_SIGMA
+            pynutil.insert(" ") + (graph_symbols | graph_digit) + pynutil.insert(" "),
+            "",
+            "",
+            DAMO_SIGMA,
         )
         default_chars_symbols = pynini.compose(
             pynini.closure(DAMO_NOT_SPACE), default_chars_symbols.optimize()
@@ -47,9 +50,9 @@ class ElectronicFst(GraphFst):
         user_name = (
             pynutil.delete("username:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + default_chars_symbols
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
 
         domain_common = pynini.string_file(get_abs_path("data/electronic/domain.tsv"))
@@ -58,22 +61,29 @@ class ElectronicFst(GraphFst):
             default_chars_symbols
             + insert_space
             + plurals._priority_union(
-                domain_common, pynutil.add_weight(pynini.cross(".", "dot"), weight=0.0001), DAMO_SIGMA
+                domain_common,
+                pynutil.add_weight(pynini.cross(".", "dot"), weight=0.0001),
+                DAMO_SIGMA,
             )
             + pynini.closure(
-                insert_space + (pynini.cdrewrite(TO_UPPER, "", "", DAMO_SIGMA) @ default_chars_symbols), 0, 1
+                insert_space
+                + (pynini.cdrewrite(TO_UPPER, "", "", DAMO_SIGMA) @ default_chars_symbols),
+                0,
+                1,
             )
         )
         domain = (
             pynutil.delete("domain:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + domain
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         ).optimize()
 
-        protocol = pynutil.delete("protocol: \"") + pynini.closure(DAMO_NOT_QUOTE, 1) + pynutil.delete("\"")
+        protocol = (
+            pynutil.delete('protocol: "') + pynini.closure(DAMO_NOT_QUOTE, 1) + pynutil.delete('"')
+        )
         graph = (
             pynini.closure(protocol + delete_space, 0, 1)
             + pynini.closure(user_name + delete_space + pynutil.insert(" at ") + delete_space, 0, 1)

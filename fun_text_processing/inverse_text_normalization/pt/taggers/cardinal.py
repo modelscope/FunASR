@@ -1,4 +1,3 @@
-
 import pynini
 from fun_text_processing.inverse_text_normalization.pt.utils import get_abs_path
 from fun_text_processing.text_normalization.en.graph_utils import (
@@ -50,7 +49,9 @@ class CardinalFst(GraphFst):
             graph_hundred_component += delete_space
             graph_hundred_component += pynini.union(
                 graph_twenties | graph_teen | pynutil.insert("00"),
-                (graph_ties | pynutil.insert("0")) + delete_space + (graph_digit | pynutil.insert("0")),
+                (graph_ties | pynutil.insert("0"))
+                + delete_space
+                + (graph_digit | pynutil.insert("0")),
             )
             graph_hundred_component = pynini.union(graph_hundred_component, graph_one_hundred)
 
@@ -59,8 +60,11 @@ class CardinalFst(GraphFst):
             )
 
             graph_thousands = pynini.union(
-                graph_hundred_component_at_least_one_none_zero_digit + delete_space + pynutil.delete("mil"),
-                pynutil.insert("001") + pynutil.delete("mil"),  # because we say 'mil', not 'hum mil'
+                graph_hundred_component_at_least_one_none_zero_digit
+                + delete_space
+                + pynutil.delete("mil"),
+                pynutil.insert("001")
+                + pynutil.delete("mil"),  # because we say 'mil', not 'hum mil'
                 pynutil.insert("000", weight=0.01),
             )
 
@@ -126,7 +130,9 @@ class CardinalFst(GraphFst):
             )
 
             graph = graph @ pynini.union(
-                pynutil.delete(pynini.closure("0")) + pynini.difference(DAMO_DIGIT, "0") + pynini.closure(DAMO_DIGIT),
+                pynutil.delete(pynini.closure("0"))
+                + pynini.difference(DAMO_DIGIT, "0")
+                + pynini.closure(DAMO_DIGIT),
                 "0",
             )
 
@@ -138,7 +144,9 @@ class CardinalFst(GraphFst):
 
         else:
             graph_e = (
-                pynutil.delete(DAMO_WHITE_SPACE.plus) + pynutil.delete("e") + pynutil.delete(DAMO_WHITE_SPACE.plus)
+                pynutil.delete(DAMO_WHITE_SPACE.plus)
+                + pynutil.delete("e")
+                + pynutil.delete(DAMO_WHITE_SPACE.plus)
             )
 
             graph_ties_component = pynini.union(
@@ -147,7 +155,9 @@ class CardinalFst(GraphFst):
                 pynutil.add_weight(pynutil.insert("0") + graph_digit, 0.1),
             ) @ (pynini.closure(DAMO_DIGIT) + (DAMO_DIGIT - "0") + pynini.closure(DAMO_DIGIT))
 
-            graph_hundreds_except_hundred = (pynini.project(graph_hundreds, "input") - "cento") @ graph_hundreds
+            graph_hundreds_except_hundred = (
+                pynini.project(graph_hundreds, "input") - "cento"
+            ) @ graph_hundreds
 
             graph_hundred_component_prefix_e = pynini.union(
                 graph_one_hundred,
@@ -156,9 +166,9 @@ class CardinalFst(GraphFst):
             ) @ (pynini.closure(DAMO_DIGIT) + (DAMO_DIGIT - "0") + pynini.closure(DAMO_DIGIT))
             graph_hundred_component_prefix_e = graph_hundred_component_prefix_e.optimize()
 
-            graph_hundred_component_no_prefix = pynini.union(graph_hundreds + graph_e + graph_ties_component,) @ (
-                pynini.closure(DAMO_DIGIT) + (DAMO_DIGIT - "0") + pynini.closure(DAMO_DIGIT)
-            )
+            graph_hundred_component_no_prefix = pynini.union(
+                graph_hundreds + graph_e + graph_ties_component,
+            ) @ (pynini.closure(DAMO_DIGIT) + (DAMO_DIGIT - "0") + pynini.closure(DAMO_DIGIT))
             graph_hundred_component_no_prefix = graph_hundred_component_no_prefix.optimize()
 
             graph_mil_prefix_e = pynini.union(
@@ -276,7 +286,10 @@ class CardinalFst(GraphFst):
                     + delete_space
                     + (pynutil.delete("quintilhão") | pynutil.delete("quintilhões"))
                 )
-                + ((graph_e + graph_quatrilhao_prefix_e) | (delete_space + graph_quatrilhao_no_prefix))
+                + (
+                    (graph_e + graph_quatrilhao_prefix_e)
+                    | (delete_space + graph_quatrilhao_no_prefix)
+                )
             )
 
             graph_quintilhao_no_prefix = pynini.union(
@@ -288,7 +301,10 @@ class CardinalFst(GraphFst):
                     )
                     | pynutil.insert("000", weight=0.1)
                 )
-                + ((graph_e + graph_quatrilhao_prefix_e) | (delete_space + graph_quatrilhao_no_prefix))
+                + (
+                    (graph_e + graph_quatrilhao_prefix_e)
+                    | (delete_space + graph_quatrilhao_no_prefix)
+                )
             )
 
             graph_sextilhao_prefix_e = pynini.union(
@@ -297,7 +313,10 @@ class CardinalFst(GraphFst):
                     + delete_space
                     + (pynutil.delete("sextilhão") | pynutil.delete("sextilhões"))
                 )
-                + ((graph_e + graph_quintilhao_prefix_e) | (delete_space + graph_quintilhao_no_prefix))
+                + (
+                    (graph_e + graph_quintilhao_prefix_e)
+                    | (delete_space + graph_quintilhao_no_prefix)
+                )
             )
 
             graph_sextilhao_no_prefix = pynini.union(
@@ -309,7 +328,10 @@ class CardinalFst(GraphFst):
                     )
                     | pynutil.insert("000", weight=0.1)
                 )
-                + ((graph_e + graph_quintilhao_prefix_e) | (delete_space + graph_quintilhao_no_prefix))
+                + (
+                    (graph_e + graph_quintilhao_prefix_e)
+                    | (delete_space + graph_quintilhao_no_prefix)
+                )
             )
 
             graph = pynini.union(
@@ -327,7 +349,9 @@ class CardinalFst(GraphFst):
             ).optimize()
 
             graph = graph @ pynini.union(
-                pynutil.delete(pynini.closure("0")) + pynini.difference(DAMO_DIGIT, "0") + pynini.closure(DAMO_DIGIT),
+                pynutil.delete(pynini.closure("0"))
+                + pynini.difference(DAMO_DIGIT, "0")
+                + pynini.closure(DAMO_DIGIT),
                 "0",
             )
 
@@ -335,18 +359,18 @@ class CardinalFst(GraphFst):
         self.graph_no_exception = graph
 
         # save self.numbers_up_to_thousand for use in DecimalFst
-        digits_up_to_thousand = DAMO_DIGIT | (DAMO_DIGIT ** 2) | (DAMO_DIGIT ** 3)
+        digits_up_to_thousand = DAMO_DIGIT | (DAMO_DIGIT**2) | (DAMO_DIGIT**3)
         numbers_up_to_thousand = pynini.compose(graph, digits_up_to_thousand).optimize()
         self.numbers_up_to_thousand = numbers_up_to_thousand
 
         # save self.numbers_up_to_million for use in DecimalFst
         digits_up_to_million = (
             DAMO_DIGIT
-            | (DAMO_DIGIT ** 2)
-            | (DAMO_DIGIT ** 3)
-            | (DAMO_DIGIT ** 4)
-            | (DAMO_DIGIT ** 5)
-            | (DAMO_DIGIT ** 6)
+            | (DAMO_DIGIT**2)
+            | (DAMO_DIGIT**3)
+            | (DAMO_DIGIT**4)
+            | (DAMO_DIGIT**5)
+            | (DAMO_DIGIT**6)
         )
         numbers_up_to_million = pynini.compose(graph, digits_up_to_million).optimize()
         self.numbers_up_to_million = numbers_up_to_million
@@ -357,15 +381,17 @@ class CardinalFst(GraphFst):
         self.digits_from_year = digits_from_year
 
         # don't convert cardinals from zero to nine inclusive
-        graph_exception = pynini.project(pynini.union(graph_digit, graph_zero), 'input')
+        graph_exception = pynini.project(pynini.union(graph_digit, graph_zero), "input")
 
         self.graph = (pynini.project(graph, "input") - graph_exception.arcsort()) @ graph
 
         optional_minus_graph = pynini.closure(
-            pynutil.insert("negative: ") + pynini.cross("menos", "\"-\"") + DAMO_SPACE, 0, 1
+            pynutil.insert("negative: ") + pynini.cross("menos", '"-"') + DAMO_SPACE, 0, 1
         )
 
-        final_graph = optional_minus_graph + pynutil.insert("integer: \"") + self.graph + pynutil.insert("\"")
+        final_graph = (
+            optional_minus_graph + pynutil.insert('integer: "') + self.graph + pynutil.insert('"')
+        )
 
         final_graph = self.add_tokens(final_graph)
         self.fst = final_graph.optimize()

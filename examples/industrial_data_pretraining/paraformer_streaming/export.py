@@ -9,7 +9,9 @@
 
 from funasr import AutoModel
 
-model = AutoModel(model="iic/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8404-online", )
+model = AutoModel(
+    model="iic/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8404-online",
+)
 
 res = model.export(type="onnx", quantize=False)
 print(res)
@@ -19,7 +21,9 @@ print(res)
 from funasr import AutoModel
 
 
-model = AutoModel(model="/Users/zhifu/.cache/modelscope/hub/iic/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8404-online")
+model = AutoModel(
+    model="/Users/zhifu/.cache/modelscope/hub/iic/speech_paraformer_asr_nat-zh-cn-16k-common-vocab8404-online"
+)
 
 res = model.export(type="onnx", quantize=False)
 print(res)

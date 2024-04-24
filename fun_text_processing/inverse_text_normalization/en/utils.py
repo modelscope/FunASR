@@ -1,5 +1,3 @@
-
-
 import os
 from typing import Union
 
@@ -15,7 +13,7 @@ def num_to_word(x: Union[str, int]):
     Args
         x: integer
 
-    Returns: spoken representation 
+    Returns: spoken representation
     """
     if isinstance(x, int):
         x = str(x)
@@ -29,7 +27,7 @@ def get_abs_path(rel_path):
 
     Args:
         rel_path: relative path to this file
-        
+
     Returns absolute path
     """
-    return os.path.dirname(os.path.abspath(__file__)) + '/' + rel_path
+    return os.path.dirname(os.path.abspath(__file__)) + "/" + rel_path

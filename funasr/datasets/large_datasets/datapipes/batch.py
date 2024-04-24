@@ -19,13 +19,13 @@ def _token_len_fn(token, len_fn):
 class MaxTokenBucketizerIterDataPipe(IterableDataset):
 
     def __init__(
-            self,
-            datapipe,
-            batch_size=8000,
-            len_fn=_default_len_fn,
-            buffer_size=10240,
-            sort_size=500,
-            batch_mode="padding",
+        self,
+        datapipe,
+        batch_size=8000,
+        len_fn=_default_len_fn,
+        buffer_size=10240,
+        sort_size=500,
+        batch_mode="padding",
     ):
         assert batch_size > 0, "Batch size is required to be larger than 0!"
         assert buffer_size >= -1, "Buffer size is required to be larger than -1!"

@@ -1,4 +1,3 @@
-
 import pynini
 from fun_text_processing.inverse_text_normalization.en.utils import get_abs_path
 from fun_text_processing.text_normalization.en.graph_utils import DAMO_CHAR, GraphFst
@@ -25,6 +24,6 @@ class OrdinalFst(GraphFst):
         )
 
         self.graph = graph @ cardinal_graph
-        final_graph = pynutil.insert("integer: \"") + self.graph + pynutil.insert("\"")
+        final_graph = pynutil.insert('integer: "') + self.graph + pynutil.insert('"')
         final_graph = self.add_tokens(final_graph)
         self.fst = final_graph.optimize()

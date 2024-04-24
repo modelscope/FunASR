@@ -1,4 +1,3 @@
-
 import pynini
 from fun_text_processing.inverse_text_normalization.vi.graph_utils import (
     DAMO_DIGIT,
@@ -32,15 +31,22 @@ class MoneyFst(GraphFst):
         unit = pynini.string_file(get_abs_path("data/currency.tsv"))
         unit_singular = pynini.invert(unit)
 
-        graph_unit_singular = pynutil.insert('currency: "') + convert_space(unit_singular) + pynutil.insert('"')
+        graph_unit_singular = (
+            pynutil.insert('currency: "') + convert_space(unit_singular) + pynutil.insert('"')
+        )
 
-        add_leading_zero_to_double_digit = (DAMO_DIGIT + DAMO_DIGIT) | (pynutil.insert("0") + DAMO_DIGIT)
+        add_leading_zero_to_double_digit = (DAMO_DIGIT + DAMO_DIGIT) | (
+            pynutil.insert("0") + DAMO_DIGIT
+        )
 
         # twelve dollars fifty, only after integer
         optional_cents_suffix = pynini.closure(
             delete_extra_space
             + pynutil.insert('fractional_part: "')
-            + (pynutil.add_weight(cardinal_graph @ add_leading_zero_to_double_digit, -0.7) | graph_half)
+            + (
+                pynutil.add_weight(cardinal_graph @ add_leading_zero_to_double_digit, -0.7)
+                | graph_half
+            )
             + pynutil.insert('"'),
             0,
             1,
@@ -55,7 +61,9 @@ class MoneyFst(GraphFst):
             + optional_cents_suffix
         )
 
-        graph_decimal = graph_decimal_final + delete_extra_space + graph_unit_singular + optional_cents_suffix
+        graph_decimal = (
+            graph_decimal_final + delete_extra_space + graph_unit_singular + optional_cents_suffix
+        )
         final_graph = graph_integer | graph_decimal
         final_graph = self.add_tokens(final_graph)
         self.fst = final_graph.optimize()

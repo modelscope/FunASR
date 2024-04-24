@@ -36,9 +36,7 @@ class FeatureTransform(torch.nn.Module):
             self.global_mvn = None
 
         if self.apply_uttmvn is not None:
-            self.uttmvn = UtteranceMVN(
-                norm_means=uttmvn_norm_means, norm_vars=uttmvn_norm_vars
-            )
+            self.uttmvn = UtteranceMVN(norm_means=uttmvn_norm_means, norm_vars=uttmvn_norm_vars)
         else:
             self.uttmvn = None
 
@@ -191,9 +189,7 @@ class GlobalMVN(torch.nn.Module):
 
 
 class UtteranceMVN(torch.nn.Module):
-    def __init__(
-        self, norm_means: bool = True, norm_vars: bool = False, eps: float = 1.0e-20
-    ):
+    def __init__(self, norm_means: bool = True, norm_vars: bool = False, eps: float = 1.0e-20):
         super().__init__()
         self.norm_means = norm_means
         self.norm_vars = norm_vars

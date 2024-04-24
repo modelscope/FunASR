@@ -28,6 +28,7 @@ from funasr.models.transformer.scorers.scorer_interface import BatchScorerInterf
 from omegaconf import OmegaConf
 from funasr.register import tables
 
+
 class DecoderLayer(nn.Module):
     """Single decoder layer module.
 
@@ -51,16 +52,16 @@ class DecoderLayer(nn.Module):
     """
 
     def __init__(
-            self,
-            size,
-            self_attn,
-            src_attn,
-            feed_forward,
-            dropout_rate,
-            normalize_before=True,
-            concat_after=False,
-            layer_id=None,
-            args={},
+        self,
+        size,
+        self_attn,
+        src_attn,
+        feed_forward,
+        dropout_rate,
+        normalize_before=True,
+        concat_after=False,
+        layer_id=None,
+        args={},
     ):
         """Construct an DecoderLayer object."""
         super(DecoderLayer, self).__init__()
@@ -86,7 +87,7 @@ class DecoderLayer(nn.Module):
                 layer_id = 0
                 scale = ((1 + layer_id) / args.get("n_layer")) ** 0.7
                 nn.init.constant_(self.ln0.weight, scale)
-            
+
         # init
         if args.get("init_rwkv", True):
             print("init_rwkv")
@@ -115,28 +116,24 @@ class DecoderLayer(nn.Module):
 
         if self.layer_id == 0 and self.ln0 is not None:
             tgt = self.ln0(tgt)
-            
+
         residual = tgt
-        
-        
+
         tgt = self.norm1(tgt)
 
         if cache is None:
-    
+
             x = residual + self.dropout(self.self_attn(tgt, mask=tgt_mask))
         else:
-            
+
             # tgt_q = tgt[:, -1:, :]
             # residual_q = residual[:, -1:, :]
             tgt_q_mask = None
-            
+
             x = residual + self.dropout(self.self_attn(tgt, mask=tgt_q_mask))
             x = x[:, -1, :]
 
-
-
         # x = residual + self.dropout(self.self_attn(tgt_q, tgt, tgt, tgt_q_mask))
-        
 
         residual = x
         x = self.norm2(x)
@@ -145,12 +142,10 @@ class DecoderLayer(nn.Module):
         x = self.norm3(x)
         x = residual + self.dropout(self.feed_forward(x))
 
-
         if cache is not None:
             x = torch.cat([cache, x], dim=1)
 
         return x, tgt_mask, memory, memory_mask
-
 
 
 class BaseTransformerDecoder(nn.Module, BatchScorerInterface):
@@ -176,15 +171,15 @@ class BaseTransformerDecoder(nn.Module, BatchScorerInterface):
     """
 
     def __init__(
-            self,
-            vocab_size: int,
-            encoder_output_size: int,
-            dropout_rate: float = 0.1,
-            positional_dropout_rate: float = 0.1,
-            input_layer: str = "embed",
-            use_output_layer: bool = True,
-            pos_enc_class=PositionalEncoding,
-            normalize_before: bool = True,
+        self,
+        vocab_size: int,
+        encoder_output_size: int,
+        dropout_rate: float = 0.1,
+        positional_dropout_rate: float = 0.1,
+        input_layer: str = "embed",
+        use_output_layer: bool = True,
+        pos_enc_class=PositionalEncoding,
+        normalize_before: bool = True,
     ):
         super().__init__()
         attention_dim = encoder_output_size
@@ -217,11 +212,11 @@ class BaseTransformerDecoder(nn.Module, BatchScorerInterface):
         self.decoders = None
 
     def forward(
-            self,
-            hs_pad: torch.Tensor,
-            hlens: torch.Tensor,
-            ys_in_pad: torch.Tensor,
-            ys_in_lens: torch.Tensor,
+        self,
+        hs_pad: torch.Tensor,
+        hlens: torch.Tensor,
+        ys_in_pad: torch.Tensor,
+        ys_in_lens: torch.Tensor,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Forward decoder.
 
@@ -249,20 +244,14 @@ class BaseTransformerDecoder(nn.Module, BatchScorerInterface):
         tgt_mask = tgt_mask & m
 
         memory = hs_pad
-        memory_mask = (~make_pad_mask(hlens, maxlen=memory.size(1)))[:, None, :].to(
-            memory.device
-        )
+        memory_mask = (~make_pad_mask(hlens, maxlen=memory.size(1)))[:, None, :].to(memory.device)
         # Padding for Longformer
         if memory_mask.shape[-1] != memory.shape[1]:
             padlen = memory.shape[1] - memory_mask.shape[-1]
-            memory_mask = torch.nn.functional.pad(
-                memory_mask, (0, padlen), "constant", False
-            )
+            memory_mask = torch.nn.functional.pad(memory_mask, (0, padlen), "constant", False)
 
         x = self.embed(tgt)
-        x, tgt_mask, memory, memory_mask = self.decoders(
-            x, tgt_mask, memory, memory_mask
-        )
+        x, tgt_mask, memory, memory_mask = self.decoders(x, tgt_mask, memory, memory_mask)
         if self.normalize_before:
             x = self.after_norm(x)
         if self.output_layer is not None:
@@ -272,11 +261,11 @@ class BaseTransformerDecoder(nn.Module, BatchScorerInterface):
         return x, olens
 
     def forward_one_step(
-            self,
-            tgt: torch.Tensor,
-            tgt_mask: torch.Tensor,
-            memory: torch.Tensor,
-            cache: List[torch.Tensor] = None,
+        self,
+        tgt: torch.Tensor,
+        tgt_mask: torch.Tensor,
+        memory: torch.Tensor,
+        cache: List[torch.Tensor] = None,
     ) -> Tuple[torch.Tensor, List[torch.Tensor]]:
         """Forward one step.
 
@@ -296,9 +285,7 @@ class BaseTransformerDecoder(nn.Module, BatchScorerInterface):
             cache = [None] * len(self.decoders)
         new_cache = []
         for c, decoder in zip(cache, self.decoders):
-            x, tgt_mask, memory, memory_mask = decoder(
-                x, tgt_mask, memory, None, cache=c
-            )
+            x, tgt_mask, memory, memory_mask = decoder(x, tgt_mask, memory, None, cache=c)
             new_cache.append(x)
 
         if self.normalize_before:
@@ -313,13 +300,11 @@ class BaseTransformerDecoder(nn.Module, BatchScorerInterface):
     def score(self, ys, state, x):
         """Score."""
         ys_mask = subsequent_mask(len(ys), device=x.device).unsqueeze(0)
-        logp, state = self.forward_one_step(
-            ys.unsqueeze(0), ys_mask, x.unsqueeze(0), cache=state
-        )
+        logp, state = self.forward_one_step(ys.unsqueeze(0), ys_mask, x.unsqueeze(0), cache=state)
         return logp.squeeze(0), state
 
     def batch_score(
-            self, ys: torch.Tensor, states: List[Any], xs: torch.Tensor
+        self, ys: torch.Tensor, states: List[Any], xs: torch.Tensor
     ) -> Tuple[torch.Tensor, List[Any]]:
         """Score new token batch.
 
@@ -343,8 +328,7 @@ class BaseTransformerDecoder(nn.Module, BatchScorerInterface):
         else:
             # transpose state of [batch, layer] into [layer, batch]
             batch_state = [
-                torch.stack([states[b][i] for b in range(n_batch)])
-                for i in range(n_layers)
+                torch.stack([states[b][i] for b in range(n_batch)]) for i in range(n_layers)
             ]
 
         # batch decoding
@@ -355,25 +339,26 @@ class BaseTransformerDecoder(nn.Module, BatchScorerInterface):
         state_list = [[states[i][b] for i in range(n_layers)] for b in range(n_batch)]
         return logp, state_list
 
+
 @tables.register("decoder_classes", "TransformerRWKVDecoder")
 class TransformerRWKVDecoder(BaseTransformerDecoder):
     def __init__(
-            self,
-            vocab_size: int,
-            encoder_output_size: int,
-            attention_heads: int = 4,
-            linear_units: int = 2048,
-            num_blocks: int = 6,
-            dropout_rate: float = 0.1,
-            positional_dropout_rate: float = 0.1,
-            self_attention_dropout_rate: float = 0.0,
-            src_attention_dropout_rate: float = 0.0,
-            input_layer: str = "embed",
-            use_output_layer: bool = True,
-            pos_enc_class=PositionalEncoding,
-            normalize_before: bool = True,
-            concat_after: bool = False,
-            **kwargs,
+        self,
+        vocab_size: int,
+        encoder_output_size: int,
+        attention_heads: int = 4,
+        linear_units: int = 2048,
+        num_blocks: int = 6,
+        dropout_rate: float = 0.1,
+        positional_dropout_rate: float = 0.1,
+        self_attention_dropout_rate: float = 0.0,
+        src_attention_dropout_rate: float = 0.0,
+        input_layer: str = "embed",
+        use_output_layer: bool = True,
+        pos_enc_class=PositionalEncoding,
+        normalize_before: bool = True,
+        concat_after: bool = False,
+        **kwargs,
     ):
         super().__init__(
             vocab_size=vocab_size,
@@ -386,6 +371,7 @@ class TransformerRWKVDecoder(BaseTransformerDecoder):
             normalize_before=normalize_before,
         )
         from funasr.models.sense_voice.rwkv_v6 import RWKVLayer
+
         rwkv_cfg = kwargs.get("rwkv_cfg", {})
         args = OmegaConf.create(rwkv_cfg)
         # self.attn = RWKVLayer(args=args, layer_id=layer_id)
@@ -395,9 +381,7 @@ class TransformerRWKVDecoder(BaseTransformerDecoder):
             lambda lnum: DecoderLayer(
                 attention_dim,
                 RWKVLayer(args=args, layer_id=lnum),
-                MultiHeadedAttention(
-                    attention_heads, attention_dim, src_attention_dropout_rate
-                ),
+                MultiHeadedAttention(attention_heads, attention_dim, src_attention_dropout_rate),
                 PositionwiseFeedForward(attention_dim, linear_units, dropout_rate),
                 dropout_rate,
                 normalize_before,
@@ -406,18 +390,18 @@ class TransformerRWKVDecoder(BaseTransformerDecoder):
                 args=args,
             ),
         )
-        
+
         # init
         if args.get("init_rwkv", True):
             print("init_rwkv")
             nn.init.uniform_(self.embed[0].weight, a=-1e-4, b=1e-4)
 
     def forward(
-            self,
-            hs_pad: torch.Tensor,
-            hlens: torch.Tensor,
-            ys_in_pad: torch.Tensor,
-            ys_in_lens: torch.Tensor,
+        self,
+        hs_pad: torch.Tensor,
+        hlens: torch.Tensor,
+        ys_in_pad: torch.Tensor,
+        ys_in_lens: torch.Tensor,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Forward decoder.
 
@@ -445,20 +429,14 @@ class TransformerRWKVDecoder(BaseTransformerDecoder):
         tgt_mask = tgt_mask & m
 
         memory = hs_pad
-        memory_mask = (~make_pad_mask(hlens, maxlen=memory.size(1)))[:, None, :].to(
-            memory.device
-        )
+        memory_mask = (~make_pad_mask(hlens, maxlen=memory.size(1)))[:, None, :].to(memory.device)
         # Padding for Longformer
         if memory_mask.shape[-1] != memory.shape[1]:
             padlen = memory.shape[1] - memory_mask.shape[-1]
-            memory_mask = torch.nn.functional.pad(
-                memory_mask, (0, padlen), "constant", False
-            )
+            memory_mask = torch.nn.functional.pad(memory_mask, (0, padlen), "constant", False)
 
         x = self.embed(tgt)
-        x, tgt_mask, memory, memory_mask = self.decoders(
-            x, tgt_mask, memory, memory_mask
-        )
+        x, tgt_mask, memory, memory_mask = self.decoders(x, tgt_mask, memory, memory_mask)
         if self.normalize_before:
             x = self.after_norm(x)
         if self.output_layer is not None:
@@ -468,11 +446,11 @@ class TransformerRWKVDecoder(BaseTransformerDecoder):
         return x, olens
 
     def forward_one_step(
-            self,
-            tgt: torch.Tensor,
-            tgt_mask: torch.Tensor,
-            memory: torch.Tensor,
-            cache: List[torch.Tensor] = None,
+        self,
+        tgt: torch.Tensor,
+        tgt_mask: torch.Tensor,
+        memory: torch.Tensor,
+        cache: List[torch.Tensor] = None,
     ) -> Tuple[torch.Tensor, List[torch.Tensor]]:
         """Forward one step.
 
@@ -492,9 +470,7 @@ class TransformerRWKVDecoder(BaseTransformerDecoder):
             cache = [None] * len(self.decoders)
         new_cache = []
         for c, decoder in zip(cache, self.decoders):
-            x, tgt_mask, memory, memory_mask = decoder(
-                x, tgt_mask, memory, None, cache=c
-            )
+            x, tgt_mask, memory, memory_mask = decoder(x, tgt_mask, memory, None, cache=c)
             new_cache.append(x)
 
         if self.normalize_before:

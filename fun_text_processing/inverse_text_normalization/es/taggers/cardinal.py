@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.inverse_text_normalization.es.utils import get_abs_path
 from fun_text_processing.text_normalization.en.graph_utils import (
@@ -16,10 +14,10 @@ from pynini.lib import pynutil
 class CardinalFst(GraphFst):
     """
     Finite state transducer for classifying cardinals
-        e.g. menos veintitrés -> cardinal { negative: "-" integer: "23"} 
+        e.g. menos veintitrés -> cardinal { negative: "-" integer: "23"}
     This class converts cardinals up to (but not including) "un cuatrillón",
     i.e up to "one septillion" in English (10^{24}).
-    Cardinals below ten are not converted (in order to avoid 
+    Cardinals below ten are not converted (in order to avoid
     "vivo en una casa" --> "vivo en 1 casa" and any other odd conversions.)
 
     Although technically Spanish grammar requires that "y" only comes after
@@ -54,7 +52,9 @@ class CardinalFst(GraphFst):
         )
 
         graph_thousands = pynini.union(
-            graph_hundred_component_at_least_one_none_zero_digit + delete_space + pynutil.delete("mil"),
+            graph_hundred_component_at_least_one_none_zero_digit
+            + delete_space
+            + pynutil.delete("mil"),
             pynutil.insert("001") + pynutil.delete("mil"),  # because we say 'mil', not 'un mil'
             pynutil.insert("000", weight=0.1),
         )
@@ -67,7 +67,9 @@ class CardinalFst(GraphFst):
         )
 
         graph_mil_millones = pynini.union(
-            graph_hundred_component_at_least_one_none_zero_digit + delete_space + pynutil.delete("mil"),
+            graph_hundred_component_at_least_one_none_zero_digit
+            + delete_space
+            + pynutil.delete("mil"),
             pynutil.insert("001") + pynutil.delete("mil"),  # because we say 'mil', not 'un mil'
         )
         graph_mil_millones += delete_space + (
@@ -89,7 +91,9 @@ class CardinalFst(GraphFst):
         )
 
         graph_mil_billones = pynini.union(
-            graph_hundred_component_at_least_one_none_zero_digit + delete_space + pynutil.delete("mil"),
+            graph_hundred_component_at_least_one_none_zero_digit
+            + delete_space
+            + pynutil.delete("mil"),
             pynutil.insert("001") + pynutil.delete("mil"),  # because we say 'mil', not 'un mil'
         )
         graph_mil_billones += delete_space + (
@@ -104,7 +108,9 @@ class CardinalFst(GraphFst):
         )
 
         graph_mil_trillones = pynini.union(
-            graph_hundred_component_at_least_one_none_zero_digit + delete_space + pynutil.delete("mil"),
+            graph_hundred_component_at_least_one_none_zero_digit
+            + delete_space
+            + pynutil.delete("mil"),
             pynutil.insert("001") + pynutil.delete("mil"),  # because we say 'mil', not 'un mil'
         )
         graph_mil_trillones += delete_space + (
@@ -131,7 +137,10 @@ class CardinalFst(GraphFst):
         )
 
         graph = graph @ pynini.union(
-            pynutil.delete(pynini.closure("0")) + pynini.difference(DAMO_DIGIT, "0") + pynini.closure(DAMO_DIGIT), "0"
+            pynutil.delete(pynini.closure("0"))
+            + pynini.difference(DAMO_DIGIT, "0")
+            + pynini.closure(DAMO_DIGIT),
+            "0",
         )
 
         # ignore "y" inside cardinal numbers
@@ -144,32 +153,34 @@ class CardinalFst(GraphFst):
         self.graph_no_exception = graph
 
         # save self.numbers_up_to_thousand for use in DecimalFst
-        digits_up_to_thousand = DAMO_DIGIT | (DAMO_DIGIT ** 2) | (DAMO_DIGIT ** 3)
+        digits_up_to_thousand = DAMO_DIGIT | (DAMO_DIGIT**2) | (DAMO_DIGIT**3)
         numbers_up_to_thousand = pynini.compose(graph, digits_up_to_thousand).optimize()
         self.numbers_up_to_thousand = numbers_up_to_thousand
 
         # save self.numbers_up_to_million for use in DecimalFst
         digits_up_to_million = (
             DAMO_DIGIT
-            | (DAMO_DIGIT ** 2)
-            | (DAMO_DIGIT ** 3)
-            | (DAMO_DIGIT ** 4)
-            | (DAMO_DIGIT ** 5)
-            | (DAMO_DIGIT ** 6)
+            | (DAMO_DIGIT**2)
+            | (DAMO_DIGIT**3)
+            | (DAMO_DIGIT**4)
+            | (DAMO_DIGIT**5)
+            | (DAMO_DIGIT**6)
         )
         numbers_up_to_million = pynini.compose(graph, digits_up_to_million).optimize()
         self.numbers_up_to_million = numbers_up_to_million
 
         # don't convert cardinals from zero to nine inclusive
-        graph_exception = pynini.project(pynini.union(graph_digit, graph_zero), 'input')
+        graph_exception = pynini.project(pynini.union(graph_digit, graph_zero), "input")
 
         self.graph = (pynini.project(graph, "input") - graph_exception.arcsort()) @ graph
 
         optional_minus_graph = pynini.closure(
-            pynutil.insert("negative: ") + pynini.cross("menos", "\"-\"") + DAMO_SPACE, 0, 1
+            pynutil.insert("negative: ") + pynini.cross("menos", '"-"') + DAMO_SPACE, 0, 1
         )
 
-        final_graph = optional_minus_graph + pynutil.insert("integer: \"") + self.graph + pynutil.insert("\"")
+        final_graph = (
+            optional_minus_graph + pynutil.insert('integer: "') + self.graph + pynutil.insert('"')
+        )
 
         final_graph = self.add_tokens(final_graph)
         self.fst = final_graph.optimize()

@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.inverse_text_normalization.fr.graph_utils import GraphFst, convert_space
 from fun_text_processing.inverse_text_normalization.fr.utils import get_abs_path
@@ -17,5 +15,5 @@ class WhiteListFst(GraphFst):
         super().__init__(name="whitelist", kind="classify")
 
         whitelist = pynini.string_file(get_abs_path("data/whitelist.tsv"))
-        graph = pynutil.insert("name: \"") + convert_space(whitelist) + pynutil.insert("\"")
+        graph = pynutil.insert('name: "') + convert_space(whitelist) + pynutil.insert('"')
         self.fst = graph.optimize()

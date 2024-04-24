@@ -7,6 +7,8 @@ from funasr import AutoModel
 
 model = AutoModel(model="iic/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404")
 
-res = model.generate(input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav",
-            hotword='达摩院 魔搭')
+res = model.generate(
+    input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav",
+    hotword="达摩院 魔搭",
+)
 print(res)

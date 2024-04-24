@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import (
     DAMO_ALPHA,
@@ -50,40 +48,71 @@ class MoneyFst(GraphFst):
         maj_plural_graph = maj_singular @ (fem_plural | masc_plural)
         min_plural_graph = min_singular @ (fem_plural | masc_plural)
 
-        graph_maj_singular = pynutil.insert("currency_maj: \"") + maj_singular_graph + pynutil.insert("\"")
-        graph_maj_plural = pynutil.insert("currency_maj: \"") + maj_plural_graph + pynutil.insert("\"")
+        graph_maj_singular = (
+            pynutil.insert('currency_maj: "') + maj_singular_graph + pynutil.insert('"')
+        )
+        graph_maj_plural = (
+            pynutil.insert('currency_maj: "') + maj_plural_graph + pynutil.insert('"')
+        )
 
-        graph_integer_one = pynutil.insert("integer_part: \"") + pynini.cross("1", "un") + pynutil.insert("\"")
+        graph_integer_one = (
+            pynutil.insert('integer_part: "') + pynini.cross("1", "un") + pynutil.insert('"')
+        )
 
         decimal_with_quantity = (DAMO_SIGMA + DAMO_ALPHA) @ graph_decimal_final
 
         graph_decimal_plural = pynini.union(
-            graph_maj_plural + pynini.closure(delete_space, 0, 1) + insert_space + graph_decimal_final,  # $1,05
-            graph_decimal_final + pynini.closure(delete_space, 0, 1) + insert_space + graph_maj_plural,  # 1,05 $
+            graph_maj_plural
+            + pynini.closure(delete_space, 0, 1)
+            + insert_space
+            + graph_decimal_final,  # $1,05
+            graph_decimal_final
+            + pynini.closure(delete_space, 0, 1)
+            + insert_space
+            + graph_maj_plural,  # 1,05 $
         )
         graph_decimal_plural = (
             (DAMO_SIGMA - "1") + decimal_separator + DAMO_SIGMA
         ) @ graph_decimal_plural  # Can't have "un euros"
 
         graph_decimal_singular = pynini.union(
-            graph_maj_singular + pynini.closure(delete_space, 0, 1) + insert_space + graph_decimal_final,  # $1,05
-            graph_decimal_final + pynini.closure(delete_space, 0, 1) + insert_space + graph_maj_singular,  # 1,05 $
+            graph_maj_singular
+            + pynini.closure(delete_space, 0, 1)
+            + insert_space
+            + graph_decimal_final,  # $1,05
+            graph_decimal_final
+            + pynini.closure(delete_space, 0, 1)
+            + insert_space
+            + graph_maj_singular,  # 1,05 $
         )
-        graph_decimal_singular = (pynini.accep("1") + decimal_separator + DAMO_SIGMA) @ graph_decimal_singular
+        graph_decimal_singular = (
+            pynini.accep("1") + decimal_separator + DAMO_SIGMA
+        ) @ graph_decimal_singular
 
         graph_decimal = pynini.union(
             graph_decimal_singular,
             graph_decimal_plural,
-            graph_maj_plural + pynini.closure(delete_space, 0, 1) + insert_space + decimal_with_quantity,
+            graph_maj_plural
+            + pynini.closure(delete_space, 0, 1)
+            + insert_space
+            + decimal_with_quantity,
         )
 
         graph_integer = (
-            pynutil.insert("integer_part: \"") + ((DAMO_SIGMA - "1") @ cardinal_graph) + pynutil.insert("\"")
+            pynutil.insert('integer_part: "')
+            + ((DAMO_SIGMA - "1") @ cardinal_graph)
+            + pynutil.insert('"')
         )
 
         graph_integer_only = pynini.union(
-            graph_maj_singular + pynini.closure(delete_space, 0, 1) + insert_space + graph_integer_one,
-            graph_integer_one + pynini.closure(delete_space, 0, 1) + insert_space + graph_maj_singular,
+            graph_maj_singular
+            + pynini.closure(delete_space, 0, 1)
+            + insert_space
+            + graph_integer_one,
+            graph_integer_one
+            + pynini.closure(delete_space, 0, 1)
+            + insert_space
+            + graph_maj_singular,
         )
         graph_integer_only |= pynini.union(
             graph_maj_plural + pynini.closure(delete_space, 0, 1) + insert_space + graph_integer,
@@ -103,8 +132,12 @@ class MoneyFst(GraphFst):
             | ((DAMO_DIGIT - "0") + DAMO_DIGIT)
         )
 
-        graph_min_singular = pynutil.insert("currency_min: \"") + min_singular_graph + pynutil.insert("\"")
-        graph_min_plural = pynutil.insert("currency_min: \"") + min_plural_graph + pynutil.insert("\"")
+        graph_min_singular = (
+            pynutil.insert('currency_min: "') + min_singular_graph + pynutil.insert('"')
+        )
+        graph_min_plural = (
+            pynutil.insert('currency_min: "') + min_plural_graph + pynutil.insert('"')
+        )
 
         # format ** euro ** cent
         decimal_graph_with_minor = None
@@ -119,19 +152,25 @@ class MoneyFst(GraphFst):
             integer_plus_maj = (pynini.closure(DAMO_DIGIT) - "0") @ integer_plus_maj
 
             graph_fractional_one = (
-                pynutil.insert("fractional_part: \"")
+                pynutil.insert('fractional_part: "')
                 + two_digits_fractional_part @ pynini.cross("1", "un")
-                + pynutil.insert("\"")
+                + pynutil.insert('"')
             )
 
             graph_fractional = (
-                two_digits_fractional_part @ (pynini.closure(DAMO_DIGIT, 1, 2) - "1") @ cardinal.two_digit_non_zero
+                two_digits_fractional_part
+                @ (pynini.closure(DAMO_DIGIT, 1, 2) - "1")
+                @ cardinal.two_digit_non_zero
             )
-            graph_fractional = pynutil.insert("fractional_part: \"") + graph_fractional + pynutil.insert("\"")
+            graph_fractional = (
+                pynutil.insert('fractional_part: "') + graph_fractional + pynutil.insert('"')
+            )
 
             fractional_plus_min = pynini.union(
                 graph_fractional + insert_space + pynutil.insert(curr_symbol) @ graph_min_plural,
-                graph_fractional_one + insert_space + pynutil.insert(curr_symbol) @ graph_min_singular,
+                graph_fractional_one
+                + insert_space
+                + pynutil.insert(curr_symbol) @ graph_min_singular,
             )
 
             decimal_graph_with_minor_curr = (
@@ -140,9 +179,9 @@ class MoneyFst(GraphFst):
             decimal_graph_with_minor_curr |= pynutil.add_weight(
                 integer_plus_maj
                 + pynini.cross(decimal_separator, DAMO_SPACE)
-                + pynutil.insert("fractional_part: \"")
+                + pynutil.insert('fractional_part: "')
                 + two_digits_fractional_part @ cardinal.two_digit_non_zero
-                + pynutil.insert("\""),
+                + pynutil.insert('"'),
                 weight=0.0001,
             )
 

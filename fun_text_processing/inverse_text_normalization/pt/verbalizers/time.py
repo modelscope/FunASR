@@ -1,6 +1,3 @@
-
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import (
     DAMO_DIGIT,
@@ -21,14 +18,16 @@ class TimeFst(GraphFst):
 
     def __init__(self):
         super().__init__(name="time", kind="verbalize")
-        add_leading_zero_to_double_digit = (DAMO_DIGIT + DAMO_DIGIT) | (pynutil.insert("0") + DAMO_DIGIT)
+        add_leading_zero_to_double_digit = (DAMO_DIGIT + DAMO_DIGIT) | (
+            pynutil.insert("0") + DAMO_DIGIT
+        )
 
         prefix = (
             pynutil.delete("morphosyntactic_features:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + delete_space
             + insert_space
         )
@@ -37,25 +36,25 @@ class TimeFst(GraphFst):
         hour = (
             pynutil.delete("hours:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_DIGIT, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
         minute = (
             pynutil.delete("minutes:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_DIGIT, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
         suffix = (
             delete_space
             + insert_space
             + pynutil.delete("suffix:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
         optional_suffix = pynini.closure(suffix, 0, 1)
 

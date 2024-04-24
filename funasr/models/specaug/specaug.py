@@ -1,4 +1,5 @@
 """SpecAugment module."""
+
 from typing import Optional
 from typing import Sequence
 from typing import Union
@@ -10,6 +11,7 @@ from funasr.models.specaug.time_warp import TimeWarp
 from funasr.register import tables
 
 import torch.nn as nn
+
 
 @tables.register("specaug_classes", "SpecAug")
 class SpecAug(nn.Module):
@@ -40,9 +42,7 @@ class SpecAug(nn.Module):
         num_time_mask: int = 2,
     ):
         if not apply_time_warp and not apply_time_mask and not apply_freq_mask:
-            raise ValueError(
-                "Either one of time_warp, time_mask, or freq_mask should be applied"
-            )
+            raise ValueError("Either one of time_warp, time_mask, or freq_mask should be applied")
         if (
             apply_time_mask
             and (time_mask_width_range is not None)
@@ -101,6 +101,7 @@ class SpecAug(nn.Module):
             x, x_lengths = self.time_mask(x, x_lengths)
         return x, x_lengths
 
+
 @tables.register("specaug_classes", "SpecAugLFR")
 class SpecAugLFR(nn.Module):
     """Implementation of SpecAug.
@@ -122,9 +123,7 @@ class SpecAugLFR(nn.Module):
         num_time_mask: int = 2,
     ):
         if not apply_time_warp and not apply_time_mask and not apply_freq_mask:
-            raise ValueError(
-                "Either one of time_warp, time_mask, or freq_mask should be applied"
-            )
+            raise ValueError("Either one of time_warp, time_mask, or freq_mask should be applied")
         if (
             apply_time_mask
             and (time_mask_width_range is not None)
@@ -149,7 +148,7 @@ class SpecAugLFR(nn.Module):
                 dim="freq",
                 mask_width_range=freq_mask_width_range,
                 num_mask=num_freq_mask,
-                lfr_rate=lfr_rate+1,
+                lfr_rate=lfr_rate + 1,
             )
 
         else:

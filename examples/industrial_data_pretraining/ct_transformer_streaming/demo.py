@@ -13,6 +13,6 @@ rec_result_all = "outputs: "
 cache = {}
 for vad in vads:
     rec_result = model.generate(input=vad, cache=cache)
-    rec_result_all += rec_result[0]['text']
+    rec_result_all += rec_result[0]["text"]
 
 print(rec_result_all)

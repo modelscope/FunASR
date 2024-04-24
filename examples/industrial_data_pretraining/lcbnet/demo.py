@@ -5,11 +5,15 @@
 
 from funasr import AutoModel
 
-model = AutoModel(model="iic/LCB-NET",
-                  model_revision="v1.0.0")
+model = AutoModel(model="iic/LCB-NET", model_revision="v1.0.0")
 
 
-
-res = model.generate(input=("https://www.modelscope.cn/api/v1/models/iic/LCB-NET/repo?Revision=master&FilePath=example/asr_example.wav","https://www.modelscope.cn/api/v1/models/iic/LCB-NET/repo?Revision=master&FilePath=example/ocr.txt"),data_type=("sound", "text"))
+res = model.generate(
+    input=(
+        "https://www.modelscope.cn/api/v1/models/iic/LCB-NET/repo?Revision=master&FilePath=example/asr_example.wav",
+        "https://www.modelscope.cn/api/v1/models/iic/LCB-NET/repo?Revision=master&FilePath=example/ocr.txt",
+    ),
+    data_type=("sound", "text"),
+)
 
 print(res)

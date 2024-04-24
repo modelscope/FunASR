@@ -17,24 +17,24 @@ from funasr.models.transformer.utils.repeat import repeat
 
 class EncoderLayer(nn.Module):
     def __init__(
-            self,
-            input_units,
-            num_units,
-            kernel_size=3,
-            activation="tanh",
-            stride=1,
-            include_batch_norm=False,
-            residual=False
+        self,
+        input_units,
+        num_units,
+        kernel_size=3,
+        activation="tanh",
+        stride=1,
+        include_batch_norm=False,
+        residual=False,
     ):
         super().__init__()
         left_padding = math.ceil((kernel_size - stride) / 2)
         right_padding = kernel_size - stride - left_padding
         self.conv_padding = nn.ConstantPad1d((left_padding, right_padding), 0.0)
         self.conv1d = nn.Conv1d(
-                input_units,
-                num_units,
-                kernel_size,
-                stride,
+            input_units,
+            num_units,
+            kernel_size,
+            stride,
         )
         self.activation = self.get_activation(activation)
         if include_batch_norm:
@@ -71,23 +71,23 @@ class ConvEncoder(AbsEncoder):
     """
 
     def __init__(
-            self,
-            num_layers,
-            input_units,
-            num_units,
-            kernel_size=3,
-            dropout_rate=0.3,
-            position_encoder=None,
-            activation='tanh',
-            auxiliary_states=True,
-            out_units=None,
-            out_norm=False,
-            out_residual=False,
-            include_batchnorm=False,
-            regularization_weight=0.0,
-            stride=1,
-            tf2torch_tensor_name_prefix_torch: str = "speaker_encoder",
-            tf2torch_tensor_name_prefix_tf: str = "EAND/speaker_encoder",
+        self,
+        num_layers,
+        input_units,
+        num_units,
+        kernel_size=3,
+        dropout_rate=0.3,
+        position_encoder=None,
+        activation="tanh",
+        auxiliary_states=True,
+        out_units=None,
+        out_norm=False,
+        out_residual=False,
+        include_batchnorm=False,
+        regularization_weight=0.0,
+        stride=1,
+        tf2torch_tensor_name_prefix_torch: str = "speaker_encoder",
+        tf2torch_tensor_name_prefix_tf: str = "EAND/speaker_encoder",
     ):
         super().__init__()
         self._output_size = num_units
@@ -125,8 +125,8 @@ class ConvEncoder(AbsEncoder):
                 activation,
                 self.stride[lnum],
                 include_batchnorm,
-                residual=True if lnum > 0 else False
-            )
+                residual=True if lnum > 0 else False,
+            ),
         )
 
         if self.out_units is not None:
@@ -137,7 +137,7 @@ class ConvEncoder(AbsEncoder):
                 num_units,
                 out_units,
                 kernel_size,
-        )
+            )
 
         if self.out_norm:
             self.after_norm = LayerNorm(out_units)
@@ -172,4 +172,3 @@ class ConvEncoder(AbsEncoder):
             outputs = outputs + inputs
 
         return outputs, ilens, None
-

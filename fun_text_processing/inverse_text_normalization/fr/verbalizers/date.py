@@ -1,4 +1,3 @@
-
 import pynini
 from fun_text_processing.inverse_text_normalization.fr.graph_utils import (
     DAMO_NOT_QUOTE,
@@ -18,29 +17,29 @@ class DateFst(GraphFst):
     def __init__(self):
         super().__init__(name="date", kind="verbalize")
 
-        convert_primer = pynini.cross('1', '1ᵉʳ')
+        convert_primer = pynini.cross("1", "1ᵉʳ")
         day = (
             pynutil.delete("day:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + (
                 pynini.closure(DAMO_NOT_QUOTE, 1) | pynutil.add_weight(convert_primer, -1)
             )  # first of the month is ordinal
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
         month = (
             pynutil.delete("month:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
         year = (
             pynutil.delete("year:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
 
         # day month
@@ -51,9 +50,9 @@ class DateFst(GraphFst):
             pynutil.delete("preserve_order:") + delete_space + pynutil.delete("true") + delete_space
             | pynutil.delete("field_order:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + DAMO_NOT_QUOTE
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + delete_space
         )
 

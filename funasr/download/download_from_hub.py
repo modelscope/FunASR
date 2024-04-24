@@ -22,8 +22,9 @@ def download_model(**kwargs):
             if model_or_path in name_maps_openai:
                 model_or_path = name_maps_openai[model_or_path]
             kwargs["model_path"] = model_or_path
-   
+
     return kwargs
+
 
 def download_from_ms(**kwargs):
     model_or_path = kwargs.get("model")
@@ -32,18 +33,21 @@ def download_from_ms(**kwargs):
     model_revision = kwargs.get("model_revision", "master")
     if not os.path.exists(model_or_path) and "model_path" not in kwargs:
         try:
-            model_or_path = get_or_download_model_dir(model_or_path, model_revision,
-                                                      is_training=kwargs.get("is_training"),
-                                                      check_latest=kwargs.get("check_latest", True))
+            model_or_path = get_or_download_model_dir(
+                model_or_path,
+                model_revision,
+                is_training=kwargs.get("is_training"),
+                check_latest=kwargs.get("check_latest", True),
+            )
         except Exception as e:
             print(f"Download: {model_or_path} failed!: {e}")
-    
+
     kwargs["model_path"] = model_or_path if "model_path" not in kwargs else kwargs["model_path"]
-    
+
     if os.path.exists(os.path.join(model_or_path, "configuration.json")):
-        with open(os.path.join(model_or_path, "configuration.json"), 'r', encoding='utf-8') as f:
+        with open(os.path.join(model_or_path, "configuration.json"), "r", encoding="utf-8") as f:
             conf_json = json.load(f)
-            
+
             cfg = {}
             if "file_path_metas" in conf_json:
                 add_file_root_path(model_or_path, conf_json["file_path_metas"], cfg)
@@ -52,7 +56,9 @@ def download_from_ms(**kwargs):
                 config = OmegaConf.load(cfg["config"])
                 kwargs = OmegaConf.merge(config, cfg)
                 kwargs["model"] = config["model"]
-    elif os.path.exists(os.path.join(model_or_path, "config.yaml")) and os.path.exists(os.path.join(model_or_path, "model.pt")):
+    elif os.path.exists(os.path.join(model_or_path, "config.yaml")) and os.path.exists(
+        os.path.join(model_or_path, "model.pt")
+    ):
         config = OmegaConf.load(os.path.join(model_or_path, "config.yaml"))
         kwargs = OmegaConf.merge(config, kwargs)
         init_param = os.path.join(model_or_path, "model.pb")
@@ -76,11 +82,13 @@ def download_from_ms(**kwargs):
         requirements = os.path.join(model_or_path, "requirements.txt")
         print(f"Detect model requirements, begin to install it: {requirements}")
         from funasr.utils.install_model_requirements import install_requirements
+
         install_requirements(requirements)
     return kwargs
 
-def add_file_root_path(model_or_path: str, file_path_metas: dict, cfg = {}):
-    
+
+def add_file_root_path(model_or_path: str, file_path_metas: dict, cfg={}):
+
     if isinstance(file_path_metas, dict):
         for k, v in file_path_metas.items():
             if isinstance(v, str):
@@ -91,17 +99,17 @@ def add_file_root_path(model_or_path: str, file_path_metas: dict, cfg = {}):
                 if k not in cfg:
                     cfg[k] = {}
                 add_file_root_path(model_or_path, v, cfg[k])
-    
+
     return cfg
 
 
 def get_or_download_model_dir(
-        model,
-        model_revision=None,
-        is_training=False,
-        check_latest=True,
-    ):
-    """ Get local model directory or download model if necessary.
+    model,
+    model_revision=None,
+    is_training=False,
+    check_latest=True,
+):
+    """Get local model directory or download model if necessary.
 
     Args:
         model (str): model id or path to local model directory.
@@ -112,27 +120,19 @@ def get_or_download_model_dir(
     from modelscope.hub.snapshot_download import snapshot_download
 
     from modelscope.utils.constant import Invoke, ThirdParty
-    
+
     key = Invoke.LOCAL_TRAINER if is_training else Invoke.PIPELINE
-    
+
     if os.path.exists(model) and check_latest:
-        model_cache_dir = model if os.path.isdir(
-            model) else os.path.dirname(model)
+        model_cache_dir = model if os.path.isdir(model) else os.path.dirname(model)
         try:
             check_local_model_is_latest(
-                model_cache_dir,
-                user_agent={
-                    Invoke.KEY: key,
-                    ThirdParty.KEY: "funasr"
-                })
+                model_cache_dir, user_agent={Invoke.KEY: key, ThirdParty.KEY: "funasr"}
+            )
         except:
             print("could not check the latest version")
     else:
         model_cache_dir = snapshot_download(
-            model,
-            revision=model_revision,
-            user_agent={
-                Invoke.KEY: key,
-                ThirdParty.KEY: "funasr"
-            })
+            model, revision=model_revision, user_agent={Invoke.KEY: key, ThirdParty.KEY: "funasr"}
+        )
     return model_cache_dir

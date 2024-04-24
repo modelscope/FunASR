@@ -1,5 +1,3 @@
-
-
 import os
 
 import pynini
@@ -20,9 +18,9 @@ from pynini.lib import pynutil
 class ClassifyFst(GraphFst):
     """
     Final class that composes all other classification grammars. This class can process an entire sentence including punctuation.
-    For deployment, this grammar will be compiled and exported to OpenFst Finate State Archiv (FAR) File. 
+    For deployment, this grammar will be compiled and exported to OpenFst Finate State Archiv (FAR) File.
     More details to deployment at NeMo/tools/text_processing_deployment.
-    
+
     Args:
         input_case: accepting either "lower_cased" or "cased" input.
         deterministic: if True will provide a single transduction option,
@@ -47,7 +45,8 @@ class ClassifyFst(GraphFst):
             os.makedirs(cache_dir, exist_ok=True)
             whitelist_file = os.path.basename(whitelist) if whitelist else ""
             far_file = os.path.join(
-                cache_dir, f"zh_tn_{deterministic}_deterministic_{input_case}_{whitelist_file}_tokenize.far"
+                cache_dir,
+                f"zh_tn_{deterministic}_deterministic_{input_case}_{whitelist_file}_tokenize.far",
             )
         if not overwrite_cache and far_file and os.path.exists(far_file):
             self.fst = pynini.Far(far_file, mode="r")["tokenize_and_classify"]
@@ -77,5 +76,8 @@ class ClassifyFst(GraphFst):
 
             tagger = pynini.cdrewrite(token.optimize(), "", "", FUN_SIGMA).optimize()
 
-            preprocessor = PreProcessor(remove_interjections=True, fullwidth_to_halfwidth=True,)
+            preprocessor = PreProcessor(
+                remove_interjections=True,
+                fullwidth_to_halfwidth=True,
+            )
             self.fst = preprocessor.fst @ tagger

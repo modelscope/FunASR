@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.inverse_text_normalization.vi.graph_utils import (
     DAMO_DIGIT,
@@ -62,7 +60,9 @@ class CardinalFst(GraphFst):
                 zero + delete_space + (graph_digit | graph_four),
             )
         )
-        graph_hundred_component = graph_hundred_ties_component | (pynutil.insert("00") + delete_space + graph_digit)
+        graph_hundred_component = graph_hundred_ties_component | (
+            pynutil.insert("00") + delete_space + graph_digit
+        )
 
         graph_hundred_component_at_least_one_none_zero_digit = graph_hundred_component @ (
             pynini.closure(DAMO_DIGIT) + (DAMO_DIGIT - "0") + pynini.closure(DAMO_DIGIT)
@@ -80,7 +80,9 @@ class CardinalFst(GraphFst):
         )
 
         graph_ten_thousand = pynini.union(
-            graph_hundred_component_at_least_one_none_zero_digit + delete_space + pynutil.delete("vạn"),
+            graph_hundred_component_at_least_one_none_zero_digit
+            + delete_space
+            + pynutil.delete("vạn"),
             pynutil.insert("0000", weight=0.1),
         )
 
@@ -90,7 +92,9 @@ class CardinalFst(GraphFst):
         )
 
         graph_million = pynini.union(
-            graph_hundred_component_at_least_one_none_zero_digit + delete_space + pynutil.delete("triệu"),
+            graph_hundred_component_at_least_one_none_zero_digit
+            + delete_space
+            + pynutil.delete("triệu"),
             pynutil.insert("000", weight=0.1),
         )
         graph_billion = pynini.union(
@@ -108,7 +112,11 @@ class CardinalFst(GraphFst):
             + graph_thousands
             + delete_space
             + graph_hundred_ties_zero,
-            graph_ten_thousand + delete_space + graph_ten_thousand_suffix + delete_space + graph_hundred_ties_zero,
+            graph_ten_thousand
+            + delete_space
+            + graph_ten_thousand_suffix
+            + delete_space
+            + graph_hundred_ties_zero,
             graph_hundred_component_at_least_one_none_zero_digit
             + delete_space
             + pynutil.delete(pynini.union("nghìn", "ngàn"))
@@ -119,7 +127,10 @@ class CardinalFst(GraphFst):
         )
 
         graph = graph @ pynini.union(
-            pynutil.delete(pynini.closure("0")) + pynini.difference(DAMO_DIGIT, "0") + pynini.closure(DAMO_DIGIT), "0",
+            pynutil.delete(pynini.closure("0"))
+            + pynini.difference(DAMO_DIGIT, "0")
+            + pynini.closure(DAMO_DIGIT),
+            "0",
         )
 
         # don't convert cardinals from zero to nine inclusive
@@ -130,10 +141,16 @@ class CardinalFst(GraphFst):
         self.graph = (pynini.project(graph, "input") - graph_exception.arcsort()) @ graph
 
         optional_minus_graph = pynini.closure(
-            pynutil.insert("negative: ") + pynini.cross(pynini.union("âm", "trừ"), '"-"') + DAMO_SPACE, 0, 1,
+            pynutil.insert("negative: ")
+            + pynini.cross(pynini.union("âm", "trừ"), '"-"')
+            + DAMO_SPACE,
+            0,
+            1,
         )
 
-        final_graph = optional_minus_graph + pynutil.insert('integer: "') + self.graph + pynutil.insert('"')
+        final_graph = (
+            optional_minus_graph + pynutil.insert('integer: "') + self.graph + pynutil.insert('"')
+        )
 
         final_graph = self.add_tokens(final_graph)
         self.fst = final_graph.optimize()

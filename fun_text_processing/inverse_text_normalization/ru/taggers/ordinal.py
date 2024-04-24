@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import DAMO_DIGIT, GraphFst
 from pynini.lib import pynutil
@@ -26,6 +24,6 @@ class OrdinalFst(GraphFst):
 
         # do not invert numbers less than 10
         graph = pynini.compose(graph, DAMO_DIGIT ** (2, ...))
-        graph = pynutil.insert("integer: \"") + graph + pynutil.insert("\"")
+        graph = pynutil.insert('integer: "') + graph + pynutil.insert('"')
         graph = self.add_tokens(graph)
         self.fst = graph.optimize()
