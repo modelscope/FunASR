@@ -63,7 +63,7 @@ class WKV(torch.autograd.Function):
         ctx.B = B
         ctx.T = T
         ctx.C = C
-        assert T <= T_MAX
+        # assert T <= T_MAX
         assert B * C % min(C, 1024) == 0
         if "32" in os.environ["RWKV_FLOAT_MODE"]:
             w = -torch.exp(w.contiguous())

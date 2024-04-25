@@ -167,9 +167,9 @@ class ResidualAttentionBlockRWKV(nn.Module):
 
         rwkv_cfg = kwargs.get("rwkv_cfg", {})
         args = OmegaConf.create(rwkv_cfg)
-        if args.get("version", "v4"):
+        if args.get("version", "v4") == "v4":
             from funasr.models.sense_voice.rwkv_v4 import RWKVLayer
-        elif args.get("version", "v5"):
+        elif args.get("version", "v5") == "v5":
             from funasr.models.sense_voice.rwkv_v5 import RWKVLayer
         else:
             from funasr.models.sense_voice.rwkv_v6 import RWKVLayer
