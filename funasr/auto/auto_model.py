@@ -513,7 +513,7 @@ class AutoModel:
                 distribute_spk(sentence_list, sv_output)
                 result["sentence_info"] = sentence_list
             elif kwargs.get("sentence_timestamp", False):
-                if not len(result["text"]):
+                if not len(result["text"].strip()):
                     sentence_list = []
                 else:
                     sentence_list = timestamp_sentence(
