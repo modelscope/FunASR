@@ -21,6 +21,7 @@ class IndexDSJsonlRankFull(torch.utils.data.Dataset):
         self.min_source_length = kwargs.get("min_source_length", 0)
         self.max_target_length = kwargs.get("max_target_length", 2048)
         self.min_target_length = kwargs.get("min_target_length", 0)
+        self.max_token_length = kwargs.get("max_token_length", 2200)
 
         is_training = kwargs.get("is_training", True)
         if not (path.endswith(".jsonl") or path.endswith(".json")):
@@ -102,6 +103,8 @@ class IndexDSJsonlRankFull(torch.utils.data.Dataset):
                             target_len < self.min_target_length
                             or target_len > self.max_target_length
                         ):
+                            continue
+                        if (source_len + target_len) > self.max_token_length:
                             continue
                         contents_i = {
                             "source": source,
