@@ -195,10 +195,6 @@ class ResidualAttentionBlockRWKV(nn.Module):
                 layer_id = 0
                 scale = ((1 + layer_id) / args.get("n_layer")) ** 0.7
                 nn.init.constant_(self.ln0.weight, scale)
-        if args.get("datatype", "bf16") == "bf16":
-            self.att.to(torch.bfloat16)
-            if self.ln0 is not None:
-                self.ln0 = self.ln0.to(torch.bfloat16)
 
         self.layer_id = layer_id
         self.args = args
@@ -211,6 +207,11 @@ class ResidualAttentionBlockRWKV(nn.Module):
                 print("init_rwkv")
                 scale = ((1 + layer_id) / args.get("n_layer")) ** 0.7
                 nn.init.constant_(self.ln1.weight, scale)
+
+        if args.get("datatype", "bf16") == "bf16":
+            self.att.to(torch.bfloat16)
+            if self.ln1 is not None:
+                self.ln1.to(torch.bfloat16)
 
         self.cross_attn = MultiHeadAttention(n_state, n_head) if cross_attention else None
         self.cross_attn_ln = LayerNorm(n_state) if cross_attention else None
