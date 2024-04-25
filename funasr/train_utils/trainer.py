@@ -117,7 +117,7 @@ class Trainer:
         self.start_data_split_i = 0
         self.start_step = 0
         self.use_wandb = kwargs.get("use_wandb", False)
-        if self.use_wandb is not None:
+        if self.use_wandb:
             wandb.login(key=kwargs.get("wandb_token"))
             wandb.init(
                 config=kwargs,
