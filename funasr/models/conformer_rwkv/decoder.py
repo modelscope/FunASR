@@ -93,7 +93,15 @@ class DecoderLayer(nn.Module):
             print("init_rwkv")
             scale = ((1 + layer_id) / args.get("n_layer")) ** 0.7
             nn.init.constant_(self.norm1.weight, scale)
-            nn.init.constant_(self.self_attn.ln2.weight, scale)
+            # nn.init.constant_(self.self_attn.ln2.weight, scale)
+
+        if args.get("init_rwkv", True):
+            print("init_rwkv")
+            nn.init.orthogonal_(self.self_attn.receptance.weight, gain=1)
+            nn.init.orthogonal_(self.self_attn.key.weight, gain=0.1)
+            nn.init.orthogonal_(self.self_attn.value.weight, gain=1)
+            nn.init.orthogonal_(self.self_attn.gate.weight, gain=0.1)
+            nn.init.zeros_(self.self_attn.output.weight)
 
     def forward(self, tgt, tgt_mask, memory, memory_mask, cache=None):
         """Compute decoded features.
@@ -376,19 +384,26 @@ class TransformerRWKVDecoder(BaseTransformerDecoder):
         args = OmegaConf.create(rwkv_cfg)
         # self.attn = RWKVLayer(args=args, layer_id=layer_id)
 
+        rwkv_cfg = kwargs.get("rwkv_cfg", {})
+        args = OmegaConf.create(rwkv_cfg)
         if args.get("version", "v4") == "v4":
             from funasr.models.sense_voice.rwkv_v4 import RWKVLayer
+            from funasr.models.sense_voice.rwkv_v4 import RWKV_TimeMix as RWKV_Tmix
         elif args.get("version", "v5") == "v5":
             from funasr.models.sense_voice.rwkv_v5 import RWKVLayer
+            from funasr.models.sense_voice.rwkv_v5 import RWKV_Tmix_x052 as RWKV_Tmix
         else:
             from funasr.models.sense_voice.rwkv_v6 import RWKVLayer
+            from funasr.models.sense_voice.rwkv_v6 import RWKV_Tmix_x060 as RWKV_Tmix
+        # self.attn = RWKVLayer(args=args, layer_id=layer_id)
+        attn = RWKV_Tmix(args, layer_id=layer_id)
 
         attention_dim = encoder_output_size
         self.decoders = repeat(
             num_blocks,
             lambda lnum: DecoderLayer(
                 attention_dim,
-                RWKVLayer(args=args, layer_id=lnum),
+                attn,
                 MultiHeadedAttention(attention_heads, attention_dim, src_attention_dropout_rate),
                 PositionwiseFeedForward(attention_dim, linear_units, dropout_rate),
                 dropout_rate,

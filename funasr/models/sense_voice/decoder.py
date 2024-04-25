@@ -169,7 +169,7 @@ class ResidualAttentionBlockRWKV(nn.Module):
         args = OmegaConf.create(rwkv_cfg)
         if args.get("version", "v4") == "v4":
             from funasr.models.sense_voice.rwkv_v4 import RWKVLayer
-
+            from funasr.models.sense_voice.rwkv_v4 import RWKV_TimeMix as RWKV_Tmix
         elif args.get("version", "v5") == "v5":
             from funasr.models.sense_voice.rwkv_v5 import RWKVLayer
             from funasr.models.sense_voice.rwkv_v5 import RWKV_Tmix_x052 as RWKV_Tmix
@@ -178,6 +178,15 @@ class ResidualAttentionBlockRWKV(nn.Module):
             from funasr.models.sense_voice.rwkv_v6 import RWKV_Tmix_x060 as RWKV_Tmix
         # self.attn = RWKVLayer(args=args, layer_id=layer_id)
         self.attn = RWKV_Tmix(args, layer_id=layer_id)
+
+        if args.get("init_rwkv", True):
+            print("init_rwkv")
+            nn.init.orthogonal_(self.att.receptance.weight, gain=1)
+            nn.init.orthogonal_(self.att.key.weight, gain=0.1)
+            nn.init.orthogonal_(self.att.value.weight, gain=1)
+            nn.init.orthogonal_(self.att.gate.weight, gain=0.1)
+            nn.init.zeros_(self.att.output.weight)
+
         if args.get("datatype", "bf16") == "bf16":
             self.attn.to(torch.bfloat16)
 
