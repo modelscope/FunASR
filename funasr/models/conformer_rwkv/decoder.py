@@ -54,7 +54,7 @@ class DecoderLayer(nn.Module):
     def __init__(
         self,
         size,
-        self_attn,
+        # self_attn,
         src_attn,
         feed_forward,
         dropout_rate,
@@ -402,7 +402,6 @@ class TransformerRWKVDecoder(BaseTransformerDecoder):
             num_blocks,
             lambda lnum: DecoderLayer(
                 attention_dim,
-                attn,
                 MultiHeadedAttention(attention_heads, attention_dim, src_attention_dropout_rate),
                 PositionwiseFeedForward(attention_dim, linear_units, dropout_rate),
                 dropout_rate,
