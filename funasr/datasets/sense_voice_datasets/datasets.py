@@ -1,3 +1,5 @@
+import logging
+
 import torch
 import random
 
@@ -131,18 +133,27 @@ class SenseVoiceDataset(torch.utils.data.Dataset):
             b, t, _ = outputs["speech"].shape
             if b * t > self.batch_size:
                 beg = torch.randint(0, 2, ()).item()
+                logging.info(
+                    f"Warning, b * t: {b * t} > {self.batch_size}, drop half data, beg:{beg}"
+                )
                 for key, data_list in outputs.items():
                     outputs[key] = outputs[key][beg : beg + b : 2]
 
             b, t, _ = outputs["speech"].shape
             if b * t > self.batch_size:
                 beg = torch.randint(0, 2, ()).item()
+                logging.info(
+                    f"Warning, b * t: {b * t} > {self.batch_size}, drop half data, beg:{beg}"
+                )
                 for key, data_list in outputs.items():
                     outputs[key] = outputs[key][beg : beg + b : 2]
 
             b, t, _ = outputs["speech"].shape
             if b * t > self.batch_size:
                 beg = torch.randint(0, 2, ()).item()
+                logging.info(
+                    f"Warning, b * t: {b * t} > {self.batch_size}, drop half data, beg:{beg}"
+                )
                 for key, data_list in outputs.items():
                     outputs[key] = outputs[key][beg : beg + b : 2]
         return outputs
