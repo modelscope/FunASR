@@ -109,6 +109,8 @@ class Trainer:
         self.val_loss_step_or_eoch = {}
 
         self.reset_gpu_cache = kwargs.get("reset_gpu_cache", False)
+        self.start_data_split_i = 0
+        self.start_step = 0
 
     def save_checkpoint(
         self,
@@ -141,6 +143,7 @@ class Trainer:
                 "val_loss_step_or_eoch": self.val_loss_step_or_eoch,
                 "best_step_or_epoch": self.best_step_or_epoch,
                 "avg_keep_nbest_models_type": self.avg_keep_nbest_models_type,
+                "step": step,
             }
             if hasattr(model, "module"):
                 state["state_dict"] = model.module.state_dict()
@@ -267,6 +270,13 @@ class Trainer:
                 self.best_step_or_epoch = (
                     checkpoint["best_step_or_epoch"] if "best_step_or_epoch" in checkpoint else ""
                 )
+                self.start_data_split_i = (
+                    checkpoint["start_data_split_i"] if "start_data_split_i" in checkpoint else 0
+                )
+                self.batch_total = checkpoint["batch_total"] if "batch_total" in checkpoint else 0
+                self.start_step = checkpoint["step"] if "step" in checkpoint else 0
+                self.start_step = 0 if self.start_step is None else self.start_step
+
                 model.to(self.device)
                 print(f"Checkpoint loaded successfully from '{ckpt}'")
             else:
