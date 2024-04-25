@@ -370,11 +370,19 @@ class TransformerRWKVDecoder(BaseTransformerDecoder):
             pos_enc_class=pos_enc_class,
             normalize_before=normalize_before,
         )
-        from funasr.models.sense_voice.rwkv_v6 import RWKVLayer
+        # from funasr.models.sense_voice.rwkv_v6 import RWKVLayer
 
         rwkv_cfg = kwargs.get("rwkv_cfg", {})
         args = OmegaConf.create(rwkv_cfg)
         # self.attn = RWKVLayer(args=args, layer_id=layer_id)
+
+        if args.get("version", "v4"):
+            from funasr.models.sense_voice.rwkv_v4 import RWKVLayer
+        elif args.get("version", "v5"):
+            from funasr.models.sense_voice.rwkv_v5 import RWKVLayer
+        else:
+            from funasr.models.sense_voice.rwkv_v6 import RWKVLayer
+
         attention_dim = encoder_output_size
         self.decoders = repeat(
             num_blocks,
