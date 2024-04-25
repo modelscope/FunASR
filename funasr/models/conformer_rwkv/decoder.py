@@ -62,11 +62,12 @@ class DecoderLayer(nn.Module):
         concat_after=False,
         layer_id=None,
         args={},
+        **kwargs,
     ):
         """Construct an DecoderLayer object."""
         super(DecoderLayer, self).__init__()
         self.size = size
-        self.self_attn = self_attn.to(torch.bfloat16)
+        # self.self_attn = self_attn.to(torch.bfloat16)
         self.src_attn = src_attn
         self.feed_forward = feed_forward
         self.norm1 = LayerNorm(size)
@@ -79,6 +80,19 @@ class DecoderLayer(nn.Module):
             self.concat_linear1 = nn.Linear(size + size, size)
             self.concat_linear2 = nn.Linear(size + size, size)
         self.layer_id = layer_id
+
+        if args.get("version", "v4") == "v4":
+            from funasr.models.sense_voice.rwkv_v4 import RWKVLayer
+            from funasr.models.sense_voice.rwkv_v4 import RWKV_TimeMix as RWKV_Tmix
+        elif args.get("version", "v5") == "v5":
+            from funasr.models.sense_voice.rwkv_v5 import RWKVLayer
+            from funasr.models.sense_voice.rwkv_v5 import RWKV_Tmix_x052 as RWKV_Tmix
+        else:
+            from funasr.models.sense_voice.rwkv_v6 import RWKVLayer
+            from funasr.models.sense_voice.rwkv_v6 import RWKV_Tmix_x060 as RWKV_Tmix
+        # self.attn = RWKVLayer(args=args, layer_id=layer_id)
+        self.self_attn = RWKV_Tmix(args, layer_id=layer_id)
+
         self.ln0 = None
         if self.layer_id == 0 and not args.get("ln0", True):
             self.ln0 = LayerNorm(args.n_embd)
@@ -382,21 +396,6 @@ class TransformerRWKVDecoder(BaseTransformerDecoder):
 
         rwkv_cfg = kwargs.get("rwkv_cfg", {})
         args = OmegaConf.create(rwkv_cfg)
-        # self.attn = RWKVLayer(args=args, layer_id=layer_id)
-
-        rwkv_cfg = kwargs.get("rwkv_cfg", {})
-        args = OmegaConf.create(rwkv_cfg)
-        if args.get("version", "v4") == "v4":
-            from funasr.models.sense_voice.rwkv_v4 import RWKVLayer
-            from funasr.models.sense_voice.rwkv_v4 import RWKV_TimeMix as RWKV_Tmix
-        elif args.get("version", "v5") == "v5":
-            from funasr.models.sense_voice.rwkv_v5 import RWKVLayer
-            from funasr.models.sense_voice.rwkv_v5 import RWKV_Tmix_x052 as RWKV_Tmix
-        else:
-            from funasr.models.sense_voice.rwkv_v6 import RWKVLayer
-            from funasr.models.sense_voice.rwkv_v6 import RWKV_Tmix_x060 as RWKV_Tmix
-        # self.attn = RWKVLayer(args=args, layer_id=layer_id)
-        attn = RWKV_Tmix(args, layer_id=layer_id)
 
         attention_dim = encoder_output_size
         self.decoders = repeat(
