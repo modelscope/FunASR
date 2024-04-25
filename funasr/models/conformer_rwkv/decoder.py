@@ -29,6 +29,11 @@ from omegaconf import OmegaConf
 from funasr.register import tables
 
 
+class LayerNorm(nn.LayerNorm):
+    def forward(self, x: Tensor) -> Tensor:
+        return super().forward(x.float()).type(x.dtype)
+
+
 class DecoderLayer(nn.Module):
     """Single decoder layer module.
 
@@ -94,7 +99,7 @@ class DecoderLayer(nn.Module):
         self.self_attn = RWKV_Tmix(args, layer_id=layer_id)
         if args.get("datatype", "bf16") == "bf16":
             self.self_attn.to(torch.bfloat16)
-            self.norm1.to(torch.bfloat16)
+            # self.norm1.to(torch.bfloat16)
         self.args = args
         self.ln0 = None
         if self.layer_id == 0 and not args.get("ln0", True):

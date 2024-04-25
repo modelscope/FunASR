@@ -15,6 +15,11 @@ from funasr.train_utils.recursive_op import recursive_average
 from funasr.train_utils.average_nbest_models import average_checkpoints
 from torch.distributed.fsdp.sharded_grad_scaler import ShardedGradScaler
 
+try:
+    import wandb
+except:
+    wandb = None
+
 
 @contextmanager
 def maybe_autocast(enabled):
@@ -111,6 +116,19 @@ class Trainer:
         self.reset_gpu_cache = kwargs.get("reset_gpu_cache", False)
         self.start_data_split_i = 0
         self.start_step = 0
+        if kwargs.get("use_wandb", False):
+            # wandb.login()
+            wandb.init(
+                config=kwargs,
+                project=kwargs.get("project_wandb", "my_project"),
+                entity=kwargs.get("team_wandb", "my_team"),
+                name=kwargs.get("exp_wandb", "my_exp"),
+                dir=output_dir,
+                job_type="training",
+                reinit=True,
+            )
+        else:
+            wandb = None
 
     def save_checkpoint(
         self,
@@ -622,18 +640,29 @@ class Trainer:
             )
             logging.info(description)
 
+            description_dict = {
+                f"rank{self.local_rank}_loss/{tag}": loss,
+                f"rank{self.local_rank}_lr/{tag}": lr,
+            }
+
             if writer is not None:
                 writer.add_scalar(f"rank{self.local_rank}_loss/{tag}", loss, self.batch_total)
-                writer.add_scalar(f"rank{self.local_rank}_lr/{tag}", lr, self.batch_total)
                 writer.add_scalar(f"rank{self.local_rank}_lr/{tag}", lr, self.batch_total)
                 for key, var in stats.items():
                     writer.add_scalar(
                         f"stats_rank{self.local_rank}_{key}/{tag}", var.item(), self.batch_total
                     )
+                    description_dict[f"stats_rank{self.local_rank}_{key}/{tag}"] = var.item()
                 for key, var in speed_stats.items():
                     writer.add_scalar(
                         f"stats_rank{self.local_rank}_{key}/{tag}", eval(var), self.batch_total
                     )
+                    description_dict[f"stats_rank{self.local_rank}_{key}/{tag}"] = eval(var)
+            if wandb is not None:
+                wandb.log(
+                    description_dict,
+                    setp=self.batch_total,
+                )
 
     def close(self, writer=None):
 
