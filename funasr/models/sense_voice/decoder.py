@@ -210,8 +210,8 @@ class ResidualAttentionBlockRWKV(nn.Module):
 
         if args.get("datatype", "bf16") == "bf16":
             self.att.to(torch.bfloat16)
-            if self.ln1 is not None:
-                self.ln1.to(torch.bfloat16)
+            # if self.ln1 is not None:
+            #     self.ln1.to(torch.bfloat16)
 
         self.cross_attn = MultiHeadAttention(n_state, n_head) if cross_attention else None
         self.cross_attn_ln = LayerNorm(n_state) if cross_attention else None
