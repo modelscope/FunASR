@@ -624,7 +624,7 @@ class Trainer:
             acc_avg_epoch = getattr(self, f"{tag}_acc_avg")
             description = (
                 f"{tag}, "
-                f"rank: {self.local_rank}, "
+                f"rank: {self.rank}, "
                 f"epoch: {epoch}/{self.max_epoch}, "
                 f"data_slice: {data_split_i}/{data_split_num}, "
                 f"step: {batch_idx + 1}/{batch_num_epoch}, total step: {self.batch_total}, "
@@ -640,23 +640,23 @@ class Trainer:
             logging.info(description)
 
             description_dict = {
-                f"rank{self.local_rank}_loss/{tag}": loss,
-                f"rank{self.local_rank}_lr/{tag}": lr,
+                f"rank{self.rank}_loss/{tag}": loss,
+                f"rank{self.rank}_lr/{tag}": lr,
             }
 
             if writer is not None:
-                writer.add_scalar(f"rank{self.local_rank}_loss/{tag}", loss, self.batch_total)
-                writer.add_scalar(f"rank{self.local_rank}_lr/{tag}", lr, self.batch_total)
+                writer.add_scalar(f"rank{self.rank}_loss/{tag}", loss, self.batch_total)
+                writer.add_scalar(f"rank{self.rank}_lr/{tag}", lr, self.batch_total)
                 for key, var in stats.items():
                     writer.add_scalar(
-                        f"stats_rank{self.local_rank}_{key}/{tag}", var.item(), self.batch_total
+                        f"stats_rank{self.rank}_{key}/{tag}", var.item(), self.batch_total
                     )
-                    description_dict[f"stats_rank{self.local_rank}_{key}/{tag}"] = var.item()
+                    description_dict[f"stats_rank{self.rank}_{key}/{tag}"] = var.item()
                 for key, var in speed_stats.items():
                     writer.add_scalar(
-                        f"stats_rank{self.local_rank}_{key}/{tag}", eval(var), self.batch_total
+                        f"stats_rank{self.rank}_{key}/{tag}", eval(var), self.batch_total
                     )
-                    description_dict[f"stats_rank{self.local_rank}_{key}/{tag}"] = eval(var)
+                    description_dict[f"stats_rank{self.rank}_{key}/{tag}"] = eval(var)
             if self.use_wandb and wandb is not None:
                 wandb.log(
                     description_dict,
