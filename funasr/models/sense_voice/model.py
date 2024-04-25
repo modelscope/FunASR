@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 from typing import Dict
 from typing import Iterable, Optional
@@ -309,7 +310,7 @@ class SenseVoiceRWKV(nn.Module):
             speech_lengths = speech_lengths[:, 0]
 
         batch_size = speech.shape[0]
-
+        logging.info(f"speech shape: {speech.shape}, text_lengths: {text_lengths}")
         if self.activation_checkpoint:
             from torch.utils.checkpoint import checkpoint
 
@@ -318,6 +319,19 @@ class SenseVoiceRWKV(nn.Module):
             )
         else:
             encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
+
+        gpu_info = (
+            "GPU, memory: usage: {:.3f} GB, "
+            "peak: {:.3f} GB, "
+            "cache: {:.3f} GB, "
+            "cache_peak: {:.3f} GB".format(
+                torch.cuda.memory_allocated() / 1024 / 1024 / 1024,
+                torch.cuda.max_memory_allocated() / 1024 / 1024 / 1024,
+                torch.cuda.memory_reserved() / 1024 / 1024 / 1024,
+                torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024,
+            )
+        )
+        logging.info(f"after decoder: {gpu_info}")
 
         loss_att, acc_att, cer_att, wer_att = self._calc_att_loss(
             encoder_out, encoder_out_lens, text, text_lengths, target_mask=target_mask

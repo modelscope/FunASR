@@ -352,8 +352,32 @@ class Trainer:
             with my_context():
                 time2 = time.perf_counter()
                 with maybe_autocast(self.use_fp16):
-                    retval = model(**batch)
 
+                    gpu_info = (
+                        "GPU, memory: usage: {:.3f} GB, "
+                        "peak: {:.3f} GB, "
+                        "cache: {:.3f} GB, "
+                        "cache_peak: {:.3f} GB".format(
+                            torch.cuda.memory_allocated() / 1024 / 1024 / 1024,
+                            torch.cuda.max_memory_allocated() / 1024 / 1024 / 1024,
+                            torch.cuda.memory_reserved() / 1024 / 1024 / 1024,
+                            torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024,
+                        )
+                    )
+                    logging.info(f"before forward: {gpu_info}")
+                    retval = model(**batch)
+                    gpu_info = (
+                        "GPU, memory: usage: {:.3f} GB, "
+                        "peak: {:.3f} GB, "
+                        "cache: {:.3f} GB, "
+                        "cache_peak: {:.3f} GB".format(
+                            torch.cuda.memory_allocated() / 1024 / 1024 / 1024,
+                            torch.cuda.max_memory_allocated() / 1024 / 1024 / 1024,
+                            torch.cuda.memory_reserved() / 1024 / 1024 / 1024,
+                            torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024,
+                        )
+                    )
+                    logging.info(f"after forward: {gpu_info}")
                     if (
                         self.reset_gpu_cache
                         and (torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024) > 70
