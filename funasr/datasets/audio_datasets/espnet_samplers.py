@@ -92,6 +92,7 @@ class EspnetStyleBatchSampler(DistributedSampler):
         max_len_in_batch = 0  # Tracks the max sample length within the current batch
 
         for idx in sorted_indices:
+          
             # original_sample_length = self.dataset.get_source_len(idx)
             # if (
             #     original_sample_length < self.min_token_length
@@ -100,6 +101,7 @@ class EspnetStyleBatchSampler(DistributedSampler):
             #     continue
 
             # sample_length = 1 if self.batch_type == "example" else original_sample_length
+
             # Set sample_length based on the batch type
             if self.batch_type == "example":
                 sample_length = 1

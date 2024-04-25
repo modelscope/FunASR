@@ -211,7 +211,9 @@ def main(**kwargs):
                 data_split_i=data_split_i,
                 data_split_num=dataloader.data_split_num,
             )
+            
             torch.cuda.empty_cache()
+
 
         trainer.validate_epoch(
             model=model, dataloader_val=dataloader_val, epoch=epoch, writer=writer
