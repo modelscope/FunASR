@@ -169,11 +169,15 @@ class ResidualAttentionBlockRWKV(nn.Module):
         args = OmegaConf.create(rwkv_cfg)
         if args.get("version", "v4") == "v4":
             from funasr.models.sense_voice.rwkv_v4 import RWKVLayer
+
         elif args.get("version", "v5") == "v5":
             from funasr.models.sense_voice.rwkv_v5 import RWKVLayer
+            from funasr.models.sense_voice.rwkv_v5 import RWKV_Tmix_x052 as RWKV_Tmix
         else:
             from funasr.models.sense_voice.rwkv_v6 import RWKVLayer
-        self.attn = RWKVLayer(args=args, layer_id=layer_id)
+            from funasr.models.sense_voice.rwkv_v6 import RWKV_Tmix_x060 as RWKV_Tmix
+        # self.attn = RWKVLayer(args=args, layer_id=layer_id)
+        self.attn = RWKV_Tmix(args, layer_id=layer_id)
         if args.get("datatype", "bf16") == "bf16":
             self.attn.to(torch.bfloat16)
 
@@ -218,10 +222,14 @@ class ResidualAttentionBlockRWKV(nn.Module):
         if self.layer_id == 0 and self.ln0 is not None:
             x = self.ln0(x)
 
+        if self.args.get("datatype", "bf16") == "bf16":
+            x = x.bfloat16()
         if self.ln1 is None:
             x = x + self.attn(x, mask=mask, kv_cache=kv_cache, is_pad_mask=is_pad_mask)[0]
         else:
             x = x + self.attn(self.ln1(x), mask=mask, kv_cache=kv_cache, is_pad_mask=is_pad_mask)[0]
+        if self.args.get("datatype", "bf16") == "bf16":
+            x = x.to(torch.float32)
 
         if self.cross_attn:
             x = (
