@@ -187,9 +187,6 @@ class ResidualAttentionBlockRWKV(nn.Module):
             nn.init.orthogonal_(self.att.gate.weight, gain=0.1)
             nn.init.zeros_(self.att.output.weight)
 
-        if args.get("datatype", "bf16") == "bf16":
-            self.attn.to(torch.bfloat16)
-
         self.ln0 = None
         if layer_id == 0 and not args.get("ln0", True):
             self.ln0 = LayerNorm(args.n_embd)
@@ -198,6 +195,11 @@ class ResidualAttentionBlockRWKV(nn.Module):
                 layer_id = 0
                 scale = ((1 + layer_id) / args.get("n_layer")) ** 0.7
                 nn.init.constant_(self.ln0.weight, scale)
+        if args.get("datatype", "bf16") == "bf16":
+            self.attn.to(torch.bfloat16)
+            if self.ln0 is not None:
+                self.ln0 = self.ln0.to(torch.bfloat16)
+
         self.layer_id = layer_id
         self.args = args
 
