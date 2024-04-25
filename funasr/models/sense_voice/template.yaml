@@ -1,11 +1,5 @@
-# This is an example that demonstrates how to configure a model file.
-# You can modify the configuration according to your own requirements.
-
-# to print the register_table:
-# from funasr.register import tables
-# tables.print()
 # network architecture
-model: SenseVoice
+model: SenseVoiceRWKV
 model_conf:
     lsm_weight: 0.1
     length_normalized_loss: true
@@ -27,6 +21,26 @@ model_conf:
         n_text_head: 20
         n_text_layer: 32
 
+
+# decoder
+decoder: SenseVoiceDecoder
+decoder_conf:
+    rwkv_cfg:
+      n_embd: 1280
+      dropout: 0
+      head_size_a: 64
+      ctx_len: 1280
+      dim_att: 1280 #${model_conf.rwkv_cfg.n_embd}
+      dim_ffn: null
+      head_size_divisor: 8
+      n_layer: 32
+      pre_ffn: 0
+      ln0: false
+      ln1: false
+      init_rwkv: false
+      datatype: bf16
+
+
 # frontend related
 frontend: WhisperFrontend
 frontend_conf:
@@ -42,12 +56,17 @@ tokenizer_conf:
 
 dataset: SenseVoiceDataset
 dataset_conf:
-    index_ds: IndexDSJsonl
+    index_ds: IndexDSJsonlRankSplit
     batch_sampler: EspnetStyleBatchSampler
-    batch_type: length # example or length
-    batch_size: 7000 # if batch_type is example, batch_size is the numbers of samples; if length, batch_size is source_token_len+target_token_len;
-    max_token_length: 2000 # filter samples if source_token_len+target_token_len > max_token_length,
+    rank_split: true
+    batch_type: token # example or length
+    batch_size: 3500 # if batch_type is example, batch_size is the numbers of samples; if length, batch_size is source_token_len+target_token_len;
+    max_token_length: 2200
     min_token_length: 60
+    max_source_length: 2000
+    min_source_length: 60
+    max_target_length: 150
+    min_target_length: 0
     shuffle: True
     num_workers: 4
     sos: ${model_conf.sos}
@@ -60,6 +79,7 @@ train_conf:
   keep_nbest_models: 20
   avg_nbest_model: ${train_conf.keep_nbest_models}
   log_interval: 50
+  reset_gpu_cache: true
 
 optim: adamw
 optim_conf:

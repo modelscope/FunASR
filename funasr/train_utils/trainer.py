@@ -107,6 +107,9 @@ class Trainer:
         self.best_step_or_epoch = ""
         self.val_acc_step_or_eoch = {}
         self.val_loss_step_or_eoch = {}
+        
+        self.reset_gpu_cache = kwargs.get("reset_gpu_cache", False)
+
 
     def save_checkpoint(
         self,
@@ -324,6 +327,12 @@ class Trainer:
                 time2 = time.perf_counter()
                 with maybe_autocast(self.use_fp16):
                     retval = model(**batch)
+                    
+                    if (
+                        self.reset_gpu_cache
+                        and (torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024) > 70
+                    ):
+                        torch.cuda.empty_cache()
 
                 time3 = time.perf_counter()
                 speed_stats["forward_time"] = f"{time3 - time2:0.3f}"
