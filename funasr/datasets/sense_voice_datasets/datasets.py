@@ -146,11 +146,11 @@ class SenseVoiceDataset(torch.utils.data.Dataset):
             for key, data_list in outputs.items():
                 outputs[key] = outputs[key][beg : beg + b : 2]
 
-            speech_lengths_max = outputs["speech_lengths_max"].max().item()
+            speech_lengths_max = outputs["speech_lengths"].max().item()
             outputs["speech"] = outputs["speech"][:, :speech_lengths_max, :]
             text_lengths_max = outputs["text_lengths"].max().item()
             outputs["text"] = outputs["text"][:, :text_lengths_max]
-            target_mask_lengths_max = outputs["target_mask_lengths_max"].max().item()
+            target_mask_lengths_max = outputs["target_mask_lengths"].max().item()
             outputs["target_mask"] = outputs["target_mask"][:, :target_mask_lengths_max]
 
         return outputs
