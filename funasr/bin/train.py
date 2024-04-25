@@ -110,14 +110,6 @@ def main(**kwargs):
     if local_rank == 0:
         logging.info(f"{model_summary(model)}")
 
-        n_params = 0
-        for n in model.state_dict():
-            p = model.state_dict()[n]
-            shape = p.shape
-            print(p, shape)
-            n_params += p.numel()
-        print("model params", n_params)
-
     if use_ddp:
         model = model.cuda(local_rank)
         model = DDP(
