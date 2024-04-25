@@ -156,7 +156,6 @@ class MultiHeadAttention(nn.Module):
         return (w @ v).permute(0, 2, 1, 3).flatten(start_dim=2), qk.detach()
 
 
-from funasr.models.sense_voice.rwkv_v6 import RWKVLayer
 from omegaconf import OmegaConf
 
 
@@ -168,6 +167,10 @@ class ResidualAttentionBlockRWKV(nn.Module):
 
         rwkv_cfg = kwargs.get("rwkv_cfg", {})
         args = OmegaConf.create(rwkv_cfg)
+        if args.get("version", "v5"):
+            from funasr.models.sense_voice.rwkv_v5 import RWKVLayer
+        else:
+            from funasr.models.sense_voice.rwkv_v6 import RWKVLayer
         self.attn = RWKVLayer(args=args, layer_id=layer_id)
         if args.get("datatype", "bf16") == "bf16":
             self.attn.to(torch.bfloat16)
