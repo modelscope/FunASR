@@ -30,7 +30,7 @@ from funasr.register import tables
 
 
 class LayerNorm(nn.LayerNorm):
-    def forward(self, x: Tensor) -> Tensor:
+    def forward(self, x):
         return super().forward(x.float()).type(x.dtype)
 
 

@@ -116,19 +116,18 @@ class Trainer:
         self.reset_gpu_cache = kwargs.get("reset_gpu_cache", False)
         self.start_data_split_i = 0
         self.start_step = 0
-        if kwargs.get("use_wandb", False):
-            # wandb.login()
+        self.use_wandb = kwargs.get("use_wandb", False)
+        if self.use_wandb is not None:
+            wandb.login(key=kwargs.get("wandb_token"))
             wandb.init(
                 config=kwargs,
-                project=kwargs.get("project_wandb", "my_project"),
-                entity=kwargs.get("team_wandb", "my_team"),
-                name=kwargs.get("exp_wandb", "my_exp"),
+                project=kwargs.get("wandb_project", "my_project"),
+                entity=kwargs.get("wandb_team", "my_team"),
+                name=kwargs.get("wandb_exp_name", "my_exp"),
                 dir=output_dir,
                 job_type="training",
                 reinit=True,
             )
-        else:
-            wandb = None
 
     def save_checkpoint(
         self,
@@ -658,7 +657,7 @@ class Trainer:
                         f"stats_rank{self.local_rank}_{key}/{tag}", eval(var), self.batch_total
                     )
                     description_dict[f"stats_rank{self.local_rank}_{key}/{tag}"] = eval(var)
-            if wandb is not None:
+            if self.use_wandb and wandb is not None:
                 wandb.log(
                     description_dict,
                     setp=self.batch_total,

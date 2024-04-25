@@ -1,0 +1,145 @@
+2024-04-25 21:14:46,163 INFO    StreamThr :90024 [internal.py:wandb_internal():86] W&B internal server running at pid: 90024, started at: 2024-04-25 21:14:46.156788
+2024-04-25 21:14:46,164 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status
+2024-04-25 21:14:46,172 INFO    WriterThread:90024 [datastore.py:open_for_write():87] open: ./wandb/run-20240425_211446-lkqptn01/run-lkqptn01.wandb
+2024-04-25 21:14:46,173 DEBUG   SenderThread:90024 [sender.py:send():379] send: header
+2024-04-25 21:14:46,284 DEBUG   SenderThread:90024 [sender.py:send():379] send: run
+2024-04-25 21:14:46,828 ERROR   SenderThread:90024 [internal_api.py:execute():373] 403 response executing GraphQL.
+2024-04-25 21:14:46,828 ERROR   SenderThread:90024 [internal_api.py:execute():374] {"errors":[{"message":"permission denied","path":["upsertBucket"],"extensions":{"code":"PERMISSION_ERROR"}}],"data":{"upsertBucket":null}}
+2024-04-25 21:14:46,828 ERROR   SenderThread:90024 [sender.py:send_run():971] It appears that you do not have permission to access the requested resource. Please reach out to the project owner to grant you access. If you have the correct permissions, verify that there are no issues with your networking setup.(Error 403: Forbidden)
+Traceback (most recent call last):
+  File "/Users/zhifu/miniconda3/envs/funasr/lib/python3.8/site-packages/wandb/sdk/lib/retry.py", line 131, in __call__
+    result = self._call_fn(*args, **kwargs)
+  File "/Users/zhifu/miniconda3/envs/funasr/lib/python3.8/site-packages/wandb/sdk/internal/internal_api.py", line 369, in execute
+    return self.client.execute(*args, **kwargs)  # type: ignore
+  File "/Users/zhifu/miniconda3/envs/funasr/lib/python3.8/site-packages/wandb/vendor/gql-0.2.0/wandb_gql/client.py", line 52, in execute
+    result = self._get_result(document, *args, **kwargs)
+  File "/Users/zhifu/miniconda3/envs/funasr/lib/python3.8/site-packages/wandb/vendor/gql-0.2.0/wandb_gql/client.py", line 60, in _get_result
+    return self.transport.execute(document, *args, **kwargs)
+  File "/Users/zhifu/miniconda3/envs/funasr/lib/python3.8/site-packages/wandb/sdk/lib/gql_request.py", line 59, in execute
+    request.raise_for_status()
+  File "/Users/zhifu/miniconda3/envs/funasr/lib/python3.8/site-packages/requests/models.py", line 1021, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 403 Client Error: Forbidden for url: https://api.wandb.ai/graphql
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/zhifu/miniconda3/envs/funasr/lib/python3.8/site-packages/wandb/sdk/internal/sender.py", line 969, in send_run
+    server_run = self._init_run(run, config_value_dict)
+  File "/Users/zhifu/miniconda3/envs/funasr/lib/python3.8/site-packages/wandb/sdk/internal/sender.py", line 1014, in _init_run
+    server_run, inserted, server_messages = self._api.upsert_run(
+  File "/Users/zhifu/miniconda3/envs/funasr/lib/python3.8/site-packages/wandb/apis/normalize.py", line 73, in wrapper
+    raise err
+  File "/Users/zhifu/miniconda3/envs/funasr/lib/python3.8/site-packages/wandb/apis/normalize.py", line 41, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/zhifu/miniconda3/envs/funasr/lib/python3.8/site-packages/wandb/sdk/internal/internal_api.py", line 2217, in upsert_run
+    response = self.gql(
+  File "/Users/zhifu/miniconda3/envs/funasr/lib/python3.8/site-packages/wandb/sdk/internal/internal_api.py", line 341, in gql
+    ret = self._retry_gql(
+  File "/Users/zhifu/miniconda3/envs/funasr/lib/python3.8/site-packages/wandb/sdk/lib/retry.py", line 147, in __call__
+    retry_timedelta_triggered = check_retry_fn(e)
+  File "/Users/zhifu/miniconda3/envs/funasr/lib/python3.8/site-packages/wandb/util.py", line 968, in check_retry_fn
+    return fallback_retry_fn(e)
+  File "/Users/zhifu/miniconda3/envs/funasr/lib/python3.8/site-packages/wandb/util.py", line 910, in no_retry_auth
+    raise CommError(
+wandb.errors.CommError: It appears that you do not have permission to access the requested resource. Please reach out to the project owner to grant you access. If you have the correct permissions, verify that there are no issues with your networking setup.(Error 403: Forbidden)
+2024-04-25 21:14:51,848 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:14:56,865 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:15:01,882 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:15:06,910 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:15:11,930 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:15:16,954 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:15:21,968 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:15:26,992 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:15:32,007 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:15:37,026 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:15:42,047 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:15:47,060 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:15:52,088 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:15:57,107 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:16:02,125 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:16:07,154 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:16:12,184 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:16:17,193 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:16:22,218 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:16:27,236 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:16:32,248 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:16:37,267 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:16:42,285 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:16:47,302 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:16:52,323 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:16:57,345 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:17:02,359 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:17:07,370 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:17:12,391 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:17:17,410 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:17:22,427 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:17:27,449 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:17:32,472 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:17:37,492 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:17:42,514 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:17:47,529 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:17:52,547 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:17:57,565 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:18:02,584 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:18:07,605 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:18:12,630 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:18:17,649 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:18:22,670 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:18:27,689 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:18:32,706 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:18:37,721 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:18:42,738 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:18:47,760 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:18:52,776 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:18:57,797 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:19:02,816 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:19:07,831 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:19:12,849 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:19:17,886 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:19:22,903 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:19:27,914 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:19:32,935 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:19:37,956 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:19:42,977 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:19:47,997 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:19:53,013 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:19:58,037 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:20:03,054 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:20:08,074 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:20:13,095 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:20:18,115 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:20:23,136 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:20:28,158 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:20:33,175 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:20:38,195 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:20:43,216 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:20:48,237 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:20:53,254 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:20:58,276 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:21:03,293 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:21:08,306 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:21:13,328 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:21:18,349 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:21:23,372 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:21:28,393 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:21:33,418 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:21:38,428 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:21:43,452 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:21:48,475 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:21:53,493 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:21:58,512 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:22:03,530 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:22:08,546 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:22:13,563 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:22:18,586 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:22:23,604 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:22:28,621 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:22:33,641 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:22:38,688 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:22:43,704 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:22:48,722 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:22:53,742 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:22:58,756 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:23:03,775 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
+2024-04-25 21:23:08,798 DEBUG   HandlerThread:90024 [handler.py:handle_request():146] handle_request: status_report
