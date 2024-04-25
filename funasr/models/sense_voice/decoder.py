@@ -176,8 +176,8 @@ class ResidualAttentionBlockRWKV(nn.Module):
         else:
             from funasr.models.sense_voice.rwkv_v6 import RWKVLayer
             from funasr.models.sense_voice.rwkv_v6 import RWKV_Tmix_x060 as RWKV_Tmix
-        # self.attn = RWKVLayer(args=args, layer_id=layer_id)
-        self.attn = RWKV_Tmix(args, layer_id=layer_id)
+        # self.att = RWKVLayer(args=args, layer_id=layer_id)
+        self.att = RWKV_Tmix(args, layer_id=layer_id)
 
         if args.get("init_rwkv", True):
             print("init_rwkv")
@@ -196,7 +196,7 @@ class ResidualAttentionBlockRWKV(nn.Module):
                 scale = ((1 + layer_id) / args.get("n_layer")) ** 0.7
                 nn.init.constant_(self.ln0.weight, scale)
         if args.get("datatype", "bf16") == "bf16":
-            self.attn.to(torch.bfloat16)
+            self.att.to(torch.bfloat16)
             if self.ln0 is not None:
                 self.ln0 = self.ln0.to(torch.bfloat16)
 
@@ -236,9 +236,9 @@ class ResidualAttentionBlockRWKV(nn.Module):
         if self.args.get("datatype", "bf16") == "bf16":
             x = x.bfloat16()
         if self.ln1 is None:
-            x = x + self.attn(x, mask=mask, kv_cache=kv_cache, is_pad_mask=is_pad_mask)[0]
+            x = x + self.att(x, mask=mask, kv_cache=kv_cache, is_pad_mask=is_pad_mask)[0]
         else:
-            x = x + self.attn(self.ln1(x), mask=mask, kv_cache=kv_cache, is_pad_mask=is_pad_mask)[0]
+            x = x + self.att(self.ln1(x), mask=mask, kv_cache=kv_cache, is_pad_mask=is_pad_mask)[0]
         if self.args.get("datatype", "bf16") == "bf16":
             x = x.to(torch.float32)
 
