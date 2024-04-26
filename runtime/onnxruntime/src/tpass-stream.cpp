@@ -35,6 +35,7 @@ TpassStream::TpassStream(std::map<std::string, std::string>& model_path, int thr
         string de_model_path;
         string am_cmvn_path;
         string am_config_path;
+        string token_path;
         string hw_compile_model_path;
         string seg_dict_path;
         
@@ -60,8 +61,9 @@ TpassStream::TpassStream(std::map<std::string, std::string>& model_path, int thr
         }
         am_cmvn_path = PathAppend(model_path.at(ONLINE_MODEL_DIR), AM_CMVN_NAME);
         am_config_path = PathAppend(model_path.at(ONLINE_MODEL_DIR), AM_CONFIG_NAME);
+        token_path = PathAppend(model_path.at(MODEL_DIR), TOKEN_PATH);
 
-        asr_handle->InitAsr(am_model_path, en_model_path, de_model_path, am_cmvn_path, am_config_path, thread_num);
+        asr_handle->InitAsr(am_model_path, en_model_path, de_model_path, am_cmvn_path, am_config_path, token_path, thread_num);
     }else{
         LOG(ERROR) <<"Can not find offline-model-dir or online-model-dir";
         exit(-1);
