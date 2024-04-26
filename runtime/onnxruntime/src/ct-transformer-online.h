@@ -26,7 +26,7 @@ private:
 public:
 
 	CTTransformerOnline();
-	void InitPunc(const std::string &punc_model, const std::string &punc_config, int thread_num);
+	void InitPunc(const std::string &punc_model, const std::string &punc_config, const std::string &token_file, int thread_num);
 	~CTTransformerOnline();
 	vector<int>  Infer(vector<int32_t> input_data, int nCacheSize);
 	string AddPunc(const char* sz_input, vector<string> &arr_cache, std::string language="zh-cn");
