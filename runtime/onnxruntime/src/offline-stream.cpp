@@ -32,6 +32,7 @@ OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int
         string am_model_path;
         string am_cmvn_path;
         string am_config_path;
+        string token_path;
         string hw_compile_model_path;
         string seg_dict_path;
     
@@ -57,8 +58,9 @@ OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int
         }
         am_cmvn_path = PathAppend(model_path.at(MODEL_DIR), AM_CMVN_NAME);
         am_config_path = PathAppend(model_path.at(MODEL_DIR), AM_CONFIG_NAME);
+        token_path = PathAppend(model_path.at(MODEL_DIR), TOKEN_PATH);
 
-        asr_handle->InitAsr(am_model_path, am_cmvn_path, am_config_path, thread_num);
+        asr_handle->InitAsr(am_model_path, am_cmvn_path, am_config_path, token_path, thread_num);
     }
 
     // Lm resource
