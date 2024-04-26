@@ -13,7 +13,7 @@ using namespace std;
 namespace funasr {
 PhoneSet::PhoneSet(const char *filename) {
   ifstream in(filename);
-  LoadPhoneSetFromYaml(filename);
+  LoadPhoneSetFromJson(filename);
 }
 PhoneSet::~PhoneSet()
 {
@@ -33,6 +33,25 @@ void PhoneSet::LoadPhoneSetFromYaml(const char* filename) {
     phone_.push_back(it->as<string>());
     phn2Id_.emplace(it->as<string>(), id);
   }
+}
+
+void PhoneSet::LoadPhoneSetFromJson(const char* filename) {
+    nlohmann::json json_array;
+    std::ifstream file(filename);
+    if (file.is_open()) {
+        file >> json_array;
+        file.close();
+    } else {
+        LOG(INFO) << "Error loading token file, token file error or not exist.";
+        exit(-1);
+    }
+
+    int id = 0;
+    for (const auto& element : json_array) {
+        phone_.push_back(element);
+        phn2Id_.emplace(element, id);
+        id++;
+    }
 }
 
 int PhoneSet::Size() const {
