@@ -87,20 +87,23 @@ TpassStream::TpassStream(std::map<std::string, std::string>& model_path, int thr
     if(model_path.find(PUNC_DIR) != model_path.end()){
         string punc_model_path;
         string punc_config_path;
+        string token_path;
     
         punc_model_path = PathAppend(model_path.at(PUNC_DIR), MODEL_NAME);
         if(model_path.find(PUNC_QUANT) != model_path.end() && model_path.at(PUNC_QUANT) == "true"){
             punc_model_path = PathAppend(model_path.at(PUNC_DIR), QUANT_MODEL_NAME);
         }
         punc_config_path = PathAppend(model_path.at(PUNC_DIR), PUNC_CONFIG_NAME);
+        token_path = PathAppend(model_path.at(MODEL_DIR), TOKEN_PATH);
 
         if (access(punc_model_path.c_str(), F_OK) != 0 ||
-            access(punc_config_path.c_str(), F_OK) != 0 )
+            access(punc_config_path.c_str(), F_OK) != 0 ||
+            access(token_path.c_str(), F_OK) != 0)
         {
             LOG(INFO) << "PUNC model file is not exist, skip load punc model.";
         }else{
             punc_online_handle = make_unique<CTTransformerOnline>();
-            punc_online_handle->InitPunc(punc_model_path, punc_config_path, thread_num);
+            punc_online_handle->InitPunc(punc_model_path, punc_config_path, token_path, thread_num);
             use_punc = true;
         }
     }
