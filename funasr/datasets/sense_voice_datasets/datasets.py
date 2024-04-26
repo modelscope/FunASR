@@ -159,6 +159,7 @@ class SenseVoiceDataset(torch.utils.data.Dataset):
 
     def _filter_badcase(self, outputs, i=0):
         b, t, _ = outputs["speech"].shape
+        
         if b * t > self.batch_size * 1.25:
             beg = torch.randint(0, 2, ()).item()
             if b < 2:
@@ -169,6 +170,7 @@ class SenseVoiceDataset(torch.utils.data.Dataset):
             for key, data_list in outputs.items():
                 outputs[key] = outputs[key][beg : beg + b : 2]
 
+                
             speech_lengths_max = outputs["speech_lengths"].max().item()
             outputs["speech"] = outputs["speech"][:, :speech_lengths_max, :]
             text_lengths_max = outputs["text_lengths"].max().item()
