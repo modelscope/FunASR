@@ -56,6 +56,7 @@ namespace funasr {
 #define LM_CONFIG_NAME "config.yaml"
 #define PUNC_CONFIG_NAME "punc.yaml"
 #define MODEL_SEG_DICT "seg_dict"
+#define TOKEN_PATH "tokens.json"
 #define HOTWORD "hotword"
 // #define NN_HOTWORD "nn-hotword"
 
