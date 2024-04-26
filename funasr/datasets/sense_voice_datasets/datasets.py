@@ -92,6 +92,8 @@ class SenseVoiceDataset(torch.utils.data.Dataset):
 
         target_ids = self.tokenizer.encode(target, allowed_special="all")
         target_ids_len = len(target_ids) + 1  # [lid, text]
+        if target_ids_len > 200:
+            return None
 
         eos = self.tokenizer.encode(self.eos, allowed_special="all")  # [eos]
 
@@ -129,7 +131,7 @@ class SenseVoiceDataset(torch.utils.data.Dataset):
         if len(outputs) < 1:
             logging.info(f"ERROR: data is empty!")
             outputs = {
-                "speech": torch.ones((10, 128), dtype=torch.float32),
+                "speech": torch.rand((10, 128), dtype=torch.float32),
                 "speech_lengths": torch.tensor([10], dtype=torch.int32),
                 "text": torch.tensor([58836], dtype=torch.int32),
                 "text_lengths": torch.tensor([1], dtype=torch.int32),
