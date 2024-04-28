@@ -116,6 +116,7 @@ class Trainer:
         self.reset_gpu_cache = kwargs.get("reset_gpu_cache", False)
         self.start_data_split_i = 0
         self.start_step = 0
+        self.step_cur_in_epoch = 0
         self.use_wandb = kwargs.get("use_wandb", False)
         if self.use_wandb:
             wandb.login(key=kwargs.get("wandb_token"))
@@ -128,7 +129,6 @@ class Trainer:
                 job_type="training",
                 reinit=True,
             )
-            self.step_cur_in_epoch = 0
 
     def save_checkpoint(
         self,
