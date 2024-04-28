@@ -297,7 +297,7 @@ class Trainer:
                     checkpoint["best_step_or_epoch"] if "best_step_or_epoch" in checkpoint else ""
                 )
                 self.start_data_split_i = (
-                    checkpoint["start_data_split_i"] if "start_data_split_i" in checkpoint else 0
+                    checkpoint["data_split_i"] if "data_split_i" in checkpoint else 0
                 )
                 self.batch_total = checkpoint["batch_total"] if "batch_total" in checkpoint else 0
                 self.start_step = checkpoint["step"] if "step" in checkpoint else 0
