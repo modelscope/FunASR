@@ -116,7 +116,7 @@ class Trainer:
         self.reset_gpu_cache = kwargs.get("reset_gpu_cache", False)
         self.start_data_split_i = 0
         self.start_step = 0
-        self.step_cur_in_epoch = 0
+        self.step_in_epoch = 0
         self.use_wandb = kwargs.get("use_wandb", False)
         if self.use_wandb:
             wandb.login(key=kwargs.get("wandb_token"))
@@ -138,7 +138,7 @@ class Trainer:
         optim=None,
         scheduler=None,
         scaler=None,
-        step_cur_in_epoch=None,
+        step_in_epoch=None,
         **kwargs,
     ):
         """
@@ -150,7 +150,7 @@ class Trainer:
             epoch (int): The epoch number at which the checkpoint is being saved.
         """
 
-        step_cur_in_epoch = None if step is None else step_cur_in_epoch
+        step_in_epoch = None if step is None else step_in_epoch
         if self.rank == 0:
             logging.info(f"Save checkpoint: {epoch}, rank: {self.local_rank}\n")
             # self.step_or_epoch += 1
@@ -165,12 +165,12 @@ class Trainer:
                 "best_step_or_epoch": self.best_step_or_epoch,
                 "avg_keep_nbest_models_type": self.avg_keep_nbest_models_type,
                 "step": step,
-                "step_cur_in_epoch": step_cur_in_epoch,
+                "step_in_epoch": step_in_epoch,
                 "data_split_i": kwargs.get("data_split_i", 0),
                 "data_split_num": kwargs.get("data_split_num", 1),
                 "batch_total": self.batch_total,
             }
-            step = step_cur_in_epoch
+            step = step_in_epoch
             if hasattr(model, "module"):
                 state["state_dict"] = model.module.state_dict()
 
@@ -302,12 +302,10 @@ class Trainer:
                 self.batch_total = checkpoint["batch_total"] if "batch_total" in checkpoint else 0
                 self.start_step = checkpoint["step"] if "step" in checkpoint else 0
                 self.start_step = 0 if self.start_step is None else self.start_step
-                self.step_cur_in_epoch = (
-                    checkpoint["step_cur_in_epoch"] if "step_cur_in_epoch" in checkpoint else 0
+                self.step_in_epoch = (
+                    checkpoint["step_in_epoch"] if "step_in_epoch" in checkpoint else 0
                 )
-                self.step_cur_in_epoch = (
-                    0 if self.step_cur_in_epoch is None else self.step_cur_in_epoch
-                )
+                self.step_in_epoch = 0 if self.step_in_epoch is None else self.step_in_epoch
 
                 model.to(self.device)
                 print(f"Checkpoint loaded successfully from '{ckpt}'")
@@ -356,7 +354,7 @@ class Trainer:
                 if iterator_stop > 0:
                     break
             self.batch_total += 1
-            self.step_cur_in_epoch += 1
+            self.step_in_epoch += 1
             time1 = time.perf_counter()
             speed_stats["data_load"] = f"{time1-time_beg:0.3f}"
 
@@ -459,7 +457,7 @@ class Trainer:
                 self.log(
                     epoch,
                     batch_idx,
-                    step_cur_in_epoch=self.step_cur_in_epoch,
+                    step_in_epoch=self.step_in_epoch,
                     batch_num_epoch=batch_num_epoch,
                     lr=lr,
                     loss=loss.detach().cpu().item(),
@@ -478,7 +476,7 @@ class Trainer:
                     epoch=epoch,
                     writer=writer,
                     step=batch_idx + 1,
-                    step_cur_in_epoch=self.step_cur_in_epoch,
+                    step_in_epoch=self.step_in_epoch,
                 )
 
             if (batch_idx + 1) % self.save_checkpoint_interval == 0:
@@ -489,7 +487,7 @@ class Trainer:
                     scheduler=scheduler,
                     scaler=scaler,
                     step=batch_idx + 1,
-                    step_cur_in_epoch=self.step_cur_in_epoch,
+                    step_in_epoch=self.step_in_epoch,
                     data_split_i=kwargs.get("data_split_i", 0),
                     data_split_num=kwargs.get("data_split_num", 1),
                 )
@@ -599,10 +597,10 @@ class Trainer:
                     iterator_stop.fill_(1)
                     dist.all_reduce(iterator_stop, dist.ReduceOp.SUM)
 
-        if kwargs.get("step_cur_in_epoch", None) is None:
+        if kwargs.get("step_in_epoch", None) is None:
             ckpt_name = f"model.pt.ep{epoch}"
         else:
-            ckpt_name = f'model.pt.ep{epoch}.{kwargs.get("step_cur_in_epoch")}'
+            ckpt_name = f'model.pt.ep{epoch}.{kwargs.get("step_in_epoch")}'
         self.val_acc_step_or_eoch[ckpt_name] = self.val_acc_avg
         self.val_loss_step_or_eoch[ckpt_name] = self.val_loss_avg
         model.train()
@@ -615,7 +613,7 @@ class Trainer:
         self,
         epoch=0,
         batch_idx=0,
-        step_cur_in_epoch=0,
+        step_in_epoch=0,
         batch_num_epoch=-1,
         lr=0.0,
         loss=0.0,
@@ -649,7 +647,7 @@ class Trainer:
                 f"rank: {self.rank}, "
                 f"epoch: {epoch}/{self.max_epoch}, "
                 f"data_slice: {data_split_i}/{data_split_num}, "
-                f"step_in_slice: {batch_idx + 1}/{batch_num_epoch}, step_in_epoch: {step_cur_in_epoch}, total step: {self.batch_total}, "
+                f"step_in_slice: {batch_idx + 1}/{batch_num_epoch}, step_in_epoch: {step_in_epoch}, total step: {self.batch_total}, "
                 f"(loss_avg_rank: {loss:.3f}), "
                 f"(loss_avg_epoch: {loss_avg_epoch:.3f}), "
                 f"(ppl_avg_epoch: {math.exp(loss_avg_epoch):.3e}), "

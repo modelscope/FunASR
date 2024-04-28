@@ -226,7 +226,7 @@ def main(**kwargs):
             model=model, dataloader_val=dataloader_val, epoch=epoch + 1, writer=writer
         )
         scheduler.step()
-        trainer.step_cur_in_epoch = 0
+        trainer.step_in_epoch = 0
         trainer.save_checkpoint(
             epoch + 1, model=model, optim=optim, scheduler=scheduler, scaler=scaler
         )
