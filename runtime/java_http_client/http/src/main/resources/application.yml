@@ -1,0 +1,21 @@
+#/**
+# *
+# * @author Virgil Qiu
+# * @since 2024/04/24
+# *
+# */
+
+spring:
+  application:
+    name: java_http_client
+server:
+  port: 8081
+
+
+parameters:
+  model: "offline" #离线模型为例
+  hotWords: "{\"自定义\":20,\"热词\":20,\"设置\":30}"
+  fileUrl: "E:/EI/Audio"
+  serverIpPort: "ws://your_funasr_ip:port"
+
+

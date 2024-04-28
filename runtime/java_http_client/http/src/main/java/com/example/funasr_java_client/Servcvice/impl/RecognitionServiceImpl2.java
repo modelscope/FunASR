@@ -23,14 +23,21 @@ import java.util.concurrent.ExecutionException;
 
 /**
  *
- * @author Virtuoso Qiu
+ * @author Virgil Qiu
  * @since 2024/04/24
  *
  */
 
 @Service
 public class RecognitionServiceImpl2 implements RecognitionService2 {
-
+    @Value("${parameters.fileUrl}")
+    private String fileUrl;
+    @Value("${parameters.model}")
+    private String model;
+    @Value("${parameters.hotWords}")
+    private String hotWords;
+    @Value("${parameters.serverIpPort}")
+    private String serverIpPort;
     @Override
     public Object recognition(MultipartFile file) throws IOException, ExecutionException, InterruptedException {
         if (file.isEmpty()) {
@@ -42,7 +49,7 @@ public class RecognitionServiceImpl2 implements RecognitionService2 {
         String[] parts = originalFilename.split("\\.");
         String prefix = (parts.length > 0) ? parts[0] : originalFilename;
         System.out.println(prefix);
-        String localFilePath = "E:/EI/Audio" + prefix + ".pcm";
+        String localFilePath = fileUrl + prefix + ".pcm";
 
         File localFile = new File(localFilePath);
 
@@ -54,17 +61,17 @@ public class RecognitionServiceImpl2 implements RecognitionService2 {
         file.transferTo(localFile);
 
         WebSocketClient client = new WebSocketClient();
-        URI uri = URI.create("ws://182.40.192.72:10095");
+        URI uri = URI.create(serverIpPort);
         StandardWebSocketClient standardWebSocketClient = new StandardWebSocketClient();
         WebSocketSession webSocketSession = standardWebSocketClient.execute(client, null, uri).get();
 
 
         JSONObject configJson = new JSONObject();
-        configJson.put("mode", "offline");
+        configJson.put("mode", model);
         configJson.put("wav_name", prefix);
         configJson.put("wav_format", "pcm"); // 文件格式为pcm
         configJson.put("is_speaking", true);
-        configJson.put("hotwords", "{\"自定义\":20,\"热词\":20,\"设置\":30}");
+        configJson.put("hotwords", hotWords);
         configJson.put("itn", true);
 
         // 发送配置参数与meta信息
