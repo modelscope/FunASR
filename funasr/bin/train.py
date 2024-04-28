@@ -223,7 +223,7 @@ def main(**kwargs):
             torch.cuda.empty_cache()
 
         trainer.validate_epoch(
-            model=model, dataloader_val=dataloader_val, epoch=epoch, writer=writer
+            model=model, dataloader_val=dataloader_val, epoch=epoch + 1, writer=writer
         )
         scheduler.step()
         trainer.step_cur_in_epoch = 0
