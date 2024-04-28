@@ -475,6 +475,7 @@ class Trainer:
                     epoch=epoch,
                     writer=writer,
                     step=batch_idx + 1,
+                    batch_num_epoch=batch_num_epoch,
                 )
 
             if (batch_idx + 1) % self.save_checkpoint_interval == 0:
@@ -593,10 +594,10 @@ class Trainer:
                     iterator_stop.fill_(1)
                     dist.all_reduce(iterator_stop, dist.ReduceOp.SUM)
 
-        if kwargs.get("step", None) is None:
+        if kwargs.get("step_cur_in_epoch", None) is None:
             ckpt_name = f"model.pt.ep{epoch}"
         else:
-            ckpt_name = f'model.pt.ep{epoch}.{kwargs.get("step")}'
+            ckpt_name = f'model.pt.ep{epoch}.{kwargs.get("step_cur_in_epoch")}'
         self.val_acc_step_or_eoch[ckpt_name] = self.val_acc_avg
         self.val_loss_step_or_eoch[ckpt_name] = self.val_loss_avg
         model.train()

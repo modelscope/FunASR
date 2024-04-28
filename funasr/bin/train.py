@@ -193,7 +193,7 @@ def main(**kwargs):
     try:
         from tensorboardX import SummaryWriter
 
-        writer = SummaryWriter(tensorboard_dir) if trainer.rank == 0 else None
+        writer = SummaryWriter(tensorboard_dir)  # if trainer.rank == 0 else None
     except:
         writer = None
 
