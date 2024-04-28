@@ -51,6 +51,7 @@ class SenseVoiceDataset(torch.utils.data.Dataset):
         self.batch_size = kwargs.get("batch_size")
         self.batch_type = kwargs.get("batch_type")
         self.prompt_ids_len = 0
+        self.retry = kwargs.get("retry", 5)
 
     def get_source_len(self, index):
         item = self.index_ds[index]
@@ -64,59 +65,75 @@ class SenseVoiceDataset(torch.utils.data.Dataset):
         return len(self.index_ds)
 
     def __getitem__(self, index):
-        item = self.index_ds[index]
         # import pdb;
         # pdb.set_trace()
-        source = item["source"]
-        data_src = load_audio_text_image_video(source, fs=self.fs)
-        if self.preprocessor_speech:
-            data_src = self.preprocessor_speech(data_src, fs=self.fs)
-        speech, speech_lengths = extract_fbank(
-            data_src, data_type=self.data_type, frontend=self.frontend, is_final=True
-        )  # speech: [b, T, d]
 
-        if speech_lengths > self.batch_size:
-            return None
-        speech = speech.permute(0, 2, 1)
-        target = item["target"]
-        if self.preprocessor_text:
-            target = self.preprocessor_text(target)
+        output = None
+        for idx in range(self.retry):
+            if idx == 0:
+                index_cur = index
+            else:
+                if index <= self.retry:
+                    index_cur = index + idx
+                else:
+                    index_cur = torch.randint(0, index, ()).item()
 
-        task = item.get("prompt", "<|ASR|>")
-        text_language = item.get("text_language", "<|zh|>")
+            item = self.index_ds[index_cur]
 
-        prompt = f"{self.sos}{task}{text_language}"
-        prompt_ids = self.tokenizer.encode(prompt, allowed_special="all")
-        prompt_ids_len = len(prompt_ids) - 1  # [sos, task]
-        self.prompt_ids_len = prompt_ids_len
+            source = item["source"]
+            data_src = load_audio_text_image_video(source, fs=self.fs)
+            if self.preprocessor_speech:
+                data_src = self.preprocessor_speech(data_src, fs=self.fs)
+            speech, speech_lengths = extract_fbank(
+                data_src, data_type=self.data_type, frontend=self.frontend, is_final=True
+            )  # speech: [b, T, d]
 
-        target_ids = self.tokenizer.encode(target, allowed_special="all")
-        target_ids_len = len(target_ids) + 1  # [lid, text]
-        if target_ids_len > 200:
-            return None
+            if speech_lengths > self.batch_size:
+                continue
+            speech = speech.permute(0, 2, 1)
+            target = item["target"]
+            if self.preprocessor_text:
+                target = self.preprocessor_text(target)
 
-        eos = self.tokenizer.encode(self.eos, allowed_special="all")  # [eos]
+            task = item.get("prompt", "<|ASR|>")
+            text_language = item.get("text_language", "<|zh|>")
 
-        ids = prompt_ids + target_ids + eos
-        ids_lengths = len(ids)
+            prompt = f"{self.sos}{task}{text_language}"
+            prompt_ids = self.tokenizer.encode(prompt, allowed_special="all")
+            prompt_ids_len = len(prompt_ids) - 1  # [sos, task]
+            self.prompt_ids_len = prompt_ids_len
 
-        text = torch.tensor(ids, dtype=torch.int64)
-        text_lengths = torch.tensor([ids_lengths], dtype=torch.int32)
+            target_ids = self.tokenizer.encode(target, allowed_special="all")
+            target_ids_len = len(target_ids) + 1  # [lid, text]
+            if target_ids_len > 200:
+                continue
 
-        target_mask = (
-            [0] * (prompt_ids_len) + [1] * (target_ids_len) + [1]
-        )  # [sos, task, lid, text, eos]: [0, 0, 1, 1, 1]
-        target_mask_lengths = len(target_mask)
-        target_mask = torch.tensor(target_mask, dtype=torch.float32)
-        target_mask_lengths = torch.tensor([target_mask_lengths], dtype=torch.int32)
-        return {
-            "speech": speech[0, :, :],
-            "speech_lengths": speech_lengths,
-            "text": text,
-            "text_lengths": text_lengths,
-            "target_mask": target_mask,
-            "target_mask_lengths": target_mask_lengths,
-        }
+            eos = self.tokenizer.encode(self.eos, allowed_special="all")  # [eos]
+
+            ids = prompt_ids + target_ids + eos
+            ids_lengths = len(ids)
+
+            text = torch.tensor(ids, dtype=torch.int64)
+            text_lengths = torch.tensor([ids_lengths], dtype=torch.int32)
+
+            target_mask = (
+                [0] * (prompt_ids_len) + [1] * (target_ids_len) + [1]
+            )  # [sos, task, lid, text, eos]: [0, 0, 1, 1, 1]
+            target_mask_lengths = len(target_mask)
+            target_mask = torch.tensor(target_mask, dtype=torch.float32)
+            target_mask_lengths = torch.tensor([target_mask_lengths], dtype=torch.int32)
+
+            output = {
+                "speech": speech[0, :, :],
+                "speech_lengths": speech_lengths,
+                "text": text,
+                "text_lengths": text_lengths,
+                "target_mask": target_mask,
+                "target_mask_lengths": target_mask_lengths,
+            }
+            break
+
+        return output
 
     def collator(self, samples: list = None):
         outputs = {}
@@ -129,13 +146,30 @@ class SenseVoiceDataset(torch.utils.data.Dataset):
                 outputs[key].append(sample[key])
 
         if len(outputs) < 1:
-            logging.info(f"ERROR: data is empty!")
+            logging.error(f"ERROR: data is empty!")
             outputs = {
-                "speech": torch.rand((10, 128), dtype=torch.float32),
-                "speech_lengths": torch.tensor([10], dtype=torch.int32),
-                "text": torch.tensor([58836], dtype=torch.int32),
-                "text_lengths": torch.tensor([1], dtype=torch.int32),
-                "target_mask": torch.tensor([[0] * (self.prompt_ids_len) + [1] * (1) + [1]]),
+                "speech": torch.rand((10, 128), dtype=torch.float32)[None, :, :],
+                "speech_lengths": torch.tensor(
+                    [
+                        10,
+                    ],
+                    dtype=torch.int32,
+                )[:, None],
+                "text": torch.tensor(
+                    [
+                        58836,
+                    ],
+                    dtype=torch.int32,
+                )[None, :],
+                "text_lengths": torch.tensor(
+                    [
+                        1,
+                    ],
+                    dtype=torch.int32,
+                )[:, None],
+                "target_mask": torch.tensor([[0] * (self.prompt_ids_len) + [1] * (1) + [1]])[
+                    None, :
+                ],
             }
             return outputs
 
@@ -159,7 +193,7 @@ class SenseVoiceDataset(torch.utils.data.Dataset):
 
     def _filter_badcase(self, outputs, i=0):
         b, t, _ = outputs["speech"].shape
-        
+
         if b * t > self.batch_size * 1.25:
             beg = torch.randint(0, 2, ()).item()
             if b < 2:
@@ -170,7 +204,6 @@ class SenseVoiceDataset(torch.utils.data.Dataset):
             for key, data_list in outputs.items():
                 outputs[key] = outputs[key][beg : beg + b : 2]
 
-                
             speech_lengths_max = outputs["speech_lengths"].max().item()
             outputs["speech"] = outputs["speech"][:, :speech_lengths_max, :]
             text_lengths_max = outputs["text_lengths"].max().item()
