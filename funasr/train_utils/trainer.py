@@ -150,6 +150,7 @@ class Trainer:
             epoch (int): The epoch number at which the checkpoint is being saved.
         """
 
+        step_cur_in_epoch = None if step is None else step_cur_in_epoch
         if self.rank == 0:
             logging.info(f"Save checkpoint: {epoch}, rank: {self.local_rank}\n")
             # self.step_or_epoch += 1
