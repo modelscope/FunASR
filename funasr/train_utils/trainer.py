@@ -332,7 +332,7 @@ class Trainer:
         """
         if self.use_ddp or self.use_fsdp:
             dist.barrier()
-        logging.info(f"Train epoch: {epoch}, rank: {self.local_rank}\n")
+        logging.info(f"Train epoch: {epoch}, rank: {self.rank}\n")
         model.train()
 
         # Set the number of steps for gradient accumulation
@@ -514,7 +514,7 @@ class Trainer:
         """
         if self.use_ddp or self.use_fsdp:
             dist.barrier()
-        logging.info(f"Validate epoch: {epoch}, rank: {self.local_rank}\n")
+        logging.info(f"Validate epoch: {epoch}, rank: {self.rank}\n")
         model.eval()
 
         with torch.no_grad():
