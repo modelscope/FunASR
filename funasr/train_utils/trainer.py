@@ -128,6 +128,7 @@ class Trainer:
                 job_type="training",
                 reinit=True,
             )
+            self.step_cur_in_epoch = 0
 
     def save_checkpoint(
         self,
@@ -137,6 +138,8 @@ class Trainer:
         optim=None,
         scheduler=None,
         scaler=None,
+        step_cur_in_epoch=0,
+        **kwargs,
     ):
         """
         Saves a checkpoint containing the model's state, the optimizer's state,
@@ -161,7 +164,9 @@ class Trainer:
                 "best_step_or_epoch": self.best_step_or_epoch,
                 "avg_keep_nbest_models_type": self.avg_keep_nbest_models_type,
                 "step": step,
+                "step_cur_in_epoch": step_cur_in_epoch,
             }
+            step = step_cur_in_epoch
             if hasattr(model, "module"):
                 state["state_dict"] = model.module.state_dict()
 
@@ -293,6 +298,12 @@ class Trainer:
                 self.batch_total = checkpoint["batch_total"] if "batch_total" in checkpoint else 0
                 self.start_step = checkpoint["step"] if "step" in checkpoint else 0
                 self.start_step = 0 if self.start_step is None else self.start_step
+                self.step_cur_in_epoch = (
+                    checkpoint["step_cur_in_epoch"] if "step_cur_in_epoch" in checkpoint else 0
+                )
+                self.step_cur_in_epoch = (
+                    0 if self.step_cur_in_epoch is None else self.step_cur_in_epoch
+                )
 
                 model.to(self.device)
                 print(f"Checkpoint loaded successfully from '{ckpt}'")
@@ -341,6 +352,7 @@ class Trainer:
                 if iterator_stop > 0:
                     break
             self.batch_total += 1
+            self.step_cur_in_epoch += 1
             time1 = time.perf_counter()
             speed_stats["data_load"] = f"{time1-time_beg:0.3f}"
 
@@ -443,6 +455,7 @@ class Trainer:
                 self.log(
                     epoch,
                     batch_idx,
+                    step_cur_in_epoch=self.step_cur_in_epoch,
                     batch_num_epoch=batch_num_epoch,
                     lr=lr,
                     loss=loss.detach().cpu().item(),
@@ -471,6 +484,7 @@ class Trainer:
                     scheduler=scheduler,
                     scaler=scaler,
                     step=batch_idx + 1,
+                    step_cur_in_epoch=self.step_cur_in_epoch,
                 )
 
             time_beg = time.perf_counter()
@@ -594,6 +608,7 @@ class Trainer:
         self,
         epoch=0,
         batch_idx=0,
+        step_cur_in_epoch=0,
         batch_num_epoch=-1,
         lr=0.0,
         loss=0.0,
@@ -626,6 +641,7 @@ class Trainer:
                 f"{tag}, "
                 f"rank: {self.rank}, "
                 f"epoch: {epoch}/{self.max_epoch}, "
+                f"step_cur_in_epoch: {step_cur_in_epoch}, "
                 f"data_slice: {data_split_i}/{data_split_num}, "
                 f"step: {batch_idx + 1}/{batch_num_epoch}, total step: {self.batch_total}, "
                 f"(loss_avg_rank: {loss:.3f}), "

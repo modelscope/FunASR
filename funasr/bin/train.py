@@ -206,6 +206,7 @@ def main(**kwargs):
                 epoch, data_split_i=data_split_i, start_step=trainer.start_step
             )
             trainer.start_step = 0
+
             trainer.train_epoch(
                 model=model,
                 optim=optim,
@@ -225,7 +226,7 @@ def main(**kwargs):
             model=model, dataloader_val=dataloader_val, epoch=epoch, writer=writer
         )
         scheduler.step()
-
+        trainer.step_cur_in_epoch = 0
         trainer.save_checkpoint(epoch, model=model, optim=optim, scheduler=scheduler, scaler=scaler)
 
         time2 = time.perf_counter()
