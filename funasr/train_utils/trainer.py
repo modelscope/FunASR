@@ -138,7 +138,7 @@ class Trainer:
         optim=None,
         scheduler=None,
         scaler=None,
-        step_cur_in_epoch=0,
+        step_cur_in_epoch=None,
         **kwargs,
     ):
         """
