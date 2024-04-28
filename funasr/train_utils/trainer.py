@@ -260,7 +260,7 @@ class Trainer:
             ckpt = os.path.join(self.output_dir, "model.pt")
             if os.path.isfile(ckpt):
                 checkpoint = torch.load(ckpt, map_location="cpu")
-                self.start_epoch = checkpoint["epoch"] + 1
+                self.start_epoch = checkpoint["epoch"]
                 # self.model.load_state_dict(checkpoint['state_dict'])
                 src_state = checkpoint["state_dict"]
                 dst_state = model.state_dict()
