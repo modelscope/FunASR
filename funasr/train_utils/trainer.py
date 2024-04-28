@@ -469,7 +469,7 @@ class Trainer:
                     data_split_num=kwargs.get("data_split_num", 1),
                 )
 
-            if (batch_idx + 1) % self.validate_interval == 0:
+            if self.step_in_epoch % self.validate_interval == 0:
                 self.validate_epoch(
                     model=model,
                     dataloader_val=dataloader_val,
@@ -479,7 +479,7 @@ class Trainer:
                     step_in_epoch=self.step_in_epoch,
                 )
 
-            if (batch_idx + 1) % self.save_checkpoint_interval == 0:
+            if self.step_in_epoch % self.save_checkpoint_interval == 0:
                 self.save_checkpoint(
                     epoch,
                     model=model,
