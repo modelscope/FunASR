@@ -475,7 +475,7 @@ class Trainer:
                     epoch=epoch,
                     writer=writer,
                     step=batch_idx + 1,
-                    batch_num_epoch=batch_num_epoch,
+                    step_cur_in_epoch=self.step_cur_in_epoch,
                 )
 
             if (batch_idx + 1) % self.save_checkpoint_interval == 0:
