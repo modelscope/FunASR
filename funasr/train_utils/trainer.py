@@ -166,6 +166,9 @@ class Trainer:
                 "avg_keep_nbest_models_type": self.avg_keep_nbest_models_type,
                 "step": step,
                 "step_cur_in_epoch": step_cur_in_epoch,
+                "data_split_i": kwargs.get("data_split_i", 0),
+                "data_split_num": kwargs.get("data_split_num", 1),
+                "batch_total": self.batch_total,
             }
             step = step_cur_in_epoch
             if hasattr(model, "module"):
@@ -487,6 +490,8 @@ class Trainer:
                     scaler=scaler,
                     step=batch_idx + 1,
                     step_cur_in_epoch=self.step_cur_in_epoch,
+                    data_split_i=kwargs.get("data_split_i", 0),
+                    data_split_num=kwargs.get("data_split_num", 1),
                 )
 
             time_beg = time.perf_counter()
