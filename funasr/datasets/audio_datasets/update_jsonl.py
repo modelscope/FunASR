@@ -35,7 +35,7 @@ def gen_scp_from_jsonl(jsonl_file, jsonl_file_out, ncpu):
 
         for line in lines:
 
-            jsonl_file_out_f.write(line)
+            jsonl_file_out_f.write(line + "\n")
             jsonl_file_out_f.flush()
 
     jsonl_file_out_f.close()
@@ -53,6 +53,7 @@ def update_data(lines, i):
     if (source_len_old - source_len) > 100 or (source_len - source_len_old) > 100:
         print(f"old: {source_len_old}, new: {source_len}, wav: {wav_path}")
     data["source_len"] = source_len
+    data["source"] = wav_path
     jsonl_line = json.dumps(data, ensure_ascii=False)
     lines[i] = jsonl_line
 
