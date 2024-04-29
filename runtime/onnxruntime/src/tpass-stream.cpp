@@ -94,7 +94,7 @@ TpassStream::TpassStream(std::map<std::string, std::string>& model_path, int thr
             punc_model_path = PathAppend(model_path.at(PUNC_DIR), QUANT_MODEL_NAME);
         }
         punc_config_path = PathAppend(model_path.at(PUNC_DIR), PUNC_CONFIG_NAME);
-        token_path = PathAppend(model_path.at(MODEL_DIR), TOKEN_PATH);
+        token_path = PathAppend(model_path.at(PUNC_DIR), TOKEN_PATH);
 
         if (access(punc_model_path.c_str(), F_OK) != 0 ||
             access(punc_config_path.c_str(), F_OK) != 0 ||
