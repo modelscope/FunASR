@@ -7,6 +7,7 @@ from omegaconf import DictConfig, OmegaConf
 import concurrent.futures
 import librosa
 import torch.distributed as dist
+from tqdm import tqdm
 
 
 def gen_jsonl_from_wav_text_list(
@@ -28,6 +29,7 @@ def gen_jsonl_from_wav_text_list(
             with open(data_file, "r") as f:
 
                 data_file_lists = f.readlines()
+                print("")
                 lines_for_each_th = (len(data_file_lists) - 1) // cpu_cores + 1
                 task_num = cpu_cores if len(data_file_lists) > cpu_cores else 1
                 # import pdb;pdb.set_trace()
@@ -41,6 +43,7 @@ def gen_jsonl_from_wav_text_list(
                                     i * lines_for_each_th : (i + 1) * lines_for_each_th
                                 ],
                                 data_type,
+                                i,
                             )
                             for i in range(task_num)
                         ]
@@ -69,11 +72,15 @@ def gen_jsonl_from_wav_text_list(
         dist.barrier()
 
 
-def parse_context_length(data_list: list, data_type: str):
-
+def parse_context_length(data_list: list, data_type: str, id=0):
+    pbar = tqdm(total=len(data_list), dynamic_ncols=True)
     res = {}
     for i, line in enumerate(data_list):
-        key, line = line.strip().split(maxsplit=1)
+        pbar.update(1)
+        pbar.set_description(f"cpu: {id}")
+        lines = line.strip().split(maxsplit=1)
+        key = lines[0]
+        line = lines[1] if len(lines) > 1 else ""
         line = line.strip()
         if os.path.exists(line):
             waveform, _ = librosa.load(line, sr=16000)

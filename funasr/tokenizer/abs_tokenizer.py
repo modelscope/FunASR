@@ -62,7 +62,7 @@ class BaseTokenizer(ABC):
                 raise RuntimeError(f"Unknown symbol '{unk_symbol}' doesn't exist in the token_list")
             self.unk_id = self.token2id[self.unk_symbol]
 
-    def encode(self, text):
+    def encode(self, text, **kwargs):
         tokens = self.text2tokens(text)
         text_ints = self.tokens2ids(tokens)
 
