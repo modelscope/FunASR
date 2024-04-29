@@ -35,7 +35,7 @@ class IndexDSJsonlRankFull(torch.utils.data.Dataset):
             with open(path, encoding="utf-8") as fin:
                 file_list_all = fin.readlines()
 
-                num_per_slice = (len(file_list_all) - 1) // data_split_num + 1
+                num_per_slice = (len(file_list_all) - 1) // data_split_num + 1  # 16
                 file_list = file_list_all[
                     data_split_i * num_per_slice : (data_split_i + 1) * num_per_slice
                 ]

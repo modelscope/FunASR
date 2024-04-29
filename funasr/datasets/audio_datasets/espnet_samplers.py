@@ -71,7 +71,7 @@ class EspnetStyleBatchSampler(DistributedSampler):
         self.max_token_length = kwargs.get("max_token_length", 2048)
         self.min_token_length = kwargs.get("min_token_length", 0)
         self.length_scale_source = kwargs.get("length_scale_source", 1.0)
-        self.start_step = 0
+        self.start_step = start_step
         if self.start_step > 0:
             logging.info(f"Warning, start_step > 0, dataloader start from step: {self.start_step}")
         # super().__init__(dataset, num_replicas=num_replicas, rank=rank,
@@ -146,7 +146,10 @@ class EspnetStyleBatchSampler(DistributedSampler):
         start_idx = self.rank * batches_per_rank
         end_idx = start_idx + batches_per_rank
         rank_batches = buffer_batches[start_idx + self.start_step : end_idx]
-
+        if self.start_step > 0:
+            logging.info(
+                f"Warning, rank: {self.rank}, dataloader start from step: {self.start_step}, batch_num_before: {end_idx-start_idx}, now: {len(rank_batches)}"
+            )
         # Return an iterator over the batches for the current rank
         return iter(rank_batches)
 
