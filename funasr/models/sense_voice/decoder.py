@@ -365,7 +365,7 @@ class MultiHeadedAttentionSANMDecoder(nn.Module):
         self.pad_fn = nn.ConstantPad1d((left_padding, right_padding), 0.0)
         self.kernel_size = kernel_size
 
-    def forward(self, inputs, mask, cache=None, mask_shfit_chunk=None):
+    def forward(self, inputs, mask, cache=None, mask_shfit_chunk=None, **kwargs):
         """
         :param x: (#batch, time1, size).
         :param mask: Mask tensor (#batch, 1, time)
