@@ -29,7 +29,6 @@ def gen_jsonl_from_wav_text_list(
             with open(data_file, "r") as f:
 
                 data_file_lists = f.readlines()
-                print("")
                 lines_for_each_th = (len(data_file_lists) - 1) // cpu_cores + 1
                 task_num = cpu_cores if len(data_file_lists) > cpu_cores else 1
                 # import pdb;pdb.set_trace()
