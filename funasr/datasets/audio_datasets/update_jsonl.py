@@ -50,8 +50,8 @@ def update_data(lines, i):
     sample_num = len(waveform)
     source_len = int(sample_num / 16000 * 1000 / 10)
     source_len_old = data["source_len"]
-    if (source_len_old - source_len) > 100 or (source_len - source_len_old) > 100:
-        logging.info(f"old: {source_len_old}, new: {source_len}, wav: {wav_path}")
+    # if (source_len_old - source_len) > 100 or (source_len - source_len_old) > 100:
+    #     logging.info(f"old: {source_len_old}, new: {source_len}, wav: {wav_path}")
     data["source_len"] = source_len
     data["source"] = wav_path
     jsonl_line = json.dumps(data, ensure_ascii=False)

@@ -456,7 +456,7 @@ class Trainer:
                     batch_num_epoch = len(dataloader_train)
                 self.log(
                     epoch,
-                    batch_idx,
+                    batch_idx + kwargs.get("start_step", 0),
                     step_in_epoch=self.step_in_epoch,
                     batch_num_epoch=batch_num_epoch,
                     lr=lr,
