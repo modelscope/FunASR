@@ -287,9 +287,7 @@ class CTTransformer(torch.nn.Module):
             # y, _ = self.wrapped_model(**data)
             y, _ = self.punc_forward(**data)
             _, indices = y.view(-1, y.shape[-1]).topk(1, dim=1)
-            punctuations = indices
-            if indices.size()[0] != 1:
-                punctuations = torch.squeeze(indices)
+            punctuations = torch.squeeze(indices, dim=1)
             assert punctuations.size()[0] == len(mini_sentence)
 
             # Search for the last Period/QuestionMark as cache
