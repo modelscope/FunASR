@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 
 def gen_jsonl_from_wav_text_list(
-    path, data_type_list=("source", "target"), jsonl_file_out: str = None, **kwargs
+    path, data_type_list=("source",), jsonl_file_out: str = None, **kwargs
 ):
     try:
         rank = dist.get_rank()
@@ -24,42 +24,45 @@ def gen_jsonl_from_wav_text_list(
     print(f"convert wav.scp text to jsonl, ncpu: {cpu_cores}")
     if rank == 0:
         json_dict = {}
-        for data_type, data_file in zip(data_type_list, path):
-            json_dict[data_type] = {}
-            with open(data_file, "r") as f:
+        # for data_type, data_file in zip(data_type_list, path):
+        data_type = data_type_list[0]
+        data_file = path
+        json_dict[data_type] = {}
+        with open(data_file, "r") as f:
 
-                data_file_lists = f.readlines()
-                lines_for_each_th = (len(data_file_lists) - 1) // cpu_cores + 1
-                task_num = cpu_cores if len(data_file_lists) > cpu_cores else 1
-                # import pdb;pdb.set_trace()
-                if task_num > 1:
-                    with concurrent.futures.ThreadPoolExecutor(max_workers=cpu_cores) as executor:
+            data_file_lists = f.readlines()
+            print("")
+            lines_for_each_th = (len(data_file_lists) - 1) // cpu_cores + 1
+            task_num = cpu_cores if len(data_file_lists) > cpu_cores else 1
+            # import pdb;pdb.set_trace()
+            if task_num > 1:
+                with concurrent.futures.ThreadPoolExecutor(max_workers=cpu_cores) as executor:
 
-                        futures = [
-                            executor.submit(
-                                parse_context_length,
-                                data_file_lists[
-                                    i * lines_for_each_th : (i + 1) * lines_for_each_th
-                                ],
-                                data_type,
-                                i,
-                            )
-                            for i in range(task_num)
-                        ]
+                    futures = [
+                        executor.submit(
+                            parse_context_length,
+                            data_file_lists[i * lines_for_each_th : (i + 1) * lines_for_each_th],
+                            data_type,
+                            i,
+                        )
+                        for i in range(task_num)
+                    ]
 
-                        for future in concurrent.futures.as_completed(futures):
+                    for future in concurrent.futures.as_completed(futures):
 
-                            json_dict[data_type].update(future.result())
-                else:
-                    res = parse_context_length(data_file_lists, data_type)
-                    json_dict[data_type].update(res)
+                        json_dict[data_type].update(future.result())
+            else:
+                res = parse_context_length(data_file_lists, data_type)
+                json_dict[data_type].update(res)
 
         with open(jsonl_file_out, "w") as f:
             for key in json_dict[data_type_list[0]].keys():
                 jsonl_line = {"key": key}
                 for data_file in data_type_list:
                     jsonl_line.update(json_dict[data_file][key])
-                jsonl_line = json.dumps(jsonl_line, ensure_ascii=False)
+                # jsonl_line = json.dumps(jsonl_line, ensure_ascii=False)
+                source_len = jsonl_line["source_len"]
+                jsonl_line = f"{key} {source_len}"
                 f.write(jsonl_line + "\n")
                 f.flush()
         print(f"processed {len(json_dict[data_type_list[0]])} samples")
@@ -97,16 +100,11 @@ def main_hydra(cfg: DictConfig):
     kwargs = OmegaConf.to_container(cfg, resolve=True)
     print(kwargs)
 
-    scp_file_list = kwargs.get(
-        "scp_file_list",
-        ("/Users/zhifu/funasr1.0/test_local/wav.scp", "/Users/zhifu/funasr1.0/test_local/text.txt"),
-    )
-    if isinstance(scp_file_list, str):
-        scp_file_list = eval(scp_file_list)
-    data_type_list = kwargs.get("data_type_list", ("source", "target"))
-    jsonl_file_out = kwargs.get(
-        "jsonl_file_out", "/Users/zhifu/funasr1.0/test_local/audio_datasets.jsonl"
-    )
+    scp_file_list = kwargs.get("scp_file_list", "/Users/zhifu/funasr1.0/data/list/train_wav.scp")
+    # if isinstance(scp_file_list, str):
+    #     scp_file_list = eval(scp_file_list)
+    data_type_list = kwargs.get("data_type_list", ("source",))
+    jsonl_file_out = kwargs.get("jsonl_file_out", "/Users/zhifu/funasr1.0/data/list/wav_len.txt")
     gen_jsonl_from_wav_text_list(
         scp_file_list, data_type_list=data_type_list, jsonl_file_out=jsonl_file_out
     )

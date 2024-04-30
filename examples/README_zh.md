@@ -256,10 +256,10 @@ funasr/bin/train.py \
 export CUDA_VISIBLE_DEVICES="0,1"
 gpu_num=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
 
-torchrun --nnodes 1 --nproc_per_node ${gpu_num} \
+torchrun --nnodes 1 --nproc_per_node ${gpu_num} --master_port 12345 \
 ../../../funasr/bin/train.py ${train_args}
 ```
---nnodes 表示参与的节点总数，--nproc_per_node 表示每个节点上运行的进程数
+--nnodes 表示参与的节点总数，--nproc_per_node 表示每个节点上运行的进程数，--master_port 表示端口号
 
 ##### 多机多gpu训练
 
@@ -280,7 +280,7 @@ torchrun --nnodes 2 --node_rank 1 --nproc_per_node ${gpu_num} --master_addr 192.
 ../../../funasr/bin/train.py ${train_args}
 ```
 
---nnodes 表示参与的节点总数，--node_rank 表示当前节点id，--nproc_per_node 表示每个节点上运行的进程数（通常为gpu个数）
+--nnodes 表示参与的节点总数，--node_rank 表示当前节点id，--nproc_per_node 表示每个节点上运行的进程数（通常为gpu个数），--master_port 表示端口号
 
 #### 准备数据
 
