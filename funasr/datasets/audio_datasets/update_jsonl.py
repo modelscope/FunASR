@@ -31,7 +31,7 @@ def gen_scp_from_jsonl(jsonl_file, jsonl_file_out, ncpu):
         else:
             for i in range(num_total):
                 update_data(lines, i)
-        print("All audio durations have been processed.")
+        logging.info("All audio durations have been processed.")
 
         for line in lines:
 
@@ -51,7 +51,7 @@ def update_data(lines, i):
     source_len = int(sample_num / 16000 * 1000 / 10)
     source_len_old = data["source_len"]
     if (source_len_old - source_len) > 100 or (source_len - source_len_old) > 100:
-        print(f"old: {source_len_old}, new: {source_len}, wav: {wav_path}")
+        logging.info(f"old: {source_len_old}, new: {source_len}, wav: {wav_path}")
     data["source_len"] = source_len
     data["source"] = wav_path
     jsonl_line = json.dumps(data, ensure_ascii=False)
@@ -67,7 +67,7 @@ def update_wav_len(jsonl_file_list_in, jsonl_file_out_dir, ncpu=1):
         for i, jsonl in enumerate(data_file_lists):
             filename_with_extension = os.path.basename(jsonl.strip())
             jsonl_file_out = os.path.join(jsonl_file_out_dir, filename_with_extension)
-            print(f"{i}/{len(data_file_lists)}, jsonl: {jsonl}, {jsonl_file_out}")
+            logging.info(f"{i}/{len(data_file_lists)}, jsonl: {jsonl}, {jsonl_file_out}")
 
             gen_scp_from_jsonl(jsonl.strip(), jsonl_file_out, ncpu)
 
@@ -76,7 +76,7 @@ def update_wav_len(jsonl_file_list_in, jsonl_file_out_dir, ncpu=1):
 def main_hydra(cfg: DictConfig):
 
     kwargs = OmegaConf.to_container(cfg, resolve=True)
-    print(kwargs)
+    logging.info(kwargs)
 
     jsonl_file_list_in = kwargs.get(
         "jsonl_file_list_in", "/Users/zhifu/funasr1.0/data/list/data_jsonl.list"
