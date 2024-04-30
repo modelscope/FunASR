@@ -186,7 +186,7 @@ class SenseVoiceDataset(torch.utils.data.Dataset):
                 )
 
         if self.batch_type != "example":
-            for i in range(3):
+            for i in range(10):
                 outputs = self._filter_badcase(outputs, i=i)
 
         return outputs

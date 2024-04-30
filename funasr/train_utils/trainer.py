@@ -308,6 +308,7 @@ class Trainer:
                     checkpoint["step_in_epoch"] if "step_in_epoch" in checkpoint else 0
                 )
                 self.step_in_epoch = 0 if self.step_in_epoch is None else self.step_in_epoch
+                print(checkpoint["train_acc_avg"])
                 self.train_acc_avg = (
                     checkpoint["train_acc_avg"] if "train_acc_avg" in checkpoint else 0
                 )
