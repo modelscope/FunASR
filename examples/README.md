@@ -248,10 +248,10 @@ funasr/bin/train.py \
 export CUDA_VISIBLE_DEVICES="0,1"
 gpu_num=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
 
-torchrun --nnodes 1 --nproc_per_node ${gpu_num} \
+torchrun --nnodes 1 --nproc_per_node ${gpu_num} --master_port 12345 \
 ../../../funasr/bin/train.py ${train_args}
 ```
---nnodes represents the total number of participating nodes, while --nproc_per_node indicates the number of processes running on each node.
+--nnodes represents the total number of participating nodes, while --nproc_per_node indicates the number of processes running on each node. --master_port indicates the port is 12345
 
 ##### Multi-Machine Multi-GPU Training
 
@@ -260,7 +260,7 @@ On the master node, assuming the IP is 192.168.1.1 and the port is 12345, and yo
 export CUDA_VISIBLE_DEVICES="0,1"
 gpu_num=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
 
-torchrun --nnodes 2 --node_rank 0 --nproc_per_node ${gpu_num} --master_addr=192.168.1.1 --master_port=12345 \
+torchrun --nnodes 2 --node_rank 0 --nproc_per_node ${gpu_num} --master_addr 192.168.1.1 --master_port 12345 \
 ../../../funasr/bin/train.py ${train_args}
 ```
 On the worker node (assuming the IP is 192.168.1.2), you need to ensure that the MASTER_ADDR and MASTER_PORT environment variables are set to match those of the master node, and then run the same command:
@@ -269,7 +269,7 @@ On the worker node (assuming the IP is 192.168.1.2), you need to ensure that the
 export CUDA_VISIBLE_DEVICES="0,1"
 gpu_num=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
 
-torchrun --nnodes 2 --node_rank 1 --nproc_per_node ${gpu_num} --master_addr=192.168.1.1 --master_port=12345 \
+torchrun --nnodes 2 --node_rank 1 --nproc_per_node ${gpu_num} --master_addr 192.168.1.1 --master_port 12345 \
 ../../../funasr/bin/train.py ${train_args}
 ```
 

@@ -27,6 +27,8 @@ data_url=www.openslr.org/resources/33
 tag="exp1"
 workspace=`pwd`
 
+master_port=12345
+
 . utils/parse_options.sh || exit 1;
 
 # Set bash to 'debug' mode, it will exit on :
@@ -113,6 +115,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
   torchrun \
   --nnodes 1 \
   --nproc_per_node ${gpu_num} \
+  --master_port ${master_port} \
   ../../../funasr/bin/train.py \
   --config-path "${workspace}/conf" \
   --config-name "${config}" \
