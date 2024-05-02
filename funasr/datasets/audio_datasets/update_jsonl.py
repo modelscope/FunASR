@@ -46,16 +46,17 @@ def update_data(lines, i):
     data = json.loads(line.strip())
 
     wav_path = data["source"].replace("/cpfs01", "/cpfs_speech/data")
-    waveform, _ = librosa.load(wav_path, sr=16000)
-    sample_num = len(waveform)
-    source_len = int(sample_num / 16000 * 1000 / 10)
-    source_len_old = data["source_len"]
-    # if (source_len_old - source_len) > 100 or (source_len - source_len_old) > 100:
-    #     logging.info(f"old: {source_len_old}, new: {source_len}, wav: {wav_path}")
-    data["source_len"] = source_len
-    data["source"] = wav_path
-    jsonl_line = json.dumps(data, ensure_ascii=False)
-    lines[i] = jsonl_line
+    if os.path.exists(wav_path):
+        waveform, _ = librosa.load(wav_path, sr=16000)
+        sample_num = len(waveform)
+        source_len = int(sample_num / 16000 * 1000 / 10)
+        source_len_old = data["source_len"]
+        # if (source_len_old - source_len) > 100 or (source_len - source_len_old) > 100:
+        #     logging.info(f"old: {source_len_old}, new: {source_len}, wav: {wav_path}")
+        data["source_len"] = source_len
+        data["source"] = wav_path
+        jsonl_line = json.dumps(data, ensure_ascii=False)
+        lines[i] = jsonl_line
 
 
 def update_wav_len(jsonl_file_list_in, jsonl_file_out_dir, ncpu=1):
