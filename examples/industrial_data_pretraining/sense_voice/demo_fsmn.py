@@ -23,5 +23,5 @@ DecodingOptions = {
     "gain_event": True,
 }
 
-res = model.generate(input=input_wav, batch_size_s=0, DecodingOptions=DecodingOptions)
+res = model.generate(input=input_wav, batch_size_s=0, DecodingOptions=DecodingOptions, beam_size=5)
 print(res)
