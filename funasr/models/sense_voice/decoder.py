@@ -472,7 +472,7 @@ class ResidualAttentionBlockFSMN(nn.Module):
         is_pad_mask = kwargs.get("is_pad_mask", False)
         is_pad_memory_mask = kwargs.get("is_pad_memory_mask", False)
 
-        fsmn_cache = cache[layer]["fsmn_cache"] if len(cache) > 0 or cache is None else None
+        fsmn_cache = cache[layer]["fsmn_cache"] if cache is not None and len(cache) > 0 else None
         # if fsmn_cache is not None:
         #     x = x[:, -1:]
         att_res, fsmn_cache = self.attn(self.attn_ln(x), mask=None, cache=fsmn_cache)

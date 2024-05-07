@@ -62,8 +62,10 @@ def detect_language(
 
     else:
         x = x.to(mel.device)
+    # FIX(funasr): sense vocie
+    # logits = model.logits(x[:, :-1], mel)[:, -1]
+    logits = model.logits(x[:, :], mel)[:, -1]
 
-    logits = model.logits(x[:, :-1], mel)[:, -1]
     # collect detected languages; suppress all non-language tokens
     mask = torch.ones(logits.shape[-1], dtype=torch.bool)
     mask[list(tokenizer.all_language_tokens)] = False

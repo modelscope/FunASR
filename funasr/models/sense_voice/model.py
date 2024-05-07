@@ -806,7 +806,6 @@ class SenseVoiceFSMN(nn.Module):
             if len(kwargs.get("data_type", [])) > 1:
                 audio_sample_list, text_token_int_list = audio_sample_list
                 text_token_int = text_token_int_list[0]
-                text_token_int = tokenizer.encode(text_token_int)
             else:
                 text_token_int = None
 
@@ -846,7 +845,7 @@ class SenseVoiceFSMN(nn.Module):
         )
 
         if text_token_int is not None:
-            i = 1
+            i = 0
             results = []
             ibest_writer = None
             if kwargs.get("output_dir") is not None:
@@ -855,7 +854,9 @@ class SenseVoiceFSMN(nn.Module):
                 ibest_writer = self.writer[f"1best_recog"]
 
             # 1. Forward decoder
-            ys_pad = torch.tensor(text_token_int, dtype=torch.int64).to(kwargs["device"])[None, :]
+            ys_pad = torch.tensor(sos_int + text_token_int, dtype=torch.int64).to(kwargs["device"])[
+                None, :
+            ]
             ys_pad_lens = torch.tensor([len(text_token_int)], dtype=torch.int64).to(
                 kwargs["device"]
             )[None, :]
