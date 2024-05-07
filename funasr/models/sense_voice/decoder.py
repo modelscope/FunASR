@@ -599,5 +599,6 @@ class SenseVoiceDecoderFSMN(nn.Module):
     def score(self, ys, state, x):
         """Score."""
         ys_mask = subsequent_mask(len(ys), device=x.device).unsqueeze(0)
-        logp = self.forward(ys.unsqueeze(0), x.unsqueeze(0), cache=state)
+        logp = self.forward(ys.unsqueeze(0), x.unsqueeze(0), cache=None)
+        logp = torch.log_softmax(logp, dim=-1)
         return logp.squeeze(0)[-1, :], state
