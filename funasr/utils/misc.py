@@ -78,3 +78,17 @@ def prepare_model_dir(**kwargs):
     #     config_json = os.path.join(model_path, "configuration.json")
     #     if os.path.exists(config_json):
     #         shutil.copy(config_json, os.path.join(kwargs.get("output_dir", "./"), "configuration.json"))
+
+
+def extract_filename_without_extension(file_path):
+    """
+    从给定的文件路径中提取文件名（不包含路径和扩展名）
+    :param file_path: 完整的文件路径
+    :return: 文件名（不含路径和扩展名）
+    """
+    # 首先，使用os.path.basename获取路径中的文件名部分（含扩展名）
+    filename_with_extension = os.path.basename(file_path)
+    # 然后，使用os.path.splitext分离文件名和扩展名
+    filename, extension = os.path.splitext(filename_with_extension)
+    # 返回不包含扩展名的文件名
+    return filename
