@@ -17,9 +17,6 @@ def main_hydra(cfg: DictConfig):
             return cfg_item
 
     kwargs = to_plain_list(cfg)
-    log_level = getattr(logging, kwargs.get("log_level", "INFO").upper())
-
-    logging.basicConfig(level=log_level)
 
     if kwargs.get("debug", False):
         import pdb

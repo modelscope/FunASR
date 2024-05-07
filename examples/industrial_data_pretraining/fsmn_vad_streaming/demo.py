@@ -9,11 +9,9 @@ wav_file = "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audi
 
 model = AutoModel(model="iic/speech_fsmn_vad_zh-cn-16k-common-pytorch")
 
-mm = model.model
-for p in mm.parameters():
-    print(f"{p.numel()}")
 res = model.generate(input=wav_file)
 print(res)
+
 # [[beg1, end1], [beg2, end2], .., [begN, endN]]
 # beg/end: ms
 
