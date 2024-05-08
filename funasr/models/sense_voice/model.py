@@ -515,13 +515,17 @@ class SenseVoiceRWKV(nn.Module):
         self.beam_search.eos = eos_int[0]
 
         # Paramterts for rich decoding
-        self.beam_search.emo_unk = tokenizer.encode(DecodingOptions.get("emo_unk_token", "<|SPECIAL_TOKEN_1|>"))[0]
+        self.beam_search.emo_unk = tokenizer.encode(
+            DecodingOptions.get("emo_unk_token", "<|SPECIAL_TOKEN_1|>"), allowed_special="all")[0]
         self.beam_search.emo_unk_score = 1
-        self.beam_search.emo_tokens = tokenizer.encode(DecodingOptions.get("emo_target_tokens", "<|HAPPY|><|SAD|><|ANGRY|>"))
+        self.beam_search.emo_tokens = tokenizer.encode(
+            DecodingOptions.get("emo_target_tokens", "<|HAPPY|><|SAD|><|ANGRY|>"), allowed_special="all")
         self.beam_search.emo_scores = DecodingOptions.get("emo_target_threshold", [0.1, 0.1, 0.1])
 
-        self.beam_search.event_bg_token = tokenizer.encode(DecodingOptions.get("gain_tokens_bg", "<|Speech|><|BGM|><|Applause|><|Laughter|>"))
-        self.beam_search.event_ed_token = tokenizer.encode(DecodingOptions.get("gain_tokens_ed", "<|/Speech|><|/BGM|><|/Applause|><|/Laughter|>"))
+        self.beam_search.event_bg_token = tokenizer.encode(
+            DecodingOptions.get("gain_tokens_bg", "<|Speech|><|BGM|><|Applause|><|Laughter|>"), allowed_special="all")
+        self.beam_search.event_ed_token = tokenizer.encode(
+            DecodingOptions.get("gain_tokens_ed", "<|/Speech|><|/BGM|><|/Applause|><|/Laughter|>"), allowed_special="all")
         self.beam_search.event_score_ga = DecodingOptions.get("gain_tokens_score", [1, 1, 1, 1])
 
         encoder_out, encoder_out_lens = self.encode(
@@ -854,13 +858,17 @@ class SenseVoiceFSMN(nn.Module):
         self.beam_search.eos = eos_int[0]
 
         # Paramterts for rich decoding
-        self.beam_search.emo_unk = tokenizer.encode(DecodingOptions.get("emo_unk_token", "<|SPECIAL_TOKEN_1|>"))[0]
+        self.beam_search.emo_unk = tokenizer.encode(
+            DecodingOptions.get("emo_unk_token", "<|SPECIAL_TOKEN_1|>"), allowed_special="all")[0]
         self.beam_search.emo_unk_score = 1
-        self.beam_search.emo_tokens = tokenizer.encode(DecodingOptions.get("emo_target_tokens", "<|HAPPY|><|SAD|><|ANGRY|>"))
+        self.beam_search.emo_tokens = tokenizer.encode(
+            DecodingOptions.get("emo_target_tokens", "<|HAPPY|><|SAD|><|ANGRY|>"), allowed_special="all")
         self.beam_search.emo_scores = DecodingOptions.get("emo_target_threshold", [0.1, 0.1, 0.1])
 
-        self.beam_search.event_bg_token = tokenizer.encode(DecodingOptions.get("gain_tokens_bg", "<|Speech|><|BGM|><|Applause|><|Laughter|>"))
-        self.beam_search.event_ed_token = tokenizer.encode(DecodingOptions.get("gain_tokens_ed", "<|/Speech|><|/BGM|><|/Applause|><|/Laughter|>"))
+        self.beam_search.event_bg_token = tokenizer.encode(
+            DecodingOptions.get("gain_tokens_bg", "<|Speech|><|BGM|><|Applause|><|Laughter|>"), allowed_special="all")
+        self.beam_search.event_ed_token = tokenizer.encode(
+            DecodingOptions.get("gain_tokens_ed", "<|/Speech|><|/BGM|><|/Applause|><|/Laughter|>"), allowed_special="all")
         self.beam_search.event_score_ga = DecodingOptions.get("gain_tokens_score", [1, 1, 1, 1])
 
         encoder_out, encoder_out_lens = self.encode(
