@@ -208,7 +208,7 @@ class BeamSearch(torch.nn.Module):
             import math
 
             last_token = yseq[-1]
-            if last_token in self.emo_tokens + self.emo_unk:
+            if last_token in self.emo_tokens + [self.emo_unk]:
                 # prevent output event after emotation token 
                 score[self.event_bg_token] = -np.inf
 
