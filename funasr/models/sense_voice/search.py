@@ -213,7 +213,9 @@ class BeamSearch(torch.nn.Module):
                 score[self.event_bg_token] = -np.inf
 
             for eve_bg, eve_ed, eve_ga in zip(self.event_bg_token, self.event_ed_token, self.event_score_ga):
-                score[(eve_bg, eve_ed)] += torch.Tensor(get_score(yseq, eve_bg, eve_ed)).to(score.device)
+                score_offset = get_score(yseq, eve_bg, eve_ed)
+                score[eve_bg] += score_offset[0]
+                score[eve_ed] += score_offset[1]
                 score[eve_bg] += math.log(eve_ga)
 
 
