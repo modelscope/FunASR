@@ -364,7 +364,6 @@ class AutoModel:
             if len(sorted_data) > 0 and len(sorted_data[0]) > 0:
                 batch_size = max(batch_size, sorted_data[0][0][1] - sorted_data[0][0][0])
 
-            batch_size_ms_cum = 0
             beg_idx = 0
             beg_asr_total = time.time()
             time_speech_total_per_sample = speech_lengths / 16000
@@ -373,19 +372,22 @@ class AutoModel:
             # pbar_sample = tqdm(colour="blue", total=n, dynamic_ncols=True)
 
             all_segments = []
+            max_len_in_batch = 0
+            end_idx = 1
             for j, _ in enumerate(range(0, n)):
                 # pbar_sample.update(1)
-                batch_size_ms_cum += sorted_data[j][0][1] - sorted_data[j][0][0]
+                sample_length = sorted_data[j][0][1] - sorted_data[j][0][0]
+                potential_batch_length = max(max_len_in_batch, sample_length) * (j + 1 - beg_idx)
+                # batch_size_ms_cum += sorted_data[j][0][1] - sorted_data[j][0][0]
                 if (
                     j < n - 1
-                    and (batch_size_ms_cum + sorted_data[j + 1][0][1] - sorted_data[j + 1][0][0])
-                    < batch_size
-                    and (sorted_data[j + 1][0][1] - sorted_data[j + 1][0][0])
-                    < batch_size_threshold_ms
+                    and sample_length < batch_size_threshold_ms
+                    and potential_batch_length < batch_size
                 ):
+                    max_len_in_batch = max(max_len_in_batch, sample_length)
+                    end_idx += 1
                     continue
-                batch_size_ms_cum = 0
-                end_idx = j + 1
+
                 speech_j, speech_lengths_j = slice_padding_audio_samples(
                     speech, speech_lengths, sorted_data[beg_idx:end_idx]
                 )
@@ -410,6 +412,8 @@ class AutoModel:
                         )
                         results[_b]["spk_embedding"] = spk_res[0]["spk_embedding"]
                 beg_idx = end_idx
+                end_idx += 1
+                max_len_in_batch = sample_length
                 if len(results) < 1:
                     continue
                 results_sorted.extend(results)
