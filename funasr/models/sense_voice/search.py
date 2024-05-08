@@ -54,7 +54,6 @@ class BeamSearch(torch.nn.Module):
         event_bg_token: List[int] = field(default_factory=lambda: [58946, 58948, 58950, 58952]),
         event_ed_token: List[int] = field(default_factory=lambda: [58947, 58949, 58951, 58953]),
         event_score_ga: List[float] = field(default_factory=lambda: [1, 1, 5, 25]),
-
         token_list: List[str] = None,
         pre_beam_ratio: float = 1.5,
         pre_beam_score_key: str = None,
@@ -209,15 +208,16 @@ class BeamSearch(torch.nn.Module):
 
             last_token = yseq[-1]
             if last_token in self.emo_tokens + [self.emo_unk]:
-                # prevent output event after emotation token 
+                # prevent output event after emotation token
                 score[self.event_bg_token] = -np.inf
 
-            for eve_bg, eve_ed, eve_ga in zip(self.event_bg_token, self.event_ed_token, self.event_score_ga):
+            for eve_bg, eve_ed, eve_ga in zip(
+                self.event_bg_token, self.event_ed_token, self.event_score_ga
+            ):
                 score_offset = get_score(yseq, eve_bg, eve_ed)
                 score[eve_bg] += score_offset[0]
                 score[eve_ed] += score_offset[1]
                 score[eve_bg] += math.log(eve_ga)
-
 
             score[self.emo_unk] += math.log(self.emo_unk_score)
             for emo, emo_th in zip(self.emo_tokens, self.emo_scores):
@@ -231,7 +231,6 @@ class BeamSearch(torch.nn.Module):
             scores[k] = struct_score(hyp.yseq, scores[k])
 
         return scores, states
-
 
     def score_partial(
         self, hyp: Hypothesis, ids: torch.Tensor, x: torch.Tensor
