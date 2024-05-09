@@ -667,9 +667,11 @@ class SenseVoiceFSMN(nn.Module):
         else:
             encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
 
-        loss_att, acc_att, cer_att, wer_att = self._calc_att_loss(
-            encoder_out, encoder_out_lens, text, text_lengths, target_mask=target_mask
-        )
+        with autocast(False):
+            loss_att, acc_att, cer_att, wer_att = self._calc_att_loss(
+                encoder_out, encoder_out_lens, text, text_lengths, target_mask=target_mask
+            )
+
         loss = loss_att
         stats = {}
         stats["acc"] = acc_att
