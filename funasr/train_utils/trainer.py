@@ -384,19 +384,19 @@ class Trainer:
 
                 loss, stats, weight = retval
                 stats = {k: v for k, v in stats.items() if v is not None}
-                # if self.use_ddp or self.use_fsdp:
-                #     # Apply weighted averaging for loss and stats
-                #     loss = (loss * weight.type(loss.dtype)).sum()
-                #     # if distributed, this method can also apply all_reduce()
-                #     # stats, weight = recursive_average(stats, weight, distributed=True)
-                #     if self.use_ddp or self.use_fsdp:
-                #         dist.all_reduce(weight, op=dist.ReduceOp.SUM)
-                #     # Now weight is summation over all workers
-                #     loss /= weight.sum()  # shape:[1] -> shape:[]
-                #     # Multiply world_size because DistributedDataParallel
-                #     # automatically normalizes the gradient by world_size.
-                #     loss *= self.world_size
-                loss *= self.world_size
+                if self.use_ddp or self.use_fsdp:
+                    # Apply weighted averaging for loss and stats
+                    loss = (loss * weight.type(loss.dtype)).sum()
+                    # if distributed, this method can also apply all_reduce()
+                    # stats, weight = recursive_average(stats, weight, distributed=True)
+                    if self.use_ddp or self.use_fsdp:
+                        dist.all_reduce(weight, op=dist.ReduceOp.SUM)
+                    # Now weight is summation over all workers
+                    loss /= weight.sum()  # shape:[1] -> shape:[]
+                    # Multiply world_size because DistributedDataParallel
+                    # automatically normalizes the gradient by world_size.
+                    loss *= self.world_size
+                # loss *= self.world_size
                 # Scale the loss since we're not updating for every mini-batch
                 loss = loss / accum_grad
 
@@ -417,6 +417,17 @@ class Trainer:
                         self.train_acc_avg * (self.step_in_epoch - 1)
                         + stats["acc"].detach().cpu().item()
                     ) / self.step_in_epoch
+                if self.use_ddp or self.use_fsdp:
+                    train_loss_avg = torch.tensor(self.train_loss_avg, dtype=torch.float32).to(
+                        self.device
+                    )
+                    train_acc_avg = torch.tensor(self.train_acc_avg, dtype=torch.float32).to(
+                        self.device
+                    )
+                    dist.all_reduce(train_loss_avg, op=dist.ReduceOp.SUM)
+                    dist.all_reduce(train_acc_avg, op=dist.ReduceOp.SUM)
+                    self.train_loss_avg = train_loss_avg.detach().cpu().item() / self.world_size
+                    self.train_acc_avg = train_acc_avg.detach().cpu().item() / self.world_size
 
             # Perform an optimizer step only after accumulating enough gradients
             if (batch_idx + 1) % accum_grad == 0:
@@ -447,18 +458,6 @@ class Trainer:
                 optim.zero_grad(set_to_none=True)
                 total_time = f"{(time.perf_counter() - time5)/accum_grad:0.3f}"
                 time5 = time.perf_counter()
-
-                if self.use_ddp or self.use_fsdp:
-                    train_loss_avg = torch.tensor(self.train_loss_avg, dtype=torch.float32).to(
-                        self.device
-                    )
-                    train_acc_avg = torch.tensor(self.train_acc_avg, dtype=torch.float32).to(
-                        self.device
-                    )
-                    dist.all_reduce(train_loss_avg, op=dist.ReduceOp.SUM)
-                    dist.all_reduce(train_acc_avg, op=dist.ReduceOp.SUM)
-                    self.train_loss_avg = train_loss_avg.detach().cpu().item() / self.world_size
-                    self.train_acc_avg = train_acc_avg.detach().cpu().item() / self.world_size
 
                 speed_stats["optim_time"] = f"{time5 - time4:0.3f}"
 
@@ -666,9 +665,9 @@ class Trainer:
                 f"data_slice: {data_split_i}/{data_split_num}, "
                 f"step_in_slice: {batch_idx + 1}/{batch_num_epoch}, step_in_epoch: {step_in_epoch}, total step: {self.batch_total}, "
                 f"(loss_avg_rank: {loss:.3f}), "
-                f"(loss_avg_epoch: {loss_avg_epoch:.3f}), "
-                f"(ppl_avg_epoch: {math.exp(loss_avg_epoch):.3e}), "
-                f"(acc_avg_epoch: {acc_avg_epoch:.3f}), "
+                f"(loss_avg_slice: {loss_avg_epoch:.3f}), "
+                f"(ppl_avg_slice: {math.exp(loss_avg_epoch):.3e}), "
+                f"(acc_avg_slice: {acc_avg_epoch:.3f}), "
                 f"(lr: {lr:.3e}), "
                 f"{[(k, round(v.detach().cpu().item(), 3)) for k, v in stats.items()]}, "
                 f"{speed_stats}, "

@@ -241,6 +241,8 @@ def main(**kwargs):
             f"estimated to finish {trainer.max_epoch} "
             f"epoch: {(trainer.max_epoch - epoch) * time_escaped:.3f} hours\n"
         )
+        trainer.train_acc_avg = 0.0
+        trainer.train_loss_avg = 0.0
 
     if trainer.rank == 0:
         average_checkpoints(trainer.output_dir, trainer.avg_nbest_model)
