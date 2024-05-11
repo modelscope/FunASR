@@ -410,24 +410,14 @@ class Trainer:
                 speed_stats["backward_and_AllReaduce_time"] = f"{time4 - time3:0.3f}"
 
                 self.train_loss_avg = (
-                    self.train_loss_avg * (self.step_in_epoch - 1) + loss.detach().cpu().item()
-                ) / self.step_in_epoch
+                    self.train_loss_avg * (batch_idx + kwargs.get("start_step", 0))
+                    + loss.detach().cpu().item()
+                ) / (batch_idx + kwargs.get("start_step", 0) + 1)
                 if "acc" in stats:
                     self.train_acc_avg = (
-                        self.train_acc_avg * (self.step_in_epoch - 1)
+                        self.train_acc_avg * (batch_idx + kwargs.get("start_step", 0))
                         + stats["acc"].detach().cpu().item()
-                    ) / self.step_in_epoch
-                if self.use_ddp or self.use_fsdp:
-                    train_loss_avg = torch.tensor(self.train_loss_avg, dtype=torch.float32).to(
-                        self.device
-                    )
-                    train_acc_avg = torch.tensor(self.train_acc_avg, dtype=torch.float32).to(
-                        self.device
-                    )
-                    dist.all_reduce(train_loss_avg, op=dist.ReduceOp.SUM)
-                    dist.all_reduce(train_acc_avg, op=dist.ReduceOp.SUM)
-                    self.train_loss_avg = train_loss_avg.detach().cpu().item() / self.world_size
-                    self.train_acc_avg = train_acc_avg.detach().cpu().item() / self.world_size
+                    ) / (batch_idx + kwargs.get("start_step", 0) + 1)
 
             # Perform an optimizer step only after accumulating enough gradients
             if (batch_idx + 1) % accum_grad == 0:
@@ -456,6 +446,19 @@ class Trainer:
                 scheduler.step()
                 # Clear gradients for the next accumulation stage
                 optim.zero_grad(set_to_none=True)
+
+                if self.use_ddp or self.use_fsdp:
+                    train_loss_avg = torch.tensor(self.train_loss_avg, dtype=torch.float32).to(
+                        self.device
+                    )
+                    train_acc_avg = torch.tensor(self.train_acc_avg, dtype=torch.float32).to(
+                        self.device
+                    )
+                    dist.all_reduce(train_loss_avg, op=dist.ReduceOp.SUM)
+                    dist.all_reduce(train_acc_avg, op=dist.ReduceOp.SUM)
+                    self.train_loss_avg = train_loss_avg.detach().cpu().item() / self.world_size
+                    self.train_acc_avg = train_acc_avg.detach().cpu().item() / self.world_size
+
                 total_time = f"{(time.perf_counter() - time5)/accum_grad:0.3f}"
                 time5 = time.perf_counter()
 
