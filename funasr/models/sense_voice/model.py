@@ -517,7 +517,7 @@ class SenseVoiceRWKV(nn.Module):
         # Paramterts for rich decoding
         self.beam_search.emo_unk = tokenizer.encode(
             DecodingOptions.get("emo_unk_token", "<|SPECIAL_TOKEN_1|>"), allowed_special="all")[0]
-        self.beam_search.emo_unk_score = 1
+        self.beam_search.emo_unk_score = DecodingOptions.get("emo_unk_score", 1.0)
         self.beam_search.emo_tokens = tokenizer.encode(
             DecodingOptions.get("emo_target_tokens", "<|HAPPY|><|SAD|><|ANGRY|>"), allowed_special="all")
         self.beam_search.emo_scores = DecodingOptions.get("emo_target_threshold", [0.1, 0.1, 0.1])
@@ -860,7 +860,7 @@ class SenseVoiceFSMN(nn.Module):
         # Paramterts for rich decoding
         self.beam_search.emo_unk = tokenizer.encode(
             DecodingOptions.get("emo_unk_token", "<|SPECIAL_TOKEN_1|>"), allowed_special="all")[0]
-        self.beam_search.emo_unk_score = 1
+        self.beam_search.emo_unk_score = DecodingOptions.get("emo_unk_score", 1.0)
         self.beam_search.emo_tokens = tokenizer.encode(
             DecodingOptions.get("emo_target_tokens", "<|HAPPY|><|SAD|><|ANGRY|>"), allowed_special="all")
         self.beam_search.emo_scores = DecodingOptions.get("emo_target_threshold", [0.1, 0.1, 0.1])
