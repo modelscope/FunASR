@@ -35,6 +35,7 @@ TpassStream::TpassStream(std::map<std::string, std::string>& model_path, int thr
         string de_model_path;
         string am_cmvn_path;
         string am_config_path;
+        string token_path;
         string hw_compile_model_path;
         string seg_dict_path;
         
@@ -60,8 +61,9 @@ TpassStream::TpassStream(std::map<std::string, std::string>& model_path, int thr
         }
         am_cmvn_path = PathAppend(model_path.at(ONLINE_MODEL_DIR), AM_CMVN_NAME);
         am_config_path = PathAppend(model_path.at(ONLINE_MODEL_DIR), AM_CONFIG_NAME);
+        token_path = PathAppend(model_path.at(MODEL_DIR), TOKEN_PATH);
 
-        asr_handle->InitAsr(am_model_path, en_model_path, de_model_path, am_cmvn_path, am_config_path, thread_num);
+        asr_handle->InitAsr(am_model_path, en_model_path, de_model_path, am_cmvn_path, am_config_path, token_path, thread_num);
     }else{
         LOG(ERROR) <<"Can not find offline-model-dir or online-model-dir";
         exit(-1);
@@ -85,20 +87,23 @@ TpassStream::TpassStream(std::map<std::string, std::string>& model_path, int thr
     if(model_path.find(PUNC_DIR) != model_path.end()){
         string punc_model_path;
         string punc_config_path;
+        string token_path;
     
         punc_model_path = PathAppend(model_path.at(PUNC_DIR), MODEL_NAME);
         if(model_path.find(PUNC_QUANT) != model_path.end() && model_path.at(PUNC_QUANT) == "true"){
             punc_model_path = PathAppend(model_path.at(PUNC_DIR), QUANT_MODEL_NAME);
         }
         punc_config_path = PathAppend(model_path.at(PUNC_DIR), PUNC_CONFIG_NAME);
+        token_path = PathAppend(model_path.at(PUNC_DIR), TOKEN_PATH);
 
         if (access(punc_model_path.c_str(), F_OK) != 0 ||
-            access(punc_config_path.c_str(), F_OK) != 0 )
+            access(punc_config_path.c_str(), F_OK) != 0 ||
+            access(token_path.c_str(), F_OK) != 0)
         {
             LOG(INFO) << "PUNC model file is not exist, skip load punc model.";
         }else{
             punc_online_handle = make_unique<CTTransformerOnline>();
-            punc_online_handle->InitPunc(punc_model_path, punc_config_path, thread_num);
+            punc_online_handle->InitPunc(punc_model_path, punc_config_path, token_path, thread_num);
             use_punc = true;
         }
     }
