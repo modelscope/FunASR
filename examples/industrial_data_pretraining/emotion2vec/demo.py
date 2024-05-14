@@ -7,8 +7,12 @@ from funasr import AutoModel
 
 # model="iic/emotion2vec_base"
 # model="iic/emotion2vec_base_finetuned"
+# model="iic/emotion2vec_plus_seed_modelscope"
+# model="iic/emotion2vec_plus_base_modelscope"
+model = "iic/emotion2vec_plus_large_modelscope"
+
 model = AutoModel(
-    model="/Users/zhifu/Downloads/modelscope_models/emotion2vec_plus_seed",
+    model=model,
     # vad_model="iic/speech_fsmn_vad_zh-cn-16k-common-pytorch",
     # vad_model_revision="master",
     # vad_kwargs={"max_single_segment_time": 2000},
