@@ -21,6 +21,7 @@ DecodingOptions = {
     "language": "auto",
     "fp16": True,
     "gain_event": True,
+    "beam_size": 5,
 }
 
 res = model.generate(input=input_wav, batch_size_s=0, DecodingOptions=DecodingOptions)
