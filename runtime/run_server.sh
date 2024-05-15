@@ -4,7 +4,7 @@ BLADE_DIR=$(python3 -c "import torch_blade; import os; print(os.path.dirname(tor
 export LD_LIBRARY_PATH=/usr/local/lib:${TORCH_DIR}/lib:${BLADE_DIR}:${LD_LIBRARY_PATH}
 
 download_model_dir="/workspace/models"
-model_dir="damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx"
+model_dir="damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx"
 vad_dir="damo/speech_fsmn_vad_zh-cn-16k-common-onnx"
 punc_dir="damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx"
 itn_dir="thuduj12/fst_itn_zh"
