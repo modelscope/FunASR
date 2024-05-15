@@ -53,6 +53,12 @@ class SenseVoiceDataset(torch.utils.data.Dataset):
         self.prompt_ids_len = 0
         self.retry = kwargs.get("retry", 5)
 
+        self.permute = False
+        from funasr.frontends.whisper_frontend import WhisperFrontend
+
+        if isinstance(self.frontend, WhisperFrontend):
+            self.permute = True
+
     def get_source_len(self, index):
         item = self.index_ds[index]
         return self.index_ds.get_source_len(item)
@@ -92,7 +98,8 @@ class SenseVoiceDataset(torch.utils.data.Dataset):
 
             if speech_lengths > self.batch_size:
                 continue
-            speech = speech.permute(0, 2, 1)
+            if self.permute:
+                speech = speech.permute(0, 2, 1)
             target = item["target"]
             if self.preprocessor_text:
                 target = self.preprocessor_text(target)
@@ -100,8 +107,14 @@ class SenseVoiceDataset(torch.utils.data.Dataset):
             task = item.get("prompt", "<|ASR|>")
             text_language = item.get("text_language", "<|zh|>")
 
-            prompt = f"{self.sos}{task}{text_language}"
-            prompt_ids = self.tokenizer.encode(prompt, allowed_special="all")
+            if isinstance(self.sos, str):
+                prompt = f"{self.sos}{task}{text_language}"
+                prompt_ids = self.tokenizer.encode(prompt, allowed_special="all")
+            else:
+                prompt = f"{task}{text_language}"
+                prompt_ids = self.tokenizer.encode(prompt, allowed_special="all")
+                prompt_ids = [self.sos] + prompt_ids
+
             prompt_ids_len = len(prompt_ids) - 1  # [sos, task]
             self.prompt_ids_len = prompt_ids_len
 
@@ -110,7 +123,10 @@ class SenseVoiceDataset(torch.utils.data.Dataset):
             if target_ids_len > 200:
                 continue
 
-            eos = self.tokenizer.encode(self.eos, allowed_special="all")  # [eos]
+            if isinstance(self.eos, str):
+                eos = self.tokenizer.encode(self.eos, allowed_special="all")  # [eos]
+            else:
+                eos = [self.eos]
 
             ids = prompt_ids + target_ids + eos  # [sos, task, lid, text, eos]
             ids_lengths = len(ids)

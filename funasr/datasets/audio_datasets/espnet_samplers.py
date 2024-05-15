@@ -146,10 +146,9 @@ class EspnetStyleBatchSampler(DistributedSampler):
         start_idx = self.rank * batches_per_rank
         end_idx = start_idx + batches_per_rank
         rank_batches = buffer_batches[start_idx + self.start_step : end_idx]
-        if self.start_step > 0:
-            logging.info(
-                f"Warning, rank: {self.rank}, dataloader start from step: {self.start_step}, batch_num_before: {end_idx-start_idx}, now: {len(rank_batches)}"
-            )
+        logging.info(
+            f"rank: {self.rank}, dataloader start from step: {self.start_step}, batch_num: {end_idx-start_idx}, batch_num_after_step: {len(rank_batches)}"
+        )
         # Return an iterator over the batches for the current rank
         return iter(rank_batches)
 
