@@ -7,8 +7,8 @@ from funasr import AutoModel
 
 model = AutoModel(
     model="/Users/zhifu/Downloads/modelscope_models/SenseVoiceModelscope",
-    vad_model="iic/speech_fsmn_vad_zh-cn-16k-common-pytorch",
-    vad_kwargs={"max_single_segment_time": 30000},
+    # vad_model="iic/speech_fsmn_vad_zh-cn-16k-common-pytorch",
+    # vad_kwargs={"max_single_segment_time": 30000},
 )
 
 
