@@ -254,7 +254,12 @@ class Emotion2vec(torch.nn.Module):
                 x = torch.softmax(x, dim=-1)
                 scores = x[0].tolist()
 
-            result_i = {"key": key[i], "labels": labels, "scores": scores}
+            select_label = [lb for lb in labels if lb != "none"]
+            select_score = [scores[idx] for idx, lb in enumerate(labels) if lb != "none"]
+
+            # result_i = {"key": key[i], "labels": labels, "scores": scores}
+            result_i = {"key": key[i], "labels": select_label, "scores": select_score}
+
             if extract_embedding:
                 result_i["feats"] = feats
             results.append(result_i)
