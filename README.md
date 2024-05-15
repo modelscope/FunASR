@@ -28,6 +28,7 @@
 
 <a name="whats-new"></a>
 ## What's new:
+- 2024/05/15: Offline File Transcription Service 4.5, Offline File Transcription Service of English 1.6，Real-time Transcription Service 1.10 released，adapting to FunASR 1.0 model structure；([docs](runtime/readme.md))
 - 2024/03/05：Added the Qwen-Audio and Qwen-Audio-Chat large-scale audio-text multimodal models, which have topped multiple audio domain leaderboards. These models support speech dialogue, [usage](examples/industrial_data_pretraining/qwen_audio).
 - 2024/03/05：Added support for the Whisper-large-v3 model, a multitasking model that can perform multilingual speech recognition, speech translation, and language identification. It can be downloaded from the[modelscope](examples/industrial_data_pretraining/whisper/demo.py), and [openai](examples/industrial_data_pretraining/whisper/demo_from_openai.py).
 - 2024/03/05: Offline File Transcription Service 4.4, Offline File Transcription Service of English 1.5，Real-time Transcription Service 1.9 released，docker image supports ARM64 platform, update modelscope；([docs](runtime/readme.md))

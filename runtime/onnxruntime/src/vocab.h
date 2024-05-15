@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include "nlohmann/json.hpp"
 using namespace std;
 
 namespace funasr {
@@ -16,6 +17,7 @@ class Vocab {
     std::map<string, string> lex_map;
     bool IsEnglish(string ch);
     void LoadVocabFromYaml(const char* filename);
+    void LoadVocabFromJson(const char* filename);
     void LoadLex(const char* filename);
 
   public:

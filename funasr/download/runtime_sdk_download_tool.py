@@ -20,6 +20,7 @@ def main():
     args = parser.parse_args()
 
     model_dir = args.model_name
+    output_dir = args.model_name
     if not Path(args.model_name).exists():
         from modelscope.hub.snapshot_download import snapshot_download
 
@@ -27,6 +28,7 @@ def main():
             model_dir = snapshot_download(
                 args.model_name, cache_dir=args.export_dir, revision=args.model_revision
             )
+            output_dir = os.path.join(args.export_dir, args.model_name)
         except:
             raise "model_dir must be model_name in modelscope or local path downloaded from modelscope, but is {}".format(
                 model_dir
@@ -37,15 +39,13 @@ def main():
             model_file = os.path.join(model_dir, "model_quant.onnx")
         if not os.path.exists(model_file):
             print(".onnx is not exist, begin to export onnx")
-            from funasr.bin.export_model import ModelExport
+            from funasr import AutoModel
 
-            export_model = ModelExport(
-                cache_dir=args.export_dir,
-                onnx=True,
-                device="cpu",
-                quant=args.quantize,
-            )
-            export_model.export(model_dir)
+            export_model = AutoModel(model=args.model_name, output_dir=output_dir)
+            export_model.export(
+                    quantize=args.quantize,
+                    type=args.type,
+                    )
 
 
 if __name__ == "__main__":
