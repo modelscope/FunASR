@@ -29,6 +29,7 @@ FunASR希望在语音识别的学术研究和工业应用之间架起一座桥�
 
 <a name="最新动态"></a>
 ## 最新动态
+- 2024/05/15: 中文离线文件转写服务 4.5、英文离线文件转写服务 1.6、中文实时语音听写服务 1.10 发布，适配FunASR 1.0模型结构；详细信息参阅([部署文档](runtime/readme_cn.md))
 - 2024/03/05：新增加Qwen-Audio与Qwen-Audio-Chat音频文本模态大模型，在多个音频领域测试榜单刷榜，中支持语音对话，详细用法见 [示例](examples/industrial_data_pretraining/qwen_audio)。
 - 2024/03/05：新增加Whisper-large-v3模型支持，多语言语音识别/翻译/语种识别，支持从 [modelscope](examples/industrial_data_pretraining/whisper/demo.py)仓库下载，也支持从 [openai](examples/industrial_data_pretraining/whisper/demo_from_openai.py)仓库下载模型。
 - 2024/03/05: 中文离线文件转写服务 4.4、英文离线文件转写服务 1.5、中文实时语音听写服务 1.9 发布，docker镜像支持arm64平台，升级modelscope版本；详细信息参阅([部署文档](runtime/readme_cn.md))
