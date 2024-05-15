@@ -49,6 +49,10 @@ class Emotion2vec(torch.nn.Module):
             torch.nn.LayerNorm, eps=cfg.get("norm_eps"), elementwise_affine=cfg.get("norm_affine")
         )
 
+        self.selected_token = {
+            '生气/angry', '开心/happy', '中立/neutral',  '难过/sad',  '<unk>'
+        }
+
         def make_block(drop_path, dim=None, heads=None):
             return AltBlock(
                 cfg.get("embed_dim") if dim is None else dim,
@@ -249,6 +253,8 @@ class Emotion2vec(torch.nn.Module):
             if self.proj:
                 x = x.mean(dim=1)
                 x = self.proj(x)
+                for idx, lab in enumerate(labels):
+                    x[:,idx] = -np.inf if lab not in self.selected_token else x[:,idx]
                 x = torch.softmax(x, dim=-1)
                 scores = x[0].tolist()
 
