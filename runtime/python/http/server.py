@@ -117,7 +117,7 @@ async def api_recognition(audio: UploadFile = File(..., description="audio file"
         for sentence in rec_result["sentence_info"]:
             # 每句话的时间戳
             sentences.append(
-                {"text": sentence["text"], "start": sentence["start"], "end": sentence["start"]}
+                {"text": sentence["text"], "start": sentence["start"], "end": sentence["end"]}
             )
         ret = {"text": text, "sentences": sentences, "code": 0}
         logger.info(f"识别结果：{ret}")
