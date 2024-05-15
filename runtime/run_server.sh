@@ -1,4 +1,8 @@
 
+TORCH_DIR=$(python3 -c "import torch; import os; print(os.path.dirname(torch.__file__))")
+BLADE_DIR=$(python3 -c "import torch_blade; import os; print(os.path.dirname(torch_blade.__file__))")
+export LD_LIBRARY_PATH=/usr/local/lib:${TORCH_DIR}/lib:${BLADE_DIR}:${LD_LIBRARY_PATH}
+
 download_model_dir="/workspace/models"
 model_dir="damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx"
 vad_dir="damo/speech_fsmn_vad_zh-cn-16k-common-onnx"
@@ -38,5 +42,6 @@ $cmd_path/${cmd}  \
   --port ${port} \
   --certfile  "${certfile}" \
   --keyfile "${keyfile}" \
+  --gpu \
   --hotword "${hotword}" &
 
