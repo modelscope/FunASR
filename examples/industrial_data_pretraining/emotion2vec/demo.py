@@ -7,9 +7,9 @@ from funasr import AutoModel
 
 # model="iic/emotion2vec_base"
 # model="iic/emotion2vec_base_finetuned"
-# model="iic/emotion2vec_plus_seed_modelscope"
-# model="iic/emotion2vec_plus_base_modelscope"
-model = "iic/emotion2vec_plus_large_modelscope"
+# model="iic/emotion2vec_plus_seed"
+# model="iic/emotion2vec_plus_base"
+model = "iic/emotion2vec_plus_large"
 
 model = AutoModel(
     model=model,
@@ -19,6 +19,7 @@ model = AutoModel(
 )
 
 wav_file = f"{model.model_path}/example/test.wav"
+
 res = model.generate(
     wav_file, output_dir="./outputs", granularity="utterance", extract_embedding=False
 )
