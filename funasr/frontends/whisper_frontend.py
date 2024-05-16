@@ -33,7 +33,7 @@ class WhisperFrontend(nn.Module):
         self.win_length = N_FFT
         self.hop_length = HOP_LENGTH
         self.pad_samples = N_SAMPLES
-        self.frame_shift = self.hop_length
+        self.frame_shift = int(self.hop_length / self.fs * 1000)
         self.lfr_n = 1
         self.n_mels = n_mels
         if whisper_model == "large-v3" or whisper_model == "large":
