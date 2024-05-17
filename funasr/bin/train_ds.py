@@ -133,7 +133,7 @@ def main(**kwargs):
     kwargs["device"] = next(model.parameters()).device
     trainer.device = kwargs["device"]
 
-    model, optim, scheduler = trainer.warp_optim_scheduler(model, kwargs)
+    model, optim, scheduler = trainer.warp_optim_scheduler(model, **kwargs)
 
     # dataset
     logging.info("Build dataloader")
