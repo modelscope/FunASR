@@ -398,7 +398,7 @@ class Trainer:
                 loss_dict["speed_stats"]["backward_time"] = f"{time4 - time3:0.3f}"
 
             self.update_step(model, optim, scheduler, scaler, loss_dict=loss_dict)
-            total_time = f"{(time.perf_counter() - time5) / accum_grad:0.3f}"
+            total_time = f"{(time.perf_counter() - time5):0.3f}"
             time5 = time.perf_counter()
 
             loss_dict["speed_stats"]["optim_time"] = f"{time5 - time4:0.3f}"
