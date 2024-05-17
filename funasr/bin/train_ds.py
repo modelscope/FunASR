@@ -130,8 +130,8 @@ def main(**kwargs):
 
     model = trainer.warp_model(model)
 
-    kwargs["device"] = next(model.parameters()).device
-    trainer.device = kwargs["device"]
+    kwargs["device"] = int(os.environ.get("LOCAL_RANK", 0))
+    trainer.device = int(os.environ.get("LOCAL_RANK", 0))
 
     model, optim, scheduler = trainer.warp_optim_scheduler(model, **kwargs)
 
