@@ -36,6 +36,26 @@ cmake  -DCMAKE_BUILD_TYPE=release .. -DONNXRUNTIME_DIR=/path/to/onnxruntime-linu
 make -j 4
 ```
 
+### 测试
+
+```shell
+curl -F \"file=@example.wav\" 127.0.0.1:80
+```
+
+### 运行
+
+```shell
+./funasr-http-server  \
+  --lm-dir '' \
+  --itn-dir '' \
+  --download-model-dir ${download_model_dir} \
+  --model-dir ${model_dir} \
+  --vad-dir ${vad_dir} \
+  --punc-dir ${punc_dir} \
+  --decoder-thread-num ${decoder_thread_num} \
+  --io-thread-num  ${io_thread_num} \
+  --port ${port} \
+```
 
 
 
