@@ -9,7 +9,8 @@ import torch.distributed as dist
 from torch.cuda.amp import autocast, GradScaler
 from contextlib import nullcontext, contextmanager
 from pathlib import Path
-
+from torch.nn.parallel import DistributedDataParallel as DDP
+from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
 from funasr.train_utils.device_funcs import to_device
 from funasr.train_utils.recursive_op import recursive_average
 from funasr.train_utils.average_nbest_models import average_checkpoints
@@ -48,10 +49,13 @@ class Trainer:
 
     def __init__(
         self,
-        local_rank,
+        rank=0,
+        local_rank=0,
+        world_size=1,
         use_ddp: bool = False,
         use_fsdp: bool = False,
         use_fp16: bool = False,
+        use_deepspeed: bool = False,
         output_dir: str = "./",
         **kwargs,
     ):
@@ -69,6 +73,13 @@ class Trainer:
                       output_dir (str): The directory where model checkpoints will be saved. Default is './'.
                       resume (str, optional): The file path to a checkpoint to resume training from.
         """
+        self.rank = kwargs.get("rank", 0)
+        self.local_rank = local_rank
+        self.world_size = world_size
+        self.use_ddp = use_ddp
+        self.use_fsdp = use_fsdp
+        self.use_deepspeed = use_deepspeed
+        self.device = kwargs.get("device", "cuda")
 
         self.output_dir = output_dir
         if not os.path.exists(self.output_dir):
@@ -76,10 +87,7 @@ class Trainer:
         self.resume = kwargs.get("resume", True)
         self.start_epoch = 0
         self.max_epoch = kwargs.get("max_epoch", 100)
-        self.local_rank = local_rank
-        self.use_ddp = use_ddp
-        self.use_fsdp = use_fsdp
-        self.device = kwargs.get("device", "cuda")
+
         # self.kwargs = kwargs
         self.log_interval = kwargs.get("log_interval", 50)
         self.batch_total = 0
@@ -93,15 +101,6 @@ class Trainer:
         self.grad_clip = kwargs.get("grad_clip", 10.0)
         self.grad_clip_type = kwargs.get("grad_clip_type", 2.0)
 
-        try:
-            rank = dist.get_rank()
-            world_size = dist.get_world_size()
-        except:
-            rank = 0
-            world_size = 1
-            logging.warning("distributed is not initialized, only single shard")
-        self.rank = rank
-        self.world_size = world_size
         self.train_acc_avg = 0.0
         self.train_loss_avg = 0.0
         self.val_acc_avg = 0.0
@@ -373,117 +372,28 @@ class Trainer:
                 my_context = model.no_sync if batch_idx % accum_grad != 0 else my_context
             with my_context():
                 time2 = time.perf_counter()
-                with maybe_autocast(self.use_fp16):
-                    retval = model(**batch)
-
-                    if (
-                        self.reset_gpu_cache
-                        and (torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024) > 70
-                    ):
-                        torch.cuda.empty_cache()
-
-                loss, stats, weight = retval
-                stats = {k: v for k, v in stats.items() if v is not None}
-                if self.use_ddp or self.use_fsdp:
-                    # Apply weighted averaging for loss and stats
-                    loss = (loss * weight.type(loss.dtype)).sum()
-                    # if distributed, this method can also apply all_reduce()
-                    # stats, weight = recursive_average(stats, weight, distributed=True)
-                    if self.use_ddp or self.use_fsdp:
-                        dist.all_reduce(weight, op=dist.ReduceOp.SUM)
-                    # Now weight is summation over all workers
-                    loss /= weight.sum()  # shape:[1] -> shape:[]
-                    # Multiply world_size because DistributedDataParallel
-                    # automatically normalizes the gradient by world_size.
-                    loss *= self.world_size
-                # loss *= self.world_size
-                # Scale the loss since we're not updating for every mini-batch
-                loss = loss / accum_grad
+                loss_dict = {}
+                self.forward_step(model, batch, loss_dict=loss_dict)
 
                 time3 = time.perf_counter()
                 speed_stats["forward_time"] = f"{time3 - time2:0.3f}"
-                if self.use_fp16:
-                    scaler.scale(loss).backward()
-                else:
-                    loss.backward()
+                self.backward_step(model, scaler, loss_dict=loss_dict)
+
                 time4 = time.perf_counter()
                 speed_stats["backward_and_AllReaduce_time"] = f"{time4 - time3:0.3f}"
 
-                self.train_loss_avg = (
-                    self.train_loss_avg * (batch_idx + kwargs.get("start_step", 0))
-                    + loss.detach().cpu().item()
-                ) / (batch_idx + kwargs.get("start_step", 0) + 1)
-                if "acc" in stats:
-                    self.train_acc_avg = (
-                        self.train_acc_avg * (batch_idx + kwargs.get("start_step", 0))
-                        + stats["acc"].detach().cpu().item()
-                    ) / (batch_idx + kwargs.get("start_step", 0) + 1)
+                # self.train_loss_avg = (
+                #     self.train_loss_avg * (batch_idx + kwargs.get("start_step", 0))
+                #     + loss.detach().cpu().item()
+                # ) / (batch_idx + kwargs.get("start_step", 0) + 1)
+                # if "acc" in stats:
+                #     self.train_acc_avg = (
+                #         self.train_acc_avg * (batch_idx + kwargs.get("start_step", 0))
+                #         + stats["acc"].detach().cpu().item()
+                #     ) / (batch_idx + kwargs.get("start_step", 0) + 1)
 
+            self.update_step(model, optim, scheduler, scaler, loss_dict)
             # Perform an optimizer step only after accumulating enough gradients
-            if (batch_idx + 1) % accum_grad == 0:
-                # Perform gradient clipping if it is set
-                if self.grad_clip > 0:
-                    grad_norm = torch.nn.utils.clip_grad_norm_(
-                        model.parameters(),
-                        max_norm=self.grad_clip,
-                        norm_type=self.grad_clip_type,
-                    )
-                    if not torch.isfinite(grad_norm):
-                        logging.warning(
-                            f"The grad norm is {grad_norm}. Skipping updating the model."
-                        )
-                        optim.zero_grad()  # Reset gradients
-                        continue
-
-                # Execute an optimization step (update model parameters)
-                if self.use_ddp or self.use_fsdp:
-                    dist.barrier()
-                if self.use_fp16:
-                    scaler.step(optim)
-                    scaler.update()
-                else:
-                    optim.step()
-                scheduler.step()
-                # Clear gradients for the next accumulation stage
-                optim.zero_grad(set_to_none=True)
-
-                if self.use_ddp or self.use_fsdp:
-                    train_loss_avg = torch.tensor(self.train_loss_avg, dtype=torch.float32).to(
-                        self.device
-                    )
-                    train_acc_avg = torch.tensor(self.train_acc_avg, dtype=torch.float32).to(
-                        self.device
-                    )
-                    dist.all_reduce(train_loss_avg, op=dist.ReduceOp.SUM)
-                    dist.all_reduce(train_acc_avg, op=dist.ReduceOp.SUM)
-                    self.train_loss_avg = train_loss_avg.detach().cpu().item() / self.world_size
-                    self.train_acc_avg = train_acc_avg.detach().cpu().item() / self.world_size
-
-                total_time = f"{(time.perf_counter() - time5)/accum_grad:0.3f}"
-                time5 = time.perf_counter()
-
-                speed_stats["optim_time"] = f"{time5 - time4:0.3f}"
-
-                speed_stats["total_time"] = total_time
-                lr = scheduler.get_last_lr()[0]
-                batch_num_epoch = 1
-                if hasattr(dataloader_train, "__len__"):
-                    batch_num_epoch = len(dataloader_train)
-                self.log(
-                    epoch,
-                    batch_idx,
-                    log_step=batch_idx + kwargs.get("start_step", 0),
-                    step_in_epoch=self.step_in_epoch,
-                    batch_num_epoch=batch_num_epoch,
-                    lr=lr,
-                    loss=loss.detach().cpu().item(),
-                    speed_stats=speed_stats,
-                    stats=stats,
-                    writer=writer,
-                    tag="train",
-                    data_split_i=kwargs.get("data_split_i", 0),
-                    data_split_num=kwargs.get("data_split_num", 1),
-                )
 
             if self.step_in_epoch % self.validate_interval == 0:
                 self.validate_epoch(
@@ -519,6 +429,113 @@ class Trainer:
         if self.use_ddp or self.use_fsdp:
             dist.barrier()
             iterator_stop = torch.tensor(0).to(self.device)
+
+    def forward_step(self, model, batch, loss_dict={}):
+        with maybe_autocast(self.use_fp16):
+            retval = model(**batch)
+
+            if (
+                self.reset_gpu_cache
+                and (torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024) > 70
+            ):
+                torch.cuda.empty_cache()
+
+        loss, stats, weight = retval
+        stats = {k: v for k, v in stats.items() if v is not None}
+        # if self.use_ddp or self.use_fsdp:
+        #     # Apply weighted averaging for loss and stats
+        #     loss = (loss * weight.type(loss.dtype)).sum()
+        #     # if distributed, this method can also apply all_reduce()
+        #     # stats, weight = recursive_average(stats, weight, distributed=True)
+        #     if self.use_ddp or self.use_fsdp:
+        #         dist.all_reduce(weight, op=dist.ReduceOp.SUM)
+        #     # Now weight is summation over all workers
+        #     loss /= weight.sum()  # shape:[1] -> shape:[]
+        #     # Multiply world_size because DistributedDataParallel
+        #     # automatically normalizes the gradient by world_size.
+        #     loss *= self.world_size
+        # loss *= self.world_size
+        # Scale the loss since we're not updating for every mini-batch
+
+        loss_dict["loss"] = loss
+        loss_dict["stats"] = stats
+        loss_dict["weight"] = weight
+
+    def backward_step(self, model, scaler, loss_dict={}):
+        loss = loss_dict["loss"]
+
+        if self.use_deepspeed:
+            scaled_loss = model.backward(loss)
+        else:
+            loss = loss / self.accum_grad
+            if self.use_fp16:
+                scaler.scale(loss).backward()
+            else:
+                loss.backward()
+
+    def update_step(self, model, optim, scheduler, scaler, batch_idx=0, loss_dict=loss_dict):
+        if (batch_idx + 1) % self.accum_grad == 0:
+            # Perform gradient clipping if it is set
+            if self.grad_clip > 0:
+                grad_norm = torch.nn.utils.clip_grad_norm_(
+                    model.parameters(),
+                    max_norm=self.grad_clip,
+                    norm_type=self.grad_clip_type,
+                )
+                if not torch.isfinite(grad_norm):
+                    logging.warning(f"The grad norm is {grad_norm}. Skipping updating the model.")
+                    optim.zero_grad()  # Reset gradients
+                    return
+
+            # Execute an optimization step (update model parameters)
+            if self.use_ddp or self.use_fsdp:
+                dist.barrier()
+            if self.use_fp16:
+                scaler.step(optim)
+                scaler.update()
+            else:
+                optim.step()
+            scheduler.step()
+            # Clear gradients for the next accumulation stage
+            optim.zero_grad(set_to_none=True)
+
+            if self.use_ddp or self.use_fsdp:
+                train_loss_avg = torch.tensor(self.train_loss_avg, dtype=torch.float32).to(
+                    self.device
+                )
+                train_acc_avg = torch.tensor(self.train_acc_avg, dtype=torch.float32).to(
+                    self.device
+                )
+                dist.all_reduce(train_loss_avg, op=dist.ReduceOp.SUM)
+                dist.all_reduce(train_acc_avg, op=dist.ReduceOp.SUM)
+                self.train_loss_avg = train_loss_avg.detach().cpu().item() / self.world_size
+                self.train_acc_avg = train_acc_avg.detach().cpu().item() / self.world_size
+
+            total_time = f"{(time.perf_counter() - time5) / accum_grad:0.3f}"
+            time5 = time.perf_counter()
+
+            speed_stats["optim_time"] = f"{time5 - time4:0.3f}"
+
+            speed_stats["total_time"] = total_time
+            lr = scheduler.get_last_lr()[0]
+            batch_num_epoch = 1
+            if hasattr(dataloader_train, "__len__"):
+                batch_num_epoch = len(dataloader_train)
+            self.log(
+                epoch,
+                batch_idx,
+                log_step=batch_idx + kwargs.get("start_step", 0),
+                step_in_epoch=self.step_in_epoch,
+                batch_num_epoch=batch_num_epoch,
+                lr=lr,
+                loss=loss.detach().cpu().item(),
+                speed_stats=speed_stats,
+                stats=stats,
+                writer=writer,
+                tag="train",
+                data_split_i=kwargs.get("data_split_i", 0),
+                data_split_num=kwargs.get("data_split_num", 1),
+            )
 
     def validate_epoch(
         self,
@@ -712,3 +729,72 @@ class Trainer:
 
         if self.use_ddp or self.use_fsdp:
             torch.distributed.destroy_process_group()
+
+    def warp_model(self, model, **kwargs):
+
+        if self.use_deepspeed:
+            from deepspeed.runtime.zero.stage_1_and_2 import (
+                estimate_zero2_model_states_mem_needs_all_live,
+            )
+            from deepspeed.runtime.zero.stage3 import estimate_zero3_model_states_mem_needs_all_live
+            from deepspeed.utils.zero_to_fp32 import convert_zero_checkpoint_to_fp32_state_dict
+
+            local_world_size = int(os.environ.get("LOCAL_WORLD_SIZE", 1))
+            world_size = int(os.environ.get("WORLD_SIZE", 1))
+
+            # NOTE(xcsong): look in detail how the memory estimator API works:
+            #   https://deepspeed.readthedocs.io/en/latest/memory.html#discussion
+            if int(os.environ.get("RANK", 0)) == 0:
+                logging.info("Estimating model states memory needs (zero2)...")
+                estimate_zero2_model_states_mem_needs_all_live(
+                    model,
+                    num_gpus_per_node=local_world_size,
+                    num_nodes=world_size // local_world_size,
+                )
+                logging.info("Estimating model states memory needs (zero3)...")
+                estimate_zero3_model_states_mem_needs_all_live(
+                    model,
+                    num_gpus_per_node=local_world_size,
+                    num_nodes=world_size // local_world_size,
+                )
+            device = None  # Init device later
+            pass  # Init DeepSpeed later
+
+        elif self.use_ddp:
+            local_rank = int(os.environ.get("LOCAL_RANK", 0))
+            model = model.cuda(local_rank)
+            model = DDP(
+                model,
+                device_ids=[local_rank],
+                find_unused_parameters=kwargs.get("train_conf", {}).get(
+                    "find_unused_parameters", False
+                ),
+            )
+        # elif self.use_fsdp:
+        #     # model = FSDP(model).cuda(local_rank)
+        #
+        #     def custom_auto_wrap_policy(
+        #         module: nn.Module,
+        #         recurse: bool,
+        #         nonwrapped_numel: int,
+        #         # Additional custom arguments
+        #         min_num_params: int = int(1e8),
+        #     ) -> bool:
+        #         # 根据自定义逻辑决定是否包装模块
+        #         is_large = unwrapped_params >= min_num_params
+        #         requires_grad_uniform = len({p.requires_grad for p in module.parameters()}) == 1
+        #         return is_large and requires_grad_uniform
+        #
+        #     # Configure a custom `min_num_params`
+        #     my_auto_wrap_policy = functools.partial(custom_auto_wrap_policy, min_num_params=int(1e5))
+        #     torch.cuda.set_device(local_rank)
+        #     model = FSDP(
+        #         model,
+        #         auto_wrap_policy=custom_auto_wrap_policy,
+        #         mixed_precision=None,
+        #         device_id=torch.cuda.current_device(),
+        #     )
+        else:
+            model = model.to(device=kwargs.get("device", "cuda"))
+
+        return model
