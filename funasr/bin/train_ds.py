@@ -24,7 +24,7 @@ from funasr.train_utils.average_nbest_models import average_checkpoints
 
 from funasr.register import tables
 from funasr.optimizers import optim_classes
-from funasr.train_utils.trainer import Trainer
+from funasr.train_utils.trainer_ds import Trainer
 from funasr.schedulers import scheduler_classes
 from funasr.train_utils.initialize import initialize
 from funasr.download.download_from_hub import download_model
@@ -34,6 +34,11 @@ from funasr.train_utils.load_pretrained_model import load_pretrained_model
 from funasr.utils.misc import prepare_model_dir
 from funasr.train_utils.model_summary import model_summary
 from funasr import AutoModel
+
+try:
+    import deepspeed
+except:
+    deepspeed = None
 
 
 @hydra.main(config_name=None, version_base=None)
@@ -61,14 +66,21 @@ def main(**kwargs):
     # open tf32
     torch.backends.cuda.matmul.allow_tf32 = kwargs.get("enable_tf32", True)
 
+    rank = int(os.environ.get("RANK", 0))
     local_rank = int(os.environ.get("LOCAL_RANK", 0))
+    world_size = int(os.environ.get("WORLD_SIZE", 1))
+
     if local_rank == 0:
         tables.print()
-    # Check if we are using DDP or FSDP
-    use_ddp = "WORLD_SIZE" in os.environ and int(os.environ["WORLD_SIZE"]) > 1
+
+    use_ddp = world_size > 1
     use_fsdp = kwargs.get("use_fsdp", False)
-    # use_ddp = False if use_fsdp else use_fsdp
-    if use_ddp or use_fsdp:
+    use_deepspeed = kwargs.get("use_deepspeed", False)
+    if use_deepspeed:
+        logging.info(f"use_deepspeed: {use_deepspeed}")
+        deepspeed.init_distributed(dist_backend=kwargs.get("backend", "nccl"))
+    elif use_ddp or use_fsdp:
+        logging.info(f"use_ddp: {use_ddp}, use_fsdp: {use_fsdp}")
         dist.init_process_group(backend=kwargs.get("backend", "nccl"), init_method="env://")
         torch.cuda.set_device(local_rank)
 
@@ -78,12 +90,7 @@ def main(**kwargs):
     model = AutoModel(**kwargs)
 
     # save config.yaml
-    if (
-        (use_ddp or use_fsdp)
-        and dist.get_rank() == 0
-        or not (use_ddp or use_fsdp)
-        and local_rank == 0
-    ):
+    if rank == 0:
         prepare_model_dir(**kwargs)
 
     # parse kwargs
@@ -110,43 +117,21 @@ def main(**kwargs):
     if local_rank == 0:
         logging.info(f"{model_summary(model)}")
 
-    if use_ddp:
-        model = model.cuda(local_rank)
-        model = DDP(
-            model,
-            device_ids=[local_rank],
-            find_unused_parameters=kwargs.get("train_conf", {}).get(
-                "find_unused_parameters", False
-            ),
-        )
-    elif use_fsdp:
-        # model = FSDP(model).cuda(local_rank)
+    trainer = Trainer(
+        rank=rank,
+        local_rank=local_rank,
+        world_size=world_size,
+        use_ddp=use_ddp,
+        use_fsdp=use_fsdp,
+        device=kwargs["device"],
+        output_dir=kwargs.get("output_dir", "./exp"),
+        **kwargs.get("train_conf"),
+    )
 
-        def custom_auto_wrap_policy(
-            module: nn.Module,
-            recurse: bool,
-            nonwrapped_numel: int,
-            # Additional custom arguments
-            min_num_params: int = int(1e8),
-        ) -> bool:
-            # 根据自定义逻辑决定是否包装模块
-            is_large = unwrapped_params >= min_num_params
-            requires_grad_uniform = len({p.requires_grad for p in module.parameters()}) == 1
-            return is_large and requires_grad_uniform
-
-        # Configure a custom `min_num_params`
-        my_auto_wrap_policy = functools.partial(custom_auto_wrap_policy, min_num_params=int(1e5))
-        torch.cuda.set_device(local_rank)
-        model = FSDP(
-            model,
-            auto_wrap_policy=custom_auto_wrap_policy,
-            mixed_precision=None,
-            device_id=torch.cuda.current_device(),
-        )
-    else:
-        model = model.to(device=kwargs.get("device", "cuda"))
+    model = trainer.warp_model(model)
 
     kwargs["device"] = next(model.parameters()).device
+    trainer.device = kwargs["device"]
 
     # optim
     logging.info("Build optim")
@@ -162,6 +147,16 @@ def main(**kwargs):
     scheduler_class = scheduler_classes.get(scheduler)
     scheduler = scheduler_class(optim, **kwargs.get("scheduler_conf"))
 
+    if use_deepspeed:
+        args = OmegaConf.create({"deepspeed_config": kwargs.get("deepspeed_config", "")})
+        model, optimizer, _, scheduler = deepspeed.initialize(
+            args=args,
+            model=model,
+            optimizer=optim,
+            lr_scheduler=scheduler,
+            model_parameters=model.parameters(),
+        )
+
     # dataset
     logging.info("Build dataloader")
     dataloader_class = tables.dataloader_classes.get(
@@ -169,14 +164,6 @@ def main(**kwargs):
     )
     dataloader = dataloader_class(**kwargs)
     # dataloader_tr, dataloader_val = dataloader_class(**kwargs)
-    trainer = Trainer(
-        local_rank=local_rank,
-        use_ddp=use_ddp,
-        use_fsdp=use_fsdp,
-        device=kwargs["device"],
-        output_dir=kwargs.get("output_dir", "./exp"),
-        **kwargs.get("train_conf"),
-    )
 
     scaler = GradScaler(enabled=trainer.use_fp16) if trainer.use_fp16 else None
     scaler = ShardedGradScaler(enabled=trainer.use_fp16) if trainer.use_fsdp else scaler
