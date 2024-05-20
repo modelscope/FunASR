@@ -23,12 +23,16 @@ except:
 
 
 @contextmanager
-def maybe_autocast(enabled):
-    if enabled:
-        with autocast():
+def maybe_autocast(dtype=None, use_deepspeed=False):
+    if use_deepspeed:
+        with torch.cuda.amp.autocast(enabled=True, dtype=dtype, cache_enabled=False):
             yield
     else:
-        yield
+        if dtype == torch.float16:
+            with autocast(enabled=True):
+                yield
+        else:
+            yield
 
 
 class Trainer:
@@ -91,7 +95,10 @@ class Trainer:
         # self.kwargs = kwargs
         self.log_interval = kwargs.get("log_interval", 50)
         self.batch_total = 0
+        self.dtype = torch.float32
         self.use_fp16 = use_fp16
+        if self.use_fp16:
+            self.dtype = torch.float16
         self.save_checkpoint_interval = kwargs.get("save_checkpoint_interval", 5000)
         self.validate_interval = kwargs.get("validate_interval", 5000)
         self.keep_nbest_models = kwargs.get("keep_nbest_models", 500)
@@ -159,7 +166,113 @@ class Trainer:
         Args:
             epoch (int): The epoch number at which the checkpoint is being saved.
         """
+        step_in_epoch = None if step is None else step_in_epoch
+        if self.use_deepspeed:
+            with torch.no_grad():
+                model.save_checkpoint(save_dir=model_dir, tag=tag, client_state=info_dict)
+            logging.info(f"Save checkpoint: {epoch}, rank: {self.local_rank}\n")
+            # self.step_or_epoch += 1
+            state = {
+                "epoch": epoch,
+                # "state_dict": model.state_dict(),
+                # "optimizer": optim.state_dict(),
+                # "scheduler": scheduler.state_dict(),
+                "saved_ckpts": self.saved_ckpts,
+                "val_acc_step_or_eoch": self.val_acc_step_or_eoch,
+                "val_loss_step_or_eoch": self.val_loss_step_or_eoch,
+                "best_step_or_epoch": self.best_step_or_epoch,
+                "avg_keep_nbest_models_type": self.avg_keep_nbest_models_type,
+                "step": step,
+                "step_in_epoch": step_in_epoch,
+                "data_split_i": kwargs.get("data_split_i", 0),
+                "data_split_num": kwargs.get("data_split_num", 1),
+                "batch_total": self.batch_total,
+                "train_loss_avg": kwargs.get("train_loss_avg", 0),
+                "train_acc_avg": kwargs.get("train_acc_avg", 0),
+            }
+            step = step_in_epoch
+            if hasattr(model, "module"):
+                state["state_dict"] = model.module.state_dict()
 
+            if scaler:
+                state["scaler_state"] = scaler.state_dict()
+            # Create output directory if it does not exist
+            os.makedirs(self.output_dir, exist_ok=True)
+            if step is None:
+                ckpt_name = f"model.pt.ep{epoch}"
+            else:
+                ckpt_name = f"model.pt.ep{epoch}.{step}"
+            filename = os.path.join(self.output_dir, ckpt_name)
+
+            # torch.save(state, filename)
+            with torch.no_grad():
+                model.save_checkpoint(save_dir=self.output_dir, tag=ckpt_name, client_state=state)
+            logging.info(f"\nCheckpoint saved to {filename}\n")
+            latest = Path(os.path.join(self.output_dir, f"model.pt"))
+            # torch.save(state, latest)
+            with torch.no_grad():
+                model.save_checkpoint(save_dir=self.output_dir, tag=f"model.pt", client_state=state)
+            if self.best_step_or_epoch == "":
+                self.best_step_or_epoch = ckpt_name
+
+            if self.avg_keep_nbest_models_type == "acc":
+                if (
+                    self.val_acc_step_or_eoch[ckpt_name]
+                    >= self.val_acc_step_or_eoch[self.best_step_or_epoch]
+                ):
+                    self.best_step_or_epoch = ckpt_name
+                    best_ckpt = Path(os.path.join(self.output_dir, f"model.pt.best"))
+                    # torch.save(state, best_ckpt)
+                    with torch.no_grad():
+                        model.save_checkpoint(
+                            save_dir=self.output_dir, tag=f"model.pt.best", client_state=state
+                        )
+                    logging.info(
+                        f"Update best acc: {self.val_acc_step_or_eoch[self.best_step_or_epoch]:.4f}, {best_ckpt}"
+                    )
+                else:
+                    logging.info(
+                        f"No improvement in acc: {self.val_acc_step_or_eoch[ckpt_name]:.4f} < {self.val_acc_step_or_eoch[self.best_step_or_epoch]:.4f}, {os.path.join(self.output_dir, self.best_step_or_epoch)}"
+                    )
+            elif self.avg_keep_nbest_models_type == "loss":
+                if (
+                    self.val_loss_step_or_eoch[ckpt_name]
+                    <= self.val_loss_step_or_eoch[self.best_step_or_epoch]
+                ):
+                    self.best_step_or_epoch = ckpt_name
+                    best_ckpt = Path(os.path.join(self.output_dir, f"model.pt.best"))
+                    # torch.save(state, best_ckpt)
+                    with torch.no_grad():
+                        model.save_checkpoint(
+                            save_dir=self.output_dir, tag=f"model.pt.best", client_state=state
+                        )
+                    logging.info(
+                        f"Update best loss: {self.val_loss_step_or_eoch[self.best_step_or_epoch]:.4f}, {best_ckpt}"
+                    )
+                else:
+                    logging.info(
+                        f"No improvement in loss: {self.val_loss_step_or_eoch[ckpt_name]:.4f} > {self.val_loss_step_or_eoch[self.best_step_or_epoch]:.4f}, {os.path.join(self.output_dir, self.best_step_or_epoch)}"
+                    )
+            else:
+                print("Undo")
+            self.saved_ckpts[ckpt_name] = getattr(
+                self, f"val_{self.avg_keep_nbest_models_type}_step_or_eoch"
+            )[ckpt_name]
+            if self.keep_nbest_models > 0:
+                if len(self.saved_ckpts) > self.keep_nbest_models:
+                    if self.avg_keep_nbest_models_type == "acc":
+                        key = min(self.saved_ckpts, key=self.saved_ckpts.get)
+                    else:
+                        key = max(self.saved_ckpts, key=self.saved_ckpts.get)
+                    if key in self.saved_ckpts:
+                        del self.saved_ckpts[key]
+                    filename = os.path.join(self.output_dir, key)
+                    logging.info(f"Delete: {filename}")
+                    if os.path.exists(filename):
+                        os.remove(filename)
+
+        elif self.use_fsdp:
+            pass
         step_in_epoch = None if step is None else step_in_epoch
         if self.rank == 0:
             logging.info(f"Save checkpoint: {epoch}, rank: {self.local_rank}\n")
@@ -269,66 +382,117 @@ class Trainer:
             resume_path (str): The file path to the checkpoint to resume from.
         """
         if self.resume:
-            ckpt = os.path.join(self.output_dir, "model.pt")
-            if os.path.isfile(ckpt):
-                checkpoint = torch.load(ckpt, map_location="cpu")
-                self.start_epoch = checkpoint["epoch"]
-                # self.model.load_state_dict(checkpoint['state_dict'])
-                src_state = checkpoint["state_dict"]
-                dst_state = model.state_dict()
-                for k in dst_state.keys():
-                    if not k.startswith("module.") and "module." + k in src_state.keys():
-                        k_ddp = "module." + k
-                    elif k.startswith("module.") and "module." + k not in src_state.keys():
-                        k_ddp = k.replace("module.", "", 1)
-                    else:
-                        k_ddp = k
-                    if k_ddp in src_state.keys():
-                        dst_state[k] = src_state[k_ddp]
-                    else:
-                        print(f"Miss key in ckpt: model: {k}, ckpt: {k_ddp}")
 
-                model.load_state_dict(dst_state)
-                optim.load_state_dict(checkpoint["optimizer"])
-                scheduler.load_state_dict(checkpoint["scheduler"])
-                if scaler is not None and "scaler_state" in checkpoint:
-                    scaler.load_state_dict(checkpoint["scaler_state"])
+            if self.use_deepspeed:
+                ckpt = os.path.join(self.output_dir, "model.pt")
+                if os.path.isfile(ckpt):
+                    _, checkpoint = model_engine.load_checkpoint(self.output_dir, "model.pt")
 
-                self.saved_ckpts = checkpoint["saved_ckpts"]
-                self.val_acc_step_or_eoch = (
-                    checkpoint["val_acc_step_or_eoch"]
-                    if "val_acc_step_or_eoch" in checkpoint
-                    else {}
-                )
-                self.val_loss_step_or_eoch = (
-                    checkpoint["val_loss_step_or_eoch"]
-                    if "val_loss_step_or_eoch" in checkpoint
-                    else {}
-                )
-                self.best_step_or_epoch = (
-                    checkpoint["best_step_or_epoch"] if "best_step_or_epoch" in checkpoint else ""
-                )
-                self.start_data_split_i = (
-                    checkpoint["data_split_i"] if "data_split_i" in checkpoint else 0
-                )
-                self.batch_total = checkpoint["batch_total"] if "batch_total" in checkpoint else 0
-                self.start_step = checkpoint["step"] if "step" in checkpoint else 0
-                self.start_step = 0 if self.start_step is None else self.start_step
-                self.step_in_epoch = (
-                    checkpoint["step_in_epoch"] if "step_in_epoch" in checkpoint else 0
-                )
-                self.step_in_epoch = 0 if self.step_in_epoch is None else self.step_in_epoch
-                print(checkpoint["train_acc_avg"])
-                self.train_acc_avg = (
-                    checkpoint["train_acc_avg"] if "train_acc_avg" in checkpoint else 0
-                )
-                self.train_loss_avg = (
-                    checkpoint["train_loss_avg"] if "train_loss_avg" in checkpoint else 0
-                )
-                model.to(self.device)
-                print(f"Checkpoint loaded successfully from '{ckpt}'")
+                    self.saved_ckpts = checkpoint["saved_ckpts"]
+                    self.val_acc_step_or_eoch = (
+                        checkpoint["val_acc_step_or_eoch"]
+                        if "val_acc_step_or_eoch" in checkpoint
+                        else {}
+                    )
+                    self.val_loss_step_or_eoch = (
+                        checkpoint["val_loss_step_or_eoch"]
+                        if "val_loss_step_or_eoch" in checkpoint
+                        else {}
+                    )
+                    self.best_step_or_epoch = (
+                        checkpoint["best_step_or_epoch"]
+                        if "best_step_or_epoch" in checkpoint
+                        else ""
+                    )
+                    self.start_data_split_i = (
+                        checkpoint["data_split_i"] if "data_split_i" in checkpoint else 0
+                    )
+                    self.batch_total = (
+                        checkpoint["batch_total"] if "batch_total" in checkpoint else 0
+                    )
+                    self.start_step = checkpoint["step"] if "step" in checkpoint else 0
+                    self.start_step = 0 if self.start_step is None else self.start_step
+                    self.step_in_epoch = (
+                        checkpoint["step_in_epoch"] if "step_in_epoch" in checkpoint else 0
+                    )
+                    self.step_in_epoch = 0 if self.step_in_epoch is None else self.step_in_epoch
+                    print(checkpoint["train_acc_avg"])
+                    self.train_acc_avg = (
+                        checkpoint["train_acc_avg"] if "train_acc_avg" in checkpoint else 0
+                    )
+                    self.train_loss_avg = (
+                        checkpoint["train_loss_avg"] if "train_loss_avg" in checkpoint else 0
+                    )
+                    model.to(self.device)
+                    print(f"Checkpoint loaded successfully from '{ckpt}'")
+                else:
+                    print(f"No checkpoint found at '{ckpt}', does not resume status!")
             else:
-                print(f"No checkpoint found at '{ckpt}', does not resume status!")
+
+                ckpt = os.path.join(self.output_dir, "model.pt")
+                if os.path.isfile(ckpt):
+                    checkpoint = torch.load(ckpt, map_location="cpu")
+                    self.start_epoch = checkpoint["epoch"]
+                    # self.model.load_state_dict(checkpoint['state_dict'])
+                    src_state = checkpoint["state_dict"]
+                    dst_state = model.state_dict()
+                    for k in dst_state.keys():
+                        if not k.startswith("module.") and "module." + k in src_state.keys():
+                            k_ddp = "module." + k
+                        elif k.startswith("module.") and "module." + k not in src_state.keys():
+                            k_ddp = k.replace("module.", "", 1)
+                        else:
+                            k_ddp = k
+                        if k_ddp in src_state.keys():
+                            dst_state[k] = src_state[k_ddp]
+                        else:
+                            print(f"Miss key in ckpt: model: {k}, ckpt: {k_ddp}")
+
+                    model.load_state_dict(dst_state)
+                    optim.load_state_dict(checkpoint["optimizer"])
+                    scheduler.load_state_dict(checkpoint["scheduler"])
+                    if scaler is not None and "scaler_state" in checkpoint:
+                        scaler.load_state_dict(checkpoint["scaler_state"])
+
+                    self.saved_ckpts = checkpoint["saved_ckpts"]
+                    self.val_acc_step_or_eoch = (
+                        checkpoint["val_acc_step_or_eoch"]
+                        if "val_acc_step_or_eoch" in checkpoint
+                        else {}
+                    )
+                    self.val_loss_step_or_eoch = (
+                        checkpoint["val_loss_step_or_eoch"]
+                        if "val_loss_step_or_eoch" in checkpoint
+                        else {}
+                    )
+                    self.best_step_or_epoch = (
+                        checkpoint["best_step_or_epoch"]
+                        if "best_step_or_epoch" in checkpoint
+                        else ""
+                    )
+                    self.start_data_split_i = (
+                        checkpoint["data_split_i"] if "data_split_i" in checkpoint else 0
+                    )
+                    self.batch_total = (
+                        checkpoint["batch_total"] if "batch_total" in checkpoint else 0
+                    )
+                    self.start_step = checkpoint["step"] if "step" in checkpoint else 0
+                    self.start_step = 0 if self.start_step is None else self.start_step
+                    self.step_in_epoch = (
+                        checkpoint["step_in_epoch"] if "step_in_epoch" in checkpoint else 0
+                    )
+                    self.step_in_epoch = 0 if self.step_in_epoch is None else self.step_in_epoch
+                    print(checkpoint["train_acc_avg"])
+                    self.train_acc_avg = (
+                        checkpoint["train_acc_avg"] if "train_acc_avg" in checkpoint else 0
+                    )
+                    self.train_loss_avg = (
+                        checkpoint["train_loss_avg"] if "train_loss_avg" in checkpoint else 0
+                    )
+                    model.to(self.device)
+                    print(f"Checkpoint loaded successfully from '{ckpt}'")
+                else:
+                    print(f"No checkpoint found at '{ckpt}', does not resume status!")
 
         if self.use_ddp or self.use_fsdp:
             dist.barrier()
@@ -349,7 +513,7 @@ class Trainer:
         Args:
             epoch (int): The current epoch number.
         """
-        if self.use_ddp or self.use_fsdp:
+        if self.use_ddp or self.use_fsdp or self.use_deepspeed:
             dist.barrier()
         logging.info(f"Train epoch: {epoch}, rank: {self.rank}\n")
         model.train()
@@ -366,6 +530,8 @@ class Trainer:
         time_beg = time.perf_counter()
         time5 = time_beg
         for batch_idx, batch in enumerate(dataloader_train):
+            self.batch_total += 1
+            self.step_in_epoch += 1
             loss_dict = {
                 "speed_stats": {},
                 "epoch": epoch,
@@ -373,10 +539,10 @@ class Trainer:
                 "data_split_i": kwargs.get("data_split_i", 0),
                 "data_split_num": kwargs.get("data_split_num", 1),
                 "log_step": batch_idx + kwargs.get("start_step", 0),
+                "batch_total": self.batch_total,
+                "step_in_epoch": self.step_in_epoch,
             }
 
-            self.batch_total += 1
-            self.step_in_epoch += 1
             time1 = time.perf_counter()
             loss_dict["speed_stats"]["data_load"] = f"{time1-time_beg:0.3f}"
 
@@ -408,6 +574,14 @@ class Trainer:
             loss_dict["lr"] = scheduler.get_last_lr()[0]
             loss_dict["batch_num_epoch"] = len(dataloader_train)
 
+            self.val_loss_avg = (
+                self.val_loss_avg * batch_idx + loss_dict["loss"].detach().cpu().item()
+            ) / (batch_idx + 1)
+            if "acc" in stats:
+                self.val_acc_avg = (
+                    self.val_acc_avg * batch_idx + loss_dict["stats"]["acc"].detach().cpu().item()
+                ) / (batch_idx + 1)
+
             self.log(loss_dict, tag="train")
 
             if self.step_in_epoch % self.validate_interval == 0:
@@ -436,18 +610,18 @@ class Trainer:
                 )
 
             time_beg = time.perf_counter()
-        else:
-            if self.use_ddp or self.use_fsdp:
-                iterator_stop.fill_(1)
-                dist.all_reduce(iterator_stop, dist.ReduceOp.SUM)
 
-        if self.use_ddp or self.use_fsdp:
-            dist.barrier()
-            iterator_stop = torch.tensor(0).to(self.device)
+        if self.use_ddp or self.use_fsdp or self.use_deepspeed:
+            val_loss_avg = torch.tensor(self.val_loss_avg, dtype=torch.float32).to(self.device)
+            val_acc_avg = torch.tensor(self.val_acc_avg, dtype=torch.float32).to(self.device)
+            dist.all_reduce(val_loss_avg, op=dist.ReduceOp.SUM)
+            dist.all_reduce(val_acc_avg, op=dist.ReduceOp.SUM)
+            self.val_loss_avg = val_loss_avg.detach().cpu().item() / self.world_size
+            self.val_acc_avg = val_acc_avg.detach().cpu().item() / self.world_size
 
     def forward_step(self, model, batch, loss_dict={}):
         dtype = torch.bfloat16
-        with torch.cuda.amp.autocast(enabled=True, dtype=dtype, cache_enabled=False):
+        with maybe_autocast(dtype=self.dtype, use_deepspeed=self.use_deepspeed):
             retval = model(**batch)
 
         loss, stats, weight = retval
@@ -516,7 +690,7 @@ class Trainer:
         Args:
             epoch (int): The current epoch number.
         """
-        if self.use_ddp or self.use_fsdp:
+        if self.use_ddp or self.use_fsdp or self.use_deepspeed:
             dist.barrier()
         logging.info(f"Validate epoch: {epoch}, rank: {self.rank}\n")
         model.eval()
@@ -524,77 +698,61 @@ class Trainer:
         with torch.no_grad():
 
             speed_stats = {}
-            time5 = time.perf_counter()
-            iterator_stop = torch.tensor(0).to(self.device)
+            time_beg = time.perf_counter()
+            time5 = time_beg
+
             dataloader_val.batch_sampler.set_epoch(epoch)
             for batch_idx, batch in enumerate(dataloader_val):
-                if self.use_ddp or self.use_fsdp:
-                    dist.all_reduce(iterator_stop, dist.ReduceOp.SUM)
-                    if iterator_stop > 0:
-                        break
-                time1 = time.perf_counter()
-                speed_stats["data_load"] = f"{time1 - time5:0.3f}"
-                batch = to_device(batch, self.device)
-                time2 = time.perf_counter()
-                retval = model(**batch)
-                time3 = time.perf_counter()
-                speed_stats["forward_time"] = f"{time3 - time2:0.3f}"
-                loss, stats, weight = retval
-                stats = {k: v for k, v in stats.items() if v is not None}
-                if self.use_ddp or self.use_fsdp:
-                    # Apply weighted averaging for loss and stats
-                    loss = (loss * weight.type(loss.dtype)).sum()
-                    # if distributed, this method can also apply all_reduce()
-                    # stats, weight = recursive_average(stats, weight, distributed=True)
-                    if self.use_ddp or self.use_fsdp:
-                        dist.all_reduce(weight, op=dist.ReduceOp.SUM)
-                    # Now weight is summation over all workers
-                    loss /= weight.sum()  # shape:[1] -> shape:[]
-                    # Multiply world_size because DistributedDataParallel
-                    # automatically normalizes the gradient by world_size.
-                    loss *= self.world_size
-                # Scale the loss since we're not updating for every mini-batch
-                loss = loss
-                time4 = time.perf_counter()
 
-                self.val_loss_avg = (self.val_loss_avg * batch_idx + loss.detach().cpu().item()) / (
-                    batch_idx + 1
-                )
+                loss_dict = {
+                    "speed_stats": {},
+                    "epoch": epoch,
+                    "batch_idx": batch_idx,
+                    "data_split_i": kwargs.get("data_split_i", 0),
+                    "data_split_num": kwargs.get("data_split_num", 1),
+                    "log_step": batch_idx + kwargs.get("start_step", 0),
+                    "batch_total": batch_idx,
+                    "step_in_epoch": step_in_epoch,
+                    "lr": 0.0,
+                }
+
+                time1 = time.perf_counter()
+                loss_dict["speed_stats"]["data_load"] = f"{time1 - time_beg:0.3f}"
+
+                batch = to_device(batch, self.device)
+
+                time2 = time.perf_counter()
+
+                self.forward_step(model, batch, loss_dict=loss_dict)
+
+                time3 = time.perf_counter()
+                loss_dict["speed_stats"]["forward_time"] = f"{time3 - time2:0.3f}"
+
+                total_time = f"{(time.perf_counter() - time5):0.3f}"
+                time5 = time.perf_counter()
+
+                loss_dict["speed_stats"]["total_time"] = total_time
+
+                loss_dict["batch_num_epoch"] = len(dataloader_val)
+
+                self.log(loss_dict, tag="val")
+                time_beg = time.perf_counter()
+                self.val_loss_avg = (
+                    self.val_loss_avg * batch_idx + loss_dict["loss"].detach().cpu().item()
+                ) / (batch_idx + 1)
                 if "acc" in stats:
                     self.val_acc_avg = (
-                        self.val_acc_avg * batch_idx + stats["acc"].detach().cpu().item()
+                        self.val_acc_avg * batch_idx
+                        + loss_dict["stats"]["acc"].detach().cpu().item()
                     ) / (batch_idx + 1)
-                if self.use_ddp or self.use_fsdp:
-                    val_loss_avg = torch.tensor(self.val_loss_avg, dtype=torch.float32).to(
-                        self.device
-                    )
-                    val_acc_avg = torch.tensor(self.val_acc_avg, dtype=torch.float32).to(
-                        self.device
-                    )
-                    dist.all_reduce(val_loss_avg, op=dist.ReduceOp.SUM)
-                    dist.all_reduce(val_acc_avg, op=dist.ReduceOp.SUM)
-                    self.val_loss_avg = val_loss_avg.detach().cpu().item() / self.world_size
-                    self.val_acc_avg = val_acc_avg.detach().cpu().item() / self.world_size
-                time5 = time.perf_counter()
-                batch_num_epoch = 1
-                if hasattr(dataloader_val, "__len__"):
-                    batch_num_epoch = len(dataloader_val)
-                self.log(
-                    epoch,
-                    batch_idx,
-                    batch_num_epoch=batch_num_epoch,
-                    lr=0.0,
-                    loss=loss.detach().cpu().item(),
-                    speed_stats=speed_stats,
-                    stats=stats,
-                    writer=writer,
-                    tag="val",
-                )
 
-            else:
-                if self.use_ddp or self.use_fsdp:
-                    iterator_stop.fill_(1)
-                    dist.all_reduce(iterator_stop, dist.ReduceOp.SUM)
+            if self.use_ddp or self.use_fsdp or self.use_deepspeed:
+                val_loss_avg = torch.tensor(self.val_loss_avg, dtype=torch.float32).to(self.device)
+                val_acc_avg = torch.tensor(self.val_acc_avg, dtype=torch.float32).to(self.device)
+                dist.all_reduce(val_loss_avg, op=dist.ReduceOp.SUM)
+                dist.all_reduce(val_acc_avg, op=dist.ReduceOp.SUM)
+                self.val_loss_avg = val_loss_avg.detach().cpu().item() / self.world_size
+                self.val_acc_avg = val_acc_avg.detach().cpu().item() / self.world_size
 
         if kwargs.get("step_in_epoch", None) is None:
             ckpt_name = f"model.pt.ep{epoch}"
@@ -603,10 +761,6 @@ class Trainer:
         self.val_acc_step_or_eoch[ckpt_name] = self.val_acc_avg
         self.val_loss_step_or_eoch[ckpt_name] = self.val_loss_avg
         model.train()
-
-        if self.use_ddp or self.use_fsdp:
-            dist.barrier()
-            iterator_stop = torch.tensor(0).to(self.device)
 
     def log(
         self,
@@ -617,7 +771,8 @@ class Trainer:
         loss = loss_dict["loss"].detach().cpu().item()
         epoch = loss_dict["epoch"]
         batch_idx = loss_dict["batch_idx"]
-        step_in_epoch = self.step_in_epoch
+        step_in_epoch = loss_dict["step_in_epoch"]
+        batch_total = loss_dict["batch_total"]
         batch_num_epoch = loss_dict["batch_num_epoch"]
         lr = loss_dict["lr"]
 
@@ -648,7 +803,7 @@ class Trainer:
                 f"rank: {self.rank}, "
                 f"epoch: {epoch}/{self.max_epoch}, "
                 f"data_slice: {data_split_i}/{data_split_num}, "
-                f"step_in_slice: {batch_idx + 1}/{batch_num_epoch}, step_in_epoch: {step_in_epoch}, total step: {self.batch_total}, "
+                f"step_in_slice: {batch_idx + 1}/{batch_num_epoch}, step_in_epoch: {step_in_epoch}, total step: {batch_total}, "
                 f"(loss_avg_rank: {loss:.3f}), "
                 f"(loss_avg_slice: {loss_avg_epoch:.3f}), "
                 f"(ppl_avg_slice: {math.exp(loss_avg_epoch):.3e}), "
@@ -667,22 +822,18 @@ class Trainer:
 
             writer = self.writer
             if writer is not None:
-                writer.add_scalar(f"rank{self.rank}_loss/{tag}", loss, self.batch_total)
-                writer.add_scalar(f"rank{self.rank}_lr/{tag}", lr, self.batch_total)
+                writer.add_scalar(f"rank{self.rank}_loss/{tag}", loss, batch_total)
+                writer.add_scalar(f"rank{self.rank}_lr/{tag}", lr, batch_total)
                 for key, var in stats.items():
-                    writer.add_scalar(
-                        f"stats_rank{self.rank}_{key}/{tag}", var.item(), self.batch_total
-                    )
+                    writer.add_scalar(f"stats_rank{self.rank}_{key}/{tag}", var.item(), batch_total)
                     description_dict[f"stats_rank{self.rank}_{key}/{tag}"] = var.item()
                 for key, var in speed_stats.items():
-                    writer.add_scalar(
-                        f"stats_rank{self.rank}_{key}/{tag}", eval(var), self.batch_total
-                    )
+                    writer.add_scalar(f"stats_rank{self.rank}_{key}/{tag}", eval(var), batch_total)
                     description_dict[f"stats_rank{self.rank}_{key}/{tag}"] = eval(var)
             if self.use_wandb and wandb is not None:
                 wandb.log(
                     description_dict,
-                    setp=self.batch_total,
+                    setp=batch_total,
                 )
 
     def close(self, writer=None):
@@ -768,6 +919,12 @@ class Trainer:
             args = OmegaConf.create({"deepspeed_config": self.deepspeed_config})
             with open(self.deepspeed_config, "r") as fin:
                 ds_configs = json.load(fin)
+
+            if "bf16" in ds_configs and ds_configs["bf16"]["enabled"]:
+                self.dtype = torch.bfloat16
+
+            if "fp16" in ds_configs and ds_configs["fp16"]["enabled"]:
+                self.dtype = torch.float16
             if "optimizer" in ds_configs:
                 # NOTE(xcsong): Disable custom optimizer if it is set in ds_config,
                 # extremely useful when enable cpu_offload, DeepspeedCpuAdam
