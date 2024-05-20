@@ -198,7 +198,9 @@ def main(**kwargs):
         trainer.train_loss_avg = 0.0
 
     if trainer.rank == 0:
-        average_checkpoints(trainer.output_dir, trainer.avg_nbest_model)
+        average_checkpoints(
+            trainer.output_dir, trainer.avg_nbest_model, use_deepspeed=trainer.use_deepspeed
+        )
 
     trainer.close()
 
