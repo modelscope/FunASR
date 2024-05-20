@@ -388,7 +388,7 @@ class Trainer:
                 ckpt = os.path.join(self.output_dir, "model.pt")
                 if os.path.exists(ckpt):
                     _, checkpoint = model.load_checkpoint(self.output_dir, "model.pt")
-
+                    self.start_epoch = checkpoint["epoch"]
                     self.saved_ckpts = checkpoint["saved_ckpts"]
                     self.val_acc_step_or_eoch = (
                         checkpoint["val_acc_step_or_eoch"]
