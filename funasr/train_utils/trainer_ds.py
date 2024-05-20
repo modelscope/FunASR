@@ -15,6 +15,7 @@ from funasr.train_utils.device_funcs import to_device
 from funasr.train_utils.recursive_op import recursive_average
 from funasr.train_utils.average_nbest_models import average_checkpoints
 from torch.distributed.fsdp.sharded_grad_scaler import ShardedGradScaler
+import funasr.utils.misc as misc_utils
 
 try:
     import wandb
@@ -268,7 +269,8 @@ class Trainer:
                     filename = os.path.join(self.output_dir, key)
                     logging.info(f"Delete: {filename}")
                     if os.path.exists(filename):
-                        os.remove(filename)
+                        # os.remove(filename)
+                        misc_utils.smart_remove(filename)
 
         elif self.use_fsdp:
             pass
@@ -360,7 +362,8 @@ class Trainer:
                     filename = os.path.join(self.output_dir, key)
                     logging.info(f"Delete: {filename}")
                     if os.path.exists(filename):
-                        os.remove(filename)
+                        # os.remove(filename)
+                        misc_utils.smart_remove(filename)
 
         if self.use_ddp or self.use_fsdp:
             dist.barrier()

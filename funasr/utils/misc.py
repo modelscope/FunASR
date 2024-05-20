@@ -94,3 +94,26 @@ def extract_filename_without_extension(file_path):
     filename, extension = os.path.splitext(filename_with_extension)
     # 返回不包含扩展名的文件名
     return filename
+
+
+def smart_remove(path):
+    """Intelligently removes files, empty directories, and non-empty directories recursively."""
+    # Check if the provided path exists
+    if not os.path.exists(path):
+        print(f"{path} does not exist.")
+        return
+
+    # If the path is a file, delete it
+    if os.path.isfile(path):
+        os.remove(path)
+        print(f"File {path} has been deleted.")
+    # If the path is a directory
+    elif os.path.isdir(path):
+        try:
+            # Attempt to remove an empty directory
+            os.rmdir(path)
+            print(f"Empty directory {path} has been deleted.")
+        except OSError:
+            # If the directory is not empty, remove it along with all its contents
+            shutil.rmtree(path)
+            print(f"Non-empty directory {path} has been recursively deleted.")
