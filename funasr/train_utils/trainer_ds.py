@@ -15,6 +15,7 @@ from funasr.train_utils.device_funcs import to_device
 from funasr.train_utils.recursive_op import recursive_average
 from funasr.train_utils.average_nbest_models import average_checkpoints
 from torch.distributed.fsdp.sharded_grad_scaler import ShardedGradScaler
+import funasr.utils.misc as misc_utils
 
 try:
     import wandb
@@ -268,7 +269,8 @@ class Trainer:
                     filename = os.path.join(self.output_dir, key)
                     logging.info(f"Delete: {filename}")
                     if os.path.exists(filename):
-                        os.remove(filename)
+                        # os.remove(filename)
+                        misc_utils.smart_remove(filename)
 
         elif self.use_fsdp:
             pass
@@ -360,7 +362,8 @@ class Trainer:
                     filename = os.path.join(self.output_dir, key)
                     logging.info(f"Delete: {filename}")
                     if os.path.exists(filename):
-                        os.remove(filename)
+                        # os.remove(filename)
+                        misc_utils.smart_remove(filename)
 
         if self.use_ddp or self.use_fsdp:
             dist.barrier()
@@ -385,7 +388,7 @@ class Trainer:
                 ckpt = os.path.join(self.output_dir, "model.pt")
                 if os.path.exists(ckpt):
                     _, checkpoint = model.load_checkpoint(self.output_dir, "model.pt")
-
+                    self.start_epoch = checkpoint["epoch"]
                     self.saved_ckpts = checkpoint["saved_ckpts"]
                     self.val_acc_step_or_eoch = (
                         checkpoint["val_acc_step_or_eoch"]
@@ -709,8 +712,8 @@ class Trainer:
                     "data_split_i": kwargs.get("data_split_i", 0),
                     "data_split_num": kwargs.get("data_split_num", 1),
                     "log_step": batch_idx + kwargs.get("start_step", 0),
-                    "batch_total": batch_idx,
-                    "step_in_epoch": batch_idx,
+                    "batch_total": batch_idx + 1,
+                    "step_in_epoch": batch_idx + 1,
                     "lr": 0.0,
                 }
 
