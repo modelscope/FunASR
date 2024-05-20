@@ -62,7 +62,8 @@ def average_checkpoints(output_dir: str, last_n: int = 5, **kwargs):
 
     # Check if we have any state_dicts to average
     if len(state_dicts) < 1:
-        raise RuntimeError("No checkpoints found for averaging.")
+        print("No checkpoints found for averaging.")
+        return
 
     # Average or sum weights
     avg_state_dict = OrderedDict()
