@@ -1,4 +1,8 @@
-//
+/**
+ * Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights
+ * Reserved. MIT License  (https://opensource.org/licenses/MIT)
+ */
+/* 2023-2024 by zhaomingwork@qq.com */
 // reply.cpp
 // ~~~~~~~~~
 //
@@ -91,7 +95,7 @@ std::vector<::asio::const_buffer> reply::to_buffers() {
   }
   buffers.push_back(asio::buffer(misc_strings::crlf));
   buffers.push_back(asio::buffer(content));
-  std::cout << "buffer=" << content << std::endl;
+ 
   return buffers;
 }
 
