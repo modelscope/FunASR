@@ -384,7 +384,7 @@ class Trainer:
             if self.use_deepspeed:
                 ckpt = os.path.join(self.output_dir, "model.pt")
                 if os.path.exists(ckpt):
-                    _, checkpoint = model_engine.load_checkpoint(self.output_dir, "model.pt")
+                    _, checkpoint = model.load_checkpoint(self.output_dir, "model.pt")
 
                     self.saved_ckpts = checkpoint["saved_ckpts"]
                     self.val_acc_step_or_eoch = (
