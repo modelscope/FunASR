@@ -112,7 +112,9 @@ class MultiHeadAttention(nn.Module):
                 qk = qk + mask[:n_ctx, :n_ctx]
             else:
                 mask = mask.unsqueeze(1).eq(0)  # (batch, 1, *, time2)
-                min_value = float(np.finfo(torch.tensor(0, dtype=qk.dtype).numpy().dtype).min)
+                min_value = -float(
+                    "inf"
+                )  # min_value = float(np.finfo(torch.tensor(0, dtype=qk.dtype).numpy().dtype).min)
                 qk = qk.masked_fill(mask, min_value)
 
         qk = qk.float()

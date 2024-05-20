@@ -130,32 +130,10 @@ def main(**kwargs):
 
     model = trainer.warp_model(model)
 
-    kwargs["device"] = next(model.parameters()).device
-    trainer.device = kwargs["device"]
+    kwargs["device"] = int(os.environ.get("LOCAL_RANK", 0))
+    trainer.device = int(os.environ.get("LOCAL_RANK", 0))
 
-    # optim
-    logging.info("Build optim")
-    optim = kwargs.get("optim", "adam")
-    assert optim in optim_classes
-    optim_class = optim_classes.get(optim)
-    optim = optim_class(model.parameters(), **kwargs.get("optim_conf"))
-
-    # scheduler
-    logging.info("Build scheduler")
-    scheduler = kwargs.get("scheduler", "warmuplr")
-    assert scheduler in scheduler_classes
-    scheduler_class = scheduler_classes.get(scheduler)
-    scheduler = scheduler_class(optim, **kwargs.get("scheduler_conf"))
-
-    if use_deepspeed:
-        args = OmegaConf.create({"deepspeed_config": kwargs.get("deepspeed_config", "")})
-        model, optimizer, _, scheduler = deepspeed.initialize(
-            args=args,
-            model=model,
-            optimizer=optim,
-            lr_scheduler=scheduler,
-            model_parameters=model.parameters(),
-        )
+    model, optim, scheduler = trainer.warp_optim_scheduler(model, **kwargs)
 
     # dataset
     logging.info("Build dataloader")
@@ -175,15 +153,6 @@ def main(**kwargs):
         scaler=scaler,
     )
 
-    tensorboard_dir = os.path.join(kwargs.get("output_dir"), "tensorboard")
-    os.makedirs(tensorboard_dir, exist_ok=True)
-    try:
-        from tensorboardX import SummaryWriter
-
-        writer = SummaryWriter(tensorboard_dir)  # if trainer.rank == 0 else None
-    except:
-        writer = None
-
     dataloader_tr, dataloader_val = None, None
     for epoch in range(trainer.start_epoch, trainer.max_epoch):
         time1 = time.perf_counter()
@@ -201,7 +170,6 @@ def main(**kwargs):
                 dataloader_train=dataloader_tr,
                 dataloader_val=dataloader_val,
                 epoch=epoch,
-                writer=writer,
                 data_split_i=data_split_i,
                 data_split_num=dataloader.data_split_num,
                 start_step=trainer.start_step,
@@ -211,9 +179,7 @@ def main(**kwargs):
             torch.cuda.empty_cache()
 
         trainer.start_data_split_i = 0
-        trainer.validate_epoch(
-            model=model, dataloader_val=dataloader_val, epoch=epoch + 1, writer=writer
-        )
+        trainer.validate_epoch(model=model, dataloader_val=dataloader_val, epoch=epoch + 1)
         scheduler.step()
         trainer.step_in_epoch = 0
         trainer.save_checkpoint(
@@ -232,7 +198,9 @@ def main(**kwargs):
         trainer.train_loss_avg = 0.0
 
     if trainer.rank == 0:
-        average_checkpoints(trainer.output_dir, trainer.avg_nbest_model)
+        average_checkpoints(
+            trainer.output_dir, trainer.avg_nbest_model, use_deepspeed=trainer.use_deepspeed
+        )
 
     trainer.close()
 
