@@ -1,5 +1,11 @@
 
 file(GLOB files1 "*.cpp")
+
+if(APPLE)
+    file(GLOB itn_files "itn-*.cpp")
+    list(REMOVE_ITEM files1 ${itn_files})
+endif(APPLE)
+
 set(files ${files1})
 
 message("files: "${files})
@@ -23,6 +29,8 @@ else()
     set(EXTRA_LIBS pthread yaml-cpp csrc kaldi-decoder fst glog gflags avutil avcodec avformat swresample)
     include_directories(${ONNXRUNTIME_DIR}/include)
     include_directories(${FFMPEG_DIR}/include)
+    target_link_directories(funasr PUBLIC ${ONNXRUNTIME_DIR}/lib)
+    target_link_directories(funasr PUBLIC ${FFMPEG_DIR}/lib)
 endif()
 
 #message("CXX_FLAGS "${CMAKE_CXX_FLAGS})

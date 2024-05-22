@@ -409,7 +409,7 @@
 		return p_result;
 	}
 
-#if !defined(__APPLE__)
+//#if !defined(__APPLE__)
 	_FUNASRAPI const std::vector<std::vector<float>> CompileHotwordEmbedding(FUNASR_HANDLE handle, std::string &hotwords, ASR_TYPE mode)
 	{
 		if (mode == ASR_OFFLINE){
@@ -433,7 +433,7 @@
 		}
 		
 	}
-#endif
+//#endif
 
 	// APIs for 2pass-stream Infer
 	_FUNASRAPI FUNASR_RESULT FunTpassInferBuffer(FUNASR_HANDLE handle, FUNASR_HANDLE online_handle, const char* sz_buf, 
