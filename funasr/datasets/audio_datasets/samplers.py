@@ -22,30 +22,33 @@ def CustomDistributedBatchSampler_fn(dataset, **kwargs):
     batch_type = kwargs.get("batch_type", "example")
     if batch_type == "example":
         batch_sampler = CustomDistributedBatchSampler(dataset, **kwargs)
-        
+
     else:
         if kwargs.get("sort_size", -1) > 0:
             batch_sampler = CustomDistributedBufferDynamicBatchSampler(dataset, **kwargs)
         else:
             batch_sampler = CustomDistributedDynamicBatchSampler(dataset, **kwargs)
         # batch_sampler = CustomDistributedDynamicBatchSampler(dataset, **kwargs)
-        
+
     dataloader_args["batch_sampler"] = batch_sampler
     dataloader_args["num_workers"] = kwargs.get("num_workers", 4)
     dataloader_args["pin_memory"] = kwargs.get("pin_memory", True)
-    
+
     return dataloader_args
 
+
 class CustomDistributedBatchSampler(Sampler):
-    def __init__(self, dataset,
-                 batch_size,
-                 num_replicas=None,
-                 rank=None,
-                 shuffle=True,
-                 drop_last=False,
-                 is_training: bool = True,
-                 **kwargs,
-                 ):
+    def __init__(
+        self,
+        dataset,
+        batch_size,
+        num_replicas=None,
+        rank=None,
+        shuffle=True,
+        drop_last=False,
+        is_training: bool = True,
+        **kwargs,
+    ):
 
         try:
             rank = dist.get_rank()
@@ -62,9 +65,13 @@ class CustomDistributedBatchSampler(Sampler):
         self.drop_last = drop_last
         # self.total_size = len(dataset)
         if self.drop_last:
-            self.total_size = (len(self.dataset) // (batch_size * num_replicas)) * (batch_size * num_replicas)
+            self.total_size = (len(self.dataset) // (batch_size * num_replicas)) * (
+                batch_size * num_replicas
+            )
         else:
-            self.total_size = math.ceil(len(self.dataset) / (batch_size * num_replicas)) * (batch_size * num_replicas)
+            self.total_size = math.ceil(len(self.dataset) / (batch_size * num_replicas)) * (
+                batch_size * num_replicas
+            )
         self.num_samples = int(self.total_size // self.num_replicas)
         self.epoch = 0
         self.max_token_length = kwargs.get("max_token_length", None)
@@ -84,12 +91,14 @@ class CustomDistributedBatchSampler(Sampler):
         if padding_size <= len(indices):
             indices += indices[:padding_size]
         else:
-            indices += (indices * (padding_size // len(indices)) + indices[:padding_size % len(indices)])
+            indices += (
+                indices * (padding_size // len(indices)) + indices[: padding_size % len(indices)]
+            )
 
         assert len(indices) == self.total_size
 
         # Subsample
-        indices = indices[self.rank:self.total_size:self.num_replicas]
+        indices = indices[self.rank : self.total_size : self.num_replicas]
         assert len(indices) == self.num_samples
 
         # Filter out indices with length greater than the max length, if provided
@@ -102,7 +111,9 @@ class CustomDistributedBatchSampler(Sampler):
             indices = filtered_indices
 
         # Now that we have only the indices for this replica, chunk them into batches
-        batches = [indices[i:i + self.batch_size] for i in range(0, len(indices), self.batch_size)]
+        batches = [
+            indices[i : i + self.batch_size] for i in range(0, len(indices), self.batch_size)
+        ]
 
         # Drop the last batch if it's not full and drop_last is True
         if self.drop_last and len(batches[-1]) != self.batch_size:
@@ -117,18 +128,21 @@ class CustomDistributedBatchSampler(Sampler):
     def set_epoch(self, epoch):
         self.epoch = epoch
 
+
 class CustomDistributedBufferBatchSampler(Sampler):
-    def __init__(self, dataset,
-                 batch_size,
-                 num_replicas=None,
-                 rank=None,
-                 shuffle=True,
-                 drop_last=False,
-                 is_training: bool = True,
-                 sort_size: int = 1024,
-                 **kwargs,
-                 ):
-        
+    def __init__(
+        self,
+        dataset,
+        batch_size,
+        num_replicas=None,
+        rank=None,
+        shuffle=True,
+        drop_last=False,
+        is_training: bool = True,
+        sort_size: int = 1024,
+        **kwargs,
+    ):
+
         try:
             rank = dist.get_rank()
             num_replicas = dist.get_world_size()
@@ -144,15 +158,19 @@ class CustomDistributedBufferBatchSampler(Sampler):
         self.drop_last = drop_last
         # self.total_size = len(dataset)
         if self.drop_last:
-            self.total_size = (len(self.dataset) // (batch_size * num_replicas)) * (batch_size * num_replicas)
+            self.total_size = (len(self.dataset) // (batch_size * num_replicas)) * (
+                batch_size * num_replicas
+            )
         else:
-            self.total_size = math.ceil(len(self.dataset) / (batch_size * num_replicas)) * (batch_size * num_replicas)
+            self.total_size = math.ceil(len(self.dataset) / (batch_size * num_replicas)) * (
+                batch_size * num_replicas
+            )
         self.num_samples = int(self.total_size // self.num_replicas)
         self.epoch = 0
         self.max_token_length = kwargs.get("max_token_length", None)
         self.length_scale_source = kwargs.get("length_scale_source", 1.0)
         self.sort_size = sort_size
-    
+
     def __iter__(self):
         # Generate a list of indices
         if self.shuffle:
@@ -161,20 +179,22 @@ class CustomDistributedBufferBatchSampler(Sampler):
             indices = torch.randperm(len(self.dataset), generator=g).tolist()
         else:
             indices = list(range(len(self.dataset)))
-        
+
         # Add extra samples to make it evenly divisible
         padding_size = self.total_size - len(indices)
         if padding_size <= len(indices):
             indices += indices[:padding_size]
         else:
-            indices += (indices * (padding_size // len(indices)) + indices[:padding_size % len(indices)])
-        
+            indices += (
+                indices * (padding_size // len(indices)) + indices[: padding_size % len(indices)]
+            )
+
         assert len(indices) == self.total_size
-        
+
         # Subsample
-        indices = indices[self.rank:self.total_size:self.num_replicas]
+        indices = indices[self.rank : self.total_size : self.num_replicas]
         assert len(indices) == self.num_samples
-        
+
         # Filter out indices with length greater than the max length, if provided
         if self.max_token_length is not None:
             filtered_indices = []
@@ -205,29 +225,34 @@ class CustomDistributedBufferBatchSampler(Sampler):
 
     def _create_batches_from_buffer(self, buffer):
         # Function to convert the sorted buffer into batches
-        batched_buffer = [buffer[i:i + self.batch_size] for i in range(0, len(buffer), self.batch_size)]
+        batched_buffer = [
+            buffer[i : i + self.batch_size] for i in range(0, len(buffer), self.batch_size)
+        ]
         if self.drop_last and len(batched_buffer[-1]) != self.batch_size:
             batched_buffer = batched_buffer[:-1]
         return batched_buffer
-    
+
     def __len__(self):
-        
+
         return self.num_samples // self.batch_size
-    
+
     def set_epoch(self, epoch):
         self.epoch = epoch
 
+
 class CustomDistributedDynamicBatchSampler(DistributedSampler):
-    def __init__(self, dataset,
-                 batch_size,
-                 num_replicas=None,
-                 rank=None,
-                 shuffle=True,
-                 drop_last=False,
-                 is_training: bool = True,
-                 **kwargs,
-                 ):
-        
+    def __init__(
+        self,
+        dataset,
+        batch_size,
+        num_replicas=None,
+        rank=None,
+        shuffle=True,
+        drop_last=False,
+        is_training: bool = True,
+        **kwargs,
+    ):
+
         try:
             rank = dist.get_rank()
             num_replicas = dist.get_world_size()
@@ -241,13 +266,13 @@ class CustomDistributedDynamicBatchSampler(DistributedSampler):
         self.is_training = is_training
         self.shuffle = shuffle and is_training
         self.drop_last = drop_last
-        
+
         self.total_size = len(self.dataset)
         # self.num_samples = int(math.ceil(self.total_size / self.num_replicas))
         self.epoch = 0
         self.max_token_length = kwargs.get("max_token_length", 2048)
         self.length_scale_source = kwargs.get("length_scale_source", 1.0)
-    
+
     def __iter__(self):
         if self.shuffle:
             g = torch.Generator()
@@ -255,21 +280,22 @@ class CustomDistributedDynamicBatchSampler(DistributedSampler):
             indices = torch.randperm(len(self.dataset), generator=g).tolist()
         else:
             indices = list(range(len(self.dataset)))
-        
-        indices = indices[self.rank:self.total_size:self.num_replicas]
-        
+
+        indices = indices[self.rank : self.total_size : self.num_replicas]
+
         batches = []
         batch = []
         max_len_in_batch = 0
         current_batch_length = 0
-        
+
         for idx in indices:
             sample_length = self.dataset.get_source_len(idx)
             if sample_length > self.max_token_length:
                 continue
-            potential_batch_length = (max_len_in_batch if sample_length < max_len_in_batch else sample_length) * (
-                    len(batch) + 1)
-            
+            potential_batch_length = (
+                max_len_in_batch if sample_length < max_len_in_batch else sample_length
+            ) * (len(batch) + 1)
+
             if potential_batch_length <= self.batch_size:
                 batch.append(idx)
                 if sample_length > max_len_in_batch:
@@ -280,40 +306,49 @@ class CustomDistributedDynamicBatchSampler(DistributedSampler):
                 batch = [idx]
                 max_len_in_batch = sample_length
                 # current_batch_length = max_len_in_batch
-        
+
         # Add the last batch if it's not empty and we're not dropping it
         if batch and (not self.drop_last or len(batch) * max_len_in_batch == self.batch_size):
             batches.append(batch)
-        
+
         return iter(batches)
-    
+
     def __len__(self):
-        
+
         return 1
-    
+
     def set_epoch(self, epoch):
         self.epoch = epoch
 
 
 class CustomDistributedBufferDynamicBatchSampler(DistributedSampler):
-    def __init__(self, dataset,
-                 batch_size,
-                 batch_type="token",
-                 num_replicas=None,
-                 rank=None,
-                 shuffle=True,
-                 drop_last=False,
-                 is_training: bool = True,
-                 sort_size: int = 1024,
-                 **kwargs,
-                 ):
-        
+    def __init__(
+        self,
+        dataset,
+        batch_size,
+        batch_type="token",
+        num_replicas=None,
+        rank=None,
+        rank_split=False,
+        shuffle=True,
+        drop_last=False,
+        is_training: bool = True,
+        sort_size: int = 1024,
+        **kwargs,
+    ):
+
         try:
             rank = dist.get_rank()
             num_replicas = dist.get_world_size()
         except:
             rank = 0
             num_replicas = 1
+
+        # if rank_split:
+        #     logging.info(f"Warning, rank_split: {rank_split}, batch and shuffle data in local rank")
+        #     rank = 0
+        #     num_replicas = 1
+
         self.rank = rank
         self.num_replicas = num_replicas
         self.dataset = dataset
@@ -322,22 +357,23 @@ class CustomDistributedBufferDynamicBatchSampler(DistributedSampler):
         self.is_training = is_training
         self.shuffle = shuffle and is_training
         self.drop_last = drop_last
-        
+
         self.total_size = len(self.dataset)
         self.num_samples = int(math.ceil(self.total_size / self.num_replicas))
         self.epoch = 0
         self.sort_size = sort_size * num_replicas
         self.max_token_length = kwargs.get("max_token_length", 2048)
         self.length_scale_source = kwargs.get("length_scale_source", 1.0)
-        super().__init__(dataset, num_replicas=num_replicas, rank=rank,
-                         shuffle=shuffle, drop_last=drop_last)
+        super().__init__(
+            dataset, num_replicas=num_replicas, rank=rank, shuffle=shuffle, drop_last=drop_last
+        )
 
     def __iter__(self):
         if self.shuffle:
             g = torch.Generator()
             g.manual_seed(self.epoch)
             random.seed(self.epoch)
-            
+
             indices = torch.randperm(len(self.dataset), generator=g).tolist()
         else:
             indices = list(range(len(self.dataset)))
@@ -345,7 +381,9 @@ class CustomDistributedBufferDynamicBatchSampler(DistributedSampler):
         # Create sorted buffers and form batches
         buffer_batches = []
         for i in range(0, len(indices), self.sort_size):
-            buffer = sorted(indices[i:i + self.sort_size], key=lambda idx: self.dataset.get_source_len(idx))
+            buffer = sorted(
+                indices[i : i + self.sort_size], key=lambda idx: self.dataset.get_source_len(idx)
+            )
             batch = []
             max_len_in_batch = 0
             for idx in buffer:
@@ -367,10 +405,10 @@ class CustomDistributedBufferDynamicBatchSampler(DistributedSampler):
         # Ensure each rank gets the same number of batches, duplicate data if needed
         batches_per_rank = math.ceil(len(buffer_batches) / self.num_replicas)
         total_batches_needed = batches_per_rank * self.num_replicas
-        
+
         extra_batches = total_batches_needed - len(buffer_batches)
         buffer_batches += random.choices(buffer_batches, k=extra_batches)
-        
+
         # Evenly distribute batches from buffer_batches to each rank
         rank_batches = [[] for _ in range(self.num_replicas)]
         for i, batch in enumerate(buffer_batches):
@@ -381,17 +419,18 @@ class CustomDistributedBufferDynamicBatchSampler(DistributedSampler):
 
         return iter(final_batches)
 
-    
     def __len__(self):
-        
+
         return 1
-    
+
     def set_epoch(self, epoch):
         self.epoch = epoch
 
 
 class DistributedSamplerWarp(BatchSampler):
-    def __init__(self, dataset, batch_size, num_replicas=None, rank=None, shuffle=True, drop_last=False):
+    def __init__(
+        self, dataset, batch_size, num_replicas=None, rank=None, shuffle=True, drop_last=False
+    ):
         if num_replicas is None:
             if not torch.distributed.is_available():
                 raise RuntimeError("Requires distributed package to be available")
@@ -400,32 +439,29 @@ class DistributedSamplerWarp(BatchSampler):
             if not torch.distributed.is_available():
                 raise RuntimeError("Requires distributed package to be available")
             rank = torch.distributed.get_rank()
-        
+
         self.dataset = dataset
         self.batch_size = batch_size
         self.num_replicas = num_replicas
         self.rank = rank
         self.shuffle = shuffle
         self.drop_last = drop_last
-        
+
         # Create an instance of the DistributedSampler
         self.sampler = DistributedSampler(
-            self.dataset,
-            num_replicas=self.num_replicas,
-            rank=self.rank,
-            shuffle=self.shuffle
+            self.dataset, num_replicas=self.num_replicas, rank=self.rank, shuffle=self.shuffle
         )
-        
+
         # Call BatchSampler's constructor
         super().__init__(self.sampler, batch_size, drop_last)
-    
+
     def __iter__(self):
         # If we shuffle, we need to call the set_epoch method
         if self.shuffle:
             self.sampler.set_epoch(self.epoch)
-        
+
         # Generate batch indices using the parent class
         return super().__iter__()
-    
+
     def set_epoch(self, epoch):
         self.epoch = epoch

@@ -1,6 +1,9 @@
-
 import pynini
-from fun_text_processing.text_normalization.en.graph_utils import DAMO_NOT_QUOTE, GraphFst, delete_preserve_order
+from fun_text_processing.text_normalization.en.graph_utils import (
+    DAMO_NOT_QUOTE,
+    GraphFst,
+    delete_preserve_order,
+)
 from pynini.lib import pynutil
 
 
@@ -25,14 +28,28 @@ class MoneyFst(GraphFst):
 
         keep_space = pynini.accep(" ")
 
-        maj = pynutil.delete("currency_maj: \"") + pynini.closure(DAMO_NOT_QUOTE, 1) + pynutil.delete("\"")
-        min = pynutil.delete("currency_min: \"") + pynini.closure(DAMO_NOT_QUOTE, 1) + pynutil.delete("\"")
-
-        fractional_part = (
-            pynutil.delete("fractional_part: \"") + pynini.closure(DAMO_NOT_QUOTE, 1) + pynutil.delete("\"")
+        maj = (
+            pynutil.delete('currency_maj: "')
+            + pynini.closure(DAMO_NOT_QUOTE, 1)
+            + pynutil.delete('"')
+        )
+        min = (
+            pynutil.delete('currency_min: "')
+            + pynini.closure(DAMO_NOT_QUOTE, 1)
+            + pynutil.delete('"')
         )
 
-        integer_part = pynutil.delete("integer_part: \"") + pynini.closure(DAMO_NOT_QUOTE, 1) + pynutil.delete("\"")
+        fractional_part = (
+            pynutil.delete('fractional_part: "')
+            + pynini.closure(DAMO_NOT_QUOTE, 1)
+            + pynutil.delete('"')
+        )
+
+        integer_part = (
+            pynutil.delete('integer_part: "')
+            + pynini.closure(DAMO_NOT_QUOTE, 1)
+            + pynutil.delete('"')
+        )
         optional_add_and = pynini.closure(pynutil.insert("und "), 0, 1)
 
         #  *** currency_maj

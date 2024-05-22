@@ -3,7 +3,6 @@ from typing import Union
 import warnings
 
 
-
 class DatadirWriter:
     """Writer class to create kaldi like data directory.
 
@@ -63,8 +62,7 @@ class DatadirWriter:
                 child.close()
                 if prev_child is not None and prev_child.keys != child.keys:
                     warnings.warn(
-                        f"Ids are mismatching between "
-                        f"{prev_child.path} and {child.path}"
+                        f"Ids are mismatching between " f"{prev_child.path} and {child.path}"
                     )
                 prev_child = child
 

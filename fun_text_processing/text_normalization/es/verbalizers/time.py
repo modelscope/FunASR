@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import (
     DAMO_NOT_QUOTE,
@@ -33,7 +31,9 @@ class TimeFst(GraphFst):
     def __init__(self, deterministic: bool = True):
         super().__init__(name="time", kind="verbalize", deterministic=deterministic)
 
-        change_minutes = pynini.cdrewrite(alt_minutes, pynini.accep("[BOS]"), pynini.accep("[EOS]"), DAMO_SIGMA)
+        change_minutes = pynini.cdrewrite(
+            alt_minutes, pynini.accep("[BOS]"), pynini.accep("[EOS]"), DAMO_SIGMA
+        )
 
         morning_phrases = pynini.cross("am", "de la mañana")
         afternoon_phrases = pynini.cross("pm", "de la tarde")
@@ -58,40 +58,44 @@ class TimeFst(GraphFst):
         hour = (
             pynutil.delete("hours:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
         minute = (
             pynutil.delete("minutes:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
-        minute = (minute @ change_minutes) if deterministic else pynini.union(minute, minute @ change_minutes)
+        minute = (
+            (minute @ change_minutes)
+            if deterministic
+            else pynini.union(minute, minute @ change_minutes)
+        )
 
         suffix = (
             pynutil.delete("suffix:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
         zone = (
             pynutil.delete("zone:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
         optional_zone = pynini.closure(delete_space + insert_space + zone, 0, 1)
         second = (
             pynutil.delete("seconds:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
 
         graph_hms = (
@@ -148,8 +152,8 @@ class TimeFst(GraphFst):
         graph = (graph_hms | graph_hm | graph_h) + optional_zone
 
         if not deterministic:
-            graph_style_1 = pynutil.delete(" style: \"1\"")
-            graph_style_2 = pynutil.delete(" style: \"2\"")
+            graph_style_1 = pynutil.delete(' style: "1"')
+            graph_style_2 = pynutil.delete(' style: "2"')
 
             graph_menos = hour + delete_space + pynutil.insert(" menos ") + minute + graph_style_1
             graph_menos |= (

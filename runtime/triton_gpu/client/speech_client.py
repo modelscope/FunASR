@@ -71,9 +71,7 @@ class StreamingSpeechClient(object):
         # the exact first chunk length frames
         # since the subsampling will look ahead several frames
         first_chunk_length = (chunk_size - 1) * subsampling + context
-        add_frames = math.ceil(
-            (frame_length_ms - frame_shift_ms) / frame_shift_ms
-        )
+        add_frames = math.ceil((frame_length_ms - frame_shift_ms) / frame_shift_ms)
         first_chunk_ms = (first_chunk_length + add_frames) * frame_shift_ms
         other_chunk_ms = chunk_size * subsampling * frame_shift_ms
         self.first_chunk_in_secs = first_chunk_ms / 1000

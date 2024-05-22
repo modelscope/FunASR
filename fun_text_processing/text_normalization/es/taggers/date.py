@@ -1,7 +1,10 @@
-
-
 import pynini
-from fun_text_processing.text_normalization.en.graph_utils import DAMO_DIGIT, DAMO_SPACE, GraphFst, delete_extra_space
+from fun_text_processing.text_normalization.en.graph_utils import (
+    DAMO_DIGIT,
+    DAMO_SPACE,
+    GraphFst,
+    delete_extra_space,
+)
 from fun_text_processing.text_normalization.es.utils import get_abs_path
 from pynini.lib import pynutil
 
@@ -34,22 +37,27 @@ class DateFst(GraphFst):
 
         # 01, 31, 1
         digit_day = optional_leading_zero @ pynini.union(*[str(x) for x in range(1, 32)]) @ numbers
-        day = (pynutil.insert("day: \"") + digit_day + pynutil.insert("\"")).optimize()
+        day = (pynutil.insert('day: "') + digit_day + pynutil.insert('"')).optimize()
 
         digit_month = optional_leading_zero @ pynini.union(*[str(x) for x in range(1, 13)])
         number_to_month = digit_month @ number_to_month
 
-        month_name = (pynutil.insert("month: \"") + month_graph + pynutil.insert("\"")).optimize()
-        month_number = (pynutil.insert("month: \"") + number_to_month + pynutil.insert("\"")).optimize()
+        month_name = (pynutil.insert('month: "') + month_graph + pynutil.insert('"')).optimize()
+        month_number = (
+            pynutil.insert('month: "') + number_to_month + pynutil.insert('"')
+        ).optimize()
 
         # prefer cardinal over year
         year = (DAMO_DIGIT - "0") + pynini.closure(DAMO_DIGIT, 1, 3)  # 90, 990, 1990
         year @= numbers
         self.year = year
 
-        year_only = pynutil.insert("year: \"") + year + pynutil.insert("\"")
+        year_only = pynutil.insert('year: "') + year + pynutil.insert('"')
         year_with_articles = (
-            pynutil.insert("year: \"") + pynini.closure(articles + DAMO_SPACE, 0, 1) + year + pynutil.insert("\"")
+            pynutil.insert('year: "')
+            + pynini.closure(articles + DAMO_SPACE, 0, 1)
+            + year
+            + pynutil.insert('"')
         )
 
         graph_dmy = (
@@ -61,7 +69,10 @@ class DateFst(GraphFst):
         )
 
         graph_mdy = (  # English influences on language
-            month_name + delete_extra_space + day + pynini.closure(DAMO_SPACE + year_with_articles, 0, 1)
+            month_name
+            + delete_extra_space
+            + day
+            + pynini.closure(DAMO_SPACE + year_with_articles, 0, 1)
         )
 
         separators = [".", "-", "/"]
@@ -75,7 +86,9 @@ class DateFst(GraphFst):
 
         dash = "-"
         day_optional = pynini.closure(pynini.cross(dash, DAMO_SPACE) + day, 0, 1)
-        graph_ymd = DAMO_DIGIT ** 4 @ year_only + pynini.cross(dash, DAMO_SPACE) + month_number + day_optional
+        graph_ymd = (
+            DAMO_DIGIT**4 @ year_only + pynini.cross(dash, DAMO_SPACE) + month_number + day_optional
+        )
 
         final_graph = graph_dmy + pynutil.insert(" preserve_order: true")
         final_graph |= graph_ymd

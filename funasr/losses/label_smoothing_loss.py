@@ -50,8 +50,8 @@ class LabelSmoothingLoss(nn.Module):
         """
         assert x.size(2) == self.size
         batch_size = x.size(0)
-        x = x.view(-1, self.size)
-        target = target.view(-1)
+        x = x.contiguous().view(-1, self.size)
+        target = target.contiguous().view(-1)
         with torch.no_grad():
             true_dist = x.clone()
             true_dist.fill_(self.smoothing / (self.size - 1))
@@ -65,11 +65,7 @@ class LabelSmoothingLoss(nn.Module):
 
 
 class SequenceBinaryCrossEntropy(nn.Module):
-    def __init__(
-            self,
-            normalize_length=False,
-            criterion=nn.BCEWithLogitsLoss(reduction="none")
-    ):
+    def __init__(self, normalize_length=False, criterion=nn.BCEWithLogitsLoss(reduction="none")):
         super().__init__()
         self.normalize_length = normalize_length
         self.criterion = criterion
@@ -95,7 +91,7 @@ class NllLoss(nn.Module):
         size,
         padding_idx,
         normalize_length=False,
-        criterion=nn.NLLLoss(reduction='none'),
+        criterion=nn.NLLLoss(reduction="none"),
     ):
         """Construct an NllLoss object."""
         super(NllLoss, self).__init__()
@@ -122,6 +118,6 @@ class NllLoss(nn.Module):
             ignore = target == self.padding_idx  # (B,)
             total = len(target) - ignore.sum().item()
             target = target.masked_fill(ignore, 0)  # avoid -1 index
-        kl = self.criterion(x , target)
+        kl = self.criterion(x, target)
         denom = total if self.normalize_length else batch_size
         return kl.masked_fill(ignore, 0).sum() / denom

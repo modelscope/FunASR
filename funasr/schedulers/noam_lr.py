@@ -1,4 +1,5 @@
 """Noam learning rate scheduler module."""
+
 from typing import Union
 import warnings
 
@@ -56,8 +57,6 @@ class NoamLR(_LRScheduler, AbsBatchStepScheduler):
     def get_lr(self):
         step_num = self.last_epoch + 1
         return [
-            lr
-            * self.model_size**-0.5
-            * min(step_num**-0.5, step_num * self.warmup_steps**-1.5)
+            lr * self.model_size**-0.5 * min(step_num**-0.5, step_num * self.warmup_steps**-1.5)
             for lr in self.base_lrs
         ]

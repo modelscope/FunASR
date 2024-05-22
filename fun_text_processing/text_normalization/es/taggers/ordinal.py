@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import (
     DAMO_CHAR,
@@ -19,7 +17,7 @@ ties = pynini.invert(pynini.string_file(get_abs_path("data/ordinals/ties.tsv")))
 hundreds = pynini.invert(pynini.string_file(get_abs_path("data/ordinals/hundreds.tsv")))
 
 
-def get_one_to_one_thousand(cardinal: 'pynini.FstLike') -> 'pynini.FstLike':
+def get_one_to_one_thousand(cardinal: "pynini.FstLike") -> "pynini.FstLike":
     """
     Produces an acceptor for verbalizations of all numbers from 1 to 1000. Needed for ordinals and fractions.
 
@@ -36,7 +34,7 @@ def get_one_to_one_thousand(cardinal: 'pynini.FstLike') -> 'pynini.FstLike':
 class OrdinalFst(GraphFst):
     """
     Finite state transducer for classifying ordinal
-        	"21.º" -> ordinal { integer: "vigésimo primero" morphosyntactic_features: "gender_masc" }
+                "21.º" -> ordinal { integer: "vigésimo primero" morphosyntactic_features: "gender_masc" }
     This class converts ordinal up to the millionth (millonésimo) order (exclusive).
 
     This FST also records the ending of the ordinal (called "morphosyntactic_features"):
@@ -75,7 +73,8 @@ class OrdinalFst(GraphFst):
         )
 
         graph_hundred_component = pynini.union(
-            graph_hundreds + pynini.closure(DAMO_SPACE + pynini.union(graph_tens_component, graph_digit), 0, 1),
+            graph_hundreds
+            + pynini.closure(DAMO_SPACE + pynini.union(graph_tens_component, graph_digit), 0, 1),
             graph_tens_component,
             graph_digit,
         )
@@ -88,7 +87,9 @@ class OrdinalFst(GraphFst):
         graph_thousands = (
             strip_accent(self.one_to_one_thousand) + DAMO_SPACE + thousands
         )  # Cardinals become prefix for thousands series. Snce accent on the powers of ten we strip accent from leading words
-        graph_thousands @= pynini.cdrewrite(delete_space, "", "milésimo", DAMO_SIGMA)  # merge as a prefix
+        graph_thousands @= pynini.cdrewrite(
+            delete_space, "", "milésimo", DAMO_SIGMA
+        )  # merge as a prefix
         graph_thousands |= thousands
 
         self.multiples_of_thousand = (cardinal_graph @ graph_thousands).optimize()
@@ -96,7 +97,9 @@ class OrdinalFst(GraphFst):
         if (
             not deterministic
         ):  # Formally the words preceding the power of ten should be a prefix, but some maintain word boundaries.
-            graph_thousands |= (self.one_to_one_thousand @ graph_hundred_component) + DAMO_SPACE + thousands
+            graph_thousands |= (
+                (self.one_to_one_thousand @ graph_hundred_component) + DAMO_SPACE + thousands
+            )
 
         graph_thousands += pynini.closure(DAMO_SPACE + graph_hundred_component, 0, 1)
 
@@ -118,14 +121,18 @@ class OrdinalFst(GraphFst):
         fem = pynini.accep("gender_fem")
         apocope = pynini.accep("apocope")
 
-        delete_period = pynini.closure(pynutil.delete("."), 0, 1)  # Sometimes the period is omitted f
+        delete_period = pynini.closure(
+            pynutil.delete("."), 0, 1
+        )  # Sometimes the period is omitted f
 
         accept_masc = delete_period + pynini.cross("º", masc)
         accep_fem = delete_period + pynini.cross("ª", fem)
         accep_apocope = delete_period + pynini.cross("ᵉʳ", apocope)
 
         # Managing Romanization
-        graph_roman = pynutil.insert("integer: \"") + roman_to_int(ordinal_graph) + pynutil.insert("\"")
+        graph_roman = (
+            pynutil.insert('integer: "') + roman_to_int(ordinal_graph) + pynutil.insert('"')
+        )
         if not deterministic:
             # Introduce plural
             plural = pynini.closure(pynutil.insert("/plural"), 0, 1)
@@ -136,27 +143,29 @@ class OrdinalFst(GraphFst):
             insert_morphology = pynutil.insert(pynini.union(masc, fem)) + plural
             insert_morphology |= pynutil.insert(apocope)
             insert_morphology = (
-                pynutil.insert(" morphosyntactic_features: \"") + insert_morphology + pynutil.insert("\"")
+                pynutil.insert(' morphosyntactic_features: "')
+                + insert_morphology
+                + pynutil.insert('"')
             )
 
             graph_roman += insert_morphology
 
         else:
             # We insert both genders as default
-            graph_roman += pynutil.insert(" morphosyntactic_features: \"gender_masc\"") | pynutil.insert(
-                " morphosyntactic_features: \"gender_fem\""
-            )
+            graph_roman += pynutil.insert(
+                ' morphosyntactic_features: "gender_masc"'
+            ) | pynutil.insert(' morphosyntactic_features: "gender_fem"')
 
         # Rest of graph
         convert_abbreviation = accept_masc | accep_fem | accep_apocope
 
         graph = (
-            pynutil.insert("integer: \"")
+            pynutil.insert('integer: "')
             + ordinal_graph
-            + pynutil.insert("\"")
-            + pynutil.insert(" morphosyntactic_features: \"")
+            + pynutil.insert('"')
+            + pynutil.insert(' morphosyntactic_features: "')
             + convert_abbreviation
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
         )
         graph = pynini.union(graph, graph_roman)
 

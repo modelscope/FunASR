@@ -1,4 +1,5 @@
 """Time warp module."""
+
 import torch
 
 from funasr.models.transformer.utils.nets_utils import pad_list

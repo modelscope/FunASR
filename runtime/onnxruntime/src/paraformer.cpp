@@ -18,7 +18,7 @@ Paraformer::Paraformer()
 }
 
 // offline
-void Paraformer::InitAsr(const std::string &am_model, const std::string &am_cmvn, const std::string &am_config, int thread_num){
+void Paraformer::InitAsr(const std::string &am_model, const std::string &am_cmvn, const std::string &am_config, const std::string &token_file, int thread_num){
     LoadConfigFromYaml(am_config.c_str());
     // knf options
     fbank_opts_.frame_opts.dither = 0;
@@ -65,13 +65,13 @@ void Paraformer::InitAsr(const std::string &am_model, const std::string &am_cmvn
         m_szInputNames.push_back(item.c_str());
     for (auto& item : m_strOutputNames)
         m_szOutputNames.push_back(item.c_str());
-    vocab = new Vocab(am_config.c_str());
-	phone_set_ = new PhoneSet(am_config.c_str());
+    vocab = new Vocab(token_file.c_str());
+	phone_set_ = new PhoneSet(token_file.c_str());
     LoadCmvn(am_cmvn.c_str());
 }
 
 // online
-void Paraformer::InitAsr(const std::string &en_model, const std::string &de_model, const std::string &am_cmvn, const std::string &am_config, int thread_num){
+void Paraformer::InitAsr(const std::string &en_model, const std::string &de_model, const std::string &am_cmvn, const std::string &am_config, const std::string &token_file, int thread_num){
     
     LoadOnlineConfigFromYaml(am_config.c_str());
     // knf options
@@ -143,15 +143,15 @@ void Paraformer::InitAsr(const std::string &en_model, const std::string &de_mode
     for (auto& item : de_strOutputNames)
         de_szOutputNames_.push_back(item.c_str());
 
-    vocab = new Vocab(am_config.c_str());
-    phone_set_ = new PhoneSet(am_config.c_str());
+    vocab = new Vocab(token_file.c_str());
+    phone_set_ = new PhoneSet(token_file.c_str());
     LoadCmvn(am_cmvn.c_str());
 }
 
 // 2pass
-void Paraformer::InitAsr(const std::string &am_model, const std::string &en_model, const std::string &de_model, const std::string &am_cmvn, const std::string &am_config, int thread_num){
+void Paraformer::InitAsr(const std::string &am_model, const std::string &en_model, const std::string &de_model, const std::string &am_cmvn, const std::string &am_config, const std::string &token_file, int thread_num){
     // online
-    InitAsr(en_model, de_model, am_cmvn, am_config, thread_num);
+    InitAsr(en_model, de_model, am_cmvn, am_config, token_file, thread_num);
 
     // offline
     try {

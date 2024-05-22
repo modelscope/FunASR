@@ -23,7 +23,7 @@ def get_serial_number(cardinal):
 
 class TelephoneFst(GraphFst):
     """
-    Finite state transducer for classifying telephone numbers, e.g. 
+    Finite state transducer for classifying telephone numbers, e.g.
         one two three one two three five six seven eight -> { number_part: "123-123-5678" }
 
     This class also support card number and IP format.
@@ -61,61 +61,89 @@ class TelephoneFst(GraphFst):
         double_digit.invert()
 
         # to handle cases like "one twenty three"
-        two_digit_cardinal = pynini.compose(cardinal.graph_no_exception, DAMO_DIGIT ** 2)
+        two_digit_cardinal = pynini.compose(cardinal.graph_no_exception, DAMO_DIGIT**2)
         double_digit_to_digit = (
-            pynini.compose(double_digit, str_to_digit + pynutil.delete(" ") + str_to_digit) | two_digit_cardinal
+            pynini.compose(double_digit, str_to_digit + pynutil.delete(" ") + str_to_digit)
+            | two_digit_cardinal
         )
 
-        single_or_double_digit = (pynutil.add_weight(double_digit_to_digit, -0.0001) | str_to_digit).optimize()
+        single_or_double_digit = (
+            pynutil.add_weight(double_digit_to_digit, -0.0001) | str_to_digit
+        ).optimize()
         single_or_double_digit |= (
             single_or_double_digit
-            + pynini.closure(pynutil.add_weight(pynutil.delete(" ") + single_or_double_digit, 0.0001))
+            + pynini.closure(
+                pynutil.add_weight(pynutil.delete(" ") + single_or_double_digit, 0.0001)
+            )
         ).optimize()
 
         number_part = pynini.compose(
             single_or_double_digit,
-            DAMO_DIGIT ** 3 + pynutil.insert("-") + DAMO_DIGIT ** 3 + pynutil.insert("-") + DAMO_DIGIT ** 4,
+            DAMO_DIGIT**3
+            + pynutil.insert("-")
+            + DAMO_DIGIT**3
+            + pynutil.insert("-")
+            + DAMO_DIGIT**4,
         ).optimize()
-        number_part = pynutil.insert("number_part: \"") + number_part.optimize() + pynutil.insert("\"")
+        number_part = (
+            pynutil.insert('number_part: "') + number_part.optimize() + pynutil.insert('"')
+        )
 
         cardinal_option = pynini.compose(single_or_double_digit, DAMO_DIGIT ** (2, 3))
 
         country_code = (
-            pynutil.insert("country_code: \"")
-            + pynini.closure(pynini.cross("プラス ", "+"), 0, 1) #plus
-            + ((pynini.closure(str_to_digit + pynutil.delete(" "), 0, 2) + str_to_digit) | cardinal_option)
-            + pynutil.insert("\"")
+            pynutil.insert('country_code: "')
+            + pynini.closure(pynini.cross("プラス ", "+"), 0, 1)  # plus
+            + (
+                (pynini.closure(str_to_digit + pynutil.delete(" "), 0, 2) + str_to_digit)
+                | cardinal_option
+            )
+            + pynutil.insert('"')
         )
 
-        optional_country_code = pynini.closure(country_code + pynutil.delete(" ") + insert_space, 0, 1).optimize()
+        optional_country_code = pynini.closure(
+            country_code + pynutil.delete(" ") + insert_space, 0, 1
+        ).optimize()
         graph = optional_country_code + number_part
 
         # credit card number
-        space_four_digits = insert_space + DAMO_DIGIT ** 4
-        credit_card_graph = pynini.compose(single_or_double_digit, DAMO_DIGIT ** 4 + space_four_digits ** 3).optimize()
-        graph |= pynutil.insert("number_part: \"") + credit_card_graph.optimize() + pynutil.insert("\"")
+        space_four_digits = insert_space + DAMO_DIGIT**4
+        credit_card_graph = pynini.compose(
+            single_or_double_digit, DAMO_DIGIT**4 + space_four_digits**3
+        ).optimize()
+        graph |= (
+            pynutil.insert('number_part: "') + credit_card_graph.optimize() + pynutil.insert('"')
+        )
 
         # SSN
         ssn_graph = pynini.compose(
             single_or_double_digit,
-            DAMO_DIGIT ** 3 + pynutil.insert("-") + DAMO_DIGIT ** 2 + pynutil.insert("-") + DAMO_DIGIT ** 4,
+            DAMO_DIGIT**3
+            + pynutil.insert("-")
+            + DAMO_DIGIT**2
+            + pynutil.insert("-")
+            + DAMO_DIGIT**4,
         ).optimize()
-        graph |= pynutil.insert("number_part: \"") + ssn_graph.optimize() + pynutil.insert("\"")
+        graph |= pynutil.insert('number_part: "') + ssn_graph.optimize() + pynutil.insert('"')
 
         # ip
-        digit_or_double = pynini.closure(str_to_digit + pynutil.delete(" "), 0, 1) + double_digit_to_digit
-        digit_or_double |= double_digit_to_digit + pynini.closure(pynutil.delete(" ") + str_to_digit, 0, 1)
+        digit_or_double = (
+            pynini.closure(str_to_digit + pynutil.delete(" "), 0, 1) + double_digit_to_digit
+        )
+        digit_or_double |= double_digit_to_digit + pynini.closure(
+            pynutil.delete(" ") + str_to_digit, 0, 1
+        )
         digit_or_double |= str_to_digit + (pynutil.delete(" ") + str_to_digit) ** (0, 2)
         digit_or_double |= cardinal_option
         digit_or_double = digit_or_double.optimize()
 
-        ip_graph = digit_or_double + (pynini.cross(" 点 ", ".") + digit_or_double) ** 3 #dot
+        ip_graph = digit_or_double + (pynini.cross(" 点 ", ".") + digit_or_double) ** 3  # dot
 
-        graph |= pynutil.insert("number_part: \"") + ip_graph.optimize() + pynutil.insert("\"")
+        graph |= pynutil.insert('number_part: "') + ip_graph.optimize() + pynutil.insert('"')
         graph |= (
-            pynutil.insert("number_part: \"")
+            pynutil.insert('number_part: "')
             + pynutil.add_weight(get_serial_number(cardinal=cardinal), weight=0.0001)
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
         )
 
         final_graph = self.add_tokens(graph)

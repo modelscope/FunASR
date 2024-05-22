@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import (
     DAMO_CHAR,
@@ -34,15 +32,50 @@ class FractionFst(GraphFst):
         ordinal_graph = ordinal.graph
 
         # 2-10 are all ordinals
-        three_to_ten = pynini.string_map(["2", "3", "4", "5", "6", "7", "8", "9", "10",])
+        three_to_ten = pynini.string_map(
+            [
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "10",
+            ]
+        )
         block_three_to_ten = pynutil.delete(three_to_ten)  # To block cardinal productions
         if not deterministic:  # Multiples of tens are sometimes rendered as ordinals
-            three_to_ten |= pynini.string_map(["20", "30", "40", "50", "60", "70", "80", "90",])
+            three_to_ten |= pynini.string_map(
+                [
+                    "20",
+                    "30",
+                    "40",
+                    "50",
+                    "60",
+                    "70",
+                    "80",
+                    "90",
+                ]
+            )
         graph_three_to_ten = three_to_ten @ ordinal_graph
         graph_three_to_ten @= pynini.cdrewrite(ordinal_exceptions, "", "", DAMO_SIGMA)
 
         # Higher powers of tens (and multiples) are converted to ordinals.
-        hundreds = pynini.string_map(["100", "200", "300", "400", "500", "600", "700", "800", "900",])
+        hundreds = pynini.string_map(
+            [
+                "100",
+                "200",
+                "300",
+                "400",
+                "500",
+                "600",
+                "700",
+                "800",
+                "900",
+            ]
+        )
         graph_hundreds = hundreds @ ordinal_graph
 
         multiples_of_thousand = ordinal.multiples_of_thousand  # So we can have X milésimos
@@ -55,29 +88,37 @@ class FractionFst(GraphFst):
         graph_higher_powers_of_ten += higher_powers_of_ten
         graph_higher_powers_of_ten = cardinal_graph @ graph_higher_powers_of_ten
         graph_higher_powers_of_ten @= pynini.cdrewrite(
-            pynutil.delete("un "), pynini.accep("[BOS]"), pynini.project(higher_powers_of_ten, "output"), DAMO_SIGMA
+            pynutil.delete("un "),
+            pynini.accep("[BOS]"),
+            pynini.project(higher_powers_of_ten, "output"),
+            DAMO_SIGMA,
         )  # we drop 'un' from these ordinals (millionths, not one-millionths)
 
-        graph_higher_powers_of_ten = multiples_of_thousand | graph_hundreds | graph_higher_powers_of_ten
+        graph_higher_powers_of_ten = (
+            multiples_of_thousand | graph_hundreds | graph_higher_powers_of_ten
+        )
         block_higher_powers_of_ten = pynutil.delete(
             pynini.project(graph_higher_powers_of_ten, "input")
         )  # For cardinal graph
 
         graph_fractions_ordinals = graph_higher_powers_of_ten | graph_three_to_ten
         graph_fractions_ordinals += pynutil.insert(
-            "\" morphosyntactic_features: \"ordinal\""
+            '" morphosyntactic_features: "ordinal"'
         )  # We note the root for processing later
 
         # Blocking the digits and hundreds from Cardinal graph
         graph_fractions_cardinals = pynini.cdrewrite(
-            block_three_to_ten | block_higher_powers_of_ten, pynini.accep("[BOS]"), pynini.accep("[EOS]"), DAMO_SIGMA
+            block_three_to_ten | block_higher_powers_of_ten,
+            pynini.accep("[BOS]"),
+            pynini.accep("[EOS]"),
+            DAMO_SIGMA,
         )
         graph_fractions_cardinals @= DAMO_CHAR.plus @ pynini.cdrewrite(
             pynutil.delete("0"), pynini.accep("[BOS]"), pynini.accep("[EOS]"), DAMO_SIGMA
         )  # Empty characters become '0' for DAMO_CHAR fst, so need to block
         graph_fractions_cardinals @= cardinal_graph
         graph_fractions_cardinals += pynutil.insert(
-            "\" morphosyntactic_features: \"add_root\""
+            '" morphosyntactic_features: "add_root"'
         )  # blocking these entries to reduce erroneous possibilities in debugging
 
         if deterministic:
@@ -88,14 +129,18 @@ class FractionFst(GraphFst):
         graph_denominator = pynini.union(
             graph_fractions_ordinals,
             graph_fractions_cardinals,
-            pynutil.add_weight(cardinal_graph + pynutil.insert("\""), 0.001),
+            pynutil.add_weight(cardinal_graph + pynutil.insert('"'), 0.001),
         )  # Last form is simply recording the cardinal. Weighting so last resort
 
-        integer = pynutil.insert("integer_part: \"") + cardinal_graph + pynutil.insert("\"") + DAMO_SPACE
-        numerator = (
-            pynutil.insert("numerator: \"") + cardinal_graph + (pynini.cross("/", "\" ") | pynini.cross(" / ", "\" "))
+        integer = (
+            pynutil.insert('integer_part: "') + cardinal_graph + pynutil.insert('"') + DAMO_SPACE
         )
-        denominator = pynutil.insert("denominator: \"") + graph_denominator
+        numerator = (
+            pynutil.insert('numerator: "')
+            + cardinal_graph
+            + (pynini.cross("/", '" ') | pynini.cross(" / ", '" '))
+        )
+        denominator = pynutil.insert('denominator: "') + graph_denominator
 
         self.graph = pynini.closure(integer, 0, 1) + numerator + denominator
 

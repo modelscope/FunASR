@@ -18,25 +18,25 @@ from funasr.models.data2vec.multihead_attention import MultiheadAttention
 
 class ConvFeatureExtractionModel(nn.Module):
     def __init__(
-            self,
-            conv_layers: List[Tuple[int, int, int]],
-            dropout: float = 0.0,
-            mode: str = "default",
-            conv_bias: bool = False,
-            in_d: int = 1
+        self,
+        conv_layers: List[Tuple[int, int, int]],
+        dropout: float = 0.0,
+        mode: str = "default",
+        conv_bias: bool = False,
+        in_d: int = 1,
     ):
         super().__init__()
 
         assert mode in {"default", "layer_norm"}
 
         def block(
-                n_in,
-                n_out,
-                k,
-                stride,
-                is_layer_norm=False,
-                is_group_norm=False,
-                conv_bias=False,
+            n_in,
+            n_out,
+            k,
+            stride,
+            is_layer_norm=False,
+            is_group_norm=False,
+            conv_bias=False,
         ):
             def make_conv():
                 conv = nn.Conv1d(n_in, n_out, k, stride=stride, bias=conv_bias)
@@ -44,8 +44,8 @@ class ConvFeatureExtractionModel(nn.Module):
                 return conv
 
             assert (
-                           is_layer_norm and is_group_norm
-                   ) == False, "layer norm and group norm are exclusive"
+                is_layer_norm and is_group_norm
+            ) == False, "layer norm and group norm are exclusive"
 
             if is_layer_norm:
                 return nn.Sequential(
@@ -134,25 +134,25 @@ class TransformerEncoder(nn.Module):
         return layer
 
     def __init__(
-            self,
-            # position
-            dropout,
-            encoder_embed_dim,
-            required_seq_len_multiple,
-            pos_conv_depth,
-            conv_pos,
-            conv_pos_groups,
-            # transformer layers
-            layer_type,
-            encoder_layers,
-            encoder_ffn_embed_dim,
-            encoder_attention_heads,
-            attention_dropout,
-            activation_dropout,
-            activation_fn,
-            layer_norm_first,
-            encoder_layerdrop,
-            max_positions,
+        self,
+        # position
+        dropout,
+        encoder_embed_dim,
+        required_seq_len_multiple,
+        pos_conv_depth,
+        conv_pos,
+        conv_pos_groups,
+        # transformer layers
+        layer_type,
+        encoder_layers,
+        encoder_ffn_embed_dim,
+        encoder_attention_heads,
+        attention_dropout,
+        activation_dropout,
+        activation_fn,
+        layer_norm_first,
+        encoder_layerdrop,
+        max_positions,
     ):
         super().__init__()
 
@@ -185,9 +185,7 @@ class TransformerEncoder(nn.Module):
                     ]
                 )
 
-            self.pos_conv = make_conv_block(
-                self.embedding_dim, k, conv_pos_groups, num_layers
-            )
+            self.pos_conv = make_conv_block(self.embedding_dim, k, conv_pos_groups, num_layers)
 
         else:
             self.pos_conv = make_conv_pos(
@@ -206,9 +204,7 @@ class TransformerEncoder(nn.Module):
         self.layer_norm_first = layer_norm_first
         self.layerdrop = encoder_layerdrop
         self.max_positions = max_positions
-        self.layers = nn.ModuleList(
-            [self.build_encoder_layer() for _ in range(encoder_layers)]
-        )
+        self.layers = nn.ModuleList([self.build_encoder_layer() for _ in range(encoder_layers)])
         self.layer_norm = torch.nn.LayerNorm(self.embedding_dim)
 
         self.apply(utils.init_bert_params)
@@ -222,11 +218,11 @@ class TransformerEncoder(nn.Module):
         return x, layer_results
 
     def extract_features(
-            self,
-            x,
-            padding_mask=None,
-            tgt_layer=None,
-            min_layer=0,
+        self,
+        x,
+        padding_mask=None,
+        tgt_layer=None,
+        min_layer=0,
     ):
 
         if padding_mask is not None:
@@ -240,9 +236,7 @@ class TransformerEncoder(nn.Module):
             x = self.layer_norm(x)
 
         # pad to the sequence length dimension
-        x, pad_length = utils.pad_to_multiple(
-            x, self.required_seq_len_multiple, dim=-2, value=0
-        )
+        x, pad_length = utils.pad_to_multiple(x, self.required_seq_len_multiple, dim=-2, value=0)
         if pad_length > 0 and padding_mask is None:
             padding_mask = x.new_zeros((x.size(0), x.size(1)), dtype=torch.bool)
             padding_mask[:, -pad_length:] = True
@@ -304,15 +298,15 @@ class TransformerSentenceEncoderLayer(nn.Module):
     """
 
     def __init__(
-            self,
-            embedding_dim: int = 768,
-            ffn_embedding_dim: int = 3072,
-            num_attention_heads: int = 8,
-            dropout: float = 0.1,
-            attention_dropout: float = 0.1,
-            activation_dropout: float = 0.1,
-            activation_fn: str = "relu",
-            layer_norm_first: bool = False,
+        self,
+        embedding_dim: int = 768,
+        ffn_embedding_dim: int = 3072,
+        num_attention_heads: int = 8,
+        dropout: float = 0.1,
+        attention_dropout: float = 0.1,
+        activation_dropout: float = 0.1,
+        activation_fn: str = "relu",
+        layer_norm_first: bool = False,
     ) -> None:
 
         super().__init__()
@@ -345,10 +339,10 @@ class TransformerSentenceEncoderLayer(nn.Module):
         self.final_layer_norm = torch.nn.LayerNorm(self.embedding_dim)
 
     def forward(
-            self,
-            x: torch.Tensor,  # (T, B, C)
-            self_attn_mask: torch.Tensor = None,
-            self_attn_padding_mask: torch.Tensor = None,
+        self,
+        x: torch.Tensor,  # (T, B, C)
+        self_attn_mask: torch.Tensor = None,
+        self_attn_padding_mask: torch.Tensor = None,
     ):
         """
         LayerNorm is applied either before or after the self-attention/ffn

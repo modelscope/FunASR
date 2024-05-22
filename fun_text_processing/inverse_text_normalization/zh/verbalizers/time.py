@@ -1,4 +1,3 @@
-
 import pynini
 from fun_text_processing.inverse_text_normalization.zh.graph_utils import (
     DAMO_CHAR,
@@ -20,29 +19,31 @@ class TimeFst(GraphFst):
 
     def __init__(self):
         super().__init__(name="time", kind="verbalize")
-        add_leading_zero_to_double_digit = (DAMO_DIGIT + DAMO_DIGIT) | (pynutil.insert("0") + DAMO_DIGIT)
-        
+        add_leading_zero_to_double_digit = (DAMO_DIGIT + DAMO_DIGIT) | (
+            pynutil.insert("0") + DAMO_DIGIT
+        )
+
         hour = (
             pynutil.delete("hour:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_DIGIT, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
         minute = (
             pynutil.delete("minute:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_DIGIT, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
 
         second = (
             pynutil.delete("second:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_DIGIT, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
 
         suffix = (
@@ -50,9 +51,9 @@ class TimeFst(GraphFst):
             + pynutil.insert(" ")
             + pynutil.delete("noon:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_CHAR - " ", 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
         optional_suffix = pynini.closure(suffix, 0, 1)
         zone = (
@@ -60,9 +61,9 @@ class TimeFst(GraphFst):
             + pynutil.insert(" ")
             + pynutil.delete("zone:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_CHAR - " ", 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
         optional_zone = pynini.closure(zone, 0, 1)
         graph = (

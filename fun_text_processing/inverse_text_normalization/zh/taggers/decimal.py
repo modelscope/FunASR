@@ -1,4 +1,3 @@
-
 import pynini
 from fun_text_processing.inverse_text_normalization.zh.utils import get_abs_path
 from fun_text_processing.inverse_text_normalization.zh.graph_utils import (
@@ -26,7 +25,7 @@ class DecimalFst(GraphFst):
 
         graph_digit = pynini.string_file(get_abs_path("data/numbers/digit.tsv"))
         graph_zero = pynini.string_file(get_abs_path("data/numbers/zero.tsv"))
-        graph_dot =pynini.string_file(get_abs_path("data/numbers/dot.tsv")) 
+        graph_dot = pynini.string_file(get_abs_path("data/numbers/dot.tsv"))
 
         graph_digits = graph_digit | graph_zero
 
@@ -37,11 +36,17 @@ class DecimalFst(GraphFst):
         point = pynini.cross("点", "")
 
         optional_graph_negative = pynini.closure(
-            pynutil.insert("negative: ") + (pynini.cross("负", "\"true\"") | pynini.cross("负的", "\"true\"")) + delete_extra_space, 0, 1
+            pynutil.insert("negative: ")
+            + (pynini.cross("负", '"true"') | pynini.cross("负的", '"true"'))
+            + delete_extra_space,
+            0,
+            1,
         )
 
-        graph_fractional = pynutil.insert("fractional_part: \"") + graph_decimal + pynutil.insert("\"")
-        graph_integer = pynutil.insert("integer_part: \"") + cardinal_graph + pynutil.insert("\"")
+        graph_fractional = (
+            pynutil.insert('fractional_part: "') + graph_decimal + pynutil.insert('"')
+        )
+        graph_integer = pynutil.insert('integer_part: "') + cardinal_graph + pynutil.insert('"')
         final_graph_wo_sign = (
             pynini.closure(graph_integer, 0, 1) + point + pynutil.insert(" ") + graph_fractional
         )

@@ -1,4 +1,3 @@
-
 import os
 import string
 from pathlib import Path
@@ -36,7 +35,9 @@ delete_extra_space = pynini.cross(pynini.closure(DAMO_WHITE_SPACE, 1), " ")
 delete_hyphen = pynutil.delete(pynini.closure("-", 0, 1))
 insert_hyphen = pynutil.insert("-")
 
-TO_LOWER = pynini.union(*[pynini.cross(x, y) for x, y in zip(string.ascii_uppercase, string.ascii_lowercase)])
+TO_LOWER = pynini.union(
+    *[pynini.cross(x, y) for x, y in zip(string.ascii_uppercase, string.ascii_lowercase)]
+)
 TO_UPPER = pynini.invert(TO_LOWER)
 
 
@@ -66,7 +67,9 @@ def convert_space(fst) -> "pynini.FstLike":
 
     Returns output fst where breaking spaces are converted to non breaking spaces
     """
-    return fst @ pynini.cdrewrite(pynini.cross(DAMO_SPACE, DAMO_NON_BREAKING_SPACE), "", "", DAMO_SIGMA)
+    return fst @ pynini.cdrewrite(
+        pynini.cross(DAMO_SPACE, DAMO_NON_BREAKING_SPACE), "", "", DAMO_SIGMA
+    )
 
 
 class GraphFst:
@@ -88,7 +91,9 @@ class GraphFst:
 
         self.far_path = Path(os.path.dirname(__file__) + "/grammars/" + kind + "/" + name + ".far")
         if self.far_exist():
-            self._fst = Far(self.far_path, mode="r", arc_type="standard", far_type="default").get_fst()
+            self._fst = Far(
+                self.far_path, mode="r", arc_type="standard", far_type="default"
+            ).get_fst()
 
     def far_exist(self) -> bool:
         """

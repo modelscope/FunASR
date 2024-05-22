@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import GraphFst
 from fun_text_processing.text_normalization.ru.utils import get_abs_path
@@ -10,7 +8,7 @@ class TimeFst(GraphFst):
     """
     Finite state transducer for classifying time, e.g.
         "02:15" -> time { hours: "два часа пятнадцать минут" }
-    
+
     Args:
         number_names: number_names for cardinal and ordinal numbers
         deterministic: if True will provide a single transduction option,
@@ -20,18 +18,26 @@ class TimeFst(GraphFst):
     def __init__(self, number_names: dict, deterministic: bool = True):
         super().__init__(name="time", kind="classify", deterministic=deterministic)
 
-        increment_hour_ordinal = pynini.string_file(get_abs_path("data/time/increment_hour_ordinal.tsv"))
-        increment_hour_cardinal = pynini.string_file(get_abs_path("data/time/increment_hour_cardinal.tsv"))
+        increment_hour_ordinal = pynini.string_file(
+            get_abs_path("data/time/increment_hour_ordinal.tsv")
+        )
+        increment_hour_cardinal = pynini.string_file(
+            get_abs_path("data/time/increment_hour_cardinal.tsv")
+        )
         convert_hour = pynini.string_file(get_abs_path("data/time/time_convert.tsv"))
 
-        number = pynini.closure(pynini.cross("0", ""), 0, 1) + number_names['cardinal_names_nominative']
+        number = (
+            pynini.closure(pynini.cross("0", ""), 0, 1) + number_names["cardinal_names_nominative"]
+        )
         hour_options = pynini.project(increment_hour_ordinal, "input")
         hour_options = hour_options | pynini.project(convert_hour, "output")
 
         hour_exeption_ends_with_one = pynini.union(*["01", "21"])
         hour_exeption_ends_rest = pynini.union(*["02", "03", "04", "22", "23"])
         hour_other = (
-            pynini.difference(hour_options, pynini.union(hour_exeption_ends_with_one, hour_exeption_ends_rest))
+            pynini.difference(
+                hour_options, pynini.union(hour_exeption_ends_with_one, hour_exeption_ends_rest)
+            )
         ).optimize()
 
         hour = hour_exeption_ends_with_one @ number + pynutil.insert(" час")
@@ -56,41 +62,52 @@ class TimeFst(GraphFst):
         self.minutes = minutes.optimize()
         # 17:15 -> "семнадцать часов и пятнадцать минут"
         hm = (
-            pynutil.insert("hours: \"")
+            pynutil.insert('hours: "')
             + hour.optimize()
-            + pynutil.insert("\"")
-            + (pynini.cross(":", " ") + pynutil.insert("minutes: \"") + optional_and + minutes.optimize())
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
+            + (
+                pynini.cross(":", " ")
+                + pynutil.insert('minutes: "')
+                + optional_and
+                + minutes.optimize()
+            )
+            + pynutil.insert('"')
             + pynutil.insert(" preserve_order: true")
         )
-        h = pynutil.insert("hours: \"") + hour + pynutil.insert("\"") + pynutil.delete(":00")
+        h = pynutil.insert('hours: "') + hour + pynutil.insert('"') + pynutil.delete(":00")
         self.graph_preserve_order = (hm | h).optimize()
 
         # 17:15 -> "пятнадцать минут шестого"
         # Requires permutations for the correct verbalization
-        self.increment_hour_ordinal = pynini.compose(hour_options, increment_hour_ordinal).optimize()
+        self.increment_hour_ordinal = pynini.compose(
+            hour_options, increment_hour_ordinal
+        ).optimize()
         m_next_h = (
-            pynutil.insert("hours: \"")
+            pynutil.insert('hours: "')
             + self.increment_hour_ordinal
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
             + pynini.cross(":", " ")
-            + pynutil.insert("minutes: \"")
+            + pynutil.insert('minutes: "')
             + minutes
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
         )
 
         # 17:45 -> "без пятнадцати минут шесть"
         # Requires permutations for the correct verbalization
-        self.mins_to_h = pynini.string_file(get_abs_path("data/time/minutes_to_hour.tsv")).optimize()
-        self.increment_hour_cardinal = pynini.compose(hour_options, increment_hour_cardinal).optimize()
+        self.mins_to_h = pynini.string_file(
+            get_abs_path("data/time/minutes_to_hour.tsv")
+        ).optimize()
+        self.increment_hour_cardinal = pynini.compose(
+            hour_options, increment_hour_cardinal
+        ).optimize()
         m_to_h = (
-            pynutil.insert("hours: \"")
+            pynutil.insert('hours: "')
             + self.increment_hour_cardinal
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
             + pynini.cross(":", " ")
-            + pynutil.insert("minutes: \"без ")
+            + pynutil.insert('minutes: "без ')
             + self.mins_to_h
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
         )
 
         self.final_graph = m_next_h | self.graph_preserve_order | m_to_h

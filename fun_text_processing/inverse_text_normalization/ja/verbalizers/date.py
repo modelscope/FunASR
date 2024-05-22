@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.inverse_text_normalization.ja.graph_utils import (
     DAMO_NOT_QUOTE,
@@ -22,43 +20,47 @@ class DateFst(GraphFst):
         month = (
             pynutil.delete("month:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
         day = (
             pynutil.delete("day:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
         year = (
             pynutil.delete("year:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + pynini.closure(DAMO_NOT_QUOTE, 1)
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
 
         # month (day) year
         graph_mdy = (
-            month + pynini.closure(delete_extra_space + day, 0, 1) + pynini.closure(delete_extra_space + year, 0, 1)
+            month
+            + pynini.closure(delete_extra_space + day, 0, 1)
+            + pynini.closure(delete_extra_space + year, 0, 1)
         )
 
         # (day) month year
         graph_dmy = (
-            pynini.closure(day + delete_extra_space, 0, 1) + month + pynini.closure(delete_extra_space + year, 0, 1)
+            pynini.closure(day + delete_extra_space, 0, 1)
+            + month
+            + pynini.closure(delete_extra_space + year, 0, 1)
         )
 
         optional_preserve_order = pynini.closure(
             pynutil.delete("preserve_order:") + delete_space + pynutil.delete("true") + delete_space
             | pynutil.delete("field_order:")
             + delete_space
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + DAMO_NOT_QUOTE
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
             + delete_space
         )
 

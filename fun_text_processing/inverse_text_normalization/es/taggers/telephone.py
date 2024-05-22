@@ -1,13 +1,16 @@
-
 import pynini
 from fun_text_processing.inverse_text_normalization.es.utils import get_abs_path
-from fun_text_processing.text_normalization.en.graph_utils import GraphFst, delete_space, insert_space
+from fun_text_processing.text_normalization.en.graph_utils import (
+    GraphFst,
+    delete_space,
+    insert_space,
+)
 from pynini.lib import pynutil
 
 
 class TelephoneFst(GraphFst):
     """
-    Finite state transducer for classifying telephone numbers, e.g. 
+    Finite state transducer for classifying telephone numbers, e.g.
         uno dos tres uno dos tres cinco seis siete ocho -> { number_part: "123-123-5678" }.
         If 10 digits are spoken, they are grouped as 3+3+4 (eg. 123-456-7890).
         If 9 digits are spoken, they are grouped as 3+3+3 (eg. 123-456-789).
@@ -116,9 +119,15 @@ class TelephoneFst(GraphFst):
             + double_digits
         )
 
-        number_part = pynini.union(ten_digit_graph, nine_digit_graph, eight_digit_graph,)
+        number_part = pynini.union(
+            ten_digit_graph,
+            nine_digit_graph,
+            eight_digit_graph,
+        )
 
-        number_part = pynutil.insert("number_part: \"") + pynini.invert(number_part) + pynutil.insert("\"")
+        number_part = (
+            pynutil.insert('number_part: "') + pynini.invert(number_part) + pynutil.insert('"')
+        )
 
         graph = number_part
         final_graph = self.add_tokens(graph)

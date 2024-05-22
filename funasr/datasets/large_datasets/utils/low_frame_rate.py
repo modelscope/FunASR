@@ -20,10 +20,10 @@ def build_LFR_features(data, m, n):
     T_lfr = int(np.ceil(T / n))
     for i in range(T_lfr):
         if m <= T - i * n:
-            LFR_inputs.append(np.hstack(data[i*n:i*n+m]))
+            LFR_inputs.append(np.hstack(data[i * n : i * n + m]))
         else:
             num_padding = m - (T - i * n)
-            frame = np.hstack(data[i*n:])
+            frame = np.hstack(data[i * n :])
             for _ in range(num_padding):
                 frame = np.hstack((frame, data[-1]))
             LFR_inputs.append(frame)

@@ -1,5 +1,3 @@
-
-
 import string
 from collections import OrderedDict
 from typing import Dict, List, Union
@@ -22,7 +20,7 @@ class TokenParser:
 
         Args:
             text: text to be parsed
-        
+
         """
         self.text = text
         self.len_text = len(text)
@@ -76,9 +74,9 @@ class TokenParser:
         if self.char == ":":
             self.parse_char(":")
             self.parse_ws()
-            self.parse_char("\"")
+            self.parse_char('"')
             value_string = self.parse_string_value()
-            self.parse_char("\"")
+            self.parse_char('"')
             return value_string
         elif self.char == "{":
             d = OrderedDict()
@@ -95,11 +93,11 @@ class TokenParser:
 
     def parse_char(self, exp) -> bool:
         """
-        Parses character 
+        Parses character
 
         Args:
             exp: character to read in
-        
+
         Returns true if successful
         """
         assert self.char == exp
@@ -112,7 +110,7 @@ class TokenParser:
 
         Args:
             exp: characters to read in
-        
+
         Returns true if successful
         """
         ok = False
@@ -147,7 +145,7 @@ class TokenParser:
         # assert self.char not in string.whitespace and self.char != EOS
         assert self.char != EOS
         l = []
-        while self.char != "\"" or self.text[self.index + 1] != " ":
+        while self.char != '"' or self.text[self.index + 1] != " ":
             l.append(self.char)
             if not self.read():
                 raise ValueError()
@@ -169,8 +167,8 @@ class TokenParser:
 
     def read(self):
         """
-        Reads in next char. 
-        
+        Reads in next char.
+
         Returns true if not EOS
         """
         if self.index < self.len_text - 1:  # should be unique

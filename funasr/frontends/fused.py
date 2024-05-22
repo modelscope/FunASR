@@ -7,14 +7,10 @@ from typing import Tuple
 
 
 class FusedFrontends(nn.Module):
-    def __init__(
-        self, frontends=None, align_method="linear_projection", proj_dim=100, fs=16000
-    ):
+    def __init__(self, frontends=None, align_method="linear_projection", proj_dim=100, fs=16000):
 
         super().__init__()
-        self.align_method = (
-            align_method  # fusing method : linear_projection only for now
-        )
+        self.align_method = align_method  # fusing method : linear_projection only for now
         self.proj_dim = proj_dim  # dim of the projection done on each frontend
         self.frontends = []  # list of the frontends to combine
 
@@ -109,9 +105,7 @@ class FusedFrontends(nn.Module):
                 input_feats, feats_lens = frontend.forward(input, input_lengths)
             self.feats.append([input_feats, feats_lens])
 
-        if (
-            self.align_method == "linear_projection"
-        ):  # TODO(Dan): to add other align methods
+        if self.align_method == "linear_projection":  # TODO(Dan): to add other align methods
 
             # first step : projections
             self.feats_proj = []

@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import (
     DAMO_NOT_QUOTE,
@@ -24,11 +22,21 @@ class MoneyFst(GraphFst):
     def __init__(self, decimal: GraphFst, deterministic: bool = True):
         super().__init__(name="money", kind="verbalize", deterministic=deterministic)
         keep_space = pynini.accep(" ")
-        maj = pynutil.delete("currency_maj: \"") + pynini.closure(DAMO_NOT_QUOTE, 1) + pynutil.delete("\"")
-        min = pynutil.delete("currency_min: \"") + pynini.closure(DAMO_NOT_QUOTE, 1) + pynutil.delete("\"")
+        maj = (
+            pynutil.delete('currency_maj: "')
+            + pynini.closure(DAMO_NOT_QUOTE, 1)
+            + pynutil.delete('"')
+        )
+        min = (
+            pynutil.delete('currency_min: "')
+            + pynini.closure(DAMO_NOT_QUOTE, 1)
+            + pynutil.delete('"')
+        )
 
         fractional_part = (
-            pynutil.delete("fractional_part: \"") + pynini.closure(DAMO_NOT_QUOTE, 1) + pynutil.delete("\"")
+            pynutil.delete('fractional_part: "')
+            + pynini.closure(DAMO_NOT_QUOTE, 1)
+            + pynutil.delete('"')
         )
 
         integer_part = decimal.integer
@@ -42,7 +50,9 @@ class MoneyFst(GraphFst):
         if not deterministic:
             fractional |= pynutil.insert("and ") + fractional
 
-        graph_integer_with_minor = integer_part + keep_space + maj + keep_space + fractional + delete_preserve_order
+        graph_integer_with_minor = (
+            integer_part + keep_space + maj + keep_space + fractional + delete_preserve_order
+        )
 
         # *** point *** currency_maj
         graph_decimal = decimal.numbers + keep_space + maj

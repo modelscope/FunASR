@@ -1,6 +1,9 @@
-
 import pynini
-from fun_text_processing.inverse_text_normalization.vi.graph_utils import DAMO_NOT_QUOTE, GraphFst, delete_space
+from fun_text_processing.inverse_text_normalization.vi.graph_utils import (
+    DAMO_NOT_QUOTE,
+    GraphFst,
+    delete_space,
+)
 from pynini.lib import pynutil
 
 

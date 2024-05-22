@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import (
     DAMO_CHAR,
@@ -21,15 +19,15 @@ from pynini.lib import pynutil
 
 class FractionFst(GraphFst):
     """
-	Finite state transducer for verbalizing fraction
-		e.g. tokens { fraction { integer: "treinta y tres" numerator: "cuatro" denominator: "quinto" } } ->
-            treinta y tres y cuatro quintos
+    Finite state transducer for verbalizing fraction
+            e.g. tokens { fraction { integer: "treinta y tres" numerator: "cuatro" denominator: "quinto" } } ->
+        treinta y tres y cuatro quintos
 
 
-	Args:
-		deterministic: if True will provide a single transduction option,
-			for False multiple transduction are generated (used for audio-based normalization)
-	"""
+    Args:
+            deterministic: if True will provide a single transduction option,
+                    for False multiple transduction are generated (used for audio-based normalization)
+    """
 
     def __init__(self, deterministic: bool = True):
         super().__init__(name="fraction", kind="verbalize", deterministic=deterministic)
@@ -40,28 +38,28 @@ class FractionFst(GraphFst):
         conjunction = pynutil.insert(" y ")
 
         integer = (
-            pynutil.delete("integer_part: \"")
+            pynutil.delete('integer_part: "')
             + strip_cardinal_apocope(pynini.closure(DAMO_NOT_QUOTE))
-            + pynutil.delete("\"")
+            + pynutil.delete('"')
         )
 
-        numerator_one = pynutil.delete("numerator: \"") + pynini.accep("un") + pynutil.delete("\" ")
+        numerator_one = pynutil.delete('numerator: "') + pynini.accep("un") + pynutil.delete('" ')
         numerator = (
-            pynutil.delete("numerator: \"")
+            pynutil.delete('numerator: "')
             + pynini.difference(pynini.closure(DAMO_NOT_QUOTE), "un")
-            + pynutil.delete("\" ")
+            + pynutil.delete('" ')
         )
 
-        denominator_add_stem = pynutil.delete("denominator: \"") + (
+        denominator_add_stem = pynutil.delete('denominator: "') + (
             pynini.closure(DAMO_NOT_QUOTE)
             + fraction_stem
-            + pynutil.delete("\" morphosyntactic_features: \"add_root\"")
+            + pynutil.delete('" morphosyntactic_features: "add_root"')
         )
-        denominator_ordinal = pynutil.delete("denominator: \"") + (
-            pynini.closure(DAMO_NOT_QUOTE) + pynutil.delete("\" morphosyntactic_features: \"ordinal\"")
+        denominator_ordinal = pynutil.delete('denominator: "') + (
+            pynini.closure(DAMO_NOT_QUOTE) + pynutil.delete('" morphosyntactic_features: "ordinal"')
         )
-        denominator_cardinal = pynutil.delete("denominator: \"") + (
-            pynini.closure(DAMO_NOT_QUOTE) + pynutil.delete("\"")
+        denominator_cardinal = pynutil.delete('denominator: "') + (
+            pynini.closure(DAMO_NOT_QUOTE) + pynutil.delete('"')
         )
 
         denominator_singular = pynini.union(denominator_add_stem, denominator_ordinal)
@@ -76,7 +74,9 @@ class FractionFst(GraphFst):
         merge = pynini.cdrewrite(
             pynini.cross(" y ", "i"), "", "", DAMO_SIGMA
         )  # The denominator must be a single word, with the conjunction "y" replaced by i
-        merge @= pynini.cdrewrite(delete_space, "", pynini.difference(DAMO_CHAR, "parte"), DAMO_SIGMA)
+        merge @= pynini.cdrewrite(
+            delete_space, "", pynini.difference(DAMO_CHAR, "parte"), DAMO_SIGMA
+        )
 
         # The merger can produce duplicate vowels. This is not allowed in orthography
         delete_duplicates = pynini.string_map([("aa", "a"), ("oo", "o")])  # Removes vowels
@@ -90,10 +90,15 @@ class FractionFst(GraphFst):
         )
         merge_into_single_word = merge @ remove_accents @ delete_duplicates
 
-        fraction_default = numerator + delete_space + insert_space + (denominator_plural @ merge_into_single_word)
+        fraction_default = (
+            numerator + delete_space + insert_space + (denominator_plural @ merge_into_single_word)
+        )
 
         fraction_with_one = (
-            numerator_one + delete_space + insert_space + (denominator_singular @ merge_into_single_word)
+            numerator_one
+            + delete_space
+            + insert_space
+            + (denominator_singular @ merge_into_single_word)
         )
 
         fraction_with_cardinal = strip_cardinal_apocope(numerator | numerator_one)
@@ -106,9 +111,13 @@ class FractionFst(GraphFst):
             # Other rules will manage use of "un" at end, so just worry about endings
             exceptions = pynini.string_map([("tercia", "tercera")])
             apply_exceptions = pynini.cdrewrite(exceptions, "", "", DAMO_SIGMA)
-            vowel_change = pynini.cdrewrite(pynini.cross("o", "a"), "", pynini.accep("[EOS]"), DAMO_SIGMA)
+            vowel_change = pynini.cdrewrite(
+                pynini.cross("o", "a"), "", pynini.accep("[EOS]"), DAMO_SIGMA
+            )
 
-            denominator_singular_fem = shift_cardinal_gender(denominator_singular) @ vowel_change @ apply_exceptions
+            denominator_singular_fem = (
+                shift_cardinal_gender(denominator_singular) @ vowel_change @ apply_exceptions
+            )
             denominator_plural_fem = denominator_singular_fem + plural
 
             numerator_one_fem = shift_cardinal_gender(numerator_one)
@@ -129,7 +138,8 @@ class FractionFst(GraphFst):
 
             fraction_with_one_fem = numerator_one_fem + delete_space + insert_space
             fraction_with_one_fem += pynini.union(
-                denominator_singular_fem @ merge_stem, denominator_singular_fem @ merge_into_single_word
+                denominator_singular_fem @ merge_stem,
+                denominator_singular_fem @ merge_into_single_word,
             )  # Both forms exists
             fraction_with_one_fem += pynutil.insert(" parte")
             fraction_with_one_fem @= pynini.cdrewrite(
@@ -147,7 +157,9 @@ class FractionFst(GraphFst):
             )  # Case of no merger
             fraction_default |= fraction_default_fem
 
-            fraction_with_one |= numerator_one + delete_space + insert_space + denominator_singular @ merge_stem
+            fraction_with_one |= (
+                numerator_one + delete_space + insert_space + denominator_singular @ merge_stem
+            )
             fraction_with_one |= fraction_with_one_fem
 
         fraction_with_one @= pynini.cdrewrite(
@@ -166,7 +178,9 @@ class FractionFst(GraphFst):
             + (denominator_plural @ pynini.cross("medios", "medias"))
         )
         fraction_with_one |= (
-            pynutil.delete(numerator_one) + delete_space + (denominator_singular @ pynini.cross("medio", "media"))
+            pynutil.delete(numerator_one)
+            + delete_space
+            + (denominator_singular @ pynini.cross("medio", "media"))
         )
 
         fraction_fem = fraction_with_one | fraction_default | fraction_with_cardinal

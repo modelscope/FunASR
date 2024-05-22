@@ -1,4 +1,3 @@
-
 import pynini
 from fun_text_processing.inverse_text_normalization.fr.graph_utils import (
     GraphFst,
@@ -13,7 +12,7 @@ from pynini.lib import pynutil
 class TelephoneFst(GraphFst):
     """
     Finite state transducer for classifying telephone numbers. Assumes conventional grouping for Metropolitan France (and overseas departments)
-    (two number sequences are grouped as individual cardinals) or digit by digit (chiffre-par-chiffre) e.g. 
+    (two number sequences are grouped as individual cardinals) or digit by digit (chiffre-par-chiffre) e.g.
     "zero un quatre-vingt-deux zero deux vingt-deux cinquante" -> { number_part: "01 42 02 22 50" }
     "zero un quatre deux zero deux deux deux cinq zero" -> { number_part: "01 42 02 22 50" }
 
@@ -57,12 +56,16 @@ class TelephoneFst(GraphFst):
         # Paired digits
         graph_pair_digits_and_ties = double_digits | graph_pair_all_digits
 
-        graph_digits_and_ties = pynini.closure(graph_pair_digits_and_ties + delete_space + insert_space, 3, 3)
-        graph_digits_and_ties = graph_first_pair + graph_digits_and_ties + graph_pair_digits_and_ties
+        graph_digits_and_ties = pynini.closure(
+            graph_pair_digits_and_ties + delete_space + insert_space, 3, 3
+        )
+        graph_digits_and_ties = (
+            graph_first_pair + graph_digits_and_ties + graph_pair_digits_and_ties
+        )
 
         number_part = pynini.union(graph_all_digits, graph_digits_and_ties)
 
-        number_part = pynutil.insert("number_part: \"") + number_part + pynutil.insert("\"")
+        number_part = pynutil.insert('number_part: "') + number_part + pynutil.insert('"')
 
         graph = number_part
         final_graph = self.add_tokens(graph)

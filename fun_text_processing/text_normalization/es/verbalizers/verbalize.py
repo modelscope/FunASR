@@ -1,5 +1,3 @@
-
-
 from fun_text_processing.text_normalization.en.graph_utils import GraphFst
 from fun_text_processing.text_normalization.en.verbalizers.whitelist import WhiteListFst
 from fun_text_processing.text_normalization.es.verbalizers.cardinal import CardinalFst
@@ -37,7 +35,9 @@ class VerbalizeFst(GraphFst):
         fraction_graph = fraction.fst
         date = DateFst(deterministic=deterministic)
         date_graph = date.fst
-        measure = MeasureFst(cardinal=cardinal, decimal=decimal, fraction=fraction, deterministic=deterministic)
+        measure = MeasureFst(
+            cardinal=cardinal, decimal=decimal, fraction=fraction, deterministic=deterministic
+        )
         measure_graph = measure.fst
         electronic = ElectronicFst(deterministic=deterministic)
         electronic_graph = electronic.fst

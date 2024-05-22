@@ -1,8 +1,11 @@
-
-
 import pynini
 from fun_text_processing.text_normalization.de.utils import get_abs_path, load_labels
-from fun_text_processing.text_normalization.en.graph_utils import DAMO_ALPHA, DAMO_DIGIT, GraphFst, insert_space
+from fun_text_processing.text_normalization.en.graph_utils import (
+    DAMO_ALPHA,
+    DAMO_DIGIT,
+    GraphFst,
+    insert_space,
+)
 from pynini.lib import pynutil
 
 
@@ -21,22 +24,31 @@ class ElectronicFst(GraphFst):
         super().__init__(name="electronic", kind="classify", deterministic=deterministic)
 
         dot = pynini.accep(".")
-        accepted_common_domains = [x[0] for x in load_labels(get_abs_path("data/electronic/domain.tsv"))]
+        accepted_common_domains = [
+            x[0] for x in load_labels(get_abs_path("data/electronic/domain.tsv"))
+        ]
         accepted_common_domains = pynini.union(*accepted_common_domains)
         accepted_symbols = [x[0] for x in load_labels(get_abs_path("data/electronic/symbols.tsv"))]
         accepted_symbols = pynini.union(*accepted_symbols) - dot
         accepted_characters = pynini.closure(DAMO_ALPHA | DAMO_DIGIT | accepted_symbols)
 
         # email
-        username = pynutil.insert("username: \"") + accepted_characters + pynutil.insert("\"") + pynini.cross('@', ' ')
+        username = (
+            pynutil.insert('username: "')
+            + accepted_characters
+            + pynutil.insert('"')
+            + pynini.cross("@", " ")
+        )
         domain_graph = accepted_characters + dot + accepted_characters
-        domain_graph = pynutil.insert("domain: \"") + domain_graph + pynutil.insert("\"")
+        domain_graph = pynutil.insert('domain: "') + domain_graph + pynutil.insert('"')
         domain_common_graph = (
-            pynutil.insert("domain: \"")
+            pynutil.insert('domain: "')
             + accepted_characters
             + accepted_common_domains
-            + pynini.closure((accepted_symbols | dot) + pynini.closure(accepted_characters, 1), 0, 1)
-            + pynutil.insert("\"")
+            + pynini.closure(
+                (accepted_symbols | dot) + pynini.closure(accepted_characters, 1), 0, 1
+            )
+            + pynutil.insert('"')
         )
         graph = (username + domain_graph) | domain_common_graph
 
@@ -44,7 +56,7 @@ class ElectronicFst(GraphFst):
         protocol_start = pynini.accep("https://") | pynini.accep("http://")
         protocol_end = pynini.accep("www.")
         protocol = protocol_start | protocol_end | (protocol_start + protocol_end)
-        protocol = pynutil.insert("protocol: \"") + protocol + pynutil.insert("\"")
+        protocol = pynutil.insert('protocol: "') + protocol + pynutil.insert('"')
         graph |= protocol + insert_space + (domain_graph | domain_common_graph)
         self.graph = graph
 

@@ -9,7 +9,10 @@ from itertools import chain
 from typing import Any, Dict, List, NamedTuple, Tuple, Union
 
 from funasr.metrics.common import end_detect
-from funasr.models.transformer.scorers.scorer_interface import PartialScorerInterface, ScorerInterface
+from funasr.models.transformer.scorers.scorer_interface import (
+    PartialScorerInterface,
+    ScorerInterface,
+)
 
 
 class Hypothesis(NamedTuple):
@@ -317,9 +320,7 @@ class BeamSearchPara(torch.nn.Module):
                     Hypothesis(
                         score=weighted_scores[j],
                         yseq=self.append_token(hyp.yseq, j),
-                        scores=self.merge_scores(
-                            hyp.scores, scores, j, part_scores, part_j
-                        ),
+                        scores=self.merge_scores(hyp.scores, scores, j, part_scores, part_j),
                         states=self.merge_states(states, part_states, part_j),
                     )
                 )
@@ -331,7 +332,11 @@ class BeamSearchPara(torch.nn.Module):
         return best_hyps
 
     def forward(
-        self, x: torch.Tensor, am_scores: torch.Tensor, maxlenratio: float = 0.0, minlenratio: float = 0.0
+        self,
+        x: torch.Tensor,
+        am_scores: torch.Tensor,
+        maxlenratio: float = 0.0,
+        minlenratio: float = 0.0,
     ) -> List[Hypothesis]:
         """Perform beam search.
 
@@ -375,8 +380,7 @@ class BeamSearchPara(torch.nn.Module):
         # check the number of hypotheses reaching to eos
         if len(nbest_hyps) == 0:
             logging.warning(
-                "there is no N-best results, perform recognition "
-                "again with smaller minlenratio."
+                "there is no N-best results, perform recognition " "again with smaller minlenratio."
             )
             return (
                 []
@@ -387,17 +391,13 @@ class BeamSearchPara(torch.nn.Module):
         # report the best result
         best = nbest_hyps[0]
         for k, v in best.scores.items():
-            logging.info(
-                f"{v:6.2f} * {self.weights[k]:3} = {v * self.weights[k]:6.2f} for {k}"
-            )
+            logging.info(f"{v:6.2f} * {self.weights[k]:3} = {v * self.weights[k]:6.2f} for {k}")
         logging.info(f"total log probability: {best.score:.2f}")
         logging.info(f"normalized log probability: {best.score / len(best.yseq):.2f}")
         logging.info(f"total number of ended hypotheses: {len(nbest_hyps)}")
         if self.token_list is not None:
             logging.info(
-                "best hypo: "
-                + "".join([self.token_list[x.item()] for x in best.yseq[1:-1]])
-                + "\n"
+                "best hypo: " + "".join([self.token_list[x.item()] for x in best.yseq[1:-1]]) + "\n"
             )
         return nbest_hyps
 
@@ -432,8 +432,7 @@ class BeamSearchPara(torch.nn.Module):
         if i == maxlen - 1:
             logging.info("adding <eos> in the last position in the loop")
             running_hyps = [
-                h._replace(yseq=self.append_token(h.yseq, self.eos))
-                for h in running_hyps
+                h._replace(yseq=self.append_token(h.yseq, self.eos)) for h in running_hyps
             ]
 
         # add ended hypotheses to a final list, and removed them from current hypotheses

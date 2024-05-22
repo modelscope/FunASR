@@ -1,4 +1,3 @@
-
 import os
 import string
 from pathlib import Path
@@ -19,9 +18,9 @@ DAMO_UPPER = pynini.union(*string.ascii_uppercase).optimize()
 DAMO_ALPHA = pynini.union(DAMO_LOWER, DAMO_UPPER).optimize()
 DAMO_ALNUM = pynini.union(DAMO_DIGIT, DAMO_ALPHA).optimize()
 DAMO_HEX = pynini.union(*string.hexdigits).optimize()
-DAMO_NON_BREAKING_SPACE = u"\u00A0"
+DAMO_NON_BREAKING_SPACE = "\u00A0"
 DAMO_SPACE = " "
-DAMO_WHITE_SPACE = pynini.union(" ", "\t", "\n", "\r", u"\u00A0").optimize()
+DAMO_WHITE_SPACE = pynini.union(" ", "\t", "\n", "\r", "\u00A0").optimize()
 DAMO_NOT_SPACE = pynini.difference(DAMO_CHAR, DAMO_WHITE_SPACE).optimize()
 DAMO_NOT_QUOTE = pynini.difference(DAMO_CHAR, r'"').optimize()
 
@@ -49,7 +48,9 @@ graph_plural = plurals._priority_union(
 
 SINGULAR_TO_PLURAL = graph_plural
 PLURAL_TO_SINGULAR = pynini.invert(graph_plural)
-TO_LOWER = pynini.union(*[pynini.cross(x, y) for x, y in zip(string.ascii_uppercase, string.ascii_lowercase)])
+TO_LOWER = pynini.union(
+    *[pynini.cross(x, y) for x, y in zip(string.ascii_uppercase, string.ascii_lowercase)]
+)
 TO_UPPER = pynini.invert(TO_LOWER)
 
 
@@ -65,7 +66,7 @@ def generator_main(file_name: str, graphs: Dict[str, pynini.FstLike]):
     for rule, graph in graphs.items():
         exporter[rule] = graph.optimize()
     exporter.close()
-    print(f'Created {file_name}')
+    print(f"Created {file_name}")
 
 
 def get_plurals(fst):
@@ -92,18 +93,20 @@ def get_singulars(fst):
     return PLURAL_TO_SINGULAR @ fst
 
 
-def convert_space(fst) -> 'pynini.FstLike':
+def convert_space(fst) -> "pynini.FstLike":
     """
     Converts space to nonbreaking space.
     Used only in tagger grammars for transducing token values within quotes, e.g. name: "hello kitty"
-    This is making transducer significantly slower, so only use when there could be potential spaces within quotes, otherwise leave it. 
+    This is making transducer significantly slower, so only use when there could be potential spaces within quotes, otherwise leave it.
 
     Args:
         fst: input fst
 
     Returns output fst where breaking spaces are converted to non breaking spaces
     """
-    return fst @ pynini.cdrewrite(pynini.cross(DAMO_SPACE, DAMO_NON_BREAKING_SPACE), "", "", DAMO_SIGMA)
+    return fst @ pynini.cdrewrite(
+        pynini.cross(DAMO_SPACE, DAMO_NON_BREAKING_SPACE), "", "", DAMO_SIGMA
+    )
 
 
 class GraphFst:
@@ -123,9 +126,11 @@ class GraphFst:
         self._fst = None
         self.deterministic = deterministic
 
-        self.far_path = Path(os.path.dirname(__file__) + '/grammars/' + kind + '/' + name + '.far')
+        self.far_path = Path(os.path.dirname(__file__) + "/grammars/" + kind + "/" + name + ".far")
         if self.far_exist():
-            self._fst = Far(self.far_path, mode="r", arc_type="standard", far_type="default").get_fst()
+            self._fst = Far(
+                self.far_path, mode="r", arc_type="standard", far_type="default"
+            ).get_fst()
 
     def far_exist(self) -> bool:
         """
@@ -134,26 +139,26 @@ class GraphFst:
         return self.far_path.exists()
 
     @property
-    def fst(self) -> 'pynini.FstLike':
+    def fst(self) -> "pynini.FstLike":
         return self._fst
 
     @fst.setter
     def fst(self, fst):
         self._fst = fst
 
-    def add_tokens(self, fst) -> 'pynini.FstLike':
+    def add_tokens(self, fst) -> "pynini.FstLike":
         """
         Wraps class name around to given fst
 
-        Args: 
+        Args:
             fst: input fst
-        
+
         Returns:
             Fst: fst
         """
         return pynutil.insert(f"{self.name} {{ ") + fst + pynutil.insert(" }")
 
-    def delete_tokens(self, fst) -> 'pynini.FstLike':
+    def delete_tokens(self, fst) -> "pynini.FstLike":
         """
         Deletes class name wrap around output of given fst
 
@@ -172,4 +177,4 @@ class GraphFst:
             + delete_space
             + pynutil.delete("}")
         )
-        return res @ pynini.cdrewrite(pynini.cross(u"\u00A0", " "), "", "", DAMO_SIGMA)
+        return res @ pynini.cdrewrite(pynini.cross("\u00A0", " "), "", "", DAMO_SIGMA)

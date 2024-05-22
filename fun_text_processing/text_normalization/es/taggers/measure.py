@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import (
     DAMO_ALPHA,
@@ -41,7 +39,9 @@ class MeasureFst(GraphFst):
             for False multiple transduction are generated (used for audio-based normalization)
     """
 
-    def __init__(self, cardinal: GraphFst, decimal: GraphFst, fraction: GraphFst, deterministic: bool = True):
+    def __init__(
+        self, cardinal: GraphFst, decimal: GraphFst, fraction: GraphFst, deterministic: bool = True
+    ):
         super().__init__(name="measure", kind="classify", deterministic=deterministic)
         cardinal_graph = cardinal.graph
 
@@ -58,22 +58,26 @@ class MeasureFst(GraphFst):
         )
 
         optional_unit_denominator = pynini.closure(
-            pynutil.insert(DAMO_NON_BREAKING_SPACE) + graph_unit_denominator, 0, 1,
+            pynutil.insert(DAMO_NON_BREAKING_SPACE) + graph_unit_denominator,
+            0,
+            1,
         )
 
         unit_plural = (
-            pynutil.insert("units: \"")
+            pynutil.insert('units: "')
             + ((graph_unit_plural + optional_unit_denominator) | graph_unit_denominator)
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
         )
 
         unit_singular_graph = (
-            pynutil.insert("units: \"")
+            pynutil.insert('units: "')
             + ((graph_unit_singular + optional_unit_denominator) | graph_unit_denominator)
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
         )
 
-        subgraph_decimal = decimal.fst + insert_space + pynini.closure(DAMO_SPACE, 0, 1) + unit_plural
+        subgraph_decimal = (
+            decimal.fst + insert_space + pynini.closure(DAMO_SPACE, 0, 1) + unit_plural
+        )
 
         subgraph_cardinal = (
             (optional_graph_negative + (DAMO_SIGMA - "1")) @ cardinal.fst
@@ -89,57 +93,59 @@ class MeasureFst(GraphFst):
             + unit_singular_graph
         )
 
-        subgraph_fraction = fraction.fst + insert_space + pynini.closure(delete_space, 0, 1) + unit_singular_graph
+        subgraph_fraction = (
+            fraction.fst + insert_space + pynini.closure(delete_space, 0, 1) + unit_singular_graph
+        )
 
         decimal_times = (
             pynutil.insert("decimal { ")
             + decimal.final_graph_wo_negative
-            + pynutil.insert(" } units: \"")
-            + pynini.union('x', 'X')
-            + pynutil.insert("\"")
+            + pynutil.insert(' } units: "')
+            + pynini.union("x", "X")
+            + pynutil.insert('"')
         )
 
         cardinal_times = (
-            pynutil.insert("cardinal { integer: \"")
+            pynutil.insert('cardinal { integer: "')
             + strip_cardinal_apocope(cardinal_graph)
-            + pynutil.insert("\" } units: \"")
-            + pynini.union('x', 'X')
-            + pynutil.insert("\"")
+            + pynutil.insert('" } units: "')
+            + pynini.union("x", "X")
+            + pynutil.insert('"')
         )
 
         cardinal_dash_alpha = (
-            pynutil.insert("cardinal { integer: \"")
+            pynutil.insert('cardinal { integer: "')
             + strip_cardinal_apocope(cardinal_graph)
-            + pynutil.delete('-')
-            + pynutil.insert("\" } units: \"")
+            + pynutil.delete("-")
+            + pynutil.insert('" } units: "')
             + pynini.closure(DAMO_ALPHA, 1)
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
         )
 
         decimal_dash_alpha = (
             pynutil.insert("decimal { ")
             + decimal.final_graph_wo_negative
-            + pynutil.delete('-')
-            + pynutil.insert(" } units: \"")
+            + pynutil.delete("-")
+            + pynutil.insert(' } units: "')
             + pynini.closure(DAMO_ALPHA, 1)
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
         )
 
         alpha_dash_cardinal = (
-            pynutil.insert("units: \"")
+            pynutil.insert('units: "')
             + pynini.closure(DAMO_ALPHA, 1)
-            + pynutil.delete('-')
-            + pynutil.insert("\"")
-            + pynutil.insert(" cardinal { integer: \"")
+            + pynutil.delete("-")
+            + pynutil.insert('"')
+            + pynutil.insert(' cardinal { integer: "')
             + cardinal_graph
-            + pynutil.insert("\" } preserve_order: true")
+            + pynutil.insert('" } preserve_order: true')
         )
 
         alpha_dash_decimal = (
-            pynutil.insert("units: \"")
+            pynutil.insert('units: "')
             + pynini.closure(DAMO_ALPHA, 1)
-            + pynutil.delete('-')
-            + pynutil.insert("\"")
+            + pynutil.delete("-")
+            + pynutil.insert('"')
             + pynutil.insert(" decimal { ")
             + decimal.final_graph_wo_negative
             + pynutil.insert(" } preserve_order: true")

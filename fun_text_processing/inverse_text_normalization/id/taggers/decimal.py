@@ -9,30 +9,41 @@ from fun_text_processing.inverse_text_normalization.id.graph_utils import (
 from pynini.lib import pynutil
 import pdb
 
-def get_quantity(decimal: 'pynini.FstLike', cardinal_up_to_hundred: 'pynini.FstLike') -> 'pynini.FstLike':
+
+def get_quantity(
+    decimal: "pynini.FstLike", cardinal_up_to_hundred: "pynini.FstLike"
+) -> "pynini.FstLike":
     """
     Returns FST that transforms either a cardinal or decimal followed by a quantity into a numeral,
     e.g. one million -> integer_part: "1" quantity: "million"
     e.g. one point five million -> integer_part: "1" fractional_part: "5" quantity: "million"
 
-    Args: 
+    Args:
         decimal: decimal FST
         cardinal_up_to_hundred: cardinal FST
     """
     numbers = cardinal_up_to_hundred @ (
-        pynutil.delete(pynini.closure("0")) + pynini.difference(DAMO_DIGIT, "0") + pynini.closure(DAMO_DIGIT)
+        pynutil.delete(pynini.closure("0"))
+        + pynini.difference(DAMO_DIGIT, "0")
+        + pynini.closure(DAMO_DIGIT)
     )
     suffix = pynini.union("juta", "miliar", "triliun", "kuadriliun", "triliun", "sextillion")
     res = (
-        pynutil.insert("integer_part: \"")
+        pynutil.insert('integer_part: "')
         + numbers
-        + pynutil.insert("\"")
+        + pynutil.insert('"')
         + delete_extra_space
-        + pynutil.insert("quantity: \"")
+        + pynutil.insert('quantity: "')
         + suffix
-        + pynutil.insert("\"")
+        + pynutil.insert('"')
     )
-    res |= decimal + delete_extra_space + pynutil.insert("quantity: \"") + (suffix | "ribu") + pynutil.insert("\"")
+    res |= (
+        decimal
+        + delete_extra_space
+        + pynutil.insert('quantity: "')
+        + (suffix | "ribu")
+        + pynutil.insert('"')
+    )
     return res
 
 
@@ -52,21 +63,30 @@ class DecimalFst(GraphFst):
 
         graph_decimal = pynini.string_file(get_abs_path("data/numbers/digit.tsv"))
 
-        graph_decimal |= pynini.string_file(get_abs_path("data/numbers/zero.tsv")) | pynini.cross("o", "0")
+        graph_decimal |= pynini.string_file(get_abs_path("data/numbers/zero.tsv")) | pynini.cross(
+            "o", "0"
+        )
 
         graph_decimal = pynini.closure(graph_decimal + delete_space) + graph_decimal
         self.graph = graph_decimal
 
-        point = pynutil.delete("point") #titik
+        point = pynutil.delete("point")  # titik
 
         optional_graph_negative = pynini.closure(
-            pynutil.insert("negative: ") + pynini.cross("kurang", "\"true\"") + delete_extra_space, 0, 1
+            pynutil.insert("negative: ") + pynini.cross("kurang", '"true"') + delete_extra_space,
+            0,
+            1,
         )
 
-        graph_fractional = pynutil.insert("fractional_part: \"") + graph_decimal + pynutil.insert("\"")
-        graph_integer = pynutil.insert("integer_part: \"") + cardinal_graph + pynutil.insert("\"")
+        graph_fractional = (
+            pynutil.insert('fractional_part: "') + graph_decimal + pynutil.insert('"')
+        )
+        graph_integer = pynutil.insert('integer_part: "') + cardinal_graph + pynutil.insert('"')
         final_graph_wo_sign = (
-            pynini.closure(graph_integer + delete_extra_space, 0, 1) + point + delete_extra_space + graph_fractional
+            pynini.closure(graph_integer + delete_extra_space, 0, 1)
+            + point
+            + delete_extra_space
+            + graph_fractional
         )
         final_graph = optional_graph_negative + final_graph_wo_sign
 

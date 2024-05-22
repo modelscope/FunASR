@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import (
     DAMO_CHAR,
@@ -79,14 +77,18 @@ class WhiteListFst(GraphFst):
             )
 
         if not deterministic:
-            multiple_forms_whitelist_graph = get_formats(get_abs_path("data/whitelist/alternatives_all_format.tsv"))
+            multiple_forms_whitelist_graph = get_formats(
+                get_abs_path("data/whitelist/alternatives_all_format.tsv")
+            )
             graph |= multiple_forms_whitelist_graph
 
-            graph_unit = pynini.string_file(get_abs_path("data/measure/unit.tsv")) | pynini.string_file(
-                get_abs_path("data/measure/unit_alternatives.tsv")
-            )
+            graph_unit = pynini.string_file(
+                get_abs_path("data/measure/unit.tsv")
+            ) | pynini.string_file(get_abs_path("data/measure/unit_alternatives.tsv"))
             graph_unit_plural = graph_unit @ SINGULAR_TO_PLURAL
-            units_graph = pynini.compose(DAMO_CHAR ** (3, ...), convert_space(graph_unit | graph_unit_plural))
+            units_graph = pynini.compose(
+                DAMO_CHAR ** (3, ...), convert_space(graph_unit | graph_unit_plural)
+            )
             graph |= units_graph
 
         # convert to states only if comma is present before the abbreviation to avoid converting all caps words,
@@ -103,7 +105,11 @@ class WhiteListFst(GraphFst):
 
         states.extend(additional_options)
         state_graph = pynini.string_map(states)
-        graph |= pynini.closure(DAMO_NOT_SPACE, 1) + pynini.union(", ", ",") + pynini.invert(state_graph).optimize()
+        graph |= (
+            pynini.closure(DAMO_NOT_SPACE, 1)
+            + pynini.union(", ", ",")
+            + pynini.invert(state_graph).optimize()
+        )
 
         if input_file:
             whitelist_provided = _get_whitelist_graph(input_case, input_file)
@@ -114,7 +120,7 @@ class WhiteListFst(GraphFst):
 
         self.graph = (convert_space(graph)).optimize()
 
-        self.fst = (pynutil.insert("name: \"") + self.graph + pynutil.insert("\"")).optimize()
+        self.fst = (pynutil.insert('name: "') + self.graph + pynutil.insert('"')).optimize()
 
 
 def get_formats(input_f, input_case="cased", is_default=True):
@@ -126,13 +132,21 @@ def get_formats(input_f, input_case="cased", is_default=True):
     for x, y in multiple_formats:
         if input_case == "lower_cased":
             x = x.lower()
-        additional_options.append((f"{x}.", y))  # default "dr" -> doctor, this includes period "dr." -> doctor
-        additional_options.append((f"{x[0].upper() + x[1:]}", f"{y[0].upper() + y[1:]}"))  # "Dr" -> Doctor
-        additional_options.append((f"{x[0].upper() + x[1:]}.", f"{y[0].upper() + y[1:]}"))  # "Dr." -> Doctor
+        additional_options.append(
+            (f"{x}.", y)
+        )  # default "dr" -> doctor, this includes period "dr." -> doctor
+        additional_options.append(
+            (f"{x[0].upper() + x[1:]}", f"{y[0].upper() + y[1:]}")
+        )  # "Dr" -> Doctor
+        additional_options.append(
+            (f"{x[0].upper() + x[1:]}.", f"{y[0].upper() + y[1:]}")
+        )  # "Dr." -> Doctor
     multiple_formats.extend(additional_options)
 
     if not is_default:
-        multiple_formats = [(x, f"|raw_start|{x}|raw_end||norm_start|{y}|norm_end|") for (x, y) in multiple_formats]
+        multiple_formats = [
+            (x, f"|raw_start|{x}|raw_end||norm_start|{y}|norm_end|") for (x, y) in multiple_formats
+        ]
 
     multiple_formats = pynini.string_map(multiple_formats)
     return multiple_formats

@@ -64,8 +64,9 @@ class BasicBlock(torch.nn.Module):
         self.num_layer = num_layer
 
         for i in range(num_layer):
-            layer = BasicLayer(in_filters if i == 0 else filters, filters,
-                               stride if i == 0 else 1, bn_momentum)
+            layer = BasicLayer(
+                in_filters if i == 0 else filters, filters, stride if i == 0 else 1, bn_momentum
+            )
             self.add_module("layer_{}".format(i), layer)
 
     def forward(self, xs_pad, ilens):
@@ -78,14 +79,14 @@ class BasicBlock(torch.nn.Module):
 
 class ResNet34(AbsEncoder):
     def __init__(
-            self,
-            input_size,
-            use_head_conv=True,
-            batchnorm_momentum=0.5,
-            use_head_maxpool=False,
-            num_nodes_pooling_layer=256,
-            layers_in_block=(3, 4, 6, 3),
-            filters_in_block=(32, 64, 128, 256),
+        self,
+        input_size,
+        use_head_conv=True,
+        batchnorm_momentum=0.5,
+        use_head_maxpool=False,
+        num_nodes_pooling_layer=256,
+        layers_in_block=(3, 4, 6, 3),
+        filters_in_block=(32, 64, 128, 256),
     ):
         super(ResNet34, self).__init__()
 
@@ -98,8 +99,12 @@ class ResNet34(AbsEncoder):
 
         pre_filters = filters_in_block[0]
         if use_head_conv:
-            self.pre_conv = torch.nn.Conv2d(1, pre_filters, 3, 1, 1, bias=False, padding_mode="zeros")
-            self.pre_conv_bn = torch.nn.BatchNorm2d(pre_filters, eps=1e-3, momentum=batchnorm_momentum)
+            self.pre_conv = torch.nn.Conv2d(
+                1, pre_filters, 3, 1, 1, bias=False, padding_mode="zeros"
+            )
+            self.pre_conv_bn = torch.nn.BatchNorm2d(
+                pre_filters, eps=1e-3, momentum=batchnorm_momentum
+            )
 
         if use_head_maxpool:
             self.head_maxpool = torch.nn.MaxPool2d(3, 1, padding=1)
@@ -108,17 +113,21 @@ class ResNet34(AbsEncoder):
             if i == 0:
                 in_filters = pre_filters if self.use_head_conv else 1
             else:
-                in_filters = filters_in_block[i-1]
+                in_filters = filters_in_block[i - 1]
 
-            block = BasicBlock(in_filters,
-                               filters=filters_in_block[i],
-                               num_layer=layers_in_block[i],
-                               stride=1 if i == 0 else 2,
-                               bn_momentum=batchnorm_momentum)
+            block = BasicBlock(
+                in_filters,
+                filters=filters_in_block[i],
+                num_layer=layers_in_block[i],
+                stride=1 if i == 0 else 2,
+                bn_momentum=batchnorm_momentum,
+            )
             self.add_module("block_{}".format(i), block)
 
         self.resnet0_dense = torch.nn.Conv2d(filters_in_block[-1], num_nodes_pooling_layer, 1)
-        self.resnet0_bn = torch.nn.BatchNorm2d(num_nodes_pooling_layer, eps=1e-3, momentum=batchnorm_momentum)
+        self.resnet0_bn = torch.nn.BatchNorm2d(
+            num_nodes_pooling_layer, eps=1e-3, momentum=batchnorm_momentum
+        )
 
         self.time_ds_ratio = 8
 
@@ -126,15 +135,15 @@ class ResNet34(AbsEncoder):
         return self.num_nodes_pooling_layer
 
     def forward(
-            self,
-            xs_pad: torch.Tensor,
-            ilens: torch.Tensor,
-            prev_states: torch.Tensor = None
+        self, xs_pad: torch.Tensor, ilens: torch.Tensor, prev_states: torch.Tensor = None
     ) -> Tuple[torch.Tensor, torch.Tensor]:
 
         features = xs_pad
-        assert features.size(-1) == self.input_size, \
-            "Dimension of features {} doesn't match the input_size {}.".format(features.size(-1), self.input_size)
+        assert (
+            features.size(-1) == self.input_size
+        ), "Dimension of features {} doesn't match the input_size {}.".format(
+            features.size(-1), self.input_size
+        )
         features = torch.unsqueeze(features, dim=1)
         if self.use_head_conv:
             features = self.pre_conv(features)
@@ -155,21 +164,22 @@ class ResNet34(AbsEncoder):
 
         return features, resnet_out_lens
 
+
 # Note: For training, this implement is not equivalent to tf because of the kernel_regularizer in tf.layers.
 # TODO: implement kernel_regularizer in torch with munal loss addition or weigth_decay in the optimizer
 class ResNet34_SP_L2Reg(AbsEncoder):
     def __init__(
-            self,
-            input_size,
-            use_head_conv=True,
-            batchnorm_momentum=0.5,
-            use_head_maxpool=False,
-            num_nodes_pooling_layer=256,
-            layers_in_block=(3, 4, 6, 3),
-            filters_in_block=(32, 64, 128, 256),
-            tf2torch_tensor_name_prefix_torch="encoder",
-            tf2torch_tensor_name_prefix_tf="EAND/speech_encoder",
-            tf_train_steps=720000,
+        self,
+        input_size,
+        use_head_conv=True,
+        batchnorm_momentum=0.5,
+        use_head_maxpool=False,
+        num_nodes_pooling_layer=256,
+        layers_in_block=(3, 4, 6, 3),
+        filters_in_block=(32, 64, 128, 256),
+        tf2torch_tensor_name_prefix_torch="encoder",
+        tf2torch_tensor_name_prefix_tf="EAND/speech_encoder",
+        tf_train_steps=720000,
     ):
         super(ResNet34_SP_L2Reg, self).__init__()
 
@@ -185,8 +195,12 @@ class ResNet34_SP_L2Reg(AbsEncoder):
 
         pre_filters = filters_in_block[0]
         if use_head_conv:
-            self.pre_conv = torch.nn.Conv2d(1, pre_filters, 3, 1, 1, bias=False, padding_mode="zeros")
-            self.pre_conv_bn = torch.nn.BatchNorm2d(pre_filters, eps=1e-3, momentum=batchnorm_momentum)
+            self.pre_conv = torch.nn.Conv2d(
+                1, pre_filters, 3, 1, 1, bias=False, padding_mode="zeros"
+            )
+            self.pre_conv_bn = torch.nn.BatchNorm2d(
+                pre_filters, eps=1e-3, momentum=batchnorm_momentum
+            )
 
         if use_head_maxpool:
             self.head_maxpool = torch.nn.MaxPool2d(3, 1, padding=1)
@@ -195,17 +209,23 @@ class ResNet34_SP_L2Reg(AbsEncoder):
             if i == 0:
                 in_filters = pre_filters if self.use_head_conv else 1
             else:
-                in_filters = filters_in_block[i-1]
+                in_filters = filters_in_block[i - 1]
 
-            block = BasicBlock(in_filters,
-                               filters=filters_in_block[i],
-                               num_layer=layers_in_block[i],
-                               stride=1 if i == 0 else 2,
-                               bn_momentum=batchnorm_momentum)
+            block = BasicBlock(
+                in_filters,
+                filters=filters_in_block[i],
+                num_layer=layers_in_block[i],
+                stride=1 if i == 0 else 2,
+                bn_momentum=batchnorm_momentum,
+            )
             self.add_module("block_{}".format(i), block)
 
-        self.resnet0_dense = torch.nn.Conv1d(filters_in_block[-1] * input_size // 8, num_nodes_pooling_layer, 1)
-        self.resnet0_bn = torch.nn.BatchNorm1d(num_nodes_pooling_layer, eps=1e-3, momentum=batchnorm_momentum)
+        self.resnet0_dense = torch.nn.Conv1d(
+            filters_in_block[-1] * input_size // 8, num_nodes_pooling_layer, 1
+        )
+        self.resnet0_bn = torch.nn.BatchNorm1d(
+            num_nodes_pooling_layer, eps=1e-3, momentum=batchnorm_momentum
+        )
 
         self.time_ds_ratio = 8
 
@@ -213,15 +233,15 @@ class ResNet34_SP_L2Reg(AbsEncoder):
         return self.num_nodes_pooling_layer
 
     def forward(
-            self,
-            xs_pad: torch.Tensor,
-            ilens: torch.Tensor,
-            prev_states: torch.Tensor = None
+        self, xs_pad: torch.Tensor, ilens: torch.Tensor, prev_states: torch.Tensor = None
     ) -> Tuple[torch.Tensor, torch.Tensor]:
 
         features = xs_pad
-        assert features.size(-1) == self.input_size, \
-            "Dimension of features {} doesn't match the input_size {}.".format(features.size(-1), self.input_size)
+        assert (
+            features.size(-1) == self.input_size
+        ), "Dimension of features {} doesn't match the input_size {}.".format(
+            features.size(-1), self.input_size
+        )
         features = torch.unsqueeze(features, dim=1)
         if self.use_head_conv:
             features = self.pre_conv(features)
@@ -238,7 +258,7 @@ class ResNet34_SP_L2Reg(AbsEncoder):
 
         # B, C, T, F
         bb, cc, tt, ff = resnet_outs.shape
-        resnet_outs = torch.reshape(resnet_outs.permute(0, 3, 1, 2), [bb, ff*cc, tt])
+        resnet_outs = torch.reshape(resnet_outs.permute(0, 3, 1, 2), [bb, ff * cc, tt])
         features = self.resnet0_dense(resnet_outs)
         features = F.relu(features)
         features = self.resnet0_bn(features)
@@ -248,22 +268,22 @@ class ResNet34_SP_L2Reg(AbsEncoder):
 
 class ResNet34Diar(ResNet34):
     def __init__(
-            self,
-            input_size,
-            embedding_node="resnet1_dense",
-            use_head_conv=True,
-            batchnorm_momentum=0.5,
-            use_head_maxpool=False,
-            num_nodes_pooling_layer=256,
-            layers_in_block=(3, 4, 6, 3),
-            filters_in_block=(32, 64, 128, 256),
-            num_nodes_resnet1=256,
-            num_nodes_last_layer=256,
-            pooling_type="window_shift",
-            pool_size=20,
-            stride=1,
-            tf2torch_tensor_name_prefix_torch="encoder",
-            tf2torch_tensor_name_prefix_tf="seq2seq/speech_encoder"
+        self,
+        input_size,
+        embedding_node="resnet1_dense",
+        use_head_conv=True,
+        batchnorm_momentum=0.5,
+        use_head_maxpool=False,
+        num_nodes_pooling_layer=256,
+        layers_in_block=(3, 4, 6, 3),
+        filters_in_block=(32, 64, 128, 256),
+        num_nodes_resnet1=256,
+        num_nodes_last_layer=256,
+        pooling_type="window_shift",
+        pool_size=20,
+        stride=1,
+        tf2torch_tensor_name_prefix_torch="encoder",
+        tf2torch_tensor_name_prefix_tf="seq2seq/speech_encoder",
     ):
         """
         Author: Speech Lab, Alibaba Group, China
@@ -291,10 +311,14 @@ class ResNet34Diar(ResNet34):
         self.tf2torch_tensor_name_prefix_tf = tf2torch_tensor_name_prefix_tf
 
         self.resnet1_dense = torch.nn.Linear(num_nodes_pooling_layer * 2, num_nodes_resnet1)
-        self.resnet1_bn = torch.nn.BatchNorm1d(num_nodes_resnet1, eps=1e-3, momentum=batchnorm_momentum)
+        self.resnet1_bn = torch.nn.BatchNorm1d(
+            num_nodes_resnet1, eps=1e-3, momentum=batchnorm_momentum
+        )
 
         self.resnet2_dense = torch.nn.Linear(num_nodes_resnet1, num_nodes_last_layer)
-        self.resnet2_bn = torch.nn.BatchNorm1d(num_nodes_last_layer, eps=1e-3, momentum=batchnorm_momentum)
+        self.resnet2_bn = torch.nn.BatchNorm1d(
+            num_nodes_last_layer, eps=1e-3, momentum=batchnorm_momentum
+        )
 
     def output_size(self) -> int:
         if self.embedding_node.startswith("resnet1"):
@@ -305,19 +329,21 @@ class ResNet34Diar(ResNet34):
         return self.num_nodes_pooling_layer
 
     def forward(
-            self,
-            xs_pad: torch.Tensor,
-            ilens: torch.Tensor,
-            prev_states: torch.Tensor = None,
+        self,
+        xs_pad: torch.Tensor,
+        ilens: torch.Tensor,
+        prev_states: torch.Tensor = None,
     ) -> Tuple[torch.Tensor, torch.Tensor, Optional[torch.Tensor]]:
 
         endpoints = OrderedDict()
         res_out, ilens = super().forward(xs_pad, ilens)
         endpoints["resnet0_bn"] = res_out
         if self.pooling_type == "frame_gsp":
-            features = statistic_pooling(res_out, ilens, (3, ))
+            features = statistic_pooling(res_out, ilens, (3,))
         else:
-            features, ilens = windowed_statistic_pooling(res_out, ilens, (2, 3), self.pool_size, self.stride)
+            features, ilens = windowed_statistic_pooling(
+                res_out, ilens, (2, 3), self.pool_size, self.stride
+            )
         features = features.transpose(1, 2)
         endpoints["pooling"] = features
 
@@ -340,22 +366,22 @@ class ResNet34Diar(ResNet34):
 
 class ResNet34SpL2RegDiar(ResNet34_SP_L2Reg):
     def __init__(
-            self,
-            input_size,
-            embedding_node="resnet1_dense",
-            use_head_conv=True,
-            batchnorm_momentum=0.5,
-            use_head_maxpool=False,
-            num_nodes_pooling_layer=256,
-            layers_in_block=(3, 4, 6, 3),
-            filters_in_block=(32, 64, 128, 256),
-            num_nodes_resnet1=256,
-            num_nodes_last_layer=256,
-            pooling_type="window_shift",
-            pool_size=20,
-            stride=1,
-            tf2torch_tensor_name_prefix_torch="encoder",
-            tf2torch_tensor_name_prefix_tf="seq2seq/speech_encoder"
+        self,
+        input_size,
+        embedding_node="resnet1_dense",
+        use_head_conv=True,
+        batchnorm_momentum=0.5,
+        use_head_maxpool=False,
+        num_nodes_pooling_layer=256,
+        layers_in_block=(3, 4, 6, 3),
+        filters_in_block=(32, 64, 128, 256),
+        num_nodes_resnet1=256,
+        num_nodes_last_layer=256,
+        pooling_type="window_shift",
+        pool_size=20,
+        stride=1,
+        tf2torch_tensor_name_prefix_torch="encoder",
+        tf2torch_tensor_name_prefix_tf="seq2seq/speech_encoder",
     ):
         """
         Author: Speech Lab, Alibaba Group, China
@@ -383,10 +409,14 @@ class ResNet34SpL2RegDiar(ResNet34_SP_L2Reg):
         self.tf2torch_tensor_name_prefix_tf = tf2torch_tensor_name_prefix_tf
 
         self.resnet1_dense = torch.nn.Linear(num_nodes_pooling_layer * 2, num_nodes_resnet1)
-        self.resnet1_bn = torch.nn.BatchNorm1d(num_nodes_resnet1, eps=1e-3, momentum=batchnorm_momentum)
+        self.resnet1_bn = torch.nn.BatchNorm1d(
+            num_nodes_resnet1, eps=1e-3, momentum=batchnorm_momentum
+        )
 
         self.resnet2_dense = torch.nn.Linear(num_nodes_resnet1, num_nodes_last_layer)
-        self.resnet2_bn = torch.nn.BatchNorm1d(num_nodes_last_layer, eps=1e-3, momentum=batchnorm_momentum)
+        self.resnet2_bn = torch.nn.BatchNorm1d(
+            num_nodes_last_layer, eps=1e-3, momentum=batchnorm_momentum
+        )
 
     def output_size(self) -> int:
         if self.embedding_node.startswith("resnet1"):
@@ -397,19 +427,21 @@ class ResNet34SpL2RegDiar(ResNet34_SP_L2Reg):
         return self.num_nodes_pooling_layer
 
     def forward(
-            self,
-            xs_pad: torch.Tensor,
-            ilens: torch.Tensor,
-            prev_states: torch.Tensor = None,
+        self,
+        xs_pad: torch.Tensor,
+        ilens: torch.Tensor,
+        prev_states: torch.Tensor = None,
     ) -> Tuple[torch.Tensor, torch.Tensor, Optional[torch.Tensor]]:
 
         endpoints = OrderedDict()
         res_out, ilens = super().forward(xs_pad, ilens)
         endpoints["resnet0_bn"] = res_out
         if self.pooling_type == "frame_gsp":
-            features = statistic_pooling(res_out, ilens, (2, ))
+            features = statistic_pooling(res_out, ilens, (2,))
         else:
-            features, ilens = windowed_statistic_pooling(res_out, ilens, (2, ), self.pool_size, self.stride)
+            features, ilens = windowed_statistic_pooling(
+                res_out, ilens, (2,), self.pool_size, self.stride
+            )
         features = features.transpose(1, 2)
         endpoints["pooling"] = features
 
@@ -428,4 +460,3 @@ class ResNet34SpL2RegDiar(ResNet34_SP_L2Reg):
         endpoints["resnet2_bn"] = features
 
         return endpoints[self.embedding_node], ilens, None
-

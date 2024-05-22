@@ -40,9 +40,7 @@ class CTC(torch.nn.Module):
                 logging.warning("ignore_nan_grad option is not supported for warp_ctc")
             self.ctc_loss = warp_ctc.CTCLoss(size_average=True, reduce=reduce)
         else:
-            raise ValueError(
-                f'ctc_type must be "builtin" or "warpctc": {self.ctc_type}'
-            )
+            raise ValueError(f'ctc_type must be "builtin" or "warpctc": {self.ctc_type}')
 
         self.reduce = reduce
 

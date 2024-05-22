@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import DAMO_SPACE, GraphFst
 from fun_text_processing.text_normalization.ru.verbalizers.time import TimeFst as TNTimeVerbalizer
@@ -24,30 +22,32 @@ class TimeFst(GraphFst):
         tn_time_verbalizer = TNTimeVerbalizer().graph
         tn_time_graph_preserve_order = pynini.compose(tn_time_tagger, tn_time_verbalizer).optimize()
         graph_preserve_order = pynini.invert(tn_time_graph_preserve_order).optimize()
-        graph_preserve_order = pynutil.insert("hours: \"") + graph_preserve_order + pynutil.insert("\"")
+        graph_preserve_order = (
+            pynutil.insert('hours: "') + graph_preserve_order + pynutil.insert('"')
+        )
 
         # "пятнадцать минут шестого" -> 17:15
         # Requires permutations for the correct verbalization
         m_next_h = (
-            pynutil.insert("minutes: \"")
+            pynutil.insert('minutes: "')
             + pynini.invert(tn_time.minutes).optimize()
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
             + pynini.accep(DAMO_SPACE)
-            + pynutil.insert("hours: \"")
+            + pynutil.insert('hours: "')
             + pynini.invert(tn_time.increment_hour_ordinal).optimize()
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
         ).optimize()
 
         # "без пятнадцати минут шесть" -> 17:45
         # Requires permutation for the correct verbalization
         m_to_h = (
-            pynini.cross("без ", "minutes: \"")
+            pynini.cross("без ", 'minutes: "')
             + pynini.invert(tn_time.mins_to_h)
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
             + pynini.accep(DAMO_SPACE)
-            + pynutil.insert("hours: \"")
+            + pynutil.insert('hours: "')
             + pynini.invert(tn_time.increment_hour_cardinal).optimize()
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
         )
 
         graph_reserve_order = m_next_h | m_to_h

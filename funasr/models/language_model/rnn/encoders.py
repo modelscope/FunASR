@@ -34,9 +34,7 @@ class RNNP(torch.nn.Module):
                 inputdim = hdim
 
             RNN = torch.nn.LSTM if "lstm" in typ else torch.nn.GRU
-            rnn = RNN(
-                inputdim, cdim, num_layers=1, bidirectional=bidir, batch_first=True
-            )
+            rnn = RNN(inputdim, cdim, num_layers=1, bidirectional=bidir, batch_first=True)
 
             setattr(self, "%s%d" % ("birnn" if bidir else "rnn", i), rnn)
 
@@ -72,9 +70,7 @@ class RNNP(torch.nn.Module):
             rnn.flatten_parameters()
             if prev_state is not None and rnn.bidirectional:
                 prev_state = reset_backward_rnn_state(prev_state)
-            ys, states = rnn(
-                xs_pack, hx=None if prev_state is None else prev_state[layer]
-            )
+            ys, states = rnn(xs_pack, hx=None if prev_state is None else prev_state[layer])
             elayer_states.append(states)
             # ys: utt list of frame x cdim x 2 (2: means bidirectional)
             ys_pad, ilens = pad_packed_sequence(ys, batch_first=True)
@@ -155,9 +151,7 @@ class RNN(torch.nn.Module):
         # ys: utt list of frame x cdim x 2 (2: means bidirectional)
         ys_pad, ilens = pad_packed_sequence(ys, batch_first=True)
         # (sum _utt frame_utt) x dim
-        projected = torch.tanh(
-            self.l_last(ys_pad.contiguous().view(-1, ys_pad.size(2)))
-        )
+        projected = torch.tanh(self.l_last(ys_pad.contiguous().view(-1, ys_pad.size(2))))
         xs_pad = projected.view(ys_pad.size(0), ys_pad.size(1), -1)
         return xs_pad, ilens, states  # x: utt list of frame x dim
 
@@ -225,9 +219,7 @@ class VGG2L(torch.nn.Module):
         else:
             ilens = np.array(ilens, dtype=np.float32)
         ilens = np.array(np.ceil(ilens / 2), dtype=np.int64)
-        ilens = np.array(
-            np.ceil(np.array(ilens, dtype=np.float32) / 2), dtype=np.int64
-        ).tolist()
+        ilens = np.array(np.ceil(np.array(ilens, dtype=np.float32) / 2), dtype=np.int64).tolist()
 
         # x: utt_list of frame (remove zeropaded frames) x (input channel num x dim)
         xs_pad = xs_pad.transpose(1, 2)
@@ -250,9 +242,7 @@ class Encoder(torch.nn.Module):
     :param int in_channel: number of input channels
     """
 
-    def __init__(
-            self, etype, idim, elayers, eunits, eprojs, subsample, dropout, in_channel=1
-    ):
+    def __init__(self, etype, idim, elayers, eunits, eprojs, subsample, dropout, in_channel=1):
         super(Encoder, self).__init__()
         typ = etype.lstrip("vgg").rstrip("p")
         if typ not in ["lstm", "gru", "blstm", "bgru"]:
@@ -367,6 +357,4 @@ def encoder_for(args, idim, subsample):
             enc_list.append(enc)
         return enc_list
     else:
-        raise ValueError(
-            "Number of encoders needs to be more than one. {}".format(num_encs)
-        )
+        raise ValueError("Number of encoders needs to be more than one. {}".format(num_encs))

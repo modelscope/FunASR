@@ -1,4 +1,5 @@
 """Torch utility module."""
+
 import torch
 
 if torch.distributed.is_available():

@@ -1,5 +1,3 @@
-
-
 # Copyright 2017 Google Inc.
 
 
@@ -21,7 +19,7 @@ from pynini.lib import pynutil
 
 class CardinalFst(GraphFst):
     """
-    Finite state transducer for classifying cardinals, e.g. 
+    Finite state transducer for classifying cardinals, e.g.
         "1 001" ->  cardinal { integer: "тысяча один" }
 
     Args:
@@ -34,59 +32,75 @@ class CardinalFst(GraphFst):
     def __init__(self, number_names: dict, alternative_formats: dict, deterministic: bool = False):
         super().__init__(name="cardinal", kind="classify", deterministic=deterministic)
 
-        self.cardinal_numbers_default = self.get_cardinal_numbers(number_names, alternative_formats, mode="all")
+        self.cardinal_numbers_default = self.get_cardinal_numbers(
+            number_names, alternative_formats, mode="all"
+        )
         self.cardinal_numbers_nominative = self.get_cardinal_numbers(
             number_names, alternative_formats, mode="nominative"
         )
         self.optional_graph_negative = pynini.closure(
-            pynutil.insert("negative: ") + pynini.cross("-", "\"true\"") + insert_space, 0, 1
+            pynutil.insert("negative: ") + pynini.cross("-", '"true"') + insert_space, 0, 1
         )
 
         self.cardinal_numbers_with_optional_negative = (
             self.optional_graph_negative
-            + pynutil.insert("integer: \"")
+            + pynutil.insert('integer: "')
             + self.cardinal_numbers_default
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
         )
 
         # "03" -> remove leading zeros and verbalize
         leading_zeros = pynini.closure(pynini.cross("0", ""))
-        self.cardinal_numbers_with_leading_zeros = (leading_zeros + self.cardinal_numbers_default).optimize()
+        self.cardinal_numbers_with_leading_zeros = (
+            leading_zeros + self.cardinal_numbers_default
+        ).optimize()
 
         # "123" -> "один два три"
-        single_digits_graph = pynini.string_file(get_abs_path("data/numbers/cardinals_nominative_case.tsv")).optimize()
+        single_digits_graph = pynini.string_file(
+            get_abs_path("data/numbers/cardinals_nominative_case.tsv")
+        ).optimize()
         single_digits_graph = pynini.compose(DAMO_DIGIT, single_digits_graph)
-        self.single_digits_graph = single_digits_graph + pynini.closure(insert_space + single_digits_graph)
+        self.single_digits_graph = single_digits_graph + pynini.closure(
+            insert_space + single_digits_graph
+        )
 
         optional_quantity = pynini.string_file(get_abs_path("data/numbers/quantity.tsv")).optimize()
-        optional_quantity = pynutil.insert("quantity: \"") + optional_quantity + pynutil.insert("\"")
+        optional_quantity = pynutil.insert('quantity: "') + optional_quantity + pynutil.insert('"')
         optional_quantity = pynini.closure(
-            (pynutil.add_weight(pynini.accep(DAMO_SPACE), -0.1) | insert_space) + optional_quantity, 0, 1
+            (pynutil.add_weight(pynini.accep(DAMO_SPACE), -0.1) | insert_space) + optional_quantity,
+            0,
+            1,
         )
 
         serial_graph = self.get_serial_graph()
 
         final_graph = (
             self.optional_graph_negative
-            + pynutil.insert("integer: \"")
+            + pynutil.insert('integer: "')
             + self.cardinal_numbers_with_leading_zeros
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
             + optional_quantity
         ).optimize()
 
         final_graph = pynutil.add_weight(final_graph, -0.1)
-        final_graph |= pynutil.insert("integer: \"") + pynutil.add_weight(serial_graph, 10) + pynutil.insert("\"")
+        final_graph |= (
+            pynutil.insert('integer: "')
+            + pynutil.add_weight(serial_graph, 10)
+            + pynutil.insert('"')
+        )
         self.final_graph = final_graph
 
         # to cover cases "2-х" -> "двух" (this is not covered by ordinal endings)
         final_graph |= pynini.compose(
-            pynini.compose(DAMO_DIGIT ** (1, ...) + pynini.cross('-х', ''), final_graph),
-            DAMO_SIGMA + pynini.accep("х\"") + DAMO_SIGMA,
+            pynini.compose(DAMO_DIGIT ** (1, ...) + pynini.cross("-х", ""), final_graph),
+            DAMO_SIGMA + pynini.accep('х"') + DAMO_SIGMA,
         )
         final_graph = self.add_tokens(final_graph)
         self.fst = final_graph.optimize()
 
-    def get_cardinal_numbers(self, number_names: dict, alternative_formats: dict, mode: str = "all"):
+    def get_cardinal_numbers(
+        self, number_names: dict, alternative_formats: dict, mode: str = "all"
+    ):
         """Returns cardinal numbers names graph.
 
         Args:
@@ -95,13 +109,13 @@ class CardinalFst(GraphFst):
             mode: "all" - to return graph that includes all Ru cases, "nominative" to return only the nominative form
         """
         if mode == "all":
-            cardinal_names = number_names['cardinal_number_names']
+            cardinal_names = number_names["cardinal_number_names"]
         elif mode == "nominative":
-            cardinal_names = number_names['cardinal_names_nominative']
+            cardinal_names = number_names["cardinal_names_nominative"]
         else:
-            raise ValueError(f'{mode} is not supported.')
-        one_thousand_alternative = alternative_formats['one_thousand_alternative']
-        separators = alternative_formats['separators']
+            raise ValueError(f"{mode} is not supported.")
+        one_thousand_alternative = alternative_formats["one_thousand_alternative"]
+        separators = alternative_formats["separators"]
 
         cardinal_numbers = cardinal_names | pynini.compose(cardinal_names, one_thousand_alternative)
         cardinal_numbers = pynini.compose(separators, cardinal_numbers)
@@ -126,11 +140,26 @@ class CardinalFst(GraphFst):
 
         # at least 1 alpha and 1 digit is present
         at_least_one_alpha_num = (
-            DAMO_SIGMA + (RU_ALPHA | pynini.project(TO_CYRILLIC, "input")) + DAMO_SIGMA + DAMO_DIGIT + DAMO_SIGMA
-        ) | (DAMO_SIGMA + DAMO_DIGIT + DAMO_SIGMA + (RU_ALPHA | pynini.project(TO_CYRILLIC, "input")) + DAMO_SIGMA)
+            DAMO_SIGMA
+            + (RU_ALPHA | pynini.project(TO_CYRILLIC, "input"))
+            + DAMO_SIGMA
+            + DAMO_DIGIT
+            + DAMO_SIGMA
+        ) | (
+            DAMO_SIGMA
+            + DAMO_DIGIT
+            + DAMO_SIGMA
+            + (RU_ALPHA | pynini.project(TO_CYRILLIC, "input"))
+            + DAMO_SIGMA
+        )
         serial_graph = pynini.compose(at_least_one_alpha_num, serial_graph.optimize()).optimize()
         # numbers only with 2+ delimiters
         serial_graph |= (
-            num_graph + delimiter + num_graph + delimiter + num_graph + pynini.closure(delimiter + num_graph)
+            num_graph
+            + delimiter
+            + num_graph
+            + delimiter
+            + num_graph
+            + pynini.closure(delimiter + num_graph)
         ).optimize()
         return serial_graph.optimize()

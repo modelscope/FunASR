@@ -18,7 +18,7 @@ requirements = {
         "kaldiio>=2.17.0",
         "torch_complex",
         # "nltk>=3.4.5",
-        "sentencepiece", # train
+        "sentencepiece",  # train
         "jieba",
         "rotary_embedding_torch",
         # "ffmpeg-python",
@@ -53,7 +53,7 @@ requirements = {
         "torch_optimizer",
         "fairscale",
         "transformers",
-        "openai-whisper"
+        "openai-whisper",
     ],
     "setup": [
         "numpy",
@@ -81,9 +81,9 @@ requirements = {
         "recommonmark>=0.4.0",
         "nbsphinx>=0.4.2",
         "sphinx-markdown-tables>=0.0.12",
-        "configargparse>=1.2.1"
+        "configargparse>=1.2.1",
     ],
-    "llm":[
+    "llm": [
         "transformers>=4.32.0",
         "accelerate",
         "tiktoken",
@@ -102,9 +102,7 @@ requirements["test"].extend(requirements["train"])
 install_requires = requirements["install"]
 setup_requires = requirements["setup"]
 tests_require = requirements["test"]
-extras_require = {
-    k: v for k, v in requirements.items() if k not in ["install", "setup"]
-}
+extras_require = {k: v for k, v in requirements.items() if k not in ["install", "setup"]}
 
 dirname = os.path.dirname(__file__)
 version_file = os.path.join(dirname, "funasr", "version.txt")
@@ -139,13 +137,15 @@ setup(
         "License :: OSI Approved :: Apache Software License",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-    entry_points={"console_scripts": [
-        "funasr = funasr.bin.inference:main_hydra",
-        "funasr-train = funasr.bin.train:main_hydra",
-        "funasr-export = funasr.bin.export:main_hydra",
-        "scp2jsonl = funasr.datasets.audio_datasets.scp2jsonl:main_hydra",
-        "jsonl2scp = funasr.datasets.audio_datasets.jsonl2scp:main_hydra",
-        "funasr-scp2jsonl = funasr.datasets.audio_datasets.scp2jsonl:main_hydra",
-        "funasr-jsonl2scp = funasr.datasets.audio_datasets.jsonl2scp:main_hydra",
-    ]},
+    entry_points={
+        "console_scripts": [
+            "funasr = funasr.bin.inference:main_hydra",
+            "funasr-train = funasr.bin.train:main_hydra",
+            "funasr-export = funasr.bin.export:main_hydra",
+            "scp2jsonl = funasr.datasets.audio_datasets.scp2jsonl:main_hydra",
+            "jsonl2scp = funasr.datasets.audio_datasets.jsonl2scp:main_hydra",
+            "funasr-scp2jsonl = funasr.datasets.audio_datasets.scp2jsonl:main_hydra",
+            "funasr-jsonl2scp = funasr.datasets.audio_datasets.jsonl2scp:main_hydra",
+        ]
+    },
 )

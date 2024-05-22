@@ -1,4 +1,3 @@
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import (
     DAMO_DIGIT,
@@ -35,20 +34,28 @@ class DateFst(GraphFst):
     ):
         super().__init__(name="date", kind="classify", deterministic=deterministic)
 
-        add_leading_zero_to_double_digit = (DAMO_DIGIT + DAMO_DIGIT) | (pynutil.insert("0") + DAMO_DIGIT)
+        add_leading_zero_to_double_digit = (DAMO_DIGIT + DAMO_DIGIT) | (
+            pynutil.insert("0") + DAMO_DIGIT
+        )
         optional_delete_space = pynini.closure(DAMO_SIGMA | pynutil.delete(" ", weight=0.0001))
         tagger = tn_date_verbalizer.graph.invert().optimize()
 
         delete_day_marker = (
-            pynutil.delete("day: \"") + pynini.closure(DAMO_NOT_QUOTE, 1) + pynutil.delete("\"")
+            pynutil.delete('day: "') + pynini.closure(DAMO_NOT_QUOTE, 1) + pynutil.delete('"')
         ) @ itn_cardinal_tagger.graph_no_exception
 
-        month_as_number = pynutil.delete("month: \"") + itn_cardinal_tagger.graph_no_exception + pynutil.delete("\"")
-        month_as_string = pynutil.delete("month: \"") + tn_date_tagger.month_abbr.invert() + pynutil.delete("\"")
+        month_as_number = (
+            pynutil.delete('month: "')
+            + itn_cardinal_tagger.graph_no_exception
+            + pynutil.delete('"')
+        )
+        month_as_string = (
+            pynutil.delete('month: "') + tn_date_tagger.month_abbr.invert() + pynutil.delete('"')
+        )
 
         convert_year = (tn_date_tagger.year @ optional_delete_space).invert().optimize()
         delete_year_marker = (
-            pynutil.delete("year: \"") + pynini.closure(DAMO_NOT_QUOTE, 1) + pynutil.delete("\"")
+            pynutil.delete('year: "') + pynini.closure(DAMO_NOT_QUOTE, 1) + pynutil.delete('"')
         ) @ convert_year
 
         # day. month as string (year)
@@ -73,5 +80,5 @@ class DateFst(GraphFst):
 
         final_graph = tagger @ verbalizer
 
-        graph = pynutil.insert("name: \"") + convert_space(final_graph) + pynutil.insert("\"")
+        graph = pynutil.insert('name: "') + convert_space(final_graph) + pynutil.insert('"')
         self.fst = graph.optimize()

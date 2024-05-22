@@ -1,6 +1,3 @@
-
-
-
 from fun_text_processing.inverse_text_normalization.fr.graph_utils import GraphFst
 from fun_text_processing.inverse_text_normalization.fr.verbalizers.cardinal import CardinalFst
 from fun_text_processing.inverse_text_normalization.fr.verbalizers.date import DateFst
@@ -18,7 +15,7 @@ from fun_text_processing.inverse_text_normalization.fr.verbalizers.whitelist imp
 class VerbalizeFst(GraphFst):
     """
     Composes other verbalizer grammars.
-    For deployment, this grammar will be compiled and exported to OpenFst Finate State Archiv (FAR) File. 
+    For deployment, this grammar will be compiled and exported to OpenFst Finate State Archiv (FAR) File.
     More details to deployment at NeMo/tools/text_processing_deployment.
     """
 

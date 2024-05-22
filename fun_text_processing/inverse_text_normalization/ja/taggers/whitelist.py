@@ -15,5 +15,5 @@ class WhiteListFst(GraphFst):
         super().__init__(name="whitelist", kind="classify")
 
         whitelist = pynini.string_file(get_abs_path("data/whitelist.tsv")).invert()
-        graph = pynutil.insert("name: \"") + convert_space(whitelist) + pynutil.insert("\"")
+        graph = pynutil.insert('name: "') + convert_space(whitelist) + pynutil.insert('"')
         self.fst = graph.optimize()

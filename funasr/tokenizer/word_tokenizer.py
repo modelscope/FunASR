@@ -19,8 +19,7 @@ class WordTokenizer(AbsTokenizer):
 
         if not remove_non_linguistic_symbols and non_linguistic_symbols is not None:
             warnings.warn(
-                "non_linguistic_symbols is only used "
-                "when remove_non_linguistic_symbols = True"
+                "non_linguistic_symbols is only used " "when remove_non_linguistic_symbols = True"
             )
 
         if non_linguistic_symbols is None:

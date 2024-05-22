@@ -19,8 +19,7 @@ class KoreanCleaner:
             "9": "구",
         }
         new_text = "".join(
-            number_to_kor[char] if char in number_to_kor.keys() else char
-            for char in text
+            number_to_kor[char] if char in number_to_kor.keys() else char for char in text
         )
         return new_text
 
@@ -56,9 +55,7 @@ class KoreanCleaner:
         }
         new_text = re.sub("[a-z]+", lambda x: str.upper(x.group()), text)
         new_text = "".join(
-            upper_alphabet_to_kor[char]
-            if char in upper_alphabet_to_kor.keys()
-            else char
+            upper_alphabet_to_kor[char] if char in upper_alphabet_to_kor.keys() else char
             for char in new_text
         )
 

@@ -133,7 +133,7 @@ def tokenize(
 
     if not write_vocabulary:
         return
-    
+
     ## FIXME
     ## del duplicate add_symbols in counter
     for symbol_and_id in add_symbol:
@@ -197,12 +197,8 @@ def get_parser() -> argparse.ArgumentParser:
         help="The verbose level of logging",
     )
 
-    parser.add_argument(
-        "--input", "-i", required=True, help="Input text. - indicates sys.stdin"
-    )
-    parser.add_argument(
-        "--output", "-o", required=True, help="Output text. - indicates sys.stdout"
-    )
+    parser.add_argument("--input", "-i", required=True, help="Input text. - indicates sys.stdin")
+    parser.add_argument("--output", "-o", required=True, help="Output text. - indicates sys.stdout")
     parser.add_argument(
         "--field",
         "-f",

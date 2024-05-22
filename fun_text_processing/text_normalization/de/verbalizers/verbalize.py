@@ -1,4 +1,3 @@
-
 from fun_text_processing.text_normalization.de.taggers.cardinal import CardinalFst as CardinalTagger
 from fun_text_processing.text_normalization.de.verbalizers.cardinal import CardinalFst
 from fun_text_processing.text_normalization.de.verbalizers.date import DateFst
@@ -17,7 +16,7 @@ from fun_text_processing.text_normalization.en.verbalizers.whitelist import Whit
 class VerbalizeFst(GraphFst):
     """
     Composes other verbalizer grammars.
-    For deployment, this grammar will be compiled and exported to OpenFst Finate State Archiv (FAR) File. 
+    For deployment, this grammar will be compiled and exported to OpenFst Finate State Archiv (FAR) File.
     More details to deployment at NeMo/tools/text_processing_deployment.
 
     Args:
@@ -38,7 +37,9 @@ class VerbalizeFst(GraphFst):
         fraction_graph = fraction.fst
         date = DateFst(ordinal=ordinal)
         date_graph = date.fst
-        measure = MeasureFst(cardinal=cardinal, decimal=decimal, fraction=fraction, deterministic=deterministic)
+        measure = MeasureFst(
+            cardinal=cardinal, decimal=decimal, fraction=fraction, deterministic=deterministic
+        )
         measure_graph = measure.fst
         electronic = ElectronicFst(deterministic=deterministic)
         electronic_graph = electronic.fst

@@ -1,5 +1,3 @@
-
-
 # Copyright 2017 Google Inc.
 
 
@@ -7,7 +5,10 @@
 # Russian minimally supervised number grammar.
 
 import pynini
-from fun_text_processing.text_normalization.en.graph_utils import DAMO_NON_BREAKING_SPACE, DAMO_SPACE
+from fun_text_processing.text_normalization.en.graph_utils import (
+    DAMO_NON_BREAKING_SPACE,
+    DAMO_SPACE,
+)
 from fun_text_processing.text_normalization.ru.utils import get_abs_path
 
 RU_LOWER_ALPHA = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя"
@@ -41,7 +42,9 @@ RU_STRESSED_MAP = [
     ("Ё", "Е"),
 ]
 
-REWRITE_STRESSED = pynini.closure(pynini.string_map(RU_STRESSED_MAP).optimize() | RU_ALPHA).optimize()
+REWRITE_STRESSED = pynini.closure(
+    pynini.string_map(RU_STRESSED_MAP).optimize() | RU_ALPHA
+).optimize()
 TO_CYRILLIC = pynini.string_file(get_abs_path("data/latin_to_cyrillic.tsv")).optimize()
 TO_LATIN = pynini.invert(TO_CYRILLIC).optimize()
 RU_ALPHA_OR_SPACE = pynini.union(RU_ALPHA, DAMO_SPACE, DAMO_NON_BREAKING_SPACE).optimize()

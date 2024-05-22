@@ -29,11 +29,11 @@ class FairseqDropout(nn.Module):
             return x
 
     def make_generation_fast_(
-            self,
-            name: str,
-            retain_dropout: bool = False,
-            retain_dropout_modules: Optional[List[str]] = None,
-            **kwargs
+        self,
+        name: str,
+        retain_dropout: bool = False,
+        retain_dropout_modules: Optional[List[str]] = None,
+        **kwargs,
     ):
         if retain_dropout:
             if retain_dropout_modules is not None and self.module_name is None:
@@ -42,12 +42,10 @@ class FairseqDropout(nn.Module):
                     "because module_name was not set".format(name)
                 )
             elif (
-                    retain_dropout_modules is None  # if None, apply to all modules
-                    or self.module_name in retain_dropout_modules
+                retain_dropout_modules is None  # if None, apply to all modules
+                or self.module_name in retain_dropout_modules
             ):
-                logging.info(
-                    "Enabling dropout during inference for module: {}".format(name)
-                )
+                logging.info("Enabling dropout during inference for module: {}".format(name))
                 self.apply_during_inference = True
             else:
                 logging.info("Disabling dropout for module: {}".format(name))
@@ -60,19 +58,19 @@ class MultiheadAttention(nn.Module):
     """
 
     def __init__(
-            self,
-            embed_dim,
-            num_heads,
-            kdim=None,
-            vdim=None,
-            dropout=0.0,
-            bias=True,
-            add_bias_kv=False,
-            add_zero_attn=False,
-            self_attention=False,
-            encoder_decoder_attention=False,
-            q_noise=0.0,
-            qn_block_size=8,
+        self,
+        embed_dim,
+        num_heads,
+        kdim=None,
+        vdim=None,
+        dropout=0.0,
+        bias=True,
+        add_bias_kv=False,
+        add_zero_attn=False,
+        self_attention=False,
+        encoder_decoder_attention=False,
+        q_noise=0.0,
+        qn_block_size=8,
     ):
         super().__init__()
         self.embed_dim = embed_dim
@@ -81,15 +79,13 @@ class MultiheadAttention(nn.Module):
         self.qkv_same_dim = self.kdim == embed_dim and self.vdim == embed_dim
 
         self.num_heads = num_heads
-        self.dropout_module = FairseqDropout(
-            dropout, module_name=self.__class__.__name__
-        )
+        self.dropout_module = FairseqDropout(dropout, module_name=self.__class__.__name__)
 
         self.head_dim = embed_dim // num_heads
         assert (
-                self.head_dim * num_heads == self.embed_dim
+            self.head_dim * num_heads == self.embed_dim
         ), "embed_dim must be divisible by num_heads"
-        self.scaling = self.head_dim ** -0.5
+        self.scaling = self.head_dim**-0.5
 
         self.self_attention = self_attention
         self.encoder_decoder_attention = encoder_decoder_attention
@@ -157,45 +153,23 @@ class MultiheadAttention(nn.Module):
             start_idx = i * self.head_dim
             end_idx = (i + 1) * self.head_dim
             k_proj_heads_norm.append(
-                torch.sum(
-                    torch.abs(
-                        self.k_proj.weight[
-                        start_idx:end_idx,
-                        ]
-                    )
-                ).tolist()
+                torch.sum(torch.abs(self.k_proj.weight[start_idx:end_idx,])).tolist()
                 + torch.sum(torch.abs(self.k_proj.bias[start_idx:end_idx])).tolist()
             )
             q_proj_heads_norm.append(
-                torch.sum(
-                    torch.abs(
-                        self.q_proj.weight[
-                        start_idx:end_idx,
-                        ]
-                    )
-                ).tolist()
+                torch.sum(torch.abs(self.q_proj.weight[start_idx:end_idx,])).tolist()
                 + torch.sum(torch.abs(self.q_proj.bias[start_idx:end_idx])).tolist()
             )
             v_proj_heads_norm.append(
-                torch.sum(
-                    torch.abs(
-                        self.v_proj.weight[
-                        start_idx:end_idx,
-                        ]
-                    )
-                ).tolist()
+                torch.sum(torch.abs(self.v_proj.weight[start_idx:end_idx,])).tolist()
                 + torch.sum(torch.abs(self.v_proj.bias[start_idx:end_idx])).tolist()
             )
 
         heads_norm = []
         for i in range(self.num_heads):
-            heads_norm.append(
-                k_proj_heads_norm[i] + q_proj_heads_norm[i] + v_proj_heads_norm[i]
-            )
+            heads_norm.append(k_proj_heads_norm[i] + q_proj_heads_norm[i] + v_proj_heads_norm[i])
 
-        sorted_head_index = sorted(
-            range(self.num_heads), key=lambda k: heads_norm[k], reverse=True
-        )
+        sorted_head_index = sorted(range(self.num_heads), key=lambda k: heads_norm[k], reverse=True)
         reserve_head_index = []
         for i in range(num_heads_to_keep):
             start = sorted_head_index[i] * self.head_dim
@@ -214,26 +188,14 @@ class MultiheadAttention(nn.Module):
 
         for ele in reserve_head_index:
             start_idx, end_idx = ele
-            new_q_weight.append(
-                self.q_proj.weight[
-                start_idx:end_idx,
-                ]
-            )
+            new_q_weight.append(self.q_proj.weight[start_idx:end_idx,])
             new_q_bias.append(self.q_proj.bias[start_idx:end_idx])
 
-            new_k_weight.append(
-                self.k_proj.weight[
-                start_idx:end_idx,
-                ]
-            )
+            new_k_weight.append(self.k_proj.weight[start_idx:end_idx,])
 
             new_k_bias.append(self.k_proj.bias[start_idx:end_idx])
 
-            new_v_weight.append(
-                self.v_proj.weight[
-                start_idx:end_idx,
-                ]
-            )
+            new_v_weight.append(self.v_proj.weight[start_idx:end_idx,])
             new_v_bias.append(self.v_proj.bias[start_idx:end_idx])
 
             new_out_proj_weight.append(self.out_proj.weight[:, start_idx:end_idx])
@@ -277,17 +239,17 @@ class MultiheadAttention(nn.Module):
         self.skip_embed_dim_check = True
 
     def forward(
-            self,
-            query,
-            key: Optional[Tensor],
-            value: Optional[Tensor],
-            key_padding_mask: Optional[Tensor] = None,
-            incremental_state: Optional[Dict[str, Dict[str, Optional[Tensor]]]] = None,
-            need_weights: bool = True,
-            static_kv: bool = False,
-            attn_mask: Optional[Tensor] = None,
-            before_softmax: bool = False,
-            need_head_weights: bool = False,
+        self,
+        query,
+        key: Optional[Tensor],
+        value: Optional[Tensor],
+        key_padding_mask: Optional[Tensor] = None,
+        incremental_state: Optional[Dict[str, Dict[str, Optional[Tensor]]]] = None,
+        need_weights: bool = True,
+        static_kv: bool = False,
+        attn_mask: Optional[Tensor] = None,
+        before_softmax: bool = False,
+        need_head_weights: bool = False,
     ) -> Tuple[Tensor, Optional[Tensor]]:
         """Input shape: Time x Batch x Channel
 
@@ -314,9 +276,7 @@ class MultiheadAttention(nn.Module):
         tgt_len, bsz, embed_dim = query.size()
         src_len = tgt_len
         if not self.skip_embed_dim_check:
-            assert (
-                    embed_dim == self.embed_dim
-            ), f"query dim {embed_dim} != {self.embed_dim}"
+            assert embed_dim == self.embed_dim, f"query dim {embed_dim} != {self.embed_dim}"
         assert list(query.size()) == [tgt_len, bsz, embed_dim]
         if key is not None:
             src_len, key_bsz, _ = key.size()
@@ -326,18 +286,18 @@ class MultiheadAttention(nn.Module):
                 assert src_len, bsz == value.shape[:2]
 
         if (
-                not self.onnx_trace
-                and not is_tpu  # don't use PyTorch version on TPUs
-                and incremental_state is None
-                and not static_kv
-                # A workaround for quantization to work. Otherwise JIT compilation
-                # treats bias in linear module as method.
-                and not torch.jit.is_scripting()
-                # The Multihead attention implemented in pytorch forces strong dimension check
-                # for input embedding dimention and K,Q,V projection dimension.
-                # Since pruning will break the dimension check and it is not easy to modify the pytorch API,
-                # it is preferred to bypass the pytorch MHA when we need to skip embed_dim_check
-                and not self.skip_embed_dim_check
+            not self.onnx_trace
+            and not is_tpu  # don't use PyTorch version on TPUs
+            and incremental_state is None
+            and not static_kv
+            # A workaround for quantization to work. Otherwise JIT compilation
+            # treats bias in linear module as method.
+            and not torch.jit.is_scripting()
+            # The Multihead attention implemented in pytorch forces strong dimension check
+            # for input embedding dimention and K,Q,V projection dimension.
+            # Since pruning will break the dimension check and it is not easy to modify the pytorch API,
+            # it is preferred to bypass the pytorch MHA when we need to skip embed_dim_check
+            and not self.skip_embed_dim_check
         ):
             assert key is not None and value is not None
             return F.multi_head_attention_forward(
@@ -401,9 +361,7 @@ class MultiheadAttention(nn.Module):
             k = torch.cat([k, self.bias_k.repeat(1, bsz, 1)])
             v = torch.cat([v, self.bias_v.repeat(1, bsz, 1)])
             if attn_mask is not None:
-                attn_mask = torch.cat(
-                    [attn_mask, attn_mask.new_zeros(attn_mask.size(0), 1)], dim=1
-                )
+                attn_mask = torch.cat([attn_mask, attn_mask.new_zeros(attn_mask.size(0), 1)], dim=1)
             if key_padding_mask is not None:
                 key_padding_mask = torch.cat(
                     [
@@ -413,23 +371,11 @@ class MultiheadAttention(nn.Module):
                     dim=1,
                 )
 
-        q = (
-            q.contiguous()
-                .view(tgt_len, bsz * self.num_heads, self.head_dim)
-                .transpose(0, 1)
-        )
+        q = q.contiguous().view(tgt_len, bsz * self.num_heads, self.head_dim).transpose(0, 1)
         if k is not None:
-            k = (
-                k.contiguous()
-                    .view(-1, bsz * self.num_heads, self.head_dim)
-                    .transpose(0, 1)
-            )
+            k = k.contiguous().view(-1, bsz * self.num_heads, self.head_dim).transpose(0, 1)
         if v is not None:
-            v = (
-                v.contiguous()
-                    .view(-1, bsz * self.num_heads, self.head_dim)
-                    .transpose(0, 1)
-            )
+            v = v.contiguous().view(-1, bsz * self.num_heads, self.head_dim).transpose(0, 1)
 
         if saved_state is not None:
             # saved states are stored with shape (bsz, num_heads, seq_len, head_dim)
@@ -488,16 +434,12 @@ class MultiheadAttention(nn.Module):
             k = torch.cat([k, k.new_zeros((k.size(0), 1) + k.size()[2:])], dim=1)
             v = torch.cat([v, v.new_zeros((v.size(0), 1) + v.size()[2:])], dim=1)
             if attn_mask is not None:
-                attn_mask = torch.cat(
-                    [attn_mask, attn_mask.new_zeros(attn_mask.size(0), 1)], dim=1
-                )
+                attn_mask = torch.cat([attn_mask, attn_mask.new_zeros(attn_mask.size(0), 1)], dim=1)
             if key_padding_mask is not None:
                 key_padding_mask = torch.cat(
                     [
                         key_padding_mask,
-                        torch.zeros(key_padding_mask.size(0), 1).type_as(
-                            key_padding_mask
-                        ),
+                        torch.zeros(key_padding_mask.size(0), 1).type_as(key_padding_mask),
                     ],
                     dim=1,
                 )
@@ -546,9 +488,9 @@ class MultiheadAttention(nn.Module):
         attn = self.out_proj(attn)
         attn_weights: Optional[Tensor] = None
         if need_weights:
-            attn_weights = attn_weights_float.view(
-                bsz, self.num_heads, tgt_len, src_len
-            ).transpose(1, 0)
+            attn_weights = attn_weights_float.view(bsz, self.num_heads, tgt_len, src_len).transpose(
+                1, 0
+            )
             if not need_head_weights:
                 # average attention weights over heads
                 attn_weights = attn_weights.mean(dim=0)
@@ -557,11 +499,11 @@ class MultiheadAttention(nn.Module):
 
     @staticmethod
     def _append_prev_key_padding_mask(
-            key_padding_mask: Optional[Tensor],
-            prev_key_padding_mask: Optional[Tensor],
-            batch_size: int,
-            src_len: int,
-            static_kv: bool,
+        key_padding_mask: Optional[Tensor],
+        prev_key_padding_mask: Optional[Tensor],
+        batch_size: int,
+        src_len: int,
+        static_kv: bool,
     ) -> Optional[Tensor]:
         # saved key padding masks have shape (bsz, seq_len)
         if prev_key_padding_mask is not None and static_kv:
@@ -590,9 +532,7 @@ class MultiheadAttention(nn.Module):
                     (batch_size, src_len - key_padding_mask.size(1)),
                     device=key_padding_mask.device,
                 )
-                new_key_padding_mask = torch.cat(
-                    [filler.float(), key_padding_mask.float()], dim=1
-                )
+                new_key_padding_mask = torch.cat([filler.float(), key_padding_mask.float()], dim=1)
             else:
                 new_key_padding_mask = key_padding_mask.float()
         else:
@@ -601,9 +541,9 @@ class MultiheadAttention(nn.Module):
 
     @torch.jit.export
     def reorder_incremental_state(
-            self,
-            incremental_state: Dict[str, Dict[str, Optional[Tensor]]],
-            new_order: Tensor,
+        self,
+        incremental_state: Dict[str, Dict[str, Optional[Tensor]]],
+        new_order: Tensor,
     ):
         """Reorder buffered internal state (for incremental generation)."""
         input_buffer = self._get_input_buffer(incremental_state)
@@ -611,16 +551,16 @@ class MultiheadAttention(nn.Module):
             for k in input_buffer.keys():
                 input_buffer_k = input_buffer[k]
                 if input_buffer_k is not None:
-                    if self.encoder_decoder_attention and input_buffer_k.size(
-                            0
-                    ) == new_order.size(0):
+                    if self.encoder_decoder_attention and input_buffer_k.size(0) == new_order.size(
+                        0
+                    ):
                         break
                     input_buffer[k] = input_buffer_k.index_select(0, new_order)
             incremental_state = self._set_input_buffer(incremental_state, input_buffer)
         return incremental_state
 
     def _get_input_buffer(
-            self, incremental_state: Optional[Dict[str, Dict[str, Optional[Tensor]]]]
+        self, incremental_state: Optional[Dict[str, Dict[str, Optional[Tensor]]]]
     ) -> Dict[str, Optional[Tensor]]:
         result = self.get_incremental_state(incremental_state, "attn_state")
         if result is not None:
@@ -630,9 +570,9 @@ class MultiheadAttention(nn.Module):
             return empty_result
 
     def _set_input_buffer(
-            self,
-            incremental_state: Dict[str, Dict[str, Optional[Tensor]]],
-            buffer: Dict[str, Optional[Tensor]],
+        self,
+        incremental_state: Dict[str, Dict[str, Optional[Tensor]]],
+        buffer: Dict[str, Optional[Tensor]],
     ):
         return self.set_incremental_state(incremental_state, "attn_state", buffer)
 
@@ -648,8 +588,8 @@ class MultiheadAttention(nn.Module):
                 # in_proj_weight used to be q + k + v with same dimensions
                 dim = int(state_dict[k].shape[0] / 3)
                 items_to_add[prefix + "q_proj.weight"] = state_dict[k][:dim]
-                items_to_add[prefix + "k_proj.weight"] = state_dict[k][dim: 2 * dim]
-                items_to_add[prefix + "v_proj.weight"] = state_dict[k][2 * dim:]
+                items_to_add[prefix + "k_proj.weight"] = state_dict[k][dim : 2 * dim]
+                items_to_add[prefix + "v_proj.weight"] = state_dict[k][2 * dim :]
 
                 keys_to_remove.append(k)
 
@@ -657,10 +597,8 @@ class MultiheadAttention(nn.Module):
                 if k_bias in state_dict.keys():
                     dim = int(state_dict[k].shape[0] / 3)
                     items_to_add[prefix + "q_proj.bias"] = state_dict[k_bias][:dim]
-                    items_to_add[prefix + "k_proj.bias"] = state_dict[k_bias][
-                                                           dim: 2 * dim
-                                                           ]
-                    items_to_add[prefix + "v_proj.bias"] = state_dict[k_bias][2 * dim:]
+                    items_to_add[prefix + "k_proj.bias"] = state_dict[k_bias][dim : 2 * dim]
+                    items_to_add[prefix + "v_proj.bias"] = state_dict[k_bias][2 * dim :]
 
                     keys_to_remove.append(prefix + "in_proj_bias")
 

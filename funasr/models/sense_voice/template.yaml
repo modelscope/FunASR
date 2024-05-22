@@ -1,45 +1,108 @@
-# This is an example that demonstrates how to configure a model file.
-# You can modify the configuration according to your own requirements.
-
-# to print the register_table:
-# from funasr.register import tables
-# tables.print()
-
 # network architecture
-model: SenseVoice
+model: SenseVoiceRWKV
 model_conf:
     lsm_weight: 0.1
     length_normalized_loss: true
-    hub: funasr
+    activation_checkpoint: true
+    sos: "<|startoftranscript|>"
+    eos: "<|endoftext|>"
+    downsample_rate: 4
+    use_padmask: true
+
+    dims:
+        n_mels: 128
+        n_vocab: 60515
+        n_audio_ctx: 1500
+        n_audio_state: 1280
+        n_audio_head: 20
+        n_audio_layer: 32
+        n_text_ctx: 448
+        n_text_state: 1280
+        n_text_head: 20
+        n_text_layer: 32
 
 
+# decoder
+decoder: SenseVoiceDecoder
+decoder_conf:
+    rwkv_cfg:
+      n_embd: 1280
+      dropout: 0
+      head_size_a: 64
+      ctx_len: 1280
+      dim_att: 1280 #${model_conf.rwkv_cfg.n_embd}
+      dim_ffn: null
+      head_size_divisor: 8
+      n_layer: 32
+      pre_ffn: 0
+      ln0: false
+      ln1: false
+      init_rwkv: false
+      datatype: bf16
 
-# only use for hub == funasr,
-#  if hub == openai, dims is automaticall download
-dims:
-    n_mels: 128
-    n_vocab: 51866
-    n_audio_ctx: 1500
-    n_audio_state: 1280
-    n_audio_head: 20
-    n_audio_layer: 32
-    n_text_ctx: 448
-    n_text_state: 1280
-    n_text_head: 20
-    n_text_layer: 32
 
 # frontend related
 frontend: WhisperFrontend
 frontend_conf:
     fs: 16000
-    n_mels: ${dims.n_mels}
-    do_pad_trim: true
+    n_mels: ${model_conf.dims.n_mels}
+    do_pad_trim: false
 
-tokenizer: WhisperTokenizer
+tokenizer: SenseVoiceTokenizer
 tokenizer_conf:
-  language: null
-  task: transcribe
+  vocab_path: null
   is_multilingual: true
-  num_languages: 100
+  num_languages: 8749
 
-scope_map: [none, "model."]
+dataset: SenseVoiceDataset
+dataset_conf:
+    index_ds: IndexDSJsonlRankSplit
+    batch_sampler: EspnetStyleBatchSampler
+    rank_split: true
+    batch_type: token # example or length
+    batch_size: 3500 # if batch_type is example, batch_size is the numbers of samples; if length, batch_size is source_token_len+target_token_len;
+    max_token_length: 2200
+    min_token_length: 60
+    max_source_length: 2000
+    min_source_length: 60
+    max_target_length: 150
+    min_target_length: 0
+    shuffle: True
+    num_workers: 4
+    sos: ${model_conf.sos}
+    eos: ${model_conf.eos}
+
+train_conf:
+  accum_grad: 2
+  grad_clip: 5
+  max_epoch: 20
+  keep_nbest_models: 20
+  avg_nbest_model: ${train_conf.keep_nbest_models}
+  log_interval: 50
+  reset_gpu_cache: true
+
+optim: adamw
+optim_conf:
+    lr: 0.00002
+
+scheduler: warmuplr
+scheduler_conf:
+    warmup_steps: 10000
+
+specaug: SpecAug
+specaug_conf:
+    apply_time_warp: true
+    time_warp_window: 5
+    time_warp_mode: bicubic
+    apply_freq_mask: true
+    freq_mask_width_range:
+    - 0
+    - 40
+    num_freq_mask: 2
+    apply_time_mask: true
+    time_mask_width_ratio_range:
+    - 0.0
+    - 0.12
+    num_time_mask: 2
+
+scope_map: ['encoder.encoders', 'model.encoder', 'decoder.decoders', 'model.decoder']

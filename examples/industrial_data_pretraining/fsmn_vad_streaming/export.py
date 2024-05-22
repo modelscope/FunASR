@@ -17,7 +17,9 @@ print(res)
 
 from funasr import AutoModel
 
-model = AutoModel(model="/Users/zhifu/.cache/modelscope/hub/iic/speech_fsmn_vad_zh-cn-16k-common-pytorch")
+model = AutoModel(
+    model="/Users/zhifu/.cache/modelscope/hub/iic/speech_fsmn_vad_zh-cn-16k-common-pytorch"
+)
 
 res = model.export(type="onnx", quantize=False)
 print(res)

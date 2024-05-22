@@ -1,12 +1,13 @@
 import subprocess
 
+
 def install_requirements(requirements_path):
     try:
         result = subprocess.run(
-            ['pip', 'install', '-r', requirements_path],
+            ["pip", "install", "-r", requirements_path],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            text=True
+            text=True,
         )
 
         # check status
@@ -19,10 +20,10 @@ def install_requirements(requirements_path):
             return False
     except Exception as e:
         result = subprocess.run(
-            ['pip', 'install', '-r', requirements_path],
+            ["pip", "install", "-r", requirements_path],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            text=True
+            text=True,
         )
 
         # check status

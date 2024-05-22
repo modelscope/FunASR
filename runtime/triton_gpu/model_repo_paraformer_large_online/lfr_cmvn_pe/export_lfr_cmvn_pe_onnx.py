@@ -8,14 +8,16 @@ import torch.nn.functional as F
 
 
 class LFR_CMVN_PE(torch.nn.Module):
-    def __init__(self,
-                 mean: torch.Tensor,
-                 istd: torch.Tensor,
-                 m: int = 7,
-                 n: int = 6,
-                 max_len: int = 5000,
-                 encoder_input_size: int = 560,
-                 encoder_output_size: int = 512):
+    def __init__(
+        self,
+        mean: torch.Tensor,
+        istd: torch.Tensor,
+        m: int = 7,
+        n: int = 6,
+        max_len: int = 5000,
+        encoder_input_size: int = 560,
+        encoder_output_size: int = 512,
+    ):
         super().__init__()
 
         # LRF
@@ -34,12 +36,14 @@ class LFR_CMVN_PE(torch.nn.Module):
         self.encoder_output_size = encoder_output_size
         self.max_len = max_len
         self.pe = torch.zeros(self.max_len, self.encoder_input_size)
-        position = torch.arange(0, self.max_len,
-                                dtype=torch.float32).unsqueeze(1)
+        position = torch.arange(0, self.max_len, dtype=torch.float32).unsqueeze(1)
         div_term = torch.exp(
-            torch.arange((self.encoder_input_size/2), dtype=torch.float32) *
-            -(math.log(10000.0) / (self.encoder_input_size/2-1)))
-        self.pe[:, 0::1] = torch.cat((torch.sin(position * div_term), torch.cos(position * div_term)), dim=1)
+            torch.arange((self.encoder_input_size / 2), dtype=torch.float32)
+            * -(math.log(10000.0) / (self.encoder_input_size / 2 - 1))
+        )
+        self.pe[:, 0::1] = torch.cat(
+            (torch.sin(position * div_term), torch.cos(position * div_term)), dim=1
+        )
 
     def forward(self, x, cache, offset):
         """
@@ -54,9 +58,9 @@ class LFR_CMVN_PE(torch.nn.Module):
         x = x.view(B, -1, D * self.m)
 
         x = (x + self.mean) * self.istd
-        x = x * (self.encoder_output_size ** 0.5)
+        x = x * (self.encoder_output_size**0.5)
 
-        index = offset + torch.arange(1, x.size(1)+1).to(dtype=torch.int32)
+        index = offset + torch.arange(1, x.size(1) + 1).to(dtype=torch.int32)
         pos_emb = F.embedding(index, self.pe)  # B X T X d_model
         r_cache = x + pos_emb
 
@@ -68,23 +72,23 @@ class LFR_CMVN_PE(torch.nn.Module):
 
 
 def load_cmvn(cmvn_file):
-    with open(cmvn_file, 'r', encoding='utf-8') as f:
+    with open(cmvn_file, "r", encoding="utf-8") as f:
         lines = f.readlines()
 
     means_list = []
     vars_list = []
     for i in range(len(lines)):
         line_item = lines[i].split()
-        if line_item[0] == '<AddShift>':
+        if line_item[0] == "<AddShift>":
             line_item = lines[i + 1].split()
-            if line_item[0] == '<LearnRateCoef>':
-                add_shift_line = line_item[3:(len(line_item) - 1)]
+            if line_item[0] == "<LearnRateCoef>":
+                add_shift_line = line_item[3 : (len(line_item) - 1)]
                 means_list = list(add_shift_line)
                 continue
-        elif line_item[0] == '<Rescale>':
+        elif line_item[0] == "<Rescale>":
             line_item = lines[i + 1].split()
-            if line_item[0] == '<LearnRateCoef>':
-                rescale_line = line_item[3:(len(line_item) - 1)]
+            if line_item[0] == "<LearnRateCoef>":
+                rescale_line = line_item[3 : (len(line_item) - 1)]
                 vars_list = list(rescale_line)
                 continue
 
@@ -94,6 +98,7 @@ def load_cmvn(cmvn_file):
     vars = torch.from_numpy(vars)
     return means, vars
 
+
 if __name__ == "__main__":
     means, vars = load_cmvn("am.mvn")
     means = torch.tile(means, (10, 1))
@@ -102,30 +107,36 @@ if __name__ == "__main__":
     model = LFR_CMVN_PE(means, vars)
     model.eval()
 
-    all_names = ['chunk_xs', 'cache', 'offset', 'chunk_xs_out', 'chunk_xs_out_len', 'r_cache', 'r_offset']
+    all_names = [
+        "chunk_xs",
+        "cache",
+        "offset",
+        "chunk_xs_out",
+        "chunk_xs_out_len",
+        "r_cache",
+        "r_offset",
+    ]
     dynamic_axes = {}
 
     for name in all_names:
-        dynamic_axes[name] = {0: 'B'}
+        dynamic_axes[name] = {0: "B"}
 
     input_data1 = torch.randn(4, 61, 80).to(torch.float32)
     input_data2 = torch.randn(4, 10, 560).to(torch.float32)
     input_data3 = torch.randn(4, 1).to(torch.int32)
 
     onnx_path = "./1/lfr_cmvn_pe.onnx"
-    torch.onnx.export(model,
-                      (input_data1, input_data2, input_data3),
-                      onnx_path,
-                      export_params=True,
-                      opset_version=11,
-                      do_constant_folding=True,
-                      input_names=['chunk_xs', 'cache', 'offset'],
-                      output_names=['chunk_xs_out', 'chunk_xs_out_len', 'r_cache', 'r_offset'],
-                      dynamic_axes=dynamic_axes,
-                      verbose=False
-                      )
+    torch.onnx.export(
+        model,
+        (input_data1, input_data2, input_data3),
+        onnx_path,
+        export_params=True,
+        opset_version=11,
+        do_constant_folding=True,
+        input_names=["chunk_xs", "cache", "offset"],
+        output_names=["chunk_xs_out", "chunk_xs_out_len", "r_cache", "r_offset"],
+        dynamic_axes=dynamic_axes,
+        verbose=False,
+    )
 
     print("export to onnx model succeed!")
-
-
-

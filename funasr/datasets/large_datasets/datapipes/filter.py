@@ -1,14 +1,13 @@
 from torch.utils.data import IterableDataset
 
+
 def default_fn(data):
     return data
 
 
 class FilterIterDataPipe(IterableDataset):
 
-    def __init__(self,
-                 datapipe,
-                 fn=default_fn):
+    def __init__(self, datapipe, fn=default_fn):
         self.datapipe = datapipe
         self.fn = fn
 

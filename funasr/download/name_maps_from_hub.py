@@ -15,7 +15,7 @@ name_maps_ms = {
 }
 
 name_maps_hf = {
-
+    "": "",
 }
 
 name_maps_openai = {

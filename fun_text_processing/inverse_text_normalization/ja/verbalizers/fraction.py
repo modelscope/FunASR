@@ -1,6 +1,11 @@
-
 import pynini
-from fun_text_processing.inverse_text_normalization.ja.graph_utils import DAMO_NOT_QUOTE, GraphFst, delete_space, DAMO_SIGMA, delete_extra_space
+from fun_text_processing.inverse_text_normalization.ja.graph_utils import (
+    DAMO_NOT_QUOTE,
+    GraphFst,
+    delete_space,
+    DAMO_SIGMA,
+    delete_extra_space,
+)
 from pynini.lib import pynutil
 
 
@@ -14,7 +19,9 @@ class FractionFst(GraphFst):
     def __init__(self):
         super().__init__(name="fraction", kind="verbalize")
         optional_sign = pynini.closure(pynini.cross('negative: "true"', "-") + delete_space, 0, 1)
-        numerator = pynutil.delete('numerator: "') + pynini.closure(DAMO_NOT_QUOTE, 1) + pynutil.delete('"')
+        numerator = (
+            pynutil.delete('numerator: "') + pynini.closure(DAMO_NOT_QUOTE, 1) + pynutil.delete('"')
+        )
 
         denominator = (
             pynutil.insert("/")

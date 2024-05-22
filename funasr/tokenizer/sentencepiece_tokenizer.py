@@ -8,11 +8,10 @@ import sentencepiece as spm
 from funasr.tokenizer.abs_tokenizer import BaseTokenizer
 from funasr.register import tables
 
+
 @tables.register("tokenizer_classes", "SentencepiecesTokenizer")
 class SentencepiecesTokenizer(BaseTokenizer):
-    def __init__(self, bpemodel: Union[Path, str],
-                 **kwargs
-                 ):
+    def __init__(self, bpemodel: Union[Path, str], **kwargs):
         super().__init__(**kwargs)
         self.bpemodel = str(bpemodel)
         # NOTE(kamo):
@@ -21,6 +20,7 @@ class SentencepiecesTokenizer(BaseTokenizer):
         # "TypeError: can't pickle SwigPyObject objects",
         # when giving it as argument of "multiprocessing.Process()".
         self.sp = None
+        self._build_sentence_piece_processor()
 
     def __repr__(self):
         return f'{self.__class__.__name__}(model="{self.bpemodel}")'
@@ -39,10 +39,13 @@ class SentencepiecesTokenizer(BaseTokenizer):
         self._build_sentence_piece_processor()
         return self.sp.DecodePieces(list(tokens))
 
-    def encode(self, line: str) -> List[int]:
+    def encode(self, line: str, **kwargs) -> List[int]:
         self._build_sentence_piece_processor()
         return self.sp.EncodeAsIds(line)
 
-    def decode(self, line: List[int]):
+    def decode(self, line: List[int], **kwargs):
         self._build_sentence_piece_processor()
         return self.sp.DecodeIds(line)
+
+    def get_vocab_size(self):
+        return self.sp.GetPieceSize()

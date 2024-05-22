@@ -1,18 +1,21 @@
-
 from fun_text_processing.inverse_text_normalization.de.verbalizers.cardinal import CardinalFst
 from fun_text_processing.inverse_text_normalization.de.verbalizers.decimal import DecimalFst
 from fun_text_processing.inverse_text_normalization.de.verbalizers.measure import MeasureFst
 from fun_text_processing.inverse_text_normalization.de.verbalizers.money import MoneyFst
 from fun_text_processing.inverse_text_normalization.de.verbalizers.time import TimeFst
-from fun_text_processing.text_normalization.de.verbalizers.cardinal import CardinalFst as TNCardinalVerbalizer
-from fun_text_processing.text_normalization.de.verbalizers.decimal import DecimalFst as TNDecimalVerbalizer
+from fun_text_processing.text_normalization.de.verbalizers.cardinal import (
+    CardinalFst as TNCardinalVerbalizer,
+)
+from fun_text_processing.text_normalization.de.verbalizers.decimal import (
+    DecimalFst as TNDecimalVerbalizer,
+)
 from fun_text_processing.text_normalization.en.graph_utils import GraphFst
 
 
 class VerbalizeFst(GraphFst):
     """
     Composes other verbalizer grammars.
-    For deployment, this grammar will be compiled and exported to OpenFst Finate State Archiv (FAR) File. 
+    For deployment, this grammar will be compiled and exported to OpenFst Finate State Archiv (FAR) File.
     More details to deployment at NeMo/tools/text_processing_deployment.
     """
 

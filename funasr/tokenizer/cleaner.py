@@ -1,6 +1,7 @@
 from typing import Collection
 
 from jaconv import jaconv
+
 # import tacotron_cleaner.cleaners
 
 try:

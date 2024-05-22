@@ -14,7 +14,7 @@ namespace funasr {
 Vocab::Vocab(const char *filename)
 {
     ifstream in(filename);
-    LoadVocabFromYaml(filename);
+    LoadVocabFromJson(filename);
 }
 Vocab::Vocab(const char *filename, const char *lex_file)
 {
@@ -40,6 +40,25 @@ void Vocab::LoadVocabFromYaml(const char* filename){
         vocab.push_back(it->as<string>());
         token_id[it->as<string>()] = i;
         i ++;
+    }
+}
+
+void Vocab::LoadVocabFromJson(const char* filename){
+    nlohmann::json json_array;
+    std::ifstream file(filename);
+    if (file.is_open()) {
+        file >> json_array;
+        file.close();
+    } else {
+        LOG(INFO) << "Error loading token file, token file error or not exist.";
+        exit(-1);
+    }
+
+    int i = 0;
+    for (const auto& element : json_array) {
+        vocab.push_back(element);
+        token_id[element] = i;
+        i++;
     }
 }
 

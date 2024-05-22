@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import GraphFst, get_abs_path
 from pynini.lib import pynutil
@@ -22,19 +20,25 @@ class FractionFst(GraphFst):
         super().__init__(name="fraction", kind="classify", deterministic=deterministic)
         cardinal_graph = cardinal.graph
 
-        integer = pynutil.insert("integer_part: \"") + cardinal_graph + pynutil.insert("\"")
+        integer = pynutil.insert('integer_part: "') + cardinal_graph + pynutil.insert('"')
         numerator = (
-            pynutil.insert("numerator: \"") + cardinal_graph + (pynini.cross("/", "\" ") | pynini.cross(" / ", "\" "))
+            pynutil.insert('numerator: "')
+            + cardinal_graph
+            + (pynini.cross("/", '" ') | pynini.cross(" / ", '" '))
         )
 
         endings = ["rd", "th", "st", "nd"]
         endings += [x.upper() for x in endings]
         optional_end = pynini.closure(pynini.cross(pynini.union(*endings), ""), 0, 1)
 
-        denominator = pynutil.insert("denominator: \"") + cardinal_graph + optional_end + pynutil.insert("\"")
+        denominator = (
+            pynutil.insert('denominator: "') + cardinal_graph + optional_end + pynutil.insert('"')
+        )
 
         graph = pynini.closure(integer + pynini.accep(" "), 0, 1) + (numerator + denominator)
-        graph |= pynini.closure(integer + (pynini.accep(" ") | pynutil.insert(" ")), 0, 1) + pynini.compose(
+        graph |= pynini.closure(
+            integer + (pynini.accep(" ") | pynutil.insert(" ")), 0, 1
+        ) + pynini.compose(
             pynini.string_file(get_abs_path("data/number/fraction.tsv")), (numerator + denominator)
         )
 

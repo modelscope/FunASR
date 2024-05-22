@@ -1,13 +1,16 @@
-
 import pynini
-from fun_text_processing.text_normalization.en.graph_utils import DAMO_DIGIT, GraphFst, convert_space
+from fun_text_processing.text_normalization.en.graph_utils import (
+    DAMO_DIGIT,
+    GraphFst,
+    convert_space,
+)
 from pynini.lib import pynutil
 
 
 class RangeFst(GraphFst):
     """
     This class is a composite class of two other class instances
-    
+
     Args:
         time: composed tagger and verbalizer
         date: composed tagger and verbalizer
@@ -18,7 +21,12 @@ class RangeFst(GraphFst):
     """
 
     def __init__(
-        self, time: GraphFst, date: GraphFst, cardinal: GraphFst, deterministic: bool = True, lm: bool = False,
+        self,
+        time: GraphFst,
+        date: GraphFst,
+        cardinal: GraphFst,
+        deterministic: bool = True,
+        lm: bool = False,
     ):
         super().__init__(name="range", kind="classify", deterministic=deterministic)
 
@@ -32,16 +40,20 @@ class RangeFst(GraphFst):
 
         cardinal = cardinal.graph_with_and
         # YEAR
-        date_year_four_digit = (DAMO_DIGIT ** 4 + pynini.closure(pynini.accep("s"), 0, 1)) @ date
-        date_year_two_digit = (DAMO_DIGIT ** 2 + pynini.closure(pynini.accep("s"), 0, 1)) @ date
+        date_year_four_digit = (DAMO_DIGIT**4 + pynini.closure(pynini.accep("s"), 0, 1)) @ date
+        date_year_two_digit = (DAMO_DIGIT**2 + pynini.closure(pynini.accep("s"), 0, 1)) @ date
         year_to_year_graph = (
             date_year_four_digit
             + delete_space
             + pynini.cross("-", " to ")
             + delete_space
-            + (date_year_four_digit | date_year_two_digit | (DAMO_DIGIT ** 2 @ cardinal))
+            + (date_year_four_digit | date_year_two_digit | (DAMO_DIGIT**2 @ cardinal))
         )
-        mid_year_graph = pynini.accep("mid") + pynini.cross("-", " ") + (date_year_four_digit | date_year_two_digit)
+        mid_year_graph = (
+            pynini.accep("mid")
+            + pynini.cross("-", " ")
+            + (date_year_four_digit | date_year_two_digit)
+        )
 
         self.graph |= year_to_year_graph
         self.graph |= mid_year_graph
@@ -55,7 +67,11 @@ class RangeFst(GraphFst):
         if not deterministic or lm:
             # cardinal ----
             cardinal_to_cardinal_graph = (
-                cardinal + delete_space + pynini.cross("-", pynini.union(" to ", " minus ")) + delete_space + cardinal
+                cardinal
+                + delete_space
+                + pynini.cross("-", pynini.union(" to ", " minus "))
+                + delete_space
+                + cardinal
             )
 
             range_graph |= cardinal_to_cardinal_graph | (
@@ -79,10 +95,14 @@ class RangeFst(GraphFst):
             )
 
             for x in ["/", " / "]:
-                range_graph |= cardinal + pynini.closure(pynini.cross(x, " divided by ") + cardinal, 1)
+                range_graph |= cardinal + pynini.closure(
+                    pynini.cross(x, " divided by ") + cardinal, 1
+                )
 
         self.graph |= range_graph
 
         self.graph = self.graph.optimize()
-        graph = pynutil.insert("name: \"") + convert_space(self.graph).optimize() + pynutil.insert("\"")
+        graph = (
+            pynutil.insert('name: "') + convert_space(self.graph).optimize() + pynutil.insert('"')
+        )
         self.fst = graph.optimize()

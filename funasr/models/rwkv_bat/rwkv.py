@@ -76,6 +76,7 @@ class RWKV(torch.nn.Module):
         x = x + self.dropout_ffn(ffn)
         return x, state
 
+
 class RWKVDecoderLayer(torch.nn.Module):
     """RWKV module.
 

@@ -1,4 +1,3 @@
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import (
     DAMO_ALPHA,
@@ -16,7 +15,7 @@ from pynini.lib import pynutil
 class SerialFst(GraphFst):
     """
     This class is a composite class of two other class instances
-    
+
     Args:
         time: composed tagger and verbalizer
         date: composed tagger and verbalizer
@@ -26,7 +25,9 @@ class SerialFst(GraphFst):
         lm: whether to use for hybrid LM
     """
 
-    def __init__(self, cardinal: GraphFst, ordinal: GraphFst, deterministic: bool = True, lm: bool = False):
+    def __init__(
+        self, cardinal: GraphFst, ordinal: GraphFst, deterministic: bool = True, lm: bool = False
+    ):
         super().__init__(name="integer", kind="classify", deterministic=deterministic)
 
         """
@@ -42,16 +43,17 @@ class SerialFst(GraphFst):
             pynini.accep("0") + pynini.closure(DAMO_DIGIT), cardinal.single_digits_graph
         ).optimize()
         # TODO: "#" doesn't work from the file
-        symbols_graph = pynini.string_file(get_abs_path("data/whitelist/symbol.tsv")).optimize() | pynini.cross(
-            "#", "hash"
-        )
+        symbols_graph = pynini.string_file(
+            get_abs_path("data/whitelist/symbol.tsv")
+        ).optimize() | pynini.cross("#", "hash")
         num_graph |= symbols_graph
 
         if not self.deterministic and not lm:
             num_graph |= cardinal.single_digits_graph
             # also allow double digits to be pronounced as integer in serial number
             num_graph |= pynutil.add_weight(
-                DAMO_DIGIT ** 2 @ cardinal.graph_hundred_component_at_least_one_none_zero_digit, weight=0.0001
+                DAMO_DIGIT**2 @ cardinal.graph_hundred_component_at_least_one_none_zero_digit,
+                weight=0.0001,
             )
 
         # add space between letter and digit/symbol
@@ -84,10 +86,17 @@ class SerialFst(GraphFst):
         serial_graph |= num_letter + next_alpha_or_num
         # numbers only with 2+ delimiters
         serial_graph |= (
-            num_graph + delimiter + num_graph + delimiter + num_graph + pynini.closure(delimiter + num_graph)
+            num_graph
+            + delimiter
+            + num_graph
+            + delimiter
+            + num_graph
+            + pynini.closure(delimiter + num_graph)
         )
         # 2+ symbols
-        serial_graph |= pynini.compose(DAMO_SIGMA + symbols + DAMO_SIGMA, num_graph + delimiter + num_graph)
+        serial_graph |= pynini.compose(
+            DAMO_SIGMA + symbols + DAMO_SIGMA, num_graph + delimiter + num_graph
+        )
 
         # exclude ordinal numbers from serial options
         serial_graph = pynini.compose(
@@ -113,10 +122,13 @@ class SerialFst(GraphFst):
         # this is not to verbolize "/" as "slash" in cases like "import/export"
         serial_graph = pynini.compose(
             pynini.difference(
-                DAMO_SIGMA, pynini.closure(DAMO_ALPHA, 1) + pynini.accep("/") + pynini.closure(DAMO_ALPHA, 1)
+                DAMO_SIGMA,
+                pynini.closure(DAMO_ALPHA, 1) + pynini.accep("/") + pynini.closure(DAMO_ALPHA, 1),
             ),
             serial_graph,
         )
         self.graph = serial_graph.optimize()
-        graph = pynutil.insert("name: \"") + convert_space(self.graph).optimize() + pynutil.insert("\"")
+        graph = (
+            pynutil.insert('name: "') + convert_space(self.graph).optimize() + pynutil.insert('"')
+        )
         self.fst = graph.optimize()

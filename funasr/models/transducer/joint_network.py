@@ -39,9 +39,7 @@ class JointNetwork(torch.nn.Module):
 
         self.lin_out = torch.nn.Linear(joint_space_size, output_size)
 
-        self.joint_activation = get_activation(
-            joint_activation_type
-        )
+        self.joint_activation = get_activation(joint_activation_type)
 
     def forward(
         self,

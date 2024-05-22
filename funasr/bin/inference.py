@@ -14,18 +14,17 @@ def main_hydra(cfg: DictConfig):
             return {k: to_plain_list(v) for k, v in cfg_item.items()}
         else:
             return cfg_item
-    
-    kwargs = to_plain_list(cfg)
-    log_level = getattr(logging, kwargs.get("log_level", "INFO").upper())
 
-    logging.basicConfig(level=log_level)
+    kwargs = to_plain_list(cfg)
 
     if kwargs.get("debug", False):
-        import pdb; pdb.set_trace()
+        import pdb
+
+        pdb.set_trace()
     model = AutoModel(**kwargs)
     res = model.generate(input=kwargs["input"])
     print(res)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main_hydra()

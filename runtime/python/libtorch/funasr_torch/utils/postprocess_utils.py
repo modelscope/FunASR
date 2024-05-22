@@ -6,7 +6,7 @@ from typing import Any, List, Union
 
 
 def isChinese(ch: str):
-    if '\u4e00' <= ch <= '\u9fff' or '\u0030' <= ch <= '\u0039':
+    if "\u4e00" <= ch <= "\u9fff" or "\u0030" <= ch <= "\u0039":
         return True
     return False
 
@@ -14,9 +14,9 @@ def isChinese(ch: str):
 def isAllChinese(word: Union[List[Any], str]):
     word_lists = []
     for i in word:
-        cur = i.replace(' ', '')
-        cur = cur.replace('</s>', '')
-        cur = cur.replace('<s>', '')
+        cur = i.replace(" ", "")
+        cur = cur.replace("</s>", "")
+        cur = cur.replace("<s>", "")
         word_lists.append(cur)
 
     if len(word_lists) == 0:
@@ -31,9 +31,9 @@ def isAllChinese(word: Union[List[Any], str]):
 def isAllAlpha(word: Union[List[Any], str]):
     word_lists = []
     for i in word:
-        cur = i.replace(' ', '')
-        cur = cur.replace('</s>', '')
-        cur = cur.replace('<s>', '')
+        cur = i.replace(" ", "")
+        cur = cur.replace("</s>", "")
+        cur = cur.replace("<s>", "")
         word_lists.append(cur)
 
     if len(word_lists) == 0:
@@ -62,12 +62,14 @@ def abbr_dispose(words: List[Any], time_stamp: List[List] = None) -> List[Any]:
         if num <= last_num:
             continue
 
-        if len(words[num]) == 1 and words[num].encode('utf-8').isalpha():
-            if num + 1 < words_size and words[
-                    num + 1] == ' ' and num + 2 < words_size and len(
-                        words[num +
-                              2]) == 1 and words[num +
-                                                 2].encode('utf-8').isalpha():
+        if len(words[num]) == 1 and words[num].encode("utf-8").isalpha():
+            if (
+                num + 1 < words_size
+                and words[num + 1] == " "
+                and num + 2 < words_size
+                and len(words[num + 2]) == 1
+                and words[num + 2].encode("utf-8").isalpha()
+            ):
                 # found the begin of abbr
                 abbr_begin.append(num)
                 num += 2
@@ -75,11 +77,13 @@ def abbr_dispose(words: List[Any], time_stamp: List[List] = None) -> List[Any]:
                 # to find the end of abbr
                 while True:
                     num += 1
-                    if num < words_size and words[num] == ' ':
+                    if num < words_size and words[num] == " ":
                         num += 1
-                        if num < words_size and len(
-                                words[num]) == 1 and words[num].encode(
-                                    'utf-8').isalpha():
+                        if (
+                            num < words_size
+                            and len(words[num]) == 1
+                            and words[num].encode("utf-8").isalpha()
+                        ):
                             abbr_end.pop()
                             abbr_end.append(num)
                             last_num = num
@@ -89,11 +93,11 @@ def abbr_dispose(words: List[Any], time_stamp: List[List] = None) -> List[Any]:
                         break
 
     for num in range(words_size):
-        if words[num] == ' ':
+        if words[num] == " ":
             ts_nums.append(ts_index)
         else:
             ts_nums.append(ts_index)
-            ts_index += 1 
+            ts_index += 1
     last_num = -1
     for num in range(words_size):
         if num <= last_num:
@@ -110,7 +114,7 @@ def abbr_dispose(words: List[Any], time_stamp: List[List] = None) -> List[Any]:
                     last_num = num
                     break
                 else:
-                    if words[num].encode('utf-8').isalpha():
+                    if words[num].encode("utf-8").isalpha():
                         word_lists.append(words[num].upper())
                 num += 1
             if time_stamp is not None:
@@ -118,7 +122,7 @@ def abbr_dispose(words: List[Any], time_stamp: List[List] = None) -> List[Any]:
                 ts_lists.append([begin, end])
         else:
             word_lists.append(words[num])
-            if time_stamp is not None and words[num] != ' ':
+            if time_stamp is not None and words[num] != " ":
                 begin = time_stamp[ts_nums[num]][0]
                 end = time_stamp[ts_nums[num]][1]
                 ts_lists.append([begin, end])
@@ -133,18 +137,18 @@ def abbr_dispose(words: List[Any], time_stamp: List[List] = None) -> List[Any]:
 def sentence_postprocess(words: List[Any], time_stamp: List[List] = None):
     middle_lists = []
     word_lists = []
-    word_item = ''
+    word_item = ""
     ts_lists = []
 
     # wash words lists
     for i in words:
-        word = ''
+        word = ""
         if isinstance(i, str):
             word = i
         else:
-            word = i.decode('utf-8')
+            word = i.decode("utf-8")
 
-        if word in ['<s>', '</s>', '<unk>']:
+        if word in ["<s>", "</s>", "<unk>"]:
             continue
         else:
             middle_lists.append(word)
@@ -152,7 +156,7 @@ def sentence_postprocess(words: List[Any], time_stamp: List[List] = None):
     # all chinese characters
     if isAllChinese(middle_lists):
         for i, ch in enumerate(middle_lists):
-            word_lists.append(ch.replace(' ', ''))
+            word_lists.append(ch.replace(" ", ""))
         if time_stamp is not None:
             ts_lists = time_stamp
 
@@ -163,9 +167,9 @@ def sentence_postprocess(words: List[Any], time_stamp: List[List] = None):
             if ts_flag and time_stamp is not None:
                 begin = time_stamp[i][0]
                 end = time_stamp[i][1]
-            word = ''
-            if '@@' in ch:
-                word = ch.replace('@@', '')
+            word = ""
+            if "@@" in ch:
+                word = ch.replace("@@", "")
                 word_item += word
                 if time_stamp is not None:
                     ts_flag = False
@@ -173,8 +177,8 @@ def sentence_postprocess(words: List[Any], time_stamp: List[List] = None):
             else:
                 word_item += ch
                 word_lists.append(word_item)
-                word_lists.append(' ')
-                word_item = ''
+                word_lists.append(" ")
+                word_item = ""
                 if time_stamp is not None:
                     ts_flag = True
                     end = time_stamp[i][1]
@@ -191,7 +195,7 @@ def sentence_postprocess(words: List[Any], time_stamp: List[List] = None):
             if ts_flag and time_stamp is not None:
                 begin = time_stamp[i][0]
                 end = time_stamp[i][1]
-            word = ''
+            word = ""
             if isAllChinese(ch):
                 if alpha_blank is True:
                     word_lists.pop()
@@ -201,8 +205,8 @@ def sentence_postprocess(words: List[Any], time_stamp: List[List] = None):
                     ts_flag = True
                     ts_lists.append([begin, end])
                     begin = end
-            elif '@@' in ch:
-                word = ch.replace('@@', '')
+            elif "@@" in ch:
+                word = ch.replace("@@", "")
                 word_item += word
                 alpha_blank = False
                 if time_stamp is not None:
@@ -211,30 +215,30 @@ def sentence_postprocess(words: List[Any], time_stamp: List[List] = None):
             elif isAllAlpha(ch):
                 word_item += ch
                 word_lists.append(word_item)
-                word_lists.append(' ')
-                word_item = ''
+                word_lists.append(" ")
+                word_item = ""
                 alpha_blank = True
                 if time_stamp is not None:
                     ts_flag = True
-                    end = time_stamp[i][1] 
+                    end = time_stamp[i][1]
                     ts_lists.append([begin, end])
                     begin = end
             else:
-                raise ValueError('invalid character: {}'.format(ch))
+                raise ValueError("invalid character: {}".format(ch))
 
-    if time_stamp is not None: 
+    if time_stamp is not None:
         word_lists, ts_lists = abbr_dispose(word_lists, ts_lists)
         real_word_lists = []
         for ch in word_lists:
-            if ch != ' ':
+            if ch != " ":
                 real_word_lists.append(ch)
-        sentence = ' '.join(real_word_lists).strip()
+        sentence = " ".join(real_word_lists).strip()
         return sentence, ts_lists, real_word_lists
     else:
         word_lists = abbr_dispose(word_lists)
         real_word_lists = []
         for ch in word_lists:
-            if ch != ' ':
+            if ch != " ":
                 real_word_lists.append(ch)
-        sentence = ''.join(word_lists).strip()
+        sentence = "".join(word_lists).strip()
         return sentence, real_word_lists

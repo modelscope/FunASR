@@ -1,5 +1,3 @@
-
-
 import os
 import string
 from pathlib import Path
@@ -18,7 +16,7 @@ FUN_UPPER = pynini.union(*string.ascii_uppercase).optimize()
 FUN_ALPHA = pynini.union(FUN_LOWER, FUN_UPPER).optimize()
 
 FUN_SPACE = " "
-FUN_WHITE_SPACE = pynini.union(" ", "\t", "\n", "\r", u"\u00A0").optimize()
+FUN_WHITE_SPACE = pynini.union(" ", "\t", "\n", "\r", "\u00A0").optimize()
 FUN_NOT_SPACE = pynini.difference(FUN_CHAR, FUN_WHITE_SPACE).optimize()
 FUN_NOT_QUOTE = pynini.difference(FUN_CHAR, r'"').optimize()
 
@@ -33,7 +31,7 @@ insert_space = pynutil.insert(" ")
 delete_extra_space = pynini.cross(pynini.closure(FUN_WHITE_SPACE, 1), " ")
 
 
-def generator_main(file_name: str, graphs: Dict[str, 'pynini.FstLike']):
+def generator_main(file_name: str, graphs: Dict[str, "pynini.FstLike"]):
     """
     Exports graph as OpenFst finite state archive (FAR) file with given file name and rule name.
 
@@ -45,7 +43,7 @@ def generator_main(file_name: str, graphs: Dict[str, 'pynini.FstLike']):
     for rule, graph in graphs.items():
         exporter[rule] = graph.optimize()
     exporter.close()
-    print(f'Created {file_name}')
+    print(f"Created {file_name}")
 
 
 class GraphFst:
@@ -65,9 +63,11 @@ class GraphFst:
         self._fst = None
         self.deterministic = deterministic
 
-        self.far_path = Path(os.path.dirname(__file__) + '/grammars/' + kind + '/' + name + '.far')
+        self.far_path = Path(os.path.dirname(__file__) + "/grammars/" + kind + "/" + name + ".far")
         if self.far_exist():
-            self._fst = Far(self.far_path, mode="r", arc_type="standard", far_type="default").get_fst()
+            self._fst = Far(
+                self.far_path, mode="r", arc_type="standard", far_type="default"
+            ).get_fst()
 
     def far_exist(self) -> bool:
         """
@@ -76,14 +76,14 @@ class GraphFst:
         return self.far_path.exists()
 
     @property
-    def fst(self) -> 'pynini.FstLike':
+    def fst(self) -> "pynini.FstLike":
         return self._fst
 
     @fst.setter
     def fst(self, fst):
         self._fst = fst
 
-    def add_tokens(self, fst) -> 'pynini.FstLike':
+    def add_tokens(self, fst) -> "pynini.FstLike":
         """
         Wraps class name around to given fst
 
@@ -95,7 +95,7 @@ class GraphFst:
         """
         return pynutil.insert(f"{self.name} {{ ") + fst + pynutil.insert(" }")
 
-    def delete_tokens(self, fst) -> 'pynini.FstLike':
+    def delete_tokens(self, fst) -> "pynini.FstLike":
         """
         Deletes class name wrap around output of given fst
 
@@ -114,4 +114,4 @@ class GraphFst:
             + delete_space
             + pynutil.delete("}")
         )
-        return res @ pynini.cdrewrite(pynini.cross(u"\u00A0", " "), "", "", FUN_SIGMA)
+        return res @ pynini.cdrewrite(pynini.cross("\u00A0", " "), "", "", FUN_SIGMA)

@@ -19,58 +19,55 @@ def check_audio_list(audio: list):
     audio_dur = 0
     for i in range(len(audio)):
         seg = audio[i]
-        assert seg[1] >= seg[0], 'modelscope error: Wrong time stamps.'
-        assert isinstance(seg[2], np.ndarray), 'modelscope error: Wrong data type.'
-        assert int(seg[1] * 16000) - int(
-            seg[0] * 16000
-        ) == seg[2].shape[
-            0], 'modelscope error: audio data in list is inconsistent with time length.'
+        assert seg[1] >= seg[0], "modelscope error: Wrong time stamps."
+        assert isinstance(seg[2], np.ndarray), "modelscope error: Wrong data type."
+        assert (
+            int(seg[1] * 16000) - int(seg[0] * 16000) == seg[2].shape[0]
+        ), "modelscope error: audio data in list is inconsistent with time length."
         if i > 0:
-            assert seg[0] >= audio[
-                i - 1][1], 'modelscope error: Wrong time stamps.'
+            assert seg[0] >= audio[i - 1][1], "modelscope error: Wrong time stamps."
         audio_dur += seg[1] - seg[0]
     return audio_dur
     # assert audio_dur > 5, 'modelscope error: The effective audio duration is too short.'
 
 
 def sv_preprocess(inputs: Union[np.ndarray, list]):
-        output = []
-        for i in range(len(inputs)):
-            if isinstance(inputs[i], str):
-                file_bytes = File.read(inputs[i])
-                data, fs = sf.load(io.BytesIO(file_bytes), dtype='float32')
-                if len(data.shape) == 2:
-                    data = data[:, 0]
-                data = torch.from_numpy(data).unsqueeze(0)
-                data = data.squeeze(0)
-            elif isinstance(inputs[i], np.ndarray):
-                assert len(
-                    inputs[i].shape
-                ) == 1, 'modelscope error: Input array should be [N, T]'
-                data = inputs[i]
-                if data.dtype in ['int16', 'int32', 'int64']:
-                    data = (data / (1 << 15)).astype('float32')
-                else:
-                    data = data.astype('float32')
-                data = torch.from_numpy(data)
+    output = []
+    for i in range(len(inputs)):
+        if isinstance(inputs[i], str):
+            file_bytes = File.read(inputs[i])
+            data, fs = sf.load(io.BytesIO(file_bytes), dtype="float32")
+            if len(data.shape) == 2:
+                data = data[:, 0]
+            data = torch.from_numpy(data).unsqueeze(0)
+            data = data.squeeze(0)
+        elif isinstance(inputs[i], np.ndarray):
+            assert len(inputs[i].shape) == 1, "modelscope error: Input array should be [N, T]"
+            data = inputs[i]
+            if data.dtype in ["int16", "int32", "int64"]:
+                data = (data / (1 << 15)).astype("float32")
             else:
-                raise ValueError(
-                    'modelscope error: The input type is restricted to audio address and nump array.'
-                )
-            output.append(data)
-        return output
+                data = data.astype("float32")
+            data = torch.from_numpy(data)
+        else:
+            raise ValueError(
+                "modelscope error: The input type is restricted to audio address and nump array."
+            )
+        output.append(data)
+    return output
 
 
-def sv_chunk(vad_segments: list, fs = 16000) -> list:
+def sv_chunk(vad_segments: list, fs=16000) -> list:
     config = {
-            'seg_dur': 1.5,
-            'seg_shift': 0.75,
-        }
+        "seg_dur": 1.5,
+        "seg_shift": 0.75,
+    }
+
     def seg_chunk(seg_data):
         seg_st = seg_data[0]
         data = seg_data[2]
-        chunk_len = int(config['seg_dur'] * fs)
-        chunk_shift = int(config['seg_shift'] * fs)
+        chunk_len = int(config["seg_dur"] * fs)
+        chunk_shift = int(config["seg_shift"] * fs)
         last_chunk_ed = 0
         seg_res = []
         for chunk_st in range(0, data.shape[0], chunk_shift):
@@ -81,13 +78,8 @@ def sv_chunk(vad_segments: list, fs = 16000) -> list:
             chunk_st = max(0, chunk_ed - chunk_len)
             chunk_data = data[chunk_st:chunk_ed]
             if chunk_data.shape[0] < chunk_len:
-                chunk_data = np.pad(chunk_data,
-                                    (0, chunk_len - chunk_data.shape[0]),
-                                    'constant')
-            seg_res.append([
-                chunk_st / fs + seg_st, chunk_ed / fs + seg_st,
-                chunk_data
-            ])
+                chunk_data = np.pad(chunk_data, (0, chunk_len - chunk_data.shape[0]), "constant")
+            seg_res.append([chunk_st / fs + seg_st, chunk_ed / fs + seg_st, chunk_data])
         return seg_res
 
     segs = []
@@ -100,16 +92,16 @@ def sv_chunk(vad_segments: list, fs = 16000) -> list:
 def extract_feature(audio):
     features = []
     for au in audio:
-        feature = Kaldi.fbank(
-            au.unsqueeze(0), num_mel_bins=80)
+        feature = Kaldi.fbank(au.unsqueeze(0), num_mel_bins=80)
         feature = feature - feature.mean(dim=0, keepdim=True)
         features.append(feature.unsqueeze(0))
     features = torch.cat(features)
     return features
 
 
-def postprocess(segments: list, vad_segments: list,
-                labels: np.ndarray, embeddings: np.ndarray) -> list:
+def postprocess(
+    segments: list, vad_segments: list, labels: np.ndarray, embeddings: np.ndarray
+) -> list:
     assert len(segments) == len(labels)
     labels = correct_labels(labels)
     distribute_res = []
@@ -154,15 +146,16 @@ def correct_labels(labels):
         new_labels.append(id2id[i])
     return np.array(new_labels)
 
+
 def merge_seque(distribute_res):
     res = [distribute_res[0]]
     for i in range(1, len(distribute_res)):
-        if distribute_res[i][2] != res[-1][2] or distribute_res[i][
-                0] > res[-1][1]:
+        if distribute_res[i][2] != res[-1][2] or distribute_res[i][0] > res[-1][1]:
             res.append(distribute_res[i])
         else:
             res[-1][1] = distribute_res[i][1]
     return res
+
 
 def smooth(res, mindur=1):
     # short segments are assigned to nearest speakers.
@@ -187,19 +180,18 @@ def smooth(res, mindur=1):
 def distribute_spk(sentence_list, sd_time_list):
     sd_sentence_list = []
     for d in sentence_list:
-        sentence_start = d['ts_list'][0][0]
-        sentence_end = d['ts_list'][-1][1]
+        sentence_start = d["ts_list"][0][0]
+        sentence_end = d["ts_list"][-1][1]
         sentence_spk = 0
         max_overlap = 0
         for sd_time in sd_time_list:
             spk_st, spk_ed, spk = sd_time
-            spk_st = spk_st*1000
-            spk_ed = spk_ed*1000
-            overlap = max(
-                min(sentence_end, spk_ed) - max(sentence_start, spk_st), 0)
+            spk_st = spk_st * 1000
+            spk_ed = spk_ed * 1000
+            overlap = max(min(sentence_end, spk_ed) - max(sentence_start, spk_st), 0)
             if overlap > max_overlap:
                 max_overlap = overlap
                 sentence_spk = spk
-        d['spk'] = sentence_spk
+        d["spk"] = sentence_spk
         sd_sentence_list.append(d)
     return sd_sentence_list

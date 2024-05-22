@@ -8,6 +8,7 @@ from typing import List, Tuple, Dict, Any
 import math
 import numpy as np
 
+
 class VadStateMachine(Enum):
     kVadInStateStartPointNotDetected = 1
     kVadInStateInSpeechSegment = 2
@@ -37,36 +38,36 @@ class VadDetectMode(Enum):
 
 class VADXOptions:
     def __init__(
-            self,
-            sample_rate: int = 16000,
-            detect_mode: int = VadDetectMode.kVadMutipleUtteranceDetectMode.value,
-            snr_mode: int = 0,
-            max_end_silence_time: int = 800,
-            max_start_silence_time: int = 3000,
-            do_start_point_detection: bool = True,
-            do_end_point_detection: bool = True,
-            window_size_ms: int = 200,
-            sil_to_speech_time_thres: int = 150,
-            speech_to_sil_time_thres: int = 150,
-            speech_2_noise_ratio: float = 1.0,
-            do_extend: int = 1,
-            lookback_time_start_point: int = 200,
-            lookahead_time_end_point: int = 100,
-            max_single_segment_time: int = 60000,
-            nn_eval_block_size: int = 8,
-            dcd_block_size: int = 4,
-            snr_thres: int = -100.0,
-            noise_frame_num_used_for_snr: int = 100,
-            decibel_thres: int = -100.0,
-            speech_noise_thres: float = 0.6,
-            fe_prior_thres: float = 1e-4,
-            silence_pdf_num: int = 1,
-            sil_pdf_ids: List[int] = [0],
-            speech_noise_thresh_low: float = -0.1,
-            speech_noise_thresh_high: float = 0.3,
-            output_frame_probs: bool = False,
-            frame_in_ms: int = 10,
-            frame_length_ms: int = 25,
+        self,
+        sample_rate: int = 16000,
+        detect_mode: int = VadDetectMode.kVadMutipleUtteranceDetectMode.value,
+        snr_mode: int = 0,
+        max_end_silence_time: int = 800,
+        max_start_silence_time: int = 3000,
+        do_start_point_detection: bool = True,
+        do_end_point_detection: bool = True,
+        window_size_ms: int = 200,
+        sil_to_speech_time_thres: int = 150,
+        speech_to_sil_time_thres: int = 150,
+        speech_2_noise_ratio: float = 1.0,
+        do_extend: int = 1,
+        lookback_time_start_point: int = 200,
+        lookahead_time_end_point: int = 100,
+        max_single_segment_time: int = 60000,
+        nn_eval_block_size: int = 8,
+        dcd_block_size: int = 4,
+        snr_thres: int = -100.0,
+        noise_frame_num_used_for_snr: int = 100,
+        decibel_thres: int = -100.0,
+        speech_noise_thres: float = 0.6,
+        fe_prior_thres: float = 1e-4,
+        silence_pdf_num: int = 1,
+        sil_pdf_ids: List[int] = [0],
+        speech_noise_thresh_low: float = -0.1,
+        speech_noise_thresh_high: float = 0.3,
+        output_frame_probs: bool = False,
+        frame_in_ms: int = 10,
+        frame_length_ms: int = 25,
     ):
         self.sample_rate = sample_rate
         self.detect_mode = detect_mode
@@ -127,8 +128,13 @@ class E2EVadFrameProb(object):
 
 
 class WindowDetector(object):
-    def __init__(self, window_size_ms: int, sil_to_speech_time: int,
-                 speech_to_sil_time: int, frame_size_ms: int):
+    def __init__(
+        self,
+        window_size_ms: int,
+        sil_to_speech_time: int,
+        speech_to_sil_time: int,
+        frame_size_ms: int,
+    ):
         self.window_size_ms = window_size_ms
         self.sil_to_speech_time = sil_to_speech_time
         self.speech_to_sil_time = speech_to_sil_time
@@ -174,11 +180,17 @@ class WindowDetector(object):
         self.win_state[self.cur_win_pos] = cur_frame_state
         self.cur_win_pos = (self.cur_win_pos + 1) % self.win_size_frame
 
-        if self.pre_frame_state == FrameState.kFrameStateSil and self.win_sum >= self.sil_to_speech_frmcnt_thres:
+        if (
+            self.pre_frame_state == FrameState.kFrameStateSil
+            and self.win_sum >= self.sil_to_speech_frmcnt_thres
+        ):
             self.pre_frame_state = FrameState.kFrameStateSpeech
             return AudioChangeState.kChangeStateSil2Speech
 
-        if self.pre_frame_state == FrameState.kFrameStateSpeech and self.win_sum <= self.speech_to_sil_frmcnt_thres:
+        if (
+            self.pre_frame_state == FrameState.kFrameStateSpeech
+            and self.win_sum <= self.speech_to_sil_frmcnt_thres
+        ):
             self.pre_frame_state = FrameState.kFrameStateSil
             return AudioChangeState.kChangeStateSpeech2Sil
 
@@ -192,19 +204,22 @@ class WindowDetector(object):
         return int(self.frame_size_ms)
 
 
-class E2EVadModel():
+class E2EVadModel:
     """
     Author: Speech Lab of DAMO Academy, Alibaba Group
     Deep-FSMN for Large Vocabulary Continuous Speech Recognition
     https://arxiv.org/abs/1803.05030
     """
+
     def __init__(self, vad_post_args: Dict[str, Any]):
         super(E2EVadModel, self).__init__()
         self.vad_opts = VADXOptions(**vad_post_args)
-        self.windows_detector = WindowDetector(self.vad_opts.window_size_ms,
-                                               self.vad_opts.sil_to_speech_time_thres,
-                                               self.vad_opts.speech_to_sil_time_thres,
-                                               self.vad_opts.frame_in_ms)
+        self.windows_detector = WindowDetector(
+            self.vad_opts.window_size_ms,
+            self.vad_opts.sil_to_speech_time_thres,
+            self.vad_opts.speech_to_sil_time_thres,
+            self.vad_opts.frame_in_ms,
+        )
         # self.encoder = encoder
         # init variables
         self.is_final = False
@@ -226,7 +241,9 @@ class E2EVadModel():
         self.output_data_buf = []
         self.output_data_buf_offset = 0
         self.frame_probs = []
-        self.max_end_sil_frame_cnt_thresh = self.vad_opts.max_end_silence_time - self.vad_opts.speech_to_sil_time_thres
+        self.max_end_sil_frame_cnt_thresh = (
+            self.vad_opts.max_end_silence_time - self.vad_opts.speech_to_sil_time_thres
+        )
         self.speech_noise_thres = self.vad_opts.speech_noise_thres
         self.scores = None
         self.idx_pre_chunk = 0
@@ -257,7 +274,9 @@ class E2EVadModel():
         self.output_data_buf = []
         self.output_data_buf_offset = 0
         self.frame_probs = []
-        self.max_end_sil_frame_cnt_thresh = self.vad_opts.max_end_silence_time - self.vad_opts.speech_to_sil_time_thres
+        self.max_end_sil_frame_cnt_thresh = (
+            self.vad_opts.max_end_silence_time - self.vad_opts.speech_to_sil_time_thres
+        )
         self.speech_noise_thres = self.vad_opts.speech_noise_thres
         self.scores = None
         self.idx_pre_chunk = 0
@@ -287,36 +306,58 @@ class E2EVadModel():
             self.data_buf_size = self.data_buf_all_size
         else:
             self.data_buf_all_size += len(self.waveform[0])
-        for offset in range(0, self.waveform.shape[1] - frame_sample_length + 1, frame_shift_length):
+        for offset in range(
+            0, self.waveform.shape[1] - frame_sample_length + 1, frame_shift_length
+        ):
             self.decibel.append(
-                10 * math.log10(np.square((self.waveform[0][offset: offset + frame_sample_length])).sum() + \
-                                0.000001))
+                10
+                * math.log10(
+                    np.square((self.waveform[0][offset : offset + frame_sample_length])).sum()
+                    + 0.000001
+                )
+            )
 
     def ComputeScores(self, scores: np.ndarray) -> None:
         # scores = self.encoder(feats, in_cache)  # return B * T * D
         self.vad_opts.nn_eval_block_size = scores.shape[1]
         self.frm_cnt += scores.shape[1]  # count total frames
-        self.scores=scores
+        self.scores = scores
 
     def PopDataBufTillFrame(self, frame_idx: int) -> None:  # need check again
         while self.data_buf_start_frame < frame_idx:
-            if self.data_buf_size >= int(self.vad_opts.frame_in_ms * self.vad_opts.sample_rate / 1000):
+            if self.data_buf_size >= int(
+                self.vad_opts.frame_in_ms * self.vad_opts.sample_rate / 1000
+            ):
                 self.data_buf_start_frame += 1
-                self.data_buf_size = self.data_buf_all_size-self.data_buf_start_frame * int(
-                    self.vad_opts.frame_in_ms * self.vad_opts.sample_rate / 1000)
+                self.data_buf_size = self.data_buf_all_size - self.data_buf_start_frame * int(
+                    self.vad_opts.frame_in_ms * self.vad_opts.sample_rate / 1000
+                )
 
-    def PopDataToOutputBuf(self, start_frm: int, frm_cnt: int, first_frm_is_start_point: bool,
-                           last_frm_is_end_point: bool, end_point_is_sent_end: bool) -> None:
+    def PopDataToOutputBuf(
+        self,
+        start_frm: int,
+        frm_cnt: int,
+        first_frm_is_start_point: bool,
+        last_frm_is_end_point: bool,
+        end_point_is_sent_end: bool,
+    ) -> None:
         self.PopDataBufTillFrame(start_frm)
-        expected_sample_number = int(frm_cnt * self.vad_opts.sample_rate * self.vad_opts.frame_in_ms / 1000)
+        expected_sample_number = int(
+            frm_cnt * self.vad_opts.sample_rate * self.vad_opts.frame_in_ms / 1000
+        )
         if last_frm_is_end_point:
-            extra_sample = max(0, int(self.vad_opts.frame_length_ms * self.vad_opts.sample_rate / 1000 - \
-                                      self.vad_opts.sample_rate * self.vad_opts.frame_in_ms / 1000))
+            extra_sample = max(
+                0,
+                int(
+                    self.vad_opts.frame_length_ms * self.vad_opts.sample_rate / 1000
+                    - self.vad_opts.sample_rate * self.vad_opts.frame_in_ms / 1000
+                ),
+            )
             expected_sample_number += int(extra_sample)
         if end_point_is_sent_end:
             expected_sample_number = max(expected_sample_number, self.data_buf_size)
         if self.data_buf_size < expected_sample_number:
-            print('error in calling pop data_buf\n')
+            print("error in calling pop data_buf\n")
 
         if len(self.output_data_buf) == 0 or first_frm_is_start_point:
             self.output_data_buf.append(E2EVadSpeechBufWithDoa())
@@ -326,15 +367,17 @@ class E2EVadModel():
             self.output_data_buf[-1].doa = 0
         cur_seg = self.output_data_buf[-1]
         if cur_seg.end_ms != start_frm * self.vad_opts.frame_in_ms:
-            print('warning\n')
+            print("warning\n")
         out_pos = len(cur_seg.buffer)  # cur_seg.buff现在没做任何操作
         data_to_pop = 0
         if end_point_is_sent_end:
             data_to_pop = expected_sample_number
         else:
-            data_to_pop = int(frm_cnt * self.vad_opts.frame_in_ms * self.vad_opts.sample_rate / 1000)
+            data_to_pop = int(
+                frm_cnt * self.vad_opts.frame_in_ms * self.vad_opts.sample_rate / 1000
+            )
         if data_to_pop > self.data_buf_size:
-            print('VAD data_to_pop is bigger than self.data_buf_size!!!\n')
+            print("VAD data_to_pop is bigger than self.data_buf_size!!!\n")
             data_to_pop = self.data_buf_size
             expected_sample_number = self.data_buf_size
 
@@ -346,7 +389,7 @@ class E2EVadModel():
             # cur_seg.buffer[out_pos++] = data_buf_.back()
             out_pos += 1
         if cur_seg.end_ms != start_frm * self.vad_opts.frame_in_ms:
-            print('Something wrong with the VAD algorithm\n')
+            print("Something wrong with the VAD algorithm\n")
         self.data_buf_start_frame += frm_cnt
         cur_seg.end_ms = (start_frm + frm_cnt) * self.vad_opts.frame_in_ms
         if first_frm_is_start_point:
@@ -369,11 +412,14 @@ class E2EVadModel():
         if self.vad_opts.do_start_point_detection:
             pass
         if self.confirmed_start_frame != -1:
-            print('not reset vad properly\n')
+            print("not reset vad properly\n")
         else:
             self.confirmed_start_frame = start_frame
 
-        if not fake_result and self.vad_state_machine == VadStateMachine.kVadInStateStartPointNotDetected:
+        if (
+            not fake_result
+            and self.vad_state_machine == VadStateMachine.kVadInStateStartPointNotDetected
+        ):
             self.PopDataToOutputBuf(self.confirmed_start_frame, 1, True, False, False)
 
     def OnVoiceEnd(self, end_frame: int, fake_result: bool, is_last_frame: bool) -> None:
@@ -382,7 +428,7 @@ class E2EVadModel():
         if self.vad_opts.do_end_point_detection:
             pass
         if self.confirmed_end_frame != -1:
-            print('not reset vad properly\n')
+            print("not reset vad properly\n")
         else:
             self.confirmed_end_frame = end_frame
         if not fake_result:
@@ -419,7 +465,10 @@ class E2EVadModel():
         assert len(self.sil_pdf_ids) == self.vad_opts.silence_pdf_num
         if len(self.sil_pdf_ids) > 0:
             assert len(self.scores) == 1  # 只支持batch_size = 1的测试
-            sil_pdf_scores = [self.scores[0][t - self.idx_pre_chunk][sil_pdf_id] for sil_pdf_id in self.sil_pdf_ids]
+            sil_pdf_scores = [
+                self.scores[0][t - self.idx_pre_chunk][sil_pdf_id]
+                for sil_pdf_id in self.sil_pdf_ids
+            ]
             sum_score = sum(sil_pdf_scores)
             noise_prob = math.log(sum_score) * self.vad_opts.speech_2_noise_ratio
             total_score = 1.0
@@ -442,15 +491,21 @@ class E2EVadModel():
             if self.noise_average_decibel < -99.9:
                 self.noise_average_decibel = cur_decibel
             else:
-                self.noise_average_decibel = (cur_decibel + self.noise_average_decibel * (
-                        self.vad_opts.noise_frame_num_used_for_snr
-                        - 1)) / self.vad_opts.noise_frame_num_used_for_snr
+                self.noise_average_decibel = (
+                    cur_decibel
+                    + self.noise_average_decibel * (self.vad_opts.noise_frame_num_used_for_snr - 1)
+                ) / self.vad_opts.noise_frame_num_used_for_snr
 
         return frame_state
 
-    def __call__(self, score: np.ndarray, waveform: np.ndarray,
-                is_final: bool = False, max_end_sil: int = 800, online: bool = False
-                ):
+    def __call__(
+        self,
+        score: np.ndarray,
+        waveform: np.ndarray,
+        is_final: bool = False,
+        max_end_sil: int = 800,
+        online: bool = False,
+    ):
         self.max_end_sil_frame_cnt_thresh = max_end_sil - self.vad_opts.speech_to_sil_time_thres
         self.waveform = waveform  # compute decibel for each frame
         self.ComputeDecibel()
@@ -478,8 +533,10 @@ class E2EVadModel():
                             end_ms = -1
                             self.next_seg = False
                     else:
-                        if not is_final and (not self.output_data_buf[i].contain_seg_start_point or not self.output_data_buf[
-                            i].contain_seg_end_point):
+                        if not is_final and (
+                            not self.output_data_buf[i].contain_seg_start_point
+                            or not self.output_data_buf[i].contain_seg_end_point
+                        ):
                             continue
                         start_ms = self.output_data_buf[i].start_ms
                         end_ms = self.output_data_buf[i].end_ms
@@ -517,7 +574,9 @@ class E2EVadModel():
 
         return 0
 
-    def DetectOneFrame(self, cur_frm_state: FrameState, cur_frm_idx: int, is_final_frame: bool) -> None:
+    def DetectOneFrame(
+        self, cur_frm_state: FrameState, cur_frm_idx: int, is_final_frame: bool
+    ) -> None:
         tmp_cur_frm_state = FrameState.kFrameStateInvalid
         if cur_frm_state == FrameState.kFrameStateSpeech:
             if math.fabs(1.0) > self.vad_opts.fe_prior_thres:
@@ -534,7 +593,9 @@ class E2EVadModel():
             self.pre_end_silence_detected = False
             start_frame = 0
             if self.vad_state_machine == VadStateMachine.kVadInStateStartPointNotDetected:
-                start_frame = max(self.data_buf_start_frame, cur_frm_idx - self.LatencyFrmNumAtStartPoint())
+                start_frame = max(
+                    self.data_buf_start_frame, cur_frm_idx - self.LatencyFrmNumAtStartPoint()
+                )
                 self.OnVoiceStart(start_frame)
                 self.vad_state_machine = VadStateMachine.kVadInStateInSpeechSegment
                 for t in range(start_frame + 1, cur_frm_idx + 1):
@@ -542,8 +603,10 @@ class E2EVadModel():
             elif self.vad_state_machine == VadStateMachine.kVadInStateInSpeechSegment:
                 for t in range(self.latest_confirmed_speech_frame + 1, cur_frm_idx):
                     self.OnVoiceDetected(t)
-                if cur_frm_idx - self.confirmed_start_frame + 1 > \
-                        self.vad_opts.max_single_segment_time / frm_shift_in_ms:
+                if (
+                    cur_frm_idx - self.confirmed_start_frame + 1
+                    > self.vad_opts.max_single_segment_time / frm_shift_in_ms
+                ):
                     self.OnVoiceEnd(cur_frm_idx, False, False)
                     self.vad_state_machine = VadStateMachine.kVadInStateEndPointDetected
                 elif not is_final_frame:
@@ -557,8 +620,10 @@ class E2EVadModel():
             if self.vad_state_machine == VadStateMachine.kVadInStateStartPointNotDetected:
                 pass
             elif self.vad_state_machine == VadStateMachine.kVadInStateInSpeechSegment:
-                if cur_frm_idx - self.confirmed_start_frame + 1 > \
-                        self.vad_opts.max_single_segment_time / frm_shift_in_ms:
+                if (
+                    cur_frm_idx - self.confirmed_start_frame + 1
+                    > self.vad_opts.max_single_segment_time / frm_shift_in_ms
+                ):
                     self.OnVoiceEnd(cur_frm_idx, False, False)
                     self.vad_state_machine = VadStateMachine.kVadInStateEndPointDetected
                 elif not is_final_frame:
@@ -570,8 +635,10 @@ class E2EVadModel():
         elif AudioChangeState.kChangeStateSpeech2Speech == state_change:
             self.continous_silence_frame_count = 0
             if self.vad_state_machine == VadStateMachine.kVadInStateInSpeechSegment:
-                if cur_frm_idx - self.confirmed_start_frame + 1 > \
-                        self.vad_opts.max_single_segment_time / frm_shift_in_ms:
+                if (
+                    cur_frm_idx - self.confirmed_start_frame + 1
+                    > self.vad_opts.max_single_segment_time / frm_shift_in_ms
+                ):
                     self.max_time_out = True
                     self.OnVoiceEnd(cur_frm_idx, False, False)
                     self.vad_state_machine = VadStateMachine.kVadInStateEndPointDetected
@@ -585,40 +652,53 @@ class E2EVadModel():
             self.continous_silence_frame_count += 1
             if self.vad_state_machine == VadStateMachine.kVadInStateStartPointNotDetected:
                 # silence timeout, return zero length decision
-                if ((self.vad_opts.detect_mode == VadDetectMode.kVadSingleUtteranceDetectMode.value) and (
-                        self.continous_silence_frame_count * frm_shift_in_ms > self.vad_opts.max_start_silence_time)) \
-                        or (is_final_frame and self.number_end_time_detected == 0):
+                if (
+                    (self.vad_opts.detect_mode == VadDetectMode.kVadSingleUtteranceDetectMode.value)
+                    and (
+                        self.continous_silence_frame_count * frm_shift_in_ms
+                        > self.vad_opts.max_start_silence_time
+                    )
+                ) or (is_final_frame and self.number_end_time_detected == 0):
                     for t in range(self.lastest_confirmed_silence_frame + 1, cur_frm_idx):
                         self.OnSilenceDetected(t)
                     self.OnVoiceStart(0, True)
-                    self.OnVoiceEnd(0, True, False);
+                    self.OnVoiceEnd(0, True, False)
                     self.vad_state_machine = VadStateMachine.kVadInStateEndPointDetected
                 else:
                     if cur_frm_idx >= self.LatencyFrmNumAtStartPoint():
                         self.OnSilenceDetected(cur_frm_idx - self.LatencyFrmNumAtStartPoint())
             elif self.vad_state_machine == VadStateMachine.kVadInStateInSpeechSegment:
-                if self.continous_silence_frame_count * frm_shift_in_ms >= self.max_end_sil_frame_cnt_thresh:
+                if (
+                    self.continous_silence_frame_count * frm_shift_in_ms
+                    >= self.max_end_sil_frame_cnt_thresh
+                ):
                     lookback_frame = int(self.max_end_sil_frame_cnt_thresh / frm_shift_in_ms)
                     if self.vad_opts.do_extend:
-                        lookback_frame -= int(self.vad_opts.lookahead_time_end_point / frm_shift_in_ms)
+                        lookback_frame -= int(
+                            self.vad_opts.lookahead_time_end_point / frm_shift_in_ms
+                        )
                         lookback_frame -= 1
                         lookback_frame = max(0, lookback_frame)
                     self.OnVoiceEnd(cur_frm_idx - lookback_frame, False, False)
                     self.vad_state_machine = VadStateMachine.kVadInStateEndPointDetected
-                elif cur_frm_idx - self.confirmed_start_frame + 1 > \
-                        self.vad_opts.max_single_segment_time / frm_shift_in_ms:
+                elif (
+                    cur_frm_idx - self.confirmed_start_frame + 1
+                    > self.vad_opts.max_single_segment_time / frm_shift_in_ms
+                ):
                     self.OnVoiceEnd(cur_frm_idx, False, False)
                     self.vad_state_machine = VadStateMachine.kVadInStateEndPointDetected
                 elif self.vad_opts.do_extend and not is_final_frame:
                     if self.continous_silence_frame_count <= int(
-                            self.vad_opts.lookahead_time_end_point / frm_shift_in_ms):
+                        self.vad_opts.lookahead_time_end_point / frm_shift_in_ms
+                    ):
                         self.OnVoiceDetected(cur_frm_idx)
                 else:
                     self.MaybeOnVoiceEndIfLastFrame(is_final_frame, cur_frm_idx)
             else:
                 pass
 
-        if self.vad_state_machine == VadStateMachine.kVadInStateEndPointDetected and \
-                self.vad_opts.detect_mode == VadDetectMode.kVadMutipleUtteranceDetectMode.value:
+        if (
+            self.vad_state_machine == VadStateMachine.kVadInStateEndPointDetected
+            and self.vad_opts.detect_mode == VadDetectMode.kVadMutipleUtteranceDetectMode.value
+        ):
             self.ResetDetection()
-

@@ -1,5 +1,11 @@
 import pynini
-from fun_text_processing.inverse_text_normalization.ja.graph_utils import GraphFst, delete_extra_space, delete_space, insert_space, DAMO_CHAR
+from fun_text_processing.inverse_text_normalization.ja.graph_utils import (
+    GraphFst,
+    delete_extra_space,
+    delete_space,
+    insert_space,
+    DAMO_CHAR,
+)
 from pynini.lib import pynutil
 
 
@@ -18,9 +24,11 @@ class FractionFst(GraphFst):
         super().__init__(name="fraction", kind="classify")
 
         graph_cardinal = cardinal.graph_no_exception
-        graph_four = pynini.cross("クォーター", "4") # quarter
+        graph_four = pynini.cross("クォーター", "4")  # quarter
 
-        denominator = pynutil.insert('denominator: "') + (graph_cardinal | graph_four) + pynutil.insert('"')
+        denominator = (
+            pynutil.insert('denominator: "') + (graph_cardinal | graph_four) + pynutil.insert('"')
+        )
         fraction_component = pynutil.delete(pynini.union("分の", "割る"))
         numerator = pynutil.insert('numerator: "') + graph_cardinal + pynutil.insert('"')
 

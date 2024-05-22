@@ -24,24 +24,32 @@ class OrdinalFst(GraphFst):
         teen = pynini.string_file(get_abs_path("data/ordinals/teen.tsv"))
         zero = pynini.string_file(get_abs_path("data/numbers/zero.tsv"))
         hundred_digit = pynini.string_file(get_abs_path("data/numbers/hundred_digit.tsv"))
-        addzero = insert('0')
-        tens = ties + addzero | (digit + delete('十') + (digit | addzero))
-        hundred = (digit + delete('百') + (tens
-                                          | teen
-                                          | add_weight(zero + digit, 0.1)
-                                          | add_weight(digit + addzero, 0.5)
-                                          | add_weight(addzero**2, 1.0)))
-        hundred |= (cross("百", "1") + (tens
-                                          | teen
-                                          | add_weight(zero + digit, 0.1)
-                                          | add_weight(digit + addzero, 0.5)
-                                          | add_weight(addzero**2, 1.0)))
+        addzero = insert("0")
+        tens = ties + addzero | (digit + delete("十") + (digit | addzero))
+        hundred = (
+            digit
+            + delete("百")
+            + (
+                tens
+                | teen
+                | add_weight(zero + digit, 0.1)
+                | add_weight(digit + addzero, 0.5)
+                | add_weight(addzero**2, 1.0)
+            )
+        )
+        hundred |= cross("百", "1") + (
+            tens
+            | teen
+            | add_weight(zero + digit, 0.1)
+            | add_weight(digit + addzero, 0.5)
+            | add_weight(addzero**2, 1.0)
+        )
         hundred |= hundred_digit
 
         ordinal = digit | teen | tens | hundred
         graph = pynini.closure(DAMO_CHAR, 1) + ordinal
 
         self.graph = graph @ cardinal_graph
-        final_graph = pynutil.insert("integer: \"") + self.graph + pynutil.insert("\"")
+        final_graph = pynutil.insert('integer: "') + self.graph + pynutil.insert('"')
         final_graph = self.add_tokens(final_graph)
         self.fst = final_graph.optimize()

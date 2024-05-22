@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import DAMO_SIGMA, DAMO_SPACE
 from fun_text_processing.text_normalization.es import LOCALIZATION
@@ -22,12 +20,16 @@ else:
     decimal_separator = pynini.accep(",")
 
 ones = pynini.union("un", "ún")
-fem_ones = pynini.union(pynini.cross("un", "una"), pynini.cross("ún", "una"), pynini.cross("uno", "una"))
-one_to_one_hundred = pynini.union(digits, "uno", tens, teens, twenties, tens + pynini.accep(" y ") + digits)
+fem_ones = pynini.union(
+    pynini.cross("un", "una"), pynini.cross("ún", "una"), pynini.cross("uno", "una")
+)
+one_to_one_hundred = pynini.union(
+    digits, "uno", tens, teens, twenties, tens + pynini.accep(" y ") + digits
+)
 fem_hundreds = hundreds @ pynini.cdrewrite(pynini.cross("ientos", "ientas"), "", "", DAMO_SIGMA)
 
 
-def strip_accent(fst: 'pynini.FstLike') -> 'pynini.FstLike':
+def strip_accent(fst: "pynini.FstLike") -> "pynini.FstLike":
     """
     Converts all accented vowels to non-accented equivalents
 
@@ -37,7 +39,7 @@ def strip_accent(fst: 'pynini.FstLike') -> 'pynini.FstLike':
     return fst @ pynini.cdrewrite(accents, "", "", DAMO_SIGMA)
 
 
-def shift_cardinal_gender(fst: 'pynini.FstLike') -> 'pynini.FstLike':
+def shift_cardinal_gender(fst: "pynini.FstLike") -> "pynini.FstLike":
     """
     Applies gender conversion rules to a cardinal string. These include: rendering all masculine forms of "uno" (including apocopated forms) as "una" and
     Converting all gendered numbers in the hundreds series (200,300,400...) to feminine equivalent (e.g. "doscientos" -> "doscientas"). Conversion only applies
@@ -59,23 +61,27 @@ def shift_cardinal_gender(fst: 'pynini.FstLike') -> 'pynini.FstLike':
         + (pynini.accep("mil") | pynini.accep("milésimo"))
         + pynini.closure(DAMO_SPACE + hundreds, 0, 1)
         + pynini.closure(DAMO_SPACE + one_to_one_hundred, 0, 1)
-        + pynini.union(pynini.accep("[EOS]"), pynini.accep("\""), decimal_separator)
+        + pynini.union(pynini.accep("[EOS]"), pynini.accep('"'), decimal_separator)
     )
     before_double_digits = pynini.closure(DAMO_SPACE + one_to_one_hundred, 0, 1) + pynini.union(
-        pynini.accep("[EOS]"), pynini.accep("\"")
+        pynini.accep("[EOS]"), pynini.accep('"')
     )
 
-    fem_allign = pynini.cdrewrite(fem_hundreds, "", before_mil, DAMO_SIGMA)  # doscientas mil dosciento
-    fem_allign @= pynini.cdrewrite(fem_hundreds, "", before_double_digits, DAMO_SIGMA)  # doscientas mil doscienta
+    fem_allign = pynini.cdrewrite(
+        fem_hundreds, "", before_mil, DAMO_SIGMA
+    )  # doscientas mil dosciento
+    fem_allign @= pynini.cdrewrite(
+        fem_hundreds, "", before_double_digits, DAMO_SIGMA
+    )  # doscientas mil doscienta
 
     fem_allign @= pynini.cdrewrite(
-        fem_ones, "", pynini.union("[EOS]", "\"", decimal_separator), DAMO_SIGMA
+        fem_ones, "", pynini.union("[EOS]", '"', decimal_separator), DAMO_SIGMA
     )  # If before a quote or EOS, we know it's the end of a string
 
     return fst @ fem_allign
 
 
-def shift_number_gender(fst: 'pynini.FstLike') -> 'pynini.FstLike':
+def shift_number_gender(fst: "pynini.FstLike") -> "pynini.FstLike":
     """
     Performs gender conversion on all verbalized numbers in output. All values in the hundreds series (200,300,400) are changed to
     feminine gender (e.g. "doscientos" -> "doscientas") and all forms of "uno" (including apocopated forms) are converted to "una".
@@ -90,13 +96,13 @@ def shift_number_gender(fst: 'pynini.FstLike') -> 'pynini.FstLike':
     """
     fem_allign = pynini.cdrewrite(fem_hundreds, "", "", DAMO_SIGMA)
     fem_allign @= pynini.cdrewrite(
-        fem_ones, "", pynini.union(DAMO_SPACE, pynini.accep("[EOS]"), pynini.accep("\"")), DAMO_SIGMA
+        fem_ones, "", pynini.union(DAMO_SPACE, pynini.accep("[EOS]"), pynini.accep('"')), DAMO_SIGMA
     )  # If before a quote or EOS, we know it's the end of a string
 
     return fst @ fem_allign
 
 
-def strip_cardinal_apocope(fst: 'pynini.FstLike') -> 'pynini.FstLike':
+def strip_cardinal_apocope(fst: "pynini.FstLike") -> "pynini.FstLike":
     """
     Reverts apocope on cardinal strings in line with formation rules. e.g. "un" -> "uno". Due to cardinal formation rules, this in effect only
     affects strings where the final value is a variation of "un".
@@ -109,11 +115,11 @@ def strip_cardinal_apocope(fst: 'pynini.FstLike') -> 'pynini.FstLike':
     """
     # Since cardinals use apocope by default for large values (e.g. "millón"), this only needs to act on the last instance of one
     strip = pynini.cross("un", "uno") | pynini.cross("ún", "uno")
-    strip = pynini.cdrewrite(strip, "", pynini.union("[EOS]", "\""), DAMO_SIGMA)
+    strip = pynini.cdrewrite(strip, "", pynini.union("[EOS]", '"'), DAMO_SIGMA)
     return fst @ strip
 
 
-def add_cardinal_apocope_fem(fst: 'pynini.FstLike') -> 'pynini.FstLike':
+def add_cardinal_apocope_fem(fst: "pynini.FstLike") -> "pynini.FstLike":
     """
     Adds apocope on cardinal strings in line with stressing rules. e.g. "una" -> "un". This only occurs when "una" precedes a stressed "a" sound in formal speech. This is not predictable
     with text string, so is included for non-deterministic cases.
@@ -126,11 +132,11 @@ def add_cardinal_apocope_fem(fst: 'pynini.FstLike') -> 'pynini.FstLike':
     """
     # Since the stress trigger follows the cardinal string and only affects the preceding sound, this only needs to act on the last instance of one
     strip = pynini.cross("una", "un") | pynini.cross("veintiuna", "veintiún")
-    strip = pynini.cdrewrite(strip, "", pynini.union("[EOS]", "\""), DAMO_SIGMA)
+    strip = pynini.cdrewrite(strip, "", pynini.union("[EOS]", '"'), DAMO_SIGMA)
     return fst @ strip
 
 
-def roman_to_int(fst: 'pynini.FstLike') -> 'pynini.FstLike':
+def roman_to_int(fst: "pynini.FstLike") -> "pynini.FstLike":
     """
     Alters given fst to convert Roman integers (lower and upper cased) into Arabic numerals. Valid for values up to 1000.
     e.g.

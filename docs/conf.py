@@ -17,9 +17,9 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'FunASR'
-copyright = '2022, Speech Lab, Alibaba Group'
-author = 'Speech Lab, Alibaba Grou'
+project = "FunASR"
+copyright = "2022, Speech Lab, Alibaba Group"
+author = "Speech Lab, Alibaba Group"
 
 
 # -- General configuration ---------------------------------------------------
@@ -30,18 +30,18 @@ author = 'Speech Lab, Alibaba Grou'
 extensions = [
     "nbsphinx",
     "sphinx.ext.autodoc",
-    'sphinx.ext.napoleon',
-    'sphinx.ext.viewcode',
+    "sphinx.ext.napoleon",
+    "sphinx.ext.viewcode",
     "sphinx.ext.mathjax",
     "sphinx.ext.todo",
     # "sphinxarg.ext",
     "sphinx_markdown_tables",
-    'recommonmark',
-    'sphinx_rtd_theme',
+    "recommonmark",
+    "sphinx_rtd_theme",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 source_suffix = [".rst", ".md"]
 

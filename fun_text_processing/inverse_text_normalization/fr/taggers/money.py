@@ -1,4 +1,3 @@
-
 import pynini
 from fun_text_processing.inverse_text_normalization.fr.graph_utils import (
     DAMO_DIGIT,
@@ -52,10 +51,14 @@ class MoneyFst(GraphFst):
         )  # recognizes all currencies
 
         # Graphs for large round amounts ('deux billiards d'euros', 'un milliard de dollars')
-        graph_de = pynini.union("de ", "des ", "d'")  # the use of de/d'only occurs with round amounts
+        graph_de = pynini.union(
+            "de ", "des ", "d'"
+        )  # the use of de/d'only occurs with round amounts
         graph_currency_component_large_round_amounts = graph_de + accept_all_currency
         graph_currency_component_large_round_amounts = (
-            pynutil.insert(" currency: \"") + graph_currency_component_large_round_amounts + pynutil.insert("\"")
+            pynutil.insert(' currency: "')
+            + graph_currency_component_large_round_amounts
+            + pynutil.insert('"')
         )
 
         graph_money_large_round_amounts = (
@@ -64,21 +67,25 @@ class MoneyFst(GraphFst):
         graph_money_large_round_amounts += graph_currency_component_large_round_amounts
 
         # For standard currency
-        add_leading_zero_to_double_digit = (DAMO_DIGIT + DAMO_DIGIT) | (pynutil.insert("0") + DAMO_DIGIT)
+        add_leading_zero_to_double_digit = (DAMO_DIGIT + DAMO_DIGIT) | (
+            pynutil.insert("0") + DAMO_DIGIT
+        )
 
         # Graphs integer denomination for large denominations (e.g. $)
-        graph_integer_component_major = pynutil.insert("integer_part: \"") + cardinal_graph + pynutil.insert("\"")
+        graph_integer_component_major = (
+            pynutil.insert('integer_part: "') + cardinal_graph + pynutil.insert('"')
+        )
         graph_integer_component_major += delete_space
 
         graph_currency_component_major = (
-            pynutil.insert(" currency: \"") + convert_currency_major + pynutil.insert("\"")
+            pynutil.insert(' currency: "') + convert_currency_major + pynutil.insert('"')
         )
 
         graph_decimal_component_major = (
             delete_space
-            + pynutil.insert(" fractional_part: \"")
+            + pynutil.insert(' fractional_part: "')
             + (cardinal_graph @ add_leading_zero_to_double_digit)
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
         )
 
         # Rare cases where 'et' will separate major and minor denominations.
@@ -96,21 +103,23 @@ class MoneyFst(GraphFst):
         )
 
         # For cases when only small denominations are used.
-        graph_integer_component_minor = pynutil.insert("integer_part: \"0\"")
+        graph_integer_component_minor = pynutil.insert('integer_part: "0"')
 
         graph_decimal_component_minor = (
-            pynutil.insert(" fractional_part: \"")
+            pynutil.insert(' fractional_part: "')
             + (cardinal_graph @ add_leading_zero_to_double_digit)
-            + pynutil.insert("\"")
+            + pynutil.insert('"')
         )
         graph_decimal_component_minor += delete_extra_space
 
         graph_currency_component_minor = (
-            pynutil.insert(" currency: \"") + convert_currency_minor + pynutil.insert("\"")
+            pynutil.insert(' currency: "') + convert_currency_minor + pynutil.insert('"')
         )
 
         graph_money_minor = (
-            graph_integer_component_minor + graph_decimal_component_minor + graph_currency_component_minor
+            graph_integer_component_minor
+            + graph_decimal_component_minor
+            + graph_currency_component_minor
         )
 
         graph_money_standard_amounts = graph_money_major | graph_money_minor

@@ -1,5 +1,3 @@
-
-
 import pynini
 from fun_text_processing.text_normalization.en.graph_utils import GraphFst
 from fun_text_processing.text_normalization.ru.alphabet import RU_ALPHA
@@ -19,6 +17,6 @@ class ElectronicFst(GraphFst):
     def __init__(self, deterministic: bool = True):
         super().__init__(name="electronic", kind="verbalize", deterministic=deterministic)
 
-        graph = pynutil.delete("username: \"") + pynini.closure(RU_ALPHA | " ") + pynutil.delete("\"")
+        graph = pynutil.delete('username: "') + pynini.closure(RU_ALPHA | " ") + pynutil.delete('"')
         delete_tokens = self.delete_tokens(graph)
         self.fst = delete_tokens.optimize()

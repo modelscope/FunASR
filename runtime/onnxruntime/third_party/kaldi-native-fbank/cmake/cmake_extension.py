@@ -39,7 +39,6 @@ try:
                 # -linux_x86_64.whl
                 self.root_is_pure = False
 
-
 except ImportError:
     bdist_wheel = None
 
@@ -84,9 +83,7 @@ class BuildExtension(build_ext):
                 cmake --build {self.build_temp} --target install --config Release -- -m
             """
             print(f"build command is:\n{build_cmd}")
-            ret = os.system(
-                f"cmake {cmake_args} -B {self.build_temp} -S {kaldi_native_fbank_dir}"
-            )
+            ret = os.system(f"cmake {cmake_args} -B {self.build_temp} -S {kaldi_native_fbank_dir}")
             if ret != 0:
                 raise Exception("Failed to configure kaldi_native_fbank")
 
@@ -98,9 +95,7 @@ class BuildExtension(build_ext):
         else:
             if make_args == "" and system_make_args == "":
                 print("For fast compilation, run:")
-                print(
-                    'export KALDI_NATIVE_FBANK_MAKE_ARGS="-j"; python setup.py install'
-                )
+                print('export KALDI_NATIVE_FBANK_MAKE_ARGS="-j"; python setup.py install')
 
             build_cmd = f"""
                 cd {self.build_temp}

@@ -179,7 +179,12 @@ class Tokenizer:
         langs = tuple(LANGUAGES.keys())[: self.num_languages]
         sot_sequence = [sot]
         if self.language is not None:
-            sot_sequence.append(sot + 1 + langs.index(self.language))
+            if self.language == "nospeech":
+                sot_sequence.append(self.no_speech)
+            else:
+                sot_sequence.append(sot + 1 + langs.index(self.language))
+        # if self.language is not None:
+        #     sot_sequence.append(sot + 1 + langs.index(self.language))
         if self.task is not None:
             task_token: int = transcribe if self.task == "transcribe" else translate
             sot_sequence.append(task_token)
@@ -199,7 +204,7 @@ class Tokenizer:
         This method decodes given tokens with timestamps tokens annotated, e.g. "<|1.08|>".
         """
         return self.encoding.decode(token_ids, **kwargs)
-    
+
     def get_vocab_size(self) -> int:
         return self.encoding.n_vocab
 
@@ -286,9 +291,7 @@ class Tokenizer:
         keeping basic punctuations like commas, periods, question marks, exclamation points, etc.
         """
         symbols = list('"#()*+/:;<=>@[\\]^_`{|}~「」『』')
-        symbols += (
-            "<< >> <<< >>> -- --- -( -[ (' (\" (( )) ((( ))) [[ ]] {{ }} ♪♪ ♪♪♪".split()
-        )
+        symbols += "<< >> <<< >>> -- --- -( -[ (' (\" (( )) ((( ))) [[ ]] {{ }} ♪♪ ♪♪♪".split()
 
         # symbols that may be a single token or multiple tokens depending on the tokenizer.
         # In case they're multiple tokens, suppress the first token, which is safe because:
@@ -363,8 +366,10 @@ class Tokenizer:
 
 
 @lru_cache(maxsize=None)
-def get_encoding(name: str = "gpt2", num_languages: int = 99):
-    vocab_path = os.path.join(os.path.dirname(__file__), "assets", f"{name}.tiktoken")
+def get_encoding(name: str = "gpt2", num_languages: int = 99, vocab_path: str = None):
+    if vocab_path is None:
+        vocab_path = os.path.join(os.path.dirname(__file__), "assets", f"{name}.tiktoken")
+
     ranks = {
         base64.b64decode(token): int(rank)
         for token, rank in (line.split() for line in open(vocab_path) if line)
@@ -372,7 +377,7 @@ def get_encoding(name: str = "gpt2", num_languages: int = 99):
     n_vocab = len(ranks)
     special_tokens = {}
 
-    if False: #name == "gpt2" or name == "multilingual":
+    if False:  # name == "gpt2" or name == "multilingual":
         specials = [
             "<|endoftext|>",
             "<|startoftranscript|>",
@@ -423,12 +428,15 @@ def get_tokenizer(
     language: Optional[str] = None,
     task: Optional[str] = None,  # Literal["transcribe", "translate", None]
     encoding_path: Optional[str] = None,
+    vocab_path: Optional[str] = None,
 ) -> Tokenizer:
     if language is not None:
         language = language.lower()
         if language not in LANGUAGES:
             if language in TO_LANGUAGE_CODE:
                 language = TO_LANGUAGE_CODE[language]
+            elif language == "nospeech":
+                pass
             else:
                 raise ValueError(f"Unsupported language: {language}")
 
@@ -443,8 +451,6 @@ def get_tokenizer(
     if encoding_path is not None:
         encoding_name = encoding_path
 
-    encoding = get_encoding(name=encoding_name, num_languages=num_languages)
+    encoding = get_encoding(name=encoding_name, num_languages=num_languages, vocab_path=vocab_path)
 
-    return Tokenizer(
-        encoding=encoding, num_languages=num_languages, language=language, task=task
-    )
+    return Tokenizer(encoding=encoding, num_languages=num_languages, language=language, task=task)
