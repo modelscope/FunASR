@@ -73,9 +73,9 @@ def main(**kwargs):
         iter_stop = int(kwargs.get("scale", -1.0) * len(dataloader_train))
         log_step = iter_stop // 100
         if batch_idx % log_step == 0:
-            print(f"prcessed: {batch_idx}/{iter_stop}")
+            logging.info(f"prcessed: {batch_idx}/{iter_stop}")
         if batch_idx >= iter_stop and iter_stop > 0.0:
-            print(f"prcessed: {iter_stop}/{iter_stop}")
+            logging.info(f"prcessed: {iter_stop}/{iter_stop}")
             break
 
         fbank = batch["speech"].numpy()[0, :, :]
