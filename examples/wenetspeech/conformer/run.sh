@@ -42,8 +42,8 @@ train_set=train_l
 valid_set=dev
 test_sets="dev test_net test_meeting"
 
-asr_config=conf/conformer_12e_6d_2048_512.yaml
-model_dir="baseline_$(basename "${asr_config}" .yaml)_${lang}_${token_type}_${tag}"
+config=conformer_12e_6d_2048_512.yaml
+model_dir="baseline_$(basename "${config}" .yaml)_${lang}_${token_type}_${tag}"
 
 
 
@@ -76,6 +76,7 @@ if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
     python ../../../funasr/bin/compute_audio_cmvn.py \
     --config-path "${workspace}/conf" \
     --config-name "${config}" \
+    ++scale=0.1 \
     ++train_data_set_list="${feats_dir}/data/${train_set}/audio_datasets.jsonl" \
     ++cmvn_file="${feats_dir}/data/${train_set}/cmvn.json" \
 
