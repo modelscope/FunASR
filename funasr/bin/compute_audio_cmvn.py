@@ -75,6 +75,7 @@ def main(**kwargs):
         if batch_idx % log_step == 0:
             print(f"prcessed: {batch_idx}/{iter_stop}")
         if batch_idx >= iter_stop and iter_stop > 0.0:
+            print(f"prcessed: {iter_stop}/{iter_stop}")
             break
 
         fbank = batch["speech"].numpy()[0, :, :]
