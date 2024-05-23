@@ -23,6 +23,7 @@
 #include "fst/fstlib.h"
 #include "precomp.h"
 #include "itn-token-parser.h"
+#include "itn-model.h"
 
 using fst::StdArc;
 using fst::StdVectorFst;

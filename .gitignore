@@ -1,4 +1,6 @@
 .idea
+.ccls-cache
+compile_commands.json
 ./__pycache__/
 */__pycache__/
 */*/__pycache__/
