@@ -8,6 +8,7 @@ import argparse
 import codecs
 import re
 import sys
+import json
 
 is_python2 = sys.version_info[0] == 2
 
