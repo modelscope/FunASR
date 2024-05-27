@@ -42,7 +42,7 @@ namespace funasr {
     public:
         ParaformerTorch();
         ~ParaformerTorch();
-        void InitAsr(const std::string &am_model, const std::string &am_cmvn, const std::string &am_config, int thread_num);
+        void InitAsr(const std::string &am_model, const std::string &am_cmvn, const std::string &am_config, const std::string &token_file, int thread_num);
         void InitHwCompiler(const std::string &hw_model, int thread_num);
         void InitSegDict(const std::string &seg_dict_model);
         std::vector<std::vector<float>> CompileHotwordEmbedding(std::string &hotwords);

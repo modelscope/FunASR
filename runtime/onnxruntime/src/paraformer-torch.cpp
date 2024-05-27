@@ -16,7 +16,7 @@ ParaformerTorch::ParaformerTorch()
 }
 
 // offline
-void ParaformerTorch::InitAsr(const std::string &am_model, const std::string &am_cmvn, const std::string &am_config, int thread_num){
+void ParaformerTorch::InitAsr(const std::string &am_model, const std::string &am_cmvn, const std::string &am_config, const std::string &token_file, int thread_num){
     LoadConfigFromYaml(am_config.c_str());
     // knf options
     fbank_opts_.frame_opts.dither = 0;
@@ -28,8 +28,8 @@ void ParaformerTorch::InitAsr(const std::string &am_model, const std::string &am
     fbank_opts_.energy_floor = 0;
     fbank_opts_.mel_opts.debug_mel = false;
 
-    vocab = new Vocab(am_config.c_str());
-	phone_set_ = new PhoneSet(am_config.c_str());
+    vocab = new Vocab(token_file.c_str());
+	phone_set_ = new PhoneSet(token_file.c_str());
     LoadCmvn(am_cmvn.c_str());
 
     torch::DeviceType device = at::kCPU;
