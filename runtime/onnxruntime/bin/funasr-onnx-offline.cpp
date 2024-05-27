@@ -168,32 +168,32 @@ int main(int argc, char** argv)
         auto& wav_id = wav_ids[i];
 
         // For debug:begin
-        int32_t sampling_rate_ = audio_fs.getValue();
-        funasr::Audio audio(1);
-		if(is_target_file(wav_file.c_str(), "wav")){
-			if(!audio.LoadWav2Char(wav_file.c_str(), &sampling_rate_)){
-				LOG(ERROR)<<"Failed to load "<< wav_file;
-                exit(-1);
-            }
-		}else if(is_target_file(wav_file.c_str(), "pcm")){
-			if (!audio.LoadPcmwav2Char(wav_file.c_str(), &sampling_rate_)){
-				LOG(ERROR)<<"Failed to load "<< wav_file;
-                exit(-1);
-            }
-		}else{
-			if (!audio.FfmpegLoad(wav_file.c_str(), true)){
-				LOG(ERROR)<<"Failed to load "<< wav_file;
-                exit(-1);
-            }
-		}
-        char* speech_buff = audio.GetSpeechChar();
-        int buff_len = audio.GetSpeechLen()*2;
+        // int32_t sampling_rate_ = audio_fs.getValue();
+        // funasr::Audio audio(1);
+		// if(is_target_file(wav_file.c_str(), "wav")){
+		// 	if(!audio.LoadWav2Char(wav_file.c_str(), &sampling_rate_)){
+		// 		LOG(ERROR)<<"Failed to load "<< wav_file;
+        //         exit(-1);
+        //     }
+		// }else if(is_target_file(wav_file.c_str(), "pcm")){
+		// 	if (!audio.LoadPcmwav2Char(wav_file.c_str(), &sampling_rate_)){
+		// 		LOG(ERROR)<<"Failed to load "<< wav_file;
+        //         exit(-1);
+        //     }
+		// }else{
+		// 	if (!audio.FfmpegLoad(wav_file.c_str(), true)){
+		// 		LOG(ERROR)<<"Failed to load "<< wav_file;
+        //         exit(-1);
+        //     }
+		// }
+        // char* speech_buff = audio.GetSpeechChar();
+        // int buff_len = audio.GetSpeechLen()*2;
 
-        gettimeofday(&start, nullptr);
-        FUNASR_RESULT result=FunOfflineInferBuffer(asr_hanlde, speech_buff, buff_len, RASR_NONE, nullptr, hotwords_embedding, audio_fs.getValue(), "pcm", true, decoder_handle);
+        // gettimeofday(&start, nullptr);
+        // FUNASR_RESULT result=FunOfflineInferBuffer(asr_hanlde, speech_buff, buff_len, RASR_NONE, nullptr, hotwords_embedding, audio_fs.getValue(), "pcm", true, decoder_handle);
         // For debug:end
 
-        // FUNASR_RESULT result=FunOfflineInfer(asr_hanlde, wav_file.c_str(), RASR_NONE, nullptr, hotwords_embedding, audio_fs.getValue(), true, decoder_handle);
+        FUNASR_RESULT result=FunOfflineInfer(asr_hanlde, wav_file.c_str(), RASR_NONE, nullptr, hotwords_embedding, audio_fs.getValue(), true, decoder_handle);
         gettimeofday(&end, nullptr);
         seconds = (end.tv_sec - start.tv_sec);
         taking_micros += ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
