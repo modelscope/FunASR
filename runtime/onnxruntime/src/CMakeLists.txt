@@ -1,6 +1,11 @@
 
 file(GLOB files1 "*.cpp")
+list(REMOVE_ITEM files1 "${CMAKE_CURRENT_SOURCE_DIR}/paraformer-torch.cpp")
 set(files ${files1})
+
+if(GPU)
+    set(files ${files} "${CMAKE_CURRENT_SOURCE_DIR}/paraformer-torch.cpp")
+endif()
 
 message("files: "${files})
 
@@ -25,7 +30,11 @@ else()
     include_directories(${FFMPEG_DIR}/include)
 endif()
 
+if(GPU)
+    set(TORCH_DEPS torch torch_cuda torch_cpu c10 c10_cuda torch_blade ral_base_context)
+endif()
+
 #message("CXX_FLAGS "${CMAKE_CXX_FLAGS})
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/third_party)
-target_link_libraries(funasr PUBLIC onnxruntime ${EXTRA_LIBS})
+target_link_libraries(funasr PUBLIC onnxruntime ${EXTRA_LIBS} ${TORCH_DEPS})
