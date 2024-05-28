@@ -3,7 +3,11 @@
  * MIT License  (https://opensource.org/licenses/MIT)
 */
 #pragma once
-
+#define C10_USE_GLOG
+#include <torch/serialize.h>
+#include <torch/script.h>
+#include <torch/torch.h>
+#include <torch/csrc/jit/passes/tensorexpr_fuser.h>
 #include "precomp.h"
 #include "fst/fstlib.h"
 #include "fst/symbol-table.h"
@@ -12,7 +16,7 @@
 
 namespace funasr {
 
-    class Paraformer : public Model {
+    class ParaformerTorch : public Model {
     /**
      * Author: Speech Lab of DAMO Academy, Alibaba Group
      * Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition
@@ -27,26 +31,18 @@ namespace funasr {
         const float scale = 1.0;
 
         void LoadConfigFromYaml(const char* filename);
-        void LoadOnlineConfigFromYaml(const char* filename);
         void LoadCmvn(const char *filename);
         void LfrCmvn(std::vector<std::vector<float>> &asr_feats);
 
-        std::shared_ptr<Ort::Session> hw_m_session = nullptr;
-        Ort::Env hw_env_;
-        Ort::SessionOptions hw_session_options;
-        vector<string> hw_m_strInputNames, hw_m_strOutputNames;
-        vector<const char*> hw_m_szInputNames;
-        vector<const char*> hw_m_szOutputNames;
+        using TorchModule = torch::jit::script::Module;
+        std::shared_ptr<TorchModule> model_ = nullptr;
+        std::vector<torch::Tensor> encoder_outs_;
         bool use_hotword;
 
     public:
-        Paraformer();
-        ~Paraformer();
+        ParaformerTorch();
+        ~ParaformerTorch();
         void InitAsr(const std::string &am_model, const std::string &am_cmvn, const std::string &am_config, const std::string &token_file, int thread_num);
-        // online
-        void InitAsr(const std::string &en_model, const std::string &de_model, const std::string &am_cmvn, const std::string &am_config, const std::string &token_file, int thread_num);
-        // 2pass
-        void InitAsr(const std::string &am_model, const std::string &en_model, const std::string &de_model, const std::string &am_cmvn, const std::string &am_config, const std::string &token_file, int thread_num);
         void InitHwCompiler(const std::string &hw_model, int thread_num);
         void InitSegDict(const std::string &seg_dict_model);
         std::vector<std::vector<float>> CompileHotwordEmbedding(std::string &hotwords);
@@ -59,6 +55,7 @@ namespace funasr {
         string Rescoring();
         string GetLang(){return language;};
         int GetAsrSampleRate() { return asr_sample_rate; };
+        void SetBatchSize(int batch_size) {batch_size_ = batch_size;};
         int GetBatchSize() {return batch_size_;};
         void StartUtterance();
         void EndUtterance();
@@ -77,25 +74,7 @@ namespace funasr {
         int lfr_n = PARA_LFR_N;
 
         // paraformer-offline
-        std::shared_ptr<Ort::Session> m_session_ = nullptr;
-        Ort::Env env_;
-        Ort::SessionOptions session_options_;
-
-        vector<string> m_strInputNames, m_strOutputNames;
-        vector<const char*> m_szInputNames;
-        vector<const char*> m_szOutputNames;
-
         std::string language="zh-cn";
-
-        // paraformer-online
-        std::shared_ptr<Ort::Session> encoder_session_ = nullptr;
-        std::shared_ptr<Ort::Session> decoder_session_ = nullptr;
-        vector<string> en_strInputNames, en_strOutputNames;
-        vector<const char*> en_szInputNames_;
-        vector<const char*> en_szOutputNames_;
-        vector<string> de_strInputNames, de_strOutputNames;
-        vector<const char*> de_szInputNames_;
-        vector<const char*> de_szOutputNames_;
 
         // lm
         std::shared_ptr<fst::Fst<fst::StdArc>> lm_ = nullptr;

@@ -6,12 +6,8 @@ set(CMAKE_CXX_STANDARD 14 CACHE STRING "The C++ version to be used.")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-option(ENABLE_WEBSOCKET "Whether to build websocket server" ON)
+option(ENABLE_HTTP "Whether to build http server" ON)
 option(ENABLE_PORTAUDIO "Whether to build portaudio" ON)
-option(ENABLE_GLOG "Whether to build glog" ON)
-option(ENABLE_FST "Whether to build openfst" ON) # ITN need openfst compiled
-option(BUILD_SHARED_LIBS "Build shared libraries" ON)
-option(GPU "Whether to build with GPU" OFF)
 
 if(WIN32)
   file(REMOVE ${PROJECT_SOURCE_DIR}/../onnxruntime/third_party/glog/src/config.h 
@@ -24,31 +20,18 @@ else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fPIC")
 endif()
 
-if(GPU)
-    add_definitions(-DUSE_GPU)
-    set(TORCH_DIR "/usr/local/lib/python3.8/dist-packages/torch")
-    set(TORCH_BLADE_DIR "/usr/local/lib/python3.8/dist-packages/torch_blade")
-    include_directories(${TORCH_DIR}/include)
-    include_directories(${TORCH_DIR}/include/torch/csrc/api/include)
-    link_directories(${TORCH_DIR}/lib)
-    link_directories(${TORCH_BLADE_DIR})
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -D_GLIBCXX_USE_CXX11_ABI=0")
-endif()
+
+
+
+option(ENABLE_GLOG "Whether to build glog" ON)
+option(ENABLE_FST "Whether to build openfst" ON) # ITN need openfst compiled
+option(BUILD_SHARED_LIBS "Build shared libraries" ON)
  
-if(ENABLE_WEBSOCKET)
+if(ENABLE_HTTP)
   # cmake_policy(SET CMP0135 NEW)
   include(FetchContent)
 
-  if(NOT EXISTS ${PROJECT_SOURCE_DIR}/third_party/websocket/websocketpp )
-    FetchContent_Declare(websocketpp
-    GIT_REPOSITORY https://github.com/zaphoyd/websocketpp.git
-      GIT_TAG 0.8.2
-      SOURCE_DIR ${PROJECT_SOURCE_DIR}/third_party/websocket
-      )
-    
-    FetchContent_MakeAvailable(websocketpp)
-  endif()
-  include_directories(${PROJECT_SOURCE_DIR}/third_party/websocket)
+ 
    
   if(NOT EXISTS ${PROJECT_SOURCE_DIR}/third_party/asio/asio )
     FetchContent_Declare(asio

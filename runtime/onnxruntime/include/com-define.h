@@ -51,6 +51,15 @@ namespace funasr {
 #define QUANT_MODEL_NAME "model_quant.onnx"
 #define VAD_CMVN_NAME "am.mvn"
 #define VAD_CONFIG_NAME "config.yaml"
+
+// gpu models
+#define INFER_GPU "gpu"
+#define BATCHSIZE "batch-size"
+#define TORCH_MODEL_NAME "model.torchscripts"
+#define TORCH_QUANT_MODEL_NAME "model_quant.torchscripts"
+#define BLADE_MODEL_NAME "model.blade.fp16.pt"
+#define BLADEDISC "bladedisc"
+
 #define AM_CMVN_NAME "am.mvn"
 #define AM_CONFIG_NAME "config.yaml"
 #define LM_CONFIG_NAME "config.yaml"
