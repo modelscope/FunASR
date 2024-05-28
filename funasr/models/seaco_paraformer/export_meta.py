@@ -163,7 +163,11 @@ def export_backbone_forward(
     dha_ids = dha_pred.max(-1)[-1]
     dha_mask = (dha_ids == self.NOBIAS).int().unsqueeze(-1)
     decoder_out = decoder_out * dha_mask + dha_pred * (1 - dha_mask)
-    return decoder_out, pre_token_length, alphas
+
+    # get predicted timestamps
+    us_alphas, us_cif_peak = self.predictor.get_upsample_timestmap(enc, mask, pre_token_length)
+    
+    return decoder_out, pre_token_length, us_alphas, us_cif_peak
 
 
 def export_backbone_dummy_inputs(self):
@@ -178,7 +182,7 @@ def export_backbone_input_names(self):
 
 
 def export_backbone_output_names(self):
-    return ["logits", "token_num", "alphas"]
+    return ["logits", "token_num", "us_alphas", "us_cif_peak"]
 
 
 def export_backbone_dynamic_axes(self):
@@ -190,6 +194,8 @@ def export_backbone_dynamic_axes(self):
         "bias_embed": {0: "batch_size", 1: "num_hotwords"},
         "logits": {0: "batch_size", 1: "logits_length"},
         "pre_acoustic_embeds": {1: "feats_length1"},
+        "us_alphas": {0: "batch_size", 1: "alphas_length"},
+        "us_cif_peak": {0: "batch_size", 1: "alphas_length"},
     }
 
 
