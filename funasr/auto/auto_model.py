@@ -42,7 +42,7 @@ def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
     filelist = [".scp", ".txt", ".json", ".jsonl", ".text"]
 
     chars = string.ascii_letters + string.digits
-    if isinstance(data_in, str) and data_in.startswith("http"):  # url
+    if isinstance(data_in, str) and data_in.startswith("http://"):  # url
         data_in = download_from_url(data_in)
 
     if isinstance(data_in, str) and os.path.exists(
