@@ -78,7 +78,7 @@ def _onnx(
             )
 
 
-def _torchscripts(model, path, device='cpu'):
+def _torchscripts(model, path, device='cuda'):
     dummy_input = model.export_dummy_inputs()
 
     if device == 'cuda':
