@@ -109,7 +109,9 @@ def export_rebuild_model(model, **kwargs):
     backbone_model.export_dynamic_axes = types.MethodType(
         export_backbone_dynamic_axes, backbone_model
     )
-    backbone_model.export_name = types.MethodType(export_backbone_name, backbone_model)
+    
+    embedder_model.export_name = "model_eb"
+    backbone_model.export_name = "model_bb"
 
     return backbone_model, embedder_model
 
@@ -192,6 +194,3 @@ def export_backbone_dynamic_axes(self):
         "pre_acoustic_embeds": {1: "feats_length1"},
     }
 
-
-def export_backbone_name(self):
-    return "model.onnx"

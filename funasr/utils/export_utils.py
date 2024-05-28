@@ -2,7 +2,7 @@ import os
 import torch
 
 
-def export_onnx(model, data_in=None, quantize: bool = False, opset_version: int = 14, **kwargs):
+def export(model, data_in=None, quantize: bool = False, opset_version: int = 14, type='onnx', **kwargs):
     model_scripts = model.export(**kwargs)
     export_dir = kwargs.get("output_dir", os.path.dirname(kwargs.get("init_param")))
     os.makedirs(export_dir, exist_ok=True)
@@ -11,14 +11,20 @@ def export_onnx(model, data_in=None, quantize: bool = False, opset_version: int 
         model_scripts = (model_scripts,)
     for m in model_scripts:
         m.eval()
-        _onnx(
-            m,
-            data_in=data_in,
-            quantize=quantize,
-            opset_version=opset_version,
-            export_dir=export_dir,
-            **kwargs
-        )
+        if type == 'onnx':
+            _onnx(
+                m,
+                data_in=data_in,
+                quantize=quantize,
+                opset_version=opset_version,
+                export_dir=export_dir,
+                **kwargs
+            )
+        elif type == 'torchscript':
+            _torchscripts(
+                m,
+                path=export_dir,
+            )
         print("output dir: {}".format(export_dir))
 
     return export_dir
@@ -37,7 +43,7 @@ def _onnx(
 
     verbose = kwargs.get("verbose", False)
 
-    export_name = model.export_name() if hasattr(model, "export_name") else "model.onnx"
+    export_name = model.export_name + '.onnx'
     model_path = os.path.join(export_dir, export_name)
     torch.onnx.export(
         model,
@@ -70,3 +76,15 @@ def _onnx(
                 weight_type=QuantType.QUInt8,
                 nodes_to_exclude=nodes_to_exclude,
             )
+
+
+def _torchscripts(model, path, device='cpu'):
+    dummy_input = model.export_dummy_inputs()
+
+    if device == 'cuda':
+        model = model.cuda()
+        dummy_input = tuple([i.cuda() for i in dummy_input])
+
+    # model_script = torch.jit.script(model)
+    model_script = torch.jit.trace(model, dummy_input)
+    model_script.save(os.path.join(path, f'{model.export_name}.torchscripts'))
