@@ -1,5 +1,9 @@
 
 file(GLOB files1 "*.cpp")
+if(APPLE)
+    file(GLOB itn_files "itn-*.cpp")
+    list(REMOVE_ITEM files1 ${itn_files})
+endif(APPLE)
 list(REMOVE_ITEM files1 "${CMAKE_CURRENT_SOURCE_DIR}/paraformer-torch.cpp")
 set(files ${files1})
 
@@ -28,6 +32,10 @@ else()
     set(EXTRA_LIBS pthread yaml-cpp csrc kaldi-decoder fst glog gflags avutil avcodec avformat swresample)
     include_directories(${ONNXRUNTIME_DIR}/include)
     include_directories(${FFMPEG_DIR}/include)
+    if(APPLE)
+        target_link_directories(funasr PUBLIC ${ONNXRUNTIME_DIR}/lib)
+        target_link_directories(funasr PUBLIC ${FFMPEG_DIR}/lib)
+    endif(APPLE)    
 endif()
 
 if(GPU)
