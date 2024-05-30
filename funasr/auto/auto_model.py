@@ -359,6 +359,7 @@ class AutoModel:
             results_sorted = []
 
             if not len(sorted_data):
+                results_ret_list.append({"key": key, "text": "", "timestamp": []})
                 logging.info("decoding, utt: {}, empty speech".format(key))
                 continue
 
