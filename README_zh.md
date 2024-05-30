@@ -2,9 +2,11 @@
 
 (简体中文|[English](./README.md))
 
-# FunASR: A Fundamental End-to-End Speech Recognition Toolkit
 
-[![SVG Banners](https://svg-banners.vercel.app/api?type=origin&text1=FunASR🤠&text2=💖%20Open%20Source%20by%20Alibaba%20TONGYI&width=800&height=210)](https://github.com/Akshay090/svg-banners)
+
+[![SVG Banners](https://svg-banners.vercel.app/api?type=origin&text1=FunASR🤠&text2=💖%20A%20Fundamental%20End-to-End%20Speech%20Recognition%20Toolkit&width=800&height=210)](https://github.com/Akshay090/svg-banners)
+
+[//]: # (# FunASR: A Fundamental End-to-End Speech Recognition Toolkit)
 
 [![PyPI](https://img.shields.io/pypi/v/funasr)](https://pypi.org/project/funasr/)
 
