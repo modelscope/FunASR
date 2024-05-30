@@ -60,18 +60,26 @@
 <a name="Installation"></a>
 ## Installation
 
+- Requirements
+```text
+python>=3.8
+torch>=1.13
+torchaudio
+```
+
+- Install for pypi
 ```shell
 pip3 install -U funasr
 ```
-Or install from source code
+- Or install from source code
 ``` sh
 git clone https://github.com/alibaba/FunASR.git && cd FunASR
 pip3 install -e ./
 ```
-Install modelscope for the pretrained models (Optional)
+- Install modelscope or huggingface_hub for the pretrained models (Optional)
 
 ```shell
-pip3 install -U modelscope
+pip3 install -U modelscope huggingface_hub
 ```
 
 ## Model Zoo

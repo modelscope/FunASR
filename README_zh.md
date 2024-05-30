@@ -64,14 +64,24 @@ FunASR希望在语音识别的学术研究和工业应用之间架起一座桥�
 <a name="安装教程"></a>
 ## 安装教程
 
+- 安装funasr之前，确保已经安装了下面依赖环境:
+```text
+python>=3.8
+torch>=1.13
+torchaudio
+```
+
+- pip安装
 ```shell
 pip3 install -U funasr
 ```
-或者从源代码安装
+
+- 或者从源代码安装
 ``` sh
 git clone https://github.com/alibaba/FunASR.git && cd FunASR
 pip3 install -e ./
 ```
+
 如果需要使用工业预训练模型，安装modelscope与huggingface_hub（可选）
 
 ```shell
