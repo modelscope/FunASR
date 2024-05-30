@@ -59,7 +59,9 @@ def export_rebuild_model(model, **kwargs):
     backbone_model.export_dynamic_axes = types.MethodType(
         export_backbone_dynamic_axes, backbone_model
     )
-    backbone_model.export_name = types.MethodType(export_backbone_name, backbone_model)
+    
+    embedder_model.export_name = "model_eb"
+    backbone_model.export_name = "model_bb"
 
     return backbone_model, embedder_model
 
