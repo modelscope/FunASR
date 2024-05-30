@@ -83,7 +83,10 @@ def _torchscripts(model, path, device='cuda'):
 
     if device == 'cuda':
         model = model.cuda()
-        dummy_input = tuple([i.cuda() for i in dummy_input])
+        if isinstance(dummy_input, torch.Tensor):
+            dummy_input = dummy_input.cuda()
+        else:
+            dummy_input = tuple([i.cuda() for i in dummy_input])
 
     # model_script = torch.jit.script(model)
     model_script = torch.jit.trace(model, dummy_input)

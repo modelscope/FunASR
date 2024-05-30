@@ -10,7 +10,7 @@
 from funasr import AutoModel
 
 model = AutoModel(
-    model="iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch",
+    model="iic/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404",
 )
 
 res = model.export(type="torchscript", quantize=False)
