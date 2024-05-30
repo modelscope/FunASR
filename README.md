@@ -157,6 +157,8 @@ for i in range(total_chunk_num):
 ```
 Note: `chunk_size` is the configuration for streaming latency.` [0,10,5]` indicates that the real-time display granularity is `10*60=600ms`, and the lookahead information is `5*60=300ms`. Each inference input is `600ms` (sample points are `16000*0.6=960`), and the output is the corresponding text. For the last speech segment input, `is_final=True` needs to be set to force the output of the last word.
 
+<details><summary>More Examples</summary>
+
 ### Voice Activity Detection (Non-Streaming)
 ```python
 from funasr import AutoModel
@@ -215,9 +217,24 @@ text_file = f"{model.model_path}/example/text.txt"
 res = model.generate(input=(wav_file, text_file), data_type=("sound", "text"))
 print(res)
 ```
+
+
+### Speech Emotion Recognition
+```python
+from funasr import AutoModel
+
+model = AutoModel(model="emotion2vec_plus_large")
+
+wav_file = f"{model.model_path}/example/test.wav"
+
+res = model.generate(wav_file, output_dir="./outputs", granularity="utterance", extract_embedding=False)
+print(res)
+```
+
 More usages ref to [docs](docs/tutorial/README_zh.md), 
 more examples ref to [demo](https://github.com/alibaba-damo-academy/FunASR/tree/main/examples/industrial_data_pretraining)
 
+</details>
 
 ## Export ONNX
 

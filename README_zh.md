@@ -68,10 +68,10 @@ pip3 install -U funasr
 git clone https://github.com/alibaba/FunASR.git && cd FunASR
 pip3 install -e ./
 ```
-如果需要使用工业预训练模型，安装modelscope（可选）
+如果需要使用工业预训练模型，安装modelscope与huggingface_hub（可选）
 
 ```shell
-pip3 install -U modelscope
+pip3 install -U modelscope huggingface_hub
 ```
 
 ## 模型仓库
@@ -153,6 +153,8 @@ for i in range(total_chunk_num):
 
 注：`chunk_size`为流式延时配置，`[0,10,5]`表示上屏实时出字粒度为`10*60=600ms`，未来信息为`5*60=300ms`。每次推理输入为`600ms`（采样点数为`16000*0.6=960`），输出为对应文字，最后一个语音片段输入需要设置`is_final=True`来强制输出最后一个字。
 
+<details><summary>更多例子</summary>
+
 ### 语音端点检测（非实时）
 ```python
 from funasr import AutoModel
@@ -216,8 +218,23 @@ text_file = f"{model.model_path}/example/text.txt"
 res = model.generate(input=(wav_file, text_file), data_type=("sound", "text"))
 print(res)
 ```
+
+### 情感识别
+```python
+from funasr import AutoModel
+
+model = AutoModel(model="emotion2vec_plus_large")
+
+wav_file = f"{model.model_path}/example/test.wav"
+
+res = model.generate(wav_file, output_dir="./outputs", granularity="utterance", extract_embedding=False)
+print(res)
+```
+
 更详细（[教程文档](docs/tutorial/README_zh.md)），
 更多（[模型示例](https://github.com/alibaba-damo-academy/FunASR/tree/main/examples/industrial_data_pretraining)）
+
+</details>
 
 ## 导出ONNX
 ### 从命令行导出
