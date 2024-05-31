@@ -355,7 +355,7 @@ std::vector<std::string> ParaformerTorch::Forward(float** din, int* len, bool in
 
             torch::Tensor tensor_hw_emb =
                 torch::from_blob(embedding.data(),
-                        {1, hw_emb.size(), hw_emb[0].size()}, torch::kFloat).contiguous();
+                        {1, static_cast<int64_t>(hw_emb.size()), static_cast<int64_t>(hw_emb[0].size())}, torch::kFloat).contiguous();
             #ifdef USE_GPU
             tensor_hw_emb = tensor_hw_emb.to(at::kCUDA);
             #endif
@@ -505,25 +505,25 @@ std::vector<std::vector<float>> ParaformerTorch::CompileHotwordEmbedding(std::st
     feats = feats.to(at::kCUDA);
     #endif
     std::vector<torch::jit::IValue> inputs = {feats};
-//
     std::vector<std::vector<float>> result;
     try {
-        auto outputs = hw_model_->forward(inputs).toTuple()->elements();
+        auto output = hw_model_->forward(inputs);
         torch::Tensor emb_tensor;
         #ifdef USE_GPU
-        emb_tensor = outputs[0].toTensor().to(at::kCPU);
+        emb_tensor = output.toTensor().to(at::kCPU);
         #else
-        emb_tensor = outputs[0].toTensor();
+        emb_tensor = output.toTensor();
         #endif
         assert(emb_tensor.size(0) == max_hotword_len);
         assert(emb_tensor.size(1) == hotword_size);
         embedding_dim = emb_tensor.size(2);
 
+        float* floatData = emb_tensor.data_ptr<float>();
         for (int j = 0; j < hotword_size; j++)
         {
-            float* floatData = emb_tensor[j].data_ptr<float>();
+            int start_pos = hotword_size * (lengths[j] - 1) * embedding_dim + j * embedding_dim;
             std::vector<float> embedding;
-            embedding.insert(embedding.begin(), floatData, floatData + embedding_dim);
+            embedding.insert(embedding.begin(), floatData + start_pos, floatData + start_pos + embedding_dim);
             result.push_back(embedding);
         }
     }
