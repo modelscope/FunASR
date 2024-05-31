@@ -339,6 +339,7 @@ std::vector<std::string> ParaformerTorch::Forward(float** din, int* len, bool in
     #endif
     std::vector<torch::jit::IValue> inputs = {feats, feat_lens};
 
+    std::vector<float> batch_embedding;
     std::vector<float> embedding;
     try{
         if (use_hotword) {
@@ -352,10 +353,14 @@ std::vector<std::string> ParaformerTorch::Forward(float** din, int* len, bool in
             for (auto item : hw_emb) {
                 embedding.insert(embedding.end(), item.begin(), item.end());
             }
+            batch_embedding.reserve(batch_in * embedding.size());
+            for (size_t index = 0; index < batch_in; ++index) {
+                batch_embedding.insert(batch_embedding.end(), embedding.begin(), embedding.end());
+            }
 
             torch::Tensor tensor_hw_emb =
-                torch::from_blob(embedding.data(),
-                        {1, static_cast<int64_t>(hw_emb.size()), static_cast<int64_t>(hw_emb[0].size())}, torch::kFloat).contiguous();
+                torch::from_blob(batch_embedding.data(),
+                        {batch_in, static_cast<int64_t>(hw_emb.size()), static_cast<int64_t>(hw_emb[0].size())}, torch::kFloat).contiguous();
             #ifdef USE_GPU
             tensor_hw_emb = tensor_hw_emb.to(at::kCUDA);
             #endif
