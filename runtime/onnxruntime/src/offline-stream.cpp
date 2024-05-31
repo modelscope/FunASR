@@ -33,7 +33,8 @@ OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int
         string am_cmvn_path;
         string am_config_path;
         string token_path;
-        string hw_compile_model_path;
+        string hw_cpu_model_path;
+        string hw_gpu_model_path;
         string seg_dict_path;
     
         if(use_gpu){
@@ -50,17 +51,33 @@ OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int
         }
 
         bool enable_hotword = false;
-        hw_compile_model_path = PathAppend(model_path.at(MODEL_DIR), MODEL_EB_NAME);
+        hw_cpu_model_path = PathAppend(model_path.at(MODEL_DIR), MODEL_EB_NAME);
+        hw_gpu_model_path = PathAppend(model_path.at(MODEL_DIR), TORCH_MODEL_EB_NAME);
         seg_dict_path = PathAppend(model_path.at(MODEL_DIR), MODEL_SEG_DICT);
-        if (access(hw_compile_model_path.c_str(), F_OK) == 0) { // if model_eb.onnx exist, hotword enabled
+        if (access(hw_cpu_model_path.c_str(), F_OK) == 0) { // if model_eb.onnx exist, hotword enabled
           enable_hotword = true;
-          asr_handle->InitHwCompiler(hw_compile_model_path, thread_num);
+          asr_handle->InitHwCompiler(hw_cpu_model_path, thread_num);
           asr_handle->InitSegDict(seg_dict_path);
         }
+        if (use_gpu && access(hw_gpu_model_path.c_str(), F_OK) == 0) { // if model_eb.torchscripts exist, hotword enabled
+          enable_hotword = true;
+          asr_handle->InitHwCompiler(hw_gpu_model_path, thread_num);
+          asr_handle->InitSegDict(seg_dict_path);
+        }
+
         if (enable_hotword) {
           am_model_path = PathAppend(model_path.at(MODEL_DIR), MODEL_NAME);
           if(model_path.find(QUANTIZE) != model_path.end() && model_path.at(QUANTIZE) == "true"){
             am_model_path = PathAppend(model_path.at(MODEL_DIR), QUANT_MODEL_NAME);
+          }
+          if(use_gpu){
+            am_model_path = PathAppend(model_path.at(MODEL_DIR), TORCH_MODEL_NAME);
+            if(model_path.find(QUANTIZE) != model_path.end() && model_path.at(QUANTIZE) == "true"){
+                am_model_path = PathAppend(model_path.at(MODEL_DIR), TORCH_QUANT_MODEL_NAME);
+            }
+            if(model_path.find(BLADEDISC) != model_path.end() && model_path.at(BLADEDISC) == "true"){
+                am_model_path = PathAppend(model_path.at(MODEL_DIR), BLADE_MODEL_NAME);
+            }
           }
         } else {
           am_model_path = PathAppend(model_path.at(MODEL_DIR), MODEL_NAME);

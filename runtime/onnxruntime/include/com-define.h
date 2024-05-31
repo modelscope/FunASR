@@ -48,6 +48,7 @@ namespace funasr {
 #define MODEL_NAME "model.onnx"
 // hotword embedding compile model
 #define MODEL_EB_NAME "model_eb.onnx"
+#define TORCH_MODEL_EB_NAME "model_eb.torchscripts"
 #define QUANT_MODEL_NAME "model_quant.onnx"
 #define VAD_CMVN_NAME "am.mvn"
 #define VAD_CONFIG_NAME "config.yaml"
