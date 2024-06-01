@@ -13,9 +13,9 @@ apt install ffmpeg -y
 
 
 #### recognizer examples
-suport many audio type as ffmpeg support
+support many audio type as ffmpeg support
 ```shell
-from funasr_api import FunasrApi
+    from funasr_api import FunasrApi
     rcg = FunasrApi(
         uri="wss://www.funasr.com:10096/"
     )
@@ -23,7 +23,7 @@ from funasr_api import FunasrApi
     print("asr_example.mp3 text=",text)
 ```
 
-#### streaming recognizer examples, only support pcm or wav
+#### streaming recognizer examples,use FunasrApi.audio2wav to covert to WAV type if need
 
 ```shell
     #define call_back function for msg 
