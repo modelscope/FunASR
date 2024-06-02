@@ -1,6 +1,6 @@
 # python funasr_api
 
-This is the api for python to use funasr engine 
+This is the api for python to use funasr engine, only support 2pass server.
 
 ## For install
 
@@ -15,24 +15,24 @@ apt install ffmpeg -y
 #### recognizer examples
 support many audio type as ffmpeg support
 ```shell
-    from funasr_api import FunasrApi
+    # create an recognizer
     rcg = FunasrApi(
         uri="wss://www.funasr.com:10096/"
     )
     text=rcg.rec_file("asr_example.mp3")
-    print("asr_example.mp3 text=",text)
+    print("asr_example.mp3 result=",text)
 ```
 
 #### streaming recognizer examples,use FunasrApi.audio2wav to covert to WAV type if need
 
 ```shell
+    rcg = FunasrApi(
+        uri="wss://www.funasr.com:10096/"
+    )
     #define call_back function for msg 
     def on_msg(msg):
-       print("stream_example msg=",msg)
-    rcg = FunasrApi(
-        uri="wss://www.funasr.com:10096/",msg_callback=on_msg
-    )
-    rcg.create_connection()
+       print("stream msg=",msg)
+    stream=rcg.create_stream(msg_callback=on_msg)
     
     wav_path = "asr_example.wav"
 
@@ -41,21 +41,20 @@ support many audio type as ffmpeg support
         
     # use FunasrApi's audio2wav to covert other audio to PCM if needed
     #import os
+    #from funasr_tools import FunasrTools
     #file_ext=os.path.splitext(wav_path)[-1].upper()
     #if not file_ext =="PCM" and not file_ext =="WAV":
-    #       audio_bytes=rcg.audio2wav(audio_bytes)
+    #       audio_bytes=FunasrTools.audio2wav(audio_bytes)
     
     stride = int(60 * 10 / 10 / 1000 * 16000 * 2)
     chunk_num = (len(audio_bytes) - 1) // stride + 1
 
     for i in range(chunk_num):
-
         beg = i * stride
         data = audio_bytes[beg : beg + stride]
-
-        rcg.feed_chunk(data)
-    msg=rcg.get_result()
-    print("asr_example.wav text=",msg)
+        stream.feed_chunk(data)
+    final_result=stream.wait_for_end()
+    print("asr_example.wav stream_result=",final_result)
 ```
 
 ## Acknowledge
