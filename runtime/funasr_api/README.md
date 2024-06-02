@@ -13,14 +13,24 @@ apt install ffmpeg -y
 
 
 #### recognizer examples
-support many audio type as ffmpeg support
+support many audio type as ffmpeg support, detail see FunASR/runtime/funasr_api/example.py
 ```shell
     # create an recognizer
     rcg = FunasrApi(
         uri="wss://www.funasr.com:10096/"
     )
+	
+	
+    # recognizer by filepath
     text=rcg.rec_file("asr_example.mp3")
-    print("asr_example.mp3 result=",text)
+    print("recognizer by filepath result=",text)
+    
+    
+    # recognizer by buffer
+    with open("asr_example.wav", "rb") as f:
+        audio_bytes = f.read()
+    text=rcg.rec_buf(audio_bytes)
+    print("recognizer by buffer result=",text)
 ```
 
 #### streaming recognizer examples,use FunasrApi.audio2wav to covert to WAV type if need

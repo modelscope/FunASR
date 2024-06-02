@@ -157,7 +157,21 @@ class FunasrCore:
          self.connect_state==2
          self.websocket.close()
          
-         
+    def rec_buf(self,audio_bytes):
+       try:
+        self.rec_file_len=len(audio_bytes)
+        stride = int(60 * 10 / 10 / 1000 * 16000 * 2)
+        chunk_num = (len(audio_bytes) - 1) // stride + 1
+
+        for i in range(chunk_num):
+
+            beg = i * stride
+            data = audio_bytes[beg : beg + stride]
+            self.feed_chunk(data)
+        return self.get_result()
+       except  Exception  as e:
+            print("rec_file",e)
+            return
     # rec file 
     def rec_file(self,file_path):
        try:
@@ -173,17 +187,7 @@ class FunasrCore:
         if audio_bytes==None:
            print("error, ffmpeg can not decode such file!")
            exit(0)
-
-        self.rec_file_len=len(audio_bytes)
-        stride = int(60 * 10 / 10 / 1000 * 16000 * 2)
-        chunk_num = (len(audio_bytes) - 1) // stride + 1
-
-        for i in range(chunk_num):
-
-            beg = i * stride
-            data = audio_bytes[beg : beg + stride]
-            self.feed_chunk(data)
-        return self.get_result()
+        return self.rec_buf(audio_bytes)
        except  Exception  as e:
             print("rec_file",e)
             return

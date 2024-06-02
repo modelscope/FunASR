@@ -70,8 +70,16 @@ class FunasrApi:
      except Exception as e:
             print("init_core",e)
             exit(0)
- 
-   
+    
+    # rec buffer
+    def rec_buf(self,audio_buf):
+       try:
+           funasr_core=self.new_core()
+           funasr_core.rec_buf(audio_buf)
+           return funasr_core.get_result()
+       except  Exception  as e:
+            print("rec_file",e)
+            return   
     # rec file 
     def rec_file(self,file_path):
        try:
