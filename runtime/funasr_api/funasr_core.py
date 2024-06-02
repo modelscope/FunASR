@@ -115,14 +115,7 @@ class FunasrCore:
        except Exception as e:
             print("new_connection",e)
  
-    # use ffmpeg to convert audio to wav
-    def audio2wav(self,audiobuf):
-     try:
-         
-      return FunasrTools.audio2wav(audiobuf)
-     except Exception as e:
-            print("audio2wav",e)
-            return None
+ 
  
     # threads for rev msg
     def thread_rec_msg(self):

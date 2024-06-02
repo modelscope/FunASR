@@ -7,15 +7,11 @@
 
 # pip install websocket-client
 # apt install ffmpeg
-import ssl
-from websocket import ABNF
-from websocket import create_connection
-from queue import Queue
+
 import threading
 import traceback
 import json
 import time
-import numpy as np
 
 
 # class for recognizer in websocket
