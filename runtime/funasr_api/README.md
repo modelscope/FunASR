@@ -19,14 +19,13 @@ support many audio type as ffmpeg support, detail see FunASR/runtime/funasr_api/
     rcg = FunasrApi(
         uri="wss://www.funasr.com:10096/"
     )
-	
-	
     # recognizer by filepath
     text=rcg.rec_file("asr_example.mp3")
     print("recognizer by filepath result=",text)
     
     
     # recognizer by buffer
+	# rec_buf(audio_buf,ffmpeg_decode=False),set ffmpeg_decode=True if audio is not PCM or WAV type
     with open("asr_example.wav", "rb") as f:
         audio_bytes = f.read()
     text=rcg.rec_buf(audio_bytes)

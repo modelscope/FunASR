@@ -71,11 +71,11 @@ class FunasrApi:
             print("init_core",e)
             exit(0)
     
-    # rec buffer
-    def rec_buf(self,audio_buf):
+    # rec buffer, set ffmpeg_decode=True if audio is not PCM or WAV type
+    def rec_buf(self,audio_buf,ffmpeg_decode=False):
        try:
            funasr_core=self.new_core()
-           funasr_core.rec_buf(audio_buf)
+           funasr_core.rec_buf(audio_buf,ffmpeg_decode=ffmpeg_decode)
            return funasr_core.get_result()
        except  Exception  as e:
             print("rec_file",e)

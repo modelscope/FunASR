@@ -157,8 +157,10 @@ class FunasrCore:
          self.connect_state==2
          self.websocket.close()
          
-    def rec_buf(self,audio_bytes):
+    def rec_buf(self,audio_bytes,ffmpeg_decode=False):
        try:
+        if ffmpeg_decode:
+            audio_bytes=FunasrTools.audio2wav(audio_bytes)
         self.rec_file_len=len(audio_bytes)
         stride = int(60 * 10 / 10 / 1000 * 16000 * 2)
         chunk_num = (len(audio_bytes) - 1) // stride + 1
