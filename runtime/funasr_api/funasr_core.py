@@ -202,7 +202,7 @@ class FunasrCore:
             time.sleep(0.01)
             timeout=timeout-1
  
-        if timeout<=0:
+        if timeout<=0 and not file_dur==0:
            print("time out!",self.timeout)
        except Exception  as e:
             print("wait_for_result",e)
