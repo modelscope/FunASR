@@ -52,7 +52,7 @@ class AutoFrontend:
 
         key_list, data_list = prepare_data_iterator(input, input_len=input_len)
         batch_size = kwargs.get("batch_size", 1)
-        device = kwargs.get("device", "cpu")
+        device = kwargs.get("device", "cuda")
         if device == "cpu":
             batch_size = 1
 
