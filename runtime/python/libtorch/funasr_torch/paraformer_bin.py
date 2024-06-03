@@ -337,7 +337,7 @@ class ContextualParaformer(Paraformer):
                         outputs = self.bb_infer(feats, feats_len, bias_embed)
                         am_scores, valid_token_lens = outputs[0], outputs[1]
                     else:
-                        outputs = self.bb_infer_infer(feats.cuda(), feats_len.cuda(), bias_embed.cuda())
+                        outputs = self.bb_infer(feats.cuda(), feats_len.cuda(), bias_embed.cuda())
                         am_scores, valid_token_lens = outputs[0].cpu(), outputs[1].cpu()
             except:
                 # logging.warning(traceback.format_exc())
