@@ -1,5 +1,7 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
+from funasr.models.transformer.utils.nets_utils import make_pad_mask
 
 from funasr.register import tables
 
@@ -119,9 +121,8 @@ class Transformer(nn.Module):
         x = self.linear2(x)
 
         olens = None
-        if ilens is not None:
-            olens = (ilens - 1) // self.k + 1
-            mask = (~make_pad_mask(olens)[:, None, :]).to(x.device)
+        olens = (ilens - 1) // self.k + 1
+        masks = (~make_pad_mask(olens)[:, None, :]).to(x.device)
         for layer, block in enumerate(self.blocks):
             x, masks = block(x, masks)
         return x, olens
