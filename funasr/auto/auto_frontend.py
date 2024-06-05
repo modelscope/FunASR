@@ -60,7 +60,7 @@ class AutoFrontend:
 
         result_list = []
         num_samples = len(data_list)
-        pbar = tqdm(colour="blue", total=num_samples + 1, dynamic_ncols=True)
+        # pbar = tqdm(colour="blue", total=num_samples + 1, dynamic_ncols=True)
 
         time0 = time.perf_counter()
         for beg_idx in range(0, num_samples, batch_size):
@@ -99,11 +99,11 @@ class AutoFrontend:
             }
             result_list.append(batch)
 
-            pbar.update(1)
-            description = f"{meta_data}, "
-            pbar.set_description(description)
+            # pbar.update(1)
+            # description = f"{meta_data}, "
+            # pbar.set_description(description)
 
         time_end = time.perf_counter()
-        pbar.set_description(f"time escaped total: {time_end - time0:0.3f}")
+        # pbar.set_description(f"time escaped total: {time_end - time0:0.3f}")
 
         return result_list
