@@ -84,7 +84,7 @@ class Transformer(nn.Module):
         self.blocks = nn.ModuleList(
             [
                 EncoderLayer(
-                    output_size,
+                    llm_dim,
                     MultiHeadedAttention(
                         kwargs.get("attention_heads", 8),
                         llm_dim,
