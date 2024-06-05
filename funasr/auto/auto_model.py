@@ -42,8 +42,9 @@ def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
     filelist = [".scp", ".txt", ".json", ".jsonl", ".text"]
 
     chars = string.ascii_letters + string.digits
-    if isinstance(data_in, str) and data_in.startswith("http"):  # url
-        data_in = download_from_url(data_in)
+    if isinstance(data_in, str):
+        if data_in.startswith("http://") or data_in.startswith("https://"):  # url
+            data_in = download_from_url(data_in)
 
     if isinstance(data_in, str) and os.path.exists(
         data_in
@@ -284,7 +285,7 @@ class AutoModel:
             with torch.no_grad():
                 res = model.inference(**batch, **kwargs)
                 if isinstance(res, (list, tuple)):
-                    results = res[0]
+                    results = res[0] if len(res) > 0 else [{"text": ""}]
                     meta_data = res[1] if len(res) > 1 else {}
             time2 = time.perf_counter()
 
@@ -358,6 +359,7 @@ class AutoModel:
             results_sorted = []
 
             if not len(sorted_data):
+                results_ret_list.append({"key": key, "text": "", "timestamp": []})
                 logging.info("decoding, utt: {}, empty speech".format(key))
                 continue
 

@@ -72,6 +72,7 @@ class EspnetStyleBatchSampler(DistributedSampler):
         self.min_token_length = kwargs.get("min_token_length", 0)
         self.length_scale_source = kwargs.get("length_scale_source", 1.0)
         self.start_step = start_step
+        self.batch_num = 1
         if self.start_step > 0:
             logging.info(f"Warning, start_step > 0, dataloader start from step: {self.start_step}")
         # super().__init__(dataset, num_replicas=num_replicas, rank=rank,
@@ -146,6 +147,9 @@ class EspnetStyleBatchSampler(DistributedSampler):
         start_idx = self.rank * batches_per_rank
         end_idx = start_idx + batches_per_rank
         rank_batches = buffer_batches[start_idx + self.start_step : end_idx]
+
+        self.batch_num = len(rank_batches)
+
         logging.info(
             f"rank: {self.rank}, dataloader start from step: {self.start_step}, batch_num: {end_idx-start_idx}, batch_num_after_step: {len(rank_batches)}"
         )
@@ -154,7 +158,7 @@ class EspnetStyleBatchSampler(DistributedSampler):
 
     def __len__(self):
         # Calculate the number of batches per epoch for the current rank
-        return 1
+        return self.batch_num
 
     def set_epoch(self, epoch):
         # Set the epoch for shuffling

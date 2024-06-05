@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include "nlohmann/json.hpp"
 #define UNIT_BEG_SIL_SYMBOL "<s>"
 #define UNIT_END_SIL_SYMBOL "</s>"
 #define UNIT_BLK_SYMBOL "<blank>"
@@ -28,6 +29,7 @@ class PhoneSet {
     vector<string> phone_;
     unordered_map<string, int> phn2Id_;
     void LoadPhoneSetFromYaml(const char* filename);
+    void LoadPhoneSetFromJson(const char* filename);
 };
 
 } // namespace funasr

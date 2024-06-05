@@ -14,7 +14,7 @@
 namespace funasr {
 class OfflineStream {
   public:
-    OfflineStream(std::map<std::string, std::string>& model_path, int thread_num);
+    OfflineStream(std::map<std::string, std::string>& model_path, int thread_num, bool use_gpu=false, int batch_size=1);
     ~OfflineStream(){};
 
     std::unique_ptr<VadModel> vad_handle= nullptr;
@@ -33,6 +33,6 @@ class OfflineStream {
     bool use_itn=false;
 };
 
-OfflineStream *CreateOfflineStream(std::map<std::string, std::string>& model_path, int thread_num=1);
+OfflineStream *CreateOfflineStream(std::map<std::string, std::string>& model_path, int thread_num=1, bool use_gpu=false, int batch_size=1);
 } // namespace funasr
 #endif

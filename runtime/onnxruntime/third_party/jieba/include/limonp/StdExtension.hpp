@@ -70,13 +70,13 @@ ostream& operator << (ostream& os, const deque<T>& dq) {
   return os;
 }
 
-
+#ifndef USE_GPU
 template<class T1, class T2>
 ostream& operator << (ostream& os, const pair<T1, T2>& pr) {
   os << pr.first << ":" << pr.second ;
   return os;
 }
-
+#endif
 
 template<class T>
 string& operator << (string& str, const T& obj) {

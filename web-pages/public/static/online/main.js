@@ -373,7 +373,7 @@ function getJsonMessage( jsonMsg ) {
 	varArea.value=rec_text;
 	console.log( "offline_text: " + asrmodel+","+offline_text);
 	console.log( "rec_text: " + rec_text);
-	if (isfilemode==true && is_final==false){
+	if (isfilemode==true && is_final==true){
 		console.log("call stop ws!");
 		play_file();
 		wsconnecter.wsStop();

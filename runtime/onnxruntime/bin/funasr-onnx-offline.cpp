@@ -19,6 +19,7 @@
 #include "com-define.h"
 #include <unordered_map>
 #include "util.h"
+#include "audio.h"
 using namespace std;
 
 bool is_target_file(const std::string& filename, const std::string target) {
@@ -44,6 +45,7 @@ int main(int argc, char** argv)
     TCLAP::CmdLine cmd("funasr-onnx-offline", ' ', "1.0");
     TCLAP::ValueArg<std::string>    model_dir("", MODEL_DIR, "the asr model path, which contains model.onnx, config.yaml, am.mvn", true, "", "string");
     TCLAP::ValueArg<std::string>    quantize("", QUANTIZE, "true (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir", false, "true", "string");
+    TCLAP::ValueArg<std::string>    bladedisc("", BLADEDISC, "true (Default), load the model of bladedisc in model_dir.", false, "true", "string");
     TCLAP::ValueArg<std::string>    vad_dir("", VAD_DIR, "the vad model path, which contains model.onnx, vad.yaml, vad.mvn", false, "", "string");
     TCLAP::ValueArg<std::string>    vad_quant("", VAD_QUANT, "true (Default), load the model of model.onnx in vad_dir. If set true, load the model of model_quant.onnx in vad_dir", false, "true", "string");
     TCLAP::ValueArg<std::string>    punc_dir("", PUNC_DIR, "the punc model path, which contains model.onnx, punc.yaml", false, "", "string");
@@ -57,9 +59,12 @@ int main(int argc, char** argv)
     TCLAP::ValueArg<std::string>    wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", true, "", "string");
     TCLAP::ValueArg<std::int32_t>   audio_fs("", AUDIO_FS, "the sample rate of audio", false, 16000, "int32_t");
     TCLAP::ValueArg<std::string>    hotword("", HOTWORD, "the hotword file, one hotword perline, Format: Hotword Weight (could be: 阿里巴巴 20)", false, "", "string");
+    TCLAP::SwitchArg use_gpu("", INFER_GPU, "Whether to use GPU for inference, default is false", false);
+    TCLAP::ValueArg<std::int32_t> batch_size("", BATCHSIZE, "batch_size for ASR model when using GPU", false, 4, "int32_t");
 
     cmd.add(model_dir);
     cmd.add(quantize);
+    cmd.add(bladedisc);
     cmd.add(vad_dir);
     cmd.add(vad_quant);
     cmd.add(punc_dir);
@@ -73,11 +78,14 @@ int main(int argc, char** argv)
     cmd.add(wav_path);
     cmd.add(audio_fs);
     cmd.add(hotword);
+    cmd.add(use_gpu);
+    cmd.add(batch_size);
     cmd.parse(argc, argv);
 
     std::map<std::string, std::string> model_path;
     GetValue(model_dir, MODEL_DIR, model_path);
     GetValue(quantize, QUANTIZE, model_path);
+    GetValue(bladedisc, BLADEDISC, model_path);
     GetValue(vad_dir, VAD_DIR, model_path);
     GetValue(vad_quant, VAD_QUANT, model_path);
     GetValue(punc_dir, PUNC_DIR, model_path);
@@ -89,7 +97,9 @@ int main(int argc, char** argv)
     struct timeval start, end;
     gettimeofday(&start, nullptr);
     int thread_num = 1;
-    FUNASR_HANDLE asr_hanlde=FunOfflineInit(model_path, thread_num);
+    bool use_gpu_ = use_gpu.getValue();
+    int batch_size_ = batch_size.getValue();
+    FUNASR_HANDLE asr_hanlde=FunOfflineInit(model_path, thread_num, use_gpu_, batch_size_);
 
     if (!asr_hanlde)
     {
@@ -156,7 +166,33 @@ int main(int argc, char** argv)
     for (int i = 0; i < wav_list.size(); i++) {
         auto& wav_file = wav_list[i];
         auto& wav_id = wav_ids[i];
-        gettimeofday(&start, nullptr);
+
+        // For debug:begin
+        // int32_t sampling_rate_ = audio_fs.getValue();
+        // funasr::Audio audio(1);
+		// if(is_target_file(wav_file.c_str(), "wav")){
+		// 	if(!audio.LoadWav2Char(wav_file.c_str(), &sampling_rate_)){
+		// 		LOG(ERROR)<<"Failed to load "<< wav_file;
+        //         exit(-1);
+        //     }
+		// }else if(is_target_file(wav_file.c_str(), "pcm")){
+		// 	if (!audio.LoadPcmwav2Char(wav_file.c_str(), &sampling_rate_)){
+		// 		LOG(ERROR)<<"Failed to load "<< wav_file;
+        //         exit(-1);
+        //     }
+		// }else{
+		// 	if (!audio.FfmpegLoad(wav_file.c_str(), true)){
+		// 		LOG(ERROR)<<"Failed to load "<< wav_file;
+        //         exit(-1);
+        //     }
+		// }
+        // char* speech_buff = audio.GetSpeechChar();
+        // int buff_len = audio.GetSpeechLen()*2;
+
+        // gettimeofday(&start, nullptr);
+        // FUNASR_RESULT result=FunOfflineInferBuffer(asr_hanlde, speech_buff, buff_len, RASR_NONE, nullptr, hotwords_embedding, audio_fs.getValue(), "pcm", true, decoder_handle);
+        // For debug:end
+
         FUNASR_RESULT result=FunOfflineInfer(asr_hanlde, wav_file.c_str(), RASR_NONE, nullptr, hotwords_embedding, audio_fs.getValue(), true, decoder_handle);
         gettimeofday(&end, nullptr);
         seconds = (end.tv_sec - start.tv_sec);

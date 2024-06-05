@@ -8,6 +8,7 @@
 #include "cppjieba/DictTrie.hpp"
 #include "cppjieba/HMMModel.hpp"
 #include "cppjieba/Jieba.hpp"
+#include "nlohmann/json.hpp"
 
 namespace funasr {
 class CTokenizer {
@@ -27,6 +28,7 @@ public:
 	CTokenizer();
 	~CTokenizer();
 	bool OpenYaml(const char* sz_yamlfile);
+	bool OpenYaml(const char* sz_yamlfile, const char* token_file);
 	void ReadYaml(const YAML::Node& node);
 	vector<string> Id2String(vector<int> input);
 	vector<int> String2Ids(vector<string> input);

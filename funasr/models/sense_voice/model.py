@@ -1264,6 +1264,7 @@ class SenseVoiceSANM(nn.Module):
         if isinstance(task, str):
             task = [task]
         task = "".join([f"<|{x}|>" for x in task])
+        
         sos = kwargs.get("model_conf").get("sos")
         if isinstance(sos, str):
             initial_prompt = kwargs.get("initial_prompt", f"<|startoftranscript|>{task}")
@@ -1285,6 +1286,7 @@ class SenseVoiceSANM(nn.Module):
             eos_int = tokenizer.encode(eos, allowed_special="all")
         else:
             eos_int = [eos]
+
         self.beam_search.sos = sos_int
         self.beam_search.eos = eos_int[0]
 
