@@ -90,7 +90,7 @@ class Transformer(nn.Module):
                         llm_dim,
                         kwargs.get("attention_dropout_rate", 0.0),
                     ),
-                    positionwise_layer(
+                    PositionwiseFeedForward(
                         llm_dim,
                         llm_dim // 4,
                         kwargs.get("dropout_rate", 0.0),
