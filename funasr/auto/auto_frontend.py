@@ -95,7 +95,7 @@ class AutoFrontend:
                 "input": speech,
                 "input_len": speech_lengths,
                 "key": key_batch,
-                data_type: "fbank",
+                "data_type": "fbank",
             }
             result_list.append(batch)
 
