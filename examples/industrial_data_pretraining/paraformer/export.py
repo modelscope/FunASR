@@ -13,7 +13,8 @@ model = AutoModel(
     model="iic/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404",
 )
 
-res = model.export(type="torchscript", quantize=False)
+res = model.export(type="torchscripts", quantize=False)
+# res = model.export(type="bladedisc", input=f"{model.model_path}/example/asr_example.wav")
 print(res)
 
 
