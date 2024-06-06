@@ -48,7 +48,10 @@ class OpenAIIndexDSJsonl(torch.utils.data.Dataset):  # torch.utils.data.Dataset
         for file_json in file_list:
             with open(file_json.strip(), encoding="utf-8") as fin:
                 for line in fin:
-                    data = json.loads(line.strip())["messages"]
+                    data_dict = json.loads(line.strip())
+                    data = data_dict["messages"]
+                    speech_length = data_dict.get("speech_length", -1) // 8
+                    text_length = data_dict.get("text_length", 0)
 
                     system, user, assistant = [], [], []
                     for i, item in enumerate(data):
@@ -63,7 +66,12 @@ class OpenAIIndexDSJsonl(torch.utils.data.Dataset):  # torch.utils.data.Dataset
 
                     system = system * len(user)
 
-                    contents_i = {"system": system, "user": user, "assistant": assistant}
+                    contents_i = {
+                        "system": system,
+                        "user": user,
+                        "assistant": assistant,
+                        "source_len": speech_length + text_length,
+                    }
                     contents.append(contents_i)
 
         self.contents = contents
@@ -80,11 +88,14 @@ class OpenAIIndexDSJsonl(torch.utils.data.Dataset):  # torch.utils.data.Dataset
         return data
 
     def get_source_len(self, data_dict):
-        return len(data_dict["system"]) + len(data_dict["user"])
+        source_len = data_dict.get("source_len", -1)
+        if source_len < 0:
+            source_len = len(data_dict["system"]) + len(data_dict["user"])
+        return source_len
 
     def get_target_len(self, data_dict):
 
-        return len(data_dict["assistant"])
+        return 0
 
 
 if __name__ == "__main__":

@@ -51,7 +51,7 @@ class OpenAIDataset(torch.utils.data.Dataset):
         self.batch_size = kwargs.get("batch_size")
         self.batch_type = kwargs.get("batch_type")
         self.prompt_ids_len = 0
-        self.retry = kwargs.get("retry", 5)
+        self.retry = kwargs.get("retry", 10)
 
         self.permute = False
         from funasr.frontends.whisper_frontend import WhisperFrontend
@@ -60,6 +60,8 @@ class OpenAIDataset(torch.utils.data.Dataset):
             self.permute = True
 
         self.pattern = re.compile(r"(<\|startofspeech\|>.*?<\|endofspeech\|>)")
+        # self.kwargs = kwargs
+        self.max_token_length = kwargs.get("max_token_length", 1024)
 
     def get_source_len(self, index):
         item = self.index_ds[index]
@@ -77,7 +79,9 @@ class OpenAIDataset(torch.utils.data.Dataset):
         # pdb.set_trace()
 
         output = None
+
         for idx in range(self.retry):
+            badcase_flag = False
             if idx == 0:
                 index_cur = index
             else:
@@ -112,9 +116,14 @@ class OpenAIDataset(torch.utils.data.Dataset):
                             "<|endofspeech|>", ""
                         )
                         if sub_str.startswith("!"):
-
-                            data_src = load_audio_text_image_video(sub_str[1:], fs=self.fs)
-
+                            try:
+                                data_src = load_audio_text_image_video(sub_str[1:], fs=self.fs)
+                            except Exception as e:
+                                logging.error(
+                                    f"Loading wav failed! {str(e)}, {traceback.format_exc()}"
+                                )
+                                badcase_flag = True
+                                continue
                             speech, speech_lengths = extract_fbank(
                                 data_src,
                                 data_type=self.data_type,
@@ -134,6 +143,8 @@ class OpenAIDataset(torch.utils.data.Dataset):
                             source_ids += sub_token
                             fbank_mask_i += [1] * len(sub_token)
 
+                if badcase_flag:
+                    continue
                 source_mask = [-100] * len(source_ids)
                 target_out = f"{target_out}<|im_end|>"
                 target_ids = self.tokenizer.encode(target_out)
@@ -142,6 +153,10 @@ class OpenAIDataset(torch.utils.data.Dataset):
                 fbank_mask += fbank_mask_i
                 fbank_beg.append(fbank_beg_i)
 
+            if len(input_ids) > self.max_token_length:
+                badcase_flag = True
+            if badcase_flag:
+                continue
             input_ids = torch.tensor(input_ids, dtype=torch.int64)
             attention_mask = torch.tensor([len(input_ids)], dtype=torch.int32)
             labels = torch.tensor(labels, dtype=torch.int64)
@@ -186,9 +201,9 @@ class OpenAIDataset(torch.utils.data.Dataset):
                     data_list, batch_first=True, padding_value=pad_value
                 )
 
-        if self.batch_type != "example":
-            for i in range(10):
-                outputs = self._filter_badcase(outputs, i=i)
+        # if self.batch_type != "example":
+        #     for i in range(10):
+        #         outputs = self._filter_badcase(outputs, i=i)
 
         return outputs
 
