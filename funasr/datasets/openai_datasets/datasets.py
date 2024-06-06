@@ -215,7 +215,7 @@ class OpenAIDataset(torch.utils.data.Dataset):
             if b < 2:
                 beg = 0
             logging.info(
-                f"Warning, b * t: {b * t} > {self.batch_size}, drop half data {i}th, beg:{beg}"
+                f"Warning, b * t: {b * t} > {self.batch_size}, b: {b}, t: {t}, drop half data {i}th, beg:{beg}"
             )
             for key, data_list in outputs.items():
                 outputs[key] = outputs[key][beg : beg + b : 2]
