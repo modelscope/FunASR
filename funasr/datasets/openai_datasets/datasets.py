@@ -62,6 +62,7 @@ class OpenAIDataset(torch.utils.data.Dataset):
         self.pattern = re.compile(r"(<\|startofspeech\|>.*?<\|endofspeech\|>)")
         # self.kwargs = kwargs
         self.max_token_length = kwargs.get("max_token_length", 1024)
+        self.batch_size_scale_ratio_max = kwargs.get("batch_size_scale_ratio_max", 1.5)
 
     def get_source_len(self, index):
         item = self.index_ds[index]
@@ -153,13 +154,13 @@ class OpenAIDataset(torch.utils.data.Dataset):
                 fbank_mask += fbank_mask_i
                 fbank_beg.append(fbank_beg_i)
 
-            if len(input_ids) > self.max_token_length:
-                badcase_flag = True
+            # if len(input_ids) > self.max_token_length:
+            #     badcase_flag = True
             if badcase_flag:
                 continue
-            input_ids = torch.tensor(input_ids, dtype=torch.int64)
+            input_ids = torch.tensor(input_ids, dtype=torch.int64)[: self.max_token_length]
             attention_mask = torch.tensor([len(input_ids)], dtype=torch.int32)
-            labels = torch.tensor(labels, dtype=torch.int64)
+            labels = torch.tensor(labels, dtype=torch.int64)[: self.max_token_length]
 
             fbank = speech[0, :, :]
             fbank_lens = speech_lengths
@@ -207,7 +208,7 @@ class OpenAIDataset(torch.utils.data.Dataset):
 
             if self.batch_type != "example":
                 b, t = outputs["input_ids"].shape
-                if b * t > self.batch_size * 2:
+                if b * t > self.batch_size * self.batch_size_scale_ratio_max:
                     beg = torch.randint(0, 2, ()).item()
                     if b < 2:
                         beg = 0
