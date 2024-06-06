@@ -154,13 +154,13 @@ class OpenAIDataset(torch.utils.data.Dataset):
                 fbank_mask += fbank_mask_i
                 fbank_beg.append(fbank_beg_i)
 
-            # if len(input_ids) > self.max_token_length:
-            #     badcase_flag = True
+            if len(input_ids) > self.max_token_length:
+                badcase_flag = True
             if badcase_flag:
                 continue
-            input_ids = torch.tensor(input_ids, dtype=torch.int64)[: self.max_token_length]
+            input_ids = torch.tensor(input_ids, dtype=torch.int64)  # [: self.max_token_length]
             attention_mask = torch.tensor([len(input_ids)], dtype=torch.int32)
-            labels = torch.tensor(labels, dtype=torch.int64)[: self.max_token_length]
+            labels = torch.tensor(labels, dtype=torch.int64)  # [: self.max_token_length]
 
             fbank = speech[0, :, :]
             fbank_lens = speech_lengths
