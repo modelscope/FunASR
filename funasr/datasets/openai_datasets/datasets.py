@@ -1,5 +1,4 @@
 import logging
-
 import re
 import torch
 import random
@@ -8,8 +7,8 @@ from funasr.register import tables
 from funasr.utils.load_utils import extract_fbank, load_audio_text_image_video
 
 
-@tables.register("dataset_classes", "SenseVoiceDataset")
-class SenseVoiceDataset(torch.utils.data.Dataset):
+@tables.register("dataset_classes", "OpenAIDataset")
+class OpenAIDataset(torch.utils.data.Dataset):
     """
     SenseVoiceDataset
     """
@@ -60,6 +59,8 @@ class SenseVoiceDataset(torch.utils.data.Dataset):
         if isinstance(self.frontend, WhisperFrontend):
             self.permute = True
 
+        self.pattern = re.compile(r"(<\|startofspeech\|>.*?<\|endofspeech\|>)")
+
     def get_source_len(self, index):
         item = self.index_ds[index]
         return self.index_ds.get_source_len(item)
@@ -84,71 +85,81 @@ class SenseVoiceDataset(torch.utils.data.Dataset):
 
             item = self.index_ds[index_cur]
 
-            source = item["source"]
-            try:
-                data_src = load_audio_text_image_video(source, fs=self.fs)
-            except Exception as e:
-                logging.error(f"Loading wav failed! {str(e)}, {traceback.format_exc()}")
-                continue
+            system = item["system"]
+            user = item["user"]
+            assistant = item["assistant"]
 
-            if self.preprocessor_speech:
-                data_src = self.preprocessor_speech(data_src, fs=self.fs)
-            speech, speech_lengths = extract_fbank(
-                data_src, data_type=self.data_type, frontend=self.frontend, is_final=True
-            )  # speech: [b, T, d]
+            input_ids, labels, fbank, fbank_lens, fbank_mask, fbank_beg = [], [], [], [], [], []
 
-            if speech_lengths > self.batch_size:
-                continue
-            if self.permute:
-                speech = speech.permute(0, 2, 1)
-            target = item["target"]
-            if self.preprocessor_text:
-                target = self.preprocessor_text(target)
+            for i, (system_prompt, user_prompt, target_out) in enumerate(
+                zip(system, user, assistant)
+            ):
 
-            task = item.get("prompt", "<|ASR|>")
-            text_language = item.get("text_language", "<|zh|>")
+                source_input = f"<|im_start|>system\n{system_prompt}<|im_end|>\n<|im_start|>user\n{user_prompt}<|im_end|>\n<|im_start|>assistant\n"
 
-            if isinstance(self.sos, str):
-                prompt = f"{self.sos}{task}{text_language}"
-                prompt_ids = self.tokenizer.encode(prompt, allowed_special="all")
-            else:
-                prompt = f"{task}{text_language}"
-                prompt_ids = self.tokenizer.encode(prompt, allowed_special="all")
-                prompt_ids = [self.sos] + prompt_ids
+                splits = self.pattern.split(source_input)
+                source_ids = []
+                fbank_mask_i = []
+                fbank_beg_i = []
+                fbank_lens_i = []
+                for k, sub_str in enumerate(splits):
+                    if not sub_str.startswith("<|startofspeech|>"):
+                        sub_token = self.tokenizer.encode(sub_str)
+                        source_ids += sub_token
+                        fbank_mask_i += [0] * len(sub_token)
+                    else:
+                        sub_str = sub_str.replace("<|startofspeech|>", "").replace(
+                            "<|endofspeech|>", ""
+                        )
+                        if sub_str.startswith("!"):
 
-            prompt_ids_len = len(prompt_ids) - 1  # [sos, task]
-            self.prompt_ids_len = prompt_ids_len
+                            data_src = load_audio_text_image_video(sub_str[1:], fs=self.fs)
 
-            target_ids = self.tokenizer.encode(target, allowed_special="all")
-            target_ids_len = len(target_ids) + 1  # [lid, text]
-            if target_ids_len > 200:
-                continue
+                            speech, speech_lengths = extract_fbank(
+                                data_src,
+                                data_type=self.data_type,
+                                frontend=self.frontend,
+                                is_final=True,
+                            )  # speech: [b, T, d]
+                            if self.permute:
+                                speech = speech.permute(0, 2, 1)
+                            if speech_lengths > self.batch_size:
+                                continue
 
-            if isinstance(self.eos, str):
-                eos = self.tokenizer.encode(self.eos, allowed_special="all")  # [eos]
-            else:
-                eos = [self.eos]
+                            fbank_lens = speech_lengths[0].item()
+                            olens = 1 + (fbanks_len - 3 + 2 * 1) // 2
+                            olens = 1 + (olens - 3 + 2 * 1) // 2
+                            sub_token_len = (olens - 1) // 2 + 1
+                            sub_token = [0] * sub_token_len[0]
+                            fbank_beg_i = [len(source_ids)]
+                            source_ids += sub_token
+                            fbank_mask_i += [1] * len(sub_token)
 
-            ids = prompt_ids + target_ids + eos  # [sos, task, lid, text, eos]
-            ids_lengths = len(ids)
+                source_mask = [-100] * len(source_ids)
+                target_out = f"{target_out}<|im_end|>"
+                target_ids = tokenizer.encode(target_out)
+                input_ids += source_ids + target_ids
+                labels += source_mask + target_ids
+                fbank_mask += fbank_mask_i
+                fbank_beg.append(fbank_beg_i)
 
-            text = torch.tensor(ids, dtype=torch.int64)
-            text_lengths = torch.tensor([ids_lengths], dtype=torch.int32)
+            input_ids = torch.tensor(input_ids, dtype=torch.int64)
+            attention_mask = torch.tensor([len(input_ids)], dtype=torch.int32)
+            labels = torch.tensor(labels, dtype=torch.int64)
 
-            target_mask = (
-                [0] * (prompt_ids_len) + [1] * (target_ids_len) + [1]
-            )  # [sos, task, lid, text, eos]: [0, 0, 1, 1, 1]
-            target_mask_lengths = len(target_mask)
-            target_mask = torch.tensor(target_mask, dtype=torch.float32)
-            target_mask_lengths = torch.tensor([target_mask_lengths], dtype=torch.int32)
+            fbank = speech[0, :, :]
+            fbank_lens = speech_lengths
+            fbank_mask = torch.tensor(fbank_mask, dtype=torch.float32)
+            fbank_beg = torch.tensor(fbank_beg, dtype=torch.int32)
 
             output = {
-                "speech": speech[0, :, :],
-                "speech_lengths": speech_lengths,
-                "text": text,
-                "text_lengths": text_lengths,
-                "target_mask": target_mask,
-                "target_mask_lengths": target_mask_lengths,
+                "speech": fbank,
+                "speech_lengths": fbank_lens,
+                "fbank_mask": fbank_mask,
+                "fbank_beg": fbank_beg,
+                "input_ids": input_ids,
+                "attention_mask": attention_mask,
+                "labels_ids": labels,
             }
             break
 
@@ -163,34 +174,6 @@ class SenseVoiceDataset(torch.utils.data.Dataset):
                 if key not in outputs:
                     outputs[key] = []
                 outputs[key].append(sample[key])
-
-        if len(outputs) < 1:
-            logging.error(f"ERROR: data is empty!")
-            outputs = {
-                "speech": torch.rand((10, 128), dtype=torch.float32)[None, :, :],
-                "speech_lengths": torch.tensor(
-                    [
-                        10,
-                    ],
-                    dtype=torch.int32,
-                )[:, None],
-                "text": torch.tensor(
-                    [
-                        58836,
-                    ],
-                    dtype=torch.int32,
-                )[None, :],
-                "text_lengths": torch.tensor(
-                    [
-                        1,
-                    ],
-                    dtype=torch.int32,
-                )[:, None],
-                "target_mask": torch.tensor([[0] * (self.prompt_ids_len) + [1] * (1) + [1]])[
-                    None, :
-                ],
-            }
-            return outputs
 
         for key, data_list in outputs.items():
             if isinstance(data_list[0], torch.Tensor):
