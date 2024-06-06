@@ -481,7 +481,7 @@ class Trainer:
                     step_in_epoch=self.step_in_epoch,
                     batch_num_epoch=batch_num_epoch,
                     lr=lr,
-                    loss=loss.detach().cpu().item(),
+                    loss=accum_grad * loss.detach().cpu().item(),
                     speed_stats=speed_stats,
                     stats=stats,
                     writer=writer,
