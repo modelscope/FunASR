@@ -12,10 +12,30 @@ name_maps_ms = {
     "Whisper-large-v2": "iic/speech_whisper-large_asr_multilingual",
     "Whisper-large-v3": "iic/Whisper-large-v3",
     "Qwen-Audio": "Qwen/Qwen-Audio",
+    "emotion2vec_plus_large": "iic/emotion2vec_plus_large",
+    "emotion2vec_plus_base": "iic/emotion2vec_plus_base",
+    "emotion2vec_plus_seed": "iic/emotion2vec_plus_seed",
 }
 
 name_maps_hf = {
-    "": "",
+    "paraformer": "funasr/paraformer-zh",
+    "paraformer-zh": "funasr/paraformer-zh",
+    "paraformer-en": "funasr/paraformer-zh",
+    "paraformer-zh-streaming": "funasr/paraformer-zh-streaming",
+    "fsmn-vad": "funasr/fsmn-vad",
+    "ct-punc": "funasr/ct-punc",
+    "ct-punc-c": "iic/punc_ct-transformer_zh-cn-common-vocab272727-pytorch",
+    "fa-zh": "funasr/fa-zh",
+    "cam++": "funasr/campplus",
+    "Whisper-large-v2": "iic/speech_whisper-large_asr_multilingual",
+    "Whisper-large-v3": "iic/Whisper-large-v3",
+    "Qwen-Audio": "Qwen/Qwen-Audio",
+    "emotion2vec_plus_large": "emotion2vec/emotion2vec_plus_large",
+    "iic/emotion2vec_plus_large": "emotion2vec/emotion2vec_plus_large",
+    "emotion2vec_plus_base": "emotion2vec/emotion2vec_plus_base",
+    "iic/emotion2vec_plus_base": "emotion2vec/emotion2vec_plus_base",
+    "emotion2vec_plus_seed": "emotion2vec/emotion2vec_plus_seed",
+    "iic/emotion2vec_plus_seed": "emotion2vec/emotion2vec_plus_seed",
 }
 
 name_maps_openai = {

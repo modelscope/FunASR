@@ -56,6 +56,10 @@ int main(int argc, char* argv[]) {
         "true (Default), load the model of model_quant.onnx in model_dir. If set "
         "false, load the model of model.onnx in model_dir",
         false, "true", "string");
+    TCLAP::ValueArg<std::string> bladedisc(
+        "", BLADEDISC, 
+        "true (Default), load the model of bladedisc in model_dir.", 
+        false, "true", "string");
     TCLAP::ValueArg<std::string> vad_dir(
         "", VAD_DIR,
         "default: /workspace/models/vad, the vad model path, which contains model_quant.onnx, vad.yaml, vad.mvn",
@@ -121,6 +125,8 @@ int main(int argc, char* argv[]) {
         false, "/workspace/resources/hotwords.txt", "string");
     TCLAP::ValueArg<std::int32_t> fst_inc_wts("", FST_INC_WTS, 
         "the fst hotwords incremental bias", false, 20, "int32_t");
+    TCLAP::SwitchArg use_gpu("", INFER_GPU, "Whether to use GPU, default is false", false);
+    TCLAP::ValueArg<std::int32_t> batch_size("", BATCHSIZE, "batch_size for ASR model when using GPU", false, 4, "int32_t");
 
     // add file
     cmd.add(hotword);
@@ -135,6 +141,7 @@ int main(int argc, char* argv[]) {
     cmd.add(model_dir);
     cmd.add(model_revision);
     cmd.add(quantize);
+    cmd.add(bladedisc);
     cmd.add(vad_dir);
     cmd.add(vad_revision);
     cmd.add(vad_quant);
@@ -151,11 +158,14 @@ int main(int argc, char* argv[]) {
     cmd.add(io_thread_num);
     cmd.add(decoder_thread_num);
     cmd.add(model_thread_num);
+    cmd.add(use_gpu);
+    cmd.add(batch_size);
     cmd.parse(argc, argv);
 
     std::map<std::string, std::string> model_path;
     GetValue(model_dir, MODEL_DIR, model_path);
     GetValue(quantize, QUANTIZE, model_path);
+    GetValue(bladedisc, BLADEDISC, model_path);
     GetValue(vad_dir, VAD_DIR, model_path);
     GetValue(vad_quant, VAD_QUANT, model_path);
     GetValue(punc_dir, PUNC_DIR, model_path);
@@ -173,6 +183,8 @@ int main(int argc, char* argv[]) {
     global_beam_ = global_beam.getValue();
     lattice_beam_ = lattice_beam.getValue();
     am_scale_ = am_scale.getValue();
+    bool use_gpu_ = use_gpu.getValue();
+    int batch_size_ = batch_size.getValue();
 
     // Download model form Modelscope
     try{
@@ -468,7 +480,7 @@ int main(int argc, char* argv[]) {
     WebSocketServer websocket_srv(
         io_decoder, is_ssl, server, wss_server, s_certfile,
         s_keyfile);  // websocket server for asr engine
-    websocket_srv.initAsr(model_path, s_model_thread_num);  // init asr model
+    websocket_srv.initAsr(model_path, s_model_thread_num, use_gpu_, batch_size_);  // init asr model
 
     LOG(INFO) << "decoder-thread-num: " << s_decoder_thread_num;
     LOG(INFO) << "io-thread-num: " << s_io_thread_num;

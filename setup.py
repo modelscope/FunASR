@@ -39,7 +39,7 @@ requirements = {
         "jaconv",
         "hydra-core>=1.3.2",
         "tensorboardX",
-        "rotary_embedding_torch",
+        # "rotary_embedding_torch",
         "openai-whisper",
     ],
     # train: The modules invoked when training only.

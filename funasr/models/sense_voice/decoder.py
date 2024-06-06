@@ -360,6 +360,7 @@ class SenseVoiceDecoder(nn.Module):
         """Score."""
         ys_mask = subsequent_mask(len(ys), device=x.device).unsqueeze(0)
         logp = self.forward(ys.unsqueeze(0), x.unsqueeze(0), cache=state)
+        logp = torch.log_softmax(logp, dim=-1)
         return logp.squeeze(0)[-1, :], state
 
 

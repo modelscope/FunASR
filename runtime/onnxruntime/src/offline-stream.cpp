@@ -1,7 +1,7 @@
 #include "precomp.h"
 
 namespace funasr {
-OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int thread_num)
+OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int thread_num, bool use_gpu, int batch_size)
 {
     // VAD model
     if(model_path.find(VAD_DIR) != model_path.end()){
@@ -36,7 +36,19 @@ OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int
         string hw_compile_model_path;
         string seg_dict_path;
     
-        asr_handle = make_unique<Paraformer>();
+        if(use_gpu){
+            #ifdef USE_GPU
+            asr_handle = make_unique<ParaformerTorch>();
+            asr_handle->SetBatchSize(batch_size);
+            #else
+            LOG(ERROR) <<"GPU is not supported! CPU will be used! If you want to use GPU, please add -DGPU=ON when cmake";
+            asr_handle = make_unique<Paraformer>();
+            use_gpu = false;
+            #endif
+        }else{
+            asr_handle = make_unique<Paraformer>();
+        }
+
         bool enable_hotword = false;
         hw_compile_model_path = PathAppend(model_path.at(MODEL_DIR), MODEL_EB_NAME);
         seg_dict_path = PathAppend(model_path.at(MODEL_DIR), MODEL_SEG_DICT);
@@ -54,6 +66,15 @@ OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int
           am_model_path = PathAppend(model_path.at(MODEL_DIR), MODEL_NAME);
           if(model_path.find(QUANTIZE) != model_path.end() && model_path.at(QUANTIZE) == "true"){
             am_model_path = PathAppend(model_path.at(MODEL_DIR), QUANT_MODEL_NAME);
+          }
+          if(use_gpu){
+            am_model_path = PathAppend(model_path.at(MODEL_DIR), TORCH_MODEL_NAME);
+            if(model_path.find(QUANTIZE) != model_path.end() && model_path.at(QUANTIZE) == "true"){
+                am_model_path = PathAppend(model_path.at(MODEL_DIR), TORCH_QUANT_MODEL_NAME);
+            }
+            if(model_path.find(BLADEDISC) != model_path.end() && model_path.at(BLADEDISC) == "true"){
+                am_model_path = PathAppend(model_path.at(MODEL_DIR), BLADE_MODEL_NAME);
+            }
           }
         }
         am_cmvn_path = PathAppend(model_path.at(MODEL_DIR), AM_CMVN_NAME);
@@ -120,10 +141,10 @@ OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int
 #endif
 }
 
-OfflineStream *CreateOfflineStream(std::map<std::string, std::string>& model_path, int thread_num)
+OfflineStream *CreateOfflineStream(std::map<std::string, std::string>& model_path, int thread_num, bool use_gpu, int batch_size)
 {
     OfflineStream *mm;
-    mm = new OfflineStream(model_path, thread_num);
+    mm = new OfflineStream(model_path, thread_num, use_gpu, batch_size);
     return mm;
 }
 
