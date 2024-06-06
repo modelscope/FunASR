@@ -35,7 +35,7 @@ frontend: WhisperFrontend
 frontend_conf:
     fs: 16000
     whisper_model: large-v3
-    do_pad_trim: true
+    do_pad_trim: false
     permute: false # true: [bs, frames, dims]; false: [bs, dims, frames]
     filters_path: "/nfs/zhifu.gzf/init_model/SenseVoiceModelscope/assets/mel_filters.npz"
 
