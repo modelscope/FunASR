@@ -417,7 +417,7 @@ class CustomDistributedBufferDynamicBatchSampler(DistributedSampler):
             rank_batches[i % self.num_replicas].append(batch)
 
         # Assign all batches for the current rank directly
-        final_batches = rank_batches[self.rank][self.start_step :]
+        final_batches = rank_batches[self.rank]  # [self.start_step :]
         self.batch_num = len(final_batches)
 
         logging.info(
