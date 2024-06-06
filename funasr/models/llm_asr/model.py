@@ -483,8 +483,9 @@ class LLMASR2(nn.Module):
         _, l, _ = encoder_out.shape
         for batch_idx in range(batch_size):
             fbank_beg_idx = fbank_beg[batch_idx, 0].item()
-            inputs_embeds[batch_idx, fbank_beg_idx : fbank_beg_idx + l, :] = encoder_out[
-                batch_idx, :l, :
+            min_len = min(l, inputs_embeds.shape[1] - fbank_beg_idx)
+            inputs_embeds[batch_idx, fbank_beg_idx : fbank_beg_idx + min_len, :] = encoder_out[
+                batch_idx, :min_len, :
             ]
         labels_ids[labels_ids == -1] = -100
         model_outputs = self.llm(
