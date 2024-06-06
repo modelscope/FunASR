@@ -1,0 +1,78 @@
+# This is an example that demonstrates how to configure a model file.
+# You can modify the configuration according to your own requirements.
+
+# to print the register_table:
+# from funasr.register import tables
+# tables.print()
+
+# network architecture
+model: LLMASR2
+model_conf:
+    lsm_weight: 0.1     # label smoothing option
+    length_normalized_loss: true
+
+# encoder
+audio_encoder: "/nfs/zhifu.gzf/init_model/SenseVoiceModelscope"
+audio_encoder_conf:
+    hub: ms
+    freeze: true
+
+llm: Qwen1.5-7b-chat
+llm_conf:
+  hub: hf
+  freeze: true
+  init_param_path: "/nfs/zhifu.gzf/init_model/qwen/Qwen1___5-7B-Chat_raw"
+
+audio_adaptor: Transformer
+audio_adaptor_conf:
+  downsample_rate: 2
+  llm_dim: 4096
+  encoder_dim: 1280
+  n_layer: 2
+
+# frontend related
+frontend: WhisperFrontend
+frontend_conf:
+    fs: 16000
+    whisper_model: large-v3
+    do_pad_trim: true
+    permute: false # true: [bs, frames, dims]; false: [bs, dims, frames]
+    filters_path: "/nfs/zhifu.gzf/init_model/SenseVoiceModelscope/assets/mel_filters.npz"
+
+
+
+train_conf:
+  accum_grad: 1
+  grad_clip: 5
+  max_epoch: 15
+  keep_nbest_models: 10
+  log_interval: 10
+
+optim: adamw
+optim_conf:
+   lr: 0.0001
+   weight_decay: 0.000000
+
+scheduler: warmuplr
+scheduler_conf:
+   warmup_steps: 1500
+
+dataset: OpenAIDataset
+dataset_conf:
+    index_ds: OpenAIIndexDSJsonl
+    batch_sampler: CustomDistributedBatchSampler
+    batch_type: example # example or length
+    batch_size: 4 # if batch_type is example, batch_size is the numbers of samples; if length, batch_size is source_token_len+target_token_len;
+    max_token_length: 3000 # filter samples if source_token_len+target_token_len > max_token_length,
+    shuffle: True
+    num_workers: 0
+    audio_adaptor_downsample_rate: ${audio_adaptor_conf.downsample_rate}
+    audio_encoder_downsample_rate: 2
+#    prompt: "<|startoftranscription|><|zh|><|transcribe|><|zh|><|notimestamps|><|wo_itn|>"
+
+
+
+tokenizer: HuggingfaceTokenizer
+tokenizer_conf:
+  init_param_path: "/nfs/zhifu.gzf/init_model/qwen/Qwen1___5-7B-Chat_raw"
+
