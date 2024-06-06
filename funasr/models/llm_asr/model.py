@@ -476,14 +476,8 @@ class LLMASR2(nn.Module):
         # audio_adaptor
         encoder_out, encoder_out_lens = self.audio_adaptor(encoder_out, encoder_out_lens)
 
-        input_ids[input_ids == -1] = 0
-        input_ids[input_ids == -100] = 0
-        if hasattr(self.llm.model, "embed_tokens"):
-            inputs_embeds = self.llm.model.embed_tokens(input_ids)
-        elif hasattr(self.llm.model.model, "embed_tokens"):
-            inputs_embeds = self.llm.model.model.embed_tokens(input_ids)
-        else:
-            inputs_embeds = self.llm.model.model.model.embed_tokens(input_ids)
+        input_ids[input_ids < 0] = 0
+        inputs_embeds = self.llm.model.get_input_embeddings()(input_ids)
 
         batch_size, token_num, dims = inputs_embeds.shape
         _, l, _ = encoder_out.shape
@@ -492,7 +486,7 @@ class LLMASR2(nn.Module):
             inputs_embeds[batch_idx, fbank_beg_idx : fbank_beg_idx + l, :] = encoder_out[
                 batch_idx, :l, :
             ]
-
+        labels_ids[labels_ids == -1] = -100
         model_outputs = self.llm(
             inputs_embeds=inputs_embeds, attention_mask=attention_mask, labels=labels_ids
         )
