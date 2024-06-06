@@ -201,16 +201,16 @@ class OpenAIDataset(torch.utils.data.Dataset):
                     data_list, batch_first=True, padding_value=pad_value
                 )
 
-        # if self.batch_type != "example":
-        #     for i in range(10):
-        #         outputs = self._filter_badcase(outputs, i=i)
+        if self.batch_type != "example":
+            for i in range(10):
+                outputs = self._filter_badcase(outputs, i=i)
 
         return outputs
 
     def _filter_badcase(self, outputs, i=0):
-        b, t, _ = outputs["speech"].shape
+        b, t = outputs["input_ids"].shape
 
-        if b * t > self.batch_size * 1.25:
+        if b * t > self.batch_size * 2:
             beg = torch.randint(0, 2, ()).item()
             if b < 2:
                 beg = 0
@@ -219,12 +219,12 @@ class OpenAIDataset(torch.utils.data.Dataset):
             )
             for key, data_list in outputs.items():
                 outputs[key] = outputs[key][beg : beg + b : 2]
-
-            speech_lengths_max = outputs["speech_lengths"].max().item()
-            outputs["speech"] = outputs["speech"][:, :speech_lengths_max, :]
-            text_lengths_max = outputs["text_lengths"].max().item()
-            outputs["text"] = outputs["text"][:, :text_lengths_max]
-            target_mask_lengths_max = outputs["target_mask_lengths"].max().item()
-            outputs["target_mask"] = outputs["target_mask"][:, :target_mask_lengths_max]
+            #
+            # speech_lengths_max = outputs["speech_lengths"].max().item()
+            # outputs["speech"] = outputs["speech"][:, :speech_lengths_max, :]
+            # text_lengths_max = outputs["text_lengths"].max().item()
+            # outputs["text"] = outputs["text"][:, :text_lengths_max]
+            # target_mask_lengths_max = outputs["target_mask_lengths"].max().item()
+            # outputs["target_mask"] = outputs["target_mask"][:, :target_mask_lengths_max]
 
         return outputs
