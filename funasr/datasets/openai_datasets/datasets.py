@@ -155,6 +155,9 @@ class OpenAIDataset(torch.utils.data.Dataset):
                 fbank_beg.append(fbank_beg_i)
 
             if len(input_ids) > self.max_token_length:
+                logging.info(
+                    f"input_ids > max_token_length: {len(input_ids)}>{self.max_token_length}, {item}"
+                )
                 badcase_flag = True
             if badcase_flag:
                 continue
