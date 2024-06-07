@@ -871,13 +871,13 @@ void TimestampOnnx( std::vector<float>& us_alphas,
             }            
         }
         // fix case: sum > 1
-        int cif_idx = 0;
-        while(sum>=1.0 - 1e-4 && cif_idx < cif_peak.size()){
+        int cif_idx = cif_peak.size()-1;
+        while(sum>=1.0 - 1e-4 && cif_idx >= 0 ){
             if(cif_peak[cif_idx] < 1.0 - 1e-4){
                 cif_peak[cif_idx] = sum;
                 sum -=(1.0 - 1e-4);
             }
-            cif_idx++;
+            cif_idx--;
         }
 
         fire_place.clear();
