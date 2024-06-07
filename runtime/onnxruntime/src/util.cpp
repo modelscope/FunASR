@@ -870,6 +870,11 @@ void TimestampOnnx( std::vector<float>& us_alphas,
                 sum -=(1.0 - 1e-4);
             }            
         }
+        int cif_idx = 0;
+        while(sum>=1.0 - 1e-4 && cif_idx < cif_peak.size()){
+            cif_peak[cif_idx] = sum;
+            sum -=(1.0 - 1e-4);
+        }
 
         fire_place.clear();
         for (int i = 0; i < num_frames; i++) {
