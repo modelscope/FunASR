@@ -388,6 +388,7 @@ class AutoModel:
                 ):
                     max_len_in_batch = max(max_len_in_batch, sample_length)
                     end_idx += 1
+                    results_sorted.append({'key': 'bad_data', 'text': '', 'timestamp': []})
                     continue
 
                 speech_j, speech_lengths_j = slice_padding_audio_samples(
@@ -417,7 +418,7 @@ class AutoModel:
                 end_idx += 1
                 max_len_in_batch = sample_length
                 if len(results) < 1:
-                    continue
+                    results.append({'key': 'bad_data', 'text': '', 'timestamp': []})
                 results_sorted.extend(results)
 
             # end_asr_total = time.time()
