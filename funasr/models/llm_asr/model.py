@@ -481,7 +481,7 @@ class LLMASR2(nn.Module):
 
         batch_size, token_num, dims = inputs_embeds.shape
         fbank_mask[fbank_mask < 0] = 0
-        fbank_fake_lens = fbank_mask.sum(-1)
+        fbank_fake_lens = fbank_mask.sum(-1).to(torch.int32)
         # _, l, _ = encoder_out.shape
         for batch_idx in range(batch_size):
 
