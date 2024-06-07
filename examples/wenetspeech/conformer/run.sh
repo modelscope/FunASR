@@ -92,7 +92,7 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     echo "<blank>" > ${token_list}
     echo "<s>" >> ${token_list}
     echo "</s>" >> ${token_list}
-    utils/text2token.py -s 1 -n 1 --space "" --text_format "jsonl" ${feats_dir}/data/$train_set/audio_datasets.jsonl | cut -f 2- -d" " | tr " " "\n" \
+    utils/text2token.py -s 1 -n 1 --space "" ${feats_dir}/data/$train_set/text | cut -f 2- -d" " | tr " " "\n" \
         | sort | uniq | grep -a -v -e '^\s*$' | awk '{print $0}' >> ${token_list}
     echo "<unk>" >> ${token_list}
 fi

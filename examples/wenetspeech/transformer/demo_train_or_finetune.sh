@@ -1,1 +1,0 @@
-../paraformer/demo_train_or_finetune.sh
