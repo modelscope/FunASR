@@ -488,6 +488,8 @@ class LLMASR2(nn.Module):
             fbank_fake_len = fbank_fake_lens[batch_idx].item()
             fbank_beg_idx = fbank_beg[batch_idx, 0].item()
             min_len = min(fbank_fake_len, inputs_embeds.shape[1] - fbank_beg_idx)
+            fbank_fake_len = encoder_out_lens[batch_idx].item()
+            min_len = min(fbank_fake_len, inputs_embeds.shape[1] - fbank_beg_idx)
             try:
                 inputs_embeds[batch_idx, fbank_beg_idx : fbank_beg_idx + min_len, :] = encoder_out[
                     batch_idx, :min_len, :
