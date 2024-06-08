@@ -431,7 +431,7 @@ class CustomDistributedBufferDynamicBatchSampler(DistributedSampler):
         self.batch_num = len(final_batches)
 
         logging.info(
-            f"rank: {self.rank}, dataloader start from step: {self.start_step}, batch_num: {rank_batches[self.rank]}, after: {self.batch_num}"
+            f"rank: {self.rank}, dataloader start from step: {self.start_step}, batch_num: {len(rank_batches[self.rank])}, after: {self.batch_num}"
         )
         return iter(final_batches)
 
