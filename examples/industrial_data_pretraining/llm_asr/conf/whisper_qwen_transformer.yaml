@@ -28,7 +28,7 @@ audio_adaptor_conf:
   downsample_rate: 2
   llm_dim: 4096
   encoder_dim: 1280
-  n_layer: 0
+  n_layer: 2
 
 # frontend related
 frontend: WhisperFrontend
