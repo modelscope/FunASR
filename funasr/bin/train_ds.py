@@ -180,7 +180,7 @@ def main(**kwargs):
 
             torch.cuda.empty_cache()
 
-            time_escaped = (time.perf_counter() - time1) / 3600.0
+            time_escaped = (time.perf_counter() - time_slice_i) / 3600.0
             logging.info(
                 f"rank: {local_rank}, "
                 f"time_escaped_epoch: {time_escaped:.3f} hours, "
