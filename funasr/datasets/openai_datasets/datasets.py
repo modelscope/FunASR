@@ -216,7 +216,7 @@ class OpenAIDataset(torch.utils.data.Dataset):
                     if b < 2:
                         beg = 0
                     logging.info(
-                        f"Warning, b * t: {b * t} > {self.batch_size}, b: {b}, t: {t}, drop half data {idx}th, beg:{beg}"
+                        f"Warning, b * t: {b * t} > {self.batch_size_scale_ratio_max} * {self.batch_size}, b: {b}, t: {t}, drop half data {idx}th, beg:{beg}"
                     )
                     samples = samples[beg : beg + b : 2]
                     continue
