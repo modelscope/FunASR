@@ -212,7 +212,7 @@ class OpenAIDataset(torch.utils.data.Dataset):
 
             if self.batch_type != "example":
                 b, t = outputs["input_ids"].shape
-                if b > 1 and b * t > self.batch_size * self.batch_size_scale_ratio_max:
+                if b > 1 and b * t > self.batch_size_token_max:
                     logging.info(
                         f"Warning, {idx}th, b*t: {b}*{t}={b * t} > batch_size_sample_max: {self.batch_size_token_max}, drop last data"
                     )
