@@ -59,17 +59,20 @@ scheduler_conf:
 
 dataset: OpenAIDataset
 dataset_conf:
-    index_ds: OpenAIIndexDSJsonl
-    batch_sampler: CustomDistributedBatchSampler
-    batch_type: example # example or length
-    batch_size: 4 # if batch_type is example, batch_size is the numbers of samples; if length, batch_size is source_token_len+target_token_len;
-    max_token_length: 3000 # filter samples if source_token_len+target_token_len > max_token_length,
-    shuffle: True
-    num_workers: 0
-    audio_adaptor_downsample_rate: ${audio_adaptor_conf.downsample_rate}
-    audio_encoder_downsample_rate: 2
-#    prompt: "<|startoftranscription|><|zh|><|transcribe|><|zh|><|notimestamps|><|wo_itn|>"
-
+  index_ds: OpenAIIndexDSJsonl
+  batch_sampler: BatchSampler
+  batch_type: token
+  batch_size: 900
+  max_token_length: 1024
+  shuffle: true
+  sort_size: 1024
+  batch_size_scale_ratio_max: 2
+  num_workers: 4
+  audio_adaptor_downsample_rate: ${audio_adaptor_conf.downsample_rate}
+  audio_encoder_downsample_rate: 2
+  data_split_num: 512
+  batch_size_sample_max: 15
+  retry: 20
 
 
 tokenizer: HuggingfaceTokenizer
