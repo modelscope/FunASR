@@ -19,6 +19,7 @@ from funasr.utils import postprocess_utils
 from funasr.utils.datadir_writer import DatadirWriter
 from funasr.register import tables
 from funasr.train_utils.device_funcs import to_device
+import traceback
 
 
 @tables.register("model_classes", "LLMASR")
@@ -489,6 +490,7 @@ class LLMASR2(nn.Module):
             fbank_fake_len = fbank_fake_lens[batch_idx].item()
             fbank_beg_idx = fbank_beg[batch_idx, 0].item()
             min_len = min(fbank_fake_len, inputs_embeds.shape[1] - fbank_beg_idx)
+
             try:
                 inputs_embeds[batch_idx, fbank_beg_idx : fbank_beg_idx + min_len, :] = encoder_out[
                     batch_idx, :min_len, :
@@ -499,7 +501,7 @@ class LLMASR2(nn.Module):
                     f"batch_idx: {batch_idx}, inputs_embeds: {inputs_embeds.shape}, fbank_beg_idx: {fbank_beg_idx}, min_len: {min_len}, fbank_fake_len: {fbank_fake_len}"
                 )
                 fbank_fake_len = encoder_out_lens[batch_idx].item()
-                min_len = min(fbank_fake_len, inputs_embeds.shape[1] - fbank_beg_idx)
+                min_len = min(fbank_fake_len, min_len)
                 inputs_embeds[batch_idx, fbank_beg_idx : fbank_beg_idx + min_len, :] = encoder_out[
                     batch_idx, :min_len, :
                 ]
