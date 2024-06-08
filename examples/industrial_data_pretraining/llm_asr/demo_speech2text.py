@@ -16,12 +16,14 @@ jsonl = (
 with open(jsonl, "r") as f:
     lines = f.readlines()
 
+tearchforing = True
 for i, line in enumerate(lines):
     data_dict = json.loads(line.strip())
     data = data_dict["messages"]
 
     res = model.generate(
-        input=data,
+        input=[data],
+        tearchforing=tearchforing,
         cache={},
     )
 
