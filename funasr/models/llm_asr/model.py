@@ -532,7 +532,7 @@ class LLMASR2(nn.Module):
         loss, stats, weight = force_gatherable((loss, stats, batch_size), loss.device)
         return loss, stats, weight
 
-    def data_template(self, data_in):
+    def data_template(self, data):
         system, user, assistant = [], [], []
         for i, item in enumerate(data):
             role = item["role"]
