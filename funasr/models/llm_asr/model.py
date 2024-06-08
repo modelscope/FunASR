@@ -498,7 +498,7 @@ class LLMASR2(nn.Module):
             except Exception as e:
                 logging.error(f"{str(e)}, {traceback.format_exc()}")
                 logging.info(
-                    f"batch_idx: {batch_idx}, inputs_embeds: {inputs_embeds.shape}, fbank_beg_idx: {fbank_beg_idx}, min_len: {min_len}, fbank_fake_len: {fbank_fake_len}"
+                    f"batch_idx: {batch_idx}, inputs_embeds: {inputs_embeds.shape}, fbank_beg_idx: {fbank_beg_idx}, min_len: {min_len}, fbank_fake_len: {fbank_fake_len}, encoder_out: {encoder_out.shape}, encoder_out_lens: {encoder_out_lens[batch_idx].item()}"
                 )
                 fbank_fake_len = encoder_out_lens[batch_idx].item()
                 min_len = min(fbank_fake_len, min_len)
