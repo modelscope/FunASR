@@ -162,7 +162,7 @@ class OpenAIDataset(torch.utils.data.Dataset):
             if badcase_flag:
                 continue
             input_ids = torch.tensor(input_ids, dtype=torch.int64)  # [: self.max_token_length]
-            attention_mask = torch.tensor([len(input_ids)], dtype=torch.int32)
+            attention_mask = torch.tensor([1] * len(input_ids), dtype=torch.int32)
             labels = torch.tensor(labels, dtype=torch.int64)  # [: self.max_token_length]
 
             fbank = speech[0, :, :]
