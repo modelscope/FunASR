@@ -211,14 +211,15 @@ class OpenAIDataset(torch.utils.data.Dataset):
 
             if self.batch_type != "example":
                 b, t = outputs["input_ids"].shape
-                if b * t > self.batch_size * self.batch_size_scale_ratio_max:
-                    beg = torch.randint(0, 2, ()).item()
-                    if b < 2:
-                        beg = 0
+                if b > 1 and b * t > self.batch_size * self.batch_size_scale_ratio_max:
+                    # beg = torch.randint(0, 2, ()).item()
+                    # if b < 2:
+                    #     beg = 0
                     logging.info(
-                        f"Warning, b * t: {b * t} > {self.batch_size_scale_ratio_max} * {self.batch_size}, b: {b}, t: {t}, drop half data {idx}th, beg:{beg}"
+                        f"Warning, b*t: {b}*{t}={b * t} > batch_size*relax: {self.batch_size_scale_ratio_max}*{self.batch_size}={self.batch_size_scale_ratio_max*self.batch_size}, drop half data {idx}th, beg:{beg}"
                     )
-                    samples = samples[beg : beg + b : 2]
+                    # samples = samples[beg : beg + b : 2]
+                    samples = samples[:-1]
                     continue
 
             break
