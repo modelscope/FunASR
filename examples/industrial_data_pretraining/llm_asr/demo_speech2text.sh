@@ -1,10 +1,10 @@
 
 
 
-ckpt_dir="/nfs/zhifu.gzf/ckpt/saves/qwen_1.5_7b/full/sft/asr_tts_text_exp1_ds_z3/checkpoint-11000"
+ckpt_dir="/nfs/beinian.lzr/workspace/GPT-4o/Exp/exp6/5m-8gpu/exp6_speech2text_linear_ddp_0609"
 ckpt_id="model.pt.ep0.90000"
 jsonl_dir="/nfs/beinian.lzr/workspace/GPT-4o/Data/Speech2Text/TestData"
-out_dir="${ckpt_dir}/asr"
+out_dir="${ckpt_dir}/inference-${ckpt_id}"
 mkdir -p ${out_dir}
 
 device="cuda:0"
@@ -12,9 +12,9 @@ device="cuda:0"
 for data_set in "librispeech_test_clean_speech2text.jsonl" "librispeech_test_other_speech2text.jsonl"; do
     jsonl=${jsonl_dir}/${data_set}
     output_dir=${out_dir}/${data_set}
-
-    pred_file=${out_dir}/${data_set}/1best_recog/text_tn
-    ref_file=${out_dir}/${data_set}/1best_recog/label
+    mkdir -p ${output_dir}
+    pred_file=${output_dir}/${data_set}/1best_recog/text_tn
+    ref_file=${output_dir}/${data_set}/1best_recog/label
 
     python ./demo_speech2text.py ${ckpt_dir} ${ckpt_id} ${jsonl} ${output_dir} ${device}
 
@@ -26,9 +26,9 @@ done
 for data_set in "aishell1_test_speech2text.jsonl" "aishell2_ios_test_speech2text.jsonl" "librispeech_test_other_speech2text.jsonl"; do
     jsonl=${jsonl_dir}/${data_set}
     output_dir=${out_dir}/${data_set}
-
-    pred_file=${out_dir}/${data_set}/1best_recog/text_tn
-    ref_file=${out_dir}/${data_set}/1best_recog/label
+    mkdir -p ${output_dir}
+    pred_file=${output_dir}/${data_set}/1best_recog/text_tn
+    ref_file=${output_dir}/${data_set}/1best_recog/label
 
     python ./demo_speech2text.py ${ckpt_dir} ${ckpt_id} ${jsonl} ${output_dir}
 
@@ -39,9 +39,9 @@ done
 for data_set in "s2tt_en2zh.v20240605.test.jsonl"; do
     jsonl=${jsonl_dir}/${data_set}
     output_dir=${out_dir}/${data_set}
-
-    pred_file=${out_dir}/${data_set}/1best_recog/text_tn
-    ref_file=${out_dir}/${data_set}/1best_recog/label
+    mkdir -p ${output_dir}
+    pred_file=${output_dir}/${data_set}/1best_recog/text_tn
+    ref_file=${output_dir}/${data_set}/1best_recog/label
 
     python ./demo_speech2text.py ${ckpt_dir} ${ckpt_id} ${jsonl} ${output_dir}
 
@@ -52,9 +52,9 @@ done
 for data_set in "s2tt_zh2en.v20240605.test.jsonl"; do
     jsonl=${jsonl_dir}/${data_set}
     output_dir=${out_dir}/${data_set}
-
-    pred_file=${out_dir}/${data_set}/1best_recog/text_tn
-    ref_file=${out_dir}/${data_set}/1best_recog/label
+    mkdir -p ${output_dir}
+    pred_file=${output_dir}/${data_set}/1best_recog/text_tn
+    ref_file=${output_dir}/${data_set}/1best_recog/label
 
     python ./demo_speech2text.py ${ckpt_dir} ${ckpt_id} ${jsonl} ${output_dir}
 

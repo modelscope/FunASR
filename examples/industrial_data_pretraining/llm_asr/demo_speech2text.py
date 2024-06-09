@@ -15,6 +15,7 @@ jsonl = (
     "/nfs/beinian.lzr/workspace/GPT-4o/Data/Speech2Text/TestData/aishell1_test_speech2text.jsonl"
 )
 output_dir = f"{os.path.join(ckpt_dir, ckpt_id)}"
+device = "cuda:0"
 
 ckpt_dir = sys.argv[1]
 ckpt_id = sys.argv[2]

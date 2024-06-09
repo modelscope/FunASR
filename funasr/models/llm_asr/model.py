@@ -556,7 +556,7 @@ class LLMASR2(nn.Module):
 
         return contents
 
-    def data_load_speech(self, contents: dict, tokenizer, frontend, **kwargs):
+    def data_load_speech(self, contents: dict, tokenizer, frontend, meta_data={}, **kwargs):
 
         system = contents["system"]
         user = contents["user"]
@@ -594,7 +594,10 @@ class LLMASR2(nn.Module):
                     )
                     if sub_str.startswith("!"):
                         try:
+                            time1 = time.perf_counter()
                             data_src = load_audio_text_image_video(sub_str[1:], fs=frontend.fs)
+                            time2 = time.perf_counter()
+                            meta_data["load_data"] = f"{time2 - time1:0.3f}"
                         except Exception as e:
                             logging.error(f"Loading wav failed! {str(e)}, {traceback.format_exc()}")
 
@@ -604,6 +607,15 @@ class LLMASR2(nn.Module):
                             frontend=frontend,
                             is_final=True,
                         )  # speech: [b, T, d]
+
+                        time3 = time.perf_counter()
+                        meta_data["extract_feat"] = f"{time3 - time2:0.3f}"
+                        meta_data["batch_data_time"] = (
+                            speech_lengths.sum().item()
+                            * frontend.frame_shift
+                            * frontend.lfr_n
+                            / 1000
+                        )
 
                         if kwargs.get("permute", True):
                             speech = speech.permute(0, 2, 1)
@@ -666,7 +678,7 @@ class LLMASR2(nn.Module):
             raise NotImplementedError("batch decoding is not implemented")
 
         contents = self.data_template(data_in[0])
-        output = self.data_load_speech(contents, tokenizer, frontend, **kwargs)
+        output = self.data_load_speech(contents, tokenizer, frontend, meta_data=meta_data, **kwargs)
         batch = to_device(output, kwargs["device"])
 
         # audio encoder
