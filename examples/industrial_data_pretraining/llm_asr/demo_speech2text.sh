@@ -32,7 +32,7 @@ for data_set in "aishell1_test_speech2text.jsonl" "aishell2_ios_test_speech2text
 
     python ./demo_speech2text.py ${ckpt_dir} ${ckpt_id} ${jsonl} ${output_dir} ${device}
 
-    python /mnt/workspace/zhifu.gzf/codebase/FunASR/funasr/metrics/wer.py ++ref_file=${ref_file} ++hyp_file=${pred_file} ++cer_file=${pred_file}.cer ++cn_postprocess=false
+    python /mnt/workspace/zhifu.gzf/codebase/FunASR/funasr/metrics/wer.py ++ref_file=${ref_file} ++hyp_file=${pred_file} ++cer_file=${pred_file}.cer ++cn_postprocess=true
 
 done
 
@@ -45,7 +45,7 @@ for data_set in "s2tt_en2zh.v20240605.test.jsonl"; do
 
     python ./demo_speech2text.py ${ckpt_dir} ${ckpt_id} ${jsonl} ${output_dir} ${device}
 
-    python /mnt/workspace/zhifu.gzf/codebase/FunASR/funasr/metrics/wer.py ++ref_file=${ref_file} ++hyp_file=${pred_file} ++cer_file=${pred_file}.cer ++cn_postprocess=false
+    python /mnt/workspace/zhifu.gzf/codebase/FunASR/funasr/metrics/wer.py ++ref_file=${ref_file} ++hyp_file=${pred_file} ++cer_file=${pred_file}.cer ++cn_postprocess=true
 
 done
 
