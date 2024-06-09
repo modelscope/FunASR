@@ -1,0 +1,63 @@
+
+
+
+ckpt_dir="/nfs/zhifu.gzf/ckpt/saves/qwen_1.5_7b/full/sft/asr_tts_text_exp1_ds_z3/checkpoint-11000"
+ckpt_id="model.pt.ep0.90000"
+jsonl_dir="/nfs/beinian.lzr/workspace/GPT-4o/Data/Speech2Text/TestData"
+out_dir="${ckpt_dir}/asr"
+mkdir -p ${out_dir}
+
+device="cuda:0"
+
+for data_set in "librispeech_test_clean_speech2text.jsonl" "librispeech_test_other_speech2text.jsonl"; do
+    jsonl=${jsonl_dir}/${data_set}
+    output_dir=${out_dir}/${data_set}
+
+    pred_file=${out_dir}/${data_set}/1best_recog/text_tn
+    ref_file=${out_dir}/${data_set}/1best_recog/label
+
+    python ./demo_speech2text.py ${ckpt_dir} ${ckpt_id} ${jsonl} ${output_dir} ${device}
+
+    python /mnt/workspace/zhifu.gzf/codebase/FunASR/funasr/metrics/wer.py ++ref_file=${ref_file} ++hyp_file=${pred_file} ++cer_file=${pred_file}.cer ++cn_postprocess=false
+
+done
+
+
+for data_set in "aishell1_test_speech2text.jsonl" "aishell2_ios_test_speech2text.jsonl" "librispeech_test_other_speech2text.jsonl"; do
+    jsonl=${jsonl_dir}/${data_set}
+    output_dir=${out_dir}/${data_set}
+
+    pred_file=${out_dir}/${data_set}/1best_recog/text_tn
+    ref_file=${out_dir}/${data_set}/1best_recog/label
+
+    python ./demo_speech2text.py ${ckpt_dir} ${ckpt_id} ${jsonl} ${output_dir}
+
+    python /mnt/workspace/zhifu.gzf/codebase/FunASR/funasr/metrics/wer.py ++ref_file=${ref_file} ++hyp_file=${pred_file} ++cer_file=${pred_file}.cer ++cn_postprocess=true
+
+done
+
+for data_set in "s2tt_en2zh.v20240605.test.jsonl"; do
+    jsonl=${jsonl_dir}/${data_set}
+    output_dir=${out_dir}/${data_set}
+
+    pred_file=${out_dir}/${data_set}/1best_recog/text_tn
+    ref_file=${out_dir}/${data_set}/1best_recog/label
+
+    python ./demo_speech2text.py ${ckpt_dir} ${ckpt_id} ${jsonl} ${output_dir}
+
+    python /mnt/workspace/zhifu.gzf/codebase/FunASR/funasr/metrics/wer.py ++ref_file=${ref_file} ++hyp_file=${pred_file} ++cer_file=${pred_file}.cer ++cn_postprocess=true
+
+done
+
+for data_set in "s2tt_zh2en.v20240605.test.jsonl"; do
+    jsonl=${jsonl_dir}/${data_set}
+    output_dir=${out_dir}/${data_set}
+
+    pred_file=${out_dir}/${data_set}/1best_recog/text_tn
+    ref_file=${out_dir}/${data_set}/1best_recog/label
+
+    python ./demo_speech2text.py ${ckpt_dir} ${ckpt_id} ${jsonl} ${output_dir}
+
+    python /mnt/workspace/zhifu.gzf/codebase/FunASR/funasr/metrics/wer.py ++ref_file=${ref_file} ++hyp_file=${pred_file} ++cer_file=${pred_file}.cer ++cn_postprocess=true
+
+done

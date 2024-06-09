@@ -700,10 +700,10 @@ class LLMASR2(nn.Module):
             generated_ids = self.llm.generate(
                 inputs_embeds=inputs_embeds, max_new_tokens=kwargs.get("max_length", 512)
             )
-            generated_ids = [
-                output_ids[len(input_id) :]
-                for input_id, output_ids in zip(input_ids, generated_ids)
-            ]
+            # generated_ids = [
+            #     output_ids[len(input_id) :]
+            #     for input_id, output_ids in zip(input_ids, generated_ids)
+            # ]
             response = tokenizer.batch_decode(
                 generated_ids, skip_special_tokens=kwargs.get("skip_special_tokens", True)
             )[0]
@@ -733,7 +733,8 @@ class LLMASR2(nn.Module):
             ibest_writer = self.writer[f"{0 + 1}best_recog"]
 
         results = []
-        result_i = {"key": key[0], "text": response, "label": label}
+        response_clean = re.sub("[^\w\s\u3000\u4e00-\u9fff]+", "", response)
+        result_i = {"key": key[0], "text": response, "text_tn": response_clean, "label": label}
         if loss is not None:
             result_i["loss"] = loss
         results.append(result_i)
@@ -741,5 +742,6 @@ class LLMASR2(nn.Module):
         if ibest_writer is not None:
             ibest_writer["text"][key[0]] = response
             ibest_writer["label"][key[0]] = label
+            ibest_writer["text_tn"][key[0]] = response_clean
 
         return results, meta_data
