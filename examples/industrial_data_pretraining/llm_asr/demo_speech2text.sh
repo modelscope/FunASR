@@ -1,6 +1,4 @@
 
-
-
 ckpt_dir="/nfs/beinian.lzr/workspace/GPT-4o/Exp/exp6/5m-8gpu/exp6_speech2text_linear_ddp_0609"
 ckpt_id="model.pt.ep0.90000"
 jsonl_dir="/nfs/beinian.lzr/workspace/GPT-4o/Data/Speech2Text/TestData"
@@ -8,6 +6,9 @@ out_dir="${ckpt_dir}/inference-${ckpt_id}"
 mkdir -p ${out_dir}
 
 device="cuda:0"
+
+ckpt_id=$1
+device=$2
 
 for data_set in "librispeech_test_clean_speech2text.jsonl" "librispeech_test_other_speech2text.jsonl"; do
     jsonl=${jsonl_dir}/${data_set}
