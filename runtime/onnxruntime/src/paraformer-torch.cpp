@@ -317,6 +317,13 @@ std::vector<std::string> ParaformerTorch::Forward(float** din, int* len, bool in
         feats_batch.emplace_back(flattened);
     }
 
+    if(max_frames == 0){
+        for(int index=0; index<batch_in; index++){
+            results.push_back(result);
+        }
+        return results;
+    }
+
     torch::NoGradGuard no_grad;
     model_->eval();
     // padding
