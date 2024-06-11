@@ -41,7 +41,7 @@ for data_set in "aishell1_test_speech2text.jsonl" "aishell2_ios_test_speech2text
 
 }&
 done
-
+wait
 #for data_set in "s2tt_en2zh.v20240605.test.jsonl"; do
 #    jsonl=${jsonl_dir}/${data_set}
 #    output_dir=${out_dir}/${data_set}

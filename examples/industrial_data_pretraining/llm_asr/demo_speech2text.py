@@ -28,6 +28,9 @@ model = AutoModel(
     init_param=f"{os.path.join(ckpt_dir, ckpt_id)}",
     output_dir=output_dir,
     device=device,
+    fp16=False,
+    bf16=False,
+    llm_dtype="bf16",
 )
 
 
