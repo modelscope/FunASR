@@ -42,24 +42,24 @@ for data_set in "aishell1_test_speech2text.jsonl" "aishell2_ios_test_speech2text
 }&
 done
 wait
-#for data_set in "s2tt_en2zh.v20240605.test.jsonl"; do
-#    jsonl=${jsonl_dir}/${data_set}
-#    output_dir=${out_dir}/${data_set}
-#    mkdir -p ${output_dir}
-#    pred_file=${output_dir}/1best_recog/text_tn
-#    ref_file=${output_dir}/1best_recog/label
-#
-#    python ./demo_speech2text.py ${ckpt_dir} ${ckpt_id} ${jsonl} ${output_dir} ${device}
-#
-#done
-#
-#for data_set in "s2tt_zh2en.v20240605.test.jsonl"; do
-#    jsonl=${jsonl_dir}/${data_set}
-#    output_dir=${out_dir}/${data_set}
-#    mkdir -p ${output_dir}
-#    pred_file=${output_dir}/1best_recog/text_tn
-#    ref_file=${output_dir}/1best_recog/label
-#
-#    python ./demo_speech2text.py ${ckpt_dir} ${ckpt_id} ${jsonl} ${output_dir} ${device}
-#
-#done
+
+for data_set in "common_voice_zh-CN_speech2text.jsonl" "common_voice_en_speech2text.jsonl"; do
+{
+    jsonl=${jsonl_dir}/${data_set}
+    output_dir=${out_dir}/${data_set}
+    mkdir -p ${output_dir}
+    pred_file=${output_dir}/1best_recog/text_tn
+    ref_file=${output_dir}/1best_recog/label
+
+    python ./demo_speech2text.py ${ckpt_dir} ${ckpt_id} ${jsonl} ${output_dir} ${device}
+
+    cn_postprocess=false
+    if [ $data_set = "common_voice_zh-CN_speech2text.jsonl" ];then
+      cn_postprocess=true
+    fi
+
+    python /mnt/workspace/zhifu.gzf/codebase/FunASR/funasr/metrics/wer.py ++ref_file=${ref_file} ++hyp_file=${pred_file} ++cer_file=${pred_file}.cer ++cn_postprocess=${cn_postprocess}
+
+}&
+done
+wait
