@@ -83,25 +83,27 @@ class Transformer(nn.Module):
         from funasr.models.transformer.attention import MultiHeadedAttention
         from funasr.models.transformer.positionwise_feed_forward import PositionwiseFeedForward
 
-        self.blocks = nn.ModuleList(
-            [
-                EncoderLayer(
-                    llm_dim,
-                    MultiHeadedAttention(
-                        kwargs.get("attention_heads", 8),
+        self.blocks = None
+        if kwargs.get("n_layer", 2) > 0:
+            self.blocks = nn.ModuleList(
+                [
+                    EncoderLayer(
                         llm_dim,
-                        kwargs.get("attention_dropout_rate", 0.0),
-                    ),
-                    PositionwiseFeedForward(
-                        llm_dim,
-                        llm_dim // 4,
+                        MultiHeadedAttention(
+                            kwargs.get("attention_heads", 8),
+                            llm_dim,
+                            kwargs.get("attention_dropout_rate", 0.0),
+                        ),
+                        PositionwiseFeedForward(
+                            llm_dim,
+                            llm_dim // 4,
+                            kwargs.get("dropout_rate", 0.0),
+                        ),
                         kwargs.get("dropout_rate", 0.0),
-                    ),
-                    kwargs.get("dropout_rate", 0.0),
-                )
-                for i in range(kwargs.get("n_layer", 2))
-            ]
-        )
+                    )
+                    for i in range(kwargs.get("n_layer", 2))
+                ]
+            )
 
     def forward(self, x, ilens=None):
 
@@ -123,6 +125,8 @@ class Transformer(nn.Module):
         olens = None
         olens = (ilens - 1) // self.k + 1
         masks = (~make_pad_mask(olens)[:, None, :]).to(x.device)
-        for layer, block in enumerate(self.blocks):
-            x, masks = block(x, masks)
+
+        if self.blocks is not None:
+            for layer, block in enumerate(self.blocks):
+                x, masks = block(x, masks)
         return x, olens

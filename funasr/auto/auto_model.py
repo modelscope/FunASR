@@ -233,6 +233,8 @@ class AutoModel:
         # fp16
         if kwargs.get("fp16", False):
             model.to(torch.float16)
+        elif kwargs.get("bf16", False):
+            model.to(torch.bfloat16)
         return model, kwargs
 
     def __call__(self, *args, **cfg):
