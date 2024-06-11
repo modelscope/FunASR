@@ -684,6 +684,13 @@ class LLMASR2(nn.Module):
         # audio encoder
         speech = batch["speech"]
         speech_lengths = batch["speech_lengths"][:, 0]
+        # fp16
+        if kwargs.get("fp16", False):
+            speech = speech.to(torch.float16)
+            encoder_out_lens = encoder_out_lens.to(torch.float16)
+        elif kwargs.get("bf16", False):
+            speech = speech.to(torch.bfloat16)
+            encoder_out_lens = encoder_out_lens.to(torch.bfloat16)
         encoder_out, encoder_out_lens = self.audio_encoder(speech.permute(0, 2, 1), speech_lengths)
 
         # audio_adaptor
