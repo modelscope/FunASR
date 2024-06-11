@@ -384,28 +384,31 @@ std::vector<std::string> ParaformerTorch::Forward(float** din, int* len, bool in
         am_scores = outputs[0].toTensor();
         valid_token_lens = outputs[1].toTensor();
         #endif
+
+        torch::Tensor us_alphas_tensor;
+        torch::Tensor us_peaks_tensor;
+        if(outputs.size() == 4){
+            #ifdef USE_GPU
+            us_alphas_tensor = outputs[2].toTensor().to(at::kCPU);
+            us_peaks_tensor = outputs[3].toTensor().to(at::kCPU);
+            #else
+            us_alphas_tensor = outputs[2].toTensor();
+            us_peaks_tensor = outputs[3].toTensor();
+            #endif
+        }
+
         // timestamp
         for(int index=0; index<batch_in; index++){
             result="";
             if(outputs.size() == 4){
-                torch::Tensor us_alphas_tensor;
-                torch::Tensor us_peaks_tensor;
-                #ifdef USE_GPU
-                us_alphas_tensor = outputs[2].toTensor().to(at::kCPU);
-                us_peaks_tensor = outputs[3].toTensor().to(at::kCPU);
-                #else
-                us_alphas_tensor = outputs[2].toTensor();
-                us_peaks_tensor = outputs[3].toTensor();
-                #endif
-
                 float* us_alphas_data = us_alphas_tensor[index].data_ptr<float>();
-                std::vector<float> us_alphas(paraformer_length[index]);
+                std::vector<float> us_alphas(us_alphas_tensor[index].size(0));
                 for (int i = 0; i < us_alphas.size(); i++) {
                     us_alphas[i] = us_alphas_data[i];
                 }
 
                 float* us_peaks_data = us_peaks_tensor[index].data_ptr<float>();
-                std::vector<float> us_peaks(paraformer_length[index]);
+                std::vector<float> us_peaks(us_alphas_tensor[index].size(0));
                 for (int i = 0; i < us_peaks.size(); i++) {
                     us_peaks[i] = us_peaks_data[i];
                 }
