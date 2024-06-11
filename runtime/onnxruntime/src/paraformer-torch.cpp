@@ -402,13 +402,13 @@ std::vector<std::string> ParaformerTorch::Forward(float** din, int* len, bool in
             result="";
             if(outputs.size() == 4){
                 float* us_alphas_data = us_alphas_tensor[index].data_ptr<float>();
-                std::vector<float> us_alphas(us_alphas_tensor[index].size(0));
+                std::vector<float> us_alphas(paraformer_length[index]*3);
                 for (int i = 0; i < us_alphas.size(); i++) {
                     us_alphas[i] = us_alphas_data[i];
                 }
 
                 float* us_peaks_data = us_peaks_tensor[index].data_ptr<float>();
-                std::vector<float> us_peaks(us_alphas_tensor[index].size(0));
+                std::vector<float> us_peaks(paraformer_length[index]*3);
                 for (int i = 0; i < us_peaks.size(); i++) {
                     us_peaks[i] = us_peaks_data[i];
                 }
