@@ -22,6 +22,7 @@ def export(model, data_in=None, quantize: bool = False, opset_version: int = 14,
             )
         elif type == 'torchscripts':
             device = 'cuda' if torch.cuda.is_available() else 'cpu'
+            print("Exporting torchscripts on device {}".format(device))
             _torchscripts(
                 m,
                 path=export_dir,
