@@ -29,13 +29,13 @@ def cif_wo_hidden(alphas, threshold):
 
 
 def ts_prediction_lfr6_standard(
-    us_alphas, us_peaks, char_list, vad_offset=0.0, force_time_shift=-1.5, sil_in_str=True
+    us_alphas, us_peaks, char_list, vad_offset=0.0, force_time_shift=-1.5, sil_in_str=True, upsample_rate=3,
 ):
     if not len(char_list):
         return "", []
     START_END_THRESHOLD = 5
-    MAX_TOKEN_DURATION = 12
-    TIME_RATE = 10.0 * 6 / 1000 / 3  #  3 times upsampled
+    MAX_TOKEN_DURATION = 12  #  3 times upsampled
+    TIME_RATE=10.0 * 6 / 1000 / upsample_rate
     if len(us_alphas.shape) == 2:
         alphas, peaks = us_alphas[0], us_peaks[0]  # support inference batch_size=1 only
     else:

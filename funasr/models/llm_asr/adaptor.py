@@ -125,6 +125,7 @@ class Transformer(nn.Module):
         olens = None
         olens = (ilens - 1) // self.k + 1
         masks = (~make_pad_mask(olens)[:, None, :]).to(x.device)
+
         if self.blocks is not None:
             for layer, block in enumerate(self.blocks):
                 x, masks = block(x, masks)

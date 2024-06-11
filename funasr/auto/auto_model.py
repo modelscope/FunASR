@@ -429,6 +429,10 @@ class AutoModel:
             #                      f"time_speech_total_per_sample: {time_speech_total_per_sample: 0.3f}, "
             #                      f"time_escape_total_per_sample: {time_escape_total_per_sample:0.3f}")
 
+            if len(results_sorted) != n:
+                results_ret_list.append({"key": key, "text": "", "timestamp": []})
+                logging.info("decoding, utt: {}, empty result".format(key))
+                continue
             restored_data = [0] * n
             for j in range(n):
                 index = sorted_data[j][1]
