@@ -182,7 +182,7 @@ def main(**kwargs):
 
             time_escaped = (time.perf_counter() - time_slice_i) / 3600.0
             logging.info(
-                f"rank: {local_rank}, "
+                f"\n\nrank: {local_rank}, "
                 f"time_escaped_epoch: {time_escaped:.3f} hours, "
                 f"estimated to finish {dataloader.data_split_num} data_slices, remaining: {dataloader.data_split_num-data_split_i} slices, {(dataloader.data_split_num-data_split_i)*time_escaped:.3f} hours, "
                 f"epoch: {trainer.max_epoch - epoch} epochs, {((trainer.max_epoch - epoch - 1)*dataloader.data_split_num + dataloader.data_split_num-data_split_i)*time_escaped:.3f} hours\n"
@@ -199,7 +199,7 @@ def main(**kwargs):
         time2 = time.perf_counter()
         time_escaped = (time2 - time1) / 3600.0
         logging.info(
-            f"rank: {local_rank}, "
+            f"\n\nrank: {local_rank}, "
             f"time_escaped_epoch: {time_escaped:.3f} hours, "
             f"estimated to finish {trainer.max_epoch} "
             f"epoch: {(trainer.max_epoch - epoch) * time_escaped:.3f} hours\n"
