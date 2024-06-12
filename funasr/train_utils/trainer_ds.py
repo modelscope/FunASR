@@ -313,6 +313,7 @@ class Trainer:
                 state_dict = model.state_dict()
 
             if self.effective_save_name_excludes is not None:
+                logging.info(f"effective_save_name_excludes: {self.effective_save_name_excludes}")
                 dst_state_dict = {}
                 for k in state_dict.keys():
                     for k_ex in self.effective_save_name_excludes:

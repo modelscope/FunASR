@@ -413,15 +413,16 @@ class LLMASR2(nn.Module):
 
         if freeze:
             for name, param in audio_encoder.named_parameters():
-                idx = re.search(r"\.\d+\.", name)
-                if idx is not None:
-                    beg, end = idx.regs[0]
-                    layer_id = int(name[beg + 1 : end - 1])
-                    if isinstance(freeze_layer_num, (list, tuple)):
+                if isinstance(freeze_layer_num, (list, tuple)):
+                    idx = re.search(r"\.\d+\.", name)
+                    if idx is not None:
+                        beg, end = idx.regs[0]
+                        layer_id = int(name[beg + 1 : end - 1])
                         if layer_id in freeze_layer_num:
                             param.requires_grad = False
-                    else:
-                        param.requires_grad = False
+                else:
+                    param.requires_grad = False
+
             audio_encoder.eval()
 
         self.audio_encoder = audio_encoder
