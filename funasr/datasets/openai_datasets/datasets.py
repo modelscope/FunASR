@@ -376,6 +376,7 @@ class OpenAIDatasetMultiTurn(torch.utils.data.Dataset):
                 target_ids = self.tokenizer.encode(target_out)
                 input_ids += source_ids + target_ids
                 labels += source_mask + target_ids
+                fbank.append(speech)
                 fbank_mask += fbank_mask_i
                 fbank_beg.append(fbank_beg_i)
 
