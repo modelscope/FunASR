@@ -718,7 +718,7 @@ def cif_v1(hidden, alphas, threshold):
 
     frames = frames - shift_frames + shift_remain_frames - remain_frames
 
-    max_label_len = batch_len.max()
+    max_label_len = torch.round(alphas.sum(-1)).int().max() # torch.round to calculate the max length
 
     frame_fires = torch.zeros(
         batch_size, max_label_len, hidden_size, dtype=dtype, device=device
