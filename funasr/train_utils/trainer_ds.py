@@ -319,7 +319,7 @@ class Trainer:
                     for k_ex in self.effective_save_name_excludes:
                         k_tmp = k.replace("module.", "")
                         if k.startswith(k_ex):
-                            logging.info(f"key: {{k}} matching: {k_ex}, not save it")
+                            logging.info(f"key: {k} matching: {k_ex}, not save it")
                             break
                     else:
                         dst_state_dict[k] = state_dict[k]
