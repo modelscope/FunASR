@@ -60,7 +60,7 @@ def load_pretrained_model(
         if excludes is not None:
             for k_ex in excludes:
                 if k.startswith(k_ex):
-                    logging.info(f"key: {{k}} matching: {k_ex}, excluded")
+                    logging.info(f"key: {k} matching: {k_ex}, excluded")
                     excludes_flag = True
                     break
         if excludes_flag:
