@@ -130,15 +130,19 @@ ParaformerTorch::~ParaformerTorch()
 {
     if(vocab){
         delete vocab;
+        vocab = nullptr;
     }
     if(lm_vocab){
         delete lm_vocab;
+        lm_vocab = nullptr;
     }
     if(seg_dict){
         delete seg_dict;
+        seg_dict = nullptr;
     }
     if(phone_set_){
         delete phone_set_;
+        phone_set_ = nullptr;
     }
 }
 
