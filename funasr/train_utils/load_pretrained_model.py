@@ -52,16 +52,15 @@ def load_pretrained_model(
     if excludes is not None:
         if isinstance(excludes, str):
             excludes = excludes.split(",")
-    if not isinstance(excludes, (tuple, list)):
-        excludes = [excludes]
+
     logging.info(f"excludes: {excludes}")
 
     for k in dst_state.keys():
-
-        for k_ex in excludes:
-            if k.startswith(k_ex):
-                logging.info(f"key: {{k}} matching: {k_ex}, excluded")
-                continue
+        if excludes is not None:
+            for k_ex in excludes:
+                if k.startswith(k_ex):
+                    logging.info(f"key: {{k}} matching: {k_ex}, excluded")
+                    continue
 
         k_src = k
 
