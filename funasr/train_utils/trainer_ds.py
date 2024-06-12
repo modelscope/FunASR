@@ -287,7 +287,9 @@ class Trainer:
         elif self.use_fsdp:
             pass
         elif self.rank == 0:
-            logging.info(f"Save checkpoint: {epoch}, rank: {self.local_rank}\n")
+            logging.info(
+                f"Save checkpoint: {epoch}, rank: {self.rank}, local_rank: {self.local_rank}\n"
+            )
             # self.step_or_epoch += 1
             state = {
                 "epoch": epoch,

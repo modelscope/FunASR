@@ -15,11 +15,6 @@ class OpenAIIndexDSJsonl(torch.utils.data.Dataset):  # torch.utils.data.Dataset
 
     def __init__(self, path: str, **kwargs):
         super().__init__()
-        self.max_source_length = kwargs.get("max_source_length", 2048)
-        self.min_source_length = kwargs.get("min_source_length", 0)
-        self.max_target_length = kwargs.get("max_target_length", 2048)
-        self.min_target_length = kwargs.get("min_target_length", 0)
-        self.max_token_length = kwargs.get("max_token_length", 2200)
 
         is_training = kwargs.get("is_training", True)
         if not (path.endswith(".jsonl") or path.endswith(".json")):
