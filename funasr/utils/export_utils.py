@@ -196,4 +196,4 @@ def _bladedisc_opt_for_encdec(model, path, enable_fp16):
     model.encoder = _bladedisc_opt(model.encoder, input_data[:2])
     model.decoder = _bladedisc_opt(model.decoder, tuple(decoder_inputs))
     model_script = torch.jit.trace(model, input_data)
-    model_script.save(os.path.join(path, f"{model.export_name}.torchscripts"))
+    model_script.save(os.path.join(path, f"{model.export_name}_blade.torchscripts"))

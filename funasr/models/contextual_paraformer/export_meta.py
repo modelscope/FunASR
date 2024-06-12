@@ -76,7 +76,7 @@ def export_rebuild_model(model, **kwargs):
     )
     
     embedder_model.export_name = "model_eb"
-    backbone_model.export_name = "model_bb"
+    backbone_model.export_name = "model"
 
     return backbone_model, embedder_model
 
