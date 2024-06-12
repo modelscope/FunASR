@@ -124,6 +124,7 @@ def main(**kwargs):
         use_ddp=use_ddp,
         use_fsdp=use_fsdp,
         device=kwargs["device"],
+        excludes=kwargs.get("excludes", None),
         output_dir=kwargs.get("output_dir", "./exp"),
         **kwargs.get("train_conf"),
     )
