@@ -469,10 +469,11 @@ class AutoModel:
 
             return_raw_text = kwargs.get("return_raw_text", False)
             # step.3 compute punc model
+            raw_text = None
             if self.punc_model is not None:
                 if not len(result["text"].strip()):
                     if return_raw_text:
-                        result["raw_text"] = ""
+                        result["raw_text"] = raw_text = ""
                 else:
                     deep_update(self.punc_kwargs, cfg)
                     punc_res = self.inference(
@@ -482,9 +483,7 @@ class AutoModel:
                     if return_raw_text:
                         result["raw_text"] = raw_text
                     result["text"] = punc_res[0]["text"]
-            else:
-                raw_text = None
-
+                
             # speaker embedding cluster after resorted
             if self.spk_model is not None and kwargs.get("return_spk_res", True):
                 if raw_text is None:
