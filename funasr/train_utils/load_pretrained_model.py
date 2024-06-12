@@ -52,6 +52,8 @@ def load_pretrained_model(
     if excludes is not None:
         if isinstance(excludes, str):
             excludes = excludes.split(",")
+    if not isinstance(excludes, (tuple, list)):
+        excludes = [excludes]
     logging.info(f"excludes: {excludes}")
 
     for k in dst_state.keys():
