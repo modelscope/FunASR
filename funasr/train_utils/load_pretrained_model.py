@@ -56,11 +56,15 @@ def load_pretrained_model(
     logging.info(f"excludes: {excludes}")
 
     for k in dst_state.keys():
+        excludes_flag = False
         if excludes is not None:
             for k_ex in excludes:
                 if k.startswith(k_ex):
                     logging.info(f"key: {{k}} matching: {k_ex}, excluded")
-                    continue
+                    excludes_flag = True
+                    break
+        if excludes_flag:
+            continue
 
         k_src = k
 
