@@ -496,11 +496,14 @@ class LLMASR2(nn.Module):
 
         batch_size, frames, _ = speech.shape
 
-        # audio encoder
-        encoder_out, encoder_out_lens = self.audio_encoder(speech.permute(0, 2, 1), speech_lengths)
+        with torch.cuda.amp.autocast(enabled=False):
+            # audio encoder
+            encoder_out, encoder_out_lens = self.audio_encoder(
+                speech.permute(0, 2, 1), speech_lengths
+            )
 
-        # audio_adaptor
-        encoder_out, encoder_out_lens = self.audio_adaptor(encoder_out, encoder_out_lens)
+            # audio_adaptor
+            encoder_out, encoder_out_lens = self.audio_adaptor(encoder_out, encoder_out_lens)
 
         input_ids[input_ids < 0] = 0
         inputs_embeds = self.llm.model.get_input_embeddings()(input_ids)
