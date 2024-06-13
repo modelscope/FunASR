@@ -146,7 +146,7 @@ def main(**kwargs):
     dataloader = dataloader_class(**kwargs)
     # dataloader_tr, dataloader_val = dataloader_class(**kwargs)
 
-    scaler = GradScaler(enabled=trainer.use_fp16) if trainer.use_fp16 else None
+    scaler = GradScaler(enabled=True) if trainer.use_fp16 or trainer.use_bf16 else None
     scaler = ShardedGradScaler(enabled=trainer.use_fp16) if trainer.use_fsdp else scaler
 
     trainer.resume_checkpoint(
