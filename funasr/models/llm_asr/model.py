@@ -420,6 +420,8 @@ class LLMASR2(nn.Module):
                         layer_id = int(name[beg + 1 : end - 1])
                         if layer_id in freeze_layer_num:
                             param.requires_grad = False
+                    else:
+                        param.requires_grad = False
                 else:
                     param.requires_grad = False
 
