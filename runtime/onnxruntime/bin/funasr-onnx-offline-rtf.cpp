@@ -54,7 +54,7 @@ void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, vector<string> wa
     // warm up
     for (size_t i = 0; i < 10; i++)
     {
-        FUNASR_RESULT result=FunOfflineInfer(asr_handle, wav_list[0].c_str(), RASR_NONE, nullptr, hotwords_embedding, audio_fs, true, decoder_handle);
+        FUNASR_RESULT result=FunOfflineInfer(asr_handle, wav_list[0].c_str(), RASR_NONE, nullptr, hotwords_embedding, audio_fs, true, decoder_handle, core_id);
         if(result){
             FunASRFreeResult(result);
         }
@@ -68,7 +68,7 @@ void runReg(FUNASR_HANDLE asr_handle, vector<string> wav_list, vector<string> wa
         }
 
         gettimeofday(&start, nullptr);
-        FUNASR_RESULT result=FunOfflineInfer(asr_handle, wav_list[i].c_str(), RASR_NONE, nullptr, hotwords_embedding, audio_fs, true, decoder_handle);
+        FUNASR_RESULT result=FunOfflineInfer(asr_handle, wav_list[i].c_str(), RASR_NONE, nullptr, hotwords_embedding, audio_fs, true, decoder_handle, core_id);
 
         gettimeofday(&end, nullptr);
         seconds = (end.tv_sec - start.tv_sec);
@@ -184,7 +184,8 @@ int main(int argc, char *argv[])
     gettimeofday(&start, nullptr);
     bool use_gpu_ = use_gpu.getValue();
     int batch_size_ = batch_size.getValue();
-    FUNASR_HANDLE asr_handle=FunOfflineInit(model_path, 1, use_gpu_, batch_size_);
+    int rtf_threds = thread_num.getValue();
+    FUNASR_HANDLE asr_handle=FunOfflineInit(model_path, 1, use_gpu_, batch_size_, rtf_threds);
 
     if (!asr_handle)
     {
@@ -232,7 +233,6 @@ int main(int argc, char *argv[])
     long total_time = 0;
     std::vector<std::thread> threads;
 
-    int rtf_threds = thread_num.getValue();
     std::string hotword_path = hotword.getValue();
     int value_bias = 20;
     value_bias = fst_inc_wts.getValue();

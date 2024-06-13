@@ -35,6 +35,7 @@ namespace funasr {
         void LfrCmvn(std::vector<std::vector<float>> &asr_feats);
 
         using TorchModule = torch::jit::script::Module;
+        std::vector<std::shared_ptr<TorchModule>> models_;
         std::shared_ptr<TorchModule> model_ = nullptr;
         std::shared_ptr<TorchModule> hw_model_ = nullptr;
         std::vector<torch::Tensor> encoder_outs_;
@@ -49,7 +50,7 @@ namespace funasr {
         std::vector<std::vector<float>> CompileHotwordEmbedding(std::string &hotwords);
         void Reset();
         void FbankKaldi(float sample_rate, const float* waves, int len, std::vector<std::vector<float>> &asr_feats);
-        std::vector<std::string> Forward(float** din, int* len, bool input_finished=true, const std::vector<std::vector<float>> &hw_emb={{0.0}}, void* wfst_decoder=nullptr, int batch_in=1);
+        std::vector<std::string> Forward(float** din, int* len, bool input_finished=true, const std::vector<std::vector<float>> &hw_emb={{0.0}}, void* wfst_decoder=nullptr, int batch_in=1, int core_id=0);
         string GreedySearch( float* in, int n_len, int64_t token_nums,
                              bool is_stamp=false, std::vector<float> us_alphas={0}, std::vector<float> us_cif_peak={0});
 
@@ -57,6 +58,7 @@ namespace funasr {
         string GetLang(){return language;};
         int GetAsrSampleRate() { return asr_sample_rate; };
         void SetBatchSize(int batch_size) {batch_size_ = batch_size;};
+        void SetModuleNum(int module_num) {module_num_ = module_num;};
         int GetBatchSize() {return batch_size_;};
         void StartUtterance();
         void EndUtterance();
@@ -92,6 +94,7 @@ namespace funasr {
         float tail_alphas = 0.45;
         int asr_sample_rate = MODEL_SAMPLE_RATE;
         int batch_size_ = 1;
+        int module_num_ = 1;
     };
 
 } // namespace funasr

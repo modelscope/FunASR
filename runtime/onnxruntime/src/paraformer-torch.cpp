@@ -48,7 +48,10 @@ void ParaformerTorch::InitAsr(const std::string &am_model, const std::string &am
 
     try {
         torch::jit::script::Module model = torch::jit::load(am_model, device);
-        model_ = std::make_shared<TorchModule>(std::move(model)); 
+        model_ = std::make_shared<TorchModule>(std::move(model));
+        for(int i=0; i<module_num_; i++){
+            models_.push_back(std::make_shared<torch::jit::script::Module>(model_->clone()));
+        }
         LOG(INFO) << "Successfully load model from " << am_model;
     } catch (std::exception const &e) {
         LOG(ERROR) << "Error when load am model: " << am_model << e.what();
@@ -288,7 +291,7 @@ void ParaformerTorch::LfrCmvn(std::vector<std::vector<float>> &asr_feats) {
     asr_feats = out_feats;
 }
 
-std::vector<std::string> ParaformerTorch::Forward(float** din, int* len, bool input_finished, const std::vector<std::vector<float>> &hw_emb, void* decoder_handle, int batch_in)
+std::vector<std::string> ParaformerTorch::Forward(float** din, int* len, bool input_finished, const std::vector<std::vector<float>> &hw_emb, void* decoder_handle, int batch_in, int core_id)
 {
     vector<std::string> results;
     string result="";
@@ -329,7 +332,7 @@ std::vector<std::string> ParaformerTorch::Forward(float** din, int* len, bool in
     }
 
     torch::NoGradGuard no_grad;
-    model_->eval();
+    models_[core_id]->eval();
     // padding
     std::vector<float> all_feats(batch_in * max_frames * feature_dim);
     for(int index=0; index<batch_in; index++){
@@ -385,7 +388,7 @@ std::vector<std::string> ParaformerTorch::Forward(float** din, int* len, bool in
     }
 
     try {
-        auto outputs = model_->forward(inputs).toTuple()->elements();
+        auto outputs = models_[core_id]->forward(inputs).toTuple()->elements();
         torch::Tensor am_scores;
         torch::Tensor valid_token_lens;
         #ifdef USE_GPU

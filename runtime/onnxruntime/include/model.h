@@ -22,7 +22,7 @@ class Model {
     virtual void InitLm(const std::string &lm_file, const std::string &lm_config, const std::string &lex_file){};
     virtual void InitFstDecoder(){};
     virtual std::string Forward(float *din, int len, bool input_finished, const std::vector<std::vector<float>> &hw_emb={{0.0}}, void* wfst_decoder=nullptr){return "";};
-    virtual std::vector<std::string> Forward(float** din, int* len, bool input_finished, const std::vector<std::vector<float>> &hw_emb={{0.0}}, void* wfst_decoder=nullptr, int batch_in=1)
+    virtual std::vector<std::string> Forward(float** din, int* len, bool input_finished, const std::vector<std::vector<float>> &hw_emb={{0.0}}, void* wfst_decoder=nullptr, int batch_in=1, int core_id=0)
       {return std::vector<string>();};
     virtual std::string Rescoring() = 0;
     virtual void InitHwCompiler(const std::string &hw_model, int thread_num){};
@@ -31,6 +31,7 @@ class Model {
     virtual std::string GetLang(){return "";};
     virtual int GetAsrSampleRate() = 0;
     virtual void SetBatchSize(int batch_size) {};
+    virtual void SetModuleNum(int module_num) {};
     virtual int GetBatchSize() {return 0;};
     virtual Vocab* GetVocab() {return nullptr;};
     virtual Vocab* GetLmVocab() {return nullptr;};
