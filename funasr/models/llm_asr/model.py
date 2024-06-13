@@ -449,9 +449,9 @@ class LLMASR2(nn.Module):
             for name, param in model.named_parameters():
                 param.requires_grad = False
             model.eval()
-        self.llm = model
-        llm_dim = model.get_input_embeddings().weight.shape[-1]
         self.llm_dtype = llm_conf.get("llm_dtype", "fp32")
+        self.llm = model.to(dtype_map[self.llm_dtype])
+        llm_dim = model.get_input_embeddings().weight.shape[-1]
 
         # adaptor
         adaptor_class = tables.adaptor_classes.get(audio_adaptor)
@@ -536,7 +536,9 @@ class LLMASR2(nn.Module):
             labels_ids[labels_ids == -1] = -100
             attention_mask[attention_mask < 0] = 0
             model_outputs = self.llm(
-                inputs_embeds=inputs_embeds, attention_mask=attention_mask, labels=labels_ids
+                inputs_embeds=inputs_embeds.to(dtype_map[self.llm_dtype]),
+                attention_mask=attention_mask,
+                labels=labels_ids,
             )
             loss = model_outputs.loss
 
