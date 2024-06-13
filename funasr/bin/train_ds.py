@@ -66,6 +66,7 @@ def main(**kwargs):
     # open tf32
     torch.backends.cuda.matmul.allow_tf32 = kwargs.get("enable_tf32", True)
 
+    rank = int(os.environ.get("RANK", 0))
     local_rank = int(os.environ.get("LOCAL_RANK", 0))
     world_size = int(os.environ.get("WORLD_SIZE", 1))
 
@@ -83,7 +84,7 @@ def main(**kwargs):
         dist.init_process_group(backend=kwargs.get("backend", "nccl"), init_method="env://")
         torch.cuda.set_device(local_rank)
 
-    rank = dist.get_rank()
+    # rank = dist.get_rank()
 
     logging.info("Build model, frontend, tokenizer")
     device = kwargs.get("device", "cuda")

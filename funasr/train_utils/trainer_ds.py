@@ -78,7 +78,7 @@ class Trainer:
                       output_dir (str): The directory where model checkpoints will be saved. Default is './'.
                       resume (str, optional): The file path to a checkpoint to resume training from.
         """
-        self.rank = kwargs.get("rank", 0)
+        self.rank = rank
         self.local_rank = local_rank
         self.world_size = world_size
         self.use_ddp = use_ddp
