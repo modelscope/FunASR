@@ -58,7 +58,7 @@ namespace funasr {
 #define BATCHSIZE "batch-size"
 #define TORCH_MODEL_NAME "model.torchscripts"
 #define TORCH_QUANT_MODEL_NAME "model_quant.torchscripts"
-#define BLADE_MODEL_NAME "model.blade.fp16.pt"
+#define BLADE_MODEL_NAME "model_blade.torchscripts"
 #define BLADEDISC "bladedisc"
 
 #define AM_CMVN_NAME "am.mvn"
