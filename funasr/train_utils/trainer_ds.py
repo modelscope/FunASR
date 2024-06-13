@@ -30,8 +30,9 @@ def maybe_autocast(dtype=None, use_deepspeed=False):
             yield
     else:
         if dtype == torch.float16 or dtype == torch.bfloat16:
-            with autocast(enabled=True, dtype=dtype):
-                yield
+            yield
+            # with autocast(enabled=True, dtype=dtype):
+            #     yield
         else:
             yield
 
