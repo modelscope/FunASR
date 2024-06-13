@@ -96,7 +96,7 @@ def load_pretrained_model(
                 dst_state[k] = src_state[k_src]
 
         else:
-            print(f"Warning, miss key in ckpt: {k}")
+            print(f"Warning, miss key in ckpt: {k}, {path}")
 
     flag = obj.load_state_dict(dst_state, strict=True)
     logging.info(f"Loading ckpt: {path}, status: {flag}")
