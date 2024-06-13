@@ -526,7 +526,7 @@ class LLMASR2(nn.Module):
                 ]
 
         labels_ids[labels_ids == -1] = -100
-
+        attention_mask[attention_mask < 0] = 0
         model_outputs = self.llm(
             inputs_embeds=inputs_embeds, attention_mask=attention_mask, labels=labels_ids
         )
