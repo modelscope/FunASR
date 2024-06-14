@@ -334,6 +334,7 @@ class OpenAIDatasetMultiTurn(torch.utils.data.Dataset):
 
                 splits = self.pattern.split(source_input)
                 source_ids = []
+                fbank_i = []
                 fbank_mask_i = []
                 fbank_beg_i = []
                 fbank_lens_i = []
@@ -381,9 +382,11 @@ class OpenAIDatasetMultiTurn(torch.utils.data.Dataset):
                 target_ids = self.tokenizer.encode(target_out)
                 input_ids += source_ids + target_ids
                 labels += source_mask + target_ids
-                fbank.append(speech)
+                fbank.append(speech[0, :, :])
                 fbank_mask += fbank_mask_i
-                fbank_beg.append(fbank_beg_i)
+                if len(fbank_beg_i) < 1:
+                    fbank_beg_i = [-1]
+                fbank_beg += fbank_beg_i
 
             if len(input_ids) > self.max_token_length:
                 logging.info(
@@ -396,7 +399,7 @@ class OpenAIDatasetMultiTurn(torch.utils.data.Dataset):
             attention_mask = torch.tensor([1] * len(input_ids), dtype=torch.int32)
             labels = torch.tensor(labels, dtype=torch.int64)  # [: self.max_token_length]
 
-            fbank = speech[0, :, :]
+            # fbank = speech[0, :, :]
             fbank_lens = speech_lengths
             fbank_mask = torch.tensor(fbank_mask, dtype=torch.float32)
             fbank_beg = torch.tensor(fbank_beg, dtype=torch.int32)
@@ -426,7 +429,10 @@ class OpenAIDatasetMultiTurn(torch.utils.data.Dataset):
                 for key in sample.keys():
                     if key not in outputs:
                         outputs[key] = []
-                    outputs[key].append(sample[key])
+                    if isinstance(sample[key], (list, tuple)):
+                        outputs[key].extend(sample[key])
+                    else:
+                        outputs[key].append(sample[key])
 
             for key, data_list in outputs.items():
                 if isinstance(data_list[0], torch.Tensor):
