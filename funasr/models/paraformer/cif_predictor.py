@@ -539,7 +539,8 @@ def cif_v1_export(hidden, alphas, threshold: float):
 
     frames = frames - shift_frames + shift_remain_frames - remain_frames
 
-    max_label_len = batch_len.max()
+    max_label_len = alphas.sum(dim=-1)
+    max_label_len = torch.floor(max_label_len).max().to(dtype=torch.int64)
 
     frame_fires = torch.zeros(
         batch_size, max_label_len, hidden_size, dtype=dtype, device=device
