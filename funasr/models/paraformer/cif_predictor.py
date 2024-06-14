@@ -504,7 +504,7 @@ def cif_v1_export(hidden, alphas, threshold: float):
     frames = torch.zeros(batch_size, len_time, hidden_size, dtype=dtype, device=device)
     fires = torch.zeros(batch_size, len_time, dtype=dtype, device=device)
 
-    prefix_sum = torch.cumsum(alphas, dim=1)
+    prefix_sum = torch.cumsum(alphas, dim=1, dtype=torch.float64).to(torch.float32) # cumsum precision degradation cause wrong result in extreme 
     prefix_sum_floor = torch.floor(prefix_sum)
     dislocation_prefix_sum = torch.roll(prefix_sum, 1, dims=1)
     dislocation_prefix_sum_floor = torch.floor(dislocation_prefix_sum)
@@ -671,7 +671,7 @@ def cif_wo_hidden_v1(alphas, threshold, return_fire_idxs=False):
 
     fires = torch.zeros(batch_size, len_time, dtype=dtype, device=device)
 
-    prefix_sum = torch.cumsum(alphas, dim=1)
+    prefix_sum = torch.cumsum(alphas, dim=1, dtype=torch.float64).to(torch.float32) # cumsum precision degradation cause wrong result in extreme 
     prefix_sum_floor = torch.floor(prefix_sum)
     dislocation_prefix_sum = torch.roll(prefix_sum, 1, dims=1)
     dislocation_prefix_sum_floor = torch.floor(dislocation_prefix_sum)
