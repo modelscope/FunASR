@@ -69,7 +69,7 @@ dataset_conf:
   batch_size_scale_ratio_max: 2
   num_workers: 4
   audio_adaptor_downsample_rate: ${audio_adaptor_conf.downsample_rate}
-  audio_encoder_downsample_rate: 2
+  audio_encoder_downsample_rate: 4
   data_split_num: 512
   batch_size_sample_max: 15
   retry: 20

@@ -64,6 +64,8 @@ class OpenAIDataset(torch.utils.data.Dataset):
         self.max_token_length = kwargs.get("max_token_length", 1024)
         self.batch_size_scale_ratio_max = kwargs.get("batch_size_scale_ratio_max", 1.5)
         self.batch_size_token_max = kwargs.get("batch_size_token_max", 2500)
+        self.audio_adaptor_downsample_rate = kwargs.get("audio_adaptor_downsample_rate", 2)
+        self.audio_encoder_downsample_rate = kwargs.get("audio_encoder_downsample_rate", 4)
 
     def get_source_len(self, index):
         item = self.index_ds[index]
@@ -136,10 +138,13 @@ class OpenAIDataset(torch.utils.data.Dataset):
                                 speech = speech.permute(0, 2, 1)
                             # if speech_lengths > self.batch_size:
                             #     continue
+                            if self.audio_encoder_downsample_rate == 4:
+                                olens = 1 + (speech_lengths[0].item() - 3 + 2 * 1) // 2
+                                olens = 1 + (olens - 3 + 2 * 1) // 2
+                            elif self.audio_encoder_downsample_rate == 1:
+                                olens = speech_lengths[0].item()
 
-                            olens = 1 + (speech_lengths[0].item() - 3 + 2 * 1) // 2
-                            olens = 1 + (olens - 3 + 2 * 1) // 2
-                            sub_token_len = (olens - 1) // 2 + 1
+                            sub_token_len = (olens - 1) // self.audio_adaptor_downsample_rate + 1
                             sub_token = [0] * sub_token_len
                             fbank_beg_i = [len(source_ids)]
                             source_ids += sub_token

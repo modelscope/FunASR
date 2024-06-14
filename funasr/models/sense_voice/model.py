@@ -1042,6 +1042,7 @@ class SenseVoiceSANM(nn.Module):
         self.length_normalized_loss = length_normalized_loss
         self.beam_search = None
         self.activation_checkpoint = kwargs.get("activation_checkpoint", False)
+        self.encoder_output_size = encoder_output_size
 
     def forward(
         self,
@@ -1451,6 +1452,7 @@ class SenseVoiceSANMCTC(nn.Module):
         self.ctc = ctc
 
         self.length_normalized_loss = length_normalized_loss
+        self.encoder_output_size = encoder_output_size
 
     def forward(
         self,

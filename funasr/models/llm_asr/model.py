@@ -498,9 +498,7 @@ class LLMASR2(nn.Module):
 
         with torch.cuda.amp.autocast(enabled=False):
             # audio encoder
-            encoder_out, encoder_out_lens = self.audio_encoder(
-                speech.permute(0, 2, 1), speech_lengths
-            )
+            encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
 
             # audio_adaptor
             encoder_out, encoder_out_lens = self.audio_adaptor(encoder_out, encoder_out_lens)
@@ -565,6 +563,12 @@ class LLMASR2(nn.Module):
             batch_size = int((labels_ids > 0 + 1).sum())
         loss, stats, weight = force_gatherable((loss, stats, batch_size), loss.device)
         return loss, stats, weight
+
+    def encode(self, speech, speech_lengths):
+        # audio encoder
+        encoder_out, encoder_out_lens = self.audio_encoder(speech.permute(0, 2, 1), speech_lengths)
+
+        return encoder_out, encoder_out_lens
 
     def data_template(self, data):
         system, user, assistant = [], [], []
@@ -721,7 +725,8 @@ class LLMASR2(nn.Module):
             speech = speech.to(torch.float16)
         elif kwargs.get("bf16", False):
             speech = speech.to(torch.bfloat16)
-        encoder_out, encoder_out_lens = self.audio_encoder(speech.permute(0, 2, 1), speech_lengths)
+        # audio encoder
+        encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
 
         # audio_adaptor
         encoder_out, encoder_out_lens = self.audio_adaptor(encoder_out, encoder_out_lens)
@@ -806,3 +811,21 @@ class LLMASR2(nn.Module):
             ibest_writer["text_tn"][key[0]] = response_clean
 
         return results, meta_data
+
+
+@tables.register("model_classes", "LLMASR3")
+class LLMASR3(nn.Module):
+    """ """
+
+    def __init__(
+        self,
+        *args,
+        **kwargs,
+    ):
+
+        super().__init__(*args, **kwargs)
+
+    def encode(self, speech, speech_lengths):
+        # audio encoder
+        encoder_out, encoder_out_lens = self.audio_encoder(speech, speech_lengths)
+        return encoder_out, encoder_out_lens
