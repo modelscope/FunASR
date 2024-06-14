@@ -398,7 +398,9 @@ class LLMASR2(nn.Module):
             # frontend = model.kwargs.get("frontend")
             audio_encoder_output_size = model.model.encoder_output_size
 
-            audio_encoder = model.model.model.encoder
+            audio_encoder = (
+                model.model.model.encoder if hasattr(model.model, "model") else model.model.encoder
+            )
 
             # self.frontend = frontend
 
@@ -814,7 +816,7 @@ class LLMASR2(nn.Module):
 
 
 @tables.register("model_classes", "LLMASR3")
-class LLMASR3(nn.Module):
+class LLMASR3(LLMASR2):
     """ """
 
     def __init__(
