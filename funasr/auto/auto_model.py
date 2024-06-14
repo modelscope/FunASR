@@ -19,6 +19,7 @@ from funasr.register import tables
 from funasr.utils.load_utils import load_bytes
 from funasr.download.file import download_from_url
 from funasr.utils.timestamp_tools import timestamp_sentence
+from funasr.utils.timestamp_tools import timestamp_sentence_en
 from funasr.download.download_from_hub import download_model
 from funasr.utils.vad_utils import slice_padding_audio_samples
 from funasr.utils.vad_utils import merge_vad
@@ -323,7 +324,7 @@ class AutoModel:
             input, input_len=input_len, model=self.vad_model, kwargs=self.vad_kwargs, **cfg
         )
         end_vad = time.time()
-
+            
         #  FIX(gcf): concat the vad clips for sense vocie model for better aed
         if kwargs.get("merge_vad", False):
             for i in range(len(res)):
@@ -519,24 +520,40 @@ class AutoModel:
                                        and 'iic/speech_seaco_paraformer_large_asr_nat-zh-cn-16k-common-vocab8404-pytorch'\
                                        can predict timestamp, and speaker diarization relies on timestamps."
                         )
-                    sentence_list = timestamp_sentence(
-                        punc_res[0]["punc_array"],
-                        result["timestamp"],
-                        raw_text,
-                        return_raw_text=return_raw_text,
-                    )
+                    if kwargs.get("en_post_proc", False):
+                        sentence_list = timestamp_sentence_en(
+                            punc_res[0]["punc_array"],
+                            result["timestamp"],
+                            raw_text,
+                            return_raw_text=return_raw_text,
+                        )
+                    else:
+                        sentence_list = timestamp_sentence(
+                            punc_res[0]["punc_array"],
+                            result["timestamp"],
+                            raw_text,
+                            return_raw_text=return_raw_text,
+                        )
                 distribute_spk(sentence_list, sv_output)
                 result["sentence_info"] = sentence_list
             elif kwargs.get("sentence_timestamp", False):
                 if not len(result["text"].strip()):
                     sentence_list = []
                 else:
-                    sentence_list = timestamp_sentence(
-                        punc_res[0]["punc_array"],
-                        result["timestamp"],
-                        raw_text,
-                        return_raw_text=return_raw_text,
-                    )
+                    if kwargs.get("en_post_proc", False):
+                        sentence_list = timestamp_sentence_en(
+                            punc_res[0]["punc_array"],
+                            result["timestamp"],
+                            raw_text,
+                            return_raw_text=return_raw_text,
+                        )
+                    else:
+                        sentence_list = timestamp_sentence(
+                            punc_res[0]["punc_array"],
+                            result["timestamp"],
+                            raw_text,
+                            return_raw_text=return_raw_text,
+                        )
                 result["sentence_info"] = sentence_list
             if "spk_embedding" in result:
                 del result["spk_embedding"]
