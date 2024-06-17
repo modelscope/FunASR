@@ -114,8 +114,6 @@ class WhisperWarp(nn.Module):
         
         result = whisper.decode(self.model, speech, language='english')
         # result = whisper.transcribe(self.model, speech)
-
-        import pdb; pdb.set_trace()
         
         results = []
         result_i = {"key": key[0], "text": result.text}
