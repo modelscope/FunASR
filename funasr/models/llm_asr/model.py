@@ -1018,7 +1018,7 @@ class LLMASR4(nn.Module):
 
             for turn_id in range(fbank_beg.shape[1]):
                 fbank_beg_idx = fbank_beg[batch_idx, turn_id].item()
-                if fbank_beg[batch_idx, turn_id] > 0:
+                if fbank_beg_idx > 0:
                     speech_token_len = fake_token_len[batch_idx, turn_id]
                     speech_token = encoder_out[speech_idx, :speech_token_len, :]
 
