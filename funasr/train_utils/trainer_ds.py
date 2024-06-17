@@ -478,7 +478,7 @@ class Trainer:
                             for k_ex in self.excludes:
                                 k_tmp = k.replace("module.", "")
                                 if k_tmp.startswith(k_ex):
-                                    logging.info(f"key: {{k}} matching: {k_ex}, excluded")
+                                    logging.info(f"key: {k} matching: {k_ex}, excluded")
                                     excludes_flag = True
                                     break
                         if excludes_flag:
