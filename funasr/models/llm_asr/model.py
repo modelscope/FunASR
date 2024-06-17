@@ -990,12 +990,14 @@ class LLMASR4(nn.Module):
                 text: (Batch, Length)
                 text_lengths: (Batch,)
         """
-        # import pdb;
-        # pdb.set_trace()
+        import pdb
+
+        pdb.set_trace()
         if len(speech_lengths.size()) > 1:
             speech_lengths = speech_lengths[:, 0]
 
-        batch_size, frames, _ = speech.shape
+        batch_size_speech, frames, _ = speech.shape
+        batch_size, token_num = input_ids.shape
 
         with torch.cuda.amp.autocast(enabled=False):
             # audio encoder
@@ -1008,38 +1010,34 @@ class LLMASR4(nn.Module):
         inputs_embeds = self.llm.model.get_input_embeddings()(input_ids)
 
         batch_size, token_num, dims = inputs_embeds.shape
-        fbank_mask[fbank_mask < 0] = 0
-        fbank_fake_lens = fbank_mask.sum(-1).to(torch.int32)
-        # _, l, _ = encoder_out.shape
         fake_token_len = kwargs.get("fake_token_len")
         fake_token_len[fake_token_len < 0] = 0
         fbank_beg[fbank_beg < 0] = 0
+        speech_idx = 0
         for batch_idx in range(batch_size):
 
             for turn_id in range(fbank_beg.shape[1]):
                 fbank_beg_idx = fbank_beg[batch_idx, turn_id].item()
-                if fbank_beg[turn_id] > 0:
+                if fbank_beg[batch_idx, turn_id] > 0:
                     speech_token_len = fake_token_len[batch_idx, turn_id]
-                    speech_token = encoder_out[batch_idx + turn_id, turn_id, :speech_token_len, :]
+                    speech_token = encoder_out[speech_idx, :speech_token_len, :]
 
-            fbank_fake_len = fbank_fake_lens[batch_idx].item()
-            fbank_beg_idx = fbank_beg[batch_idx, 0].item()
-            min_len = min(fbank_fake_len, inputs_embeds.shape[1] - fbank_beg_idx)
+                    try:
+                        inputs_embeds[
+                            batch_idx, fbank_beg_idx : fbank_beg_idx + speech_token_len, :
+                        ] = speech_token
+                    except Exception as e:
+                        logging.error(f"{str(e)}, {traceback.format_exc()}")
+                        logging.info(
+                            f"batch_idx: {batch_idx}, inputs_embeds: {inputs_embeds.shape}, fbank_beg_idx: {fbank_beg_idx}, speech_token_len: {speech_token_len}, encoder_out: {encoder_out.shape}, encoder_out_lens: {encoder_out_lens[speech_idx].item()}"
+                        )
+                        speech_token_len = encoder_out_lens[speech_idx].item()
+                        speech_token = encoder_out[speech_idx, turn_id, :speech_token_len, :]
+                        inputs_embeds[
+                            batch_idx, fbank_beg_idx : fbank_beg_idx + speech_token_len, :
+                        ] = speech_token
 
-            try:
-                inputs_embeds[batch_idx, fbank_beg_idx : fbank_beg_idx + min_len, :] = encoder_out[
-                    batch_idx, :min_len, :
-                ]
-            except Exception as e:
-                logging.error(f"{str(e)}, {traceback.format_exc()}")
-                logging.info(
-                    f"batch_idx: {batch_idx}, inputs_embeds: {inputs_embeds.shape}, fbank_beg_idx: {fbank_beg_idx}, min_len: {min_len}, fbank_fake_len: {fbank_fake_len}, encoder_out: {encoder_out.shape}, encoder_out_lens: {encoder_out_lens[batch_idx].item()}"
-                )
-                fbank_fake_len = encoder_out_lens[batch_idx].item()
-                min_len = min(fbank_fake_len, min_len)
-                inputs_embeds[batch_idx, fbank_beg_idx : fbank_beg_idx + min_len, :] = encoder_out[
-                    batch_idx, :min_len, :
-                ]
+                    speech_idx += 1
 
         with torch.cuda.amp.autocast(
             enabled=True if self.llm_dtype != "fp32" else False, dtype=dtype_map[self.llm_dtype]
@@ -1061,7 +1059,8 @@ class LLMASR4(nn.Module):
 
         stats["loss"] = torch.clone(loss.detach())
         stats["batch_size"] = batch_size
-        stats["batch_size_x_frames"] = frames * batch_size
+        stats["batch_size_speech"] = batch_size_speech
+        stats["batch_size_x_frames"] = frames * batch_size_speech
         stats["batch_size_real_frames"] = speech_lengths.sum().item()
         stats["padding_frames"] = stats["batch_size_x_frames"] - stats["batch_size_real_frames"]
         stats["batch_size_x_tokens"] = token_num * batch_size

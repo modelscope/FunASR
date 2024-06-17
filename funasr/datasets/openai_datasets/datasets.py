@@ -300,9 +300,9 @@ class OpenAIDatasetMultiTurn(torch.utils.data.Dataset):
         return len(self.index_ds)
 
     def __getitem__(self, index):
-        import pdb
-
-        pdb.set_trace()
+        # import pdb
+        #
+        # pdb.set_trace()
 
         output = None
 
@@ -397,6 +397,7 @@ class OpenAIDatasetMultiTurn(torch.utils.data.Dataset):
                 labels += source_mask + target_ids
                 fbank.append(speech[0, :, :])
                 fbank_mask += fbank_mask_i
+                fbank_lens.append(speech_lengths)
 
             if len(input_ids) > self.max_token_length:
                 logging.info(
@@ -410,7 +411,7 @@ class OpenAIDatasetMultiTurn(torch.utils.data.Dataset):
             labels = torch.tensor(labels, dtype=torch.int64)  # [: self.max_token_length]
 
             # fbank = speech[0, :, :]
-            fbank_lens = speech_lengths
+            # fbank_lens = torch.tensor(fbank_lens, dtype=torch.int32)
             fbank_mask = torch.tensor(fbank_mask, dtype=torch.float32)
             fbank_beg = torch.tensor(fbank_beg, dtype=torch.int32)
             fake_token_len = torch.tensor(fake_token_len, dtype=torch.int32)
