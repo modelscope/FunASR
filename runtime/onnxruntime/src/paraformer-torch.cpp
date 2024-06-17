@@ -356,7 +356,9 @@ std::vector<std::string> ParaformerTorch::Forward(float** din, int* len, bool in
         if (use_hotword) {
             if(hw_emb.size()<=0){
                 LOG(ERROR) << "hw_emb is null";
-                results.push_back(result);
+                for(int index=0; index<batch_in; index++){
+                    results.push_back(result);
+                }
                 return results;
             }
             
@@ -380,11 +382,19 @@ std::vector<std::string> ParaformerTorch::Forward(float** din, int* len, bool in
     }catch (std::exception const &e)
     {
         LOG(ERROR)<<e.what();
-        results.push_back(result);
+        for(int index=0; index<batch_in; index++){
+            results.push_back(result);
+        }
         return results;
     }
 
     try {
+        if(inputs.size() == 0){
+            for(int index=0; index<batch_in; index++){
+                results.push_back(result);
+            }
+            return results;
+        }
         auto outputs = model_->forward(inputs).toTuple()->elements();
         torch::Tensor am_scores;
         torch::Tensor valid_token_lens;
