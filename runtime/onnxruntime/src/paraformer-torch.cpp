@@ -390,6 +390,7 @@ std::vector<std::string> ParaformerTorch::Forward(float** din, int* len, bool in
 
     try {
         if(inputs.size() == 0){
+            LOG(ERROR) << "inputs of forward is null";
             for(int index=0; index<batch_in; index++){
                 results.push_back(result);
             }
