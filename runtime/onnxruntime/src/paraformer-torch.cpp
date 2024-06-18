@@ -50,6 +50,11 @@ void ParaformerTorch::InitAsr(const std::string &am_model, const std::string &am
         torch::jit::script::Module model = torch::jit::load(am_model, device);
         model_ = std::make_shared<TorchModule>(std::move(model)); 
         LOG(INFO) << "Successfully load model from " << am_model;
+    	torch::NoGradGuard no_grad;
+    	model_->eval();
+	torch::jit::setGraphExecutorOptimize(false);
+	torch::jit::FusionStrategy static0 = {{torch::jit::FusionBehavior::STATIC, 0}};
+	torch::jit::setFusionStrategy(static0);
     } catch (std::exception const &e) {
         LOG(ERROR) << "Error when load am model: " << am_model << e.what();
         exit(-1);
@@ -115,6 +120,8 @@ void ParaformerTorch::InitHwCompiler(const std::string &hw_model, int thread_num
         torch::jit::script::Module model = torch::jit::load(hw_model, device);
         hw_model_ = std::make_shared<TorchModule>(std::move(model));
         LOG(INFO) << "Successfully load model from " << hw_model;
+    	torch::NoGradGuard no_grad;
+    	hw_model_->eval();
     } catch (std::exception const &e) {
         LOG(ERROR) << "Error when load hw model: " << hw_model << e.what();
         exit(-1);
@@ -328,8 +335,6 @@ std::vector<std::string> ParaformerTorch::Forward(float** din, int* len, bool in
         return results;
     }
 
-    torch::NoGradGuard no_grad;
-    model_->eval();
     // padding
     std::vector<float> all_feats(batch_in * max_frames * feature_dim);
     for(int index=0; index<batch_in; index++){
@@ -524,8 +529,6 @@ std::vector<std::vector<float>> ParaformerTorch::CompileHotwordEmbedding(std::st
     hotword_matrix.insert(hotword_matrix.end(), blank_vec.begin(), blank_vec.end());
     lengths.push_back(1);
 
-    torch::NoGradGuard no_grad;
-    hw_model_->eval();
     torch::Tensor feats =
         torch::from_blob(hotword_matrix.data(),
                 {hotword_size, max_hotword_len}, torch::kInt32).contiguous();
