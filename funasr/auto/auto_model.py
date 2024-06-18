@@ -19,6 +19,7 @@ from funasr.register import tables
 from funasr.utils.load_utils import load_bytes
 from funasr.download.file import download_from_url
 from funasr.utils.timestamp_tools import timestamp_sentence
+from funasr.utils.timestamp_tools import timestamp_sentence_en
 from funasr.download.download_from_hub import download_model
 from funasr.utils.vad_utils import slice_padding_audio_samples
 from funasr.utils.vad_utils import merge_vad
@@ -233,6 +234,8 @@ class AutoModel:
         # fp16
         if kwargs.get("fp16", False):
             model.to(torch.float16)
+        elif kwargs.get("bf16", False):
+            model.to(torch.bfloat16)
         return model, kwargs
 
     def __call__(self, *args, **cfg):
@@ -321,7 +324,7 @@ class AutoModel:
             input, input_len=input_len, model=self.vad_model, kwargs=self.vad_kwargs, **cfg
         )
         end_vad = time.time()
-
+            
         #  FIX(gcf): concat the vad clips for sense vocie model for better aed
         if kwargs.get("merge_vad", False):
             for i in range(len(res)):
@@ -427,6 +430,10 @@ class AutoModel:
             #                      f"time_speech_total_per_sample: {time_speech_total_per_sample: 0.3f}, "
             #                      f"time_escape_total_per_sample: {time_escape_total_per_sample:0.3f}")
 
+            if len(results_sorted) != n:
+                results_ret_list.append({"key": key, "text": "", "timestamp": []})
+                logging.info("decoding, utt: {}, empty result".format(key))
+                continue
             restored_data = [0] * n
             for j in range(n):
                 index = sorted_data[j][1]
@@ -459,25 +466,22 @@ class AutoModel:
                             result[k] = restored_data[j][k]
                         else:
                             result[k] += restored_data[j][k]
-
+                            
+            if not len(result["text"].strip()):
+                continue
             return_raw_text = kwargs.get("return_raw_text", False)
             # step.3 compute punc model
+            raw_text = None
             if self.punc_model is not None:
-                if not len(result["text"].strip()):
-                    if return_raw_text:
-                        result["raw_text"] = ""
-                else:
-                    deep_update(self.punc_kwargs, cfg)
-                    punc_res = self.inference(
-                        result["text"], model=self.punc_model, kwargs=self.punc_kwargs, **cfg
-                    )
-                    raw_text = copy.copy(result["text"])
-                    if return_raw_text:
-                        result["raw_text"] = raw_text
-                    result["text"] = punc_res[0]["text"]
-            else:
-                raw_text = None
-
+                deep_update(self.punc_kwargs, cfg)
+                punc_res = self.inference(
+                    result["text"], model=self.punc_model, kwargs=self.punc_kwargs, **cfg
+                )
+                raw_text = copy.copy(result["text"])
+                if return_raw_text:
+                    result["raw_text"] = raw_text
+                result["text"] = punc_res[0]["text"]
+                
             # speaker embedding cluster after resorted
             if self.spk_model is not None and kwargs.get("return_spk_res", True):
                 if raw_text is None:
@@ -513,24 +517,40 @@ class AutoModel:
                                        and 'iic/speech_seaco_paraformer_large_asr_nat-zh-cn-16k-common-vocab8404-pytorch'\
                                        can predict timestamp, and speaker diarization relies on timestamps."
                         )
-                    sentence_list = timestamp_sentence(
-                        punc_res[0]["punc_array"],
-                        result["timestamp"],
-                        raw_text,
-                        return_raw_text=return_raw_text,
-                    )
+                    if kwargs.get("en_post_proc", False):
+                        sentence_list = timestamp_sentence_en(
+                            punc_res[0]["punc_array"],
+                            result["timestamp"],
+                            raw_text,
+                            return_raw_text=return_raw_text,
+                        )
+                    else:
+                        sentence_list = timestamp_sentence(
+                            punc_res[0]["punc_array"],
+                            result["timestamp"],
+                            raw_text,
+                            return_raw_text=return_raw_text,
+                        )
                 distribute_spk(sentence_list, sv_output)
                 result["sentence_info"] = sentence_list
             elif kwargs.get("sentence_timestamp", False):
                 if not len(result["text"].strip()):
                     sentence_list = []
                 else:
-                    sentence_list = timestamp_sentence(
-                        punc_res[0]["punc_array"],
-                        result["timestamp"],
-                        raw_text,
-                        return_raw_text=return_raw_text,
-                    )
+                    if kwargs.get("en_post_proc", False):
+                        sentence_list = timestamp_sentence_en(
+                            punc_res[0]["punc_array"],
+                            result["timestamp"],
+                            raw_text,
+                            return_raw_text=return_raw_text,
+                        )
+                    else:
+                        sentence_list = timestamp_sentence(
+                            punc_res[0]["punc_array"],
+                            result["timestamp"],
+                            raw_text,
+                            return_raw_text=return_raw_text,
+                        )
                 result["sentence_info"] = sentence_list
             if "spk_embedding" in result:
                 del result["spk_embedding"]
@@ -582,12 +602,6 @@ class AutoModel:
         )
 
         with torch.no_grad():
-
-            if type == "onnx":
-                export_dir = export_utils.export_onnx(model=model, data_in=data_list, **kwargs)
-            else:
-                export_dir = export_utils.export_torchscripts(
-                    model=model, data_in=data_list, **kwargs
-                )
+            export_dir = export_utils.export(model=model, data_in=data_list,  **kwargs)
 
         return export_dir

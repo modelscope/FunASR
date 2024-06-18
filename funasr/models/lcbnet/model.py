@@ -23,8 +23,6 @@ from funasr.utils import postprocess_utils
 from funasr.utils.datadir_writer import DatadirWriter
 from funasr.register import tables
 
-import pdb
-
 
 @tables.register("model_classes", "LCBNet")
 class LCBNet(nn.Module):

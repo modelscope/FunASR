@@ -73,8 +73,6 @@ class SenseVoice(nn.Module):
     ):
         target_mask = kwargs.get("target_mask", None)
 
-        # import pdb;
-        # pdb.set_trace()
         if len(text_lengths.size()) > 1:
             text_lengths = text_lengths[:, 0]
         if len(speech_lengths.size()) > 1:
@@ -303,8 +301,6 @@ class SenseVoiceRWKV(nn.Module):
     ):
         target_mask = kwargs.get("target_mask", None)
 
-        # import pdb;
-        # pdb.set_trace()
         if len(text_lengths.size()) > 1:
             text_lengths = text_lengths[:, 0]
         if len(speech_lengths.size()) > 1:
@@ -648,8 +644,6 @@ class SenseVoiceFSMN(nn.Module):
     ):
         target_mask = kwargs.get("target_mask", None)
 
-        # import pdb;
-        # pdb.set_trace()
         if len(text_lengths.size()) > 1:
             text_lengths = text_lengths[:, 0]
         if len(speech_lengths.size()) > 1:
@@ -1052,8 +1046,6 @@ class SenseVoiceSANM(nn.Module):
     ):
         target_mask = kwargs.get("target_mask", None)
 
-        # import pdb;
-        # pdb.set_trace()
         if len(text_lengths.size()) > 1:
             text_lengths = text_lengths[:, 0]
         if len(speech_lengths.size()) > 1:
@@ -1264,15 +1256,29 @@ class SenseVoiceSANM(nn.Module):
         if isinstance(task, str):
             task = [task]
         task = "".join([f"<|{x}|>" for x in task])
-        initial_prompt = kwargs.get("initial_prompt", f"<|startoftranscript|>{task}")
+        
+        sos = kwargs.get("model_conf").get("sos")
+        if isinstance(sos, str):
+            initial_prompt = kwargs.get("initial_prompt", f"<|startoftranscript|>{task}")
 
-        language = DecodingOptions.get("language", None)
-        language = None if language == "auto" else language
+            language = DecodingOptions.get("language", None)
+            language = None if language == "auto" else language
 
-        sos = f"{initial_prompt}<|{language}|>" if language is not None else initial_prompt
-        sos_int = tokenizer.encode(sos, allowed_special="all")
+            sos = f"{initial_prompt}<|{language}|>" if language is not None else initial_prompt
+            sos_int = tokenizer.encode(sos, allowed_special="all")
+        else:
+            language = DecodingOptions.get("language", None)
+            language = None if language == "auto" else language
+            initial_prompt = kwargs.get("initial_prompt", f"{task}")
+            initial_prompt_lid = f"{initial_prompt}<|{language}|>" if language is not None else initial_prompt
+            initial_prompt_lid_int = tokenizer.encode(initial_prompt_lid, allowed_special="all")
+            sos_int = [sos] + initial_prompt_lid_int
         eos = kwargs.get("model_conf").get("eos")
-        eos_int = tokenizer.encode(eos, allowed_special="all")
+        if isinstance(eos, str):
+            eos_int = tokenizer.encode(eos, allowed_special="all")
+        else:
+            eos_int = [eos]
+
         self.beam_search.sos = sos_int
         self.beam_search.eos = eos_int[0]
 
@@ -1298,7 +1304,7 @@ class SenseVoiceSANM(nn.Module):
         self.beam_search.event_score_ga = DecodingOptions.get("gain_tokens_score", [1, 1, 1, 1])
 
         encoder_out, encoder_out_lens = self.encode(
-            speech[None, :, :].permute(0, 2, 1), speech_lengths
+            speech[None, :, :], speech_lengths
         )
 
         if text_token_int is not None:

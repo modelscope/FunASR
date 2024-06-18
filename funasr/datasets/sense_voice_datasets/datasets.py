@@ -1,5 +1,6 @@
 import logging
 
+import re
 import torch
 import random
 import traceback
@@ -71,8 +72,6 @@ class SenseVoiceDataset(torch.utils.data.Dataset):
         return len(self.index_ds)
 
     def __getitem__(self, index):
-        # import pdb;
-        # pdb.set_trace()
 
         output = None
         for idx in range(self.retry):

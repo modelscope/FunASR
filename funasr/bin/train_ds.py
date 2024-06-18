@@ -158,6 +158,8 @@ def main(**kwargs):
         time1 = time.perf_counter()
 
         for data_split_i in range(trainer.start_data_split_i, dataloader.data_split_num):
+            time_slice_i = time.perf_counter()
+
             dataloader_tr, dataloader_val = dataloader.build_iter(
                 epoch, data_split_i=data_split_i, start_step=trainer.start_step
             )
@@ -177,6 +179,14 @@ def main(**kwargs):
             trainer.start_step = 0
 
             torch.cuda.empty_cache()
+
+            time_escaped = (time.perf_counter() - time_slice_i) / 3600.0
+            logging.info(
+                f"rank: {local_rank}, "
+                f"time_escaped_epoch: {time_escaped:.3f} hours, "
+                f"estimated to finish {dataloader.data_split_num} data_slices, remaining: {dataloader.data_split_num-data_split_i} slices, {(dataloader.data_split_num-data_split_i)*time_escaped:.3f} hours, "
+                f"epoch: {trainer.max_epoch - epoch} epochs, {((trainer.max_epoch - epoch - 1)*dataloader.data_split_num + dataloader.data_split_num-data_split_i)*time_escaped:.3f} hours\n"
+            )
 
         trainer.start_data_split_i = 0
         trainer.validate_epoch(model=model, dataloader_val=dataloader_val, epoch=epoch + 1)

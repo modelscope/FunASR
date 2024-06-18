@@ -199,7 +199,7 @@ int main(int argc, char* argv[]) {
         std::string s_itn_path = model_path[ITN_DIR];
         std::string s_lm_path = model_path[LM_DIR];
 
-        std::string python_cmd = "python -m funasr.download.runtime_sdk_download_tool --type onnx --quantize True ";
+        std::string python_cmd = "python -m funasr.download.runtime_sdk_download_tool --type onnx ";
 
         if(vad_dir.isSet() && !s_vad_path.empty()){
             std::string python_cmd_vad;
@@ -208,12 +208,12 @@ int main(int argc, char* argv[]) {
 
             if (access(s_vad_path.c_str(), F_OK) == 0){
                 // local
-                python_cmd_vad = python_cmd + " --model-name " + s_vad_path + " --export-dir ./ " + " --model_revision " + model_path["vad-revision"];
+                python_cmd_vad = python_cmd + " --quantize " + s_vad_quant + " --model-name " + s_vad_path + " --export-dir ./ " + " --model_revision " + model_path["vad-revision"];
                 down_vad_path  = s_vad_path;
             }else{
                 // modelscope
                 LOG(INFO) << "Download model: " <<  s_vad_path << " from modelscope: ";
-                python_cmd_vad = python_cmd + " --model-name " + s_vad_path + " --export-dir " + s_download_model_dir + " --model_revision " + model_path["vad-revision"];
+                python_cmd_vad = python_cmd + " --quantize " + s_vad_quant + " --model-name " + s_vad_path + " --export-dir " + s_download_model_dir + " --model_revision " + model_path["vad-revision"];
                 down_vad_path  = s_download_model_dir+"/"+s_vad_path;
             }
                 
@@ -262,12 +262,12 @@ int main(int argc, char* argv[]) {
 
             if (access(s_asr_path.c_str(), F_OK) == 0){
                 // local
-                python_cmd_asr = python_cmd + " --model-name " + s_asr_path + " --export-dir ./ " + " --model_revision " + model_path["model-revision"];
+                python_cmd_asr = python_cmd + " --quantize " + s_asr_quant + " --model-name " + s_asr_path + " --export-dir ./ " + " --model_revision " + model_path["model-revision"];
                 down_asr_path  = s_asr_path;
             }else{
                 // modelscope
                 LOG(INFO) << "Download model: " <<  s_asr_path << " from modelscope: ";
-                python_cmd_asr = python_cmd + " --model-name " + s_asr_path + " --export-dir " + s_download_model_dir + " --model_revision " + model_path["model-revision"];
+                python_cmd_asr = python_cmd + " --quantize " + s_asr_quant + " --model-name " + s_asr_path + " --export-dir " + s_download_model_dir + " --model_revision " + model_path["model-revision"];
                 down_asr_path  = s_download_model_dir+"/"+s_asr_path;
             }
                 
@@ -340,7 +340,7 @@ int main(int argc, char* argv[]) {
 
             if (access(s_lm_path.c_str(), F_OK) == 0) {
                 // local
-                python_cmd_lm = python_cmd + " --model-name " + s_lm_path +
+                python_cmd_lm = python_cmd + "--quantize " + s_punc_quant + " --model-name " + s_lm_path +
                                     " --export-dir ./ " + " --model_revision " +
                                     model_path["lm-revision"] + " --export False ";
                 down_lm_path = s_lm_path;
@@ -348,7 +348,7 @@ int main(int argc, char* argv[]) {
                 // modelscope
                 LOG(INFO) << "Download model: " << s_lm_path
                             << " from modelscope : "; 
-                python_cmd_lm = python_cmd + " --model-name " +
+                python_cmd_lm = python_cmd + " --quantize " + s_punc_quant + " --model-name " +
                         s_lm_path +
                         " --export-dir " + s_download_model_dir +
                         " --model_revision " + model_path["lm-revision"]

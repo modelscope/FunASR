@@ -54,7 +54,7 @@ class Paraformer:
             encoder_model_file = os.path.join(model_dir, "model_quant.onnx")
             decoder_model_file = os.path.join(model_dir, "decoder_quant.onnx")
         if not os.path.exists(encoder_model_file) or not os.path.exists(decoder_model_file):
-            print(".onnx is not exist, begin to export onnx")
+            print(".onnx does not exist, begin to export onnx")
             try:
                 from funasr import AutoModel
             except:
