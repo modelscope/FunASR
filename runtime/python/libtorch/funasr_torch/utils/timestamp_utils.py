@@ -7,7 +7,7 @@ def time_stamp_lfr6_onnx(us_cif_peak, char_list, begin_time=0.0, total_offset=-1
     START_END_THRESHOLD = 5
     MAX_TOKEN_DURATION = 30
     TIME_RATE = 10.0 * 6 / 1000 / 3  #  3 times upsampled
-    cif_peak = us_cif_peak.reshape(-1)
+    cif_peak = us_cif_peak.reshape(-1).cpu()
     num_frames = cif_peak.shape[-1]
     if char_list[-1] == "</s>":
         char_list = char_list[:-1]

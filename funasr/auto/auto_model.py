@@ -602,12 +602,6 @@ class AutoModel:
         )
 
         with torch.no_grad():
-
-            if type == "onnx":
-                export_dir = export_utils.export_onnx(model=model, data_in=data_list, **kwargs)
-            else:
-                export_dir = export_utils.export_torchscripts(
-                    model=model, data_in=data_list, **kwargs
-                )
+            export_dir = export_utils.export(model=model, data_in=data_list,  **kwargs)
 
         return export_dir

@@ -31,6 +31,7 @@ def export_rebuild_model(model, **kwargs):
     model.export_dynamic_axes = types.MethodType(export_dynamic_axes, model)
     model.export_name = types.MethodType(export_name, model)
 
+    model.export_name = 'model'
     return model
 
 

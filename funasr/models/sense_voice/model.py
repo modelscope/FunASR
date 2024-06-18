@@ -73,8 +73,6 @@ class SenseVoice(nn.Module):
     ):
         target_mask = kwargs.get("target_mask", None)
 
-        # import pdb;
-        # pdb.set_trace()
         if len(text_lengths.size()) > 1:
             text_lengths = text_lengths[:, 0]
         if len(speech_lengths.size()) > 1:
@@ -303,8 +301,6 @@ class SenseVoiceRWKV(nn.Module):
     ):
         target_mask = kwargs.get("target_mask", None)
 
-        # import pdb;
-        # pdb.set_trace()
         if len(text_lengths.size()) > 1:
             text_lengths = text_lengths[:, 0]
         if len(speech_lengths.size()) > 1:
@@ -648,8 +644,6 @@ class SenseVoiceFSMN(nn.Module):
     ):
         target_mask = kwargs.get("target_mask", None)
 
-        # import pdb;
-        # pdb.set_trace()
         if len(text_lengths.size()) > 1:
             text_lengths = text_lengths[:, 0]
         if len(speech_lengths.size()) > 1:
@@ -1052,8 +1046,6 @@ class SenseVoiceSANM(nn.Module):
     ):
         target_mask = kwargs.get("target_mask", None)
 
-        # import pdb;
-        # pdb.set_trace()
         if len(text_lengths.size()) > 1:
             text_lengths = text_lengths[:, 0]
         if len(speech_lengths.size()) > 1:
