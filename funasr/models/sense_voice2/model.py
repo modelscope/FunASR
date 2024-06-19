@@ -441,7 +441,7 @@ class EncoderLayerSANM(nn.Module):
 
 
 @tables.register("encoder_classes", "SenseVoiceEncoder")
-class SANMTPEncoder(nn.Module):
+class SenseVoiceEncoder(nn.Module):
     """
     Author: Speech Lab of DAMO Academy, Alibaba Group
     SCAMA: Streaming chunk-aware multihead attention for online end-to-end speech recognition
@@ -584,7 +584,7 @@ class SANMTPEncoder(nn.Module):
 
 
 @tables.register("model_classes", "SenseVoiceCTC")
-class SenseVoiceSANMCTC(nn.Module):
+class SenseVoiceCTC(nn.Module):
     """CTC-attention hybrid Encoder-Decoder model"""
 
     def __init__(
@@ -852,3 +852,11 @@ class SenseVoiceSANMCTC(nn.Module):
                     ibest_writer["text"][key[i]] = text
 
         return results, meta_data
+
+    def export(self, **kwargs):
+        from .export_meta import export_rebuild_model
+
+        if "max_seq_len" not in kwargs:
+            kwargs["max_seq_len"] = 512
+        models = export_rebuild_model(model=self, **kwargs)
+        return models

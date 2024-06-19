@@ -988,9 +988,9 @@ class LLMASR4(nn.Module):
                 text: (Batch, Length)
                 text_lengths: (Batch,)
         """
-        import pdb
-
-        pdb.set_trace()
+        # import pdb
+        #
+        # pdb.set_trace()
         if len(speech_lengths.size()) > 1:
             speech_lengths = speech_lengths[:, 0]
 
@@ -1011,6 +1011,7 @@ class LLMASR4(nn.Module):
         fake_token_len = kwargs.get("fake_token_len")
         fake_token_len[fake_token_len < 0] = 0
         fbank_beg[fbank_beg < 0] = 0
+
         speech_idx = 0
         for batch_idx in range(batch_size):
 
@@ -1025,12 +1026,15 @@ class LLMASR4(nn.Module):
                             batch_idx, fbank_beg_idx : fbank_beg_idx + speech_token_len, :
                         ] = speech_token
                     except Exception as e:
+                        #
                         logging.error(f"{str(e)}, {traceback.format_exc()}")
                         logging.info(
-                            f"batch_idx: {batch_idx}, inputs_embeds: {inputs_embeds.shape}, fbank_beg_idx: {fbank_beg_idx}, speech_token_len: {speech_token_len}, encoder_out: {encoder_out.shape}, encoder_out_lens: {encoder_out_lens[speech_idx].item()}"
+                            f"batch_idx: {batch_idx}, inputs_embeds: {inputs_embeds.shape}, fbank_beg_idx: {fbank_beg_idx}, speech_token_len: {speech_token_len}, encoder_out: {encoder_out.shape}, encoder_out_lens: {encoder_out_lens}, fake_token_len: {fake_token_len}, speech_lengths: {speech_lengths}"
                         )
+                        # import pdb;
+                        # pdb.set_trace()
                         speech_token_len = encoder_out_lens[speech_idx].item()
-                        speech_token = encoder_out[speech_idx, turn_id, :speech_token_len, :]
+                        speech_token = encoder_out[speech_idx, :speech_token_len, :]
                         inputs_embeds[
                             batch_idx, fbank_beg_idx : fbank_beg_idx + speech_token_len, :
                         ] = speech_token
@@ -1064,6 +1068,12 @@ class LLMASR4(nn.Module):
         stats["batch_size_x_tokens"] = token_num * batch_size
         stats["batch_size_real_tokens"] = attention_mask.sum().item()
         stats["padding_tokens"] = stats["batch_size_x_tokens"] - stats["batch_size_real_tokens"]
+
+        dialog_turns = (fbank_beg > 0).sum(-1)
+        dialog_turns_max = torch.max(dialog_turns).int().item()
+        dialog_turns_avg = dialog_turns.sum().item() / batch_size
+        stats["dialog_turns_max"] = dialog_turns_max
+        stats["dialog_turns_avg"] = dialog_turns_avg
 
         # force_gatherable: to-device and to-tensor if scalar for DataParallel
         if self.length_normalized_loss:

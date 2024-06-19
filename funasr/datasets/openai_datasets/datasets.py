@@ -283,7 +283,7 @@ class OpenAIDatasetMultiTurn(torch.utils.data.Dataset):
 
         self.pattern = re.compile(r"(<\|startofspeech\|>.*?<\|endofspeech\|>)")
         # self.kwargs = kwargs
-        self.max_token_length = kwargs.get("max_token_length", 1024)
+        self.max_token_length = kwargs.get("max_token_length", 1500)
         self.batch_size_scale_ratio_max = kwargs.get("batch_size_scale_ratio_max", 1.5)
         self.batch_size_token_max = kwargs.get("batch_size_token_max", 2500)
         self.multiturn_num_max = kwargs.get("multiturn_num_max", 5)
@@ -333,6 +333,8 @@ class OpenAIDatasetMultiTurn(torch.utils.data.Dataset):
                 zip(system, user, assistant)
             ):
                 if i >= self.multiturn_num_max:
+                    break
+                if len(input_ids) > self.max_token_length:
                     break
                 if i == 0:
                     source_input = f"<|im_start|>system\n{system_prompt}<|im_end|>\n<|im_start|>user\n{user_prompt}<|im_end|>\n<|im_start|>assistant\n"
