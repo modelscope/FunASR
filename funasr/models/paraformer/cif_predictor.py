@@ -494,6 +494,8 @@ class CifPredictorV2Export(torch.nn.Module):
         token_num_floor = torch.floor(token_num)
 
         return hidden, alphas, token_num_floor
+
+
 @torch.jit.script
 def cif_v1_export(hidden, alphas, threshold: float):
     device = hidden.device
@@ -516,9 +518,7 @@ def cif_v1_export(hidden, alphas, threshold: float):
     fires[fire_idxs] = 1
     fires = fires + prefix_sum - prefix_sum_floor
 
-    prefix_sum_hidden = torch.cumsum(
-        alphas.unsqueeze(-1).tile((1, 1, hidden_size)) * hidden, dim=1
-    )
+    prefix_sum_hidden = torch.cumsum(alphas.unsqueeze(-1).tile((1, 1, hidden_size)) * hidden, dim=1)
 
     frames = prefix_sum_hidden[fire_idxs]
     shift_frames = torch.roll(frames, 1, dims=0)
@@ -530,9 +530,7 @@ def cif_v1_export(hidden, alphas, threshold: float):
     shift_frames[shift_batch_idxs] = 0
 
     remains = fires - torch.floor(fires)
-    remain_frames = (
-        remains[fire_idxs].unsqueeze(-1).tile((1, hidden_size)) * hidden[fire_idxs]
-    )
+    remain_frames = remains[fire_idxs].unsqueeze(-1).tile((1, hidden_size)) * hidden[fire_idxs]
 
     shift_remain_frames = torch.roll(remain_frames, 1, dims=0)
     shift_remain_frames[shift_batch_idxs] = 0
@@ -541,13 +539,12 @@ def cif_v1_export(hidden, alphas, threshold: float):
 
     max_label_len = batch_len.max()
 
-    frame_fires = torch.zeros(
-        batch_size, max_label_len, hidden_size, dtype=dtype, device=device
-    )
+    frame_fires = torch.zeros(batch_size, max_label_len, hidden_size, dtype=dtype, device=device)
     indices = torch.arange(max_label_len, device=device).expand(batch_size, -1)
     frame_fires_idxs = indices < batch_len.unsqueeze(1)
     frame_fires[frame_fires_idxs] = frames
     return frame_fires, fires
+
 
 @torch.jit.script
 def cif_export(hidden, alphas, threshold: float):
@@ -692,11 +689,8 @@ def cif_v1(hidden, alphas, threshold):
     device = hidden.device
     dtype = hidden.dtype
     batch_size, len_time, hidden_size = hidden.size()
-    frames = torch.zeros(batch_size, len_time, hidden_size,
-                         dtype=dtype, device=device)
-    prefix_sum_hidden = torch.cumsum(
-        alphas.unsqueeze(-1).tile((1, 1, hidden_size)) * hidden, dim=1
-    )
+    frames = torch.zeros(batch_size, len_time, hidden_size, dtype=dtype, device=device)
+    prefix_sum_hidden = torch.cumsum(alphas.unsqueeze(-1).tile((1, 1, hidden_size)) * hidden, dim=1)
 
     frames = prefix_sum_hidden[fire_idxs]
     shift_frames = torch.roll(frames, 1, dims=0)
@@ -708,10 +702,7 @@ def cif_v1(hidden, alphas, threshold):
     shift_frames[shift_batch_idxs] = 0
 
     remains = fires - torch.floor(fires)
-    remain_frames = (
-        remains[fire_idxs].unsqueeze(-1).tile((1,
-                                               hidden_size)) * hidden[fire_idxs]
-    )
+    remain_frames = remains[fire_idxs].unsqueeze(-1).tile((1, hidden_size)) * hidden[fire_idxs]
 
     shift_remain_frames = torch.roll(remain_frames, 1, dims=0)
     shift_remain_frames[shift_batch_idxs] = 0
@@ -720,9 +711,7 @@ def cif_v1(hidden, alphas, threshold):
 
     max_label_len = batch_len.max()
 
-    frame_fires = torch.zeros(
-        batch_size, max_label_len, hidden_size, dtype=dtype, device=device
-    )
+    frame_fires = torch.zeros(batch_size, max_label_len, hidden_size, dtype=dtype, device=device)
     indices = torch.arange(max_label_len, device=device).expand(batch_size, -1)
     frame_fires_idxs = indices < batch_len.unsqueeze(1)
     frame_fires[frame_fires_idxs] = frames

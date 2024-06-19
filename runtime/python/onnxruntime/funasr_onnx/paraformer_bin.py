@@ -62,7 +62,7 @@ class Paraformer:
         if quantize:
             model_file = os.path.join(model_dir, "model_quant.onnx")
         if not os.path.exists(model_file):
-            print(".onnx is not exist, begin to export onnx")
+            print(".onnx does not exist, begin to export onnx")
             try:
                 from funasr import AutoModel
             except:
@@ -285,7 +285,7 @@ class ContextualParaformer(Paraformer):
             model_eb_file = os.path.join(model_dir, "model_eb.onnx")
 
         if not (os.path.exists(model_eb_file) and os.path.exists(model_bb_file)):
-            print(".onnx is not exist, begin to export onnx")
+            print(".onnx does not exist, begin to export onnx")
             try:
                 from funasr import AutoModel
             except:
@@ -331,7 +331,6 @@ class ContextualParaformer(Paraformer):
     # ) -> List:
         # make hotword list
         hotwords, hotwords_length = self.proc_hotword(hotwords)
-        # import pdb; pdb.set_trace()
         [bias_embed] = self.eb_infer(hotwords, hotwords_length)
         # index from bias_embed
         bias_embed = bias_embed.transpose(1, 0, 2)
@@ -411,10 +410,10 @@ class ContextualParaformer(Paraformer):
             return np.array(hotwords)
 
         hotword_int = [word_map(i) for i in hotwords]
-        # import pdb; pdb.set_trace()
+
         hotword_int.append(np.array([1]))
         hotwords = pad_list(hotword_int, pad_value=0, max_len=10)
-        # import pdb; pdb.set_trace()
+        
         return hotwords, hotwords_length
 
     def bb_infer(

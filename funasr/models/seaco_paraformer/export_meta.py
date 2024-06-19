@@ -109,7 +109,9 @@ def export_rebuild_model(model, **kwargs):
     backbone_model.export_dynamic_axes = types.MethodType(
         export_backbone_dynamic_axes, backbone_model
     )
-    backbone_model.export_name = types.MethodType(export_backbone_name, backbone_model)
+    
+    embedder_model.export_name = "model_eb"
+    backbone_model.export_name = "model"
 
     return backbone_model, embedder_model
 
@@ -198,6 +200,3 @@ def export_backbone_dynamic_axes(self):
         "us_cif_peak": {0: "batch_size", 1: "alphas_length"},
     }
 
-
-def export_backbone_name(self):
-    return "model.onnx"

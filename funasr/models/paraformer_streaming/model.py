@@ -50,8 +50,6 @@ class ParaformerStreaming(Paraformer):
 
         super().__init__(*args, **kwargs)
 
-        # import pdb;
-        # pdb.set_trace()
         self.sampling_ratio = kwargs.get("sampling_ratio", 0.2)
 
         self.scama_mask = None
@@ -83,8 +81,6 @@ class ParaformerStreaming(Paraformer):
                 text: (Batch, Length)
                 text_lengths: (Batch,)
         """
-        # import pdb;
-        # pdb.set_trace()
         decoding_ind = kwargs.get("decoding_ind")
         if len(text_lengths.size()) > 1:
             text_lengths = text_lengths[:, 0]

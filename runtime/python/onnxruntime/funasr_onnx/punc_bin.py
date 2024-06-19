@@ -52,7 +52,7 @@ class CT_Transformer:
         if quantize:
             model_file = os.path.join(model_dir, "model_quant.onnx")
         if not os.path.exists(model_file):
-            print(".onnx is not exist, begin to export onnx")
+            print(".onnx does not exist, begin to export onnx")
             try:
                 from funasr import AutoModel
             except:
