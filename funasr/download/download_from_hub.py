@@ -56,13 +56,13 @@ def download_from_ms(**kwargs):
                 config = OmegaConf.load(cfg["config"])
                 kwargs = OmegaConf.merge(config, cfg)
                 kwargs["model"] = config["model"]
-    elif os.path.exists(os.path.join(model_or_path, "config.yaml")) and os.path.exists(
-        os.path.join(model_or_path, "model.pt")
-    ):
+    elif os.path.exists(os.path.join(model_or_path, "config.yaml")):
         config = OmegaConf.load(os.path.join(model_or_path, "config.yaml"))
         kwargs = OmegaConf.merge(config, kwargs)
-        init_param = os.path.join(model_or_path, "model.pb")
-        kwargs["init_param"] = init_param
+        init_param = os.path.join(model_or_path, "model.pt")
+        if "init_param" not in kwargs or not os.path.exists(kwargs["init_param"]):
+            kwargs["init_param"] = init_param
+            assert os.path.exists(kwargs["init_param"]), "init_param does not exist"
         if os.path.exists(os.path.join(model_or_path, "tokens.txt")):
             kwargs["tokenizer_conf"]["token_list"] = os.path.join(model_or_path, "tokens.txt")
         if os.path.exists(os.path.join(model_or_path, "tokens.json")):
@@ -122,7 +122,7 @@ def download_from_hf(**kwargs):
     ):
         config = OmegaConf.load(os.path.join(model_or_path, "config.yaml"))
         kwargs = OmegaConf.merge(config, kwargs)
-        init_param = os.path.join(model_or_path, "model.pb")
+        init_param = os.path.join(model_or_path, "model.pt")
         kwargs["init_param"] = init_param
         if os.path.exists(os.path.join(model_or_path, "tokens.txt")):
             kwargs["tokenizer_conf"]["token_list"] = os.path.join(model_or_path, "tokens.txt")

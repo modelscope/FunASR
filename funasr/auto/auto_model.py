@@ -213,7 +213,6 @@ class AutoModel:
         deep_update(model_conf, kwargs.get("model_conf", {}))
         deep_update(model_conf, kwargs)
         model = model_class(**model_conf, vocab_size=vocab_size)
-        model.to(device)
 
         # init_param
         init_param = kwargs.get("init_param", None)
@@ -236,6 +235,7 @@ class AutoModel:
             model.to(torch.float16)
         elif kwargs.get("bf16", False):
             model.to(torch.bfloat16)
+        model.to(device)
         return model, kwargs
 
     def __call__(self, *args, **cfg):
@@ -324,7 +324,7 @@ class AutoModel:
             input, input_len=input_len, model=self.vad_model, kwargs=self.vad_kwargs, **cfg
         )
         end_vad = time.time()
-            
+
         #  FIX(gcf): concat the vad clips for sense vocie model for better aed
         if kwargs.get("merge_vad", False):
             for i in range(len(res)):
@@ -466,7 +466,7 @@ class AutoModel:
                             result[k] = restored_data[j][k]
                         else:
                             result[k] += restored_data[j][k]
-                            
+
             if not len(result["text"].strip()):
                 continue
             return_raw_text = kwargs.get("return_raw_text", False)
@@ -481,7 +481,7 @@ class AutoModel:
                 if return_raw_text:
                     result["raw_text"] = raw_text
                 result["text"] = punc_res[0]["text"]
-                
+
             # speaker embedding cluster after resorted
             if self.spk_model is not None and kwargs.get("return_spk_res", True):
                 if raw_text is None:
@@ -602,6 +602,6 @@ class AutoModel:
         )
 
         with torch.no_grad():
-            export_dir = export_utils.export(model=model, data_in=data_list,  **kwargs)
+            export_dir = export_utils.export(model=model, data_in=data_list, **kwargs)
 
         return export_dir
