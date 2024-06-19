@@ -6,7 +6,7 @@
 import sys
 from funasr import AutoModel
 
-model_dir = "/nfs/beinian.lzr/workspace/models/funasr_results/asr/sense_voice/sensevoice_sanm_ctc"
+model_dir = "/Users/zhifu/Downloads/modelscope_models/SenseVoiceCTC"
 input_file = (
     "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav"
 )
