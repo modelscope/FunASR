@@ -287,6 +287,7 @@ class OpenAIDatasetMultiTurn(torch.utils.data.Dataset):
         self.batch_size_scale_ratio_max = kwargs.get("batch_size_scale_ratio_max", 1.5)
         self.batch_size_token_max = kwargs.get("batch_size_token_max", 2500)
         self.multiturn_num_max = kwargs.get("multiturn_num_max", 5)
+        self.max_source_length = kwargs.get("max_source_length", 3000)
 
     def get_source_len(self, index):
         item = self.index_ds[index]
@@ -333,8 +334,6 @@ class OpenAIDatasetMultiTurn(torch.utils.data.Dataset):
                 zip(system, user, assistant)
             ):
                 if i >= self.multiturn_num_max:
-                    break
-                if len(input_ids) > self.max_token_length:
                     break
                 if i == 0:
                     source_input = f"<|im_start|>system\n{system_prompt}<|im_end|>\n<|im_start|>user\n{user_prompt}<|im_end|>\n<|im_start|>assistant\n"
@@ -404,6 +403,11 @@ class OpenAIDatasetMultiTurn(torch.utils.data.Dataset):
             if len(input_ids) > self.max_token_length:
                 logging.info(
                     f"input_ids > max_token_length: {len(input_ids)}>{self.max_token_length}, {item}"
+                )
+                badcase_flag = True
+            if speech_lengths > self.max_source_length:
+                logging.info(
+                    f"speech_lengths > max_source_length: {speech_lengths}>{self.max_source_length}, {item}"
                 )
                 badcase_flag = True
             if badcase_flag:

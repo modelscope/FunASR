@@ -54,6 +54,9 @@ class OpenAIIndexDSJsonl(torch.utils.data.Dataset):  # torch.utils.data.Dataset
                     speech_length = data_dict.get("speech_length", -1) // 8
                     text_length = data_dict.get("text_length", 0)
                     if speech_length > self.max_source_length:
+                        logging.info(
+                            "speech_length: {speech_length} > {self.max_source_length}, drop it"
+                        )
                         continue
                     if text_length > self.max_target_length:
                         continue
