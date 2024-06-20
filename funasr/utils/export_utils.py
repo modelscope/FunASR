@@ -2,18 +2,10 @@ import os
 import torch
 import functools
 
-try:
-    import torch_blade
-except Exception as e:
-    print(
-        f"Warning, if you want to use bladedisc, please install it and try it again: pip install -U torch_blade\n"
-    )
-
 
 def export(
     model, data_in=None, quantize: bool = False, opset_version: int = 14, type="onnx", **kwargs
 ):
-
     model_scripts = model.export(**kwargs)
     export_dir = kwargs.get("output_dir", os.path.dirname(kwargs.get("init_param")))
     os.makedirs(export_dir, exist_ok=True)
@@ -113,6 +105,12 @@ def _torchscripts(model, path, device="cuda"):
 
 def _bladedisc_opt(model, model_inputs, enable_fp16=True):
     model = model.eval()
+    try:
+        import torch_blade
+    except Exception as e:
+        print(
+            f"Warning, if you are exporting bladedisc, please install it and try it again: pip install -U torch_blade\n"
+        )
     torch_config = torch_blade.config.Config()
     torch_config.enable_fp16 = enable_fp16
     with torch.no_grad(), torch_config:
