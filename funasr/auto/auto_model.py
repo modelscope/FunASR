@@ -92,7 +92,8 @@ def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
                 if isinstance(data_i, str) and os.path.exists(data_i):
                     key = misc.extract_filename_without_extension(data_i)
                 else:
-                    key = "rand_key_" + "".join(random.choice(chars) for _ in range(13))
+                    if key is None:
+                        key = "rand_key_" + "".join(random.choice(chars) for _ in range(13))
                 key_list.append(key)
 
     else:  # raw text; audio sample point, fbank; bytes

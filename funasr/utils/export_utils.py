@@ -5,7 +5,7 @@ import functools
 try:
     import torch_blade
 except Exception as e:
-    print(f"failed to load torch_blade: {e}")
+    print(f"Warning, if you are exporting bladedisc, please install it and try it again: pip install -U torch_blade\n")
 
 
 def export(model, data_in=None, quantize: bool = False, opset_version: int = 14, type='onnx', **kwargs):

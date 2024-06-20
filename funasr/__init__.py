@@ -1,8 +1,6 @@
 """Initialize funasr package."""
 
 import os
-import pkgutil
-import importlib
 
 dirname = os.path.dirname(__file__)
 version_file = os.path.join(dirname, "version.txt")
