@@ -84,6 +84,12 @@ def download_from_ms(**kwargs):
         from funasr.utils.install_model_requirements import install_requirements
 
         install_requirements(requirements)
+    if kwargs.get("trust_remote_code", False):
+
+        import model
+
+        # from funasr.register import tables
+        # tables.print("model")
     return kwargs
 
 
