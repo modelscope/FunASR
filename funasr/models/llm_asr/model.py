@@ -1375,8 +1375,8 @@ class LLMASR4(nn.Module):
         results.append(result_i)
 
         if ibest_writer is not None:
-            ibest_writer["text"][key[0]] = response
-            ibest_writer["label"][key[0]] = label
+            ibest_writer["text"][key[0]] = response.replace("\n", " ")
+            ibest_writer["label"][key[0]] = label.replace("\n", " ")
             ibest_writer["text_tn"][key[0]] = response_clean
 
         return results, meta_data
