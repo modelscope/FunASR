@@ -1,21 +1,25 @@
 # -*- encoding: utf-8 -*-
-
-import functools
+import yaml
 import logging
-import pickle
+import functools
+import numpy as np
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, NamedTuple, Set, Tuple, Union
 
-import numpy as np
-import yaml
-
-
-import warnings
-
 root_dir = Path(__file__).resolve().parent
-
 logger_initialized = {}
 
+def pad_list(xs, pad_value, max_len=None):
+    n_batch = len(xs)
+    if max_len is None:
+        max_len = max(x.size(0) for x in xs)
+    # pad = xs[0].new(n_batch, max_len, *xs[0].size()[1:]).fill_(pad_value)
+    # numpy format
+    pad = (np.zeros((n_batch, max_len)) + pad_value).astype(np.int32)
+    for i in range(n_batch):
+        pad[i, : xs[i].shape[0]] = xs[i]
+
+    return pad
 
 class TokenIDConverter:
     def __init__(

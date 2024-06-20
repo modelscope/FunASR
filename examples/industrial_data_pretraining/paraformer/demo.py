@@ -21,6 +21,19 @@ res = model.generate(
 print(res)
 
 
+""" call english model like below for detailed timestamps
+# choose english paraformer model first
+# iic/speech_paraformer_asr-en-16k-vocab4199-pytorch
+res = model.generate(
+    input="https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_en.wav",
+    cache={},
+    pred_timestamp=True,
+    return_raw_text=True,
+    sentence_timestamp=True,
+    en_post_proc=True,
+)
+"""
+
 """ can not use currently
 from funasr import AutoFrontend
 

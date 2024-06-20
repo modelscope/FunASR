@@ -49,13 +49,23 @@ namespace funasr {
 // hotword embedding compile model
 #define MODEL_EB_NAME "model_eb.onnx"
 #define QUANT_MODEL_NAME "model_quant.onnx"
-#define VAD_CMVN_NAME "vad.mvn"
-#define VAD_CONFIG_NAME "vad.yaml"
+#define VAD_CMVN_NAME "am.mvn"
+#define VAD_CONFIG_NAME "config.yaml"
+
+// gpu models
+#define INFER_GPU "gpu"
+#define BATCHSIZE "batch-size"
+#define TORCH_MODEL_NAME "model.torchscripts"
+#define TORCH_QUANT_MODEL_NAME "model_quant.torchscripts"
+#define BLADE_MODEL_NAME "model.blade.fp16.pt"
+#define BLADEDISC "bladedisc"
+
 #define AM_CMVN_NAME "am.mvn"
 #define AM_CONFIG_NAME "config.yaml"
 #define LM_CONFIG_NAME "config.yaml"
-#define PUNC_CONFIG_NAME "punc.yaml"
+#define PUNC_CONFIG_NAME "config.yaml"
 #define MODEL_SEG_DICT "seg_dict"
+#define TOKEN_PATH "tokens.json"
 #define HOTWORD "hotword"
 // #define NN_HOTWORD "nn-hotword"
 

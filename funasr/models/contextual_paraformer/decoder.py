@@ -424,7 +424,6 @@ class ContextualParaformerDecoderExport(torch.nn.Module):
         # contextual_mask = myutils.sequence_mask(contextual_length, device=memory.device)[:, None, :]
         contextual_mask = self.make_pad_mask(contextual_length)
         contextual_mask, _ = self.prepare_mask(contextual_mask)
-        # import pdb; pdb.set_trace()
         contextual_mask = contextual_mask.transpose(2, 1).unsqueeze(1)
         cx, tgt_mask, _, _, _ = self.bias_decoder(
             x_self_attn, tgt_mask, bias_embed, memory_mask=contextual_mask

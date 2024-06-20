@@ -66,8 +66,6 @@ class AudioLLMQwenAudioDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         item = self.index_ds[index]
-        # import pdb;
-        # pdb.set_trace()
         source = item["source"]
         data_src = load_audio_text_image_video(source, fs=self.fs)
         if self.preprocessor_speech:
