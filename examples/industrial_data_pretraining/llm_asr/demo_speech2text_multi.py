@@ -9,19 +9,19 @@ import sys
 
 from funasr import AutoModel
 
-ckpt_dir = "/nfs/beinian.lzr/workspace/GPT-4o/Exp/exp6/5m-8gpu/exp6_speech2text_linear_ddp_0609"
-ckpt_id = "model.pt.ep0.90000"
-jsonl = (
-    "/nfs/beinian.lzr/workspace/GPT-4o/Data/Speech2Text/TestData/aishell1_test_speech2text.jsonl"
-)
-output_dir = f"{os.path.join(ckpt_dir, ckpt_id)}"
+
+ckpt_dir = "/nfs/beinian.lzr/workspace/GPT-4o/Exp/exp7/5m-8gpu/exp5-1-0619"
+ckpt_id = "model.pt.ep6"
+jsonl = "/nfs/beinian.lzr/workspace/GPT-4o/Data/Speech2Text/TestData/s2tchat.v20240619.test.jsonl"
+output_dir = os.path.join(ckpt_dir, f"inference-{ckpt_id}")
 device = "cuda:0"
 
-ckpt_dir = sys.argv[1]
-ckpt_id = sys.argv[2]
-jsonl = sys.argv[3]
-output_dir = sys.argv[4]
-device = sys.argv[5]
+# ckpt_dir = sys.argv[1]
+# ckpt_id = sys.argv[2]
+# jsonl = sys.argv[3]
+# output_dir = sys.argv[4]
+# device = sys.argv[5]
+
 
 model = AutoModel(
     model=ckpt_dir,
@@ -53,14 +53,15 @@ for i, line in enumerate(lines):
 
     system_i, user_i, assistant_i = [], [], []
 
+    contents_i = []
     for j, (system_prompt, user_prompt, target_out) in enumerate(zip(system, user, assistant)):
         key = f"{key}_turn_{j}"
 
-        system_i += [system_prompt]
-        user_i += [user_prompt]
-        assistant_i += [target_out]
+        if j == 0:
+            contents_i.append({"role": "system", "content": system_prompt})
 
-        contents_i = {"system": system_i, "user": user_i, "assistant": assistant}
+        contents_i.append({"role": "user", "content": user_prompt})
+        contents_i.append({"role": "assistant", "content": target_out})
 
         res = model.generate(
             input=[contents_i],

@@ -1125,7 +1125,7 @@ class LLMASR4(nn.Module):
             [],
             [],
         )
-
+        input_source_ids = []
         for i, (system_prompt, user_prompt, target_out) in enumerate(zip(system, user, assistant)):
             if i >= kwargs.get("multiturn_num_max", 5):
                 break
@@ -1200,6 +1200,7 @@ class LLMASR4(nn.Module):
             source_mask = [-100] * len(source_ids)
             target_out = f"{target_out}<|im_end|>"
             target_ids = tokenizer.encode(target_out)
+            input_source_ids = input_ids + source_ids
             input_ids += source_ids + target_ids
             labels += source_mask + target_ids
             fbank.append(speech[0, :, :])
@@ -1215,7 +1216,7 @@ class LLMASR4(nn.Module):
         fbank_mask = torch.tensor(fbank_mask, dtype=torch.float32)
         fbank_beg = torch.tensor(fbank_beg, dtype=torch.int32)
         fake_token_len = torch.tensor(fake_token_len, dtype=torch.int32)
-        source_ids = torch.tensor(source_ids, dtype=torch.int64)
+        source_ids = torch.tensor(input_source_ids, dtype=torch.int64)
         target_ids = torch.tensor(target_ids, dtype=torch.int64)
 
         speech = torch.nn.utils.rnn.pad_sequence(fbank, batch_first=True, padding_value=0.0)
@@ -1227,7 +1228,7 @@ class LLMASR4(nn.Module):
             "speech_lengths": speech_lengths,
             "fbank_mask": fbank_mask[None, :],
             "fbank_beg": fbank_beg[None,],
-            "fake_token_len": fake_token_len[:, None],
+            "fake_token_len": fake_token_len[None, :],
             "input_ids": input_ids[None,],
             "attention_mask": attention_mask[None,],
             "labels_ids": labels,
@@ -1274,6 +1275,7 @@ class LLMASR4(nn.Module):
         input_ids = batch["input_ids"]
         source_ids = batch["source_ids"]
         fbank_beg = batch["fbank_beg"]
+        fake_token_len = batch["fake_token_len"]
 
         if not kwargs.get("tearchforing", False):
             input_ids = source_ids
@@ -1282,7 +1284,7 @@ class LLMASR4(nn.Module):
         inputs_embeds = self.llm.model.get_input_embeddings()(input_ids)
 
         batch_size, token_num, dims = inputs_embeds.shape
-        fake_token_len = kwargs.get("fake_token_len")
+
         fake_token_len[fake_token_len < 0] = 0
         fbank_beg[fbank_beg < 0] = 0
 
