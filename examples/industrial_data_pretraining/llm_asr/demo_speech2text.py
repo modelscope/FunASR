@@ -9,19 +9,20 @@ import sys
 
 from funasr import AutoModel
 
-ckpt_dir = "/nfs/beinian.lzr/workspace/GPT-4o/Exp/exp6/5m-8gpu/exp6_speech2text_linear_ddp_0609"
-ckpt_id = "model.pt.ep0.90000"
-jsonl = (
-    "/nfs/beinian.lzr/workspace/GPT-4o/Data/Speech2Text/TestData/aishell1_test_speech2text.jsonl"
-)
-output_dir = f"{os.path.join(ckpt_dir, ckpt_id)}"
-device = "cuda:0"
+if len(sys.argv) > 1:
+    ckpt_dir = sys.argv[1]
+    ckpt_id = sys.argv[2]
+    jsonl = sys.argv[3]
+    output_dir = sys.argv[4]
+    device = sys.argv[5]
+else:
+    ckpt_dir = "/nfs/beinian.lzr/workspace/GPT-4o/Exp/exp6/5m-8gpu/exp6_speech2text_linear_ddp_0609"
+    ckpt_id = "model.pt.ep0.90000"
+    jsonl = "/nfs/beinian.lzr/workspace/GPT-4o/Data/Speech2Text/TestData/aishell1_test_speech2text.jsonl"
+    dataset = jsonl.split("/")[-1]
+    output_dir = os.path.join(ckpt_dir, f"inference-{ckpt_id}", dataset)
+    device = "cuda:0"
 
-ckpt_dir = sys.argv[1]
-ckpt_id = sys.argv[2]
-jsonl = sys.argv[3]
-output_dir = sys.argv[4]
-device = sys.argv[5]
 
 model = AutoModel(
     model=ckpt_dir,

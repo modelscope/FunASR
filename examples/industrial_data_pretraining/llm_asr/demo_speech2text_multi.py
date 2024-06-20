@@ -22,8 +22,8 @@ else:
     jsonl = (
         "/nfs/beinian.lzr/workspace/GPT-4o/Data/Speech2Text/TestData/s2tchat.v20240619.test.jsonl"
     )
-    output_dir = os.path.join(ckpt_dir, f"inference-{ckpt_id}")
-    device = "cuda:0"
+    dataset = jsonl.split("/")[-1]
+    output_dir = os.path.join(ckpt_dir, f"inference-{ckpt_id}", dataset)
 
 
 model = AutoModel(
