@@ -43,7 +43,7 @@ with open(jsonl, "r") as f:
 tearchforing = False
 for i, line in enumerate(lines):
 
-    key = f"dialog_{i}"
+    key_i = f"dialog_{i}"
 
     data_dict = json.loads(line.strip())
     data = data_dict["messages"]
@@ -58,7 +58,7 @@ for i, line in enumerate(lines):
 
     contents_i = []
     for j, (system_prompt, user_prompt, target_out) in enumerate(zip(system, user, assistant)):
-        key = f"{key}_turn_{j}"
+        key = f"{key_i}_turn_{j}"
 
         if j == 0:
             contents_i.append({"role": "system", "content": system_prompt})
