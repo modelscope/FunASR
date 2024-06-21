@@ -1457,9 +1457,9 @@ class SenseVoiceSANMCTC(nn.Module):
 
         self.lid_dict = {"auto": 0, "zh": 3, "en": 4, "yue": 5, "ja": 6, "ko": 7, "nospeech": 8}
         self.lid_int_dict = {24884: 3, 24885: 4, 24888: 5, 24892: 6, 24896: 7, 24992: 8}
-        self.textnorm_dict = {"withtextnorm": 9, "wotextnorm": 10}
+        self.textnorm_dict = {"withitn": 9, "woitn": 10}
         self.textnorm_int_dict = {25016: 9, 25017: 10}
-        self.embed = torch.nn.Embedding(3 + len(self.lid_dict) + len(self.textnorm_dict), input_size)
+        self.embed = torch.nn.Embedding(2 + len(self.lid_dict) + len(self.textnorm_dict), input_size)
 
     def forward(
         self,
