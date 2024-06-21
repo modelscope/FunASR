@@ -21,4 +21,4 @@ def check_for_update():
         print(f"New version available: {pypi_version}. Your current version is {current_version}.")
         print('Please use the command "pip install -U funasr" to upgrade.')
     else:
-        print("You are using the latest version of funasr.")
+        print(f"You are using the latest version of funasr-{current_version}")
