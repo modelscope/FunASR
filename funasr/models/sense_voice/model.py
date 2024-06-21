@@ -1455,11 +1455,11 @@ class SenseVoiceSANMCTC(nn.Module):
         self.length_normalized_loss = length_normalized_loss
         self.encoder_output_size = encoder_output_size
 
-        self.lid_dict = {"auto": 0, "zh": 3, "en": 4, "yue": 5, "ja": 6, "ko": 7, "nospeech": 8}
-        self.lid_int_dict = {24884: 3, 24885: 4, 24888: 5, 24892: 6, 24896: 7, 24992: 8}
-        self.textnorm_dict = {"withitn": 9, "woitn": 10}
-        self.textnorm_int_dict = {25016: 9, 25017: 10}
-        self.embed = torch.nn.Embedding(2 + len(self.lid_dict) + len(self.textnorm_dict), input_size)
+        self.lid_dict = {"auto": 0, "zh": 3, "en": 4, "yue": 7, "ja": 11, "ko": 12, "nospeech": 13}
+        self.lid_int_dict = {24884: 3, 24885: 4, 24888: 7, 24892: 11, 24896: 12, 24992: 13}
+        self.textnorm_dict = {"withitn": 14, "woitn": 15}
+        self.textnorm_int_dict = {25016: 14, 25017: 15}
+        self.embed = torch.nn.Embedding(7 + len(self.lid_dict) + len(self.textnorm_dict), input_size)
 
     def forward(
         self,
