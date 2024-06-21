@@ -1645,7 +1645,7 @@ class SenseVoiceSANMCTC(nn.Module):
             language_query = self.embed(torch.LongTensor([[0]]).to(speech.device)).repeat(
                 speech.size(0), 1, 1
             )
-        textnorm = kwargs.get("text_norm", "wotextnorm")
+        textnorm = kwargs.get("text_norm", "woitn")
         textnorm_query = self.embed(
             torch.LongTensor([[self.textnorm_dict[textnorm]]]).to(speech.device)
         ).repeat(speech.size(0), 1, 1)
