@@ -53,7 +53,7 @@ class ContextualEmbedderExport(torch.nn.Module):
                 0: "num_hotwords",
             },
             "hw_embed": {
-                0: "num_hotwords",
+                1: "num_hotwords",
             },
         }
 
