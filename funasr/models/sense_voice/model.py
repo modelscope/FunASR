@@ -10,7 +10,7 @@ import torch.nn.functional as F
 from torch import Tensor
 from torch import nn
 from torch.cuda.amp import autocast
-from funasr.metrics.compute_acc import compute_accuracy
+from funasr.metrics.compute_acc import compute_accuracy, th_accuracy
 from funasr.losses.label_smoothing_loss import LabelSmoothingLoss
 from funasr.train_utils.device_funcs import force_gatherable
 from . import whisper_lib as whisper
@@ -1439,16 +1439,25 @@ class SenseVoiceSANMCTC(nn.Module):
         self.specaug = specaug
         self.normalize = normalize
         self.encoder = encoder
+        self.length_normalized_loss = length_normalized_loss
         self.error_calculator = None
+        self.criterion_att = LabelSmoothingLoss(
+            size=self.vocab_size,
+            padding_idx=self.ignore_id,
+            smoothing=kwargs.get("lsm_weight", 0.0),
+            normalize_length=self.length_normalized_loss,
+        )
 
         self.ctc = ctc
 
         self.length_normalized_loss = length_normalized_loss
         self.encoder_output_size = encoder_output_size
 
-        self.lid_dict = {"zh": 3, "en": 4, "yue": 7, "ja": 11, "ko": 12, "nospeech": 13}
-        self.textnorm_dict = {"withtextnorm": 14, "wotextnorm": 15}
-        self.embed = torch.nn.Embedding(8 + len(self.lid_dict) + len(self.textnorm_dict), 560)
+        self.lid_dict = {"zh": 3, "en": 4, "yue": 5, "ja": 6, "ko": 7, "nospeech": 8}
+        self.lid_int_dict = {24884: 3, 24885: 4, 24888: 5, 24892: 6, 24896: 7, 24992: 8}
+        self.textnorm_dict = {"withtextnorm": 9, "wotextnorm": 10}
+        self.textnorm_int_dict = {25016: 9, 25017: 10}
+        self.embed = torch.nn.Embedding(3 + len(self.lid_dict) + len(self.textnorm_dict), input_size)
 
     def forward(
         self,
@@ -1475,17 +1484,25 @@ class SenseVoiceSANMCTC(nn.Module):
         batch_size = speech.shape[0]
 
         # 1. Encoder
-        encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
+        encoder_out, encoder_out_lens = self.encode(speech, speech_lengths, text)
 
         loss_ctc, cer_ctc = None, None
+        loss_rich, acc_rich = None, None
         stats = dict()
 
-        loss_ctc, cer_ctc = self._calc_ctc_loss(encoder_out, encoder_out_lens, text, text_lengths)
+        loss_ctc, cer_ctc = self._calc_ctc_loss(
+            encoder_out[:, 4:, :], encoder_out_lens - 4, text[:, 4:], text_lengths - 4
+        )
+
+        loss_rich, acc_rich = self._calc_rich_ce_loss(
+            encoder_out[:, :4, :], text[:, :4]
+        )
 
         loss = loss_ctc
-
         # Collect total loss stats
-        stats["loss"] = torch.clone(loss.detach())
+        stats["loss"] = torch.clone(loss.detach()) if loss_ctc is not None else None
+        stats["loss_rich"] = torch.clone(loss_rich.detach()) if loss_rich is not None else None
+        stats["acc_rich"] = acc_rich
 
         # force_gatherable: to-device and to-tensor if scalar for DataParallel
         if self.length_normalized_loss:
@@ -1497,6 +1514,7 @@ class SenseVoiceSANMCTC(nn.Module):
         self,
         speech: torch.Tensor,
         speech_lengths: torch.Tensor,
+        text: torch.Tensor,
         **kwargs,
     ):
         """Frontend + Encoder. Note that this method is used by asr_inference.py
@@ -1513,6 +1531,20 @@ class SenseVoiceSANMCTC(nn.Module):
         # Normalization for feature: e.g. Global-CMVN, Utterance-CMVN
         if self.normalize is not None:
             speech, speech_lengths = self.normalize(speech, speech_lengths)
+
+
+        lids = torch.LongTensor([[self.lid_int_dict[int(lid)] if torch.rand(1) > 0.2 and int(lid) in self.lid_int_dict else 0 ] for lid in text[:, 0]]).to(speech.device)
+        language_query = self.embed(lids)
+
+        styles = torch.LongTensor([[self.textnorm_int_dict[int(style)]] for style in text[:, 3]]).to(speech.device)
+        style_query = self.embed(styles)
+        speech = torch.cat((style_query, speech), dim=1)
+        speech_lengths += 1
+
+        event_emo_query = self.embed(torch.LongTensor([[1, 2]]).to(speech.device)).repeat(speech.size(0), 1, 1)
+        input_query = torch.cat((language_query, event_emo_query), dim=1)
+        speech = torch.cat((input_query, speech), dim=1)
+        speech_lengths += 3
 
         # Forward encoder
         # feats: (Batch, Length, Dim)
@@ -1537,6 +1569,22 @@ class SenseVoiceSANMCTC(nn.Module):
             ys_hat = self.ctc.argmax(encoder_out).data
             cer_ctc = self.error_calculator(ys_hat.cpu(), ys_pad.cpu(), is_ctc=True)
         return loss_ctc, cer_ctc
+
+    def _calc_rich_ce_loss(
+        self,
+        encoder_out: torch.Tensor,
+        ys_pad: torch.Tensor,
+    ):
+        decoder_out = self.ctc.ctc_lo(encoder_out)
+        # 2. Compute attention loss
+        loss_rich = self.criterion_att(decoder_out, ys_pad.contiguous())
+        acc_rich = th_accuracy(
+            decoder_out.view(-1, self.vocab_size),
+            ys_pad.contiguous(),
+            ignore_label=self.ignore_id,
+        )
+
+        return loss_rich, acc_rich
 
     def inference(
         self,
@@ -1610,7 +1658,7 @@ class SenseVoiceSANMCTC(nn.Module):
         speech_lengths += 3
 
         # Encoder
-        encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
+        encoder_out, encoder_out_lens = self.encoder(speech, speech_lengths)
         if isinstance(encoder_out, tuple):
             encoder_out = encoder_out[0]
 
