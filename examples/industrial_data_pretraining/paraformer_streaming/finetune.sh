@@ -52,7 +52,7 @@ DISTRIBUTED_ARGS="
     --nproc_per_node $gpu_num \
     --node_rank ${RANK:-0} \
     --master_addr ${MASTER_ADDR:-127.0.0.1} \
-    --master_port ${MASTER_PORT: 26669}
+    --master_port ${MASTER_PORT:-26669}
 "
 
 echo $DISTRIBUTED_ARGS

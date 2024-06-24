@@ -18,8 +18,8 @@ model = AutoModel(
 res = model.generate(
     input=input_file,
     cache={},
-    language="zh",
-    text_norm="wotextnorm",
+    language="auto",
+    text_norm="woitn",
 )
 
 print(res)
