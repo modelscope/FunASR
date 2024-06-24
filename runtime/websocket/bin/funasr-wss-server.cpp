@@ -262,17 +262,10 @@ int main(int argc, char* argv[]) {
                 s_lm_path="";
             }
 
-            down_asr_model = down_asr_path+"/model_quant.onnx";
-            if(s_asr_quant=="false" || s_asr_quant=="False" || s_asr_quant=="FALSE"){
-                down_asr_model = down_asr_path+"/model.onnx";
-            }
-
             if (use_gpu_){
                 model_type = "torchscripts";
-                down_asr_model = down_asr_path+"/model.torchscripts";
                 if (s_blade=="true" || s_blade=="True" || s_blade=="TRUE"){
                     model_type = "bladedisc";
-                    down_asr_model = down_asr_path+"/model_blade.torchscripts";
                 }
             }
 
@@ -286,7 +279,19 @@ int main(int argc, char* argv[]) {
                 python_cmd_asr = python_cmd + " --type " + model_type + " --quantize " + s_asr_quant + " --model-name " + s_asr_path + " --export-dir " + s_download_model_dir + " --model_revision " + model_path["model-revision"];
                 down_asr_path  = s_download_model_dir+"/"+s_asr_path;
             }
-                
+            
+            down_asr_model = down_asr_path+"/model_quant.onnx";
+            if(s_asr_quant=="false" || s_asr_quant=="False" || s_asr_quant=="FALSE"){
+                down_asr_model = down_asr_path+"/model.onnx";
+            }
+
+            if (use_gpu_){
+                down_asr_model = down_asr_path+"/model.torchscripts";
+                if (s_blade=="true" || s_blade=="True" || s_blade=="TRUE"){
+                    down_asr_model = down_asr_path+"/model_blade.torchscripts";
+                }
+            }
+
             int ret = system(python_cmd_asr.c_str());
             if(ret !=0){
                 LOG(INFO) << "Failed to download model from modelscope. If you set local asr model path, you can ignore the errors.";
