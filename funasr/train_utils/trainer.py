@@ -362,10 +362,10 @@ class Trainer:
         time_beg = time.perf_counter()
         time5 = time_beg
         for batch_idx, batch in enumerate(dataloader_train):
-            if self.use_ddp or self.use_fsdp:
-                dist.all_reduce(iterator_stop, dist.ReduceOp.SUM)
-                if iterator_stop > 0:
-                    break
+            # if self.use_ddp or self.use_fsdp:
+            #     dist.all_reduce(iterator_stop, dist.ReduceOp.SUM)
+            #     if iterator_stop > 0:
+            #         break
             self.batch_total += 1
             self.step_in_epoch += 1
             time1 = time.perf_counter()
@@ -381,11 +381,11 @@ class Trainer:
                 with maybe_autocast(self.use_fp16):
                     retval = model(**batch)
 
-                    if (
-                        self.reset_gpu_cache
-                        and (torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024) > 70
-                    ):
-                        torch.cuda.empty_cache()
+                    # if (
+                    #     self.reset_gpu_cache
+                    #     and (torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024) > 70
+                    # ):
+                    #     torch.cuda.empty_cache()
 
                 loss, stats, weight = retval
                 stats = {k: v for k, v in stats.items() if v is not None}
@@ -516,14 +516,14 @@ class Trainer:
                 )
 
             time_beg = time.perf_counter()
-        else:
-            if self.use_ddp or self.use_fsdp:
-                iterator_stop.fill_(1)
-                dist.all_reduce(iterator_stop, dist.ReduceOp.SUM)
+        # else:
+        #     if self.use_ddp or self.use_fsdp:
+        #         iterator_stop.fill_(1)
+        #         dist.all_reduce(iterator_stop, dist.ReduceOp.SUM)
 
         if self.use_ddp or self.use_fsdp:
             dist.barrier()
-            iterator_stop = torch.tensor(0).to(self.device)
+            # iterator_stop = torch.tensor(0).to(self.device)
 
     def validate_epoch(
         self,
