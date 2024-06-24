@@ -357,7 +357,7 @@ int main(int argc, char* argv[]) {
 
             if (access(s_lm_path.c_str(), F_OK) == 0) {
                 // local
-                python_cmd_lm = python_cmd + " --type onnx " + "--quantize " + s_punc_quant + " --model-name " + s_lm_path +
+                python_cmd_lm = python_cmd + " --type onnx " + " --model-name " + s_lm_path +
                                     " --export-dir ./ " + " --model_revision " +
                                     model_path["lm-revision"] + " --export False ";
                 down_lm_path = s_lm_path;
@@ -365,7 +365,7 @@ int main(int argc, char* argv[]) {
                 // modelscope
                 LOG(INFO) << "Download model: " << s_lm_path
                             << " from modelscope : "; 
-                python_cmd_lm = python_cmd + " --type onnx " + " --quantize " + s_punc_quant + " --model-name " +
+                python_cmd_lm = python_cmd + " --type onnx " + " --model-name " +
                         s_lm_path +
                         " --export-dir " + s_download_model_dir +
                         " --model_revision " + model_path["lm-revision"]
@@ -400,12 +400,12 @@ int main(int argc, char* argv[]) {
 
             if (access(s_punc_path.c_str(), F_OK) == 0){
                 // local
-                python_cmd_punc = python_cmd + " --type onnx " + " --model-name " + s_punc_path + " --export-dir ./ " + " --model_revision " + model_path["punc-revision"];
+                python_cmd_punc = python_cmd + " --type onnx " + "--quantize " + s_punc_quant + " --model-name " + s_punc_path + " --export-dir ./ " + " --model_revision " + model_path["punc-revision"];
                 down_punc_path  = s_punc_path;
             }else{
                 // modelscope
                 LOG(INFO) << "Download model: " <<  s_punc_path << " from modelscope: ";
-                python_cmd_punc = python_cmd + " --type onnx " + " --model-name " + s_punc_path + " --export-dir " + s_download_model_dir + " --model_revision " + model_path["punc-revision"];
+                python_cmd_punc = python_cmd + " --type onnx " + "--quantize " + s_punc_quant + " --model-name " + s_punc_path + " --export-dir " + s_download_model_dir + " --model_revision " + model_path["punc-revision"];
                 down_punc_path  = s_download_model_dir+"/"+s_punc_path;
             }
                 
