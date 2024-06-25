@@ -218,6 +218,7 @@ class AutoModel:
         kwargs["frontend"] = frontend
         # build model
         model_class = tables.model_classes.get(kwargs["model"])
+        assert model_class is not None, f'{kwargs["model"]} is not registered'
         model_conf = {}
         deep_update(model_conf, kwargs.get("model_conf", {}))
         deep_update(model_conf, kwargs)
