@@ -92,7 +92,8 @@ def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
                 if isinstance(data_i, str) and os.path.exists(data_i):
                     key = misc.extract_filename_without_extension(data_i)
                 else:
-                    key = "rand_key_" + "".join(random.choice(chars) for _ in range(13))
+                    if key is None:
+                        key = "rand_key_" + "".join(random.choice(chars) for _ in range(13))
                 key_list.append(key)
 
     else:  # raw text; audio sample point, fbank; bytes
@@ -109,6 +110,13 @@ def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
 class AutoModel:
 
     def __init__(self, **kwargs):
+
+        try:
+            from funasr.utils.version_checker import check_for_update
+
+            check_for_update()
+        except:
+            pass
 
         log_level = getattr(logging, kwargs.get("log_level", "INFO").upper())
         logging.basicConfig(level=log_level)
@@ -213,7 +221,6 @@ class AutoModel:
         deep_update(model_conf, kwargs.get("model_conf", {}))
         deep_update(model_conf, kwargs)
         model = model_class(**model_conf, vocab_size=vocab_size)
-        model.to(device)
 
         # init_param
         init_param = kwargs.get("init_param", None)
@@ -236,6 +243,7 @@ class AutoModel:
             model.to(torch.float16)
         elif kwargs.get("bf16", False):
             model.to(torch.bfloat16)
+        model.to(device)
         return model, kwargs
 
     def __call__(self, *args, **cfg):
@@ -466,7 +474,7 @@ class AutoModel:
                             result[k] = restored_data[j][k]
                         else:
                             result[k] += restored_data[j][k]
-                            
+
             if not len(result["text"].strip()):
                 continue
             return_raw_text = kwargs.get("return_raw_text", False)
@@ -481,7 +489,7 @@ class AutoModel:
                 if return_raw_text:
                     result["raw_text"] = raw_text
                 result["text"] = punc_res[0]["text"]
-                
+
             # speaker embedding cluster after resorted
             if self.spk_model is not None and kwargs.get("return_spk_res", True):
                 if raw_text is None:
@@ -602,6 +610,6 @@ class AutoModel:
         )
 
         with torch.no_grad():
-            export_dir = export_utils.export(model=model, data_in=data_list,  **kwargs)
+            export_dir = export_utils.export(model=model, data_in=data_list, **kwargs)
 
         return export_dir

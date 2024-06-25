@@ -33,8 +33,8 @@ def compute_wer(
             if cn_postprocess:
                 value = " ".join(value)
                 value = value.replace(" ", "")
-                if value[0] == "请":
-                    value = value[1:]
+                # if value[0] == "请":
+                #     value = value[1:]
                 value = [x for x in value]
             hyp_dict[key] = value
     with open(ref_file, "r") as ref_reader:

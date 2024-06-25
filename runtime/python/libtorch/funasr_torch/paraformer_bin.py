@@ -50,7 +50,7 @@ class Paraformer:
         if quantize:
             model_file = os.path.join(model_dir, "model_quant.torchscript")
         if not os.path.exists(model_file):
-            print(".torchscript does not exist, begin to export torchscript")
+            print(".torchscripts does not exist, begin to export torchscript")
             try:
                 from funasr import AutoModel
             except:

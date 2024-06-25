@@ -118,6 +118,12 @@ class IndexDSJsonlRankFull(torch.utils.data.Dataset):
                         text_language = data.get("text_language", None)
                         if text_language is not None:
                             contents_i["text_language"] = text_language
+                        if "emo_target" in data:
+                            contents_i["emo_target"] = data["emo_target"]
+                        if "event_target" in data:
+                            contents_i["event_target"] = data["event_target"]
+                        if "with_or_wo_itn" in data:
+                            contents_i["with_or_wo_itn"] = data["with_or_wo_itn"]
                         # audio_language = data.get("audio_language", None)
                         # if audio_language is not None:
                         #     contents_i["audio_language"] = audio_language
