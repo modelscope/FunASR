@@ -1155,9 +1155,12 @@ class LLMASR4(nn.Module):
                         "<|endofspeech|>", ""
                     )
                     if sub_str.startswith("!"):
+                        sub_str = sub_str[1:]
+                        if sub_str.startswith("!"):  # !!bytes
+                            sub_str = eval(sub_str[1:])
                         try:
                             time1 = time.perf_counter()
-                            data_src = load_audio_text_image_video(sub_str[1:], fs=frontend.fs)
+                            data_src = load_audio_text_image_video(sub_str, fs=frontend.fs)
                             time2 = time.perf_counter()
                             meta_data["load_data"] = f"{time2 - time1:0.3f}"
                         except Exception as e:
