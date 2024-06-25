@@ -6,6 +6,7 @@
 import sys
 from funasr import AutoModel
 
+
 model_dir = "/Users/zhifu/Downloads/modelscope_models/ctc_model"
 input_file = (
     "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav"

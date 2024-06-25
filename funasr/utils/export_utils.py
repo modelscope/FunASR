@@ -2,10 +2,6 @@ import os
 import torch
 import functools
 
-try:
-    import torch_blade
-except Exception as e:
-    print(f"failed to load torch_blade: {e}")
 
 def export(
     model, data_in=None, quantize: bool = False, opset_version: int = 14, type="onnx", **kwargs

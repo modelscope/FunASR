@@ -62,4 +62,3 @@ for data_set in "common_voice_zh-CN_speech2text.jsonl" "common_voice_en_speech2t
 
 }&
 done
-wait
