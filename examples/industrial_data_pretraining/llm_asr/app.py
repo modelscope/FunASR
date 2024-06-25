@@ -27,7 +27,8 @@ from funasr import AutoModel
 # 				  )
 
 import re
-
+import os
+import sys
 
 if len(sys.argv) > 1:
     ckpt_dir = sys.argv[1]
@@ -98,15 +99,6 @@ audio_examples = [
         "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/BAC009S0764W0121.wav",
         "You are a helpful assistant.",
     ],
-    # # ["example/common_voice_zh-CN_33410210.wav", "You are a helpful assistant."],
-    # ["example/common_voice_yue_31220919.wav", "You are a helpful assistant."],
-    # # ["example/common_voice_yue_31258759.wav", "You are a helpful assistant."],
-    # ["example/common_voice_en_19500538.wav", "You are a helpful assistant."],
-    # # ["example/common_voice_en_32697525.wav", "You are a helpful assistant."],
-    # ["example/common_voice_ja_27696032.wav", "You are a helpful assistant."],
-    # # ["example/common_voice_ja_37441971.wav", "You are a helpful assistant."],
-    # ["example/common_voice_ko_36331016.wav", "You are a helpful assistant."],
-    # # ["example/common_voice_ko_36838377.wav", "You are a helpful assistant."],
 ]
 
 description = """
