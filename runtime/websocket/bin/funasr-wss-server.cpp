@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
         false, "/workspace/models", "string");
     TCLAP::ValueArg<std::string> model_dir(
         "", MODEL_DIR,
-        "default: /workspace/models/asr, the asr model path, which contains *.onnx/*.torchscripts, config.yaml, am.mvn",
+        "default: /workspace/models/asr, the asr model path, which contains *.onnx/*.torchscript, config.yaml, am.mvn",
         false, "/workspace/models/asr", "string");
     TCLAP::ValueArg<std::string> model_revision(
         "", "model-revision",
@@ -263,7 +263,7 @@ int main(int argc, char* argv[]) {
             }
 
             if (use_gpu_){
-                model_type = "torchscripts";
+                model_type = "torchscript";
                 if (s_blade=="true" || s_blade=="True" || s_blade=="TRUE"){
                     model_type = "bladedisc";
                 }
@@ -286,9 +286,9 @@ int main(int argc, char* argv[]) {
             }
 
             if (use_gpu_){
-                down_asr_model = down_asr_path+"/model.torchscripts";
+                down_asr_model = down_asr_path+"/model.torchscript";
                 if (s_blade=="true" || s_blade=="True" || s_blade=="TRUE"){
-                    down_asr_model = down_asr_path+"/model_blade.torchscripts";
+                    down_asr_model = down_asr_path+"/model_blade.torchscript";
                 }
             }
 

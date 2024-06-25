@@ -26,9 +26,9 @@ def export(model, data_in=None, quantize: bool = False, opset_version: int = 14,
                 export_dir=export_dir,
                 **kwargs
             )
-        elif type == 'torchscripts':
+        elif type == 'torchscript':
             device = 'cuda' if torch.cuda.is_available() else 'cpu'
-            print("Exporting torchscripts on device {}".format(device))
+            print("Exporting torchscript on device {}".format(device))
             _torchscripts(
                 m,
                 path=export_dir,
@@ -107,7 +107,7 @@ def _torchscripts(model, path, device='cuda'):
             dummy_input = tuple([i.cuda() for i in dummy_input])
 
     model_script = torch.jit.trace(model, dummy_input)
-    model_script.save(os.path.join(path, f'{model.export_name}.torchscripts'))
+    model_script.save(os.path.join(path, f'{model.export_name}.torchscript'))
 
 
 def _bladedisc_opt(model, model_inputs, enable_fp16=True):
@@ -196,4 +196,4 @@ def _bladedisc_opt_for_encdec(model, path, enable_fp16):
     model.encoder = _bladedisc_opt(model.encoder, input_data[:2])
     model.decoder = _bladedisc_opt(model.decoder, tuple(decoder_inputs))
     model_script = torch.jit.trace(model, input_data)
-    model_script.save(os.path.join(path, f"{model.export_name}_blade.torchscripts"))
+    model_script.save(os.path.join(path, f"{model.export_name}_blade.torchscript"))

@@ -59,7 +59,7 @@ OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int
           asr_handle->InitHwCompiler(hw_cpu_model_path, thread_num);
           asr_handle->InitSegDict(seg_dict_path);
         }
-        if (use_gpu && access(hw_gpu_model_path.c_str(), F_OK) == 0) { // if model_eb.torchscripts exist, hotword enabled
+        if (use_gpu && access(hw_gpu_model_path.c_str(), F_OK) == 0) { // if model_eb.torchscript exist, hotword enabled
           enable_hotword = true;
           asr_handle->InitHwCompiler(hw_gpu_model_path, thread_num);
           asr_handle->InitSegDict(seg_dict_path);
