@@ -46,11 +46,11 @@ class Paraformer:
                     model_dir
                 )
 
-        model_file = os.path.join(model_dir, "model.torchscripts")
+        model_file = os.path.join(model_dir, "model.torchscript")
         if quantize:
-            model_file = os.path.join(model_dir, "model_quant.torchscripts")
+            model_file = os.path.join(model_dir, "model_quant.torchscript")
         if not os.path.exists(model_file):
-            print(".torchscripts does not exist, begin to export torchscripts")
+            print(".torchscripts does not exist, begin to export torchscript")
             try:
                 from funasr import AutoModel
             except:
@@ -268,11 +268,11 @@ class ContextualParaformer(Paraformer):
                 )
 
         if quantize:
-            model_bb_file = os.path.join(model_dir, "model_bb_quant.torchscripts")
-            model_eb_file = os.path.join(model_dir, "model_eb_quant.torchscripts")
+            model_bb_file = os.path.join(model_dir, "model_bb_quant.torchscript")
+            model_eb_file = os.path.join(model_dir, "model_eb_quant.torchscript")
         else:
-            model_bb_file = os.path.join(model_dir, "model_bb.torchscripts")
-            model_eb_file = os.path.join(model_dir, "model_eb.torchscripts")
+            model_bb_file = os.path.join(model_dir, "model_bb.torchscript")
+            model_eb_file = os.path.join(model_dir, "model_eb.torchscript")
 
         if not (os.path.exists(model_eb_file) and os.path.exists(model_bb_file)):
             print(".onnx does not exist, begin to export onnx")
@@ -282,7 +282,7 @@ class ContextualParaformer(Paraformer):
                 raise "You are exporting onnx, please install funasr and try it again. To install funasr, you could:\n" "\npip3 install -U funasr\n" "For the users in China, you could install with the command:\n" "\npip3 install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple"
 
             model = AutoModel(model=model_dir)
-            model_dir = model.export(type="torchscripts", quantize=quantize, **kwargs)
+            model_dir = model.export(type="torchscript", quantize=quantize, **kwargs)
 
         config_file = os.path.join(model_dir, "config.yaml")
         cmvn_file = os.path.join(model_dir, "am.mvn")

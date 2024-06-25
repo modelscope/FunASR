@@ -36,6 +36,7 @@ namespace funasr {
 
         using TorchModule = torch::jit::script::Module;
         std::shared_ptr<TorchModule> model_ = nullptr;
+        std::shared_ptr<TorchModule> hw_model_ = nullptr;
         std::vector<torch::Tensor> encoder_outs_;
         bool use_hotword;
 

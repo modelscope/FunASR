@@ -12,7 +12,7 @@ model = AutoModel(
     device="cpu",
 )
 
-res = model.export(type="torchscripts", quantize=False)
+res = model.export(type="torchscript", quantize=False)
 print(res)
 
 
