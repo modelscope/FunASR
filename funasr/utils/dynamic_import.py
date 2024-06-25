@@ -3,6 +3,7 @@ import importlib.util
 import importlib.util
 import inspect
 import os.path
+import sys
 
 
 def load_module_from_path(file_path):
@@ -19,19 +20,19 @@ def load_module_from_path(file_path):
     return module
 
 
-def import_module_from_path(file_path):
+def import_module_from_path(file_path: str):
 
-    current_working_directory = os.getcwd()
+    if file_path.startswith("http"):
+        from funasr.download.file import download_from_url
 
-    # 获取当前文件所在的目录
+        file_path = download_from_url(file_path)
+
     file_dir = os.path.dirname(file_path)
     file_name = os.path.basename(file_path)
     module_name = file_path.split("/")[-1].replace(".py", "")
-
-    if len(file_dir) > 0:
-        os.chdir(file_dir)
+    sys.path.append(file_dir)
     importlib.import_module(module_name)
-    os.chdir(current_working_directory)
+    print(f"Loading remote code successfully: {file_path}")
 
 
 #
