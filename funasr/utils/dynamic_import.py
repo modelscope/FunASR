@@ -2,6 +2,7 @@ import importlib.util
 
 import importlib.util
 import inspect
+import os.path
 
 
 def load_module_from_path(file_path):
@@ -16,6 +17,21 @@ def load_module_from_path(file_path):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+def import_module_from_path(file_path):
+
+    current_working_directory = os.getcwd()
+
+    # 获取当前文件所在的目录
+    file_dir = os.path.dirname(file_path)
+    file_name = os.path.basename(file_path)
+    module_name = file_path.split("/")[-1].replace(".py", "")
+
+    if len(file_dir) > 0:
+        os.chdir(file_dir)
+    importlib.import_module(module_name)
+    os.chdir(current_working_directory)
 
 
 #

@@ -171,7 +171,8 @@ class AutoModel:
         self.spk_kwargs = spk_kwargs
         self.model_path = kwargs.get("model_path")
 
-    def build_model(self, **kwargs):
+    @staticmethod
+    def build_model(**kwargs):
         assert "model" in kwargs
         if "model_conf" not in kwargs:
             logging.info("download models from model hub: {}".format(kwargs.get("hub", "ms")))
