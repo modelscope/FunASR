@@ -7,8 +7,22 @@ It has attracted many developers to participate in experiencing and developing. 
 - File transcription service, Mandarin, CPU version, done
 - The real-time transcription service, Mandarin (CPU), done
 - File transcription service, English, CPU version, done
-- File transcription service, Mandarin, GPU version, in progress
+- File transcription service, Mandarin, GPU version, done
 - and more.
+
+## File Transcription Service, Mandarin (GPU)
+
+Currently, the FunASR runtime-SDK supports the deployment of file transcription service, Mandarin (GPU version), with a complete speech recognition chain that can transcribe tens of hours of audio into punctuated text, and supports recognition for more than a hundred concurrent streams. 
+
+To meet the needs of different users, we have prepared different tutorials with text and images for both novice and advanced developers.
+
+### Whats-new
+- 2024/06/27: File Transcription Service 1.0 GPU released, docker image version funasr-runtime-sdk-gpu-0.1.0
+
+### Advanced Development Guide
+
+The documentation mainly targets advanced developers who require modifications and customization of the service. It supports downloading model deployments from modelscope and also supports deploying models that users have fine-tuned. For detailed information, please refer to the documentation available by [docs](./docs/SDK_advanced_guide_offline_gpu.md)
+
 
 ## File Transcription Service, English (CPU)
 
