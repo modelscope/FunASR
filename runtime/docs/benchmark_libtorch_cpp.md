@@ -10,15 +10,14 @@ A long audio test set(Non-open source) containing 103 audio files, with duration
 ./funasr-onnx-offline-rtf \
     --model-dir    ./damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-torchscript \
     --vad-dir   ./damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
-    --punc-dir  ./damo/punc_ct-transformer_zh-cn-common-vocab272727-onnx \
+    --punc-dir  ./damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx \
     --gpu \
     --thread-num 20 \
     --bladedisc true \
     --batch-size 20 \
     --wav-path     ./long_test.scp
-
-Node: run in docker, ref to ([docs](./SDK_advanced_guide_offline_gpu_zh.md))
 ```
+Node: run in docker, ref to ([docs](./SDK_advanced_guide_offline_gpu_zh.md))
 
 ### Intel(R) Xeon(R) Platinum 8369B CPU @ 2.90GHz 16core-32processor with avx512_vnni, GPU @ A10
 
@@ -28,5 +27,5 @@ Node: run in docker, ref to ([docs](./SDK_advanced_guide_offline_gpu_zh.md))
 | 1                |   20   | 0.0048 |      208     |
 | 20               |   20   | 0.0008 |      1200    |
 
-Node: On the CPUs, the single-thread RTF is 0.066, and 32-threads' speedup is 330+
+Node: On CPUs, the single-thread RTF is 0.066, and 32-threads' speedup is 330+
 
