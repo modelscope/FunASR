@@ -17,7 +17,7 @@ Currently, the FunASR runtime-SDK supports the deployment of file transcription 
 To meet the needs of different users, we have prepared different tutorials with text and images for both novice and advanced developers.
 
 ### Whats-new
-- 2024/06/27: File Transcription Service 1.0 GPU released, docker image version funasr-runtime-sdk-gpu-0.1.0
+- 2024/06/27: File Transcription Service 1.0 GPU released, supporting dynamic batch processing and multi-threading concurrency. In the long audio test set, the single-thread RTF is 0.0076, and multi-threads' speedup is 1200+ (compared to 330+ on CPU), ref to([docs](./docs/benchmark_libtorch_cpp.md)) , docker image version funasr-runtime-sdk-gpu-0.1.0
 
 ### Advanced Development Guide
 
