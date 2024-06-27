@@ -27,6 +27,8 @@ else:
     )
     dataset = jsonl.split("/")[-1]
     output_dir = os.path.join(ckpt_dir, f"inference-{ckpt_id}", dataset)
+    device = "cuda:0"
+    new_sys = False
 
 
 model = AutoModel(
