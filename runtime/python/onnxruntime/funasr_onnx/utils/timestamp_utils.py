@@ -7,7 +7,7 @@ import numpy as np
 
 def time_stamp_lfr6_onnx(us_cif_peak, char_list, begin_time=0.0, total_offset=-1.5):
     if not len(char_list):
-        return []
+        return "", []
     START_END_THRESHOLD = 5
     MAX_TOKEN_DURATION = 30
     TIME_RATE = 10.0 * 6 / 1000 / 3  #  3 times upsampled
