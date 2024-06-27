@@ -121,9 +121,6 @@ class AutoModel:
         log_level = getattr(logging, kwargs.get("log_level", "INFO").upper())
         logging.basicConfig(level=log_level)
 
-        if not kwargs.get("disable_log", True):
-            tables.print()
-
         model, kwargs = self.build_model(**kwargs)
 
         # if vad_model is not None, build vad model else None
@@ -246,6 +243,10 @@ class AutoModel:
         elif kwargs.get("bf16", False):
             model.to(torch.bfloat16)
         model.to(device)
+
+        if not kwargs.get("disable_log", True):
+            tables.print()
+
         return model, kwargs
 
     def __call__(self, *args, **cfg):
