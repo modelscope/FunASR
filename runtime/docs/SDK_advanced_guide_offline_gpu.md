@@ -29,7 +29,7 @@ Use the following command to pull and launch the Docker image for the FunASR run
 ```shell
 sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-gpu-0.1.0
 
-sudo docker run -p 10098:10095 -it --privileged=true -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-gpu-0.1.0
+sudo docker run --gpus=all -p 10098:10095 -it --privileged=true -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-gpu-0.1.0
 ```
 
 Introduction to command parameters: 
