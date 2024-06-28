@@ -449,7 +449,7 @@ class CifPredictorV2Export(torch.nn.Module):
         mask = mask.transpose(-1, -2).float()
         mask = mask.squeeze(-1)
         hidden, alphas, token_num = self.tail_process_fn(hidden, alphas, mask=mask)
-        acoustic_embeds, cif_peak = cif_v1_export(hidden, alphas, self.threshold)
+        acoustic_embeds, cif_peak = cif_export(hidden, alphas, self.threshold)
 
         return acoustic_embeds, token_num, alphas, cif_peak
 
