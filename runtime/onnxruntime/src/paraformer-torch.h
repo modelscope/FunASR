@@ -36,6 +36,7 @@ namespace funasr {
 
         using TorchModule = torch::jit::script::Module;
         std::shared_ptr<TorchModule> model_ = nullptr;
+        std::shared_ptr<TorchModule> hw_model_ = nullptr;
         std::vector<torch::Tensor> encoder_outs_;
         bool use_hotword;
 
@@ -48,6 +49,7 @@ namespace funasr {
         std::vector<std::vector<float>> CompileHotwordEmbedding(std::string &hotwords);
         void Reset();
         void FbankKaldi(float sample_rate, const float* waves, int len, std::vector<std::vector<float>> &asr_feats);
+        void WarmUp();
         std::vector<std::string> Forward(float** din, int* len, bool input_finished=true, const std::vector<std::vector<float>> &hw_emb={{0.0}}, void* wfst_decoder=nullptr, int batch_in=1);
         string GreedySearch( float* in, int n_len, int64_t token_nums,
                              bool is_stamp=false, std::vector<float> us_alphas={0}, std::vector<float> us_cif_peak={0});

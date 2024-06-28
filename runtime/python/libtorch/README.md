@@ -41,7 +41,7 @@ pip install -e ./
 
 ## Run the demo
 
-- Model_dir: the model path, which contains `model.torchscripts`, `config.yaml`, `am.mvn`.
+- Model_dir: the model path, which contains `model.torchscript`, `config.yaml`, `am.mvn`.
 - Input: wav formt file, support formats: `str, np.ndarray, List[str]`
 - Output: `List[str]`: recognition result.
 - Example:
