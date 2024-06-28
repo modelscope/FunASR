@@ -25,7 +25,9 @@ Node: run in docker, ref to ([docs](./SDK_advanced_guide_offline_gpu_zh.md))
 |------------------|:------:|:------:|:------------:|
 | 1                |   1    | 0.0076 |      130     |
 | 1                |   20   | 0.0048 |      208     |
-| 20               |   20   | 0.0008 |      1200    |
+| 5                |   20   | 0.0011 |      850     |
+| 10               |   20   | 0.0008 |      1200+   |
+| 20               |   20   | 0.0008 |      1200+   |
 
 Node: On CPUs, the single-thread RTF is 0.066, and 32-threads' speedup is 330+
 
