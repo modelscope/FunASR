@@ -1,9 +1,10 @@
-import requests
 from packaging import version
 from funasr import __version__  # Ensure that __version__ is defined in your package's __init__.py
 
 
 def get_pypi_version(package_name):
+    import requests
+
     url = f"https://pypi.org/pypi/{package_name}/json"
     response = requests.get(url)
     if response.status_code == 200:

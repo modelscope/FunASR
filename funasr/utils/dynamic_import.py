@@ -2,6 +2,8 @@ import importlib.util
 
 import importlib.util
 import inspect
+import os.path
+import sys
 
 
 def load_module_from_path(file_path):
@@ -16,6 +18,23 @@ def load_module_from_path(file_path):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+def import_module_from_path(file_path: str):
+
+    if file_path.startswith("http"):
+        from funasr.download.file import download_from_url
+
+        file_path = download_from_url(file_path)
+
+    file_dir = os.path.dirname(file_path)
+    file_name = os.path.basename(file_path)
+    module_name = file_path.split("/")[-1].replace(".py", "")
+    if len(file_dir) < 1:
+        file_dir = "./"
+    sys.path.append(file_dir)
+    importlib.import_module(module_name)
+    print(f"Loading remote code successfully: {file_path}")
 
 
 #
