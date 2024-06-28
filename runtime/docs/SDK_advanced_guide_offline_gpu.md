@@ -12,7 +12,7 @@ This document serves as a development guide for the FunASR offline file transcri
 
 | TIME       | INFO                                                                                                                             | IMAGE VERSION                | IMAGE ID     |
 |------------|----------------------------------------------------------------------------------------------------------------------------------|------------------------------|--------------|
-| 2024.06.27 | Offline File Transcription Software Package(GPU) 1.0 released | funasr-runtime-sdk-gpu-0.1.0 | aa10f938da3b |
+| 2024.06.27 | Offline File Transcription Software Package(GPU) 1.0 released | funasr-runtime-sdk-gpu-0.1.0 | b86066f4d018 |
 
 
 ## Quick start
