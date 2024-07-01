@@ -20,7 +20,7 @@ from funasr.utils.load_utils import load_bytes
 from funasr.download.file import download_from_url
 from funasr.utils.timestamp_tools import timestamp_sentence
 from funasr.utils.timestamp_tools import timestamp_sentence_en
-from funasr.download.download_from_hub import download_model
+from funasr.download.download_model_from_hub import download_model
 from funasr.utils.vad_utils import slice_padding_audio_samples
 from funasr.utils.vad_utils import merge_vad
 from funasr.utils.load_utils import load_audio_text_image_video
