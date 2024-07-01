@@ -19,7 +19,7 @@ from funasr.utils.load_utils import load_bytes
 from funasr.download.file import download_from_url
 from funasr.auto.auto_model import prepare_data_iterator
 from funasr.utils.timestamp_tools import timestamp_sentence
-from funasr.download.download_from_hub import download_model
+from funasr.download.download_model_from_hub import download_model
 from funasr.utils.vad_utils import slice_padding_audio_samples
 from funasr.train_utils.set_all_random_seed import set_all_random_seed
 from funasr.train_utils.load_pretrained_model import load_pretrained_model

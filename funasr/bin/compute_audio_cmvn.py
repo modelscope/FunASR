@@ -7,7 +7,7 @@ import logging
 from omegaconf import DictConfig, OmegaConf
 
 from funasr.register import tables
-from funasr.download.download_from_hub import download_model
+from funasr.download.download_model_from_hub import download_model
 from funasr.train_utils.set_all_random_seed import set_all_random_seed
 
 
