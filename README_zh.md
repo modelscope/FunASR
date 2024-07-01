@@ -33,6 +33,7 @@ FunASR希望在语音识别的学术研究和工业应用之间架起一座桥�
 
 <a name="最新动态"></a>
 ## 最新动态
+- 2024/07/01：中文离线文件转写服务GPU版本 1.1发布，优化bladedisc模型兼容性问题；详细信息参阅([部署文档](runtime/readme_cn.md))
 - 2024/06/27：中文离线文件转写服务GPU版本 1.0发布，支持动态batch，支持多路并发，在长音频测试集上单线RTF为0.0076，多线加速比为1200+（CPU为330+）；详细信息参阅([部署文档](runtime/readme_cn.md))
 - 2024/05/15：新增加情感识别模型，[emotion2vec+large](https://modelscope.cn/models/iic/emotion2vec_plus_large/summary)，[emotion2vec+base](https://modelscope.cn/models/iic/emotion2vec_plus_base/summary)，[emotion2vec+seed](https://modelscope.cn/models/iic/emotion2vec_plus_seed/summary)，输出情感类别为：生气/angry，开心/happy，中立/neutral，难过/sad。
 - 2024/05/15: 中文离线文件转写服务 4.5、英文离线文件转写服务 1.6、中文实时语音听写服务 1.10 发布，适配FunASR 1.0模型结构；详细信息参阅([部署文档](runtime/readme_cn.md))

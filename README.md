@@ -29,6 +29,7 @@
 
 <a name="whats-new"></a>
 ## What's new:
+- 2024/07/01: Offline File Transcription Service GPU 1.1 released, optimize BladeDISC model compatibility issues; ref to ([docs](runtime/readme.md))
 - 2024/06/27: Offline File Transcription Service GPU 1.0 released, supporting dynamic batch processing and multi-threading concurrency. In the long audio test set, the single-thread RTF is 0.0076, and multi-threads' speedup is 1200+ (compared to 330+ on CPU); ref to ([docs](runtime/readme.md))
 - 2024/05/15：emotion recognition models are new supported. [emotion2vec+large](https://modelscope.cn/models/iic/emotion2vec_plus_large/summary)，[emotion2vec+base](https://modelscope.cn/models/iic/emotion2vec_plus_base/summary)，[emotion2vec+seed](https://modelscope.cn/models/iic/emotion2vec_plus_seed/summary). currently supports the following categories: 0: angry 1: happy 2: neutral 3: sad 4: unknown.
 - 2024/05/15: Offline File Transcription Service 4.5, Offline File Transcription Service of English 1.6，Real-time Transcription Service 1.10 released，adapting to FunASR 1.0 model structure；([docs](runtime/readme.md))

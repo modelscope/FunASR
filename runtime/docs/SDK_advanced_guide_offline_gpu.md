@@ -12,6 +12,7 @@ This document serves as a development guide for the FunASR offline file transcri
 
 | TIME       | INFO                                                                                                                             | IMAGE VERSION                | IMAGE ID     |
 |------------|----------------------------------------------------------------------------------------------------------------------------------|------------------------------|--------------|
+| 2024.07.01 | Optimize BladeDISC model compatibility issues | funasr-runtime-sdk-gpu-0.1.1 | b39c6fb16451 |
 | 2024.06.27 | Offline File Transcription Software Package(GPU) 1.0 released | funasr-runtime-sdk-gpu-0.1.0 | b86066f4d018 |
 
 
@@ -27,9 +28,9 @@ If you do not have Docker installed, please refer to [Docker Installation](https
 ### Pulling and launching images
 Use the following command to pull and launch the Docker image for the FunASR runtime-SDK:
 ```shell
-sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-gpu-0.1.0
+sudo docker pull registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-gpu-0.1.1
 
-sudo docker run --gpus=all -p 10098:10095 -it --privileged=true -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-gpu-0.1.0
+sudo docker run --gpus=all -p 10098:10095 -it --privileged=true -v /root:/workspace/models registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-gpu-0.1.1
 ```
 
 Introduction to command parameters: 
@@ -45,16 +46,17 @@ Use the flollowing script to start the server ：
 nohup bash run_server.sh \
   --download-model-dir /workspace/models \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
-  --model-dir damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-torchscript  \
+  --model-dir damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch  \
   --punc-dir damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx \
   --lm-dir damo/speech_ngram_lm_zh-cn-ai-wesp-fst \
   --itn-dir thuduj12/fst_itn_zh \
   --hotword /workspace/models/hotwords.txt > log.txt 2>&1 &
 
+***When the service starts for the first time, it will export the TorchScript model, which may take some time. Please be patient***
 # If you want to close ssl，please add：--certfile 0
 # If you want to deploy the timestamp or nn hotword model, please set --model-dir to the corresponding model:
-#   damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-torchscript（timestamp）
-#   damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404-torchscript（hotword）
+#   damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch（timestamp）
+#   damo/speech_paraformer-large-contextual_asr_nat-zh-cn-16k-common-vocab8404（hotword）
 # If you want to load hotwords on the server side, please configure the hotwords in the host machine file ./funasr-runtime-resources/models/hotwords.txt (docker mapping address: /workspace/models/hotwords.txt):
 # One hotword per line, format (hotword weight): 阿里巴巴 20"
 ```
@@ -67,7 +69,7 @@ The funasr-wss-server supports downloading models from Modelscope. You can set t
 cd /workspace/FunASR/runtime
 nohup bash run_server.sh \
   --download-model-dir /workspace/models \
-  --model-dir damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-torchscript \
+  --model-dir damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch \
   --vad-dir damo/speech_fsmn_vad_zh-cn-16k-common-onnx \
   --punc-dir damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx \
   --itn-dir thuduj12/fst_itn_zh \
@@ -104,8 +106,8 @@ kill -9 PID
 ### Modifying Models and Other Parameters
 To replace the currently used model or other parameters, you need to first shut down the FunASR service, make the necessary modifications to the parameters you want to replace, and then restart the FunASR service. The model should be either an ASR/VAD/PUNC model from ModelScope or a fine-tuned model obtained from ModelScope.
 ```text
-# For example, to replace the ASR model with damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-torchscript, use the following parameter setting --model-dir
-    --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-torchscript 
+# For example, to replace the ASR model with damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch, use the following parameter setting --model-dir
+    --model-dir damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch 
 # Set the port number using --port
     --port <port number>
 # Set the number of inference threads the server will start using --decoder-thread-num
@@ -118,7 +120,7 @@ To replace the currently used model or other parameters, you need to first shut 
 
 After executing the above command, the real-time speech transcription service will be started. If the model is specified as a ModelScope model id, the following models will be automatically downloaded from ModelScope:
 [FSMN-VAD](https://www.modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-onnx/summary),
-[Paraformer-lagre](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-torchscript/summary),
+[Paraformer-lagre](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary),
 [CT-Transformer](https://www.modelscope.cn/models/damo/punc_ct-transformer_cn-en-common-vocab471067-large-onnx/summary),
 [FST-ITN](https://www.modelscope.cn/models/thuduj12/fst_itn_zh/summary),
 [Ngram lm](https://www.modelscope.cn/models/damo/speech_ngram_lm_zh-cn-ai-wesp-fst/summary)
