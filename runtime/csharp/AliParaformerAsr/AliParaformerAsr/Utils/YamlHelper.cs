@@ -14,16 +14,19 @@ namespace AliParaformerAsr.Utils
     /// YamlHelper
     /// Copyright (c)  2023 by manyeyes
     /// </summary>
-    internal class YamlHelper
+    internal class YamlHelper 
     {
-        public static T ReadYaml<T>(string yamlFilePath)
+        public static T ReadYaml<T>(string yamlFilePath) where T:new()
         {
             if (!File.Exists(yamlFilePath))
             {
-#pragma warning disable CS8603 // 可能返回 null 引用。
-                return default(T);
-#pragma warning restore CS8603 // 可能返回 null 引用。
+                // 如果允许返回默认对象，则新建一个默认对象，否则应该是抛出异常
+                // If allowing to return a default object, create a new default object; otherwise, throw an exception
+
+                return new T();
+                // throw new Exception($"not find yaml config file: {yamlFilePath}");
             }
+
             StreamReader yamlReader = File.OpenText(yamlFilePath);
             Deserializer yamlDeserializer = new Deserializer();
             T info = yamlDeserializer.Deserialize<T>(yamlReader);
