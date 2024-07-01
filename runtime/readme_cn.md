@@ -19,7 +19,7 @@ FunASR是由阿里巴巴通义实验室语音团队开源的一款语音识别�
 为了支持不同用户的需求，针对不同场景，准备了不同的图文教程：
 
 ### 最新动态
-- 2024/07/01:   中文离线文件转写服务GPU 1.1 发布，优化bladedisc模型兼容性问题，dokcer镜像版本funasr-runtime-sdk-gpu-0.1.1 (b39c6fb16451)
+- 2024/07/01:   中文离线文件转写服务GPU 1.1 发布，优化bladedisc模型兼容性问题，dokcer镜像版本funasr-runtime-sdk-gpu-0.1.1 (8875cbf9b99e)
 - 2024/06/27:   中文离线文件转写服务GPU 1.0 发布，支持动态batch，支持多路并发，在长音频测试集上单线RTF为0.0076，多线加速比为1200+（CPU为330+），详见([文档](./docs/benchmark_libtorch_cpp.md))，dokcer镜像版本funasr-runtime-sdk-gpu-0.1.0 (b86066f4d018)
 
 ### 部署与开发文档
