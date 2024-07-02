@@ -1636,7 +1636,7 @@ class LLMASR5(nn.Module):
                     target_ids_len_i = end_i - beg_i
                     target_ids_len.append(target_ids_len_i)
                     target_ids.append(target_ids_i)
-                    hidden_states_i = hidden_states[batch_idx, beg_i:end_i, :]
+                    hidden_states_i = hidden_states[batch_idx, beg_i - 1 : end_i - 1, :]
                     hidden_states_select.append(hidden_states_i)
                     beg_i = end_i
                     continue
