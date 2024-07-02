@@ -2377,6 +2377,7 @@ class LLMASR5(nn.Module):
                     target_ids.append(target_ids_i)
                     hidden_states_i = hidden_states[batch_idx, beg_i - 1 : end_i - 1, :]
                     hidden_states_select.append(hidden_states_i)
+                    end_i += 1
                     beg_i = end_i
                     continue
 
@@ -2393,15 +2394,31 @@ class LLMASR5(nn.Module):
         target_ids_len = torch.tensor(target_ids_len, dtype=torch.int32, device=input_ids.device)
         target_ids = target_ids.to(device=input_ids.device)
         hidden_states_select = hidden_states_select.to(device=input_ids.device)
-        loss, logits, target, codec_lengths = self.nll(
-            hidden_states_select, target_ids_len, codec, codec_len
+        nll, logits, target, target_lengths = self.nll(
+            hidden_states_select, target_ids_len, codec[:, :, None], codec_len
         )
+
+        output_mask = (
+            ~make_pad_mask(target_lengths, maxlen=target_lengths.max())
+            .to(hidden_states_select.device)
+            .unsqueeze(-1)
+        )
+        total, batch_size = output_mask.sum() * self.predict_nq, nll.shape[0] * self.predict_nq
+        denom = total if self.length_normalized_loss else batch_size
+        loss = (nll * output_mask).sum() / denom
 
         stats = {}
         with torch.no_grad():
             preds = torch.argmax(model_outputs.logits, -1)
             acc_att = compute_accuracy(preds[:, :-1], labels_ids[:, 1:], ignore_label=-100)
             stats["acc"] = acc_att
+
+            cc = logits.shape[-1]
+            for i in range(self.predict_nq):
+                acc = th_accuracy(
+                    logits[:, :, i, :].reshape(-1, cc), target[:, :, i], self.ad_ignore_id
+                )
+                stats[f"codec_acc_{i + 1}"] = acc
 
         stats["loss"] = torch.clone(loss.detach())
         stats["batch_size"] = batch_size

@@ -8,7 +8,7 @@
 
 import torch
 from torch import nn
-from cosyvoice.modules.nets_utils import make_pad_mask
+from funasr.models.transformer.utils.nets_utils import make_pad_mask
 
 
 class LabelSmoothingLoss(nn.Module):
