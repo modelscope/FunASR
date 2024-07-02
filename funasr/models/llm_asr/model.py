@@ -1432,8 +1432,6 @@ class LLMASR5(nn.Module):
         vocab_size: int = -1,
         ignore_id: int = -1,
         blank_id: int = 0,
-        sos: int = 1,
-        eos: int = 2,
         lsm_weight: float = 0.0,
         length_normalized_loss: bool = False,
         report_cer: bool = True,
@@ -1533,6 +1531,8 @@ class LLMASR5(nn.Module):
         self.length_normalized_loss = length_normalized_loss
         self.beam_search = None
 
+        self.eos = kwargs.get("eos", 151645)
+
     def forward(
         self,
         speech: torch.Tensor,
@@ -1554,6 +1554,7 @@ class LLMASR5(nn.Module):
         import pdb
 
         pdb.set_trace()
+
         if len(speech_lengths.size()) > 1:
             speech_lengths = speech_lengths[:, 0]
 
@@ -1615,6 +1616,41 @@ class LLMASR5(nn.Module):
                 labels=labels_ids,
             )
             loss = model_outputs.loss
+
+        codec = kwargs.get("codec")
+        codec_len = kwargs.get("codec_len")
+        if len(codec_len.size()) > 1:
+            codec_len = codec_len[:, 0]
+        hidden_states = model_outputs.hidden_states[-1].float()
+
+        target_ids = []
+        target_ids_len = []
+        hidden_states_select = []
+        for batch_idx in range(labels_ids.shape[0]):
+            beg_i = 0
+            end_i = 0
+            for token_idx in range(labels_ids.shape[1]):
+                token_int = labels_ids[batch_idx, token_idx].item()
+                if token_int == self.eos:
+                    target_ids_i = labels_ids[batch_idx, beg_i:end_i]
+                    target_ids_len_i = end_i - beg_i
+                    target_ids_len.append(target_ids_len_i)
+                    target_ids.append(target_ids_i)
+                    hidden_states_i = hidden_states[batch_idx, beg_i:end_i, :]
+                    hidden_states_select.append(hidden_states_i)
+                    beg_i = end_i
+                    continue
+
+                end_i += 1
+                if token_int <= 0:
+                    beg_i += 1
+
+        target_ids = torch.nn.utils.rnn.pad_sequence(
+            target_ids, batch_first=True, padding_value=-100
+        )
+        hidden_states_select = torch.nn.utils.rnn.pad_sequence(
+            hidden_states_select, batch_first=True, padding_value=0.0
+        )
 
         stats = {}
         with torch.no_grad():
