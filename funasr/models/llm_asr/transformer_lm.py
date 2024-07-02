@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 
 from funasr.models.transformer.embedding import PositionalEncoding, ScaledPositionalEncoding, RelPositionalEncoding, LegacyRelPositionalEncoding
-from funasr.models.transformer.encoder import TransformerEncoder as Encoder
+from funasr.models.llm_asr.transformer_encoder import TransformerEncoder_s0 as Encoder
 from funasr.models.transformer.utils.mask import subsequent_mask
 from funasr.models.transformer.utils.nets_utils import make_pad_mask
 import logging
