@@ -2126,6 +2126,17 @@ class LLMASR5(nn.Module):
         self.ad_sos_eos = 0
         self.ad_task_id = 1
         self.ad_ignore_id = -1
+        self.predict_nq = 1
+
+        from .label_smoothing_loss import LabelSmoothingLoss
+
+        self.criterion_ce = LabelSmoothingLoss(
+            size=self.lm_out_voc_size // self.predict_nq,
+            padding_idx=self.ad_ignore_id,
+            smoothing=lsm_weight,
+            normalize_length=length_normalized_loss,
+            reduction=False,
+        )
 
     def build_audio_decoder(self, name, conf):
         if name == "transformer":
@@ -2204,7 +2215,7 @@ class LLMASR5(nn.Module):
         )
         for i, codec_len in enumerate(codec_lengths):
             llm_targets[i, :codec_len] = codec[i, :codec_len]
-            llm_targets[i, codec_len] = self.codebook_size + self.sos_eos
+            llm_targets[i, codec_len] = self.codebook_size + self.ad_sos_eos
 
         return (llm_inputs, llm_targets), (llm_lengths, codec_lengths + 1)
 
