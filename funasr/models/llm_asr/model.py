@@ -1541,9 +1541,13 @@ class LLMASR5(nn.Module):
         # audio decoder related
         self.audio_decoder = self.build_audio_decoder(name=audio_decoder, conf=audio_decoder_conf)
         self.audio_decoder_in_proj = torch.nn.Linear(llm_dim, self.audio_decoder.embed_unit)
+        self.codebook_dim = audio_decoder_conf.pop("codebook_dim", 1024)
+        self.codebook_size = audio_decoder_conf.pop("codebook_size", 4096)
+        self.codec_embedder = torch.nn.Embedding(self.codebook_size, self.codebook_dim)
         self.audio_decoder_embedding = torch.nn.Embedding(2, self.audio_decoder.embed_unit)
         self.ad_sos_eos = 0
         self.ad_task_id = 1
+        self.ad_ignore_id = -1
 
     def build_audio_decoder(self, name, conf):
         if name == "transformer":
@@ -1564,6 +1568,15 @@ class LLMASR5(nn.Module):
 
         conf["name"] = name
         return lm_model
+
+    def calc_dense_vector(self, codec, codec_lengths):
+        """
+        Args:
+            codec: (B, T, Nq)
+            codec_lengths: (B, )
+        """
+        mask = codec != self.ad_ignore_id
+        return self.codec_embedder(codec * mask).sum(dim=-2) * mask
 
     def prepare_audio_decoder_io(
             self,
@@ -1649,7 +1662,7 @@ class LLMASR5(nn.Module):
         # x: (Batch, Length) -> y: (Batch, Length, NVocab)
         sequence = sequence[:, :x_lengths.max()]
         target = target[:, :y_lengths.max()]
-        y, _ = self.codec_lm(sequence, x_lengths, text_lengths+1)
+        y, _ = self.audio_decoder(sequence, x_lengths, text_lengths+1)
         bb, tt = y.shape[0], y.shape[1]
         y = y.reshape(bb, tt, self.predict_nq, -1)
         # 2b. Extract real logits
