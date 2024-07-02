@@ -22,6 +22,6 @@ namespace AliFsmnVadSharp.Model
         public string encoder { get => _encoder; set => _encoder = value; }
         public FrontendConfEntity frontend_conf { get => _frontend_conf; set => _frontend_conf = value; }
         public EncoderConfEntity encoder_conf { get => _encoder_conf; set => _encoder_conf = value; }
-        public VadPostConfEntity vad_post_conf { get => _vad_post_conf; set => _vad_post_conf = value; }
+        public VadPostConfEntity model_conf { get => _vad_post_conf; set => _vad_post_conf = value; }
     }
 }
