@@ -2115,16 +2115,16 @@ class LLMASR5(nn.Module):
         self.eos = kwargs.get("eos", 151645)
 
         # audio decoder related
+        self.codebook_dim = audio_decoder_conf.get("codebook_dim", 1024)
+        self.codebook_size = audio_decoder_conf.get("codebook_size", 4096)
+        self.lm_out_voc_size = self.codebook_size + 1
         self.audio_decoder = self.build_audio_decoder(name=audio_decoder, conf=audio_decoder_conf)
         self.audio_decoder_in_proj = torch.nn.Linear(llm_dim, self.audio_decoder.embed_unit)
-        self.codebook_dim = audio_decoder_conf.pop("codebook_dim", 1024)
-        self.codebook_size = audio_decoder_conf.pop("codebook_size", 4096)
         self.codec_embedder = torch.nn.Embedding(self.codebook_size, self.codebook_dim)
         self.audio_decoder_embedding = torch.nn.Embedding(2, self.audio_decoder.embed_unit)
         self.ad_sos_eos = 0
         self.ad_task_id = 1
         self.ad_ignore_id = -1
-        self.lm_out_voc_size = self.codebook_size + 1
 
     def build_audio_decoder(self, name, conf):
         if name == "transformer":
