@@ -2124,6 +2124,7 @@ class LLMASR5(nn.Module):
         self.ad_sos_eos = 0
         self.ad_task_id = 1
         self.ad_ignore_id = -1
+        self.lm_out_voc_size = self.codebook_size + 1
 
     def build_audio_decoder(self, name, conf):
         if name == "transformer":
