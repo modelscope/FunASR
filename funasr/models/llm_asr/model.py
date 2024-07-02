@@ -2084,6 +2084,7 @@ class LLMASR5(nn.Module):
             load_in_8bit=None,
             device_map=None,
             use_cache=None,
+            output_hidden_states=True,
         )
         freeze = llm_conf.get("freeze", True)
         if freeze:
