@@ -40,7 +40,6 @@ requirements = {
         "hydra-core>=1.3.2",
         "tensorboardX",
         # "rotary_embedding_torch",
-        "openai-whisper",
         "requests",
     ],
     # train: The modules invoked when training only.

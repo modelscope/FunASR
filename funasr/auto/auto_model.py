@@ -20,7 +20,7 @@ from funasr.utils.load_utils import load_bytes
 from funasr.download.file import download_from_url
 from funasr.utils.timestamp_tools import timestamp_sentence
 from funasr.utils.timestamp_tools import timestamp_sentence_en
-from funasr.download.download_from_hub import download_model
+from funasr.download.download_model_from_hub import download_model
 from funasr.utils.vad_utils import slice_padding_audio_samples
 from funasr.utils.vad_utils import merge_vad
 from funasr.utils.load_utils import load_audio_text_image_video
@@ -121,9 +121,6 @@ class AutoModel:
         log_level = getattr(logging, kwargs.get("log_level", "INFO").upper())
         logging.basicConfig(level=log_level)
 
-        if not kwargs.get("disable_log", True):
-            tables.print()
-
         model, kwargs = self.build_model(**kwargs)
 
         # if vad_model is not None, build vad model else None
@@ -218,6 +215,7 @@ class AutoModel:
         kwargs["frontend"] = frontend
         # build model
         model_class = tables.model_classes.get(kwargs["model"])
+        assert model_class is not None, f'{kwargs["model"]} is not registered'
         model_conf = {}
         deep_update(model_conf, kwargs.get("model_conf", {}))
         deep_update(model_conf, kwargs)
@@ -245,6 +243,10 @@ class AutoModel:
         elif kwargs.get("bf16", False):
             model.to(torch.bfloat16)
         model.to(device)
+
+        if not kwargs.get("disable_log", True):
+            tables.print()
+
         return model, kwargs
 
     def __call__(self, *args, **cfg):

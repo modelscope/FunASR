@@ -28,6 +28,8 @@ def compute_wer(
     ref_dict = {}
     with open(hyp_file, "r") as hyp_reader:
         for line in hyp_reader:
+            if len(line.split()) < 2:
+                continue
             key = line.strip().split()[0]
             value = line.strip().split()[1:]
             if cn_postprocess:
@@ -39,6 +41,8 @@ def compute_wer(
             hyp_dict[key] = value
     with open(ref_file, "r") as ref_reader:
         for line in ref_reader:
+            if len(line.split()) < 2:
+                continue
             key = line.strip().split()[0]
             value = line.strip().split()[1:]
             if cn_postprocess:

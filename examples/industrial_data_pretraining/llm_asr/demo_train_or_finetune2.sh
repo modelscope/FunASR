@@ -30,7 +30,7 @@ init_param="${output_dir}/model.pt"
 mkdir -p ${output_dir}
 echo "log_file: ${log_file}"
 
-deepspeed_config=${workspace}../../ds_stage1.json
+deepspeed_config=${workspace}/../../ds_stage1.json
 
 DISTRIBUTED_ARGS="
     --nnodes ${WORLD_SIZE:-1} \

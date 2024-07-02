@@ -169,7 +169,7 @@ def merge_seque(distribute_res):
     return res
 
 
-def smooth(res, mindur=1):
+def smooth(res, mindur=0.7):
     # if only one segment, return directly
     if len(res) < 2:
         return res
