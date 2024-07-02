@@ -2139,7 +2139,6 @@ class LLMASR5(nn.Module):
         else:
             raise TypeError(f"Unknown codec decoder type {name}")
 
-        conf["name"] = name
         return lm_model
 
     def calc_dense_vector(self, codec, codec_lengths):
