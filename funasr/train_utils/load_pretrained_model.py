@@ -10,7 +10,7 @@ import torch.optim
 import pdb
 
 
-def _load_pretrained_model(
+def load_pretrained_model(
     path,
     model: torch.nn.Module,
     ignore_init_mismatch: bool = True,
@@ -102,28 +102,28 @@ def _load_pretrained_model(
     logging.info(f"Loading ckpt: {path}, status: {flag}")
 
 
-def load_pretrained_model(
-    path,
-    model: torch.nn.Module,
-    ignore_init_mismatch: bool = True,
-    map_location: str = "cpu",
-    oss_bucket=None,
-    scope_map=[],
-    excludes=None,
-    **kwargs,
-):
-    if isinstance(path, str):
-        path = path.split(",")
-
-    for i, path_i in enumerate(path):
-        logging.info(f"Loading ckpt-{i}: {path_i}")
-        _load_pretrained_model(
-            path_i,
-            model=model,
-            ignore_init_mismatch=ignore_init_mismatch,
-            map_location=map_location,
-            oss_bucket=oss_bucket,
-            scope_map=scope_map,
-            excludes=excludes,
-            **kwargs,
-        )
+# def load_pretrained_model(
+#     path,
+#     model: torch.nn.Module,
+#     ignore_init_mismatch: bool = True,
+#     map_location: str = "cpu",
+#     oss_bucket=None,
+#     scope_map=[],
+#     excludes=None,
+#     **kwargs,
+# ):
+#     if isinstance(path, str):
+#         path = path.split(",")
+#
+#     for i, path_i in enumerate(path):
+#         logging.info(f"Loading ckpt-{i}: {path_i}")
+#         _load_pretrained_model(
+#             path_i,
+#             model=model,
+#             ignore_init_mismatch=ignore_init_mismatch,
+#             map_location=map_location,
+#             oss_bucket=oss_bucket,
+#             scope_map=scope_map,
+#             excludes=excludes,
+#             **kwargs,
+#         )

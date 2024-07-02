@@ -224,18 +224,21 @@ class AutoModel:
         # init_param
         init_param = kwargs.get("init_param", None)
         if init_param is not None:
-            if os.path.exists(init_param):
-                logging.info(f"Loading pretrained params from {init_param}")
-                load_pretrained_model(
-                    model=model,
-                    path=init_param,
-                    ignore_init_mismatch=kwargs.get("ignore_init_mismatch", True),
-                    oss_bucket=kwargs.get("oss_bucket", None),
-                    scope_map=kwargs.get("scope_map", []),
-                    excludes=kwargs.get("excludes", None),
-                )
-            else:
-                print(f"error, init_param does not exist!: {init_param}")
+            if isinstance(init_param, str):
+                init_param = [init_param]
+            for i, init_param_i in enumerate(init_param):
+                if os.path.exists(init_param_i):
+                    logging.info(f"Loading pretrained params from ckpt-{i}: {init_param_i}")
+                    load_pretrained_model(
+                        model=model,
+                        path=init_param_i,
+                        ignore_init_mismatch=kwargs.get("ignore_init_mismatch", True),
+                        oss_bucket=kwargs.get("oss_bucket", None),
+                        scope_map=kwargs.get("scope_map", []),
+                        excludes=kwargs.get("excludes", None),
+                    )
+                else:
+                    print(f"error, init_param from ckpt-{i} does not exist!: {init_param_i}")
 
         # fp16
         if kwargs.get("fp16", False):
