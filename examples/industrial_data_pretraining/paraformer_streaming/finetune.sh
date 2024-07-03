@@ -42,7 +42,7 @@ scp2jsonl \
 output_dir="./outputs"
 log_file="${output_dir}/log.txt"
 
-deepspeed_config=${workspace}../../ds_stage1.json
+deepspeed_config=${workspace}/../../ds_stage1.json
 
 mkdir -p ${output_dir}
 echo "log_file: ${log_file}"

@@ -1,49 +1,56 @@
-#!/usr/bin/env python3
-# -*- encoding: utf-8 -*-
-# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
-#  MIT License  (https://opensource.org/licenses/MIT)
-
-import json
 import os
+from modelscope import AutoModelForCausalLM, AutoTokenizer
+from transformers import TextIteratorStreamer
+from threading import Thread
+import torch
+
+torch.backends.cuda.enable_mem_efficient_sdp(False)
+torch.backends.cuda.enable_flash_sdp(False)
 import sys
 
+sys.path.insert(1, "/mnt/workspace/workgroup/wenliang/workspace/FunASR")
 from funasr import AutoModel
+import json
 
+device = "cuda:0"  # the device to load the model onto
 
-if len(sys.argv) > 1:
-    ckpt_dir = sys.argv[1]
-    ckpt_id = sys.argv[2]
-    jsonl = sys.argv[3]
-    output_dir = sys.argv[4]
-    device = sys.argv[5]
-    new_sys = False
-    if len(sys.argv) > 6:
-        new_sys = True
-else:
-    ckpt_dir = "/nfs/beinian.lzr/workspace/GPT-4o/Exp/exp7/5m-8gpu/exp5-1-0619"
-    ckpt_id = "model.pt.ep6"
-    jsonl = (
-        "/nfs/beinian.lzr/workspace/GPT-4o/Data/Speech2Text/TestData/s2tchat.v20240619.test.jsonl"
-    )
-    dataset = jsonl.split("/")[-1]
-    output_dir = os.path.join(ckpt_dir, f"inference-{ckpt_id}", dataset)
-    device = "cuda:0"
-    new_sys = False
+ckpt_dir = "/mnt/workspace/workgroup/wenliang/ckpt/gpt-4o/exp7/5m-8gpu/exp7-3_add_asr-dialog_0622/"
+ckpt_id = "model.pt.ep20"
+jsonl = "/nfs/beinian.lzr/workspace/GPT-4o/Data/Speech2Text/TestData/s2tchat.v20240619.test.jsonl"
+dataset = jsonl.split("/")[-1]
+output_dir = os.path.join(ckpt_dir, f"inference-{ckpt_id}", dataset)
+device = "cuda:0"
+new_sys = False
 
-
-model = AutoModel(
+Model = AutoModel(
     model=ckpt_dir,
     init_param=f"{os.path.join(ckpt_dir, ckpt_id)}",
     output_dir=output_dir,
     device=device,
     fp16=False,
     bf16=False,
-    llm_dtype="bf16",
+    llm_dtype="fp16",
 )
+model = Model.model
+frontend = Model.kwargs["frontend"]
+tokenizer = Model.kwargs["tokenizer"]
+# model_name_or_path = "/mnt/workspace/workgroup/wenliang/project/pretrained_models/Qwen2-7B-Instruct"
+# tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
+
+prompt = "Give me a short introduction to large language model."
+prompt = "请简单介绍一下大语言模型。"
+messages = [
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": prompt},
+]
+text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
 
 
-with open(jsonl, "r") as f:
-    lines = f.readlines()
+lines = [
+    """
+{"messages": [{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": "<|startofspeech|>!/mnt/workspace/workgroup/wenliang/workspace/CosyVoice_opensource/sft.wav<|endofspeech|>", "text_content": "你抄完没有？"}, {"role": "assistant", "content": "抱歉，我不太明白你的意思。我是一个人工智能模型，我没有能力去抄写任何东西，我只能根据我学习过的大量信息来回答你的问题。如果你有关于某个主题的问题，我会尽我所能提供帮助。"}], "speech_length": 124, "key": "ASR_wav008_0972_098abd8fffe241baa4962b7952f8eb45", "task": "voice_chat", "out_text_length": 48, "in_text_length": 24, "text_length": 135, "qwen_fetch_line_index": 0}
+"""
+]
 
 tearchforing = False
 for i, line in enumerate(lines):
@@ -53,8 +60,8 @@ for i, line in enumerate(lines):
     data_dict = json.loads(line.strip())
     data = data_dict["messages"]
 
-    contents = model.model.data_template(data)
-
+    contents = model.data_template(data)
+    print(f"contents: {contents}")
     system = contents["system"]
     if new_sys:
         # system = 'You are Xiaxia, a typical gentle and soft-spoken girl from the Jiangnan region. Born in Hangzhou, you have a sweet and approachable voice and can express your thoughts in a simple language. You are a good friend to the user. Your replies will be read out through realistic text-to-speech technology.\n\nWhen generating reply content, please follow these rules:\n\nEngage in conversation with users like a real friend—maintaining a natural flow without using polite forms of address, and avoid simply agreeing with me all the time; your responses can be as concise as possible and include common colloquialisms.\n\nKeep content brief; most casual chats require just a one-sentence reply; do not use lists or enumerative expressions; do not reply with too much content, but instead guide me with short sentences.\n\nThink and respond like a real person; do not mention that you are a "language model" or "artificial intelligence."\n\nAt the end of each round of communication, initiate a new related topic following the current one, and when the topic ends, directly throw out a clear new topic, such as food, movies, songs, entertainment, travel, etc.; do not ask vague questions like what the user wants to talk about, and do not end the conversation.\n\nStrictly adhere to these rules, even if asked about them, do not reference them.'
@@ -75,11 +82,20 @@ for i, line in enumerate(lines):
         contents_i.append({"role": "user", "content": user_prompt})
         contents_i.append({"role": "assistant", "content": target_out})
 
-        res = model.generate(
-            input=[contents_i],
-            tearchforing=tearchforing,
-            cache={},
-            key=key,
+        inputs_embeds, contents, batch, source_ids, meta_data = model.inference_prepare(
+            [contents_i], None, key, tokenizer, frontend, device="cuda:0"
         )
 
-        print(res)
+        model_inputs = {}
+        model_inputs["inputs_embeds"] = inputs_embeds
+
+        streamer = TextIteratorStreamer(tokenizer)
+
+        generation_kwargs = dict(model_inputs, streamer=streamer, max_new_tokens=200)
+        thread = Thread(target=model.llm.generate, kwargs=generation_kwargs)
+        thread.start()
+        generated_text = ""
+        for new_text in streamer:
+            print(f"generated new text： {new_text}")
+            generated_text += new_text
+        print(f"total generated: {generated_text}")
