@@ -2715,37 +2715,26 @@ class LLMASR5(nn.Module):
             self.llm = self.llm.to(dtype_map[llm_dtype])
             inputs_embeds = inputs_embeds.to(dtype_map[llm_dtype])
 
-            if not kwargs.get("tearchforing", False):
+            generated_ids = self.llm.generate(
+                inputs_embeds=inputs_embeds,
+                max_new_tokens=kwargs.get("max_length", 512),
+                output_hidden_states=True,
+                return_dict_in_generate=True,
+                output_scores=True,
+            )
+            hidden_states = generated_ids["hidden_states"]
 
-                generated_ids = self.llm.generate(
-                    inputs_embeds=inputs_embeds, max_new_tokens=kwargs.get("max_length", 512)
-                )
-                # generated_ids = [
-                #     output_ids[len(input_id) :]
-                #     for input_id, output_ids in zip(input_ids, generated_ids)
-                # ]
-                response = tokenizer.batch_decode(
-                    generated_ids, skip_special_tokens=kwargs.get("skip_special_tokens", True)
-                )[0]
+            # hidden_states: (t1, t2, ..., tn, ..., tN), tn=(l1, l2, ..., ln, ..., lN), ln: shape: 1x1x3584
 
-                loss = None
-            else:
+            # generated_ids = [
+            #     output_ids[len(input_id) :]
+            #     for input_id, output_ids in zip(input_ids, generated_ids)
+            # ]
+            # response = tokenizer.batch_decode(
+            #     generated_ids, skip_special_tokens=kwargs.get("skip_special_tokens", True)
+            # )[0]
 
-                labels_ids = batch["labels_ids"]
-                labels_ids[labels_ids == -1] = -100
-                attention_mask = batch.get("attention_mask", None)
-                # attention_mask = attention_mask.to(dtype_map[llm_dtype])
-                model_outputs = self.llm(
-                    inputs_embeds=inputs_embeds, attention_mask=attention_mask, labels=labels_ids
-                )
-
-                preds = torch.argmax(model_outputs.logits, -1)[:, source_ids.shape[1] :]
-                response = tokenizer.batch_decode(
-                    preds,
-                    add_special_tokens=False,
-                    skip_special_tokens=kwargs.get("skip_special_tokens", True),
-                )[0]
-                loss = model_outputs.loss.item()
+            loss = None
 
         ibest_writer = None
         if kwargs.get("output_dir") is not None:
