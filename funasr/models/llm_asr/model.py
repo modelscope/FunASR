@@ -2357,9 +2357,10 @@ class LLMASR5(nn.Module):
             loss = model_outputs.loss
 
         codec = kwargs.get("codec")
-        codec_len = kwargs.get("codec_len")
-        if len(codec_len.size()) > 1:
-            codec_len = codec_len[:, 0]
+        # codec_len = kwargs.get("codec_len")
+        # if len(codec_len.size()) > 1:
+        #     codec_len = codec_len[:, 0]
+        codec_len = (codec > 0).sum(-1)
         hidden_states = model_outputs.hidden_states[-1].float()
 
         target_ids = []
