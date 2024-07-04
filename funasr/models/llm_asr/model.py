@@ -2754,7 +2754,7 @@ class LLMASR5(nn.Module):
                 dtype=torch.int32,
             ).to(inputs_embeds.device)
             for i in range(token_num):
-                hidden_states_out[0, i, :] = hidden_states[1][-1][0, 0, :].to(torch.float32)
+                hidden_states_out[0, i, :] = hidden_states[i][-1][0, 0, :].to(torch.float32)
 
             speech_tokens = self.audio_decode(hidden_states_out, hidden_states_out_len)[
                 :, :, 0
