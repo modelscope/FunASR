@@ -2564,8 +2564,16 @@ class LLMASR5(nn.Module):
             fbank_beg += [fbank_beg_i + len(input_ids)]
             fake_token_len += [fake_token_len_i]
             source_mask = [-100] * len(source_ids)
-            target_out = f"{target_out}<|im_end|>"
-            target_ids = tokenizer.encode(target_out)
+            splits = pattern.split(target_out)
+            for k, sub_str in enumerate(splits):
+                if len(sub_str) < 1:
+                    continue
+                if not sub_str.startswith("<|startofspeech|>"):
+                    sub_str = f"{sub_str}<|im_end|>"
+                    sub_token = tokenizer.encode(sub_str)
+            target_ids = sub_token
+            # target_out = f"{target_out}<|im_end|>"
+            # target_ids = tokenizer.encode(target_out)
             input_source_ids = input_ids + source_ids
             input_ids += source_ids + target_ids
             labels += source_mask + target_ids
@@ -2740,9 +2748,9 @@ class LLMASR5(nn.Module):
             for i in range(token_num):
                 hidden_states_out[0, i, :] = hidden_states[1][-1][0, 0, :].to(torch.float32)
 
-            speech_tokens = self.audio_decode(
-                hidden_states_out, hidden_states_out_len
-            )  # 1xl: 2,10,1023
+            speech_tokens = self.audio_decode(hidden_states_out, hidden_states_out_len)[
+                :, :, 0
+            ]  # 1xlx1: 2,10,1023
 
             sequences = generated_ids["sequences"]
             # generated_ids = [

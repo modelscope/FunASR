@@ -225,7 +225,7 @@ class AutoModel:
         init_param = kwargs.get("init_param", None)
         if init_param is not None:
             if isinstance(init_param, str):
-                init_param = [init_param]
+                init_param = init_param.split(",")
             for i, init_param_i in enumerate(init_param):
                 if os.path.exists(init_param_i):
                     logging.info(f"Loading pretrained params from ckpt-{i}: {init_param_i}")
