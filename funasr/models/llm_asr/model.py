@@ -2732,7 +2732,7 @@ class LLMASR5(nn.Module):
             )
 
             for i in range(token_num):
-                hidden_states_out[0, i, :] = hidden_states[1, -1][0, 0, :].to(torch.float32)
+                hidden_states_out[0, i, :] = hidden_states[1][-1][0, 0, :].to(torch.float32)
 
             # generated_ids = [
             #     output_ids[len(input_id) :]
