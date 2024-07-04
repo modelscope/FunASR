@@ -33,6 +33,7 @@ FunASR希望在语音识别的学术研究和工业应用之间架起一座桥�
 
 <a name="最新动态"></a>
 ## 最新动态
+- 2024/07/04：[SenseVoice](https://github.com/FunAudioLLM/SenseVoice) 是一个基础语音理解模型，具备多种语音理解能力，涵盖了自动语音识别（ASR）、语言识别（LID）、情感识别（SER）以及音频事件检测（AED）。
 - 2024/07/01：中文离线文件转写服务GPU版本 1.1发布，优化bladedisc模型兼容性问题；详细信息参阅([部署文档](runtime/readme_cn.md))
 - 2024/06/27：中文离线文件转写服务GPU版本 1.0发布，支持动态batch，支持多路并发，在长音频测试集上单线RTF为0.0076，多线加速比为1200+（CPU为330+）；详细信息参阅([部署文档](runtime/readme_cn.md))
 - 2024/05/15：新增加情感识别模型，[emotion2vec+large](https://modelscope.cn/models/iic/emotion2vec_plus_large/summary)，[emotion2vec+base](https://modelscope.cn/models/iic/emotion2vec_plus_base/summary)，[emotion2vec+seed](https://modelscope.cn/models/iic/emotion2vec_plus_seed/summary)，输出情感类别为：生气/angry，开心/happy，中立/neutral，难过/sad。
@@ -99,6 +100,7 @@ FunASR开源了大量在工业数据上预训练模型，您可以在[模型许�
 
 |                                                                                                     模型名字                                                                                                      |        任务详情        |      训练数据      |  参数量   | 
 |:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:------------------:|:--------------:|:------:|
+|   SenseVoiceSmall <br> ([⭐](https://www.modelscope.cn/models/iic/SenseVoiceSmall)  [🤗](https://huggingface.co/FunAudioLLM/SenseVoiceSmall) )   |  多种语音理解能力，涵盖了自动语音识别（ASR）、语言识别（LID）、情感识别（SER）以及音频事件检测（AED）   |  400000小时，中文   |  330M  |
 |    paraformer-zh <br> ([⭐](https://www.modelscope.cn/models/damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary)  [🤗](https://huggingface.co/funasr/paraformer-zh) )    |  语音识别，带时间戳输出，非实时   |   60000小时，中文   |  220M  |
 | paraformer-zh-streaming <br> ( [⭐](https://modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary) [🤗](https://huggingface.co/funasr/paraformer-zh-streaming) ) |      语音识别，实时       |   60000小时，中文   |  220M  |
 |         paraformer-en <br> ( [⭐](https://www.modelscope.cn/models/damo/speech_paraformer-large-vad-punc_asr_nat-en-16k-common-vocab10020/summary) [🤗](https://huggingface.co/funasr/paraformer-en) )         |      语音识别，非实时      |   50000小时，英文   |  220M  |
