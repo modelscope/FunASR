@@ -1530,7 +1530,7 @@ class LLMASR5(nn.Module):
         self.concat_emb_hidden = audio_decoder_conf.get("concat_emb_hidden", False)
         self.concat_emb_hidden_norm = audio_decoder_conf.get("concat_emb_hidden_norm", False)
         if self.concat_emb_hidden_norm:
-            self.hidden_norm = torch.nn.LayerNorm(llm_dim)
+            self.hidden_norm = torch.nn.LayerNorm(self.llm_dim)
             self.fusion_dropout = nn.Dropout(audio_decoder_conf.get("fusion_drop_rate", 0.0))
             self.emb_norm = torch.nn.LayerNorm(self.llm_dim)
             self.fusion_norm = torch.nn.LayerNorm(self.llm_dim)
