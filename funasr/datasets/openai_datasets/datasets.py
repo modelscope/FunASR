@@ -610,6 +610,8 @@ class OpenAIDatasetMultiTurnCodec(torch.utils.data.Dataset):
                 fake_token_len_i = 0
                 fbank_beg_i = -1
                 fbank_lens_i = []
+                speech = []
+                speech_lengths = []
                 for k, sub_str in enumerate(splits):
                     if not sub_str.startswith("<|startofspeech|>"):
                         sub_token = self.tokenizer.encode(sub_str)
@@ -688,9 +690,11 @@ class OpenAIDatasetMultiTurnCodec(torch.utils.data.Dataset):
 
                 input_ids += source_ids + target_ids
                 labels += source_mask + target_ids
-                fbank.append(speech[0, :, :])
+
                 fbank_mask += fbank_mask_i
-                fbank_lens.append(speech_lengths)
+                if len(speech) > 0:
+                    fbank.append(speech[0, :, :])
+                    fbank_lens.append(speech_lengths)
 
             if badcase_flag:
                 continue
@@ -706,8 +710,6 @@ class OpenAIDatasetMultiTurnCodec(torch.utils.data.Dataset):
             fake_token_len = torch.tensor(fake_token_len, dtype=torch.int32)
 
             output = {
-                "speech": fbank,
-                "speech_lengths": fbank_lens,
                 "fbank_mask": fbank_mask,
                 "fbank_beg": fbank_beg,
                 "fake_token_len": fake_token_len,
@@ -719,6 +721,10 @@ class OpenAIDatasetMultiTurnCodec(torch.utils.data.Dataset):
                 codec_len = torch.tensor(codec_len, dtype=torch.int32)
                 output["codec"] = codec
                 output["codec_len"] = codec_len
+            if len(fbank) > 0:
+                output["speech"] = fbank
+                output["speech_lengths"] = fbank_lens
+
             break
 
         return output
