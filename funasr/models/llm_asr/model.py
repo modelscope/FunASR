@@ -1532,8 +1532,8 @@ class LLMASR5(nn.Module):
         if self.concat_emb_hidden_norm:
             self.hidden_norm = torch.nn.LayerNorm(llm_dim)
             self.fusion_dropout = nn.Dropout(audio_decoder_conf.get("fusion_drop_rate", 0.0))
-            self.emb_norm = torch.nn.LayerNorm(self._output_size)
-            self.fusion_norm = torch.nn.LayerNorm(self._output_size)
+            self.emb_norm = torch.nn.LayerNorm(self.llm_dim)
+            self.fusion_norm = torch.nn.LayerNorm(self.llm_dim)
             self.fusion_act = Swish()
         self.codebook_dim = audio_decoder_conf.get("codebook_dim", 1024)
         self.codebook_size = audio_decoder_conf.get("codebook_size", 4096)
