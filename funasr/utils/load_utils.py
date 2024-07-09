@@ -125,9 +125,11 @@ def load_audio_text_image_video(
         if mat.ndim == 2:
             mat = mat[:, 0]
         data_or_path_or_list = mat
+    elif isinstance(data_or_path_or_list, bytes):  # audio bytes
+        data_or_path_or_list = load_bytes(data_or_path_or_list)
     else:
         pass
-        # print(f"unsupport data type: {data_or_path_or_list}, return raw data")
+        print(f"unsupport data type: {data_or_path_or_list}, return raw data")
 
     if audio_fs != fs and data_type != "text":
         resampler = torchaudio.transforms.Resample(audio_fs, fs)

@@ -814,7 +814,7 @@ class LLMASR2(nn.Module):
             ibest_writer = self.writer[f"{0 + 1}best_recog"]
 
         results = []
-        response_clean = re.sub("[^\w\s\u3000\u4e00-\u9fff]+", "", response)
+        response_clean = re.sub(r"[^\w\s\u3000\u4e00-\u9fff]+", "", response)
         result_i = {"key": key[0], "text": response, "text_tn": response_clean, "label": label}
         if loss is not None:
             result_i["loss"] = loss
@@ -1097,6 +1097,9 @@ class LLMASR4(nn.Module):
             if role == "system":
                 system.append(content)
             elif role == "user":
+                if "audio" in item:
+                    audio = item["audio"]
+                    content = [content, audio]
                 user.append(content)
             elif role == "assistant":
                 assistant.append(content)
@@ -1134,7 +1137,8 @@ class LLMASR4(nn.Module):
             if len(input_ids) > kwargs.get("max_token_length", 1500):
 
                 break
-
+            if isinstance(user_prompt, (list, tuple)):
+                user_prompt, audio = user_prompt
             if i == 0:
                 source_input = f"<|im_start|>system\n{system_prompt}<|im_end|>\n<|im_start|>user\n{user_prompt}<|im_end|>\n<|im_start|>assistant\n"
             else:
@@ -1159,8 +1163,8 @@ class LLMASR4(nn.Module):
                     )
                     if sub_str.startswith("!"):
                         sub_str = sub_str[1:]
-                        if sub_str.startswith("!"):  # !!bytes
-                            sub_str = eval(sub_str[1:])
+                        if sub_str.startswith("!"):  # !!: audio sample point
+                            sub_str = audio
                         try:
                             time1 = time.perf_counter()
                             data_src = load_audio_text_image_video(sub_str, fs=frontend.fs)
@@ -1395,7 +1399,7 @@ class LLMASR4(nn.Module):
             ibest_writer = self.writer[f"{0 + 1}best_recog"]
 
         results = []
-        response_clean = re.sub("[^\w\s\u3000\u4e00-\u9fff]+", "", response)
+        response_clean = re.sub(r"[^\w\s\u3000\u4e00-\u9fff]+", "", response)
         result_i = {"key": key[0], "text": response, "text_tn": response_clean, "label": label}
         if loss is not None:
             result_i["loss"] = loss
@@ -2224,7 +2228,7 @@ class LLMASR5(nn.Module):
             ibest_writer = self.writer[f"{0 + 1}best_recog"]
 
         results = []
-        response_clean = re.sub("[^\w\s\u3000\u4e00-\u9fff]+", "", response)
+        response_clean = re.sub(r"[^\w\s\u3000\u4e00-\u9fff]+", "", response)
         result_i = {
             "key": key[0],
             "text": response,
