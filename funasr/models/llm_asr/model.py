@@ -1417,6 +1417,21 @@ class Swish(torch.nn.Module):
         return x * torch.sigmoid(x)
 
 
+class LayerNorm(nn.LayerNorm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def forward(self, input):
+        output = F.layer_norm(
+            input.float(),
+            self.normalized_shape,
+            self.weight.float() if self.weight is not None else None,
+            self.bias.float() if self.bias is not None else None,
+            self.eps,
+        )
+        return output.type_as(input)
+
+
 @tables.register("model_classes", "LLMASR5")
 class LLMASR5(nn.Module):
     """ """
@@ -1527,18 +1542,19 @@ class LLMASR5(nn.Module):
         self.eos = kwargs.get("eos", 151645)
 
         # audio decoder related
-        self.concat_emb_hidden = audio_decoder_conf.get("concat_emb_hidden", False)
-        self.concat_emb_hidden_norm = audio_decoder_conf.get("concat_emb_hidden_norm", False)
-        if self.concat_emb_hidden_norm:
-            self.hidden_norm = torch.nn.LayerNorm(llm_dim)
-            self.fusion_dropout = nn.Dropout(audio_decoder_conf.get("fusion_drop_rate", 0.0))
-            self.emb_norm = torch.nn.LayerNorm(llm_dim)
-            self.fusion_norm = torch.nn.LayerNorm(llm_dim)
-            self.fusion_act = Swish()
+
         self.codebook_dim = audio_decoder_conf.get("codebook_dim", 1024)
         self.codebook_size = audio_decoder_conf.get("codebook_size", 4096)
         self.lm_out_voc_size = self.codebook_size + 1
         self.audio_decoder = self.build_audio_decoder(name=audio_decoder, conf=audio_decoder_conf)
+        self.concat_emb_hidden = audio_decoder_conf.get("concat_emb_hidden", False)
+        self.concat_emb_hidden_norm = audio_decoder_conf.get("concat_emb_hidden_norm", False)
+        if self.concat_emb_hidden_norm:
+            self.hidden_norm = LayerNorm(llm_dim)
+            self.fusion_dropout = nn.Dropout(audio_decoder_conf.get("fusion_drop_rate", 0.0))
+            self.emb_norm = LayerNorm(llm_dim)
+            self.fusion_norm = LayerNorm(self.audio_decoder.embed_unit)
+            self.fusion_act = Swish()
         audio_decoder_in_proj_dim = llm_dim * 2 if self.concat_emb_hidden else llm_dim
         self.audio_decoder_in_proj = torch.nn.Linear(
             audio_decoder_in_proj_dim, self.audio_decoder.embed_unit
@@ -1661,7 +1677,7 @@ class LLMASR5(nn.Module):
         # For data parallel
         text = text[:, : text_lengths.max()]
         codec = codec[:, : codec_lengths.max()]
-        text = self.audio_decoder_in_proj(text)
+        # text = self.audio_decoder_in_proj(text)
 
         # build inputs and targets for language model
         with autocast(False):
@@ -1827,6 +1843,7 @@ class LLMASR5(nn.Module):
         if self.concat_emb_hidden:
             if not self.concat_emb_hidden_norm:
                 hidden_states_select = torch.concat((hidden_states_select, target_emb), dim=-1)
+                hidden_states_select = self.audio_decoder_in_proj(hidden_states_select)
             else:
                 outs = self.hidden_norm(hidden_states_select)
                 outs = self.fusion_dropout(self.fusion_act(outs))
