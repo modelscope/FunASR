@@ -615,7 +615,11 @@ class HiFTGenerator(nn.Module):
         real = magnitude * torch.cos(phase)
         img = magnitude * torch.sin(phase)
         inverse_transform = torch.istft(
-            torch.cat([real.unsqueeze(-1), img.unsqueeze(-1)], dim=-1),
-            self.istft_params["n_fft"], self.istft_params["hop_len"], self.istft_params["n_fft"], window=self.stft_window)
+            # torch.cat([real.unsqueeze(-1), img.unsqueeze(-1)], dim=-1),
+            torch.complex(real, img),
+            self.istft_params["n_fft"], self.istft_params["hop_len"],
+            self.istft_params["n_fft"], window=self.stft_window,
+            return_complex=False
+        )
 
         return inverse_transform.unsqueeze(-2)  # unsqueeze to stay consistent with conv_transpose1d implementation
