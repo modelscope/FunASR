@@ -1,0 +1,18 @@
+services:
+  asr:
+    image: soar97/triton-sensevoice:24.05
+    ports:
+      - "10085:8000"
+      - "10086:8001"
+      - "10087:8002"
+    environment:
+      - PYTHONIOENCODING=utf-8
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['0']
+              capabilities: [gpu]
+    command: >
+      /bin/bash -c "cd ./model_repo_sense_voice_small && bash run.sh"

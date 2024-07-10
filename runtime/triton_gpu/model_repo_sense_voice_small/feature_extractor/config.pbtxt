@@ -1,4 +1,4 @@
-# Copyright (c) 2023, NVIDIA CORPORATION.  All rights reserved.
+# Copyright (c) 2024, NVIDIA CORPORATION.  All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,51 +12,70 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "encoder"
-backend: "onnxruntime"
-default_model_filename: "model.onnx"
+name: "feature_extractor"
+backend: "python"
+max_batch_size: 16
 
-max_batch_size: 64
+parameters [
+  {
+    key: "num_mel_bins",
+    value: { string_value: "80"}
+  },
+  {
+    key: "frame_shift_in_ms"
+    value: { string_value: "10"}
+  },
+  {
+    key: "frame_length_in_ms"
+    value: { string_value: "25"}
+  },
+  {
+    key: "sample_rate"
+    value: { string_value: "16000"}
+  },
+  {
+    key: "cmvn_path"
+    value: { string_value: "./model_repo_sense_voice_small/feature_extractor/am.mvn"}
+  },
+  {
+    key: "config_path"
+    value: { string_value: "./model_repo_sense_voice_small/feature_extractor/config.yaml"}
+  }
+
+]
 
 input [
   {
-    name: "speech"
+    name: "wav"
     data_type: TYPE_FP32
-    dims: [-1, 560]
+    dims: [-1]
   },
   {
-    name: "speech_lengths"
+    name: "wav_lens"
     data_type: TYPE_INT32
     dims: [1]
-    reshape: { shape: [ ] }
   }
 ]
 
 output [
   {
-    name: "logits"
+    name: "speech"
     data_type: TYPE_FP32
-    dims: [-1, 8404] 
+    dims: [-1, 560]  # 80
   },
   {
-    name: "token_num"
+    name: "speech_lengths"
     data_type: TYPE_INT32
     dims: [1]
-    reshape: { shape: [ ] }
   }
 ]
 
 dynamic_batching {
-    preferred_batch_size: [ 2,4,8,16,32,64 ]
-    max_queue_delay_microseconds: 500
   }
-
-parameters { key: "cudnn_conv_algo_search" value: { string_value: "2" } }
 
 instance_group [
     {
-      count: 1
+      count: 2
       kind: KIND_GPU
     }
 ]
-
