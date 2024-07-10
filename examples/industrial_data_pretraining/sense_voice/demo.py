@@ -12,8 +12,6 @@ input_file = (
     "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav"
 )
 
-input_file = ("/nfs/beinian.lzr/workspace/models/modelscope_models/SenseVoice/example/rich_2.wav")
-
 model = AutoModel(
     model=model_dir,
 )
