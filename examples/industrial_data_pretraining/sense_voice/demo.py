@@ -5,11 +5,14 @@
 
 import sys
 from funasr import AutoModel
+from funasr.utils.postprocess_utils import rich_transcription_postprocess
 
 model_dir = "iic/SenseVoiceSmall"
 input_file = (
     "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav"
 )
+
+input_file = ("/nfs/beinian.lzr/workspace/models/modelscope_models/SenseVoice/example/rich_2.wav")
 
 model = AutoModel(
     model=model_dir,
@@ -22,4 +25,6 @@ res = model.generate(
     use_itn=False,
 )
 
-print(res)
+text = rich_transcription_postprocess(res[0]["text"])
+
+print(text)
