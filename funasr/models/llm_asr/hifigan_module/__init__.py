@@ -9,6 +9,6 @@ def init_weights(m, mean=0.0, std=0.01):
         m.weight.data.normal_(mean, std)
 
 
-from cosyvoice.modules.hifigan_module.generator import HifiGenerator, NsfHifiGenerator, HiFTGenerator
-from cosyvoice.modules.hifigan_module.discriminator import MultipleDiscriminator
-from cosyvoice.modules.hifigan_module.nsf_utils import ConvRNNF0Predictor
+from funasr.models.llm_asr.hifigan_module.generator import HifiGenerator, NsfHifiGenerator, HiFTGenerator
+from funasr.models.llm_asr.hifigan_module.discriminator import MultipleDiscriminator
+from funasr.models.llm_asr.hifigan_module.nsf_utils import ConvRNNF0Predictor
