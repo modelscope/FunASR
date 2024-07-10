@@ -2374,14 +2374,14 @@ class LLMASR5(nn.Module):
             if min_length is not None and i < min_length:
                 pred[:, self.codebook_size + self.ad_sos_eos] = float(np.finfo(np.float32).min)
             top_ids = self.ras_sampling(pred[0], out_tokens[0, :out_token_len, 0])
+
+            if torch.any(top_ids == (self.codebook_size + self.ad_sos_eos)):
+                hit_eos = True
+                break
+
             out_tokens[0, out_token_len, 0] = top_ids[0]
             seq_input[0, prompt_len + out_token_len, :] = self.codec_embedder(top_ids)[0]
             out_token_len += 1
-
-            if torch.any(out_tokens[:, out_token_len - 1] == (self.codebook_size + self.ad_sos_eos)):
-                hit_eos = True
-                out_tokens = out_tokens[:, :out_token_len, :]
-                break
 
         if decoding_length is None:
             return out_tokens
