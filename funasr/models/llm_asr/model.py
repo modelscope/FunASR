@@ -2383,6 +2383,7 @@ class LLMASR5(nn.Module):
             seq_input[0, prompt_len + out_token_len, :] = self.codec_embedder(top_ids)[0]
             out_token_len += 1
 
+        out_tokens = out_tokens[:, :out_token_len, :]
         if decoding_length is None:
             return out_tokens
         else:
