@@ -59,10 +59,19 @@ def download_from_ms(**kwargs):
     elif os.path.exists(os.path.join(model_or_path, "config.yaml")):
         config = OmegaConf.load(os.path.join(model_or_path, "config.yaml"))
         kwargs = OmegaConf.merge(config, kwargs)
-        init_param = os.path.join(model_or_path, "model.pt")
-        if "init_param" not in kwargs or not os.path.exists(kwargs["init_param"]):
-            kwargs["init_param"] = init_param
-            assert os.path.exists(kwargs["init_param"]), "init_param does not exist"
+
+        init_param = kwargs.get("init_param", "")
+        if not os.path.exists(init_param):
+            init_param_new = init_param
+            if isinstance(init_param, str):
+                init_param = init_param.split(",")
+            for init_param_i in init_param:
+                if not os.path.exists(init_param_i):
+                    print(f"init_param: {init_param_i},  does not exist")
+                    init_param_i = os.path.join(model_or_path, "model.pt")
+                    init_param_new = f"{init_param_new},{init_param_i}"
+            kwargs["init_param"] = init_param_new
+            # assert os.path.exists(kwargs["init_param"]), "init_param does not exist"
         if os.path.exists(os.path.join(model_or_path, "tokens.txt")):
             kwargs["tokenizer_conf"]["token_list"] = os.path.join(model_or_path, "tokens.txt")
         if os.path.exists(os.path.join(model_or_path, "tokens.json")):
