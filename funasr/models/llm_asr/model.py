@@ -2359,13 +2359,13 @@ class LLMASR5(nn.Module):
             dtype=torch.float32, device=device
         )
         seq_input[:, :prompt.shape[1], :] = prompt
-        out_tokens = torch.zeros([1, max_length, 1], device=device)
+        out_tokens = torch.zeros([1, max_length, 1], dtype=torch.int64, device=device)
         out_token_len = 0
         prompt_len = prompt.shape[1]
         state, hit_eos = None, False
         for i in range(max_length):
             # use state for speedup
-            pred, (state, _) = self.audio_decoder.score(seq_input[0], state, prompt[0])
+            pred, (state, _) = self.audio_decoder.score(seq_input[0, :prompt_len+out_token_len], state, prompt[0])
 
             # sampling all `nq` token ids
             pred = pred.reshape(self.predict_nq, -1)
@@ -2373,7 +2373,7 @@ class LLMASR5(nn.Module):
             pred = torch.log_softmax(pred, dim=-1)
             if min_length is not None and i < min_length:
                 pred[:, self.codebook_size + self.ad_sos_eos] = float(np.finfo(np.float32).min)
-            top_ids = self.ras_sampling(pred[0], out_tokens[0])
+            top_ids = self.ras_sampling(pred[0], out_tokens[0, :out_token_len, 0])
             out_tokens[0, out_token_len, 0] = top_ids[0]
             seq_input[0, prompt_len + out_token_len, :] = self.codec_embedder(top_ids)[0]
             out_token_len += 1
