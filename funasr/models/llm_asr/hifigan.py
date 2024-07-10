@@ -464,10 +464,7 @@ class HifiGan(nn.Module):
         """
 
         recon_speech = self._decode(x.transpose(1, 2)).squeeze(1)
-        retval = dict(
-            recon_speech=recon_speech,
-        )
-        return retval
+        return recon_speech
 
     def collect_feats(self, **batch: torch.Tensor) -> Dict[str, torch.Tensor]:
         pass
