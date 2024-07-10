@@ -2305,7 +2305,7 @@ class LLMASR5(nn.Module):
         if wav is not None:
             path = os.path.join(out_dir, f"{key}.wav")
             torchaudio.save(
-                path, wav[0], sample_rate=self.vocoder.sample_rate,
+                path, wav.cpu(), sample_rate=self.vocoder.sample_rate,
                 encoding='PCM_S', bits_per_sample=16
             )
 
