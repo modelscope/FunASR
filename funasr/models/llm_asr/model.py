@@ -1,4 +1,6 @@
 import logging
+import os.path
+import torchaudio
 from typing import Union, Dict, List, Tuple, Optional
 
 import time
@@ -1580,6 +1582,29 @@ class LLMASR5(nn.Module):
             reduction=False,
         )
 
+        mel_decoder_name = kwargs.get("mel_decoder", None)
+        mel_decoder_conf = kwargs.get("mel_decoder_conf", None)
+        self.mel_decoder = self.build_mel_decoder(name=mel_decoder_name, conf=mel_decoder_conf)
+        vocoder_name = kwargs.get("vocoder", None)
+        vocoder_conf = kwargs.get("vocoder_conf", None)
+        self.vocoder = self.build_vocoder(name=vocoder_name, conf=vocoder_conf)
+
+    def build_mel_decoder(self, name: str, conf: dict):
+        if name is None or conf is None:
+            return None
+        if name == "MaskedDiffWithXvec":
+            from funasr.models.llm_asr.flow_matching import MaskedDiffWithXvec
+            return MaskedDiffWithXvec(**conf)
+        return None
+
+    def build_vocoder(self, name: str, conf: dict):
+        if name is None or conf is None:
+            return None
+        if name == "HifiGAN":
+            from funasr.models.llm_asr.hifigan import HifiGan
+            return HifiGan(**conf)
+        return None
+
     def build_audio_decoder(self, name, conf):
         if name == "transformer":
             from funasr.models.llm_asr.transformer_lm import TransformerEmbedLM
@@ -2205,7 +2230,16 @@ class LLMASR5(nn.Module):
             target_ids = generated_ids["sequences"]
             target_emb = self.llm.model.get_input_embeddings()(target_ids)
             if self.concat_emb_hidden:
-                hidden_states_select = torch.concat((hidden_states_select, target_emb), dim=-1)
+                if not self.concat_emb_hidden_norm:
+                    hidden_states_select = torch.concat((hidden_states_select, target_emb), dim=-1)
+                    hidden_states_select = self.audio_decoder_in_proj(hidden_states_select)
+                else:
+                    outs = self.hidden_norm(hidden_states_select)
+                    outs = self.fusion_dropout(self.fusion_act(outs))
+                    # emb = model_outputs.hidden_states[0]
+                    emb = self.fusion_dropout(self.fusion_act(self.emb_norm(target_emb)))
+                    outs = self.audio_decoder_in_proj(torch.cat([outs, emb], dim=-1))
+                    hidden_states_select = self.fusion_act(self.fusion_norm(outs))
 
             speech_tokens = self.audio_decode(hidden_states_select, hidden_states_out_len)[
                 :, :, 0
@@ -2221,11 +2255,17 @@ class LLMASR5(nn.Module):
 
             loss = None
 
+        # synthesize waveforms
+        spk_emb = kwargs.get("spk_emb", None)
+        feat, wav = self.synthesize_waveform(speech_tokens, spk_emb, inputs_embeds.device)
+
         ibest_writer = None
         if kwargs.get("output_dir") is not None:
             if not hasattr(self, "writer"):
                 self.writer = DatadirWriter(kwargs.get("output_dir"))
             ibest_writer = self.writer[f"{0 + 1}best_recog"]
+
+            self.write_mel_wav(kwargs.get("output_dir"), feat, wav, key[0])
 
         results = []
         response_clean = re.sub(r"[^\w\s\u3000\u4e00-\u9fff]+", "", response)
@@ -2253,6 +2293,48 @@ class LLMASR5(nn.Module):
 
         return results, meta_data
 
+    def write_mel_wav(self, output_dir, feat, wav, key):
+        out_dir = os.path.join(output_dir, "1best_recog", "mels")
+        os.makedirs(out_dir, exist_ok=True)
+        if feat is not None:
+            feat = feat.cpu().numpy()[0]
+            np.save(os.path.join(out_dir, f"{key}.npy"), feat)
+
+        out_dir = os.path.join(output_dir, "1best_recog", "wavs")
+        os.makedirs(out_dir, exist_ok=True)
+        if wav is not None:
+            path = os.path.join(out_dir, f"{key}.wav")
+            torchaudio.save(
+                path, wav[0], sample_rate=self.vocoder.sample_rate,
+                encoding='PCM_S', bits_per_sample=16
+            )
+
+    def synthesize_waveform(self, speech_tokens, spk_emb, device):
+        mel_feat, wav = None, None
+        if self.mel_decoder is not None and spk_emb is not None:
+            # mel_feat in BxCxT
+            mel_feat = self.token2mel(speech_tokens, spk_emb, device)
+            if self.vocoder is not None:
+                wav = self.vocoder.inference(mel_feat.transpose(1, 2))
+
+        return mel_feat, wav
+
+    def token2mel(self, tokens: torch.Tensor, xvec: torch.Tensor, device: torch.device):
+        xvec = torch.tensor(xvec).to(device).unsqueeze(0)
+        xvec_lens = torch.tensor([xvec.shape[1]], device=device, dtype=torch.int64)
+        token_lens = torch.tensor([tokens.shape[1]], device=device, dtype=torch.int64)
+        feat = self.mel_decoder.inference(
+            tokens, token_lens,
+            xvec, xvec_lens,
+            diff_steps=10,
+            temperature=1.0,
+            prompt=dict(
+                prompt_text=(None, None),
+                prompt_audio=(None, None)
+            )
+        )
+        return feat
+
     def audio_decode(
         self,
         text: torch.Tensor,
@@ -2263,9 +2345,8 @@ class LLMASR5(nn.Module):
         decoding_length=None,
     ):
         # 1. encode text
-        text = self.audio_decoder_in_proj(text)
+        # text = self.audio_decoder_in_proj(text)
         device = text.device
-        out_tokens = []
         sos_eos_emb = self.audio_decoder_embedding(
             torch.tensor([[self.ad_sos_eos]], dtype=torch.int64, device=device)
         )
@@ -2273,30 +2354,18 @@ class LLMASR5(nn.Module):
             torch.tensor([[self.ad_task_id]], dtype=torch.int64, device=device)
         )
         prompt = torch.cat([sos_eos_emb, text, task_id_emb], dim=1)
-        state, cfg_state = None, None
+        seq_input = torch.zeros(
+            [1, prompt.shape[1] + max_length, prompt.shape[2]],
+            dtype=torch.float32, device=device
+        )
+        seq_input[:, :prompt.shape[1], :] = prompt
+        out_tokens = torch.zeros([1, max_length, 1], device=device)
+        out_token_len = 0
+        prompt_len = prompt.shape[1]
+        state, hit_eos = None, False
         for i in range(max_length):
-            if len(out_tokens) > 0:
-                codec_prompt = torch.tensor([out_tokens], dtype=torch.int64, device=device)
-                codec_lengths = torch.tensor([len(out_tokens)], dtype=torch.int64, device=device)
-                # if any quantizer output is eos
-                if torch.any(codec_prompt[:, -1] == (self.codebook_size + self.ad_sos_eos)):
-                    break
-                seq_input, _ = self.prepare_audio_decoder_io(
-                    text, text_lengths, codec_prompt, codec_lengths, need_targets=False
-                )
-            else:
-                seq_input, _ = self.prepare_audio_decoder_io(
-                    text, text_lengths, None, None, need_targets=False
-                )
-
             # use state for speedup
             pred, (state, _) = self.audio_decoder.score(seq_input[0], state, prompt[0])
-            if infer_cfg_ratio is not None:
-                cond_len = prompt[0].shape[0]
-                cfg_pred, (cfg_state, _) = self.audio_decoder.score(
-                    seq_input[0][cond_len - 1 :], cfg_state, prompt[0][cond_len - 1 :]
-                )
-                pred = (1 + infer_cfg_ratio) * pred - infer_cfg_ratio * cfg_pred
 
             # sampling all `nq` token ids
             pred = pred.reshape(self.predict_nq, -1)
@@ -2304,49 +2373,44 @@ class LLMASR5(nn.Module):
             pred = torch.log_softmax(pred, dim=-1)
             if min_length is not None and i < min_length:
                 pred[:, self.codebook_size + self.ad_sos_eos] = float(np.finfo(np.float32).min)
-            top_ids = []
-            for k in range(self.predict_nq):
-                top_ids.append(self.ras_sampling(pred[k], out_tokens)[0].item())
-            out_tokens.append(top_ids)
+            top_ids = self.ras_sampling(pred[0], out_tokens[0])
+            out_tokens[0, out_token_len, 0] = top_ids[0]
+            seq_input[0, prompt_len + out_token_len, :] = self.codec_embedder(top_ids)[0]
+            out_token_len += 1
 
-        # remove eos token
-        hit_eos = False
-        if torch.any(
-            torch.tensor(out_tokens[-1], dtype=torch.int64) == self.codebook_size + self.ad_sos_eos
-        ):
-            hit_eos = True
-            out_tokens = out_tokens[:-1]
+            if torch.any(out_tokens[:, out_token_len - 1] == (self.codebook_size + self.ad_sos_eos)):
+                hit_eos = True
+                out_tokens = out_tokens[:, :out_token_len, :]
+                break
 
         if decoding_length is None:
-            return torch.tensor([out_tokens], dtype=torch.int64, device=device)
+            return out_tokens
         else:
-            return torch.tensor([out_tokens], dtype=torch.int64, device=device), hit_eos
+            return out_tokens, hit_eos
 
     # Repetition Aware Sampling in VALL-E 2
     def ras_sampling(
         self, weighted_scores, decoded_tokens, *, top_p=0.8, top_k=25, win_size=10, tau_r=0.1
     ):
         top_ids = self.nucleus_sampling(weighted_scores, top_p=top_p, top_k=top_k)
-        rep_num = (torch.tensor(decoded_tokens[-win_size:]).to(top_ids) == top_ids).sum().item()
+        rep_num = torch.sum(decoded_tokens[-win_size:] == top_ids).item()
         if rep_num >= win_size * tau_r:
             top_ids = self.random_sampling(weighted_scores)
 
         return top_ids
 
     def nucleus_sampling(self, weighted_scores, top_p=0.8, top_k=25):
-        prob, indices = [], []
         cum_prob = 0.0
         sorted_value, sorted_idx = weighted_scores.softmax(dim=0).sort(descending=True, stable=True)
+        i = len(sorted_idx)
         for i in range(len(sorted_idx)):
             # sampling both top-p and numbers.
-            if cum_prob < top_p and len(prob) < top_k:
+            if cum_prob < top_p and i < top_k:
                 cum_prob += sorted_value[i]
-                prob.append(sorted_value[i])
-                indices.append(sorted_idx[i])
             else:
                 break
-        prob = torch.tensor(prob).to(weighted_scores)
-        indices = torch.tensor(indices, dtype=torch.long).to(weighted_scores.device)
+        prob = sorted_value[:i]
+        indices = sorted_idx[:i]
         sampling_ids = prob.multinomial(1, replacement=True)
         top_ids = indices[sampling_ids]
         return top_ids
