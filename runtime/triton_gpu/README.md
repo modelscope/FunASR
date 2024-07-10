@@ -74,6 +74,7 @@ Benchmark results below were based on Aishell1 test set with a single V100, the 
 |----------|--------------------|------------|---------------------|
 | 32 (onnx fp32)                | 16 | 67.09 | 0.0019|
 | 32 (onnx fp32)                | 1 | 82.04  | 0.0023|
+
 (Note: for batch-size-per-task=1 cases, tritonserver could use dynamic batching to improve throughput.)
 
 ## Acknowledge
