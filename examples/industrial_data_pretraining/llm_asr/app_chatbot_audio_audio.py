@@ -129,7 +129,7 @@ def model_inference(input_wav, text_inputs, state, turn_num, history):
         cache={},
         key="test_demo",
     )
-    print(res)
+    print(res[0]["text"])
     res_text = res[0]["text"]
     history[-1][1] = gr.Audio((22050, res[0]["wav"].cpu().flatten().numpy()), autoplay=True)
     out_his = state.get("out", "")
@@ -220,30 +220,33 @@ def launch():
                     turn_num = gr.Number(label="Max dialog turns", value=5, maximum=5)
                     gr.Examples(examples=audio_examples, inputs=audio_inputs, examples_per_page=20)
 
-        # with gr.Row():
-        #     fn_button = gr.Button("Start")
-        clear_button = gr.Button("Clear")
+        with gr.Row():
+            fn_button = gr.Button("Start")
+            clear_button = gr.Button("Clear")
 
         text_outputs = gr.HTML(label="Results")
 
-        # fn_button.click(model_inference, inputs=[audio_inputs, text_inputs, state, turn_num, chatbot], outputs=[state, chatbot])
-
-        audio_inputs.stop_recording(
-            model_inference,
-            inputs=[audio_inputs, text_inputs, state, turn_num, chatbot],
-            outputs=[state, chatbot, text_outputs],
-        )
-        audio_inputs.upload(
+        fn_button.click(
             model_inference,
             inputs=[audio_inputs, text_inputs, state, turn_num, chatbot],
             outputs=[state, chatbot, text_outputs],
         )
 
-        # clear.click(clear_state, inputs=[audio_inputs, text_inputs, state, turn_num, chatbot], outputs=[state, chatbot], queue=False)
+        # audio_inputs.stop_recording(
+        #     model_inference,
+        #     inputs=[audio_inputs, text_inputs, state, turn_num, chatbot],
+        #     outputs=[state, chatbot, text_outputs],
+        # )
+        # audio_inputs.upload(
+        #     model_inference,
+        #     inputs=[audio_inputs, text_inputs, state, turn_num, chatbot],
+        #     outputs=[state, chatbot, text_outputs],
+        # )
+
         clear_button.click(
-            lambda: (None, None, None),
+            lambda: (None, None, None, None),
             inputs=None,
-            outputs=[audio_inputs, state, chatbot],
+            outputs=[audio_inputs, state, chatbot, text_outputs],
             queue=False,
         )
 
