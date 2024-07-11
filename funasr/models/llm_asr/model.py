@@ -1939,6 +1939,9 @@ class LLMASR5(nn.Module):
             if role == "system":
                 system.append(content)
             elif role == "user":
+                if "audio" in item:
+                    audio = item["audio"]
+                    content = [content, audio]
                 user.append(content)
             elif role == "assistant":
                 assistant.append(content)
