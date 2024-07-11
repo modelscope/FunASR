@@ -22,6 +22,8 @@ import re
 import os
 import sys
 
+import numpy as np
+
 if len(sys.argv) > 1:
     ckpt_dir = sys.argv[1]
     ckpt_id = sys.argv[2]
@@ -47,6 +49,9 @@ init_param_ckpt = f"{os.path.join(ckpt_dir, ckpt_id)}"
 flow_init = "/data/zhifu.gzf/init_model/cosyvoice_flow_matching_for_streaming_with_prompt_random_cut_sft_zh_0630_25hz_1/60epoch.pth.prefix"
 vocoder_init = "/data/zhifu.gzf/init_model/hiftnet_1400k_cvt/model.pth.prefix"
 init_param = f"{init_param},{init_param_ckpt},{flow_init},{vocoder_init}"
+spk_emb = np.load(
+    "/data/zhifu.gzf/init_model/cosyvoice_flow_matching_for_streaming_with_prompt_random_cut_sft_zh_0630_25hz_1/xvec/xiaoxia.npy"
+)
 
 model_llm = AutoModel(
     model=ckpt_dir,
@@ -119,12 +124,14 @@ def model_inference(input_wav, text_inputs, state, turn_num, history):
 
     res = model_llm.generate(
         input=[contents_i],
+        spk_emb=spk_emb,
         tearchforing=False,
         cache={},
         key="test_demo",
     )
+    print(res)
     res_text = res[0]["text"]
-    history[-1][1] = gr.Audio((16000, res[0]["wav"].flatten()), autoplay=True)
+    history[-1][1] = gr.Audio((22050, res[0]["wav"].cpu().flatten().numpy()), autoplay=True)
     out_his = state.get("out", "")
     out = f"{out_his}" f"<br><br>" f"Q: {asr_out}" f"<br>" f"A: {res_text}"
     # out = f"{res}"
