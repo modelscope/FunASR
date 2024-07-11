@@ -2005,7 +2005,6 @@ class LLMASR5(nn.Module):
                     )
                     if sub_str.startswith("!"):
                         sub_str = sub_str[1:]
-                        sub_str = sub_str[1:]
                         if sub_str.startswith("!"):  # !!: audio sample point
                             sub_str = audio
                         try:
