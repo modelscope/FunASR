@@ -1,5 +1,0 @@
-onnx
-onnxruntime
-torch-quant >= 0.4.0
-funasr_torch
-funasr_onnx

@@ -1,1 +1,0 @@
-<s> He came here on %#YEARDATE#% </s>
