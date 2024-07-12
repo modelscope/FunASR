@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
 
-CUDA_VISIBLE_DEVICES="0,1"
+CUDA_VISIBLE_DEVICES="0,1,2,3"
 
 # general configuration
 feats_dir="../DATA" #feature output dictionary
 exp_dir=`pwd`
 lang=zh
 token_type=char
-stage=0
+stage=5
 stop_stage=5
 
 # feature configuration
@@ -20,11 +20,12 @@ inference_scp="wav.scp"
 inference_batch_size=1
 
 # data
-raw_data=../raw_data
-data_url=www.openslr.org/resources/33
+#raw_data=/data/nas/zhuang/dataset/data_aishell
+raw_data=/data/nas/ASR_Datasets/data_aishell/
+#data_url=www.openslr.org/resources/33s
 
 # exp tag
-tag="exp1"
+tag="wenetctc_version"
 workspace=`pwd`
 
 master_port=12345
@@ -145,7 +146,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
 
   for dset in ${test_sets}; do
 
-    inference_dir="${exp_dir}/exp/${model_dir}/inference-${inference_checkpoint}/${dset}"
+    inference_dir="${exp_dir}/exp/${model_dir}/inference-${inference_checkpoint}/${dset}_funasr_ar_decoder"
     _logdir="${inference_dir}/logdir"
     echo "inference_dir: ${inference_dir}"
 

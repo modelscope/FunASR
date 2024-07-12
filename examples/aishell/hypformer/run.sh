@@ -8,8 +8,8 @@ feats_dir="../DATA" #feature output dictionary
 exp_dir=`pwd`
 lang=zh
 token_type=char
-stage=1
-stop_stage=1
+stage=5
+stop_stage=5
 
 # feature configuration
 nj=32
@@ -22,10 +22,10 @@ inference_batch_size=1
 # data
 #raw_data=/data/nas/zhuang/dataset/data_aishell
 raw_data=/data/nas/ASR_Datasets/data_aishell/
-#data_url=www.openslr.org/resources/33s
+#data_url=www.openslr.org/resources/33
 
 # exp tag
-tag="wenetctc_version"
+tag="exp1"
 workspace=`pwd`
 
 master_port=12345
@@ -40,11 +40,10 @@ set -o pipefail
 
 train_set=train
 valid_set=dev
-test_sets="dev test"
+test_sets="test"
 
-config=transformer_12e_6d_2048_256.yaml
+config=hypformer_conformer_12e_6d_2048_256.yaml
 model_dir="baseline_$(basename "${config}" .yaml)_${lang}_${token_type}_${tag}"
-
 
 
 if [ ${stage} -le -1 ] && [ ${stop_stage} -ge -1 ]; then
@@ -79,14 +78,8 @@ if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
     python ../../../funasr/bin/compute_audio_cmvn.py \
     --config-path "${workspace}/conf" \
     --config-name "${config}" \
-    ++train_data_set_list=/ssd/zhuang/code/FunASR2024/examples/aishell/DATA/data/train/audio_datasets.jsonl \
-    ++cmvn_file=/ssd/zhuang/code/FunASR2024/examples/kespeech/DATA/data/ES/Mandarin/train/cmvn.json \
-    # --config-path "${workspace}/conf" \
-    # --config-name "${config}" \
-    # ++train_data_set_list="${feats_dir}/data/${train_set}/audio_datasets.jsonl" \
-    # ++cmvn_file="${feats_dir}/data/${train_set}/cmvn.json" \
-
-
+    ++train_data_set_list="${feats_dir}/data/${train_set}/audio_datasets.jsonl" \
+    ++cmvn_file="${feats_dir}/data/${train_set}/cmvn.json"
 fi
 
 token_list=${feats_dir}/data/${lang}_token_list/$token_type/tokens.txt
@@ -94,7 +87,7 @@ echo "dictionary: ${token_list}"
 if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     echo "stage 2: Dictionary Preparation"
     mkdir -p ${feats_dir}/data/${lang}_token_list/$token_type/
-
+   
     echo "make a dictionary"
     echo "<blank>" > ${token_list}
     echo "<s>" >> ${token_list}
@@ -127,6 +120,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
   ../../../funasr/bin/train.py \
   --config-path "${workspace}/conf" \
   --config-name "${config}" \
+  ++init_param="/ssd/zhuang/code/FunASR2024/examples/aishell/paraformer/exp/baseline_speech_paraformer_asr_nat-aishell1-pytorch_config_zh_char_exp1/orresponding_model_saved_from_git.pb" \
   ++train_data_set_list="${feats_dir}/data/${train_set}/audio_datasets.jsonl" \
   ++valid_data_set_list="${feats_dir}/data/${valid_set}/audio_datasets.jsonl" \
   ++tokenizer_conf.token_list="${token_list}" \
@@ -152,7 +146,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
 
   for dset in ${test_sets}; do
 
-    inference_dir="${exp_dir}/exp/${model_dir}/inference-${inference_checkpoint}/${dset}_funasr_attn_rescore"
+    inference_dir="${exp_dir}/exp/${model_dir}/inference-${inference_checkpoint}/${dset}_hyp_beam_4"
     _logdir="${inference_dir}/logdir"
     echo "inference_dir: ${inference_dir}"
 
