@@ -1595,6 +1595,7 @@ class LLMASR5(nn.Module):
             return None
         if name == "MaskedDiffWithXvec":
             from funasr.models.llm_asr.flow_matching import MaskedDiffWithXvec
+
             return MaskedDiffWithXvec(**conf)
         return None
 
@@ -1603,6 +1604,7 @@ class LLMASR5(nn.Module):
             return None
         if name == "HifiGAN":
             from funasr.models.llm_asr.hifigan import HifiGan
+
             return HifiGan(**conf)
         return None
 
@@ -1938,6 +1940,9 @@ class LLMASR5(nn.Module):
             if role == "system":
                 system.append(content)
             elif role == "user":
+                if "audio" in item:
+                    audio = item["audio"]
+                    content = [content, audio]
                 user.append(content)
             elif role == "assistant":
                 assistant.append(content)
@@ -1975,6 +1980,8 @@ class LLMASR5(nn.Module):
             if len(input_ids) > kwargs.get("max_token_length", 1500):
                 break
 
+            if isinstance(user_prompt, (list, tuple)):
+                user_prompt, audio = user_prompt
             if i == 0:
                 source_input = f"<|im_start|>system\n{system_prompt}<|im_end|>\n<|im_start|>user\n{user_prompt}<|im_end|>\n<|im_start|>assistant\n"
             else:
@@ -1999,8 +2006,8 @@ class LLMASR5(nn.Module):
                     )
                     if sub_str.startswith("!"):
                         sub_str = sub_str[1:]
-                        if sub_str.startswith("!"):  # !!bytes
-                            sub_str = eval(sub_str[1:])
+                        if sub_str.startswith("!"):  # !!: audio sample point
+                            sub_str = audio
                         try:
                             time1 = time.perf_counter()
                             data_src = load_audio_text_image_video(sub_str, fs=frontend.fs)
@@ -2280,6 +2287,7 @@ class LLMASR5(nn.Module):
             "text_tn": response_clean,
             "label": label,
             "speech_tokens": speech_tokens,
+            "wav": wav,
         }
         if loss is not None:
             result_i["loss"] = loss
@@ -2310,8 +2318,11 @@ class LLMASR5(nn.Module):
         if wav is not None:
             path = os.path.join(out_dir, f"{key}.wav")
             torchaudio.save(
-                path, wav.cpu(), sample_rate=self.vocoder.sample_rate,
-                encoding='PCM_S', bits_per_sample=16
+                path,
+                wav.cpu(),
+                sample_rate=self.vocoder.sample_rate,
+                encoding="PCM_S",
+                bits_per_sample=16,
             )
 
     def synthesize_waveform(self, speech_tokens, spk_emb, device):
@@ -2329,14 +2340,13 @@ class LLMASR5(nn.Module):
         xvec_lens = torch.tensor([xvec.shape[1]], device=device, dtype=torch.int64)
         token_lens = torch.tensor([tokens.shape[1]], device=device, dtype=torch.int64)
         feat = self.mel_decoder.inference(
-            tokens, token_lens,
-            xvec, xvec_lens,
+            tokens,
+            token_lens,
+            xvec,
+            xvec_lens,
             diff_steps=10,
             temperature=1.0,
-            prompt=dict(
-                prompt_text=(None, None),
-                prompt_audio=(None, None)
-            )
+            prompt=dict(prompt_text=(None, None), prompt_audio=(None, None)),
         )
         return feat
 
@@ -2360,17 +2370,18 @@ class LLMASR5(nn.Module):
         )
         prompt = torch.cat([sos_eos_emb, text, task_id_emb], dim=1)
         seq_input = torch.zeros(
-            [1, prompt.shape[1] + max_length, prompt.shape[2]],
-            dtype=torch.float32, device=device
+            [1, prompt.shape[1] + max_length, prompt.shape[2]], dtype=torch.float32, device=device
         )
-        seq_input[:, :prompt.shape[1], :] = prompt
+        seq_input[:, : prompt.shape[1], :] = prompt
         out_tokens = torch.zeros([1, max_length, 1], dtype=torch.int64, device=device)
         out_token_len = 0
         prompt_len = prompt.shape[1]
         state, hit_eos = None, False
         for i in range(max_length):
             # use state for speedup
-            pred, (state, _) = self.audio_decoder.score(seq_input[0, :prompt_len+out_token_len], state, prompt[0])
+            pred, (state, _) = self.audio_decoder.score(
+                seq_input[0, : prompt_len + out_token_len], state, prompt[0]
+            )
 
             # sampling all `nq` token ids
             pred = pred.reshape(self.predict_nq, -1)
