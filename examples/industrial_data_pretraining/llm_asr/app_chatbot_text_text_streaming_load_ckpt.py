@@ -323,7 +323,7 @@ def launch():
                         text_inputs_usr = gr.Text(
                             label="User Prompt",
                         )
-
+                    do_asr = gr.Dropdown(choices=[True, False], value=False, label="Wether do asr")
         with gr.Row():
             model_ckpt_list = gr.Dropdown(
                 choices=all_file_paths, value=all_file_paths[0], label="Model ckpt path"
