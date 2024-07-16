@@ -128,6 +128,34 @@ funasr ++model=paraformer-zh ++vad_model="fsmn-vad" ++punc_model="ct-punc" ++inp
 注：支持单条音频文件识别，也支持文件列表，列表为kaldi风格wav.scp：`wav_id   wav_path`
 
 ### 非实时语音识别
+#### SenseVoice
+```python
+from funasr import AutoModel
+from funasr.utils.postprocess_utils import rich_transcription_postprocess
+
+model_dir = "iic/SenseVoiceSmall"
+
+model = AutoModel(
+    model=model_dir,
+    vad_model="fsmn-vad",
+    vad_kwargs={"max_single_segment_time": 30000},
+    device="cuda:0",
+)
+
+# en
+res = model.generate(
+    input=f"{model.model_path}/example/en.mp3",
+    cache={},
+    language="auto",  # "zn", "en", "yue", "ja", "ko", "nospeech"
+    use_itn=True,
+    batch_size_s=60,
+    merge_vad=True,  #
+    merge_length_s=15,
+)
+text = rich_transcription_postprocess(res[0]["text"])
+print(text)
+```
+#### Paraformer
 ```python
 from funasr import AutoModel
 # paraformer-zh is a multi-functional asr model
