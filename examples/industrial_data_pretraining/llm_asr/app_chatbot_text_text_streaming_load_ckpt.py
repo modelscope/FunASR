@@ -12,6 +12,7 @@ import torchaudio
 from transformers import TextIteratorStreamer
 from threading import Thread
 import torch
+import time
 
 torch.backends.cuda.enable_mem_efficient_sdp(False)
 torch.backends.cuda.enable_flash_sdp(False)
@@ -32,30 +33,17 @@ if len(sys.argv) > 1:
     if len(sys.argv) > 6:
         new_sys = True
 else:
-    ckpt_dir = "/data/zhifu.gzf/init_model/gpt4o-exp7-4"
+    ckpt_dir = "/data/zhifu.gzf/init_model/GPT-4o/Exp"
     ckpt_id = "model.pt.ep1.140000"
     jsonl = (
         "/nfs/beinian.lzr/workspace/GPT-4o/Data/Speech2Text/TestData/s2tchat.v20240619.test.jsonl"
     )
     dataset = jsonl.split("/")[-1]
     output_dir = os.path.join(ckpt_dir, f"inference-{ckpt_id}", dataset)
-    device = "cuda:1"
+    device = "cuda:2"
     new_sys = True
+    # init_param = "/data/zhifu.gzf/init_model/GPT-4o/Exp/exp7-4-0712_full-encoder/model.pt.ep0.290000"
 
-
-model_llm = AutoModel(
-    model=ckpt_dir,
-    init_param=f"{os.path.join(ckpt_dir, ckpt_id)}",
-    output_dir=output_dir,
-    device=device,
-    fp16=False,
-    bf16=False,
-    llm_dtype="bf16",
-    max_length=1024,
-)
-model = model_llm.model
-frontend = model_llm.kwargs["frontend"]
-tokenizer = model_llm.kwargs["tokenizer"]
 
 model_asr = AutoModel(
     model="/data/zhifu.gzf/init_model/SenseVoice",
@@ -67,7 +55,94 @@ model_asr = AutoModel(
 )
 
 
-def model_inference(input_wav, text_inputs, state, turn_num, history, text_usr):
+def ckpt_sort(file_paths):
+
+    tmp_dict = {}
+    for file_paths_i in file_paths:
+        file_name = os.path.basename(file_paths_i)
+        file_paths_is = file_name.split(".")
+        int_p = int(file_paths_is[2][2:]) * 10000000
+        if len(file_paths_is) > 3:
+            float_p = int(file_paths_is[3])
+        else:
+            float_p = 0
+        v = int_p + float_p
+        tmp_dict[file_paths_i] = v
+    sorted_keys = sorted(tmp_dict, key=tmp_dict.get, reverse=True)
+    return sorted_keys
+
+
+def get_all_file_paths(directory):
+    file_paths = []
+    for root, directories, files in sorted(os.walk(directory)):
+        file_paths_i = []
+        for filename in files:
+            if filename.startswith("model.pt.ep"):
+                filepath = os.path.join(root, filename)
+                file_paths_i.append(filepath)
+        if len(file_paths_i) > 0:
+            file_paths_i = ckpt_sort(file_paths_i)
+            # print(file_paths_i)
+            file_paths.extend(file_paths_i[:10])
+
+    return file_paths
+
+
+all_file_paths = get_all_file_paths(ckpt_dir)
+init_param = all_file_paths[0]
+ckpt_dir = os.path.dirname(init_param)
+model_llm = AutoModel(
+    # model="/data/zhifu.gzf/init_model/gpt4o-exp7-4",
+    model=ckpt_dir,
+    init_param=init_param,
+    output_dir=output_dir,
+    device=device,
+    fp16=False,
+    bf16=False,
+    llm_dtype="bf16",
+    max_length=1024,
+)
+model = model_llm.model
+frontend = model_llm.kwargs["frontend"]
+tokenizer = model_llm.kwargs["tokenizer"]
+
+model_dict = {"model": model, "frontend": frontend, "tokenizer": tokenizer}
+
+
+def load_model(init_param, his_state):
+    beg = time.time()
+    print(f"init_param: {init_param}")
+    if his_state is None:
+        his_state = {}
+    ckpt_dir = os.path.dirname(init_param)
+    model_llm = AutoModel(
+        # model="/data/zhifu.gzf/init_model/gpt4o-exp7-4",
+        model=ckpt_dir,
+        init_param=init_param,
+        output_dir=output_dir,
+        device=device,
+        fp16=False,
+        bf16=False,
+        llm_dtype="bf16",
+        max_length=1024,
+    )
+    model = model_llm.model
+    frontend = model_llm.kwargs["frontend"]
+    tokenizer = model_llm.kwargs["tokenizer"]
+
+    his_state["model"] = model
+    his_state["frontend"] = frontend
+    his_state["tokenizer"] = tokenizer
+    end = time.time()
+    return his_state, f"Model has been loaded! time: {end-beg:.2f}"
+
+
+def model_inference(his_state, input_wav, text_inputs, state, turn_num, history, text_usr):
+    if his_state is None:
+        his_state = model_dict
+    model = his_state["model"]
+    frontend = his_state["frontend"]
+    tokenizer = his_state["tokenizer"]
     # print(f"text_inputs: {text_inputs}")
     # print(f"input_wav: {input_wav}")
     # print(f"state: {state}")
@@ -91,9 +166,11 @@ def model_inference(input_wav, text_inputs, state, turn_num, history, text_usr):
             resampler = torchaudio.transforms.Resample(fs, 16000)
             input_wav_t = torch.from_numpy(input_wav).to(torch.float32)
             input_wav = resampler(input_wav_t[None, :])[0, :].numpy().astype("float32")
-
+        beg_asr = time.time()
         asr_out = model_asr.generate(input_wav)[0]["text"]
-        print(f"asr_out: {asr_out}")
+        end_asr = time.time()
+
+        print(f"asr_out: {asr_out}, time: {end_asr-beg_asr:.2f}")
         history.append([asr_out, None])
         user_prompt = f"{text_usr}<|startofspeech|>!!<|endofspeech|>"
     else:
@@ -128,12 +205,15 @@ def model_inference(input_wav, text_inputs, state, turn_num, history, text_usr):
     thread = Thread(target=model.llm.generate, kwargs=generation_kwargs)
     thread.start()
     res = ""
+    beg_llm = time.time()
     for new_text in streamer:
-        print(f"generated new text： {new_text}")
+        end_llm = time.time()
+        print(f"generated new text： {new_text}, time: {end_llm-beg_llm:.2f}")
         res += new_text.replace("<|im_end|>", "")
         contents_i[-1]["content"] = res
         state["contents_i"] = contents_i
         history[-1][1] = res
+
         yield state, history
     # print(f"total generated: {res}")
     # history[-1][1] = res
@@ -147,10 +227,22 @@ def model_inference(input_wav, text_inputs, state, turn_num, history, text_usr):
     # return state, history
 
 
-def clear_state(audio_inputs, text_inputs, state, turn_num, chatbot):
-    state = {"contents_i": []}
+def clear_state(his_state):
+    model = his_state["model"]
+    frontend = his_state["frontend"]
+    tokenizer = his_state["tokenizer"]
+    del model
+    del frontend
+    del tokenizer
+    del his_state["model"]
+    del his_state["frontend"]
+    del his_state["tokenizer"]
+    import gc
 
-    return state, None
+    gc.collect()
+    torch.cuda.empty_cache()
+
+    return None, None, None, None, None
 
 
 audio_examples = [
@@ -205,6 +297,10 @@ Upload an audio file or input through a microphone, then type te System Prompt.
 def launch():
     with gr.Blocks(theme=gr.themes.Soft()) as demo:
         gr.Markdown(description)
+        state_m = gr.State()
+
+        # text_inputs_model.submit(load_model, [text_inputs_model, state_m], [state_m, text_outputs_model])
+        # load_button.click(load_model, state_m, [state_m, text_outputs_model])
         state = gr.State()
         chatbot = gr.Chatbot()
         with gr.Column():
@@ -228,13 +324,16 @@ def launch():
                             label="User Prompt",
                         )
 
-                    # gr.Examples(
-                    #     examples=audio_examples, inputs=audio_inputs, examples_per_page=20
-                    # )
+        with gr.Row():
+            model_ckpt_list = gr.Dropdown(
+                choices=all_file_paths, value=all_file_paths[0], label="Model ckpt path"
+            )
+            clear_button = gr.Button("Clear")
+        text_outputs_model = gr.HTML(label="Load states")
 
-        # with gr.Row():
-        #     fn_button = gr.Button("Start")
-        clear_button = gr.Button("Clear")
+        model_ckpt_list.select(
+            load_model, [model_ckpt_list, state_m], [state_m, text_outputs_model]
+        )
 
         # text_outputs = gr.HTML(label="Results")
 
@@ -243,20 +342,20 @@ def launch():
         # 	gr.HTML(centered_table_html)
         audio_inputs.stop_recording(
             model_inference,
-            inputs=[audio_inputs, text_inputs, state, turn_num, chatbot, text_inputs_usr],
+            inputs=[state_m, audio_inputs, text_inputs, state, turn_num, chatbot, text_inputs_usr],
             outputs=[state, chatbot],
         )
         audio_inputs.upload(
             model_inference,
-            inputs=[audio_inputs, text_inputs, state, turn_num, chatbot, text_inputs_usr],
+            inputs=[state_m, audio_inputs, text_inputs, state, turn_num, chatbot, text_inputs_usr],
             outputs=[state, chatbot],
         )
 
         # clear.click(clear_state, inputs=[audio_inputs, text_inputs, state, turn_num, chatbot], outputs=[state, chatbot], queue=False)
         clear_button.click(
-            lambda: (None, None, None, None),
-            inputs=None,
-            outputs=[audio_inputs, state, chatbot, text_inputs_usr],
+            clear_state,
+            inputs=state_m,
+            outputs=[audio_inputs, state, chatbot, text_inputs_usr, state_m],
             queue=False,
         )
 
@@ -265,7 +364,7 @@ def launch():
     demo.launch(
         share=False,
         server_name="0.0.0.0",
-        server_port=12343,
+        server_port=12345,
         ssl_certfile="./cert.pem",
         ssl_keyfile="./key.pem",
         inbrowser=True,
