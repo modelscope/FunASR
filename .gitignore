@@ -2874,3 +2874,15 @@ examples/aishell/hypformer/exp/baseline_speech_hypformer_asr_nat-aishell1-pytorc
 examples/aishell/hypformer/exp/baseline_speech_hypformer_asr_nat-aishell1-pytorch_config_zh_char_exp1/model.pt.ep150
 examples/aishell/hypformer/exp/baseline_speech_hypformer_asr_nat-aishell1-pytorch_config_zh_char_exp1/train.log.txt.2024-05-22_18-22
 examples/aishell/hypformer/exp/baseline_speech_hypformer_asr_nat-aishell1-pytorch_config_zh_char_exp1/tensorboard/events.out.tfevents.1716373347.ubuntu-Super-Server
+examples/aishell/paraformer/exp/speech_paraformer_asr_nat-aishell1-pytorch/inference/test/1/1best_recog/text
+examples/aishell/paraformer/exp/speech_paraformer_asr_nat-aishell1-pytorch/inference/test/1/1best_recog/token
+examples/aishell/paraformer/exp/speech_paraformer_asr_nat-aishell1-pytorch/inference/test/1best_recog/text
+examples/aishell/paraformer/exp/speech_paraformer_asr_nat-aishell1-pytorch/inference/test/1best_recog/text.proc
+examples/aishell/paraformer/exp/speech_paraformer_asr_nat-aishell1-pytorch/inference/test/1best_recog/text.ref
+examples/aishell/paraformer/exp/speech_paraformer_asr_nat-aishell1-pytorch/inference/test/1best_recog/token
+examples/aishell/paraformer/exp/speech_paraformer_asr_nat-aishell1-pytorch/inference/test/2/1best_recog/text
+examples/aishell/paraformer/exp/speech_paraformer_asr_nat-aishell1-pytorch/inference/test/2/1best_recog/token
+examples/aishell/paraformer/exp/speech_paraformer_asr_nat-aishell1-pytorch/inference/test/logdir/keys.1.scp
+examples/aishell/paraformer/exp/speech_paraformer_asr_nat-aishell1-pytorch/inference/test/logdir/keys.2.scp
+examples/aishell/paraformer/exp/speech_paraformer_asr_nat-aishell1-pytorch/inference/test/logdir/log.1.txt
+examples/aishell/paraformer/exp/speech_paraformer_asr_nat-aishell1-pytorch/inference/test/logdir/log.2.txt

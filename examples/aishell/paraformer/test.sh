@@ -26,10 +26,10 @@ set -o pipefail
 
 test_sets="test"
 
-config_path=/ssd/zhuang/code/FunASR2024/examples/aishell/paraformer/exp/baseline_paraformer_conformer_12e_6d_2048_256_zh_char_exp1
-model=/ssd/zhuang/code/FunASR2024/examples/aishell/paraformer/exp/speech_paraformer_asr_nat-aishell1-pytorch/model.pb
-token_list=/ssd/zhuang/code/FunASR2024/examples/aishell/DATA/data/zh_token_list/char/tokens.txt
-cmvn_file=/ssd/zhuang/code/FunASR2024/examples/aishell/paraformer/exp/speech_paraformer_asr_nat-aishell1-pytorch/am.mvn
+config_path=/ssd/zhuang/code/FunASR/examples/aishell/paraformer/exp/baseline_paraformer_conformer_12e_6d_2048_256_zh_char_exp1
+model=/ssd/zhuang/code/FunASR/examples/aishell/paraformer/exp/speech_paraformer_asr_nat-aishell1-pytorch/model.pb
+token_list=/ssd/zhuang/code/FunASR/examples/aishell/paraformer/exp/speech_paraformer_asr_nat-aishell1-pytorch/tokens.txt
+cmvn_file=/ssd/zhuang/code/FunASR/examples/aishell/paraformer/exp/speech_paraformer_asr_nat-aishell1-pytorch/am.mvn
 
 
 
@@ -51,7 +51,7 @@ for dset in ${test_sets}; do
     data_dir="${feats_dir}/data/${dset}"
     key_file=${data_dir}/${inference_scp}
 
-    inference_dir=${config_path}/inference/${dset}
+    inference_dir=/ssd/zhuang/code/FunASR/examples/aishell/paraformer/exp/speech_paraformer_asr_nat-aishell1-pytorch/inference/${dset}
     _logdir="${inference_dir}/logdir"
 
     echo "inference_dir: ${inference_dir}"
