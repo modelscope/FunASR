@@ -339,7 +339,9 @@ class AutoModel:
         #  FIX(gcf): concat the vad clips for sense vocie model for better aed
         if kwargs.get("merge_vad", False):
             for i in range(len(res)):
-                res[i]["value"] = merge_vad(res[i]["value"], kwargs.get("merge_length", 15000))
+                res[i]["value"] = merge_vad(
+                    res[i]["value"], kwargs.get("merge_length_s", 15) * 1000
+                )
 
         # step.2 compute asr model
         model = self.model
@@ -379,6 +381,9 @@ class AutoModel:
 
             if len(sorted_data) > 0 and len(sorted_data[0]) > 0:
                 batch_size = max(batch_size, sorted_data[0][0][1] - sorted_data[0][0][0])
+
+            if kwargs["device"] == "cpu":
+                batch_size = 0
 
             beg_idx = 0
             beg_asr_total = time.time()
