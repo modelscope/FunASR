@@ -156,6 +156,16 @@ res = model.generate(
 text = rich_transcription_postprocess(res[0]["text"])
 print(text)
 ```
+Parameter Descriptions:
+- `model_dir`: The name of the model, or the model's path on the local disk.
+- `trust_remote_code`:
+  - When set to `True`, this indicates that the model's code implementation should be loaded from the location specified by `remote_code`, which points to the exact code for the model (for example, `model.py` in the current directory). It supports absolute paths, relative paths, and network URLs.
+  - When set to `False`, this signifies that the model's code implementation is the integrated version within [FunASR](https://github.com/modelscope/FunASR). In this case, any modifications to `model.py` in the current directory will not take effect because the version loaded is the internal one from FunASR. For the model code, [click here to view](https://github.com/modelscope/FunASR/tree/main/funasr/models/sense_voice).
+- `max_single_segment_time`: The maximum length of audio segments that the `vad_model` can cut, measured in milliseconds (ms).
+- `use_itn`: Indicates whether the output should include punctuation and inverse text normalization.
+- `batch_size_s`: Represents a dynamic batch size where the total duration of the audio in the batch is measured in seconds (s).
+- `merge_vad`: Whether to concatenate short audio fragments cut by the vad model, with the merged length being `merge_length_s`, measured in seconds (s).
+
 #### Paraformer
 ```python
 from funasr import AutoModel
