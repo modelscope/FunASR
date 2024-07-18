@@ -25,7 +25,7 @@ class ModelDimensions:
     n_text_state: int
     n_text_head: int
     n_text_layer: int
-    att_type: str
+    att_type: str = "default"
 
 
 # class LayerNorm(nn.LayerNorm):
