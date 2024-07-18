@@ -1,0 +1,14 @@
+{
+    "lora_layers":{
+        "encoder": {
+            "self_attn": ["linear_q", "linear_k", "linear_v", "linear_out"],
+            "feed_forward": ["w_1", "w_2"]
+        }
+    },
+    "lora_info":{
+        "r": 32,
+        "lora_alpha": 64,
+        "lora_dropout": 0.0
+    },
+    "lora_exception": ["decoder"]
+}

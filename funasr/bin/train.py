@@ -9,6 +9,7 @@ import hydra
 import logging
 import time
 import argparse
+import json
 from io import BytesIO
 
 from contextlib import nullcontext
@@ -28,7 +29,7 @@ from funasr.train_utils.trainer import Trainer
 from funasr.schedulers import scheduler_classes
 from funasr.train_utils.initialize import initialize
 from funasr.download.download_model_from_hub import download_model
-from funasr.models.lora.utils import mark_only_lora_as_trainable
+from funasr.models.lora.utils import mark_only_lora_as_trainable, lora_summary, loar_wrapper
 from funasr.train_utils.set_all_random_seed import set_all_random_seed
 from funasr.train_utils.load_pretrained_model import load_pretrained_model
 from funasr.utils.misc import prepare_model_dir
@@ -75,6 +76,19 @@ def main(**kwargs):
     logging.info("Build model, frontend, tokenizer")
     device = kwargs.get("device", "cuda")
     kwargs["device"] = "cpu"
+
+    use_lora = kwargs.get("use_lora", False)
+    lora_details = kwargs.get("lora_details", None)
+    output_dir = kwargs.get("output_dir", "./exp")
+    if lora_details is not None and use_lora:
+        lora_config = os.path.join(output_dir, "lora_config.json")
+        with open(lora_details, 'r') as file:
+            lora_details = json.load(file)
+        lora_exception = lora_details.get("lora_exception", [])
+        with open(lora_config, "w") as f:
+             json.dump(lora_details, f, indent=4)
+        kwargs["lora_details"] = lora_config
+
     model = AutoModel(**kwargs)
 
     # save config.yaml
@@ -107,9 +121,17 @@ def main(**kwargs):
                 if k.startswith(t + ".") or k == t:
                     logging.info(f"Setting {k}.requires_grad = False")
                     p.requires_grad = False
+
+    # mark_only_lora_as_trainable
+    if use_lora:
+        lora_bias = kwargs.get("lora_bias", "none")
+        mark_only_lora_as_trainable(model, lora_bias, lora_exception)
+
     if local_rank == 0:
         logging.info(f"{model_summary(model)}")
-
+        if use_lora:
+            logging.info(f"{lora_summary(model)}")
+    
     if use_ddp:
         model = model.cuda(local_rank)
         model = DDP(

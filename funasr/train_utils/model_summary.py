@@ -44,17 +44,18 @@ def to_bytes(dtype) -> int:
     return int(str(dtype)[-2:]) // 8
 
 
-def model_summary(model: torch.nn.Module) -> str:
+def model_summary(model: torch.nn.Module, print_details=False) -> str:
     message = "Model structure:\n"
     message += str(model)
 
     tot_params, num_params = 0, 0
     for name, param in model.named_parameters():
-        print(
-            "name: {}, dtype: {}, device: {}, trainable: {}, shape: {}, numel: {}".format(
-                name, param.dtype, param.device, param.requires_grad, param.shape, param.numel()
+        if print_details:
+            print(
+                "name: {}, dtype: {}, device: {}, trainable: {}, shape: {}, numel: {}".format(
+                    name, param.dtype, param.device, param.requires_grad, param.shape, param.numel()
+                )
             )
-        )
         tot_params += param.numel()
         if param.requires_grad:
             num_params += param.numel()

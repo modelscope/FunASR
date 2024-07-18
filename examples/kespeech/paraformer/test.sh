@@ -28,12 +28,14 @@ set -o pipefail
 
 # test_sets="test"
 # test_sets="ES/Beijing/test ES/Ji-Lu/test ES/Jiang-Huai/test ES/Jiao-Liao/test ES/Lan-Yin/test ES/Northeastern/test ES/Southwestern/test ES/Zhongyuan/test MD/test"
-test_sets="WD/test"
+test_sets=ES/Southwestern/test
 
 config_path=/ssd/zhuang/code/FunASR/examples/aishell/paraformer/exp/baseline_paraformer_conformer_12e_6d_2048_256_zh_char_exp1
-model=/ssd/zhuang/code/FunASR/examples/aishell/paraformer/exp/speech_paraformer_asr_nat-aishell1-pytorch/model.pb
+model=/ssd/zhuang/code/FunASR/examples/kespeech/paraformer/exp/baseline_paraformer_conformer_12e_6d_2048_256_zh_char_SW-LoRA-FT/model.pt.avg10
 token_list=/ssd/zhuang/code/FunASR/examples/aishell/paraformer/exp/speech_paraformer_asr_nat-aishell1-pytorch/tokens.txt
 cmvn_file=/ssd/zhuang/code/FunASR/examples/aishell/paraformer/exp/speech_paraformer_asr_nat-aishell1-pytorch/am.mvn
+use_lora=true
+lora_details=/ssd/zhuang/code/FunASR/examples/kespeech/paraformer/exp/baseline_paraformer_conformer_12e_6d_2048_256_zh_char_SW-LoRA-FT/lora_config.json
 
 
 
@@ -55,7 +57,7 @@ for dset in ${test_sets}; do
     data_dir="${feats_dir}/data/${dset}"
     key_file=${data_dir}/${inference_scp}
 
-    inference_dir=/ssd/zhuang/code/FunASR/examples/aishell/paraformer/exp/speech_paraformer_asr_nat-aishell1-pytorch/inference_kespeech/${dset}
+    inference_dir=/ssd/zhuang/code/FunASR/examples/kespeech/paraformer/exp/baseline_paraformer_conformer_12e_6d_2048_256_zh_char_SW-LoRA-FT/inference/${dset}
     _logdir="${inference_dir}/logdir"
 
     echo "inference_dir: ${inference_dir}"
@@ -84,6 +86,8 @@ for dset in ${test_sets}; do
             ++input="${_logdir}/keys.${JOB}.scp" \
             ++output_dir="${inference_dir}/${JOB}" \
             ++device="${inference_device}" \
+            ++use_lora=${use_lora} \
+            ++lora_details=${lora_details} \
             ++ncpu=1 \
             ++disable_log=true \
             ++batch_size="${inference_batch_size}" &> ${_logdir}/log.${JOB}.txt
