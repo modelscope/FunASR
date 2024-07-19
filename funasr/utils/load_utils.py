@@ -76,7 +76,7 @@ def load_audio_text_image_video(
                 for audio in data_or_path_or_list
             ]
     if isinstance(data_or_path_or_list, str) and data_or_path_or_list.startswith(
-        "http"
+            ("http://", "https://")
     ):  # download url to local file
         data_or_path_or_list = download_from_url(data_or_path_or_list)
 
