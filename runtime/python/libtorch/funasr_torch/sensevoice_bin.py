@@ -111,10 +111,8 @@ class SenseVoiceSmall:
             mask = yseq != self.blank_id
             token_int = yseq[mask].tolist()
 
-            if tokenizer is not None:
-                asr_res.append(self.tokenizer.decode(token_int))
-            else:
-                asr_res.append(token_int)
+            asr_res.append(self.tokenizer.decode(token_int))
+
         return asr_res
 
     def load_data(self, wav_content: Union[str, np.ndarray, List[str]], fs: int = None) -> List:
