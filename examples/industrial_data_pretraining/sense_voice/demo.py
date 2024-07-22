@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
-# Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
+# Copyright FunASR (https://github.com/FunAudioLLM/SenseVoice). All Rights Reserved.
 #  MIT License  (https://opensource.org/licenses/MIT)
-
 
 from funasr import AutoModel
 from funasr.utils.postprocess_utils import rich_transcription_postprocess
 
-model_dir = "/Users/zhifu/Downloads/modelscope_models/SenseVoiceSmall"  # "iic/SenseVoiceSmall"
+model_dir = "iic/SenseVoiceSmall"
 
 
 model = AutoModel(
@@ -19,30 +18,17 @@ model = AutoModel(
 
 # en
 res = model.generate(
-    input="/Users/zhifu/Downloads/8_output.wav",
+    input=f"{model.model_path}/example/en.mp3",
     cache={},
     language="auto",  # "zn", "en", "yue", "ja", "ko", "nospeech"
     use_itn=True,
     batch_size_s=60,
     merge_vad=True,  #
-    merge_length_s=0.1,
-)
-text = rich_transcription_postprocess(res[0]["text"])
-print(text)
-
-# en
-res = model.generate(
-    input="/Users/zhifu/Downloads/8_output.wav",
-    cache={},
-    language="auto",  # "zn", "en", "yue", "ja", "ko", "nospeech"
-    use_itn=True,
-    batch_size_s=60,
-    merge_vad=False,  #
     merge_length_s=15,
 )
 text = rich_transcription_postprocess(res[0]["text"])
 print(text)
-raise "exit"
+
 # zh
 res = model.generate(
     input=f"{model.model_path}/example/zh.mp3",
