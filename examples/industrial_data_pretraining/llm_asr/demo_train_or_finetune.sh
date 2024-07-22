@@ -30,10 +30,20 @@ init_param="${output_dir}/model.pt"
 mkdir -p ${output_dir}
 echo "log_file: ${log_file}"
 
-torchrun \
---nnodes 1 \
---nproc_per_node ${gpu_num} \
-../../../funasr/bin/train.py \
+deepspeed_config=${workspace}/../../ds_stage1.json
+
+DISTRIBUTED_ARGS="
+    --nnodes ${WORLD_SIZE:-1} \
+    --nproc_per_node $gpu_num \
+    --node_rank ${RANK:-0} \
+    --master_addr ${MASTER_ADDR:-127.0.0.1} \
+    --master_port ${MASTER_PORT:-26669}
+"
+
+echo $DISTRIBUTED_ARGS
+
+torchrun $DISTRIBUTED_ARGS \
+../../../funasr/bin/train_ds.py \
 --config-path "${workspace}/conf" \
 --config-name "${config}" \
 ++train_data_set_list="${train_data}" \
@@ -41,6 +51,9 @@ torchrun \
 ++dataset_conf.batch_size=4 \
 ++dataset_conf.num_workers=4 \
 ++train_conf.max_epoch=15 \
+++train_conf.use_deepspeed=false \
+++train_conf.deepspeed_config=${deepspeed_config} \
 ++optim_conf.lr=0.0001 \
 ++init_param="${init_param}" \
+
 ++output_dir="${output_dir}" &> ${log_file} &

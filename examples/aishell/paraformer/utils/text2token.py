@@ -8,6 +8,7 @@ import argparse
 import codecs
 import re
 import sys
+import json
 
 is_python2 = sys.version_info[0] == 2
 
@@ -60,6 +61,12 @@ def get_parser():
                         read from SI1279.PHN file -> "sil b r ih sil k s aa r er n aa l
                         sil t er n ih sil t ih v sil" """,
     )
+    parser.add_argument(
+        "--text_format",
+        default="text",
+        type=str,
+        help="text, jsonl",
+    )
     return parser
 
 
@@ -82,6 +89,9 @@ def main():
     line = f.readline()
     n = args.nchar
     while line:
+        if args.text_format == "jsonl":
+            data = json.loads(line.strip())
+            line = data["target"]
         x = line.split()
         print(" ".join(x[: args.skip_ncols]), end=" ")
         a = " ".join(x[args.skip_ncols :])

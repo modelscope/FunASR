@@ -4,6 +4,7 @@ project(FunASROnnx)
 
 option(ENABLE_GLOG "Whether to build glog" ON)
 option(ENABLE_FST "Whether to build openfst" ON) # ITN need openfst compiled
+option(GPU "Whether to build with GPU" OFF)
 
 # set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD 14 CACHE STRING "The C++ version to be used.")
@@ -16,6 +17,17 @@ if(BIG_ENDIAN)
     message("Big endian system")
 else()
     message("Little endian system")
+endif()
+
+# json
+include(FetchContent)
+if(NOT EXISTS ${PROJECT_SOURCE_DIR}/third_party/json/ChangeLog.md )
+FetchContent_Declare(json
+  URL   https://github.com/nlohmann/json/archive/refs/tags/v3.11.2.tar.gz
+SOURCE_DIR ${PROJECT_SOURCE_DIR}/third_party/json
+)
+
+FetchContent_MakeAvailable(json)
 endif()
 
 # for onnxruntime
@@ -36,6 +48,18 @@ include_directories(${PROJECT_SOURCE_DIR}/third_party/yaml-cpp/include)
 include_directories(${PROJECT_SOURCE_DIR}/third_party/jieba/include)
 include_directories(${PROJECT_SOURCE_DIR}/third_party/jieba/include/limonp/include)
 include_directories(${PROJECT_SOURCE_DIR}/third_party/kaldi)
+include_directories(${PROJECT_SOURCE_DIR}/third_party/json/include)
+
+if(GPU)
+    add_definitions(-DUSE_GPU)
+    set(TORCH_DIR "/usr/local/lib/python3.8/dist-packages/torch")
+    set(TORCH_BLADE_DIR "/usr/local/lib/python3.8/dist-packages/torch_blade")
+    include_directories(${TORCH_DIR}/include)
+    include_directories(${TORCH_DIR}/include/torch/csrc/api/include)
+    link_directories(${TORCH_DIR}/lib)
+    link_directories(${TORCH_BLADE_DIR})
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -D_GLIBCXX_USE_CXX11_ABI=0")
+endif()
 
 if(ENABLE_GLOG)
     include_directories(${PROJECT_SOURCE_DIR}/third_party/glog/src)

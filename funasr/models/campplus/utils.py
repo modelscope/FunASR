@@ -169,7 +169,7 @@ def merge_seque(distribute_res):
     return res
 
 
-def smooth(res, mindur=1):
+def smooth(res, mindur=0.7):
     # if only one segment, return directly
     if len(res) < 2:
         return res
@@ -193,23 +193,21 @@ def smooth(res, mindur=1):
 
 
 def distribute_spk(sentence_list, sd_time_list):
-    sd_sentence_list = []
+    sd_time_list = [(spk_st * 1000, spk_ed * 1000, spk) for spk_st, spk_ed, spk in sd_time_list]
     for d in sentence_list:
-        sentence_start = d["start"]
-        sentence_end = d["end"]
+        sentence_start = d['start']
+        sentence_end = d['end']
         sentence_spk = 0
         max_overlap = 0
-        for sd_time in sd_time_list:
-            spk_st, spk_ed, spk = sd_time
-            spk_st = spk_st * 1000
-            spk_ed = spk_ed * 1000
+        for spk_st, spk_ed, spk in sd_time_list:
             overlap = max(min(sentence_end, spk_ed) - max(sentence_start, spk_st), 0)
             if overlap > max_overlap:
                 max_overlap = overlap
                 sentence_spk = spk
-        d["spk"] = int(sentence_spk)
-        sd_sentence_list.append(d)
-    return sd_sentence_list
+            if overlap > 0 and sentence_spk == spk:
+                max_overlap += overlap
+        d['spk'] = int(sentence_spk)
+    return sentence_list
 
 
 class Storage(metaclass=ABCMeta):

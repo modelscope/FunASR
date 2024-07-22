@@ -34,7 +34,6 @@ from funasr.models.transformer.utils.subsampling import Conv2dSubsampling8
 from funasr.models.transformer.utils.subsampling import TooShortUttError
 from funasr.models.transformer.utils.subsampling import check_short_utt
 from funasr.models.encoder.abs_encoder import AbsEncoder
-import pdb
 import math
 
 
@@ -363,7 +362,6 @@ class MFCCAEncoder(AbsEncoder):
         t_leng = xs_pad.size(1)
         d_dim = xs_pad.size(2)
         xs_pad = xs_pad.reshape(-1, channel_size, t_leng, d_dim)
-        # pdb.set_trace()
         if channel_size < 8:
             repeat_num = math.ceil(8 / channel_size)
             xs_pad = xs_pad.repeat(1, repeat_num, 1, 1)[:, 0:8, :, :]

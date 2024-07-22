@@ -1,7 +1,7 @@
 DOCKER:
+  funasr-runtime-sdk-online-cpu-0.1.10
   funasr-runtime-sdk-online-cpu-0.1.9
   funasr-runtime-sdk-online-cpu-0.1.8
-  funasr-runtime-sdk-online-cpu-0.1.7
 DEFAULT_ASR_MODEL:
   damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx
   damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx

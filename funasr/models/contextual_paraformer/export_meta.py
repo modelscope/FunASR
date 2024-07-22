@@ -16,6 +16,21 @@ class ContextualEmbedderExport2(ContextualEmbedderExport):
         self.embedding = model.bias_embed
         model.bias_encoder.batch_first = False
         self.bias_encoder = model.bias_encoder
+    
+    def export_dummy_inputs(self):
+        hotword = torch.tensor(
+            [
+                [10, 11, 12, 13, 14, 10, 11, 12, 13, 14],
+                [100, 101, 0, 0, 0, 0, 0, 0, 0, 0],
+                [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [10, 11, 12, 13, 14, 10, 11, 12, 13, 14],
+                [100, 101, 0, 0, 0, 0, 0, 0, 0, 0],
+                [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            ],
+            dtype=torch.int32,
+        )
+        # hotword_length = torch.tensor([10, 2, 1], dtype=torch.int32)
+        return (hotword)
 
 
 def export_rebuild_model(model, **kwargs):
@@ -59,7 +74,9 @@ def export_rebuild_model(model, **kwargs):
     backbone_model.export_dynamic_axes = types.MethodType(
         export_backbone_dynamic_axes, backbone_model
     )
-    backbone_model.export_name = types.MethodType(export_backbone_name, backbone_model)
+    
+    embedder_model.export_name = "model_eb"
+    backbone_model.export_name = "model"
 
     return backbone_model, embedder_model
 

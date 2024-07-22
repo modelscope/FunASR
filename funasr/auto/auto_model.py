@@ -19,7 +19,8 @@ from funasr.register import tables
 from funasr.utils.load_utils import load_bytes
 from funasr.download.file import download_from_url
 from funasr.utils.timestamp_tools import timestamp_sentence
-from funasr.download.download_from_hub import download_model
+from funasr.utils.timestamp_tools import timestamp_sentence_en
+from funasr.download.download_model_from_hub import download_model
 from funasr.utils.vad_utils import slice_padding_audio_samples
 from funasr.utils.vad_utils import merge_vad
 from funasr.utils.load_utils import load_audio_text_image_video
@@ -42,8 +43,9 @@ def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
     filelist = [".scp", ".txt", ".json", ".jsonl", ".text"]
 
     chars = string.ascii_letters + string.digits
-    if isinstance(data_in, str) and data_in.startswith("http"):  # url
-        data_in = download_from_url(data_in)
+    if isinstance(data_in, str):
+        if data_in.startswith("http://") or data_in.startswith("https://"):  # url
+            data_in = download_from_url(data_in)
 
     if isinstance(data_in, str) and os.path.exists(
         data_in
@@ -90,7 +92,8 @@ def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
                 if isinstance(data_i, str) and os.path.exists(data_i):
                     key = misc.extract_filename_without_extension(data_i)
                 else:
-                    key = "rand_key_" + "".join(random.choice(chars) for _ in range(13))
+                    if key is None:
+                        key = "rand_key_" + "".join(random.choice(chars) for _ in range(13))
                 key_list.append(key)
 
     else:  # raw text; audio sample point, fbank; bytes
@@ -108,11 +111,15 @@ class AutoModel:
 
     def __init__(self, **kwargs):
 
+        try:
+            from funasr.utils.version_checker import check_for_update
+
+            check_for_update()
+        except:
+            pass
+
         log_level = getattr(logging, kwargs.get("log_level", "INFO").upper())
         logging.basicConfig(level=log_level)
-
-        if not kwargs.get("disable_log", True):
-            tables.print()
 
         model, kwargs = self.build_model(**kwargs)
 
@@ -161,7 +168,8 @@ class AutoModel:
         self.spk_kwargs = spk_kwargs
         self.model_path = kwargs.get("model_path")
 
-    def build_model(self, **kwargs):
+    @staticmethod
+    def build_model(**kwargs):
         assert "model" in kwargs
         if "model_conf" not in kwargs:
             logging.info("download models from model hub: {}".format(kwargs.get("hub", "ms")))
@@ -207,11 +215,11 @@ class AutoModel:
         kwargs["frontend"] = frontend
         # build model
         model_class = tables.model_classes.get(kwargs["model"])
+        assert model_class is not None, f'{kwargs["model"]} is not registered'
         model_conf = {}
         deep_update(model_conf, kwargs.get("model_conf", {}))
         deep_update(model_conf, kwargs)
         model = model_class(**model_conf, vocab_size=vocab_size)
-        model.to(device)
 
         # init_param
         init_param = kwargs.get("init_param", None)
@@ -232,6 +240,13 @@ class AutoModel:
         # fp16
         if kwargs.get("fp16", False):
             model.to(torch.float16)
+        elif kwargs.get("bf16", False):
+            model.to(torch.bfloat16)
+        model.to(device)
+
+        if not kwargs.get("disable_log", True):
+            tables.print()
+
         return model, kwargs
 
     def __call__(self, *args, **cfg):
@@ -284,7 +299,7 @@ class AutoModel:
             with torch.no_grad():
                 res = model.inference(**batch, **kwargs)
                 if isinstance(res, (list, tuple)):
-                    results = res[0]
+                    results = res[0] if len(res) > 0 else [{"text": ""}]
                     meta_data = res[1] if len(res) > 1 else {}
             time2 = time.perf_counter()
 
@@ -300,7 +315,7 @@ class AutoModel:
             speed_stats["rtf"] = f"{(time_escape) / batch_data_time:0.3f}"
             description = f"{speed_stats}, "
             if pbar:
-                pbar.update(1)
+                pbar.update(end_idx - beg_idx)
                 pbar.set_description(description)
             time_speech_total += batch_data_time
             time_escape_total += time_escape
@@ -324,7 +339,9 @@ class AutoModel:
         #  FIX(gcf): concat the vad clips for sense vocie model for better aed
         if kwargs.get("merge_vad", False):
             for i in range(len(res)):
-                res[i]["value"] = merge_vad(res[i]["value"], kwargs.get("merge_length", 15000))
+                res[i]["value"] = merge_vad(
+                    res[i]["value"], kwargs.get("merge_length_s", 15) * 1000
+                )
 
         # step.2 compute asr model
         model = self.model
@@ -358,13 +375,16 @@ class AutoModel:
             results_sorted = []
 
             if not len(sorted_data):
+                results_ret_list.append({"key": key, "text": "", "timestamp": []})
                 logging.info("decoding, utt: {}, empty speech".format(key))
                 continue
 
             if len(sorted_data) > 0 and len(sorted_data[0]) > 0:
                 batch_size = max(batch_size, sorted_data[0][0][1] - sorted_data[0][0][0])
 
-            batch_size_ms_cum = 0
+            if kwargs["device"] == "cpu":
+                batch_size = 0
+
             beg_idx = 0
             beg_asr_total = time.time()
             time_speech_total_per_sample = speech_lengths / 16000
@@ -373,19 +393,22 @@ class AutoModel:
             # pbar_sample = tqdm(colour="blue", total=n, dynamic_ncols=True)
 
             all_segments = []
+            max_len_in_batch = 0
+            end_idx = 1
             for j, _ in enumerate(range(0, n)):
                 # pbar_sample.update(1)
-                batch_size_ms_cum += sorted_data[j][0][1] - sorted_data[j][0][0]
+                sample_length = sorted_data[j][0][1] - sorted_data[j][0][0]
+                potential_batch_length = max(max_len_in_batch, sample_length) * (j + 1 - beg_idx)
+                # batch_size_ms_cum += sorted_data[j][0][1] - sorted_data[j][0][0]
                 if (
                     j < n - 1
-                    and (batch_size_ms_cum + sorted_data[j + 1][0][1] - sorted_data[j + 1][0][0])
-                    < batch_size
-                    and (sorted_data[j + 1][0][1] - sorted_data[j + 1][0][0])
-                    < batch_size_threshold_ms
+                    and sample_length < batch_size_threshold_ms
+                    and potential_batch_length < batch_size
                 ):
+                    max_len_in_batch = max(max_len_in_batch, sample_length)
+                    end_idx += 1
                     continue
-                batch_size_ms_cum = 0
-                end_idx = j + 1
+
                 speech_j, speech_lengths_j = slice_padding_audio_samples(
                     speech, speech_lengths, sorted_data[beg_idx:end_idx]
                 )
@@ -410,6 +433,8 @@ class AutoModel:
                         )
                         results[_b]["spk_embedding"] = spk_res[0]["spk_embedding"]
                 beg_idx = end_idx
+                end_idx += 1
+                max_len_in_batch = sample_length
                 if len(results) < 1:
                     continue
                 results_sorted.extend(results)
@@ -421,6 +446,10 @@ class AutoModel:
             #                      f"time_speech_total_per_sample: {time_speech_total_per_sample: 0.3f}, "
             #                      f"time_escape_total_per_sample: {time_escape_total_per_sample:0.3f}")
 
+            if len(results_sorted) != n:
+                results_ret_list.append({"key": key, "text": "", "timestamp": []})
+                logging.info("decoding, utt: {}, empty result".format(key))
+                continue
             restored_data = [0] * n
             for j in range(n):
                 index = sorted_data[j][1]
@@ -454,23 +483,20 @@ class AutoModel:
                         else:
                             result[k] += restored_data[j][k]
 
+            if not len(result["text"].strip()):
+                continue
             return_raw_text = kwargs.get("return_raw_text", False)
             # step.3 compute punc model
+            raw_text = None
             if self.punc_model is not None:
-                if not len(result["text"].strip()):
-                    if return_raw_text:
-                        result["raw_text"] = ""
-                else:
-                    deep_update(self.punc_kwargs, cfg)
-                    punc_res = self.inference(
-                        result["text"], model=self.punc_model, kwargs=self.punc_kwargs, **cfg
-                    )
-                    raw_text = copy.copy(result["text"])
-                    if return_raw_text:
-                        result["raw_text"] = raw_text
-                    result["text"] = punc_res[0]["text"]
-            else:
-                raw_text = None
+                deep_update(self.punc_kwargs, cfg)
+                punc_res = self.inference(
+                    result["text"], model=self.punc_model, kwargs=self.punc_kwargs, **cfg
+                )
+                raw_text = copy.copy(result["text"])
+                if return_raw_text:
+                    result["raw_text"] = raw_text
+                result["text"] = punc_res[0]["text"]
 
             # speaker embedding cluster after resorted
             if self.spk_model is not None and kwargs.get("return_spk_res", True):
@@ -485,8 +511,8 @@ class AutoModel:
                 sv_output = postprocess(all_segments, None, labels, spk_embedding.cpu())
                 if self.spk_mode == "vad_segment":  # recover sentence_list
                     sentence_list = []
-                    for res, vadsegment in zip(restored_data, vadsegments):
-                        if "timestamp" not in res:
+                    for rest, vadsegment in zip(restored_data, vadsegments):
+                        if "timestamp" not in rest:
                             logging.error(
                                 "Only 'iic/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch' \
                                            and 'iic/speech_seaco_paraformer_large_asr_nat-zh-cn-16k-common-vocab8404-pytorch'\
@@ -496,8 +522,8 @@ class AutoModel:
                             {
                                 "start": vadsegment[0],
                                 "end": vadsegment[1],
-                                "sentence": res["text"],
-                                "timestamp": res["timestamp"],
+                                "sentence": rest["text"],
+                                "timestamp": rest["timestamp"],
                             }
                         )
                 elif self.spk_mode == "punc_segment":
@@ -507,24 +533,40 @@ class AutoModel:
                                        and 'iic/speech_seaco_paraformer_large_asr_nat-zh-cn-16k-common-vocab8404-pytorch'\
                                        can predict timestamp, and speaker diarization relies on timestamps."
                         )
-                    sentence_list = timestamp_sentence(
-                        punc_res[0]["punc_array"],
-                        result["timestamp"],
-                        raw_text,
-                        return_raw_text=return_raw_text,
-                    )
+                    if kwargs.get("en_post_proc", False):
+                        sentence_list = timestamp_sentence_en(
+                            punc_res[0]["punc_array"],
+                            result["timestamp"],
+                            raw_text,
+                            return_raw_text=return_raw_text,
+                        )
+                    else:
+                        sentence_list = timestamp_sentence(
+                            punc_res[0]["punc_array"],
+                            result["timestamp"],
+                            raw_text,
+                            return_raw_text=return_raw_text,
+                        )
                 distribute_spk(sentence_list, sv_output)
                 result["sentence_info"] = sentence_list
             elif kwargs.get("sentence_timestamp", False):
                 if not len(result["text"].strip()):
                     sentence_list = []
                 else:
-                    sentence_list = timestamp_sentence(
-                        punc_res[0]["punc_array"],
-                        result["timestamp"],
-                        raw_text,
-                        return_raw_text=return_raw_text,
-                    )
+                    if kwargs.get("en_post_proc", False):
+                        sentence_list = timestamp_sentence_en(
+                            punc_res[0]["punc_array"],
+                            result["timestamp"],
+                            raw_text,
+                            return_raw_text=return_raw_text,
+                        )
+                    else:
+                        sentence_list = timestamp_sentence(
+                            punc_res[0]["punc_array"],
+                            result["timestamp"],
+                            raw_text,
+                            return_raw_text=return_raw_text,
+                        )
                 result["sentence_info"] = sentence_list
             if "spk_embedding" in result:
                 del result["spk_embedding"]
@@ -576,12 +618,6 @@ class AutoModel:
         )
 
         with torch.no_grad():
-
-            if type == "onnx":
-                export_dir = export_utils.export_onnx(model=model, data_in=data_list, **kwargs)
-            else:
-                export_dir = export_utils.export_torchscripts(
-                    model=model, data_in=data_list, **kwargs
-                )
+            export_dir = export_utils.export(model=model, data_in=data_list, **kwargs)
 
         return export_dir

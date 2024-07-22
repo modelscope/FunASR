@@ -62,7 +62,7 @@ class Paraformer:
         if quantize:
             model_file = os.path.join(model_dir, "model_quant.onnx")
         if not os.path.exists(model_file):
-            print(".onnx is not exist, begin to export onnx")
+            print(".onnx does not exist, begin to export onnx")
             try:
                 from funasr import AutoModel
             except:
@@ -285,7 +285,7 @@ class ContextualParaformer(Paraformer):
             model_eb_file = os.path.join(model_dir, "model_eb.onnx")
 
         if not (os.path.exists(model_eb_file) and os.path.exists(model_bb_file)):
-            print(".onnx is not exist, begin to export onnx")
+            print(".onnx does not exist, begin to export onnx")
             try:
                 from funasr import AutoModel
             except:
@@ -326,9 +326,11 @@ class ContextualParaformer(Paraformer):
     def __call__(
         self, wav_content: Union[str, np.ndarray, List[str]], hotwords: str, **kwargs
     ) -> List:
+    # def __call__(
+    #     self, waveform_list:list, hotwords: str, **kwargs
+    # ) -> List:
         # make hotword list
         hotwords, hotwords_length = self.proc_hotword(hotwords)
-        # import pdb; pdb.set_trace()
         [bias_embed] = self.eb_infer(hotwords, hotwords_length)
         # index from bias_embed
         bias_embed = bias_embed.transpose(1, 0, 2)
@@ -345,15 +347,47 @@ class ContextualParaformer(Paraformer):
             try:
                 outputs = self.bb_infer(feats, feats_len, bias_embed)
                 am_scores, valid_token_lens = outputs[0], outputs[1]
+
+                if len(outputs) == 4:
+                    # for BiCifParaformer Inference
+                    us_alphas, us_peaks = outputs[2], outputs[3]
+                else:
+                    us_alphas, us_peaks = None, None
+
             except ONNXRuntimeError:
                 # logging.warning(traceback.format_exc())
                 logging.warning("input wav is silence or noise")
                 preds = [""]
             else:
                 preds = self.decode(am_scores, valid_token_lens)
-                for pred in preds:
-                    pred = sentence_postprocess(pred)
-                    asr_res.append({"preds": pred})
+                if us_peaks is None:
+                    for pred in preds:
+                        if self.language == "en-bpe":
+                            pred = sentence_postprocess_sentencepiece(pred)
+                        else:
+                            pred = sentence_postprocess(pred)
+                        asr_res.append({"preds": pred})
+                else:
+                    for pred, us_peaks_ in zip(preds, us_peaks):
+                        raw_tokens = pred
+                        timestamp, timestamp_raw = time_stamp_lfr6_onnx(
+                            us_peaks_, copy.copy(raw_tokens)
+                        )
+                        text_proc, timestamp_proc, _ = sentence_postprocess(
+                            raw_tokens, timestamp_raw
+                        )
+                        # logging.warning(timestamp)
+                        if len(self.plot_timestamp_to):
+                            self.plot_wave_timestamp(
+                                waveform_list[0], timestamp, self.plot_timestamp_to
+                            )
+                        asr_res.append(
+                            {
+                                "preds": text_proc,
+                                "timestamp": timestamp_proc,
+                                "raw_tokens": raw_tokens,
+                            }
+                        )
         return asr_res
 
     def proc_hotword(self, hotwords):
@@ -376,10 +410,10 @@ class ContextualParaformer(Paraformer):
             return np.array(hotwords)
 
         hotword_int = [word_map(i) for i in hotwords]
-        # import pdb; pdb.set_trace()
+
         hotword_int.append(np.array([1]))
         hotwords = pad_list(hotword_int, pad_value=0, max_len=10)
-        # import pdb; pdb.set_trace()
+        
         return hotwords, hotwords_length
 
     def bb_infer(

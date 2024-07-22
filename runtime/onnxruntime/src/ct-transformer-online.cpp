@@ -11,7 +11,7 @@ CTTransformerOnline::CTTransformerOnline()
 {
 }
 
-void CTTransformerOnline::InitPunc(const std::string &punc_model, const std::string &punc_config, int thread_num){
+void CTTransformerOnline::InitPunc(const std::string &punc_model, const std::string &punc_config, const std::string &token_file, int thread_num){
     session_options.SetIntraOpNumThreads(thread_num);
     session_options.SetGraphOptimizationLevel(ORT_ENABLE_ALL);
     session_options.DisableCpuMemArena();
@@ -43,7 +43,7 @@ void CTTransformerOnline::InitPunc(const std::string &punc_model, const std::str
     for (auto& item : m_strOutputNames)
         m_szOutputNames.push_back(item.c_str());
 
-	m_tokenizer.OpenYaml(punc_config.c_str());
+	m_tokenizer.OpenYaml(punc_config.c_str(), token_file.c_str());
 }
 
 CTTransformerOnline::~CTTransformerOnline()

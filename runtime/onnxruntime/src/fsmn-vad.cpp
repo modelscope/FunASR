@@ -30,7 +30,7 @@ void FsmnVad::LoadConfigFromYaml(const char* filename){
 
     try{
         YAML::Node frontend_conf = config["frontend_conf"];
-        YAML::Node post_conf = config["vad_post_conf"];
+        YAML::Node post_conf = config["model_conf"];
 
         this->vad_sample_rate_ = frontend_conf["fs"].as<int>();
         this->vad_silence_duration_ =  post_conf["max_end_silence_time"].as<int>();

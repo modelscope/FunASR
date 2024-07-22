@@ -3,25 +3,82 @@
 # Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
 #  MIT License  (https://opensource.org/licenses/MIT)
 
+
 from funasr import AutoModel
+from funasr.utils.postprocess_utils import rich_transcription_postprocess
+
+model_dir = "iic/SenseVoiceSmall"
+
 
 model = AutoModel(
-    model="/Users/zhifu/Downloads/modelscope_models/SenseVoiceModelscope",
-    vad_model="iic/speech_fsmn_vad_zh-cn-16k-common-pytorch",
+    model=model_dir,
+    vad_model="fsmn-vad",
     vad_kwargs={"max_single_segment_time": 30000},
+    device="cuda:0",
 )
 
-
-input_wav = (
-    "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/ASR/test_audio/asr_example_zh.wav"
+# en
+res = model.generate(
+    input=f"{model.model_path}/example/en.mp3",
+    cache={},
+    language="auto",  # "zn", "en", "yue", "ja", "ko", "nospeech"
+    use_itn=True,
+    batch_size_s=60,
+    merge_vad=True,  #
+    merge_length_s=15,
 )
+text = rich_transcription_postprocess(res[0]["text"])
+print(text)
 
-DecodingOptions = {
-    "task": ("ASR", "AED", "SER"),
-    "language": "auto",
-    "fp16": True,
-    "gain_event": True,
-}
+# zh
+res = model.generate(
+    input=f"{model.model_path}/example/zh.mp3",
+    cache={},
+    language="auto",  # "zn", "en", "yue", "ja", "ko", "nospeech"
+    use_itn=True,
+    batch_size_s=60,
+    merge_vad=True,  #
+    merge_length_s=15,
+)
+text = rich_transcription_postprocess(res[0]["text"])
+print(text)
 
-res = model.generate(input=input_wav, batch_size_s=0, DecodingOptions=DecodingOptions)
-print(res)
+# yue
+res = model.generate(
+    input=f"{model.model_path}/example/yue.mp3",
+    cache={},
+    language="auto",  # "zn", "en", "yue", "ja", "ko", "nospeech"
+    use_itn=True,
+    batch_size_s=60,
+    merge_vad=True,  #
+    merge_length_s=15,
+)
+text = rich_transcription_postprocess(res[0]["text"])
+print(text)
+
+# ja
+res = model.generate(
+    input=f"{model.model_path}/example/ja.mp3",
+    cache={},
+    language="auto",  # "zn", "en", "yue", "ja", "ko", "nospeech"
+    use_itn=True,
+    batch_size_s=60,
+    merge_vad=True,  #
+    merge_length_s=15,
+)
+text = rich_transcription_postprocess(res[0]["text"])
+print(text)
+
+
+# ko
+res = model.generate(
+    input=f"{model.model_path}/example/ko.mp3",
+    cache={},
+    language="auto",  # "zn", "en", "yue", "ja", "ko", "nospeech"
+    use_itn=True,
+    batch_size_s=60,
+    merge_vad=True,  #
+    merge_length_s=15,
+)
+text = rich_transcription_postprocess(res[0]["text"])
+print(text)

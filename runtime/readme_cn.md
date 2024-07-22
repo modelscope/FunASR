@@ -10,8 +10,22 @@ FunASR是由阿里巴巴通义实验室语音团队开源的一款语音识别�
 - 中文离线文件转写服务（CPU版本），已完成
 - 中文流式语音识别服务（CPU版本），已完成
 - 英文离线文件转写服务（CPU版本），已完成
-- 中文离线文件转写服务（GPU版本），进行中
+- 中文离线文件转写服务（GPU版本），已完成
 - 更多支持中
+
+## 中文离线文件转写服务（GPU版本）
+
+中文语音离线文件服务部署（GPU版本），拥有完整的语音识别链路，可以将几十个小时的长音频与视频识别成带标点的文字，而且支持多路请求同时进行转写。
+为了支持不同用户的需求，针对不同场景，准备了不同的图文教程：
+
+### 最新动态
+- 2024/07/01:   中文离线文件转写服务GPU 1.1 发布，优化bladedisc模型兼容性问题，dokcer镜像版本funasr-runtime-sdk-gpu-0.1.1 (8875cbf9b99e)
+- 2024/06/27:   中文离线文件转写服务GPU 1.0 发布，支持动态batch，支持多路并发，在长音频测试集上单线RTF为0.0076，多线加速比为1200+（CPU为330+），详见([文档](./docs/benchmark_libtorch_cpp.md))，dokcer镜像版本funasr-runtime-sdk-gpu-0.1.0 (b86066f4d018)
+
+### 部署与开发文档
+
+部署模型来自于ModelScope，或者用户finetune，支持用户定制服务，详细文档参考（[点击此处](./docs/SDK_advanced_guide_offline_gpu_zh.md)）
+
 
 ## 英文离线文件转写服务（CPU版本）
 
@@ -19,6 +33,7 @@ FunASR是由阿里巴巴通义实验室语音团队开源的一款语音识别�
 为了支持不同用户的需求，针对不同场景，准备了不同的图文教程：
 
 ### 最新动态
+- 2024/05/15:   英文离线文件转写服务 1.6 发布，适配FunASR 1.0模型结构，dokcer镜像版本funasr-runtime-sdk-en-cpu-0.1.6 (84d781d07997)
 - 2024/03/05:   英文离线文件转写服务 1.5 发布，docker镜像支持arm64平台，升级modelscope版本，dokcer镜像版本funasr-runtime-sdk-en-cpu-0.1.5 (7cca2abc5901)
 - 2024/01/25:   英文离线文件转写服务 1.3 发布，优化vad数据处理方式，大幅降低峰值内存占用，内存泄漏优化，dokcer镜像版本funasr-runtime-sdk-en-cpu-0.1.3 (c00f9ce7a195)
 - 2024/01/03:   英文离线文件转写服务 1.2 发布，修复已知的crash问题及内存泄漏问题，dokcer镜像版本funasr-runtime-sdk-en-cpu-0.1.2 (0cdd9f4a4bb5)
@@ -36,6 +51,7 @@ FunASR实时语音听写服务软件包，既可以实时地进行语音转文�
 为了支持不同用户的需求，针对不同场景，准备了不同的图文教程：
 
 ### 最新动态
+- 2024/05/15:   中文实时语音听写服务 1.10 发布，适配FunASR 1.0模型结构，dokcer镜像版本funasr-runtime-sdk-online-cpu-0.1.10 (1c2adfcff84d)
 - 2024/03/05:   中文实时语音听写服务 1.9 发布，docker镜像支持arm64平台，升级modelscope版本，dokcer镜像版本funasr-runtime-sdk-online-cpu-0.1.9 (4a875e08c7a2)
 - 2024/01/25:   中文实时语音听写服务 1.7 发布，客户端优化，dokcer镜像版本funasr-runtime-sdk-online-cpu-0.1.7 (2aa23805572e)
 - 2024/01/03:   中文实时语音听写服务 1.6 发布，2pass-offline模式支持Ngram语言模型解码、wfst热词，同时修复已知的crash问题及内存泄漏问题，dokcer镜像版本funasr-runtime-sdk-online-cpu-0.1.6 (f99925110d27)
@@ -58,6 +74,7 @@ FunASR实时语音听写服务软件包，既可以实时地进行语音转文�
 为了支持不同用户的需求，针对不同场景，准备了不同的图文教程：
 
 ### 最新动态
+- 2024/05/15:   中文离线文件转写服务 4.5 发布，适配FunASR 1.0模型结构，dokcer镜像版本funasr-runtime-sdk-cpu-0.4.5 (058b9882ae67)
 - 2024/03/05:   中文离线文件转写服务 4.4 发布，docker镜像支持arm64平台，升级modelscope版本，dokcer镜像版本funasr-runtime-sdk-cpu-0.4.4 (2dc87b86dc49)
 - 2024/01/25:   中文离线文件转写服务 4.2 发布，优化vad数据处理方式，大幅降低峰值内存占用，内存泄漏优化，dokcer镜像版本funasr-runtime-sdk-cpu-0.4.2 (befdc7b179ed)
 - 2024/01/08:   中文离线文件转写服务 4.1 发布，优化句子级时间戳json格式，dokcer镜像版本funasr-runtime-sdk-cpu-0.4.1 (0250f8ef981b)

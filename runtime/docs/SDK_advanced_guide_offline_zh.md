@@ -10,6 +10,7 @@ FunASR离线文件转写软件包，提供了一款功能强大的语音离线�
 
 | 时间         | 详情                                                | 镜像版本                         | 镜像ID         |
 |------------|---------------------------------------------------|------------------------------|--------------|
+| 2024.05.15 | 适配FunASR 1.0模型结构 | funasr-runtime-sdk-cpu-0.4.5 | 058b9882ae67 |
 | 2024.03.05 | docker镜像支持arm64平台，升级modelscope版本 | funasr-runtime-sdk-cpu-0.4.4 | 2dc87b86dc49 |
 | 2024.01.25 | 优化vad数据处理方式，大幅降低峰值内存占用；内存泄漏优化| funasr-runtime-sdk-cpu-0.4.2 | befdc7b179ed |
 | 2024.01.08 | 优化句子级时间戳json格式 | funasr-runtime-sdk-cpu-0.4.1 | 0250f8ef981b |
@@ -48,11 +49,11 @@ docker安装失败请参考 [Docker Installation](https://alibaba-damo-academy.g
 
 ```shell
 sudo docker pull \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.4.4
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.4.5
 mkdir -p ./funasr-runtime-resources/models
 sudo docker run -p 10095:10095 -it --privileged=true \
   -v $PWD/funasr-runtime-resources/models:/workspace/models \
-  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.4.4
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-cpu-0.4.5
 ```
 
 ### 服务端启动
@@ -148,6 +149,7 @@ python3 funasr_wss_client.py --host "127.0.0.1" --port 10095 --mode offline \
 --port 10095 部署端口号
 --wav-path 需要进行转写的音频文件，支持文件路径
 --hotword 热词文件，每行一个热词，格式(热词 权重)：阿里巴巴 20
+--thread-num 设置客户端线程数
 --use-itn 设置是否使用itn，默认1开启，设置为0关闭
 ```
 
