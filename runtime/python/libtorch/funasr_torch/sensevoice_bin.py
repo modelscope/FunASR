@@ -112,7 +112,7 @@ class SenseVoiceSmall:
             token_int = yseq[mask].tolist()
 
             if tokenizer is not None:
-                asr_res.append(tokenizer.decode(token_int))
+                asr_res.append(self.tokenizer.decode(token_int))
             else:
                 asr_res.append(token_int)
         return asr_res
