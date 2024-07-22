@@ -7,7 +7,7 @@
 
 from funasr import AutoModel
 
-model = AutoModel(model="Qwen-Audio-Chat")
+model = AutoModel(model="Qwen/Qwen-Audio-Chat")
 
 audio_in = "https://github.com/QwenLM/Qwen-Audio/raw/main/assets/audio/1272-128104-0000.flac"
 
