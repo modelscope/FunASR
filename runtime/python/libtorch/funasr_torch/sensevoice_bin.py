@@ -17,11 +17,12 @@ from .utils.utils import (
     read_yaml,
 )
 from .utils.frontend import WavFrontend
+from .utils.sentencepiece_tokenizer import SentencepiecesTokenizer
 
 logging = get_logger()
 
 
-class SenseVoiceSmallTorchScript:
+class SenseVoiceSmall:
     """
     Author: Speech Lab of DAMO Academy, Alibaba Group
     Paraformer: Fast and Accurate Parallel Transformer for Non-autoregressive End-to-End Speech Recognition
@@ -39,43 +40,66 @@ class SenseVoiceSmallTorchScript:
         cache_dir: str = None,
         **kwargs,
     ):
+
+        if not Path(model_dir).exists():
+            try:
+                from modelscope.hub.snapshot_download import snapshot_download
+            except:
+                raise "You are exporting model from modelscope, please install modelscope and try it again. To install modelscope, you could:\n" "\npip3 install -U modelscope\n" "For the users in China, you could install with the command:\n" "\npip3 install -U modelscope -i https://mirror.sjtu.edu.cn/pypi/web/simple"
+            try:
+                model_dir = snapshot_download(model_dir, cache_dir=cache_dir)
+            except:
+                raise "model_dir must be model_name in modelscope or local path downloaded from modelscope, but is {}".format(
+                    model_dir
+                )
+
+        model_file = os.path.join(model_dir, "model.torchscript")
         if quantize:
             model_file = os.path.join(model_dir, "model_quant.torchscript")
-        else:
-            model_file = os.path.join(model_dir, "model.torchscript")
+        if not os.path.exists(model_file):
+            print(".torchscripts does not exist, begin to export torchscript")
+            try:
+                from funasr import AutoModel
+            except:
+                raise "You are exporting onnx, please install funasr and try it again. To install funasr, you could:\n" "\npip3 install -U funasr\n" "For the users in China, you could install with the command:\n" "\npip3 install -U funasr -i https://mirror.sjtu.edu.cn/pypi/web/simple"
+
+            model = AutoModel(model=model_dir)
+            model_dir = model.export(type="torchscript", quantize=quantize, **kwargs)
 
         config_file = os.path.join(model_dir, "config.yaml")
         cmvn_file = os.path.join(model_dir, "am.mvn")
         config = read_yaml(config_file)
-        # token_list = os.path.join(model_dir, "tokens.json")
-        # with open(token_list, "r", encoding="utf-8") as f:
-        #     token_list = json.load(f)
 
-        # self.converter = TokenIDConverter(token_list)
-        self.tokenizer = CharTokenizer()
-        config["frontend_conf"]['cmvn_file'] = cmvn_file
+        self.tokenizer = SentencepiecesTokenizer(
+            bpemodel=os.path.join(model_dir, "chn_jpn_yue_eng_ko_spectok.bpe.model")
+        )
+        config["frontend_conf"]["cmvn_file"] = cmvn_file
         self.frontend = WavFrontend(**config["frontend_conf"])
         self.ort_infer = torch.jit.load(model_file)
         self.batch_size = batch_size
         self.blank_id = 0
 
-    def __call__(self, 
-                 wav_content: Union[str, np.ndarray, List[str]], 
-                 language: List, 
-                 textnorm: List,
-                 tokenizer=None,
-                 **kwargs) -> List:
+    def __call__(self, wav_content: Union[str, np.ndarray, List[str]], **kwargs) -> List:
+
+        language = self.lid_dict[kwargs.get("language", "auto")]
+        use_itn = kwargs.get("use_itn", False)
+        textnorm = kwargs.get("text_norm", None)
+        if textnorm is None:
+            textnorm = "withitn" if use_itn else "woitn"
+        textnorm = self.textnorm_dict[textnorm]
+
         waveform_list = self.load_data(wav_content, self.frontend.opts.frame_opts.samp_freq)
         waveform_nums = len(waveform_list)
         asr_res = []
         for beg_idx in range(0, waveform_nums, self.batch_size):
             end_idx = min(waveform_nums, beg_idx + self.batch_size)
             feats, feats_len = self.extract_feat(waveform_list[beg_idx:end_idx])
-            ctc_logits, encoder_out_lens = self.ort_infer(torch.Tensor(feats), 
-                                                          torch.Tensor(feats_len), 
-                                                          torch.tensor(language),
-                                                          torch.tensor(textnorm)
-                                                          )
+            ctc_logits, encoder_out_lens = self.ort_infer(
+                torch.Tensor(feats),
+                torch.Tensor(feats_len),
+                torch.tensor([language]),
+                torch.tensor([textnorm]),
+            )
             # support batch_size=1 only currently
             x = ctc_logits[0, : encoder_out_lens[0].item(), :]
             yseq = x.argmax(dim=-1)
@@ -83,9 +107,9 @@ class SenseVoiceSmallTorchScript:
 
             mask = yseq != self.blank_id
             token_int = yseq[mask].tolist()
-            
+
             if tokenizer is not None:
-                asr_res.append(tokenizer.tokens2text(token_int))
+                asr_res.append(tokenizer.decode(token_int))
             else:
                 asr_res.append(token_int)
         return asr_res
@@ -127,4 +151,3 @@ class SenseVoiceSmallTorchScript:
         feat_res = [pad_feat(feat, feat.shape[0]) for feat in feats]
         feats = np.array(feat_res).astype(np.float32)
         return feats
-
