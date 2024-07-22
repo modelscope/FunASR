@@ -107,8 +107,8 @@ class SenseVoiceSmall:
             ctc_logits, encoder_out_lens = self.infer(
                 feats,
                 feats_len,
-                np.array(language, dtype=np.int32),
-                np.array(textnorm, dtype=np.int32),
+                np.array([language], dtype=np.int32),
+                np.array([textnorm], dtype=np.int32),
             )
             # back to torch.Tensor
             ctc_logits = torch.from_numpy(ctc_logits).float()
@@ -120,7 +120,7 @@ class SenseVoiceSmall:
             mask = yseq != self.blank_id
             token_int = yseq[mask].tolist()
 
-            asr_res.append(self.tokenizer.encode(token_int))
+            asr_res.append(self.tokenizer.decode(token_int))
 
         return asr_res
 
