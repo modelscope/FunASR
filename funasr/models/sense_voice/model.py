@@ -644,6 +644,7 @@ class SenseVoiceSmall(nn.Module):
         self.embed = torch.nn.Embedding(
             7 + len(self.lid_dict) + len(self.textnorm_dict), input_size
         )
+        self.emo_dict = {"unk": 25009, "happy": 25001, "sad": 25002, "angry": 25003, "neutral": 25004}
 
         self.criterion_att = LabelSmoothingLoss(
             size=self.vocab_size,
@@ -870,7 +871,9 @@ class SenseVoiceSmall(nn.Module):
 
         # c. Passed the encoder result and the beam search
         ctc_logits = self.ctc.log_softmax(encoder_out)
-
+        if kwargs.get("ban_emo_unk", False):
+            ctc_logits[:, :, self.emo_dict["unk"]] = -float("inf")
+            
         results = []
         b, n, d = encoder_out.size()
         if isinstance(key[0], (list, tuple)):

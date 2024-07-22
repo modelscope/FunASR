@@ -337,7 +337,7 @@ class AutoModel:
         end_vad = time.time()
 
         #  FIX(gcf): concat the vad clips for sense vocie model for better aed
-        if kwargs.get("merge_vad", False):
+        if cfg.get("merge_vad", False):
             for i in range(len(res)):
                 res[i]["value"] = merge_vad(
                     res[i]["value"], kwargs.get("merge_length_s", 15) * 1000
