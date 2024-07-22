@@ -236,7 +236,9 @@ class AutoModel:
         init_param = kwargs.get("init_param", None)
         if init_param is not None:
             if os.path.exists(init_param):
-                logging.info(f"Loading pretrained params from {init_param}")
+                local_rank = int(os.environ.get("LOCAL_RANK", 0))
+                if local_rank == 0:
+                    logging.info(f"Loading pretrained params from {init_param}")
                 load_pretrained_model(
                     model=model,
                     path=init_param,
@@ -246,7 +248,8 @@ class AutoModel:
                     excludes=kwargs.get("excludes", None),
                 )
             else:
-                print(f"error, init_param does not exist!: {init_param}")
+                if local_rank == 0:
+                    print(f"error, init_param does not exist!: {init_param}")
 
         # fp16
         if kwargs.get("fp16", False):

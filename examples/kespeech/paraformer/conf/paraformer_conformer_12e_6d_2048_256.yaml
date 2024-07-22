@@ -78,7 +78,7 @@ specaug_conf:
 train_conf:
   accum_grad: 1
   grad_clip: 5
-  max_epoch: 300
+  max_epoch: 180
   keep_nbest_models: 10
   avg_nbest_model: 10
   log_interval: 50

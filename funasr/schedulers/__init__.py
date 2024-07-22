@@ -7,6 +7,7 @@ from funasr.schedulers.noam_lr import NoamLR
 from funasr.schedulers.tri_stage_scheduler import TriStageLR
 from funasr.schedulers.warmup_lr import WarmupLR
 from funasr.schedulers.lambdalr_cus import CustomLambdaLR
+from funasr.schedulers.partition_warmup_lr import PartitionWarmupLR
 
 scheduler_classes = dict(
     ReduceLROnPlateau=torch.optim.lr_scheduler.ReduceLROnPlateau,
@@ -22,4 +23,5 @@ scheduler_classes = dict(
     onecyclelr=torch.optim.lr_scheduler.OneCycleLR,
     CosineAnnealingWarmRestarts=torch.optim.lr_scheduler.CosineAnnealingWarmRestarts,
     custom_lambdalr=CustomLambdaLR,
+    partition_warmuplr=PartitionWarmupLR,
 )

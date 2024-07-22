@@ -8,6 +8,7 @@ import torch
 import torch.nn
 import torch.optim
 import pdb
+import os
 
 
 def load_pretrained_model(
@@ -28,11 +29,13 @@ def load_pretrained_model(
     Examples:
 
     """
+    local_rank = int(os.environ.get("LOCAL_RANK", 0))      
 
     obj = model
     dst_state = obj.state_dict()
 
-    logging.info(f"ckpt: {path}")
+    if local_rank == 0:
+        logging.info(f"ckpt: {path}")
 
     if oss_bucket is None:
         src_state = torch.load(path, map_location=map_location)
@@ -47,20 +50,22 @@ def load_pretrained_model(
     if isinstance(scope_map, str):
         scope_map = scope_map.split(",")
     scope_map += ["module.", "None"]
-    logging.info(f"scope_map: {scope_map}")
+    if local_rank == 0:
+        logging.info(f"scope_map: {scope_map}")
 
     if excludes is not None:
         if isinstance(excludes, str):
             excludes = excludes.split(",")
-
-    logging.info(f"excludes: {excludes}")
+    if local_rank == 0:
+        logging.info(f"excludes: {excludes}")
 
     for k in dst_state.keys():
         excludes_flag = False
         if excludes is not None:
             for k_ex in excludes:
                 if k.startswith(k_ex):
-                    logging.info(f"key: {k} matching: {k_ex}, excluded")
+                    if local_rank == 0:
+                        logging.info(f"key: {k} matching: {k_ex}, excluded")
                     excludes_flag = True
                     break
         if excludes_flag:
@@ -78,25 +83,29 @@ def load_pretrained_model(
                 if dst_prefix == "" and (src_prefix + k) in src_state.keys():
                     k_src = src_prefix + k
                     if not k_src.startswith("module."):
-                        logging.info(f"init param, map: {k} from {k_src} in ckpt")
+                        if local_rank == 0:
+                            logging.info(f"init param, map: {k} from {k_src} in ckpt")
                 elif (
                     k.startswith(dst_prefix)
                     and k.replace(dst_prefix, src_prefix, 1) in src_state.keys()
                 ):
                     k_src = k.replace(dst_prefix, src_prefix, 1)
                     if not k_src.startswith("module."):
-                        logging.info(f"init param, map: {k} from {k_src} in ckpt")
+                        if local_rank == 0:
+                            logging.info(f"init param, map: {k} from {k_src} in ckpt")
 
         if k_src in src_state.keys():
             if ignore_init_mismatch and dst_state[k].shape != src_state[k_src].shape:
-                logging.info(
-                    f"ignore_init_mismatch:{ignore_init_mismatch}, dst: {k, dst_state[k].shape}, src: {k_src, src_state[k_src].shape}"
-                )
+                if local_rank == 0:
+                    logging.info(
+                        f"ignore_init_mismatch:{ignore_init_mismatch}, dst: {k, dst_state[k].shape}, src: {k_src, src_state[k_src].shape}"
+                    )
             else:
                 dst_state[k] = src_state[k_src]
 
         else:
-            print(f"Warning, miss key in ckpt: {k}, {path}")
+            if local_rank == 0:
+                print(f"Warning, miss key in ckpt: {k}, {path}")
 
     flag = obj.load_state_dict(dst_state, strict=True)
     logging.info(f"Loading ckpt: {path}, status: {flag}")

@@ -175,7 +175,26 @@ def main(**kwargs):
     optim = kwargs.get("optim", "adam")
     assert optim in optim_classes
     optim_class = optim_classes.get(optim)
-    optim = optim_class(model.parameters(), **kwargs.get("optim_conf"))
+  
+    if kwargs["scheduler"] == "partition_warmuplr":
+        optim_groups = []
+        encoder_params = []
+        base_params = []
+        for name, param in model.named_parameters():
+            if 'encoder' in name:
+                encoder_params.append(param)
+            else:
+                base_params.append(param)
+
+        assert encoder_params, "Encoder parameters are empty!"
+        optim_groups = [
+        {'params': encoder_params, 'lr': 1e-4},
+        {'params': base_params, 'lr': kwargs.get("optim_conf", {}).get("lr", 1e-3)}
+        ]
+        
+    else:
+        optim_groups = model.parameters()
+    optim = optim_class(optim_groups, **kwargs.get("optim_conf"))
 
     # scheduler
     logging.info("Build scheduler")

@@ -17,7 +17,7 @@ inference_scp="wav.scp"
 inference_batch_size=1
 
 # exp tag
-tag="SW-LoRA-FT"
+tag="WD-LoRA-FT2"
 workspace=`pwd`
 
 master_port=12345
@@ -30,8 +30,8 @@ set -e
 set -u
 set -o pipefail
 
-train_set=ES/Southwestern/train
-valid_set=ES/Southwestern/dev
+train_set=WD/train
+valid_set=WD/dev
 
 config=paraformer_conformer_12e_6d_2048_256.yaml
 model_dir="baseline_$(basename "${config}" .yaml)_${lang}_${token_type}_${tag}"

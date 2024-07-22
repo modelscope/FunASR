@@ -74,9 +74,14 @@ train_conf:
 optim: adam
 optim_conf:
    lr: 0.002
-scheduler: warmuplr
+# scheduler: warmuplr
+# scheduler_conf:
+#    warmup_steps: 30000
+scheduler: partition_warmuplr
 scheduler_conf:
    warmup_steps: 30000
+   enable_warmup: [False, True]
+
 
 dataset: AudioDataset
 dataset_conf:

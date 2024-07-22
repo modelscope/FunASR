@@ -470,7 +470,7 @@ class Trainer:
                 speed_stats["optim_time"] = f"{time5 - time4:0.3f}"
 
                 speed_stats["total_time"] = total_time
-                lr = scheduler.get_last_lr()[0]
+                lr = scheduler.get_last_lr()[-1]
                 batch_num_epoch = 1
                 if hasattr(dataloader_train, "__len__"):
                     batch_num_epoch = len(dataloader_train)
