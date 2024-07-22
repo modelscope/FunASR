@@ -14,7 +14,9 @@ def get_pypi_version(package_name):
         raise Exception("Failed to retrieve version information from PyPI.")
 
 
-def check_for_update():
+def check_for_update(disable=False):
+    if disable:
+        return
     current_version = version.parse(__version__)
     pypi_version = get_pypi_version("funasr")
 
