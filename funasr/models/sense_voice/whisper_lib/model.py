@@ -204,10 +204,11 @@ class MultiHeadAttentionSdpa(nn.Module):
             v,
             attn_mask=mask,
             dropout_p=0.0,
-            is_causal=True,
+            is_causal=is_causal,
             scale=scale,
         )
-        attn_output = attn_output.masked_fill(mask.logical_not(), 0.0)
+        if mask is not None:
+            attn_output = attn_output.masked_fill(mask.logical_not(), 0.0)
         attn_output = attn_output.transpose(1, 2)
         attn_output = attn_output.flatten(start_dim=2)
         return attn_output, None
