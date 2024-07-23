@@ -312,7 +312,7 @@ class TextDecoder(nn.Module):
                     n_state,
                     n_head,
                     cross_attention=True,
-                    att_type="default",
+                    att_type=kwargs.get("att_type", "default"),
                 )
                 for _ in range(n_layer)
             ]
