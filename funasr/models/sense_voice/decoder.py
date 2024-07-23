@@ -71,7 +71,7 @@ def sense_voice_decode_forward(
     x = tgt.to(memory.dtype)
 
     if use_padmask and hlens is not None:
-        memory_mask = (~make_pad_mask(hlens)[:, None, :]).to(memory.device)
+        memory_mask = (~make_pad_mask(hlens)[:, :, None]).to(memory.device)
     else:
         memory_mask = None
 
