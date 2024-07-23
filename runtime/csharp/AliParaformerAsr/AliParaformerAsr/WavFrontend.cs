@@ -30,7 +30,8 @@ namespace AliParaformerAsr
             _fbank_beg_idx = 0;
             _onlineFbank = new OnlineFbank(
                 dither: _frontendConfEntity.dither,
-                snip_edges: false,
+                snip_edges: _frontendConfEntity.snip_edges,
+                window_type: _frontendConfEntity.window,
                 sample_rate: _frontendConfEntity.fs,
                 num_bins: _frontendConfEntity.n_mels
                 );
