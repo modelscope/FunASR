@@ -1,16 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="KaldiNativeFbankSharp" Version="1.0.8" />
+    <PackageReference Include="KaldiNativeFbankSharp" Version="1.1.2" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
-    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.17.3" />
-    <PackageReference Include="Microsoft.ML.OnnxRuntime.Managed" Version="1.17.3" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.18.1" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntime.Managed" Version="1.18.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="YamlDotNet" Version="13.1.1" />
   </ItemGroup>
