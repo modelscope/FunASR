@@ -196,7 +196,7 @@ class MultiHeadAttentionSdpa(nn.Module):
                 mask = None
                 is_causal = True
             else:
-                mask = mask.unsqueeze(1).to(torch.bool)  # (batch, 1, t, 1)
+                mask = mask.unsqueeze(1).to(torch.bool)  # (batch, 1, 1, t)
 
         attn_output = torch.nn.functional.scaled_dot_product_attention(
             q,
@@ -208,7 +208,7 @@ class MultiHeadAttentionSdpa(nn.Module):
             scale=scale,
         )
         if mask is not None:
-            attn_output = attn_output.masked_fill(mask.logical_not(), 0.0)
+            attn_output = attn_output.masked_fill(mask.transpose(2, 3).logical_not(), 0.0)
         attn_output = attn_output.transpose(1, 2)
         attn_output = attn_output.flatten(start_dim=2)
         return attn_output, None

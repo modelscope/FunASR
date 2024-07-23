@@ -42,7 +42,7 @@ def sense_voice_encode_forward(
         olens = None
 
     if use_padmask and olens is not None:
-        padding_mask = (~make_pad_mask(olens)[:, :, None]).to(torch.bool).to(x.device)
+        padding_mask = (~make_pad_mask(olens)[:, None, :]).to(torch.bool).to(x.device)
     else:
         padding_mask = None
 
