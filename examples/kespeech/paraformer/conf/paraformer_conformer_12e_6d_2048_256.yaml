@@ -78,7 +78,7 @@ specaug_conf:
 train_conf:
   accum_grad: 1
   grad_clip: 5
-  max_epoch: 180
+  max_epoch: 300
   keep_nbest_models: 10
   avg_nbest_model: 10
   log_interval: 50
@@ -86,9 +86,13 @@ train_conf:
 optim: adam
 optim_conf:
    lr: 0.0005
-scheduler: warmuplr
+# scheduler: warmuplr
+# scheduler_conf:
+#    warmup_steps: 30000
+scheduler: partition_warmuplr
 scheduler_conf:
    warmup_steps: 30000
+   enable_warmup: [False, True]
 
 dataset: AudioDataset
 dataset_conf:

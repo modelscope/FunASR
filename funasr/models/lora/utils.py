@@ -8,13 +8,15 @@ import os
 
 from typing import Dict
 
-from .layers import LoRALayer, Linear, Conv2d, Embedding
+from .layers import LoRALayer, Linear, ConvLoRA
 
 
-def mark_only_lora_as_trainable(model: nn.Module, bias: str = "none", lora_exception: list = []) -> None:
-    '''
+def mark_only_lora_as_trainable(
+    model: nn.Module, bias: str = "none", lora_exception: list = []
+) -> None:
+    """
     lora_exception: list控制可以训练的层
-    '''
+    """
     # LoRA内部的参数全部设置为可训练
     for n, p in model.named_parameters():
         if "lora_" not in n and "cif" not in n:
@@ -45,7 +47,9 @@ def lora_state_dict(model: nn.Module, bias: str = "none") -> Dict[str, torch.Ten
     if bias == "none":
         return {k: my_state_dict[k] for k in my_state_dict if "lora_" in k}
     elif bias == "all":
-        return {k: my_state_dict[k] for k in my_state_dict if "lora_" in k or "bias" in k}
+        return {
+            k: my_state_dict[k] for k in my_state_dict if "lora_" in k or "bias" in k
+        }
     elif bias == "lora_only":
         to_return = {}
         for k in my_state_dict:
@@ -57,7 +61,7 @@ def lora_state_dict(model: nn.Module, bias: str = "none") -> Dict[str, torch.Ten
         return to_return
     else:
         raise NotImplementedError
-    
+
 
 def lora_summary(model: nn.Module) -> str:
     message = "Lora train able params:\n"
@@ -70,8 +74,10 @@ def lora_summary(model: nn.Module) -> str:
     return message
 
 
-def loar_wrapper(model: nn.Module, substitute_dict: dict, lora_kwargs:dict) -> nn.Module:
-    '''
+def loar_wrapper(
+    model: nn.Module, substitute_dict: dict, lora_kwargs: dict
+) -> nn.Module:
+    """
     substitute_list: list, 代表需要替换的层, 如['encoder.q', 'decoder.k', 'decoder.v', 'decoder.out_proj]
     在conformer_encoder中有几个部分可以更改:{a: b, c: d, e: f}
     {   encoder:    {forward_macaron: [w_1, w_2]},
@@ -81,7 +87,7 @@ def loar_wrapper(model: nn.Module, substitute_dict: dict, lora_kwargs:dict) -> n
                     {src_attn: [linear_q, linear_k, linear_v, linear_out],}},
                     {feed_forward: [w_1, w_2]}
     }
-    '''
+    """
     # 检查model里是否包含substitute_dict的模型
     for module_name, M_module_name in substitute_dict.items():
         module = getattr(model, module_name)
@@ -91,8 +97,7 @@ def loar_wrapper(model: nn.Module, substitute_dict: dict, lora_kwargs:dict) -> n
     return model
 
 
-
-def replace_layer_recursive(module, target_layer_name, lora_kwargs, parent_name=''):
+def replace_layer_recursive(module, target_layer_name, lora_kwargs, parent_name=""):
     # 遍历当前模块的所有子模块
     for name, child in list(module.named_children()):
         # 构建当前层的全路径名称
@@ -100,7 +105,7 @@ def replace_layer_recursive(module, target_layer_name, lora_kwargs, parent_name=
             full_name = f"{parent_name}.{name}"
         else:
             full_name = name
-        
+
         # 检查当前子模块是否是需要替换的Linear层
         if isinstance(child, nn.Linear) and name == target_layer_name:
             in_features = child.in_features
@@ -110,10 +115,43 @@ def replace_layer_recursive(module, target_layer_name, lora_kwargs, parent_name=
             local_rank = int(os.environ.get("LOCAL_RANK", 0))
             if local_rank == 0:
                 print(f"Replacing layer: {full_name} with new LoRA linear layer")
-        elif isinstance(child, nn.Conv2d) and name == target_layer_name:
+
+        elif isinstance(child, nn.Conv1d) and name == target_layer_name:
+            in_channels = child.in_channels
+            out_channels = child.out_channels
+            kernel_size = child.kernel_size[0]
+            stride = child.stride[0]
+            padding = child.padding[0]
+            groups = child.groups
+            bias = child.bias is not None
+            replace_layer = ConvLoRA(
+                nn.Conv1d,
+                in_channels,
+                out_channels,
+                kernel_size,
+                stride,
+                padding,
+                groups,
+                bias,
+                **lora_kwargs,
+            )
+            setattr(module, name, replace_layer)
             local_rank = int(os.environ.get("LOCAL_RANK", 0))
             if local_rank == 0:
-                print(f"Replacing layer: {full_name} ")
+                print(f"Replacing layer: {full_name} with new LoRA Conv2d layer")
+
+        elif isinstance(child, nn.Conv2d) and name == target_layer_name:
+            in_channels = child.in_channels
+            out_channels = child.out_channels
+            kernel_size = child.kernel_size
+            replace_layer = ConvLoRA(
+                nn.Conv2d, in_channels, out_channels, kernel_size, **lora_kwargs
+            )
+            setattr(module, name, replace_layer)
+            local_rank = int(os.environ.get("LOCAL_RANK", 0))
+            if local_rank == 0:
+                print(f"Replacing layer: {full_name} with new LoRA Conv2d layer")
+
         elif isinstance(child, nn.Embedding) and name == target_layer_name:
             local_rank = int(os.environ.get("LOCAL_RANK", 0))
             if local_rank == 0:

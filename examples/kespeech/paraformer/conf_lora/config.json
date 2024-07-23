@@ -2,7 +2,9 @@
     "lora_layers":{
         "encoder": {
             "self_attn": ["linear_q", "linear_k", "linear_v", "linear_out"],
-            "feed_forward": ["w_1", "w_2"]
+            "feed_forward": ["w_1", "w_2"],
+            "feed_forward_macaron": ["w_1", "w_2"],
+            "conv_module": ["pointwise_conv1", "pointwise_conv2", "depthwise_conv"]
         }
     },
     "lora_info":{

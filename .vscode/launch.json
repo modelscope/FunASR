@@ -43,7 +43,7 @@
                         "++valid_data_set_list=/ssd/zhuang/code/FunASR/examples/kespeech/DATA/data/ES/Southwestern/dev/audio_datasets.jsonl",
                         "++tokenizer_conf.token_list=/ssd/zhuang/code/FunASR/examples/aishell/paraformer/exp/speech_paraformer_asr_nat-aishell1-pytorch/tokens.txt", 
                         "++frontend_conf.cmvn_file=/ssd/zhuang/code/FunASR/examples/aishell/paraformer/exp/speech_paraformer_asr_nat-aishell1-pytorch/am.mvn", 
-                        "++output_dir=/ssd/zhuang/code/FunASR/examples/kespeech/paraformer/exp/baseline_paraformer_conformer_12e_6d_2048_256_zh_char_SW-LoRA-FT",
+                        "++output_dir=/ssd/zhuang/code/FunASR/examples/kespeech/paraformer/exp/baseline_paraformer_conformer_12e_6d_2048_256_zh_char_SW-LoRA-FT2",
                         "++use_lora=true",
                         "++lora_details=/ssd/zhuang/code/FunASR/examples/kespeech/paraformer/conf_lora/config.json",
                         "++lora_bias=lora_only"

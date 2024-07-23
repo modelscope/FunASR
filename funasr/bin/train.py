@@ -80,6 +80,8 @@ def main(**kwargs):
     use_lora = kwargs.get("use_lora", False)
     lora_details = kwargs.get("lora_details", None)
     output_dir = kwargs.get("output_dir", "./exp")
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
     if lora_details is not None and use_lora:
         lora_config = os.path.join(output_dir, "lora_config.json")
         with open(lora_details, 'r') as file:
