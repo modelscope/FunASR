@@ -5,7 +5,7 @@
 服务端部署采用websocket协议，客户端可以支持html5网页访问，支持麦克风输入与文件输入，可以通过如下2种方式访问：
 - 方式一：
 
-   html客户端直连，手动下载客户端（[点击此处](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/html5/static)）至本地，打开`index.html`网页，输入wss地址与端口号
+   html客户端直连，手动下载客户端（[点击此处](https://github.com/modelscope/FunASR/tree/main/runtime/html5/static)）至本地，打开`index.html`网页，输入wss地址与端口号
 
 - 方式二：
 
