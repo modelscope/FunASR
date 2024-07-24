@@ -5,7 +5,7 @@
 The server deployment uses the websocket protocol. The client can support html5 webpage access and microphone input or file input. There are two ways to access the service:
 - Method 1: 
 
-  Directly connect to the html client, manually download the client ([click here](https://github.com/alibaba-damo-academy/FunASR/tree/main/funasr/runtime/html5/static)) to the local computer, and open the index.html webpage to enter the wss address and port number.
+  Directly connect to the html client, manually download the client ([click here](https://github.com/modelscope/FunASR/tree/main/runtime/html5/static)) to the local computer, and open the index.html webpage to enter the wss address and port number.
 
 - Method 2: 
 
