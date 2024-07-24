@@ -12,7 +12,7 @@ from tqdm import tqdm
 
 
 def gen_jsonl_from_wav_text_list(
-    path, data_type_list=("source", "target"), jsonl_file_out: str = None, **kwargs
+    path, data_type_list=("source", "target"), jsonl_file_out: str = None, model_dir: str = "iic/SenseVoiceSmall", **kwargs
 ):
     try:
         rank = dist.get_rank()
@@ -58,7 +58,6 @@ def gen_jsonl_from_wav_text_list(
         if "text_language" not in data_type_list or "emo_target" not in data_type_list or "event_target" not in data_type_list:
             from funasr import AutoModel
 
-            model_dir = "iic/SenseVoiceSmall"
             model = AutoModel(
                 model=model_dir,
             )
@@ -169,8 +168,9 @@ def main_hydra(cfg: DictConfig):
     jsonl_file_out = kwargs.get(
         "jsonl_file_out", "/Users/zhifu/funasr1.0/test_local/audio_datasets.jsonl"
     )
+    model_dir = kwargs.get("model_dir", "iic/SenseVoiceSmall")
     gen_jsonl_from_wav_text_list(
-        scp_file_list, data_type_list=data_type_list, jsonl_file_out=jsonl_file_out
+        scp_file_list, data_type_list=data_type_list, jsonl_file_out=jsonl_file_out, model_dir=model_dir
     )
 
 
@@ -178,7 +178,8 @@ def main_hydra(cfg: DictConfig):
 python -m funasr.datasets.audio_datasets.sensevoice2jsonl \
 ++scp_file_list='["/Users/zhifu/funasr1.0/test_local/wav.scp", "/Users/zhifu/funasr1.0/test_local/text.txt", "/Users/zhifu/funasr1.0/test_local/text_language.txt", "/Users/zhifu/funasr1.0/test_local/emo_target.txt", "/Users/zhifu/funasr1.0/test_local/event_target.txt"]' \
 ++data_type_list='["source", "target", "text_language", "emo_target", "event_target"]' \
-++jsonl_file_out=/Users/zhifu/funasr1.0/test_local/audio_datasets.jsonl
+++jsonl_file_out='/Users/zhifu/funasr1.0/test_local/audio_datasets.jsonl' \
+++model_dir='iic/SenseVoiceSmall'
 """
 
 if __name__ == "__main__":
