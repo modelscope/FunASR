@@ -23,9 +23,11 @@ namespace funasr {
 #define FST_INC_WTS "fst-inc-wts"
 #define VAD_DIR "vad-dir"
 #define PUNC_DIR "punc-dir"
+#define SV_DIR "sv-dir"
 #define QUANTIZE "quantize"
 #define VAD_QUANT "vad-quant"
 #define PUNC_QUANT "punc-quant"
+#define SV_QUANT "sv-quant"
 #define ASR_MODE "mode"
 
 #define WAV_PATH "wav-path"
@@ -52,6 +54,8 @@ namespace funasr {
 #define QUANT_MODEL_NAME "model_quant.onnx"
 #define VAD_CMVN_NAME "am.mvn"
 #define VAD_CONFIG_NAME "config.yaml"
+#define SV_CMVN_NAME "sv.mvn"
+#define SV_CONFIG_NAME "config.yaml"
 
 // gpu models
 #define INFER_GPU "gpu"

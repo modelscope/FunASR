@@ -473,7 +473,8 @@
 //#endif
 
 	// APIs for 2pass-stream Infer
-	_FUNASRAPI FUNASR_RESULT FunTpassInferBuffer(FUNASR_HANDLE handle, FUNASR_HANDLE online_handle, const char* sz_buf, 
+	_FUNASRAPI FUNASR_RESULT FunTpassInferBuffer(FUNASR_HANDLE handle, FUNASR_HANDLE online_handle,FUNASR_HANDLE sv_handle,
+												std::vector<std::vector<float>>& voice_feats,  const char* sz_buf, bool sv_mode,	                                            
 												 int n_len, std::vector<std::vector<std::string>> &punc_cache, bool input_finished, 
 												 int sampling_rate, std::string wav_format, ASR_TYPE mode, 
 												 const std::vector<std::vector<float>> &hw_emb, bool itn, FUNASR_DEC_HANDLE dec_handle)
@@ -567,7 +568,21 @@
 			if(msg_vec.size()==0){
 				continue;
 			}
+		
 			msg = msg_vec[0];
+			//sv-cam for spk
+			if(sv_mode&&frame->len>1600)//Filter audio clips less than 100ms
+			{
+				std::vector<float>wave(frame->data,frame->data+frame->len);
+				// std::vector<float>wave;
+				// for (int i = 0; i < frame->len; i++)
+				// {
+				// 	wave.push_back(frame->data[i]);
+				// }
+				std::vector<std::vector<float>>sv_result = CamPPlusSvInfer(sv_handle, wave);
+				int speaker_idx = funasr::GetSpeakersID(sv_result[0], voice_feats);
+				p_result->speaker_idx = speaker_idx;
+			}
 			//timestamp
 			if(msg_vec.size() > 1){
 				std::vector<std::string> msg_stamp = funasr::split(msg_vec[1], ',');
@@ -875,3 +890,51 @@
 			return;
 		wfst_decoder->UnloadHwsRes();
 	}
+
+// APIs for CamPPlusSv Infer
+_FUNASRAPI FUNASR_HANDLE CamPPlusSvInit(std::map<std::string, std::string>& model_path, int thread_num)
+{
+	// funasr::SvModel *mm = funasr::CreateSvModel(model_path, thread_num);
+	// return mm;
+	// std::vector<float> wave;
+	funasr::SvModel* mm = funasr::CreateAndInferSvModel(model_path, thread_num);
+	return mm;
+}
+
+std::vector<std::vector<float>> CamPPlusSvInfer(FUNASR_HANDLE handle, std::vector<float> data)
+{
+	std::vector<std::vector<float>> result;
+	funasr::SvModel* sv_obj = (funasr::SvModel*)handle;
+	if (!sv_obj)
+		return result;
+
+	result = sv_obj->Infer(data);
+	return result;
+}
+
+_FUNASRAPI void CamPPlusSvUninit(FUNASR_HANDLE handle)
+{
+	funasr::SvModel* sv_obj = (funasr::SvModel*)handle;
+
+	if (!sv_obj)
+		return;
+
+	delete sv_obj;
+}
+_FUNASRAPI const int FunASRGetSvResult(FUNASR_RESULT result, int n_index)
+{
+	funasr::FUNASR_RECOG_RESULT* p_result = (funasr::FUNASR_RECOG_RESULT*)result;
+	if (!p_result)
+		return -1;
+
+	return p_result->speaker_idx;
+}
+_FUNASRAPI const std::vector<float> FunASRGetSvEmbResult(FUNASR_RESULT result, int n_index)
+{
+	std::vector<float>speaker_emb;
+	funasr::FUNASR_RECOG_RESULT* p_result = (funasr::FUNASR_RECOG_RESULT*)result;
+	if (!p_result)
+		return speaker_emb;
+
+	return p_result->speaker_emb;
+}
