@@ -870,6 +870,9 @@ class LLMASR4(nn.Module):
 
         # audio encoder
         hub = audio_encoder_conf.get("hub", None)
+        self.audio_encoder_activation_checkpoint = audio_encoder_conf.get(
+            "activation_checkpoint", False
+        )
         if hub == "ms":
             from funasr import AutoModel
 
@@ -925,6 +928,9 @@ class LLMASR4(nn.Module):
             device_map=None,
             use_cache=None,
         )
+
+        if llm_conf.get("activation_checkpoint", False):
+            model.gradient_checkpointing_enable()
         freeze = llm_conf.get("freeze", True)
         if freeze:
             for name, param in model.named_parameters():
@@ -984,7 +990,14 @@ class LLMASR4(nn.Module):
 
             # with torch.cuda.amp.autocast(enabled=False):
             # audio encoder
-            encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
+            if self.audio_encoder_activation_checkpoint:
+                from torch.utils.checkpoint import checkpoint
+
+                encoder_out, encoder_out_lens = checkpoint(
+                    self.encode, speech, speech_lengths, use_reentrant=False
+                )
+            else:
+                encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
 
             # audio_adaptor
             encoder_out, encoder_out_lens = self.audio_adaptor(encoder_out, encoder_out_lens)
