@@ -929,6 +929,14 @@ class LLMASR4(nn.Module):
             use_cache=None,
         )
 
+        if llm_conf.get("use_lora", False):
+            lora_conf = llm_conf.get("lora_conf", {})
+            from peft import get_peft_model, LoraConfig, TaskType
+
+            peft_config = LoraConfig(**lora_conf)
+            model = get_peft_model(model, peft_config)
+            model.print_trainable_parameters()
+
         if llm_conf.get("activation_checkpoint", False):
             model.gradient_checkpointing_enable()
         freeze = llm_conf.get("freeze", True)

@@ -162,6 +162,7 @@ class Trainer:
             if isinstance(effective_save_name_excludes, str):
                 effective_save_name_excludes = effective_save_name_excludes.split(",")
         self.effective_save_name_excludes = effective_save_name_excludes
+        self.use_lora = kwargs.get("use_lora", False)
 
     def save_checkpoint(
         self,
@@ -342,6 +343,11 @@ class Trainer:
                 ckpt_name = f"model.pt.ep{epoch}"
             else:
                 ckpt_name = f"model.pt.ep{epoch}.{step}"
+
+            if self.use_lora:
+                lora_outdir = f"{self.output_dir}/lora-{ckpt_name}"
+                os.makedirs(lora_outdir, exist_ok=True)
+                model.llm.save_pretrained(lora_outdir)
             filename = os.path.join(self.output_dir, ckpt_name)
             torch.save(state, filename)
 
