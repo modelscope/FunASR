@@ -958,7 +958,11 @@ class LLMASR4(nn.Module):
             src_state = torch.load(init_param_path, map_location="cpu")
             flag = audio_adaptor.load_state_dict(src_state, strict=False)
             logging.info(f"Loading audio_adaptor ckpt: {init_param_path}, status: {flag}")
-
+        freeze = audio_adaptor_conf.get("freeze", True)
+        if freeze:
+            for name, param in audio_adaptor.named_parameters():
+                param.requires_grad = False
+            audio_adaptor.eval()
         self.audio_adaptor = audio_adaptor
 
         self.error_calculator = None
