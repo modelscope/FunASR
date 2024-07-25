@@ -938,11 +938,15 @@ class LLMASR4(nn.Module):
         logging.info(f"use_lora: {llm_conf.get('use_lora', False)}")
         if llm_conf.get("use_lora", False):
             lora_conf = llm_conf.get("lora_conf", {})
-            from peft import get_peft_model, LoraConfig, TaskType
+            from peft import get_peft_model, LoraConfig, TaskType, PeftConfig, PeftModel
 
-            peft_config = LoraConfig(**lora_conf)
-            model = get_peft_model(model, peft_config)
-            model.print_trainable_parameters()
+            lora_init_param_path = lora_conf.get("init_param_path", None)
+            if lora_init_param_path is not None:
+                model = PeftModel.from_pretrained(model, lora_init_param_path)
+            else:
+                peft_config = LoraConfig(**lora_conf)
+                model = get_peft_model(model, peft_config)
+                model.print_trainable_parameters()
 
         if llm_conf.get("activation_checkpoint", False):
             model.gradient_checkpointing_enable()
