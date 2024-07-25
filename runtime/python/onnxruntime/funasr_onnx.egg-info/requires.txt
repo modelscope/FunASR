@@ -1,0 +1,8 @@
+librosa
+onnxruntime>=1.7.0
+scipy
+numpy<=1.26.4
+kaldi-native-fbank
+PyYAML>=5.1.2
+onnx
+sentencepiece
