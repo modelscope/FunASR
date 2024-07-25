@@ -163,12 +163,12 @@ class SenseVoiceSmall:
                 _language_list = _language_list * B
             if len(_textnorm_list) == 1 and B != 1:
                 _textnorm_list = _textnorm_list * B
-
+            
             ctc_logits, encoder_out_lens = self.ort_infer(
                 torch.Tensor(feats).to(self.device),
                 torch.Tensor(feats_len).to(self.device),
-                torch.tensor([_language_list]).to(self.device),
-                torch.tensor([_textnorm_list]).to(self.device),
+                torch.tensor(_language_list).to(self.device),
+                torch.tensor(_textnorm_list).to(self.device),
             )
             # support batch_size=1 only currently
             x = ctc_logits[0, : encoder_out_lens[0].item(), :]
