@@ -963,6 +963,7 @@ class LLMASR4(nn.Module):
             for name, param in audio_adaptor.named_parameters():
                 param.requires_grad = False
             audio_adaptor.eval()
+
         self.audio_adaptor = audio_adaptor
 
         self.error_calculator = None
