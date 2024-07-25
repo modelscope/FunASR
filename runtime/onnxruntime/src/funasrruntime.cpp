@@ -474,7 +474,7 @@
 
 	// APIs for 2pass-stream Infer
 	_FUNASRAPI FUNASR_RESULT FunTpassInferBuffer(FUNASR_HANDLE handle, FUNASR_HANDLE online_handle,FUNASR_HANDLE sv_handle,
-												std::vector<std::vector<float>>& voice_feats,  const char* sz_buf, bool sv_mode,	                                            
+												std::vector<std::vector<float>>& voice_feats, bool sv_mode, const char* sz_buf,	                                            
 												 int n_len, std::vector<std::vector<std::string>> &punc_cache, bool input_finished, 
 												 int sampling_rate, std::string wav_format, ASR_TYPE mode, 
 												 const std::vector<std::vector<float>> &hw_emb, bool itn, FUNASR_DEC_HANDLE dec_handle)
@@ -502,6 +502,10 @@
 		funasr::PuncModel* punc_online_handle = (tpass_stream->punc_online_handle).get();
 		if (!punc_online_handle)
 			return nullptr;
+
+		// funasr::SvModel* sv_offline_handle = (tpass_stream->punc_online_handle).get();
+		// if (!sv_offline_handle)
+		// 	return nullptr;
 
 		if(wav_format == "pcm" || wav_format == "PCM"){
 			if (!audio->LoadPcmwavOnline(sz_buf, n_len, &sampling_rate))
@@ -570,16 +574,12 @@
 			}
 		
 			msg = msg_vec[0];
-			//sv-cam for spk
+			//sv-cam for Speaker verification
 			if(sv_mode&&frame->len>1600)//Filter audio clips less than 100ms
 			{
 				std::vector<float>wave(frame->data,frame->data+frame->len);
-				// std::vector<float>wave;
-				// for (int i = 0; i < frame->len; i++)
-				// {
-				// 	wave.push_back(frame->data[i]);
-				// }
 				std::vector<std::vector<float>>sv_result = CamPPlusSvInfer(sv_handle, wave);
+				// float threshold =sv_handle->threshold;
 				int speaker_idx = funasr::GetSpeakersID(sv_result[0], voice_feats);
 				p_result->speaker_idx = speaker_idx;
 			}

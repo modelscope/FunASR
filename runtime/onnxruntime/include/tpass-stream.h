@@ -20,6 +20,7 @@ class TpassStream {
     std::unique_ptr<VadModel> vad_handle = nullptr;
     std::unique_ptr<Model> asr_handle = nullptr;
     std::unique_ptr<PuncModel> punc_online_handle = nullptr;
+    // std::unique_ptr<SvModel> sv_offline_handle = nullptr;
 #if !defined(__APPLE__)
     std::unique_ptr<ITNModel> itn_handle = nullptr;
 #endif

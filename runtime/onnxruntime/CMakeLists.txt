@@ -7,6 +7,7 @@ option(ENABLE_FST "Whether to build openfst" ON) # ITN need openfst compiled
 option(GPU "Whether to build with GPU" OFF)
 
 # set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_BUILD_TYPE DEBUG)
 set(CMAKE_CXX_STANDARD 14 CACHE STRING "The C++ version to be used.")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -18,6 +19,14 @@ if(BIG_ENDIAN)
 else()
     message("Little endian system")
 endif()
+###wzp-add for tmp  test
+# 如果是 Linux
+message("当前操作系统为 Linux")
+SET(ONNXRUNTIME_DIR /workspace/onnxruntime-linux-x64-1.14.0)
+SET(FFMPEG_DIR /workspace/ffmpeg-master-latest-linux64-gpl-shared)
+include_directories(${ONNXRUNTIME_DIR}/include)
+include_directories(${FFMPEG_DIR}/include)
+
 
 # json
 include(FetchContent)

@@ -25,19 +25,37 @@ class WavFrontend:
         lfr_m: int = 1,
         lfr_n: int = 1,
         dither: float = 1.0,
+        preemphasis_coefficient: float=None,
         **kwargs,
     ) -> None:
 
         opts = knf.FbankOptions()
-        opts.frame_opts.samp_freq = fs
+        sampling_rate = 16000
+        mel_bins = 80
+        frame_length = 25  # ms
+        frame_shift = 10  # ms
+        dither = 0
+        preemphasis_coefficient = 0.97
+        window_type = 'povey'
         opts.frame_opts.dither = dither
-        opts.frame_opts.window_type = window
-        opts.frame_opts.frame_shift_ms = float(frame_shift)
-        opts.frame_opts.frame_length_ms = float(frame_length)
-        opts.mel_opts.num_bins = n_mels
-        opts.energy_floor = 0
-        opts.frame_opts.snip_edges = True
+        opts.frame_opts.preemph_coeff = preemphasis_coefficient
+        opts.frame_opts.samp_freq = sampling_rate
+        # opts.frame_opts.frame_shift = frame_shift / 1000.0  # 秒
+        # opts.frame_opts.frame_length = frame_length / 1000.0  # 秒
+        opts.frame_opts.window_type = window_type
+        opts.mel_opts.num_bins = mel_bins
         opts.mel_opts.debug_mel = False
+        # opts.frame_opts.samp_freq = fs
+        # opts.frame_opts.dither = dither
+        # opts.frame_opts.window_type = window
+        # opts.frame_opts.frame_shift_ms = float(frame_shift)
+        # opts.frame_opts.frame_length_ms = float(frame_length)
+        # opts.mel_opts.num_bins = n_mels
+        # opts.energy_floor = 0
+        # opts.frame_opts.snip_edges = True
+        # opts.mel_opts.debug_mel = False
+        # if preemphasis_coefficient:
+        #     opts.frame_opts.preemph_coeff=preemphasis_coefficient
         self.opts = opts
 
         self.lfr_m = lfr_m
@@ -50,8 +68,9 @@ class WavFrontend:
         self.fbank_beg_idx = 0
         self.reset_status()
 
-    def fbank(self, waveform: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-        waveform = waveform * (1 << 15)
+    def fbank(self, waveform: np.ndarray,is_cam=False) -> Tuple[np.ndarray, np.ndarray]:
+        if not is_cam:
+            waveform = waveform * (1 << 15)
         self.fbank_fn = knf.OnlineFbank(self.opts)
         self.fbank_fn.accept_waveform(self.opts.frame_opts.samp_freq, waveform.tolist())
         frames = self.fbank_fn.num_frames_ready

@@ -3,7 +3,7 @@
 # Copyright FunASR (https://github.com/alibaba-damo-academy/FunASR). All Rights Reserved.
 #  MIT License  (https://opensource.org/licenses/MIT)
 # Modified from 3D-Speaker (https://github.com/alibaba-damo-academy/3D-Speaker)
-
+import types
 import time
 import torch
 import numpy as np
@@ -23,7 +23,8 @@ from funasr.models.campplus.components import (
     get_nonlinear,
     FCM,
 )
-
+import onnx
+from onnxruntime.quantization import QuantType, quantize_dynamic
 
 if LooseVersion(torch.__version__) >= LooseVersion("1.6.0"):
     from torch.cuda.amp import autocast
@@ -32,6 +33,44 @@ else:
     @contextmanager
     def autocast(enabled=True):
         yield
+
+
+
+def export_rebuild_model(model, **kwargs):
+    is_onnx = kwargs.get("type", "onnx") == "onnx"
+    # model.forward = types.MethodType(export_forward, model)
+    model.export_dummy_inputs = types.MethodType(export_dummy_inputs, model)
+    model.export_input_names = types.MethodType(export_input_names, model)
+    model.export_output_names = types.MethodType(export_output_names, model)
+    model.export_dynamic_axes = types.MethodType(export_dynamic_axes, model)
+    model.export_name = types.MethodType(export_name, model)
+    return model
+
+
+def export_forward(self, feats: torch.Tensor, *args, **kwargs):
+    scores, out_caches = self.encoder(feats, *args)
+    return scores, out_caches
+
+
+def export_dummy_inputs(self, data_in=None): 
+    return torch.rand(1, 1,80)
+
+def export_input_names(self):
+    return ["input"]
+
+
+def export_output_names(self):
+    return ["output"]
+
+
+def export_dynamic_axes(self):
+    return {'input': [0, 1]}
+
+
+def export_name(
+    self,
+):
+    return "model.onnx"
 
 
 @tables.register("model_classes", "CAMPPlus")
@@ -144,3 +183,39 @@ class CAMPPlus(torch.nn.Module):
         meta_data["batch_data_time"] = np.array(speech_times).sum().item() / 16000.0
         results = [{"spk_embedding": self.forward(speech.to(torch.float32))}]
         return results, meta_data
+    
+
+
+    
+    def export(self,**kwargs):
+        print("Done")
+
+        models = export_rebuild_model(model=self, **kwargs)
+        return models
+        # dummy_input = torch.rand(1, 1,80)   
+        # model_script = self.modules
+        # model_path=kwargs["model_path"]
+        # onnx_path = "model.onnx"
+        # quant_onnx_path = "model_quant.onnx"
+        # input_names=["input"]
+        # output_names=["output"]
+        # verbose=True
+        # torch.onnx.export(
+        #     model_script,
+        #     dummy_input,
+        #     model_path,
+        #     verbose=verbose,
+        #     opset_version=14,
+        #     input_names=input_names,
+        #     output_names=output_names,
+        #     dynamic_axes={'input': [0, 1]}
+        # )
+        # quantize=1
+        # if quantize:
+        #     onnx_model = onnx.load(model_path)
+        #     quantize_dynamic(
+        #         model_input=model_path,
+        #         model_output=quant_model_path, 
+        #         weight_type=QuantType.QUInt8,
+        #         )
+

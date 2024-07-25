@@ -28,6 +28,7 @@ void GetValue(TCLAP::ValueArg<std::string> &value_arg, string key, std::map<std:
 {
 
     model_path.insert({key, value_arg.getValue()});
+    LOG(INFO)<< key << " : " << value_arg.getValue();
 }
 float CosineSimilarity(const std::vector<float> &emb1,
                        const std::vector<float> &emb2)
@@ -70,7 +71,8 @@ std::vector<float> readwavfile(const std::string &wav_file)
         if (!audio.LoadWav(wav_file.c_str(), &sampling_rate))
         {
             printf("audio.LoadWav failed!\n");
-            return;
+            std::vector<float> data;
+            return data;
         }
     }
     int len;
@@ -87,15 +89,19 @@ std::vector<float> readwavfile(const std::string &wav_file)
 
 int main(int argc, char *argv[])
 {
-    // google::InitGoogleLogging(argv[0]);
-    // FLAGS_logtostderr = true;
+    google::InitGoogleLogging(argv[0]);
+    FLAGS_logtostderr = true;
     TCLAP::CmdLine cmd("funasr-onnx-offline-sv", ' ', "1.0");
-    // TCLAP::ValueArg<std::string>    model_dir("", MODEL_DIR, "the punc model path, which contains model.onnx, cam.yaml", false, "/workspace/FunASR/camplus_sv_zh-cn-16k-common-onnx", "string");
-    TCLAP::ValueArg<std::string> model_dir("", SV_DIR, "the punc model path, which contains model.onnx, cam.yaml", false, "E:/models/funasr/camplus_sv_zh-cn-16k-common-onnx", "string");
+    // TCLAP::ValueArg<std::string> model_dir("", SV_DIR, "the cam model path, which contains model.onnx, cam.yaml", true, "", "string");
+    // TCLAP::ValueArg<std::string> sv_quant("", SV_QUANT, "false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir", false, "true", "string");
+    // TCLAP::ValueArg<std::string> wav_file1("", "wav_file1", "the input could be: wav_path, e.g.: asr_example1.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, ", true, "", "string");
+    // TCLAP::ValueArg<std::string> wav_file2("", "wav_file2", "the input could be: wav_path, e.g.: asr_example2.wav; pcm_path, e.g.: asr_example.pcm; wav.scp,", true, "", "string");
+    // TCLAP::ValueArg<std::int32_t> onnx_thread("", "model-thread-num", "onnxruntime SetIntraOpNumThreads", false, 1, "int32_t");
+
+    TCLAP::ValueArg<std::string> model_dir("", SV_DIR, "the cam model path, which contains model.onnx, cam.yaml", false, "/workspace/models/weights2/camplus_sv_zh-cn-16k-common-onnx", "string");
     TCLAP::ValueArg<std::string> sv_quant("", SV_QUANT, "false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir", false, "true", "string");
-    // TCLAP::ValueArg<std::string>    wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", false, "/workspace/FunASR/example.wav", "string");
-    TCLAP::ValueArg<std::string> wav_file1("", "wav_file1", "the input could be: wav_path, e.g.: asr_example1.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", false, "/workspace/FunASR/example1.wav", "string");
-    TCLAP::ValueArg<std::string> wav_file2("", "wav_file2", "the input could be: wav_path, e.g.: asr_example2.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", false, "/workspace/FunASR/example2.wav", "string");
+    TCLAP::ValueArg<std::string> wav_file1("", "wav_file1", "the input could be: wav_path, e.g.: asr_example1.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, ", false, "/home/wzp/project/FunASR/speaker1_a_cn_16k.wav", "string");
+    TCLAP::ValueArg<std::string> wav_file2("", "wav_file2", "the input could be: wav_path, e.g.: asr_example2.wav; pcm_path, e.g.: asr_example.pcm; wav.scp,", false, "/home/wzp/project/FunASR/speaker1_a_cn_16k.wav", "string");
     TCLAP::ValueArg<std::int32_t> onnx_thread("", "model-thread-num", "onnxruntime SetIntraOpNumThreads", false, 1, "int32_t");
 
     cmd.add(model_dir);
@@ -109,20 +115,22 @@ int main(int argc, char *argv[])
     GetValue(model_dir, SV_DIR, model_path);
     GetValue(sv_quant, SV_QUANT, model_path);
 
-    std::string wav_file1 = wav_file1.getValue();
-    std::string wav_file2 = wav_file2.getValue();
-    ;
-    std::vector<float> data1 = readwavfile(wav_file1);
-    std::vector<float> data2 = readwavfile(wav_file2);
+    std::string audio_file1 = wav_file1.getValue();
+    std::string audio_file2 = wav_file2.getValue();
+    
+    std::vector<float> data1 = readwavfile(audio_file1);
+    std::vector<float> data2 = readwavfile(audio_file2);
     int thread_num = onnx_thread.getValue();
 
     FUNASR_HANDLE sv_hanlde = CamPPlusSvInit(model_path, thread_num);
-
     std::vector<std::vector<float>> result1 = CamPPlusSvInfer(sv_hanlde, data1);
     std::vector<std::vector<float>> result2 = CamPPlusSvInfer(sv_hanlde, data2);
-
     float sim = CosineSimilarity(result1[0], result2[0]);
-    printf("余弦相似度=%f\n", sim);
+    for(int i=0;i<10;i++)
+    {
+        printf("%f\n",result1[0][i]);
+    }
+    printf("声纹相似度=%f\n", sim);
     CamPPlusSvUninit(sv_hanlde);
     return 0;
 }

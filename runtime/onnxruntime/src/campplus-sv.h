@@ -38,7 +38,7 @@ namespace funasr
 
         int sample_rate_ = MODEL_SAMPLE_RATE;
         int lfr_m = VAD_LFR_M;
-        int lfr_n = VAD_LFR_N;
+        int lfr_n = VAD_LFR_N;        
 
     private:
         void ReadModel(const char *cam_model);

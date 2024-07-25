@@ -27,3 +27,5 @@ GPT-SoVITS*
 modelscope_models
 examples/aishell/llm_asr_nar/*
 .vscode
+*.wav
+sv_demo.py

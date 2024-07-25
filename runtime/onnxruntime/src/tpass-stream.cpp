@@ -124,6 +124,31 @@ TpassStream::TpassStream(std::map<std::string, std::string>& model_path, int thr
         }
     }
 #endif
+
+// //sv cam
+// if(model_path.find(VAD_DIR) != model_path.end()){
+//         string vad_model_path;
+//         string vad_cmvn_path;
+//         string vad_config_path;
+    
+//         vad_model_path = PathAppend(model_path.at(VAD_DIR), MODEL_NAME);
+//         if(model_path.find(VAD_QUANT) != model_path.end() && model_path.at(VAD_QUANT) == "true"){
+//             vad_model_path = PathAppend(model_path.at(VAD_DIR), QUANT_MODEL_NAME);
+//         }
+//         vad_cmvn_path = PathAppend(model_path.at(VAD_DIR), VAD_CMVN_NAME);
+//         vad_config_path = PathAppend(model_path.at(VAD_DIR), VAD_CONFIG_NAME);
+//         if (access(vad_model_path.c_str(), F_OK) != 0 ||
+//             access(vad_cmvn_path.c_str(), F_OK) != 0 ||
+//             access(vad_config_path.c_str(), F_OK) != 0 )
+//         {
+//             LOG(INFO) << "VAD model file is not exist, skip load vad model.";
+//         }else{
+//             vad_handle = make_unique<FsmnVad>();
+//             vad_handle->InitVad(vad_model_path, vad_cmvn_path, vad_config_path, thread_num);
+//             use_vad = true;
+//         }
+//     }
+
       
 }
 

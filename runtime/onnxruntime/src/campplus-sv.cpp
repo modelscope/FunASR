@@ -29,6 +29,7 @@ namespace funasr
         ReadModel(model.c_str());
         LoadCmvn(cmvn.c_str());
         LoadConfigFromYaml(config.c_str());
+        
     }
 
     void CamPPlusSv::LoadConfigFromYaml(const char *filename)
@@ -306,7 +307,7 @@ namespace funasr
         {
             // for (int j = 0; j < means_list_.size(); j++) {
             for (int j = 0; j < std::min(out_feats[0].size(), means_list_.size()); j++)
-            { // wzp-add
+            { 
                 out_feat[j] = (out_feat[j] + means_list_[j]) * vars_list_[j];
             }
         }
@@ -318,7 +319,6 @@ namespace funasr
         {
             int rows = voice_feats.size();
             int clos = voice_feats[0].size();
-            // float feat_mean[1][clos];
             std::vector<float> feat_mean(clos, 0.0);
             for (int j = 0; j < clos; ++j)
             {
@@ -327,7 +327,6 @@ namespace funasr
                 {
                     sum += voice_feats[i][j];
                 }
-                // feat_mean[0][j] = sum / (float)rows;
                 feat_mean[j] = sum / (float)rows;
             }
 
@@ -335,7 +334,6 @@ namespace funasr
             {
                 for (int j = 0; j < clos; ++j)
                 {
-                    // voice_feats[i][j] -= feat_mean[0][j];
                     voice_feats[i][j] -= feat_mean[j];
                 }
             }
@@ -354,8 +352,18 @@ namespace funasr
             return voice_features;
         }
         // sub mean  pad
+        printf("====1===\n");
+        for (int i = 0; i < 10; i++)
+        {
+            printf("%f\n", vad_feats[0][i]);
+        }
         SubMean(vad_feats);
-        // LfrCmvn(vad_feats);      
+        // LfrCmvn(vad_feats);
+        printf("====2===\n");
+        for (int i = 0; i < 10; i++)
+        {
+            printf("%f\n", vad_feats[0][i]);
+        }
         Forward(vad_feats, &voice_features); //   
 
         return voice_features;
