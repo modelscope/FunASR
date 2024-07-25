@@ -368,7 +368,7 @@ class CustomDistributedBufferDynamicBatchSampler(DistributedSampler):
         self.batch_size_sample_max = kwargs.get("batch_size_sample_max", 200)
         self.start_step = start_step
         self.batch_num = 1
-        self.batch_size_scale_threshold = kwargs.get("batch_size_scale_threshold", 40.0)
+        self.batch_size_scale_threshold = kwargs.get("batch_size_scale_threshold", 4000.0)
         if self.start_step > 0:
             logging.info(f"Warning, start_step > 0, dataloader start from step: {self.start_step}")
         # super().__init__(
