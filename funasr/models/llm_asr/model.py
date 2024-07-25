@@ -937,10 +937,10 @@ class LLMASR4(nn.Module):
 
         logging.info(f"use_lora: {llm_conf.get('use_lora', False)}")
         if llm_conf.get("use_lora", False):
-            from omegaconf import OmegaConf
+            from omegaconf import OmegaConf, DictConfig
 
             lora_conf = llm_conf.get("lora_conf", {})
-            if isinstance(lora_conf, OmegaConf):
+            if isinstance(lora_conf, (OmegaConf, DictConfig)):
                 lora_conf = OmegaConf.to_container(lora_conf, resolve=True)
             from peft import get_peft_model, LoraConfig, TaskType, PeftConfig, PeftModel
 
