@@ -929,6 +929,13 @@ class LLMASR4(nn.Module):
             use_cache=None,
         )
 
+        freeze = llm_conf.get("freeze", True)
+        if freeze:
+            for name, param in model.named_parameters():
+                param.requires_grad = False
+            model.eval()
+
+        logging.info(f"use_lora: {llm_conf.get('use_lora', False)}")
         if llm_conf.get("use_lora", False):
             lora_conf = llm_conf.get("lora_conf", {})
             from peft import get_peft_model, LoraConfig, TaskType
@@ -939,11 +946,7 @@ class LLMASR4(nn.Module):
 
         if llm_conf.get("activation_checkpoint", False):
             model.gradient_checkpointing_enable()
-        freeze = llm_conf.get("freeze", True)
-        if freeze:
-            for name, param in model.named_parameters():
-                param.requires_grad = False
-            model.eval()
+
         self.llm_dtype = llm_conf.get("llm_dtype", "fp32")
         self.llm = model.to(dtype_map[self.llm_dtype])
         llm_dim = model.get_input_embeddings().weight.shape[-1]
