@@ -498,7 +498,7 @@ class Trainer:
                         if k_ddp in src_state.keys():
                             dst_state[k] = src_state[k_ddp]
                         else:
-                            print(f"Miss key in ckpt: model: {k}, ckpt: {k_ddp}")
+                            print(f"Miss key in ckpt: model: {k}, ckpt: {ckpt}")
 
                     model.load_state_dict(dst_state)
                     optim.load_state_dict(checkpoint["optimizer"])
