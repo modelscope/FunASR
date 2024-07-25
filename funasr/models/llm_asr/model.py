@@ -940,7 +940,8 @@ class LLMASR4(nn.Module):
             from omegaconf import OmegaConf
 
             lora_conf = llm_conf.get("lora_conf", {})
-            lora_conf = OmegaConf.to_container(lora_conf, resolve=True)
+            if isinstance(lora_conf, OmegaConf):
+                lora_conf = OmegaConf.to_container(lora_conf, resolve=True)
             from peft import get_peft_model, LoraConfig, TaskType, PeftConfig, PeftModel
 
             lora_init_param_path = lora_conf.get("init_param_path", None)
