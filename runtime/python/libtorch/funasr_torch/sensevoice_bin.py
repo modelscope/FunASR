@@ -170,15 +170,19 @@ class SenseVoiceSmall:
                 torch.tensor(_language_list).to(self.device),
                 torch.tensor(_textnorm_list).to(self.device),
             )
-            # support batch_size=1 only currently
-            x = ctc_logits[0, : encoder_out_lens[0].item(), :]
-            yseq = x.argmax(dim=-1)
-            yseq = torch.unique_consecutive(yseq, dim=-1)
+            for b in range(feats.shape[0]):
+                # back to torch.Tensor
+                if isinstance(ctc_logits, np.ndarray):
+                    ctc_logits = torch.from_numpy(ctc_logits).float()
+                # support batch_size=1 only currently
+                x = ctc_logits[b, : encoder_out_lens[b].item(), :]
+                yseq = x.argmax(dim=-1)
+                yseq = torch.unique_consecutive(yseq, dim=-1)
 
-            mask = yseq != self.blank_id
-            token_int = yseq[mask].tolist()
+                mask = yseq != self.blank_id
+                token_int = yseq[mask].tolist()
 
-            asr_res.append(self.tokenizer.decode(token_int))
+                asr_res.append(self.tokenizer.decode(token_int))
 
         return asr_res
 
