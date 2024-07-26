@@ -264,6 +264,8 @@ class AutoModel:
 
     def inference(self, input, input_len=None, model=None, kwargs=None, key=None, **cfg):
         kwargs = self.kwargs if kwargs is None else kwargs
+        if "cache" in kwargs:
+            kwargs.pop("cache")
         deep_update(kwargs, cfg)
         model = self.model if model is None else model
         model.eval()
