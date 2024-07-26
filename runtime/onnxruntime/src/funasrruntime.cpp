@@ -473,7 +473,7 @@
 //#endif
 
 	// APIs for 2pass-stream Infer
-	_FUNASRAPI FUNASR_RESULT FunTpassInferBuffer(FUNASR_HANDLE handle, FUNASR_HANDLE online_handle,FUNASR_HANDLE sv_handle,
+	_FUNASRAPI FUNASR_RESULT FunTpassInferBuffer(FUNASR_HANDLE handle, FUNASR_HANDLE online_handle,
 												std::vector<std::vector<float>>& voice_feats, bool sv_mode, const char* sz_buf,	                                            
 												 int n_len, std::vector<std::vector<std::string>> &punc_cache, bool input_finished, 
 												 int sampling_rate, std::string wav_format, ASR_TYPE mode, 
@@ -501,11 +501,10 @@
 
 		funasr::PuncModel* punc_online_handle = (tpass_stream->punc_online_handle).get();
 		if (!punc_online_handle)
+			return nullptr;         
+		funasr::SvModel* sv_handle = (tpass_stream->sv_handle).get();
+		if (!sv_handle &&sv_mode)
 			return nullptr;
-
-		// funasr::SvModel* sv_offline_handle = (tpass_stream->punc_online_handle).get();
-		// if (!sv_offline_handle)
-		// 	return nullptr;
 
 		if(wav_format == "pcm" || wav_format == "PCM"){
 			if (!audio->LoadPcmwavOnline(sz_buf, n_len, &sampling_rate))
@@ -577,11 +576,20 @@
 			//sv-cam for Speaker verification
 			if(sv_mode&&frame->len>1600)//Filter audio clips less than 100ms
 			{
+				if (voice_feats.size()<MAX_SPKS_NUM)
+				{
 				std::vector<float>wave(frame->data,frame->data+frame->len);
-				std::vector<std::vector<float>>sv_result = CamPPlusSvInfer(sv_handle, wave);
-				// float threshold =sv_handle->threshold;
-				int speaker_idx = funasr::GetSpeakersID(sv_result[0], voice_feats);
+				std::vector<std::vector<float>>sv_result=sv_handle->Infer(wave);
+				// std::vector<std::vector<float>>sv_result = CamPPlusSvInfer(sv_handle, wave);
+				float threshold =sv_handle->threshold;
+				int speaker_idx = funasr::GetSpeakersID(sv_result[0], voice_feats,threshold);
 				p_result->speaker_idx = speaker_idx;
+				}
+				else
+				{
+					LOG(ERROR)<<"Exceeding the maximum speaker limit!\n";
+					p_result->speaker_idx = MAX_SPKS_NUM;
+				}
 			}
 			//timestamp
 			if(msg_vec.size() > 1){

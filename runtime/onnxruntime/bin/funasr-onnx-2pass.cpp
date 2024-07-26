@@ -45,49 +45,27 @@ int main(int argc, char **argv)
     FLAGS_logtostderr = true;
 
     TCLAP::CmdLine cmd("funasr-onnx-2pass", ' ', "1.0");
-    // TCLAP::ValueArg<std::string>    offline_model_dir("", OFFLINE_MODEL_DIR, "the asr offline model path, which contains model.onnx, config.yaml, am.mvn", true, "", "string");
-    // TCLAP::ValueArg<std::string>    online_model_dir("", ONLINE_MODEL_DIR, "the asr online model path, which contains model.onnx, decoder.onnx, config.yaml, am.mvn", true, "", "string");
-    // TCLAP::ValueArg<std::string>    quantize("", QUANTIZE, "true (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir", false, "true", "string");
-    // TCLAP::ValueArg<std::string>    vad_dir("", VAD_DIR, "the vad online model path, which contains model.onnx, vad.yaml, vad.mvn", false, "", "string");
-    // TCLAP::ValueArg<std::string>    vad_quant("", VAD_QUANT, "true (Default), load the model of model.onnx in vad_dir. If set true, load the model of model_quant.onnx in vad_dir", false, "true", "string");
-    // TCLAP::ValueArg<std::string>    punc_dir("", PUNC_DIR, "the punc online model path, which contains model.onnx, punc.yaml", false, "", "string");
-    // TCLAP::ValueArg<std::string>    punc_quant("", PUNC_QUANT, "true (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "true", "string");
-    //  TCLAP::ValueArg<std::string>    sv_dir("", SV_DIR, "the sv online model path, which contains model.onnx, config.yaml", false, "", "string");
-    // TCLAP::ValueArg<std::string>    sv_quant("", SV_QUANT, "true (Default), load the model of model.onnx in sv_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "true", "string");
-    // TCLAP::ValueArg<std::string>    itn_dir("", ITN_DIR, "the itn model(fst) path, which contains zh_itn_tagger.fst and zh_itn_verbalizer.fst", false, "", "string");
-    // TCLAP::ValueArg<std::string>    lm_dir("", LM_DIR, "the lm model path, which contains compiled models: TLG.fst, config.yaml, lexicon.txt ", false, "", "string");
-    // TCLAP::ValueArg<float>    global_beam("", GLOB_BEAM, "the decoding beam for beam searching ", false, 3.0, "float");
-    // TCLAP::ValueArg<float>    lattice_beam("", LAT_BEAM, "the lattice generation beam for beam searching ", false, 3.0, "float");
-    // TCLAP::ValueArg<float>    am_scale("", AM_SCALE, "the acoustic scale for beam searching ", false, 10.0, "float");
-    // TCLAP::ValueArg<std::int32_t>   fst_inc_wts("", FST_INC_WTS, "the fst hotwords incremental bias", false, 20, "int32_t");
-    // TCLAP::ValueArg<std::string>    asr_mode("", ASR_MODE, "offline, online, 2pass", false, "2pass", "string");
-    // TCLAP::ValueArg<std::int32_t>   onnx_thread("", "model-thread-num", "onnxruntime SetIntraOpNumThreads", false, 1, "int32_t");
+    TCLAP::ValueArg<std::string>    offline_model_dir("", OFFLINE_MODEL_DIR, "the asr offline model path, which contains model.onnx, config.yaml, am.mvn", true, "", "string");
+    TCLAP::ValueArg<std::string>    online_model_dir("", ONLINE_MODEL_DIR, "the asr online model path, which contains model.onnx, decoder.onnx, config.yaml, am.mvn", true, "", "string");
+    TCLAP::ValueArg<std::string>    quantize("", QUANTIZE, "true (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir", false, "true", "string");
+    TCLAP::ValueArg<std::string>    vad_dir("", VAD_DIR, "the vad online model path, which contains model.onnx, vad.yaml, vad.mvn", true, "", "string");
+    TCLAP::ValueArg<std::string>    vad_quant("", VAD_QUANT, "true (Default), load the model of model.onnx in vad_dir. If set true, load the model of model_quant.onnx in vad_dir", false, "true", "string");
+    TCLAP::ValueArg<std::string>    punc_dir("", PUNC_DIR, "the punc online model path, which contains model.onnx, punc.yaml", true, "", "string");
+    TCLAP::ValueArg<std::string>    punc_quant("", PUNC_QUANT, "true (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "true", "string");
+     TCLAP::ValueArg<std::string>    sv_dir("", SV_DIR, "the sv online model path, which contains model.onnx, config.yaml", true, "", "string");
+    TCLAP::ValueArg<std::string>    sv_quant("", SV_QUANT, "true (Default), load the model of model.onnx in sv_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "true", "string");
+    TCLAP::ValueArg<std::string>    itn_dir("", ITN_DIR, "the itn model(fst) path, which contains zh_itn_tagger.fst and zh_itn_verbalizer.fst", false, "", "string");
+    TCLAP::ValueArg<std::string>    lm_dir("", LM_DIR, "the lm model path, which contains compiled models: TLG.fst, config.yaml, lexicon.txt ", false, "", "string");
+    TCLAP::ValueArg<float>    global_beam("", GLOB_BEAM, "the decoding beam for beam searching ", false, 3.0, "float");
+    TCLAP::ValueArg<float>    lattice_beam("", LAT_BEAM, "the lattice generation beam for beam searching ", false, 3.0, "float");
+    TCLAP::ValueArg<float>    am_scale("", AM_SCALE, "the acoustic scale for beam searching ", false, 10.0, "float");
+    TCLAP::ValueArg<std::int32_t>   fst_inc_wts("", FST_INC_WTS, "the fst hotwords incremental bias", false, 20, "int32_t");
+    TCLAP::ValueArg<std::string>    asr_mode("", ASR_MODE, "offline, online, 2pass", false, "2pass", "string");
+    TCLAP::ValueArg<std::int32_t>   onnx_thread("", "model-thread-num", "onnxruntime SetIntraOpNumThreads", false, 1, "int32_t");
 
-    // TCLAP::ValueArg<std::string> wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", true, "", "string");
-    // TCLAP::ValueArg<std::int32_t>   audio_fs("", AUDIO_FS, "the sample rate of audio", false, 16000, "int32_t");
-    // TCLAP::ValueArg<std::string>    hotword("", HOTWORD, "the hotword file, one hotword perline, Format: Hotword Weight (could be: 阿里巴巴 20)", false, "", "string");
-
-    TCLAP::ValueArg<std::string> offline_model_dir("", OFFLINE_MODEL_DIR, "the asr offline model path, which contains model.onnx, config.yaml, am.mvn", false, "/workspace/models/weights2/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-onnx", "string");
-    TCLAP::ValueArg<std::string> online_model_dir("", ONLINE_MODEL_DIR, "the asr online model path, which contains model.onnx, decoder.onnx, config.yaml, am.mvn", false, "/workspace/models/weights2/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online-onnx", "string");
-    TCLAP::ValueArg<std::string> quantize("", QUANTIZE, "true (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir", false, "true", "string");
-    TCLAP::ValueArg<std::string> vad_dir("", VAD_DIR, "the vad online model path, which contains model.onnx, vad.yaml, vad.mvn", false, "/workspace/models/weights2/speech_fsmn_vad_zh-cn-16k-common-onnx", "string");
-    TCLAP::ValueArg<std::string> vad_quant("", VAD_QUANT, "true (Default), load the model of model.onnx in vad_dir. If set true, load the model of model_quant.onnx in vad_dir", false, "true", "string");
-    TCLAP::ValueArg<std::string> punc_dir("", PUNC_DIR, "the punc online model path, which contains model.onnx, punc.yaml", false, "/workspace/models/weights2/punc_ct-transformer_zh-cn-common-vad_realtime-vocab272727-onnx", "string");
-    TCLAP::ValueArg<std::string> punc_quant("", PUNC_QUANT, "true (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "true", "string");
-    TCLAP::ValueArg<std::string> sv_dir("", SV_DIR, "the sv online model path, which contains model.onnx, config.yaml", false, "/workspace/models/weights2/camplus_sv_zh-cn-16k-common-onnx", "string");
-    TCLAP::ValueArg<std::string> sv_quant("", SV_QUANT, "true (Default), load the model of model.onnx in sv_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "true", "string");
-    TCLAP::ValueArg<std::string> itn_dir("", ITN_DIR, "the itn model(fst) path, which contains zh_itn_tagger.fst and zh_itn_verbalizer.fst", false, "", "string");
-    TCLAP::ValueArg<std::string> lm_dir("", LM_DIR, "the lm model path, which contains compiled models: TLG.fst, config.yaml, lexicon.txt ", false, "", "string");
-    TCLAP::ValueArg<float> global_beam("", GLOB_BEAM, "the decoding beam for beam searching ", false, 3.0, "float");
-    TCLAP::ValueArg<float> lattice_beam("", LAT_BEAM, "the lattice generation beam for beam searching ", false, 3.0, "float");
-    TCLAP::ValueArg<float> am_scale("", AM_SCALE, "the acoustic scale for beam searching ", false, 10.0, "float");
-    TCLAP::ValueArg<std::int32_t> fst_inc_wts("", FST_INC_WTS, "the fst hotwords incremental bias", false, 20, "int32_t");
-    TCLAP::ValueArg<std::string> asr_mode("", ASR_MODE, "offline, online, 2pass", false, "2pass", "string");
-    TCLAP::ValueArg<std::int32_t> onnx_thread("", "model-thread-num", "onnxruntime SetIntraOpNumThreads", false, 1, "int32_t");
-
-    TCLAP::ValueArg<std::string> wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", false, "/home/wzp/project/FunASR/asr_example_zh.wav", "string");
-    TCLAP::ValueArg<std::int32_t> audio_fs("", AUDIO_FS, "the sample rate of audio", false, 16000, "int32_t");
-    TCLAP::ValueArg<std::string> hotword("", HOTWORD, "the hotword file, one hotword perline, Format: Hotword Weight (could be: 阿里巴巴 20)", false, "", "string");
+    TCLAP::ValueArg<std::string> wav_path("", WAV_PATH, "the input could be: wav_path, e.g.: asr_example.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, kaldi style wav list (wav_id \t wav_path)", true, "", "string");
+    TCLAP::ValueArg<std::int32_t>   audio_fs("", AUDIO_FS, "the sample rate of audio", false, 16000, "int32_t");
+    TCLAP::ValueArg<std::string>    hotword("", HOTWORD, "the hotword file, one hotword perline, Format: Hotword Weight (could be: 阿里巴巴 20)", false, "", "string");
 
     cmd.add(offline_model_dir);
     cmd.add(online_model_dir);
@@ -169,12 +147,6 @@ int main(int argc, char **argv)
     // init sv-cam
     bool sv_mode = 1; // use cam model  for speaker verification
     std::vector<std::vector<float>> voice_feats;
-    FUNASR_HANDLE sv_handle = nullptr;
-    if (sv_mode)
-    {
-        sv_handle = CamPPlusSvInit(model_path, thread_num);
-    }
-
     gettimeofday(&end, nullptr);
     long seconds = (end.tv_sec - start.tv_sec);
     long modle_init_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
@@ -280,7 +252,7 @@ int main(int argc, char **argv)
             }
             gettimeofday(&start, nullptr);
             FUNASR_RESULT result = FunTpassInferBuffer(tpass_handle, tpass_online_handle,
-                                                       sv_handle, voice_feats, sv_mode,
+                                                       voice_feats, sv_mode,
                                                        speech_buff + sample_offset, step, punc_cache, is_final, sampling_rate_, "pcm",
                                                        (ASR_TYPE)asr_mode_, hotwords_embedding, true, decoder_handle);
             gettimeofday(&end, nullptr);
@@ -291,10 +263,10 @@ int main(int argc, char **argv)
             {
                 string online_msg = FunASRGetResult(result, 0);
                 online_res += online_msg;
-                if (online_msg != "")
-                {
-                    LOG(INFO) << wav_id << " : " << online_msg;
-                }
+                // if (online_msg != "")
+                // {
+                //     LOG(INFO) << wav_id << " : " << online_msg;
+                // }
                 string tpass_msg = FunASRGetTpassResult(result, 0);
 
                 tpass_res += tpass_msg;
@@ -307,19 +279,19 @@ int main(int argc, char **argv)
                         LOG(INFO) << "speaker_idx: " << speaker_idx;
                     }
                 }
-                string stamp = FunASRGetStamp(result);
-                if (stamp != "")
-                {
-                    LOG(INFO) << wav_ids[i] << " time stamp : " << stamp;
-                    if (time_stamp_res == "")
-                    {
-                        time_stamp_res += stamp;
-                    }
-                    else
-                    {
-                        time_stamp_res = time_stamp_res.erase(time_stamp_res.length() - 1) + "," + stamp.substr(1);
-                    }
-                }
+                // string stamp = FunASRGetStamp(result);
+                // if (stamp != "")
+                // {
+                //     LOG(INFO) << wav_ids[i] << " time stamp : " << stamp;
+                //     if (time_stamp_res == "")
+                //     {
+                //         time_stamp_res += stamp;
+                //     }
+                //     else
+                //     {
+                //         time_stamp_res = time_stamp_res.erase(time_stamp_res.length() - 1) + "," + stamp.substr(1);
+                //     }
+                // }
                 snippet_time += FunASRGetRetSnippetTime(result);
                 FunASRFreeResult(result);
             }
@@ -349,6 +321,5 @@ int main(int argc, char **argv)
     FunASRWfstDecoderUninit(decoder_handle);
     FunTpassOnlineUninit(tpass_online_handle);
     FunTpassUninit(tpass_handle);
-    CamPPlusSvUninit(sv_handle);
     return 0;
 }

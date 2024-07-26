@@ -11,23 +11,20 @@ def cosine_similarity(u, v):
     norm_v = np.linalg.norm(v) 
     if norm_u == 0 or norm_v == 0:
         return 0    
-
     similarity = dot_product / (norm_u * norm_v)    
     return similarity
 
-
-model_dir = "/workspace/models/weights/camplus_sv_zh-cn-16k-common-onnx"
-wav_path1 = "/home/wzp/project/FunASR/speaker1_a_cn_16k.wav".format(
+model_dir = "iic/speech_campplus_sv_zh-cn_16k-common"
+wav_path1 = "{}/.cache/modelscope/hub/iic/speech_campplus_sv_zh-cn_16k-common/examples/speaker1_a_cn_16k.wav".format(
     Path.home()
 )
-wav_path2 = "/home/wzp/project/FunASR/speaker1_b_cn_16k.wav".format(
+wav_path2 = "{}/.cache/modelscope/hub/iic/speech_campplus_sv_zh-cn_16k-common/examples/speaker1_b_cn_16k.wav".format(
     Path.home()
 )
 model = CamPlusPlus(model_dir)
 embedding1 = model(wav_path1)
-# embedding2 = model(wav_path2)
+embedding2 = model(wav_path2)
 
-# # # compute similarity score
-# print(' Computing the similarity score...')
-# scores=cosine_similarity(embedding1[0],embedding2[0])
-# print(scores)
+print("Computing the similarity score...")
+scores=cosine_similarity(embedding1[0],embedding2[0])
+print("scores={:.4f}".format(scores))

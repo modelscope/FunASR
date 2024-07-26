@@ -27,7 +27,7 @@ namespace funasr
         session_options_.DisableCpuMemArena();
 
         ReadModel(model.c_str());
-        LoadCmvn(cmvn.c_str());
+        // LoadCmvn(cmvn.c_str());
         LoadConfigFromYaml(config.c_str());
         
     }
@@ -49,12 +49,16 @@ namespace funasr
         try
         {
             YAML::Node frontend_conf = config["frontend_conf"];
-            YAML::Node post_conf = config["vad_post_conf"];
-
-            this->sample_rate_ = frontend_conf["fs"].as<int>();
-
-            fbank_opts_.frame_opts.samp_freq = (float)sample_rate_;
-            fbank_opts_.mel_opts.num_bins = 80; // wzp-add  cam++
+            YAML::Node model_conf = config["model_conf"];
+            this->sample_rate_ = frontend_conf["fs"].as<int>();  
+            fbank_opts_.frame_opts.dither = 0;
+            fbank_opts_.mel_opts.num_bins = model_conf["feat_dim"].as<int>();
+            fbank_opts_.frame_opts.samp_freq = (float)this->sample_rate_ ;
+            fbank_opts_.frame_opts.window_type = "povey";
+            fbank_opts_.frame_opts.frame_shift_ms = 10;
+            fbank_opts_.frame_opts.frame_length_ms = 25;
+            fbank_opts_.energy_floor = 0;
+            fbank_opts_.mel_opts.debug_mel = false;
         }
         catch (exception const &e)
         {
@@ -140,7 +144,6 @@ namespace funasr
         const int feature_dim = chunk_feats[0].size(); // 80
 
         //  2. Generate input nodes tensor
-        // vad node { batch,frame number,feature dim }
         const int64_t vad_feats_shape[3] = {1, num_frames, feature_dim}; //[1,553,80]
         std::vector<float> vad_feats;
         for (const auto &chunk_feat : chunk_feats)
@@ -190,7 +193,7 @@ namespace funasr
         std::vector<float> buf(waves.size());
         for (int32_t i = 0; i != waves.size(); ++i)
         {
-            buf[i] = waves[i] * 32768;
+            buf[i] = waves[i] * 1;
         }
         fbank.AcceptWaveform(sample_rate, buf.data(), buf.size());
         int32_t frames = fbank.NumFramesReady();
@@ -241,8 +244,7 @@ namespace funasr
                     if (vars_lines[0] == "<LearnRateCoef>")
                     {
                         for (int j = 3; j < vars_lines.size() - 1; j++)
-                        {
-                            // vars_list_.push_back(stof(vars_lines[j])*scale);
+                        {                           
                             vars_list_.push_back(stof(vars_lines[j]));
                         }
                         continue;
@@ -351,21 +353,9 @@ namespace funasr
         {
             return voice_features;
         }
-        // sub mean  pad
-        printf("====1===\n");
-        for (int i = 0; i < 10; i++)
-        {
-            printf("%f\n", vad_feats[0][i]);
-        }
-        SubMean(vad_feats);
-        // LfrCmvn(vad_feats);
-        printf("====2===\n");
-        for (int i = 0; i < 10; i++)
-        {
-            printf("%f\n", vad_feats[0][i]);
-        }
-        Forward(vad_feats, &voice_features); //   
-
+        // sub mean  pad 
+        SubMean(vad_feats);  
+        Forward(vad_feats, &voice_features);  
         return voice_features;
     }
 

@@ -99,9 +99,9 @@ int main(int argc, char *argv[])
     // TCLAP::ValueArg<std::int32_t> onnx_thread("", "model-thread-num", "onnxruntime SetIntraOpNumThreads", false, 1, "int32_t");
 
     TCLAP::ValueArg<std::string> model_dir("", SV_DIR, "the cam model path, which contains model.onnx, cam.yaml", false, "/workspace/models/weights2/camplus_sv_zh-cn-16k-common-onnx", "string");
-    TCLAP::ValueArg<std::string> sv_quant("", SV_QUANT, "false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir", false, "true", "string");
+    TCLAP::ValueArg<std::string> sv_quant("", SV_QUANT, "false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir", false, "flase", "string");
     TCLAP::ValueArg<std::string> wav_file1("", "wav_file1", "the input could be: wav_path, e.g.: asr_example1.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, ", false, "/home/wzp/project/FunASR/speaker1_a_cn_16k.wav", "string");
-    TCLAP::ValueArg<std::string> wav_file2("", "wav_file2", "the input could be: wav_path, e.g.: asr_example2.wav; pcm_path, e.g.: asr_example.pcm; wav.scp,", false, "/home/wzp/project/FunASR/speaker1_a_cn_16k.wav", "string");
+    TCLAP::ValueArg<std::string> wav_file2("", "wav_file2", "the input could be: wav_path, e.g.: asr_example2.wav; pcm_path, e.g.: asr_example.pcm; wav.scp,", false, "/home/wzp/project/FunASR/speaker1_b_cn_16k.wav", "string");
     TCLAP::ValueArg<std::int32_t> onnx_thread("", "model-thread-num", "onnxruntime SetIntraOpNumThreads", false, 1, "int32_t");
 
     cmd.add(model_dir);
@@ -126,10 +126,12 @@ int main(int argc, char *argv[])
     std::vector<std::vector<float>> result1 = CamPPlusSvInfer(sv_hanlde, data1);
     std::vector<std::vector<float>> result2 = CamPPlusSvInfer(sv_hanlde, data2);
     float sim = CosineSimilarity(result1[0], result2[0]);
+    printf("声纹特征sample10:\n");
     for(int i=0;i<10;i++)
     {
-        printf("%f\n",result1[0][i]);
+        printf("%f,",result1[0][i]);
     }
+    printf("\n");
     printf("声纹相似度=%f\n", sim);
     CamPPlusSvUninit(sv_hanlde);
     return 0;
