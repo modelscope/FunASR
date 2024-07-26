@@ -165,6 +165,9 @@ class SenseVoiceSmall:
             feats, feats_len = self.extract_feat(waveform_list[beg_idx:end_idx])
             _language_list = language_list[beg_idx:end_idx]
             _textnorm_list = textnorm_list[beg_idx:end_idx]
+            if not len(_language_list):
+                _language_list = [language_list[0]]
+                _textnorm_list = [textnorm_list[0]]
             B = feats.shape[0]
             if len(_language_list) == 1 and B != 1:
                 _language_list = _language_list * B
