@@ -26,8 +26,4 @@ emotion2vec*
 GPT-SoVITS*
 modelscope_models
 examples/aishell/llm_asr_nar/*
-.vscode
-*.wav
-sv_demo.py
-compare_fbank_dif.py
-runtime/onnxruntime/build
+*egg-info
