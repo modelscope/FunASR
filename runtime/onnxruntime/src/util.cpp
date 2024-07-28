@@ -1082,5 +1082,44 @@ void SmoothTimestamps(std::string &str_punc, std::string &str_itn, std::string &
     
     return;
 }
+float CosineSimilarity(const std::vector<float> &emb1, const std::vector<float> &emb2)
+	{
+		CHECK_EQ(emb1.size(), emb2.size());
+		float dot = 0.f;
+		float emb1_sum = 0.0000001f;
+		float emb2_sum = 0.0000001f;
+		for (size_t i = 0; i < emb1.size(); i++)
+		{
+			dot += emb1[i] * emb2[i];
+			emb1_sum += emb1[i] * emb1[i];
+			emb2_sum += emb2[i] * emb2[i];
+		}
+		dot /= std::max(std::sqrt(emb1_sum) * std::sqrt(emb2_sum),
+						std::numeric_limits<float>::epsilon());
+		return dot;
+	}
+	int GetSpeakersID(const std::vector<float> &emb1,  std::vector<std::vector<float>> &emb_list, float threshold)
+	{
+		if(emb_list.size()==0)
+		{
+			emb_list.push_back(emb1);
+			return 0;
+		}
+		for (int i=0;i<emb_list.size();i++)
+		{
+			std::vector<float>emb_exist=emb_list.at(i);
+			float sim=CosineSimilarity(emb1,emb_exist);
+			// printf("sim=%f\n", sim);
+			if(sim>threshold)
+			{
+				return i;
+			}
+		}
+		//insert  new speaker embedings 
+		emb_list.push_back(emb1);
+		return emb_list.size()-1;
+	
+	}
+
 
 } // namespace funasr

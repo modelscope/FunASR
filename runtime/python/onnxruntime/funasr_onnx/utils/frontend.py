@@ -50,7 +50,7 @@ class WavFrontend:
         self.fbank_beg_idx = 0
         self.reset_status()
 
-    def fbank(self, waveform: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def fbank(self, waveform: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:   
         waveform = waveform * (1 << 15)
         self.fbank_fn = knf.OnlineFbank(self.opts)
         self.fbank_fn.accept_waveform(self.opts.frame_opts.samp_freq, waveform.tolist())
