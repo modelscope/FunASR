@@ -27,6 +27,7 @@ typedef unsigned char FUNASR_BOOL;
 #define FUNASR_TRUE 1
 #define FUNASR_FALSE 0
 #define QM_DEFAULT_THREAD_NUM  4
+#define MAX_SPKS_NUM 1000 //最大说话人数
 
 typedef enum
 {
@@ -116,7 +117,8 @@ _FUNASRAPI void				FunOfflineUninit(FUNASR_HANDLE handle);
 _FUNASRAPI FUNASR_HANDLE  	FunTpassInit(std::map<std::string, std::string>& model_path, int thread_num);
 _FUNASRAPI FUNASR_HANDLE    FunTpassOnlineInit(FUNASR_HANDLE tpass_handle, std::vector<int> chunk_size={5,10,5});
 // buffer
-_FUNASRAPI FUNASR_RESULT	FunTpassInferBuffer(FUNASR_HANDLE handle, FUNASR_HANDLE online_handle, const char* sz_buf, 
+_FUNASRAPI FUNASR_RESULT	FunTpassInferBuffer(FUNASR_HANDLE handle, FUNASR_HANDLE online_handle,
+                                                std::vector<std::vector<float>>& voice_feats, bool sv_mode, const char* sz_buf, 
 												int n_len, std::vector<std::vector<std::string>> &punc_cache, bool input_finished=true, 
 												int sampling_rate=16000, std::string wav_format="pcm", ASR_TYPE mode=ASR_TWO_PASS, 
 												const std::vector<std::vector<float>> &hw_emb={{0.0}}, bool itn=true, FUNASR_DEC_HANDLE dec_handle=nullptr);
@@ -129,3 +131,9 @@ _FUNASRAPI void			FunASRWfstDecoderUninit(FUNASR_DEC_HANDLE handle);
 _FUNASRAPI void			FunWfstDecoderLoadHwsRes(FUNASR_DEC_HANDLE handle, int inc_bias, std::unordered_map<std::string, int> &hws_map);
 _FUNASRAPI void			FunWfstDecoderUnloadHwsRes(FUNASR_DEC_HANDLE handle);
 
+// APIs for CamPPlusSv Infer
+_FUNASRAPI FUNASR_HANDLE  CamPPlusSvInit(std::map<std::string, std::string>& model_path, int thread_num);
+_FUNASRAPI std::vector<std::vector<float>>  CamPPlusSvInfer(FUNASR_HANDLE handle, std::vector<float>data);
+_FUNASRAPI void CamPPlusSvUninit(FUNASR_HANDLE handle);
+_FUNASRAPI const int FunASRGetSvResult(FUNASR_RESULT result, int n_index);
+_FUNASRAPI const std::vector<float> FunASRGetSvEmbResult(FUNASR_RESULT result, int n_index);
