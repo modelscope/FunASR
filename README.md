@@ -332,11 +332,11 @@ For more detailed information, please refer to the [service deployment documenta
 ## Community Communication
 If you encounter problems in use, you can directly raise Issues on the github page.
 
-You can also scan the following DingTalk group or WeChat group QR code to join the community group for communication and discussion.
+You can also scan the following DingTalk group to join the community group for communication and discussion.
 
-|                           DingTalk group                            |                     WeChat group                      |
-|:-------------------------------------------------------------------:|:-----------------------------------------------------:|
-| <div align="left"><img src="docs/images/dingding.png" width="250"/> | <img src="docs/images/wechat.png" width="215"/></div> |
+|                           DingTalk group                            |
+|:-------------------------------------------------------------------:|
+| <div align="left"><img src="docs/images/dingding.png" width="250"/> |
 
 ## Contributors
 
