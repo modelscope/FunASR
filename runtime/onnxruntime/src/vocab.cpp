@@ -50,7 +50,7 @@ void Vocab::LoadVocabFromJson(const char* filename){
         file >> json_array;
         file.close();
     } else {
-        LOG(INFO) << "Error loading token file, token file error or not exist.";
+        LOG(ERROR) << "Error loading token file, token file error or not exist."<<filename;
         exit(-1);
     }
 

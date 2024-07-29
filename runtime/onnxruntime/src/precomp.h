@@ -72,3 +72,5 @@ using namespace std;
 #include "tpass-stream.h"
 #include "tpass-online-stream.h"
 #include "funasrruntime.h"
+#include "campplus-sv.h"
+#include "cam-sv-model.h"
