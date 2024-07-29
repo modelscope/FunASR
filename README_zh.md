@@ -339,9 +339,9 @@ FunASR支持预训练或者进一步微调的模型进行服务部署。目前�
 
 如果您在使用中遇到问题，可以直接在github页面提Issues。欢迎语音兴趣爱好者扫描以下的钉钉群二维码加入社区群，进行交流和讨论。
 
-|                          钉钉群                                      |
+|                                 钉钉群                                 |
 |:-------------------------------------------------------------------:|
-| <div align="left"><img src="docs/images/dingding.jpg" width="250"/> |
+| <div align="left"><img src="docs/images/dingding.png" width="250"/> |
 
 ## 社区贡献者
 
