@@ -812,7 +812,7 @@ class LLMASR2(nn.Module):
             ibest_writer = self.writer[f"{0 + 1}best_recog"]
 
         results = []
-        response_clean = re.sub("[^\w\s\u3000\u4e00-\u9fff]+", "", response)
+        response_clean = re.sub(r"[^\w\s\u3000\u4e00-\u9fff]+", "", response)
         result_i = {"key": key[0], "text": response, "text_tn": response_clean, "label": label}
         if loss is not None:
             result_i["loss"] = loss
@@ -1395,7 +1395,7 @@ class LLMASR4(nn.Module):
             ibest_writer = self.writer[f"{0 + 1}best_recog"]
 
         results = []
-        response_clean = re.sub("[^\w\s\u3000\u4e00-\u9fff]+", "", response)
+        response_clean = re.sub(r"[^\w\s\u3000\u4e00-\u9fff]+", "", response)
         result_i = {"key": key[0], "text": response, "text_tn": response_clean, "label": label}
         if loss is not None:
             result_i["loss"] = loss
