@@ -12,6 +12,8 @@ typedef struct
     std::string stamp_sents;
     std::string tpass_msg;
     float snippet_time;
+    int speaker_idx = -999;
+    std::vector<float> speaker_emb;
 }FUNASR_RECOG_RESULT;
 
 typedef struct

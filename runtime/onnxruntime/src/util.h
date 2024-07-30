@@ -69,5 +69,8 @@ void TimestampOnnx( std::vector<float>& us_alphas,
 bool IsTargetFile(const std::string& filename, const std::string target);
 void ExtractHws(string hws_file, unordered_map<string, int> &hws_map);
 void ExtractHws(string hws_file, unordered_map<string, int> &hws_map, string& nn_hotwords_);
+float CosineSimilarity(const std::vector<float> &emb1, const std::vector<float> &emb2);
+int GetSpeakersID(const std::vector<float> &emb1, std::vector<std::vector<float>> &emb_list, float threshold = 0.40);
+
 } // namespace funasr
 #endif

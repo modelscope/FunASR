@@ -473,7 +473,8 @@
 //#endif
 
 	// APIs for 2pass-stream Infer
-	_FUNASRAPI FUNASR_RESULT FunTpassInferBuffer(FUNASR_HANDLE handle, FUNASR_HANDLE online_handle, const char* sz_buf, 
+	_FUNASRAPI FUNASR_RESULT FunTpassInferBuffer(FUNASR_HANDLE handle, FUNASR_HANDLE online_handle,
+												std::vector<std::vector<float>>& voice_feats, bool sv_mode, const char* sz_buf,	                                            
 												 int n_len, std::vector<std::vector<std::string>> &punc_cache, bool input_finished, 
 												 int sampling_rate, std::string wav_format, ASR_TYPE mode, 
 												 const std::vector<std::vector<float>> &hw_emb, bool itn, FUNASR_DEC_HANDLE dec_handle)
@@ -500,6 +501,9 @@
 
 		funasr::PuncModel* punc_online_handle = (tpass_stream->punc_online_handle).get();
 		if (!punc_online_handle)
+			return nullptr;         
+		funasr::SvModel* sv_handle = (tpass_stream->sv_handle).get();
+		if (!sv_handle &&sv_mode)
 			return nullptr;
 
 		if(wav_format == "pcm" || wav_format == "PCM"){
@@ -567,7 +571,26 @@
 			if(msg_vec.size()==0){
 				continue;
 			}
+		
 			msg = msg_vec[0];
+			//sv-cam for Speaker verification
+			if(sv_mode&&frame->len>1600)//Filter audio clips less than 100ms
+			{
+				if (voice_feats.size()<MAX_SPKS_NUM)
+				{
+				std::vector<float>wave(frame->data,frame->data+frame->len);
+				std::vector<std::vector<float>>sv_result=sv_handle->Infer(wave);
+				// std::vector<std::vector<float>>sv_result = CamPPlusSvInfer(sv_handle, wave);
+				float threshold =sv_handle->threshold;
+				int speaker_idx = funasr::GetSpeakersID(sv_result[0], voice_feats,threshold);
+				p_result->speaker_idx = speaker_idx;
+				}
+				else
+				{
+					LOG(ERROR)<<"Exceeding the maximum speaker limit!\n";
+					p_result->speaker_idx = MAX_SPKS_NUM;
+				}
+			}
 			//timestamp
 			if(msg_vec.size() > 1){
 				std::vector<std::string> msg_stamp = funasr::split(msg_vec[1], ',');
@@ -875,3 +898,51 @@
 			return;
 		wfst_decoder->UnloadHwsRes();
 	}
+
+// APIs for CamPPlusSv Infer
+_FUNASRAPI FUNASR_HANDLE CamPPlusSvInit(std::map<std::string, std::string>& model_path, int thread_num)
+{
+	// funasr::SvModel *mm = funasr::CreateSvModel(model_path, thread_num);
+	// return mm;
+	// std::vector<float> wave;
+	funasr::SvModel* mm = funasr::CreateAndInferSvModel(model_path, thread_num);
+	return mm;
+}
+
+std::vector<std::vector<float>> CamPPlusSvInfer(FUNASR_HANDLE handle, std::vector<float> data)
+{
+	std::vector<std::vector<float>> result;
+	funasr::SvModel* sv_obj = (funasr::SvModel*)handle;
+	if (!sv_obj)
+		return result;
+
+	result = sv_obj->Infer(data);
+	return result;
+}
+
+_FUNASRAPI void CamPPlusSvUninit(FUNASR_HANDLE handle)
+{
+	funasr::SvModel* sv_obj = (funasr::SvModel*)handle;
+
+	if (!sv_obj)
+		return;
+
+	delete sv_obj;
+}
+_FUNASRAPI const int FunASRGetSvResult(FUNASR_RESULT result, int n_index)
+{
+	funasr::FUNASR_RECOG_RESULT* p_result = (funasr::FUNASR_RECOG_RESULT*)result;
+	if (!p_result)
+		return -1;
+
+	return p_result->speaker_idx;
+}
+_FUNASRAPI const std::vector<float> FunASRGetSvEmbResult(FUNASR_RESULT result, int n_index)
+{
+	std::vector<float>speaker_emb;
+	funasr::FUNASR_RECOG_RESULT* p_result = (funasr::FUNASR_RECOG_RESULT*)result;
+	if (!p_result)
+		return speaker_emb;
+
+	return p_result->speaker_emb;
+}
