@@ -92,16 +92,10 @@ int main(int argc, char *argv[])
     google::InitGoogleLogging(argv[0]);
     FLAGS_logtostderr = true;
     TCLAP::CmdLine cmd("funasr-onnx-offline-sv", ' ', "1.0");
-    // TCLAP::ValueArg<std::string> model_dir("", SV_DIR, "the cam model path, which contains model.onnx, cam.yaml", true, "", "string");
-    // TCLAP::ValueArg<std::string> sv_quant("", SV_QUANT, "false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir", false, "true", "string");
-    // TCLAP::ValueArg<std::string> wav_file1("", "wav_file1", "the input could be: wav_path, e.g.: asr_example1.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, ", true, "", "string");
-    // TCLAP::ValueArg<std::string> wav_file2("", "wav_file2", "the input could be: wav_path, e.g.: asr_example2.wav; pcm_path, e.g.: asr_example.pcm; wav.scp,", true, "", "string");
-    // TCLAP::ValueArg<std::int32_t> onnx_thread("", "model-thread-num", "onnxruntime SetIntraOpNumThreads", false, 1, "int32_t");
-
-    TCLAP::ValueArg<std::string> model_dir("", SV_DIR, "the cam model path, which contains model.onnx, cam.yaml", false, "/workspace/models/weights2/camplus_sv_zh-cn-16k-common-onnx", "string");
-    TCLAP::ValueArg<std::string> sv_quant("", SV_QUANT, "false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir", false, "flase", "string");
-    TCLAP::ValueArg<std::string> wav_file1("", "wav_file1", "the input could be: wav_path, e.g.: asr_example1.wav; pcm_path, e.g.: asr_example.pcm; wav.scp, ", false, "/home/wzp/project/FunASR/speaker1_a_cn_16k.wav", "string");
-    TCLAP::ValueArg<std::string> wav_file2("", "wav_file2", "the input could be: wav_path, e.g.: asr_example2.wav; pcm_path, e.g.: asr_example.pcm; wav.scp,", false, "/home/wzp/project/FunASR/speaker1_b_cn_16k.wav", "string");
+    TCLAP::ValueArg<std::string> model_dir("", SV_DIR, "the cam model path, which contains model.onnx, cam.yaml", true, "", "string");
+    TCLAP::ValueArg<std::string> sv_quant("", SV_QUANT, "false (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir", false, "true", "string");
+    TCLAP::ValueArg<std::string> wav_file1("", "wav_file1", "the input could be: wav_path, e.g.: asr_example1.wav; pcm_path, e.g.: asr_example.pcm; wav.scp,", false, "/workspace/models/iic/speech_campplus_sv_zh-cn_16k-common/examples/speaker1_a_cn_16k.wav", "string");
+    TCLAP::ValueArg<std::string> wav_file2("", "wav_file2", "the input could be: wav_path, e.g.: asr_example2.wav; pcm_path, e.g.: asr_example.pcm; wav.scp,", false, "/workspace/models/iic/speech_campplus_sv_zh-cn_16k-common/examples/speaker1_b_cn_16k.wav", "string");
     TCLAP::ValueArg<std::int32_t> onnx_thread("", "model-thread-num", "onnxruntime SetIntraOpNumThreads", false, 1, "int32_t");
 
     cmd.add(model_dir);

@@ -566,7 +566,7 @@ std::string TimestampSmooth(std::string &text, std::string &text_itn, std::strin
     return timestamps_str;
 }
 
-std::string TimestampSentence(std::string &text, std::string &str_time){
+std::string TimestampSentence(std::string &text, std::string &str_time, std::vector<int> speaker_idxs){
     std::vector<std::string> characters;
     funasr::TimestampSplitChiEngCharacters(text, characters);
     vector<vector<int>> timestamps = funasr::ParseTimestamps(str_time);

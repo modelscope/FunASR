@@ -14,7 +14,11 @@ class TpassOnlineStream {
 
     std::unique_ptr<VadModel> vad_online_handle = nullptr;
     std::unique_ptr<Model> asr_online_handle = nullptr;
+
+    //for sv-cam
+    std::vector<std::vector<float>> voice_feats;
 };
 TpassOnlineStream* CreateTpassOnlineStream(void* tpass_stream, std::vector<int> chunk_size);
+void TpassOnlineCacheReset(void* tpass_online_stream);
 } // namespace funasr
 #endif

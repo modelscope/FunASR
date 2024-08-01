@@ -138,6 +138,31 @@ OfflineStream::OfflineStream(std::map<std::string, std::string>& model_path, int
         }
     }
 #endif
+
+    // sv cam
+    if (model_path.find(SV_DIR) != model_path.end() && model_path.at(SV_DIR) != "")
+    {
+        string sv_model_path;
+        string sv_config_path;
+
+        sv_model_path = PathAppend(model_path.at(SV_DIR), MODEL_NAME);
+        if (model_path.find(SV_QUANT) != model_path.end() && model_path.at(SV_QUANT) == "true")
+        {
+            sv_model_path = PathAppend(model_path.at(SV_DIR), QUANT_MODEL_NAME);
+        }
+        sv_config_path = PathAppend(model_path.at(SV_DIR), SV_CONFIG_NAME);
+        if (access(sv_model_path.c_str(), F_OK) != 0 ||
+            access(sv_config_path.c_str(), F_OK) != 0)
+        {
+            LOG(INFO) << "CAMPlusPlus model file is not exist, skip load model.";
+        }else
+        {
+            sv_handle = make_unique<CamPPlusSv>();
+            sv_handle->InitSv(sv_model_path, sv_config_path, thread_num);
+            use_sv = true;
+        }
+    }
+
 }
 
 OfflineStream *CreateOfflineStream(std::map<std::string, std::string>& model_path, int thread_num, bool use_gpu, int batch_size)

@@ -50,6 +50,11 @@
 		return funasr::CreateTpassOnlineStream(tpass_handle, chunk_size);
 	}
 
+	_FUNASRAPI void FunTpassOnlineReset(FUNASR_HANDLE tpass_online_handle)
+	{
+		funasr::TpassOnlineCacheReset(tpass_online_handle);
+	}
+
 	// APIs for ASR Infer
 	_FUNASRAPI FUNASR_RESULT FunASRInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, FUNASR_MODE mode, QM_CALLBACK fn_callback, bool input_finished, int sampling_rate, std::string wav_format)
 	{
@@ -206,8 +211,9 @@
 
 	// APIs for Offline-stream Infer
 	_FUNASRAPI FUNASR_RESULT FunOfflineInferBuffer(FUNASR_HANDLE handle, const char* sz_buf, int n_len, 
-												   FUNASR_MODE mode, QM_CALLBACK fn_callback, const std::vector<std::vector<float>> &hw_emb, 
-												   int sampling_rate, std::string wav_format, bool itn, FUNASR_DEC_HANDLE dec_handle)
+												   FUNASR_MODE mode, QM_CALLBACK fn_callback, const std::vector<std::vector<float>> &hw_emb,
+												    std::vector<std::vector<float>> &voice_feats, int sampling_rate, std::string wav_format, 
+													bool use_itn, bool use_sv, FUNASR_DEC_HANDLE dec_handle)
 	{
 		funasr::OfflineStream* offline_stream = (funasr::OfflineStream*)handle;
 		if (!offline_stream)
@@ -307,7 +313,7 @@
 			p_result->msg = punc_res;
 		}
 #if !defined(__APPLE__)
-		if(offline_stream->UseITN() && itn){
+		if(offline_stream->UseITN() && use_itn){
 			string msg_itn = offline_stream->itn_handle->Normalize(p_result->msg);
 			if(!(p_result->stamp).empty()){
 				std::string new_stamp = funasr::TimestampSmooth(p_result->msg, msg_itn, p_result->stamp);
@@ -319,13 +325,14 @@
 		}
 #endif
 		if (!(p_result->stamp).empty()){
-			p_result->stamp_sents = funasr::TimestampSentence(p_result->msg, p_result->stamp);
+			p_result->stamp_sents = funasr::TimestampSentence(p_result->msg, p_result->stamp, p_result->speaker_idxs);
 		}
 		return p_result;
 	}
 
 	_FUNASRAPI FUNASR_RESULT FunOfflineInfer(FUNASR_HANDLE handle, const char* sz_filename, FUNASR_MODE mode, QM_CALLBACK fn_callback, 
-											 const std::vector<std::vector<float>> &hw_emb, int sampling_rate, bool itn, FUNASR_DEC_HANDLE dec_handle)
+											 const std::vector<std::vector<float>> &hw_emb, std::vector<std::vector<float>> &voice_feats,
+											 int sampling_rate, bool use_itn, bool use_sv, FUNASR_DEC_HANDLE dec_handle)
 	{
 		funasr::OfflineStream* offline_stream = (funasr::OfflineStream*)handle;
 		if (!offline_stream)
@@ -357,11 +364,13 @@
         }
 		std::vector<int> index_vector={0};
 		int msg_idx = 0;
+		int svs_idx = 0;
 		if(offline_stream->UseVad()){
 			audio.CutSplit(offline_stream, index_vector);
 		}
 		std::vector<string> msgs(index_vector.size());
 		std::vector<float> msg_stimes(index_vector.size());
+		std::vector<int> svs(index_vector.size(), -1);
 
 		float** buff;
 		int* len;
@@ -387,7 +396,30 @@
 					msg_idx++;
 				}else{
 					LOG(ERROR) << "msg_idx: " << msg_idx <<" is out of range " << index_vector.size();
-				}				
+				}
+			}
+
+			if(offline_stream->UseSv() && use_sv){
+				for(int index=0; index<batch_in; index++){
+					if (len[index] > 1600){
+						if (voice_feats.size() < MAX_SPKS_NUM){						
+							std::vector<float> wave(buff[index], buff[index]+len[index]);
+							std::vector<std::vector<float>> sv_result = offline_stream->sv_handle->Infer(wave);
+							float threshold = offline_stream->sv_handle->threshold;
+							int speaker_idx = funasr::GetSpeakersID(sv_result[0], voice_feats, threshold);
+							if(svs_idx < index_vector.size()){
+								svs[index_vector[svs_idx]] = speaker_idx;
+								svs_idx++;
+							}else{
+								LOG(ERROR) << "svs_idx: " << svs_idx <<" is out of range " << index_vector.size();
+							}
+						}else{
+							LOG(ERROR) << "Exceeding the maximum speaker limit!";
+							LOG(ERROR) << "speaker_idx: " << MAX_SPKS_NUM;
+						}
+					}
+				}
+				p_result->speaker_idxs = svs;
 			}
 
 			// release
@@ -429,7 +461,7 @@
 			p_result->msg = punc_res;
 		}
 #if !defined(__APPLE__)
-		if(offline_stream->UseITN() && itn){
+		if(offline_stream->UseITN() && use_itn){
 			string msg_itn = offline_stream->itn_handle->Normalize(p_result->msg);
 			if(!(p_result->stamp).empty()){
 				std::string new_stamp = funasr::TimestampSmooth(p_result->msg, msg_itn, p_result->stamp);
@@ -440,8 +472,8 @@
 			p_result->msg = msg_itn;
 		}
 #endif
-		if (!(p_result->stamp).empty()){
-			p_result->stamp_sents = funasr::TimestampSentence(p_result->msg, p_result->stamp);
+		if (!(p_result->stamp).empty() || !(p_result->speaker_idxs.empty())){
+			p_result->stamp_sents = funasr::TimestampSentence(p_result->msg, p_result->stamp, p_result->speaker_idxs);
 		}
 		return p_result;
 	}
@@ -473,11 +505,10 @@
 //#endif
 
 	// APIs for 2pass-stream Infer
-	_FUNASRAPI FUNASR_RESULT FunTpassInferBuffer(FUNASR_HANDLE handle, FUNASR_HANDLE online_handle,
-												std::vector<std::vector<float>>& voice_feats, bool sv_mode, const char* sz_buf,	                                            
-												 int n_len, std::vector<std::vector<std::string>> &punc_cache, bool input_finished, 
+	_FUNASRAPI FUNASR_RESULT FunTpassInferBuffer(FUNASR_HANDLE handle, FUNASR_HANDLE online_handle, const char* sz_buf,
+												 int n_len, std::vector<std::vector<std::string>> &punc_cache, bool input_finished,
 												 int sampling_rate, std::string wav_format, ASR_TYPE mode, 
-												 const std::vector<std::vector<float>> &hw_emb, bool itn, FUNASR_DEC_HANDLE dec_handle)
+												 const std::vector<std::vector<float>> &hw_emb, bool use_itn, bool use_sv, FUNASR_DEC_HANDLE dec_handle)
 	{
 		funasr::TpassStream* tpass_stream = (funasr::TpassStream*)handle;
 		funasr::TpassOnlineStream* tpass_online_stream = (funasr::TpassOnlineStream*)online_handle;
@@ -501,9 +532,6 @@
 
 		funasr::PuncModel* punc_online_handle = (tpass_stream->punc_online_handle).get();
 		if (!punc_online_handle)
-			return nullptr;         
-		funasr::SvModel* sv_handle = (tpass_stream->sv_handle).get();
-		if (!sv_handle &&sv_mode)
 			return nullptr;
 
 		if(wav_format == "pcm" || wav_format == "PCM"){
@@ -532,7 +560,7 @@
 					p_result->tpass_msg = msg_punc;
 #if !defined(__APPLE__)
 					// ITN
-					if(tpass_stream->UseITN() && itn){
+					if(tpass_stream->UseITN() && use_itn){
 						string msg_itn = tpass_stream->itn_handle->Normalize(msg_punc);
 						p_result->tpass_msg = msg_itn;
 					}
@@ -574,21 +602,21 @@
 		
 			msg = msg_vec[0];
 			//sv-cam for Speaker verification
-			if(sv_mode&&frame->len>1600)//Filter audio clips less than 100ms
+			if(tpass_stream->UseSv() && use_sv &&frame->len>1600)//Filter audio clips less than 100ms
 			{
+				std::vector<std::vector<float>>& voice_feats = tpass_online_stream->voice_feats;
 				if (voice_feats.size()<MAX_SPKS_NUM)
 				{
-				std::vector<float>wave(frame->data,frame->data+frame->len);
-				std::vector<std::vector<float>>sv_result=sv_handle->Infer(wave);
-				// std::vector<std::vector<float>>sv_result = CamPPlusSvInfer(sv_handle, wave);
-				float threshold =sv_handle->threshold;
-				int speaker_idx = funasr::GetSpeakersID(sv_result[0], voice_feats,threshold);
-				p_result->speaker_idx = speaker_idx;
+					std::vector<float>wave(frame->data, frame->data+frame->len);
+					std::vector<std::vector<float>> sv_result = tpass_stream->sv_handle->Infer(wave);
+					float threshold = tpass_stream->sv_handle->threshold;
+					int speaker_idx = funasr::GetSpeakersID(sv_result[0], voice_feats, threshold);
+					// p_result->speaker_idx = speaker_idx;
 				}
 				else
 				{
 					LOG(ERROR)<<"Exceeding the maximum speaker limit!\n";
-					p_result->speaker_idx = MAX_SPKS_NUM;
+					// p_result->speaker_idx = MAX_SPKS_NUM;
 				}
 			}
 			//timestamp
@@ -612,7 +640,7 @@
 			}
 			p_result->tpass_msg = msg_punc;
 #if !defined(__APPLE__)
-			if(tpass_stream->UseITN() && itn){
+			if(tpass_stream->UseITN() && use_itn){
 				string msg_itn = tpass_stream->itn_handle->Normalize(msg_punc);
 				// TimestampSmooth
 				if(!(p_result->stamp).empty()){
@@ -625,7 +653,7 @@
 			}
 #endif
 			if (!(p_result->stamp).empty()){
-				p_result->stamp_sents = funasr::TimestampSentence(p_result->tpass_msg, p_result->stamp);
+				p_result->stamp_sents = funasr::TimestampSentence(p_result->tpass_msg, p_result->stamp, p_result->speaker_idxs);
 			}
 			if(frame != nullptr){
 				delete frame;
@@ -902,10 +930,7 @@
 // APIs for CamPPlusSv Infer
 _FUNASRAPI FUNASR_HANDLE CamPPlusSvInit(std::map<std::string, std::string>& model_path, int thread_num)
 {
-	// funasr::SvModel *mm = funasr::CreateSvModel(model_path, thread_num);
-	// return mm;
-	// std::vector<float> wave;
-	funasr::SvModel* mm = funasr::CreateAndInferSvModel(model_path, thread_num);
+	funasr::SvModel* mm = funasr::CreateSVModel(model_path, thread_num);
 	return mm;
 }
 
@@ -935,7 +960,7 @@ _FUNASRAPI const int FunASRGetSvResult(FUNASR_RESULT result, int n_index)
 	if (!p_result)
 		return -1;
 
-	return p_result->speaker_idx;
+	return p_result->speaker_idxs[n_index];
 }
 _FUNASRAPI const std::vector<float> FunASRGetSvEmbResult(FUNASR_RESULT result, int n_index)
 {
@@ -944,5 +969,5 @@ _FUNASRAPI const std::vector<float> FunASRGetSvEmbResult(FUNASR_RESULT result, i
 	if (!p_result)
 		return speaker_emb;
 
-	return p_result->speaker_emb;
+	return p_result->speaker_embs[n_index];
 }

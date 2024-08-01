@@ -140,7 +140,7 @@ void WebSocketServer::do_decoder(
                                        subvector.data(), subvector.size(),
                                        punc_cache, false, audio_fs,
                                        wav_format, (ASR_TYPE)asr_mode_,
-                                       hotwords_embedding, itn, decoder_handle);
+                                       hotwords_embedding, itn, true, decoder_handle);
 
         } else {
           scoped_lock guard(thread_lock);
@@ -177,7 +177,7 @@ void WebSocketServer::do_decoder(
                                        buffer.data(), buffer.size(), punc_cache,
                                        is_final, audio_fs,
                                        wav_format, (ASR_TYPE)asr_mode_,
-                                       hotwords_embedding, itn, decoder_handle);
+                                       hotwords_embedding, itn, true, decoder_handle);
         } else {
           scoped_lock guard(thread_lock);
           msg["access_num"]=(int)msg["access_num"]-1;	 

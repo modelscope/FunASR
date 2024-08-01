@@ -51,6 +51,8 @@ int main(int argc, char** argv)
     TCLAP::ValueArg<std::string>    punc_dir("", PUNC_DIR, "the punc model path, which contains model.onnx, punc.yaml", false, "", "string");
     TCLAP::ValueArg<std::string>    punc_quant("", PUNC_QUANT, "true (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "true", "string");
     TCLAP::ValueArg<std::string>    lm_dir("", LM_DIR, "the lm model path, which contains compiled models: TLG.fst, config.yaml, lexicon.txt ", false, "", "string");
+    TCLAP::ValueArg<std::string>    sv_dir("", SV_DIR, "the sv online model path, which contains model.onnx, config.yaml", false, "", "string");
+    TCLAP::ValueArg<std::string>    sv_quant("", SV_QUANT, "true (Default), load the model of model.onnx in sv_dir. If set true, load the model of model_quant.onnx in sv_dir", false, "true", "string");
     TCLAP::ValueArg<float>    global_beam("", GLOB_BEAM, "the decoding beam for beam searching ", false, 3.0, "float");
     TCLAP::ValueArg<float>    lattice_beam("", LAT_BEAM, "the lattice generation beam for beam searching ", false, 3.0, "float");
     TCLAP::ValueArg<float>    am_scale("", AM_SCALE, "the acoustic scale for beam searching ", false, 10.0, "float");
@@ -71,6 +73,8 @@ int main(int argc, char** argv)
     cmd.add(punc_quant);
     cmd.add(itn_dir);
     cmd.add(lm_dir);
+    cmd.add(sv_dir);
+    cmd.add(sv_quant);
     cmd.add(global_beam);
     cmd.add(lattice_beam);
     cmd.add(am_scale);
@@ -90,6 +94,8 @@ int main(int argc, char** argv)
     GetValue(vad_quant, VAD_QUANT, model_path);
     GetValue(punc_dir, PUNC_DIR, model_path);
     GetValue(punc_quant, PUNC_QUANT, model_path);
+    GetValue(sv_dir, SV_DIR, model_path);
+    GetValue(sv_quant, SV_QUANT, model_path);
     GetValue(itn_dir, ITN_DIR, model_path);
     GetValue(lm_dir, LM_DIR, model_path);
     GetValue(wav_path, WAV_PATH, model_path);
@@ -190,10 +196,10 @@ int main(int argc, char** argv)
         // int buff_len = audio.GetSpeechLen()*2;
 
         // gettimeofday(&start, nullptr);
-        // FUNASR_RESULT result=FunOfflineInferBuffer(asr_hanlde, speech_buff, buff_len, RASR_NONE, nullptr, hotwords_embedding, audio_fs.getValue(), "pcm", true, decoder_handle);
+        // FUNASR_RESULT result=FunOfflineInferBuffer(asr_hanlde, speech_buff, buff_len, RASR_NONE, nullptr, hotwords_embedding, voice_feats, audio_fs.getValue(), "pcm", true, true, decoder_handle);
         // For debug:end
-
-        FUNASR_RESULT result=FunOfflineInfer(asr_hanlde, wav_file.c_str(), RASR_NONE, nullptr, hotwords_embedding, audio_fs.getValue(), true, decoder_handle);
+        std::vector<std::vector<float>> voice_feats;
+        FUNASR_RESULT result=FunOfflineInfer(asr_hanlde, wav_file.c_str(), RASR_NONE, nullptr, hotwords_embedding, voice_feats, audio_fs.getValue(), true, true, decoder_handle);
         gettimeofday(&end, nullptr);
         seconds = (end.tv_sec - start.tv_sec);
         taking_micros += ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);

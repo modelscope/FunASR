@@ -48,11 +48,11 @@ int main(int argc, char **argv)
     TCLAP::ValueArg<std::string>    offline_model_dir("", OFFLINE_MODEL_DIR, "the asr offline model path, which contains model.onnx, config.yaml, am.mvn", true, "", "string");
     TCLAP::ValueArg<std::string>    online_model_dir("", ONLINE_MODEL_DIR, "the asr online model path, which contains model.onnx, decoder.onnx, config.yaml, am.mvn", true, "", "string");
     TCLAP::ValueArg<std::string>    quantize("", QUANTIZE, "true (Default), load the model of model.onnx in model_dir. If set true, load the model of model_quant.onnx in model_dir", false, "true", "string");
-    TCLAP::ValueArg<std::string>    vad_dir("", VAD_DIR, "the vad online model path, which contains model.onnx, vad.yaml, vad.mvn", true, "", "string");
+    TCLAP::ValueArg<std::string>    vad_dir("", VAD_DIR, "the vad online model path, which contains model.onnx, vad.yaml, vad.mvn", false, "", "string");
     TCLAP::ValueArg<std::string>    vad_quant("", VAD_QUANT, "true (Default), load the model of model.onnx in vad_dir. If set true, load the model of model_quant.onnx in vad_dir", false, "true", "string");
-    TCLAP::ValueArg<std::string>    punc_dir("", PUNC_DIR, "the punc online model path, which contains model.onnx, punc.yaml", true, "", "string");
+    TCLAP::ValueArg<std::string>    punc_dir("", PUNC_DIR, "the punc online model path, which contains model.onnx, punc.yaml", false, "", "string");
     TCLAP::ValueArg<std::string>    punc_quant("", PUNC_QUANT, "true (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "true", "string");
-     TCLAP::ValueArg<std::string>    sv_dir("", SV_DIR, "the sv online model path, which contains model.onnx, config.yaml", true, "", "string");
+    TCLAP::ValueArg<std::string>    sv_dir("", SV_DIR, "the sv online model path, which contains model.onnx, config.yaml", false, "", "string");
     TCLAP::ValueArg<std::string>    sv_quant("", SV_QUANT, "true (Default), load the model of model.onnx in sv_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "true", "string");
     TCLAP::ValueArg<std::string>    itn_dir("", ITN_DIR, "the itn model(fst) path, which contains zh_itn_tagger.fst and zh_itn_verbalizer.fst", false, "", "string");
     TCLAP::ValueArg<std::string>    lm_dir("", LM_DIR, "the lm model path, which contains compiled models: TLG.fst, config.yaml, lexicon.txt ", false, "", "string");
@@ -74,6 +74,7 @@ int main(int argc, char **argv)
     cmd.add(vad_quant);
     cmd.add(punc_dir);
     cmd.add(punc_quant);
+    cmd.add(itn_dir);
     cmd.add(sv_dir);
     cmd.add(sv_quant);
     cmd.add(lm_dir);
@@ -81,7 +82,6 @@ int main(int argc, char **argv)
     cmd.add(lattice_beam);
     cmd.add(am_scale);
     cmd.add(fst_inc_wts);
-    cmd.add(itn_dir);
     cmd.add(wav_path);
     cmd.add(audio_fs);
     cmd.add(asr_mode);
@@ -135,8 +135,7 @@ int main(int argc, char **argv)
     float glob_beam = 3.0f;
     float lat_beam = 3.0f;
     float am_sc = 10.0f;
-    if (lm_dir.isSet())
-    {
+    if (lm_dir.isSet()) {
         glob_beam = global_beam.getValue();
         lat_beam = lattice_beam.getValue();
         am_sc = am_scale.getValue();
@@ -144,9 +143,6 @@ int main(int argc, char **argv)
     // init wfst decoder
     FUNASR_DEC_HANDLE decoder_handle = FunASRWfstDecoderInit(tpass_handle, ASR_TWO_PASS, glob_beam, lat_beam, am_sc);
 
-    // init sv-cam
-    bool sv_mode = 1; // use cam model  for speaker verification
-    std::vector<std::vector<float>> voice_feats;
     gettimeofday(&end, nullptr);
     long seconds = (end.tv_sec - start.tv_sec);
     long modle_init_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
@@ -165,8 +161,7 @@ int main(int argc, char **argv)
     string default_id = "wav_default_id";
     string wav_path_ = model_path.at(WAV_PATH);
 
-    if (is_target_file(wav_path_, "scp"))
-    {
+    if (is_target_file(wav_path_, "scp")) {
         ifstream in(wav_path_);
         if (!in.is_open())
         {
@@ -183,8 +178,7 @@ int main(int argc, char **argv)
             wav_ids.emplace_back(column1);
         }
         in.close();
-    }
-    else
+    }else
     {
         wav_list.emplace_back(wav_path_);
         wav_ids.emplace_back(default_id);
@@ -239,6 +233,7 @@ int main(int argc, char **argv)
         string tpass_res = "";
         string time_stamp_res = "";
         std::vector<std::vector<string>> punc_cache(2);
+        FunTpassOnlineReset(tpass_online_handle);
         for (int sample_offset = 0; sample_offset < buff_len; sample_offset += std::min(step, buff_len - sample_offset))
         {
             if (sample_offset + step >= buff_len - 1)
@@ -252,9 +247,8 @@ int main(int argc, char **argv)
             }
             gettimeofday(&start, nullptr);
             FUNASR_RESULT result = FunTpassInferBuffer(tpass_handle, tpass_online_handle,
-                                                       voice_feats, sv_mode,
                                                        speech_buff + sample_offset, step, punc_cache, is_final, sampling_rate_, "pcm",
-                                                       (ASR_TYPE)asr_mode_, hotwords_embedding, true, decoder_handle);
+                                                       (ASR_TYPE)asr_mode_, hotwords_embedding, true, true, decoder_handle);
             gettimeofday(&end, nullptr);
             seconds = (end.tv_sec - start.tv_sec);
             taking_micros += ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
@@ -263,35 +257,36 @@ int main(int argc, char **argv)
             {
                 string online_msg = FunASRGetResult(result, 0);
                 online_res += online_msg;
-                // if (online_msg != "")
-                // {
-                //     LOG(INFO) << wav_id << " : " << online_msg;
-                // }
+                if (online_msg != "")
+                {
+                    LOG(INFO) << wav_id << " : " << online_msg;
+                }
                 string tpass_msg = FunASRGetTpassResult(result, 0);
 
                 tpass_res += tpass_msg;
                 if (tpass_msg != "")
                 {
-                    LOG(INFO) << wav_id << " offline results : " << tpass_msg;
                     int speaker_idx = FunASRGetSvResult(result, 0);
-                    if (speaker_idx != -999)
+                    if (speaker_idx != -1)
                     {
-                        LOG(INFO) << "speaker_idx: " << speaker_idx;
+                        LOG(INFO) << wav_id << " speaker_id : " << speaker_idx << " offline results : " << tpass_msg;
+                    } else{
+                        LOG(INFO) << wav_id << " offline results : " << tpass_msg;
                     }
                 }
-                // string stamp = FunASRGetStamp(result);
-                // if (stamp != "")
-                // {
-                //     LOG(INFO) << wav_ids[i] << " time stamp : " << stamp;
-                //     if (time_stamp_res == "")
-                //     {
-                //         time_stamp_res += stamp;
-                //     }
-                //     else
-                //     {
-                //         time_stamp_res = time_stamp_res.erase(time_stamp_res.length() - 1) + "," + stamp.substr(1);
-                //     }
-                // }
+                string stamp = FunASRGetStamp(result);
+                if (stamp != "")
+                {
+                    LOG(INFO) << wav_ids[i] << " time stamp : " << stamp;
+                    if (time_stamp_res == "")
+                    {
+                        time_stamp_res += stamp;
+                    }
+                    else
+                    {
+                        time_stamp_res = time_stamp_res.erase(time_stamp_res.length() - 1) + "," + stamp.substr(1);
+                    }
+                }
                 snippet_time += FunASRGetRetSnippetTime(result);
                 FunASRFreeResult(result);
             }

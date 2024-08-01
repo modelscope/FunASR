@@ -18,6 +18,11 @@ TpassOnlineStream::TpassOnlineStream(TpassStream* tpass_stream, std::vector<int>
     }
 }
 
+void TpassOnlineCacheReset(void* tpass_online_stream){
+    TpassOnlineStream* tpass_online_obj = (TpassOnlineStream*)tpass_online_stream;
+    tpass_online_obj->voice_feats.clear();
+}
+
 TpassOnlineStream* CreateTpassOnlineStream(void* tpass_stream, std::vector<int> chunk_size)
 {
     TpassOnlineStream *mm;

@@ -88,6 +88,7 @@ void runReg(FUNASR_HANDLE tpass_handle, std::vector<int> chunk_size, vector<stri
         int step = 1600*2;
         bool is_final = false;
         std::vector<std::vector<string>> punc_cache(2);
+        FunTpassOnlineReset(tpass_online_handle);
         for (int sample_offset = 0; sample_offset < buff_len; sample_offset += std::min(step, buff_len - sample_offset)) {
             if (sample_offset + step >= buff_len - 1) {
                     step = buff_len - sample_offset;
@@ -96,7 +97,7 @@ void runReg(FUNASR_HANDLE tpass_handle, std::vector<int> chunk_size, vector<stri
                     is_final = false;
             }
             FUNASR_RESULT result = FunTpassInferBuffer(tpass_handle, tpass_online_handle, speech_buff+sample_offset, step, punc_cache, is_final, 
-                                                        sampling_rate_, "pcm", (ASR_TYPE)asr_mode_, hotwords_embedding, true, decoder_handle);
+                                                        sampling_rate_, "pcm", (ASR_TYPE)asr_mode_, hotwords_embedding, true, true, decoder_handle);
             if (result)
             {
                 FunASRFreeResult(result);
@@ -137,6 +138,7 @@ void runReg(FUNASR_HANDLE tpass_handle, std::vector<int> chunk_size, vector<stri
         string tpass_res="";
         string time_stamp_res="";
         std::vector<std::vector<string>> punc_cache(2);
+        FunTpassOnlineReset(tpass_online_handle);
         for (int sample_offset = 0; sample_offset < buff_len; sample_offset += std::min(step, buff_len - sample_offset)) {
             if (sample_offset + step >= buff_len - 1) {
                     step = buff_len - sample_offset;
@@ -146,7 +148,7 @@ void runReg(FUNASR_HANDLE tpass_handle, std::vector<int> chunk_size, vector<stri
             }
             gettimeofday(&start, nullptr);
             FUNASR_RESULT result = FunTpassInferBuffer(tpass_handle, tpass_online_handle, speech_buff+sample_offset, step, punc_cache, is_final, 
-                                                        sampling_rate_, "pcm", (ASR_TYPE)asr_mode_, hotwords_embedding, true, decoder_handle);
+                                                        sampling_rate_, "pcm", (ASR_TYPE)asr_mode_, hotwords_embedding, true, true, decoder_handle);
             gettimeofday(&end, nullptr);
             seconds = (end.tv_sec - start.tv_sec);
             long taking_micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
@@ -161,8 +163,16 @@ void runReg(FUNASR_HANDLE tpass_handle, std::vector<int> chunk_size, vector<stri
                 }
                 string tpass_msg = FunASRGetTpassResult(result, 0);
                 tpass_res += tpass_msg;
-                if(tpass_msg != ""){
-                    LOG(INFO) <<"Thread: " << this_thread::get_id() <<" " << wav_ids[i] <<" offline results : "<<tpass_msg;
+
+                if (tpass_msg != "")
+                {
+                    int speaker_idx = FunASRGetSvResult(result, 0);
+                    if (speaker_idx != -1)
+                    {
+                        LOG(INFO) <<"Thread: " << this_thread::get_id() <<" " << wav_ids[i] << " speaker_id : " << speaker_idx << " offline results : " << tpass_msg;
+                    } else{
+                        LOG(INFO) <<"Thread: " << this_thread::get_id() <<" " << wav_ids[i] <<" offline results : "<<tpass_msg;
+                    }
                 }
                 string stamp = FunASRGetStamp(result);
                 if(stamp !=""){
@@ -223,6 +233,8 @@ int main(int argc, char** argv)
     TCLAP::ValueArg<std::string>    vad_quant("", VAD_QUANT, "true (Default), load the model of model.onnx in vad_dir. If set true, load the model of model_quant.onnx in vad_dir", false, "true", "string");
     TCLAP::ValueArg<std::string>    punc_dir("", PUNC_DIR, "the punc online model path, which contains model.onnx, punc.yaml", false, "", "string");
     TCLAP::ValueArg<std::string>    punc_quant("", PUNC_QUANT, "true (Default), load the model of model.onnx in punc_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "true", "string");
+    TCLAP::ValueArg<std::string>    sv_dir("", SV_DIR, "the sv online model path, which contains model.onnx, config.yaml", false, "", "string");
+    TCLAP::ValueArg<std::string>    sv_quant("", SV_QUANT, "true (Default), load the model of model.onnx in sv_dir. If set true, load the model of model_quant.onnx in punc_dir", false, "true", "string");
     TCLAP::ValueArg<std::string>    itn_dir("", ITN_DIR, "the itn model(fst) path, which contains zh_itn_tagger.fst and zh_itn_verbalizer.fst", false, "", "string");
     TCLAP::ValueArg<std::string>    lm_dir("", LM_DIR, "the lm model path, which contains compiled models: TLG.fst, config.yaml, lexicon.txt ", false, "", "string");
     TCLAP::ValueArg<float>    global_beam("", GLOB_BEAM, "the decoding beam for beam searching ", false, 3.0, "float");
@@ -245,6 +257,8 @@ int main(int argc, char** argv)
     cmd.add(punc_dir);
     cmd.add(punc_quant);
     cmd.add(itn_dir);
+    cmd.add(sv_dir);
+    cmd.add(sv_quant);
     cmd.add(lm_dir);
     cmd.add(global_beam);
     cmd.add(lattice_beam);
@@ -266,8 +280,10 @@ int main(int argc, char** argv)
     GetValue(vad_quant, VAD_QUANT, model_path);
     GetValue(punc_dir, PUNC_DIR, model_path);
     GetValue(punc_quant, PUNC_QUANT, model_path);
-    GetValue(itn_dir, ITN_DIR, model_path);
+    GetValue(sv_dir, SV_DIR, model_path);
+    GetValue(sv_quant, SV_QUANT, model_path);
     GetValue(lm_dir, LM_DIR, model_path);
+    GetValue(itn_dir, ITN_DIR, model_path);
     GetValue(wav_path, WAV_PATH, model_path);
     GetValue(asr_mode, ASR_MODE, model_path);
 
@@ -285,9 +301,9 @@ int main(int argc, char** argv)
         LOG(ERROR) << "Wrong asr-mode : " << model_path[ASR_MODE];
         exit(-1);
     }
-    FUNASR_HANDLE tpass_hanlde=FunTpassInit(model_path, thread_num);
+    FUNASR_HANDLE tpass_handle = FunTpassInit(model_path, thread_num);
 
-    if (!tpass_hanlde)
+    if (!tpass_handle)
     {
         LOG(ERROR) << "FunTpassInit init failed";
         exit(-1);
@@ -326,7 +342,7 @@ int main(int argc, char** argv)
             return 0;
         }
         string line;
-        while(getline(in, line))
+        while (getline(in, line))
         {
             istringstream iss(line);
             string column1, column2;
@@ -349,7 +365,7 @@ int main(int argc, char** argv)
     int rtf_threds = thread_num_.getValue();
     for (int i = 0; i < rtf_threds; i++)
     {
-        threads.emplace_back(thread(runReg, tpass_hanlde, chunk_size, wav_list, wav_ids, audio_fs.getValue(), &total_length, &total_time, i, (ASR_TYPE)asr_mode_, nn_hotwords_,
+        threads.emplace_back(thread(runReg, tpass_handle, chunk_size, wav_list, wav_ids, audio_fs.getValue(), &total_length, &total_time, i, (ASR_TYPE)asr_mode_, nn_hotwords_,
                                     glob_beam, lat_beam, am_sc, fst_inc_wts.getValue(), hws_map));
     }
 
@@ -363,7 +379,7 @@ int main(int argc, char** argv)
     LOG(INFO) << "total_rtf " << (double)total_time/ (total_length*1000000);
     LOG(INFO) << "speedup " << 1.0/((double)total_time/ (total_length*1000000));
 
-    FunTpassUninit(tpass_hanlde);
+    FunTpassUninit(tpass_handle);
     return 0;
 }
 

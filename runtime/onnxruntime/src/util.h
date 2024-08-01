@@ -47,7 +47,7 @@ void TimestampSplitChiEngCharacters(const std::string &input_str,
                                   std::vector<std::string> &characters);
 std::string VectorToString(const std::vector<std::vector<int>>& vec, bool out_empty=true);                                  
 std::string TimestampSmooth(std::string &text, std::string &text_itn, std::string &str_time);
-std::string TimestampSentence(std::string &text, std::string &str_time);
+std::string TimestampSentence(std::string &text, std::string &str_time, std::vector<int> speaker_idxs);
 std::vector<std::string> split(const std::string &s, char delim);
 
 template<typename T>
@@ -71,6 +71,5 @@ void ExtractHws(string hws_file, unordered_map<string, int> &hws_map);
 void ExtractHws(string hws_file, unordered_map<string, int> &hws_map, string& nn_hotwords_);
 float CosineSimilarity(const std::vector<float> &emb1, const std::vector<float> &emb2);
 int GetSpeakersID(const std::vector<float> &emb1, std::vector<std::vector<float>> &emb_list, float threshold = 0.40);
-
 } // namespace funasr
 #endif

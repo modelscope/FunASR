@@ -7,29 +7,16 @@
 #include "precomp.h"
 #include <vector>
 
-template <typename T>
-void print_vec_shape(const std::vector<std::vector<T>> &data)
-{
-    std::cout << "vec_shape= [" << data.size() << ", ";
-    if (!data.empty())
-    {
-        std::cout << data[0].size();
-    }
-    std::cout << "]" << std::endl;
-}
-
 namespace funasr
 {
-    void CamPPlusSv::InitSv(const std::string &model, const std::string &cmvn, const std::string &config, int thread_num)
+    void CamPPlusSv::InitSv(const std::string &model, const std::string &config, int thread_num)
     {
         session_options_.SetIntraOpNumThreads(thread_num);
         session_options_.SetGraphOptimizationLevel(ORT_ENABLE_ALL);
         session_options_.DisableCpuMemArena();
 
         ReadModel(model.c_str());
-        // LoadCmvn(cmvn.c_str());
         LoadConfigFromYaml(config.c_str());
-        
     }
 
     void CamPPlusSv::LoadConfigFromYaml(const char *filename)
@@ -104,8 +91,8 @@ namespace funasr
                 shape << j;
                 shape << " ";
             }
-            LOG(INFO) << "\tInput " << i << " : name=" << name.get() << " type=" << type
-                      << " dims=" << shape.str();
+            // LOG(INFO) << "\tInput " << i << " : name=" << name.get() << " type=" << type
+            //           << " dims=" << shape.str();
             (*in_names)[i] = name.get();
             name.release();
         }
@@ -125,8 +112,8 @@ namespace funasr
                 shape << j;
                 shape << " ";
             }
-            LOG(INFO) << "\tOutput " << i << " : name=" << name.get() << " type=" << type
-                      << " dims=" << shape.str();
+            // LOG(INFO) << "\tOutput " << i << " : name=" << name.get() << " type=" << type
+            //           << " dims=" << shape.str();
             (*out_names)[i] = name.get();
             name.release();
         }
@@ -205,116 +192,6 @@ namespace funasr
         }
     }
 
-    void CamPPlusSv::LoadCmvn(const char *filename)
-    {
-        try
-        {
-            using namespace std;
-            ifstream cmvn_stream(filename);
-            if (!cmvn_stream.is_open())
-            {
-                LOG(ERROR) << "Failed to open file: " << filename;
-                exit(-1);
-            }
-            string line;
-
-            while (getline(cmvn_stream, line))
-            {
-                istringstream iss(line);
-                vector<string> line_item{istream_iterator<string>{iss}, istream_iterator<string>{}};
-                if (line_item[0] == "<AddShift>")
-                {
-                    getline(cmvn_stream, line);
-                    istringstream means_lines_stream(line);
-                    vector<string> means_lines{istream_iterator<string>{means_lines_stream}, istream_iterator<string>{}};
-                    if (means_lines[0] == "<LearnRateCoef>")
-                    {
-                        for (int j = 3; j < means_lines.size() - 1; j++)
-                        {
-                            means_list_.push_back(stof(means_lines[j]));
-                        }
-                        continue;
-                    }
-                }
-                else if (line_item[0] == "<Rescale>")
-                {
-                    getline(cmvn_stream, line);
-                    istringstream vars_lines_stream(line);
-                    vector<string> vars_lines{istream_iterator<string>{vars_lines_stream}, istream_iterator<string>{}};
-                    if (vars_lines[0] == "<LearnRateCoef>")
-                    {
-                        for (int j = 3; j < vars_lines.size() - 1; j++)
-                        {                           
-                            vars_list_.push_back(stof(vars_lines[j]));
-                        }
-                        continue;
-                    }
-                }
-            }
-        }
-        catch (std::exception const &e)
-        {
-            LOG(ERROR) << "Error when load vad cmvn : " << e.what();
-            exit(-1);
-        }
-    }
-
-    void CamPPlusSv::LfrCmvn(std::vector<std::vector<float>> &vad_feats)
-    {
-
-        // std::vector<std::vector<float>> out_feats;
-        // int T = vad_feats.size();
-        // int T_lrf = ceil(1.0 * T / lfr_n);
-
-        // // Pad frames at start(copy first frame)
-        // for (int i = 0; i < (lfr_m - 1) / 2; i++)
-        // {
-        //     vad_feats.insert(vad_feats.begin(), vad_feats[0]);
-        // }
-        // // Merge lfr_m frames as one,lfr_n frames per window
-        // T = T + (lfr_m - 1) / 2;
-        // std::vector<float> p;
-        // for (int i = 0; i < T_lrf; i++)
-        // {
-        //     if (lfr_m <= T - i * lfr_n)
-        //     {
-        //         for (int j = 0; j < lfr_m; j++)
-        //         {
-        //             p.insert(p.end(), vad_feats[i * lfr_n + j].begin(), vad_feats[i * lfr_n + j].end());
-        //         }
-        //         out_feats.emplace_back(p);
-        //         p.clear();
-        //     }
-        //     else
-        //     {
-        //         // Fill to lfr_m frames at last window if less than lfr_m frames  (copy last frame)
-        //         int num_padding = lfr_m - (T - i * lfr_n);
-        //         for (int j = 0; j < (vad_feats.size() - i * lfr_n); j++)
-        //         {
-        //             p.insert(p.end(), vad_feats[i * lfr_n + j].begin(), vad_feats[i * lfr_n + j].end());
-        //         }
-        //         for (int j = 0; j < num_padding; j++)
-        //         {
-        //             p.insert(p.end(), vad_feats[vad_feats.size() - 1].begin(), vad_feats[vad_feats.size() - 1].end());
-        //         }
-        //         out_feats.emplace_back(p);
-        //         p.clear();
-        //     }
-        // }
-        // //Apply cmvn
-        std::vector<std::vector<float>> out_feats;
-        out_feats = vad_feats;
-        // only  Apply cmvn
-        for (auto &out_feat : out_feats)
-        {
-            // for (int j = 0; j < means_list_.size(); j++) {
-            for (int j = 0; j < std::min(out_feats[0].size(), means_list_.size()); j++)
-            { 
-                out_feat[j] = (out_feat[j] + means_list_[j]) * vars_list_[j];
-            }
-        }
-        vad_feats = out_feats;
-    }
     void  CamPPlusSv::SubMean(std::vector<std::vector<float>> &voice_feats)
     {
         if (voice_feats.size() > 0)
