@@ -1502,7 +1502,7 @@ class EncoderLayerSANMLarge(nn.Module):
         super().__init__()
 
         att_type = kwargs.get("att_type", "self_att_fsmn_sdpa")
-        self.attn = att_type_dict[att_type](linear_units, attention_heads)
+        self.attn = att_type_dict[att_type](linear_units, attention_heads, **kwargs)
         self.attn_ln = LayerNorm(linear_units)
 
         n_mlp = linear_units * 4
@@ -1530,7 +1530,6 @@ class SenseVoiceEncoder(nn.Module):
     def __init__(
         self,
         input_size,
-        n_ctx: int,
         linear_units: int,
         attention_heads: int,
         num_blocks: int,
@@ -1542,9 +1541,7 @@ class SenseVoiceEncoder(nn.Module):
 
         self.blocks = nn.ModuleList(
             [
-                EncoderLayerSANMLarge(
-                    linear_units, attention_heads, att_type=kwargs.get("att_type", "default")
-                )
+                EncoderLayerSANMLarge(linear_units, attention_heads, **kwargs)
                 for _ in range(num_blocks)
             ]
         )
@@ -1624,7 +1621,7 @@ class SenseVoiceL(nn.Module):
     def __init__(self, *args, **kwargs):
         super().__init__()
 
-        encoder = kwargs.get("kwargs")
+        encoder = kwargs.get("encoder")
         encoder_conf = kwargs.get("encoder_conf", {})
         encoder_class = tables.encoder_classes.get(encoder)
         encoder = encoder_class(**encoder_conf)
