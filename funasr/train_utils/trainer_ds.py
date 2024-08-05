@@ -217,9 +217,9 @@ class Trainer:
             # Create output directory if it does not exist
             os.makedirs(self.output_dir, exist_ok=True)
             if step is None:
-                ckpt_name = f"model.pt.ep{epoch}"
+                ckpt_name = f"ds-model.pt.ep{epoch}"
             else:
-                ckpt_name = f"model.pt.ep{epoch}.{step}"
+                ckpt_name = f"ds-model.pt.ep{epoch}.{step}"
             filename = os.path.join(self.output_dir, ckpt_name)
 
             # torch.save(state, filename)
@@ -239,11 +239,11 @@ class Trainer:
                     >= self.val_acc_step_or_eoch[self.best_step_or_epoch]
                 ):
                     self.best_step_or_epoch = ckpt_name
-                    best_ckpt = Path(os.path.join(self.output_dir, f"model.pt.best"))
+                    best_ckpt = Path(os.path.join(self.output_dir, f"ds-model.pt.best"))
                     # torch.save(state, best_ckpt)
                     with torch.no_grad():
                         model.save_checkpoint(
-                            save_dir=self.output_dir, tag=f"model.pt.best", client_state=state
+                            save_dir=self.output_dir, tag=f"ds-model.pt.best", client_state=state
                         )
                     logging.info(
                         f"Update best acc: {self.val_acc_step_or_eoch[self.best_step_or_epoch]:.4f}, {best_ckpt}"
@@ -258,11 +258,11 @@ class Trainer:
                     <= self.val_loss_step_or_eoch[self.best_step_or_epoch]
                 ):
                     self.best_step_or_epoch = ckpt_name
-                    best_ckpt = Path(os.path.join(self.output_dir, f"model.pt.best"))
+                    best_ckpt = Path(os.path.join(self.output_dir, f"ds-model.pt.best"))
                     # torch.save(state, best_ckpt)
                     with torch.no_grad():
                         model.save_checkpoint(
-                            save_dir=self.output_dir, tag=f"model.pt.best", client_state=state
+                            save_dir=self.output_dir, tag=f"ds-model.pt.best", client_state=state
                         )
                     logging.info(
                         f"Update best loss: {self.val_loss_step_or_eoch[self.best_step_or_epoch]:.4f}, {best_ckpt}"
