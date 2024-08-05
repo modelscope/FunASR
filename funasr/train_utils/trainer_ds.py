@@ -814,6 +814,9 @@ class Trainer:
             ckpt_name = f"model.pt.ep{epoch}"
         else:
             ckpt_name = f'model.pt.ep{epoch}.{kwargs.get("step_in_epoch")}'
+
+        if self.use_deepspeed:
+            ckpt_name = f"ds-{ckpt_name}"
         self.val_acc_step_or_eoch[ckpt_name] = self.val_acc_avg
         self.val_loss_step_or_eoch[ckpt_name] = self.val_loss_avg
 
