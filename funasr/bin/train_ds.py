@@ -156,7 +156,7 @@ def main(**kwargs):
 
     if kwargs.get("train_conf", {}).get("save_init_model", True):
 
-        trainer.save_checkpoint(0, model=model, optim=optim, scheduler=scheduler, scaler=scaler)
+        trainer.save_checkpoint(-1, model=model, optim=optim, scheduler=scheduler, scaler=scaler)
 
     trainer.resume_checkpoint(
         model=model,
