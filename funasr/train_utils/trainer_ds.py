@@ -227,11 +227,11 @@ class Trainer:
                 model.save_checkpoint(save_dir=self.output_dir, tag=ckpt_name, client_state=state)
             logging.info(f"\nCheckpoint saved to {filename}\n")
 
-            with torch.no_grad():
-                model.save_checkpoint(
-                    save_dir=self.output_dir, tag=f"ds-model.pt", client_state=state
-                )
             if not (step is None and epoch == 0):
+                with torch.no_grad():
+                    model.save_checkpoint(
+                        save_dir=self.output_dir, tag=f"ds-model.pt", client_state=state
+                    )
                 if self.best_step_or_epoch == "":
                     self.best_step_or_epoch = ckpt_name
 
@@ -361,9 +361,10 @@ class Trainer:
             torch.save(state, filename)
 
             logging.info(f"\nCheckpoint saved to {filename}\n")
-            latest = Path(os.path.join(self.output_dir, f"model.pt"))
-            torch.save(state, latest)
-            if not (step is None and epoch != 0):
+
+            if not (step is None and epoch == 0):
+                latest = Path(os.path.join(self.output_dir, f"model.pt"))
+                torch.save(state, latest)
                 if self.best_step_or_epoch == "":
                     self.best_step_or_epoch = ckpt_name
 
