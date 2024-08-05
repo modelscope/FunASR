@@ -154,6 +154,10 @@ def main(**kwargs):
     scaler = GradScaler(enabled=True) if trainer.use_fp16 or trainer.use_bf16 else None
     scaler = ShardedGradScaler(enabled=trainer.use_fp16) if trainer.use_fsdp else scaler
 
+    if kwargs.get("train_conf", {}).get("save_init_model", True):
+
+        trainer.save_checkpoint(0, model=model, optim=optim, scheduler=scheduler, scaler=scaler)
+
     trainer.resume_checkpoint(
         model=model,
         optim=optim,
