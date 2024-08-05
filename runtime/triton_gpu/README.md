@@ -1,85 +1,81 @@
-## Inference with Triton 
+## Triton Inference Serving Best Practice for SenseVoice
 
-### Steps:
-1. Prepare model repo files
+### Quick Start
+Directly launch the service using docker compose.
 ```sh
-git-lfs install
-git clone https://www.modelscope.cn/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch.git
-
-pretrained_model_dir=$(pwd)/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
-
-cp $pretrained_model_dir/am.mvn ./model_repo_paraformer_large_offline/feature_extractor/
-cp $pretrained_model_dir/config.yaml ./model_repo_paraformer_large_offline/feature_extractor/
-
-# Refer here to get model.onnx (https://github.com/alibaba-damo-academy/FunASR/blob/main/funasr/export/README.md)
-cp <exported_onnx_dir>/model.onnx ./model_repo_paraformer_large_offline/encoder/1/
+docker compose up --build
 ```
+
+### Build Image
+Build the docker image from scratch. 
+```sh
+# build from scratch, cd to the parent dir of Dockerfile.server
+docker build . -f Dockerfile/Dockerfile.sensevoice -t soar97/triton-sensevoice:24.05
+```
+
+### Create Docker Container
+```sh
+your_mount_dir=/mnt:/mnt
+docker run -it --name "sensevoice-server" --gpus all --net host -v $your_mount_dir --shm-size=2g soar97/triton-sensevoice:24.05
+```
+
+### Export SenseVoice Model to Onnx
+Please follow the official guide of FunASR to export the sensevoice onnx file. Also, you need to download the tokenizer file by yourself. 
+### Launch Server
 Log of directory tree:
 ```sh
-model_repo_paraformer_large_offline/
+model_repo_sense_voice_small
 |-- encoder
 |   |-- 1
-|   |   `-- model.onnx
+|   |   `-- model.onnx -> /your/path/model.onnx
 |   `-- config.pbtxt
 |-- feature_extractor
 |   |-- 1
 |   |   `-- model.py
-|   |-- config.pbtxt
 |   |-- am.mvn
+|   |-- config.pbtxt
 |   `-- config.yaml
-|-- infer_pipeline
+|-- scoring
 |   |-- 1
+|   |   `-- model.py
+|   |-- chn_jpn_yue_eng_ko_spectok.bpe.model -> /your/path/chn_jpn_yue_eng_ko_spectok.bpe.model
 |   `-- config.pbtxt
-`-- scoring
+`-- sensevoice
     |-- 1
-    |   `-- model.py
     `-- config.pbtxt
 
-8 directories, 9 files
-```
+8 directories, 10 files
 
-2. Follow below instructions to launch triton server
-```sh
-# using docker image Dockerfile/Dockerfile.server
-docker build . -f Dockerfile/Dockerfile.server -t triton-paraformer:23.01 
-docker run -it --rm --name "paraformer_triton_server" --gpus all -v <path_host/model_repo_paraformer_large_offline>:/workspace/ --shm-size 1g --net host triton-paraformer:23.01 
 
 # launch the service 
-tritonserver --model-repository /workspace/model_repo_paraformer_large_offline \
+tritonserver --model-repository /workspace/model_repo_sensevoice_small \
              --pinned-memory-pool-byte-size=512000000 \
              --cuda-memory-pool-byte-size=0:1024000000
-
 ```
 
-### Performance benchmark
 
-Benchmark [speech_paraformer](https://www.modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary) based on Aishell1 test set with a single V100, the total audio duration is 36108.919 seconds.
-
+### Benchmark using Dataset
 ```sh
-# For client container:
-docker run -it --rm --name "client_test" --net host --gpus all -v <path_host/triton_gpu/client>:/workpace/ soar97/triton-k2:22.12.1 # noqa
-# For aishell manifests:
-apt-get install git-lfs
-git-lfs install
-git clone https://huggingface.co/csukuangfj/aishell-test-dev-manifests
-sudo mkdir -p /root/fangjun/open-source/icefall-aishell/egs/aishell/ASR/download/aishell
-tar xf ./aishell-test-dev-manifests/data_aishell.tar.gz -C /root/fangjun/open-source/icefall-aishell/egs/aishell/ASR/download/aishell/ # noqa
-
-serveraddr=localhost
-manifest_path=/workspace/aishell-test-dev-manifests/data/fbank/aishell_cuts_test.jsonl.gz
-num_task=60
-python3 client/decode_manifest_triton.py \
-    --server-addr $serveraddr \
+git clone https://github.com/yuekaizhang/Triton-ASR-Client.git
+cd Triton-ASR-Client
+num_task=32
+python3 client.py \
+    --server-addr localhost \
+    --server-port 10086 \
+    --model-name sensevoice \
     --compute-cer \
-    --model-name infer_pipeline \
     --num-tasks $num_task \
-    --manifest-filename $manifest_path
+    --batch-size 16 \
+    --manifest-dir ./datasets/aishell1_test
 ```
 
-(Note: The service has been fully warm up.)
-|concurrent-tasks | processing time(s) | RTF |
-|----------|--------------------|------------|
-| 60 (onnx fp32)                | 116.0 | 0.0032|
+Benchmark results below were based on Aishell1 test set with a single V100, the total audio duration is 36108.919 seconds.
+|concurrent-tasks | batch-size-per-task | processing time(s) | RTF |
+|----------|--------------------|------------|---------------------|
+| 32 (onnx fp32)                | 16 | 67.09 | 0.0019|
+| 32 (onnx fp32)                | 1 | 82.04  | 0.0023|
+
+(Note: for batch-size-per-task=1 cases, tritonserver could use dynamic batching to improve throughput.)
 
 ## Acknowledge
 This part originates from NVIDIA CISI project. We also have TTS and NLP solutions deployed on triton inference server. If you are interested, please contact us.

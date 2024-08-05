@@ -33,6 +33,7 @@ FunASR希望在语音识别的学术研究和工业应用之间架起一座桥�
 
 <a name="最新动态"></a>
 ## 最新动态
+- 2024/07/04：[SenseVoice](https://github.com/FunAudioLLM/SenseVoice) 是一个基础语音理解模型，具备多种语音理解能力，涵盖了自动语音识别（ASR）、语言识别（LID）、情感识别（SER）以及音频事件检测（AED）。
 - 2024/07/01：中文离线文件转写服务GPU版本 1.1发布，优化bladedisc模型兼容性问题；详细信息参阅([部署文档](runtime/readme_cn.md))
 - 2024/06/27：中文离线文件转写服务GPU版本 1.0发布，支持动态batch，支持多路并发，在长音频测试集上单线RTF为0.0076，多线加速比为1200+（CPU为330+）；详细信息参阅([部署文档](runtime/readme_cn.md))
 - 2024/05/15：新增加情感识别模型，[emotion2vec+large](https://modelscope.cn/models/iic/emotion2vec_plus_large/summary)，[emotion2vec+base](https://modelscope.cn/models/iic/emotion2vec_plus_base/summary)，[emotion2vec+seed](https://modelscope.cn/models/iic/emotion2vec_plus_seed/summary)，输出情感类别为：生气/angry，开心/happy，中立/neutral，难过/sad。
@@ -99,6 +100,7 @@ FunASR开源了大量在工业数据上预训练模型，您可以在[模型许�
 
 |                                                                                                     模型名字                                                                                                      |        任务详情        |      训练数据      |  参数量   | 
 |:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:------------------:|:--------------:|:------:|
+|   SenseVoiceSmall <br> ([⭐](https://www.modelscope.cn/models/iic/SenseVoiceSmall)  [🤗](https://huggingface.co/FunAudioLLM/SenseVoiceSmall) )   |  多种语音理解能力，涵盖了自动语音识别（ASR）、语言识别（LID）、情感识别（SER）以及音频事件检测（AED）   |  400000小时，中文   |  330M  |
 |    paraformer-zh <br> ([⭐](https://www.modelscope.cn/models/damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary)  [🤗](https://huggingface.co/funasr/paraformer-zh) )    |  语音识别，带时间戳输出，非实时   |   60000小时，中文   |  220M  |
 | paraformer-zh-streaming <br> ( [⭐](https://modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary) [🤗](https://huggingface.co/funasr/paraformer-zh-streaming) ) |      语音识别，实时       |   60000小时，中文   |  220M  |
 |         paraformer-en <br> ( [⭐](https://www.modelscope.cn/models/damo/speech_paraformer-large-vad-punc_asr_nat-en-16k-common-vocab10020/summary) [🤗](https://huggingface.co/funasr/paraformer-en) )         |      语音识别，非实时      |   50000小时，英文   |  220M  |
@@ -126,6 +128,43 @@ funasr ++model=paraformer-zh ++vad_model="fsmn-vad" ++punc_model="ct-punc" ++inp
 注：支持单条音频文件识别，也支持文件列表，列表为kaldi风格wav.scp：`wav_id   wav_path`
 
 ### 非实时语音识别
+#### SenseVoice
+```python
+from funasr import AutoModel
+from funasr.utils.postprocess_utils import rich_transcription_postprocess
+
+model_dir = "iic/SenseVoiceSmall"
+
+model = AutoModel(
+    model=model_dir,
+    vad_model="fsmn-vad",
+    vad_kwargs={"max_single_segment_time": 30000},
+    device="cuda:0",
+)
+
+# en
+res = model.generate(
+    input=f"{model.model_path}/example/en.mp3",
+    cache={},
+    language="auto",  # "zn", "en", "yue", "ja", "ko", "nospeech"
+    use_itn=True,
+    batch_size_s=60,
+    merge_vad=True,  #
+    merge_length_s=15,
+)
+text = rich_transcription_postprocess(res[0]["text"])
+print(text)
+```
+参数说明：
+- `model_dir`：模型名称，或本地磁盘中的模型路径。
+- `vad_model`：表示开启VAD，VAD的作用是将长音频切割成短音频，此时推理耗时包括了VAD与SenseVoice总耗时，为链路耗时，如果需要单独测试SenseVoice模型耗时，可以关闭VAD模型。
+- `vad_kwargs`：表示VAD模型配置,`max_single_segment_time`: 表示`vad_model`最大切割音频时长, 单位是毫秒ms。
+- `use_itn`：输出结果中是否包含标点与逆文本正则化。
+- `batch_size_s` 表示采用动态batch，batch中总音频时长，单位为秒s。
+- `merge_vad`：是否将 vad 模型切割的短音频碎片合成，合并后长度为`merge_length_s`，单位为秒s。
+- `ban_emo_unk`：禁用emo_unk标签，禁用后所有的句子都会被赋与情感标签。
+
+#### Paraformer
 ```python
 from funasr import AutoModel
 # paraformer-zh is a multi-functional asr model
@@ -298,11 +337,11 @@ FunASR支持预训练或者进一步微调的模型进行服务部署。目前�
 <a name="社区交流"></a>
 ## 联系我们
 
-如果您在使用中遇到问题，可以直接在github页面提Issues。欢迎语音兴趣爱好者扫描以下的钉钉群或者微信群二维码加入社区群，进行交流和讨论。
+如果您在使用中遇到问题，可以直接在github页面提Issues。欢迎语音兴趣爱好者扫描以下的钉钉群二维码加入社区群，进行交流和讨论。
 
-|                                  钉钉群                                  |                          微信                           |
-|:---------------------------------------------------------------------:|:-----------------------------------------------------:|
-| <div align="left"><img src="docs/images/dingding.jpg" width="250"/>   | <img src="docs/images/wechat.png" width="215"/></div> |
+|                                 钉钉群                                 |
+|:-------------------------------------------------------------------:|
+| <div align="left"><img src="docs/images/dingding.png" width="250"/> |
 
 ## 社区贡献者
 

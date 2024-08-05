@@ -449,6 +449,7 @@ class WebsocketClient {
         m_client.get_alog().write(websocketpp::log::alevel::app,
                                   "Send Error: " + ec.message());
       }
+      delete[] iArray;
       Pa_Sleep(20);  // sleep for 20ms
     }
 

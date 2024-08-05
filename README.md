@@ -29,6 +29,7 @@
 
 <a name="whats-new"></a>
 ## What's new:
+- 2024/07/04：[SenseVoice](https://github.com/FunAudioLLM/SenseVoice) is a speech foundation model with multiple speech understanding capabilities, including ASR, LID, SER, and AED.
 - 2024/07/01: Offline File Transcription Service GPU 1.1 released, optimize BladeDISC model compatibility issues; ref to ([docs](runtime/readme.md))
 - 2024/06/27: Offline File Transcription Service GPU 1.0 released, supporting dynamic batch processing and multi-threading concurrency. In the long audio test set, the single-thread RTF is 0.0076, and multi-threads' speedup is 1200+ (compared to 330+ on CPU); ref to ([docs](runtime/readme.md))
 - 2024/05/15：emotion recognition models are new supported. [emotion2vec+large](https://modelscope.cn/models/iic/emotion2vec_plus_large/summary)，[emotion2vec+base](https://modelscope.cn/models/iic/emotion2vec_plus_base/summary)，[emotion2vec+seed](https://modelscope.cn/models/iic/emotion2vec_plus_seed/summary). currently supports the following categories: 0: angry 1: happy 2: neutral 3: sad 4: unknown.
@@ -90,21 +91,22 @@ FunASR has open-sourced a large number of pre-trained models on industrial data.
 (Note: ⭐ represents the ModelScope model zoo, 🤗 represents the Huggingface model zoo, 🍀 represents the OpenAI model zoo)
 
 
-|                                                                                                         Model Name                                                                                                         |                     Task Details                      |          Training Data           | Parameters |
-|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------:|:--------------------------------:|:----------:|
-|          paraformer-zh <br> ([⭐](https://www.modelscope.cn/models/damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary)  [🤗](https://huggingface.co/funasr/paraformer-zh) )           |  speech recognition, with timestamps, non-streaming   |      60000 hours, Mandarin       |    220M    |
-| <nobr>paraformer-zh-streaming <br> ( [⭐](https://modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary) [🤗](https://huggingface.co/funasr/paraformer-zh-streaming) )</nobr> |             speech recognition, streaming             |      60000 hours, Mandarin       |    220M    |
-|               paraformer-en <br> ( [⭐](https://www.modelscope.cn/models/damo/speech_paraformer-large-vad-punc_asr_nat-en-16k-common-vocab10020/summary) [🤗](https://huggingface.co/funasr/paraformer-en) )                | speech recognition, without timestamps, non-streaming |       50000 hours, English       |    220M    |
-|                            conformer-en <br> ( [⭐](https://modelscope.cn/models/damo/speech_conformer_asr-en-16k-vocab4199-pytorch/summary) [🤗](https://huggingface.co/funasr/conformer-en) )                             |           speech recognition, non-streaming           |       50000 hours, English       |    220M    |
-|                               ct-punc <br> ( [⭐](https://modelscope.cn/models/damo/punc_ct-transformer_cn-en-common-vocab471067-large/summary) [🤗](https://huggingface.co/funasr/ct-punc) )                               |                punctuation restoration                |    100M, Mandarin and English    |    290M    | 
-|                                   fsmn-vad <br> ( [⭐](https://modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary) [🤗](https://huggingface.co/funasr/fsmn-vad) )                                   |               voice activity detection                | 5000 hours, Mandarin and English |    0.4M    | 
-|                                     fa-zh <br> ( [⭐](https://modelscope.cn/models/damo/speech_timestamp_prediction-v1-16k-offline/summary) [🤗](https://huggingface.co/funasr/fa-zh) )                                     |                 timestamp prediction                  |       5000 hours, Mandarin       |    38M     | 
-|                                       cam++ <br> ( [⭐](https://modelscope.cn/models/iic/speech_campplus_sv_zh-cn_16k-common/summary) [🤗](https://huggingface.co/funasr/campplus) )                                        |           speaker verification/diarization            |            5000 hours            |    7.2M    | 
-|                                 Whisper-large-v2 <br> ([⭐](https://www.modelscope.cn/models/iic/speech_whisper-large_asr_multilingual/summary)  [🍀](https://github.com/openai/whisper) )                                  |  speech recognition, with timestamps, non-streaming   |           multilingual           |   1550 M   |
-|                                            Whisper-large-v3 <br> ([⭐](https://www.modelscope.cn/models/iic/Whisper-large-v3/summary)  [🍀](https://github.com/openai/whisper) )                                            |  speech recognition, with timestamps, non-streaming   |           multilingual           |   1550 M   |
-|                                               Qwen-Audio <br> ([⭐](examples/industrial_data_pretraining/qwen_audio/demo.py)  [🤗](https://huggingface.co/Qwen/Qwen-Audio) )                                                |      audio-text multimodal models (pretraining)       |           multilingual           |     8B     |
-|                                        Qwen-Audio-Chat <br> ([⭐](examples/industrial_data_pretraining/qwen_audio/demo_chat.py)  [🤗](https://huggingface.co/Qwen/Qwen-Audio-Chat) )                                        |          audio-text multimodal models (chat)          |           multilingual           |     8B     |
-|                              emotion2vec+large <br> ([⭐](https://modelscope.cn/models/iic/emotion2vec_plus_large/summary)  [🤗](https://huggingface.co/emotion2vec/emotion2vec_plus_large) )                               |              speech emotion recongintion              |           40000 hours            |    300M    |
+|                                                                                                         Model Name                                                                                                         |                                   Task Details                                   |          Training Data           | Parameters |
+|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------:|:--------------------------------:|:----------:|
+|                                       SenseVoiceSmall <br> ([⭐](https://www.modelscope.cn/models/iic/SenseVoiceSmall)  [🤗](https://huggingface.co/FunAudioLLM/SenseVoiceSmall) )                                          | multiple speech understanding capabilities, including ASR, ITN, LID, SER, and AED, support languages such as zh, yue, en, ja, ko   |           300000 hours           |   234M     |
+|          paraformer-zh <br> ([⭐](https://www.modelscope.cn/models/damo/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch/summary)  [🤗](https://huggingface.co/funasr/paraformer-zh) )           |                speech recognition, with timestamps, non-streaming                |      60000 hours, Mandarin       |    220M    |
+| <nobr>paraformer-zh-streaming <br> ( [⭐](https://modelscope.cn/models/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online/summary) [🤗](https://huggingface.co/funasr/paraformer-zh-streaming) )</nobr> |                          speech recognition, streaming                           |      60000 hours, Mandarin       |    220M    |
+|               paraformer-en <br> ( [⭐](https://www.modelscope.cn/models/damo/speech_paraformer-large-vad-punc_asr_nat-en-16k-common-vocab10020/summary) [🤗](https://huggingface.co/funasr/paraformer-en) )                |              speech recognition, without timestamps, non-streaming               |       50000 hours, English       |    220M    |
+|                            conformer-en <br> ( [⭐](https://modelscope.cn/models/damo/speech_conformer_asr-en-16k-vocab4199-pytorch/summary) [🤗](https://huggingface.co/funasr/conformer-en) )                             |                        speech recognition, non-streaming                         |       50000 hours, English       |    220M    |
+|                               ct-punc <br> ( [⭐](https://modelscope.cn/models/damo/punc_ct-transformer_cn-en-common-vocab471067-large/summary) [🤗](https://huggingface.co/funasr/ct-punc) )                               |                             punctuation restoration                              |    100M, Mandarin and English    |    290M    | 
+|                                   fsmn-vad <br> ( [⭐](https://modelscope.cn/models/damo/speech_fsmn_vad_zh-cn-16k-common-pytorch/summary) [🤗](https://huggingface.co/funasr/fsmn-vad) )                                   |                             voice activity detection                             | 5000 hours, Mandarin and English |    0.4M    | 
+|                                     fa-zh <br> ( [⭐](https://modelscope.cn/models/damo/speech_timestamp_prediction-v1-16k-offline/summary) [🤗](https://huggingface.co/funasr/fa-zh) )                                     |                               timestamp prediction                               |       5000 hours, Mandarin       |    38M     | 
+|                                       cam++ <br> ( [⭐](https://modelscope.cn/models/iic/speech_campplus_sv_zh-cn_16k-common/summary) [🤗](https://huggingface.co/funasr/campplus) )                                        |                         speaker verification/diarization                         |            5000 hours            |    7.2M    | 
+|                                 Whisper-large-v2 <br> ([⭐](https://www.modelscope.cn/models/iic/speech_whisper-large_asr_multilingual/summary)  [🍀](https://github.com/openai/whisper) )                                  |                speech recognition, with timestamps, non-streaming                |           multilingual           |   1550 M   |
+|                                            Whisper-large-v3 <br> ([⭐](https://www.modelscope.cn/models/iic/Whisper-large-v3/summary)  [🍀](https://github.com/openai/whisper) )                                            |                speech recognition, with timestamps, non-streaming                |           multilingual           |   1550 M   |
+|                                               Qwen-Audio <br> ([⭐](examples/industrial_data_pretraining/qwen_audio/demo.py)  [🤗](https://huggingface.co/Qwen/Qwen-Audio) )                                                |                    audio-text multimodal models (pretraining)                    |           multilingual           |     8B     |
+|                                        Qwen-Audio-Chat <br> ([⭐](examples/industrial_data_pretraining/qwen_audio/demo_chat.py)  [🤗](https://huggingface.co/Qwen/Qwen-Audio-Chat) )                                        |                       audio-text multimodal models (chat)                        |           multilingual           |     8B     |
+|                              emotion2vec+large <br> ([⭐](https://modelscope.cn/models/iic/emotion2vec_plus_large/summary)  [🤗](https://huggingface.co/emotion2vec/emotion2vec_plus_large) )                               |                           speech emotion recongintion                            |           40000 hours            |    300M    |
 
 
 
@@ -127,6 +129,43 @@ funasr ++model=paraformer-zh ++vad_model="fsmn-vad" ++punc_model="ct-punc" ++inp
 Notes: Support recognition of single audio file, as well as file list in Kaldi-style wav.scp format: `wav_id wav_pat`
 
 ### Speech Recognition (Non-streaming)
+#### SenseVoice
+```python
+from funasr import AutoModel
+from funasr.utils.postprocess_utils import rich_transcription_postprocess
+
+model_dir = "iic/SenseVoiceSmall"
+
+model = AutoModel(
+    model=model_dir,
+    vad_model="fsmn-vad",
+    vad_kwargs={"max_single_segment_time": 30000},
+    device="cuda:0",
+)
+
+# en
+res = model.generate(
+    input=f"{model.model_path}/example/en.mp3",
+    cache={},
+    language="auto",  # "zn", "en", "yue", "ja", "ko", "nospeech"
+    use_itn=True,
+    batch_size_s=60,
+    merge_vad=True,  #
+    merge_length_s=15,
+)
+text = rich_transcription_postprocess(res[0]["text"])
+print(text)
+```
+Parameter Description:
+- `model_dir`: The name of the model, or the path to the model on the local disk.
+- `vad_model`: This indicates the activation of VAD (Voice Activity Detection). The purpose of VAD is to split long audio into shorter clips. In this case, the inference time includes both VAD and SenseVoice total consumption, and represents the end-to-end latency. If you wish to test the SenseVoice model's inference time separately, the VAD model can be disabled.
+- `vad_kwargs`: Specifies the configurations for the VAD model. `max_single_segment_time`: denotes the maximum duration for audio segmentation by the `vad_model`, with the unit being milliseconds (ms).
+- `use_itn`: Whether the output result includes punctuation and inverse text normalization.
+- `batch_size_s`: Indicates the use of dynamic batching, where the total duration of audio in the batch is measured in seconds (s).
+- `merge_vad`: Whether to merge short audio fragments segmented by the VAD model, with the merged length being `merge_length_s`, in seconds (s).
+- `ban_emo_unk`: Whether to ban the output of the `emo_unk` token.
+
+#### Paraformer
 ```python
 from funasr import AutoModel
 # paraformer-zh is a multi-functional asr model
@@ -293,11 +332,11 @@ For more detailed information, please refer to the [service deployment documenta
 ## Community Communication
 If you encounter problems in use, you can directly raise Issues on the github page.
 
-You can also scan the following DingTalk group or WeChat group QR code to join the community group for communication and discussion.
+You can also scan the following DingTalk group to join the community group for communication and discussion.
 
-|                           DingTalk group                            |                     WeChat group                      |
-|:-------------------------------------------------------------------:|:-----------------------------------------------------:|
-| <div align="left"><img src="docs/images/dingding.png" width="250"/> | <img src="docs/images/wechat.png" width="215"/></div> |
+|                           DingTalk group                            |
+|:-------------------------------------------------------------------:|
+| <div align="left"><img src="docs/images/dingding.png" width="250"/> |
 
 ## Contributors
 

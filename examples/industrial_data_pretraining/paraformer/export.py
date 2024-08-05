@@ -20,10 +20,10 @@ print(res)
 
 # # method2, inference from local path
 # from funasr import AutoModel
-
+#
 # model = AutoModel(
 #     model="/Users/zhifu/.cache/modelscope/hub/iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
 # )
-
+#
 # res = model.export(type="onnx", quantize=False)
 # print(res)

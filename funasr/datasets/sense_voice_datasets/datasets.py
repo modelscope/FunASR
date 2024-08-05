@@ -325,10 +325,10 @@ class SenseVoiceCTCDataset(torch.utils.data.Dataset):
             asr_target = item["target"]
             if self.preprocessor_text:
                 asr_target = self.preprocessor_text(asr_target)
-            emo_target = item["emo_target"]
-            event_target = item["event_target"]
+            emo_target = item.get("emo_target", "<|NEUTRAL|>")
+            event_target = item.get("event_target", "<|Speech|>")
             text_language = item.get("text_language", "<|zh|>")
-            punc_itn_bottom = item.get("with_or_wo_itn", "<|SPECIAL_TOKEN_13|>")
+            punc_itn_bottom = item.get("with_or_wo_itn", "<|woitn|>")
 
             target_ids = self.tokenizer.encode(asr_target, allowed_special="all")
             target_ids_len = len(target_ids)  # [text]

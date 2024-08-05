@@ -1,4 +1,10 @@
 # AliParaformerAsr
+##### 支持模型
+## paraformer-large offline onnx模型下载
+https://huggingface.co/manyeyes/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx
+## SenseVoiceSmall offline onnx模型下载
+https://www.modelscope.cn/models/manyeyes/sensevoice-small-onnx
+
 ##### 简介：
 项目中使用的Asr模型是阿里巴巴达摩院提供的Paraformer-large ASR模型。
 **项目基于Net 6.0，使用C#编写，调用Microsoft.ML.OnnxRuntime对onnx模型进行解码，支持跨平台编译。项目以库的形式进行调用，部署非常方便。**
@@ -25,9 +31,6 @@ Sampler：通过采样，将声学特征向量与目标文字向量变换成含�
 
 ##### ASR常用参数（参考：asr.yaml文件）：
 用于解码的asr.yaml配置参数，取自官方模型配置config.yaml原文件。便于跟进和升级。
-
-## paraformer-large offline onnx模型下载
-https://huggingface.co/manyeyes/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-onnx
 
 ## 离线（非流式）模型调用方法：
 

@@ -15,10 +15,10 @@ python -m funasr.bin.export \
 ++quantize=false
 
 
-# method2, inference from local path
-model="/Users/zhifu/.cache/modelscope/hub/iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
-
-python -m funasr.bin.export \
-++model=${model} \
-++type="onnx" \
-++quantize=false
+## method2, inference from local path
+#model="/Users/zhifu/.cache/modelscope/hub/iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch"
+#
+#python -m funasr.bin.export \
+#++model=${model} \
+#++type="onnx" \
+#++quantize=false

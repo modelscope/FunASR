@@ -114,7 +114,10 @@ class AutoModel:
         try:
             from funasr.utils.version_checker import check_for_update
 
-            check_for_update()
+            print(
+                "Check update of funasr, and it would cost few times. You may disable it by set `disable_update=True` in AutoModel"
+            )
+            check_for_update(disable=kwargs.get("disable_update", False))
         except:
             pass
 
@@ -264,6 +267,8 @@ class AutoModel:
 
     def inference(self, input, input_len=None, model=None, kwargs=None, key=None, **cfg):
         kwargs = self.kwargs if kwargs is None else kwargs
+        if "cache" in kwargs:
+            kwargs.pop("cache")
         deep_update(kwargs, cfg)
         model = self.model if model is None else model
         model.eval()
@@ -315,7 +320,7 @@ class AutoModel:
             speed_stats["rtf"] = f"{(time_escape) / batch_data_time:0.3f}"
             description = f"{speed_stats}, "
             if pbar:
-                pbar.update(1)
+                pbar.update(end_idx - beg_idx)
                 pbar.set_description(description)
             time_speech_total += batch_data_time
             time_escape_total += time_escape
@@ -337,9 +342,11 @@ class AutoModel:
         end_vad = time.time()
 
         #  FIX(gcf): concat the vad clips for sense vocie model for better aed
-        if kwargs.get("merge_vad", False):
+        if cfg.get("merge_vad", False):
             for i in range(len(res)):
-                res[i]["value"] = merge_vad(res[i]["value"], kwargs.get("merge_length", 15000))
+                res[i]["value"] = merge_vad(
+                    res[i]["value"], kwargs.get("merge_length_s", 15) * 1000
+                )
 
         # step.2 compute asr model
         model = self.model
@@ -379,6 +386,9 @@ class AutoModel:
 
             if len(sorted_data) > 0 and len(sorted_data[0]) > 0:
                 batch_size = max(batch_size, sorted_data[0][0][1] - sorted_data[0][0][0])
+
+            if kwargs["device"] == "cpu":
+                batch_size = 0
 
             beg_idx = 0
             beg_asr_total = time.time()
@@ -506,8 +516,8 @@ class AutoModel:
                 sv_output = postprocess(all_segments, None, labels, spk_embedding.cpu())
                 if self.spk_mode == "vad_segment":  # recover sentence_list
                     sentence_list = []
-                    for res, vadsegment in zip(restored_data, vadsegments):
-                        if "timestamp" not in res:
+                    for rest, vadsegment in zip(restored_data, vadsegments):
+                        if "timestamp" not in rest:
                             logging.error(
                                 "Only 'iic/speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404-pytorch' \
                                            and 'iic/speech_seaco_paraformer_large_asr_nat-zh-cn-16k-common-vocab8404-pytorch'\
@@ -517,8 +527,8 @@ class AutoModel:
                             {
                                 "start": vadsegment[0],
                                 "end": vadsegment[1],
-                                "sentence": res["text"],
-                                "timestamp": res["timestamp"],
+                                "sentence": rest["text"],
+                                "timestamp": rest["timestamp"],
                             }
                         )
                 elif self.spk_mode == "punc_segment":

@@ -156,7 +156,6 @@ def timestamp_sentence(
 
         punc_id = int(punc_id) if punc_id is not None else 1
         sentence_end = timestamp[1] if timestamp is not None else sentence_end
-        sentence_start = timestamp[0] if timestamp is not None else sentence_start
         sentence_text_seg = (
             sentence_text_seg[:-1] if sentence_text_seg[-1] == " " else sentence_text_seg
         )
@@ -184,6 +183,7 @@ def timestamp_sentence(
             sentence_text = ""
             sentence_text_seg = ""
             ts_list = []
+            sentence_start = timestamp[0] if timestamp is not None else sentence_start
     return res
 
 
