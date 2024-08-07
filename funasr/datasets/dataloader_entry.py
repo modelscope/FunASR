@@ -49,14 +49,19 @@ class DataloaderMapStyle:
     def __init__(self, frontend=None, tokenizer=None, **kwargs):
         # dataset
         logging.info("Build dataloader")
+
         dataset_class = tables.dataset_classes.get(kwargs.get("dataset", "AudioDataset"))
-        dataset_tr = dataset_class(
-            kwargs.get("train_data_set_list"),
-            frontend=frontend,
-            tokenizer=tokenizer,
-            is_training=True,
-            **kwargs.get("dataset_conf"),
-        )
+        dataset_tr = None
+        # split dataset
+        self.data_split_num = kwargs["dataset_conf"].get("data_split_num", 1)
+        if self.data_split_num == 1:
+            dataset_tr = dataset_class(
+                kwargs.get("train_data_set_list"),
+                frontend=frontend,
+                tokenizer=tokenizer,
+                is_training=True,
+                **kwargs.get("dataset_conf"),
+            )
         dataset_val = dataset_class(
             kwargs.get("valid_data_set_list"),
             frontend=frontend,
@@ -69,8 +74,6 @@ class DataloaderMapStyle:
         self.dataset_val = dataset_val
         self.kwargs = kwargs
 
-        # split dataset
-        self.data_split_num = kwargs["dataset_conf"].get("data_split_num", 1)
         self.dataset_class = dataset_class
         self.frontend = frontend
         self.tokenizer = tokenizer

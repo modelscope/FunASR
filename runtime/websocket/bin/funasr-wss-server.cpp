@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
         false, "/workspace/models", "string");
     TCLAP::ValueArg<std::string> model_dir(
         "", MODEL_DIR,
-        "default: /workspace/models/asr, the asr model path, which contains model_quant.onnx, config.yaml, am.mvn",
+        "default: /workspace/models/asr, the asr model path, which contains *.onnx/*.torchscript, config.yaml, am.mvn",
         false, "/workspace/models/asr", "string");
     TCLAP::ValueArg<std::string> model_revision(
         "", "model-revision",
@@ -56,6 +56,10 @@ int main(int argc, char* argv[]) {
         "true (Default), load the model of model_quant.onnx in model_dir. If set "
         "false, load the model of model.onnx in model_dir",
         false, "true", "string");
+    TCLAP::ValueArg<std::string> bladedisc(
+        "", BLADEDISC, 
+        "true (Default), load the model of bladedisc in model_dir.", 
+        false, "true", "string");
     TCLAP::ValueArg<std::string> vad_dir(
         "", VAD_DIR,
         "default: /workspace/models/vad, the vad model path, which contains model_quant.onnx, vad.yaml, vad.mvn",
@@ -63,7 +67,7 @@ int main(int argc, char* argv[]) {
     TCLAP::ValueArg<std::string> vad_revision(
         "", "vad-revision",
         "VAD model revision",
-        false, "v2.0.4", "string");
+        false, "v2.0.6", "string");
     TCLAP::ValueArg<std::string> vad_quant(
         "", VAD_QUANT,
         "true (Default), load the model of model_quant.onnx in vad_dir. If set "
@@ -121,6 +125,8 @@ int main(int argc, char* argv[]) {
         false, "/workspace/resources/hotwords.txt", "string");
     TCLAP::ValueArg<std::int32_t> fst_inc_wts("", FST_INC_WTS, 
         "the fst hotwords incremental bias", false, 20, "int32_t");
+    TCLAP::SwitchArg use_gpu("", INFER_GPU, "Whether to use GPU, default is false", false);
+    TCLAP::ValueArg<std::int32_t> batch_size("", BATCHSIZE, "batch_size for ASR model when using GPU", false, 4, "int32_t");
 
     // add file
     cmd.add(hotword);
@@ -135,6 +141,7 @@ int main(int argc, char* argv[]) {
     cmd.add(model_dir);
     cmd.add(model_revision);
     cmd.add(quantize);
+    cmd.add(bladedisc);
     cmd.add(vad_dir);
     cmd.add(vad_revision);
     cmd.add(vad_quant);
@@ -151,11 +158,14 @@ int main(int argc, char* argv[]) {
     cmd.add(io_thread_num);
     cmd.add(decoder_thread_num);
     cmd.add(model_thread_num);
+    cmd.add(use_gpu);
+    cmd.add(batch_size);
     cmd.parse(argc, argv);
 
     std::map<std::string, std::string> model_path;
     GetValue(model_dir, MODEL_DIR, model_path);
     GetValue(quantize, QUANTIZE, model_path);
+    GetValue(bladedisc, BLADEDISC, model_path);
     GetValue(vad_dir, VAD_DIR, model_path);
     GetValue(vad_quant, VAD_QUANT, model_path);
     GetValue(punc_dir, PUNC_DIR, model_path);
@@ -173,6 +183,8 @@ int main(int argc, char* argv[]) {
     global_beam_ = global_beam.getValue();
     lattice_beam_ = lattice_beam.getValue();
     am_scale_ = am_scale.getValue();
+    bool use_gpu_ = use_gpu.getValue();
+    int batch_size_ = batch_size.getValue();
 
     // Download model form Modelscope
     try{
@@ -186,8 +198,9 @@ int main(int argc, char* argv[]) {
         std::string s_punc_quant = model_path[PUNC_QUANT];
         std::string s_itn_path = model_path[ITN_DIR];
         std::string s_lm_path = model_path[LM_DIR];
+        std::string s_blade = model_path[BLADEDISC];
 
-        std::string python_cmd = "python -m funasr.download.runtime_sdk_download_tool --type onnx --quantize True ";
+        std::string python_cmd = "python -m funasr.download.runtime_sdk_download_tool ";
 
         if(vad_dir.isSet() && !s_vad_path.empty()){
             std::string python_cmd_vad;
@@ -196,12 +209,12 @@ int main(int argc, char* argv[]) {
 
             if (access(s_vad_path.c_str(), F_OK) == 0){
                 // local
-                python_cmd_vad = python_cmd + " --model-name " + s_vad_path + " --export-dir ./ " + " --model_revision " + model_path["vad-revision"];
+                python_cmd_vad = python_cmd + " --type onnx " + " --quantize " + s_vad_quant + " --model-name " + s_vad_path + " --export-dir ./ " + " --model_revision " + model_path["vad-revision"];
                 down_vad_path  = s_vad_path;
             }else{
                 // modelscope
                 LOG(INFO) << "Download model: " <<  s_vad_path << " from modelscope: ";
-                python_cmd_vad = python_cmd + " --model-name " + s_vad_path + " --export-dir " + s_download_model_dir + " --model_revision " + model_path["vad-revision"];
+                python_cmd_vad = python_cmd + " --type onnx " + " --quantize " + s_vad_quant + " --model-name " + s_vad_path + " --export-dir " + s_download_model_dir + " --model_revision " + model_path["vad-revision"];
                 down_vad_path  = s_download_model_dir+"/"+s_vad_path;
             }
                 
@@ -229,6 +242,7 @@ int main(int argc, char* argv[]) {
             std::string python_cmd_asr;
             std::string down_asr_path;
             std::string down_asr_model;
+            std::string model_type = "onnx";
 
             // modify model-revision by model name
             size_t found = s_asr_path.find("speech_paraformer-large-vad-punc_asr_nat-zh-cn-16k-common-vocab8404");
@@ -248,24 +262,39 @@ int main(int argc, char* argv[]) {
                 s_lm_path="";
             }
 
+            if (use_gpu_){
+                model_type = "torchscript";
+                if (s_blade=="true" || s_blade=="True" || s_blade=="TRUE"){
+                    model_type = "bladedisc";
+                }
+            }
+
             if (access(s_asr_path.c_str(), F_OK) == 0){
                 // local
-                python_cmd_asr = python_cmd + " --model-name " + s_asr_path + " --export-dir ./ " + " --model_revision " + model_path["model-revision"];
+                python_cmd_asr = python_cmd + " --type " + model_type + " --quantize " + s_asr_quant + " --model-name " + s_asr_path + " --export-dir ./ " + " --model_revision " + model_path["model-revision"];
                 down_asr_path  = s_asr_path;
             }else{
                 // modelscope
                 LOG(INFO) << "Download model: " <<  s_asr_path << " from modelscope: ";
-                python_cmd_asr = python_cmd + " --model-name " + s_asr_path + " --export-dir " + s_download_model_dir + " --model_revision " + model_path["model-revision"];
+                python_cmd_asr = python_cmd + " --type " + model_type + " --quantize " + s_asr_quant + " --model-name " + s_asr_path + " --export-dir " + s_download_model_dir + " --model_revision " + model_path["model-revision"];
                 down_asr_path  = s_download_model_dir+"/"+s_asr_path;
             }
-                
-            int ret = system(python_cmd_asr.c_str());
-            if(ret !=0){
-                LOG(INFO) << "Failed to download model from modelscope. If you set local asr model path, you can ignore the errors.";
-            }
+            
             down_asr_model = down_asr_path+"/model_quant.onnx";
             if(s_asr_quant=="false" || s_asr_quant=="False" || s_asr_quant=="FALSE"){
                 down_asr_model = down_asr_path+"/model.onnx";
+            }
+
+            if (use_gpu_){
+                down_asr_model = down_asr_path+"/model.torchscript";
+                if (s_blade=="true" || s_blade=="True" || s_blade=="TRUE"){
+                    down_asr_model = down_asr_path+"/model_blade.torchscript";
+                }
+            }
+
+            int ret = system(python_cmd_asr.c_str());
+            if(ret !=0){
+                LOG(INFO) << "Failed to download model from modelscope. If you set local asr model path, you can ignore the errors.";
             }
 
             if (access(down_asr_model.c_str(), F_OK) != 0){
@@ -286,7 +315,7 @@ int main(int argc, char* argv[]) {
 
             if (access(s_itn_path.c_str(), F_OK) == 0) {
                 // local
-                python_cmd_itn = python_cmd + " --model-name " + s_itn_path +
+                python_cmd_itn = python_cmd + " --type onnx " + " --model-name " + s_itn_path +
                                     " --export-dir ./ " + " --model_revision " +
                                     model_path["itn-revision"] + " --export False ";
                 down_itn_path = s_itn_path;
@@ -294,7 +323,7 @@ int main(int argc, char* argv[]) {
                 // modelscope
                 LOG(INFO) << "Download model: " << s_itn_path
                             << " from modelscope : "; 
-                python_cmd_itn = python_cmd + " --model-name " +
+                python_cmd_itn = python_cmd + " --type onnx " + " --model-name " +
                         s_itn_path +
                         " --export-dir " + s_download_model_dir +
                         " --model_revision " + model_path["itn-revision"]
@@ -328,7 +357,7 @@ int main(int argc, char* argv[]) {
 
             if (access(s_lm_path.c_str(), F_OK) == 0) {
                 // local
-                python_cmd_lm = python_cmd + " --model-name " + s_lm_path +
+                python_cmd_lm = python_cmd + " --type onnx " + " --model-name " + s_lm_path +
                                     " --export-dir ./ " + " --model_revision " +
                                     model_path["lm-revision"] + " --export False ";
                 down_lm_path = s_lm_path;
@@ -336,7 +365,7 @@ int main(int argc, char* argv[]) {
                 // modelscope
                 LOG(INFO) << "Download model: " << s_lm_path
                             << " from modelscope : "; 
-                python_cmd_lm = python_cmd + " --model-name " +
+                python_cmd_lm = python_cmd + " --type onnx " + " --model-name " +
                         s_lm_path +
                         " --export-dir " + s_download_model_dir +
                         " --model_revision " + model_path["lm-revision"]
@@ -371,12 +400,12 @@ int main(int argc, char* argv[]) {
 
             if (access(s_punc_path.c_str(), F_OK) == 0){
                 // local
-                python_cmd_punc = python_cmd + " --model-name " + s_punc_path + " --export-dir ./ " + " --model_revision " + model_path["punc-revision"];
+                python_cmd_punc = python_cmd + " --type onnx " + "--quantize " + s_punc_quant + " --model-name " + s_punc_path + " --export-dir ./ " + " --model_revision " + model_path["punc-revision"];
                 down_punc_path  = s_punc_path;
             }else{
                 // modelscope
                 LOG(INFO) << "Download model: " <<  s_punc_path << " from modelscope: ";
-                python_cmd_punc = python_cmd + " --model-name " + s_punc_path + " --export-dir " + s_download_model_dir + " --model_revision " + model_path["punc-revision"];
+                python_cmd_punc = python_cmd + " --type onnx " + "--quantize " + s_punc_quant + " --model-name " + s_punc_path + " --export-dir " + s_download_model_dir + " --model_revision " + model_path["punc-revision"];
                 down_punc_path  = s_download_model_dir+"/"+s_punc_path;
             }
                 
@@ -468,7 +497,7 @@ int main(int argc, char* argv[]) {
     WebSocketServer websocket_srv(
         io_decoder, is_ssl, server, wss_server, s_certfile,
         s_keyfile);  // websocket server for asr engine
-    websocket_srv.initAsr(model_path, s_model_thread_num);  // init asr model
+    websocket_srv.initAsr(model_path, s_model_thread_num, use_gpu_, batch_size_);  // init asr model
 
     LOG(INFO) << "decoder-thread-num: " << s_decoder_thread_num;
     LOG(INFO) << "io-thread-num: " << s_io_thread_num;

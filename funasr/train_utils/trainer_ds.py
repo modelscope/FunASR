@@ -29,9 +29,10 @@ def maybe_autocast(dtype=None, use_deepspeed=False):
         with torch.cuda.amp.autocast(enabled=True, dtype=dtype, cache_enabled=False):
             yield
     else:
-        if dtype == torch.float16:
-            with autocast(enabled=True):
-                yield
+        if dtype == torch.float16 or dtype == torch.bfloat16:
+            yield
+            # with autocast(enabled=True, dtype=dtype):
+            #     yield
         else:
             yield
 
@@ -60,6 +61,7 @@ class Trainer:
         use_ddp: bool = False,
         use_fsdp: bool = False,
         use_fp16: bool = False,
+        use_bf16: bool = False,
         use_deepspeed: bool = False,
         output_dir: str = "./",
         **kwargs,
@@ -78,7 +80,7 @@ class Trainer:
                       output_dir (str): The directory where model checkpoints will be saved. Default is './'.
                       resume (str, optional): The file path to a checkpoint to resume training from.
         """
-        self.rank = kwargs.get("rank", 0)
+        self.rank = rank
         self.local_rank = local_rank
         self.world_size = world_size
         self.use_ddp = use_ddp
@@ -98,8 +100,11 @@ class Trainer:
         self.batch_total = 0
         self.dtype = torch.float32
         self.use_fp16 = use_fp16
+        self.use_bf16 = use_bf16
         if self.use_fp16:
             self.dtype = torch.float16
+        if self.use_bf16:
+            self.dtype = torch.bfloat16
         self.save_checkpoint_interval = kwargs.get("save_checkpoint_interval", 5000)
         self.validate_interval = kwargs.get("validate_interval", 5000)
         self.keep_nbest_models = kwargs.get("keep_nbest_models", 500)
@@ -147,6 +152,16 @@ class Trainer:
 
         self.use_deepspeed = use_deepspeed
         self.deepspeed_config = kwargs.get("deepspeed_config", "")
+        excludes = kwargs.get("excludes", None)
+        if excludes is not None:
+            if isinstance(excludes, str):
+                excludes = excludes.split(",")
+        self.excludes = excludes
+        effective_save_name_excludes = kwargs.get("effective_save_name_excludes", None)
+        if effective_save_name_excludes is not None:
+            if isinstance(effective_save_name_excludes, str):
+                effective_save_name_excludes = effective_save_name_excludes.split(",")
+        self.effective_save_name_excludes = effective_save_name_excludes
 
     def save_checkpoint(
         self,
@@ -167,6 +182,8 @@ class Trainer:
         Args:
             epoch (int): The epoch number at which the checkpoint is being saved.
         """
+        if self.use_ddp or self.use_fsdp:
+            dist.barrier()
         step_in_epoch = None if step is None else step_in_epoch
         if self.use_deepspeed:
 
@@ -275,11 +292,12 @@ class Trainer:
         elif self.use_fsdp:
             pass
         elif self.rank == 0:
-            logging.info(f"Save checkpoint: {epoch}, rank: {self.local_rank}\n")
+            logging.info(
+                f"Save checkpoint: {epoch}, rank: {self.rank}, local_rank: {self.local_rank}\n"
+            )
             # self.step_or_epoch += 1
             state = {
                 "epoch": epoch,
-                "state_dict": model.state_dict(),
                 "optimizer": optim.state_dict(),
                 "scheduler": scheduler.state_dict(),
                 "saved_ckpts": self.saved_ckpts,
@@ -297,7 +315,24 @@ class Trainer:
             }
             step = step_in_epoch
             if hasattr(model, "module"):
-                state["state_dict"] = model.module.state_dict()
+                state_dict = model.module.state_dict()
+            else:
+                state_dict = model.state_dict()
+
+            if self.effective_save_name_excludes is not None:
+                logging.info(f"effective_save_name_excludes: {self.effective_save_name_excludes}")
+                dst_state_dict = {}
+                for k in state_dict.keys():
+                    for k_ex in self.effective_save_name_excludes:
+                        k_tmp = k.replace("module.", "")
+                        if k.startswith(k_ex):
+                            logging.info(f"key: {k} matching: {k_ex}, not save it")
+                            break
+                    else:
+                        dst_state_dict[k] = state_dict[k]
+                state["state_dict"] = dst_state_dict
+            else:
+                state["state_dict"] = state_dict
 
             if scaler:
                 state["scaler_state"] = scaler.state_dict()
@@ -438,6 +473,16 @@ class Trainer:
                     src_state = checkpoint["state_dict"]
                     dst_state = model.state_dict()
                     for k in dst_state.keys():
+                        excludes_flag = False
+                        if self.excludes is not None:
+                            for k_ex in self.excludes:
+                                k_tmp = k.replace("module.", "")
+                                if k_tmp.startswith(k_ex):
+                                    logging.info(f"key: {k} matching: {k_ex}, excluded")
+                                    excludes_flag = True
+                                    break
+                        if excludes_flag:
+                            continue
                         if not k.startswith("module.") and "module." + k in src_state.keys():
                             k_ddp = "module." + k
                         elif k.startswith("module.") and "module." + k not in src_state.keys():
@@ -621,7 +666,6 @@ class Trainer:
             self.train_acc_avg = train_acc_avg.detach().cpu().item() / self.world_size
 
     def forward_step(self, model, batch, loss_dict={}):
-        dtype = torch.bfloat16
         with maybe_autocast(dtype=self.dtype, use_deepspeed=self.use_deepspeed):
             retval = model(**batch)
 
@@ -639,7 +683,7 @@ class Trainer:
             scaled_loss = model.backward(loss)
         else:
             loss = loss / self.accum_grad
-            if self.use_fp16:
+            if self.use_fp16 or self.use_bf16:
                 scaler.scale(loss).backward()
             else:
                 loss.backward()
@@ -667,7 +711,7 @@ class Trainer:
                 # Execute an optimization step (update model parameters)
                 if self.use_ddp or self.use_fsdp:
                     dist.barrier()
-                if self.use_fp16:
+                if self.use_fp16 or self.use_bf16:
                     scaler.step(optim)
                     scaler.update()
                 else:
@@ -761,6 +805,10 @@ class Trainer:
             ckpt_name = f'model.pt.ep{epoch}.{kwargs.get("step_in_epoch")}'
         self.val_acc_step_or_eoch[ckpt_name] = self.val_acc_avg
         self.val_loss_step_or_eoch[ckpt_name] = self.val_loss_avg
+
+        if self.use_ddp or self.use_fsdp or self.use_deepspeed:
+            dist.barrier()
+
         model.train()
 
     def log(

@@ -359,7 +359,7 @@ tensorboard --logdir /xxxx/FunASR/examples/industrial_data_pretraining/paraforme
 
 #### 有configuration.json
 
-假定，训练模型路径为：./model_dir，如果改目录下有生成configuration.json，只需要将 [上述模型推理方法](https://github.com/alibaba-damo-academy/FunASR/blob/main/examples/README_zh.md#%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86) 中模型名字修改为模型路径即可
+假定，训练模型路径为：./model_dir，如果该目录下有生成configuration.json，只需要将 [上述模型推理方法](https://github.com/alibaba-damo-academy/FunASR/blob/main/examples/README_zh.md#%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86) 中模型名字修改为模型路径即可
 
 例如：
 

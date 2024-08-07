@@ -49,3 +49,9 @@ class SentencepiecesTokenizer(BaseTokenizer):
 
     def get_vocab_size(self):
         return self.sp.GetPieceSize()
+
+    def ids2tokens(self, *args, **kwargs):
+        return self.decode(*args, **kwargs)
+
+    def tokens2ids(self, *args, **kwargs):
+        return self.encode(*args, **kwargs)

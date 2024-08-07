@@ -1,0 +1,22 @@
+FROM nvcr.io/nvidia/tritonserver:24.05-py3
+# https://docs.nvidia.com/deeplearning/frameworks/support-matrix/index.html
+# Please choose previous tritonserver:xx.xx if you encounter cuda driver mismatch issue
+
+LABEL maintainer="NVIDIA"
+LABEL repository="tritonserver"
+
+RUN pip install torch
+RUN apt-get update  && apt-get -y install cmake
+
+WORKDIR /workspace
+RUN pip install -U "huggingface_hub[cli]" tritonclient[all] soundfile pyyaml torchaudio sentencepiece
+
+ENV TORCH_CUDA_ARCH_LIST="8.0 8.6 8.9 9.0"
+RUN git clone https://github.com/csukuangfj/kaldifeat && \
+    cd kaldifeat && \
+    sed -i 's/in running_cuda_version//g' get_version.py && \
+    python3 setup.py install && \
+    cd -
+
+RUN huggingface-cli download --local-dir ./model_repo_sense_voice_small yuekai/model_repo_sense_voice_small
+RUN rm -r ./model_repo_sense_voice_small/.huggingface

@@ -51,6 +51,7 @@ dynamic_batching {
     max_queue_delay_microseconds: 500
   }
 
+parameters { key: "cudnn_conv_algo_search" value: { string_value: "2" } }
 
 instance_group [
     {

@@ -402,11 +402,11 @@ void WebSocketServer::on_message(websocketpp::connection_hdl hdl,
 
 // init asr model
 void WebSocketServer::initAsr(std::map<std::string, std::string>& model_path,
-                              int thread_num) {
+                              int thread_num, bool use_gpu, int batch_size) {
   try {
     // init model with api
 
-    asr_handle = FunOfflineInit(model_path, thread_num);
+    asr_handle = FunOfflineInit(model_path, thread_num, use_gpu, batch_size);
     LOG(INFO) << "model successfully inited";
     
     LOG(INFO) << "initAsr run check_and_clean_connection";

@@ -180,7 +180,7 @@ async def ws_serve(websocket, path):
                         "decoder_chunk_look_back"
                     ]
                 if "hotword" in messagejson:
-                    websocket.status_dict_asr["hotword"] = messagejson["hotword"]
+                    websocket.status_dict_asr["hotword"] = messagejson["hotwords"]
                 if "mode" in messagejson:
                     websocket.mode = messagejson["mode"]
 

@@ -5,6 +5,10 @@
 #include <string>
 #include <map>
 #include "funasrruntime.h"
+#include "vocab.h"
+#include "phone-set.h"
+#include "fst/fstlib.h"
+#include "fst/symbol-table.h"
 namespace funasr {
 class Model {
   public:
@@ -18,13 +22,19 @@ class Model {
     virtual void InitLm(const std::string &lm_file, const std::string &lm_config, const std::string &lex_file){};
     virtual void InitFstDecoder(){};
     virtual std::string Forward(float *din, int len, bool input_finished, const std::vector<std::vector<float>> &hw_emb={{0.0}}, void* wfst_decoder=nullptr){return "";};
+    virtual std::vector<std::string> Forward(float** din, int* len, bool input_finished, const std::vector<std::vector<float>> &hw_emb={{0.0}}, void* wfst_decoder=nullptr, int batch_in=1)
+      {return std::vector<string>();};
     virtual std::string Rescoring() = 0;
     virtual void InitHwCompiler(const std::string &hw_model, int thread_num){};
     virtual void InitSegDict(const std::string &seg_dict_model){};
     virtual std::vector<std::vector<float>> CompileHotwordEmbedding(std::string &hotwords){return std::vector<std::vector<float>>();};
     virtual std::string GetLang(){return "";};
     virtual int GetAsrSampleRate() = 0;
-
+    virtual void SetBatchSize(int batch_size) {};
+    virtual int GetBatchSize() {return 0;};
+    virtual Vocab* GetVocab() {return nullptr;};
+    virtual Vocab* GetLmVocab() {return nullptr;};
+    virtual PhoneSet* GetPhoneSet() {return nullptr;};
 };
 
 Model *CreateModel(std::map<std::string, std::string>& model_path, int thread_num=1, ASR_TYPE type=ASR_OFFLINE);

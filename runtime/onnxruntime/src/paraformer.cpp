@@ -462,15 +462,23 @@ void Paraformer::LfrCmvn(std::vector<std::vector<float>> &asr_feats) {
     asr_feats = out_feats;
 }
 
-string Paraformer::Forward(float* din, int len, bool input_finished, const std::vector<std::vector<float>> &hw_emb, void* decoder_handle)
+std::vector<std::string> Paraformer::Forward(float** din, int* len, bool input_finished, const std::vector<std::vector<float>> &hw_emb, void* decoder_handle, int batch_in)
 {
+    std::vector<std::string> results;
+    string result="";
     WfstDecoder* wfst_decoder = (WfstDecoder*)decoder_handle;
     int32_t in_feat_dim = fbank_opts_.mel_opts.num_bins;
 
+    if(batch_in != 1){
+        results.push_back(result);
+        return results;
+    }
+
     std::vector<std::vector<float>> asr_feats;
-    FbankKaldi(asr_sample_rate, din, len, asr_feats);
+    FbankKaldi(asr_sample_rate, din[0], len[0], asr_feats);
     if(asr_feats.size() == 0){
-      return "";
+        results.push_back(result);
+        return results;
     }
     LfrCmvn(asr_feats);
     int32_t feat_dim = lfr_m*in_feat_dim;
@@ -509,7 +517,8 @@ string Paraformer::Forward(float* din, int len, bool input_finished, const std::
         if (use_hotword) {
             if(hw_emb.size()<=0){
                 LOG(ERROR) << "hw_emb is null";
-                return "";
+                results.push_back(result);
+                return results;
             }
             //PrintMat(hw_emb, "input_clas_emb");
             const int64_t hotword_shape[3] = {1, static_cast<int64_t>(hw_emb.size()), static_cast<int64_t>(hw_emb[0].size())};
@@ -526,10 +535,10 @@ string Paraformer::Forward(float* din, int len, bool input_finished, const std::
     }catch (std::exception const &e)
     {
         LOG(ERROR)<<e.what();
-        return "";
+        results.push_back(result);
+        return results;
     }
 
-    string result="";
     try {
         auto outputTensor = m_session_->Run(Ort::RunOptions{nullptr}, m_szInputNames.data(), input_onnx.data(), input_onnx.size(), m_szOutputNames.data(), m_szOutputNames.size());
         std::vector<int64_t> outputShape = outputTensor[0].GetTensorTypeAndShapeInfo().GetShape();
@@ -577,7 +586,8 @@ string Paraformer::Forward(float* din, int len, bool input_finished, const std::
         LOG(ERROR)<<e.what();
     }
 
-    return result;
+    results.push_back(result);
+    return results;
 }
 
 

@@ -198,7 +198,7 @@ class CifPredictorV3(torch.nn.Module):
             output2 = self.upsample_cnn(_output)
             output2 = output2.transpose(1, 2)
             output2, _ = self.self_attn(output2, mask)
-        # import pdb; pdb.set_trace()
+        
         alphas2 = torch.sigmoid(self.cif_output2(output2))
         alphas2 = torch.nn.functional.relu(alphas2 * self.smooth_factor2 - self.noise_threshold2)
         # repeat the mask in T demension to match the upsampled length

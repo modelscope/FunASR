@@ -7,7 +7,7 @@ import logging
 from omegaconf import DictConfig, OmegaConf
 
 from funasr.register import tables
-from funasr.download.download_from_hub import download_model
+from funasr.download.download_model_from_hub import download_model
 from funasr.train_utils.set_all_random_seed import set_all_random_seed
 
 
@@ -52,7 +52,7 @@ def main(**kwargs):
         frontend=frontend,
         tokenizer=None,
         is_training=False,
-        **kwargs.get("dataset_conf")
+        **kwargs.get("dataset_conf"),
     )
 
     # dataloader
@@ -68,11 +68,14 @@ def main(**kwargs):
         dataset_train, collate_fn=dataset_train.collator, **batch_sampler_train
     )
 
-    iter_stop = int(kwargs.get("scale", 1.0) * len(dataloader_train))
-
     total_frames = 0
     for batch_idx, batch in enumerate(dataloader_train):
-        if batch_idx >= iter_stop:
+        iter_stop = int(kwargs.get("scale", -1.0) * len(dataloader_train))
+        log_step = iter_stop // 100
+        if batch_idx % log_step == 0:
+            logging.info(f"prcessed: {batch_idx}/{iter_stop}")
+        if batch_idx >= iter_stop and iter_stop > 0.0:
+            logging.info(f"prcessed: {iter_stop}/{iter_stop}")
             break
 
         fbank = batch["speech"].numpy()[0, :, :]

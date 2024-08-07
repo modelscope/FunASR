@@ -4,6 +4,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 
+// 模型文件下载地址：https://modelscope.cn/models/iic/speech_fsmn_vad_zh-cn-16k-common-onnx/
+
 namespace AliFsmnVadSharp
 {
     public class AliFsmnVad : IDisposable
@@ -28,9 +30,9 @@ namespace AliFsmnVadSharp
             VadYamlEntity vadYamlEntity = YamlHelper.ReadYaml<VadYamlEntity>(configFilePath);
             _wavFrontend = new WavFrontend(mvnFilePath, vadYamlEntity.frontend_conf);
             _frontend = vadYamlEntity.frontend;
-            _vad_post_conf = vadYamlEntity.vad_post_conf;
+            _vad_post_conf = vadYamlEntity.model_conf;
             _batchSize = batchSize;
-            _max_end_sil = _max_end_sil != int.MinValue ? _max_end_sil : vadYamlEntity.vad_post_conf.max_end_silence_time;
+            _max_end_sil = _max_end_sil != int.MinValue ? _max_end_sil : vadYamlEntity.model_conf.max_end_silence_time;
             _encoderConfEntity = vadYamlEntity.encoder_conf;
 
             ILoggerFactory loggerFactory = new LoggerFactory();

@@ -64,7 +64,7 @@ class EncoderLayer(nn.Module):
         stochastic_depth_rate=0.0,
     ):
         """Construct an EncoderLayer object."""
-        super(EncoderLayer, self).__init__()
+        super().__init__()
         self.self_attn = self_attn
         self.feed_forward = feed_forward
         self.norm1 = LayerNorm(size)

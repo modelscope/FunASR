@@ -85,7 +85,12 @@ class Trainer:
         self.batch_total = 0
         self.use_fp16 = use_fp16
         self.save_checkpoint_interval = kwargs.get("save_checkpoint_interval", 5000)
-        self.validate_interval = kwargs.get("validate_interval", 5000)
+        self.validate_interval = kwargs.get("validate_interval", -1)
+        if self.validate_interval < 0:
+            self.validate_interval = self.save_checkpoint_interval
+        assert (
+            self.save_checkpoint_interval == self.validate_interval
+        ), f"save_checkpoint_interval must equal to validate_interval"
         self.keep_nbest_models = kwargs.get("keep_nbest_models", 500)
         self.avg_keep_nbest_models_type = kwargs.get("avg_keep_nbest_models_type", "acc")
         self.avg_nbest_model = kwargs.get("avg_nbest_model", 10)
@@ -357,10 +362,10 @@ class Trainer:
         time_beg = time.perf_counter()
         time5 = time_beg
         for batch_idx, batch in enumerate(dataloader_train):
-            if self.use_ddp or self.use_fsdp:
-                dist.all_reduce(iterator_stop, dist.ReduceOp.SUM)
-                if iterator_stop > 0:
-                    break
+            # if self.use_ddp or self.use_fsdp:
+            #     dist.all_reduce(iterator_stop, dist.ReduceOp.SUM)
+            #     if iterator_stop > 0:
+            #         break
             self.batch_total += 1
             self.step_in_epoch += 1
             time1 = time.perf_counter()
@@ -376,11 +381,11 @@ class Trainer:
                 with maybe_autocast(self.use_fp16):
                     retval = model(**batch)
 
-                    if (
-                        self.reset_gpu_cache
-                        and (torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024) > 70
-                    ):
-                        torch.cuda.empty_cache()
+                    # if (
+                    #     self.reset_gpu_cache
+                    #     and (torch.cuda.max_memory_reserved() / 1024 / 1024 / 1024) > 70
+                    # ):
+                    #     torch.cuda.empty_cache()
 
                 loss, stats, weight = retval
                 stats = {k: v for k, v in stats.items() if v is not None}
@@ -476,7 +481,7 @@ class Trainer:
                     step_in_epoch=self.step_in_epoch,
                     batch_num_epoch=batch_num_epoch,
                     lr=lr,
-                    loss=loss.detach().cpu().item(),
+                    loss=accum_grad * loss.detach().cpu().item(),
                     speed_stats=speed_stats,
                     stats=stats,
                     writer=writer,
@@ -511,14 +516,14 @@ class Trainer:
                 )
 
             time_beg = time.perf_counter()
-        else:
-            if self.use_ddp or self.use_fsdp:
-                iterator_stop.fill_(1)
-                dist.all_reduce(iterator_stop, dist.ReduceOp.SUM)
+        # else:
+        #     if self.use_ddp or self.use_fsdp:
+        #         iterator_stop.fill_(1)
+        #         dist.all_reduce(iterator_stop, dist.ReduceOp.SUM)
 
         if self.use_ddp or self.use_fsdp:
             dist.barrier()
-            iterator_stop = torch.tensor(0).to(self.device)
+            # iterator_stop = torch.tensor(0).to(self.device)
 
     def validate_epoch(
         self,

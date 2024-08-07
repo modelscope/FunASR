@@ -14,7 +14,7 @@ workspace=`pwd`
 local_path_root=${workspace}/modelscope_models
 mkdir -p ${local_path_root}
 local_path=${local_path_root}/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch
-git clone https://www.modelscope.cn/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch.git ${local_path}
+git lfs clone https://www.modelscope.cn/damo/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch.git ${local_path}
 
 device="cuda:0" # "cuda:0" for gpu0, "cuda:1" for gpu1, "cpu"
 

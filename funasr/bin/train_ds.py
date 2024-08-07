@@ -27,7 +27,7 @@ from funasr.optimizers import optim_classes
 from funasr.train_utils.trainer_ds import Trainer
 from funasr.schedulers import scheduler_classes
 from funasr.train_utils.initialize import initialize
-from funasr.download.download_from_hub import download_model
+from funasr.download.download_model_from_hub import download_model
 from funasr.models.lora.utils import mark_only_lora_as_trainable
 from funasr.train_utils.set_all_random_seed import set_all_random_seed
 from funasr.train_utils.load_pretrained_model import load_pretrained_model
@@ -84,6 +84,8 @@ def main(**kwargs):
         dist.init_process_group(backend=kwargs.get("backend", "nccl"), init_method="env://")
         torch.cuda.set_device(local_rank)
 
+    # rank = dist.get_rank()
+
     logging.info("Build model, frontend, tokenizer")
     device = kwargs.get("device", "cuda")
     kwargs["device"] = "cpu"
@@ -124,6 +126,7 @@ def main(**kwargs):
         use_ddp=use_ddp,
         use_fsdp=use_fsdp,
         device=kwargs["device"],
+        excludes=kwargs.get("excludes", None),
         output_dir=kwargs.get("output_dir", "./exp"),
         **kwargs.get("train_conf"),
     )
@@ -143,7 +146,7 @@ def main(**kwargs):
     dataloader = dataloader_class(**kwargs)
     # dataloader_tr, dataloader_val = dataloader_class(**kwargs)
 
-    scaler = GradScaler(enabled=trainer.use_fp16) if trainer.use_fp16 else None
+    scaler = GradScaler(enabled=True) if trainer.use_fp16 or trainer.use_bf16 else None
     scaler = ShardedGradScaler(enabled=trainer.use_fp16) if trainer.use_fsdp else scaler
 
     trainer.resume_checkpoint(
@@ -158,6 +161,8 @@ def main(**kwargs):
         time1 = time.perf_counter()
 
         for data_split_i in range(trainer.start_data_split_i, dataloader.data_split_num):
+            time_slice_i = time.perf_counter()
+
             dataloader_tr, dataloader_val = dataloader.build_iter(
                 epoch, data_split_i=data_split_i, start_step=trainer.start_step
             )
@@ -178,6 +183,14 @@ def main(**kwargs):
 
             torch.cuda.empty_cache()
 
+            time_escaped = (time.perf_counter() - time_slice_i) / 3600.0
+            logging.info(
+                f"\n\nrank: {local_rank}, "
+                f"time_escaped_epoch: {time_escaped:.3f} hours, "
+                f"estimated to finish {dataloader.data_split_num} data_slices, remaining: {dataloader.data_split_num-data_split_i} slices, {(dataloader.data_split_num-data_split_i)*time_escaped:.3f} hours, "
+                f"epoch: {trainer.max_epoch - epoch} epochs, {((trainer.max_epoch - epoch - 1)*dataloader.data_split_num + dataloader.data_split_num-data_split_i)*time_escaped:.3f} hours\n"
+            )
+
         trainer.start_data_split_i = 0
         trainer.validate_epoch(model=model, dataloader_val=dataloader_val, epoch=epoch + 1)
         scheduler.step()
@@ -189,7 +202,7 @@ def main(**kwargs):
         time2 = time.perf_counter()
         time_escaped = (time2 - time1) / 3600.0
         logging.info(
-            f"rank: {local_rank}, "
+            f"\n\nrank: {local_rank}, "
             f"time_escaped_epoch: {time_escaped:.3f} hours, "
             f"estimated to finish {trainer.max_epoch} "
             f"epoch: {(trainer.max_epoch - epoch) * time_escaped:.3f} hours\n"
