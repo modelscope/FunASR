@@ -160,7 +160,11 @@ class AutoModel:
             if spk_mode not in ["default", "vad_segment", "punc_segment"]:
                 logging.error("spk_mode should be one of default, vad_segment and punc_segment.")
             self.spk_mode = spk_mode
-
+        ser_model = kwargs.get("ser_model", None)
+        ser_kwargs = {} if kwargs.get("ser_kwargs", {}) is None else kwargs.get("ser_kwargs", {})
+        if ser_model is not None:
+            logging.info("Building SER model.")
+            ser_model, ser_kwargs = self.build_model(**ser_kwargs)
         self.kwargs = kwargs
         self.model = model
         self.vad_model = vad_model
@@ -169,6 +173,8 @@ class AutoModel:
         self.punc_kwargs = punc_kwargs
         self.spk_model = spk_model
         self.spk_kwargs = spk_kwargs
+        self.ser_model = ser_model
+        self.ser_kwargs = ser_kwargs
         self.model_path = kwargs.get("model_path")
 
     @staticmethod
@@ -437,6 +443,11 @@ class AutoModel:
                             speech_b, input_len=None, model=self.spk_model, kwargs=kwargs, **cfg
                         )
                         results[_b]["spk_embedding"] = spk_res[0]["spk_embedding"]
+                        if self.ser_model is not None:
+                            ser_res = self.inference(speech_b, input_len=None, model=self.ser_model, kwargs=self.ser_kwargs, **cfg)
+                            if "SenseVoiceSmall" in kwargs.get("ser_model", None):
+                                results[_b]["ser_type"] = [i['text'].split("|><|")[1] for i in ser_res]
+
                 beg_idx = end_idx
                 end_idx += 1
                 max_len_in_batch = sample_length
@@ -529,6 +540,7 @@ class AutoModel:
                                 "end": vadsegment[1],
                                 "sentence": rest["text"],
                                 "timestamp": rest["timestamp"],
+                                "emotion": rest["ser_type"],
                             }
                         )
                 elif self.spk_mode == "punc_segment":
@@ -552,6 +564,9 @@ class AutoModel:
                             raw_text,
                             return_raw_text=return_raw_text,
                         )
+                    if len(sentence_list) == len(result["ser_type"]):
+                        for i in range(len(sentence_list)):
+                            sentence_list[i]["emotion"] = result["ser_type"][i]
                 distribute_spk(sentence_list, sv_output)
                 result["sentence_info"] = sentence_list
             elif kwargs.get("sentence_timestamp", False):
@@ -575,6 +590,8 @@ class AutoModel:
                 result["sentence_info"] = sentence_list
             if "spk_embedding" in result:
                 del result["spk_embedding"]
+            if "ser_type" in result:
+                del result["ser_type"]
 
             result["key"] = key
             results_ret_list.append(result)
