@@ -106,7 +106,7 @@
                         childer: [
                             {
                                 name: '关于我们',
-                                link: 'https://www.baidu.com/'
+                                link: ''
                             }
                         ]
                     },
