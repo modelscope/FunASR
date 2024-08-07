@@ -237,6 +237,7 @@ class AutoModel:
                         scope_map=kwargs.get("scope_map", []),
                         excludes=kwargs.get("excludes", None),
                         use_deepspeed=kwargs.get("train_conf", {}).get("use_deepspeed", False),
+                        save_deepspeed_zero_fp32=kwargs.get("save_deepspeed_zero_fp32", False),
                     )
                 else:
                     print(f"error, init_param from ckpt-{i} does not exist!: {init_param_i}")

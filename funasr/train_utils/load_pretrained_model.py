@@ -41,12 +41,24 @@ def load_pretrained_model(
             ckpt_name = os.path.basename(path)
             if os.path.exists(f"{ckpt_dir}/zero_to_fp32.py"):
                 print("Detect zero_to_fp32, begin to convert fp32 model")
-                from deepspeed.utils.zero_to_fp32 import get_fp32_state_dict_from_zero_checkpoint
+                ckpt_fp32 = f"{ckpt_dir}/{ckpt_name[3:]}"
+                if os.path.exists(ckpt_fp32):
+                    print(f"Detect zero_to_fp32 already exist! Loading it directly. {ckpt_fp32}")
+                    src_state = torch.load(ckpt_fp32, map_location=map_location)
+                else:
+                    with open(f"{ckpt_dir}/latest", "w") as latest:
+                        latest.write(ckpt_name)
+                        latest.flush()
+                    from deepspeed.utils.zero_to_fp32 import (
+                        get_fp32_state_dict_from_zero_checkpoint,
+                    )
 
-                with open(f"{ckpt_dir}/latest", "w") as latest:
-                    latest.write(ckpt_name)
-                    latest.flush()
-                src_state = get_fp32_state_dict_from_zero_checkpoint(ckpt_dir)  # already on cpu
+                    src_state = get_fp32_state_dict_from_zero_checkpoint(ckpt_dir)  # already on cpu
+                    if kwargs.get("save_deepspeed_zero_fp32", False):
+                        print(
+                            f'save_deepspeed_zero_fp32: {kwargs.get("save_deepspeed_zero_fp32", False)}, {ckpt_fp32}'
+                        )
+                        torch.save({"state_dict": src_state}, ckpt_fp32)
             else:
                 print("Detect deepspeed without zero, load fp32 model directly")
                 for item in os.listdir(path):
