@@ -2,7 +2,7 @@ from typing import Any
 from typing import Dict
 from typing import Union
 from io import BytesIO
-
+import os
 import logging
 import torch
 import torch.nn
@@ -31,11 +31,30 @@ def load_pretrained_model(
 
     obj = model
     dst_state = obj.state_dict()
+    use_deepspeed = kwargs.get("use_deepspeed", False)
 
-    logging.info(f"ckpt: {path}")
+    logging.info(f"ckpt: {path}, use_deepspeed: {use_deepspeed}")
 
     if oss_bucket is None:
-        src_state = torch.load(path, map_location=map_location)
+        if use_deepspeed:
+            ckpt_dir = os.path.dirname(path)
+            ckpt_name = os.path.basename(path)
+            if os.path.exists(f"{ckpt_dir}/zero_to_fp32.py"):
+                print("Detect zero_to_fp32, begin to convert fp32 model")
+                from deepspeed.utils.zero_to_fp32 import get_fp32_state_dict_from_zero_checkpoint
+
+                with open(f"{ckpt_dir}/latest", "w") as latest:
+                    latest.write(ckpt_name)
+                    latest.flush()
+                src_state = get_fp32_state_dict_from_zero_checkpoint(ckpt_dir)  # already on cpu
+            else:
+                print("Detect deepspeed without zero, load fp32 model directly")
+                for item in os.listdir(path):
+                    if item.endswith(".pt"):
+                        src_state = torch.load(f"{path}/{item}", map_location=map_location)
+
+        else:
+            src_state = torch.load(path, map_location=map_location)
     else:
         buffer = BytesIO(oss_bucket.get_object(path).read())
         src_state = torch.load(buffer, map_location=map_location)
@@ -100,30 +119,3 @@ def load_pretrained_model(
 
     flag = obj.load_state_dict(dst_state, strict=True)
     logging.info(f"Loading ckpt: {path}, status: {flag}")
-
-
-# def load_pretrained_model(
-#     path,
-#     model: torch.nn.Module,
-#     ignore_init_mismatch: bool = True,
-#     map_location: str = "cpu",
-#     oss_bucket=None,
-#     scope_map=[],
-#     excludes=None,
-#     **kwargs,
-# ):
-#     if isinstance(path, str):
-#         path = path.split(",")
-#
-#     for i, path_i in enumerate(path):
-#         logging.info(f"Loading ckpt-{i}: {path_i}")
-#         _load_pretrained_model(
-#             path_i,
-#             model=model,
-#             ignore_init_mismatch=ignore_init_mismatch,
-#             map_location=map_location,
-#             oss_bucket=oss_bucket,
-#             scope_map=scope_map,
-#             excludes=excludes,
-#             **kwargs,
-#         )
