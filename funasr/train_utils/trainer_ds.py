@@ -895,6 +895,13 @@ class Trainer:
             if writer is not None:
                 writer.add_scalar(f"rank{self.rank}_loss/{tag}", loss, batch_total)
                 writer.add_scalar(f"rank{self.rank}_lr/{tag}", lr, batch_total)
+                writer.add_scalar(
+                    f"rank{self.rank}_acc_avg_slice/{tag}", acc_avg_epoch, batch_total
+                )
+                writer.add_scalar(
+                    f"rank{self.rank}_loss_avg_epoch/{tag}", loss_avg_epoch, batch_total
+                )
+
                 for key, var in stats.items():
                     writer.add_scalar(f"stats_rank{self.rank}_{key}/{tag}", var.item(), batch_total)
                     description_dict[f"stats_rank{self.rank}_{key}/{tag}"] = var.item()
