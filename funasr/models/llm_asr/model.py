@@ -981,6 +981,7 @@ class LLMASR4(nn.Module):
 
         self.length_normalized_loss = length_normalized_loss
         self.beam_search = None
+        import os
 
         rank = int(os.environ.get("RANK", 0))
         logging.info(f"rank: {rank}, model is builded.")
