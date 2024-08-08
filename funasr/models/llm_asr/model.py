@@ -982,6 +982,9 @@ class LLMASR4(nn.Module):
         self.length_normalized_loss = length_normalized_loss
         self.beam_search = None
 
+        rank = int(os.environ.get("RANK", 0))
+        logging.info(f"rank: {rank}, model is builded.")
+
     def forward(
         self,
         speech: torch.Tensor = None,
