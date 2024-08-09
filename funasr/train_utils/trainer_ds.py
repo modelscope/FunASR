@@ -145,7 +145,7 @@ class Trainer:
         try:
             from tensorboardX import SummaryWriter
 
-            self.writer = SummaryWriter(tensorboard_dir)  # if trainer.rank == 0 else None
+            self.writer = SummaryWriter(tensorboard_dir) if self.rank == 0 else None
         except:
             self.writer = None
 
@@ -190,7 +190,7 @@ class Trainer:
         step_in_epoch = None if step is None else step_in_epoch
         if self.use_deepspeed:
 
-            logging.info(f"Save checkpoint: {epoch}, rank: {self.local_rank}\n")
+            logging.info(f"Save checkpoint: {epoch}, rank: {self.rank}\n")
             # self.step_or_epoch += 1
             state = {
                 "epoch": epoch,
