@@ -107,6 +107,24 @@ def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
     return key_list, data_list
 
 
+def distribute_emotion(sentence_list, ser_time_list):
+    ser_time_list = [(st * 1000, ed * 1000, emotion) for st, ed, emotion in ser_time_list]
+    for d in sentence_list:
+        sentence_start = d['start']
+        sentence_end = d['end']
+        sentence_emotion = "EMO_UNKNOWN"
+        max_overlap = 0
+        for st, ed, emotion in ser_time_list:
+            overlap = max(min(sentence_end, ed) - max(sentence_start, st), 0)
+            if overlap > max_overlap:
+                max_overlap = overlap
+                sentence_emotion = emotion
+            if overlap > 0 and sentence_emotion == emotion:
+                max_overlap += overlap
+        d['emotion'] = sentence_emotion
+    return sentence_list
+
+
 class AutoModel:
 
     def __init__(self, **kwargs):
@@ -567,6 +585,9 @@ class AutoModel:
                     if len(sentence_list) == len(result["ser_type"]):
                         for i in range(len(sentence_list)):
                             sentence_list[i]["emotion"] = result["ser_type"][i]
+                    else:
+                        merged_list = [[x[0], x[1], y] for x, y in zip(all_segments, result["ser_type"])]
+                        distribute_emotion(sentence_list, merged_list)
                 distribute_spk(sentence_list, sv_output)
                 result["sentence_info"] = sentence_list
             elif kwargs.get("sentence_timestamp", False):
