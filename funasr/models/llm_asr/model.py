@@ -1161,9 +1161,15 @@ class LLMASR4(nn.Module):
             if isinstance(user_prompt, (list, tuple)):
                 user_prompt, audio = user_prompt
             if i == 0:
-                source_input = f"<|im_start|>system\n{system_prompt}<|im_end|>\n<|im_start|>user\n{user_prompt}<|im_end|>\n<|im_start|>assistant\n"
+                if kwargs.get("infer_with_assistant_input", False):
+                    source_input = f"<|im_start|>system\n{system_prompt}<|im_end|>\n<|im_start|>user\n{user_prompt}"
+                else:
+                    source_input = f"<|im_start|>system\n{system_prompt}<|im_end|>\n<|im_start|>user\n{user_prompt}<|im_end|>\n<|im_start|>assistant\n"
             else:
-                source_input = f"<|im_start|>user\n{user_prompt}<|im_end|>\n<|im_start|>assistant\n"
+                if kwargs.get("infer_with_assistant_input", False):
+                    source_input = f"<|im_start|>user\n{user_prompt}"
+                else:
+                    source_input = f"<|im_start|>user\n{user_prompt}<|im_end|>\n<|im_start|>assistant\n"
 
             splits = pattern.split(source_input)
             source_ids = []
