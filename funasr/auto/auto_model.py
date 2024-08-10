@@ -110,16 +110,17 @@ def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
 class AutoModel:
 
     def __init__(self, **kwargs):
+        check_update = kwargs.get("check_for_update", True)
+        if check_update:
+            try:
+                from funasr.utils.version_checker import check_for_update
 
-        try:
-            from funasr.utils.version_checker import check_for_update
-
-            print(
-                "Check update of funasr, and it would cost few times. You may disable it by set `disable_update=True` in AutoModel"
-            )
-            check_for_update(disable=kwargs.get("disable_update", False))
-        except:
-            pass
+                print(
+                    "Check update of funasr, and it would cost few times. You may disable it by set `disable_update=True` in AutoModel"
+                )
+                check_for_update(disable=kwargs.get("disable_update", False))
+            except:
+                pass
 
         log_level = getattr(logging, kwargs.get("log_level", "INFO").upper())
         logging.basicConfig(level=log_level)
