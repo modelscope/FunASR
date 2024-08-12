@@ -462,9 +462,14 @@ class AutoModel:
                         )
                         results[_b]["spk_embedding"] = spk_res[0]["spk_embedding"]
                         if self.ser_model is not None:
-                            ser_res = self.inference(speech_b, input_len=None, model=self.ser_model, kwargs=self.ser_kwargs, **cfg)
+                            ser_res = self.inference(speech_b, input_len=None, model=self.ser_model,
+                                                     kwargs=self.ser_kwargs, **cfg)
                             if "SenseVoiceSmall" in kwargs.get("ser_model", None):
                                 results[_b]["ser_type"] = [i['text'].split("|><|")[1] for i in ser_res]
+                            elif "emotion2vec" in kwargs.get("ser_model", None):
+                                results[_b]["ser_type"] = [i['labels'][i["scores"].index(max(i["scores"]))] for i in ser_res]
+
+
 
                 beg_idx = end_idx
                 end_idx += 1
