@@ -151,8 +151,7 @@ def main(**kwargs):
     dataloader = dataloader_class(**kwargs)
     # dataloader_tr, dataloader_val = dataloader_class(**kwargs)
 
-    scaler = GradScaler(enabled=True) if trainer.use_fp16 or trainer.use_bf16 else None
-    scaler = ShardedGradScaler(enabled=trainer.use_fp16) if trainer.use_fsdp else scaler
+    scaler = GradScaler(enabled=True) if trainer.use_fp16 else None
 
     if kwargs.get("train_conf", {}).get("save_init_model", True):
 

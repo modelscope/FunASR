@@ -703,11 +703,11 @@ class Trainer:
         if self.use_deepspeed:
             scaled_loss = model.backward(loss)
         else:
-            loss = loss / self.accum_grad
-            if self.use_fp16 or self.use_bf16:
-                scaler.scale(loss).backward()
+            scaled_loss = loss / self.accum_grad
+            if scaler is not None:
+                scaler.scale(scaled_loss).backward()
             else:
-                loss.backward()
+                scaled_loss.backward()
 
     def update_step(self, model, optim, scheduler, scaler, loss_dict=None):
         batch_idx = loss_dict["batch_idx"]
@@ -732,7 +732,7 @@ class Trainer:
                 # Execute an optimization step (update model parameters)
                 if self.use_ddp or self.use_fsdp:
                     dist.barrier()
-                if self.use_fp16 or self.use_bf16:
+                if scaler is not None:
                     scaler.step(optim)
                     scaler.update()
                 else:
