@@ -34,6 +34,7 @@ from funasr.train_utils.load_pretrained_model import load_pretrained_model
 from funasr.utils.misc import prepare_model_dir
 from funasr.train_utils.model_summary import model_summary
 from funasr import AutoModel
+from datetime import timedelta
 
 try:
     import deepspeed
@@ -81,7 +82,11 @@ def main(**kwargs):
         deepspeed.init_distributed(dist_backend=kwargs.get("backend", "nccl"))
     elif use_ddp or use_fsdp:
         logging.info(f"use_ddp: {use_ddp}, use_fsdp: {use_fsdp}")
-        dist.init_process_group(backend=kwargs.get("backend", "nccl"), init_method="env://")
+        dist.init_process_group(
+            backend=kwargs.get("backend", "nccl"),
+            init_method="env://",
+            timeout=timedelta(seconds=60 * 60),
+        )
         torch.cuda.set_device(local_rank)
 
     # rank = dist.get_rank()
@@ -148,6 +153,10 @@ def main(**kwargs):
 
     scaler = GradScaler(enabled=True) if trainer.use_fp16 or trainer.use_bf16 else None
     scaler = ShardedGradScaler(enabled=trainer.use_fp16) if trainer.use_fsdp else scaler
+
+    if kwargs.get("train_conf", {}).get("save_init_model", True):
+
+        trainer.save_checkpoint(-1, model=model, optim=optim, scheduler=scheduler, scaler=scaler)
 
     trainer.resume_checkpoint(
         model=model,

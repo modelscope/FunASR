@@ -95,7 +95,6 @@ class Trainer:
         self.start_epoch = 0
         self.max_epoch = kwargs.get("max_epoch", 100)
 
-        # self.kwargs = kwargs
         self.log_interval = kwargs.get("log_interval", 50)
         self.batch_total = 0
         self.dtype = torch.float32
@@ -146,11 +145,13 @@ class Trainer:
         try:
             from tensorboardX import SummaryWriter
 
-            self.writer = SummaryWriter(tensorboard_dir)  # if trainer.rank == 0 else None
+            self.writer = SummaryWriter(tensorboard_dir) if self.rank == 0 else None
         except:
             self.writer = None
 
         self.use_deepspeed = use_deepspeed
+        if self.use_deepspeed:
+            self.accum_grad = 1
         self.deepspeed_config = kwargs.get("deepspeed_config", "")
         excludes = kwargs.get("excludes", None)
         if excludes is not None:
@@ -162,6 +163,8 @@ class Trainer:
             if isinstance(effective_save_name_excludes, str):
                 effective_save_name_excludes = effective_save_name_excludes.split(",")
         self.effective_save_name_excludes = effective_save_name_excludes
+        self.use_lora = kwargs.get("use_lora", False)
+        self.kwargs = kwargs
 
     def save_checkpoint(
         self,
@@ -187,7 +190,7 @@ class Trainer:
         step_in_epoch = None if step is None else step_in_epoch
         if self.use_deepspeed:
 
-            logging.info(f"Save checkpoint: {epoch}, rank: {self.local_rank}\n")
+            logging.info(f"Save checkpoint: {epoch}, rank: {self.rank}\n")
             # self.step_or_epoch += 1
             state = {
                 "epoch": epoch,
@@ -216,78 +219,84 @@ class Trainer:
             # Create output directory if it does not exist
             os.makedirs(self.output_dir, exist_ok=True)
             if step is None:
-                ckpt_name = f"model.pt.ep{epoch}"
+                ckpt_name = f"ds-model.pt.ep{epoch}"
             else:
-                ckpt_name = f"model.pt.ep{epoch}.{step}"
+                ckpt_name = f"ds-model.pt.ep{epoch}.{step}"
             filename = os.path.join(self.output_dir, ckpt_name)
 
             # torch.save(state, filename)
             with torch.no_grad():
                 model.save_checkpoint(save_dir=self.output_dir, tag=ckpt_name, client_state=state)
             logging.info(f"\nCheckpoint saved to {filename}\n")
-            latest = Path(os.path.join(self.output_dir, f"model.pt"))
-            # torch.save(state, latest)
-            with torch.no_grad():
-                model.save_checkpoint(save_dir=self.output_dir, tag=f"model.pt", client_state=state)
-            if self.best_step_or_epoch == "":
-                self.best_step_or_epoch = ckpt_name
 
-            if self.avg_keep_nbest_models_type == "acc":
-                if (
-                    self.val_acc_step_or_eoch[ckpt_name]
-                    >= self.val_acc_step_or_eoch[self.best_step_or_epoch]
-                ):
+            if epoch >= 0:
+                with torch.no_grad():
+                    model.save_checkpoint(
+                        save_dir=self.output_dir, tag=f"ds-model.pt", client_state=state
+                    )
+                if self.best_step_or_epoch == "":
                     self.best_step_or_epoch = ckpt_name
-                    best_ckpt = Path(os.path.join(self.output_dir, f"model.pt.best"))
-                    # torch.save(state, best_ckpt)
-                    with torch.no_grad():
-                        model.save_checkpoint(
-                            save_dir=self.output_dir, tag=f"model.pt.best", client_state=state
+
+                if self.avg_keep_nbest_models_type == "acc":
+                    if (
+                        self.val_acc_step_or_eoch[ckpt_name]
+                        >= self.val_acc_step_or_eoch[self.best_step_or_epoch]
+                    ):
+                        self.best_step_or_epoch = ckpt_name
+                        best_ckpt = Path(os.path.join(self.output_dir, f"ds-model.pt.best"))
+                        # torch.save(state, best_ckpt)
+                        with torch.no_grad():
+                            model.save_checkpoint(
+                                save_dir=self.output_dir,
+                                tag=f"ds-model.pt.best",
+                                client_state=state,
+                            )
+                        logging.info(
+                            f"Update best acc: {self.val_acc_step_or_eoch[self.best_step_or_epoch]:.4f}, {best_ckpt}"
                         )
-                    logging.info(
-                        f"Update best acc: {self.val_acc_step_or_eoch[self.best_step_or_epoch]:.4f}, {best_ckpt}"
-                    )
-                else:
-                    logging.info(
-                        f"No improvement in acc: {self.val_acc_step_or_eoch[ckpt_name]:.4f} < {self.val_acc_step_or_eoch[self.best_step_or_epoch]:.4f}, {os.path.join(self.output_dir, self.best_step_or_epoch)}"
-                    )
-            elif self.avg_keep_nbest_models_type == "loss":
-                if (
-                    self.val_loss_step_or_eoch[ckpt_name]
-                    <= self.val_loss_step_or_eoch[self.best_step_or_epoch]
-                ):
-                    self.best_step_or_epoch = ckpt_name
-                    best_ckpt = Path(os.path.join(self.output_dir, f"model.pt.best"))
-                    # torch.save(state, best_ckpt)
-                    with torch.no_grad():
-                        model.save_checkpoint(
-                            save_dir=self.output_dir, tag=f"model.pt.best", client_state=state
-                        )
-                    logging.info(
-                        f"Update best loss: {self.val_loss_step_or_eoch[self.best_step_or_epoch]:.4f}, {best_ckpt}"
-                    )
-                else:
-                    logging.info(
-                        f"No improvement in loss: {self.val_loss_step_or_eoch[ckpt_name]:.4f} > {self.val_loss_step_or_eoch[self.best_step_or_epoch]:.4f}, {os.path.join(self.output_dir, self.best_step_or_epoch)}"
-                    )
-            else:
-                print("Undo")
-            self.saved_ckpts[ckpt_name] = getattr(
-                self, f"val_{self.avg_keep_nbest_models_type}_step_or_eoch"
-            )[ckpt_name]
-            if self.keep_nbest_models > 0:
-                if len(self.saved_ckpts) > self.keep_nbest_models:
-                    if self.avg_keep_nbest_models_type == "acc":
-                        key = min(self.saved_ckpts, key=self.saved_ckpts.get)
                     else:
-                        key = max(self.saved_ckpts, key=self.saved_ckpts.get)
-                    if key in self.saved_ckpts:
-                        del self.saved_ckpts[key]
-                    filename = os.path.join(self.output_dir, key)
-                    logging.info(f"Delete: {filename}")
-                    if os.path.exists(filename):
-                        # os.remove(filename)
-                        misc_utils.smart_remove(filename)
+                        logging.info(
+                            f"No improvement in acc: {self.val_acc_step_or_eoch[ckpt_name]:.4f} < {self.val_acc_step_or_eoch[self.best_step_or_epoch]:.4f}, {os.path.join(self.output_dir, self.best_step_or_epoch)}"
+                        )
+                elif self.avg_keep_nbest_models_type == "loss":
+                    if (
+                        self.val_loss_step_or_eoch[ckpt_name]
+                        <= self.val_loss_step_or_eoch[self.best_step_or_epoch]
+                    ):
+                        self.best_step_or_epoch = ckpt_name
+                        best_ckpt = Path(os.path.join(self.output_dir, f"ds-model.pt.best"))
+                        # torch.save(state, best_ckpt)
+                        with torch.no_grad():
+                            model.save_checkpoint(
+                                save_dir=self.output_dir,
+                                tag=f"ds-model.pt.best",
+                                client_state=state,
+                            )
+                        logging.info(
+                            f"Update best loss: {self.val_loss_step_or_eoch[self.best_step_or_epoch]:.4f}, {best_ckpt}"
+                        )
+                    else:
+                        logging.info(
+                            f"No improvement in loss: {self.val_loss_step_or_eoch[ckpt_name]:.4f} > {self.val_loss_step_or_eoch[self.best_step_or_epoch]:.4f}, {os.path.join(self.output_dir, self.best_step_or_epoch)}"
+                        )
+                else:
+                    print("Undo")
+                self.saved_ckpts[ckpt_name] = getattr(
+                    self, f"val_{self.avg_keep_nbest_models_type}_step_or_eoch"
+                )[ckpt_name]
+                if self.keep_nbest_models > 0:
+                    if len(self.saved_ckpts) > self.keep_nbest_models:
+                        if self.avg_keep_nbest_models_type == "acc":
+                            key = min(self.saved_ckpts, key=self.saved_ckpts.get)
+                        else:
+                            key = max(self.saved_ckpts, key=self.saved_ckpts.get)
+                        if key in self.saved_ckpts:
+                            del self.saved_ckpts[key]
+                        filename = os.path.join(self.output_dir, key)
+                        logging.info(f"Delete: {filename}")
+                        if os.path.exists(filename):
+                            # os.remove(filename)
+                            misc_utils.smart_remove(filename)
 
         elif self.use_fsdp:
             pass
@@ -342,63 +351,73 @@ class Trainer:
                 ckpt_name = f"model.pt.ep{epoch}"
             else:
                 ckpt_name = f"model.pt.ep{epoch}.{step}"
+
+            if self.use_lora:
+                lora_outdir = f"{self.output_dir}/lora-{ckpt_name}"
+                os.makedirs(lora_outdir, exist_ok=True)
+                if hasattr(model, "module"):
+                    model.module.llm.save_pretrained(lora_outdir)
+                else:
+                    model.llm.save_pretrained(lora_outdir)
             filename = os.path.join(self.output_dir, ckpt_name)
             torch.save(state, filename)
 
             logging.info(f"\nCheckpoint saved to {filename}\n")
-            latest = Path(os.path.join(self.output_dir, f"model.pt"))
-            torch.save(state, latest)
-            if self.best_step_or_epoch == "":
-                self.best_step_or_epoch = ckpt_name
 
-            if self.avg_keep_nbest_models_type == "acc":
-                if (
-                    self.val_acc_step_or_eoch[ckpt_name]
-                    >= self.val_acc_step_or_eoch[self.best_step_or_epoch]
-                ):
+            if epoch >= 0:
+                latest = Path(os.path.join(self.output_dir, f"model.pt"))
+                torch.save(state, latest)
+                if self.best_step_or_epoch == "":
                     self.best_step_or_epoch = ckpt_name
-                    best_ckpt = Path(os.path.join(self.output_dir, f"model.pt.best"))
-                    torch.save(state, best_ckpt)
-                    logging.info(
-                        f"Update best acc: {self.val_acc_step_or_eoch[self.best_step_or_epoch]:.4f}, {best_ckpt}"
-                    )
-                else:
-                    logging.info(
-                        f"No improvement in acc: {self.val_acc_step_or_eoch[ckpt_name]:.4f} < {self.val_acc_step_or_eoch[self.best_step_or_epoch]:.4f}, {os.path.join(self.output_dir, self.best_step_or_epoch)}"
-                    )
-            elif self.avg_keep_nbest_models_type == "loss":
-                if (
-                    self.val_loss_step_or_eoch[ckpt_name]
-                    <= self.val_loss_step_or_eoch[self.best_step_or_epoch]
-                ):
-                    self.best_step_or_epoch = ckpt_name
-                    best_ckpt = Path(os.path.join(self.output_dir, f"model.pt.best"))
-                    torch.save(state, best_ckpt)
-                    logging.info(
-                        f"Update best loss: {self.val_loss_step_or_eoch[self.best_step_or_epoch]:.4f}, {best_ckpt}"
-                    )
-                else:
-                    logging.info(
-                        f"No improvement in loss: {self.val_loss_step_or_eoch[ckpt_name]:.4f} > {self.val_loss_step_or_eoch[self.best_step_or_epoch]:.4f}, {os.path.join(self.output_dir, self.best_step_or_epoch)}"
-                    )
-            else:
-                print("Undo")
-            self.saved_ckpts[ckpt_name] = getattr(
-                self, f"val_{self.avg_keep_nbest_models_type}_step_or_eoch"
-            )[ckpt_name]
-            if self.keep_nbest_models > 0:
-                if len(self.saved_ckpts) > self.keep_nbest_models:
-                    if self.avg_keep_nbest_models_type == "acc":
-                        key = min(self.saved_ckpts, key=self.saved_ckpts.get)
+
+                if self.avg_keep_nbest_models_type == "acc":
+                    if (
+                        self.val_acc_step_or_eoch[ckpt_name]
+                        >= self.val_acc_step_or_eoch[self.best_step_or_epoch]
+                    ):
+                        self.best_step_or_epoch = ckpt_name
+                        best_ckpt = Path(os.path.join(self.output_dir, f"model.pt.best"))
+                        torch.save(state, best_ckpt)
+                        logging.info(
+                            f"Update best acc: {self.val_acc_step_or_eoch[self.best_step_or_epoch]:.4f}, {best_ckpt}"
+                        )
                     else:
-                        key = max(self.saved_ckpts, key=self.saved_ckpts.get)
-                    if key in self.saved_ckpts:
-                        del self.saved_ckpts[key]
-                    filename = os.path.join(self.output_dir, key)
-                    logging.info(f"Delete: {filename}")
-                    if os.path.exists(filename):
-                        # os.remove(filename)
-                        misc_utils.smart_remove(filename)
+                        logging.info(
+                            f"No improvement in acc: {self.val_acc_step_or_eoch[ckpt_name]:.4f} < {self.val_acc_step_or_eoch[self.best_step_or_epoch]:.4f}, {os.path.join(self.output_dir, self.best_step_or_epoch)}"
+                        )
+                elif self.avg_keep_nbest_models_type == "loss":
+                    if (
+                        self.val_loss_step_or_eoch[ckpt_name]
+                        <= self.val_loss_step_or_eoch[self.best_step_or_epoch]
+                    ):
+                        self.best_step_or_epoch = ckpt_name
+                        best_ckpt = Path(os.path.join(self.output_dir, f"model.pt.best"))
+                        torch.save(state, best_ckpt)
+                        logging.info(
+                            f"Update best loss: {self.val_loss_step_or_eoch[self.best_step_or_epoch]:.4f}, {best_ckpt}"
+                        )
+                    else:
+                        logging.info(
+                            f"No improvement in loss: {self.val_loss_step_or_eoch[ckpt_name]:.4f} > {self.val_loss_step_or_eoch[self.best_step_or_epoch]:.4f}, {os.path.join(self.output_dir, self.best_step_or_epoch)}"
+                        )
+                else:
+                    print("Undo")
+                self.saved_ckpts[ckpt_name] = getattr(
+                    self, f"val_{self.avg_keep_nbest_models_type}_step_or_eoch"
+                )[ckpt_name]
+                if self.keep_nbest_models > 0:
+                    if len(self.saved_ckpts) > self.keep_nbest_models:
+                        if self.avg_keep_nbest_models_type == "acc":
+                            key = min(self.saved_ckpts, key=self.saved_ckpts.get)
+                        else:
+                            key = max(self.saved_ckpts, key=self.saved_ckpts.get)
+                        if key in self.saved_ckpts:
+                            del self.saved_ckpts[key]
+                        filename = os.path.join(self.output_dir, key)
+                        logging.info(f"Delete: {filename}")
+                        if os.path.exists(filename):
+                            # os.remove(filename)
+                            misc_utils.smart_remove(filename)
 
         if self.use_ddp or self.use_fsdp:
             dist.barrier()
@@ -420,9 +439,9 @@ class Trainer:
         if self.resume:
 
             if self.use_deepspeed:
-                ckpt = os.path.join(self.output_dir, "model.pt")
+                ckpt = os.path.join(self.output_dir, "ds-model.pt")
                 if os.path.exists(ckpt):
-                    _, checkpoint = model.load_checkpoint(self.output_dir, "model.pt")
+                    _, checkpoint = model.load_checkpoint(self.output_dir, "ds-model.pt")
                     self.start_epoch = checkpoint["epoch"]
                     self.saved_ckpts = checkpoint["saved_ckpts"]
                     self.val_acc_step_or_eoch = (
@@ -492,7 +511,7 @@ class Trainer:
                         if k_ddp in src_state.keys():
                             dst_state[k] = src_state[k_ddp]
                         else:
-                            print(f"Miss key in ckpt: model: {k}, ckpt: {k_ddp}")
+                            print(f"Miss key in ckpt: model: {k}, ckpt: {ckpt}")
 
                     model.load_state_dict(dst_state)
                     optim.load_state_dict(checkpoint["optimizer"])
@@ -576,6 +595,8 @@ class Trainer:
         time_beg = time.perf_counter()
         time5 = time_beg
         for batch_idx, batch in enumerate(dataloader_train):
+            if batch_idx == 0 and (self.use_ddp or self.use_fsdp or self.use_deepspeed):
+                dist.barrier()
             self.batch_total += 1
             self.step_in_epoch += 1
             loss_dict = {
@@ -803,6 +824,9 @@ class Trainer:
             ckpt_name = f"model.pt.ep{epoch}"
         else:
             ckpt_name = f'model.pt.ep{epoch}.{kwargs.get("step_in_epoch")}'
+
+        if self.use_deepspeed:
+            ckpt_name = f"ds-{ckpt_name}"
         self.val_acc_step_or_eoch[ckpt_name] = self.val_acc_avg
         self.val_loss_step_or_eoch[ckpt_name] = self.val_loss_avg
 
@@ -873,6 +897,13 @@ class Trainer:
             if writer is not None:
                 writer.add_scalar(f"rank{self.rank}_loss/{tag}", loss, batch_total)
                 writer.add_scalar(f"rank{self.rank}_lr/{tag}", lr, batch_total)
+                writer.add_scalar(
+                    f"rank{self.rank}_acc_avg_slice/{tag}", acc_avg_epoch, batch_total
+                )
+                writer.add_scalar(
+                    f"rank{self.rank}_loss_avg_epoch/{tag}", loss_avg_epoch, batch_total
+                )
+
                 for key, var in stats.items():
                     writer.add_scalar(f"stats_rank{self.rank}_{key}/{tag}", var.item(), batch_total)
                     description_dict[f"stats_rank{self.rank}_{key}/{tag}"] = var.item()
