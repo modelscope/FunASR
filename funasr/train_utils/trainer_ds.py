@@ -712,7 +712,7 @@ class Trainer:
 
     def update_step(self, model, optim, scheduler, scaler, loss_dict=None):
         batch_idx = loss_dict["batch_idx"]
-        grad_norm = 0.0
+        grad_norm = None
         if self.use_deepspeed:
             model.step()
             grad_norm = model.get_global_grad_norm()
@@ -743,8 +743,8 @@ class Trainer:
                 scheduler.step()
                 # Clear gradients for the next accumulation stage
                 optim.zero_grad(set_to_none=True)
-
-        loss_dict["stats"]["grad_norm"] = grad_norm
+        if grad_norm is not None:
+            loss_dict["stats"]["grad_norm"] = grad_norm
 
     def validate_epoch(
         self,
