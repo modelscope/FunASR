@@ -5,6 +5,7 @@ import logging
 from collections import OrderedDict
 import numpy as np
 from omegaconf import DictConfig, OmegaConf
+import torch
 
 
 def statistic_model_parameters(model, prefix=None):
@@ -117,3 +118,9 @@ def smart_remove(path):
             # If the directory is not empty, remove it along with all its contents
             shutil.rmtree(path)
             print(f"Non-empty directory {path} has been recursively deleted.")
+
+
+def tensor_to_scalar(x):
+    if torch.is_tensor(x):
+        return x.detach().item()
+    return x

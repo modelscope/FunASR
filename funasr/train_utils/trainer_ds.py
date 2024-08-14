@@ -16,6 +16,7 @@ from funasr.train_utils.recursive_op import recursive_average
 from funasr.train_utils.average_nbest_models import average_checkpoints
 from torch.distributed.fsdp.sharded_grad_scaler import ShardedGradScaler
 import funasr.utils.misc as misc_utils
+from funasr.utils.misc import tensor_to_scalar
 
 try:
     import wandb
@@ -743,9 +744,7 @@ class Trainer:
                 # Clear gradients for the next accumulation stage
                 optim.zero_grad(set_to_none=True)
 
-        loss_dict["stats"]["grad_norm"] = (
-            grad_norm.item() if torch.is_tensor(grad_norm) else grad_norm
-        )
+        loss_dict["stats"]["grad_norm"] = grad_norm
 
     def validate_epoch(
         self,
@@ -888,7 +887,7 @@ class Trainer:
                 f"(ppl_avg_slice: {math.exp(loss_avg_epoch):.3e}), "
                 f"(acc_avg_slice: {acc_avg_epoch:.3f}), "
                 f"(lr: {lr:.3e}), "
-                f"{[(k, round(v.detach().cpu().item(), 3)) for k, v in stats.items()]}, "
+                f"{[(k, round(tensor_to_scalar(v), 3)) for k, v in stats.items()]}, "
                 f"{speed_stats}, "
                 f"{gpu_info}"
             )
@@ -911,8 +910,10 @@ class Trainer:
                 )
 
                 for key, var in stats.items():
-                    writer.add_scalar(f"stats_rank{self.rank}_{key}/{tag}", var.item(), batch_total)
-                    description_dict[f"stats_rank{self.rank}_{key}/{tag}"] = var.item()
+                    writer.add_scalar(
+                        f"stats_rank{self.rank}_{key}/{tag}", tensor_to_scalar(var), batch_total
+                    )
+                    description_dict[f"stats_rank{self.rank}_{key}/{tag}"] = tensor_to_scalar(var)
                 for key, var in speed_stats.items():
                     writer.add_scalar(f"stats_rank{self.rank}_{key}/{tag}", eval(var), batch_total)
                     description_dict[f"stats_rank{self.rank}_{key}/{tag}"] = eval(var)
