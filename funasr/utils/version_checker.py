@@ -15,13 +15,15 @@ def get_pypi_version(package_name):
 
 
 def check_for_update(disable=False):
+    current_version = version.parse(__version__)
+    print(f"funasr version: {current_version}.")
     if disable:
         return
-    current_version = version.parse(__version__)
+
     pypi_version = get_pypi_version("funasr")
 
     if current_version < pypi_version:
-        print(f"New version available: {pypi_version}. Your current version is {current_version}.")
+        print(f"New version is available: {pypi_version}.")
         print('Please use the command "pip install -U funasr" to upgrade.')
     else:
         print(f"You are using the latest version of funasr-{current_version}")
