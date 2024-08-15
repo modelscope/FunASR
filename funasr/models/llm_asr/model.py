@@ -2593,44 +2593,58 @@ class LLMASR6(nn.Module):
 
         self.eos = kwargs.get("eos", 151645)
 
-        # audio decoder related
-
-        self.codebook_dim = audio_decoder_conf.get("codebook_dim", 1024)
-        self.codebook_size = audio_decoder_conf.get("codebook_size", 4096)
-        self.lm_out_voc_size = self.codebook_size + 1
-        self.audio_decoder = self.build_audio_decoder(name=audio_decoder, conf=audio_decoder_conf)
-        self.concat_emb_hidden = audio_decoder_conf.get("concat_emb_hidden", False)
-        self.concat_emb_hidden_norm = audio_decoder_conf.get("concat_emb_hidden_norm", False)
-        if self.concat_emb_hidden_norm:
-            self.hidden_norm = LayerNorm(llm_dim)
-            self.fusion_dropout = nn.Dropout(audio_decoder_conf.get("fusion_drop_rate", 0.0))
-            self.emb_norm = LayerNorm(llm_dim)
-            self.fusion_norm = LayerNorm(self.audio_decoder.embed_unit)
-            self.fusion_act = Swish()
-        audio_decoder_in_proj_dim = llm_dim * 2 if self.concat_emb_hidden else llm_dim
-        self.audio_decoder_in_proj = torch.nn.Linear(
-            audio_decoder_in_proj_dim, self.audio_decoder.embed_unit
+        # tts text tokenizer related
+        tts_token_type = audio_decoder_conf.get("tts_token_type", "whisper_rich_ttsfrd")
+        ttsfrd_res_dir = audio_decoder_conf.get("ttsfrd_res_dir", "./ttsfrd/9.5.5")
+        from funasr.models.llm_asr.tts_text_tokenizer.build_tokenizer import build_tokenizer
+        self.tts_text_tokenizer = build_tokenizer(
+            tts_token_type,
+            bpemodel=ttsfrd_res_dir,
+            p_word2phn=1.0,
         )
-        self.codec_embedder = torch.nn.Embedding(self.codebook_size, self.codebook_dim)
-        self.audio_decoder_embedding = torch.nn.Embedding(2, self.audio_decoder.embed_unit)
-        self.ad_sos_eos = 0
-        self.ad_task_id = 1
-        self.ad_ignore_id = -1
-        self.predict_nq = 1
-
-        from .label_smoothing_loss import LabelSmoothingLoss
-
-        self.criterion_ce = LabelSmoothingLoss(
-            size=self.lm_out_voc_size // self.predict_nq,
-            padding_idx=self.ad_ignore_id,
-            smoothing=lsm_weight,
-            normalize_length=length_normalized_loss,
-            reduction=False,
+        from funasr.models.llm_asr.tts_models.e2e_model import UCTDXvecSlotModel
+        self.tts_model = UCTDXvecSlotModel(
+            **kwargs.get("tts_model_conf", {})
         )
+        self.tts_dim_proj = nn.Linear(llm_dim, self.tts_model.output_size)
 
-        mel_decoder_name = kwargs.get("mel_decoder", None)
-        mel_decoder_conf = kwargs.get("mel_decoder_conf", None)
-        self.mel_decoder = self.build_mel_decoder(name=mel_decoder_name, conf=mel_decoder_conf)
+
+        # self.codebook_dim = audio_decoder_conf.get("codebook_dim", 1024)
+        # self.codebook_size = audio_decoder_conf.get("codebook_size", 4096)
+        # self.lm_out_voc_size = self.codebook_size + 1
+        # self.audio_decoder = self.build_audio_decoder(name=audio_decoder, conf=audio_decoder_conf)
+        # self.concat_emb_hidden = audio_decoder_conf.get("concat_emb_hidden", False)
+        # self.concat_emb_hidden_norm = audio_decoder_conf.get("concat_emb_hidden_norm", False)
+        # if self.concat_emb_hidden_norm:
+        #     self.hidden_norm = LayerNorm(llm_dim)
+        #     self.fusion_dropout = nn.Dropout(audio_decoder_conf.get("fusion_drop_rate", 0.0))
+        #     self.emb_norm = LayerNorm(llm_dim)
+        #     self.fusion_norm = LayerNorm(self.audio_decoder.embed_unit)
+        #     self.fusion_act = Swish()
+        # audio_decoder_in_proj_dim = llm_dim * 2 if self.concat_emb_hidden else llm_dim
+        # self.audio_decoder_in_proj = torch.nn.Linear(
+        #     audio_decoder_in_proj_dim, self.audio_decoder.embed_unit
+        # )
+        # self.codec_embedder = torch.nn.Embedding(self.codebook_size, self.codebook_dim)
+        # self.audio_decoder_embedding = torch.nn.Embedding(2, self.audio_decoder.embed_unit)
+        # self.ad_sos_eos = 0
+        # self.ad_task_id = 1
+        # self.ad_ignore_id = -1
+        # self.predict_nq = 1
+        #
+        # from .label_smoothing_loss import LabelSmoothingLoss
+        #
+        # self.criterion_ce = LabelSmoothingLoss(
+        #     size=self.lm_out_voc_size // self.predict_nq,
+        #     padding_idx=self.ad_ignore_id,
+        #     smoothing=lsm_weight,
+        #     normalize_length=length_normalized_loss,
+        #     reduction=False,
+        # )
+        #
+        # mel_decoder_name = kwargs.get("mel_decoder", None)
+        # mel_decoder_conf = kwargs.get("mel_decoder_conf", None)
+        # self.mel_decoder = self.build_mel_decoder(name=mel_decoder_name, conf=mel_decoder_conf)
         vocoder_name = kwargs.get("vocoder", None)
         vocoder_conf = kwargs.get("vocoder_conf", None)
         self.vocoder = self.build_vocoder(name=vocoder_name, conf=vocoder_conf)
@@ -2931,45 +2945,69 @@ class LLMASR6(nn.Module):
         hidden_states_his_select = hidden_states_his_select.to(device=input_ids.device)
         hidden_states_his_select_len = input_mask.sum(-1)
 
-        import pdb
+        # import pdb
+        #
+        # pdb.set_trace()
 
-        pdb.set_trace()
+        # if self.concat_emb_hidden:
+        #     if not self.concat_emb_hidden_norm:
+        #         hidden_states_select = torch.concat((hidden_states_select, target_emb), dim=-1)
+        #         hidden_states_select = self.audio_decoder_in_proj(hidden_states_select)
+        #     else:
+        #         outs = self.hidden_norm(hidden_states_select)
+        #         outs = self.fusion_dropout(self.fusion_act(outs))
+        #         # emb = model_outputs.hidden_states[0]
+        #         emb = self.fusion_dropout(self.fusion_act(self.emb_norm(target_emb)))
+        #         outs = self.audio_decoder_in_proj(torch.cat([outs, emb], dim=-1))
+        #         hidden_states_select = self.fusion_act(self.fusion_norm(outs))
+        #
+        # nll, logits, target, target_lengths = self.nll(
+        #     hidden_states_select, target_ids_len, codec[:, :, None], codec_len
+        # )
+        # output_mask = (
+        #     ~make_pad_mask(target_lengths, maxlen=target_lengths.max())
+        #     .to(hidden_states_select.device)
+        #     .unsqueeze(-1)
+        # )
+        # total, batch_size = output_mask.sum() * self.predict_nq, nll.shape[0] * self.predict_nq
+        # denom = total if self.length_normalized_loss else batch_size
+        # loss = (nll * output_mask).sum() / denom
+        #
+        # with torch.no_grad():
+        #     preds = torch.argmax(model_outputs.logits, -1)
+        #     acc_att = compute_accuracy(preds[:, :-1], labels_ids[:, 1:], ignore_label=-100)
+        #     stats["acc"] = acc_att
+        #
+        #     cc = logits.shape[-1]
+        #     for i in range(self.predict_nq):
+        #         acc = th_accuracy(
+        #             logits[:, :, i, :].reshape(-1, cc), target[:, :, i], self.ad_ignore_id
+        #         )
+        #         stats[f"codec_acc_{i + 1}"] = acc
 
-        if self.concat_emb_hidden:
-            if not self.concat_emb_hidden_norm:
-                hidden_states_select = torch.concat((hidden_states_select, target_emb), dim=-1)
-                hidden_states_select = self.audio_decoder_in_proj(hidden_states_select)
-            else:
-                outs = self.hidden_norm(hidden_states_select)
-                outs = self.fusion_dropout(self.fusion_act(outs))
-                # emb = model_outputs.hidden_states[0]
-                emb = self.fusion_dropout(self.fusion_act(self.emb_norm(target_emb)))
-                outs = self.audio_decoder_in_proj(torch.cat([outs, emb], dim=-1))
-                hidden_states_select = self.fusion_act(self.fusion_norm(outs))
-
-        nll, logits, target, target_lengths = self.nll(
-            hidden_states_select, target_ids_len, codec[:, :, None], codec_len
+        # nar tts model related
+        device = hidden_states_his_select.device
+        text = [self.tts_text_tokenizer.text2tokens(x) for x in target_ids]
+        text_lengths = [len(x) for x in text]
+        text = pad_list(text, pad_value=-1).long().to(device)
+        text_lengths = torch.tensor(text_lengths).to(audio_len)
+        # mute the "da" noise.
+        # TODO: make sure the sample rate is 22050.
+        audio[:, :int(0.02*22050)] = 0
+        hidden_states_his_select = self.tts_dim_proj(hidden_states_his_select)
+        tts_loss, tts_states, tts_weight = self.tts_model.forward(
+            text=text,
+            text_lengths=text_lengths,
+            speech_token=codec,
+            speech_token_lengths=codec_len,
+            audio=audio,
+            audio_lengths=audio_len,
+            prompt=hidden_states_his_select,
+            prompt_len=hidden_states_his_select_len
         )
-        output_mask = (
-            ~make_pad_mask(target_lengths, maxlen=target_lengths.max())
-            .to(hidden_states_select.device)
-            .unsqueeze(-1)
-        )
-        total, batch_size = output_mask.sum() * self.predict_nq, nll.shape[0] * self.predict_nq
-        denom = total if self.length_normalized_loss else batch_size
-        loss = (nll * output_mask).sum() / denom
-
-        with torch.no_grad():
-            preds = torch.argmax(model_outputs.logits, -1)
-            acc_att = compute_accuracy(preds[:, :-1], labels_ids[:, 1:], ignore_label=-100)
-            stats["acc"] = acc_att
-
-            cc = logits.shape[-1]
-            for i in range(self.predict_nq):
-                acc = th_accuracy(
-                    logits[:, :, i, :].reshape(-1, cc), target[:, :, i], self.ad_ignore_id
-                )
-                stats[f"codec_acc_{i + 1}"] = acc
+        loss = loss + tts_loss
+        for key, value in tts_states.items():
+            stats[f"tts_{key}"] = value
 
         stats["loss"] = torch.clone(loss.detach())
         stats["batch_size"] = batch_size

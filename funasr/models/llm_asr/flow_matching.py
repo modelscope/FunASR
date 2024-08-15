@@ -498,6 +498,7 @@ class MaskedDiffWithXvec(BaseDiffWithXvec):
             audio_lengths: torch.Tensor,
             xvec: Optional[torch.Tensor] = None,
             xvec_lengths: Optional[torch.Tensor] = None,
+            **kwargs
     ):
         batch_size = audio.shape[0]
         # for data parallel

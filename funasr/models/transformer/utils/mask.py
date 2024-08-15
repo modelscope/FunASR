@@ -50,3 +50,25 @@ def vad_mask(size, vad_pos, device="cpu", dtype=torch.bool):
     sub_corner = torch.zeros(vad_pos - 1, size - vad_pos, device=device, dtype=dtype)
     ret[0 : vad_pos - 1, vad_pos:] = sub_corner
     return ret
+
+
+def causal_block_mask(size, block_size=1, device="cpu", dtype=torch.bool):
+    """Create mask for subsequent steps (size, size).
+
+    :param int size: size of mask
+    :param int block_size: block size of mask
+    :param str device: "cpu" or "cuda" or torch.Tensor.device
+    :param torch.dtype dtype: result dtype
+    :rtype: torch.Tensor
+    >>> causal_block_mask(4, 2)
+    [[1, 1, 0, 0],
+     [1, 1, 0, 0],
+     [1, 1, 1, 1],
+     [1, 1, 1, 1]]
+    """
+    assert size % block_size == 0
+    pos_idx = torch.arange(size, device=device)
+    block_value = (torch.div(pos_idx, block_size, rounding_mode='trunc') + 1) * block_size
+    ret = pos_idx.unsqueeze(0) < block_value.unsqueeze(1)
+    return ret.to(dtype)
+
