@@ -72,8 +72,8 @@ class OpenAIIndexDSJsonl(torch.utils.data.Dataset):  # torch.utils.data.Dataset
                         elif role == "user":
                             user.append(content)
                         elif role == "assistant":
-                            if "wav_path" in data:
-                                wav_path = data["wav_path"]
+                            if "wav_path" in item:
+                                wav_path = item["wav_path"]
                                 assistant.append([content, {"wav_path": wav_path}])
                             else:
                                 assistant.append(content)
