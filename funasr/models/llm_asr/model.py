@@ -922,12 +922,26 @@ class LLMASR4(nn.Module):
 
         init_param_path = llm_conf.get("init_param_path", "vicuna-7b-v1.5")
 
-        model = AutoModelForCausalLM.from_pretrained(
-            init_param_path,
-            load_in_8bit=None,
-            device_map=None,
-            use_cache=None,
-        )
+        if not llm_conf.get("low_cpu", False):
+            model = AutoModelForCausalLM.from_pretrained(
+                init_param_path,
+                load_in_8bit=None,
+                device_map=None,
+                use_cache=None,
+            )
+        else:
+            import os
+
+            if int(os.environ.get("RANK", 0)) == 0:
+                model = AutoModelForCausalLM.from_pretrained(
+                    init_param_path,
+                    load_in_8bit=None,
+                    device_map="cpu",
+                    use_cache=None,
+                )
+            else:
+                llm_config = AutoConfig.from_pretrained(init_param_path)
+                model = AutoModelForCausalLM.from_config(llm_config)
 
         freeze = llm_conf.get("freeze", True)
         if freeze:
@@ -1169,7 +1183,9 @@ class LLMASR4(nn.Module):
                 if kwargs.get("infer_with_assistant_input", False):
                     source_input = f"<|im_start|>user\n{user_prompt}"
                 else:
-                    source_input = f"<|im_start|>user\n{user_prompt}<|im_end|>\n<|im_start|>assistant\n"
+                    source_input = (
+                        f"<|im_start|>user\n{user_prompt}<|im_end|>\n<|im_start|>assistant\n"
+                    )
 
             splits = pattern.split(source_input)
             source_ids = []
