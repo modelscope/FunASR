@@ -2879,9 +2879,6 @@ class LLMASR6(nn.Module):
         # audio sampling point
         audio = kwargs.get("audio")
         audio_len = kwargs.get("audio_len")
-        import pdb
-
-        pdb.set_trace()
 
         # codec
         codec = kwargs.get("codec")
@@ -2891,19 +2888,23 @@ class LLMASR6(nn.Module):
         input_mask[input_mask < 0] = 0
 
         hidden_states = model_outputs.hidden_states[-1].float()
+        hidden_states_his_select = []
 
         # target, str
         target_ids = []
         target_ids_len = []
-        hidden_states_his_select = []
+        turn_id_cum = 0
         for batch_idx in range(labels_ids.shape[0]):
-            if batch_idx == 0:
+
+            for turn_id in range(fbank_beg.shape[1]):
                 beg = 0
-            else:
-                beg = input_mask[batch_idx - 1].sum(-1)
-            end = input_mask[batch_idx].sum(-1)
-            hidden_states_his_i = hidden_states[batch_idx, beg:end, :]
-            hidden_states_his_select.append(hidden_states_his_i)
+                end = input_mask[turn_id_cum].sum(-1)
+                print(f"beg: {beg}, end: {end}")
+                hidden_states_his_i = hidden_states[batch_idx, beg:end, :]
+                hidden_states_his_select.append(hidden_states_his_i)
+
+                turn_id_cum += 1
+
             beg_i = 0
             end_i = 0
             for token_idx in range(labels_ids.shape[1]):
@@ -2928,7 +2929,11 @@ class LLMASR6(nn.Module):
             hidden_states_his_select, batch_first=True, padding_value=0.0
         )
         hidden_states_his_select = hidden_states_his_select.to(device=input_ids.device)
-        hidden_states_his_select_len = input_mask.sum(dims=-1)
+        hidden_states_his_select_len = input_mask.sum(-1)
+
+        import pdb
+
+        pdb.set_trace()
 
         if self.concat_emb_hidden:
             if not self.concat_emb_hidden_norm:

@@ -993,6 +993,10 @@ class OpenAIDatasetMultiTurnCodecMel(torch.utils.data.Dataset):
                 fake_token_len += [fake_token_len_i]
                 source_mask = [-100] * len(source_ids)
 
+                input_mask_i = [1] * len(input_ids) + [1] * len(source_ids) + [0] * len(target_ids)
+                input_mask_i = torch.tensor(input_mask_i, dtype=torch.int64)
+                input_mask.append(input_mask_i)
+
                 input_ids += source_ids + target_ids
                 labels += source_mask + target_ids
 
@@ -1000,14 +1004,6 @@ class OpenAIDatasetMultiTurnCodecMel(torch.utils.data.Dataset):
                 if len(speech) > 0:
                     fbank.append(speech[0, :, :])
                     fbank_lens.append(speech_lengths)
-
-                if i < multiturn_num - 1:
-                    input_mask_i = [1] * len(source_ids) + [1] * len(target_ids)
-                else:
-                    input_mask_i = [1] * len(source_ids) + [0] * len(target_ids)
-
-                input_mask_i = torch.tensor(input_mask_i, dtype=torch.int64)
-                input_mask.append(input_mask_i)
 
             if badcase_flag:
                 continue
