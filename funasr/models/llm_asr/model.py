@@ -2571,6 +2571,7 @@ class LLMASR6(nn.Module):
         self.llm_dtype = llm_conf.get("llm_dtype", "fp32")
         self.llm = model.to(dtype_map[self.llm_dtype])
         llm_dim = model.get_input_embeddings().weight.shape[-1]
+        self.tokenizer = AutoTokenizer.from_pretrained(init_param_path)
 
         # adaptor
         adaptor_class = tables.adaptor_classes.get(audio_adaptor)
@@ -2875,19 +2876,30 @@ class LLMASR6(nn.Module):
             )
             loss = model_outputs.loss
 
+        # audio sampling point
         audio = kwargs.get("audio")
         audio_len = kwargs.get("audio_len")
         import pdb
 
         pdb.set_trace()
+
+        # codec
         codec = kwargs.get("codec")
         codec_len = (codec > 0).sum(-1)
+
+        input_mask = kwargs.get("input_mask")
+        input_mask[input_mask < 0] = 0
+
         hidden_states = model_outputs.hidden_states[-1].float()
 
+        # target, str
         target_ids = []
         target_ids_len = []
         hidden_states_select = []
+        hidden_states_his_select = []
         for batch_idx in range(labels_ids.shape[0]):
+            hidden_states_his_i = hidden_states[batch_idx, : len(input_mask[batch_idx]), :]
+            hidden_states_his_select.append(hidden_states_his_i)
             beg_i = 0
             end_i = 0
             for token_idx in range(labels_ids.shape[1]):
@@ -2896,7 +2908,8 @@ class LLMASR6(nn.Module):
                     target_ids_i = labels_ids[batch_idx, beg_i:end_i]
                     target_ids_len_i = end_i - beg_i
                     target_ids_len.append(target_ids_len_i)
-                    target_ids.append(target_ids_i)
+                    target = self.tokenizer.decode(target_ids_i)
+                    target_ids.append(target)
                     hidden_states_i = hidden_states[batch_idx, beg_i - 1 : end_i - 1, :]
                     hidden_states_select.append(hidden_states_i)
                     end_i += 1
@@ -2907,17 +2920,18 @@ class LLMASR6(nn.Module):
                 if token_int <= 0:
                     beg_i += 1
 
-        target_ids = torch.nn.utils.rnn.pad_sequence(
-            target_ids, batch_first=True, padding_value=-100
-        )
         hidden_states_select = torch.nn.utils.rnn.pad_sequence(
             hidden_states_select, batch_first=True, padding_value=0.0
         )
-        target_ids_len = torch.tensor(target_ids_len, dtype=torch.int32, device=input_ids.device)
-        target_ids = target_ids.to(device=input_ids.device)
-        target_ids[target_ids < 0] = 0
-        target_emb = self.llm.model.get_input_embeddings()(target_ids)
         hidden_states_select = hidden_states_select.to(device=input_ids.device)
+
+        # hidden_states_his_select
+        hidden_states_his_select = torch.nn.utils.rnn.pad_sequence(
+            hidden_states_his_select, batch_first=True, padding_value=0.0
+        )
+        hidden_states_his_select = hidden_states_his_select.to(device=input_ids.device)
+        hidden_states_his_select_len = input_mask.sum(dims=-1)
+
         if self.concat_emb_hidden:
             if not self.concat_emb_hidden_norm:
                 hidden_states_select = torch.concat((hidden_states_select, target_emb), dim=-1)

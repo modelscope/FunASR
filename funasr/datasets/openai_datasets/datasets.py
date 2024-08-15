@@ -875,8 +875,10 @@ class OpenAIDatasetMultiTurnCodecMel(torch.utils.data.Dataset):
                 codec_len,
                 audio,
                 audio_len,
-            ) = ([], [], [], [], [], [], [], [], [], [], [])
+                input_mask,
+            ) = ([], [], [], [], [], [], [], [], [], [], [], [])
 
+            multiturn_num = len(system)
             for i, (system_prompt, user_prompt, target_out) in enumerate(
                 zip(system, user, assistant)
             ):
@@ -998,6 +1000,12 @@ class OpenAIDatasetMultiTurnCodecMel(torch.utils.data.Dataset):
                     fbank.append(speech[0, :, :])
                     fbank_lens.append(speech_lengths)
 
+                if i < multiturn_num - 1:
+                    input_mask += [1] * (len(source_ids) + len(target_ids))
+                else:
+                    input_mask += [1] * len(source_ids)
+                    input_mask += [0] * len(target_ids)
+
             if badcase_flag:
                 continue
 
@@ -1029,7 +1037,8 @@ class OpenAIDatasetMultiTurnCodecMel(torch.utils.data.Dataset):
             if len(audio) > 0:
                 output["audio"] = audio
                 output["audio_len"] = torch.tensor(audio_len, dtype=torch.int32)
-
+            if len(input_mask) > 0:
+                output["input_mask"] = torch.tensor(input_mask, dtype=torch.int64)
             break
 
         return output
