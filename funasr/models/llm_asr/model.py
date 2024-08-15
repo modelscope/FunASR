@@ -2895,7 +2895,7 @@ class LLMASR6(nn.Module):
         # target, str
         target_ids = []
         target_ids_len = []
-        hidden_states_select = []
+        # hidden_states_select = []
         hidden_states_his_select = []
         for batch_idx in range(labels_ids.shape[0]):
             hidden_states_his_i = hidden_states[batch_idx, : len(input_mask[batch_idx]), :]
@@ -2910,8 +2910,8 @@ class LLMASR6(nn.Module):
                     target_ids_len.append(target_ids_len_i)
                     target = self.tokenizer.decode(target_ids_i)
                     target_ids.append(target)
-                    hidden_states_i = hidden_states[batch_idx, beg_i - 1 : end_i - 1, :]
-                    hidden_states_select.append(hidden_states_i)
+                    # hidden_states_i = hidden_states[batch_idx, beg_i - 1 : end_i - 1, :]
+                    # hidden_states_select.append(hidden_states_i)
                     end_i += 1
                     beg_i = end_i
                     continue
@@ -2920,10 +2920,10 @@ class LLMASR6(nn.Module):
                 if token_int <= 0:
                     beg_i += 1
 
-        hidden_states_select = torch.nn.utils.rnn.pad_sequence(
-            hidden_states_select, batch_first=True, padding_value=0.0
-        )
-        hidden_states_select = hidden_states_select.to(device=input_ids.device)
+        # hidden_states_select = torch.nn.utils.rnn.pad_sequence(
+        #     hidden_states_select, batch_first=True, padding_value=0.0
+        # )
+        # hidden_states_select = hidden_states_select.to(device=input_ids.device)
 
         # hidden_states_his_select
         hidden_states_his_select = torch.nn.utils.rnn.pad_sequence(
