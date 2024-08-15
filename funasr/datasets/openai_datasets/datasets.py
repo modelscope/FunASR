@@ -873,7 +873,9 @@ class OpenAIDatasetMultiTurnCodecMel(torch.utils.data.Dataset):
                 fake_token_len,
                 codec,
                 codec_len,
-            ) = ([], [], [], [], [], [], [], [], [])
+                audio,
+                audio_len,
+            ) = ([], [], [], [], [], [], [], [], [], [], [])
 
             for i, (system_prompt, user_prompt, target_out) in enumerate(
                 zip(system, user, assistant)
@@ -955,6 +957,9 @@ class OpenAIDatasetMultiTurnCodecMel(torch.utils.data.Dataset):
                     target_out, meta = target_out
                     if isinstance(meta, dict) and "wav_path" in meta:
                         wav_path = meta["wav_path"]
+                        wav_samples = load_audio_text_image_video(wav_path, fs=self.fs)
+                        audio.append(wav_samples)
+                        audio_len.append(len(wav_samples))
 
                 splits = self.pattern.split(target_out)
                 codec_i = []
@@ -1021,6 +1026,9 @@ class OpenAIDatasetMultiTurnCodecMel(torch.utils.data.Dataset):
             if len(fbank) > 0:
                 output["speech"] = fbank
                 output["speech_lengths"] = fbank_lens
+            if len(audio) > 0:
+                output["audio"] = audio
+                output["audio_len"] = torch.tensor(audio_len, dtype=torch.int32)
 
             break
 
