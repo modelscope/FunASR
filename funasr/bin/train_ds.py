@@ -14,7 +14,7 @@ from io import BytesIO
 from contextlib import nullcontext
 import torch.distributed as dist
 
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import DictConfig, OmegaConf, ListConfig
 from torch.cuda.amp import autocast, GradScaler
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
@@ -113,7 +113,7 @@ def main(**kwargs):
     if freeze_param is not None:
         if "," in freeze_param:
             freeze_param = eval(freeze_param)
-        if not isinstance(freeze_param, (list, tuple)):
+        if not isinstance(freeze_param, (list, tuple, ListConfig)):
             freeze_param = (freeze_param,)
         logging.info("freeze_param is not None: %s", freeze_param)
         for t in freeze_param:

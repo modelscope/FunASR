@@ -2548,6 +2548,9 @@ class LLMASR6(nn.Module):
             audio_encoder.eval()
 
         self.audio_encoder = audio_encoder
+        self.audio_encoder_activation_checkpoint = audio_encoder_conf.get(
+            "activation_checkpoint", False
+        )
 
         # llm
         self.llm = None
@@ -2563,11 +2566,14 @@ class LLMASR6(nn.Module):
             use_cache=None,
             output_hidden_states=True,
         )
+
         freeze = llm_conf.get("freeze", True)
         if freeze:
             for name, param in model.named_parameters():
                 param.requires_grad = False
             model.eval()
+        if llm_conf.get("activation_checkpoint", False):
+            model.gradient_checkpointing_enable()
         self.llm_dtype = llm_conf.get("llm_dtype", "fp32")
         self.llm = model.to(dtype_map[self.llm_dtype])
         llm_dim = model.get_input_embeddings().weight.shape[-1]
@@ -2597,17 +2603,21 @@ class LLMASR6(nn.Module):
         tts_token_type = audio_decoder_conf.get("tts_token_type", "whisper_rich_ttsfrd")
         ttsfrd_res_dir = audio_decoder_conf.get("ttsfrd_res_dir", "./ttsfrd/9.5.5")
         from funasr.models.llm_asr.tts_text_tokenizer.build_tokenizer import build_tokenizer
+
         self.tts_text_tokenizer = build_tokenizer(
             tts_token_type,
             bpemodel=ttsfrd_res_dir,
             p_word2phn=1.0,
         )
         from funasr.models.llm_asr.tts_models.e2e_model import UCTDXvecSlotModel
-        self.tts_model = UCTDXvecSlotModel(
-            **kwargs.get("tts_model_conf", {})
-        )
-        self.tts_dim_proj = nn.Linear(llm_dim, self.tts_model.output_size)
 
+        from omegaconf import OmegaConf, DictConfig
+
+        tts_model_conf = kwargs.get("tts_model_conf", {})
+        if isinstance(tts_model_conf, DictConfig):
+            tts_model_conf = OmegaConf.to_container(tts_model_conf, resolve=True)
+        self.tts_model = UCTDXvecSlotModel(**tts_model_conf)
+        self.tts_dim_proj = nn.Linear(llm_dim, self.tts_model.output_size)
 
         # self.codebook_dim = audio_decoder_conf.get("codebook_dim", 1024)
         # self.codebook_size = audio_decoder_conf.get("codebook_size", 4096)
@@ -2833,12 +2843,19 @@ class LLMASR6(nn.Module):
 
             batch_size_speech, frames, _ = speech.shape
 
-            with torch.cuda.amp.autocast(enabled=False):
-                # audio encoder
+            # with torch.cuda.amp.autocast(enabled=False):
+            # audio encoder
+            if self.audio_encoder_activation_checkpoint:
+                from torch.utils.checkpoint import checkpoint
+
+                encoder_out, encoder_out_lens = checkpoint(
+                    self.encode, speech, speech_lengths, use_reentrant=False
+                )
+            else:
                 encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
 
-                # audio_adaptor
-                encoder_out, encoder_out_lens = self.audio_adaptor(encoder_out, encoder_out_lens)
+            # audio_adaptor
+            encoder_out, encoder_out_lens = self.audio_adaptor(encoder_out, encoder_out_lens)
 
             fake_token_len = kwargs.get("fake_token_len")
             fake_token_len[fake_token_len < 0] = 0
@@ -2910,15 +2927,21 @@ class LLMASR6(nn.Module):
         turn_id_cum = 0
         for batch_idx in range(labels_ids.shape[0]):
 
-            for turn_id in range(fbank_beg.shape[1]):
-                beg = 0
-                end = input_mask[turn_id_cum].sum(-1)
-                print(f"beg: {beg}, end: {end}")
-                hidden_states_his_i = hidden_states[batch_idx, beg:end, :]
-                hidden_states_his_select.append(hidden_states_his_i)
+            try:
+                for turn_id in range(fbank_beg.shape[1]):
 
-                turn_id_cum += 1
+                    fbank_beg_idx = fbank_beg[batch_idx, turn_id].item()
+                    if fbank_beg_idx > 0:
+                        beg = 0
+                        end = input_mask[turn_id_cum].sum(-1)
+                        print(f"beg: {beg}, end: {end}")
+                        hidden_states_his_i = hidden_states[batch_idx, beg:end, :]
+                        hidden_states_his_select.append(hidden_states_his_i)
+                        turn_id_cum += 1
+            except:
+                import pdb
 
+                pdb.set_trace()
             beg_i = 0
             end_i = 0
             for token_idx in range(labels_ids.shape[1]):
@@ -2986,14 +3009,19 @@ class LLMASR6(nn.Module):
         #         stats[f"codec_acc_{i + 1}"] = acc
 
         # nar tts model related
+        # import pdb; pdb.set_trace()
         device = hidden_states_his_select.device
-        text = [self.tts_text_tokenizer.text2tokens(x) for x in target_ids]
+        text = [
+            torch.tensor(self.tts_text_tokenizer.text2tokens(x), dtype=torch.int64).to(device)
+            for x in target_ids
+        ]
         text_lengths = [len(x) for x in text]
         text = pad_list(text, pad_value=-1).long().to(device)
-        text_lengths = torch.tensor(text_lengths).to(audio_len)
+        audio_len = torch.tensor(audio_len, dtype=torch.int64).to(device)
+        text_lengths = torch.tensor(text_lengths, dtype=torch.int64).to(device)
         # mute the "da" noise.
         # TODO: make sure the sample rate is 22050.
-        audio[:, :int(0.02*22050)] = 0
+        audio[:, : int(0.02 * 22050)] = 0
         hidden_states_his_select = self.tts_dim_proj(hidden_states_his_select)
         tts_loss, tts_states, tts_weight = self.tts_model.forward(
             text=text,
@@ -3003,7 +3031,7 @@ class LLMASR6(nn.Module):
             audio=audio,
             audio_lengths=audio_len,
             prompt=hidden_states_his_select,
-            prompt_len=hidden_states_his_select_len
+            prompt_len=hidden_states_his_select_len,
         )
         loss = loss + tts_loss
         for key, value in tts_states.items():
