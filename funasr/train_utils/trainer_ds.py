@@ -884,7 +884,7 @@ class Trainer:
                 f"step_in_slice: {batch_idx + 1}/{batch_num_epoch}, step_in_epoch: {step_in_epoch}, total step: {batch_total}, "
                 f"(loss_avg_rank: {loss:.3f}), "
                 f"(loss_avg_slice: {loss_avg_epoch:.3f}), "
-                f"(ppl_avg_slice: {math.exp(loss_avg_epoch):.3e}), "
+                # f"(ppl_avg_slice: {math.exp(loss_avg_epoch):.3e}), "
                 f"(acc_avg_slice: {acc_avg_epoch:.3f}), "
                 f"(lr: {lr:.3e}), "
                 f"{[(k, round(tensor_to_scalar(v), 3)) for k, v in stats.items()]}, "
