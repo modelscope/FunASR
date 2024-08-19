@@ -587,12 +587,13 @@ class AutoModel:
                             raw_text,
                             return_raw_text=return_raw_text,
                         )
-                    if len(sentence_list) == len(result["ser_type"]):
-                        for i in range(len(sentence_list)):
-                            sentence_list[i]["emotion"] = result["ser_type"][i]
-                    else:
-                        merged_list = [[x[0], x[1], y] for x, y in zip(all_segments, result["ser_type"])]
-                        distribute_emotion(sentence_list, merged_list)
+                    if "ser_type" in result:
+                        if len(sentence_list) == len(result["ser_type"]):
+                            for i in range(len(sentence_list)):
+                                sentence_list[i]["emotion"] = result["ser_type"][i]
+                        else:
+                            merged_list = [[x[0], x[1], y] for x, y in zip(all_segments, result["ser_type"])]
+                            distribute_emotion(sentence_list, merged_list)
                 distribute_spk(sentence_list, sv_output)
                 result["sentence_info"] = sentence_list
             elif kwargs.get("sentence_timestamp", False):
