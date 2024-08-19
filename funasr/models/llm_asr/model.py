@@ -1645,14 +1645,15 @@ class LLMASR4_extract_kv(nn.Module):
         # import pdb
         #
         # pdb.set_trace()
+        stats = {}
         input_ids[input_ids < 0] = 0
         inputs_embeds = self.llm.model.get_input_embeddings()(input_ids)
+        batch_size, token_num = input_ids.shape
         if speech is not None:
             if len(speech_lengths.size()) > 1:
                 speech_lengths = speech_lengths[:, 0]
 
             batch_size_speech, frames, _ = speech.shape
-            batch_size, token_num = input_ids.shape
 
             # with torch.cuda.amp.autocast(enabled=False):
             # audio encoder
@@ -1702,6 +1703,11 @@ class LLMASR4_extract_kv(nn.Module):
 
                         speech_idx += 1
 
+            stats["batch_size_speech"] = batch_size_speech
+            stats["batch_size_x_frames"] = frames * batch_size_speech
+            stats["batch_size_real_frames"] = speech_lengths.sum().item()
+            stats["padding_frames"] = stats["batch_size_x_frames"] - stats["batch_size_real_frames"]
+
         with torch.cuda.amp.autocast(
             enabled=True if self.llm_dtype != "fp32" else False, dtype=dtype_map[self.llm_dtype]
         ):
@@ -1725,11 +1731,10 @@ class LLMASR4_extract_kv(nn.Module):
         with open(f"{kv_cache_outdir}/{key}.txt", "w") as f:
             for turn_id_cum in range(input_mask.shape[0]):
                 end = input_mask[turn_id_cum].sum(-1)
-                line = f"{key}.assistent.{turn_id_cum} {mat_file} {end}"
+                line = f"{key}.assistent.{turn_id_cum} {mat_file} {end}\n"
                 f.write(line)
                 f.flush()
 
-        stats = {}
         with torch.no_grad():
             preds = torch.argmax(model_outputs.logits, -1)
             acc_att = compute_accuracy(preds[:, :-1], labels_ids[:, 1:], ignore_label=-100)
@@ -1737,10 +1742,6 @@ class LLMASR4_extract_kv(nn.Module):
 
         stats["loss"] = torch.clone(loss.detach())
         stats["batch_size"] = batch_size
-        stats["batch_size_speech"] = batch_size_speech
-        stats["batch_size_x_frames"] = frames * batch_size_speech
-        stats["batch_size_real_frames"] = speech_lengths.sum().item()
-        stats["padding_frames"] = stats["batch_size_x_frames"] - stats["batch_size_real_frames"]
         stats["batch_size_x_tokens"] = token_num * batch_size
         stats["batch_size_real_tokens"] = attention_mask.sum().item()
         stats["padding_tokens"] = stats["batch_size_x_tokens"] - stats["batch_size_real_tokens"]
