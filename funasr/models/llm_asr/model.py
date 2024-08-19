@@ -1021,6 +1021,8 @@ class LLMASR4(nn.Module):
         # import pdb
         #
         # pdb.set_trace()
+        batch_size, token_num = input_ids.shape
+        stats = {}
         input_ids[input_ids < 0] = 0
         inputs_embeds = self.llm.model.get_input_embeddings()(input_ids)
         if speech is not None:
@@ -1028,9 +1030,7 @@ class LLMASR4(nn.Module):
                 speech_lengths = speech_lengths[:, 0]
 
             batch_size_speech, frames, _ = speech.shape
-            batch_size, token_num = input_ids.shape
 
-            # with torch.cuda.amp.autocast(enabled=False):
             # audio encoder
             if self.audio_encoder_activation_checkpoint:
                 from torch.utils.checkpoint import checkpoint
@@ -1078,6 +1078,11 @@ class LLMASR4(nn.Module):
 
                         speech_idx += 1
 
+            stats["batch_size_speech"] = batch_size_speech
+            stats["batch_size_x_frames"] = frames * batch_size_speech
+            stats["batch_size_real_frames"] = speech_lengths.sum().item()
+            stats["padding_frames"] = stats["batch_size_x_frames"] - stats["batch_size_real_frames"]
+
         with torch.cuda.amp.autocast(
             enabled=True if self.llm_dtype != "fp32" else False, dtype=dtype_map[self.llm_dtype]
         ):
@@ -1090,7 +1095,6 @@ class LLMASR4(nn.Module):
             )
             loss = model_outputs.loss
 
-        stats = {}
         with torch.no_grad():
             preds = torch.argmax(model_outputs.logits, -1)
             acc_att = compute_accuracy(preds[:, :-1], labels_ids[:, 1:], ignore_label=-100)
@@ -1098,10 +1102,7 @@ class LLMASR4(nn.Module):
 
         stats["loss"] = torch.clone(loss.detach())
         stats["batch_size"] = batch_size
-        stats["batch_size_speech"] = batch_size_speech
-        stats["batch_size_x_frames"] = frames * batch_size_speech
-        stats["batch_size_real_frames"] = speech_lengths.sum().item()
-        stats["padding_frames"] = stats["batch_size_x_frames"] - stats["batch_size_real_frames"]
+
         stats["batch_size_x_tokens"] = token_num * batch_size
         stats["batch_size_real_tokens"] = attention_mask.sum().item()
         stats["padding_tokens"] = stats["batch_size_x_tokens"] - stats["batch_size_real_tokens"]
