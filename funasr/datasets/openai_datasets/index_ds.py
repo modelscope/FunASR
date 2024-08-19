@@ -86,6 +86,8 @@ class OpenAIIndexDSJsonl(torch.utils.data.Dataset):  # torch.utils.data.Dataset
                         "assistant": assistant,
                         "source_len": speech_length + text_length,
                     }
+                    if "key" in data_dict:
+                        contents_i["key"] = data_dict["key"]
                     contents.append(contents_i)
 
         self.contents = contents

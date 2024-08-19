@@ -730,7 +730,7 @@ class Trainer:
                             f"The grad norm is {grad_norm}. Skipping updating the model."
                         )
                         optim.zero_grad()  # Reset gradients
-                        return
+                        # return
 
                 # Execute an optimization step (update model parameters)
                 if self.use_ddp or self.use_fsdp:
@@ -743,7 +743,7 @@ class Trainer:
                 scheduler.step()
                 # Clear gradients for the next accumulation stage
                 optim.zero_grad(set_to_none=True)
-        if grad_norm is not None:
+        if grad_norm is not None and not torch.isfinite(grad_norm):
             loss_dict["stats"]["grad_norm"] = grad_norm
 
     def validate_epoch(
