@@ -1592,6 +1592,10 @@ class LLMASR4_extract_kv(nn.Module):
         self.llm = model.to(dtype_map[self.llm_dtype])
         llm_dim = model.get_input_embeddings().weight.shape[-1]
         self.kv_cache_outdir = llm_conf.get("kv_cache_outdir", None)
+        if self.kv_cache_outdir is not None:
+            import os
+
+            os.makedirs(self.kv_cache_outdir, exist_ok=True)
 
         # adaptor
         adaptor_class = tables.adaptor_classes.get(audio_adaptor)
@@ -1714,14 +1718,16 @@ class LLMASR4_extract_kv(nn.Module):
         input_mask[input_mask < 0] = 0
 
         hidden_states = model_outputs.hidden_states[-1].float()
-        key = kwargs.get("key")
+        key = kwargs.get("key")[0]
         kv_cache_outdir = self.kv_cache_outdir
-        savemat(f"{kv_cache_outdir}/{key}.mat", {"kv_cache": hidden_states[0]})
+        mat_file = f"{kv_cache_outdir}/{key}.mat"
+        savemat(mat_file, {"kv_cache": hidden_states[0].cpu()})
         with open(f"{kv_cache_outdir}/{key}.txt", "w") as f:
-            f.write(f"{kv_cache_outdir}/{key}.mat")
-            for turn_id_cum in range(input_mask.shape[1]):
+            for turn_id_cum in range(input_mask.shape[0]):
                 end = input_mask[turn_id_cum].sum(-1)
-                f.write(f"\t{end}")
+                line = f"{key}.assistent.{turn_id_cum} {mat_file} {end}"
+                f.write(line)
+                f.flush()
 
         stats = {}
         with torch.no_grad():

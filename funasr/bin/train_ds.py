@@ -168,14 +168,13 @@ def main(**kwargs):
     for epoch in range(trainer.start_epoch, trainer.max_epoch):
         time1 = time.perf_counter()
 
-        if trainer.kwargs.get("do_train", True):
-            for data_split_i in range(trainer.start_data_split_i, dataloader.data_split_num):
-                time_slice_i = time.perf_counter()
+        for data_split_i in range(trainer.start_data_split_i, dataloader.data_split_num):
+            time_slice_i = time.perf_counter()
 
-                dataloader_tr, dataloader_val = dataloader.build_iter(
-                    epoch, data_split_i=data_split_i, start_step=trainer.start_step
-                )
-
+            dataloader_tr, dataloader_val = dataloader.build_iter(
+                epoch, data_split_i=data_split_i, start_step=trainer.start_step
+            )
+            if trainer.kwargs.get("do_train", True):
                 trainer.train_epoch(
                     model=model,
                     optim=optim,
