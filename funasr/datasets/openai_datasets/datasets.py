@@ -362,8 +362,6 @@ class OpenAIDatasetMultiTurn(torch.utils.data.Dataset):
                         sub_token = self.tokenizer.encode(sub_str)
                         source_ids += sub_token
                         # fbank_mask_i += [0] * len(sub_token)
-                        fbank_beg_i = 0
-                        fake_token_len_i = 0
                     else:
                         sub_str = sub_str.replace("<|startofspeech|>", "").replace(
                             "<|endofspeech|>", ""
