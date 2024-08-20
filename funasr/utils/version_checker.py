@@ -20,6 +20,9 @@ def check_for_update(disable=False):
     if disable:
         return
 
+    print(
+        "Check update of funasr, and it would cost few times. You may disable it by set `disable_update=True` in AutoModel"
+    )
     pypi_version = get_pypi_version("funasr")
 
     if current_version < pypi_version:
