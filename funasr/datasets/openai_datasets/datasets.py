@@ -1332,13 +1332,13 @@ class OpenAIDatasetMultiTurnCodecMel2(torch.utils.data.Dataset):
                     fbank.append(speech[0, :, :])
                     fbank_lens.append(speech_lengths)
 
-                # filter
-                # if i == multiturn_num - 1:
-                ratio = codec_i_len / len(token_num_tts)
-                if ratio < 1 or ratio > 7:
-                    badcase_flag = True
-                if codec_i_len + len(token_num_tts) > 1500:
-                    badcase_flag = True
+                # # filter
+                # # if i == multiturn_num - 1:
+                # ratio = codec_i_len / len(token_num_tts)
+                # if ratio < 1 or ratio > 7:
+                #     badcase_flag = True
+                # if codec_i_len + len(token_num_tts) > 1500:
+                #     badcase_flag = True
 
             if badcase_flag:
                 continue
