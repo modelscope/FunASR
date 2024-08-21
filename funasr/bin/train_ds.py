@@ -14,7 +14,7 @@ from io import BytesIO
 from contextlib import nullcontext
 import torch.distributed as dist
 
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import DictConfig, OmegaConf, ListConfig
 from torch.cuda.amp import autocast, GradScaler
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
@@ -113,7 +113,7 @@ def main(**kwargs):
     if freeze_param is not None:
         if "," in freeze_param:
             freeze_param = eval(freeze_param)
-        if not isinstance(freeze_param, (list, tuple)):
+        if not isinstance(freeze_param, (list, tuple, ListConfig)):
             freeze_param = (freeze_param,)
         logging.info("freeze_param is not None: %s", freeze_param)
         for t in freeze_param:
@@ -136,7 +136,7 @@ def main(**kwargs):
         **kwargs.get("train_conf"),
     )
 
-    model = trainer.warp_model(model)
+    model = trainer.warp_model(model, **kwargs)
 
     kwargs["device"] = int(os.environ.get("LOCAL_RANK", 0))
     trainer.device = int(os.environ.get("LOCAL_RANK", 0))
@@ -151,8 +151,7 @@ def main(**kwargs):
     dataloader = dataloader_class(**kwargs)
     # dataloader_tr, dataloader_val = dataloader_class(**kwargs)
 
-    scaler = GradScaler(enabled=True) if trainer.use_fp16 or trainer.use_bf16 else None
-    scaler = ShardedGradScaler(enabled=trainer.use_fp16) if trainer.use_fsdp else scaler
+    scaler = GradScaler(enabled=True) if trainer.use_fp16 else None
 
     if kwargs.get("train_conf", {}).get("save_init_model", True):
 
@@ -175,30 +174,30 @@ def main(**kwargs):
             dataloader_tr, dataloader_val = dataloader.build_iter(
                 epoch, data_split_i=data_split_i, start_step=trainer.start_step
             )
+            if trainer.kwargs.get("do_train", True):
+                trainer.train_epoch(
+                    model=model,
+                    optim=optim,
+                    scheduler=scheduler,
+                    scaler=scaler,
+                    dataloader_train=dataloader_tr,
+                    dataloader_val=dataloader_val,
+                    epoch=epoch,
+                    data_split_i=data_split_i,
+                    data_split_num=dataloader.data_split_num,
+                    start_step=trainer.start_step,
+                )
+                trainer.start_step = 0
 
-            trainer.train_epoch(
-                model=model,
-                optim=optim,
-                scheduler=scheduler,
-                scaler=scaler,
-                dataloader_train=dataloader_tr,
-                dataloader_val=dataloader_val,
-                epoch=epoch,
-                data_split_i=data_split_i,
-                data_split_num=dataloader.data_split_num,
-                start_step=trainer.start_step,
-            )
-            trainer.start_step = 0
+                torch.cuda.empty_cache()
 
-            torch.cuda.empty_cache()
-
-            time_escaped = (time.perf_counter() - time_slice_i) / 3600.0
-            logging.info(
-                f"\n\nrank: {local_rank}, "
-                f"time_escaped_epoch: {time_escaped:.3f} hours, "
-                f"estimated to finish {dataloader.data_split_num} data_slices, remaining: {dataloader.data_split_num-data_split_i} slices, {(dataloader.data_split_num-data_split_i)*time_escaped:.3f} hours, "
-                f"epoch: {trainer.max_epoch - epoch} epochs, {((trainer.max_epoch - epoch - 1)*dataloader.data_split_num + dataloader.data_split_num-data_split_i)*time_escaped:.3f} hours\n"
-            )
+                time_escaped = (time.perf_counter() - time_slice_i) / 3600.0
+                logging.info(
+                    f"\n\nrank: {local_rank}, "
+                    f"time_escaped_epoch: {time_escaped:.3f} hours, "
+                    f"estimated to finish {dataloader.data_split_num} data_slices, remaining: {dataloader.data_split_num-data_split_i} slices, {(dataloader.data_split_num-data_split_i)*time_escaped:.3f} hours, "
+                    f"epoch: {trainer.max_epoch - epoch} epochs, {((trainer.max_epoch - epoch - 1)*dataloader.data_split_num + dataloader.data_split_num-data_split_i)*time_escaped:.3f} hours\n"
+                )
 
         trainer.start_data_split_i = 0
         trainer.validate_epoch(model=model, dataloader_val=dataloader_val, epoch=epoch + 1)

@@ -16,6 +16,7 @@ from funasr.train_utils.recursive_op import recursive_average
 from funasr.train_utils.average_nbest_models import average_checkpoints
 from torch.distributed.fsdp.sharded_grad_scaler import ShardedGradScaler
 import funasr.utils.misc as misc_utils
+from funasr.utils.misc import tensor_to_scalar
 
 try:
     import wandb
@@ -703,16 +704,18 @@ class Trainer:
         if self.use_deepspeed:
             scaled_loss = model.backward(loss)
         else:
-            loss = loss / self.accum_grad
-            if self.use_fp16 or self.use_bf16:
-                scaler.scale(loss).backward()
+            scaled_loss = loss / self.accum_grad
+            if scaler is not None:
+                scaler.scale(scaled_loss).backward()
             else:
-                loss.backward()
+                scaled_loss.backward()
 
     def update_step(self, model, optim, scheduler, scaler, loss_dict=None):
         batch_idx = loss_dict["batch_idx"]
+        grad_norm = None
         if self.use_deepspeed:
             model.step()
+            grad_norm = model.get_global_grad_norm()
         else:
             if (batch_idx + 1) % self.accum_grad == 0:
                 # Perform gradient clipping if it is set
@@ -727,12 +730,12 @@ class Trainer:
                             f"The grad norm is {grad_norm}. Skipping updating the model."
                         )
                         optim.zero_grad()  # Reset gradients
-                        return
+                        # return
 
                 # Execute an optimization step (update model parameters)
                 if self.use_ddp or self.use_fsdp:
                     dist.barrier()
-                if self.use_fp16 or self.use_bf16:
+                if scaler is not None:
                     scaler.step(optim)
                     scaler.update()
                 else:
@@ -740,6 +743,8 @@ class Trainer:
                 scheduler.step()
                 # Clear gradients for the next accumulation stage
                 optim.zero_grad(set_to_none=True)
+        if grad_norm is not None and not torch.isfinite(grad_norm):
+            loss_dict["stats"]["grad_norm"] = grad_norm
 
     def validate_epoch(
         self,
@@ -879,10 +884,10 @@ class Trainer:
                 f"step_in_slice: {batch_idx + 1}/{batch_num_epoch}, step_in_epoch: {step_in_epoch}, total step: {batch_total}, "
                 f"(loss_avg_rank: {loss:.3f}), "
                 f"(loss_avg_slice: {loss_avg_epoch:.3f}), "
-                f"(ppl_avg_slice: {math.exp(loss_avg_epoch):.3e}), "
+                # f"(ppl_avg_slice: {math.exp(loss_avg_epoch):.3e}), "
                 f"(acc_avg_slice: {acc_avg_epoch:.3f}), "
                 f"(lr: {lr:.3e}), "
-                f"{[(k, round(v.detach().cpu().item(), 3)) for k, v in stats.items()]}, "
+                f"{[(k, round(tensor_to_scalar(v), 3)) for k, v in stats.items()]}, "
                 f"{speed_stats}, "
                 f"{gpu_info}"
             )
@@ -905,8 +910,10 @@ class Trainer:
                 )
 
                 for key, var in stats.items():
-                    writer.add_scalar(f"stats_rank{self.rank}_{key}/{tag}", var.item(), batch_total)
-                    description_dict[f"stats_rank{self.rank}_{key}/{tag}"] = var.item()
+                    writer.add_scalar(
+                        f"stats_rank{self.rank}_{key}/{tag}", tensor_to_scalar(var), batch_total
+                    )
+                    description_dict[f"stats_rank{self.rank}_{key}/{tag}"] = tensor_to_scalar(var)
                 for key, var in speed_stats.items():
                     writer.add_scalar(f"stats_rank{self.rank}_{key}/{tag}", eval(var), batch_total)
                     description_dict[f"stats_rank{self.rank}_{key}/{tag}"] = eval(var)
