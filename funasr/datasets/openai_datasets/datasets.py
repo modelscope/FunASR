@@ -7,6 +7,7 @@ from funasr.register import tables
 from funasr.utils.load_utils import extract_fbank, load_audio_text_image_video
 import math
 
+
 @tables.register("dataset_classes", "OpenAIDataset")
 class OpenAIDataset(torch.utils.data.Dataset):
     """
@@ -776,6 +777,7 @@ class OpenAIDatasetMultiTurnCodec(torch.utils.data.Dataset):
 
         return outputs
 
+
 @tables.register("dataset_classes", "OpenAIDatasetMultiTurnCodecMel")
 class OpenAIDatasetMultiTurnCodecMel(torch.utils.data.Dataset):
     """
@@ -881,7 +883,8 @@ class OpenAIDatasetMultiTurnCodecMel(torch.utils.data.Dataset):
                 audio,
                 audio_len,
                 input_mask,
-            ) = ([], [], [], [], [], [], [], [], [], [], [], [])
+                input_mask_beg,
+            ) = ([], [], [], [], [], [], [], [], [], [], [], [], [])
 
             multiturn_num = len(system)
             for i, (system_prompt, user_prompt, target_out) in enumerate(
@@ -998,6 +1001,19 @@ class OpenAIDatasetMultiTurnCodecMel(torch.utils.data.Dataset):
                 fake_token_len += [fake_token_len_i]
                 source_mask = [-100] * len(source_ids)
 
+                if i == 0:
+                    sys_prompt = f"<|im_start|>system\n{system_prompt}<|im_end|>\n"
+                    sys_prompt_len = self.tokenizer.encode(sys_prompt)
+                    input_mask_i = (
+                        [1] * len(sys_prompt_len) + [0] * len(source_ids) + [0] * len(target_ids)
+                    )
+                else:
+                    input_mask_i = (
+                        [1] * len(input_ids) + [0] * len(source_ids) + [0] * len(target_ids)
+                    )
+                input_mask_i = torch.tensor(input_mask_i, dtype=torch.int64)
+                input_mask_beg.append(input_mask_i)
+
                 input_mask_i = [1] * len(input_ids) + [1] * len(source_ids) + [0] * len(target_ids)
                 input_mask_i = torch.tensor(input_mask_i, dtype=torch.int64)
                 input_mask.append(input_mask_i)
@@ -1043,6 +1059,8 @@ class OpenAIDatasetMultiTurnCodecMel(torch.utils.data.Dataset):
                 output["audio_len"] = audio_len  # torch.tensor(audio_len, dtype=torch.int32)
             if len(input_mask) > 0:
                 output["input_mask"] = input_mask
+                output["input_mask_beg"] = input_mask_beg
+
             if key is not None:
                 output["key"] = key
             break
@@ -1420,6 +1438,7 @@ class OpenAIDatasetMultiTurnCodecMel2(torch.utils.data.Dataset):
 
         return outputs
 
+
 @tables.register("dataset_classes", "OpenAIDatasetMultiTurnForFullDuplexVAD")
 class OpenAIDatasetMultiTurnForFullDuplexVAD(torch.utils.data.Dataset):
     """
@@ -1427,14 +1446,14 @@ class OpenAIDatasetMultiTurnForFullDuplexVAD(torch.utils.data.Dataset):
     """
 
     def __init__(
-            self,
-            path,
-            index_ds: str = None,
-            frontend=None,
-            tokenizer=None,
-            int_pad_value: int = -1,
-            float_pad_value: float = 0.0,
-            **kwargs,
+        self,
+        path,
+        index_ds: str = None,
+        frontend=None,
+        tokenizer=None,
+        int_pad_value: int = -1,
+        float_pad_value: float = 0.0,
+        **kwargs,
     ):
         super().__init__()
         index_ds_class = tables.index_ds_classes.get(index_ds)
@@ -1525,7 +1544,7 @@ class OpenAIDatasetMultiTurnForFullDuplexVAD(torch.utils.data.Dataset):
             )
 
             for i, (system_prompt, user_prompt, target_out) in enumerate(
-                    zip(system, user, assistant)
+                zip(system, user, assistant)
             ):
                 if len(input_ids) > self.max_token_length:
                     logging.info(
@@ -1535,10 +1554,8 @@ class OpenAIDatasetMultiTurnForFullDuplexVAD(torch.utils.data.Dataset):
 
                 if i == 0:
                     source_input = f"<|im_start|>system\n{system_prompt}<|im_end|>\n<|im_start|>user\n{user_prompt}<|im_end|>\n<|im_start|>assistant\n"
-                elif i == len(system)-1:
-                    source_input = (
-                        f"<|im_start|>user\n{user_prompt}"
-                    )
+                elif i == len(system) - 1:
+                    source_input = f"<|im_start|>user\n{user_prompt}"
                 else:
                     source_input = (
                         f"<|im_start|>user\n{user_prompt}<|im_end|>\n<|im_start|>assistant\n"
@@ -1614,22 +1631,26 @@ class OpenAIDatasetMultiTurnForFullDuplexVAD(torch.utils.data.Dataset):
             turn_taking_labels = [-100] * len(labels)
             barge_in_labels = [-100] * len(labels)
             last_vad = [0] * fake_token_len[-1]
-            pos_vad = math.ceil(fake_token_len[-1] * (true_time_span/last_time_span))
+            pos_vad = math.ceil(fake_token_len[-1] * (true_time_span / last_time_span))
             assert pos_vad <= fake_token_len[-1]
             if pos_vad > 0:
                 last_vad[-pos_vad:] = [1] * pos_vad
 
             if task == "turn-taking":
-                turn_taking_labels[-fake_token_len[-1]:] = last_vad
+                turn_taking_labels[-fake_token_len[-1] :] = last_vad
             elif task == "barge-in":
                 # print(f'barge-in: {last_vad}')
-                barge_in_labels[-fake_token_len[-1]:] = last_vad
+                barge_in_labels[-fake_token_len[-1] :] = last_vad
 
             input_ids = torch.tensor(input_ids, dtype=torch.int64)  # [: self.max_token_length]
             attention_mask = torch.tensor([1] * len(input_ids), dtype=torch.int32)
             labels = torch.tensor(labels, dtype=torch.int64)  # [: self.max_token_length]
-            turn_taking_labels = torch.tensor(turn_taking_labels, dtype=torch.int64)  # [: self.max_token_length]
-            barge_in_labels = torch.tensor(barge_in_labels, dtype=torch.int64)  # [: self.max_token_length]
+            turn_taking_labels = torch.tensor(
+                turn_taking_labels, dtype=torch.int64
+            )  # [: self.max_token_length]
+            barge_in_labels = torch.tensor(
+                barge_in_labels, dtype=torch.int64
+            )  # [: self.max_token_length]
 
             # fbank = speech[0, :, :]
             # fbank_lens = torch.tensor(fbank_lens, dtype=torch.int32)

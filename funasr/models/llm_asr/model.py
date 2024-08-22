@@ -1727,6 +1727,8 @@ class LLMASR4_extract_kv(nn.Module):
             )
             loss = model_outputs.loss
 
+        input_mask_beg = kwargs.get("input_mask_beg")
+        input_mask_beg[input_mask_beg < 0] = 0
         input_mask = kwargs.get("input_mask")
         input_mask[input_mask < 0] = 0
 
@@ -1737,9 +1739,10 @@ class LLMASR4_extract_kv(nn.Module):
         savemat(mat_file, {"kv_cache": hidden_states[0].cpu()})
 
         for turn_id_cum in range(input_mask.shape[0]):
+            beg = input_mask_beg[turn_id_cum].sum(-1)
             end = input_mask[turn_id_cum].sum(-1)
             uttid = f"{key}_assistant_{turn_id_cum:02d}"
-            line = f"{uttid} {mat_file} {end}\n"
+            line = f"{uttid} {mat_file} {beg} {end}\n"
             self.fo.write(line)
             self.fo.flush()
 
@@ -5242,6 +5245,7 @@ class LLMASR7(nn.Module):
         top_ids = weighted_scores.softmax(dim=0).multinomial(1, replacement=True)
         return top_ids
 
+
 @tables.register("model_classes", "LLMVAD")
 class LLMVAD(nn.Module):
     """ """
@@ -5381,14 +5385,23 @@ class LLMVAD(nn.Module):
         print("self.llm.config:", self.llm.config)
         from transformers.models.qwen2.modeling_qwen2 import Qwen2DecoderLayer
         from copy import deepcopy
+
         self.task_decoder_layer_config = deepcopy(self.llm.config)
         self.task_decoder_layer_config.hidden_size = self.llm.config.hidden_size // 4
         self.task_decoder_layer_config.intermediate_size = self.llm.config.intermediate_size // 4
-        self.task_decoder_layer_config.num_attention_heads = self.llm.config.num_attention_heads // 4
-        self.task_decoder_layer_config.num_key_value_heads = self.llm.config.num_key_value_heads // 4
+        self.task_decoder_layer_config.num_attention_heads = (
+            self.llm.config.num_attention_heads // 4
+        )
+        self.task_decoder_layer_config.num_key_value_heads = (
+            self.llm.config.num_key_value_heads // 4
+        )
         print("self.task_decoder_layer_config:", self.task_decoder_layer_config)
-        self.down_proj = nn.Linear(self.llm.config.hidden_size, self.task_decoder_layer_config.hidden_size, bias=False).to(dtype_map[self.llm_dtype])
-        self.task_decoder_layer = Qwen2DecoderLayer(self.task_decoder_layer_config, self.llm.config.num_hidden_layers).to(dtype_map[self.llm_dtype])
+        self.down_proj = nn.Linear(
+            self.llm.config.hidden_size, self.task_decoder_layer_config.hidden_size, bias=False
+        ).to(dtype_map[self.llm_dtype])
+        self.task_decoder_layer = Qwen2DecoderLayer(
+            self.task_decoder_layer_config, self.llm.config.num_hidden_layers
+        ).to(dtype_map[self.llm_dtype])
         if getattr(self.llm.config, "classifier_dropout", None) is not None:
             classifier_dropout = self.llm.config.classifier_dropout
         elif getattr(self.llm.config, "hidden_dropout", None) is not None:
@@ -5398,9 +5411,12 @@ class LLMVAD(nn.Module):
         self.dropout = nn.Dropout(classifier_dropout)
         self.barge_in_num_labels = 2
         self.turn_taking_num_labels = 2
-        self.barge_in_score = nn.Linear(self.task_decoder_layer_config.hidden_size, self.barge_in_num_labels).to(dtype_map[self.llm_dtype])
-        self.turn_taking_score = nn.Linear(self.task_decoder_layer_config.hidden_size, self.turn_taking_num_labels).to(dtype_map[self.llm_dtype])
-
+        self.barge_in_score = nn.Linear(
+            self.task_decoder_layer_config.hidden_size, self.barge_in_num_labels
+        ).to(dtype_map[self.llm_dtype])
+        self.turn_taking_score = nn.Linear(
+            self.task_decoder_layer_config.hidden_size, self.turn_taking_num_labels
+        ).to(dtype_map[self.llm_dtype])
 
     def forward(
         self,
@@ -5503,17 +5519,24 @@ class LLMVAD(nn.Module):
             if position_ids is None:
                 device = input_ids.device if input_ids is not None else inputs_embeds.device
                 position_ids = torch.arange(
-                    past_key_values_length, seq_length + past_key_values_length, dtype=torch.long, device=device
+                    past_key_values_length,
+                    seq_length + past_key_values_length,
+                    dtype=torch.long,
+                    device=device,
                 )
                 position_ids = position_ids.unsqueeze(0).view(-1, seq_length)
             else:
                 position_ids = position_ids.view(-1, seq_length).long()
-            from transformers.modeling_attn_mask_utils import _prepare_4d_causal_attention_mask, \
-                _prepare_4d_causal_attention_mask_for_sdpa
+            from transformers.modeling_attn_mask_utils import (
+                _prepare_4d_causal_attention_mask,
+                _prepare_4d_causal_attention_mask_for_sdpa,
+            )
 
             if self.llm.config._attn_implementation == "flash_attention_2":
                 # 2d mask is passed through the layers
-                causal_attention_mask = attention_mask if (attention_mask is not None and 0 in attention_mask) else None
+                causal_attention_mask = (
+                    attention_mask if (attention_mask is not None and 0 in attention_mask) else None
+                )
             elif self.llm.config._attn_implementation == "sdpa" and not output_attentions:
                 # output_attentions=True can not be supported when using SDPA, and we fall back on
                 # the manual implementation that requires a 4D causal mask in all cases.
@@ -5565,11 +5588,16 @@ class LLMVAD(nn.Module):
         loss = None
         if barge_in_labels is not None:
             barge_in_labels[barge_in_labels == -1] = -100
-            barge_in_loss = self.loss_fct(barge_in_logits.view(-1, self.barge_in_num_labels), barge_in_labels.view(-1))
+            barge_in_loss = self.loss_fct(
+                barge_in_logits.view(-1, self.barge_in_num_labels), barge_in_labels.view(-1)
+            )
             loss = barge_in_loss
         if turn_taking_labels is not None:
             turn_taking_labels[turn_taking_labels == -1] = -100
-            turn_taking_loss = self.loss_fct(turn_taking_logits.view(-1, self.turn_taking_num_labels), turn_taking_labels.view(-1))
+            turn_taking_loss = self.loss_fct(
+                turn_taking_logits.view(-1, self.turn_taking_num_labels),
+                turn_taking_labels.view(-1),
+            )
             loss = turn_taking_loss if loss is None else loss + turn_taking_loss
 
         stats = {}
@@ -5581,7 +5609,9 @@ class LLMVAD(nn.Module):
             stats["turn_taking_loss"] = torch.clone(turn_taking_loss.detach())
             with torch.no_grad():
                 turn_taking_preds = torch.argmax(turn_taking_logits, -1)
-                turn_taking_acc = compute_accuracy(turn_taking_preds, turn_taking_labels, ignore_label=-100)
+                turn_taking_acc = compute_accuracy(
+                    turn_taking_preds, turn_taking_labels, ignore_label=-100
+                )
                 stats["turn_taking_acc"] = turn_taking_acc
         if barge_in_labels is not None:
             stats["barge_in_loss"] = torch.clone(barge_in_loss.detach())
@@ -5637,7 +5667,13 @@ class LLMVAD(nn.Module):
             llm_dtype = "fp16" if kwargs.get("fp16", False) else llm_dtype
             llm_dtype = "bf16" if kwargs.get("bf16", False) else llm_dtype
 
-        stats = {"turn_taking_preds": [], "barge_in_preds": [], "turn_taking_labels": [], "barge_in_labels": [], 'task': task}
+        stats = {
+            "turn_taking_preds": [],
+            "barge_in_preds": [],
+            "turn_taking_labels": [],
+            "barge_in_labels": [],
+            "task": task,
+        }
         with torch.cuda.amp.autocast(
             enabled=True if llm_dtype != "fp32" else False, dtype=dtype_map[llm_dtype]
         ):
@@ -5668,18 +5704,25 @@ class LLMVAD(nn.Module):
             if position_ids is None:
                 device = inputs_embeds.device
                 position_ids = torch.arange(
-                    past_key_values_length, seq_length + past_key_values_length, dtype=torch.long, device=device
+                    past_key_values_length,
+                    seq_length + past_key_values_length,
+                    dtype=torch.long,
+                    device=device,
                 )
                 position_ids = position_ids.unsqueeze(0).view(-1, seq_length)
             else:
                 position_ids = position_ids.view(-1, seq_length).long()
 
-            from transformers.modeling_attn_mask_utils import _prepare_4d_causal_attention_mask, \
-                _prepare_4d_causal_attention_mask_for_sdpa
+            from transformers.modeling_attn_mask_utils import (
+                _prepare_4d_causal_attention_mask,
+                _prepare_4d_causal_attention_mask_for_sdpa,
+            )
 
             if self.llm.config._attn_implementation == "flash_attention_2":
                 # 2d mask is passed through the layers
-                attention_mask = attention_mask if (attention_mask is not None and 0 in attention_mask) else None
+                attention_mask = (
+                    attention_mask if (attention_mask is not None and 0 in attention_mask) else None
+                )
             elif self.llm.config._attn_implementation == "sdpa" and not output_attentions:
                 # output_attentions=True can not be supported when using SDPA, and we fall back on
                 # the manual implementation that requires a 4D causal mask in all cases.
@@ -5734,19 +5777,41 @@ class LLMVAD(nn.Module):
                 for batch_idx in range(batch_size):
                     fbank_begin_index = fbank_beg[batch_idx, -1].item()
                     fbank_end_index = fbank_begin_index + fake_token_len[batch_idx, -1].item()
-                    turn_taking_preds_last = turn_taking_preds[batch_idx, fbank_begin_index:fbank_end_index].cpu().numpy().tolist()
+                    turn_taking_preds_last = (
+                        turn_taking_preds[batch_idx, fbank_begin_index:fbank_end_index]
+                        .cpu()
+                        .numpy()
+                        .tolist()
+                    )
                     turn_taking_preds_res.append(turn_taking_preds_last)
                     # print(f"turn_taking_labels: {turn_taking_labels}")
-                    turn_taking_labels_last = turn_taking_labels[batch_idx, fbank_begin_index:fbank_end_index].cpu().numpy().tolist()
+                    turn_taking_labels_last = (
+                        turn_taking_labels[batch_idx, fbank_begin_index:fbank_end_index]
+                        .cpu()
+                        .numpy()
+                        .tolist()
+                    )
                     turn_taking_labels_res.append(turn_taking_labels_last)
                     # print(f"turn_taking_preds: {turn_taking_preds_last}")
-                    barge_in_preds_last = barge_in_preds[batch_idx, fbank_begin_index:fbank_end_index].cpu().numpy().tolist()
+                    barge_in_preds_last = (
+                        barge_in_preds[batch_idx, fbank_begin_index:fbank_end_index]
+                        .cpu()
+                        .numpy()
+                        .tolist()
+                    )
                     barge_in_preds_res.append(barge_in_preds_last)
                     # print(f"barge_in_labels: {barge_in_labels}")
-                    barge_in_labels_last = barge_in_labels[batch_idx, fbank_begin_index:fbank_end_index].cpu().numpy().tolist()
+                    barge_in_labels_last = (
+                        barge_in_labels[batch_idx, fbank_begin_index:fbank_end_index]
+                        .cpu()
+                        .numpy()
+                        .tolist()
+                    )
                     barge_in_labels_res.append(barge_in_labels_last)
 
-                turn_taking_acc = compute_accuracy(turn_taking_preds, turn_taking_labels, ignore_label=-100)
+                turn_taking_acc = compute_accuracy(
+                    turn_taking_preds, turn_taking_labels, ignore_label=-100
+                )
                 stats["turn_taking_acc"] = turn_taking_acc.item()
 
                 barge_in_acc = compute_accuracy(barge_in_preds, barge_in_labels, ignore_label=-100)
@@ -5756,7 +5821,6 @@ class LLMVAD(nn.Module):
             stats["turn_taking_labels"].append(turn_taking_labels_res)
             stats["barge_in_labels"].append(barge_in_labels_res)
         return turn_taking_logits, barge_in_logits, meta_data, stats
-
 
     def encode(self, speech, speech_lengths):
         # audio encoder
@@ -5789,19 +5853,18 @@ class LLMVAD(nn.Module):
         }
 
         if "task" in sample:
-            task = sample['task']
-            last_total_time = data[-1]['end_time'] - data[-1]['start_time']
-            if task == 'turn-taking':
-                true_time_span = data[-1]['turn-taking-gap_time-added']
+            task = sample["task"]
+            last_total_time = data[-1]["end_time"] - data[-1]["start_time"]
+            if task == "turn-taking":
+                true_time_span = data[-1]["turn-taking-gap_time-added"]
             elif task == "barge-in":
-                true_time_span = last_total_time - data[-1]['barge-in-0']
+                true_time_span = last_total_time - data[-1]["barge-in-0"]
             else:
                 raise ValueError("task must be turn-taking or barge-in")
             contents["true_time_span"] = true_time_span
             contents["last_total_time"] = last_total_time
-            contents['task'] = sample['task']
+            contents["task"] = sample["task"]
         return contents
-
 
     def data_template(self, data):
         system, user, assistant = [], [], []
@@ -5828,7 +5891,6 @@ class LLMVAD(nn.Module):
 
         return contents
 
-
     def vad_data_load_speech(self, contents: dict, tokenizer, frontend, meta_data={}, **kwargs):
 
         system = contents["system"]
@@ -5852,13 +5914,9 @@ class LLMVAD(nn.Module):
             if i == 0:
                 source_input = f"<|im_start|>system\n{system_prompt}<|im_end|>\n<|im_start|>user\n{user_prompt}<|im_end|>\n<|im_start|>assistant\n"
             elif i == len(system) - 1:
-                source_input = (
-                    f"<|im_start|>user\n{user_prompt}"
-                )
+                source_input = f"<|im_start|>user\n{user_prompt}"
             else:
-                source_input = (
-                    f"<|im_start|>user\n{user_prompt}<|im_end|>\n<|im_start|>assistant\n"
-                )
+                source_input = f"<|im_start|>user\n{user_prompt}<|im_end|>\n<|im_start|>assistant\n"
 
             splits = pattern.split(source_input)
             source_ids = []
@@ -5941,18 +5999,22 @@ class LLMVAD(nn.Module):
         if "true_time_span" in contents:
             true_time_span = contents["true_time_span"]
             last_time_span = contents["last_total_time"]
-            pos_vad = math.ceil(fake_token_len[-1] * (true_time_span/last_time_span))
+            pos_vad = math.ceil(fake_token_len[-1] * (true_time_span / last_time_span))
             assert pos_vad <= fake_token_len[-1]
             if pos_vad > 0:
                 last_vad[-pos_vad:] = [1] * pos_vad
-        turn_taking_labels[-fake_token_len[-1]:] = last_vad
-        barge_in_labels[-fake_token_len[-1]:] = last_vad
+        turn_taking_labels[-fake_token_len[-1] :] = last_vad
+        barge_in_labels[-fake_token_len[-1] :] = last_vad
 
         input_ids = torch.tensor(input_ids, dtype=torch.int64)  # [: self.max_token_length]
         attention_mask = torch.tensor([1] * len(input_ids), dtype=torch.int32)
         labels = torch.tensor(labels, dtype=torch.int64)  # [: self.max_token_length]
-        turn_taking_labels = torch.tensor([turn_taking_labels], dtype=torch.int64)  # [: self.max_token_length]
-        barge_in_labels = torch.tensor([barge_in_labels], dtype=torch.int64)  # [: self.max_token_length]
+        turn_taking_labels = torch.tensor(
+            [turn_taking_labels], dtype=torch.int64
+        )  # [: self.max_token_length]
+        barge_in_labels = torch.tensor(
+            [barge_in_labels], dtype=torch.int64
+        )  # [: self.max_token_length]
 
         # fbank = speech[0, :, :]
         # fbank_lens = torch.tensor(fbank_lens, dtype=torch.int32)
@@ -6004,7 +6066,9 @@ class LLMVAD(nn.Module):
             raise NotImplementedError("batch decoding is not implemented")
 
         contents = self.vad_data_template(data_in[0])
-        output = self.vad_data_load_speech(contents, tokenizer, frontend, meta_data=meta_data, **kwargs)
+        output = self.vad_data_load_speech(
+            contents, tokenizer, frontend, meta_data=meta_data, **kwargs
+        )
         batch = to_device(output, kwargs["device"])
 
         # audio encoder
