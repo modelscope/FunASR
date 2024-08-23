@@ -587,7 +587,8 @@ class Trainer:
         # Set the number of steps for gradient accumulation
         accum_grad = self.accum_grad
         # Initialize the gradient accumulation
-        # optim.zero_grad()
+        if kwargs.get("data_split_i", 0) == 0:
+            optim.zero_grad()
         speed_stats = {}
 
         iterator_stop = torch.tensor(0).to(self.device)
