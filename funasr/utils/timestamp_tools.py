@@ -141,6 +141,8 @@ def timestamp_sentence(
     )
     for punc_stamp_text in punc_stamp_text_list:
         punc_id, timestamp, text = punc_stamp_text
+        if sentence_start is None and timestamp is not None:
+            sentence_start = timestamp[0]
         # sentence_text += text if text is not None else ''
         if text is not None:
             if "a" <= text[0] <= "z" or "A" <= text[0] <= "Z":
@@ -183,7 +185,7 @@ def timestamp_sentence(
             sentence_text = ""
             sentence_text_seg = ""
             ts_list = []
-            sentence_start = timestamp[0] if timestamp is not None else sentence_start
+            sentence_start = None
     return res
 
 
