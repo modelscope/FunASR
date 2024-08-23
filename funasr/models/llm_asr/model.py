@@ -1601,6 +1601,7 @@ class LLMASR4_extract_kv(nn.Module):
 
             os.makedirs(self.kv_cache_outdir, exist_ok=True)
             os.makedirs(f"{self.kv_cache_outdir}/mat", exist_ok=True)
+            os.makedirs(f"{self.kv_cache_outdir}/inputs_embeds", exist_ok=True)
             os.makedirs(f"{self.kv_cache_outdir}/txt", exist_ok=True)
 
         # adaptor
@@ -1737,6 +1738,9 @@ class LLMASR4_extract_kv(nn.Module):
         kv_cache_outdir = self.kv_cache_outdir
         mat_file = f"{kv_cache_outdir}/mat/{key}.mat"
         savemat(mat_file, {"kv_cache": hidden_states[0].cpu()})
+
+        mat_file = f"{kv_cache_outdir}/inputs_embeds/{key}.mat"
+        savemat(mat_file, {"inputs_embeds": inputs_embeds[0].float().cpu()})
 
         for turn_id_cum in range(input_mask.shape[0]):
             beg = input_mask_beg[turn_id_cum].sum(-1)

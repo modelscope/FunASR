@@ -587,7 +587,7 @@ class Trainer:
         # Set the number of steps for gradient accumulation
         accum_grad = self.accum_grad
         # Initialize the gradient accumulation
-        optim.zero_grad()
+        # optim.zero_grad()
         speed_stats = {}
 
         iterator_stop = torch.tensor(0).to(self.device)
@@ -743,8 +743,9 @@ class Trainer:
                 scheduler.step()
                 # Clear gradients for the next accumulation stage
                 optim.zero_grad(set_to_none=True)
-        if grad_norm is not None and not torch.isfinite(grad_norm):
-            loss_dict["stats"]["grad_norm"] = grad_norm
+        if grad_norm is not None:
+            if isinstance(grad_norm, torch.Tensor) and not torch.isfinite(grad_norm):
+                loss_dict["stats"]["grad_norm"] = grad_norm
 
     def validate_epoch(
         self,
