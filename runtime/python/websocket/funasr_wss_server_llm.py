@@ -8,7 +8,6 @@ import numpy as np
 import argparse
 import ssl
 
-
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "--host", type=str, default="127.0.0.1", required=False, help="host ip, localhost, 0.0.0.0"
@@ -55,7 +54,6 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-
 websocket_users = set()
 
 print("model loading")
@@ -83,7 +81,6 @@ model_vad = AutoModel(
     disable_log=True,
     # chunk_size=60,
 )
-
 
 # async def async_asr(websocket, audio_in):
 #     if len(audio_in) > 0:
@@ -229,7 +226,7 @@ async def model_inference(
         )
         contents_i = [{"role": "system", "content": system_prompt}] + contents_i[3:]
 
-    print(f"contents_i: {contents_i}")
+    # print(f"contents_i: {contents_i}")
 
     inputs_embeds, contents, batch, source_ids, meta_data = model.inference_prepare(
         [contents_i], None, "test_demo", tokenizer, frontend, device=device
@@ -246,7 +243,7 @@ async def model_inference(
     beg_llm = time.time()
     for new_text in streamer:
         end_llm = time.time()
-        print(f"generated new text： {new_text}, time: {end_llm-beg_llm:.2f}")
+        print(f"generated new text： {new_text}, time: {end_llm - beg_llm:.2f}")
 
         if len(new_text) > 0:
             res += new_text.replace("<|im_end|>", "")
@@ -263,7 +260,7 @@ async def model_inference(
                     "is_final": websocket.is_speaking,
                 }
             )
-            print(f"online: {message}")
+            # print(f"online: {message}")
             await websocket.send(message)
 
     mode = "2pass-offline"
@@ -275,7 +272,7 @@ async def model_inference(
             "is_final": websocket.is_speaking,
         }
     )
-    print(f"offline: {message}")
+    # print(f"offline: {message}")
     await websocket.send(message)
 
 
