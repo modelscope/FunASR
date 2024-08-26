@@ -247,7 +247,6 @@ async def model_inference(
         print(
             f"generated new text： {new_text}, time_fr_receive: {end_llm - beg0:.2f}, time_llm_decode: {end_llm - beg_llm:.2f}"
         )
-
         if len(new_text) > 0:
             res += new_text.replace("<|im_end|>", "")
             contents_i[-1]["content"] = res

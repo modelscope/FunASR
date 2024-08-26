@@ -1632,7 +1632,7 @@ class SenseVoiceL(nn.Module):
         encoder = encoder_class(**encoder_conf)
 
         if encoder_conf.get("freeze", False):
-            freeze_exclude_key = encoder_conf.get("freeze_exclude_key", "fsmn_block")
+            freeze_exclude_key = encoder_conf.get("freeze_exclude_key", None)
             for name, param in encoder.named_parameters():
                 if not freeze_exclude_key in name:
                     logging.info(f"name: {name} is freeze")

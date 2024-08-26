@@ -225,7 +225,7 @@ async def record_from_scp(chunk_begin, chunk_size):
                 # voices.put(message)
                 await websocket.send(message)
 
-            sleep_duration = 0.00001
+            sleep_duration = 0.00001  # 60 * args.chunk_size[1] / args.chunk_interval / 1000
 
             await asyncio.sleep(sleep_duration)
 
