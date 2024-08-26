@@ -192,6 +192,7 @@ async def model_inference(
     history=None,
     text_usr="",
 ):
+    beg0 = time.time()
     if his_state is None:
         his_state = model_dict
     model = his_state["model"]
@@ -243,7 +244,9 @@ async def model_inference(
     beg_llm = time.time()
     for new_text in streamer:
         end_llm = time.time()
-        print(f"generated new text： {new_text}, time: {end_llm - beg_llm:.2f}")
+        print(
+            f"generated new text： {new_text}, time_fr_receive: {end_llm - beg0:.2f}, time_llm_decode: {end_llm - beg_llm:.2f}"
+        )
 
         if len(new_text) > 0:
             res += new_text.replace("<|im_end|>", "")
