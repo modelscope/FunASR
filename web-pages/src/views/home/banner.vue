@@ -71,6 +71,10 @@ export default {
             jzmdSwiperObj: null,
             jzmdList: [
                 {
+                    name: '刘连响',
+                    num: 300
+                },                
+                {
                     name: '程俊陶',
                     num: 300
                 },
