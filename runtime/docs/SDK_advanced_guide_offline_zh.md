@@ -58,7 +58,7 @@ sudo docker run -p 10095:10095 -it --privileged=true \
 
 ### 服务端启动
 
-docker启动之后，启动 funasr-wss-server服务程序：
+docker启动之后，进入到docker里边启动 funasr-wss-server服务程序：
 ```shell
 cd FunASR/runtime
 nohup bash run_server.sh \
