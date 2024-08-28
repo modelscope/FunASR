@@ -930,6 +930,7 @@ class LLMASR4(nn.Module):
         from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig
 
         init_param_path = llm_conf.get("init_param_path", "vicuna-7b-v1.5")
+        llm_load_kwargs = llm_conf.get("load_kwargs", {})
 
         if not llm_conf.get("low_cpu", False):
             model = AutoModelForCausalLM.from_pretrained(
@@ -937,6 +938,7 @@ class LLMASR4(nn.Module):
                 load_in_8bit=None,
                 device_map=None,
                 use_cache=None,
+                **llm_load_kwargs,
             )
         else:
             import os
@@ -947,6 +949,7 @@ class LLMASR4(nn.Module):
                     load_in_8bit=None,
                     device_map="cpu",
                     use_cache=None,
+                    **llm_load_kwargs,
                 )
             else:
                 llm_config = AutoConfig.from_pretrained(init_param_path)
