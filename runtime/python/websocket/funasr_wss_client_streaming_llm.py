@@ -22,7 +22,7 @@ parser.add_argument(
 )
 parser.add_argument("--port", type=int, default=10095, required=False, help="grpc server port")
 parser.add_argument("--chunk_size", type=str, default="5, 10, 5", help="chunk")
-parser.add_argument("--chunk_interval", type=int, default=60, help="chunk")
+parser.add_argument("--chunk_interval", type=int, default=10, help="chunk")
 parser.add_argument("--audio_in", type=str, default=None, help="audio_in")
 parser.add_argument("--audio_fs", type=int, default=16000, help="audio_fs")
 parser.add_argument("--asr_prompt", type=str, default="Copy:", help="asr prompt")
