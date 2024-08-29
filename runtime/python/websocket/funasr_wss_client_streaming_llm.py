@@ -38,6 +38,7 @@ parser.add_argument("--thread_num", type=int, default=1, help="thread_num")
 parser.add_argument("--words_max_print", type=int, default=10000, help="chunk")
 parser.add_argument("--ssl", type=int, default=1, help="1 for ssl connect, 0 for no ssl")
 parser.add_argument("--mode", type=str, default="online", help="offline, online, 2pass")
+parser.add_argument("--skip_seconds", type=int, default=0, help="skip how many seconds in audio")
 
 
 args = parser.parse_args()
@@ -124,6 +125,10 @@ async def record_from_scp(chunk_begin, chunk_size):
             wav_format = "others"
             with open(wav_path, "rb") as f:
                 audio_bytes = f.read()
+        
+        # skip seconds in audio_bytes
+        if args.skip_seconds > 0:
+            audio_bytes = audio_bytes[args.skip_seconds * sample_rate * 2 :]
 
         stride = int(60 * args.chunk_size[1] / args.chunk_interval / 1000 * sample_rate * 2)
         chunk_num = (len(audio_bytes) - 1) // stride + 1
