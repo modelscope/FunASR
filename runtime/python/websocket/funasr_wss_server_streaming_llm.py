@@ -55,6 +55,7 @@ model_vad = AutoModel(
     device=args.device,
     disable_pbar=True,
     disable_log=True,
+    max_single_segment_time=30000,
     # chunk_size=60,
 )
 
@@ -184,15 +185,23 @@ async def streaming_transcribe(websocket, audio_in, his_state=None, asr_prompt=N
     onscreen_asr_res = previous_asr_text
     onscreen_s2tt_res = previous_s2tt_text
 
+    remain_s2tt_text = True
+
     for new_asr_text in asr_streamer:
         print(f"generated new asr text： {new_asr_text}")
         if len(new_asr_text) > 0:
             onscreen_asr_res += new_asr_text.replace("<|im_end|>", "")
 
-        new_s2tt_text = next(s2tt_streamer)
-        print(f"generated new s2tt text： {new_s2tt_text}")
-        if len(new_s2tt_text) > 0:
-            onscreen_s2tt_res += new_s2tt_text.replace("<|im_end|>", "")
+        if remain_s2tt_text:
+            try:
+                new_s2tt_text = next(s2tt_streamer)
+                print(f"generated new s2tt text： {new_s2tt_text}")
+                if len(new_s2tt_text) > 0:
+                    onscreen_s2tt_res += new_s2tt_text.replace("<|im_end|>", "")
+            except StopIteration:
+                new_s2tt_text = ""
+                remain_s2tt_text = False
+                pass
         
         if len(new_asr_text) > 0 or len(new_s2tt_text) > 0:
             message = json.dumps(
@@ -209,25 +218,25 @@ async def streaming_transcribe(websocket, audio_in, his_state=None, asr_prompt=N
         websocket.streaming_state["onscreen_s2tt_res"] = previous_vad_onscreen_s2tt_text + onscreen_s2tt_res
 
         
-    
-    for new_s2tt_text in s2tt_streamer:
-        print(f"generated new s2tt text： {new_s2tt_text}")
-        if len(new_s2tt_text) > 0:
-            onscreen_s2tt_res += new_s2tt_text.replace("<|im_end|>", "")
-        
-        if len(new_s2tt_text) > 0:
-            message = json.dumps(
-                {
-                    "mode": "online",
-                    "asr_text": previous_vad_onscreen_asr_text + onscreen_asr_res,
-                    "s2tt_text": previous_vad_onscreen_s2tt_text + onscreen_s2tt_res,
-                    "wav_name": websocket.wav_name,
-                    "is_final": websocket.is_speaking,
-                }
-            )
-            await websocket.send(message)
-        websocket.streaming_state["onscreen_asr_res"] = previous_vad_onscreen_asr_text + onscreen_asr_res
-        websocket.streaming_state["onscreen_s2tt_res"] = previous_vad_onscreen_s2tt_text + onscreen_s2tt_res
+    if remain_s2tt_text:
+        for new_s2tt_text in s2tt_streamer:
+            print(f"generated new s2tt text： {new_s2tt_text}")
+            if len(new_s2tt_text) > 0:
+                onscreen_s2tt_res += new_s2tt_text.replace("<|im_end|>", "")
+            
+            if len(new_s2tt_text) > 0:
+                message = json.dumps(
+                    {
+                        "mode": "online",
+                        "asr_text": previous_vad_onscreen_asr_text + onscreen_asr_res,
+                        "s2tt_text": previous_vad_onscreen_s2tt_text + onscreen_s2tt_res,
+                        "wav_name": websocket.wav_name,
+                        "is_final": websocket.is_speaking,
+                    }
+                )
+                await websocket.send(message)
+            websocket.streaming_state["onscreen_asr_res"] = previous_vad_onscreen_asr_text + onscreen_asr_res
+            websocket.streaming_state["onscreen_s2tt_res"] = previous_vad_onscreen_s2tt_text + onscreen_s2tt_res
 
     streaming_time_end = time.time()
     print(f"Streaming inference time: {streaming_time_end - streaming_time_beg}")
@@ -369,6 +378,11 @@ async def ws_serve(websocket, path):
                 # vad end
                 if speech_end_i != -1 or not websocket.is_speaking:
                     audio_in = b"".join(frames_asr)
+                    try:
+                        await streaming_transcribe(websocket, audio_in, asr_prompt=asr_prompt, s2tt_prompt=s2tt_prompt)
+                    except Exception as e:
+                        print(f"error in streaming, {e}")
+                        print(f"error in streaming, {websocket.streaming_state}")
                     frames_asr = []
                     speech_start = False
                     websocket.streaming_state["previous_asr_text"] = ""

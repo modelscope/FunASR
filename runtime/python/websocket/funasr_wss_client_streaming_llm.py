@@ -171,6 +171,8 @@ async def record_from_scp(chunk_begin, chunk_size):
 async def message(id):
     global websocket, voices
     text_print = ""
+    prev_asr_text = ""
+    prev_s2tt_text = ""
     try:
         while True:
             meg = await websocket.recv()
@@ -178,6 +180,11 @@ async def message(id):
             asr_text = meg["asr_text"]
             s2tt_text = meg["s2tt_text"]
 
+            if prev_asr_text.startswith(asr_text) and prev_s2tt_text.startswith(s2tt_text):
+                continue
+
+            prev_asr_text = asr_text
+            prev_s2tt_text = s2tt_text
             text_print = "\n\n" + "ASR: " + asr_text + "\n\n" + "S2TT: " + s2tt_text
             os.system("clear")
             print("\rpid" + str(id) + ": " + text_print)
