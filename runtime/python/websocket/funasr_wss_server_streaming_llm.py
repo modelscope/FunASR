@@ -55,7 +55,8 @@ model_vad = AutoModel(
     device=args.device,
     disable_pbar=True,
     disable_log=True,
-    max_single_segment_time=30000,
+    max_single_segment_time=40000,
+    max_end_silence_time=580,
     # chunk_size=60,
 )
 
