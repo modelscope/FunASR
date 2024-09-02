@@ -78,7 +78,7 @@ all_file_paths = [
 
 llm_kwargs = {"num_beams": 1, "do_sample": False}
 UNFIX_LEN = 5
-MIN_LEN_PER_PARAGRAPH = 10
+MIN_LEN_PER_PARAGRAPH = 25
 MIN_LEN_SEC_AUDIO_FIX = 1.1
 MAX_ITER_PER_CHUNK = 20
 
@@ -198,12 +198,14 @@ async def streaming_transcribe(websocket, audio_in, his_state=None, asr_prompt=N
 
     for new_asr_text in asr_streamer:
         print(f"generated new asr text： {new_asr_text}")
-        asr_iter_cnt += 1
-        if asr_iter_cnt > MAX_ITER_PER_CHUNK:
-            is_asr_repetition = True
-            break
+        
         if len(new_asr_text) > 0:
             onscreen_asr_res += new_asr_text.replace("<|im_end|>", "")
+            if len(new_asr_text.replace("<|im_end|>", "")) > 0:
+                asr_iter_cnt += 1
+            if asr_iter_cnt > MAX_ITER_PER_CHUNK:
+                is_asr_repetition = True
+                break
 
         if remain_s2tt_text:
             try:
@@ -243,12 +245,14 @@ async def streaming_transcribe(websocket, audio_in, his_state=None, asr_prompt=N
     if remain_s2tt_text:
         for new_s2tt_text in s2tt_streamer:
             print(f"generated new s2tt text： {new_s2tt_text}")
-            s2tt_iter_cnt += 1
-            if s2tt_iter_cnt > MAX_ITER_PER_CHUNK:
-                is_s2tt_repetition = True
-                break
+            
             if len(new_s2tt_text) > 0:
                 onscreen_s2tt_res += new_s2tt_text.replace("<|im_end|>", "")
+                if len(new_s2tt_text.replace("<|im_end|>", "")) > 0:
+                    s2tt_iter_cnt += 1
+                if s2tt_iter_cnt > MAX_ITER_PER_CHUNK:
+                    is_s2tt_repetition = True
+                    break
             
             if len(new_s2tt_text) > 0:
                 all_asr_res = previous_vad_onscreen_asr_text + onscreen_asr_res
