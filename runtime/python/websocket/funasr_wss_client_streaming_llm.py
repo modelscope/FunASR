@@ -185,7 +185,7 @@ async def message(id):
             asr_text = meg["asr_text"]
             s2tt_text = meg["s2tt_text"]
 
-            if prev_asr_text.startswith(asr_text) and prev_s2tt_text.startswith(s2tt_text):
+            if prev_asr_text.replace("</em>", "").startswith(asr_text.replace("</em>", "")) and prev_s2tt_text.replace("</em>", "").startswith(s2tt_text.replace("</em>", "")):
                 continue
 
             prev_asr_text = asr_text
