@@ -238,7 +238,7 @@ async def record_from_scp(chunk_begin, chunk_size):
         while not offline_msg_done:
             await asyncio.sleep(1)
 
-    await websocket.close()
+    #await websocket.close()
 
 
 async def message(id):
@@ -246,6 +246,7 @@ async def message(id):
     text_print = ""
     text_print_2pass_online = ""
     text_print_2pass_offline = ""
+    tts_count = 0
     if args.output_dir is not None:
         ibest_writer = open(
             os.path.join(args.output_dir, "text.{}".format(id)), "a", encoding="utf-8"
@@ -253,9 +254,18 @@ async def message(id):
     else:
         ibest_writer = None
     try:
+        timestamp = int(time.time())
+        file_name = f'tts_client_{timestamp}.pcm'
+        file = open(file_name, 'wb')
         while True:
-
             meg = await websocket.recv()
+            if isinstance(meg, bytes):
+                try:
+                    tts_count += len(meg)
+                    file.write(meg)
+                except Exception as e:
+                    print(e)
+                continue
             meg = json.loads(meg)
             wav_name = meg.get("wav_name", "demo")
             text = meg["text"]
@@ -296,8 +306,9 @@ async def message(id):
                     text_print_2pass_online = ""
                     text_print = text_print_2pass_offline + "{}".format(text)
                     text_print_2pass_offline += "{}".format(text)
-                text_print = text_print[-args.words_max_print :]
+                #text_print = text_print[-args.words_max_print :]
                 os.system("clear")
+                print("tts_count len: =>{}".format(tts_count))
                 print("\rpid" + str(id) + ": " + text_print)
                 # offline_msg_done=True
 
@@ -305,8 +316,6 @@ async def message(id):
         print("Exception:", e)
         # traceback.print_exc()
         # await websocket.close()
-
-
 async def ws_client(id, chunk_begin, chunk_size):
     if args.audio_in is None:
         chunk_begin = 0
