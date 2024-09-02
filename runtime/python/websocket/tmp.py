@@ -3,6 +3,7 @@ import asyncio
 import json
 import websockets
 import time
+from datetime import datetime
 import argparse
 import ssl
 import numpy as np
@@ -30,14 +31,14 @@ parser.add_argument("--ncpu", type=int, default=4, help="cpu cores")
 parser.add_argument(
     "--certfile",
     type=str,
-    default="../../ssl_key/server.crt",
+    default="",
     required=False,
     help="certfile for ssl",
 )
 parser.add_argument(
     "--keyfile",
     type=str,
-    default="../../ssl_key/server.key",
+    default="ssl_key/server.key",
     required=False,
     help="keyfile for ssl",
 )
@@ -66,15 +67,18 @@ if "key" in os.environ:
     api.login(key)
 
 # os.environ["MODELSCOPE_CACHE"] = "/nfs/zhifu.gzf/modelscope"
-# llm_dir = snapshot_download('qwen/Qwen2-7B-Instruct', cache_dir=None, revision='master')
-# audio_encoder_dir = snapshot_download('iic/SenseVoice', cache_dir=None, revision='master')
+llm_dir = snapshot_download('qwen/Qwen2-7B-Instruct', cache_dir=None, revision='master')
+audio_encoder_dir = snapshot_download('iic/SenseVoice', cache_dir=None, revision='master')
 
-llm_dir = "/cpfs_speech/zhifu.gzf/init_model/qwen/Qwen2-7B-Instruct"
-audio_encoder_dir = "/nfs/yangyexin.yyx/init_model/iic/SenseVoiceModelscope_0712"
+# llm_dir = "/cpfs_speech/zhifu.gzf/init_model/qwen/Qwen2-7B-Instruct"
+# audio_encoder_dir = "/nfs/yangyexin.yyx/init_model/iic/SenseVoiceModelscope_0712"
 device = "cuda:0"
 all_file_paths = [
-    "/nfs/yangyexin.yyx/init_model/qwen2_7b_mmt_v14_20240830/",
-    "/nfs/yangyexin.yyx/init_model/audiolm_v14_20240824_train_encoder_all_20240822_lr1e-4_warmup2350/"
+    "FunAudioLLM/qwen2_7b_mmt_v14_20240830",
+    "FunAudioLLM/audiolm_v11_20240807",
+    "FunAudioLLM/Speech2Text_Align_V0712",
+    "FunAudioLLM/Speech2Text_Align_V0718",
+    "FunAudioLLM/Speech2Text_Align_V0628",
 ]
 
 llm_kwargs = {"num_beams": 1, "do_sample": False}
@@ -144,6 +148,8 @@ def load_bytes(input):
     return array
 
 async def streaming_transcribe(websocket, audio_in, his_state=None, asr_prompt=None, s2tt_prompt=None):
+    current_time = datetime.now()
+    print("DEBUG:" + str(current_time) + " call streaming_transcribe function:")
     if his_state is None:
         his_state = model_dict
     model = his_state["model"]
@@ -220,8 +226,8 @@ async def streaming_transcribe(websocket, audio_in, his_state=None, asr_prompt=N
     is_s2tt_repetition = False
 
     for new_asr_text in asr_streamer:
-        print(f"generated new asr text： {new_asr_text}")
-        
+        current_time = datetime.now()
+        print("DEBUG: " + str(current_time) + " " + f"generated new asr text： {new_asr_text}")
         if len(new_asr_text) > 0:
             onscreen_asr_res += new_asr_text.replace("<|im_end|>", "")
             if len(new_asr_text.replace("<|im_end|>", "")) > 0:
@@ -233,7 +239,8 @@ async def streaming_transcribe(websocket, audio_in, his_state=None, asr_prompt=N
         if remain_s2tt_text:
             try:
                 new_s2tt_text = next(s2tt_streamer)
-                print(f"generated new s2tt text： {new_s2tt_text}")
+                current_time = datetime.now()
+                print("DEBUG: " + str(current_time) + " " + f"generated new s2tt text： {new_s2tt_text}")
                 s2tt_iter_cnt += 1
                 if len(new_s2tt_text) > 0:
                     onscreen_s2tt_res += new_s2tt_text.replace("<|im_end|>", "")
@@ -267,8 +274,8 @@ async def streaming_transcribe(websocket, audio_in, his_state=None, asr_prompt=N
         
     if remain_s2tt_text:
         for new_s2tt_text in s2tt_streamer:
-            print(f"generated new s2tt text： {new_s2tt_text}")
-            
+            current_time = datetime.now()
+            print("DEBUG: " + str(current_time) + " " + f"generated new s2tt text： {new_s2tt_text}")
             if len(new_s2tt_text) > 0:
                 onscreen_s2tt_res += new_s2tt_text.replace("<|im_end|>", "")
                 if len(new_s2tt_text.replace("<|im_end|>", "")) > 0:
@@ -307,8 +314,8 @@ async def streaming_transcribe(websocket, audio_in, his_state=None, asr_prompt=N
 
     if asr_text_len > UNFIX_LEN and audio_seconds > MIN_LEN_SEC_AUDIO_FIX and not is_asr_repetition:
         pre_previous_asr_text = previous_asr_text
-        previous_asr_text = tokenizer.decode(tokenizer.encode(onscreen_asr_res)[:-UNFIX_LEN]).replace("�", "")
-        if len(previous_asr_text) <= len(pre_previous_asr_text):
+        previous_asr_text = tokenizer.decode(tokenizer.encode(onscreen_asr_res)[:-UNFIX_LEN])
+        if len(previous_asr_text) < len(pre_previous_asr_text):
             previous_asr_text = pre_previous_asr_text
     elif is_asr_repetition:
         pass
@@ -316,8 +323,8 @@ async def streaming_transcribe(websocket, audio_in, his_state=None, asr_prompt=N
         previous_asr_text = ""
     if s2tt_text_len > UNFIX_LEN and audio_seconds > MIN_LEN_SEC_AUDIO_FIX and not is_s2tt_repetition:
         pre_previous_s2tt_text = previous_s2tt_text
-        previous_s2tt_text = tokenizer.decode(tokenizer.encode(onscreen_s2tt_res)[:-UNFIX_LEN]).replace("�", "")
-        if len(previous_s2tt_text) <= len(pre_previous_s2tt_text):
+        previous_s2tt_text = tokenizer.decode(tokenizer.encode(onscreen_s2tt_res)[:-UNFIX_LEN])
+        if len(previous_s2tt_text) < len(pre_previous_s2tt_text):
             previous_s2tt_text = pre_previous_s2tt_text
     elif is_s2tt_repetition:
         pass
@@ -383,6 +390,13 @@ async def ws_serve(websocket, path):
 
     try:
         async for message in websocket:
+            if isinstance(message, str):
+                current_time = datetime.now()
+                print("DEBUG:" + str(current_time) + " received message:", message)
+            else:
+                current_time = datetime.now()
+                print("DEBUG:" + str(current_time) + " received audio bytes:")
+
             if isinstance(message, str):
                 messagejson = json.loads(message)
 
@@ -491,6 +505,8 @@ async def ws_serve(websocket, path):
 
 
 async def async_vad(websocket, audio_in):
+    current_time = datetime.now()
+    print("DEBUG:" + str(current_time) + " call vad function:")
     segments_result = model_vad.generate(input=audio_in, **websocket.status_dict_vad)[0]["value"]
     # print(segments_result)
 
@@ -506,7 +522,7 @@ async def async_vad(websocket, audio_in):
     return speech_start, speech_end
 
 
-if len(args.certfile) > 0:
+if False:
     ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 
     # Generate with Lets Encrypt, copied to this location, chown to current user and 400 permissions
