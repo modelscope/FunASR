@@ -15,7 +15,7 @@ from modelscope.hub.snapshot_download import snapshot_download
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    "--host", type=str, default="127.0.0.1", required=False, help="host ip, localhost, 0.0.0.0"
+    "--host", type=str, default="0.0.0.0", required=False, help="host ip, localhost, 0.0.0.0"
 )
 parser.add_argument("--port", type=int, default=10095, required=False, help="grpc server port")
 parser.add_argument(
@@ -62,9 +62,11 @@ model_vad = AutoModel(
 )
 
 api = HubApi()
+key = "ed70b703-9ec7-44b8-b5ce-5f4527719810"
+api.login(key)
 if "key" in os.environ:
     key = os.environ["key"]
-    api.login(key)
+api.login(key)
 
 # os.environ["MODELSCOPE_CACHE"] = "/nfs/zhifu.gzf/modelscope"
 llm_dir = snapshot_download("qwen/Qwen2-7B-Instruct", cache_dir=None, revision="master")
@@ -98,7 +100,9 @@ def contains_lora_folder(directory):
     return None
 
 
+ckpt_dir = snapshot_download(ckpt_dir, cache_dir=None, revision="master")
 lora_folder = contains_lora_folder(ckpt_dir)
+
 if lora_folder is not None:
     model_llm = AutoModel(
         model=ckpt_dir,
