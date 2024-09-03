@@ -49,6 +49,17 @@ from queue import Queue
 
 voices = Queue()
 
+class Colors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'   # 重置颜色
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 
 async def record_microphone():
     is_finished = False
@@ -185,12 +196,24 @@ async def message(id):
             asr_text = meg["asr_text"]
             s2tt_text = meg["s2tt_text"]
 
-            if prev_asr_text.startswith(asr_text) and prev_s2tt_text.startswith(s2tt_text):
-                continue
+            clean_prev_asr_text = prev_asr_text.replace("<em>", "").replace("</em>", "")
+            clean_prev_s2tt_text = prev_s2tt_text.replace("<em>", "").replace("</em>", "")
+            clean_asr_text = asr_text.replace("<em>", "").replace("</em>", "")
+            clean_s2tt_text = s2tt_text.replace("<em>", "").replace("</em>", "")
+
+            if clean_prev_asr_text.startswith(clean_asr_text):
+                new_asr_unfix_pos = asr_text.find("<em>")
+                asr_text = clean_prev_asr_text[:new_asr_unfix_pos] + "<em>" + clean_prev_asr_text[new_asr_unfix_pos:] + "</em>"
+
+            if clean_prev_s2tt_text.startswith(clean_s2tt_text):
+                new_s2tt_unfix_pos = s2tt_text.find("<em>")
+                s2tt_text = clean_prev_s2tt_text[:new_s2tt_unfix_pos] + "<em>" + clean_prev_s2tt_text[new_s2tt_unfix_pos:] + "</em>"
 
             prev_asr_text = asr_text
             prev_s2tt_text = s2tt_text
-            text_print = "\n\n" + "ASR: " + asr_text + "\n\n" + "S2TT: " + s2tt_text
+            print_asr_text = Colors.OKGREEN + asr_text[:asr_text.find("<em>")] + Colors.ENDC + Colors.OKCYAN + asr_text[asr_text.find("<em>") + len("<em>"): -len("</em>")] + Colors.ENDC
+            print_s2tt_text = Colors.OKGREEN + s2tt_text[:s2tt_text.find("<em>")] + Colors.ENDC + Colors.OKCYAN + s2tt_text[s2tt_text.find("<em>") + len("<em>"): -len("</em>")] + Colors.ENDC
+            text_print = "\n\n" + "ASR: " + print_asr_text + "\n\n" + "S2TT: " + print_s2tt_text
             os.system("clear")
             print("\rpid" + str(id) + ": " + text_print)
 
