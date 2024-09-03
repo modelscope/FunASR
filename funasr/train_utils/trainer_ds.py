@@ -225,6 +225,14 @@ class Trainer:
                 ckpt_name = f"ds-model.pt.ep{epoch}.{step}"
             filename = os.path.join(self.output_dir, ckpt_name)
 
+            if self.use_lora:
+                lora_outdir = f"{self.output_dir}/lora-{ckpt_name}"
+                os.makedirs(lora_outdir, exist_ok=True)
+                if hasattr(model, "module"):
+                    model.module.llm.save_pretrained(lora_outdir)
+                else:
+                    model.llm.save_pretrained(lora_outdir)
+
             # torch.save(state, filename)
             with torch.no_grad():
                 model.save_checkpoint(save_dir=self.output_dir, tag=ckpt_name, client_state=state)

@@ -49,6 +49,7 @@ class NlsTtsSynthesizer:
 
     def on_data(self, data, *args):
         self.count += len(data)
+        print(f"cout: {self.count}")
         self.tts_fifo.append(data)
         # with open('tts_server.pcm', 'ab') as file:
         #    file.write(data)
@@ -78,6 +79,7 @@ class NlsTtsSynthesizer:
         self.started = True
 
     def send_text(self, text):
+        print(f"text: {text}")
         self.sdk.sendStreamInputTts(text)
 
     async def stop(self):
@@ -194,7 +196,7 @@ if "appkey" in os.environ:
 
 from modelscope.hub.snapshot_download import snapshot_download
 
-os.environ["MODELSCOPE_CACHE"] = "/nfs/zhifu.gzf/modelscope"
+os.environ["MODELSCOPE_CACHE"] = "/mnt/workspace"
 llm_dir = snapshot_download("qwen/Qwen2-7B-Instruct", cache_dir=None, revision="master")
 audio_encoder_dir = snapshot_download("iic/SenseVoice", cache_dir=None, revision="master")
 
@@ -221,7 +223,7 @@ model_llm = AutoModel(
     bf16=False,
     llm_dtype="bf16",
     max_length=1024,
-    # llm_kwargs=llm_kwargs,
+    llm_kwargs=llm_kwargs,
     llm_conf={"init_param_path": llm_dir},
     tokenizer_conf={"init_param_path": llm_dir},
     audio_encoder=audio_encoder_dir,
@@ -321,8 +323,10 @@ async def model_inference(
             f"generated new text： {new_text}, time_fr_receive: {end_llm - beg0:.2f}, time_llm_decode: {end_llm - beg_llm:.2f}"
         )
         if len(new_text) > 0:
+            new_text = new_text.replace("<|im_end|>", "")
+            res += new_text
             synthesizer.send_text(new_text)
-            res += new_text.replace("<|im_end|>", "")
+
             contents_i[-1]["content"] = res
             websocket.llm_state["contents_i"] = contents_i
             # history[-1][1] = res
@@ -333,7 +337,7 @@ async def model_inference(
                     "mode": mode,
                     "text": new_text,
                     "wav_name": websocket.wav_name,
-                    "is_final": websocket.is_speaking,
+                    "is_final": False,
                 }
             )
             # print(f"online: {message}")
@@ -342,6 +346,7 @@ async def model_inference(
                 while len(fifo_queue) > 0:
                     await websocket.send(fifo_queue.popleft())
 
+    # synthesizer.send_text(res)
     tts_to_client_task = asyncio.create_task(send_to_client(websocket, synthesizer, fifo_queue))
     synthesizer.stop()
     await tts_to_client_task
@@ -351,7 +356,7 @@ async def model_inference(
             "mode": mode,
             "text": res,
             "wav_name": websocket.wav_name,
-            "is_final": websocket.is_speaking,
+            "is_final": True,
         }
     )
     # print(f"offline: {message}")
@@ -452,7 +457,8 @@ async def ws_serve(websocket, path):
                         frames_asr = []
                         frames_asr.extend(frames_pre)
                 # asr punc offline
-                if speech_end_i != -1 or not websocket.is_speaking:
+                # if speech_end_i != -1 or not websocket.is_speaking:
+                if not websocket.is_speaking:
                     # print("vad end point")
                     if websocket.mode == "2pass" or websocket.mode == "offline":
                         audio_in = b"".join(frames_asr)

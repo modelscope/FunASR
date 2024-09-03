@@ -20,7 +20,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     "--host", type=str, default="localhost", required=False, help="host ip, localhost, 0.0.0.0"
 )
-parser.add_argument("--port", type=int, default=10095, required=False, help="grpc server port")
+parser.add_argument("--port", type=int, default=10096, required=False, help="grpc server port")
 parser.add_argument("--chunk_size", type=str, default="5, 10, 5", help="chunk")
 parser.add_argument("--encoder_chunk_look_back", type=int, default=4, help="chunk")
 parser.add_argument("--decoder_chunk_look_back", type=int, default=0, help="chunk")
@@ -42,7 +42,7 @@ parser.add_argument(
 parser.add_argument("--thread_num", type=int, default=1, help="thread_num")
 parser.add_argument("--words_max_print", type=int, default=10000, help="chunk")
 parser.add_argument("--output_dir", type=str, default=None, help="output_dir")
-parser.add_argument("--ssl", type=int, default=1, help="1 for ssl connect, 0 for no ssl")
+parser.add_argument("--ssl", type=int, default=0, help="1 for ssl connect, 0 for no ssl")
 parser.add_argument("--use_itn", type=int, default=1, help="1 for using itn, 0 for not itn")
 parser.add_argument("--mode", type=str, default="2pass", help="offline, online, 2pass")
 
@@ -238,7 +238,7 @@ async def record_from_scp(chunk_begin, chunk_size):
         while not offline_msg_done:
             await asyncio.sleep(1)
 
-    #await websocket.close()
+    # await websocket.close()
 
 
 async def message(id):
@@ -255,8 +255,8 @@ async def message(id):
         ibest_writer = None
     try:
         timestamp = int(time.time())
-        file_name = f'tts_client_{timestamp}.pcm'
-        file = open(file_name, 'wb')
+        file_name = f"tts_client_{timestamp}.pcm"
+        file = open(file_name, "wb")
         while True:
             meg = await websocket.recv()
             if isinstance(meg, bytes):
@@ -306,7 +306,7 @@ async def message(id):
                     text_print_2pass_online = ""
                     text_print = text_print_2pass_offline + "{}".format(text)
                     text_print_2pass_offline += "{}".format(text)
-                #text_print = text_print[-args.words_max_print :]
+                # text_print = text_print[-args.words_max_print :]
                 os.system("clear")
                 print("tts_count len: =>{}".format(tts_count))
                 print("\rpid" + str(id) + ": " + text_print)
@@ -316,6 +316,8 @@ async def message(id):
         print("Exception:", e)
         # traceback.print_exc()
         # await websocket.close()
+
+
 async def ws_client(id, chunk_begin, chunk_size):
     if args.audio_in is None:
         chunk_begin = 0
