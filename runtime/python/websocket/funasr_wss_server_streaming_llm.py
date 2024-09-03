@@ -142,7 +142,6 @@ model_dict = {"model": model, "frontend": frontend, "tokenizer": tokenizer}
 
 print("model loaded! only support one client at the same time now!!!!")
 
-
 def load_bytes(input):
     middle_data = np.frombuffer(input, dtype=np.int16)
     middle_data = np.asarray(middle_data)
@@ -158,10 +157,7 @@ def load_bytes(input):
     array = np.frombuffer((middle_data.astype(dtype) - offset) / abs_max, dtype=np.float32)
     return array
 
-
-async def streaming_transcribe(
-    websocket, audio_in, his_state=None, asr_prompt=None, s2tt_prompt=None
-):
+async def streaming_transcribe(websocket, audio_in, is_vad_end=False, his_state=None, asr_prompt=None, s2tt_prompt=None):
     current_time = datetime.now()
     print("DEBUG:" + str(current_time) + " call streaming_transcribe function:")
     if his_state is None:
@@ -287,12 +283,18 @@ async def streaming_transcribe(
         if len(new_asr_text) > 0 or len(new_s2tt_text) > 0:
             all_asr_res = previous_vad_onscreen_asr_text + onscreen_asr_res
             fix_asr_part = previous_vad_onscreen_asr_text + previous_asr_text
-            unfix_asr_part = all_asr_res[len(fix_asr_part) :]
-            return_asr_res = fix_asr_part + "<em>" + unfix_asr_part + "</em>"
+            unfix_asr_part = all_asr_res[len(fix_asr_part):]
+            if not is_vad_end:
+                return_asr_res = fix_asr_part + "<em>" + unfix_asr_part + "</em>"
+            else:
+                return_asr_res = fix_asr_part + unfix_asr_part + "<em></em>"
             all_s2tt_res = previous_vad_onscreen_s2tt_text + onscreen_s2tt_res
             fix_s2tt_part = previous_vad_onscreen_s2tt_text + previous_s2tt_text
-            unfix_s2tt_part = all_s2tt_res[len(fix_s2tt_part) :]
-            return_s2tt_res = fix_s2tt_part + "<em>" + unfix_s2tt_part + "</em>"
+            unfix_s2tt_part = all_s2tt_res[len(fix_s2tt_part):]
+            if not is_vad_end:
+                return_s2tt_res = fix_s2tt_part + "<em>" + unfix_s2tt_part + "</em>"
+            else:
+                return_s2tt_res = fix_s2tt_part + unfix_s2tt_part + "<em></em>"
             message = json.dumps(
                 {
                     "mode": "online",
@@ -327,12 +329,18 @@ async def streaming_transcribe(
             if len(new_s2tt_text) > 0:
                 all_asr_res = previous_vad_onscreen_asr_text + onscreen_asr_res
                 fix_asr_part = previous_vad_onscreen_asr_text + previous_asr_text
-                unfix_asr_part = all_asr_res[len(fix_asr_part) :]
-                return_asr_res = fix_asr_part + "<em>" + unfix_asr_part + "</em>"
+                unfix_asr_part = all_asr_res[len(fix_asr_part):]
+                if not is_vad_end:
+                    return_asr_res = fix_asr_part + "<em>" + unfix_asr_part + "</em>"
+                else:
+                    return_asr_res = fix_asr_part + unfix_asr_part + "<em></em>"
                 all_s2tt_res = previous_vad_onscreen_s2tt_text + onscreen_s2tt_res
                 fix_s2tt_part = previous_vad_onscreen_s2tt_text + previous_s2tt_text
-                unfix_s2tt_part = all_s2tt_res[len(fix_s2tt_part) :]
-                return_s2tt_res = fix_s2tt_part + "<em>" + unfix_s2tt_part + "</em>"
+                unfix_s2tt_part = all_s2tt_res[len(fix_s2tt_part):]
+                if not is_vad_end:
+                    return_s2tt_res = fix_s2tt_part + "<em>" + unfix_s2tt_part + "</em>"
+                else:
+                    return_s2tt_res = fix_s2tt_part + unfix_s2tt_part + "<em></em>"
                 message = json.dumps(
                     {
                         "mode": "online",
@@ -522,7 +530,7 @@ async def ws_serve(websocket, path):
                     audio_in = b"".join(frames_asr)
                     try:
                         await streaming_transcribe(
-                            websocket, audio_in, asr_prompt=asr_prompt, s2tt_prompt=s2tt_prompt
+                            websocket, audio_in, is_vad_end=True, asr_prompt=asr_prompt, s2tt_prompt=s2tt_prompt
                         )
                     except Exception as e:
                         print(f"error in streaming, {e}")
