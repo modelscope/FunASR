@@ -974,8 +974,9 @@ class LLMASR4(nn.Module):
             if lora_init_param_path is not None:
                 model = PeftModel.from_pretrained(model, lora_init_param_path)
                 for name, param in model.named_parameters():
-                    if "lora_A" in name or "lora_B" in name:
-                        param.requires_grad = True
+                    if not lora_conf.get("freeze_lora", False):
+                        if "lora_A" in name or "lora_B" in name:
+                            param.requires_grad = True
             else:
                 peft_config = LoraConfig(**lora_conf)
                 model = get_peft_model(model, peft_config)
