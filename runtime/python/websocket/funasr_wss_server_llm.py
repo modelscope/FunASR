@@ -11,8 +11,16 @@ import nls
 from collections import deque
 import threading
 
+
 class NlsTtsSynthesizer:
-    def __init__(self, websocket, tts_fifo, token, appkey, url="wss://nls-gateway-cn-beijing.aliyuncs.com/ws/v1"):
+    def __init__(
+        self,
+        websocket,
+        tts_fifo,
+        token,
+        appkey,
+        url="wss://nls-gateway-cn-beijing.aliyuncs.com/ws/v1",
+    ):
         self.websocket = websocket
         self.tts_fifo = tts_fifo
         self.url = url
@@ -36,30 +44,33 @@ class NlsTtsSynthesizer:
             on_completed=self.on_completed,
             on_error=self.on_error,
             on_close=self.on_close,
-            callback_args=[]
+            callback_args=[],
         )
+
     def on_data(self, data, *args):
         self.count += len(data)
+        print(f"cout: {self.count}")
         self.tts_fifo.append(data)
-        #with open('tts_server.pcm', 'ab') as file:
+        # with open('tts_server.pcm', 'ab') as file:
         #    file.write(data)
+
     def on_sentence_begin(self, message, *args):
-        print('on sentence begin =>{}'.format(message))
+        print("on sentence begin =>{}".format(message))
 
     def on_sentence_synthesis(self, message, *args):
-        print('on sentence synthesis =>{}'.format(message))
+        print("on sentence synthesis =>{}".format(message))
 
     def on_sentence_end(self, message, *args):
-        print('on sentence end =>{}'.format(message))
+        print("on sentence end =>{}".format(message))
 
     def on_completed(self, message, *args):
-        print('on completed =>{}'.format(message))
+        print("on completed =>{}".format(message))
 
     def on_error(self, message, *args):
-        print('on_error args=>{}'.format(args))
+        print("on_error args=>{}".format(args))
 
     def on_close(self, *args):
-        print('on_close: args=>{}'.format(args))
+        print("on_close: args=>{}".format(args))
         print("on message data cout: =>{}".format(self.count))
         self.started = False
 
@@ -68,16 +79,18 @@ class NlsTtsSynthesizer:
         self.started = True
 
     def send_text(self, text):
+        print(f"text: {text}")
         self.sdk.sendStreamInputTts(text)
 
     async def stop(self):
         self.sdk.stopStreamInputTts()
 
+
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    "--host", type=str, default="127.0.0.1", required=False, help="host ip, localhost, 0.0.0.0"
+    "--host", type=str, default="0.0.0.0", required=False, help="host ip, localhost, 0.0.0.0"
 )
-parser.add_argument("--port", type=int, default=10095, required=False, help="grpc server port")
+parser.add_argument("--port", type=int, default=10096, required=False, help="grpc server port")
 parser.add_argument(
     "--asr_model",
     type=str,
@@ -124,16 +137,6 @@ websocket_users = set()
 print("model loading")
 from funasr import AutoModel
 
-# # asr
-# model_asr = AutoModel(
-#     model=args.asr_model,
-#     model_revision=args.asr_model_revision,
-#     ngpu=args.ngpu,
-#     ncpu=args.ncpu,
-#     device=args.device,
-#     disable_pbar=False,
-#     disable_log=True,
-# )
 
 # vad
 model_vad = AutoModel(
@@ -147,26 +150,6 @@ model_vad = AutoModel(
     # chunk_size=60,
 )
 
-# async def async_asr(websocket, audio_in):
-#     if len(audio_in) > 0:
-#         # print(len(audio_in))
-#         print(type(audio_in))
-#         rec_result = model_asr.generate(input=audio_in, **websocket.status_dict_asr)[0]
-#         print("offline_asr, ", rec_result)
-#
-#
-#         if len(rec_result["text"]) > 0:
-#             # print("offline", rec_result)
-#             mode = "2pass-offline" if "2pass" in websocket.mode else websocket.mode
-#             message = json.dumps(
-#                 {
-#                     "mode": mode,
-#                     "text": rec_result["text"],
-#                     "wav_name": websocket.wav_name,
-#                     "is_final": websocket.is_speaking,
-#                 }
-#             )
-#             await websocket.send(message)
 
 import os
 
@@ -205,20 +188,26 @@ if "key" in os.environ:
     key = os.environ["key"]
     api.login(key)
 
+appkey = "xxx"
+appkey_token = "xxx"
+if "appkey" in os.environ:
+    appkey = os.environ["appkey"]
+    appkey_token = os.environ["appkey_token"]
+
 from modelscope.hub.snapshot_download import snapshot_download
 
-# os.environ["MODELSCOPE_CACHE"] = "/nfs/zhifu.gzf/modelscope"
-# llm_dir = snapshot_download('qwen/Qwen2-7B-Instruct', cache_dir=None, revision='master')
-# audio_encoder_dir = snapshot_download('iic/SenseVoice', cache_dir=None, revision='master')
+os.environ["MODELSCOPE_CACHE"] = "/mnt/workspace"
+llm_dir = snapshot_download("qwen/Qwen2-7B-Instruct", cache_dir=None, revision="master")
+audio_encoder_dir = snapshot_download("iic/SenseVoice", cache_dir=None, revision="master")
 
-llm_dir = "/cpfs_speech/zhifu.gzf/init_model/qwen/Qwen2-7B-Instruct"
-audio_encoder_dir = "/nfs/zhifu.gzf/init_model/SenseVoiceLargeModelscope"
+# llm_dir = "/cpfs_speech/zhifu.gzf/init_model/qwen/Qwen2-7B-Instruct"
+# audio_encoder_dir = "/nfs/zhifu.gzf/init_model/SenseVoiceLargeModelscope"
 
 device = "cuda:0"
 
 all_file_paths = [
-    "/nfs/zhifu.gzf/init_model/Speech2Text_Align_V0712_modelscope"
-    # "FunAudioLLM/Speech2Text_Align_V0712",
+    # "/nfs/zhifu.gzf/init_model/Speech2Text_Align_V0712_modelscope"
+    "FunAudioLLM/Speech2Text_Align_V0712",
     # "FunAudioLLM/Speech2Text_Align_V0718",
     # "FunAudioLLM/Speech2Text_Align_V0628",
 ]
@@ -246,6 +235,7 @@ tokenizer = model_llm.kwargs["tokenizer"]
 
 model_dict = {"model": model, "frontend": frontend, "tokenizer": tokenizer}
 
+
 async def send_to_client(websocket, syntheszier, tts_fifo):
     # Sending tts data to the client
     while True:
@@ -260,6 +250,8 @@ async def send_to_client(websocket, syntheszier, tts_fifo):
         else:
             print("WebSocket connection is not open or syntheszier is not started.")
             break
+
+
 async def model_inference(
     websocket,
     audio_in,
@@ -271,7 +263,9 @@ async def model_inference(
     text_usr="",
 ):
     fifo_queue = deque()
-    synthesizer = NlsTtsSynthesizer(websocket=websocket, tts_fifo=fifo_queue, token="xxx", appkey="xxx")
+    synthesizer = NlsTtsSynthesizer(
+        websocket=websocket, tts_fifo=fifo_queue, token=appkey_token, appkey=appkey
+    )
     synthesizer.start()
     beg0 = time.time()
     if his_state is None:
@@ -329,8 +323,10 @@ async def model_inference(
             f"generated new text： {new_text}, time_fr_receive: {end_llm - beg0:.2f}, time_llm_decode: {end_llm - beg_llm:.2f}"
         )
         if len(new_text) > 0:
+            new_text = new_text.replace("<|im_end|>", "")
+            res += new_text
             synthesizer.send_text(new_text)
-            res += new_text.replace("<|im_end|>", "")
+
             contents_i[-1]["content"] = res
             websocket.llm_state["contents_i"] = contents_i
             # history[-1][1] = res
@@ -341,7 +337,7 @@ async def model_inference(
                     "mode": mode,
                     "text": new_text,
                     "wav_name": websocket.wav_name,
-                    "is_final": websocket.is_speaking,
+                    "is_final": False,
                 }
             )
             # print(f"online: {message}")
@@ -350,6 +346,7 @@ async def model_inference(
                 while len(fifo_queue) > 0:
                     await websocket.send(fifo_queue.popleft())
 
+    # synthesizer.send_text(res)
     tts_to_client_task = asyncio.create_task(send_to_client(websocket, synthesizer, fifo_queue))
     synthesizer.stop()
     await tts_to_client_task
@@ -359,7 +356,7 @@ async def model_inference(
             "mode": mode,
             "text": res,
             "wav_name": websocket.wav_name,
-            "is_final": websocket.is_speaking,
+            "is_final": True,
         }
     )
     # print(f"offline: {message}")
@@ -460,7 +457,8 @@ async def ws_serve(websocket, path):
                         frames_asr = []
                         frames_asr.extend(frames_pre)
                 # asr punc offline
-                if speech_end_i != -1 or not websocket.is_speaking:
+                # if speech_end_i != -1 or not websocket.is_speaking:
+                if not websocket.is_speaking:
                     # print("vad end point")
                     if websocket.mode == "2pass" or websocket.mode == "offline":
                         audio_in = b"".join(frames_asr)
@@ -506,7 +504,7 @@ async def async_vad(websocket, audio_in):
     return speech_start, speech_end
 
 
-if len(args.certfile) > 0:
+if False:  # len(args.certfile) > 0:
     ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 
     # Generate with Lets Encrypt, copied to this location, chown to current user and 400 permissions
