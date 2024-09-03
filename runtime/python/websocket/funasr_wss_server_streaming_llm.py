@@ -3,6 +3,7 @@ import asyncio
 import json
 import websockets
 import time
+from datetime import datetime
 import argparse
 import ssl
 import numpy as np
@@ -30,14 +31,14 @@ parser.add_argument("--ncpu", type=int, default=4, help="cpu cores")
 parser.add_argument(
     "--certfile",
     type=str,
-    default="../../ssl_key/server.crt",
+    default="",
     required=False,
     help="certfile for ssl",
 )
 parser.add_argument(
     "--keyfile",
     type=str,
-    default="../../ssl_key/server.key",
+    default="ssl_key/server.key",
     required=False,
     help="keyfile for ssl",
 )
@@ -55,7 +56,8 @@ model_vad = AutoModel(
     device=args.device,
     disable_pbar=True,
     disable_log=True,
-    max_single_segment_time=30000,
+    max_single_segment_time=40000,
+    max_end_silence_time=580,
     # chunk_size=60,
 )
 
@@ -65,33 +67,68 @@ if "key" in os.environ:
     api.login(key)
 
 # os.environ["MODELSCOPE_CACHE"] = "/nfs/zhifu.gzf/modelscope"
-# llm_dir = snapshot_download('qwen/Qwen2-7B-Instruct', cache_dir=None, revision='master')
-# audio_encoder_dir = snapshot_download('iic/SenseVoice', cache_dir=None, revision='master')
+llm_dir = snapshot_download("qwen/Qwen2-7B-Instruct", cache_dir=None, revision="master")
+audio_encoder_dir = snapshot_download("iic/SenseVoice", cache_dir=None, revision="master")
 
-llm_dir = "/cpfs_speech/zhifu.gzf/init_model/qwen/Qwen2-7B-Instruct"
-audio_encoder_dir = "/nfs/yangyexin.yyx/init_model/iic/SenseVoiceModelscope_0712"
+# llm_dir = "/cpfs_speech/zhifu.gzf/init_model/qwen/Qwen2-7B-Instruct"
+# audio_encoder_dir = "/nfs/yangyexin.yyx/init_model/iic/SenseVoiceModelscope_0712"
 device = "cuda:0"
 all_file_paths = [
-    "/nfs/yangyexin.yyx/init_model/audiolm_v14_20240824_train_encoder_all_20240822_lr1e-4_warmup2350/"
+    "FunAudioLLM/qwen2_7b_mmt_v14_20240830",
+    "FunAudioLLM/audiolm_v11_20240807",
+    "FunAudioLLM/Speech2Text_Align_V0712",
+    "FunAudioLLM/Speech2Text_Align_V0718",
+    "FunAudioLLM/Speech2Text_Align_V0628",
 ]
 
 llm_kwargs = {"num_beams": 1, "do_sample": False}
-unfix_len = 5
+UNFIX_LEN = 5
+MIN_LEN_PER_PARAGRAPH = 25
+MIN_LEN_SEC_AUDIO_FIX = 1.1
+MAX_ITER_PER_CHUNK = 20
 
 ckpt_dir = all_file_paths[0]
 
-model_llm = AutoModel(
-    model=ckpt_dir,
-    device=device,
-    fp16=False,
-    bf16=False,
-    llm_dtype="bf16",
-    max_length=1024,
-    llm_kwargs=llm_kwargs,
-    llm_conf={"init_param_path": llm_dir, "load_kwargs": {"attn_implementation": "eager"}},
-    tokenizer_conf={"init_param_path": llm_dir},
-    audio_encoder=audio_encoder_dir,
-)
+
+def contains_lora_folder(directory):
+    for name in os.listdir(directory):
+        full_path = os.path.join(directory, name)
+        if os.path.isdir(full_path) and "lora" in name:
+            return full_path
+    return None
+
+
+lora_folder = contains_lora_folder(ckpt_dir)
+if lora_folder is not None:
+    model_llm = AutoModel(
+        model=ckpt_dir,
+        device=device,
+        fp16=False,
+        bf16=False,
+        llm_dtype="bf16",
+        max_length=1024,
+        llm_kwargs=llm_kwargs,
+        llm_conf={
+            "init_param_path": llm_dir,
+            "lora_conf": {"init_param_path": lora_folder},
+            "load_kwargs": {"attn_implementation": "eager"},
+        },
+        tokenizer_conf={"init_param_path": llm_dir},
+        audio_encoder=audio_encoder_dir,
+    )
+else:
+    model_llm = AutoModel(
+        model=ckpt_dir,
+        device=device,
+        fp16=False,
+        bf16=False,
+        llm_dtype="bf16",
+        max_length=1024,
+        llm_kwargs=llm_kwargs,
+        llm_conf={"init_param_path": llm_dir, "load_kwargs": {"attn_implementation": "eager"}},
+        tokenizer_conf={"init_param_path": llm_dir},
+        audio_encoder=audio_encoder_dir,
+    )
 
 model = model_llm.model
 frontend = model_llm.kwargs["frontend"]
@@ -100,6 +137,7 @@ tokenizer = model_llm.kwargs["tokenizer"]
 model_dict = {"model": model, "frontend": frontend, "tokenizer": tokenizer}
 
 print("model loaded! only support one client at the same time now!!!!")
+
 
 def load_bytes(input):
     middle_data = np.frombuffer(input, dtype=np.int16)
@@ -116,7 +154,12 @@ def load_bytes(input):
     array = np.frombuffer((middle_data.astype(dtype) - offset) / abs_max, dtype=np.float32)
     return array
 
-async def streaming_transcribe(websocket, audio_in, his_state=None, asr_prompt=None, s2tt_prompt=None):
+
+async def streaming_transcribe(
+    websocket, audio_in, his_state=None, asr_prompt=None, s2tt_prompt=None
+):
+    current_time = datetime.now()
+    print("DEBUG:" + str(current_time) + " call streaming_transcribe function:")
     if his_state is None:
         his_state = model_dict
     model = his_state["model"]
@@ -130,17 +173,21 @@ async def streaming_transcribe(websocket, audio_in, his_state=None, asr_prompt=N
     else:
         previous_asr_text = websocket.streaming_state.get("previous_asr_text", "")
         previous_s2tt_text = websocket.streaming_state.get("previous_s2tt_text", "")
-        previous_vad_onscreen_asr_text = websocket.streaming_state.get("previous_vad_onscreen_asr_text", "")
-        previous_vad_onscreen_s2tt_text = websocket.streaming_state.get("previous_vad_onscreen_s2tt_text", "")
-    
+        previous_vad_onscreen_asr_text = websocket.streaming_state.get(
+            "previous_vad_onscreen_asr_text", ""
+        )
+        previous_vad_onscreen_s2tt_text = websocket.streaming_state.get(
+            "previous_vad_onscreen_s2tt_text", ""
+        )
+
     if asr_prompt is None or asr_prompt == "":
-        asr_prompt = "Copy:"
+        asr_prompt = "Speech transcription:"
     if s2tt_prompt is None or s2tt_prompt == "":
-        s2tt_prompt = "Translate the following sentence into English:"
+        s2tt_prompt = "Translate into English:"
 
     audio_seconds = load_bytes(audio_in).shape[0] / 16000
     print(f"Streaming audio length: {audio_seconds} seconds")
-    
+
     asr_content = []
     system_prompt = "You are a helpful assistant."
     asr_content.append({"role": "system", "content": system_prompt})
@@ -158,12 +205,24 @@ async def streaming_transcribe(websocket, audio_in, his_state=None, asr_prompt=N
 
     streaming_time_beg = time.time()
     inputs_asr_embeds, contents, batch, source_ids, meta_data = model.inference_prepare(
-        [asr_content], None, "test_demo", tokenizer, frontend, device=device, infer_with_assistant_input=True
+        [asr_content],
+        None,
+        "test_demo",
+        tokenizer,
+        frontend,
+        device=device,
+        infer_with_assistant_input=True,
     )
     model_asr_inputs = {}
     model_asr_inputs["inputs_embeds"] = inputs_asr_embeds
     inputs_s2tt_embeds, contents, batch, source_ids, meta_data = model.inference_prepare(
-        [s2tt_content], None, "test_demo", tokenizer, frontend, device=device, infer_with_assistant_input=True
+        [s2tt_content],
+        None,
+        "test_demo",
+        tokenizer,
+        frontend,
+        device=device,
+        infer_with_assistant_input=True,
     )
     model_s2tt_inputs = {}
     model_s2tt_inputs["inputs_embeds"] = inputs_s2tt_embeds
@@ -181,62 +240,111 @@ async def streaming_transcribe(websocket, audio_in, his_state=None, asr_prompt=N
     s2tt_generation_kwargs.update(llm_kwargs)
     s2tt_thread = Thread(target=model.llm.generate, kwargs=s2tt_generation_kwargs)
     s2tt_thread.start()
-    
+
     onscreen_asr_res = previous_asr_text
     onscreen_s2tt_res = previous_s2tt_text
 
     remain_s2tt_text = True
 
+    asr_iter_cnt = 0
+    s2tt_iter_cnt = 0
+    is_asr_repetition = False
+    is_s2tt_repetition = False
+
     for new_asr_text in asr_streamer:
-        print(f"generated new asr text： {new_asr_text}")
+        current_time = datetime.now()
+        print("DEBUG: " + str(current_time) + " " + f"generated new asr text： {new_asr_text}")
         if len(new_asr_text) > 0:
             onscreen_asr_res += new_asr_text.replace("<|im_end|>", "")
+            if len(new_asr_text.replace("<|im_end|>", "")) > 0:
+                asr_iter_cnt += 1
+            if asr_iter_cnt > MAX_ITER_PER_CHUNK:
+                is_asr_repetition = True
+                break
 
         if remain_s2tt_text:
             try:
                 new_s2tt_text = next(s2tt_streamer)
-                print(f"generated new s2tt text： {new_s2tt_text}")
+                current_time = datetime.now()
+                print(
+                    "DEBUG: "
+                    + str(current_time)
+                    + " "
+                    + f"generated new s2tt text： {new_s2tt_text}"
+                )
+                s2tt_iter_cnt += 1
                 if len(new_s2tt_text) > 0:
                     onscreen_s2tt_res += new_s2tt_text.replace("<|im_end|>", "")
             except StopIteration:
                 new_s2tt_text = ""
                 remain_s2tt_text = False
                 pass
-        
+
         if len(new_asr_text) > 0 or len(new_s2tt_text) > 0:
+            all_asr_res = previous_vad_onscreen_asr_text + onscreen_asr_res
+            fix_asr_part = previous_vad_onscreen_asr_text + previous_asr_text
+            unfix_asr_part = all_asr_res[len(fix_asr_part) :]
+            return_asr_res = fix_asr_part + "<em>" + unfix_asr_part + "</em>"
+            all_s2tt_res = previous_vad_onscreen_s2tt_text + onscreen_s2tt_res
+            fix_s2tt_part = previous_vad_onscreen_s2tt_text + previous_s2tt_text
+            unfix_s2tt_part = all_s2tt_res[len(fix_s2tt_part) :]
+            return_s2tt_res = fix_s2tt_part + "<em>" + unfix_s2tt_part + "</em>"
             message = json.dumps(
                 {
                     "mode": "online",
-                    "asr_text": previous_vad_onscreen_asr_text + onscreen_asr_res,
-                    "s2tt_text": previous_vad_onscreen_s2tt_text +  onscreen_s2tt_res,
+                    "asr_text": return_asr_res,
+                    "s2tt_text": return_s2tt_res,
                     "wav_name": websocket.wav_name,
                     "is_final": websocket.is_speaking,
                 }
             )
             await websocket.send(message)
-        websocket.streaming_state["onscreen_asr_res"] = previous_vad_onscreen_asr_text + onscreen_asr_res
-        websocket.streaming_state["onscreen_s2tt_res"] = previous_vad_onscreen_s2tt_text + onscreen_s2tt_res
+        websocket.streaming_state["onscreen_asr_res"] = (
+            previous_vad_onscreen_asr_text + onscreen_asr_res
+        )
+        websocket.streaming_state["onscreen_s2tt_res"] = (
+            previous_vad_onscreen_s2tt_text + onscreen_s2tt_res
+        )
 
-        
     if remain_s2tt_text:
         for new_s2tt_text in s2tt_streamer:
-            print(f"generated new s2tt text： {new_s2tt_text}")
+            current_time = datetime.now()
+            print(
+                "DEBUG: " + str(current_time) + " " + f"generated new s2tt text： {new_s2tt_text}"
+            )
             if len(new_s2tt_text) > 0:
                 onscreen_s2tt_res += new_s2tt_text.replace("<|im_end|>", "")
-            
+                if len(new_s2tt_text.replace("<|im_end|>", "")) > 0:
+                    s2tt_iter_cnt += 1
+                if s2tt_iter_cnt > MAX_ITER_PER_CHUNK:
+                    is_s2tt_repetition = True
+                    break
+
             if len(new_s2tt_text) > 0:
+                all_asr_res = previous_vad_onscreen_asr_text + onscreen_asr_res
+                fix_asr_part = previous_vad_onscreen_asr_text + previous_asr_text
+                unfix_asr_part = all_asr_res[len(fix_asr_part) :]
+                return_asr_res = fix_asr_part + "<em>" + unfix_asr_part + "</em>"
+                all_s2tt_res = previous_vad_onscreen_s2tt_text + onscreen_s2tt_res
+                fix_s2tt_part = previous_vad_onscreen_s2tt_text + previous_s2tt_text
+                unfix_s2tt_part = all_s2tt_res[len(fix_s2tt_part) :]
+                return_s2tt_res = fix_s2tt_part + "<em>" + unfix_s2tt_part + "</em>"
                 message = json.dumps(
                     {
                         "mode": "online",
-                        "asr_text": previous_vad_onscreen_asr_text + onscreen_asr_res,
-                        "s2tt_text": previous_vad_onscreen_s2tt_text + onscreen_s2tt_res,
+                        "asr_text": return_asr_res,
+                        "s2tt_text": return_s2tt_res,
                         "wav_name": websocket.wav_name,
                         "is_final": websocket.is_speaking,
                     }
                 )
                 await websocket.send(message)
-            websocket.streaming_state["onscreen_asr_res"] = previous_vad_onscreen_asr_text + onscreen_asr_res
-            websocket.streaming_state["onscreen_s2tt_res"] = previous_vad_onscreen_s2tt_text + onscreen_s2tt_res
+            websocket.streaming_state["onscreen_asr_res"] = (
+                previous_vad_onscreen_asr_text + onscreen_asr_res
+            )
+            websocket.streaming_state["onscreen_s2tt_res"] = (
+                previous_vad_onscreen_s2tt_text + onscreen_s2tt_res
+            )
 
     streaming_time_end = time.time()
     print(f"Streaming inference time: {streaming_time_end - streaming_time_beg}")
@@ -244,19 +352,41 @@ async def streaming_transcribe(websocket, audio_in, his_state=None, asr_prompt=N
     asr_text_len = len(tokenizer.encode(onscreen_asr_res))
     s2tt_text_len = len(tokenizer.encode(onscreen_s2tt_res))
 
-    if asr_text_len > unfix_len and audio_seconds > 1.1:
-        previous_asr_text = tokenizer.decode(tokenizer.encode(onscreen_asr_res)[:-unfix_len])
+    if asr_text_len > UNFIX_LEN and audio_seconds > MIN_LEN_SEC_AUDIO_FIX and not is_asr_repetition:
+        pre_previous_asr_text = previous_asr_text
+        previous_asr_text = tokenizer.decode(
+            tokenizer.encode(onscreen_asr_res)[:-UNFIX_LEN]
+        ).replace("�", "")
+        if len(previous_asr_text) <= len(pre_previous_asr_text):
+            previous_asr_text = pre_previous_asr_text
+    elif is_asr_repetition:
+        pass
     else:
         previous_asr_text = ""
-    if s2tt_text_len > unfix_len and audio_seconds > 1.1:
-        previous_s2tt_text = tokenizer.decode(tokenizer.encode(onscreen_s2tt_res)[:-unfix_len])
+    if (
+        s2tt_text_len > UNFIX_LEN
+        and audio_seconds > MIN_LEN_SEC_AUDIO_FIX
+        and not is_s2tt_repetition
+    ):
+        pre_previous_s2tt_text = previous_s2tt_text
+        previous_s2tt_text = tokenizer.decode(
+            tokenizer.encode(onscreen_s2tt_res)[:-UNFIX_LEN]
+        ).replace("�", "")
+        if len(previous_s2tt_text) <= len(pre_previous_s2tt_text):
+            previous_s2tt_text = pre_previous_s2tt_text
+    elif is_s2tt_repetition:
+        pass
     else:
         previous_s2tt_text = ""
 
     websocket.streaming_state["previous_asr_text"] = previous_asr_text
-    websocket.streaming_state["onscreen_asr_res"] = previous_vad_onscreen_asr_text + onscreen_asr_res
+    websocket.streaming_state["onscreen_asr_res"] = (
+        previous_vad_onscreen_asr_text + onscreen_asr_res
+    )
     websocket.streaming_state["previous_s2tt_text"] = previous_s2tt_text
-    websocket.streaming_state["onscreen_s2tt_res"] = previous_vad_onscreen_s2tt_text + onscreen_s2tt_res
+    websocket.streaming_state["onscreen_s2tt_res"] = (
+        previous_vad_onscreen_s2tt_text + onscreen_s2tt_res
+    )
 
     print("fix asr part:", previous_asr_text)
     print("fix s2tt part:", previous_s2tt_text)
@@ -313,6 +443,13 @@ async def ws_serve(websocket, path):
     try:
         async for message in websocket:
             if isinstance(message, str):
+                current_time = datetime.now()
+                print("DEBUG:" + str(current_time) + " received message:", message)
+            else:
+                current_time = datetime.now()
+                print("DEBUG:" + str(current_time) + " received audio bytes:")
+
+            if isinstance(message, str):
                 messagejson = json.loads(message)
 
                 if "is_speaking" in messagejson:
@@ -332,11 +469,11 @@ async def ws_serve(websocket, path):
                 if "asr_prompt" in messagejson:
                     asr_prompt = messagejson["asr_prompt"]
                 else:
-                    asr_prompt = "Copy:"
+                    asr_prompt = "Speech transcription:"
                 if "s2tt_prompt" in messagejson:
                     s2tt_prompt = messagejson["s2tt_prompt"]
                 else:
-                    s2tt_prompt = "Translate the following sentence into English:"
+                    s2tt_prompt = "Translate into English:"
 
             websocket.status_dict_vad["chunk_size"] = int(
                 chunk_size[1] * 60 / websocket.chunk_interval
@@ -350,19 +487,20 @@ async def ws_serve(websocket, path):
                     # asr online
                     websocket.streaming_state["is_final"] = speech_end_i != -1
                     if (
-                        (len(frames_asr) % websocket.chunk_interval == 0
-                        or websocket.streaming_state["is_final"]) 
-                        and len(frames_asr) != 0
-                    ):
+                        len(frames_asr) % websocket.chunk_interval == 0
+                        or websocket.streaming_state["is_final"]
+                    ) and len(frames_asr) != 0:
                         audio_in = b"".join(frames_asr)
                         try:
-                            await streaming_transcribe(websocket, audio_in, asr_prompt=asr_prompt, s2tt_prompt=s2tt_prompt)
+                            await streaming_transcribe(
+                                websocket, audio_in, asr_prompt=asr_prompt, s2tt_prompt=s2tt_prompt
+                            )
                         except Exception as e:
                             print(f"error in streaming, {e}")
                             print(f"error in streaming, {websocket.streaming_state}")
                     if speech_start:
                         frames_asr.append(message)
-                    
+
                     # vad online
                     try:
                         speech_start_i, speech_end_i = await async_vad(websocket, message)
@@ -379,7 +517,9 @@ async def ws_serve(websocket, path):
                 if speech_end_i != -1 or not websocket.is_speaking:
                     audio_in = b"".join(frames_asr)
                     try:
-                        await streaming_transcribe(websocket, audio_in, asr_prompt=asr_prompt, s2tt_prompt=s2tt_prompt)
+                        await streaming_transcribe(
+                            websocket, audio_in, asr_prompt=asr_prompt, s2tt_prompt=s2tt_prompt
+                        )
                     except Exception as e:
                         print(f"error in streaming, {e}")
                         print(f"error in streaming, {websocket.streaming_state}")
@@ -387,8 +527,39 @@ async def ws_serve(websocket, path):
                     speech_start = False
                     websocket.streaming_state["previous_asr_text"] = ""
                     websocket.streaming_state["previous_s2tt_text"] = ""
-                    websocket.streaming_state["previous_vad_onscreen_asr_text"] = websocket.streaming_state.get("onscreen_asr_res", "") + "\n\n"
-                    websocket.streaming_state["previous_vad_onscreen_s2tt_text"] = websocket.streaming_state.get("onscreen_s2tt_res", "") + "\n\n"
+                    now_onscreen_asr_res = websocket.streaming_state.get("onscreen_asr_res", "")
+                    now_onscreen_s2tt_res = websocket.streaming_state.get("onscreen_s2tt_res", "")
+                    if (
+                        len(tokenizer.encode(now_onscreen_asr_res.split("\n\n")[-1]))
+                        < MIN_LEN_PER_PARAGRAPH
+                        or len(tokenizer.encode(now_onscreen_s2tt_res.split("\n\n")[-1]))
+                        < MIN_LEN_PER_PARAGRAPH
+                    ):
+                        if (
+                            now_onscreen_asr_res.endswith(".")
+                            or now_onscreen_asr_res.endswith("?")
+                            or now_onscreen_asr_res.endswith("!")
+                        ):
+                            now_onscreen_asr_res += " "
+                        if (
+                            now_onscreen_s2tt_res.endswith(".")
+                            or now_onscreen_s2tt_res.endswith("?")
+                            or now_onscreen_s2tt_res.endswith("!")
+                        ):
+                            now_onscreen_s2tt_res += " "
+                        websocket.streaming_state["previous_vad_onscreen_asr_text"] = (
+                            now_onscreen_asr_res
+                        )
+                        websocket.streaming_state["previous_vad_onscreen_s2tt_text"] = (
+                            now_onscreen_s2tt_res
+                        )
+                    else:
+                        websocket.streaming_state["previous_vad_onscreen_asr_text"] = (
+                            now_onscreen_asr_res + "\n\n"
+                        )
+                        websocket.streaming_state["previous_vad_onscreen_s2tt_text"] = (
+                            now_onscreen_s2tt_res + "\n\n"
+                        )
                     if not websocket.is_speaking:
                         websocket.vad_pre_idx = 0
                         frames = []
@@ -410,6 +581,8 @@ async def ws_serve(websocket, path):
 
 
 async def async_vad(websocket, audio_in):
+    current_time = datetime.now()
+    print("DEBUG:" + str(current_time) + " call vad function:")
     segments_result = model_vad.generate(input=audio_in, **websocket.status_dict_vad)[0]["value"]
     # print(segments_result)
 
@@ -425,7 +598,7 @@ async def async_vad(websocket, audio_in):
     return speech_start, speech_end
 
 
-if len(args.certfile) > 0:
+if False:
     ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 
     # Generate with Lets Encrypt, copied to this location, chown to current user and 400 permissions

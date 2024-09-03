@@ -972,6 +972,7 @@ class LLMASR4(nn.Module):
 
             lora_init_param_path = lora_conf.get("init_param_path", None)
             if lora_init_param_path is not None:
+                logging.info(f"lora_init_param_path: {lora_init_param_path}")
                 model = PeftModel.from_pretrained(model, lora_init_param_path)
                 for name, param in model.named_parameters():
                     if not lora_conf.get("freeze_lora", False):
