@@ -57,7 +57,7 @@ model_vad = AutoModel(
     disable_pbar=True,
     disable_log=True,
     max_single_segment_time=40000,
-    max_end_silence_time=580,
+    max_end_silence_time=800,
     # chunk_size=60,
 )
 
@@ -76,6 +76,7 @@ audio_encoder_dir = snapshot_download("iic/SenseVoice", cache_dir=None, revision
 # audio_encoder_dir = "/nfs/yangyexin.yyx/init_model/iic/SenseVoiceModelscope_0712"
 device = "cuda:0"
 all_file_paths = [
+    "FunAudioLLM/qwen2_7b_mmt_v15_20240902",
     "FunAudioLLM/qwen2_7b_mmt_v14_20240830",
     "FunAudioLLM/audiolm_v11_20240807",
     "FunAudioLLM/Speech2Text_Align_V0712",
@@ -91,48 +92,20 @@ MAX_ITER_PER_CHUNK = 20
 
 ckpt_dir = all_file_paths[0]
 
-
-def contains_lora_folder(directory):
-    for name in os.listdir(directory):
-        full_path = os.path.join(directory, name)
-        if os.path.isdir(full_path) and "lora" in name:
-            return full_path
-    return None
-
-
 ckpt_dir = snapshot_download(ckpt_dir, cache_dir=None, revision="master")
-lora_folder = contains_lora_folder(ckpt_dir)
 
-if lora_folder is not None:
-    model_llm = AutoModel(
-        model=ckpt_dir,
-        device=device,
-        fp16=False,
-        bf16=False,
-        llm_dtype="bf16",
-        max_length=1024,
-        llm_kwargs=llm_kwargs,
-        llm_conf={
-            "init_param_path": llm_dir,
-            "lora_conf": {"init_param_path": lora_folder},
-            "load_kwargs": {"attn_implementation": "eager"},
-        },
-        tokenizer_conf={"init_param_path": llm_dir},
-        audio_encoder=audio_encoder_dir,
-    )
-else:
-    model_llm = AutoModel(
-        model=ckpt_dir,
-        device=device,
-        fp16=False,
-        bf16=False,
-        llm_dtype="bf16",
-        max_length=1024,
-        llm_kwargs=llm_kwargs,
-        llm_conf={"init_param_path": llm_dir, "load_kwargs": {"attn_implementation": "eager"}},
-        tokenizer_conf={"init_param_path": llm_dir},
-        audio_encoder=audio_encoder_dir,
-    )
+model_llm = AutoModel(
+    model=ckpt_dir,
+    device=device,
+    fp16=False,
+    bf16=False,
+    llm_dtype="bf16",
+    max_length=1024,
+    llm_kwargs=llm_kwargs,
+    llm_conf={"init_param_path": llm_dir, "load_kwargs": {"attn_implementation": "eager"}},
+    tokenizer_conf={"init_param_path": llm_dir},
+    audio_encoder=audio_encoder_dir,
+)
 
 model = model_llm.model
 frontend = model_llm.kwargs["frontend"]
