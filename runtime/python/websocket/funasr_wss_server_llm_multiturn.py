@@ -132,7 +132,7 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-websocket_users = set()
+websocket_users = {}
 
 print("model loading")
 from funasr import AutoModel
@@ -280,32 +280,38 @@ async def model_inference(
     # print(f"audio_in: {audio_in}")
     # print(f"websocket.llm_state: {websocket.llm_state}")
 
-    if websocket.llm_state is None:
-        websocket.llm_state = {"contents_i": []}
+    if websocket_users[websocket]["llm_state"].get("contents_i", None) is None:
+        websocket_users[websocket]["llm_state"]["contents_i"] = []
     # print(f"history: {history}")
     # if history is None:
     #     history = []
 
     # audio_in = "https://isv-data.oss-cn-hangzhou.aliyuncs.com/ics/MaaS/tmp/1.wav"
     # user_prompt = f"<|startofspeech|>!{audio_in}<|endofspeech|>"
-    user_prompt = f"{text_usr}<|startofspeech|>!!<|endofspeech|>"
+    user_prompt = websocket_users[websocket].get("user_prompt", "")
+    user_prompt = f"{user_prompt}<|startofspeech|>!!<|endofspeech|>"
 
-    contents_i = websocket.llm_state["contents_i"]
+    contents_i = websocket_users[websocket]["llm_state"]["contents_i"]
+
     # print(f"contents_i_0: {contents_i}")
-    if len(system_prompt) == 0:
-        system_prompt = "你是小夏，一位典型的温婉江南姑娘。你出生于杭州，声音清甜并有亲近感，会用简洁语言表达你的想法。你是用户的好朋友。你的回答将通过逼真的文字转语音技术读出。"
+    system_prompt = websocket_users[websocket].get(
+        "system_prompt",
+        "你是小夏，一位典型的温婉江南姑娘。你出生于杭州，声音清甜并有亲近感，会用简洁语言表达你的想法。你是用户的好朋友。你的回答将通过逼真的文字转语音技术读出。",
+    )
 
     if len(contents_i) < 1:
         contents_i.append({"role": "system", "content": system_prompt})
     contents_i.append({"role": "user", "content": user_prompt, "audio": audio_in})
     contents_i.append({"role": "assistant", "content": "target_out"})
+
+    turn_num = websocket_users[websocket].get("turn_num", 5)
     if len(contents_i) > 2 * turn_num + 1:
         print(
             f"clip dialog pairs from: {len(contents_i)} to: {turn_num}, \ncontents_i_before_clip: {contents_i}"
         )
         contents_i = [{"role": "system", "content": system_prompt}] + contents_i[3:]
 
-    print(f"contents_i: {len(contents_i)}")
+    # print(f"contents_i: {len(contents_i)}")
 
     inputs_embeds, contents, batch, source_ids, meta_data = model.inference_prepare(
         [contents_i], None, "test_demo", tokenizer, frontend, device=device
@@ -336,7 +342,7 @@ async def model_inference(
             synthesizer.send_text(new_text)
 
             contents_i[-1]["content"] = res
-            websocket.llm_state["contents_i"] = contents_i
+            websocket_users[websocket]["llm_state"]["contents_i"] = contents_i
             # history[-1][1] = res
 
             mode = "2pass-online"
@@ -344,7 +350,7 @@ async def model_inference(
                 {
                     "mode": mode,
                     "text": new_text,
-                    "wav_name": websocket.wav_name,
+                    "wav_name": websocket_users[websocket].get("wav_name", "microphone"),
                     "is_final": False,
                 }
             )
@@ -359,7 +365,7 @@ async def model_inference(
         {
             "mode": mode,
             "text": res,
-            "wav_name": websocket.wav_name,
+            "wav_name": websocket_users[websocket].get("wav_name", "microphone"),
             "is_final": True,
         }
     )
@@ -373,11 +379,8 @@ print("model loaded! only support one client at the same time now!!!!")
 async def ws_reset(websocket):
     print("ws reset now, total num is ", len(websocket_users))
 
-    websocket.status_dict_asr_online["cache"] = {}
-    websocket.status_dict_asr_online["is_final"] = True
-    websocket.status_dict_vad["cache"] = {}
-    websocket.status_dict_vad["is_final"] = True
-    websocket.status_dict_punc["cache"] = {}
+    if websocket in websocket_users:
+        del websocket_users[websocket]
 
     await websocket.close()
 
@@ -391,123 +394,134 @@ async def clear_websocket():
 async def ws_serve(websocket, path):
     frames = []
     frames_asr = []
-    frames_asr_online = []
+    frames_llm = []
     global websocket_users
     # await clear_websocket()
-    websocket_users.add(websocket)
-    websocket.status_dict_asr = {}
-    websocket.status_dict_asr_online = {"cache": {}, "is_final": False}
-    websocket.status_dict_vad = {"cache": {}, "is_final": False}
-    websocket.status_dict_punc = {"cache": {}}
-    websocket.chunk_interval = 10
-    websocket.vad_pre_idx = 0
+    websocket_users[websocket] = {}
+    websocket_users[websocket]["status_dict_asr"] = {}
+    websocket_users[websocket]["status_dict_vad"] = {"cache": {}, "is_final": False}
+
+    websocket_users[websocket]["chunk_interval"] = 10
+    websocket_users[websocket]["vad_pre_idx"] = 0
     speech_start = False
     speech_end_i = -1
-    websocket.wav_name = "microphone"
-    websocket.mode = "2pass"
-    websocket.llm_state = None
-    print("new user connected", flush=True)
+    websocket_users[websocket]["wav_name"] = "microphone"
+    websocket_users[websocket]["mode"] = "2pass"
+    websocket_users[websocket]["llm_state"] = {}
+    websocket.stop_send = False
+    print(f"new user connected: {len(websocket_users)}", flush=True)
     print(f"connected time: {datetime.now()}")
 
     try:
         async for message in websocket:
-            print(f"reci time: {datetime.now()}")
+            print(f"receive time: {datetime.now()}")
             if isinstance(message, str):
                 messagejson = json.loads(message)
 
                 if "is_speaking" in messagejson:
-                    websocket.is_speaking = messagejson["is_speaking"]
-                    websocket.status_dict_asr_online["is_final"] = not websocket.is_speaking
+                    websocket_users[websocket]["is_speaking"] = messagejson["is_speaking"]
+                    websocket_users[websocket]["speech_start"] = messagejson["is_speaking"]
                 if "chunk_interval" in messagejson:
-                    websocket.chunk_interval = messagejson["chunk_interval"]
+                    websocket_users[websocket]["chunk_interval"] = messagejson["chunk_interval"]
                 if "wav_name" in messagejson:
-                    websocket.wav_name = messagejson.get("wav_name")
+                    websocket_users[websocket]["wav_name"] = messagejson.get("wav_name")
                 if "chunk_size" in messagejson:
                     chunk_size = messagejson["chunk_size"]
                     if isinstance(chunk_size, str):
                         chunk_size = chunk_size.split(",")
-                    websocket.status_dict_asr_online["chunk_size"] = [int(x) for x in chunk_size]
-                if "encoder_chunk_look_back" in messagejson:
-                    websocket.status_dict_asr_online["encoder_chunk_look_back"] = messagejson[
-                        "encoder_chunk_look_back"
-                    ]
-                if "decoder_chunk_look_back" in messagejson:
-                    websocket.status_dict_asr_online["decoder_chunk_look_back"] = messagejson[
-                        "decoder_chunk_look_back"
-                    ]
-                if "hotword" in messagejson:
-                    websocket.status_dict_asr["hotword"] = messagejson["hotwords"]
-                if "mode" in messagejson:
-                    websocket.mode = messagejson["mode"]
+                    chunk_size = [int(x) for x in chunk_size]
+                    websocket_users[websocket]["status_dict_vad"]["chunk_size"] = (
+                        chunk_size[1] * 60 / websocket_users[websocket].get("chunk_interval", 10)
+                    )
 
-            websocket.status_dict_vad["chunk_size"] = int(
-                websocket.status_dict_asr_online["chunk_size"][1] * 60 / websocket.chunk_interval
-            )
-            if len(frames_asr_online) > 0 or len(frames_asr) > 0 or not isinstance(message, str):
+                if "mode" in messagejson:
+                    websocket_users[websocket]["mode"] = messagejson["mode"]
+                if "is_close" in messagejson:
+                    websocket_users[websocket]["is_close"] = messagejson["is_close"]
+                if "system_prompt" in messagejson:
+                    websocket_users[websocket]["system_prompt"] = messagejson["system_prompt"]
+                if "user_prompt" in messagejson:
+                    websocket_users[websocket]["user_prompt"] = messagejson["user_prompt"]
+            if len(frames_asr) > 0 or not isinstance(message, str) or len(frames_llm) > 0:
                 if not isinstance(message, str):
                     frames.append(message)
-                    duration_ms = len(message) // 32
-                    websocket.vad_pre_idx += duration_ms
 
-                    if speech_start:
-                        frames_asr.append(message)
-                    # vad online
-                    try:
-                        speech_start_i, speech_end_i = await async_vad(websocket, message)
-                    except:
-                        print("error in vad")
-                    if speech_start_i != -1:
-                        speech_start = True
-                        beg_bias = (websocket.vad_pre_idx - speech_start_i) // duration_ms
-                        frames_pre = frames[-beg_bias:]
-                        frames_asr = []
-                        frames_asr.extend(frames_pre)
-                # asr punc offline
+                    if websocket_users[websocket].get("speech_start", True):
+                        frames_llm.append(message)
+                    # duration_ms = len(message) // 32
+                    # websocket.vad_pre_idx += duration_ms
+
+                    # if speech_start:
+                    #     frames_asr.append(message)
+                    # # vad online
+                    # try:
+                    #     speech_start_i, speech_end_i = await async_vad(websocket, message)
+                    # except:
+                    #     print("error in vad")
+                    # if speech_start_i != -1:
+                    #     speech_start = True
+                    #     beg_bias = (websocket.vad_pre_idx - speech_start_i) // duration_ms
+                    #     frames_pre = frames[-beg_bias:]
+                    #     frames_asr = []
+                    #     frames_asr.extend(frames_pre)
+
                 # if speech_end_i != -1 or not websocket.is_speaking:
-                if not websocket.is_speaking:
+                if not websocket_users[websocket].get("is_speaking", True):
                     # print("vad end point")
-                    if websocket.mode == "2pass" or websocket.mode == "offline":
-                        audio_in = b"".join(frames_asr)
+                    if (
+                        websocket_users[websocket].get("mode", "2pass") == "2pass"
+                        or websocket_users[websocket].get("mode", "2pass") == "2pass" == "offline"
+                    ):
+                        # audio_in = b"".join(frames_asr)
+                        audio_in = b"".join(frames_llm)
                         try:
                             # await async_asr(websocket, audio_in)
                             await model_inference(websocket, audio_in)
                         except Exception as e:
                             print(f"{str(e)}, {traceback.format_exc()}")
-                    frames_asr = []
-                    speech_start = False
+                    # frames_asr = []
+                    # speech_start = False
+                    frames_llm = []
 
-                    if not websocket.is_speaking:
-                        websocket.vad_pre_idx = 0
-                        frames = []
-                        websocket.status_dict_vad["cache"] = {}
-                    else:
-                        frames = frames[-20:]
+                    # if not websocket.is_speaking:
+                    #     websocket.vad_pre_idx = 0
+                    #     frames = []
+                    #     websocket.status_dict_vad["cache"] = {}
+                    # else:
+                    #     frames = frames[-20:]
+                    frames = frames[-20:]
             else:
                 print(f"message: {message}")
+            if websocket_users[websocket].get("is_close", False):
+                print(f'is_close: {websocket_users[websocket].get("is_close", False)}')
+                websocket.stop_send = True
+                del websocket_users[websocket]
+                # await ws_reset(websocket)
+
     except websockets.ConnectionClosed:
         print("ConnectionClosed...", websocket_users, flush=True)
         await ws_reset(websocket)
-        websocket_users.remove(websocket)
+
     except websockets.InvalidState:
         print("InvalidState...")
     except Exception as e:
         print("Exception:", e)
 
 
-async def async_vad(websocket, audio_in):
-    segments_result = model_vad.generate(input=audio_in, **websocket.status_dict_vad)[0]["value"]
-    # print(segments_result)
-
-    speech_start = -1
-    speech_end = -1
-
-    if len(segments_result) == 0 or len(segments_result) > 1:
-        return speech_start, speech_end
-    if segments_result[0][0] != -1:
-        speech_start = segments_result[0][0]
-    if segments_result[0][1] != -1:
-        speech_end = segments_result[0][1]
-    return speech_start, speech_end
+# async def async_vad(websocket, audio_in):
+#     segments_result = model_vad.generate(input=audio_in, **websocket.status_dict_vad)[0]["value"]
+#     # print(segments_result)
+#
+#     speech_start = -1
+#     speech_end = -1
+#
+#     if len(segments_result) == 0 or len(segments_result) > 1:
+#         return speech_start, speech_end
+#     if segments_result[0][0] != -1:
+#         speech_start = segments_result[0][0]
+#     if segments_result[0][1] != -1:
+#         speech_end = segments_result[0][1]
+#     return speech_start, speech_end
 
 
 if False:  # len(args.certfile) > 0:
