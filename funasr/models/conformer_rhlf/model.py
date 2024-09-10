@@ -42,7 +42,7 @@ class ConformerDPO(Conformer):
         self.ctc_decoder = torchaudio.models.decoder.cuda_ctc_decoder(
             char_list, nbest = self.nbest, beam_size = self.beam_size, blank_skip_threshold = 0.95)
 
-    def load_state_dict(self, state_dict: logging.Mapping[str, logging.Any], strict: bool = True):
+    def load_state_dict(self, state_dict, strict=True):
         missing_keys_1, unexpected_keys_1 = super().load_state_dict(state_dict, strict)
         missing_keys_2, unexpected_keys_2 = self.ref_model.load_state_dict(state_dict, strict)
         return (missing_keys_1 + missing_keys_2, unexpected_keys_1 + unexpected_keys_2) 
