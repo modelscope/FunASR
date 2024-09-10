@@ -51,7 +51,8 @@ def download_from_ms(**kwargs):
             cfg = {}
             if "file_path_metas" in conf_json:
                 add_file_root_path(model_or_path, conf_json["file_path_metas"], cfg)
-            cfg.update(kwargs)
+            # cfg.update(kwargs)
+            cfg = OmegaConf.merge(cfg, kwargs)
             if "config" in cfg:
                 config = OmegaConf.load(cfg["config"])
                 kwargs = OmegaConf.merge(config, cfg)
@@ -129,7 +130,8 @@ def download_from_hf(**kwargs):
             cfg = {}
             if "file_path_metas" in conf_json:
                 add_file_root_path(model_or_path, conf_json["file_path_metas"], cfg)
-            cfg.update(kwargs)
+            cfg = OmegaConf.merge(cfg, kwargs)
+            # cfg.update(kwargs)
             if "config" in cfg:
                 config = OmegaConf.load(cfg["config"])
                 kwargs = OmegaConf.merge(config, cfg)
@@ -166,7 +168,7 @@ def download_from_hf(**kwargs):
 
 
 def add_file_root_path(model_or_path: str, file_path_metas: dict, cfg={}):
-
+    print(file_path_metas)
     if isinstance(file_path_metas, dict):
         for k, v in file_path_metas.items():
             if isinstance(v, str):
@@ -177,7 +179,6 @@ def add_file_root_path(model_or_path: str, file_path_metas: dict, cfg={}):
                 if k not in cfg:
                     cfg[k] = {}
                 add_file_root_path(model_or_path, v, cfg[k])
-
     return cfg
 
 

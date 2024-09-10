@@ -225,6 +225,14 @@ class Trainer:
                 ckpt_name = f"ds-model.pt.ep{epoch}.{step}"
             filename = os.path.join(self.output_dir, ckpt_name)
 
+            if self.use_lora:
+                lora_outdir = f"{self.output_dir}/lora-{ckpt_name}"
+                os.makedirs(lora_outdir, exist_ok=True)
+                if hasattr(model, "module"):
+                    model.module.llm.save_pretrained(lora_outdir)
+                else:
+                    model.llm.save_pretrained(lora_outdir)
+
             # torch.save(state, filename)
             with torch.no_grad():
                 model.save_checkpoint(save_dir=self.output_dir, tag=ckpt_name, client_state=state)
@@ -587,7 +595,8 @@ class Trainer:
         # Set the number of steps for gradient accumulation
         accum_grad = self.accum_grad
         # Initialize the gradient accumulation
-        optim.zero_grad()
+        if kwargs.get("data_split_i", 0) == 0:
+            optim.zero_grad()
         speed_stats = {}
 
         iterator_stop = torch.tensor(0).to(self.device)
@@ -730,7 +739,7 @@ class Trainer:
                             f"The grad norm is {grad_norm}. Skipping updating the model."
                         )
                         optim.zero_grad()  # Reset gradients
-                        return
+                        # return
 
                 # Execute an optimization step (update model parameters)
                 if self.use_ddp or self.use_fsdp:
@@ -744,7 +753,8 @@ class Trainer:
                 # Clear gradients for the next accumulation stage
                 optim.zero_grad(set_to_none=True)
         if grad_norm is not None:
-            loss_dict["stats"]["grad_norm"] = grad_norm
+            if isinstance(grad_norm, torch.Tensor) and not torch.isfinite(grad_norm):
+                loss_dict["stats"]["grad_norm"] = grad_norm
 
     def validate_epoch(
         self,
@@ -860,7 +870,7 @@ class Trainer:
         data_split_num = loss_dict["data_split_num"]
         log_step = loss_dict.get("log_step", None)
 
-        if (batch_idx + 1) % self.log_interval == 0:
+        if (batch_idx + 1) % self.log_interval == 0 or (batch_idx + 1) == batch_num_epoch:
             batch_idx = log_step if log_step is not None else batch_idx
             gpu_info = (
                 "GPU, memory: usage: {:.3f} GB, "
@@ -884,7 +894,7 @@ class Trainer:
                 f"step_in_slice: {batch_idx + 1}/{batch_num_epoch}, step_in_epoch: {step_in_epoch}, total step: {batch_total}, "
                 f"(loss_avg_rank: {loss:.3f}), "
                 f"(loss_avg_slice: {loss_avg_epoch:.3f}), "
-                f"(ppl_avg_slice: {math.exp(loss_avg_epoch):.3e}), "
+                # f"(ppl_avg_slice: {math.exp(loss_avg_epoch):.3e}), "
                 f"(acc_avg_slice: {acc_avg_epoch:.3f}), "
                 f"(lr: {lr:.3e}), "
                 f"{[(k, round(tensor_to_scalar(v), 3)) for k, v in stats.items()]}, "
