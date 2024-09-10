@@ -556,13 +556,9 @@ class UCTDXvecSlotModel(UpsampleCtcTokenDiffModel):
         torch.nn.init.xavier_normal_(spk_query)
         self.spk_query = torch.nn.Parameter(spk_query, requires_grad=True)
         self.prompt_xvec_proj = nn.Linear(self.output_size, self.xvec_size)
-        # build xvec extractor for Mel spectrum
-        # self.mel_spec_fn = self.fm_model.mel_extractor
-        # from funasr.models.llm_asr.tts_models.campp_encoder import CAMPPlus
-        # self.mel_xvec_fn = CAMPPlus(self.mel_spec_fn.num_mels, self.xvec_size)
-        # self.audio_prompt_lens = kwargs.get("audio_prompt_lens", [0.3, 1.0])
-        # text_mel_xvec_rand_ratios = kwargs.get("text_mel_xvec_rand_ratio", [0.3, 0.3, 0.4])
-        # self.register_buffer("text_mel_xvec_rand_ratios", torch.tensor(text_mel_xvec_rand_ratios))
+        self.outside_prompt_dim = kwargs.get("outside_prompt_dim", None)
+        if self.outside_prompt_dim is not None:
+            self.outside_prompt_poj = nn.Linear(self.outside_prompt_dim, self.output_size)
 
     def forward(self, text: torch.Tensor, text_lengths: torch.Tensor, speech_token: torch.Tensor,
                 speech_token_lengths: torch.Tensor, audio: torch.Tensor, audio_lengths: torch.Tensor,
@@ -577,43 +573,56 @@ class UCTDXvecSlotModel(UpsampleCtcTokenDiffModel):
         text_emb = self.text_embedding(torch.clamp(text, min=0)) * mask
         text_emb_lengths = text_lengths
 
-        if "prompt" in kwargs and "prompt_len" in kwargs:
-            prompt = kwargs["prompt"]
-            prompt_lens = kwargs["prompt_len"]
-        else:
-            prompt, prompt_lens, text_emb, text_emb_lengths = self.split_prompt(
-                text_emb, text_emb_lengths, text, text_lengths
-            )
+        prompt, prompt_lens, text_emb, text_emb_lengths = self.split_prompt(
+            text_emb, text_emb_lengths, text, text_lengths
+        )
+        if "outside_prompt" in kwargs and "outside_prompt_lengths" in kwargs:
+            prompt = kwargs["outside_prompt"]
+            prompt_lens = kwargs["outside_prompt_lengths"]
+            prompt = self.outside_prompt_poj(prompt)
+            hint_once("use outside_prompt", "outside_prompt")
 
         # textual prompt xvec
-        prompt_xvec, _ = self.spk_aggregator(
-            prompt, prompt_lens,
-            self.spk_query.expand([batch_size, -1, -1]), torch.tensor([1] * batch_size).to(prompt_lens)
-        )
-        prompt_xvec = self.prompt_xvec_proj(prompt_xvec)
+        if self.text_mel_xvec_rand_ratios[0] > 0:
+            prompt_xvec = self.spk_aggregator(
+                prompt, prompt_lens,
+                self.spk_query.expand([batch_size, -1, -1]), torch.tensor([1] * batch_size).to(prompt_lens)
+            )[0]
+            prompt_xvec = self.prompt_xvec_proj(prompt_xvec)
+        else:
+            prompt_xvec = torch.zeros([batch_size, 1, self.xvec_size]).to(text_emb)
 
-        # # mel prompt xvec
-        # audio_rand_lens = torch.rand_like(audio_lengths, dtype=torch.float32) * (self.audio_prompt_lens[1] - self.audio_prompt_lens[0]) + self.audio_prompt_lens[0]
-        # audio_rand_lens = (audio_rand_lens * audio_lengths).round().long()
-        # audio_rand_lens = torch.clamp(audio_rand_lens, min=round(self.mel_spec_fn.sampling_rate*0.5))
-        # audio_prompt = [audio[i, :audio_rand_lens[i]] for i in range(batch_size)]
-        # audio_rand_lens = torch.tensor([x.shape[0] for x in audio_prompt]).to(text_lengths)
-        # audio_prompt = pad_list(audio_prompt, 0.0)
-        # mel_feat, feat_lens = self.mel_spec_fn(audio_prompt, audio_rand_lens)
-        # mel_xvec = self.mel_xvec_fn(mel_feat).unsqueeze(1)
-        #
-        # # random select a xvec from xvec matrix
-        # xvec = xvec[:, :xvec_lengths.max()]
-        #
-        # # random using prompt, mel and input xvecs
-        # mixup_rand = self.text_mel_xvec_rand_ratios.multinomial(batch_size, replacement=True).unsqueeze(1).unsqueeze(2)
-        # rand_xvec = (
-        #     (mixup_rand == 0) * prompt_xvec +
-        #     (mixup_rand == 1) * mel_xvec +
-        #     (mixup_rand == 2) * xvec
-        # )
-        rand_xvec = prompt_xvec
-        rand_xvec_lens = torch.tensor([1] * batch_size).to(text_emb_lengths)
+        # mel prompt xvec
+        if self.text_mel_xvec_rand_ratios[1] > 0:
+            audio_rand_lens = torch.rand_like(audio_lengths, dtype=torch.float32) * (
+                        self.audio_prompt_lens[1] - self.audio_prompt_lens[0]) + self.audio_prompt_lens[0]
+            audio_rand_lens = (audio_rand_lens * audio_lengths).round().long()
+            audio_rand_lens = torch.clamp(audio_rand_lens, min=round(self.mel_spec_fn.sampling_rate * 0.5))
+            audio_prompt = [audio[i, :audio_rand_lens[i]] for i in range(batch_size)]
+            audio_rand_lens = torch.tensor([x.shape[0] for x in audio_prompt]).to(text_lengths)
+            audio_prompt = pad_list(audio_prompt, 0.0)
+            mel_feat, feat_lens = self.mel_spec_fn(audio_prompt, audio_rand_lens)
+            mel_xvec = self.mel_xvec_fn(mel_feat).unsqueeze(1)
+        else:
+            mel_xvec = torch.zeros([batch_size, 1, self.xvec_size]).to(text_emb)
+
+        if xvec is not None:
+            # random select a xvec from xvec matrix
+            xvec = xvec[:, :xvec_lengths.max()]
+        else:
+            xvec = torch.zeros([batch_size, 1, self.xvec_size]).to(text_emb)
+
+        # random using prompt, mel and input xvecs
+        mixup_rand = torch.tensor(self.text_mel_xvec_rand_ratios).to(text_emb).multinomial(batch_size,
+                                                                                           replacement=True).unsqueeze(
+            1).unsqueeze(2)
+        hint_once(f"xvec mixup prob: {mixup_rand}", "xvec mixup prob")
+        rand_xvec = (
+                (mixup_rand == 0) * prompt_xvec +
+                (mixup_rand == 1) * mel_xvec +
+                (mixup_rand == 2) * xvec
+        )
+        rand_xvec_lens = torch.tensor([1] * batch_size).to(xvec_lengths)
 
         outs_tuple = self.text_encoder(text_emb, ilens=text_emb_lengths)
         text_enc = outs_tuple[0]
@@ -673,6 +682,14 @@ class UCTDXvecSlotModel(UpsampleCtcTokenDiffModel):
         prompt, prompt_lens, text_emb, text_emb_lengths = self.split_prompt(
             text_emb, text_emb_lengths, text, text_lengths
         )
+        if "outside_prompt" in kwargs:
+            prompt = kwargs["outside_prompt"].to(text.device)
+            if "outside_prompt_lengths" in kwargs:
+                prompt_lens = kwargs["outside_prompt_lengths"]
+            else:
+                prompt_lens = torch.tensor([prompt.shape[1]]).to(text_lengths)
+            prompt = self.outside_prompt_poj(prompt)
+            hint_once("use outside_prompt", "outside_prompt")
 
         if xvec is not None:
             # using the xvec
@@ -681,10 +698,10 @@ class UCTDXvecSlotModel(UpsampleCtcTokenDiffModel):
         else:
             # textual prompt xvec
             hint_once("using textual prompt for slot.", "use_spk_emb")
-            prompt_xvec, _ = self.spk_aggregator(
+            prompt_xvec = self.spk_aggregator(
                 prompt, prompt_lens,
                 self.spk_query.expand([batch_size, -1, -1]), torch.tensor([1] * batch_size).to(prompt_lens)
-            )
+            )[0]
             xvec = self.prompt_xvec_proj(prompt_xvec)
             xvec_lengths = torch.tensor([1] * batch_size).to(text_lengths)
 
@@ -742,13 +759,14 @@ class UCTDXvecSlotModel(UpsampleCtcTokenDiffModel):
         prompt_audio = list(prompt_dict.get("prompt_audio", [None, None]))
         streaming_mode = kwargs.get("streaming_mode", "v2")
 
+        ftype = self.text_embedding.weight.dtype
         if prompt_token[0] is None:
-            prompt_token[0] = torch.zeros([1, 0, self.output_size], device=device, dtype=torch.float32)
+            prompt_token[0] = torch.zeros([1, 0, self.output_size], device=device, dtype=ftype)
             prompt_token[1] = torch.tensor([0], device=device, dtype=torch.long)
         if prompt_audio[0] is None:
             prompt_audio[0] = torch.zeros(
                 [1, 0, self.fm_model.mel_extractor.num_mels],
-                device=device, dtype=torch.float32
+                device=device, dtype=ftype
             )
             prompt_audio[1] = torch.tensor([0], device=device, dtype=torch.long)
 
@@ -762,6 +780,14 @@ class UCTDXvecSlotModel(UpsampleCtcTokenDiffModel):
         prompt, prompt_lens, text_emb, text_emb_lengths = self.split_prompt(
             text_emb, text_emb_lengths, text, text_lengths
         )
+        if "outside_prompt" in kwargs:
+            prompt = kwargs["outside_prompt"].to(device)
+            if "outside_prompt_lengths" in kwargs:
+                prompt_lens = kwargs["outside_prompt_lengths"]
+            else:
+                prompt_lens = torch.tensor([prompt.shape[1]]).to(text_lengths)
+            prompt = self.outside_prompt_poj(prompt)
+            hint_once("use outside_prompt", "outside_prompt")
 
         if xvec is not None:
             # using speaker embedding
@@ -770,10 +796,10 @@ class UCTDXvecSlotModel(UpsampleCtcTokenDiffModel):
         else:
             # textual prompt xvec
             hint_once("using textual prompt for slot.", "use_spk_emb")
-            prompt_xvec, _ = self.spk_aggregator(
+            prompt_xvec = self.spk_aggregator(
                 prompt, prompt_lens,
                 self.spk_query.expand([batch_size, -1, -1]), torch.tensor([1] * batch_size).to(prompt_lens)
-            )
+            )[0]
             xvec = self.prompt_xvec_proj(prompt_xvec)
             xvec_lengths = torch.tensor([1] * batch_size).to(text_lengths)
 
@@ -786,11 +812,15 @@ class UCTDXvecSlotModel(UpsampleCtcTokenDiffModel):
             chunk_text_emb = text_emb[:, :chunk_end + lookahead_size]
             chunk_text_emb_lengths = torch.tensor([chunk_text_emb.shape[1]], dtype=torch.long, device=device)
 
+            text_enc_st_time = time.time()
             outs_tuple = self.text_encoder(chunk_text_emb, ilens=chunk_text_emb_lengths)
+            if chunk_id == 0:
+                logging.info(f"text_enc cost time: {(time.time() - text_enc_st_time) * 1000.0:.2f} ms")
             text_enc = outs_tuple[0]
             text_enc_lens = chunk_text_emb_lengths
 
             # forward AM model
+            am_st_time = time.time()
             tokens, aligned_token_emb, aligned_token_lens = self.am_model.inference(
                 text_enc, text_enc_lens,
                 xvec, xvec_lengths,
@@ -800,6 +830,8 @@ class UCTDXvecSlotModel(UpsampleCtcTokenDiffModel):
                 return_hidden=True,
                 use_causal_prob=use_causal_prob,
             )
+            if chunk_id == 0:
+                logging.info(f"am cost time: {(time.time() - am_st_time) * 1000.0:.2f} ms")
             token_hop_len, mel_hop_len = 0, 0
             if isinstance(tokens, tuple):
                 tokens, fa_tokens = tokens
@@ -818,6 +850,7 @@ class UCTDXvecSlotModel(UpsampleCtcTokenDiffModel):
                         cur_token_len = cur_token_len - token_hop_len
 
                 # forward FM model
+                fm_st_time = time.time()
                 feat = self.fm_model.inference(
                     cur_token, cur_token_len,
                     xvec, xvec_lengths,
@@ -827,6 +860,8 @@ class UCTDXvecSlotModel(UpsampleCtcTokenDiffModel):
                     ),
                     **kwargs,
                 )
+                if chunk_id == 0:
+                    logging.info(f"fm cost time: {(time.time() - fm_st_time) * 1000.0:.2f} ms")
                 feat = self.rms_rescale_feat(feat)
                 cost = time.time() - _st_time
                 if chunk_id == 0:

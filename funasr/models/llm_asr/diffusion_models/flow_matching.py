@@ -4,6 +4,7 @@ import torch.nn.functional as F
 from funasr.models.llm_asr.diffusion_models.matcha_decoder import (Decoder, ConditionalDecoder)
 import logging
 from funasr.utils.hinter import hint_once
+import time
 
 
 class BASECFM(torch.nn.Module, ABC):
@@ -71,30 +72,46 @@ class BASECFM(torch.nn.Module, ABC):
 
         # I am storing this because I can later plot it by putting a debugger here and saving it to a file
         # Or in future might add like a return_all_steps flag
-        sol = []
+        # sol = []
 
         steps = 1
+        z, bz = x, x.shape[0]
         while steps <= len(t_span) - 1:
-            dphi_dt = self.estimator(x, mask, mu, t, spks, cond)
-            # Classifier-Free Guidance inference introduced in VoiceBox
             if self.inference_cfg_rate > 0:
-                cfg_dphi_dt = self.estimator(
-                    x, mask,
-                    torch.zeros_like(mu), t,
-                    torch.zeros_like(spks) if spks is not None else None,
-                    torch.zeros_like(cond)
-                )
+                x_in = torch.concat([x, x], dim=0)
+                mask_in = torch.concat([mask, mask], dim=0)
+                mu_in = torch.concat([mu, torch.zeros_like(mu)], dim=0)
+                t_in = torch.concat([t.unsqueeze(0), t.unsqueeze(0)], dim=0)
+                spks_in = torch.concat([spks, torch.zeros_like(spks)], dim=0) if spks is not None else None
+                if isinstance(cond, torch.Tensor):
+                    cond_in = torch.concat([cond, torch.zeros_like(cond)], dim=0)
+                else:
+                    cond_in = dict(
+                        prompt=[
+                            torch.concat([cond["prompt"][0], torch.zeros_like(cond["prompt"][0])], dim=0),
+                            torch.concat([cond["prompt"][1], cond["prompt"][1]], dim=0),
+                        ]
+                    )
+            else:
+                x_in, mask_in, mu_in, t_in = x, mask, mu, t
+                spks_in, cond_in = spks, cond
+            fm_dec_onstep_time = time.time()
+            dphi_dt = self.estimator(x_in, mask_in, mu_in, t_in, spks_in, cond_in)
+            logging.info(f"fm dec {steps} step time: {(time.time() - fm_dec_onstep_time) * 1000.0:.2f} ms")
+            if self.inference_cfg_rate > 0:
+                dphi_dt, cfg_dphi_dt = torch.split(dphi_dt, [bz, bz], dim=0)
                 dphi_dt = ((1.0 + self.inference_cfg_rate) * dphi_dt -
                            self.inference_cfg_rate * cfg_dphi_dt)
 
             x = x + dt * dphi_dt
             t = t + dt
-            sol.append(x)
+            # sol.append(x)
             if steps < len(t_span) - 1:
                 dt = t_span[steps + 1] - t
             steps += 1
 
-        return sol[-1]
+        return x
+        # return sol[-1]
 
     def calc_reg_loss(self, prediction, target, loss_mask):
         if self.reg_loss_type == 'l1':
