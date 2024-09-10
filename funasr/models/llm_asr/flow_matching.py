@@ -14,6 +14,7 @@ from funasr.models.transformer.utils.nets_utils import pad_list
 from distutils.version import LooseVersion
 from contextlib import contextmanager
 from funasr.utils.hinter import hint_once
+import time
 if LooseVersion(torch.__version__) >= LooseVersion("1.6.0"):
     from torch.cuda.amp import autocast
 else:
@@ -648,9 +649,14 @@ class MaskedDiffWithXvec(BaseDiffWithXvec):
             raise ValueError(f"Frame rate {self.input_frame_rate} has not implemented.")
 
     @torch.no_grad()
-    def inference(self, text, text_lens,
-                  xvec=None, xvec_lens=None,
-                  diff_steps=10, temperature=1.0, prompt: dict = None, y_lens=None):
+    def inference(
+            self,
+            text, text_lens,
+            xvec=None, xvec_lens=None,
+            diff_steps=10, temperature=1.0,
+            prompt: dict = None, y_lens=None,
+            **kwargs
+    ):
         rand_xvec = None
         if xvec is not None:
             if xvec.dim() == 2:
@@ -662,14 +668,16 @@ class MaskedDiffWithXvec(BaseDiffWithXvec):
         prompt_text, prompt_text_lens = prompt.get("prompt_text", (None, None))
         prompt_audio, prompt_audio_lens = prompt.get("prompt_audio", (None, None))
 
+        if prompt_text is not None:
+            text, text_lens = self.concat_prompt(prompt_text, prompt_text_lens, text, text_lens)
         if self.vocab_size is not None and self.vocab_size > 0:
-            if prompt_text is not None:
-                text, text_lens = self.concat_prompt(prompt_text, prompt_text_lens, text, text_lens)
             mask = (text != -1).float().unsqueeze(-1)
             text = self.input_embedding(torch.clamp(text, min=0)) * mask
 
+        fm_enc_time = time.time()
         h, h_lengths, _ = self.encoder(text, text_lens)
         h = self.encoder_proj(h)
+        logging.info(f"fm enc time: {(time.time() - fm_enc_time) * 1000.0:.2f} ms")
         if y_lens is None:
             y_lens = self.calc_target_len(text_lens)
         y = torch.zeros([1, y_lens.max().item(), self.output_size], device=text.device)
